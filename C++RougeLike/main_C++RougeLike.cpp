@@ -4,8 +4,6 @@
 #include "main_C++RougeLike.h"
 
 
-
-
 //====
 Map::Map(int height, int width) :  height(height) , width(width)
 {

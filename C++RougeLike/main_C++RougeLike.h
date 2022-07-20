@@ -1,8 +1,8 @@
 #pragma once
-#include "mybsp.cpp"
+
+#include "mybsp.h"
 #include "libtcod.hpp"
 #include <curses.h>
-
 
 enum CONTROLS 
 {
