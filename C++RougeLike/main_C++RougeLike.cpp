@@ -29,12 +29,12 @@ Map::~Map()
 
 bool Map::isWall(int y, int x) const
 {
-    return !tiles[y + x * width].canWalk;
+    return !tiles[x + y * width].canWalk;
 }
 
 void Map::setWall(int y, int x)
 {
-    tiles[y + x * width].canWalk = false;
+    tiles[x + y * width].canWalk = false;
 }
 
 void Map::render() const
@@ -49,6 +49,7 @@ void Map::render() const
             //TCODConsole::root->setCharBackground(x, y,
             //    isWall(x, y) ? darkWall : darkGround);
             //mvchgat(y,x,-1, A_NORMAL,isWall(y,x) ? darkWall : darkGround, NULL);
+            /*mvaddch(y,x,'#');*/
             mvchgat(y,x,1, A_NORMAL,isWall(y,x) ? darkWall : darkGround, NULL);
         }
     }
@@ -62,22 +63,21 @@ Engine::Engine()
     player = new Actor(25, 40, '@',3);
     actors.push_back(player);
     /*map = new Map(30, 120);*/
-    map = new Map(80, 45);
+    map = new Map(30, 120);
 }
 
 Engine::~Engine() 
 {
     /*actors.clearAndDelete();*/
     actors.clear();
-    actors.~vector();
     delete map;
 }
 
 void Engine::update()
 {
-    ////DEBUG
-    //mvprintw(1,1,"player->y:%u",player->y);
-    //mvprintw(2,1,"player->x:%u",player->x);
+    //DEBUG
+    mvprintw(1,1,"player->y:%u",player->y);
+    mvprintw(2,1,"player->x:%u",player->x);
 
     //TCOD_key_t key;
     //TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);

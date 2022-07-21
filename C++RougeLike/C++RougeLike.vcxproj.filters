@@ -18,12 +18,6 @@
     <ClCompile Include="main_C++RougeLike.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mybsp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="mytree.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main_C++RougeLike.h">

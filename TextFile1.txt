@@ -1,0 +1,217 @@
+commented stuff
+
+//void Map::dig(int y1, int x1, int y2, int x2)
+//{
+//
+//        //int tiley = y1+20;
+//        //int tilex = x1+20;
+//        
+//
+//        //tiles[tilex + tiley * width].canWalk = true;
+//        //printw("x1:%u|", x1);
+//        //printw("y1:%u|\n", x1);
+//
+//
+//        //swap x
+//        if (x2 < x1)
+//        {
+//            //printw("x1:%u|", x1);
+//            //printw("y1:%u", x1);
+//            //printw("num:%u\n", iter);
+//            int tmp = x2;
+//            x2 = x1;
+//            x1 = tmp;
+//        }
+//        //printw("x1:%u~", x1);
+//        //printw("y1:%u|", x1);
+//
+//        //swap y
+//        if (y2 < y1)
+//        {
+//            int tmp = y2;
+//            y2 = y1;
+//            y1 = tmp;
+//        }
+//
+//        for (int tilex = x1; tilex <= x2; tilex++)
+//        {
+//            for (int tiley = y1; tiley <= y2; tiley++)
+//            {
+//                tiles[tilex + tiley * width].canWalk = true;
+//            }
+//        }
+//        
+//        //for (int tiley = y1; tiley <= y2; tiley++)
+//        //{
+//        //    for (int tilex = x1; tilex <= x2; tilex++)
+//        //    {
+//        //        tiles[tilex + tiley * width].canWalk = true;
+//        //    }
+//        //}
+//}
+
+//void Map::createRoom(bool first, int y1, int x1, int y2, int x2)
+//{
+//    /*Engine engine;*/
+//
+//    dig(y1, x1, y2, x2);
+//
+//    if (first)
+//    {
+//        ////put the player in the first room
+//        //engine.player->y = (y1 + y2) / 2;
+//        //engine.player->x = (x1 + x2) / 2;
+//
+//        engine.player->y = x1 + 1;
+//        engine.player->x = y1 + 1;
+//
+//    }
+//    else
+//    {
+//        //TCODRandom random;
+//        //std::default_random_engine* generator;
+//        //std::uniform_int_distribution<int> distribution(1, 6);
+//        //auto dice = std::bind(distribution, generator);
+//        //auto rng = dice;
+//        
+//        /*sp::StaticRandomInitializer* rng;*/
+//        //sp::StaticRandomInitializer::StaticRandomInitializer()* rng = 0;
+//        /*sp::StaticRandomInitializer::StaticRandomInitializer();*/
+//        //auto* rng = sp::irandom;
+//
+//
+//
+//        /*srand(time(NULL));*/
+//        
+//        //int* ptr_rng;
+//        //int* ptr_rng = &rngrand;
+//
+//        
+//        if (int rng = rand() % 4 == 0)
+//        {
+//            engine.actors.push_back(
+//                new Actor(
+//                (x1 + x2) / 2,
+//                (y1 + y2) / 2,
+//                '@',
+//                4
+//                )
+//            );
+//        }
+//    }
+//}
+//====
+
+TOOOO HEAAADER!!!->>>
+//class BspListener_2 : public BspCallback
+//{
+//private:
+//	Map& map; // a map to dig
+//	int roomNum; // room number
+//	int lasty = 0, lastx = 0; // center of the last room
+//
+//public:
+//	BspListener(Map& map) : map(map), roomNum(0) {}
+//	/*bool visitNode();*/
+//	
+//	bool visitNode(Bsp* node, void* userData)
+//	{
+//		if (node->isLeaf())
+//		{
+//			int y, x, h, w;
+//			// dig a room
+//
+//			TCODRandom* rng = TCODRandom::getInstance();
+//
+//			h = rng->getInt(6, node->h - 2);
+//			w = rng->getInt(6, node->w - 2);
+//			y = rng->getInt(node->y + 1, node->y + node->h - h - 1);
+//			x = rng->getInt(node->x + 1, node->x + node->w - w - 1);
+//
+//			map.createRoom(roomNum == 0, y, x, y + h - 1, x + w - 1);
+//
+//			if (roomNum != 0)
+//			{
+//				// dig a corridor from last room
+//				
+//				map.dig(lasty, x + w / 2, y + h / 2, x + w / 2);
+//				map.dig(lasty, lastx, lasty, x + w / 2);
+//			}
+//			lastx = x + w / 2;
+//			lasty = y + h / 2;
+//			roomNum++;
+//		}
+//		return true;
+//	}
+//};
+
+//class BspListener : public ITCODBspCallback 
+//{
+//private:
+//	Map& map; // a map to dig
+//	int roomNum; // room number
+//	int lastx, lasty; // center of the last room
+//public:
+//	BspListener(Map& map) : map(map), roomNum(0) {}
+//
+//	bool visitNode(TCODBsp* node, void* userData)
+//	{
+//
+//		if (node->isLeaf())
+//		{
+//			//printw("isLeaf\n");
+//			//printw("%u",node->isLeaf());
+//			
+//			int x, y, w, h;
+//			// dig a room
+//			TCODRandom* rng = TCODRandom::getInstance();
+//			w = rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
+//			h = rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
+//			x = rng->getInt(node->x + 1, node->x + node->w - w - 1);//from node x + 1 to node x + node width - width - 1
+//			y = rng->getInt(node->y + 1, node->y + node->h - h - 1);//from node y + 1 to node x + node height - width - 1
+//
+//			//DEBUG rng
+//			printw("w = %u||",w);
+//			printw("h = %u||",h);
+//			printw("x = %u||",x);
+//			printw("y = %u||",y);
+//			printw("roomnum = %u\n", roomNum);
+//
+//			map.createRoom
+//			(
+//				roomNum == 0,
+//				x,
+//				y,
+//				x + w - 1,
+//				y + h - 1
+//			);
+//
+//
+//
+//			//DEBUG createRoom
+//
+//
+//			if (roomNum != 0) 
+//			{
+//				// dig a corridor from last room
+//
+//				map.dig(
+//					lasty,
+//					lastx,
+//					lasty,
+//					x + w / 2
+//				);
+//				map.dig(
+//					lasty,
+//					x + w / 2,
+//					y + h / 2,
+//					x + w / 2
+//				);
+//			}
+//			lastx = x + w / 2;
+//			lasty = y + h / 2;
+//			roomNum++;
+//		}
+//		return true;
+//	}
+//};

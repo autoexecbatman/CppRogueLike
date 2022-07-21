@@ -139,8 +139,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="mybsp.cpp" />
-    <ClCompile Include="mytree.cpp" />
     <ClCompile Include="main_C++RougeLike.cpp" />
   </ItemGroup>
   <ItemGroup>
