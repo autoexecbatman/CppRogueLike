@@ -1,6 +1,7 @@
 #pragma once
-#include "libtcod.hpp"
-#include "mytree.h"
+
+#include "libtcod.hpp"//TCODRandom and TCOD_Random
+#include "mytree.h"//tree class and typedef struct m_tree_t
 
 
 typedef struct 
@@ -18,10 +19,8 @@ bool my_bsp_traverse_inverted_level_order(my_bsp_t* node, my_bsp_callback_t list
 
 void my_bsp_split_recursive(my_bsp_t* node, TCOD_Random* randomizer, int nb, int minHSize, int minVSize, float maxHRatio, float maxVRatio);
 
-#include "libtcod.hpp"
-//#include "mytree.cpp"
-//#include "mybsp.h"
 
+//====
 class Bsp;
 class BspCallback
 {
@@ -33,13 +32,15 @@ public:
 class Bsp : public Tree
 {
 public:
-	int y, x, h, w;
-	int position;
-	bool horizontal;
-	uint8_t level;
+	int y = 0, x = 0, h = 0, w = 0;
+	int position = 0;
+	bool horizontal = false;
+	uint8_t level = 0;
 
 	Bsp() : level(0) {}
 	Bsp(int y, int x, int h, int w) : y(y), x(x), h(h), w(w), level(0) {}
+
+	/*virtual ~Bsp();*/
 
 	void mysplitRecursive(TCODRandom* randomizer, int nb, int minHSize, int minVSize, float maxHRatio, float maxVRatio);
 
