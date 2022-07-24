@@ -3,7 +3,7 @@
 #include "main_C++RougeLike.h"
 
 //====
-Map::Map(int height, int width) :  height(height) , width(width)
+Map::Map(int height, int width) : height(height), width(width)
 {
     tiles = new Tile[height * width];
     setWall(22, 30);
@@ -50,7 +50,7 @@ void Map::render() const
             //    isWall(x, y) ? darkWall : darkGround);
             //mvchgat(y,x,-1, A_NORMAL,isWall(y,x) ? darkWall : darkGround, NULL);
             /*mvaddch(y,x,'#');*/
-            mvchgat(y,x,1, A_NORMAL,isWall(y,x) ? darkWall : darkGround, NULL);
+            mvchgat(y, x, 1, A_NORMAL, isWall(y, x) ? darkWall : darkGround, NULL);
         }
     }
 }
@@ -60,13 +60,13 @@ Engine::Engine()
     /*TCODConsole::initRoot(80, 50, "libtcod C++ tutorial", false);*/
     initscr();
     start_color();
-    player = new Actor(25, 40, '@',3);
+    player = new Actor(25, 40, '@', 3);
     actors.push_back(player);
     /*map = new Map(30, 120);*/
     map = new Map(30, 120);
 }
 
-Engine::~Engine() 
+Engine::~Engine()
 {
     /*actors.clearAndDelete();*/
     actors.clear();
@@ -76,54 +76,54 @@ Engine::~Engine()
 void Engine::update()
 {
     //DEBUG
-    mvprintw(1,1,"player->y:%u",player->y);
-    mvprintw(2,1,"player->x:%u",player->x);
+    mvprintw(1, 1, "player->y:%u", player->y);
+    mvprintw(2, 1, "player->x:%u", player->x);
 
     //TCOD_key_t key;
     //TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
     int key = getch();
     switch (key)
     {
-    //case TCODK_UP:
-    //    if (!map->isWall(player->x, player->y - 1)) {
-    //        player->y--;
-    //    }
-    //    break;
+        //case TCODK_UP:
+        //    if (!map->isWall(player->x, player->y - 1)) {
+        //        player->y--;
+        //    }
+        //    break;
     case UP:
         if (!map->isWall(player->y - 1, player->x))
         {
             player->y--;
         }
         break;
-    //case TCODK_DOWN:
-    //    if (!map->isWall(player->x, player->y + 1)) {
-    //        player->y++;
-    //    }
-    //    break;
+        //case TCODK_DOWN:
+        //    if (!map->isWall(player->x, player->y + 1)) {
+        //        player->y++;
+        //    }
+        //    break;
     case DOWN:
         if (!map->isWall(player->y + 1, player->x))
         {
             player->y++;
         }
         break;
-    //case TCODK_LEFT:
-    //    if (!map->isWall(player->x - 1, player->y)) {
-    //        player->x--;
-    //    }
-    //    break;
+        //case TCODK_LEFT:
+        //    if (!map->isWall(player->x - 1, player->y)) {
+        //        player->x--;
+        //    }
+        //    break;
     case LEFT:
-        if (!map->isWall(player->y , player->x - 1))
+        if (!map->isWall(player->y, player->x - 1))
         {
             player->x--;
         }
         break;
-    //case TCODK_RIGHT:
-    //    if (!map->isWall(player->x + 1, player->y)) {
-    //        player->x++;
-    //    }
-    //    break;
+        //case TCODK_RIGHT:
+        //    if (!map->isWall(player->x + 1, player->y)) {
+        //        player->x++;
+        //    }
+        //    break;
     case RIGHT:
-        if (!map->isWall(player->y,player->x + 1))
+        if (!map->isWall(player->y, player->x + 1))
         {
             player->x++;
         }
@@ -133,8 +133,8 @@ void Engine::update()
     }
 }
 
-void Engine::render() 
-{    
+void Engine::render()
+{
     //TCODConsole::root->clear();
     clear();
     // draw the map
@@ -163,7 +163,7 @@ void Actor::render() const
 int main()
 {
     Engine engine;
-//====
+    //====
 #define GRASS_PAIR     1
 #define EMPTY_PAIR     1
 #define WATER_PAIR     2
@@ -171,12 +171,12 @@ int main()
 #define NPC_PAIR       4
 #define PLAYER_PAIR    5
 //====
-        init_pair(1, COLOR_YELLOW, COLOR_GREEN);
-        init_pair(2, COLOR_CYAN, COLOR_BLUE);
-        init_pair(3, COLOR_BLACK, COLOR_WHITE);
-        init_pair(4, COLOR_RED, COLOR_MAGENTA);
-        init_pair(5, COLOR_RED, COLOR_YELLOW );
-//====
+    init_pair(1, COLOR_YELLOW, COLOR_GREEN);
+    init_pair(2, COLOR_CYAN, COLOR_BLUE);
+    init_pair(3, COLOR_BLACK, COLOR_WHITE);
+    init_pair(4, COLOR_RED, COLOR_MAGENTA);
+    init_pair(5, COLOR_RED, COLOR_YELLOW);
+    //====
     while (true)
     {
         engine.update();

@@ -6,18 +6,18 @@
 //static const int ROOM_MAX_SIZE = 12;
 //static const int ROOM_MIN_SIZE = 6;
 
-enum CONTROLS 
+enum CONTROLS
 {
 	UP = 'w', DOWN = 's', LEFT = 'a', RIGHT = 'd', QUIT = 'q'
 };
 
-struct Tile 
+struct Tile
 {
 	bool canWalk; // can we walk through this tile?
 	Tile() : canWalk(true) {}
 };
 
-class Map 
+class Map
 {
 public:
 	int height, width;
@@ -44,7 +44,7 @@ public:
 	int ch;//ascii code
 	int col; //TCODColor col;//color
 
-	Actor(int y ,int x, int ch, int col/*const TCODColor& col */);
+	Actor(int y, int x, int ch, int col/*const TCODColor& col */);
 	void render() const;
 };
 
