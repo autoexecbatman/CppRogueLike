@@ -9,6 +9,7 @@ struct Tile
 class Map
 {
 public:
+	
 	int map_height, map_width;
 
 	void bsp(int map_width, int map_height);

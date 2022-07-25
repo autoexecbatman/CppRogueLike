@@ -5,9 +5,12 @@
 #include "Map.h"
 #include "Engine.h"
 
+Engine engine;
 int main()
 {
-    Engine engine;
+    /*Engine engine;*/
+    //int player_x = engine.player->x;
+    //int player_y = engine.player->y;
     //====
 #define GRASS_PAIR     1
 #define EMPTY_PAIR     1

@@ -25,9 +25,9 @@ Engine::~Engine()
 
 void Engine::update()
 {
-    ////DEBUG
-    //mvprintw(1, 1, "player->y:%u", player->y);
-    //mvprintw(2, 1, "player->x:%u", player->x);
+    //DEBUG
+    mvprintw(1, 1, "player->y:%u", player->y);
+    mvprintw(2, 1, "player->x:%u", player->x);
 
     //TCOD_key_t key;
     //TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
