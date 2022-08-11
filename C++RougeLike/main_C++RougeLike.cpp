@@ -11,6 +11,7 @@
 //the player will be able to interact with the map
 //the map will have walls
 //the map will have a player spawn point
+//the game will run only in the curses window
 
 #include <curses.h>
 #include <stdlib.h>
@@ -42,6 +43,8 @@ int main()
 	#define WALL_PAIR      6
 	//define a color for the light wall
 	#define LIGHT_WALL_PAIR 7
+	//define a color for the light ground
+	#define LIGHT_GROUND_PAIR 8
 
 	
     //====
@@ -53,12 +56,14 @@ int main()
     init_pair(1, COLOR_YELLOW, COLOR_GREEN);
     init_pair(2, COLOR_CYAN, COLOR_BLUE);
     init_pair(3, COLOR_BLACK, COLOR_WHITE);
-    init_pair(4, COLOR_RED, COLOR_MAGENTA);
+    init_pair(4, COLOR_RED, COLOR_WHITE);
     init_pair(5, COLOR_RED, COLOR_YELLOW);
 	//create a new pair with the color pair number 6 and the foreground blue and background color red
 	init_pair(6, COLOR_BLUE, COLOR_RED);
 	//create a new pair with the color pair number 7 and the foreground red and background color blue
-	init_pair(7, COLOR_RED, COLOR_BLUE);
+	init_pair(7, COLOR_RED, COLOR_WHITE);
+	//create a new pair with the color pair number 8 and the foreground green and background color yellow
+	init_pair(8, COLOR_GREEN, COLOR_YELLOW);
 	
 	
 	
@@ -70,6 +75,8 @@ int main()
 	//the game loop will draw the game state to the screen
 	//the game loop will handle user input and update the game state
 	//the game loop will wait for the next frame
+	
+
     while (true)
     {
         //update the map
@@ -78,6 +85,7 @@ int main()
         engine.render();
         //refresh the window
         refresh();//TCODConsole::flush();
+		
     }
     return 0;
 }

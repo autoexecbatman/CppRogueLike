@@ -9,10 +9,14 @@ Engine::Engine() : fovRadius(10),computeFov(true)
 {
 	//initialize the screen in NCurses
     initscr();
-
 	//start color NCurses
     start_color();
-	
+    cbreak();
+    noecho();
+    //remove the blinking cursor
+    curs_set(0);
+
+
 	//make a new Actor for the player
     player = new Actor(25, 40, '@', 3);
     actors.push_back(player);
@@ -72,8 +76,14 @@ void Engine::update()
             player->x++;
             computeFov = true;
         }
-    default:break;
+        break;
+    //use the QUIT case to exit the game
+    case QUIT:
+        endwin();
+        exit(0);
+        break;
     }
+
 	
 	//create the compute fov function
     if (computeFov)

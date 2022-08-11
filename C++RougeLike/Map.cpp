@@ -129,8 +129,8 @@ void Map::render() const
 {
     static const int darkWall = 1;//green
     static const int darkGround = 2;//blue
-    static const int lightWall = 3;//
-    static const int lightGround = 4;//
+    static const int lightWall = 7;//
+    static const int lightGround = 8;//
 
     for (int iter_y = 0; iter_y < map_height; iter_y++)
     {
