@@ -9,7 +9,7 @@
 static const int ROOM_MAX_SIZE = 12;
 static const int ROOM_MIN_SIZE = 6;
 
-
+//create a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
 {
 private:
@@ -23,13 +23,6 @@ public:
     {
         if (node->isLeaf())
         {
-            //printw("isLeaf\n");
-            //printw("%u",node->isLeaf());
-            printw("|node->x%u", node->x);
-            printw("|node->w%u", node->w);
-            printw("|node-y%u", node->y);
-            printw("|node-h%u", node->h);
-            printw("|room%u\n", roomNum);
             // variables
             int room_pos_x = 0, room_pos_y = 0, room_width = 0, room_height = 0;
             // dig a room
@@ -38,33 +31,6 @@ public:
             room_height = rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
             room_pos_x = rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
             room_pos_y = rng->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
-            
-            ////dig a static room
-            //int rw = 10;
-            //int rh = 5;
-            //int rx = 5;
-            //int ry = 5;
-
-            //map.createRoom(roomNum == 0, rx, ry, rx + rw - 1, ry + rh - 1);
-            //map.createRoom(roomNum == 1, 100, 5, 89, 12);
-            ///*map.createRoom(roomNum == 1, 30, 10, 4, 14);*/
-
-            //if (roomNum != 0)
-            //{
-            //    map.dig(lasty,rx+rw/2,ry+rh/2,rx+rw/2);
-            //    map.dig(lasty, lastx, lasty, rx + rw / 2);
-            //}
-
-
-            //lastx = rx + rw / 2;
-            //lasty = ry + rh / 2;
-            /*roomNum++;*/
-            ////DEBUG rng
-            //printw("w = %u||", w);
-            //printw("h = %u||", h);
-            //printw("x = %u||", x);
-            //printw("y = %u||", y);
-            //printw("roomnum = %u\n", roomNum);
 
             map.createRoom//create rooms func
             (
@@ -93,9 +59,10 @@ public:
                 );
                 /*map.dig(1,10,117,10);*/
             }
-            // set variables
+            //set variables
             lastx = room_pos_x + room_width / 2;
             lasty = room_pos_y + room_height / 2;
+			
             //iterate to next room
             roomNum++;
         }
@@ -113,65 +80,77 @@ void Map::bsp(int map_width, int map_height)
 }
 
 //====
+//In Map.cpp, we allocate the TCODMap object in the constructor
 Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width)
 {
     tiles = new Tile[map_height * map_width];
+    map = new TCODMap(map_width, map_height);
     bsp(map_width, map_height);
-    /*printw("map_height:%u", map_height);*/
-    //int room_vertical_size = 40;
-    //int room_horizontal_size = 20;
-    //for (int i = 0; i < room_vertical_size; ++i)
-    //{
-    //    for (int j = 0; j < room_horizontal_size; ++j)
-    //    {
-    //        setWall(j, i);
-    //    }        
-    //}
-    /*setWall(22, 40);*/
-    /*TCODBsp* myBSP = new TCODBsp(0, 0, map_width, map_height);*/
-
 }
 
 Map::~Map()
 {
     delete[] tiles;
+    delete map;
 }
 
 bool Map::isWall(int isWall_pos_y, int isWall_pos_x) const//checks if it is a wall?
 {
-    return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
+    //return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
+
+    return !map->isWalkable(
+        isWall_pos_x,
+        isWall_pos_y
+    );
+
 }
 
-void Map::setWall(int setWall_pos_y, int setWall_pos_x)
+bool Map::isExplored(int exp_x, int exp_y) const
 {
-    tiles[setWall_pos_x + setWall_pos_y * map_width].canWalk = false;
+    return tiles[exp_x + exp_y * map_width].explored;
+}
+
+bool Map::isInFov(int fov_x, int fov_y) const
+{
+    if (map->isInFov(fov_x,fov_y))
+    {
+        tiles[fov_x + fov_y * map_width].explored = true;
+        return true;
+    }
+    return false;
+}
+
+void Map::computeFov()
+{
+    map->computeFov(engine.player->x, engine.player->y, engine.fovRadius);
 }
 
 void Map::render() const
 {
     static const int darkWall = 1;//green
     static const int darkGround = 2;//blue
+    static const int lightWall = 3;//
+    static const int lightGround = 4;//
 
     for (int iter_y = 0; iter_y < map_height; iter_y++)
     {
         for (int iter_x = 0; iter_x < map_width; iter_x++)
         {
-            mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);
+            if (isInFov(iter_x,iter_y))
+            {
+                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? lightWall : lightGround, NULL);
+            }
+            else if (isExplored(iter_x,iter_y))
+            {
+                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);
+            }
+            /*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);*/
         }
     }
 }
-
+//a function for digging the tiles
 void Map::dig(int x1, int y1, int x2, int y2)
 {
-
-    //int tiley = y1+20;
-    //int tilex = x1+20;
-
-
-    //tiles[tilex + tiley * width].canWalk = true;
-    //printw("x1:%u|", x1);
-    //printw("y1:%u|\n", x1);
-
     //swap x
     if (x2 < x1)
     {
@@ -189,30 +168,48 @@ void Map::dig(int x1, int y1, int x2, int y2)
         y2 = y1;
         y1 = tmp;
     }
-
+    //DEBUG
     //printw("x1:%u~", x1);
     //printw("y1:%u|", x1);
 
-
+    //We're using a fovRadius field on the engine class, 
+    //this way we'll be able to dynamically change the radius.
+    //the isInFov function will be used to check if the tile is in the fov.
+	//The dig function must also be updated to use the TCODMap object
     for (int tiley = y1; tiley <= y2 +1; tiley++)
     {
         for (int tilex = x1; tilex <= x2 +1; tilex++)
         {
-            tiles[tilex + tiley * map_width].canWalk = true;
+            //tiles[tilex + tiley * map_width].canWalk = true;
+
+            //set the map properties
+			map->setProperties(
+				tilex,
+				tiley,
+				true,
+				true
+			);
+			
+            /*map->setProperties(tilex, tiley, true, true);*/
+			
         }
     }
 }
-//Engine* engine = new Engine;
+
+
+//the implementation of the Map class
 void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 {
-   
+	//dig the corridors
     dig(x1, y1, x2, y2);
 
+    //if this is the first room, we need to place the player in it
     if (first)
     {
         engine.player->y = y1 + 1;
         engine.player->x = x1 + 1;
     }
+	//if this is not the first room, we make a random number of monsters and place them in the room
     else
     {
         if (int rng = rand() % 4 == 0)
@@ -226,26 +223,6 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
                 )
             );
         }
-        //TCODRandom random;
-        //std::default_random_engine* generator;
-        //std::uniform_int_distribution<int> distribution(1, 6);
-        //auto dice = std::bind(distribution, generator);
-        //auto rng = dice;
-
-        /*sp::StaticRandomInitializer* rng;*/
-        //sp::StaticRandomInitializer::StaticRandomInitializer()* rng = 0;
-        /*sp::StaticRandomInitializer::StaticRandomInitializer();*/
-        //auto* rng = sp::irandom;
-
-
-
-        /*srand(time(NULL));*/
-
-        //int* ptr_rng;
-        //int* ptr_rng = &rngrand;
-
-
-        
     }
     
 }

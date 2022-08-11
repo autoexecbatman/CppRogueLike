@@ -4,95 +4,99 @@
 #include "Map.h"
 #include "Engine.h"
 
-Engine::Engine()
+//the constructor for the engine class
+Engine::Engine() : fovRadius(10),computeFov(true)
 {
-    /*TCODConsole::initRoot(80, 50, "libtcod C++ tutorial", false);*/
-    std::cout << "constructed" << std::endl;
+	//initialize the screen in NCurses
     initscr();
+
+	//start color NCurses
     start_color();
+	
+	//make a new Actor for the player
     player = new Actor(25, 40, '@', 3);
     actors.push_back(player);
-    /*map = new Map(30, 120);*/
+
+	//make a new map instance
     map = new Map(30, 120);
+
 }
 
+//the destructor for the engine class
 Engine::~Engine()
 {
     /*actors.clearAndDelete();*/
     actors.clear();
     delete map;
-}
-
+ }
+//the update function for the engine class
 void Engine::update()
-{
-    //DEBUG
-    mvprintw(1, 1, "player->y:%u", player->y);
-    mvprintw(2, 1, "player->x:%u", player->x);
-
-    //TCOD_key_t key;
-    //TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+{    
+    //create a key listener using ncurses
     int key = getch();
+	
+	//create switch cases for the controls
     switch (key)
     {
-        //case TCODK_UP:
-        //    if (!map->isWall(player->x, player->y - 1)) {
-        //        player->y--;
-        //    }
-        //    break;
+    //create the up case
     case UP:
         if (!map->isWall(player->y - 1, player->x))
         {
             player->y--;
+            computeFov = true;
         }
         break;
-        //case TCODK_DOWN:
-        //    if (!map->isWall(player->x, player->y + 1)) {
-        //        player->y++;
-        //    }
-        //    break;
+		
+    //create the down case
     case DOWN:
         if (!map->isWall(player->y + 1, player->x))
         {
             player->y++;
+            computeFov = true;
         }
         break;
-        //case TCODK_LEFT:
-        //    if (!map->isWall(player->x - 1, player->y)) {
-        //        player->x--;
-        //    }
-        //    break;
+
+    //create the left case
     case LEFT:
         if (!map->isWall(player->y, player->x - 1))
         {
             player->x--;
+            computeFov = true;
         }
         break;
-        //case TCODK_RIGHT:
-        //    if (!map->isWall(player->x + 1, player->y)) {
-        //        player->x++;
-        //    }
-        //    break;
+
+	//create the right case
     case RIGHT:
         if (!map->isWall(player->y, player->x + 1))
         {
             player->x++;
+            computeFov = true;
         }
-        break;
-
     default:break;
     }
+	
+	//create the compute fov function
+    if (computeFov)
+    {
+        map->computeFov();
+        computeFov = false;
+    }
 }
-
+//the engine render function implementation
 void Engine::render()
 {
-    //TCODConsole::root->clear();
+    //clear the screen
     clear();
+	
     // draw the map
     map->render();
 
     // draw the actors
     for (auto actor : actors)
     {
-        actor->render();
+        if (map->isInFov(actor->x, actor->y))
+        {
+            actor->render();
+        }
     }
 }
