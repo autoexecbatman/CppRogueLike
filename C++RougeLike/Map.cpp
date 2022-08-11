@@ -30,6 +30,7 @@ public:
             printw("|node-y%u", node->y);
             printw("|node-h%u", node->h);
             printw("|room%u\n", roomNum);
+            // variables
             int room_pos_x = 0, room_pos_y = 0, room_width = 0, room_height = 0;
             // dig a room
             TCODRandom* rng = TCODRandom::getInstance();
@@ -65,7 +66,7 @@ public:
             //printw("y = %u||", y);
             //printw("roomnum = %u\n", roomNum);
 
-            map.createRoom//createroom func
+            map.createRoom//create rooms func
             (
                 roomNum == 0,
                 room_pos_x,
@@ -73,18 +74,29 @@ public:
                 room_pos_x + room_width - 1 - 1,
                 room_pos_y + room_height - 1 - 1
             );
-
+            
             if (roomNum != 0)
             {
                 // dig a corridor from last room
 
-                //map.dig(lasty, room_pos_x + room_width / 2, room_pos_y + room_height / 2, room_pos_x + room_width / 2);
-                //map.dig(lasty, lastx, lasty, room_pos_x + room_width / 2);
-                map.dig(1,10,117,10);
+                map.dig(
+                    room_pos_x + room_width / 2,
+                    lasty,
+                    room_pos_x + room_width / 2,
+                    room_pos_y + room_height / 2
+                );
+                map.dig(
+                    lastx,
+                    lasty,
+                    room_pos_x + room_width / 2,
+                    lasty
+                );
+                /*map.dig(1,10,117,10);*/
             }
-
+            // set variables
             lastx = room_pos_x + room_width / 2;
             lasty = room_pos_y + room_height / 2;
+            //iterate to next room
             roomNum++;
         }
         return true;
@@ -207,8 +219,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
         {
             engine.actors.push_back(
                 new Actor(
-                    (x1 + x2) / 2,
                     (y1 + y2) / 2,
+                    (x1 + x2) / 2,
                     '@',
                     4
                 )
