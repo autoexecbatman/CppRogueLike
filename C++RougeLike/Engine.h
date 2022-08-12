@@ -11,10 +11,19 @@ enum CONTROLS
 class Engine
 {
 public:
+	enum GameStatus
+	{
+		STARTUP,
+		IDLE,
+		NEW_TURN,
+		VICTORY,
+		DEFEAT
+	} gameStatus;
+
 	std::vector<Actor*> actors;
 	Actor* player;
 	Map* map;
-	int fovRadius;
+	int fovRadius = 0;
 
 
 	Engine();
@@ -22,8 +31,7 @@ public:
 	void update();
 	void render();
 private:
-	bool computeFov;
+	bool computeFov = false;
 };
-extern Engine engine;
 
-//Engine engine;
+extern Engine engine;

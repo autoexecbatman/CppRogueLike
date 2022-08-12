@@ -30,6 +30,10 @@ public:
 	bool isInFov(int fov_x, int fov_y) const;
 	//indicates whether this tile has already been seen by the player
 	bool isExplored(int exp_x, int exp_y) const;
+	bool canWalk(int canw_x, int canw_y) const;
+	//create a declaration for addMonster function
+	void addMonster(int mon_x, int mon_y);
+	//compute the field of view
 	void computeFov();
 	void render() const;
 

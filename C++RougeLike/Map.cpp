@@ -8,6 +8,8 @@
 
 static const int ROOM_MAX_SIZE = 12;
 static const int ROOM_MIN_SIZE = 6;
+//add maximum number of monsters per room
+static const int MAX_ROOM_MONSTERS = 3;
 
 //create a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
@@ -83,15 +85,15 @@ void Map::bsp(int map_width, int map_height)
 //In Map.cpp, we allocate the TCODMap object in the constructor
 Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width)
 {
-    tiles = new Tile[map_height * map_width];
-    map = new TCODMap(map_width, map_height);
+    tiles = new Tile[map_height * map_width]; // allocate the map's tiles
+    map = new TCODMap(map_width, map_height); // allocate the map
     bsp(map_width, map_height);
 }
 
 Map::~Map()
 {
-    delete[] tiles;
-    delete map;
+    delete[] tiles; // free the map's tiles
+    delete map; //delete the TCODMap object
 }
 
 bool Map::isWall(int isWall_pos_y, int isWall_pos_x) const//checks if it is a wall?
@@ -127,10 +129,10 @@ void Map::computeFov()
 
 void Map::render() const
 {
-    static const int darkWall = 1;//green
-    static const int darkGround = 2;//blue
-    static const int lightWall = 7;//
-    static const int lightGround = 8;//
+    static const int darkWall = 1;
+    static const int darkGround = 2;
+    static const int lightWall = 7;
+    static const int lightGround = 8;
 
     for (int iter_y = 0; iter_y < map_height; iter_y++)
     {
@@ -138,66 +140,64 @@ void Map::render() const
         {
             if (isInFov(iter_x,iter_y))
             {
+				//if (isWall(iter_y,iter_x))
+				//{
+				//	mvaddch(iter_y, iter_x, '#');
+				//}
+				//else
+				//{
+				//	mvaddch(iter_y, iter_x, '.');
+				//}
+
                 mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? lightWall : lightGround, NULL);
             }
             else if (isExplored(iter_x,iter_y))
             {
+				//if (isWall(iter_y,iter_x))
+				//	{
+				//	mvaddch(iter_y, iter_x, '#');
+				//	}
+				//else
+				//	{
+				//	mvaddch(iter_y, iter_x, '.');
+				//	}
+				
                 mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);
             }
             /*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);*/
         }
     }
 }
-//a function for digging the tiles
+
 void Map::dig(int x1, int y1, int x2, int y2)
 {
-    //swap x
     if (x2 < x1)
     {
-        //printw("x1:%u|", x1);
-        //printw("y1:%u", x1);
-        //printw("num:%u\n", iter);
         int tmp = x2;
         x2 = x1;
         x1 = tmp;
     }
-    //swap y
     if (y2 < y1)
     {
         int tmp = y2;
         y2 = y1;
         y1 = tmp;
     }
-    //DEBUG
-    //printw("x1:%u~", x1);
-    //printw("y1:%u|", x1);
 
-    //We're using a fovRadius field on the engine class, 
-    //this way we'll be able to dynamically change the radius.
-    //the isInFov function will be used to check if the tile is in the fov.
-	//The dig function must also be updated to use the TCODMap object
     for (int tiley = y1; tiley <= y2 +1; tiley++)
     {
         for (int tilex = x1; tilex <= x2 +1; tilex++)
         {
-            //tiles[tilex + tiley * map_width].canWalk = true;
-
-            //set the map properties
 			map->setProperties(
 				tilex,
 				tiley,
 				true,
 				true
-			);
-			
-            /*map->setProperties(tilex, tiley, true, true);*/
-			
+			);			
         }
     }
 }
 
-
-//the implementation of the Map class
 void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 {
 	//dig the corridors
@@ -210,20 +210,69 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
         engine.player->x = x1 + 1;
     }
 	//if this is not the first room, we make a random number of monsters and place them in the room
-    else
-    {
-        if (int rng = rand() % 4 == 0)
-        {
-            engine.actors.push_back(
-                new Actor(
-                    (y1 + y2) / 2,
-                    (x1 + x2) / 2,
-                    '@',
-                    4
-                )
-            );
-        }
-    }
-    
+    //First we get a random number of monsters and for each one, get a random position inside the room. If the tile is empty (canWalk) we create a monster.
+	else
+	{
+		int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
+		for (int i = 0; i < numMonsters; i++)
+		{
+			int monsterx = TCODRandom::getInstance()->getInt(x1, x2);
+			int monstery = TCODRandom::getInstance()->getInt(y1, y2);
+			if (isWall(monstery, monsterx))
+			{
+				continue;
+			}
+			addMonster(monstery, monsterx);
+		}
+	}    
+}
+
+//the canWalk() implementation
+//we want to detect when the player tries to walk on a Tile if it is occupied by another actor
+bool Map::canWalk(int canw_x, int canw_y) const
+{
+	for (const auto& actor : engine.actors)
+	{
+		if (actor->x == canw_x && actor->y == canw_y)
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
+//create a add monster implementation
+void Map::addMonster(int mon_x, int mon_y)
+{
+	//create a random amount of orcs and trolls in the room
+	int rng = rand() % 4;
+	for (int iter = 0; iter < rng; iter++)
+	{
+		int rng2 = rand() % 2;
+		if (rng2 == 0)
+		{
+			engine.actors.push_back(
+				new Actor(
+					mon_x,
+					mon_y,
+					'o',
+					"orc",
+					4
+				)
+			);
+		}
+		else
+		{
+			engine.actors.push_back(
+				new Actor(
+					mon_x,
+					mon_y,
+					'T',
+					"troll",
+					10
+				)
+			);
+		}
+	}
 }
 //====
