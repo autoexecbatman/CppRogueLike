@@ -51,10 +51,12 @@ void Engine::update()
         map->computeFov();
     }
     gameStatus = IDLE;
-	
+    
     //a key listener using curses to get input
     int key = getch();
-	
+
+    //the clear function should be called before each update
+    clear();
 
     //move the player character
     switch (key)
@@ -84,8 +86,8 @@ void Engine::update()
             map->computeFov();
         }
 	}
-
-	if (gameStatus == NEW_TURN)
+    
+	if (gameStatus == NEW_TURN)//
 	{
         for (const auto& actor : engine.actors)
         {
@@ -153,7 +155,7 @@ void Engine::update()
 void Engine::render()
 {
     //clear the screen
-    clear();
+    //clear();
 	
     // draw the map
     map->render();
@@ -166,6 +168,4 @@ void Engine::render()
             actor->render();
         }
     }
-
-	
 }

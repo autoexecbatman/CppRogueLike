@@ -18,7 +18,8 @@ void Actor::render() const
 //the monster update
 void Actor::update()
 {
-    printw("the %s growls\n", name);		
+    //printf("the %s growls\n", name);
+    mvprintw(29, 0, "the %s growls\n", name);
 }
 
 bool Actor::moveOrAttack(int x, int y) 
@@ -32,7 +33,7 @@ bool Actor::moveOrAttack(int x, int y)
     {
 		if (actor->x == x && actor->y == y)
 		{
-            printw("The %s laughs at your puny efforts to attack him!\n", actor->name);
+            mvprintw(29, 0, "The %s laughs at your puny efforts to attack him!\n", actor->name);
 			return false;
 		}
     }

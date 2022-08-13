@@ -73,13 +73,13 @@ int main()
  
     //====
 	//main loop
-	//the main loop will run until the user quits the game by pressing the q key
     while (true)
     {
         //update the map
         engine.update();
 		//render the map
         engine.render();
+		
         //refresh the window
         refresh();
     }
