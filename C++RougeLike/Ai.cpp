@@ -2,8 +2,7 @@
 
 #include "main.h"
 
-static const int TRACKING_TURNS = 3;
-
+constexpr auto TRACKING_TURNS = 3;
 
 //====
 MonsterAi::MonsterAi() : moveCount(0) {}
@@ -36,7 +35,7 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 	int dy = targety - owner->y;
 	int stepdx = (dx > 0 ? 1 : -1);
 	int stepdy = (dy > 0 ? 1 : -1);
-	float distance = sqrtf(dx * dx + dy * dy);
+	double distance = sqrt(dx * dx + dy * dy);
 	if (distance >= 2)
 	{
 		dx = (int)(round(dx / distance));

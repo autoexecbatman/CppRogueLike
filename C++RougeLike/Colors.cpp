@@ -6,7 +6,7 @@
 void Colors::my_init_pair()
 {
     //====
-    //use the init pair function to make a color using curses
+    //the init_pair functions to make a color using curses
     //the first parameter is the color pair number
     //the second parameter is the foreground color
     //the third parameter is the background color

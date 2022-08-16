@@ -1,11 +1,14 @@
 #pragma once
 
-//create a struct for the tiles
+//====
+//check if the player has seen this tile
 struct Tile
 {
-	//check if the player has seen this tile
-	bool explored;
-	Tile() : explored(false) {}
+	//bool explored;
+	//Tile() : explored(false) {} // check if the player has seen this tile set to 'false' by default
+
+	bool explored = false;
+	inline auto tile() { return explored = false; };
 };
 
 //a class for the game map

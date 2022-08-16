@@ -1,10 +1,11 @@
 #include <curses.h>
 
 #include "main.h"
+#include "Colors.h"
 
-static const int ROOM_MAX_SIZE = 12;
-static const int ROOM_MIN_SIZE = 6;
-static const int MAX_ROOM_MONSTERS = 3;
+constexpr auto ROOM_MAX_SIZE = 12;
+constexpr auto ROOM_MIN_SIZE = 6;
+constexpr auto MAX_ROOM_MONSTERS = 3;
 
 //create a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
@@ -124,10 +125,6 @@ void Map::computeFov()
 
 void Map::render() const
 {
-    static const int darkWall = 1;
-    static const int darkGround = 2;
-    static const int lightWall = 7;
-    static const int lightGround = 8;
 
     for (int iter_y = 0; iter_y < map_height; iter_y++)
     {
@@ -144,7 +141,7 @@ void Map::render() const
 				//	mvaddch(iter_y, iter_x, '.');
 				//}
 
-                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? lightWall : lightGround, NULL);
+                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);
             }
             else if (isExplored(iter_x,iter_y))
             {
@@ -157,7 +154,7 @@ void Map::render() const
 				//	mvaddch(iter_y, iter_x, '.');
 				//	}
 				
-                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);
+                mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? DARK_WALL_PAIR : DARK_GROUND_PAIR, NULL);
             }
             /*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);*/
         }
@@ -195,17 +192,16 @@ void Map::dig(int x1, int y1, int x2, int y2)
 
 void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 {
-	//dig the corridors
-    dig(x1, y1, x2, y2);
+    dig(x1, y1, x2, y2); // dig the corridors
 
-    //if this is the first room, we need to place the player in it
-    if (first)
+    if (first) // if this is the first room, we need to place the player in it
     {
         engine.player->y = y1 + 1;
         engine.player->x = x1 + 1;
     }
-	//if this is not the first room, we make a random number of monsters and place them in the room
-    //First we get a random number of monsters and for each one, get a random position inside the room. If the tile is empty (canWalk) we create a monster.
+	//If this is NOT the first room, we make a random number of monsters and place them in the room
+    //First we get a random number of monsters and for each one, get a random position inside the room.
+    //If the tile is empty (canWalk) we create a monster.
 	else
 	{
 		int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
@@ -222,8 +218,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 	}    
 }
 
-//the canWalk() implementation
-//we want to detect when the player tries to walk on a Tile if it is occupied by another actor
+//====
+// We want to detect, when the player tries to walk on a Tile , if it is occupied by another actor.
 bool Map::canWalk(int canw_x, int canw_y) const
 {
 	for (const auto& actor : engine.actors)
@@ -236,7 +232,6 @@ bool Map::canWalk(int canw_x, int canw_y) const
 	return true;
 }
 
-//create a add monster implementation
 void Map::addMonster(int mon_x, int mon_y)
 {
 	//create a random amount of orcs and trolls in the room
@@ -246,22 +241,12 @@ void Map::addMonster(int mon_x, int mon_y)
 		int rng2 = rand() % 2;
 		if (rng2 == 0)
 		{
-			//engine.actors.push_back(
-			//	new Actor(
-			//		mon_x,
-			//		mon_y,
-			//		'o',
-			//		"orc",
-			//		4
-			//	)
-			//);
-
 			Actor* orc = new Actor(
 				mon_x,
 				mon_y,
 				'o',
 				"orc",
-				4
+				ORC_PAIR
 			);
 
 			orc->destructible = new MonsterDestructible(10, 0, "dead orc");
@@ -270,25 +255,15 @@ void Map::addMonster(int mon_x, int mon_y)
             engine.actors.push_back(orc);
 		}
 		else
-		{
-			//engine.actors.push_back(
-			//	new Actor(
-			//		mon_x,
-			//		mon_y,
-			//		'T',
-			//		"troll",
-			//		10
-			//	)
-			//);
-			
+		{	
 			Actor* troll = new Actor(
 				mon_x,
 				mon_y,
 				'T',
 				"troll",
-				10
+				TROLL_PAIR
 				);
-			
+
             troll->destructible = new MonsterDestructible(16, 1, "troll carcass");
             troll->attacker = new Attacker(4);
             troll->ai = new MonsterAi();

@@ -2,6 +2,7 @@
 #include <iostream>
 
 #include "main.h"
+#include "Colors.h"
 
 //====
 
@@ -27,7 +28,7 @@ Engine::Engine(
         40,
         '@',
 		"player",
-        5
+        PLAYER_PAIR
     );	
     
 	player->destructible = new PlayerDestructible(
@@ -45,92 +46,58 @@ Engine::Engine(
     map = new Map(30, 120);
 	
 }
-//the destructor for the engine class
+
 Engine::~Engine()
 {
-    /*actors.clearAndDelete();*/
-    actors.clear();
-    delete map;
+    actors.clear(); // replaces "TCODList* actors.clearAndDelete()"
+    delete map; // deletes the map instance
 }
+
+//====
 //the update function for the engine class
 void Engine::update()
 {
-    //The update function must ensure the FOV is computed on first frame only.
+    //====
+    // The update function must ensure the FOV is computed on first frame only.
     // This is to avoid FOV recomputation on each frame.
     if (gameStatus == STARTUP)
     {
         map->computeFov();
     }
-    gameStatus = IDLE;//set the game status to idle
-    player->update();
-    ////a key listener using curses to get input
-    //int key = getch();
-    ////the clear function should be called before each update
-    //clear();
-	
+
+    gameStatus = IDLE; // set the game status to idle
+
+    player->update(); // update the player
+
 	if (gameStatus == NEW_TURN)
 	{
         for (const auto& actor : engine.actors)
         {
             if (actor != player)
             {
-                actor->update();
+                actor->update(); // update monsters
             }
         }
 	}
-	
-	
- //   //move the player character
- //   switch (key)
- //   {
- //   case UP:
-	//	dy = -1;
-	//	break;
-	//case DOWN:
-	//	dy = 1;
-	//	break;
-	//case LEFT:
-	//	dx = -1;
-	//	break;
- //   case RIGHT:
-	//	dx = 1;
-	//	break;
- //   case QUIT:
-	//	exit(0);
-	//	break;
- //   }
-	
- //   if (dx != 0 || dy != 0)
-	//{
- //       gameStatus = NEW_TURN;
- //       if (player->moveOrAttack(player->x + dx, player->y + dy))
- //       {
- //           map->computeFov();
- //       }
-	//}
-    
 }
+
+//====
 //the engine render function implementation
 void Engine::render()
 {
-    //clear the screen
-    //clear();
+    map->render(); // draw the map
 
-    // draw the map
-    map->render();
-
-    // draw the actors
-    for (const auto& actor : actors)
+    for (const auto& actor : actors) // iterate through the actors list
     {
-        if (map->isInFov(actor->x, actor->y))
+        if (map->isInFov(actor->x, actor->y)) // if actor position is in the fov of the player
         {
-            actor->render();
+            actor->render(); // draw the actor
         }
     }
 
-    player->render();
-	//show the player's stats in curses
-	mvprintw(0, 0, "HP: %d", player->destructible->hp);
+    player->render(); // draw the player
+
+	mvprintw(0, 0, "HP: %d", player->destructible->hp); // print the player's hp in the top left corner
 }
 
 void Engine::sendToBack(Actor* actor)

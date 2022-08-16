@@ -2,6 +2,7 @@
 #include <algorithm>
 
 #include "main.h"
+#include "Colors.h"
 
 //====
 
@@ -38,7 +39,7 @@ void Destructible::die(Actor* owner)
 {
 	//transform the actor into a corpse!
     owner->ch = '%';
-    owner->col = 9;
+    owner->col = DEAD_NPC_PAIR;
 	owner->name = corpseName;
 	owner->blocks = false;
 	//make sure corpses are drawn before living actors

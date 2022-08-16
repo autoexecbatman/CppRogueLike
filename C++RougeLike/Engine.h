@@ -1,9 +1,9 @@
 #pragma once
 
-#include <vector>
 #include <deque>
 #include <curses.h>
 
+//====
 //the enumeration for the controls of the player
 enum CONTROLS
 {
@@ -28,7 +28,6 @@ public:
 	int fovRadius = 0;
 	int screenWidth = 0;
 	int screenHeight = 0;
-
 
 	Engine(int screenWidth, int screenHeight);
 	~Engine();

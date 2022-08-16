@@ -39,23 +39,4 @@ void Actor::update()
     }
 }
 
-//bool Actor::moveOrAttack(int x, int y) 
-//{
-//    if (engine.map->isWall(y, x))
-//    {
-//        return false;
-//    }
-//	
-//    for (const auto& actor : engine.actors)
-//    {
-//		if (actor->x == x && actor->y == y)
-//		{
-//            mvprintw(29, 0, "The %s laughs at your puny efforts to attack him!\n", actor->name);
-//			return false;
-//		}
-//    }
-//    this->x = x;
-//	this->y = y;
-//	return true;
-//}
 //====

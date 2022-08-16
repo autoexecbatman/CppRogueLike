@@ -2,19 +2,21 @@
 
 //====
 //define the color pairs for the game
-#define GRASS_PAIR     1
-#define EMPTY_PAIR     1
-#define WATER_PAIR     2
-#define MOUNTAIN_PAIR  3
-#define ORC_PAIR       4
-#define PLAYER_PAIR    5
-#define WALL_PAIR      6
-#define LIGHT_WALL_PAIR 7
-#define LIGHT_GROUND_PAIR 8
-#define DEAD_NPC_PAIR 9
-#define TROLL_PAIR 10
 
-class Colors
-{public:
+constexpr auto DARK_WALL_PAIR = 1;
+constexpr auto EMPTY_PAIR = 1;
+constexpr auto DARK_GROUND_PAIR = 2;
+constexpr auto MOUNTAIN_PAIR = 3;
+constexpr auto ORC_PAIR = 4;
+constexpr auto PLAYER_PAIR = 5;
+constexpr auto WALL_PAIR = 6;
+constexpr auto LIGHT_WALL_PAIR = 7;
+constexpr auto LIGHT_GROUND_PAIR = 8;
+constexpr auto DEAD_NPC_PAIR = 9;
+constexpr auto TROLL_PAIR = 10;
+
+
+struct Colors
+{
 	void my_init_pair();
 };

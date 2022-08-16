@@ -5,10 +5,10 @@
 class Destructible
 {
 public:
-	float maxHp;
-	float hp;
-	float defense;
-	const char* corpseName;
+	float maxHp = 0;
+	float hp = 0;
+	float defense = 0;
+	const char* corpseName = 0;
 	
 	Destructible(float maxHp, float defense, const char* corpseName);
 	inline bool isDead() { return hp <= 0; }
