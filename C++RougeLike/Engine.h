@@ -26,8 +26,8 @@ public:
 	Actor* player;
 	Map* map;
 	int fovRadius = 0;
-	int screenWidth;
-	int screenHeight;
+	int screenWidth = 0;
+	int screenHeight = 0;
 
 
 	Engine(int screenWidth, int screenHeight);
