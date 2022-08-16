@@ -140,13 +140,20 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Actor.cpp" />
+    <ClCompile Include="Ai.cpp" />
+    <ClCompile Include="Attacker.cpp" />
+    <ClCompile Include="Destructible.cpp" />
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="main_C++RougeLike.cpp" />
     <ClCompile Include="Map.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
+    <ClInclude Include="Ai.h" />
+    <ClInclude Include="Attacker.h" />
+    <ClInclude Include="Destructible.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="mybsp.h" />
     <ClInclude Include="mytree.h" />

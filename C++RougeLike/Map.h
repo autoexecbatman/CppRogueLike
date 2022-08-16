@@ -1,5 +1,4 @@
 #pragma once
-#include <libtcod.h>
 
 //create a struct for the tiles
 struct Tile

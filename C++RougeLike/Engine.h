@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <deque>
+#include <curses.h>
 
 //the enumeration for the controls of the player
 enum CONTROLS
@@ -19,17 +21,20 @@ public:
 		VICTORY,
 		DEFEAT
 	} gameStatus;
-
-	std::vector<Actor*> actors;
+	int lastKey = getch();
+	std::deque<Actor*> actors;
 	Actor* player;
 	Map* map;
 	int fovRadius = 0;
+	int screenWidth;
+	int screenHeight;
 
 
-	Engine();
+	Engine(int screenWidth, int screenHeight);
 	~Engine();
 	void update();
 	void render();
+	void sendToBack(Actor* actor);
 private:
 	bool computeFov = false;
 };

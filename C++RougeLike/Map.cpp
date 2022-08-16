@@ -1,14 +1,9 @@
 #include <curses.h>
 
-#include "libtcod.hpp"
-
-#include "Map.h"
-#include "Actor.h"
-#include "Engine.h"
+#include "main.h"
 
 static const int ROOM_MAX_SIZE = 12;
 static const int ROOM_MIN_SIZE = 6;
-//add maximum number of monsters per room
 static const int MAX_ROOM_MONSTERS = 3;
 
 //create a binary space partition listener class (BSP)
@@ -233,7 +228,7 @@ bool Map::canWalk(int canw_x, int canw_y) const
 {
 	for (const auto& actor : engine.actors)
 	{
-		if (actor->x == canw_x && actor->y == canw_y)
+		if (actor->blocks && actor->x == canw_x && actor->y == canw_y)
 		{
 			return false;
 		}
@@ -251,27 +246,53 @@ void Map::addMonster(int mon_x, int mon_y)
 		int rng2 = rand() % 2;
 		if (rng2 == 0)
 		{
-			engine.actors.push_back(
-				new Actor(
-					mon_x,
-					mon_y,
-					'o',
-					"orc",
-					4
-				)
+			//engine.actors.push_back(
+			//	new Actor(
+			//		mon_x,
+			//		mon_y,
+			//		'o',
+			//		"orc",
+			//		4
+			//	)
+			//);
+
+			Actor* orc = new Actor(
+				mon_x,
+				mon_y,
+				'o',
+				"orc",
+				4
 			);
+
+			orc->destructible = new MonsterDestructible(10, 0, "dead orc");
+            orc->attacker = new Attacker(3);
+            orc->ai = new MonsterAi();
+            engine.actors.push_back(orc);
 		}
 		else
 		{
-			engine.actors.push_back(
-				new Actor(
-					mon_x,
-					mon_y,
-					'T',
-					"troll",
-					10
-				)
-			);
+			//engine.actors.push_back(
+			//	new Actor(
+			//		mon_x,
+			//		mon_y,
+			//		'T',
+			//		"troll",
+			//		10
+			//	)
+			//);
+			
+			Actor* troll = new Actor(
+				mon_x,
+				mon_y,
+				'T',
+				"troll",
+				10
+				);
+			
+            troll->destructible = new MonsterDestructible(16, 1, "troll carcass");
+            troll->attacker = new Attacker(4);
+            troll->ai = new MonsterAi();
+            engine.actors.push_back(troll);
 		}
 	}
 }
