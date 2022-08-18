@@ -21,7 +21,7 @@ Engine::Engine(
     noecho(); //turn off echoing of keys to the screen
     curs_set(0); //remove the blinking cursor
 
-
+    //====
 	//a new Actor for the player
     player = new Actor(
         25,
@@ -42,6 +42,7 @@ Engine::Engine(
 	
     actors.push_back(player);
 
+	//====
 	//a new map instance
     map = new Map(30, 120);
 	

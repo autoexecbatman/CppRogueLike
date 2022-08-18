@@ -222,14 +222,27 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 // We want to detect, when the player tries to walk on a Tile , if it is occupied by another actor.
 bool Map::canWalk(int canw_x, int canw_y) const
 {
-	for (const auto& actor : engine.actors)
+	
+    if (isWall(canw_y, canw_x)) // check if the tile is a wall
+    {
+		return false;
+    }
+
+	for (const auto& actor : engine.actors) // iterate through the actor deque
 	{
-		if (actor->blocks && actor->x == canw_x && actor->y == canw_y)
+		if (
+            actor->blocks // if the actor blocks
+            && 
+			actor->x == canw_x // and if there is another actor on the tile
+            && 
+            actor->y == canw_y
+            )
 		{
 			return false;
 		}
 	}
-	return true;
+    
+    return true;
 }
 
 void Map::addMonster(int mon_x, int mon_y)

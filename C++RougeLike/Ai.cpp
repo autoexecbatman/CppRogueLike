@@ -2,6 +2,8 @@
 
 #include "main.h"
 
+//====
+//a constexpr for tracking the number of turns
 constexpr auto TRACKING_TURNS = 3;
 
 //====
