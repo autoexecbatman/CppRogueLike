@@ -4,11 +4,11 @@
 //check if the player has seen this tile
 struct Tile
 {
-	//bool explored;
+	bool explored = false;
+
 	//Tile() : explored(false) {} // check if the player has seen this tile set to 'false' by default
 
-	bool explored = false;
-	inline auto tile() { return explored = false; };
+	auto tile() { return explored = false; }
 };
 
 //a class for the game map

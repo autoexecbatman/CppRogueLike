@@ -19,20 +19,21 @@ Destructible::Destructible(
 
 float Destructible::takeDamage(Actor* owner, float damage)
 {
-    damage -= defense;
-    if (damage > 0)
+    damage -= defense; // (dam - def)
+    if (damage > 0) // if dam > 0
     {
-        hp -= damage;
-        if (hp <= 0)
+        hp -= damage; // current hp - damage
+        if (hp <= 0) // if hp <= 0
         {
-            die(owner);
+            die(owner); // owner killed
         }
     }
     else
     {
-        damage = 0;
+        damage = 0; // else 0 dam dealt
     }
-    return damage;
+	
+    return damage; // total damage dealt
 }
 
 void Destructible::die(Actor* owner)
