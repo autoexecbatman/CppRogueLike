@@ -1,4 +1,5 @@
 // Debug needs to be set to x86
+
 //we are making a roguelike game
 //using the curses library
 //and the classes from doryen TCOD libtcod library without using the console
@@ -7,6 +8,7 @@
 
 #include "main.h"
 #include "Colors.h"
+#include "Window.h"
 
 
 //====
@@ -31,14 +33,7 @@ int main()
     Colors colors;
     colors.my_init_pair();
 
-    //====
-    //add a new curses window for printing debug information
-    // newwin() creates a new window with the given number of lines,
-    //nlines and columns, ncols.
-    //The upper left corner of the window is at line begy, column begx.
-    //If nlines is zero, it defaults to LINES - begy; ncols to COLS - begx.
-    //Create a new full-screen window by calling newwin(0, 0, 0, 0).
-    //WINDOW* newwin(int nlines, int ncols, int begy, int begx);
+    Window window;
 	
     //====
 	//main game loop
@@ -47,22 +42,9 @@ int main()
         engine.update(); // update the map
         engine.render(); // render the map
         refresh(); // refresh the window
-		
-		// need to refresh stdscr before window
-        WINDOW* win = newwin(3, 20, 0, 0);
-        wborder(
-            win,
-            '-', 
-            '-', 
-            '-', 
-            '-', 
-            '-', 
-            '-',
-			'-',
-			'-'
-        );
-        mvwprintw(win, 1, 1, "something");
-        wrefresh(win);
+        window.border();
+        window.text();
+        window.windowrefresh();
     }
 
     return 0;

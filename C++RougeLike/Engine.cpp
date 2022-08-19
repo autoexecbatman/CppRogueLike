@@ -20,7 +20,9 @@ Engine::Engine(
     cbreak(); //disable line buffering
     noecho(); //turn off echoing of keys to the screen
     curs_set(0); //remove the blinking cursor
+    
 
+	
     //====
 	//a new Actor for the player
     player = new Actor(
@@ -98,7 +100,7 @@ void Engine::render()
 
     player->render(); // draw the player
 
-	mvprintw(0, 0, "HP: %d", player->destructible->hp); // print the player's hp in the top left corner
+	//mvprintw(0, 0, "HP: %d", player->destructible->hp); // print the player's hp in the top left corner
 }
 
 void Engine::sendToBack(Actor* actor)
@@ -109,6 +111,8 @@ void Engine::sendToBack(Actor* actor)
     //actors.insertBefore(actor,0);
 
 	//removes the actor from the vector using std::vector erase function
+    std::cout << "before erase" << std::endl;
+    std::cout << actor->name << std::endl;
 	actors.erase(std::find(actors.begin(), actors.end(), actor), actors.end());
 	//adds the actor to the vector using std::vector insert function
 	actors.insert(actors.begin(), actor);

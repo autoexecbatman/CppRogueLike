@@ -143,9 +143,16 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 			actor->y == targety
 			)
 		{
-		std::cout <<
-			"There's a %s here\n"
-			<< std::endl;
+		//std::cout <<
+		//	"There's a %s here\n"
+		//	<< std::endl;
+
+			mvprintw(
+				29,
+				0,
+				"There's a %s here\n",
+				actor->name
+			);
 		}
 	}
 

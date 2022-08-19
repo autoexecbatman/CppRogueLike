@@ -147,6 +147,7 @@
     <ClCompile Include="Engine.cpp" />
     <ClCompile Include="main_C++RougeLike.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Actor.h" />
@@ -159,6 +160,7 @@
     <ClInclude Include="Map.h" />
     <ClInclude Include="mybsp.h" />
     <ClInclude Include="mytree.h" />
+    <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

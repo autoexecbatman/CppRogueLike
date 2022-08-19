@@ -59,9 +59,7 @@ MonsterDestructible::MonsterDestructible(
 
 void MonsterDestructible::die(Actor* owner)
 {
-    // transform it into a nasty corpse! it doesn't block, can't be
-    // attacked and doesn't move
-    std::cout << "%s is dead\n" << std::endl;
+    mvprintw(29,0,"%s is dead\n", owner->name);
 	Destructible::die(owner);
 }
 
@@ -78,7 +76,9 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Actor* owner)
 {
-	std::cout << "You died!\n" << std::endl;
+	/*std::cout << "You died!\n" << std::endl;*/
+    int y = getmaxy(stdscr);
+    mvprintw(y, 9, "You died!\n", owner->name);
 	Destructible::die(owner);
     engine.gameStatus = Engine::DEFEAT;
 }
