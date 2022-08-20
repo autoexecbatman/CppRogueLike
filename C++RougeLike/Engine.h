@@ -34,6 +34,7 @@ public:
 	void update();
 	void render();
 	void sendToBack(Actor* actor);
+	void print_container(const std::deque<Actor*> actors);
 private:
 	bool computeFov = false;
 };

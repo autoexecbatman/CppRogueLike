@@ -1,5 +1,6 @@
 #include <curses.h>
 #include <iostream>
+#include <algorithm>
 
 #include "main.h"
 #include "Colors.h"
@@ -106,14 +107,84 @@ void Engine::render()
 void Engine::sendToBack(Actor* actor)
 {
 	//TODO : Find the right member function to remove actor from vector
-	
-    //actors.remove(actor);
-    //actors.insertBefore(actor,0);
+    //Since actors are drawn in their order in the list,
+    // a corpse my be drawn on top of a living actor.
+    //To keep that from happening, 
+    //we simply move the dead actors to the beginning of the list
+    //in the Engine::sendToBack function
+    //example: 
+    // actors.remove(actor); // remove by value
+    // 
+    // 	void remove(const T elt) {
+    //    for (T* curElt = begin(); curElt != end(); curElt++) {
+    //        if (*curElt == elt) {
+    //            remove(curElt);
+    //            return;
+    //        }
+    //    }
+    //}
+    // 
+    //example: 
+    // actors.insertBefore(actor,0);
+    // 	T * insertBefore(const T elt,int before) {
+    //    if (fillSize + 1 >= allocSize) allocate();
+    //    for (int idx = fillSize; idx > before; idx--) {
+    //        array[idx] = array[idx - 1];
+    //    }
+    //    array[before] = elt;
+    //    fillSize++;
+    //    return &array[before];
+    //}
+	//removes the actor from the vector using std::deque erase function
+	std::cout << "before" << std::endl;
+    std::cout << "size()->" << actors.size() << std::endl;
+    print_container(actors);
 
-	//removes the actor from the vector using std::vector erase function
-    std::cout << "before erase" << std::endl;
-    std::cout << actor->name << std::endl;
-	actors.erase(std::find(actors.begin(), actors.end(), actor), actors.end());
+	//erase only the actor from the list of actors
+	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
+
+	//actors.erase( // erases elements
+ //       std::find( // 
+ //           actors.begin(),
+ //           actors.end(),
+ //           actor
+ //       ),// first iterator
+	//	actors.end() // last iterator
+ //   );
+
 	//adds the actor to the vector using std::vector insert function
-	actors.insert(actors.begin(), actor);
+	/*actors.insert(actors.begin(), actor);*/
+    actors.push_front(actor);
+    
+    std::cout << "after" << std::endl;
+    std::cout << "size()->" << actors.size() << std::endl;
+    print_container(actors);
+
+    ////send destructible to back of the list
+    //auto it = actor;
+    //for (auto it = actors.begin(); it != actors.end();)
+    //{
+    //    if (*it)
+    //    {
+    //        it = actors.erase(it);
+    //    }
+    //    else
+    //    {
+    //        ++it;
+    //    }
+    //}
+
+    //actors.push_front(it);
+
+}
+
+void Engine::print_container(const std::deque<Actor*> actors)
+{
+    int i = 0;
+    for (const auto& actor : actors) 
+    {
+        std::cout << actor->name << i << " ";
+		i++;
+    }
+    std::cout << '\n';
 }
