@@ -30,7 +30,7 @@ Engine::Engine(
 		25,
 		40,
 		'@',
-		"player",
+		"Django",
 		PLAYER_PAIR
 	);
 
@@ -40,7 +40,7 @@ Engine::Engine(
 		"your cadaver"
 	);
 
-	player->attacker = new Attacker(5);
+	player->attacker = new Attacker(100);
 	player->ai = new PlayerAi();
 
 	actors.push_back(player);

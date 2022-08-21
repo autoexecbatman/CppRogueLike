@@ -22,12 +22,14 @@ public:
 	
     /*auto create_window();*/
     // have to refresh stdscr before window
-    WINDOW* win = newwin(
-        3, // int nlines
-        wintext_len, // int ncols
-        0, // int begy
-        0 // int begx
-    );
+    //WINDOW* win = newwin(
+    //    3, // int nlines
+    //    wintext_len, // int ncols
+    //    0, // int begy
+    //    0 // int begx
+    //);
+
+    void create_window(int nlines, int begy, int begx, const char* wintext);
 
     void border();
     void text(const char* wintext);

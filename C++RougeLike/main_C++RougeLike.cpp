@@ -42,9 +42,10 @@ int main()
         engine.update(); // update the map
         engine.render(); // render the map
         refresh(); // refresh the window
-        window.border();
-        window.text(window.wintext);
-        window.windowrefresh();
+        //window.border();
+        //window.text("window.wintext");
+        //window.windowrefresh();
+        window.create_window(3,0,0,engine.player->name);
     }
 
     return 0;
