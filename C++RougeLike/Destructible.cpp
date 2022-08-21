@@ -77,8 +77,8 @@ PlayerDestructible::PlayerDestructible(
 void PlayerDestructible::die(Actor* owner)
 {
 	/*std::cout << "You died!\n" << std::endl;*/
-    int y = getmaxy(stdscr);
-    mvprintw(y, 9, "You died!\n", owner->name);
+    /*int y = getmaxy(stdscr);*/
+    mvprintw(29, 0, "You died!\n", owner->name);
 	Destructible::die(owner);
     engine.gameStatus = Engine::DEFEAT;
 }

@@ -43,7 +43,7 @@ int main()
         engine.render(); // render the map
         refresh(); // refresh the window
         window.border();
-        window.text();
+        window.text(window.wintext);
         window.windowrefresh();
     }
 
