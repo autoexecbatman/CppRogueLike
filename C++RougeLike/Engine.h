@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <curses.h>
+#include "Gui.h"
 
 //====
 //the enumeration for the controls of the player
@@ -28,6 +29,7 @@ public:
 	int fovRadius = 0;
 	int screenWidth = 0;
 	int screenHeight = 0;
+	Gui* gui; // we make a pointer of the gui
 
 	Engine(int screenWidth, int screenHeight);
 	~Engine();

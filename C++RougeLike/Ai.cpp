@@ -79,17 +79,44 @@ void PlayerAi::update(Actor* owner)
 	clear();
 	switch (key) // TODO : Correct ?
 	{
-	case UP:
+	case '8':
 		dy = -1;
 		break;
-	case DOWN:
+	case '2':
 		dy = 1;
 		break;
-	case LEFT:
+	case '4':
 		dx = -1;
 		break;
-	case RIGHT:
+	case '6':
 		dx = 1;
+		break;
+	// if numpad key 7 is pressed move diagonaly up left
+	case '7':
+		dx = -1;
+		dy = -1;
+		break;
+		// if numpad key 9 is pressed move diagonaly up right
+	case '9':
+		dx = 1;
+		dy = -1;
+		break;
+	// if numpad key 1 is pressed move diagonaly down left
+	case '1':
+		dx = -1;
+		dy = 1;
+		break;
+	// if numpad key 3 is pressed move diagonaly down right
+	case '3':
+		dx = 1;
+		dy = 1;
+		break;
+	// numpad key 5 is pressed a turn will pass
+	case '5':
+		engine.gameStatus = Engine::NEW_TURN;
+		break;
+	case ' ': 
+		engine.player->attacker->attack(engine.player, engine.player);
 		break;
 	case QUIT:
 		exit(0);

@@ -47,14 +47,15 @@ Engine::Engine(
 
 	//====
 	//a new map instance
-	map = new Map(30, 120);
-
+	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
+	gui = new Gui();
 }
 
 Engine::~Engine()
 {
 	actors.clear(); // replaces "TCODList* actors.clearAndDelete()"
 	delete map; // deletes the map instance
+	delete gui;
 }
 
 //====
@@ -100,7 +101,7 @@ void Engine::render()
 	}
 
 	player->render(); // draw the player
-
+	gui->render();
 	mvprintw(0, 100, "HP: %d/%d", (int)player->destructible->hp,(int)player->destructible->maxHp); // print the player's hp in the top left corner
 }
 
@@ -141,8 +142,7 @@ void Engine::sendToBack(Actor* actor)
 	print_container(actors);
 
 	//erase only the actor from the list of actors
-	/*actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());*/
-	std::remove(actors.begin(), actors.end(), actor);
+	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
 
 	//actors.erase( // erases elements
  //       std::find( // 
