@@ -21,6 +21,6 @@ void Colors::my_init_pair()
     init_pair(8, COLOR_GREEN, COLOR_YELLOW);//light ground color
     init_pair(9, COLOR_RED, COLOR_BLACK);//dead npc color
     init_pair(10, COLOR_GREEN, COLOR_BLACK);//troll color
-	init_pair(11, COLOR_RED, COLOR_BLACK);//gui color
-	init_pair(12, COLOR_GREEN, COLOR_BLACK);//guibkgd color
+	init_pair(11, COLOR_WHITE, COLOR_GREEN);//hp full color
+	init_pair(12, COLOR_WHITE, COLOR_RED);//hp missing color
 }

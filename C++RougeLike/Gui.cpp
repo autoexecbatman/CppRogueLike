@@ -24,46 +24,80 @@ Gui::~Gui()
 
 void Gui::render()
 {
-	refresh();
-	box(
+	refresh(); // refresh the screen has to be called for the window to show
+	box( // draw a border around the GUI window
 		con, // WINDOW* win
 		0, // int vertChar
 		0 // int horChar
 	);
-	wrefresh(con);
-	wbkgdset(con, '.');
-	wclear(con);
+	wstandout(con);
+	wcolor_set(con, DARK_GROUND_PAIR, 0);
+	wbkgdset(con, '.'); // set the background color of the GUI window
+	wclear(con); // clear the GUI window
 
-	renderBar(
+	renderBar( // draw the health bar
 		1, // int x
 		1, // int y
-		BAR_WIDTH, // int width
-		"HP", // const char* name
+		BAR_WIDTH, // int bar_width
+		"HP:", // const char* name
 		engine.player->destructible->hp, // float value
 		engine.player->destructible->maxHp, // float maxValue
-		GUI_PAIR, // int barColor
-		GUIBKGD_PAIR // int backColor
+		HPBARFULL_PAIR, // int barColor
+		HPBARMISSING_PAIR // int backColor
 	);
+	wrefresh(con); // refresh the GUI window has to be called for window to update
 }
 
-void Gui::renderBar(int x, int y, int width, const char* name, float value, float maxValue, int barColor, int backColor)
+void Gui::renderBar(
+	int x,
+	int y,
+	int bar_width,
+	const char* name, 
+	float value, 
+	float maxValue, 
+	int barColor, 
+	int backColor
+)
 {
 	float ratio = value / maxValue; // ratio of the bar's value to its maximum value
-	int barWidth = (int)(ratio * width); // the width of the bar in characters
+	int barWidth = (int)(ratio * bar_width); // the width of the bar in characters
 	wattron(con, COLOR_PAIR(barColor)); // set the color of the bar to barColor
 	for (int i = 0; i < barWidth; i++) // print the bar
 	{
-		mvwaddch(con, y, x + i, '=');
+		mvwaddch( // display the full hp
+			con,
+			y, 
+			x + i + strlen(name),
+			'+'
+		);
 	}
 	//{
 	//	mvwaddch(con, y, x + i, ' ');
 	//}
 	wattroff(con, COLOR_PAIR(barColor));
 	wattron(con, COLOR_PAIR(backColor));
-	for (int i = barWidth; i < width; i++)
+	for (int i = barWidth; i < bar_width; i++)
 	{
-		mvwaddch(con, y, x + i, ' ');
+		mvwaddch( // display the missing hp
+			con, 
+			y, 
+			x + i + strlen(name),
+			'-'
+		);
 	}
 	wattroff(con, COLOR_PAIR(backColor));
-	mvwprintw(con, y, x + width / 2 - strlen(name) / 2, name);
+	mvwprintw( // display the hp tag
+		con, 
+		1,
+		1, 
+		name
+	);
+	mvwprintw(
+		con,
+		1,
+		24,
+		"%d/%d",
+		(int)value,
+		(int)maxValue
+		);
 }

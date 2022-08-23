@@ -14,8 +14,8 @@ constexpr auto LIGHT_WALL_PAIR = 7;
 constexpr auto LIGHT_GROUND_PAIR = 8;
 constexpr auto DEAD_NPC_PAIR = 9;
 constexpr auto TROLL_PAIR = 10;
-constexpr auto GUI_PAIR = 11;
-constexpr auto GUIBKGD_PAIR = 12;
+constexpr auto HPBARFULL_PAIR = 11;
+constexpr auto HPBARMISSING_PAIR = 12;
 
 
 struct Colors
