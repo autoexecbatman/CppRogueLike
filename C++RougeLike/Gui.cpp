@@ -25,15 +25,10 @@ Gui::~Gui()
 void Gui::render()
 {
 	refresh(); // refresh the screen has to be called for the window to show
-	box( // draw a border around the GUI window
-		con, // WINDOW* win
-		0, // int vertChar
-		0 // int horChar
-	);
+	wclear(con); // clear the GUI window
 	wstandout(con);
 	wcolor_set(con, DARK_GROUND_PAIR, 0);
 	wbkgdset(con, '.'); // set the background color of the GUI window
-	wclear(con); // clear the GUI window
 
 	renderBar( // draw the health bar
 		1, // int x
@@ -44,6 +39,11 @@ void Gui::render()
 		engine.player->destructible->maxHp, // float maxValue
 		HPBARFULL_PAIR, // int barColor
 		HPBARMISSING_PAIR // int backColor
+	);
+	box( // draw a border around the GUI window
+		con, // WINDOW* win
+		0, // int vertChar
+		0 // int horChar
 	);
 	wrefresh(con); // refresh the GUI window has to be called for window to update
 }
