@@ -5,6 +5,7 @@
 
 constexpr int PANEL_HEIGHT = 7;
 constexpr int BAR_WIDTH = 20;
+constexpr int MSG_HEIGHT = PANEL_HEIGHT - 2;
 
 Gui::Gui()
 {
@@ -24,11 +25,11 @@ Gui::~Gui()
 
 void Gui::render()
 {
+	//wbkgdset(con, '.'); // set the background color of the GUI window
 	refresh(); // refresh the screen has to be called for the window to show
 	wclear(con); // clear the GUI window
-	wstandout(con);
-	wcolor_set(con, DARK_GROUND_PAIR, 0);
-	wbkgdset(con, '.'); // set the background color of the GUI window
+	/*wstandout(con);*/
+	/*wcolor_set(con, DARK_GROUND_PAIR, 0);*/
 
 	renderBar( // draw the health bar
 		1, // int x
@@ -47,15 +48,20 @@ void Gui::render()
 	);
 	
 	// draw the message log
-	message("message log");
+	// color the message
+	
+	message(LIGHT_GROUND_PAIR, "message log");
+
 	
 	wrefresh(con); // refresh the GUI window has to be called for window to update
 
 }
 
-void Gui::message(const char* text, ...)
+void Gui::message(int message_col, const char* text, ...)
 {
-	mvwprintw(con, 2, 1, text);
+	wattron(con, COLOR_PAIR(message_col));
+	mvwprintw(con, MSG_HEIGHT, 1, text);
+	wattroff(con, COLOR_PAIR(message_col));
 	//// build the text
 	//va_list args;
 	//va_start(args, text);
