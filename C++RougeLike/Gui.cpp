@@ -45,7 +45,23 @@ void Gui::render()
 		0, // int vertChar
 		0 // int horChar
 	);
+	
+	// draw the message log
+	message("message log");
+	
 	wrefresh(con); // refresh the GUI window has to be called for window to update
+
+}
+
+void Gui::message(const char* text, ...)
+{
+	mvwprintw(con, 2, 1, text);
+	//// build the text
+	//va_list args;
+	//va_start(args, text);
+	//vwprintw(con, text, args);
+	//va_end(args);
+	//wrefresh(con);
 }
 
 void Gui::renderBar(

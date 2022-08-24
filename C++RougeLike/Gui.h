@@ -7,6 +7,8 @@ public:
     Gui();
     ~Gui();
     void render();
+	// create the message function
+	void message(const char* text, ...);
 
 protected:
     WINDOW* con; // the gui window
