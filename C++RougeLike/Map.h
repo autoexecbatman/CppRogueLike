@@ -8,7 +8,7 @@ struct Tile
 
 	//Tile() : explored(false) {} // check if the player has seen this tile set to 'false' by default
 
-	bool tile() { return explored = false; }
+	/*bool tile() { return explored = false; }*/
 };
 
 //a class for the game map

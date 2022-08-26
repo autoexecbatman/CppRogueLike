@@ -160,8 +160,6 @@
     <ClInclude Include="Gui.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Map.h" />
-    <ClInclude Include="mybsp.h" />
-    <ClInclude Include="mytree.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
