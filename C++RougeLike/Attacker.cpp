@@ -2,6 +2,7 @@
 
 #include "main.h"
 #include "Window.h"
+#include "Colors.h"
 
 Attacker::Attacker(float power) : power(power) {}
 
@@ -17,11 +18,19 @@ void Attacker::attack(Actor* owner, Actor* target)
 			//	"%s attacks %s for %g hit points.\n"
 			//	<< std::endl;
 			
-			mvprintw(
-				29,
-				0,
-				"%s attacks %s for %g hit points.\n",
-				owner->name,
+			//mvprintw(
+			//	29,
+			//	0,
+			//	"%s attacks %s for %g hit points.\n",
+			//	owner->name,
+			//	target->name,
+			//	power - target->destructible->defense
+			//);
+
+			engine.gui->log_message(
+				LIGHT_WALL_PAIR,
+				"%s attacks %s for %g hit points.", 
+				owner->name, 
 				target->name,
 				power - target->destructible->defense
 			);

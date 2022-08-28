@@ -1,3 +1,4 @@
+#include <iostream>
 #include <curses.h>
 #include "Colors.h"
 
@@ -5,6 +6,7 @@
 
 void Colors::my_init_pair()
 {
+    std::cout << "colors on" << std::endl;
     //====
     //the init_pair functions to make a color using curses
     //the first parameter is the color pair number
