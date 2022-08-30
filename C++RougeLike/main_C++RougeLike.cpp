@@ -25,7 +25,7 @@ void wizardeye()
 }
 
 //====
-//this is the main function where the game will start
+//this is the main function where the game will run
 int main()
 {
 	//====
@@ -34,7 +34,7 @@ int main()
     colors.my_init_pair();
 
     Window window;
-	
+
     //====
 	//main game loop
     while (!engine.player->destructible->isDead())
@@ -43,24 +43,9 @@ int main()
         engine.update(); // update the map
         engine.render(); // render the map
         refresh(); // refresh the window
-        //window.border();
-        //window.text("window.wintext");
-        //window.windowrefresh();
 
 		window.create_window(3, 0, 0, engine.player->name);
 
-		////display the players hp
-		//mvprintw(engine.player->y, engine.player->x, "HP: %d", engine.player->destructible->hp);
-		////display the players name
-		//mvprintw(engine.player->y + 1, engine.player->x, engine.player->name);
-		////display the players position
-		//mvprintw(engine.player->y + 2, engine.player->x, "X: %d Y: %d", engine.player->x, engine.player->y);
-		////display the players symbol
-		//mvprintw(engine.player->y + 3, engine.player->x, "%c", engine.player->ch);
-		////display the players color
-		//mvprintw(engine.player->y + 4, engine.player->x, "Color: %d", engine.player->col);
-		////display the players blocks
-		//mvprintw(engine.player->y + 5, engine.player->x, "Blocks: %d", engine.player->blocks);
     }
 
     return 0;

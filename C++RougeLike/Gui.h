@@ -12,7 +12,7 @@ public:
 	void log_message(int log_message_color, const char* log_message_text, ...);
     
 
-//protected:
+protected:
     WINDOW* con; // the gui window
     WINDOW* sub; // a subwindow in the gui
 	
@@ -42,4 +42,5 @@ public:
         int barColor, 
         int backColor
     );
+    void renderMouseLook();
 };

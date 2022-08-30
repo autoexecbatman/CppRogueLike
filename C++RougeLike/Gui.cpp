@@ -71,6 +71,9 @@ void Gui::render()
 		wcolor_set(con, message->log_message_color, 0);
 		mvwprintw(con, 2, 1, message->log_message_text);
 	}
+	
+	// draw the mouse look
+	renderMouseLook();
 
 	wrefresh(con); // refresh the GUI window has to be called for window to update
 
@@ -167,7 +170,7 @@ void Gui::renderBar(
 	int backColor
 )
 {
-	std::cout << "void Gui::renderBar() {}" << std::endl;
+	/*std::cout << "void Gui::renderBar() {}" << std::endl;*/
 	float ratio = value / maxValue; // ratio of the bar's value to its maximum value
 	int barWidth = (int)(ratio * bar_width); // the width of the bar in characters
 	wattron(con, COLOR_PAIR(barColor)); // set the color of the bar to barColor
@@ -235,13 +238,36 @@ void Gui::print_container(std::vector<LogMessage*> message)
 	std::cout << '\n';
 }
 
-//void Engine::print_container(const std::deque<Actor*> actors)
-//{
-//	int i = 0;
-//	for (const auto& actor : actors)
-//	{
-//		std::cout << actor->name << i << " ";
-//		i++;
-//	}
-//	std::cout << '\n';
-//}
+void Gui::renderMouseLook()
+{
+	mvprintw(0, 10, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x);
+	/*mvprintw(10, 0, "Y: %d, X: %d", engine.mouse.x, engine.mouse.y);*/
+	if (!engine.map->isInFov(Mouse_status.x, Mouse_status.y))
+	{
+		//if the mouse is out of fov, nothing to render
+		return;
+	}
+	char buf[128] = "";
+	bool first = true;
+	for (const auto& actor : engine.actors)
+	{
+		if (actor->x == Mouse_status.x && actor->y == Mouse_status.y)
+		{
+			if (!first)
+			{
+				strcat(buf, ", ");
+			}
+			else
+			{
+				first = false;
+			}
+			strcat(buf, actor->name);
+		}
+	}
+	mvwprintw(
+		con,
+		0,
+		1,
+		buf
+	);
+}

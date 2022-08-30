@@ -16,11 +16,14 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight)
 {
+	std::cout << "Engine();" << std::endl;
 	initscr(); //initialize the screen in curses
 	start_color(); //start color curses
 	cbreak(); //disable line buffering
 	noecho(); //turn off echoing of keys to the screen
 	curs_set(0); //remove the blinking cursor
+	keypad(stdscr, true); // enable the keypad for non-char keys
+	mouse_on(ALL_MOUSE_EVENTS); // enable mouse events
 
 
 

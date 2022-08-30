@@ -118,6 +118,10 @@ void PlayerAi::update(Actor* owner)
 	case ' ': 
 		engine.player->attacker->attack(engine.player, engine.player);
 		break;
+	case KEY_MOUSE:
+		std::cout << "mouse" << std::endl;
+		request_mouse_pos();
+		break;
 	case QUIT:
 		exit(0);
 	}
