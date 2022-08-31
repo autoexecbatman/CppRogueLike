@@ -122,6 +122,12 @@ void PlayerAi::update(Actor* owner)
 		std::cout << "mouse" << std::endl;
 		request_mouse_pos();
 		break;
+	// if 'p' is pressed pick health potion
+	
+	case 'p':
+		engine.player->pickItem(engine.player->x, engine.player->y);
+		break;
+		
 	case QUIT:
 		exit(0);
 	}

@@ -38,6 +38,7 @@ public:
 	//compute the field of view
 	void computeFov();
 	void render() const;
+	void addItem(int x, int y);
 
 protected:
 	//create a pointer for the map array

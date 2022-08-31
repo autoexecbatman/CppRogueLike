@@ -3,6 +3,7 @@
 
 #include "main.h"
 
+
 //====
 //the actor constructor initializes the actor's position,name and color
 Actor::Actor(
@@ -20,7 +21,8 @@ Actor::Actor(
 	blocks(true),
 	attacker(NULL),
 	destructible(NULL),
-	ai(NULL)
+	ai(NULL),
+	container(NULL)
 {}
 
 //the actor render function with color
@@ -29,6 +31,11 @@ void Actor::render() const
     attron(COLOR_PAIR(col));
     mvaddch(y, x, ch);
     attroff(COLOR_PAIR(col));
+}
+void Actor::pickItem(int x, int y)
+{
+	// add item to inventory
+    container->add(this);
 }
 //the monster update
 void Actor::update()

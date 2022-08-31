@@ -45,7 +45,7 @@ Engine::Engine(
 
 	player->attacker = new Attacker(100);
 	player->ai = new PlayerAi();
-
+	player->container = new Container(26);
 	actors.push_back(player);
 
 	//====

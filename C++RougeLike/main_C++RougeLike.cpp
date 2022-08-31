@@ -39,7 +39,7 @@ int main()
 	//main game loop
     while (!engine.player->destructible->isDead())
     {
-        std::cout << "Running..." << std::endl;
+        std::cout << "Main loop Running..." << std::endl;
         engine.update(); // update the map
         engine.render(); // render the map
         refresh(); // refresh the window

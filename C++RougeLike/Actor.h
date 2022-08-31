@@ -1,4 +1,5 @@
 #pragma once
+//#include "Container.h"
 
 //====
 // a class for the moving characters
@@ -14,6 +15,8 @@ public:
 	Attacker* attacker; // the actor can attack
 	Destructible* destructible; // the actor can be destroyed
 	Ai* ai; // the actor can have AI
+	Container* container; // the actor can be a container
+	Pickable* pickable;
 	
 	Actor(
 		int y,
@@ -25,6 +28,7 @@ public:
 
 	void update(); // update() will handle the monster turn.
 	void render() const; // render the actor on the screen.
+	void pickItem(int x, int y); // pick up an item
 };
 
 //====

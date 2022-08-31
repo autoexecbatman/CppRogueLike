@@ -6,6 +6,7 @@
 constexpr auto ROOM_MAX_SIZE = 12;
 constexpr auto ROOM_MIN_SIZE = 6;
 constexpr auto MAX_ROOM_MONSTERS = 3;
+constexpr int MAX_ROOM_ITEMS = 2;
 
 //create a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
@@ -173,6 +174,14 @@ void Map::render() const
     }
 }
 
+void Map::addItem(int x, int y)
+{
+    Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);
+    healthPotion->blocks = false;
+    healthPotion->pickable = new Healer(4);
+    engine.actors.push_back(healthPotion);
+}
+
 void Map::dig(int x1, int y1, int x2, int y2)
 {
     if (x2 < x1)
@@ -227,7 +236,20 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
 			}
 			addMonster(monstery, monsterx);
 		}
-	}    
+	} 
+	
+	// add items
+	int numItems = TCODRandom::getInstance()->getInt(0, MAX_ROOM_ITEMS);
+	for (int i = 0; i < numItems; i++)
+	{
+		int itemx = TCODRandom::getInstance()->getInt(x1, x2);
+		int itemy = TCODRandom::getInstance()->getInt(y1, y2);
+		if (isWall(itemy, itemx))
+		{
+			continue;
+		}
+		addItem(itemy, itemx);
+	}
 }
 
 //====
