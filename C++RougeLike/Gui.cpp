@@ -240,14 +240,14 @@ void Gui::print_container(std::vector<LogMessage*> message)
 
 void Gui::renderMouseLook()
 {
-	mvprintw(0, 10, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x);
-	/*mvprintw(10, 0, "Y: %d, X: %d", engine.mouse.x, engine.mouse.y);*/
+	mvprintw(0, 10, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
+
 	if (!engine.map->isInFov(Mouse_status.x, Mouse_status.y))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;
 	}
-	char buf[128] = "";
+	char buf[128] = ""; // a buffer to store the text in
 	bool first = true;
 	for (const auto& actor : engine.actors)
 	{

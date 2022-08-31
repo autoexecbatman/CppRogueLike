@@ -23,6 +23,8 @@ public:
 	//====
 	//handles death, owner killed
 	virtual void die(Actor* owner);
+	// The function returns the amount of health point actually restored.
+	float heal(float amount);
 };
 
 //====

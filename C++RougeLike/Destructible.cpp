@@ -84,3 +84,16 @@ void PlayerDestructible::die(Actor* owner)
 }
 
 //====
+
+// The function returns the amount of health point actually restored.
+float Destructible::heal(float amount)
+{
+    // TODO: Add your implementation code here.
+	hp += amount;
+    if (hp > maxHp)
+    {
+        amount -= hp - maxHp;
+        hp = maxHp;
+    }
+    return amount;
+}
