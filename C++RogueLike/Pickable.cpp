@@ -5,7 +5,6 @@ bool Pickable::pick(Actor* owner, Actor* wearer)
 {
 	if (wearer->container && wearer->container->add(owner))
 	{
-		/*inventory.erase(std::remove(inventory.begin(), inventory.end(), actor), inventory.end());*/
 		engine.actors.erase(std::remove(engine.actors.begin(), engine.actors.end(), owner), engine.actors.end());
 		return true;
 	}

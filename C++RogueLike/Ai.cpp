@@ -157,7 +157,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 	{
 		std::clog << "You pick" << std::endl;
 		bool found = false;
-		for (const auto& actor : engine.actors)
+		for (const auto actor : engine.actors)
 		{
 			if (
 				actor->pickable
@@ -169,7 +169,6 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 			{
 				if (actor->pickable->pick(actor, owner))
 				{
-					
 					found = true;
 					engine.gui->log_message(DARK_GROUND_PAIR, "You pick up the %s.", actor->name);
 					break;
