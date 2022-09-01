@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "main.h"
+#include "Colors.h"
 
 //====
 //a constexpr for tracking the number of turns
@@ -122,14 +123,19 @@ void PlayerAi::update(Actor* owner)
 		std::cout << "mouse" << std::endl;
 		request_mouse_pos();
 		break;
+	// detect the key press and pass it to the handleActionKey function
+	case 'g':
+		handleActionKey(owner, key);
+		break;
+
 	// if 'p' is pressed pick health potion
-	
 	case 'p':
 		engine.player->pickItem(engine.player->x, engine.player->y);
 		break;
 		
 	case QUIT:
 		exit(0);
+		break;
 	}
 
 	if (dx!=0||dy!=0)
@@ -139,6 +145,39 @@ void PlayerAi::update(Actor* owner)
 		{
 			engine.map->computeFov();
 		}
+	}
+}
+
+void PlayerAi::handleActionKey(Actor* owner, int ascii)
+{
+	std::clog << "handleActionKey" << std::endl;
+	switch (ascii)
+	{
+		std::clog << "lalala" << std::endl;
+	case 'g':
+	{
+		std::clog << "You pick" << std::endl;
+		bool found = false;
+		for (const auto& actor : engine.actors)
+		{
+			if (
+				actor->pickable
+				&&
+				actor->x == owner->x
+				&&
+				actor->y == owner->y
+				)
+			{
+				if (actor->pickable->pick(actor, owner))
+				{
+					
+					found = true;
+					engine.gui->log_message(DARK_GROUND_PAIR, "You pick up the %s.", actor->name);
+					break;
+				}
+			}
+		}
+	}
 	}
 }
 
