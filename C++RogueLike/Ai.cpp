@@ -153,7 +153,6 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 	std::clog << "handleActionKey" << std::endl;
 	switch (ascii)
 	{
-		std::clog << "lalala" << std::endl;
 	case 'g':
 	{
 		std::clog << "You pick" << std::endl;
@@ -175,7 +174,16 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 					engine.gui->log_message(DARK_GROUND_PAIR, "You pick up the %s.", actor->name);
 					break;
 				}
+				else if (!found)
+				{
+					found = true;
+					engine.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
+				}
 			}
+		}
+		if (!found)
+		{
+			engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up");
 		}
 	}
 	}
