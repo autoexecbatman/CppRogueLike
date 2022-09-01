@@ -22,8 +22,18 @@ Actor::Actor(
 	attacker(NULL),
 	destructible(NULL),
 	ai(NULL),
-	container(NULL)
+	container(NULL),
+	pickable(NULL)
 {}
+
+Actor::~Actor()
+{
+	if (attacker) delete attacker;
+	if (destructible) delete destructible;
+	if (ai) delete ai;
+	if (pickable) delete pickable;
+	if (container) delete container;
+}
 
 //the actor render function with color
 void Actor::render() const

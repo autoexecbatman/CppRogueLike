@@ -26,6 +26,8 @@ public:
 		int col
 	);
 
+	~Actor();
+
 	void update(); // update() will handle the monster turn.
 	void render() const; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
