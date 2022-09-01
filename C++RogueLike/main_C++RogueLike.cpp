@@ -17,11 +17,11 @@ Engine engine(30, 120);
 
 void wizardeye()
 {
-    for (const auto& actor : engine.actors)
-    {
-        //print the actor's name
-        mvprintw(actor->y, actor->x, actor->name);
-    }
+	for (const auto& actor : engine.actors)
+	{
+		//print the actor's name
+		mvprintw(actor->y, actor->x, actor->name);
+	}
 }
 
 //====
@@ -30,23 +30,23 @@ int main()
 {
 	//====
 	//initialize the color pairs
-    Colors colors;
-    colors.my_init_pair();
+	Colors colors;
+	colors.my_init_pair();
 
-    Window window;
+	Window window;
 
-    //====
+	//====
 	//main game loop
-    while (!engine.player->destructible->isDead())
-    {
-        std::cout << "Main loop Running..." << std::endl;
-        engine.update(); // update the map
-        engine.render(); // render the map
-        refresh(); // refresh the window
+	while (!engine.player->destructible->isDead())
+	{
+		std::cout << "Main loop Running..." << std::endl;
+		engine.update(); // update the map
+		engine.render(); // render the map
+		refresh(); // refresh the window
 
 		window.create_window(3, 0, 0, engine.player->name);
 
-    }
+	}
 
-    return 0;
+	return 0;
 }

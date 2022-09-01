@@ -7,17 +7,17 @@
 //====
 //the actor constructor initializes the actor's position,name and color
 Actor::Actor(
-    int y,
-    int x,
-    int ch,
-    const char* name,
-    int col
+	int y,
+	int x,
+	int ch,
+	const char* name,
+	int col
 ) : 
-    y(y),
-    x(x),
-    ch(ch),
-    col(col),
-    name(name),
+	y(y),
+	x(x),
+	ch(ch),
+	col(col),
+	name(name),
 	blocks(true),
 	attacker(NULL),
 	destructible(NULL),
@@ -28,22 +28,22 @@ Actor::Actor(
 //the actor render function with color
 void Actor::render() const
 {
-    attron(COLOR_PAIR(col));
-    mvaddch(y, x, ch);
-    attroff(COLOR_PAIR(col));
+	attron(COLOR_PAIR(col));
+	mvaddch(y, x, ch);
+	attroff(COLOR_PAIR(col));
 }
 void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
-    container->add(this);
+	container->add(this);
 }
 //the monster update
 void Actor::update()
 {	
-    if (ai)
-    {
-        ai->update(this);
-    }
+	if (ai)
+	{
+		ai->update(this);
+	}
 }
 
 //====
