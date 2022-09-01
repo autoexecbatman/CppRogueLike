@@ -37,15 +37,16 @@ int main()
 
 	//====
 	//main game loop
+	int countLoop = 0;
 	while (!engine.player->destructible->isDead())
 	{
-		std::cout << "Main loop Running..." << std::endl;
+		std::clog << "Running..." << countLoop << std::endl;
 		engine.update(); // update the map
 		engine.render(); // render the map
 		refresh(); // refresh the window
 
 		window.create_window(3, 0, 0, engine.player->name);
-
+		countLoop++;
 	}
 
 	return 0;
