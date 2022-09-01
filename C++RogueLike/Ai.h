@@ -5,6 +5,7 @@
 class Ai
 {
 public:
+	virtual ~Ai() {};
 	virtual void update(Actor* owner) = 0;
 };
 

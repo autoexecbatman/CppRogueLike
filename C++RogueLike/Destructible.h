@@ -16,6 +16,8 @@ public:
 		const char* corpseName
 	);
 
+	virtual ~Destructible() {};
+
 	bool isDead() { return hp <= 0; } // is the actor dead?
 	//====
 	//handles damage, owner attacked, returns (dam - def)
