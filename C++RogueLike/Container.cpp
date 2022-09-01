@@ -16,6 +16,7 @@ Container::~Container()
 // checks that the container is not full.
 bool Container::add(Actor* actor)
 {
+	std::clog << "Container::add();" << std::endl;
 	if (inv_size < 0 && inventory.size() <= unsigned(inv_size))
 	{
 		// inventory full
