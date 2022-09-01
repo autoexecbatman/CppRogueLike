@@ -1,3 +1,4 @@
+#include <vector>
 #include "main.h"
 
 bool Pickable::pick(Actor* owner, Actor* wearer)

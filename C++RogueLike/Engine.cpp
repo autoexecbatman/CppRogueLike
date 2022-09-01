@@ -89,6 +89,7 @@ void Engine::update()
 			}
 		}
 	}
+	print_container(actors);
 }
 
 //====
@@ -144,7 +145,7 @@ void Engine::sendToBack(Actor* actor)
 	//removes the actor from the vector using std::deque erase function
 	//std::cout << "before" << std::endl;
 	//std::cout << "size()->" << actors.size() << std::endl;
-	//print_container(actors);
+	print_container(actors);
 
 	//erase only the actor from the list of actors
 	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
@@ -164,7 +165,7 @@ void Engine::sendToBack(Actor* actor)
 
 	//std::cout << "after" << std::endl;
 	//std::cout << "size()->" << actors.size() << std::endl;
-	//print_container(actors);
+	print_container(actors);
 
 	////send destructible to back of the list
 	//auto it = actor;
