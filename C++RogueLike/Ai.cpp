@@ -184,8 +184,10 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 		{
 			engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up");
 		}
-	}
-	}
+	engine.gameStatus = Engine::NEW_TURN;
+	} // end of case 'g'
+	break;
+	} // end of switch statement
 }
 
 bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety) 
@@ -213,14 +215,24 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		}
 	}
 
-	// look for corpses
+	// look for corpses or items
 	for (const auto& actor : engine.actors)
 	{
-		if (
-			actor->destructible 
-			&& 
+		bool corpseOrItem = (
+			actor->destructible
+			&&
 			actor->destructible->isDead()
-			&& 
+			)
+			||
+			actor->pickable;
+
+		if (
+			corpseOrItem
+			&&
+			//actor->destructible 
+			//&& 
+			//actor->destructible->isDead()
+			//&& 
 			actor->x == targetx
 			&&
 			actor->y == targety
