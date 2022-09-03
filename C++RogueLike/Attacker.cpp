@@ -28,11 +28,11 @@ void Attacker::attack(Actor* owner, Actor* target)
 			//);
 
 			engine.gui->log_message(
-				LIGHT_WALL_PAIR,
-				"%s attacks %s for %g hit points.", 
-				owner->name, 
-				target->name,
-				power - target->destructible->defense
+				LIGHT_WALL_PAIR, // int log_message_color
+				"%s attacks %s for %g hit points.\n", // const char* log_message_text
+				owner->name, // const char* ...
+				target->name,// const char* ...
+				power - target->destructible->defense // const char* ...
 			);
 		}
 		else
