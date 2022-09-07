@@ -29,7 +29,7 @@ protected:
 		~LogMessage();
 	};
 	void print_container(const std::vector<LogMessage*> log_message);
-	std::vector<LogMessage*> log;
+	std::vector<LogMessage*> log; // the message log
 
 
 	void renderBar(

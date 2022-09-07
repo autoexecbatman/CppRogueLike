@@ -170,7 +170,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 				if (actor->pickable->pick(actor, owner))
 				{
 					found = true;
-					engine.gui->log_message(DARK_GROUND_PAIR, "You pick up the %s.", actor->name);
+					engine.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor->name);
 					break;
 				}
 				else if (!found)
@@ -182,7 +182,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 		}
 		if (!found)
 		{
-			engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up");
+			engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
 		}
 	engine.gameStatus = Engine::NEW_TURN;
 	} // end of case 'g'

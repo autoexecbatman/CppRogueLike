@@ -23,8 +23,8 @@ Gui::Gui()
 	std::cout << "sub = derwin();" << std::endl;
 	sub = derwin(
 		con, // 
-		2, // int nlines
-		29, // int ncols
+		4, // int nlines
+		28, // int ncols
 		2, // int begy
 		1 // int begx
 	);
@@ -35,19 +35,18 @@ Gui::~Gui()
 {
 	std::cout << "~Gui();" << std::endl;
 	delwin(con);
+	delwin(sub);
 	/*log.clear();*/
 }
 
 void Gui::render()
 {
-	std::cout << "void Gui::render() {}" << std::endl;
-	//wbkgdset(con, '.'); // set the background color of the GUI window
+	// DEBUG log
+	std::clog << "void Gui::render() {}" << std::endl;
+
 	refresh(); // refresh the screen has to be called for the window to show
 	/*wclear(con);*/
-	/*wclear(sub);*/
-	/*wclear(con);*/ // clear the GUI window
-	/*wstandout(con);*/
-	/*wcolor_set(con, DARK_GROUND_PAIR, 0);*/
+	
 	renderBar( // draw the health bar
 		1, // int x
 		1, // int y
@@ -58,6 +57,7 @@ void Gui::render()
 		HPBARFULL_PAIR, // int barColor
 		HPBARMISSING_PAIR // int backColor
 	);
+
 	box( // draw a border around the GUI window
 		con, // WINDOW* win
 		0, // int vertChar
@@ -65,23 +65,30 @@ void Gui::render()
 	);
 	
 	// draw the log
-	/*message(LIGHT_GROUND_PAIR, "message log");*/
-	for (auto const& message : log)
+	int y = 1;
+	for (const auto message : log)
 	{
-		wcolor_set(con, message->log_message_color, 0);
-		mvwprintw(con, 2, 1, message->log_message_text);
+		wclear(sub);
+		/*wcolor_set(con, message->log_message_color, 0);*/
+		wattron(sub, COLOR_PAIR(message->log_message_color));
+		mvwprintw(sub, 0, 0, message->log_message_text);
+		wattroff(sub, COLOR_PAIR(message->log_message_color));
+		y++;
 	}
 	
 	// draw the mouse look
 	renderMouseLook();
 
-	wrefresh(con); // refresh the GUI window has to be called for window to update
+	wrefresh(con);
+	wrefresh(sub);// refresh the GUI window has to be called for window to update
 
 }
 
 void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 {
-	std::cout << "void Gui::log_message() {}" << std::endl;
+	// DEBUG log
+	//std::clog << "void Gui::log_message() {}" << std::endl;
+
 	// build the text
 	va_list args;
 	char buf[128];
@@ -91,6 +98,7 @@ void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 	
 	char* lineBegin = buf;
 	char* lineEnd = nullptr;
+
 	do
 	{
 		// make room for the new message
@@ -98,17 +106,21 @@ void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 		//{
 		//	log.erase(log.begin());
 		//}
+
 		// detect end of line
-		lineEnd = strchr(lineBegin, '\n');
-		if (lineEnd) 
-		{
-			*lineEnd = '\0';
-		}
+		//lineEnd = strchr(lineBegin, '\n');
+		//if (lineEnd) 
+		//{
+		//	*lineEnd = '\0';
+		//}
+
 		// add a new message to the log
-		LogMessage* msg = new LogMessage(lineBegin, 2);
+		LogMessage* msg = new LogMessage(lineBegin, DARK_GROUND_PAIR);
 		log.push_back(msg);
+
 		// go to next line
 		lineBegin = lineEnd + 1;
+
 	} while (lineEnd);
 	print_container(log);
 }
