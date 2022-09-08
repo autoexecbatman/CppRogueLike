@@ -32,6 +32,7 @@ public:
 	void handleActionKey(Actor* owner, int ascii);
 	
 protected:
+	Actor* choseFromInventory(Actor* owner);
 	bool moveOrAttack(Actor* owner, int targetx, int targety);
 };
 

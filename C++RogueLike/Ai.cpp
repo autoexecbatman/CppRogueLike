@@ -12,33 +12,35 @@ MonsterAi::MonsterAi() : moveCount(0) {}
 
 void MonsterAi::update(Actor* owner)
 {
-	if (owner->destructible && owner->destructible->isDead())
+
+	if (owner->destructible && owner->destructible->isDead()) // if the owner is dead
 	{
-		return;
+		return; // do nothing
 	}
 
-	if (engine.map->isInFov(owner->x, owner->y))
+	if (engine.map->isInFov(owner->x, owner->y)) // if the owner is in the fov
 	{
+		// move towards the player
 		moveCount = TRACKING_TURNS;
 	}
 	else
 	{
-		moveCount--;
+		moveCount--; // decrement the move count
 	}
 
-	if (moveCount > 0)
+	if (moveCount > 0) // if the move count is greater than 0
 	{
-		moveOrAttack(owner, engine.player->x,engine.player->y);
+		moveOrAttack(owner, engine.player->x, engine.player->y); // move or attack the player
 	}
 }
 
 void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 {
-	int dx = targetx - owner->x;
-	int dy = targety - owner->y;
-	int stepdx = (dx > 0 ? 1 : -1);
-	int stepdy = (dy > 0 ? 1 : -1);
-	double distance = sqrt(dx * dx + dy * dy);
+	int dx = targetx - owner->x; // get the x distance
+	int dy = targety - owner->y; // get the y distance
+	int stepdx = (dx > 0 ? 1 : -1); // get the x step
+	int stepdy = (dy > 0 ? 1 : -1); // get the y step
+	double distance = sqrt(dx * dx + dy * dy); // get the distance
 	if (distance >= 2)
 	{
 		dx = (int)(round(dx / distance));
@@ -78,7 +80,7 @@ void PlayerAi::update(Actor* owner)
 	int dx = 0, dy = 0;
 	int key = getch();
 	clear();
-	switch (key) // TODO : Correct ?
+	switch (key)
 	{
 	case '8':
 		dy = -1;
@@ -128,11 +130,16 @@ void PlayerAi::update(Actor* owner)
 		handleActionKey(owner, key);
 		break;
 
+	// detect the key press and pass it to the handleActionKey function
+	case 'i':
+		handleActionKey(owner, key);
+		break;
+	
 	// if 'p' is pressed pick health potion
 	case 'p':
 		engine.player->pickItem(engine.player->x, engine.player->y);
 		break;
-		
+	
 	case QUIT:
 		exit(0);
 		break;
@@ -187,7 +194,85 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 	engine.gameStatus = Engine::NEW_TURN;
 	} // end of case 'g'
 	break;
+
+	case 'i': // display inventory
+	{
+		std::clog << "You display inventory" << std::endl;
+		Actor* actor = choseFromInventory(owner);
+		if (actor) {
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::NEW_TURN;
+		}
+	}
+	break;
+	
 	} // end of switch statement
+}
+
+Actor* PlayerAi::choseFromInventory(Actor* owner)
+{
+	constexpr int INVENTORY_WIDTH = 50;
+	constexpr int INVENTORY_HEIGHT = 28;
+	const int center_y = getmaxy(stdscr) / 2;
+	const int center_x = getmaxx(stdscr) / 2;
+	
+	refresh();
+
+	// Note that thanks to the STATIC keyword,
+	// the console is only created the first time.
+	static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);
+	WINDOW* inv = newwin(
+		INVENTORY_HEIGHT, // int nlines
+		INVENTORY_WIDTH, // int ncols
+		center_y, // int begy
+		center_x // int begx
+	);
+
+	box(inv, 0, 0);
+	
+	/*// display the inventory frame*/
+	/*con.setDefaultForeground(TCODColor(200, 180, 50));*/
+	con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");
+	
+	/*// display the items with their keyboard shortcut*/
+	/*con.setDefaultForeground(TCODColor::white);*/
+	int shortcut = 'a';
+	int y = 1;
+	/*for (Actor** it = owner->container->inventory.begin();
+		it != owner->container->inventory.end(); it++) {
+		Actor* actor = *it;
+		con.print(2, y, "(%c) %s", shortcut, actor->name);
+		y++;
+		shortcut++;
+	}*/
+	
+	
+	for (Actor* actor : owner->container->inventory)
+	{
+		engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);
+		y++;
+		shortcut++;
+	}
+	
+	/*// blit the inventory console on the root console
+	TCODConsole::blit(&con, 0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT,
+		TCODConsole::root, engine.screenWidth / 2 - INVENTORY_WIDTH / 2,
+		engine.screenHeight / 2 - INVENTORY_HEIGHT / 2);
+	TCODConsole::flush();*/
+	
+	/*// wait for a key press
+	TCOD_key_t key;
+	TCODSystem::waitForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL, true);*/
+	
+	/*if (key.vk == TCODK_CHAR) {
+		int actorIndex = key.c - 'a';
+		if (actorIndex >= 0 && actorIndex < owner->container->inventory.size()) {
+			return owner->container->inventory.get(actorIndex);
+		}
+		return NULL;
+	}*/
+	wrefresh(inv);
+	return NULL;
 }
 
 bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety) 
