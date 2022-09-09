@@ -16,7 +16,7 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight)
 {
-	std::cout << "Engine();" << std::endl;
+	/*std::cout << "Engine();" << std::endl;*/
 	initscr(); //initialize the screen in curses
 	start_color(); //start color curses
 	cbreak(); //disable line buffering
@@ -65,13 +65,14 @@ Engine::~Engine()
 //the update function for the engine class
 void Engine::update()
 {
-	std::cout << "void Engine::update() {}" << std::endl;
+	//DEBUG log
+	/*std::cout << "void Engine::update() {}" << std::endl;*/
 	//====
 	// The update function must ensure the FOV is computed on first frame only.
 	// This is to avoid FOV recomputation on each frame.
 	if (gameStatus == STARTUP)
 	{
-		std::cout << "map->computeFov" << std::endl;
+		/*std::cout << "map->computeFov" << std::endl;*/
 		map->computeFov();
 	}
 
@@ -89,7 +90,7 @@ void Engine::update()
 			}
 		}
 	}
-	print_container(actors);
+	/*print_container(actors);*/
 }
 
 //====
@@ -145,7 +146,9 @@ void Engine::sendToBack(Actor* actor)
 	//removes the actor from the vector using std::deque erase function
 	//std::cout << "before" << std::endl;
 	//std::cout << "size()->" << actors.size() << std::endl;
-	print_container(actors);
+
+	// DEBUG CONTAINER
+	/*print_container(actors);*/
 
 	//erase only the actor from the list of actors
 	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
@@ -165,7 +168,9 @@ void Engine::sendToBack(Actor* actor)
 
 	//std::cout << "after" << std::endl;
 	//std::cout << "size()->" << actors.size() << std::endl;
-	print_container(actors);
+
+	//DEBUG CONTAINER
+	/*print_container(actors);*/
 
 	////send destructible to back of the list
 	//auto it = actor;

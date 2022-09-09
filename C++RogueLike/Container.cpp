@@ -5,7 +5,7 @@
 
 Container::Container(int inv_size) : inv_size(inv_size)
 {
-	std::clog << "Container::Container(int size)" << std::endl;
+	/*std::clog << "Container::Container(int size)" << std::endl;*/
 }
 
 Container::~Container() 

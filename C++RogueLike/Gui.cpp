@@ -11,8 +11,8 @@ constexpr int MSG_X = BAR_WIDTH + 2;
 
 Gui::Gui()
 {
-	std::cout << "Gui();" << std::endl;
-	std::cout << "con = newwin();" << std::endl;
+	//std::cout << "Gui();" << std::endl;
+	//std::cout << "con = newwin();" << std::endl;
 	con = newwin(
 		PANEL_HEIGHT, // int nlines
 		engine.screenWidth, // int ncols
@@ -20,7 +20,7 @@ Gui::Gui()
 		0 // int begx
 	);
 	
-	std::cout << "sub = derwin();" << std::endl;
+	/*std::cout << "sub = derwin();" << std::endl;*/
 	sub = derwin(
 		con, // 
 		4, // int nlines
@@ -42,7 +42,7 @@ Gui::~Gui()
 void Gui::render()
 {
 	// DEBUG log
-	std::clog << "void Gui::render() {}" << std::endl;
+	/*std::clog << "void Gui::render() {}" << std::endl;*/
 
 	refresh(); // refresh the screen has to be called for the window to show
 	/*wclear(con);*/
