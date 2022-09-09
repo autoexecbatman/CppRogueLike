@@ -91,6 +91,8 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
+    <None Include="ClassDiagram1.cd">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
