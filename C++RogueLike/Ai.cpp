@@ -211,30 +211,28 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 
 Actor* PlayerAi::choseFromInventory(Actor* owner)
 {
-	constexpr int INVENTORY_WIDTH = 50;
-	constexpr int INVENTORY_HEIGHT = 28;
-	const int center_y = getmaxy(stdscr) / 2;
-	const int center_x = getmaxx(stdscr) / 2;
+	constexpr int INVENTORY_HEIGHT = 7;
+	constexpr int INVENTORY_WIDTH = 30;
 	
 	refresh();
 
 	// Note that thanks to the STATIC keyword,
 	// the console is only created the first time.
-	static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);
+	/*static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);*/
 	WINDOW* inv = newwin(
 		INVENTORY_HEIGHT, // int nlines
 		INVENTORY_WIDTH, // int ncols
-		center_y, // int begy
-		center_x // int begx
+		22, // int begy
+		30 // int begx
 	);
 
-	box(inv, 0, 0);
-	
-	/*// display the inventory frame*/
+	// display the inventory frame
 	/*con.setDefaultForeground(TCODColor(200, 180, 50));*/
-	con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");
+	/*con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");*/
+	box(inv, 0, 0);
+	mvwprintw(inv, 0, 0, "Inventory");
 	
-	/*// display the items with their keyboard shortcut*/
+	// display the items with their keyboard shortcut
 	/*con.setDefaultForeground(TCODColor::white);*/
 	int shortcut = 'a';
 	int y = 1;
@@ -246,10 +244,11 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 		shortcut++;
 	}*/
 	
-	
 	for (Actor* actor : owner->container->inventory)
 	{
-		engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);
+		/*engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
+
+		mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name);
 		y++;
 		shortcut++;
 	}
@@ -259,6 +258,7 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 		TCODConsole::root, engine.screenWidth / 2 - INVENTORY_WIDTH / 2,
 		engine.screenHeight / 2 - INVENTORY_HEIGHT / 2);
 	TCODConsole::flush();*/
+	wrefresh(inv);
 	
 	/*// wait for a key press
 	TCOD_key_t key;
@@ -271,8 +271,14 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 		}
 		return NULL;
 	}*/
-	wrefresh(inv);
-	return NULL;
+	if (engine.lastKey == 'a') // <<-- ??? get access for keypress
+	{
+		// get the value of 'a'
+		std::clog << "lastkey == 'a'" << std::endl;
+		return owner->container->inventory.at('a');
+	}
+
+	return nullptr;
 }
 
 bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety) 
