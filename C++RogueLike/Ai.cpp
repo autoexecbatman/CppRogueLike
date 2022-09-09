@@ -134,7 +134,7 @@ void PlayerAi::update(Actor* owner)
 	case 'i':
 		handleActionKey(owner, key);
 		break;
-	
+
 	// if 'p' is pressed pick health potion
 	case 'p':
 		engine.player->pickItem(engine.player->x, engine.player->y);
@@ -271,13 +271,20 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 		}
 		return NULL;
 	}*/
-	if (engine.lastKey == 'a') // <<-- ??? get access for keypress
-	{
-		// get the value of 'a'
-		std::clog << "lastkey == 'a'" << std::endl;
-		return owner->container->inventory.at('a');
-	}
 
+	int key = getch();
+	if (key == 'a') // <<-- ??? get access for keypress
+	{
+		// when 'a' is pressed
+		// find and use potion
+		for (Actor* actor : owner->container->inventory)
+		{
+			if (actor->name == "health potion")
+			{
+				return actor;
+			}
+		}
+	}
 	return nullptr;
 }
 
