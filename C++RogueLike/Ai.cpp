@@ -134,6 +134,11 @@ void PlayerAi::update(Actor* owner)
 	case 'i':
 		handleActionKey(owner, key);
 		break;
+	
+	// use the health potion
+	case 'a':
+		handleActionKey(owner, key);
+		break;
 
 	// if 'p' is pressed pick health potion
 	case 'p':
@@ -153,6 +158,11 @@ void PlayerAi::update(Actor* owner)
 			engine.map->computeFov();
 		}
 	}
+}
+
+void grabKey(int stolenkey)
+{
+	int key = stolenkey;
 }
 
 void PlayerAi::handleActionKey(Actor* owner, int ascii)
@@ -197,9 +207,21 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 
 	case 'i': // display inventory
 	{
+		Actor* actor = choseFromInventory(owner, ascii);
 		std::clog << "You display inventory" << std::endl;
-		Actor* actor = choseFromInventory(owner);
-		if (actor) {
+		if (actor) 
+		{
+			actor->pickable->use(actor, owner);
+		}
+	}
+	break;
+
+	case 'a': // use the potion at the same time
+	{
+		Actor* actor = choseFromInventory(owner, ascii);
+		std::clog << "You heal" << std::endl;
+		if (actor)
+		{
 			actor->pickable->use(actor, owner);
 			engine.gameStatus = Engine::NEW_TURN;
 		}
@@ -209,7 +231,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 	} // end of switch statement
 }
 
-Actor* PlayerAi::choseFromInventory(Actor* owner)
+Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)
 {
 	constexpr int INVENTORY_HEIGHT = 7;
 	constexpr int INVENTORY_WIDTH = 30;
@@ -219,47 +241,49 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 	// Note that thanks to the STATIC keyword,
 	// the console is only created the first time.
 	/*static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);*/
-	WINDOW* inv = newwin(
-		INVENTORY_HEIGHT, // int nlines
-		INVENTORY_WIDTH, // int ncols
-		22, // int begy
-		30 // int begx
-	);
-
-	// display the inventory frame
-	/*con.setDefaultForeground(TCODColor(200, 180, 50));*/
-	/*con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");*/
-	box(inv, 0, 0);
-	mvwprintw(inv, 0, 0, "Inventory");
-	
-	// display the items with their keyboard shortcut
-	/*con.setDefaultForeground(TCODColor::white);*/
-	int shortcut = 'a';
-	int y = 1;
-	/*for (Actor** it = owner->container->inventory.begin();
-		it != owner->container->inventory.end(); it++) {
-		Actor* actor = *it;
-		con.print(2, y, "(%c) %s", shortcut, actor->name);
-		y++;
-		shortcut++;
-	}*/
-	
-	for (Actor* actor : owner->container->inventory)
+	if (ascii == 'i')
 	{
-		/*engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
+		WINDOW* inv = newwin(
+			INVENTORY_HEIGHT, // int nlines
+			INVENTORY_WIDTH, // int ncols
+			22, // int begy
+			30 // int begx
+		);
 
-		mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name);
-		y++;
-		shortcut++;
+		// display the inventory frame
+		/*con.setDefaultForeground(TCODColor(200, 180, 50));*/
+		/*con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");*/
+		box(inv, 0, 0);
+		mvwprintw(inv, 0, 0, "Inventory");
+
+		// display the items with their keyboard shortcut
+		/*con.setDefaultForeground(TCODColor::white);*/
+		int shortcut = 'a';
+		int y = 1;
+		/*for (Actor** it = owner->container->inventory.begin();
+			it != owner->container->inventory.end(); it++) {
+			Actor* actor = *it;
+			con.print(2, y, "(%c) %s", shortcut, actor->name);
+			y++;
+			shortcut++;
+		}*/
+
+		for (Actor* actor : owner->container->inventory)
+		{
+			/*engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
+
+			mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name);
+			y++;
+			shortcut++;
+		}
+
+		/*// blit the inventory console on the root console
+		TCODConsole::blit(&con, 0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT,
+			TCODConsole::root, engine.screenWidth / 2 - INVENTORY_WIDTH / 2,
+			engine.screenHeight / 2 - INVENTORY_HEIGHT / 2);
+		TCODConsole::flush();*/
+		wrefresh(inv);
 	}
-	
-	/*// blit the inventory console on the root console
-	TCODConsole::blit(&con, 0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT,
-		TCODConsole::root, engine.screenWidth / 2 - INVENTORY_WIDTH / 2,
-		engine.screenHeight / 2 - INVENTORY_HEIGHT / 2);
-	TCODConsole::flush();*/
-	wrefresh(inv);
-	
 	/*// wait for a key press
 	TCOD_key_t key;
 	TCODSystem::waitForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL, true);*/
@@ -272,8 +296,8 @@ Actor* PlayerAi::choseFromInventory(Actor* owner)
 		return NULL;
 	}*/
 
-	int key = getch();
-	if (key == 'a') // <<-- ??? get access for keypress
+	/*int key = getch();*/
+	if (ascii == 'a') // <<-- ??? get access for keypress
 	{
 		// when 'a' is pressed
 		// find and use potion
