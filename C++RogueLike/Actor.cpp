@@ -56,4 +56,13 @@ void Actor::update()
 	}
 }
 
+// get distance from actor position to another actor position
+double Actor::getDistance(int cx, int cy) const
+{
+	int dx = x - cx;
+	int dy = y - cy;
+	
+	return sqrt(dx * dx + dy * dy);
+}
+
 //====

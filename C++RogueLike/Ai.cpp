@@ -64,12 +64,12 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		owner->attacker->attack(owner, engine.player);
 	}
 }
-
-
-//====
 // how many turns the monster chases the player
 // after losing his sight
 
+
+
+//====
 void PlayerAi::update(Actor* owner)
 {
 	if (owner->destructible && owner->destructible->isDead())
@@ -158,11 +158,6 @@ void PlayerAi::update(Actor* owner)
 			engine.map->computeFov();
 		}
 	}
-}
-
-void grabKey(int stolenkey)
-{
-	int key = stolenkey;
 }
 
 void PlayerAi::handleActionKey(Actor* owner, int ascii)
