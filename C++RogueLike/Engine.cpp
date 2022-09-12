@@ -6,7 +6,8 @@
 #include "Colors.h"
 
 //====
-
+// initializes the console window, colors and other curses console functions.
+// creates a new player, map, and gui.
 Engine::Engine(
 	int screenWidth,
 	int screenHeight
@@ -28,7 +29,7 @@ Engine::Engine(
 
 
 	//====
-	//a new Actor for the player
+	// a new Actor for the player
 	player = new Actor(
 		25,
 		40,
@@ -49,8 +50,11 @@ Engine::Engine(
 	actors.push_back(player);
 
 	//====
-	//a new map instance
+	// a new Map instance
 	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
+
+	//====
+	// a new Gui instance
 	gui = new Gui();
 }
 
@@ -58,11 +62,12 @@ Engine::~Engine()
 {
 	actors.clear(); // replaces "TCODList* actors.clearAndDelete()"
 	delete map; // deletes the map instance
-	delete gui;
+	delete gui; // deletes the gui instance
 }
 
 //====
-//the update function for the engine class
+// the update function to update the game logic
+// and stores events
 void Engine::update()
 {
 	//DEBUG log
@@ -94,7 +99,8 @@ void Engine::update()
 }
 
 //====
-//the engine render function implementation
+// the engine render function implementation
+// draws the entities on the map
 void Engine::render()
 {
 	map->render(); // draw the map
@@ -112,6 +118,8 @@ void Engine::render()
 	mvprintw(0, 100, "HP: %d/%d", (int)player->destructible->hp,(int)player->destructible->maxHp); // print the player's hp in the top left corner
 }
 
+//====
+// earases the actor and pushes it to the begining
 void Engine::sendToBack(Actor* actor)
 {
 	//TODO : Find the right member function to remove actor from vector
@@ -190,6 +198,8 @@ void Engine::sendToBack(Actor* actor)
 
 }
 
+//====
+// prints the deque to the console window
 void Engine::print_container(const std::deque<Actor*> actors)
 {
 	int i = 0;
@@ -199,4 +209,30 @@ void Engine::print_container(const std::deque<Actor*> actors)
 		i++;
 	}
 	std::cout << '\n';
+}
+
+//====
+// This function returns the closest monster from position x, y within range.
+// If range is 0, it's considered infinite.
+// If no monster is found within range, it returns NULL.
+Actor* Engine::getClosestMonster(int x, int y, double range) const
+{
+	// TODO: Add your implementation code here.
+	Actor* closest = nullptr;
+	float bestDistance = 1E6f;
+
+	for (Actor* actor : engine.actors)
+	{
+		if (actor != player && actor->destructible && !actor->destructible->isDead())
+		{
+			float distance = actor->getDistance(x, y);
+			if (distance < bestDistance && (distance <= range || range == 0.0f))
+			{
+				bestDistance = distance;
+				closest = actor;
+			}
+		}
+	}
+
+	return nullptr;
 }

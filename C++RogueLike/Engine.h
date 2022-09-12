@@ -37,6 +37,7 @@ public:
 	void render();
 	void sendToBack(Actor* actor);
 	void print_container(const std::deque<Actor*> actors);
+	Actor* getClosestMonster(int x, int y, double range) const;
 private:
 	bool computeFov = false;
 };
