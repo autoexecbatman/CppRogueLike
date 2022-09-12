@@ -16,7 +16,7 @@ constexpr auto DEAD_NPC_PAIR = 9;
 constexpr auto TROLL_PAIR = 10;
 constexpr auto HPBARFULL_PAIR = 11;
 constexpr auto HPBARMISSING_PAIR = 12;
-
+constexpr auto LIGHTNING_PAIR = 13;
 
 struct Colors
 {
