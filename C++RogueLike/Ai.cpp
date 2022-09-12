@@ -34,6 +34,9 @@ void MonsterAi::update(Actor* owner)
 	}
 }
 
+//====
+// how many turns the monster chases the player
+// after losing his sight
 void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 {
 	int dx = targetx - owner->x; // get the x distance
@@ -64,10 +67,6 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		owner->attacker->attack(owner, engine.player);
 	}
 }
-// how many turns the monster chases the player
-// after losing his sight
-
-
 
 //====
 void PlayerAi::update(Actor* owner)
