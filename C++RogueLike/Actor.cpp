@@ -56,11 +56,11 @@ void Actor::update()
 	}
 }
 
-// get distance from actor position to another actor position
+// a function to get the distance from an actor to a specific tile of the map
 double Actor::getDistance(int cx, int cy) const
 {
-	int dx = x - cx;
-	int dy = y - cy;
+	int dx = Actor::x - cx;
+	int dy = Actor::y - cy;
 	
 	return sqrt(dx * dx + dy * dy);
 }
