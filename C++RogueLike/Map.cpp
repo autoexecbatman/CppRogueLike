@@ -176,17 +176,25 @@ void Map::render() const
 
 void Map::addItem(int x, int y)
 {
-	// add health potion
-	Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);
-	healthPotion->blocks = false;
-	healthPotion->pickable = new Healer(4);
-	engine.actors.push_back(healthPotion);
+	TCODRandom* rng = TCODRandom::getInstance();
+	int dice = rng->getInt(0, 100);
 	
-	// add lightning scrolls
-	Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);
-	lightningScroll->blocks = false;
-	lightningScroll->pickable = new LightningBolt(5, 20);
-	engine.actors.push_back(lightningScroll);
+	if (dice < 70)
+	{
+		// add health potion
+		Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);
+		healthPotion->blocks = false;
+		healthPotion->pickable = new Healer(4);
+		engine.actors.push_back(healthPotion);
+	}
+	else if (dice < 70+10)
+	{
+		// add lightning scrolls
+		Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);
+		lightningScroll->blocks = false;
+		lightningScroll->pickable = new LightningBolt(5, 20);
+		engine.actors.push_back(lightningScroll);
+	}
 }
 
 void Map::dig(int x1, int y1, int x2, int y2)
