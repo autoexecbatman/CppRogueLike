@@ -236,3 +236,78 @@ Actor* Engine::getClosestMonster(int x, int y, double range) const
 
 	return nullptr;
 }
+
+//====
+// The function returns a boolean to allow the player to cancel by pressing a key or right clicking.
+// A range of 0 means that we allow the tile to be picked anywhere in the player's field of view.
+// This function uses a default value for the maxRange parameter so that we can omit the parameter :
+// engine.pickATile(&x, &y);
+// is the same as
+// engine.pickATile(&x, &y, 0.0f);
+// We're not going to use the main loop from main.cpp while picking a tile. 
+// This would require to add a flag in the engine to know if we're in standard play mode or tile picking mode.Instead, we create a alternative game loop.
+// Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
+bool Engine::pickATile(int* x, int* y, float maxRange)
+{
+	while (true)
+	{
+		render();
+	}
+	// Now the player might not be aware of where he's allowed to click. 
+	// Let's highlight the zone for him. We scan the whole map and look for tiles in FOV and within range :
+	// highlight the possible range
+	for (int cx = 0; cx < map->map_width; cx++) 
+	{
+		for (int cy = 0; cy < map->map_height; cy++) 
+		{
+			if (
+				map->isInFov(cx, cy) 
+				&& 
+				(
+					maxRange == 0 
+					||
+					player->getDistance(cx, cy) <= maxRange
+					)
+				)
+			{
+				// Remember how we darkened the oldest message log by multiplying its color by a float smaller than 1 ? 
+				// Well we can highlight a color using the same trick :
+				/*TCODColor col = TCODConsole::root->getCharBackground(cx, cy);*/
+				/*col = col * 1.2f;*/
+				/*TCODConsole::root->setCharBackground(cx, cy, col);*/
+				mvchgat(cy, cx, 1, A_NORMAL, HPBARFULL_PAIR, NULL);
+			}
+		}
+
+		// Now we need to update the mouse coordinate in Engine::mouse, so let's duplicate the checkForEvent call from Engine::update :
+
+			/*TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &lastKey, &mouse);*/
+		
+		request_mouse_pos();
+		// We're going to do one more thing to help the player select his tile : fill the tile under the mouse cursor with white :
+		if (
+			map->isInFov(Mouse_status.x, Mouse_status.y)
+			&&
+			(
+				maxRange == 0 
+				|| 
+				player->getDistance(Mouse_status.x, Mouse_status.y) <= maxRange
+				)
+			) 
+		{
+			/*TCODConsole::root->setCharBackground(mouse.cx, mouse.cy, TCODColor::white);*/
+			mvchgat(Mouse_status.y, Mouse_status.x, 1, A_NORMAL, HPBARMISSING_PAIR, NULL);
+			// And if the player presses the left button while a valid tile is selected, return the tile coordinates :
+
+			//if (Mouse_status.button) {
+			//	*x = mouse.cx;
+			//	*y = mouse.cy;
+			//	return true;
+			//}
+		}
+		
+		
+	}
+
+	return false;
+}

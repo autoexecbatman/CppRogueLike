@@ -38,6 +38,7 @@ public:
 	void sendToBack(Actor* actor);
 	void print_container(const std::deque<Actor*> actors);
 	Actor* getClosestMonster(int x, int y, double range) const;
+	bool pickATile(int* x, int* y, float maxRange = 0.0f);
 private:
 	bool computeFov = false;
 };
