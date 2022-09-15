@@ -17,7 +17,8 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight)
 {
-	/*std::cout << "Engine();" << std::endl;*/
+	// DEBUG MESSAGE
+	//std::clog << "Engine();" << std::endl;
 	initscr(); //initialize the screen in curses
 	start_color(); //start color curses
 	cbreak(); //disable line buffering
@@ -25,33 +26,6 @@ Engine::Engine(
 	curs_set(0); //remove the blinking cursor
 	keypad(stdscr, true); // enable the keypad for non-char keys
 	mouse_on(ALL_MOUSE_EVENTS); // enable mouse events
-
-
-
-	//====
-	// a new Actor for the player
-	player = new Actor(
-		25,
-		40,
-		'@',
-		"Django",
-		PLAYER_PAIR
-	);
-
-	player->destructible = new PlayerDestructible(
-		30,
-		2,
-		"your cadaver"
-	);
-
-	player->attacker = new Attacker(100);
-	player->ai = new PlayerAi();
-	player->container = new Container(26);
-	actors.push_back(player);
-
-	//====
-	// a new Map instance
-	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
 
 	//====
 	// a new Gui instance
@@ -310,4 +284,47 @@ bool Engine::pickATile(int* x, int* y, float maxRange)
 	}
 
 	return false;
+}
+
+//====
+// When the Engine is created, 
+// we don't know yet if we have to generate a new map or load a previously saved one.
+// Will be called in load()
+void Engine::init()
+{
+	//====
+	// a new Actor for the player
+	player = new Actor(
+		25,
+		40,
+		'@',
+		"Steven Seagull",
+		PLAYER_PAIR
+	);
+
+	player->destructible = new PlayerDestructible(
+		30,
+		2,
+		"your cadaver"
+	);
+
+	player->attacker = new Attacker(100);
+	player->ai = new PlayerAi();
+	player->container = new Container(26);
+	actors.push_back(player);
+
+	//====
+	// a new Map instance
+	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
+	map->init(true);
+
+}
+
+void Engine::load()
+{
+	init();
+}
+
+void Engine::save()
+{
 }
