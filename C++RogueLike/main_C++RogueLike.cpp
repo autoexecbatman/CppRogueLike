@@ -11,6 +11,7 @@
 #include "Window.h"
 
 
+
 //====
 //an instance of the Engine class
 Engine engine(30, 120);
@@ -35,6 +36,7 @@ int main()
 
 	Window window;
 
+	engine.load();
 	//====
 	//main game loop
 	int countLoop = 0;
@@ -48,6 +50,7 @@ int main()
 		window.create_window(3, 0, 0, engine.player->name);
 		countLoop++;
 	}
+	/*engine.save();*/
 
 	return 0;
 }
