@@ -20,7 +20,7 @@ public:
 	int map_height, map_width;
 
 	//this is the map array
-	void bsp(int map_width, int map_height);
+	void bsp(int map_width, int map_height, TCODRandom* rng, bool withActors);
 	//the constructor
 	Map(int map_height, int map_width);
 	//the destructor
@@ -40,15 +40,21 @@ public:
 	void render() const;
 	void addItem(int x, int y);
 
+	void init(bool withActors);
+
 protected:
 	//create a pointer for the map array
 	Tile* tiles;
 	//create a reference to a TCODMap object named map
 	TCODMap* map;
+
+	long seed;
+	TCODRandom* rng;
+
 	//make a friend class for the BspListener
 	friend class BspListener;
 	//make a dig function for the map
 	void dig(int x1, int y1, int x2, int y2);
 	//a function for the room generation
-	void createRoom(bool first, int x1, int y1, int x2, int y2);
+	void createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };

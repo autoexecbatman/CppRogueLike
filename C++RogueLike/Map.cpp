@@ -24,12 +24,13 @@ public:
 		{
 			// variables
 			int room_pos_x = 0, room_pos_y = 0, room_width = 0, room_height = 0;
+			bool withActors = (bool)userData;
 			// dig a room
-			TCODRandom* rng = TCODRandom::getInstance();
-			room_width = rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
-			room_height = rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
-			room_pos_x = rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
-			room_pos_y = rng->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
+			/*TCODRandom* rng = TCODRandom::getInstance();*/
+			room_width = map.rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
+			room_height = map.rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
+			room_pos_x = map.rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
+			room_pos_y = map.rng->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
 
 			map.createRoom//create rooms func
 			(
@@ -37,7 +38,8 @@ public:
 				room_pos_x,
 				room_pos_y,
 				room_pos_x + room_width - 1 - 1,
-				room_pos_y + room_height - 1 - 1
+				room_pos_y + room_height - 1 - 1,
+				withActors
 			);
 			
 			if (roomNum != 0)
@@ -70,21 +72,21 @@ public:
 };
 
 
-void Map::bsp(int map_width, int map_height)
+void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 {
+	
 	TCODBsp* myBSP = new TCODBsp(0, 0, map_width, map_height);
-	myBSP->splitRecursive(NULL, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
+	myBSP->splitRecursive(rng, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
 	BspListener* mylistener = new BspListener(*this);
-	myBSP->traverseInvertedLevelOrder(mylistener, NULL);
+	myBSP->traverseInvertedLevelOrder(mylistener, (void*)withActors);
 }
 
 //====
 //In Map.cpp, we allocate the TCODMap object in the constructor
 Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width)
 {
-	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
-	map = new TCODMap(map_width, map_height); // allocate the map
-	bsp(map_width, map_height);
+	// a random seed for the map
+	seed = TCODRandom::getInstance()->getInt(0, 0x7FFFFFFF); // 0x7FFFFFFF is the highest possible 32 bit signed integer value.
 }
 
 Map::~Map()
@@ -197,6 +199,17 @@ void Map::addItem(int x, int y)
 	}
 }
 
+//====
+// We have to move the map initialization code out of the constructor
+// for enabling loading the map from the file.
+void Map::init(bool withActors)
+{
+	rng = new TCODRandom(seed, TCOD_RNG_CMWC);
+	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
+	map = new TCODMap(map_width, map_height); // allocate the map
+	bsp(map_width, map_height, rng, withActors);
+}
+
 void Map::dig(int x1, int y1, int x2, int y2)
 {
 	if (x2 < x1)
@@ -226,10 +239,14 @@ void Map::dig(int x1, int y1, int x2, int y2)
 	}
 }
 
-void Map::createRoom(bool first, int x1, int y1, int x2, int y2)
+void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
 	dig(x1, y1, x2, y2); // dig the corridors
 
+	if (!withActors)
+	{
+		return;
+	}
 	if (first) // if this is the first room, we need to place the player in it
 	{
 		engine.player->y = y1 + 1;
