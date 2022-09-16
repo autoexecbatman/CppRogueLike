@@ -15,5 +15,8 @@ public:
 	bool add(Actor* actor);
 	void remove(Actor* actor);
 
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+
 	void print_container(std::vector<Actor*> container);
 };

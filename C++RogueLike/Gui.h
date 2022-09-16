@@ -1,8 +1,9 @@
 #pragma once
 #include <curses.h>
 #include <vector>
+#include "Persistent.h"
 
-class Gui
+class Gui : public Persistent
 {
 public:
 	Gui();
@@ -11,6 +12,11 @@ public:
 	//We want a handy function to write to the log using curses
 	void log_message(int log_message_color, const char* log_message_text, ...);
 	
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+
+
+
 
 protected:
 	WINDOW* con; // the gui window

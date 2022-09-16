@@ -22,6 +22,8 @@ public:
 		VICTORY,
 		DEFEAT
 	} gameStatus;
+
+	int run = 1;
 	int lastKey = getch();
 	std::deque<Actor*> actors;
 	Actor* player;

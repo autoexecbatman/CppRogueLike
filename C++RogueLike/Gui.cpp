@@ -283,3 +283,25 @@ void Gui::renderMouseLook()
 		buf
 	);
 }
+
+void Gui::save(TCODZip& zip)
+{
+	zip.putInt(log.size());
+	for (LogMessage* message : log)
+	{
+		zip.putString(message->log_message_text);
+		zip.putInt(message->log_message_color);
+	}
+}
+
+void Gui::load(TCODZip& zip)
+{
+	int nbMessages = zip.getInt();
+	while (nbMessages > 0) 
+	{
+		const char* text = zip.getString();
+		int col = zip.getInt();
+		log_message(col, text);
+		nbMessages--;
+	}
+}

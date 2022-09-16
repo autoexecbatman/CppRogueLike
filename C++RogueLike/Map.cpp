@@ -72,6 +72,25 @@ public:
 };
 
 
+void Map::load(TCODZip& zip)
+{
+	seed = zip.getInt();
+	init(false);
+	for (int i = 0; i < map_width * map_height; i++)
+	{
+		tiles[i].explored = zip.getInt();
+	}
+}
+
+void Map::save(TCODZip& zip)
+{
+	zip.putInt(seed);
+	for (int i = 0; i < map_width * map_height; i++) 
+	{
+		zip.putInt(tiles[i].explored);
+	}
+}
+
 void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 {
 	
@@ -145,31 +164,39 @@ void Map::render() const
 	{
 		for (int iter_x = 0; iter_x < map_width; iter_x++)
 		{
-			if (isInFov(iter_x,iter_y))
+			if (isInFov(iter_x, iter_y))
 			{
-				//if (isWall(iter_y,iter_x))
+				//int key = getch();
+				//if (key == 't')
 				//{
-				//	mvaddch(iter_y, iter_x, '#');
-				//}
-				//else
-				//{
-				//	mvaddch(iter_y, iter_x, '.');
-				//}
+					if (isWall(iter_y, iter_x))
+					{
+						standout();
+						mvaddch(iter_y, iter_x, '#');
+						standend();
 
-				mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);
+					}
+					else
+					{
+						standout();
+						mvaddch(iter_y, iter_x, '.');
+						standend();
+					}
+				//}
+				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);*/
 			}
 			else if (isExplored(iter_x,iter_y))
 			{
-				//if (isWall(iter_y,iter_x))
-				//	{
-				//	mvaddch(iter_y, iter_x, '#');
-				//	}
-				//else
-				//	{
-				//	mvaddch(iter_y, iter_x, '.');
-				//	}
+				if (isWall(iter_y,iter_x))
+					{
+					mvaddch(iter_y, iter_x, '#');
+					}
+				else
+					{
+					mvaddch(iter_y, iter_x, '.');
+					}
 				
-				mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? DARK_WALL_PAIR : DARK_GROUND_PAIR, NULL);
+				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? DARK_WALL_PAIR : DARK_GROUND_PAIR, NULL);*/
 			}
 			/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);*/
 		}

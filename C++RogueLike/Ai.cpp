@@ -7,7 +7,19 @@
 //a constexpr for tracking the number of turns
 constexpr auto TRACKING_TURNS = 3;
 
-//====
+//==AI==
+Ai* Ai::create(TCODZip& zip) {
+	AiType type = (AiType)zip.getInt();
+	Ai* ai = NULL;
+	switch (type) {
+	case PLAYER: ai = new PlayerAi(); break;
+	case MONSTER: ai = new MonsterAi(); break;
+	}
+	ai->load(zip);
+	return ai;
+}
+
+//==MONSTER_AI==
 MonsterAi::MonsterAi() : moveCount(0) {}
 
 void MonsterAi::update(Actor* owner)
@@ -32,6 +44,17 @@ void MonsterAi::update(Actor* owner)
 	{
 		moveOrAttack(owner, engine.player->x, engine.player->y); // move or attack the player
 	}
+}
+
+void MonsterAi::load(TCODZip& zip)
+{
+	moveCount = zip.getInt();
+}
+
+void MonsterAi::save(TCODZip& zip)
+{
+	zip.putInt(MONSTER);
+	zip.putInt(moveCount);
 }
 
 //====
@@ -68,7 +91,7 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 	}
 }
 
-//====
+//==PLAYER_AI==
 void PlayerAi::update(Actor* owner)
 {
 	if (owner->destructible && owner->destructible->isDead())
@@ -145,8 +168,10 @@ void PlayerAi::update(Actor* owner)
 		break;
 	
 	case QUIT:
-		exit(0);
+		engine.run = 0;
 		break;
+
+	default:break;
 	}
 
 	if (dx!=0||dy!=0)
@@ -223,6 +248,15 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 	break;
 	
 	} // end of switch statement
+}
+
+void PlayerAi::load(TCODZip& zip)
+{
+}
+
+void PlayerAi::save(TCODZip& zip)
+{
+	zip.putInt(PLAYER);
 }
 
 Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)

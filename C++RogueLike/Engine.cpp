@@ -5,6 +5,7 @@
 #include "main.h"
 #include "Colors.h"
 
+
 //====
 // initializes the console window, colors and other curses console functions.
 // creates a new player, map, and gui.
@@ -17,6 +18,7 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight)
 {
+
 	// DEBUG MESSAGE
 	//std::clog << "Engine();" << std::endl;
 	initscr(); //initialize the screen in curses
@@ -46,6 +48,7 @@ void Engine::update()
 {
 	//DEBUG log
 	/*std::cout << "void Engine::update() {}" << std::endl;*/
+
 	//====
 	// The update function must ensure the FOV is computed on first frame only.
 	// This is to avoid FOV recomputation on each frame.
@@ -322,9 +325,68 @@ void Engine::init()
 
 void Engine::load()
 {
-	init();
+	if (TCODSystem::fileExists("game.sav"))
+	{
+		TCODZip zip;
+		zip.loadFromFile("game.sav");
+		// load the map
+		int width = zip.getInt();
+		int height = zip.getInt();
+		map = new Map(width, height);
+		map->load(zip);
+		// load the player
+		player = new Actor(0, 0, 0, NULL, PLAYER_PAIR);
+		player->load(zip);
+		actors.push_back(player);
+		// then all other actors
+		int nbActors = zip.getInt();
+		while (nbActors > 0)
+		{
+			Actor* actor = new Actor(0, 0, 0, NULL, PLAYER_PAIR);
+			actor->load(zip);
+			actors.push_back(actor);
+			nbActors--;
+		}
+		// finally the message log
+		gui->load(zip);
+	}
+	else
+	{
+		engine.init();
+	}
 }
 
 void Engine::save()
 {
+	// handle the permadeath
+	// delete the save file if the player is dead
+	if (player->destructible->isDead())
+	{
+		TCODSystem::deleteFile("game.sav");
+	}
+	// else save the map
+	else
+	{
+		std::clog << "saving..." << std::endl;
+		TCODZip zip;
+		// save the map first
+		zip.putInt(map->map_width);
+		zip.putInt(map->map_height);
+		map->save(zip);
+		// then save the player
+		player->save(zip);
+		// then all the other actors
+		zip.putInt(actors.size() - 1);
+		for (Actor* actor : actors)
+		{
+			if (actor != player)
+			{
+				actor->save(zip);
+			}
+		}
+	// save the message log
+	gui->save(zip);
+	zip.saveToFile("game.sav");
+	}
+	
 }

@@ -149,6 +149,7 @@
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="main_C++RogueLike.cpp" />
     <ClCompile Include="Map.cpp" />
+    <ClCompile Include="Persistent.cpp" />
     <ClCompile Include="Pickable.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
@@ -163,6 +164,7 @@
     <ClInclude Include="Gui.h" />
     <ClInclude Include="main.h" />
     <ClInclude Include="Map.h" />
+    <ClInclude Include="Persistent.h" />
     <ClInclude Include="Pickable.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>

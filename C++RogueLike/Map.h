@@ -13,11 +13,14 @@ struct Tile
 
 //a class for the game map
 //the map is a 2d array of tiles
-class Map
+class Map : public Persistent
 {
 public:
 	//this is the map dimensions
 	int map_height, map_width;
+
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
 
 	//this is the map array
 	void bsp(int map_width, int map_height, TCODRandom* rng, bool withActors);

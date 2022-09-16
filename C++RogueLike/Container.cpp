@@ -34,6 +34,29 @@ void Container::remove(Actor* actor)
 	inventory.erase(std::remove(inventory.begin(), inventory.end(), actor), inventory.end());
 }
 
+void Container::load(TCODZip& zip)
+{
+	inv_size = zip.getInt();
+	int nbActors = zip.getInt();
+	while (nbActors > 0) {
+		Actor* actor = new Actor(0, 0, 0, NULL, 0);
+		actor->load(zip);
+		inventory.push_back(actor);
+		nbActors--;
+	}
+}
+
+void Container::save(TCODZip& zip)
+{
+	zip.putInt(inv_size);
+	zip.putInt(inventory.size());
+	// iterate through the inventory and save the item
+	for (Actor* actor : inventory)
+	{
+		actor->save(zip);
+	}
+}
+
 void Container::print_container(std::vector<Actor*> container)
 {
 	int i = 0;

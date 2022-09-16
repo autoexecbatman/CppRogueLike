@@ -66,3 +66,13 @@ void Attacker::attack(Actor* owner, Actor* target)
 		);
 	}
 }
+
+void Attacker::load(TCODZip& zip)
+{
+	power = zip.getFloat();
+}
+
+void Attacker::save(TCODZip& zip)
+{
+	zip.putFloat(power);
+}

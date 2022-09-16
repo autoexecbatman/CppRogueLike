@@ -2,7 +2,7 @@
 
 //====
 
-class Destructible
+class Destructible : public Persistent
 {
 public:
 	float maxHp = 0; // maximum health points
@@ -16,7 +16,7 @@ public:
 		const char* corpseName
 	);
 
-	virtual ~Destructible() {};
+	virtual ~Destructible();
 
 	bool isDead() { return hp <= 0; } // is the actor dead?
 	//====
@@ -27,6 +27,15 @@ public:
 	virtual void die(Actor* owner);
 	// The function returns the amount of health point actually restored.
 	float heal(float amount);
+
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+	static Destructible* create(TCODZip& zip);
+protected:
+	enum DestructibleType 
+	{
+		MONSTER, PLAYER
+	};
 };
 
 //====
@@ -42,6 +51,7 @@ public:
 	//====
 	//handles death, owner killed
 	void die(Actor* owner);
+	void save(TCODZip& zip);
 };
 
 //====
@@ -57,6 +67,7 @@ public:
 	//====
 	//handles death, owner killed	
 	void die(Actor* owner);
+	void save(TCODZip& zip);
 };
 
 //====

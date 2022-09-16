@@ -51,6 +51,9 @@
     <ClCompile Include="Pickable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Persistent.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Map.h">
@@ -87,6 +90,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Pickable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Persistent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

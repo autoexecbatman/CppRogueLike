@@ -25,6 +25,7 @@ void wizardeye()
 	}
 }
 
+
 //====
 //this is the main function where the game will run
 int main()
@@ -35,13 +36,14 @@ int main()
 	colors.my_init_pair();
 
 	Window window;
-
+	
 	engine.load();
 	//====
 	//main game loop
 	int countLoop = 0;
-	while (!engine.player->destructible->isDead())
+	while (engine.run == 1 && !engine.player->destructible->isDead())
 	{
+
 		std::clog << "Running..." << countLoop << std::endl;
 		engine.update(); // update the map
 		engine.render(); // render the map
@@ -49,8 +51,13 @@ int main()
 
 		window.create_window(3, 0, 0, engine.player->name);
 		countLoop++;
+
+		if (engine.run == 0)
+		{
+			break;
+		}
 	}
-	/*engine.save();*/
+	engine.save();
 
 	return 0;
 }

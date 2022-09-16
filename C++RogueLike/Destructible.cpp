@@ -15,7 +15,14 @@ Destructible::Destructible(
 	hp(maxHp),
 	defense(defense),
 	corpseName(corpseName)
-{}
+{
+	this->corpseName = _strdup(corpseName);
+}
+
+Destructible::~Destructible()
+{
+	free((char*)corpseName);
+}
 
 float Destructible::takeDamage(Actor* owner, float damage)
 {
@@ -96,4 +103,43 @@ float Destructible::heal(float amount)
 		hp = maxHp;
 	}
 	return amount;
+}
+
+void Destructible::load(TCODZip& zip)
+{
+	maxHp = zip.getFloat();
+	hp = zip.getFloat();
+	defense = zip.getFloat();
+	corpseName = _strdup(zip.getString());
+}
+
+void Destructible::save(TCODZip& zip)
+{
+	zip.putFloat(maxHp);
+	zip.putFloat(hp);
+	zip.putFloat(defense);
+	zip.putString(corpseName);
+}
+
+void PlayerDestructible::save(TCODZip& zip)
+{
+	zip.putInt(PLAYER);
+	Destructible::save(zip);
+}
+
+void MonsterDestructible::save(TCODZip& zip) 
+{
+	zip.putInt(MONSTER);
+	Destructible::save(zip);
+}
+
+Destructible* Destructible::create(TCODZip& zip) {
+	DestructibleType type = (DestructibleType)zip.getInt();
+	Destructible* destructible = NULL;
+	switch (type) {
+	case MONSTER: destructible = new MonsterDestructible(0, 0, NULL); break;
+	case PLAYER: destructible = new PlayerDestructible(0, 0, NULL); break;
+	}
+	destructible->load(zip);
+	return destructible;
 }

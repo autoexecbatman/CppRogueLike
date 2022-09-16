@@ -3,7 +3,7 @@
 
 //====
 // a class for the moving characters
-class Actor
+class Actor :public Persistent
 {
 public:
 	int y = 0, x = 0; // position on map
@@ -27,6 +27,9 @@ public:
 	);
 
 	~Actor();
+
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
 
 	void update(); // update() will handle the monster turn.
 	double getDistance(int cx, int cy) const; // a function to get the distance from an actor to a specific tile of the map
