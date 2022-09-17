@@ -3,7 +3,7 @@
 
 //====
 // a class for the moving characters
-class Actor :public Persistent
+class Actor : public Persistent
 {
 public:
 	int y = 0, x = 0; // position on map

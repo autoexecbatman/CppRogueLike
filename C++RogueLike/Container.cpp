@@ -38,7 +38,8 @@ void Container::load(TCODZip& zip)
 {
 	inv_size = zip.getInt();
 	int nbActors = zip.getInt();
-	while (nbActors > 0) {
+	while (nbActors > 0) 
+	{
 		Actor* actor = new Actor(0, 0, 0, NULL, 0);
 		actor->load(zip);
 		inventory.push_back(actor);

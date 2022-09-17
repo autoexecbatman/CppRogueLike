@@ -34,11 +34,11 @@ class PlayerAi : public Ai
 {
 public:
 	void update(Actor* owner);
-	void handleActionKey(Actor* owner, int ascii);
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 	
 protected:
+	void handleActionKey(Actor* owner, int ascii);
 	Actor* choseFromInventory(Actor* owner, int ascii);
 	bool moveOrAttack(Actor* owner, int targetx, int targety);
 };

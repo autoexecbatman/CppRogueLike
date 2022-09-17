@@ -24,10 +24,12 @@ bool Pickable::use(Actor* owner, Actor* wearer)
 	return false;
 }
 
-Pickable* Pickable::create(TCODZip& zip) {
+Pickable* Pickable::create(TCODZip& zip) 
+{
 	PickableType type = (PickableType)zip.getInt();
 	Pickable* pickable = NULL;
-	switch (type) {
+	switch (type)
+	{
 	case HEALER: pickable = new Healer(0); break;
 	case LIGHTNING_BOLT: pickable = new LightningBolt(0, 0); break;
 	}

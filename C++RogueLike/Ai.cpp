@@ -8,7 +8,8 @@
 constexpr auto TRACKING_TURNS = 3;
 
 //==AI==
-Ai* Ai::create(TCODZip& zip) {
+Ai* Ai::create(TCODZip& zip) 
+{
 	AiType type = (AiType)zip.getInt();
 	Ai* ai = NULL;
 	switch (type) {
@@ -264,13 +265,14 @@ Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)
 	constexpr int INVENTORY_HEIGHT = 7;
 	constexpr int INVENTORY_WIDTH = 30;
 	
-	refresh();
-
+	
 	// Note that thanks to the STATIC keyword,
 	// the console is only created the first time.
 	/*static TCODConsole con(INVENTORY_WIDTH, INVENTORY_HEIGHT);*/
 	if (ascii == 'i')
 	{
+		refresh();
+
 		WINDOW* inv = newwin(
 			INVENTORY_HEIGHT, // int nlines
 			INVENTORY_WIDTH, // int ncols
@@ -331,8 +333,9 @@ Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)
 		// find and use potion
 		for (Actor* actor : owner->container->inventory)
 		{
-			if (actor->name == "health potion")
+			if (!strcmp(actor->name, "health potion"))
 			{
+				std::cout << " if is true ! " << std::endl;
 				return actor;
 			}
 		}
