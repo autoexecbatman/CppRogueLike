@@ -328,16 +328,20 @@ void Engine::load()
 	if (TCODSystem::fileExists("game.sav"))
 	{
 		TCODZip zip;
+
 		zip.loadFromFile("game.sav");
+
 		// load the map
 		int width = zip.getInt();
 		int height = zip.getInt();
-		map = new Map(width, height);
+		map = new Map(height, width);
 		map->load(zip);
+
 		// load the player
 		player = new Actor(0, 0, 0, NULL, PLAYER_PAIR);
 		player->load(zip);
 		actors.push_back(player);
+
 		// then all other actors
 		int nbActors = zip.getInt();
 		while (nbActors > 0)
@@ -347,6 +351,7 @@ void Engine::load()
 			actors.push_back(actor);
 			nbActors--;
 		}
+
 		// finally the message log
 		gui->load(zip);
 	}
@@ -368,13 +373,17 @@ void Engine::save()
 	else
 	{
 		std::clog << "saving..." << std::endl;
+
 		TCODZip zip;
+
 		// save the map first
 		zip.putInt(map->map_width);
 		zip.putInt(map->map_height);
 		map->save(zip);
+
 		// then save the player
 		player->save(zip);
+
 		// then all the other actors
 		zip.putInt(actors.size() - 1);
 		for (Actor* actor : actors)
@@ -384,8 +393,10 @@ void Engine::save()
 				actor->save(zip);
 			}
 		}
+
 	// save the message log
 	gui->save(zip);
+
 	zip.saveToFile("game.sav");
 	}
 	
