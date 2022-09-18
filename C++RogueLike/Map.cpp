@@ -171,16 +171,17 @@ void Map::render() const
 				//{
 					if (isWall(iter_y, iter_x))
 					{
-						standout();
+						// TODO : add a key to toggle between fovVisible on and off
+						/*standout();*/
 						mvaddch(iter_y, iter_x, '#');
-						standend();
+						/*standend();*/
 
 					}
 					else
 					{
-						standout();
+						/*standout();*/
 						mvaddch(iter_y, iter_x, '.');
-						standend();
+						/*standend();*/
 					}
 				//}
 				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);*/
