@@ -12,7 +12,6 @@ public:
 
 	//==GAME_STATUS==
 	// enumerates the current game status.
-	// TODO : very bad. convert to enum class.
 	enum class GameStatus : int
 	{
 		STARTUP,
