@@ -19,11 +19,11 @@ Actor::Actor(
 	col(col),
 	name(name),
 	blocks(true),
-	attacker(NULL),
-	destructible(NULL),
-	ai(NULL),
-	container(NULL),
-	pickable(NULL)
+	attacker(nullptr),
+	destructible(nullptr),
+	ai(nullptr),
+	container(nullptr),
+	pickable(nullptr)
 {}
 
 Actor::~Actor()
