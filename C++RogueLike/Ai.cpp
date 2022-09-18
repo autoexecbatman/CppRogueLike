@@ -7,6 +7,18 @@
 //a constexpr for tracking the number of turns
 constexpr auto TRACKING_TURNS = 3;
 
+//==CONTROLS==
+// the enumeration for the controls of the player
+// TODO : convert to enum class if needed.
+enum class CONTROLS : char
+{
+	UP = 'w',
+	DOWN = 's',
+	LEFT = 'a',
+	RIGHT = 'd',
+	QUIT = 'q'
+};
+
 //==AI==
 Ai* Ai::create(TCODZip& zip) 
 {
@@ -94,7 +106,7 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 
 //==PLAYER_AI==
 void PlayerAi::update(Actor* owner)
-{
+{	
 	if (owner->destructible && owner->destructible->isDead())
 	{
 		return;
@@ -139,7 +151,7 @@ void PlayerAi::update(Actor* owner)
 		break;
 	// numpad key 5 is pressed a turn will pass
 	case '5':
-		engine.gameStatus = Engine::NEW_TURN;
+		engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		break;
 	case ' ': 
 		engine.player->attacker->attack(engine.player, engine.player);
@@ -168,8 +180,8 @@ void PlayerAi::update(Actor* owner)
 		engine.player->pickItem(engine.player->x, engine.player->y);
 		break;
 	
-	case QUIT:
-		engine.run = 0;
+	case static_cast<int>(CONTROLS::QUIT):
+		engine.run = false;
 		break;
 
 	default:break;
@@ -177,7 +189,7 @@ void PlayerAi::update(Actor* owner)
 
 	if (dx!=0||dy!=0)
 	{
-		engine.gameStatus = Engine::NEW_TURN;
+		engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		if (moveOrAttack(owner,owner->x+dx,owner->y+dy))
 		{
 			engine.map->computeFov();
@@ -221,7 +233,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 		{
 			engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
 		}
-	engine.gameStatus = Engine::NEW_TURN;
+	engine.gameStatus = Engine::GameStatus::NEW_TURN;
 	} // end of case 'g'
 	break;
 
@@ -243,7 +255,7 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 		if (actor)
 		{
 			actor->pickable->use(actor, owner);
-			engine.gameStatus = Engine::NEW_TURN;
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		}
 	}
 	break;
