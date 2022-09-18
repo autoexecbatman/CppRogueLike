@@ -1,10 +1,9 @@
-#include <curses.h>
 #include <iostream>
-#include <algorithm>
+#include <curses.h>
+#include <algorithm> // for std::find
 
 #include "main.h"
 #include "Colors.h"
-
 
 //====
 // initializes the console window, colors and other curses console functions.
@@ -13,14 +12,16 @@ Engine::Engine(
 	int screenWidth,
 	int screenHeight
 ) :
-	gameStatus(STARTUP),
+	gameStatus(GameStatus::STARTUP),
 	fovRadius(10),
 	screenWidth(screenWidth),
-	screenHeight(screenHeight)
+	screenHeight(screenHeight)	
 {
 
 	// DEBUG MESSAGE
 	//std::clog << "Engine();" << std::endl;
+
+	//==INIT_CURSES==
 	initscr(); //initialize the screen in curses
 	start_color(); //start color curses
 	cbreak(); //disable line buffering
@@ -29,7 +30,7 @@ Engine::Engine(
 	keypad(stdscr, true); // enable the keypad for non-char keys
 	mouse_on(ALL_MOUSE_EVENTS); // enable mouse events
 
-	//====
+	//==GUI==
 	// a new Gui instance
 	gui = new Gui();
 }
@@ -46,25 +47,26 @@ Engine::~Engine()
 // and stores events
 void Engine::update()
 {
+	
 	//DEBUG log
 	/*std::cout << "void Engine::update() {}" << std::endl;*/
 
-	//====
+	//==COMPUTE_FOV==
 	// The update function must ensure the FOV is computed on first frame only.
 	// This is to avoid FOV recomputation on each frame.
-	if (gameStatus == STARTUP)
+	if (gameStatus == GameStatus::STARTUP)
 	{
 		/*std::cout << "map->computeFov" << std::endl;*/
 		map->computeFov();
 	}
 
-	gameStatus = IDLE; // set the game status to idle
+	gameStatus = GameStatus::IDLE; // set the game status to idle
 
 	player->update(); // update the player
 
-	if (gameStatus == NEW_TURN)
+	if (gameStatus == GameStatus::NEW_TURN)
 	{
-		for (const auto& actor : engine.actors)
+		for (Actor* actor : engine.actors)
 		{
 			if (actor != player)
 			{
@@ -92,7 +94,8 @@ void Engine::render()
 
 	player->render(); // draw the player
 	gui->render();
-	mvprintw(0, 100, "HP: %d/%d", (int)player->destructible->hp,(int)player->destructible->maxHp); // print the player's hp in the top left corner
+	
+	//mvprintw(0, 100, "HP: %d/%d", (int)player->destructible->hp,(int)player->destructible->maxHp); // print the player's hp in the top left corner
 }
 
 //====
@@ -338,7 +341,7 @@ void Engine::load()
 		map->load(zip);
 
 		// load the player
-		player = new Actor(0, 0, 0, NULL, PLAYER_PAIR);
+		player = new Actor(0, 0, 0, "dummy name", EMPTY_PAIR);
 		player->load(zip);
 		actors.push_back(player);
 
@@ -346,7 +349,7 @@ void Engine::load()
 		int nbActors = zip.getInt();
 		while (nbActors > 0)
 		{
-			Actor* actor = new Actor(0, 0, 0, NULL, PLAYER_PAIR);
+			Actor* actor = new Actor(0, 0, 0, "dummy name", EMPTY_PAIR);
 			actor->load(zip);
 			actors.push_back(actor);
 			nbActors--;
