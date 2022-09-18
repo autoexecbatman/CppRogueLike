@@ -22,7 +22,7 @@ public:
 	} gameStatus;
 
 	//==ENGINE_FIELDS==
-	// TODO : find a way to initialize properly.
+
 	int screenHeight, screenWidth;
 	int fovRadius;
 
@@ -32,10 +32,10 @@ public:
 	std::deque<Actor*> actors;
 
 	//==ENGINE_PROPERTIES==
-	// TODO : initialize properly.
+
 	Actor* player;
 	Map* map;
-	Gui* gui; // we make a pointer of the gui
+	Gui* gui;
 
 	Engine(int screenWidth, int screenHeight);
 	~Engine();

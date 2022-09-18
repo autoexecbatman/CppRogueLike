@@ -15,7 +15,9 @@ Engine::Engine(
 	gameStatus(GameStatus::STARTUP),
 	fovRadius(10),
 	screenWidth(screenWidth),
-	screenHeight(screenHeight)	
+	screenHeight(screenHeight),
+	player(nullptr),
+	map(nullptr)
 {
 
 	// DEBUG MESSAGE
