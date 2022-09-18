@@ -252,7 +252,7 @@ void Gui::print_container(std::vector<LogMessage*> message)
 
 void Gui::renderMouseLook()
 {
-	mvprintw(0, 10, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
+	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
 
 	if (!engine.map->isInFov(Mouse_status.x, Mouse_status.y))
 	{
