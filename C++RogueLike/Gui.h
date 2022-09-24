@@ -5,7 +5,7 @@
 
 class Gui : public Persistent
 {
-public:
+public:	
 	Gui();
 	~Gui();
 	void render();
@@ -14,7 +14,8 @@ public:
 	
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
-
+	
+	void gui_clear();
 
 
 
@@ -49,4 +50,33 @@ protected:
 		int backColor
 	);
 	void renderMouseLook();
+};
+
+class Menu 
+{
+public:
+	enum class MenuItemCode : int
+	{
+		NONE,
+		NEW_GAME,
+		CONTINUE,
+		EXIT
+	};
+	Menu();
+	~Menu();
+	
+	void menu_clear();
+	void addItem(MenuItemCode code, const char* label);
+
+	MenuItemCode pick();
+
+protected:
+
+	struct MenuItem 
+	{
+		MenuItemCode code;
+		const char* label;
+	};
+
+	std::vector<MenuItem*> items;
 };
