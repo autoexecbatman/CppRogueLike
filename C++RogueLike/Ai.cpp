@@ -113,9 +113,9 @@ void PlayerAi::update(Actor* owner)
 	}
 	
 	int dx = 0, dy = 0;
-	int key = getch();
+	
 	clear();
-	switch (key)
+	switch (engine.key)
 	{
 	case '8':
 		dy = -1;
@@ -162,17 +162,17 @@ void PlayerAi::update(Actor* owner)
 		break;
 	// detect the key press and pass it to the handleActionKey function
 	case 'g':
-		handleActionKey(owner, key);
+		handleActionKey(owner, engine.key);
 		break;
 
 	// detect the key press and pass it to the handleActionKey function
 	case 'i':
-		handleActionKey(owner, key);
+		handleActionKey(owner, engine.key);
 		break;
 	
 	// use the health potion
 	case 'a':
-		handleActionKey(owner, key);
+		handleActionKey(owner, engine.key);
 		break;
 
 	// if 'p' is pressed pick health potion
