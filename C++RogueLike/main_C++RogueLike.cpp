@@ -39,8 +39,8 @@ int main()
 	Window window;
 	
 	//==ENGINE==
-	// load the game if not init new one
-	engine.load();
+	// load the starting menu
+	engine.game_menu();
 
 	//==GAME_LOOP==
 	// main game loop
@@ -60,6 +60,7 @@ int main()
 		// example : while (true) { clear(); refresh(); getch(); }
 
 		engine.update(); // update map and actors positions and other stuff
+
 		engine.render(); // render map and actors to the screen
 		
 		// TODO : move to the appropriate location.
@@ -67,6 +68,8 @@ int main()
 
 		// TODO : decide if you are going to use this class.
 		window.create_window(3, 0, 0, engine.player->name);
+
+		engine.key_listener();
 
 		countLoop++;
 	}
