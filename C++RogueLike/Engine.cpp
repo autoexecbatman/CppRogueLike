@@ -4,8 +4,9 @@
 
 #include "main.h"
 #include "Colors.h"
+#include "Window.h"
 
-//====
+//==ENGINE_CONSTRUCTOR==
 // initializes the console window, colors and other curses console functions.
 // creates a new player, map, and gui.
 Engine::Engine(
@@ -24,11 +25,11 @@ Engine::Engine(
 	//std::clog << "Engine();" << std::endl;
 
 	//==INIT_CURSES==
-	initscr(); //initialize the screen in curses
-	start_color(); //start color curses
-	cbreak(); //disable line buffering
-	noecho(); //turn off echoing of keys to the screen
-	curs_set(0); //remove the blinking cursor
+	initscr(); // initialize the screen in curses
+	start_color(); // start color curses
+	cbreak(); // disable line buffering
+	noecho(); // turn off echoing of keys to the screen
+	curs_set(0); // remove the blinking cursor
 	keypad(stdscr, true); // enable the keypad for non-char keys
 	mouse_on(ALL_MOUSE_EVENTS); // enable mouse events
 
@@ -39,26 +40,20 @@ Engine::Engine(
 
 Engine::~Engine()
 {
-	actors.clear(); // replaces "TCODList* actors.clearAndDelete()"
-	delete map; // deletes the map instance
+	term();
 	delete gui; // deletes the gui instance
 }
 
-//====
+//==ENGINE_UPDATE==
 // the update function to update the game logic
 // and stores events
 void Engine::update()
 {
-	
-	//DEBUG log
-	/*std::cout << "void Engine::update() {}" << std::endl;*/
-
 	//==COMPUTE_FOV==
 	// The update function must ensure the FOV is computed on first frame only.
 	// This is to avoid FOV recomputation on each frame.
 	if (gameStatus == GameStatus::STARTUP)
 	{
-		/*std::cout << "map->computeFov" << std::endl;*/
 		map->computeFov();
 	}
 
@@ -66,17 +61,16 @@ void Engine::update()
 
 	player->update(); // update the player
 
-	if (gameStatus == GameStatus::NEW_TURN)
+	if (gameStatus == GameStatus::NEW_TURN) // check new turn
 	{
-		for (Actor* actor : engine.actors)
+		for (Actor* actor : actors) // go through the list of actors
 		{
-			if (actor != player)
+			if (actor != player) // check if the actor is not the player
 			{
-				actor->update(); // update monsters
+				actor->update(); // update all actors except the player
 			}
 		}
 	}
-	/*print_container(actors);*/
 }
 
 //====
@@ -95,9 +89,7 @@ void Engine::render()
 	}
 
 	player->render(); // draw the player
-	gui->render();
-	
-	//mvprintw(0, 100, "HP: %d/%d", (int)player->destructible->hp,(int)player->destructible->maxHp); // print the player's hp in the top left corner
+	gui->render(); // draw the gui
 }
 
 //====
@@ -152,8 +144,6 @@ void Engine::sendToBack(Actor* actor)
 	//	actors.end() // last iterator
  //   );
 
-	//adds the actor to the vector using std::vector insert function
-	/*actors.insert(actors.begin(), actor);*/
 	actors.push_front(actor);
 
 	//std::cout << "after" << std::endl;
@@ -161,23 +151,6 @@ void Engine::sendToBack(Actor* actor)
 
 	//DEBUG CONTAINER
 	/*print_container(actors);*/
-
-	////send destructible to back of the list
-	//auto it = actor;
-	//for (auto it = actors.begin(); it != actors.end();)
-	//{
-	//    if (*it)
-	//    {
-	//        it = actors.erase(it);
-	//    }
-	//    else
-	//    {
-	//        ++it;
-	//    }
-	//}
-
-	//actors.push_front(it);
-
 }
 
 //====
@@ -325,11 +298,129 @@ void Engine::init()
 	// a new Map instance
 	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
 	map->init(true);
+	/*gameStatus = GameStatus::STARTUP;*/
+}
 
+void Engine::game_menu()
+{
+	// this function will contain a loop where the game menu will be displayed
+	// and the player will be able to choose an option
+	// the function will return when the player chooses an option
+	
+	// first we assign the variables we need for the function
+
+	bool menu_run = true; // this variable will be used to keep the loop running
+	int menu_key = 0; // this variable will contain the key the player presses
+	int new_option = 0;
+	int old_option = -1;
+
+	enum class MenuOptions
+	{
+		NEW_GAME,
+		LOAD_GAME,
+		QUIT
+	};
+
+	// we create a new window for the menu
+	WINDOW* menu_win = newwin(
+		6, // int nlines
+		20, // int ncols
+		10, // int begy
+		40 // int begx
+	);
+	box(menu_win, 0, 0);
+	int max_x = getmaxx(menu_win); // get the maximum x value of the window
+	int max_y = getmaxy(menu_win); // get the maximum y value of the window
+	
+	refresh();
+	
+	while (menu_run == true) 
+	{
+		// first clear the window
+		wclear(menu_win);
+
+		// then draw the menu
+
+		// first print the menu title
+
+		mvwprintw(menu_win, 0, 4, "==THE MENU==");
+
+		// then print the menu selection options
+
+		mvwprintw(menu_win, 1, 4, "New Game");
+		mvwprintw(menu_win, 2, 4, "Continue");
+		mvwprintw(menu_win, 3, 4, "Exit");
+
+		// then print the menu cursor
+
+		mvwprintw(menu_win, new_option + 1, 1, ">");
+		mvwprintw(menu_win, old_option + 1, 1, " ");
+		old_option = new_option;
+
+		wrefresh(menu_win);
+
+		// get the key press
+		menu_key = getch();
+		switch (menu_key)
+		{
+		case KEY_UP:
+			// move the selection cursor up
+			new_option--;
+			if (new_option < 0) new_option = 2;
+			break;
+
+		case KEY_DOWN:
+			// move the selection cursor down
+			new_option++;
+			if (new_option > 2) new_option = 0;
+			break;
+		
+		case 'q':
+			// quit the menu window
+			menu_run = false;
+			break;
+
+		case 'n':
+			// if the key enter is pressed and cursor is on "New Game" then start a new game
+			menu_run = false;
+			delwin(menu_win);
+			engine.init();
+			break;
+
+		case 'l':
+			// if the key enter is pressed and cursor is on "Continue" then load the game
+			menu_run = false;
+			delwin(menu_win);
+			engine.load();
+			break;
+
+		case 0:
+			// new game
+			//engine.init();
+			//engine.gameLoop();
+			menu_run = true;
+			break;
+
+		case 1:
+			// continue
+			//engine.load();
+			//engine.gameLoop();
+			menu_run = true;
+			break;
+
+		case 2:
+			// exit
+			menu_run = true;
+			break;
+
+		}
+	}
 }
 
 void Engine::load()
 {
+	
+	
 	if (TCODSystem::fileExists("game.sav"))
 	{
 		TCODZip zip;
@@ -360,6 +451,7 @@ void Engine::load()
 		// finally the message log
 		gui->load(zip);
 	}
+	// TODO : Delete this line moved to switch case in game_menu
 	else
 	{
 		engine.init();
@@ -405,4 +497,11 @@ void Engine::save()
 	zip.saveToFile("game.sav");
 	}
 	
+}
+
+void Engine::term()
+{
+	actors.clear();
+	if (map) delete map;
+	gui->gui_clear();
 }
