@@ -28,6 +28,7 @@ public:
 
 	bool run = true;
 	int lastKey = getch();
+	int key;
 
 	std::deque<Actor*> actors;
 
@@ -50,8 +51,14 @@ public:
 	void init();
 	void load();
 	void save();
+	
+	void term();
 
 	void print_container(const std::deque<Actor*> actors);
+
+	void game_menu();
+
+	void key_listener() { key = getch(); }
 	
 private:
 	bool computeFov = false;
