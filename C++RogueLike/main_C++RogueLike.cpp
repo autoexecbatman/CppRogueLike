@@ -52,6 +52,7 @@ int main()
 		{
 			break;
 		}
+		
 		//==DEBUG==
 		std::clog << "Running..." << countLoop << std::endl;
 
@@ -67,9 +68,9 @@ int main()
 		refresh(); // refresh the window
 
 		// TODO : decide if you are going to use this class.
-		window.create_window(3, 0, 0, engine.player->name);
+		window.create_window(3, 22, 60, engine.player->name); // create a resizable window
 
-		engine.key_listener();
+		engine.key_listener(); // listen for key presses
 
 		countLoop++;
 	}
