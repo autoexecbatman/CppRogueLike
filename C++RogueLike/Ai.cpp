@@ -182,6 +182,10 @@ void PlayerAi::update(Actor* owner)
 	
 	case static_cast<int>(CONTROLS::QUIT):
 		engine.run = false;
+		if (engine.run == false)
+		{
+			mvprintw(29, 0, "You quit the game ! Press any key ...");
+		}
 		break;
 
 	default:break;

@@ -9,6 +9,8 @@
 class Engine
 {
 public:
+	Engine(int screenWidth, int screenHeight);
+	~Engine();
 
 	//==GAME_STATUS==
 	// enumerates the current game status.
@@ -21,16 +23,12 @@ public:
 		DEFEAT
 	} gameStatus;
 
-	//==ENGINE_FIELDS==
-
-	int screenHeight, screenWidth;
 	int fovRadius;
 
-	bool run = true;
-	int lastKey = getch();
-	int key;
+	//==ENGINE_FIELDS==
 
-	std::deque<Actor*> actors;
+	int screenWidth;
+	int screenHeight;
 
 	//==ENGINE_PROPERTIES==
 
@@ -38,8 +36,12 @@ public:
 	Map* map;
 	Gui* gui;
 
-	Engine(int screenWidth, int screenHeight);
-	~Engine();
+	bool run = true;
+	int lastKey = getch();
+	int key = getch();
+
+	std::deque<Actor*> actors;
+
 
 	void update();
 	void render();

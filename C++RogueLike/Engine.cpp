@@ -18,7 +18,10 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
 	player(nullptr),
-	map(nullptr)
+	map(nullptr),
+	gui(nullptr),
+	run(true),
+	key(0)
 {
 
 	// DEBUG MESSAGE
@@ -314,13 +317,6 @@ void Engine::game_menu()
 	int new_option = 0;
 	int old_option = -1;
 
-	enum class MenuOptions
-	{
-		NEW_GAME,
-		LOAD_GAME,
-		QUIT
-	};
-
 	// we create a new window for the menu
 	WINDOW* menu_win = newwin(
 		6, // int nlines
@@ -347,9 +343,9 @@ void Engine::game_menu()
 
 		// then print the menu selection options
 
-		mvwprintw(menu_win, 1, 4, "New Game");
-		mvwprintw(menu_win, 2, 4, "Continue");
-		mvwprintw(menu_win, 3, 4, "Exit");
+		mvwprintw(menu_win, 1, 4, "[N,n] New Game");
+		mvwprintw(menu_win, 2, 4, "[L,l] Load");
+		mvwprintw(menu_win, 3, 4, "[Q,q] Quit");
 
 		// then print the menu cursor
 
@@ -374,45 +370,25 @@ void Engine::game_menu()
 			new_option++;
 			if (new_option > 2) new_option = 0;
 			break;
-		
-		case 'q':
+
+		case 'q' || 'Q':
 			// quit the menu window
 			menu_run = false;
 			break;
-
+		case 'N':
 		case 'n':
 			// if the key enter is pressed and cursor is on "New Game" then start a new game
 			menu_run = false;
 			delwin(menu_win);
 			engine.init();
 			break;
-
+		case 'L':
 		case 'l':
 			// if the key enter is pressed and cursor is on "Continue" then load the game
 			menu_run = false;
 			delwin(menu_win);
 			engine.load();
 			break;
-
-		case 0:
-			// new game
-			//engine.init();
-			//engine.gameLoop();
-			menu_run = true;
-			break;
-
-		case 1:
-			// continue
-			//engine.load();
-			//engine.gameLoop();
-			menu_run = true;
-			break;
-
-		case 2:
-			// exit
-			menu_run = true;
-			break;
-
 		}
 	}
 }
