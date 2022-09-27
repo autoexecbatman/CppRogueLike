@@ -17,8 +17,10 @@ constexpr auto TROLL_PAIR = 10;
 constexpr auto HPBARFULL_PAIR = 11;
 constexpr auto HPBARMISSING_PAIR = 12;
 constexpr auto LIGHTNING_PAIR = 13;
+constexpr auto WHITE_PAIR = 14;
 
-struct Colors
+class Colors
 {
+public:
 	void my_init_pair();
 };

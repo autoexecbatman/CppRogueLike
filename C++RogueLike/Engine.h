@@ -9,8 +9,6 @@
 class Engine
 {
 public:
-	Engine(int screenWidth, int screenHeight);
-	~Engine();
 
 	//==GAME_STATUS==
 	// enumerates the current game status.
@@ -33,12 +31,13 @@ public:
 	//==ENGINE_PROPERTIES==
 
 	Actor* player;
+	Actor* stairs;
 	Map* map;
 	Gui* gui;
 
 	bool run = true;
 	int lastKey = getch();
-	int key = getch();
+	int keyPress = getch();
 
 	std::deque<Actor*> actors;
 
@@ -51,6 +50,7 @@ public:
 	bool pickATile(int* x, int* y, float maxRange = 0.0f);
 
 	void init();
+	void game_menu();
 	void load();
 	void save();
 	
@@ -58,12 +58,14 @@ public:
 
 	void print_container(const std::deque<Actor*> actors);
 
-	void game_menu();
 
-	void key_listener() { key = getch(); }
+	void key_listener() { keyPress = getch(); }
 	
+	Engine(int screenWidth, int screenHeight);
+	~Engine();
 private:
 	bool computeFov = false;
+
 };
 
 extern Engine engine;

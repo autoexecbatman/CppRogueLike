@@ -115,7 +115,7 @@ void PlayerAi::update(Actor* owner)
 	int dx = 0, dy = 0;
 	
 	clear();
-	switch (engine.key)
+	switch (engine.keyPress)
 	{
 	case '8':
 		dy = -1;
@@ -162,17 +162,17 @@ void PlayerAi::update(Actor* owner)
 		break;
 	// detect the key press and pass it to the handleActionKey function
 	case 'g':
-		handleActionKey(owner, engine.key);
+		handleActionKey(owner, engine.keyPress);
 		break;
 
 	// detect the key press and pass it to the handleActionKey function
 	case 'i':
-		handleActionKey(owner, engine.key);
+		handleActionKey(owner, engine.keyPress);
 		break;
 	
 	// use the health potion
 	case 'a':
-		handleActionKey(owner, engine.key);
+		handleActionKey(owner, engine.keyPress);
 		break;
 
 	// if 'p' is pressed pick health potion
@@ -188,6 +188,11 @@ void PlayerAi::update(Actor* owner)
 		}
 		break;
 
+	// if escape key is pressed bring the game menu
+	case 27:
+		engine.game_menu();
+		break;
+	
 	default:break;
 	}
 

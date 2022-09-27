@@ -1,6 +1,6 @@
 #include <iostream>
 #include <curses.h>
-#include <algorithm> // for std::find
+#include <algorithm> // for std::remove in sendToBack(Actor*)
 
 #include "main.h"
 #include "Colors.h"
@@ -18,10 +18,11 @@ Engine::Engine(
 	screenWidth(screenWidth),
 	screenHeight(screenHeight),
 	player(nullptr),
+	stairs(nullptr),
 	map(nullptr),
 	gui(nullptr),
 	run(true),
-	key(0)
+	keyPress(0)
 {
 
 	// DEBUG MESSAGE
@@ -43,7 +44,12 @@ Engine::Engine(
 
 Engine::~Engine()
 {
-	term();
+	actors.clear(); // clear the actors deque
+
+	if (map) delete map; // delete the map
+
+	gui->gui_clear(); // clears the message log
+
 	delete gui; // deletes the gui instance
 }
 
@@ -276,7 +282,7 @@ bool Engine::pickATile(int* x, int* y, float maxRange)
 // Will be called in load()
 void Engine::init()
 {
-	//====
+	//==PLAYER==
 	// a new Actor for the player
 	player = new Actor(
 		25,
@@ -297,11 +303,22 @@ void Engine::init()
 	player->container = new Container(26);
 	actors.push_back(player);
 
-	//====
+	//==STAIRS==
+	// create stairs for player to descend to the next level
+	stairs = new Actor(
+		0,
+		0,
+		'>',
+		"stairs",
+		WHITE_PAIR
+	);
+	actors.push_back(stairs);
+
+	//==MAP==
 	// a new Map instance
 	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
 	map->init(true);
-	/*gameStatus = GameStatus::STARTUP;*/
+	gameStatus = GameStatus::STARTUP;
 }
 
 void Engine::game_menu()
@@ -371,10 +388,12 @@ void Engine::game_menu()
 			if (new_option > 2) new_option = 0;
 			break;
 
-		case 'q' || 'Q':
+		case 'Q':
+		case 'q':
 			// quit the menu window
 			menu_run = false;
 			break;
+
 		case 'N':
 		case 'n':
 			// if the key enter is pressed and cursor is on "New Game" then start a new game
@@ -382,6 +401,7 @@ void Engine::game_menu()
 			delwin(menu_win);
 			engine.init();
 			break;
+
 		case 'L':
 		case 'l':
 			// if the key enter is pressed and cursor is on "Continue" then load the game
@@ -389,6 +409,8 @@ void Engine::game_menu()
 			delwin(menu_win);
 			engine.load();
 			break;
+
+		default:break;
 		}
 	}
 }

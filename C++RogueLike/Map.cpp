@@ -275,14 +275,17 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 	{
 		return;
 	}
+
 	if (first) // if this is the first room, we need to place the player in it
 	{
 		engine.player->y = y1 + 1;
 		engine.player->x = x1 + 1;
 	}
+	
 	//If this is NOT the first room, we make a random number of monsters and place them in the room
 	//First we get a random number of monsters and for each one, get a random position inside the room.
 	//If the tile is empty (canWalk) we create a monster.
+
 	else
 	{
 		int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
@@ -296,6 +299,10 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 			}
 			addMonster(monstery, monsterx);
 		}
+
+		// add stairs
+		engine.stairs->x = x1 + x2 / 2;
+		engine.stairs->y = y1 + y2 / 2;
 	} 
 	
 	// add items
@@ -310,6 +317,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 		}
 		addItem(itemy, itemx);
 	}
+
+
 }
 
 //====

@@ -16,7 +16,7 @@ public:
 	Destructible* destructible; // the actor can be destroyed
 	Ai* ai; // the actor can have AI
 	Container* container; // the actor can be a container
-	Pickable* pickable;
+	Pickable* pickable; // the actor can be picked
 	
 	Actor(
 		int y,
