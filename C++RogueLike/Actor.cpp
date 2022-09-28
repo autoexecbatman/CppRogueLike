@@ -19,6 +19,7 @@ Actor::Actor(
 	col(col),
 	name(name),
 	blocks(true),
+	fovOnly(true),
 	attacker(nullptr),
 	destructible(nullptr),
 	ai(nullptr),

@@ -11,6 +11,7 @@ public:
 	int col = 0; // color for the actor
 	const char* name = "actor_name"; // add name
 	bool blocks = false; // does the actor blocks movement?
+	bool fovOnly = false; // to make some actors visible when not in fov
 	
 	Attacker* attacker; // the actor can attack
 	Destructible* destructible; // the actor can be destroyed
