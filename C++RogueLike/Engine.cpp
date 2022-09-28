@@ -89,9 +89,20 @@ void Engine::render()
 {
 	map->render(); // draw the map
 
-	for (const auto& actor : actors) // iterate through the actors list
+	for (Actor* actor : actors) // iterate through the actors list
 	{
-		if (map->isInFov(actor->x, actor->y)) // if actor position is in the fov of the player
+		if (actor != player // check if the actor is not the player
+			&&
+			(
+				(
+					!actor->fovOnly
+					&&
+					map->isExplored(actor->x,actor->y)
+					) // check if the actor is not fovOnly and is explored
+			||
+			map->isInFov(actor->x, actor->y)
+				) // OR if the actors position is in the FOV of the player
+			) // end of if statement
 		{
 			actor->render(); // draw the actor
 		}
@@ -312,6 +323,8 @@ void Engine::init()
 		"stairs",
 		WHITE_PAIR
 	);
+	stairs->blocks = false;
+	stairs->fovOnly = false;
 	actors.push_back(stairs);
 
 	//==MAP==
@@ -432,15 +445,20 @@ void Engine::load()
 		map->load(zip);
 
 		// load the player
-		player = new Actor(0, 0, 0, "dummy name", EMPTY_PAIR);
+		player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);
 		player->load(zip);
 		actors.push_back(player);
+
+		// load the stairs
+		stairs = new Actor(0, 0, 0, "loaded stairs", WHITE_PAIR);
+		stairs->load(zip);
+		actors.push_back(stairs);
 
 		// then all other actors
 		int nbActors = zip.getInt();
 		while (nbActors > 0)
 		{
-			Actor* actor = new Actor(0, 0, 0, "dummy name", EMPTY_PAIR);
+			Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);
 			actor->load(zip);
 			actors.push_back(actor);
 			nbActors--;
@@ -479,11 +497,14 @@ void Engine::save()
 		// then save the player
 		player->save(zip);
 
+		// then save the stairs
+		stairs->save(zip);
+
 		// then all the other actors
-		zip.putInt(actors.size() - 1);
+		zip.putInt(actors.size() - 2);
 		for (Actor* actor : actors)
 		{
-			if (actor != player)
+			if (actor != player && actor != stairs)
 			{
 				actor->save(zip);
 			}
