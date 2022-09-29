@@ -40,6 +40,7 @@ Engine::Engine(
 	//==GUI==
 	// a new Gui instance
 	gui = new Gui();
+	level = 0;
 }
 
 Engine::~Engine()
@@ -404,7 +405,7 @@ void Engine::game_menu()
 		case 'Q':
 		case 'q':
 			// quit the menu window
-			menu_run = false;
+			exit(0);
 			break;
 
 		case 'N':
@@ -523,4 +524,43 @@ void Engine::term()
 	actors.clear();
 	if (map) delete map;
 	gui->gui_clear();
+}
+
+void Engine::nextLevel()
+{
+	level++;
+	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
+	player->destructible->heal(player->destructible->maxHp / 2);
+	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
+	gui->log_message(WHITE_PAIR, "You are now on level %d", level);
+
+	// clear the dungeon except the player and the stairs
+	actors.clear();
+	actors.push_back(player);
+	actors.push_back(stairs);
+	
+	print_container(actors);
+	
+	delete map;
+
+
+	
+	map = new Map(30 - 8, 120);
+	map->init(true);
+	gameStatus = GameStatus::STARTUP;
+
+	
+}
+
+// create the getActor function
+Actor* Engine::getActor(int x, int y) const
+{
+	for (Actor* actor : actors)
+	{
+		if (actor->x == x && actor->y == y)
+		{
+			return actor;
+		}
+	}
+	return nullptr;
 }

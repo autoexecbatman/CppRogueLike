@@ -66,6 +66,10 @@ public:
 private:
 	bool computeFov = false;
 
+public:
+	int level;
+	void nextLevel();
+	Actor* getActor(int x, int y) const;
 };
 
 extern Engine engine;
