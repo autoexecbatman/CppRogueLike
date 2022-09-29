@@ -23,7 +23,7 @@ enum class CONTROLS : char
 Ai* Ai::create(TCODZip& zip) 
 {
 	AiType type = (AiType)zip.getInt();
-	Ai* ai = NULL;
+	Ai* ai = nullptr;
 	switch (type) {
 	case PLAYER: ai = new PlayerAi(); break;
 	case MONSTER: ai = new MonsterAi(); break;
@@ -191,6 +191,13 @@ void PlayerAi::update(Actor* owner)
 	// if escape key is pressed bring the game menu
 	case 27:
 		engine.game_menu();
+		break;
+
+	case '>':
+		if (engine.stairs->x == owner->x && engine.stairs->y == owner->y)
+		{
+			engine.nextLevel();
+		}
 		break;
 	
 	default:break;
