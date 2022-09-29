@@ -47,11 +47,6 @@ int main()
 	int countLoop = 0;
 	while (engine.run == true && !engine.player->destructible->isDead())
 	{
-		// checks if 'q' was not pressed
-		if (engine.run == false)
-		{
-			break;
-		}
 		
 		//==DEBUG==
 		std::clog << "Running..." << countLoop << std::endl;
@@ -70,7 +65,11 @@ int main()
 		// TODO : decide if you are going to use this class.
 		window.create_window(3, 22, 60, engine.player->name); // create a resizable window
 
-		engine.key_listener(); // listen for key presses
+		//engine.key_listener(); // listen for key presses
+		//==INPUT==
+		// get the input from the player
+		engine.lastKey = engine.keyPress;
+		engine.keyPress = getch();
 
 		countLoop++;
 	}
