@@ -18,6 +18,7 @@ public:
 
 	virtual ~Destructible();
 
+	// returns true if hp is below or equal to 0
 	bool isDead() { return hp <= 0; } // is the actor dead?
 	//====
 	//handles damage, owner attacked, returns (dam - def)
