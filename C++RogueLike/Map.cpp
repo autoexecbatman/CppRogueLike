@@ -102,7 +102,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 
 //====
 //In Map.cpp, we allocate the TCODMap object in the constructor
-Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width)
+Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width), map(nullptr)
 {
 	// a random seed for the map
 	seed = TCODRandom::getInstance()->getInt(0, 0x7FFFFFFF); // 0x7FFFFFFF is the highest possible 32 bit signed integer value.
@@ -216,6 +216,7 @@ void Map::addItem(int x, int y)
 		healthPotion->blocks = false;
 		healthPotion->pickable = new Healer(4);
 		engine.actors.push_back(healthPotion);
+		engine.sendToBack(healthPotion);
 	}
 	else if (dice < 70+10)
 	{
@@ -224,6 +225,7 @@ void Map::addItem(int x, int y)
 		lightningScroll->blocks = false;
 		lightningScroll->pickable = new LightningBolt(5, 20);
 		engine.actors.push_back(lightningScroll);
+		engine.sendToBack(lightningScroll);
 	}
 }
 
@@ -301,8 +303,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 		}
 
 		// add stairs
-		engine.stairs->x = x1 + x2 / 2;
-		engine.stairs->y = y1 + y2 / 2;
+		engine.stairs->x = x1 + 1;
+		engine.stairs->y = y1 + 1;
 	} 
 	
 	// add items
@@ -350,6 +352,9 @@ bool Map::canWalk(int canw_x, int canw_y) const
 
 void Map::addMonster(int mon_x, int mon_y)
 {
+	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
+	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
+
 	//create a random amount of orcs and trolls in the room
 	int rng = rand() % 4;
 	for (int iter = 0; iter < rng; iter++)
@@ -384,6 +389,73 @@ void Map::addMonster(int mon_x, int mon_y)
 			troll->attacker = new Attacker(4);
 			troll->ai = new MonsterAi();
 			engine.actors.push_back(troll);
+		}
+	}
+	// for each level add a new monster type
+	if (engine.level == 2)
+	{
+		Actor* goblin = new Actor(
+			mon_x,
+			mon_y,
+			'g',
+			"goblin",
+			GOBLIN_PAIR
+		);
+
+		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin");
+		goblin->attacker = new Attacker(3);
+		goblin->ai = new MonsterAi();
+		engine.actors.push_back(goblin);
+	}
+	// add a dragon
+	if (engine.level == 3)
+	{
+		Actor* dragon = new Actor(
+			mon_x,
+			mon_y,
+			'D',
+			"dragon",
+			DRAGON_PAIR
+		);
+
+		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon");
+		dragon->attacker = new Attacker(4);
+		dragon->ai = new MonsterAi();
+		engine.actors.push_back(dragon);
+	}
+	// roll a die if a new monster type should be added
+	if (engine.level > 3)
+	{
+		int rng3 = rand() % 2;
+		if (rng3 == 0)
+		{
+			Actor* goblin = new Actor(
+				mon_x,
+				mon_y,
+				'g',
+				"goblin",
+				GOBLIN_PAIR
+			);
+
+			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin");
+			goblin->attacker = new Attacker(3);
+			goblin->ai = new MonsterAi();
+			engine.actors.push_back(goblin);
+		}
+		else
+		{
+			Actor* dragon = new Actor(
+				mon_x,
+				mon_y,
+				'D',
+				"dragon",
+				DRAGON_PAIR
+			);
+
+			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon");
+			dragon->attacker = new Attacker(4);
+			dragon->ai = new MonsterAi();
+			engine.actors.push_back(dragon);
 		}
 	}
 }
