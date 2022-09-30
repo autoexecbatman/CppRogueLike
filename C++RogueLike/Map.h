@@ -1,9 +1,13 @@
 #pragma once
 
-//====
-//check if the player has seen this tile
-struct Tile
+//==Tile==
+// A tile of the map
+// checks if the player has seen this tile
+// it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov()) 
+
+class Tile
 {
+public:
 	bool explored = false;
 
 	//Tile() : explored(false) {} // check if the player has seen this tile set to 'false' by default
@@ -11,6 +15,7 @@ struct Tile
 	/*bool tile() { return explored = false; }*/
 };
 
+//==Map==
 //a class for the game map
 //the map is a 2d array of tiles
 class Map : public Persistent

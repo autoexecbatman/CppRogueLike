@@ -102,7 +102,16 @@ void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 
 //====
 //In Map.cpp, we allocate the TCODMap object in the constructor
-Map::Map(int map_height, int map_width) : map_height(map_height), map_width(map_width), map(nullptr)
+Map::Map(
+	int map_height,
+	int map_width
+)
+	:
+	map_height(map_height),
+	map_width(map_width),
+	map(nullptr),
+	rng(nullptr),
+	tiles(nullptr)
 {
 	// a random seed for the map
 	seed = TCODRandom::getInstance()->getInt(0, 0x7FFFFFFF); // 0x7FFFFFFF is the highest possible 32 bit signed integer value.
@@ -370,7 +379,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				ORC_PAIR
 			);
 
-			orc->destructible = new MonsterDestructible(10, 0, "dead orc");
+			orc->destructible = new MonsterDestructible(10, 0, "dead orc", 0);
 			orc->attacker = new Attacker(3);
 			orc->ai = new MonsterAi();
 			engine.actors.push_back(orc);
@@ -385,7 +394,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				TROLL_PAIR
 				);
 
-			troll->destructible = new MonsterDestructible(16, 1, "troll carcass");
+			troll->destructible = new MonsterDestructible(16, 1, "troll carcass", 0);
 			troll->attacker = new Attacker(4);
 			troll->ai = new MonsterAi();
 			engine.actors.push_back(troll);
@@ -402,7 +411,7 @@ void Map::addMonster(int mon_x, int mon_y)
 			GOBLIN_PAIR
 		);
 
-		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin");
+		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 0);
 		goblin->attacker = new Attacker(3);
 		goblin->ai = new MonsterAi();
 		engine.actors.push_back(goblin);
@@ -418,7 +427,7 @@ void Map::addMonster(int mon_x, int mon_y)
 			DRAGON_PAIR
 		);
 
-		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon");
+		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 0);
 		dragon->attacker = new Attacker(4);
 		dragon->ai = new MonsterAi();
 		engine.actors.push_back(dragon);
@@ -437,7 +446,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				GOBLIN_PAIR
 			);
 
-			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin");
+			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 0);
 			goblin->attacker = new Attacker(3);
 			goblin->ai = new MonsterAi();
 			engine.actors.push_back(goblin);
@@ -452,7 +461,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				DRAGON_PAIR
 			);
 
-			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon");
+			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 0);
 			dragon->attacker = new Attacker(4);
 			dragon->ai = new MonsterAi();
 			engine.actors.push_back(dragon);
