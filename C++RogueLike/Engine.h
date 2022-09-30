@@ -70,6 +70,7 @@ public:
 	int level;
 	void nextLevel();
 	Actor* getActor(int x, int y) const;
+	void dispay_stats(int level);
 };
 
 extern Engine engine;

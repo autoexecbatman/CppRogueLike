@@ -307,10 +307,11 @@ void Engine::init()
 	player->destructible = new PlayerDestructible(
 		30,
 		2,
-		"your cadaver"
+		"your cadaver",
+		0
 	);
 
-	player->attacker = new Attacker(100);
+	player->attacker = new Attacker(5);
 	player->ai = new PlayerAi();
 	player->container = new Container(26);
 	actors.push_back(player);
@@ -431,8 +432,6 @@ void Engine::game_menu()
 
 void Engine::load()
 {
-	
-	
 	if (TCODSystem::fileExists("game.sav"))
 	{
 		TCODZip zip;
@@ -563,4 +562,46 @@ Actor* Engine::getActor(int x, int y) const
 		}
 	}
 	return nullptr;
+}
+
+void Engine::dispay_stats(int level)
+{
+	// TODO: Add your implementation code here.
+	// display the player stats
+	WINDOW* stats = newwin(
+		11, // height
+		30, // width
+		0, // y
+		0 // x
+	);
+	
+	box(stats, 0, 0);
+	refresh();
+	while (true)
+	{
+		mvwprintw(stats, 1, 1, "Player Stats");
+		mvwprintw(stats, 2, 1, "Level: %d", level);
+		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
+		mvwprintw(stats, 4, 1, "Food: %d/%d", player->destructible->food, player->destructible->foodMax);
+		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
+		mvwprintw(stats, 6, 1, "[a] Attack: %d", (int)player->attacker->power);
+		mvwprintw(stats, 7, 1, "[d] Defense: %d", (int)player->destructible->defense);
+		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", (int)player->destructible->hp, (int)player->destructible->maxHp);
+		
+		wrefresh(stats);
+
+		int key = getch();
+		switch (key)
+		{
+		case 'a':
+			player->attacker->power += 1;
+			return;
+		case 'd':
+			player->destructible->defense += 1;
+			return;
+		case 'h':
+			player->destructible->maxHp += 1;
+			return;
+		}
+	}
 }
