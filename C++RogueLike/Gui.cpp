@@ -78,6 +78,14 @@ void Gui::render()
 	// draw the mouse look
 	renderMouseLook();
 
+	// draw the XP bar
+	//PlayerAi* ai = (PlayerAi*)engine.player->ai;
+	//char xpTxt[128];
+	//sprintf(xpTxt, "XP(%d)", ai->xpLevel);
+	//renderBar(1, 5, BAR_WIDTH, xpTxt, engine.player->destructible->xp,
+	//	ai->getNextLevelXp(),
+	//	WHITE_PAIR, DRAGON_PAIR);
+
 	wrefresh(con);
 	wrefresh(sub);// refresh the GUI window has to be called for window to update
 
