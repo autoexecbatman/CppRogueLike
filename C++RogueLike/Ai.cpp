@@ -105,8 +105,26 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 }
 
 //==PLAYER_AI==
+
+PlayerAi::PlayerAi() : xpLevel(1) {}
+
+const int LEVEL_UP_BASE = 200;
+const int LEVEL_UP_FACTOR = 150;
+
+int PlayerAi::getNextLevelXp()
+{
+	return LEVEL_UP_BASE + xpLevel * LEVEL_UP_FACTOR;
+}
+
 void PlayerAi::update(Actor* owner)
 {	
+	int levelUpXp = getNextLevelXp();
+	if (owner->destructible->xp >= levelUpXp) {
+		xpLevel++;
+		owner->destructible->xp -= levelUpXp;
+		engine.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
+	}
+
 	if (owner->destructible && owner->destructible->isDead())
 	{
 		return;
