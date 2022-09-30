@@ -379,7 +379,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				ORC_PAIR
 			);
 
-			orc->destructible = new MonsterDestructible(10, 0, "dead orc", 0);
+			orc->destructible = new MonsterDestructible(10, 0, "dead orc", 200);
 			orc->attacker = new Attacker(3);
 			orc->ai = new MonsterAi();
 			engine.actors.push_back(orc);
@@ -394,7 +394,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				TROLL_PAIR
 				);
 
-			troll->destructible = new MonsterDestructible(16, 1, "troll carcass", 0);
+			troll->destructible = new MonsterDestructible(16, 1, "troll carcass", 200);
 			troll->attacker = new Attacker(4);
 			troll->ai = new MonsterAi();
 			engine.actors.push_back(troll);
@@ -411,7 +411,7 @@ void Map::addMonster(int mon_x, int mon_y)
 			GOBLIN_PAIR
 		);
 
-		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 0);
+		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 50);
 		goblin->attacker = new Attacker(3);
 		goblin->ai = new MonsterAi();
 		engine.actors.push_back(goblin);
@@ -427,7 +427,7 @@ void Map::addMonster(int mon_x, int mon_y)
 			DRAGON_PAIR
 		);
 
-		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 0);
+		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 1000);
 		dragon->attacker = new Attacker(4);
 		dragon->ai = new MonsterAi();
 		engine.actors.push_back(dragon);
@@ -446,7 +446,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				GOBLIN_PAIR
 			);
 
-			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 0);
+			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 55);
 			goblin->attacker = new Attacker(3);
 			goblin->ai = new MonsterAi();
 			engine.actors.push_back(goblin);
@@ -461,7 +461,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				DRAGON_PAIR
 			);
 
-			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 0);
+			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 1255);
 			dragon->attacker = new Attacker(4);
 			dragon->ai = new MonsterAi();
 			engine.actors.push_back(dragon);
