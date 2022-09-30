@@ -119,10 +119,12 @@ int PlayerAi::getNextLevelXp()
 void PlayerAi::update(Actor* owner)
 {	
 	int levelUpXp = getNextLevelXp();
-	if (owner->destructible->xp >= levelUpXp) {
+	if (owner->destructible->xp >= levelUpXp) 
+	{
 		xpLevel++;
 		owner->destructible->xp -= levelUpXp;
 		engine.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
+		engine.dispay_stats(xpLevel);
 	}
 
 	if (owner->destructible && owner->destructible->isDead())
