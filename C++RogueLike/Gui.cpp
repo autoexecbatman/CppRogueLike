@@ -122,7 +122,7 @@ void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 		//}
 
 		// add a new message to the log
-		LogMessage* msg = new LogMessage(lineBegin, DARK_GROUND_PAIR);
+		LogMessage* msg = new LogMessage(lineBegin, WHITE_PAIR);
 		log.push_back(msg);
 
 		// go to next line
