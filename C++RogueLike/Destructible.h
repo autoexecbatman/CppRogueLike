@@ -8,8 +8,12 @@ public:
 	float maxHp = 0; // maximum health points
 	float hp = 0; // current health points
 	float defense = 0; // hit points deflected
+	int food = 0;
+	int foodMax = 0;
+	int needToSleep = 0;
 	const char* corpseName = "corpseName"; // the actor's name once it is dead/destroyed
-	int xp; // for awarding experience points
+	int xp = 0; // for awarding experience points
+	
 	
 	Destructible(
 		float maxHp,
@@ -67,7 +71,8 @@ public:
 	PlayerDestructible(
 		float maxHp,
 		float defense,
-		const char* corpseName
+		const char* corpseName,
+		int xp
 	);
 	//====
 	//handles death, owner killed	

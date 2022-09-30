@@ -83,7 +83,8 @@ void MonsterDestructible::die(Actor* owner)
 PlayerDestructible::PlayerDestructible(
 	float maxHp,
 	float defense,
-	const char* corpseName
+	const char* corpseName,
+	int xp
 ) :
 	Destructible(maxHp, defense, corpseName, xp)
 {
@@ -167,10 +168,10 @@ Destructible* Destructible::create(TCODZip& zip)
 	switch (type) 
 	{
 	case DestructibleType::MONSTER:
-		destructible = new MonsterDestructible(0, 0, NULL,0);
+		destructible = new MonsterDestructible(0, 0, NULL, 0);
 		break;
 	case DestructibleType::PLAYER:
-		destructible = new PlayerDestructible(0, 0, NULL);
+		destructible = new PlayerDestructible(0, 0, NULL, 0);
 		break;
 	}
 	
