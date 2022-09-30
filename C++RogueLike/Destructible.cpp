@@ -9,14 +9,17 @@
 Destructible::Destructible(
 	float maxHp,
 	float defense,
-	const char* corpseName
+	const char* corpseName,
+	int xp
 ) :
 	maxHp(maxHp),
 	hp(maxHp),
 	defense(defense),
-	corpseName(corpseName)
+	corpseName(corpseName),
+	xp(xp)
 {
 	this->corpseName = _strdup(corpseName);
+	xp = 0;
 }
 
 Destructible::~Destructible()
@@ -59,14 +62,19 @@ void Destructible::die(Actor* owner)
 MonsterDestructible::MonsterDestructible(
 	float maxHp,
 	float defense,
-	const char* corpseName
+	const char* corpseName,
+	int xp
 ) :
-	Destructible(maxHp, defense, corpseName)
+	Destructible(maxHp, defense, corpseName, xp)
 {}
 
 void MonsterDestructible::die(Actor* owner)
 {
 	mvprintw(29,0,"%s is dead\n", owner->name);
+	
+	engine.gui->log_message(WHITE_PAIR, "%s is dead. You gain %d xp", owner->name, xp);
+	engine.player->destructible->xp += xp;
+
 	Destructible::die(owner);
 }
 
@@ -77,7 +85,7 @@ PlayerDestructible::PlayerDestructible(
 	float defense,
 	const char* corpseName
 ) :
-	Destructible(maxHp, defense, corpseName)
+	Destructible(maxHp, defense, corpseName, xp)
 {
 }
 
@@ -121,25 +129,52 @@ void Destructible::save(TCODZip& zip)
 	zip.putString(corpseName);
 }
 
+//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+//int putEnum(T value) { putInt(static_cast<int>(value)); }
+//
+//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+//T getEnum() { return static_cast<T>(getInt()); }
+
+
+//Usage:
+//putEnum(DestructibleType::PLAYER);
+//auto des_type = getEnum<DestructibleType>();
+
+//template<typename Enum, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
+//int putEnum(Enum value) { return putInt(static_cast<std::underlying_type_v<Enum>>(value)); }
+
 void PlayerDestructible::save(TCODZip& zip)
 {
-	zip.putInt(PLAYER);
+	/*zip.putInt(static_cast<int>(DestructibleType::PLAYER));*/
+	zip.putInt(static_cast<int>(DestructibleType::PLAYER));
 	Destructible::save(zip);
 }
 
 void MonsterDestructible::save(TCODZip& zip) 
 {
-	zip.putInt(MONSTER);
+	 /*zip.putInt(static_cast<int>(DestructibleType::MONSTER));*/
+	// convert DestructibleType to type int using std::underlying_type_v
+	zip.putInt(static_cast<std::underlying_type_t<DestructibleType>>(DestructibleType::MONSTER));
+	
 	Destructible::save(zip);
 }
 
-Destructible* Destructible::create(TCODZip& zip) {
+Destructible* Destructible::create(TCODZip& zip) 
+{
 	DestructibleType type = (DestructibleType)zip.getInt();
-	Destructible* destructible = NULL;
-	switch (type) {
-	case MONSTER: destructible = new MonsterDestructible(0, 0, NULL); break;
-	case PLAYER: destructible = new PlayerDestructible(0, 0, NULL); break;
+	Destructible* destructible = nullptr;
+
+	switch (type) 
+	{
+	case DestructibleType::MONSTER:
+		destructible = new MonsterDestructible(0, 0, NULL,0);
+		break;
+	case DestructibleType::PLAYER:
+		destructible = new PlayerDestructible(0, 0, NULL);
+		break;
 	}
+	
 	destructible->load(zip);
+	
 	return destructible;
 }
