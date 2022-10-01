@@ -6,7 +6,7 @@
 class Actor : public Persistent
 {
 public:
-	int y = 0, x = 0; // position on map
+	int posY = 0, posX = 0; // position on map
 	int ch = -47; // the symbol to print
 	int col = 0; // color for the actor
 	const char* name = "actor_name"; // add name
@@ -33,7 +33,9 @@ public:
 	void save(TCODZip& zip);
 
 	void update(); // update() will handle the monster turn.
-	double getDistance(int cx, int cy) const; // a function to get the distance from an actor to a specific tile of the map
+
+	double getDistance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
+
 	void render() const; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
 };

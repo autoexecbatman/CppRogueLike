@@ -163,7 +163,7 @@ bool Map::isInFov(int fov_x, int fov_y) const
 
 void Map::computeFov()
 {
-	map->computeFov(engine.player->x, engine.player->y, engine.fovRadius);
+	map->computeFov(engine.player->posX, engine.player->posY, engine.fovRadius);
 }
 
 void Map::render() const
@@ -289,8 +289,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 
 	if (first) // if this is the first room, we need to place the player in it
 	{
-		engine.player->y = y1 + 1;
-		engine.player->x = x1 + 1;
+		engine.player->posY = y1 + 1;
+		engine.player->posX = x1 + 1;
 	}
 	
 	//If this is NOT the first room, we make a random number of monsters and place them in the room
@@ -312,8 +312,8 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 		}
 
 		// add stairs
-		engine.stairs->x = x1 + 1;
-		engine.stairs->y = y1 + 1;
+		engine.stairs->posX = x1 + 1;
+		engine.stairs->posY = y1 + 1;
 	} 
 	
 	// add items
@@ -347,9 +347,9 @@ bool Map::canWalk(int canw_x, int canw_y) const
 		if (
 			actor->blocks // if the actor blocks
 			&& 
-			actor->x == canw_x // and if there is another actor on the tile
+			actor->posX == canw_x // and if there is another actor on the tile
 			&& 
-			actor->y == canw_y
+			actor->posY == canw_y
 			)
 		{
 			return false;

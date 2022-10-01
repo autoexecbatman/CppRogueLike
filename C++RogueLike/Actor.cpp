@@ -1,5 +1,6 @@
 #include <iostream>
 #include <curses.h>
+#include <math.h>
 
 #include "main.h"
 
@@ -13,8 +14,8 @@ Actor::Actor(
 	const char* name,
 	int col
 ) : 
-	y(y),
-	x(x),
+	posY(y),
+	posX(x),
 	ch(ch),
 	col(col),
 	name(name),
@@ -38,8 +39,8 @@ Actor::~Actor()
 
 void Actor::load(TCODZip& zip)
 {
-	x = zip.getInt();
-	y = zip.getInt();
+	posX = zip.getInt();
+	posY = zip.getInt();
 	ch = zip.getInt();
 	col = zip.getInt();
 	name = _strdup(zip.getString());
@@ -77,8 +78,8 @@ void Actor::load(TCODZip& zip)
 
 void Actor::save(TCODZip& zip)
 {
-	zip.putInt(x);
-	zip.putInt(y);
+	zip.putInt(posX);
+	zip.putInt(posY);
 	zip.putInt(ch);
 	zip.putInt(col);
 	zip.putString(name);
@@ -101,14 +102,16 @@ void Actor::save(TCODZip& zip)
 void Actor::render() const
 {
 	attron(COLOR_PAIR(col));
-	mvaddch(y, x, ch);
+	mvaddch(posY, posX, ch);
 	attroff(COLOR_PAIR(col));
 }
+
 void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
 	container->add(this);
 }
+
 //the monster update
 void Actor::update()
 {	
@@ -119,12 +122,10 @@ void Actor::update()
 }
 
 // a function to get the distance from an actor to a specific tile of the map
-double Actor::getDistance(int cx, int cy) const
+double Actor::getDistance(int tileX, int tileY) const
 {
-	int dx = Actor::x - cx;
-	int dy = Actor::y - cy;
+	int dx = Actor::posX - tileX;
+	int dy = Actor::posY - tileY;
 	
-	return sqrt(dx * dx + dy * dy);
+	return sqrt(pow(dx, 2) + pow(dy, 2));
 }
-
-//====

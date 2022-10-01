@@ -43,7 +43,7 @@ void MonsterAi::update(Actor* owner)
 		return; // do nothing
 	}
 
-	if (engine.map->isInFov(owner->x, owner->y)) // if the owner is in the fov
+	if (engine.map->isInFov(owner->posX, owner->posY)) // if the owner is in the fov
 	{
 		// move towards the player
 		moveCount = TRACKING_TURNS;
@@ -55,7 +55,7 @@ void MonsterAi::update(Actor* owner)
 
 	if (moveCount > 0) // if the move count is greater than 0
 	{
-		moveOrAttack(owner, engine.player->x, engine.player->y); // move or attack the player
+		moveOrAttack(owner, engine.player->posX, engine.player->posY); // move or attack the player
 	}
 }
 
@@ -75,8 +75,8 @@ void MonsterAi::save(TCODZip& zip)
 // after losing his sight
 void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 {
-	int dx = targetx - owner->x; // get the x distance
-	int dy = targety - owner->y; // get the y distance
+	int dx = targetx - owner->posX; // get the x distance
+	int dy = targety - owner->posY; // get the y distance
 	int stepdx = (dx > 0 ? 1 : -1); // get the x step
 	int stepdy = (dy > 0 ? 1 : -1); // get the y step
 	double distance = sqrt(dx * dx + dy * dy); // get the distance
@@ -84,18 +84,18 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 	{
 		dx = (int)(round(dx / distance));
 		dy = (int)(round(dy / distance));
-		if (engine.map->canWalk(owner->x + dx, owner->y + dy))
+		if (engine.map->canWalk(owner->posX + dx, owner->posY + dy))
 		{
-			owner->x += dx;
-			owner->y += dy;
+			owner->posX += dx;
+			owner->posY += dy;
 		}
-		else if (engine.map->canWalk(owner->x + stepdx, owner->y))
+		else if (engine.map->canWalk(owner->posX + stepdx, owner->posY))
 		{
-			owner->x += stepdx;
+			owner->posX += stepdx;
 		}
-		else if (engine.map->canWalk(owner->x, owner->y + stepdy))
+		else if (engine.map->canWalk(owner->posX, owner->posY + stepdy))
 		{
-			owner->y += stepdy;
+			owner->posY += stepdy;
 		}
 	}
 	else if (owner->attacker)
@@ -197,7 +197,7 @@ void PlayerAi::update(Actor* owner)
 
 	// if 'p' is pressed pick health potion
 	case 'p':
-		engine.player->pickItem(engine.player->x, engine.player->y);
+		engine.player->pickItem(engine.player->posX, engine.player->posY);
 		break;
 	
 	case static_cast<int>(CONTROLS::QUIT):
@@ -214,7 +214,7 @@ void PlayerAi::update(Actor* owner)
 		break;
 
 	case '>':
-		if (engine.stairs->x == owner->x && engine.stairs->y == owner->y)
+		if (engine.stairs->posX == owner->posX && engine.stairs->posY == owner->posY)
 		{
 			engine.nextLevel();
 		}
@@ -226,7 +226,7 @@ void PlayerAi::update(Actor* owner)
 	if (dx!=0||dy!=0)
 	{
 		engine.gameStatus = Engine::GameStatus::NEW_TURN;
-		if (moveOrAttack(owner,owner->x+dx,owner->y+dy))
+		if (moveOrAttack(owner,owner->posX+dx,owner->posY+dy))
 		{
 			engine.map->computeFov();
 		}
@@ -247,9 +247,9 @@ void PlayerAi::handleActionKey(Actor* owner, int ascii)
 			if (
 				actor->pickable
 				&&
-				actor->x == owner->x
+				actor->posX == owner->posX
 				&&
-				actor->y == owner->y
+				actor->posY == owner->posY
 				)
 			{
 				if (actor->pickable->pick(actor, owner))
@@ -406,9 +406,9 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 			&&
 			!actor->destructible->isDead()
 			&&
-			actor->x == targetx
+			actor->posX == targetx
 			&&
-			actor->y == targety
+			actor->posY == targety
 			)
 		{
 			owner->attacker->attack(owner, actor);
@@ -434,9 +434,9 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 			//&& 
 			//actor->destructible->isDead()
 			//&& 
-			actor->x == targetx
+			actor->posX == targetx
 			&&
-			actor->y == targety
+			actor->posY == targety
 			)
 		{
 		//std::cout <<
@@ -452,8 +452,8 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		}
 	}
 
-		owner->x = targetx;
-		owner->y = targety;
+		owner->posX = targetx;
+		owner->posY = targety;
 
 		return true;
 }

@@ -21,7 +21,7 @@ void wizardeye()
 	for (const auto& actor : engine.actors)
 	{
 		// print the actor's name
-		mvprintw(actor->y, actor->x, actor->name);
+		mvprintw(actor->posY, actor->posX, actor->name);
 	}
 }
 
@@ -45,6 +45,7 @@ int main()
 	//==GAME_LOOP==
 	// main game loop
 	int countLoop = 0;
+
 	while (engine.run == true && !engine.player->destructible->isDead())
 	{
 		
@@ -67,7 +68,6 @@ int main()
 		// TODO : decide if you are going to use this class.
 		window.create_window(3, 22, 60, engine.player->name); // create a resizable window
 
-		//engine.key_listener(); // listen for key presses
 		//==INPUT==
 		// get the input from the player
 		engine.lastKey = engine.keyPress;

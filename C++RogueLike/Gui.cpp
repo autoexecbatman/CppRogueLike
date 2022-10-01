@@ -270,7 +270,7 @@ void Gui::renderMouseLook()
 	bool first = true;
 	for (const auto& actor : engine.actors)
 	{
-		if (actor->x == Mouse_status.x && actor->y == Mouse_status.y)
+		if (actor->posX == Mouse_status.x && actor->posY == Mouse_status.y)
 		{
 			if (!first)
 			{

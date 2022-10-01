@@ -73,7 +73,7 @@ LightningBolt::LightningBolt(float range, float damage) : range(range), damage(d
 
 bool LightningBolt::use(Actor* owner, Actor* wearer)
 {
-	Actor* closestMonster = engine.getClosestMonster(wearer->x, wearer->y, range);
+	Actor* closestMonster = engine.getClosestMonster(wearer->posX, wearer->posY, range);
 	if (!closestMonster)
 	{
 		engine.gui->log_message(HPBARMISSING_PAIR, "No enemy is close enough to strike.");

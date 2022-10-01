@@ -98,10 +98,10 @@ void Engine::render()
 				(
 					!actor->fovOnly
 					&&
-					map->isExplored(actor->x,actor->y)
+					map->isExplored(actor->posX,actor->posY)
 					) // check if the actor is not fovOnly and is explored
 			||
-			map->isInFov(actor->x, actor->y)
+			map->isInFov(actor->posX, actor->posY)
 				) // OR if the actors position is in the FOV of the player
 			) // end of if statement
 		{
@@ -556,7 +556,7 @@ Actor* Engine::getActor(int x, int y) const
 {
 	for (Actor* actor : actors)
 	{
-		if (actor->x == x && actor->y == y)
+		if (actor->posX == x && actor->posY == y)
 		{
 			return actor;
 		}
