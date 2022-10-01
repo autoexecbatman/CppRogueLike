@@ -191,26 +191,26 @@ void Engine::print_container(const std::deque<Actor*> actors)
 // This function returns the closest monster from position x, y within range.
 // If range is 0, it's considered infinite.
 // If no monster is found within range, it returns NULL.
-Actor* Engine::getClosestMonster(int x, int y, double range) const
+Actor* Engine::getClosestMonster(int fromPosX, int fromPosY, double inRange) const
 {
 	// TODO: Add your implementation code here.
-	Actor* closest = nullptr;
+	Actor* closestMonster = nullptr;
 	float bestDistance = 1E6f;
 
 	for (Actor* actor : engine.actors)
 	{
 		if (actor != player && actor->destructible && !actor->destructible->isDead())
 		{
-			float distance = actor->getDistance(x, y);
-			if (distance < bestDistance && (distance <= range || range == 0.0f))
+			float distance = actor->getDistance(fromPosX, fromPosY);
+			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
-				closest = actor;
+				closestMonster = actor;
 			}
 		}
 	}
 
-	return nullptr;
+	return closestMonster;
 }
 
 //====

@@ -8,7 +8,7 @@ public:
 	virtual bool use(Actor* owner, Actor* wearer);
 	static Pickable* create(TCODZip& zip);
 protected:
-	enum PickableType 
+	enum class PickableType : int
 	{
 		HEALER, LIGHTNING_BOLT, CONFUSER, FIREBALL
 	};

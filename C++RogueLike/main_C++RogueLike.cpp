@@ -55,10 +55,11 @@ int main()
 		//==ENGINE_FUNCTIONS==
 		// TODO : Clear and redraw, then present, then wait for input.  In that order.
 		// example : while (true) { clear(); refresh(); getch(); }
-
+		clear();
+		
 		engine.update(); // update map and actors positions and other stuff
 
-		clear();
+		
 
 		engine.render(); // render map and actors to the screen
 		

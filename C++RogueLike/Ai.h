@@ -8,7 +8,8 @@ public:
 	virtual void update(Actor* owner) = 0;
 	static Ai* create(TCODZip& zip);
 protected:
-	enum AiType {
+	enum class AiType 
+	{
 		MONSTER, CONFUSED_MONSTER, PLAYER
 	};
 };

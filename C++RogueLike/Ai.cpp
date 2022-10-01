@@ -24,10 +24,25 @@ Ai* Ai::create(TCODZip& zip)
 {
 	AiType type = (AiType)zip.getInt();
 	Ai* ai = nullptr;
-	switch (type) {
-	case PLAYER: ai = new PlayerAi(); break;
-	case MONSTER: ai = new MonsterAi(); break;
+
+	switch (type) 
+	{
+		
+	case AiType::PLAYER:
+	{
+		ai = new PlayerAi();
+		break;
 	}
+
+	case AiType::MONSTER:
+	{
+		ai = new MonsterAi(); 
+		break;
+	}
+	
+	default: break;
+	}
+
 	ai->load(zip);
 	return ai;
 }
@@ -66,7 +81,7 @@ void MonsterAi::load(TCODZip& zip)
 
 void MonsterAi::save(TCODZip& zip)
 {
-	zip.putInt(MONSTER);
+	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::MONSTER));
 	zip.putInt(moveCount);
 }
 
@@ -305,7 +320,7 @@ void PlayerAi::load(TCODZip& zip)
 
 void PlayerAi::save(TCODZip& zip)
 {
-	zip.putInt(PLAYER);
+	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
 }
 
 Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)
@@ -457,5 +472,4 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 
 		return true;
 }
-
 //====

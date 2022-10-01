@@ -30,8 +30,8 @@ Pickable* Pickable::create(TCODZip& zip)
 	Pickable* pickable = NULL;
 	switch (type)
 	{
-	case HEALER: pickable = new Healer(0); break;
-	case LIGHTNING_BOLT: pickable = new LightningBolt(0, 0); break;
+	case PickableType::HEALER: pickable = new Healer(0); break;
+	case PickableType::LIGHTNING_BOLT: pickable = new LightningBolt(0, 0); break;
 	}
 	pickable->load(zip);
 	return pickable;
@@ -62,7 +62,7 @@ void Healer::load(TCODZip& zip)
 
 void Healer::save(TCODZip& zip) 
 {
-	zip.putInt(HEALER);
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::HEALER));
 	zip.putFloat(amount);
 }
 
@@ -95,7 +95,7 @@ void LightningBolt::load(TCODZip& zip)
 
 void LightningBolt::save(TCODZip& zip) 
 {
-	zip.putInt(LIGHTNING_BOLT);
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LIGHTNING_BOLT));
 	zip.putFloat(range);
 	zip.putFloat(damage);
 }

@@ -46,7 +46,9 @@ public:
 	void render();
 	
 	void sendToBack(Actor* actor);
-	Actor* getClosestMonster(int x, int y, double range) const;
+
+	Actor* getClosestMonster(int fromPosX, int fromPosY, double inRange) const;
+	
 	bool pickATile(int* x, int* y, float maxRange = 0.0f);
 
 	void init();
