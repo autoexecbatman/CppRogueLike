@@ -41,10 +41,14 @@ public:
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 	
+	void pick_item(Actor* owner);
+	void display_inventory(Actor* owner);
+	
 protected:
-	void handleActionKey(Actor* owner, int ascii);
+	/*void handleActionKey(Actor* owner, int ascii);*/
 	Actor* choseFromInventory(Actor* owner, int ascii);
 	bool moveOrAttack(Actor* owner, int targetx, int targety);
+	
 };
 
 //====

@@ -17,10 +17,12 @@ protected:
 class Healer : public Pickable
 {
 public:
-	float amount; // how many hp
+	int amountToHeal; // how many hp
 
-	Healer(float amount);
+	Healer(int amountToHeal);
+
 	bool use(Actor* owner, Actor* wearer);
+
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };
@@ -28,9 +30,13 @@ public:
 class LightningBolt : public Pickable
 {
 public:
-	float range, damage;
+	float maxRange = 0;
+	float damage = 0;
+	
 	LightningBolt(float range, float damage);
+
 	bool use(Actor* owner, Actor* wearer);
+
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };

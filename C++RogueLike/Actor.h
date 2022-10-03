@@ -1,8 +1,8 @@
 #pragma once
-//#include "Container.h"
 
-//====
-// a class for the moving characters
+//==Actor==
+// a class for the actors in the game
+// (player, monsters, items, etc.)
 class Actor : public Persistent
 {
 public:

@@ -1,15 +1,13 @@
 #pragma once
-//#include <vector>
-//#include "main.h"
 
 class Container
 {
 public:
-	int inv_size;
-	/*TCODList<Actor*> inventory;*/
-	std::vector<Actor*> inventory;
+	int invSize = 0;
 
-	Container(int inv_size);
+	std::vector<Actor*> inventoryList;
+
+	Container(int invSize);
 	~Container();
 	// checks that the container is not full.
 	bool add(Actor* actor);

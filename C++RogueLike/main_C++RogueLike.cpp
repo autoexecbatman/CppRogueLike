@@ -59,8 +59,6 @@ int main()
 		
 		engine.update(); // update map and actors positions and other stuff
 
-		
-
 		engine.render(); // render map and actors to the screen
 		
 		// TODO : move to the appropriate location.

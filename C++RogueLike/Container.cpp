@@ -3,56 +3,62 @@
 
 #include "main.h"
 
-Container::Container(int inv_size) : inv_size(inv_size)
-{
-	/*std::clog << "Container::Container(int size)" << std::endl;*/
-}
+Container::Container(int invSize) : invSize(invSize) {}
 
 Container::~Container() 
 {
-	inventory.clear();
+	inventoryList.clear();
 }
 
 // checks that the container is not full.
 bool Container::add(Actor* actor)
-{
-	std::clog << "Container::add();" << std::endl;
-	if (inv_size < 0 && inventory.size() <= unsigned(inv_size))
+{	
+	//if (invSize < 0 && inventory.size() <= invSize)
+	//{
+	//	// inventory full
+	//	return false;
+	//}
+
+	if (// check if the inventory is full
+		invSize > 0
+		&& 
+		inventoryList.size() >= static_cast<unsigned int>(invSize)
+		)
 	{
-		// inventory full
+		// inventory full return false
 		return false;
 	}
-	inventory.push_back(actor);
-	// print inventory list in curses
-	print_container(inventory);
+
+	inventoryList.push_back(actor); // add the actor to the inventory
+
 	return true;
 }
 
 
 void Container::remove(Actor* actor)
 {
-	inventory.erase(std::remove(inventory.begin(), inventory.end(), actor), inventory.end());
+	inventoryList.erase(std::remove(inventoryList.begin(), inventoryList.end(), actor), inventoryList.end());
 }
 
 void Container::load(TCODZip& zip)
 {
-	inv_size = zip.getInt();
+	invSize = zip.getInt();
 	int nbActors = zip.getInt();
 	while (nbActors > 0) 
 	{
-		Actor* actor = new Actor(0, 0, 0, NULL, 0);
+		Actor* actor = new Actor(0, 0, 0, nullptr, 0);
 		actor->load(zip);
-		inventory.push_back(actor);
+		inventoryList.push_back(actor);
 		nbActors--;
 	}
 }
 
 void Container::save(TCODZip& zip)
 {
-	zip.putInt(inv_size);
-	zip.putInt(inventory.size());
+	zip.putInt(invSize);
+	zip.putInt(inventoryList.size());
 	// iterate through the inventory and save the item
-	for (Actor* actor : inventory)
+	for (Actor* actor : inventoryList)
 	{
 		actor->save(zip);
 	}
@@ -61,7 +67,7 @@ void Container::save(TCODZip& zip)
 void Container::print_container(std::vector<Actor*> container)
 {
 	int i = 0;
-	for (const auto& item : inventory)
+	for (const auto& item : inventoryList)
 	{
 		std::cout << item->name << i << " ";
 		i++;

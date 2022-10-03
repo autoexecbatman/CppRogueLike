@@ -71,7 +71,6 @@ public:
 	}
 };
 
-
 void Map::load(TCODZip& zip)
 {
 	seed = zip.getInt();

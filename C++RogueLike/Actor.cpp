@@ -33,10 +33,11 @@ Actor::~Actor()
 	if (attacker) delete attacker;
 	if (destructible) delete destructible;
 	if (ai) delete ai;
-	if (pickable) delete pickable;
 	if (container) delete container;
+	if (pickable) delete pickable;
 }
 
+//====
 void Actor::load(TCODZip& zip)
 {
 	posX = zip.getInt();
@@ -85,11 +86,11 @@ void Actor::save(TCODZip& zip)
 	zip.putString(name);
 	zip.putInt(blocks);
 
-	zip.putInt(attacker != NULL);
-	zip.putInt(destructible != NULL);
-	zip.putInt(ai != NULL);
-	zip.putInt(pickable != NULL);
-	zip.putInt(container != NULL);
+	zip.putInt(attacker != nullptr);
+	zip.putInt(destructible != nullptr);
+	zip.putInt(ai != nullptr);
+	zip.putInt(pickable != nullptr);
+	zip.putInt(container != nullptr);
 
 	if (attacker) attacker->save(zip);
 	if (destructible) destructible->save(zip);

@@ -59,59 +59,18 @@ void Destructible::die(Actor* owner)
 
 //====
 
-MonsterDestructible::MonsterDestructible(
-	float maxHp,
-	float defense,
-	const char* corpseName,
-	int xp
-) :
-	Destructible(maxHp, defense, corpseName, xp)
-{}
-
-void MonsterDestructible::die(Actor* owner)
-{
-	mvprintw(29,0,"%s is dead\n", owner->name);
-	
-	engine.gui->log_message(WHITE_PAIR, "%s is dead. You gain %d xp", owner->name, xp);
-	engine.player->destructible->xp += xp;
-
-	Destructible::die(owner);
-}
-
-//====
-
-PlayerDestructible::PlayerDestructible(
-	float maxHp,
-	float defense,
-	const char* corpseName,
-	int xp
-) :
-	Destructible(maxHp, defense, corpseName, xp)
-{
-}
-
-void PlayerDestructible::die(Actor* owner)
-{
-	/*std::cout << "You died!\n" << std::endl;*/
-	/*int y = getmaxy(stdscr);*/
-	mvprintw(29, 0, "You died!\n", owner->name);
-	Destructible::die(owner);
-	engine.gameStatus = Engine::GameStatus::DEFEAT;
-}
-
-//====
-
 // The function returns the amount of health point actually restored.
-float Destructible::heal(float amount)
+float Destructible::heal(float hpToHeal)
 {
-	// TODO: Add your implementation code here.
-	hp += amount;
-	if (hp > maxHp)
+	Destructible::hp += hpToHeal;
+	
+	if (Destructible::hp > Destructible::maxHp)
 	{
-		amount -= hp - maxHp;
-		hp = maxHp;
+		hpToHeal -= Destructible::hp - Destructible::maxHp;
+		Destructible::hp = Destructible::maxHp;
 	}
-	return amount;
+
+	return hpToHeal;
 }
 
 void Destructible::load(TCODZip& zip)
@@ -178,4 +137,46 @@ Destructible* Destructible::create(TCODZip& zip)
 	destructible->load(zip);
 	
 	return destructible;
+}
+
+//==PlayerDestructible==
+
+PlayerDestructible::PlayerDestructible(
+	float maxHp,
+	float defense,
+	const char* corpseName,
+	int xp
+) :
+	Destructible(maxHp, defense, corpseName, xp)
+{
+}
+
+void PlayerDestructible::die(Actor* owner)
+{
+	/*std::cout << "You died!\n" << std::endl;*/
+	/*int y = getmaxy(stdscr);*/
+	mvprintw(29, 0, "You died!\n", owner->name);
+	Destructible::die(owner);
+	engine.gameStatus = Engine::GameStatus::DEFEAT;
+}
+
+//==MonsterDestructible==
+
+MonsterDestructible::MonsterDestructible(
+	float maxHp,
+	float defense,
+	const char* corpseName,
+	int xp
+) :
+	Destructible(maxHp, defense, corpseName, xp)
+{}
+
+void MonsterDestructible::die(Actor* owner)
+{
+	mvprintw(29,0,"%s is dead\n", owner->name);
+	
+	engine.gui->log_message(WHITE_PAIR, "%s is dead. You gain %d xp", owner->name, xp);
+	engine.player->destructible->xp += xp;
+
+	Destructible::die(owner);
 }
