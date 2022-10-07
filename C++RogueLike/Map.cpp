@@ -235,6 +235,17 @@ void Map::addItem(int x, int y)
 		engine.actors.push_back(lightningScroll);
 		engine.sendToBack(lightningScroll);
 	}
+	/*else if (dice < 70 + 10 + 10)*/
+	// always spawn this scroll
+	if (true)
+	{
+		// add fireball scrolls
+		Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
+		fireballScroll->blocks = false;
+		fireballScroll->pickable = new Fireball(3, 12);
+		engine.actors.push_back(fireballScroll);
+		engine.sendToBack(fireballScroll);
+	}
 }
 
 //====
@@ -467,4 +478,17 @@ void Map::addMonster(int mon_x, int mon_y)
 		}
 	}
 }
+
+Actor* Map::getActor(int x, int y) const
+{
+	for (auto& actor : engine.actors)
+	{
+		if (actor->posX == x && actor->posY == y)
+		{
+			return actor;
+		}
+	}
+	return nullptr;
+}
+
 //====

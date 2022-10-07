@@ -112,3 +112,51 @@ void LightningBolt::save(TCODZip& zip)
 	zip.putFloat(maxRange);
 	zip.putFloat(damage);
 }
+
+//==Fireball==
+Fireball::Fireball(float range, float damage) : LightningBolt(range, damage) {}
+
+bool Fireball::use(Actor* owner, Actor* wearer)
+{
+	engine.gui->log_message(WHITE_PAIR, "Left-click a target tile for the fireball,\nor right-click to cancel.");
+
+	int x, y;
+
+	if (!engine.pickATile(&x, &y)) // <-- runs a while loop here
+	{
+		return false;
+	}
+
+	// burn everything in <range> (including player)
+	engine.gui->log_message(WHITE_PAIR, "The fireball explodes, burning everything within %g tiles!", Fireball::maxRange);
+
+	for (Actor* actor : engine.actors)
+	{
+		if (
+			actor->destructible
+			&&
+			!actor->destructible->isDead()
+			&&
+			actor->getDistance(x, y) <= Fireball::maxRange
+			)
+		{
+			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
+			actor->destructible->takeDamage(actor, damage);
+		}
+	}
+
+	return Pickable::use(owner, wearer);
+}
+
+void Fireball::load(TCODZip& zip)
+{
+	maxRange = zip.getFloat();
+	damage = zip.getFloat();
+}
+
+void Fireball::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::FIREBALL));
+	zip.putFloat(maxRange);
+	zip.putFloat(damage);
+}

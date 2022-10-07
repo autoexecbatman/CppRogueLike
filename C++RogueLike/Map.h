@@ -48,6 +48,9 @@ public:
 	void render() const;
 	void addItem(int x, int y);
 
+	// getActor returns the actor at the given coordinates or NULL if there's none
+	Actor* getActor(int x, int y) const;
+
 	void init(bool withActors);
 
 protected:

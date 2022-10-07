@@ -40,3 +40,14 @@ public:
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };
+
+class Fireball : public LightningBolt
+{
+public:
+	Fireball(float range, float damage);
+
+	bool use(Actor* owner, Actor* wearer);
+
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+};

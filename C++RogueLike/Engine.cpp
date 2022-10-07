@@ -225,65 +225,233 @@ Actor* Engine::getClosestMonster(int fromPosX, int fromPosY, double inRange) con
 // Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
 bool Engine::pickATile(int* x, int* y, float maxRange)
 {
-	while (true)
+	//while (engine.run == true)
+	//{
+	//	clear();
+	//	render();
+	//	
+	//	nodelay(stdscr, true);
+	//// Now the player might not be aware of where he's allowed to click. 
+	//// Let's highlight the zone for him. We scan the whole map and look for tiles in FOV and within range :
+	//// highlight the possible range
+	//	for (int cx = 0; cx < map->map_width; cx++)
+	//	{
+	//		for (int cy = 0; cy < map->map_height; cy++)
+	//		{
+	//			if (
+	//				map->isInFov(cx, cy)
+	//				&&
+	//				(
+	//					maxRange == 0
+	//					||
+	//					player->getDistance(cx, cy) <= maxRange
+	//					)
+	//				)
+	//			{
+	//				// Remember how we darkened the oldest message log by multiplying its color by a float smaller than 1 ? 
+	//				// Well we can highlight a color using the same trick :
+	//				/*TCODColor col = TCODConsole::root->getCharBackground(cx, cy);*/
+	//				/*col = col * 1.2f;*/
+	//				/*TCODConsole::root->setCharBackground(cx, cy, col);*/
+	//				/*mvchgat(cy, cx, 1, A_NORMAL, HPBARFULL_PAIR, NULL);*/
+	//				attron(COLOR_PAIR(DARK_GROUND_PAIR));
+	//				mvwprintw(stdscr, cy, cx, "0");
+	//				attroff(COLOR_PAIR(DARK_GROUND_PAIR));
+	//				refresh();
+	//			}
+	//		}
+	//	}
+	//	nodelay(stdscr, false);
+	//	// Now we need to update the mouse coordinate in Engine::mouse, so let's duplicate the checkForEvent call from Engine::update :
+	//		/*TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &lastKey, &mouse);*/
+	//	request_mouse_pos();
+	//		// We're going to do one more thing to help the player select his tile : fill the tile under the mouse cursor with white :
+	//	if (
+	//		map->isInFov(Mouse_status.x, Mouse_status.y)
+	//		&&
+	//		(
+	//			maxRange == 0
+	//			||
+	//			player->getDistance(Mouse_status.x, Mouse_status.y) <= maxRange
+	//			)
+	//		)
+	//	{
+	//		/*TCODConsole::root->setCharBackground(mouse.cx, mouse.cy, TCODColor::white);*/
+	//		mvchgat(Mouse_status.y, Mouse_status.x, 1, A_NORMAL, HPBARMISSING_PAIR, NULL);
+	//		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+	//		mvprintw(Mouse_status.y, Mouse_status.x, "X");
+	//		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+	//		refresh();
+	//		
+	//		// And if the player presses the left button while a valid tile is selected, return the tile coordinates :
+	//		if (BUTTON1_CLICKED)
+	//		{
+	//			// first display a message
+	//			gui->log_message(WHITE_PAIR, "Target confirmed");
+	//			// then return the coordinates
+	//			
+	//			/*request_mouse_pos();*/
+	//			*x = Mouse_status.x;
+	//			*y = Mouse_status.y;
+	//			return true;
+	//		}
+	//	}
+	//	// If the player pressed a key or right clicked, we exit :
+	//	if (BUTTON3_CLICKED)
+	//	{
+	//		return false;
+	//	}
+	//	refresh();
+	//}
+
+
+	int targetCursorY = player->posY; // init position Y
+	int targetCursorX = player->posX; // init position X
+
+	int lastY = targetCursorY;
+	int lastX = targetCursorX;
+
+	int lineY = 0;
+	int lineX = 0;
+
+	bool run = true;
+
+
+	while (run == true)
 	{
-		render();
-	}
-	// Now the player might not be aware of where he's allowed to click. 
-	// Let's highlight the zone for him. We scan the whole map and look for tiles in FOV and within range :
-	// highlight the possible range
-	for (int cx = 0; cx < map->map_width; cx++) 
-	{
-		for (int cy = 0; cy < map->map_height; cy++) 
+		clear();
+
+		// make the line follow the mouse position
+		// if mouse move
+		if (mouse_moved())
 		{
-			if (
-				map->isInFov(cx, cy) 
-				&& 
-				(
-					maxRange == 0 
-					||
-					player->getDistance(cx, cy) <= maxRange
-					)
-				)
+			request_mouse_pos();
+			targetCursorY = Mouse_status.y;
+			targetCursorX = Mouse_status.x;
+		}
+		engine.render();
+
+		//display the FOV in white
+
+		for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
+		{
+			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
 			{
-				// Remember how we darkened the oldest message log by multiplying its color by a float smaller than 1 ? 
-				// Well we can highlight a color using the same trick :
-				/*TCODColor col = TCODConsole::root->getCharBackground(cx, cy);*/
-				/*col = col * 1.2f;*/
-				/*TCODConsole::root->setCharBackground(cx, cy, col);*/
-				mvchgat(cy, cx, 1, A_NORMAL, HPBARFULL_PAIR, NULL);
+				if (engine.map->isInFov(tilePosX, tilePosY))
+				{
+					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+				}
 			}
 		}
 
-		// Now we need to update the mouse coordinate in Engine::mouse, so let's duplicate the checkForEvent call from Engine::update :
-
-			/*TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &lastKey, &mouse);*/
-		
-		request_mouse_pos();
-		// We're going to do one more thing to help the player select his tile : fill the tile under the mouse cursor with white :
-		if (
-			map->isInFov(Mouse_status.x, Mouse_status.y)
-			&&
-			(
-				maxRange == 0 
-				|| 
-				player->getDistance(Mouse_status.x, Mouse_status.y) <= maxRange
-				)
-			) 
+		// first color the player position if the cursor has moved from the player position
+		if (targetCursorY != player->posY || targetCursorX != player->posX)
 		{
-			/*TCODConsole::root->setCharBackground(mouse.cx, mouse.cy, TCODColor::white);*/
-			mvchgat(Mouse_status.y, Mouse_status.x, 1, A_NORMAL, HPBARMISSING_PAIR, NULL);
-			// And if the player presses the left button while a valid tile is selected, return the tile coordinates :
-
-			//if (Mouse_status.button) {
-			//	*x = mouse.cx;
-			//	*y = mouse.cy;
-			//	return true;
-			//}
+			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, NULL);
 		}
-		
-		
+
+		// draw a line using TCODLine class
+		/*
+		@CppEx
+		// Going from point 5,8 to point 13,4
+		int x = 5, y = 8;
+		TCODLine::init(x, y, 13, 4);
+		do {
+			// update cell x,y
+		} while (!TCODLine::step(&x, &y));
+		*/
+		TCODLine::init(player->posX, player->posY, targetCursorX, targetCursorY);
+		while (!TCODLine::step(&lineX, &lineY))
+		{
+			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, NULL);
+		}
+
+		// the player uses the keyboard to select a target
+		// the target selection cursor is displayed in white
+		// the player can press enter to select the target
+		// or press escape to cancel the target selection
+		// 'X' is the char for the selection cursor in the target selection mode
+
+		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+		mvaddch(targetCursorY, targetCursorX, 'X');
+		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+
+		// if the cursor is on a monster then display the monster's name
+
+		if (engine.map->isInFov(targetCursorX, targetCursorY))
+		{
+			Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+			// and actor is not an item
+			if (actor != nullptr && actor->destructible != nullptr)
+			{
+				mvprintw(0, 0, actor->name);
+				// print the monster's stats
+				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->maxHp));
+				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
+			}
+		}
+
+		refresh();
+
+		// get the key press
+		int key = getch();
+		switch (key)
+		{
+		case KEY_UP:
+			// move the selection cursor up
+			targetCursorY--;
+			break;
+
+		case KEY_DOWN:
+			// move the selection cursor down
+			targetCursorY++;
+			break;
+
+		case KEY_LEFT:
+			// move the selection cursor left
+			targetCursorX--;
+			break;
+
+		case KEY_RIGHT:
+			// move the selection cursor right
+			targetCursorX++;
+			break;
+
+		case 'f':
+			return true;
+			break;
+		case 10:
+
+			// if the key enter is pressed then select the target
+			// and return the target position
+
+			// if the target is a monster then attack it
+		{
+			if (engine.map->isInFov(targetCursorX, targetCursorY))
+			{
+				Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+				// and actor is not an item
+				if (actor != nullptr && actor->destructible != nullptr)
+				{
+					player->attacker->attack(player, actor);
+					run = false;
+				}
+			}
+		}
+		break;
+		case 'r':
+		case 27:
+			// if the key escape is pressed then cancel the target selection
+			run = false;
+			break;
+
+		default:break;
+		}
+
+
 	}
+	clear();
+
 
 	return false;
 }
@@ -429,6 +597,181 @@ void Engine::game_menu()
 		}
 	}
 }
+
+
+bool Engine::mouse_moved()
+{
+	int old_mouse_x = Mouse_status.x;
+	int old_mouse_y = Mouse_status.y;
+
+	// check if the mouse has moved
+	
+	// first we get the current mouse position
+	request_mouse_pos();
+	
+	// then we compare it to the previous mouse position
+	if (Mouse_status.x != old_mouse_x || Mouse_status.y != old_mouse_y)
+	{
+		// if the mouse has moved, we update the old mouse position
+		old_mouse_x = Mouse_status.x;
+		old_mouse_y = Mouse_status.y;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+void Engine::target()
+{
+	int targetCursorY = player->posY; // init position Y
+	int targetCursorX = player->posX; // init position X
+
+	int lastY = targetCursorY;
+	int lastX = targetCursorX;
+
+	int lineY = 0;
+	int lineX = 0;
+
+	bool run = true;
+
+
+	while (run == true)
+	{
+		clear();
+
+		// make the line follow the mouse position
+		// if mouse move
+		if (mouse_moved())
+		{
+			request_mouse_pos();
+			targetCursorY = Mouse_status.y;
+			targetCursorX = Mouse_status.x;
+		}
+		engine.render();
+
+		//display the FOV in white
+		
+		for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
+		{
+			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
+			{
+				if (engine.map->isInFov(tilePosX, tilePosY))
+				{
+					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+				}
+			}
+		}
+
+		// first color the player position if the cursor has moved from the player position
+		if (targetCursorY != player->posY || targetCursorX != player->posX)
+		{
+			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, NULL);
+		}
+
+		// draw a line using TCODLine class
+		/*
+		@CppEx
+		// Going from point 5,8 to point 13,4
+		int x = 5, y = 8;
+		TCODLine::init(x, y, 13, 4);
+		do {
+			// update cell x,y
+		} while (!TCODLine::step(&x, &y));
+		*/
+		TCODLine::init(player->posX, player->posY, targetCursorX, targetCursorY);
+		while (!TCODLine::step(&lineX, &lineY))
+		{
+			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, NULL);
+		}
+		
+		// the player uses the keyboard to select a target
+		// the target selection cursor is displayed in white
+		// the player can press enter to select the target
+		// or press escape to cancel the target selection
+		// 'X' is the char for the selection cursor in the target selection mode
+
+		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+		mvaddch(targetCursorY,targetCursorX,'X');
+		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+
+		// if the cursor is on a monster then display the monster's name
+		
+		if (engine.map->isInFov(targetCursorX, targetCursorY))
+		{
+			Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+			// and actor is not an item
+			if (actor != nullptr && actor->destructible != nullptr )
+			{
+				mvprintw(0, 0, actor->name);
+				// print the monster's stats
+				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->maxHp));
+				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
+			}
+		}
+		
+		refresh();
+
+		// get the key press
+		int key = getch();
+		switch (key)
+		{
+		case KEY_UP:
+			// move the selection cursor up
+			targetCursorY--;
+			break;
+
+		case KEY_DOWN:
+			// move the selection cursor down
+			targetCursorY++;
+			break;
+
+		case KEY_LEFT:
+			// move the selection cursor left
+			targetCursorX--;
+			break;
+
+		case KEY_RIGHT:
+			// move the selection cursor right
+			targetCursorX++;
+			break;
+			
+		case 10:
+			
+			// if the key enter is pressed then select the target
+			// and return the target position
+			
+			// if the target is a monster then attack it
+		{
+			if (engine.map->isInFov(targetCursorX, targetCursorY))
+			{
+				Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+				// and actor is not an item
+				if (actor != nullptr && actor->destructible != nullptr)
+				{
+					player->attacker->attack(player,actor);
+					run = false;
+				}
+			}
+		}
+			break;
+		case 'r':
+		case 27:
+			// if the key escape is pressed then cancel the target selection
+			run = false;
+			break;
+			
+		default:break;
+		}
+
+
+	}
+	clear();
+}
+
+
 
 void Engine::load()
 {

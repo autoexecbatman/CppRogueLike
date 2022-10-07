@@ -35,7 +35,7 @@ Gui::~Gui()
 {
 	delwin(con);
 	delwin(sub);
-	gui_clear();
+	log.clear();
 }
 
 void Gui::render()

@@ -126,11 +126,11 @@ enum class Controls : int
 	DOWN = '2',
 	DOWN_ARROW = KEY_DOWN,
 	DOWN_ARROW_NUMPAD = KEY_C2,
-	
+
 	LEFT = '4',
 	LEFT_ARROW = KEY_LEFT,
 	LEFT_ARROW_NUMPAD = KEY_B1,
-	
+
 	RIGHT = '6',
 	RIGHT_ARROW = KEY_RIGHT,
 	RIGHT_ARROW_NUMPAD = KEY_B3,
@@ -143,38 +143,40 @@ enum class Controls : int
 
 	DOWN_LEFT = '1',
 	DOWN_LEFT_ARROW_NUMPAD = KEY_C1,
-	
+
 	DOWN_RIGHT = '3',
 	DOWN_RIGHT_ARROW_NUMPAD = KEY_C3,
 
 	// input for the player to wait
 	WAIT = '5',
 	WAIT_ARROW_NUMPAD = KEY_B2,
-	
+
 	// input for the player to hit himself
 	HIT_SELF = ' ',
 
-	// input for the player to pick items
-	PICK = 'g',
+	// input for the player to pick items 
+	PICK = 'p',
+	PICK_SHIFT_STAR = '*',
+	PICK_NUMPAD = PADSTAR,
 
 	// input for displaying the inventory
 	INVENTORY = 'i',
 
 	// input for displaying the game menu
-	ESCAPE = KEY_EXIT,
-	// 27
+	ESCAPE = 27,
 	
-	// the controls for the player to exit the game
 	MOUSE = KEY_MOUSE,
 
 	HEAL = 'a',
 
 	DESCEND = '>',
 
+	// input for the player to target 
+	TARGET = 't',
+
 	// the controls for the player to exit the game
 	QUIT = 'q'
 };
-
 
 PlayerAi::PlayerAi() : xpLevel(1) {}
 
@@ -271,16 +273,14 @@ void PlayerAi::update(Actor* owner)
 		request_mouse_pos();
 		break;
 	case Controls::PICK:
+	case Controls::PICK_SHIFT_STAR:
+	case Controls::PICK_NUMPAD:
 		pick_item(owner);
 		break;
 	case Controls::INVENTORY:
 		/*handleActionKey(owner, engine.keyPress);*/
 		display_inventory(owner);
 		break;
-	// use the health potion
-	//case Controls::HEAL:
-	//	handleActionKey(owner, engine.keyPress);
-	//	break;
 	case Controls::QUIT:
 		engine.run = false;
 		if (engine.run == false)
@@ -298,6 +298,9 @@ void PlayerAi::update(Actor* owner)
 		{
 			engine.nextLevel();
 		}
+		break;
+	case Controls::TARGET:
+		engine.target();
 		break;
 	
 	default:break;
@@ -353,7 +356,7 @@ void PlayerAi::display_inventory(Actor* owner)
 {
 	/*Actor* actor = choseFromInventory(owner, ascii);*/
 
-	constexpr int INVENTORY_HEIGHT = 7;
+	constexpr int INVENTORY_HEIGHT = 29;
 	constexpr int INVENTORY_WIDTH = 30;
 
 	refresh();
@@ -361,8 +364,8 @@ void PlayerAi::display_inventory(Actor* owner)
 	WINDOW* inv = newwin(
 		INVENTORY_HEIGHT, // int nlines
 		INVENTORY_WIDTH, // int ncols
-		22, // int begy
-		30 // int begx
+		0, // int begy
+		0 // int begx
 	);
 
 	// display the inventory frame
@@ -405,13 +408,15 @@ void PlayerAi::display_inventory(Actor* owner)
 	//	actor->pickable->use(actor, owner);
 	//}
 
+	Gui gui;
 	// wait for a key press
 	int inventoryInput = getch();
 	switch (inventoryInput)
 	{
-	case 'i':
+	case static_cast<int>(Controls::ESCAPE):
 		clear();
 		break;
+
 	case 'a':
 	{
 		// use item
@@ -422,8 +427,9 @@ void PlayerAi::display_inventory(Actor* owner)
 			engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		}
 	}
-		clear();
-		break;
+	clear();
+	break;
+
 	case 'b':
 	{
 		// use item
@@ -434,8 +440,67 @@ void PlayerAi::display_inventory(Actor* owner)
 			engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		}
 	}
-		clear();
-		break;
+	clear();
+	break;
+
+	case 'c':
+	{
+		// use item
+		Actor* actor = choseFromInventory(owner, inventoryInput);
+		if (actor)
+		{
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
+	clear();
+	break;
+
+	case 'd':
+	{
+		// use item
+		Actor* actor = choseFromInventory(owner, inventoryInput);
+		if (actor)
+		{
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
+	clear();
+	break;
+
+	case 'e':
+	{
+		// use item
+		Actor* actor = choseFromInventory(owner, inventoryInput);
+		if (actor)
+		{
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
+
+	case 'f':
+	{
+		// use item
+		Actor* actor = choseFromInventory(owner, inventoryInput);
+		if (actor)
+		{
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
+
+	case 'h':
+	{
+		// use item
+		Actor* actor = choseFromInventory(owner, inventoryInput);
+		if (actor)
+		{
+			actor->pickable->use(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
 
 	default:
 		clear();
@@ -457,6 +522,49 @@ Actor* PlayerAi::choseFromInventory(Actor* owner, int ascii)
 		if (owner->container->inventoryList.size() > 0)
 		{
 			return owner->container->inventoryList[1];
+		}
+	}
+	if (ascii == 'c')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[2];
+		}
+	}
+	if (ascii == 'd')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[3];
+		}
+	}
+	if (ascii == 'e')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[4];
+		}
+	}
+	if (ascii == 'f')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[5];
+		}
+	}
+	if (ascii == 'g')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[6];
+		}
+	}
+	// if case is 'h'
+	if (ascii == 'h')
+	{
+		if (owner->container->inventoryList.size() > 0)
+		{
+			return owner->container->inventoryList[7];
 		}
 	}
 

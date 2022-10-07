@@ -65,7 +65,7 @@ int main()
 		refresh(); // refresh the window
 
 		// TODO : decide if you are going to use this class.
-		window.create_window(3, 22, 60, engine.player->name); // create a resizable window
+		/*window.create_window(3, 22, 60, engine.player->name);*/ // creates a resizable window
 
 		//==INPUT==
 		// get the input from the player

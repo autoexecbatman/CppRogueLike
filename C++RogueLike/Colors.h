@@ -20,6 +20,8 @@ constexpr auto LIGHTNING_PAIR = 13;
 constexpr auto WHITE_PAIR = 14;
 constexpr auto GOBLIN_PAIR = 15;
 constexpr auto DRAGON_PAIR = 16;
+constexpr auto FIREBALL_PAIR = 17;
+
 
 class Colors
 {

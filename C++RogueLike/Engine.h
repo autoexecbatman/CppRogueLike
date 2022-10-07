@@ -53,6 +53,8 @@ public:
 
 	void init();
 	void game_menu();
+	bool mouse_moved();
+	void target();
 	void load();
 	void save();
 	
