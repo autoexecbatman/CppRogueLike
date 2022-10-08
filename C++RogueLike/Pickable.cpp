@@ -130,6 +130,61 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 	// burn everything in <range> (including player)
 	engine.gui->log_message(WHITE_PAIR, "The fireball explodes, burning everything within %g tiles!", Fireball::maxRange);
 
+	// make impact explosion using a circle algorithm and curses library 
+	// (this is a bit of a hack, but it works)
+	
+	// get the center of the explosion
+	int centerX = x;
+	int centerY = y;
+
+	// get the radius of the explosion
+	int radius = static_cast<int>(Fireball::maxRange);
+	
+	// get the top left corner of the explosion
+	int topLeftX = centerX - radius;
+	int topLeftY = centerY - radius;
+	
+	// get the bottom right corner of the explosion
+	int bottomRightX = centerX + radius;
+	int bottomRightY = centerY + radius;
+	
+	// get the width and height of the explosion
+	int width = bottomRightX - topLeftX;
+	int height = bottomRightY - topLeftY;
+	
+	// create a window for the explosion
+	WINDOW* explosionWindow = newwin(height, width, topLeftY, topLeftX);
+	
+	// draw fire inside the window
+	wbkgd(explosionWindow, COLOR_PAIR(FIREBALL_PAIR));
+
+	// add a character 'x' to the center of the explosion
+	// add a random color to x
+	bool run = true;
+	nodelay(explosionWindow, true);
+	for (int numLoops = 0;numLoops < 1000; numLoops++ ) 
+	{
+		// draw the explosion
+		for (int i = 0; i < width; i++)
+		{
+			for (int j = 0; j < height; j++)
+			{
+				mvwaddch(explosionWindow, j, i, 'x' | COLOR_PAIR(rand() % 8));
+			}
+			int randColor = rand() % 7 + 1;
+			wattron(explosionWindow, COLOR_PAIR(randColor));
+			mvwaddch(explosionWindow, 0, 0 + i , 'x');
+			wattroff(explosionWindow, COLOR_PAIR(randColor));
+			wrefresh(explosionWindow);
+		}
+	}
+	nodelay(explosionWindow, false);
+	// draw the explosion
+	wrefresh(explosionWindow);
+	
+	// wait for a bit using curses
+	napms(1000);
+
 	for (Actor* actor : engine.actors)
 	{
 		if (
@@ -142,10 +197,35 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 		{
 			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
 			actor->destructible->takeDamage(actor, damage);
+			animation(actor->posX, actor->posY, maxRange);
 		}
 	}
 
 	return Pickable::use(owner, wearer);
+}
+
+
+void Fireball::animation(int x, int y , int maxRange)
+{
+	bool run = true;
+	while (run == true)
+	{
+		clear();
+		engine.render();
+
+		attron(COLOR_PAIR(FIREBALL_PAIR));
+		mvprintw(y, x, "~");
+		attroff(COLOR_PAIR(FIREBALL_PAIR));
+		
+		// ask the player to press a key to continue
+		mvprintw(29, 0, "press 'SPACE' to continue");
+		refresh();
+		
+		if (getch() == ' ')
+		{
+			run = false;
+		}
+	}
 }
 
 void Fireball::load(TCODZip& zip)

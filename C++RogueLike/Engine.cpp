@@ -418,9 +418,20 @@ bool Engine::pickATile(int* x, int* y, float maxRange)
 			break;
 
 		case 'f':
+			// if the player presses the 'f' key then the target selection is confirmed
+			// and the target coordinates are returned
+			
+			// first display a message
+			gui->log_message(WHITE_PAIR, "Target confirmed");
+			// then return the coordinates
+			*x = targetCursorX;
+			*y = targetCursorY;
+
 			return true;
 			break;
+
 		case 10:
+
 
 			// if the key enter is pressed then select the target
 			// and return the target position

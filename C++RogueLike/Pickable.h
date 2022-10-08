@@ -48,6 +48,8 @@ public:
 
 	bool use(Actor* owner, Actor* wearer);
 
+	void animation(int x, int y, int maxRange);
+
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };
