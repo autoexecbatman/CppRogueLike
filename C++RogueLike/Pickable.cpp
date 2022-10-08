@@ -13,6 +13,20 @@ bool Pickable::pick(Actor* owner, Actor* wearer)
 	return false;
 }
 
+void Pickable::drop(Actor* owner, Actor* wearer)
+{
+	if (wearer->container)
+	{
+		wearer->container->remove(owner);
+		owner->posX = wearer->posX;
+		owner->posY = wearer->posY;
+		owner->ch = wearer->ch;
+		owner->col = wearer->col;
+		engine.actors.push_back(owner);
+		engine.sendToBack(owner);
+	}
+}
+
 bool Pickable::use(Actor* owner, Actor* wearer)
 {
 	if (wearer->container)
@@ -240,3 +254,48 @@ void Fireball::save(TCODZip& zip)
 	zip.putFloat(maxRange);
 	zip.putFloat(damage);
 }
+
+//==Confuser==
+Confuser::Confuser(int nbTurns, float range) : nbTurns(nbTurns), range(range) {}
+
+bool Confuser::use(Actor* owner, Actor* wearer)
+{
+	engine.gui->log_message(WHITE_PAIR, "Left-click an enemy to confuse it,\nor right-click to cancel.");
+
+	int x, y;
+
+	if (!engine.pickATile(&x, &y, range))
+	{
+		return false;
+	}
+
+	Actor* actor = engine.getActor(x, y);
+
+	if (!actor)
+	{
+		return false;
+	}
+
+	// replace the monster's AI with a confused one; 
+	// after <nbTurns> turns the old AI will be restored
+	ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);
+	actor->ai = confusedAi;
+	engine.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
+	
+
+	return Pickable::use(owner, wearer);
+}
+
+void Confuser::load(TCODZip& zip)
+{
+	nbTurns = zip.getInt();
+	range = zip.getFloat();
+}
+
+void Confuser::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::CONFUSER));
+	zip.putInt(nbTurns);
+	zip.putFloat(range);
+}
+

@@ -52,3 +52,15 @@ protected:
 };
 
 //====
+class ConfusedMonsterAi : public Ai
+{
+public:
+	ConfusedMonsterAi(int nbTurns, Ai* oldAi);
+	void update(Actor* owner);
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+	
+protected:
+	int nbTurns;
+	Ai* oldAi;
+};

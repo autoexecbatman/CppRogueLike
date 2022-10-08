@@ -5,8 +5,10 @@ public:
 	virtual ~Pickable() {};
 
 	bool pick(Actor* owner, Actor* wearer);
+	void drop(Actor* owner, Actor* wearer);
 	virtual bool use(Actor* owner, Actor* wearer);
 	static Pickable* create(TCODZip& zip);
+	
 protected:
 	enum class PickableType : int
 	{
@@ -49,6 +51,20 @@ public:
 	bool use(Actor* owner, Actor* wearer);
 
 	void animation(int x, int y, int maxRange);
+
+	void load(TCODZip& zip);
+	void save(TCODZip& zip);
+};
+
+class Confuser : public Pickable
+{
+public:
+	int nbTurns = 0;
+	float range = 0;
+
+	Confuser(int nbTurns, float range);
+
+	bool use(Actor* owner, Actor* wearer);
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);

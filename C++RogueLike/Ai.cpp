@@ -168,6 +168,9 @@ enum class Controls : int
 	MOUSE = KEY_MOUSE,
 
 	HEAL = 'a',
+	
+	// input for the player to drop items
+	DROP = 'd',
 
 	DESCEND = '>',
 
@@ -277,6 +280,16 @@ void PlayerAi::update(Actor* owner)
 	case Controls::PICK_NUMPAD:
 		pick_item(owner);
 		break;
+	case Controls::DROP:
+	{
+		Actor* actor = choseFromInventory(owner, 'a');
+		if (actor) 
+		{
+			actor->pickable->drop(actor, owner);
+			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		}
+	}
+	break;
 	case Controls::INVENTORY:
 		/*handleActionKey(owner, engine.keyPress);*/
 		display_inventory(owner);
@@ -580,7 +593,6 @@ void PlayerAi::save(TCODZip& zip)
 	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
 }
 
-
 bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety) 
 {
 	if (engine.map->isWall(targety, targetx))
@@ -646,5 +658,59 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		owner->posY = targety;
 
 		return true;
+}
+
+//==ConfusedMonsterAi==
+ConfusedMonsterAi::ConfusedMonsterAi(int nbTurns, Ai* oldAi) :
+	nbTurns(nbTurns),
+	oldAi(oldAi)
+{
+}
+
+void ConfusedMonsterAi::update(Actor* owner)
+{
+	TCODRandom* rng = TCODRandom::getInstance();
+	int dx = rng->getInt(-1, 1);
+	int dy = rng->getInt(-1, 1);
+
+	if (dx != 0 || dy != 0)
+	{
+		int destx = owner->posX + dx;
+		int desty = owner->posY + dy;
+
+		if (engine.map->canWalk(desty, destx))
+		{
+			owner->posX = destx;
+			owner->posY = desty;
+		}
+		else
+		{
+			Actor* actor = engine.getActor(destx, desty);
+			if (actor)
+			{
+				owner->attacker->attack(owner, actor);
+			}
+		}
+	}
+
+	nbTurns--;
+	if (nbTurns == 0)
+	{
+		owner->ai = oldAi;
+		delete this;
+	}
+}
+
+void ConfusedMonsterAi::load(TCODZip& zip)
+{
+	nbTurns = zip.getInt();
+	oldAi = Ai::create(zip);
+}
+
+void ConfusedMonsterAi::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
+	zip.putInt(nbTurns);
+	oldAi->save(zip);
 }
 //====

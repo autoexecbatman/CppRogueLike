@@ -235,9 +235,7 @@ void Map::addItem(int x, int y)
 		engine.actors.push_back(lightningScroll);
 		engine.sendToBack(lightningScroll);
 	}
-	/*else if (dice < 70 + 10 + 10)*/
-	// always spawn this scroll
-	if (true)
+	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
 		Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
@@ -246,6 +244,27 @@ void Map::addItem(int x, int y)
 		engine.actors.push_back(fireballScroll);
 		engine.sendToBack(fireballScroll);
 	}
+	else
+	{
+		// add confusion scrolls
+		Actor* confusionScroll = new Actor(x, y, '#', "scroll of confusion", CONFUSION_PAIR);
+		confusionScroll->blocks = false;
+		confusionScroll->pickable = new Confuser(10, 8);
+		engine.actors.push_back(confusionScroll);
+		engine.sendToBack(confusionScroll);
+	}
+	/*else if (dice < 70 + 10 + 10)*/
+	// always spawn this scroll
+	//if (true)
+	//{
+	//	// add fireball scrolls
+	//	Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
+	//	fireballScroll->blocks = false;
+	//	fireballScroll->pickable = new Fireball(3, 12);
+	//	engine.actors.push_back(fireballScroll);
+	//	engine.sendToBack(fireballScroll);
+	//}
+	//
 }
 
 //====
