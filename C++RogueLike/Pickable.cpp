@@ -45,14 +45,31 @@ Pickable* Pickable::create(TCODZip& zip)
 
 	switch (type)
 	{
+
 	case PickableType::HEALER:
 	{
 		pickable = new Healer(0);
 		break;
 	}
+
 	case PickableType::LIGHTNING_BOLT:
+	{
 		pickable = new LightningBolt(0, 0);
 		break;
+	}
+
+	case PickableType::CONFUSER:
+	{
+		pickable = new Confuser(0, 0);
+		break;
+	}
+
+	case PickableType::FIREBALL:
+	{
+		pickable = new Fireball(0, 0);
+		break;
+	}
+
 	}
 
 	pickable->load(zip);

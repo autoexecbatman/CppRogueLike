@@ -28,7 +28,12 @@ Ai* Ai::create(TCODZip& zip)
 		break;
 	}
 	
-	default: break;
+	case AiType::CONFUSED_MONSTER:
+	{
+		ai = new ConfusedMonsterAi(0, nullptr);
+		break;
+	}
+
 	}
 
 	ai->load(zip);
