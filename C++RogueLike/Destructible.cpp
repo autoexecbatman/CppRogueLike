@@ -27,16 +27,20 @@ Destructible::~Destructible()
 	free((char*)corpseName);
 }
 
-float Destructible::takeDamage(Actor* owner, float damage)
+float Destructible::take_damage(Actor* owner, float damage)
 {
-	damage -= defense; // (dam - def)
+	damage -= Destructible::defense; // (dam - def)
+
 	if (damage > 0) // if dam > 0
 	{
-		hp -= damage; // current hp - damage
+
+		Destructible::hp -= damage; // current hp - damage
+		
 		if (hp <= 0) // if hp <= 0
 		{
 			die(owner); // owner killed
 		}
+
 	}
 	else
 	{
@@ -48,13 +52,15 @@ float Destructible::takeDamage(Actor* owner, float damage)
 
 void Destructible::die(Actor* owner)
 {
+
 	//transform the actor into a corpse!
 	owner->ch = '%';
-	owner->col = DEAD_NPC_PAIR;
 	owner->name = corpseName;
 	owner->blocks = false;
+
 	//make sure corpses are drawn before living actors
-	engine.sendToBack(owner);
+	engine.send_to_back(owner);
+
 }
 
 //====

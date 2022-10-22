@@ -27,5 +27,6 @@ constexpr auto CONFUSION_PAIR = 18;
 class Colors
 {
 public:
+	Colors();
 	void my_init_pair();
 };

@@ -34,7 +34,7 @@ public:
 
 	void update(); // update() will handle the monster turn.
 
-	double getDistance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
+	double get_distance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
 
 	void render() const; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item

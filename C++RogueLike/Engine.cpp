@@ -1,6 +1,7 @@
 #include <iostream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
+#include <random>
 
 #include "main.h"
 #include "Colors.h"
@@ -115,7 +116,7 @@ void Engine::render()
 
 //====
 // earases the actor and pushes it to the begining
-void Engine::sendToBack(Actor* actor)
+void Engine::send_to_back(Actor* actor)
 {
 	//TODO : Find the right member function to remove actor from vector
 	//Since actors are drawn in their order in the list,
@@ -191,7 +192,7 @@ void Engine::print_container(const std::deque<Actor*> actors)
 // This function returns the closest monster from position x, y within range.
 // If range is 0, it's considered infinite.
 // If no monster is found within range, it returns NULL.
-Actor* Engine::getClosestMonster(int fromPosX, int fromPosY, double inRange) const
+Actor* Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
 {
 	// TODO: Add your implementation code here.
 	Actor* closestMonster = nullptr;
@@ -199,9 +200,9 @@ Actor* Engine::getClosestMonster(int fromPosX, int fromPosY, double inRange) con
 
 	for (Actor* actor : engine.actors)
 	{
-		if (actor != player && actor->destructible && !actor->destructible->isDead())
+		if (actor != player && actor->destructible && !actor->destructible->is_dead())
 		{
-			float distance = actor->getDistance(fromPosX, fromPosY);
+			float distance = actor->get_distance(fromPosX, fromPosY);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
@@ -223,7 +224,7 @@ Actor* Engine::getClosestMonster(int fromPosX, int fromPosY, double inRange) con
 // We're not going to use the main loop from main.cpp while picking a tile. 
 // This would require to add a flag in the engine to know if we're in standard play mode or tile picking mode.Instead, we create a alternative game loop.
 // Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
-bool Engine::pickATile(int* x, int* y, float maxRange)
+bool Engine::pick_tile(int* x, int* y, float maxRange)
 {
 	//while (engine.run == true)
 	//{
@@ -484,13 +485,13 @@ void Engine::init()
 	);
 
 	player->destructible = new PlayerDestructible(
-		30,
+		random_number(1,10),
 		2,
 		"your cadaver",
 		0
 	);
 
-	player->attacker = new Attacker(5);
+	player->attacker = new Attacker(random_number(1,10));
 	player->ai = new PlayerAi();
 	player->container = new Container(26);
 	actors.push_back(player);
@@ -832,7 +833,7 @@ void Engine::save()
 {
 	// handle the permadeath
 	// delete the save file if the player is dead
-	if (player->destructible->isDead())
+	if (player->destructible->is_dead())
 	{
 		TCODSystem::deleteFile("game.sav");
 	}
@@ -879,7 +880,7 @@ void Engine::term()
 	gui->gui_clear();
 }
 
-void Engine::nextLevel()
+void Engine::next_level()
 {
 	level++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
@@ -906,7 +907,7 @@ void Engine::nextLevel()
 }
 
 // create the getActor function
-Actor* Engine::getActor(int x, int y) const
+Actor* Engine::get_actor(int x, int y) const
 {
 	for (Actor* actor : actors)
 	{
@@ -958,4 +959,80 @@ void Engine::dispay_stats(int level)
 			return;
 		}
 	}
+}
+
+// display character sheet
+void Engine::display_character_sheet()
+{
+	WINDOW* character_sheet = newwin(
+		30, // height
+		120, // width
+		0, // y
+		0 // x
+	);
+
+	box(character_sheet, 0, 0);
+
+	refresh();
+	// display the player stats
+	bool run = true;
+	while (run == true)
+	{
+		// display the player stats
+		// using a dnd character sheet
+		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
+
+		// display the player name
+		mvwprintw(character_sheet, 1, 1, "Name: ");
+		// display the player class
+		mvwprintw(character_sheet, 2, 1, "Class: ");
+		// display the class kit
+		mvwprintw(character_sheet, 3, 1, "Kit: ");
+		// display the player level
+		mvwprintw(character_sheet, 4, 1, "Level: %d", level);
+		// display the player experience
+		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
+		// display the player alignment
+		mvwprintw(character_sheet, 6, 1, "Alignment: ");
+		// add character details on the right side
+		// display the player race
+		mvwprintw(character_sheet, 1, 60, "Race: ");
+		// display gender
+		mvwprintw(character_sheet, 2, 60, "Gender: ");
+		// display hair color
+		mvwprintw(character_sheet, 3, 60, "Hair Color: ");
+		// display eye color
+		mvwprintw(character_sheet, 4, 60, "Eye Color: ");
+		// display complexion
+		mvwprintw(character_sheet, 5, 60, "Complexion: ");
+		// display features 
+		mvwprintw(character_sheet, 6, 60, "Features: ");
+		// display homeland
+		mvwprintw(character_sheet, 7, 60, "Homeland: ");
+		// display deity
+		mvwprintw(character_sheet, 8, 60, "Deity: ");
+		// display vision
+		mvwprintw(character_sheet, 9, 60, "Vision: ");
+		// display secondary skills
+		mvwprintw(character_sheet, 10, 60, "Secondary Skills: ");
+
+		wrefresh(character_sheet);
+
+		int key = getch();
+		// if any key was pressed then exit the loop
+		if (key != ERR)
+		{
+			run = false;
+		}
+	}
+	clear();
+}
+
+// make a random number function to use in the game
+int Engine::random_number(int min, int max)
+{
+	static std::default_random_engine randomEngine(time(nullptr));
+	std::uniform_int_distribution<int> range(min, max);
+	
+	return range(randomEngine);
 }

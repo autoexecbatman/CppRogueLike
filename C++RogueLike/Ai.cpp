@@ -46,7 +46,7 @@ MonsterAi::MonsterAi() : moveCount(0) {}
 void MonsterAi::update(Actor* owner)
 {
 
-	if (owner->destructible && owner->destructible->isDead()) // if the owner is dead
+	if (owner->destructible && owner->destructible->is_dead()) // if the owner is dead
 	{
 		return; // do nothing
 	}
@@ -177,6 +177,8 @@ enum class Controls : int
 	// input for the player to drop items
 	DROP = 'd',
 
+	CHAR_SHEET = 'c',
+
 	DESCEND = '>',
 
 	// input for the player to target 
@@ -218,7 +220,7 @@ void PlayerAi::update(Actor* owner)
 		engine.dispay_stats(xpLevel);
 	}
 
-	if (owner->destructible && owner->destructible->isDead())
+	if (owner->destructible && owner->destructible->is_dead())
 	{
 		return;
 	}
@@ -314,11 +316,14 @@ void PlayerAi::update(Actor* owner)
 	case Controls::DESCEND:
 		if (engine.stairs->posX == owner->posX && engine.stairs->posY == owner->posY)
 		{
-			engine.nextLevel();
+			engine.next_level();
 		}
 		break;
 	case Controls::TARGET:
 		engine.target();
+		break;
+	case Controls::CHAR_SHEET:
+		engine.display_character_sheet();
 		break;
 	
 	default:break;
@@ -611,7 +616,7 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		if (
 			actor->destructible
 			&&
-			!actor->destructible->isDead()
+			!actor->destructible->is_dead()
 			&&
 			actor->posX == targetx
 			&&
@@ -629,7 +634,7 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		bool corpseOrItem = (
 			actor->destructible
 			&&
-			actor->destructible->isDead()
+			actor->destructible->is_dead()
 			)
 			||
 			actor->pickable;
@@ -690,7 +695,7 @@ void ConfusedMonsterAi::update(Actor* owner)
 		}
 		else
 		{
-			Actor* actor = engine.getActor(destx, desty);
+			Actor* actor = engine.get_actor(destx, desty);
 			if (actor)
 			{
 				owner->attacker->attack(owner, actor);

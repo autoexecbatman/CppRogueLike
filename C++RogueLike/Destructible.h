@@ -25,9 +25,9 @@ public:
 	virtual ~Destructible();
 
 	// returns true if hp is below or equal to 0
-	bool isDead() { return hp <= 0; } // is the actor dead?
+	bool is_dead() { return hp <= 0; } // is the actor dead?
 
-	float takeDamage(Actor* owner, float damage); // handles damage, owner attacked, returns (dam - def)
+	float take_damage(Actor* owner, float damage); // handles damage, owner attacked, returns (dam - def)
 
 	virtual void die(Actor* owner); // handles death, owner killed
 	

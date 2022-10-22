@@ -224,7 +224,7 @@ void Map::addItem(int x, int y)
 		healthPotion->blocks = false;
 		healthPotion->pickable = new Healer(4);
 		engine.actors.push_back(healthPotion);
-		engine.sendToBack(healthPotion);
+		engine.send_to_back(healthPotion);
 	}
 	else if (dice < 70+10)
 	{
@@ -233,7 +233,7 @@ void Map::addItem(int x, int y)
 		lightningScroll->blocks = false;
 		lightningScroll->pickable = new LightningBolt(5, 20);
 		engine.actors.push_back(lightningScroll);
-		engine.sendToBack(lightningScroll);
+		engine.send_to_back(lightningScroll);
 	}
 	else if (dice < 70 + 10 + 10)
 	{
@@ -242,7 +242,7 @@ void Map::addItem(int x, int y)
 		fireballScroll->blocks = false;
 		fireballScroll->pickable = new Fireball(3, 12);
 		engine.actors.push_back(fireballScroll);
-		engine.sendToBack(fireballScroll);
+		engine.send_to_back(fireballScroll);
 	}
 	else
 	{
@@ -251,7 +251,7 @@ void Map::addItem(int x, int y)
 		confusionScroll->blocks = false;
 		confusionScroll->pickable = new Confuser(10, 8);
 		engine.actors.push_back(confusionScroll);
-		engine.sendToBack(confusionScroll);
+		engine.send_to_back(confusionScroll);
 	}
 	/*else if (dice < 70 + 10 + 10)*/
 	// always spawn this scroll

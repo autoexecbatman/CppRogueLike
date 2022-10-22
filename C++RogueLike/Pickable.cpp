@@ -23,7 +23,7 @@ void Pickable::drop(Actor* owner, Actor* wearer)
 		owner->ch = wearer->ch;
 		owner->col = wearer->col;
 		engine.actors.push_back(owner);
-		engine.sendToBack(owner);
+		engine.send_to_back(owner);
 	}
 }
 
@@ -114,7 +114,7 @@ LightningBolt::LightningBolt(float maxRange, float damage) : maxRange(maxRange),
 bool LightningBolt::use(Actor* owner, Actor* wearer)
 {
 	// find closest enemy (inside a maximum range)
-	Actor* closestMonster = engine.getClosestMonster(wearer->posX, wearer->posY, maxRange);
+	Actor* closestMonster = engine.get_closest_monster(wearer->posX, wearer->posY, maxRange);
 
 	if (!closestMonster)
 	{
@@ -126,7 +126,7 @@ bool LightningBolt::use(Actor* owner, Actor* wearer)
 	// hit closest monster for <damage> hit points
 	engine.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
 		"The damage is %g hit points.", closestMonster->name, damage);
-	closestMonster->destructible->takeDamage(closestMonster, damage);
+	closestMonster->destructible->take_damage(closestMonster, damage);
 
 	return Pickable::use(owner, wearer);
 }
@@ -153,7 +153,7 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 
 	int x, y;
 
-	if (!engine.pickATile(&x, &y)) // <-- runs a while loop here
+	if (!engine.pick_tile(&x, &y)) // <-- runs a while loop here
 	{
 		return false;
 	}
@@ -221,13 +221,13 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 		if (
 			actor->destructible
 			&&
-			!actor->destructible->isDead()
+			!actor->destructible->is_dead()
 			&&
-			actor->getDistance(x, y) <= Fireball::maxRange
+			actor->get_distance(x, y) <= Fireball::maxRange
 			)
 		{
 			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
-			actor->destructible->takeDamage(actor, damage);
+			actor->destructible->take_damage(actor, damage);
 			animation(actor->posX, actor->posY, maxRange);
 		}
 	}
@@ -281,12 +281,12 @@ bool Confuser::use(Actor* owner, Actor* wearer)
 
 	int x, y;
 
-	if (!engine.pickATile(&x, &y, range))
+	if (!engine.pick_tile(&x, &y, range))
 	{
 		return false;
 	}
 
-	Actor* actor = engine.getActor(x, y);
+	Actor* actor = engine.get_actor(x, y);
 
 	if (!actor)
 	{

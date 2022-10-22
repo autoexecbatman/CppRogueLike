@@ -46,7 +46,7 @@ int main()
 	// main game loop
 	int countLoop = 0;
 
-	while (engine.run == true && !engine.player->destructible->isDead())
+	while (engine.run == true && !engine.player->destructible->is_dead())
 	{
 		
 		//==DEBUG==
@@ -55,8 +55,9 @@ int main()
 		//==ENGINE_FUNCTIONS==
 		// TODO : Clear and redraw, then present, then wait for input.  In that order.
 		// example : while (true) { clear(); refresh(); getch(); }
-		clear();
 		
+		clear(); // clear the screen
+
 		engine.update(); // update map and actors positions and other stuff
 
 		engine.render(); // render map and actors to the screen

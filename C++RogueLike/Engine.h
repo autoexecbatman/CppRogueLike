@@ -41,15 +41,14 @@ public:
 
 	std::deque<Actor*> actors;
 
-
 	void update();
 	void render();
 	
-	void sendToBack(Actor* actor);
+	void send_to_back(Actor* actor);
 
-	Actor* getClosestMonster(int fromPosX, int fromPosY, double inRange) const;
+	Actor* get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
 	
-	bool pickATile(int* x, int* y, float maxRange = 0.0f);
+	bool pick_tile(int* x, int* y, float maxRange = 0.0f);
 
 	void init();
 	void game_menu();
@@ -67,14 +66,21 @@ public:
 	
 	Engine(int screenWidth, int screenHeight);
 	~Engine();
+	
 private:
+
 	bool computeFov = false;
 
 public:
+	
 	int level;
-	void nextLevel();
-	Actor* getActor(int x, int y) const;
+	void next_level();
+	Actor* get_actor(int x, int y) const;
 	void dispay_stats(int level);
+	void display_character_sheet();
+
+	int random_number(int min, int max);
+	
 };
 
 extern Engine engine;

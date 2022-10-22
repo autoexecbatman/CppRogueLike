@@ -2,8 +2,11 @@
 #include <curses.h>
 #include "Colors.h"
 
+//==COLORS==
 
+Colors::Colors() {};
 
+//initialize the color pairs
 void Colors::my_init_pair()
 {
 	/*std::cout << "colors on" << std::endl;*/
