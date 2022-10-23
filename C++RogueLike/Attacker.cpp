@@ -1,6 +1,8 @@
 #include <iostream>
 
-#include "main.h"
+//#include "main.h"
+#include "Actor.h"
+#include "Engine.h"
 #include "Window.h"
 #include "Colors.h"
 

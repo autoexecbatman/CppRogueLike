@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROJECT_PATH_CONTAINER_H_
+#define PROJECT_PATH_CONTAINER_H_
 
 class Container
 {
@@ -18,3 +19,5 @@ public:
 
 	void print_container(std::vector<Actor*> container);
 };
+
+#endif // !PROJECT_PATH_CONTAINER_H_

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROJECT_PATH_COLORS_H_
+#define PROJECT_PATH_COLORS_H_
 
 //====
 //define the color pairs for the game
@@ -30,3 +31,5 @@ public:
 	Colors();
 	void my_init_pair();
 };
+
+#endif // !PROJECT_PATH_COLORS_H_

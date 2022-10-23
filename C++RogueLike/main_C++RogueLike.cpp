@@ -1,29 +1,28 @@
 // Debug needs to be set to x86
 
-//we are making a roguelike game
-//using the curses library
-//and the classes from doryen TCOD libtcod library without using the TCOD console
+// we are making a roguelike game
+// using the curses library
+// and the classes from doryen TCOD libtcod library without using the TCOD console
 
 #include <iostream>
 #include <curses.h>
 
-#include "main.h" // TODO : find a better way to include multiple headers.
+#include "Persistent.h"
+#include "Destructible.h"
+#include "Attacker.h"
+#include "Ai.h"
+#include "Pickable.h"
+#include "Container.h"
+#include "Actor.h"
+#include "Map.h"
+#include "Engine.h"
 #include "Colors.h"
 #include "Window.h"
+#include "Literals.h"
 
 //==ENGINE==
-// an instance of the Engine class.
-Engine engine(30, 120); // TODO : check what is going on with the width/height of the console window.
-
-// TODO : find an appropriate location for this function.
-void wizardeye()
-{
-	for (const auto& actor : engine.actors)
-	{
-		// print the actor's name
-		mvprintw(actor->posY, actor->posX, actor->name);
-	}
-}
+// an instance of the Engine class.(singleton)
+Engine engine(120_x, 30_y);
 
 //==MAIN_FUNCTION==
 // This is the main function where the game will run.

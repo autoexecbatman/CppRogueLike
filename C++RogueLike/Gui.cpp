@@ -1,8 +1,8 @@
 #include <iostream>
+
 #include "Gui.h"
 #include "main.h"
 #include "Colors.h"
-
 
 constexpr int PANEL_HEIGHT = 7;
 constexpr int BAR_WIDTH = 20;
@@ -15,7 +15,7 @@ Gui::Gui()
 	//std::cout << "con = newwin();" << std::endl;
 	con = newwin(
 		PANEL_HEIGHT, // int nlines
-		engine.screenWidth, // int ncols
+		30, // int ncols
 		22, // int begy
 		0 // int begx
 	);
@@ -261,7 +261,7 @@ void Gui::renderMouseLook()
 {
 	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
 
-	if (!engine.map->isInFov(Mouse_status.x, Mouse_status.y))
+	if (!engine.map->is_in_fov(Mouse_status.x, Mouse_status.y))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;

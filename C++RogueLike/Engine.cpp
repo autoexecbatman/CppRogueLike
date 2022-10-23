@@ -3,7 +3,17 @@
 #include <algorithm> // for std::remove in sendToBack(Actor*)
 #include <random>
 
-#include "main.h"
+#include "Engine.h"
+#include "Actor.h"
+#include "Map.h"
+#include "Gui.h"
+#include "Destructible.h"
+#include "Attacker.h"
+#include "Ai.h"
+#include "Pickable.h"
+#include "Container.h"
+
+
 #include "Colors.h"
 #include "Window.h"
 
@@ -11,8 +21,8 @@
 // initializes the console window, colors and other curses console functions.
 // creates a new player, map, and gui.
 Engine::Engine(
-	int screenWidth,
-	int screenHeight
+	Length screenWidth,
+	Length screenHeight
 ) :
 	gameStatus(GameStatus::STARTUP),
 	fovRadius(10),
@@ -55,6 +65,54 @@ Engine::~Engine()
 	delete gui; // deletes the gui instance
 }
 
+//====
+// When the Engine is created, 
+// we don't know yet if we have to generate a new map or load a previously saved one.
+// Will be called in load()
+void Engine::init()
+{
+	//==PLAYER==
+	// a new Actor for the player
+	player = new Actor(
+		25,
+		40,
+		'@',
+		"Steven Seagull",
+		PLAYER_PAIR
+	);
+
+	player->destructible = new PlayerDestructible(
+		10 + random_number(1,10),
+		2,
+		"your cadaver",
+		0
+	);
+
+	player->attacker = new Attacker(random_number(1,10));
+	player->ai = new PlayerAi();
+	player->container = new Container(26);
+	actors.push_back(player);
+
+	//==STAIRS==
+	// create stairs for player to descend to the next level
+	stairs = new Actor(
+		0,
+		0,
+		'>',
+		"stairs",
+		WHITE_PAIR
+	);
+	stairs->blocks = false;
+	stairs->fovOnly = false;
+	actors.push_back(stairs);
+
+	//==MAP==
+	// a new Map instance
+	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
+	map->init(true);
+	gameStatus = GameStatus::STARTUP;
+}
+
 //==ENGINE_UPDATE==
 // the update function to update the game logic
 // and stores events
@@ -65,7 +123,7 @@ void Engine::update()
 	// This is to avoid FOV recomputation on each frame.
 	if (gameStatus == GameStatus::STARTUP)
 	{
-		map->computeFov();
+		map->compute_fov();
 	}
 
 	gameStatus = GameStatus::IDLE; // set the game status to idle
@@ -99,10 +157,10 @@ void Engine::render()
 				(
 					!actor->fovOnly
 					&&
-					map->isExplored(actor->posX,actor->posY)
+					map->is_explored(actor->posX,actor->posY)
 					) // check if the actor is not fovOnly and is explored
 			||
-			map->isInFov(actor->posX, actor->posY)
+			map->is_in_fov(actor->posX, actor->posY)
 				) // OR if the actors position is in the FOV of the player
 			) // end of if statement
 		{
@@ -338,7 +396,7 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 		{
 			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
 			{
-				if (engine.map->isInFov(tilePosX, tilePosY))
+				if (engine.map->is_in_fov(tilePosX, tilePosY))
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 				}
@@ -379,9 +437,9 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 
 		// if the cursor is on a monster then display the monster's name
 
-		if (engine.map->isInFov(targetCursorX, targetCursorY))
+		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+			Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr)
 			{
@@ -439,9 +497,9 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 
 			// if the target is a monster then attack it
 		{
-			if (engine.map->isInFov(targetCursorX, targetCursorY))
+			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+				Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
@@ -468,53 +526,6 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 	return false;
 }
 
-//====
-// When the Engine is created, 
-// we don't know yet if we have to generate a new map or load a previously saved one.
-// Will be called in load()
-void Engine::init()
-{
-	//==PLAYER==
-	// a new Actor for the player
-	player = new Actor(
-		25,
-		40,
-		'@',
-		"Steven Seagull",
-		PLAYER_PAIR
-	);
-
-	player->destructible = new PlayerDestructible(
-		random_number(1,10),
-		2,
-		"your cadaver",
-		0
-	);
-
-	player->attacker = new Attacker(random_number(1,10));
-	player->ai = new PlayerAi();
-	player->container = new Container(26);
-	actors.push_back(player);
-
-	//==STAIRS==
-	// create stairs for player to descend to the next level
-	stairs = new Actor(
-		0,
-		0,
-		'>',
-		"stairs",
-		WHITE_PAIR
-	);
-	stairs->blocks = false;
-	stairs->fovOnly = false;
-	actors.push_back(stairs);
-
-	//==MAP==
-	// a new Map instance
-	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
-	map->init(true);
-	gameStatus = GameStatus::STARTUP;
-}
 
 void Engine::game_menu()
 {
@@ -610,7 +621,6 @@ void Engine::game_menu()
 	}
 }
 
-
 bool Engine::mouse_moved()
 {
 	int old_mouse_x = Mouse_status.x;
@@ -670,7 +680,7 @@ void Engine::target()
 		{
 			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
 			{
-				if (engine.map->isInFov(tilePosX, tilePosY))
+				if (engine.map->is_in_fov(tilePosX, tilePosY))
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 				}
@@ -711,9 +721,9 @@ void Engine::target()
 
 		// if the cursor is on a monster then display the monster's name
 		
-		if (engine.map->isInFov(targetCursorX, targetCursorY))
+		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+			Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr )
 			{
@@ -757,9 +767,9 @@ void Engine::target()
 			
 			// if the target is a monster then attack it
 		{
-			if (engine.map->isInFov(targetCursorX, targetCursorY))
+			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				Actor* actor = engine.map->getActor(targetCursorX, targetCursorY);
+				Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
@@ -782,8 +792,6 @@ void Engine::target()
 	}
 	clear();
 }
-
-
 
 void Engine::load()
 {
@@ -1035,4 +1043,14 @@ int Engine::random_number(int min, int max)
 	std::uniform_int_distribution<int> range(min, max);
 	
 	return range(randomEngine);
+}
+
+// displays the actors names
+void Engine::wizard_eye()
+{
+	for (const auto& actor : engine.actors)
+	{
+		// print the actor's name
+		mvprintw(actor->posY, actor->posX, actor->name);
+	}
 }

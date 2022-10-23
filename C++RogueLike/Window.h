@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PROJECT_PATH_WINDOW_H_
+#define PROJECT_PATH_WINDOW_H_
+
 #include <iostream>
 #include <curses.h>
 
@@ -36,3 +38,5 @@ public:
 	void windowrefresh();
 
 };
+
+#endif // !PROJECT_PATH_WINDOW_H_

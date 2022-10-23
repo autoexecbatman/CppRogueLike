@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PROJECT_PATH_AI_H_
+#define PROJECT_PATH_AI_H_
 
 //==AI==
 class Ai : public Persistent
@@ -64,3 +65,5 @@ protected:
 	int nbTurns;
 	Ai* oldAi;
 };
+
+#endif // !PROJECT_PATH_AI_H_

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef PROJECT_PATH_DESTRUCTIBLE_H_
+#define PROJECT_PATH_DESTRUCTIBLE_H_
+
+class Actor;
 
 //====
 
@@ -79,3 +82,5 @@ public:
 };
 
 //====
+
+#endif // !PROJECT_PATH_DESTRUCTIBLE_H_

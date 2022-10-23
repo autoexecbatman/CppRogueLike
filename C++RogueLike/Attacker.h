@@ -1,4 +1,10 @@
-#pragma once
+#ifndef PROJECT_PATH_ATTACKER_H_
+#define PROJECT_PATH_ATTACKER_H_
+
+#include "libtcod.hpp"
+#include "Persistent.h"
+
+class Actor;
 
 class Attacker : public Persistent
 {
@@ -13,3 +19,5 @@ public:
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };
+
+#endif // !PROJECT_PATH_ATTACKER_H_

@@ -1,4 +1,7 @@
-#pragma once
+#ifndef PROJECT_PATH_GUI_H_
+#define PROJECT_PATH_GUI_H_
+
+
 #include <curses.h>
 #include <vector>
 #include "Persistent.h"
@@ -80,3 +83,5 @@ protected:
 
 	std::vector<MenuItem*> items;
 };
+
+#endif // !PROJECT_PATH_GUI_H_

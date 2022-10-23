@@ -1,4 +1,13 @@
-#pragma once
+#ifndef PROJECT_PATH_ACTOR_H_
+#define PROJECT_PATH_ACTOR_H_
+
+#include "libtcod.hpp"
+#include "Attacker.h"
+#include "Destructible.h"
+#include "Ai.h"
+#include "Container.h"
+#include "Pickable.h"
+
 
 //==Actor==
 // a class for the actors in the game
@@ -40,4 +49,5 @@ public:
 	void pickItem(int x, int y); // pick up an item
 };
 
+#endif // !PROJECT_PATH_ACTOR_H_
 //====

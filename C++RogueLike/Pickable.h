@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PROJECT_PATH_PICKABLE_H_
+#define PROJECT_PATH_PICKABLE_H_
+
 class Pickable : public Persistent
 {
 public:
@@ -69,3 +71,5 @@ public:
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 };
+
+#endif // !PROJECT_PATH_PICKABLE_H_

@@ -1,4 +1,9 @@
-#pragma once
+#ifndef PROJECT_PATH_MAP_H_
+#define PROJECT_PATH_MAP_H_
+
+#include "Persistent.h"
+
+class Actor;
 
 //==Tile==
 // A tile of the map
@@ -35,21 +40,22 @@ public:
 	~Map();
 	
 	//check if a tile is walkable
-	bool isWall(int isWall_pos_y, int isWall_pos_x) const;
+	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
 	//check if a tile is in the FOV
-	bool isInFov(int fov_x, int fov_y) const;
+	bool is_in_fov(int fov_x, int fov_y) const;
 	//indicates whether this tile has already been seen by the player
-	bool isExplored(int exp_x, int exp_y) const;
-	bool canWalk(int canw_x, int canw_y) const;
+	bool is_explored(int exp_x, int exp_y) const;
+	bool can_walk(int canw_x, int canw_y) const;
 	//create a declaration for addMonster function
-	void addMonster(int mon_x, int mon_y);
+	void add_monster(int mon_x, int mon_y);
 	//compute the field of view
-	void computeFov();
+	void compute_fov();
 	void render() const;
-	void addItem(int x, int y);
+	void add_item(int x, int y);
+	int random_number(int min, int max);
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
-	Actor* getActor(int x, int y) const;
+	Actor* get_actor(int x, int y) const;
 
 	void init(bool withActors);
 
@@ -67,5 +73,7 @@ protected:
 	//make a dig function for the map
 	void dig(int x1, int y1, int x2, int y2);
 	//a function for the room generation
-	void createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors);
+	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };
+
+#endif // !PROJECT_PATH_MAP_H_

@@ -95,6 +95,9 @@
     <ClInclude Include="Persistent.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Literals.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd">

@@ -1,4 +1,5 @@
 #include <curses.h>
+#include <random>
 
 #include "main.h"
 #include "Colors.h"
@@ -8,7 +9,7 @@ constexpr auto ROOM_MIN_SIZE = 6;
 constexpr auto MAX_ROOM_MONSTERS = 3;
 constexpr int MAX_ROOM_ITEMS = 2;
 
-//create a binary space partition listener class (BSP)
+// a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
 {
 private:
@@ -32,7 +33,7 @@ public:
 			room_pos_x = map.rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
 			room_pos_y = map.rng->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
 
-			map.createRoom//create rooms func
+			map.create_room//create rooms func
 			(
 				roomNum == 0,
 				room_pos_x,
@@ -122,23 +123,22 @@ Map::~Map()
 	delete map; //delete the TCODMap object
 }
 
-bool Map::isWall(int isWall_pos_y, int isWall_pos_x) const//checks if it is a wall?
+bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
 {
-	//return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
+	// return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
 
 	return !map->isWalkable(
 		isWall_pos_x,
 		isWall_pos_y
 	);
-
 }
 
-bool Map::isExplored(int exp_x, int exp_y) const
+bool Map::is_explored(int exp_x, int exp_y) const
 {
 	return tiles[exp_x + exp_y * map_width].explored;
 }
 
-bool Map::isInFov(int fov_x, int fov_y) const
+bool Map::is_in_fov(int fov_x, int fov_y) const
 {
 	if ( // fov is out of bounds
 		fov_x < 0 
@@ -160,7 +160,7 @@ bool Map::isInFov(int fov_x, int fov_y) const
 	return false;
 }
 
-void Map::computeFov()
+void Map::compute_fov()
 {
 	map->computeFov(engine.player->posX, engine.player->posY, engine.fovRadius);
 }
@@ -172,12 +172,12 @@ void Map::render() const
 	{
 		for (int iter_x = 0; iter_x < map_width; iter_x++)
 		{
-			if (isInFov(iter_x, iter_y))
+			if (is_in_fov(iter_x, iter_y))
 			{
 				//int key = getch();
 				//if (key == 't')
 				//{
-					if (isWall(iter_y, iter_x))
+					if (is_wall(iter_y, iter_x))
 					{
 						// TODO : add a key to toggle between fovVisible on and off
 						/*standout();*/
@@ -194,9 +194,9 @@ void Map::render() const
 				//}
 				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);*/
 			}
-			else if (isExplored(iter_x,iter_y))
+			else if (is_explored(iter_x,iter_y))
 			{
-				if (isWall(iter_y,iter_x))
+				if (is_wall(iter_y,iter_x))
 					{
 					mvaddch(iter_y, iter_x, '#');
 					}
@@ -212,7 +212,7 @@ void Map::render() const
 	}
 }
 
-void Map::addItem(int x, int y)
+void Map::add_item(int x, int y)
 {
 	TCODRandom* rng = TCODRandom::getInstance();
 	int dice = rng->getInt(0, 100);
@@ -293,13 +293,13 @@ void Map::dig(int x1, int y1, int x2, int y2)
 		y1 = tmp;
 	}
 
-	for (int tiley = y1; tiley <= y2 +1; tiley++)
+	for (int tileY = y1; tileY <= y2 +1; tileY++)
 	{
-		for (int tilex = x1; tilex <= x2 +1; tilex++)
+		for (int tileX = x1; tileX <= x2 +1; tileX++)
 		{
 			map->setProperties(
-				tilex,
-				tiley,
+				tileX,
+				tileY,
 				true,
 				true
 			);			
@@ -307,7 +307,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 	}
 }
 
-void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors)
+void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
 	dig(x1, y1, x2, y2); // dig the corridors
 
@@ -322,22 +322,24 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 		engine.player->posX = x1 + 1;
 	}
 	
-	//If this is NOT the first room, we make a random number of monsters and place them in the room
-	//First we get a random number of monsters and for each one, get a random position inside the room.
-	//If the tile is empty (canWalk) we create a monster.
-
+	// If this is NOT the first room, we make a random number of monsters and place them in the room
+	// First we get a random number of monsters and for each one, get a random position inside the room.
+	// If the tile is empty (canWalk) we create a monster.
+	
 	else
 	{
 		int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
 		for (int i = 0; i < numMonsters; i++)
 		{
-			int monsterx = TCODRandom::getInstance()->getInt(x1, x2);
-			int monstery = TCODRandom::getInstance()->getInt(y1, y2);
-			if (isWall(monstery, monsterx))
+			int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
+			int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
+
+			if (is_wall(monsterY, monsterX))
 			{
 				continue;
 			}
-			addMonster(monstery, monsterx);
+
+			add_monster(monsterY, monsterX);
 		}
 
 		// add stairs
@@ -347,26 +349,28 @@ void Map::createRoom(bool first, int x1, int y1, int x2, int y2, bool withActors
 	
 	// add items
 	int numItems = TCODRandom::getInstance()->getInt(0, MAX_ROOM_ITEMS);
+
 	for (int i = 0; i < numItems; i++)
 	{
-		int itemx = TCODRandom::getInstance()->getInt(x1, x2);
-		int itemy = TCODRandom::getInstance()->getInt(y1, y2);
-		if (isWall(itemy, itemx))
+		int itemX = TCODRandom::getInstance()->getInt(x1, x2);
+		int itemY = TCODRandom::getInstance()->getInt(y1, y2);
+
+		if (is_wall(itemY, itemX))
 		{
 			continue;
 		}
-		addItem(itemy, itemx);
-	}
 
+		add_item(itemY, itemX);
+	}
 
 }
 
 //====
 // We want to detect, when the player tries to walk on a Tile , if it is occupied by another actor.
-bool Map::canWalk(int canw_x, int canw_y) const
+bool Map::can_walk(int canw_x, int canw_y) const
 {
 	
-	if (isWall(canw_y, canw_x)) // check if the tile is a wall
+	if (is_wall(canw_y, canw_x)) // check if the tile is a wall
 	{
 		return false;
 	}
@@ -388,16 +392,21 @@ bool Map::canWalk(int canw_x, int canw_y) const
 	return true;
 }
 
-void Map::addMonster(int mon_x, int mon_y)
+void Map::add_monster(int mon_x, int mon_y)
 {
 	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
 	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
 
 	//create a random amount of orcs and trolls in the room
+
+	/*srand(time(nullptr));*/
+
 	int rng = rand() % 4;
+	
 	for (int iter = 0; iter < rng; iter++)
 	{
 		int rng2 = rand() % 2;
+
 		if (rng2 == 0)
 		{
 			Actor* orc = new Actor(
@@ -408,7 +417,7 @@ void Map::addMonster(int mon_x, int mon_y)
 				ORC_PAIR
 			);
 
-			orc->destructible = new MonsterDestructible(10, 0, "dead orc", 200);
+			orc->destructible = new MonsterDestructible(random_number(1,8), 0, "dead orc", 200);
 			orc->attacker = new Attacker(3);
 			orc->ai = new MonsterAi();
 			engine.actors.push_back(orc);
@@ -498,7 +507,7 @@ void Map::addMonster(int mon_x, int mon_y)
 	}
 }
 
-Actor* Map::getActor(int x, int y) const
+Actor* Map::get_actor(int x, int y) const
 {
 	for (auto& actor : engine.actors)
 	{
@@ -508,6 +517,15 @@ Actor* Map::getActor(int x, int y) const
 		}
 	}
 	return nullptr;
+}
+
+// make a random number function to use in the game
+int Map::random_number(int min, int max)
+{
+	static std::default_random_engine randomEngine(time(nullptr));
+	std::uniform_int_distribution<int> range(min, max);
+
+	return range(randomEngine);
 }
 
 //====

@@ -51,7 +51,7 @@ void MonsterAi::update(Actor* owner)
 		return; // do nothing
 	}
 
-	if (engine.map->isInFov(owner->posX, owner->posY)) // if the owner is in the fov
+	if (engine.map->is_in_fov(owner->posX, owner->posY)) // if the owner is in the fov
 	{
 		// move towards the player
 		moveCount = TRACKING_TURNS;
@@ -96,16 +96,16 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 		dx = static_cast<int>(round(dx / distance));
 		dy = static_cast<int>(round(dy / distance));
 
-		if (engine.map->canWalk(owner->posX + dx, owner->posY + dy))
+		if (engine.map->can_walk(owner->posX + dx, owner->posY + dy))
 		{
 			owner->posX += dx;
 			owner->posY += dy;
 		}
-		else if (engine.map->canWalk(owner->posX + stepdx, owner->posY))
+		else if (engine.map->can_walk(owner->posX + stepdx, owner->posY))
 		{
 			owner->posX += stepdx;
 		}
-		else if (engine.map->canWalk(owner->posX, owner->posY + stepdy))
+		else if (engine.map->can_walk(owner->posX, owner->posY + stepdy))
 		{
 			owner->posY += stepdy;
 		}
@@ -334,7 +334,7 @@ void PlayerAi::update(Actor* owner)
 		engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		if (moveOrAttack(owner,owner->posX+dx,owner->posY+dy))
 		{
-			engine.map->computeFov();
+			engine.map->compute_fov();
 		}
 	}
 }
@@ -605,7 +605,7 @@ void PlayerAi::save(TCODZip& zip)
 
 bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety) 
 {
-	if (engine.map->isWall(targety, targetx))
+	if (engine.map->is_wall(targety, targetx))
 	{
 		return false;
 	}
@@ -688,7 +688,7 @@ void ConfusedMonsterAi::update(Actor* owner)
 		int destx = owner->posX + dx;
 		int desty = owner->posY + dy;
 
-		if (engine.map->canWalk(desty, destx))
+		if (engine.map->can_walk(desty, destx))
 		{
 			owner->posX = destx;
 			owner->posY = desty;

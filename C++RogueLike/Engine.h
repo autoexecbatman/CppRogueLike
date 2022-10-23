@@ -1,11 +1,17 @@
-#pragma once
+#ifndef PROJECT_PATH_ENGINE_H_
+#define PROJECT_PATH_ENGINE_H_
 
 #include <deque>
 
+#include "Map.h"
+#include "Actor.h"
 #include "Gui.h"
+#include "Literals.h"
 
 //==ENGINE==
-// the engine class
+// The engine class is the main class of the game.
+// It will handle the game loop and the game states.
+// ( Length screenWidth , Length screenHeight ) : the width and height of the screen.
 class Engine
 {
 public:
@@ -25,8 +31,8 @@ public:
 
 	//==ENGINE_FIELDS==
 
-	int screenWidth;
-	int screenHeight;
+	Length screenWidth;
+	Length screenHeight;
 
 	//==ENGINE_PROPERTIES==
 
@@ -50,7 +56,6 @@ public:
 	
 	bool pick_tile(int* x, int* y, float maxRange = 0.0f);
 
-	void init();
 	void game_menu();
 	bool mouse_moved();
 	void target();
@@ -60,13 +65,13 @@ public:
 	void term();
 
 	void print_container(const std::deque<Actor*> actors);
-
-
+	
 	void key_listener() { keyPress = getch(); }
 	
-	Engine(int screenWidth, int screenHeight);
+	Engine(Length screenWidth, Length screenHeight);
 	~Engine();
 	
+	void init();
 private:
 
 	bool computeFov = false;
@@ -80,7 +85,10 @@ public:
 	void display_character_sheet();
 
 	int random_number(int min, int max);
+	void wizard_eye();
 	
 };
 
 extern Engine engine;
+
+#endif // PROJECT_PATH_ENGINE_H_
