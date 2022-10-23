@@ -1,5 +1,18 @@
 // Debug needs to be set to x86
 
+// File: C++RogueLike\main_C++RogueLike.cpp
+// 
+// Description: This file is the main .cpp file where 
+// the game is initialized and the game loop is run.
+//
+// Functions:
+// - int main()
+// 
+// Objects:
+// - Game game
+//
+// Author: Vladimir "Undead" Lenin
+
 // we are making a roguelike game
 // using the curses library
 // and the classes from doryen TCOD libtcod library without using the TCOD console
