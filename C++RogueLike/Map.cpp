@@ -187,7 +187,7 @@ void Map::compute_fov()
 
 void Map::render() const
 {
-
+	
 	for (int iter_y = 0; iter_y < map_height; iter_y++)
 	{
 		for (int iter_x = 0; iter_x < map_width; iter_x++)
@@ -458,115 +458,6 @@ void Map::add_monster(int mon_x, int mon_y){
 		engine.actors.push_back(dragon.create_dragon(mon_y, mon_x));
 	}
 }
-
-	/*srand(time(nullptr));*/
-
-	int rng = rand() % 4;
-	
-	for (int iter = 0; iter < rng; iter++)
-	{
-		int rng2 = rand() % 2;
-
-		if (rng2 == 0)
-		{
-			Actor* orc = new Actor(
-				mon_x,
-				mon_y,
-				'o',
-				"orc",
-				ORC_PAIR
-			);
-
-			orc->destructible = new MonsterDestructible(random_number(1,8), 0, "dead orc", 200);
-			orc->attacker = new Attacker(3);
-			orc->ai = new MonsterAi();
-			engine.actors.push_back(orc);
-		}
-		else
-		{	
-			Actor* troll = new Actor(
-				mon_x,
-				mon_y,
-				'T',
-				"troll",
-				TROLL_PAIR
-				);
-
-			troll->destructible = new MonsterDestructible(16, 1, "troll carcass", 200);
-			troll->attacker = new Attacker(4);
-			troll->ai = new MonsterAi();
-			engine.actors.push_back(troll);
-		}
-	}
-	// for each level add a new monster type
-	if (engine.level == 2)
-	{
-		Actor* goblin = new Actor(
-			mon_x,
-			mon_y,
-			'g',
-			"goblin",
-			GOBLIN_PAIR
-		);
-
-		goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 50);
-		goblin->attacker = new Attacker(3);
-		goblin->ai = new MonsterAi();
-		engine.actors.push_back(goblin);
-	}
-	// add a dragon
-	if (engine.level == 3)
-	{
-		Actor* dragon = new Actor(
-			mon_x,
-			mon_y,
-			'D',
-			"dragon",
-			DRAGON_PAIR
-		);
-
-		dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 1000);
-		dragon->attacker = new Attacker(4);
-		dragon->ai = new MonsterAi();
-		engine.actors.push_back(dragon);
-	}
-	// roll a die if a new monster type should be added
-	if (engine.level > 3)
-	{
-		int rng3 = rand() % 2;
-		if (rng3 == 0)
-		{
-			Actor* goblin = new Actor(
-				mon_x,
-				mon_y,
-				'g',
-				"goblin",
-				GOBLIN_PAIR
-			);
-
-			goblin->destructible = new MonsterDestructible(10, 0, "dead goblin", 55);
-			goblin->attacker = new Attacker(3);
-			goblin->ai = new MonsterAi();
-			engine.actors.push_back(goblin);
-		}
-		else
-		{
-			Actor* dragon = new Actor(
-				mon_x,
-				mon_y,
-				'D',
-				"dragon",
-				DRAGON_PAIR
-			);
-
-			dragon->destructible = new MonsterDestructible(20, 2, "dead dragon", 1255);
-			dragon->attacker = new Attacker(4);
-			dragon->ai = new MonsterAi();
-			engine.actors.push_back(dragon);
-		}
-	}
-}
-
 Actor* Map::get_actor(int x, int y) const
 {
 	for (auto& actor : engine.actors)
@@ -582,7 +473,7 @@ Actor* Map::get_actor(int x, int y) const
 // make a random number function to use in the game
 int Map::random_number(int min, int max)
 {
-	static std::default_random_engine randomEngine(time(nullptr));
+	static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));
 	std::uniform_int_distribution<int> range(min, max);
 
 	return range(randomEngine);
