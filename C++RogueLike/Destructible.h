@@ -8,19 +8,18 @@ class Actor;
 class Destructible : public Persistent
 {
 public:
-	float maxHp = 0; // maximum health points
-	float hp = 0; // current health points
-	float defense = 0; // hit points deflected
+	int hpMax = 0; // maximum health points
+	int hp = 0; // current health points
+	int defense = 0; // hit points deflected
 	int food = 0;
 	int foodMax = 0;
 	int needToSleep = 0;
 	const char* corpseName = "corpseName"; // the actor's name once it is dead/destroyed
 	int xp = 0; // for awarding experience points
-	
-	
+
 	Destructible(
-		float maxHp,
-		float defense,
+		int hpMax,
+		int defense,
 		const char* corpseName,
 		int xp
 	);
@@ -30,11 +29,11 @@ public:
 	// returns true if hp is below or equal to 0
 	bool is_dead() { return hp <= 0; } // is the actor dead?
 
-	float take_damage(Actor* owner, float damage); // handles damage, owner attacked, returns (dam - def)
+	float take_damage(Actor* owner, int damage); // handles damage, owner attacked, returns (dam - def)
 
 	virtual void die(Actor* owner); // handles death, owner killed
 	
-	float heal(float hpToHeal); // The function returns the amount of health point actually restored.
+	float heal(int hpToHeal); // The function returns the amount of health point actually restored.
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
@@ -53,8 +52,8 @@ class MonsterDestructible : public Destructible
 {
 public:
 	MonsterDestructible(
-		float maxHp,
-		float defense,
+		int hpMax,
+		int defense,
 		const char* corpseName,
 		int xp
 	);
@@ -70,8 +69,8 @@ class PlayerDestructible : public Destructible
 {
 public:
 	PlayerDestructible(
-		float maxHp,
-		float defense,
+		int hpMax,
+		int defense,
 		const char* corpseName,
 		int xp
 	);

@@ -7,13 +7,13 @@
 //====
 
 Destructible::Destructible(
-	float maxHp,
-	float defense,
+	int hpMax,
+	int defense,
 	const char* corpseName,
 	int xp
 ) :
-	maxHp(maxHp),
-	hp(maxHp),
+	hpMax(hpMax),
+	hp(hpMax),
 	defense(defense),
 	corpseName(corpseName),
 	xp(xp)
@@ -27,7 +27,7 @@ Destructible::~Destructible()
 	free((char*)corpseName);
 }
 
-float Destructible::take_damage(Actor* owner, float damage)
+float Destructible::take_damage(Actor* owner, int damage)
 {
 	damage -= Destructible::defense; // (dam - def)
 
@@ -66,14 +66,14 @@ void Destructible::die(Actor* owner)
 //====
 
 // The function returns the amount of health point actually restored.
-float Destructible::heal(float hpToHeal)
+float Destructible::heal(int hpToHeal)
 {
 	Destructible::hp += hpToHeal;
 	
-	if (Destructible::hp > Destructible::maxHp)
+	if (Destructible::hp > Destructible::hpMax)
 	{
-		hpToHeal -= Destructible::hp - Destructible::maxHp;
-		Destructible::hp = Destructible::maxHp;
+		hpToHeal -= Destructible::hp - Destructible::hpMax;
+		Destructible::hp = Destructible::hpMax;
 	}
 
 	return hpToHeal;
@@ -81,7 +81,7 @@ float Destructible::heal(float hpToHeal)
 
 void Destructible::load(TCODZip& zip)
 {
-	maxHp = zip.getFloat();
+	hpMax = zip.getFloat();
 	hp = zip.getFloat();
 	defense = zip.getFloat();
 	corpseName = _strdup(zip.getString());
@@ -89,7 +89,7 @@ void Destructible::load(TCODZip& zip)
 
 void Destructible::save(TCODZip& zip)
 {
-	zip.putFloat(maxHp);
+	zip.putFloat(hpMax);
 	zip.putFloat(hp);
 	zip.putFloat(defense);
 	zip.putString(corpseName);
@@ -148,12 +148,12 @@ Destructible* Destructible::create(TCODZip& zip)
 //==PlayerDestructible==
 
 PlayerDestructible::PlayerDestructible(
-	float maxHp,
-	float defense,
+	int hpMax,
+	int defense,
 	const char* corpseName,
 	int xp
 ) :
-	Destructible(maxHp, defense, corpseName, xp)
+	Destructible(hpMax, defense, corpseName, xp)
 {
 }
 
@@ -169,12 +169,12 @@ void PlayerDestructible::die(Actor* owner)
 //==MonsterDestructible==
 
 MonsterDestructible::MonsterDestructible(
-	float maxHp,
-	float defense,
+	int hpMax,
+	int defense,
 	const char* corpseName,
 	int xp
 ) :
-	Destructible(maxHp, defense, corpseName, xp)
+	Destructible(hpMax, defense, corpseName, xp)
 {}
 
 void MonsterDestructible::die(Actor* owner)
