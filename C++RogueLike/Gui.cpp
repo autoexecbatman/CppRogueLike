@@ -43,6 +43,9 @@ void Gui::render()
 	// DEBUG log
 	/*std::clog << "void Gui::render() {}" << std::endl;*/
 
+	wclear(con);
+	wclear(sub);
+	
 	refresh(); // refresh the screen has to be called for the window to show
 	/*wclear(con);*/
 	
@@ -52,7 +55,7 @@ void Gui::render()
 		BAR_WIDTH, // int bar_width
 		"HP:", // const char* name
 		engine.player->destructible->hp, // float value
-		engine.player->destructible->maxHp, // float maxValue
+		engine.player->destructible->hpMax, // float maxValue
 		HPBARFULL_PAIR, // int barColor
 		HPBARMISSING_PAIR // int backColor
 	);
@@ -100,7 +103,7 @@ void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 	va_list args;
 	char buf[128];
 	va_start(args, log_message_text);
-	vsprintf(buf, log_message_text, args);
+	vsprintf_s(buf, log_message_text, args);
 	va_end(args);
 	
 	char* lineBegin = buf;
@@ -251,7 +254,7 @@ void Gui::print_container(std::vector<LogMessage*> message)
 	int i = 0;
 	for (const auto& message : message)
 	{
-		std::cout << message->log_message_text << i << " ";
+		std::cout << i << message->log_message_text << " ";
 		i++;
 	}
 	std::cout << '\n';
