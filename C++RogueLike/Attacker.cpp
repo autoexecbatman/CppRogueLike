@@ -19,7 +19,7 @@ void Attacker::attack(Actor* owner, Actor* target)
 			// damage message
 			engine.gui->log_message(
 				LIGHT_WALL_PAIR, // color
-				"%s attacks %s\n for %g hit points.\n", // message
+				"%s attacks %s for %g hit points.\n", // message
 				owner->name,
 				target->name,
 				power - target->destructible->defense
