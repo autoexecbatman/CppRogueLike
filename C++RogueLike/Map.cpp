@@ -436,7 +436,28 @@ void test_dice(){
 	engine.gui->log_message(WHITE_PAIR, "Dice: %dD%d+%d = %d", d3.nb_rolls, d3.nb_faces, d3.bonus, d3);
 }
 
-	//create a random amount of orcs and trolls in the room
+void Map::add_monster(int mon_x, int mon_y){
+	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
+	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
+	RandomDice d;
+	//create a random amount of orcs and trolls in the room based on a d100
+	for (int i = 0; i < 4 * d.d6(); i++){
+		Goblin goblin(mon_y, mon_x);
+		engine.actors.push_back(goblin.create_goblin(mon_y, mon_x));
+	}
+	for (int i = 0; i < 2 * d.d6(); i++){
+		Orc orc(mon_y, mon_x);
+		engine.actors.push_back(orc.create_orc(mon_y, mon_x));
+	}
+	for (int i = 0; i < 2 * d.d6(); i++){
+		Troll troll(mon_y, mon_x);
+		engine.actors.push_back(troll.create_troll(mon_y, mon_x));
+	}
+	for (int i = 0; i < 1 * d.d6(); i++){
+		Dragon dragon(mon_y, mon_x);
+		engine.actors.push_back(dragon.create_dragon(mon_y, mon_x));
+	}
+}
 
 	/*srand(time(nullptr));*/
 
