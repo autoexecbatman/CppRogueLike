@@ -947,9 +947,9 @@ void Engine::dispay_stats(int level)
 		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
 		mvwprintw(stats, 4, 1, "Food: %d/%d", player->destructible->food, player->destructible->foodMax);
 		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
-		mvwprintw(stats, 6, 1, "[a] Attack: %d", (int)player->attacker->power);
-		mvwprintw(stats, 7, 1, "[d] Defense: %d", (int)player->destructible->defense);
-		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", (int)player->destructible->hp, (int)player->destructible->hpMax);
+		mvwprintw(stats, 6, 1, "[a] Attack: %d", player->attacker->power);
+		mvwprintw(stats, 7, 1, "[d] Defense: %d", player->destructible->defense);
+		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", player->destructible->hp, player->destructible->hpMax);
 		
 		wrefresh(stats);
 
