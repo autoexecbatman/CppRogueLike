@@ -58,6 +58,7 @@ int main()
 	// main game loop
 	int countLoop = 0;
 
+	// TODO : remove possible dangling pointer <!engine.player->destructible->is_dead()>
 	while (engine.run == true && !engine.player->destructible->is_dead())
 	{
 		
@@ -69,13 +70,13 @@ int main()
 		// example : while (true) { clear(); refresh(); getch(); }
 		
 		clear(); // clear the screen
-
+		refresh();
 		engine.update(); // update map and actors positions and other stuff
 
 		engine.render(); // render map and actors to the screen
 		
 		// TODO : move to the appropriate location.
-		refresh(); // refresh the window
+		/*refresh();*/ // refresh the window
 
 		// TODO : decide if you are going to use this class.
 		/*window.create_window(3, 22, 60, engine.player->name);*/ // creates a resizable window
