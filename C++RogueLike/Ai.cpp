@@ -210,7 +210,7 @@ T castEnum(T value) { return static_cast<T>(value); }
 auto exampleInt = castEnum(Controls::UP);
 
 void PlayerAi::update(Actor* owner)
-{	
+{
 	int levelUpXp = getNextLevelXp();
 	if (owner->destructible->xp >= levelUpXp) 
 	{
@@ -227,7 +227,6 @@ void PlayerAi::update(Actor* owner)
 	
 	int dx = 0, dy = 0;
 	
-	clear();
 
 	switch (static_cast<Controls>(engine.keyPress))
 	{
