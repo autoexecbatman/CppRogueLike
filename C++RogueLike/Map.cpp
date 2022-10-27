@@ -155,7 +155,7 @@ bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a
 
 bool Map::is_explored(int exp_x, int exp_y) const
 {
-	return tiles[exp_x + exp_y * map_width].explored;
+	return tiles[exp_x + (exp_y * map_width)].explored;
 }
 
 bool Map::is_in_fov(int fov_x, int fov_y) const
