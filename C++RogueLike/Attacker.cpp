@@ -6,7 +6,7 @@
 #include "Window.h"
 #include "Colors.h"
 
-Attacker::Attacker(float power) : power(power) {}
+Attacker::Attacker(int power) : power(power) {}
 
 void Attacker::attack(Actor* owner, Actor* target)
 {
@@ -19,13 +19,12 @@ void Attacker::attack(Actor* owner, Actor* target)
 			// damage message
 			engine.gui->log_message(
 				LIGHT_WALL_PAIR, // color
-				"%s attacks %s for %g hit points.\n", // message
+				"%s attacks %s for %d hit points.\n", // message
 				owner->name,
 				target->name,
 				power - target->destructible->defense
 			);
 			
-			// rewrite `attron(COLOR_PAIR(Actor::col));` so it uses the color of the actor
 			attron(COLOR_PAIR(owner->col));
 			mvprintw(0, 0, "%s", owner->name);
 			attroff(COLOR_PAIR(owner->col));
@@ -38,7 +37,7 @@ void Attacker::attack(Actor* owner, Actor* target)
 			mvprintw(0, ownerNameLen + attacksTheLen, "%s", target->name);
 			attroff(COLOR_PAIR(target->col));
 			int targetNameLen = strlen(target->name);
-			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %g hit points.\n", power - target->destructible->defense);
+			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", power - target->destructible->defense);
 		}
 		else
 		{
@@ -53,7 +52,7 @@ void Attacker::attack(Actor* owner, Actor* target)
 		}
 		
 		// the target takes damage
-		target->destructible->take_damage(target, power); 
+		target->destructible->take_damage(target, power);
 		
 	}
 	else
@@ -74,10 +73,10 @@ void Attacker::attack(Actor* owner, Actor* target)
 
 void Attacker::load(TCODZip& zip)
 {
-	power = zip.getFloat();
+	power = zip.getInt();
 }
 
 void Attacker::save(TCODZip& zip)
 {
-	zip.putFloat(power);
+	zip.putInt(power);
 }
