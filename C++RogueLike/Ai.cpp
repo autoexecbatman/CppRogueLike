@@ -195,7 +195,7 @@ const int LEVEL_UP_FACTOR = 150;
 
 int PlayerAi::getNextLevelXp()
 {
-	return LEVEL_UP_BASE + xpLevel * LEVEL_UP_FACTOR;
+	return LEVEL_UP_BASE + (xpLevel * LEVEL_UP_FACTOR);
 }
 
 //template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
