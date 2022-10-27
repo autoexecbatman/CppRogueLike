@@ -16,7 +16,7 @@ class Actor : public Persistent
 {
 public:
 	int posY = 0, posX = 0; // position on map
-	int ch = -47; // the symbol to print
+	char ch = -47; // the symbol to print
 	int col = 0; // color for the actor
 	const char* name = "actor_name"; // add name
 	bool blocks = false; // does the actor blocks movement?
