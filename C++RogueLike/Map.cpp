@@ -412,10 +412,29 @@ bool Map::can_walk(int canw_x, int canw_y) const
 	return true;
 }
 
-void Map::add_monster(int mon_x, int mon_y)
-{
-	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
-	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
+struct Dice{
+	int nb_rolls;
+	int nb_faces;
+	int bonus;
+	Dice(int nb_rolls, int nb_faces, int bonus) : nb_rolls(nb_rolls), nb_faces(nb_faces), bonus(bonus) {}
+};
+// make dice literal 
+Dice operator "" _d(unsigned long long nb_faces){
+	return Dice(1, static_cast<int>(nb_faces), 0);
+}
+// overload + operator for dice and int
+Dice operator+(const Dice& d1, int bonus){
+	return Dice(d1.nb_rolls, d1.nb_faces, d1.bonus + bonus);
+}
+void test_dice(){
+	Dice d1 = 6_d + 4;
+	Dice d2 = 6_d + 4 + 2;
+	Dice d3 = 6_d + 4 + 2 + 3;
+	// print the dice header using mvprintw using log_message function
+	engine.gui->log_message(WHITE_PAIR, "Dice: %dD%d+%d = %d", d1.nb_rolls, d1.nb_faces, d1.bonus, d1);
+	engine.gui->log_message(WHITE_PAIR, "Dice: %dD%d+%d = %d", d2.nb_rolls, d2.nb_faces, d2.bonus, d2);
+	engine.gui->log_message(WHITE_PAIR, "Dice: %dD%d+%d = %d", d3.nb_rolls, d3.nb_faces, d3.bonus, d3);
+}
 
 	//create a random amount of orcs and trolls in the room
 
