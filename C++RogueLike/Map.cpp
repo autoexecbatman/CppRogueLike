@@ -17,6 +17,13 @@ class Actor;
 
 #include "Colors.h"
 
+#include "Goblin.h"
+
+#include "globals.h"
+
+//#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
+//#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
+
 constexpr auto ROOM_MAX_SIZE = 12;
 constexpr auto ROOM_MIN_SIZE = 6;
 constexpr auto MAX_ROOM_MONSTERS = 3;
