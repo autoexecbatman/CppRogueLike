@@ -445,7 +445,7 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 			{
 				mvprintw(0, 0, actor->name);
 				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->maxHp));
+				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
 			}
 		}
@@ -729,7 +729,7 @@ void Engine::target()
 			{
 				mvprintw(0, 0, actor->name);
 				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->maxHp));
+				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
 			}
 		}
@@ -892,7 +892,7 @@ void Engine::next_level()
 {
 	level++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
-	player->destructible->heal(player->destructible->maxHp / 2);
+	player->destructible->heal(player->destructible->hpMax / 2);
 	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
 	gui->log_message(WHITE_PAIR, "You are now on level %d", level);
 
@@ -949,7 +949,7 @@ void Engine::dispay_stats(int level)
 		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
 		mvwprintw(stats, 6, 1, "[a] Attack: %d", (int)player->attacker->power);
 		mvwprintw(stats, 7, 1, "[d] Defense: %d", (int)player->destructible->defense);
-		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", (int)player->destructible->hp, (int)player->destructible->maxHp);
+		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", (int)player->destructible->hp, (int)player->destructible->hpMax);
 		
 		wrefresh(stats);
 
@@ -963,7 +963,7 @@ void Engine::dispay_stats(int level)
 			player->destructible->defense += 1;
 			return;
 		case 'h':
-			player->destructible->maxHp += 1;
+			player->destructible->hpMax += 1;
 			return;
 		}
 	}
