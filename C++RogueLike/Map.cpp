@@ -359,7 +359,7 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 				continue;
 			}
 
-			add_monster(monsterY, monsterX);
+			add_monster(monsterX, monsterY);
 		}
 
 		// add stairs
