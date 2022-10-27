@@ -46,9 +46,8 @@ public:
 	//indicates whether this tile has already been seen by the player
 	bool is_explored(int exp_x, int exp_y) const;
 	bool can_walk(int canw_x, int canw_y) const;
-	//create a declaration for addMonster function
 	void add_monster(int mon_x, int mon_y);
-	//compute the field of view
+	// compute the field of view using `TCODMap::computeFov()`
 	void compute_fov();
 	void render() const;
 	void add_item(int x, int y);
@@ -60,7 +59,7 @@ public:
 	void init(bool withActors);
 
 protected:
-	//create a pointer for the map array
+	// create a pointer for the map array
 	Tile* tiles;
 	//create a reference to a TCODMap object named map
 	TCODMap* map;
