@@ -1,7 +1,20 @@
 #include <curses.h>
 #include <random>
 
-#include "main.h"
+//#include "main.h"
+
+#include "libtcod.hpp"
+class Actor;
+#include "Persistent.h"
+#include "Destructible.h"
+#include "Attacker.h"
+#include "Ai.h"
+#include "Pickable.h"
+#include "Container.h"
+#include "Actor.h"
+#include "Map.h"
+#include "Engine.h"
+
 #include "Colors.h"
 
 constexpr auto ROOM_MAX_SIZE = 12;
