@@ -227,6 +227,8 @@ void PlayerAi::update(Actor* owner)
 	
 	int dx = 0, dy = 0;
 	
+	// TODO : check if this clear() need to be relocated
+	clear(); // this is here for clearing the level up screen 
 
 	switch (static_cast<Controls>(engine.keyPress))
 	{
