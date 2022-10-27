@@ -148,6 +148,7 @@
     <ClCompile Include="Container.cpp" />
     <ClCompile Include="Destructible.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Goblin.cpp" />
     <ClCompile Include="Gui.cpp" />
     <ClCompile Include="main_C++RogueLike.cpp" />
     <ClCompile Include="Map.cpp" />
@@ -163,6 +164,8 @@
     <ClInclude Include="Container.h" />
     <ClInclude Include="Destructible.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="globals.h" />
+    <ClInclude Include="Goblin.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Literals.h" />
     <ClInclude Include="main.h" />
