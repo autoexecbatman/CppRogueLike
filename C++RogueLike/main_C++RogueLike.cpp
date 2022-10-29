@@ -70,7 +70,7 @@ int main()
 		// example : while (true) { clear(); refresh(); getch(); }
 		
 		clear(); // clear the screen
-		refresh();
+		/*refresh();*/
 		engine.update(); // update map and actors positions and other stuff
 
 		engine.render(); // render map and actors to the screen

@@ -22,7 +22,7 @@ public:
 	bool blocks = false; // does the actor blocks movement?
 	bool fovOnly = false; // to make some actors visible when not in fov
 	
-	Attacker* attacker; // the actor can attack
+	std::unique_ptr<Attacker> attacker; // the actor can attack
 	Destructible* destructible; // the actor can be destroyed
 	Ai* ai; // the actor can have AI
 	Container* container; // the actor can be a container
@@ -43,7 +43,7 @@ public:
 
 	void update(); // update() will handle the monster turn.
 
-	double get_distance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
+	int get_distance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
 
 	void render() const; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item

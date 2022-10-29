@@ -243,8 +243,8 @@ void Map::add_item(int x, int y)
 		Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);
 		healthPotion->blocks = false;
 		healthPotion->pickable = new Healer(4);
-		engine.actors.push_back(healthPotion);
-		engine.send_to_back(healthPotion);
+		/*engine.actors.push_back(healthPotion);*/
+		/*engine.send_to_back(healthPotion);*/
 	}
 	else if (dice < 70+10)
 	{
@@ -252,8 +252,8 @@ void Map::add_item(int x, int y)
 		Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);
 		lightningScroll->blocks = false;
 		lightningScroll->pickable = new LightningBolt(5, 20);
-		engine.actors.push_back(lightningScroll);
-		engine.send_to_back(lightningScroll);
+		/*engine.actors.push_back(lightningScroll);*/
+		/*engine.send_to_back(lightningScroll);*/
 	}
 	else if (dice < 70 + 10 + 10)
 	{
@@ -261,8 +261,8 @@ void Map::add_item(int x, int y)
 		Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
 		fireballScroll->blocks = false;
 		fireballScroll->pickable = new Fireball(3, 12);
-		engine.actors.push_back(fireballScroll);
-		engine.send_to_back(fireballScroll);
+		/*engine.actors.push_back(fireballScroll);*/
+		/*engine.send_to_back(fireballScroll);*/
 	}
 	else
 	{
@@ -270,8 +270,8 @@ void Map::add_item(int x, int y)
 		Actor* confusionScroll = new Actor(x, y, '#', "scroll of confusion", CONFUSION_PAIR);
 		confusionScroll->blocks = false;
 		confusionScroll->pickable = new Confuser(10, 8);
-		engine.actors.push_back(confusionScroll);
-		engine.send_to_back(confusionScroll);
+		/*engine.actors.push_back(confusionScroll);*/
+		/*engine.send_to_back(confusionScroll);*/
 	}
 	/*else if (dice < 70 + 10 + 10)*/
 	// always spawn this scroll
@@ -395,7 +395,7 @@ bool Map::can_walk(int canw_x, int canw_y) const
 		return false;
 	}
 
-	for (const auto& actor : engine.actors) // iterate through the actor deque
+	for (const auto& [id, actor] : engine.actors) // iterate through the actor deque
 	{
 		if (
 			actor->blocks // if the actor blocks
@@ -439,32 +439,34 @@ void test_dice(){
 void Map::add_monster(int mon_x, int mon_y){
 	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
 	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
+	
 	RandomDice d;
 	//create a random amount of orcs and trolls in the room based on a d100
 	for (int i = 0; i < 4 * d.d6(); i++){
 		Goblin goblin(mon_y, mon_x);
-		engine.actors.push_back(goblin.create_goblin(mon_y, mon_x));
+		/*engine.actors.push_back(goblin.create_goblin(mon_y, mon_x));*/
 	}
+	
 	for (int i = 0; i < 2 * d.d6(); i++){
 		Orc orc(mon_y, mon_x);
-		engine.actors.push_back(orc.create_orc(mon_y, mon_x));
+		/*engine.actors.push_back(orc.create_orc(mon_y, mon_x));*/
 	}
 	for (int i = 0; i < 2 * d.d6(); i++){
 		Troll troll(mon_y, mon_x);
-		engine.actors.push_back(troll.create_troll(mon_y, mon_x));
+		/*engine.actors.push_back(troll.create_troll(mon_y, mon_x));*/
 	}
 	for (int i = 0; i < 1 * d.d6(); i++){
 		Dragon dragon(mon_y, mon_x);
-		engine.actors.push_back(dragon.create_dragon(mon_y, mon_x));
+		/*engine.actors.push_back(dragon.create_dragon(mon_y, mon_x));*/
 	}
 }
 Actor* Map::get_actor(int x, int y) const
 {
-	for (auto& actor : engine.actors)
+	for (const auto& [id,actor] : engine.actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{
-			return actor;
+			return actor.get();
 		}
 	}
 	return nullptr;

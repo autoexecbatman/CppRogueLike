@@ -3,11 +3,11 @@
 #include "Colors.h"
 
 //==PICKABLE==
-bool Pickable::pick(Actor* owner, Actor* wearer)
+bool Pickable::pick(Actor& owner, Actor& wearer)
 {
-	if (wearer->container && wearer->container->add(owner))
+	if (wearer.container && wearer.container->add(&owner))
 	{
-		engine.actors.erase(std::remove(engine.actors.begin(), engine.actors.end(), owner), engine.actors.end());
+		/*engine.actors.erase(std::remove(engine.actors.begin(), engine.actors.end(), owner), engine.actors.end());*/
 		return true;
 	}
 	return false;
@@ -22,7 +22,7 @@ void Pickable::drop(Actor* owner, Actor* wearer)
 		owner->posY = wearer->posY;
 		owner->ch = wearer->ch;
 		owner->col = wearer->col;
-		engine.actors.push_back(owner);
+		/*engine.actors.push_back(owner);*/
 		engine.send_to_back(owner);
 	}
 }
@@ -126,7 +126,7 @@ bool LightningBolt::use(Actor* owner, Actor* wearer)
 	// hit closest monster for <damage> hit points
 	engine.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
 		"The damage is %g hit points.", closestMonster->name, damage);
-	closestMonster->destructible->take_damage(closestMonster, damage);
+	closestMonster->destructible->take_damage(*closestMonster, damage);
 
 	return Pickable::use(owner, wearer);
 }
@@ -216,7 +216,8 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 	// wait for a bit using curses
 	napms(1000);
 
-	for (Actor* actor : engine.actors)
+	// this loop is responsible for dealing damage to actors and fire damage animation
+	for (const auto& [id, actor] : engine.actors)
 	{
 		if (
 			actor->destructible
@@ -226,9 +227,14 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 			actor->get_distance(x, y) <= Fireball::maxRange
 			)
 		{
+			// TODO : "{name} at {position} is {distance} away from fireball centered at {position}"
 			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
-			actor->destructible->take_damage(actor, damage);
-			animation(actor->posX, actor->posY, maxRange);
+			engine.gui->log_message(WHITE_PAIR, "at y:%d x:%d", actor->posY, actor->posX);
+			engine.gui->log_message(WHITE_PAIR, "distance from center: %d", actor->get_distance(x, y));
+			engine.gui->log_message(WHITE_PAIR, "the center is at -> centerX:%d centerY:%d", x, y);
+			
+			actor->destructible->take_damage(*actor, damage);
+			animation(actor->posX, actor->posY, Fireball::maxRange);
 		}
 	}
 

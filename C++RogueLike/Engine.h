@@ -8,6 +8,10 @@
 #include "Gui.h"
 #include "Literals.h"
 
+
+
+
+
 //==ENGINE==
 // The engine class is the main class of the game.
 // It will handle the game loop and the game states.
@@ -36,8 +40,8 @@ public:
 
 	//==ENGINE_PROPERTIES==
 
-	Actor* player;
-	Actor* stairs;
+	std::unique_ptr<Actor> player;
+	std::unique_ptr<Actor> stairs;
 	Map* map;
 	Gui* gui;
 
@@ -45,8 +49,50 @@ public:
 	int lastKey = getch();
 	int keyPress = getch();
 
-	std::deque<Actor*> actors;
+	/*std::deque<Actor*> actors;*/
 
+	std::unordered_map<int, std::unique_ptr<Actor>> actors;
+	std::deque<int> actorsOrder;
+
+	int nextId = 0;
+
+	template <class T>
+	auto new_actor(
+		int y,
+		int x,
+		char ch,
+		const char* name,
+		int col
+	) -> int
+	{
+		actors.emplace(nextId, std::make_unique<T>) (y, x, ch, name, col);
+		actorsOrder.push_back(nextId);
+
+		return nextId++;
+	}
+
+
+	//template <class T>
+	//auto new_actor(
+	//	int y,
+	//	int x,
+	//	char ch,
+	//	const char* name,
+	//	int col,
+	//	int maxHp,
+	//	int defense,
+	//	int power,
+	//	int xp
+	//) -> int
+	//{
+	//	actors.try_emplace(nextId, std::make_unique<T>) (y, x, ch, name, col, maxHp, defense, power, xp);
+	//	actorsOrder.push_back(nextId);
+
+	//	return nextId++;
+	//}
+
+	//==ENGINE_METHODS==
+	
 	void update();
 	void render();
 	
@@ -80,13 +126,17 @@ public:
 	
 	int level;
 	void next_level();
+
 	Actor* get_actor(int x, int y) const;
+	
 	void dispay_stats(int level);
 	void display_character_sheet();
 
 	int random_number(int min, int max);
 	void wizard_eye();
 	
+	void delete_actor(int id);
+
 };
 
 extern Engine engine;

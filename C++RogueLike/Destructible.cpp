@@ -27,7 +27,7 @@ Destructible::~Destructible()
 	free((char*)corpseName);
 }
 
-float Destructible::take_damage(Actor* owner, int damage)
+float Destructible::take_damage(Actor& owner, int damage)
 {
 	damage -= Destructible::defense; // (dam - def)
 
@@ -38,7 +38,7 @@ float Destructible::take_damage(Actor* owner, int damage)
 		
 		if (hp <= 0) // if hp <= 0
 		{
-			die(owner); // owner killed
+			die(&owner); // owner killed
 		}
 
 	}
@@ -59,7 +59,7 @@ void Destructible::die(Actor* owner)
 	owner->blocks = false;
 
 	//make sure corpses are drawn before living actors
-	engine.send_to_back(owner);
+	/*engine.delete_actor(owner);*/
 
 }
 

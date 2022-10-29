@@ -14,7 +14,7 @@ public:
 	
 	Attacker(int power);
 
-	void attack(Actor* owner, Actor* target);
+	void attack(Actor& owner, Actor& target);
 	
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
