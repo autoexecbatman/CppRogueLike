@@ -10,9 +10,9 @@ class Attacker : public Persistent
 {
 public:
 
-	int power = 0; // hit points given
+	float power = 0; // hit points given
 	
-	Attacker(int power);
+	Attacker(float power);
 
 	void attack(Actor& owner, Actor& target);
 	

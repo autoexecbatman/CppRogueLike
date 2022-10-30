@@ -6,7 +6,7 @@
 #include "Window.h"
 #include "Colors.h"
 
-Attacker::Attacker(int power) : power(power) {}
+Attacker::Attacker(float power) : power(power) {}
 
 void Attacker::attack(Actor& owner, Actor& target)
 {
@@ -73,10 +73,10 @@ void Attacker::attack(Actor& owner, Actor& target)
 
 void Attacker::load(TCODZip& zip)
 {
-	power = zip.getInt();
+	power = zip.getFloat();
 }
 
 void Attacker::save(TCODZip& zip)
 {
-	zip.putInt(power);
+	zip.putFloat(power);
 }
