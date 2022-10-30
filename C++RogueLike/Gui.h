@@ -55,33 +55,33 @@ protected:
 	void renderMouseLook();
 };
 
-//class Menu 
-//{
-//public:
-//	enum class MenuItemCode : int
-//	{
-//		NONE,
-//		NEW_GAME,
-//		CONTINUE,
-//		EXIT
-//	};
-//	Menu();
-//	~Menu();
-//	
-//	void menu_clear();
-//	void addItem(MenuItemCode code, const char* label);
-//
-//	MenuItemCode pick();
-//
-//protected:
-//
-//	struct MenuItem 
-//	{
-//		MenuItemCode code;
-//		const char* label;
-//	};
-//
-//	std::vector<MenuItem*> items;
-//};
+class Menu 
+{
+public:
+	enum class MenuItemCode : int
+	{
+		NONE,
+		NEW_GAME,
+		CONTINUE,
+		EXIT
+	};
+	Menu();
+	~Menu();
+	
+	void menu_clear();
+	void addItem(MenuItemCode code, const char* label);
+
+	MenuItemCode pick();
+
+protected:
+
+	struct MenuItem 
+	{
+		MenuItemCode code;
+		const char* label;
+	};
+
+	std::vector<MenuItem*> items;
+};
 
 #endif // !PROJECT_PATH_GUI_H_

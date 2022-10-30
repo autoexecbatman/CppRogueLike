@@ -39,7 +39,14 @@ Actor::Actor(
 	pickable(nullptr)
 {}
 
-Actor::~Actor() {}
+Actor::~Actor()
+{
+	if (attacker) delete attacker;
+	if (destructible) delete destructible;
+	if (ai) delete ai;
+	if (container) delete container;
+	if (pickable) delete pickable;
+}
 
 //====
 void Actor::load(TCODZip& zip)
@@ -59,7 +66,7 @@ void Actor::load(TCODZip& zip)
 
 	if (hasAttacker) 
 	{
-		attacker = std::make_unique<Attacker>(0);
+		attacker = new Attacker(0.0f);
 		attacker->load(zip);
 	}
 	if (hasDestructible) 
@@ -127,96 +134,10 @@ void Actor::update()
 }
 
 // a function to get the distance from an actor to a specific tile of the map
-int Actor::get_distance(int tileX, int tileY) const
+double Actor::get_distance(int tileX, int tileY) const
 {
-	// using chebyshev distance
-	int distance = std::max(abs(posX - tileX), abs(posY - tileY));
-
-	mvprintw(10, 0, "Distance: %d", distance);
-
-	return distance;
+	int dx = Actor::posX - tileX;
+	int dy = Actor::posY - tileY;
+	
+	return sqrt(pow(dx, 2) + pow(dy, 2));
 }
-
-//namespace test {
-//
-//#ifndef TEST_CASSERT
-//#include <cassert>
-//#endif // !TEST_CASSERT
-//
-//#ifndef TEST_GOBLIN
-//#include "Goblin.h"
-//#endif // !TEST_GOBLIN
-//
-//
-//	int id = 0;
-//
-//	std::unordered_map<int, std::unique_ptr<Actor>> new_actors;
-//	std::deque<int> actor_turn_order;
-//	int next_id = 0;
-//
-//	/// Add a new Actor and return it's ID.
-//	template <typename T>
-//	auto new_actor(int new_y, int new_x) -> int {
-//		new_actors.emplace_back<T>(next_id, std::make_unique<T>(new_y, new_x));
-//		actor_turn_order.push_back(next_id);
-//		return next_id++;
-//	}
-//
-//	/// Remove an actor, ignores missing ID's.
-//	auto delete_actor(int id) {
-//		auto it = new_actors.find(id);
-//		if (it != new_actors.end()) new_actors.erase(it);
-//	}
-//
-//	/// Returns actor by ID if exists, otherwise returns nullptr.
-//	auto get_actor(int id) -> Actor* {
-//		auto it = new_actors.find(id);
-//		if (it != new_actors.end()) return it->second.get();
-//		return nullptr;
-//	}
-//
-//	/// Return the next scheduled actor.
-//	auto next_actor(int id) -> Actor& {
-//		assert(actor_turn_order.size());
-//		while (true) {
-//			int next_id = actor_turn_order.front();
-//			actor_turn_order.pop_front();
-//			auto it = new_actors.find(id);
-//			if (it == new_actors.end()) continue;  // Actor was deleted.
-//			actor_turn_order.push_back(next_id);
-//				return *(it->second);
-//		}
-//	}
-//
-//
-//	void test() {
-//		// Create a new actor.
-//		int id = new_actor<Goblin>(0, 0);
-//		// Get the actor.
-//		Actor* actor = get_actor(id);
-//		// Delete the actor.
-//		delete_actor(id);
-//		// Get the next scheduled actor.
-//		Actor& next = next_actor(id);
-//	}
-//	
-//	void create_monster(int mon_y, int mon_x) {
-//		for (int i = 0; i < 10; ++i) {
-//			// New actors handled by implemtation.
-//			
-//			test::id = new_actor<Goblin>(mon_y, mon_x);
-//			auto new_actor = get_actor(id);
-//		}
-//
-//
-//		for (const auto& it : new_actors) {
-//			// No changes expected while rendering.
-//			it.second.get();
-//		}
-//
-//		while (true) {
-//			auto& actor = next_actor(id);
-//			// Can call delete_actor while handling actor.
-//		}
-//	}
-//}

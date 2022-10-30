@@ -113,7 +113,7 @@ void MonsterAi::moveOrAttack(Actor* owner, int targetx, int targety)
 
 	else if (owner->attacker)
 	{
-		owner->attacker->attack(*owner, *engine.player);
+		owner->attacker->attack(owner, engine.player);
 	}
 }
 
@@ -277,7 +277,7 @@ void PlayerAi::update(Actor* owner)
 		engine.gameStatus = Engine::GameStatus::NEW_TURN;
 		break;
 	case Controls::HIT_SELF:
-		engine.player->attacker->attack(*engine.player, *engine.player);
+		engine.player->attacker->attack(engine.player, engine.player);
 		break;
 	case Controls::MOUSE:
 		std::cout << "mouse" << std::endl;
@@ -344,7 +344,7 @@ void PlayerAi::pick_item(Actor* owner)
 {
 	std::clog << "You pick" << std::endl;
 	bool found = false;
-	for (const auto& [id, actor] : engine.actors)
+	for (Actor* actor : engine.actors)
 	{
 		if (
 			actor->pickable
@@ -354,7 +354,7 @@ void PlayerAi::pick_item(Actor* owner)
 			actor->posY == owner->posY
 			)
 		{
-			if (actor->pickable->pick(*actor, *owner))
+			if (actor->pickable->pick(actor, owner))
 			{
 				found = true;
 				engine.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor->name);
@@ -612,7 +612,7 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 	}
 
 	// look for living actors to attack
-	for (const auto& [id,actor] : engine.actors)
+	for (const auto& actor : engine.actors)
 	{
 		if (
 			actor->destructible
@@ -624,13 +624,13 @@ bool PlayerAi::moveOrAttack(Actor* owner, int targetx, int targety)
 			actor->posY == targety
 			)
 		{
-			owner->attacker->attack(*owner, *actor);
+			owner->attacker->attack(owner, actor);
 			return false;
 		}
 	}
 
 	// look for corpses or items
-	for (const auto& [id,actor] : engine.actors)
+	for (const auto& actor : engine.actors)
 	{
 		bool corpseOrItem = (
 			actor->destructible
@@ -699,7 +699,7 @@ void ConfusedMonsterAi::update(Actor* owner)
 			Actor* actor = engine.get_actor(destx, desty);
 			if (actor)
 			{
-				owner->attacker->attack(*owner, *actor);
+				owner->attacker->attack(owner, actor);
 			}
 		}
 	}

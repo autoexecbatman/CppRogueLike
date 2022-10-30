@@ -29,7 +29,7 @@ public:
 	// returns true if hp is below or equal to 0
 	bool is_dead() { return hp <= 0; } // is the actor dead?
 
-	float take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
+	float take_damage(Actor* owner, int damage); // handles damage, owner attacked, returns (dam - def)
 
 	virtual void die(Actor* owner); // handles death, owner killed
 	

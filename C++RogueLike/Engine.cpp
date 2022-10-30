@@ -73,57 +73,29 @@ void Engine::init()
 {
 	//==PLAYER==
 	// a new Actor for the player
-	//player = new Actor(
-	//	25,
-	//	40,
-	//	'@',
-	//	"Steven Seagull",
-	//	PLAYER_PAIR
-	//);
-
-	// create the player using the template new_actor
-
-	/*int playerId = new_actor<Actor>(
+	player = new Actor(
 		25,
 		40,
 		'@',
 		"Steven Seagull",
 		PLAYER_PAIR
-		);*/
-
-	player = std::make_unique<Actor>(25,
-		40,
-		'@',
-		"Steven Seagull",
-		PLAYER_PAIR
-		);
-	
-	//
-	//player = new_actor(
-	//	25,
-	//	40,
-	//	'@',
-	//	"Steven Seagull",
-	//	PLAYER_PAIR
-	//);
-
-	
+	);
 
 	player->destructible = new PlayerDestructible(
-		10 + random_number(1,10), // maxHp
-		100, // defense
+		10 + random_number(1,10),
+		2,
 		"your cadaver",
 		0
 	);
 
-	player->attacker = std::make_unique<Attacker>(20  + random_number(1,10));
+	player->attacker = new Attacker(random_number(1,10));
 	player->ai = new PlayerAi();
 	player->container = new Container(26);
-	/*actors.push_back(player);*/
+	actors.push_back(player);
 
 	//==STAIRS==
 	// create stairs for player to descend to the next level
-	stairs = std::make_unique<Actor>(
+	stairs = new Actor(
 		0,
 		0,
 		'>',
@@ -132,7 +104,7 @@ void Engine::init()
 	);
 	stairs->blocks = false;
 	stairs->fovOnly = false;
-	/*actors.push_back(stairs);*/
+	actors.push_back(stairs);
 
 	//==MAP==
 	// a new Map instance
@@ -160,7 +132,7 @@ void Engine::update()
 
 	if (gameStatus == GameStatus::NEW_TURN) // check new turn
 	{
-		for (const auto& [id ,actor] : actors) // go through the list of actors
+		for (Actor* actor : actors) // go through the list of actors
 		{
 			if (actor != player) // check if the actor is not the player
 			{
@@ -177,7 +149,7 @@ void Engine::render()
 {
 	map->render(); // draw the map
 
-	for (const auto& [id ,actor] : actors) // iterate through the actors list
+	for (Actor* actor : actors) // iterate through the actors list
 	{
 		if (actor != player // check if the actor is not the player
 			&&
@@ -198,14 +170,6 @@ void Engine::render()
 
 	player->render(); // draw the player
 	gui->render(); // draw the gui
-	refresh();
-}
-
-
-void Engine::delete_actor(int id)
-{
-	auto it = actors.find(id);
-	if (it != actors.end()) actors.erase(it);
 }
 
 //====
@@ -249,7 +213,7 @@ void Engine::send_to_back(Actor* actor)
 	/*print_container(actors);*/
 
 	//erase only the actor from the list of actors
-	//actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
+	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
 
 	//actors.erase( // erases elements
  //       std::find( // 
@@ -260,7 +224,7 @@ void Engine::send_to_back(Actor* actor)
 	//	actors.end() // last iterator
  //   );
 
-	/*actors.push_front(actor);*/
+	actors.push_front(actor);
 
 	//std::cout << "after" << std::endl;
 	//std::cout << "size()->" << actors.size() << std::endl;
@@ -271,16 +235,16 @@ void Engine::send_to_back(Actor* actor)
 
 //====
 // prints the deque to the console window
-//void Engine::print_container(const std::deque<Actor*> actors)
-//{
-//	int i = 0;
-//	for (const auto& actor : actors)
-//	{
-//		std::cout << actor->name << i << " ";
-//		i++;
-//	}
-//	std::cout << '\n';
-//}
+void Engine::print_container(const std::deque<Actor*> actors)
+{
+	int i = 0;
+	for (const auto& actor : actors)
+	{
+		std::cout << actor->name << i << " ";
+		i++;
+	}
+	std::cout << '\n';
+}
 
 //====
 // This function returns the closest monster from position x, y within range.
@@ -288,10 +252,11 @@ void Engine::send_to_back(Actor* actor)
 // If no monster is found within range, it returns NULL.
 Actor* Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
 {
+	// TODO: Add your implementation code here.
 	Actor* closestMonster = nullptr;
 	float bestDistance = 1E6f;
 
-	for (const auto& [id,actor] : engine.actors)
+	for (Actor* actor : engine.actors)
 	{
 		if (actor != player && actor->destructible && !actor->destructible->is_dead())
 		{
@@ -299,7 +264,7 @@ Actor* Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) c
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
-				closestMonster = actor.get();
+				closestMonster = actor;
 			}
 		}
 	}
@@ -538,7 +503,7 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
-					player->attacker->attack(*player, *actor);
+					player->attacker->attack(player, actor);
 					run = false;
 				}
 			}
@@ -755,7 +720,7 @@ void Engine::target()
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		int distance = player->get_distance(targetCursorX, targetCursorY);
+		
 		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 		{
 			Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
@@ -766,8 +731,6 @@ void Engine::target()
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
-				// print the distance from the player to the target cursor
-				mvprintw(0, 50, "Distance: %d", distance);
 			}
 		}
 		
@@ -810,7 +773,7 @@ void Engine::target()
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
-					player->attacker->attack(*player,*actor);
+					player->attacker->attack(player,actor);
 					run = false;
 				}
 			}
@@ -845,16 +808,14 @@ void Engine::load()
 		map->load(zip);
 
 		// load the player
-		/*player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);*/
-		player = std::make_unique<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR);
-		
+		player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);
 		player->load(zip);
-		/*actors.push_back(player);*/
+		actors.push_back(player);
 
 		// load the stairs
-		stairs = std::make_unique<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR);
+		stairs = new Actor(0, 0, 0, "loaded stairs", WHITE_PAIR);
 		stairs->load(zip);
-		/*actors.push_back(stairs);*/
+		actors.push_back(stairs);
 
 		// then all other actors
 		int nbActors = zip.getInt();
@@ -862,7 +823,7 @@ void Engine::load()
 		{
 			Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);
 			actor->load(zip);
-			/*actors.push_back(actor);*/
+			actors.push_back(actor);
 			nbActors--;
 		}
 
@@ -904,7 +865,7 @@ void Engine::save()
 
 		// then all the other actors
 		zip.putInt(actors.size() - 2);
-		for (const auto& [id ,actor] : engine.actors)
+		for (Actor* actor : actors)
 		{
 			if (actor != player && actor != stairs)
 			{
@@ -937,10 +898,10 @@ void Engine::next_level()
 
 	// clear the dungeon except the player and the stairs
 	actors.clear();
-	/*actors.push_back(player);*/
-	/*actors.push_back(stairs);*/
+	actors.push_back(player);
+	actors.push_back(stairs);
 	
-	/*print_container(actors);*/
+	print_container(actors);
 	
 	delete map;
 
@@ -956,11 +917,11 @@ void Engine::next_level()
 // create the getActor function
 Actor* Engine::get_actor(int x, int y) const
 {
-	for (const auto& [id, actor] : actors)
+	for (Actor* actor : actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{
-			return actor.get();
+			return actor;
 		}
 	}
 	return nullptr;
@@ -1030,7 +991,7 @@ void Engine::display_character_sheet()
 		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
 
 		// display the player name
-		mvwprintw(character_sheet, 1, 1, "Name: ", player->name);
+		mvwprintw(character_sheet, 1, 1, "Name: ");
 		// display the player class
 		mvwprintw(character_sheet, 2, 1, "Class: ");
 		// display the class kit
@@ -1090,6 +1051,6 @@ void Engine::wizard_eye()
 	for (const auto& actor : engine.actors)
 	{
 		// print the actor's name
-		mvprintw(actor.second->posY, actor.second->posX, actor.second->name);
+		mvprintw(actor->posY, actor->posX, actor->name);
 	}
 }
