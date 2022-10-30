@@ -83,7 +83,7 @@ void Engine::init()
 
 	player->destructible = new PlayerDestructible(
 		10 + random_number(1,10),
-		2,
+		10,
 		"your cadaver",
 		0
 	);

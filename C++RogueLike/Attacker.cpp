@@ -6,7 +6,7 @@
 #include "Window.h"
 #include "Colors.h"
 
-Attacker::Attacker(float power) : power(power) {}
+Attacker::Attacker(int power) : power(power) {}
 
 void Attacker::attack(Actor* owner, Actor* target)
 {
