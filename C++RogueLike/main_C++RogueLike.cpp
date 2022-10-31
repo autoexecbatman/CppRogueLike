@@ -75,7 +75,6 @@ int main()
 
 		engine.render(); // render map and actors to the screen
 		
- // creates a resizable window
 		//==INPUT==
 		// get the input from the player
 		engine.lastKey = engine.keyPress;
