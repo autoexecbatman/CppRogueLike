@@ -134,10 +134,12 @@ void Actor::update()
 }
 
 // a function to get the distance from an actor to a specific tile of the map
-double Actor::get_distance(int tileX, int tileY) const
+int Actor::get_distance(int tileX, int tileY) const
 {
-	int dx = Actor::posX - tileX;
-	int dy = Actor::posY - tileY;
+	// using chebyshev distance
+	int distance = std::max(abs(posX - tileX), abs(posY - tileY));
+
+	mvprintw(10, 0, "Distance: %d", distance);
 	
-	return sqrt(pow(dx, 2) + pow(dy, 2));
+	return distance;
 }
