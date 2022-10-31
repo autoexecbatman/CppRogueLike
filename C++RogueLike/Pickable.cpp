@@ -170,22 +170,25 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 
 	// get the radius of the explosion
 	int radius = static_cast<int>(Fireball::maxRange);
-	
-	// get the top left corner of the explosion
-	int topLeftX = centerX - radius;
-	int topLeftY = centerY - radius;
-	
-	// get the bottom right corner of the explosion
-	int bottomRightX = centerX + radius;
-	int bottomRightY = centerY + radius;
-	
-	// get the width and height of the explosion
-	int width = bottomRightX - topLeftX;
-	int height = bottomRightY - topLeftY;
-	
-	// create a window for the explosion
-	WINDOW* explosionWindow = newwin(height, width, topLeftY, topLeftX);
-	
+
+	int sideLength = radius * 2 + 1;
+
+	// calculate the chebyshev distance from the player to maxRange
+	int chebyshev = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
+
+	int height = sideLength;
+	int width = sideLength;
+
+	int centerOfExplosionY = centerY - chebyshev;
+	int centerOfExplosionX = centerX - chebyshev;
+
+	WINDOW* explosionWindow = newwin(
+		height, // number of rows
+		width, // number of columns
+		centerOfExplosionY, // y position
+		centerOfExplosionX // x position
+	);
+
 	// draw fire inside the window
 	wbkgd(explosionWindow, COLOR_PAIR(FIREBALL_PAIR));
 
@@ -227,8 +230,21 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 			)
 		{
 			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
-			actor->destructible->take_damage(actor, damage);
 			animation(actor->posX, actor->posY, maxRange);
+		}
+	}
+
+	for (Actor* actor : engine.actors)
+	{
+		if (
+			actor->destructible
+			&&
+			!actor->destructible->is_dead()
+			&&
+			actor->get_distance(x, y) <= Fireball::maxRange
+			)
+		{
+			actor->destructible->take_damage(actor, damage);
 		}
 	}
 
