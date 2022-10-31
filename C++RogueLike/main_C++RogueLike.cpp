@@ -6,12 +6,12 @@
 // the game is initialized and the game loop is run.
 //
 // Functions:
-// - int main()
+// 
 // 
 // Objects:
-// - Game game
+// 
 //
-// Author: Vladimir "Undead" Lenin
+// Author: 
 
 // we are making a roguelike game
 // using the curses library
@@ -70,17 +70,12 @@ int main()
 		// example : while (true) { clear(); refresh(); getch(); }
 		
 		clear(); // clear the screen
-		refresh();
+		
 		engine.update(); // update map and actors positions and other stuff
 
 		engine.render(); // render map and actors to the screen
 		
-		// TODO : move to the appropriate location.
-		/*refresh();*/ // refresh the window
-
-		// TODO : decide if you are going to use this class.
-		/*window.create_window(3, 22, 60, engine.player->name);*/ // creates a resizable window
-
+ // creates a resizable window
 		//==INPUT==
 		// get the input from the player
 		engine.lastKey = engine.keyPress;
