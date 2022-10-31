@@ -170,6 +170,7 @@ void Engine::render()
 
 	player->render(); // draw the player
 	gui->render(); // draw the gui
+	refresh();
 }
 
 //====
