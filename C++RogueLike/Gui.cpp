@@ -269,7 +269,7 @@ void Gui::renderMouseLook()
 		//if the mouse is out of fov, nothing to render
 		return;
 	}
-	char buf[128] = ""; // a buffer to store the text in
+	char buf[128*10] = ""; // a buffer to store the text in
 	bool first = true;
 	for (const auto& actor : engine.actors)
 	{
