@@ -1,90 +1,38 @@
 // Debug needs to be set to x86
 
-// File: C++RogueLike\main_C++RogueLike.cpp
-// 
-// Description: This file is the main .cpp file where 
-// the game is initialized and the game loop is run.
-//
-// Functions:
-// 
-// 
-// Objects:
-// 
-//
-// Author: 
-
-// we are making a roguelike game
-// using the curses library
-// and the classes from doryen TCOD libtcod library without using the TCOD console
-
 #include <iostream>
-#include <curses.h>
 
-#include "Persistent.h"
-#include "Destructible.h"
-#include "Attacker.h"
-#include "Ai.h"
-#include "Pickable.h"
-#include "Container.h"
-#include "Actor.h"
-#include "Map.h"
 #include "Engine.h"
 #include "Colors.h"
 #include "Window.h"
-#include "Literals.h"
-
 //==ENGINE==
 // an instance of the Engine class.(singleton)
-Engine engine(120_x, 30_y);
+Engine engine(
+	120, // int screenWidth
+	30 // int screenHeight
+);
 
-//==MAIN_FUNCTION==
-// This is the main function where the game will run.
 int main()
 {
-	//==COLORS==
-	//initialize the color pairs
 	Colors colors;
 	colors.my_init_pair();
-
-	//==WINDOW==
-	// create a window object
-	Window window;
 	
-	//==ENGINE==
-	// load the starting menu
-	engine.game_menu();
+	engine.game_menu(); // load the starting menu
 
-	//==GAME_LOOP==
-	// main game loop
 	int countLoop = 0;
-
-	// TODO : remove possible dangling pointer <!engine.player->destructible->is_dead()>
-	while (engine.run == true && !engine.player->destructible->is_dead())
+	while (engine.run == true)
 	{
-		
 		//==DEBUG==
-		std::clog << "Running..." << countLoop << std::endl;
-
+		std::clog << "Running...\nLoop number" << countLoop << std::endl;
 		//==ENGINE_FUNCTIONS==
-		// TODO : Clear and redraw, then present, then wait for input.  In that order.
-		// example : while (true) { clear(); refresh(); getch(); }
-		
-		clear(); // clear the screen
-		
-		engine.update(); // update map and actors positions and other stuff
-
+		engine.update(); // update map and actors positions
 		engine.render(); // render map and actors to the screen
-		
 		//==INPUT==
 		// get the input from the player
 		engine.lastKey = engine.keyPress;
 		engine.keyPress = getch();
-
 		countLoop++;
 	}
-	//==ENGINE==
-	// save the game after the loop breaks
 	engine.save();
-
 	return 0;
 }
