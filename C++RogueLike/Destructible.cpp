@@ -9,7 +9,7 @@
 Destructible::Destructible(
 	int hpMax,
 	int defense,
-	const char* corpseName,
+	std::string corpseName,
 	int xp
 ) :
 	hpMax(hpMax),
@@ -18,16 +18,12 @@ Destructible::Destructible(
 	corpseName(corpseName),
 	xp(xp)
 {
-	this->corpseName = _strdup(corpseName);
-	xp = 0;
+	
 }
 
-Destructible::~Destructible()
-{
-	free((char*)corpseName);
-}
+Destructible::~Destructible() {}
 
-float Destructible::take_damage(Actor* owner, int damage)
+int Destructible::take_damage(Actor& owner, int damage)
 {
 	damage -= Destructible::defense; // (dam - def)
 
@@ -50,23 +46,22 @@ float Destructible::take_damage(Actor* owner, int damage)
 	return damage; // total damage dealt
 }
 
-void Destructible::die(Actor* owner)
+void Destructible::die(Actor& owner)
 {
 
 	//transform the actor into a corpse!
-	owner->ch = '%';
-	owner->name = corpseName;
-	owner->blocks = false;
+	owner.ch = '%';
+	owner.name = corpseName;
+	owner.blocks = false;
 
 	//make sure corpses are drawn before living actors
 	engine.send_to_back(owner);
-
 }
 
 //====
 
 // The function returns the amount of health point actually restored.
-float Destructible::heal(int hpToHeal)
+int Destructible::heal(int hpToHeal)
 {
 	Destructible::hp += hpToHeal;
 	
@@ -81,18 +76,18 @@ float Destructible::heal(int hpToHeal)
 
 void Destructible::load(TCODZip& zip)
 {
-	hpMax = zip.getFloat();
-	hp = zip.getFloat();
-	defense = zip.getFloat();
+	hpMax = zip.getInt();
+	hp = zip.getInt();
+	defense = zip.getInt();
 	corpseName = _strdup(zip.getString());
 }
 
 void Destructible::save(TCODZip& zip)
 {
-	zip.putFloat(hpMax);
-	zip.putFloat(hp);
-	zip.putFloat(defense);
-	zip.putString(corpseName);
+	zip.putInt(hpMax);
+	zip.putInt(hp);
+	zip.putInt(defense);
+	zip.putString(corpseName.c_str());
 }
 
 //template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
@@ -125,24 +120,30 @@ void MonsterDestructible::save(TCODZip& zip)
 	Destructible::save(zip);
 }
 
-Destructible* Destructible::create(TCODZip& zip) 
+std::shared_ptr<Destructible> Destructible::create(TCODZip& zip)
 {
 	DestructibleType type = (DestructibleType)zip.getInt();
-	Destructible* destructible = nullptr;
+	/*Destructible* destructible = nullptr;*/
+	std::shared_ptr<Destructible> destructible = nullptr;
 
 	switch (type) 
 	{
 	case DestructibleType::MONSTER:
-		destructible = new MonsterDestructible(0, 0, NULL, 0);
+		/*destructible = new MonsterDestructible(0, 0, NULL, 0);*/
+		// make unique
+		destructible = std::make_shared<MonsterDestructible>(0, 0, "NULL", 0);
 		break;
 	case DestructibleType::PLAYER:
-		destructible = new PlayerDestructible(0, 0, NULL, 0);
+		/*destructible = new PlayerDestructible(0, 0, NULL, 0);*/
+		destructible = std::make_shared<PlayerDestructible>(0, 0, "NULL", 0);
 		break;
 	}
 	
 	destructible->load(zip);
 	
 	return destructible;
+
+	/*return nullptr;*/
 }
 
 //==PlayerDestructible==
@@ -150,18 +151,19 @@ Destructible* Destructible::create(TCODZip& zip)
 PlayerDestructible::PlayerDestructible(
 	int hpMax,
 	int defense,
-	const char* corpseName,
+	/*const char* corpseName,*/
+	std::string corpseName,
 	int xp
 ) :
 	Destructible(hpMax, defense, corpseName, xp)
 {
 }
 
-void PlayerDestructible::die(Actor* owner)
+void PlayerDestructible::die(Actor& owner)
 {
 	/*std::cout << "You died!\n" << std::endl;*/
 	/*int y = getmaxy(stdscr);*/
-	mvprintw(29, 0, "You died!\n", owner->name);
+	mvprintw(29, 0, "You died!\n", owner.name.c_str());
 	Destructible::die(owner);
 	engine.gameStatus = Engine::GameStatus::DEFEAT;
 }
@@ -171,17 +173,23 @@ void PlayerDestructible::die(Actor* owner)
 MonsterDestructible::MonsterDestructible(
 	int hpMax,
 	int defense,
-	const char* corpseName,
+	/*const char* corpseName,*/
+	std::string corpseName,
 	int xp
 ) :
 	Destructible(hpMax, defense, corpseName, xp)
 {}
 
-void MonsterDestructible::die(Actor* owner)
+void MonsterDestructible::die(Actor& owner)
 {
-	mvprintw(29,0,"%s is dead\n", owner->name);
+	mvprintw(29,0,"%s is dead\n", owner.name.c_str());
 	
-	engine.gui->log_message(WHITE_PAIR, "%s is dead. You gain %d xp", owner->name, xp);
+	engine.gui->log_message(
+		WHITE_PAIR,
+		"%s is dead. You gain %d xp\n",
+		owner.name.c_str(),
+		xp
+	);
 	engine.player->destructible->xp += xp;
 
 	Destructible::die(owner);

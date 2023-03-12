@@ -47,8 +47,8 @@ protected:
 		int y,
 		int width,
 		const char* name,
-		float value, 
-		float maxValue, 
+		int value, 
+		int maxValue, 
 		int barColor, 
 		int backColor
 	);

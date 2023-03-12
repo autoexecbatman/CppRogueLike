@@ -1,13 +1,16 @@
+
 #include <iostream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
 #include <random>
+#include <climits>
+#include <deque>
+#include <cassert>
 
 #include "Engine.h"
 #include "Actor.h"
 #include "Map.h"
 #include "Gui.h"
-#include "Destructible.h"
 #include "Attacker.h"
 #include "Ai.h"
 #include "Pickable.h"
@@ -20,10 +23,8 @@
 //==ENGINE_CONSTRUCTOR==
 // initializes the console window, colors and other curses console functions.
 // creates a new player, map, and gui.
-Engine::Engine(
-	Length screenWidth,
-	Length screenHeight
-) :
+Engine::Engine(int screenWidth, int screenHeight)
+	:
 	gameStatus(GameStatus::STARTUP),
 	fovRadius(10),
 	screenWidth(screenWidth),
@@ -37,7 +38,7 @@ Engine::Engine(
 {
 
 	// DEBUG MESSAGE
-	//std::clog << "Engine();" << std::endl;
+	std::clog << "Engine constructor called..." << std::endl;
 
 	//==INIT_CURSES==
 	initscr(); // initialize the screen in curses
@@ -50,19 +51,26 @@ Engine::Engine(
 
 	//==GUI==
 	// a new Gui instance
-	gui = new Gui();
-	level = 0;
+	gui = std::make_unique<Gui>();
 }
 
 Engine::~Engine()
 {
+	//// DEBUG MESSAGE
+	//std::clog << "Engine destructor called..." << std::endl;
+
+	try {
+		std::clog << "Engine destructor called..." << std::endl;
+	}
+	catch (...) {
+		// handle the exception in an appropriate way
+		std::exit(EXIT_FAILURE);
+	}
+	
 	actors.clear(); // clear the actors deque
 
-	if (map) delete map; // delete the map
-
-	gui->gui_clear(); // clears the message log
-
-	delete gui; // deletes the gui instance
+	//==END_CURSES==
+	endwin(); // end curses
 }
 
 //====
@@ -73,43 +81,50 @@ void Engine::init()
 {
 	//==PLAYER==
 	// a new Actor for the player
-	player = new Actor(
+	engine.player = std::make_shared<Actor>(
 		25,
 		40,
 		'@',
-		"Steven Seagull",
-		PLAYER_PAIR
+		"Player",
+		PLAYER_PAIR,
+		0
 	);
 
-	player->destructible = new PlayerDestructible(
+	engine.player->destructible = std::make_shared<PlayerDestructible>(
 		10 + random_number(1,10),
-		10,
+		5,
 		"your cadaver",
 		0
 	);
 
-	player->attacker = new Attacker(random_number(1,10));
-	player->ai = new PlayerAi();
-	player->container = new Container(26);
-	actors.push_back(player);
+	engine.player->attacker = std::make_shared<Attacker>(random_number(1,10));
+	engine.player->ai = std::make_shared<PlayerAi>();
+	engine.player->container = std::make_shared<Container>(26);
+	engine.actors.push_back(player);
+	/*actors.push_back(player->index, player);*/
 
 	//==STAIRS==
 	// create stairs for player to descend to the next level
-	stairs = new Actor(
+	engine.stairs = std::make_shared<Actor>(
 		0,
 		0,
 		'>',
 		"stairs",
-		WHITE_PAIR
+		WHITE_PAIR,
+		1
 	);
-	stairs->blocks = false;
-	stairs->fovOnly = false;
-	actors.push_back(stairs);
+
+	engine.stairs->blocks = false;
+	engine.stairs->fovOnly = false;
+	
+	engine.actors.push_back(stairs);
+	/*actors.try_emplace(stairs->index, stairs);*/
 
 	//==MAP==
 	// a new Map instance
-	map = new Map(30 - 8, 120); // need to make space for the gui (-7y)
-	map->init(true);
+	engine.map = std::make_unique<Map>(30 - 8, 120); // need to make space for the gui (-7y)
+	engine.map->init(true); // set the checker function
+
 	gameStatus = GameStatus::STARTUP;
 }
 
@@ -118,25 +133,40 @@ void Engine::init()
 // and stores events
 void Engine::update()
 {
-	//==COMPUTE_FOV==
-	// The update function must ensure the FOV is computed on first frame only.
-	// This is to avoid FOV recomputation on each frame.
-	if (gameStatus == GameStatus::STARTUP)
+	// if the player is dead then set the run flag to false
+	if (engine.player->destructible->is_dead())
 	{
-		map->compute_fov();
+		// set the run flag to false
+		run = false;
+		// ask the player to press any key
+		engine.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
 	}
-
-	gameStatus = GameStatus::IDLE; // set the game status to idle
-
-	player->update(); // update the player
-
-	if (gameStatus == GameStatus::NEW_TURN) // check new turn
+	else
 	{
-		for (Actor* actor : actors) // go through the list of actors
+		//==COMPUTE_FOV==
+		// The update function must ensure the FOV is computed on first frame only.
+		// This is to avoid FOV recomputation on each frame.
+		if (Engine::gameStatus == GameStatus::STARTUP)
 		{
-			if (actor != player) // check if the actor is not the player
+			//DEBUG
+			std::clog << "...Computing FOV..." << std::endl;
+			engine.map->compute_fov();
+		}
+
+		gameStatus = GameStatus::IDLE; // set the game status to idle
+
+		engine.player->update(); // update the player and get the keypress for the player
+
+		if (Engine::gameStatus == GameStatus::NEW_TURN) // check new turn
+		{
+			//==ACTORS==
+			// go through the list of actors
+			for (const auto& actor : actors)
 			{
-				actor->update(); // update all actors except the player
+				if (actor != player)
+				{
+					actor->update();
+				}
 			}
 		}
 	}
@@ -147,9 +177,31 @@ void Engine::update()
 // draws the entities on the map
 void Engine::render()
 {
+	clear();
 	map->render(); // draw the map
 
-	for (Actor* actor : actors) // iterate through the actors list
+	//for (Actor* actor : actors) // iterate through the actors list
+	//{
+	//	if (actor != player /*&& actor != player2 && actor != player3*/ // check if the actor is not the player
+	//		&&
+	//		(
+	//			(
+	//				!actor->fovOnly
+	//				&&
+	//				map->is_explored(actor->posX,actor->posY)
+	//				) // check if the actor is not fovOnly and is explored
+	//		||
+	//		map->is_in_fov(actor->posX, actor->posY)
+	//			) // OR if the actors position is in the FOV of the player
+	//		) // end of if statement
+	//	{
+	//		actor->render(); // draw the actor
+	//	}
+	//}
+
+	//==ACTORS==
+	// go through the list of actors
+	for (const auto& actor : actors)
 	{
 		if (actor != player // check if the actor is not the player
 			&&
@@ -157,10 +209,10 @@ void Engine::render()
 				(
 					!actor->fovOnly
 					&&
-					map->is_explored(actor->posX,actor->posY)
+					map->is_explored(actor->posX, actor->posY)
 					) // check if the actor is not fovOnly and is explored
-			||
-			map->is_in_fov(actor->posX, actor->posY)
+				||
+				map->is_in_fov(actor->posX, actor->posY)
 				) // OR if the actors position is in the FOV of the player
 			) // end of if statement
 		{
@@ -169,106 +221,200 @@ void Engine::render()
 	}
 
 	player->render(); // draw the player
+
 	gui->render(); // draw the gui
 	refresh();
 }
 
 //====
-// earases the actor and pushes it to the begining
-void Engine::send_to_back(Actor* actor)
+// erases the actor and pushes it to the begining
+//void Engine::send_to_back(std::shared_ptr<Actor> actor)
+//{
+//	//TODO : Find the right member function to remove actor from vector
+//	//Since actors are drawn in their order in the list,
+//	// a corpse my be drawn on top of a living actor.
+//	//To keep that from happening, 
+//	//we simply move the dead actors to the beginning of the list
+//	//in the Engine::sendToBack function
+//	//example: 
+//	// actors.remove(actor); // remove by value
+//	// 
+//	// 	void remove(const T elt) {
+//	//    for (T* curElt = begin(); curElt != end(); curElt++) {
+//	//        if (*curElt == elt) {
+//	//            remove(curElt);
+//	//            return;
+//	//        }
+//	//    }
+//	//}
+//	// 
+//	//example: 
+//	// actors.insertBefore(actor,0);
+//	// 	T * insertBefore(const T elt,int before) {
+//	//    if (fillSize + 1 >= allocSize) allocate();
+//	//    for (int idx = fillSize; idx > before; idx--) {
+//	//        array[idx] = array[idx - 1];
+//	//    }
+//	//    array[before] = elt;
+//	//    fillSize++;
+//	//    return &array[before];
+//	//}
+//	//removes the actor from the vector using std::deque erase function
+//	std::cout << "before" << std::endl;
+//	std::cout << "size()->" << actors.size() << std::endl;
+//
+//	// DEBUG CONTAINER
+//	print_container(actors);
+//
+//	std::deque<std::shared_ptr<Actor>> d;
+//
+//	// insert all the actors into the deque
+//	for (auto& [i, a] : actors)
+//	{
+//		if (a != actor)
+//		{
+//			d.push_back(a);
+//		}
+//	}
+//
+//	d.push_front(actor); // push the actor to the front of the deque
+//
+//	// clear the actors map
+//	actors.clear();
+//
+//	// insert all the actors from the deque into the map
+//	int key = 0;
+//	for (auto& actor : d)
+//	{
+//		actors.insert(std::make_pair(key, actor));
+//		key++;
+//	}
+//
+//
+//	// erase only the actor from the list of actors
+//	//actors.erase(
+//	//	std::remove(
+//	//		actors.begin(),
+//	//		actors.end(),
+//	//		actor),
+//	//	actors.end()
+//	//);
+//	//actors.erase( // erases elements
+// //       std::find( // 
+// //           actors.begin(),
+// //           actors.end(),
+// //           actor
+// //       ),// first iterator
+//	//	actors.end() // last iterator
+// //   );
+//	//actors.emplace_front(actor);
+//
+//	// DEBUG CONTAINER
+//	/*print_container(actors);*/
+//
+//	std::cout << "after" << std::endl;
+//	std::cout << "size()->" << actors.size() << std::endl;
+//
+//	//DEBUG CONTAINER
+//	print_container(actors);
+//}
+
+void Engine::send_to_back(Actor& actor)
 {
-	//TODO : Find the right member function to remove actor from vector
-	//Since actors are drawn in their order in the list,
-	// a corpse my be drawn on top of a living actor.
-	//To keep that from happening, 
-	//we simply move the dead actors to the beginning of the list
-	//in the Engine::sendToBack function
-	//example: 
-	// actors.remove(actor); // remove by value
-	// 
-	// 	void remove(const T elt) {
-	//    for (T* curElt = begin(); curElt != end(); curElt++) {
-	//        if (*curElt == elt) {
-	//            remove(curElt);
-	//            return;
-	//        }
-	//    }
+	// first print out the actor
+	//std::clog << "the key -> " << actor.index << " <- " << actor.name << " " << "is being sent to back." << std::endl;
+	//print_container(actors);
+
+	//for (const auto& a : actors)
+	//{
+	//	if (a.get() == &actor)
+	//	{
+	//	//	for (int i = index; i > 0; i--)
+	//	//	{
+	//	//		std::swap(actors[i - 1], actors[i]); // swap the actor with the one before it
+
+	//	//		// update the index of the actor
+	//	//		actors[i - 1]->index = i - 1;
+	//	//		actors[i]->index = i;
+	//	//	}
+	//	//	break;
+
+	//		actors.erase(actor.index); // erase the actor from the map
+	//	}
 	//}
-	// 
-	//example: 
-	// actors.insertBefore(actor,0);
-	// 	T * insertBefore(const T elt,int before) {
-	//    if (fillSize + 1 >= allocSize) allocate();
-	//    for (int idx = fillSize; idx > before; idx--) {
-	//        array[idx] = array[idx - 1];
-	//    }
-	//    array[before] = elt;
-	//    fillSize++;
-	//    return &array[before];
-	//}
-	//removes the actor from the vector using std::deque erase function
-	//std::cout << "before" << std::endl;
-	//std::cout << "size()->" << actors.size() << std::endl;
 
-	// DEBUG CONTAINER
-	/*print_container(actors);*/
+	for (const auto& a : actors) // loop through the actors
+	{
+		if (a.get() == &actor) // if the actor is found
+		{
+			auto it = std::find_if(actors.begin(), actors.end(), [&actor](const auto& a) { return a.get() == &actor; } ); // get the iterator of the actor
+			const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
+			for (int i = distance; i > 0; i--)
+			{
+				std::swap(actors[i - 1], actors[i]);
+			}
+		}
+	}
 
-	//erase only the actor from the list of actors
-	actors.erase(std::remove(actors.begin(), actors.end(), actor), actors.end());
-
-	//actors.erase( // erases elements
- //       std::find( // 
- //           actors.begin(),
- //           actors.end(),
- //           actor
- //       ),// first iterator
-	//	actors.end() // last iterator
- //   );
-
-	actors.push_front(actor);
-
-	//std::cout << "after" << std::endl;
-	//std::cout << "size()->" << actors.size() << std::endl;
-
-	//DEBUG CONTAINER
 	/*print_container(actors);*/
 }
 
 //====
 // prints the deque to the console window
-void Engine::print_container(const std::deque<Actor*> actors)
+void Engine::print_container(std::vector<std::shared_ptr<Actor>> actors)
 {
 	int i = 0;
 	for (const auto& actor : actors)
 	{
-		std::cout << actor->name << i << " ";
+		std::clog << i << ". " << actor->name << " " /*<< std::endl*/;
 		i++;
 	}
-	std::cout << '\n';
+	std::clog << '\n';
 }
 
 //====
 // This function returns the closest monster from position x, y within range.
 // If range is 0, it's considered infinite.
 // If no monster is found within range, it returns NULL.
-Actor* Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
+std::shared_ptr<Actor> Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
 {
 	// TODO: Add your implementation code here.
-	Actor* closestMonster = nullptr;
-	float bestDistance = 1E6f;
+	/*Actor* closestMonster = nullptr;*/
+	std::shared_ptr<Actor> closestMonster = nullptr;
+	//int bestDistance = INT_MAX;
 
-	for (Actor* actor : engine.actors)
-	{
-		if (actor != player && actor->destructible && !actor->destructible->is_dead())
-		{
-			float distance = actor->get_distance(fromPosX, fromPosY);
-			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
-			{
-				bestDistance = distance;
-				closestMonster = actor;
-			}
-		}
-	}
+	////for (Actor* actor : engine.actors)
+	////{
+	////	if (actor != player && actor->destructible && !actor->destructible->is_dead())
+	////	{
+	////		int distance = actor->get_distance(fromPosX, fromPosY);
+	////		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
+	////		{
+	////			bestDistance = distance;
+	////			closestMonster = actor;
+	////		}
+	////	}
+	////}
+
+	////==ACTORS==
+	//// go through the list of actors
+	//for (auto actor = actors.begin(); actor != actors.end(); ++actor)
+	//{
+	//	if (*actor != player
+	//		&&
+	//		(*actor)->destructible
+	//		&&
+	//		!(*actor)->destructible->is_dead()
+	//		) // end of if statement
+	//	{
+	//		int distance = (*actor)->get_distance(fromPosX, fromPosY);
+	//		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
+	//		{
+	//			bestDistance = distance;
+	//			closestMonster = actor->get();
+	//		}
+	//	}
+	//}
 
 	return closestMonster;
 }
@@ -283,7 +429,7 @@ Actor* Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) c
 // We're not going to use the main loop from main.cpp while picking a tile. 
 // This would require to add a flag in the engine to know if we're in standard play mode or tile picking mode.Instead, we create a alternative game loop.
 // Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
-bool Engine::pick_tile(int* x, int* y, float maxRange)
+bool Engine::pick_tile(int* x, int* y, int maxRange)
 {
 	//while (engine.run == true)
 	//{
@@ -364,7 +510,6 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 	//	refresh();
 	//}
 
-
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
 
@@ -375,8 +520,6 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 	int lineX = 0;
 
 	bool run = true;
-
-
 	while (run == true)
 	{
 		clear();
@@ -391,23 +534,10 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 		}
 		engine.render();
 
-		//display the FOV in white
-
-		for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
-		{
-			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
-			{
-				if (engine.map->is_in_fov(tilePosX, tilePosY))
-				{
-					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
-				}
-			}
-		}
-
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursorY != player->posY || targetCursorX != player->posX)
 		{
-			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, NULL);
+			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, nullptr);
 		}
 
 		// draw a line using TCODLine class
@@ -437,19 +567,96 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-
 		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
+			auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr)
 			{
-				mvprintw(0, 0, actor->name);
+				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
+				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
 			}
 		}
+
+		// highlight the possible range of the explosion make it follow the cursor
+
+		// get the center of the explosion
+		int centerX = targetCursorX;
+		int centerY = targetCursorY;
+
+		// get the radius of the explosion
+		int radius = maxRange;
+		
+		int sideLength = radius * 2 + 1;
+
+		// calculate the chebyshev distance from the player to maxRange
+		int chebyshevD = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
+
+		int height = sideLength;
+		int width = sideLength;
+
+		int centerOfExplosionY = centerY - chebyshevD;
+		int centerOfExplosionX = centerX - chebyshevD;
+
+		WINDOW* aoe = newwin(
+			height+2, // number of rows
+			width+2, // number of columns 
+			centerOfExplosionY-1, // y position
+			centerOfExplosionX-1// x position
+		);
+		
+		box(aoe, 0, 0);
+
+		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
+
+		wrefresh(aoe);
+
+		////display the FOV in white
+		// 
+		//for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
+		//{
+		//	for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
+		//	{
+		//		if (engine.map->is_in_fov(tilePosX, tilePosY))
+		//		{
+		//			mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+		//		}
+		//	}
+		//}
+
+		// draw the AOE in white
+		for (int tilePosX = targetCursorX - (chebyshevD - 1 - 1 + 2) ; tilePosX < (centerOfExplosionX + (width - 1 + 1)); tilePosX++)
+		{
+			for (int tilePosY = targetCursorY - (chebyshevD - 1 - 1 + 2); tilePosY < (centerOfExplosionY + (height - 1 + 1)); tilePosY++)
+			{
+				{
+					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+				}
+			}
+		}
+
+		///DEBUG
+		//mvprintw(0, 0, "param X : %d", *x);
+		//mvprintw(1, 0, "param Y : %d", *y);
+		//mvprintw(2, 0, "targetCursorX : %d", targetCursorX);
+		//mvprintw(3, 0, "targetCursorY : %d", targetCursorY);
+		//mvprintw(4, 0, "lastX : %d", lastX);
+		//mvprintw(5, 0, "lastY : %d", lastY);
+		//mvprintw(6, 0, "lineX : %d", lineX);
+		//mvprintw(7, 0, "lineY : %d", lineY);
+		//mvprintw(8, 0, "centerX : %d", centerX);
+		//mvprintw(9, 0, "centerY : %d", centerY);
+		//mvprintw(10, 0, "radius : %d", radius);
+		//mvprintw(11, 0, "sideLength : %d", sideLength);
+		//mvprintw(12, 0, "chebyshevD : %d", chebyshevD);
+		//mvprintw(13, 0, "height : %d", height);
+		//mvprintw(14, 0, "width : %d ", width);
+		//mvprintw(15, 0, " x : %d ", *x);
+		//mvprintw(16, 0, " y : %d ", *y);
+		//mvprintw(17, 0, "centerOfExplosionX : %d", centerOfExplosionX);
+		//mvprintw(18, 0, "centerOfExplosionY : %d", centerOfExplosionY);
 
 		refresh();
 
@@ -500,11 +707,11 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 		{
 			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
+				auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
-					player->attacker->attack(player, actor);
+					/*player->attacker->attack(player, actor);*/
 					run = false;
 				}
 			}
@@ -518,28 +725,42 @@ bool Engine::pick_tile(int* x, int* y, float maxRange)
 
 		default:break;
 		}
-
-
 	}
 	clear();
-
 
 	return false;
 }
 
+struct commands
+{
+	const char* text;
+	void (*function)(WINDOW*);
+};
+
+typedef struct commands COMMAND;
+
+void new_game(WINDOW* win) { engine.init(); }
+void load_game(WINDOW* win) { engine.load(); }
+void exit_game(WINDOW* win) { exit(0); }
+
+
+COMMAND command[3] =
+{
+{ "New Game", new_game },
+{ "Load Game", load_game },
+{ "Exit", exit_game }
+};
 
 void Engine::game_menu()
 {
-	// this function will contain a loop where the game menu will be displayed
+	// this function will contain a loop where the "Game Menu" will be displayed
 	// and the player will be able to choose an option
 	// the function will return when the player chooses an option
 	
 	// first we assign the variables we need for the function
 
-	bool menu_run = true; // this variable will be used to keep the loop running
-	int menu_key = 0; // this variable will contain the key the player presses
-	int new_option = 0;
 	int old_option = -1;
+	int new_option = 0;
 
 	// we create a new window for the menu
 	WINDOW* menu_win = newwin(
@@ -554,6 +775,7 @@ void Engine::game_menu()
 	
 	refresh();
 	
+	bool menu_run = true; // this variable will be used to keep the loop running
 	while (menu_run == true) 
 	{
 		// first clear the window
@@ -580,7 +802,7 @@ void Engine::game_menu()
 		wrefresh(menu_win);
 
 		// get the key press
-		menu_key = getch();
+		const int menu_key = getch(); // this variable will contain the key the player presses
 		switch (menu_key)
 		{
 		case KEY_UP:
@@ -615,6 +837,14 @@ void Engine::game_menu()
 			menu_run = false;
 			delwin(menu_win);
 			engine.load();
+			break;
+
+		case 10:
+			// if the key enter is pressed then select the option
+			// and return the target position
+			menu_run = false;
+			delwin(menu_win);
+			command[new_option].function(menu_win);
 			break;
 
 		default:break;
@@ -721,17 +951,19 @@ void Engine::target()
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		
+		int distance = player->get_distance(targetCursorX, targetCursorY);
 		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
+			auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr )
 			{
-				mvprintw(0, 0, actor->name);
+				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
+				// print the distance from the player to the target cursor
+				mvprintw(0, 50, "Distance: %d", distance);
 			}
 		}
 		
@@ -770,11 +1002,11 @@ void Engine::target()
 		{
 			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				Actor* actor = engine.map->get_actor(targetCursorX, targetCursorY);
+				auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
-					player->attacker->attack(player,actor);
+					player->attacker->attack(*player, *actor);
 					run = false;
 				}
 			}
@@ -805,26 +1037,33 @@ void Engine::load()
 		// load the map
 		int width = zip.getInt();
 		int height = zip.getInt();
-		map = new Map(height, width);
+		/*map = new Map(height, width);*/
+		engine.map = std::make_unique<Map>(height, width);
 		map->load(zip);
 
 		// load the player
-		player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);
+		/*player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);*/
+		player = std::make_shared<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);
 		player->load(zip);
 		actors.push_back(player);
+		/*actors.try_emplace(player->index, player);*/
 
 		// load the stairs
-		stairs = new Actor(0, 0, 0, "loaded stairs", WHITE_PAIR);
+		/*stairs = new Actor(0, 0, 0, "loaded stairs", WHITE_PAIR);*/
+		stairs = std::make_shared<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR, 0);
 		stairs->load(zip);
 		actors.push_back(stairs);
+		/*actors.try_emplace(stairs->index, stairs);*/
 
 		// then all other actors
 		int nbActors = zip.getInt();
 		while (nbActors > 0)
 		{
-			Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);
+			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
+			std::shared_ptr<Actor> actor = std::make_shared<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR, 0);
 			actor->load(zip);
 			actors.push_back(actor);
+			/*actors.try_emplace(actor->index, actor);*/
 			nbActors--;
 		}
 
@@ -866,7 +1105,15 @@ void Engine::save()
 
 		// then all the other actors
 		zip.putInt(actors.size() - 2);
-		for (Actor* actor : actors)
+		//for (Actor* actor : actors)
+		//{
+		//	if (actor != player && actor != stairs)
+		//	{
+		//		actor->save(zip);
+		//	}
+		//}
+		
+		for (auto& actor : actors)
 		{
 			if (actor != player && actor != stairs)
 			{
@@ -885,7 +1132,7 @@ void Engine::save()
 void Engine::term()
 {
 	actors.clear();
-	if (map) delete map;
+	/*if (map) delete map;*/
 	gui->gui_clear();
 }
 
@@ -900,15 +1147,18 @@ void Engine::next_level()
 	// clear the dungeon except the player and the stairs
 	actors.clear();
 	actors.push_back(player);
+	/*actors.try_emplace(player->index, player);*/
 	actors.push_back(stairs);
+	/*actors.try_emplace(stairs->index, stairs);*/
 	
-	print_container(actors);
+	/*print_container(actors);*/
 	
-	delete map;
+	/*delete map;*/
 
 
 	
-	map = new Map(30 - 8, 120);
+	/*map = new Map(30 - 8, 120);*/
+	map = std::make_unique<Map>(30 - 8, 120);
 	map->init(true);
 	gameStatus = GameStatus::STARTUP;
 
@@ -916,15 +1166,24 @@ void Engine::next_level()
 }
 
 // create the getActor function
-Actor* Engine::get_actor(int x, int y) const
+std::shared_ptr<Actor> Engine::get_actor(int x, int y) const
 {
-	for (Actor* actor : actors)
+	//for (Actor* actor : actors)
+	//{
+	//	if (actor->posX == x && actor->posY == y)
+	//	{
+	//		return actor;
+	//	}
+	//}
+
+	for (auto& actor : actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{
 			return actor;
 		}
 	}
+
 	return nullptr;
 }
 
@@ -1027,7 +1286,7 @@ void Engine::display_character_sheet()
 
 		wrefresh(character_sheet);
 
-		int key = getch();
+		const int key = getch();
 		// if any key was pressed then exit the loop
 		if (key != ERR)
 		{
@@ -1040,7 +1299,7 @@ void Engine::display_character_sheet()
 // make a random number function to use in the game
 int Engine::random_number(int min, int max)
 {
-	static std::default_random_engine randomEngine(time(nullptr));
+	static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));
 	std::uniform_int_distribution<int> range(min, max);
 	
 	return range(randomEngine);
@@ -1052,6 +1311,6 @@ void Engine::wizard_eye()
 	for (const auto& actor : engine.actors)
 	{
 		// print the actor's name
-		mvprintw(actor->posY, actor->posX, actor->name);
+		mvprintw(actor->posY, actor->posX, actor->name.c_str());
 	}
 }

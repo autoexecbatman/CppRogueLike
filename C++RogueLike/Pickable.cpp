@@ -3,70 +3,108 @@
 #include "Colors.h"
 
 //==PICKABLE==
-bool Pickable::pick(Actor* owner, Actor* wearer)
+bool Pickable::pick(Actor& owner, const Actor& wearer)
 {
-	if (wearer->container && wearer->container->add(owner))
+	if (wearer.container && wearer.container->add(owner))
 	{
-		engine.actors.erase(std::remove(engine.actors.begin(), engine.actors.end(), owner), engine.actors.end());
+		// TODO : Fix this to remove the item from the map after it has been picked up.
+		/*engine.actors.erase(
+		std::remove(engine.actors.begin(), engine.actors.end(), owner),
+		engine.actors.end()
+		);*/
+
+		engine.gui->log_message( // displays the message
+			COLOR_WHITE,
+			"%s picks up a %s.",
+			wearer.name.c_str(),
+			owner.name.c_str()
+		);
+		
+		// first iterate through the list of actors
+		for (auto actor : engine.actors)
+		{
+			// if the actor is the owner of the item
+			if (actor.get() == &owner)
+			{
+				// remove the item from the list of actors
+				//engine.actors.erase(
+				//	std::remove(engine.actors.begin(), engine.actors.end(), actor),
+				//	engine.actors.end()
+				//);
+				
+				std::erase(engine.actors, actor);
+
+				//actor->ch = '.';
+				//actor->col = WHITE_PAIR;
+
+				break;
+			}
+		} 
+
+		return true;
+	}
+
+	return false;
+}
+
+void Pickable::drop(Actor& owner, Actor& wearer)
+{
+	//if (wearer->container)
+	//{
+	//	wearer->container->remove(owner);
+	//	owner->posX = wearer->posX;
+	//	owner->posY = wearer->posY;
+	//	owner->ch = wearer->ch;
+	//	owner->col = wearer->col;
+	//	engine.actors.emplace_back(owner);
+	//	engine.send_to_back(owner);
+	//}
+}
+
+bool Pickable::use(Actor& owner, Actor& wearer)
+{
+	if (wearer.container)
+	{
+		wearer.container->remove(owner);
+		/*delete owner;*/
 		return true;
 	}
 	return false;
 }
 
-void Pickable::drop(Actor* owner, Actor* wearer)
-{
-	if (wearer->container)
-	{
-		wearer->container->remove(owner);
-		owner->posX = wearer->posX;
-		owner->posY = wearer->posY;
-		owner->ch = wearer->ch;
-		owner->col = wearer->col;
-		engine.actors.push_back(owner);
-		engine.send_to_back(owner);
-	}
-}
-
-bool Pickable::use(Actor* owner, Actor* wearer)
-{
-	if (wearer->container)
-	{
-		wearer->container->remove(owner);
-		delete owner;
-		return true;
-	}
-	return false;
-}
-
-Pickable* Pickable::create(TCODZip& zip) 
+std::shared_ptr<Pickable> Pickable::create(TCODZip& zip)
 {
 	PickableType type = (PickableType)zip.getInt();
-	Pickable* pickable = nullptr;
+	std::shared_ptr<Pickable> pickable = nullptr;
 
 	switch (type)
 	{
 
 	case PickableType::HEALER:
 	{
-		pickable = new Healer(0);
+		/*pickable = new Healer(0);*/
+		pickable = std::make_shared<Healer>(0);
 		break;
 	}
 
 	case PickableType::LIGHTNING_BOLT:
 	{
-		pickable = new LightningBolt(0, 0);
+		/*pickable = new LightningBolt(0, 0);*/
+		pickable = std::make_shared<LightningBolt>(0, 0);
 		break;
 	}
 
 	case PickableType::CONFUSER:
 	{
-		pickable = new Confuser(0, 0);
+		/*pickable = new Confuser(0, 0);*/
+		pickable = std::make_shared<Confuser>(0, 0);
 		break;
 	}
 
 	case PickableType::FIREBALL:
 	{
-		pickable = new Fireball(0, 0);
+		/*pickable = new Fireball(0, 0);*/
+		pickable = std::make_shared<Fireball>(0, 0);
 		break;
 	}
 
@@ -80,11 +118,11 @@ Pickable* Pickable::create(TCODZip& zip)
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}
 
-bool Healer::use(Actor* owner, Actor* wearer)
+bool Healer::use(Actor& owner, Actor& wearer)
 {
-	if (wearer->destructible)
+	if (wearer.destructible)
 	{
-		int amountHealed = wearer->destructible->heal(amountToHeal);
+		int amountHealed = wearer.destructible->heal(amountToHeal);
 
 		if (amountHealed > 0)
 		{
@@ -97,24 +135,24 @@ bool Healer::use(Actor* owner, Actor* wearer)
 
 void Healer::load(TCODZip& zip) 
 {
-	amountToHeal = zip.getFloat();
+	amountToHeal = zip.getInt();
 }
 
 void Healer::save(TCODZip& zip) 
 {
 	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::HEALER));
-	zip.putFloat(amountToHeal);
+	zip.putInt(amountToHeal);
 }
 
 //==LIGHTNING_BOLT==
-LightningBolt::LightningBolt(float maxRange, float damage) : maxRange(maxRange), damage(damage)
+LightningBolt::LightningBolt(int maxRange, int damage) : maxRange(maxRange), damage(damage)
 {
 }
 
-bool LightningBolt::use(Actor* owner, Actor* wearer)
+bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
 	// find closest enemy (inside a maximum range)
-	Actor* closestMonster = engine.get_closest_monster(wearer->posX, wearer->posY, maxRange);
+	std::shared_ptr<Actor> closestMonster = engine.get_closest_monster(wearer.posX, wearer.posY, maxRange);
 
 	if (!closestMonster)
 	{
@@ -126,40 +164,47 @@ bool LightningBolt::use(Actor* owner, Actor* wearer)
 	// hit closest monster for <damage> hit points
 	engine.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
 		"The damage is %g hit points.", closestMonster->name, damage);
-	closestMonster->destructible->take_damage(closestMonster, damage);
+	closestMonster->destructible->take_damage(*closestMonster, damage);
 
 	return Pickable::use(owner, wearer);
 }
 
 void LightningBolt::load(TCODZip& zip) 
 {
-	maxRange = zip.getFloat();
-	damage = zip.getFloat();
+	maxRange = zip.getInt();
+	damage = zip.getInt();
 }
 
 void LightningBolt::save(TCODZip& zip) 
 {
 	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LIGHTNING_BOLT));
-	zip.putFloat(maxRange);
-	zip.putFloat(damage);
+	zip.putInt(maxRange);
+	zip.putInt(damage);
 }
 
 //==Fireball==
-Fireball::Fireball(float range, float damage) : LightningBolt(range, damage) {}
+Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
-bool Fireball::use(Actor* owner, Actor* wearer)
+bool Fireball::use(Actor& owner, Actor& wearer)
 {
-	engine.gui->log_message(WHITE_PAIR, "Left-click a target tile for the fireball,\nor right-click to cancel.");
+	engine.gui->log_message(
+		WHITE_PAIR,
+		"Left-click a target tile for the fireball,\nor right-click to cancel."
+	);
 
 	int x, y;
 
-	if (!engine.pick_tile(&x, &y)) // <-- runs a while loop here
+	if (!engine.pick_tile(&x, &y , Fireball::maxRange)) // <-- runs a while loop here
 	{
 		return false;
 	}
 
 	// burn everything in <range> (including player)
-	engine.gui->log_message(WHITE_PAIR, "The fireball explodes, burning everything within %g tiles!", Fireball::maxRange);
+	engine.gui->log_message(
+		WHITE_PAIR,
+		"The fireball explodes, burning everything within %d tiles!",
+		Fireball::maxRange
+	);
 
 	// make impact explosion using a circle algorithm and curses library 
 	// (this is a bit of a hack, but it works)
@@ -169,7 +214,9 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 	int centerY = y;
 
 	// get the radius of the explosion
-	int radius = static_cast<int>(Fireball::maxRange);
+	/*int radius = static_cast<int>(Fireball::maxRange);*/
+	// use gsl
+	int radius = gsl::narrow_cast<int>(Fireball::maxRange);
 
 	int sideLength = radius * 2 + 1;
 
@@ -219,7 +266,7 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 	// wait for a bit using curses
 	napms(1000);
 
-	for (Actor* actor : engine.actors)
+	for (const auto& actor : engine.actors)
 	{
 		if (
 			actor->destructible
@@ -229,12 +276,12 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 			actor->get_distance(x, y) <= Fireball::maxRange
 			)
 		{
-			engine.gui->log_message(WHITE_PAIR, "The %s gets burned for %g hit points.", actor->name, damage);
+			engine.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->name.c_str(), damage);
 			animation(actor->posX, actor->posY, maxRange);
 		}
 	}
 
-	for (Actor* actor : engine.actors)
+	for (const auto& actor : engine.actors)
 	{
 		if (
 			actor->destructible
@@ -244,7 +291,7 @@ bool Fireball::use(Actor* owner, Actor* wearer)
 			actor->get_distance(x, y) <= Fireball::maxRange
 			)
 		{
-			actor->destructible->take_damage(actor, damage);
+			actor->destructible->take_damage(*actor, damage);
 		}
 	}
 
@@ -277,21 +324,21 @@ void Fireball::animation(int x, int y , int maxRange)
 
 void Fireball::load(TCODZip& zip)
 {
-	maxRange = zip.getFloat();
-	damage = zip.getFloat();
+	maxRange = zip.getInt();
+	damage = zip.getInt();
 }
 
 void Fireball::save(TCODZip& zip)
 {
 	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::FIREBALL));
-	zip.putFloat(maxRange);
-	zip.putFloat(damage);
+	zip.putInt(maxRange);
+	zip.putInt(damage);
 }
 
 //==Confuser==
-Confuser::Confuser(int nbTurns, float range) : nbTurns(nbTurns), range(range) {}
+Confuser::Confuser(int nbTurns, int range) : nbTurns(nbTurns), range(range) {}
 
-bool Confuser::use(Actor* owner, Actor* wearer)
+bool Confuser::use(Actor& owner, Actor& wearer)
 {
 	engine.gui->log_message(WHITE_PAIR, "Left-click an enemy to confuse it,\nor right-click to cancel.");
 
@@ -302,7 +349,7 @@ bool Confuser::use(Actor* owner, Actor* wearer)
 		return false;
 	}
 
-	Actor* actor = engine.get_actor(x, y);
+	auto actor = engine.get_actor(x, y);
 
 	if (!actor)
 	{
@@ -311,7 +358,8 @@ bool Confuser::use(Actor* owner, Actor* wearer)
 
 	// replace the monster's AI with a confused one; 
 	// after <nbTurns> turns the old AI will be restored
-	ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);
+	/*ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);*/
+	auto confusedAi = std::make_shared<ConfusedMonsterAi>(nbTurns, actor->ai);
 	actor->ai = confusedAi;
 	engine.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
 	
@@ -322,13 +370,13 @@ bool Confuser::use(Actor* owner, Actor* wearer)
 void Confuser::load(TCODZip& zip)
 {
 	nbTurns = zip.getInt();
-	range = zip.getFloat();
+	range = zip.getInt();
 }
 
 void Confuser::save(TCODZip& zip)
 {
 	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::CONFUSER));
 	zip.putInt(nbTurns);
-	zip.putFloat(range);
+	zip.putInt(range);
 }
 

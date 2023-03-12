@@ -9,7 +9,6 @@ class Actor;
 // A tile of the map
 // checks if the player has seen this tile
 // it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov()) 
-
 class Tile
 {
 public:
@@ -54,7 +53,7 @@ public:
 	int random_number(int min, int max);
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
-	Actor* get_actor(int x, int y) const;
+	std::shared_ptr<Actor> get_actor(int x, int y) const;
 
 	void init(bool withActors);
 
@@ -62,7 +61,7 @@ protected:
 	// create a pointer for the map array
 	Tile* tiles;
 	//create a reference to a TCODMap object named map
-	TCODMap* map;
+	TCODMap* tcodMap;
 
 	long seed;
 	TCODRandom* rng;

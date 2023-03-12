@@ -4,17 +4,17 @@
 class Actor;
 
 //==GOBLIN==
-class Goblin : Actor
+class Goblin : public Actor
 {
 public:
+	/*Goblin(int y, int x);*/
 	Goblin(int y, int x);
-	~Goblin();
 
 	/*Actor* create_goblin(int y, int x);*/
 
 	// make a create_goblin function that returns a std::unique_ptr<Actor> instead of an Actor*
 
-	Actor* create_goblin(int y, int x);
+	std::shared_ptr<Goblin> create_goblin(int y, int x);
 
 };
 //====
@@ -26,7 +26,7 @@ public:
 	Orc(int y, int x);
 	~Orc();
 
-	Actor* create_orc(int y, int x);
+	std::shared_ptr<Actor> create_orc(int y, int x);
 };
 //====
 
@@ -37,7 +37,7 @@ public:
 	Troll(int y, int x);
 	~Troll();
 
-	Actor* create_troll(int y, int x);
+	std::shared_ptr<Actor> create_troll(int y, int x);
 };
 //====
 
@@ -48,7 +48,7 @@ public:
 	Dragon(int y, int x);
 	~Dragon();
 
-	Actor* create_dragon(int y, int x);
+	std::shared_ptr<Actor> create_dragon(int y, int x);
 };
 //====
 

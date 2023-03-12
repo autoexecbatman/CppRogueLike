@@ -36,6 +36,10 @@ Gui::~Gui()
 	delwin(con);
 	delwin(sub);
 	log.clear();
+	for (LogMessage* message : log)
+	{
+		delete message;
+	}
 }
 
 void Gui::render()
@@ -125,13 +129,13 @@ void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 		//}
 
 		// add a new message to the log
-		LogMessage* msg = new LogMessage(lineBegin, WHITE_PAIR);
+		LogMessage* msg = new LogMessage(lineBegin, log_message_col);
 		log.push_back(msg);
 
 		// go to next line
 		lineBegin = lineEnd + 1;
-
 	} while (lineEnd);
+
 	print_container(log);
 }
 //
@@ -185,16 +189,16 @@ void Gui::renderBar(
 	int x,
 	int y,
 	int bar_width,
-	const char* name, 
-	float value, 
-	float maxValue, 
-	int barColor, 
+	const char* name,
+	int value,
+	int maxValue,
+	int barColor,
 	int backColor
 )
 {
 	/*std::cout << "void Gui::renderBar() {}" << std::endl;*/
-	float ratio = value / maxValue; // ratio of the bar's value to its maximum value
-	int barWidth = (int)(ratio * bar_width); // the width of the bar in characters
+	const float ratio = gsl::narrow_cast<float>(value) / gsl::narrow_cast<float>(maxValue); // ratio of the bar's value to its maximum value
+	const int barWidth = gsl::narrow_cast<int>(ratio * gsl::narrow_cast<float>(bar_width)); // the width of the bar in characters
 	wattron(con, COLOR_PAIR(barColor)); // set the color of the bar to barColor
 	for (int i = 0; i < barWidth; i++) // print the bar
 	{
@@ -209,6 +213,7 @@ void Gui::renderBar(
 	//	mvwaddch(con, y, x + i, ' ');
 	//}
 	wattroff(con, COLOR_PAIR(barColor));
+
 	wattron(con, COLOR_PAIR(backColor));
 	for (int i = barWidth; i < bar_width; i++)
 	{
@@ -241,7 +246,6 @@ Gui::LogMessage::LogMessage(const char* log_message_text, int log_message_color)
 	std::cout << "Gui::LogMessage::LogMessage() {}" << std::endl;
 	this->log_message_text = new char[strlen(log_message_text)]; // allocate memory for the text
 	strcpy(this->log_message_text, log_message_text); // copy the text
-	
 }
 
 Gui::LogMessage::~LogMessage()
@@ -283,7 +287,7 @@ void Gui::renderMouseLook()
 			{
 				first = false;
 			}
-			strcat(buf, actor->name);
+			strcat(buf, actor->name.c_str());
 		}
 	}
 	mvwprintw(
@@ -319,6 +323,11 @@ void Gui::load(TCODZip& zip)
 void Gui::gui_clear()
 {
 	log.clear();
+	// delete the pointers of the log
+	for (LogMessage* message : log)
+	{
+		delete message;
+	}
 }
 
 //==MENU==

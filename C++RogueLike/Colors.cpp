@@ -33,6 +33,6 @@ void Colors::my_init_pair()
 	init_pair(15, COLOR_YELLOW, COLOR_BLACK); // goblin color
 	init_pair(16, COLOR_GREEN, COLOR_RED); // dragon color
 	init_pair(17, COLOR_RED, COLOR_YELLOW); // fireball color
-	init_pair(18, COLOR_BLUE, COLOR_BLACK); // confusion color
+	init_pair(18, COLOR_WHITE, COLOR_GREEN); // confusion color
 	
 }

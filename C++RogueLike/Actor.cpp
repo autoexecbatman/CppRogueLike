@@ -1,9 +1,13 @@
 #include <iostream>
 #include <curses.h>
 #include <math.h>
+#include <memory>
 
 //#include "main.h"
-#include "libtcod.hpp"
+//#include "libtcod.hpp"
+#pragma warning (push, 0)
+#include <libtcod/libtcod.hpp>
+#pragma warning (pop)
 class Actor;
 #include "Persistent.h"
 #include "Destructible.h"
@@ -22,13 +26,16 @@ Actor::Actor(
 	int y,
 	int x,
 	int ch,
-	const char* name,
-	int col
+	/*const char* name,*/
+	std::string name,
+	int col,
+	int index
 ) : 
 	posY(y),
 	posX(x),
 	ch(ch),
 	col(col),
+	index(index),
 	name(name),
 	blocks(true),
 	fovOnly(true),
@@ -39,14 +46,7 @@ Actor::Actor(
 	pickable(nullptr)
 {}
 
-Actor::~Actor()
-{
-	if (attacker) delete attacker;
-	if (destructible) delete destructible;
-	if (ai) delete ai;
-	if (container) delete container;
-	if (pickable) delete pickable;
-}
+Actor::~Actor() {}
 
 //====
 void Actor::load(TCODZip& zip)
@@ -66,7 +66,8 @@ void Actor::load(TCODZip& zip)
 
 	if (hasAttacker) 
 	{
-		attacker = new Attacker(0.0f);
+		/*attacker = new Attacker(0);*/
+		attacker = std::make_shared<Attacker>(0);
 		attacker->load(zip);
 	}
 	if (hasDestructible) 
@@ -83,7 +84,8 @@ void Actor::load(TCODZip& zip)
 	}
 	if (hasContainer) 
 	{
-		container = new Container(0);
+		/*container = new Container(0);*/
+		container = std::make_shared<Container>(0);
 		container->load(zip);
 	}
 }
@@ -94,7 +96,7 @@ void Actor::save(TCODZip& zip)
 	zip.putInt(posY);
 	zip.putInt(ch);
 	zip.putInt(col);
-	zip.putString(name);
+	zip.putString(name.c_str());
 	zip.putInt(blocks);
 
 	zip.putInt(attacker != nullptr);
@@ -121,15 +123,21 @@ void Actor::render() const
 void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
-	container->add(this);
+	container->add(*this);
+	/*container->add(std::shared_ptr<Actor>(this));*/
 }
 
 //the monster update
 void Actor::update()
-{	
+{
+	// if the actor has an ai then update the ai
 	if (ai)
 	{
-		ai->update(this);
+		/*ai->update(this);*/
+		/*ai->update(std::shared_ptr<Actor>(this));*/
+		/*ai->update(std::shared_ptr<Actor>(this, [](Actor*) {}));*/
+		/*ai->update(shared_from_this());*/
+		ai->update(*this);
 	}
 }
 
@@ -140,6 +148,6 @@ int Actor::get_distance(int tileX, int tileY) const
 	int distance = std::max(abs(posX - tileX), abs(posY - tileY));
 
 	mvprintw(10, 0, "Distance: %d", distance);
-	
+
 	return distance;
 }

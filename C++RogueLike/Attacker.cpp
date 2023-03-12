@@ -8,36 +8,36 @@
 
 Attacker::Attacker(int power) : power(power) {}
 
-void Attacker::attack(Actor* owner, Actor* target)
+void Attacker::attack(Actor& owner, Actor& target)
 {
 
-	if (target->destructible && !target->destructible->is_dead())
+	if (target.destructible && !target.destructible->is_dead())
 	{
 		// if the target takes damage then a message is displayed
-		if (power - target->destructible->defense > 0)
+		if (power - target.destructible->defense > 0)
 		{
 			// damage message
 			engine.gui->log_message(
-				LIGHT_WALL_PAIR, // color
+				LIGHTNING_PAIR, // color
 				"%s attacks %s for %d hit points.\n", // message
-				owner->name,
-				target->name,
-				power - target->destructible->defense
+				owner.name.c_str(),
+				target.name.c_str(),
+				power - target.destructible->defense
 			);
 			
-			attron(COLOR_PAIR(owner->col));
-			mvprintw(0, 0, "%s", owner->name);
-			attroff(COLOR_PAIR(owner->col));
+			attron(COLOR_PAIR(owner.col));
+			mvprintw(0, 0, "%s", owner.name.c_str());
+			attroff(COLOR_PAIR(owner.col));
 			
-			int ownerNameLen = strlen(owner->name);
+			int ownerNameLen = strlen(owner.name.c_str());
 			const char* attacksThe = " attacks the ";
 			int attacksTheLen = strlen(attacksThe);
 			mvprintw(0, ownerNameLen, attacksThe);
-			attron(COLOR_PAIR(target->col));
-			mvprintw(0, ownerNameLen + attacksTheLen, "%s", target->name);
-			attroff(COLOR_PAIR(target->col));
-			int targetNameLen = strlen(target->name);
-			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", power - target->destructible->defense);
+			attron(COLOR_PAIR(target.col));
+			mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
+			attroff(COLOR_PAIR(target.col));
+			int targetNameLen = strlen(target.name.c_str());
+			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", power - target.destructible->defense);
 		}
 		else
 		{
@@ -46,13 +46,13 @@ void Attacker::attack(Actor* owner, Actor* target)
 				29, // y
 				0, // x
 				"%s attacks %s but it has no effect!\n", // format
-				owner->name,
-				target->name
+				owner.name.c_str(),
+				target.name.c_str()
 			);
 		}
 		
 		// the target takes damage
-		target->destructible->take_damage(target, power);
+		target.destructible->take_damage(target, power);
 		
 	}
 	else
@@ -65,18 +65,18 @@ void Attacker::attack(Actor* owner, Actor* target)
 			29,
 			0,
 			"%s attacks %s in vain.\n",
-			owner->name,
-			target->name
+			owner.name.c_str(),
+			target.name.c_str()
 		);
 	}
 }
 
 void Attacker::load(TCODZip& zip)
 {
-	power = zip.getFloat();
+	power = zip.getInt();
 }
 
 void Attacker::save(TCODZip& zip)
 {
-	zip.putFloat(power);
+	zip.putInt(power);
 }

@@ -112,5 +112,7 @@
     <None Include="ClassDiagram1.cd">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="ClassDiagram2.cd" />
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

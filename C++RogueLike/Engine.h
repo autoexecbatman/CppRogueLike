@@ -2,93 +2,79 @@
 #define PROJECT_PATH_ENGINE_H_
 
 #include <deque>
+#include <map>
+#include <memory>
 
-#include "Map.h"
 #include "Actor.h"
 #include "Gui.h"
 #include "Literals.h"
+#include "Map.h"
 
-//==ENGINE==
-// The engine class is the main class of the game.
-// It will handle the game loop and the game states.
-// ( Length screenWidth , Length screenHeight ) : the width and height of the screen.
-class Engine
-{
+class Engine {
 public:
+    enum class GameStatus : int {
+        STARTUP,
+        IDLE,
+        NEW_TURN,
+        VICTORY,
+        DEFEAT
+    } gameStatus;
 
-	//==GAME_STATUS==
-	// enumerates the current game status.
-	enum class GameStatus : int
-	{
-		STARTUP,
-		IDLE,
-		NEW_TURN,
-		VICTORY,
-		DEFEAT
-	} gameStatus;
+    int fovRadius;
+    int screenWidth;
+    int screenHeight;
+    std::shared_ptr<Actor> player;
+    std::shared_ptr<Actor> stairs;
+    std::unique_ptr<Gui> gui;
+    std::unique_ptr<Map> map;
+    bool run = true;
+    int keyPress = getch();
+    int lastKey = getch();
+    int level = 0;
+    std::vector<std::shared_ptr<Actor>> actors;
 
-	int fovRadius;
+    // Constructors and destructor.
+    Engine(int screenWidth, int screenHeight);
+    ~Engine();
 
-	//==ENGINE_FIELDS==
+    // Deleted copy constructor and copy assignment operator.
+    Engine(const Engine&) = delete;
+    Engine& operator=(const Engine&) = delete;
 
-	Length screenWidth;
-	Length screenHeight;
+    // Deleted move constructor and move assignment operator.
+    Engine(Engine&&) = delete;
+    Engine& operator=(Engine&&) = delete;
 
-	//==ENGINE_PROPERTIES==
+    // Public member functions.
+    void init();
+    void update();
+    void render();
+    void send_to_back(Actor& actor);
+    std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
+    bool pick_tile(int* x, int* y, int maxRange);
+    void game_menu();
+    bool mouse_moved();
+    void target();
+    void load();
+    void save();
+    void term();
+    void print_container(std::vector<std::shared_ptr<Actor>> actors);
+    void key_listener() noexcept { keyPress = getch(); }
+    void next_level();
+    std::shared_ptr<Actor> get_actor(int x, int y) const;
+    void dispay_stats(int level);
+    void display_character_sheet();
+    int random_number(int min, int max);
+    void wizard_eye();
 
-	Actor* player;
-	Actor* stairs;
-	Map* map;
-	Gui* gui;
-
-	bool run = true;
-	int lastKey = getch();
-	int keyPress = getch();
-
-	std::deque<Actor*> actors;
-
-	void update();
-	void render();
-	
-	void send_to_back(Actor* actor);
-
-	Actor* get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
-	
-	bool pick_tile(int* x, int* y, float maxRange = 0.0f);
-
-	void game_menu();
-	bool mouse_moved();
-	void target();
-	void load();
-	void save();
-	
-	void term();
-
-	void print_container(const std::deque<Actor*> actors);
-	
-	void key_listener() { keyPress = getch(); }
-	
-	Engine(Length screenWidth, Length screenHeight);
-	~Engine();
-	
-	void init();
 private:
+    // Private member variables.
+    bool computeFov = false;
 
-	bool computeFov = false;
-
-public:
-	
-	int level;
-	void next_level();
-	Actor* get_actor(int x, int y) const;
-	void dispay_stats(int level);
-	void display_character_sheet();
-
-	int random_number(int min, int max);
-	void wizard_eye();
-	
+    // Private member functions.
 };
 
+// Declaration of the global engine object.
 extern Engine engine;
 
 #endif // PROJECT_PATH_ENGINE_H_

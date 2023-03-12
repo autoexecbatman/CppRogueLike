@@ -6,18 +6,19 @@ class Container
 public:
 	int invSize = 0;
 
-	std::vector<Actor*> inventoryList;
+	std::vector<std::shared_ptr<Actor>> inventoryList;
 
 	Container(int invSize);
 	~Container();
+
 	// checks that the container is not full.
-	bool add(Actor* actor);
-	void remove(Actor* actor);
+	bool add(Actor& actor);
+	void remove(Actor& actor);
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 
-	void print_container(std::vector<Actor*> container);
+	void print_container(std::vector<std::shared_ptr<Actor>> container);
 };
 
 #endif // !PROJECT_PATH_CONTAINER_H_

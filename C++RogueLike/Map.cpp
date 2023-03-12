@@ -1,9 +1,12 @@
 #include <curses.h>
 #include <random>
-
+#include <iostream>
 //#include "main.h"
 
-#include "libtcod.hpp"
+//#include "libtcod.hpp"
+#pragma warning (push, 0)
+#include <libtcod/libtcod.hpp>
+#pragma warning (pop)
 class Actor;
 #include "Persistent.h"
 #include "Destructible.h"
@@ -129,7 +132,7 @@ Map::Map(
 	:
 	map_height(map_height),
 	map_width(map_width),
-	map(nullptr),
+	tcodMap(nullptr),
 	rng(nullptr),
 	tiles(nullptr)
 {
@@ -140,14 +143,14 @@ Map::Map(
 Map::~Map()
 {
 	delete[] tiles; // free the map's tiles
-	delete map; //delete the TCODMap object
+	delete tcodMap; //delete the TCODMap object
 }
 
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
 {
 	// return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
 
-	return !map->isWalkable(
+	return !tcodMap->isWalkable(
 		isWall_pos_x,
 		isWall_pos_y
 	);
@@ -172,7 +175,7 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 	{
 		return false;
 	}
-	if (map->isInFov(fov_x,fov_y))
+	if (tcodMap->isInFov(fov_x,fov_y))
 	{
 		tiles[fov_x + fov_y * map_width].explored = true;
 		return true;
@@ -182,7 +185,7 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 
 void Map::compute_fov()
 {
-	map->computeFov(engine.player->posX, engine.player->posY, engine.fovRadius);
+	tcodMap->computeFov(engine.player->posX, engine.player->posY, engine.fovRadius);
 }
 
 void Map::render() const
@@ -237,41 +240,72 @@ void Map::add_item(int x, int y)
 	TCODRandom* rng = TCODRandom::getInstance();
 	int dice = rng->getInt(0, 100);
 	
+	static int potionIndex = 0;
 	if (dice < 70)
 	{
 		// add health potion
-		Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);
+		/*Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);*/
+		auto healthPotion = std::make_shared<Actor>(x, y, '!', "health potion", HPBARMISSING_PAIR, 0);
+		healthPotion->index = potionIndex++;
 		healthPotion->blocks = false;
-		healthPotion->pickable = new Healer(4);
+		/*healthPotion->pickable = new Healer(4);*/
+		healthPotion->pickable = std::make_shared<Healer>(4);
 		engine.actors.push_back(healthPotion);
-		engine.send_to_back(healthPotion);
+		/*engine.actors.emplace_back(healthPotion);*/
+		/*engine.actors.emplace(healthPotion);*/
+		/*engine.actors.try_emplace(healthPotion->index,healthPotion);*/
+		//auto result = engine.actors.insert({ healthPotion->index, healthPotion });
+		//if (!result.second) {
+		//	// an element with the same key already exists
+		//	// you may want to handle this error case
+		//	// for example, by deleting the healthPotion shared_ptr
+		//}
+
+		// Generate a new index for the potion
+
+		// Add the potion to the map
+		/*engine.actors.try_emplace(healthPotion->index, healthPotion);*/
+
+		engine.send_to_back(*healthPotion);
 	}
 	else if (dice < 70+10)
 	{
 		// add lightning scrolls
-		Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);
+		/*Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);*/
+		auto lightningScroll = std::make_shared<Actor>(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR,1);
 		lightningScroll->blocks = false;
-		lightningScroll->pickable = new LightningBolt(5, 20);
-		engine.actors.push_back(lightningScroll);
-		engine.send_to_back(lightningScroll);
+		/*lightningScroll->pickable = new LightningBolt(5, 20);*/
+		lightningScroll->pickable = std::make_shared<LightningBolt>(5, 20);
+		/*engine.actors.emplace_back(lightningScroll);*/
+		/*engine.actors.emplace(lightningScroll);*/
+		/*engine.send_to_back(lightningScroll);*/
 	}
 	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
-		Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
+		/*Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);*/
+		auto fireballScroll = std::make_shared<Actor>(x, y, '#', "scroll of fireball", FIREBALL_PAIR,1);
 		fireballScroll->blocks = false;
-		fireballScroll->pickable = new Fireball(3, 12);
+		/*fireballScroll->pickable = new Fireball(3, 12);*/
+		fireballScroll->pickable = std::make_shared<Fireball>(3, 12);
 		engine.actors.push_back(fireballScroll);
-		engine.send_to_back(fireballScroll);
+		/*engine.actors.emplace_back(fireballScroll);*/
+		/*engine.actors.emplace(fireballScroll);*/
+		
+		/*engine.actors.insert(std::make_pair(fireballScroll->index, fireballScroll));*/
+		/*engine.send_to_back(fireballScroll);*/
 	}
 	else
 	{
 		// add confusion scrolls
-		Actor* confusionScroll = new Actor(x, y, '#', "scroll of confusion", CONFUSION_PAIR);
+		/*Actor* confusionScroll = new Actor(x, y, '#', "scroll of confusion", CONFUSION_PAIR);*/
+		auto confusionScroll = std::make_shared<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
 		confusionScroll->blocks = false;
-		confusionScroll->pickable = new Confuser(10, 8);
-		engine.actors.push_back(confusionScroll);
-		engine.send_to_back(confusionScroll);
+		/*confusionScroll->pickable = new Confuser(10, 8);*/
+		confusionScroll->pickable = std::make_shared<Confuser>(10, 8);
+		/*engine.actors.emplace_back(confusionScroll);*/
+		/*engine.actors.emplace(confusionScroll);*/
+		/*engine.send_to_back(confusionScroll);*/
 	}
 	/*else if (dice < 70 + 10 + 10)*/
 	// always spawn this scroll
@@ -294,7 +328,7 @@ void Map::init(bool withActors)
 {
 	rng = new TCODRandom(seed, TCOD_RNG_CMWC);
 	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
-	map = new TCODMap(map_width, map_height); // allocate the map
+	tcodMap = new TCODMap(map_width, map_height); // allocate the map
 	bsp(map_width, map_height, rng, withActors);
 }
 
@@ -317,7 +351,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 	{
 		for (int tileX = x1; tileX <= x2 +1; tileX++)
 		{
-			map->setProperties(
+			tcodMap->setProperties(
 				tileX,
 				tileY,
 				true,
@@ -340,6 +374,14 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	{
 		engine.player->posY = y1 + 1;
 		engine.player->posX = x1 + 1;
+		
+		//// create player 2
+		//engine.player2->posY = y1 + 2;
+		//engine.player2->posX = x1 + 1;
+		//
+		//// create player 3
+		//engine.player3->posY = y1 + 3;
+		//engine.player3->posX = x1 + 1;
 	}
 	
 	// If this is NOT the first room, we make a random number of monsters and place them in the room
@@ -443,24 +485,37 @@ void Map::add_monster(int mon_x, int mon_y){
 	//create a random amount of orcs and trolls in the room based on a d100
 	for (int i = 0; i < 4 * d.d6(); i++){
 		Goblin goblin(mon_y, mon_x);
-		engine.actors.push_back(goblin.create_goblin(mon_y, mon_x));
+		/*engine.actors.emplace_back(goblin.create_goblin(mon_y, mon_x));*/
+		/*engine.actors.try_emplace(i,goblin.create_goblin(mon_y, mon_x));*/
+		/*std::shared_ptr<Actor> actor = std::static_pointer_cast<Actor>(goblin.create_goblin(mon_y, mon_x));*/
+		auto actor = goblin.create_goblin(mon_y, mon_x);
+
+		/*engine.actors.try_emplace(i, actor);*/
+		engine.actors.push_back(actor);
+		// store the key i in the actor index
+		actor->index = i;
 	}
-	for (int i = 0; i < 2 * d.d6(); i++){
-		Orc orc(mon_y, mon_x);
-		engine.actors.push_back(orc.create_orc(mon_y, mon_x));
-	}
-	for (int i = 0; i < 2 * d.d6(); i++){
-		Troll troll(mon_y, mon_x);
-		engine.actors.push_back(troll.create_troll(mon_y, mon_x));
-	}
-	for (int i = 0; i < 1 * d.d6(); i++){
-		Dragon dragon(mon_y, mon_x);
-		engine.actors.push_back(dragon.create_dragon(mon_y, mon_x));
-	}
+	//for (int i = 0; i < 2 * d.d6(); i++){
+	//	Orc orc(mon_y, mon_x);
+	//	/*engine.actors.emplace_back(orc.create_orc(mon_y, mon_x));*/
+	//	engine.actors.try_emplace(i ,orc.create_orc(mon_y, mon_x));
+	//}
+	//for (int i = 0; i < 2 * d.d6(); i++){
+	//	Troll troll(mon_y, mon_x);
+	//	/*engine.actors.emplace_back(troll.create_troll(mon_y, mon_x));*/
+	//	/*engine.actors.emplace(troll.create_troll(mon_y, mon_x));*/
+	//	engine.actors.try_emplace(i, troll.create_troll(mon_y, mon_x));
+	//}
+	//for (int i = 0; i < 1 * d.d6(); i++){
+	//	Dragon dragon(mon_y, mon_x);
+	//	/*engine.actors.emplace_back(dragon.create_dragon(mon_y, mon_x));*/
+	//	/*engine.actors.emplace(dragon.create_dragon(mon_y, mon_x));*/
+	//}
 }
-Actor* Map::get_actor(int x, int y) const
+
+std::shared_ptr<Actor> Map::get_actor(int x, int y) const
 {
-	for (auto& actor : engine.actors)
+	for (const auto& actor : engine.actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{

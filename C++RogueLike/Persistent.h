@@ -1,8 +1,10 @@
 #ifndef PROJECT_PATH_PERSISTENT_H_
 #define PROJECT_PATH_PERSISTENT_H_
 
-#include "libtcod.hpp"
-
+//#include "libtcod.hpp"
+#pragma warning (push, 0)
+#include <libtcod/libtcod.hpp>
+#pragma warning (pop)
 class Persistent
 {
 public:
