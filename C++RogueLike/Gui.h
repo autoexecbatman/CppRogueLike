@@ -1,43 +1,60 @@
-#ifndef PROJECT_PATH_GUI_H_
-#define PROJECT_PATH_GUI_H_
+#ifndef GUI_H
+#define GUI_H
 
+// Description:
+// The Gui class is responsible for displaying the gui window
+// and all of the information that is displayed in the gui window.
+//
+// Functions:
+// The constructor and destructor are empty
+// because the gui window is initialized and deleted
+// using explicit calls to the gui_init() and gui_delete() functions.
+// 
+// Initialize the gui window using the PDCurses library
+// 
+// 
+// Objects:
+//
+//
+// Author: @autoexecbatman
 
 #include <curses.h>
 #include <vector>
+#include <string>
+
 #include "Persistent.h"
+#include "LogMessage.h"
 
 class Gui : public Persistent
 {
-public:	
-	Gui();
-	~Gui();
+private:
+	int guiHp{ 0 };
+
+	WINDOW* guiWin{ nullptr };
+
+	void gui_new(int height, int width, int starty, int startx) noexcept { guiWin = newwin(height, width, starty, startx); }
+	void gui_clear() noexcept { wclear(guiWin); }
+	void gui_print(int x, int y, const std::string& text) noexcept { mvwprintw(guiWin, y, x, text.c_str()); }
+	void gui_refresh() noexcept { wrefresh(guiWin); }
+	void gui_delete() noexcept { delwin(guiWin); }
+public:
+	void gui_init(); // initialize the gui
+	void gui_update(); // update the gui
+	void gui_render(); // render the gui
+
+	void gui();
 	void render();
 	//We want a handy function to write to the log using curses
 	void log_message(int log_message_color, const char* log_message_text, ...);
 	
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
-	
-	void gui_clear();
-
-
 
 protected:
 	WINDOW* con; // the gui window
 	WINDOW* sub; // a subwindow in the gui
 	
-	//Create a struct to be able to define the color of each line in the log.
-	//So we need a structure to store the message's text and its color.
-	//Since this structure is only used by the Gui class, we put it in its protected declaration zone.
-	
-	struct LogMessage
-	{
-		char* log_message_text = nullptr;
-		int log_message_color = 0;
-		
-		LogMessage(const char* log_message_text, int log_message_color);
-		~LogMessage();
-	};
+	//==LOG==
 	void print_container(const std::vector<LogMessage*> log_message);
 	std::vector<LogMessage*> log; // the message log
 
@@ -53,35 +70,8 @@ protected:
 		int backColor
 	);
 	void renderMouseLook();
+private:
+
 };
 
-class Menu 
-{
-public:
-	enum class MenuItemCode : int
-	{
-		NONE,
-		NEW_GAME,
-		CONTINUE,
-		EXIT
-	};
-	Menu();
-	~Menu();
-	
-	void menu_clear();
-	void addItem(MenuItemCode code, const char* label);
-
-	MenuItemCode pick();
-
-protected:
-
-	struct MenuItem 
-	{
-		MenuItemCode code;
-		const char* label;
-	};
-
-	std::vector<MenuItem*> items;
-};
-
-#endif // !PROJECT_PATH_GUI_H_
+#endif // !GUI_H

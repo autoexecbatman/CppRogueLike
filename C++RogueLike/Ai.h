@@ -46,11 +46,11 @@ protected:
 class PlayerAi : public Ai
 {
 public:
-	int xpLevel;
-	PlayerAi();
+	int xpLevel{ 1 };
+
 	int getNextLevelXp();
 	bool levelUpUpdate(Actor& owner);
-	void update(Actor& owner);
+	void update(Actor& owner) override;
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 	

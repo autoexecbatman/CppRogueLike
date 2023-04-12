@@ -8,12 +8,12 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 	if (wearer.container && wearer.container->add(owner))
 	{
 		// TODO : Fix this to remove the item from the map after it has been picked up.
-		/*engine.actors.erase(
-		std::remove(engine.actors.begin(), engine.actors.end(), owner),
-		engine.actors.end()
+		/*game.actors.erase(
+		std::remove(game.actors.begin(), game.actors.end(), owner),
+		game.actors.end()
 		);*/
 
-		engine.gui->log_message( // displays the message
+		game.gui->log_message( // displays the message
 			COLOR_WHITE,
 			"%s picks up a %s.",
 			wearer.name.c_str(),
@@ -21,18 +21,18 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 		);
 		
 		// first iterate through the list of actors
-		for (auto actor : engine.actors)
+		for (auto actor : game.actors)
 		{
 			// if the actor is the owner of the item
 			if (actor.get() == &owner)
 			{
 				// remove the item from the list of actors
-				//engine.actors.erase(
-				//	std::remove(engine.actors.begin(), engine.actors.end(), actor),
-				//	engine.actors.end()
+				//game.actors.erase(
+				//	std::remove(game.actors.begin(), game.actors.end(), actor),
+				//	game.actors.end()
 				//);
 				
-				std::erase(engine.actors, actor);
+				std::erase(game.actors, actor);
 
 				//actor->ch = '.';
 				//actor->col = WHITE_PAIR;
@@ -63,6 +63,7 @@ void Pickable::drop(Actor& owner, Actor& wearer)
 
 bool Pickable::use(Actor& owner, Actor& wearer)
 {
+	std::clog << "Using item" << std::endl;
 	if (wearer.container)
 	{
 		wearer.container->remove(owner);
@@ -152,17 +153,17 @@ LightningBolt::LightningBolt(int maxRange, int damage) : maxRange(maxRange), dam
 bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
 	// find closest enemy (inside a maximum range)
-	std::shared_ptr<Actor> closestMonster = engine.get_closest_monster(wearer.posX, wearer.posY, maxRange);
+	std::shared_ptr<Actor> closestMonster = game.get_closest_monster(wearer.posX, wearer.posY, maxRange);
 
 	if (!closestMonster)
 	{
-		engine.gui->log_message(HPBARMISSING_PAIR, "No enemy is close enough to strike.");
+		game.gui->log_message(HPBARMISSING_PAIR, "No enemy is close enough to strike.");
 
 		return false;
 	}
 
 	// hit closest monster for <damage> hit points
-	engine.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
+	game.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
 		"The damage is %g hit points.", closestMonster->name, damage);
 	closestMonster->destructible->take_damage(*closestMonster, damage);
 
@@ -187,20 +188,20 @@ Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
 bool Fireball::use(Actor& owner, Actor& wearer)
 {
-	engine.gui->log_message(
+	game.gui->log_message(
 		WHITE_PAIR,
 		"Left-click a target tile for the fireball,\nor right-click to cancel."
 	);
 
 	int x, y;
 
-	if (!engine.pick_tile(&x, &y , Fireball::maxRange)) // <-- runs a while loop here
+	if (!game.pick_tile(&x, &y , Fireball::maxRange)) // <-- runs a while loop here
 	{
 		return false;
 	}
 
 	// burn everything in <range> (including player)
-	engine.gui->log_message(
+	game.gui->log_message(
 		WHITE_PAIR,
 		"The fireball explodes, burning everything within %d tiles!",
 		Fireball::maxRange
@@ -266,7 +267,7 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	// wait for a bit using curses
 	napms(1000);
 
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
 		if (
 			actor->destructible
@@ -276,12 +277,12 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 			actor->get_distance(x, y) <= Fireball::maxRange
 			)
 		{
-			engine.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->name.c_str(), damage);
+			game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->name.c_str(), damage);
 			animation(actor->posX, actor->posY, maxRange);
 		}
 	}
 
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
 		if (
 			actor->destructible
@@ -305,7 +306,7 @@ void Fireball::animation(int x, int y , int maxRange)
 	while (run == true)
 	{
 		clear();
-		engine.render();
+		game.render();
 
 		attron(COLOR_PAIR(FIREBALL_PAIR));
 		mvprintw(y, x, "~");
@@ -340,16 +341,16 @@ Confuser::Confuser(int nbTurns, int range) : nbTurns(nbTurns), range(range) {}
 
 bool Confuser::use(Actor& owner, Actor& wearer)
 {
-	engine.gui->log_message(WHITE_PAIR, "Left-click an enemy to confuse it,\nor right-click to cancel.");
+	game.gui->log_message(WHITE_PAIR, "Left-click an enemy to confuse it,\nor right-click to cancel.");
 
 	int x, y;
 
-	if (!engine.pick_tile(&x, &y, range))
+	if (!game.pick_tile(&x, &y, range))
 	{
 		return false;
 	}
 
-	auto actor = engine.get_actor(x, y);
+	auto actor = game.get_actor(x, y);
 
 	if (!actor)
 	{
@@ -361,7 +362,7 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 	/*ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);*/
 	auto confusedAi = std::make_shared<ConfusedMonsterAi>(nbTurns, actor->ai);
 	actor->ai = confusedAi;
-	engine.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
+	game.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
 	
 
 	return Pickable::use(owner, wearer);

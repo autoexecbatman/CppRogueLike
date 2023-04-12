@@ -17,7 +17,7 @@ class Actor;
 #include "Container.h"
 #include "Actor.h"
 #include "Map.h"
-#include "Engine.h"
+#include "Game.h"
 
 
 //====
@@ -26,7 +26,6 @@ Actor::Actor(
 	int y,
 	int x,
 	int ch,
-	/*const char* name,*/
 	std::string name,
 	int col,
 	int index
@@ -58,15 +57,14 @@ void Actor::load(TCODZip& zip)
 	name = _strdup(zip.getString());
 	blocks = zip.getInt();
 
-	bool hasAttacker = zip.getInt();
-	bool hasDestructible = zip.getInt();
-	bool hasAi = zip.getInt();
-	bool hasPickable = zip.getInt();
-	bool hasContainer = zip.getInt();
+	const bool hasAttacker = zip.getInt();
+	const bool hasDestructible = zip.getInt();
+	const bool hasAi = zip.getInt();
+	const bool hasPickable = zip.getInt();
+	const bool hasContainer = zip.getInt();
 
 	if (hasAttacker) 
 	{
-		/*attacker = new Attacker(0);*/
 		attacker = std::make_shared<Attacker>(0);
 		attacker->load(zip);
 	}
@@ -84,7 +82,6 @@ void Actor::load(TCODZip& zip)
 	}
 	if (hasContainer) 
 	{
-		/*container = new Container(0);*/
 		container = std::make_shared<Container>(0);
 		container->load(zip);
 	}

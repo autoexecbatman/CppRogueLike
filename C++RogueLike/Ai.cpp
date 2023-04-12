@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include "main.h"
+#include "Menu.h"
 #include "Colors.h"
 
 //====
@@ -16,7 +17,7 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 
 	switch (type) 
 	{
-		
+
 	case AiType::PLAYER:
 	{
 		/*ai = new PlayerAi();*/
@@ -49,13 +50,17 @@ MonsterAi::MonsterAi() : moveCount(0) {}
 
 void MonsterAi::update(Actor& owner)
 {
+	if (owner.ai == nullptr) // if the owner has no ai
+	{
+		return; // do nothing
+	}
 
 	if (owner.destructible && owner.destructible->is_dead()) // if the owner is dead
 	{
 		return; // do nothing
 	}
 
-	if (engine.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
+	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
 	{
 		// move towards the player
 		moveCount = TRACKING_TURNS;
@@ -67,7 +72,7 @@ void MonsterAi::update(Actor& owner)
 
 	if (moveCount > 0) // if the move count is greater than 0
 	{
-		moveOrAttack(owner, engine.player->posX, engine.player->posY); // move or attack the player
+		moveOrAttack(owner, game.player->posX, game.player->posY); // move or attack the player
 	}
 }
 
@@ -100,16 +105,16 @@ void MonsterAi::moveOrAttack(Actor& owner, int targetx, int targety)
 		dx = static_cast<int>(round(dx / distance));
 		dy = static_cast<int>(round(dy / distance));
 
-		if (engine.map->can_walk(owner.posX + dx, owner.posY + dy))
+		if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
 		{
 			owner.posX += dx;
 			owner.posY += dy;
 		}
-		else if (engine.map->can_walk(owner.posX + stepdx, owner.posY))
+		else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
 		{
 			owner.posX += stepdx;
 		}
-		else if (engine.map->can_walk(owner.posX, owner.posY + stepdy))
+		else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
 		{
 			owner.posY += stepdy;
 		}
@@ -117,7 +122,7 @@ void MonsterAi::moveOrAttack(Actor& owner, int targetx, int targety)
 
 	else if (owner.attacker)
 	{
-		owner.attacker->attack(owner, *engine.player);
+		owner.attacker->attack(owner, *game.player);
 	}
 }
 
@@ -204,8 +209,6 @@ enum class Controls : int
 	SWITCH_ALL = 'm'
 };
 
-PlayerAi::PlayerAi() : xpLevel(1) {}
-
 const int LEVEL_UP_BASE = 200;
 const int LEVEL_UP_FACTOR = 150;
 
@@ -235,8 +238,8 @@ bool PlayerAi::levelUpUpdate(Actor& owner)
 	{
 		xpLevel++;
 		owner.destructible->xp -= levelUpXp;
-		engine.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
-		engine.dispay_stats(xpLevel);
+		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
+		game.dispay_stats(xpLevel);
 	}
 
 	if (owner.destructible && owner.destructible->is_dead())
@@ -248,14 +251,15 @@ bool PlayerAi::levelUpUpdate(Actor& owner)
 
 void PlayerAi::update(Actor& owner)
 {
+	std::clog << "PlayerAi::update(Actor& owner)" << std::endl;
 	levelUpUpdate(owner);
 
 	int dx = 0, dy = 0; // movement delta
 
 	// TODO : check if this clear() need to be relocated
-	clear(); // this is here for clearing the level up screen 
+	/*clear();*/ // this is here for clearing the level up screen 
 	// the controls for the player movement
-	switch (static_cast<Controls>(engine.keyPress))
+	switch (static_cast<Controls>(game.keyPress))
 	{
 	case Controls::UP:
 	case Controls::UP_ARROW:
@@ -299,10 +303,10 @@ void PlayerAi::update(Actor& owner)
 		break;
 	case Controls::WAIT:
 	case Controls::WAIT_ARROW_NUMPAD:
-		engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	case Controls::HIT_SELF:
-		engine.player->attacker->attack(*engine.player, *engine.player);
+		game.player->attacker->attack(*game.player, *game.player);
 		break;
 	case Controls::MOUSE:
 		std::cout << "mouse" << std::endl;
@@ -319,37 +323,40 @@ void PlayerAi::update(Actor& owner)
 		if (actor) 
 		{
 			actor->pickable->drop(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 	break;
 	case Controls::INVENTORY:
-		/*handleActionKey(owner, engine.keyPress);*/
+		/*handleActionKey(owner, game.keyPress);*/
 		display_inventory(owner);
 		break;
 	case Controls::QUIT:
-		engine.run = false;
-		if (engine.run == false)
+		game.run = false;
+		if (game.run == false)
 		{
 			mvprintw(29, 0, "You quit the game ! Press any key ...");
 		}
 		break;
 	// if escape key is pressed bring the game menu
 	case Controls::ESCAPE:
-		engine.game_menu();
+	{
+		Menu menu;
+		menu.menu();
 		break;
+	}
 
 	case Controls::DESCEND:
-		if (engine.stairs->posX == owner.posX && engine.stairs->posY == owner.posY)
+		if (game.stairs->posX == owner.posX && game.stairs->posY == owner.posY)
 		{
-			engine.next_level();
+			game.next_level();
 		}
 		break;
 	case Controls::TARGET:
-		engine.target();
+		game.target();
 		break;
 	case Controls::CHAR_SHEET:
-		engine.display_character_sheet();
+		game.display_character_sheet();
 		break;
 
 	default:break;
@@ -357,12 +364,13 @@ void PlayerAi::update(Actor& owner)
 	// compute FOV if needed
 	if (dx!=0||dy!=0)
 	{
-		engine.gameStatus = Engine::GameStatus::NEW_TURN;
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 		if (moveOrAttack(owner,owner.posX+dx,owner.posY+dy))
 		{
-			engine.map->compute_fov();
+			game.map->compute_fov();
 		}
 	}
+	std::clog << "PlayerAi::update(Actor& owner) end" << std::endl;
 }
 
 void PlayerAi::pick_item(Actor& owner)
@@ -370,7 +378,7 @@ void PlayerAi::pick_item(Actor& owner)
 	std::clog << "You try to pick something..." << std::endl;
 
 	bool found = false;
-	for (const auto actor : engine.actors)
+	for (const auto actor : game.actors)
 	{
 		/*std::clog << "Checking actor " << actor->name << std::endl;*/
 
@@ -385,23 +393,23 @@ void PlayerAi::pick_item(Actor& owner)
 			if (actor->pickable->pick(*actor, owner))
 			{
 				found = true;
-				engine.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor->name.c_str());
+				game.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor->name.c_str());
 				break;
 			}
 			else if (!found)
 			{
 				found = true;
-				engine.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
+				game.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
 			}
 		}
 	}
 
 	if (!found)
 	{
-		engine.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
+		game.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
 	}
 
-	engine.gameStatus = Engine::GameStatus::NEW_TURN;
+	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
 void PlayerAi::display_inventory(Actor& owner)
@@ -440,7 +448,7 @@ void PlayerAi::display_inventory(Actor& owner)
 
 	for (auto& actor : owner.container->inventoryList)
 	{
-		/*engine.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
+		/*game.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
 
 		mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
 		y++;
@@ -449,8 +457,8 @@ void PlayerAi::display_inventory(Actor& owner)
 
 	/*// blit the inventory console on the root console
 	TCODConsole::blit(&con, 0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT,
-		TCODConsole::root, engine.screenWidth / 2 - INVENTORY_WIDTH / 2,
-		engine.screenHeight / 2 - INVENTORY_HEIGHT / 2);
+		TCODConsole::root, game.screenWidth / 2 - INVENTORY_WIDTH / 2,
+		game.screenHeight / 2 - INVENTORY_HEIGHT / 2);
 	TCODConsole::flush();*/
 	wrefresh(inv);
 
@@ -460,7 +468,7 @@ void PlayerAi::display_inventory(Actor& owner)
 	//	actor->pickable->use(actor, owner);
 	//}
 
-	Gui gui;
+	Gui gui; // create a new Gui object for the inventory menu to use for rendering the inventory
 	// wait for a key press
 	int inventoryInput = getch();
 	switch (inventoryInput)
@@ -476,7 +484,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 	clear();
@@ -489,7 +497,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 	clear();
@@ -502,7 +510,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 	clear();
@@ -515,7 +523,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 	clear();
@@ -528,7 +536,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 
@@ -539,7 +547,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 
@@ -550,7 +558,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			engine.gameStatus = Engine::GameStatus::NEW_TURN;
+			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
 	}
 
@@ -562,6 +570,7 @@ void PlayerAi::display_inventory(Actor& owner)
 
 std::shared_ptr<Actor> PlayerAi::choseFromInventory(Actor& owner, int ascii)
 {
+	std::clog << "You chose from inventory" << std::endl;
 	if (ascii == 'a')
 	{
 		if (owner.container->inventoryList.size() > 0)
@@ -634,23 +643,29 @@ void PlayerAi::save(TCODZip& zip)
 
 bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 {
-	if (engine.map->is_wall(targety, targetx))
+	//if (game.map != nullptr)
+	//{
+	//	if (game.map->is_wall(targetx, targety))
+	//	{
+	//		return false;
+	//	}
+	//}
+	//else
+	//{
+	//	std::clog << "map is null in moveOrAttack" << std::endl;
+	//	exit(-1);
+	//}
+
+	if (game.map->is_wall(targety, targetx))
 	{
 		return false;
 	}
 
 	// look for living actors to attack
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
-		if (
-			actor->destructible
-			&&
-			!actor->destructible->is_dead()
-			&&
-			actor->posX == targetx
-			&&
-			actor->posY == targety
-			)
+		const auto isNotDead = (actor->destructible && !actor->destructible->is_dead());
+		if (isNotDead && actor->posX == targetx && actor->posY == targety)
 		{
 			owner.attacker->attack(owner, *actor);
 			return false;
@@ -658,45 +673,20 @@ bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 	}
 
 	// look for corpses or items
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
-		bool corpseOrItem = (
-			actor->destructible
-			&&
-			actor->destructible->is_dead()
-			)
-			||
-			actor->pickable;
+		const auto isDeadCorpseOrItem = (actor->destructible && actor->destructible->is_dead()) || actor->pickable;
 
-		if (
-			corpseOrItem
-			&&
-			//actor->destructible 
-			//&& 
-			//actor->destructible->isDead()
-			//&& 
-			actor->posX == targetx
-			&&
-			actor->posY == targety
-			)
+		if (isDeadCorpseOrItem && actor->posX == targetx && actor->posY == targety)
 		{
-		//std::cout <<
-		//	"There's a %s here\n"
-		//	<< std::endl;
-
-			mvprintw(
-				29,
-				0,
-				"There's a %s here\n",
-				actor->name
-			);
+			mvprintw(29, 0, "There's a %s here\n", actor->name.c_str());
 		}
 	}
 
-		owner.posX = targetx;
-		owner.posY = targety;
+	owner.posX = targetx;
+	owner.posY = targety;
 
-		return true;
+	return true;
 }
 
 //==ConfusedMonsterAi==
@@ -717,14 +707,14 @@ void ConfusedMonsterAi::update(Actor& owner)
 		int destx = owner.posX + dx;
 		int desty = owner.posY + dy;
 
-		if (engine.map->can_walk(desty, destx))
+		if (game.map->can_walk(desty, destx))
 		{
 			owner.posX = destx;
 			owner.posY = desty;
 		}
 		else
 		{
-			std::shared_ptr<Actor> actor = engine.get_actor(destx, desty);
+			std::shared_ptr<Actor> actor = game.get_actor(destx, desty);
 			if (actor)
 			{
 				owner.attacker->attack(owner, *actor);

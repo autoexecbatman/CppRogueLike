@@ -1,5 +1,5 @@
-#ifndef PROJECT_PATH_ACTOR_H_
-#define PROJECT_PATH_ACTOR_H_
+#ifndef ACTOR_H
+#define ACTOR_H
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
@@ -13,9 +13,11 @@
 //==Actor==
 // a class for the actors in the game
 // (player, monsters, items, etc.)
-class Actor : public Persistent , public std::enable_shared_from_this<Actor>
+class Actor : public Persistent
 {
 public:
+	std::string gender{ "None" };
+	std::string playerClass{ "None" };
 	int posY = 0, posX = 0; // position on map
 	char ch = -47; // the symbol to print
 	int col = 0; // color for the actor
@@ -43,8 +45,8 @@ public:
 
 	~Actor();
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
 
 	void update(); // update() will handle the monster turn.
 
@@ -54,5 +56,5 @@ public:
 	void pickItem(int x, int y); // pick up an item
 };
 
-#endif // !PROJECT_PATH_ACTOR_H_
+#endif // !ACTOR_H
 //====

@@ -1,6 +1,6 @@
 #ifndef PROJECT_PATH_DESTRUCTIBLE_H_
 #define PROJECT_PATH_DESTRUCTIBLE_H_
-
+#include <iostream>
 class Actor;
 
 //====

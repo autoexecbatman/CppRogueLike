@@ -25,10 +25,8 @@ constexpr auto FIREBALL_PAIR = 17;
 constexpr auto CONFUSION_PAIR = 18;
 
 
-class Colors
+struct Colors
 {
-public:
-	Colors();
 	void my_init_pair();
 };
 

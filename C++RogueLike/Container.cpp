@@ -44,6 +44,7 @@ bool Container::add(Actor& actor)
 
 void Container::remove(Actor& actor)
 {
+	std::clog << "Removing item from inventory" << std::endl;
 	/*inventoryList.erase(std::remove(inventoryList.begin(), inventoryList.end(), actor), inventoryList.end());*/
 
 	// iterate through the inventory and remove the item
@@ -52,6 +53,7 @@ void Container::remove(Actor& actor)
 		if (it->get() == &actor)
 		{
 			inventoryList.erase(it);
+			std::clog << "Item removed from inventory" << *it << std::endl;
 			break;
 		}
 	}

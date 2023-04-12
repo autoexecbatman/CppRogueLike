@@ -2,7 +2,7 @@
 
 //#include "main.h"
 #include "Actor.h"
-#include "Engine.h"
+#include "Game.h"
 #include "Window.h"
 #include "Colors.h"
 
@@ -17,7 +17,7 @@ void Attacker::attack(Actor& owner, Actor& target)
 		if (power - target.destructible->defense > 0)
 		{
 			// damage message
-			engine.gui->log_message(
+			game.gui->log_message(
 				LIGHTNING_PAIR, // color
 				"%s attacks %s for %d hit points.\n", // message
 				owner.name.c_str(),

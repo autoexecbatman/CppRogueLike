@@ -4,7 +4,7 @@
 
 //==COLORS==
 
-Colors::Colors() {};
+//Colors::Colors() {};
 
 //initialize the color pairs
 void Colors::my_init_pair()

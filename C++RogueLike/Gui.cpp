@@ -5,85 +5,174 @@
 #include "Colors.h"
 
 constexpr int PANEL_HEIGHT = 7;
+constexpr int PANEL_WIDTH = 30;
+constexpr int GUI_Y = 22;
+constexpr int GUI_X = 0;
+
 constexpr int BAR_WIDTH = 20;
+
 constexpr int MSG_HEIGHT = PANEL_HEIGHT - 2;
 constexpr int MSG_X = BAR_WIDTH + 2;
 
-Gui::Gui()
+void Gui::gui_init()
 {
-	//std::cout << "Gui();" << std::endl;
-	//std::cout << "con = newwin();" << std::endl;
-	con = newwin(
-		PANEL_HEIGHT, // int nlines
-		30, // int ncols
-		22, // int begy
-		0 // int begx
-	);
 	
-	/*std::cout << "sub = derwin();" << std::endl;*/
-	sub = derwin(
-		con, // 
-		4, // int nlines
-		28, // int ncols
-		2, // int begy
-		1 // int begx
-	);
+	gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);
+
+	if (game.player->destructible)
+	{
+		guiHp = game.player->destructible->hp;
+	}
+
+	gui_clear();
+	box(guiWin, 0, 0);
+	mvwprintw(guiWin, 1, 1, "HP:%d", guiHp);
+	gui_refresh();
+}
+
+void Gui::gui_update()
+{
+	// pseudo code for gui_update()
+
+	// update the gui memory
+	guiHp = game.player->destructible->hp;
 
 }
 
-Gui::~Gui()
+void Gui::gui_render()
 {
-	delwin(con);
-	delwin(sub);
-	log.clear();
-	for (LogMessage* message : log)
-	{
-		delete message;
-	}
+	// pseudo code for gui_render()
+	gui_clear();
+	box(guiWin, 0, 0);
+	mvwprintw(guiWin, 1, 1, "HP:%d", guiHp);
+	gui_refresh();
+}
+
+void Gui::gui()
+{
+	refresh();
+
+	/*gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);*/
+	gui_clear();
+	box(guiWin, 0, 0);
+
+	// print the text
+	mvwprintw(guiWin, 1, 1, "HP:%d", game.player->destructible->hp);
+
+	gui_refresh();
 }
 
 void Gui::render()
 {
-	// DEBUG log
-	/*std::clog << "void Gui::render() {}" << std::endl;*/
+	std::clog << "Gui::render();" << std::endl;
+	std::clog << "making con..." << std::endl;
+	try {
+		//con = newwin(
+		//	0,/*PANEL_HEIGHT,*/ // int nlines
+		//	0,/*30,*/ // int ncols
+		//	22, // int begy
+		//	0 // int begx
+		//);
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to initialize con window.\n" << std::endl;
+		std::clog << e.what() << std::endl;
+	}
 
-	wclear(con);
-	wclear(sub);
-	
-	refresh(); // refresh the screen has to be called for the window to show
-	/*wclear(con);*/
-	
-	renderBar( // draw the health bar
-		1, // int x
-		1, // int y
-		BAR_WIDTH, // int bar_width
-		"HP:", // const char* name
-		engine.player->destructible->hp, // float value
-		engine.player->destructible->hpMax, // float maxValue
-		HPBARFULL_PAIR, // int barColor
-		HPBARMISSING_PAIR // int backColor
-	);
-
-	box( // draw a border around the GUI window
-		con, // WINDOW* win
-		0, // int vertChar
-		0 // int horChar
-	);
-	
-	// draw the log
-	int y = 1;
-	for (const auto message : log)
-	{
-		wclear(sub);
-		/*wcolor_set(con, message->log_message_color, 0);*/
-		wattron(sub, COLOR_PAIR(message->log_message_color));
-		mvwprintw(sub, 0, 0, message->log_message_text);
-		wattroff(sub, COLOR_PAIR(message->log_message_color));
-		y++;
+	std::clog << "sub = derwin();" << std::endl;
+	try {
+		//sub = derwin(
+		//	con, // 
+		//	0,//4, // int nlines
+		//	0,//28, // int ncols
+		//	0,/*2,*/ // int begy
+		//	0/*1*/ // int begx
+		//);
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to initialize sub window.\n" << std::endl;
+		std::cout << e.what() << std::endl;
 	}
 	
-	// draw the mouse look
-	renderMouseLook();
+
+	// DEBUG log
+	std::clog << "wclear(con);" << std::endl;
+	std::clog << "wclear(sub);" << std::endl;
+	try {
+		/*wclear(con);*/
+		/*wclear(sub);*/
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to clear windows.\n" << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+	std::clog << "clear ok." << std::endl;
+	
+	try {
+		/*refresh();*/ // refresh the screen has to be called for the window to show
+		/*wclear(con);*/
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to refresh screen.\n" << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+	std::clog << "refresh ok." << std::endl;
+	try {
+		//renderBar( // draw the health bar
+		//	1, // int x
+		//	1, // int y
+		//	BAR_WIDTH, // int bar_width
+		//	"HP:", // const char* name
+		//	engine.player->destructible->hp, // float value
+		//	engine.player->destructible->hpMax, // float maxValue
+		//	HPBARFULL_PAIR, // int barColor
+		//	HPBARMISSING_PAIR // int backColor
+		//);
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to render health bar.\n" << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+
+	try {
+		//box( // draw a border around the GUI window
+		//	con, // WINDOW* win
+		//	0, // int vertChar
+		//	0 // int horChar
+		//);
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to draw border around GUI window.\n" << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+	
+	// draw the log
+	try {
+		//int y = 1;
+		//for (const auto message : log)
+		//{
+		//	wclear(sub);
+		//	/*wcolor_set(con, message->log_message_color, 0);*/
+		//	wattron(sub, COLOR_PAIR(message->log_message_color));
+		//	mvwprintw(sub, 0, 0, message->log_message_text);
+		//	wattroff(sub, COLOR_PAIR(message->log_message_color));
+		//	y++;
+		//}
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed draw." << std::endl;
+		std::cout << e.what() << std::endl;
+	}
+
+	std::clog << "renderMouseLook();" << std::endl;
+	try {
+		// draw the mouse look
+		renderMouseLook();
+	}
+	catch (...) {
+		std::clog << "Failed to render mouse look.\n" << std::endl;
+	}
+	std::clog << "renderMouseLook() ok." << std::endl;
 
 	// draw the XP bar
 	//PlayerAi* ai = (PlayerAi*)engine.player->ai;
@@ -93,50 +182,60 @@ void Gui::render()
 	//	ai->getNextLevelXp(),
 	//	WHITE_PAIR, DRAGON_PAIR);
 
-	wrefresh(con);
-	wrefresh(sub);// refresh the GUI window has to be called for window to update
+	try {
+/*		wrefresh(con);
+		wrefresh(sub);*/// refresh the GUI window has to be called for window to update
+	}
+	catch (std::exception& e) {
+		std::clog << "Failed to refresh windows.\n" << std::endl;
+		std::cout << e.what() << std::endl;
+	}
 
+	std::clog << "Gui rendering complete." << std::endl;
 }
 
 void Gui::log_message(int log_message_col, const char* log_message_text, ...)
 {
 	// DEBUG log
 	//std::clog << "void Gui::log_message() {}" << std::endl;
-
-	// build the text
-	va_list args;
-	char buf[128];
-	va_start(args, log_message_text);
-	vsprintf_s(buf, log_message_text, args);
-	va_end(args);
 	
-	char* lineBegin = buf;
-	char* lineEnd = nullptr;
+	std::clog << "log_message_col: " << log_message_col << std::endl;
+	std::clog << "log_message_text: " << log_message_text << std::endl;
 
-	do
-	{
-		// make room for the new message
-		//if (log.size() == MSG_HEIGHT)
-		//{
-		//	log.erase(log.begin());
-		//}
+	//// build the text
+	//va_list args;
+	//char buf[128];
+	//va_start(args, log_message_text);
+	//vsprintf_s(buf, log_message_text, args);
+	//va_end(args);
+	//
+	//char* lineBegin = buf;
+	//char* lineEnd = nullptr;
 
-		// detect end of line
-		//lineEnd = strchr(lineBegin, '\n');
-		//if (lineEnd) 
-		//{
-		//	*lineEnd = '\0';
-		//}
+	//do
+	//{
+	//	// make room for the new message
+	//	//if (log.size() == MSG_HEIGHT)
+	//	//{
+	//	//	log.erase(log.begin());
+	//	//}
 
-		// add a new message to the log
-		LogMessage* msg = new LogMessage(lineBegin, log_message_col);
-		log.push_back(msg);
+	//	// detect end of line
+	//	//lineEnd = strchr(lineBegin, '\n');
+	//	//if (lineEnd) 
+	//	//{
+	//	//	*lineEnd = '\0';
+	//	//}
 
-		// go to next line
-		lineBegin = lineEnd + 1;
-	} while (lineEnd);
+	//	// add a new message to the log
+	//	LogMessage* msg = new LogMessage(lineBegin, log_message_col);
+	//	/*log.push_back(msg);*/
 
-	print_container(log);
+	//	// go to next line
+	//	lineBegin = lineEnd + 1;
+	//} while (lineEnd);
+
+	//print_container(log);
 }
 //
 //	//mvwprintw(con, MSG_HEIGHT, 1, text);
@@ -241,17 +340,17 @@ void Gui::renderBar(
 		);
 }
 
-Gui::LogMessage::LogMessage(const char* log_message_text, int log_message_color) : log_message_color(log_message_color)
-{
-	std::cout << "Gui::LogMessage::LogMessage() {}" << std::endl;
-	this->log_message_text = new char[strlen(log_message_text)]; // allocate memory for the text
-	strcpy(this->log_message_text, log_message_text); // copy the text
-}
-
-Gui::LogMessage::~LogMessage()
-{
-	delete[]log_message_text; // free the memory allocated for the text
-}
+//Gui::LogMessage::LogMessage(const char* log_message_text, int log_message_color) : log_message_color(log_message_color)
+//{
+//	std::cout << "Gui::LogMessage::LogMessage() {}" << std::endl;
+//	this->log_message_text = new char[strlen(log_message_text)]; // allocate memory for the text
+//	strcpy(this->log_message_text, log_message_text); // copy the text
+//}
+//
+//Gui::LogMessage::~LogMessage()
+//{
+//	delete[]log_message_text; // free the memory allocated for the text
+//}
 
 void Gui::print_container(std::vector<LogMessage*> message)
 {
@@ -268,14 +367,14 @@ void Gui::renderMouseLook()
 {
 	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
 
-	if (!engine.map->is_in_fov(Mouse_status.x, Mouse_status.y))
+	if (!game.map->is_in_fov(Mouse_status.x, Mouse_status.y))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;
 	}
 	char buf[128*10] = ""; // a buffer to store the text in
 	bool first = true;
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
 		if (actor->posX == Mouse_status.x && actor->posY == Mouse_status.y)
 		{
@@ -303,7 +402,7 @@ void Gui::save(TCODZip& zip)
 	zip.putInt(log.size());
 	for (LogMessage* message : log)
 	{
-		zip.putString(message->log_message_text);
+		zip.putString(message->log_message_text.c_str());
 		zip.putInt(message->log_message_color);
 	}
 }
@@ -320,86 +419,76 @@ void Gui::load(TCODZip& zip)
 	}
 }
 
-void Gui::gui_clear()
-{
-	log.clear();
-	// delete the pointers of the log
-	for (LogMessage* message : log)
-	{
-		delete message;
-	}
-}
-
 //==MENU==
-Menu::Menu()
-{
-	// create a new window for the menu using curses
-	WINDOW* menu = newwin(0, 0, 0, 0);
-	// place a box
-	box(menu,0,0);
-}
-
-Menu::~Menu()
-{
-	menu_clear();
-}
-
-void Menu::menu_clear() 
-{
-	items.clear();
-}
-
-void Menu::addItem(MenuItemCode code, const char* label) 
-{
-	MenuItem* item = new MenuItem();
-	item->code = code;
-	item->label = label;
-	items.push_back(item);
-}
-
-Menu::MenuItemCode Menu::pick()
-{
-	/*static TCODImage img("menu_background1.png");*/
-	int selectedItem = 0;
-
-	while (engine.run == true)
-	{
-		/*img.blit2x(TCODConsole::root, 0, 0);*/
-		int currentItem = 0;
-		/*for (MenuItem** it = items.begin(); it != items.end(); it++)*/
-		for (MenuItem* item : items)
-		{
-			if (currentItem == selectedItem) 
-			{
-				/*TCODConsole::root->setDefaultForeground(TCODColor::lighterOrange);*/
-			}
-			else 
-			{
-				/*TCODConsole::root->setDefaultForeground(TCODColor::lightGrey);*/
-			}
-			/*TCODConsole::root->print(10, 10 + currentItem * 3, (*it)->label);*/
-			
-			currentItem++;
-		}
-		/*TCODConsole::flush();*/
-
-		//// check key presses
-		//TCOD_key_t key;
-		//TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
-		//switch (key.vk) {
-		//case TCODK_UP:
-		//	selectedItem--;
-		//	if (selectedItem < 0) {
-		//		selectedItem = items.size() - 1;
-		//	}
-		//	break;
-		//case TCODK_DOWN:
-		//	selectedItem = (selectedItem + 1) % items.size();
-		//	break;
-		//case TCODK_ENTER:
-		//	return items.get(selectedItem)->code;
-		//default: break;
-		//}
-	}
-	return MenuItemCode::NONE;
-}
+//Menu::Menu()
+//{
+//	// create a new window for the menu using curses
+//	WINDOW* menu = newwin(0, 0, 0, 0);
+//	// place a box
+//	box(menu,0,0);
+//}
+//
+//Menu::~Menu()
+//{
+//	menu_clear();
+//}
+//
+//void Menu::menu_clear() 
+//{
+//	items.clear();
+//}
+//
+//void Menu::addItem(MenuItemCode code, const char* label) 
+//{
+//	MenuItem* item = new MenuItem();
+//	item->code = code;
+//	item->label = label;
+//	items.push_back(item);
+//}
+//
+//Menu::MenuItemCode Menu::pick()
+//{
+//	/*static TCODImage img("menu_background1.png");*/
+//	int selectedItem = 0;
+//
+//	while (game.run == true)
+//	{
+//		/*img.blit2x(TCODConsole::root, 0, 0);*/
+//		int currentItem = 0;
+//		/*for (MenuItem** it = items.begin(); it != items.end(); it++)*/
+//		for (MenuItem* item : items)
+//		{
+//			if (currentItem == selectedItem) 
+//			{
+//				/*TCODConsole::root->setDefaultForeground(TCODColor::lighterOrange);*/
+//			}
+//			else 
+//			{
+//				/*TCODConsole::root->setDefaultForeground(TCODColor::lightGrey);*/
+//			}
+//			/*TCODConsole::root->print(10, 10 + currentItem * 3, (*it)->label);*/
+//			
+//			currentItem++;
+//		}
+//		/*TCODConsole::flush();*/
+//
+//		//// check key presses
+//		//TCOD_key_t key;
+//		//TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS, &key, NULL);
+//		//switch (key.vk) {
+//		//case TCODK_UP:
+//		//	selectedItem--;
+//		//	if (selectedItem < 0) {
+//		//		selectedItem = items.size() - 1;
+//		//	}
+//		//	break;
+//		//case TCODK_DOWN:
+//		//	selectedItem = (selectedItem + 1) % items.size();
+//		//	break;
+//		//case TCODK_ENTER:
+//		//	return items.get(selectedItem)->code;
+//		//default: break;
+//		//}
+//	}
+//	return MenuItemCode::NONE;
+//}
