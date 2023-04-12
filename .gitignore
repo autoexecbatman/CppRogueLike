@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /TempFuncTest
 /UT_PDCurses_input/UT_PDCurses_input.vcxproj.filters
 /UT_PDCurses_input/UT_PDCurses_input.vcxproj
+/UT_PDCurses_input/main_UT_PDCurses_input.cpp
