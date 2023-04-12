@@ -45,19 +45,22 @@ bool Container::add(Actor& actor)
 void Container::remove(Actor& actor)
 {
 	std::clog << "Removing item from inventory" << std::endl;
-	/*inventoryList.erase(std::remove(inventoryList.begin(), inventoryList.end(), actor), inventoryList.end());*/
 
-	// iterate through the inventory and remove the item
-	for (auto it = inventoryList.begin(); it != inventoryList.end(); it++)
-	{
-		if (it->get() == &actor)
-		{
-			inventoryList.erase(it);
-			std::clog << "Item removed from inventory" << *it << std::endl;
-			break;
-		}
+	auto it = std::find_if(
+		inventoryList.begin(),
+		inventoryList.end(),
+		[&](const std::shared_ptr<Actor>& item) 
+		{return item.get() == &actor;}
+	);
+
+	if (it == inventoryList.end()) {
+		std::cout << "Item not found in inventory" << std::endl;
+		std::clog << "Item not found in inventory" << std::endl;
+		return;
 	}
 
+	inventoryList.erase(it);
+	std::clog << "Item removed from inventory" << std::endl;
 }
 
 void Container::load(TCODZip& zip)
