@@ -14,6 +14,6 @@ class Actor;
 #include "Container.h"
 #include "Actor.h"
 #include "Map.h"
-#include "Engine.h"
+#include "Game.h"
 
 #endif // !PROJECT_PATH_MAIN_H_
