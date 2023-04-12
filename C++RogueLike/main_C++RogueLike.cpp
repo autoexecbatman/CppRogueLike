@@ -69,7 +69,7 @@ int main()
 	menu.menu();
 	clear(); // finished with the menu, clear the screen
 
-	refresh(); // startnig new drawing, refresh the screen
+	refresh(); // starting new drawing, refresh the screen
 	//==INIT_GUI==
 	Gui gui;
 	gui.gui_init();
