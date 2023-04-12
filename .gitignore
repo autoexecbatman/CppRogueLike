@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /Temp
 /tempCPPRL
 /TempFuncTest
+/UT_PDCurses_input/UT_PDCurses_input.vcxproj.filters
+/UT_PDCurses_input/UT_PDCurses_input.vcxproj
