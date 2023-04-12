@@ -75,10 +75,10 @@ int main()
 	gui.gui_init();
 
 	//==INIT_PLAYER==
-	// extract the player from the game class
+	// TODO : extract the player from the game class
 	Player player( 40, 25 );
 
-	auto countLoop{ 0 }; // count the number of loops
+	auto countLoop{ 0 };
 	while (game.run == true)
 	{
 		//==DEBUG==
@@ -90,7 +90,7 @@ int main()
 		std::clog << "initializing game update..." << std::endl;
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
-		player.update(); // update the player
+		player.update(); // TODO : update the player
 		std::clog << "initialized successfully." << std::endl;
 		
 		//==DRAW==
@@ -98,10 +98,10 @@ int main()
 		/*clear();*/
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
-		player.render(); // render the player
+		player.render(); // TODO : render the player
 		std::clog << "initialized successfully." << std::endl;
 
-		// print the player's gender
+		// DEBUG : print the player's gender
 		mvprintw(
 			1,
 			1,
@@ -109,7 +109,7 @@ int main()
 			game.player->gender.c_str()
 		);
 
-		// print the player's class
+		// DEBUG : print the player's class
 		mvprintw(
 			2,
 			1,
@@ -117,7 +117,7 @@ int main()
 			game.player->playerClass.c_str()
 		);
 
-		// print the player's name
+		// DEBUG : print the player's name
 		mvprintw(
 			3,
 			1,
@@ -126,7 +126,6 @@ int main()
 		);
 
 		//==INPUT==
-		// get the input from the player
 		std::clog << "storing key" << std::endl;
 		game.lastKey = game.keyPress;
 
@@ -136,11 +135,10 @@ int main()
 		countLoop++;
 	}
 	std::clog << "Closing the game..." << std::endl;
-	game.save(); // save the game
-	
-	endwin(); // close the curses window
+	game.save();	
+	endwin();
 
-	debugFile.close(); // close the stream to serialize the std::clog output
+	debugFile.close();
 
 	return 0;
 }
