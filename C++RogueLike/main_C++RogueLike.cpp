@@ -55,6 +55,13 @@ int main()
 		mousemask(0x1fffffffL, nullptr); // enable mouse events * #define ALL_MOUSE_EVENTS        0x1fffffffL
 		std::clog << "Initialized successfully.\n";
 	}
+	else
+	{
+		std::clog << "Mouse not supported.\n";
+		std::cout << "Mouse not supported.\n";
+		exit(-1);
+	}
+
 	refresh(); // refresh the screen
 
 	//==INIT_MENU==
