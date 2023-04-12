@@ -51,7 +51,7 @@ public:
 	int getNextLevelXp();
 	bool levelUpUpdate(Actor& owner);
 	void update(Actor& owner) override;
-	void load(TCODZip& zip);
+	void load(TCODZip& zip); // should be marked as override ? No, because it's not a virtual function
 	void save(TCODZip& zip);
 	
 	void pick_item(Actor& owner);

@@ -23,7 +23,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Actor> player{ std::make_shared<Actor>(
+	std::shared_ptr<Actor> player{ std::make_shared<Actor>( // < - extract the player from the game class
 		25, // int posX
 		40, // int posY
 		'@', // char symbol

@@ -109,7 +109,7 @@ void Actor::save(TCODZip& zip)
 	if (container) container->save(zip);
 }
 
-//the actor render function with color
+// the actor render function with color
 void Actor::render() const
 {
 	attron(COLOR_PAIR(col));
@@ -117,6 +117,7 @@ void Actor::render() const
 	attroff(COLOR_PAIR(col));
 }
 
+// adds an item to the actor's inventory
 void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
@@ -124,7 +125,7 @@ void Actor::pickItem(int x, int y)
 	/*container->add(std::shared_ptr<Actor>(this));*/
 }
 
-//the monster update
+// the actor update
 void Actor::update()
 {
 	// if the actor has an ai then update the ai

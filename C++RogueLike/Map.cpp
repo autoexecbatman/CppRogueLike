@@ -388,6 +388,8 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	{
 		game.player->posY = y1 + 1;
 		game.player->posX = x1 + 1;
+
+		// create a player from the player class and place it in the room
 		
 		//// create player 2
 		//game.player2->posY = y1 + 2;

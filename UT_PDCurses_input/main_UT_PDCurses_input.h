@@ -1,0 +1,6 @@
+#ifndef MAIN_UT_PDCURSES_INPUT_H
+#define MAIN_UT_PDCURSES_INPUT_H
+
+void test();
+
+#endif // !MAIN_UT_PDCURSES_INPUT_H

@@ -634,6 +634,12 @@ std::shared_ptr<Actor> PlayerAi::choseFromInventory(Actor& owner, int ascii)
 
 void PlayerAi::load(TCODZip& zip)
 {
+	// this is a player, so nothing to load
+	// because the player is always the same ? 
+	// or is this for loading a saved game ?
+	// if so, then the player is not always the same
+	// so this is not correct
+	// but I don't know how to do it yet
 }
 
 void PlayerAi::save(TCODZip& zip)

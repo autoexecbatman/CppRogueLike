@@ -9,8 +9,12 @@
 #include "Colors.h"
 #include "Game.h"
 #include "Menu.h"
+#include "Gui.h"
+#include "Player.h"
 
 Game game;
+
+// TODO : extract the player from the game class
 
 int main()
 {
@@ -23,7 +27,7 @@ int main()
 	initscr(); // initialize the screen in curses
 	std::clog << "Initialized successfully.\n";
 
-	if (has_colors()) 
+	if (has_colors()) // check if the terminal supports colors
 	{
 		std::clog << "Initializing colors...\n";
 		start_color(); // start color curses
@@ -63,6 +67,10 @@ int main()
 	Gui gui;
 	gui.gui_init();
 
+	//==INIT_PLAYER==
+	// extract the player from the game class
+	Player player( 40, 25 );
+
 	auto countLoop{ 0 }; // count the number of loops
 	while (game.run == true)
 	{
@@ -75,6 +83,7 @@ int main()
 		std::clog << "initializing game update..." << std::endl;
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
+		player.update(); // update the player
 		std::clog << "initialized successfully." << std::endl;
 		
 		//==DRAW==
@@ -82,6 +91,7 @@ int main()
 		/*clear();*/
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
+		player.render(); // render the player
 		std::clog << "initialized successfully." << std::endl;
 
 		// print the player's gender

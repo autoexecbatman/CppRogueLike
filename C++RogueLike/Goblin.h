@@ -1,5 +1,5 @@
-#ifndef PROJECT_PATH_GOBLIN_H_
-#define PROJECT_PATH_GOBLIN_H_
+#ifndef GOBLIN_H
+#define GOBLIN_H
 
 class Actor;
 
@@ -7,15 +7,9 @@ class Actor;
 class Goblin : public Actor
 {
 public:
-	/*Goblin(int y, int x);*/
 	Goblin(int y, int x);
 
-	/*Actor* create_goblin(int y, int x);*/
-
-	// make a create_goblin function that returns a std::unique_ptr<Actor> instead of an Actor*
-
 	std::shared_ptr<Goblin> create_goblin(int y, int x);
-
 };
 //====
 
@@ -52,4 +46,4 @@ public:
 };
 //====
 
-#endif // PROJECT_PATH_GOBLIN_H_
+#endif // GOBLIN_H
