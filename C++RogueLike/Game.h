@@ -1,7 +1,6 @@
-#ifndef PROJECT_PATH_ENGINE_H_
-#define PROJECT_PATH_ENGINE_H_
+#ifndef _GAME_H_
+#define _GAME_H_
 
-#include <deque>
 #include <map>
 #include <memory>
 
@@ -9,41 +8,49 @@
 #include "Gui.h"
 #include "Literals.h"
 #include "Map.h"
+#include "Colors.h"
 
-class Engine {
+class Game
+{
 public:
-    enum class GameStatus : int {
-        STARTUP,
-        IDLE,
-        NEW_TURN,
-        VICTORY,
-        DEFEAT
-    } gameStatus;
+	bool run{ true };
+	enum class GameStatus : int 
+	{
+		STARTUP,
+		IDLE,
+		NEW_TURN,
+		VICTORY,
+		DEFEAT
+	} gameStatus{ GameStatus::STARTUP };
 
-    int fovRadius;
-    int screenWidth;
-    int screenHeight;
-    std::shared_ptr<Actor> player;
-    std::shared_ptr<Actor> stairs;
-    std::unique_ptr<Gui> gui;
-    std::unique_ptr<Map> map;
-    bool run = true;
-    int keyPress = getch();
-    int lastKey = getch();
-    int level = 0;
-    std::vector<std::shared_ptr<Actor>> actors;
+	std::shared_ptr<Actor> player{ std::make_shared<Actor>(
+		25, // int posX
+		40, // int posY
+		'@', // char symbol
+		"Player", // std::string name
+		PLAYER_PAIR, // int colorPair
+		0 // int index
+	) };
 
-    // Constructors and destructor.
-    Engine(int screenWidth, int screenHeight);
-    ~Engine();
+	std::shared_ptr<Actor> stairs{ std::make_shared<Actor>(
+		0, // int posX
+		0, // int posY
+		'>', // char symbol
+		"stairs", // std::string name
+		WHITE_PAIR, // int colorPair
+		1 // int index
+	) };
 
-    // Deleted copy constructor and copy assignment operator.
-    Engine(const Engine&) = delete;
-    Engine& operator=(const Engine&) = delete;
+	std::unique_ptr<Map> map{ std::make_unique<Map>(22, 120) };
+	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
-    // Deleted move constructor and move assignment operator.
-    Engine(Engine&&) = delete;
-    Engine& operator=(Engine&&) = delete;
+
+	int keyPress{ getch() }; // stores the current key pressed
+    int lastKey{ getch() }; // stores that was pressed before the current key
+
+    int level{ 0 };
+
+	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
 
     // Public member functions.
     void init();
@@ -52,7 +59,7 @@ public:
     void send_to_back(Actor& actor);
     std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
     bool pick_tile(int* x, int* y, int maxRange);
-    void game_menu();
+
     bool mouse_moved();
     void target();
     void load();
@@ -75,6 +82,6 @@ private:
 };
 
 // Declaration of the global engine object.
-extern Engine engine;
+extern Game game;
 
 #endif // PROJECT_PATH_ENGINE_H_

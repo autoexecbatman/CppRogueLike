@@ -1,13 +1,11 @@
-
 #include <iostream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
 #include <random>
 #include <climits>
-#include <deque>
 #include <cassert>
 
-#include "Engine.h"
+#include "Game.h"
 #include "Actor.h"
 #include "Map.h"
 #include "Gui.h"
@@ -20,153 +18,119 @@
 #include "Colors.h"
 #include "Window.h"
 
-//==ENGINE_CONSTRUCTOR==
-// initializes the console window, colors and other curses console functions.
-// creates a new player, map, and gui.
-Engine::Engine(int screenWidth, int screenHeight)
-	:
-	gameStatus(GameStatus::STARTUP),
-	fovRadius(10),
-	screenWidth(screenWidth),
-	screenHeight(screenHeight),
-	player(nullptr),
-	stairs(nullptr),
-	map(nullptr),
-	gui(nullptr),
-	run(true),
-	keyPress(0)
-{
-
-	// DEBUG MESSAGE
-	std::clog << "Engine constructor called..." << std::endl;
-
-	//==INIT_CURSES==
-	initscr(); // initialize the screen in curses
-	start_color(); // start color curses
-	cbreak(); // disable line buffering
-	noecho(); // turn off echoing of keys to the screen
-	curs_set(0); // remove the blinking cursor
-	keypad(stdscr, true); // enable the keypad for non-char keys
-	mouse_on(ALL_MOUSE_EVENTS); // enable mouse events
-
-	//==GUI==
-	// a new Gui instance
-	gui = std::make_unique<Gui>();
-}
-
-Engine::~Engine()
-{
-	//// DEBUG MESSAGE
-	//std::clog << "Engine destructor called..." << std::endl;
-
-	try {
-		std::clog << "Engine destructor called..." << std::endl;
-	}
-	catch (...) {
-		// handle the exception in an appropriate way
-		std::exit(EXIT_FAILURE);
-	}
-	
-	actors.clear(); // clear the actors deque
-
-	//==END_CURSES==
-	endwin(); // end curses
-}
-
 //====
 // When the Engine is created, 
 // we don't know yet if we have to generate a new map or load a previously saved one.
 // Will be called in load()
-void Engine::init()
+void Game::init()
 {
 	//==PLAYER==
-	// a new Actor for the player
-	engine.player = std::make_shared<Actor>(
-		25,
-		40,
-		'@',
-		"Player",
-		PLAYER_PAIR,
-		0
-	);
+	game.actors.emplace_back(game.player);
 
-	engine.player->destructible = std::make_shared<PlayerDestructible>(
-		10 + random_number(1,10),
-		5,
-		"your cadaver",
-		0
-	);
-
-	engine.player->attacker = std::make_shared<Attacker>(random_number(1,10));
-	engine.player->ai = std::make_shared<PlayerAi>();
-	engine.player->container = std::make_shared<Container>(26);
-	engine.actors.push_back(player);
-	/*actors.push_back(player->index, player);*/
+	if (game.player != nullptr)
+	{
+		std::clog << "game.player is not null" << std::endl;
+		game.player->destructible = std::make_shared<PlayerDestructible>(
+			10 + random_number(1, 10),
+			5,
+			"your cadaver",
+			0
+		);
+		game.player->attacker = std::make_shared<Attacker>(random_number(1, 10));
+		game.player->ai = std::make_shared<PlayerAi>();
+		game.player->container = std::make_shared<Container>(26);
+	}
+	else
+	{
+		std::clog << "game.player is null" << std::endl;
+	}
 
 	//==STAIRS==
 	// create stairs for player to descend to the next level
-	engine.stairs = std::make_shared<Actor>(
-		0,
-		0,
-		'>',
-		"stairs",
-		WHITE_PAIR,
-		1
-	);
+	//game.stairs = std::make_shared<Actor>(
+	//	0,
+	//	0,
+	//	'>',
+	//	"stairs",
+	//	WHITE_PAIR,
+	//	1
+	//);
 
-	engine.stairs->blocks = false;
-	engine.stairs->fovOnly = false;
+	game.stairs->blocks = false;
+	game.stairs->fovOnly = false;
 	
-	engine.actors.push_back(stairs);
-	/*actors.try_emplace(stairs->index, stairs);*/
+	game.actors.push_back(stairs);
 
 	//==MAP==
 	// a new Map instance
-	engine.map = std::make_unique<Map>(30 - 8, 120); // need to make space for the gui (-7y)
-	engine.map->init(true); // set the checker function
+	//game.map = std::make_unique<Map>(30 - 8, 120); // need to make space for the gui (-7y)
+
+	game.map->init(true); // set the checker function
 
 	gameStatus = GameStatus::STARTUP;
+	std::clog << "GameStatus::STARTUP" << std::endl;
 }
 
 //==ENGINE_UPDATE==
 // the update function to update the game logic
 // and stores events
-void Engine::update()
+void Game::update()
 {
-	// if the player is dead then set the run flag to false
-	if (engine.player->destructible->is_dead())
+	if (game.player) // check if the player is not null
 	{
-		// set the run flag to false
-		run = false;
-		// ask the player to press any key
-		engine.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
-	}
-	else
-	{
-		//==COMPUTE_FOV==
-		// The update function must ensure the FOV is computed on first frame only.
-		// This is to avoid FOV recomputation on each frame.
-		if (Engine::gameStatus == GameStatus::STARTUP)
+		if (game.player->destructible)
 		{
-			//DEBUG
-			std::clog << "...Computing FOV..." << std::endl;
-			engine.map->compute_fov();
-		}
-
-		gameStatus = GameStatus::IDLE; // set the game status to idle
-
-		engine.player->update(); // update the player and get the keypress for the player
-
-		if (Engine::gameStatus == GameStatus::NEW_TURN) // check new turn
-		{
-			//==ACTORS==
-			// go through the list of actors
-			for (const auto& actor : actors)
+			// if the player is dead then set the run flag to false
+			if (game.player->destructible->is_dead())
 			{
-				if (actor != player)
+				std::clog << "Player is dead!" << std::endl;
+				// set the run flag to false
+				run = false;
+				// ask the player to press any key
+				game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
+			}
+			else
+			{
+				//==COMPUTE_FOV==
+				// The update function must ensure the FOV is computed on first frame only.
+				// This is to avoid FOV recomputation on each frame.
+				if (Game::gameStatus == GameStatus::STARTUP)
 				{
-					actor->update();
+					//DEBUG
+					std::clog << "...Computing FOV..." << std::endl;
+					game.map->compute_fov();
 				}
+
+				gameStatus = GameStatus::IDLE; // set the game status to idle
+				std::clog << "GameStatus::IDLE" << std::endl;
+
+				std::clog << "Updating player..." << std::endl;
+				game.player->update(); // update the player and get the keypress for the player
+				std::clog << "Player updated!" << std::endl;
+
+				std::clog << "Updating actors..." << std::endl;
+				if (Game::gameStatus == GameStatus::NEW_TURN) // check new turn
+				{
+					//==ACTORS==
+					// go through the list of actors
+					for (const auto& actor : actors)
+					{
+						if (actor != nullptr)
+						{
+							if (actor != player)
+							{
+								actor->update();
+							}
+						}
+						else
+						{
+							std::clog << "actor is null!" << std::endl;
+							std::cout << "actor is null!" << std::endl;
+							exit(-1);
+						}
+					}
+				}
+				std::clog << "Actors updated!" << std::endl;
 			}
 		}
 	}
@@ -175,9 +139,8 @@ void Engine::update()
 //====
 // the engine render function implementation
 // draws the entities on the map
-void Engine::render()
+void Game::render()
 {
-	clear();
 	map->render(); // draw the map
 
 	//for (Actor* actor : actors) // iterate through the actors list
@@ -198,32 +161,45 @@ void Engine::render()
 	//		actor->render(); // draw the actor
 	//	}
 	//}
+	
+	std::clog << "Actors are trying to be drawn..." << std::endl;
 
 	//==ACTORS==
 	// go through the list of actors
 	for (const auto& actor : actors)
 	{
-		if (actor != player // check if the actor is not the player
-			&&
-			(
-				(
-					!actor->fovOnly
-					&&
-					map->is_explored(actor->posX, actor->posY)
-					) // check if the actor is not fovOnly and is explored
-				||
-				map->is_in_fov(actor->posX, actor->posY)
-				) // OR if the actors position is in the FOV of the player
-			) // end of if statement
+		if (actor != nullptr)
 		{
-			actor->render(); // draw the actor
+			if (actor != player // check if the actor is not the player
+				&&
+				(
+					(
+						!actor->fovOnly
+						&&
+						map->is_explored(actor->posX, actor->posY)
+						) // check if the actor is not fovOnly and is explored
+					||
+					map->is_in_fov(actor->posX, actor->posY)
+					) // OR if the actors position is in the FOV of the player
+				) // end of if statement
+			{
+				std::clog << "Actor: " << actor->name << " is in FOV" << std::endl;
+				actor->render(); // draw the actor
+				std::clog << "Actor: " << actor->name << " is drawn" << std::endl;
+			}
 		}
 	}
-
+	std::clog << "Actors are drawn" << std::endl;
+	std::clog << "Player is trying render..." << std::endl;
 	player->render(); // draw the player
-
-	gui->render(); // draw the gui
-	refresh();
+	std::clog << "Player is drawn" << std::endl;
+	std::clog << "GUI is trying render..." << std::endl;
+	//gui->render(); // draw the gui
+	std::clog << "GUI is drawn" << std::endl;
+	/*refresh();*/	
+	std::clog << "GUI Refreshed" << std::endl;
+	std::clog << "GUI Rendered" << std::endl;
+	std::clog << "RENDER FUNCTION OUT" << std::endl;
 }
 
 //====
@@ -319,7 +295,7 @@ void Engine::render()
 //	print_container(actors);
 //}
 
-void Engine::send_to_back(Actor& actor)
+void Game::send_to_back(Actor& actor)
 {
 	// first print out the actor
 	//std::clog << "the key -> " << actor.index << " <- " << actor.name << " " << "is being sent to back." << std::endl;
@@ -361,7 +337,7 @@ void Engine::send_to_back(Actor& actor)
 
 //====
 // prints the deque to the console window
-void Engine::print_container(std::vector<std::shared_ptr<Actor>> actors)
+void Game::print_container(std::vector<std::shared_ptr<Actor>> actors)
 {
 	int i = 0;
 	for (const auto& actor : actors)
@@ -376,7 +352,7 @@ void Engine::print_container(std::vector<std::shared_ptr<Actor>> actors)
 // This function returns the closest monster from position x, y within range.
 // If range is 0, it's considered infinite.
 // If no monster is found within range, it returns NULL.
-std::shared_ptr<Actor> Engine::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
+std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
 {
 	// TODO: Add your implementation code here.
 	/*Actor* closestMonster = nullptr;*/
@@ -429,9 +405,9 @@ std::shared_ptr<Actor> Engine::get_closest_monster(int fromPosX, int fromPosY, d
 // We're not going to use the main loop from main.cpp while picking a tile. 
 // This would require to add a flag in the engine to know if we're in standard play mode or tile picking mode.Instead, we create a alternative game loop.
 // Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
-bool Engine::pick_tile(int* x, int* y, int maxRange)
+bool Game::pick_tile(int* x, int* y, int maxRange)
 {
-	//while (engine.run == true)
+	//while (game.run == true)
 	//{
 	//	clear();
 	//	render();
@@ -532,7 +508,7 @@ bool Engine::pick_tile(int* x, int* y, int maxRange)
 			targetCursorY = Mouse_status.y;
 			targetCursorX = Mouse_status.x;
 		}
-		engine.render();
+		game.render();
 
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursorY != player->posY || targetCursorX != player->posX)
@@ -567,9 +543,9 @@ bool Engine::pick_tile(int* x, int* y, int maxRange)
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
+		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
+			auto actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr)
 			{
@@ -615,11 +591,11 @@ bool Engine::pick_tile(int* x, int* y, int maxRange)
 
 		////display the FOV in white
 		// 
-		//for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
+		//for (int tilePosX = 0; tilePosX < game.map->map_width; tilePosX++)
 		//{
-		//	for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
+		//	for (int tilePosY = 0; tilePosY < game.map->map_height; tilePosY++)
 		//	{
-		//		if (engine.map->is_in_fov(tilePosX, tilePosY))
+		//		if (game.map->is_in_fov(tilePosX, tilePosY))
 		//		{
 		//			mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 		//		}
@@ -705,9 +681,9 @@ bool Engine::pick_tile(int* x, int* y, int maxRange)
 
 			// if the target is a monster then attack it
 		{
-			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
+			if (game.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
+				auto actor = game.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
@@ -731,128 +707,7 @@ bool Engine::pick_tile(int* x, int* y, int maxRange)
 	return false;
 }
 
-struct commands
-{
-	const char* text;
-	void (*function)(WINDOW*);
-};
-
-typedef struct commands COMMAND;
-
-void new_game(WINDOW* win) { engine.init(); }
-void load_game(WINDOW* win) { engine.load(); }
-void exit_game(WINDOW* win) { exit(0); }
-
-
-COMMAND command[3] =
-{
-{ "New Game", new_game },
-{ "Load Game", load_game },
-{ "Exit", exit_game }
-};
-
-void Engine::game_menu()
-{
-	// this function will contain a loop where the "Game Menu" will be displayed
-	// and the player will be able to choose an option
-	// the function will return when the player chooses an option
-	
-	// first we assign the variables we need for the function
-
-	int old_option = -1;
-	int new_option = 0;
-
-	// we create a new window for the menu
-	WINDOW* menu_win = newwin(
-		6, // int nlines
-		20, // int ncols
-		10, // int begy
-		40 // int begx
-	);
-	box(menu_win, 0, 0);
-	int max_x = getmaxx(menu_win); // get the maximum x value of the window
-	int max_y = getmaxy(menu_win); // get the maximum y value of the window
-	
-	refresh();
-	
-	bool menu_run = true; // this variable will be used to keep the loop running
-	while (menu_run == true) 
-	{
-		// first clear the window
-		wclear(menu_win);
-
-		// then draw the menu
-
-		// first print the menu title
-
-		mvwprintw(menu_win, 0, 4, "==THE MENU==");
-
-		// then print the menu selection options
-
-		mvwprintw(menu_win, 1, 4, "[N,n] New Game");
-		mvwprintw(menu_win, 2, 4, "[L,l] Load");
-		mvwprintw(menu_win, 3, 4, "[Q,q] Quit");
-
-		// then print the menu cursor
-
-		mvwprintw(menu_win, new_option + 1, 1, ">");
-		mvwprintw(menu_win, old_option + 1, 1, " ");
-		old_option = new_option;
-
-		wrefresh(menu_win);
-
-		// get the key press
-		const int menu_key = getch(); // this variable will contain the key the player presses
-		switch (menu_key)
-		{
-		case KEY_UP:
-			// move the selection cursor up
-			new_option--;
-			if (new_option < 0) new_option = 2;
-			break;
-
-		case KEY_DOWN:
-			// move the selection cursor down
-			new_option++;
-			if (new_option > 2) new_option = 0;
-			break;
-
-		case 'Q':
-		case 'q':
-			// quit the menu window
-			exit(0);
-			break;
-
-		case 'N':
-		case 'n':
-			// if the key enter is pressed and cursor is on "New Game" then start a new game
-			menu_run = false;
-			delwin(menu_win);
-			engine.init();
-			break;
-
-		case 'L':
-		case 'l':
-			// if the key enter is pressed and cursor is on "Continue" then load the game
-			menu_run = false;
-			delwin(menu_win);
-			engine.load();
-			break;
-
-		case 10:
-			// if the key enter is pressed then select the option
-			// and return the target position
-			menu_run = false;
-			delwin(menu_win);
-			command[new_option].function(menu_win);
-			break;
-
-		default:break;
-		}
-	}
-}
-
-bool Engine::mouse_moved()
+bool Game::mouse_moved()
 {
 	int old_mouse_x = Mouse_status.x;
 	int old_mouse_y = Mouse_status.y;
@@ -877,7 +732,7 @@ bool Engine::mouse_moved()
 
 }
 
-void Engine::target()
+void Game::target()
 {
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
@@ -903,15 +758,15 @@ void Engine::target()
 			targetCursorY = Mouse_status.y;
 			targetCursorX = Mouse_status.x;
 		}
-		engine.render();
+		game.render();
 
 		//display the FOV in white
 		
-		for (int tilePosX = 0; tilePosX < engine.map->map_width; tilePosX++)
+		for (int tilePosX = 0; tilePosX < game.map->map_width; tilePosX++)
 		{
-			for (int tilePosY = 0; tilePosY < engine.map->map_height; tilePosY++)
+			for (int tilePosY = 0; tilePosY < game.map->map_height; tilePosY++)
 			{
-				if (engine.map->is_in_fov(tilePosX, tilePosY))
+				if (game.map->is_in_fov(tilePosX, tilePosY))
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 				}
@@ -952,9 +807,9 @@ void Engine::target()
 
 		// if the cursor is on a monster then display the monster's name
 		int distance = player->get_distance(targetCursorX, targetCursorY);
-		if (engine.map->is_in_fov(targetCursorX, targetCursorY))
+		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
+			auto actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr )
 			{
@@ -1000,9 +855,9 @@ void Engine::target()
 			
 			// if the target is a monster then attack it
 		{
-			if (engine.map->is_in_fov(targetCursorX, targetCursorY))
+			if (game.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				auto actor = engine.map->get_actor(targetCursorX, targetCursorY);
+				auto actor = game.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
@@ -1026,7 +881,7 @@ void Engine::target()
 	clear();
 }
 
-void Engine::load()
+void Game::load()
 {
 	if (TCODSystem::fileExists("game.sav"))
 	{
@@ -1038,7 +893,7 @@ void Engine::load()
 		int width = zip.getInt();
 		int height = zip.getInt();
 		/*map = new Map(height, width);*/
-		engine.map = std::make_unique<Map>(height, width);
+		game.map = std::make_unique<Map>(height, width);
 		map->load(zip);
 
 		// load the player
@@ -1073,70 +928,128 @@ void Engine::load()
 	// TODO : Delete this line moved to switch case in game_menu
 	else
 	{
-		engine.init();
+		game.init();
 	}
 }
 
-void Engine::save()
+void Game::save()
 {
-	// handle the permadeath
-	// delete the save file if the player is dead
-	if (player->destructible->is_dead())
+	if (player != nullptr)
 	{
-		TCODSystem::deleteFile("game.sav");
-	}
-	// else save the map
-	else
-	{
-		std::clog << "saving..." << std::endl;
-
-		TCODZip zip;
-
-		// save the map first
-		zip.putInt(map->map_width);
-		zip.putInt(map->map_height);
-		map->save(zip);
-
-		// then save the player
-		player->save(zip);
-
-		// then save the stairs
-		stairs->save(zip);
-
-		// then all the other actors
-		zip.putInt(actors.size() - 2);
-		//for (Actor* actor : actors)
-		//{
-		//	if (actor != player && actor != stairs)
-		//	{
-		//		actor->save(zip);
-		//	}
-		//}
-		
-		for (auto& actor : actors)
+		if (player->destructible != nullptr)
 		{
-			if (actor != player && actor != stairs)
+
+			// handle the permadeath
+			// delete the save file if the player is dead
+			if (player->destructible->is_dead())
 			{
-				actor->save(zip);
+				// if file exists delete it
+				if (TCODSystem::fileExists("game.sav"))
+				{
+					TCODSystem::deleteFile("game.sav");
+				}
+
+
+				/*TCODSystem::deleteFile("game.sav");*/
+			}
+			// else save the map
+			else
+			{
+				if (map != nullptr)
+				{
+					std::clog << "saving..." << std::endl;
+
+					TCODZip zip;
+
+					// save the map first
+					zip.putInt(map->map_width);
+					zip.putInt(map->map_height);
+					map->save(zip);
+
+					if (player != nullptr)
+					{
+						// then save the player
+						player->save(zip);
+					}
+					else
+					{
+						std::clog << "player is null in Game::save()" << std::endl;
+					}
+
+					if (stairs != nullptr)
+					{
+						// then save the stairs
+						stairs->save(zip);
+					}
+					else
+					{
+						std::clog << "player is null in Game::save()" << std::endl;
+					}
+
+					if(!actors.empty())
+					{
+						// then all the other actors
+						zip.putInt(actors.size() - 2);
+					}
+					else 
+					{
+						std::clog << "actors is empty in Game::save()" << std::endl;
+					}
+
+					for (const auto& actor : actors)
+					{
+						if (actor != nullptr)
+						{
+							if (actor != player && actor != stairs)
+							{
+								actor->save(zip);
+							}
+						}
+						else
+						{
+							std::clog << "actor is null in Game::save()" << std::endl;
+						}
+					}
+
+					if (gui != nullptr)
+					{
+						// save the message log
+						gui->save(zip);
+					}
+					else
+					{
+						std::clog << "gui is null in Game::save()" << std::endl;
+					}
+
+					zip.saveToFile("game.sav");
+				}
+				else
+				{
+					std::clog << "map is null in Game::save()" << std::endl;
+				}
 			}
 		}
-
-	// save the message log
-	gui->save(zip);
-
-	zip.saveToFile("game.sav");
+		else
+		{
+			std::clog << "player->destructible is null in Game::save()" << std::endl;
+			return;
+		}
 	}
-	
+	else
+	{
+		std::clog << "player is null in Game::save()" << std::endl;
+		return;
+	}
 }
 
-void Engine::term()
+void Game::term()
 {
 	actors.clear();
 	/*if (map) delete map;*/
-	gui->gui_clear();
+	/*gui->gui_clear();*/
 }
 
-void Engine::next_level()
+void Game::next_level()
 {
 	level++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
@@ -1147,26 +1060,16 @@ void Engine::next_level()
 	// clear the dungeon except the player and the stairs
 	actors.clear();
 	actors.push_back(player);
-	/*actors.try_emplace(player->index, player);*/
 	actors.push_back(stairs);
-	/*actors.try_emplace(stairs->index, stairs);*/
-	
-	/*print_container(actors);*/
-	
-	/*delete map;*/
 
-
-	
-	/*map = new Map(30 - 8, 120);*/
 	map = std::make_unique<Map>(30 - 8, 120);
 	map->init(true);
-	gameStatus = GameStatus::STARTUP;
 
-	
+	gameStatus = GameStatus::STARTUP;
 }
 
 // create the getActor function
-std::shared_ptr<Actor> Engine::get_actor(int x, int y) const
+std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 {
 	//for (Actor* actor : actors)
 	//{
@@ -1187,7 +1090,7 @@ std::shared_ptr<Actor> Engine::get_actor(int x, int y) const
 	return nullptr;
 }
 
-void Engine::dispay_stats(int level)
+void Game::dispay_stats(int level)
 {
 	// TODO: Add your implementation code here.
 	// display the player stats
@@ -1230,7 +1133,7 @@ void Engine::dispay_stats(int level)
 }
 
 // display character sheet
-void Engine::display_character_sheet()
+void Game::display_character_sheet()
 {
 	WINDOW* character_sheet = newwin(
 		30, // height
@@ -1243,7 +1146,7 @@ void Engine::display_character_sheet()
 
 	refresh();
 	// display the player stats
-	bool run = true;
+	auto run{ true };
 	while (run == true)
 	{
 		// display the player stats
@@ -1251,9 +1154,9 @@ void Engine::display_character_sheet()
 		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
 
 		// display the player name
-		mvwprintw(character_sheet, 1, 1, "Name: ");
+		mvwprintw(character_sheet, 1, 1, "Name: %s", player->name.c_str());
 		// display the player class
-		mvwprintw(character_sheet, 2, 1, "Class: ");
+		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
 		// display the class kit
 		mvwprintw(character_sheet, 3, 1, "Kit: ");
 		// display the player level
@@ -1266,7 +1169,7 @@ void Engine::display_character_sheet()
 		// display the player race
 		mvwprintw(character_sheet, 1, 60, "Race: ");
 		// display gender
-		mvwprintw(character_sheet, 2, 60, "Gender: ");
+		mvwprintw(character_sheet, 2, 60, "Gender: %s", player->gender.c_str());
 		// display hair color
 		mvwprintw(character_sheet, 3, 60, "Hair Color: ");
 		// display eye color
@@ -1297,18 +1200,20 @@ void Engine::display_character_sheet()
 }
 
 // make a random number function to use in the game
-int Engine::random_number(int min, int max)
+// TODO : does this belong in the engine class?
+int Game::random_number(int min, int max)
 {
-	static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));
+	static std::default_random_engine randomEngine(gsl::narrow_cast<unsigned int>(time(nullptr)));
 	std::uniform_int_distribution<int> range(min, max);
 	
 	return range(randomEngine);
 }
 
 // displays the actors names
-void Engine::wizard_eye()
+// TODO: this is a test function
+void Game::wizard_eye()
 {
-	for (const auto& actor : engine.actors)
+	for (const auto& actor : game.actors)
 	{
 		// print the actor's name
 		mvprintw(actor->posY, actor->posX, actor->name.c_str());
