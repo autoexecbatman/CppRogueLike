@@ -25,7 +25,7 @@ public:
 	// in the function create_room()
 	// in Map.cpp
 
-	bool player_is_dead();
+	bool player_is_dead(); // TODO : correct this function
 	void update();
 	void draw();
 };
