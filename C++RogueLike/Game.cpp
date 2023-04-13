@@ -4,6 +4,7 @@
 #include <random>
 #include <climits>
 #include <cassert>
+#include <gsl/util>
 
 #include "Game.h"
 #include "Actor.h"
@@ -191,7 +192,7 @@ void Game::render()
 	}
 	std::clog << "Actors are drawn" << std::endl;
 	std::clog << "Player is trying render..." << std::endl;
-	/*player->render();*/ // draw the player
+	player->render(); // draw the player
 	std::clog << "Player is drawn" << std::endl;
 	std::clog << "GUI is trying render..." << std::endl;
 	//gui->render(); // draw the gui
