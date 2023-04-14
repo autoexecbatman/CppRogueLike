@@ -1,6 +1,6 @@
 #include <iostream>
 #include <vector>
-#include <gsl/gsl_util>
+#include <gsl/util>
 
 #include "main.h"
 

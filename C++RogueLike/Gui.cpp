@@ -1,5 +1,5 @@
 #include <iostream>
-#include <gsl/gsl_util>
+#include <gsl/util>
 
 #include "Gui.h"
 #include "main.h"
