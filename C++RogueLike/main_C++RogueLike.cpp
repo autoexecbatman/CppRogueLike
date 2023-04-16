@@ -15,8 +15,6 @@
 
 Game game;
 
-// TODO : extract the player from the game class
-
 int main()
 {
 	//==DEBUG_STREAM==
@@ -106,7 +104,6 @@ int main()
 		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
 
 		//==INPUT==
-
 		game.key_store();
 		game.key_listen();
 
