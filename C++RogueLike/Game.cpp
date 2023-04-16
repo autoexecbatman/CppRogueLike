@@ -1099,7 +1099,6 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 
 void Game::dispay_stats(int level)
 {
-	// TODO: Add your implementation code here.
 	// display the player stats
 	WINDOW* stats = newwin(
 		11, // height
