@@ -75,10 +75,6 @@ int main()
 	Gui gui;
 	gui.gui_init();
 
-	//==INIT_PLAYER==
-	// TODO : extract the player from the game class
-	/*Player player( 40, 25 );*/
-
 	auto countLoop{ 0 };
 	while (game.run == true)
 	{
@@ -91,15 +87,13 @@ int main()
 		std::clog << "initializing game update..." << std::endl;
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
-		/*player.update();*/ // TODO : update the player
 		std::clog << "initialized successfully." << std::endl;
-		
+
 		//==DRAW==
 		std::clog << "initializing game render..." << std::endl;
 		/*clear();*/
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
-		/*player.render();*/ // TODO : render the player
 		std::clog << "initialized successfully." << std::endl;
 
 		// DEBUG : print the player's gender
@@ -112,8 +106,6 @@ int main()
 		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
 
 		//==INPUT==
-		std::clog << "storing key" << std::endl;
-		game.lastKey = game.keyPress;
 
 		game.key_store();
 		game.key_listen();
@@ -121,7 +113,7 @@ int main()
 		countLoop++;
 	}
 	
-	game.save();	
+	game.save();
 	endwin();
 
 	debugFile.close();
