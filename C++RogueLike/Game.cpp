@@ -1,3 +1,4 @@
+// file: Game.cpp
 #include <iostream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
@@ -14,8 +15,6 @@
 #include "Ai.h"
 #include "Pickable.h"
 #include "Container.h"
-
-
 #include "Colors.h"
 #include "Window.h"
 
@@ -134,7 +133,13 @@ void Game::update()
 				std::clog << "Actors updated!" << std::endl;
 			}
 		}
+		else
+		{
+			std::clog << "Error: Game::update() - game.player->destructible is null" << std::endl;
+			std::cout << "Error: Game::update() - game.player->destructible is null" << std::endl;
+			exit(-1);
 	}
+}
 }
 
 //====
@@ -935,6 +940,7 @@ void Game::load()
 
 void Game::save()
 {
+	std::clog << "Saving the game..." << std::endl;
 	if (player != nullptr)
 	{
 		if (player->destructible != nullptr)
@@ -1220,3 +1226,5 @@ void Game::wizard_eye()
 		mvprintw(actor->posY, actor->posX, actor->name.c_str());
 	}
 }
+
+// end of file: Game.cpp

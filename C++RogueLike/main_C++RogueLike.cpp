@@ -115,8 +115,8 @@ int main()
 		std::clog << "storing key" << std::endl;
 		game.lastKey = game.keyPress;
 
-		std::clog << "getting key" << std::endl;
-		game.keyPress = getch();
+		game.key_store();
+		game.key_listen();
 
 		countLoop++;
 	}

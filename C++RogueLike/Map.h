@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_MAP_H_
-#define PROJECT_PATH_MAP_H_
+// file: Map.h
+#ifndef MAP_H
+#define MAP_H
 
 #include "Persistent.h"
 
@@ -74,4 +75,5 @@ protected:
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };
 
-#endif // !PROJECT_PATH_MAP_H_
+#endif // !MAP_H
+// end of file: Map.h

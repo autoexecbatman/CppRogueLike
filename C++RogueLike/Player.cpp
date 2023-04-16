@@ -1,6 +1,11 @@
+// file: Player.cpp
+#include <gsl/util>
+#include "Game.h"
+#include "Map.h"
+#include "Ai.h"
 #include "Player.h"
 #include "Actor.h"
-#include "globals.h"
+#include "RandomDice.h"
 #include "Colors.h"
 #include "curses.h"
 
@@ -45,3 +50,5 @@ void Player::draw()
 	mvaddch(posY, posX, ch);
 	attroff(COLOR_PAIR(col));
 }
+
+// end of file: Player.cpp

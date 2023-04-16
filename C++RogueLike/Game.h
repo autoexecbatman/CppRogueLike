@@ -1,12 +1,15 @@
+// file: Game.h
 #ifndef GAME_H
 #define GAME_H
 
 #include <memory> // std::shared_ptr
+#include <vector> // std::vector
 
-#include "Actor.h" // Actor
-#include "Gui.h" // Gui
-#include "Map.h" // Map
-#include "Colors.h" // Colors
+#include "Actor.h"
+#include "Gui.h"
+#include "Map.h"
+#include "Colors.h"
+#include "Player.h"
 
 class Game
 {
@@ -21,7 +24,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Actor> player{ std::make_shared<Actor>( // < - extract the player from the game class
+	std::shared_ptr<Actor> player{ std::make_shared<Actor>(
 		25, // int posX
 		40, // int posY
 		'@', // char symbol
@@ -64,7 +67,8 @@ public:
 	void save();
 	void term();
 	void print_container(std::vector<std::shared_ptr<Actor>> actors);
-	void key_listener() noexcept { keyPress = getch(); }
+	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
+	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 	void next_level();
 	std::shared_ptr<Actor> get_actor(int x, int y) const;
 	void dispay_stats(int level);
@@ -82,4 +86,5 @@ private:
 // Declaration of the global engine object.
 extern Game game;
 
-#endif // ENGINE_H
+#endif // GAME_H
+// end of file: Game.h

@@ -1,3 +1,4 @@
+// file: MenuClass.cpp
 #include "MenuClass.h"
 #include "Game.h"
 #include "MenuName.h"
@@ -195,3 +196,5 @@ void MenuClass::menu_class()
 		}
 	}
 }
+
+// end of file: MenuClass.cpp
