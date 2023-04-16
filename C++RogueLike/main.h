@@ -1,4 +1,4 @@
-// file C++RogueLike\main.h
+// file: main.h
 #ifndef MAIN_H
 #define MAIN_H
 
@@ -18,4 +18,4 @@ class Actor;
 #include "Game.h"
 
 #endif // !MAIN_H
-// end of file C++RogueLike\main.h
+// end of file: C++RogueLike\main.h
