@@ -1,3 +1,4 @@
+// file: main_C++RogueLike.cpp
 // Debug needs to be set to x86
 // we are making a rogue-like game in C++ using the PDCurses library and the libtcod library
 #include <iostream>
@@ -102,28 +103,13 @@ int main()
 		std::clog << "initialized successfully." << std::endl;
 
 		// DEBUG : print the player's gender
-		mvprintw(
-			1,
-			1,
-			"Gender: %s",
-			game.player->gender.c_str()
-		);
+		mvprintw(1, 1, "Gender: %s", game.player->gender.c_str());
 
 		// DEBUG : print the player's class
-		mvprintw(
-			2,
-			1,
-			"Class: %s",
-			game.player->playerClass.c_str()
-		);
+		mvprintw(2, 1, "Class: %s", game.player->playerClass.c_str());
 
 		// DEBUG : print the player's name
-		mvprintw(
-			3,
-			1,
-			"Name: %s",
-			game.player->name.c_str()
-		);
+		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
 
 		//==INPUT==
 		std::clog << "storing key" << std::endl;
@@ -134,7 +120,7 @@ int main()
 
 		countLoop++;
 	}
-	std::clog << "Closing the game..." << std::endl;
+	
 	game.save();	
 	endwin();
 
@@ -142,3 +128,4 @@ int main()
 
 	return 0;
 }
+// end of file main_C++RogueLike.cpp
