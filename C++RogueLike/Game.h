@@ -45,7 +45,6 @@ public:
 	std::unique_ptr<Map> map{ std::make_unique<Map>(22, 120) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
-
 	int keyPress{ getch() }; // stores the current key pressed
 	int lastKey{ getch() }; // stores that was pressed before the current key
 
