@@ -2,6 +2,7 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include "Goblin.h"
 #include "Persistent.h"
 
 class Actor;
@@ -25,12 +26,20 @@ public:
 //the map is a 2d array of tiles
 class Map : public Persistent
 {
+private:
+	int playerPosX{ 0 };
+	int playerPosY{ 0 };
+
 public:
+	void set_player_pos(int x, int y) { playerPosX = x; playerPosY = y; }
+	int get_player_pos_x() const { return playerPosX; }
+	int get_player_pos_y() const { return playerPosY; }
+
 	//this is the map dimensions
 	int map_height, map_width;
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
 
 	//this is the map array
 	void bsp(int map_width, int map_height, TCODRandom* rng, bool withActors);

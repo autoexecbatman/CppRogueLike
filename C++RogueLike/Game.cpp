@@ -1058,11 +1058,11 @@ void Game::term()
 
 void Game::next_level()
 {
-	level++;
+	player->playerLevel++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
 	player->destructible->heal(player->destructible->hpMax / 2);
 	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
-	gui->log_message(WHITE_PAIR, "You are now on level %d", level);
+	gui->log_message(WHITE_PAIR, "You are now on level %d", player->playerLevel);
 
 	// clear the dungeon except the player and the stairs
 	actors.clear();
@@ -1166,7 +1166,7 @@ void Game::display_character_sheet()
 		// display the class kit
 		mvwprintw(character_sheet, 3, 1, "Kit: ");
 		// display the player level
-		mvwprintw(character_sheet, 4, 1, "Level: %d", level);
+		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
 		// display the player experience
 		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
 		// display the player alignment

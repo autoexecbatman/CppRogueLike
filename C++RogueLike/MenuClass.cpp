@@ -132,12 +132,12 @@ void MenuClass::menu_class()
 	menu_class_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
 	MenuName menuName;
 
-    while (run)
-    {
+	while (run)
+	{
 		menu_class_clear();
 
 		// print menu options
-        mvwprintw(
+		mvwprintw(
 			menuClassWindow,
 			0,
 			0,

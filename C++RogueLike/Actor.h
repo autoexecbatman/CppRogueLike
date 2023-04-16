@@ -16,6 +16,7 @@
 class Actor : public Persistent
 {
 public:
+	int playerLevel{ 0 };
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
 	int posY = 0, posX = 0; // position on map

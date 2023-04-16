@@ -48,7 +48,7 @@ public:
 	int keyPress{ getch() }; // stores the current key pressed
 	int lastKey{ getch() }; // stores that was pressed before the current key
 
-	int level{ 0 };
+	/*int playerLevel{ 0 };*/
 
 	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
 
