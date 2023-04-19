@@ -51,12 +51,12 @@ public:
 	void save(TCODZip& zip);
 
 protected:
-	WINDOW* con; // the gui window
-	WINDOW* sub; // a subwindow in the gui
+	WINDOW* con{ nullptr }; // the gui window
+	WINDOW* sub{ nullptr }; // a subwindow in the gui
 	
 	//==LOG==
 	void print_container(const std::vector<LogMessage*> log_message);
-	std::vector<LogMessage*> log; // the message log
+	std::vector<LogMessage*> log = {}; // the message log
 
 
 	void renderBar(
