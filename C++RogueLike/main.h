@@ -1,7 +1,8 @@
-#ifndef PROJECT_PATH_MAIN_H_
-#define PROJECT_PATH_MAIN_H_
+// file: main.h
+#ifndef MAIN_H
+#define MAIN_H
 
-//#include "libtcod.hpp"
+//#include "libtcod.hpp" for using a previous version of libtcod version 1.5.1
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
@@ -16,4 +17,5 @@ class Actor;
 #include "Map.h"
 #include "Game.h"
 
-#endif // !PROJECT_PATH_MAIN_H_
+#endif // !MAIN_H
+// end of file: C++RogueLike\main.h

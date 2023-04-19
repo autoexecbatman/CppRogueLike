@@ -119,7 +119,7 @@
     <ClInclude Include="Literals.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globals.h">
+    <ClInclude Include="RandomDice.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Goblin.h">

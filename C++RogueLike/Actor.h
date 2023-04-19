@@ -16,12 +16,12 @@
 class Actor : public Persistent
 {
 public:
+	int playerLevel{ 0 };
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
 	int posY = 0, posX = 0; // position on map
 	char ch = -47; // the symbol to print
 	int col = 0; // color for the actor
-	//const char* name = "actor_name"; // add name
 	std::string name = "actor_name"; // add name
 	bool blocks = false; // does the actor blocks movement?
 	bool fovOnly = false; // to make some actors visible when not in fov

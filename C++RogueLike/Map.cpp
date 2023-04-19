@@ -1,3 +1,4 @@
+// file: Map.cpp
 #include <curses.h>
 #include <random>
 #include <iostream>
@@ -17,12 +18,10 @@ class Actor;
 #include "Actor.h"
 #include "Map.h"
 #include "Game.h"
-
 #include "Colors.h"
-
 #include "Goblin.h"
-
-#include "globals.h"
+#include "RandomDice.h"
+#include "Player.h"
 
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
@@ -551,3 +550,4 @@ int Map::random_number(int min, int max)
 }
 
 //====
+// end of file: Map.cpp

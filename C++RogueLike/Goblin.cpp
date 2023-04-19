@@ -3,7 +3,7 @@
 #include "Colors.h"
 
 #include "Goblin.h"
-#include "globals.h"
+#include "RandomDice.h"
 
 
 //==GOBLIN==

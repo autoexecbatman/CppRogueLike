@@ -206,7 +206,7 @@
     <ClInclude Include="Container.h" />
     <ClInclude Include="Destructible.h" />
     <ClInclude Include="Game.h" />
-    <ClInclude Include="globals.h" />
+    <ClInclude Include="RandomDice.h" />
     <ClInclude Include="Goblin.h" />
     <ClInclude Include="Gui.h" />
     <ClInclude Include="Literals.h" />

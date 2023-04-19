@@ -13,7 +13,19 @@ void MenuName::menu_name_refresh() noexcept { wrefresh(menuNameWindow); }
 
 void MenuName::menu_name_delete() noexcept { delwin(menuNameWindow); }
 
-std::string MenuName::menu_name_input() { wgetnstr(menuNameWindow, name, 39); return name; }
+std::string MenuName::menu_name_input()
+{
+	wgetnstr(menuNameWindow, name, 39);
+	// check if name is empty
+	if ( strlen(name) != 0)
+	{
+		return name;
+	}
+	else
+	{
+		return "Player";
+	}
+}
 
 void MenuName::menu_name_store() { playerName = name; }
 

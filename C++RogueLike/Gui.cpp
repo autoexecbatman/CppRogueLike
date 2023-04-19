@@ -1,4 +1,5 @@
 #include <iostream>
+#include <gsl/util>
 
 #include "Gui.h"
 #include "main.h"

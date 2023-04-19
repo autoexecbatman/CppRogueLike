@@ -1,3 +1,4 @@
+// file: main_C++RogueLike.cpp
 // Debug needs to be set to x86
 // we are making a rogue-like game in C++ using the PDCurses library and the libtcod library
 #include <iostream>
@@ -13,8 +14,6 @@
 #include "Player.h"
 
 Game game;
-
-// TODO : extract the player from the game class
 
 int main()
 {
@@ -78,7 +77,7 @@ int main()
 
 	//==INIT_PLAYER==
 	// TODO : extract the player from the game class
-	/*Player player( 40, 25 );*/
+	Player player( 40, 25 );
 
 	auto countLoop{ 0 };
 	while (game.run == true)
@@ -92,52 +91,37 @@ int main()
 		std::clog << "initializing game update..." << std::endl;
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
-		/*player.update();*/ // TODO : update the player
+		player.update(); // TODO : update the player
 		std::clog << "initialized successfully." << std::endl;
-		
+
 		//==DRAW==
 		std::clog << "initializing game render..." << std::endl;
 		/*clear();*/
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
-		/*player.render();*/ // TODO : render the player
+		player.render(); // TODO : render the player
 		std::clog << "initialized successfully." << std::endl;
 
-		// DEBUG : print the player's gender
-		mvprintw(
-			1,
-			1,
-			"Gender: %s",
-			game.player->gender.c_str()
-		);
-
-		// DEBUG : print the player's class
-		mvprintw(
-			2,
-			1,
-			"Class: %s",
-			game.player->playerClass.c_str()
-		);
-
-		// DEBUG : print the player's name
-		mvprintw(
-			3,
-			1,
-			"Name: %s",
-			game.player->name.c_str()
-		);
+		// DEBUG : print player info
+		mvprintw(1, 1, "Gender: %s", game.player->gender.c_str());
+		mvprintw(2, 1, "Class: %s", game.player->playerClass.c_str());
+		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
 
 		//==INPUT==
-		game.key_store();
-		game.key_listen();
+		std::clog << "storing key" << std::endl;
+		game.lastKey = game.keyPress;
+
+		std::clog << "getting key" << std::endl;
+		game.keyPress = getch();
 
 		countLoop++;
 	}
-	std::clog << "Closing the game..." << std::endl;
-	game.save();	
+	
+	game.save();
 	endwin();
 
 	debugFile.close();
 
 	return 0;
 }
+// end of file: main_C++RogueLike.cpp

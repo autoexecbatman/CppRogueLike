@@ -1,9 +1,11 @@
+// file: Game.cpp
 #include <iostream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
 #include <random>
 #include <climits>
 #include <cassert>
+#include <gsl/util>
 
 #include "Game.h"
 #include "Actor.h"
@@ -13,8 +15,6 @@
 #include "Ai.h"
 #include "Pickable.h"
 #include "Container.h"
-
-
 #include "Colors.h"
 #include "Window.h"
 
@@ -133,7 +133,13 @@ void Game::update()
 				std::clog << "Actors updated!" << std::endl;
 			}
 		}
+		else
+		{
+			std::clog << "Error: Game::update() - game.player->destructible is null" << std::endl;
+			std::cout << "Error: Game::update() - game.player->destructible is null" << std::endl;
+			exit(-1);
 	}
+}
 }
 
 //====
@@ -934,6 +940,7 @@ void Game::load()
 
 void Game::save()
 {
+	std::clog << "Saving the game..." << std::endl;
 	if (player != nullptr)
 	{
 		if (player->destructible != nullptr)
@@ -1051,11 +1058,11 @@ void Game::term()
 
 void Game::next_level()
 {
-	dungeonLevel++;
+	level++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
 	player->destructible->heal(player->destructible->hpMax / 2);
 	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
-	gui->log_message(WHITE_PAIR, "You are now on level %d", dungeonLevel);
+	gui->log_message(WHITE_PAIR, "You are now on level %d", level);
 
 	// clear the dungeon except the player and the stairs
 	actors.clear();
@@ -1092,7 +1099,7 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 
 void Game::dispay_stats(int xpLevel)
 {
-
+	// TODO: Add your implementation code here.
 	// display the player stats
 	WINDOW* stats = newwin(
 		11, // height
@@ -1160,7 +1167,7 @@ void Game::display_character_sheet()
 		// display the class kit
 		mvwprintw(character_sheet, 3, 1, "Kit: ");
 		// display the player level
-		mvwprintw(character_sheet, 4, 1, "Level: ");
+		mvwprintw(character_sheet, 4, 1, "Level: %d", level);
 		// display the player experience
 		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
 		// display the player alignment

@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_CONTAINER_H_
-#define PROJECT_PATH_CONTAINER_H_
+// file: Container.h
+#ifndef CONTAINER_H
+#define CONTAINER_H
 
 class Container
 {
@@ -21,4 +22,5 @@ public:
 	void print_container(std::vector<std::shared_ptr<Actor>> container);
 };
 
-#endif // !PROJECT_PATH_CONTAINER_H_
+#endif // !CONTAINER_H
+// end of file: Container.h

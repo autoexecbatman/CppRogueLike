@@ -1,33 +1,28 @@
+// file: Player.h
 #ifndef PLAYER_H
 #define PLAYER_H
 
-// should it take coordinates as parameters? Yes. Because the player is should move using the keyboard.
-// should the player be a pointer? No. Because pointers are used to point to objects, not to be objects themselves.
-// the player is a unique object, it should not be copied. True. Unless you want multiple user controlled objects like player.
-// should the player be a class? Yes. Because the player is an actor.
-// should it be added to a container of Actors? No. The plan is to have only one player.
-// should it share ai with other actors?
-// what to extract from the player pointer in the game class?
-// I want the player not to be a pointer, but I want to be able to access it from the game class.
-// I want to be able to access the player from the game class, but I want to be able to access the game class from the player class.
-
-
-//class Actor;
+#include <gsl/util>
+#include "RandomDice.h"
+#include "Map.h"
 #include "Actor.h"
 
 class Player : public Actor
 {
 public:
 	Player(int y, int x);
-
 	// Note::
 	// X/Y coordinates set
 	// in the function create_room()
 	// in Map.cpp
 
-	bool player_is_dead();
-	void update();
-	void draw();
+	bool player_is_dead(); // TODO : correct this function
+	void setPosX(int x) noexcept { posX = x; }
+	void setPosY(int y) noexcept { posY = y; }
+	int getPosX() const noexcept { return posX; }
+	int getPosY() const noexcept { return posY; }
+	void player_get_pos_from_map();
 };
 
 #endif // !PLAYER_H
+// end of file: Player.h
