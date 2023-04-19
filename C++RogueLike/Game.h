@@ -1,14 +1,12 @@
-#ifndef _GAME_H_
-#define _GAME_H_
+#ifndef GAME_H
+#define GAME_H
 
-#include <map>
 #include <memory>
 
 #include "Actor.h"
 #include "Gui.h"
 #include "Map.h"
 #include "Colors.h"
-#include "Player.h"
 
 class Game
 {
@@ -84,4 +82,4 @@ private:
 // Declaration of the global engine object.
 extern Game game;
 
-#endif // PROJECT_PATH_ENGINE_H_
+#endif // !GAME_H
