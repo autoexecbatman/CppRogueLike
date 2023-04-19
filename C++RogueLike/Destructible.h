@@ -1,5 +1,5 @@
-#ifndef PROJECT_PATH_DESTRUCTIBLE_H_
-#define PROJECT_PATH_DESTRUCTIBLE_H_
+#ifndef DESTRUCTIBLE_H
+#define DESTRUCTIBLE_H
 #include <iostream>
 class Actor;
 
@@ -87,4 +87,4 @@ public:
 
 //====
 
-#endif // !PROJECT_PATH_DESTRUCTIBLE_H_
+#endif // !DESTRUCTIBLE_H

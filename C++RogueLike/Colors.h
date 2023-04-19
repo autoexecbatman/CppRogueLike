@@ -27,7 +27,7 @@ constexpr auto CONFUSION_PAIR = 18;
 
 struct Colors
 {
-	void my_init_pair();
+	void my_init_pair() noexcept;
 };
 
 #endif // !PROJECT_PATH_COLORS_H_

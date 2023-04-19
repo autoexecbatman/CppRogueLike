@@ -445,7 +445,7 @@ void PlayerAi::display_inventory(Actor& owner)
 		y++;
 		shortcut++;
 	}*/
-
+	
 	for (auto& actor : owner.container->inventoryList)
 	{
 		/*game.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/

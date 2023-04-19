@@ -50,36 +50,36 @@ public:
 
 	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
 
-    // Public member functions.
-    void init();
-    void update();
-    void render();
-    void send_to_back(Actor& actor);
-    std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
-    bool pick_tile(int* x, int* y, int maxRange);
+	// Public member functions.
+	void init();
+	void update();
+	void render();
+	void send_to_back(Actor& actor);
+	std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
+	bool pick_tile(int* x, int* y, int maxRange);
 
-    bool mouse_moved();
-    void target();
-    void load();
-    void save();
-    void term();
-    void print_container(std::vector<std::shared_ptr<Actor>> actors);
+	bool mouse_moved();
+	void target();
+	void load();
+	void save();
+	void term();
+	void print_container(std::vector<std::shared_ptr<Actor>> actors);
 
 	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
-    void next_level();
-    std::shared_ptr<Actor> get_actor(int x, int y) const;
+	void next_level();
+	std::shared_ptr<Actor> get_actor(int x, int y) const;
 	void dispay_stats(int xpLevel);
-    void display_character_sheet();
-    int random_number(int min, int max);
-    void wizard_eye();
+	void display_character_sheet();
+	int random_number(int min, int max);
+	void wizard_eye();
 
 private:
-    // Private member variables.
-    bool computeFov = false;
+	// Private member variables.
+	bool computeFov = false;
 
-    // Private member functions.
+	// Private member functions.
 };
 
 // Declaration of the global engine object.
