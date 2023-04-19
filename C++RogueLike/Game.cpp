@@ -191,7 +191,7 @@ void Game::render()
 	}
 	std::clog << "Actors are drawn" << std::endl;
 	std::clog << "Player is trying render..." << std::endl;
-	/*player->render();*/ // draw the player
+	player->render(); // draw the player
 	std::clog << "Player is drawn" << std::endl;
 	std::clog << "GUI is trying render..." << std::endl;
 	//gui->render(); // draw the gui
@@ -1051,11 +1051,11 @@ void Game::term()
 
 void Game::next_level()
 {
-	level++;
+	dungeonLevel++;
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
 	player->destructible->heal(player->destructible->hpMax / 2);
 	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
-	gui->log_message(WHITE_PAIR, "You are now on level %d", level);
+	gui->log_message(WHITE_PAIR, "You are now on level %d", dungeonLevel);
 
 	// clear the dungeon except the player and the stairs
 	actors.clear();
@@ -1090,9 +1090,9 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 	return nullptr;
 }
 
-void Game::dispay_stats(int level)
+void Game::dispay_stats(int xpLevel)
 {
-	// TODO: Add your implementation code here.
+
 	// display the player stats
 	WINDOW* stats = newwin(
 		11, // height
@@ -1106,7 +1106,7 @@ void Game::dispay_stats(int level)
 	while (true)
 	{
 		mvwprintw(stats, 1, 1, "Player Stats");
-		mvwprintw(stats, 2, 1, "Level: %d", level);
+		mvwprintw(stats, 2, 1, "Level: %d", xpLevel);
 		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
 		mvwprintw(stats, 4, 1, "Food: %d/%d", player->destructible->food, player->destructible->foodMax);
 		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
@@ -1160,7 +1160,7 @@ void Game::display_character_sheet()
 		// display the class kit
 		mvwprintw(character_sheet, 3, 1, "Kit: ");
 		// display the player level
-		mvwprintw(character_sheet, 4, 1, "Level: %d", level);
+		mvwprintw(character_sheet, 4, 1, "Level: ");
 		// display the player experience
 		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
 		// display the player alignment

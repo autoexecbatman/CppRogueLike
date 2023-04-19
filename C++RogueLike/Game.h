@@ -1,7 +1,6 @@
-#ifndef _GAME_H_
-#define _GAME_H_
+#ifndef GAME_H
+#define GAME_H
 
-#include <map>
 #include <memory>
 
 #include "Actor.h"
@@ -44,11 +43,10 @@ public:
 	std::unique_ptr<Map> map{ std::make_unique<Map>(22, 120) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
+	int keyPress{ 0 }; // stores the current key pressed
+	int lastKey{ 0 }; // stores that was pressed before the current key
 
-	int keyPress{ getch() }; // stores the current key pressed
-    int lastKey{ getch() }; // stores that was pressed before the current key
-
-    int level{ 0 };
+	int dungeonLevel{ 0 };
 
 	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
 
@@ -66,10 +64,13 @@ public:
     void save();
     void term();
     void print_container(std::vector<std::shared_ptr<Actor>> actors);
-    void key_listener() noexcept { keyPress = getch(); }
+
+	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
+	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
+
     void next_level();
     std::shared_ptr<Actor> get_actor(int x, int y) const;
-    void dispay_stats(int level);
+	void dispay_stats(int xpLevel);
     void display_character_sheet();
     int random_number(int min, int max);
     void wizard_eye();
@@ -84,4 +85,4 @@ private:
 // Declaration of the global engine object.
 extern Game game;
 
-#endif // PROJECT_PATH_ENGINE_H_
+#endif // !GAME_H
