@@ -11,7 +11,6 @@
 #include "Game.h"
 #include "Menu.h"
 #include "Gui.h"
-#include "Player.h"
 
 Game game;
 
@@ -75,10 +74,6 @@ int main()
 	Gui gui;
 	gui.gui_init();
 
-	//==INIT_PLAYER==
-	// TODO : extract the player from the game class
-	/*Player player( 40, 25 );*/
-
 	auto countLoop{ 0 };
 	while (game.run == true)
 	{
@@ -91,7 +86,6 @@ int main()
 		std::clog << "initializing game update..." << std::endl;
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
-		//player.update(); // TODO : update the player
 		std::clog << "initialized successfully." << std::endl;
 
 		//==DRAW==
@@ -99,7 +93,6 @@ int main()
 		/*clear();*/
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
-		//player.render(); // TODO : render the player
 		std::clog << "initialized successfully." << std::endl;
 
 		// DEBUG : print player info
@@ -108,11 +101,8 @@ int main()
 		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
 
 		//==INPUT==
-		std::clog << "storing key" << std::endl;
-		game.lastKey = game.keyPress;
-
-		std::clog << "getting key" << std::endl;
-		game.keyPress = getch();
+		game.key_store();
+		game.key_listen();
 
 		countLoop++;
 	}

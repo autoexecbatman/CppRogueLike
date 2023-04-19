@@ -43,10 +43,10 @@ public:
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
 
-	int keyPress{ getch() }; // stores the current key pressed
-	int lastKey{ getch() }; // stores that was pressed before the current key
+	int keyPress{ 0 }; // stores the current key pressed
+	int lastKey{ 0 }; // stores that was pressed before the current key
 
-	int level{ 0 };
+	int dungeonLevel{ 0 };
 
 	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
 
@@ -64,7 +64,10 @@ public:
 	void save();
 	void term();
 	void print_container(std::vector<std::shared_ptr<Actor>> actors);
-	void key_listener() noexcept { keyPress = getch(); }
+
+	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
+	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
+
 	void next_level();
 	std::shared_ptr<Actor> get_actor(int x, int y) const;
 	void dispay_stats(int level);
