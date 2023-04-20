@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Sample-Test1", "Sample-Test
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UT_PDCurses_draw", "UT_PDCurses_draw\UT_PDCurses_draw.vcxproj", "{93E3BD53-7A5E-4BF9-A5EF-FF14E1606680}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UT_STL_Containers", "UT_STL_Containers\UT_STL_Containers.vcxproj", "{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -154,6 +156,22 @@ Global
 		{93E3BD53-7A5E-4BF9-A5EF-FF14E1606680}.UT_PDCurses_input|x64.Build.0 = Debug|x64
 		{93E3BD53-7A5E-4BF9-A5EF-FF14E1606680}.UT_PDCurses_input|x86.ActiveCfg = Debug|Win32
 		{93E3BD53-7A5E-4BF9-A5EF-FF14E1606680}.UT_PDCurses_input|x86.Build.0 = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Debug|x64.ActiveCfg = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Debug|x64.Build.0 = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Debug|x86.ActiveCfg = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Debug|x86.Build.0 = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Release|x64.ActiveCfg = Release|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Release|x64.Build.0 = Release|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Release|x86.ActiveCfg = Release|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Release|x86.Build.0 = Release|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Temp|x64.ActiveCfg = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Temp|x64.Build.0 = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Temp|x86.ActiveCfg = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.Temp|x86.Build.0 = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.UT_PDCurses_input|x64.ActiveCfg = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.UT_PDCurses_input|x64.Build.0 = Debug|x64
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.UT_PDCurses_input|x86.ActiveCfg = Debug|Win32
+		{1B1BD7F7-FFE9-48E6-B25E-6531CDA4986F}.UT_PDCurses_input|x86.Build.0 = Debug|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

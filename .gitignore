@@ -368,3 +368,6 @@ FodyWeavers.xsd
 /UT_PDCurses_input/UT_PDCurses_input.vcxproj.filters
 /UT_PDCurses_input/UT_PDCurses_input.vcxproj
 /UT_PDCurses_input/main_UT_PDCurses_input.cpp
+/UT_STL_Containers/UT_STL_Containers.vcxproj.filters
+/UT_STL_Containers/UT_STL_Containers.vcxproj
+/UT_STL_Containers/main_UT_STL_Containers.cpp
