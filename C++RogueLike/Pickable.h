@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_PICKABLE_H_
-#define PROJECT_PATH_PICKABLE_H_
+// file: Pickable.h
+#ifndef PICKABLE_H
+#define PICKABLE_H
 //==PICKABLE==
 //==
 class Pickable : public Persistent
@@ -97,4 +98,5 @@ public:
 };
 //====
 
-#endif // !PROJECT_PATH_PICKABLE_H_
+#endif // !PICKABLE_H
+// end of file: Pickable.h

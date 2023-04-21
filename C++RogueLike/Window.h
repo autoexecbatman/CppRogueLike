@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_WINDOW_H_
-#define PROJECT_PATH_WINDOW_H_
+// file: Window.h
+#ifndef WINDOW_H
+#define WINDOW_H
 
 #include <iostream>
 #include <curses.h>
@@ -39,4 +40,5 @@ public:
 
 };
 
-#endif // !PROJECT_PATH_WINDOW_H_
+#endif // !WINDOW_H
+// end of file: Window.h

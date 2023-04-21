@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_COLORS_H_
-#define PROJECT_PATH_COLORS_H_
+// file: Colors.h
+#ifndef COLORS_H
+#define COLORS_H
 
 //====
 //define the color pairs for the game
@@ -30,4 +31,5 @@ struct Colors
 	void my_init_pair() noexcept;
 };
 
-#endif // !PROJECT_PATH_COLORS_H_
+#endif // !COLORS_H
+// file: Colors.h

@@ -1,3 +1,4 @@
+// file Destructible.h
 #ifndef DESTRUCTIBLE_H
 #define DESTRUCTIBLE_H
 #include <iostream>
@@ -88,3 +89,4 @@ public:
 //====
 
 #endif // !DESTRUCTIBLE_H
+// end of file: Destructible.h

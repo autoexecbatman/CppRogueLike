@@ -1,4 +1,4 @@
-// file: globals.h
+// file: RandomDice.h
 #ifndef RANDOM_DICE_H
 #define RANDOM_DICE_H
 

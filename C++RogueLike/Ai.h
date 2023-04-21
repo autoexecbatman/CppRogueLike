@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_AI_H_
-#define PROJECT_PATH_AI_H_
+// file: Ai.h
+#ifndef AI_H
+#define AI_H
 
 //==AI==
 class Ai : public Persistent
@@ -78,4 +79,5 @@ protected:
 	std::shared_ptr<Ai> oldAi;
 };
 
-#endif // !PROJECT_PATH_AI_H_
+#endif // !AI_H
+// file: Ai.h

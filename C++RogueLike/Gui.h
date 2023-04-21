@@ -1,3 +1,4 @@
+// file: Gui.h
 #ifndef GUI_H
 #define GUI_H
 
@@ -75,3 +76,4 @@ private:
 };
 
 #endif // !GUI_H
+// end of file: Gui.h

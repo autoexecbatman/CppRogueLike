@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_LOGMESSAGE_H_
-#define PROJECT_PATH_LOGMESSAGE_H_
+// file: LogMessage.h
+#ifndef LOGMESSAGE_H
+#define LOGMESSAGE_H
 //Create a struct to be able to define the color of each line in the log.
 //So we need a structure to store the message's text and its color.
 //Since this structure is only used by the Gui class, we put it in its protected declaration zone.
@@ -15,4 +16,5 @@ struct LogMessage
 	~LogMessage();
 };
 
-#endif // !PROJECT_PATH_LOGMESSAGE_H_
+#endif // !LOGMESSAGE_H
+// end of file: LogMessage.h

@@ -1,3 +1,4 @@
+// file: Goblin.h
 #ifndef GOBLIN_H
 #define GOBLIN_H
 
@@ -47,3 +48,4 @@ public:
 //====
 
 #endif // GOBLIN_H
+// end of file: Goblin.h

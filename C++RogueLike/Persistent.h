@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_PERSISTENT_H_
-#define PROJECT_PATH_PERSISTENT_H_
+// file: Persistent.h
+#ifndef PERSISTENT_H
+#define PERSISTENT_H
 
 //#include "libtcod.hpp"
 #pragma warning (push, 0)
@@ -12,4 +13,5 @@ public:
 	virtual void save(TCODZip& zip) = 0;
 };
 
-#endif // !PROJECT_PATH_PERSISTENT_H_
+#endif // !PERSISTENT_H
+// end of file: Persistent.h

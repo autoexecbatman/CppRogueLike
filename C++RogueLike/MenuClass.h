@@ -1,3 +1,4 @@
+// file: MenuClass.h
 #ifndef MENU_CLASS_H
 #define MENU_CLASS_H
 #include <curses.h>
@@ -56,5 +57,5 @@ public:
 	void menu_class();
 };
 
-
 #endif // !MENU_CLASS_H
+// end of file: MenuClass.h

@@ -1,3 +1,4 @@
+// file: Actor.h
 #ifndef ACTOR_H
 #define ACTOR_H
 #pragma warning (push, 0)
@@ -57,4 +58,4 @@ public:
 };
 
 #endif // !ACTOR_H
-//====
+// end of file: Actor.h

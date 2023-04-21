@@ -1,3 +1,4 @@
+// file: MenuName.h
 #ifndef MENU_NAME_H
 #define MENU_NAME_H
 
@@ -38,3 +39,4 @@ public:
 };
 
 #endif // !MENU_NAME_H
+// file: MenuName.h

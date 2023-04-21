@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_LITERALS_H_
-#define PROJECT_PATH_LITERALS_H_
+// file: Literals.h
+#ifndef LITERALS_H
+#define LITERALS_H
 
 #include <gsl/util>
 
@@ -22,4 +23,5 @@ constexpr Length operator "" _y(unsigned long long y)
 	return Length{ 0, gsl::narrow_cast<int>(y)};
 }
 
-#endif // !PROJECT_PATH_LITERALS_H_
+#endif // !LITERALS_H
+// end of file: Literals.h

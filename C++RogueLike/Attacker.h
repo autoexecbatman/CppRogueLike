@@ -1,5 +1,6 @@
-#ifndef PROJECT_PATH_ATTACKER_H_
-#define PROJECT_PATH_ATTACKER_H_
+// file: Attacker.h
+#ifndef ATTACKER_H
+#define ATTACKER_H
 
 //#include "libtcod.hpp"
 #pragma warning (push, 0)
@@ -23,4 +24,5 @@ public:
 	void save(TCODZip& zip);
 };
 
-#endif // !PROJECT_PATH_ATTACKER_H_
+#endif // !ATTACKER_H
+// file: Attacker.h

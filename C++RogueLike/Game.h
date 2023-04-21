@@ -1,3 +1,4 @@
+// file: Game.h
 #ifndef GAME_H
 #define GAME_H
 
@@ -86,3 +87,4 @@ private:
 extern Game game;
 
 #endif // !GAME_H
+// end of file: Game.h
