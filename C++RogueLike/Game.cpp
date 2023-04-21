@@ -1226,3 +1226,5 @@ void Game::wizard_eye()
 		mvprintw(actor->posY, actor->posX, actor->name.c_str());
 	}
 }
+
+// end of file: Game.cpp

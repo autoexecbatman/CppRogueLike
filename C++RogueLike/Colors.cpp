@@ -1,3 +1,4 @@
+// file: Colors.cpp
 #include <iostream>
 #include <curses.h>
 #include "Colors.h"
@@ -35,3 +36,5 @@ void Colors::my_init_pair() noexcept
 	init_pair(17, COLOR_RED, COLOR_YELLOW); // fireball color
 	init_pair(18, COLOR_WHITE, COLOR_GREEN); // confusion color
 }
+
+// end of file: Colors.cpp

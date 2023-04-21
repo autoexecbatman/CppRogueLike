@@ -1,3 +1,4 @@
+// file: Attacker.cpp
 #include <iostream>
 
 //#include "main.h"
@@ -80,3 +81,5 @@ void Attacker::save(TCODZip& zip)
 {
 	zip.putInt(power);
 }
+
+// end of file: Attacker.cpp

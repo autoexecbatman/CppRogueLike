@@ -1,3 +1,4 @@
+// file: Destructible.cpp
 #include <iostream>
 #include <algorithm>
 
@@ -194,3 +195,5 @@ void MonsterDestructible::die(Actor& owner)
 
 	Destructible::die(owner);
 }
+
+// end of file: Destructible.cpp

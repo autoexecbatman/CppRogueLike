@@ -1,3 +1,4 @@
+// file: MenuName.cpp
 #include <string>
 
 #include "MenuName.h"
@@ -56,3 +57,5 @@ void MenuName::menu_name()
 
 	menu_name_delete();
 }
+
+// end of file: MenuName.cpp

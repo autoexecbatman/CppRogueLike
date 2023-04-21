@@ -1,3 +1,4 @@
+// file: Goblin.cpp
 #include "Game.h"
 #include "Actor.h"
 #include "Colors.h"
@@ -148,3 +149,5 @@ std::shared_ptr<Goblin> Goblin::create_goblin(int y, int x)
 //}
 //
 ////====
+
+// end of file: Goblin.cpp

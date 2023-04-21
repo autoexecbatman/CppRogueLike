@@ -1,3 +1,4 @@
+// file: Window.cpp
 #include "Window.h"
 #include "main.h"
 
@@ -80,3 +81,5 @@ void Window::windowrefresh()
 {
 	/*wrefresh(win);*/
 }
+
+// end of file: Window.cpp

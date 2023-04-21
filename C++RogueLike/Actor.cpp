@@ -1,3 +1,4 @@
+// file: Actor.cpp
 #include <iostream>
 #include <curses.h>
 #include <math.h>
@@ -149,3 +150,5 @@ int Actor::get_distance(int tileX, int tileY) const
 
 	return distance;
 }
+
+// end of file: Actor.cpp

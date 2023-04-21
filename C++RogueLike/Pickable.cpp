@@ -1,3 +1,4 @@
+// file: Pickable.cpp
 #include <gsl/util>
 #include <vector>
 
@@ -383,3 +384,4 @@ void Confuser::save(TCODZip& zip)
 	zip.putInt(range);
 }
 
+// end of file: Pickable.cpp

@@ -1,3 +1,4 @@
+// file: MenuGender.cpp
 #include "MenuGender.h"
 #include "Game.h"
 #include "Menu.h"
@@ -213,3 +214,5 @@ void MenuGender::menu_gender()
 	} // !end while run
 	menu_gender_delete();
 }
+
+// end of file: MenuGender.cpp
