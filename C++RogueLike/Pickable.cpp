@@ -246,30 +246,29 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 
 	// add a character 'x' to the center of the explosion
 	// add a random color to x
+
 	bool run = true;
+
 	nodelay(explosionWindow, true);
-	for (int numLoops = 0;numLoops < 1000; numLoops++ ) 
-	{
-		// draw the explosion
-		for (int i = 0; i < width; i++)
-		{
-			for (int j = 0; j < height; j++)
-			{
-				mvwaddch(explosionWindow, j, i, 'x' | COLOR_PAIR(rand() % 8));
+
+	// Reduce the number of iterations from 1000 to 50
+	for (int numLoops = 0; numLoops < 50; numLoops++) {
+		// Draw the explosion
+		for (int i = 0; i < width; i++) {
+			for (int j = 0; j < height; j++) {
+				int randColor = rand() % 7 + 1;
+				mvwaddch(explosionWindow, j, i, 'x' | COLOR_PAIR(randColor));
 			}
-			int randColor = rand() % 7 + 1;
-			wattron(explosionWindow, COLOR_PAIR(randColor));
-			mvwaddch(explosionWindow, 0, 0 + i , 'x');
-			wattroff(explosionWindow, COLOR_PAIR(randColor));
-			wrefresh(explosionWindow);
 		}
+		wrefresh(explosionWindow);
+		napms(20);  // Add a small delay between each frame
 	}
+
 	nodelay(explosionWindow, false);
-	// draw the explosion
 	wrefresh(explosionWindow);
-	
-	// wait for a bit using curses
-	napms(1000);
+	napms(1000);  // Keep the final frame for 1 second
+
+	delwin(explosionWindow);
 
 	for (const auto& actor : game.actors)
 	{
