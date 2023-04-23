@@ -265,59 +265,113 @@ void PlayerAi::update(Actor& owner)
 	case Controls::UP:
 	case Controls::UP_ARROW:
 	case Controls::UP_ARROW_NUMPAD:
+	{
 		dy = -1;
 		break;
+	}
+
 	case Controls::DOWN:
 	case Controls::DOWN_ARROW:
 	case Controls::DOWN_ARROW_NUMPAD:
+	{
 		dy = 1;
 		break;
+	}
+
 	case Controls::LEFT:
 	case Controls::LEFT_ARROW:
 	case Controls::LEFT_ARROW_NUMPAD:
+	{
 		dx = -1;
 		break;
+	}
+
 	case Controls::RIGHT:
 	case Controls::RIGHT_ARROW:
 	case Controls::RIGHT_ARROW_NUMPAD:
+	{
 		dx = 1;
 		break;
+	}
+
 	case Controls::UP_LEFT:
 	case Controls::UP_LEFT_ARROW_NUMPAD:
+	{
 		dx = -1;
 		dy = -1;
 		break;
+	}
+
 	case Controls::UP_RIGHT:
 	case Controls::UP_RIGHT_ARROW_NUMPAD:
+	{
 		dx = 1;
 		dy = -1;
 		break;
+	}
+
 	case Controls::DOWN_LEFT:
 	case Controls::DOWN_LEFT_ARROW_NUMPAD:
+	{
 		dx = -1;
 		dy = 1;
 		break;
+	}
+
 	case Controls::DOWN_RIGHT:
 	case Controls::DOWN_RIGHT_ARROW_NUMPAD:
+	{
 		dx = 1;
 		dy = 1;
 		break;
+	}
+
 	case Controls::WAIT:
 	case Controls::WAIT_ARROW_NUMPAD:
+	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
+	}
+
 	case Controls::HIT_SELF:
+	{
+		if (game.player)
+		{
+			if (game.player->attacker)
+			{
 		game.player->attacker->attack(*game.player, *game.player);
+			}
+			else
+			{
+				std::cout << "Error: PlayerAi::update(Actor& owner). game.player->attacker is null" << std::endl;
+				exit(-1);
+			}
+
+		}
+		else
+		{
+			std::cout << "Error: PlayerAi::update(Actor& owner). game.player is null" << std::endl;
+			exit(-1);
+		}
+
 		break;
+	}
+
 	case Controls::MOUSE:
+	{
 		std::cout << "mouse" << std::endl;
 		request_mouse_pos();
 		break;
+	}
+
 	case Controls::PICK:
 	case Controls::PICK_SHIFT_STAR:
 	case Controls::PICK_NUMPAD:
+	{
 		pick_item(owner);
 		break;
+	}
+
 	case Controls::DROP:
 	{
 		std::shared_ptr<Actor> actor = choseFromInventory(owner, 'a');
@@ -326,21 +380,24 @@ void PlayerAi::update(Actor& owner)
 			actor->pickable->drop(*actor, owner);
 			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
-	}
 	break;
+	}
+
 	case Controls::INVENTORY:
+	{
 		/*handleActionKey(owner, game.keyPress);*/
 		display_inventory(owner);
 		break;
+	}
+
 	case Controls::QUIT:
-		game.run = false;
-		if (game.run == false)
 		{
+		game.run = false;
 			mvprintw(29, 0, "You quit the game ! Press any key ...");
-		}
 		break;
-	// if escape key is pressed bring the game menu
-	case Controls::ESCAPE:
+	}
+
+	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
 		Menu menu;
 		menu.menu();
@@ -348,25 +405,34 @@ void PlayerAi::update(Actor& owner)
 	}
 
 	case Controls::DESCEND:
+	{
 		if (game.stairs->posX == owner.posX && game.stairs->posY == owner.posY)
 		{
 			game.next_level();
 		}
 		break;
+	}
+
 	case Controls::TARGET:
+	{
 		game.target();
 		break;
+	}
+
 	case Controls::CHAR_SHEET:
+	{
 		game.display_character_sheet();
 		break;
+	}
 
 	default:break;
 	}
+
 	// compute FOV if needed
-	if (dx!=0||dy!=0)
+	if (dx != 0 || dy != 0)
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		if (moveOrAttack(owner,owner.posX+dx,owner.posY+dy))
+		if (moveOrAttack(owner, owner.posX + dx, owner.posY + dy))
 		{
 			game.map->compute_fov();
 		}
