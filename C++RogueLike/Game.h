@@ -2,7 +2,7 @@
 #ifndef GAME_H
 #define GAME_H
 
-#include <memory>
+#include <memory> // std::shared_ptr, std::make_shared
 
 #include "Actor.h"
 #include "Gui.h"
