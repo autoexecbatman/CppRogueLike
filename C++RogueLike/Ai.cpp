@@ -15,7 +15,7 @@ constexpr auto TRACKING_TURNS = 3;
 //==AI==
 std::shared_ptr<Ai> Ai::create(TCODZip& zip) 
 {
-	AiType type = (AiType)zip.getInt();
+	AiType type = gsl::narrow_cast<AiType>(zip.getInt());
 	/*Ai* ai = nullptr;*/
 	std::shared_ptr<Ai> ai = nullptr;
 
