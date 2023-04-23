@@ -95,11 +95,6 @@ int main()
 		gui.gui_render(); // render the gui
 		std::clog << "initialized successfully." << std::endl;
 
-		// DEBUG : print player info
-		mvprintw(1, 1, "Gender: %s", game.player->gender.c_str());
-		mvprintw(2, 1, "Class: %s", game.player->playerClass.c_str());
-		mvprintw(3, 1, "Name: %s", game.player->name.c_str());
-
 		//==INPUT==
 		game.key_store();
 		game.key_listen();
