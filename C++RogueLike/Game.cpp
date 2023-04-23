@@ -501,6 +501,16 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 	int lineY = 0;
 	int lineX = 0;
 
+	int sideLength = 5;
+
+	int height = sideLength;
+	int width = sideLength;
+
+	// Create the window once
+	WINDOW* aoe = newwin(height + 2, width + 2, 0, 0);
+	box(aoe, 0, 0);
+	wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
+
 	bool run = true;
 	while (run == true)
 	{
@@ -535,7 +545,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		TCODLine::init(player->posX, player->posY, targetCursorX, targetCursorY);
 		while (!TCODLine::step(&lineX, &lineY))
 		{
-			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, NULL);
+			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, nullptr);
 		}
 
 		// the player uses the keyboard to select a target
@@ -579,21 +589,27 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		int height = sideLength;
 		int width = sideLength;
 
+		// Calculate the position of the aoe window
 		int centerOfExplosionY = centerY - chebyshevD;
 		int centerOfExplosionX = centerX - chebyshevD;
 
-		WINDOW* aoe = newwin(
-			height+2, // number of rows
-			width+2, // number of columns 
-			centerOfExplosionY-1, // y position
-			centerOfExplosionX-1// x position
-		);
-		
+
+		// Move the window to the new position
+		mvwin(aoe, centerOfExplosionY - 1, centerOfExplosionX - 1);
+		wrefresh(aoe);
+
 		box(aoe, 0, 0);
 
 		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
-
-		wrefresh(aoe);
+		if (aoe != nullptr)
+		{
+			wrefresh(aoe); // After continuosly pressing mouse to move the aoe window. Exception thrown at 0x62D79032 (pdcurses.dll) in C++RogueLike.exe: 0xC0000005: Access violation reading location 0x0800EFED. 
+		}
+		else
+		{
+			std::cout << "aoe is null" << std::endl;
+			exit(-1);
+		}
 
 		////display the FOV in white
 		// 
@@ -614,7 +630,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			for (int tilePosY = targetCursorY - (chebyshevD - 1 - 1 + 2); tilePosY < (centerOfExplosionY + (height - 1 + 1)); tilePosY++)
 			{
 				{
-					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, nullptr);
 				}
 			}
 		}
@@ -707,7 +723,10 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 
 		default:break;
 		}
+
 	}
+	// Delete the window after the loop
+	delwin(aoe);
 	clear();
 
 	return false;
