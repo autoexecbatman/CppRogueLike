@@ -1,5 +1,8 @@
 // file: Ai.cpp
 #include <iostream>
+#include <curses.h>
+#include <gsl/util>
+#include <gsl/pointers>
 
 #include "main.h"
 #include "Menu.h"
@@ -42,8 +45,18 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 
 	}
 
+	if (ai != nullptr)
+	{
 	ai->load(zip);
 	return ai;
+}
+	else
+	{
+		std::cout << "Error: Ai::create() - ai is null" << std::endl;
+		exit(-1);
+	}
+
+	return ai; // TODO: don't return nullptr
 }
 
 //==MONSTER_AI==
@@ -56,9 +69,17 @@ void MonsterAi::update(Actor& owner)
 		return; // do nothing
 	}
 
-	if (owner.destructible && owner.destructible->is_dead()) // if the owner is dead
+	if (owner.destructible != nullptr)
 	{
+		if (owner.destructible->is_dead()) // if the owner is dead
+		{
 		return; // do nothing
+	}
+	}
+	else
+	{
+		std::cout << "Error: MonsterAi::update() - owner.destructible is null" << std::endl;
+		exit(-1);
 	}
 
 	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
@@ -106,6 +127,8 @@ void MonsterAi::moveOrAttack(Actor& owner, int targetx, int targety)
 		dx = static_cast<int>(round(dx / distance));
 		dy = static_cast<int>(round(dy / distance));
 
+		if (game.map != nullptr)
+		{
 		if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
 		{
 			owner.posX += dx;
@@ -119,6 +142,13 @@ void MonsterAi::moveOrAttack(Actor& owner, int targetx, int targety)
 		{
 			owner.posY += stepdy;
 		}
+	}
+		else
+		{
+			std::cout << "Error: game.map is null" << std::endl;
+			exit(-1);
+		}
+
 	}
 
 	else if (owner.attacker)
@@ -235,12 +265,20 @@ bool PlayerAi::levelUpUpdate(Actor& owner)
 {
 	// level up if needed
 	int levelUpXp = getNextLevelXp();
+	if (owner.destructible != nullptr)
+	{
 	if (owner.destructible->xp >= levelUpXp)
 	{
 		xpLevel++;
 		owner.destructible->xp -= levelUpXp;
 		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
 		game.dispay_stats(xpLevel);
+	}
+	}
+	else
+	{
+		std::cout << "Error: PlayerAi::levelUpUpdate(Actor& owner). owner.destructible is null" << std::endl;
+		exit(-1);
 	}
 
 	if (owner.destructible && owner.destructible->is_dead())
@@ -728,10 +766,17 @@ bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 	//	std::clog << "map is null in moveOrAttack" << std::endl;
 	//	exit(-1);
 	//}
-
+	if (game.map != nullptr)
+	{
 	if (game.map->is_wall(targety, targetx))
 	{
 		return false;
+	}
+	}
+	else
+	{
+		std::cout << "Error: moveOrAttack() called on actor with no map." << std::endl;
+		exit(-1);
 	}
 
 	// look for living actors to attack
@@ -742,6 +787,12 @@ bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 		{
 			owner.attacker->attack(owner, *actor);
 			return false;
+		}
+	}
+		else
+		{
+			std::cout << "Error: moveOrAttack() called on actor with null actor." << std::endl;
+			exit(-1);
 		}
 	}
 
@@ -771,7 +822,7 @@ ConfusedMonsterAi::ConfusedMonsterAi(int nbTurns, std::shared_ptr<Ai> oldAi) :
 
 void ConfusedMonsterAi::update(Actor& owner)
 {
-	TCODRandom* rng = TCODRandom::getInstance();
+	gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
 	int dx = rng->getInt(-1, 1);
 	int dy = rng->getInt(-1, 1);
 
@@ -780,6 +831,8 @@ void ConfusedMonsterAi::update(Actor& owner)
 		int destx = owner.posX + dx;
 		int desty = owner.posY + dy;
 
+		if (game.map != nullptr)
+		{
 		if (game.map->can_walk(desty, destx))
 		{
 			owner.posX = destx;
@@ -792,6 +845,12 @@ void ConfusedMonsterAi::update(Actor& owner)
 			{
 				owner.attacker->attack(owner, *actor);
 			}
+			}
+		}
+		else
+		{
+			std::cout << "Error: update() called on actor with no map." << std::endl;
+			exit(-1);
 		}
 	}
 
@@ -813,7 +872,15 @@ void ConfusedMonsterAi::save(TCODZip& zip)
 {
 	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
 	zip.putInt(nbTurns);
+	if (oldAi != nullptr)
+	{
 	oldAi->save(zip);
+}
+	else
+	{
+		std::cout << "Error: save() called on actor with no oldAi." << std::endl;
+		exit(-1);
+	}
 }
 //====
 
