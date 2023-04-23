@@ -196,7 +196,8 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 		"Left-click a target tile for the fireball,\nor right-click to cancel."
 	);
 
-	int x, y;
+	int x{ 0 };
+	int y{ 0 };
 
 	if (!game.pick_tile(&x, &y , Fireball::maxRange)) // <-- runs a while loop here
 	{
