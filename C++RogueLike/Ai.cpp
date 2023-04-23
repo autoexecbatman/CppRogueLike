@@ -482,33 +482,48 @@ void PlayerAi::pick_item(Actor& owner)
 {
 	std::clog << "You try to pick something..." << std::endl;
 
-	bool found = false;
-	for (const auto actor : game.actors)
+	if (game.actors.empty())
 	{
-		/*std::clog << "Checking actor " << actor->name << std::endl;*/
-
-		if (
-			actor->pickable
-			&&
-			actor->posX == owner.posX
-			&&
-			actor->posY == owner.posY
-			)
-		{
-			if (actor->pickable->pick(*actor, owner))
-			{
-				found = true;
-				game.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor->name.c_str());
-				break;
-			}
-			else if (!found)
-			{
-				found = true;
-				game.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
-			}
-		}
+		std::cout << "Error: PlayerAi::pick_item(Actor& owner). game.actors is empty" << std::endl;
+		exit(-1);
 	}
 
+	bool found = false;
+
+	for (const auto& actor : game.actors)
+		{
+		// Skip null actors
+		if (actor == nullptr)
+			{
+			std::cout << "Error: PlayerAi::pick_item(Actor& owner). game.actors contains null pointer" << std::endl;
+			exit(-1);
+			}
+
+		std::clog << "Checking actor " << actor->name << std::endl;
+		std::cout << "Checking actor " << actor->name << std::endl;
+
+		// Skip actors without a pickable component
+		if (actor->pickable == nullptr)
+			{
+			std::clog << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
+			std::cout << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
+			continue;
+			}
+
+		// Check if the actor can be picked up at the player's position
+		if (is_pickable_at_position(*actor, owner))
+		{
+			// Try to pick up the actor
+			found = try_pick_actor(*actor, owner);
+
+			if (found)
+			{
+				break;
+		}
+	}
+	}
+
+	// Log a message if there's nothing to pick up
 	if (!found)
 	{
 		game.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
