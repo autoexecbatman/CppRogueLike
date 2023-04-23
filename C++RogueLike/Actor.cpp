@@ -90,6 +90,17 @@ void Actor::load(TCODZip& zip)
 
 void Actor::save(TCODZip& zip)
 {
+	// Check if the actor's name is empty
+	if (name.empty())
+	{
+		// Assign a default name
+		name = "Unnamed Actor";
+	}
+
+	// Add a debug log to display the actor name
+	std::cout << "Saving actor: " << name << std::endl;
+	std::clog << "Saving actor: " << name << std::endl;
+
 	zip.putInt(posX);
 	zip.putInt(posY);
 	zip.putInt(ch);
