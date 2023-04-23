@@ -597,7 +597,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// Move the window to the new position
 		mvwin(aoe, centerOfExplosionY - 1, centerOfExplosionX - 1);
 		wrefresh(aoe);
-
+		
 		box(aoe, 0, 0);
 
 		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));

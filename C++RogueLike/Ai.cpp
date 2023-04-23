@@ -47,9 +47,8 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 
 	if (ai != nullptr)
 	{
-	ai->load(zip);
-	return ai;
-}
+		ai->load(zip);
+	}
 	else
 	{
 		std::cout << "Error: Ai::create() - ai is null" << std::endl;
@@ -73,8 +72,8 @@ void MonsterAi::update(Actor& owner)
 	{
 		if (owner.destructible->is_dead()) // if the owner is dead
 		{
-		return; // do nothing
-	}
+			return; // do nothing
+		}
 	}
 	else
 	{
@@ -126,23 +125,23 @@ void MonsterAi::moveOrAttack(Actor& owner, int targetx, int targety)
 	{
 		dx = static_cast<int>(round(dx / distance));
 		dy = static_cast<int>(round(dy / distance));
-
+		
 		if (game.map != nullptr)
 		{
-		if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
-		{
-			owner.posX += dx;
-			owner.posY += dy;
+			if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
+			{
+				owner.posX += dx;
+				owner.posY += dy;
+			}
+			else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
+			{
+				owner.posX += stepdx;
+			}
+			else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
+			{
+				owner.posY += stepdy;
+			}
 		}
-		else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
-		{
-			owner.posX += stepdx;
-		}
-		else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
-		{
-			owner.posY += stepdy;
-		}
-	}
 		else
 		{
 			std::cout << "Error: game.map is null" << std::endl;
@@ -267,13 +266,13 @@ bool PlayerAi::levelUpUpdate(Actor& owner)
 	int levelUpXp = getNextLevelXp();
 	if (owner.destructible != nullptr)
 	{
-	if (owner.destructible->xp >= levelUpXp)
-	{
-		xpLevel++;
-		owner.destructible->xp -= levelUpXp;
-		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
-		game.dispay_stats(xpLevel);
-	}
+		if (owner.destructible->xp >= levelUpXp)
+		{
+			xpLevel++;
+			owner.destructible->xp -= levelUpXp;
+			game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
+			game.dispay_stats(xpLevel);
+		}
 	}
 	else
 	{
@@ -377,7 +376,7 @@ void PlayerAi::update(Actor& owner)
 		{
 			if (game.player->attacker)
 			{
-		game.player->attacker->attack(*game.player, *game.player);
+				game.player->attacker->attack(*game.player, *game.player);
 			}
 			else
 			{
@@ -413,12 +412,12 @@ void PlayerAi::update(Actor& owner)
 	case Controls::DROP:
 	{
 		std::shared_ptr<Actor> actor = choseFromInventory(owner, 'a');
-		if (actor) 
+		if (actor)
 		{
 			actor->pickable->drop(*actor, owner);
 			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
-	break;
+		break;
 	}
 
 	case Controls::INVENTORY:
@@ -429,9 +428,9 @@ void PlayerAi::update(Actor& owner)
 	}
 
 	case Controls::QUIT:
-		{
+	{
 		game.run = false;
-			mvprintw(29, 0, "You quit the game ! Press any key ...");
+		mvprintw(29, 0, "You quit the game ! Press any key ...");
 		break;
 	}
 
@@ -491,24 +490,24 @@ void PlayerAi::pick_item(Actor& owner)
 	bool found = false;
 
 	for (const auto& actor : game.actors)
-		{
+	{
 		// Skip null actors
 		if (actor == nullptr)
-			{
+		{
 			std::cout << "Error: PlayerAi::pick_item(Actor& owner). game.actors contains null pointer" << std::endl;
 			exit(-1);
-			}
+		}
 
 		std::clog << "Checking actor " << actor->name << std::endl;
 		std::cout << "Checking actor " << actor->name << std::endl;
 
 		// Skip actors without a pickable component
 		if (actor->pickable == nullptr)
-			{
+		{
 			std::clog << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
 			std::cout << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
 			continue;
-			}
+		}
 
 		// Check if the actor can be picked up at the player's position
 		if (is_pickable_at_position(*actor, owner))
@@ -519,8 +518,8 @@ void PlayerAi::pick_item(Actor& owner)
 			if (found)
 			{
 				break;
+			}
 		}
-	}
 	}
 
 	// Log a message if there's nothing to pick up
@@ -532,224 +531,182 @@ void PlayerAi::pick_item(Actor& owner)
 	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
+bool PlayerAi::is_pickable_at_position(const Actor& actor, const Actor& owner) const
+{
+	return actor.posX == owner.posX && actor.posY == owner.posY;
+}
+
+bool PlayerAi::try_pick_actor(Actor& actor, Actor& owner)
+{
+	std::clog << "Trying to pick actor " << actor.name << std::endl;
+	std::cout << "Trying to pick actor " << actor.name << std::endl;
+
+	bool picked = actor.pickable->pick(actor, owner);
+
+	if (picked)
+	{
+		if (game.gui != nullptr)
+		{
+			game.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor.name.c_str());
+		}
+		else
+		{
+			std::cout << "Error: PlayerAi::try_pick_actor(Actor& actor, Actor& owner). game.gui is null pointer" << std::endl;
+			exit(-1);
+		}
+	}
+	else
+	{
+		if (game.gui != nullptr)
+		{
+			game.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
+		}
+		else
+		{
+			std::cout << "Error: PlayerAi::try_pick_actor(Actor& actor, Actor& owner). game.gui is null pointer" << std::endl;
+			exit(-1);
+		}
+	}
+
+	return picked;
+}
+
+constexpr int INVENTORY_HEIGHT = 29;
+constexpr int INVENTORY_WIDTH = 30;
+
+void PlayerAi::displayInventoryItems(WINDOW* inv, Actor& owner)
+{
+	int shortcut = 'a';
+	int y = 1;
+	for (const auto& actor : owner.container->inventoryList)
+	{
+		if (actor != nullptr)
+		{
+			mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
+		}
+		y++;
+		shortcut++;
+	}
+}
+
 void PlayerAi::display_inventory(Actor& owner)
 {
-	/*Actor* actor = choseFromInventory(owner, ascii);*/
-
-	constexpr int INVENTORY_HEIGHT = 29;
-	constexpr int INVENTORY_WIDTH = 30;
-
 	refresh();
 
-	WINDOW* inv = newwin(
-		INVENTORY_HEIGHT, // int nlines
-		INVENTORY_WIDTH, // int ncols
-		0, // int begy
-		0 // int begx
-	);
+	WINDOW* inv = newwin(INVENTORY_HEIGHT, INVENTORY_WIDTH, 0, 0);
 
-	// display the inventory frame
-	/*con.setDefaultForeground(TCODColor(200, 180, 50));*/
-	/*con.printFrame(0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT, true, TCOD_BKGND_DEFAULT, "inventory");*/
 	box(inv, 0, 0);
 	mvwprintw(inv, 0, 0, "Inventory");
 
-	// display the items with their keyboard shortcut
-	/*con.setDefaultForeground(TCODColor::white);*/
-	int shortcut = 'a';
-	int y = 1;
-	/*for (Actor** it = owner->container->inventory.begin();
-		it != owner->container->inventory.end(); it++) {
-		Actor* actor = *it;
-		con.print(2, y, "(%c) %s", shortcut, actor->name);
-		y++;
-		shortcut++;
-	}*/
-	
-	for (auto& actor : owner.container->inventoryList)
+	if (owner.container->inventoryList.size() > 0)
 	{
-		/*game.gui->log_message(y, 0, "(%c) %s", shortcut, actor->name);*/
-
-		mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
-		y++;
-		shortcut++;
+		displayInventoryItems(inv, owner);
+	}
+	else
+	{
+		int y = 1;
+		mvwprintw(inv, y, 1, "Your inventory is empty.");
 	}
 
-	/*// blit the inventory console on the root console
-	TCODConsole::blit(&con, 0, 0, INVENTORY_WIDTH, INVENTORY_HEIGHT,
-		TCODConsole::root, game.screenWidth / 2 - INVENTORY_WIDTH / 2,
-		game.screenHeight / 2 - INVENTORY_HEIGHT / 2);
-	TCODConsole::flush();*/
 	wrefresh(inv);
 
-	//std::clog << "You display inventory" << std::endl;
-	//if (actor)
-	//{
-	//	actor->pickable->use(actor, owner);
-	//}
-
-	Gui gui; // create a new Gui object for the inventory menu to use for rendering the inventory
-	// wait for a key press
 	int inventoryInput = getch();
-	switch (inventoryInput)
+	if (inventoryInput == static_cast<int>(Controls::ESCAPE))
 	{
-	case static_cast<int>(Controls::ESCAPE):
+		delwin(inv);
 		clear();
-		break;
-
-	case 'a':
+	}
+	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
 	{
-		// use item
 		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
 			game.gameStatus = Game::GameStatus::NEW_TURN;
 		}
-	}
-	clear();
-	break;
-
-	case 'b':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-	clear();
-	break;
-
-	case 'c':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-	clear();
-	break;
-
-	case 'd':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-	clear();
-	break;
-
-	case 'e':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-
-	case 'f':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-
-	case 'h':
-	{
-		// use item
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
-
-	default:
+		delwin(inv);
 		clear();
-		break;
+	}
+	else
+	{
+		delwin(inv);
+		clear();
 	}
 }
 
 std::shared_ptr<Actor> PlayerAi::choseFromInventory(Actor& owner, int ascii)
 {
 	std::clog << "You chose from inventory" << std::endl;
-	if (ascii == 'a')
+	if (owner.container != nullptr)
 	{
-		if (owner.container->inventoryList.size() > 0)
+		if (ascii == 'a')
 		{
-			return owner.container->inventoryList[0];
+			if (owner.container->inventoryList.size() > 0)
+			{
+				/*return owner.container->inventoryList[0];*/
+				// prefer to use gsl::at() instead pf unchecked subscript operator (bounds.4).
+				// gsl::at() will throw an exception if the index is out of bounds
+				return gsl::at(owner.container->inventoryList, 0);
+			}
+		}
+		if (ascii == 'b')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 1);
+			}
+		}
+		if (ascii == 'c')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 2);
+			}
+		}
+		if (ascii == 'd')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 3);
+			}
+		}
+		if (ascii == 'e')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 4);
+			}
+		}
+		if (ascii == 'f')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 5);
+			}
+		}
+		if (ascii == 'g')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 6);
+			}
+		}
+		// if case is 'h'
+		if (ascii == 'h')
+		{
+			if (owner.container->inventoryList.size() > 0)
+			{
+				return gsl::at(owner.container->inventoryList, 7);
+			}
 		}
 	}
-	if (ascii == 'b')
+	else
 	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[1];
-		}
-	}
-	if (ascii == 'c')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[2];
-		}
-	}
-	if (ascii == 'd')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[3];
-		}
-	}
-	if (ascii == 'e')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[4];
-		}
-	}
-	if (ascii == 'f')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[5];
-		}
-	}
-	if (ascii == 'g')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[6];
-		}
-	}
-	// if case is 'h'
-	if (ascii == 'h')
-	{
-		if (owner.container->inventoryList.size() > 0)
-		{
-			return owner.container->inventoryList[7];
-		}
+		std::cout << "Error: choseFromInventory() called on actor with no container." << std::endl;
+		exit(-1);
 	}
 
-	return nullptr;
+	return nullptr; // TODO: don't hand out nullptrs
 }
 
 void PlayerAi::load(TCODZip& zip)
@@ -765,6 +722,18 @@ void PlayerAi::load(TCODZip& zip)
 void PlayerAi::save(TCODZip& zip)
 {
 	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
+}
+
+bool is_not_dead(const Actor& actor)
+{
+	if (actor.destructible && !actor.destructible->is_dead())
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
@@ -783,10 +752,10 @@ bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 	//}
 	if (game.map != nullptr)
 	{
-	if (game.map->is_wall(targety, targetx))
-	{
-		return false;
-	}
+		if (game.map->is_wall(targety, targetx))
+		{
+			return false;
+		}
 	}
 	else
 	{
@@ -797,13 +766,14 @@ bool PlayerAi::moveOrAttack(Actor& owner, int targetx, int targety)
 	// look for living actors to attack
 	for (const auto& actor : game.actors)
 	{
-		const auto isNotDead = (actor->destructible && !actor->destructible->is_dead());
-		if (isNotDead && actor->posX == targetx && actor->posY == targety)
+		if (actor != nullptr)
 		{
-			owner.attacker->attack(owner, *actor);
-			return false;
+			if (is_not_dead(*actor) && actor->posX == targetx && actor->posY == targety)
+			{
+				owner.attacker->attack(owner, *actor);
+				return false;
+			}
 		}
-	}
 		else
 		{
 			std::cout << "Error: moveOrAttack() called on actor with null actor." << std::endl;
@@ -848,18 +818,18 @@ void ConfusedMonsterAi::update(Actor& owner)
 
 		if (game.map != nullptr)
 		{
-		if (game.map->can_walk(desty, destx))
-		{
-			owner.posX = destx;
-			owner.posY = desty;
-		}
-		else
-		{
-			std::shared_ptr<Actor> actor = game.get_actor(destx, desty);
-			if (actor)
+			if (game.map->can_walk(desty, destx))
 			{
-				owner.attacker->attack(owner, *actor);
+				owner.posX = destx;
+				owner.posY = desty;
 			}
+			else
+			{
+				std::shared_ptr<Actor> actor = game.get_actor(destx, desty);
+				if (actor)
+				{
+					owner.attacker->attack(owner, *actor);
+				}
 			}
 		}
 		else
@@ -889,8 +859,8 @@ void ConfusedMonsterAi::save(TCODZip& zip)
 	zip.putInt(nbTurns);
 	if (oldAi != nullptr)
 	{
-	oldAi->save(zip);
-}
+		oldAi->save(zip);
+	}
 	else
 	{
 		std::cout << "Error: save() called on actor with no oldAi." << std::endl;

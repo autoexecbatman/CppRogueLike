@@ -2,6 +2,8 @@
 #ifndef AI_H
 #define AI_H
 
+#include <curses.h>
+
 //==AI==
 class Ai : public Persistent
 {
@@ -62,6 +64,10 @@ protected:
 	/*void handleActionKey(Actor* owner, int ascii);*/
 	std::shared_ptr<Actor> choseFromInventory(Actor& owner, int ascii);
 	bool moveOrAttack(Actor& owner, int targetx, int targety);
+private:
+	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
+	bool try_pick_actor(Actor& actor, Actor& owner);
+	void displayInventoryItems(WINDOW* inv, Actor& owner);
 	
 };
 

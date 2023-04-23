@@ -15,6 +15,13 @@ Container::~Container()
 // checks that the container is not full.
 bool Container::add(Actor& actor)
 {	
+
+	// Do not add the player to the inventory
+	if (&actor == game.player.get())
+	{
+		return false;
+	}
+
 	//if (invSize < 0 && inventory.size() <= invSize)
 	//{
 	//	// inventory full
@@ -87,7 +94,7 @@ void Container::save(TCODZip& zip)
 	// iterate through the inventory and save the item
 	for (std::shared_ptr<Actor> actor : inventoryList)
 	{
-		actor->save(zip);
+		actor->save(zip); // Unhandled exception at 0x632F9A85 (libtcod.dll) in C++RogueLike.exe: 0xC00000FD: Stack overflow (parameters: 0x00000001, 0x00442FFC).
 	}
 }
 
