@@ -240,8 +240,8 @@ enum class Controls : int
 	SWITCH_ALL = 'm'
 };
 
-const int LEVEL_UP_BASE = 200;
-const int LEVEL_UP_FACTOR = 150;
+constexpr int LEVEL_UP_BASE = 200;
+constexpr int LEVEL_UP_FACTOR = 150;
 
 int PlayerAi::getNextLevelXp()
 {
