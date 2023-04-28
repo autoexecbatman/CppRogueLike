@@ -15,8 +15,7 @@ constexpr auto TRACKING_TURNS = 3;
 //==AI==
 std::shared_ptr<Ai> Ai::create(TCODZip& zip) 
 {
-	AiType type = gsl::narrow_cast<AiType>(zip.getInt());
-	/*Ai* ai = nullptr;*/
+	const AiType type = gsl::narrow_cast<AiType>(zip.getInt());
 	std::shared_ptr<Ai> ai = nullptr;
 
 	switch (type) 
@@ -24,21 +23,18 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 
 	case AiType::PLAYER:
 	{
-		/*ai = new PlayerAi();*/
 		ai = std::make_shared<PlayerAi>();
 		break;
 	}
 
 	case AiType::MONSTER:
 	{
-		/*ai = new MonsterAi();*/
 		ai = std::make_shared<MonsterAi>();
 		break;
 	}
 	
 	case AiType::CONFUSED_MONSTER:
 	{
-		/*ai = new ConfusedMonsterAi(0, nullptr);*/
 		ai = std::make_shared<ConfusedMonsterAi>(0, nullptr);
 		break;
 	}
