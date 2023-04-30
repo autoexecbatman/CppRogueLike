@@ -4,16 +4,18 @@
 
 #include <curses.h>
 
+#include "Persistent.h"
+
+class Actor; // for no circular dependency with Actor.h
+
 //==AI==
 class Ai : public Persistent
 {
 public:
+	// Defaulted constructor and destructor
 	Ai() = default;
 	virtual ~Ai() {};
-	virtual void update(Actor& owner) = 0;
-	/*static Ai* create(TCODZip& zip);*/
 
-	static std::shared_ptr<Ai> create(TCODZip& zip);
 	// Defaulted copy constructor and copy assignment operator
 	Ai(const Ai&) = default;
 	Ai& operator=(const Ai&) = default;
@@ -22,27 +24,15 @@ public:
 	Ai(Ai&&) noexcept = default;
 	Ai& operator=(Ai&&) noexcept = default;
 
+	virtual void update(Actor& owner) = 0;
+
+	static std::shared_ptr<Ai> create(TCODZip& zip);
+
 protected:
-	enum class AiType 
+	enum class AiType
 	{
 		MONSTER, CONFUSED_MONSTER, PLAYER
 	};
-};
-
-//==MONSTER_AI==
-class MonsterAi : public Ai
-{
-public:
-	MonsterAi();
-	void update(Actor& owner);
-
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
-	
-protected:
-	int moveCount = 0;
-
-	void moveOrAttack(Actor& owner, int targetx, int targety);
 };
 
 //==PLAYER_AI==

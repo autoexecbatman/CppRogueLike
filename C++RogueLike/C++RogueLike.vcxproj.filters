@@ -75,6 +75,9 @@
     <ClCompile Include="MenuName.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AiMonster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Map.h">
@@ -141,6 +144,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="MenuName.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AiMonster.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

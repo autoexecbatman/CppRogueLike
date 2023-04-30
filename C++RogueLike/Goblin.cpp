@@ -2,7 +2,7 @@
 #include "Game.h"
 #include "Actor.h"
 #include "Colors.h"
-
+#include "AiMonster.h"
 #include "Goblin.h"
 #include "RandomDice.h"
 
@@ -18,20 +18,12 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", 15, 0)
 	col = 15;
 	blocks = true;
 	fovOnly = true;
-	/*attacker = new Attacker(Attacker(d.d6()));*/
 	int damage = d.d6();
 	attacker = std::make_shared<Attacker>(Attacker(damage));
-	/*destructible = new MonsterDestructible(d.d8(), 0, "dead goblin", 15);*/
 	int hp = d.d8();
 	destructible = std::make_shared<MonsterDestructible>(MonsterDestructible(hp, 0, "dead goblin", 15));
-	/*ai = new MonsterAi();*/
-	ai = std::make_shared<MonsterAi>();
+	ai = std::make_shared<AiMonster>();
 }
-
-//Actor* Goblin::create_goblin(int y, int x)
-//{
-//	return new Goblin(y, x);
-//}
 
 // make a create_goblin function that returns a std::unique_ptr<Actor> instead of an Actor*
 std::shared_ptr<Goblin> Goblin::create_goblin(int y, int x)
@@ -39,9 +31,6 @@ std::shared_ptr<Goblin> Goblin::create_goblin(int y, int x)
 	auto goblin = std::make_shared<Goblin>(y, x);
 	return goblin;
 }
-
-
-
 //====
 
 ////==ORC==
