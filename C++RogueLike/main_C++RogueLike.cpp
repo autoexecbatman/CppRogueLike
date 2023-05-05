@@ -1,3 +1,9 @@
+//==Debug-MemoryLeaks==
+// https://learn.microsoft.com/en-us/cpp/c-runtime-library/find-memory-leaks-using-the-crt-library?view=msvc-170
+#define _CRTDBG_MAP_ALLOC // enable debug memory allocation
+#include <stdlib.h> // define malloc, free
+#include <crtdbg.h> // define _CrtDumpMemoryLeaks
+//====
 // file: main_C++RogueLike.cpp
 // Debug needs to be set to x86
 // we are making a rogue-like game in C++ using the PDCurses library and the libtcod library
@@ -17,6 +23,9 @@ Game game;
 
 int main()
 {
+	//==DEBUG_MEMORY_LEAKS==
+	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	/*_CrtSetBreakAlloc(174);*/
 	//==DEBUG_STREAM==
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
 	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
