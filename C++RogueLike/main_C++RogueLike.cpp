@@ -19,6 +19,9 @@
 #include "Menu.h"
 #include "Gui.h"
 
+#include "ChatGPT.h" // for openai::start
+#include "include/user_config.h"
+
 Game game;
 
 int main()
@@ -26,6 +29,10 @@ int main()
 	//==DEBUG_MEMORY_LEAKS==
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	/*_CrtSetBreakAlloc(174);*/
+
+	//==OPENAI_API==
+	openai::start(API_KEY, "");
+
 	//==DEBUG_STREAM==
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
 	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
