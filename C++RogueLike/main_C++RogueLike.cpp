@@ -120,7 +120,18 @@ int main()
 	}
 	
 	game.save();
+	gui.gui_shutdown();
 	endwin();
+	if (isendwin())
+	{
+		std::clog << "Curses shutdown successfully.\n";
+		std::cout << "Curses shutdown successfully.\n";
+	}
+	else
+	{
+		std::clog << "Curses shutdown failed.\n";
+		std::cout << "Curses shutdown failed.\n";
+	}
 
 	debugFile.close();
 
