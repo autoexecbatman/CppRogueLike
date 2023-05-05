@@ -5,7 +5,6 @@
 #include <crtdbg.h> // define _CrtDumpMemoryLeaks
 //====
 // file: main_C++RogueLike.cpp
-// Debug needs to be set to x86
 // we are making a rogue-like game in C++ using the PDCurses library and the libtcod library
 #include <iostream>
 #include <fstream>
