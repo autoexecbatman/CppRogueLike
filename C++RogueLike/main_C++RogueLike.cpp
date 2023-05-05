@@ -90,7 +90,7 @@ int main()
 	Gui gui;
 	gui.gui_init();
 
-	auto countLoop{ 0 };
+	int countLoop{ 0 };
 	while (game.run == true)
 	{
 		//==DEBUG==
