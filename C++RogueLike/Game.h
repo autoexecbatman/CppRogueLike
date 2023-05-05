@@ -61,8 +61,8 @@ public:
 
 	bool mouse_moved();
 	void target();
-	void load();
-	void save();
+	void load_all(); // does not override Persistent::load()
+	void save_all(); // does not override Persistent::save()
 	void term();
 	void print_container(std::vector<std::shared_ptr<Actor>> actors);
 

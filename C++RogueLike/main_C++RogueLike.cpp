@@ -118,7 +118,7 @@ int main()
 		countLoop++;
 	}
 	
-	game.save();
+	game.save_all();
 	gui.gui_shutdown();
 	endwin();
 	if (isendwin())

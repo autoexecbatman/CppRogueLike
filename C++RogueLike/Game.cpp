@@ -906,7 +906,7 @@ void Game::target()
 	clear();
 }
 
-void Game::load()
+void Game::load_all()
 {
 	if (TCODSystem::fileExists("game.sav"))
 	{
@@ -957,7 +957,7 @@ void Game::load()
 	}
 }
 
-void Game::save()
+void Game::save_all()
 {
 	std::clog << "Saving the game..." << std::endl;
 	if (player != nullptr)
