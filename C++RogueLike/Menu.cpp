@@ -118,7 +118,7 @@ void Menu::menu()
 				}
 				case MenuOptions::LOAD_GAME:
 				{
-					game.load();
+					game.load_all();
 					break;
 				}
 				case MenuOptions::OPTIONS:
@@ -145,7 +145,7 @@ void Menu::menu()
 		case 'l':
 		{
 			run = false;
-			game.load();
+			game.load_all();
 			break;
 		}
 		case 'O':
