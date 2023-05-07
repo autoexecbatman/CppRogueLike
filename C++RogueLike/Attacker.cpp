@@ -30,14 +30,14 @@ void Attacker::attack(Actor& owner, Actor& target)
 			mvprintw(0, 0, "%s", owner.name.c_str());
 			attroff(COLOR_PAIR(owner.col));
 			
-			int ownerNameLen = strlen(owner.name.c_str());
+			size_t ownerNameLen = strlen(owner.name.c_str());
 			const char* attacksThe = " attacks the ";
-			int attacksTheLen = strlen(attacksThe);
+			size_t attacksTheLen = strlen(attacksThe);
 			mvprintw(0, ownerNameLen, attacksThe);
 			attron(COLOR_PAIR(target.col));
 			mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
 			attroff(COLOR_PAIR(target.col));
-			int targetNameLen = strlen(target.name.c_str());
+			size_t targetNameLen = strlen(target.name.c_str());
 			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", power - target.destructible->defense);
 		}
 		else

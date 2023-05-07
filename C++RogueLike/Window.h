@@ -18,7 +18,7 @@ class Window
 public:
 	const char* wintext = "init_wintext";
 	//the lenght of wintext
-	int wintext_len = strlen(wintext) + 2; // why +2 ? borders...
+	size_t wintext_len = strlen(wintext) + 2; // why +2 ? borders...
 	
 	//define wintext_len as a function declaration
 	/*int wintext_len(const char* wintext);*/
