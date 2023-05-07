@@ -90,7 +90,8 @@ void Container::load(TCODZip& zip)
 void Container::save(TCODZip& zip)
 {
 	zip.putInt(invSize);
-	zip.putInt(inventoryList.size());
+	const int nbActors = gsl::narrow_cast<int>(inventoryList.size());
+	zip.putInt(nbActors);
 	// iterate through the inventory and save the item
 	for (std::shared_ptr<Actor> actor : inventoryList)
 	{
