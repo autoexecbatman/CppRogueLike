@@ -63,7 +63,6 @@ public:
 	void target();
 	void load_all(); // does not override Persistent::load()
 	void save_all(); // does not override Persistent::save()
-	void term();
 	void print_container(std::vector<std::shared_ptr<Actor>> actors);
 
 	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }

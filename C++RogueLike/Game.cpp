@@ -1068,13 +1068,6 @@ void Game::save_all()
 	}
 }
 
-void Game::term()
-{
-	actors.clear();
-	/*if (map) delete map;*/
-	/*gui->gui_clear();*/
-}
-
 void Game::next_level()
 {
 	dungeonLevel++;
