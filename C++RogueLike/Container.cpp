@@ -78,11 +78,9 @@ void Container::load(TCODZip& zip)
 	int nbActors = zip.getInt();
 	while (nbActors > 0) 
 	{
-		/*Actor* actor = new Actor(0, 0, 0, nullptr, 0);*/
-		std::shared_ptr<Actor> actor = std::make_shared<Actor>(0, 0, 0, nullptr, 0, 0);
+		std::shared_ptr<Actor> actor = std::make_shared<Actor>(0, 0, 0, "", 0, 0);
 		actor->load(zip);
-		inventoryList.push_back(actor);
-		/*inventoryList.emplace_back(actor);*/
+		inventoryList.push_back(std::move(actor));
 		nbActors--;
 	}
 }
