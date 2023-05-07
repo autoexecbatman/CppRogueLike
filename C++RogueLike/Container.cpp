@@ -7,9 +7,9 @@
 #include "Actor.h"
 #include "Game.h"
 
-Container::Container(int invSize) : invSize(invSize) {}
+Container::Container(int invSize) noexcept : invSize(invSize) {}
 
-Container::~Container() 
+Container::~Container() noexcept
 {
 	inventoryList.clear();
 }
@@ -52,7 +52,7 @@ bool Container::add(Actor& actor)
 	return true;
 }
 
-
+// remove an item from the inventory
 void Container::remove(Actor& actor)
 {
 	std::clog << "Removing item from inventory" << std::endl;
@@ -78,7 +78,7 @@ void Container::load(TCODZip& zip)
 {
 	invSize = zip.getInt();
 	int nbActors = zip.getInt();
-	while (nbActors > 0) 
+	while (nbActors > 0)
 	{
 		std::shared_ptr<Actor> actor = std::make_shared<Actor>(0, 0, 0, "", 0, 0);
 		actor->load(zip);
