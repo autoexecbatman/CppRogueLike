@@ -1,28 +1,23 @@
 // file: Actor.cpp
 #include <iostream>
-#include <curses.h>
+#include <string>
+#include <algorithm>
 #include <math.h>
 #include <memory>
 
-//#include "main.h"
-//#include "libtcod.hpp"
+#include <curses.h>
 #pragma warning (push, 0)
-#include <libtcod/libtcod.hpp>
+#include <libtcod.h>
 #pragma warning (pop)
-class Actor;
-#include "Persistent.h"
-#include "Destructible.h"
+
+#include "Actor.h"
 #include "Attacker.h"
+#include "Destructible.h"
 #include "Ai.h"
 #include "Pickable.h"
 #include "Container.h"
-#include "Actor.h"
-#include "Map.h"
-#include "Game.h"
-
 
 //====
-//the actor constructor initializes the actor's position,name and color
 Actor::Actor(
 	int y,
 	int x,
@@ -90,13 +85,6 @@ void Actor::load(TCODZip& zip)
 
 void Actor::save(TCODZip& zip)
 {
-	// Check if the actor's name is empty
-	if (name.empty())
-	{
-		// Assign a default name
-		name = "Unnamed Actor";
-	}
-
 	// Add a debug log to display the actor name
 	std::cout << "Saving actor: " << name << std::endl;
 	std::clog << "Saving actor: " << name << std::endl;
@@ -122,7 +110,7 @@ void Actor::save(TCODZip& zip)
 }
 
 // the actor render function with color
-void Actor::render() const
+void Actor::render() const noexcept
 {
 	attron(COLOR_PAIR(col));
 	mvaddch(posY, posX, ch);
@@ -152,10 +140,10 @@ void Actor::update()
 }
 
 // a function to get the distance from an actor to a specific tile of the map
-int Actor::get_distance(int tileX, int tileY) const
+int Actor::get_distance(int tileX, int tileY) const noexcept
 {
 	// using chebyshev distance
-	int distance = std::max(abs(posX - tileX), abs(posY - tileY));
+	const int distance = std::max(abs(posX - tileX), abs(posY - tileY));
 
 	mvprintw(10, 0, "Distance: %d", distance);
 

@@ -4,12 +4,13 @@
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
+
+#include "Persistent.h"
 #include "Attacker.h"
 #include "Destructible.h"
 #include "Ai.h"
 #include "Container.h"
 #include "Pickable.h"
-
 
 //==Actor==
 // a class for the actors in the game
@@ -44,16 +45,16 @@ public:
 		int index
 	);
 
-	~Actor();
+	virtual ~Actor();
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
 	void update(); // update() will handle the monster turn.
 
-	int get_distance(int tileX, int tileY) const; // a function to get the distance from an actor to a specific tile of the map
+	int get_distance(int tileX, int tileY) const noexcept; // a function to get the distance from an actor to a specific tile of the map
 
-	void render() const; // render the actor on the screen.
+	void render() const noexcept; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
 };
 
