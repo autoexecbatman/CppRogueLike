@@ -13,6 +13,7 @@
 #include "Gui.h"
 #include "Attacker.h"
 #include "Ai.h"
+#include "AiPlayer.h"
 #include "Pickable.h"
 #include "Container.h"
 #include "Colors.h"
@@ -37,7 +38,7 @@ void Game::init()
 			0
 		);
 		game.player->attacker = std::make_shared<Attacker>(random_number(1, 10));
-		game.player->ai = std::make_shared<PlayerAi>();
+		game.player->ai = std::make_shared<AiPlayer>();
 		game.player->container = std::make_shared<Container>(26);
 	}
 	else

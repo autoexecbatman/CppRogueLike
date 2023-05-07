@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Map.h"
 #include "Ai.h"
+#include "AiPlayer.h"
 #include "Player.h"
 #include "Actor.h"
 #include "RandomDice.h"
@@ -31,7 +32,7 @@ Player::Player(int y, int x)
 	attacker = std::make_shared<Attacker>(Attacker(d.d4()));
 
 	destructible = std::make_shared<PlayerDestructible>(PlayerDestructible(30, 2, "dead player", 100));
-	ai = std::make_shared<PlayerAi>();
+	ai = std::make_shared<AiPlayer>();
 }
 
 bool Player::player_is_dead()

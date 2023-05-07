@@ -81,6 +81,9 @@
     <ClCompile Include="ChatGPT.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AiPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Map.h">
@@ -153,6 +156,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ChatGPT.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AiPlayer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
