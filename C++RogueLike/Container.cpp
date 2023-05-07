@@ -3,7 +3,9 @@
 #include <vector>
 #include <gsl/util>
 
-#include "main.h"
+#include "Container.h"
+#include "Actor.h"
+#include "Game.h"
 
 Container::Container(int invSize) : invSize(invSize) {}
 
