@@ -8,6 +8,7 @@
 #include "Gui.h"
 #include "Map.h"
 #include "Colors.h"
+#include "ChatGPT.h"
 
 class Game
 {
@@ -39,6 +40,8 @@ public:
 		WHITE_PAIR, // int colorPair
 		1 // int index
 	) };
+
+	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(22, 120) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
