@@ -53,22 +53,18 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 }
 
 //==ConfusedMonsterAi==
-ConfusedMonsterAi::ConfusedMonsterAi(int nbTurns, std::shared_ptr<Ai> oldAi) :
-	nbTurns(nbTurns),
-	oldAi(oldAi)
-{
-}
+ConfusedMonsterAi::ConfusedMonsterAi(int nbTurns, std::shared_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(oldAi) {}
 
 void ConfusedMonsterAi::update(Actor& owner)
 {
-	gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
+	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
 	int dx = rng->getInt(-1, 1);
 	int dy = rng->getInt(-1, 1);
 
 	if (dx != 0 || dy != 0)
 	{
-		int destx = owner.posX + dx;
-		int desty = owner.posY + dy;
+		const int destx = owner.posX + dx;
+		const int desty = owner.posY + dy;
 
 		if (game.map != nullptr)
 		{
@@ -97,7 +93,6 @@ void ConfusedMonsterAi::update(Actor& owner)
 	if (nbTurns == 0)
 	{
 		owner.ai = oldAi;
-		delete this;
 	}
 }
 
