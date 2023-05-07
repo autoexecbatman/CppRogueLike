@@ -332,7 +332,7 @@ void Game::send_to_back(Actor& actor)
 		{
 			auto it = std::find_if(actors.begin(), actors.end(), [&actor](const auto& a) { return a.get() == &actor; } ); // get the iterator of the actor
 			const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
-			for (int i = distance; i > 0; i--)
+			for (auto i = distance; i > 0; i--)
 			{
 				std::swap(actors[i - 1], actors[i]);
 			}
