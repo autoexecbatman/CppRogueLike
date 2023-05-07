@@ -1,14 +1,17 @@
 // file: Map.cpp
-#include <curses.h>
-#include <random>
 #include <iostream>
-//#include "main.h"
+#include <random>
+#include <gsl/util>
+#include <gsl/pointers>
+#include <gsl/span>
 
-//#include "libtcod.hpp"
+#include <curses.h>
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
-class Actor;
+
+#include "Game.h"
+#include "Map.h"
 #include "Persistent.h"
 #include "Destructible.h"
 #include "Attacker.h"
@@ -16,8 +19,6 @@ class Actor;
 #include "Pickable.h"
 #include "Container.h"
 #include "Actor.h"
-#include "Map.h"
-#include "Game.h"
 #include "Colors.h"
 #include "Goblin.h"
 #include "RandomDice.h"
@@ -47,7 +48,7 @@ public:
 		{
 			// variables
 			int room_pos_x = 0, room_pos_y = 0, room_width = 0, room_height = 0;
-			bool withActors = (bool)userData;
+			const bool withActors = gsl::narrow_cast<bool>(userData);
 			// dig a room
 			/*TCODRandom* rng = TCODRandom::getInstance();*/
 			room_width = map.rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
@@ -100,7 +101,8 @@ void Map::load(TCODZip& zip)
 	init(false);
 	for (int i = 0; i < map_width * map_height; i++)
 	{
-		tiles[i].explored = zip.getInt();
+		/*tiles[i].explored = zip.getInt();*/
+		tiles[i].explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
 
@@ -109,17 +111,19 @@ void Map::save(TCODZip& zip)
 	zip.putInt(seed);
 	for (int i = 0; i < map_width * map_height; i++) 
 	{
-		zip.putInt(tiles[i].explored);
+		zip.putInt(gsl::narrow_cast<int>(tiles[i].explored));
 	}
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 {
 	
-	TCODBsp* myBSP = new TCODBsp(0, 0, map_width, map_height);
+	gsl::owner<TCODBsp*> myBSP = new TCODBsp(0, 0, map_width, map_height);
 	myBSP->splitRecursive(rng, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
 	BspListener* mylistener = new BspListener(*this);
 	myBSP->traverseInvertedLevelOrder(mylistener, (void*)withActors);
+	delete myBSP;
+	delete mylistener;
 }
 
 //====
@@ -143,6 +147,7 @@ Map::~Map()
 {
 	delete[] tiles; // free the map's tiles
 	delete tcodMap; //delete the TCODMap object
+	delete rng; // delete the rng
 }
 
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
@@ -250,75 +255,45 @@ void Map::render() const
 
 void Map::add_item(int x, int y)
 {
-	TCODRandom* rng = TCODRandom::getInstance();
-	int dice = rng->getInt(0, 100);
-	
-	static int potionIndex = 0;
+	gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
+	const int dice = rng->getInt(0, 100);
+	int potionIndex = 0;
 	if (dice < 70)
 	{
-		// add health potion
-		/*Actor* healthPotion = new Actor(x, y, '!', "health potion", HPBARMISSING_PAIR);*/
+		// add a health potion
 		auto healthPotion = std::make_shared<Actor>(x, y, '!', "health potion", HPBARMISSING_PAIR, 0);
 		healthPotion->index = potionIndex++;
 		healthPotion->blocks = false;
-		/*healthPotion->pickable = new Healer(4);*/
 		healthPotion->pickable = std::make_shared<Healer>(4);
 		game.actors.push_back(healthPotion);
-		/*game.actors.emplace_back(healthPotion);*/
-		/*game.actors.emplace(healthPotion);*/
-		/*game.actors.try_emplace(healthPotion->index,healthPotion);*/
-		//auto result = game.actors.insert({ healthPotion->index, healthPotion });
-		//if (!result.second) {
-		//	// an element with the same key already exists
-		//	// you may want to handle this error case
-		//	// for example, by deleting the healthPotion shared_ptr
-		//}
-
-		// Generate a new index for the potion
-
-		// Add the potion to the map
-		/*game.actors.try_emplace(healthPotion->index, healthPotion);*/
-
 		game.send_to_back(*healthPotion);
 	}
 	else if (dice < 70+10)
 	{
 		// add lightning scrolls
-		/*Actor* lightningScroll = new Actor(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR);*/
 		auto lightningScroll = std::make_shared<Actor>(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR,1);
 		lightningScroll->blocks = false;
-		/*lightningScroll->pickable = new LightningBolt(5, 20);*/
 		lightningScroll->pickable = std::make_shared<LightningBolt>(5, 20);
-		/*game.actors.emplace_back(lightningScroll);*/
-		/*game.actors.emplace(lightningScroll);*/
-		/*game.send_to_back(lightningScroll);*/
+		game.actors.push_back(lightningScroll);
+		game.send_to_back(*lightningScroll);
 	}
 	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
-		/*Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);*/
 		auto fireballScroll = std::make_shared<Actor>(x, y, '#', "scroll of fireball", FIREBALL_PAIR,1);
 		fireballScroll->blocks = false;
-		/*fireballScroll->pickable = new Fireball(3, 12);*/
 		fireballScroll->pickable = std::make_shared<Fireball>(3, 12);
 		game.actors.push_back(fireballScroll);
-		/*game.actors.emplace_back(fireballScroll);*/
-		/*game.actors.emplace(fireballScroll);*/
-		
-		/*game.actors.insert(std::make_pair(fireballScroll->index, fireballScroll));*/
-		/*game.send_to_back(fireballScroll);*/
+		game.send_to_back(*fireballScroll);
 	}
 	else
 	{
 		// add confusion scrolls
-		/*Actor* confusionScroll = new Actor(x, y, '#', "scroll of confusion", CONFUSION_PAIR);*/
 		auto confusionScroll = std::make_shared<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
 		confusionScroll->blocks = false;
-		/*confusionScroll->pickable = new Confuser(10, 8);*/
 		confusionScroll->pickable = std::make_shared<Confuser>(10, 8);
-		/*game.actors.emplace_back(confusionScroll);*/
-		/*game.actors.emplace(confusionScroll);*/
-		/*game.send_to_back(confusionScroll);*/
+		game.actors.push_back(std::move(confusionScroll));
+		game.send_to_back(*confusionScroll);
 	}
 	/*else if (dice < 70 + 10 + 10)*/
 	// always spawn this scroll
@@ -525,6 +500,12 @@ void Map::add_monster(int mon_x, int mon_y){
 	//	Dragon dragon(mon_y, mon_x);
 	//	/*game.actors.emplace_back(dragon.create_dragon(mon_y, mon_x));*/
 	//	/*game.actors.emplace(dragon.create_dragon(mon_y, mon_x));*/
+
+	//	auto actor = dragon.create_dragon(mon_y, mon_x);
+
+	//	game.actors.push_back(actor);
+	//	// store the key i in the actor index
+	//	/*actor->index = i;*/
 	//}
 }
 
@@ -543,7 +524,9 @@ std::shared_ptr<Actor> Map::get_actor(int x, int y) const
 // make a random number function to use in the game
 int Map::random_number(int min, int max)
 {
-	static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));
+	auto seed = gsl::narrow_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
+	/*static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));*/
+	static std::default_random_engine randomEngine(seed);
 	std::uniform_int_distribution<int> range(min, max);
 
 	return range(randomEngine);

@@ -169,6 +169,8 @@
     <None Include="ClassDiagram1.cd">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="ClassDiagram2.cd" />
+    <None Include="Menu.cd">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

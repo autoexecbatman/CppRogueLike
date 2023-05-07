@@ -11,7 +11,7 @@
 #include <string>
 
 // https://pdcurses.org/docs/MANUAL.html
-#include <curses.h>
+#include <curses.h> 
 
 #include "Colors.h"
 #include "Game.h"
@@ -35,7 +35,7 @@ int main()
 	//==DEBUG_STREAM==
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
 	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
-
+	
 	//==INIT_CURSES==
 	std::clog << "Initializing curses...\n";
 	initscr(); // initialize the screen in curses

@@ -19,8 +19,10 @@ private:
 	int oldOption{ -1 };
 	int newOption{ 1 };
 	bool run{ true };
+	int keyPress{ 0 };
 
 	WINDOW* menuWindow{ nullptr };
+
 	
 	void menu_new(int height, int width, int starty, int startx) noexcept { menuWindow = newwin(height, width, starty, startx); }
 	void menu_clear() noexcept { wclear(menuWindow); }
@@ -40,7 +42,10 @@ private:
 	std::string menu_get_string(MenuOptions option) noexcept;
 	void menu_print_option(MenuOptions option, int row) noexcept;
 
+	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
+
 public:
+	/*~Menu() noexcept { menu_delete(); }*/
 	void menu();
 };
 

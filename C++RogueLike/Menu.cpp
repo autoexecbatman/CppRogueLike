@@ -48,6 +48,7 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 void Menu::menu()
 {
 	menu_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
+	box(menuWindow, 0, 0);
 	MenuGender menuGender;
 
 	while (run)
@@ -70,8 +71,10 @@ void Menu::menu()
 		
 		menu_refresh(); 
 		
-		const auto& input = getch();
-		switch (input)
+		/*const int input = getch();*/
+		/*int input = wgetch(menuWindow);*/
+		key_listen();
+		switch (keyPress)
 		{
 		case KEY_UP:
 		{

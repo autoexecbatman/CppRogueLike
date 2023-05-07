@@ -32,6 +32,11 @@ void Gui::gui_init()
 	gui_refresh();
 }
 
+void Gui::gui_shutdown()
+{
+	gui_delete();
+}
+
 void Gui::gui_update()
 {
 	// pseudo code for gui_update()

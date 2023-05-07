@@ -2,6 +2,9 @@
 #ifndef DESTRUCTIBLE_H
 #define DESTRUCTIBLE_H
 #include <iostream>
+
+#include "Persistent.h"
+
 class Actor;
 
 //====

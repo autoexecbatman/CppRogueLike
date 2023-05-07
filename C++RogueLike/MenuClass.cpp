@@ -152,7 +152,7 @@ void MenuClass::menu_class()
 
 		menu_class_refresh();
 
-		const auto& input = getch();
+		const int input = getch();
 		switch (input)
 		{
 
@@ -195,6 +195,7 @@ void MenuClass::menu_class()
 			currentOption = static_cast<MenuClassOptions>(newOption);
 		}
 	}
+	menu_class_delete();
 }
 
 // end of file: MenuClass.cpp

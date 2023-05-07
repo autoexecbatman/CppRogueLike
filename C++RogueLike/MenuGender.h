@@ -1,8 +1,11 @@
 // file: MenuGender.h
 #ifndef MENU_GENDER_H
 #define MENU_GENDER_H
-#include <curses.h>
+
+#include <iostream>
 #include <string>
+
+#include <curses.h>
 
 class MenuGender
 {
@@ -20,6 +23,7 @@ private:
 	int newOption{ 1 };
 	bool run{ true };
 	std::string gender{ "None" };
+	int keyPress{ 0 };
 
 	WINDOW* menuGenderWindow{ nullptr };
 
@@ -46,6 +50,8 @@ private:
 
 	void menu_gender_print_option(MenuGenderOptions option, int row) noexcept;
 	std::string menu_gender_get_string(MenuGenderOptions option) noexcept;
+
+	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 public:
 	bool back{ false };

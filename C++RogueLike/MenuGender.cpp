@@ -19,7 +19,7 @@ void MenuGender::menu_gender_assign_random()
 {
 	const Menu menu;
 	// roll a random number between 0 and 1
-	const auto& rng = game.random_number(0, 1);
+	const int rng = game.random_number(0, 1);
 
 	// if the number is 0 return "Male"
 
@@ -153,8 +153,9 @@ void MenuGender::menu_gender()
 
 		menu_gender_refresh();
 
-		const auto input = getch();
-		switch (input)
+		/*const int input = getch();*/
+		key_listen();
+		switch (keyPress)
 		{
 
 		case KEY_UP:

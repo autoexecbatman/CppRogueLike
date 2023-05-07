@@ -995,8 +995,7 @@ void Game::save_all()
 
 					if (player != nullptr)
 					{
-						// then save the player
-						player->save(zip);
+						player->save(zip); // save the player
 					}
 					else
 					{
@@ -1005,8 +1004,7 @@ void Game::save_all()
 
 					if (stairs != nullptr)
 					{
-						// then save the stairs
-						stairs->save(zip);
+						stairs->save(zip); // save the stairs
 					}
 					else
 					{
@@ -1016,7 +1014,9 @@ void Game::save_all()
 					if(!actors.empty())
 					{
 						// then all the other actors
-						zip.putInt(actors.size() - 2);
+						int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
+						int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
+						zip.putInt(nbActorsToSave);
 					}
 					else 
 					{

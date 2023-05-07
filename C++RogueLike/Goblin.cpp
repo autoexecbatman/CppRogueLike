@@ -103,7 +103,7 @@ std::shared_ptr<Goblin> Goblin::create_goblin(int y, int x)
 ////====
 //
 ////==DRAGON===
-//Dragon::Dragon(int y, int x) : Actor(y, x, 'D', "dragon", DRAGON_PAIR)
+//Dragon::Dragon(int y, int x) : Actor(y, x, 'D', "dragon", DRAGON_PAIR, 100)
 //{
 //	RandomDice d;
 //	posY = y;
@@ -120,23 +120,23 @@ std::shared_ptr<Goblin> Goblin::create_goblin(int y, int x)
 //	int hp = d.d12() + 5;
 //	destructible = std::make_shared<MonsterDestructible>(MonsterDestructible(hp, 2, "dead dragon", 200));
 //	/*ai = new MonsterAi();*/
-//	ai = std::make_shared<MonsterAi>();
+//	ai = std::make_shared<AiMonster>();
 //}
-//
+
 //Dragon::~Dragon()
 //{}
-//
-////Actor* Dragon::create_dragon(int y, int x)
-////{
-////	return new Dragon(y, x);
-////}
-//
+
+//Actor* Dragon::create_dragon(int y, int x)
+//{
+//	return new Dragon(y, x);
+//}
+
 //std::shared_ptr<Actor> Dragon::create_dragon(int y, int x)
 //{
 //	auto dragon = std::make_shared<Actor>(y, x);
 //	return dragon;
 //}
-//
-////====
+
+//====
 
 // end of file: Goblin.cpp

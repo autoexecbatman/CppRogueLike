@@ -2,7 +2,7 @@
 #ifndef GOBLIN_H
 #define GOBLIN_H
 
-class Actor;
+#include "Actor.h"
 
 //==GOBLIN==
 class Goblin : public Actor
@@ -36,16 +36,15 @@ public:
 };
 //====
 
-//==DRAGON===
-class Dragon : Actor
-{
-public:
-	Dragon(int y, int x);
-	~Dragon();
-
-	std::shared_ptr<Actor> create_dragon(int y, int x);
-};
-//====
+////==DRAGON===
+//class Dragon : public Actor
+//{
+//public:
+//	Dragon(int y, int x);
+//
+//	std::shared_ptr<Actor> create_dragon(int y, int x);
+//};
+////====
 
 #endif // GOBLIN_H
 // end of file: Goblin.h

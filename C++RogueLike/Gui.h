@@ -28,6 +28,12 @@
 
 class Gui : public Persistent
 {
+public:
+	~Gui()
+	{
+		delete con;
+		delete sub;
+	}
 private:
 	int guiHp{ 0 };
 
@@ -40,6 +46,7 @@ private:
 	void gui_delete() noexcept { delwin(guiWin); }
 public:
 	void gui_init(); // initialize the gui
+	void gui_shutdown(); // shutdown the gui
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
 
