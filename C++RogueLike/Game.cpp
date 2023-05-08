@@ -135,7 +135,7 @@ void Game::render()
 	{
 		if (actor && actor != player)
 		{
-			bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
+			const bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
 				|| map->is_in_fov(actor->posX, actor->posY);
 
 			if (isVisible)
@@ -167,72 +167,38 @@ void Game::send_to_back(Actor& actor)
 	{
 		if (a.get() == &actor) // if the actor is found
 		{
-			auto it = std::find_if(actors.begin(), actors.end(), [&actor](const auto& a) { return a.get() == &actor; } ); // get the iterator of the actor
+			auto it = std::find_if(actors.begin(), actors.end(), [&actor](const auto& a) noexcept { return a.get() == &actor; }); // get the iterator of the actor
 			const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
 			for (auto i = distance; i > 0; i--)
 			{
-				std::swap(actors[i - 1], actors[i]);
+				std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
 			}
 		}
 	}
 }
 
-//====
-// prints the deque to the console window
-void Game::print_container(std::vector<std::shared_ptr<Actor>> actors)
-{
-	int i = 0;
-	for (const auto& actor : actors)
-	{
-		std::clog << i << ". " << actor->name << " " /*<< std::endl*/;
-		i++;
-	}
-	std::clog << '\n';
-}
-
-//====
-// This function returns the closest monster from position x, y within range.
-// If range is 0, it's considered infinite.
-// If no monster is found within range, it returns NULL.
 std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
 {
-	// TODO: Add your implementation code here.
-	/*Actor* closestMonster = nullptr;*/
 	std::shared_ptr<Actor> closestMonster = nullptr;
-	//int bestDistance = INT_MAX;
+	int bestDistance = INT_MAX;
 
-	////for (Actor* actor : engine.actors)
-	////{
-	////	if (actor != player && actor->destructible && !actor->destructible->is_dead())
-	////	{
-	////		int distance = actor->get_distance(fromPosX, fromPosY);
-	////		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
-	////		{
-	////			bestDistance = distance;
-	////			closestMonster = actor;
-	////		}
-	////	}
-	////}
-
-	////==ACTORS==
-	//// go through the list of actors
-	//for (auto actor = actors.begin(); actor != actors.end(); ++actor)
-	//{
-	//	if (*actor != player
-	//		&&
-	//		(*actor)->destructible
-	//		&&
-	//		!(*actor)->destructible->is_dead()
-	//		) // end of if statement
-	//	{
-	//		int distance = (*actor)->get_distance(fromPosX, fromPosY);
-	//		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
-	//		{
-	//			bestDistance = distance;
-	//			closestMonster = actor->get();
-	//		}
-	//	}
-	//}
+	for (auto actor = actors.begin(); actor != actors.end(); ++actor)
+	{
+		if (*actor != player
+			&&
+			(*actor)->destructible
+			&&
+			!(*actor)->destructible->is_dead()
+			)
+		{
+			int distance = (*actor)->get_distance(fromPosX, fromPosY);
+			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
+			{
+				bestDistance = distance;
+				closestMonster = *actor;
+			}
+		}
+	}
 
 	return closestMonster;
 }

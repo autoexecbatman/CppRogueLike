@@ -66,7 +66,6 @@ public:
 	void target();
 	void load_all(); // does not override Persistent::load()
 	void save_all(); // does not override Persistent::save()
-	void print_container(std::vector<std::shared_ptr<Actor>> actors);
 
 	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
@@ -87,6 +86,18 @@ private:
 
 // Declaration of the global engine object.
 extern Game game;
+
+template<typename T>
+void print_container(const std::vector<std::shared_ptr<T>>& container)
+{
+	int i = 0;
+	for (const auto& item : container)
+	{
+		std::clog << i << ". " << item->name << " ";
+		i++;
+	}
+	std::clog << '\n';
+}
 
 #endif // !GAME_H
 // end of file: Game.h

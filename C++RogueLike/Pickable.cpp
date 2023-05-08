@@ -166,6 +166,11 @@ bool LightningBolt::use(Actor& owner, Actor& wearer)
 	// hit closest monster for <damage> hit points
 	game.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
 		"The damage is %g hit points.", closestMonster->name, damage);
+	// print to stdscr PDC
+	clear();
+	mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n",closestMonster->name.c_str());
+	refresh();
+	getch();
 	closestMonster->destructible->take_damage(*closestMonster, damage);
 
 	return Pickable::use(owner, wearer);
