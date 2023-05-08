@@ -16,12 +16,12 @@ public:
 
 	int power = 0; // hit points given
 	
-	Attacker(int power);
+	Attacker(int power) noexcept;
 
-	void attack(Actor& owner, Actor& target);
+	void attack(const Actor& owner, Actor& target);
 	
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
 };
 
 #endif // !ATTACKER_H

@@ -1,15 +1,15 @@
 // file: Attacker.cpp
 #include <iostream>
+#include <gsl/gsl>
 
-//#include "main.h"
-#include "Actor.h"
-#include "Game.h"
-#include "Window.h"
 #include "Colors.h"
+#include "Window.h"
+#include "Game.h"
+#include "Actor.h"
 
-Attacker::Attacker(int power) : power(power) {}
+Attacker::Attacker(int power) noexcept : power(power) {}
 
-void Attacker::attack(Actor& owner, Actor& target)
+void Attacker::attack(const Actor& owner, Actor& target)
 {
 
 	if (target.destructible && !target.destructible->is_dead())
@@ -30,14 +30,14 @@ void Attacker::attack(Actor& owner, Actor& target)
 			mvprintw(0, 0, "%s", owner.name.c_str());
 			attroff(COLOR_PAIR(owner.col));
 			
-			size_t ownerNameLen = strlen(owner.name.c_str());
+			const int ownerNameLen = gsl::narrow_cast<int>(strlen(owner.name.c_str()));
 			const char* attacksThe = " attacks the ";
-			size_t attacksTheLen = strlen(attacksThe);
+			const int attacksTheLen = gsl::narrow_cast<int>(strlen(attacksThe));
 			mvprintw(0, ownerNameLen, attacksThe);
 			attron(COLOR_PAIR(target.col));
 			mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
 			attroff(COLOR_PAIR(target.col));
-			size_t targetNameLen = strlen(target.name.c_str());
+			const int targetNameLen = gsl::narrow_cast<int>(strlen(target.name.c_str()));
 			mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", power - target.destructible->defense);
 		}
 		else
