@@ -133,66 +133,40 @@ void Game::update()
 // draws the entities on the map
 void Game::render()
 {
-	map->render(); // draw the map
+	map->render();
 
-	//for (Actor* actor : actors) // iterate through the actors list
-	//{
-	//	if (actor != player /*&& actor != player2 && actor != player3*/ // check if the actor is not the player
-	//		&&
-	//		(
-	//			(
-	//				!actor->fovOnly
-	//				&&
-	//				map->is_explored(actor->posX,actor->posY)
-	//				) // check if the actor is not fovOnly and is explored
-	//		||
-	//		map->is_in_fov(actor->posX, actor->posY)
-	//			) // OR if the actors position is in the FOV of the player
-	//		) // end of if statement
-	//	{
-	//		actor->render(); // draw the actor
-	//	}
-	//}
-	
 	std::clog << "Actors are trying to be drawn..." << std::endl;
 
-	//==ACTORS==
-	// go through the list of actors
 	for (const auto& actor : actors)
 	{
-		if (actor != nullptr)
+		if (actor && actor != player)
 		{
-			if (actor != player // check if the actor is not the player
-				&&
-				(
-					(
-						!actor->fovOnly
-						&&
-						map->is_explored(actor->posX, actor->posY)
-						) // check if the actor is not fovOnly and is explored
-					||
-					map->is_in_fov(actor->posX, actor->posY)
-					) // OR if the actors position is in the FOV of the player
-				) // end of if statement
+			bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
+				|| map->is_in_fov(actor->posX, actor->posY);
+
+			if (isVisible)
 			{
 				std::clog << "Actor: " << actor->name << " is in FOV" << std::endl;
-				actor->render(); // draw the actor
+				actor->render();
 				std::clog << "Actor: " << actor->name << " is drawn" << std::endl;
 			}
 		}
 	}
 	std::clog << "Actors are drawn" << std::endl;
+
 	std::clog << "Player is trying render..." << std::endl;
-	player->render(); // draw the player
+	player->render();
 	std::clog << "Player is drawn" << std::endl;
+
 	std::clog << "GUI is trying render..." << std::endl;
-	//gui->render(); // draw the gui
+	//gui->render();
 	std::clog << "GUI is drawn" << std::endl;
-	/*refresh();*/	
+
 	std::clog << "GUI Refreshed" << std::endl;
 	std::clog << "GUI Rendered" << std::endl;
 	std::clog << "RENDER FUNCTION OUT" << std::endl;
 }
+
 
 //====
 // erases the actor and pushes it to the begining
