@@ -27,21 +27,37 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 {
 	switch (option)
 	{
+
 	case MenuOptions::NEW_GAME:
-		return "New Game";
-		break;
+	{
+		std::string newGame = "New Game";
+		return newGame;	
+	}
+
 	case MenuOptions::LOAD_GAME:
-		return "Load Game";
-		break;
+	{
+		std::string loadGame = "Load Game";
+		return loadGame;
+	}
+
 	case MenuOptions::OPTIONS:
-		return "Options";
-		break;
+	{
+		std::string options = "Options";
+		return options;
+	}
+
 	case MenuOptions::QUIT:
-		return "Quit";
-		break;
-	default:
-		return "Error";
-		break;
+	{
+		std::string quit = "Quit";
+		return quit;
+	}
+
+	default:	
+	{
+		std::string error = "Error";
+		return error;
+	}
+
 	}
 }
 
