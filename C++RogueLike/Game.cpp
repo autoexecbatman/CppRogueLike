@@ -598,8 +598,8 @@ void Game::target()
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
 
-	int lastY = targetCursorY;
-	int lastX = targetCursorX;
+	const int lastY = targetCursorY;
+	const int lastX = targetCursorX;
 
 	int lineY = 0;
 	int lineX = 0;
@@ -667,7 +667,7 @@ void Game::target()
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		int distance = player->get_distance(targetCursorX, targetCursorY);
+		const int distance = player->get_distance(targetCursorX, targetCursorY);
 		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
 			auto actor = game.map->get_actor(targetCursorX, targetCursorY);
@@ -676,7 +676,7 @@ void Game::target()
 			{
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", static_cast<int>(actor->destructible->hp), static_cast<int>(actor->destructible->hpMax));
+				mvprintw(1, 0, "HP: %d/%d", gsl::narrow_cast<int>(actor->destructible->hp), gsl::narrow_cast<int>(actor->destructible->hpMax));
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
@@ -945,7 +945,7 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 	return nullptr;
 }
 
-void Game::dispay_levelup(int xpLevel)
+void Game::dispay_levelup(int xpLevel) noexcept
 {
 	WINDOW* stats = newwin(
 		11, // height
@@ -1002,7 +1002,7 @@ void Game::dispay_levelup(int xpLevel)
 }
 
 // display character sheet
-void Game::display_character_sheet()
+void Game::display_character_sheet() noexcept
 {
 	WINDOW* character_sheet = newwin(
 		30, // height
@@ -1065,6 +1065,7 @@ void Game::display_character_sheet()
 			run = false;
 		}
 	}
+	delwin(character_sheet);
 	clear();
 }
 
@@ -1080,7 +1081,7 @@ int Game::random_number(int min, int max)
 
 // displays the actors names
 // TODO: this is a test function
-void Game::wizard_eye()
+void Game::wizard_eye() noexcept
 {
 	for (const auto& actor : game.actors)
 	{

@@ -73,10 +73,10 @@ public:
 
 	void next_level();
 	std::shared_ptr<Actor> get_actor(int x, int y) const;
-	void dispay_levelup(int level);
-	void display_character_sheet();
+	void dispay_levelup(int level) noexcept;
+	void display_character_sheet() noexcept;
 	int random_number(int min, int max);
-	void wizard_eye();
+	void wizard_eye() noexcept;
 
 private:
 	// Private member variables.
