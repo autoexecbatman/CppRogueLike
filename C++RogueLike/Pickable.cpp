@@ -149,9 +149,7 @@ void Healer::save(TCODZip& zip)
 }
 
 //==LIGHTNING_BOLT==
-LightningBolt::LightningBolt(int maxRange, int damage) : maxRange(maxRange), damage(damage)
-{
-}
+LightningBolt::LightningBolt(int maxRange, int damage) : maxRange(maxRange), damage(damage) {}
 
 bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
@@ -301,7 +299,6 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 
 	return Pickable::use(owner, wearer);
 }
-
 
 void Fireball::animation(int x, int y , int maxRange)
 {
