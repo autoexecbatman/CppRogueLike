@@ -28,7 +28,7 @@ void Game::init()
 	//==PLAYER==
 	game.actors.emplace_back(game.player);
 
-	if (game.player != nullptr)
+	if (game.player)
 	{
 		std::clog << "game.player is not null" << std::endl;
 		game.player->destructible = std::make_shared<PlayerDestructible>(
@@ -77,70 +77,55 @@ void Game::init()
 // and stores events
 void Game::update()
 {
-	if (game.player) // check if the player is not null
+	if (game.player && game.player->destructible) // Check if the player and destructible are not null
 	{
-		if (game.player->destructible)
+		if (game.player->destructible->is_dead())
 		{
-			// if the player is dead then set the run flag to false
-			if (game.player->destructible->is_dead())
-			{
-				std::clog << "Player is dead!" << std::endl;
-				// set the run flag to false
-				run = false;
-				// ask the player to press any key
-				game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
-			}
-			else
-			{
-				//==COMPUTE_FOV==
-				// The update function must ensure the FOV is computed on first frame only.
-				// This is to avoid FOV recomputation on each frame.
-				if (Game::gameStatus == GameStatus::STARTUP)
-				{
-					//DEBUG
-					std::clog << "...Computing FOV..." << std::endl;
-					game.map->compute_fov();
-				}
-
-				gameStatus = GameStatus::IDLE; // set the game status to idle
-				std::clog << "GameStatus::IDLE" << std::endl;
-
-				std::clog << "Updating player..." << std::endl;
-				game.player->update(); // update the player and get the keypress for the player
-				std::clog << "Player updated!" << std::endl;
-
-				std::clog << "Updating actors..." << std::endl;
-				if (Game::gameStatus == GameStatus::NEW_TURN) // check new turn
-				{
-					//==ACTORS==
-					// go through the list of actors
-					for (const auto& actor : actors)
-					{
-						if (actor != nullptr)
-						{
-							if (actor != player)
-							{
-								actor->update();
-							}
-						}
-						else
-						{
-							std::clog << "actor is null!" << std::endl;
-							std::cout << "actor is null!" << std::endl;
-							exit(-1);
-						}
-					}
-				}
-				std::clog << "Actors updated!" << std::endl;
-			}
+			std::clog << "Player is dead!" << std::endl;
+			run = false;
+			game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
 		}
 		else
 		{
-			std::clog << "Error: Game::update() - game.player->destructible is null" << std::endl;
-			std::cout << "Error: Game::update() - game.player->destructible is null" << std::endl;
-			exit(-1);
+			if (Game::gameStatus == GameStatus::STARTUP)
+			{
+				std::clog << "...Computing FOV..." << std::endl;
+				game.map->compute_fov();
+			}
+
+			gameStatus = GameStatus::IDLE;
+			std::clog << "GameStatus::IDLE" << std::endl;
+
+			std::clog << "Updating player..." << std::endl;
+			game.player->update();
+			std::clog << "Player updated!" << std::endl;
+
+			std::clog << "Updating actors..." << std::endl;
+			if (Game::gameStatus == GameStatus::NEW_TURN)
+			{
+				for (const auto& actor : actors)
+				{
+					if (actor && actor != player)
+					{
+						actor->update();
+					}
+					else
+					{
+						std::clog << "actor is null!" << std::endl;
+						std::cout << "actor is null!" << std::endl;
+						exit(-1);
+					}
+				}
+			}
+			std::clog << "Actors updated!" << std::endl;
+		}
 	}
-}
+	else
+	{
+		std::clog << "Error: Game::update() - game.player or game.player->destructible is null" << std::endl;
+		std::cout << "Error: Game::update() - game.player or game.player->destructible is null" << std::endl;
+		exit(-1);
+	}
 }
 
 //====
