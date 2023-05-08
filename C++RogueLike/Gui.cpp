@@ -39,19 +39,15 @@ void Gui::gui_shutdown()
 
 void Gui::gui_update()
 {
-	// pseudo code for gui_update()
-
-	// update the gui memory
-	guiHp = game.player->destructible->hp;
-
+	if (game.player) { guiHp = game.player->destructible->hp; } // update the gui memory
 }
 
 void Gui::gui_render()
 {
-	// pseudo code for gui_render()
 	gui_clear();
 	box(guiWin, 0, 0);
 	mvwprintw(guiWin, 1, 1, "HP:%d", guiHp);
+	renderMouseLook();
 	gui_refresh();
 }
 
@@ -300,18 +296,20 @@ void Gui::renderBar(
 	int maxValue,
 	int barColor,
 	int backColor
-)
+) noexcept
 {
-	/*std::cout << "void Gui::renderBar() {}" << std::endl;*/
+	std::cout << "void Gui::renderBar() {}" << std::endl;
 	const float ratio = gsl::narrow_cast<float>(value) / gsl::narrow_cast<float>(maxValue); // ratio of the bar's value to its maximum value
 	const int barWidth = gsl::narrow_cast<int>(ratio * gsl::narrow_cast<float>(bar_width)); // the width of the bar in characters
+	const int nameLength = gsl::narrow_cast<int>(strlen(name)); // the length of the name of the bar
+
 	wattron(con, COLOR_PAIR(barColor)); // set the color of the bar to barColor
 	for (int i = 0; i < barWidth; i++) // print the bar
 	{
 		mvwaddch( // display the full hp
 			con,
 			y, 
-			x + i + strlen(name),
+			x + i + nameLength,
 			'+'
 		);
 	}
@@ -326,7 +324,7 @@ void Gui::renderBar(
 		mvwaddch( // display the missing hp
 			con, 
 			y, 
-			x + i + strlen(name),
+			x + i + nameLength,
 			'-'
 		);
 	}
@@ -342,8 +340,8 @@ void Gui::renderBar(
 		1,
 		24,
 		"%d/%d",
-		(int)value,
-		(int)maxValue
+		gsl::narrow_cast<int>(value),
+		gsl::narrow_cast<int>(maxValue)
 		);
 }
 
@@ -359,12 +357,12 @@ void Gui::renderBar(
 //	delete[]log_message_text; // free the memory allocated for the text
 //}
 
-void Gui::print_container(std::vector<LogMessage*> message)
+void Gui::print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage)
 {
 	int i = 0;
-	for (const auto& message : message)
+	for (const auto& m : logMessage)
 	{
-		std::cout << i << message->log_message_text << " ";
+		std::cout << i << m->log_message_text << " ";
 		i++;
 	}
 	std::cout << '\n';
@@ -372,42 +370,46 @@ void Gui::print_container(std::vector<LogMessage*> message)
 
 void Gui::renderMouseLook()
 {
-	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", Mouse_status.y, Mouse_status.x); // display the mouse position
+	const int mouseX = Mouse_status.x;
+	const int mouseY = Mouse_status.y;
+	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", mouseY, mouseX); // display the mouse position
 
 	if (!game.map->is_in_fov(Mouse_status.x, Mouse_status.y))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;
 	}
-	char buf[128*10] = ""; // a buffer to store the text in
+
+	std::string buf;
 	bool first = true;
 	for (const auto& actor : game.actors)
 	{
-		if (actor->posX == Mouse_status.x && actor->posY == Mouse_status.y)
+		if (actor->posX == mouseX && actor->posY == mouseY)
 		{
 			if (!first)
 			{
-				strcat(buf, ", ");
+				buf += ", ";
 			}
 			else
 			{
 				first = false;
 			}
-			strcat(buf, actor->name.c_str());
+			buf += actor->name;
 		}
 	}
 	mvwprintw(
-		con,
+		guiWin,
 		0,
 		1,
-		buf
+		buf.c_str()
 	);
 }
 
 void Gui::save(TCODZip& zip)
 {
-	zip.putInt(log.size());
-	for (LogMessage* message : log)
+	const int logSize = gsl::narrow_cast<int>(log.size());
+	zip.putInt(logSize);
+	for (const auto& message : log)
 	{
 		zip.putString(message->log_message_text.c_str());
 		zip.putInt(message->log_message_color);

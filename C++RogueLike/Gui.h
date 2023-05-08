@@ -22,6 +22,7 @@
 #include <curses.h>
 #include <vector>
 #include <string>
+#include <gsl/pointers>
 
 #include "Persistent.h"
 #include "LogMessage.h"
@@ -52,20 +53,20 @@ public:
 
 	void gui();
 	void render();
-	//We want a handy function to write to the log using curses
-	void log_message(int log_message_color, const char* log_message_text, ...);
 	
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void log_message(int log_message_color, const char* log_message_text, ...); // We want a handy function to write to the log using curses basically format with color
+	
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
 
 protected:
-	WINDOW* con{ nullptr }; // the gui window
-	WINDOW* sub{ nullptr }; // a subwindow in the gui
+	gsl::owner<WINDOW*> con{ nullptr }; // the gui window
+	gsl::owner<WINDOW*> sub{ nullptr }; // a subwindow in the gui
 	
 	//==LOG==
-	void print_container(const std::vector<LogMessage*> log_message);
-	std::vector<LogMessage*> log = {}; // the message log
+	std::vector<std::shared_ptr<LogMessage>> log; // the message log
 
+	void print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage);
 
 	void renderBar(
 		int x,
@@ -76,10 +77,9 @@ protected:
 		int maxValue, 
 		int barColor, 
 		int backColor
-	);
-	void renderMouseLook();
-private:
+	) noexcept;
 
+	void renderMouseLook();
 };
 
 #endif // !GUI_H
