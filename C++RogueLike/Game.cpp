@@ -1110,10 +1110,8 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 	return nullptr;
 }
 
-void Game::dispay_stats(int xpLevel)
+void Game::dispay_levelup(int xpLevel)
 {
-	// TODO: Add your implementation code here.
-	// display the player stats
 	WINDOW* stats = newwin(
 		11, // height
 		30, // width
@@ -1123,6 +1121,7 @@ void Game::dispay_stats(int xpLevel)
 	
 	box(stats, 0, 0);
 	refresh();
+
 	while (true)
 	{
 		mvwprintw(stats, 1, 1, "Player Stats");
@@ -1139,17 +1138,32 @@ void Game::dispay_stats(int xpLevel)
 		int key = getch();
 		switch (key)
 		{
+
 		case 'a':
 			player->attacker->power += 1;
-			return;
+			break;
+
 		case 'd':
 			player->destructible->defense += 1;
-			return;
+			break;
+
 		case 'h':
 			player->destructible->hpMax += 1;
-			return;
+			break;
+
+		default:
+			continue;
 		}
+
+		break;
 	}
+
+	if (stats != nullptr)
+	{
+		delwin(stats);
+	}
+
+	clear();
 }
 
 // display character sheet

@@ -41,7 +41,7 @@ bool AiPlayer::levelUpUpdate(Actor& owner)
 			xpLevel++;
 			owner.destructible->xp -= levelUpXp;
 			game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
-			game.dispay_stats(xpLevel);
+			game.dispay_levelup(xpLevel);
 		}
 	}
 	else
