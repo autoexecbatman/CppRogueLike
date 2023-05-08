@@ -77,7 +77,7 @@ void Game::init()
 // and stores events
 void Game::update()
 {
-	if (game.player && game.player->destructible) // Check if the player and destructible are not null
+	if (game.player && game.player->destructible)
 	{
 		if (game.player->destructible->is_dead())
 		{
@@ -108,12 +108,6 @@ void Game::update()
 					if (actor && actor != player)
 					{
 						actor->update();
-					}
-					else
-					{
-						std::clog << "actor is null!" << std::endl;
-						std::cout << "actor is null!" << std::endl;
-						exit(-1);
 					}
 				}
 			}
@@ -167,124 +161,8 @@ void Game::render()
 	std::clog << "RENDER FUNCTION OUT" << std::endl;
 }
 
-
-//====
-// erases the actor and pushes it to the begining
-//void Engine::send_to_back(std::shared_ptr<Actor> actor)
-//{
-//	//TODO : Find the right member function to remove actor from vector
-//	//Since actors are drawn in their order in the list,
-//	// a corpse my be drawn on top of a living actor.
-//	//To keep that from happening, 
-//	//we simply move the dead actors to the beginning of the list
-//	//in the Engine::sendToBack function
-//	//example: 
-//	// actors.remove(actor); // remove by value
-//	// 
-//	// 	void remove(const T elt) {
-//	//    for (T* curElt = begin(); curElt != end(); curElt++) {
-//	//        if (*curElt == elt) {
-//	//            remove(curElt);
-//	//            return;
-//	//        }
-//	//    }
-//	//}
-//	// 
-//	//example: 
-//	// actors.insertBefore(actor,0);
-//	// 	T * insertBefore(const T elt,int before) {
-//	//    if (fillSize + 1 >= allocSize) allocate();
-//	//    for (int idx = fillSize; idx > before; idx--) {
-//	//        array[idx] = array[idx - 1];
-//	//    }
-//	//    array[before] = elt;
-//	//    fillSize++;
-//	//    return &array[before];
-//	//}
-//	//removes the actor from the vector using std::deque erase function
-//	std::cout << "before" << std::endl;
-//	std::cout << "size()->" << actors.size() << std::endl;
-//
-//	// DEBUG CONTAINER
-//	print_container(actors);
-//
-//	std::deque<std::shared_ptr<Actor>> d;
-//
-//	// insert all the actors into the deque
-//	for (auto& [i, a] : actors)
-//	{
-//		if (a != actor)
-//		{
-//			d.push_back(a);
-//		}
-//	}
-//
-//	d.push_front(actor); // push the actor to the front of the deque
-//
-//	// clear the actors map
-//	actors.clear();
-//
-//	// insert all the actors from the deque into the map
-//	int key = 0;
-//	for (auto& actor : d)
-//	{
-//		actors.insert(std::make_pair(key, actor));
-//		key++;
-//	}
-//
-//
-//	// erase only the actor from the list of actors
-//	//actors.erase(
-//	//	std::remove(
-//	//		actors.begin(),
-//	//		actors.end(),
-//	//		actor),
-//	//	actors.end()
-//	//);
-//	//actors.erase( // erases elements
-// //       std::find( // 
-// //           actors.begin(),
-// //           actors.end(),
-// //           actor
-// //       ),// first iterator
-//	//	actors.end() // last iterator
-// //   );
-//	//actors.emplace_front(actor);
-//
-//	// DEBUG CONTAINER
-//	/*print_container(actors);*/
-//
-//	std::cout << "after" << std::endl;
-//	std::cout << "size()->" << actors.size() << std::endl;
-//
-//	//DEBUG CONTAINER
-//	print_container(actors);
-//}
-
 void Game::send_to_back(Actor& actor)
 {
-	// first print out the actor
-	//std::clog << "the key -> " << actor.index << " <- " << actor.name << " " << "is being sent to back." << std::endl;
-	//print_container(actors);
-
-	//for (const auto& a : actors)
-	//{
-	//	if (a.get() == &actor)
-	//	{
-	//	//	for (int i = index; i > 0; i--)
-	//	//	{
-	//	//		std::swap(actors[i - 1], actors[i]); // swap the actor with the one before it
-
-	//	//		// update the index of the actor
-	//	//		actors[i - 1]->index = i - 1;
-	//	//		actors[i]->index = i;
-	//	//	}
-	//	//	break;
-
-	//		actors.erase(actor.index); // erase the actor from the map
-	//	}
-	//}
-
 	for (const auto& a : actors) // loop through the actors
 	{
 		if (a.get() == &actor) // if the actor is found
@@ -297,8 +175,6 @@ void Game::send_to_back(Actor& actor)
 			}
 		}
 	}
-
-	/*print_container(actors);*/
 }
 
 //====
