@@ -474,16 +474,9 @@ void Map::add_monster(int mon_x, int mon_y){
 	RandomDice d;
 	//create a random amount of orcs and trolls in the room based on a d100
 	for (int i = 0; i < 4 * d.d6(); i++){
-		Goblin goblin(mon_y, mon_x);
-		/*game.actors.emplace_back(goblin.create_goblin(mon_y, mon_x));*/
-		/*game.actors.try_emplace(i,goblin.create_goblin(mon_y, mon_x));*/
-		/*std::shared_ptr<Actor> actor = std::static_pointer_cast<Actor>(goblin.create_goblin(mon_y, mon_x));*/
-		auto actor = goblin.create_goblin(mon_y, mon_x);
-
-		/*game.actors.try_emplace(i, actor);*/
-		game.actors.push_back(actor);
-		// store the key i in the actor index
+		auto actor = create_goblin(mon_y, mon_x);
 		actor->index = i;
+		game.actors.push_back(actor);
 	}
 	//for (int i = 0; i < 2 * d.d6(); i++){
 	//	Orc orc(mon_y, mon_x);
@@ -530,6 +523,13 @@ int Map::random_number(int min, int max)
 	std::uniform_int_distribution<int> range(min, max);
 
 	return range(randomEngine);
+}
+
+std::shared_ptr<Goblin> Map::create_goblin(int mon_y, int mon_x)
+{
+	auto goblin = std::make_shared<Goblin>(mon_y, mon_x);
+
+	return goblin;
 }
 
 // end of file: Map.cpp

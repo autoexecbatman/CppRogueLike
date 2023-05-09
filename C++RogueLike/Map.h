@@ -30,6 +30,7 @@ private:
 	int playerPosX{ 0 };
 	int playerPosY{ 0 };
 
+	std::shared_ptr<Goblin> create_goblin(int mon_y, int mon_x);
 public:
 	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
 	int get_player_pos_x() const noexcept { return playerPosX; }
