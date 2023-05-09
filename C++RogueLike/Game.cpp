@@ -47,25 +47,12 @@ void Game::init()
 	}
 
 	//==STAIRS==
-	// create stairs for player to descend to the next level
-	//game.stairs = std::make_shared<Actor>(
-	//	0,
-	//	0,
-	//	'>',
-	//	"stairs",
-	//	WHITE_PAIR,
-	//	1
-	//);
-
 	game.stairs->blocks = false;
 	game.stairs->fovOnly = false;
 	
 	game.actors.push_back(stairs);
 
 	//==MAP==
-	// a new Map instance
-	//game.map = std::make_unique<Map>(30 - 8, 120); // need to make space for the gui (-7y)
-
 	game.map->init(true); // set the checker function
 
 	gameStatus = GameStatus::STARTUP;
