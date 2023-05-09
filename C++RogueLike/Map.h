@@ -31,6 +31,9 @@ private:
 	int playerPosY{ 0 };
 
 	std::shared_ptr<Goblin> create_goblin(int mon_y, int mon_x);
+	std::shared_ptr<Orc> create_orc(int mon_y, int mon_x);
+	std::shared_ptr<Troll> create_troll(int mon_y, int mon_x);
+	std::shared_ptr<Dragon> create_dragon(int mon_y, int mon_x);
 public:
 	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
 	int get_player_pos_x() const noexcept { return playerPosX; }

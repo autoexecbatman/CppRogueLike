@@ -468,38 +468,34 @@ void test_dice(){
 	game.gui->log_message(WHITE_PAIR, "Dice: %dD%d+%d = %d", d3.nb_rolls, d3.nb_faces, d3.bonus, d3);
 }
 
-void Map::add_monster(int mon_x, int mon_y){
-	// TODO : a 4 tile long monstrous dragon "Dogo" with 1000 HP and 1000 damage
-	// TODO : a 1 tile long "Goblin" with 10 HP and 10 damage
+void Map::add_monster(int mon_x, int mon_y)
+{
 	RandomDice d;
-	//create a random amount of orcs and trolls in the room based on a d100
-	for (int i = 0; i < 4 * d.d6(); i++){
-		auto actor = create_goblin(mon_y, mon_x);
-		actor->index = i;
-		game.actors.push_back(actor);
+
+	for (int i = 0; i < 4 * d.d6(); i++) { // create goblins
+		auto goblin = create_goblin(mon_y, mon_x);
+		goblin->index = i;
+		game.actors.push_back(goblin);
 	}
-	//for (int i = 0; i < 2 * d.d6(); i++){
-	//	Orc orc(mon_y, mon_x);
-	//	/*game.actors.emplace_back(orc.create_orc(mon_y, mon_x));*/
-	//	game.actors.try_emplace(i ,orc.create_orc(mon_y, mon_x));
-	//}
-	//for (int i = 0; i < 2 * d.d6(); i++){
-	//	Troll troll(mon_y, mon_x);
-	//	/*game.actors.emplace_back(troll.create_troll(mon_y, mon_x));*/
-	//	/*game.actors.emplace(troll.create_troll(mon_y, mon_x));*/
-	//	game.actors.try_emplace(i, troll.create_troll(mon_y, mon_x));
-	//}
-	//for (int i = 0; i < 1 * d.d6(); i++){
-	//	Dragon dragon(mon_y, mon_x);
-	//	/*game.actors.emplace_back(dragon.create_dragon(mon_y, mon_x));*/
-	//	/*game.actors.emplace(dragon.create_dragon(mon_y, mon_x));*/
 
-	//	auto actor = dragon.create_dragon(mon_y, mon_x);
+	for (int i = 0; i < 2 * d.d6(); i++) { // create orcs
+		auto orc = create_orc(mon_y, mon_x);
+		orc->index = i;
+		game.actors.push_back(orc);
+	}
 
-	//	game.actors.push_back(actor);
-	//	// store the key i in the actor index
-	//	/*actor->index = i;*/
-	//}
+	for (int i = 0; i < 2 * d.d6(); i++) { // create trolls
+		auto troll = create_troll(mon_y, mon_x);
+		troll->index = i;
+		game.actors.push_back(troll);
+	}
+
+	for (int i = 0; i < 1 * d.d6(); i++) { // create dragons
+		auto dragon = create_dragon(mon_y, mon_x);
+		dragon->index = i;
+		game.actors.push_back(dragon);
+	}
+
 }
 
 std::shared_ptr<Actor> Map::get_actor(int x, int y) const
@@ -528,8 +524,25 @@ int Map::random_number(int min, int max)
 std::shared_ptr<Goblin> Map::create_goblin(int mon_y, int mon_x)
 {
 	auto goblin = std::make_shared<Goblin>(mon_y, mon_x);
-
 	return goblin;
+}
+
+std::shared_ptr<Orc> Map::create_orc(int mon_y, int mon_x)
+{
+	auto orc = std::make_shared<Orc>(mon_y, mon_x);
+	return orc;
+}
+
+std::shared_ptr<Troll> Map::create_troll(int mon_y, int mon_x)
+{
+	auto troll = std::make_shared<Troll>(mon_y, mon_x);
+	return troll;
+}
+
+std::shared_ptr<Dragon> Map::create_dragon(int mon_y, int mon_x)
+{
+	auto dragon = std::make_shared<Dragon>(mon_y, mon_x);
+	return dragon;
 }
 
 // end of file: Map.cpp
