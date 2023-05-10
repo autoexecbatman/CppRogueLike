@@ -186,6 +186,7 @@
     <ClCompile Include="Actor.cpp" />
     <ClCompile Include="Ai.cpp" />
     <ClCompile Include="AiMonster.cpp" />
+    <ClCompile Include="AiMonsterConfused.cpp" />
     <ClCompile Include="AiPlayer.cpp" />
     <ClCompile Include="Attacker.cpp" />
     <ClCompile Include="ChatGPT.cpp" />
@@ -210,6 +211,7 @@
   <ItemGroup>
     <ClInclude Include="Actor.h" />
     <ClInclude Include="Ai.h" />
+    <ClInclude Include="AiMonsterConfused.h" />
     <ClInclude Include="AiPlayer.h" />
     <ClInclude Include="Attacker.h" />
     <ClInclude Include="ChatGPT.h" />

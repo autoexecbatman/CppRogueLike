@@ -36,18 +36,6 @@ protected:
 };
 
 //====
-class ConfusedMonsterAi : public Ai
-{
-public:
-	ConfusedMonsterAi(int nbTurns, std::shared_ptr<Ai> oldAi) noexcept;
-	void update(Actor& owner) override;
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
-	
-protected:
-	int nbTurns;
-	std::shared_ptr<Ai> oldAi;
-};
 
 #endif // !AI_H
 // file: Ai.h

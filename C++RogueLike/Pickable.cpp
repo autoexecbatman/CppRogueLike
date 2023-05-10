@@ -2,8 +2,12 @@
 #include <gsl/util>
 #include <vector>
 
-#include "main.h"
 #include "Colors.h"
+#include "Actor.h"
+#include "Game.h"
+#include "Pickable.h"
+#include "Container.h"
+#include "AiMonsterConfused.h"
 
 //==PICKABLE==
 bool Pickable::pick(Actor& owner, const Actor& wearer)
@@ -365,7 +369,7 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 	// replace the monster's AI with a confused one; 
 	// after <nbTurns> turns the old AI will be restored
 	/*ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);*/
-	auto confusedAi = std::make_shared<ConfusedMonsterAi>(nbTurns, actor->ai);
+	auto confusedAi = std::make_shared<AiMonsterConfused>(nbTurns, actor->ai);
 	actor->ai = confusedAi;
 	game.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
 	
