@@ -47,9 +47,8 @@ public:
 
 	//this is the map array
 	void bsp(int map_width, int map_height, TCODRandom* rng, bool withActors);
-	//the constructor
+
 	Map(int map_height, int map_width);
-	//the destructor
 	~Map();
 	
 	//check if a tile is walkable
@@ -57,7 +56,7 @@ public:
 	//check if a tile is in the FOV
 	bool is_in_fov(int fov_x, int fov_y) const;
 	//indicates whether this tile has already been seen by the player
-	bool is_explored(int exp_x, int exp_y) const;
+	bool is_explored(int exp_x, int exp_y) const noexcept;
 	bool can_walk(int canw_x, int canw_y) const;
 	void add_monster(int mon_x, int mon_y);
 	// compute the field of view using `TCODMap::computeFov()`
@@ -67,7 +66,7 @@ public:
 	int random_number(int min, int max);
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
-	std::shared_ptr<Actor> get_actor(int x, int y) const;
+	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
 
 	void init(bool withActors);
 

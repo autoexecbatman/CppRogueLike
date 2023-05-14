@@ -160,9 +160,10 @@ bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a
 	);
 }
 
-bool Map::is_explored(int exp_x, int exp_y) const
+bool Map::is_explored(int exp_x, int exp_y) const noexcept
 {
-	return tiles[exp_x + (exp_y * map_width)].explored;
+	return gsl::span(tiles, map_width * map_height)[exp_x + (exp_y * map_width)].explored;
+
 }
 
 bool Map::is_in_fov(int fov_x, int fov_y) const
@@ -498,7 +499,7 @@ void Map::add_monster(int mon_x, int mon_y)
 
 }
 
-std::shared_ptr<Actor> Map::get_actor(int x, int y) const
+std::shared_ptr<Actor> Map::get_actor(int x, int y) const noexcept
 {
 	for (const auto& actor : game.actors)
 	{
