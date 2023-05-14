@@ -21,13 +21,13 @@ public:
 	int playerLevel{ 0 };
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
-	int posY = 0, posX = 0; // position on map
-	char ch = -47; // the symbol to print
-	int col = 0; // color for the actor
-	std::string name = "actor_name"; // add name
-	bool blocks = false; // does the actor blocks movement?
-	bool fovOnly = false; // to make some actors visible when not in fov
-	int index = 0; // index of the actor in the actors array
+	int posY{ 0 }, posX{ 0 }; // position on map
+	char ch{ -47 }; // the symbol to print
+	int col{ 0 }; // color for the actor
+	std::string name{ "actor_name" }; // add name
+	bool blocks{ false }; // does the actor blocks movement?
+	bool fovOnly{ false }; // to make some actors visible when not in fov
+	int index{ 0 }; // index of the actor in the actors array
 	/*bool sent_to_back = false;*/
 	
 	std::shared_ptr<Attacker> attacker; // the actor can attack
