@@ -34,6 +34,7 @@ Actor::Actor(
 	name(name),
 	blocks(true),
 	fovOnly(true),
+	canSwim(false),
 	attacker(nullptr),
 	destructible(nullptr),
 	ai(nullptr),

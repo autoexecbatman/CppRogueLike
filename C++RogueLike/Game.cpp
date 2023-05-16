@@ -40,6 +40,7 @@ void Game::init()
 		game.player->attacker = std::make_shared<Attacker>(random_number(1, 10));
 		game.player->ai = std::make_shared<AiPlayer>();
 		game.player->container = std::make_shared<Container>(26);
+		game.player->canSwim = true;
 	}
 	else
 	{
@@ -629,8 +630,9 @@ void Game::target()
 			{
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", gsl::narrow_cast<int>(actor->destructible->hp), gsl::narrow_cast<int>(actor->destructible->hpMax));
+				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
+				mvprintw(3, 0, "STR: %d", actor->attacker->power);
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
 			}

@@ -35,6 +35,7 @@ void Colors::my_init_pair() noexcept
 	init_pair(16, COLOR_GREEN, COLOR_RED); // dragon color
 	init_pair(17, COLOR_RED, COLOR_YELLOW); // fireball color
 	init_pair(18, COLOR_WHITE, COLOR_GREEN); // confusion color
+	init_pair(19, COLOR_BLUE, COLOR_BLACK); // water color
 }
 
 // end of file: Colors.cpp

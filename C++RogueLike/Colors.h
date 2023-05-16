@@ -24,6 +24,7 @@ constexpr auto GOBLIN_PAIR = 15;
 constexpr auto DRAGON_PAIR = 16;
 constexpr auto FIREBALL_PAIR = 17;
 constexpr auto CONFUSION_PAIR = 18;
+constexpr auto WATER_PAIR = 19;
 
 
 struct Colors

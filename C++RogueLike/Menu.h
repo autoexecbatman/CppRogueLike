@@ -23,7 +23,6 @@ private:
 
 	WINDOW* menuWindow{ nullptr };
 
-	
 	void menu_new(int height, int width, int starty, int startx) noexcept { menuWindow = newwin(height, width, starty, startx); }
 	void menu_clear() noexcept { wclear(menuWindow); }
 	void menu_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuWindow, y, x, text.c_str()); }
@@ -49,5 +48,5 @@ public:
 	void menu();
 };
 
-#endif // !MENU_H_
+#endif // !MENU_H
 // end of file: Menu.h

@@ -27,6 +27,8 @@
 #include "Persistent.h"
 #include "LogMessage.h"
 
+constexpr int GUI_HEIGHT{ 7 };
+
 class Gui : public Persistent
 {
 public:
@@ -37,6 +39,7 @@ public:
 	}
 private:
 	int guiHp{ 0 };
+	int guiHpMax{ 0 };
 
 	WINDOW* guiWin{ nullptr };
 

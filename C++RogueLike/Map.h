@@ -22,15 +22,21 @@ constexpr int MAX_ROOM_ITEMS = 4;
 //==Tile==
 // A tile of the map
 // checks if the player has seen this tile
-// it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov()) 
+// it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov())
+
+enum class TileType {
+	FLOOR,
+	WALL,
+	WATER,
+	DOOR,
+	// Add more as needed...
+};
+
 class Tile
 {
 public:
-	bool explored = false;
-
-	//Tile() : explored(false) {} // check if the player has seen this tile set to 'false' by default
-
-	/*bool tile() { return explored = false; }*/
+	TileType type{};
+	bool explored{ false };
 };
 
 //==Map==
@@ -63,10 +69,10 @@ public:
 	Map(int map_height, int map_width);
 	~Map();
 	
-	//check if a tile is walkable
+	void init(bool withActors);
 	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
-	//check if a tile is in the FOV
 	bool is_in_fov(int fov_x, int fov_y) const;
+	bool is_water(int isWater_pos_y, int isWater_pos_x) const;
 	//indicates whether this tile has already been seen by the player
 	bool is_explored(int exp_x, int exp_y) const noexcept;
 	bool can_walk(int canw_x, int canw_y) const;
@@ -80,7 +86,6 @@ public:
 	// getActor returns the actor at the given coordinates or NULL if there's none
 	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
 
-	void init(bool withActors);
 
 protected:
 	Tile* tiles;
@@ -91,6 +96,7 @@ protected:
 	friend class BspListener;
 	//make a dig function for the map
 	void dig(int x1, int y1, int x2, int y2);
+	void set_tile(int x, int y, TileType newType) noexcept;
 	//a function for the room generation
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };

@@ -7,6 +7,10 @@
 #include "AiPlayer.h"
 #include "Controls.h"
 
+//==INVENTORY==
+constexpr int INVENTORY_HEIGHT = 29;
+constexpr int INVENTORY_WIDTH = 30;
+
 //==PLAYER_AI==
 
 constexpr int LEVEL_UP_BASE = 200;
@@ -27,8 +31,6 @@ template<typename T>
 T castEnum(T value) { return static_cast<T>(value); }
 
 auto exampleInt = castEnum(Controls::UP);
-
-
 
 bool AiPlayer::levelUpUpdate(Actor& owner)
 {
@@ -343,10 +345,7 @@ bool AiPlayer::try_pick_actor(Actor& actor, Actor& owner)
 	return picked;
 }
 
-constexpr int INVENTORY_HEIGHT = 29;
-constexpr int INVENTORY_WIDTH = 30;
-
-void AiPlayer::displayInventoryItems(WINDOW* inv, Actor& owner)
+void AiPlayer::displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept
 {
 	int shortcut = 'a';
 	int y = 1;
@@ -376,13 +375,13 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 	else
 	{
-		int y = 1;
+		const int y = 1;
 		mvwprintw(inv, y, 1, "Your inventory is empty.");
 	}
 
 	wrefresh(inv);
 
-	int inventoryInput = getch();
+	const int inventoryInput = getch();
 	if (inventoryInput == static_cast<int>(Controls::ESCAPE))
 	{
 		delwin(inv);
@@ -415,8 +414,6 @@ std::shared_ptr<Actor> AiPlayer::choseFromInventory(Actor& owner, int ascii)
 		{
 			if (owner.container->inventoryList.size() > 0)
 			{
-				/*return owner.container->inventoryList[0];*/
-				// prefer to use gsl::at() instead pf unchecked subscript operator (bounds.4).
 				// gsl::at() will throw an exception if the index is out of bounds
 				return gsl::at(owner.container->inventoryList, 0);
 			}
@@ -510,23 +507,31 @@ bool is_not_dead(const Actor& actor)
 
 bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 {
-	//if (game.map != nullptr)
-	//{
-	//	if (game.map->is_wall(targetx, targety))
-	//	{
-	//		return false;
-	//	}
-	//}
-	//else
-	//{
-	//	std::clog << "map is null in moveOrAttack" << std::endl;
-	//	exit(-1);
-	//}
 	if (game.map != nullptr)
 	{
 		if (game.map->is_wall(targety, targetx))
 		{
 			return false;
+		}
+		else if (game.map->is_water(targety, targetx))
+		{
+			if (!owner.canSwim)
+			{
+				return false;
+			}
+			else
+			{
+				// print message that player is swimming
+				mvprintw(0, 0, "You are swimming!");
+				refresh();
+				mvprintw(1, 0, "Press any key to continue.");
+				getch();
+				clear();
+
+				owner.posX = targetx;
+				owner.posY = targety;
+				return true;
+			}
 		}
 	}
 	else

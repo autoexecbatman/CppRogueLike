@@ -27,11 +27,6 @@
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
 
-constexpr auto ROOM_MAX_SIZE = 12;
-constexpr auto ROOM_MIN_SIZE = 6;
-constexpr auto MAX_ROOM_MONSTERS = 3;
-constexpr int MAX_ROOM_ITEMS = 2;
-
 // a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
 {
@@ -152,6 +147,17 @@ Map::~Map()
 	if (rng) delete rng; // new called in init
 }
 
+//====
+// We have to move the map initialization code out of the constructor
+// for enabling loading the map from the file.
+void Map::init(bool withActors)
+{
+	rng = new TCODRandom(seed, TCOD_RNG_CMWC);
+	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
+	tcodMap = new TCODMap(map_width, map_height); // allocate the map
+	bsp(map_width, map_height, rng, withActors);
+}
+
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
 {
 	// return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
@@ -178,11 +184,11 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 		if ( // fov is out of bounds
 			fov_x < 0
 			||
-			fov_x >= map_width
+			fov_x >= MAP_WIDTH
 			||
 			fov_y < 0
 			||
-			fov_y >= map_height
+			fov_y >= MAP_HEIGHT
 			)
 		{
 			return false;
@@ -202,10 +208,16 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 	}
 }
 
+bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
+{
+	int index = isWater_pos_y * map_width + isWater_pos_x;
+	return tiles[index].type == TileType::WATER;
+}
+
 void Map::compute_fov()
 {
 	std::clog << "Map::compute_fov()" << std::endl;
-	tcodMap->computeFov(game.player->posX, game.player->posY, 10);
+	tcodMap->computeFov(game.player->posX, game.player->posY, FOV_RADIUS);
 }
 
 void Map::render() const
@@ -215,32 +227,26 @@ void Map::render() const
 	{
 		for (int iter_x = 0; iter_x < map_width; iter_x++)
 		{
-			if (is_in_fov(iter_x, iter_y))
+			if (is_in_fov(iter_x, iter_y) || is_explored(iter_x, iter_y))
 			{
 				if (is_wall(iter_y, iter_x))
 				{
 					mvaddch(iter_y, iter_x, '#');
 				}
-				else
+				else if (is_water(iter_y, iter_x))  // Add a function to check if a tile is water
 				{
-					mvaddch(iter_y, iter_x, '.');
-				}
-			}
-			else if (is_explored(iter_x, iter_y))
-			{
-				if (is_wall(iter_y, iter_x))
-				{
-					mvaddch(iter_y, iter_x, '#');
-					refresh();
+					attron(COLOR_PAIR(WATER_PAIR));
+					mvaddch(iter_y, iter_x, '~');
+					attroff(COLOR_PAIR(WATER_PAIR));
 				}
 				else
 				{
 					mvaddch(iter_y, iter_x, '.');
-					refresh();
 				}
 			}
 		}
 	}
+	refresh(); // Refresh once after all tiles have been drawn
 	std::clog << "Map::render() end" << std::endl;
 }
 
@@ -283,33 +289,23 @@ void Map::add_item(int x, int y)
 		auto confusionScroll = std::make_shared<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
 		confusionScroll->blocks = false;
 		confusionScroll->pickable = std::make_shared<Confuser>(10, 8);
-		game.actors.push_back(std::move(confusionScroll));
+		game.actors.push_back(confusionScroll);
 		game.send_to_back(*confusionScroll);
 	}
 }
 
-//====
-// We have to move the map initialization code out of the constructor
-// for enabling loading the map from the file.
-void Map::init(bool withActors)
-{
-	rng = new TCODRandom(seed, TCOD_RNG_CMWC);
-	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
-	tcodMap = new TCODMap(map_width, map_height); // allocate the map
-	bsp(map_width, map_height, rng, withActors);
-}
 
 void Map::dig(int x1, int y1, int x2, int y2)
 {
 	if (x2 < x1)
 	{
-		int tmp = x2;
+		const int tmp = x2;
 		x2 = x1;
 		x1 = tmp;
 	}
 	if (y2 < y1)
 	{
-		int tmp = y2;
+		const int tmp = y2;
 		y2 = y1;
 		y1 = tmp;
 	}
@@ -328,9 +324,42 @@ void Map::dig(int x1, int y1, int x2, int y2)
 	}
 }
 
+void Map::set_tile(int x, int y, TileType newType) noexcept
+{
+	if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT)
+	{
+		// Coordinates out of bounds, don't do anything
+		return;
+	}
+
+	// Calculate the index into the array
+	int index = y * MAP_WIDTH + x;
+
+	// Make a span from the tiles array
+	gsl::span<Tile> tilesSpan(tiles, MAP_WIDTH * MAP_HEIGHT);
+
+	// Use the span for access
+	tilesSpan[index].type = newType;
+}
+
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
 	dig(x1, y1, x2, y2); // dig the corridors
+
+	// Add water tiles
+	int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
+	for (int x = x1; x <= x2; x++)
+	{
+		for (int y = y1; y <= y2; y++)
+		{
+			int roll = TCODRandom::getInstance()->getInt(0, 100);
+			if (roll < waterPercentage)
+			{
+				// Assuming you have a set_tile function that sets the tile at (x, y) to water
+				set_tile(x, y, TileType::WATER);
+			}
+		}
+	}
 
 	if (!withActors)
 	{
@@ -351,11 +380,11 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	
 	else
 	{
-		int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
+		const int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
 		for (int i = 0; i < numMonsters; i++)
 		{
-			int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
-			int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
+			const int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
+			const int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
 
 			if (is_wall(monsterY, monsterX))
 			{
@@ -394,6 +423,10 @@ bool Map::can_walk(int canw_x, int canw_y) const
 {
 	
 	if (is_wall(canw_y, canw_x)) // check if the tile is a wall
+	{
+		return false;
+	}
+	if (is_water(canw_y, canw_x)) // check if the tile is water
 	{
 		return false;
 	}

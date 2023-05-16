@@ -62,10 +62,10 @@ void AiMonster::moveOrAttack(Actor& owner, int targetx, int targety)
 	int dx = targetx - owner.posX; // get the x distance
 	int dy = targety - owner.posY; // get the y distance
 
-	int stepdx = (dx > 0 ? 1 : -1); // get the x step
-	int stepdy = (dy > 0 ? 1 : -1); // get the y step
+	const int stepdx = (dx > 0 ? 1 : -1); // get the x step
+	const int stepdy = (dy > 0 ? 1 : -1); // get the y step
 
-	double distance = sqrt(dx * dx + dy * dy); // get the distance
+	const double distance = sqrt(dx * dx + dy * dy); // get the distance
 
 	if (distance >= 2)
 	{

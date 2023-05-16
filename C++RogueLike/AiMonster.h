@@ -1,6 +1,8 @@
 #ifndef AI_MONSTER_H
 #define AI_MONSTER_H
 
+#pragma once
+
 #include "Ai.h"
 #include "Persistent.h"
 #include "Actor.h"

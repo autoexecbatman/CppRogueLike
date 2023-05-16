@@ -24,11 +24,12 @@ void Gui::gui_init()
 	if (game.player->destructible)
 	{
 		guiHp = game.player->destructible->hp;
+		guiHpMax = game.player->destructible->hpMax;
 	}
 
 	gui_clear();
 	box(guiWin, 0, 0);
-	mvwprintw(guiWin, 1, 1, "HP:%d", guiHp);
+
 	gui_refresh();
 }
 
@@ -46,7 +47,11 @@ void Gui::gui_render()
 {
 	gui_clear();
 	box(guiWin, 0, 0);
-	mvwprintw(guiWin, 1, 1, "HP:%d", guiHp);
+	if (game.player->name.empty()) { game.player->name = "Player"; }
+	mvwprintw(guiWin, 1, 1, "Name: %s", game.player->name.c_str());
+	mvwprintw(guiWin, 2, 1, "HP:%d/%d", guiHp, guiHpMax);
+	mvwprintw(guiWin, 3, 1, "Attack:%d", game.player->attacker->power);
+	mvwprintw(guiWin, 4, 1, "Defense:%d", game.player->destructible->defense);
 	renderMouseLook();
 	gui_refresh();
 }

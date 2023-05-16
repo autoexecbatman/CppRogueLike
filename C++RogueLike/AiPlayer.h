@@ -2,12 +2,13 @@
 #ifndef AIPLAYER_H
 #define AIPLAYER_H
 
+#pragma once
+
 #include <curses.h>
 #include <libtcod.h>
 
 #include "Actor.h"
 #include "Ai.h"
-
 
 //==PLAYER_AI==
 class AiPlayer : public Ai
@@ -31,7 +32,7 @@ protected:
 private:
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
 	bool try_pick_actor(Actor& actor, Actor& owner);
-	void displayInventoryItems(WINDOW* inv, Actor& owner);
+	void displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept;
 
 };
 

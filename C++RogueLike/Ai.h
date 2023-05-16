@@ -2,6 +2,8 @@
 #ifndef AI_H
 #define AI_H
 
+#pragma once
+
 #include <curses.h>
 
 #include "Persistent.h"

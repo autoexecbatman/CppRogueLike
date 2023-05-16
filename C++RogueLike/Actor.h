@@ -27,6 +27,7 @@ public:
 	std::string name{ "actor_name" }; // add name
 	bool blocks{ false }; // does the actor blocks movement?
 	bool fovOnly{ false }; // to make some actors visible when not in fov
+	bool canSwim{ false }; // can the actor swim?
 	int index{ 0 }; // index of the actor in the actors array
 	/*bool sent_to_back = false;*/
 	
