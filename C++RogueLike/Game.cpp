@@ -870,7 +870,7 @@ void Game::next_level()
 	actors.push_back(player);
 	actors.push_back(stairs);
 
-	map = std::make_unique<Map>(30 - 8, 120);
+	map = std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH);
 	map->init(true);
 
 	gameStatus = GameStatus::STARTUP;

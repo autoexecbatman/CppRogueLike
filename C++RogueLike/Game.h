@@ -43,7 +43,7 @@ public:
 
 	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
 
-	std::unique_ptr<Map> map{ std::make_unique<Map>(22, 120) };
+	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
 

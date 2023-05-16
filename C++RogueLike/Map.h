@@ -2,10 +2,22 @@
 #ifndef MAP_H
 #define MAP_H
 
+#pragma once
+
 #include "Goblin.h"
 #include "Persistent.h"
 
 class Actor;
+
+constexpr int MAP_HEIGHT = 30 - 8;
+constexpr int MAP_WIDTH = 119;
+
+constexpr int FOV_RADIUS = 10;
+
+constexpr auto ROOM_MAX_SIZE = 12;
+constexpr auto ROOM_MIN_SIZE = 6;
+constexpr auto MAX_ROOM_MONSTERS = 3;
+constexpr int MAX_ROOM_ITEMS = 4;
 
 //==Tile==
 // A tile of the map
