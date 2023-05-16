@@ -184,21 +184,21 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 
 	// If tcodMap is null, log an error and return false
 	if (tcodMap == nullptr)
-		{
+	{
 		std::clog << "Error: tcodMap is null" << std::endl;
-			return false;
-		}
-
-	// If the coordinates are in field of view, mark the tile as explored
-		if (tcodMap->isInFov(fov_x, fov_y))
-		{
-		gsl::span(tiles, MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
-			return true;
-		}
-
-	// If the coordinates are not in field of view, return false
 		return false;
 	}
+
+	// If the coordinates are in field of view, mark the tile as explored
+	if (tcodMap->isInFov(fov_x, fov_y))
+	{
+		gsl::span(tiles, MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
+		return true;
+	}
+
+	// If the coordinates are not in field of view, return false
+	return false;
+}
 
 
 bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
@@ -467,32 +467,39 @@ void test_dice(){
 
 void Map::add_monster(int mon_x, int mon_y)
 {
+	static bool dragonPlaced = false; // flag to track if a dragon has been placed
 	RandomDice d;
 
-	for (int i = 0; i < 4 * d.d6(); i++) { // create goblins
-		auto goblin = create_goblin(mon_y, mon_x);
-		goblin->index = i;
-		game.actors.push_back(goblin);
-	}
+	// Determine if this room should contain the dragon
+	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
-	for (int i = 0; i < 2 * d.d6(); i++) { // create orcs
-		auto orc = create_orc(mon_y, mon_x);
-		orc->index = i;
-		game.actors.push_back(orc);
-	}
-
-	for (int i = 0; i < 2 * d.d6(); i++) { // create trolls
-		auto troll = create_troll(mon_y, mon_x);
-		troll->index = i;
-		game.actors.push_back(troll);
-	}
-
-	for (int i = 0; i < 1 * d.d6(); i++) { // create dragons
+	if (placeDragon)
+	{
 		auto dragon = create_dragon(mon_y, mon_x);
-		dragon->index = i;
+		dragon->index = 0;
 		game.actors.push_back(dragon);
+		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
+	else
+	{
+		for (int i = 0; i < 4 * d.d6(); i++) { // create goblins
+			auto goblin = create_goblin(mon_y, mon_x);
+			goblin->index = i;
+			game.actors.push_back(goblin);
+		}
 
+		for (int i = 0; i < 2 * d.d6(); i++) { // create orcs
+			auto orc = create_orc(mon_y, mon_x);
+			orc->index = i;
+			game.actors.push_back(orc);
+		}
+
+		for (int i = 0; i < 2 * d.d6(); i++) { // create trolls
+			auto troll = create_troll(mon_y, mon_x);
+			troll->index = i;
+			game.actors.push_back(troll);
+		}
+	}
 }
 
 std::shared_ptr<Actor> Map::get_actor(int x, int y) const noexcept
