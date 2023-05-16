@@ -536,6 +536,8 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	}
 
 	// look for living actors to attack
+	// TODO : should we iterate over the entire list ?
+	// in order to check that there is nothing to attack and tile is empty ?
 	for (const auto& actor : game.actors)
 	{
 		if (actor != nullptr)

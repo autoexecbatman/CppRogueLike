@@ -47,7 +47,7 @@ public:
 		if (node->isLeaf())
 		{
 			// variables
-			int room_pos_x = 0, room_pos_y = 0, room_width = 0, room_height = 0;
+			int room_pos_x, room_pos_y, room_width, room_height = 0;
 			const bool withActors = gsl::narrow_cast<bool>(userData);
 			// dig a room
 			/*TCODRandom* rng = TCODRandom::getInstance();*/
@@ -65,7 +65,9 @@ public:
 				room_pos_y + room_height - 1 - 1,
 				withActors
 			);
-			
+
+			std::cout << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
+			std::clog << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;			
 			if (roomNum != 0)
 			{
 				// dig a corridor from last room
@@ -145,9 +147,9 @@ Map::Map(
 
 Map::~Map()
 {
-	delete[] tiles; // free the map's tiles
-	delete tcodMap; //delete the TCODMap object
-	delete rng; // delete the rng
+	if (tiles) delete[] tiles; // new called in init
+	if (tcodMap) delete tcodMap; // new called in init
+	if (rng) delete rng; // new called in init
 }
 
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
@@ -215,40 +217,28 @@ void Map::render() const
 		{
 			if (is_in_fov(iter_x, iter_y))
 			{
-				//int key = getch();
-				//if (key == 't')
-				//{
-					if (is_wall(iter_y, iter_x))
-					{
-						// TODO : add a key to toggle between fovVisible on and off
-						/*standout();*/
-						mvaddch(iter_y, iter_x, '#');
-						/*standend();*/
-
-					}
-					else
-					{
-						/*standout();*/
-						mvaddch(iter_y, iter_x, '.');
-						/*standend();*/
-					}
-				//}
-				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? LIGHT_WALL_PAIR : LIGHT_GROUND_PAIR, NULL);*/
-			}
-			else if (is_explored(iter_x,iter_y))
-			{
-				if (is_wall(iter_y,iter_x))
-					{
+				if (is_wall(iter_y, iter_x))
+				{
 					mvaddch(iter_y, iter_x, '#');
-					}
+				}
 				else
-					{
+				{
 					mvaddch(iter_y, iter_x, '.');
-					}
-				
-				/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? DARK_WALL_PAIR : DARK_GROUND_PAIR, NULL);*/
+				}
 			}
-			/*mvchgat(iter_y, iter_x, 1, A_NORMAL, isWall(iter_y, iter_x) ? darkWall : darkGround, NULL);*/
+			else if (is_explored(iter_x, iter_y))
+			{
+				if (is_wall(iter_y, iter_x))
+				{
+					mvaddch(iter_y, iter_x, '#');
+					refresh();
+				}
+				else
+				{
+					mvaddch(iter_y, iter_x, '.');
+					refresh();
+				}
+			}
 		}
 	}
 	std::clog << "Map::render() end" << std::endl;
@@ -256,7 +246,7 @@ void Map::render() const
 
 void Map::add_item(int x, int y)
 {
-	gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
+	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
 	const int dice = rng->getInt(0, 100);
 	int potionIndex = 0;
 	if (dice < 70)
@@ -296,18 +286,6 @@ void Map::add_item(int x, int y)
 		game.actors.push_back(std::move(confusionScroll));
 		game.send_to_back(*confusionScroll);
 	}
-	/*else if (dice < 70 + 10 + 10)*/
-	// always spawn this scroll
-	//if (true)
-	//{
-	//	// add fireball scrolls
-	//	Actor* fireballScroll = new Actor(x, y, '#', "scroll of fireball", FIREBALL_PAIR);
-	//	fireballScroll->blocks = false;
-	//	fireballScroll->pickable = new Fireball(3, 12);
-	//	game.actors.push_back(fireballScroll);
-	//	game.sendToBack(fireballScroll);
-	//}
-	//
 }
 
 //====
@@ -365,14 +343,6 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 		game.player->posX = x1 + 1;
 
 		// create a player from the player class and place it in the room
-		
-		//// create player 2
-		//game.player2->posY = y1 + 2;
-		//game.player2->posX = x1 + 1;
-		//
-		//// create player 3
-		//game.player3->posY = y1 + 3;
-		//game.player3->posX = x1 + 1;
 	}
 	
 	// If this is NOT the first room, we make a random number of monsters and place them in the room
@@ -401,12 +371,12 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	} 
 	
 	// add items
-	int numItems = TCODRandom::getInstance()->getInt(0, MAX_ROOM_ITEMS);
+	const int numItems = TCODRandom::getInstance()->getInt(0, MAX_ROOM_ITEMS);
 
 	for (int i = 0; i < numItems; i++)
 	{
-		int itemX = TCODRandom::getInstance()->getInt(x1, x2);
-		int itemY = TCODRandom::getInstance()->getInt(y1, y2);
+		const int itemX = TCODRandom::getInstance()->getInt(x1, x2);
+		const int itemY = TCODRandom::getInstance()->getInt(y1, y2);
 
 		if (is_wall(itemY, itemX))
 		{
@@ -515,7 +485,6 @@ std::shared_ptr<Actor> Map::get_actor(int x, int y) const noexcept
 int Map::random_number(int min, int max)
 {
 	auto seed = gsl::narrow_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-	/*static std::default_random_engine randomEngine(static_cast<unsigned int>(time(nullptr)));*/
 	static std::default_random_engine randomEngine(seed);
 	std::uniform_int_distribution<int> range(min, max);
 

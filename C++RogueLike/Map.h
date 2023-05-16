@@ -71,15 +71,11 @@ public:
 	void init(bool withActors);
 
 protected:
-	// create a pointer for the map array
 	Tile* tiles;
-	//create a reference to a TCODMap object named map
 	TCODMap* tcodMap;
-
-	long seed;
 	TCODRandom* rng;
+	long seed;
 
-	//make a friend class for the BspListener
 	friend class BspListener;
 	//make a dig function for the map
 	void dig(int x1, int y1, int x2, int y2);
