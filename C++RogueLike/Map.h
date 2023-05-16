@@ -48,6 +48,7 @@ private:
 	int playerPosX{ 0 };
 	int playerPosY{ 0 };
 
+
 	std::shared_ptr<Goblin> create_goblin(int mon_y, int mon_x);
 	std::shared_ptr<Orc> create_orc(int mon_y, int mon_x);
 	std::shared_ptr<Troll> create_troll(int mon_y, int mon_x);
@@ -85,7 +86,6 @@ public:
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
 	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
-
 
 protected:
 	Tile* tiles;

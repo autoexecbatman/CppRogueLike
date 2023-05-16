@@ -176,42 +176,35 @@ bool Map::is_explored(int exp_x, int exp_y) const noexcept
 
 bool Map::is_in_fov(int fov_x, int fov_y) const
 {
-	// if tcodMap is null return false
-	if (tcodMap != nullptr)
+	// Check if the coordinates are out of bounds
+	if (fov_x < 0 || fov_x >= MAP_WIDTH || fov_y < 0 || fov_y >= MAP_HEIGHT)
 	{
-
-
-		if ( // fov is out of bounds
-			fov_x < 0
-			||
-			fov_x >= MAP_WIDTH
-			||
-			fov_y < 0
-			||
-			fov_y >= MAP_HEIGHT
-			)
-		{
-			return false;
-		}
-		if (tcodMap->isInFov(fov_x, fov_y))
-		{
-			tiles[fov_x + fov_y * map_width].explored = true;
-			return true;
-		}
 		return false;
 	}
-	else
-	{
-		std::clog << "tcodMap is null !!!" << std::endl;
-		std::cout << "tcodMap is null !!!" << std::endl;
-		exit(-1);
+
+	// If tcodMap is null, log an error and return false
+	if (tcodMap == nullptr)
+		{
+		std::clog << "Error: tcodMap is null" << std::endl;
+			return false;
+		}
+
+	// If the coordinates are in field of view, mark the tile as explored
+		if (tcodMap->isInFov(fov_x, fov_y))
+		{
+		gsl::span(tiles, MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
+			return true;
+		}
+
+	// If the coordinates are not in field of view, return false
+		return false;
 	}
-}
+
 
 bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
 {
-	int index = isWater_pos_y * map_width + isWater_pos_x;
-	return tiles[index].type == TileType::WATER;
+	const int index = isWater_pos_y * map_width + isWater_pos_x;
+	return gsl::span(tiles, map_width * map_height)[index].type == TileType::WATER;
 }
 
 void Map::compute_fov()
