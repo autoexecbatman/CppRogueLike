@@ -41,22 +41,19 @@ int main()
 	initscr(); // initialize the screen in curses
 	std::clog << "Initialized successfully.\n";
 
-	if (has_colors()) // check if the terminal supports colors
-	{
-		std::clog << "Initializing colors...\n";
-		start_color(); // start color curses
-		std::clog << "Initialized successfully.\n";
-		std::clog << "Initializing color pairs...\n";
-		Colors colors;
-		colors.my_init_pair();
-		std::clog << "Initialized successfully.\n";
-	}
-	else
-	{
+	if (!has_colors()) {
 		std::clog << "Colors not supported.\n";
 		std::cout << "Colors not supported.\n";
-		exit(-1);
+		throw std::runtime_error("Colors not supported");
 	}
+
+	std::clog << "Initializing colors...\n";
+	start_color(); // start color curses
+	std::clog << "Initialized successfully.\n";
+	std::clog << "Initializing color pairs...\n";
+	Colors colors;
+	colors.my_init_pair();
+	std::clog << "Initialized successfully.\n";
 
 	cbreak(); // disable line buffering
 	noecho(); // turn off echoing of keys to the screen
@@ -134,6 +131,7 @@ int main()
 
 	debugFile.close();
 
+	/*_CrtDumpMemoryLeaks();*/
 	return 0;
 }
 
