@@ -56,16 +56,28 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 
 void Pickable::drop(Actor& owner, Actor& wearer)
 {
-	//if (wearer->container)
-	//{
-	//	wearer->container->remove(owner);
-	//	owner->posX = wearer->posX;
-	//	owner->posY = wearer->posY;
-	//	owner->ch = wearer->ch;
-	//	owner->col = wearer->col;
-	//	engine.actors.emplace_back(owner);
-	//	engine.send_to_back(owner);
-	//}
+	if (&wearer != game.player.get())
+	{
+		return;
+	}
+
+	if (wearer.container)
+	{
+		wearer.container->remove(owner);
+
+		// Create a new Actor for the dropped item
+		auto dropped_item = std::make_shared<Actor>(owner);
+
+		// Initialize the new Actor with the attributes of the dropped item
+		dropped_item->posX = wearer.posX;
+		dropped_item->posY = wearer.posY;
+		dropped_item->ch = owner.ch;  // Use the character symbol of the dropped item
+		dropped_item->col = owner.col;  // Use the color of the dropped item
+
+		// Add the new Actor to game.actors
+		game.actors.push_back(dropped_item);
+		game.send_to_back(*dropped_item);
+	}
 }
 
 bool Pickable::use(Actor& owner, Actor& wearer)
