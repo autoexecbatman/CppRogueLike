@@ -45,7 +45,6 @@ public:
 			int room_pos_x, room_pos_y, room_width, room_height = 0;
 			const bool withActors = gsl::narrow_cast<bool>(userData);
 			// dig a room
-			/*TCODRandom* rng = TCODRandom::getInstance();*/
 			room_width = map.rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
 			room_height = map.rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
 			room_pos_x = map.rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
@@ -62,7 +61,7 @@ public:
 			);
 
 			std::cout << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
-			std::clog << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;			
+			std::clog << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
 			if (roomNum != 0)
 			{
 				// dig a corridor from last room
@@ -98,8 +97,8 @@ void Map::load(TCODZip& zip)
 	init(false);
 	for (int i = 0; i < map_width * map_height; i++)
 	{
-		/*tiles[i].explored = zip.getInt();*/
-		tiles[i].explored = gsl::narrow_cast<bool>(zip.getInt());
+		gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		tiles_span[i].explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
 
@@ -108,13 +107,13 @@ void Map::save(TCODZip& zip)
 	zip.putInt(seed);
 	for (int i = 0; i < map_width * map_height; i++) 
 	{
-		zip.putInt(gsl::narrow_cast<int>(tiles[i].explored));
+		gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		zip.putInt(gsl::narrow_cast<int>(tiles_span[i].explored));
 	}
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 {
-	
 	gsl::owner<TCODBsp*> myBSP = new TCODBsp(0, 0, map_width, map_height);
 	myBSP->splitRecursive(rng, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
 	BspListener* mylistener = new BspListener(*this);
@@ -125,10 +124,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 
 //====
 //In Map.cpp, we allocate the TCODMap object in the constructor
-Map::Map(
-	int map_height,
-	int map_width
-)
+Map::Map(int map_height, int map_width)
 	:
 	map_height(map_height),
 	map_width(map_width),
@@ -326,10 +322,10 @@ void Map::set_tile(int x, int y, TileType newType) noexcept
 	}
 
 	// Calculate the index into the array
-	int index = y * MAP_WIDTH + x;
+	const int index = y * MAP_WIDTH + x;
 
 	// Make a span from the tiles array
-	gsl::span<Tile> tilesSpan(tiles, MAP_WIDTH * MAP_HEIGHT);
+	const gsl::span<Tile> tilesSpan(tiles, MAP_WIDTH * MAP_HEIGHT);
 
 	// Use the span for access
 	tilesSpan[index].type = newType;
@@ -337,16 +333,17 @@ void Map::set_tile(int x, int y, TileType newType) noexcept
 
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
+	RandomDice d;
 	dig(x1, y1, x2, y2); // dig the corridors
 
 	// Add water tiles
-	int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
+	const int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
 	for (int x = x1; x <= x2; x++)
 	{
 		for (int y = y1; y <= y2; y++)
 		{
-			int roll = TCODRandom::getInstance()->getInt(0, 100);
-			if (roll < waterPercentage)
+			const int rolld100 = d.d100();
+			if (rolld100 < waterPercentage)
 			{
 				// Assuming you have a set_tile function that sets the tile at (x, y) to water
 				set_tile(x, y, TileType::WATER);
@@ -482,22 +479,31 @@ void Map::add_monster(int mon_x, int mon_y)
 	}
 	else
 	{
-		for (int i = 0; i < 4 * d.d6(); i++) { // create goblins
+		const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
+		for (auto i{ 0 }; i < roll4d6; i++) { // create goblins
 			auto goblin = create_goblin(mon_y, mon_x);
 			goblin->index = i;
 			game.actors.push_back(goblin);
 		}
 
-		for (int i = 0; i < 2 * d.d6(); i++) { // create orcs
-			auto orc = create_orc(mon_y, mon_x);
-			orc->index = i;
-			game.actors.push_back(orc);
+		if (game.player->playerLevel > 3)
+		{
+			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
+			for (auto i{ 0 }; i < roll2d6; i++) { // create orcs
+				auto orc = create_orc(mon_y, mon_x);
+				orc->index = i;
+				game.actors.push_back(orc);
+			}
 		}
 
-		for (int i = 0; i < 2 * d.d6(); i++) { // create trolls
-			auto troll = create_troll(mon_y, mon_x);
-			troll->index = i;
-			game.actors.push_back(troll);
+		if (game.player->playerLevel > 5)
+		{
+			const auto roll1d6 = d.d6();
+			for (auto i{ 0 }; i < roll1d6; i++) { // create trolls
+				auto troll = create_troll(mon_y, mon_x);
+				troll->index = i;
+				game.actors.push_back(troll);
+			}
 		}
 	}
 }
