@@ -1,0 +1,75 @@
+#include <iostream>
+#include <memory>
+#include <gsl/gsl>
+
+#include <libtcod.h>
+
+#include "Game.h"
+#include "Actor.h"
+#include "Ai.h"
+#include "AiMonsterConfused.h"
+
+//==ConfusedMonsterAi==
+AiMonsterConfused::AiMonsterConfused(int nbTurns, std::shared_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(oldAi) {}
+
+void AiMonsterConfused::update(Actor& owner)
+{
+	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
+	int dx = rng->getInt(-1, 1);
+	int dy = rng->getInt(-1, 1);
+
+	if (dx != 0 || dy != 0)
+	{
+		const int destx = owner.posX + dx;
+		const int desty = owner.posY + dy;
+
+		if (game.map != nullptr)
+		{
+			if (game.map->can_walk(desty, destx))
+			{
+				owner.posX = destx;
+				owner.posY = desty;
+			}
+			else
+			{
+				std::shared_ptr<Actor> actor = game.get_actor(destx, desty);
+				if (actor)
+				{
+					owner.attacker->attack(owner, *actor);
+				}
+			}
+		}
+		else
+		{
+			std::cout << "Error: update() called on actor with no map." << std::endl;
+			exit(-1);
+		}
+	}
+
+	nbTurns--;
+	if (nbTurns == 0)
+	{
+		owner.ai = oldAi;
+	}
+}
+
+void AiMonsterConfused::load(TCODZip& zip)
+{
+	nbTurns = zip.getInt();
+	oldAi = Ai::create(zip);
+}
+
+void AiMonsterConfused::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
+	zip.putInt(nbTurns);
+	if (oldAi != nullptr)
+	{
+		oldAi->save(zip);
+	}
+	else
+	{
+		std::cout << "Error: save() called on actor with no oldAi." << std::endl;
+		exit(-1);
+	}
+}

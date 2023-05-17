@@ -50,8 +50,8 @@ void Gui::gui_render()
 	if (game.player->name.empty()) { game.player->name = "Player"; }
 	mvwprintw(guiWin, 1, 1, "Name: %s", game.player->name.c_str());
 	mvwprintw(guiWin, 2, 1, "HP:%d/%d", guiHp, guiHpMax);
-	mvwprintw(guiWin, 3, 1, "Attack:%d", game.player->attacker->power);
-	mvwprintw(guiWin, 4, 1, "Defense:%d", game.player->destructible->defense);
+	mvwprintw(guiWin, 3, 1, "Attack:%d", game.player->attacker->dmg);
+	mvwprintw(guiWin, 4, 1, "Defense:%d", game.player->destructible->dr);
 	renderMouseLook();
 	gui_refresh();
 }

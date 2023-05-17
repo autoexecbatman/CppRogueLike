@@ -206,6 +206,7 @@
     <ClCompile Include="Persistent.cpp" />
     <ClCompile Include="Pickable.cpp" />
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="StrengthAttributes.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -221,6 +222,7 @@
     <ClInclude Include="Destructible.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="AiMonster.h" />
+    <ClInclude Include="StrengthAttributes.h" />
     <ClInclude Include="RandomDice.h" />
     <ClInclude Include="Goblin.h" />
     <ClInclude Include="Gui.h" />
@@ -240,6 +242,7 @@
   <ItemGroup>
     <None Include="ClassDiagram1.cd" />
     <None Include="Menu.cd" />
+    <None Include="strength.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

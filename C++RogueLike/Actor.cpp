@@ -123,7 +123,6 @@ void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
 	container->add(*this);
-	/*container->add(std::shared_ptr<Actor>(this));*/
 }
 
 // the actor update
@@ -132,10 +131,6 @@ void Actor::update()
 	// if the actor has an ai then update the ai
 	if (ai)
 	{
-		/*ai->update(this);*/
-		/*ai->update(std::shared_ptr<Actor>(this));*/
-		/*ai->update(std::shared_ptr<Actor>(this, [](Actor*) {}));*/
-		/*ai->update(shared_from_this());*/
 		ai->update(*this);
 	}
 }

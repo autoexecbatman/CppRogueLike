@@ -13,21 +13,15 @@ class Destructible : public Persistent
 {
 public:
 	int hpMax{ 0 }; // maximum health points
-	int hp = 0; // current health points
-	int defense = 0; // hit points deflected
-	int food = 0;
-	int foodMax = 0;
-	int needToSleep = 0;
-	std::string corpseName = "corpseName"; // the actor's name once it is dead/destroyed
-	int xp = 0; // for awarding experience points
+	int hp{ 0 }; // current health points
+	int dr{ 0 }; // hit points deflected
+	int food{ 0 };
+	int foodMax{ 0 };
+	int needToSleep{ 0 };
+	std::string corpseName{ "corpseName" }; // the actor's name once it is dead/destroyed
+	int xp{ 0 }; // for awarding experience points
 
-	Destructible(
-		int hpMax,
-		int defense,
-		std::string corpseName,
-		int xp
-	);
-
+	Destructible(int hpMax, int dr, std::string corpseName, int xp);
 	virtual ~Destructible();
 
 	// returns true if hp is below or equal to 0
@@ -60,7 +54,7 @@ class MonsterDestructible : public Destructible
 public:
 	MonsterDestructible(
 		int hpMax,
-		int defense,
+		int dr,
 		std::string corpseName,
 		int xp
 	);
@@ -78,7 +72,7 @@ class PlayerDestructible : public Destructible
 public:
 	PlayerDestructible(
 		int hpMax,
-		int defense,
+		int dr,
 		std::string corpseName,
 		int xp
 	);

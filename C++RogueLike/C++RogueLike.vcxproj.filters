@@ -87,6 +87,9 @@
     <ClCompile Include="AiMonsterConfused.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="StrengthAttributes.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Map.h">
@@ -170,6 +173,9 @@
     <ClInclude Include="AiMonsterConfused.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="StrengthAttributes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="ClassDiagram1.cd">
@@ -177,6 +183,9 @@
     </None>
     <None Include="Menu.cd">
       <Filter>Header Files</Filter>
+    </None>
+    <None Include="strength.json">
+      <Filter>Source Files</Filter>
     </None>
   </ItemGroup>
 </Project>

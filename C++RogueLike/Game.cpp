@@ -37,11 +37,11 @@ void Game::init()
 		int playerDamage = 2 + d.d8();
 		game.player->destructible = std::make_shared<PlayerDestructible>(
 			playerHp, // int maxHp
-			5, // int defense
+			5, // int dr
 			"your cadaver", // std::string corpseName
 			0 // int xp
 		);
-		game.player->attacker = std::make_shared<Attacker>(playerDamage); // int power / damage
+		game.player->attacker = std::make_shared<Attacker>(playerDamage); // int dmg / damage
 		game.player->ai = std::make_shared<AiPlayer>();
 		game.player->container = std::make_shared<Container>(26);
 		game.player->canSwim = true;
@@ -362,7 +362,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
+				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
 			}
 		}
 
@@ -635,8 +635,8 @@ void Game::target()
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->defense);
-				mvprintw(3, 0, "STR: %d", actor->attacker->power);
+				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
+				mvprintw(3, 0, "STR: %d", actor->attacker->dmg);
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
 			}
@@ -925,8 +925,8 @@ void Game::dispay_levelup(int xpLevel)
 		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
 		mvwprintw(stats, 4, 1, "Food: %d/%d", player->destructible->food, player->destructible->foodMax);
 		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
-		mvwprintw(stats, 6, 1, "[a] Attack: %d", player->attacker->power);
-		mvwprintw(stats, 7, 1, "[d] Defense: %d", player->destructible->defense);
+		mvwprintw(stats, 6, 1, "[a] Attack: %d", player->attacker->dmg);
+		mvwprintw(stats, 7, 1, "[d] Defense: %d", player->destructible->dr);
 		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", player->destructible->hp, player->destructible->hpMax);
 		
 		wrefresh(stats);
@@ -938,13 +938,13 @@ void Game::dispay_levelup(int xpLevel)
 		case 'a':
 		{
 			const int roll = d.d4();
-			player->attacker->power += d.d4();
+			player->attacker->dmg += d.d4();
 			break;
 		}
 
 		case 'd':
 		{
-			player->destructible->defense += 1;
+			player->destructible->dr += 1;
 			break;
 		}
 

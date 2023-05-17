@@ -11,6 +11,7 @@
 #include "Ai.h"
 #include "Container.h"
 #include "Pickable.h"
+#include "StrengthAttributes.h"
 
 //==Actor==
 // a class for the actors in the game
@@ -18,6 +19,7 @@
 class Actor : public Persistent
 {
 public:
+	int strength{ 18 };
 	int playerLevel{ 0 };
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
@@ -36,6 +38,7 @@ public:
 	std::shared_ptr<Ai> ai; // the actor can have AI
 	std::shared_ptr<Container> container; // the actor can be a container
 	std::shared_ptr<Pickable> pickable; // the actor can be picked
+	std::shared_ptr<StrengthAttributes> strengthAttributes; // the actor can have strength attributes
 	
 	Actor(
 		int y,
@@ -57,6 +60,7 @@ public:
 
 	void render() const noexcept; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
+	int getStrength() const noexcept { return strength; } // get the strength of the actor
 };
 
 #endif // !ACTOR_H

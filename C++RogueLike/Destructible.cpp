@@ -4,47 +4,51 @@
 
 #include "main.h"
 #include "Colors.h"
+#include "StrengthAttributes.h"
 
 //====
-
-Destructible::Destructible(
-	int hpMax,
-	int defense,
-	std::string corpseName,
-	int xp
-) :
+Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp)
+	:
 	hpMax(hpMax),
 	hp(hpMax),
-	defense(defense),
+	dr(dr),
 	corpseName(corpseName),
 	xp(xp)
-{
-	
-}
+{}
 
 Destructible::~Destructible() {}
 
 int Destructible::take_damage(Actor& owner, int damage)
 {
-	damage -= Destructible::defense; // (dam - def)
+	int str = owner.strength - 1;
+	std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
+	if (str >= 0 && str < attrs.size()) {
+		StrengthAttributes strength = attrs[str];
+		damage = damage - Destructible::dr + strength.dmgAdj; // include dmgAdj
+	}
+	else {
+		// Handle out of range case...
+	}
 
-	if (damage > 0) // if dam > 0
+	if (damage > 0)
 	{
-
-		Destructible::hp -= damage; // current hp - damage
-		
-		if (hp <= 0) // if hp <= 0
+		Destructible::hp -= damage;
+		if (hp <= 0)
 		{
-			die(owner); // owner killed
+			die(owner);
 		}
-
 	}
 	else
 	{
-		damage = 0; // else 0 dam dealt
+		damage = 0;
 	}
-	
-	return damage; // total damage dealt
+
+	//clear();
+	//mvprintw(0, 0, "Damage: %d", damage);
+	//refresh();
+	//getch();
+
+	return damage;
 }
 
 void Destructible::die(Actor& owner)
@@ -79,7 +83,7 @@ void Destructible::load(TCODZip& zip)
 {
 	hpMax = zip.getInt();
 	hp = zip.getInt();
-	defense = zip.getInt();
+	dr = zip.getInt();
 	corpseName = _strdup(zip.getString());
 }
 
@@ -87,7 +91,7 @@ void Destructible::save(TCODZip& zip)
 {
 	zip.putInt(hpMax);
 	zip.putInt(hp);
-	zip.putInt(defense);
+	zip.putInt(dr);
 	zip.putString(corpseName.c_str());
 }
 
@@ -151,12 +155,12 @@ std::shared_ptr<Destructible> Destructible::create(TCODZip& zip)
 
 PlayerDestructible::PlayerDestructible(
 	int hpMax,
-	int defense,
+	int dr,
 	/*const char* corpseName,*/
 	std::string corpseName,
 	int xp
 ) :
-	Destructible(hpMax, defense, corpseName, xp)
+	Destructible(hpMax, dr, corpseName, xp)
 {
 }
 
@@ -173,12 +177,12 @@ void PlayerDestructible::die(Actor& owner)
 
 MonsterDestructible::MonsterDestructible(
 	int hpMax,
-	int defense,
+	int dr,
 	/*const char* corpseName,*/
 	std::string corpseName,
 	int xp
 ) :
-	Destructible(hpMax, defense, corpseName, xp)
+	Destructible(hpMax, dr, corpseName, xp)
 {}
 
 void MonsterDestructible::die(Actor& owner)

@@ -2,7 +2,8 @@
 #ifndef ATTACKER_H
 #define ATTACKER_H
 
-//#include "libtcod.hpp"
+#pragma once
+
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
@@ -14,9 +15,9 @@ class Attacker : public Persistent
 {
 public:
 
-	int power = 0; // hit points given
+	int dmg = 0;
 	
-	Attacker(int power) noexcept;
+	Attacker(int dmg) noexcept;
 
 	void attack(const Actor& owner, Actor& target);
 	

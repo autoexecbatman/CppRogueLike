@@ -18,6 +18,8 @@
 #include "Menu.h"
 #include "Gui.h"
 
+#include "StrengthAttributes.h"
+
 #include "ChatGPT.h" // for openai::start
 #include "include/user_config.h"
 
@@ -25,6 +27,7 @@ Game game;
 
 int main()
 {
+
 	//==DEBUG_MEMORY_LEAKS==
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	/*_CrtSetBreakAlloc(174);*/
@@ -128,6 +131,8 @@ int main()
 		std::clog << "Curses shutdown failed.\n";
 		std::cout << "Curses shutdown failed.\n";
 	}
+
+	print_chart();
 
 	debugFile.close();
 
