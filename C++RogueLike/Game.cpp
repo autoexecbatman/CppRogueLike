@@ -18,6 +18,7 @@
 #include "Container.h"
 #include "Colors.h"
 #include "Window.h"
+#include "RandomDice.h"
 
 //====
 // When the Engine is created, 
@@ -25,19 +26,22 @@
 // Will be called in load()
 void Game::init()
 {
+	RandomDice d;
 	//==PLAYER==
 	game.actors.emplace_back(game.player);
 
 	if (game.player)
 	{
 		std::clog << "game.player is not null" << std::endl;
+		int playerHp = 20 + d.d10();
+		int playerDamage = 2 + d.d8();
 		game.player->destructible = std::make_shared<PlayerDestructible>(
-			10 + random_number(1, 10),
-			5,
-			"your cadaver",
-			0
+			playerHp, // int maxHp
+			5, // int defense
+			"your cadaver", // std::string corpseName
+			0 // int xp
 		);
-		game.player->attacker = std::make_shared<Attacker>(random_number(1, 10));
+		game.player->attacker = std::make_shared<Attacker>(playerDamage); // int power / damage
 		game.player->ai = std::make_shared<AiPlayer>();
 		game.player->container = std::make_shared<Container>(26);
 		game.player->canSwim = true;
@@ -900,8 +904,10 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const
 	return nullptr;
 }
 
-void Game::dispay_levelup(int xpLevel) noexcept
+void Game::dispay_levelup(int xpLevel)
 {
+	RandomDice d;
+
 	WINDOW* stats = newwin(
 		11, // height
 		30, // width
@@ -925,21 +931,29 @@ void Game::dispay_levelup(int xpLevel) noexcept
 		
 		wrefresh(stats);
 
-		int key = getch();
+		const int key = getch();
 		switch (key)
 		{
 
 		case 'a':
-			player->attacker->power += 1;
+		{
+			const int roll = d.d4();
+			player->attacker->power += d.d4();
 			break;
+		}
 
 		case 'd':
+		{
 			player->destructible->defense += 1;
 			break;
+		}
 
 		case 'h':
-			player->destructible->hpMax += 1;
+		{
+			const int roll = d.d8();
+			player->destructible->hpMax += d.d8();
 			break;
+		}
 
 		default:
 			continue;
@@ -948,7 +962,7 @@ void Game::dispay_levelup(int xpLevel) noexcept
 		break;
 	}
 
-	if (stats != nullptr)
+	if (stats)
 	{
 		delwin(stats);
 	}
