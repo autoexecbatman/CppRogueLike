@@ -31,7 +31,7 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 	case MenuOptions::NEW_GAME:
 	{
 		std::string newGame = "New Game";
-		return newGame;	
+		return newGame;
 	}
 
 	case MenuOptions::LOAD_GAME:
@@ -52,7 +52,7 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 		return quit;
 	}
 
-	default:	
+	default:
 	{
 		std::string error = "Error";
 		return error;
@@ -84,11 +84,8 @@ void Menu::menu()
 		menu_print_option(MenuOptions::LOAD_GAME, 2);
 		menu_print_option(MenuOptions::OPTIONS, 3);
 		menu_print_option(MenuOptions::QUIT, 4);
-		
-		menu_refresh(); 
-		
-		/*const int input = getch();*/
-		/*int input = wgetch(menuWindow);*/
+
+		menu_refresh();
 		key_listen();
 		switch (keyPress)
 		{
@@ -117,41 +114,41 @@ void Menu::menu()
 			run = false;
 			switch (currentOption)
 			{
-				case MenuOptions::NEW_GAME:
-				{
-					// gender selection screen
-					menuGender.menu_gender();
+			case MenuOptions::NEW_GAME:
+			{
+				// gender selection screen
+				menuGender.menu_gender();
 
-					if (menuGender.back)
-					{
-						run = true;
-						menuGender.back = false;
-						break;
-					}
-					else
-					{
-						game.init();
-					}
-
-					break;
-				}
-				case MenuOptions::LOAD_GAME:
+				if (menuGender.back)
 				{
-					game.load_all();
-					break;
-				}
-				case MenuOptions::OPTIONS:
-				{
-					// do nothing
 					run = true;
+					menuGender.back = false;
 					break;
 				}
-				case MenuOptions::QUIT:
+				else
 				{
-					game.run = false;
-					std::cout << "You quit without saving!" << std::endl;
-					break;
+					game.init();
 				}
+
+				break;
+			}
+			case MenuOptions::LOAD_GAME:
+			{
+				game.load_all();
+				break;
+			}
+			case MenuOptions::OPTIONS:
+			{
+				// do nothing
+				run = true;
+				break;
+			}
+			case MenuOptions::QUIT:
+			{
+				game.run = false;
+				std::cout << "You quit without saving!" << std::endl;
+				break;
+			}
 			}
 			break;
 		}

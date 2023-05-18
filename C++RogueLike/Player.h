@@ -10,7 +10,9 @@
 class Player : public Actor
 {
 public:
-	Player(int y, int x);
+	std::string playerGender{ "None" };
+	/*Player(int y, int x);*/
+	Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int dmg, bool canSwim);
 	// Note::
 	// X/Y coordinates set
 	// in the function create_room()

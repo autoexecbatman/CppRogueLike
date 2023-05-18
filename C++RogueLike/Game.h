@@ -5,6 +5,7 @@
 #include <memory> // std::shared_ptr, std::make_shared
 
 #include "Actor.h"
+#include "Player.h"
 #include "Gui.h"
 #include "Map.h"
 #include "Colors.h"
@@ -23,14 +24,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Actor> player{ std::make_shared<Actor>(
-		25, // int posX
-		40, // int posY
-		'@', // char symbol
-		"Player", // std::string name
-		PLAYER_PAIR, // int colorPair
-		0 // int index
-	) };
+	std::shared_ptr<Player> player{ std::make_shared<Player>(0,0,0,0,"",0,0,false) };
 
 	std::shared_ptr<Actor> stairs{ std::make_shared<Actor>(
 		0, // int posX
@@ -56,6 +50,7 @@ public:
 
 	// Public member functions.
 	void init();
+	void create_player();
 	void update();
 	void render();
 	void send_to_back(Actor& actor);

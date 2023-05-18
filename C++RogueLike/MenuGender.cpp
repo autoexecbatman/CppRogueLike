@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Menu.h"
 #include "MenuClass.h"
+#include "Player.h"
 
 void MenuGender::menu_gender_store(MenuGenderOptions option)
 {
@@ -12,7 +13,8 @@ void MenuGender::menu_gender_store(MenuGenderOptions option)
 
 void MenuGender::menu_gender_assign()
 {
-	game.player->gender = gender;
+	/*game.player->gender = gender;*/
+	/*Player::gender = gender;*/
 }
 
 void MenuGender::menu_gender_assign_random()

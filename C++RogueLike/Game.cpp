@@ -19,37 +19,15 @@
 #include "Colors.h"
 #include "Window.h"
 #include "RandomDice.h"
+#include "Player.h"
 
 //====
-// When the Engine is created, 
+// When the Game is created, 
 // we don't know yet if we have to generate a new map or load a previously saved one.
 // Will be called in load()
 void Game::init()
 {
-	RandomDice d;
-	//==PLAYER==
-	game.actors.emplace_back(game.player);
-
-	if (game.player)
-	{
-		std::clog << "game.player is not null" << std::endl;
-		int playerHp = 20 + d.d10();
-		int playerDamage = 2 + d.d8();
-		game.player->destructible = std::make_shared<PlayerDestructible>(
-			playerHp, // int maxHp
-			5, // int dr
-			"your cadaver", // std::string corpseName
-			0 // int xp
-		);
-		game.player->attacker = std::make_shared<Attacker>(playerDamage); // int dmg / damage
-		game.player->ai = std::make_shared<AiPlayer>();
-		game.player->container = std::make_shared<Container>(26);
-		game.player->canSwim = true;
-	}
-	else
-	{
-		std::clog << "game.player is null" << std::endl;
-	}
+	create_player();
 
 	//==STAIRS==
 	game.stairs->blocks = false;
@@ -62,6 +40,17 @@ void Game::init()
 
 	gameStatus = GameStatus::STARTUP;
 	std::clog << "GameStatus::STARTUP" << std::endl;
+}
+
+void Game::create_player()
+{
+	//==PLAYER==
+	RandomDice d;
+	int playerHp = 20 + d.d10();
+	int playerDamage = 2 + d.d8();
+
+	game.player = std::make_shared<Player>(0, 0, playerHp, 5, "your cadaver", 0, playerDamage, true);
+	game.actors.emplace_back(game.player);
 }
 
 //==ENGINE_UPDATE==
@@ -712,19 +701,16 @@ void Game::load_all()
 		// load the map
 		int width = zip.getInt();
 		int height = zip.getInt();
-		/*map = new Map(height, width);*/
 		game.map = std::make_unique<Map>(height, width);
 		map->load(zip);
 
 		// load the player
-		/*player = new Actor(0, 0, 0, "loaded player", EMPTY_PAIR);*/
-		player = std::make_shared<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);
+		/*player = std::make_shared<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
+		/*player = std::make_shared<Player>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
 		player->load(zip);
 		actors.push_back(player);
-		/*actors.try_emplace(player->index, player);*/
 
 		// load the stairs
-		/*stairs = new Actor(0, 0, 0, "loaded stairs", WHITE_PAIR);*/
 		stairs = std::make_shared<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR, 0);
 		stairs->load(zip);
 		actors.push_back(stairs);

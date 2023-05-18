@@ -32,10 +32,10 @@ class BspListener : public ITCODBspCallback
 {
 private:
 	Map& map; // a map to dig
-	int roomNum; // room number
-	int lastx = 0, lasty = 0; // center of the last room
+	int roomNum{ 0 }; // room number
+	int lastx{ 0 }, lasty{ 0 }; // center of the last room
 public:
-	BspListener(Map& map) : map(map), roomNum(0) {}
+	BspListener(Map& map) noexcept : map(map), roomNum(0) {}
 
 	bool visitNode(TCODBsp* node, void* userData) override
 	{
@@ -97,7 +97,7 @@ void Map::load(TCODZip& zip)
 	init(false);
 	for (int i = 0; i < map_width * map_height; i++)
 	{
-		gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		const gsl::span<Tile> tiles_span(tiles, map_width * map_height);
 		tiles_span[i].explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
@@ -107,7 +107,7 @@ void Map::save(TCODZip& zip)
 	zip.putInt(seed);
 	for (int i = 0; i < map_width * map_height; i++) 
 	{
-		gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		const gsl::span<Tile> tiles_span(tiles, map_width * map_height);
 		zip.putInt(gsl::narrow_cast<int>(tiles_span[i].explored));
 	}
 }
@@ -116,7 +116,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
 {
 	gsl::owner<TCODBsp*> myBSP = new TCODBsp(0, 0, map_width, map_height);
 	myBSP->splitRecursive(rng, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
-	BspListener* mylistener = new BspListener(*this);
+	gsl::owner<BspListener*> mylistener = new BspListener(*this);
 	myBSP->traverseInvertedLevelOrder(mylistener, (void*)withActors);
 	delete myBSP;
 	delete mylistener;

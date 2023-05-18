@@ -10,29 +10,23 @@
 #include "Colors.h"
 #include "curses.h"
 
-Player::Player(int y, int x)
+//Player::Player(int y, int x)
+Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int dmg, bool canSwim)
 	:
-	Actor(
-		y, // int y
-		x, // int x
-		'@', // char ch
-		"player", // std::string name
-		PLAYER_PAIR, // int col
-		0 // int index
-	)
+	Actor(y, x, '@', "player", PLAYER_PAIR, 0)
 {
 	RandomDice d;
-	posY = y;
-	posX = x;
-	ch = '@';
-	name = "player";
-	col = PLAYER_PAIR;
+
 	blocks = true;
 	fovOnly = true;
-	attacker = std::make_shared<Attacker>(Attacker(d.d4()));
 
-	destructible = std::make_shared<PlayerDestructible>(PlayerDestructible(30, 2, "dead player", 100));
+	strength = 5 + d.d8();
+
+	attacker = std::make_shared<Attacker>(dmg);
+	destructible = std::make_shared<PlayerDestructible>(maxHp, dr, corpseName, xp);
 	ai = std::make_shared<AiPlayer>();
+	container = std::make_shared<Container>(26);
+	this->canSwim = canSwim;
 }
 
 bool Player::player_is_dead()

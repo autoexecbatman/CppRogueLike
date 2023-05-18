@@ -10,12 +10,14 @@
 Goblin::Goblin(int y, int x) :
 	Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 {
-	blocks = true;
-	fovOnly = true;
 	RandomDice d;
 	const int damage = d.d6();
-	attacker = std::make_shared<Attacker>(damage);
 	const int hp = d.d8();
+
+	blocks = true;
+	fovOnly = true;
+
+	attacker = std::make_shared<Attacker>(damage);
 	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15);
 	ai = std::make_shared<AiMonster>();
 }

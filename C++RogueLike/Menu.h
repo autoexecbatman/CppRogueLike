@@ -44,7 +44,6 @@ private:
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 public:
-	/*~Menu() noexcept { menu_delete(); }*/
 	void menu();
 };
 
