@@ -6,6 +6,7 @@
 #undef MOUSE_MOVED
 #define NOMINMAX
 #include <nlohmann/json.hpp>
+#pragma warning(disable : 4996)
 #include "include/openai/openai.hpp"
 
 class ChatGPT {

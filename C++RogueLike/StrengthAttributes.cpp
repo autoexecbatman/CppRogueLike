@@ -32,12 +32,14 @@ void print_chart()
 	auto strengthChart = loadStrengthAttributes();
 	for (const auto& strength : strengthChart)
 	{
-		std::cout << strength.hitProb << '\n';
-		std::cout << strength.dmgAdj << '\n';
-		std::cout << strength.wgtAllow << '\n';
-		std::cout << strength.maxPress << '\n';
-		std::cout << strength.openDoors << '\n';
-		std::cout << strength.BB_LG << '\n';
-		std::cout << strength.notes << '\n';
+		std::cout << "----" << std::endl;
+		std::cout << "strength.hitProb: " << strength.hitProb << std::endl;
+		std::cout << "strength.dmgAdj: " << strength.dmgAdj << std::endl;
+		std::cout << "strength.wgtAllow: " << strength.wgtAllow << std::endl;
+		std::cout << "strength.maxPress: " << strength.maxPress << std::endl;
+		std::cout << "strength.openDoors: " << strength.openDoors << std::endl;
+		std::cout << "strength.BB_LG: " << strength.BB_LG << std::endl;
+		std::cout << "strength.notes: " << strength.notes << std::endl;
+		std::cout << "----" << std::endl;
 	}
 }

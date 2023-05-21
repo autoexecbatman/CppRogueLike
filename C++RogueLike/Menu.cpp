@@ -23,6 +23,25 @@ void Menu::menu_print_option(MenuOptions option, int row) noexcept
 	}
 }
 
+void Menu::menu_new(int height, int width, int starty, int startx) noexcept {
+	// check bound before creating window
+	if (height > LINES || width > COLS) {
+		std::clog << "Menu window size is too big" << std::endl;
+		std::cout << "Menu window size is too big " << height << " " << width << std::endl;
+		std::cout << "LINES " << LINES << " COLS " << COLS << std::endl;
+		exit(-1);
+	}
+
+	if (starty < 0 || startx < 0 || starty >= 29 || startx >= 119) {
+		std::clog << "Menu window start position is out of bounds" << std::endl;
+		std::cout << "Menu window start position is out of bounds " << starty << " " << startx << std::endl;
+		exit(-1);
+	}
+
+	// create window (height, width, starty, startx
+	menuWindow = newwin(height, width, starty, startx);
+}
+
 std::string Menu::menu_get_string(MenuOptions option) noexcept
 {
 	switch (option)
@@ -63,8 +82,8 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 
 void Menu::menu()
 {
-	menu_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
-	box(menuWindow, 0, 0);
+	menu_new(height_, width_, starty_, startx_);
+
 	MenuGender menuGender;
 
 	while (run)
@@ -84,8 +103,9 @@ void Menu::menu()
 		menu_print_option(MenuOptions::LOAD_GAME, 2);
 		menu_print_option(MenuOptions::OPTIONS, 3);
 		menu_print_option(MenuOptions::QUIT, 4);
-
+		box(menuWindow, 0, 0);
 		menu_refresh();
+
 		key_listen();
 		switch (keyPress)
 		{
@@ -106,6 +126,7 @@ void Menu::menu()
 		{
 			menu_set_run_false();
 			game.run = false;
+			game.shouldSave = false;
 			std::cout << "`Q/q` was pressed...You quit without saving!" << std::endl;
 			break;
 		}
@@ -146,6 +167,7 @@ void Menu::menu()
 			case MenuOptions::QUIT:
 			{
 				game.run = false;
+				game.shouldSave = false;
 				std::cout << "You quit without saving!" << std::endl;
 				break;
 			}

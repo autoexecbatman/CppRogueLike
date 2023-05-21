@@ -203,6 +203,7 @@
     <ClCompile Include="MenuClass.cpp" />
     <ClCompile Include="MenuGender.cpp" />
     <ClCompile Include="MenuName.cpp" />
+    <ClCompile Include="MenuRace.cpp" />
     <ClCompile Include="Persistent.cpp" />
     <ClCompile Include="Pickable.cpp" />
     <ClCompile Include="Player.cpp" />
@@ -222,6 +223,7 @@
     <ClInclude Include="Destructible.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="AiMonster.h" />
+    <ClInclude Include="MenuRace.h" />
     <ClInclude Include="StrengthAttributes.h" />
     <ClInclude Include="RandomDice.h" />
     <ClInclude Include="Goblin.h" />

@@ -20,7 +20,12 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 	blocks = true;
 	fovOnly = true;
 
-	strength = 5 + d.d8();
+	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
+	constitution = d.d6() + d.d6() + d.d6();
+	intelligence = d.d6() + d.d6() + d.d6();
+	wisdom = d.d6() + d.d6() + d.d6();
+	charisma = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_shared<Attacker>(dmg);
 	destructible = std::make_shared<PlayerDestructible>(maxHp, dr, corpseName, xp);
@@ -31,7 +36,7 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 
 bool Player::player_is_dead()
 {
-	return true;
+	return false;
 }
 
 // a function to get postion from the map class using the getter functions

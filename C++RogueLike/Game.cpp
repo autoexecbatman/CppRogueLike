@@ -27,8 +27,7 @@
 // Will be called in load()
 void Game::init()
 {
-	create_player();
-
+	if (!game.stairs) { err("game.stairs is nullptr"); }
 	//==STAIRS==
 	game.stairs->blocks = false;
 	game.stairs->fovOnly = false;
@@ -740,6 +739,13 @@ void Game::load_all()
 
 void Game::save_all()
 {
+	// don't save if quit from the menu without playing
+	if (!shouldSave)
+	{
+		std::cout << "You quit without saving." << std::endl;
+		return;
+	}
+
 	std::clog << "Saving the game..." << std::endl;
 	if (player != nullptr)
 	{
@@ -984,14 +990,14 @@ void Game::display_character_sheet() noexcept
 		// display the class kit
 		mvwprintw(character_sheet, 3, 1, "Kit: ");
 		// display the player level
-		mvwprintw(character_sheet, 4, 1, "Level: ");
+		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
 		// display the player experience
 		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
 		// display the player alignment
 		mvwprintw(character_sheet, 6, 1, "Alignment: ");
 		// add character details on the right side
 		// display the player race
-		mvwprintw(character_sheet, 1, 60, "Race: ");
+		mvwprintw(character_sheet, 1, 60, "Race: %s", player->playerRace.c_str());
 		// display gender
 		mvwprintw(character_sheet, 2, 60, "Gender: %s", player->gender.c_str());
 		// display hair color

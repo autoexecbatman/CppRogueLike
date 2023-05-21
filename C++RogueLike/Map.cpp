@@ -41,16 +41,15 @@ public:
 	{
 		if (node->isLeaf())
 		{
-			// variables
 			int room_pos_x, room_pos_y, room_width, room_height = 0;
 			const bool withActors = gsl::narrow_cast<bool>(userData);
-			// dig a room
-			room_width = map.rng->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
-			room_height = map.rng->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
-			room_pos_x = map.rng->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
-			room_pos_y = map.rng->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
+			room_width = map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
+			room_height = map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
+			room_pos_x = map.rng_unique->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
+			room_pos_y = map.rng_unique->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
 
-			map.create_room//create rooms func
+			// first create a room
+			map.create_room
 			(
 				roomNum == 0,
 				room_pos_x,
@@ -62,10 +61,10 @@ public:
 
 			std::cout << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
 			std::clog << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
+
 			if (roomNum != 0)
 			{
 				// dig a corridor from last room
-
 				map.dig(
 					room_pos_x + room_width / 2,
 					lasty,
@@ -78,13 +77,12 @@ public:
 					room_pos_x + room_width / 2,
 					lasty
 				);
-				/*map.dig(1,10,117,10);*/
+				/*map.dig(1,10,117,10);*/ // test dig
 			}
-			//set variables
-			lastx = room_pos_x + room_width / 2;
-			lasty = room_pos_y + room_height / 2;
+
+			lastx = room_pos_x + room_width / 2; // set lastx to center of room
+			lasty = room_pos_y + room_height / 2; // set lasty to center of room
 			
-			//iterate to next room
 			roomNum++;
 		}
 		return true;
@@ -105,6 +103,9 @@ void Map::load(TCODZip& zip)
 void Map::save(TCODZip& zip)
 {
 	zip.putInt(seed);
+
+	if (!tiles) { std::cout << "Map::save: tiles is null" << std::endl; exit(-1); }
+
 	for (int i = 0; i < map_width * map_height; i++) 
 	{
 		const gsl::span<Tile> tiles_span(tiles, map_width * map_height);
@@ -112,14 +113,12 @@ void Map::save(TCODZip& zip)
 	}
 }
 
-void Map::bsp(int map_width, int map_height, TCODRandom* rng, bool withActors)
+void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
 {
-	gsl::owner<TCODBsp*> myBSP = new TCODBsp(0, 0, map_width, map_height);
-	myBSP->splitRecursive(rng, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
-	gsl::owner<BspListener*> mylistener = new BspListener(*this);
-	myBSP->traverseInvertedLevelOrder(mylistener, (void*)withActors);
-	delete myBSP;
-	delete mylistener;
+	TCODBsp myBSP = TCODBsp(0, 0, map_width, map_height);
+	myBSP.splitRecursive(&rng_unique, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
+	BspListener mylistener = BspListener(*this);
+	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
 }
 
 //====
@@ -129,7 +128,6 @@ Map::Map(int map_height, int map_width)
 	map_height(map_height),
 	map_width(map_width),
 	tcodMap(nullptr),
-	rng(nullptr),
 	tiles(nullptr)
 {
 	// a random seed for the map
@@ -140,7 +138,6 @@ Map::~Map()
 {
 	if (tiles) delete[] tiles; // new called in init
 	if (tcodMap) delete tcodMap; // new called in init
-	if (rng) delete rng; // new called in init
 }
 
 //====
@@ -148,10 +145,10 @@ Map::~Map()
 // for enabling loading the map from the file.
 void Map::init(bool withActors)
 {
-	rng = new TCODRandom(seed, TCOD_RNG_CMWC);
+	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
 	tcodMap = new TCODMap(map_width, map_height); // allocate the map
-	bsp(map_width, map_height, rng, withActors);
+	bsp(map_width, map_height, *rng_unique, withActors);
 }
 
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
@@ -472,7 +469,7 @@ void Map::add_monster(int mon_x, int mon_y)
 
 	if (placeDragon)
 	{
-		auto dragon = create_dragon(mon_y, mon_x);
+		auto dragon = std::make_shared<Dragon>(mon_y, mon_x);
 		dragon->index = 0;
 		game.actors.push_back(dragon);
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
@@ -481,16 +478,16 @@ void Map::add_monster(int mon_x, int mon_y)
 	{
 		const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
 		for (auto i{ 0 }; i < roll4d6; i++) { // create goblins
-			auto goblin = create_goblin(mon_y, mon_x);
+			auto goblin = create_monster<Goblin>(mon_y, mon_x);
 			goblin->index = i;
 			game.actors.push_back(goblin);
 		}
 
-		if (game.player->playerLevel > 3)
+		if (true/*game.player->playerLevel > 3*/)
 		{
 			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
 			for (auto i{ 0 }; i < roll2d6; i++) { // create orcs
-				auto orc = create_orc(mon_y, mon_x);
+				auto orc = create_monster<Orc>(mon_y, mon_x);
 				orc->index = i;
 				game.actors.push_back(orc);
 			}
@@ -500,7 +497,7 @@ void Map::add_monster(int mon_x, int mon_y)
 		{
 			const auto roll1d6 = d.d6();
 			for (auto i{ 0 }; i < roll1d6; i++) { // create trolls
-				auto troll = create_troll(mon_y, mon_x);
+				auto troll = create_monster<Troll>(mon_y, mon_x);
 				troll->index = i;
 				game.actors.push_back(troll);
 			}
@@ -528,30 +525,6 @@ int Map::random_number(int min, int max)
 	std::uniform_int_distribution<int> range(min, max);
 
 	return range(randomEngine);
-}
-
-std::shared_ptr<Goblin> Map::create_goblin(int mon_y, int mon_x)
-{
-	auto goblin = std::make_shared<Goblin>(mon_y, mon_x);
-	return goblin;
-}
-
-std::shared_ptr<Orc> Map::create_orc(int mon_y, int mon_x)
-{
-	auto orc = std::make_shared<Orc>(mon_y, mon_x);
-	return orc;
-}
-
-std::shared_ptr<Troll> Map::create_troll(int mon_y, int mon_x)
-{
-	auto troll = std::make_shared<Troll>(mon_y, mon_x);
-	return troll;
-}
-
-std::shared_ptr<Dragon> Map::create_dragon(int mon_y, int mon_x)
-{
-	auto dragon = std::make_shared<Dragon>(mon_y, mon_x);
-	return dragon;
 }
 
 // end of file: Map.cpp

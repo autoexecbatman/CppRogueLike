@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Menu.h"
 #include "MenuClass.h"
+#include "MenuRace.h"
 #include "Player.h"
 
 void MenuGender::menu_gender_store(MenuGenderOptions option)
@@ -13,8 +14,7 @@ void MenuGender::menu_gender_store(MenuGenderOptions option)
 
 void MenuGender::menu_gender_assign()
 {
-	/*game.player->gender = gender;*/
-	/*Player::gender = gender;*/
+	game.player->gender = gender;
 }
 
 void MenuGender::menu_gender_assign_random()
@@ -138,7 +138,7 @@ void MenuGender::menu_gender_select()
 void MenuGender::menu_gender()
 {
 	menu_gender_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
-	MenuClass menuClass;
+	MenuRace menuRace;
 
 	run = true;
 	while (run)
@@ -195,7 +195,7 @@ void MenuGender::menu_gender()
 		{
 			menu_gender_set_run_false();
 			menu_gender_select();
-			menuClass.menu_class();
+			menuRace.menu_race();
 			break;
 		} // !end case 10
 

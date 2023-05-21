@@ -18,7 +18,7 @@ constexpr int FOV_RADIUS = 10;
 
 constexpr auto ROOM_MAX_SIZE = 12;
 constexpr auto ROOM_MIN_SIZE = 6;
-constexpr auto MAX_ROOM_MONSTERS = 3;
+constexpr auto MAX_ROOM_MONSTERS = 1; // TODO: check if this is used at all 
 constexpr int MAX_ROOM_ITEMS = 4;
 
 //==Tile==
@@ -49,28 +49,27 @@ class Map : public Persistent
 private:
 	int playerPosX{ 0 };
 	int playerPosY{ 0 };
-
-	std::shared_ptr<Goblin> create_goblin(int mon_y, int mon_x);
-	std::shared_ptr<Orc> create_orc(int mon_y, int mon_x);
-	std::shared_ptr<Troll> create_troll(int mon_y, int mon_x);
-	std::shared_ptr<Dragon> create_dragon(int mon_y, int mon_x);
 public:
+	int map_height, map_width;
+
+	Map(int map_height, int map_width);
+	~Map();
+
+	template <typename MonsterType>
+	std::shared_ptr<MonsterType> create_monster(int mon_y, int mon_x)
+	{
+		auto monster = std::make_shared<MonsterType>(mon_y, mon_x);
+		return monster;
+	}
 	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
 	int get_player_pos_x() const noexcept { return playerPosX; }
 	int get_player_pos_y() const noexcept { return playerPosY; }
 
-	//this is the map dimensions
-	int map_height, map_width;
-
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
-	//this is the map array
-	void bsp(int map_width, int map_height, TCODRandom* rng, bool withActors);
+	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
 
-	Map(int map_height, int map_width);
-	~Map();
-	
 	void init(bool withActors);
 	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
 	bool is_in_fov(int fov_x, int fov_y) const;
@@ -91,14 +90,12 @@ public:
 protected:
 	gsl::owner<Tile*> tiles;
 	TCODMap* tcodMap;
-	TCODRandom* rng;
+	std::unique_ptr<TCODRandom> rng_unique;
 	long seed;
 
 	friend class BspListener;
-	//make a dig function for the map
 	void dig(int x1, int y1, int x2, int y2);
 	void set_tile(int x, int y, TileType newType) noexcept;
-	//a function for the room generation
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };
 

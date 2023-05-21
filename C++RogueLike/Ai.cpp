@@ -4,7 +4,6 @@
 #include <gsl/util>
 #include <gsl/pointers>
 
-#include "main.h"
 #include "Menu.h"
 #include "Colors.h"
 #include "AiMonster.h"
@@ -19,36 +18,14 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 
 	switch (type)
 	{
-
-	case AiType::PLAYER:
-	{
-		ai = std::make_shared<AiPlayer>();
-		break;
+	case AiType::PLAYER: {ai = std::make_shared<AiPlayer>(); break; }
+	case AiType::MONSTER: {ai = std::make_shared<AiMonster>(); break; }
+	case AiType::CONFUSED_MONSTER: {ai = std::make_shared<AiMonsterConfused>(0, nullptr); break; }
+	default: {std::cout << "Error: Ai::create() - unknown AiType" << std::endl; exit(-1); }
 	}
 
-	case AiType::MONSTER:
-	{
-		ai = std::make_shared<AiMonster>();
-		break;
-	}
-
-	case AiType::CONFUSED_MONSTER:
-	{
-		ai = std::make_shared<AiMonsterConfused>(0, nullptr);
-		break;
-	}
-
-	}
-
-	if (ai != nullptr)
-	{
-		ai->load(zip);
-	}
-	else
-	{
-		std::cout << "Error: Ai::create() - ai is null" << std::endl;
-		exit(-1);
-	}
+	if (ai) { ai->load(zip); }
+	else { std::cout << "Error: Ai::create() - ai is null" << std::endl; exit(-1); }
 
 	return ai; // TODO: don't return nullptr
 }

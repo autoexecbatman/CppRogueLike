@@ -80,6 +80,9 @@ int main()
 	printw("Console size: %d x %d", COLS, LINES); // print the console size
 	refresh(); // refresh the screen
 
+	//==PLAYER==
+	game.create_player(); // the player is initialized here because it needs to get data from menu selections
+
 	//==INIT_MENU==
 	Menu menu;
 	menu.menu();

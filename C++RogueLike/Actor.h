@@ -19,10 +19,18 @@
 class Actor : public Persistent
 {
 public:
-	int strength{ 18 };
+	int strength{ 0 };
+	int dexterity{ 0 };
+	int constitution{ 0 };
+	int intelligence{ 0 };
+	int wisdom{ 0 };
+	int charisma{ 0 };
+
 	int playerLevel{ 0 };
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
+	std::string playerRace{ "None" };
+
 	int posY{ 0 }, posX{ 0 }; // position on map
 	char ch{ -47 }; // the symbol to print
 	int col{ 0 }; // color for the actor
@@ -60,7 +68,9 @@ public:
 
 	void render() const noexcept; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
-	int getStrength() const noexcept { return strength; } // get the strength of the actor
+	int get_strength() const noexcept { return strength; } // get the strength of the actor
+	int get_posY() const noexcept { return posY; } // get the y position of the actor
+	int get_posX() const noexcept { return posX; } // get the x position of the actor
 };
 
 #endif // !ACTOR_H

@@ -14,8 +14,7 @@ class Actor;
 class Attacker : public Persistent
 {
 public:
-
-	int dmg = 0;
+	int dmg{ 0 };
 	
 	Attacker(int dmg) noexcept;
 

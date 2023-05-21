@@ -20,9 +20,9 @@ Destructible::~Destructible() {}
 
 int Destructible::take_damage(Actor& owner, int damage)
 {
-	int str = owner.strength - 1;
+	int str = owner.strength - 1; // -1 to access vector index from 0
 	std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
-	if (str >= 0 && str < attrs.size()) {
+	if (str >= 0 && str < static_cast<int>(attrs.size())) {
 		StrengthAttributes strength = attrs[str];
 		damage = damage - Destructible::dr + strength.dmgAdj; // include dmgAdj
 	}

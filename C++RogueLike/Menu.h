@@ -1,6 +1,7 @@
 // file: Menu.h
 #ifndef MENU_H
 #define MENU_H
+#include <iostream>
 #include <curses.h>
 #include <string>
 
@@ -22,8 +23,12 @@ private:
 	int keyPress{ 0 };
 
 	WINDOW* menuWindow{ nullptr };
+	int height_{ 10 };
+	int width_{ 20 };
+	int starty_{ (LINES / 2) - 5 };
+	int startx_{ (COLS / 2) - 10 };
 
-	void menu_new(int height, int width, int starty, int startx) noexcept { menuWindow = newwin(height, width, starty, startx); }
+	void menu_new(int height, int width, int starty, int startx) noexcept;
 	void menu_clear() noexcept { wclear(menuWindow); }
 	void menu_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuWindow, y, x, text.c_str()); }
 	void menu_refresh() noexcept { wrefresh(menuWindow); }

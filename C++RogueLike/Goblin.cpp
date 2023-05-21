@@ -7,8 +7,7 @@
 #include "RandomDice.h"
 
 //==GOBLIN==
-Goblin::Goblin(int y, int x) :
-	Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
+Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 {
 	RandomDice d;
 	const int damage = d.d6();
@@ -17,6 +16,8 @@ Goblin::Goblin(int y, int x) :
 	blocks = true;
 	fovOnly = true;
 
+	strength = d.d6() + d.d6() + d.d6();
+
 	attacker = std::make_shared<Attacker>(damage);
 	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15);
 	ai = std::make_shared<AiMonster>();
@@ -24,8 +25,7 @@ Goblin::Goblin(int y, int x) :
 //====
 
 //==ORC==
-Orc::Orc(int y, int x) :
-	Actor(y, x, 'o', "orc", ORC_PAIR, 0)
+Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
 {
 	blocks = true;
 	fovOnly = true;

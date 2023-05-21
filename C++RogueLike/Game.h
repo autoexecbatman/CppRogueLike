@@ -2,6 +2,8 @@
 #ifndef GAME_H
 #define GAME_H
 
+#pragma once
+
 #include <memory> // std::shared_ptr, std::make_shared
 
 #include "Actor.h"
@@ -15,6 +17,7 @@ class Game
 {
 public:
 	bool run{ true };
+	bool shouldSave{ true };
 	enum class GameStatus : int
 	{
 		STARTUP,
@@ -71,6 +74,7 @@ public:
 	void display_character_sheet() noexcept;
 	int random_number(int min, int max);
 	void wizard_eye() noexcept;
+	void err(std::string e) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); }
 
 private:
 	// Private member variables.
