@@ -17,6 +17,10 @@
 #include "Attacker.h"
 #include "Ai.h"
 #include "Pickable.h"
+#include "Healer.h"
+#include "LightningBolt.h"
+#include "Fireball.h"
+#include "Confuser.h"
 #include "Container.h"
 #include "Actor.h"
 #include "Colors.h"
@@ -193,7 +197,6 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 	return false;
 }
 
-
 bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
 {
 	const int index = isWater_pos_y * map_width + isWater_pos_x;
@@ -279,7 +282,6 @@ void Map::add_item(int x, int y)
 		game.send_to_back(*confusionScroll);
 	}
 }
-
 
 void Map::dig(int x1, int y1, int x2, int y2)
 {
