@@ -173,7 +173,6 @@ void MenuClass::menu_class()
 			run = false;
 			menu_class_select();
 			menuName.menu_name();
-			/*game.player->name = menuName.promptName();*/
 			break;
 		}
 		case 27: // escape

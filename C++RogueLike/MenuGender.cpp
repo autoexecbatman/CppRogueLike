@@ -137,7 +137,9 @@ void MenuGender::menu_gender_select()
 
 void MenuGender::menu_gender()
 {
-	menu_gender_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
+	/*menu_gender_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);*/
+	menu_gender_new(height_,width_,starty_,startx_);
+
 	MenuRace menuRace;
 
 	run = true;
@@ -155,7 +157,6 @@ void MenuGender::menu_gender()
 
 		menu_gender_refresh();
 
-		/*const int input = getch();*/
 		key_listen();
 		switch (keyPress)
 		{

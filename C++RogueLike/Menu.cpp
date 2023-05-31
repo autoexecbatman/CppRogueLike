@@ -23,7 +23,7 @@ void Menu::menu_print_option(MenuOptions option, int row) noexcept
 	}
 }
 
-void Menu::menu_new(int height, int width, int starty, int startx) noexcept {
+void Menu::menu_new(int height, int width, int starty, int startx) {
 	// check bound before creating window
 	if (height > LINES || width > COLS) {
 		std::clog << "Menu window size is too big" << std::endl;
@@ -82,7 +82,7 @@ std::string Menu::menu_get_string(MenuOptions option) noexcept
 
 void Menu::menu()
 {
-	menu_new(height_, width_, starty_, startx_);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 
 	MenuGender menuGender;
 

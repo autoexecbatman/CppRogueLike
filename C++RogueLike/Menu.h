@@ -23,12 +23,12 @@ private:
 	int keyPress{ 0 };
 
 	WINDOW* menuWindow{ nullptr };
-	int height_{ 10 };
-	int width_{ 20 };
-	int starty_{ (LINES / 2) - 5 };
-	int startx_{ (COLS / 2) - 10 };
+	int menu_height{ 10 };
+	const int menu_width{ 12 };
+	int menu_starty{ (LINES / 2) - 5 };
+	int menu_startx{ (COLS / 2) - 10 };
 
-	void menu_new(int height, int width, int starty, int startx) noexcept;
+	void menu_new(int height, int width, int starty, int startx);
 	void menu_clear() noexcept { wclear(menuWindow); }
 	void menu_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuWindow, y, x, text.c_str()); }
 	void menu_refresh() noexcept { wrefresh(menuWindow); }
@@ -49,6 +49,7 @@ private:
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 public:
+	Menu() : menuWindow(nullptr),menu_height(10), menu_width(12), menu_starty((LINES / 2) - 5), menu_startx((COLS / 2) - 10) {}
 	void menu();
 };
 

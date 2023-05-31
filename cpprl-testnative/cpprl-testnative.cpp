@@ -73,7 +73,7 @@ namespace CPPRogueLike
 
 	TEST_CLASS(MenuTest)
 	{
-		TEST_METHOD(menu)
+		TEST_METHOD(menu_new)
 		{
 
 		}

@@ -7,6 +7,8 @@
 
 #include <curses.h>
 
+#include "Menu.h"
+
 class MenuGender
 {
 private:
@@ -26,6 +28,10 @@ private:
 	int keyPress{ 0 };
 
 	WINDOW* menuGenderWindow{ nullptr };
+	int height_{ 10 };
+	int width_{ 20 };
+	int starty_{ (LINES / 2) - 5 };
+	int startx_{ (COLS / 2) - 10 };
 
 	void menu_gender_new(int height, int width, int starty, int startx) noexcept { menuGenderWindow = newwin(height, width, starty, startx); }
 	void menu_gender_clear() noexcept { wclear(menuGenderWindow); }
