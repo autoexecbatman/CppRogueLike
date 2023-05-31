@@ -127,28 +127,29 @@ void MonsterDestructible::save(TCODZip& zip)
 
 std::shared_ptr<Destructible> Destructible::create(TCODZip& zip)
 {
-	DestructibleType type = (DestructibleType)zip.getInt();
-	/*Destructible* destructible = nullptr;*/
-	std::shared_ptr<Destructible> destructible = nullptr;
+	DestructibleType type{ (DestructibleType)zip.getInt() };
+	std::shared_ptr<Destructible> destructible{};
 
-	switch (type) 
+	switch (type)
 	{
 	case DestructibleType::MONSTER:
-		/*destructible = new MonsterDestructible(0, 0, NULL, 0);*/
-		// make unique
-		destructible = std::make_shared<MonsterDestructible>(0, 0, "NULL", 0);
+	{
+		destructible = std::make_shared<MonsterDestructible>(0, 0, "", 0);
 		break;
+	}
+
 	case DestructibleType::PLAYER:
-		/*destructible = new PlayerDestructible(0, 0, NULL, 0);*/
-		destructible = std::make_shared<PlayerDestructible>(0, 0, "NULL", 0);
+	{
+		destructible = std::make_shared<PlayerDestructible>(0, 0, "", 0);
+		break;
+	}
+	default:
 		break;
 	}
 	
-	destructible->load(zip);
+	if (destructible) { destructible->load(zip); }
 	
 	return destructible;
-
-	/*return nullptr;*/
 }
 
 //==PlayerDestructible==
