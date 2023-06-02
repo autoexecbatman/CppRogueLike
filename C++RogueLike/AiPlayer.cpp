@@ -349,14 +349,22 @@ void AiPlayer::displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept
 {
 	int shortcut = 'a';
 	int y = 1;
-	for (const auto& actor : owner.container->inventoryList)
+	try
 	{
-		if (actor != nullptr)
+		for (const auto& actor : owner.container->inventoryList)
 		{
-			mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
+			if (actor != nullptr)
+			{
+				mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
+			}
+			y++;
+			shortcut++;
 		}
-		y++;
-		shortcut++;
+	}
+	catch (const std::exception& e)
+	{
+		std::cout << "Error: PlayerAi::displayInventoryItems(WINDOW* inv, const Actor& owner). " << e.what() << std::endl;
+		exit(-1);
 	}
 }
 
@@ -369,14 +377,22 @@ void AiPlayer::display_inventory(Actor& owner)
 	box(inv, 0, 0);
 	mvwprintw(inv, 0, 0, "Inventory");
 
-	if (owner.container->inventoryList.size() > 0)
+	try
 	{
-		displayInventoryItems(inv, owner);
+		if (owner.container->inventoryList.size() > 0)
+		{
+			displayInventoryItems(inv, owner);
+		}
+		else
+		{
+			const int y = 1;
+			mvwprintw(inv, y, 1, "Your inventory is empty.");
+		}
 	}
-	else
+	catch (const std::exception& e)
 	{
-		const int y = 1;
-		mvwprintw(inv, y, 1, "Your inventory is empty.");
+		std::cout << "Error: PlayerAi::display_inventory(Actor& owner). " << e.what() << std::endl;
+		exit(-1);
 	}
 
 	wrefresh(inv);
@@ -410,63 +426,10 @@ std::shared_ptr<Actor> AiPlayer::choseFromInventory(Actor& owner, int ascii)
 	std::clog << "You chose from inventory" << std::endl;
 	if (owner.container != nullptr)
 	{
-		if (ascii == 'a')
+		int index = ascii - 'a';
+		if (index >= 0 && index < owner.container->inventoryList.size())
 		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				// gsl::at() will throw an exception if the index is out of bounds
-				return gsl::at(owner.container->inventoryList, 0);
-			}
-		}
-		if (ascii == 'b')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 1);
-			}
-		}
-		if (ascii == 'c')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 2);
-			}
-		}
-		if (ascii == 'd')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 3);
-			}
-		}
-		if (ascii == 'e')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 4);
-			}
-		}
-		if (ascii == 'f')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 5);
-			}
-		}
-		if (ascii == 'g')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 6);
-			}
-		}
-		// if case is 'h'
-		if (ascii == 'h')
-		{
-			if (owner.container->inventoryList.size() > 0)
-			{
-				return gsl::at(owner.container->inventoryList, 7);
-			}
+			return gsl::at(owner.container->inventoryList, index);
 		}
 	}
 	else
