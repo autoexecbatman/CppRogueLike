@@ -107,7 +107,13 @@ void Game::update()
 // draws the entities on the map
 void Game::render()
 {
-	map->render();
+	try { map->render(); }
+	catch (const std::exception& e)
+	{
+		std::clog << e.what() << std::endl;
+		std::cout << e.what() << std::endl;
+		exit(-1);
+	}
 
 	std::clog << "Actors are trying to be drawn..." << std::endl;
 
@@ -132,12 +138,6 @@ void Game::render()
 	player->render();
 	std::clog << "Player is drawn" << std::endl;
 
-	std::clog << "GUI is trying render..." << std::endl;
-	//gui->render();
-	std::clog << "GUI is drawn" << std::endl;
-
-	std::clog << "GUI Refreshed" << std::endl;
-	std::clog << "GUI Rendered" << std::endl;
 	std::clog << "RENDER FUNCTION OUT" << std::endl;
 }
 
