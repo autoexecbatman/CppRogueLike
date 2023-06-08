@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <math.h>
 #include <memory>
+#include <gsl/gsl>
 
 #include <curses.h>
 #pragma warning (push, 0)
@@ -47,6 +48,7 @@ Actor::~Actor() {}
 //====
 void Actor::load(TCODZip& zip)
 {
+	// this block assigns the values from the zip file to the actor
 	posX = zip.getInt();
 	posY = zip.getInt();
 	ch = zip.getInt();
@@ -54,34 +56,20 @@ void Actor::load(TCODZip& zip)
 	name = _strdup(zip.getString());
 	blocks = zip.getInt();
 
-	const bool hasAttacker = zip.getInt();
-	const bool hasDestructible = zip.getInt();
-	const bool hasAi = zip.getInt();
-	const bool hasPickable = zip.getInt();
-	const bool hasContainer = zip.getInt();
+	// this block assigns checks if the actor has a component
+	const bool hasAttacker{ gsl::narrow_cast<bool>(zip.getInt()) };
+	const bool hasDestructible{ gsl::narrow_cast<bool>(zip.getInt()) };
+	const bool hasAi{ gsl::narrow_cast<bool>(zip.getInt()) };
+	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
+	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
 
-	if (hasAttacker) 
-	{
-		attacker = std::make_shared<Attacker>(0);
-		attacker->load(zip);
-	}
-	if (hasDestructible) 
-	{
-		destructible = Destructible::create(zip);
-	}
-	if (hasAi) 
-	{
-		ai = Ai::create(zip);
-	}
-	if (hasPickable) 
-	{
-		pickable = Pickable::create(zip);
-	}
-	if (hasContainer) 
-	{
-		container = std::make_shared<Container>(0);
-		container->load(zip);
-	}
+	// this block assigns the values from the zip file to the actor's components if they exist. 
+	// Is this a double assignment? No, because the components are not assigned in the constructor.
+	if (hasAttacker) { attacker = std::make_shared<Attacker>(0); attacker->load(zip); }
+	if (hasDestructible) { destructible = Destructible::create(zip); }
+	if (hasAi) { ai = Ai::create(zip); }
+	if (hasPickable) { pickable = Pickable::create(zip); }
+	if (hasContainer) { container = std::make_shared<Container>(0); container->load(zip); }
 }
 
 void Actor::save(TCODZip& zip)
