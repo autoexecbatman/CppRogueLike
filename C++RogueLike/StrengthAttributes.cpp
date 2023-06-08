@@ -4,6 +4,7 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
+#include "Game.h"
 #include "StrengthAttributes.h"
 
 using json = nlohmann::json;
@@ -20,11 +21,31 @@ void from_json(const json& j, StrengthAttributes& p) {
 
 std::vector<StrengthAttributes> loadStrengthAttributes() {
 	std::ifstream i("strength.json");
-	json j;
-	i >> j;
 
-	std::vector<StrengthAttributes> strengthChart = j.get<std::vector<StrengthAttributes>>();
-	return strengthChart;
+	if (!i.is_open()) {
+		game.log("Error: Unable to open strength.json. Error " + std::to_string(errno));
+		throw std::runtime_error("Error: Unable to open strength.json. Error " + std::to_string(errno));
+	}
+
+	json j;
+	try {
+		i >> j;
+	}
+	catch (const json::parse_error& e) {
+		std::ostringstream oss;
+		oss << "Error: Unable to parse strength.json. Exception details: " << e.what();
+		throw std::runtime_error(oss.str());
+	}
+
+	try {
+		std::vector<StrengthAttributes> strengthChart = j.get<std::vector<StrengthAttributes>>();
+		return strengthChart;
+	}
+	catch (const json::type_error& e) {
+		std::ostringstream oss;
+		oss << "Error: Unable to convert JSON to vector<StrengthAttributes>. Exception details: " << e.what();
+		throw std::runtime_error(oss.str());
+	}
 }
 
 void print_chart()
