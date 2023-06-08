@@ -34,6 +34,7 @@ auto exampleInt = castEnum(Controls::UP);
 
 bool AiPlayer::levelUpUpdate(Actor& owner)
 {
+	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
 	int levelUpXp = getNextLevelXp();
 	if (owner.destructible != nullptr)
@@ -56,12 +57,20 @@ bool AiPlayer::levelUpUpdate(Actor& owner)
 	{
 		return true;
 	}
+
 	return false;
 }
 
 void AiPlayer::update(Actor& owner)
 {
-	std::clog << "PlayerAi::update(Actor& owner)" << std::endl;
+	// if owner is not the player, return
+	if (&owner != game.player.get())
+	{
+		game.log("AiPlayer::update(Actor& owner) owner.ai != game.player");
+		return;
+	}
+
+	game.log("AiPlayer::update(Actor& owner)");
 	levelUpUpdate(owner);
 
 	int dx{0}, dy{0}; // movement delta
@@ -245,6 +254,7 @@ void AiPlayer::update(Actor& owner)
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		if (moveOrAttack(owner, owner.posX + dx, owner.posY + dy))
 		{
+			game.log("AiPlayer::update(Actor& owner) moveOrAttack(owner, owner.posX + dx, owner.posY + dy)");
 			game.map->compute_fov();
 		}
 	}
@@ -470,6 +480,7 @@ bool is_not_dead(const Actor& actor)
 
 bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 {
+	game.log("Player tries to move or attack");
 	if (game.map != nullptr)
 	{
 		if (game.map->is_wall(targety, targetx))
