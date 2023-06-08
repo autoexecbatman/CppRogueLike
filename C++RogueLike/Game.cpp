@@ -846,8 +846,8 @@ void Game::dispay_levelup(int xpLevel)
 	WINDOW* stats = newwin(
 		11, // height
 		30, // width
-		0, // y
-		0 // x
+		1, // y
+		1 // x
 	);
 	
 	box(stats, 0, 0);
