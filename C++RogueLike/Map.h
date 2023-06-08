@@ -50,7 +50,7 @@ private:
 	int playerPosX{ 0 };
 	int playerPosY{ 0 };
 public:
-	int map_height, map_width;
+	int map_height{}, map_width{};
 
 	Map(int map_height, int map_width);
 	~Map();
@@ -88,10 +88,10 @@ public:
 	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
 
 protected:
-	gsl::owner<Tile*> tiles;
-	TCODMap* tcodMap;
-	std::unique_ptr<TCODRandom> rng_unique;
-	long seed;
+	gsl::owner<Tile*> tiles{};
+	TCODMap* tcodMap{};
+	std::unique_ptr<TCODRandom> rng_unique{};
+	long seed{};
 
 	friend class BspListener;
 	void dig(int x1, int y1, int x2, int y2);

@@ -13,8 +13,8 @@
 //==AI==
 std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 {
-	const AiType type = gsl::narrow_cast<AiType>(zip.getInt());
-	std::shared_ptr<Ai> ai = nullptr;
+	const AiType type{ gsl::narrow_cast<AiType>(zip.getInt()) };
+	std::shared_ptr<Ai> ai{};
 
 	switch (type)
 	{
