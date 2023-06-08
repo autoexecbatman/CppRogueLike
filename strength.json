@@ -1,0 +1,182 @@
+[
+	{
+		"Str": 1,
+		"Hit": -5,
+		"Dmg": -4,
+		"Wgt": 1,
+		"MaxPress": 3,
+		"OpenDoors": 1,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 2,
+		"Hit": -3,
+		"Dmg": -2,
+		"Wgt": 1,
+		"MaxPress": 5,
+		"OpenDoors": 1,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 3,
+		"Hit": -3,
+		"Dmg": -1,
+		"Wgt": 5,
+		"MaxPress": 10,
+		"OpenDoors": 2,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 4,
+		"Hit": -2,
+		"Dmg": -1,
+		"Wgt": 10,
+		"MaxPress": 25,
+		"OpenDoors": 3,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 5,
+		"Hit": -2,
+		"Dmg": -1,
+		"Wgt": 10,
+		"MaxPress": 25,
+		"OpenDoors": 3,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 6,
+		"Hit": -1,
+		"Dmg": 0,
+		"Wgt": 20,
+		"MaxPress": 55,
+		"OpenDoors": 4,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 7,
+		"Hit": -1,
+		"Dmg": 0,
+		"Wgt": 20,
+		"MaxPress": 55,
+		"OpenDoors": 4,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 8,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 35,
+		"MaxPress": 90,
+		"OpenDoors": 5,
+		"BB_LG": 1,
+		"Notes": ""
+	},
+	{
+		"Str": 9,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 35,
+		"MaxPress": 90,
+		"OpenDoors": 5,
+		"BB_LG": 1,
+		"Notes": ""
+	},
+	{
+		"Str": 10,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 40,
+		"MaxPress": 115,
+		"OpenDoors": 6,
+		"BB_LG": 2,
+		"Notes": ""
+	},
+	{
+		"Str": 11,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 40,
+		"MaxPress": 115,
+		"OpenDoors": 6,
+		"BB_LG": 2,
+		"Notes": ""
+	},
+	{
+		"Str": 12,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 45,
+		"MaxPress": 140,
+		"OpenDoors": 7,
+		"BB_LG": 4,
+		"Notes": ""
+	},
+	{
+		"Str": 13,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 45,
+		"MaxPress": 140,
+		"OpenDoors": 7,
+		"BB_LG": 4,
+		"Notes": ""
+	},
+	{
+		"Str": 14,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 55,
+		"MaxPress": 170,
+		"OpenDoors": 8,
+		"BB_LG": 7,
+		"Notes": ""
+	},
+	{
+		"Str": 15,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 55,
+		"MaxPress": 170,
+		"OpenDoors": 8,
+		"BB_LG": 7,
+		"Notes": ""
+	},
+	{
+		"Str": 16,
+		"Hit": 0,
+		"Dmg": 1,
+		"Wgt": 70,
+		"MaxPress": 195,
+		"OpenDoors": 9,
+		"BB_LG": 10,
+		"Notes": ""
+	},
+	{
+		"Str": 17,
+		"Hit": 1,
+		"Dmg": 1,
+		"Wgt": 85,
+		"MaxPress": 220,
+		"OpenDoors": 10,
+		"BB_LG": 13,
+		"Notes": ""
+	},
+	{
+		"Str": 18,
+		"Hit": 1,
+		"Dmg": 2,
+		"Wgt": 110,
+		"MaxPress": 255,
+		"OpenDoors": 11,
+		"BB_LG": 16,
+		"Notes": ""
+	}
+]
