@@ -739,119 +739,62 @@ void Game::load_all()
 
 void Game::save_all()
 {
-	// don't save if quit from the menu without playing
-	if (!shouldSave)
+	try
 	{
-		std::cout << "You quit without saving." << std::endl;
-		return;
-	}
+		if (!shouldSave) { game.log("You quit without saving."); return; } // don't save if quit from the menu without playing
 
-	std::clog << "Saving the game..." << std::endl;
-	if (player != nullptr)
-	{
-		if (player->destructible != nullptr)
+		if (!player->destructible)
 		{
-
-			// handle the permadeath
-			// delete the save file if the player is dead
-			if (player->destructible->is_dead())
-			{
-				// if file exists delete it
-				if (TCODSystem::fileExists("game.sav"))
-				{
-					TCODSystem::deleteFile("game.sav");
-				}
-
-
-				/*TCODSystem::deleteFile("game.sav");*/
-			}
-			// else save the map
-			else
-			{
-				if (map != nullptr)
-				{
-					std::clog << "saving..." << std::endl;
-
-					TCODZip zip;
-
-					// save the map first
-					zip.putInt(map->map_width);
-					zip.putInt(map->map_height);
-					map->save(zip);
-
-					if (player != nullptr)
-					{
-						player->save(zip); // save the player
-					}
-					else
-					{
-						std::clog << "player is null in Game::save()" << std::endl;
-					}
-
-					if (stairs != nullptr)
-					{
-						stairs->save(zip); // save the stairs
-					}
-					else
-					{
-						std::clog << "player is null in Game::save()" << std::endl;
-					}
-
-					if(!actors.empty())
-					{
-						// then all the other actors
-						int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
-						int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
-						zip.putInt(nbActorsToSave);
-					}
-					else 
-					{
-						std::clog << "actors is empty in Game::save()" << std::endl;
-					}
-
-					for (const auto& actor : actors)
-					{
-						if (actor != nullptr)
-						{
-							if (actor != player && actor != stairs)
-							{
-								actor->save(zip);
-							}
-						}
-						else
-						{
-							std::clog << "actor is null in Game::save()" << std::endl;
-						}
-					}
-
-					if (gui != nullptr)
-					{
-						// save the message log
-						gui->save(zip);
-					}
-					else
-					{
-						std::clog << "gui is null in Game::save()" << std::endl;
-					}
-
-					zip.saveToFile("game.sav");
-				}
-				else
-				{
-					std::clog << "map is null in Game::save()" << std::endl;
-				}
-			}
+			throw std::runtime_error("player->destructible is null. Saving aborted.");
 		}
-		else
+
+		if (player->destructible->is_dead() && TCODSystem::fileExists("game.sav"))
 		{
-			std::clog << "player->destructible is null in Game::save()" << std::endl;
+			// handle the permadeath
+			// delete the save file if the player is dead or the save file is corrupted
+			TCODSystem::deleteFile("game.sav");
 			return;
 		}
+		else // else save the game
+		{
+			TCODZip zip; // create a zip object
+
+			zip.putInt(map->map_width);
+			zip.putInt(map->map_height);
+			if (map) try { map->save(zip); }
+			catch (const std::exception& e) { game.log(e.what()); }
+
+			if (player) try { player->save(zip); }
+			catch (const std::exception& e) { game.log(e.what()); }
+			if (stairs) try { stairs->save(zip); }
+			catch (const std::exception& e) { game.log(e.what()); }
+
+			if (!actors.empty())
+			{
+				int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
+				int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
+				zip.putInt(nbActorsToSave);
+
+				for (const auto& actor : actors)
+				{
+					if (actor != nullptr && actor != player && actor != stairs)
+					{
+						actor->save(zip);
+					}
+				}
+			}
+
+			if (gui) try { gui->save(zip); }
+			catch (const std::exception& e) { game.log(e.what()); }
+
+			zip.saveToFile("game.sav");
+			game.log("Game saved successfully.");
+		}
 	}
-	else
+	catch (const std::exception& e)
 	{
-		std::clog << "player is null in Game::save()" << std::endl;
-		return;
+		game.log("Error occurred while saving: " + std::string(e.what()));
+		throw;
 	}
 }
 
@@ -1048,6 +991,15 @@ void Game::wizard_eye() noexcept
 	{
 		// print the actor's name
 		mvprintw(actor->posY, actor->posX, actor->name.c_str());
+	}
+}
+
+void Game::log(const std::string& message)
+{
+	if (debugMode)
+	{
+		std::clog << message << std::endl;
+		std::cout << message << std::endl;
 	}
 }
 

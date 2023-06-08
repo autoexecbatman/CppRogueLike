@@ -16,6 +16,7 @@
 class Game
 {
 public:
+	Game() = default;
 	bool run{ true };
 	bool shouldSave{ true };
 	enum class GameStatus : int
@@ -27,7 +28,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Player> player{ std::make_shared<Player>(0,0,0,0,"",0,0,false) };
+	std::shared_ptr<Player> player{ std::make_shared<Player>(0, 0, 0, 0, "", 0, 0, false) };
 
 	std::shared_ptr<Actor> stairs{ std::make_shared<Actor>(
 		0, // int posX
@@ -75,10 +76,14 @@ public:
 	int random_number(int min, int max);
 	void wizard_eye() noexcept;
 	void err(std::string e) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); }
+	void enableDebugMode() { debugMode = true; }
+	void disableDebugMode() { debugMode = false; }
+	void log(const std::string& message);
 
 private:
 	// Private member variables.
-	bool computeFov = false;
+	bool computeFov{ false };
+	bool debugMode{ true };
 
 	// Private member functions.
 };
