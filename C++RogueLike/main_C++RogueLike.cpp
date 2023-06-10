@@ -11,7 +11,7 @@
 #include <string>
 
 // https://pdcurses.org/docs/MANUAL.html
-#include <curses.h> 
+#include <curses.h>
 
 #include "Colors.h"
 #include "Game.h"
@@ -22,15 +22,25 @@
 
 #include "ChatGPT.h" // for openai::start
 #include "include/user_config.h"
+#include "main_C++RogueLike.h"
 
 Game game;
 
 int main()
 {
-
+	// set environment PDC_TRACE_FLUSH
+//     if (getenv("PDC_TRACE_FLUSH"))
+//			want_fflush = TRUE;
+// Set the PDC_TRACE_FLUSH environment variable
+// This will cause PDC_debug to flush the log file after each write
+#ifdef _WIN32
+_putenv("PDC_TRACE_FLUSH=1");
+#else
+setenv("PDC_TRACE_FLUSH", "1", 1);
+#endif
 	//==DEBUG_MEMORY_LEAKS==
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-	/*_CrtSetBreakAlloc(174);*/
+	/*_CrtSetBreakAlloc(1779);*/
 
 	//==OPENAI_API==
 	openai::start(API_KEY, "");
@@ -39,6 +49,77 @@ int main()
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
 	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
 	
+	//==INIT_CURSES==
+	init_curses();
+	traceon();
+	PDC_debug("Debug stream initialized successfully.\n");
+
+	//==PLAYER==
+	game.create_player(); // the player is initialized here because it needs to get data from menu selections
+
+	//==INIT_MENU==
+	Menu menu;
+	menu.menu();
+	clear(); // finished with the menu, clear the screen
+
+	refresh(); // starting new drawing, refresh the screen
+	//==INIT_GUI==
+	Gui gui;
+	gui.gui_init();
+
+	int countLoop{ 0 };
+	while (game.run == true)
+	{
+		//==DEBUG==
+		std::clog << "//====================LOOP====================//\n";
+		std::string debug{ "Loop number: " + std::to_string(countLoop) + "\n" };
+		std::clog << debug << std::endl;
+
+		//==UPDATE==
+		std::clog << "initializing game update..." << std::endl;
+		game.update(); // update map and actors positions
+		gui.gui_update(); // update the gui
+		std::clog << "initialized successfully." << std::endl;
+
+		//==DRAW==
+		std::clog << "initializing game render..." << std::endl;
+		clear();
+		game.render(); // render map and actors to the screen
+		gui.gui_render(); // render the gui
+		refresh();
+		std::clog << "initialized successfully." << std::endl;
+
+		//==INPUT==
+		game.key_store();
+		game.key_listen();
+
+		countLoop++;
+	}
+	traceoff();
+	
+	game.save_all();
+	gui.gui_shutdown();
+	endwin();
+	if (isendwin())
+	{
+		std::clog << "Curses shutdown successfully.\n";
+		std::cout << "Curses shutdown successfully.\n";
+	}
+	else
+	{
+		std::clog << "Curses shutdown failed.\n";
+		std::cout << "Curses shutdown failed.\n";
+	}
+
+	print_chart();
+
+	debugFile.close();
+	/*_CrtDumpMemoryLeaks();*/
+	return 0;
+}
+
+void init_curses()
+{
 	//==INIT_CURSES==
 	std::clog << "Initializing curses...\n";
 	initscr(); // initialize the screen in curses
@@ -79,68 +160,7 @@ int main()
 	printw("Welcome to C++RogueLike!"); // print a welcome message
 	printw("Console size: %d x %d", COLS, LINES); // print the console size
 	refresh(); // refresh the screen
-
-	//==PLAYER==
-	game.create_player(); // the player is initialized here because it needs to get data from menu selections
-
-	//==INIT_MENU==
-	Menu menu;
-	menu.menu();
-	clear(); // finished with the menu, clear the screen
-
-	refresh(); // starting new drawing, refresh the screen
-	//==INIT_GUI==
-	Gui gui;
-	gui.gui_init();
-
-	int countLoop{ 0 };
-	while (game.run == true)
-	{
-		//==DEBUG==
-		std::clog << "//====================LOOP====================//\n";
-		std::string debug{ "Loop number: " + std::to_string(countLoop) + "\n" };
-		std::clog << debug << std::endl;
-
-		//==UPDATE==
-		std::clog << "initializing game update..." << std::endl;
-		game.update(); // update map and actors positions
-		gui.gui_update(); // update the gui
-		std::clog << "initialized successfully." << std::endl;
-
-		//==DRAW==
-		std::clog << "initializing game render..." << std::endl;
-		/*clear();*/
-		game.render(); // render map and actors to the screen
-		gui.gui_render(); // render the gui
-		std::clog << "initialized successfully." << std::endl;
-
-		//==INPUT==
-		game.key_store();
-		game.key_listen();
-
-		countLoop++;
-	}
-	
-	game.save_all();
-	gui.gui_shutdown();
-	endwin();
-	if (isendwin())
-	{
-		std::clog << "Curses shutdown successfully.\n";
-		std::cout << "Curses shutdown successfully.\n";
-	}
-	else
-	{
-		std::clog << "Curses shutdown failed.\n";
-		std::cout << "Curses shutdown failed.\n";
-	}
-
-	print_chart();
-
-	debugFile.close();
-
-	/*_CrtDumpMemoryLeaks();*/
-	return 0;
+	game.log("refresh called");
 }
 
 // end of file: main_C++RogueLike.cpp
