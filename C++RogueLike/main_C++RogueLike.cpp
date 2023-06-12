@@ -28,16 +28,6 @@ Game game;
 
 int main()
 {
-	// set environment PDC_TRACE_FLUSH
-//     if (getenv("PDC_TRACE_FLUSH"))
-//			want_fflush = TRUE;
-// Set the PDC_TRACE_FLUSH environment variable
-// This will cause PDC_debug to flush the log file after each write
-#ifdef _WIN32
-_putenv("PDC_TRACE_FLUSH=1");
-#else
-setenv("PDC_TRACE_FLUSH", "1", 1);
-#endif
 	//==DEBUG_MEMORY_LEAKS==
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	/*_CrtSetBreakAlloc(1779);*/
@@ -51,8 +41,6 @@ setenv("PDC_TRACE_FLUSH", "1", 1);
 	
 	//==INIT_CURSES==
 	init_curses();
-	traceon();
-	PDC_debug("Debug stream initialized successfully.\n");
 
 	//==PLAYER==
 	game.create_player(); // the player is initialized here because it needs to get data from menu selections
@@ -60,6 +48,7 @@ setenv("PDC_TRACE_FLUSH", "1", 1);
 	//==INIT_MENU==
 	Menu menu;
 	menu.menu();
+	/*game.run_menus();*/
 	clear(); // finished with the menu, clear the screen
 
 	refresh(); // starting new drawing, refresh the screen
@@ -95,7 +84,6 @@ setenv("PDC_TRACE_FLUSH", "1", 1);
 
 		countLoop++;
 	}
-	traceoff();
 	
 	game.save_all();
 	gui.gui_shutdown();
@@ -118,7 +106,7 @@ setenv("PDC_TRACE_FLUSH", "1", 1);
 	return 0;
 }
 
-void init_curses()
+void init_curses() // a chain of functions to initialize curses
 {
 	//==INIT_CURSES==
 	std::clog << "Initializing curses...\n";
@@ -160,7 +148,7 @@ void init_curses()
 	printw("Welcome to C++RogueLike!"); // print a welcome message
 	printw("Console size: %d x %d", COLS, LINES); // print the console size
 	refresh(); // refresh the screen
-	game.log("refresh called");
+	game.log("refresh called"); // log the refresh call
 }
 
 // end of file: main_C++RogueLike.cpp

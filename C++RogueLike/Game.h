@@ -60,6 +60,7 @@ public:
 	void send_to_back(Actor& actor);
 	std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
 	bool pick_tile(int* x, int* y, int maxRange);
+	void run_menus();
 
 	bool mouse_moved();
 	void target();

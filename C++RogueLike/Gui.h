@@ -38,8 +38,7 @@ public:
 		delete sub;
 	}
 private:
-	int guiHp{ 0 };
-	int guiHpMax{ 0 };
+	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
 
 	WINDOW* guiWin{ nullptr };
 

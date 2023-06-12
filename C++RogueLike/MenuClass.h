@@ -21,6 +21,7 @@ private:
 	int oldOption{ -1 };
 	int newOption{ 1 };
 	bool run{ true };
+	bool back{ false };
 
 	WINDOW* menuClassWindow{ nullptr };
 
@@ -44,6 +45,7 @@ private:
 	void menu_class_move_up() noexcept { newOption--; currentOption = static_cast<MenuClassOptions>(newOption); }
 	void menu_class_move_down() noexcept { newOption++; currentOption = static_cast<MenuClassOptions>(newOption); }
 	void menu_class_select();
+	void menu_class_set_back_true() noexcept { back = true; }
 
 	// create function for fighter, rogue, cleric, wizard, random, back
 	void menu_class_fighter();

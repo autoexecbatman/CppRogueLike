@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "MenuName.h"
 #include "MenuClass.h"
+#include "MenuGender.h"
 
 std::string MenuRace::menu_race_get_string(MenuRaceOptions option) noexcept
 {
@@ -152,6 +153,8 @@ void MenuRace::menu_race_random()
 void MenuRace::menu_race_back()
 {
 	// go back to previous menu (gender menu)
+	menu_race_set_run_false(); // set current menu loop to false
+	menu_race_set_back_true(); // set back flag to true
 }
 
 void MenuRace::menu_race()
@@ -199,17 +202,20 @@ void MenuRace::menu_race()
 
 		case 10: // enter
 		{
-			run = false;
-			menu_race_select();
-			menuClass.menu_class();
-			break;
+			menu_race_set_run_false(); // exit current menu loop either way if a selection was made
+			menu_race_select(); // execute selection
+			if (!back) { menuClass.menu_class(); } // if back flag is false, go to next menu
+			break; // break and go back to previous menu (menuGender)
 		}
+
 		case 27: // escape
+		{
 			menu_race_back();
 			break;
+		}
 		default:
 			break;
-		}
+		} // end switch (input)
 
 		// check if in bounds of menu options
 		if (newOption < 1)

@@ -206,6 +206,11 @@ bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
 void Map::compute_fov()
 {
 	std::clog << "Map::compute_fov()" << std::endl;
+	if (tcodMap == nullptr)
+	{
+		game.log("Error: tcodMap is null");
+		return;
+	}
 	tcodMap->computeFov(game.player->posX, game.player->posY, FOV_RADIUS);
 }
 

@@ -125,6 +125,8 @@ void MenuClass::menu_class_random()
 void MenuClass::menu_class_back()
 {
 	// go back to previous menu (gender menu)
+	menu_class_set_run_false();
+	menu_class_set_back_true();
 }
 
 void MenuClass::menu_class()

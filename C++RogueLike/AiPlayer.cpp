@@ -77,7 +77,7 @@ void AiPlayer::update(Actor& owner)
 	const Controls key{ static_cast<Controls>(game.keyPress) };
 
 	// TODO : check if this clear() need to be relocated
-	/*clear();*/ // this is here for clearing the level up screen 
+	/*clear();*/ // this is here for clearing the level up screen
 	// the controls for the player movement
 	switch (static_cast<Controls>(game.keyPress))
 	{

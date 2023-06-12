@@ -20,6 +20,11 @@
 #include "Window.h"
 #include "RandomDice.h"
 #include "Player.h"
+#include "Menu.h"
+#include "MenuGender.h"
+#include "MenuRace.h"
+#include "MenuClass.h"
+#include "MenuName.h"
 
 //====
 // When the Game is created, 
@@ -38,7 +43,8 @@ void Game::init()
 	game.map->init(true); // set the checker function
 
 	gameStatus = GameStatus::STARTUP;
-	std::clog << "GameStatus::STARTUP" << std::endl;
+	game.log("GameStatus::STARTUP");
+	game.log("game.init() was called!");
 }
 
 void Game::create_player()
@@ -513,6 +519,36 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 
 	return false;
 }
+
+void Game::run_menus() {
+	Menu mainMenu;
+	MenuGender menuGender;
+	MenuRace menuRace;
+	// If you have more menus, define them here...
+
+	while (game.run) {
+		// Main menu
+		mainMenu.menu_set_run_true();
+		mainMenu.menu();
+		if (!mainMenu.run) break; // If main menu is quit, break out of loop
+
+		// Gender menu
+		menuGender.menu_gender_set_run_true();
+		menuGender.menu_gender();
+		if (!menuGender.run) continue; // If back is pressed in gender menu, continue to main menu
+
+		// Race menu
+		menuRace.menu_race_set_run_true();
+		menuRace.menu_race();
+		if (!menuRace.run) continue; // If back is pressed in race menu, continue to gender menu
+
+		// If you have more menus, add them here following the same pattern...
+
+		// Init the game after all menus
+		game.init();
+	}
+}
+
 
 bool Game::mouse_moved()
 {

@@ -6,6 +6,23 @@
 #include "MenuRace.h"
 #include "Player.h"
 
+void MenuGender::menu_gender_clear() noexcept
+{
+	try
+	{
+		wclear(menuGenderWindow);
+	}
+	catch (const std::exception& e)
+	{
+		// Log the error message
+		game.log("An error occurred in menu_gender_clear: " + std::string(e.what()));
+
+		// Rethrow the original exception to be handled by the caller
+		throw;
+	}
+	game.log("MenuGender cleared successfully.");
+}
+
 void MenuGender::menu_gender_store(MenuGenderOptions option)
 {
 	const auto& newGender = menu_gender_get_string(option);
@@ -126,8 +143,8 @@ void MenuGender::menu_gender_select()
 
 	case MenuGenderOptions::BACK:
 	{
-		menu_gender_set_run_false();
-		menu_gender_set_back_true();
+		menu_gender_set_run_false(); // set loop to false
+		menu_gender_set_back_true(); // back was hit
 		break;
 	}
 
@@ -137,15 +154,16 @@ void MenuGender::menu_gender_select()
 
 void MenuGender::menu_gender()
 {
-	/*menu_gender_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);*/
+	// make the gender selection menu window
 	menu_gender_new(height_,width_,starty_,startx_);
 
+	// set the next menu in the chain -> menuRace
 	MenuRace menuRace;
 
-	run = true;
-	while (run)
+	run = true; // this is here to enable the loop after back was pressed
+	while (run) // menu has its own loop
 	{
-		menu_gender_clear();
+		menu_gender_clear(); // clear the window
 
 		// print the menu options to the top of the window
 		mvwprintw(menuGenderWindow, 0, 0, "%d", currentGenderOption);
@@ -194,9 +212,14 @@ void MenuGender::menu_gender()
 
 		case 10:
 		{
-			menu_gender_set_run_false();
-			menu_gender_select();
-			menuRace.menu_race();
+			/*menu_gender_set_run_false();*/ // loon is terminated either way
+			menu_gender_select(); // excute the selection
+			if (/*!menuRace.back || !back*/false)
+			{
+				menuRace.menu_race(); // if back was NOT pressed, go to the next menu (menuRace)
+			}
+			// reset the back flag to false
+			/*menu_gender_set_back_false();*/
 			break;
 		} // !end case 10
 

@@ -23,7 +23,7 @@ private:
 
 	int oldOption{ -1 };
 	int newOption{ 1 };
-	bool run{ true };
+
 	std::string gender{ "None" };
 	int keyPress{ 0 };
 
@@ -34,12 +34,11 @@ private:
 	int startx_{ (COLS / 2) - 10 };
 
 	void menu_gender_new(int height, int width, int starty, int startx) noexcept { menuGenderWindow = newwin(height, width, starty, startx); }
-	void menu_gender_clear() noexcept { wclear(menuGenderWindow); }
+	void menu_gender_clear() noexcept;
 	void menu_gender_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuGenderWindow, y, x, text.c_str()); }
 	void menu_gender_refresh() noexcept { wrefresh(menuGenderWindow); }
 	void menu_gender_delete() noexcept { delwin(menuGenderWindow); }
-	void menu_gender_set_run_true() noexcept { run = true; }
-	void menu_gender_set_run_false() noexcept { run = false; }
+
 	int menu_gender_get_oldOption() noexcept { return oldOption; }
 	int menu_gender_get_newOption() noexcept { return newOption; }
 	void menu_gender_set_oldOption(int option) noexcept { oldOption = option; }
@@ -51,6 +50,7 @@ private:
 	// menu_gender_assign() for asignning gender to actors
 	void menu_gender_assign();
 	void menu_gender_set_back_true() noexcept { back = true; }
+	void menu_gender_set_back_false() noexcept { back = false; }
 	// function for menu_gender_assign_random
 	void menu_gender_assign_random();
 
@@ -60,11 +60,13 @@ private:
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 public:
+	bool run{ true };
 	bool back{ false };
 
-	void menu_gender_select();
-
 	void menu_gender();
+	void menu_gender_select();
+	void menu_gender_set_run_true() noexcept { run = true; }
+	void menu_gender_set_run_false() noexcept { run = false; }
 };
 
 #endif // !MENU_H

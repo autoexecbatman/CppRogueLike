@@ -22,7 +22,6 @@ private:
 
 	int oldOption{ -1 };
 	int newOption{ 1 };
-	bool run{ true };
 
 	WINDOW* menuRaceWindow{ nullptr };
 
@@ -31,14 +30,15 @@ private:
 	void menu_race_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuRaceWindow, y, x, text.c_str()); }
 	void menu_race_refresh() noexcept { wrefresh(menuRaceWindow); }
 	void menu_race_delete() noexcept { delwin(menuRaceWindow); }
-	void menu_race_set_run_true() noexcept { run = true; }
-	void menu_race_set_run_false() noexcept { run = false; }
+
 	int menu_race_get_oldOption() noexcept { return oldOption; }
 	int menu_race_get_newOption() noexcept { return newOption; }
 	void menu_race_set_oldOption(int option) noexcept { oldOption = option; }
 	void menu_race_set_newOption(int option) noexcept { newOption = option; }
 	void menu_race_highlight_on() noexcept { wattron(menuRaceWindow, A_REVERSE); }
 	void menu_race_highlight_off() noexcept { wattroff(menuRaceWindow, A_REVERSE); }
+	void menu_race_set_back_true() noexcept { back = true; }
+
 
 	std::string menu_race_get_string(MenuRaceOptions option) noexcept;
 	void menu_race_print_option(MenuRaceOptions option, int row) noexcept;
@@ -57,7 +57,12 @@ private:
 	void menu_race_back();
 
 public:
+	bool run{ true };
+	bool back{ false };
+
 	void menu_race();
+	void menu_race_set_run_true() noexcept { run = true; }
+	void menu_race_set_run_false() noexcept { run = false; }
 };
 
 #endif // !MENU_RACE_H
