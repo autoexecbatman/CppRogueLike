@@ -8,18 +8,7 @@
 
 void MenuGender::menu_gender_clear() noexcept
 {
-	try
-	{
-		wclear(menuGenderWindow);
-	}
-	catch (const std::exception& e)
-	{
-		// Log the error message
-		game.log("An error occurred in menu_gender_clear: " + std::string(e.what()));
-
-		// Rethrow the original exception to be handled by the caller
-		throw;
-	}
+	wclear(menuGenderWindow);
 	game.log("MenuGender cleared successfully.");
 }
 
@@ -124,7 +113,6 @@ void MenuGender::menu_gender_select()
 	{
 		menu_gender_store(MenuGenderOptions::MALE);
 		menu_gender_assign();
-
 		break;
 	}
 
@@ -143,8 +131,6 @@ void MenuGender::menu_gender_select()
 
 	case MenuGenderOptions::BACK:
 	{
-		menu_gender_set_run_false(); // set loop to false
-		menu_gender_set_back_true(); // back was hit
 		break;
 	}
 
@@ -160,7 +146,6 @@ void MenuGender::menu_gender()
 	// set the next menu in the chain -> menuRace
 	MenuRace menuRace;
 
-	run = true; // this is here to enable the loop after back was pressed
 	while (run) // menu has its own loop
 	{
 		menu_gender_clear(); // clear the window
@@ -212,14 +197,30 @@ void MenuGender::menu_gender()
 
 		case 10:
 		{
-			/*menu_gender_set_run_false();*/ // loon is terminated either way
-			menu_gender_select(); // excute the selection
-			if (/*!menuRace.back || !back*/false)
+			menu_gender_set_run_false(); // loop is terminated either way
+			menu_gender_select(); // switch selection
+			if (currentGenderOption == MenuGenderOptions::BACK) // if this menu selected back
+			{
+				break;
+			}
+			else
 			{
 				menuRace.menu_race(); // if back was NOT pressed, go to the next menu (menuRace)
+				if (menuRace.currentOption == MenuRace::MenuRaceOptions::BACK) // if the next menu selected back
+				{
+					// set the current menu to run again
+					run = true;
+					menuRace.run = true;
+					break;
+				}
+				else
+				{
+					// set the current menu to NOT run again
+					run = false;
+					menuRace.run = false;
+					break;
+				}
 			}
-			// reset the back flag to false
-			/*menu_gender_set_back_false();*/
 			break;
 		} // !end case 10
 

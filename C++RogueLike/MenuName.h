@@ -7,7 +7,6 @@
 
 class MenuName
 {
-	bool run{ true };
 	WINDOW* menuNameWindow{ nullptr };
 
 	int menuNameX{ 0 };
@@ -34,8 +33,9 @@ class MenuName
 	void menu_name_assign();
 
 public:
-	void menu_name();
+	bool run{ true };
 
+	void menu_name();
 };
 
 #endif // !MENU_NAME_H

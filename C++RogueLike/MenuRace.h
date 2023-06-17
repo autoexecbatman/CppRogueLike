@@ -6,7 +6,7 @@
 
 class MenuRace
 {
-private:
+public:
 	enum class MenuRaceOptions : int
 	{
 		NONE,
@@ -19,7 +19,7 @@ private:
 		RANDOM,
 		BACK
 	} currentOption{ MenuRaceOptions::HUMAN };
-
+private:
 	int oldOption{ -1 };
 	int newOption{ 1 };
 
@@ -37,8 +37,6 @@ private:
 	void menu_race_set_newOption(int option) noexcept { newOption = option; }
 	void menu_race_highlight_on() noexcept { wattron(menuRaceWindow, A_REVERSE); }
 	void menu_race_highlight_off() noexcept { wattroff(menuRaceWindow, A_REVERSE); }
-	void menu_race_set_back_true() noexcept { back = true; }
-
 
 	std::string menu_race_get_string(MenuRaceOptions option) noexcept;
 	void menu_race_print_option(MenuRaceOptions option, int row) noexcept;
@@ -54,11 +52,9 @@ private:
 	void menu_race_halfelf();
 	void menu_race_halfling();
 	void menu_race_random();
-	void menu_race_back();
 
 public:
 	bool run{ true };
-	bool back{ false };
 
 	void menu_race();
 	void menu_race_set_run_true() noexcept { run = true; }

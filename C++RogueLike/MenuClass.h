@@ -6,7 +6,7 @@
 
 class MenuClass
 {
-private:
+public:
 	enum class MenuClassOptions : int
 	{
 		NONE,
@@ -17,11 +17,9 @@ private:
 		RANDOM,
 		BACK
 	} currentOption{ MenuClassOptions::FIGHTER };
-
+private:
 	int oldOption{ -1 };
 	int newOption{ 1 };
-	bool run{ true };
-	bool back{ false };
 
 	WINDOW* menuClassWindow{ nullptr };
 
@@ -45,7 +43,6 @@ private:
 	void menu_class_move_up() noexcept { newOption--; currentOption = static_cast<MenuClassOptions>(newOption); }
 	void menu_class_move_down() noexcept { newOption++; currentOption = static_cast<MenuClassOptions>(newOption); }
 	void menu_class_select();
-	void menu_class_set_back_true() noexcept { back = true; }
 
 	// create function for fighter, rogue, cleric, wizard, random, back
 	void menu_class_fighter();
@@ -53,9 +50,10 @@ private:
 	void menu_class_cleric();
 	void menu_class_wizard();
 	void menu_class_random();
-	void menu_class_back();
 
 public:
+	bool run{ true };
+
 	void menu_class();
 };
 

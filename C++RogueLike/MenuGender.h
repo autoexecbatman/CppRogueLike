@@ -11,7 +11,7 @@
 
 class MenuGender
 {
-private:
+public:
 	enum class MenuGenderOptions : int
 	{
 		NONE,
@@ -20,6 +20,7 @@ private:
 		RANDOM,
 		BACK
 	} currentGenderOption{ MenuGenderOptions::MALE };
+private:
 
 	int oldOption{ -1 };
 	int newOption{ 1 };
@@ -45,13 +46,8 @@ private:
 	void menu_gender_set_newOption(int option) noexcept { newOption = option; }
 	void menu_gender_highlight_on() noexcept { wattron(menuGenderWindow, A_REVERSE); }
 	void menu_gender_highlight_off() noexcept { wattroff(menuGenderWindow, A_REVERSE); }
-	// a function that will store the gender in a local variable
-	void menu_gender_store(MenuGenderOptions option);
-	// menu_gender_assign() for asignning gender to actors
+	void menu_gender_store(MenuGenderOptions option); // a function that will store the gender in a local variable
 	void menu_gender_assign();
-	void menu_gender_set_back_true() noexcept { back = true; }
-	void menu_gender_set_back_false() noexcept { back = false; }
-	// function for menu_gender_assign_random
 	void menu_gender_assign_random();
 
 	void menu_gender_print_option(MenuGenderOptions option, int row) noexcept;
@@ -61,7 +57,6 @@ private:
 
 public:
 	bool run{ true };
-	bool back{ false };
 
 	void menu_gender();
 	void menu_gender_select();

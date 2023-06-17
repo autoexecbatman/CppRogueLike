@@ -224,20 +224,20 @@ void Menu::menu()
 		}
 
 		case 10:
-		{
+		{ // if a selection is made
 			menu_set_run_false(); // stop running this menu loop
 			switch (currentOption)
 			{
 
 			case MenuOptions::NEW_GAME:
 			{
-				// gender selection screen
 				menuGender.menu_gender(); // go to next menu
 
-				if (menuGender.back) // if back was hit
+				if (menuGender.currentGenderOption == MenuGender::MenuGenderOptions::BACK)
 				{
+					// reset flags to default
 					menu_set_run_true(); // keep menu on
-					menuGender.back = false; // reset the back flag to false
+					menuGender.run = true; // keep running the next menu
 					break; // break out of switch and keep running menu loop
 				}
 				else // if back was not hit
@@ -245,7 +245,7 @@ void Menu::menu()
 					game.init(); // after all the menus are done, start a new game
 				}
 
-				break; // break out of switch
+				break; // break out of switch and start running game loop
 			}
 
 			case MenuOptions::LOAD_GAME:

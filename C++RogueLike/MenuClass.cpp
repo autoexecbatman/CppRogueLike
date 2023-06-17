@@ -65,7 +65,6 @@ void MenuClass::menu_class_select()
 		menu_class_random();
 		break;
 	case MenuClassOptions::BACK:
-		menu_class_back();
 		break;
 	default:
 		break;
@@ -122,13 +121,6 @@ void MenuClass::menu_class_random()
 	}
 }
 
-void MenuClass::menu_class_back()
-{
-	// go back to previous menu (gender menu)
-	menu_class_set_run_false();
-	menu_class_set_back_true();
-}
-
 void MenuClass::menu_class()
 {
 	menu_class_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
@@ -172,14 +164,24 @@ void MenuClass::menu_class()
 
 		case 10: // enter
 		{
-			run = false;
+			run = false; // class loop stop
 			menu_class_select();
-			menuName.menu_name();
+			if (currentOption == MenuClassOptions::BACK)
+			{
+				break;
+			}
+			else
+			{
+				menuName.menu_name();
+			}
 			break;
 		}
+
 		case 27: // escape
-			menu_class_back();
+		{
 			break;
+		}
+
 		default:
 			break;
 		}

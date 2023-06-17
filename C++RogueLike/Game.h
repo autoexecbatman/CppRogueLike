@@ -16,7 +16,6 @@
 class Game
 {
 public:
-	Game() = default;
 	bool run{ true };
 	bool shouldSave{ true };
 	enum class GameStatus : int

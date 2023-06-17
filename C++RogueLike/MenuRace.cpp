@@ -73,7 +73,6 @@ void MenuRace::menu_race_select()
 		menu_race_random();
 		break;
 	case MenuRaceOptions::BACK:
-		menu_race_back();
 		break;
 	default:
 		break;
@@ -150,13 +149,6 @@ void MenuRace::menu_race_random()
 	}
 }
 
-void MenuRace::menu_race_back()
-{
-	// go back to previous menu (gender menu)
-	menu_race_set_run_false(); // set current menu loop to false
-	menu_race_set_back_true(); // set back flag to true
-}
-
 void MenuRace::menu_race()
 {
 	menu_race_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
@@ -204,13 +196,29 @@ void MenuRace::menu_race()
 		{
 			menu_race_set_run_false(); // exit current menu loop either way if a selection was made
 			menu_race_select(); // execute selection
-			if (!back) { menuClass.menu_class(); } // if back flag is false, go to next menu
+			if (currentOption == MenuRaceOptions::BACK) // current back
+			{
+				break;
+			}
+			else
+			{
+				menuClass.run = true;
+				menuClass.menu_class();
+				if (menuClass.currentOption == MenuClass::MenuClassOptions::BACK)
+				{
+					run = true;
+					menuClass.run = true;
+				}
+				else
+				{
+					run = false;
+				}
+			} // if back flag is false, go to next menu
 			break; // break and go back to previous menu (menuGender)
 		}
 
 		case 27: // escape
 		{
-			menu_race_back();
 			break;
 		}
 		default:
