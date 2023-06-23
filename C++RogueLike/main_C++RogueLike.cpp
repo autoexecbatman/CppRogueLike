@@ -106,7 +106,8 @@ int main()
 	return 0;
 }
 
-void init_curses() // a chain of functions to initialize curses
+// a chain of functions to initialize curses
+void init_curses()
 {
 	//==INIT_CURSES==
 	std::clog << "Initializing curses...\n";

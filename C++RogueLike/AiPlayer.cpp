@@ -154,7 +154,7 @@ void AiPlayer::update(Actor& owner)
 
 	case Controls::HIT_SELF:
 	{
-		game.chatGPT->start_chat();
+		/*game.chatGPT->start_chat();*/
 		if (game.player)
 		{
 			if (game.player->attacker)

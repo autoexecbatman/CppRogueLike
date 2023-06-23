@@ -69,7 +69,11 @@ void Game::update()
 		{
 			std::clog << "Player is dead!" << std::endl;
 			run = false;
-			game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit.");
+
+			//game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit."); // message to display when the player dies
+			// store the events
+			game.messageToDisplay = "You died! Press any key...";
+			game.messageColor = COLOR_RED;
 		}
 		else
 		{
@@ -122,7 +126,6 @@ void Game::render()
 	}
 
 	std::clog << "Actors are trying to be drawn..." << std::endl;
-
 	for (const auto& actor : actors)
 	{
 		if (actor && actor != player)
@@ -836,20 +839,31 @@ void Game::save_all()
 
 void Game::next_level()
 {
+	// increment the dungeon level
 	dungeonLevel++;
+
+	// present a message to the player -> TODO : move this to the gui
 	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
+
+	// heal the player
 	player->destructible->heal(player->destructible->hpMax / 2);
+
+	// present a message to the player -> TODO : move this to the gui
 	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
 	gui->log_message(WHITE_PAIR, "You are now on level %d", dungeonLevel);
 
-	// clear the dungeon except the player and the stairs
+	// clear the actors container except the player and the stairs
 	actors.clear();
+
+	// add the player and the stairs to the actors container
 	actors.push_back(player);
 	actors.push_back(stairs);
 
+	// generate a new map
 	map = std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH);
 	map->init(true);
 
+	// set the game status to STARTUP because we need to recompute the FOV 
 	gameStatus = GameStatus::STARTUP;
 }
 

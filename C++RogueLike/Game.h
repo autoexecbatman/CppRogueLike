@@ -16,6 +16,8 @@
 class Game
 {
 public:
+	std::string messageToDisplay{ "" };
+	int messageColor{ 0 };
 	bool run{ true };
 	bool shouldSave{ true };
 	enum class GameStatus : int
@@ -69,6 +71,7 @@ public:
 	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
+	// the player goes down stairs
 	void next_level();
 	std::shared_ptr<Actor> get_actor(int x, int y) const;
 	void dispay_levelup(int level);

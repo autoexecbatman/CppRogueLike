@@ -39,6 +39,8 @@ public:
 	}
 private:
 	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
+	std::string guiMessage{}; // the message to be displayed on the gui
+	int guiMessageColor{}; // the color of the message to be displayed on the gui
 
 	WINDOW* guiWin{ nullptr };
 

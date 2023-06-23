@@ -5,9 +5,10 @@
 #include "Gui.h"
 #include "main.h"
 #include "Colors.h"
+#include "LogMessage.h"
 
 constexpr int PANEL_HEIGHT = 7;
-constexpr int PANEL_WIDTH = 30;
+constexpr int PANEL_WIDTH = 60;
 constexpr int GUI_Y = 22;
 constexpr int GUI_X = 0;
 
@@ -41,6 +42,11 @@ void Gui::gui_shutdown()
 void Gui::gui_update()
 {
 	if (game.player) { guiHp = game.player->destructible->hp; } // update the gui memory
+	
+	// message to display
+	// if an event has occured, store the message in a private variable
+	guiMessage = game.messageToDisplay;
+	guiMessageColor = game.messageColor;
 }
 
 void Gui::gui_render()
@@ -53,6 +59,14 @@ void Gui::gui_render()
 	mvwprintw(guiWin, 3, 1, "Attack:%d", game.player->attacker->dmg);
 	mvwprintw(guiWin, 4, 1, "Defense:%d", game.player->destructible->dr);
 	renderMouseLook();
+
+	// message to render
+	wattron(guiWin, COLOR_PAIR(guiMessageColor));
+	mvwprintw(guiWin, 5, 1, guiMessage.c_str());
+	wattroff(guiWin, COLOR_PAIR(guiMessageColor));
+	// use curses make new line
+	
+
 	gui_refresh();
 }
 

@@ -9,7 +9,7 @@
 
 struct LogMessage
 {
-	std::string log_message_text{ nullptr };
+	std::string log_message_text{};
 	int log_message_color{ 0 };
 
 	LogMessage(const char* log_message_text, int log_message_color);
