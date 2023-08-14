@@ -6,6 +6,7 @@
 #include <climits>
 #include <cassert>
 #include <gsl/util>
+#include <format>
 
 #include "Game.h"
 #include "Actor.h"
@@ -67,19 +68,15 @@ void Game::update()
 	{
 		if (game.player->destructible->is_dead())
 		{
-			std::clog << "Player is dead!" << std::endl;
+			game.log("Player is dead!");
+			game.message(COLOR_RED, "You died! Press any key...");
 			run = false;
-
-			//game.gui->log_message(COLOR_RED, "You died!\nPress any key to exit."); // message to display when the player dies
-			// store the events
-			game.messageToDisplay = "You died! Press any key...";
-			game.messageColor = COLOR_RED;
 		}
 		else
 		{
 			if (Game::gameStatus == GameStatus::STARTUP)
 			{
-				std::clog << "...Computing FOV..." << std::endl;
+				game.log("...Computing FOV...");
 				game.map->compute_fov();
 			}
 
@@ -552,7 +549,6 @@ void Game::run_menus() {
 	}
 }
 
-
 bool Game::mouse_moved()
 {
 	int old_mouse_x = Mouse_status.x;
@@ -696,10 +692,8 @@ void Game::target()
 			break;
 			
 		case 10:
-			
 			// if the key enter is pressed then select the target
 			// and return the target position
-			
 			// if the target is a monster then attack it
 		{
 			if (game.map->is_in_fov(targetCursorX, targetCursorY))
@@ -713,7 +707,8 @@ void Game::target()
 				}
 			}
 		}
-			break;
+		break;
+
 		case 'r':
 		case 27:
 			// if the key escape is pressed then cancel the target selection
@@ -721,10 +716,9 @@ void Game::target()
 			break;
 			
 		default:break;
-		}
+		} // end of switch (key)
 
-
-	}
+	} // end of while (run == true)
 	clear();
 }
 
@@ -843,14 +837,14 @@ void Game::next_level()
 	dungeonLevel++;
 
 	// present a message to the player -> TODO : move this to the gui
-	gui->log_message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
+	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
 
 	// heal the player
 	player->destructible->heal(player->destructible->hpMax / 2);
 
 	// present a message to the player -> TODO : move this to the gui
-	gui->log_message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
-	gui->log_message(WHITE_PAIR, "You are now on level %d", dungeonLevel);
+	game.message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
+	game.message(WHITE_PAIR, std::format("You are now on level %d", dungeonLevel));
 
 	// clear the actors container except the player and the stairs
 	actors.clear();
@@ -1051,6 +1045,15 @@ void Game::log(const std::string& message)
 		std::clog << message << std::endl;
 		std::cout << message << std::endl;
 	}
+}
+
+void Game::message(int color, const std::string& text)
+{
+	// store message in game
+	messageToDisplay = text;
+	/*std::cout << "Stored message: '" << messageToDisplay << "'" << std::endl;*/
+	game.log("Stored message: '" + messageToDisplay + "'");
+	messageColor = color;
 }
 
 // end of file: Game.cpp

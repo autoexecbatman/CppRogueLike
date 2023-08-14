@@ -16,8 +16,8 @@
 class Game
 {
 public:
-	std::string messageToDisplay{ "" };
-	int messageColor{ 0 };
+	std::string messageToDisplay{ "Init Message" };
+	int messageColor{ EMPTY_PAIR };
 	bool run{ true };
 	bool shouldSave{ true };
 	enum class GameStatus : int
@@ -77,11 +77,16 @@ public:
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
 	int random_number(int min, int max);
+
+	//==DEBUG FUNCTIONS==//
 	void wizard_eye() noexcept;
 	void err(std::string e) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); }
 	void enableDebugMode() { debugMode = true; }
 	void disableDebugMode() { debugMode = false; }
 	void log(const std::string& message);
+
+	//==MESSAGE FUNCTIONS==//
+	void message(int color, const std::string& text);
 
 private:
 	// Private member variables.
