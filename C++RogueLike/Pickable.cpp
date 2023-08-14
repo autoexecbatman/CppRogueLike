@@ -18,35 +18,13 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 {
 	if (wearer.container && wearer.container->add(owner))
 	{
-		// TODO : Fix this to remove the item from the map after it has been picked up.
-		/*game.actors.erase(
-		std::remove(game.actors.begin(), game.actors.end(), owner),
-		game.actors.end()
-		);*/
-
-		game.gui->log_message( // displays the message
-			COLOR_WHITE,
-			"%s picks up a %s.",
-			wearer.name.c_str(),
-			owner.name.c_str()
-		);
-		
-		// first iterate through the list of actors
-		for (auto actor : game.actors)
+		for (const auto& actor : game.actors)
 		{
 			// if the actor is the owner of the item
 			if (actor.get() == &owner)
 			{
 				// remove the item from the list of actors
-				//game.actors.erase(
-				//	std::remove(game.actors.begin(), game.actors.end(), actor),
-				//	game.actors.end()
-				//);
-				
 				std::erase(game.actors, actor);
-
-				//actor->ch = '.';
-				//actor->col = WHITE_PAIR;
 
 				break;
 			}

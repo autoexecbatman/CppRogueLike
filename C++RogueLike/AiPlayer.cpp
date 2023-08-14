@@ -1,5 +1,6 @@
 // file: AiPlayer.cpp
 
+#include <format>
 #include <gsl/util>
 
 #include "Game.h"
@@ -71,7 +72,7 @@ void AiPlayer::update(Actor& owner)
 	}
 
 	game.log("AiPlayer::update(Actor& owner)");
-	levelUpUpdate(owner);
+	levelUpUpdate(owner); // level up if needed
 
 	int dx{0}, dy{0}; // movement delta
 	const Controls key{ static_cast<Controls>(game.keyPress) };
@@ -213,7 +214,7 @@ void AiPlayer::update(Actor& owner)
 	case Controls::QUIT:
 	{
 		game.run = false;
-		mvprintw(29, 0, "You quit the game ! Press any key ...");
+		game.message(WHITE_PAIR, "You quit the game ! Press any key ...");
 		break;
 	}
 
@@ -248,7 +249,7 @@ void AiPlayer::update(Actor& owner)
 	default:break;
 	}
 
-	// compute FOV if needed
+	// compute FOV if needed (if player moved)
 	if (dx != 0 || dy != 0)
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -271,25 +272,23 @@ void AiPlayer::pick_item(Actor& owner)
 		exit(-1);
 	}
 
-	bool found = false;
+	bool found = false; // true if an item was found at the player's position
 
-	for (const auto& actor : game.actors)
+	for (auto actor : game.actors) // we don't use a reference here because we are modifying the vector
 	{
 		// Skip null actors
 		if (actor == nullptr)
 		{
-			std::cout << "Error: PlayerAi::pick_item(Actor& owner). game.actors contains null pointer" << std::endl;
+			game.log("Error: PlayerAi::pick_item(Actor& owner). game.actors contains null pointer");
 			exit(-1);
 		}
 
-		std::clog << "Checking actor " << actor->name << std::endl;
-		std::cout << "Checking actor " << actor->name << std::endl;
+		game.log("Checking actor " + actor->name);
 
 		// Skip actors without a pickable component
 		if (actor->pickable == nullptr)
 		{
-			std::clog << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
-			std::cout << "Skipping actor " << actor->name << " because it has no pickable component" << std::endl;
+			game.log("Skipping actor " + actor->name + " because it has no pickable component");
 			continue;
 		}
 
@@ -297,7 +296,7 @@ void AiPlayer::pick_item(Actor& owner)
 		if (is_pickable_at_position(*actor, owner))
 		{
 			// Try to pick up the actor
-			found = try_pick_actor(*actor, owner);
+			found = try_pick_actor(actor, owner); // the actor gets deleted in this function if it was picked up
 
 			if (found)
 			{
@@ -309,7 +308,7 @@ void AiPlayer::pick_item(Actor& owner)
 	// Log a message if there's nothing to pick up
 	if (!found)
 	{
-		game.gui->log_message(HPBARFULL_PAIR, "There is nothing to pick up.");
+		game.message(WHITE_PAIR, "There is nothing to pick up.");
 	}
 
 	game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -320,36 +319,33 @@ bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) c
 	return actor.posX == owner.posX && actor.posY == owner.posY;
 }
 
-bool AiPlayer::try_pick_actor(Actor& actor, Actor& owner)
+bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
 {
-	std::clog << "Trying to pick actor " << actor.name << std::endl;
-	std::cout << "Trying to pick actor " << actor.name << std::endl;
+	game.log("Trying to pick actor " + actor->name);
 
-	bool picked = actor.pickable->pick(actor, owner);
+	// actor is destroyed if picked what can we do about it ? 
+	// we can't use actor anymore
+	bool picked = actor->pickable->pick(*actor, owner);
+
+	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) picked = " + std::to_string(picked));
+	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor.name = " + actor->name);
 
 	if (picked)
 	{
-		if (game.gui != nullptr)
+		// store the message here because actor is destroyed if picked
+		if (actor)
 		{
-			game.gui->log_message(DARK_GROUND_PAIR, "You take the %s.", actor.name.c_str());
+			game.message(WHITE_PAIR, std::format("You take the {}.", actor->name));
 		}
 		else
 		{
-			std::cout << "Error: PlayerAi::try_pick_actor(Actor& actor, Actor& owner). game.gui is null pointer" << std::endl;
+			game.log("Error: AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor is null");
 			exit(-1);
 		}
 	}
 	else
 	{
-		if (game.gui != nullptr)
-		{
-			game.gui->log_message(HPBARMISSING_PAIR, "Your inventory is full.");
-		}
-		else
-		{
-			std::cout << "Error: PlayerAi::try_pick_actor(Actor& actor, Actor& owner). game.gui is null pointer" << std::endl;
-			exit(-1);
-		}
+		game.message(HPBARMISSING_PAIR, "Your inventory is full.");
 	}
 
 	return picked;
