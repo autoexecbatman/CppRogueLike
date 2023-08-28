@@ -28,31 +28,48 @@ void Attacker::attack(const Actor& owner, Actor& target)
 				int adjDmg = dmg + strength.dmgAdj; // Adjusted damage
 				const int totaldmg = adjDmg - target.destructible->dr;
 
+				// if damage is dealt display combat messages
 				if (totaldmg > 0)
 				{
-					//game.gui->log_message( // damage message
-					//	LIGHTNING_PAIR, // color
-					//	"%s attacks %s for %d hit points.\n", // message
-					//	owner.name.c_str(),
-					//	target.name.c_str(),
-					//	totaldmg
-					//);
-
+					// game.message for attack occured
 					game.message(WHITE_PAIR, std::format("{} attacks {} for {} hit points.", owner.name, target.name, totaldmg));
 
+
+					// TODO : use game.message instead of mvprintw below, to keep order of clear screen.
+					// color of attacker 
 					attron(COLOR_PAIR(owner.col));
 					mvprintw(0, 0, "%s", owner.name.c_str());
-					attroff(COLOR_PAIR(owner.col));
+					attroff(COLOR_PAIR(owner.col)); // color off
+
+					// get name length of attacker
 					const int ownerNameLen = gsl::narrow_cast<int>(owner.name.length());
+
+					// additional string
 					std::string attacksThe = " attacks the ";
+
+					// get name length of target
 					const int attacksTheLen = gsl::narrow_cast<int>(attacksThe.length());
+
+					// print attacksThe
 					mvprintw(0, ownerNameLen, attacksThe.c_str());
+
+					// color target
 					attron(COLOR_PAIR(target.col));
+
+					// print target name in color
 					mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
+
+					// color off
 					attroff(COLOR_PAIR(target.col));
+
+					// get target name length
 					const int targetNameLen = gsl::narrow_cast<int>(target.name.length());
+
+					// print HP damage
 					mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", totaldmg);
+
 				}
+				// else no damage message
 				else { mvprintw(29, 0, "%s attacks %s but it has no effect!\n", owner.name.c_str(), target.name.c_str()); }
 			}
 			else { game.err("OUT OF BOUNDS!"); return; }
@@ -61,7 +78,9 @@ void Attacker::attack(const Actor& owner, Actor& target)
 		catch (std::exception& e) { game.err(e.what()); return; }
 		catch (...) { game.err("Attacker::attack() - Unknown error."); return; }
 
+		// apply damage to target
 		target.destructible->take_damage(target, dmg);
+
 	}
 	else
 	{
