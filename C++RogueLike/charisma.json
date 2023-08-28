@@ -1,0 +1,116 @@
+[
+	{
+		"Cha": 1,
+		"MaxHencmen": 0,
+		"Loyalty": -8,
+		"ReactionAdj": -7
+	},
+	{
+		"Cha": 2,
+		"MaxHencmen": 1,
+		"Loyalty": -7,
+		"ReactionAdj": -6
+	},
+	{
+		"Cha": 3,
+		"MaxHencmen": 1,
+		"Loyalty": -6,
+		"ReactionAdj": -5
+	},
+	{
+		"Cha": 4,
+		"MaxHencmen": 1,
+		"Loyalty": -5,
+		"ReactionAdj": -4
+	},
+	{
+		"Cha": 5,
+		"MaxHencmen": 2,
+		"Loyalty": -4,
+		"ReactionAdj": -3
+	},
+	{
+		"Cha": 6,
+		"MaxHencmen": 2,
+		"Loyalty": -3,
+		"ReactionAdj": -2
+	},
+	{
+		"Cha": 7,
+		"MaxHencmen": 3,
+		"Loyalty": -2,
+		"ReactionAdj": -1
+	},
+	{
+		"Cha": 8,
+		"MaxHencmen": 3,
+		"Loyalty": -1,
+		"ReactionAdj": -0
+	},
+	{
+		"Cha": 9,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 10,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 11,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 12,
+		"MaxHencmen": 5,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 13,
+		"MaxHencmen": 5,
+		"Loyalty": 0,
+		"ReactionAdj": 1
+	},
+	{
+		"Cha": 14,
+		"MaxHencmen": 6,
+		"Loyalty": 1,
+		"ReactionAdj": 2
+	},
+	{
+		"Cha": 15,
+		"MaxHencmen": 7,
+		"Loyalty": 3,
+		"ReactionAdj": 3
+	},
+	{
+		"Cha": 16,
+		"MaxHencmen": 8,
+		"Loyalty": 4,
+		"ReactionAdj": 5
+	},
+	{
+		"Cha": 17,
+		"MaxHencmen": 10,
+		"Loyalty": 6,
+		"ReactionAdj": 6
+	},
+	{
+		"Cha": 18,
+		"MaxHencmen": 15,
+		"Loyalty": 8,
+		"ReactionAdj": 7
+	},
+	{
+		"Cha": 19,
+		"MaxHencmen": 20,
+		"Loyalty": 10,
+		"ReactionAdj": 8
+	}
+]

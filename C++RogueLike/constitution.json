@@ -1,0 +1,154 @@
+[
+	{
+		"Con": 1,
+		"HPAdj": -3,
+		"SystemShock": 25,
+		"RessurectionSurvival": 30,
+		"PoisonSave": -2,
+		"Regeneratioin": 0,
+	},
+	{
+		"Con": 2,
+		"HPAdj": -2,
+		"SystemShock": 30,
+		"RessurectionSurvival": 35,
+		"PoisonSave": -1,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 3,
+		"HPAdj": -2,
+		"SystemShock": 35,
+		"RessurectionSurvival": 40,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 4,
+		"HPAdj": -1,
+		"SystemShock": 40,
+		"RessurectionSurvival": 45,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 5,
+		"HPAdj": -1,
+		"SystemShock": 45,
+		"RessurectionSurvival": 50,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 6,
+		"HPAdj": -1,
+		"SystemShock": 50,
+		"RessurectionSurvival": 55,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 7,
+		"HPAdj": 0,
+		"SystemShock": 55,
+		"RessurectionSurvival": 60,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 8,
+		"HPAdj": 0,
+		"SystemShock": 60,
+		"RessurectionSurvival": 65,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 9,
+		"HPAdj": 0,
+		"SystemShock": 65,
+		"RessurectionSurvival": 70,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 10,
+		"HPAdj": 0,
+		"SystemShock": 70,
+		"RessurectionSurvival": 75,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 11,
+		"HPAdj": 0,
+		"SystemShock": 75,
+		"RessurectionSurvival": 80,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 12,
+		"HPAdj": 0,
+		"SystemShock": 80,
+		"RessurectionSurvival": 85,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 13,
+		"HPAdj": 0,
+		"SystemShock": 85,
+		"RessurectionSurvival": 90,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 14,
+		"HPAdj": 0,
+		"SystemShock": 88,
+		"RessurectionSurvival": 92,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 15,
+		"HPAdj": 1,
+		"SystemShock": 90,
+		"RessurectionSurvival": 94,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 16,
+		"HPAdj": 2,
+		"SystemShock": 95,
+		"RessurectionSurvival": 96,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 17,
+		"HPAdj": 3,
+		"SystemShock": 97,
+		"RessurectionSurvival": 98,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 18,
+		"HPAdj": 4,
+		"SystemShock": 99,
+		"RessurectionSurvival": 100,
+		"PoisonSave": 0,
+		"Regeneratioin": 0
+	},
+	{
+		"Con": 19,
+		"HPAdj": 5,
+		"SystemShock": 99,
+		"RessurectionSurvival": 100,
+		"PoisonSave": 1,
+		"Regeneratioin": 0
+	}
+]

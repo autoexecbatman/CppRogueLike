@@ -220,5 +220,20 @@
     <None Include="strength.json">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="charisma.json">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="constitution.json">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="dexterity.json">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="intelligence.json">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="wisdom.json">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

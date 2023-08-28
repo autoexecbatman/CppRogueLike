@@ -1,0 +1,122 @@
+[
+	{
+		"Dex": 1,
+		"ReactionAdj": -6,
+		"MissileAttackAdj": -6,
+		"DefensiveAdj": 5
+	},
+	{
+		"Dex": 2,
+		"ReactionAdj": -4,
+		"MissileAttackAdj": -4,
+		"DefensiveAdj": 5
+	},
+	{
+		"Dex": 3,
+		"ReactionAdj": -3,
+		"MissileAttackAdj": -3,
+		"DefensiveAdj": 4
+	},
+	{
+		"Dex": 4,
+		"ReactionAdj": -2,
+		"MissileAttackAdj": -2,
+		"DefensiveAdj": 3
+	},
+	{
+		"Dex": 5,
+		"ReactionAdj": -1,
+		"MissileAttackAdj": -1,
+		"DefensiveAdj": 2
+	},
+	{
+		"Dex": 6,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 1
+	},
+	{
+		"Dex": 7,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 1
+	},
+	{
+		"Dex": 8,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 9,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 10,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 11,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 12,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 13,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 14,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 15,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": -1
+	},
+	{
+		"Dex": 16,
+		"ReactionAdj": 1,
+		"MissileAttackAdj": 1,
+		"DefensiveAdj": -2
+	},
+	{
+		"Dex": 17,
+		"ReactionAdj": 2,
+		"MissileAttackAdj": 2,
+		"DefensiveAdj": -3
+	},
+	{
+		"Dex": 18,
+		"ReactionAdj": 2,
+		"MissileAttackAdj": 2,
+		"DefensiveAdj": -4
+	},
+	{
+		"Dex": 19,
+		"ReactionAdj": 3,
+		"MissileAttackAdj": 3,
+		"DefensiveAdj": -4
+	},
+	{
+		"Dex": 20,
+		"ReactionAdj": 3,
+		"MissileAttackAdj": 3,
+		"DefensiveAdj": -4
+	}
+]

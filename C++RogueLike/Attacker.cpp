@@ -3,6 +3,7 @@
 #include <string>
 #include <gsl/gsl>
 #include <gsl/util>
+#include <format>
 
 #include "Colors.h"
 #include "Window.h"
@@ -29,13 +30,15 @@ void Attacker::attack(const Actor& owner, Actor& target)
 
 				if (totaldmg > 0)
 				{
-					game.gui->log_message( // damage message
-						LIGHTNING_PAIR, // color
-						"%s attacks %s for %d hit points.\n", // message
-						owner.name.c_str(),
-						target.name.c_str(),
-						totaldmg
-					);
+					//game.gui->log_message( // damage message
+					//	LIGHTNING_PAIR, // color
+					//	"%s attacks %s for %d hit points.\n", // message
+					//	owner.name.c_str(),
+					//	target.name.c_str(),
+					//	totaldmg
+					//);
+
+					game.message(WHITE_PAIR, std::format("{} attacks {} for {} hit points.", owner.name, target.name, totaldmg));
 
 					attron(COLOR_PAIR(owner.col));
 					mvprintw(0, 0, "%s", owner.name.c_str());
@@ -57,7 +60,6 @@ void Attacker::attack(const Actor& owner, Actor& target)
 		catch (std::out_of_range& e) { game.err(e.what()); return; }
 		catch (std::exception& e) { game.err(e.what()); return; }
 		catch (...) { game.err("Attacker::attack() - Unknown error."); return; }
-
 
 		target.destructible->take_damage(target, dmg);
 	}

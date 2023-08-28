@@ -274,6 +274,7 @@ void AiPlayer::pick_item(Actor& owner)
 
 	bool found = false; // true if an item was found at the player's position
 
+	// search for an item at the player's position
 	for (auto actor : game.actors) // we don't use a reference here because we are modifying the vector
 	{
 		// Skip null actors

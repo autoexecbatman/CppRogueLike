@@ -252,9 +252,14 @@
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="charisma.json" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="constitution.json" />
+    <None Include="dexterity.json" />
+    <None Include="intelligence.json" />
     <None Include="Menu.cd" />
     <None Include="strength.json" />
+    <None Include="wisdom.json" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

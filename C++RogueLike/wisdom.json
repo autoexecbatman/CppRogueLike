@@ -1,0 +1,135 @@
+[
+	{
+		"Wis": 1,
+		"MagicalDefenseAdj": -6,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 80,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 2,
+		"MagicalDefenseAdj": -4,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 60,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 3,
+		"MagicalDefenseAdj": -3,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 50,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 4,
+		"MagicalDefenseAdj": -2,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 45,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 5,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 40,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 6,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 35,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 7,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 30,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 8,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 25,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 9,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 20,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 10,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 15,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 11,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 10,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 12,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 5,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 13,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 1,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 14,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 1,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 15,
+		"MagicalDefenseAdj": 1,
+		"BonusSpells": 2,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 16,
+		"MagicalDefenseAdj": 2,
+		"BonusSpells": 2,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 17,
+		"MagicalDefenseAdj": 3,
+		"BonusSpells": 3,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 18,
+		"MagicalDefenseAdj": 4,
+		"BonusSpells": 4,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 19,
+		"MagicalDefenseAdj": 4,
+		"BonusSpells": "1st,3rd",
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	}
+]

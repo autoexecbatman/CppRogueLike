@@ -1,0 +1,154 @@
+[
+	{
+		"Int": 1,
+		"NumberOfLanguages": 0,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 2,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 3,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 4,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 5,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 6,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 7,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 8,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 9,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 4,
+		"ChanceToLearnSpell": 35,
+		"MaxNumberOfSpells": 6,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 10,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 5,
+		"ChanceToLearnSpell": 40,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 11,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 5,
+		"ChanceToLearnSpell": 45,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 12,
+		"NumberOfLanguages": 3,
+		"SpellLevel": 6,
+		"ChanceToLearnSpell": 50,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 13,
+		"NumberOfLanguages": 3,
+		"SpellLevel": 6,
+		"ChanceToLearnSpell": 55,
+		"MaxNumberOfSpells": 9,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 14,
+		"NumberOfLanguages": 4,
+		"SpellLevel": 7,
+		"ChanceToLearnSpell": 60,
+		"MaxNumberOfSpells": 9,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 15,
+		"NumberOfLanguages": 4,
+		"SpellLevel": 7,
+		"ChanceToLearnSpell": 65,
+		"MaxNumberOfSpells": 11,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 16,
+		"NumberOfLanguages": 5,
+		"SpellLevel": 8,
+		"ChanceToLearnSpell": 70,
+		"MaxNumberOfSpells": 11,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 17,
+		"NumberOfLanguages": 6,
+		"SpellLevel": 8,
+		"ChanceToLearnSpell": 75,
+		"MaxNumberOfSpells": 14,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 18,
+		"NumberOfLanguages": 7,
+		"SpellLevel": 9,
+		"ChanceToLearnSpell": 85,
+		"MaxNumberOfSpells": 18,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 19,
+		"NumberOfLanguages": 8,
+		"SpellLevel": 9,
+		"ChanceToLearnSpell": 95,
+		"MaxNumberOfSpells": 100,
+		"IllusionImmunity": 0
+	}
+]
