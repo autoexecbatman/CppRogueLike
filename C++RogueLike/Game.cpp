@@ -1051,9 +1051,11 @@ void Game::message(int color, const std::string& text)
 {
 	// store message in game
 	messageToDisplay = text;
-	/*std::cout << "Stored message: '" << messageToDisplay << "'" << std::endl;*/
-	game.log("Stored message: '" + messageToDisplay + "'");
 	messageColor = color;
+
+	game.log("Stored message: '" + messageToDisplay + "'");
+	game.log("Stored message color: " + std::to_string(messageColor));
+
 }
 
 // end of file: Game.cpp
