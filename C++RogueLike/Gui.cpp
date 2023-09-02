@@ -30,11 +30,30 @@ constexpr int STATS_X = 0;
 
 // messageLogWindow is the window that displays the message log
 // ==== ==== ==== ==== ====
-constexpr int LOG_HEIGHT = PANEL_HEIGHT - 3;
+constexpr int LOG_HEIGHT = PANEL_HEIGHT - 2;
 constexpr int LOG_WIDTH = 56;
-constexpr int LOG_Y = 2;
+constexpr int LOG_Y = 1;
 constexpr int LOG_X = 60;
 // ==== ==== ==== ==== ====
+
+void Gui::addDisplayMessage(const std::vector<std::pair<int, std::string>>& message)
+{
+	displayMessages.push_back(message);
+}
+
+void Gui::renderMessages() {
+	// Iterate through each message
+	for (const auto& message : displayMessages) {
+		// Iterate through each part of the message
+		for (const auto& part : message) {
+			// Extract color and text
+			int color = part.first;
+			const std::string& text = part.second;
+
+			// Render logic here using color and text
+		}
+	}
+}
 
 void Gui::gui_init()
 {
@@ -106,16 +125,111 @@ void Gui::gui_render()
 
 	// Render to the message log window
 	wclear(messageLogWindow);
-	box(messageLogWindow, 0, 0);
+	/*box(messageLogWindow, 0, 0);*/
 
-	wattron(messageLogWindow, COLOR_PAIR(guiMessageColor));
-	mvwprintw(messageLogWindow, 1, 1, guiMessage.c_str());
+	// Assuming maxMessagesToShow is the maximum number of messages you want to display
+	const int maxMessagesToShow = 5;
+	int messagesToShow = std::min(maxMessagesToShow, static_cast<int>(game.attackMessagesWhole.size()));
+
+	for (int i = 0; i < messagesToShow; i++)
+	{
+		const auto& messageParts = game.attackMessagesWhole[game.attackMessagesWhole.size() - 1 - i];
+
+		int currentX = 0; // starting position for each message
+
+		for (const auto& part : messageParts)
+		{
+			wattron(messageLogWindow, COLOR_PAIR(part.first));  // Turn on color
+			mvwprintw(messageLogWindow, i, currentX, part.second.c_str());
+			wattroff(messageLogWindow, COLOR_PAIR(part.first)); // Turn off color immediately after
+			currentX += part.second.size(); // increment the X position by the length of the message part
+		}
+	}
 	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor));
+
+	//int yCoordinate = 1; // Starting Y coordinate for messages
+
+	//// display messages to the message log window
+	//for (const auto& message : game.attackMessagesWhole) {
+	//	int xCoordinate = 1; // Starting X coordinate for each message
+
+	//	for (const auto& part : message) {
+	//		int color = part.first;
+	//		const std::string& text = part.second;
+
+	//		// Set color attributes
+	//		wattron(messageLogWindow, COLOR_PAIR(color));
+	//		mvwprintw(messageLogWindow, yCoordinate, xCoordinate, text.c_str());
+	//		wattroff(messageLogWindow, COLOR_PAIR(color));
+
+	//		xCoordinate += text.length(); // Adjust X coordinate for next part
+	//	}
+
+	//	yCoordinate++; // Move to the next line for the next message
+	//	if (yCoordinate >= LOG_HEIGHT) { // Or whatever your window height is
+	//		break; // Stop rendering if we've reached the end of the window
+	//	}
+	//}
+
+	//wattron(messageLogWindow, COLOR_PAIR(guiMessageColor));
+	//mvwprintw(messageLogWindow, 1, 1, guiMessage.c_str());
+	//wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor));
+
+	// display messages to the message log window
+	int messageCount = 0;
+	for (const auto& message : game.attackMessagesWhole)
+	{
+		// print every message in the vector and enumerate them
+		/*mvwprintw(messageLogWindow, 0, 1, "%d: %s", messageCount, message.second.c_str());*/
+
+		/*gui_print_message(message.second, message.first);*/
+
+		messageCount++;
+	}
+
+	//// print a message using escape code colors to the message log window
+	//mvwprintw(messageLogWindow, 0, 1, "\x1b[31mHello World!\x1b[0m");
+
+	// print a colored string to the message log window
+	// first argument is the window to print to
+	// second argument is the y coordinate
+	// third argument is the x coordinate
+	// fourth argument is the string to print
+	// fifth argument is the color pair to use
+
 
 	wrefresh(messageLogWindow);
 
 	wrefresh(statsWindow);
 	gui_refresh();
+}
+
+// make a function for printing colored strings to the message log window
+void Gui::gui_print_message(const std::string& message, int colorPair) noexcept
+{
+	// print a colored string to the message log window
+	// first argument is the window to print to
+	// second argument is the y coordinate
+	// third argument is the x coordinate
+	// fourth argument is the string to print
+	// fifth argument is the color pair to use
+	wattron(messageLogWindow, COLOR_PAIR(colorPair));
+	mvwprintw(messageLogWindow, 0, 1, message.c_str());
+	wattroff(messageLogWindow, COLOR_PAIR(colorPair));
+}
+
+// make a function to extract the color pairs from the message vector and print them to the message log window
+void Gui::gui_print_messages() noexcept
+{
+	// display messages to the message log window
+	int messageCount = 0;
+	for (const auto& message : game.attackMessagesWhole)
+	{
+		// print every message in the vector and enumerate them
+		/*gui_print_message(message.second, message.first);*/
+
+		messageCount++;
+	}
 }
 
 void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
@@ -136,17 +250,17 @@ void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax
 void Gui::gui_print_attrs(int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma) noexcept
 {
 	// print strength
-	mvwprintw(guiWin, 1, 1, "Strength: %d", strength);
+	mvwprintw(guiWin, 1, 1, "Str: %d ", strength);
 	// same row print dexterity
-	mvwprintw(guiWin, 1, 14, "Dexterity: %d", dexterity);
+	mvwprintw(guiWin, 1, 9, "Dex: %d ", dexterity);
 	// print constitution
-	mvwprintw(guiWin, 1, 28, "Constitution: %d", constitution);
+	mvwprintw(guiWin, 1, 18, "Con: %d ", constitution);
 	// print intelligence
-	mvwprintw(guiWin, 1, 45, "Intelligence: %d", intelligence);
+	mvwprintw(guiWin, 1, 27, "Int: %d ", intelligence);
 	// print wisdom
-	mvwprintw(guiWin, 1, 62, "Wisdom: %d", wisdom);
+	mvwprintw(guiWin, 1, 36, "Wis: %d ", wisdom);
 	// print charisma
-	mvwprintw(guiWin, 1, 75, "Charisma: %d", charisma);
+	mvwprintw(guiWin, 1, 45, "Cha: %d ", charisma);
 }
 
 void Gui::gui()

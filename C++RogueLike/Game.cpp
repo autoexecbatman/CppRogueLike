@@ -69,7 +69,7 @@ void Game::update()
 		if (game.player->destructible->is_dead())
 		{
 			game.log("Player is dead!");
-			game.message(COLOR_RED, "You died! Press any key...");
+			game.message(COLOR_RED, "You died! Press any key...",true);
 			run = false;
 		}
 		else
@@ -837,14 +837,14 @@ void Game::next_level()
 	dungeonLevel++;
 
 	// present a message to the player -> TODO : move this to the gui
-	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.");
+	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true);
 
 	// heal the player
 	player->destructible->heal(player->destructible->hpMax / 2);
 
 	// present a message to the player -> TODO : move this to the gui
-	game.message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...");
-	game.message(WHITE_PAIR, std::format("You are now on level %d", dungeonLevel));
+	game.message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...",true);
+	game.message(WHITE_PAIR, std::format("You are now on level %d", dungeonLevel),true);
 
 	// clear the actors container except the player and the stairs
 	actors.clear();
@@ -1047,17 +1047,47 @@ void Game::log(const std::string& message)
 	}
 }
 
-void Game::message(int color, const std::string& text)
+void Game::message(int color, const std::string& text, bool isComplete = false)
 {
 	// store message in game
 	messageToDisplay = text;
 	messageColor = color;
 
-	game.attackMessageParts.push_back(std::make_pair(color, text));
+	// Always append the message part to attackMessageParts
+	attackMessageParts.push_back({ color, text });
+
+	// If isComplete flag is set, consider the message to be finished
+	if (isComplete) {
+		// Add the entire composed message parts to attackMessagesWhole
+		attackMessagesWhole.push_back(attackMessageParts);
+
+		// Clear attackMessageParts for the next message
+		attackMessageParts.clear();
+	}
 
 	game.log("Stored message: '" + messageToDisplay + "'");
 	game.log("Stored message color: " + std::to_string(messageColor));
 
+}
+
+void Game::appendMessagePart(int color, const std::string& text) {
+	attackMessageParts.push_back({ color, text });
+}
+
+void Game::finalizeMessage() {
+	if (!attackMessageParts.empty()) {
+		attackMessagesWhole.push_back(attackMessageParts);
+		attackMessageParts.clear();
+	}
+}
+
+// A possible function in Game.cpp
+
+void Game::transferMessagesToGui() {
+	for (const auto& message : attackMessagesWhole) {
+		gui->addDisplayMessage(message);
+	}
+	attackMessagesWhole.clear();
 }
 
 // end of file: Game.cpp

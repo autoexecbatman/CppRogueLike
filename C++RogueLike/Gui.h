@@ -31,6 +31,15 @@ constexpr int GUI_HEIGHT{ 7 };
 
 class Gui : public Persistent
 {
+	// In Gui.h
+
+private:
+	std::vector<std::vector<std::pair<int, std::string>>> displayMessages;
+
+public:
+	void addDisplayMessage(const std::vector<std::pair<int, std::string>>& message);
+	void renderMessages();
+
 public:
 	~Gui()
 	{
@@ -56,6 +65,10 @@ public:
 	void gui_shutdown(); // shutdown the gui
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
+
+	void gui_print_message(const std::string& message, int colorPair) noexcept;
+
+	void gui_print_messages() noexcept;
 
 	void gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept;
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;

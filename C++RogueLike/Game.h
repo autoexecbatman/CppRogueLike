@@ -17,9 +17,9 @@ class Game
 {
 private:
 	std::vector<std::pair<int, std::string>> attackMessageParts; // this vector holds the parts of the attack message
-	std::vector <std::vector<std::vector<std::pair<int, std::string>>>> attackMessagesWhole; // this vector holds all of the attack messages
 
 public:
+	std::vector <std::vector<std::pair<int, std::string>>> attackMessagesWhole; // this vector holds all of the attack messages
 	std::string messageToDisplay{ "Init Message" };
 	int messageColor{ EMPTY_PAIR };
 
@@ -91,7 +91,10 @@ public:
 	void log(const std::string& message);
 
 	//==MESSAGE FUNCTIONS==//
-	void message(int color, const std::string& text);
+	void message(int color, const std::string& text, bool isComplete);
+	void appendMessagePart(int color, const std::string& text);
+	void finalizeMessage();
+	void transferMessagesToGui();
 
 private:
 	// Private member variables.

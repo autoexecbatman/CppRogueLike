@@ -21,7 +21,7 @@ void Colors::my_init_pair() noexcept
 	init_pair(2, COLOR_CYAN, COLOR_BLUE);//water color
 	init_pair(3, COLOR_BLACK, COLOR_WHITE);//mountain color
 	init_pair(4, COLOR_RED, COLOR_BLACK);//orc color
-	init_pair(5, COLOR_WHITE, COLOR_BLACK);//player color
+	init_pair(5, COLOR_GREEN, COLOR_MAGENTA);//player color
 	init_pair(6, COLOR_BLUE, COLOR_RED);//wall color
 	init_pair(7, COLOR_RED, COLOR_WHITE);//light wall color
 	init_pair(8, COLOR_GREEN, COLOR_YELLOW);//light ground color

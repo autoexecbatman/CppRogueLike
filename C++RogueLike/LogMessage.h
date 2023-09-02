@@ -9,8 +9,8 @@
 
 struct LogMessage
 {
-	std::string logMessageText{};
 	int logMessageColor{ 0 };
+	std::string logMessageText{};
 };
 
 #endif // !LOGMESSAGE_H

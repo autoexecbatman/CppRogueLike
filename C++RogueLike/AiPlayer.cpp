@@ -214,7 +214,7 @@ void AiPlayer::update(Actor& owner)
 	case Controls::QUIT:
 	{
 		game.run = false;
-		game.message(WHITE_PAIR, "You quit the game ! Press any key ...");
+		game.message(WHITE_PAIR, "You quit the game ! Press any key ...",true);
 		break;
 	}
 
@@ -309,7 +309,7 @@ void AiPlayer::pick_item(Actor& owner)
 	// Log a message if there's nothing to pick up
 	if (!found)
 	{
-		game.message(WHITE_PAIR, "There is nothing to pick up.");
+		game.message(WHITE_PAIR, "There is nothing to pick up.",true);
 	}
 
 	game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -336,7 +336,7 @@ bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
 		// store the message here because actor is destroyed if picked
 		if (actor)
 		{
-			game.message(WHITE_PAIR, std::format("You take the {}.", actor->name));
+			game.message(WHITE_PAIR, std::format("You take the {}.", actor->name),true);
 		}
 		else
 		{
@@ -346,7 +346,7 @@ bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
 	}
 	else
 	{
-		game.message(HPBARMISSING_PAIR, "Your inventory is full.");
+		game.message(HPBARMISSING_PAIR, "Your inventory is full.",true);
 	}
 
 	return picked;
