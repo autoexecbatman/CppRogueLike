@@ -7,21 +7,46 @@
 #include "Colors.h"
 #include "LogMessage.h"
 
+// guiWin is the main gui window
+// ==== ==== ==== ==== ====
 constexpr int PANEL_HEIGHT = 7;
-constexpr int PANEL_WIDTH = 60;
+constexpr int PANEL_WIDTH = 118;
 constexpr int GUI_Y = 22;
 constexpr int GUI_X = 0;
+// ==== ==== ==== ==== ====
 
 constexpr int BAR_WIDTH = 20;
 
 constexpr int MSG_HEIGHT = PANEL_HEIGHT - 2;
 constexpr int MSG_X = BAR_WIDTH + 2;
 
+// statsWindow is the window that displays the player's stats
+// ==== ==== ==== ==== ====
+constexpr int STATS_HEIGHT = PANEL_HEIGHT;
+constexpr int STATS_WIDTH = 20;
+constexpr int STATS_Y = 0;
+constexpr int STATS_X = 0;
+// ==== ==== ==== ==== ====
+
+// messageLogWindow is the window that displays the message log
+// ==== ==== ==== ==== ====
+constexpr int LOG_HEIGHT = PANEL_HEIGHT - 3;
+constexpr int LOG_WIDTH = 56;
+constexpr int LOG_Y = 2;
+constexpr int LOG_X = 60;
+// ==== ==== ==== ==== ====
+
 void Gui::gui_init()
 {
-	
+	// main gui window
 	gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);
 
+	// stats window
+	statsWindow = derwin(guiWin, STATS_HEIGHT, STATS_WIDTH, STATS_Y, STATS_X);
+	// message log window
+	messageLogWindow = derwin(guiWin, LOG_HEIGHT, LOG_WIDTH, LOG_Y, LOG_X);
+
+	// set hp and hpMax
 	if (game.player->destructible)
 	{
 		guiHp = game.player->destructible->hp;
@@ -36,7 +61,9 @@ void Gui::gui_init()
 
 void Gui::gui_shutdown()
 {
-	gui_delete();
+	delwin(statsWindow); // delete the stats window
+	delwin(messageLogWindow); // delete the message log window
+	gui_delete(); // delete the main gui window
 }
 
 void Gui::gui_update()
@@ -52,22 +79,74 @@ void Gui::gui_update()
 void Gui::gui_render()
 {
 	gui_clear();
-	box(guiWin, 0, 0);
-	if (game.player->name.empty()) { game.player->name = "Player"; }
-	mvwprintw(guiWin, 1, 1, "Name: %s", game.player->name.c_str());
-	mvwprintw(guiWin, 2, 1, "HP:%d/%d", guiHp, guiHpMax);
-	mvwprintw(guiWin, 3, 1, "Attack:%d", game.player->attacker->dmg);
-	mvwprintw(guiWin, 4, 1, "Defense:%d", game.player->destructible->dr);
+	wclear(statsWindow);
+
+	box(guiWin, 0, 0); // border
+
+	// print the player's attributes on guiWin
+	gui_print_attrs(
+		game.player->strength,
+		game.player->dexterity,
+		game.player->constitution,
+		game.player->intelligence,
+		game.player->wisdom,
+		game.player->charisma
+	);
+
+	gui_print_stats(
+		game.player->name,
+		guiHp,
+		guiHpMax,
+		game.player->attacker->dmg,
+		game.player->destructible->dr
+	);
+
+	// mouse look
 	renderMouseLook();
 
-	// message to render
-	wattron(guiWin, COLOR_PAIR(guiMessageColor));
-	mvwprintw(guiWin, 5, 1, guiMessage.c_str());
-	wattroff(guiWin, COLOR_PAIR(guiMessageColor));
-	// use curses make new line
-	
+	// Render to the message log window
+	wclear(messageLogWindow);
+	box(messageLogWindow, 0, 0);
 
+	wattron(messageLogWindow, COLOR_PAIR(guiMessageColor));
+	mvwprintw(messageLogWindow, 1, 1, guiMessage.c_str());
+	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor));
+
+	wrefresh(messageLogWindow);
+
+	wrefresh(statsWindow);
 	gui_refresh();
+}
+
+void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
+{
+	// check if the player has no name input then place default name
+	if (game.player->name.empty()) { game.player->name = "Player"; }
+
+	// print name
+	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName.c_str());
+	// print hp
+	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
+	// print attack
+	mvwprintw(guiWin, 4, 1, "Attack:%d", damage);
+	// print defense
+	mvwprintw(guiWin, 5, 1, "Defense:%d", dr);
+}
+
+void Gui::gui_print_attrs(int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma) noexcept
+{
+	// print strength
+	mvwprintw(guiWin, 1, 1, "Strength: %d", strength);
+	// same row print dexterity
+	mvwprintw(guiWin, 1, 14, "Dexterity: %d", dexterity);
+	// print constitution
+	mvwprintw(guiWin, 1, 28, "Constitution: %d", constitution);
+	// print intelligence
+	mvwprintw(guiWin, 1, 45, "Intelligence: %d", intelligence);
+	// print wisdom
+	mvwprintw(guiWin, 1, 62, "Wisdom: %d", wisdom);
+	// print charisma
+	mvwprintw(guiWin, 1, 75, "Charisma: %d", charisma);
 }
 
 void Gui::gui()
@@ -174,10 +253,10 @@ void Gui::render()
 		//for (const auto message : log)
 		//{
 		//	wclear(sub);
-		//	/*wcolor_set(con, message->log_message_color, 0);*/
-		//	wattron(sub, COLOR_PAIR(message->log_message_color));
-		//	mvwprintw(sub, 0, 0, message->log_message_text);
-		//	wattroff(sub, COLOR_PAIR(message->log_message_color));
+		//	/*wcolor_set(con, message->logMessageColor, 0);*/
+		//	wattron(sub, COLOR_PAIR(message->logMessageColor));
+		//	mvwprintw(sub, 0, 0, message->logMessageText);
+		//	wattroff(sub, COLOR_PAIR(message->logMessageColor));
 		//	y++;
 		//}
 	}
@@ -216,19 +295,19 @@ void Gui::render()
 	std::clog << "Gui rendering complete." << std::endl;
 }
 
-void Gui::log_message(int log_message_col, const char* log_message_text, ...)
+void Gui::log_message(int log_message_col, const char* logMessageText, ...)
 {
 	// DEBUG log
 	//std::clog << "void Gui::log_message() {}" << std::endl;
 	
 	std::clog << "log_message_col: " << log_message_col << std::endl;
-	std::clog << "log_message_text: " << log_message_text << std::endl;
+	std::clog << "log_message_text: " << logMessageText << std::endl;
 
 	//// build the text
 	//va_list args;
 	//char buf[128];
-	//va_start(args, log_message_text);
-	//vsprintf_s(buf, log_message_text, args);
+	//va_start(args, logMessageText);
+	//vsprintf_s(buf, logMessageText, args);
 	//va_end(args);
 	//
 	//char* lineBegin = buf;
@@ -369,7 +448,7 @@ void Gui::print_container(const std::vector<std::shared_ptr<LogMessage>>& logMes
 	int i = 0;
 	for (const auto& m : logMessage)
 	{
-		std::cout << i << m->log_message_text << " ";
+		std::cout << i << m->logMessageText << " ";
 		i++;
 	}
 	std::cout << '\n';
@@ -418,8 +497,8 @@ void Gui::save(TCODZip& zip)
 	zip.putInt(logSize);
 	for (const auto& message : log)
 	{
-		zip.putString(message->log_message_text.c_str());
-		zip.putInt(message->log_message_color);
+		zip.putString(message->logMessageText.c_str());
+		zip.putInt(message->logMessageColor);
 	}
 }
 

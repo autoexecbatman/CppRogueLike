@@ -12,13 +12,13 @@
 
 Attacker::Attacker(int dmg) noexcept : dmg(dmg) {}
 
-void Attacker::attack(const Actor& owner, Actor& target)
+void Attacker::attack(const Actor& attacker, Actor& target)
 {
 	if (!target.destructible) { std::cout << "Attacker::attack() - target.destructible is null." << std::endl; return; }
 
-	if (!target.destructible->is_dead() && owner.strength > 0)
+	if (!target.destructible->is_dead() && attacker.strength > 0)
 	{
-		int str = owner.strength - 1; // -1 to access vector index from 0
+		int str = attacker.strength - 1; // -1 to access vector index from 0
 		std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
 		try
 		{
@@ -32,17 +32,18 @@ void Attacker::attack(const Actor& owner, Actor& target)
 				if (totaldmg > 0)
 				{
 					// game.message for attack occured
-					game.message(WHITE_PAIR, std::format("{} attacks {} for {} hit points.", owner.name, target.name, totaldmg));
-
+					game.message(WHITE_PAIR, std::format("{} attacks {} for {} hit points.", attacker.name, target.name, totaldmg));
 
 					// TODO : use game.message instead of mvprintw below, to keep order of clear screen.
-					// color of attacker 
-					attron(COLOR_PAIR(owner.col));
-					mvprintw(0, 0, "%s", owner.name.c_str());
-					attroff(COLOR_PAIR(owner.col)); // color off
+					// color of attacker
+					attron(COLOR_PAIR(attacker.col));
+					mvprintw(0, 0, "%s", attacker.name.c_str());
+					attroff(COLOR_PAIR(attacker.col)); // color off
+
+					game.message(attacker.col, std::format("{}", attacker.name));
 
 					// get name length of attacker
-					const int ownerNameLen = gsl::narrow_cast<int>(owner.name.length());
+					const int ownerNameLen = gsl::narrow_cast<int>(attacker.name.length());
 
 					// additional string
 					std::string attacksThe = " attacks the ";
@@ -53,11 +54,15 @@ void Attacker::attack(const Actor& owner, Actor& target)
 					// print attacksThe
 					mvprintw(0, ownerNameLen, attacksThe.c_str());
 
+					game.message(WHITE_PAIR, std::format("{}", attacksThe));
+
 					// color target
 					attron(COLOR_PAIR(target.col));
 
 					// print target name in color
 					mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
+
+					game.message(target.col, std::format("{}", target.name));
 
 					// color off
 					attroff(COLOR_PAIR(target.col));
@@ -68,9 +73,14 @@ void Attacker::attack(const Actor& owner, Actor& target)
 					// print HP damage
 					mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", totaldmg);
 
+					game.message(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
 				}
 				// else no damage message
-				else { mvprintw(29, 0, "%s attacks %s but it has no effect!\n", owner.name.c_str(), target.name.c_str()); }
+				else 
+				{ 
+					/*mvprintw(29, 0, "%s attacks %s but it has no effect!\n", attacker.name.c_str(), target.name.c_str()); */
+					game.message(WHITE_PAIR, std::format("{} attacks {} but it has no effect!", attacker.name, target.name));
+				}
 			}
 			else { game.err("OUT OF BOUNDS!"); return; }
 		}
@@ -84,7 +94,7 @@ void Attacker::attack(const Actor& owner, Actor& target)
 	}
 	else
 	{
-		mvprintw(29, 0, "%s attacks %s in vain.\n", owner.name.c_str(), target.name.c_str());
+		mvprintw(29, 0, "%s attacks %s in vain.\n", attacker.name.c_str(), target.name.c_str());
 	}
 }
 

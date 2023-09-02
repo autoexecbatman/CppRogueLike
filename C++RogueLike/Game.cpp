@@ -1053,6 +1053,8 @@ void Game::message(int color, const std::string& text)
 	messageToDisplay = text;
 	messageColor = color;
 
+	game.attackMessageParts.push_back(std::make_pair(color, text));
+
 	game.log("Stored message: '" + messageToDisplay + "'");
 	game.log("Stored message color: " + std::to_string(messageColor));
 

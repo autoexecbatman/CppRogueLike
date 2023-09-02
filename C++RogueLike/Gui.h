@@ -34,13 +34,15 @@ class Gui : public Persistent
 public:
 	~Gui()
 	{
+		// TODO : these windows are not in use anymore
 		delete con;
 		delete sub;
 	}
 private:
 	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
+
+	int guiMessageColor{ 0 }; // the color of the message to be displayed on the gui
 	std::string guiMessage{}; // the message to be displayed on the gui
-	int guiMessageColor{}; // the color of the message to be displayed on the gui
 
 	WINDOW* guiWin{ nullptr };
 
@@ -55,15 +57,22 @@ public:
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
 
+	void gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept;
+	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
+
 	void gui();
 	void render();
 	
-	void log_message(int log_message_color, const char* log_message_text, ...); // We want a handy function to write to the log using curses basically format with color
+	// this function will be redundant soon
+	void log_message(int logMessageColor, const char* logMessageText, ...); // We want a handy function to write to the log using curses basically format with color
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
 protected:
+	gsl::owner<WINDOW*> statsWindow{ nullptr };
+	gsl::owner<WINDOW*> messageLogWindow{ nullptr };
+
 	gsl::owner<WINDOW*> con{ nullptr }; // the gui window
 	gsl::owner<WINDOW*> sub{ nullptr }; // a subwindow in the gui
 	

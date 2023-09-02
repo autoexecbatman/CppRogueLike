@@ -15,10 +15,10 @@ class Attacker : public Persistent
 {
 public:
 	int dmg{ 0 };
-	
+
 	Attacker(int dmg) noexcept;
 
-	void attack(const Actor& owner, Actor& target);
+	void attack(const Actor& attacker, Actor& target);
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

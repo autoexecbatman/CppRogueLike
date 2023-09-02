@@ -15,9 +15,14 @@
 
 class Game
 {
+private:
+	std::vector<std::pair<int, std::string>> attackMessageParts; // this vector holds the parts of the attack message
+	std::vector <std::vector<std::vector<std::pair<int, std::string>>>> attackMessagesWhole; // this vector holds all of the attack messages
+
 public:
 	std::string messageToDisplay{ "Init Message" };
 	int messageColor{ EMPTY_PAIR };
+
 	bool run{ true };
 	bool shouldSave{ true };
 	enum class GameStatus : int
