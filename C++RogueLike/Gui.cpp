@@ -98,9 +98,11 @@ void Gui::gui_update()
 void Gui::gui_render()
 {
 	gui_clear();
-	wclear(statsWindow);
-
+	
 	box(guiWin, 0, 0); // border
+
+	// mouse look
+	renderMouseLook();
 
 	// print the player's attributes on guiWin
 	gui_print_attrs(
@@ -120,15 +122,16 @@ void Gui::gui_render()
 		game.player->destructible->dr
 	);
 
-	// mouse look
-	renderMouseLook();
+	gui_print_log();
 
-	// Render to the message log window
-	wclear(messageLogWindow);
-	/*box(messageLogWindow, 0, 0);*/
+	gui_refresh();
+}
 
-	// Assuming maxMessagesToShow is the maximum number of messages you want to display
+void Gui::gui_print_log()
+{
+	// maxMessagesToShow is the maximum number of messages to display
 	const int maxMessagesToShow = 5;
+	// messagesToShow is the number of messages to display based on the size of the attackMessagesWhole vector
 	int messagesToShow = std::min(maxMessagesToShow, static_cast<int>(game.attackMessagesWhole.size()));
 
 	for (int i = 0; i < messagesToShow; i++)
@@ -145,91 +148,7 @@ void Gui::gui_render()
 			currentX += part.second.size(); // increment the X position by the length of the message part
 		}
 	}
-	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor));
-
-	//int yCoordinate = 1; // Starting Y coordinate for messages
-
-	//// display messages to the message log window
-	//for (const auto& message : game.attackMessagesWhole) {
-	//	int xCoordinate = 1; // Starting X coordinate for each message
-
-	//	for (const auto& part : message) {
-	//		int color = part.first;
-	//		const std::string& text = part.second;
-
-	//		// Set color attributes
-	//		wattron(messageLogWindow, COLOR_PAIR(color));
-	//		mvwprintw(messageLogWindow, yCoordinate, xCoordinate, text.c_str());
-	//		wattroff(messageLogWindow, COLOR_PAIR(color));
-
-	//		xCoordinate += text.length(); // Adjust X coordinate for next part
-	//	}
-
-	//	yCoordinate++; // Move to the next line for the next message
-	//	if (yCoordinate >= LOG_HEIGHT) { // Or whatever your window height is
-	//		break; // Stop rendering if we've reached the end of the window
-	//	}
-	//}
-
-	//wattron(messageLogWindow, COLOR_PAIR(guiMessageColor));
-	//mvwprintw(messageLogWindow, 1, 1, guiMessage.c_str());
-	//wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor));
-
-	// display messages to the message log window
-	int messageCount = 0;
-	for (const auto& message : game.attackMessagesWhole)
-	{
-		// print every message in the vector and enumerate them
-		/*mvwprintw(messageLogWindow, 0, 1, "%d: %s", messageCount, message.second.c_str());*/
-
-		/*gui_print_message(message.second, message.first);*/
-
-		messageCount++;
-	}
-
-	//// print a message using escape code colors to the message log window
-	//mvwprintw(messageLogWindow, 0, 1, "\x1b[31mHello World!\x1b[0m");
-
-	// print a colored string to the message log window
-	// first argument is the window to print to
-	// second argument is the y coordinate
-	// third argument is the x coordinate
-	// fourth argument is the string to print
-	// fifth argument is the color pair to use
-
-
-	wrefresh(messageLogWindow);
-
-	wrefresh(statsWindow);
-	gui_refresh();
-}
-
-// make a function for printing colored strings to the message log window
-void Gui::gui_print_message(const std::string& message, int colorPair) noexcept
-{
-	// print a colored string to the message log window
-	// first argument is the window to print to
-	// second argument is the y coordinate
-	// third argument is the x coordinate
-	// fourth argument is the string to print
-	// fifth argument is the color pair to use
-	wattron(messageLogWindow, COLOR_PAIR(colorPair));
-	mvwprintw(messageLogWindow, 0, 1, message.c_str());
-	wattroff(messageLogWindow, COLOR_PAIR(colorPair));
-}
-
-// make a function to extract the color pairs from the message vector and print them to the message log window
-void Gui::gui_print_messages() noexcept
-{
-	// display messages to the message log window
-	int messageCount = 0;
-	for (const auto& message : game.attackMessagesWhole)
-	{
-		// print every message in the vector and enumerate them
-		/*gui_print_message(message.second, message.first);*/
-
-		messageCount++;
-	}
+	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor)); // Turn off color
 }
 
 void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept

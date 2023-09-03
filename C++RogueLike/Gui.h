@@ -56,9 +56,9 @@ private:
 	WINDOW* guiWin{ nullptr };
 
 	void gui_new(int height, int width, int starty, int startx) noexcept { guiWin = newwin(height, width, starty, startx); }
-	void gui_clear() noexcept { wclear(guiWin); }
+	void gui_clear() noexcept { wclear(statsWindow); wclear(messageLogWindow); wclear(guiWin); }
 	void gui_print(int x, int y, const std::string& text) noexcept { mvwprintw(guiWin, y, x, text.c_str()); }
-	void gui_refresh() noexcept { wrefresh(guiWin); }
+	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 public:
 	void gui_init(); // initialize the gui
@@ -66,11 +66,8 @@ public:
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
 
-	void gui_print_message(const std::string& message, int colorPair) noexcept;
-
-	void gui_print_messages() noexcept;
-
 	void gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept;
+	void gui_print_log();
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
 
 	void gui();
