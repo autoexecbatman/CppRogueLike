@@ -6,8 +6,6 @@
 
 *Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.*
 
-### OPEN FOR CONTRIBUTION !!! 🤗
-
 ## *** UNDER CONSTRUCTION! ***:construction:
 
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
@@ -19,6 +17,7 @@
 
 # Contributing to CppRogueLike
 
+#### OPEN TO CONTRIBUTION !!! 🤗
 Thank you for considering a contribution to CppRogueLike.
 
 ## Running Using Visual Studio 2022
