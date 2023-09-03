@@ -1,8 +1,10 @@
+### This is a home for a mysterious roguelike...
+
+
+
+## *** UNDER CONSTRUCTION! ***:construction:
+
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
-
-#### This is a home for a mysterious roguelike...
-
-*** UNDER CONSTRUCTION! ***:construction:
 
 ## Running The Game From RAR
    - Clone the repository
