@@ -384,3 +384,5 @@ FodyWeavers.xsd
 /Sample-Test1/pch.cpp
 /Sample-Test1/pch.h
 /Sample-Test1/test.cpp
+/UnitTest1/pch.h
+/UT_PDCurses_draw/main_UT_PDCurses_draw.cpp
