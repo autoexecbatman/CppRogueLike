@@ -1,8 +1,14 @@
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
+*This is a home for a mysterious roguelike...:construction:
+
 ## Running The Game From RAR
    - Clone the repository
    - Extract the folder in **cpprl pre-release-x64.rar**
    - Run the executable from the folder !
+
+# Contributing to CppRogueLike
+
+Thank you for considering a contribution to CppRogueLike.
 
 ## Running Using Visual Studio 2022
 
@@ -59,10 +65,6 @@
 **Note IMPORTANT**: Will not build currently due to missing additional ChatGPT API related headers. Please comment out ChatGPT API related `#include` in `Game.h` and a few lines in `main()`. This issue will be addressed soon.
 
 
-# Contributing to CppRogueLike
-
-Thank you for considering a contribution to CppRogueLike.
-
 ## Development Environment
 
 I primarily use **Visual Studio 2022** for development. However, if you're comfortable with other environments like VS Code, feel free to use them. If you need assistance with setting up, reach out, and i'll help.
@@ -75,3 +77,4 @@ Ensure your contributions adhere to the [C++ Core Guidelines](https://isocpp.git
 - [ad&d 2e book](https://archive.org/details/advanced-dungeons-dragons-2nd-edition)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 - [Git and GitHub Handbook](https://guides.github.com/)
+- [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html)
