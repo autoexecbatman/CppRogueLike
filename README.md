@@ -1,10 +1,10 @@
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
 
-### This is a home for a mysterious roguelike...
+*This is a home for a mysterious roguelike...*
 
-The vision for this project is to have a fun fantasy adnd2e RL game.
+*The vision for this project is to have a fun fantasy adnd2e RL game.*
 
-Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.
+*Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.*
 
 ### OPEN FOR CONTRIBUTION !!! 🤗
 
