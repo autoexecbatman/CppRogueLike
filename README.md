@@ -1,4 +1,9 @@
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
+## Running The Game From RAR
+   - Clone the repository
+   - Extract the folder in **cpprl pre-release-x64.rar**
+   - Run the executable from the folder !
+
 ## Running Using Visual Studio 2022
 
 1. **Install Visual Studio 2022**: Download and install for free from [VisualStudio2022](https://visualstudio.microsoft.com/downloads/).
