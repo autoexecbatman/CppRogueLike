@@ -14,15 +14,15 @@ Attacker::Attacker(int dmg) noexcept : dmg(dmg) {}
 
 void Attacker::attack(const Actor& attacker, Actor& target)
 {
-	if (!target.destructible) { std::cout << "Attacker::attack() - target.destructible is null." << std::endl; return; }
+	if (!target.destructible) { game.log("Attacker::attack() - target.destructible is null."); return; }
 
-	if (!target.destructible->is_dead() && attacker.strength > 0)
+	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
 		int str = attacker.strength - 1; // -1 to access vector index from 0
 		std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
 		try
 		{
-			if (str >= 0 && str < static_cast<int>(attrs.size()))
+			if (str >= 0 && str < static_cast<int>(attrs.size())) // if str is in range of vector size
 			{
 				StrengthAttributes strength = attrs[str];
 				int adjDmg = dmg + strength.dmgAdj; // Adjusted damage
@@ -59,7 +59,11 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 	}
 	else
 	{
-		mvprintw(29, 0, "%s attacks %s in vain.\n", attacker.name.c_str(), target.name.c_str());
+		game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+		game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+		game.appendMessagePart(target.col, std::format("{}", target.name));
+		game.appendMessagePart(WHITE_PAIR, std::format(" in vain."));
+		game.finalizeMessage();
 	}
 }
 
