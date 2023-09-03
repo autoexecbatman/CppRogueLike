@@ -20,8 +20,11 @@
 
 #include "StrengthAttributes.h"
 
-#include "ChatGPT.h" // for openai::start
-#include "include/user_config.h"
+//==OPENAI_API==
+/*#include "ChatGPT.h"*/ // for openai::start
+/*#include "include/user_config.h"*/ 
+//====
+
 #include "main_C++RogueLike.h"
 
 Game game;
@@ -33,7 +36,7 @@ int main()
 	/*_CrtSetBreakAlloc(1779);*/
 
 	//==OPENAI_API==
-	openai::start(API_KEY, "");
+	/*openai::start(API_KEY, "");*/
 
 	//==DEBUG_STREAM==
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
@@ -86,6 +89,8 @@ int main()
 	}
 	
 	game.save_all();
+
+	// make sure to shut down all windows before exiting the program
 	gui.gui_shutdown();
 	endwin();
 	if (isendwin())
@@ -99,7 +104,7 @@ int main()
 		std::cout << "Curses shutdown failed.\n";
 	}
 
-	print_chart();
+	print_chart(); // print strength chart for debugging
 
 	debugFile.close();
 	/*_CrtDumpMemoryLeaks();*/
