@@ -31,73 +31,20 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 				// if damage is dealt display combat messages
 				if (totaldmg > 0)
 				{
-					// game.message for attack occured
-					/*game.message(WHITE_PAIR, std::format("{} attacks {} for {} hit points.", attacker.name, target.name, totaldmg),true);*/
-
-					//game.appendMessagePart(attacker.col, std::format("{} attacks {} for {} hit points.", attacker.name, target.name, totaldmg));
-					//game.finalizeMessage();
-
-					// TODO : use game.message instead of mvprintw below, to keep order of clear screen.
-					// color of attacker
-					attron(COLOR_PAIR(attacker.col));
-					mvprintw(0, 0, "%s", attacker.name.c_str());
-					attroff(COLOR_PAIR(attacker.col)); // color off
-
-					/*game.message(attacker.col, std::format("{}", attacker.name),false);*/
-
 					game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
-
-					// get name length of attacker
-					const int ownerNameLen = gsl::narrow_cast<int>(attacker.name.length());
-
-					// additional string
-					std::string attacksThe = " attacks the ";
-
-					// get name length of target
-					const int attacksTheLen = gsl::narrow_cast<int>(attacksThe.length());
-
-					// print attacksThe
-					mvprintw(0, ownerNameLen, attacksThe.c_str());
-
-					/*game.message(WHITE_PAIR, std::format("{}", attacksThe),false);*/
-
-					game.appendMessagePart(WHITE_PAIR, std::format("{}", attacksThe));
-
-					// color target
-					attron(COLOR_PAIR(target.col));
-
-					// print target name in color
-					mvprintw(0, ownerNameLen + attacksTheLen, "%s", target.name.c_str());
-
-					// color off
-					attroff(COLOR_PAIR(target.col));
-
-					/*game.message(target.col, std::format("{}", target.name),false);*/
-
+					game.appendMessagePart(WHITE_PAIR, " attacks the ");
 					game.appendMessagePart(target.col, std::format("{}", target.name));
-
-					// get target name length
-					const int targetNameLen = gsl::narrow_cast<int>(target.name.length());
-
-					// print HP damage
-					mvprintw(0, ownerNameLen + attacksTheLen + targetNameLen, " for %d hit points.\n", totaldmg);
-
-					/*game.message(WHITE_PAIR, std::format(" for {} hit points.", totaldmg),true);*/
-
 					game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
 					game.finalizeMessage();
 				}
 				// else no damage message
 				else 
 				{ 
-					/*mvprintw(29, 0, "%s attacks %s but it has no effect!\n", attacker.name.c_str(), target.name.c_str()); */
-					/*game.message(WHITE_PAIR, std::format("{} attacks {} but it has no effect!", attacker.name, target.name),true);*/
 					game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
 					game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
 					game.appendMessagePart(target.col, std::format("{}", target.name));
 					game.appendMessagePart(WHITE_PAIR, std::format(" but it has no effect!"));
 					game.finalizeMessage();
-
 				}
 			}
 			else { game.err("OUT OF BOUNDS!"); return; }
