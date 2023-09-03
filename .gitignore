@@ -377,3 +377,10 @@ FodyWeavers.xsd
 /UnitTest1/UnitTest1.vcxproj
 /UT_PDCurses_draw/UT_PDCurses_draw.vcxproj.filters
 /UT_PDCurses_draw/UT_PDCurses_draw.vcxproj
+/UT_PDCurses_input/main_UT_PDCurses_input.h
+/UnitTest1/UnitTest1.cpp
+/UnitTest1/pch.cpp
+/Sample-Test1/packages.config
+/Sample-Test1/pch.cpp
+/Sample-Test1/pch.h
+/Sample-Test1/test.cpp
