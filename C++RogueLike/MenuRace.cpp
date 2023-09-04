@@ -124,7 +124,8 @@ void MenuRace::menu_race_halfling()
 void MenuRace::menu_race_random()
 {
 	// randomize player class use radom number generator
-	const auto& rng = game.random_number(1, 6);
+	RandomDice d;
+	const int rng = d.d6();
 	switch (rng)
 	{
 	case 1:

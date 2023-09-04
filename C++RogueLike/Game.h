@@ -81,10 +81,9 @@ public:
 	std::shared_ptr<Actor> get_actor(int x, int y) const;
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
-	int random_number(int min, int max);
 
 	//==DEBUG FUNCTIONS==//
-	void wizard_eye() noexcept;
+	void wizard_eye() noexcept; // prints Actors names instead of their ASCII chars
 	void err(std::string e) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); }
 	void enableDebugMode() { debugMode = true; }
 	void disableDebugMode() { debugMode = false; }

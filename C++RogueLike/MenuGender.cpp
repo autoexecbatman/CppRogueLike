@@ -26,21 +26,28 @@ void MenuGender::menu_gender_assign()
 void MenuGender::menu_gender_assign_random()
 {
 	const Menu menu;
-	// roll a random number between 0 and 1
-	const int rng = game.random_number(0, 1);
+	// roll a random number between 1 and 2
+	RandomDice d;
+	const int rng = d.d2();
 
-	// if the number is 0 return "Male"
-
-	if (rng == 0)
+	// if the number is 1 return "Male"
+	switch(rng)
+	{
+	case 1:
 	{
 		// game.player->gender = ?
 		const auto& male = menu_gender_get_string(MenuGenderOptions::MALE);
 		game.player->gender = male;
 	}
-	else
+	break;
+	case 2:
 	{
 		const auto& female = menu_gender_get_string(MenuGenderOptions::FEMALE);
 		game.player->gender = female;
+	}
+	break;
+	default:
+		break;
 	}
 }
 

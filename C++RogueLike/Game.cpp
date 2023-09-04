@@ -27,67 +27,96 @@
 #include "MenuClass.h"
 #include "MenuName.h"
 
-//====
+//==INIT==
 // When the Game is created, 
-// we don't know yet if we have to generate a new map or load a previously saved one.
-// Will be called in load()
+// We don't know yet if we have to generate a new map or load a previously saved one.
+// Will be called in load_all() when loading and menu() for new game
 void Game::init()
 {
-	if (!game.stairs) { err("game.stairs is nullptr"); }
 	//==STAIRS==
-	game.stairs->blocks = false;
-	game.stairs->fovOnly = false;
-	
+	if (!game.stairs) { err("game.stairs is nullptr"); }
+	game.stairs->blocks = false; // stairs are not blocking
+	game.stairs->fovOnly = false; // stairs are not fovOnly
 	game.actors.push_back(stairs);
 
 	//==MAP==
 	game.map->init(true); // set the checker function
 
+	//==GameStatus==
+	// we set gameStatus to STARTUP because we want to compute the fov only once
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
+
+	//==LOG==
 	game.log("game.init() was called!");
 }
 
+//==CREATE PLAYER==
+// This function sets the arguments to the player pointer
 void Game::create_player()
 {
 	//==PLAYER==
-	RandomDice d;
-	int playerHp = 20 + d.d10();
-	int playerDamage = 2 + d.d8();
+	RandomDice d; // we create a RandomDice object to roll the dice
+	int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
+	int playerDamage = 2 + d.d8(); // we roll the dice to get the player's damage
 
+	// update the player pointer
 	game.player = std::make_shared<Player>(0, 0, playerHp, 5, "your cadaver", 0, playerDamage, true);
+	// add the player to the actors vector for rendering
 	game.actors.emplace_back(game.player);
+
+	// TODO :
+	// 1. Set the playerHp to rolls based on class and attribute modifiers.
+	// 2. Set the playerDamage to rolls based on class and attribute modifiers and weapon.
+	// 3. Set the playerAC to be based on base AC and attribute modifiers and armor.
+
 }
 
-//==ENGINE_UPDATE==
+//==UPDATE==
 // the update function to update the game logic
 // and stores events
 void Game::update()
 {
+	// we check if the pointers are not null
 	if (game.player && game.player->destructible)
 	{
+		// permadeath is enabled !
+		// if the player is dead, we end the game
 		if (game.player->destructible->is_dead())
 		{
-			game.log("Player is dead!");
-			game.message(COLOR_RED, "You died! Press any key...",true);
+			game.log("Player is dead!"); // log the event
+
+			game.appendMessagePart(COLOR_RED, "You died! Press any key...");
+			game.finalizeMessage();
+
+			// set the game loop to stop
 			run = false;
 		}
 		else
 		{
+			// still alive, we update the game logic
+			// to compute the FOV only once for performance
+			// gameStatus should be set to STARTUP
 			if (Game::gameStatus == GameStatus::STARTUP)
 			{
 				game.log("...Computing FOV...");
 				game.map->compute_fov();
 			}
 
+			// we set the gameStatus to IDLE
+			// IDLE is the default state
 			gameStatus = GameStatus::IDLE;
-			std::clog << "GameStatus::IDLE" << std::endl;
+			game.log("GameStatus::IDLE");
 
-			std::clog << "Updating player..." << std::endl;
+			// in the update procedure if the player has moved
+			// we set the gameStatus to NEW_TURN
+			// or IDLE if the player has not moved
+			game.log("Updating player...");
 			game.player->update();
-			std::clog << "Player updated!" << std::endl;
+			game.log("Player updated!");
 
-			std::clog << "Updating actors..." << std::endl;
+			// if the player moved we update the world
+			game.log("Updating actors...");
 			if (Game::gameStatus == GameStatus::NEW_TURN)
 			{
 				for (const auto& actor : actors)
@@ -98,53 +127,54 @@ void Game::update()
 					}
 				}
 			}
-			std::clog << "Actors updated!" << std::endl;
+			game.log("Actors updated!");
 		}
 	}
 	else
 	{
-		std::clog << "Error: Game::update() - game.player or game.player->destructible is null" << std::endl;
-		std::cout << "Error: Game::update() - game.player or game.player->destructible is null" << std::endl;
+		game.log("Error: Game::update() - game.player or game.player->destructible is null");
 		exit(-1);
 	}
 }
 
-//====
+//==RENDERING==
 // the engine render function implementation
 // draws the entities on the map
 void Game::render()
 {
+	// we try to render the map first
 	try { map->render(); }
 	catch (const std::exception& e)
 	{
-		std::clog << e.what() << std::endl;
-		std::cout << e.what() << std::endl;
+		game.log(e.what());
 		exit(-1);
 	}
 
-	std::clog << "Actors are trying to be drawn..." << std::endl;
+	game.log("Actors are trying to be drawn...");
 	for (const auto& actor : actors)
 	{
 		if (actor && actor != player)
 		{
+			// storing the logic of visibility in a variable for readability
 			const bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
 				|| map->is_in_fov(actor->posX, actor->posY);
 
 			if (isVisible)
 			{
-				std::clog << "Actor: " << actor->name << " is in FOV" << std::endl;
+				game.log("Actor: " + actor->name + " is in FOV");
 				actor->render();
 				std::clog << "Actor: " << actor->name << " is drawn" << std::endl;
 			}
 		}
 	}
-	std::clog << "Actors are drawn" << std::endl;
+	game.log("Actors are drawn");
 
-	std::clog << "Player is trying render..." << std::endl;
+	game.log("Player is trying to be drawn...");
 	player->render();
-	std::clog << "Player is drawn" << std::endl;
+	game.log("Player is drawn");
 
-	std::clog << "RENDER FUNCTION OUT" << std::endl;
+	game.log("RENDER FUNCTION OUT");
+	// heavy on the logging here because there is alot happening in this functions
 }
 
 void Game::send_to_back(Actor& actor)
@@ -201,6 +231,8 @@ std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, dou
 // Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
 bool Game::pick_tile(int* x, int* y, int maxRange)
 {
+	// this old code is commented out here only for reference
+	// =========================
 	//while (game.run == true)
 	//{
 	//	clear();
@@ -279,6 +311,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 	//	}
 	//	refresh();
 	//}
+	//==============================================================
 
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
@@ -294,8 +327,8 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 	int height = sideLength;
 	int width = sideLength;
 
-	// Create the window once
-	WINDOW* aoe = newwin(height + 2, width + 2, 0, 0);
+	// Create the window once and state where you delete it below
+	WINDOW* aoe = newwin(height + 2, width + 2, 0, 0); // deleted in -> pick_tile()
 	box(aoe, 0, 0);
 	wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
 
@@ -395,7 +428,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		}
 		else
 		{
-			std::cout << "aoe is null" << std::endl;
+			game.log("aoe is null in Game::pick_tile().");
 			exit(-1);
 		}
 
@@ -1017,18 +1050,7 @@ void Game::display_character_sheet() noexcept
 	clear();
 }
 
-// make a random number function to use in the game
-// TODO : does this belong in the engine class?
-int Game::random_number(int min, int max)
-{
-	static std::default_random_engine randomEngine(gsl::narrow_cast<unsigned int>(time(nullptr)));
-	std::uniform_int_distribution<int> range(min, max);
-	
-	return range(randomEngine);
-}
-
-// displays the actors names
-// TODO: this is a test function
+// displays the actors as names
 void Game::wizard_eye() noexcept
 {
 	for (const auto& actor : game.actors)

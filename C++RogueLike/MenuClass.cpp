@@ -2,6 +2,7 @@
 #include "MenuClass.h"
 #include "Game.h"
 #include "MenuName.h"
+#include "RandomDice.h"
 
 std::string MenuClass::menu_class_get_string(MenuClassOptions option) noexcept
 {
@@ -102,7 +103,8 @@ void MenuClass::menu_class_cleric()
 void MenuClass::menu_class_random()
 {
 	// randomize player class use radom number generator
-	const auto& rng = game.random_number(1, 4);
+	RandomDice d;
+	const int rng = d.d4();
 	switch (rng)
 	{
 		case 1:

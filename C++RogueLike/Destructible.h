@@ -24,8 +24,8 @@ public:
 	Destructible(int hpMax, int dr, std::string corpseName, int xp);
 	virtual ~Destructible();
 
-	// returns true if hp is below or equal to 0
-	bool is_dead() noexcept { return hp <= 0; } // is the actor dead?
+	// is the actor dead? (returns true if hp is below or equal to 0)
+	bool is_dead() noexcept { return hp <= 0; }
 
 	//int take_damage(Actor* owner, int damage); // handles damage, owner attacked, returns (dam - def)
 	int take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
