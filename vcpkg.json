@@ -1,0 +1,23 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "libtcod-template",
+  "version-semver": "0.0.0",
+  "dependencies": [
+    "fmt",
+    {
+      "name": "libtcod",
+      "default-features": false,
+      "features": [
+        "png",
+        "sdl",
+        "unicode"
+      ]
+    },
+    "ms-gsl",
+    "nlohmann-json",
+    "sdl2",
+    "stb",
+    "curl",
+    "pdcurses"
+  ]
+}
