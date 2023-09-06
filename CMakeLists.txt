@@ -92,9 +92,7 @@ if (MSVC)
 endif()
 
 # Get from Vcpkg.
-find_path(pdcurses_INCLUDES curses.h)
-find_library(pdcurses_LIBS pdcurses)
-include_directories(${pdcurses_INCLUDES})
+find_package(unofficial-pdcurses CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
 find_package(fmt CONFIG REQUIRED)
@@ -109,17 +107,17 @@ target_link_libraries(
         CURL::libcurl
         SDL2::SDL2
         SDL2::SDL2main
-       ${pdcurses_LIBS}
+        unofficial::pdcurses::pdcurses
 )
 
 # Copy JSON files to build directory.
 set(JSON_FILES
-    "${PROJECT_SOURCE_DIR}/strength.json"
-    "${PROJECT_SOURCE_DIR}/dexterity.json"
-    "${PROJECT_SOURCE_DIR}/constitution.json"
-    "${PROJECT_SOURCE_DIR}/wisdom.json"
-    "${PROJECT_SOURCE_DIR}/intelligence.json"
-    "${PROJECT_SOURCE_DIR}/charisma.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/strength.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/dexterity.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/constitution.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/wisdom.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/intelligence.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/charisma.json"
 )
 
 foreach(JSON_FILE ${JSON_FILES})
