@@ -10,7 +10,7 @@
 class Healer : public Pickable
 {
 public:
-	int amountToHeal; // how many hp
+	int amountToHeal{ 0 }; // how many hp
 
 	Healer(int amountToHeal);
 

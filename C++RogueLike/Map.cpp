@@ -19,6 +19,7 @@
 #include "Pickable.h"
 #include "Healer.h"
 #include "LightningBolt.h"
+#include "LongSword.h"
 #include "Fireball.h"
 #include "Confuser.h"
 #include "Container.h"
@@ -249,7 +250,18 @@ void Map::add_item(int x, int y)
 	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
 	const int dice = rng->getInt(0, 100);
 	int potionIndex = 0;
-	if (dice < 70)
+	if (dice < 70 - 10)
+	{
+		// add long sword
+		auto longSword = std::make_shared<Actor>(x, y, '/', "long sword", 2, 0);
+		longSword->index = 0;
+		longSword->blocks = false;
+		longSword->pickable = std::make_shared<LongSword>(2);
+		game.actors.push_back(longSword);
+		game.send_to_back(*longSword);
+
+	}
+	else if (dice < 70)
 	{
 		// add a health potion
 		auto healthPotion = std::make_shared<Actor>(x, y, '!', "health potion", HPBARMISSING_PAIR, 0);

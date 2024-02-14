@@ -7,7 +7,7 @@ if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 endif()
 
 project(
-    C++RogueLike  # Project name, change this as needed.
+    C++RogueLike # Project name, change this as needed.
     LANGUAGES C CXX
 )
 
@@ -15,8 +15,10 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Set the output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
+# Set source files
 set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor.h
@@ -53,6 +55,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/LongSword.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/LongSword.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main_C++RogueLike.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Map.cpp
@@ -82,9 +86,6 @@ set(SOURCE_FILES # Add Source Files Here !
 
 # Create an executable with the listed source files
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
-
-# Ensure the C++20 standard is available.
-target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_20)
 
 # Enforce UTF-8 encoding on MSVC.
 if (MSVC)
@@ -123,8 +124,8 @@ set(JSON_FILES
 foreach(JSON_FILE ${JSON_FILES})
     get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} -E echo "Copying ${JSON_FILE} to ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${JSON_FILENAME}"
+                       COMMAND ${CMAKE_COMMAND} -E echo "Copying ${JSON_FILE} to build directory"
                        COMMAND ${CMAKE_COMMAND} -E copy_if_different
                                ${JSON_FILE}
-                               ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${JSON_FILENAME})
+                               $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
 endforeach()

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "Persistent.h"
+class Actor;
 
 //==PICKABLE==
 //==
@@ -31,7 +33,7 @@ public:
 protected:
 	enum class PickableType : int
 	{
-		HEALER, LIGHTNING_BOLT, CONFUSER, FIREBALL
+		HEALER, LIGHTNING_BOLT, CONFUSER, FIREBALL, LONGSWORD
 	};
 };
 //====

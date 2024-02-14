@@ -6,11 +6,12 @@
     "fmt",
     {
       "name": "libtcod",
-      "default-features": false,
+      "default-features": true,
       "features": [
         "png",
         "sdl",
-        "unicode"
+        "unicode",
+        "zlib"
       ]
     },
     "ms-gsl",

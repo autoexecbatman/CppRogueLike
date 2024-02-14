@@ -1,4 +1,6 @@
 #include "Healer.h"
+#include "Game.h"
+#include "Colors.h"
 
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}
@@ -11,7 +13,15 @@ bool Healer::use(Actor& owner, Actor& wearer)
 
 		if (amountHealed > 0)
 		{
+			game.message(COLOR_WHITE, "You heal ", false);
+			game.message(COLOR_RED, std::to_string(amountHealed), false);
+			game.message(COLOR_WHITE, " hit points.", true);
+
 			return Pickable::use(owner, wearer);
+		}
+		else
+		{
+			game.message(COLOR_RED, "Health is already maxed out!", true);
 		}
 	}
 
