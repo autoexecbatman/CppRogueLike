@@ -363,6 +363,12 @@ void AiPlayer::displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept
 			if (actor != nullptr)
 			{
 				mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
+				// if the actor is equipped, print a star
+				if (actor->isEquipped)
+				{
+					int nameLength = strlen(actor->name.c_str()) + 5;
+					mvwprintw(inv, y, nameLength, "*");
+				}
 			}
 			y++;
 			shortcut++;
@@ -497,7 +503,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 				refresh();
 				mvprintw(1, 0, "Press any key to continue.");
 				getch();
-				clear();
+				clear(); 
 
 				owner.posX = targetx;
 				owner.posY = targety;

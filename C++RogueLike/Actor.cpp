@@ -113,6 +113,16 @@ void Actor::pickItem(int x, int y)
 	container->add(*this);
 }
 
+void Actor::equip(Actor& item)
+{
+	item.isEquipped = true;
+}
+
+void Actor::unequip(Actor& item)
+{
+	item.isEquipped = false;
+}
+
 // the actor update
 void Actor::update()
 {

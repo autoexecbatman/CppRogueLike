@@ -256,7 +256,7 @@ void Map::add_item(int x, int y)
 		auto longSword = std::make_shared<Actor>(x, y, '/', "long sword", 2, 0);
 		longSword->index = 0;
 		longSword->blocks = false;
-		longSword->pickable = std::make_shared<LongSword>(2);
+		longSword->pickable = std::make_shared<LongSword>(1,8);
 		game.actors.push_back(longSword);
 		game.send_to_back(*longSword);
 

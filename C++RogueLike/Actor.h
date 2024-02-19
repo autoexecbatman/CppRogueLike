@@ -1,6 +1,9 @@
 // file: Actor.h
 #ifndef ACTOR_H
 #define ACTOR_H
+
+#pragma once
+
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
@@ -38,6 +41,7 @@ public:
 	bool blocks{ false }; // does the actor blocks movement?
 	bool fovOnly{ false }; // to make some actors visible when not in fov
 	bool canSwim{ false }; // can the actor swim?
+	bool isEquipped{ false }; // is the actor equipped?
 	int index{ 0 }; // index of the actor in the actors array
 	/*bool sent_to_back = false;*/
 	
@@ -68,6 +72,8 @@ public:
 
 	void render() const noexcept; // render the actor on the screen.
 	void pickItem(int x, int y); // pick up an item
+	void equip(Actor& item);
+	void unequip(Actor& item);
 	int get_strength() const noexcept { return strength; } // get the strength of the actor
 	int get_posY() const noexcept { return posY; } // get the y position of the actor
 	int get_posX() const noexcept { return posX; } // get the x position of the actor

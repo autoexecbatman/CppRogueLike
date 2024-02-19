@@ -5,16 +5,19 @@
 
 #include "Pickable.h"
 #include "Actor.h"
-#include "RandomDice.h"
 
 class LongSword : public Pickable
 {
 public:
-	int damage{ 0 };
-	LongSword(int dmg);
+	int minDmg{ 1 };
+	int maxDmg{ 8 };
+	// longsword roll is 1d8
+	LongSword(int minDmg, int maxDmg);
+	
 	bool use(Actor& owner, Actor& wearer) override;
-	void load(TCODZip& zip) override;
+
 	void save(TCODZip& zip) override;
+	void load(TCODZip& zip) override;
 };
 
 #endif // !LONGSWORD_H
