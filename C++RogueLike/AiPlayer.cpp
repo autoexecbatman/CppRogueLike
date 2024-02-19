@@ -503,7 +503,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 				refresh();
 				mvprintw(1, 0, "Press any key to continue.");
 				getch();
-				clear(); 
+				clear();
 
 				owner.posX = targetx;
 				owner.posY = targety;

@@ -24,30 +24,26 @@ bool Container::add(Actor& actor)
 		return false;
 	}
 
-	//if (invSize < 0 && inventory.size() <= invSize)
-	//{
-	//	// inventory full
-	//	return false;
-	//}
-
-	if (// check if the inventory is full
-		//invSize > 0
-		//&& 
-		//inventoryList.size() >= static_cast<unsigned int>(invSize)
-		// use gsl
-		invSize > 0
-		&&
-		inventoryList.size() >= gsl::narrow_cast<unsigned int>(invSize)
-		)
+	// check if the inventory is full
+	if (invSize > 0 && inventoryList.size() >= gsl::narrow_cast<unsigned int>(invSize))
 	{
 		// inventory full return false
 		return false;
 	}
-	/*inventoryList.emplace_back(&actor);*/
 
-	inventoryList.push_back(std::make_shared<Actor>(actor));
-
-	/*inventoryList.push_back(actor);*/ // add the actor to the inventory
+	// if inventory is not full try add the actor to the inventory and catch any exceptions
+	try
+	{
+		inventoryList.push_back(std::make_shared<Actor>(actor));
+	}
+	catch (const std::bad_alloc& e)
+	{
+		game.log("Failed to add " + actor.name + " to your inventory. System out of memory.");
+	}
+	catch (const std::exception& e)
+	{
+		game.log("Failed to add " + actor.name + " to your inventory. Error: " + e.what());
+	}
 
 	return true;
 }
