@@ -877,7 +877,7 @@ void Game::next_level()
 
 	// present a message to the player -> TODO : move this to the gui
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...",true);
-	game.message(WHITE_PAIR, std::format("You are now on level %d", dungeonLevel),true);
+	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 
 	// clear the actors container except the player and the stairs
 	actors.clear();
