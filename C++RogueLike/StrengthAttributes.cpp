@@ -10,6 +10,7 @@
 using json = nlohmann::json;
 
 void from_json(const json& j, StrengthAttributes& p) {
+	j.at("Str").get_to(p.Str);
 	j.at("Hit").get_to(p.hitProb);
 	j.at("Dmg").get_to(p.dmgAdj);
 	j.at("Wgt").get_to(p.wgtAllow);
@@ -48,12 +49,15 @@ std::vector<StrengthAttributes> loadStrengthAttributes() {
 	}
 }
 
-void print_chart()
+void StrengthAttributes::print_chart()
 {
 	auto strengthChart = loadStrengthAttributes();
+	int strengthIndex = 1;
 	for (const auto& strength : strengthChart)
 	{
 		std::cout << "----" << std::endl;
+		std::cout << "Strength " << strength.Str << std::endl;
+		strengthIndex++;
 		std::cout << "strength.hitProb: " << strength.hitProb << std::endl;
 		std::cout << "strength.dmgAdj: " << strength.dmgAdj << std::endl;
 		std::cout << "strength.wgtAllow: " << strength.wgtAllow << std::endl;

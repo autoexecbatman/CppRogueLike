@@ -32,17 +32,31 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/AiPlayer.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Attacker.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Attacker.h
+    #charisma
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/CharismaAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/CharismaAttributes.h
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Confuser.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Confuser.h
+    #constitution
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ConstitutionAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ConstitutionAttributes.h
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Container.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Container.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Controls.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Dagger.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Dagger.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Destructible.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Destructible.h
+    #dexterity
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/DexterityAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/DexterityAttributes.h
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Fireball.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Fireball.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Game.cpp
@@ -53,6 +67,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Goblin.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.h
+    #intelligence
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/IntelligenceAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/IntelligenceAttributes.h
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/LongSword.cpp
@@ -82,6 +100,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/StrengthAttributes.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Window.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Window.h
+    #wisdom
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/WisdomAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/WisdomAttributes.h
 )
 
 # Create an executable with the listed source files

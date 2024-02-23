@@ -4,6 +4,7 @@
 #include <vector>
 
 struct StrengthAttributes {
+    int Str{};
     int hitProb{};
     int dmgAdj{};
     int wgtAllow{};
@@ -11,7 +12,8 @@ struct StrengthAttributes {
     int openDoors{};
     double BB_LG{};
     std::string notes{};
+
+    void print_chart();
 };
 
-void print_chart();
 std::vector<StrengthAttributes> loadStrengthAttributes();

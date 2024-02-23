@@ -104,7 +104,8 @@ int main()
 		std::cout << "Curses shutdown failed.\n";
 	}
 
-	print_chart(); // print strength chart for debugging
+	StrengthAttributes strength;
+	strength.print_chart(); // print strength chart for debugging
 
 	debugFile.close();
 	/*_CrtDumpMemoryLeaks();*/
