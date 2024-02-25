@@ -59,9 +59,16 @@ void Game::create_player()
 	RandomDice d; // we create a RandomDice object to roll the dice
 	int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
 	int playerDamage = 2 + d.d8(); // we roll the dice to get the player's damage
+	int playerMinDmg = 2; // the player's minimum damage
+	int playerMaxDmg = 8; // the player's maximum damage
+	int playerDr = 1; // the player's damage reduction
+	int playerXp = 0; // the player's experience points
+	int playerTHAC0 = 20; // the player's THAC0
+	int playerAC = 10; // the player's armor class
 
 	// update the player pointer
-	game.player = std::make_shared<Player>(0, 0, playerHp, 5, "your cadaver", 0, playerDamage, true);
+	game.player = std::make_shared<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
+
 	// add the player to the actors vector for rendering
 	game.actors.emplace_back(game.player);
 
@@ -101,6 +108,9 @@ void Game::update()
 			{
 				game.log("...Computing FOV...");
 				game.map->compute_fov();
+
+				// adjust the attributes based on players race
+				game.player->racial_ability_adjustments();
 			}
 
 			// we set the gameStatus to IDLE

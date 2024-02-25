@@ -12,14 +12,16 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 	RandomDice d;
 	const int damage = d.d6();
 	const int hp = d.d8();
+	const int dmgMin = 1;
+	const int dmgMax = 6;
 
 	blocks = true;
 	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 
-	attacker = std::make_shared<Attacker>(damage);
-	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15);
+	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
+	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15, 10, 10);
 	ai = std::make_shared<AiMonster>();
 }
 //====
@@ -31,9 +33,11 @@ Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
 	fovOnly = true;
 	RandomDice d;
 	const int damage = d.d10();
-	attacker = std::make_shared<Attacker>(Attacker(damage));
+	const int dmgMin = 1;
+	const int dmgMax = 10;
+	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
 	const int hp = d.d10();
-	destructible = std::make_shared<MonsterDestructible>(MonsterDestructible(hp, 0, "dead orc", 35));
+	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead orc", 35, 10, 10);
 	ai = std::make_shared<AiMonster>();
 }
 //====
@@ -45,9 +49,11 @@ Troll::Troll(int y, int x) : Actor(y, x, 'T', "troll", TROLL_PAIR, 0)
 	fovOnly = true;
 	RandomDice d;
 	const int damage = d.d10() + 3;
-	attacker = std::make_shared<Attacker>(Attacker(damage));
+	const int dmgMin = 1;
+	const int dmgMax = 13;
+	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
 	const int hp = d.d12();
-	destructible = std::make_shared<MonsterDestructible>(MonsterDestructible(hp, 1, "dead troll", 100));
+	destructible = std::make_shared<MonsterDestructible>(hp, 1, "dead troll", 100, 50, 50);
 	ai = std::make_shared<AiMonster>();
 }
 //====
@@ -59,9 +65,11 @@ Dragon::Dragon(int y, int x) : Actor(y, x, 'D', "dragon", DRAGON_PAIR, 100)
 	fovOnly = true;
 	RandomDice d;
 	const int damage = d.d12() + 5;
-	attacker = std::make_shared<Attacker>(Attacker(damage));
+	const int dmgMin = 1;
+	const int dmgMax = 17;
+	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
 	const int hp = d.d12() + 5;
-	destructible = std::make_shared<MonsterDestructible>(MonsterDestructible(hp, 2, "dead dragon", 200));
+	destructible = std::make_shared<MonsterDestructible>(hp, 2, "dead dragon", 200, 100, 100);
 	ai = std::make_shared<AiMonster>();
 }
 //====

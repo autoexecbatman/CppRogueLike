@@ -15,8 +15,11 @@ class Attacker : public Persistent
 {
 public:
 	int dmg{ 0 };
+	int maxDmg{ 0 };
+	int minDmg{ 0 };
+	std::string roll{ "diceroll" };
 
-	Attacker(int dmg) noexcept;
+	Attacker(int dmg, int minDmg, int maxDmg) noexcept;
 
 	void attack(const Actor& attacker, Actor& target);
 	

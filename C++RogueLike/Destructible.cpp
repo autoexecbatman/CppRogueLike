@@ -7,35 +7,37 @@
 #include "StrengthAttributes.h"
 
 //====
-Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp)
+Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp, int thaco, int armorClass)
 	:
 	hpMax(hpMax),
 	hp(hpMax),
 	dr(dr),
 	corpseName(corpseName),
-	xp(xp)
+	xp(xp),
+	thaco(thaco),
+	armorClass(armorClass)
 {}
 
 Destructible::~Destructible() {}
 
 int Destructible::take_damage(Actor& owner, int damage)
 {
-	int str = owner.strength - 1; // -1 to access vector index from 0
-	std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
-	if (str >= 0 && str < static_cast<int>(attrs.size())) {
-		StrengthAttributes strength = attrs[str];
-		damage = damage - Destructible::dr + strength.dmgAdj; // include dmgAdj
-	}
-	else {
-		// Handle out of range case...
-	}
+	//clear();
+	//mvprintw(0, 0, "take_damage( %s, %d )", owner.name.c_str(), damage);
+	//refresh();
+	//getch();
 
+	// substract damage reduction
+	/*damage = damage - owner.destructible->dr;*/
+
+	// check if damage is greater than 0
+	// if it is, then apply the damage to the actor
 	if (damage > 0)
 	{
-		Destructible::hp -= damage;
+		owner.destructible->hp -= damage;
 		if (hp <= 0)
 		{
-			die(owner);
+			owner.destructible->die(owner);
 		}
 	}
 	else
@@ -44,7 +46,13 @@ int Destructible::take_damage(Actor& owner, int damage)
 	}
 
 	//clear();
-	//mvprintw(0, 0, "Damage: %d", damage);
+	//
+	//mvprintw(1, 0, "the strength of %s is %d", owner.name.c_str(), owner.strength);
+	//mvprintw(2, 0, "damage reduction of %s: %d", owner.name.c_str(), owner.destructible->dr);
+	//mvprintw(3, 0, "the damage being returned: %d", damage);
+	//mvprintw(4, 0, "HP: %d/%d", owner.destructible->hp, owner.destructible->hpMax);
+	//mvprintw(5, 0, "Name: %s", owner.name.c_str());
+	//mvprintw(6, 0, "Damage roll: %d d %d", game.player->attacker->minDmg, game.player->attacker->maxDmg);
 	//refresh();
 	//getch();
 
@@ -85,6 +93,9 @@ void Destructible::load(TCODZip& zip)
 	hp = zip.getInt();
 	dr = zip.getInt();
 	corpseName = _strdup(zip.getString());
+	xp = zip.getInt();
+	thaco = zip.getInt();
+	armorClass = zip.getInt();
 }
 
 void Destructible::save(TCODZip& zip)
@@ -93,6 +104,9 @@ void Destructible::save(TCODZip& zip)
 	zip.putInt(hp);
 	zip.putInt(dr);
 	zip.putString(corpseName.c_str());
+	zip.putInt(xp);
+	zip.putInt(thaco);
+	zip.putInt(armorClass);
 }
 
 //template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
@@ -134,13 +148,13 @@ std::shared_ptr<Destructible> Destructible::create(TCODZip& zip)
 	{
 	case DestructibleType::MONSTER:
 	{
-		destructible = std::make_shared<MonsterDestructible>(0, 0, "", 0);
+		destructible = std::make_shared<MonsterDestructible>(0, 0, "", 0, 0, 0);
 		break;
 	}
 
 	case DestructibleType::PLAYER:
 	{
-		destructible = std::make_shared<PlayerDestructible>(0, 0, "", 0);
+		destructible = std::make_shared<PlayerDestructible>(0, 0, "", 0, 0, 0);
 		break;
 	}
 	default:
@@ -157,11 +171,12 @@ std::shared_ptr<Destructible> Destructible::create(TCODZip& zip)
 PlayerDestructible::PlayerDestructible(
 	int hpMax,
 	int dr,
-	/*const char* corpseName,*/
 	std::string corpseName,
-	int xp
+	int xp,
+	int thaco,
+	int armorClass
 ) :
-	Destructible(hpMax, dr, corpseName, xp)
+	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
 {
 }
 
@@ -179,11 +194,12 @@ void PlayerDestructible::die(Actor& owner)
 MonsterDestructible::MonsterDestructible(
 	int hpMax,
 	int dr,
-	/*const char* corpseName,*/
 	std::string corpseName,
-	int xp
+	int xp,
+	int thaco,
+	int armorClass
 ) :
-	Destructible(hpMax, dr, corpseName, xp)
+	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
 {}
 
 void MonsterDestructible::die(Actor& owner)

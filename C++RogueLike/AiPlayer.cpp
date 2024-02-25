@@ -323,10 +323,19 @@ bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) c
 bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
 {
 	game.log("Trying to pick actor " + actor->name);
+	bool picked{};
 
 	// actor is destroyed if picked what can we do about it ? 
 	// we can't use actor anymore
-	bool picked = actor->pickable->pick(*actor, owner);
+	try
+	{
+		picked = actor->pickable->pick(*actor, owner);
+	}
+	catch (const std::exception& e)
+	{
+		game.log("Error: AiPlayer::try_pick_actor(Actor& actor, Actor& owner). " + std::string(e.what()));
+		picked = false;
+	}
 
 	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) picked = " + std::to_string(picked));
 	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor.name = " + actor->name);

@@ -33,6 +33,7 @@ public:
 	std::string gender{ "None" };
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
+	std::string weaponEquipped{ "None" };
 
 	int posY{ 0 }, posX{ 0 }; // position on map
 	char ch{ -47 }; // the symbol to print

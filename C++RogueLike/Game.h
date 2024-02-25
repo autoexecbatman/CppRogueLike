@@ -34,7 +34,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Player> player{ std::make_shared<Player>(0, 0, 0, 0, "", 0, 0, false) };
+	std::shared_ptr<Player> player{ std::make_shared<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, false) };
 
 	std::shared_ptr<Actor> stairs{ std::make_shared<Actor>(
 		0, // int posX

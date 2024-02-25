@@ -15,13 +15,16 @@ public:
 	int hpMax{ 0 }; // maximum health points
 	int hp{ 0 }; // current health points
 	int dr{ 0 }; // hit points deflected
+	std::string corpseName{ "corpseName" }; // the actor's name once it is dead/destroyed
+	int xp{ 0 }; // for awarding experience points
+	int thaco{ 0 }; // to hit armor class 0
+	int armorClass{ 0 }; // armor class
+	
 	int food{ 0 };
 	int foodMax{ 0 };
 	int needToSleep{ 0 };
-	std::string corpseName{ "corpseName" }; // the actor's name once it is dead/destroyed
-	int xp{ 0 }; // for awarding experience points
 
-	Destructible(int hpMax, int dr, std::string corpseName, int xp);
+	Destructible(int hpMax, int dr, std::string corpseName, int xp, int thaco, int armorClass);
 	virtual ~Destructible();
 
 	// is the actor dead? (returns true if hp is below or equal to 0)
@@ -56,7 +59,9 @@ public:
 		int hpMax,
 		int dr,
 		std::string corpseName,
-		int xp
+		int xp,
+		int thaco,
+		int armorClass
 	);
 	//====
 	//handles death, owner killed
@@ -74,7 +79,9 @@ public:
 		int hpMax,
 		int dr,
 		std::string corpseName,
-		int xp
+		int xp,
+		int thaco,
+		int armorClass
 	);
 	//====
 	//handles death, owner killed	

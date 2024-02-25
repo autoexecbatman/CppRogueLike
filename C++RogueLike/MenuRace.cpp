@@ -84,6 +84,8 @@ void MenuRace::menu_race_human()
 	// set player race
 	const auto& human = menu_race_get_string(MenuRaceOptions::HUMAN);
 	game.player->playerRace = human;
+	// set player state to human
+	game.player->playerRaceState = Player::PlayerRace::Human;
 }
 
 void MenuRace::menu_race_dwarf()
@@ -91,6 +93,8 @@ void MenuRace::menu_race_dwarf()
 	// set player race
 	const auto& dwarf = menu_race_get_string(MenuRaceOptions::DWARF);
 	game.player->playerRace = dwarf;
+	// set player state to dwarf
+	game.player->playerRaceState = Player::PlayerRace::Dwarf;
 }
 
 void MenuRace::menu_race_elf()
@@ -98,6 +102,8 @@ void MenuRace::menu_race_elf()
 	// set player race
 	const auto& elf = menu_race_get_string(MenuRaceOptions::ELF);
 	game.player->playerRace = elf;
+	// set player state to elf
+	game.player->playerRaceState = Player::PlayerRace::Elf;
 }
 
 void MenuRace::menu_race_gnome()
@@ -105,6 +111,8 @@ void MenuRace::menu_race_gnome()
 	// set player race
 	const auto& gnome = menu_race_get_string(MenuRaceOptions::GNOME);
 	game.player->playerRace = gnome;
+	// set player state to gnome
+	game.player->playerRaceState = Player::PlayerRace::Gnome;
 }
 
 void MenuRace::menu_race_halfelf()
@@ -112,6 +120,8 @@ void MenuRace::menu_race_halfelf()
 	// set player race
 	const auto& halfelf = menu_race_get_string(MenuRaceOptions::HALFELF);
 	game.player->playerRace = halfelf;
+	// set player state to halfelf
+	game.player->playerRaceState = Player::PlayerRace::HalfElf;
 }
 
 void MenuRace::menu_race_halfling()
@@ -119,6 +129,8 @@ void MenuRace::menu_race_halfling()
 	// set player race
 	const auto& halfling = menu_race_get_string(MenuRaceOptions::HALFLING);
 	game.player->playerRace = halfling;
+	// set player state to halfling
+	game.player->playerRaceState = Player::PlayerRace::Halfling;
 }
 
 void MenuRace::menu_race_random()

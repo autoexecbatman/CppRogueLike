@@ -16,21 +16,37 @@
 //==PICKABLE==
 bool Pickable::pick(Actor& owner, const Actor& wearer)
 {
-	if (wearer.container && wearer.container->add(owner))
-	{
-		for (const auto& actor : game.actors)
+	try {
+		if (wearer.container && wearer.container->add(owner))
 		{
-			// if the actor is the owner of the item
-			if (actor.get() == &owner)
+			for (const auto& actor : game.actors)
 			{
-				// remove the item from the list of actors
-				std::erase(game.actors, actor);
+				// if the actor is the owner of the item
+				if (actor.get() == &owner)
+				{
+					try {
+						// remove the item from the list of actors
+						std::erase(game.actors, actor);
+					}
+					catch (std::exception& e) {
+						std::cerr << "Error: " << e.what() << std::endl;
+					}
 
-				break;
+					break;
+				}
 			}
-		} 
 
-		return true;
+			//auto& actors = game.actors; // For clarity
+			//auto it = std::remove_if(actors.begin(), actors.end(), [&owner](const std::shared_ptr<Actor>& actor) {
+			//	return actor.get() == &owner;
+			//	});
+			//actors.erase(it, actors.end());
+
+			return true;
+		}
+	}
+	catch (std::exception& e) {
+		std::cerr << "Error: " << e.what() << std::endl;
 	}
 
 	return false;

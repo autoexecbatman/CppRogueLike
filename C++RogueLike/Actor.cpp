@@ -17,6 +17,7 @@
 #include "Ai.h"
 #include "Pickable.h"
 #include "Container.h"
+#include "Game.h"
 
 //====
 Actor::Actor(
@@ -65,7 +66,7 @@ void Actor::load(TCODZip& zip)
 
 	// this block assigns the values from the zip file to the actor's components if they exist. 
 	// Is this a double assignment? No, because the components are not assigned in the constructor.
-	if (hasAttacker) { attacker = std::make_shared<Attacker>(0); attacker->load(zip); }
+	if (hasAttacker) { attacker = std::make_shared<Attacker>(0,0,0); attacker->load(zip); }
 	if (hasDestructible) { destructible = Destructible::create(zip); }
 	if (hasAi) { ai = Ai::create(zip); }
 	if (hasPickable) { pickable = Pickable::create(zip); }
@@ -75,8 +76,7 @@ void Actor::load(TCODZip& zip)
 void Actor::save(TCODZip& zip)
 {
 	// Add a debug log to display the actor name
-	std::cout << "Saving actor: " << name << std::endl;
-	std::clog << "Saving actor: " << name << std::endl;
+	game.log("Saving actor: " + name);
 
 	zip.putInt(posX);
 	zip.putInt(posY);
@@ -116,11 +116,13 @@ void Actor::pickItem(int x, int y)
 void Actor::equip(Actor& item)
 {
 	item.isEquipped = true;
+	weaponEquipped = item.name;
 }
 
 void Actor::unequip(Actor& item)
 {
 	item.isEquipped = false;
+	weaponEquipped = "None";
 }
 
 // the actor update

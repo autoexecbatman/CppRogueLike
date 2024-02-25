@@ -9,24 +9,62 @@
 class RandomDice
 {
 public:
+    enum class DiceType : int
+    {
+        D2, D4, D6, D8, D10, D12, D20, D100
+    } diceType{ DiceType::D6 };
+
     // public functions to emulate a set of dice from d2 to d100
-    int d2() { return roll(2); }
-    int d4() { return roll(4); }
-    int d6() { return roll(6); }
-    int d8() { return roll(8); }
-    int d10() { return roll(10); }
-    int d12() { return roll(12); }
-    int d20() { return roll(20); }
-    int d100() { return roll(100); }
+    int d2() { diceType = DiceType::D2; return roll(2); }
+    int d4() { diceType = DiceType::D4; return roll(4); }
+    int d6() { diceType = DiceType::D6; return roll(6); }
+	int d8() { diceType = DiceType::D8; return roll(8); }
+	int d10() { diceType = DiceType::D10; return roll(10); }
+	int d12() { diceType = DiceType::D12; return roll(12); }
+	int d20() { diceType = DiceType::D20; return roll(20); }
+	int d100() { diceType = DiceType::D100; return roll(100); }
+
+    // get dice type
+	std::string getDiceType()
+	{
+		switch (diceType)
+		{
+		case DiceType::D2: return "D2";
+		case DiceType::D4: return "D4";
+		case DiceType::D6: return "D6";
+		case DiceType::D8: return "D8";
+		case DiceType::D10: return "D10";
+		case DiceType::D12: return "D12";
+		case DiceType::D20: return "D20";
+		case DiceType::D100: return "D100";
+		default: return "D6";
+		}
+	}
+
+	// set dice using a string
+	int rollFromString(std::string& diceType)
+	{
+		if (diceType == "D2") return d2();
+		if (diceType == "D4") return d4();
+		if (diceType == "D6") return d6();
+		if (diceType == "D8") return d8();
+		if (diceType == "D10") return d10();
+		if (diceType == "D12") return d12();
+		if (diceType == "D20") return d20();
+		if (diceType == "D100") return d100();
+		return d6();
+	}
+
+    int roll(int max) 
+	{
+        return m_gen() % max + 1;
+    }
 
 private:
     // we use the mersenne twister engine for our random number generator
     // we seed it with a random device
     std::mt19937 m_gen{ std::random_device{}() };
 
-    int roll(int max) {
-        return m_gen() % max + 1;
-    }
 };
 
 #endif // RANDOM_DICE_H

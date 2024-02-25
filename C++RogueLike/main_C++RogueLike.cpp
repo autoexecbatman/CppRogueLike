@@ -63,23 +63,23 @@ int main()
 	while (game.run == true)
 	{
 		//==DEBUG==
-		std::clog << "//====================LOOP====================//\n";
+		game.log("//====================LOOP====================//");
 		std::string debug{ "Loop number: " + std::to_string(countLoop) + "\n" };
-		std::clog << debug << std::endl;
+		game.log(debug);
 
 		//==UPDATE==
-		std::clog << "initializing game update..." << std::endl;
+		game.log("Running update...");
 		game.update(); // update map and actors positions
 		gui.gui_update(); // update the gui
-		std::clog << "initialized successfully." << std::endl;
+		game.log("Update OK.");
 
 		//==DRAW==
-		std::clog << "initializing game render..." << std::endl;
+		game.log("Running render...");
 		clear();
 		game.render(); // render map and actors to the screen
 		gui.gui_render(); // render the gui
 		refresh();
-		std::clog << "initialized successfully." << std::endl;
+		game.log("Render OK.");
 
 		//==INPUT==
 		game.key_store();
@@ -95,13 +95,12 @@ int main()
 	endwin();
 	if (isendwin())
 	{
-		std::clog << "Curses shutdown successfully.\n";
-		std::cout << "Curses shutdown successfully.\n";
+		game.log("Curses shutdown successfully.");
 	}
 	else
 	{
-		std::clog << "Curses shutdown failed.\n";
-		std::cout << "Curses shutdown failed.\n";
+		game.log("Curses shutdown failed.");
+		exit(EXIT_FAILURE);
 	}
 
 	StrengthAttributes strength;

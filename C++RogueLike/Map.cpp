@@ -14,6 +14,7 @@
 #include "Map.h"
 #include "Persistent.h"
 #include "Destructible.h"
+#include "Dagger.h"
 #include "Attacker.h"
 #include "Ai.h"
 #include "Pickable.h"
@@ -206,7 +207,7 @@ bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
 
 void Map::compute_fov()
 {
-	std::clog << "Map::compute_fov()" << std::endl;
+	game.log("Map::compute_fov()");
 	if (tcodMap == nullptr)
 	{
 		game.log("Error: tcodMap is null");
@@ -217,7 +218,7 @@ void Map::compute_fov()
 
 void Map::render() const
 {
-	std::clog << "Map::render()" << std::endl;
+	game.log("Map::render()");
 	for (int iter_y = 0; iter_y < map_height; iter_y++)
 	{
 		for (int iter_x = 0; iter_x < map_width; iter_x++)
@@ -242,7 +243,7 @@ void Map::render() const
 		}
 	}
 	refresh(); // Refresh once after all tiles have been drawn
-	std::clog << "Map::render() end" << std::endl;
+	game.log("Map::render() end");
 }
 
 void Map::add_item(int x, int y)
@@ -260,6 +261,16 @@ void Map::add_item(int x, int y)
 		game.actors.push_back(longSword);
 		game.send_to_back(*longSword);
 
+	}
+	else if (dice < 85)
+	{
+		// add dagger
+		auto dagger = std::make_shared<Actor>(x, y, '/', "dagger", 1, 0);
+		dagger->index = 1;
+		dagger->blocks = false;
+		dagger->pickable = std::make_shared<Dagger>(1, 4);
+		game.actors.push_back(dagger);
+		game.send_to_back(*dagger);
 	}
 	else if (dice < 70)
 	{
