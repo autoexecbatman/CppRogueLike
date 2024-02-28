@@ -29,12 +29,12 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 				int rollDmg{};
 				// roll for damage based on weapon
 				// 1. get the weapon
-				if (attacker.weaponEquipped == "long sword")
+				if (attacker.weaponEquipped == "Long Sword")
 				{
 					rollDmg = diceDmg.d8(); // roll 1d8
 					clear();
 					// print  "you are using a long sword"
-					mvprintw(0, 0, "you are using a long sword");
+					mvprintw(0, 0, "you are using a Long Sword");
 					refresh();
 					getch();
 				}

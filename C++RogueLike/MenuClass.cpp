@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "MenuName.h"
 #include "RandomDice.h"
+#include "Player.h"
 
 std::string MenuClass::menu_class_get_string(MenuClassOptions option) noexcept
 {
@@ -77,6 +78,7 @@ void MenuClass::menu_class_fighter()
 	// set player class
 	const auto& fighter = menu_class_get_string(MenuClassOptions::FIGHTER);
 	game.player->playerClass = fighter;
+	game.player->playerClassState = Player::PlayerClassState::FIGHTER;
 }
 
 void MenuClass::menu_class_rogue()
@@ -84,6 +86,7 @@ void MenuClass::menu_class_rogue()
 	// set player class
 	const auto& rogue = menu_class_get_string(MenuClassOptions::ROGUE);
 	game.player->playerClass = rogue;
+	game.player->playerClassState = Player::PlayerClassState::ROGUE;
 }
 
 void MenuClass::menu_class_wizard()
@@ -91,6 +94,7 @@ void MenuClass::menu_class_wizard()
 	// set player class
 	const auto& wizard = menu_class_get_string(MenuClassOptions::WIZARD);
 	game.player->playerClass = wizard;
+	game.player->playerClassState = Player::PlayerClassState::WIZARD;
 }
 
 void MenuClass::menu_class_cleric()
@@ -98,6 +102,7 @@ void MenuClass::menu_class_cleric()
 	// set player class
 	const auto& cleric = menu_class_get_string(MenuClassOptions::CLERIC);
 	game.player->playerClass = cleric;
+	game.player->playerClassState = Player::PlayerClassState::CLERIC;
 }
 
 void MenuClass::menu_class_random()

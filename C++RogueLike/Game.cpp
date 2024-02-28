@@ -26,6 +26,7 @@
 #include "MenuRace.h"
 #include "MenuClass.h"
 #include "MenuName.h"
+#include "CalculatedTHAC0s.h"
 
 //==INIT==
 // When the Game is created, 
@@ -63,8 +64,12 @@ void Game::create_player()
 	int playerMaxDmg = 8; // the player's maximum damage
 	int playerDr = 1; // the player's damage reduction
 	int playerXp = 0; // the player's experience points
-	int playerTHAC0 = 20; // the player's THAC0
+
+	CalculatedTHAC0s calculatedTHAC0s; // we create a CalculatedTHAC0s object to get the player's THAC0
+	int playerTHAC0 = calculatedTHAC0s.getFighter(0); // the player's THAC0
+	//int playerTHAC0 = 20; // the player's THAC0
 	int playerAC = 10; // the player's armor class
+	int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
 	game.player = std::make_shared<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
@@ -111,6 +116,7 @@ void Game::update()
 
 				// adjust the attributes based on players race
 				game.player->racial_ability_adjustments();
+				game.player->calculate_thaco();
 			}
 
 			// we set the gameStatus to IDLE

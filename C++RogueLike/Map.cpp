@@ -29,6 +29,7 @@
 #include "Goblin.h"
 #include "RandomDice.h"
 #include "Player.h"
+#include "Weapons.h"
 
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
@@ -248,29 +249,40 @@ void Map::render() const
 
 void Map::add_item(int x, int y)
 {
-	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
-	const int dice = rng->getInt(0, 100);
+	RandomDice d;
+	const int dice = d.d100();
 	int potionIndex = 0;
-	if (dice < 70 - 10)
-	{
-		// add long sword
-		auto longSword = std::make_shared<Actor>(x, y, '/', "long sword", 2, 0);
-		longSword->index = 0;
-		longSword->blocks = false;
-		longSword->pickable = std::make_shared<LongSword>(1,8);
-		game.actors.push_back(longSword);
-		game.send_to_back(*longSword);
+	std::vector<Weapons> weaponsList = loadWeapons(); // Load weapons from JSON, consider caching this instead of loading each time
 
-	}
-	else if (dice < 85)
-	{
-		// add dagger
-		auto dagger = std::make_shared<Actor>(x, y, '/', "dagger", 1, 0);
-		dagger->index = 1;
-		dagger->blocks = false;
-		dagger->pickable = std::make_shared<Dagger>(1, 4);
-		game.actors.push_back(dagger);
-		game.send_to_back(*dagger);
+	if (dice < 70) { // Adjust this threshold based on your game's item spawn logic
+		// Randomly select a weapon from the list
+		
+		const int weaponIndex = d.roll(weaponsList.size());
+		const Weapons& selectedWeapon = weaponsList[weaponIndex - 1];
+		const int rollColor = d.roll(3);
+		// Create an Actor for the weapon
+		auto weaponActor = std::make_shared<Actor>(x, y, '/', selectedWeapon.name, rollColor, 0); // Assuming you have a generic symbol and color for weapons
+		weaponActor->blocks = false;
+		//weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon); // Assuming you have a way to handle different weapon types
+		if (selectedWeapon.name == "Dagger")
+		{
+			weaponActor->pickable = std::make_shared<Dagger>(1,4);
+			game.err("Dagger added");
+		}
+		else if (selectedWeapon.name == "Long Sword")
+		{
+			weaponActor->pickable = std::make_shared<LongSword>(1,8);
+			game.err("Long Sword added");
+		}
+		else
+		{
+			/*weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon);*/
+			game.log("Error: Unknown weapon type"); // Log an error if the weapon type is unknown"
+			return;
+		}
+
+		game.actors.push_back(weaponActor);
+		game.send_to_back(*weaponActor);
 	}
 	else if (dice < 70)
 	{

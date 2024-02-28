@@ -1,0 +1,34 @@
+[
+	{
+		"name": "Long Sword",
+		"type": "Melee",
+		"damageRoll": "1d8",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 1, 4 ],
+		"specialProperties": [ "None", "Flaming", "Frost" ]
+	},
+	{
+		"name": "Dagger",
+		"type": "Melee",
+		"damageRoll": "1d4",
+		"hitBonusRange": [ 0, 3 ],
+		"damageBonusRange": [ 0, 2 ],
+		"specialProperties": [ "None", "Poisoned" ]
+	},
+	{
+		"name": "Longbow",
+		"type": "Ranged",
+		"damageRoll": "1d8",
+		"hitBonusRange": [ 1, 3 ],
+		"damageBonusRange": [ 0, 3 ],
+		"specialProperties": [ "None", "Piercing" ]
+	},
+	{
+		"name": "Staff",
+		"type": "Magic",
+		"damageRoll": "1d6",
+		"hitBonusRange": [ 0, 1 ],
+		"damageBonusRange": [ 0, 2 ],
+		"specialProperties": [ "None", "Arcane Boost", "Healing Touch" ]
+	}
+]

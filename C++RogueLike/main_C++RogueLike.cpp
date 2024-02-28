@@ -19,6 +19,7 @@
 #include "Gui.h"
 
 #include "StrengthAttributes.h"
+#include "Weapons.h"
 
 //==OPENAI_API==
 /*#include "ChatGPT.h"*/ // for openai::start
@@ -105,6 +106,11 @@ int main()
 
 	StrengthAttributes strength;
 	strength.print_chart(); // print strength chart for debugging
+
+	Weapons weapons;
+	weapons.print_chart();
+
+	return 0;
 
 	debugFile.close();
 	/*_CrtDumpMemoryLeaks();*/

@@ -10,18 +10,26 @@
 class Player : public Actor
 {
 public:
-	enum class PlayerRace
+	enum class PlayerRaceState
 	{
-		Human,
-		Elf,
-		Dwarf,
-		Halfling,
-		Gnome,
-		HalfElf
+		HUMAN,
+		ELF,
+		DWARF,
+		HALFLING,
+		GNOME,
+		HALFELF
 	} playerRaceState;
 
+	enum class PlayerClassState
+	{
+		FIGHTER,
+		ROGUE,
+		CLERIC,
+		WIZARD
+	} playerClassState;
+
 	std::string playerGender{ "None" };
-	/*Player(int y, int x);*/
+
 	Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg, bool canSwim);
 	// Note::
 	// X/Y coordinates set
@@ -35,6 +43,7 @@ public:
 	int getPosY() const noexcept { return posY; }
 	void player_get_pos_from_map();
 	void racial_ability_adjustments();
+	void calculate_thaco();
 
 	std::string get_weapon_equipped() const noexcept { return weaponEquipped; }
 	void set_weapon_equipped(std::string weapon) noexcept { weaponEquipped = weapon; }
