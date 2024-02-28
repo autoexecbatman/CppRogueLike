@@ -19,7 +19,7 @@ constexpr int LEVEL_UP_FACTOR = 150;
 
 int AiPlayer::getNextLevelXp()
 {
-	return LEVEL_UP_BASE + (xpLevel * LEVEL_UP_FACTOR);
+	return LEVEL_UP_BASE + (game.player->playerLevel * LEVEL_UP_FACTOR);
 }
 
 //template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
@@ -42,10 +42,11 @@ bool AiPlayer::levelUpUpdate(Actor& owner)
 	{
 		if (owner.destructible->xp >= levelUpXp)
 		{
-			xpLevel++;
+			game.player->playerLevel++;
 			owner.destructible->xp -= levelUpXp;
-			game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", xpLevel);
-			game.dispay_levelup(xpLevel);
+			game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
+			game.player->calculate_thaco();
+			game.dispay_levelup(game.player->playerLevel);
 		}
 	}
 	else

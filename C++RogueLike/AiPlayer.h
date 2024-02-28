@@ -14,7 +14,6 @@
 class AiPlayer : public Ai
 {
 public:
-	int xpLevel{ 1 };
 
 	int getNextLevelXp();
 	bool levelUpUpdate(Actor& owner);
