@@ -19,42 +19,56 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
-		int str = attacker.strength - 1; // -1 to access vector index from 0
-		std::vector<StrengthAttributes> attrs = loadStrengthAttributes();
+		int str = attacker.strength - 1; // -1 to access vector index from 0 and strength starts at 1
+		std::vector<StrengthAttributes> attrs = loadStrengthAttributes(); // load the strength attributes from file
 		try
 		{ // try to catch out of range errors
 			if (str >= 0 && str < static_cast<int>(attrs.size())) // if str is in range of vector size
 			{
-				RandomDice diceDmg; // create a dice object
-				int rollDmg{};
-				// roll for damage based on weapon
-				// 1. get the weapon
-				if (attacker.weaponEquipped == "Long Sword")
-				{
-					rollDmg = diceDmg.d8(); // roll 1d8
-					clear();
-					// print  "you are using a long sword"
-					mvprintw(0, 0, "you are using a Long Sword");
-					refresh();
-					getch();
-				}
-				else
-				{
-					rollDmg = diceDmg.d4(); // roll 1d4
-				}
-
+				// first 
 				RandomDice diceAttack; // create a dice object
 				int rollAttack = diceAttack.d20(); // roll 1d20
 
-				StrengthAttributes strength = attrs[str]; // get the strength attributes for the attacker
+				RandomDice diceDmg; // create a dice object
+				int rollDmg{};
+				// roll for damage based on weapon
+				if (attacker.weaponEquipped == "Long Sword")
+				{
+					rollDmg = diceDmg.d8(); // roll 1d8
+				}
+				else if (attacker.weaponEquipped == "Short Sword")
+				{
+					rollDmg = diceDmg.d6(); // roll 1d6
+				}
+				else if (attacker.weaponEquipped == "Dagger")
+				{
+					rollDmg = diceDmg.d4(); // roll 1d4
+				}
+				else
+				{
+					rollDmg = diceDmg.d2(); // roll 1d4
+				}
+
+				StrengthAttributes strength = attrs.at(str); // get the strength attributes for the attacker
+
 				//int rollNeeded = attacker.destructible->thaco - (20 - target.destructible->armorClass); // Example THAC0 calculation
-				int rollNeeded = 20 - (attacker.destructible->thaco - target.destructible->armorClass); // Example THAC0 calculation
+				//int rollNeeded = 20 - (attacker.destructible->thaco - target.destructible->armorClass); // Example THAC0 calculation
+				int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // Example THAC0 calculation
+
+				//clear();
+				//mvprintw(0,0, "%s rolls: %d", attacker.name.c_str(), rollAttack);
+				///*mvprintw(1, 0, "%s 's thaco - %s 's ac: %d %d =  %d", attacker.name.c_str(), attacker.destructible->thaco, target.name.c_str(), target.destructible->armorClass, rollNeeded);*/
+				//mvprintw(1, 0, "%s 's thaco: %d", attacker.name.c_str(), attacker.destructible->thaco);
+				//mvprintw(2, 0, "%s 's ac: %d", target.name.c_str(), target.destructible->armorClass);
+				//mvprintw(3, 0, "thaco - ac: %d", rollNeeded);
+				//refresh();
+				//getch();
+
 				if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
 				{
 					// calculate the adjusted damage
 					int adjDmg = rollDmg + strength.dmgAdj; // Adjusted damage
 					const int totaldmg = adjDmg - target.destructible->dr;
-					dmg = totaldmg;
 
 					//clear();
 					//mvprintw(0, 0, "Attacker::attack( %s, %s )", attacker.name.c_str(), target.name.c_str());
@@ -76,7 +90,7 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 						game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
 						game.finalizeMessage();
 						// apply damage to target
-						target.destructible->take_damage(target, dmg);
+						target.destructible->take_damage(target, totaldmg);
 					}
 					// else no damage message
 					else
@@ -102,8 +116,6 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 		catch (std::out_of_range& e) { game.err(e.what()); return; }
 		catch (std::exception& e) { game.err(e.what()); return; }
 		catch (...) { game.err("Attacker::attack() - Unknown error."); return; }
-
-
 	}
 	else
 	{

@@ -14,14 +14,18 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 	const int hp = d.d8();
 	const int dmgMin = 1;
 	const int dmgMax = 6;
+	const int thaco = 20;
+	const int ac = 6;
 
 	blocks = true;
 	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 
+	weaponEquipped = "Short Sword";
+
 	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
-	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15, 10, 10);
+	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead goblin", 15, thaco, ac);
 	ai = std::make_shared<AiMonster>();
 }
 //====
@@ -29,15 +33,23 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 //==ORC==
 Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
 {
-	blocks = true;
-	fovOnly = true;
 	RandomDice d;
 	const int damage = d.d10();
 	const int dmgMin = 1;
 	const int dmgMax = 10;
-	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
 	const int hp = d.d10();
-	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead orc", 35, 10, 10);
+	const int thaco = 19;
+	const int ac = 6;
+
+	blocks = true;
+	fovOnly = true;
+
+	strength = d.d6() + d.d6() + d.d6();
+
+	weaponEquipped = "Long Sword";
+
+	attacker = std::make_shared<Attacker>(damage, dmgMin, dmgMax);
+	destructible = std::make_shared<MonsterDestructible>(hp, 0, "dead orc", 35, thaco, ac);
 	ai = std::make_shared<AiMonster>();
 }
 //====

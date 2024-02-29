@@ -64,11 +64,8 @@ void Game::create_player()
 	int playerMaxDmg = 8; // the player's maximum damage
 	int playerDr = 1; // the player's damage reduction
 	int playerXp = 0; // the player's experience points
-
-	CalculatedTHAC0s calculatedTHAC0s; // we create a CalculatedTHAC0s object to get the player's THAC0
-	int playerTHAC0 = calculatedTHAC0s.getFighter(0); // the player's THAC0
-	//int playerTHAC0 = 20; // the player's THAC0
-	int playerAC = 10; // the player's armor class
+	int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
+	int playerAC = 0; // the player's armor class
 	int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
