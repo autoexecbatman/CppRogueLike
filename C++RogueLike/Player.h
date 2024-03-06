@@ -10,23 +10,25 @@
 class Player : public Actor
 {
 public:
-	enum class PlayerRaceState
+	enum class PlayerRaceState : int
 	{
+		NONE,
 		HUMAN,
 		ELF,
 		DWARF,
 		HALFLING,
 		GNOME,
 		HALFELF
-	} playerRaceState;
+	} playerRaceState{ PlayerRaceState::NONE };
 
-	enum class PlayerClassState
+	enum class PlayerClassState : int
 	{
+		NONE,
 		FIGHTER,
 		ROGUE,
 		CLERIC,
 		WIZARD
-	} playerClassState;
+	} playerClassState{ PlayerClassState::NONE };
 
 	std::string playerGender{ "None" };
 
