@@ -45,7 +45,7 @@ void MenuRace::menu_race_print_option(MenuRaceOptions option, int row) noexcept
 	{
 		menu_race_highlight_on();
 	}
-	const auto& menuOptionString = menu_race_get_string(option);
+	const std::string& menuOptionString = menu_race_get_string(option);
 	menu_race_print(1, row, menuOptionString);
 	if (newOption == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
 	{
@@ -82,7 +82,7 @@ void MenuRace::menu_race_select()
 void MenuRace::menu_race_human()
 {
 	// set player race
-	const auto& human = menu_race_get_string(MenuRaceOptions::HUMAN);
+	const std::string& human = menu_race_get_string(MenuRaceOptions::HUMAN);
 	game.player->playerRace = human;
 	// set player state to human
 	game.player->playerRaceState = Player::PlayerRaceState::HUMAN;
@@ -91,7 +91,7 @@ void MenuRace::menu_race_human()
 void MenuRace::menu_race_dwarf()
 {
 	// set player race
-	const auto& dwarf = menu_race_get_string(MenuRaceOptions::DWARF);
+	const std::string& dwarf = menu_race_get_string(MenuRaceOptions::DWARF);
 	game.player->playerRace = dwarf;
 	// set player state to dwarf
 	game.player->playerRaceState = Player::PlayerRaceState::DWARF;
@@ -100,7 +100,7 @@ void MenuRace::menu_race_dwarf()
 void MenuRace::menu_race_elf()
 {
 	// set player race
-	const auto& elf = menu_race_get_string(MenuRaceOptions::ELF);
+	const std::string& elf = menu_race_get_string(MenuRaceOptions::ELF);
 	game.player->playerRace = elf;
 	// set player state to elf
 	game.player->playerRaceState = Player::PlayerRaceState::ELF;
@@ -109,7 +109,7 @@ void MenuRace::menu_race_elf()
 void MenuRace::menu_race_gnome()
 {
 	// set player race
-	const auto& gnome = menu_race_get_string(MenuRaceOptions::GNOME);
+	const std::string& gnome = menu_race_get_string(MenuRaceOptions::GNOME);
 	game.player->playerRace = gnome;
 	// set player state to gnome
 	game.player->playerRaceState = Player::PlayerRaceState::GNOME;
@@ -118,7 +118,7 @@ void MenuRace::menu_race_gnome()
 void MenuRace::menu_race_halfelf()
 {
 	// set player race
-	const auto& halfelf = menu_race_get_string(MenuRaceOptions::HALFELF);
+	const std::string& halfelf = menu_race_get_string(MenuRaceOptions::HALFELF);
 	game.player->playerRace = halfelf;
 	// set player state to halfelf
 	game.player->playerRaceState = Player::PlayerRaceState::HALFELF;
@@ -127,7 +127,7 @@ void MenuRace::menu_race_halfelf()
 void MenuRace::menu_race_halfling()
 {
 	// set player race
-	const auto& halfling = menu_race_get_string(MenuRaceOptions::HALFLING);
+	const std::string& halfling = menu_race_get_string(MenuRaceOptions::HALFLING);
 	game.player->playerRace = halfling;
 	// set player state to halfling
 	game.player->playerRaceState = Player::PlayerRaceState::HALFLING;
