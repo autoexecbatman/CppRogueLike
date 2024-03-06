@@ -9,22 +9,22 @@
 class RandomDice
 {
 public:
-    enum class DiceType : int
-    {
-        D2, D4, D6, D8, D10, D12, D20, D100
-    } diceType{ DiceType::D6 };
+	enum class DiceType : int
+	{
+		D2, D4, D6, D8, D10, D12, D20, D100
+	} diceType{ DiceType::D6 };
 
-    // public functions to emulate a set of dice from d2 to d100
-    int d2() { diceType = DiceType::D2; return roll(2); }
-    int d4() { diceType = DiceType::D4; return roll(4); }
-    int d6() { diceType = DiceType::D6; return roll(6); }
-	int d8() { diceType = DiceType::D8; return roll(8); }
-	int d10() { diceType = DiceType::D10; return roll(10); }
-	int d12() { diceType = DiceType::D12; return roll(12); }
-	int d20() { diceType = DiceType::D20; return roll(20); }
-	int d100() { diceType = DiceType::D100; return roll(100); }
+	// public functions to emulate a set of dice from d2 to d100
+	int d2() { diceType = DiceType::D2; return roll(1, 2); }
+	int d4() { diceType = DiceType::D4; return roll(1, 4); }
+	int d6() { diceType = DiceType::D6; return roll(1, 6); }
+	int d8() { diceType = DiceType::D8; return roll(1, 8); }
+	int d10() { diceType = DiceType::D10; return roll(1, 10); }
+	int d12() { diceType = DiceType::D12; return roll(1, 12); }
+	int d20() { diceType = DiceType::D20; return roll(1, 20); }
+	int d100() { diceType = DiceType::D100; return roll(1, 100); }
 
-    // get dice type
+	// get dice type
 	std::string getDiceType()
 	{
 		switch (diceType)
@@ -55,15 +55,16 @@ public:
 		return d6();
 	}
 
-    int roll(int max) 
+	int roll(int min, int max)
 	{
-        return m_gen() % max + 1;
-    }
+		std::uniform_int_distribution<int> dist(min, max);
+		return dist(m_gen);
+	}
 
 private:
-    // we use the mersenne twister engine for our random number generator
-    // we seed it with a random device
-    std::mt19937 m_gen{ std::random_device{}() };
+	// we use the mersenne twister engine for our random number generator
+	// we seed it with a random device
+	std::mt19937 m_gen{ std::random_device{}() };
 
 };
 
