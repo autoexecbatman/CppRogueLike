@@ -31,17 +31,17 @@ public:
 	std::string playerGender{ "None" };
 
 	Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg, bool canSwim);
+
 	// Note::
 	// X/Y coordinates set
 	// in the function create_room()
 	// in Map.cpp
-
-	bool player_is_dead(); // TODO : correct this function
 	void setPosX(int x) noexcept { posX = x; }
 	void setPosY(int y) noexcept { posY = y; }
 	int getPosX() const noexcept { return posX; }
 	int getPosY() const noexcept { return posY; }
 	void player_get_pos_from_map();
+
 	void racial_ability_adjustments();
 	void calculate_thaco();
 

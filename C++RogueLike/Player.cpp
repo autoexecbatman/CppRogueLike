@@ -35,11 +35,6 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 	this->canSwim = canSwim;
 }
 
-bool Player::player_is_dead()
-{
-	return false;
-}
-
 // a function to get postion from the map class using the getter functions
 void Player::player_get_pos_from_map()
 {
