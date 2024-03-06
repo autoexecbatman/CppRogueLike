@@ -9,11 +9,6 @@ Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
 bool Fireball::use(Actor& owner, Actor& wearer)
 {
-	game.gui->log_message(
-		WHITE_PAIR,
-		"Left-click a target tile for the fireball,\nor right-click to cancel."
-	);
-
 	int x{ 0 };
 	int y{ 0 };
 
@@ -23,11 +18,8 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	}
 
 	// burn everything in <range> (including player)
-	game.gui->log_message(
-		WHITE_PAIR,
-		"The fireball explodes, burning everything within %d tiles!",
-		Fireball::maxRange
-	);
+	game.appendMessagePart(WHITE_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
+	game.finalizeMessage();
 
 	// make impact explosion using a circle algorithm and curses library 
 	// (this is a bit of a hack, but it works)
