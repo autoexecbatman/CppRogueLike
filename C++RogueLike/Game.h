@@ -12,6 +12,7 @@
 #include "Map.h"
 #include "Colors.h"
 #include "ChatGPT.h"
+#include "Weapons.h"
 
 class Game
 {
@@ -57,6 +58,8 @@ public:
 	int dungeonLevel{ 0 };
 
 	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
+
+	std::vector<Weapons> weapons; // a vector of weapons
 
 	// Public member functions.
 	void init();
