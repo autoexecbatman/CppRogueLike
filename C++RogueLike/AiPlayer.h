@@ -26,7 +26,7 @@ public:
 
 protected:
 	/*void handleActionKey(Actor* owner, int ascii);*/
-	std::shared_ptr<Actor> choseFromInventory(Actor& owner, int ascii);
+	std::shared_ptr<Actor> chose_from_inventory(Actor& owner, int ascii);
 	bool moveOrAttack(Actor& owner, int targetx, int targety);
 private:
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;

@@ -194,7 +194,7 @@ void AiPlayer::update(Actor& owner)
 
 	case Controls::DROP:
 	{
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, 'a');
+		std::shared_ptr<Actor> actor = chose_from_inventory(owner, 'a');
 		if (actor)
 		{
 			actor->pickable->drop(*actor, owner);
@@ -426,7 +426,7 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
 	{
-		std::shared_ptr<Actor> actor = choseFromInventory(owner, inventoryInput);
+		std::shared_ptr<Actor> actor = chose_from_inventory(owner, inventoryInput);
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
@@ -442,24 +442,24 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 }
 
-std::shared_ptr<Actor> AiPlayer::choseFromInventory(Actor& owner, int ascii)
+std::shared_ptr<Actor> AiPlayer::chose_from_inventory(Actor& owner, int ascii)
 {
-	std::clog << "You chose from inventory" << std::endl;
+	game.log("You chose from inventory");
 	if (owner.container != nullptr)
 	{
-		int index = ascii - 'a';
+		const int index = ascii - 'a';
 		if (index >= 0 && index < owner.container->inventoryList.size())
 		{
-			return gsl::at(owner.container->inventoryList, index);
+			return owner.container->inventoryList.at(index);
 		}
 	}
 	else
 	{
-		std::cout << "Error: choseFromInventory() called on actor with no container." << std::endl;
-		exit(-1);
+		game.log("Error: choseFromInventory() called on actor with no container.");
+		exit(EXIT_FAILURE);
 	}
 
-	return nullptr; // TODO: don't hand out nullptrs
+	return nullptr;
 }
 
 void AiPlayer::load(TCODZip& zip)
