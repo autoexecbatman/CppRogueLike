@@ -121,23 +121,17 @@ int main()
 void init_curses()
 {
 	//==INIT_CURSES==
-	std::clog << "Initializing curses...\n";
 	initscr(); // initialize the screen in curses
-	std::clog << "Initialized successfully.\n";
 
 	if (!has_colors()) {
-		std::clog << "Colors not supported.\n";
-		std::cout << "Colors not supported.\n";
-		throw std::runtime_error("Colors not supported");
+		game.log("Colors not supported.");
 	}
-
-	std::clog << "Initializing colors...\n";
-	start_color(); // start color curses
-	std::clog << "Initialized successfully.\n";
-	std::clog << "Initializing color pairs...\n";
-	Colors colors;
-	colors.my_init_pair();
-	std::clog << "Initialized successfully.\n";
+	else
+	{
+		start_color(); // start color curses
+		Colors colors;
+		colors.my_init_pair();
+	}
 
 	cbreak(); // disable line buffering
 	noecho(); // turn off echoing of keys to the screen
@@ -146,15 +140,11 @@ void init_curses()
 
 	if (has_mouse())
 	{
-		std::clog << "Initializing mouse...\n";
 		mousemask(0x1fffffffL, nullptr); // enable mouse events * #define ALL_MOUSE_EVENTS        0x1fffffffL
-		std::clog << "Initialized successfully.\n";
 	}
 	else
 	{
-		std::clog << "Mouse not supported.\n";
-		std::cout << "Mouse not supported.\n";
-		exit(-1);
+		game.log("Mouse not supported.");
 	}
 
 	printw("Welcome to C++RogueLike!"); // print a welcome message
