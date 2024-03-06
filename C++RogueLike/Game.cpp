@@ -34,6 +34,9 @@
 // Will be called in load_all() when loading and menu() for new game
 void Game::init()
 {
+	//==INIT==
+	game.weapons = loadWeapons();
+
 	//==STAIRS==
 	if (!game.stairs) { err("game.stairs is nullptr"); }
 	game.stairs->blocks = false; // stairs are not blocking
@@ -47,6 +50,10 @@ void Game::init()
 	// we set gameStatus to STARTUP because we want to compute the fov only once
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
+
+	// adjust the attributes based on players race
+	game.player->racial_ability_adjustments();
+	game.player->calculate_thaco();
 
 	//==LOG==
 	game.log("game.init() was called!");
@@ -110,10 +117,6 @@ void Game::update()
 			{
 				game.log("...Computing FOV...");
 				game.map->compute_fov();
-
-				// adjust the attributes based on players race
-				game.player->racial_ability_adjustments();
-				game.player->calculate_thaco();
 			}
 
 			// we set the gameStatus to IDLE
@@ -329,7 +332,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 	// the target cursor is initialized at the player's position
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
-
+	
 	// capture the last position of the cursor
 	int lastY = targetCursorY;
 	int lastX = targetCursorX;
@@ -434,9 +437,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 
 		// Move the window to the new position
 		mvwin(aoe, centerOfExplosionY - 1, centerOfExplosionX - 1);
-		wrefresh(aoe);
 		
-		box(aoe, 0, 0);
 
 		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
 		if (aoe != nullptr)
@@ -472,6 +473,8 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 				}
 			}
 		}
+		/*box(aoe, 0, 0);*/
+		wrefresh(aoe);
 
 		///DEBUG
 		//mvprintw(0, 0, "param X : %d", *x);
