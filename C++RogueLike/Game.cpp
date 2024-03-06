@@ -51,10 +51,6 @@ void Game::init()
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
 
-	// adjust the attributes based on players race
-	game.player->racial_ability_adjustments();
-	game.player->calculate_thaco();
-
 	//==LOG==
 	game.log("game.init() was called!");
 }
@@ -117,6 +113,10 @@ void Game::update()
 			{
 				game.log("...Computing FOV...");
 				game.map->compute_fov();
+
+				// adjust the attributes based on players race
+				game.player->racial_ability_adjustments();
+				game.player->calculate_thaco();
 			}
 
 			// we set the gameStatus to IDLE
@@ -437,7 +437,9 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 
 		// Move the window to the new position
 		mvwin(aoe, centerOfExplosionY - 1, centerOfExplosionX - 1);
+		wrefresh(aoe);
 		
+		box(aoe, 0, 0);
 
 		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
 		if (aoe != nullptr)
@@ -473,8 +475,6 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 				}
 			}
 		}
-		/*box(aoe, 0, 0);*/
-		wrefresh(aoe);
 
 		///DEBUG
 		//mvprintw(0, 0, "param X : %d", *x);
