@@ -326,24 +326,28 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 	//}
 	//==============================================================
 
+	// the target cursor is initialized at the player's position
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
 
+	// capture the last position of the cursor
 	int lastY = targetCursorY;
 	int lastX = targetCursorX;
 
+	// initialize the line position
 	int lineY = 0;
 	int lineX = 0;
 
-	int sideLength = 5;
+	// the window size is calculated from the maxRange
+	int sideLength = 9;
 
 	int height = sideLength;
 	int width = sideLength;
 
 	// Create the window once and state where you delete it below
-	WINDOW* aoe = newwin(height + 2, width + 2, 0, 0); // deleted in -> pick_tile()
-	box(aoe, 0, 0);
+	WINDOW* aoe = newwin(height , width , 0, 0); // deleted in -> pick_tile()
 	wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
+	box(aoe, 0, 0);
 
 	bool run = true;
 	while (run == true)
@@ -459,9 +463,9 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		//}
 
 		// draw the AOE in white
-		for (int tilePosX = targetCursorX - (chebyshevD - 1 - 1 + 2) ; tilePosX < (centerOfExplosionX + (width - 1 + 1)); tilePosX++)
+		for (int tilePosX = targetCursorX - chebyshevD; tilePosX < centerOfExplosionX + width; tilePosX++)
 		{
-			for (int tilePosY = targetCursorY - (chebyshevD - 1 - 1 + 2); tilePosY < (centerOfExplosionY + (height - 1 + 1)); tilePosY++)
+			for (int tilePosY = targetCursorY - chebyshevD; tilePosY < centerOfExplosionY + height; tilePosY++)
 			{
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, nullptr);
