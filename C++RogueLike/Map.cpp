@@ -252,14 +252,16 @@ void Map::add_item(int x, int y)
 	RandomDice d;
 	const int dice = d.d100();
 	int potionIndex = 0;
-	std::vector<Weapons> weaponsList = loadWeapons(); // Load weapons from JSON, consider caching this instead of loading each time
 
-	if (dice < 70) { // Adjust this threshold based on your game's item spawn logic
+	if (dice < 60) { // Adjust this threshold based on your game's item spawn logic
+
 		// Randomly select a weapon from the list
-		
-		const int weaponIndex = d.roll(weaponsList.size());
-		const Weapons& selectedWeapon = weaponsList[weaponIndex - 1];
-		const int rollColor = d.roll(3);
+		const int weaponIndex = d.roll(1, game.weapons.size());
+		const Weapons& selectedWeapon = game.weapons.at(weaponIndex - 1);
+
+		// Randomly select a color for the weapon
+		const int rollColor = d.roll(1,3);
+
 		// Create an Actor for the weapon
 		auto weaponActor = std::make_shared<Actor>(x, y, '/', selectedWeapon.name, rollColor, 0); // Assuming you have a generic symbol and color for weapons
 		weaponActor->blocks = false;
@@ -503,6 +505,7 @@ void test_dice(){
 
 void Map::add_monster(int mon_x, int mon_y)
 {
+	game.err("player level: " + std::to_string(game.player->playerLevel));
 	static bool dragonPlaced = false; // flag to track if a dragon has been placed
 	RandomDice d;
 
@@ -525,7 +528,7 @@ void Map::add_monster(int mon_x, int mon_y)
 			game.actors.push_back(goblin);
 		}
 
-		if (true/*game.player->playerLevel > 3*/)
+		if (game.player->playerLevel > 3)
 		{
 			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
 			for (auto i{ 0 }; i < roll2d6; i++) { // create orcs
