@@ -31,27 +31,12 @@ constexpr int GUI_HEIGHT{ 7 };
 
 class Gui : public Persistent
 {
-	// In Gui.h
-
-private:
-	std::vector<std::vector<std::pair<int, std::string>>> displayMessages;
-
-public:
-	void addDisplayMessage(const std::vector<std::pair<int, std::string>>& message);
-	void renderMessages();
-
-public:
-	~Gui()
-	{
-		// TODO : these windows are not in use anymore
-		delete con;
-		delete sub;
-	}
 private:
 	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
 
 	int guiMessageColor{ 0 }; // the color of the message to be displayed on the gui
 	std::string guiMessage{}; // the message to be displayed on the gui
+	std::vector<std::vector<std::pair<int, std::string>>> displayMessages; // a container to read messages from, having a color and a string as a pair
 
 	WINDOW* guiWin{ nullptr };
 
@@ -79,12 +64,12 @@ public:
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
+	void addDisplayMessage(const std::vector<std::pair<int, std::string>>& message);
+	void renderMessages();
+
 protected:
 	gsl::owner<WINDOW*> statsWindow{ nullptr };
 	gsl::owner<WINDOW*> messageLogWindow{ nullptr };
-
-	gsl::owner<WINDOW*> con{ nullptr }; // the gui window
-	gsl::owner<WINDOW*> sub{ nullptr }; // a subwindow in the gui
 	
 	//==LOG==
 	std::vector<std::shared_ptr<LogMessage>> log; // the message log
@@ -100,7 +85,7 @@ protected:
 		int maxValue, 
 		int barColor, 
 		int backColor
-	) noexcept;
+	);
 
 	void renderMouseLook();
 };

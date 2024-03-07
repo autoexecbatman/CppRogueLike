@@ -427,12 +427,19 @@ void Gui::renderBar(
 	int maxValue,
 	int barColor,
 	int backColor
-) noexcept
+)
 {
 	std::cout << "void Gui::renderBar() {}" << std::endl;
 	const float ratio = gsl::narrow_cast<float>(value) / gsl::narrow_cast<float>(maxValue); // ratio of the bar's value to its maximum value
 	const int barWidth = gsl::narrow_cast<int>(ratio * gsl::narrow_cast<float>(bar_width)); // the width of the bar in characters
 	const int nameLength = gsl::narrow_cast<int>(strlen(name)); // the length of the name of the bar
+
+	WINDOW* con = newwin(
+		0, // int nlines
+		0, // int ncols
+		22, // int begy
+		0 // int begx
+	);
 
 	wattron(con, COLOR_PAIR(barColor)); // set the color of the bar to barColor
 	for (int i = 0; i < barWidth; i++) // print the bar
@@ -474,6 +481,9 @@ void Gui::renderBar(
 		gsl::narrow_cast<int>(value),
 		gsl::narrow_cast<int>(maxValue)
 		);
+	wrefresh(con);
+	getch();
+	delwin(con);
 }
 
 void Gui::print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage)
