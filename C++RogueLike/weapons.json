@@ -8,6 +8,14 @@
 		"specialProperties": [ "None", "Flaming", "Frost" ]
 	},
 	{
+		"name": "Short Sword",
+		"type": "Melee",
+		"damageRoll": "1d6",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 0, 3 ],
+		"specialProperties": [ "None", "Piercing" ]
+	},
+	{
 		"name": "Dagger",
 		"type": "Melee",
 		"damageRoll": "1d4",

@@ -135,7 +135,6 @@ set(JSON_FILES
     "${PROJECT_SOURCE_DIR}/C++RogueLike/intelligence.json"
     "${PROJECT_SOURCE_DIR}/C++RogueLike/charisma.json"
     "${PROJECT_SOURCE_DIR}/C++RogueLike/weapons.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/weapons.json"
 )
 
 foreach(JSON_FILE ${JSON_FILES})
