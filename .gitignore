@@ -361,7 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/C++RogueLike
 /Temp
 /tempCPPRL
 /TempFuncTest
@@ -386,3 +385,7 @@ FodyWeavers.xsd
 /Sample-Test1/test.cpp
 /UnitTest1/pch.h
 /UT_PDCurses_draw/main_UT_PDCurses_draw.cpp
+/vcpkg_installed
+/CMakeFiles
+/cpprl-testgoogle
+/cpprl-testnative

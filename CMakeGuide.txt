@@ -1,0 +1,11 @@
+1. Open a Command Prompt or Terminal and navigate to the solution directory.
+
+2. Create a new build directory and navigate into it:
+mkdir build
+cd build
+
+3. Configure and Specify path to vcpkg.cmake
+cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_TOOLCHAIN_FILE=F:/dev/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+
+4. Build
+cmake --build . --config Release
