@@ -16,6 +16,10 @@ class Window
 	//Create a new full-screen window by calling newwin(0, 0, 0, 0).
 	//WINDOW* newwin(int nlines, int ncols, int begy, int begx);
 public:
+	Window(int nlines, int ncols, int begy, int begx);
+	~Window();
+	WINDOW* window{};
+
 	const char* wintext = "init_wintext";
 	//the lenght of wintext
 	size_t wintext_len = strlen(wintext) + 2; // why +2 ? borders...

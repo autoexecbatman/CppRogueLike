@@ -21,11 +21,26 @@
 //}
 //
 
+Window::Window(int nlines, int ncols, int begy, int begx)
+{
+	window = newwin(
+		nlines, // int nlines
+		ncols, // int ncols
+		begy, // int begy
+		begx // int begx
+	);
+}
+
+Window::~Window()
+{
+	delwin(window);
+}
 
 int wintext_len(const char* wintext)
 {
 	return strlen(wintext + 2);
 }
+
 
 void Window::create_window(int nlines, int begy, int begx, const char* wintext)
 {
