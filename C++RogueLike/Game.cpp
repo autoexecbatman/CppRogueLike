@@ -896,7 +896,9 @@ void Game::next_level()
 	player->destructible->heal(player->destructible->hpMax / 2);
 
 	// present a message to the player -> TODO : move this to the gui
-	game.message(WHITE_PAIR, "After a rare moment of peace, you descend\ndeeper into the heart of the dungeon...",true);
+
+	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true);
+	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 
 	// clear the actors container except the player and the stairs
