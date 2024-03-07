@@ -4,13 +4,11 @@
 #include "AiMonsterConfused.h"
 
 //==Confuser==
-Confuser::Confuser(int nbTurns, int range) : nbTurns(nbTurns), range(range) {}
+Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(range) {}
 
 bool Confuser::use(Actor& owner, Actor& wearer)
 {
-	game.gui->log_message(WHITE_PAIR, "Left-click an enemy to confuse it,\nor right-click to cancel.");
-
-	int x, y;
+	int x{ 0 }, y{ 0 };
 
 	if (!game.pick_tile(&x, &y, range))
 	{
@@ -26,10 +24,11 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 
 	// replace the monster's AI with a confused one; 
 	// after <nbTurns> turns the old AI will be restored
-	/*ConfusedMonsterAi* confusedAi = new ConfusedMonsterAi(nbTurns, actor->ai);*/
 	auto confusedAi = std::make_shared<AiMonsterConfused>(nbTurns, actor->ai);
 	actor->ai = confusedAi;
-	game.gui->log_message(WHITE_PAIR, "The eyes of the %s look vacant,\nas he starts to stumble around!", actor->name);
+
+	game.message(WHITE_PAIR, std::format("as he starts to stumble around!"), true);
+	game.message(WHITE_PAIR, std::format("The eyes of the {} look vacant,", actor->name), true);
 
 
 	return Pickable::use(owner, wearer);

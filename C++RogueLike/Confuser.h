@@ -13,7 +13,7 @@ public:
 	int nbTurns = 0;
 	int range = 0;
 
-	Confuser(int nbTurns, int range);
+	Confuser(int nbTurns, int range) noexcept;
 
 	bool use(Actor& owner, Actor& wearer);
 
