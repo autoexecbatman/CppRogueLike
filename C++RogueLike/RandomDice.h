@@ -25,7 +25,7 @@ public:
 	int d100() { diceType = DiceType::D100; return roll(1, 100); }
 
 	// get dice type
-	std::string getDiceType()
+	std::string get_dice_type()
 	{
 		switch (diceType)
 		{
@@ -42,7 +42,7 @@ public:
 	}
 
 	// set dice using a string
-	int rollFromString(std::string& diceType)
+	int roll_from_string(const std::string& diceType)
 	{
 		if (diceType == "D2") return d2();
 		if (diceType == "D4") return d4();
