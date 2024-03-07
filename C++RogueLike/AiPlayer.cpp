@@ -552,7 +552,8 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 
 		if (isDeadCorpseOrItem && actor->posX == targetx && actor->posY == targety)
 		{
-			mvprintw(29, 0, "There's a %s here\n", actor->name.c_str());
+			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->name));
+			game.finalizeMessage();
 		}
 	}
 
