@@ -48,7 +48,7 @@ void Gui::renderMessages() noexcept {
 		// Iterate through each part of the message
 		for (const auto& part : message) {
 			// Extract color and text
-			int color = part.first;
+			const int color = part.first;
 			const std::string& text = part.second;
 
 			// Render logic here using color and text
@@ -207,7 +207,7 @@ void Gui::render()
 		//	0 // int begx
 		//);
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to initialize con window.\n" << std::endl;
 		std::clog << e.what() << std::endl;
 	}
@@ -222,7 +222,7 @@ void Gui::render()
 		//	0/*1*/ // int begx
 		//);
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to initialize sub window.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -235,7 +235,7 @@ void Gui::render()
 		/*wclear(con);*/
 		/*wclear(sub);*/
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to clear windows.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -245,7 +245,7 @@ void Gui::render()
 		/*refresh();*/ // refresh the screen has to be called for the window to show
 		/*wclear(con);*/
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to refresh screen.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -262,7 +262,7 @@ void Gui::render()
 		//	HPBARMISSING_PAIR // int backColor
 		//);
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to render health bar.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -274,7 +274,7 @@ void Gui::render()
 		//	0 // int horChar
 		//);
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to draw border around GUI window.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -292,7 +292,7 @@ void Gui::render()
 		//	y++;
 		//}
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed draw." << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -319,7 +319,7 @@ void Gui::render()
 /*		wrefresh(con);
 		wrefresh(sub);*/// refresh the GUI window has to be called for window to update
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::clog << "Failed to refresh windows.\n" << std::endl;
 		std::cout << e.what() << std::endl;
 	}
@@ -550,7 +550,7 @@ void Gui::load(TCODZip& zip)
 	while (nbMessages > 0) 
 	{
 		const char* text = zip.getString();
-		int col = zip.getInt();
+		const int col = zip.getInt();
 		log_message(col, text);
 		nbMessages--;
 	}
