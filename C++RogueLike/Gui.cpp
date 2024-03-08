@@ -42,7 +42,7 @@ void Gui::addDisplayMessage(const std::vector<std::pair<int, std::string>>& mess
 	displayMessages.push_back(message);
 }
 
-void Gui::renderMessages() {
+void Gui::renderMessages() noexcept {
 	// Iterate through each message
 	for (const auto& message : displayMessages) {
 		// Iterate through each part of the message
@@ -56,7 +56,7 @@ void Gui::renderMessages() {
 	}
 }
 
-void Gui::gui_init()
+void Gui::gui_init() noexcept
 {
 	// main gui window
 	gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);
@@ -79,7 +79,7 @@ void Gui::gui_init()
 	gui_refresh();
 }
 
-void Gui::gui_shutdown()
+void Gui::gui_shutdown() noexcept
 {
 	delwin(statsWindow); // delete the stats window
 	delwin(messageLogWindow); // delete the message log window
@@ -181,7 +181,7 @@ void Gui::gui_print_attrs(int strength, int dexterity, int constitution, int int
 	mvwprintw(guiWin, 1, 45, "Cha: %d ", charisma);
 }
 
-void Gui::gui()
+void Gui::gui() noexcept
 {
 	refresh();
 

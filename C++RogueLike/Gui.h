@@ -11,13 +11,6 @@
 // because the gui window is initialized and deleted
 // using explicit calls to the gui_init() and gui_delete() functions.
 // 
-// Initialize the gui window using the PDCurses library
-// 
-// 
-// Objects:
-//
-//
-// Author: @autoexecbatman
 
 #include <curses.h>
 #include <vector>
@@ -46,8 +39,8 @@ private:
 	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 public:
-	void gui_init(); // initialize the gui
-	void gui_shutdown(); // shutdown the gui
+	void gui_init() noexcept; // initialize the gui
+	void gui_shutdown() noexcept; // shutdown the gui
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
 
@@ -55,7 +48,7 @@ public:
 	void gui_print_log();
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
 
-	void gui();
+	void gui() noexcept;
 	void render();
 	
 	// this function will be redundant soon
@@ -65,7 +58,7 @@ public:
 	void save(TCODZip& zip) override;
 
 	void addDisplayMessage(const std::vector<std::pair<int, std::string>>& message);
-	void renderMessages();
+	void renderMessages() noexcept;
 
 protected:
 	gsl::owner<WINDOW*> statsWindow{ nullptr };
