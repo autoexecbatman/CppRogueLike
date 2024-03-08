@@ -87,9 +87,9 @@ public:
 
 	//==DEBUG FUNCTIONS==//
 	void wizard_eye() noexcept; // prints Actors names instead of their ASCII chars
-	void err(std::string e) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); refresh(); getch(); }
-	void enableDebugMode() { debugMode = true; }
-	void disableDebugMode() { debugMode = false; }
+	void err(const std::string& e) noexcept { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); refresh(); getch(); }
+	void enableDebugMode() noexcept { debugMode = true; }
+	void disableDebugMode() noexcept { debugMode = false; }
 	void log(const std::string& message);
 
 	//==MESSAGE FUNCTIONS==//
