@@ -209,7 +209,7 @@ void Game::send_to_back(Actor& actor)
 	}
 }
 
-std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const
+std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept
 {
 	std::shared_ptr<Actor> closestMonster = nullptr;
 	int bestDistance = INT_MAX;
@@ -602,7 +602,7 @@ void Game::run_menus() {
 	}
 }
 
-bool Game::mouse_moved()
+bool Game::mouse_moved() noexcept
 {
 	int old_mouse_x = Mouse_status.x;
 	int old_mouse_y = Mouse_status.y;
@@ -917,7 +917,7 @@ void Game::next_level()
 }
 
 // create the getActor function
-std::shared_ptr<Actor> Game::get_actor(int x, int y) const
+std::shared_ptr<Actor> Game::get_actor(int x, int y) const noexcept
 {
 	//for (Actor* actor : actors)
 	//{

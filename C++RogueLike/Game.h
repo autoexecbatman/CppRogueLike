@@ -67,11 +67,11 @@ public:
 	void update();
 	void render();
 	void send_to_back(Actor& actor);
-	std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const;
+	std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept;
 	bool pick_tile(int* x, int* y, int maxRange);
 	void run_menus();
 
-	bool mouse_moved();
+	bool mouse_moved() noexcept;
 	void target();
 	void load_all(); // does not override Persistent::load()
 	void save_all(); // does not override Persistent::save()
@@ -81,7 +81,7 @@ public:
 
 	// the player goes down stairs
 	void next_level();
-	std::shared_ptr<Actor> get_actor(int x, int y) const;
+	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
 
