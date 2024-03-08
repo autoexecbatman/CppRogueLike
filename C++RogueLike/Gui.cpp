@@ -34,6 +34,7 @@ constexpr int LOG_HEIGHT = PANEL_HEIGHT - 2;
 constexpr int LOG_WIDTH = 56;
 constexpr int LOG_Y = 1;
 constexpr int LOG_X = 60;
+constexpr int LOG_MAX_MESSAGES = 5;
 // ==== ==== ==== ==== ====
 
 void Gui::addDisplayMessage(const std::vector<std::pair<int, std::string>>& message)
@@ -129,14 +130,12 @@ void Gui::gui_render()
 
 void Gui::gui_print_log()
 {
-	// maxMessagesToShow is the maximum number of messages to display
-	const int maxMessagesToShow = 5;
 	// messagesToShow is the number of messages to display based on the size of the attackMessagesWhole vector
-	int messagesToShow = std::min(maxMessagesToShow, static_cast<int>(game.attackMessagesWhole.size()));
+	const int messagesToShow = std::min(LOG_MAX_MESSAGES, static_cast<int>(game.attackMessagesWhole.size()));
 
 	for (int i = 0; i < messagesToShow; i++)
 	{
-		const auto& messageParts = game.attackMessagesWhole[game.attackMessagesWhole.size() - 1 - i];
+		const std::vector<std::pair<int, std::string>>& messageParts = game.attackMessagesWhole.at(game.attackMessagesWhole.size() - 1 - i);
 
 		int currentX = 0; // starting position for each message
 
