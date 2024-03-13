@@ -16,7 +16,7 @@ bool LightningBolt::use(Actor& owner, Actor& wearer)
 
 	if (!closestMonster)
 	{
-		game.gui->log_message(HPBARMISSING_PAIR, "No enemy is close enough to strike.");
+		game.message(HPBARMISSING_PAIR, "No enemy is close enough to strike.", true);
 
 		return false;
 	}
