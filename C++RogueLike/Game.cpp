@@ -69,7 +69,7 @@ void Game::create_player()
 	int playerXp = 0; // the player's experience points
 	int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
 	int playerAC = 0; // the player's armor class
-	int playerLevel = game.player->playerLevel; // the player's level
+	const int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
 	game.player = std::make_shared<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
@@ -223,7 +223,7 @@ std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, dou
 			!(*actor)->destructible->is_dead()
 			)
 		{
-			int distance = (*actor)->get_distance(fromPosX, fromPosY);
+			const int distance = (*actor)->get_distance(fromPosX, fromPosY);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
@@ -235,122 +235,15 @@ std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, dou
 	return closestMonster;
 }
 
-//====
-// The function returns a boolean to allow the player to cancel by pressing a key or right clicking.
-// A range of 0 means that we allow the tile to be picked anywhere in the player's field of view.
-// This function uses a default value for the maxRange parameter so that we can omit the parameter :
-// engine.pickATile(&x, &y);
-// is the same as
-// engine.pickATile(&x, &y, 0.0f);
-// We're not going to use the main loop from main.cpp while picking a tile. 
-// This would require to add a flag in the engine to know if we're in standard play mode or tile picking mode.Instead, we create a alternative game loop.
-// Since we want the mouse look to keep working while targetting, we need to render the game screen in the loop
 bool Game::pick_tile(int* x, int* y, int maxRange)
 {
-	// this old code is commented out here only for reference
-	// =========================
-	//while (game.run == true)
-	//{
-	//	clear();
-	//	render();
-	//	
-	//	nodelay(stdscr, true);
-	//// Now the player might not be aware of where he's allowed to click. 
-	//// Let's highlight the zone for him. We scan the whole map and look for tiles in FOV and within range :
-	//// highlight the possible range
-	//	for (int cx = 0; cx < map->map_width; cx++)
-	//	{
-	//		for (int cy = 0; cy < map->map_height; cy++)
-	//		{
-	//			if (
-	//				map->isInFov(cx, cy)
-	//				&&
-	//				(
-	//					maxRange == 0
-	//					||
-	//					player->getDistance(cx, cy) <= maxRange
-	//					)
-	//				)
-	//			{
-	//				// Remember how we darkened the oldest message log by multiplying its color by a float smaller than 1 ? 
-	//				// Well we can highlight a color using the same trick :
-	//				/*TCODColor col = TCODConsole::root->getCharBackground(cx, cy);*/
-	//				/*col = col * 1.2f;*/
-	//				/*TCODConsole::root->setCharBackground(cx, cy, col);*/
-	//				/*mvchgat(cy, cx, 1, A_NORMAL, HPBARFULL_PAIR, NULL);*/
-	//				attron(COLOR_PAIR(DARK_GROUND_PAIR));
-	//				mvwprintw(stdscr, cy, cx, "0");
-	//				attroff(COLOR_PAIR(DARK_GROUND_PAIR));
-	//				refresh();
-	//			}
-	//		}
-	//	}
-	//	nodelay(stdscr, false);
-	//	// Now we need to update the mouse coordinate in Engine::mouse, so let's duplicate the checkForEvent call from Engine::update :
-	//		/*TCODSystem::checkForEvent(TCOD_EVENT_KEY_PRESS | TCOD_EVENT_MOUSE, &lastKey, &mouse);*/
-	//	request_mouse_pos();
-	//		// We're going to do one more thing to help the player select his tile : fill the tile under the mouse cursor with white :
-	//	if (
-	//		map->isInFov(Mouse_status.x, Mouse_status.y)
-	//		&&
-	//		(
-	//			maxRange == 0
-	//			||
-	//			player->getDistance(Mouse_status.x, Mouse_status.y) <= maxRange
-	//			)
-	//		)
-	//	{
-	//		/*TCODConsole::root->setCharBackground(mouse.cx, mouse.cy, TCODColor::white);*/
-	//		mvchgat(Mouse_status.y, Mouse_status.x, 1, A_NORMAL, HPBARMISSING_PAIR, NULL);
-	//		attron(COLOR_PAIR(HPBARMISSING_PAIR));
-	//		mvprintw(Mouse_status.y, Mouse_status.x, "X");
-	//		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
-	//		refresh();
-	//		
-	//		// And if the player presses the left button while a valid tile is selected, return the tile coordinates :
-	//		if (BUTTON1_CLICKED)
-	//		{
-	//			// first display a message
-	//			gui->log_message(WHITE_PAIR, "Target confirmed");
-	//			// then return the coordinates
-	//			
-	//			/*request_mouse_pos();*/
-	//			*x = Mouse_status.x;
-	//			*y = Mouse_status.y;
-	//			return true;
-	//		}
-	//	}
-	//	// If the player pressed a key or right clicked, we exit :
-	//	if (BUTTON3_CLICKED)
-	//	{
-	//		return false;
-	//	}
-	//	refresh();
-	//}
-	//==============================================================
-
 	// the target cursor is initialized at the player's position
 	int targetCursorY = player->posY; // init position Y
 	int targetCursorX = player->posX; // init position X
-	
-	// capture the last position of the cursor
-	int lastY = targetCursorY;
-	int lastX = targetCursorX;
 
 	// initialize the line position
 	int lineY = 0;
 	int lineX = 0;
-
-	// the window size is calculated from the maxRange
-	int sideLength = 9;
-
-	int height = sideLength;
-	int width = sideLength;
-
-	// Create the window once and state where you delete it below
-	WINDOW* aoe = newwin(height , width , 0, 0); // deleted in -> pick_tile()
-	wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
-	box(aoe, 0, 0);
 
 	bool run = true;
 	while (run == true)
@@ -370,7 +263,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursorY != player->posY || targetCursorX != player->posX)
 		{
-			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, nullptr);
+			mvchgat(player->posY, player->posX, 1, A_NORMAL, WHITE_PAIR, nullptr);
 		}
 
 		// draw a line using TCODLine class
@@ -389,12 +282,6 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, nullptr);
 		}
 
-		// the player uses the keyboard to select a target
-		// the target selection cursor is displayed in white
-		// the player can press enter to select the target
-		// or press escape to cancel the target selection
-		// 'X' is the char for the selection cursor in the target selection mode
-
 		attron(COLOR_PAIR(HPBARMISSING_PAIR));
 		mvaddch(targetCursorY, targetCursorX, 'X');
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
@@ -402,7 +289,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// if the cursor is on a monster then display the monster's name
 		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			auto actor = game.map->get_actor(targetCursorX, targetCursorY);
+			std::shared_ptr<Actor> actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr)
 			{
@@ -416,54 +303,23 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// highlight the possible range of the explosion make it follow the cursor
 
 		// get the center of the explosion
-		int centerX = targetCursorX;
-		int centerY = targetCursorY;
+		const int centerX = targetCursorX;
+		const int centerY = targetCursorY;
 
 		// get the radius of the explosion
-		int radius = maxRange;
+		const int radius = maxRange;
 		
-		int sideLength = radius * 2 + 1;
+		const int sideLength = radius * 2 + 1;
 
 		// calculate the chebyshev distance from the player to maxRange
-		int chebyshevD = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
+		const int chebyshevD = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
 
-		int height = sideLength;
-		int width = sideLength;
+		const int height = sideLength;
+		const int width = sideLength;
 
 		// Calculate the position of the aoe window
-		int centerOfExplosionY = centerY - chebyshevD;
-		int centerOfExplosionX = centerX - chebyshevD;
-
-
-		// Move the window to the new position
-		mvwin(aoe, centerOfExplosionY - 1, centerOfExplosionX - 1);
-		wrefresh(aoe);
-		
-		box(aoe, 0, 0);
-
-		wbkgd(aoe, COLOR_PAIR(COLOR_BLACK));
-		if (aoe != nullptr)
-		{
-			wrefresh(aoe); // After continuosly pressing mouse to move the aoe window. Exception thrown at 0x62D79032 (pdcurses.dll) in C++RogueLike.exe: 0xC0000005: Access violation reading location 0x0800EFED. 
-		}
-		else
-		{
-			game.log("aoe is null in Game::pick_tile().");
-			exit(-1);
-		}
-
-		////display the FOV in white
-		// 
-		//for (int tilePosX = 0; tilePosX < game.map->map_width; tilePosX++)
-		//{
-		//	for (int tilePosY = 0; tilePosY < game.map->map_height; tilePosY++)
-		//	{
-		//		if (game.map->is_in_fov(tilePosX, tilePosY))
-		//		{
-		//			mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
-		//		}
-		//	}
-		//}
+		const int centerOfExplosionY = centerY - chebyshevD;
+		const int centerOfExplosionX = centerX - chebyshevD;
 
 		// draw the AOE in white
 		for (int tilePosX = targetCursorX - chebyshevD; tilePosX < centerOfExplosionX + width; tilePosX++)
@@ -476,31 +332,27 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			}
 		}
 
-		///DEBUG
+		//// DEBUG
 		//mvprintw(0, 0, "param X : %d", *x);
 		//mvprintw(1, 0, "param Y : %d", *y);
 		//mvprintw(2, 0, "targetCursorX : %d", targetCursorX);
 		//mvprintw(3, 0, "targetCursorY : %d", targetCursorY);
-		//mvprintw(4, 0, "lastX : %d", lastX);
-		//mvprintw(5, 0, "lastY : %d", lastY);
-		//mvprintw(6, 0, "lineX : %d", lineX);
-		//mvprintw(7, 0, "lineY : %d", lineY);
-		//mvprintw(8, 0, "centerX : %d", centerX);
-		//mvprintw(9, 0, "centerY : %d", centerY);
-		//mvprintw(10, 0, "radius : %d", radius);
-		//mvprintw(11, 0, "sideLength : %d", sideLength);
-		//mvprintw(12, 0, "chebyshevD : %d", chebyshevD);
-		//mvprintw(13, 0, "height : %d", height);
-		//mvprintw(14, 0, "width : %d ", width);
-		//mvprintw(15, 0, " x : %d ", *x);
-		//mvprintw(16, 0, " y : %d ", *y);
-		//mvprintw(17, 0, "centerOfExplosionX : %d", centerOfExplosionX);
-		//mvprintw(18, 0, "centerOfExplosionY : %d", centerOfExplosionY);
+		//mvprintw(4, 0, "lineX : %d", lineX);
+		//mvprintw(5, 0, "lineY : %d", lineY);
+		//mvprintw(6, 0, "centerX : %d", centerX);
+		//mvprintw(7, 0, "centerY : %d", centerY);
+		//mvprintw(8, 0, "radius : %d", radius);
+		//mvprintw(9, 0, "sideLength : %d", sideLength);
+		//mvprintw(10, 0, "chebyshevD : %d", chebyshevD);
+		//mvprintw(11, 0, "height : %d", height);
+		//mvprintw(12, 0, "width : %d ", width);
+		//mvprintw(13, 0, "centerOfExplosionX : %d", centerOfExplosionX);
+		//mvprintw(14, 0, "centerOfExplosionY : %d", centerOfExplosionY);
 
 		refresh();
 
 		// get the key press
-		int key = getch();
+		const int key = getch();
 		switch (key)
 		{
 		case KEY_UP:
@@ -566,9 +418,6 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		}
 
 	}
-	// Delete the window after the loop
-	delwin(aoe);
-	clear();
 
 	return false;
 }
@@ -721,7 +570,7 @@ void Game::target()
 		refresh();
 
 		// get the key press
-		int key = getch();
+		const int key = getch();
 		switch (key)
 		{
 		case KEY_UP:
@@ -857,8 +706,8 @@ void Game::save_all()
 
 			if (!actors.empty())
 			{
-				int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
-				int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
+				const int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
+				const int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
 				zip.putInt(nbActorsToSave);
 
 				for (const auto& actor : actors)
