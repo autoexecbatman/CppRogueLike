@@ -19,15 +19,15 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
-		int str = attacker.strength - 1; // -1 to access vector index from 0 and strength starts at 1
+		const size_t str = static_cast<size_t>(attacker.strength - 1); // -1 to access vector index from 0 and strength starts at 1
 		std::vector<StrengthAttributes> attrs = loadStrengthAttributes(); // load the strength attributes from file
 		try
 		{ // try to catch out of range errors
-			if (str >= 0 && str < static_cast<int>(attrs.size())) // if str is in range of vector size
+			if (str >= 0 && str < attrs.size()) // if str is in range of vector size
 			{
 				// first 
 				RandomDice diceAttack; // create a dice object
-				int rollAttack = diceAttack.d20(); // roll 1d20
+				const int rollAttack = diceAttack.d20(); // roll 1d20
 
 				RandomDice diceDmg; // create a dice object
 				int rollDmg{};
@@ -51,35 +51,13 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 
 				StrengthAttributes strength = attrs.at(str); // get the strength attributes for the attacker
 
-				//int rollNeeded = attacker.destructible->thaco - (20 - target.destructible->armorClass); // Example THAC0 calculation
-				//int rollNeeded = 20 - (attacker.destructible->thaco - target.destructible->armorClass); // Example THAC0 calculation
-				int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // Example THAC0 calculation
-
-				//clear();
-				//mvprintw(0,0, "%s rolls: %d", attacker.name.c_str(), rollAttack);
-				///*mvprintw(1, 0, "%s 's thaco - %s 's ac: %d %d =  %d", attacker.name.c_str(), attacker.destructible->thaco, target.name.c_str(), target.destructible->armorClass, rollNeeded);*/
-				//mvprintw(1, 0, "%s 's thaco: %d", attacker.name.c_str(), attacker.destructible->thaco);
-				//mvprintw(2, 0, "%s 's ac: %d", target.name.c_str(), target.destructible->armorClass);
-				//mvprintw(3, 0, "thaco - ac: %d", rollNeeded);
-				//refresh();
-				//getch();
+				const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // THAC0 calculation
 
 				if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
 				{
 					// calculate the adjusted damage
-					int adjDmg = rollDmg + strength.dmgAdj; // Adjusted damage
-					const int totaldmg = adjDmg - target.destructible->dr;
-
-					//clear();
-					//mvprintw(0, 0, "Attacker::attack( %s, %s )", attacker.name.c_str(), target.name.c_str());
-					//mvprintw(1, 0, "the current str of the %s is: %d", attacker.name.c_str(), attacker.strength);
-					//mvprintw(2, 0, "rollDmg %s : %d", diceDmg.getDiceType().c_str(), rollDmg);
-					//mvprintw(3, 0, "strength.dmgAdj: %d", strength.dmgAdj);
-					//mvprintw(4, 0, "then calculate damage with bonus from strength(roll+strength.dmgAdj): %d", adjDmg);
-					//mvprintw(5, 0, "the target's dr: %d", target.destructible->dr);
-					//mvprintw(6, 0, "calculate the totaldmg - reduction: %d", totaldmg);
-					//refresh();
-					//getch();
+					const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
+					const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
 
 					// if damage is dealt display combat messages
 					if (totaldmg > 0)
@@ -113,8 +91,8 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 			}
 			else { game.err("OUT OF BOUNDS!"); return; }
 		}
-		catch (std::out_of_range& e) { game.err(e.what()); return; }
-		catch (std::exception& e) { game.err(e.what()); return; }
+		catch (const std::out_of_range& e) { game.err(e.what()); return; }
+		catch (const std::exception& e) { game.err(e.what()); return; }
 		catch (...) { game.err("Attacker::attack() - Unknown error."); return; }
 	}
 	else
