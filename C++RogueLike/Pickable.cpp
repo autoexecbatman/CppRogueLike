@@ -28,7 +28,7 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 						// remove the item from the list of actors
 						std::erase(game.actors, actor);
 					}
-					catch (std::exception& e) {
+					catch (const std::exception& e) {
 						std::cerr << "Error: " << e.what() << std::endl;
 					}
 
@@ -45,7 +45,7 @@ bool Pickable::pick(Actor& owner, const Actor& wearer)
 			return true;
 		}
 	}
-	catch (std::exception& e) {
+	catch (const std::exception& e) {
 		std::cerr << "Error: " << e.what() << std::endl;
 	}
 
@@ -92,7 +92,7 @@ bool Pickable::use(Actor& owner, Actor& wearer)
 
 std::shared_ptr<Pickable> Pickable::create(TCODZip& zip)
 {
-	PickableType type = (PickableType)zip.getInt();
+	const PickableType type = (PickableType)zip.getInt();
 	std::shared_ptr<Pickable> pickable = nullptr;
 
 	switch (type)
