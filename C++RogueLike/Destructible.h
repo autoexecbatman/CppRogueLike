@@ -31,7 +31,7 @@ public:
 	bool is_dead() noexcept { return hp <= 0; }
 
 	//int take_damage(Actor* owner, int damage); // handles damage, owner attacked, returns (dam - def)
-	int take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
+	void take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
 
 	//virtual void die(Actor* owner); // handles death, owner killed
 	virtual void die(Actor& owner) = 0; // handles death, owner killed

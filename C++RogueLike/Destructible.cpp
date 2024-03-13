@@ -20,16 +20,8 @@ Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp, int t
 
 Destructible::~Destructible() {}
 
-int Destructible::take_damage(Actor& owner, int damage)
+void Destructible::take_damage(Actor& owner, int damage)
 {
-	//clear();
-	//mvprintw(0, 0, "take_damage( %s, %d )", owner.name.c_str(), damage);
-	//refresh();
-	//getch();
-
-	// substract damage reduction
-	/*damage = damage - owner.destructible->dr;*/
-
 	// check if damage is greater than 0
 	// if it is, then apply the damage to the actor
 	if (damage > 0)
@@ -44,19 +36,6 @@ int Destructible::take_damage(Actor& owner, int damage)
 	{
 		damage = 0;
 	}
-
-	//clear();
-	//
-	//mvprintw(1, 0, "the strength of %s is %d", owner.name.c_str(), owner.strength);
-	//mvprintw(2, 0, "damage reduction of %s: %d", owner.name.c_str(), owner.destructible->dr);
-	//mvprintw(3, 0, "the damage being returned: %d", damage);
-	//mvprintw(4, 0, "HP: %d/%d", owner.destructible->hp, owner.destructible->hpMax);
-	//mvprintw(5, 0, "Name: %s", owner.name.c_str());
-	//mvprintw(6, 0, "Damage roll: %d d %d", game.player->attacker->minDmg, game.player->attacker->maxDmg);
-	//refresh();
-	//getch();
-
-	return damage;
 }
 
 void Destructible::die(Actor& owner)
