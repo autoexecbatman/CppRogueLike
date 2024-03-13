@@ -10,7 +10,7 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 {
 	int x{ 0 }, y{ 0 };
 
-	if (!game.pick_tile(&x, &y, range))
+	if (!game.pick_tile(&x, &y, 0))
 	{
 		return false;
 	}
