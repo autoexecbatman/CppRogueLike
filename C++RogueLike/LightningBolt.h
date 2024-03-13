@@ -16,7 +16,7 @@ public:
 	int maxRange = 0;
 	int damage = 0;
 
-	LightningBolt(int range, int damage);
+	LightningBolt(int range, int damage) noexcept;
 
 	bool use(Actor& owner, Actor& wearer);
 

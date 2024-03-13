@@ -7,7 +7,7 @@
 #include "LightningBolt.h"
 
 //==LIGHTNING_BOLT==
-LightningBolt::LightningBolt(int maxRange, int damage) : maxRange(maxRange), damage(damage) {}
+LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRange), damage(damage) {}
 
 bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
@@ -20,18 +20,19 @@ bool LightningBolt::use(Actor& owner, Actor& wearer)
 
 		return false;
 	}
+	else
+	{
+		closestMonster->destructible->take_damage(*closestMonster, damage);
 
-	// hit closest monster for <damage> hit points
-	game.gui->log_message(HPBARFULL_PAIR, "A lighting bolt strikes the %s with a loud thunder!\n"
-		"The damage is %g hit points.", closestMonster->name, damage);
-	// print to stdscr PDC
-	clear();
-	mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n", closestMonster->name.c_str());
-	refresh();
-	getch();
-	closestMonster->destructible->take_damage(*closestMonster, damage);
+		clear();
+		mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n", closestMonster->name.c_str());
+		refresh();
+		getch();
+		game.message(HPBARMISSING_PAIR, std::format("The damage is {} hit points.", damage), true);
 
-	return Pickable::use(owner, wearer);
+		return Pickable::use(owner, wearer);
+	}
+
 }
 
 void LightningBolt::load(TCODZip& zip)
