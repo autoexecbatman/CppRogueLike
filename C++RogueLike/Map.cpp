@@ -263,17 +263,17 @@ void Map::add_item(int x, int y)
 		const int rollColor = d.roll(1,3);
 
 		// Create an Actor for the weapon
-		auto weaponActor = std::make_shared<Actor>(x, y, '/', selectedWeapon.name, rollColor, 0); // Assuming you have a generic symbol and color for weapons
+		auto weaponActor = std::make_unique<Actor>(x, y, '/', selectedWeapon.name, rollColor, 0); // Assuming you have a generic symbol and color for weapons
 		weaponActor->blocks = false;
 		//weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon); // Assuming you have a way to handle different weapon types
 		if (selectedWeapon.name == "Dagger")
 		{
-			weaponActor->pickable = std::make_shared<Dagger>(1,4);
+			weaponActor->pickable = std::make_unique<Dagger>(1,4);
 			game.err("Dagger added");
 		}
 		else if (selectedWeapon.name == "Long Sword")
 		{
-			weaponActor->pickable = std::make_shared<LongSword>(1,8);
+			weaponActor->pickable = std::make_unique<LongSword>(1,8);
 			game.err("Long Sword added");
 		}
 		else
@@ -283,45 +283,45 @@ void Map::add_item(int x, int y)
 			return;
 		}
 
-		game.actors.push_back(weaponActor);
+		game.actors.push_back(std::move(weaponActor));
 		game.send_to_back(*weaponActor);
 	}
 	else if (dice < 70)
 	{
 		// add a health potion
-		auto healthPotion = std::make_shared<Actor>(x, y, '!', "health potion", HPBARMISSING_PAIR, 0);
+		auto healthPotion = std::make_unique<Actor>(x, y, '!', "health potion", HPBARMISSING_PAIR, 0);
 		healthPotion->index = potionIndex++;
 		healthPotion->blocks = false;
-		healthPotion->pickable = std::make_shared<Healer>(4);
-		game.actors.push_back(healthPotion);
-		game.send_to_back(*healthPotion);
+		healthPotion->pickable = std::make_unique<Healer>(4);
+		game.actors.push_back(std::move(healthPotion));
+		/*game.send_to_back(*healthPotion);*/
 	}
 	else if (dice < 70+10)
 	{
 		// add lightning scrolls
-		auto lightningScroll = std::make_shared<Actor>(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR,1);
+		auto lightningScroll = std::make_unique<Actor>(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR,1);
 		lightningScroll->blocks = false;
-		lightningScroll->pickable = std::make_shared<LightningBolt>(5, 20);
-		game.actors.push_back(lightningScroll);
-		game.send_to_back(*lightningScroll);
+		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
+		game.actors.push_back(std::move(lightningScroll));
+		/*game.send_to_back(*lightningScroll);*/
 	}
 	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
-		auto fireballScroll = std::make_shared<Actor>(x, y, '#', "scroll of fireball", FIREBALL_PAIR,1);
+		auto fireballScroll = std::make_unique<Actor>(x, y, '#', "scroll of fireball", FIREBALL_PAIR,1);
 		fireballScroll->blocks = false;
-		fireballScroll->pickable = std::make_shared<Fireball>(3, 12);
-		game.actors.push_back(fireballScroll);
-		game.send_to_back(*fireballScroll);
+		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
+		game.actors.push_back(std::move(fireballScroll));
+		/*game.send_to_back(*fireballScroll);*/
 	}
 	else
 	{
 		// add confusion scrolls
-		auto confusionScroll = std::make_shared<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
+		auto confusionScroll = std::make_unique<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
 		confusionScroll->blocks = false;
-		confusionScroll->pickable = std::make_shared<Confuser>(10, 8);
-		game.actors.push_back(confusionScroll);
-		game.send_to_back(*confusionScroll);
+		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
+		game.actors.push_back(std::move(confusionScroll));
+		/*game.send_to_back(*confusionScroll);*/
 	}
 }
 
@@ -514,9 +514,9 @@ void Map::add_monster(int mon_x, int mon_y)
 
 	if (placeDragon)
 	{
-		auto dragon = std::make_shared<Dragon>(mon_y, mon_x);
+		auto dragon = std::make_unique<Dragon>(mon_y, mon_x);
 		dragon->index = 0;
-		game.actors.push_back(dragon);
+		game.actors.push_back(std::move(dragon));
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
 	else
@@ -525,7 +525,7 @@ void Map::add_monster(int mon_x, int mon_y)
 		for (auto i{ 0 }; i < roll4d6; i++) { // create goblins
 			auto goblin = create_monster<Goblin>(mon_y, mon_x);
 			goblin->index = i;
-			game.actors.push_back(goblin);
+			game.actors.push_back(std::move(goblin));
 		}
 
 		if (game.player->playerLevel > 3)
@@ -534,7 +534,7 @@ void Map::add_monster(int mon_x, int mon_y)
 			for (auto i{ 0 }; i < roll2d6; i++) { // create orcs
 				auto orc = create_monster<Orc>(mon_y, mon_x);
 				orc->index = i;
-				game.actors.push_back(orc);
+				game.actors.push_back(std::move(orc));
 			}
 		}
 
@@ -544,32 +544,28 @@ void Map::add_monster(int mon_x, int mon_y)
 			for (auto i{ 0 }; i < roll1d6; i++) { // create trolls
 				auto troll = create_monster<Troll>(mon_y, mon_x);
 				troll->index = i;
-				game.actors.push_back(troll);
+				game.actors.push_back(std::move(troll));
 			}
 		}
 	}
 }
 
-std::shared_ptr<Actor> Map::get_actor(int x, int y) const noexcept
+const std::unique_ptr<Actor>& Map::get_actor(int x, int y) const noexcept
 {
-	for (const auto& actor : game.actors)
-	{
-		if (actor->posX == x && actor->posY == y)
+	auto it = std::find_if(
+		game.actors.begin(),
+		game.actors.end(),
+		[&](const std::unique_ptr<Actor>& actor) noexcept
 		{
-			return actor;
+			return actor->posX == x && actor->posY == y;
 		}
+	);
+
+	if (it != game.actors.end()) {
+		return *it;
 	}
+
 	return nullptr;
-}
-
-// make a random number function to use in the game
-int Map::random_number(int min, int max)
-{
-	auto seed = gsl::narrow_cast<unsigned int>(std::chrono::system_clock::now().time_since_epoch().count());
-	static std::default_random_engine randomEngine(seed);
-	std::uniform_int_distribution<int> range(min, max);
-
-	return range(randomEngine);
 }
 
 // end of file: Map.cpp

@@ -8,26 +8,26 @@
 #include "AiPlayer.h"
 
 //==AI==
-std::shared_ptr<Ai> Ai::create(TCODZip& zip)
+std::unique_ptr<Ai> Ai::create(TCODZip& zip)
 {
 	// read the type of the ai
 	const AiType type{ gsl::narrow_cast<AiType>(zip.getInt()) };
-	std::shared_ptr<Ai> ai{};
+	std::unique_ptr<Ai> ai{};
 
 	switch (type)
 	{
 	case AiType::PLAYER:
-		ai = std::make_shared<AiPlayer>();
+		ai = std::make_unique<AiPlayer>();
 		break;
 	case AiType::MONSTER:
-		ai = std::make_shared<AiMonster>();
+		ai = std::make_unique<AiMonster>();
 		break;
 	case AiType::CONFUSED_MONSTER:
-		ai = std::make_shared<AiMonsterConfused>(0, std::make_shared<AiMonster>());
+		ai = std::make_unique<AiMonsterConfused>(0, std::make_unique<AiMonster>());
 		break;
 	default:
 		std::cout << "Error: Ai::create() - unknown AiType" << std::endl;
-		ai = std::make_shared<AiPlayer>(); // assign default dummy value
+		ai = std::make_unique<AiPlayer>(); // assign default dummy value
 		break;
 	}
 
@@ -40,7 +40,7 @@ std::shared_ptr<Ai> Ai::create(TCODZip& zip)
 		catch (const std::exception& e)
 		{
 			std::cout << "Error: Ai::create() - Failed to load ai. Exception: " << e.what() << std::endl;
-			ai = std::make_shared<AiPlayer>(); // assign default dummy value in case of loading failure
+			ai = std::make_unique<AiPlayer>(); // assign default dummy value in case of loading failure
 		}
 	}
 

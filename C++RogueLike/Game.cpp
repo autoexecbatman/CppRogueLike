@@ -41,7 +41,8 @@ void Game::init()
 	if (!game.stairs) { err("game.stairs is nullptr"); }
 	game.stairs->blocks = false; // stairs are not blocking
 	game.stairs->fovOnly = false; // stairs are not fovOnly
-	game.actors.push_back(stairs);
+	game.actors.push_back(std::move(stairs_unique));
+	game.stairs = game.actors.back().get();
 
 	//==MAP==
 	game.map->init(true); // set the checker function
@@ -72,10 +73,11 @@ void Game::create_player()
 	const int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
-	game.player = std::make_shared<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
-
+	game.player_unique = std::make_unique<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
+	
 	// add the player to the actors vector for rendering
-	game.actors.emplace_back(game.player);
+	game.actors.push_back(std::move(game.player_unique));
+	game.player = dynamic_cast<Player*>(game.actors.back().get());
 
 	// TODO :
 	// 1. Set the playerHp to rolls based on class and attribute modifiers.
@@ -137,7 +139,7 @@ void Game::update()
 			{
 				for (const auto& actor : actors)
 				{
-					if (actor && actor != player)
+					if (actor && actor.get() != player)
 					{
 						actor->update();
 					}
@@ -169,7 +171,7 @@ void Game::render()
 	game.log("Actors are trying to be drawn...");
 	for (const auto& actor : actors)
 	{
-		if (actor && actor != player)
+		if (actor && actor.get() != player)
 		{
 			// storing the logic of visibility in a variable for readability
 			const bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
@@ -209,25 +211,43 @@ void Game::send_to_back(Actor& actor)
 	}
 }
 
-std::shared_ptr<Actor> Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept
+Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept
 {
-	std::shared_ptr<Actor> closestMonster = nullptr;
+	Actor* closestMonster = nullptr;
 	int bestDistance = INT_MAX;
 
-	for (auto actor = actors.begin(); actor != actors.end(); ++actor)
+	//for (auto actor = actors.begin(); actor != actors.end(); ++actor)
+	//{
+	//	if (*actor != player
+	//		&&
+	//		(*actor)->destructible
+	//		&&
+	//		!(*actor)->destructible->is_dead()
+	//		)
+	//	{
+	//		const int distance = (*actor)->get_distance(fromPosX, fromPosY);
+	//		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
+	//		{
+	//			bestDistance = distance;
+	//			closestMonster = *actor;
+	//		}
+	//	}
+	//}
+
+	for (const auto& actor : actors)
 	{
-		if (*actor != player
+		if (actor.get() != player
 			&&
-			(*actor)->destructible
+			actor->destructible
 			&&
-			!(*actor)->destructible->is_dead()
+			!actor->destructible->is_dead()
 			)
 		{
-			const int distance = (*actor)->get_distance(fromPosX, fromPosY);
+			const int distance = actor->get_distance(fromPosX, fromPosY);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
-				closestMonster = *actor;
+				closestMonster = actor.get();
 			}
 		}
 	}
@@ -289,7 +309,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// if the cursor is on a monster then display the monster's name
 		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			std::shared_ptr<Actor> actor = game.map->get_actor(targetCursorX, targetCursorY);
+			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr)
 			{
@@ -299,7 +319,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
 			}
 		}
-
+		
 		// highlight the possible range of the explosion make it follow the cursor
 
 		// get the center of the explosion
@@ -398,11 +418,11 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		{
 			if (game.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				auto actor = game.map->get_actor(targetCursorX, targetCursorY);
+				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
-					/*player->attacker->attack(player, actor);*/
+					player->attacker->attack(*player, *actor);
 					run = false;
 				}
 			}
@@ -553,7 +573,7 @@ void Game::target()
 		const int distance = player->get_distance(targetCursorX, targetCursorY);
 		if (game.map->is_in_fov(targetCursorX, targetCursorY))
 		{
-			auto actor = game.map->get_actor(targetCursorX, targetCursorY);
+			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr && actor->destructible != nullptr )
 			{
@@ -600,7 +620,8 @@ void Game::target()
 		{
 			if (game.map->is_in_fov(targetCursorX, targetCursorY))
 			{
-				auto actor = game.map->get_actor(targetCursorX, targetCursorY);
+				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
+				
 				// and actor is not an item
 				if (actor != nullptr && actor->destructible != nullptr)
 				{
@@ -642,12 +663,12 @@ void Game::load_all()
 		/*player = std::make_shared<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
 		/*player = std::make_shared<Player>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
 		player->load(zip);
-		actors.push_back(player);
+		/*actors.push_back(std::move(player));*/
 
 		// load the stairs
-		stairs = std::make_shared<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR, 0);
-		stairs->load(zip);
-		actors.push_back(stairs);
+		stairs_unique = std::make_unique<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR, 0);
+		stairs_unique->load(zip);
+		actors.push_back(std::move(stairs_unique));
 		/*actors.try_emplace(stairs->index, stairs);*/
 
 		// then all other actors
@@ -655,9 +676,9 @@ void Game::load_all()
 		while (nbActors > 0)
 		{
 			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			std::shared_ptr<Actor> actor = std::make_shared<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR, 0);
+			std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR, 0);
 			actor->load(zip);
-			actors.push_back(actor);
+			actors.push_back(std::move(actor));
 			/*actors.try_emplace(actor->index, actor);*/
 			nbActors--;
 		}
@@ -712,7 +733,7 @@ void Game::save_all()
 
 				for (const auto& actor : actors)
 				{
-					if (actor != nullptr && actor != player && actor != stairs)
+					if (actor != nullptr && actor.get() != player && actor.get() != stairs)
 					{
 						actor->save(zip);
 					}
@@ -750,12 +771,24 @@ void Game::next_level()
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 
+	// find the player in the actors container
+	auto it = std::find_if(actors.begin(), actors.end(), [this](const auto& actor) noexcept { return actor.get() == player; });
+	// find the stairs in the actors container
+	auto itStairs = std::find_if(actors.begin(), actors.end(), [this](const auto& actor) noexcept { return actor.get() == stairs; });
+
+	// move the player to a temporary variable
+	auto tempPlayer = std::move(*it);
+	// move the stairs to a temporary variable
+	auto tempStairs = std::move(*itStairs);
+
 	// clear the actors container except the player and the stairs
 	actors.clear();
 
 	// add the player and the stairs to the actors container
-	actors.push_back(player);
-	actors.push_back(stairs);
+	actors.push_back(std::move(tempPlayer));
+	actors.push_back(std::move(tempStairs));
+	player = dynamic_cast<Player*>(actors.front().get());
+	stairs = actors.back().get();
 
 	// generate a new map
 	map = std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH);
@@ -766,7 +799,7 @@ void Game::next_level()
 }
 
 // create the getActor function
-std::shared_ptr<Actor> Game::get_actor(int x, int y) const noexcept
+const std::unique_ptr<Actor>& Game::get_actor(int x, int y) const noexcept
 {
 	//for (Actor* actor : actors)
 	//{
@@ -776,7 +809,7 @@ std::shared_ptr<Actor> Game::get_actor(int x, int y) const noexcept
 	//	}
 	//}
 
-	for (auto& actor : actors)
+	for (const auto& actor : actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{

@@ -10,7 +10,7 @@
 #include "AiMonsterConfused.h"
 
 //==ConfusedMonsterAi==
-AiMonsterConfused::AiMonsterConfused(int nbTurns, std::shared_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(oldAi) {}
+AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(std::move(oldAi)) {}
 
 void AiMonsterConfused::update(Actor& owner)
 {
@@ -32,7 +32,7 @@ void AiMonsterConfused::update(Actor& owner)
 			}
 			else
 			{
-				std::shared_ptr<Actor> actor = game.get_actor(destx, desty);
+				const std::unique_ptr<Actor>& actor = game.get_actor(destx, desty);
 				if (actor)
 				{
 					owner.attacker->attack(owner, *actor);
@@ -49,7 +49,7 @@ void AiMonsterConfused::update(Actor& owner)
 	nbTurns--;
 	if (nbTurns == 0)
 	{
-		owner.ai = oldAi;
+		owner.ai = std::move(oldAi);
 	}
 }
 

@@ -28,10 +28,10 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 	wisdom = d.d6() + d.d6() + d.d6();
 	charisma = d.d6() + d.d6() + d.d6();
 
-	attacker = std::make_shared<Attacker>(dmg, minDmg, maxDmg);
-	destructible = std::make_shared<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
-	ai = std::make_shared<AiPlayer>();
-	container = std::make_shared<Container>(26);
+	attacker = std::make_unique<Attacker>(dmg, minDmg, maxDmg);
+	destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
+	ai = std::make_unique<AiPlayer>();
+	container = std::make_unique<Container>(26);
 	this->canSwim = canSwim;
 }
 

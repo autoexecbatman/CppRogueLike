@@ -12,7 +12,7 @@ LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRa
 bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
 	// find closest enemy (inside a maximum range)
-	std::shared_ptr<Actor> closestMonster = game.get_closest_monster(wearer.posX, wearer.posY, maxRange);
+	Actor* closestMonster = game.get_closest_monster(wearer.posX, wearer.posY, maxRange);
 
 	if (!closestMonster)
 	{

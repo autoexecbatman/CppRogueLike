@@ -26,11 +26,11 @@ public:
 
 protected:
 	/*void handleActionKey(Actor* owner, int ascii);*/
-	std::shared_ptr<Actor> chose_from_inventory(Actor& owner, int ascii);
+	Actor* chose_from_inventory(Actor& owner, int ascii);
 	bool moveOrAttack(Actor& owner, int targetx, int targety);
 private:
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
-	bool try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner);
+	bool try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner);
 	void displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept;
 
 };

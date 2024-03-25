@@ -15,7 +15,7 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 		return false;
 	}
 
-	auto actor = game.get_actor(x, y);
+	const std::unique_ptr<Actor>& actor = game.get_actor(x, y);
 
 	if (!actor)
 	{
@@ -24,8 +24,8 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 
 	// replace the monster's AI with a confused one; 
 	// after <nbTurns> turns the old AI will be restored
-	auto confusedAi = std::make_shared<AiMonsterConfused>(nbTurns, actor->ai);
-	actor->ai = confusedAi;
+	auto confusedAi = std::make_unique<AiMonsterConfused>(nbTurns, std::move(actor->ai));
+	actor->ai = std::move(confusedAi);
 
 	game.message(WHITE_PAIR, std::format("as he starts to stumble around!"), true);
 	game.message(WHITE_PAIR, std::format("The eyes of the {} look vacant,", actor->name), true);

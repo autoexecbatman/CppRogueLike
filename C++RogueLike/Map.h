@@ -56,9 +56,9 @@ public:
 	~Map();
 
 	template <typename MonsterType>
-	std::shared_ptr<MonsterType> create_monster(int mon_y, int mon_x)
+	std::unique_ptr<MonsterType> create_monster(int mon_y, int mon_x)
 	{
-		auto monster = std::make_shared<MonsterType>(mon_y, mon_x);
+		auto monster = std::make_unique<MonsterType>(mon_y, mon_x);
 		return monster;
 	}
 	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
@@ -82,10 +82,9 @@ public:
 	void compute_fov();
 	void render() const;
 	void add_item(int x, int y);
-	int random_number(int min, int max);
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
-	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
+	const std::unique_ptr<Actor>& get_actor(int x, int y) const noexcept;
 
 protected:
 	gsl::owner<Tile*> tiles{};

@@ -14,16 +14,16 @@ class Actor;
 class Container : public Persistent
 {
 public:
-	int invSize = 0;
+	size_t invSize{ 0 };
 
-	std::vector<std::shared_ptr<Actor>> inventoryList;
+	std::vector<std::unique_ptr<Actor>> inventoryList;
 
-	Container(int invSize) noexcept;
+	Container(size_t invSize) noexcept;
 	~Container() noexcept;
 
 	// checks that the container is not full.
-	bool add(Actor& actor);
-	void remove(Actor& actor);
+	bool add(std::unique_ptr<Actor> actor);
+	void remove(std::unique_ptr<Actor> actor);
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

@@ -48,12 +48,12 @@ public:
 	int index{ 0 }; // index of the actor in the actors array
 	/*bool sent_to_back = false;*/
 	
-	std::shared_ptr<Attacker> attacker; // the actor can attack
-	std::shared_ptr<Destructible> destructible; // the actor can be destroyed
-	std::shared_ptr<Ai> ai; // the actor can have AI
-	std::shared_ptr<Container> container; // the actor can be a container
-	std::shared_ptr<Pickable> pickable; // the actor can be picked
-	std::shared_ptr<StrengthAttributes> strengthAttributes; // the actor can have strength attributes
+	std::unique_ptr<Attacker> attacker; // the actor can attack
+	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
+	std::unique_ptr<Ai> ai; // the actor can have AI
+	std::unique_ptr<Container> container; // the actor can be a container
+	std::unique_ptr<Pickable> pickable; // the actor can be picked
+	std::unique_ptr<StrengthAttributes> strengthAttributes; // the actor can have strength attributes
 	
 	Actor(
 		int y,

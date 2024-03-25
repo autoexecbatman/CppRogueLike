@@ -12,118 +12,102 @@
 #include "Confuser.h"
 #include "Container.h"
 #include "AiMonsterConfused.h"
+#include "LongSword.h"
+#include "Dagger.h"
 
 //==PICKABLE==
-bool Pickable::pick(Actor& owner, const Actor& wearer)
+bool Pickable::pick(std::unique_ptr<Actor> owner, const Actor& wearer)
 {
-	try {
-		if (wearer.container && wearer.container->add(owner))
-		{
-			for (const auto& actor : game.actors)
-			{
-				// if the actor is the owner of the item
-				if (actor.get() == &owner)
-				{
-					try {
-						// remove the item from the list of actors
-						std::erase(game.actors, actor);
-					}
-					catch (const std::exception& e) {
-						std::cerr << "Error: " << e.what() << std::endl;
-					}
+	if (wearer.container && wearer.container->add(std::move(owner)))
+	{
+		// remove nullptrs from the actors vector
+		game.actors.erase(std::remove_if(game.actors.begin(), game.actors.end(), [](const auto& a) noexcept { return !a; }), game.actors.end());
 
-					break;
-				}
-			}
-
-			//auto& actors = game.actors; // For clarity
-			//auto it = std::remove_if(actors.begin(), actors.end(), [&owner](const std::shared_ptr<Actor>& actor) {
-			//	return actor.get() == &owner;
-			//	});
-			//actors.erase(it, actors.end());
-
-			return true;
-		}
-	}
-	catch (const std::exception& e) {
-		std::cerr << "Error: " << e.what() << std::endl;
+		return true;
 	}
 
 	return false;
 }
 
-void Pickable::drop(Actor& owner, Actor& wearer)
+void Pickable::drop(std::unique_ptr<Actor> owner, Actor& wearer)
 {
-	if (&wearer != game.player.get())
-	{
-		return;
-	}
-
+	if (&wearer != game.player) { return; }
 	if (wearer.container)
 	{
-		wearer.container->remove(owner);
-
-		// Create a new Actor for the dropped item
-		auto dropped_item = std::make_shared<Actor>(owner);
-
-		// Initialize the new Actor with the attributes of the dropped item
-		dropped_item->posX = wearer.posX;
-		dropped_item->posY = wearer.posY;
-		dropped_item->ch = owner.ch;  // Use the character symbol of the dropped item
-		dropped_item->col = owner.col;  // Use the color of the dropped item
-
-		// Add the new Actor to game.actors
-		game.actors.push_back(dropped_item);
-		game.send_to_back(*dropped_item);
+		owner->posX = wearer.posX;
+		owner->posY = wearer.posY;
+		wearer.container->remove(std::move(owner));
 	}
 }
 
 bool Pickable::use(Actor& owner, Actor& wearer)
 {
-	std::clog << "Using item" << std::endl;
 	if (wearer.container)
 	{
-		wearer.container->remove(owner);
-		/*delete owner;*/
+		wearer.container->inventoryList.erase(
+			std::remove_if(
+				wearer.container->inventoryList.begin(),
+				wearer.container->inventoryList.end(),
+				[&owner](const std::unique_ptr<Actor>& actor) { return actor.get() == &owner; }
+		)
+			, wearer.container->inventoryList.end());
+
 		return true;
 	}
 	return false;
 }
 
-std::shared_ptr<Pickable> Pickable::create(TCODZip& zip)
+std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
 {
 	const PickableType type = (PickableType)zip.getInt();
-	std::shared_ptr<Pickable> pickable = nullptr;
+	std::unique_ptr<Pickable> pickable = nullptr;
 
 	switch (type)
 	{
 
 	case PickableType::HEALER:
 	{
-		pickable = std::make_shared<Healer>(0);
+		pickable = std::make_unique<Healer>(0);
 		break;
 	}
 
 	case PickableType::LIGHTNING_BOLT:
 	{
-		pickable = std::make_shared<LightningBolt>(0, 0);
+		pickable = std::make_unique<LightningBolt>(0, 0);
 		break;
 	}
 
 	case PickableType::CONFUSER:
 	{
-		pickable = std::make_shared<Confuser>(0, 0);
+		pickable = std::make_unique<Confuser>(0, 0);
 		break;
 	}
 
 	case PickableType::FIREBALL:
 	{
-		pickable = std::make_shared<Fireball>(0, 0);
+		pickable = std::make_unique<Fireball>(0, 0);
 		break;
 	}
 
+	case PickableType::LONGSWORD:
+	{
+		pickable = std::make_unique<LongSword>(0, 0);
+		break;
 	}
 
+	case PickableType::DAGGER:
+	{
+		pickable = std::make_unique<Dagger>(0, 0);
+		break;
+	}
+
+
+	}
+	if (!pickable) {
+		game.log("Pickable create() failed. No pickable type found.");
+		game.err("Pickable create() failed. No pickable type found.");
+		return nullptr;
+	}
 	pickable->load(zip);
 
 	return pickable;

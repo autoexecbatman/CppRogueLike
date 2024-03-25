@@ -41,7 +41,7 @@ public:
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
 	/*static Destructible* create(TCODZip& zip);*/
-	static std::shared_ptr<Destructible> create(TCODZip& zip);
+	static std::unique_ptr<Destructible> create(TCODZip& zip);
 protected:
 	enum class DestructibleType : int
 	{

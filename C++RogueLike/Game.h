@@ -35,9 +35,10 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::shared_ptr<Player> player{ std::make_shared<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, false) };
+	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, false) };
+	Player* player{ player_unique.get() };
 
-	std::shared_ptr<Actor> stairs{ std::make_shared<Actor>(
+	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(
 		0, // int posX
 		0, // int posY
 		'>', // char symbol
@@ -45,6 +46,7 @@ public:
 		WHITE_PAIR, // int colorPair
 		1 // int index
 	) };
+	Actor* stairs{ stairs_unique.get() };
 
 	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
 
@@ -57,7 +59,7 @@ public:
 
 	int dungeonLevel{ 0 };
 
-	std::vector<std::shared_ptr<Actor>> actors; // a vector of actors
+	std::vector<std::unique_ptr<Actor>> actors; // a vector of actors
 
 	std::vector<Weapons> weapons; // a vector of weapons
 
@@ -67,7 +69,7 @@ public:
 	void update();
 	void render();
 	void send_to_back(Actor& actor);
-	std::shared_ptr<Actor> get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept;
+	Actor* get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept;
 	bool pick_tile(int* x, int* y, int maxRange);
 	void run_menus();
 
@@ -81,7 +83,7 @@ public:
 
 	// the player goes down stairs
 	void next_level();
-	std::shared_ptr<Actor> get_actor(int x, int y) const noexcept;
+	const std::unique_ptr<Actor>& get_actor(int x, int y) const noexcept;
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
 

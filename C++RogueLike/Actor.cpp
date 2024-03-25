@@ -66,11 +66,11 @@ void Actor::load(TCODZip& zip)
 
 	// this block assigns the values from the zip file to the actor's components if they exist. 
 	// Is this a double assignment? No, because the components are not assigned in the constructor.
-	if (hasAttacker) { attacker = std::make_shared<Attacker>(0,0,0); attacker->load(zip); }
+	if (hasAttacker) { attacker = std::make_unique<Attacker>(0,0,0); attacker->load(zip); }
 	if (hasDestructible) { destructible = Destructible::create(zip); }
 	if (hasAi) { ai = Ai::create(zip); }
 	if (hasPickable) { pickable = Pickable::create(zip); }
-	if (hasContainer) { container = std::make_shared<Container>(0); container->load(zip); }
+	if (hasContainer) { container = std::make_unique<Container>(0); container->load(zip); }
 }
 
 void Actor::save(TCODZip& zip)
@@ -110,7 +110,7 @@ void Actor::render() const noexcept
 void Actor::pickItem(int x, int y)
 {
 	// add item to inventory
-	container->add(*this);
+	/*container->add(std::move(*this));*/
 }
 
 void Actor::equip(Actor& item)

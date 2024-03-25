@@ -12,28 +12,19 @@ class Actor;
 class Pickable : public Persistent
 {
 public:
-	Pickable() = default;
 	virtual ~Pickable() {};
 
-	// defaulted copy constructor and copy assignment operator
-	Pickable(const Pickable&) = default;
-	Pickable& operator=(const Pickable&) = default;
-
-	// defaulted move constructor and move assignment operator
-	Pickable(Pickable&&) noexcept = default;
-	Pickable& operator=(Pickable&&) noexcept = default;
-
-	bool pick(Actor& owner, const Actor& wearer);
-	void drop(Actor& owner, Actor& wearer);
+	bool pick(std::unique_ptr<Actor> owner, const Actor& wearer);
+	void drop(std::unique_ptr<Actor> owner, Actor& wearer);
 
 	virtual bool use(Actor& owner, Actor& wearer);
 	/*static Pickable* create(TCODZip& zip);*/
-	static std::shared_ptr<Pickable> create(TCODZip& zip);
+	static std::unique_ptr<Pickable> create(TCODZip& zip);
 	
 protected:
 	enum class PickableType : int
 	{
-		HEALER, LIGHTNING_BOLT, CONFUSER, FIREBALL, LONGSWORD
+		HEALER, LIGHTNING_BOLT, CONFUSER, FIREBALL, LONGSWORD, DAGGER
 	};
 };
 //====

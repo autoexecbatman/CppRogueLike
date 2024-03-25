@@ -66,7 +66,7 @@ bool AiPlayer::levelUpUpdate(Actor& owner)
 void AiPlayer::update(Actor& owner)
 {
 	// if owner is not the player, return
-	if (&owner != game.player.get())
+	if (&owner != game.player)
 	{
 		game.log("AiPlayer::update(Actor& owner) owner.ai != game.player");
 		return;
@@ -194,11 +194,16 @@ void AiPlayer::update(Actor& owner)
 
 	case Controls::DROP:
 	{
-		std::shared_ptr<Actor> actor = chose_from_inventory(owner, 'a');
-		if (actor)
+		Actor* actorPtr = chose_from_inventory(owner, 'a');
+		if (actorPtr)
 		{
-			actor->pickable->drop(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
+			auto it = std::find_if(owner.container->inventoryList.begin(), owner.container->inventoryList.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
+			std::unique_ptr<Actor> actor = std::move(*it);
+			if (actor)
+			{
+				actor->pickable->drop(std::move(actor), owner);
+				game.gameStatus = Game::GameStatus::NEW_TURN;
+			}
 		}
 		break;
 	}
@@ -263,18 +268,16 @@ void AiPlayer::update(Actor& owner)
 
 void AiPlayer::pick_item(Actor& owner)
 {
-	std::clog << "You try to pick something..." << std::endl;
-
 	if (game.actors.empty())
 	{
-		std::cout << "Error: PlayerAi::pick_item(Actor& owner). game.actors is empty" << std::endl;
+		game.log("Error: PlayerAi::pick_item(Actor& owner). game.actors is empty");
 		exit(-1);
 	}
 
 	bool found = false; // true if an item was found at the player's position
 
 	// search for an item at the player's position
-	for (auto actor : game.actors) // we don't use a reference here because we are modifying the vector
+	for (auto& actor : game.actors) // we don't use a reference here because we are modifying the vector
 	{
 		// Skip null actors
 		if (actor == nullptr)
@@ -296,19 +299,17 @@ void AiPlayer::pick_item(Actor& owner)
 		if (is_pickable_at_position(*actor, owner))
 		{
 			// Try to pick up the actor
-			found = try_pick_actor(actor, owner); // the actor gets deleted in this function if it was picked up
+			found = try_pick_actor(std::move(actor), owner); // the actor gets deleted in this function if it was picked up
 
 			if (found)
 			{
 				break;
 			}
+			else
+			{
+				game.message(WHITE_PAIR, "There is nothing to pick up.", true);
+			}
 		}
-	}
-
-	// Log a message if there's nothing to pick up
-	if (!found)
-	{
-		game.message(WHITE_PAIR, "There is nothing to pick up.",true);
 	}
 
 	game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -319,16 +320,17 @@ bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) c
 	return actor.posX == owner.posX && actor.posY == owner.posY;
 }
 
-bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
+bool AiPlayer::try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner)
 {
 	game.log("Trying to pick actor " + actor->name);
 	bool picked{};
+	std::string actorName = actor->name;
 
 	// actor is destroyed if picked what can we do about it ? 
 	// we can't use actor anymore
 	try
 	{
-		picked = actor->pickable->pick(*actor, owner);
+		picked = actor->pickable->pick(std::move(actor), owner);
 	}
 	catch (const std::exception& e)
 	{
@@ -337,20 +339,11 @@ bool AiPlayer::try_pick_actor(std::shared_ptr<Actor>& actor, Actor& owner)
 	}
 
 	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) picked = " + std::to_string(picked));
-	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor.name = " + actor->name);
+	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor.name = " + actorName);
 
 	if (picked)
 	{
-		// store the message here because actor is destroyed if picked
-		if (actor)
-		{
-			game.message(WHITE_PAIR, std::format("You take the {}.", actor->name),true);
-		}
-		else
-		{
-			game.log("Error: AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor is null");
-			exit(-1);
-		}
+		game.message(WHITE_PAIR, std::format("You take the {}.", actorName), true);
 	}
 	else
 	{
@@ -426,7 +419,7 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
 	{
-		std::shared_ptr<Actor> actor = chose_from_inventory(owner, inventoryInput);
+		const auto& actor = chose_from_inventory(owner, inventoryInput);
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
@@ -442,15 +435,20 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 }
 
-std::shared_ptr<Actor> AiPlayer::chose_from_inventory(Actor& owner, int ascii)
+Actor* AiPlayer::chose_from_inventory(Actor& owner, int ascii)
 {
 	game.log("You chose from inventory");
 	if (owner.container != nullptr)
 	{
-		const int index = ascii - 'a';
+		const size_t index = ascii - 'a';
 		if (index >= 0 && index < owner.container->inventoryList.size())
 		{
-			return owner.container->inventoryList.at(index);
+			return owner.container->inventoryList.at(index).get();
+		}
+		else
+		{
+			// if the index is out of bounds
+			return nullptr;
 		}
 	}
 	else
@@ -458,8 +456,6 @@ std::shared_ptr<Actor> AiPlayer::chose_from_inventory(Actor& owner, int ascii)
 		game.log("Error: choseFromInventory() called on actor with no container.");
 		exit(EXIT_FAILURE);
 	}
-
-	return nullptr;
 }
 
 void AiPlayer::load(TCODZip& zip)

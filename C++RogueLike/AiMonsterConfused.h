@@ -11,14 +11,14 @@
 class AiMonsterConfused : public Ai
 {
 public:
-	AiMonsterConfused(int nbTurns, std::shared_ptr<Ai> oldAi) noexcept;
+	AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept;
 	void update(Actor& owner) override;
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
 protected:
 	int nbTurns;
-	std::shared_ptr<Ai> oldAi;
+	std::unique_ptr<Ai> oldAi;
 };
 
 #endif // !AI_MONSTER_CONFUSED_H
