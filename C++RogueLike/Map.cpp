@@ -284,7 +284,8 @@ void Map::add_item(int x, int y)
 		}
 
 		game.actors.push_back(std::move(weaponActor));
-		game.send_to_back(*weaponActor);
+		auto weaponActorPtr = game.actors.back().get();
+		game.send_to_back(*weaponActorPtr);
 	}
 	else if (dice < 70)
 	{
@@ -294,7 +295,8 @@ void Map::add_item(int x, int y)
 		healthPotion->blocks = false;
 		healthPotion->pickable = std::make_unique<Healer>(4);
 		game.actors.push_back(std::move(healthPotion));
-		/*game.send_to_back(*healthPotion);*/
+		auto healthPotionPtr = game.actors.back().get();
+		game.send_to_back(*healthPotionPtr);
 	}
 	else if (dice < 70+10)
 	{
@@ -303,7 +305,8 @@ void Map::add_item(int x, int y)
 		lightningScroll->blocks = false;
 		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
 		game.actors.push_back(std::move(lightningScroll));
-		/*game.send_to_back(*lightningScroll);*/
+		auto lightningScrollPtr = game.actors.back().get();
+		game.send_to_back(*lightningScrollPtr);
 	}
 	else if (dice < 70 + 10 + 10)
 	{
@@ -312,7 +315,8 @@ void Map::add_item(int x, int y)
 		fireballScroll->blocks = false;
 		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
 		game.actors.push_back(std::move(fireballScroll));
-		/*game.send_to_back(*fireballScroll);*/
+		auto fireballScrollPtr = game.actors.back().get();
+		game.send_to_back(*fireballScrollPtr);
 	}
 	else
 	{
@@ -321,7 +325,8 @@ void Map::add_item(int x, int y)
 		confusionScroll->blocks = false;
 		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
 		game.actors.push_back(std::move(confusionScroll));
-		/*game.send_to_back(*confusionScroll);*/
+		auto confusionScrollPtr = game.actors.back().get();
+		game.send_to_back(*confusionScrollPtr);
 	}
 }
 
@@ -378,7 +383,7 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	dig(x1, y1, x2, y2); // dig the corridors
 
 	// Add water tiles
-	const int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
+	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
 	for (int x = x1; x <= x2; x++)
 	{
 		for (int y = y1; y <= y2; y++)
@@ -550,19 +555,19 @@ void Map::add_monster(int mon_x, int mon_y)
 	}
 }
 
-const std::unique_ptr<Actor>& Map::get_actor(int x, int y) const noexcept
+Actor* Map::get_actor(int x, int y) noexcept
 {
 	auto it = std::find_if(
 		game.actors.begin(),
 		game.actors.end(),
-		[&](const std::unique_ptr<Actor>& actor) noexcept
+		[&](const auto& actor) noexcept
 		{
 			return actor->posX == x && actor->posY == y;
 		}
 	);
 
 	if (it != game.actors.end()) {
-		return *it;
+		return it->get();
 	}
 
 	return nullptr;

@@ -84,7 +84,7 @@ public:
 	void add_item(int x, int y);
 
 	// getActor returns the actor at the given coordinates or NULL if there's none
-	const std::unique_ptr<Actor>& get_actor(int x, int y) const noexcept;
+	Actor* get_actor(int x, int y) noexcept;
 
 protected:
 	gsl::owner<Tile*> tiles{};
