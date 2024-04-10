@@ -53,7 +53,6 @@ public:
 	int map_height{}, map_width{};
 
 	Map(int map_height, int map_width);
-	~Map();
 
 	template <typename MonsterType>
 	std::unique_ptr<MonsterType> create_monster(int mon_y, int mon_x)
@@ -87,8 +86,8 @@ public:
 	Actor* get_actor(int x, int y) noexcept;
 
 protected:
-	gsl::owner<Tile*> tiles{};
-	TCODMap* tcodMap{};
+	std::unique_ptr<Tile[]> tiles{};
+	std::unique_ptr<TCODMap> tcodMap{};
 	std::unique_ptr<TCODRandom> rng_unique{};
 	long seed{};
 

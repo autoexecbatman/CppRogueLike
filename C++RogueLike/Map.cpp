@@ -102,7 +102,7 @@ void Map::load(TCODZip& zip)
 	init(false);
 	for (int i = 0; i < map_width * map_height; i++)
 	{
-		const gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		const gsl::span<Tile> tiles_span(tiles.get(), map_width * map_height);
 		tiles_span[i].explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
@@ -115,7 +115,7 @@ void Map::save(TCODZip& zip)
 
 	for (int i = 0; i < map_width * map_height; i++) 
 	{
-		const gsl::span<Tile> tiles_span(tiles, map_width * map_height);
+		const gsl::span<Tile> tiles_span(tiles.get(), map_width * map_height);
 		zip.putInt(gsl::narrow_cast<int>(tiles_span[i].explored));
 	}
 }
@@ -141,20 +141,14 @@ Map::Map(int map_height, int map_width)
 	seed = TCODRandom::getInstance()->getInt(0, 0x7FFFFFFF); // 0x7FFFFFFF is the highest possible 32 bit signed integer value.
 }
 
-Map::~Map()
-{
-	if (tiles) delete[] tiles; // new called in init
-	if (tcodMap) delete tcodMap; // new called in init
-}
-
 //====
 // We have to move the map initialization code out of the constructor
 // for enabling loading the map from the file.
 void Map::init(bool withActors)
 {
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	tiles = new Tile[map_height * map_width]; // allocate the map's tiles
-	tcodMap = new TCODMap(map_width, map_height); // allocate the map
+	tiles = std::make_unique<Tile[]>(map_height * map_width);
+	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	bsp(map_width, map_height, *rng_unique, withActors);
 }
 
@@ -170,7 +164,7 @@ bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a
 
 bool Map::is_explored(int exp_x, int exp_y) const noexcept
 {
-	return gsl::span(tiles, map_width * map_height)[exp_x + (exp_y * map_width)].explored;
+	return gsl::span(tiles.get(), map_width * map_height)[exp_x + (exp_y * map_width)].explored;
 
 }
 
@@ -192,7 +186,7 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 	// If the coordinates are in field of view, mark the tile as explored
 	if (tcodMap->isInFov(fov_x, fov_y))
 	{
-		gsl::span(tiles, MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
+		gsl::span(tiles.get(), MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
 		return true;
 	}
 
@@ -203,7 +197,7 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
 {
 	const int index = isWater_pos_y * map_width + isWater_pos_x;
-	return gsl::span(tiles, map_width * map_height)[index].type == TileType::WATER;
+	return gsl::span(tiles.get(), map_width * map_height)[index].type == TileType::WATER;
 }
 
 void Map::compute_fov()
@@ -371,7 +365,7 @@ void Map::set_tile(int x, int y, TileType newType) noexcept
 	const int index = y * MAP_WIDTH + x;
 
 	// Make a span from the tiles array
-	const gsl::span<Tile> tilesSpan(tiles, MAP_WIDTH * MAP_HEIGHT);
+	const gsl::span<Tile> tilesSpan(tiles.get(), MAP_WIDTH * MAP_HEIGHT);
 
 	// Use the span for access
 	tilesSpan[index].type = newType;
