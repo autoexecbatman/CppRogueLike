@@ -30,6 +30,7 @@
 #include "RandomDice.h"
 #include "Player.h"
 #include "Weapons.h"
+#include "Gold.h"
 
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
@@ -280,6 +281,14 @@ void Map::add_item(int x, int y)
 		game.actors.push_back(std::move(weaponActor));
 		auto weaponActorPtr = game.actors.back().get();
 		game.send_to_back(*weaponActorPtr);
+		
+		// add gold 
+		auto gold = std::make_unique<Actor>(x, y, '$', "gold", GOLD_PAIR, 0);
+		gold->blocks = false;
+		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
+		game.actors.push_back(std::move(gold));
+		auto goldPtr = game.actors.back().get();
+		game.send_to_back(*goldPtr);
 	}
 	else if (dice < 70)
 	{
