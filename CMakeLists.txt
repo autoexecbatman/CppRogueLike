@@ -60,6 +60,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Goblin.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Goblin.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gold.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gold.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/IntelligenceAttributes.cpp
