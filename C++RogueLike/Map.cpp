@@ -277,18 +277,13 @@ void Map::add_item(int x, int y)
 			game.log("Error: Unknown weapon type"); // Log an error if the weapon type is unknown"
 			return;
 		}
-
-		game.actors.push_back(std::move(weaponActor));
-		auto weaponActorPtr = game.actors.back().get();
-		game.send_to_back(*weaponActorPtr);
+		game.actors.insert(game.actors.begin(), std::move(weaponActor));
 		
-		// add gold 
+		// add gold
 		auto gold = std::make_unique<Actor>(x, y, '$', "gold", GOLD_PAIR, 0);
 		gold->blocks = false;
 		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
-		game.actors.push_back(std::move(gold));
-		auto goldPtr = game.actors.back().get();
-		game.send_to_back(*goldPtr);
+		game.actors.insert(game.actors.begin(), std::move(gold));
 	}
 	else if (dice < 70)
 	{
@@ -297,9 +292,7 @@ void Map::add_item(int x, int y)
 		healthPotion->index = potionIndex++;
 		healthPotion->blocks = false;
 		healthPotion->pickable = std::make_unique<Healer>(4);
-		game.actors.push_back(std::move(healthPotion));
-		auto healthPotionPtr = game.actors.back().get();
-		game.send_to_back(*healthPotionPtr);
+		game.actors.insert(game.actors.begin(), std::move(healthPotion));
 	}
 	else if (dice < 70+10)
 	{
@@ -307,9 +300,7 @@ void Map::add_item(int x, int y)
 		auto lightningScroll = std::make_unique<Actor>(x, y, '#', "scroll of lightning bolt", LIGHTNING_PAIR,1);
 		lightningScroll->blocks = false;
 		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
-		game.actors.push_back(std::move(lightningScroll));
-		auto lightningScrollPtr = game.actors.back().get();
-		game.send_to_back(*lightningScrollPtr);
+		game.actors.insert(game.actors.begin(), std::move(lightningScroll));
 	}
 	else if (dice < 70 + 10 + 10)
 	{
@@ -317,9 +308,7 @@ void Map::add_item(int x, int y)
 		auto fireballScroll = std::make_unique<Actor>(x, y, '#', "scroll of fireball", FIREBALL_PAIR,1);
 		fireballScroll->blocks = false;
 		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
-		game.actors.push_back(std::move(fireballScroll));
-		auto fireballScrollPtr = game.actors.back().get();
-		game.send_to_back(*fireballScrollPtr);
+		game.actors.insert(game.actors.begin(), std::move(fireballScroll));
 	}
 	else
 	{
@@ -327,9 +316,7 @@ void Map::add_item(int x, int y)
 		auto confusionScroll = std::make_unique<Actor>(x, y, '#', "scroll of confusion", CONFUSION_PAIR,0);
 		confusionScroll->blocks = false;
 		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
-		game.actors.push_back(std::move(confusionScroll));
-		auto confusionScrollPtr = game.actors.back().get();
-		game.send_to_back(*confusionScrollPtr);
+		game.actors.insert(game.actors.begin(), std::move(confusionScroll));
 	}
 }
 
