@@ -6,14 +6,14 @@
 
 #include <memory> // std::shared_ptr, std::make_shared
 
-#include "Actor.h"
-#include "Player.h"
-#include "Gui.h"
-#include "Map.h"
-#include "Colors.h"
+#include "Gui/Gui.h"
+#include "Map/Map.h"
+#include "Colors/Colors.h"
+#include "Actor/Actor.h"
+#include "ActorTypes/Player.h"
+#include "Ai/AiShopkeeper.h"
 #include "ChatGPT.h"
 #include "Weapons.h"
-#include "AiShopkeeper.h"
 
 class Game
 {

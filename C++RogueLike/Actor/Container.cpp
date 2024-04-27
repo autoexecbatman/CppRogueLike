@@ -1,11 +1,10 @@
 // file: Container.cpp
-#include <iostream>
 #include <vector>
 #include <gsl/util>
 
+#include "../Game.h"
 #include "Container.h"
 #include "Actor.h"
-#include "Game.h"
 
 Container::Container(size_t invSize) noexcept : invSize(invSize) {}
 

@@ -6,7 +6,7 @@
 
 #include <curses.h>
 
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
 
 class Actor; // for no circular dependency with Actor.h
 

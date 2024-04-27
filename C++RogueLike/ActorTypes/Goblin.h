@@ -2,7 +2,7 @@
 #ifndef GOBLIN_H
 #define GOBLIN_H
 
-#include "Actor.h"
+#include "../Actor/Actor.h"
 
 //==GOBLIN==
 class Goblin : public Actor

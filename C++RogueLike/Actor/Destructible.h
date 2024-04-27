@@ -1,9 +1,8 @@
 // file Destructible.h
 #ifndef DESTRUCTIBLE_H
 #define DESTRUCTIBLE_H
-#include <iostream>
 
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
 
 class Actor;
 

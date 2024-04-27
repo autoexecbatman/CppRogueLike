@@ -13,12 +13,12 @@
 // https://pdcurses.org/docs/MANUAL.html
 #include <curses.h>
 
-#include "Colors.h"
 #include "Game.h"
-#include "Menu.h"
-#include "Gui.h"
+#include "Colors/Colors.h"
+#include "Menu/Menu.h"
+#include "Gui/Gui.h"
 
-#include "StrengthAttributes.h"
+#include "Attributes/StrengthAttributes.h"
 #include "Weapons.h"
 
 //==OPENAI_API==

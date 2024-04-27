@@ -8,13 +8,14 @@
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
+#include "../Ai/Ai.h"
+#include "../Attributes/StrengthAttributes.h"
+
 #include "Attacker.h"
 #include "Destructible.h"
-#include "Ai.h"
 #include "Container.h"
 #include "Pickable.h"
-#include "StrengthAttributes.h"
 
 //==Actor==
 // a class for the actors in the game

@@ -4,10 +4,8 @@
 
 #pragma once
 
-#include <gsl/pointers>
-
-#include "Goblin.h"
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
+#include "../ActorTypes/Goblin.h"
 
 class Actor;
 
@@ -73,17 +71,13 @@ public:
 	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
 	bool is_in_fov(int fov_x, int fov_y) const;
 	bool is_water(int isWater_pos_y, int isWater_pos_x) const;
-	//indicates whether this tile has already been seen by the player
-	bool is_explored(int exp_x, int exp_y) const noexcept;
+	bool is_explored(int exp_x, int exp_y) const noexcept; //indicates whether this tile has already been seen by the player
 	bool can_walk(int canw_x, int canw_y) const;
 	void add_monster(int mon_x, int mon_y);
-	// compute the field of view using `TCODMap::computeFov()`
-	void compute_fov();
+	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
 	void render() const;
 	void add_item(int x, int y);
-
-	// getActor returns the actor at the given coordinates or NULL if there's none
-	Actor* get_actor(int x, int y) noexcept;
+	Actor* get_actor(int x, int y) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 
 protected:
 	std::unique_ptr<Tile[]> tiles{};

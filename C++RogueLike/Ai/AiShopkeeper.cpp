@@ -1,8 +1,8 @@
 #include <curses.h>
 #include "AiShopkeeper.h"
-#include "RandomDice.h"
-#include "Actor.h"
-#include "Game.h"
+#include "../Game.h"
+#include "../Random/RandomDice.h"
+#include "../Actor/Actor.h"
 
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()

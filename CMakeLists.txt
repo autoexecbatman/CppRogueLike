@@ -20,85 +20,118 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
 
 # Set source files
 set(SOURCE_FILES # Add Source Files Here !
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiMonster.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiMonster.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiMonsterConfused.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiMonsterConfused.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiPlayer.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/AiPlayer.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attacker.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attacker.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/CalculatedTHAC0s.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/CharismaAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/CharismaAttributes.h
+
+    # Actor
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Actor.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Actor.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Attacker.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Attacker.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Confuser.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Confuser.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Container.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Container.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Destructible.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Destructible.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Pickable.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Actor/Pickable.h
+
+    # Persistent
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Persistent/Persistent.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Persistent/Persistent.h
+
+    # Ai
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/Ai.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/Ai.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiMonster.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiMonster.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiMonsterConfused.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiMonsterConfused.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiPlayer.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiPlayer.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiShopkeeper.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Ai/AiShopkeeper.h
+
+    # dnd_tables
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/dnd_tables/CalculatedTHAC0s.h
+
+    # Random
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Random/RandomDice.h
+
+    # Attributes
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/CharismaAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/CharismaAttributes.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/ConstitutionAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/ConstitutionAttributes.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/DexterityAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/DexterityAttributes.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/IntelligenceAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/IntelligenceAttributes.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/StrengthAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/StrengthAttributes.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/WisdomAttributes.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/WisdomAttributes.h
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Confuser.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Confuser.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ConstitutionAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ConstitutionAttributes.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Container.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Container.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Controls.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Dagger.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Dagger.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Destructible.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Destructible.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/DexterityAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/DexterityAttributes.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Fireball.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Fireball.h
+
+    # Colors
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors/Colors.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors/Colors.h
+
+    # Controls
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Controls/Controls.h
+
+    # Menu
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/Menu.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/Menu.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuClass.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuClass.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuGender.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuGender.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuName.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuName.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuRace.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuRace.h
+
+    # ActorTypes
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Dagger.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Dagger.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Goblin.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Goblin.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Gold.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Gold.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Healer.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Healer.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LightningBolt.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LightningBolt.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LongSword.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LongSword.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Player.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Player.h
+
+    # Gui
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/Gui.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/Gui.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/Window.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/Window.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/LogMessage.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui/LogMessage.h
+
+    # Main
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Game.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Game.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gui.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Goblin.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Goblin.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gold.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Gold.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Healer.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/IntelligenceAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/IntelligenceAttributes.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/LightningBolt.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/LongSword.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/LongSword.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main_C++RogueLike.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Map.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Map.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuClass.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuClass.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuGender.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuGender.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuName.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuName.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuRace.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/MenuRace.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Persistent.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Persistent.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Pickable.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Pickable.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Player.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Player.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/RandomDice.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/StrengthAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/StrengthAttributes.h
+
+    # Map
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Map/Map.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Map/Map.h
+
+
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Weapons.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Window.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/Window.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/WisdomAttributes.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/WisdomAttributes.h
 )
 
 # Create an executable with the listed source files
@@ -130,13 +163,13 @@ target_link_libraries(
 
 # Copy JSON files to build directory.
 set(JSON_FILES
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/strength.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/dexterity.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/constitution.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/wisdom.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/intelligence.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/charisma.json"
-    "${PROJECT_SOURCE_DIR}/C++RogueLike/weapons.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/strength.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/dexterity.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/constitution.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/wisdom.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/intelligence.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/charisma.json"
+    "${PROJECT_SOURCE_DIR}/C++RogueLike/json/weapons.json"
 )
 
 foreach(JSON_FILE ${JSON_FILES})

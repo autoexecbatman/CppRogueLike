@@ -17,7 +17,7 @@
 #include <string>
 #include <gsl/pointers>
 
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
 #include "LogMessage.h"
 
 constexpr int GUI_HEIGHT{ 7 };

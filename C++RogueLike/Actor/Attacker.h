@@ -7,7 +7,7 @@
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
 
 class Actor;
 

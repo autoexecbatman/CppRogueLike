@@ -4,8 +4,8 @@
 #pragma once
 
 #include "Ai.h"
-#include "Persistent.h"
-#include "Actor.h"
+#include "../Persistent/Persistent.h"
+#include "../Actor/Actor.h"
 
 class AiMonster : public Ai
 {

@@ -7,7 +7,7 @@
 
 #include <libtcod.h>
 
-#include "Persistent.h"
+#include "../Persistent/Persistent.h"
 
 class Actor;
 

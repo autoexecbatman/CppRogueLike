@@ -3,9 +3,9 @@
 #define PLAYER_H
 
 #include <gsl/util>
-#include "RandomDice.h"
-#include "Map.h"
-#include "Actor.h"
+#include "../Random/RandomDice.h"
+#include "../Map/Map.h"
+#include "../Actor/Actor.h"
 
 class Player : public Actor
 {

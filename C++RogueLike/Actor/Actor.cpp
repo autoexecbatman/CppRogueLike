@@ -11,13 +11,13 @@
 #include <libtcod.h>
 #pragma warning (pop)
 
+#include "../Game.h"
+#include "../Ai/Ai.h"
 #include "Actor.h"
 #include "Attacker.h"
 #include "Destructible.h"
-#include "Ai.h"
 #include "Pickable.h"
 #include "Container.h"
-#include "Game.h"
 
 //====
 Actor::Actor(
