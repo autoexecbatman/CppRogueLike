@@ -31,6 +31,7 @@
 #include "Player.h"
 #include "Weapons.h"
 #include "Gold.h"
+#include "AiShopkeeper.h"
 
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/dice.hpp"
 //#include "/Repositories/CaptainCrowbar/dice/source/dice/rational.hpp"
@@ -153,20 +154,14 @@ void Map::init(bool withActors)
 	bsp(map_width, map_height, *rng_unique, withActors);
 }
 
-bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const // checks if it is a wall?
+bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const
 {
-	// return !tiles[isWall_pos_x + isWall_pos_y * map_width].canWalk;
-
-	return !tcodMap->isWalkable(
-		isWall_pos_x,
-		isWall_pos_y
-	);
+	return !tcodMap->isWalkable(isWall_pos_x, isWall_pos_y);
 }
 
 bool Map::is_explored(int exp_x, int exp_y) const noexcept
 {
 	return gsl::span(tiles.get(), map_width * map_height)[exp_x + (exp_y * map_width)].explored;
-
 }
 
 bool Map::is_in_fov(int fov_x, int fov_y) const
@@ -482,6 +477,25 @@ void Map::add_monster(int mon_x, int mon_y)
 
 	// Determine if this room should contain the dragon
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
+
+	auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);
+	shopkeeper->blocks = true;
+	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
+	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
+	shopkeeper->ai = std::make_unique<AiShopkeeper>();
+	shopkeeper->container = std::make_unique<Container>(10);
+	// populate the shopkeeper's inventory
+	auto healthPotion = std::make_unique<Actor>(0, 0, '!', "health potion", HPBARMISSING_PAIR, 0);
+	healthPotion->blocks = false;
+	healthPotion->pickable = std::make_unique<Healer>(4);
+	shopkeeper->container->add(std::move(healthPotion));
+	auto dagger = std::make_unique<Actor>(0, 0, '/', "dagger", 1, 0);
+	dagger->blocks = false;
+	dagger->pickable = std::make_unique<Dagger>(1, 4);
+	shopkeeper->container->add(std::move(dagger));
+	game.actors.push_back(std::move(shopkeeper));
+	game.shopkeeper = game.actors.back().get();
+
 
 	if (placeDragon)
 	{

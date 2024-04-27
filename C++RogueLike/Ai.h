@@ -23,7 +23,7 @@ public:
 protected:
 	enum class AiType
 	{
-		MONSTER, CONFUSED_MONSTER, PLAYER
+		MONSTER, CONFUSED_MONSTER, PLAYER, SHOPKEEPER
 	};
 };
 

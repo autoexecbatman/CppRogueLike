@@ -13,6 +13,7 @@
 #include "Colors.h"
 #include "ChatGPT.h"
 #include "Weapons.h"
+#include "AiShopkeeper.h"
 
 class Game
 {
@@ -37,6 +38,7 @@ public:
 
 	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, false) };
 	Player* player{ player_unique.get() };
+	Actor* shopkeeper{ nullptr };
 
 	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(
 		0, // int posX

@@ -159,8 +159,12 @@ void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax
 	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName.c_str());
 	// print hp
 	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
-	// print attack
-	mvwprintw(guiWin, 4, 1, "Attack:%d", damage);
+	//// print attack
+	//mvwprintw(guiWin, 4, 1, "Attack:%d", damage);
+
+	// print gold
+	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->playerGold);
+
 	// print defense
 	mvwprintw(guiWin, 5, 1, "Defense:%d", dr);
 }
