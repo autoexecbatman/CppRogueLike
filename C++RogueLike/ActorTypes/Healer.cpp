@@ -1,6 +1,6 @@
 #include "Healer.h"
-#include "Game.h"
-#include "Colors.h"
+#include "../Game.h"
+#include "../Colors/Colors.h"
 
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}

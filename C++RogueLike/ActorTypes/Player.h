@@ -2,7 +2,6 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <gsl/util>
 #include "../Random/RandomDice.h"
 #include "../Map/Map.h"
 #include "../Actor/Actor.h"

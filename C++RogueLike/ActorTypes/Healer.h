@@ -2,8 +2,8 @@
 
 #include <libtcod.h>
 
-#include "Actor.h"
-#include "Pickable.h"
+#include "../Actor/Actor.h"
+#include "../Actor/Pickable.h"
 
 //==HEALER==
 //==

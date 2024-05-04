@@ -7,7 +7,7 @@
 #include <curses.h>
 #include <libtcod.h>
 
-#include "Actor.h"
+#include "../Actor/Actor.h"
 #include "Ai.h"
 
 //==PLAYER_AI==

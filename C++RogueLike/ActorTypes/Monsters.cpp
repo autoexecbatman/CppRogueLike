@@ -1,10 +1,10 @@
-// file: Goblin.cpp
-#include "Game.h"
-#include "Actor.h"
-#include "Colors.h"
-#include "AiMonster.h"
-#include "Goblin.h"
-#include "RandomDice.h"
+// file: Monsters.cpp
+#include "Monsters.h"
+#include "../Game.h"
+#include "../Actor/Actor.h"
+#include "../Colors/Colors.h"
+#include "../Ai/AiMonster.h"
+#include "../Random/RandomDice.h"
 
 //==GOBLIN==
 Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)

@@ -5,11 +5,10 @@
 #include <gsl/util>
 #include <format>
 
-#include "Colors.h"
-#include "Window.h"
-#include "Game.h"
-#include "Actor.h"
-#include "LongSword.h"
+#include "../Game.h"
+#include "../Colors/Colors.h"
+#include "../Actor/Actor.h"
+#include "../ActorTypes/LongSword.h"
 
 Attacker::Attacker(int dmg, int minDmg, int maxDmg) noexcept : dmg(dmg), minDmg(minDmg), maxDmg(maxDmg) {}
 

@@ -5,7 +5,7 @@
 #include <memory>
 #include <libtcod.h>
 
-#include "Actor.h"
+#include "../Actor/Actor.h"
 #include "Ai.h"
 
 class AiMonsterConfused : public Ai

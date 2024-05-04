@@ -1,3 +1,4 @@
+// file: AiMonster.cpp
 #include "AiMonster.h"
 #include "../Game.h"
 
@@ -101,3 +102,5 @@ void AiMonster::moveOrAttack(Actor& owner, int targetx, int targety)
 		owner.attacker->attack(owner, *game.player);
 	}
 }
+
+// file: AiMonster.cpp

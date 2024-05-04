@@ -28,7 +28,7 @@ public:
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
-	void print_container(std::vector<std::shared_ptr<Actor>> container);
+	void print_container(std::vector<std::unique_ptr<Actor>> container);
 };
 
 #endif // !CONTAINER_H

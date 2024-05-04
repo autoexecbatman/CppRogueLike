@@ -3,9 +3,10 @@
 #include <gsl/util>
 
 #include "Gui.h"
-#include "main.h"
-#include "Colors.h"
 #include "LogMessage.h"
+//#include "../main.h"
+#include "../Colors/Colors.h"
+#include "../Game.h"
 
 // guiWin is the main gui window
 // ==== ==== ==== ==== ====

@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "Pickable.h"
-#include "Actor.h"
+#include "../Actor/Actor.h"
+#include "../Actor/Pickable.h"
 
 class LongSword : public Pickable
 {

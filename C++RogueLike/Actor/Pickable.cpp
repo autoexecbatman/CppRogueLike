@@ -2,18 +2,18 @@
 #include <gsl/util>
 #include <vector>
 
-#include "Colors.h"
-#include "Actor.h"
-#include "Game.h"
 #include "Pickable.h"
-#include "Healer.h"
-#include "LightningBolt.h"
-#include "Fireball.h"
+#include "../Colors/Colors.h"
+#include "../Game.h"
+#include "Actor.h"
 #include "Confuser.h"
 #include "Container.h"
-#include "AiMonsterConfused.h"
-#include "LongSword.h"
-#include "Dagger.h"
+#include "../ActorTypes/Healer.h"
+#include "../ActorTypes/LightningBolt.h"
+#include "../ActorTypes/Fireball.h"
+#include "../ActorTypes/LongSword.h"
+#include "../ActorTypes/Dagger.h"
+#include "../Ai/AiMonsterConfused.h"
 
 //==PICKABLE==
 bool Pickable::pick(std::unique_ptr<Actor> owner, const Actor& wearer)

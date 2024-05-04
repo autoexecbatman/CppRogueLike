@@ -2,7 +2,7 @@
 
 #include <libtcod.h>
 
-#include "Actor.h"
+#include "../Actor/Actor.h"
 #include "LightningBolt.h"
 
 //==FIREBALL==

@@ -4,8 +4,8 @@
 
 #include <libtcod.h>
 
-#include "Game.h"
-#include "Actor.h"
+#include "../Game.h"
+#include "../Actor/Actor.h"
 #include "Ai.h"
 #include "AiMonsterConfused.h"
 
@@ -32,7 +32,7 @@ void AiMonsterConfused::update(Actor& owner)
 			}
 			else
 			{
-				const std::unique_ptr<Actor>& actor = game.get_actor(destx, desty);
+				const auto& actor = game.get_actor(destx, desty);
 				if (actor)
 				{
 					owner.attacker->attack(owner, *actor);

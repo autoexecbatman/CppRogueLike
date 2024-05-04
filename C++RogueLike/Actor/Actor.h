@@ -37,6 +37,7 @@ public:
 	std::string playerRace{ "None" };
 
 	std::string weaponEquipped{ "None" };
+	int value{ 0 };
 
 	int posY{ 0 }, posX{ 0 }; // position on map
 	char ch{ -47 }; // the symbol to print

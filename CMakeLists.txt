@@ -98,8 +98,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Dagger.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Goblin.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Goblin.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Monsters.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Monsters.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Gold.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Gold.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Healer.cpp

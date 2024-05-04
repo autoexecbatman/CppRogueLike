@@ -3,10 +3,10 @@
 #include <format>
 #include <gsl/util>
 
-#include "Game.h"
-#include "Menu.h"
 #include "AiPlayer.h"
-#include "Controls.h"
+#include "../Game.h"
+#include "../Menu/Menu.h"
+#include "../Controls/Controls.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;

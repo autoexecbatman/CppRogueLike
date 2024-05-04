@@ -1,8 +1,10 @@
+// File: Fireball.cpp
+#include <gsl/util>
 #include "Fireball.h"
 #include "LightningBolt.h"
-#include "Actor.h"
-#include "Game.h"
-#include "Colors.h"
+#include "../Actor/Actor.h"
+#include "../Game.h"
+#include "../Colors/Colors.h"
 
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}

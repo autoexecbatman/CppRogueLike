@@ -5,7 +5,7 @@
 #pragma once
 
 #include "../Persistent/Persistent.h"
-#include "../ActorTypes/Goblin.h"
+#include "../ActorTypes/Monsters.h"
 
 class Actor;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "Pickable.h"
+#include "../Actor/Pickable.h"
 
 class Gold : public Pickable
 {

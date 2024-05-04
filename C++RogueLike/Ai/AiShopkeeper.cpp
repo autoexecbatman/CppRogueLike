@@ -1,3 +1,4 @@
+// file: AiShopkeeper.cpp
 #include <curses.h>
 #include "AiShopkeeper.h"
 #include "../Game.h"
@@ -53,22 +54,127 @@ void AiShopkeeper::moveOrTrade(Actor& owner, int targetx, int targety)
 	}
 }
 
-void AiShopkeeper::trade()
-{
-	// create a window for the trade
-	WINDOW* tradeWindow = newwin(10, 20, 1, 1);
-	box(tradeWindow, 0, 0);
-	wrefresh(tradeWindow);
+void AiShopkeeper::trade() {
+	WINDOW* tradeWin = newwin(10, 40, 5, 5);
+	box(tradeWin, 0, 0);
+	wrefresh(tradeWin);
 
-	// find shopkeeper's inventory
-	/*auto shopkeeperInventory = game.shopkeeper->container->inventoryList;*/
-	// display shopkeeper's inventory
-	//for (auto& item : shopkeeperInventory)
-	//{
-	//	wprintw(tradeWindow, item->name.c_str());
-	//	wprintw(tradeWindow, "\n");
-	//}
-	refresh();
+	bool trading = true;
+
+	while (trading) {
+		// Display the trade menu
+		mvwprintw(tradeWin, 1, 1, "Trade Menu");
+		mvwprintw(tradeWin, 2, 1, "1. Buy");
+		mvwprintw(tradeWin, 3, 1, "2. Sell");
+		mvwprintw(tradeWin, 4, 1, "3. Exit");
+
+		wrefresh(tradeWin);
+
+		// Get user input
+		int choice = wgetch(tradeWin);
+
+		switch (choice) {
+		case '1':
+			handle_buy(tradeWin);
+			break;
+
+		case '2':
+			handle_sell(tradeWin);
+			break;
+
+		case '3':
+			trading = false;
+			break;
+
+		default:
+			break;
+		}
+
+		wrefresh(tradeWin);
+	}
+
+	delwin(tradeWin);
+}
+
+void AiShopkeeper::handle_buy(WINDOW* tradeWin) {
+	const auto& shopkeeperInventory = game.shopkeeper->container; // Assume shopkeeper has an inventory
+	int selected = 0;
+
+	while (true) {
+		// Display available items for buying
+		mvwprintw(tradeWin, 6, 1, "Items available for purchase:");
+		for (size_t i = 0; i < shopkeeperInventory->inventoryList.size(); i++) {
+			mvwprintw(tradeWin, 7 + i, 1, "%d: %s", i, shopkeeperInventory->inventoryList[i]->name.c_str());
+		}
+
+		wrefresh(tradeWin);
+
+		int choice = wgetch(tradeWin);
+
+		if (choice >= '0' && choice <= '9') {
+			selected = choice - '0';
+
+			// Check if selected item is valid
+			if (selected < shopkeeperInventory->inventoryList.size()) {
+				auto& item = shopkeeperInventory->inventoryList[selected];
+
+				// Check if player has enough currency (assuming `game.player->currency` exists)
+				if (game.player->playerGold >= item->value) {
+					// Deduct currency
+					game.player->playerGold -= item->value;
+
+					// Transfer item from shopkeeper to player
+					game.player->container->inventoryList.insert(game.player->container->inventoryList.begin(), std::move(item));
+
+					shopkeeperInventory->inventoryList.erase(shopkeeperInventory->inventoryList.begin() + selected);
+					mvwprintw(tradeWin, 6, 1, "Item purchased successfully.");
+				}
+				else {
+					mvwprintw(tradeWin, 6, 1, "Insufficient currency.");
+				}
+			}
+		}
+
+		wrefresh(tradeWin);
+	}
+}
+
+// Selling logic: display player's items and allow selling
+void AiShopkeeper::handle_sell(WINDOW* tradeWin) {
+	const auto& playerInventory = game.player->container;
+	int selected = 0;
+
+	while (true) {
+		// Display player's items for selling
+		mvwprintw(tradeWin, 6, 1, "Items available for sale:");
+		for (size_t i = 0; i < playerInventory->inventoryList.size(); i++) {
+			mvwprintw(tradeWin, 7 + i, 1, "%d: %s", i, playerInventory->inventoryList[i]->name.c_str());
+		}
+
+		wrefresh(tradeWin);
+
+		int choice = wgetch(tradeWin);
+
+		if (choice >= '0' && choice <= '9') {
+			selected = choice - '0';
+
+			// Check if selected item is valid
+			if (selected < playerInventory->inventoryList.size()) {
+				auto& item = playerInventory->inventoryList[selected];
+
+				// Add currency to the player's total
+				game.player->playerGold += item->value;
+
+				// Transfer item from player to shopkeeper
+				game.shopkeeper->container->add(std::move(item));
+
+				playerInventory->inventoryList.erase(playerInventory->inventoryList.begin() + selected);
+				mvwprintw(tradeWin, 6, 1, "Item sold successfully.");
+			}
+		}
+
+		wrefresh(tradeWin);
+	}
 }
 
 void AiShopkeeper::update(Actor& owner)
@@ -114,4 +220,4 @@ void AiShopkeeper::load(TCODZip& zip)
 void AiShopkeeper::save(TCODZip& zip)
 {
 }
-// end of file: AiShopkeeper.cpp
+// file: AiShopkeeper.cpp

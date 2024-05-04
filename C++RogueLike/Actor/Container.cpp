@@ -63,7 +63,7 @@ void Container::save(TCODZip& zip)
 	}
 }
 
-void Container::print_container(std::vector<std::shared_ptr<Actor>> container)
+void Container::print_container(std::vector<std::unique_ptr<Actor>> container)
 {
 	int i = 0;
 	for (const auto& item : inventoryList)

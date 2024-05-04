@@ -1,15 +1,15 @@
 // file: Player.cpp
 #include <gsl/util>
-#include "Game.h"
-#include "Map.h"
-#include "Ai.h"
-#include "AiPlayer.h"
-#include "Player.h"
-#include "Actor.h"
-#include "RandomDice.h"
-#include "Colors.h"
-#include "curses.h"
-#include "CalculatedTHAC0s.h"
+#include <curses.h>
+#include "../Game.h"
+#include "../Map/Map.h"
+#include "../Ai/Ai.h"
+#include "../Ai/AiPlayer.h"
+#include "../ActorTypes/Player.h"
+#include "../Actor/Actor.h"
+#include "../Random/RandomDice.h"
+#include "../Colors/Colors.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
 
 //Player::Player(int y, int x)
 Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg, bool canSwim)
