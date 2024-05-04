@@ -36,7 +36,7 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0, false) };
+	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0) };
 	Player* player{ player_unique.get() };
 	Actor* shopkeeper{ nullptr };
 

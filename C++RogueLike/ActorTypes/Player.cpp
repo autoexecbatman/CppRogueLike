@@ -12,7 +12,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 
 //Player::Player(int y, int x)
-Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg, bool canSwim)
+Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg)
 	:
 	Actor(y, x, '@', "player", PLAYER_PAIR, 0)
 {
@@ -20,6 +20,7 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 
 	blocks = true;
 	fovOnly = true;
+	canSwim = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 	dexterity = d.d6() + d.d6() + d.d6();
@@ -32,7 +33,6 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 	destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
-	this->canSwim = canSwim;
 }
 
 // a function to get postion from the map class using the getter functions
@@ -44,9 +44,8 @@ void Player::player_get_pos_from_map()
 	}
 	else
 	{
-		const auto& map = game.map;
-		posX = map->get_player_pos_x();
-		posY = map->get_player_pos_y();
+		posX = game.map->get_player_pos_x();
+		posY = game.map->get_player_pos_y();
 	}
 }
 

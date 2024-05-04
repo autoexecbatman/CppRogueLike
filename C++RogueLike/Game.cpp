@@ -73,7 +73,7 @@ void Game::create_player()
 	const int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
-	game.player_unique = std::make_unique<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg, true);
+	game.player_unique = std::make_unique<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg);
 	
 	// add the player to the actors vector for rendering
 	game.actors.push_back(std::move(game.player_unique));
