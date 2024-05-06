@@ -12,6 +12,7 @@ private:
 	void save(TCODZip& zip) override;
 	void handle_buy(WINDOW* tradeWin);
 	void handle_sell(WINDOW* tradeWin);
+	void display_item_list(WINDOW* tradeWin, std::vector<std::unique_ptr<Actor>>& inventoryList);
 public:
 	AiShopkeeper();
 protected:

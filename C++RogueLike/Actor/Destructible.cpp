@@ -1,10 +1,13 @@
 // file: Destructible.cpp
 #include <iostream>
+#include <string>
 #include <algorithm>
 
-#include "main.h"
-#include "Colors.h"
-#include "StrengthAttributes.h"
+//#include "../main.h"
+#include "../Game.h"
+#include "../Actor/Actor.h"
+#include "../Colors/Colors.h"
+#include "../Attributes/StrengthAttributes.h"
 
 //====
 Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp, int thaco, int armorClass)

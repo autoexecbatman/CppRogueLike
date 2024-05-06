@@ -493,7 +493,6 @@ void Map::add_monster(int mon_x, int mon_y)
 	game.actors.push_back(std::move(shopkeeper));
 	game.shopkeeper = game.actors.back().get();
 
-
 	if (placeDragon)
 	{
 		auto dragon = std::make_unique<Dragon>(mon_y, mon_x);
