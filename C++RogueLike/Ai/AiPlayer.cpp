@@ -38,24 +38,18 @@ bool AiPlayer::levelUpUpdate(Actor& owner)
 	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
 	int levelUpXp = getNextLevelXp();
-	if (owner.destructible != nullptr)
+
+	if (owner.destructible->xp >= levelUpXp)
 	{
-		if (owner.destructible->xp >= levelUpXp)
-		{
-			game.player->playerLevel++;
-			owner.destructible->xp -= levelUpXp;
-			game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
-			game.player->calculate_thaco();
-			game.dispay_levelup(game.player->playerLevel);
-		}
-	}
-	else
-	{
-		std::cout << "Error: PlayerAi::levelUpUpdate(Actor& owner). owner.destructible is null" << std::endl;
-		exit(-1);
+		game.player->playerLevel++;
+		owner.destructible->xp -= levelUpXp;
+		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
+		game.player->calculate_thaco();
+		game.dispay_levelup(game.player->playerLevel);
 	}
 
-	if (owner.destructible && owner.destructible->is_dead())
+
+	if (owner.destructible->is_dead())
 	{
 		return true;
 	}
@@ -480,7 +474,7 @@ void AiPlayer::save(TCODZip& zip)
 
 bool is_not_dead(const Actor& actor)
 {
-	if (actor.destructible && !actor.destructible->is_dead())
+	if (!actor.destructible->is_dead())
 	{
 		return true;
 	}
@@ -549,7 +543,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	// look for corpses or items
 	for (const auto& actor : game.actors)
 	{
-		const auto isDeadCorpseOrItem = (actor->destructible && actor->destructible->is_dead()) || actor->pickable;
+		const auto isDeadCorpseOrItem = actor->destructible->is_dead() || actor->pickable;
 
 		if (isDeadCorpseOrItem && actor->posX == targetx && actor->posY == targety)
 		{

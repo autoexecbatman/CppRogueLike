@@ -85,8 +85,6 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	for (const auto& actor : game.actors)
 	{
 		if (
-			actor->destructible
-			&&
 			!actor->destructible->is_dead()
 			&&
 			actor->get_distance(x, y) <= Fireball::maxRange
@@ -100,8 +98,6 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	for (const auto& actor : game.actors)
 	{
 		if (
-			actor->destructible
-			&&
 			!actor->destructible->is_dead()
 			&&
 			actor->get_distance(x, y) <= Fireball::maxRange

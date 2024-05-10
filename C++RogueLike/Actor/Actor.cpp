@@ -38,7 +38,8 @@ Actor::Actor(
 	fovOnly(true),
 	canSwim(false),
 	attacker(nullptr),
-	destructible(nullptr),
+	/*destructible(nullptr),*/
+	destructible(std::make_unique<Destructible>(0,0,"",0,0,0)),
 	ai(nullptr),
 	container(nullptr),
 	pickable(nullptr)
@@ -67,7 +68,7 @@ void Actor::load(TCODZip& zip)
 	// this block assigns the values from the zip file to the actor's components if they exist. 
 	// Is this a double assignment? No, because the components are not assigned in the constructor.
 	if (hasAttacker) { attacker = std::make_unique<Attacker>(0,0,0); attacker->load(zip); }
-	if (hasDestructible) { destructible = Destructible::create(zip); }
+	/*if (hasDestructible) { destructible = Destructible::create(zip); }*/
 	if (hasAi) { ai = Ai::create(zip); }
 	if (hasPickable) { pickable = Pickable::create(zip); }
 	if (hasContainer) { container = std::make_unique<Container>(0); container->load(zip); }
@@ -86,13 +87,13 @@ void Actor::save(TCODZip& zip)
 	zip.putInt(blocks);
 
 	zip.putInt(attacker != nullptr);
-	zip.putInt(destructible != nullptr);
+	/*zip.putInt(destructible != nullptr);*/
 	zip.putInt(ai != nullptr);
 	zip.putInt(pickable != nullptr);
 	zip.putInt(container != nullptr);
 
 	if (attacker) attacker->save(zip);
-	if (destructible) destructible->save(zip);
+	/*if (destructible) destructible->save(zip);*/
 	if (ai) ai->save(zip);
 	if (pickable) pickable->save(zip);
 	if (container) container->save(zip);

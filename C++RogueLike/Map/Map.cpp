@@ -477,7 +477,14 @@ void Map::add_monster(int mon_x, int mon_y)
 
 	auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);
 	shopkeeper->blocks = true;
-	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
+	/*shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);*/
+	shopkeeper->destructible->hp = 10;
+	shopkeeper->destructible->dr = 0;
+	shopkeeper->destructible->corpseName = "dead shopkeeper";
+	shopkeeper->destructible->xp = 10;
+	shopkeeper->destructible->thaco = 10;
+	shopkeeper->destructible->armorClass = 10;
+
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
 	shopkeeper->ai = std::make_unique<AiShopkeeper>();
 	shopkeeper->container = std::make_unique<Container>(10);

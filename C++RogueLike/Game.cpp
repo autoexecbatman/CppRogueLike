@@ -92,73 +92,64 @@ void Game::create_player()
 // and stores events
 void Game::update()
 {
-	// we check if the pointers are not null
-	if (game.player && game.player->destructible)
+	// permadeath is enabled !
+	// if the player is dead, we end the game
+	if (game.player->destructible->is_dead())
 	{
-		// permadeath is enabled !
-		// if the player is dead, we end the game
-		if (game.player->destructible->is_dead())
-		{
-			game.log("Player is dead!"); // log the event
+		game.log("Player is dead!"); // log the event
 
-			game.appendMessagePart(COLOR_RED, "You died! Press any key...");
-			game.finalizeMessage();
+		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
+		game.finalizeMessage();
 
-			// set the game loop to stop
-			run = false;
-		}
-		else
-		{
-			// still alive, we update the game logic
-			// to compute the FOV only once for performance
-			// gameStatus should be set to STARTUP
-			if (Game::gameStatus == GameStatus::STARTUP)
-			{
-				game.log("...Computing FOV...");
-				game.map->compute_fov();
-
-				// adjust the attributes based on players race
-				game.player->racial_ability_adjustments();
-				game.player->calculate_thaco();
-			}
-
-			// we set the gameStatus to IDLE
-			// IDLE is the default state
-			gameStatus = GameStatus::IDLE;
-			game.log("GameStatus::IDLE");
-
-			// in the update procedure if the player has moved
-			// we set the gameStatus to NEW_TURN
-			// or IDLE if the player has not moved
-			game.log("Updating player...");
-			game.player->update();
-			game.log("Player updated!");
-
-			// if the player moved we update the world
-			game.log("Updating actors...");
-			if (Game::gameStatus == GameStatus::NEW_TURN)
-			{
-				for (const auto& actor : actors)
-				{
-					if (actor->is_visible())
-					{
-						if (actor != nullptr && actor.get() != player)
-						{
-
-							game.log("Actor: " + actor->name + " is in FOV");
-							actor->update();
-
-						}
-					}
-				}
-			}
-			game.log("Actors updated!");
-		}
+		// set the game loop to stop
+		run = false;
 	}
 	else
 	{
-		game.log("Error: Game::update() - game.player or game.player->destructible is null");
-		exit(-1);
+		// still alive, we update the game logic
+		// to compute the FOV only once for performance
+		// gameStatus should be set to STARTUP
+		if (Game::gameStatus == GameStatus::STARTUP)
+		{
+			game.log("...Computing FOV...");
+			game.map->compute_fov();
+
+			// adjust the attributes based on players race
+			game.player->racial_ability_adjustments();
+			game.player->calculate_thaco();
+		}
+
+		// we set the gameStatus to IDLE
+		// IDLE is the default state
+		gameStatus = GameStatus::IDLE;
+		game.log("GameStatus::IDLE");
+
+		// in the update procedure if the player has moved
+		// we set the gameStatus to NEW_TURN
+		// or IDLE if the player has not moved
+		game.log("Updating player...");
+		game.player->update();
+		game.log("Player updated!");
+
+		// if the player moved we update the world
+		game.log("Updating actors...");
+		if (Game::gameStatus == GameStatus::NEW_TURN)
+		{
+			for (const auto& actor : actors)
+			{
+				if (actor->is_visible())
+				{
+					if (actor != nullptr && actor.get() != player)
+					{
+
+						game.log("Actor: " + actor->name + " is in FOV");
+						actor->update();
+
+					}
+				}
+			}
+		}
+		game.log("Actors updated!");
 	}
 }
 
@@ -243,12 +234,7 @@ Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) con
 
 	for (const auto& actor : actors)
 	{
-		if (actor.get() != player
-			&&
-			actor->destructible
-			&&
-			!actor->destructible->is_dead()
-			)
+		if (actor.get() != game.player && !actor->destructible->is_dead())
 		{
 			const int distance = actor->get_distance(fromPosX, fromPosY);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
@@ -318,7 +304,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		{
 			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
-			if (actor != nullptr && actor->destructible != nullptr)
+			if (actor != nullptr)
 			{
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
@@ -427,7 +413,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			{
 				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
-				if (actor != nullptr && actor->destructible != nullptr)
+				if (actor != nullptr)
 				{
 					player->attacker->attack(*player, *actor);
 					run = false;
@@ -582,7 +568,7 @@ void Game::target()
 		{
 			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
-			if (actor != nullptr && actor->destructible != nullptr )
+			if (actor != nullptr)
 			{
 				mvprintw(0, 0, actor->name.c_str());
 				// print the monster's stats
@@ -630,7 +616,7 @@ void Game::target()
 				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 				
 				// and actor is not an item
-				if (actor != nullptr && actor->destructible != nullptr)
+				if (actor != nullptr)
 				{
 					player->attacker->attack(*player, *actor);
 					run = false;
@@ -705,11 +691,6 @@ void Game::save_all()
 	try
 	{
 		if (!shouldSave) { game.log("You quit without saving."); return; } // don't save if quit from the menu without playing
-
-		if (!player->destructible)
-		{
-			throw std::runtime_error("player->destructible is null. Saving aborted.");
-		}
 
 		if (player->destructible->is_dead() && TCODSystem::fileExists("game.sav"))
 		{

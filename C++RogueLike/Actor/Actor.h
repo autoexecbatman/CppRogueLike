@@ -8,6 +8,8 @@
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 
+#include <gsl/gsl>
+
 #include "../Persistent/Persistent.h"
 #include "../Ai/Ai.h"
 #include "../Attributes/StrengthAttributes.h"
@@ -51,7 +53,7 @@ public:
 	/*bool sent_to_back = false;*/
 	
 	std::unique_ptr<Attacker> attacker; // the actor can attack
-	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
+	gsl::not_null<std::unique_ptr<Destructible>> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<Container> container; // the actor can be a container
 	std::unique_ptr<Pickable> pickable; // the actor can be picked

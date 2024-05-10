@@ -68,11 +68,8 @@ void Gui::gui_init() noexcept
 	messageLogWindow = derwin(guiWin, LOG_HEIGHT, LOG_WIDTH, LOG_Y, LOG_X);
 
 	// set hp and hpMax
-	if (game.player->destructible)
-	{
-		guiHp = game.player->destructible->hp;
-		guiHpMax = game.player->destructible->hpMax;
-	}
+	guiHp = game.player->destructible->hp;
+	guiHpMax = game.player->destructible->hpMax;
 
 	gui_clear();
 	box(guiWin, 0, 0);

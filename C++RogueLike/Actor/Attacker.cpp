@@ -14,7 +14,7 @@ Attacker::Attacker(int dmg, int minDmg, int maxDmg) noexcept : dmg(dmg), minDmg(
 
 void Attacker::attack(const Actor& attacker, Actor& target)
 {
-	if (!target.destructible) { game.log("Attacker::attack() - target.destructible is null."); return; }
+	/*if (!target.destructible) { game.log("Attacker::attack() - target.destructible is null."); return; }*/
 
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{

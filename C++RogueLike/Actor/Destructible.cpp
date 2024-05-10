@@ -10,7 +10,7 @@
 #include "../Attributes/StrengthAttributes.h"
 
 //====
-Destructible::Destructible(int hpMax,int dr,std::string corpseName,int xp, int thaco, int armorClass)
+Destructible::Destructible(int hpMax, int dr, std::string corpseName, int xp, int thaco, int armorClass)
 	:
 	hpMax(hpMax),
 	hp(hpMax),
@@ -143,7 +143,10 @@ std::unique_ptr<Destructible> Destructible::create(TCODZip& zip)
 		break;
 	}
 	
-	if (destructible) { destructible->load(zip); }
+	if (destructible)
+	{
+		destructible->load(zip);
+	}
 	
 	return destructible;
 }

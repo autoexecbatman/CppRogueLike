@@ -16,17 +16,9 @@ void AiMonster::update(Actor& owner)
 		return; // do nothing
 	}
 
-	if (owner.destructible != nullptr)
+	if (owner.destructible->is_dead()) // if the owner is dead
 	{
-		if (owner.destructible->is_dead()) // if the owner is dead
-		{
-			return; // do nothing
-		}
-	}
-	else
-	{
-		std::cout << "Error: AiMonster::update() - owner.destructible is null" << std::endl;
-		exit(-1);
+		return; // do nothing
 	}
 
 	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
