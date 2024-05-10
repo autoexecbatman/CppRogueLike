@@ -1,7 +1,7 @@
 #include "Confuser.h"
 #include "Actor.h"
-#include "Game.h"
-#include "AiMonsterConfused.h"
+#include "../Game.h"
+#include "../Ai/AiMonsterConfused.h"
 
 //==Confuser==
 Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(range) {}

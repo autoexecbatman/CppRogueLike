@@ -250,6 +250,11 @@ void AiPlayer::update(Actor& owner)
 		break;
 	}
 
+	case Controls::DEBUG:
+	{
+		game.display_debug_messages();
+	}
+
 	default:break;
 	}
 

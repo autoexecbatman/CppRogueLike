@@ -37,7 +37,7 @@ public:
 	} gameStatus{ GameStatus::STARTUP };
 
 	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0) };
-	Player* player{ player_unique.get() };
+	gsl::not_null<Player*> player{ player_unique.get() };
 	Actor* shopkeeper{ nullptr };
 
 	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(
@@ -95,6 +95,7 @@ public:
 	void enableDebugMode() noexcept { debugMode = true; }
 	void disableDebugMode() noexcept { debugMode = false; }
 	void log(const std::string& message);
+	void display_debug_messages() noexcept;
 
 	//==MESSAGE FUNCTIONS==//
 	void message(int color, const std::string& text, bool isComplete);

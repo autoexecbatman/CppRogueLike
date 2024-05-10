@@ -1,9 +1,9 @@
 // file: MenuClass.cpp
 #include "MenuClass.h"
-#include "Game.h"
 #include "MenuName.h"
-#include "RandomDice.h"
-#include "Player.h"
+#include "../Game.h"
+#include "../Random/RandomDice.h"
+#include "../ActorTypes/Player.h"
 
 std::string MenuClass::menu_class_get_string(MenuClassOptions option) noexcept
 {

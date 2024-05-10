@@ -1,9 +1,9 @@
 // file: MenuRace.cpp
 #include "MenuRace.h"
-#include "Game.h"
 #include "MenuName.h"
 #include "MenuClass.h"
 #include "MenuGender.h"
+#include "../Game.h"
 
 std::string MenuRace::menu_race_get_string(MenuRaceOptions option) noexcept
 {

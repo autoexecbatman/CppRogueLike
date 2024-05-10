@@ -2,9 +2,9 @@
 #include <curses.h>
 #include <libtcod.h>
 
-#include "Game.h"
-#include "Colors.h"
 #include "LightningBolt.h"
+#include "../Game.h"
+#include "../Colors/Colors.h"
 
 //==LIGHTNING_BOLT==
 LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRange), damage(damage) {}

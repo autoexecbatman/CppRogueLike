@@ -10,6 +10,7 @@ AiMonster::AiMonster() : moveCount(0) {}
 
 void AiMonster::update(Actor& owner)
 {
+	game.log(owner.name + "AI is updating");
 	if (owner.ai == nullptr) // if the owner has no ai
 	{
 		return; // do nothing

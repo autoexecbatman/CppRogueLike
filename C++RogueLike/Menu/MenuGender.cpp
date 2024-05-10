@@ -1,10 +1,10 @@
 // file: MenuGender.cpp
 #include "MenuGender.h"
-#include "Game.h"
 #include "Menu.h"
 #include "MenuClass.h"
 #include "MenuRace.h"
-#include "Player.h"
+#include "../Game.h"
+#include "../ActorTypes/Player.h"
 
 void MenuGender::menu_gender_clear() noexcept
 {

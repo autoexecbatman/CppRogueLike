@@ -1,6 +1,5 @@
 // file: Window.cpp
 #include "Window.h"
-#include "main.h"
 
 //create a new window function that will create the window when it is called
 //it will contain the following lines

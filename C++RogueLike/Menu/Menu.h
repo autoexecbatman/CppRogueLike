@@ -49,7 +49,7 @@ private:
 public:
 	bool run{ true };
 
-	Menu() noexcept : menuWindow(nullptr), menu_height(10), menu_width(12), menu_starty((LINES / 2) - 5), menu_startx((COLS / 2) - 10) {}
+	Menu() noexcept {}
 	void menu();
 	void menu_set_run_true() noexcept { run = true; }
 	void menu_set_run_false() noexcept { run = false; }

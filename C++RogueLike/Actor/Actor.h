@@ -84,6 +84,7 @@ public:
 	int get_strength() const noexcept { return strength; } // get the strength of the actor
 	int get_posY() const noexcept { return posY; } // get the y position of the actor
 	int get_posX() const noexcept { return posX; } // get the x position of the actor
+	bool is_visible() const noexcept; // check if the actor is visible
 };
 
 #endif // !ACTOR_H

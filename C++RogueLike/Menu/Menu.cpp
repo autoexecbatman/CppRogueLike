@@ -4,7 +4,7 @@
 
 #include "Menu.h"
 #include "MenuGender.h"
-#include "Game.h"
+#include "../Game.h"
 
 void Menu::menu_new(int height, int width, int starty, int startx)
 {

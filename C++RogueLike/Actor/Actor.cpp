@@ -125,6 +125,12 @@ void Actor::unequip(Actor& item)
 	weaponEquipped = "None";
 }
 
+bool Actor::is_visible() const noexcept
+{
+	return (!fovOnly && game.map->is_explored(posX, posY))
+		|| game.map->is_in_fov(posX, posY);
+}
+
 // the actor update
 void Actor::update()
 {

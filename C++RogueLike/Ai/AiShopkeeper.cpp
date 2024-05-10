@@ -7,46 +7,55 @@
 
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
+constexpr auto MIN_TRADE_DISTANCE = 2;  // Minimum distance to initiate a trade
 
 AiShopkeeper::AiShopkeeper() : moveCount(0) {}
 
+// If positionDifference > 0, return 1; otherwise, return -1
+int AiShopkeeper::calculateStep(int positionDifference)
+{
+	return positionDifference > 0 ? 1 : -1;
+}
+
+void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
+{
+	// Calculate how many squares away the target is horizontally and vertically
+	int moveX = targetX - owner.posX; // Number of squares to move horizontally
+	int moveY = targetY - owner.posY; // Number of squares to move vertically
+
+	// Decide in which direction to take one step horizontally and vertically
+	int stepX = calculateStep(moveX); // Direction to move horizontally (left or right)
+	int stepY = calculateStep(moveY); // Direction to move vertically (up or down)
+
+	// List potential moves in order of priority
+	std::vector<std::pair<int, int>> moves
+	{
+		{stepX, stepY},  // First priority: move diagonally
+		{stepX, 0},      // Second priority: move horizontally only
+		{0, stepY}       // Third priority: move vertically only
+	};
+
+	// Try each move in order of priority until one is successful
+	for (const auto& move : moves)
+	{
+		int nextX = owner.posX + move.first;
+		int nextY = owner.posY + move.second;
+		if (game.map->can_walk(nextX, nextY))
+		{
+			owner.posX = nextX;
+			owner.posY = nextY;
+			break; // Exit the loop after a successful move
+		}
+	}
+}
+
 void AiShopkeeper::moveOrTrade(Actor& owner, int targetx, int targety)
 {
-	int dx = targetx - owner.posX; // get the x distance
-	int dy = targety - owner.posY; // get the y distance
+	const double distance = sqrt(pow(targetx - owner.posX, 2) + pow(targety - owner.posY, 2));
 
-	const int stepdx = (dx > 0 ? 1 : -1); // get the x step
-	const int stepdy = (dy > 0 ? 1 : -1); // get the y step
-
-	const double distance = sqrt(dx * dx + dy * dy); // get the distance
-
-	if (distance >= 2)
+	if (distance >= MIN_TRADE_DISTANCE)
 	{
-		dx = static_cast<int>(round(dx / distance));
-		dy = static_cast<int>(round(dy / distance));
-
-		if (game.map != nullptr)
-		{
-			if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
-			{
-				owner.posX += dx;
-				owner.posY += dy;
-			}
-			else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
-			{
-				owner.posX += stepdx;
-			}
-			else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
-			{
-				owner.posY += stepdy;
-			}
-		}
-		else
-		{
-			game.log("Error: game.map is null");
-			exit(-1);
-		}
-
+		moveToTarget(owner, targetx, targety);
 	}
 	else
 	{
@@ -104,6 +113,7 @@ void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::vector<std::unique_p
 	}
 }
 
+
 void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 {
 	const auto& shopkeeperInventory{ game.shopkeeper->container };
@@ -154,12 +164,14 @@ void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 }
 
 // Selling logic: display player's items and allow selling
-void AiShopkeeper::handle_sell(WINDOW* tradeWin) {
-	const auto& playerInventory = game.player->container;
-	int selected = 0;
-	bool selling = true;
+void AiShopkeeper::handle_sell(WINDOW* tradeWin)
+{
+	const auto& playerInventory{ game.player->container };
+	int selected{ 0 };
+	bool selling{ true };
 
-	while (selling) {
+	while (selling)
+	{
 		// Display player's items for selling
 		mvwprintw(tradeWin, 6, 1, "Items available for sale:");
 		display_item_list(tradeWin, playerInventory->inventoryList);
@@ -168,11 +180,13 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin) {
 
 		int choice = wgetch(tradeWin);
 
-		if (choice >= '0' && choice <= '9') {
+		if (choice >= '0' && choice <= '9')
+		{
 			selected = choice - '0';
 
 			// Check if selected item is valid
-			if (selected < playerInventory->inventoryList.size()) {
+			if (selected < playerInventory->inventoryList.size())
+			{
 				auto& item = playerInventory->inventoryList[selected];
 
 				// Add currency to the player's total
@@ -198,22 +212,10 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin) {
 
 void AiShopkeeper::update(Actor& owner)
 {
-	if (owner.ai == nullptr) // if the owner has no ai
+	game.log("Shopkeeper AI update");
+	if (owner.ai == nullptr || owner.destructible->is_dead()) // if the owner has no ai OR if the owner is dead
 	{
 		return; // do nothing
-	}
-
-	if (owner.destructible != nullptr)
-	{
-		if (owner.destructible->is_dead()) // if the owner is dead
-		{
-			return; // do nothing
-		}
-	}
-	else
-	{
-		std::cout << "Error: AiMonster::update() - owner.destructible is null" << std::endl;
-		exit(-1);
 	}
 
 	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
@@ -221,7 +223,7 @@ void AiShopkeeper::update(Actor& owner)
 		// move towards the player
 		moveCount = TRACKING_TURNS;
 	}
-	else
+	else if (moveCount > 0) // if the move count is greater than 0
 	{
 		moveCount--; // decrement the move count
 	}

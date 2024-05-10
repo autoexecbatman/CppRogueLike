@@ -4,8 +4,8 @@
 #include <string>
 #include <nlohmann/json.hpp>
 
-#include "Game.h"
 #include "CharismaAttributes.h"
+#include "../Game.h"
 
 using json = nlohmann::json;
 

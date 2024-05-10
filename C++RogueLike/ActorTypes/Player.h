@@ -30,7 +30,7 @@ public:
 	} playerClassState{ PlayerClassState::NONE };
 
 	std::string playerGender{ "None" };
-	int playerGold{ 0 };
+	int playerGold{ 100 };
 
 	Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg);
 

@@ -1,5 +1,6 @@
 // file: Game.cpp
 #include <iostream>
+#include <fstream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
 #include <random>
@@ -139,9 +140,15 @@ void Game::update()
 			{
 				for (const auto& actor : actors)
 				{
-					if (actor && actor.get() != player)
+					if (actor->is_visible())
 					{
-						actor->update();
+						if (actor != nullptr && actor.get() != player)
+						{
+
+							game.log("Actor: " + actor->name + " is in FOV");
+							actor->update();
+
+						}
 					}
 				}
 			}
@@ -1005,6 +1012,82 @@ void Game::finalizeMessage() {
 		attackMessagesWhole.push_back(attackMessageParts);
 		attackMessageParts.clear();
 	}
+}
+
+void Game::display_debug_messages() noexcept
+{
+	clear();
+	int total_lines = 0; // To hold the total number of lines in the file
+	std::ifstream logFile("clog.txt");
+	std::string line;
+
+	// First, count the number of lines in the file
+	while (getline(logFile, line)) {
+		total_lines++;
+	}
+	logFile.close();
+
+	// Create a pad large enough to hold all the text
+	WINDOW* log_pad = newpad(total_lines + 1, COLS - 2);
+	int y = 0;
+
+	// Open the file again to actually display the text
+	logFile.open("clog.txt");
+	if (logFile.is_open()) {
+		while (getline(logFile, line)) {
+			mvwprintw(log_pad, y++, 1, "%s", line.c_str());
+		}
+		logFile.close();
+	}
+
+	// Initial display position
+	int pad_pos = 0;
+	prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
+
+	// Scroll interaction
+	int ch;
+	do {
+		ch = getch();
+		switch (ch) {
+		case KEY_DOWN:
+			if (pad_pos + LINES - 2 < total_lines) {
+				pad_pos++;
+			}
+			break;
+		case KEY_UP:
+			if (pad_pos > 0) {
+				pad_pos--;
+			}
+			break;
+		case KEY_NPAGE:  // Handle Page Down
+			if (pad_pos + LINES - 2 < total_lines) {
+				pad_pos += (LINES - 2);  // Move down a page
+				if (pad_pos + LINES - 2 > total_lines) {  // Don't go past the end
+					pad_pos = total_lines - LINES + 2;
+				}
+			}
+			break;
+		case KEY_PPAGE:  // Handle Page Up
+			if (pad_pos > 0) {
+				pad_pos -= (LINES - 2);  // Move up a page
+				if (pad_pos < 0) {
+					pad_pos = 0;  // Don't go past the beginning
+				}
+			}
+			break;
+		case KEY_HOME:  // Jump to the top of the log
+			pad_pos = 0;
+			break;
+		case KEY_END:  // Jump to the bottom of the log
+			if (total_lines > LINES - 2) {
+				pad_pos = total_lines - LINES + 2;
+			}
+			break;
+		}
+		prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
+	} while (ch != 'q');  // Assuming 'q' or Escape closes the log
+
+	delwin(log_pad);  // Delete the pad after use
 }
 
 // A possible function in Game.cpp

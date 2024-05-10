@@ -71,16 +71,7 @@ enum class Controls : int
 	// the controls for the player to exit the game
 	QUIT = 'q',
 
-	// switch player1 keypad F1
-	SWITCH_P1 = 'v',
-
-	// switch player2
-	SWITCH_P2 = 'b',
-
-	// switch player3
-	SWITCH_P3 = 'n',
-
-	// switch all
-	SWITCH_ALL = 'm'
+	// the controls for the player to enter debug mode
+	DEBUG = 'z',
 };
 #endif // !CONTROLS_H
