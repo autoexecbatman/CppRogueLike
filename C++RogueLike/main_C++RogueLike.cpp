@@ -60,12 +60,12 @@ int main()
 	Gui gui;
 	gui.gui_init();
 
-	int countLoop{ 0 };
+	int loopNum{ 0 };
 	while (game.run == true)
 	{
 		//==DEBUG==
 		game.log("//====================LOOP====================//");
-		std::string debug{ "Loop number: " + std::to_string(countLoop) + "\n" };
+		std::string debug{ "Loop number: " + std::to_string(loopNum) + "\n" };
 		game.log(debug);
 
 		//==UPDATE==
@@ -86,7 +86,7 @@ int main()
 		game.key_store();
 		game.key_listen();
 
-		countLoop++;
+		loopNum++;
 	}
 	
 	game.save_all();
