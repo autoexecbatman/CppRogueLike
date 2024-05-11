@@ -195,17 +195,13 @@ void Game::render()
 
 void Game::send_to_back(Actor& actor)
 {
-	for (const auto& a : actors) // loop through the actors
+	auto actorIsInVector = [&actor](const auto& a) noexcept { return a.get() == &actor; }; // lambda to check if the actor is in the vector
+	auto it = std::find_if(actors.begin(), actors.end(), actorIsInVector); // get the iterator of the actor
+	const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
+	for (auto i = distance; i > 0; i--)
 	{
-		if (a.get() == &actor) // if the actor is found
-		{
-			auto it = std::find_if(actors.begin(), actors.end(), [&actor](const auto& a) noexcept { return a.get() == &actor; }); // get the iterator of the actor
-			const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
-			for (auto i = distance; i > 0; i--)
-			{
-				std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
-			}
-		}
+		// swap actor with the previous actor
+		std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
 	}
 }
 
@@ -213,24 +209,6 @@ Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) con
 {
 	Actor* closestMonster = nullptr;
 	int bestDistance = INT_MAX;
-
-	//for (auto actor = actors.begin(); actor != actors.end(); ++actor)
-	//{
-	//	if (*actor != player
-	//		&&
-	//		(*actor)->destructible
-	//		&&
-	//		!(*actor)->destructible->is_dead()
-	//		)
-	//	{
-	//		const int distance = (*actor)->get_distance(fromPosX, fromPosY);
-	//		if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
-	//		{
-	//			bestDistance = distance;
-	//			closestMonster = *actor;
-	//		}
-	//	}
-	//}
 
 	for (const auto& actor : actors)
 	{
@@ -985,11 +963,13 @@ void Game::message(int color, const std::string& text, bool isComplete = false)
 
 }
 
-void Game::appendMessagePart(int color, const std::string& text) {
+void Game::appendMessagePart(int color, const std::string& text)
+{
 	attackMessageParts.push_back({ color, text });
 }
 
-void Game::finalizeMessage() {
+void Game::finalizeMessage()
+{
 	if (!attackMessageParts.empty()) {
 		attackMessagesWhole.push_back(attackMessageParts);
 		attackMessageParts.clear();
@@ -1004,7 +984,8 @@ void Game::display_debug_messages() noexcept
 	std::string line;
 
 	// First, count the number of lines in the file
-	while (getline(logFile, line)) {
+	while (getline(logFile, line))
+	{
 		total_lines++;
 	}
 	logFile.close();
@@ -1015,8 +996,10 @@ void Game::display_debug_messages() noexcept
 
 	// Open the file again to actually display the text
 	logFile.open("clog.txt");
-	if (logFile.is_open()) {
-		while (getline(logFile, line)) {
+	if (logFile.is_open())
+	{
+		while (getline(logFile, line))
+		{
 			mvwprintw(log_pad, y++, 1, "%s", line.c_str());
 		}
 		logFile.close();
@@ -1028,31 +1011,39 @@ void Game::display_debug_messages() noexcept
 
 	// Scroll interaction
 	int ch;
-	do {
+	do
+	{
 		ch = getch();
-		switch (ch) {
+		switch (ch)
+		{
 		case KEY_DOWN:
-			if (pad_pos + LINES - 2 < total_lines) {
+			if (pad_pos + LINES - 2 < total_lines)
+			{
 				pad_pos++;
 			}
 			break;
 		case KEY_UP:
-			if (pad_pos > 0) {
+			if (pad_pos > 0)
+			{
 				pad_pos--;
 			}
 			break;
 		case KEY_NPAGE:  // Handle Page Down
-			if (pad_pos + LINES - 2 < total_lines) {
+			if (pad_pos + LINES - 2 < total_lines)
+			{
 				pad_pos += (LINES - 2);  // Move down a page
-				if (pad_pos + LINES - 2 > total_lines) {  // Don't go past the end
+				if (pad_pos + LINES - 2 > total_lines)
+				{  // Don't go past the end
 					pad_pos = total_lines - LINES + 2;
 				}
 			}
 			break;
 		case KEY_PPAGE:  // Handle Page Up
-			if (pad_pos > 0) {
+			if (pad_pos > 0)
+			{
 				pad_pos -= (LINES - 2);  // Move up a page
-				if (pad_pos < 0) {
+				if (pad_pos < 0)
+				{
 					pad_pos = 0;  // Don't go past the beginning
 				}
 			}
@@ -1061,7 +1052,8 @@ void Game::display_debug_messages() noexcept
 			pad_pos = 0;
 			break;
 		case KEY_END:  // Jump to the bottom of the log
-			if (total_lines > LINES - 2) {
+			if (total_lines > LINES - 2)
+			{
 				pad_pos = total_lines - LINES + 2;
 			}
 			break;
@@ -1074,8 +1066,10 @@ void Game::display_debug_messages() noexcept
 
 // A possible function in Game.cpp
 
-void Game::transferMessagesToGui() {
-	for (const auto& message : attackMessagesWhole) {
+void Game::transferMessagesToGui()
+{
+	for (const auto& message : attackMessagesWhole)
+	{
 		gui->addDisplayMessage(message);
 	}
 	attackMessagesWhole.clear();
