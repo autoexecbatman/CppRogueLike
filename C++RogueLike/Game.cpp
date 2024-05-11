@@ -137,15 +137,10 @@ void Game::update()
 		{
 			for (const auto& actor : actors)
 			{
-				if (actor->is_visible())
+				if (actor->is_visible() && actor != nullptr && actor.get() != player)
 				{
-					if (actor != nullptr && actor.get() != player)
-					{
-
-						game.log("Actor: " + actor->name + " is in FOV");
-						actor->update();
-
-					}
+					game.log("Actor: " + actor->name + " is in FOV");
+					actor->update();
 				}
 			}
 		}
@@ -171,11 +166,7 @@ void Game::render()
 	{
 		if (actor && actor.get() != player)
 		{
-			// storing the logic of visibility in a variable for readability
-			const bool isVisible = (!actor->fovOnly && map->is_explored(actor->posX, actor->posY))
-				|| map->is_in_fov(actor->posX, actor->posY);
-
-			if (isVisible)
+			if (actor->is_visible())
 			{
 				game.log("Actor: " + actor->name + " is in FOV");
 				actor->render();
