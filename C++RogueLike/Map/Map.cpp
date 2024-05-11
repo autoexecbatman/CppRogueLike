@@ -137,7 +137,7 @@ Map::Map(int map_height, int map_width)
 	tiles(nullptr)
 {
 	// a random seed for the map
-	seed = TCODRandom::getInstance()->getInt(0, 0x7FFFFFFF); // 0x7FFFFFFF is the highest possible 32 bit signed integer value.
+	seed = TCODRandom::getInstance()->getInt(0, INT_MAX);
 }
 
 //====

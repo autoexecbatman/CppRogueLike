@@ -66,28 +66,19 @@ void AiMonster::moveOrAttack(Actor& owner, int targetx, int targety)
 		dx = static_cast<int>(round(dx / distance));
 		dy = static_cast<int>(round(dy / distance));
 
-		if (game.map != nullptr)
+		if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
 		{
-			if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
-			{
-				owner.posX += dx;
-				owner.posY += dy;
-			}
-			else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
-			{
-				owner.posX += stepdx;
-			}
-			else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
-			{
-				owner.posY += stepdy;
-			}
+			owner.posX += dx;
+			owner.posY += dy;
 		}
-		else
+		else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
 		{
-			std::cout << "Error: game.map is null" << std::endl;
-			exit(-1);
+			owner.posX += stepdx;
 		}
-
+		else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
+		{
+			owner.posY += stepdy;
+		}
 	}
 
 	else if (owner.attacker)

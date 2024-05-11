@@ -649,7 +649,9 @@ void Game::load_all()
 		// load the map
 		int width = zip.getInt();
 		int height = zip.getInt();
-		game.map = std::make_unique<Map>(height, width);
+		map->map_height = height;
+		map->map_width = width;
+
 		map->load(zip);
 
 		// load the player
@@ -703,16 +705,19 @@ void Game::save_all()
 		{
 			TCODZip zip; // create a zip object
 
+			// save the map
 			zip.putInt(map->map_width);
 			zip.putInt(map->map_height);
-			if (map) try { map->save(zip); }
-			catch (const std::exception& e) { game.log(e.what()); }
+			map->save(zip);
 
-			if (player) try { player->save(zip); }
-			catch (const std::exception& e) { game.log(e.what()); }
+			// save the player
+			player->save(zip);
+			
+			// save the stairs
 			if (stairs) try { stairs->save(zip); }
 			catch (const std::exception& e) { game.log(e.what()); }
 
+			// save the other actors
 			if (!actors.empty())
 			{
 				const int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
@@ -728,6 +733,7 @@ void Game::save_all()
 				}
 			}
 
+			// save the message log
 			if (gui) try { gui->save(zip); }
 			catch (const std::exception& e) { game.log(e.what()); }
 
@@ -779,7 +785,8 @@ void Game::next_level()
 	stairs = actors.back().get();
 
 	// generate a new map
-	map = std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH);
+	map->map_height = MAP_HEIGHT;
+	map->map_width = MAP_WIDTH;
 	map->init(true);
 
 	// set the game status to STARTUP because we need to recompute the FOV 

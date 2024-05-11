@@ -23,26 +23,18 @@ void AiMonsterConfused::update(Actor& owner)
 		const int destx = owner.posX + dx;
 		const int desty = owner.posY + dy;
 
-		if (game.map != nullptr)
+		if (game.map->can_walk(desty, destx))
 		{
-			if (game.map->can_walk(desty, destx))
-			{
-				owner.posX = destx;
-				owner.posY = desty;
-			}
-			else
-			{
-				const auto& actor = game.get_actor(destx, desty);
-				if (actor)
-				{
-					owner.attacker->attack(owner, *actor);
-				}
-			}
+			owner.posX = destx;
+			owner.posY = desty;
 		}
 		else
 		{
-			std::cout << "Error: update() called on actor with no map." << std::endl;
-			exit(-1);
+			const auto& actor = game.get_actor(destx, desty);
+			if (actor)
+			{
+				owner.attacker->attack(owner, *actor);
+			}
 		}
 	}
 

@@ -487,37 +487,30 @@ bool is_not_dead(const Actor& actor)
 bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 {
 	game.log("Player tries to move or attack");
-	if (game.map != nullptr)
+
+	if (game.map->is_wall(targety, targetx))
 	{
-		if (game.map->is_wall(targety, targetx))
+		return false;
+	}
+	else if (game.map->is_water(targety, targetx))
+	{
+		if (!owner.canSwim)
 		{
 			return false;
 		}
-		else if (game.map->is_water(targety, targetx))
+		else
 		{
-			if (!owner.canSwim)
-			{
-				return false;
-			}
-			else
-			{
-				// print message that player is swimming
-				mvprintw(0, 0, "You are swimming!");
-				refresh();
-				mvprintw(1, 0, "Press any key to continue.");
-				getch();
-				clear();
+			// print message that player is swimming
+			mvprintw(0, 0, "You are swimming!");
+			refresh();
+			mvprintw(1, 0, "Press any key to continue.");
+			getch();
+			clear();
 
-				owner.posX = targetx;
-				owner.posY = targety;
-				return true;
-			}
+			owner.posX = targetx;
+			owner.posY = targety;
+			return true;
 		}
-	}
-	else
-	{
-		std::cout << "Error: moveOrAttack() called on actor with no map." << std::endl;
-		exit(-1);
 	}
 
 	// look for living actors to attack

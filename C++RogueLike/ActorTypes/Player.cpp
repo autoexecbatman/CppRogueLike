@@ -43,15 +43,8 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 // a function to get postion from the map class using the getter functions
 void Player::player_get_pos_from_map()
 {
-	if (game.map == nullptr)
-	{
-		std::clog << "game.map is nullptr" << std::endl;
-	}
-	else
-	{
-		posX = game.map->get_player_pos_x();
-		posY = game.map->get_player_pos_y();
-	}
+	posX = game.map->get_player_pos_x();
+	posY = game.map->get_player_pos_y();
 }
 
 void Player::racial_ability_adjustments()
