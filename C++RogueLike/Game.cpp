@@ -753,22 +753,25 @@ void Game::next_level()
 	// increment the dungeon level
 	dungeonLevel++;
 
-	// present a message to the player -> TODO : move this to the gui
+	// present a message to the player
 	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true);
 
 	// heal the player
 	player->destructible->heal(player->destructible->hpMax / 2);
 
-	// present a message to the player -> TODO : move this to the gui
+	// present a message to the player
 
 	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true);
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 
+	auto actorIsPlayer = [this](const auto& actor) noexcept { return actor.get() == player; };
+	auto actorIsStairs = [this](const auto& actor) noexcept { return actor.get() == stairs; };
+
 	// find the player in the actors container
-	auto it = std::find_if(actors.begin(), actors.end(), [this](const auto& actor) noexcept { return actor.get() == player; });
+	auto it = std::find_if(actors.begin(), actors.end(), actorIsPlayer);
 	// find the stairs in the actors container
-	auto itStairs = std::find_if(actors.begin(), actors.end(), [this](const auto& actor) noexcept { return actor.get() == stairs; });
+	auto itStairs = std::find_if(actors.begin(), actors.end(), actorIsStairs);
 
 	// move the player to a temporary variable
 	auto tempPlayer = std::move(*it);
@@ -793,22 +796,13 @@ void Game::next_level()
 	gameStatus = GameStatus::STARTUP;
 }
 
-// create the getActor function
-const std::unique_ptr<Actor>& Game::get_actor(int x, int y) const noexcept
+Actor* Game::get_actor(int x, int y) const noexcept
 {
-	//for (Actor* actor : actors)
-	//{
-	//	if (actor->posX == x && actor->posY == y)
-	//	{
-	//		return actor;
-	//	}
-	//}
-
 	for (const auto& actor : actors)
 	{
 		if (actor->posX == x && actor->posY == y)
 		{
-			return actor;
+			return actor.get();
 		}
 	}
 

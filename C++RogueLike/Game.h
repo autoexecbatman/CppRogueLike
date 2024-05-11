@@ -85,7 +85,7 @@ public:
 
 	// the player goes down stairs
 	void next_level();
-	const std::unique_ptr<Actor>& get_actor(int x, int y) const noexcept;
+	Actor* get_actor(int x, int y) const noexcept;
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
 
