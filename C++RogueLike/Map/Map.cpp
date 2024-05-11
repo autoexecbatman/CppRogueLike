@@ -1,6 +1,7 @@
 // file: Map.cpp
 #include <iostream>
 #include <random>
+#include <algorithm>
 #include <gsl/util>
 #include <gsl/pointers>
 #include <gsl/span>
@@ -172,7 +173,7 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 	// If tcodMap is null, log an error and return false
 	if (tcodMap == nullptr)
 	{
-		std::clog << "Error: tcodMap is null" << std::endl;
+		game.log("Error: tcodMap is null");
 		return false;
 	}
 
@@ -182,9 +183,11 @@ bool Map::is_in_fov(int fov_x, int fov_y) const
 		gsl::span(tiles.get(), MAP_WIDTH * MAP_HEIGHT)[fov_x + (fov_y * MAP_WIDTH)].explored = true;
 		return true;
 	}
-
-	// If the coordinates are not in field of view, return false
-	return false;
+	else
+	{
+		// If the coordinates are not in field of view, return false
+		return false;
+	}
 }
 
 bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
@@ -316,26 +319,23 @@ void Map::dig(int x1, int y1, int x2, int y2)
 {
 	if (x2 < x1)
 	{
-		const int tmp = x2;
-		x2 = x1;
-		x1 = tmp;
-	}
-	if (y2 < y1)
-	{
-		const int tmp = y2;
-		y2 = y1;
-		y1 = tmp;
+		std::swap(x1, x2);
 	}
 
-	for (int tileY = y1; tileY <= y2 +1; tileY++)
+	if (y2 < y1)
 	{
-		for (int tileX = x1; tileX <= x2 +1; tileX++)
+		std::swap(y1, y2);
+	}
+
+	for (int tileY = y1; tileY <= y2 ; tileY++)
+	{
+		for (int tileX = x1; tileX <= x2 ; tileX++)
 		{
 			tcodMap->setProperties(
 				tileX,
 				tileY,
-				true,
-				true
+				true, // isTransparent
+				true // isWalkable
 			);			
 		}
 	}

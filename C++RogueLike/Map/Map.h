@@ -24,7 +24,8 @@ constexpr int MAX_ROOM_ITEMS = 4;
 // checks if the player has seen this tile
 // it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov())
 
-enum class TileType {
+enum class TileType
+{
 	FLOOR,
 	WALL,
 	WATER,
