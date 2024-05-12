@@ -30,11 +30,15 @@ Player::Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, 
 	charisma = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>(dmg, minDmg, maxDmg);
-	/*destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);*/
+	
+	//==Destructible==
 	destructible->hp = maxHp;
-	destructible->dr = dr;
+	destructible->hpMax = maxHp;
 	destructible->corpseName = corpseName;
 	destructible->xp = xp;
+	destructible->thaco = thaco;
+	destructible->armorClass = armorClass;
+	destructible->dr = dr;
 
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
