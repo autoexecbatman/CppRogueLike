@@ -38,7 +38,6 @@ Actor::Actor(
 	fovOnly(true),
 	canSwim(false),
 	attacker(nullptr),
-	/*destructible(nullptr),*/
 	destructible(std::make_unique<Destructible>(0,0,"",0,0,0)),
 	ai(nullptr),
 	container(nullptr),
@@ -128,8 +127,7 @@ void Actor::unequip(Actor& item)
 
 bool Actor::is_visible() const noexcept
 {
-	return (!fovOnly && game.map->is_explored(posX, posY))
-		|| game.map->is_in_fov(posX, posY);
+	return (!fovOnly && game.map->is_explored(posX, posY)) || game.map->is_in_fov(posX, posY);
 }
 
 // the actor update

@@ -37,6 +37,7 @@ void Game::init()
 {
 	//==INIT==
 	game.weapons = loadWeapons();
+	game.strengthAttributes = loadStrengthAttributes();
 
 	//==STAIRS==
 	if (!game.stairs) { err("game.stairs is nullptr"); }

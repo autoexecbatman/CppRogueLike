@@ -58,12 +58,12 @@ void Destructible::die(Actor& owner)
 // The function returns the amount of health point actually restored.
 int Destructible::heal(int hpToHeal)
 {
-	Destructible::hp += hpToHeal;
+	hp += hpToHeal;
 	
-	if (Destructible::hp > Destructible::hpMax)
+	if (hp > hpMax)
 	{
-		hpToHeal -= Destructible::hp - Destructible::hpMax;
-		Destructible::hp = Destructible::hpMax;
+		hpToHeal -= hp - hpMax;
+		hp = hpMax;
 	}
 
 	return hpToHeal;

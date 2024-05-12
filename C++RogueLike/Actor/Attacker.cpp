@@ -16,76 +16,68 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 {
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
-		const size_t str = static_cast<size_t>(attacker.strength - 1); // -1 to access vector index from 0 and strength starts at 1
-		std::vector<StrengthAttributes> attrs = loadStrengthAttributes(); // load the strength attributes from file
+		StrengthAttributes strength = game.strengthAttributes.at(attacker.strength - 1); // get the strength attributes for the attacker
 
-		if (str < attrs.size()) // if str is in range of vector size
+		// first 
+		RandomDice d; // create a dice object for attack rolls
+		const int rollAttack = d.d20(); // roll 1d20
+		int rollDmg{ 0 };
+
+		// roll for damage based on weapon
+		if (attacker.weaponEquipped == "Long Sword")
 		{
-			StrengthAttributes strength = attrs.at(str); // get the strength attributes for the attacker
+			rollDmg = d.d8(); // roll 1d8
+		}
+		else if (attacker.weaponEquipped == "Short Sword")
+		{
+			rollDmg = d.d6(); // roll 1d6
+		}
+		else if (attacker.weaponEquipped == "Dagger")
+		{
+			rollDmg = d.d4(); // roll 1d4
+		}
+		else
+		{
+			rollDmg = d.d2(); // roll 1d4
+		}
 
-			// first 
-			RandomDice diceAttack; // create a dice object for attack rolls
-			const int rollAttack = diceAttack.d20(); // roll 1d20
+		const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // THAC0 calculation
 
-			RandomDice diceDmg; // create a dice object for damage rolls
-			int rollDmg{};
-			// roll for damage based on weapon
-			if (attacker.weaponEquipped == "Long Sword")
-			{
-				rollDmg = diceDmg.d8(); // roll 1d8
-			}
-			else if (attacker.weaponEquipped == "Short Sword")
-			{
-				rollDmg = diceDmg.d6(); // roll 1d6
-			}
-			else if (attacker.weaponEquipped == "Dagger")
-			{
-				rollDmg = diceDmg.d4(); // roll 1d4
-			}
-			else
-			{
-				rollDmg = diceDmg.d2(); // roll 1d4
-			}
+		if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
+		{
+			// calculate the adjusted damage
+			const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
+			const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
 
-			const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // THAC0 calculation
-
-			if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
+			// if damage is dealt display combat messages
+			if (totaldmg > 0)
 			{
-				// calculate the adjusted damage
-				const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
-				const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
-
-				// if damage is dealt display combat messages
-				if (totaldmg > 0)
-				{
-					game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
-					game.appendMessagePart(WHITE_PAIR, " attacks the ");
-					game.appendMessagePart(target.col, std::format("{}", target.name));
-					game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
-					game.finalizeMessage();
-					// apply damage to target
-					target.destructible->take_damage(target, totaldmg);
-				}
-				// else no damage message
-				else
-				{
-					game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
-					game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-					game.appendMessagePart(target.col, std::format("{}", target.name));
-					game.appendMessagePart(WHITE_PAIR, std::format(" but it has no effect!"));
-					game.finalizeMessage();
-				}
+				game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+				game.appendMessagePart(WHITE_PAIR, " attacks the ");
+				game.appendMessagePart(target.col, std::format("{}", target.name));
+				game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
+				game.finalizeMessage();
+				// apply damage to target
+				target.destructible->take_damage(target, totaldmg);
 			}
+			// else no damage message
 			else
 			{
 				game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
 				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
 				game.appendMessagePart(target.col, std::format("{}", target.name));
-				game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
+				game.appendMessagePart(WHITE_PAIR, std::format(" but it has no effect!"));
 				game.finalizeMessage();
 			}
 		}
-		else { game.err("OUT OF BOUNDS!"); return; }
+		else
+		{
+			game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+			game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+			game.appendMessagePart(target.col, std::format("{}", target.name));
+			game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
+			game.finalizeMessage();
+		}
 	}
 	else
 	{

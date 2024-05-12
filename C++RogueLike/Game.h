@@ -64,6 +64,7 @@ public:
 	std::vector<std::unique_ptr<Actor>> actors; // a vector of actors
 
 	std::vector<Weapons> weapons; // a vector of weapons
+	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
 
 	// Public member functions.
 	void init();
