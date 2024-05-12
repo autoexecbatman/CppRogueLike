@@ -61,7 +61,7 @@ int main()
 	gui.gui_init();
 
 	int loopNum{ 0 };
-	while (game.run == true)
+	while (game.run) // main game loop
 	{
 		//==DEBUG==
 		game.log("//====================LOOP====================//");
