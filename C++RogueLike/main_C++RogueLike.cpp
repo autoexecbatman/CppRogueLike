@@ -26,7 +26,7 @@
 /*#include "include/user_config.h"*/ 
 //====
 
-#include "main_C++RogueLike.h"
+void init_curses(); // initialize curses
 
 Game game;
 
