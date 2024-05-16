@@ -8,11 +8,6 @@
 
 Container::Container(size_t invSize) noexcept : invSize(invSize) {}
 
-Container::~Container() noexcept
-{
-	inventoryList.clear();
-}
-
 // checks that the container is not full.
 bool Container::add(std::unique_ptr<Actor> actor)
 {	
@@ -54,7 +49,7 @@ void Container::load(TCODZip& zip)
 void Container::save(TCODZip& zip)
 {
 	zip.putInt(invSize);
-	const int nbActors = gsl::narrow_cast<int>(inventoryList.size());
+	const size_t nbActors = inventoryList.size();
 	zip.putInt(nbActors);
 	// iterate through the inventory and save the item
 	for (const auto& actor : inventoryList)
@@ -63,12 +58,12 @@ void Container::save(TCODZip& zip)
 	}
 }
 
-void Container::print_container(std::vector<std::unique_ptr<Actor>> container)
+void Container::print_container(std::span<std::unique_ptr<Actor>> container)
 {
 	int i = 0;
 	for (const auto& item : inventoryList)
 	{
-		std::cout << item->name.c_str() << i << " ";
+		std::cout << item->name << i << " ";
 		i++;
 	}
 	std::cout << '\n';
