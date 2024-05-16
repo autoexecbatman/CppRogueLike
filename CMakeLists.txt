@@ -146,14 +146,12 @@ endif()
 find_package(unofficial-pdcurses CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
-find_package(fmt CONFIG REQUIRED)
 find_package(Microsoft.GSL CONFIG REQUIRED)
 find_package(CURL CONFIG REQUIRED)
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
         libtcod::libtcod
-        fmt::fmt
         Microsoft.GSL::GSL
         CURL::libcurl
         SDL2::SDL2
