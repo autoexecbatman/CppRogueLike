@@ -5,7 +5,7 @@
 
 //==CONTROLS==
 // the enumeration for the controls of the player
-enum class Controls : int
+enum class Controls
 {
 	// the controls for the player movement
 	UP = '8',

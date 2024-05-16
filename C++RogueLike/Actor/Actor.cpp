@@ -24,16 +24,16 @@ Actor::Actor(
 	int y,
 	int x,
 	int ch,
-	std::string name,
+	std::string_view name,
 	int col,
 	int index
 ) : 
 	posY(y),
 	posX(x),
 	ch(ch),
+	name(name),
 	col(col),
 	index(index),
-	name(name),
 	blocks(true),
 	fovOnly(true),
 	canSwim(false),

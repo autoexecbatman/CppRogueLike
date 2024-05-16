@@ -923,7 +923,7 @@ void Game::wizard_eye() noexcept
 	}
 }
 
-void Game::log(const std::string& message)
+void Game::log(std::string_view message)
 {
 	if (debugMode)
 	{

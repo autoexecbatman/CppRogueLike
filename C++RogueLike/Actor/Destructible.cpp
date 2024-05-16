@@ -10,7 +10,7 @@
 #include "../Attributes/StrengthAttributes.h"
 
 //====
-Destructible::Destructible(int hpMax, int dr, std::string corpseName, int xp, int thaco, int armorClass)
+Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
 	:
 	hpMax(hpMax),
 	hp(hpMax),
@@ -20,8 +20,6 @@ Destructible::Destructible(int hpMax, int dr, std::string corpseName, int xp, in
 	thaco(thaco),
 	armorClass(armorClass)
 {}
-
-Destructible::~Destructible() {}
 
 void Destructible::take_damage(Actor& owner, int damage)
 {
@@ -156,7 +154,7 @@ std::unique_ptr<Destructible> Destructible::create(TCODZip& zip)
 PlayerDestructible::PlayerDestructible(
 	int hpMax,
 	int dr,
-	std::string corpseName,
+	std::string_view corpseName,
 	int xp,
 	int thaco,
 	int armorClass
@@ -179,7 +177,7 @@ void PlayerDestructible::die(Actor& owner)
 MonsterDestructible::MonsterDestructible(
 	int hpMax,
 	int dr,
-	std::string corpseName,
+	std::string_view corpseName,
 	int xp,
 	int thaco,
 	int armorClass

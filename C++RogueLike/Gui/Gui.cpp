@@ -148,13 +148,13 @@ void Gui::gui_print_log()
 	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor)); // Turn off color
 }
 
-void Gui::gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
+void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
 {
 	// check if the player has no name input then place default name
 	if (game.player->name.empty()) { game.player->name = "Player"; }
 
 	// print name
-	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName.c_str());
+	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName);
 	// print hp
 	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
 	//// print attack

@@ -27,7 +27,7 @@ public:
 
 	bool run{ true };
 	bool shouldSave{ true };
-	enum class GameStatus : int
+	enum class GameStatus
 	{
 		STARTUP,
 		IDLE,
@@ -95,7 +95,7 @@ public:
 	void err(const std::string& e) noexcept { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.c_str()); refresh(); getch(); }
 	void enableDebugMode() noexcept { debugMode = true; }
 	void disableDebugMode() noexcept { debugMode = false; }
-	void log(const std::string& message);
+	void log(std::string_view message);
 	void display_debug_messages() noexcept;
 
 	//==MESSAGE FUNCTIONS==//
@@ -116,15 +116,15 @@ private:
 extern Game game;
 
 template<typename T>
-void print_container(const std::vector<std::shared_ptr<T>>& container)
+void print_container(std::span<std::unique_ptr<T>> container)
 {
 	int i = 0;
 	for (const auto& item : container)
 	{
-		std::clog << i << ". " << item->name << " ";
+		std::cout << i << ". " << item->name << " ";
 		i++;
 	}
-	std::clog << '\n';
+	std::cout << '\n';
 }
 
 #endif // !GAME_H

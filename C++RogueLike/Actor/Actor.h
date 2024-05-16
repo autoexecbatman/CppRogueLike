@@ -63,7 +63,7 @@ public:
 		int y,
 		int x,
 		int ch,
-		std::string name,
+		std::string_view name,
 		int col,
 		int index
 	);

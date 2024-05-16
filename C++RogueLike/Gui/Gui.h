@@ -20,7 +20,7 @@
 #include "../Persistent/Persistent.h"
 #include "LogMessage.h"
 
-constexpr int GUI_HEIGHT{ 7 };
+inline constexpr int GUI_HEIGHT{ 7 };
 
 class Gui : public Persistent
 {
@@ -44,7 +44,7 @@ public:
 	void gui_update(); // update the gui
 	void gui_render(); // render the gui
 
-	void gui_print_stats(const std::string& playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept;
+	void gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept;
 	void gui_print_log();
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
 

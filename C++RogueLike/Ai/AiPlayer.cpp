@@ -472,18 +472,6 @@ void AiPlayer::save(TCODZip& zip)
 	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
 }
 
-bool is_not_dead(const Actor& actor)
-{
-	if (!actor.destructible->is_dead())
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
 bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 {
 	game.log("Player tries to move or attack");
@@ -520,7 +508,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	{
 		if (actor != nullptr)
 		{
-			if (is_not_dead(*actor) && actor->posX == targetx && actor->posY == targety)
+			if (!actor->destructible->is_dead() && actor->posX == targetx && actor->posY == targety)
 			{
 				owner.attacker->attack(owner, *actor);
 				return false;

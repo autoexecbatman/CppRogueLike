@@ -23,8 +23,12 @@ public:
 	int foodMax{ 0 };
 	int needToSleep{ 0 };
 
-	Destructible(int hpMax, int dr, std::string corpseName, int xp, int thaco, int armorClass);
-	virtual ~Destructible();
+	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
+	virtual ~Destructible() {};
+	Destructible(const Destructible&) = delete;
+	Destructible(Destructible&&) = delete;
+	Destructible& operator=(const Destructible&) = delete;
+	Destructible& operator=(Destructible&&) = delete;
 
 	// is the actor dead? (returns true if hp is below or equal to 0)
 	bool is_dead() noexcept { return hp <= 0; }
@@ -57,7 +61,7 @@ public:
 	MonsterDestructible(
 		int hpMax,
 		int dr,
-		std::string corpseName,
+		std::string_view corpseName,
 		int xp,
 		int thaco,
 		int armorClass
@@ -77,7 +81,7 @@ public:
 	PlayerDestructible(
 		int hpMax,
 		int dr,
-		std::string corpseName,
+		std::string_view corpseName,
 		int xp,
 		int thaco,
 		int armorClass
