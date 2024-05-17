@@ -11,10 +11,9 @@ Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
 bool Fireball::use(Actor& owner, Actor& wearer)
 {
-	int x{ 0 };
-	int y{ 0 };
+	Vector2D tilePicked{ 0, 0 };
 
-	if (!game.pick_tile(&x, &y, Fireball::maxRange)) // <-- runs a while loop here
+	if (!game.pick_tile(&tilePicked.x, &tilePicked.y, Fireball::maxRange)) // <-- runs a while loop here
 	{
 		return false;
 	}
@@ -27,30 +26,26 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	// (this is a bit of a hack, but it works)
 
 	// get the center of the explosion
-	int centerX = x;
-	int centerY = y;
+	Vector2D center = tilePicked;
 
 	// get the radius of the explosion
-	/*int radius = static_cast<int>(Fireball::maxRange);*/
-	// use gsl
-	int radius = gsl::narrow_cast<int>(Fireball::maxRange);
+	int radius = Fireball::maxRange;
 
 	int sideLength = radius * 2 + 1;
 
 	// calculate the chebyshev distance from the player to maxRange
-	int chebyshev = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
+	int chebyshev = std::max(abs(center.x - (center.x - radius)), abs(center.y - (center.y - radius)));
 
 	int height = sideLength;
 	int width = sideLength;
 
-	int centerOfExplosionY = centerY - chebyshev;
-	int centerOfExplosionX = centerX - chebyshev;
+	Vector2D centerOfExplosion{center.y - chebyshev, center.x - chebyshev};
 
 	WINDOW* explosionWindow = newwin(
 		height, // number of rows
 		width, // number of columns
-		centerOfExplosionY, // y position
-		centerOfExplosionX // x position
+		centerOfExplosion.y, // y position
+		centerOfExplosion.x // x position
 	);
 
 	// draw fire inside the window
@@ -87,11 +82,11 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 		if (
 			!actor->destructible->is_dead()
 			&&
-			actor->get_distance(x, y) <= Fireball::maxRange
+			actor->get_tile_distance(tilePicked) <= Fireball::maxRange
 			)
 		{
-			game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->name.c_str(), damage);
-			animation(actor->posX, actor->posY, maxRange);
+			game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->actorData.name.c_str(), damage);
+			animation(actor->get_position(), maxRange);
 		}
 	}
 
@@ -100,7 +95,7 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 		if (
 			!actor->destructible->is_dead()
 			&&
-			actor->get_distance(x, y) <= Fireball::maxRange
+			actor->get_tile_distance(tilePicked) <= Fireball::maxRange
 			)
 		{
 			actor->destructible->take_damage(*actor, damage);
@@ -110,7 +105,7 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 	return Pickable::use(owner, wearer);
 }
 
-void Fireball::animation(int x, int y, int maxRange)
+void Fireball::animation(Vector2D position, int maxRange)
 {
 	bool run = true;
 	while (run == true)
@@ -119,7 +114,7 @@ void Fireball::animation(int x, int y, int maxRange)
 		game.render();
 
 		attron(COLOR_PAIR(FIREBALL_PAIR));
-		mvprintw(y, x, "~");
+		mvprintw(position.y, position.x, "~");
 		attroff(COLOR_PAIR(FIREBALL_PAIR));
 
 		// ask the player to press a key to continue

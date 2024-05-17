@@ -225,7 +225,7 @@ void AiPlayer::update(Actor& owner)
 
 	case Controls::DESCEND:
 	{
-		if (game.stairs->posX == owner.posX && game.stairs->posY == owner.posY)
+		if (game.stairs->position.x == owner.position.x && game.stairs->position.y == owner.position.y)
 		{
 			game.next_level();
 		}
@@ -256,7 +256,7 @@ void AiPlayer::update(Actor& owner)
 	if (dx != 0 || dy != 0)
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		if (moveOrAttack(owner, owner.posX + dx, owner.posY + dy))
+		if (moveOrAttack(owner, owner.position.x + dx, owner.position.y + dy))
 		{
 			game.log("AiPlayer::update(Actor& owner) moveOrAttack(owner, owner.posX + dx, owner.posY + dy)");
 			game.map->compute_fov();
@@ -285,12 +285,12 @@ void AiPlayer::pick_item(Actor& owner)
 			exit(-1);
 		}
 
-		game.log("Checking actor " + actor->name);
+		game.log("Checking actor " + actor->actorData.name);
 
 		// Skip actors without a pickable component
 		if (actor->pickable == nullptr)
 		{
-			game.log("Skipping actor " + actor->name + " because it has no pickable component");
+			game.log("Skipping actor " + actor->actorData.name + " because it has no pickable component");
 			continue;
 		}
 
@@ -316,14 +316,14 @@ void AiPlayer::pick_item(Actor& owner)
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
 {
-	return actor.posX == owner.posX && actor.posY == owner.posY;
+	return actor.position.x == owner.position.x && actor.position.y == owner.position.y;
 }
 
 bool AiPlayer::try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner)
 {
-	game.log("Trying to pick actor " + actor->name);
+	game.log("Trying to pick actor " + actor->actorData.name);
 	bool picked{};
-	std::string actorName = actor->name;
+	std::string actorName = actor->actorData.name;
 
 	// actor is destroyed if picked what can we do about it ? 
 	// we can't use actor anymore
@@ -362,11 +362,11 @@ void AiPlayer::displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept
 		{
 			if (actor != nullptr)
 			{
-				mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->name.c_str());
+				mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->actorData.name.c_str());
 				// if the actor is equipped, print a star
-				if (actor->isEquipped)
+				if (actor->flags.isEquipped)
 				{
-					int nameLength = strlen(actor->name.c_str()) + 5;
+					int nameLength = strlen(actor->actorData.name.c_str()) + 5;
 					mvwprintw(inv, y, nameLength, "*");
 				}
 			}
@@ -482,7 +482,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	}
 	else if (game.map->is_water(targety, targetx))
 	{
-		if (!owner.canSwim)
+		if (!owner.flags.canSwim)
 		{
 			return false;
 		}
@@ -495,8 +495,8 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 			getch();
 			clear();
 
-			owner.posX = targetx;
-			owner.posY = targety;
+			owner.position.x = targetx;
+			owner.position.y = targety;
 			return true;
 		}
 	}
@@ -508,7 +508,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	{
 		if (actor != nullptr)
 		{
-			if (!actor->destructible->is_dead() && actor->posX == targetx && actor->posY == targety)
+			if (!actor->destructible->is_dead() && actor->position.x == targetx && actor->position.y == targety)
 			{
 				owner.attacker->attack(owner, *actor);
 				return false;
@@ -524,17 +524,15 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	// look for corpses or items
 	for (const auto& actor : game.actors)
 	{
-		const auto isDeadCorpseOrItem = actor->destructible->is_dead() || actor->pickable;
-
-		if (isDeadCorpseOrItem && actor->posX == targetx && actor->posY == targety)
+		if ((actor->destructible->is_dead() || actor->pickable) && actor->position.x == targetx && actor->position.y == targety)
 		{
-			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->name));
+			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
 			game.finalizeMessage();
 		}
 	}
 
-	owner.posX = targetx;
-	owner.posY = targety;
+	owner.position.x = targetx;
+	owner.position.y = targety;
 
 	return true;
 }

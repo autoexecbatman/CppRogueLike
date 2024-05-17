@@ -41,8 +41,8 @@ void Game::init()
 
 	//==STAIRS==
 	if (!game.stairs) { err("game.stairs is nullptr"); }
-	game.stairs->blocks = false; // stairs are not blocking
-	game.stairs->fovOnly = false; // stairs are not fovOnly
+	game.stairs->flags.blocks = false; // stairs are not blocking
+	game.stairs->flags.fovOnly = false; // stairs are not fovOnly
 	game.actors.push_back(std::move(stairs_unique));
 	game.stairs = game.actors.back().get();
 
@@ -75,7 +75,18 @@ void Game::create_player()
 	const int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
-	game.player_unique = std::make_unique<Player>(0, 0, playerHp, playerDr, "your cadaver", playerXp, playerTHAC0, playerAC, playerDamage, playerMinDmg, playerMaxDmg);
+	game.player_unique = std::make_unique<Player>(
+		Vector2D{ 0, 0 },
+		playerHp,
+		playerDr,
+		"your cadaver",
+		playerXp,
+		playerTHAC0,
+		playerAC,
+		playerDamage,
+		playerMinDmg,
+		playerMaxDmg
+	);
 	
 	// add the player to the actors vector for rendering
 	game.actors.push_back(std::move(game.player_unique));
@@ -140,7 +151,7 @@ void Game::update()
 			{
 				if (actor->is_visible() && actor != nullptr && actor.get() != player)
 				{
-					game.log("Actor: " + actor->name + " is in FOV");
+					game.log("Actor: " + actor->actorData.name + " is in FOV");
 					actor->update();
 				}
 			}
@@ -169,9 +180,9 @@ void Game::render()
 		{
 			if (actor->is_visible())
 			{
-				game.log("Actor: " + actor->name + " is in FOV");
+				game.log("Actor: " + actor->actorData.name + " is in FOV");
 				actor->render();
-				std::clog << "Actor: " << actor->name << " is drawn" << std::endl;
+				std::clog << "Actor: " << actor->actorData.name << " is drawn" << std::endl;
 			}
 		}
 	}
@@ -197,7 +208,7 @@ void Game::send_to_back(Actor& actor)
 	}
 }
 
-Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept
+Actor* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
 {
 	Actor* closestMonster = nullptr;
 	int bestDistance = INT_MAX;
@@ -206,7 +217,7 @@ Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) con
 	{
 		if (actor.get() != game.player && !actor->destructible->is_dead())
 		{
-			const int distance = actor->get_distance(fromPosX, fromPosY);
+			const int distance = actor->get_tile_distance(fromPosition);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
 			{
 				bestDistance = distance;
@@ -221,8 +232,8 @@ Actor* Game::get_closest_monster(int fromPosX, int fromPosY, double inRange) con
 bool Game::pick_tile(int* x, int* y, int maxRange)
 {
 	// the target cursor is initialized at the player's position
-	int targetCursorY = player->posY; // init position Y
-	int targetCursorX = player->posX; // init position X
+	int targetCursorY = player->position.y; // init position Y
+	int targetCursorX = player->position.x; // init position X
 
 	// initialize the line position
 	int lineY = 0;
@@ -244,9 +255,9 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		game.render();
 
 		// first color the player position if the cursor has moved from the player position
-		if (targetCursorY != player->posY || targetCursorX != player->posX)
+		if (targetCursorY != player->position.y || targetCursorX != player->position.x)
 		{
-			mvchgat(player->posY, player->posX, 1, A_NORMAL, WHITE_PAIR, nullptr);
+			mvchgat(player->position.y, player->position.x, 1, A_NORMAL, WHITE_PAIR, nullptr);
 		}
 
 		// draw a line using TCODLine class
@@ -259,7 +270,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			// update cell x,y
 		} while (!TCODLine::step(&x, &y));
 		*/
-		TCODLine::init(player->posX, player->posY, targetCursorX, targetCursorY);
+		TCODLine::init(player->position.x, player->position.y, targetCursorX, targetCursorY);
 		while (!TCODLine::step(&lineX, &lineY))
 		{
 			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, nullptr);
@@ -270,13 +281,13 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		if (game.map->is_in_fov(targetCursorX, targetCursorY))
+		if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
 		{
 			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr)
 			{
-				mvprintw(0, 0, actor->name.c_str());
+				mvprintw(0, 0, actor->actorData.name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
@@ -379,7 +390,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 
 			// if the target is a monster then attack it
 		{
-			if (game.map->is_in_fov(targetCursorX, targetCursorY))
+			if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
 			{
 				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 				// and actor is not an item
@@ -461,8 +472,8 @@ bool Game::mouse_moved() noexcept
 
 void Game::target()
 {
-	int targetCursorY = player->posY; // init position Y
-	int targetCursorX = player->posX; // init position X
+	int targetCursorY = player->position.y; // init position Y
+	int targetCursorX = player->position.x; // init position X
 
 	const int lastY = targetCursorY;
 	const int lastX = targetCursorX;
@@ -493,7 +504,7 @@ void Game::target()
 		{
 			for (int tilePosY = 0; tilePosY < game.map->map_height; tilePosY++)
 			{
-				if (game.map->is_in_fov(tilePosX, tilePosY))
+				if (game.map->is_in_fov(Vector2D{ tilePosX, tilePosY }))
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 				}
@@ -501,7 +512,7 @@ void Game::target()
 		}
 
 		// first color the player position if the cursor has moved from the player position
-		if (targetCursorY != player->posY || targetCursorX != player->posX)
+		if (targetCursorY != player->position.y || targetCursorX != player->position.x)
 		{
 			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, NULL);
 		}
@@ -516,7 +527,7 @@ void Game::target()
 			// update cell x,y
 		} while (!TCODLine::step(&x, &y));
 		*/
-		TCODLine::init(player->posX, player->posY, targetCursorX, targetCursorY);
+		TCODLine::init(player->position.x, player->position.y, targetCursorX, targetCursorY);
 		while (!TCODLine::step(&lineX, &lineY))
 		{
 			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, NULL);
@@ -533,14 +544,14 @@ void Game::target()
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		const int distance = player->get_distance(targetCursorX, targetCursorY);
-		if (game.map->is_in_fov(targetCursorX, targetCursorY))
+		const int distance = player->get_tile_distance(Vector2D{ targetCursorX, targetCursorY });
+		if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
 		{
 			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 			// and actor is not an item
 			if (actor != nullptr)
 			{
-				mvprintw(0, 0, actor->name.c_str());
+				mvprintw(0, 0, actor->actorData.name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
@@ -581,7 +592,7 @@ void Game::target()
 			// and return the target position
 			// if the target is a monster then attack it
 		{
-			if (game.map->is_in_fov(targetCursorX, targetCursorY))
+			if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
 			{
 				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
 				
@@ -631,7 +642,7 @@ void Game::load_all()
 		/*actors.push_back(std::move(player));*/
 
 		// load the stairs
-		stairs_unique = std::make_unique<Actor>(0, 0, 0, "loaded stairs", WHITE_PAIR, 0);
+		stairs_unique = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded stairs", WHITE_PAIR }, ActorFlags{ true, true, true, true });
 		stairs_unique->load(zip);
 		actors.push_back(std::move(stairs_unique));
 		/*actors.try_emplace(stairs->index, stairs);*/
@@ -641,7 +652,8 @@ void Game::load_all()
 		while (nbActors > 0)
 		{
 			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR, 0);
+			/*std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
+			auto actor = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true,true });
 			actor->load(zip);
 			actors.push_back(std::move(actor));
 			/*actors.try_emplace(actor->index, actor);*/
@@ -770,7 +782,7 @@ Actor* Game::get_actor(int x, int y) const noexcept
 {
 	for (const auto& actor : actors)
 	{
-		if (actor->posX == x && actor->posY == y)
+		if (actor->position.x == x && actor->position.y == y)
 		{
 			return actor.get();
 		}
@@ -867,7 +879,7 @@ void Game::display_character_sheet() noexcept
 		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
 
 		// display the player name
-		mvwprintw(character_sheet, 1, 1, "Name: %s", player->name.c_str());
+		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str());
 		// display the player class
 		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
 		// display the class kit
@@ -919,7 +931,7 @@ void Game::wizard_eye() noexcept
 	for (const auto& actor : game.actors)
 	{
 		// print the actor's name
-		mvprintw(actor->posY, actor->posX, actor->name.c_str());
+		mvprintw(actor->position.y, actor->position.x, actor->actorData.name.c_str());
 	}
 }
 

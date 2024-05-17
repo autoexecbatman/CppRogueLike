@@ -20,7 +20,7 @@ public:
 protected:
 	int moveCount = 0;
 
-	void moveOrAttack(Actor& owner, int targetx, int targety);
+	void moveOrAttack(Actor& owner, Vector2D position);
 };
 
 #endif // !AI_MONSTER_H

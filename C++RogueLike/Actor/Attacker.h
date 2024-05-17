@@ -18,13 +18,16 @@ public:
 	int maxDmg{ 0 };
 	int minDmg{ 0 };
 	std::string roll{ "diceroll" };
+	
 
 	Attacker(int dmg, int minDmg, int maxDmg) noexcept;
 
-	void attack(const Actor& attacker, Actor& target);
+	void attack(Actor& attacker, Actor& target);
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
+private:
+	int missCount{ 0 };
 };
 
 #endif // !ATTACKER_H

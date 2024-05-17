@@ -114,7 +114,7 @@ void Gui::gui_render()
 	);
 
 	gui_print_stats(
-		game.player->name,
+		game.player->actorData.name,
 		guiHp,
 		guiHpMax,
 		game.player->attacker->dmg,
@@ -151,10 +151,10 @@ void Gui::gui_print_log()
 void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
 {
 	// check if the player has no name input then place default name
-	if (game.player->name.empty()) { game.player->name = "Player"; }
+	if (game.player->actorData.name.empty()) { game.player->actorData.name = "Player"; }
 
 	// print name
-	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName);
+	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName.data());
 	// print hp
 	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
 	//// print attack
@@ -502,9 +502,10 @@ void Gui::renderMouseLook()
 {
 	const int mouseX = Mouse_status.x;
 	const int mouseY = Mouse_status.y;
+
 	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", mouseY, mouseX); // display the mouse position
 
-	if (!game.map->is_in_fov(Mouse_status.x, Mouse_status.y))
+	if (!game.map->is_in_fov(Vector2D{ Mouse_status.x, Mouse_status.y }))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;
@@ -514,7 +515,7 @@ void Gui::renderMouseLook()
 	bool first = true;
 	for (const auto& actor : game.actors)
 	{
-		if (actor->posX == mouseX && actor->posY == mouseY)
+		if (actor->position.x == mouseX && actor->position.y == mouseY)
 		{
 			if (!first)
 			{
@@ -524,7 +525,7 @@ void Gui::renderMouseLook()
 			{
 				first = false;
 			}
-			buf += actor->name;
+			buf += actor->actorData.name;
 		}
 	}
 	mvwprintw(

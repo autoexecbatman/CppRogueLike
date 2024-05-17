@@ -43,9 +43,9 @@ void Destructible::die(Actor& owner)
 {
 
 	//transform the actor into a corpse!
-	owner.ch = '%';
-	owner.name = corpseName;
-	owner.blocks = false;
+	owner.actorData.ch = '%';
+	owner.actorData.name = corpseName;
+	owner.flags.blocks = false;
 
 	//make sure corpses are drawn before living actors
 	game.send_to_back(owner);
@@ -167,7 +167,7 @@ void PlayerDestructible::die(Actor& owner)
 {
 	/*std::cout << "You died!\n" << std::endl;*/
 	/*int y = getmaxy(stdscr);*/
-	mvprintw(29, 0, "You died!\n", owner.name.c_str());
+	mvprintw(29, 0, "You died!\n", owner.actorData.name.c_str());
 	Destructible::die(owner);
 	game.gameStatus = Game::GameStatus::DEFEAT;
 }
@@ -187,12 +187,12 @@ MonsterDestructible::MonsterDestructible(
 
 void MonsterDestructible::die(Actor& owner)
 {
-	mvprintw(29,0,"%s is dead\n", owner.name.c_str());
+	mvprintw(29,0,"%s is dead\n", owner.actorData.name.c_str());
 	
 	game.gui->log_message(
 		WHITE_PAIR,
 		"%s is dead. You gain %d xp\n",
-		owner.name.c_str(),
+		owner.actorData.name.c_str(),
 		xp
 	);
 	game.player->destructible->xp += xp;

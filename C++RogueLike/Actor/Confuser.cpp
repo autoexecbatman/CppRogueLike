@@ -28,7 +28,7 @@ bool Confuser::use(Actor& owner, Actor& wearer)
 	actor->ai = std::move(confusedAi);
 
 	game.message(WHITE_PAIR, std::format("as he starts to stumble around!"), true);
-	game.message(WHITE_PAIR, std::format("The eyes of the {} look vacant,", actor->name), true);
+	game.message(WHITE_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), true);
 
 
 	return Pickable::use(owner, wearer);

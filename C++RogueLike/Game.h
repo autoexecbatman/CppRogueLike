@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <memory> // std::shared_ptr, std::make_shared
+#include <memory>
 
 #include "Gui/Gui.h"
 #include "Map/Map.h"
@@ -36,18 +36,17 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(0, 0, 0, 0, "", 0, 0, 0, 0, 0, 0) };
+	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
 	gsl::not_null<Player*> player{ player_unique.get() };
 	Actor* shopkeeper{ nullptr };
 
-	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(
-		0, // int posX
-		0, // int posY
-		'>', // char symbol
-		"stairs", // std::string name
-		WHITE_PAIR, // int colorPair
-		1 // int index
-	) };
+	//std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(
+	//	Vector2D{0,0}, // Vector2D position
+	//	'>', // char symbol
+	//	"stairs", // std::string name
+	//	WHITE_PAIR // int colorPair
+	//) };
+	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(Vector2D{0,0}, ActorData{'>', "stairs", WHITE_PAIR}, ActorFlags{true, true, false, false}) };
 	Actor* stairs{ stairs_unique.get() };
 
 	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
@@ -72,7 +71,7 @@ public:
 	void update();
 	void render();
 	void send_to_back(Actor& actor);
-	Actor* get_closest_monster(int fromPosX, int fromPosY, double inRange) const noexcept;
+	Actor* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept;
 	bool pick_tile(int* x, int* y, int maxRange);
 	void run_menus();
 

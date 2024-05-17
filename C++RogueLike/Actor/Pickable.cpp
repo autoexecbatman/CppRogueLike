@@ -34,8 +34,7 @@ void Pickable::drop(std::unique_ptr<Actor> owner, Actor& wearer)
 	if (&wearer != game.player) { return; }
 	if (wearer.container)
 	{
-		owner->posX = wearer.posX;
-		owner->posY = wearer.posY;
+		owner->position = wearer.position;
 		wearer.container->remove(std::move(owner));
 	}
 }

@@ -9,15 +9,15 @@
 
 class Actor;
 
-constexpr int MAP_HEIGHT = 30 - 8;
-constexpr int MAP_WIDTH = 119;
+inline constexpr int MAP_HEIGHT = 30 - 8;
+inline constexpr int MAP_WIDTH = 119;
 
-constexpr int FOV_RADIUS = 10;
+inline constexpr int FOV_RADIUS = 10;
 
-constexpr auto ROOM_MAX_SIZE = 12;
-constexpr auto ROOM_MIN_SIZE = 6;
-constexpr auto MAX_ROOM_MONSTERS = 1; // TODO: check if this is used at all 
-constexpr int MAX_ROOM_ITEMS = 4;
+inline constexpr auto ROOM_MAX_SIZE = 12;
+inline constexpr auto ROOM_MIN_SIZE = 6;
+inline constexpr auto MAX_ROOM_MONSTERS = 1; // TODO: check if this is used at all 
+inline constexpr int MAX_ROOM_ITEMS = 4;
 
 //==Tile==
 // A tile of the map
@@ -54,9 +54,9 @@ public:
 	Map(int map_height, int map_width);
 
 	template <typename MonsterType>
-	std::unique_ptr<MonsterType> create_monster(int mon_y, int mon_x)
+	std::unique_ptr<MonsterType> create_monster(Vector2D position)
 	{
-		auto monster = std::make_unique<MonsterType>(mon_y, mon_x);
+		auto monster = std::make_unique<MonsterType>(position);
 		return monster;
 	}
 	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
@@ -70,7 +70,7 @@ public:
 
 	void init(bool withActors);
 	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
-	bool is_in_fov(int fov_x, int fov_y) const;
+	bool is_in_fov(Vector2D position) const;
 	bool is_water(int isWater_pos_y, int isWater_pos_x) const;
 	bool is_explored(int exp_x, int exp_y) const noexcept; //indicates whether this tile has already been seen by the player
 	bool can_walk(int canw_x, int canw_y) const;

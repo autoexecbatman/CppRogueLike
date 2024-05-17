@@ -6,7 +6,7 @@ bool Dagger::use(Actor& owner, Actor& wearer)
 {
 	// equip the weapon
 
-	if (!owner.isEquipped)
+	if (!owner.flags.isEquipped)
 	{
 		wearer.attacker->dmg += maxDmg;
 		wearer.equip(owner);

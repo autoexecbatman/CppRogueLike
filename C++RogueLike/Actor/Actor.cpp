@@ -20,42 +20,32 @@
 #include "Container.h"
 
 //====
-Actor::Actor(
-	int y,
-	int x,
-	int ch,
-	std::string_view name,
-	int col,
-	int index
-) : 
-	posY(y),
-	posX(x),
-	ch(ch),
-	name(name),
-	col(col),
-	index(index),
-	blocks(true),
-	fovOnly(true),
-	canSwim(false),
+Actor::Actor(Vector2D position, ActorData data, ActorFlags flags)
+	:
+	position(position),
+	actorData(data),
+	flags(flags),
 	attacker(nullptr),
-	destructible(std::make_unique<Destructible>(0,0,"",0,0,0)),
+	destructible(std::make_unique<Destructible>(0, 0, "", 0, 0, 0)),
 	ai(nullptr),
 	container(nullptr),
 	pickable(nullptr)
 {}
 
-Actor::~Actor() {}
+Actor::~Actor() = default;
 
 //====
 void Actor::load(TCODZip& zip)
 {
 	// this block assigns the values from the zip file to the actor
-	posX = zip.getInt();
-	posY = zip.getInt();
-	ch = zip.getInt();
-	col = zip.getInt();
-	name = _strdup(zip.getString());
-	blocks = zip.getInt();
+	position.x = zip.getInt();
+	position.y = zip.getInt();
+
+	actorData.ch = zip.getInt();
+	actorData.color = zip.getInt();
+	actorData.name = _strdup(zip.getString());
+
+	flags.blocks = zip.getInt();
 
 	// this block assigns checks if the actor has a component
 	const bool hasAttacker{ gsl::narrow_cast<bool>(zip.getInt()) };
@@ -76,14 +66,14 @@ void Actor::load(TCODZip& zip)
 void Actor::save(TCODZip& zip)
 {
 	// Add a debug log to display the actor name
-	game.log("Saving actor: " + name);
+	game.log("Saving actor: " + actorData.name);
 
-	zip.putInt(posX);
-	zip.putInt(posY);
-	zip.putInt(ch);
-	zip.putInt(col);
-	zip.putString(name.c_str());
-	zip.putInt(blocks);
+	zip.putInt(position.x);
+	zip.putInt(position.y);
+	zip.putInt(actorData.ch);
+	zip.putInt(actorData.color);
+	zip.putString(actorData.name.c_str());
+	zip.putInt(flags.blocks);
 
 	zip.putInt(attacker != nullptr);
 	/*zip.putInt(destructible != nullptr);*/
@@ -101,9 +91,9 @@ void Actor::save(TCODZip& zip)
 // the actor render function with color
 void Actor::render() const noexcept
 {
-	attron(COLOR_PAIR(col));
-	mvaddch(posY, posX, ch);
-	attroff(COLOR_PAIR(col));
+	attron(COLOR_PAIR(actorData.color));
+	mvaddch(position.y, position.x, actorData.ch);
+	attroff(COLOR_PAIR(actorData.color));
 }
 
 // adds an item to the actor's inventory
@@ -115,19 +105,19 @@ void Actor::pickItem(int x, int y)
 
 void Actor::equip(Actor& item)
 {
-	item.isEquipped = true;
-	weaponEquipped = item.name;
+	item.flags.isEquipped = true;
+	weaponEquipped = item.actorData.name;
 }
 
 void Actor::unequip(Actor& item)
 {
-	item.isEquipped = false;
+	item.flags.isEquipped = false;
 	weaponEquipped = "None";
 }
 
 bool Actor::is_visible() const noexcept
 {
-	return (!fovOnly && game.map->is_explored(posX, posY)) || game.map->is_in_fov(posX, posY);
+	return (!flags.fovOnly && game.map->is_explored(position.x, position.y)) || game.map->is_in_fov(position);
 }
 
 // the actor update
@@ -141,10 +131,11 @@ void Actor::update()
 }
 
 // a function to get the distance from an actor to a specific tile of the map
-int Actor::get_distance(int tileX, int tileY) const noexcept
+int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
 	// using chebyshev distance
-	const int distance = std::max(abs(posX - tileX), abs(posY - tileY));
+	/*const int distance = std::max(abs(posX - tileX), abs(posY - tileY));*/
+	const int distance = std::max(abs(position.x - tilePosition.x), abs(position.y - tilePosition.y));
 
 	mvprintw(10, 0, "Distance: %d", distance);
 

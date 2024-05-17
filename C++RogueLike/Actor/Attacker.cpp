@@ -12,7 +12,7 @@
 
 Attacker::Attacker(int dmg, int minDmg, int maxDmg) noexcept : dmg(dmg), minDmg(minDmg), maxDmg(maxDmg) {}
 
-void Attacker::attack(const Actor& attacker, Actor& target)
+void Attacker::attack(Actor& attacker, Actor& target)
 {
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
@@ -52,9 +52,9 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 			// if damage is dealt display combat messages
 			if (totaldmg > 0)
 			{
-				game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
 				game.appendMessagePart(WHITE_PAIR, " attacks the ");
-				game.appendMessagePart(target.col, std::format("{}", target.name));
+				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
 				game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
 				game.finalizeMessage();
 				// apply damage to target
@@ -63,27 +63,42 @@ void Attacker::attack(const Actor& attacker, Actor& target)
 			// else no damage message
 			else
 			{
-				game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
 				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-				game.appendMessagePart(target.col, std::format("{}", target.name));
+				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
 				game.appendMessagePart(WHITE_PAIR, std::format(" but it has no effect!"));
 				game.finalizeMessage();
 			}
 		}
 		else
 		{
-			game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
-			game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-			game.appendMessagePart(target.col, std::format("{}", target.name));
-			game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
-			game.finalizeMessage();
+			if (missCount < 3)
+			{
+				missCount++;
+				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
+				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
+				game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
+				game.finalizeMessage();
+			}
+			else
+			{
+				missCount = 0;
+				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
+				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
+				game.appendMessagePart(WHITE_PAIR, std::format(" and hit himself instead."));
+				game.finalizeMessage();
+				// apply damage to attacker
+				attacker.destructible->take_damage(attacker, rollDmg);
+			}
 		}
 	}
 	else
 	{
-		game.appendMessagePart(attacker.col, std::format("{}", attacker.name));
+		game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
 		game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-		game.appendMessagePart(target.col, std::format("{}", target.name));
+		game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
 		game.appendMessagePart(WHITE_PAIR, std::format(" in vain."));
 		game.finalizeMessage();
 	}

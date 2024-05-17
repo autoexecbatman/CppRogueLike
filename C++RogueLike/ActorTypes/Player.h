@@ -6,6 +6,8 @@
 #include "../Map/Map.h"
 #include "../Actor/Actor.h"
 
+
+
 class Player : public Actor
 {
 public:
@@ -32,17 +34,15 @@ public:
 	std::string playerGender{ "None" };
 	int playerGold{ 100 };
 
-	Player(int y, int x, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg);
+	Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg);
 
 	// Note::
 	// X/Y coordinates set
 	// in the function create_room()
 	// in Map.cpp
-	void setPosX(int x) noexcept { posX = x; }
-	void setPosY(int y) noexcept { posY = y; }
-	int getPosX() const noexcept { return posX; }
-	int getPosY() const noexcept { return posY; }
-	void player_get_pos_from_map();
+
+	void setXY(Vector2D pos) noexcept { position = pos; }
+	Vector2D getXY() const noexcept { return position; }
 
 	void racial_ability_adjustments();
 	void calculate_thaco();

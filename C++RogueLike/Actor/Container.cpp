@@ -39,7 +39,7 @@ void Container::load(TCODZip& zip)
 	int nbActors = zip.getInt();
 	while (nbActors > 0)
 	{
-		auto actor = std::make_unique<Actor>(0, 0, 0, "", 0, 0);
+		auto actor = std::make_unique<Actor>(Vector2D(0, 0), ActorData(), ActorFlags());
 		actor->load(zip);
 		inventoryList.push_back(std::move(actor));
 		nbActors--;
@@ -63,7 +63,7 @@ void Container::print_container(std::span<std::unique_ptr<Actor>> container)
 	int i = 0;
 	for (const auto& item : inventoryList)
 	{
-		std::cout << item->name << i << " ";
+		std::cout << item->actorData.name << i << " ";
 		i++;
 	}
 	std::cout << '\n';

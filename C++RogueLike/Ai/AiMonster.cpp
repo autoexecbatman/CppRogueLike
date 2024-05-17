@@ -10,7 +10,7 @@ AiMonster::AiMonster() : moveCount(0) {}
 
 void AiMonster::update(Actor& owner)
 {
-	game.log(owner.name + "AI is updating");
+	game.log(owner.actorData.name + "AI is updating");
 	if (owner.ai == nullptr) // if the owner has no ai
 	{
 		return; // do nothing
@@ -21,7 +21,7 @@ void AiMonster::update(Actor& owner)
 		return; // do nothing
 	}
 
-	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
+	if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
 	{
 		// move towards the player
 		moveCount = TRACKING_TURNS;
@@ -33,7 +33,7 @@ void AiMonster::update(Actor& owner)
 
 	if (moveCount > 0) // if the move count is greater than 0
 	{
-		moveOrAttack(owner, game.player->posX, game.player->posY); // move or attack the player
+		moveOrAttack(owner, game.player->position); // move or attack the player
 	}
 }
 
@@ -51,33 +51,36 @@ void AiMonster::save(TCODZip& zip)
 //====
 // how many turns the monster chases the player
 // after losing his sight
-void AiMonster::moveOrAttack(Actor& owner, int targetx, int targety)
+void AiMonster::moveOrAttack(Actor& owner, Vector2D targetPosition)
 {
-	int dx = targetx - owner.posX; // get the x distance
-	int dy = targety - owner.posY; // get the y distance
+	//int dx = targetx - owner.posX; // get the x distance
+	//int dy = targety - owner.posY; // get the y distance
+	Vector2D target = targetPosition - owner.position;
 
-	const int stepdx = (dx > 0 ? 1 : -1); // get the x step
-	const int stepdy = (dy > 0 ? 1 : -1); // get the y step
+	//const int stepdx = (dx > 0 ? 1 : -1); // get the x step
+	//const int stepdy = (dy > 0 ? 1 : -1); // get the y step
+	int stepX = target.x > 0 ? 1 : -1;
+	int stepY = target.y > 0 ? 1 : -1;
 
-	const double distance = sqrt(dx * dx + dy * dy); // get the distance
+	const double distance = sqrt(target.x * target.x + target.y * target.y); // get the distance
 
 	if (distance >= 2)
 	{
-		dx = static_cast<int>(round(dx / distance));
-		dy = static_cast<int>(round(dy / distance));
+		target.x = static_cast<int>(round(target.x / distance));
+		target.y = static_cast<int>(round(target.y / distance));
 
-		if (game.map->can_walk(owner.posX + dx, owner.posY + dy))
+		if (game.map->can_walk(owner.position.x + target.x, owner.position.y + target.y))
 		{
-			owner.posX += dx;
-			owner.posY += dy;
+			owner.position.x += target.x;
+			owner.position.y += target.y;
 		}
-		else if (game.map->can_walk(owner.posX + stepdx, owner.posY))
+		else if (game.map->can_walk(owner.position.x + stepX, owner.position.y))
 		{
-			owner.posX += stepdx;
+			owner.position.x += stepX;
 		}
-		else if (game.map->can_walk(owner.posX, owner.posY + stepdy))
+		else if (game.map->can_walk(owner.position.x, owner.position.y + stepY))
 		{
-			owner.posY += stepdy;
+			owner.position.y += stepY;
 		}
 	}
 

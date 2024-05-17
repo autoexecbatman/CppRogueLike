@@ -12,7 +12,7 @@ LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRa
 bool LightningBolt::use(Actor& owner, Actor& wearer)
 {
 	// find closest enemy (inside a maximum range)
-	Actor* closestMonster = game.get_closest_monster(wearer.posX, wearer.posY, maxRange);
+	Actor* closestMonster = game.get_closest_monster(wearer.get_position(), maxRange);
 
 	if (!closestMonster)
 	{
@@ -22,13 +22,13 @@ bool LightningBolt::use(Actor& owner, Actor& wearer)
 	}
 	else
 	{
-		closestMonster->destructible->take_damage(*closestMonster, damage);
-
 		clear();
-		mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n", closestMonster->name.c_str());
+		mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n", closestMonster->actorData.name.c_str());
 		refresh();
 		getch();
 		game.message(HPBARMISSING_PAIR, std::format("The damage is {} hit points.", damage), true);
+
+		closestMonster->destructible->take_damage(*closestMonster, damage);
 
 		return Pickable::use(owner, wearer);
 	}

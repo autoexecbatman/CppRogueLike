@@ -20,13 +20,13 @@ void AiMonsterConfused::update(Actor& owner)
 
 	if (dx != 0 || dy != 0)
 	{
-		const int destx = owner.posX + dx;
-		const int desty = owner.posY + dy;
+		const int destx = owner.position.x + dx;
+		const int desty = owner.position.y + dy;
 
 		if (game.map->can_walk(desty, destx))
 		{
-			owner.posX = destx;
-			owner.posY = desty;
+			owner.position.x = destx;
+			owner.position.y = desty;
 		}
 		else
 		{

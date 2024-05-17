@@ -20,8 +20,8 @@ int AiShopkeeper::calculateStep(int positionDifference)
 void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 {
 	// Calculate how many squares away the target is horizontally and vertically
-	int moveX = targetX - owner.posX; // Number of squares to move horizontally
-	int moveY = targetY - owner.posY; // Number of squares to move vertically
+	int moveX = targetX - owner.position.x; // Number of squares to move horizontally
+	int moveY = targetY - owner.position.y; // Number of squares to move vertically
 
 	// Decide in which direction to take one step horizontally and vertically
 	int stepX = calculateStep(moveX); // Direction to move horizontally (left or right)
@@ -38,12 +38,12 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	// Try each move in order of priority until one is successful
 	for (const auto& move : moves)
 	{
-		int nextX = owner.posX + move.first;
-		int nextY = owner.posY + move.second;
+		int nextX = owner.position.x + move.first;
+		int nextY = owner.position.y + move.second;
 		if (game.map->can_walk(nextX, nextY))
 		{
-			owner.posX = nextX;
-			owner.posY = nextY;
+			owner.position.x = nextX;
+			owner.position.y = nextY;
 			break; // Exit the loop after a successful move
 		}
 	}
@@ -51,7 +51,7 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 
 void AiShopkeeper::moveOrTrade(Actor& owner, int targetx, int targety)
 {
-	const double distance = sqrt(pow(targetx - owner.posX, 2) + pow(targety - owner.posY, 2));
+	const double distance = sqrt(pow(targetx - owner.position.x, 2) + pow(targety - owner.position.y, 2));
 
 	if (distance >= MIN_TRADE_DISTANCE)
 	{
@@ -110,11 +110,11 @@ void AiShopkeeper::trade() {
 	delwin(tradeWin);
 }
 
-void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::vector<std::unique_ptr<Actor>>& inventoryList)
+void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Actor>> inventoryList)
 {
 	for (size_t i = 0; i < inventoryList.size(); i++)
 	{
-		mvwprintw(tradeWin, 7 + i, 1, "%d: %s", i, inventoryList[i]->name.c_str());
+		mvwprintw(tradeWin, 7 + i, 1, "%d: %s", i, inventoryList[i]->actorData.name.c_str());
 	}
 }
 
@@ -129,7 +129,7 @@ void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 	{
 		// Display available items for buying
 		mvwprintw(tradeWin, 6, 1, "Items available for purchase:");
-		display_item_list(tradeWin, shopkeeperInventory->inventoryList);
+		display_item_list(tradeWin, std::span(shopkeeperInventory->inventoryList));
 
 		wrefresh(tradeWin);
 
@@ -179,7 +179,7 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 	{
 		// Display player's items for selling
 		mvwprintw(tradeWin, 6, 1, "Items available for sale:");
-		display_item_list(tradeWin, playerInventory->inventoryList);
+		display_item_list(tradeWin, std::span(playerInventory->inventoryList));
 
 		wrefresh(tradeWin);
 
@@ -223,7 +223,7 @@ void AiShopkeeper::update(Actor& owner)
 		return; // do nothing
 	}
 
-	if (game.map->is_in_fov(owner.posX, owner.posY)) // if the owner is in the fov
+	if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
 	{
 		// move towards the player
 		moveCount = TRACKING_TURNS;
@@ -235,7 +235,7 @@ void AiShopkeeper::update(Actor& owner)
 
 	if (moveCount > 0) // if the move count is greater than 0
 	{
-		moveOrTrade(owner, game.player->posX, game.player->posY); // move or trade with the player
+		moveOrTrade(owner, game.player->position.x, game.player->position.y); // move or trade with the player
 	}
 }
 

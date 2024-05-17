@@ -3,12 +3,13 @@
 #define GOBLIN_H
 
 #include "../Actor/Actor.h"
+#include "../Colors/Colors.h"
 
 //==GOBLIN==
 class Goblin : public Actor
 {
 public:
-	Goblin(int y, int x);
+	Goblin(Vector2D position);
 };
 //====
 
@@ -16,7 +17,7 @@ public:
 class Orc : public Actor
 {
 public:
-	Orc(int y, int x);
+	Orc(Vector2D position);
 };
 //====
 
@@ -24,7 +25,7 @@ public:
 class Troll : public Actor
 {
 public:
-	Troll(int y, int x);
+	Troll(Vector2D position);
 };
 //====
 
@@ -32,7 +33,7 @@ public:
 class Dragon : public Actor
 {
 public:
-	Dragon(int y, int x);
+	Dragon(Vector2D position);
 };
 //====
 

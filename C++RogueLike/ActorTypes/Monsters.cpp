@@ -7,7 +7,20 @@
 #include "../Random/RandomDice.h"
 
 //==GOBLIN==
-Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
+ActorData goblinData
+{
+	'g',
+	"goblin",
+	GOBLIN_PAIR
+};
+ActorFlags goblinFlags
+{
+	true,
+	true,
+	false,
+	false
+};
+Goblin::Goblin(Vector2D position) : Actor(position, goblinData, goblinFlags)
 {
 	RandomDice d;
 	const int damage = d.d6();
@@ -16,9 +29,6 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 	const int dmgMax = 6;
 	const int thaco = 20;
 	const int ac = 6;
-
-	blocks = true;
-	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 
@@ -38,7 +48,20 @@ Goblin::Goblin(int y, int x) : Actor(y, x, 'g', "goblin", GOBLIN_PAIR, 0)
 //====
 
 //==ORC==
-Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
+ActorData orcData
+{
+	'o',
+	"orc",
+	ORC_PAIR
+};
+ActorFlags orcFlags
+{
+	true,
+	true,
+	false,
+	false
+};
+Orc::Orc(Vector2D position) : Actor(position, orcData, orcFlags)
 {
 	RandomDice d;
 	const int damage = d.d10();
@@ -47,9 +70,6 @@ Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
 	const int hp = d.d10();
 	const int thaco = 19;
 	const int ac = 6;
-
-	blocks = true;
-	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 
@@ -69,7 +89,20 @@ Orc::Orc(int y, int x) : Actor(y, x, 'o', "orc", ORC_PAIR, 0)
 //====
 
 //==TROLL===
-Troll::Troll(int y, int x) : Actor(y, x, 'T', "troll", TROLL_PAIR, 0)
+ActorData trollData
+{
+	'T',
+	"troll",
+	TROLL_PAIR
+};
+ActorFlags trollFlags
+{
+	true,
+	true,
+	false,
+	false
+};
+Troll::Troll(Vector2D position) : Actor(position, trollData, trollFlags)
 {
 	RandomDice d;
 	const int damage = d.d10() + 3;
@@ -78,9 +111,6 @@ Troll::Troll(int y, int x) : Actor(y, x, 'T', "troll", TROLL_PAIR, 0)
 	const int hp = d.d12();
 	const int thaco = 13;
 	const int ac = 4;
-
-	blocks = true;
-	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 
@@ -98,7 +128,20 @@ Troll::Troll(int y, int x) : Actor(y, x, 'T', "troll", TROLL_PAIR, 0)
 //====
 
 //==DRAGON===
-Dragon::Dragon(int y, int x) : Actor(y, x, 'D', "dragon", DRAGON_PAIR, 100)
+ActorData dragonData
+{
+	'D',
+	"dragon",
+	DRAGON_PAIR
+};
+ActorFlags dragonFlags
+{
+	true,
+	true,
+	false,
+	false
+};
+Dragon::Dragon(Vector2D position) : Actor(position, dragonData, dragonFlags)
 {
 	RandomDice d;
 	const int damage = d.d12() + 5;
@@ -107,9 +150,6 @@ Dragon::Dragon(int y, int x) : Actor(y, x, 'D', "dragon", DRAGON_PAIR, 100)
 	const int hp = d.d12() + 5;
 	const int thaco = 9;
 	const int ac = 1;
-
-	blocks = true;
-	fovOnly = true;
 
 	strength = d.d6() + d.d6() + d.d6();
 

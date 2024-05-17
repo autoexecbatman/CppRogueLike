@@ -30,7 +30,7 @@ std::string MenuName::menu_name_input()
 
 void MenuName::menu_name_store() { playerName = name; }
 
-void MenuName::menu_name_assign() { game.player->name = playerName; }
+void MenuName::menu_name_assign() { game.player->actorData.name = playerName; }
 
 void MenuName::menu_name()
 {
