@@ -134,7 +134,6 @@ void Actor::update()
 int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
 	// using chebyshev distance
-	/*const int distance = std::max(abs(posX - tileX), abs(posY - tileY));*/
 	const int distance = std::max(abs(position.x - tilePosition.x), abs(position.y - tilePosition.y));
 
 	mvprintw(10, 0, "Distance: %d", distance);
