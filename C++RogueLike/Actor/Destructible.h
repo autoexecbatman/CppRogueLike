@@ -24,7 +24,7 @@ public:
 	int needToSleep{ 0 };
 
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	virtual ~Destructible() {};
+	virtual ~Destructible() = default;
 	Destructible(const Destructible&) = delete;
 	Destructible(Destructible&&) = delete;
 	Destructible& operator=(const Destructible&) = delete;
@@ -37,7 +37,7 @@ public:
 	void take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
 
 	//virtual void die(Actor* owner); // handles death, owner killed
-	void die(Actor& owner); // handles death, owner killed
+	virtual void die(Actor& owner); // handles death, owner killed
 
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 
@@ -69,7 +69,7 @@ public:
 	//====
 	//handles death, owner killed
 	/*void die(Actor* owner);*/
-	void die(Actor& owner);
+	void die(Actor& owner) override;
 	void save(TCODZip& zip);
 };
 
@@ -89,7 +89,7 @@ public:
 	//====
 	//handles death, owner killed	
 	/*void die(Actor* owner);*/
-	void die(Actor& owner);
+	void die(Actor& owner) override;
 	void save(TCODZip& zip);
 };
 

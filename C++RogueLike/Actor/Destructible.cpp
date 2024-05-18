@@ -165,9 +165,6 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Actor& owner)
 {
-	/*std::cout << "You died!\n" << std::endl;*/
-	/*int y = getmaxy(stdscr);*/
-	mvprintw(29, 0, "You died!\n", owner.actorData.name.c_str());
 	Destructible::die(owner);
 	game.gameStatus = Game::GameStatus::DEFEAT;
 }
@@ -187,14 +184,18 @@ MonsterDestructible::MonsterDestructible(
 
 void MonsterDestructible::die(Actor& owner)
 {
-	mvprintw(29,0,"%s is dead\n", owner.actorData.name.c_str());
+	// message which monster is dead
+	game.appendMessagePart(owner.actorData.color, std::format("{}", owner.actorData.name));
+	game.appendMessagePart(WHITE_PAIR, " is dead.\n");
+	game.finalizeMessage();
 	
-	game.gui->log_message(
-		WHITE_PAIR,
-		"%s is dead. You gain %d xp\n",
-		owner.actorData.name.c_str(),
-		xp
-	);
+	// message how much xp you get
+	game.appendMessagePart(WHITE_PAIR, "You get ");
+	game.appendMessagePart(GOBLIN_PAIR, std::format("{}", xp));
+	game.appendMessagePart(WHITE_PAIR, " experience points.\n");
+	game.finalizeMessage();
+
+	// increase the player's experience
 	game.player->destructible->xp += xp;
 
 	Destructible::die(owner);

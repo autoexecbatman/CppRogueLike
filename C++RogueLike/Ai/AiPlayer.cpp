@@ -249,6 +249,18 @@ void AiPlayer::update(Actor& owner)
 		game.display_debug_messages();
 	}
 
+	case Controls::REVEAL:
+	{
+		game.map->reveal();
+		break;
+	}
+
+	case Controls::REGEN:
+	{
+		game.map->regenerate();
+		break;
+	}
+
 	default:break;
 	}
 

@@ -73,5 +73,11 @@ enum class Controls
 
 	// the controls for the player to enter debug mode
 	DEBUG = 'z',
+
+	// the controls for the player to reveal the map
+	REVEAL = 'm',
+
+	// the controls for the player to regenerate the map
+	REGEN = 'r',
 };
 #endif // !CONTROLS_H

@@ -9,7 +9,8 @@
 
 using json = nlohmann::json;
 
-void from_json(const json& j, StrengthAttributes& p) {
+void from_json(const json& j, StrengthAttributes& p)
+{
 	j.at("Str").get_to(p.Str);
 	j.at("Hit").get_to(p.hitProb);
 	j.at("Dmg").get_to(p.dmgAdj);
@@ -20,29 +21,35 @@ void from_json(const json& j, StrengthAttributes& p) {
 	j.at("Notes").get_to(p.notes);
 }
 
-std::vector<StrengthAttributes> loadStrengthAttributes() {
+std::vector<StrengthAttributes> loadStrengthAttributes()
+{
 	std::ifstream i("strength.json");
 
-	if (!i.is_open()) {
+	if (!i.is_open())
+	{
 		game.log("Error: Unable to open strength.json. Error " + std::to_string(errno));
 		throw std::runtime_error("Error: Unable to open strength.json. Error " + std::to_string(errno));
 	}
 
 	json j;
-	try {
+	try
+	{
 		i >> j;
 	}
-	catch (const json::parse_error& e) {
+	catch (const json::parse_error& e)
+	{
 		std::ostringstream oss;
 		oss << "Error: Unable to parse strength.json. Exception details: " << e.what();
 		throw std::runtime_error(oss.str());
 	}
 
-	try {
+	try
+	{
 		std::vector<StrengthAttributes> strengthChart = j.get<std::vector<StrengthAttributes>>();
 		return strengthChart;
 	}
-	catch (const json::type_error& e) {
+	catch (const json::type_error& e)
+	{
 		std::ostringstream oss;
 		oss << "Error: Unable to convert JSON to vector<StrengthAttributes>. Exception details: " << e.what();
 		throw std::runtime_error(oss.str());

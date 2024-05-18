@@ -82,7 +82,7 @@ public:
 	ActorFlags flags{ true,true,true,true };
 	
 	std::unique_ptr<Attacker> attacker; // the actor can attack
-	gsl::not_null<std::unique_ptr<Destructible>> destructible; // the actor can be destroyed
+	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<Container> container; // the actor can be a container
 	std::unique_ptr<Pickable> pickable; // the actor can be picked

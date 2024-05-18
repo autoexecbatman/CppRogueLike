@@ -59,7 +59,7 @@ int main()
 	//==INIT_GUI==
 	Gui gui;
 	gui.gui_init();
-
+	game.disableDebugMode();
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{

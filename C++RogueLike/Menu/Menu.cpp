@@ -192,7 +192,7 @@ void Menu::menu()
 		menu_print_option(MenuOptions::LOAD_GAME, 2);
 		menu_print_option(MenuOptions::OPTIONS, 3);
 		menu_print_option(MenuOptions::QUIT, 4);
-		/*box(menuWindow, 0, 0);*/
+
 		menu_refresh(); // refresh menu window each frame to show changes
 
 		menu_key_listen(); // listen for key presses

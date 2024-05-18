@@ -15,6 +15,8 @@ inline constexpr int MAP_WIDTH = 119;
 inline constexpr int FOV_RADIUS = 10;
 
 inline constexpr auto ROOM_MAX_SIZE = 12;
+inline constexpr auto ROOM_HORIZONTAL_MAX_SIZE = 20;
+inline constexpr auto ROOM_VERTICAL_MAX_SIZE = 10;
 inline constexpr auto ROOM_MIN_SIZE = 6;
 inline constexpr auto MAX_ROOM_MONSTERS = 1; // TODO: check if this is used at all 
 inline constexpr int MAX_ROOM_ITEMS = 4;
@@ -79,6 +81,9 @@ public:
 	void render() const;
 	void add_item(int x, int y);
 	Actor* get_actor(int x, int y) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	
+	void reveal(); // reveal the map
+	void regenerate(); // regenerate the map
 
 protected:
 	std::unique_ptr<Tile[]> tiles{};

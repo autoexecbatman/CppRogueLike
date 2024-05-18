@@ -3,7 +3,8 @@
 #include <string>
 #include <vector>
 
-struct StrengthAttributes {
+struct StrengthAttributes
+{
     int Str{};
     int hitProb{};
     int dmgAdj{};
@@ -16,4 +17,4 @@ struct StrengthAttributes {
     void print_chart();
 };
 
-std::vector<StrengthAttributes> loadStrengthAttributes();
+inline std::vector<StrengthAttributes> loadStrengthAttributes();

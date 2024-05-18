@@ -35,13 +35,7 @@ Goblin::Goblin(Vector2D position) : Actor(position, goblinData, goblinFlags)
 	weaponEquipped = "Short Sword";
 
 	attacker = std::make_unique<Attacker>(damage, dmgMin, dmgMax);
-	/*destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead goblin", 15, thaco, ac);*/
-	destructible->hp = hp;
-	destructible->dr = 0;
-	destructible->corpseName = "dead goblin";
-	destructible->xp = 15;
-	destructible->thaco = thaco;
-	destructible->armorClass = ac;
+	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead goblin", 15, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
 }
@@ -76,13 +70,7 @@ Orc::Orc(Vector2D position) : Actor(position, orcData, orcFlags)
 	weaponEquipped = "Long Sword";
 
 	attacker = std::make_unique<Attacker>(damage, dmgMin, dmgMax);
-	/*destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead orc", 35, thaco, ac);*/
-	destructible->hp = hp;
-	destructible->dr = 0;
-	destructible->corpseName = "dead orc";
-	destructible->xp = 35;
-	destructible->thaco = thaco;
-	destructible->armorClass = ac;
+	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead orc", 35, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
 }
@@ -115,13 +103,7 @@ Troll::Troll(Vector2D position) : Actor(position, trollData, trollFlags)
 	strength = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>(damage, dmgMin, dmgMax);
-	/*destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 100, thaco, ac);*/
-	destructible->hp = hp;
-	destructible->dr = 1;
-	destructible->corpseName = "dead troll";
-	destructible->xp = 100;
-	destructible->thaco = thaco;
-	destructible->armorClass = ac;
+	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 100, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
 }
@@ -154,13 +136,7 @@ Dragon::Dragon(Vector2D position) : Actor(position, dragonData, dragonFlags)
 	strength = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>(damage, dmgMin, dmgMax);
-	/*destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 200, thaco, ac);*/
-	destructible->hp = hp;
-	destructible->dr = 2;
-	destructible->corpseName = "dead dragon";
-	destructible->xp = 200;
-	destructible->thaco = thaco;
-	destructible->armorClass = ac;
+	destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 200, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
 }

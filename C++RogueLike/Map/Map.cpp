@@ -72,20 +72,43 @@ public:
 
 			if (roomNum != 0)
 			{
-				// dig a corridor from last room
-				map.dig(
-					room_pos_x + room_width / 2,
-					lasty,
-					room_pos_x + room_width / 2,
-					room_pos_y + room_height / 2
-				);
-				map.dig(
-					lastx,
-					lasty,
-					room_pos_x + room_width / 2,
-					lasty
-				);
+				RandomDice d;
+				const int rolld2 = d.d2();
+				if (rolld2 == 1)
+				{
+					// dig a corridor from last room
+					map.dig(
+						room_pos_x + room_width / 2,
+						lasty,
+						room_pos_x + room_width / 2,
+						room_pos_y + room_height / 2
+					);
+					map.dig(
+						lastx,
+						lasty,
+						room_pos_x + room_width / 2,
+						lasty
+					);
 				/*map.dig(1,10,117,10);*/ // test dig
+				}
+				else
+				{
+
+					// fixed corridor
+					map.dig(
+						lastx,
+						lasty,
+						room_pos_x + room_width / 2,
+						lasty
+					);
+
+					map.dig(
+						room_pos_x + room_width / 2,
+						lasty,
+						room_pos_x + room_width / 2,
+						room_pos_y + room_height / 2
+					);
+				}
 			}
 
 			lastx = room_pos_x + room_width / 2; // set lastx to center of room
@@ -96,6 +119,39 @@ public:
 		return true;
 	}
 };
+//====
+Map::Map(int map_height, int map_width)
+	:
+	map_height(map_height),
+	map_width(map_width),
+	tcodMap(nullptr),
+	tiles(nullptr),
+	seed(0)
+{}
+
+//====
+// We have to move the map initialization code out of the constructor
+// for enabling loading the map from the file.
+void Map::init(bool withActors)
+{
+	seed = TCODRandom::getInstance()->getInt(0, INT_MAX);
+	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
+	tiles = std::make_unique<Tile[]>(map_height * map_width);
+	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
+
+	bsp(map_width, map_height, *rng_unique, withActors);
+}
+
+void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
+{
+	RandomDice d;
+	float randomRatio = d.d100();
+	TCODBsp myBSP(0, 0, map_width, map_height);
+	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
+
+	BspListener mylistener(*this);
+	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
+}
 
 void Map::load(TCODZip& zip)
 {
@@ -121,37 +177,7 @@ void Map::save(TCODZip& zip)
 	}
 }
 
-void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
-{
-	TCODBsp myBSP = TCODBsp(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 4, ROOM_MAX_SIZE, ROOM_MAX_SIZE, 1.5f, 1.5f);
-	BspListener mylistener = BspListener(*this);
-	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
-}
 
-//====
-//In Map.cpp, we allocate the TCODMap object in the constructor
-Map::Map(int map_height, int map_width)
-	:
-	map_height(map_height),
-	map_width(map_width),
-	tcodMap(nullptr),
-	tiles(nullptr)
-{
-	// a random seed for the map
-	seed = TCODRandom::getInstance()->getInt(0, INT_MAX);
-}
-
-//====
-// We have to move the map initialization code out of the constructor
-// for enabling loading the map from the file.
-void Map::init(bool withActors)
-{
-	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	tiles = std::make_unique<Tile[]>(map_height * map_width);
-	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
-	bsp(map_width, map_height, *rng_unique, withActors);
-}
 
 bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const
 {
@@ -332,16 +358,48 @@ void Map::dig(int x1, int y1, int x2, int y2)
 		std::swap(y1, y2);
 	}
 
-	for (int tileY = y1; tileY <= y2 ; tileY++)
+	RandomDice d;
+	// roll d2
+	const int rollD2 = d.d2();
+
+	if (rollD2 == 1)
 	{
-		for (int tileX = x1; tileX <= x2 ; tileX++)
+		for (int tileY = y1; tileY <= y2; tileY++)
 		{
-			tcodMap->setProperties(
-				tileX,
-				tileY,
-				true, // isTransparent
-				true // isWalkable
-			);			
+			for (int tileX = x1; tileX <= x2; tileX++)
+			{
+				tcodMap->setProperties(
+					tileX,
+					tileY,
+					true, // isTransparent
+					true // isWalkable
+				);
+			}
+		}
+	}
+	else
+	{
+		int width = x2 - x1 + 1;
+		int height = y2 - y1 + 1;
+		int centerX = (x1 + x2) / 2;
+		int centerY = (y1 + y2) / 2;
+
+		for (int tileY = y1; tileY <= y2; tileY++) {
+			// Calculate the horizontal range to create a slightly diamond shape
+			int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
+			int startX = centerX - halfWidth;
+			int endX = centerX + halfWidth;
+
+			for (int tileX = startX; tileX <= endX; tileX++) {
+				if (tileX >= x1 && tileX <= x2) {
+					tcodMap->setProperties(
+						tileX,
+						tileY,
+						true, // isTransparent
+						true  // isWalkable
+					);
+				}
+			}
 		}
 	}
 }
@@ -391,8 +449,8 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 	if (first) // if this is the first room, we need to place the player in it
 	{
-		game.player->position.y = y1 + 1;
-		game.player->position.x = x1 + 1;
+		game.player->position.y = y1 + 3;
+		game.player->position.x = x1 + 4;
 
 		// create a player from the player class and place it in the room
 	}
@@ -418,8 +476,8 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 		}
 
 		// add stairs
-		game.stairs->position.x = x1 + 1;
-		game.stairs->position.y = y1 + 1;
+		game.stairs->position.x = x1 + 4;
+		game.stairs->position.y = y1 + 3;
 	} 
 	
 	// add items
@@ -482,13 +540,7 @@ void Map::add_monster(int mon_x, int mon_y)
 
 	/*auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);*/
 	auto shopkeeper = std::make_unique<Actor>(Vector2D{ mon_y, mon_x }, ActorData{ 'S', "shopkeeper", WHITE_PAIR }, ActorFlags{ true, false, false, false });
-	/*shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);*/
-	shopkeeper->destructible->hp = 10;
-	shopkeeper->destructible->dr = 0;
-	shopkeeper->destructible->corpseName = "dead shopkeeper";
-	shopkeeper->destructible->xp = 10;
-	shopkeeper->destructible->thaco = 10;
-	shopkeeper->destructible->armorClass = 10;
+	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
 	shopkeeper->ai = std::make_unique<AiShopkeeper>();
@@ -558,6 +610,49 @@ Actor* Map::get_actor(int x, int y) noexcept
 	}
 
 	return nullptr;
+}
+
+// reveal map
+void Map::reveal()
+{
+	for (int y = 0; y < map_height; y++)
+	{
+		for (int x = 0; x < map_width; x++)
+		{
+			std::span(tiles.get(), map_width * map_height)[x + (y * map_width)].explored = true;
+		}
+	}
+}
+
+// regenerate map
+void Map::regenerate()
+{
+	auto actorIsPlayer = [this](const auto& actor) noexcept { return actor.get() == game.player; };
+	auto actorIsStairs = [this](const auto& actor) noexcept { return actor.get() == game.stairs; };
+
+	// find the player in the actors container
+	auto it = std::find_if(game.actors.begin(), game.actors.end(), actorIsPlayer);
+	// find the stairs in the actors container
+	auto itStairs = std::find_if(game.actors.begin(), game.actors.end(), actorIsStairs);
+
+	// move the player to a temporary variable
+	auto tempPlayer = std::move(*it);
+	// move the stairs to a temporary variable
+	auto tempStairs = std::move(*itStairs);
+
+	// clear the actors container except the player and the stairs
+	game.actors.clear();
+
+	// add the player and the stairs to the actors container
+	game.actors.push_back(std::move(tempPlayer));
+	game.actors.push_back(std::move(tempStairs));
+	game.player = dynamic_cast<Player*>(game.actors.front().get());
+	game.stairs = game.actors.back().get();
+
+	// generate a new map
+	game.map->map_height = MAP_HEIGHT;
+	game.map->map_width = MAP_WIDTH;
+	game.map->init(true);
 }
 
 // end of file: Map.cpp

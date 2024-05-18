@@ -90,7 +90,7 @@ void Attacker::attack(Actor& attacker, Actor& target)
 				game.appendMessagePart(WHITE_PAIR, std::format(" and hit himself instead."));
 				game.finalizeMessage();
 				// apply damage to attacker
-				attacker.destructible->take_damage(attacker, rollDmg);
+				/*attacker.destructible->take_damage(attacker, rollDmg);*/
 			}
 		}
 	}
