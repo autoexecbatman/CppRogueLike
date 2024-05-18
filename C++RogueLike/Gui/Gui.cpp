@@ -500,12 +500,12 @@ void Gui::print_container(const std::vector<std::shared_ptr<LogMessage>>& logMes
 
 void Gui::renderMouseLook()
 {
-	const int mouseX = Mouse_status.x;
 	const int mouseY = Mouse_status.y;
+	const int mouseX = Mouse_status.x;
 
 	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", mouseY, mouseX); // display the mouse position
 
-	if (!game.map->is_in_fov(Vector2D{ Mouse_status.x, Mouse_status.y }))
+	if (!game.map->is_in_fov(Vector2D{ Mouse_status.y, Mouse_status.x }))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;
