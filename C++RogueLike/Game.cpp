@@ -14,6 +14,7 @@
 #include "Actor/Attacker.h"
 #include "Actor/Pickable.h"
 #include "Actor/Container.h"
+#include "ActorTypes/Player.h"
 #include "Ai/Ai.h"
 #include "Ai/AiPlayer.h"
 #include "Map/Map.h"
@@ -21,7 +22,6 @@
 #include "Gui/Window.h"
 #include "Colors/Colors.h"
 #include "Random/RandomDice.h"
-#include "ActorTypes/Player.h"
 #include "Menu/Menu.h"
 #include "Menu/MenuGender.h"
 #include "Menu/MenuRace.h"
@@ -96,7 +96,6 @@ void Game::create_player()
 	// 1. Set the playerHp to rolls based on class and attribute modifiers.
 	// 2. Set the playerDamage to rolls based on class and attribute modifiers and weapon.
 	// 3. Set the playerAC to be based on base AC and attribute modifiers and armor.
-
 }
 
 //==UPDATE==
@@ -104,60 +103,54 @@ void Game::create_player()
 // and stores events
 void Game::update()
 {
-	// permadeath is enabled !
-	// if the player is dead, we end the game
 	if (game.player->destructible->is_dead())
 	{
-		game.log("Player is dead!"); // log the event
-
+		// if the player is dead, we end the game
+		game.log("Player is dead!");
 		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
 		game.finalizeMessage();
-
-		// set the game loop to stop
 		run = false;
 	}
-	else
+
+	if (Game::gameStatus == GameStatus::STARTUP)
 	{
-		// still alive, we update the game logic
-		// to compute the FOV only once for performance
-		// gameStatus should be set to STARTUP
-		if (Game::gameStatus == GameStatus::STARTUP)
+		// to compute the FOV only once
+		// we set the gameStatus to STARTUP
+		game.map->compute_fov();
+		
+		// adjust the attributes based on players race
+		game.player->racial_ability_adjustments();
+		game.player->calculate_thaco();
+	}
+
+	// IDLE is the default state
+	gameStatus = GameStatus::IDLE;
+	game.log("GameStatus::IDLE");
+
+	game.map->update();
+
+	// In the update procedure if the player has moved
+	// we set the gameStatus to NEW_TURN
+	// or IDLE if the player has not moved
+	game.log("Updating player...");
+	game.player->update();
+	game.log("Player updated!");
+
+	// if the player has moved we update the world
+	game.log("Updating actors...");
+	if (Game::gameStatus == GameStatus::NEW_TURN)
+	{
+		for (const auto& actor : actors)
 		{
-			game.log("...Computing FOV...");
-			game.map->compute_fov();
-
-			// adjust the attributes based on players race
-			game.player->racial_ability_adjustments();
-			game.player->calculate_thaco();
-		}
-
-		// we set the gameStatus to IDLE
-		// IDLE is the default state
-		gameStatus = GameStatus::IDLE;
-		game.log("GameStatus::IDLE");
-
-		// in the update procedure if the player has moved
-		// we set the gameStatus to NEW_TURN
-		// or IDLE if the player has not moved
-		game.log("Updating player...");
-		game.player->update();
-		game.log("Player updated!");
-
-		// if the player moved we update the world
-		game.log("Updating actors...");
-		if (Game::gameStatus == GameStatus::NEW_TURN)
-		{
-			for (const auto& actor : actors)
+			if (actor && actor->is_visible() && actor.get() != player)
 			{
-				if (actor->is_visible() && actor != nullptr && actor.get() != player)
-				{
-					game.log("Actor: " + actor->actorData.name + " is in FOV");
-					actor->update();
-				}
+				game.log("Actor: " + actor->actorData.name + " is in FOV");
+				actor->update();
 			}
 		}
-		game.log("Actors updated!");
 	}
+
+	game.log("Actors updated!");
 }
 
 //==RENDERING==
@@ -166,12 +159,7 @@ void Game::update()
 void Game::render()
 {
 	// we try to render the map first
-	try { map->render(); }
-	catch (const std::exception& e)
-	{
-		game.log(e.what());
-		exit(-1);
-	}
+	map->render();
 
 	game.log("Actors are trying to be drawn...");
 	for (const auto& actor : actors)
@@ -229,18 +217,12 @@ Actor* Game::get_closest_monster(Vector2D fromPosition, double inRange) const no
 	return closestMonster;
 }
 
-bool Game::pick_tile(int* x, int* y, int maxRange)
+bool Game::pick_tile(Vector2D* position, int maxRange)
 {
 	// the target cursor is initialized at the player's position
-	int targetCursorY = player->position.y; // init position Y
-	int targetCursorX = player->position.x; // init position X
-
-	// initialize the line position
-	int lineY = 0;
-	int lineX = 0;
-
+	Vector2D targetCursor = player->position;
 	bool run = true;
-	while (run == true)
+	while (run)
 	{
 		clear();
 
@@ -248,14 +230,12 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// if mouse move
 		if (mouse_moved())
 		{
-			request_mouse_pos();
-			targetCursorY = Mouse_status.y;
-			targetCursorX = Mouse_status.x;
+			targetCursor = get_mouse_position();
 		}
 		game.render();
 
 		// first color the player position if the cursor has moved from the player position
-		if (targetCursorY != player->position.y || targetCursorX != player->position.x)
+		if (targetCursor != player->position)
 		{
 			mvchgat(player->position.y, player->position.x, 1, A_NORMAL, WHITE_PAIR, nullptr);
 		}
@@ -270,20 +250,22 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 			// update cell x,y
 		} while (!TCODLine::step(&x, &y));
 		*/
-		TCODLine::init(player->position.x, player->position.y, targetCursorX, targetCursorY);
-		while (!TCODLine::step(&lineX, &lineY))
+		// initialize the line position
+		Vector2D line{ 0,0 };
+		TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
+		while (!TCODLine::step(&line.x, &line.y))
 		{
-			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, nullptr);
+			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, nullptr);
 		}
 
 		attron(COLOR_PAIR(HPBARMISSING_PAIR));
-		mvaddch(targetCursorY, targetCursorX, 'X');
+		mvaddch(targetCursor.y, targetCursor.x, 'X');
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
+		if (game.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
+			const auto& actor = game.map->get_actor(targetCursor);
 			// and actor is not an item
 			if (actor != nullptr)
 			{
@@ -297,8 +279,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		// highlight the possible range of the explosion make it follow the cursor
 
 		// get the center of the explosion
-		const int centerX = targetCursorX;
-		const int centerY = targetCursorY;
+		Vector2D center = targetCursor;
 
 		// get the radius of the explosion
 		const int radius = maxRange;
@@ -306,43 +287,24 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		const int sideLength = radius * 2 + 1;
 
 		// calculate the chebyshev distance from the player to maxRange
-		const int chebyshevD = std::max(abs(centerX - (centerX - radius)), abs(centerY - (centerY - radius)));
+		const int chebyshevD = std::max(abs(center.x - (center.x - radius)), abs(center.y - (center.y - radius)));
 
 		const int height = sideLength;
 		const int width = sideLength;
 
 		// Calculate the position of the aoe window
-		const int centerOfExplosionY = centerY - chebyshevD;
-		const int centerOfExplosionX = centerX - chebyshevD;
+		Vector2D centerOfExplosion = center - Vector2D{ chebyshevD, chebyshevD };
 
 		// draw the AOE in white
-		for (int tilePosX = targetCursorX - chebyshevD; tilePosX < centerOfExplosionX + width; tilePosX++)
+		for (int tilePosX = center.x - chebyshevD; tilePosX < centerOfExplosion.x + width; tilePosX++)
 		{
-			for (int tilePosY = targetCursorY - chebyshevD; tilePosY < centerOfExplosionY + height; tilePosY++)
+			for (int tilePosY = center.y - chebyshevD; tilePosY < centerOfExplosion.y + height; tilePosY++)
 			{
 				{
 					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, nullptr);
 				}
 			}
 		}
-
-		//// DEBUG
-		//mvprintw(0, 0, "param X : %d", *x);
-		//mvprintw(1, 0, "param Y : %d", *y);
-		//mvprintw(2, 0, "targetCursorX : %d", targetCursorX);
-		//mvprintw(3, 0, "targetCursorY : %d", targetCursorY);
-		//mvprintw(4, 0, "lineX : %d", lineX);
-		//mvprintw(5, 0, "lineY : %d", lineY);
-		//mvprintw(6, 0, "centerX : %d", centerX);
-		//mvprintw(7, 0, "centerY : %d", centerY);
-		//mvprintw(8, 0, "radius : %d", radius);
-		//mvprintw(9, 0, "sideLength : %d", sideLength);
-		//mvprintw(10, 0, "chebyshevD : %d", chebyshevD);
-		//mvprintw(11, 0, "height : %d", height);
-		//mvprintw(12, 0, "width : %d ", width);
-		//mvprintw(13, 0, "centerOfExplosionX : %d", centerOfExplosionX);
-		//mvprintw(14, 0, "centerOfExplosionY : %d", centerOfExplosionY);
-
 		refresh();
 
 		// get the key press
@@ -351,48 +313,46 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		{
 		case KEY_UP:
 			// move the selection cursor up
-			targetCursorY--;
+			targetCursor.y--;
 			break;
 
 		case KEY_DOWN:
 			// move the selection cursor down
-			targetCursorY++;
+			targetCursor.y++;
 			break;
 
 		case KEY_LEFT:
 			// move the selection cursor left
-			targetCursorX--;
+			targetCursor.x--;
 			break;
 
 		case KEY_RIGHT:
 			// move the selection cursor right
-			targetCursorX++;
+			targetCursor.x++;
 			break;
 
 		case 'f':
-			// if the player presses the 'f' key then the target selection is confirmed
+			// if the player presses the 'f' key
+			// then the target selection is confirmed
 			// and the target coordinates are returned
 			
 			// first display a message
-			gui->log_message(WHITE_PAIR, "Target confirmed");
+			game.message(WHITE_PAIR, "Target confirmed", true);
 			// then return the coordinates
-			*x = targetCursorX;
-			*y = targetCursorY;
+			*position = targetCursor;
 
 			return true;
 			break;
 
 		case 10:
-
-
 			// if the key enter is pressed then select the target
 			// and return the target position
-
+			game.message(WHITE_PAIR, "Attack confirmed", true);
 			// if the target is a monster then attack it
 		{
-			if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
+			if (game.map->is_in_fov(targetCursor))
 			{
-				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
+				const auto& actor = game.map->get_actor(targetCursor);
 				// and actor is not an item
 				if (actor != nullptr)
 				{
@@ -404,6 +364,7 @@ bool Game::pick_tile(int* x, int* y, int maxRange)
 		break;
 		case 'r':
 		case 27:
+			game.message(WHITE_PAIR, "Target selection canceled", true);
 			// if the key escape is pressed then cancel the target selection
 			run = false;
 			break;
@@ -445,46 +406,37 @@ void Game::run_menus() {
 	}
 }
 
+// check if the mouse has moved
 bool Game::mouse_moved() noexcept
 {
-	int old_mouse_x = Mouse_status.x;
-	int old_mouse_y = Mouse_status.y;
+	auto oldMousePos{ get_mouse_position_old() };
+	auto currentMousePos{ get_mouse_position() };
+	return currentMousePos != oldMousePos;
+}
 
-	// check if the mouse has moved
-	
-	// first we get the current mouse position
+Vector2D Game::get_mouse_position() noexcept
+{
 	request_mouse_pos();
-	
-	// then we compare it to the previous mouse position
-	if (Mouse_status.x != old_mouse_x || Mouse_status.y != old_mouse_y)
-	{
-		// if the mouse has moved, we update the old mouse position
-		old_mouse_x = Mouse_status.x;
-		old_mouse_y = Mouse_status.y;
-		return true;
-	}
-	else
-	{
-		return false;
-	}
+	Vector2D mousePos{ 0,0 };
+	mousePos.x = Mouse_status.x;
+	mousePos.y = Mouse_status.y;
+	return mousePos;
+}
 
+Vector2D Game::get_mouse_position_old() noexcept
+{
+	Vector2D oldMousePos{ 0,0 };
+	oldMousePos.x = Mouse_status.x;
+	oldMousePos.y = Mouse_status.y;
+	return oldMousePos;
 }
 
 void Game::target()
 {
-	int targetCursorY = player->position.y; // init position Y
-	int targetCursorX = player->position.x; // init position X
-
-	const int lastY = targetCursorY;
-	const int lastX = targetCursorX;
-
-	int lineY = 0;
-	int lineX = 0;
-
+	Vector2D targetCursor = player->position;
+	const Vector2D lastPosition = targetCursor;
 	bool run = true;
-
-
-	while (run == true)
+	while (run)
 	{
 		clear();
 
@@ -492,29 +444,26 @@ void Game::target()
 		// if mouse move
 		if (mouse_moved())
 		{
-			request_mouse_pos();
-			targetCursorY = Mouse_status.y;
-			targetCursorX = Mouse_status.x;
+			targetCursor = get_mouse_position();
 		}
 		game.render();
 
-		//display the FOV in white
-		
-		for (int tilePosX = 0; tilePosX < game.map->map_width; tilePosX++)
+		// display the FOV in white in row major order
+		for (Vector2D pos{ 0,0 }; pos.y < game.map->map_height; pos.y++)
 		{
-			for (int tilePosY = 0; tilePosY < game.map->map_height; tilePosY++)
+			for (pos.x = 0; pos.x < game.map->map_width; pos.x++)
 			{
-				if (game.map->is_in_fov(Vector2D{ tilePosX, tilePosY }))
+				if (game.map->is_in_fov(pos))
 				{
-					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+					mvchgat(pos.y, pos.x, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
 				}
 			}
 		}
 
 		// first color the player position if the cursor has moved from the player position
-		if (targetCursorY != player->position.y || targetCursorX != player->position.x)
+		if (targetCursor != player->position)
 		{
-			mvchgat(lastY, lastX, 1, A_NORMAL, WHITE_PAIR, NULL);
+			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_PAIR, NULL);
 		}
 
 		// draw a line using TCODLine class
@@ -527,10 +476,11 @@ void Game::target()
 			// update cell x,y
 		} while (!TCODLine::step(&x, &y));
 		*/
-		TCODLine::init(player->position.x, player->position.y, targetCursorX, targetCursorY);
-		while (!TCODLine::step(&lineX, &lineY))
+		Vector2D line{ 0,0 };
+		TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
+		while (!TCODLine::step(&line.x, &line.y))
 		{
-			mvchgat(lineY, lineX, 1, A_STANDOUT, WHITE_PAIR, NULL);
+			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, NULL);
 		}
 		
 		// the player uses the keyboard to select a target
@@ -540,14 +490,14 @@ void Game::target()
 		// 'X' is the char for the selection cursor in the target selection mode
 
 		attron(COLOR_PAIR(HPBARMISSING_PAIR));
-		mvaddch(targetCursorY,targetCursorX,'X');
+		mvaddch(targetCursor.y,targetCursor.x,'X');
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		const int distance = player->get_tile_distance(Vector2D{ targetCursorX, targetCursorY });
-		if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
+		const int distance = player->get_tile_distance(targetCursor);
+		if (game.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
+			const auto& actor = game.map->get_actor(targetCursor);
 			// and actor is not an item
 			if (actor != nullptr)
 			{
@@ -569,22 +519,22 @@ void Game::target()
 		{
 		case KEY_UP:
 			// move the selection cursor up
-			targetCursorY--;
+			targetCursor.y--;
 			break;
 
 		case KEY_DOWN:
 			// move the selection cursor down
-			targetCursorY++;
+			targetCursor.y++;
 			break;
 
 		case KEY_LEFT:
 			// move the selection cursor left
-			targetCursorX--;
+			targetCursor.x--;
 			break;
 
 		case KEY_RIGHT:
 			// move the selection cursor right
-			targetCursorX++;
+			targetCursor.x++;
 			break;
 			
 		case 10:
@@ -592,12 +542,10 @@ void Game::target()
 			// and return the target position
 			// if the target is a monster then attack it
 		{
-			if (game.map->is_in_fov(Vector2D{ targetCursorX, targetCursorY }))
+			if (game.map->is_in_fov(targetCursor))
 			{
-				const auto& actor = game.map->get_actor(targetCursorX, targetCursorY);
-				
-				// and actor is not an item
-				if (actor != nullptr)
+				const auto& actor = game.map->get_actor(targetCursor);
+				if (actor)
 				{
 					player->attacker->attack(*player, *actor);
 					run = false;
@@ -612,7 +560,8 @@ void Game::target()
 			run = false;
 			break;
 			
-		default:break;
+		default:
+			break;
 		} // end of switch (key)
 
 	} // end of while (run == true)
@@ -742,7 +691,6 @@ void Game::next_level()
 	player->destructible->heal(player->destructible->hpMax / 2);
 
 	// present a message to the player
-
 	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true);
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
@@ -778,11 +726,11 @@ void Game::next_level()
 	gameStatus = GameStatus::STARTUP;
 }
 
-Actor* Game::get_actor(int x, int y) const noexcept
+Actor* Game::get_actor(Vector2D pos) const noexcept
 {
 	for (const auto& actor : actors)
 	{
-		if (actor->position.x == x && actor->position.y == y)
+		if (actor->position == pos)
 		{
 			return actor.get();
 		}

@@ -8,14 +8,15 @@ Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(ra
 
 bool Confuser::use(Actor& owner, Actor& wearer)
 {
-	int x{ 0 }, y{ 0 }; // we modify these in pick_tile to get the target position
+	//int x{ 0 }, y{ 0 }; // we modify these in pick_tile to get the target position
+	Vector2D target{ 0, 0 };
 
-	if (!game.pick_tile(&x, &y, 0))
+	if (!game.pick_tile(&target, 0))
 	{
 		return false;
 	}
 
-	auto actor = game.get_actor(x, y); // get the actor at the target position
+	auto actor = game.get_actor(target); // get the actor at the target position
 
 	if (!actor)
 	{

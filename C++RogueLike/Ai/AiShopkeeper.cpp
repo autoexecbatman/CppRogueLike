@@ -40,7 +40,7 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	{
 		int nextX = owner.position.x + move.first;
 		int nextY = owner.position.y + move.second;
-		if (game.map->can_walk(nextX, nextY))
+		if (game.map->can_walk(Vector2D{ nextY, nextX }))
 		{
 			owner.position.x = nextX;
 			owner.position.y = nextY;

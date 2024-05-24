@@ -117,7 +117,7 @@ void Actor::unequip(Actor& item)
 
 bool Actor::is_visible() const noexcept
 {
-	return (!flags.fovOnly && game.map->is_explored(position.x, position.y)) || game.map->is_in_fov(position);
+	return (!flags.fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);
 }
 
 // the actor update

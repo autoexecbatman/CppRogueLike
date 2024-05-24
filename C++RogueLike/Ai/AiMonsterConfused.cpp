@@ -15,22 +15,19 @@ AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noe
 void AiMonsterConfused::update(Actor& owner)
 {
 	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
-	int dx = rng->getInt(-1, 1);
-	int dy = rng->getInt(-1, 1);
+	Vector2D direction{ rng->getInt(-1, 1), rng->getInt(-1, 1) };
 
-	if (dx != 0 || dy != 0)
+	if (direction != Vector2D{0, 0})
 	{
-		const int destx = owner.position.x + dx;
-		const int desty = owner.position.y + dy;
+		Vector2D destination = owner.position + direction;
 
-		if (game.map->can_walk(desty, destx))
+		if (game.map->can_walk(destination))
 		{
-			owner.position.x = destx;
-			owner.position.y = desty;
+			owner.position = destination;
 		}
 		else
 		{
-			const auto& actor = game.get_actor(destx, desty);
+			const auto& actor = game.get_actor(destination);
 			if (actor)
 			{
 				owner.attacker->attack(owner, *actor);

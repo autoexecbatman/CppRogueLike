@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <span>
+
 #include "../Persistent/Persistent.h"
 #include "../ActorTypes/Monsters.h"
 
@@ -35,11 +37,12 @@ enum class TileType
 	// Add more as needed...
 };
 
-class Tile
+struct Tile
 {
-public:
-	TileType type{};
-	bool explored{ false };
+	Vector2D position;
+	TileType type;
+	bool explored;
+	Tile(Vector2D pos, TileType type) : position(pos), type(type), explored(false) {}
 };
 
 //==Map==
@@ -48,22 +51,21 @@ public:
 class Map : public Persistent
 {
 private:
-	int playerPosX{ 0 };
-	int playerPosY{ 0 };
+	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
+	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
+	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else {throw std::out_of_range { "Map::get_index() out of bounds" };} }
+	void init_tiles();
 public:
-	int map_height{}, map_width{};
+	int map_height, map_width;
 
 	Map(int map_height, int map_width);
 
-	template <typename MonsterType>
-	std::unique_ptr<MonsterType> create_monster(Vector2D position)
+	template <typename T>
+	std::unique_ptr<T> create_monster(Vector2D position)
 	{
-		auto monster = std::make_unique<MonsterType>(position);
+		auto monster = std::make_unique<T>(position);
 		return monster;
 	}
-	void set_player_pos(int x, int y) noexcept { playerPosX = x; playerPosY = y; }
-	int get_player_pos_x() const noexcept { return playerPosX; }
-	int get_player_pos_y() const noexcept { return playerPosY; }
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
@@ -71,22 +73,25 @@ public:
 	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
 
 	void init(bool withActors);
-	bool is_wall(int isWall_pos_y, int isWall_pos_x) const;
-	bool is_in_fov(Vector2D position) const;
-	bool is_water(int isWater_pos_y, int isWater_pos_x) const;
-	bool is_explored(int exp_x, int exp_y) const noexcept; //indicates whether this tile has already been seen by the player
-	bool can_walk(int canw_x, int canw_y) const;
-	void add_monster(int mon_x, int mon_y);
+	bool is_wall(Vector2D pos) const;
+	bool is_in_fov(Vector2D pos) const;
+	bool is_water(Vector2D pos) const;
+	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
+	void set_explored(Vector2D pos) const; //set the tile as explored
+	bool can_walk(Vector2D pos) const;
+	void add_monster(Vector2D pos);
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
+	void update();
 	void render() const;
-	void add_item(int x, int y);
-	Actor* get_actor(int x, int y) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	void add_item(Vector2D pos);
+	Actor* get_actor(Vector2D pos) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
 
 protected:
-	std::unique_ptr<Tile[]> tiles{};
+	/*std::unique_ptr<Tile[]> tiles{};*/
+	std::vector<std::unique_ptr<Tile>> tiles;
 	std::unique_ptr<TCODMap> tcodMap{};
 	std::unique_ptr<TCODRandom> rng_unique{};
 	long seed{};

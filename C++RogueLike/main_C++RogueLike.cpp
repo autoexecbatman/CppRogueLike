@@ -59,14 +59,12 @@ int main()
 	//==INIT_GUI==
 	Gui gui;
 	gui.gui_init();
-	game.disableDebugMode();
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
 		//==DEBUG==
 		game.log("//====================LOOP====================//");
-		std::string debug{ "Loop number: " + std::to_string(loopNum) + "\n" };
-		game.log(debug);
+		game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
 		//==UPDATE==
 		game.log("Running update...");

@@ -1,5 +1,6 @@
 // file: AiPlayer.cpp
 
+#include <unordered_map>
 #include <format>
 #include <gsl/util>
 
@@ -13,49 +14,19 @@ constexpr int INVENTORY_HEIGHT = 29;
 constexpr int INVENTORY_WIDTH = 30;
 
 //==PLAYER_AI==
-
-constexpr int LEVEL_UP_BASE = 200;
-constexpr int LEVEL_UP_FACTOR = 150;
-
-int AiPlayer::getNextLevelXp()
+struct PossibleMoves
 {
-	return LEVEL_UP_BASE + (game.player->playerLevel * LEVEL_UP_FACTOR);
-}
-
-//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-//int putEnum(T value) { putInt(static_cast<int>(value)); }
-//
-//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-//T getEnum() { return static_cast<T>(getInt()); }
-
-template<typename T>
-T castEnum(T value) { return static_cast<T>(value); }
-
-auto exampleInt = castEnum(Controls::UP);
-
-bool AiPlayer::levelUpUpdate(Actor& owner)
-{
-	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
-	// level up if needed
-	int levelUpXp = getNextLevelXp();
-
-	if (owner.destructible->xp >= levelUpXp)
-	{
-		game.player->playerLevel++;
-		owner.destructible->xp -= levelUpXp;
-		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
-		game.player->calculate_thaco();
-		game.dispay_levelup(game.player->playerLevel);
-	}
-
-
-	if (owner.destructible->is_dead())
-	{
-		return true;
-	}
-
-	return false;
-}
+	std::unordered_map<Controls, Vector2D> moves = {
+		{Controls::UP, {-1, 0}},
+		{Controls::DOWN, {1, 0}},
+		{Controls::LEFT, {0, -1}},
+		{Controls::RIGHT, {0, 1}},
+		{Controls::UP_LEFT, {-1, -1}},
+		{Controls::UP_RIGHT, {-1, 1}},
+		{Controls::DOWN_LEFT, {1, -1}},
+		{Controls::DOWN_RIGHT, {1, 1}}
+	};
+} m;
 
 void AiPlayer::update(Actor& owner)
 {
@@ -67,214 +38,73 @@ void AiPlayer::update(Actor& owner)
 	}
 
 	game.log("AiPlayer::update(Actor& owner)");
-	levelUpUpdate(owner); // level up if needed
+	levelup_update(owner); // level up if needed
 
-	int dx{0}, dy{0}; // movement delta
-	const Controls key{ static_cast<Controls>(game.keyPress) };
+	const Controls key = static_cast<Controls>(game.keyPress);
+	Vector2D moveVector{ 0, 0 };
 
-	// the controls for the player movement
-	switch (static_cast<Controls>(game.keyPress))
+	// Check for movement first
+	if (m.moves.find(key) != m.moves.end())
 	{
-	case Controls::UP:
-	case Controls::UP_ARROW:
-	case Controls::UP_ARROW_NUMPAD:
-	{
-		dy = -1;
-		break;
+		moveVector = m.moves.at(key);
 	}
-
-	case Controls::DOWN:
-	case Controls::DOWN_ARROW:
-	case Controls::DOWN_ARROW_NUMPAD:
+	else
 	{
-		dy = 1;
-		break;
-	}
-
-	case Controls::LEFT:
-	case Controls::LEFT_ARROW:
-	case Controls::LEFT_ARROW_NUMPAD:
-	{
-		dx = -1;
-		break;
-	}
-
-	case Controls::RIGHT:
-	case Controls::RIGHT_ARROW:
-	case Controls::RIGHT_ARROW_NUMPAD:
-	{
-		dx = 1;
-		break;
-	}
-
-	case Controls::UP_LEFT:
-	case Controls::UP_LEFT_ARROW_NUMPAD:
-	{
-		dx = -1;
-		dy = -1;
-		break;
-	}
-
-	case Controls::UP_RIGHT:
-	case Controls::UP_RIGHT_ARROW_NUMPAD:
-	{
-		dx = 1;
-		dy = -1;
-		break;
-	}
-
-	case Controls::DOWN_LEFT:
-	case Controls::DOWN_LEFT_ARROW_NUMPAD:
-	{
-		dx = -1;
-		dy = 1;
-		break;
-	}
-
-	case Controls::DOWN_RIGHT:
-	case Controls::DOWN_RIGHT_ARROW_NUMPAD:
-	{
-		dx = 1;
-		dy = 1;
-		break;
-	}
-
-	case Controls::WAIT:
-	case Controls::WAIT_ARROW_NUMPAD:
-	{
-		game.gameStatus = Game::GameStatus::NEW_TURN;
-		break;
-	}
-
-	case Controls::HIT_SELF:
-	{
-		/*game.chatGPT->start_chat();*/
-		if (game.player)
-		{
-			if (game.player->attacker)
-			{
-				game.player->attacker->attack(*game.player, *game.player);
-			}
-			else
-			{
-				std::cout << "Error: PlayerAi::update(Actor& owner). game.player->attacker is null" << std::endl;
-				exit(-1);
-			}
-
-		}
-		else
-		{
-			std::cout << "Error: PlayerAi::update(Actor& owner). game.player is null" << std::endl;
-			exit(-1);
-		}
-
-		break;
-	}
-
-	case Controls::MOUSE:
-	{
-		std::cout << "mouse" << std::endl;
-		request_mouse_pos();
-		break;
-	}
-
-	case Controls::PICK:
-	case Controls::PICK_SHIFT_STAR:
-	case Controls::PICK_NUMPAD:
-	{
-		pick_item(owner);
-		break;
-	}
-
-	case Controls::DROP:
-	{
-		Actor* actorPtr = chose_from_inventory(owner, 'a');
-		if (actorPtr)
-		{
-			auto it = std::find_if(owner.container->inventoryList.begin(), owner.container->inventoryList.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
-			std::unique_ptr<Actor> actor = std::move(*it);
-			if (actor)
-			{
-				actor->pickable->drop(std::move(actor), owner);
-				game.gameStatus = Game::GameStatus::NEW_TURN;
-			}
-		}
-		break;
-	}
-
-	case Controls::INVENTORY:
-	{
-		/*handleActionKey(owner, game.keyPress);*/
-		display_inventory(owner);
-		break;
-	}
-
-	case Controls::QUIT:
-	{
-		game.run = false;
-		game.message(WHITE_PAIR, "You quit the game ! Press any key ...",true);
-		break;
-	}
-
-	case Controls::ESCAPE: // if escape key is pressed bring the game menu
-	{
-		Menu menu;
-		menu.menu();
-		break;
-	}
-
-	case Controls::DESCEND:
-	{
-		if (game.stairs->position.x == owner.position.x && game.stairs->position.y == owner.position.y)
-		{
-			game.next_level();
-		}
-		break;
-	}
-
-	case Controls::TARGET:
-	{
-		game.target();
-		break;
-	}
-
-	case Controls::CHAR_SHEET:
-	{
-		game.display_character_sheet();
-		break;
-	}
-
-	case Controls::DEBUG:
-	{
-		game.display_debug_messages();
-	}
-
-	case Controls::REVEAL:
-	{
-		game.map->reveal();
-		break;
-	}
-
-	case Controls::REGEN:
-	{
-		game.map->regenerate();
-		break;
-	}
-
-	default:break;
+		call_action(owner, key);
 	}
 
 	// compute FOV if needed (if player moved)
-	if (dx != 0 || dy != 0)
+	if (moveVector.x != 0 || moveVector.y != 0)
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		if (moveOrAttack(owner, owner.position.x + dx, owner.position.y + dy))
+		Vector2D targetPosition = owner.position + moveVector;
+		if (move_or_attack(owner, targetPosition))
 		{
 			game.log("AiPlayer::update(Actor& owner) moveOrAttack(owner, owner.posX + dx, owner.posY + dy)");
 			game.map->compute_fov();
 		}
 	}
 	std::clog << "PlayerAi::update(Actor& owner) end" << std::endl;
+}
+
+void AiPlayer::load(TCODZip& zip)
+{
+	// this is a player, so nothing to load
+	// because the player is always the same ? 
+	// or is this for loading a saved game ?
+	// if so, then the player is not always the same
+	// so this is not correct
+	// but I don't know how to do it yet
+}
+
+void AiPlayer::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
+}
+
+int AiPlayer::get_next_level_xp(Actor& owner)
+{
+	constexpr int LEVEL_UP_BASE = 200;
+	constexpr int LEVEL_UP_FACTOR = 150;
+
+	return LEVEL_UP_BASE + (owner.playerLevel * LEVEL_UP_FACTOR);
+}
+
+// returns true if the player is dead
+void AiPlayer::levelup_update(Actor& owner)
+{
+	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
+	// level up if needed
+	int levelUpXp = get_next_level_xp(owner);
+
+	if (owner.destructible->xp >= levelUpXp)
+	{
+		game.player->playerLevel++;
+		owner.destructible->xp -= levelUpXp;
+		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
+		game.player->calculate_thaco();
+		game.dispay_levelup(game.player->playerLevel);
+	}
 }
 
 void AiPlayer::pick_item(Actor& owner)
@@ -326,6 +156,21 @@ void AiPlayer::pick_item(Actor& owner)
 	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
+void AiPlayer::drop_item(Actor& owner)
+{
+	Actor* actorPtr = chose_from_inventory(owner, 'a');
+	if (actorPtr)
+	{
+		auto it = std::find_if(owner.container->inventoryList.begin(), owner.container->inventoryList.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
+		std::unique_ptr<Actor> actor = std::move(*it);
+		if (actor)
+		{
+			actor->pickable->drop(std::move(actor), owner);
+			game.gameStatus = Game::GameStatus::NEW_TURN;
+		}
+	}
+}
+
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
 {
 	return actor.position.x == owner.position.x && actor.position.y == owner.position.y;
@@ -364,7 +209,7 @@ bool AiPlayer::try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner)
 	return picked;
 }
 
-void AiPlayer::displayInventoryItems(WINDOW* inv, const Actor& owner) noexcept
+void AiPlayer::display_inventory_items(WINDOW* inv, const Actor& owner) noexcept
 {
 	int shortcut = 'a';
 	int y = 1;
@@ -406,7 +251,7 @@ void AiPlayer::display_inventory(Actor& owner)
 	{
 		if (owner.container->inventoryList.size() > 0)
 		{
-			displayInventoryItems(inv, owner);
+			display_inventory_items(inv, owner);
 		}
 		else
 		{
@@ -469,30 +314,16 @@ Actor* AiPlayer::chose_from_inventory(Actor& owner, int ascii)
 	}
 }
 
-void AiPlayer::load(TCODZip& zip)
-{
-	// this is a player, so nothing to load
-	// because the player is always the same ? 
-	// or is this for loading a saved game ?
-	// if so, then the player is not always the same
-	// so this is not correct
-	// but I don't know how to do it yet
-}
-
-void AiPlayer::save(TCODZip& zip)
-{
-	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
-}
-
-bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
+// returns true if the action was successful
+bool AiPlayer::move_or_attack(Actor& owner, Vector2D target)
 {
 	game.log("Player tries to move or attack");
 
-	if (game.map->is_wall(targety, targetx))
+	if (game.map->is_wall(target))
 	{
 		return false;
 	}
-	else if (game.map->is_water(targety, targetx))
+	else if (game.map->is_water(target))
 	{
 		if (!owner.flags.canSwim)
 		{
@@ -507,8 +338,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 			getch();
 			clear();
 
-			owner.position.x = targetx;
-			owner.position.y = targety;
+			owner.position = target;
 			return true;
 		}
 	}
@@ -520,7 +350,7 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	{
 		if (actor != nullptr)
 		{
-			if (!actor->destructible->is_dead() && actor->position.x == targetx && actor->position.y == targety)
+			if (!actor->destructible->is_dead() && actor->position == target)
 			{
 				owner.attacker->attack(owner, *actor);
 				return false;
@@ -536,15 +366,116 @@ bool AiPlayer::moveOrAttack(Actor& owner, int targetx, int targety)
 	// look for corpses or items
 	for (const auto& actor : game.actors)
 	{
-		if ((actor->destructible->is_dead() || actor->pickable) && actor->position.x == targetx && actor->position.y == targety)
+		if ((actor->destructible->is_dead() || actor->pickable) && actor->position == target)
 		{
 			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
 			game.finalizeMessage();
 		}
 	}
 
-	owner.position.x = targetx;
-	owner.position.y = targety;
+	owner.position = target;
 
 	return true;
+}
+
+void AiPlayer::call_action(Actor& owner, Controls key)
+{
+	switch (key)
+	{
+	case Controls::WAIT:
+	case Controls::WAIT_ARROW_NUMPAD:
+	{
+		game.gameStatus = Game::GameStatus::NEW_TURN;
+		break;
+	}
+
+	case Controls::HIT_SELF:
+	{
+		game.player->attacker->attack(*game.player, *game.player);
+		break;
+	}
+
+	case Controls::MOUSE:
+	{
+		std::cout << "mouse" << std::endl;
+		request_mouse_pos();
+		break;
+	}
+
+	case Controls::PICK:
+	case Controls::PICK_SHIFT_STAR:
+	case Controls::PICK_NUMPAD:
+	{
+		pick_item(owner);
+		break;
+	}
+
+	case Controls::DROP:
+	{
+		drop_item(owner);
+		break;
+	}
+
+	case Controls::INVENTORY:
+	{
+		display_inventory(owner);
+		break;
+	}
+
+	case Controls::QUIT:
+	{
+		game.run = false;
+		game.message(WHITE_PAIR, "You quit the game ! Press any key ...", true);
+		break;
+	}
+
+	case Controls::ESCAPE: // if escape key is pressed bring the game menu
+	{
+		Menu menu;
+		menu.menu();
+		break;
+	}
+
+	case Controls::DESCEND:
+	{
+		if (game.stairs->position == owner.position)
+		{
+			game.next_level();
+		}
+		break;
+	}
+
+	case Controls::TARGET:
+	{
+		game.target();
+		break;
+	}
+
+	case Controls::CHAR_SHEET:
+	{
+		game.display_character_sheet();
+		break;
+	}
+
+	case Controls::DEBUG:
+	{
+		game.display_debug_messages();
+		break;
+	}
+
+	case Controls::REVEAL:
+	{
+		game.map->reveal();
+		break;
+	}
+
+	case Controls::REGEN:
+	{
+		game.map->regenerate();
+		break;
+	}
+
+	default:
+		break;
+}
 }

@@ -33,10 +33,60 @@ struct Vector2D
 		return { y + rhs.y, x + rhs.x };
 	}
 
+	// add two vectors
+	Vector2D operator+=(const Vector2D& rhs) noexcept
+	{
+		y += rhs.y;
+		x += rhs.x;
+		return *this;
+	}
+
 	// subtract two vectors
 	Vector2D operator-(const Vector2D& rhs) const noexcept
 	{
 		return { y - rhs.y, x - rhs.x };
+	}
+
+	// compare two vectors
+	bool operator==(const Vector2D& rhs) const noexcept
+	{
+		return y == rhs.y && x == rhs.x;
+	}
+
+	// compare two vectors
+	bool operator!=(const Vector2D& rhs) const noexcept
+	{
+		return !(*this == rhs);
+	}
+
+	// compare two vectors
+	bool operator<(const Vector2D& rhs) const noexcept
+	{
+		return y < rhs.y || (y == rhs.y && x < rhs.x);
+	}
+
+	// compare two vectors
+	bool operator>(const Vector2D& rhs) const noexcept
+	{
+		return y > rhs.y || (y == rhs.y && x > rhs.x);
+	}
+
+	// compare two vectors
+	bool operator<=(const Vector2D& rhs) const noexcept
+	{
+		return *this < rhs || *this == rhs;
+	}
+
+	// compare two vectors
+	bool operator>=(const Vector2D& rhs) const noexcept
+	{
+		return *this > rhs || *this == rhs;
+	}
+
+	// for bool conversion
+	operator bool() const noexcept
+	{
+		return y != 0 || x != 0;
 	}
 };
 
@@ -78,6 +128,7 @@ public:
 	int value{ 0 };
 
 	Vector2D position{ 0,0 };
+	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
 	ActorFlags flags{ true,true,true,true };
 	

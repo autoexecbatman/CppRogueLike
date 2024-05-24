@@ -119,13 +119,26 @@ public:
 		return true;
 	}
 };
+void Map::init_tiles()
+{
+	if (!tiles.empty())
+	{
+		tiles.clear();
+	}
+	for (int y = 0; y < map_height; y++)
+	{
+		for (int x = 0; x < map_width; x++)
+		{
+			tiles.push_back(std::make_unique<Tile>(Vector2D{ y, x }, TileType::WALL));
+		}
+	}
+}
 //====
 Map::Map(int map_height, int map_width)
 	:
 	map_height(map_height),
 	map_width(map_width),
 	tcodMap(nullptr),
-	tiles(nullptr),
 	seed(0)
 {}
 
@@ -134,9 +147,9 @@ Map::Map(int map_height, int map_width)
 // for enabling loading the map from the file.
 void Map::init(bool withActors)
 {
+	init_tiles();
 	seed = TCODRandom::getInstance()->getInt(0, INT_MAX);
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	tiles = std::make_unique<Tile[]>(map_height * map_width);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 
 	bsp(map_width, map_height, *rng_unique, withActors);
@@ -157,10 +170,10 @@ void Map::load(TCODZip& zip)
 {
 	seed = zip.getInt();
 	init(false);
-	for (int i = 0; i < map_width * map_height; i++)
+
+	for (const auto& tile : tiles)
 	{
-		const gsl::span<Tile> tiles_span(tiles.get(), map_width * map_height);
-		tiles_span[i].explored = gsl::narrow_cast<bool>(zip.getInt());
+		tile->explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
 
@@ -168,114 +181,87 @@ void Map::save(TCODZip& zip)
 {
 	zip.putInt(seed);
 
-	if (!tiles) { std::cout << "Map::save: tiles is null" << std::endl; exit(-1); }
-
-	for (int i = 0; i < map_width * map_height; i++) 
+	for (const auto& tile : tiles)
 	{
-		const gsl::span<Tile> tiles_span(tiles.get(), map_width * map_height);
-		zip.putInt(gsl::narrow_cast<int>(tiles_span[i].explored));
+		zip.putInt(gsl::narrow_cast<int>(tile->explored));
 	}
 }
 
-
-
-bool Map::is_wall(int isWall_pos_y, int isWall_pos_x) const
+bool Map::is_wall(Vector2D pos) const
 {
-	return !tcodMap->isWalkable(isWall_pos_x, isWall_pos_y);
+	return !tcodMap->isWalkable(pos.x, pos.y);
 }
 
-bool Map::is_explored(int exp_x, int exp_y) const noexcept
+bool Map::is_explored(Vector2D pos) const
 {
-	// Check if the coordinates are within the bounds of the map
-	if (exp_x < 0 || exp_x >= map_width || exp_y < 0 || exp_y >= map_height)
-	{
-		game.log("Error: Coordinates out of bounds");
-		exit(EXIT_FAILURE);
-	}
-	return gsl::span(tiles.get(), map_width * map_height)[exp_x + (exp_y * map_width)].explored;
+	return tiles.at(get_index(pos))->explored;
 }
 
-bool Map::is_in_fov(Vector2D position) const
+void Map::set_explored(Vector2D pos) const
 {
-	// Check if the coordinates are out of bounds
-	if (position.x < 0 || position.x >= MAP_WIDTH || position.y < 0 || position.y >= MAP_HEIGHT)
-	{
-		return false;
-	}
-
-	// If tcodMap is null, log an error and return false
-	if (tcodMap == nullptr)
-	{
-		game.log("Error: tcodMap is null");
-		return false;
-	}
-
-	// If the coordinates are in field of view, mark the tile as explored
-	if (tcodMap->isInFov(position.x, position.y))
-	{
-		std::span(tiles.get(), MAP_WIDTH * MAP_HEIGHT)[position.x + (position.y * MAP_WIDTH)].explored = true;
-		return true;
-	}
-	else
-	{
-		// If the coordinates are not in field of view, return false
-		return false;
-	}
+	tiles.at(get_index(pos))->explored = true;
 }
 
-bool Map::is_water(int isWater_pos_y, int isWater_pos_x) const
+bool Map::is_in_fov(Vector2D pos) const
 {
-	const int index = isWater_pos_y * map_width + isWater_pos_x;
-	return gsl::span(tiles.get(), map_width * map_height)[index].type == TileType::WATER;
+	return tcodMap->isInFov(pos.x, pos.y);
+}
+
+bool Map::is_water(Vector2D pos) const
+{
+	return tiles.at(get_index(pos))->type == TileType::WATER;
 }
 
 void Map::compute_fov()
 {
-	game.log("Map::compute_fov()");
-	if (tcodMap == nullptr)
-	{
-		game.log("Error: tcodMap is null");
-		return;
-	}
+	game.log("...Computing FOV...");
 	tcodMap->computeFov(game.player->position.x, game.player->position.y, FOV_RADIUS);
+}
+
+void Map::update()
+{
+	for (const auto& tile : tiles)
+	{
+		if (is_in_fov(tile->position))
+		{
+			set_explored(tile->position);
+		}
+	}
 }
 
 void Map::render() const
 {
 	game.log("Map::render()");
-	for (int iter_y = 0; iter_y < map_height; iter_y++)
+	for (const auto& tile : tiles)
 	{
-		for (int iter_x = 0; iter_x < map_width; iter_x++)
+		if (is_in_fov(tile->position) || is_explored(tile->position))
 		{
-			if (is_in_fov(Vector2D{ iter_y, iter_x }) || is_explored(iter_x, iter_y))
+			/*set_explored(tile->position);*/
+			if (is_wall(tile->position))
 			{
-				if (is_wall(iter_y, iter_x))
-				{
-					mvaddch(iter_y, iter_x, '#');
-				}
-				else if (is_water(iter_y, iter_x))  // Add a function to check if a tile is water
-				{
-					attron(COLOR_PAIR(WATER_PAIR));
-					mvaddch(iter_y, iter_x, '~');
-					attroff(COLOR_PAIR(WATER_PAIR));
-				}
-				else
-				{
-					mvaddch(iter_y, iter_x, '.');
-				}
+				mvaddch(tile->position.y, tile->position.x, '#');
+			}
+			else if (is_water(tile->position))
+			{
+				attron(COLOR_PAIR(WATER_PAIR));
+				mvaddch(tile->position.y, tile->position.x, '~');
+				attroff(COLOR_PAIR(WATER_PAIR));
+			}
+			else
+			{
+				mvaddch(tile->position.y, tile->position.x, '.');
 			}
 		}
 	}
 	refresh(); // Refresh once after all tiles have been drawn
+	
 	game.log("Map::render() end");
 }
 
-void Map::add_item(int x, int y)
+void Map::add_item(Vector2D pos)
 {
 	RandomDice d;
 	const int dice = d.d100();
-	int potionIndex = 0;
-
 	if (dice < 60) { // Adjust this threshold based on your game's item spawn logic
 
 		// Randomly select a weapon from the list
@@ -287,7 +273,7 @@ void Map::add_item(int x, int y)
 
 		// Create an Actor for the weapon
 		//auto weaponActor = std::make_unique<Actor>(x, y, '/', selectedWeapon.name, rollColor); // Assuming you have a generic symbol and color for weapons
-		auto weaponActor = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
+		auto weaponActor = std::make_unique<Actor>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
 		//weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon); // Assuming you have a way to handle different weapon types
 		if (selectedWeapon.name == "Dagger")
 		{
@@ -308,7 +294,7 @@ void Map::add_item(int x, int y)
 		game.actors.insert(game.actors.begin(), std::move(weaponActor));
 		
 		// add gold
-		auto gold = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
+		auto gold = std::make_unique<Actor>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
 		gold->flags.blocks = false;
 		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
 		game.actors.insert(game.actors.begin(), std::move(gold));
@@ -316,7 +302,7 @@ void Map::add_item(int x, int y)
 	else if (dice < 70)
 	{
 		// add a health potion
-		auto healthPotion = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+		auto healthPotion = std::make_unique<Actor>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
 		healthPotion->flags.blocks = false;
 		healthPotion->pickable = std::make_unique<Healer>(4);
 		game.actors.insert(game.actors.begin(), std::move(healthPotion));
@@ -324,7 +310,7 @@ void Map::add_item(int x, int y)
 	else if (dice < 70+10)
 	{
 		// add lightning scrolls
-		auto lightningScroll = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
+		auto lightningScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
 		lightningScroll->flags.blocks = false;
 		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
 		game.actors.insert(game.actors.begin(), std::move(lightningScroll));
@@ -332,7 +318,7 @@ void Map::add_item(int x, int y)
 	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
-		auto fireballScroll = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
+		auto fireballScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
 		fireballScroll->flags.blocks = false;
 		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
 		game.actors.insert(game.actors.begin(), std::move(fireballScroll));
@@ -340,7 +326,7 @@ void Map::add_item(int x, int y)
 	else
 	{
 		// add confusion scrolls
-		auto confusionScroll = std::make_unique<Actor>(Vector2D{ y, x }, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
+		auto confusionScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
 		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
 		game.actors.insert(game.actors.begin(), std::move(confusionScroll));
 	}
@@ -412,14 +398,7 @@ void Map::set_tile(int x, int y, TileType newType) noexcept
 		return;
 	}
 
-	// Calculate the index into the array
-	const int index = y * MAP_WIDTH + x;
-
-	// Make a span from the tiles array
-	const gsl::span<Tile> tilesSpan(tiles.get(), MAP_WIDTH * MAP_HEIGHT);
-
-	// Use the span for access
-	tilesSpan[index].type = newType;
+	tiles.at(y * MAP_WIDTH + x)->type = newType;
 }
 
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
@@ -464,20 +443,21 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 		const int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
 		for (int i = 0; i < numMonsters; i++)
 		{
-			const int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
-			const int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
+			//const int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
+			//const int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
+			Vector2D monsterPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
 
-			if (is_wall(monsterY, monsterX))
+			if (is_wall(monsterPos))
 			{
 				continue;
 			}
 
-			add_monster(monsterX, monsterY);
+			add_monster(monsterPos);
 		}
 
 		// add stairs
 		game.stairs->position.x = x1 + 4;
-		game.stairs->position.y = y1 + 3;
+		game.stairs->position.y = y1 + 2;
 	} 
 	
 	// add items
@@ -485,51 +465,46 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 	for (int i = 0; i < numItems; i++)
 	{
-		const int itemX = TCODRandom::getInstance()->getInt(x1, x2);
-		const int itemY = TCODRandom::getInstance()->getInt(y1, y2);
+		//const int itemX = TCODRandom::getInstance()->getInt(x1, x2);
+		//const int itemY = TCODRandom::getInstance()->getInt(y1, y2);
+		Vector2D itemPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
 
-		if (is_wall(itemY, itemX))
+		if (is_wall(itemPos))
 		{
 			continue;
 		}
 
-		add_item(itemX, itemY);
+		add_item(itemPos);
 	}
 
 }
 
 //====
 // We want to detect, when the player tries to walk on a Tile , if it is occupied by another actor.
-bool Map::can_walk(int canw_x, int canw_y) const
+bool Map::can_walk(Vector2D pos) const
 {
 	
-	if (is_wall(canw_y, canw_x)) // check if the tile is a wall
+	if (is_wall(pos)) // check if the tile is a wall
 	{
 		return false;
 	}
-	if (is_water(canw_y, canw_x)) // check if the tile is water
+	if (is_water(pos)) // check if the tile is water
 	{
 		return false;
 	}
 
-	for (const auto& actor : game.actors) // iterate through the actor deque
+	for (const auto& actor : game.actors)
 	{
-		if (
-			actor->flags.blocks // if the actor blocks
-			&& 
-			actor->position.x == canw_x // and if there is another actor on the tile
-			&& 
-			actor->position.y == canw_y
-			)
+		if (actor->flags.blocks && actor->position == pos)
 		{
 			return false;
 		}
 	}
-	
+
 	return true;
 }
 
-void Map::add_monster(int mon_x, int mon_y)
+void Map::add_monster(Vector2D pos)
 {
 	game.err("player level: " + std::to_string(game.player->playerLevel));
 	static bool dragonPlaced = false; // flag to track if a dragon has been placed
@@ -539,7 +514,7 @@ void Map::add_monster(int mon_x, int mon_y)
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
 	/*auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);*/
-	auto shopkeeper = std::make_unique<Actor>(Vector2D{ mon_y, mon_x }, ActorData{ 'S', "shopkeeper", WHITE_PAIR }, ActorFlags{ true, false, false, false });
+	auto shopkeeper = std::make_unique<Actor>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR}, ActorFlags{true, false, false, false});
 	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
@@ -547,12 +522,12 @@ void Map::add_monster(int mon_x, int mon_y)
 	shopkeeper->container = std::make_unique<Container>(10);
 	// populate the shopkeeper's inventory
 	/*auto healthPotion = std::make_unique<Actor>(0, 0, '!', "health potion", HPBARMISSING_PAIR, 0);*/
-	auto healthPotion = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+	auto healthPotion = std::make_unique<Actor>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
 	/*healthPotion->flags.blocks = false;*/
 	healthPotion->pickable = std::make_unique<Healer>(4);
 	shopkeeper->container->add(std::move(healthPotion));
 	/*auto dagger = std::make_unique<Actor>(0, 0, '/', "dagger", 1, 0);*/
-	auto dagger = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false, false });
+	auto dagger = std::make_unique<Actor>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false, false });
 	/*dagger->flags.blocks = false;*/
 	dagger->pickable = std::make_unique<Dagger>(1, 4);
 	shopkeeper->container->add(std::move(dagger));
@@ -562,23 +537,25 @@ void Map::add_monster(int mon_x, int mon_y)
 	if (placeDragon)
 	{
 		/*auto dragon = std::make_unique<Dragon>(mon_y, mon_x);*/
-		auto dragon = std::make_unique<Dragon>(Vector2D{ mon_y, mon_x });
+		auto dragon = std::make_unique<Dragon>(pos);
 		game.actors.push_back(std::move(dragon));
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
 	else
 	{
 		const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
-		for (auto i{ 0 }; i < roll4d6; i++) { // create goblins
-			auto goblin = create_monster<Goblin>(Vector2D{ mon_y, mon_x });
+		for (auto i{ 0 }; i < roll4d6; i++)
+		{ // create goblins
+			auto goblin = create_monster<Goblin>(pos);
 			game.actors.push_back(std::move(goblin));
 		}
 
 		if (game.player->playerLevel > 3)
 		{
 			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
-			for (auto i{ 0 }; i < roll2d6; i++) { // create orcs
-				auto orc = create_monster<Orc>(Vector2D{ mon_y, mon_x });
+			for (auto i{ 0 }; i < roll2d6; i++)
+			{ // create orcs
+				auto orc = create_monster<Orc>(pos);
 				game.actors.push_back(std::move(orc));
 			}
 		}
@@ -586,27 +563,23 @@ void Map::add_monster(int mon_x, int mon_y)
 		if (game.player->playerLevel > 5)
 		{
 			const auto roll1d6 = d.d6();
-			for (auto i{ 0 }; i < roll1d6; i++) { // create trolls
-				auto troll = create_monster<Troll>(Vector2D{ mon_y, mon_x });
+			for (auto i{ 0 }; i < roll1d6; i++)
+			{ // create trolls
+				auto troll = create_monster<Troll>(pos);
 				game.actors.push_back(std::move(troll));
 			}
 		}
 	}
 }
 
-Actor* Map::get_actor(int x, int y) noexcept
+Actor* Map::get_actor(Vector2D pos) noexcept
 {
-	auto it = std::find_if(
-		game.actors.begin(),
-		game.actors.end(),
-		[&](const auto& actor) noexcept
+	for (const auto& actor : game.actors)
+	{
+		if (actor->position == pos)
 		{
-			return actor->position.x == x && actor->position.y == y;
+			return actor.get();
 		}
-	);
-
-	if (it != game.actors.end()) {
-		return it->get();
 	}
 
 	return nullptr;
@@ -615,12 +588,9 @@ Actor* Map::get_actor(int x, int y) noexcept
 // reveal map
 void Map::reveal()
 {
-	for (int y = 0; y < map_height; y++)
+	for (const auto& tile : tiles)
 	{
-		for (int x = 0; x < map_width; x++)
-		{
-			std::span(tiles.get(), map_width * map_height)[x + (y * map_width)].explored = true;
-		}
+		tile->explored = true;
 	}
 }
 

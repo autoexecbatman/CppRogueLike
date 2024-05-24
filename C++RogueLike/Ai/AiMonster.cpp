@@ -69,16 +69,16 @@ void AiMonster::moveOrAttack(Actor& owner, Vector2D targetPosition)
 		target.x = static_cast<int>(round(target.x / distance));
 		target.y = static_cast<int>(round(target.y / distance));
 
-		if (game.map->can_walk(owner.position.x + target.x, owner.position.y + target.y))
+		if (game.map->can_walk(owner.position + target))
 		{
 			owner.position.x += target.x;
 			owner.position.y += target.y;
 		}
-		else if (game.map->can_walk(owner.position.x + stepX, owner.position.y))
+		else if (game.map->can_walk(Vector2D{ owner.position.y, owner.position.x + stepX }))
 		{
 			owner.position.x += stepX;
 		}
-		else if (game.map->can_walk(owner.position.x, owner.position.y + stepY))
+		else if (game.map->can_walk(Vector2D{ owner.position.y + stepY, owner.position.x }))
 		{
 			owner.position.y += stepY;
 		}

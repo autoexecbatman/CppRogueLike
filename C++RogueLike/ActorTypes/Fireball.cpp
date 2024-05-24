@@ -13,7 +13,7 @@ bool Fireball::use(Actor& owner, Actor& wearer)
 {
 	Vector2D tilePicked{ 0, 0 };
 
-	if (!game.pick_tile(&tilePicked.x, &tilePicked.y, Fireball::maxRange)) // <-- runs a while loop here
+	if (!game.pick_tile(&tilePicked, Fireball::maxRange)) // <-- runs a while loop here
 	{
 		return false;
 	}
