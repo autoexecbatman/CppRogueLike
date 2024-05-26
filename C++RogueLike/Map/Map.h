@@ -42,7 +42,7 @@ struct Tile
 	Vector2D position;
 	TileType type;
 	bool explored;
-	Tile(Vector2D pos, TileType type) : position(pos), type(type), explored(false) {}
+	Tile(Vector2D pos, TileType type) : position(pos), type(type), explored(false) {}	
 };
 
 //==Map==
@@ -77,7 +77,7 @@ public:
 	bool is_in_fov(Vector2D pos) const;
 	bool is_water(Vector2D pos) const;
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
-	void set_explored(Vector2D pos) const; //set the tile as explored
+	void set_explored(Vector2D pos); //set the tile as explored
 	bool can_walk(Vector2D pos) const;
 	void add_monster(Vector2D pos);
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
@@ -90,15 +90,14 @@ public:
 	void regenerate(); // regenerate the map
 
 protected:
-	/*std::unique_ptr<Tile[]> tiles{};*/
-	std::vector<std::unique_ptr<Tile>> tiles;
-	std::unique_ptr<TCODMap> tcodMap{};
-	std::unique_ptr<TCODRandom> rng_unique{};
-	long seed{};
+	std::vector<Tile> tiles;
+	std::unique_ptr<TCODMap> tcodMap;
+	std::unique_ptr<TCODRandom> rng_unique;
+	long seed;
 
 	friend class BspListener;
 	void dig(int x1, int y1, int x2, int y2);
-	void set_tile(int x, int y, TileType newType) noexcept;
+	void set_tile(Vector2D pos, TileType newType);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };
 

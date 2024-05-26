@@ -119,28 +119,34 @@ public:
 		return true;
 	}
 };
+
+//====
+Map::Map(int map_height, int map_width)
+	:
+	map_height(map_height),
+	map_width(map_width),
+	tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
+	rng_unique(std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC)),
+	seed(TCODRandom::getInstance()->getInt(0, INT_MAX))
+{}
+
 void Map::init_tiles()
 {
 	if (!tiles.empty())
 	{
 		tiles.clear();
 	}
-	for (int y = 0; y < map_height; y++)
+	for (auto y{ 0 }; y < map_height; y++)
 	{
-		for (int x = 0; x < map_width; x++)
+		for (auto x{ 0 }; x < map_width; x++)
 		{
-			tiles.push_back(std::make_unique<Tile>(Vector2D{ y, x }, TileType::WALL));
+			Vector2D pos{ 0, 0 };
+			pos.y = y;
+			pos.x = x;
+			tiles.emplace_back(Tile(pos, TileType::WALL));
 		}
 	}
 }
-//====
-Map::Map(int map_height, int map_width)
-	:
-	map_height(map_height),
-	map_width(map_width),
-	tcodMap(nullptr),
-	seed(0)
-{}
 
 //====
 // We have to move the map initialization code out of the constructor
@@ -171,9 +177,9 @@ void Map::load(TCODZip& zip)
 	seed = zip.getInt();
 	init(false);
 
-	for (const auto& tile : tiles)
+	for (auto& tile : tiles)
 	{
-		tile->explored = gsl::narrow_cast<bool>(zip.getInt());
+		tile.explored = gsl::narrow_cast<bool>(zip.getInt());
 	}
 }
 
@@ -183,7 +189,7 @@ void Map::save(TCODZip& zip)
 
 	for (const auto& tile : tiles)
 	{
-		zip.putInt(gsl::narrow_cast<int>(tile->explored));
+		zip.putInt(gsl::narrow_cast<int>(tile.explored));
 	}
 }
 
@@ -194,12 +200,12 @@ bool Map::is_wall(Vector2D pos) const
 
 bool Map::is_explored(Vector2D pos) const
 {
-	return tiles.at(get_index(pos))->explored;
+	return tiles.at(get_index(pos)).explored;
 }
 
-void Map::set_explored(Vector2D pos) const
+void Map::set_explored(Vector2D pos)
 {
-	tiles.at(get_index(pos))->explored = true;
+	tiles.at(get_index(pos)).explored = true;
 }
 
 bool Map::is_in_fov(Vector2D pos) const
@@ -209,7 +215,7 @@ bool Map::is_in_fov(Vector2D pos) const
 
 bool Map::is_water(Vector2D pos) const
 {
-	return tiles.at(get_index(pos))->type == TileType::WATER;
+	return tiles.at(get_index(pos)).type == TileType::WATER;
 }
 
 void Map::compute_fov()
@@ -220,11 +226,11 @@ void Map::compute_fov()
 
 void Map::update()
 {
-	for (const auto& tile : tiles)
+	for (auto& tile : tiles)
 	{
-		if (is_in_fov(tile->position))
+		if (is_in_fov(tile.position))
 		{
-			set_explored(tile->position);
+			set_explored(tile.position);
 		}
 	}
 }
@@ -234,22 +240,21 @@ void Map::render() const
 	game.log("Map::render()");
 	for (const auto& tile : tiles)
 	{
-		if (is_in_fov(tile->position) || is_explored(tile->position))
+		if (is_in_fov(tile.position) || is_explored(tile.position))
 		{
-			/*set_explored(tile->position);*/
-			if (is_wall(tile->position))
+			if (is_wall(tile.position))
 			{
-				mvaddch(tile->position.y, tile->position.x, '#');
+				mvaddch(tile.position.y, tile.position.x, '#');
 			}
-			else if (is_water(tile->position))
+			else if (is_water(tile.position))
 			{
 				attron(COLOR_PAIR(WATER_PAIR));
-				mvaddch(tile->position.y, tile->position.x, '~');
+				mvaddch(tile.position.y, tile.position.x, '~');
 				attroff(COLOR_PAIR(WATER_PAIR));
 			}
 			else
 			{
-				mvaddch(tile->position.y, tile->position.x, '.');
+				mvaddch(tile.position.y, tile.position.x, '.');
 			}
 		}
 	}
@@ -390,15 +395,9 @@ void Map::dig(int x1, int y1, int x2, int y2)
 	}
 }
 
-void Map::set_tile(int x, int y, TileType newType) noexcept
+void Map::set_tile(Vector2D pos, TileType newType)
 {
-	if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT)
-	{
-		// Coordinates out of bounds, don't do anything
-		return;
-	}
-
-	tiles.at(y * MAP_WIDTH + x)->type = newType;
+	tiles.at(get_index(pos)).type = newType;
 }
 
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
@@ -408,15 +407,16 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 	// Add water tiles
 	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
-	for (int x = x1; x <= x2; x++)
+	Vector2D waterPos{ 0,0 };
+	for (waterPos.x = x1; waterPos.x <= x2; ++waterPos.x)
 	{
-		for (int y = y1; y <= y2; y++)
+		for (waterPos.y = y1; waterPos.y <= y2; ++waterPos.y)
 		{
 			const int rolld100 = d.d100();
 			if (rolld100 < waterPercentage)
 			{
 				// Assuming you have a set_tile function that sets the tile at (x, y) to water
-				set_tile(x, y, TileType::WATER);
+				set_tile(waterPos, TileType::WATER);
 			}
 		}
 	}
@@ -443,8 +443,6 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 		const int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
 		for (int i = 0; i < numMonsters; i++)
 		{
-			//const int monsterX = TCODRandom::getInstance()->getInt(x1, x2);
-			//const int monsterY = TCODRandom::getInstance()->getInt(y1, y2);
 			Vector2D monsterPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
 
 			if (is_wall(monsterPos))
@@ -465,8 +463,6 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 	for (int i = 0; i < numItems; i++)
 	{
-		//const int itemX = TCODRandom::getInstance()->getInt(x1, x2);
-		//const int itemY = TCODRandom::getInstance()->getInt(y1, y2);
 		Vector2D itemPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
 
 		if (is_wall(itemPos))
@@ -588,9 +584,9 @@ Actor* Map::get_actor(Vector2D pos) noexcept
 // reveal map
 void Map::reveal()
 {
-	for (const auto& tile : tiles)
+	for (auto& tile : tiles)
 	{
-		tile->explored = true;
+		tile.explored = true;
 	}
 }
 
