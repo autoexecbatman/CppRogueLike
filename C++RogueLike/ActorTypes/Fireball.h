@@ -12,7 +12,7 @@ class Fireball : public LightningBolt
 public:
 	Fireball(int range, int damage);
 
-	bool use(Actor& owner, Actor& wearer);
+	bool use(Item& owner, Creature& wearer) override;
 
 	void animation(Vector2D position, int maxRange);
 

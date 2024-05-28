@@ -6,7 +6,7 @@
 #include "../Colors/Colors.h"
 
 //==GOBLIN==
-class Goblin : public Actor
+class Goblin : public Creature
 {
 public:
 	Goblin(Vector2D position);
@@ -14,7 +14,7 @@ public:
 //====
 
 //==ORC==
-class Orc : public Actor
+class Orc : public Creature
 {
 public:
 	Orc(Vector2D position);
@@ -22,7 +22,7 @@ public:
 //====
 
 //==TROLL===
-class Troll : public Actor
+class Troll : public Creature
 {
 public:
 	Troll(Vector2D position);
@@ -30,7 +30,7 @@ public:
 //====
 
 //==DRAGON===
-class Dragon : public Actor
+class Dragon : public Creature
 {
 public:
 	Dragon(Vector2D position);

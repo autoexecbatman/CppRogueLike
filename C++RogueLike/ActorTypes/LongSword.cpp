@@ -2,7 +2,7 @@
 
 LongSword::LongSword(int minDmg, int maxDmg) : minDmg(minDmg), maxDmg(maxDmg) {}
 
-bool LongSword::use(Actor& owner, Actor& wearer)
+bool LongSword::use(Item& owner, Creature& wearer)
 {
 	// equip the weapon
 	if (!owner.flags.isEquipped)

@@ -12,7 +12,7 @@ class AiMonster : public Ai
 {
 public:
 	AiMonster();
-	void update(Actor& owner) override;
+	void update(Creature& owner) override;
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
@@ -20,7 +20,7 @@ public:
 protected:
 	int moveCount = 0;
 
-	void moveOrAttack(Actor& owner, Vector2D position);
+	void moveOrAttack(Creature& owner, Vector2D position);
 };
 
 #endif // !AI_MONSTER_H

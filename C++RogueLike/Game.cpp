@@ -40,11 +40,7 @@ void Game::init()
 	game.strengthAttributes = loadStrengthAttributes();
 
 	//==STAIRS==
-	if (!game.stairs) { err("game.stairs is nullptr"); }
-	game.stairs->flags.blocks = false; // stairs are not blocking
-	game.stairs->flags.fovOnly = false; // stairs are not fovOnly
-	game.actors.push_back(std::move(stairs_unique));
-	game.stairs = game.actors.back().get();
+	game.stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
 
 	//==MAP==
 	game.map->init(true); // set the checker function
@@ -75,7 +71,7 @@ void Game::create_player()
 	const int playerLevel = game.player->playerLevel; // the player's level
 
 	// update the player pointer
-	game.player_unique = std::make_unique<Player>(
+	game.player = std::make_unique<Player>(
 		Vector2D{ 0, 0 },
 		playerHp,
 		playerDr,
@@ -89,8 +85,8 @@ void Game::create_player()
 	);
 	
 	// add the player to the actors vector for rendering
-	game.actors.push_back(std::move(game.player_unique));
-	game.player = dynamic_cast<Player*>(game.actors.back().get());
+	/*game.actors.push_back(std::move(game.player_unique));*/
+	/*game.player = dynamic_cast<Player*>(game.actors.back().get());*/
 
 	// TODO :
 	// 1. Set the playerHp to rolls based on class and attribute modifiers.
@@ -142,7 +138,7 @@ void Game::update()
 	{
 		for (const auto& actor : actors)
 		{
-			if (actor && actor->is_visible() && actor.get() != player)
+			if (actor && actor->is_visible())
 			{
 				game.log("Actor: " + actor->actorData.name + " is in FOV");
 				actor->update();
@@ -162,9 +158,15 @@ void Game::render()
 	map->render();
 
 	game.log("Actors are trying to be drawn...");
+
+	if (game.stairs->is_visible())
+	{
+		game.stairs->render();
+	}
+
 	for (const auto& actor : actors)
 	{
-		if (actor && actor.get() != player)
+		if (actor)
 		{
 			if (actor->is_visible())
 			{
@@ -174,6 +176,19 @@ void Game::render()
 			}
 		}
 	}
+
+	for (const auto& item : container->inv)
+	{
+		if (item)
+		{
+			if (item->is_visible())
+			{
+				item->render();
+				std::clog << "Item: " << item->actorData.name << " is drawn" << std::endl;
+			}
+		}
+	}
+
 	game.log("Actors are drawn");
 
 	game.log("Player is trying to be drawn...");
@@ -184,26 +199,14 @@ void Game::render()
 	// heavy on the logging here because there is alot happening in this functions
 }
 
-void Game::send_to_back(Actor& actor)
+Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
 {
-	auto actorIsInVector = [&actor](const auto& a) noexcept { return a.get() == &actor; }; // lambda to check if the actor is in the vector
-	auto it = std::find_if(actors.begin(), actors.end(), actorIsInVector); // get the iterator of the actor
-	const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
-	for (auto i = distance; i > 0; i--)
-	{
-		// swap actor with the previous actor
-		std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
-	}
-}
-
-Actor* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
-{
-	Actor* closestMonster = nullptr;
+	Creature* closestMonster = nullptr;
 	int bestDistance = INT_MAX;
 
 	for (const auto& actor : actors)
 	{
-		if (actor.get() != game.player && !actor->destructible->is_dead())
+		if (!actor->destructible->is_dead())
 		{
 			const int distance = actor->get_tile_distance(fromPosition);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
@@ -591,9 +594,9 @@ void Game::load_all()
 		/*actors.push_back(std::move(player));*/
 
 		// load the stairs
-		stairs_unique = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded stairs", WHITE_PAIR }, ActorFlags{ true, true, true, true });
-		stairs_unique->load(zip);
-		actors.push_back(std::move(stairs_unique));
+		stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
+		stairs->load(zip);
+		/*objects.push_back(std::move(stairs_unique));*/
 		/*actors.try_emplace(stairs->index, stairs);*/
 
 		// then all other actors
@@ -602,7 +605,7 @@ void Game::load_all()
 		{
 			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
 			/*std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			auto actor = std::make_unique<Actor>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true,true });
+			auto actor = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true,true });
 			actor->load(zip);
 			actors.push_back(std::move(actor));
 			/*actors.try_emplace(actor->index, actor);*/
@@ -657,7 +660,7 @@ void Game::save_all()
 
 				for (const auto& actor : actors)
 				{
-					if (actor != nullptr && actor.get() != player && actor.get() != stairs)
+					if (actor)
 					{
 						actor->save(zip);
 					}
@@ -695,38 +698,13 @@ void Game::next_level()
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 
-	auto actorIsPlayer = [this](const auto& actor) noexcept { return actor.get() == player; };
-	auto actorIsStairs = [this](const auto& actor) noexcept { return actor.get() == stairs; };
-
-	// find the player in the actors container
-	auto it = std::find_if(actors.begin(), actors.end(), actorIsPlayer);
-	// find the stairs in the actors container
-	auto itStairs = std::find_if(actors.begin(), actors.end(), actorIsStairs);
-
-	// move the player to a temporary variable
-	auto tempPlayer = std::move(*it);
-	// move the stairs to a temporary variable
-	auto tempStairs = std::move(*itStairs);
-
-	// clear the actors container except the player and the stairs
-	actors.clear();
-
-	// add the player and the stairs to the actors container
-	actors.push_back(std::move(tempPlayer));
-	actors.push_back(std::move(tempStairs));
-	player = dynamic_cast<Player*>(actors.front().get());
-	stairs = actors.back().get();
-
-	// generate a new map
-	map->map_height = MAP_HEIGHT;
-	map->map_width = MAP_WIDTH;
-	map->init(true);
+	map->regenerate();
 
 	// set the game status to STARTUP because we need to recompute the FOV 
 	gameStatus = GameStatus::STARTUP;
 }
 
-Actor* Game::get_actor(Vector2D pos) const noexcept
+Creature* Game::get_actor(Vector2D pos) const noexcept
 {
 	for (const auto& actor : actors)
 	{

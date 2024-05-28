@@ -278,7 +278,7 @@ void Map::add_item(Vector2D pos)
 
 		// Create an Actor for the weapon
 		//auto weaponActor = std::make_unique<Actor>(x, y, '/', selectedWeapon.name, rollColor); // Assuming you have a generic symbol and color for weapons
-		auto weaponActor = std::make_unique<Actor>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
+		auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
 		//weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon); // Assuming you have a way to handle different weapon types
 		if (selectedWeapon.name == "Dagger")
 		{
@@ -296,45 +296,47 @@ void Map::add_item(Vector2D pos)
 			game.log("Error: Unknown weapon type"); // Log an error if the weapon type is unknown"
 			return;
 		}
-		game.actors.insert(game.actors.begin(), std::move(weaponActor));
+		/*game.items.insert(game.items.begin(), std::move(weaponActor));*/
+		game.container->add(std::move(weaponActor));
 		
 		// add gold
-		auto gold = std::make_unique<Actor>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
+		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
 		gold->flags.blocks = false;
 		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
-		game.actors.insert(game.actors.begin(), std::move(gold));
+		/*game.items.insert(game.items.begin(), std::move(gold));*/
+
 	}
-	else if (dice < 70)
-	{
-		// add a health potion
-		auto healthPotion = std::make_unique<Actor>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
-		healthPotion->flags.blocks = false;
-		healthPotion->pickable = std::make_unique<Healer>(4);
-		game.actors.insert(game.actors.begin(), std::move(healthPotion));
-	}
-	else if (dice < 70+10)
-	{
-		// add lightning scrolls
-		auto lightningScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
-		lightningScroll->flags.blocks = false;
-		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
-		game.actors.insert(game.actors.begin(), std::move(lightningScroll));
-	}
-	else if (dice < 70 + 10 + 10)
-	{
-		// add fireball scrolls
-		auto fireballScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
-		fireballScroll->flags.blocks = false;
-		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
-		game.actors.insert(game.actors.begin(), std::move(fireballScroll));
-	}
-	else
-	{
-		// add confusion scrolls
-		auto confusionScroll = std::make_unique<Actor>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
-		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
-		game.actors.insert(game.actors.begin(), std::move(confusionScroll));
-	}
+	//else if (dice < 70)
+	//{
+	//	// add a health potion
+	//	auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+	//	healthPotion->flags.blocks = false;
+	//	healthPotion->pickable = std::make_unique<Healer>(4);
+	//	game.items.insert(game.items.begin(), std::move(healthPotion));
+	//}
+	//else if (dice < 70+10)
+	//{
+	//	// add lightning scrolls
+	//	auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
+	//	lightningScroll->flags.blocks = false;
+	//	lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
+	//	game.items.insert(game.items.begin(), std::move(lightningScroll));
+	//}
+	//else if (dice < 70 + 10 + 10)
+	//{
+	//	// add fireball scrolls
+	//	auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
+	//	fireballScroll->flags.blocks = false;
+	//	fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
+	//	game.items.insert(game.items.begin(), std::move(fireballScroll));
+	//}
+	//else
+	//{
+	//	// add confusion scrolls
+	//	auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
+	//	confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
+	//	game.items.insert(game.items.begin(), std::move(confusionScroll));
+	//}
 }
 
 void Map::dig(int x1, int y1, int x2, int y2)
@@ -510,7 +512,7 @@ void Map::add_monster(Vector2D pos)
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
 	/*auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);*/
-	auto shopkeeper = std::make_unique<Actor>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR}, ActorFlags{true, false, false, false});
+	auto shopkeeper = std::make_unique<Creature>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR}, ActorFlags{true, false, false, false});
 	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
@@ -518,12 +520,12 @@ void Map::add_monster(Vector2D pos)
 	shopkeeper->container = std::make_unique<Container>(10);
 	// populate the shopkeeper's inventory
 	/*auto healthPotion = std::make_unique<Actor>(0, 0, '!', "health potion", HPBARMISSING_PAIR, 0);*/
-	auto healthPotion = std::make_unique<Actor>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+	auto healthPotion = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
 	/*healthPotion->flags.blocks = false;*/
 	healthPotion->pickable = std::make_unique<Healer>(4);
 	shopkeeper->container->add(std::move(healthPotion));
 	/*auto dagger = std::make_unique<Actor>(0, 0, '/', "dagger", 1, 0);*/
-	auto dagger = std::make_unique<Actor>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false, false });
+	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false, false });
 	/*dagger->flags.blocks = false;*/
 	dagger->pickable = std::make_unique<Dagger>(1, 4);
 	shopkeeper->container->add(std::move(dagger));
@@ -568,7 +570,7 @@ void Map::add_monster(Vector2D pos)
 	}
 }
 
-Actor* Map::get_actor(Vector2D pos) noexcept
+Creature* Map::get_actor(Vector2D pos) noexcept
 {
 	for (const auto& actor : game.actors)
 	{
@@ -593,27 +595,9 @@ void Map::reveal()
 // regenerate map
 void Map::regenerate()
 {
-	auto actorIsPlayer = [this](const auto& actor) noexcept { return actor.get() == game.player; };
-	auto actorIsStairs = [this](const auto& actor) noexcept { return actor.get() == game.stairs; };
-
-	// find the player in the actors container
-	auto it = std::find_if(game.actors.begin(), game.actors.end(), actorIsPlayer);
-	// find the stairs in the actors container
-	auto itStairs = std::find_if(game.actors.begin(), game.actors.end(), actorIsStairs);
-
-	// move the player to a temporary variable
-	auto tempPlayer = std::move(*it);
-	// move the stairs to a temporary variable
-	auto tempStairs = std::move(*itStairs);
-
 	// clear the actors container except the player and the stairs
 	game.actors.clear();
-
-	// add the player and the stairs to the actors container
-	game.actors.push_back(std::move(tempPlayer));
-	game.actors.push_back(std::move(tempStairs));
-	game.player = dynamic_cast<Player*>(game.actors.front().get());
-	game.stairs = game.actors.back().get();
+	game.container->inv.clear();
 
 	// generate a new map
 	game.map->map_height = MAP_HEIGHT;

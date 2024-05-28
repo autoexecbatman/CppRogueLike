@@ -14,7 +14,7 @@ public:
 
 	Healer(int amountToHeal);
 
-	bool use(Actor& owner, Actor& wearer);
+	bool use(Item& owner, Creature& wearer);
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);

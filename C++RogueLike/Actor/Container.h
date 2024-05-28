@@ -10,18 +10,19 @@
 #include "../Persistent/Persistent.h"
 
 class Actor;
+class Item;
 
 class Container : public Persistent
 {
 public:
 	size_t invSize;
 
-	std::vector<std::unique_ptr<Actor>> inventoryList;
+	std::vector<std::unique_ptr<Item>> inv;
 
 	Container(size_t invSize) noexcept;
 
-	bool add(std::unique_ptr<Actor> actor);
-	void remove(std::unique_ptr<Actor> actor);
+	bool add(std::unique_ptr<Item> actor);
+	void remove(std::unique_ptr<Item> actor);
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

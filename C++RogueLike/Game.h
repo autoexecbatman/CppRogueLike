@@ -36,15 +36,13 @@ public:
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
 
-	std::unique_ptr<Player> player_unique{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
-	gsl::not_null<Player*> player{ player_unique.get() };
-	Actor* shopkeeper{ nullptr };
-	std::unique_ptr<Actor> stairs_unique{ std::make_unique<Actor>(Vector2D{0,0}, ActorData{'>', "stairs", WHITE_PAIR}, ActorFlags{true, true, false, false}) };
-	Actor* stairs{ stairs_unique.get() };
+	std::unique_ptr<Stairs> stairs;
+	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
+	Creature* shopkeeper{ nullptr };
 
 	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
 
-	gsl::not_null<std::unique_ptr<Map>> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
+	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
 
@@ -53,7 +51,10 @@ public:
 
 	int dungeonLevel{ 0 };
 
-	std::vector<std::unique_ptr<Actor>> actors; // a vector of actors
+	std::vector<std::unique_ptr<Creature>> actors; // a vector of actors
+	std::vector< std::unique_ptr<Object>> objects; // a vector of objects
+	//std::vector< std::unique_ptr<Item>> items; // a vector of items
+	std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
 
 	std::vector<Weapons> weapons; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
@@ -63,8 +64,22 @@ public:
 	void create_player();
 	void update();
 	void render();
-	void send_to_back(Actor& actor);
-	Actor* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept;
+	/*void send_to_back(Actor& actor);*/
+
+	template<typename T>
+	void send_to_back(T& actor)
+	{
+		auto actorIsInVector = [&actor](const auto& a) noexcept { return a.get() == &actor; }; // lambda to check if the actor is in the vector
+		auto it = std::find_if(actors.begin(), actors.end(), actorIsInVector); // get the iterator of the actor
+		const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
+		for (auto i = distance; i > 0; i--)
+		{
+			// swap actor with the previous actor
+			std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
+		}
+	}
+
+	Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept;
 	bool pick_tile(Vector2D* position, int maxRange);
 	void run_menus();
 
@@ -80,7 +95,7 @@ public:
 
 	// the player goes down stairs
 	void next_level();
-	Actor* get_actor(Vector2D pos) const noexcept;
+	Creature* get_actor(Vector2D pos) const noexcept;
 	void dispay_levelup(int level);
 	void display_character_sheet() noexcept;
 

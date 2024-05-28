@@ -28,7 +28,7 @@ void MenuGender::menu_gender_assign()
 	/*game.player->gender = gender;*/
 	// find the player in the vector of actors and assign gender to it
 
-	auto it = std::find_if(game.actors.begin(), game.actors.end(), [](const std::unique_ptr<Actor>& actor) { return actor->actorData.name == "Player"; });
+	auto it = std::find_if(game.actors.begin(), game.actors.end(), [](const std::unique_ptr<Creature>& actor) { return actor->actorData.name == "Player"; });
 	if (it != game.actors.end())
 	{
 		it->get()->gender = gender;

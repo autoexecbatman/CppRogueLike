@@ -49,7 +49,7 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	}
 }
 
-void AiShopkeeper::moveOrTrade(Actor& owner, int targetx, int targety)
+void AiShopkeeper::moveOrTrade(Creature& owner, int targetx, int targety)
 {
 	const double distance = sqrt(pow(targetx - owner.position.x, 2) + pow(targety - owner.position.y, 2));
 
@@ -110,7 +110,7 @@ void AiShopkeeper::trade() {
 	delwin(tradeWin);
 }
 
-void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Actor>> inventoryList)
+void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList)
 {
 	for (size_t i = 0; i < inventoryList.size(); i++)
 	{
@@ -129,7 +129,7 @@ void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 	{
 		// Display available items for buying
 		mvwprintw(tradeWin, 6, 1, "Items available for purchase:");
-		display_item_list(tradeWin, std::span(shopkeeperInventory->inventoryList));
+		display_item_list(tradeWin, std::span(shopkeeperInventory->inv));
 
 		wrefresh(tradeWin);
 
@@ -139,9 +139,9 @@ void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 			selected = choice - '0';
 
 			// Check if selected item is valid
-			if (selected < shopkeeperInventory->inventoryList.size())
+			if (selected < shopkeeperInventory->inv.size())
 			{
-				auto& item = shopkeeperInventory->inventoryList[selected];
+				auto& item = shopkeeperInventory->inv[selected];
 
 				// Check if player has enough currency
 				if (game.player->playerGold >= item->value)
@@ -150,9 +150,9 @@ void AiShopkeeper::handle_buy(WINDOW* tradeWin)
 					game.player->playerGold -= item->value;
 
 					// Transfer item from shopkeeper to player
-					game.player->container->inventoryList.insert(game.player->container->inventoryList.begin(), std::move(item));
+					game.player->container->inv.insert(game.player->container->inv.begin(), std::move(item));
 
-					shopkeeperInventory->inventoryList.erase(shopkeeperInventory->inventoryList.begin() + selected);
+					shopkeeperInventory->inv.erase(shopkeeperInventory->inv.begin() + selected);
 					mvwprintw(tradeWin, 9, 1, "Item purchased successfully.");
 					buying = false;
 				}
@@ -179,7 +179,7 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 	{
 		// Display player's items for selling
 		mvwprintw(tradeWin, 6, 1, "Items available for sale:");
-		display_item_list(tradeWin, std::span(playerInventory->inventoryList));
+		display_item_list(tradeWin, std::span(playerInventory->inv));
 
 		wrefresh(tradeWin);
 
@@ -190,9 +190,9 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 			selected = choice - '0';
 
 			// Check if selected item is valid
-			if (selected < playerInventory->inventoryList.size())
+			if (selected < playerInventory->inv.size())
 			{
-				auto& item = playerInventory->inventoryList[selected];
+				auto& item = playerInventory->inv[selected];
 
 				// Add currency to the player's total
 				game.player->playerGold += item->value;
@@ -200,7 +200,7 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 				// Transfer item from player to shopkeeper
 				game.shopkeeper->container->add(std::move(item));
 
-				playerInventory->inventoryList.erase(playerInventory->inventoryList.begin() + selected);
+				playerInventory->inv.erase(playerInventory->inv.begin() + selected);
 				mvwprintw(tradeWin, 9, 1, "Item sold successfully.");
 				selling = false;
 			}
@@ -215,7 +215,7 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 	}
 }
 
-void AiShopkeeper::update(Actor& owner)
+void AiShopkeeper::update(Creature& owner)
 {
 	game.log("Shopkeeper AI update");
 	if (owner.ai == nullptr || owner.destructible->is_dead()) // if the owner has no ai OR if the owner is dead

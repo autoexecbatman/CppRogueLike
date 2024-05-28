@@ -16,7 +16,7 @@
 #include "../Ai/AiMonsterConfused.h"
 
 //==PICKABLE==
-bool Pickable::pick(std::unique_ptr<Actor> owner, const Actor& wearer)
+bool Pickable::pick(std::unique_ptr<Item> owner, const Creature& wearer)
 {
 	if (wearer.container && wearer.container->add(std::move(owner)))
 	{
@@ -29,9 +29,8 @@ bool Pickable::pick(std::unique_ptr<Actor> owner, const Actor& wearer)
 	return false;
 }
 
-void Pickable::drop(std::unique_ptr<Actor> owner, Actor& wearer)
+void Pickable::drop(std::unique_ptr<Item> owner, const Creature& wearer)
 {
-	if (&wearer != game.player) { return; }
 	if (wearer.container)
 	{
 		owner->position = wearer.position;
@@ -39,17 +38,17 @@ void Pickable::drop(std::unique_ptr<Actor> owner, Actor& wearer)
 	}
 }
 
-bool Pickable::use(Actor& owner, Actor& wearer)
+bool Pickable::use(Item& owner, Creature& wearer)
 {
 	if (wearer.container)
 	{
-		wearer.container->inventoryList.erase(
+		wearer.container->inv.erase(
 			std::remove_if(
-				wearer.container->inventoryList.begin(),
-				wearer.container->inventoryList.end(),
-				[&owner](const std::unique_ptr<Actor>& actor) { return actor.get() == &owner; }
+				wearer.container->inv.begin(),
+				wearer.container->inv.end(),
+				[&owner](const std::unique_ptr<Item>& actor) { return actor.get() == &owner; }
 		)
-			, wearer.container->inventoryList.end());
+			, wearer.container->inv.end());
 
 		return true;
 	}

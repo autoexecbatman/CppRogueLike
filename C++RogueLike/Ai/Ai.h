@@ -9,6 +9,7 @@
 #include "../Persistent/Persistent.h"
 
 class Actor; // for no circular dependency with Actor.h
+class Creature; // for no circular dependency with Creature.h
 
 //==AI==
 class Ai : public Persistent
@@ -16,7 +17,7 @@ class Ai : public Persistent
 public:
 	virtual ~Ai() {};
 
-	virtual void update(Actor& owner) = 0;
+	virtual void update(Creature& owner) = 0;
 
 	static std::unique_ptr<Ai> create(TCODZip& zip);
 

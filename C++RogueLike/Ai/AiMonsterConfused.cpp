@@ -12,7 +12,7 @@
 //==ConfusedMonsterAi==
 AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(std::move(oldAi)) {}
 
-void AiMonsterConfused::update(Actor& owner)
+void AiMonsterConfused::update(Creature& owner)
 {
 	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
 	Vector2D direction{ rng->getInt(-1, 1), rng->getInt(-1, 1) };

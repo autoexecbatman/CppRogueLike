@@ -1,35 +1,29 @@
-// file: Ai.h
-#ifndef AIPLAYER_H
-#define AIPLAYER_H
-
 #pragma once
 
-#include <curses.h>
-#include <libtcod.h>
+class Ai;
+class TCODZip;
+class Actor;
+class Creature;
+class Item;
+class Vector2D;
+enum class Controls;
 
-#include "../Actor/Actor.h"
-#include "Ai.h"
-#include "../Controls/Controls.h"
-
-//==PLAYER_AI==
 class AiPlayer : public Ai
 {
 public:
-	void update(Actor& owner) override;
+	void update(Creature& owner) override;
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 private:
-	int get_next_level_xp(Actor& owner);
-	void levelup_update(Actor& owner);
-	void pick_item(Actor& owner);
-	void drop_item(Actor& owner);
+	int get_next_level_xp(Creature& owner);
+	void levelup_update(Creature& owner);
+	void pick_item(Creature& owner);
+	void drop_item(Creature& owner);
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
-	bool try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner);
-	void display_inventory_items(WINDOW* inv, const Actor& owner) noexcept;
-	void display_inventory(Actor& owner);
-	Actor* chose_from_inventory(Actor& owner, int ascii);
-	bool move_or_attack(Actor& owner, Vector2D target);
-	void call_action(Actor& owner, Controls key);
+	bool try_pick_actor(std::unique_ptr<Item> actor, Creature& owner);
+	void display_inventory_items(WINDOW* inv, const Creature& owner) noexcept;
+	void display_inventory(Creature& owner);
+	Item* chose_from_inventory(Creature& owner, int ascii);
+	bool move_or_attack(Creature& owner, Vector2D target);
+	void call_action(Creature& owner, Controls key);
 };
-
-#endif // !AIPLAYER_H

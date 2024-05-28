@@ -4,10 +4,9 @@
 
 #include "../Persistent/Persistent.h"
 
-class Actor;
+class Creature;
 
 //====
-
 class Destructible : public Persistent
 {
 public:
@@ -30,20 +29,14 @@ public:
 	Destructible& operator=(const Destructible&) = delete;
 	Destructible& operator=(Destructible&&) = delete;
 
-	// is the actor dead? (returns true if hp is below or equal to 0)
 	bool is_dead() noexcept { return hp <= 0; }
-
-	//int take_damage(Actor* owner, int damage); // handles damage, owner attacked, returns (dam - def)
-	void take_damage(Actor& owner, int damage); // handles damage, owner attacked, returns (dam - def)
-
-	//virtual void die(Actor* owner); // handles death, owner killed
-	virtual void die(Actor& owner); // handles death, owner killed
-
+	void take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
+	virtual void die(Creature& owner); // handles death, owner killed
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);
-	/*static Destructible* create(TCODZip& zip);*/
+
 	static std::unique_ptr<Destructible> create(TCODZip& zip);
 protected:
 	enum class DestructibleType : int
@@ -52,47 +45,22 @@ protected:
 	};
 
 };
-
 //====
-
 class MonsterDestructible : public Destructible
 {
 public:
-	MonsterDestructible(
-		int hpMax,
-		int dr,
-		std::string_view corpseName,
-		int xp,
-		int thaco,
-		int armorClass
-	);
-	//====
-	//handles death, owner killed
-	/*void die(Actor* owner);*/
-	void die(Actor& owner) override;
+	MonsterDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
+	void die(Creature& owner) override;
 	void save(TCODZip& zip);
 };
-
 //====
-
 class PlayerDestructible : public Destructible
 {
 public:
-	PlayerDestructible(
-		int hpMax,
-		int dr,
-		std::string_view corpseName,
-		int xp,
-		int thaco,
-		int armorClass
-	);
-	//====
-	//handles death, owner killed	
-	/*void die(Actor* owner);*/
-	void die(Actor& owner) override;
+	PlayerDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
+	void die(Creature& owner) override;
 	void save(TCODZip& zip);
 };
-
 //====
 
 #endif // !DESTRUCTIBLE_H

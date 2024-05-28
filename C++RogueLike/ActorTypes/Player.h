@@ -8,7 +8,7 @@
 
 
 
-class Player : public Actor
+class Player : public Creature
 {
 public:
 	enum class PlayerRaceState : int

@@ -9,10 +9,10 @@
 //==LIGHTNING_BOLT==
 LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRange), damage(damage) {}
 
-bool LightningBolt::use(Actor& owner, Actor& wearer)
+bool LightningBolt::use(Item& owner, Creature& wearer)
 {
 	// find closest enemy (inside a maximum range)
-	Actor* closestMonster = game.get_closest_monster(wearer.get_position(), maxRange);
+	const auto& closestMonster = game.get_closest_monster(wearer.get_position(), maxRange);
 
 	if (!closestMonster)
 	{

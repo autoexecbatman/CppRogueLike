@@ -9,7 +9,7 @@
 #pragma warning (pop)
 #include "../Persistent/Persistent.h"
 
-class Actor;
+class Creature;
 
 class Attacker : public Persistent
 {
@@ -22,7 +22,7 @@ public:
 
 	Attacker(int dmg, int minDmg, int maxDmg) noexcept;
 
-	void attack(Actor& attacker, Actor& target);
+	void attack(Creature& attacker, Creature& target);
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

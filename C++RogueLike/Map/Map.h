@@ -8,8 +8,10 @@
 
 #include "../Persistent/Persistent.h"
 #include "../ActorTypes/Monsters.h"
+#include "../Actor/Actor.h"
 
 class Actor;
+class Creature;
 
 inline constexpr int MAP_HEIGHT = 30 - 8;
 inline constexpr int MAP_WIDTH = 119;
@@ -84,7 +86,7 @@ public:
 	void update();
 	void render() const;
 	void add_item(Vector2D pos);
-	Actor* get_actor(Vector2D pos) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	Creature* get_actor(Vector2D pos) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map

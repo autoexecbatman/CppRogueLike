@@ -21,7 +21,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 	armorClass(armorClass)
 {}
 
-void Destructible::take_damage(Actor& owner, int damage)
+void Destructible::take_damage(Creature& owner, int damage)
 {
 	// check if damage is greater than 0
 	// if it is, then apply the damage to the actor
@@ -39,7 +39,7 @@ void Destructible::take_damage(Actor& owner, int damage)
 	}
 }
 
-void Destructible::die(Actor& owner)
+void Destructible::die(Creature& owner)
 {
 
 	//transform the actor into a corpse!
@@ -163,7 +163,7 @@ PlayerDestructible::PlayerDestructible(
 {
 }
 
-void PlayerDestructible::die(Actor& owner)
+void PlayerDestructible::die(Creature& owner)
 {
 	Destructible::die(owner);
 	game.gameStatus = Game::GameStatus::DEFEAT;
@@ -182,7 +182,7 @@ MonsterDestructible::MonsterDestructible(
 	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
 {}
 
-void MonsterDestructible::die(Actor& owner)
+void MonsterDestructible::die(Creature& owner)
 {
 	// message which monster is dead
 	game.appendMessagePart(owner.actorData.color, std::format("{}", owner.actorData.name));

@@ -2,7 +2,7 @@
 
 Dagger::Dagger(int minDmg, int maxDmg) : minDmg(minDmg), maxDmg(maxDmg) {}
 
-bool Dagger::use(Actor& owner, Actor& wearer)
+bool Dagger::use(Item& owner, Creature& wearer)
 {
 	// equip the weapon
 

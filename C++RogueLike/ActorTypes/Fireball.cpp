@@ -9,7 +9,7 @@
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
-bool Fireball::use(Actor& owner, Actor& wearer)
+bool Fireball::use(Item& owner, Creature& wearer)
 {
 	Vector2D tilePicked{ 0, 0 };
 

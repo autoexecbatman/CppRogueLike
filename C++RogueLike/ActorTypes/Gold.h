@@ -8,7 +8,7 @@ class Gold : public Pickable
 
 	Gold(int amount);
 
-	bool use(Actor& owner, Actor& wearer) override;
+	bool use(Item& owner, Creature& wearer) override;
 
 	void save(TCODZip& zip) override;
 	void load(TCODZip& zip) override;

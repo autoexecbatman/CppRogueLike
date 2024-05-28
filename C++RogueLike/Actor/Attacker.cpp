@@ -12,7 +12,7 @@
 
 Attacker::Attacker(int dmg, int minDmg, int maxDmg) noexcept : dmg(dmg), minDmg(minDmg), maxDmg(maxDmg) {}
 
-void Attacker::attack(Actor& attacker, Actor& target)
+void Attacker::attack(Creature& attacker, Creature& target)
 {
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{

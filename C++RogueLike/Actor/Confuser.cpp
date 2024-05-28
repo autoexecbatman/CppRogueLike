@@ -1,3 +1,4 @@
+#include <libtcod.h>
 #include "Confuser.h"
 #include "Actor.h"
 #include "../Game.h"
@@ -6,7 +7,7 @@
 //==Confuser==
 Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(range) {}
 
-bool Confuser::use(Actor& owner, Actor& wearer)
+bool Confuser::use(Item& owner, Creature& wearer)
 {
 	//int x{ 0 }, y{ 0 }; // we modify these in pick_tile to get the target position
 	Vector2D target{ 0, 0 };

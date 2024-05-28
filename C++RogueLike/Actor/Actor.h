@@ -18,6 +18,7 @@
 #include "Destructible.h"
 #include "Container.h"
 #include "Pickable.h"
+#include "../Colors/Colors.h"
 
 // {y,x} position
 struct Vector2D
@@ -111,6 +112,34 @@ struct ActorFlags
 class Actor : public Persistent
 {
 public:
+	Vector2D position{ 0,0 };
+	Vector2D direction{ 0,0 };
+	ActorData actorData{ 0,"string",0 };
+	ActorFlags flags{ true,true,true,true };
+	
+	Actor(Vector2D position, ActorData data, ActorFlags flags);
+	virtual ~Actor() = default;
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
+
+	int get_tile_distance(Vector2D tilePosition) const noexcept; // a function to get the distance from an actor to a specific tile of the map
+
+	void render() const noexcept; // render the actor on the screen.
+
+	int get_posY() const noexcept { return position.y; } // get the y position of the actor
+	int get_posX() const noexcept { return position.x; } // get the x position of the actor
+	Vector2D get_position() const noexcept { return position; } // get the position of the actor
+	bool is_visible() const noexcept; // check if the actor is visible
+};
+
+class Creature : public Actor
+{
+public:
+	Creature(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags) {};
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
+
+	void update(); // update() will handle the monster turn.
 	//==Actor Attributes==
 	int strength{ 0 };
 	int dexterity{ 0 };
@@ -125,41 +154,46 @@ public:
 	std::string playerRace{ "None" };
 
 	std::string weaponEquipped{ "None" };
-	int value{ 0 };
-
-	Vector2D position{ 0,0 };
-	Vector2D direction{ 0,0 };
-	ActorData actorData{ 0,"string",0 };
-	ActorFlags flags{ true,true,true,true };
-	
-	std::unique_ptr<Attacker> attacker; // the actor can attack
-	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
-	std::unique_ptr<Ai> ai; // the actor can have AI
-	std::unique_ptr<Container> container; // the actor can be a container
-	std::unique_ptr<Pickable> pickable; // the actor can be picked
-	std::unique_ptr<StrengthAttributes> strengthAttributes; // the actor can have strength attributes
-	
-	Actor(Vector2D position, ActorData data, ActorFlags flags);
-	virtual ~Actor();
-
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
-
-	void update(); // update() will handle the monster turn.
-
-	int get_tile_distance(Vector2D tilePosition) const noexcept; // a function to get the distance from an actor to a specific tile of the map
-
-	void render() const noexcept; // render the actor on the screen.
-	void pickItem(int x, int y); // pick up an item
 
 	void equip(Actor& item);
 	void unequip(Actor& item);
 
-	int get_strength() const noexcept { return strength; } // get the strength of the actor
-	int get_posY() const noexcept { return position.y; } // get the y position of the actor
-	int get_posX() const noexcept { return position.x; } // get the x position of the actor
-	Vector2D get_position() const noexcept { return position; } // get the position of the actor
-	bool is_visible() const noexcept; // check if the actor is visible
+	void pick();
+
+	std::unique_ptr<Attacker> attacker; // the actor can attack
+	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
+	std::unique_ptr<Ai> ai; // the actor can have AI
+	std::unique_ptr<Container> container; // the actor can be a container
+};
+
+class NPC : public Creature
+{
+	public:
+	NPC(Vector2D position, ActorData data, ActorFlags flags) : Creature(position, data, flags) {};
+};
+
+class Object : public Actor
+{
+public:
+	Object(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags) {};
+};
+
+class Item : public Object
+{
+public:
+	Item(Vector2D position, ActorData data, ActorFlags flags) : Object(position, data, flags) {};
+
+	void load(TCODZip& zip) override;
+	void save(TCODZip& zip) override;
+
+	int value{ 0 };
+	std::unique_ptr<Pickable> pickable; // the actor can be picked
+};
+
+class Stairs : public Object
+{
+	public:
+	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }, { true, true, false, false }) {};
 };
 
 #endif // !ACTOR_H

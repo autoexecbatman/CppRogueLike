@@ -8,7 +8,7 @@ constexpr auto TRACKING_TURNS = 3; // Used in AiMonster::update()
 
 AiMonster::AiMonster() : moveCount(0) {}
 
-void AiMonster::update(Actor& owner)
+void AiMonster::update(Creature& owner)
 {
 	game.log(owner.actorData.name + "AI is updating");
 	if (owner.ai == nullptr) // if the owner has no ai
@@ -51,14 +51,10 @@ void AiMonster::save(TCODZip& zip)
 //====
 // how many turns the monster chases the player
 // after losing his sight
-void AiMonster::moveOrAttack(Actor& owner, Vector2D targetPosition)
+void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 {
-	//int dx = targetx - owner.posX; // get the x distance
-	//int dy = targety - owner.posY; // get the y distance
 	Vector2D target = targetPosition - owner.position;
 
-	//const int stepdx = (dx > 0 ? 1 : -1); // get the x step
-	//const int stepdy = (dy > 0 ? 1 : -1); // get the y step
 	int stepX = target.x > 0 ? 1 : -1;
 	int stepY = target.y > 0 ? 1 : -1;
 

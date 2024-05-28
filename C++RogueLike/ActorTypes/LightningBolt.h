@@ -18,7 +18,7 @@ public:
 
 	LightningBolt(int range, int damage) noexcept;
 
-	bool use(Actor& owner, Actor& wearer);
+	bool use(Item& owner, Creature& wearer) override;
 
 	void load(TCODZip& zip);
 	void save(TCODZip& zip);

@@ -5,7 +5,7 @@
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}
 
-bool Healer::use(Actor& owner, Actor& wearer)
+bool Healer::use(Item& owner, Creature& wearer)
 {
 	int amountHealed = wearer.destructible->heal(amountToHeal);
 

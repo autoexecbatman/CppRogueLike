@@ -16,7 +16,7 @@ ActorFlags playerFlags{ true, true, true, false };
 
 Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg)
 	:
-	Actor(position, playerData, playerFlags)
+	Creature(position, playerData, playerFlags)
 {
 	RandomDice d;
 
@@ -30,13 +30,14 @@ Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int
 	attacker = std::make_unique<Attacker>(dmg, minDmg, maxDmg);
 	
 	//==Destructible==
-	destructible->hp = maxHp;
-	destructible->hpMax = maxHp;
-	destructible->corpseName = corpseName;
-	destructible->xp = xp;
-	destructible->thaco = thaco;
-	destructible->armorClass = armorClass;
-	destructible->dr = dr;
+	//destructible->hp = maxHp;
+	//destructible->hpMax = maxHp;
+	//destructible->corpseName = corpseName;
+	//destructible->xp = xp;
+	//destructible->thaco = thaco;
+	//destructible->armorClass = armorClass;
+	//destructible->dr = dr;
+	destructible = std::make_unique<Destructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
 
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);

@@ -6,6 +6,8 @@
 
 #include "../Persistent/Persistent.h"
 class Actor;
+class Creature;
+class Item;
 
 //==PICKABLE==
 //==
@@ -14,10 +16,10 @@ class Pickable : public Persistent
 public:
 	virtual ~Pickable() {};
 
-	bool pick(std::unique_ptr<Actor> owner, const Actor& wearer);
-	void drop(std::unique_ptr<Actor> owner, Actor& wearer);
+	bool pick(std::unique_ptr<Item> owner, const Creature& wearer);
+	void drop(std::unique_ptr<Item> owner, const Creature& wearer);
 
-	virtual bool use(Actor& owner, Actor& wearer);
+	virtual bool use(Item& owner, Creature& wearer);
 	/*static Pickable* create(TCODZip& zip);*/
 	static std::unique_ptr<Pickable> create(TCODZip& zip);
 	

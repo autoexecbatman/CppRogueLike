@@ -1,13 +1,16 @@
 // file: AiPlayer.cpp
-
+#include <curses.h>
+#include <libtcod.h>
 #include <unordered_map>
 #include <format>
 #include <gsl/util>
 
+#include "Ai.h"
 #include "AiPlayer.h"
 #include "../Game.h"
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
+#include "../Actor/Actor.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -28,15 +31,8 @@ struct PossibleMoves
 	};
 } m;
 
-void AiPlayer::update(Actor& owner)
+void AiPlayer::update(Creature& owner)
 {
-	// if owner is not the player, return
-	if (&owner != game.player)
-	{
-		game.log("AiPlayer::update(Actor& owner) owner.ai != game.player");
-		return;
-	}
-
 	game.log("AiPlayer::update(Actor& owner)");
 	levelup_update(owner); // level up if needed
 
@@ -82,7 +78,7 @@ void AiPlayer::save(TCODZip& zip)
 	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
 }
 
-int AiPlayer::get_next_level_xp(Actor& owner)
+int AiPlayer::get_next_level_xp(Creature& owner)
 {
 	constexpr int LEVEL_UP_BASE = 200;
 	constexpr int LEVEL_UP_FACTOR = 150;
@@ -90,8 +86,7 @@ int AiPlayer::get_next_level_xp(Actor& owner)
 	return LEVEL_UP_BASE + (owner.playerLevel * LEVEL_UP_FACTOR);
 }
 
-// returns true if the player is dead
-void AiPlayer::levelup_update(Actor& owner)
+void AiPlayer::levelup_update(Creature& owner)
 {
 	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
@@ -107,62 +102,19 @@ void AiPlayer::levelup_update(Actor& owner)
 	}
 }
 
-void AiPlayer::pick_item(Actor& owner)
+void AiPlayer::pick_item(Creature& owner)
 {
-	if (game.actors.empty())
-	{
-		game.log("Error: PlayerAi::pick_item(Actor& owner). game.actors is empty");
-		exit(-1);
-	}
-
-	bool found = false; // true if an item was found at the player's position
-
-	// search for an item at the player's position
-	for (auto& actor : game.actors) // we don't use a reference here because we are modifying the vector
-	{
-		// Skip null actors
-		if (actor == nullptr)
-		{
-			game.log("Error: PlayerAi::pick_item(Actor& owner). game.actors contains null pointer");
-			exit(-1);
-		}
-
-		game.log("Checking actor " + actor->actorData.name);
-
-		// Skip actors without a pickable component
-		if (actor->pickable == nullptr)
-		{
-			game.log("Skipping actor " + actor->actorData.name + " because it has no pickable component");
-			continue;
-		}
-
-		// Check if the actor can be picked up at the player's position
-		if (is_pickable_at_position(*actor, owner))
-		{
-			// Try to pick up the actor
-			found = try_pick_actor(std::move(actor), owner); // the actor gets deleted in this function if it was picked up
-
-			if (found)
-			{
-				break;
-			}
-			else
-			{
-				game.message(WHITE_PAIR, "There is nothing to pick up.", true);
-			}
-		}
-	}
-
+	owner.pick();
 	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
-void AiPlayer::drop_item(Actor& owner)
+void AiPlayer::drop_item(Creature& owner)
 {
-	Actor* actorPtr = chose_from_inventory(owner, 'a');
+	Item* actorPtr = chose_from_inventory(owner, 'a');
 	if (actorPtr)
 	{
-		auto it = std::find_if(owner.container->inventoryList.begin(), owner.container->inventoryList.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
-		std::unique_ptr<Actor> actor = std::move(*it);
+		auto it = std::find_if(owner.container->inv.begin(), owner.container->inv.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
+		std::unique_ptr<Item> actor = std::move(*it);
 		if (actor)
 		{
 			actor->pickable->drop(std::move(actor), owner);
@@ -173,10 +125,10 @@ void AiPlayer::drop_item(Actor& owner)
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
 {
-	return actor.position.x == owner.position.x && actor.position.y == owner.position.y;
+	return actor.position == owner.position;
 }
 
-bool AiPlayer::try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner)
+bool AiPlayer::try_pick_actor(std::unique_ptr<Item> actor, Creature& owner)
 {
 	game.log("Trying to pick actor " + actor->actorData.name);
 	bool picked{};
@@ -209,13 +161,13 @@ bool AiPlayer::try_pick_actor(std::unique_ptr<Actor> actor, Actor& owner)
 	return picked;
 }
 
-void AiPlayer::display_inventory_items(WINDOW* inv, const Actor& owner) noexcept
+void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexcept
 {
 	int shortcut = 'a';
 	int y = 1;
 	try
 	{
-		for (const auto& actor : owner.container->inventoryList)
+		for (const auto& actor : owner.container->inv)
 		{
 			if (actor != nullptr)
 			{
@@ -238,7 +190,7 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Actor& owner) noexcept
 	}
 }
 
-void AiPlayer::display_inventory(Actor& owner)
+void AiPlayer::display_inventory(Creature& owner)
 {
 	refresh();
 
@@ -249,7 +201,7 @@ void AiPlayer::display_inventory(Actor& owner)
 
 	try
 	{
-		if (owner.container->inventoryList.size() > 0)
+		if (owner.container->inv.size() > 0)
 		{
 			display_inventory_items(inv, owner);
 		}
@@ -291,15 +243,15 @@ void AiPlayer::display_inventory(Actor& owner)
 	}
 }
 
-Actor* AiPlayer::chose_from_inventory(Actor& owner, int ascii)
+Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 {
 	game.log("You chose from inventory");
 	if (owner.container != nullptr)
 	{
 		const size_t index = ascii - 'a';
-		if (index >= 0 && index < owner.container->inventoryList.size())
+		if (index >= 0 && index < owner.container->inv.size())
 		{
-			return owner.container->inventoryList.at(index).get();
+			return owner.container->inv.at(index).get();
 		}
 		else
 		{
@@ -315,7 +267,7 @@ Actor* AiPlayer::chose_from_inventory(Actor& owner, int ascii)
 }
 
 // returns true if the action was successful
-bool AiPlayer::move_or_attack(Actor& owner, Vector2D target)
+bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 {
 	game.log("Player tries to move or attack");
 
@@ -366,7 +318,16 @@ bool AiPlayer::move_or_attack(Actor& owner, Vector2D target)
 	// look for corpses or items
 	for (const auto& actor : game.actors)
 	{
-		if ((actor->destructible->is_dead() || actor->pickable) && actor->position == target)
+		if (actor->destructible->is_dead() && actor->position == target)
+		{
+			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
+			game.finalizeMessage();
+		}
+	}
+
+	for (const auto& actor : game.container->inv)
+	{
+		if (actor->position == target)
 		{
 			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
 			game.finalizeMessage();
@@ -378,7 +339,7 @@ bool AiPlayer::move_or_attack(Actor& owner, Vector2D target)
 	return true;
 }
 
-void AiPlayer::call_action(Actor& owner, Controls key)
+void AiPlayer::call_action(Creature& owner, Controls key)
 {
 	switch (key)
 	{

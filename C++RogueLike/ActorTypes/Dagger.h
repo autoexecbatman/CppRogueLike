@@ -14,7 +14,7 @@ public:
 	// dagger roll is 1d4
 	Dagger(int minDmg, int maxDmg);
 
-	bool use(Actor& owner, Actor& wearer) override;
+	bool use(Item& owner, Creature& wearer) override;
 
 	void save(TCODZip& zip) override;
 	void load(TCODZip& zip) override;

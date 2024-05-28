@@ -4,7 +4,7 @@ Gold::Gold(int amount)
 {
 }
 
-bool Gold::use(Actor& owner, Actor& wearer)
+bool Gold::use(Item& owner, Creature& wearer)
 {
 	return false;
 }
