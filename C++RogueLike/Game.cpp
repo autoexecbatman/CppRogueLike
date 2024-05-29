@@ -8,6 +8,7 @@
 #include <cassert>
 #include <gsl/util>
 #include <format>
+#include <span>
 
 #include "Game.h"
 #include "Actor/Actor.h"
@@ -90,65 +91,70 @@ void Game::create_player()
 	// 3. Set the playerAC to be based on base AC and attribute modifiers and armor.
 }
 
-//==UPDATE==
-// the update function to update the game logic
-// and stores events
+void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
+{
+	for (const auto& creature : creatures)
+	{
+		if (creature)
+		{
+			creature->update();
+		}
+	}
+}
+void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
+{
+	for (const auto& creature : creatures)
+	{
+		if (creature)
+		{
+			creature->render();
+		}
+	}
+}
+void Game::render_items(std::span<std::unique_ptr<Item>> items)
+{
+	for (const auto& item : items)
+	{
+		if (item)
+		{
+			item->render();
+		}
+	}
+}
+
 void Game::update()
 {
 	switch (gameStatus)
 	{
 	case GameStatus::DEFEAT:
-		// if the player is dead, we end the game
 		game.log("Player is dead!");
 		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
 		game.finalizeMessage();
 		run = false;
-
 		break;
 	case GameStatus::STARTUP: // to compute the FOV only once
-
-		// we set the gameStatus to STARTUP
 		game.map->compute_fov();
-
 		// adjust the attributes based on players race
 		game.player->racial_ability_adjustments();
 		game.player->calculate_thaco();
-
 		gameStatus = GameStatus::IDLE;
-
 	case GameStatus::IDLE:
-		game.map->update();
-
-		// In the update procedure if the player has moved
-		// we set the gameStatus to NEW_TURN
-		// or IDLE if the player has not moved
-		game.player->update();
-		game.log("GameStatus::IDLE");
-
+		game.map->update(); // sets tiles to explored
+		game.player->update(); // if moved set to NEW_TURN else IDLE
 	case GameStatus::NEW_TURN:
 		game.update_creatures(actors);
-		game.log("GameStatus::NEW_TURN");
-
 	}
 }
 
-
-//==RENDERING==
-// the engine render function implementation
-// draws the entities on the map
 void Game::render()
 {
 	map->render();
-
-	if (game.stairs && game.stairs->is_visible())
-	{
-		game.stairs->render();
-	}
-
+	game.stairs->render();
 	render_creatures(actors);
 	render_items(container->inv);
 	player->render();
 }
+
 
 Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
 {

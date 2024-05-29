@@ -147,9 +147,12 @@ void Actor::save(TCODZip& zip)
 // the actor render function with color
 void Actor::render() const noexcept
 {
-	attron(COLOR_PAIR(actorData.color));
-	mvaddch(position.y, position.x, actorData.ch);
-	attroff(COLOR_PAIR(actorData.color));
+	if (this->is_visible())
+	{
+		attron(COLOR_PAIR(actorData.color));
+		mvaddch(position.y, position.x, actorData.ch);
+		attroff(COLOR_PAIR(actorData.color));
+	}
 }
 
 void Creature::equip(Actor& item)

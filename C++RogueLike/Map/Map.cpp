@@ -296,47 +296,47 @@ void Map::add_item(Vector2D pos)
 			game.log("Error: Unknown weapon type"); // Log an error if the weapon type is unknown"
 			return;
 		}
-		/*game.items.insert(game.items.begin(), std::move(weaponActor));*/
+		/*game.container->inv.insert(game.container->inv.begin(), std::move(weaponActor));*/
 		game.container->add(std::move(weaponActor));
 		
 		// add gold
 		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
 		gold->flags.blocks = false;
 		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
-		/*game.items.insert(game.items.begin(), std::move(gold));*/
+		/*game.container->inv.insert(game.container->inv.begin(), std::move(gold));*/
 
 	}
-	//else if (dice < 70)
-	//{
-	//	// add a health potion
-	//	auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
-	//	healthPotion->flags.blocks = false;
-	//	healthPotion->pickable = std::make_unique<Healer>(4);
-	//	game.items.insert(game.items.begin(), std::move(healthPotion));
-	//}
-	//else if (dice < 70+10)
-	//{
-	//	// add lightning scrolls
-	//	auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
-	//	lightningScroll->flags.blocks = false;
-	//	lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
-	//	game.items.insert(game.items.begin(), std::move(lightningScroll));
-	//}
-	//else if (dice < 70 + 10 + 10)
-	//{
-	//	// add fireball scrolls
-	//	auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
-	//	fireballScroll->flags.blocks = false;
-	//	fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
-	//	game.items.insert(game.items.begin(), std::move(fireballScroll));
-	//}
-	//else
-	//{
-	//	// add confusion scrolls
-	//	auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
-	//	confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
-	//	game.items.insert(game.items.begin(), std::move(confusionScroll));
-	//}
+	else if (dice < 70)
+	{
+		// add a health potion
+		auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+		healthPotion->flags.blocks = false;
+		healthPotion->pickable = std::make_unique<Healer>(4);
+		game.container->inv.insert(game.container->inv.begin(), std::move(healthPotion));
+	}
+	else if (dice < 70+10)
+	{
+		// add lightning scrolls
+		auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
+		lightningScroll->flags.blocks = false;
+		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
+		game.container->inv.insert(game.container->inv.begin(), std::move(lightningScroll));
+	}
+	else if (dice < 70 + 10 + 10)
+	{
+		// add fireball scrolls
+		auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
+		fireballScroll->flags.blocks = false;
+		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
+		game.container->inv.insert(game.container->inv.begin(), std::move(fireballScroll));
+	}
+	else
+	{
+		// add confusion scrolls
+		auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
+		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
+		game.container->inv.insert(game.container->inv.begin(), std::move(confusionScroll));
+	}
 }
 
 void Map::dig(int x1, int y1, int x2, int y2)

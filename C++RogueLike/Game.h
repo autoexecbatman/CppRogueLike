@@ -46,17 +46,11 @@ public:
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
-
-	int keyPress{ 0 };
-	int lastKey{ 0 };
-
-	int dungeonLevel{ 0 };
-
 	std::vector<std::unique_ptr<Creature>> actors; // a vector of actors
 	std::vector< std::unique_ptr<Object>> objects; // a vector of objects
-	//std::vector< std::unique_ptr<Item>> items; // a vector of items
 	std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
 
+	// for loading from json
 	std::vector<Weapons> weapons; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
 
@@ -65,42 +59,11 @@ public:
 	void create_player();
 	void update();
 	void render();
-
-	void update_creatures(std::span<std::unique_ptr<Creature>> creatures)
-	{
-		for (const auto& creature : creatures)
-		{
-			if (creature && creature->is_visible())
-			{
-				creature->update();
-			}
-		}
-	}
-	void render_creatures(std::span<std::unique_ptr<Creature>> creatures)
-	{
-		for (const auto& actor : actors)
-		{
-			if (actor && actor->is_visible())
-			{
-				actor->render();
-				std::clog << "Actor: " << actor->actorData.name << " is drawn" << std::endl;
-			}
-		}
-	}
-	void render_items(std::span<std::unique_ptr<Item>> creatures)
-	{
-		for (const auto& item : container->inv)
-		{
-			if (item && item->is_visible())
-			{
-				item->render();
-				std::clog << "Item: " << item->actorData.name << " is drawn" << std::endl;
-			}
-		}
-	}
+	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
+	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
+	void render_items(std::span<std::unique_ptr<Item>> items);
 
 	/*void send_to_back(Actor& actor);*/
-
 	template<typename T>
 	void send_to_back(T& actor)
 	{
@@ -125,10 +88,13 @@ public:
 	void load_all();
 	void save_all();
 
+	int keyPress{ 0 };
+	int lastKey{ 0 };
 	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 	// the player goes down stairs
+	int dungeonLevel{ 0 };
 	void next_level();
 	Creature* get_actor(Vector2D pos) const noexcept;
 	void dispay_levelup(int level);
@@ -152,7 +118,6 @@ private:
 	// Private member variables.
 	bool computeFov{ false };
 	bool debugMode{ true };
-
 	// Private member functions.
 };
 
