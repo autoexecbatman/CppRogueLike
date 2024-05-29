@@ -81,6 +81,7 @@ int main()
 		game.log("Render OK.");
 
 		//==INPUT==
+		game.gameStatus = Game::GameStatus::IDLE;
 		game.key_store();
 		game.key_listen();
 

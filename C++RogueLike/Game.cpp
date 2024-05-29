@@ -83,10 +83,6 @@ void Game::create_player()
 		playerMinDmg,
 		playerMaxDmg
 	);
-	
-	// add the player to the actors vector for rendering
-	/*game.actors.push_back(std::move(game.player_unique));*/
-	/*game.player = dynamic_cast<Player*>(game.actors.back().get());*/
 
 	// TODO :
 	// 1. Set the playerHp to rolls based on class and attribute modifiers.
@@ -99,104 +95,59 @@ void Game::create_player()
 // and stores events
 void Game::update()
 {
-	if (game.player->destructible->is_dead())
+	switch (gameStatus)
 	{
+	case GameStatus::DEFEAT:
 		// if the player is dead, we end the game
 		game.log("Player is dead!");
 		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
 		game.finalizeMessage();
 		run = false;
-	}
 
-	if (Game::gameStatus == GameStatus::STARTUP)
-	{
-		// to compute the FOV only once
+		break;
+	case GameStatus::STARTUP: // to compute the FOV only once
+
 		// we set the gameStatus to STARTUP
 		game.map->compute_fov();
-		
+
 		// adjust the attributes based on players race
 		game.player->racial_ability_adjustments();
 		game.player->calculate_thaco();
+
+		gameStatus = GameStatus::IDLE;
+
+	case GameStatus::IDLE:
+		game.map->update();
+
+		// In the update procedure if the player has moved
+		// we set the gameStatus to NEW_TURN
+		// or IDLE if the player has not moved
+		game.player->update();
+		game.log("GameStatus::IDLE");
+
+	case GameStatus::NEW_TURN:
+		game.update_creatures(actors);
+		game.log("GameStatus::NEW_TURN");
+
 	}
-
-	// IDLE is the default state
-	gameStatus = GameStatus::IDLE;
-	game.log("GameStatus::IDLE");
-
-	game.map->update();
-
-	// In the update procedure if the player has moved
-	// we set the gameStatus to NEW_TURN
-	// or IDLE if the player has not moved
-	game.log("Updating player...");
-	game.player->update();
-	game.log("Player updated!");
-
-	// if the player has moved we update the world
-	game.log("Updating actors...");
-	if (Game::gameStatus == GameStatus::NEW_TURN)
-	{
-		for (const auto& actor : actors)
-		{
-			if (actor && actor->is_visible())
-			{
-				game.log("Actor: " + actor->actorData.name + " is in FOV");
-				actor->update();
-			}
-		}
-	}
-
-	game.log("Actors updated!");
 }
+
 
 //==RENDERING==
 // the engine render function implementation
 // draws the entities on the map
 void Game::render()
 {
-	// we try to render the map first
 	map->render();
 
-	game.log("Actors are trying to be drawn...");
-
-	if (game.stairs->is_visible())
+	if (game.stairs && game.stairs->is_visible())
 	{
 		game.stairs->render();
 	}
 
-	for (const auto& actor : actors)
-	{
-		if (actor)
-		{
-			if (actor->is_visible())
-			{
-				game.log("Actor: " + actor->actorData.name + " is in FOV");
-				actor->render();
-				std::clog << "Actor: " << actor->actorData.name << " is drawn" << std::endl;
-			}
-		}
-	}
-
-	for (const auto& item : container->inv)
-	{
-		if (item)
-		{
-			if (item->is_visible())
-			{
-				item->render();
-				std::clog << "Item: " << item->actorData.name << " is drawn" << std::endl;
-			}
-		}
-	}
-
-	game.log("Actors are drawn");
-
-	game.log("Player is trying to be drawn...");
+	render_creatures(actors);
+	render_items(container->inv);
 	player->render();
-	game.log("Player is drawn");
-
-	game.log("RENDER FUNCTION OUT");
-	// heavy on the logging here because there is alot happening in this functions
 }
 
 Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept

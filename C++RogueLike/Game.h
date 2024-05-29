@@ -5,6 +5,7 @@
 #pragma once
 
 #include <memory>
+#include <span>
 
 #include "Gui/Gui.h"
 #include "Map/Map.h"
@@ -64,6 +65,40 @@ public:
 	void create_player();
 	void update();
 	void render();
+
+	void update_creatures(std::span<std::unique_ptr<Creature>> creatures)
+	{
+		for (const auto& creature : creatures)
+		{
+			if (creature && creature->is_visible())
+			{
+				creature->update();
+			}
+		}
+	}
+	void render_creatures(std::span<std::unique_ptr<Creature>> creatures)
+	{
+		for (const auto& actor : actors)
+		{
+			if (actor && actor->is_visible())
+			{
+				actor->render();
+				std::clog << "Actor: " << actor->actorData.name << " is drawn" << std::endl;
+			}
+		}
+	}
+	void render_items(std::span<std::unique_ptr<Item>> creatures)
+	{
+		for (const auto& item : container->inv)
+		{
+			if (item && item->is_visible())
+			{
+				item->render();
+				std::clog << "Item: " << item->actorData.name << " is drawn" << std::endl;
+			}
+		}
+	}
+
 	/*void send_to_back(Actor& actor);*/
 
 	template<typename T>
