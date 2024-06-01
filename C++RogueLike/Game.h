@@ -46,7 +46,7 @@ public:
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
 
-	std::vector<std::unique_ptr<Creature>> actors; // a vector of actors
+	std::vector<std::unique_ptr<Creature>> creatures; // a vector of actors
 	std::vector< std::unique_ptr<Object>> objects; // a vector of objects
 	std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
 
@@ -68,12 +68,12 @@ public:
 	void send_to_back(T& actor)
 	{
 		auto actorIsInVector = [&actor](const auto& a) noexcept { return a.get() == &actor; }; // lambda to check if the actor is in the vector
-		auto it = std::find_if(actors.begin(), actors.end(), actorIsInVector); // get the iterator of the actor
-		const auto distance = std::distance(actors.begin(), it); // get the distance from the begining of the vector to the actor
+		auto it = std::find_if(creatures.begin(), creatures.end(), actorIsInVector); // get the iterator of the actor
+		const auto distance = std::distance(creatures.begin(), it); // get the distance from the begining of the vector to the actor
 		for (auto i = distance; i > 0; i--)
 		{
 			// swap actor with the previous actor
-			std::swap(gsl::at(actors, i - 1), gsl::at(actors, i));
+			std::swap(gsl::at(creatures, i - 1), gsl::at(creatures, i));
 		}
 	}
 

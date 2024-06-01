@@ -298,7 +298,7 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 	// look for living actors to attack
 	// TODO : should we iterate over the entire list ?
 	// in order to check that there is nothing to attack and tile is empty ?
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (actor != nullptr)
 		{
@@ -316,7 +316,7 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 	}
 
 	// look for corpses or items
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (actor->destructible->is_dead() && actor->position == target)
 		{

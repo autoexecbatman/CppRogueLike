@@ -142,7 +142,7 @@ void Game::update()
 		game.map->update(); // sets tiles to explored
 		game.player->update(); // if moved set to NEW_TURN else IDLE
 	case GameStatus::NEW_TURN:
-		game.update_creatures(actors);
+		game.update_creatures(creatures);
 	}
 }
 
@@ -150,18 +150,17 @@ void Game::render()
 {
 	map->render();
 	game.stairs->render();
-	render_creatures(actors);
+	render_creatures(creatures);
 	render_items(container->inv);
 	player->render();
 }
-
 
 Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
 {
 	Creature* closestMonster = nullptr;
 	int bestDistance = INT_MAX;
 
-	for (const auto& actor : actors)
+	for (const auto& actor : creatures)
 	{
 		if (!actor->destructible->is_dead())
 		{
@@ -564,7 +563,7 @@ void Game::load_all()
 			/*std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
 			auto actor = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true,true });
 			actor->load(zip);
-			actors.push_back(std::move(actor));
+			creatures.push_back(std::move(actor));
 			/*actors.try_emplace(actor->index, actor);*/
 			nbActors--;
 		}
@@ -609,13 +608,13 @@ void Game::save_all()
 			catch (const std::exception& e) { game.log(e.what()); }
 
 			// save the other actors
-			if (!actors.empty())
+			if (!creatures.empty())
 			{
-				const int nbActors = gsl::narrow_cast<int>(actors.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
+				const int nbActors = gsl::narrow_cast<int>(creatures.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
 				const int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
 				zip.putInt(nbActorsToSave);
 
-				for (const auto& actor : actors)
+				for (const auto& actor : creatures)
 				{
 					if (actor)
 					{
@@ -663,7 +662,7 @@ void Game::next_level()
 
 Creature* Game::get_actor(Vector2D pos) const noexcept
 {
-	for (const auto& actor : actors)
+	for (const auto& actor : creatures)
 	{
 		if (actor->position == pos)
 		{
@@ -811,7 +810,7 @@ void Game::display_character_sheet() noexcept
 // displays the actors as names
 void Game::wizard_eye() noexcept
 {
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		// print the actor's name
 		mvprintw(actor->position.y, actor->position.x, actor->actorData.name.c_str());

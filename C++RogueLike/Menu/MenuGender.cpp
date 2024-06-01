@@ -20,20 +20,12 @@ void MenuGender::menu_gender_store(MenuGenderOptions option)
 
 void MenuGender::menu_gender_assign()
 {
-	//if (!game.player)
-	//{
-	//	game.log("void MenuGender::menu_gender_assign() player is nullptr");
-	//	exit(EXIT_FAILURE);
-	//}
-	/*game.player->gender = gender;*/
-	// find the player in the vector of actors and assign gender to it
-
-	auto it = std::find_if(game.actors.begin(), game.actors.end(), [](const std::unique_ptr<Creature>& actor) { return actor->actorData.name == "Player"; });
-	if (it != game.actors.end())
+	if (!game.player)
 	{
-		it->get()->gender = gender;
+		game.log("void MenuGender::menu_gender_assign() player is nullptr");
+		exit(EXIT_FAILURE);
 	}
-
+	game.player->gender = gender;
 }
 
 void MenuGender::menu_gender_assign_random()

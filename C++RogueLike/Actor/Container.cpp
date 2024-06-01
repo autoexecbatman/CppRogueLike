@@ -25,7 +25,7 @@ void Container::remove(std::unique_ptr<Item> actor)
 {
 	game.log("Removing item from inventory");
 	game.container->add(std::move(actor));
-	game.send_to_back(*game.actors.back().get());
+	game.send_to_back(*game.creatures.back().get());
 	inv.erase(std::remove_if(inv.begin(), inv.end(), [](const auto& a) noexcept { return !a; }), inv.end());
 	game.log("Item removed from inventory");
 }

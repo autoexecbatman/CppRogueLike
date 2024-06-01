@@ -491,7 +491,7 @@ bool Map::can_walk(Vector2D pos) const
 		return false;
 	}
 
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (actor->flags.blocks && actor->position == pos)
 		{
@@ -529,14 +529,14 @@ void Map::add_monster(Vector2D pos)
 	/*dagger->flags.blocks = false;*/
 	dagger->pickable = std::make_unique<Dagger>(1, 4);
 	shopkeeper->container->add(std::move(dagger));
-	game.actors.push_back(std::move(shopkeeper));
-	game.shopkeeper = game.actors.back().get();
+	game.creatures.push_back(std::move(shopkeeper));
+	game.shopkeeper = game.creatures.back().get();
 
 	if (placeDragon)
 	{
 		/*auto dragon = std::make_unique<Dragon>(mon_y, mon_x);*/
 		auto dragon = std::make_unique<Dragon>(pos);
-		game.actors.push_back(std::move(dragon));
+		game.creatures.push_back(std::move(dragon));
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
 	else
@@ -545,7 +545,7 @@ void Map::add_monster(Vector2D pos)
 		for (auto i{ 0 }; i < roll4d6; i++)
 		{ // create goblins
 			auto goblin = create_monster<Goblin>(pos);
-			game.actors.push_back(std::move(goblin));
+			game.creatures.push_back(std::move(goblin));
 		}
 
 		if (game.player->playerLevel > 3)
@@ -554,7 +554,7 @@ void Map::add_monster(Vector2D pos)
 			for (auto i{ 0 }; i < roll2d6; i++)
 			{ // create orcs
 				auto orc = create_monster<Orc>(pos);
-				game.actors.push_back(std::move(orc));
+				game.creatures.push_back(std::move(orc));
 			}
 		}
 
@@ -564,7 +564,7 @@ void Map::add_monster(Vector2D pos)
 			for (auto i{ 0 }; i < roll1d6; i++)
 			{ // create trolls
 				auto troll = create_monster<Troll>(pos);
-				game.actors.push_back(std::move(troll));
+				game.creatures.push_back(std::move(troll));
 			}
 		}
 	}
@@ -572,7 +572,7 @@ void Map::add_monster(Vector2D pos)
 
 Creature* Map::get_actor(Vector2D pos) noexcept
 {
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (actor->position == pos)
 		{
@@ -596,7 +596,7 @@ void Map::reveal()
 void Map::regenerate()
 {
 	// clear the actors container except the player and the stairs
-	game.actors.clear();
+	game.creatures.clear();
 	game.container->inv.clear();
 
 	// generate a new map

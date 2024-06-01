@@ -77,7 +77,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
 
 	delwin(explosionWindow);
 
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (
 			!actor->destructible->is_dead()
@@ -90,7 +90,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
 		}
 	}
 
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (
 			!actor->destructible->is_dead()

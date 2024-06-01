@@ -513,7 +513,7 @@ void Gui::renderMouseLook()
 
 	std::string buf;
 	bool first = true;
-	for (const auto& actor : game.actors)
+	for (const auto& actor : game.creatures)
 	{
 		if (actor->position.x == mouseX && actor->position.y == mouseY)
 		{
