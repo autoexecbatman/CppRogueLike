@@ -78,6 +78,8 @@ public:
 	bool is_wall(Vector2D pos) const;
 	bool is_in_fov(Vector2D pos) const;
 	bool is_water(Vector2D pos) const;
+	TileType get_tile_t(Vector2D pos) const;
+	void tile_action(TileType tileType);
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
 	void set_explored(Vector2D pos); //set the tile as explored
 	bool can_walk(Vector2D pos) const;
@@ -85,6 +87,7 @@ public:
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
 	void update();
 	void render() const;
+	void add_weapons(Vector2D pos);
 	void add_item(Vector2D pos);
 	Creature* get_actor(Vector2D pos) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	

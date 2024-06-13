@@ -16,9 +16,6 @@ class Pickable : public Persistent
 public:
 	virtual ~Pickable() {};
 
-	bool pick(std::unique_ptr<Item> owner, const Creature& wearer);
-	void drop(std::unique_ptr<Item> owner, const Creature& wearer);
-
 	virtual bool use(Item& owner, Creature& wearer);
 	/*static Pickable* create(TCODZip& zip);*/
 	static std::unique_ptr<Pickable> create(TCODZip& zip);

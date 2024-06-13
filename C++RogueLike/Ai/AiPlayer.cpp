@@ -110,55 +110,13 @@ void AiPlayer::pick_item(Creature& owner)
 
 void AiPlayer::drop_item(Creature& owner)
 {
-	Item* actorPtr = chose_from_inventory(owner, 'a');
-	if (actorPtr)
-	{
-		auto it = std::find_if(owner.container->inv.begin(), owner.container->inv.end(), [&actorPtr](const auto& item) { return item.get() == actorPtr; });
-		std::unique_ptr<Item> actor = std::move(*it);
-		if (actor)
-		{
-			actor->pickable->drop(std::move(actor), owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-	}
+	owner.drop();
+	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
 {
 	return actor.position == owner.position;
-}
-
-bool AiPlayer::try_pick_actor(std::unique_ptr<Item> actor, Creature& owner)
-{
-	game.log("Trying to pick actor " + actor->actorData.name);
-	bool picked{};
-	std::string actorName = actor->actorData.name;
-
-	// actor is destroyed if picked what can we do about it ? 
-	// we can't use actor anymore
-	try
-	{
-		picked = actor->pickable->pick(std::move(actor), owner);
-	}
-	catch (const std::exception& e)
-	{
-		game.log("Error: AiPlayer::try_pick_actor(Actor& actor, Actor& owner). " + std::string(e.what()));
-		picked = false;
-	}
-
-	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) picked = " + std::to_string(picked));
-	game.log("AiPlayer::try_pick_actor(Actor& actor, Actor& owner) actor.name = " + actorName);
-
-	if (picked)
-	{
-		game.message(WHITE_PAIR, std::format("You take the {}.", actorName), true);
-	}
-	else
-	{
-		game.message(HPBARMISSING_PAIR, "Your inventory is full.",true);
-	}
-
-	return picked;
 }
 
 void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexcept
@@ -271,29 +229,35 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 {
 	game.log("Player tries to move or attack");
 
+	// check tile state
+	// and act accordingly
+	game.map->tile_action(game.map->get_tile_t(target));
+
+	auto move_player = [&owner, &target] { owner.position = target; return true; };
+	auto is_wall = [target]{ return !game.map->is_wall(target); };
+
+	auto print_message = [] {
+		mvprintw(0, 0, "You are swimming!");
+		refresh();
+		mvprintw(1, 0, "Press any key to continue.");
+		getch();
+		clear();
+	};
+	auto check_water = [&owner, &target] { return !(game.map->is_water(target) && !owner.flags.canSwim); };
+
 	if (game.map->is_wall(target))
 	{
 		return false;
 	}
-	else if (game.map->is_water(target))
-	{
-		if (!owner.flags.canSwim)
-		{
-			return false;
-		}
-		else
-		{
-			// print message that player is swimming
-			mvprintw(0, 0, "You are swimming!");
-			refresh();
-			mvprintw(1, 0, "Press any key to continue.");
-			getch();
-			clear();
 
-			owner.position = target;
-			return true;
-		}
-	}
+	check_water();
+
+	auto not_nullptr = [](const auto& actor) { return actor != nullptr; };
+	auto is_dead = [](const auto& actor) { return actor->destructible->is_dead(); };
+	auto is_position = [&target](const auto& actor) { return actor->position == target; };
+	auto attack_and_return_false = [&owner](auto&& actor) { owner.attacker->attack(owner, *actor); return false; };
+	auto return_false = [] { return false; };
+	auto append_message = [](const auto& actor) { game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name)); game.finalizeMessage(); };
 
 	// look for living actors to attack
 	// TODO : should we iterate over the entire list ?
@@ -315,6 +279,13 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 		}
 	}
 
+	std::ranges::for_each(game.creatures
+		| std::views::filter(not_nullptr)
+		| std::views::filter(is_dead)
+		| std::views::filter(is_position),
+		attack_and_return_false
+	);
+
 	// look for corpses or items
 	for (const auto& actor : game.creatures)
 	{
@@ -325,6 +296,13 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 		}
 	}
 
+	std::ranges::for_each(game.creatures
+		| std::views::filter(not_nullptr)
+		| std::views::filter(is_dead)
+		| std::views::filter(is_position),
+		append_message
+	);
+
 	for (const auto& actor : game.container->inv)
 	{
 		if (actor->position == target)
@@ -334,7 +312,12 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 		}
 	}
 
-	owner.position = target;
+	std::ranges::for_each(game.container->inv
+			| std::views::filter(is_position),
+				append_message
+		);
+
+	owner.position = target; // move player
 
 	return true;
 }

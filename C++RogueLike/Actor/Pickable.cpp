@@ -16,28 +16,6 @@
 #include "../Ai/AiMonsterConfused.h"
 
 //==PICKABLE==
-bool Pickable::pick(std::unique_ptr<Item> owner, const Creature& wearer)
-{
-	if (wearer.container && wearer.container->add(std::move(owner)))
-	{
-		// remove nullptrs from the actors vector
-		game.creatures.erase(std::remove_if(game.creatures.begin(), game.creatures.end(), [](const auto& a) noexcept { return !a; }), game.creatures.end());
-
-		return true;
-	}
-
-	return false;
-}
-
-void Pickable::drop(std::unique_ptr<Item> owner, const Creature& wearer)
-{
-	if (wearer.container)
-	{
-		owner->position = wearer.position;
-		wearer.container->remove(std::move(owner));
-	}
-}
-
 bool Pickable::use(Item& owner, Creature& wearer)
 {
 	if (wearer.container)

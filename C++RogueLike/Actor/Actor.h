@@ -159,6 +159,7 @@ public:
 	void unequip(Actor& item);
 
 	void pick();
+	void drop();
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed

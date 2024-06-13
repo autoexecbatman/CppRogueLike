@@ -20,7 +20,6 @@ private:
 	void pick_item(Creature& owner);
 	void drop_item(Creature& owner);
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
-	bool try_pick_actor(std::unique_ptr<Item> actor, Creature& owner);
 	void display_inventory_items(WINDOW* inv, const Creature& owner) noexcept;
 	void display_inventory(Creature& owner);
 	Item* chose_from_inventory(Creature& owner, int ascii);

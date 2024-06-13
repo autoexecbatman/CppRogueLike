@@ -3,6 +3,7 @@
 #include <fstream>
 #include <curses.h>
 #include <algorithm> // for std::remove in sendToBack(Actor*)
+#include <ranges>
 #include <random>
 #include <climits>
 #include <cassert>
@@ -408,9 +409,10 @@ void Game::target()
 		game.render();
 
 		// display the FOV in white in row major order
-		for (Vector2D pos{ 0,0 }; pos.y < game.map->map_height; pos.y++)
+		Vector2D pos{ 0,0 };
+		for (; pos.y < game.map->map_height; pos.y++)
 		{
-			for (pos.x = 0; pos.x < game.map->map_width; pos.x++)
+			for (; pos.x < game.map->map_width; pos.x++)
 			{
 				if (game.map->is_in_fov(pos))
 				{
@@ -523,7 +525,7 @@ void Game::target()
 			break;
 		} // end of switch (key)
 
-	} // end of while (run == true)
+	} // end of while (run)
 	clear();
 }
 

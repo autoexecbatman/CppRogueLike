@@ -54,6 +54,9 @@ public:
 	std::vector<Weapons> weapons; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
 
+	// Random number generator.
+	RandomDice d;
+	
 	// Public member functions.
 	void init();
 	void create_player();

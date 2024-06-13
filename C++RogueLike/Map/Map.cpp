@@ -218,6 +218,37 @@ bool Map::is_water(Vector2D pos) const
 	return tiles.at(get_index(pos)).type == TileType::WATER;
 }
 
+TileType Map::get_tile_t(Vector2D pos) const
+{
+	return tiles.at(get_index(pos)).type;
+}
+
+void Map::tile_action(TileType tileType)
+{
+	switch (tileType)
+	{
+	case TileType::WATER:
+		game.log("You are in water");
+		game.message(COLOR_WHITE, "You are in water",true);
+		game.player->destructible->hp -= 1;
+		break;
+	case TileType::WALL:
+		game.log("You are against a wall");
+		game.message(COLOR_WHITE, "You are against a wall", true);
+		break;
+	case TileType::FLOOR:
+		game.log("You are on the floor");
+		game.message(COLOR_WHITE, "You are on the floor", true);
+		break;
+	case TileType::DOOR:
+		game.log("You are at a door");
+		break;
+	default:
+		game.log("You are in an unknown area");
+		break;
+	}
+}
+
 void Map::compute_fov()
 {
 	game.log("...Computing FOV...");
@@ -240,22 +271,40 @@ void Map::render() const
 	game.log("Map::render()");
 	for (const auto& tile : tiles)
 	{
-		if (is_in_fov(tile.position) || is_explored(tile.position))
+		switch (get_tile_t(tile.position))
 		{
-			if (is_wall(tile.position))
+		case TileType::WALL:
+			if (is_in_fov(tile.position) || is_explored(tile.position))
 			{
+				attron(COLOR_PAIR(WALL_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '#');
+				attroff(COLOR_PAIR(WALL_PAIR));
 			}
-			else if (is_water(tile.position))
+			break;
+		case TileType::WATER:
+			if (is_in_fov(tile.position))
 			{
 				attron(COLOR_PAIR(WATER_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '~');
 				attroff(COLOR_PAIR(WATER_PAIR));
 			}
-			else
+			break;
+		case TileType::FLOOR:
+			if (is_in_fov(tile.position))
 			{
 				mvaddch(tile.position.y, tile.position.x, '.');
 			}
+			break;
+		case TileType::DOOR:
+			if (is_in_fov(tile.position))
+			{
+				attron(COLOR_PAIR(WALL_PAIR));
+				mvaddch(tile.position.y, tile.position.x, '+');
+				attroff(COLOR_PAIR(WALL_PAIR));
+			}
+			break;
+		default:
+			break;
 		}
 	}
 	refresh(); // Refresh once after all tiles have been drawn
@@ -263,46 +312,46 @@ void Map::render() const
 	game.log("Map::render() end");
 }
 
+void Map::add_weapons(Vector2D pos)
+{
+	// Randomly select a weapon from the list
+	const int weaponIndex{ game.d.roll(1, game.weapons.size()) };
+	const Weapons& selectedWeapon{ game.weapons.at(weaponIndex - 1) };
+	const int rollColor{ game.d.roll(1,3) }; // Randomly select a color for the weapon
+
+	// Create an Actor for the weapon
+	auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
+
+	if (selectedWeapon.name == "Dagger")
+	{
+		weaponActor->pickable = std::make_unique<Dagger>(1, 4);
+		game.err("Dagger added");
+	}
+	else if (selectedWeapon.name == "Long Sword")
+	{
+		weaponActor->pickable = std::make_unique<LongSword>(1, 8);
+		game.err("Long Sword added");
+	}
+	else
+	{
+		game.log("Error: Unknown weapon type");
+		return;
+	}
+
+	game.container->add(std::move(weaponActor));
+}
+
 void Map::add_item(Vector2D pos)
 {
-	RandomDice d;
-	const int dice = d.d100();
-	if (dice < 60) { // Adjust this threshold based on your game's item spawn logic
+	const int dice{ game.d.d100() };
+	if (dice < 60)
+	{
+		add_weapons(pos);
 
-		// Randomly select a weapon from the list
-		const int weaponIndex = d.roll(1, game.weapons.size());
-		const Weapons& selectedWeapon = game.weapons.at(weaponIndex - 1);
-
-		// Randomly select a color for the weapon
-		const int rollColor = d.roll(1,3);
-
-		// Create an Actor for the weapon
-		//auto weaponActor = std::make_unique<Actor>(x, y, '/', selectedWeapon.name, rollColor); // Assuming you have a generic symbol and color for weapons
-		auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
-		//weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon); // Assuming you have a way to handle different weapon types
-		if (selectedWeapon.name == "Dagger")
-		{
-			weaponActor->pickable = std::make_unique<Dagger>(1,4);
-			game.err("Dagger added");
-		}
-		else if (selectedWeapon.name == "Long Sword")
-		{
-			weaponActor->pickable = std::make_unique<LongSword>(1,8);
-			game.err("Long Sword added");
-		}
-		else
-		{
-			/*weaponActor->pickable = std::make_shared<Pickable>(selectedWeapon);*/
-			game.log("Error: Unknown weapon type"); // Log an error if the weapon type is unknown"
-			return;
-		}
-		/*game.container->inv.insert(game.container->inv.begin(), std::move(weaponActor));*/
-		game.container->add(std::move(weaponActor));
-		
 		// add gold
 		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
 		gold->flags.blocks = false;
-		gold->pickable = std::make_unique<Gold>(d.roll(1, 10));
+		gold->pickable = std::make_unique<Gold>(game.d.roll(1, 10));
 		/*game.container->inv.insert(game.container->inv.begin(), std::move(gold));*/
 
 	}
@@ -361,6 +410,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 		{
 			for (int tileX = x1; tileX <= x2; tileX++)
 			{
+				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
 				tcodMap->setProperties(
 					tileX,
 					tileY,
@@ -385,6 +435,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 
 			for (int tileX = startX; tileX <= endX; tileX++) {
 				if (tileX >= x1 && tileX <= x2) {
+					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
 					tcodMap->setProperties(
 						tileX,
 						tileY,

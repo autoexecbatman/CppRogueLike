@@ -95,19 +95,33 @@ void Creature::save(TCODZip& zip)
 
 void Creature::pick()
 {
-	// use alias for long name: game.items->inventoryList
-	auto& inv = game.container->inv;
-	for (auto& i : inv)
+	auto is_null = [](auto&& i) { return !i; };
+	for (auto& i : game.container->inv)
 	{
 		if (i)
 		{
 			if (position == i->position)
 			{
-				// add item to inventory
 				if (container->add(std::move(i)))
 				{
-					inv.erase(std::remove(inv.begin(), inv.end(), nullptr), inv.end());
+					std::erase_if(game.container->inv, is_null);
 				}
+			}
+		}
+	}
+}
+
+void Creature::drop()
+{
+	auto is_null = [](const auto& i) { return !i; };
+	for (auto& i : container->inv)
+	{
+		if (i)
+		{
+			i->position = position;
+			if (game.container->add(std::move(i)))
+			{
+				std::erase_if(container->inv, is_null);
 			}
 		}
 	}
@@ -147,7 +161,7 @@ void Actor::save(TCODZip& zip)
 // the actor render function with color
 void Actor::render() const noexcept
 {
-	if (this->is_visible())
+	if (is_visible())
 	{
 		attron(COLOR_PAIR(actorData.color));
 		mvaddch(position.y, position.x, actorData.ch);
@@ -182,7 +196,7 @@ void Creature::update()
 	}
 }
 
-// a function to get the distance from an actor to a specific tile of the map
+// a function to get the Chebyshev distance from an actor to a specific tile of the map
 int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
 	// using chebyshev distance
