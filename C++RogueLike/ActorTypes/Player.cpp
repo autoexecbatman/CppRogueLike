@@ -12,17 +12,14 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 
 ActorData playerData{ '@', "Player", WHITE_PAIR };
-ActorFlags playerFlags{ true, true, true};
 
 Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg)
 	:
-	Creature(position, playerData, playerFlags)
+	Creature(position, playerData)
 {
-	/*RandomDice d;*/ // this is now defined in Game.h
-	//auto& d = game.d; // why this line makes everything hang ???
+	add_state(ActorState::CAN_SWIM);
 
 	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
-
 	strength = roll3d6();
 	dexterity = roll3d6();
 	constitution = roll3d6();
@@ -31,17 +28,7 @@ Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int
 	charisma = roll3d6();
 
 	attacker = std::make_unique<Attacker>(dmg, minDmg, maxDmg);
-	
-	//==Destructible==
-	//destructible->hp = maxHp;
-	//destructible->hpMax = maxHp;
-	//destructible->corpseName = corpseName;
-	//destructible->xp = xp;
-	//destructible->thaco = thaco;
-	//destructible->armorClass = armorClass;
-	//destructible->dr = dr;
 	destructible = std::make_unique<Destructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
-
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
 }
@@ -105,7 +92,6 @@ void Player::calculate_thaco()
 	game.err("Calculating THAC0...");
 	// print playerClassState
 
-	
 	CalculatedTHAC0s thaco;
 	switch (playerClassState)
 	{	

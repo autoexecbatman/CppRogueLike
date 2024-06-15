@@ -44,10 +44,9 @@ void Destructible::take_damage(Creature& owner, int damage)
 void Destructible::die(Creature& owner)
 {
 	// copy data to new entity of type Item
-	auto corpse = std::make_unique<Item>(owner.position, owner.actorData, owner.flags);
+	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = corpseName;
 	corpse->actorData.ch = '%';
-	corpse->flags.blocks = false;
 	corpse->pickable = std::make_unique<Healer>(10);
 
 	// remove the actor from the game

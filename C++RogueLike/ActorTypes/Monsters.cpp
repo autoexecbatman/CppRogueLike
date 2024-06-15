@@ -13,13 +13,8 @@ ActorData goblinData
 	"goblin",
 	GOBLIN_PAIR
 };
-ActorFlags goblinFlags
-{
-	true,
-	true,
-	false
-};
-Goblin::Goblin(Vector2D position) : Creature(position, goblinData, goblinFlags)
+
+Goblin::Goblin(Vector2D position) : Creature(position, goblinData)
 {
 	RandomDice d;
 	const int damage = d.d6();
@@ -47,13 +42,8 @@ ActorData orcData
 	"orc",
 	ORC_PAIR
 };
-ActorFlags orcFlags
-{
-	true,
-	true,
-	false
-};
-Orc::Orc(Vector2D position) : Creature(position, orcData, orcFlags)
+
+Orc::Orc(Vector2D position) : Creature(position, orcData)
 {
 	RandomDice d;
 	const int damage = d.d10();
@@ -81,13 +71,8 @@ ActorData trollData
 	"troll",
 	TROLL_PAIR
 };
-ActorFlags trollFlags
-{
-	true,
-	true,
-	false
-};
-Troll::Troll(Vector2D position) : Creature(position, trollData, trollFlags)
+
+Troll::Troll(Vector2D position) : Creature(position, trollData)
 {
 	RandomDice d;
 	const int damage = d.d10() + 3;
@@ -113,13 +98,8 @@ ActorData dragonData
 	"dragon",
 	DRAGON_PAIR
 };
-ActorFlags dragonFlags
-{
-	true,
-	true,
-	false
-};
-Dragon::Dragon(Vector2D position) : Creature(position, dragonData, dragonFlags)
+
+Dragon::Dragon(Vector2D position) : Creature(position, dragonData)
 {
 	RandomDice d;
 	const int damage = d.d12() + 5;

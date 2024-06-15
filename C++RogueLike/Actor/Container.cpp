@@ -26,7 +26,8 @@ void Container::remove(std::unique_ptr<Item> actor)
 	game.log("Removing item from inventory");
 	game.container->add(std::move(actor));
 	game.send_to_back(*game.creatures.back().get());
-	inv.erase(std::remove_if(inv.begin(), inv.end(), [](const auto& a) noexcept { return !a; }), inv.end());
+	auto is_null = [](const auto& a) noexcept { return !a; };
+	std::erase_if(inv, is_null);
 	game.log("Item removed from inventory");
 }
 
@@ -36,7 +37,7 @@ void Container::load(TCODZip& zip)
 	int nbActors = zip.getInt();
 	while (nbActors > 0)
 	{
-		auto actor = std::make_unique<Item>(Vector2D(0, 0), ActorData(), ActorFlags());
+		auto actor = std::make_unique<Item>(Vector2D(0, 0), ActorData());
 		actor->load(zip);
 		inv.push_back(std::move(actor));
 		nbActors--;

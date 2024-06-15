@@ -124,14 +124,14 @@ public:
 	Vector2D position{ 0,0 };
 	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
-	ActorFlags flags{ true,true,true };
+	/*ActorFlags flags{ true,true,true };*/
 
 	std::vector<ActorState> states;
 	bool has_state(ActorState state) const noexcept { return std::ranges::find(states, state) != states.end(); }
 	void add_state(ActorState state) noexcept { states.push_back(state); }
 	void remove_state(ActorState state) noexcept { std::erase_if(states, [state](ActorState s) { return s == state; }); }
 
-	Actor(Vector2D position, ActorData data, ActorFlags flags);
+	Actor(Vector2D position, ActorData data);
 	virtual ~Actor() = default;
 
 	void load(TCODZip& zip) override;
@@ -145,7 +145,7 @@ public:
 class Creature : public Actor
 {
 public:
-	Creature(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags)
+	Creature(Vector2D position, ActorData data) : Actor(position, data)
 	{
 		add_state(ActorState::BLOCKS);
 		add_state(ActorState::FOV_ONLY);
@@ -185,19 +185,19 @@ public:
 class NPC : public Creature
 {
 	public:
-	NPC(Vector2D position, ActorData data, ActorFlags flags) : Creature(position, data, flags) {};
+	NPC(Vector2D position, ActorData data) : Creature(position, data) {};
 };
 
 class Object : public Actor
 {
 public:
-	Object(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags) {};
+	Object(Vector2D position, ActorData data) : Actor(position, data) {};
 };
 
 class Item : public Object
 {
 public:
-	Item(Vector2D position, ActorData data, ActorFlags flags) : Object(position, data, flags) {};
+	Item(Vector2D position, ActorData data) : Object(position, data) {};
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
@@ -210,7 +210,7 @@ public:
 class Stairs : public Object
 {
 	public:
-	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }, { .blocks = true, .fovOnly = true, .canSwim = true }) 
+	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }) 
 	{
 		add_state(ActorState::FOV_ONLY);
 	};

@@ -20,11 +20,10 @@
 #include "Container.h"
 
 //====
-Actor::Actor(Vector2D position, ActorData data, ActorFlags flags)
+Actor::Actor(Vector2D position, ActorData data)
 	:
 	position(position),
-	actorData(data),
-	flags(flags)
+	actorData(data)
 {}
 
 //====
@@ -37,8 +36,6 @@ void Actor::load(TCODZip& zip)
 	actorData.ch = zip.getInt();
 	actorData.color = zip.getInt();
 	actorData.name = _strdup(zip.getString());
-
-	flags.blocks = zip.getInt();
 
 	// this block assigns checks if the actor has a component
 	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
@@ -82,7 +79,6 @@ void Creature::save(TCODZip& zip)
 	zip.putInt(actorData.ch);
 	zip.putInt(actorData.color);
 	zip.putString(actorData.name.c_str());
-	zip.putInt(flags.blocks);
 
 	zip.putInt(attacker != nullptr);
 	zip.putInt(destructible != nullptr);
@@ -137,10 +133,8 @@ void Item::save(TCODZip& zip)
 	zip.putInt(actorData.ch);
 	zip.putInt(actorData.color);
 	zip.putString(actorData.name.c_str());
-	zip.putInt(flags.blocks);
 
 	zip.putInt(pickable != nullptr);
-
 	if (pickable) pickable->save(zip);
 }
 
@@ -154,8 +148,6 @@ void Actor::save(TCODZip& zip)
 	zip.putInt(actorData.ch);
 	zip.putInt(actorData.color);
 	zip.putString(actorData.name.c_str());
-	zip.putInt(flags.blocks);
-
 }
 
 // the actor render function with color
