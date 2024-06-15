@@ -17,7 +17,6 @@ ActorFlags goblinFlags
 {
 	true,
 	true,
-	false,
 	false
 };
 Goblin::Goblin(Vector2D position) : Creature(position, goblinData, goblinFlags)
@@ -52,7 +51,6 @@ ActorFlags orcFlags
 {
 	true,
 	true,
-	false,
 	false
 };
 Orc::Orc(Vector2D position) : Creature(position, orcData, orcFlags)
@@ -87,7 +85,6 @@ ActorFlags trollFlags
 {
 	true,
 	true,
-	false,
 	false
 };
 Troll::Troll(Vector2D position) : Creature(position, trollData, trollFlags)
@@ -120,7 +117,6 @@ ActorFlags dragonFlags
 {
 	true,
 	true,
-	false,
 	false
 };
 Dragon::Dragon(Vector2D position) : Creature(position, dragonData, dragonFlags)

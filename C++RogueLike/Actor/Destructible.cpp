@@ -8,6 +8,7 @@
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 #include "../Attributes/StrengthAttributes.h"
+#include "../ActorTypes/Healer.h"
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -39,16 +40,21 @@ void Destructible::take_damage(Creature& owner, int damage)
 	}
 }
 
+// Transform the actor into a corpse !
 void Destructible::die(Creature& owner)
 {
+	// copy data to new entity of type Item
+	auto corpse = std::make_unique<Item>(owner.position, owner.actorData, owner.flags);
+	corpse->actorData.name = corpseName;
+	corpse->actorData.ch = '%';
+	corpse->flags.blocks = false;
+	corpse->pickable = std::make_unique<Healer>(10);
 
-	//transform the actor into a corpse!
-	owner.actorData.ch = '%';
-	owner.actorData.name = corpseName;
-	owner.flags.blocks = false;
+	// remove the actor from the game
+	std::erase_if(game.creatures, [&owner](const auto& c) { return c.get() == &owner; });
 
-	//make sure corpses are drawn before living actors
-	game.send_to_back(owner);
+	// add the item to the game
+	game.container->add(std::move(corpse));
 }
 
 //====

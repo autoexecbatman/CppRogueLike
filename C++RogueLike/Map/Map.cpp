@@ -77,6 +77,7 @@ public:
 				if (rolld2 == 1)
 				{
 					// dig a corridor from last room
+					// place doors
 					map.dig(
 						room_pos_x + room_width / 2,
 						lasty,
@@ -108,6 +109,7 @@ public:
 						room_pos_x + room_width / 2,
 						room_pos_y + room_height / 2
 					);
+					
 				}
 			}
 
@@ -223,29 +225,30 @@ TileType Map::get_tile_t(Vector2D pos) const
 	return tiles.at(get_index(pos)).type;
 }
 
-void Map::tile_action(TileType tileType)
+bool Map::tile_action(TileType tileType)
 {
 	switch (tileType)
 	{
 	case TileType::WATER:
 		game.log("You are in water");
-		game.message(COLOR_WHITE, "You are in water",true);
+		game.message(COLOR_WHITE, "You are in water", true);
 		game.player->destructible->hp -= 1;
-		break;
+		return game.player->has_state(ActorState::CAN_SWIM) ? true : false;
 	case TileType::WALL:
 		game.log("You are against a wall");
 		game.message(COLOR_WHITE, "You are against a wall", true);
-		break;
+		return false;
 	case TileType::FLOOR:
 		game.log("You are on the floor");
 		game.message(COLOR_WHITE, "You are on the floor", true);
-		break;
+		return true;
 	case TileType::DOOR:
 		game.log("You are at a door");
-		break;
+		game.message(COLOR_WHITE, "You are at a door", true);
+		return true;
 	default:
 		game.log("You are in an unknown area");
-		break;
+		return false;
 	}
 }
 
@@ -271,44 +274,38 @@ void Map::render() const
 	game.log("Map::render()");
 	for (const auto& tile : tiles)
 	{
-		switch (get_tile_t(tile.position))
+		if (is_in_fov(tile.position) || is_explored(tile.position))
 		{
-		case TileType::WALL:
-			if (is_in_fov(tile.position) || is_explored(tile.position))
+			switch (get_tile_t(tile.position))
 			{
+			case TileType::WALL:
 				attron(COLOR_PAIR(WALL_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '#');
 				attroff(COLOR_PAIR(WALL_PAIR));
-			}
-			break;
-		case TileType::WATER:
-			if (is_in_fov(tile.position))
-			{
+				break;
+			case TileType::WATER:
 				attron(COLOR_PAIR(WATER_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '~');
 				attroff(COLOR_PAIR(WATER_PAIR));
-			}
-			break;
-		case TileType::FLOOR:
-			if (is_in_fov(tile.position))
-			{
+				break;
+			case TileType::FLOOR:
 				mvaddch(tile.position.y, tile.position.x, '.');
-			}
-			break;
-		case TileType::DOOR:
-			if (is_in_fov(tile.position))
-			{
-				attron(COLOR_PAIR(WALL_PAIR));
+				break;
+			case TileType::DOOR:
+				attron(COLOR_PAIR(DOOR_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '+');
-				attroff(COLOR_PAIR(WALL_PAIR));
+				attroff(COLOR_PAIR(DOOR_PAIR));
+				break;
+			default:
+				break;
 			}
-			break;
-		default:
-			break;
+		}
+		else
+		{
+			/*game.log("Map::render() not in FOV");*/
 		}
 	}
 	refresh(); // Refresh once after all tiles have been drawn
-	
 	game.log("Map::render() end");
 }
 
@@ -320,7 +317,7 @@ void Map::add_weapons(Vector2D pos)
 	const int rollColor{ game.d.roll(1,3) }; // Randomly select a color for the weapon
 
 	// Create an Actor for the weapon
-	auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false, false });
+	auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor }, ActorFlags{ false, false, false });
 
 	if (selectedWeapon.name == "Dagger")
 	{
@@ -349,7 +346,7 @@ void Map::add_item(Vector2D pos)
 		add_weapons(pos);
 
 		// add gold
-		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false, false });
+		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR }, ActorFlags{ false, false, false });
 		gold->flags.blocks = false;
 		gold->pickable = std::make_unique<Gold>(game.d.roll(1, 10));
 		/*game.container->inv.insert(game.container->inv.begin(), std::move(gold));*/
@@ -358,7 +355,7 @@ void Map::add_item(Vector2D pos)
 	else if (dice < 70)
 	{
 		// add a health potion
-		auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+		auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false });
 		healthPotion->flags.blocks = false;
 		healthPotion->pickable = std::make_unique<Healer>(4);
 		game.container->inv.insert(game.container->inv.begin(), std::move(healthPotion));
@@ -366,7 +363,7 @@ void Map::add_item(Vector2D pos)
 	else if (dice < 70+10)
 	{
 		// add lightning scrolls
-		auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false, false });
+		auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR }, ActorFlags{ false, false, false });
 		lightningScroll->flags.blocks = false;
 		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
 		game.container->inv.insert(game.container->inv.begin(), std::move(lightningScroll));
@@ -374,7 +371,7 @@ void Map::add_item(Vector2D pos)
 	else if (dice < 70 + 10 + 10)
 	{
 		// add fireball scrolls
-		auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false, false });
+		auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR }, ActorFlags{ false, false, false });
 		fireballScroll->flags.blocks = false;
 		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
 		game.container->inv.insert(game.container->inv.begin(), std::move(fireballScroll));
@@ -382,7 +379,7 @@ void Map::add_item(Vector2D pos)
 	else
 	{
 		// add confusion scrolls
-		auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false, false });
+		auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR }, ActorFlags{ false, false, false });
 		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
 		game.container->inv.insert(game.container->inv.begin(), std::move(confusionScroll));
 	}
@@ -410,7 +407,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 		{
 			for (int tileX = x1; tileX <= x2; tileX++)
 			{
-				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+				set_tile(Vector2D{ tileY, tileX }, TileType::DOOR);
 				tcodMap->setProperties(
 					tileX,
 					tileY,
@@ -563,7 +560,7 @@ void Map::add_monster(Vector2D pos)
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
 	/*auto shopkeeper = std::make_unique<Actor>(mon_y, mon_x, 'S', "shopkeeper", WHITE_PAIR, 0);*/
-	auto shopkeeper = std::make_unique<Creature>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR}, ActorFlags{true, false, false, false});
+	auto shopkeeper = std::make_unique<Creature>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR}, ActorFlags{true, false, false });
 	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
@@ -571,12 +568,12 @@ void Map::add_monster(Vector2D pos)
 	shopkeeper->container = std::make_unique<Container>(10);
 	// populate the shopkeeper's inventory
 	/*auto healthPotion = std::make_unique<Actor>(0, 0, '!', "health potion", HPBARMISSING_PAIR, 0);*/
-	auto healthPotion = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false, false });
+	auto healthPotion = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR }, ActorFlags{ false, false, false });
 	/*healthPotion->flags.blocks = false;*/
 	healthPotion->pickable = std::make_unique<Healer>(4);
 	shopkeeper->container->add(std::move(healthPotion));
 	/*auto dagger = std::make_unique<Actor>(0, 0, '/', "dagger", 1, 0);*/
-	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false, false });
+	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 }, ActorFlags{ false, false, false });
 	/*dagger->flags.blocks = false;*/
 	dagger->pickable = std::make_unique<Dagger>(1, 4);
 	shopkeeper->container->add(std::move(dagger));

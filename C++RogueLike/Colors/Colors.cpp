@@ -4,10 +4,7 @@
 #include "Colors.h"
 
 //==COLORS==
-
-//Colors::Colors() {};
-
-//initialize the color pairs
+// initializes all the color pairs
 void Colors::my_init_pair() noexcept
 {
 	/*std::cout << "colors on" << std::endl;*/
@@ -22,7 +19,7 @@ void Colors::my_init_pair() noexcept
 	init_pair(3, COLOR_BLACK, COLOR_WHITE);//mountain color
 	init_pair(4, COLOR_RED, COLOR_BLACK);//orc color
 	init_pair(5, COLOR_GREEN, COLOR_MAGENTA);//player color
-	init_pair(6, COLOR_BLUE, COLOR_RED);//wall color
+	init_pair(6, COLOR_WHITE, COLOR_BLACK);//wall color
 	init_pair(7, COLOR_RED, COLOR_WHITE);//light wall color
 	init_pair(8, COLOR_GREEN, COLOR_YELLOW);//light ground color
 	init_pair(9, COLOR_RED, COLOR_BLACK);//dead npc color
@@ -37,6 +34,9 @@ void Colors::my_init_pair() noexcept
 	init_pair(18, COLOR_WHITE, COLOR_GREEN); // confusion color
 	init_pair(19, COLOR_BLUE, COLOR_BLACK); // water color
 	init_pair(20, COLOR_YELLOW, COLOR_BLACK); // gold color
+	// make brown
+	init_color(8, 500, 300, 0);
+	init_pair(21, COLOR_YELLOW, 8); // brown color
 }
 
 // end of file: Colors.cpp

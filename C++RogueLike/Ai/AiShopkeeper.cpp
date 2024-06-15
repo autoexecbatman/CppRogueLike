@@ -62,7 +62,6 @@ void AiShopkeeper::moveOrTrade(Creature& owner, int targetx, int targety)
 		trade();
 		// if traded kill shopkeeper dies
 		owner.destructible->die(owner);
-		owner.ai = nullptr;
 
 		game.message(WHITE_PAIR, "The shopkeeper has been killed!", true);
 	}

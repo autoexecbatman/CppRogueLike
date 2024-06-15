@@ -169,21 +169,25 @@ void Actor::render() const noexcept
 	}
 }
 
-void Creature::equip(Actor& item)
+void Creature::equip(Item& item)
 {
-	item.flags.isEquipped = true;
+	item.add_state(ActorState::IS_EQUIPPED);
 	weaponEquipped = item.actorData.name;
 }
 
-void Creature::unequip(Actor& item)
+void Creature::unequip(Item& item)
 {
-	item.flags.isEquipped = false;
+	item.remove_state(ActorState::IS_EQUIPPED);
 	weaponEquipped = "None";
 }
 
+// check if the actor is visible
 bool Actor::is_visible() const noexcept
 {
-	return (!flags.fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);
+	/*return (!flags.fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);*/
+	// if the actor is fovOnly return true
+	auto fovOnly = has_state(ActorState::FOV_ONLY);
+	return (!fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);
 }
 
 // the actor update

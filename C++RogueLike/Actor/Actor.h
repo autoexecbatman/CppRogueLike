@@ -9,6 +9,8 @@
 #pragma warning (pop)
 
 #include <gsl/gsl>
+#include <ranges>
+#include <bitset>
 
 #include "../Persistent/Persistent.h"
 #include "../Ai/Ai.h"
@@ -103,7 +105,14 @@ struct ActorFlags
 	bool blocks;
 	bool fovOnly;
 	bool canSwim;
-	bool isEquipped;
+};
+
+enum class ActorState
+{
+	BLOCKS,
+	FOV_ONLY,
+	CAN_SWIM,
+	IS_EQUIPPED
 };
 
 //==Actor==
@@ -115,31 +124,38 @@ public:
 	Vector2D position{ 0,0 };
 	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
-	ActorFlags flags{ true,true,true,true };
-	
+	ActorFlags flags{ true,true,true };
+
+	std::vector<ActorState> states;
+	bool has_state(ActorState state) const noexcept { return std::ranges::find(states, state) != states.end(); }
+	void add_state(ActorState state) noexcept { states.push_back(state); }
+	void remove_state(ActorState state) noexcept { std::erase_if(states, [state](ActorState s) { return s == state; }); }
+
 	Actor(Vector2D position, ActorData data, ActorFlags flags);
 	virtual ~Actor() = default;
+
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
-	int get_tile_distance(Vector2D tilePosition) const noexcept; // a function to get the distance from an actor to a specific tile of the map
-
-	void render() const noexcept; // render the actor on the screen.
-
-	int get_posY() const noexcept { return position.y; } // get the y position of the actor
-	int get_posX() const noexcept { return position.x; } // get the x position of the actor
-	Vector2D get_position() const noexcept { return position; } // get the position of the actor
-	bool is_visible() const noexcept; // check if the actor is visible
+	int get_tile_distance(Vector2D tilePosition) const noexcept;
+	void render() const noexcept;
+	bool is_visible() const noexcept;
 };
 
 class Creature : public Actor
 {
 public:
-	Creature(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags) {};
+	Creature(Vector2D position, ActorData data, ActorFlags flags) : Actor(position, data, flags)
+	{
+		add_state(ActorState::BLOCKS);
+		add_state(ActorState::FOV_ONLY);
+	};
+
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
 	void update(); // update() will handle the monster turn.
+
 	//==Actor Attributes==
 	int strength{ 0 };
 	int dexterity{ 0 };
@@ -155,9 +171,8 @@ public:
 
 	std::string weaponEquipped{ "None" };
 
-	void equip(Actor& item);
-	void unequip(Actor& item);
-
+	void equip(Item& item);
+	void unequip(Item& item);
 	void pick();
 	void drop();
 
@@ -188,13 +203,17 @@ public:
 	void save(TCODZip& zip) override;
 
 	int value{ 0 };
+
 	std::unique_ptr<Pickable> pickable; // the actor can be picked
 };
 
 class Stairs : public Object
 {
 	public:
-	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }, { true, true, false, false }) {};
+	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }, { .blocks = true, .fovOnly = true, .canSwim = true }) 
+	{
+		add_state(ActorState::FOV_ONLY);
+	};
 };
 
 #endif // !ACTOR_H

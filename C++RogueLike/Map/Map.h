@@ -79,7 +79,7 @@ public:
 	bool is_in_fov(Vector2D pos) const;
 	bool is_water(Vector2D pos) const;
 	TileType get_tile_t(Vector2D pos) const;
-	void tile_action(TileType tileType);
+	bool tile_action(TileType tileType);
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
 	void set_explored(Vector2D pos); //set the tile as explored
 	bool can_walk(Vector2D pos) const;

@@ -12,20 +12,23 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 
 ActorData playerData{ '@', "Player", WHITE_PAIR };
-ActorFlags playerFlags{ true, true, true, false };
+ActorFlags playerFlags{ true, true, true};
 
 Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg)
 	:
 	Creature(position, playerData, playerFlags)
 {
-	RandomDice d;
+	/*RandomDice d;*/ // this is now defined in Game.h
+	//auto& d = game.d; // why this line makes everything hang ???
 
-	strength = d.d6() + d.d6() + d.d6();
-	dexterity = d.d6() + d.d6() + d.d6();
-	constitution = d.d6() + d.d6() + d.d6();
-	intelligence = d.d6() + d.d6() + d.d6();
-	wisdom = d.d6() + d.d6() + d.d6();
-	charisma = d.d6() + d.d6() + d.d6();
+	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
+
+	strength = roll3d6();
+	dexterity = roll3d6();
+	constitution = roll3d6();
+	intelligence = roll3d6();
+	wisdom = roll3d6();
+	charisma = roll3d6();
 
 	attacker = std::make_unique<Attacker>(dmg, minDmg, maxDmg);
 	

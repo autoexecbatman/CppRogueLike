@@ -6,7 +6,7 @@ bool Dagger::use(Item& owner, Creature& wearer)
 {
 	// equip the weapon
 
-	if (!owner.flags.isEquipped)
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
 	{
 		wearer.attacker->dmg += maxDmg;
 		wearer.equip(owner);

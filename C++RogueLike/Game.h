@@ -36,6 +36,8 @@ public:
 		VICTORY,
 		DEFEAT
 	} gameStatus{ GameStatus::STARTUP };
+	// Random number generator.
+	RandomDice d;
 
 	std::unique_ptr<Stairs> stairs;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
@@ -54,8 +56,6 @@ public:
 	std::vector<Weapons> weapons; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
 
-	// Random number generator.
-	RandomDice d;
 	
 	// Public member functions.
 	void init();

@@ -139,9 +139,11 @@ void Game::update()
 		game.player->racial_ability_adjustments();
 		game.player->calculate_thaco();
 		gameStatus = GameStatus::IDLE;
+		[[fallthrough]];
 	case GameStatus::IDLE:
 		game.map->update(); // sets tiles to explored
 		game.player->update(); // if moved set to NEW_TURN else IDLE
+		[[fallthrough]];
 	case GameStatus::NEW_TURN:
 		game.update_creatures(creatures);
 	}
@@ -151,8 +153,8 @@ void Game::render()
 {
 	map->render();
 	game.stairs->render();
-	render_creatures(creatures);
 	render_items(container->inv);
+	render_creatures(creatures);
 	player->render();
 }
 
@@ -563,7 +565,7 @@ void Game::load_all()
 		{
 			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
 			/*std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			auto actor = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true,true });
+			auto actor = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR }, ActorFlags{ true,true,true });
 			actor->load(zip);
 			creatures.push_back(std::move(actor));
 			/*actors.try_emplace(actor->index, actor);*/

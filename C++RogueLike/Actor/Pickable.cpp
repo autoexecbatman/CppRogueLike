@@ -20,16 +20,12 @@ bool Pickable::use(Item& owner, Creature& wearer)
 {
 	if (wearer.container)
 	{
-		wearer.container->inv.erase(
-			std::remove_if(
-				wearer.container->inv.begin(),
-				wearer.container->inv.end(),
-				[&owner](const std::unique_ptr<Item>& actor) { return actor.get() == &owner; }
-		)
-			, wearer.container->inv.end());
+		auto compareItems = [&owner](const std::unique_ptr<Item>& actor) { return actor.get() == &owner; };
+		std::erase_if(wearer.container->inv, compareItems);
 
 		return true;
 	}
+
 	return false;
 }
 

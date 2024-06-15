@@ -86,7 +86,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
 			)
 		{
 			game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->actorData.name.c_str(), damage);
-			animation(actor->get_position(), maxRange);
+			animation(actor->position, maxRange);
 		}
 	}
 

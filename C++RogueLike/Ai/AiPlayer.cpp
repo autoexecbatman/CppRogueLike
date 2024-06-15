@@ -33,7 +33,6 @@ struct PossibleMoves
 
 void AiPlayer::update(Creature& owner)
 {
-	game.log("AiPlayer::update(Actor& owner)");
 	levelup_update(owner); // level up if needed
 
 	const Controls key = static_cast<Controls>(game.keyPress);
@@ -56,11 +55,9 @@ void AiPlayer::update(Creature& owner)
 		Vector2D targetPosition = owner.position + moveVector;
 		if (move_or_attack(owner, targetPosition))
 		{
-			game.log("AiPlayer::update(Actor& owner) moveOrAttack(owner, owner.posX + dx, owner.posY + dy)");
 			game.map->compute_fov();
 		}
 	}
-	std::clog << "PlayerAi::update(Actor& owner) end" << std::endl;
 }
 
 void AiPlayer::load(TCODZip& zip)
@@ -125,15 +122,15 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 	int y = 1;
 	try
 	{
-		for (const auto& actor : owner.container->inv)
+		for (const auto& item : owner.container->inv)
 		{
-			if (actor != nullptr)
+			if (item != nullptr)
 			{
-				mvwprintw(inv, y, 1, "(%c) %s", shortcut, actor->actorData.name.c_str());
+				mvwprintw(inv, y, 1, "(%c) %s", shortcut, item->actorData.name.c_str());
 				// if the actor is equipped, print a star
-				if (actor->flags.isEquipped)
+				if (item->has_state(ActorState::IS_EQUIPPED))
 				{
-					int nameLength = strlen(actor->actorData.name.c_str()) + 5;
+					int nameLength = strlen(item->actorData.name.c_str()) + 5;
 					mvwprintw(inv, y, nameLength, "*");
 				}
 			}
@@ -229,96 +226,65 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 {
 	game.log("Player tries to move or attack");
 
-	// check tile state
-	// and act accordingly
-	game.map->tile_action(game.map->get_tile_t(target));
-
-	auto move_player = [&owner, &target] { owner.position = target; return true; };
-	auto is_wall = [target]{ return !game.map->is_wall(target); };
-
-	auto print_message = [] {
-		mvprintw(0, 0, "You are swimming!");
-		refresh();
-		mvprintw(1, 0, "Press any key to continue.");
-		getch();
-		clear();
-	};
-	auto check_water = [&owner, &target] { return !(game.map->is_water(target) && !owner.flags.canSwim); };
-
-	if (game.map->is_wall(target))
+	// check tile state and if true move the player
+	if (!game.map->tile_action(game.map->get_tile_t(target)))
 	{
 		return false;
 	}
 
-	check_water();
-
-	auto not_nullptr = [](const auto& actor) { return actor != nullptr; };
-	auto is_dead = [](const auto& actor) { return actor->destructible->is_dead(); };
-	auto is_position = [&target](const auto& actor) { return actor->position == target; };
-	auto attack_and_return_false = [&owner](auto&& actor) { owner.attacker->attack(owner, *actor); return false; };
-	auto return_false = [] { return false; };
-	auto append_message = [](const auto& actor) { game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name)); game.finalizeMessage(); };
-
-	// look for living actors to attack
-	// TODO : should we iterate over the entire list ?
-	// in order to check that there is nothing to attack and tile is empty ?
-	for (const auto& actor : game.creatures)
+	if (!look_to_attack(target, owner))
 	{
-		if (actor != nullptr)
+		return false;
+	}
+
+	look_on_floor(target);
+	owner.position = target; // move player
+
+	return true;
+}
+
+void AiPlayer::look_on_floor(Vector2D& target)
+{
+	// look for corpses or items
+	for (const auto& c : game.creatures)
+	{
+		if (c)
 		{
-			if (!actor->destructible->is_dead() && actor->position == target)
+			if (c->destructible->is_dead() && c->position == target)
 			{
-				owner.attacker->attack(owner, *actor);
+				game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", c->actorData.name));
+				game.finalizeMessage();
+			}
+		}
+	}
+
+	for (const auto& i : game.container->inv)
+	{
+		if (i)
+		{
+			if (i->position == target)
+			{
+				game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", i->actorData.name));
+				game.finalizeMessage();
+			}
+		}
+	}
+}
+
+bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
+{
+	// look for living actors to attack
+	for (const auto& c : game.creatures)
+	{
+		if (c)
+		{
+			if (!c->destructible->is_dead() && c->position == target)
+			{
+				owner.attacker->attack(owner, *c);
 				return false;
 			}
 		}
-		else
-		{
-			std::cout << "Error: moveOrAttack() called on actor with null actor." << std::endl;
-			exit(-1);
-		}
 	}
-
-	std::ranges::for_each(game.creatures
-		| std::views::filter(not_nullptr)
-		| std::views::filter(is_dead)
-		| std::views::filter(is_position),
-		attack_and_return_false
-	);
-
-	// look for corpses or items
-	for (const auto& actor : game.creatures)
-	{
-		if (actor->destructible->is_dead() && actor->position == target)
-		{
-			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
-			game.finalizeMessage();
-		}
-	}
-
-	std::ranges::for_each(game.creatures
-		| std::views::filter(not_nullptr)
-		| std::views::filter(is_dead)
-		| std::views::filter(is_position),
-		append_message
-	);
-
-	for (const auto& actor : game.container->inv)
-	{
-		if (actor->position == target)
-		{
-			game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", actor->actorData.name));
-			game.finalizeMessage();
-		}
-	}
-
-	std::ranges::for_each(game.container->inv
-			| std::views::filter(is_position),
-				append_message
-		);
-
-	owner.position = target; // move player
-
 	return true;
 }
 
