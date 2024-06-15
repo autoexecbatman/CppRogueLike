@@ -66,6 +66,18 @@ public:
 	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void render_items(std::span<std::unique_ptr<Item>> items);
 
+	template <typename T>
+	void create_monster(Vector2D position)
+	{
+		creatures.push_back(std::make_unique<T>(position));
+	}
+
+	template <typename T>
+	void create_item(Vector2D position)
+	{
+		container->inv.push_back(std::make_unique<T>(position));
+	}
+
 	/*void send_to_back(Actor& actor);*/
 	template<typename T>
 	void send_to_back(T& actor)

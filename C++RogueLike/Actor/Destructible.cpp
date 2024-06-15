@@ -5,6 +5,7 @@
 
 //#include "../main.h"
 #include "../Game.h"
+#include "../Items.h"
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 #include "../Attributes/StrengthAttributes.h"

@@ -12,6 +12,7 @@
 #include <span>
 
 #include "Game.h"
+#include "Items.h"
 #include "Actor/Actor.h"
 #include "Actor/Attacker.h"
 #include "Actor/Pickable.h"

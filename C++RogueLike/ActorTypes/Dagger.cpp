@@ -1,4 +1,6 @@
 #include "Dagger.h"
+#include "../Actor/Actor.h"
+#include "../Items.h"
 
 Dagger::Dagger(int minDmg, int maxDmg) : minDmg(minDmg), maxDmg(maxDmg) {}
 

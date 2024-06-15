@@ -18,6 +18,7 @@
 #include "Destructible.h"
 #include "Pickable.h"
 #include "Container.h"
+#include "../Items.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
@@ -57,16 +58,6 @@ void Creature::load(TCODZip& zip)
 	if (hasDestructible) { destructible = Destructible::create(zip); }
 	if (hasAi) { ai = Ai::create(zip); }
 	if (hasContainer) { container = std::make_unique<Container>(0); container->load(zip); }
-}
-
-void Item::load(TCODZip& zip)
-{
-	// this block assigns checks if the actor has a component
-	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
-	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
-
-	// this block assigns the values from the zip file to the actor's components if they exist.
-	if (hasPickable) { pickable = Pickable::create(zip); }
 }
 
 void Creature::save(TCODZip& zip)
@@ -121,21 +112,6 @@ void Creature::drop()
 			}
 		}
 	}
-}
-
-void Item::save(TCODZip& zip)
-{
-	// Add a debug log to display the actor name
-	game.log("Saving actor: " + actorData.name);
-
-	zip.putInt(position.x);
-	zip.putInt(position.y);
-	zip.putInt(actorData.ch);
-	zip.putInt(actorData.color);
-	zip.putString(actorData.name.c_str());
-
-	zip.putInt(pickable != nullptr);
-	if (pickable) pickable->save(zip);
 }
 
 void Actor::save(TCODZip& zip)
@@ -201,6 +177,34 @@ int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 	mvprintw(10, 0, "Distance: %d", distance);
 
 	return distance;
+}
+
+//==Item==
+Item::Item(Vector2D position, ActorData data) : Object(position, data) {};
+
+void Item::load(TCODZip& zip)
+{
+	// this block assigns checks if the actor has a component
+	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
+	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
+
+	// this block assigns the values from the zip file to the actor's components if they exist.
+	if (hasPickable) { pickable = Pickable::create(zip); }
+}
+
+void Item::save(TCODZip& zip)
+{
+	// Add a debug log to display the actor name
+	game.log("Saving actor: " + actorData.name);
+
+	zip.putInt(position.x);
+	zip.putInt(position.y);
+	zip.putInt(actorData.ch);
+	zip.putInt(actorData.color);
+	zip.putString(actorData.name.c_str());
+
+	zip.putInt(pickable != nullptr);
+	if (pickable) pickable->save(zip);
 }
 
 // end of file: Actor.cpp

@@ -5,6 +5,7 @@
 #include "../Game.h"
 #include "Container.h"
 #include "Actor.h"
+#include "../Items.h"
 
 Container::Container(size_t invSize) noexcept : invSize(invSize) {}
 
@@ -52,7 +53,7 @@ void Container::save(TCODZip& zip)
 	// iterate through the inventory and save the item
 	for (const auto& actor : inv)
 	{
-		actor->save(zip); // Unhandled exception at 0x632F9A85 (libtcod.dll) in C++RogueLike.exe: 0xC00000FD: Stack overflow (parameters: 0x00000001, 0x00442FFC).
+		actor->save(zip);
 	}
 }
 

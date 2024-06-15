@@ -5,6 +5,7 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
+#include "../Items.h"
 
 class LongSword : public Pickable
 {

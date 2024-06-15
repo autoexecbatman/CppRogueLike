@@ -10,7 +10,6 @@
 
 #include <gsl/gsl>
 #include <ranges>
-#include <bitset>
 
 #include "../Persistent/Persistent.h"
 #include "../Ai/Ai.h"
@@ -100,13 +99,6 @@ struct ActorData
 	int color{ 0 };
 };
 
-struct ActorFlags
-{
-	bool blocks;
-	bool fovOnly;
-	bool canSwim;
-};
-
 enum class ActorState
 {
 	BLOCKS,
@@ -124,7 +116,6 @@ public:
 	Vector2D position{ 0,0 };
 	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
-	/*ActorFlags flags{ true,true,true };*/
 
 	std::vector<ActorState> states;
 	bool has_state(ActorState state) const noexcept { return std::ranges::find(states, state) != states.end(); }
@@ -197,7 +188,7 @@ public:
 class Item : public Object
 {
 public:
-	Item(Vector2D position, ActorData data) : Object(position, data) {};
+	Item(Vector2D position, ActorData data);
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

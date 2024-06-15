@@ -123,7 +123,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Game.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Game.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main_C++RogueLike.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/main.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Items.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/Items.cpp
 
     # Map
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Map/Map.cpp

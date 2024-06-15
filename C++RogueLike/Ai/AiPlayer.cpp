@@ -11,6 +11,7 @@
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
 #include "../Actor/Actor.h"
+#include "../Items.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;

@@ -4,10 +4,7 @@
 
 #pragma once
 
-#include <span>
-
 #include "../Persistent/Persistent.h"
-#include "../ActorTypes/Monsters.h"
 #include "../Actor/Actor.h"
 
 class Actor;
@@ -61,13 +58,6 @@ public:
 	int map_height, map_width;
 
 	Map(int map_height, int map_width);
-
-	template <typename T>
-	std::unique_ptr<T> create_monster(Vector2D position)
-	{
-		auto monster = std::make_unique<T>(position);
-		return monster;
-	}
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;

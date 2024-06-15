@@ -4,7 +4,6 @@
 #pragma once
 
 #include "../Actor/Pickable.h"
-#include "../Actor/Actor.h"
 
 class Dagger : public Pickable
 {

@@ -34,6 +34,7 @@
 #include "../Colors/Colors.h"
 #include "../Random/RandomDice.h"
 #include "../Weapons.h"
+#include "../Items.h"
 
 // a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
@@ -345,39 +346,23 @@ void Map::add_item(Vector2D pos)
 	{
 		add_weapons(pos);
 
-		// add gold
-		auto gold = std::make_unique<Item>(pos, ActorData{ '$', "gold", GOLD_PAIR });
-		gold->pickable = std::make_unique<Gold>(game.d.roll(1, 10));
-		game.container->inv.insert(game.container->inv.begin(), std::move(gold));
-
+		game.create_item<GoldPile>(pos);
 	}
 	else if (dice < 70)
 	{
-		// add a health potion
-		auto healthPotion = std::make_unique<Item>(pos, ActorData{ '!', "health potion", HPBARMISSING_PAIR });
-		healthPotion->pickable = std::make_unique<Healer>(4);
-		game.container->inv.insert(game.container->inv.begin(), std::move(healthPotion));
+		game.create_item<HealthPotion>(pos);
 	}
 	else if (dice < 70+10)
 	{
-		// add lightning scrolls
-		auto lightningScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of lightning bolt", LIGHTNING_PAIR });
-		lightningScroll->pickable = std::make_unique<LightningBolt>(5, 20);
-		game.container->inv.insert(game.container->inv.begin(), std::move(lightningScroll));
+		game.create_item<ScrollOfLightningBolt>(pos);
 	}
 	else if (dice < 70 + 10 + 10)
 	{
-		// add fireball scrolls
-		auto fireballScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR });
-		fireballScroll->pickable = std::make_unique<Fireball>(3, 12);
-		game.container->inv.insert(game.container->inv.begin(), std::move(fireballScroll));
+		game.create_item<ScrollOfFireball>(pos);
 	}
 	else
 	{
-		// add confusion scrolls
-		auto confusionScroll = std::make_unique<Item>(pos, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR });
-		confusionScroll->pickable = std::make_unique<Confuser>(10, 8);
-		game.container->inv.insert(game.container->inv.begin(), std::move(confusionScroll));
+		game.create_item<ScrollOfConfusion>(pos);
 	}
 }
 
@@ -403,7 +388,7 @@ void Map::dig(int x1, int y1, int x2, int y2)
 		{
 			for (int tileX = x1; tileX <= x2; tileX++)
 			{
-				set_tile(Vector2D{ tileY, tileX }, TileType::DOOR);
+				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
 				tcodMap->setProperties(
 					tileX,
 					tileY,
@@ -450,6 +435,10 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 {
 	RandomDice d;
 	dig(x1, y1, x2, y2); // dig the corridors
+	//set the first tile to door
+	set_tile(Vector2D{ y1, x1 }, TileType::DOOR);
+	//set the last tile to door
+	set_tile(Vector2D{ y2, x2 }, TileType::DOOR);
 
 	// Add water tiles
 	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
@@ -574,8 +563,7 @@ void Map::add_monster(Vector2D pos)
 
 	if (placeDragon)
 	{
-		auto dragon = std::make_unique<Dragon>(pos);
-		game.creatures.push_back(std::move(dragon));
+		game.create_monster<Dragon>(pos);
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
 	else
@@ -583,8 +571,7 @@ void Map::add_monster(Vector2D pos)
 		const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
 		for (auto i{ 0 }; i < roll4d6; i++)
 		{ // create goblins
-			auto goblin = create_monster<Goblin>(pos);
-			game.creatures.push_back(std::move(goblin));
+			game.create_monster<Goblin>(pos);
 		}
 
 		if (game.player->playerLevel > 3)
@@ -592,8 +579,7 @@ void Map::add_monster(Vector2D pos)
 			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
 			for (auto i{ 0 }; i < roll2d6; i++)
 			{ // create orcs
-				auto orc = create_monster<Orc>(pos);
-				game.creatures.push_back(std::move(orc));
+				game.create_monster<Orc>(pos);
 			}
 		}
 
@@ -602,8 +588,7 @@ void Map::add_monster(Vector2D pos)
 			const auto roll1d6 = d.d6();
 			for (auto i{ 0 }; i < roll1d6; i++)
 			{ // create trolls
-				auto troll = create_monster<Troll>(pos);
-				game.creatures.push_back(std::move(troll));
+				game.create_monster<Troll>(pos);
 			}
 		}
 	}
