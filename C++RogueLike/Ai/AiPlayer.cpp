@@ -246,18 +246,6 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 void AiPlayer::look_on_floor(Vector2D& target)
 {
 	// look for corpses or items
-	for (const auto& c : game.creatures)
-	{
-		if (c)
-		{
-			if (c->destructible->is_dead() && c->position == target)
-			{
-				game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", c->actorData.name));
-				game.finalizeMessage();
-			}
-		}
-	}
-
 	for (const auto& i : game.container->inv)
 	{
 		if (i)
