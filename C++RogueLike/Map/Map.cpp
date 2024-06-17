@@ -68,29 +68,31 @@ public:
 
 			if (roomNum != 0)
 			{
-				//RandomDice d;
-				//const int rolld2 = d.d2();
-				//if (rolld2 == 1)
-				//{
-				//	// dig a corridor from last room
-				//	map.dig({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
-				//	map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-				/////*map.dig(1,10,117,10);*/ // test dig
-				//}
-				//else
-				//{
-				//	// fixed corridor
-				//	map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-				//	map.dig({ last.y,begin.x + end.x / 2 },{ begin.y + end.y / 2,begin.x + end.x / 2 }
-				//	);
-				//}
+				RandomDice d;
+				const int rolld2 = d.d2();
+				if (rolld2 == 1)
+				{
+					// dig a corridor from last room
+					map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
+					map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+					return true;
+				///*map.dig(1,10,117,10);*/ // test dig
+				}
+				else
+				{
+					// fixed corridor
+					map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+					map.dig_corridor({ last.y,begin.x + end.x / 2 },{ begin.y + end.y / 2,begin.x + end.x / 2 }
+					);
+					return true;
+				}
 				
 				//map.dig({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
 				//map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
 
-				map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
-				map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-				return true;
+				//map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
+				//map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+				//return true;
 
 				//map.dig_v_tunnel(last.y, begin.y + end.y / 2, begin.x + end.x / 2);
 				//map.dig_h_tunnel(last.x, begin.x + end.x / 2, last.y);
@@ -294,9 +296,9 @@ void Map::render() const
 				/*getch();*/
 				break;
 			case TileType::CORRIDOR:
-				attron(COLOR_PAIR(HPBARMISSING_PAIR));
+				attron(COLOR_PAIR(WHITE_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '.');
-				attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+				attroff(COLOR_PAIR(WHITE_PAIR));
 				break;
 			default:
 				break;
@@ -384,66 +386,66 @@ void Map::dig(Vector2D begin, Vector2D end)
 		std::swap(begin.y, end.y);
 	}
 
-	//RandomDice d;
-	//// roll d2
-	//const int rollD2 = d.d2();
+	RandomDice d;
+	// roll d2
+	const int rollD2 = d.d2();
 
-	//if (rollD2 == 1)
-	//{
-	//	for (int tileY = begin.y; tileY <= end.y; tileY++)
-	//	{
-	//		for (int tileX = begin.x; tileX <= end.x; tileX++)
-	//		{
-	//			set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-	//			tcodMap->setProperties(
-	//				tileX,
-	//				tileY,
-	//				true, // isTransparent
-	//				true // isWalkable
-	//			);
-	//		}
-	//	}
-	//}
-	//else
-	//{
-	//	int width = end.x - begin.x + 1;
-	//	int height = end.y - begin.y + 1;
-	//	int centerX = (begin.x + end.x) / 2;
-	//	int centerY = (begin.y + end.y) / 2;
-
-	//	for (int tileY = begin.y; tileY <= end.y; tileY++) {
-	//		// Calculate the horizontal range to create a slightly diamond shape
-	//		int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
-	//		int startX = centerX - halfWidth;
-	//		int endX = centerX + halfWidth;
-
-	//		for (int tileX = startX; tileX <= endX; tileX++) {
-	//			if (tileX >= begin.x && tileX <= end.x) {
-	//				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-	//				tcodMap->setProperties(
-	//					tileX,
-	//					tileY,
-	//					true, // isTransparent
-	//					true  // isWalkable
-	//				);
-	//			}
-	//		}
-	//	}
-	//}
-
-	for (int tileY = begin.y; tileY <= end.y; tileY++)
+	if (rollD2 == 1)
 	{
-		for (int tileX = begin.x; tileX <= end.x; tileX++)
+		for (int tileY = begin.y; tileY <= end.y; tileY++)
 		{
-			set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-			tcodMap->setProperties(
-				tileX,
-				tileY,
-				true, // isTransparent
-				true // isWalkable
-			);
+			for (int tileX = begin.x; tileX <= end.x; tileX++)
+			{
+				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+				tcodMap->setProperties(
+					tileX,
+					tileY,
+					true, // isTransparent
+					true // isWalkable
+				);
+			}
 		}
 	}
+	else
+	{
+		int width = end.x - begin.x + 1;
+		int height = end.y - begin.y + 1;
+		int centerX = (begin.x + end.x) / 2;
+		int centerY = (begin.y + end.y) / 2;
+
+		for (int tileY = begin.y; tileY <= end.y; tileY++) {
+			// Calculate the horizontal range to create a slightly diamond shape
+			int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
+			int startX = centerX - halfWidth;
+			int endX = centerX + halfWidth;
+
+			for (int tileX = startX; tileX <= endX; tileX++) {
+				if (tileX >= begin.x && tileX <= end.x) {
+					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+					tcodMap->setProperties(
+						tileX,
+						tileY,
+						true, // isTransparent
+						true  // isWalkable
+					);
+				}
+			}
+		}
+	}
+
+	//for (int tileY = begin.y; tileY <= end.y; tileY++)
+	//{
+	//	for (int tileX = begin.x; tileX <= end.x; tileX++)
+	//	{
+	//		set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+	//		tcodMap->setProperties(
+	//			tileX,
+	//			tileY,
+	//			true, // isTransparent
+	//			true // isWalkable
+	//		);
+	//	}
+	//}
 
 }
 
@@ -454,78 +456,57 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 	bool isDoorSet = false;
 	bool secondDoorSet = false;
+	bool thirdDoorSet = false;
 	Vector2D lastTile{ 0,0 };
 	for (int tileY = begin.y; tileY <= end.y; tileY++)
 	{
 		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
-			//if (!isDoorSet && !secondDoorSet) // if no doors are set yet, set the first door
-			//{
-				if (!isDoorSet) // 
+			Vector2D thisTile{ tileY, tileX };
+			if (!isDoorSet)
+			{
+				if (is_wall(thisTile)) // if the tile is a wall
 				{
-					if (is_wall(Vector2D{ tileY, tileX })) // if the tile is a wall
-					{
-						set_tile(Vector2D{ tileY, tileX }, TileType::DOOR);
-						isDoorSet = true;
-					}
-					else
-					{
-						set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
-						tcodMap->setProperties(
-							tileX,
-							tileY,
-							true, // isTransparent
-							true // isWalkable
-						);
-					}
+					set_tile(thisTile, TileType::DOOR);
+					isDoorSet = true;
 				}
-				else if (!secondDoorSet && isDoorSet) // if the first door is set and the second door is not set
+				else
 				{
-					if (get_tile_t(Vector2D{ tileY, tileX }) == TileType::FLOOR)
-					{
-						set_tile(lastTile, TileType::DOOR); // set the last tile as a door
-						secondDoorSet = true;
-					}
-					else
-					{
-						set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
-						tcodMap->setProperties(
-							tileX,
-							tileY,
-							true, // isTransparent
-							true // isWalkable
-						);
-					}
+					set_tile(thisTile, TileType::CORRIDOR);
+					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
-			//		else
-			//		{
-			//			set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
-			//			tcodMap->setProperties(
-			//				tileX, tileY,
-			//				true, // isTransparent
-			//				true // isWalkable
-			//			);
-			//		}
-			//	}
-			//	else
-			//	{
-			//		set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
-			//		tcodMap->setProperties(
-			//			tileX, tileY,
-			//			true, // isTransparent
-			//			true // isWalkable
-			//		);
-			//	}
-			//}
-			//else
-			//{
-			//	set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
-			//	tcodMap->setProperties(
-			//		tileX, tileY,
-			//		true, // isTransparent
-			//		true // isWalkable
-			//	);
-			//}
+			}
+			else if (!secondDoorSet && isDoorSet) // if the first door is set and the second door is not set
+			{
+				if (get_tile_t(thisTile) == TileType::FLOOR || get_tile_t(thisTile) == TileType::WATER)
+				{
+					set_tile(lastTile, TileType::DOOR); // set the last tile as a door
+					secondDoorSet = true;
+				}
+				else
+				{
+					set_tile(thisTile, TileType::CORRIDOR);
+					tcodMap->setProperties(tileX,tileY,true,true); // walkable and transparent
+				}
+			}
+			else if (!thirdDoorSet && secondDoorSet && isDoorSet)
+			{
+				if (get_tile_t(thisTile) == TileType::WALL)
+				{
+					set_tile(thisTile, TileType::DOOR); // set the last tile as a door
+					thirdDoorSet = true;
+				}
+				else
+				{
+					set_tile(thisTile, TileType::CORRIDOR);
+					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
+				}
+			}
+			else
+			{
+				set_tile(thisTile, TileType::CORRIDOR);
+				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
+			}
 
 			lastTile = Vector2D{ tileY, tileX };
 		}
