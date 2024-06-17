@@ -33,6 +33,7 @@ enum class TileType
 	WALL,
 	WATER,
 	DOOR,
+	CORRIDOR,
 	// Add more as needed...
 };
 
@@ -66,6 +67,7 @@ public:
 
 	void init(bool withActors);
 	bool is_wall(Vector2D pos) const;
+	bool is_floor(Vector2D pos) const { return get_tile_t(pos) == TileType::FLOOR;}
 	bool is_in_fov(Vector2D pos) const;
 	bool is_water(Vector2D pos) const;
 	TileType get_tile_t(Vector2D pos) const;
@@ -89,9 +91,13 @@ protected:
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;
 	long seed;
+	int SUPER_COUNTER{ 0 };
 
 	friend class BspListener;
-	void dig(int x1, int y1, int x2, int y2);
+	void dig(Vector2D begin, Vector2D end);
+	void dig_corridor(Vector2D begin, Vector2D end);
+	void dig_h_tunnel(int x1, int x2, int y);
+	void dig_v_tunnel(int y1, int y2, int x);
 	void set_tile(Vector2D pos, TileType newType);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };

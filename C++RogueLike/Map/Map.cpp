@@ -42,7 +42,7 @@ class BspListener : public ITCODBspCallback
 private:
 	Map& map; // a map to dig
 	int roomNum{ 0 }; // room number
-	int lastx{ 0 }, lasty{ 0 }; // center of the last room
+	Vector2D last{ 0,0 }; // center of the last room
 public:
 	BspListener(Map& map) noexcept : map(map), roomNum(0) {}
 
@@ -50,72 +50,55 @@ public:
 	{
 		if (node->isLeaf())
 		{
-			int room_pos_x, room_pos_y, room_width, room_height = 0;
 			const bool withActors = gsl::narrow_cast<bool>(userData);
-			room_width = map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2);//random int from min size to width - 2
-			room_height = map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2);//random int from min size to height - 2
-			room_pos_x = map.rng_unique->getInt(node->x + 1, node->x + node->w - room_width - 1);//from node x + 1 to node x + node width - width - 1
-			room_pos_y = map.rng_unique->getInt(node->y + 1, node->y + node->h - room_height - 1);//from node y + 1 to node x + node height - width - 1
+			Vector2D end
+			{ 
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
+			};
+			Vector2D begin
+			{
+				map.rng_unique->getInt(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
+				map.rng_unique->getInt(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
+			};
 
 			// first create a room
-			map.create_room
-			(
-				roomNum == 0,
-				room_pos_x,
-				room_pos_y,
-				room_pos_x + room_width - 1 - 1,
-				room_pos_y + room_height - 1 - 1,
-				withActors
-			);
-
-			std::cout << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
-			std::clog << "Room " << roomNum << " : " << room_pos_x << ", " << room_pos_y << ", " << room_width << ", " << room_height << std::endl;
+			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + end.x - 1 - 1, begin.y + end.y - 1 - 1, withActors);
+			/*map.set_tile(Vector2D{ begin.y,begin.x }, TileType::DOOR);*/
 
 			if (roomNum != 0)
 			{
-				RandomDice d;
-				const int rolld2 = d.d2();
-				if (rolld2 == 1)
-				{
-					// dig a corridor from last room
-					// place doors
-					map.dig(
-						room_pos_x + room_width / 2,
-						lasty,
-						room_pos_x + room_width / 2,
-						room_pos_y + room_height / 2
-					);
-					map.dig(
-						lastx,
-						lasty,
-						room_pos_x + room_width / 2,
-						lasty
-					);
-				/*map.dig(1,10,117,10);*/ // test dig
-				}
-				else
-				{
+				//RandomDice d;
+				//const int rolld2 = d.d2();
+				//if (rolld2 == 1)
+				//{
+				//	// dig a corridor from last room
+				//	map.dig({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
+				//	map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+				/////*map.dig(1,10,117,10);*/ // test dig
+				//}
+				//else
+				//{
+				//	// fixed corridor
+				//	map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+				//	map.dig({ last.y,begin.x + end.x / 2 },{ begin.y + end.y / 2,begin.x + end.x / 2 }
+				//	);
+				//}
+				
+				//map.dig({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
+				//map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
 
-					// fixed corridor
-					map.dig(
-						lastx,
-						lasty,
-						room_pos_x + room_width / 2,
-						lasty
-					);
+				map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
+				map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+				return true;
 
-					map.dig(
-						room_pos_x + room_width / 2,
-						lasty,
-						room_pos_x + room_width / 2,
-						room_pos_y + room_height / 2
-					);
-					
-				}
+				//map.dig_v_tunnel(last.y, begin.y + end.y / 2, begin.x + end.x / 2);
+				//map.dig_h_tunnel(last.x, begin.x + end.x / 2, last.y);
+
+				/*map.set_tile(Vector2D{ last.y,last.x }, TileType::DOOR);*/
 			}
 
-			lastx = room_pos_x + room_width / 2; // set lastx to center of room
-			lasty = room_pos_y + room_height / 2; // set lasty to center of room
+			last = Vector2D{ begin.y + end.y / 2,begin.x + end.x / 2 };
 			
 			roomNum++;
 		}
@@ -247,6 +230,10 @@ bool Map::tile_action(TileType tileType)
 		game.log("You are at a door");
 		game.message(COLOR_WHITE, "You are at a door", true);
 		return true;
+	case TileType::CORRIDOR:
+		game.log("You are in a corridor");
+		game.message(COLOR_WHITE, "You are in a corridor", true);
+		return true;
 	default:
 		game.log("You are in an unknown area");
 		return false;
@@ -272,9 +259,11 @@ void Map::update()
 
 void Map::render() const
 {
+	auto count = 0;
 	game.log("Map::render()");
 	for (const auto& tile : tiles)
 	{
+		
 		if (is_in_fov(tile.position) || is_explored(tile.position))
 		{
 			switch (get_tile_t(tile.position))
@@ -293,18 +282,27 @@ void Map::render() const
 				mvaddch(tile.position.y, tile.position.x, '.');
 				break;
 			case TileType::DOOR:
+				//attron(COLOR_PAIR(DOOR_PAIR));
+				///*mvaddch(tile.position.y, tile.position.x, '+');*/
+				//mvprintw(tile.position.y, tile.position.x, "%d", SUPER_COUNTER);
+				//attroff(COLOR_PAIR(DOOR_PAIR));
+
 				attron(COLOR_PAIR(DOOR_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '+');
+				mvprintw(tile.position.y, tile.position.x, "+");
 				attroff(COLOR_PAIR(DOOR_PAIR));
+				refresh();
+				/*getch();*/
+				break;
+			case TileType::CORRIDOR:
+				attron(COLOR_PAIR(HPBARMISSING_PAIR));
+				mvaddch(tile.position.y, tile.position.x, '.');
+				attroff(COLOR_PAIR(HPBARMISSING_PAIR));
 				break;
 			default:
 				break;
 			}
 		}
-		else
-		{
-			/*game.log("Map::render() not in FOV");*/
-		}
+		count++;
 	}
 	refresh(); // Refresh once after all tiles have been drawn
 	game.log("Map::render() end");
@@ -323,12 +321,10 @@ void Map::add_weapons(Vector2D pos)
 	if (selectedWeapon.name == "Dagger")
 	{
 		weaponActor->pickable = std::make_unique<Dagger>(1, 4);
-		game.err("Dagger added");
 	}
 	else if (selectedWeapon.name == "Long Sword")
 	{
 		weaponActor->pickable = std::make_unique<LongSword>(1, 8);
-		game.err("Long Sword added");
 	}
 	else
 	{
@@ -366,65 +362,238 @@ void Map::add_item(Vector2D pos)
 	}
 }
 
-void Map::dig(int x1, int y1, int x2, int y2)
+void Map::dig(Vector2D begin, Vector2D end)
 {
-	if (x2 < x1)
+	//if (end.x < begin.x)
+	//{
+	//	std::swap(begin.x, end.x);
+	//}
+
+	//if (end.y < begin.y)
+	//{
+	//	std::swap(begin.y, end.y);
+	//}
+
+	if (begin.x > end.x)
 	{
-		std::swap(x1, x2);
+		std::swap(begin.x, end.x);
 	}
 
-	if (y2 < y1)
+	if (begin.y > end.y)
 	{
-		std::swap(y1, y2);
+		std::swap(begin.y, end.y);
 	}
 
-	RandomDice d;
-	// roll d2
-	const int rollD2 = d.d2();
+	//RandomDice d;
+	//// roll d2
+	//const int rollD2 = d.d2();
 
-	if (rollD2 == 1)
+	//if (rollD2 == 1)
+	//{
+	//	for (int tileY = begin.y; tileY <= end.y; tileY++)
+	//	{
+	//		for (int tileX = begin.x; tileX <= end.x; tileX++)
+	//		{
+	//			set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+	//			tcodMap->setProperties(
+	//				tileX,
+	//				tileY,
+	//				true, // isTransparent
+	//				true // isWalkable
+	//			);
+	//		}
+	//	}
+	//}
+	//else
+	//{
+	//	int width = end.x - begin.x + 1;
+	//	int height = end.y - begin.y + 1;
+	//	int centerX = (begin.x + end.x) / 2;
+	//	int centerY = (begin.y + end.y) / 2;
+
+	//	for (int tileY = begin.y; tileY <= end.y; tileY++) {
+	//		// Calculate the horizontal range to create a slightly diamond shape
+	//		int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
+	//		int startX = centerX - halfWidth;
+	//		int endX = centerX + halfWidth;
+
+	//		for (int tileX = startX; tileX <= endX; tileX++) {
+	//			if (tileX >= begin.x && tileX <= end.x) {
+	//				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+	//				tcodMap->setProperties(
+	//					tileX,
+	//					tileY,
+	//					true, // isTransparent
+	//					true  // isWalkable
+	//				);
+	//			}
+	//		}
+	//	}
+	//}
+
+	for (int tileY = begin.y; tileY <= end.y; tileY++)
 	{
-		for (int tileY = y1; tileY <= y2; tileY++)
+		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
-			for (int tileX = x1; tileX <= x2; tileX++)
-			{
-				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-				tcodMap->setProperties(
-					tileX,
-					tileY,
-					true, // isTransparent
-					true // isWalkable
-				);
-			}
+			set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+			tcodMap->setProperties(
+				tileX,
+				tileY,
+				true, // isTransparent
+				true // isWalkable
+			);
 		}
 	}
-	else
+
+}
+
+void Map::dig_corridor(Vector2D begin, Vector2D end)
+{
+	if (begin.x > end.x) { std::swap(begin.x, end.x); }
+	if (begin.y > end.y) { std::swap(begin.y, end.y); }
+
+	bool isDoorSet = false;
+	bool secondDoorSet = false;
+	Vector2D lastTile{ 0,0 };
+	for (int tileY = begin.y; tileY <= end.y; tileY++)
 	{
-		int width = x2 - x1 + 1;
-		int height = y2 - y1 + 1;
-		int centerX = (x1 + x2) / 2;
-		int centerY = (y1 + y2) / 2;
-
-		for (int tileY = y1; tileY <= y2; tileY++) {
-			// Calculate the horizontal range to create a slightly diamond shape
-			int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
-			int startX = centerX - halfWidth;
-			int endX = centerX + halfWidth;
-
-			for (int tileX = startX; tileX <= endX; tileX++) {
-				if (tileX >= x1 && tileX <= x2) {
-					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-					tcodMap->setProperties(
-						tileX,
-						tileY,
-						true, // isTransparent
-						true  // isWalkable
-					);
+		for (int tileX = begin.x; tileX <= end.x; tileX++)
+		{
+			//if (!isDoorSet && !secondDoorSet) // if no doors are set yet, set the first door
+			//{
+				if (!isDoorSet) // 
+				{
+					if (is_wall(Vector2D{ tileY, tileX })) // if the tile is a wall
+					{
+						set_tile(Vector2D{ tileY, tileX }, TileType::DOOR);
+						isDoorSet = true;
+					}
+					else
+					{
+						set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
+						tcodMap->setProperties(
+							tileX,
+							tileY,
+							true, // isTransparent
+							true // isWalkable
+						);
+					}
 				}
-			}
+				else if (!secondDoorSet && isDoorSet) // if the first door is set and the second door is not set
+				{
+					if (get_tile_t(Vector2D{ tileY, tileX }) == TileType::FLOOR)
+					{
+						set_tile(lastTile, TileType::DOOR); // set the last tile as a door
+						secondDoorSet = true;
+					}
+					else
+					{
+						set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
+						tcodMap->setProperties(
+							tileX,
+							tileY,
+							true, // isTransparent
+							true // isWalkable
+						);
+					}
+				}
+			//		else
+			//		{
+			//			set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
+			//			tcodMap->setProperties(
+			//				tileX, tileY,
+			//				true, // isTransparent
+			//				true // isWalkable
+			//			);
+			//		}
+			//	}
+			//	else
+			//	{
+			//		set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
+			//		tcodMap->setProperties(
+			//			tileX, tileY,
+			//			true, // isTransparent
+			//			true // isWalkable
+			//		);
+			//	}
+			//}
+			//else
+			//{
+			//	set_tile(Vector2D{ tileY, tileX }, TileType::CORRIDOR);
+			//	tcodMap->setProperties(
+			//		tileX, tileY,
+			//		true, // isTransparent
+			//		true // isWalkable
+			//	);
+			//}
+
+			lastTile = Vector2D{ tileY, tileX };
 		}
 	}
 }
+
+void Map::dig_h_tunnel(int x1, int x2, int y)
+{
+	bool isDoorSet = false;
+	auto count = 0;
+	for (int tileX = x1; tileX <= x2; tileX++)
+	{
+		if (is_wall(Vector2D{ y, tileX }) || !isDoorSet)
+		{
+			set_tile(Vector2D{ y, tileX }, TileType::DOOR);
+			isDoorSet = true;
+		}
+
+		set_tile(Vector2D{ y, tileX }, TileType::FLOOR);
+		tcodMap->setProperties(
+			tileX,
+			y,
+			true, // isTransparent
+			true // isWalkable
+		);
+
+		// render and enumerate the path
+
+		attron(COLOR_PAIR(1));
+		mvprintw(y, tileX, "%d", count);
+		attroff(COLOR_PAIR(1));
+		refresh();
+
+		count++;
+	}
+}
+
+void Map::dig_v_tunnel(int y1, int y2, int x)
+{
+	bool isDoorSet = false;
+	auto count = 0;
+	for (int tileY = y1; tileY <= y2; tileY++)
+	{
+		if (is_wall(Vector2D{ tileY, x }) || !isDoorSet)
+		{
+			set_tile(Vector2D{ tileY, x }, TileType::DOOR);
+			isDoorSet = true;
+		}
+
+		set_tile(Vector2D{ tileY, x }, TileType::FLOOR);
+		tcodMap->setProperties(
+			x,
+			tileY,
+			true, // isTransparent
+			true // isWalkable
+		);
+
+		// render the path
+
+		attron(COLOR_PAIR(1));
+		mvprintw(tileY, x, "%d", count);
+		attroff(COLOR_PAIR(1));
+		refresh();
+
+	}
+}
+
+
 
 void Map::set_tile(Vector2D pos, TileType newType)
 {
@@ -434,11 +603,9 @@ void Map::set_tile(Vector2D pos, TileType newType)
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
 	RandomDice d;
-	dig(x1, y1, x2, y2); // dig the corridors
-	//set the first tile to door
-	set_tile(Vector2D{ y1, x1 }, TileType::DOOR);
-	//set the last tile to door
-	set_tile(Vector2D{ y2, x2 }, TileType::DOOR);
+	Vector2D begin{ y1,x1 };
+	Vector2D end{ y2,x2 };
+	dig(begin, end); // dig the corridors
 
 	// Add water tiles
 	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
@@ -537,17 +704,14 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	game.err("player level: " + std::to_string(game.player->playerLevel));
+	auto& d = game.d; // get the random dice
 	static bool dragonPlaced = false; // flag to track if a dragon has been placed
-	RandomDice d;
-
 	// Determine if this room should contain the dragon
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
 	// Create a shopkeeper
 	auto shopkeeper = std::make_unique<Creature>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR});
 	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
-
 	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
 	shopkeeper->ai = std::make_unique<AiShopkeeper>();
 	shopkeeper->container = std::make_unique<Container>(10);

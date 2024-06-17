@@ -750,7 +750,7 @@ void Game::display_character_sheet() noexcept
 	WINDOW* character_sheet = newwin(
 		30, // height
 		120, // width
-		0, // y
+		0, // yplayer level
 		0 // x
 	);
 
