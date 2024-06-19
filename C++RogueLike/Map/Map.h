@@ -90,14 +90,15 @@ protected:
 	std::vector<Tile> tiles;
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;
+
+	std::unique_ptr<TCODPath> tcodPath;
+
 	long seed;
-	int SUPER_COUNTER{ 0 };
 
 	friend class BspListener;
+	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
-	void dig_h_tunnel(int x1, int x2, int y);
-	void dig_v_tunnel(int y1, int y2, int x);
 	void set_tile(Vector2D pos, TileType newType);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };

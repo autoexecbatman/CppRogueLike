@@ -77,28 +77,26 @@ bool Fireball::use(Item& owner, Creature& wearer)
 
 	delwin(explosionWindow);
 
-	for (const auto& actor : game.creatures)
+	for (const auto& c : game.creatures)
 	{
-		if (
-			!actor->destructible->is_dead()
-			&&
-			actor->get_tile_distance(tilePicked) <= Fireball::maxRange
-			)
+		if (c)
 		{
-			game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", actor->actorData.name.c_str(), damage);
-			animation(actor->position, maxRange);
+			if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
+			{
+				game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", c->actorData.name.c_str(), damage);
+				animation(c->position, maxRange);
+			}
 		}
 	}
 
-	for (const auto& actor : game.creatures)
+	for (const auto& c : game.creatures)
 	{
-		if (
-			!actor->destructible->is_dead()
-			&&
-			actor->get_tile_distance(tilePicked) <= Fireball::maxRange
-			)
+		if (c)
 		{
-			actor->destructible->take_damage(*actor, damage);
+			if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
+			{
+				c->destructible->take_damage(*c, damage);
+			}
 		}
 	}
 

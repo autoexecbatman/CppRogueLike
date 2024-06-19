@@ -36,6 +36,28 @@
 #include "../Weapons.h"
 #include "../Items.h"
 
+// tcod path listener
+class PathListener : public ITCODPathCallback
+{
+private:
+	Map& map;
+
+public:
+	PathListener(Map& map) noexcept : map(map) {}
+
+	// callback to handle pathfinding
+	// returns the cost of the path from (xFrom, yFrom) to (xTo, yTo)
+	// if the cost is 0, the path is blocked
+	// if the cost is 1, the path is open
+	// if the path is empty returns an empty path
+	float getWalkCost(int xFrom, int yFrom, int xTo, int yTo, void* userData) const override
+	{
+		return map.tcodMap->isWalkable(xTo, yTo) ? 1.0f : 0.0f;
+	}
+};
+
+//====
+
 // a binary space partition listener class (BSP)
 class BspListener : public ITCODBspCallback
 {
@@ -64,12 +86,10 @@ public:
 
 			// first create a room
 			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + end.x - 1 - 1, begin.y + end.y - 1 - 1, withActors);
-			/*map.set_tile(Vector2D{ begin.y,begin.x }, TileType::DOOR);*/
 
 			if (roomNum != 0)
 			{
-				RandomDice d;
-				const int rolld2 = d.d2();
+				const int rolld2 = game.d.d2();
 				if (rolld2 == 1)
 				{
 					// dig a corridor from last room
@@ -86,18 +106,6 @@ public:
 					);
 					return true;
 				}
-				
-				//map.dig({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
-				//map.dig({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-
-				//map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
-				//map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-				//return true;
-
-				//map.dig_v_tunnel(last.y, begin.y + end.y / 2, begin.x + end.x / 2);
-				//map.dig_h_tunnel(last.x, begin.x + end.x / 2, last.y);
-
-				/*map.set_tile(Vector2D{ last.y,last.x }, TileType::DOOR);*/
 			}
 
 			last = Vector2D{ begin.y + end.y / 2,begin.x + end.x / 2 };
@@ -120,10 +128,8 @@ Map::Map(int map_height, int map_width)
 
 void Map::init_tiles()
 {
-	if (!tiles.empty())
-	{
-		tiles.clear();
-	}
+	if (!tiles.empty()) { tiles.clear(); }
+
 	for (auto y{ 0 }; y < map_height; y++)
 	{
 		for (auto x{ 0 }; x < map_width; x++)
@@ -146,6 +152,8 @@ void Map::init(bool withActors)
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 
+	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
+	
 	bsp(map_width, map_height, *rng_unique, withActors);
 }
 
@@ -261,11 +269,9 @@ void Map::update()
 
 void Map::render() const
 {
-	auto count = 0;
 	game.log("Map::render()");
 	for (const auto& tile : tiles)
 	{
-		
 		if (is_in_fov(tile.position) || is_explored(tile.position))
 		{
 			switch (get_tile_t(tile.position))
@@ -284,16 +290,9 @@ void Map::render() const
 				mvaddch(tile.position.y, tile.position.x, '.');
 				break;
 			case TileType::DOOR:
-				//attron(COLOR_PAIR(DOOR_PAIR));
-				///*mvaddch(tile.position.y, tile.position.x, '+');*/
-				//mvprintw(tile.position.y, tile.position.x, "%d", SUPER_COUNTER);
-				//attroff(COLOR_PAIR(DOOR_PAIR));
-
 				attron(COLOR_PAIR(DOOR_PAIR));
 				mvprintw(tile.position.y, tile.position.x, "+");
 				attroff(COLOR_PAIR(DOOR_PAIR));
-				refresh();
-				/*getch();*/
 				break;
 			case TileType::CORRIDOR:
 				attron(COLOR_PAIR(WHITE_PAIR));
@@ -304,7 +303,6 @@ void Map::render() const
 				break;
 			}
 		}
-		count++;
 	}
 	refresh(); // Refresh once after all tiles have been drawn
 	game.log("Map::render() end");
@@ -366,30 +364,10 @@ void Map::add_item(Vector2D pos)
 
 void Map::dig(Vector2D begin, Vector2D end)
 {
-	//if (end.x < begin.x)
-	//{
-	//	std::swap(begin.x, end.x);
-	//}
+	if (begin.x > end.x) { std::swap(begin.x, end.x); }
+	if (begin.y > end.y) { std::swap(begin.y, end.y); }
 
-	//if (end.y < begin.y)
-	//{
-	//	std::swap(begin.y, end.y);
-	//}
-
-	if (begin.x > end.x)
-	{
-		std::swap(begin.x, end.x);
-	}
-
-	if (begin.y > end.y)
-	{
-		std::swap(begin.y, end.y);
-	}
-
-	RandomDice d;
-	// roll d2
-	const int rollD2 = d.d2();
-
+	const int rollD2 = game.d.d2(); // 50% to dig square or diamond shape
 	if (rollD2 == 1)
 	{
 		for (int tileY = begin.y; tileY <= end.y; tileY++)
@@ -397,12 +375,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 			for (int tileX = begin.x; tileX <= end.x; tileX++)
 			{
 				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-				tcodMap->setProperties(
-					tileX,
-					tileY,
-					true, // isTransparent
-					true // isWalkable
-				);
+				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 			}
 		}
 	}
@@ -422,31 +395,11 @@ void Map::dig(Vector2D begin, Vector2D end)
 			for (int tileX = startX; tileX <= endX; tileX++) {
 				if (tileX >= begin.x && tileX <= end.x) {
 					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-					tcodMap->setProperties(
-						tileX,
-						tileY,
-						true, // isTransparent
-						true  // isWalkable
-					);
+					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
 			}
 		}
 	}
-
-	//for (int tileY = begin.y; tileY <= end.y; tileY++)
-	//{
-	//	for (int tileX = begin.x; tileX <= end.x; tileX++)
-	//	{
-	//		set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
-	//		tcodMap->setProperties(
-	//			tileX,
-	//			tileY,
-	//			true, // isTransparent
-	//			true // isWalkable
-	//		);
-	//	}
-	//}
-
 }
 
 void Map::dig_corridor(Vector2D begin, Vector2D end)
@@ -465,9 +418,10 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			Vector2D thisTile{ tileY, tileX };
 			if (!isDoorSet)
 			{
-				if (is_wall(thisTile)) // if the tile is a wall
+				if (is_wall(thisTile))
 				{
 					set_tile(thisTile, TileType::DOOR);
+					tcodMap->setProperties(tileX, tileY, false, false);
 					isDoorSet = true;
 				}
 				else
@@ -481,6 +435,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 				if (get_tile_t(thisTile) == TileType::FLOOR || get_tile_t(thisTile) == TileType::WATER)
 				{
 					set_tile(lastTile, TileType::DOOR); // set the last tile as a door
+					tcodMap->setProperties(lastTile.x, lastTile.y, false, false);
 					secondDoorSet = true;
 				}
 				else
@@ -494,6 +449,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 				if (get_tile_t(thisTile) == TileType::WALL)
 				{
 					set_tile(thisTile, TileType::DOOR); // set the last tile as a door
+					tcodMap->setProperties(tileX, tileY, false, false);
 					thirdDoorSet = true;
 				}
 				else
@@ -512,69 +468,6 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 		}
 	}
 }
-
-void Map::dig_h_tunnel(int x1, int x2, int y)
-{
-	bool isDoorSet = false;
-	auto count = 0;
-	for (int tileX = x1; tileX <= x2; tileX++)
-	{
-		if (is_wall(Vector2D{ y, tileX }) || !isDoorSet)
-		{
-			set_tile(Vector2D{ y, tileX }, TileType::DOOR);
-			isDoorSet = true;
-		}
-
-		set_tile(Vector2D{ y, tileX }, TileType::FLOOR);
-		tcodMap->setProperties(
-			tileX,
-			y,
-			true, // isTransparent
-			true // isWalkable
-		);
-
-		// render and enumerate the path
-
-		attron(COLOR_PAIR(1));
-		mvprintw(y, tileX, "%d", count);
-		attroff(COLOR_PAIR(1));
-		refresh();
-
-		count++;
-	}
-}
-
-void Map::dig_v_tunnel(int y1, int y2, int x)
-{
-	bool isDoorSet = false;
-	auto count = 0;
-	for (int tileY = y1; tileY <= y2; tileY++)
-	{
-		if (is_wall(Vector2D{ tileY, x }) || !isDoorSet)
-		{
-			set_tile(Vector2D{ tileY, x }, TileType::DOOR);
-			isDoorSet = true;
-		}
-
-		set_tile(Vector2D{ tileY, x }, TileType::FLOOR);
-		tcodMap->setProperties(
-			x,
-			tileY,
-			true, // isTransparent
-			true // isWalkable
-		);
-
-		// render the path
-
-		attron(COLOR_PAIR(1));
-		mvprintw(tileY, x, "%d", count);
-		attroff(COLOR_PAIR(1));
-		refresh();
-
-	}
-}
-
-
 
 void Map::set_tile(Vector2D pos, TileType newType)
 {

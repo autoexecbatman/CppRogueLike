@@ -24,8 +24,8 @@
 // {y,x} position
 struct Vector2D
 {
-	int y;
-	int x;
+	int y{ 0 };
+	int x{ 0 };
 
 	// operator overloads
 
@@ -86,7 +86,7 @@ struct Vector2D
 	}
 
 	// for bool conversion
-	operator bool() const noexcept
+	explicit operator bool() const noexcept
 	{
 		return y != 0 || x != 0;
 	}

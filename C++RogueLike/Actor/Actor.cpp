@@ -152,10 +152,7 @@ void Creature::unequip(Item& item)
 // check if the actor is visible
 bool Actor::is_visible() const noexcept
 {
-	/*return (!flags.fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);*/
-	// if the actor is fovOnly return true
-	auto fovOnly = has_state(ActorState::FOV_ONLY);
-	return (!fovOnly && game.map->is_explored(position)) || game.map->is_in_fov(position);
+	return (!has_state(ActorState::FOV_ONLY) && game.map->is_explored(position)) || game.map->is_in_fov(position);
 }
 
 // the actor update
