@@ -91,7 +91,7 @@ void Menu::menu()
 		case 10:
 		{ // if a selection is made
 			menu_set_run_false(); // stop running this menu loop
-			iMenuStates.find(stateEnum)->second->on_selection(); // run the selected option
+			iMenuStates.at(stateEnum)->on_selection(); // run the selected option
 			break;
 		}
 
@@ -99,7 +99,7 @@ void Menu::menu()
 		case 'n':
 		{
 			menu_set_run_false();
-			iMenuStates.find(MenuState::NEW_GAME)->second->on_selection();
+			iMenuStates.at(MenuState::NEW_GAME)->on_selection();
 			break;
 		}
 
@@ -107,7 +107,7 @@ void Menu::menu()
 		case 'l':
 		{
 			menu_set_run_false();
-			iMenuStates.find(MenuState::LOAD_GAME)->second->on_selection();
+			iMenuStates.at(MenuState::LOAD_GAME)->on_selection();
 			break;
 		}
 
@@ -115,7 +115,7 @@ void Menu::menu()
 		case 'o':
 		{
 			menu_set_run_false();
-			iMenuStates.find(MenuState::OPTIONS)->second->on_selection();
+			iMenuStates.at(MenuState::OPTIONS)->on_selection();
 			break;
 		}
 
@@ -123,7 +123,7 @@ void Menu::menu()
 		case 'q':
 		{
 			menu_set_run_false(); // stop running menu loop
-			iMenuStates.find(MenuState::QUIT)->second->on_selection();
+			iMenuStates.at(MenuState::QUIT)->on_selection();
 			break; // break out of switch and start closing the game
 		}
 
