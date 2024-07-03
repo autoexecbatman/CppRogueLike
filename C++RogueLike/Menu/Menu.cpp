@@ -92,9 +92,7 @@ void Menu::menu()
 		case 'q':
 		{
 			menu_set_run_false(); // stop running menu loop
-			game.run = false; // stop running game loop
-			game.shouldSave = false; // don't save the game
-			game.log("Q/q has been pressed.\n You quit without saving.");
+			iMenuStates.find(MenuState::QUIT)->second->on_selection();
 			break; // break out of switch and start closing the game
 		}
 
@@ -109,7 +107,7 @@ void Menu::menu()
 		case 'n':
 		{
 			menu_set_run_false();
-			game.init();
+			iMenuStates.find(MenuState::NEW_GAME)->second->on_selection();
 			break;
 		}
 
@@ -117,15 +115,15 @@ void Menu::menu()
 		case 'l':
 		{
 			menu_set_run_false();
-			game.load_all();
+			iMenuStates.find(MenuState::LOAD_GAME)->second->on_selection();
 			break;
 		}
 
 		case 'O':
 		case 'o':
 		{
-			// do nothing
-			menu_set_run_true();
+			menu_set_run_false();
+			iMenuStates.find(MenuState::OPTIONS)->second->on_selection();
 			break;
 		}
 
