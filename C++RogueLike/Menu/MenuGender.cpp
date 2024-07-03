@@ -6,12 +6,6 @@
 #include "../Game.h"
 #include "../ActorTypes/Player.h"
 
-void MenuGender::menu_gender_clear() noexcept
-{
-	wclear(menuGenderWindow);
-	game.log("MenuGender cleared successfully.");
-}
-
 void MenuGender::menu_gender_store(MenuGenderOptions option)
 {
 	const auto& newGender = menu_gender_get_string(option);
@@ -58,18 +52,18 @@ void MenuGender::menu_gender_assign_random()
 
 void MenuGender::menu_gender_print_option(MenuGenderOptions option, int row) noexcept
 {
-	if (newOption == static_cast<std::underlying_type_t<MenuGenderOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuGenderOptions>>(option))
 	{
-		menu_gender_highlight_on();
+		menu_highlight_on();
 	}
 
 	const auto& menuOptionString = menu_gender_get_string(option);
 
-	menu_gender_print(1, row, menuOptionString);
+	menu_print(1, row, menuOptionString);
 
-	if (newOption == static_cast<std::underlying_type_t<MenuGenderOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuGenderOptions>>(option))
 	{
-		menu_gender_highlight_off();
+		menu_highlight_off();
 	}
 }
 
@@ -153,40 +147,40 @@ void MenuGender::menu_gender_select()
 void MenuGender::menu()
 {
 	// make the gender selection menu window
-	menu_gender_new(height_,width_,starty_,startx_);
+	menu_new(height_,width_,starty_,startx_);
 
 	// set the next menu in the chain -> menuRace
 	MenuRace menuRace;
 
 	while (run) // menu has its own loop
 	{
-		menu_gender_clear(); // clear the window
+		menu_clear(); // clear the window
 
 		// print the menu options to the top of the window
-		mvwprintw(menuGenderWindow, 0, 0, "%d", currentGenderOption);
+		mvwprintw(menuWindow, 0, 0, "%d", currentGenderOption);
 
 		menu_gender_print_option(MenuGenderOptions::MALE, 1);
 		menu_gender_print_option(MenuGenderOptions::FEMALE, 2);
 		menu_gender_print_option(MenuGenderOptions::RANDOM, 3);
 		menu_gender_print_option(MenuGenderOptions::BACK, 4);
 
-		menu_gender_refresh();
+		menu_refresh();
 
-		key_listen();
+		menu_key_listen();
 		switch (keyPress)
 		{
 
 		case KEY_UP:
 		{
-			newOption--;
-			currentGenderOption = static_cast<MenuGenderOptions>(newOption);
+			newState--;
+			currentGenderOption = static_cast<MenuGenderOptions>(newState);
 			break;
 		}
 
 		case KEY_DOWN:
 		{
-			newOption++;
-			currentGenderOption = static_cast<MenuGenderOptions>(newOption);
+			newState++;
+			currentGenderOption = static_cast<MenuGenderOptions>(newState);
 			break;
 		}
 
@@ -218,7 +212,7 @@ void MenuGender::menu()
 			else
 			{
 				menuRace.menu_race(); // if back was NOT pressed, go to the next menu (menuRace)
-				if (menuRace.currentOption == MenuRace::MenuRaceOptions::BACK) // if the next menu selected back
+				if (menuRace.currentState == MenuRace::MenuRaceOptions::BACK) // if the next menu selected back
 				{
 					// set the current menu to run again
 					run = true;
@@ -240,19 +234,19 @@ void MenuGender::menu()
 		} // !end switch keyPress
 
 		// check if the new option is out of bounds
-		if (newOption < 1)
+		if (newState < 1)
 		{
-			newOption = 4;
-			currentGenderOption = static_cast<MenuGenderOptions>(newOption);
+			newState = 4;
+			currentGenderOption = static_cast<MenuGenderOptions>(newState);
 		}
-		else if (newOption > 4)
+		else if (newState > 4)
 		{
-			newOption = 1;
-			currentGenderOption = static_cast<MenuGenderOptions>(newOption);
+			newState = 1;
+			currentGenderOption = static_cast<MenuGenderOptions>(newState);
 		}
 
 	} // !end while run
-	menu_gender_delete();
+	menu_delete();
 	game.menus.pop_front();
 }
 

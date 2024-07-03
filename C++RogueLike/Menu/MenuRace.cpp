@@ -41,13 +41,13 @@ std::string MenuRace::menu_race_get_string(MenuRaceOptions option) noexcept
 
 void MenuRace::menu_race_print_option(MenuRaceOptions option, int row) noexcept
 {
-	if (newOption == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
 	{
 		menu_race_highlight_on();
 	}
 	const std::string& menuOptionString = menu_race_get_string(option);
 	menu_race_print(1, row, menuOptionString);
-	if (newOption == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
 	{
 		menu_race_highlight_off();
 	}
@@ -55,7 +55,7 @@ void MenuRace::menu_race_print_option(MenuRaceOptions option, int row) noexcept
 
 void MenuRace::menu_race_select()
 {
-	switch (currentOption)
+	switch (currentState)
 	{
 	case MenuRaceOptions::HUMAN:
 		menu_race_human();
@@ -209,7 +209,7 @@ void MenuRace::menu_race()
 		{
 			menu_race_set_run_false(); // exit current menu loop either way if a selection was made
 			menu_race_select(); // execute selection
-			if (currentOption == MenuRaceOptions::BACK) // current back
+			if (currentState == MenuRaceOptions::BACK) // current back
 			{
 				break;
 			}
@@ -217,7 +217,7 @@ void MenuRace::menu_race()
 			{
 				menuClass.run = true;
 				menuClass.menu_class();
-				if (menuClass.currentOption == MenuClass::MenuClassOptions::BACK)
+				if (menuClass.currentState == MenuClass::MenuClassOptions::BACK)
 				{
 					run = true;
 					menuClass.run = true;
@@ -239,15 +239,15 @@ void MenuRace::menu_race()
 		} // end switch (input)
 
 		// check if in bounds of menu options
-		if (newOption < 1)
+		if (newState < 1)
 		{
-			newOption = 8;
-			currentOption = static_cast<MenuRaceOptions>(newOption);
+			newState = 8;
+			currentState = static_cast<MenuRaceOptions>(newState);
 		}
-		else if (newOption > 8)
+		else if (newState > 8)
 		{
-			newOption = 1;
-			currentOption = static_cast<MenuRaceOptions>(newOption);
+			newState = 1;
+			currentState = static_cast<MenuRaceOptions>(newState);
 		}
 	}
 	menu_race_delete();

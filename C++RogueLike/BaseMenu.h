@@ -28,7 +28,8 @@ public:
 	void menu_highlight_on() { wattron(menuWindow, A_REVERSE); };
 	void menu_highlight_off() { wattroff(menuWindow, A_REVERSE); };
 	void menu_key_listen() { keyPress = getch(); };
+	void menu_set_run_true() { run = true; };
+	void menu_set_run_false() { run = false; };
 
 	virtual void menu() = 0;
-	virtual void menu_set_run_false() = 0;
 };

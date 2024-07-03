@@ -8,50 +8,66 @@
 #include <unordered_map>
 #include <memory>
 
-#include "../Game.h"
 #include "../BaseMenu.h"
-#include "../IMenuOptions.h"
+
+class IMenuState;
+
+class NewGame : public IMenuState
+{
+public:
+	void on_selection() override;
+};
+
+class LoadGame : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Options : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Quit : public IMenuState
+{
+	void on_selection() override;
+};
 
 class Menu : public BaseMenu
 {
 private:
-	enum class MenuOptions : int
+	enum class MenuState
 	{
 		NONE,
 		NEW_GAME,
 		LOAD_GAME,
 		OPTIONS,
 		QUIT
-	} currentOption{ MenuOptions::NEW_GAME };
-	int newOption{ static_cast<int>(currentOption) };
-public:
-	std::unordered_map<MenuOptions, std::unique_ptr<IMenuOptions>> imenuOptions;
+	} currentState{ MenuState::NEW_GAME };
+	int newState{ static_cast<int>(currentState) };
+
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> imenuOptions;
 
 	int menu_height{ 10 };
 	int menu_width{ 12 };
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
 
-	std::string menu_get_string(MenuOptions option) { return menuOptions.at(option); }
-	void menu_print_option(MenuOptions option);
+	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
+	void menu_print_state(MenuState state);
 
-public:
-	std::unordered_map<MenuOptions, std::string> menuOptions
+	std::unordered_map<MenuState, std::string> menuStateStrings
 	{
-		{ MenuOptions::NEW_GAME, "New Game" },
-		{ MenuOptions::LOAD_GAME, "Load Game" },
-		{ MenuOptions::OPTIONS, "Options" },
-		{ MenuOptions::QUIT, "Quit" }
+		{ MenuState::NEW_GAME, "New Game" },
+		{ MenuState::LOAD_GAME, "Load Game" },
+		{ MenuState::OPTIONS, "Options" },
+		{ MenuState::QUIT, "Quit" }
 	};
-	bool run{ true };
-
+public:
 	Menu();
 	~Menu();
 
 	void menu() override;
-
-	void menu_set_run_true() noexcept { run = true; }
-	void menu_set_run_false() override { run = false; }
 };
 
 #endif // !MENU_H

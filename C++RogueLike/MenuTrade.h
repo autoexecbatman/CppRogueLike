@@ -13,13 +13,13 @@ private:
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
 	int keyPress{ 0 };
-	int currentOption{ 0 };
-	int newOption{ 0 };
+	int currentState{ 0 };
+	int newState{ 0 };
 	void key_listen() { keyPress = wgetch(menuWindow); }
 
 	void print_option(int x, int y, const std::string& text)
 	{
-		if (currentOption == y - 1)
+		if (currentState == y - 1)
 		{
 			wattron(menuWindow, A_REVERSE);
 			mvwprintw(menuWindow, y, x, text.c_str());
@@ -58,21 +58,21 @@ public:
 			{
 				case KEY_UP:
 				{
-					currentOption--; // decrement newOption
-					newOption = currentOption; // set currentOption to newOption
+					currentState--; // decrement newOption
+					newState = currentState; // set currentOption to newOption
 					break; // break out of switch keep running menu loop
 				}
 
 				case KEY_DOWN:
 				{
-					currentOption++; // increment newOption
-					newOption = currentOption; // set currentOption to newOption
+					currentState++; // increment newOption
+					newState = currentState; // set currentOption to newOption
 					break; // break out of switch keep running menu loop
 				}
 
 				case 10: // Enter key
 				{
-					switch (currentOption)
+					switch (currentState)
 					{
 						// return result
 						case 0:

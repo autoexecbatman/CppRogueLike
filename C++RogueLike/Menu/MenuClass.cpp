@@ -35,13 +35,13 @@ std::string MenuClass::menu_class_get_string(MenuClassOptions option) noexcept
 
 void MenuClass::menu_class_print_option(MenuClassOptions option, int row) noexcept
 {
-	if (newOption == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
 	{
 		menu_class_highlight_on();
 	}
 	const auto& menuOptionString = menu_class_get_string(option);
 	menu_class_print(1, row, menuOptionString);
-	if (newOption == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
+	if (newState == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
 	{
 		menu_class_highlight_off();
 	}
@@ -49,7 +49,7 @@ void MenuClass::menu_class_print_option(MenuClassOptions option, int row) noexce
 
 void MenuClass::menu_class_select()
 {
-	switch (currentOption)
+	switch (currentState)
 	{
 	case MenuClassOptions::FIGHTER:
 		menu_class_fighter();
@@ -173,7 +173,7 @@ void MenuClass::menu_class()
 		{
 			run = false; // class loop stop
 			menu_class_select();
-			if (currentOption == MenuClassOptions::BACK)
+			if (currentState == MenuClassOptions::BACK)
 			{
 				break;
 			}
@@ -194,15 +194,15 @@ void MenuClass::menu_class()
 		}
 
 		// check if in bounds of menu options
-		if (newOption < 1)
+		if (newState < 1)
 		{
-			newOption = 6;
-			currentOption = static_cast<MenuClassOptions>(newOption);
+			newState = 6;
+			currentState = static_cast<MenuClassOptions>(newState);
 		}
-		else if (newOption > 6)
+		else if (newState > 6)
 		{
-			newOption = 1;
-			currentOption = static_cast<MenuClassOptions>(newOption);
+			newState = 1;
+			currentState = static_cast<MenuClassOptions>(newState);
 		}
 	}
 	menu_class_delete();

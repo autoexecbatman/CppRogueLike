@@ -3,17 +3,40 @@
 #include <string>
 
 #include "Menu.h"
-//#include "MenuGender.h"
 #include "../Game.h"
-#include "../IMenuOptions.h"
+#include "../IMenuState.h"
+
+void NewGame::on_selection()
+{
+	// set menu run flag to false to halt the while loop
+	game.deadMenus.push_back(std::move(game.menus.front()));
+	game.menus.push_back(std::make_unique<MenuGender>());
+}
+
+void LoadGame::on_selection()
+{
+	game.load_all();
+}
+
+void Options::on_selection()
+{
+	// do nothing
+}
+
+void Quit::on_selection()
+{
+	game.run = false;
+	game.shouldSave = false;
+	game.log("You quit without saving!");
+}
 
 Menu::Menu()
 {
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
-	imenuOptions.emplace(MenuOptions::NEW_GAME, std::make_unique<NewGame>());
-	imenuOptions.emplace(MenuOptions::LOAD_GAME, std::make_unique<LoadGame>());
-	imenuOptions.emplace(MenuOptions::OPTIONS, std::make_unique<Options>());
-	imenuOptions.emplace(MenuOptions::QUIT, std::make_unique<Quit>());
+	imenuOptions.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
+	imenuOptions.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
+	imenuOptions.emplace(MenuState::OPTIONS, std::make_unique<Options>());
+	imenuOptions.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
 Menu::~Menu()
@@ -21,39 +44,18 @@ Menu::~Menu()
 	menu_delete();
 }
 
-void BaseMenu::menu_new(int height, int width, int starty, int startx)
+void Menu::menu_print_state(MenuState state)
 {
-	// check bound before creating window
-	if (height >= LINES || width >= COLS)
-	{
-		game.log("Menu window size is too big. Height: " + std::to_string(height) + ", Width: " + std::to_string(width));
-		game.log("Terminal size - LINES: " + std::to_string(LINES) + ", COLS: " + std::to_string(COLS));
-		std::exit(EXIT_FAILURE);
-	}
-
-	if (starty < 0 || startx < 0 || starty >= 29 || startx >= 119)
-	{
-		game.log("Menu window start position is out of bounds. StartY: " + std::to_string(starty) + ", StartX: " + std::to_string(startx));
-		std::exit(EXIT_FAILURE);
-	}
-
-	// create window (height, width, starty, startx)
-	menuWindow = newwin(height, width, starty, startx);
-}
-
-void Menu::menu_print_option(MenuOptions option)
-{
-	const int optionToPrint = static_cast<std::underlying_type_t<MenuOptions>>(option);
+	const int optionToPrint = static_cast<std::underlying_type_t<MenuState>>(state);
 	
-	if (newOption == optionToPrint)
+	if (newState == optionToPrint)
 	{
 		menu_highlight_on();
 	}
 
-	const auto& menuOptionString = menu_get_string(option);
-	menu_print(1, optionToPrint, menuOptionString);
+	menu_print(1, optionToPrint, menu_get_string(state));
 
-	if (newOption == optionToPrint)
+	if (newState == optionToPrint)
 	{
 		menu_highlight_off();
 	}
@@ -68,12 +70,12 @@ void Menu::menu()
 		menu_clear(); // clear menu window each frame
 
 		// this is for debugging the currentOption number
-		mvwprintw(menuWindow, 0, 0, "%d", currentOption);
+		mvwprintw(menuWindow, 0, 0, "%d", currentState);
 
 		// print menu options
-		for (size_t i = 1; i <= menuOptions.size(); i++)
+		for (size_t i = 1; i <= menuStateStrings.size(); i++)
 		{
-			menu_print_option(static_cast<MenuOptions>(i));
+			menu_print_state(static_cast<MenuState>(i));
 		}
 
 		menu_refresh(); // refresh menu window each frame to show changes
@@ -84,15 +86,15 @@ void Menu::menu()
 
 		case KEY_UP:
 		{
-			newOption--; // decrement newOption
-			currentOption = static_cast<MenuOptions>(newOption); // set currentOption to newOption
+			--newState;
+			currentState = static_cast<MenuState>(newState); // set currentOption to newOption
 			break; // break out of switch keep running menu loop
 		}
 
 		case KEY_DOWN:
 		{
-			newOption++; // increment newOption
-			currentOption = static_cast<MenuOptions>(newOption); // set currentOption to newOption
+			++newState;
+			currentState = static_cast<MenuState>(newState); // set currentOption to newOption
 			break; // break out of switch keep running menu loop
 		}
 
@@ -108,54 +110,8 @@ void Menu::menu()
 
 		case 10:
 		{ // if a selection is made
-			/*menu_set_run_false();*/ // stop running this menu loop
-			imenuOptions.find(currentOption)->second->on_selection(); // run the selected option
-
-			//switch (currentOption)
-			//{
-
-			//case MenuOptions::NEW_GAME:
-			//{
-			//	menuGender.menu_gender(); // go to next menu
-
-			//	if (menuGender.currentGenderOption == MenuGender::MenuGenderOptions::BACK)
-			//	{
-			//		// reset flags to default
-			//		menu_set_run_true(); // keep menu on
-			//		menuGender.run = true; // keep running the next menu
-			//		break; // break out of switch and keep running menu loop
-			//	}
-			//	else // if back was not hit
-			//	{
-			//		game.init(); // after all the menus are done, start a new game
-			//	}
-
-			//	break; // break out of switch and start running game loop
-			//}
-
-			//case MenuOptions::LOAD_GAME:
-			//{
-			//	game.load_all();
-			//	break;
-			//}
-
-			//case MenuOptions::OPTIONS:
-			//{
-			//	// do nothing
-			//	menu_set_run_true();
-			//	break;
-			//}
-
-			//case MenuOptions::QUIT:
-			//{
-			//	game.run = false;
-			//	game.shouldSave = false;
-			//	std::cout << "You quit without saving!" << std::endl;
-			//	break;
-			//}
-
-			//default:throw std::runtime_error("menu() - switch (currentOption) case key_enter - default: reached!");
-			//} // end of switch (currentOption) case key_enter
+			menu_set_run_false(); // stop running this menu loop
+			imenuOptions.find(currentState)->second->on_selection(); // run the selected option
 			break;
 		}
 
@@ -186,15 +142,15 @@ void Menu::menu()
 		default:break;
 		}
 
-		if (newOption < 1)
+		if (newState < 1)
 		{
-			newOption = 4;
-			currentOption = static_cast<MenuOptions>(newOption);
+			newState = 4;
+			currentState = static_cast<MenuState>(newState);
 		}
-		else if (newOption > 4)
+		else if (newState > 4)
 		{
-			newOption = 1;
-			currentOption = static_cast<MenuOptions>(newOption);
+			newState = 1;
+			currentState = static_cast<MenuState>(newState);
 		}
 
 	}
