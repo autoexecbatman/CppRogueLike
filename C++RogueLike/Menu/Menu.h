@@ -33,7 +33,6 @@ class Quit : public IMenuState
 
 class Menu : public BaseMenu
 {
-public:
 	int menu_height{ 10 };
 	int menu_width{ 12 };
 	int menu_starty{ (LINES / 2) - 5 };
