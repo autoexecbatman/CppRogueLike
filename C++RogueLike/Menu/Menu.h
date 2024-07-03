@@ -12,10 +12,6 @@
 #include "../BaseMenu.h"
 #include "../IMenuOptions.h"
 
-class Menu;
-class IMenuOptions;
-class NewGame;
-
 class Menu : public BaseMenu
 {
 private:
