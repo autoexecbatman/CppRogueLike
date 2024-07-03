@@ -7,12 +7,12 @@
 
 #include <curses.h>
 
-#include "Menu.h"
+#include "../BaseMenu.h"
 
-class MenuGender
+class MenuGender : public BaseMenu
 {
 public:
-	enum class MenuGenderOptions : int
+	enum class MenuGenderOptions
 	{
 		NONE,
 		MALE,
@@ -58,10 +58,11 @@ private:
 public:
 	bool run{ true };
 
-	void menu_gender();
+	//void menu() { /*dosomething*/ };
+	void menu() override;
 	void menu_gender_select();
 	void menu_gender_set_run_true() noexcept { run = true; }
-	void menu_gender_set_run_false() noexcept { run = false; }
+	void menu_set_run_false() override { run = false; }
 };
 
 #endif // !MENU_H

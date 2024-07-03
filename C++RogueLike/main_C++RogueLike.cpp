@@ -16,19 +16,15 @@
 #include "Game.h"
 #include "Colors/Colors.h"
 #include "Menu/Menu.h"
+#include "Menu/MenuGender.h"
 #include "Gui/Gui.h"
 
-#include "Attributes/StrengthAttributes.h"
-#include "Weapons.h"
+#include "Attributes/StrengthAttributes.h" // for debugging
+#include "Weapons.h" // for debugging
 
-//==OPENAI_API==
-/*#include "ChatGPT.h"*/ // for openai::start
-/*#include "include/user_config.h"*/ 
-//====
+void init_curses(); // declaration of a function that handles curses procedures
 
-void init_curses(); // initialize curses
-
-Game game;
+Game game; // create a global game object
 
 int main()
 {
@@ -36,13 +32,10 @@ int main()
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	/*_CrtSetBreakAlloc(1779);*/
 
-	//==OPENAI_API==
-	/*openai::start(API_KEY, "");*/
-
 	//==DEBUG_STREAM==
 	std::ofstream debugFile("clog.txt"); // create a file to store debug info
 	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
-	
+
 	//==INIT_CURSES==
 	init_curses();
 
@@ -50,42 +43,59 @@ int main()
 	game.create_player(); // the player is initialized here because it needs to get data from menu selections
 
 	//==INIT_MENU==
-	Menu menu;
-	menu.menu();
-	/*game.run_menus();*/
-	clear(); // finished with the menu, clear the screen
+	//Menu menu;
+	//menu.menu();
+	//clear(); // finished with the menu, clear the screen
+	//refresh(); // starting new drawing, refresh the screen
 
-	refresh(); // starting new drawing, refresh the screen
+	game.menus.push_front(std::make_unique<Menu>());
+
 	//==INIT_GUI==
 	Gui gui;
 	gui.gui_init();
+
+	static bool gInit{ false };
+
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
-		//==DEBUG==
-		game.log("//====================LOOP====================//");
-		game.log("Loop number: " + std::to_string(loopNum) + "\n");
+		//==MENU==
+		if (!game.menus.empty())
+		{
+			game.menus.front()->menu();
+		}
+		else
+		{
+			if (!gInit)
+			{ 
+				game.init();
+				gInit = true;
+			}
+			//==DEBUG==
+			game.log("//====================LOOP====================//");
+			game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
-		//==UPDATE==
-		game.log("Running update...");
-		game.update(); // update map and actors positions
-		gui.gui_update(); // update the gui
-		game.log("Update OK.");
+			//==UPDATE==
+			game.log("Running update...");
+			game.update(); // update map and actors positions
+			gui.gui_update(); // update the gui
+			game.log("Update OK.");
 
-		//==DRAW==
-		game.log("Running render...");
-		clear();
-		game.render(); // render map and actors to the screen
-		gui.gui_render(); // render the gui
-		refresh();
-		game.log("Render OK.");
+			//==DRAW==
+			game.log("Running render...");
+			clear();
+			game.render(); // render map and actors to the screen
+			gui.gui_render(); // render the gui
+			refresh();
+			game.log("Render OK.");
 
-		//==INPUT==
-		game.gameStatus = Game::GameStatus::IDLE;
-		game.key_store();
-		game.key_listen();
+			//==INPUT==
+			game.gameStatus = Game::GameStatus::IDLE;
+			game.key_store();
+			game.key_listen();
 
-		loopNum++;
+			loopNum++;
+		}
 	}
 	
 	game.save_all();
@@ -107,9 +117,7 @@ int main()
 	strength.print_chart(); // print strength chart for debugging
 
 	Weapons weapons;
-	weapons.print_chart();
-
-	return 0;
+	weapons.print_chart(); // print weapons chart for debugging
 
 	debugFile.close();
 	/*_CrtDumpMemoryLeaks();*/

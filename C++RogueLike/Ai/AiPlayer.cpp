@@ -330,8 +330,8 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
-		Menu menu;
-		menu.menu();
+		//Menu menu;
+		//menu.menu();
 		break;
 	}
 

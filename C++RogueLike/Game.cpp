@@ -103,6 +103,7 @@ void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
 		}
 	}
 }
+
 void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
 {
 	for (const auto& creature : creatures)
@@ -113,6 +114,7 @@ void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
 		}
 	}
 }
+
 void Game::render_items(std::span<std::unique_ptr<Item>> items)
 {
 	for (const auto& item : items)
@@ -346,7 +348,8 @@ void Game::run_menus() {
 	MenuRace menuRace;
 	// If you have more menus, define them here...
 
-	while (game.run) {
+	while (game.run)
+	{
 		// Main menu
 		mainMenu.menu_set_run_true();
 		mainMenu.menu();
@@ -354,7 +357,7 @@ void Game::run_menus() {
 
 		// Gender menu
 		menuGender.menu_gender_set_run_true();
-		menuGender.menu_gender();
+		/*menuGender.menu_gender();*/
 		if (!menuGender.run) continue; // If back is pressed in gender menu, continue to main menu
 
 		// Race menu
@@ -750,14 +753,12 @@ void Game::display_character_sheet() noexcept
 	WINDOW* character_sheet = newwin(
 		30, // height
 		120, // width
-		0, // yplayer level
+		0, // y
 		0 // x
 	);
-
 	box(character_sheet, 0, 0);
-
 	refresh();
-	// display the player stats
+
 	auto run{ true };
 	while (run == true)
 	{
@@ -765,40 +766,23 @@ void Game::display_character_sheet() noexcept
 		// using a dnd character sheet
 		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
 
-		// display the player name
-		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str());
-		// display the player class
-		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
-		// display the class kit
-		mvwprintw(character_sheet, 3, 1, "Kit: ");
-		// display the player level
-		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
-		// display the player experience
-		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
-		// display the player alignment
-		mvwprintw(character_sheet, 6, 1, "Alignment: ");
+		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str()); // display the player name
+		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str()); // display the player class
+		mvwprintw(character_sheet, 3, 1, "Kit: "); // display the class kit
+		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel); // display the player level
+		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp); // display the player experience
+		mvwprintw(character_sheet, 6, 1, "Alignment: "); // display the player alignment
 		// add character details on the right side
-		// display the player race
-		mvwprintw(character_sheet, 1, 60, "Race: %s", player->playerRace.c_str());
-		// display gender
-		mvwprintw(character_sheet, 2, 60, "Gender: %s", player->gender.c_str());
-		// display hair color
-		mvwprintw(character_sheet, 3, 60, "Hair Color: ");
-		// display eye color
-		mvwprintw(character_sheet, 4, 60, "Eye Color: ");
-		// display complexion
-		mvwprintw(character_sheet, 5, 60, "Complexion: ");
-		// display features 
-		mvwprintw(character_sheet, 6, 60, "Features: ");
-		// display homeland
-		mvwprintw(character_sheet, 7, 60, "Homeland: ");
-		// display deity
-		mvwprintw(character_sheet, 8, 60, "Deity: ");
-		// display vision
-		mvwprintw(character_sheet, 9, 60, "Vision: ");
-		// display secondary skills
-		mvwprintw(character_sheet, 10, 60, "Secondary Skills: ");
-
+		mvwprintw(character_sheet, 1, 60, "Race: %s", player->playerRace.c_str()); // display the player race
+		mvwprintw(character_sheet, 2, 60, "Gender: %s", player->gender.c_str()); // display gender
+		mvwprintw(character_sheet, 3, 60, "Hair Color: "); // display hair color
+		mvwprintw(character_sheet, 4, 60, "Eye Color: "); // display eye color
+		mvwprintw(character_sheet, 5, 60, "Complexion: "); // display complexion
+		mvwprintw(character_sheet, 6, 60, "Features: "); // display features 
+		mvwprintw(character_sheet, 7, 60, "Homeland: "); // display homeland
+		mvwprintw(character_sheet, 8, 60, "Deity: "); // display deity
+		mvwprintw(character_sheet, 9, 60, "Vision: "); // display vision
+		mvwprintw(character_sheet, 10, 60, "Secondary Skills: "); // display secondary skills
 		wrefresh(character_sheet);
 
 		const int key = getch();
@@ -822,12 +806,12 @@ void Game::wizard_eye() noexcept
 	}
 }
 
-void Game::log(std::string_view message)
+void Game::log(std::string_view message) const
 {
 	if (debugMode)
 	{
-		std::clog << message << std::endl;
-		std::cout << message << std::endl;
+		std::clog << message << "\n";
+		std::cout << message << "\n";
 	}
 }
 

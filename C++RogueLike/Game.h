@@ -6,6 +6,7 @@
 
 #include <memory>
 #include <span>
+#include <deque>
 
 #include "Gui/Gui.h"
 #include "Map/Map.h"
@@ -15,6 +16,10 @@
 #include "Ai/AiShopkeeper.h"
 #include "ChatGPT.h"
 #include "Weapons.h"
+#include "BaseMenu.h"
+
+//class BaseMenu;
+class Menu;
 
 class Game
 {
@@ -56,6 +61,9 @@ public:
 	std::vector<Weapons> weapons; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
 
+	// Menu container for que
+	std::deque<std::unique_ptr<BaseMenu>> menus;
+	std::deque<std::unique_ptr<BaseMenu>> deadMenus;
 	
 	// Public member functions.
 	void init();
@@ -120,7 +128,7 @@ public:
 	void err(std::string_view e) noexcept { if (debugMode) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.data()); refresh(); getch(); } }
 	void enableDebugMode() noexcept { debugMode = true; }
 	void disableDebugMode() noexcept { debugMode = false; }
-	void log(std::string_view message);
+	void log(std::string_view message) const;
 	void display_debug_messages() noexcept;
 
 	//==MESSAGE FUNCTIONS==//

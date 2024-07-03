@@ -150,7 +150,7 @@ void MenuGender::menu_gender_select()
 	} // !end switch currentGenderOption 
 }
 
-void MenuGender::menu_gender()
+void MenuGender::menu()
 {
 	// make the gender selection menu window
 	menu_gender_new(height_,width_,starty_,startx_);
@@ -193,7 +193,7 @@ void MenuGender::menu_gender()
 		case 'Q':
 		case 'q':
 		{
-			menu_gender_set_run_false();
+			/*menu_gender_set_run_false();*/
 			game.run = false;
 			std::cout << "`Q/q` was pressed...You quit without saving!" << std::endl;
 			break;
@@ -209,7 +209,7 @@ void MenuGender::menu_gender()
 
 		case 10:
 		{
-			menu_gender_set_run_false(); // loop is terminated either way
+			/*menu_gender_set_run_false();*/ // loop is terminated either way
 			menu_gender_select(); // switch selection
 			if (currentGenderOption == MenuGenderOptions::BACK) // if this menu selected back
 			{
@@ -253,6 +253,7 @@ void MenuGender::menu_gender()
 
 	} // !end while run
 	menu_gender_delete();
+	game.menus.pop_front();
 }
 
 // end of file: MenuGender.cpp
