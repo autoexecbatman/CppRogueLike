@@ -6,7 +6,6 @@
 
 void NewGame::on_selection()
 {
-	// set menu run flag to false to halt the while loop
 	game.deadMenus.push_back(std::move(game.menus.front()));
 	game.menus.push_back(std::make_unique<MenuGender>());
 }
