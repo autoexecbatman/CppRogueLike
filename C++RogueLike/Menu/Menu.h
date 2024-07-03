@@ -9,8 +9,7 @@
 #include <memory>
 
 #include "../BaseMenu.h"
-
-class IMenuState;
+#include "../IMenuState.h"
 
 class NewGame : public IMenuState
 {
@@ -46,7 +45,7 @@ private:
 	} currentState{ MenuState::NEW_GAME };
 	int newState{ static_cast<int>(currentState) };
 
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> imenuOptions;
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 
 	int menu_height{ 10 };
 	int menu_width{ 12 };

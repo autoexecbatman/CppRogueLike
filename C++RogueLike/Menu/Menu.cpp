@@ -33,10 +33,10 @@ void Quit::on_selection()
 Menu::Menu()
 {
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
-	imenuOptions.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
-	imenuOptions.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
-	imenuOptions.emplace(MenuState::OPTIONS, std::make_unique<Options>());
-	imenuOptions.emplace(MenuState::QUIT, std::make_unique<Quit>());
+	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
+	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
+	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
+	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
 Menu::~Menu()
@@ -63,21 +63,16 @@ void Menu::menu_print_state(MenuState state)
 
 void Menu::menu()
 {
-	//MenuGender menuGender; // set the next menu in the chain -> menuGender
-
 	while (run) // menu has its own loop
 	{
 		menu_clear(); // clear menu window each frame
-
-		// this is for debugging the currentOption number
-		mvwprintw(menuWindow, 0, 0, "%d", currentState);
-
-		// print menu options
+		mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
+		
+		// print the buttons to the menu window
 		for (size_t i = 1; i <= menuStateStrings.size(); i++)
-		{
+		{	
 			menu_print_state(static_cast<MenuState>(i));
 		}
-
 		menu_refresh(); // refresh menu window each frame to show changes
 
 		menu_key_listen(); // listen for key presses
@@ -111,7 +106,7 @@ void Menu::menu()
 		case 10:
 		{ // if a selection is made
 			menu_set_run_false(); // stop running this menu loop
-			imenuOptions.find(currentState)->second->on_selection(); // run the selected option
+			iMenuStates.find(currentState)->second->on_selection(); // run the selected option
 			break;
 		}
 
