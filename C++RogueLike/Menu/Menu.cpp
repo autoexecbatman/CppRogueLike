@@ -88,14 +88,6 @@ void Menu::menu()
 			break; // break out of switch keep running menu loop
 		}
 
-		case 'Q':
-		case 'q':
-		{
-			menu_set_run_false(); // stop running menu loop
-			iMenuStates.find(MenuState::QUIT)->second->on_selection();
-			break; // break out of switch and start closing the game
-		}
-
 		case 10:
 		{ // if a selection is made
 			menu_set_run_false(); // stop running this menu loop
@@ -125,6 +117,14 @@ void Menu::menu()
 			menu_set_run_false();
 			iMenuStates.find(MenuState::OPTIONS)->second->on_selection();
 			break;
+		}
+
+		case 'Q':
+		case 'q':
+		{
+			menu_set_run_false(); // stop running menu loop
+			iMenuStates.find(MenuState::QUIT)->second->on_selection();
+			break; // break out of switch and start closing the game
 		}
 
 		default:break;
