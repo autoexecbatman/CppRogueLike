@@ -19,7 +19,7 @@ public:
 	} currentState{ MenuClassOptions::FIGHTER };
 private:
 	int oldOption{ -1 };
-	int newState{ 1 };
+	int stateInt{ 1 };
 
 	WINDOW* menuClassWindow{ nullptr };
 
@@ -31,17 +31,17 @@ private:
 	void menu_class_set_run_true() noexcept { run = true; }
 	void menu_class_set_run_false() noexcept { run = false; }
 	int menu_class_get_oldOption() noexcept { return oldOption; }
-	int menu_class_get_newOption() noexcept { return newState; }
+	int menu_class_get_newOption() noexcept { return stateInt; }
 	void menu_class_set_oldOption(int option) noexcept { oldOption = option; }
-	void menu_class_set_newOption(int option) noexcept { newState = option; }
+	void menu_class_set_newOption(int option) noexcept { stateInt = option; }
 	void menu_class_highlight_on() noexcept { wattron(menuClassWindow, A_REVERSE); }
 	void menu_class_highlight_off() noexcept { wattroff(menuClassWindow, A_REVERSE); }
 
 	std::string menu_class_get_string(MenuClassOptions option) noexcept;
 	void menu_class_print_option(MenuClassOptions option, int row) noexcept;
 
-	void menu_class_move_up() noexcept { newState--; currentState = static_cast<MenuClassOptions>(newState); }
-	void menu_class_move_down() noexcept { newState++; currentState = static_cast<MenuClassOptions>(newState); }
+	void menu_class_move_up() noexcept { stateInt--; currentState = static_cast<MenuClassOptions>(stateInt); }
+	void menu_class_move_down() noexcept { stateInt++; currentState = static_cast<MenuClassOptions>(stateInt); }
 	void menu_class_select();
 
 	// create function for fighter, rogue, cleric, wizard, random, back

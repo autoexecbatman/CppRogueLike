@@ -21,7 +21,7 @@ public:
 	} currentState{ MenuRaceOptions::HUMAN };
 private:
 	int oldOption{ -1 };
-	int newState{ 1 };
+	int stateInt{ 1 };
 
 	WINDOW* menuRaceWindow{ nullptr };
 
@@ -32,17 +32,17 @@ private:
 	void menu_race_delete() noexcept { delwin(menuRaceWindow); }
 
 	int menu_race_get_oldOption() noexcept { return oldOption; }
-	int menu_race_get_newOption() noexcept { return newState; }
+	int menu_race_get_newOption() noexcept { return stateInt; }
 	void menu_race_set_oldOption(int option) noexcept { oldOption = option; }
-	void menu_race_set_newOption(int option) noexcept { newState = option; }
+	void menu_race_set_newOption(int option) noexcept { stateInt = option; }
 	void menu_race_highlight_on() noexcept { wattron(menuRaceWindow, A_REVERSE); }
 	void menu_race_highlight_off() noexcept { wattroff(menuRaceWindow, A_REVERSE); }
 
 	std::string menu_race_get_string(MenuRaceOptions option) noexcept;
 	void menu_race_print_option(MenuRaceOptions option, int row) noexcept;
 
-	void menu_race_move_up() noexcept { newState--; currentState = static_cast<MenuRaceOptions>(newState); }
-	void menu_race_move_down() noexcept { newState++; currentState = static_cast<MenuRaceOptions>(newState); }
+	void menu_race_move_up() noexcept { stateInt--; currentState = static_cast<MenuRaceOptions>(stateInt); }
+	void menu_race_move_down() noexcept { stateInt++; currentState = static_cast<MenuRaceOptions>(stateInt); }
 	void menu_race_select();
 
 	void menu_race_human();

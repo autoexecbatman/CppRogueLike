@@ -14,7 +14,7 @@ private:
 	int menu_startx{ 0 };
 	int keyPress{ 0 };
 	int currentState{ 0 };
-	int newState{ 0 };
+	int stateInt{ 0 };
 	void key_listen() { keyPress = wgetch(menuWindow); }
 
 	void print_option(int x, int y, const std::string& text)
@@ -59,14 +59,14 @@ public:
 				case KEY_UP:
 				{
 					currentState--; // decrement newOption
-					newState = currentState; // set currentOption to newOption
+					stateInt = currentState; // set currentOption to newOption
 					break; // break out of switch keep running menu loop
 				}
 
 				case KEY_DOWN:
 				{
 					currentState++; // increment newOption
-					newState = currentState; // set currentOption to newOption
+					stateInt = currentState; // set currentOption to newOption
 					break; // break out of switch keep running menu loop
 				}
 

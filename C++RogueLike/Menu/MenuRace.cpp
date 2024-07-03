@@ -41,13 +41,13 @@ std::string MenuRace::menu_race_get_string(MenuRaceOptions option) noexcept
 
 void MenuRace::menu_race_print_option(MenuRaceOptions option, int row) noexcept
 {
-	if (newState == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
+	if (stateInt == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
 	{
 		menu_race_highlight_on();
 	}
 	const std::string& menuOptionString = menu_race_get_string(option);
 	menu_race_print(1, row, menuOptionString);
-	if (newState == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
+	if (stateInt == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
 	{
 		menu_race_highlight_off();
 	}
@@ -239,15 +239,15 @@ void MenuRace::menu_race()
 		} // end switch (input)
 
 		// check if in bounds of menu options
-		if (newState < 1)
+		if (stateInt < 1)
 		{
-			newState = 8;
-			currentState = static_cast<MenuRaceOptions>(newState);
+			stateInt = 8;
+			currentState = static_cast<MenuRaceOptions>(stateInt);
 		}
-		else if (newState > 8)
+		else if (stateInt > 8)
 		{
-			newState = 1;
-			currentState = static_cast<MenuRaceOptions>(newState);
+			stateInt = 1;
+			currentState = static_cast<MenuRaceOptions>(stateInt);
 		}
 	}
 	menu_race_delete();

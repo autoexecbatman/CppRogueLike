@@ -2,6 +2,7 @@
 #include <string>
 
 #include "Menu.h"
+#include "MenuGender.h"
 #include "../Game.h"
 
 void NewGame::on_selection()

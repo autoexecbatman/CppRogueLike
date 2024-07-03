@@ -343,33 +343,33 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 }
 
 void Game::run_menus() {
-	Menu mainMenu;
-	MenuGender menuGender;
-	MenuRace menuRace;
-	// If you have more menus, define them here...
+	//Menu mainMenu;
+	//MenuGender menuGender;
+	//MenuRace menuRace;
+	//// If you have more menus, define them here...
 
-	while (game.run)
-	{
-		// Main menu
-		mainMenu.menu_set_run_true();
-		mainMenu.menu();
-		if (!mainMenu.run) break; // If main menu is quit, break out of loop
+	//while (game.run)
+	//{
+	//	// Main menu
+	//	mainMenu.menu_set_run_true();
+	//	mainMenu.menu();
+	//	if (!mainMenu.run) break; // If main menu is quit, break out of loop
 
-		// Gender menu
-		menuGender.menu_gender_set_run_true();
-		/*menuGender.menu_gender();*/
-		if (!menuGender.run) continue; // If back is pressed in gender menu, continue to main menu
+	//	// Gender menu
+	//	menuGender.menu_gender_set_run_true();
+	//	/*menuGender.menu_gender();*/
+	//	if (!menuGender.run) continue; // If back is pressed in gender menu, continue to main menu
 
-		// Race menu
-		menuRace.menu_race_set_run_true();
-		menuRace.menu_race();
-		if (!menuRace.run) continue; // If back is pressed in race menu, continue to gender menu
+	//	// Race menu
+	//	menuRace.menu_race_set_run_true();
+	//	menuRace.menu_race();
+	//	if (!menuRace.run) continue; // If back is pressed in race menu, continue to gender menu
 
-		// If you have more menus, add them here following the same pattern...
+	//	// If you have more menus, add them here following the same pattern...
 
-		// Init the game after all menus
-		game.init();
-	}
+	//	// Init the game after all menus
+	//	game.init();
+	//}
 }
 
 // check if the mouse has moved

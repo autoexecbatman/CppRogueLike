@@ -1,12 +1,5 @@
 #pragma once
 
-#include <iostream>
-
-#include "Game.h"
-#include "Menu/Menu.h"
-#include "Menu/MenuGender.h"
-
-
 class IMenuState
 {
 public:
