@@ -13,7 +13,6 @@
 
 class NewGame : public IMenuState
 {
-public:
 	void on_selection() override;
 };
 
@@ -34,7 +33,6 @@ class Quit : public IMenuState
 
 class Menu : public BaseMenu
 {
-private:
 	enum class MenuState
 	{
 		NONE,
