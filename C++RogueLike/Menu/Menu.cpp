@@ -67,14 +67,12 @@ void Menu::menu()
 	{
 		menu_clear(); // clear menu window each frame
 		mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
-		
 		// print the buttons to the menu window
 		for (size_t i = 1; i <= menuStateStrings.size(); i++)
 		{	
 			menu_print_state(static_cast<MenuState>(i));
 		}
 		menu_refresh(); // refresh menu window each frame to show changes
-
 		menu_key_listen(); // listen for key presses
 		switch (keyPress)
 		{
