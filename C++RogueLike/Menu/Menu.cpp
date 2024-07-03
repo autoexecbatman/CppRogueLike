@@ -1,10 +1,8 @@
 // file: Menu.cpp
-#include <iostream>
 #include <string>
 
 #include "Menu.h"
 #include "../Game.h"
-#include "../IMenuState.h"
 
 void NewGame::on_selection()
 {
@@ -48,14 +46,14 @@ void Menu::menu_print_state(MenuState state)
 {
 	const int optionToPrint = static_cast<std::underlying_type_t<MenuState>>(state);
 	
-	if (newState == optionToPrint)
+	if (stateEnum == state)
 	{
 		menu_highlight_on();
 	}
 
 	menu_print(1, optionToPrint, menu_get_string(state));
 
-	if (newState == optionToPrint)
+	if (stateEnum == state)
 	{
 		menu_highlight_off();
 	}
@@ -66,9 +64,9 @@ void Menu::menu()
 	while (run) // menu has its own loop
 	{
 		menu_clear(); // clear menu window each frame
-		mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
+		mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // this is for debugging the currentOption number
 		// print the buttons to the menu window
-		for (size_t i = 1; i <= menuStateStrings.size(); i++)
+		for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 		{	
 			menu_print_state(static_cast<MenuState>(i));
 		}
@@ -79,15 +77,15 @@ void Menu::menu()
 
 		case KEY_UP:
 		{
-			--newState;
-			currentState = static_cast<MenuState>(newState); // set currentOption to newOption
+			stateInt = (stateInt - 1) % iMenuStates.size();
+			stateEnum = static_cast<MenuState>(stateInt);
 			break; // break out of switch keep running menu loop
 		}
 
 		case KEY_DOWN:
 		{
-			++newState;
-			currentState = static_cast<MenuState>(newState); // set currentOption to newOption
+			stateInt = (stateInt + 1) % iMenuStates.size();
+			stateEnum = static_cast<MenuState>(stateInt); // set currentOption to newOption
 			break; // break out of switch keep running menu loop
 		}
 
@@ -104,7 +102,7 @@ void Menu::menu()
 		case 10:
 		{ // if a selection is made
 			menu_set_run_false(); // stop running this menu loop
-			iMenuStates.find(currentState)->second->on_selection(); // run the selected option
+			iMenuStates.find(stateEnum)->second->on_selection(); // run the selected option
 			break;
 		}
 
@@ -134,18 +132,6 @@ void Menu::menu()
 
 		default:break;
 		}
-
-		if (newState < 1)
-		{
-			newState = 4;
-			currentState = static_cast<MenuState>(newState);
-		}
-		else if (newState > 4)
-		{
-			newState = 1;
-			currentState = static_cast<MenuState>(newState);
-		}
-
 	}
 	game.menus.pop_front();
 }

@@ -33,19 +33,14 @@ class Quit : public IMenuState
 
 class Menu : public BaseMenu
 {
+public:
 	int menu_height{ 10 };
 	int menu_width{ 12 };
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
-	enum class MenuState
-	{
-		NONE,
-		NEW_GAME,
-		LOAD_GAME,
-		OPTIONS,
-		QUIT
-	} currentState{ MenuState::NEW_GAME };
-	int newState{ static_cast<int>(currentState) };
+	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, QUIT }
+	stateEnum { MenuState::NEW_GAME };
+	int stateInt{ static_cast<int>(stateEnum) };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuState, std::string> menuStateStrings
 	{
@@ -57,7 +52,6 @@ class Menu : public BaseMenu
 
 	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
 	void menu_print_state(MenuState state);
-
 public:
 	Menu();
 	~Menu();
