@@ -40,7 +40,6 @@ class MenuGender : public BaseMenu
 	int startx_{ (COLS / 2) - 10 };
 	enum class MenuState { MALE, FEMALE, RANDOM, BACK }
 	stateEnum{ MenuState::MALE };
-	int stateInt{ static_cast<int>(stateEnum) };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuState, std::string> menuStateStrings
 	{

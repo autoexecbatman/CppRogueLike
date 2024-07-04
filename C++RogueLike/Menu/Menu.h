@@ -39,7 +39,6 @@ class Menu : public BaseMenu
 	int menu_startx{ (COLS / 2) - 10 };
 	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, QUIT }
 	stateEnum { MenuState::NEW_GAME };
-	int stateInt{ static_cast<int>(stateEnum) };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuState, std::string> menuStateStrings
 	{

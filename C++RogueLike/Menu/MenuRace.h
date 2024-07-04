@@ -60,7 +60,6 @@ class MenuRace : public BaseMenu
 		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK
 	}
 	stateEnum{ MenuRaceOptions::HUMAN };
-	int stateInt{ static_cast<int>(stateEnum) };
 	std::unordered_map<MenuRaceOptions, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuRaceOptions, std::string> menuRaceStrings
 	{

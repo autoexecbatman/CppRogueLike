@@ -74,15 +74,13 @@ void Menu::menu()
 
 		case KEY_UP:
 		{
-			stateInt = (stateInt - 1 + iMenuStates.size()) % iMenuStates.size();
-			stateEnum = static_cast<MenuState>(stateInt);
+			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
 			break; // break out of switch keep running menu loop
 		}
 
 		case KEY_DOWN:
 		{
-			stateInt = (stateInt + 1) % iMenuStates.size();
-			stateEnum = static_cast<MenuState>(stateInt); // set currentOption to newOption
+			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
 			break; // break out of switch keep running menu loop
 		}
 

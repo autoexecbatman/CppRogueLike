@@ -131,15 +131,13 @@ void MenuRace::menu()
 
 		case KEY_UP:
 		{
-			stateInt = (stateInt - 1) % iMenuStates.size();
-			stateEnum = static_cast<MenuRaceOptions>(stateInt);
+			stateEnum = static_cast<MenuRaceOptions>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
 			break;
 		}
 
 		case KEY_DOWN:
 		{
-			stateInt = (stateInt + 1) % iMenuStates.size();
-			stateEnum = static_cast<MenuRaceOptions>(stateInt);
+			stateEnum = static_cast<MenuRaceOptions>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
 			break;
 		}
 
