@@ -53,6 +53,8 @@ public:
 	Menu();
 	~Menu();
 
+	void draw();
+	void on_key(int key);
 	void menu() override;
 };
 

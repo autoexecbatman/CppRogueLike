@@ -56,77 +56,87 @@ void Menu::menu_print_state(MenuState state)
 	}
 }
 
+void Menu::draw()
+{
+	menu_clear(); // clear menu window each frame
+	mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // this is for debugging the currentOption number
+	// print the buttons to the menu window
+	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
+	{
+		menu_print_state(static_cast<MenuState>(i));
+	}
+	menu_refresh(); // refresh menu window each frame to show changes
+}
+
+void Menu::on_key(int key)
+{
+	switch (key)
+	{
+
+	case KEY_UP:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		break; // break out of switch keep running menu loop
+	}
+
+	case KEY_DOWN:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
+		break; // break out of switch keep running menu loop
+	}
+
+	case 10:
+	{ // if a selection is made
+		menu_set_run_false(); // stop running this menu loop
+		iMenuStates.at(stateEnum)->on_selection(); // run the selected option
+		break;
+	}
+
+	case 'N':
+	case 'n':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::NEW_GAME)->on_selection();
+		break;
+	}
+
+	case 'L':
+	case 'l':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::LOAD_GAME)->on_selection();
+		break;
+	}
+
+	case 'O':
+	case 'o':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::OPTIONS)->on_selection();
+		break;
+	}
+
+	case 'Q':
+	case 'q':
+	{
+		menu_set_run_false(); // stop running menu loop
+		iMenuStates.at(MenuState::QUIT)->on_selection();
+		break; // break out of switch and start closing the game
+	}
+
+	default:break;
+	}
+}
+
 void Menu::menu()
 {
 	while (run) // menu has its own loop
 	{
-		menu_clear(); // clear menu window each frame
-		mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // this is for debugging the currentOption number
-		// print the buttons to the menu window
-		for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
-		{	
-			menu_print_state(static_cast<MenuState>(i));
-		}
-		menu_refresh(); // refresh menu window each frame to show changes
+		draw(); // draw the menu
 		menu_key_listen(); // listen for key presses
-		switch (keyPress)
-		{
-
-		case KEY_UP:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
-			break; // break out of switch keep running menu loop
-		}
-
-		case KEY_DOWN:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
-			break; // break out of switch keep running menu loop
-		}
-
-		case 10:
-		{ // if a selection is made
-			menu_set_run_false(); // stop running this menu loop
-			iMenuStates.at(stateEnum)->on_selection(); // run the selected option
-			break;
-		}
-
-		case 'N':
-		case 'n':
-		{
-			menu_set_run_false();
-			iMenuStates.at(MenuState::NEW_GAME)->on_selection();
-			break;
-		}
-
-		case 'L':
-		case 'l':
-		{
-			menu_set_run_false();
-			iMenuStates.at(MenuState::LOAD_GAME)->on_selection();
-			break;
-		}
-
-		case 'O':
-		case 'o':
-		{
-			menu_set_run_false();
-			iMenuStates.at(MenuState::OPTIONS)->on_selection();
-			break;
-		}
-
-		case 'Q':
-		case 'q':
-		{
-			menu_set_run_false(); // stop running menu loop
-			iMenuStates.at(MenuState::QUIT)->on_selection();
-			break; // break out of switch and start closing the game
-		}
-
-		default:break;
-		}
+		on_key(keyPress); // run the key press
 	}
-	game.menus.pop_front();
+	game.menus.pop_back(); // remove this menu from the list
 }
 
 // end of file: Menu.cpp
