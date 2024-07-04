@@ -44,7 +44,7 @@ int main()
 	game.create_player(); // the player is initialized here because it needs to get data from menu selections
 
 	//==INIT_MENU==
-	game.menus.push_front(std::make_unique<Menu>());
+	game.menus.push_back(std::make_unique<Menu>());
 
 	//==INIT_GUI==
 	Gui gui;
@@ -56,10 +56,10 @@ int main()
 	while (game.run) // main game loop
 	{
 		//==MENU==
+		// delete all nullptrs using ranges
+		std::erase_if(game.menus, [](const auto& menu) { return menu == nullptr; });
 		if (!game.menus.empty())
 		{
-			// delete all nullptrs using ranges
-			std::erase_if(game.menus, [](const auto& menu) { return menu == nullptr; });
 			game.menus.back()->menu();
 		}
 		else
