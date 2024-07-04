@@ -25,7 +25,6 @@ void Quit::on_selection()
 	game.run = false;
 	game.shouldSave = false;
 	game.log("You quit without saving!");
-	game.menus.back()->back = true;
 }
 
 Menu::Menu()

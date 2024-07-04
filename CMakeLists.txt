@@ -125,6 +125,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/main_C++RogueLike.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Items.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Items.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/BaseMenu.h
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/BaseMenu.cpp
+    ${PROJECT_SOURCE_DIR}/C++RogueLike/IMenuState.h
 
     # Map
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Map/Map.cpp
