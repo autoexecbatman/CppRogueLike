@@ -60,7 +60,7 @@ int main()
 		{
 			// delete all nullptrs using ranges
 			std::erase_if(game.menus, [](const auto& menu) { return menu == nullptr; });
-			game.menus.front()->menu();
+			game.menus.back()->menu();
 		}
 		else
 		{
