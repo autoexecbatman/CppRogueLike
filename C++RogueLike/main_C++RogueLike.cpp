@@ -145,7 +145,7 @@ void init_curses()
 
 	if (has_mouse())
 	{
-		mousemask(0x1fffffffL, nullptr); // enable mouse events * #define ALL_MOUSE_EVENTS        0x1fffffffL
+		mousemask(ALL_MOUSE_EVENTS, nullptr); // enable mouse events * #define ALL_MOUSE_EVENTS        0x1fffffffL
 	}
 	else
 	{
