@@ -64,6 +64,8 @@ public:
 	MenuClass();
 	~MenuClass();
 
+	void draw();
+	void on_key(int key);
 	void menu() override;
 };
 

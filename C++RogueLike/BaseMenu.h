@@ -11,8 +11,9 @@ protected:
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
 	int keyPress{ 0 };
-	bool run{ true };
 public:
+	bool run{ true };
+	bool back{ false };
 	BaseMenu() = default;
 	virtual ~BaseMenu() = default;
 	BaseMenu(const BaseMenu&) = delete;

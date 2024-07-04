@@ -56,11 +56,20 @@ int main()
 	while (game.run) // main game loop
 	{
 		//==MENU==
-		// delete all nullptrs using ranges
-		std::erase_if(game.menus, [](const auto& menu) { return menu == nullptr; });
 		if (!game.menus.empty())
 		{
 			game.menus.back()->menu();
+			// if back is pressed, pop the menu
+			if (game.menus.back()->back)
+			{
+				game.menus.pop_back();
+				game.menus.back()->menu_set_run_true();
+			}
+
+			if (!game.menus.back()->run)
+			{
+				game.menus.pop_back();
+			}
 		}
 		else
 		{

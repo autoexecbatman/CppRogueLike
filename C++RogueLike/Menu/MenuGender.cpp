@@ -9,8 +9,7 @@
 void Male::on_selection()
 {
 	game.player->gender = "Male";
-	game.deadMenus.push_back(std::move(game.menus.front()));
-	game.menus.push_front(std::make_unique<MenuClass>());
+	game.menus.push_back(std::make_unique<MenuClass>());
 }
 
 void Female::on_selection()
@@ -31,11 +30,9 @@ void Random::on_selection()
 	}
 }
 
-void Back::on_selection()
+void Back::on_selection() 
 {
-	// push the previous menu back on the stack
-	game.deadMenus.push_back(std::move(game.menus.front()));
-	game.menus.push_front(std::make_unique<Menu>()); // go back to the main menu
+	game.menus.back()->back = true;
 }
 
 MenuGender::MenuGender()
@@ -66,59 +63,67 @@ void MenuGender::menu_print_state(MenuState option)
 	}
 }
 
+void MenuGender::draw()
+{
+	menu_clear(); // clear the window
+	mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // print the menu options to the top of the window
+	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
+	{
+		menu_print_state(static_cast<MenuState>(i));
+	}
+	menu_refresh();
+}
+
+void MenuGender::on_key(int key)
+{
+	switch (keyPress)
+	{
+
+	case KEY_UP:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		break;
+	}
+
+	case KEY_DOWN:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
+		break;
+	}
+
+	case 'M':
+	case 'm':
+	{
+		iMenuStates.at(MenuState::MALE)->on_selection();
+		break;
+	}
+
+	case 'F':
+	case 'f':
+	{
+		iMenuStates.at(MenuState::FEMALE)->on_selection();
+		break;
+	}
+
+	case 10:
+	{
+		menu_set_run_false();
+		iMenuStates.at(stateEnum)->on_selection(); // run the selected option
+		break;
+	}
+
+	default:break;
+	} // !end switch keyPress
+}
+
 void MenuGender::menu()
 {
 	while (run) // menu has its own loop
 	{
-		menu_clear(); // clear the window
-		mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // print the menu options to the top of the window
-		for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
-		{
-			menu_print_state(static_cast<MenuState>(i));
-		}
-		menu_refresh();
+		draw();
 		menu_key_listen();
-		switch (keyPress)
-		{
-
-		case KEY_UP:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
-			break;
-		}
-
-		case KEY_DOWN:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
-			break;
-		}
-
-		case 'M':
-		case 'm':
-		{
-			iMenuStates.at(MenuState::MALE)->on_selection();
-			break;
-		}
-
-		case 'F':
-		case 'f':
-		{
-			iMenuStates.at(MenuState::FEMALE)->on_selection();
-			break;
-		}
-
-		case 10:
-		{
-			menu_set_run_false();
-			iMenuStates.at(stateEnum)->on_selection(); // run the selected option
-			break;
-		}
-
-		default:break;
-		} // !end switch keyPress
-
-	} // !end while run
-	/*game.menus.pop_front();*/
+		on_key(keyPress);
+	}
 }
 
 // end of file: MenuGender.cpp

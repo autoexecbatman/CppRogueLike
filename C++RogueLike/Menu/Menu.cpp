@@ -7,7 +7,6 @@
 
 void NewGame::on_selection()
 {
-	game.deadMenus.push_back(std::move(game.menus.front()));
 	game.menus.push_back(std::make_unique<MenuGender>());
 }
 
@@ -26,6 +25,7 @@ void Quit::on_selection()
 	game.run = false;
 	game.shouldSave = false;
 	game.log("You quit without saving!");
+	game.menus.back()->back = true;
 }
 
 Menu::Menu()
@@ -136,7 +136,6 @@ void Menu::menu()
 		menu_key_listen(); // listen for key presses
 		on_key(keyPress); // run the key press
 	}
-	game.menus.pop_back(); // remove this menu from the list
 }
 
 // end of file: Menu.cpp

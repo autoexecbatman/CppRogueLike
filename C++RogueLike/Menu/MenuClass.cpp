@@ -57,6 +57,7 @@ void ClassRandom::on_selection()
 
 void ClassBack::on_selection()
 {
+	game.menus.back()->back = true;
 }
 
 MenuClass::MenuClass()
@@ -89,58 +90,67 @@ void MenuClass::menu_class_print_option(MenuState option) noexcept
 	}
 }
 
+void MenuClass::draw()
+{
+	menu_clear();
+	mvwprintw(menuWindow, 0, 0, "%d", stateEnum);
+	for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
+	{
+		menu_class_print_option(static_cast<MenuState>(i));
+	}
+	menu_refresh();
+}
+
+void MenuClass::on_key(int key)
+{
+	switch (keyPress)
+	{
+
+	case KEY_UP:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		break;
+	}
+
+	case KEY_DOWN:
+	{
+		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() + 1) % iMenuStates.size());
+		break;
+	}
+
+	case 10: // enter
+	{
+		menu_set_run_false();
+		iMenuStates.at(stateEnum)->on_selection();
+		if (stateEnum == MenuState::BACK)
+		{
+			break;
+		}
+		else
+		{
+			MenuName menuName;
+			menuName.menu_name();
+		}
+		break;
+	}
+
+	case 27: // escape
+	{
+		break;
+	}
+
+	default:
+		break;
+	}
+}
+
 void MenuClass::menu()
 {
-	MenuName menuName;
-
 	while (run)
 	{
-		menu_clear();
-		mvwprintw(menuWindow, 0, 0, "%d", stateEnum);
-		for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
-		{
-			menu_class_print_option(static_cast<MenuState>(i));
-		}
-		menu_refresh();
+		draw();
 		menu_key_listen();
-		switch (keyPress)
-		{
-
-		case KEY_UP:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
-			break;
-		}
-
-		case KEY_DOWN:
-		{
-			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() + 1) % iMenuStates.size());
-			break;
-		}
-
-		case 10: // enter
-		{
-			menu_set_run_false();
-			iMenuStates.at(stateEnum)->on_selection();
-			if (stateEnum == MenuState::BACK)
-			{
-				break;
-			}
-			else
-			{
-				menuName.menu_name();
-			}
-			break;
-		}
-
-		case 27: // escape
-		{
-			break;
-		}
-
-		default:
-			break;
-		}
+		on_key(keyPress);
 	}
 }
 
