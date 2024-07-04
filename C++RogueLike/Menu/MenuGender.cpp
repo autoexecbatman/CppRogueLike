@@ -9,6 +9,8 @@
 void Male::on_selection()
 {
 	game.player->gender = "Male";
+	game.deadMenus.push_back(std::move(game.menus.front()));
+	game.menus.push_front(std::make_unique<MenuClass>());
 }
 
 void Female::on_selection()
@@ -31,7 +33,9 @@ void Random::on_selection()
 
 void Back::on_selection()
 {
-
+	// push the previous menu back on the stack
+	game.deadMenus.push_back(std::move(game.menus.front()));
+	game.menus.push_front(std::make_unique<Menu>()); // go back to the main menu
 }
 
 MenuGender::MenuGender()
@@ -55,9 +59,7 @@ void MenuGender::menu_print_state(MenuState option)
 	{
 		menu_highlight_on();
 	}
-
 	menu_print(1, row, menu_gender_get_string(option));
-
 	if (stateEnum == option)
 	{
 		menu_highlight_off();
@@ -75,7 +77,6 @@ void MenuGender::menu()
 			menu_print_state(static_cast<MenuState>(i));
 		}
 		menu_refresh();
-
 		menu_key_listen();
 		switch (keyPress)
 		{
@@ -101,18 +102,25 @@ void MenuGender::menu()
 			break;
 		}
 
+		case 'F':
+		case 'f':
+		{
+			iMenuStates.at(MenuState::FEMALE)->on_selection();
+			break;
+		}
+
 		case 10:
 		{
+			menu_set_run_false();
 			iMenuStates.at(stateEnum)->on_selection(); // run the selected option
 			break;
-		} // !end case 10
+		}
 
 		default:break;
 		} // !end switch keyPress
 
 	} // !end while run
-	menu_delete();
-	game.menus.pop_front();
+	/*game.menus.pop_front();*/
 }
 
 // end of file: MenuGender.cpp

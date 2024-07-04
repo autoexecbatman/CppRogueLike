@@ -5,228 +5,148 @@
 #include "MenuGender.h"
 #include "../Game.h"
 
-std::string MenuRace::menu_race_get_string(MenuRaceOptions option) noexcept
+void Human::on_selection()
 {
-	switch (option)
-	{
-	case MenuRaceOptions::HUMAN:
-		return "Human";
-		break;
-	case MenuRaceOptions::DWARF:
-		return "Dwarf";
-		break;
-	case MenuRaceOptions::ELF:
-		return "Elf";
-		break;
-	case MenuRaceOptions::GNOME:
-		return "Gnome";
-		break;
-	case MenuRaceOptions::HALFELF:
-		return "Half-Elf";
-		break;
-	case MenuRaceOptions::HALFLING:
-		return "Halfling";
-		break;
-	case MenuRaceOptions::RANDOM:
-		return "Random";
-		break;
-	case MenuRaceOptions::BACK:
-		return "Back";
-		break;
-	default:
-		return "Error";
-		break;
-	}
-}
-
-void MenuRace::menu_race_print_option(MenuRaceOptions option, int row) noexcept
-{
-	if (stateInt == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
-	{
-		menu_race_highlight_on();
-	}
-	const std::string& menuOptionString = menu_race_get_string(option);
-	menu_race_print(1, row, menuOptionString);
-	if (stateInt == static_cast<std::underlying_type_t<MenuRaceOptions>>(option))
-	{
-		menu_race_highlight_off();
-	}
-}
-
-void MenuRace::menu_race_select()
-{
-	switch (currentState)
-	{
-	case MenuRaceOptions::HUMAN:
-		menu_race_human();
-		break;
-	case MenuRaceOptions::DWARF:
-		menu_race_dwarf();
-		break;
-	case MenuRaceOptions::ELF:
-		menu_race_elf();
-		break;
-	case MenuRaceOptions::GNOME:
-		menu_race_gnome();
-		break;
-	case MenuRaceOptions::RANDOM:
-		menu_race_random();
-		break;
-	case MenuRaceOptions::BACK:
-		break;
-	default:
-		break;
-	}
-}
-
-void MenuRace::menu_race_human()
-{
-	// set player race
-	const std::string& human = menu_race_get_string(MenuRaceOptions::HUMAN);
-	game.player->playerRace = human;
-	// set player state to human
+	game.player->playerRace = "Human";
 	game.player->playerRaceState = Player::PlayerRaceState::HUMAN;
 }
 
-void MenuRace::menu_race_dwarf()
+void Dwarf::on_selection()
 {
-	// set player race
-	const std::string& dwarf = menu_race_get_string(MenuRaceOptions::DWARF);
-	game.player->playerRace = dwarf;
-	// set player state to dwarf
+	game.player->playerRace = "Dwarf";
 	game.player->playerRaceState = Player::PlayerRaceState::DWARF;
 }
 
-void MenuRace::menu_race_elf()
+void Elf::on_selection()
 {
-	// set player race
-	const std::string& elf = menu_race_get_string(MenuRaceOptions::ELF);
-	game.player->playerRace = elf;
-	// set player state to elf
+	game.player->playerRace = "Elf";
 	game.player->playerRaceState = Player::PlayerRaceState::ELF;
 }
 
-void MenuRace::menu_race_gnome()
+void Gnome::on_selection()
 {
-	// set player race
-	const std::string& gnome = menu_race_get_string(MenuRaceOptions::GNOME);
-	game.player->playerRace = gnome;
-	// set player state to gnome
+	game.player->playerRace = "Gnome";
 	game.player->playerRaceState = Player::PlayerRaceState::GNOME;
 }
 
-void MenuRace::menu_race_halfelf()
+void HalfElf::on_selection()
 {
-	// set player race
-	const std::string& halfelf = menu_race_get_string(MenuRaceOptions::HALFELF);
-	game.player->playerRace = halfelf;
-	// set player state to halfelf
+	game.player->playerRace = "Half-Elf";
 	game.player->playerRaceState = Player::PlayerRaceState::HALFELF;
 }
 
-void MenuRace::menu_race_halfling()
+void Halfling::on_selection()
 {
-	// set player race
-	const std::string& halfling = menu_race_get_string(MenuRaceOptions::HALFLING);
-	game.player->playerRace = halfling;
-	// set player state to halfling
+	game.player->playerRace = "Halfling";
 	game.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 }
 
-void MenuRace::menu_race_random()
+void RaceRandom::on_selection()
 {
-	// randomize player class use radom number generator
 	RandomDice d;
 	const int rng = d.d6();
 	switch (rng)
 	{
 	case 1:
-		menu_race_human();
+		game.player->playerRace = "Human";
+		game.player->playerRaceState = Player::PlayerRaceState::HUMAN;
 		break;
 	case 2:
-		menu_race_dwarf();
+		game.player->playerRace = "Dwarf";
+		game.player->playerRaceState = Player::PlayerRaceState::DWARF;
 		break;
 	case 3:
-		menu_race_elf();
+		game.player->playerRace = "Elf";
+		game.player->playerRaceState = Player::PlayerRaceState::ELF;
 		break;
 	case 4:
-		menu_race_gnome();
+		game.player->playerRace = "Gnome";
+		game.player->playerRaceState = Player::PlayerRaceState::GNOME;
 		break;
 	case 5:
-		menu_race_halfelf();
+		game.player->playerRace = "Half-Elf";
+		game.player->playerRaceState = Player::PlayerRaceState::HALFELF;
 		break;
 	case 6:
-		menu_race_halfling();
+		game.player->playerRace = "Halfling";
+		game.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 		break;
 	default:break;
 	}
 }
 
-void MenuRace::menu_race()
+void RaceBack::on_selection()
 {
-	menu_race_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
-	MenuClass menuClass;
+}
 
+MenuRace::MenuRace()
+{
+	menu_new(height_, width_, starty_, startx_);
+	iMenuStates.emplace(MenuRaceOptions::HUMAN, std::make_unique<Human>());
+	iMenuStates.emplace(MenuRaceOptions::DWARF, std::make_unique<Dwarf>());
+	iMenuStates.emplace(MenuRaceOptions::ELF, std::make_unique<Elf>());
+	iMenuStates.emplace(MenuRaceOptions::GNOME, std::make_unique<Gnome>());
+	iMenuStates.emplace(MenuRaceOptions::HALFELF, std::make_unique<HalfElf>());
+	iMenuStates.emplace(MenuRaceOptions::HALFLING, std::make_unique<Halfling>());
+	iMenuStates.emplace(MenuRaceOptions::RANDOM, std::make_unique<Random>());
+	iMenuStates.emplace(MenuRaceOptions::BACK, std::make_unique<Back>());
+}
+
+MenuRace::~MenuRace()
+{
+	menu_delete();
+}
+
+void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
+{
+	auto row = static_cast<int>(option);
+	if (stateEnum == option)
+	{
+		menu_highlight_on();
+	}
+	menu_print(1, row, menu_race_get_string(option));
+	if (stateEnum == option)
+	{
+		menu_highlight_off();
+	}
+}
+
+void MenuRace::menu()
+{
+	MenuClass menuClass;
 	while (run)
 	{
-		menu_race_clear();
+		menu_clear();
+		mvwprintw(menuWindow, 0, 0, "Choose a race:");
 
-		// print menu options
-		mvwprintw(
-			menuRaceWindow,
-			0,
-			0,
-			"Choose a race:");
+		for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
+		{
+			menu_race_print_option(static_cast<MenuRaceOptions>(i));
+		}
+		menu_refresh();
 
-		menu_race_print_option(MenuRaceOptions::HUMAN, 1);
-		menu_race_print_option(MenuRaceOptions::DWARF, 2);
-		menu_race_print_option(MenuRaceOptions::ELF, 3);
-		menu_race_print_option(MenuRaceOptions::GNOME, 4);
-		menu_race_print_option(MenuRaceOptions::HALFELF, 5);
-		menu_race_print_option(MenuRaceOptions::HALFLING, 6);
-		menu_race_print_option(MenuRaceOptions::RANDOM, 7);
-		menu_race_print_option(MenuRaceOptions::BACK, 8);
-
-		menu_race_refresh();
-
-		const int input = getch();
-		switch (input)
+		menu_key_listen();
+		switch (keyPress)
 		{
 
 		case KEY_UP:
 		{
-			menu_race_move_up();
+			stateInt = (stateInt - 1) % iMenuStates.size();
+			stateEnum = static_cast<MenuRaceOptions>(stateInt);
 			break;
 		}
 
 		case KEY_DOWN:
 		{
-			menu_race_move_down();
+			stateInt = (stateInt + 1) % iMenuStates.size();
+			stateEnum = static_cast<MenuRaceOptions>(stateInt);
 			break;
 		}
 
 		case 10: // enter
 		{
-			menu_race_set_run_false(); // exit current menu loop either way if a selection was made
-			menu_race_select(); // execute selection
-			if (currentState == MenuRaceOptions::BACK) // current back
-			{
-				break;
-			}
-			else
-			{
-				menuClass.run = true;
-				menuClass.menu_class();
-				if (menuClass.currentState == MenuClass::MenuClassOptions::BACK)
-				{
-					run = true;
-					menuClass.run = true;
-				}
-				else
-				{
-					run = false;
-				}
-			} // if back flag is false, go to next menu
+			menu_set_run_false(); // exit current menu loop either way if a selection was made
+			iMenuStates.at(stateEnum)->on_selection(); // call on_selection for the selected menu option
 			break; // break and go back to previous menu (menuGender)
 		}
 
@@ -237,20 +157,7 @@ void MenuRace::menu_race()
 		default:
 			break;
 		} // end switch (input)
-
-		// check if in bounds of menu options
-		if (stateInt < 1)
-		{
-			stateInt = 8;
-			currentState = static_cast<MenuRaceOptions>(stateInt);
-		}
-		else if (stateInt > 8)
-		{
-			stateInt = 1;
-			currentState = static_cast<MenuRaceOptions>(stateInt);
-		}
 	}
-	menu_race_delete();
 }
 
 // end of file: MenuRace.cpp

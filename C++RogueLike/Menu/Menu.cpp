@@ -44,15 +44,12 @@ Menu::~Menu()
 
 void Menu::menu_print_state(MenuState state)
 {
-	const int optionToPrint = static_cast<std::underlying_type_t<MenuState>>(state);
-	
+	auto row = static_cast<std::underlying_type_t<MenuState>>(state);	
 	if (stateEnum == state)
 	{
 		menu_highlight_on();
 	}
-
-	menu_print(1, optionToPrint, menu_get_string(state));
-
+	menu_print(1, row, menu_get_string(state));
 	if (stateEnum == state)
 	{
 		menu_highlight_off();
@@ -77,7 +74,7 @@ void Menu::menu()
 
 		case KEY_UP:
 		{
-			stateInt = (stateInt - 1) % iMenuStates.size();
+			stateInt = (stateInt - 1 + iMenuStates.size()) % iMenuStates.size();
 			stateEnum = static_cast<MenuState>(stateInt);
 			break; // break out of switch keep running menu loop
 		}

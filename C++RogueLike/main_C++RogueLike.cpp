@@ -9,6 +9,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <ranges>
 
 // https://pdcurses.org/docs/MANUAL.html
 #include <curses.h>
@@ -43,11 +44,6 @@ int main()
 	game.create_player(); // the player is initialized here because it needs to get data from menu selections
 
 	//==INIT_MENU==
-	//Menu menu;
-	//menu.menu();
-	//clear(); // finished with the menu, clear the screen
-	//refresh(); // starting new drawing, refresh the screen
-
 	game.menus.push_front(std::make_unique<Menu>());
 
 	//==INIT_GUI==
@@ -62,6 +58,8 @@ int main()
 		//==MENU==
 		if (!game.menus.empty())
 		{
+			// delete all nullptrs using ranges
+			std::erase_if(game.menus, [](const auto& menu) { return menu == nullptr; });
 			game.menus.front()->menu();
 		}
 		else

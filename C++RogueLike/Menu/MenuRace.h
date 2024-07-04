@@ -3,62 +3,85 @@
 #define MENU_RACE_H
 #include <curses.h>
 #include <string>
+#include <unordered_map>
+#include <memory>
 
-class MenuRace
+#include "../BaseMenu.h"
+#include "../IMenuState.h"
+
+class Human : public IMenuState
 {
-public:
-	enum class MenuRaceOptions : int
+	void on_selection() override;
+};
+
+class Dwarf : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Elf : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Gnome : public IMenuState
+{
+	void on_selection() override;
+};
+
+class HalfElf : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Halfling : public IMenuState
+{
+	void on_selection() override;
+};
+
+class RaceRandom : public IMenuState
+{
+	void on_selection() override;
+};
+
+class RaceBack : public IMenuState
+{
+	void on_selection() override;
+};
+
+class MenuRace : public BaseMenu
+{
+	int height_{ 10 };
+	int width_{ 20 };
+	int starty_{ (LINES / 2) - 5 };
+	int startx_{ (COLS / 2) - 10 };
+	enum class MenuRaceOptions
 	{
-		NONE,
-		HUMAN,
-		DWARF,
-		ELF,
-		GNOME,
-		HALFELF,
-		HALFLING,
-		RANDOM,
-		BACK
-	} currentState{ MenuRaceOptions::HUMAN };
-private:
-	int oldOption{ -1 };
-	int stateInt{ 1 };
+		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK
+	}
+	stateEnum{ MenuRaceOptions::HUMAN };
+	int stateInt{ static_cast<int>(stateEnum) };
+	std::unordered_map<MenuRaceOptions, std::unique_ptr<IMenuState>> iMenuStates;
+	std::unordered_map<MenuRaceOptions, std::string> menuRaceStrings
+	{
+		{ MenuRaceOptions::HUMAN, "Human" },
+		{ MenuRaceOptions::DWARF, "Dwarf" },
+		{ MenuRaceOptions::ELF, "Elf" },
+		{ MenuRaceOptions::GNOME, "Gnome" },
+		{ MenuRaceOptions::HALFELF, "Half-Elf" },
+		{ MenuRaceOptions::HALFLING, "Halfling" },
+		{ MenuRaceOptions::RANDOM, "Random" },
+		{ MenuRaceOptions::BACK, "Back" }
+	};
 
-	WINDOW* menuRaceWindow{ nullptr };
-
-	void menu_race_new(int height, int width, int starty, int startx) noexcept { menuRaceWindow = newwin(height, width, starty, startx); }
-	void menu_race_clear() noexcept { wclear(menuRaceWindow); }
-	void menu_race_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuRaceWindow, y, x, text.c_str()); }
-	void menu_race_refresh() noexcept { wrefresh(menuRaceWindow); }
-	void menu_race_delete() noexcept { delwin(menuRaceWindow); }
-
-	int menu_race_get_oldOption() noexcept { return oldOption; }
-	int menu_race_get_newOption() noexcept { return stateInt; }
-	void menu_race_set_oldOption(int option) noexcept { oldOption = option; }
-	void menu_race_set_newOption(int option) noexcept { stateInt = option; }
-	void menu_race_highlight_on() noexcept { wattron(menuRaceWindow, A_REVERSE); }
-	void menu_race_highlight_off() noexcept { wattroff(menuRaceWindow, A_REVERSE); }
-
-	std::string menu_race_get_string(MenuRaceOptions option) noexcept;
-	void menu_race_print_option(MenuRaceOptions option, int row) noexcept;
-
-	void menu_race_move_up() noexcept { stateInt--; currentState = static_cast<MenuRaceOptions>(stateInt); }
-	void menu_race_move_down() noexcept { stateInt++; currentState = static_cast<MenuRaceOptions>(stateInt); }
-	void menu_race_select();
-
-	void menu_race_human();
-	void menu_race_dwarf();
-	void menu_race_elf();
-	void menu_race_gnome();
-	void menu_race_halfelf();
-	void menu_race_halfling();
-	void menu_race_random();
+	std::string menu_race_get_string(MenuRaceOptions option) { return menuRaceStrings.at(option); }
+	void menu_race_print_option(MenuRaceOptions option) noexcept;
 
 public:
-	bool run{ true };
+	MenuRace();
+	~MenuRace();
 
-	void menu_race();
-	void menu_race_set_run_true() noexcept { run = true; }
-	void menu_race_set_run_false() noexcept { run = false; }
+	void menu() override;
 };
 
 #endif // !MENU_RACE_H

@@ -5,175 +5,124 @@
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
 
-std::string MenuClass::menu_class_get_string(MenuClassOptions option) noexcept
+void Fighter::on_selection()
 {
-	switch (option)
-	{
-	case MenuClassOptions::FIGHTER:
-		return "Fighter";
-		break;
-	case MenuClassOptions::ROGUE:
-		return "Rogue";
-		break;
-	case MenuClassOptions::WIZARD:
-		return "Wizard";
-		break;
-	case MenuClassOptions::CLERIC:
-		return "Cleric";
-		break;
-	case MenuClassOptions::RANDOM:
-		return "Random";
-		break;
-	case MenuClassOptions::BACK:
-		return "Back";
-		break;
-	default:
-		return "Error";
-		break;
-	}
-}
-
-void MenuClass::menu_class_print_option(MenuClassOptions option, int row) noexcept
-{
-	if (stateInt == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
-	{
-		menu_class_highlight_on();
-	}
-	const auto& menuOptionString = menu_class_get_string(option);
-	menu_class_print(1, row, menuOptionString);
-	if (stateInt == static_cast<std::underlying_type_t<MenuClassOptions>>(option))
-	{
-		menu_class_highlight_off();
-	}
-}
-
-void MenuClass::menu_class_select()
-{
-	switch (currentState)
-	{
-	case MenuClassOptions::FIGHTER:
-		menu_class_fighter();
-		break;
-	case MenuClassOptions::ROGUE:
-		menu_class_rogue();
-		break;
-	case MenuClassOptions::WIZARD:
-		menu_class_wizard();
-		break;
-	case MenuClassOptions::CLERIC:
-		menu_class_cleric();
-		break;
-	case MenuClassOptions::RANDOM:
-		menu_class_random();
-		break;
-	case MenuClassOptions::BACK:
-		break;
-	default:
-		break;
-	}
-}
-
-void MenuClass::menu_class_fighter()
-{
-	// set player class
-	const auto& fighter = menu_class_get_string(MenuClassOptions::FIGHTER);
-	game.player->playerClass = fighter;
+	game.player->playerClass = "Fighter";
 	game.player->playerClassState = Player::PlayerClassState::FIGHTER;
 }
 
-void MenuClass::menu_class_rogue()
+void Rogue::on_selection()
 {
-	// set player class
-	const auto& rogue = menu_class_get_string(MenuClassOptions::ROGUE);
-	game.player->playerClass = rogue;
+	game.player->playerClass = "Rogue";
 	game.player->playerClassState = Player::PlayerClassState::ROGUE;
 }
 
-void MenuClass::menu_class_wizard()
+void Cleric::on_selection()
 {
-	// set player class
-	const auto& wizard = menu_class_get_string(MenuClassOptions::WIZARD);
-	game.player->playerClass = wizard;
-	game.player->playerClassState = Player::PlayerClassState::WIZARD;
-}
-
-void MenuClass::menu_class_cleric()
-{
-	// set player class
-	const auto& cleric = menu_class_get_string(MenuClassOptions::CLERIC);
-	game.player->playerClass = cleric;
+	game.player->playerClass = "Cleric";
 	game.player->playerClassState = Player::PlayerClassState::CLERIC;
 }
 
-void MenuClass::menu_class_random()
+void Wizard::on_selection()
 {
-	// randomize player class use radom number generator
+	game.player->playerClass = "Wizard";
+	game.player->playerClassState = Player::PlayerClassState::WIZARD;
+}
+
+void ClassRandom::on_selection()
+{
 	RandomDice d;
 	const int rng = d.d4();
 	switch (rng)
 	{
-		case 1:
-		menu_class_fighter();
+	case 1:
+		game.player->playerClass = "Fighter";
+		game.player->playerClassState = Player::PlayerClassState::FIGHTER;
 		break;
-		case 2:
-		menu_class_rogue();
+	case 2:
+		game.player->playerClass = "Rogue";
+		game.player->playerClassState = Player::PlayerClassState::ROGUE;
 		break;
-		case 3:
-		menu_class_wizard();
+	case 3:
+		game.player->playerClass = "Wizard";
+		game.player->playerClassState = Player::PlayerClassState::WIZARD;
 		break;
-		case 4:
-		menu_class_cleric();
+	case 4:
+		game.player->playerClass = "Cleric";
+		game.player->playerClassState = Player::PlayerClassState::CLERIC;
 		break;
-		default:break;
+	default:break;
 	}
 }
 
-void MenuClass::menu_class()
+void ClassBack::on_selection()
 {
-	menu_class_new(10, 20, (LINES / 2) - 5, (COLS / 2) - 10);
+}
+
+MenuClass::MenuClass()
+{
+	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	iMenuStates.emplace(MenuState::FIGHTER, std::make_unique<Fighter>());
+	iMenuStates.emplace(MenuState::ROGUE, std::make_unique<Rogue>());
+	iMenuStates.emplace(MenuState::CLERIC, std::make_unique<Cleric>());
+	iMenuStates.emplace(MenuState::WIZARD, std::make_unique<Wizard>());
+	iMenuStates.emplace(MenuState::RANDOM, std::make_unique<ClassRandom>());
+	iMenuStates.emplace(MenuState::BACK, std::make_unique<ClassBack>());
+}
+
+MenuClass::~MenuClass()
+{
+	menu_delete();
+}
+
+void MenuClass::menu_class_print_option(MenuState option) noexcept
+{
+	auto row = static_cast<int>(option);
+	if (stateEnum == option)
+	{
+		menu_highlight_on();
+	}
+	menu_print(1, row, menu_class_get_string(option));
+	if (stateEnum == option)
+	{
+		menu_highlight_off();
+	}
+}
+
+void MenuClass::menu()
+{
 	MenuName menuName;
 
 	while (run)
 	{
-		menu_class_clear();
-
-		// print menu options
-		mvwprintw(
-			menuClassWindow,
-			0,
-			0,
-			"Choose a class:");
-
-		menu_class_print_option(MenuClassOptions::FIGHTER, 1);
-		menu_class_print_option(MenuClassOptions::ROGUE, 2);
-		menu_class_print_option(MenuClassOptions::CLERIC, 3);
-		menu_class_print_option(MenuClassOptions::WIZARD, 4);
-		menu_class_print_option(MenuClassOptions::RANDOM, 5);
-		menu_class_print_option(MenuClassOptions::BACK, 6);
-
-		menu_class_refresh();
-
-		const int input = getch();
-		switch (input)
+		menu_clear();
+		mvwprintw(menuWindow, 0, 0, "%d", stateEnum);
+		for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
+		{
+			menu_class_print_option(static_cast<MenuState>(i));
+		}
+		menu_refresh();
+		menu_key_listen();
+		switch (keyPress)
 		{
 
 		case KEY_UP:
 		{
-			menu_class_move_up();
+			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
 			break;
 		}
 
 		case KEY_DOWN:
 		{
-			menu_class_move_down();
+			stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() + 1) % iMenuStates.size());
 			break;
 		}
 
 		case 10: // enter
 		{
-			run = false; // class loop stop
-			menu_class_select();
-			if (currentState == MenuClassOptions::BACK)
+			menu_set_run_false();
+			iMenuStates.at(stateEnum)->on_selection();
+			if (stateEnum == MenuState::BACK)
 			{
 				break;
 			}
@@ -192,20 +141,7 @@ void MenuClass::menu_class()
 		default:
 			break;
 		}
-
-		// check if in bounds of menu options
-		if (stateInt < 1)
-		{
-			stateInt = 6;
-			currentState = static_cast<MenuClassOptions>(stateInt);
-		}
-		else if (stateInt > 6)
-		{
-			stateInt = 1;
-			currentState = static_cast<MenuClassOptions>(stateInt);
-		}
 	}
-	menu_class_delete();
 }
 
 // end of file: MenuClass.cpp
