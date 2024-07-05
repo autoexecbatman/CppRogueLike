@@ -76,6 +76,7 @@ void MenuTrade::on_key(int key)
 
 	case 10:
 	{ // if a selection is made
+		menu_set_run_false();
 		iMenuStates.at(currentState)->on_selection();
 		break; // break out of switch keep running menu loop
 	}
