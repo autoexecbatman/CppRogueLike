@@ -44,12 +44,12 @@ Menu::~Menu()
 void Menu::menu_print_state(MenuState state)
 {
 	auto row = static_cast<std::underlying_type_t<MenuState>>(state);	
-	if (stateEnum == state)
+	if (currentState == state)
 	{
 		menu_highlight_on();
 	}
 	menu_print(1, row, menu_get_string(state));
-	if (stateEnum == state)
+	if (currentState == state)
 	{
 		menu_highlight_off();
 	}
@@ -58,7 +58,7 @@ void Menu::menu_print_state(MenuState state)
 void Menu::draw()
 {
 	menu_clear(); // clear menu window each frame
-	mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // this is for debugging the currentOption number
+	mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
 	// print the buttons to the menu window
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
@@ -74,20 +74,20 @@ void Menu::on_key(int key)
 
 	case KEY_UP:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break; // break out of switch keep running menu loop
 	}
 
 	case KEY_DOWN:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
 		break; // break out of switch keep running menu loop
 	}
 
 	case 10:
 	{ // if a selection is made
 		menu_set_run_false(); // stop running this menu loop
-		iMenuStates.at(stateEnum)->on_selection(); // run the selected option
+		iMenuStates.at(currentState)->on_selection(); // run the selected option
 		break;
 	}
 

@@ -79,12 +79,12 @@ MenuClass::~MenuClass()
 void MenuClass::menu_class_print_option(MenuState option) noexcept
 {
 	auto row = static_cast<int>(option);
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_on();
 	}
 	menu_print(1, row, menu_class_get_string(option));
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_off();
 	}
@@ -93,7 +93,7 @@ void MenuClass::menu_class_print_option(MenuState option) noexcept
 void MenuClass::draw()
 {
 	menu_clear();
-	mvwprintw(menuWindow, 0, 0, "%d", stateEnum);
+	mvwprintw(menuWindow, 0, 0, "%d", currentState);
 	for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
 	{
 		menu_class_print_option(static_cast<MenuState>(i));
@@ -108,25 +108,21 @@ void MenuClass::on_key(int key)
 
 	case KEY_UP:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break;
 	}
 
 	case KEY_DOWN:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() + 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() + 1) % iMenuStates.size());
 		break;
 	}
 
 	case 10: // enter
 	{
 		menu_set_run_false();
-		iMenuStates.at(stateEnum)->on_selection();
-		if (stateEnum == MenuState::BACK)
-		{
-			break;
-		}
-		else
+		iMenuStates.at(currentState)->on_selection();
+		if (currentState != MenuState::BACK)
 		{
 			MenuName menuName;
 			menuName.menu_name();

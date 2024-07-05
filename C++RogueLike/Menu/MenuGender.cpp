@@ -9,7 +9,6 @@
 void Male::on_selection()
 {
 	game.player->gender = "Male";
-	game.menus.push_back(std::make_unique<MenuClass>());
 }
 
 void Female::on_selection()
@@ -52,12 +51,12 @@ MenuGender::~MenuGender()
 void MenuGender::menu_print_state(MenuState option)
 {
 	auto row = static_cast<int>(option);
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_on();
 	}
 	menu_print(1, row, menu_gender_get_string(option));
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_off();
 	}
@@ -66,7 +65,7 @@ void MenuGender::menu_print_state(MenuState option)
 void MenuGender::draw()
 {
 	menu_clear(); // clear the window
-	mvwprintw(menuWindow, 0, 0, "%d", stateEnum); // print the menu options to the top of the window
+	mvwprintw(menuWindow, 0, 0, "%d", currentState); // print the menu options to the top of the window
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(static_cast<MenuState>(i));
@@ -81,13 +80,13 @@ void MenuGender::on_key(int key)
 
 	case KEY_UP:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break;
 	}
 
 	case KEY_DOWN:
 	{
-		stateEnum = static_cast<MenuState>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
+		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
 		break;
 	}
 
@@ -108,7 +107,11 @@ void MenuGender::on_key(int key)
 	case 10:
 	{
 		menu_set_run_false();
-		iMenuStates.at(stateEnum)->on_selection(); // run the selected option
+		iMenuStates.at(currentState)->on_selection(); // run the selected option
+		if (currentState != MenuState::BACK)
+		{
+			game.menus.push_back(std::make_unique<MenuRace>());
+		}
 		break;
 	}
 

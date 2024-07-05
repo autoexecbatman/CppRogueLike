@@ -46,7 +46,7 @@ class MenuClass : public BaseMenu
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
 	enum class MenuState { FIGHTER, ROGUE, CLERIC, WIZARD, RANDOM, BACK }
-	stateEnum{ MenuState::FIGHTER };
+	currentState{ MenuState::FIGHTER };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuState, std::string> menuClassStrings
 	{

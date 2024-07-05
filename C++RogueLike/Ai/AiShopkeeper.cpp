@@ -5,6 +5,7 @@
 #include "../Random/RandomDice.h"
 #include "../Actor/Actor.h"
 #include "../Items.h"
+#include "../MenuTrade.h"
 
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
@@ -68,46 +69,49 @@ void AiShopkeeper::moveOrTrade(Creature& owner, int targetx, int targety)
 	}
 }
 
-void AiShopkeeper::trade() {
-	WINDOW* tradeWin = newwin(10, 40, 5, 5);
-	box(tradeWin, 0, 0);
-	wrefresh(tradeWin);
+void AiShopkeeper::trade()
+{
+	//WINDOW* tradeWin = newwin(10, 40, 5, 5);
+	//box(tradeWin, 0, 0);
+	//wrefresh(tradeWin);
 
-	bool trading = true;
+	//bool trading = true;
 
-	while (trading) {
-		// Display the trade menu
-		mvwprintw(tradeWin, 1, 1, "Trade Menu");
-		mvwprintw(tradeWin, 2, 1, "1. Buy");
-		mvwprintw(tradeWin, 3, 1, "2. Sell");
-		mvwprintw(tradeWin, 4, 1, "3. Exit");
+	//while (trading) {
+	//	// Display the trade menu
+	//	mvwprintw(tradeWin, 1, 1, "Trade Menu");
+	//	mvwprintw(tradeWin, 2, 1, "1. Buy");
+	//	mvwprintw(tradeWin, 3, 1, "2. Sell");
+	//	mvwprintw(tradeWin, 4, 1, "3. Exit");
 
-		wrefresh(tradeWin);
+	//	wrefresh(tradeWin);
 
-		// Get user input
-		int choice = wgetch(tradeWin);
+	//	// Get user input
+	//	int choice = wgetch(tradeWin);
 
-		switch (choice) {
-		case '1':
-			handle_buy(tradeWin);
-			break;
+	//	switch (choice) {
+	//	case '1':
+	//		handle_buy(tradeWin);
+	//		break;
 
-		case '2':
-			handle_sell(tradeWin);
-			break;
+	//	case '2':
+	//		handle_sell(tradeWin);
+	//		break;
 
-		case '3':
-			trading = false;
-			break;
+	//	case '3':
+	//		trading = false;
+	//		break;
 
-		default:
-			break;
-		}
+	//	default:
+	//		break;
+	//	}
 
-		wrefresh(tradeWin);
-	}
+	//	wrefresh(tradeWin);
+	//}
+	//
+	//delwin(tradeWin);
 
-	delwin(tradeWin);
+	game.menus.push_back(std::make_unique<MenuTrade>());
 }
 
 void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList)

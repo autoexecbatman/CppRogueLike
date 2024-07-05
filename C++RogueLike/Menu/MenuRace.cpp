@@ -77,6 +77,7 @@ void RaceRandom::on_selection()
 
 void RaceBack::on_selection()
 {
+	game.menus.back()->back = true;
 }
 
 MenuRace::MenuRace()
@@ -100,15 +101,62 @@ MenuRace::~MenuRace()
 void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
 {
 	auto row = static_cast<int>(option);
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_on();
 	}
 	menu_print(1, row, menu_race_get_string(option));
-	if (stateEnum == option)
+	if (currentState == option)
 	{
 		menu_highlight_off();
 	}
+}
+
+void MenuRace::draw()
+{
+	menu_clear();
+	for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
+	{
+		menu_race_print_option(static_cast<MenuRaceOptions>(i));
+	}
+	menu_refresh();
+}
+
+void MenuRace::on_key(int key)
+{
+	switch (keyPress)
+	{
+
+	case KEY_UP:
+	{
+		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
+		break;
+	}
+
+	case KEY_DOWN:
+	{
+		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
+		break;
+	}
+
+	case 10: // enter
+	{
+		menu_set_run_false(); // exit current menu loop either way if a selection was made
+		iMenuStates.at(currentState)->on_selection(); // call on_selection for the selected menu option
+		if (currentState != MenuRaceOptions::BACK)
+		{
+			game.menus.push_back(std::make_unique<MenuClass>());
+		}
+		break; // break and go back to previous menu (menuGender)
+	}
+
+	case 27: // escape
+	{
+		break;
+	}
+	default:
+		break;
+	} // end switch (input)
 }
 
 void MenuRace::menu()
@@ -116,45 +164,9 @@ void MenuRace::menu()
 	MenuClass menuClass;
 	while (run)
 	{
-		menu_clear();
-		mvwprintw(menuWindow, 0, 0, "Choose a race:");
-
-		for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
-		{
-			menu_race_print_option(static_cast<MenuRaceOptions>(i));
-		}
-		menu_refresh();
-
+		draw();
 		menu_key_listen();
-		switch (keyPress)
-		{
-
-		case KEY_UP:
-		{
-			stateEnum = static_cast<MenuRaceOptions>((static_cast<size_t>(stateEnum) + iMenuStates.size() - 1) % iMenuStates.size());
-			break;
-		}
-
-		case KEY_DOWN:
-		{
-			stateEnum = static_cast<MenuRaceOptions>((static_cast<size_t>(stateEnum) + 1) % iMenuStates.size());
-			break;
-		}
-
-		case 10: // enter
-		{
-			menu_set_run_false(); // exit current menu loop either way if a selection was made
-			iMenuStates.at(stateEnum)->on_selection(); // call on_selection for the selected menu option
-			break; // break and go back to previous menu (menuGender)
-		}
-
-		case 27: // escape
-		{
-			break;
-		}
-		default:
-			break;
-		} // end switch (input)
+		on_key(keyPress);
 	}
 }
 

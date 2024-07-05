@@ -1,101 +1,53 @@
 #pragma once
 
 #include <curses.h>
-#include <vector>
-#include "Menu/Menu.h"
+#include <string>
+#include <memory>
+#include <unordered_map>
+
+#include "BaseMenu.h"
+#include "IMenuState.h"
+
+class Buy : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Sell : public IMenuState
+{
+	void on_selection() override;
+};
+
+class Exit : public IMenuState
+{
+	void on_selection() override;
+};
 
 class MenuTrade : public BaseMenu
 {
-private:
-	bool run{ true };
-	int menu_height{ 0 };
-	int menu_width{ 0 };
-	int menu_starty{ 0 };
-	int menu_startx{ 0 };
-	int keyPress{ 0 };
-	int stateEnum{ 0 };
-	int stateInt{ 0 };
-	void key_listen() { keyPress = wgetch(menuWindow); }
+	int menu_height{ 3 };
+	int menu_width{ 12 };
+	int menu_starty{ (LINES / 2) - 5 };
+	int menu_startx{ (COLS / 2) - 10 };
 
-	void print_option(int x, int y, const std::string& text)
+	enum class MenuState { BUY, SELL, EXIT }
+	currentState{ MenuState::BUY };
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
+	std::unordered_map<MenuState, std::string> menuStateStrings
 	{
-		if (stateEnum == y - 1)
-		{
-			wattron(menuWindow, A_REVERSE);
-			mvwprintw(menuWindow, y, x, text.c_str());
-			wattroff(menuWindow, A_REVERSE);
-		}
-		else
-		{
-			mvwprintw(menuWindow, y, x, text.c_str());
-		}
-	}
+		{ MenuState::BUY, "Buy" },
+		{ MenuState::SELL, "Sell" },
+		{ MenuState::EXIT, "Exit" }
+	};
 
-	std::vector<std::string_view> options;
+	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
+	void menu_print_state(MenuState state);
+
 public:
-	MenuTrade(int height, int width, int starty, int startx)
-	{
-		menuWindow = newwin(menu_height, menu_width, menu_starty, menu_startx);
-	}
+	MenuTrade();
+	~MenuTrade();
 
-	void menu()
-	{
-		while (run)
-		{
-			// clear the screen each frame
-			wclear(menuWindow);
-
-			// print N number of options each in a new line
-			for (size_t i = 0; i < options.size(); i++)
-			{
-				print_option(1, i + 1, options.at(i).data());
-			}
-			
-			wrefresh(menuWindow);// refresh menu window each frame to show changes
-
-			key_listen(); // listen for key presses
-			switch (keyPress)
-			{
-				case KEY_UP:
-				{
-					stateEnum--; // decrement newOption
-					stateInt = stateEnum; // set currentOption to newOption
-					break; // break out of switch keep running menu loop
-				}
-
-				case KEY_DOWN:
-				{
-					stateEnum++; // increment newOption
-					stateInt = stateEnum; // set currentOption to newOption
-					break; // break out of switch keep running menu loop
-				}
-
-				case 10: // Enter key
-				{
-					switch (stateEnum)
-					{
-						// return result
-						case 0:
-							run = false;
-							break;
-					}
-				}
-				case 'Q':
-				case 'q':
-				{
-					run = false; // stop running menu loop
-					break; // break out of switch keep running menu loop
-				}
-
-				default:
-					break;
-			}
-
-			box(menuWindow, 0, 0);
-			wrefresh(menuWindow);
-		}
-	}
-
-	void populate_map(std::string_view text) { options.emplace_back(text); }
-	/*void execute_option() { options.at(currentOption); }*/
+	void draw();
+	void on_key(int key);
+	void menu() override;
 };

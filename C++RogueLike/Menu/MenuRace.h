@@ -59,7 +59,7 @@ class MenuRace : public BaseMenu
 	{
 		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK
 	}
-	stateEnum{ MenuRaceOptions::HUMAN };
+	currentState{ MenuRaceOptions::HUMAN };
 	std::unordered_map<MenuRaceOptions, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuRaceOptions, std::string> menuRaceStrings
 	{
@@ -80,7 +80,9 @@ public:
 	MenuRace();
 	~MenuRace();
 
+	void draw();
 	void menu() override;
+	void on_key(int key);
 };
 
 #endif // !MENU_RACE_H

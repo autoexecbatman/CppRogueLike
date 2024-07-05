@@ -1,6 +1,6 @@
 #pragma once
+#include "Ai.h"
 
-class Ai;
 class TCODZip;
 class Actor;
 class Creature;
@@ -14,6 +14,7 @@ public:
 	void update(Creature& owner) override;
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
+	void display_inventory(Creature& owner);
 private:
 	int get_next_level_xp(Creature& owner);
 	void levelup_update(Creature& owner);
@@ -21,7 +22,6 @@ private:
 	void drop_item(Creature& owner);
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
 	void display_inventory_items(WINDOW* inv, const Creature& owner) noexcept;
-	void display_inventory(Creature& owner);
 	Item* chose_from_inventory(Creature& owner, int ascii);
 	bool move_or_attack(Creature& owner, Vector2D target);
 	void look_on_floor(Vector2D& target);
