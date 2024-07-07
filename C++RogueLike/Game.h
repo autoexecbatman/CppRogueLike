@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <memory>
 #include <span>
 #include <deque>
@@ -14,18 +15,13 @@
 #include "Actor/Actor.h"
 #include "ActorTypes/Player.h"
 #include "Ai/AiShopkeeper.h"
-#include "ChatGPT.h"
 #include "Weapons.h"
 #include "BaseMenu.h"
-
-//class BaseMenu;
-class Menu;
 
 class Game
 {
 private:
 	std::vector<std::pair<int, std::string>> attackMessageParts; // this vector holds the parts of the attack message
-
 public:
 	std::vector <std::vector<std::pair<int, std::string>>> attackMessagesWhole; // this vector holds all of the attack messages
 	std::string messageToDisplay{ "Init Message" };
@@ -35,20 +31,14 @@ public:
 	bool shouldSave{ true };
 	enum class GameStatus
 	{
-		STARTUP,
-		IDLE,
-		NEW_TURN,
-		VICTORY,
-		DEFEAT
-	} gameStatus{ GameStatus::STARTUP };
-	// Random number generator.
-	RandomDice d;
+		STARTUP, IDLE, NEW_TURN, VICTORY, DEFEAT
+	}
+	gameStatus{ GameStatus::STARTUP };
+	RandomDice d; // Random number generator.
 
 	std::unique_ptr<Stairs> stairs;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
 	Creature* shopkeeper{ nullptr };
-
-	std::unique_ptr<ChatGPT> chatGPT{ std::make_unique<ChatGPT>() };
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };

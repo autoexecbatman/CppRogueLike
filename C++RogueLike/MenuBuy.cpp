@@ -5,6 +5,16 @@
 
 void MenuBuy::populate_items()
 {
+	if (!game.shopkeeper)
+	{
+		game.log("Shopkeeper not found!");
+		std::exit(EXIT_FAILURE);
+	}
+	if (!game.shopkeeper->container)
+	{
+		game.log("Shopkeeper container not found!");
+		std::exit(EXIT_FAILURE);
+	}
 	const auto& inv = game.shopkeeper->container->inv;
 	for (const auto& item : inv)
 	{

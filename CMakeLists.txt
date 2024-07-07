@@ -71,9 +71,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/WisdomAttributes.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Attributes/WisdomAttributes.h
 
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ChatGPT.h
-
     # Colors
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors/Colors.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Colors/Colors.h
@@ -156,17 +153,13 @@ endif()
 find_package(unofficial-pdcurses CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
-find_package(Microsoft.GSL CONFIG REQUIRED)
-find_package(CURL CONFIG REQUIRED)
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
-        libtcod::libtcod
-        Microsoft.GSL::GSL
-        CURL::libcurl
+        unofficial::pdcurses::pdcurses
         SDL2::SDL2
         SDL2::SDL2main
-        unofficial::pdcurses::pdcurses
+        libtcod::libtcod
 )
 
 # Copy JSON files to build directory.

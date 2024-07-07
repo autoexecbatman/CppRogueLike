@@ -10,8 +10,8 @@ class MenuBuy : public BaseMenu
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
 	size_t currentState{ 0 };
-
 	std::vector<std::string> menuItems;
+
 	void populate_items();
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
