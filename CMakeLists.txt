@@ -153,6 +153,7 @@ endif()
 find_package(unofficial-pdcurses CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
 target_link_libraries(
     ${PROJECT_NAME}
     PRIVATE
@@ -160,6 +161,7 @@ target_link_libraries(
         SDL2::SDL2
         SDL2::SDL2main
         libtcod::libtcod
+        nlohmann_json::nlohmann_json
 )
 
 # Copy JSON files to build directory.
