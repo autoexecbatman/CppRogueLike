@@ -66,14 +66,9 @@ Thank you for considering a contribution to CppRogueLike.
 
 ## Required Dependencies
 
-- [microsoft/GSL (ms-gsl)](https://github.com/microsoft/GSL/tree/main)
 - [PDCurses (pdcurses)](https://github.com/wmcbrine/PDCurses)
 - [libtcod (libtcod)](https://github.com/libtcod/libtcod)
 - [nlohmann/json (nlohmann-json)](https://github.com/nlohmann/json)
-- [fmtlib/fmt (fmt)](https://github.com/fmtlib/fmt)
-
-**Note IMPORTANT**: Will not build currently due to missing additional ChatGPT API related headers. Please comment out ChatGPT API related `#include` in `Game.h` and a few lines in `main()`. This issue will be addressed soon.
-
 
 ## Development Environment
 
