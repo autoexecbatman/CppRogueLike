@@ -597,7 +597,6 @@ void Map::add_monster(Vector2D pos)
 	dagger->pickable = std::make_unique<Dagger>(1, 4);
 	shopkeeper->container->add(std::move(dagger));
 	game.creatures.push_back(std::move(shopkeeper));
-	game.shopkeeper = game.creatures.back().get();
 
 	if (placeDragon)
 	{

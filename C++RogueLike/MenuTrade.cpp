@@ -2,15 +2,17 @@
 #include "Ai/AiPlayer.h"
 #include "Game.h"
 #include "MenuBuy.h"
+#include "MenuSell.h"
+#include "Actor/Actor.h"
 
 void Buy::on_selection()
 {
-	game.menus.push_back(std::make_unique<MenuBuy>());
+	game.menus.push_back(std::make_unique<MenuBuy>(shopkeeper));
 }
 
 void Sell::on_selection()
 {
-	// do something
+	game.menus.push_back(std::make_unique<MenuSell>(player));
 }
 
 void Exit::on_selection()
@@ -18,11 +20,11 @@ void Exit::on_selection()
 
 }
 
-MenuTrade::MenuTrade()
+MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player)
 {
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
-	iMenuStates.emplace(MenuState::BUY, std::make_unique<Buy>());
-	iMenuStates.emplace(MenuState::SELL, std::make_unique<Sell>());
+	iMenuStates.emplace(MenuState::BUY, std::make_unique<Buy>(shopkeeper));
+	iMenuStates.emplace(MenuState::SELL, std::make_unique<Sell>(player));
 	iMenuStates.emplace(MenuState::EXIT, std::make_unique<Exit>());
 }
 

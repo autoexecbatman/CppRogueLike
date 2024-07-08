@@ -51,67 +51,25 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	}
 }
 
-void AiShopkeeper::moveOrTrade(Creature& owner, int targetx, int targety)
+void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 {
-	const double distance = sqrt(pow(targetx - owner.position.x, 2) + pow(targety - owner.position.y, 2));
+	const double distance = sqrt(pow(targetx - shopkeeper.position.x, 2) + pow(targety - shopkeeper.position.y, 2));
 
 	if (distance >= MIN_TRADE_DISTANCE)
 	{
-		moveToTarget(owner, targetx, targety);
+		moveToTarget(shopkeeper, targetx, targety);
 	}
 	else
 	{
-		trade();
-		// if traded kill shopkeeper dies
-		owner.destructible->die(owner);
-
-		game.message(WHITE_PAIR, "The shopkeeper has been killed!", true);
+		// get the target
+		auto& player = *game.get_actor(Vector2D{ targety,targetx });
+		if (!shopkeeper.destructible->is_dead()) { trade(shopkeeper, player); }
 	}
 }
 
-void AiShopkeeper::trade()
+void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 {
-	//WINDOW* tradeWin = newwin(10, 40, 5, 5);
-	//box(tradeWin, 0, 0);
-	//wrefresh(tradeWin);
-
-	//bool trading = true;
-
-	//while (trading) {
-	//	// Display the trade menu
-	//	mvwprintw(tradeWin, 1, 1, "Trade Menu");
-	//	mvwprintw(tradeWin, 2, 1, "1. Buy");
-	//	mvwprintw(tradeWin, 3, 1, "2. Sell");
-	//	mvwprintw(tradeWin, 4, 1, "3. Exit");
-
-	//	wrefresh(tradeWin);
-
-	//	// Get user input
-	//	int choice = wgetch(tradeWin);
-
-	//	switch (choice) {
-	//	case '1':
-	//		handle_buy(tradeWin);
-	//		break;
-
-	//	case '2':
-	//		handle_sell(tradeWin);
-	//		break;
-
-	//	case '3':
-	//		trading = false;
-	//		break;
-
-	//	default:
-	//		break;
-	//	}
-
-	//	wrefresh(tradeWin);
-	//}
-	//
-	//delwin(tradeWin);
-
-	game.menus.push_back(std::make_unique<MenuTrade>());
+	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
 }
 
 void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList)
@@ -123,9 +81,9 @@ void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr
 }
 
 
-void AiShopkeeper::handle_buy(WINDOW* tradeWin)
+void AiShopkeeper::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Creature& player)
 {
-	const auto& shopkeeperInventory{ game.shopkeeper->container };
+	const auto& shopkeeperInventory{ shopkeeper.container };
 	int selected{ 0 };
 	bool buying{ true };
 
@@ -202,7 +160,7 @@ void AiShopkeeper::handle_sell(WINDOW* tradeWin)
 				game.player->playerGold += item->value;
 
 				// Transfer item from player to shopkeeper
-				game.shopkeeper->container->add(std::move(item));
+				/*game.shopkeeper->container->add(std::move(item));*/
 
 				playerInventory->inv.erase(playerInventory->inv.begin() + selected);
 				mvwprintw(tradeWin, 9, 1, "Item sold successfully.");

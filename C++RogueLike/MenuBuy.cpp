@@ -1,31 +1,22 @@
 #include <span>
+#include <ranges>
+#include <memory>
 
 #include "MenuBuy.h"
 #include "Game.h"
 
-void MenuBuy::populate_items()
+void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 {
-	if (!game.shopkeeper)
-	{
-		game.log("Shopkeeper not found!");
-		std::exit(EXIT_FAILURE);
-	}
-	if (!game.shopkeeper->container)
-	{
-		game.log("Shopkeeper container not found!");
-		std::exit(EXIT_FAILURE);
-	}
-	const auto& inv = game.shopkeeper->container->inv;
-	for (const auto& item : inv)
+	for (const auto& item : inventory)
 	{
 		menuItems.push_back(item->actorData.name);
 	}
 }
 
-MenuBuy::MenuBuy()
+MenuBuy::MenuBuy(Creature& buyer) : buyer{ buyer }
 {
 	menu_new( menu_height, menu_width, menu_starty, menu_startx );
-	populate_items();
+	populate_items(buyer.container->inv);
 }
 
 MenuBuy::~MenuBuy()
@@ -50,7 +41,7 @@ void MenuBuy::menu_print_state(size_t state)
 void MenuBuy::draw()
 {
 	// print items to buy from shopkeeper
-	const auto& inv = game.shopkeeper->container->inv;
+	const auto& inv = buyer.container->inv;
 	menu_clear();
 	for (size_t i{ 0 }; i < inv.size(); ++i)
 	{
@@ -71,6 +62,10 @@ void MenuBuy::on_key(int key)
 			break;
 		case 27: // ESC
 			menu_set_run_false();
+			break;
+		case 10: // ENTER
+			// if selected buy item
+
 			break;
 	}
 }

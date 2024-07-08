@@ -2,6 +2,10 @@
 #include <vector>
 
 #include "BaseMenu.h"
+#include "Actor/Actor.h"
+
+class Item;
+class Creature;
 
 class MenuBuy : public BaseMenu
 {
@@ -11,12 +15,13 @@ class MenuBuy : public BaseMenu
 	int menu_startx{ (COLS / 2) - 10 };
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
+	Creature& buyer;
 
-	void populate_items();
+	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 public:
-	MenuBuy();
+	MenuBuy(Creature& buyer);
 	~MenuBuy();
 
 	void draw();

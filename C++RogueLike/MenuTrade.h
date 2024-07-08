@@ -7,15 +7,22 @@
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
+#include "Actor/Actor.h"
 
 class Buy : public IMenuState
 {
 	void on_selection() override;
+	Creature& shopkeeper;
+public:
+	Buy(Creature& shopkeeper) : shopkeeper{ shopkeeper } {}
 };
 
 class Sell : public IMenuState
 {
 	void on_selection() override;
+	Creature& player;
+public:
+	Sell(Creature& player) : player{ player } {}
 };
 
 class Exit : public IMenuState
@@ -44,7 +51,7 @@ class MenuTrade : public BaseMenu
 	void menu_print_state(MenuState state);
 
 public:
-	MenuTrade();
+	MenuTrade(Creature& shopkeeper, Creature& player);
 	~MenuTrade();
 
 	void draw();

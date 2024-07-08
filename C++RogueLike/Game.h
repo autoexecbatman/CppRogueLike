@@ -38,7 +38,6 @@ public:
 
 	std::unique_ptr<Stairs> stairs;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0, 0, 0, 0) };
-	Creature* shopkeeper{ nullptr };
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
