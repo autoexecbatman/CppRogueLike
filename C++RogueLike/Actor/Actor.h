@@ -193,7 +193,7 @@ public:
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
-	int value{ 0 };
+	int value{ 1 };
 
 	std::unique_ptr<Pickable> pickable; // the actor can be picked
 };

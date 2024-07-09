@@ -8,6 +8,7 @@
 #include "BaseMenu.h"
 #include "IMenuState.h"
 #include "Actor/Actor.h"
+#include "ActorTypes/Player.h"
 
 class Buy : public IMenuState
 {
@@ -20,9 +21,10 @@ public:
 class Sell : public IMenuState
 {
 	void on_selection() override;
-	Creature& player;
+	Player& player;
+	Creature& shopkeeper;
 public:
-	Sell(Creature& player) : player{ player } {}
+	Sell(Creature& shopkeeper, Player& seller) : player{ seller }, shopkeeper{ shopkeeper } {}
 };
 
 class Exit : public IMenuState
@@ -32,10 +34,10 @@ class Exit : public IMenuState
 
 class MenuTrade : public BaseMenu
 {
-	int menu_height{ 3 };
-	int menu_width{ 12 };
-	int menu_starty{ (LINES / 2) - 5 };
-	int menu_startx{ (COLS / 2) - 10 };
+	int height_{ 3 };
+	int width_{ 12 };
+	int starty_{ (LINES / 2) - 5 };
+	int startx_{ (COLS / 2) - 10 };
 
 	enum class MenuState { BUY, SELL, EXIT }
 	currentState{ MenuState::BUY };
@@ -51,7 +53,7 @@ class MenuTrade : public BaseMenu
 	void menu_print_state(MenuState state);
 
 public:
-	MenuTrade(Creature& shopkeeper, Creature& player);
+	MenuTrade(Creature& shopkeeper, Player& player);
 	~MenuTrade();
 
 	void draw();

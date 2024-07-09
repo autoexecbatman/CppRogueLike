@@ -6,7 +6,7 @@
 #include "../Actor/Actor.h"
 #include "../Items.h"
 #include "../MenuTrade.h"
-
+#include "../ActorTypes/Player.h"
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MIN_TRADE_DISTANCE = 2;  // Minimum distance to initiate a trade
@@ -61,13 +61,11 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 	}
 	else
 	{
-		// get the target
-		auto& player = *game.get_actor(Vector2D{ targety,targetx });
-		if (!shopkeeper.destructible->is_dead()) { trade(shopkeeper, player); }
+		if (!shopkeeper.destructible->is_dead()) { trade(shopkeeper, *game.player); }
 	}
 }
 
-void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
+void AiShopkeeper::trade(Creature& shopkeeper, Player& player)
 {
 	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
 }
@@ -81,7 +79,7 @@ void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr
 }
 
 
-void AiShopkeeper::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Creature& player)
+void AiShopkeeper::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& player)
 {
 	const auto& shopkeeperInventory{ shopkeeper.container };
 	int selected{ 0 };

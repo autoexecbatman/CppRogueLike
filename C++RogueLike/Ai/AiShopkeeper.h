@@ -6,6 +6,7 @@
 #include "Ai.h"
 
 class Item;
+class Player;
 
 class AiShopkeeper : public Ai
 {
@@ -14,7 +15,7 @@ private:
 	void update(Creature& owner) override;
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
-	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Creature& player);
+	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& player);
 	void handle_sell(WINDOW* tradeWin);
 	void display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList);
 	int calculateStep(int positionDifference);
@@ -23,6 +24,6 @@ public:
 	AiShopkeeper();
 protected:
 	void moveOrTrade(Creature& owner, int targetx, int targety);
-	void trade(Creature& buyer, Creature& player);
+	void trade(Creature& shopkeeper, Player& player);
 };
 // file: AiShopkeeper.h

@@ -12,7 +12,7 @@ void Buy::on_selection()
 
 void Sell::on_selection()
 {
-	game.menus.push_back(std::make_unique<MenuSell>(player));
+	game.menus.push_back(std::make_unique<MenuSell>(shopkeeper, player));
 }
 
 void Exit::on_selection()
@@ -20,11 +20,11 @@ void Exit::on_selection()
 
 }
 
-MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player)
+MenuTrade::MenuTrade(Creature& shopkeeper, Player& player)
 {
-	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	menu_new(height_, width_, starty_, startx_);
 	iMenuStates.emplace(MenuState::BUY, std::make_unique<Buy>(shopkeeper));
-	iMenuStates.emplace(MenuState::SELL, std::make_unique<Sell>(player));
+	iMenuStates.emplace(MenuState::SELL, std::make_unique<Sell>(shopkeeper, player));
 	iMenuStates.emplace(MenuState::EXIT, std::make_unique<Exit>());
 }
 
