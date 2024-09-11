@@ -39,18 +39,21 @@ class MenuTrade : public BaseMenu
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
 
-	enum class MenuState { BUY, SELL, EXIT }
-	currentState{ MenuState::BUY };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuStateStrings
+	//enum class MenuState : size_t { BUY, SELL, EXIT }
+	//currentState{ MenuState::BUY };
+	size_t currentState{ 0 };
+	std::vector<std::unique_ptr<IMenuState>> iMenuStates;
+	std::vector<std::string> menuStateStrings{ "Buy","Sell","Exit" };
+
+	std::unordered_map<size_t, std::function<void()>> menuCallbacks
 	{
-		{ MenuState::BUY, "Buy" },
-		{ MenuState::SELL, "Sell" },
-		{ MenuState::EXIT, "Exit" }
+		{ 0, [&] { iMenuStates.at(currentState)->on_selection(); } },
+		{ 1, [&] { iMenuStates.at(currentState)->on_selection(); } },
+		{ 2, [&] { iMenuStates.at(currentState)->on_selection(); } }
 	};
 
-	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
-	void menu_print_state(MenuState state);
+	std::string menu_get_string(size_t state) { return menuStateStrings.at(state); }
+	void menu_print_state(size_t state);
 
 public:
 	MenuTrade(Creature& shopkeeper, Player& player);

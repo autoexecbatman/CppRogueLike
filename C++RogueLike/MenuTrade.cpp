@@ -23,9 +23,9 @@ void Exit::on_selection()
 MenuTrade::MenuTrade(Creature& shopkeeper, Player& player)
 {
 	menu_new(height_, width_, starty_, startx_);
-	iMenuStates.emplace(MenuState::BUY, std::make_unique<Buy>(shopkeeper));
-	iMenuStates.emplace(MenuState::SELL, std::make_unique<Sell>(shopkeeper, player));
-	iMenuStates.emplace(MenuState::EXIT, std::make_unique<Exit>());
+	iMenuStates.push_back(std::make_unique<Buy>(shopkeeper));
+	iMenuStates.push_back(std::make_unique<Sell>(shopkeeper, player));
+	iMenuStates.push_back(std::make_unique<Exit>());
 }
 
 MenuTrade::~MenuTrade()
@@ -33,30 +33,29 @@ MenuTrade::~MenuTrade()
 	menu_delete();
 }
 
-void MenuTrade::menu_print_state(MenuState state)
+void MenuTrade::menu_print_state(size_t state)
 {
-	auto row = static_cast<std::underlying_type_t<MenuState>>(state);
 	if (currentState == state)
 	{
 		menu_highlight_on();
-	}
-	menu_print(1, row, menu_get_string(state));
-	if (currentState == state)
-	{
+		menu_print(1, state, menu_get_string(state));
 		menu_highlight_off();
+	}
+	else
+	{
+		menu_print(1, state, menu_get_string(state));
 	}
 }
 
 void MenuTrade::draw()
 {
-	menu_clear(); // clear menu window each frame
-	mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
-	// print the buttons to the menu window
+	menu_clear();
+	mvwprintw(menuWindow, 0, 0, "%d", currentState); // for debugging `currentState`
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
-		menu_print_state(static_cast<MenuState>(i));
+		menu_print_state(i);
 	}
-	menu_refresh(); // refresh menu window each frame to show changes
+	menu_refresh();
 }
 
 void MenuTrade::on_key(int key)
@@ -66,21 +65,21 @@ void MenuTrade::on_key(int key)
 
 	case KEY_UP:
 	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
-		break; // break out of switch keep running menu loop
+		currentState = (currentState + iMenuStates.size() - 1) % iMenuStates.size();
+		break;
 	}
 
 	case KEY_DOWN:
 	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
-		break; // break out of switch keep running menu loop
+		currentState = (currentState + 1) % iMenuStates.size();
+		break;
 	}
 
 	case 10:
 	{ // if a selection is made
 		menu_set_run_false();
 		iMenuStates.at(currentState)->on_selection();
-		break; // break out of switch keep running menu loop
+		break;
 	}
 
 	default:

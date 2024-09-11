@@ -93,7 +93,8 @@ void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
 	if (currentState < shopkeeper.container->inv.size())
 	{
-		auto& item = shopkeeper.container->inv.at(currentState);
+		size_t moduloSize = currentState % shopkeeper.container->inv.size();
+		auto& item = shopkeeper.container->inv.at(moduloSize);
 
 		if (seller.playerGold >= item->value) // Check if player has enough currency
 		{
