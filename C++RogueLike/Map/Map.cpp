@@ -320,11 +320,11 @@ void Map::add_weapons(Vector2D pos)
 
 	if (selectedWeapon.name == "Dagger")
 	{
-		weaponActor->pickable = std::make_unique<Dagger>(1, 4);
+		weaponActor->pickable = std::make_unique<Dagger>();
 	}
 	else if (selectedWeapon.name == "Long Sword")
 	{
-		weaponActor->pickable = std::make_unique<LongSword>(1, 8);
+		weaponActor->pickable = std::make_unique<LongSword>();
 	}
 	else
 	{
@@ -583,20 +583,7 @@ void Map::add_monster(Vector2D pos)
 	// Determine if this room should contain the dragon
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
-	// Create a shopkeeper
-	auto shopkeeper = std::make_unique<Creature>(pos, ActorData{'S', "shopkeeper", WHITE_PAIR});
-	shopkeeper->destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
-	shopkeeper->attacker = std::make_unique<Attacker>(3, 1, 10);
-	shopkeeper->ai = std::make_unique<AiShopkeeper>();
-	shopkeeper->container = std::make_unique<Container>(10);
-	// populate the shopkeeper's inventory
-	auto healthPotion = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR });
-	healthPotion->pickable = std::make_unique<Healer>(4);
-	shopkeeper->container->add(std::move(healthPotion));
-	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 });
-	dagger->pickable = std::make_unique<Dagger>(1, 4);
-	shopkeeper->container->add(std::move(dagger));
-	game.creatures.push_back(std::move(shopkeeper));
+	game.create_monster<Shopkeeper>(pos);
 
 	if (placeDragon)
 	{
@@ -610,6 +597,8 @@ void Map::add_monster(Vector2D pos)
 		{ // create goblins
 			game.create_monster<Goblin>(pos);
 		}
+
+		game.create_monster<Goblin>(pos);
 
 		if (game.player->playerLevel > 3)
 		{

@@ -10,7 +10,7 @@
 #include "../Actor/Actor.h"
 #include "../ActorTypes/LongSword.h"
 
-Attacker::Attacker(int dmg, int minDmg, int maxDmg) noexcept : dmg(dmg), minDmg(minDmg), maxDmg(maxDmg) {}
+Attacker::Attacker(std::string_view roll) : roll(roll) {}
 
 void Attacker::attack(Creature& attacker, Creature& target)
 {
@@ -19,27 +19,28 @@ void Attacker::attack(Creature& attacker, Creature& target)
 		StrengthAttributes strength = game.strengthAttributes.at(attacker.strength - 1); // get the strength attributes for the attacker
 
 		// first 
-		RandomDice d; // create a dice object for attack rolls
-		const int rollAttack = d.d20(); // roll 1d20
+		const int rollAttack = game.d.d20(); // roll 1d20
 		int rollDmg{ 0 };
 
-		// roll for damage based on weapon
-		if (attacker.weaponEquipped == "Long Sword")
-		{
-			rollDmg = d.d8(); // roll 1d8
-		}
-		else if (attacker.weaponEquipped == "Short Sword")
-		{
-			rollDmg = d.d6(); // roll 1d6
-		}
-		else if (attacker.weaponEquipped == "Dagger")
-		{
-			rollDmg = d.d4(); // roll 1d4
-		}
-		else
-		{
-			rollDmg = d.d2(); // roll 1d4
-		}
+		//// roll for damage based on weapon
+		//if (attacker.weaponEquipped == "Long Sword")
+		//{
+		//	rollDmg = d.roll_from_string(roll); // roll 1d8
+		//}
+		//else if (attacker.weaponEquipped == "Short Sword")
+		//{
+		//	rollDmg = d.d6(); // roll 1d6
+		//}
+		//else if (attacker.weaponEquipped == "Dagger")
+		//{
+		//	rollDmg = d.d4(); // roll 1d4
+		//}
+		//else
+		//{
+		//	rollDmg = d.d2(); // roll 1d4
+		//}
+
+		rollDmg = game.d.roll_from_string(roll);
 
 		const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // THAC0 calculation
 
@@ -106,12 +107,14 @@ void Attacker::attack(Creature& attacker, Creature& target)
 
 void Attacker::load(TCODZip& zip)
 {
-	dmg = zip.getInt();
+	/*dmg = zip.getInt();*/
+	roll = zip.getString();
 }
 
 void Attacker::save(TCODZip& zip)
 {
-	zip.putInt(dmg);
+	/*zip.putInt(dmg);*/
+	zip.putString(roll.data());
 }
 
 // end of file: Attacker.cpp

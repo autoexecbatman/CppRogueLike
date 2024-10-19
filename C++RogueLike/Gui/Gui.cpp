@@ -117,7 +117,7 @@ void Gui::gui_render()
 		game.player->actorData.name,
 		guiHp,
 		guiHpMax,
-		game.player->attacker->dmg,
+		game.player->attacker->roll,
 		game.player->destructible->dr
 	);
 
@@ -148,7 +148,7 @@ void Gui::gui_print_log()
 	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor)); // Turn off color
 }
 
-void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, int damage, int dr) noexcept
+void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, std::string_view roll, int dr) noexcept
 {
 	// check if the player has no name input then place default name
 	if (game.player->actorData.name.empty()) { game.player->actorData.name = "Player"; }

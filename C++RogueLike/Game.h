@@ -29,6 +29,7 @@ public:
 
 	bool run{ true };
 	bool shouldSave{ true };
+	int time{ 0 };
 	enum class GameStatus
 	{
 		STARTUP, IDLE, NEW_TURN, VICTORY, DEFEAT

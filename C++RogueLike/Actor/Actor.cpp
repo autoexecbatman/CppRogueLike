@@ -54,7 +54,7 @@ void Creature::load(TCODZip& zip)
 	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
 
 	// this block assigns the values from the zip file to the actor's components if they exist.
-	if (hasAttacker) { attacker = std::make_unique<Attacker>(0, 0, 0); attacker->load(zip); }
+	if (hasAttacker) { attacker = std::make_unique<Attacker>(""); attacker->load(zip); }
 	if (hasDestructible) { destructible = Destructible::create(zip); }
 	if (hasAi) { ai = Ai::create(zip); }
 	if (hasContainer) { container = std::make_unique<Container>(0); container->load(zip); }

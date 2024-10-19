@@ -39,8 +39,6 @@ class MenuTrade : public BaseMenu
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
 
-	//enum class MenuState : size_t { BUY, SELL, EXIT }
-	//currentState{ MenuState::BUY };
 	size_t currentState{ 0 };
 	std::vector<std::unique_ptr<IMenuState>> iMenuStates;
 	std::vector<std::string> menuStateStrings{ "Buy","Sell","Exit" };

@@ -42,7 +42,7 @@ public:
 	}
 
 	// set dice using a string
-	int roll_from_string(const std::string& diceType)
+	int roll_from_string(std::string_view diceType)
 	{
 		if (diceType == "D2") return d2();
 		if (diceType == "D4") return d4();

@@ -2,20 +2,18 @@
 #include "../Actor/Actor.h"
 #include "../Items.h"
 
-Dagger::Dagger(int minDmg, int maxDmg) : minDmg(minDmg), maxDmg(maxDmg) {}
-
 bool Dagger::use(Item& owner, Creature& wearer)
 {
 	// equip the weapon
-
 	if (!owner.has_state(ActorState::IS_EQUIPPED))
 	{
-		wearer.attacker->dmg += maxDmg;
+		wearer.attacker->roll = this->roll;
 		wearer.equip(owner);
 	}
+	// unequip the weapon
 	else
 	{
-		wearer.attacker->dmg -= maxDmg;
+		wearer.attacker->roll = this->roll;
 		wearer.unequip(owner);
 	}
 

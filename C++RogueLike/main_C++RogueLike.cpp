@@ -46,12 +46,9 @@ int main()
 	//==INIT_MENU==
 	game.menus.push_back(std::make_unique<Menu>());
 
-	//==INIT_GUI==
 	Gui gui;
-	gui.gui_init();
-
 	static bool gInit{ false };
-
+	static bool guiInit{ false };
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
@@ -82,6 +79,14 @@ int main()
 			game.log("//====================LOOP====================//");
 			game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
+			//==INIT_GUI==
+			if(!guiInit)
+			{
+				
+				gui.gui_init();
+				guiInit = true;
+			}
+
 			//==UPDATE==
 			game.log("Running update...");
 			game.update(); // update map and actors positions
@@ -100,7 +105,7 @@ int main()
 			game.gameStatus = Game::GameStatus::IDLE;
 			game.key_store();
 			game.key_listen();
-
+			game.time++;
 			loopNum++;
 		}
 	}

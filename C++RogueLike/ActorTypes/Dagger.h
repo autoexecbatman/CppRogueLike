@@ -8,10 +8,8 @@
 class Dagger : public Pickable
 {
 public:
-	int minDmg{ 1 };
-	int maxDmg{ 4 };
 	// dagger roll is 1d4
-	Dagger(int minDmg, int maxDmg);
+	std::string_view roll{ "D4" };
 
 	bool use(Item& owner, Creature& wearer) override;
 

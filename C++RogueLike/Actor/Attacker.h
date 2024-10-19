@@ -8,19 +8,15 @@
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 #include "../Persistent/Persistent.h"
+#include "string_view"
 
 class Creature;
 
 class Attacker : public Persistent
 {
 public:
-	int dmg{ 0 };
-	int maxDmg{ 0 };
-	int minDmg{ 0 };
-	std::string roll{ "diceroll" };
-	
-
-	Attacker(int dmg, int minDmg, int maxDmg) noexcept;
+	std::string_view roll{ "diceroll" };
+	Attacker(std::string_view roll);
 
 	void attack(Creature& attacker, Creature& target);
 	

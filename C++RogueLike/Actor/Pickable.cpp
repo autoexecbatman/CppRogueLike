@@ -63,13 +63,13 @@ std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
 
 	case PickableType::LONGSWORD:
 	{
-		pickable = std::make_unique<LongSword>(0, 0);
+		pickable = std::make_unique<LongSword>();
 		break;
 	}
 
 	case PickableType::DAGGER:
 	{
-		pickable = std::make_unique<Dagger>(0, 0);
+		pickable = std::make_unique<Dagger>();
 		break;
 	}
 

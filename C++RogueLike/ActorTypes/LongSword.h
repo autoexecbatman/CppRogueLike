@@ -10,10 +10,8 @@
 class LongSword : public Pickable
 {
 public:
-	int minDmg{ 1 };
-	int maxDmg{ 8 };
 	// longsword roll is 1d8
-	LongSword(int minDmg, int maxDmg);
+	std::string_view roll{ "D8" };
 	
 	bool use(Item& owner, Creature& wearer) override;
 

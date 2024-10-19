@@ -17,7 +17,7 @@ void Sell::on_selection()
 
 void Exit::on_selection()
 {
-
+	
 }
 
 MenuTrade::MenuTrade(Creature& shopkeeper, Player& player)
@@ -80,6 +80,11 @@ void MenuTrade::on_key(int key)
 		menu_set_run_false();
 		iMenuStates.at(currentState)->on_selection();
 		break;
+	}
+
+	case 27:
+	{
+		menu_set_run_false();
 	}
 
 	default:

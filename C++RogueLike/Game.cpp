@@ -62,8 +62,7 @@ void Game::init()
 void Game::create_player()
 {
 	//==PLAYER==
-	RandomDice d; // we create a RandomDice object to roll the dice
-	int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
+	int playerHp = /*20 + d.d10()*/1; // we roll the dice to get the player's hp
 	int playerDamage = 2 + d.d8(); // we roll the dice to get the player's damage
 	int playerMinDmg = 2; // the player's minimum damage
 	int playerMaxDmg = 8; // the player's maximum damage
@@ -472,7 +471,7 @@ void Game::target()
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
-				mvprintw(3, 0, "STR: %d", actor->attacker->dmg);
+				mvprintw(3, 0, "Roll: %d", actor->attacker->roll);
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
 			}
@@ -700,11 +699,8 @@ void Game::dispay_levelup(int xpLevel)
 		mvwprintw(stats, 1, 1, "Player Stats");
 		mvwprintw(stats, 2, 1, "Level: %d", xpLevel);
 		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
-		mvwprintw(stats, 4, 1, "Food: %d/%d", player->destructible->food, player->destructible->foodMax);
-		mvwprintw(stats, 5, 1, "Need to sleep: %d", player->destructible->needToSleep);
-		mvwprintw(stats, 6, 1, "[a] Attack: %d", player->attacker->dmg);
-		mvwprintw(stats, 7, 1, "[d] Defense: %d", player->destructible->dr);
-		mvwprintw(stats, 8, 1, "[h] Health: %d/%d", player->destructible->hp, player->destructible->hpMax);
+		mvwprintw(stats, 7, 1, "DR: %d", player->destructible->dr);
+		mvwprintw(stats, 8, 1, "Health: %d/%d", player->destructible->hp, player->destructible->hpMax);
 		
 		wrefresh(stats);
 
@@ -714,21 +710,21 @@ void Game::dispay_levelup(int xpLevel)
 
 		case 'a':
 		{
-			const int roll = d.d4();
-			player->attacker->dmg += d.d4();
+			//const int roll = d.d4();
+			//player->attacker->dmg += d.d4();
 			break;
 		}
 
 		case 'd':
 		{
-			player->destructible->dr += 1;
+			/*player->destructible->dr += 1;*/
 			break;
 		}
 
 		case 'h':
 		{
-			const int roll = d.d8();
-			player->destructible->hpMax += d.d8();
+			//const int roll = d.d8();
+			//player->destructible->hpMax += d.d8();
 			break;
 		}
 

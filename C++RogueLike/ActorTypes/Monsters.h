@@ -1,6 +1,6 @@
-// file: Goblin.h
-#ifndef GOBLIN_H
-#define GOBLIN_H
+// file: Monsters.h
+#ifndef MONSTERS_H
+#define MONSTERS_H
 
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
@@ -37,5 +37,11 @@ public:
 };
 //====
 
-#endif // GOBLIN_H
-// end of file: Goblin.h
+class Shopkeeper : public Creature
+{
+public:
+	Shopkeeper(Vector2D position);
+};
+
+#endif // MONSTERS_H
+// end of file: Monsters.h
