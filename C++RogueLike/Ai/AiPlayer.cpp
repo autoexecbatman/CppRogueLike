@@ -244,7 +244,7 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 	return true;
 }
 
-void AiPlayer::look_on_floor(Vector2D& target)
+void AiPlayer::look_on_floor(Vector2D target)
 {
 	// look for corpses or items
 	for (const auto& i : game.container->inv)

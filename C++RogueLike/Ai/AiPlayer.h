@@ -24,7 +24,7 @@ private:
 	void display_inventory_items(WINDOW* inv, const Creature& owner) noexcept;
 	Item* chose_from_inventory(Creature& owner, int ascii);
 	bool move_or_attack(Creature& owner, Vector2D target);
-	void look_on_floor(Vector2D& target);
+	void look_on_floor(Vector2D target);
 	bool look_to_attack(Vector2D& target, Creature& owner);
 	void call_action(Creature& owner, Controls key);
 };

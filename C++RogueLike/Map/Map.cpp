@@ -226,7 +226,8 @@ bool Map::tile_action(TileType tileType)
 	case TileType::WATER:
 		game.log("You are in water");
 		game.message(COLOR_WHITE, "You are in water", true);
-		game.player->destructible->hp -= 1;
+		/*game.player->destructible->hp -= 1;*/
+		game.player->destructible->take_damage(*game.player, 1);
 		return game.player->has_state(ActorState::CAN_SWIM) ? true : false;
 	case TileType::WALL:
 		game.log("You are against a wall");
@@ -583,7 +584,7 @@ void Map::add_monster(Vector2D pos)
 	// Determine if this room should contain the dragon
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
-	game.create_monster<Shopkeeper>(pos);
+	/*game.create_monster<Shopkeeper>(pos);*/
 
 	if (placeDragon)
 	{

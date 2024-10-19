@@ -62,7 +62,7 @@ void Game::init()
 void Game::create_player()
 {
 	//==PLAYER==
-	int playerHp = /*20 + d.d10()*/1; // we roll the dice to get the player's hp
+	int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
 	int playerDamage = 2 + d.d8(); // we roll the dice to get the player's damage
 	int playerMinDmg = 2; // the player's minimum damage
 	int playerMaxDmg = 8; // the player's maximum damage

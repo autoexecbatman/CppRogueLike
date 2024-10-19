@@ -111,15 +111,12 @@ void Destructible::save(TCODZip& zip)
 
 void PlayerDestructible::save(TCODZip& zip)
 {
-	/*zip.putInt(static_cast<int>(DestructibleType::PLAYER));*/
 	zip.putInt(static_cast<int>(DestructibleType::PLAYER));
 	Destructible::save(zip);
 }
 
 void MonsterDestructible::save(TCODZip& zip) 
 {
-	 /*zip.putInt(static_cast<int>(DestructibleType::MONSTER));*/
-	// convert DestructibleType to type int using std::underlying_type_v
 	zip.putInt(static_cast<std::underlying_type_t<DestructibleType>>(DestructibleType::MONSTER));
 	
 	Destructible::save(zip);
@@ -171,7 +168,6 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Creature& owner)
 {
-	Destructible::die(owner);
 	game.gameStatus = Game::GameStatus::DEFEAT;
 }
 

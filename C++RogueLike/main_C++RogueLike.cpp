@@ -71,7 +71,7 @@ int main()
 		else
 		{
 			if (!gInit)
-			{ 
+			{
 				game.init();
 				gInit = true;
 			}
@@ -80,9 +80,9 @@ int main()
 			game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
 			//==INIT_GUI==
-			if(!guiInit)
+			if (!guiInit)
 			{
-				
+
 				gui.gui_init();
 				guiInit = true;
 			}
@@ -102,14 +102,17 @@ int main()
 			game.log("Render OK.");
 
 			//==INPUT==
-			game.gameStatus = Game::GameStatus::IDLE;
+			if (!game.player->destructible->is_dead())
+			{
+				game.gameStatus = Game::GameStatus::IDLE;
+			}
 			game.key_store();
 			game.key_listen();
 			game.time++;
 			loopNum++;
 		}
 	}
-	
+
 	game.save_all();
 
 	// make sure to shut down all windows before exiting the program

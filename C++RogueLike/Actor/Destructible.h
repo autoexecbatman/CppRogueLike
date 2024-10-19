@@ -17,13 +17,9 @@ public:
 	int xp{ 0 }; // for awarding experience points
 	int thaco{ 0 }; // to hit armor class 0
 	int armorClass{ 0 }; // armor class
-	
-	int food{ 0 };
-	int foodMax{ 0 };
-	int needToSleep{ 0 };
 
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	virtual ~Destructible() = default;
+	virtual ~Destructible() override = default;
 	Destructible(const Destructible&) = delete;
 	Destructible(Destructible&&) = delete;
 	Destructible& operator=(const Destructible&) = delete;
