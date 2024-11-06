@@ -31,7 +31,7 @@ bool Pickable::use(Item& owner, Creature& wearer)
 
 std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
 {
-	const PickableType type = (PickableType)zip.getInt();
+	const PickableType type = static_cast<PickableType>(zip.getInt());
 	std::unique_ptr<Pickable> pickable = nullptr;
 
 	switch (type)

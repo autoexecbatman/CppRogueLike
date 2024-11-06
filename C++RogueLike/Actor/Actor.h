@@ -156,16 +156,15 @@ public:
 	int charisma{ 0 };
 
 	int playerLevel{ 1 };
+	int playerGold{ 0 };
 	std::string gender{ "None" };
-	std::string playerClass{ "None" };
-	std::string playerRace{ "None" };
-
 	std::string weaponEquipped{ "None" };
 
 	void equip(Item& item);
 	void unequip(Item& item);
 	void pick();
 	void drop();
+	/*void trade() {};*/
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed

@@ -75,13 +75,13 @@ public:
 			const bool withActors = gsl::narrow_cast<bool>(userData);
 			Vector2D end
 			{ 
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
+				game.d.roll(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
+				game.d.roll(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
 			};
 			Vector2D begin
 			{
-				map.rng_unique->getInt(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
-				map.rng_unique->getInt(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
+				game.d.roll(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
+				game.d.roll(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
 			};
 
 			// first create a room
@@ -89,8 +89,7 @@ public:
 
 			if (roomNum != 0)
 			{
-				const int rolld2 = game.d.d2();
-				if (rolld2 == 1)
+				if (game.d.d2() == 1) // 50% chance
 				{
 					// dig a corridor from last room
 					map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
@@ -122,8 +121,7 @@ Map::Map(int map_height, int map_width)
 	map_height(map_height),
 	map_width(map_width),
 	tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
-	rng_unique(std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC)),
-	seed(TCODRandom::getInstance()->getInt(0, INT_MAX))
+	seed(game.d.roll(0, INT_MAX))
 {}
 
 void Map::init_tiles()
@@ -148,7 +146,7 @@ void Map::init_tiles()
 void Map::init(bool withActors)
 {
 	init_tiles();
-	seed = TCODRandom::getInstance()->getInt(0, INT_MAX);
+	seed = game.d.roll(0, INT_MAX);
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 
@@ -159,8 +157,7 @@ void Map::init(bool withActors)
 
 void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
 {
-	RandomDice d;
-	float randomRatio = d.d100();
+	float randomRatio = game.d.d100();
 	TCODBsp myBSP(0, 0, map_width, map_height);
 	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
 
@@ -317,15 +314,15 @@ void Map::add_weapons(Vector2D pos)
 	const int rollColor{ game.d.roll(1,3) }; // Randomly select a color for the weapon
 
 	// Create an Actor for the weapon
-	auto weaponActor = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor });
+	auto weaponItem = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor });
 
 	if (selectedWeapon.name == "Dagger")
 	{
-		weaponActor->pickable = std::make_unique<Dagger>();
+		weaponItem->pickable = std::make_unique<Dagger>();
 	}
 	else if (selectedWeapon.name == "Long Sword")
 	{
-		weaponActor->pickable = std::make_unique<LongSword>();
+		weaponItem->pickable = std::make_unique<LongSword>();
 	}
 	else
 	{
@@ -333,7 +330,7 @@ void Map::add_weapons(Vector2D pos)
 		return;
 	}
 
-	game.container->add(std::move(weaponActor));
+	game.container->add(std::move(weaponItem));
 }
 
 void Map::add_item(Vector2D pos)
@@ -477,7 +474,6 @@ void Map::set_tile(Vector2D pos, TileType newType)
 
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
 {
-	RandomDice d;
 	Vector2D begin{ y1,x1 };
 	Vector2D end{ y2,x2 };
 	dig(begin, end); // dig the corridors
@@ -489,10 +485,9 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	{
 		for (waterPos.y = y1; waterPos.y <= y2; ++waterPos.y)
 		{
-			const int rolld100 = d.d100();
+			const int rolld100 = game.d.d100();
 			if (rolld100 < waterPercentage)
 			{
-				// Assuming you have a set_tile function that sets the tile at (x, y) to water
 				set_tile(waterPos, TileType::WATER);
 			}
 		}
@@ -507,28 +502,11 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	{
 		game.player->position.y = y1 + 3;
 		game.player->position.x = x1 + 4;
-
-		// create a player from the player class and place it in the room
 	}
-	
-	// If this is NOT the first room, we make a random number of monsters and place them in the room
-	// First we get a random number of monsters and for each one, get a random position inside the room.
-	// If the tile is empty (canWalk) we create a monster.
-	
 	else
 	{
-		const int numMonsters = TCODRandom::getInstance()->getInt(0, MAX_ROOM_MONSTERS);
-		for (int i = 0; i < numMonsters; i++)
-		{
-			Vector2D monsterPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
-
-			if (is_wall(monsterPos))
-			{
-				continue;
-			}
-
-			add_monster(monsterPos);
-		}
+		Vector2D monsterPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
+		add_monster(monsterPos);
 
 		// add stairs
 		game.stairs->position.x = x1 + 4;
@@ -536,11 +514,11 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	} 
 	
 	// add items
-	const int numItems = TCODRandom::getInstance()->getInt(0, MAX_ROOM_ITEMS);
+	const int numItems = game.d.roll(0, MAX_ROOM_ITEMS);
 
 	for (int i = 0; i < numItems; i++)
 	{
-		Vector2D itemPos{ TCODRandom::getInstance()->getInt(y1, y2),TCODRandom::getInstance()->getInt(x1, x2) };
+		Vector2D itemPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
 
 		if (is_wall(itemPos))
 		{
@@ -584,29 +562,31 @@ void Map::add_monster(Vector2D pos)
 	// Determine if this room should contain the dragon
 	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
 
-	/*game.create_monster<Shopkeeper>(pos);*/
+	game.create_creature<Shopkeeper>(pos);
+	// keep track of the shopkeeper
+	auto shopkeeper = game.creatures.back().get();
 
 	if (placeDragon)
 	{
-		game.create_monster<Dragon>(pos);
+		game.create_creature<Dragon>(pos);
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
 	else
 	{
-		const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
-		for (auto i{ 0 }; i < roll4d6; i++)
-		{ // create goblins
-			game.create_monster<Goblin>(pos);
-		}
+		//const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
+		//for (auto i{ 0 }; i < roll4d6; i++)
+		//{ // create goblins
+		//	game.create_monster<Goblin>(pos);
+		//}
 
-		game.create_monster<Goblin>(pos);
+		game.create_creature<Goblin>(pos);
 
 		if (game.player->playerLevel > 3)
 		{
 			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
 			for (auto i{ 0 }; i < roll2d6; i++)
 			{ // create orcs
-				game.create_monster<Orc>(pos);
+				game.create_creature<Orc>(pos);
 			}
 		}
 
@@ -615,7 +595,7 @@ void Map::add_monster(Vector2D pos)
 			const auto roll1d6 = d.d6();
 			for (auto i{ 0 }; i < roll1d6; i++)
 			{ // create trolls
-				game.create_monster<Troll>(pos);
+				game.create_creature<Troll>(pos);
 			}
 		}
 	}

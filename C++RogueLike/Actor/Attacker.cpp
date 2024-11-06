@@ -4,45 +4,43 @@
 #include <gsl/gsl>
 #include <gsl/util>
 #include <format>
+#include <memory>
 
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
 #include "../ActorTypes/LongSword.h"
+#include "../ActorTypes/Monsters.h"
+#include "../MenuTrade.h"
 
 Attacker::Attacker(std::string_view roll) : roll(roll) {}
 
 void Attacker::attack(Creature& attacker, Creature& target)
 {
+	// if target is shopkeeper, do not attack
+	// use shopkeeper ai class to trade
+	// use the game.creatures vector to find the shopkeeper
+
+	if (target.actorData.name == "shopkeeper")
+	{
+		/*game.menus.push_back(std::make_unique<MenuTrade>(attacker, target));*/
+		// log message
+
+		/*game.trade_with_shopkeepers();*/
+
+		game.menus.push_back(std::make_unique<MenuTrade>(target, attacker));
+		return;
+	}
+
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
 		StrengthAttributes strength = game.strengthAttributes.at(attacker.strength - 1); // get the strength attributes for the attacker
 
-		// first 
-		const int rollAttack = game.d.d20(); // roll 1d20
-		int rollDmg{ 0 };
-
-		//// roll for damage based on weapon
-		//if (attacker.weaponEquipped == "Long Sword")
-		//{
-		//	rollDmg = d.roll_from_string(roll); // roll 1d8
-		//}
-		//else if (attacker.weaponEquipped == "Short Sword")
-		//{
-		//	rollDmg = d.d6(); // roll 1d6
-		//}
-		//else if (attacker.weaponEquipped == "Dagger")
-		//{
-		//	rollDmg = d.d4(); // roll 1d4
-		//}
-		//else
-		//{
-		//	rollDmg = d.d2(); // roll 1d4
-		//}
-
-		rollDmg = game.d.roll_from_string(roll);
-
-		const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass; // THAC0 calculation
+		// roll for attack and damage
+		const int rollAttack = game.d.d20();
+		int rollDmg = game.d.roll_from_string(roll);
+		// THAC0 calculation
+		const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass;
 
 		if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
 		{
@@ -73,26 +71,11 @@ void Attacker::attack(Creature& attacker, Creature& target)
 		}
 		else
 		{
-			if (missCount < 3)
-			{
-				missCount++;
-				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-				game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
-				game.finalizeMessage();
-			}
-			else
-			{
-				missCount = 0;
-				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-				game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
-				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-				game.appendMessagePart(WHITE_PAIR, std::format(" and hit himself instead."));
-				game.finalizeMessage();
-				// apply damage to attacker
-				/*attacker.destructible->take_damage(attacker, rollDmg);*/
-			}
+			game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
+			game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+			game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
+			game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
+			game.finalizeMessage();
 		}
 	}
 	else

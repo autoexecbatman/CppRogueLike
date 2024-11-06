@@ -19,7 +19,7 @@ class MenuBuy : public BaseMenu
 	size_t menu_starty{ static_cast<size_t>((LINES / 2) - 5) };
 	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
 	size_t currentState{ 0 };
-	std::deque<std::string> menuItems;
+	std::vector<std::string> menuItems;
 	Creature& buyer;
 
 	void populate_items(std::span<std::unique_ptr<Item>> item);

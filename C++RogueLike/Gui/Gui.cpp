@@ -197,228 +197,6 @@ void Gui::gui() noexcept
 	gui_refresh();
 }
 
-void Gui::render()
-{
-	std::clog << "Gui::render();" << std::endl;
-	std::clog << "making con..." << std::endl;
-	try {
-		//con = newwin(
-		//	0,/*PANEL_HEIGHT,*/ // int nlines
-		//	0,/*30,*/ // int ncols
-		//	22, // int begy
-		//	0 // int begx
-		//);
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to initialize con window.\n" << std::endl;
-		std::clog << e.what() << std::endl;
-	}
-
-	std::clog << "sub = derwin();" << std::endl;
-	try {
-		//sub = derwin(
-		//	con, // 
-		//	0,//4, // int nlines
-		//	0,//28, // int ncols
-		//	0,/*2,*/ // int begy
-		//	0/*1*/ // int begx
-		//);
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to initialize sub window.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-	
-
-	// DEBUG log
-	std::clog << "wclear(con);" << std::endl;
-	std::clog << "wclear(sub);" << std::endl;
-	try {
-		/*wclear(con);*/
-		/*wclear(sub);*/
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to clear windows.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-	std::clog << "clear ok." << std::endl;
-	
-	try {
-		/*refresh();*/ // refresh the screen has to be called for the window to show
-		/*wclear(con);*/
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to refresh screen.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-	std::clog << "refresh ok." << std::endl;
-	try {
-		//renderBar( // draw the health bar
-		//	1, // int x
-		//	1, // int y
-		//	BAR_WIDTH, // int bar_width
-		//	"HP:", // const char* name
-		//	engine.player->destructible->hp, // float value
-		//	engine.player->destructible->hpMax, // float maxValue
-		//	HPBARFULL_PAIR, // int barColor
-		//	HPBARMISSING_PAIR // int backColor
-		//);
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to render health bar.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-
-	try {
-		//box( // draw a border around the GUI window
-		//	con, // WINDOW* win
-		//	0, // int vertChar
-		//	0 // int horChar
-		//);
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to draw border around GUI window.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-	
-	// draw the log
-	try {
-		//int y = 1;
-		//for (const auto message : log)
-		//{
-		//	wclear(sub);
-		//	/*wcolor_set(con, message->logMessageColor, 0);*/
-		//	wattron(sub, COLOR_PAIR(message->logMessageColor));
-		//	mvwprintw(sub, 0, 0, message->logMessageText);
-		//	wattroff(sub, COLOR_PAIR(message->logMessageColor));
-		//	y++;
-		//}
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed draw." << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-
-	std::clog << "renderMouseLook();" << std::endl;
-	try {
-		// draw the mouse look
-		renderMouseLook();
-	}
-	catch (...) {
-		std::clog << "Failed to render mouse look.\n" << std::endl;
-	}
-	std::clog << "renderMouseLook() ok." << std::endl;
-
-	// draw the XP bar
-	//PlayerAi* ai = (PlayerAi*)engine.player->ai;
-	//char xpTxt[128];
-	//sprintf(xpTxt, "XP(%d)", ai->xpLevel);
-	//renderBar(1, 5, BAR_WIDTH, xpTxt, engine.player->destructible->xp,
-	//	ai->getNextLevelXp(),
-	//	WHITE_PAIR, DRAGON_PAIR);
-
-	try {
-/*		wrefresh(con);
-		wrefresh(sub);*/// refresh the GUI window has to be called for window to update
-	}
-	catch (const std::exception& e) {
-		std::clog << "Failed to refresh windows.\n" << std::endl;
-		std::cout << e.what() << std::endl;
-	}
-
-	std::clog << "Gui rendering complete." << std::endl;
-}
-
-void Gui::log_message(int log_message_col, const char* logMessageText, ...)
-{
-	// DEBUG log
-	//std::clog << "void Gui::log_message() {}" << std::endl;
-	
-	std::clog << "log_message_col: " << log_message_col << std::endl;
-	std::clog << "log_message_text: " << logMessageText << std::endl;
-
-	//// build the text
-	//va_list args;
-	//char buf[128];
-	//va_start(args, logMessageText);
-	//vsprintf_s(buf, logMessageText, args);
-	//va_end(args);
-	//
-	//char* lineBegin = buf;
-	//char* lineEnd = nullptr;
-
-	//do
-	//{
-	//	// make room for the new message
-	//	//if (log.size() == MSG_HEIGHT)
-	//	//{
-	//	//	log.erase(log.begin());
-	//	//}
-
-	//	// detect end of line
-	//	//lineEnd = strchr(lineBegin, '\n');
-	//	//if (lineEnd) 
-	//	//{
-	//	//	*lineEnd = '\0';
-	//	//}
-
-	//	// add a new message to the log
-	//	LogMessage* msg = new LogMessage(lineBegin, log_message_col);
-	//	/*log.push_back(msg);*/
-
-	//	// go to next line
-	//	lineBegin = lineEnd + 1;
-	//} while (lineEnd);
-
-	//print_container(log);
-}
-//
-//	//mvwprintw(con, MSG_HEIGHT, 1, text);
-//
-//	// build the text
-//	va_list ap; // a variable argument list
-//	char buf[128]; // a buffer to store the formatted text in
-//	va_start(ap, text); // initialize the variable argument list
-//	wattron(sub, COLOR_PAIR(message_col)); // set the color of the text
-//	vwprintw(sub, text, ap);
-//	wattroff(sub, COLOR_PAIR(message_col)); // reset the color of the text
-//	va_end(ap);
-//	wrefresh(sub);
-//
-//	//vsprintf(buf, text, ap); // print the text
-//	/*wrefresh(con);*/ // refresh the GUI window has to be called for window to update
-//
-//	char* lineBegin = buf; 
-//	char* lineEnd;
-//	
-//	do 
-//	{
-//		// make room for the new message
-//		if (log.size() == MSG_HEIGHT) 
-//		{
-//			//Message* toRemove = log.get(0);
-//			//log.remove(toRemove);
-//			//delete toRemove;
-//			log.erase(log.begin());
-//		}
-//
-//		// detect end of the line
-//		lineEnd = strchr(lineBegin, '\n');
-//		if (lineEnd) 
-//		{
-//			*lineEnd = '\0';
-//		}
-//
-//		// add a new message to the log
-//		//Message* msg = new Message(lineBegin, col);
-//		//log.push(msg);
-//		log.push_back(new Message(lineBegin, message_col));
-//		// go to next line
-//		lineBegin = lineEnd + 1;
-//	}
-//	while (lineEnd);
-//}
-
 void Gui::renderBar(
 	int x,
 	int y,
@@ -538,25 +316,25 @@ void Gui::renderMouseLook()
 
 void Gui::save(TCODZip& zip)
 {
-	const int logSize = gsl::narrow_cast<int>(log.size());
-	zip.putInt(logSize);
-	for (const auto& message : log)
-	{
-		zip.putString(message->logMessageText.c_str());
-		zip.putInt(message->logMessageColor);
-	}
+	//const int logSize = gsl::narrow_cast<int>(log.size());
+	//zip.putInt(logSize);
+	//for (const auto& message : log)
+	//{
+	//	zip.putString(message->logMessageText.c_str());
+	//	zip.putInt(message->logMessageColor);
+	//}
 }
 
 void Gui::load(TCODZip& zip)
 {
-	int nbMessages = zip.getInt();
-	while (nbMessages > 0) 
-	{
-		const char* text = zip.getString();
-		const int col = zip.getInt();
-		log_message(col, text);
-		nbMessages--;
-	}
+	//int nbMessages = zip.getInt();
+	//while (nbMessages > 0) 
+	//{
+	//	const char* text = zip.getString();
+	//	const int col = zip.getInt();
+	//	log_message(col, text);
+	//	nbMessages--;
+	//}
 }
 
 // end of file: Gui.cpp

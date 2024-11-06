@@ -32,9 +32,12 @@ public:
 	} playerClassState{ PlayerClassState::NONE };
 
 	std::string playerGender{ "None" };
+	std::string playerClass{ "None" };
+	std::string playerRace{ "None" };
 	int playerGold{ 100 };
+	int playerLevel{ 1 };
 
-	Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg);
+	Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass);
 
 	// Note::
 	// X/Y coordinates set

@@ -18,6 +18,7 @@
 #include "Actor/Pickable.h"
 #include "Actor/Container.h"
 #include "ActorTypes/Player.h"
+#include "ActorTypes/Monsters.h"
 #include "Ai/Ai.h"
 #include "Ai/AiPlayer.h"
 #include "Map/Map.h"
@@ -62,15 +63,11 @@ void Game::init()
 void Game::create_player()
 {
 	//==PLAYER==
-	int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
-	int playerDamage = 2 + d.d8(); // we roll the dice to get the player's damage
-	int playerMinDmg = 2; // the player's minimum damage
-	int playerMaxDmg = 8; // the player's maximum damage
-	int playerDr = 1; // the player's damage reduction
-	int playerXp = 0; // the player's experience points
-	int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
-	int playerAC = 0; // the player's armor class
-	const int playerLevel = game.player->playerLevel; // the player's level
+	const int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
+	const int playerDr = 1; // the player's damage reduction
+	const int playerXp = 0; // the player's experience points
+	const int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
+	const int playerAC = 0; // the player's armor class
 
 	// update the player pointer
 	game.player = std::make_unique<Player>(
@@ -80,10 +77,7 @@ void Game::create_player()
 		"your cadaver",
 		playerXp,
 		playerTHAC0,
-		playerAC,
-		playerDamage,
-		playerMinDmg,
-		playerMaxDmg
+		playerAC
 	);
 
 	// TODO :
@@ -123,6 +117,19 @@ void Game::render_items(std::span<std::unique_ptr<Item>> items)
 			item->render();
 		}
 	}
+}
+
+void Game::trade_with_shopkeepers()
+{
+	//for (auto& creature : creatures | std::views::filter([](const auto& c) {
+	//	return dynamic_cast<Shopkeeper*>(c.get()) != nullptr;
+	//	}))
+	//{
+	//	auto* shopkeeper = dynamic_cast<Shopkeeper*>(creature.get());
+	//	if (shopkeeper) {
+	//		shopkeeper->trade();
+	//	}
+	//}
 }
 
 void Game::update()

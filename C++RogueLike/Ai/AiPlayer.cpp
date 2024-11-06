@@ -94,7 +94,8 @@ void AiPlayer::levelup_update(Creature& owner)
 	{
 		game.player->playerLevel++;
 		owner.destructible->xp -= levelUpXp;
-		game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);
+		/*game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);*/
+		game.message(WHITE_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
 		game.player->calculate_thaco();
 		game.dispay_levelup(game.player->playerLevel);
 	}
@@ -332,6 +333,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		//Menu menu;
 		//menu.menu();
+		game.menus.push_back(std::make_unique<Menu>());
 		break;
 	}
 

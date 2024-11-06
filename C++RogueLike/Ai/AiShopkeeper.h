@@ -15,15 +15,13 @@ private:
 	void update(Creature& owner) override;
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
-	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& player);
-	void handle_sell(WINDOW* tradeWin);
-	void display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList);
 	int calculateStep(int positionDifference);
 	void moveToTarget(Actor& owner, int targetx, int targety);
 public:
 	AiShopkeeper();
 protected:
 	void moveOrTrade(Creature& owner, int targetx, int targety);
-	void trade(Creature& shopkeeper, Player& player);
+public:
+	void trade(Creature& shopkeeper, Creature& player);
 };
 // file: AiShopkeeper.h

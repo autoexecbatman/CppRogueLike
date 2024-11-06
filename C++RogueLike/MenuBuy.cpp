@@ -12,8 +12,7 @@ void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 	{
 		if (item)
 		{
-			/*menuItems.insert.at(0, item->actorData.name);*/
-			menuItems.push_front(item->actorData.name);
+			menuItems.push_back(item->actorData.name);
 		}
 		else
 		{

@@ -21,10 +21,10 @@ public:
 class Sell : public IMenuState
 {
 	void on_selection() override;
-	Player& player;
+	Creature& player;
 	Creature& shopkeeper;
 public:
-	Sell(Creature& shopkeeper, Player& seller) : player{ seller }, shopkeeper{ shopkeeper } {}
+	Sell(Creature& shopkeeper, Creature& seller) : player{ seller }, shopkeeper{ shopkeeper } {}
 };
 
 class Exit : public IMenuState
@@ -54,7 +54,7 @@ class MenuTrade : public BaseMenu
 	void menu_print_state(size_t state);
 
 public:
-	MenuTrade(Creature& shopkeeper, Player& player);
+	MenuTrade(Creature& shopkeeper, Creature& player);
 	~MenuTrade();
 
 	void draw();

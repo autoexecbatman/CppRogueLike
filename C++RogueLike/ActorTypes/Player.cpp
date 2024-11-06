@@ -13,7 +13,7 @@
 
 ActorData playerData{ '@', "Player", WHITE_PAIR };
 
-Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass, int dmg, int minDmg, int maxDmg)
+Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass)
 	:
 	Creature(position, playerData)
 {

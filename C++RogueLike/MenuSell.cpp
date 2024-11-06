@@ -5,7 +5,7 @@
 
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 {
-		for (const auto& item : item)
+	for (const auto& item : item)
 	{
 		if (item)
 		{
@@ -33,7 +33,7 @@ void MenuSell::menu_print_state(size_t state)
 
 }
 
-void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
+void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller)
 {
 	auto& item = seller.container->inv.at(currentState);
 	if (item)
@@ -59,7 +59,7 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Player& selle
 
 }
 
-MenuSell::MenuSell(Creature& shopkeeper, Player& player) : player(player), shopkeeper(shopkeeper)
+MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), shopkeeper(shopkeeper)
 {
 	populate_items(player.container->inv); // must first populate items to get the size of the menu
 	menu_height = menuItems.size();

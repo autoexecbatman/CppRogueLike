@@ -83,7 +83,10 @@ bool Fireball::use(Item& owner, Creature& wearer)
 		{
 			if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
 			{
-				game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", c->actorData.name.c_str(), damage);
+				/*game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", c->actorData.name.c_str(), damage);*/
+				game.appendMessagePart(WHITE_PAIR, std::format("The {} gets burned!", c->actorData.name));
+				game.appendMessagePart(WHITE_PAIR, std::format("for {} hp.", damage));
+				game.finalizeMessage();
 				animation(c->position, maxRange);
 			}
 		}

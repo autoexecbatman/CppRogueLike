@@ -49,10 +49,6 @@ public:
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
 
 	void gui() noexcept;
-	void render();
-	
-	// this function will be redundant soon
-	void log_message(int logMessageColor, const char* logMessageText, ...); // We want a handy function to write to the log using curses basically format with color
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
@@ -65,7 +61,7 @@ protected:
 	gsl::owner<WINDOW*> messageLogWindow{ nullptr };
 	
 	//==LOG==
-	std::vector<std::shared_ptr<LogMessage>> log; // the message log
+	//std::vector<std::shared_ptr<LogMessage>> log; // the message log
 
 	void print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage);
 

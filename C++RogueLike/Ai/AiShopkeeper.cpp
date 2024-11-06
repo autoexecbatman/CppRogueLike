@@ -59,144 +59,39 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 	{
 		moveToTarget(shopkeeper, targetx, targety);
 	}
-	else
+	else if (!shopkeeper.destructible->is_dead())
 	{
-		if (!shopkeeper.destructible->is_dead()) { trade(shopkeeper, *game.player); }
+		trade(shopkeeper, *game.player);
 	}
 }
 
-void AiShopkeeper::trade(Creature& shopkeeper, Player& player)
+void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 {
 	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
 }
 
-void AiShopkeeper::display_item_list(WINDOW* tradeWin, std::span<std::unique_ptr<Item>> inventoryList)
-{
-	for (size_t i = 0; i < inventoryList.size(); i++)
-	{
-		mvwprintw(tradeWin, 7 + i, 1, "%d: %s", i, inventoryList[i]->actorData.name.c_str());
-	}
-}
-
-
-void AiShopkeeper::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& player)
-{
-	const auto& shopkeeperInventory{ shopkeeper.container };
-	int selected{ 0 };
-	bool buying{ true };
-
-	while (buying)
-	{
-		// Display available items for buying
-		mvwprintw(tradeWin, 6, 1, "Items available for purchase:");
-		display_item_list(tradeWin, std::span(shopkeeperInventory->inv));
-
-		wrefresh(tradeWin);
-
-		int choice = wgetch(tradeWin);
-
-		if (choice >= '0' && choice <= '9') {
-			selected = choice - '0';
-
-			// Check if selected item is valid
-			if (selected < shopkeeperInventory->inv.size())
-			{
-				auto& item = shopkeeperInventory->inv[selected];
-
-				// Check if player has enough currency
-				if (game.player->playerGold >= item->value)
-				{
-					// Deduct currency
-					game.player->playerGold -= item->value;
-
-					// Transfer item from shopkeeper to player
-					game.player->container->inv.insert(game.player->container->inv.begin(), std::move(item));
-
-					shopkeeperInventory->inv.erase(shopkeeperInventory->inv.begin() + selected);
-					mvwprintw(tradeWin, 9, 1, "Item purchased successfully.");
-					buying = false;
-				}
-				else
-				{
-					mvwprintw(tradeWin, 9, 1, "Insufficient currency.");
-					buying = false;
-				}
-			}
-		}
-
-		wrefresh(tradeWin);
-	}
-}
-
-// Selling logic: display player's items and allow selling
-void AiShopkeeper::handle_sell(WINDOW* tradeWin)
-{
-	const auto& playerInventory{ game.player->container };
-	int selected{ 0 };
-	bool selling{ true };
-
-	while (selling)
-	{
-		// Display player's items for selling
-		mvwprintw(tradeWin, 6, 1, "Items available for sale:");
-		display_item_list(tradeWin, std::span(playerInventory->inv));
-
-		wrefresh(tradeWin);
-
-		int choice = wgetch(tradeWin);
-
-		if (choice >= '0' && choice <= '9')
-		{
-			selected = choice - '0';
-
-			// Check if selected item is valid
-			if (selected < playerInventory->inv.size())
-			{
-				auto& item = playerInventory->inv[selected];
-
-				// Add currency to the player's total
-				game.player->playerGold += item->value;
-
-				// Transfer item from player to shopkeeper
-				/*game.shopkeeper->container->add(std::move(item));*/
-
-				playerInventory->inv.erase(playerInventory->inv.begin() + selected);
-				mvwprintw(tradeWin, 9, 1, "Item sold successfully.");
-				selling = false;
-			}
-		}
-		else
-		{
-			mvwprintw(tradeWin, 9, 1, "Invalid selection.");
-			selling = false;
-		}
-
-		wrefresh(tradeWin);
-	}
-}
-
 void AiShopkeeper::update(Creature& owner)
 {
-	game.log("Shopkeeper AI update");
-	if (owner.ai == nullptr || owner.destructible->is_dead()) // if the owner has no ai OR if the owner is dead
-	{
-		return; // do nothing
-	}
+	//game.log("Shopkeeper AI update");
+	//if (owner.ai == nullptr || owner.destructible->is_dead()) // if the owner has no ai OR if the owner is dead
+	//{
+	//	return; // do nothing
+	//}
 
-	if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
-	{
-		// move towards the player
-		moveCount = TRACKING_TURNS;
-	}
-	else if (moveCount > 0) // if the move count is greater than 0
-	{
-		moveCount--; // decrement the move count
-	}
+	//if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
+	//{
+	//	// move towards the player
+	//	moveCount = TRACKING_TURNS;
+	//}
+	//else if (moveCount > 0) // if the move count is greater than 0
+	//{
+	//	moveCount--; // decrement the move count
+	//}
 
-	if (moveCount > 0) // if the move count is greater than 0
-	{
-		moveOrTrade(owner, game.player->position.x, game.player->position.y); // move or trade with the player
-	}
+	//if (moveCount > 0) // if the move count is greater than 0
+	//{
+	//	moveOrTrade(owner, game.player->position.x, game.player->position.y); // move or trade with the player
+	//}
 }
 
 void AiShopkeeper::load(TCODZip& zip)

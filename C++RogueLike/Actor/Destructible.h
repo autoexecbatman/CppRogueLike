@@ -35,7 +35,7 @@ public:
 
 	static std::unique_ptr<Destructible> create(TCODZip& zip);
 protected:
-	enum class DestructibleType : int
+	enum class DestructibleType
 	{
 		MONSTER, PLAYER
 	};

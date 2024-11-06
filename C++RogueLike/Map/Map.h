@@ -19,7 +19,6 @@ inline constexpr auto ROOM_MAX_SIZE = 12;
 inline constexpr auto ROOM_HORIZONTAL_MAX_SIZE = 20;
 inline constexpr auto ROOM_VERTICAL_MAX_SIZE = 10;
 inline constexpr auto ROOM_MIN_SIZE = 6;
-inline constexpr auto MAX_ROOM_MONSTERS = 1; // TODO: check if this is used at all 
 inline constexpr int MAX_ROOM_ITEMS = 4;
 
 //==Tile==

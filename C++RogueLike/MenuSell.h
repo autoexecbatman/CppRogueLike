@@ -18,15 +18,15 @@ class MenuSell : public BaseMenu
 	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
 	size_t currentState{ 0 };
 	std::deque<std::string> menuItems;
-	Player& player;
+	Creature& player;
 	Creature& shopkeeper;
 
 	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
-	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Player& seller);
+	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller);
 public:
-	MenuSell(Creature& shopkeeper, Player& player);
+	MenuSell(Creature& shopkeeper, Creature& player);
 	~MenuSell();
 
 	void draw();

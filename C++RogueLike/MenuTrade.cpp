@@ -20,7 +20,7 @@ void Exit::on_selection()
 	
 }
 
-MenuTrade::MenuTrade(Creature& shopkeeper, Player& player)
+MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player)
 {
 	menu_new(height_, width_, starty_, startx_);
 	iMenuStates.push_back(std::make_unique<Buy>(shopkeeper));

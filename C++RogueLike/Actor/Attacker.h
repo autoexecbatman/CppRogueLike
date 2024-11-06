@@ -22,8 +22,6 @@ public:
 	
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
-private:
-	int missCount{ 0 };
 };
 
 #endif // !ATTACKER_H

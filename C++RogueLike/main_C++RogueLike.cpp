@@ -41,7 +41,7 @@ int main()
 	init_curses();
 
 	//==PLAYER==
-	game.create_player(); // the player is initialized here because it needs to get data from menu selections
+	game.create_player(); // player is initialized here to get data from menu
 
 	//==INIT_MENU==
 	game.menus.push_back(std::make_unique<Menu>());
