@@ -18,16 +18,8 @@ Attacker::Attacker(std::string_view roll) : roll(roll) {}
 void Attacker::attack(Creature& attacker, Creature& target)
 {
 	// if target is shopkeeper, do not attack
-	// use shopkeeper ai class to trade
-	// use the game.creatures vector to find the shopkeeper
-
 	if (target.actorData.name == "shopkeeper")
 	{
-		/*game.menus.push_back(std::make_unique<MenuTrade>(attacker, target));*/
-		// log message
-
-		/*game.trade_with_shopkeepers();*/
-
 		game.menus.push_back(std::make_unique<MenuTrade>(target, attacker));
 		return;
 	}

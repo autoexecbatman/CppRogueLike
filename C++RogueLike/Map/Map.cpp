@@ -476,6 +476,15 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 {
 	Vector2D begin{ y1,x1 };
 	Vector2D end{ y2,x2 };
+
+	game.rooms.emplace_back(begin);
+	game.rooms.emplace_back(end);
+	// print rooms container
+	for (const auto& room : game.rooms)
+	{
+		std::cout << room << std::endl;
+	}
+
 	dig(begin, end); // dig the corridors
 
 	// Add water tiles
@@ -505,12 +514,29 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	}
 	else
 	{
-		Vector2D monsterPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
-		add_monster(monsterPos);
+		//Vector2D monsterPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
+		//if (is_wall(monsterPos))
+		//{
+		//	return;
+		//}
+		//add_monster(monsterPos);
 
-		// add stairs
-		game.stairs->position.x = x1 + 4;
-		game.stairs->position.y = y1 + 2;
+		static bool stairsPlaced = false; // flag to track if stairs have been placed
+		if (!stairsPlaced)
+		{
+			// add stairs
+			game.stairs->position.x = x1 + 4;
+			game.stairs->position.y = y1 + 2;
+
+			//Vector2D stairsPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
+			//if (is_wall(stairsPos))
+			//{
+			//	return;
+			//}
+			//game.stairs->position.x = stairsPos.x;
+			//game.stairs->position.y = stairsPos.y;
+			//stairsPlaced = true;
+		}
 	} 
 	
 	// add items
@@ -530,8 +556,6 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 }
 
-//====
-// We want to detect, when the player tries to walk on a Tile , if it is occupied by another actor.
 bool Map::can_walk(Vector2D pos) const
 {
 	
@@ -544,7 +568,7 @@ bool Map::can_walk(Vector2D pos) const
 		return false;
 	}
 
-	for (const auto& actor : game.creatures)
+	for (const auto& actor : game.creatures) // check if the tile is occupied by an actor
 	{
 		if (actor->has_state(ActorState::BLOCKS) && actor->position == pos)
 		{
@@ -557,21 +581,16 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	auto& d = game.d; // get the random dice
 	static bool dragonPlaced = false; // flag to track if a dragon has been placed
 	// Determine if this room should contain the dragon
-	const bool placeDragon = !dragonPlaced && d.d100() < 5; // 5% chance to place a dragon
-
-	game.create_creature<Shopkeeper>(pos);
-	// keep track of the shopkeeper
-	auto shopkeeper = game.creatures.back().get();
+	const bool placeDragon = !dragonPlaced && game.d.d100() < 5; // 5% chance to place a dragon
 
 	if (placeDragon)
 	{
 		game.create_creature<Dragon>(pos);
 		dragonPlaced = true; // set the flag to true so no more dragons are placed
 	}
-	else
+	else if (game.d.d100() < 80) // 80% chance
 	{
 		//const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
 		//for (auto i{ 0 }; i < roll4d6; i++)
@@ -579,11 +598,13 @@ void Map::add_monster(Vector2D pos)
 		//	game.create_monster<Goblin>(pos);
 		//}
 
+		/*game.create_creature<Shopkeeper>(pos);*/
+
 		game.create_creature<Goblin>(pos);
 
 		if (game.player->playerLevel > 3)
 		{
-			const auto roll2d6 = d.d6() + d.d6(); // roll 2d6
+			const auto roll2d6 = game.d.d6() + game.d.d6(); // roll 2d6
 			for (auto i{ 0 }; i < roll2d6; i++)
 			{ // create orcs
 				game.create_creature<Orc>(pos);
@@ -592,7 +613,7 @@ void Map::add_monster(Vector2D pos)
 
 		if (game.player->playerLevel > 5)
 		{
-			const auto roll1d6 = d.d6();
+			const auto roll1d6 = game.d.d6();
 			for (auto i{ 0 }; i < roll1d6; i++)
 			{ // create trolls
 				game.create_creature<Troll>(pos);
@@ -629,6 +650,7 @@ void Map::regenerate()
 	// clear the actors container except the player and the stairs
 	game.creatures.clear();
 	game.container->inv.clear();
+	game.rooms.clear(); // we clear the room coordinates
 
 	// generate a new map
 	game.map->map_height = MAP_HEIGHT;

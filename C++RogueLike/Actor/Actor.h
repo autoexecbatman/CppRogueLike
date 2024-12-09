@@ -90,6 +90,13 @@ struct Vector2D
 	{
 		return y != 0 || x != 0;
 	}
+
+	// for std::cout
+	friend std::ostream& operator<<(std::ostream& os, const Vector2D& v)
+	{
+		os << "Vector2D: {y: " << v.y << ", x: " << v.x << "}";
+		return os;
+	}
 };
 
 struct ActorData
@@ -139,7 +146,7 @@ public:
 	Creature(Vector2D position, ActorData data) : Actor(position, data)
 	{
 		add_state(ActorState::BLOCKS);
-		add_state(ActorState::FOV_ONLY);
+		/*add_state(ActorState::FOV_ONLY);*/
 	};
 
 	void load(TCODZip& zip) override;
@@ -164,7 +171,6 @@ public:
 	void unequip(Item& item);
 	void pick();
 	void drop();
-	/*void trade() {};*/
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
@@ -202,7 +208,7 @@ class Stairs : public Object
 	public:
 	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }) 
 	{
-		add_state(ActorState::FOV_ONLY);
+		/*add_state(ActorState::FOV_ONLY);*/
 	};
 };
 

@@ -108,6 +108,36 @@ void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
 	}
 }
 
+void Game::spawn_creatures()
+{
+	// add a new monster every 5 turns
+	if (game.time % 5 == 0)
+	{
+		// if there are less than 6 monsters on the map
+		if (creatures.size() < 6)
+		{
+			// roll a random index as the size of the rooms vector
+			int index = game.d.roll(0, static_cast<int>(game.rooms.size() - 1));
+			// make the index even
+			index = index % 2 == 0 ? index : index - 1;
+			// get the room begin and end
+			const Vector2D roomBegin = game.rooms.at(index);
+			const Vector2D roomEnd = game.rooms.at(index + 1);
+			// get a random position in the room
+			Vector2D pos = Vector2D{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
+			// if pos is at wall roll again
+			while (game.map->is_wall(pos))
+			{
+				pos.x = game.d.roll(roomBegin.x, roomEnd.x);
+				pos.y = game.d.roll(roomBegin.y, roomEnd.y);
+			}
+			
+			// add a monster to the map
+			game.map->add_monster(pos);
+		}
+	}
+}
+
 void Game::render_items(std::span<std::unique_ptr<Item>> items)
 {
 	for (const auto& item : items)
@@ -117,19 +147,6 @@ void Game::render_items(std::span<std::unique_ptr<Item>> items)
 			item->render();
 		}
 	}
-}
-
-void Game::trade_with_shopkeepers()
-{
-	//for (auto& creature : creatures | std::views::filter([](const auto& c) {
-	//	return dynamic_cast<Shopkeeper*>(c.get()) != nullptr;
-	//	}))
-	//{
-	//	auto* shopkeeper = dynamic_cast<Shopkeeper*>(creature.get());
-	//	if (shopkeeper) {
-	//		shopkeeper->trade();
-	//	}
-	//}
 }
 
 void Game::update()
@@ -155,6 +172,7 @@ void Game::update()
 		[[fallthrough]];
 	case GameStatus::NEW_TURN:
 		game.update_creatures(creatures);
+		game.spawn_creatures();
 	}
 }
 

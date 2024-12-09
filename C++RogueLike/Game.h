@@ -42,6 +42,7 @@ public:
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
+	std::vector<Vector2D> rooms;
 
 	std::vector<std::unique_ptr<Creature>> creatures; // a vector of actors
 	std::vector< std::unique_ptr<Object>> objects; // a vector of objects
@@ -62,9 +63,8 @@ public:
 	void render();
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
+	void spawn_creatures();
 	void render_items(std::span<std::unique_ptr<Item>> items);
-
-	void trade_with_shopkeepers();
 
 	template <typename T>
 	void create_creature(Vector2D position)
