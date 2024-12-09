@@ -63,7 +63,7 @@ public:
 	void render();
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
-	void spawn_creatures();
+	void spawn_creatures() const;
 	void render_items(std::span<std::unique_ptr<Item>> items);
 
 	template <typename T>

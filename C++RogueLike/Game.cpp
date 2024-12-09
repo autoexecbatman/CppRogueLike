@@ -108,13 +108,13 @@ void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
 	}
 }
 
-void Game::spawn_creatures()
+void Game::spawn_creatures() const
 {
 	// add a new monster every 5 turns
 	if (game.time % 5 == 0)
 	{
 		// if there are less than 6 monsters on the map
-		if (creatures.size() < 6)
+		if (creatures.size() < MAX_MONSTERS)
 		{
 			// roll a random index as the size of the rooms vector
 			int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
@@ -126,7 +126,7 @@ void Game::spawn_creatures()
 			// get a random position in the room
 			Vector2D pos = Vector2D{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
 			// if pos is at wall roll again
-			while (game.map->is_wall(pos))
+			while (game.map->can_walk(pos))
 			{
 				pos.x = game.d.roll(roomBegin.x, roomEnd.x);
 				pos.y = game.d.roll(roomBegin.y, roomEnd.y);

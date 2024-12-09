@@ -20,6 +20,7 @@ inline constexpr auto ROOM_HORIZONTAL_MAX_SIZE = 20;
 inline constexpr auto ROOM_VERTICAL_MAX_SIZE = 10;
 inline constexpr auto ROOM_MIN_SIZE = 6;
 inline constexpr int MAX_ROOM_ITEMS = 4;
+inline constexpr int MAX_MONSTERS = 6;
 
 //==Tile==
 // A tile of the map
