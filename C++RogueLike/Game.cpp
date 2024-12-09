@@ -117,7 +117,7 @@ void Game::spawn_creatures()
 		if (creatures.size() < 6)
 		{
 			// roll a random index as the size of the rooms vector
-			int index = game.d.roll(0, static_cast<int>(game.rooms.size() - 1));
+			int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
 			// make the index even
 			index = index % 2 == 0 ? index : index - 1;
 			// get the room begin and end
