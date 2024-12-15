@@ -109,7 +109,7 @@ public:
 	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 	// the player goes down stairs
-	int dungeonLevel{ 0 };
+	int dungeonLevel{ 1 };
 	void next_level();
 	Creature* get_actor(Vector2D pos) const noexcept;
 	void dispay_levelup(int level);
