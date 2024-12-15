@@ -77,6 +77,14 @@ bool Fireball::use(Item& owner, Creature& wearer)
 
 	delwin(explosionWindow);
 
+	// if the player is in range of the fireball animate the player
+	if (game.player->get_tile_distance(tilePicked) <= Fireball::maxRange)
+	{
+		animation(game.player->position, maxRange);
+		// damage the player
+		game.player->destructible->take_damage(*game.player, damage);
+	}
+
 	for (const auto& c : game.creatures)
 	{
 		if (c)
