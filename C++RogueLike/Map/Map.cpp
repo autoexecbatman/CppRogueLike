@@ -146,7 +146,7 @@ void Map::init_tiles()
 void Map::init(bool withActors)
 {
 	init_tiles();
-	seed = game.d.roll(0, INT_MAX);
+	seed = game.d.roll(0, INT_MAX); // for new seed
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 
@@ -163,6 +163,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 
 	BspListener mylistener(*this);
 	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
+	place_stairs();
 }
 
 void Map::load(TCODZip& zip)
@@ -549,21 +550,25 @@ void Map::spawn_player(Vector2D begin, Vector2D end)
 	game.player->position.y = playerPos.y;
 	} 
 	
-	// add items
-	const int numItems = game.d.roll(0, MAX_ROOM_ITEMS);
-
-	for (int i = 0; i < numItems; i++)
+void Map::place_stairs() const
 	{
-		Vector2D itemPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
-
-		if (is_wall(itemPos))
+	int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
+	index = index % 2 == 0 ? index : index - 1;
+	const Vector2D roomBegin = game.rooms.at(index);
+	const Vector2D roomEnd = game.rooms.at(index + 1);
+	Vector2D stairsPos{ game.d.roll(roomBegin.y, roomEnd.y),game.d.roll(roomBegin.x, roomEnd.x) };
+	while (!can_walk(stairsPos))
 		{
-			continue;
+		stairsPos.x = game.d.roll(roomBegin.x, roomEnd.x);
+		stairsPos.y = game.d.roll(roomBegin.y, roomEnd.y);
 		}
-
-		add_item(itemPos);
+	game.stairs->position.x = stairsPos.x;
+	game.stairs->position.y = stairsPos.y;
 	}
 
+bool Map::is_stairs(Vector2D pos) const
+{
+	return game.stairs->position == pos;
 }
 
 bool Map::can_walk(Vector2D pos) const

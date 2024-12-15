@@ -55,6 +55,8 @@ private:
 	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else {throw std::out_of_range { "Map::get_index() out of bounds" };} }
 	void init_tiles();
+	void place_stairs() const;
+	bool is_stairs(Vector2D pos) const;
 	void spawn_water(Vector2D begin, Vector2D end);
 	void spawn_items(Vector2D begin, Vector2D end);
 	void spawn_player(Vector2D begin, Vector2D end);
