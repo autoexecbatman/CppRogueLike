@@ -477,22 +477,35 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	Vector2D begin{ y1,x1 };
 	Vector2D end{ y2,x2 };
 
+	// store the room coordinates
 	game.rooms.emplace_back(begin);
 	game.rooms.emplace_back(end);
-	// print rooms container
-	for (const auto& room : game.rooms)
-	{
-		std::cout << room << std::endl;
-	}
 
 	dig(begin, end); // dig the corridors
 
+	spawn_water(begin, end);
+
+	if (!withActors)
+	{
+		return;
+	}
+
+	if (first) // if this is the first room, we need to place the player in it
+	{
+		spawn_player(begin, end);
+	}
+
+	spawn_items(begin, end);
+}
+
+void Map::spawn_water(Vector2D begin, Vector2D end)
+{
 	// Add water tiles
 	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
 	Vector2D waterPos{ 0,0 };
-	for (waterPos.x = x1; waterPos.x <= x2; ++waterPos.x)
+	for (waterPos.y = begin.y; waterPos.y <= end.y; ++waterPos.y)
 	{
-		for (waterPos.y = y1; waterPos.y <= y2; ++waterPos.y)
+		for (waterPos.x = begin.x; waterPos.x <= end.x; ++waterPos.x)
 		{
 			const int rolld100 = game.d.d100();
 			if (rolld100 < waterPercentage)
@@ -507,36 +520,33 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 		return;
 	}
 
-	if (first) // if this is the first room, we need to place the player in it
+void Map::spawn_items(Vector2D begin, Vector2D end)
 	{
-		game.player->position.y = y1 + 3;
-		game.player->position.x = x1 + 4;
-	}
-	else
+	// add items
+	const int numItems = game.d.roll(0, MAX_ROOM_ITEMS);
+	for (int i = 0; i < numItems; i++)
 	{
-		//Vector2D monsterPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
-		//if (is_wall(monsterPos))
-		//{
-		//	return;
-		//}
-		//add_monster(monsterPos);
-
-		static bool stairsPlaced = false; // flag to track if stairs have been placed
-		if (!stairsPlaced)
+		Vector2D itemPos{ game.d.roll(begin.y, end.y),game.d.roll(begin.x, end.x) };
+		while (!can_walk(itemPos) || is_stairs(itemPos))
 		{
-			// add stairs
-			game.stairs->position.x = x1 + 4;
-			game.stairs->position.y = y1 + 2;
-
-			//Vector2D stairsPos{ game.d.roll(y1, y2),game.d.roll(x1, x2) };
-			//if (is_wall(stairsPos))
-			//{
-			//	return;
-			//}
-			//game.stairs->position.x = stairsPos.x;
-			//game.stairs->position.y = stairsPos.y;
-			//stairsPlaced = true;
+			itemPos.x = game.d.roll(begin.x, end.x);
+			itemPos.y = game.d.roll(begin.y, end.y);
 		}
+		add_item(itemPos);
+	}
+}
+
+void Map::spawn_player(Vector2D begin, Vector2D end)
+{
+	// add player
+	Vector2D playerPos{ game.d.roll(begin.y, end.y),game.d.roll(begin.x, end.x) };
+	while (!can_walk(playerPos))
+	{
+		playerPos.x = game.d.roll(begin.x, end.x);
+		playerPos.y = game.d.roll(begin.y, end.y);
+		}
+	game.player->position.x = playerPos.x;
+	game.player->position.y = playerPos.y;
 	} 
 	
 	// add items
