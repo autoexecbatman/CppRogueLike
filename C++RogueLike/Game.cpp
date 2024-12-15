@@ -126,12 +126,11 @@ void Game::spawn_creatures() const
 			// get a random position in the room
 			Vector2D pos = Vector2D{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
 			// if pos is at wall roll again
-			while (game.map->can_walk(pos))
+			while (!game.map->can_walk(pos))
 			{
 				pos.x = game.d.roll(roomBegin.x, roomEnd.x);
 				pos.y = game.d.roll(roomBegin.y, roomEnd.y);
 			}
-			
 			// add a monster to the map
 			game.map->add_monster(pos);
 		}

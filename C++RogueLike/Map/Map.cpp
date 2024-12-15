@@ -515,14 +515,10 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 			}
 		}
 	}
-
-	if (!withActors)
-	{
-		return;
-	}
+}
 
 void Map::spawn_items(Vector2D begin, Vector2D end)
-	{
+{
 	// add items
 	const int numItems = game.d.roll(0, MAX_ROOM_ITEMS);
 	for (int i = 0; i < numItems; i++)
@@ -545,26 +541,26 @@ void Map::spawn_player(Vector2D begin, Vector2D end)
 	{
 		playerPos.x = game.d.roll(begin.x, end.x);
 		playerPos.y = game.d.roll(begin.y, end.y);
-		}
+	}
 	game.player->position.x = playerPos.x;
 	game.player->position.y = playerPos.y;
-	} 
-	
+}
+
 void Map::place_stairs() const
-	{
+{
 	int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
 	index = index % 2 == 0 ? index : index - 1;
 	const Vector2D roomBegin = game.rooms.at(index);
 	const Vector2D roomEnd = game.rooms.at(index + 1);
 	Vector2D stairsPos{ game.d.roll(roomBegin.y, roomEnd.y),game.d.roll(roomBegin.x, roomEnd.x) };
 	while (!can_walk(stairsPos))
-		{
+	{
 		stairsPos.x = game.d.roll(roomBegin.x, roomEnd.x);
 		stairsPos.y = game.d.roll(roomBegin.y, roomEnd.y);
-		}
+	}
 	game.stairs->position.x = stairsPos.x;
 	game.stairs->position.y = stairsPos.y;
-	}
+}
 
 bool Map::is_stairs(Vector2D pos) const
 {
@@ -596,43 +592,42 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	static bool dragonPlaced = false; // flag to track if a dragon has been placed
-	// Determine if this room should contain the dragon
-	const bool placeDragon = !dragonPlaced && game.d.d100() < 5; // 5% chance to place a dragon
+	static bool dragonPlaced = false; // Flag to track if a dragon has been placed
+	const bool placeDragon = !dragonPlaced && game.d.d100() < 5; // 5% chance for a dragon
 
 	if (placeDragon)
 	{
 		game.create_creature<Dragon>(pos);
-		dragonPlaced = true; // set the flag to true so no more dragons are placed
+		dragonPlaced = true; // Only one dragon per game
 	}
-	else if (game.d.d100() < 80) // 80% chance
+	else
 	{
-		//const auto roll4d6 = d.d6() + d.d6() + d.d6() + d.d6(); // roll 4d6
-		//for (auto i{ 0 }; i < roll4d6; i++)
-		//{ // create goblins
-		//	game.create_monster<Goblin>(pos);
-		//}
+		// Determine the monster to spawn based on dungeonLevel
+		int roll = game.d.d100(); // Random roll between 1-100
 
-		/*game.create_creature<Shopkeeper>(pos);*/
-
-		game.create_creature<Goblin>(pos);
-
-		if (game.player->playerLevel > 3)
+		if (game.dungeonLevel <= 3)
 		{
-			const auto roll2d6 = game.d.d6() + game.d.d6(); // roll 2d6
-			for (auto i{ 0 }; i < roll2d6; i++)
-			{ // create orcs
-				game.create_creature<Orc>(pos);
-			}
+			// Early levels: Mostly Goblins, rare chance for Shopkeeper
+			if (roll < 70) game.create_creature<Goblin>(pos); // 70% chance
+			else if (roll < 90) game.create_creature<Orc>(pos); // 20% chance
+			else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 8% chance
+			else game.create_creature<Troll>(pos); // 2% chance
 		}
-
-		if (game.player->playerLevel > 5)
+		else if (game.dungeonLevel <= 6)
 		{
-			const auto roll1d6 = game.d.d6();
-			for (auto i{ 0 }; i < roll1d6; i++)
-			{ // create trolls
-				game.create_creature<Troll>(pos);
-			}
+			// Mid levels: Mix of monsters, higher chance for Shopkeeper
+			if (roll < 40) game.create_creature<Goblin>(pos); // 40% chance
+			else if (roll < 75) game.create_creature<Orc>(pos); // 35% chance
+			else if (roll < 90) game.create_creature<Shopkeeper>(pos); // 15% chance
+			else game.create_creature<Troll>(pos); // 10% chance
+		}
+		else
+		{
+			// Deep levels: More dangerous creatures, Shopkeeper appears less
+			if (roll < 30) game.create_creature<Goblin>(pos); // 30% chance
+			else if (roll < 60) game.create_creature<Orc>(pos); // 30% chance
+			else if (roll < 85) game.create_creature<Troll>(pos); // 25% chance
+			else game.create_creature<Shopkeeper>(pos); // 15% chance
 		}
 	}
 }
