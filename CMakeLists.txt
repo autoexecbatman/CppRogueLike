@@ -91,8 +91,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/Menu/MenuRace.h
 
     # ActorTypes
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Dagger.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Dagger.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Fireball.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Monsters.cpp
@@ -103,8 +101,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Healer.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LightningBolt.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LightningBolt.h
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LongSword.cpp
-    ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/LongSword.h
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Player.cpp
     ${PROJECT_SOURCE_DIR}/C++RogueLike/ActorTypes/Player.h
 

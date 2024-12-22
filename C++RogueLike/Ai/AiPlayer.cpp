@@ -229,7 +229,7 @@ bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
 	game.log("Player tries to move or attack");
 
 	// check tile state and if true move the player
-	if (!game.map->tile_action(game.map->get_tile_t(target)))
+	if (!game.map->tile_action(game.map->get_tile_type(target)))
 	{
 		return false;
 	}

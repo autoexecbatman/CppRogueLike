@@ -6,6 +6,7 @@
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
 #include "AiPlayer.h"
+#include "AiShopkeeper.h"
 
 //==AI==
 std::unique_ptr<Ai> Ai::create(TCODZip& zip)
@@ -24,6 +25,9 @@ std::unique_ptr<Ai> Ai::create(TCODZip& zip)
 		break;
 	case AiType::CONFUSED_MONSTER:
 		ai = std::make_unique<AiMonsterConfused>(0, std::make_unique<AiMonster>());
+		break;
+	case AiType::SHOPKEEPER:
+		ai = std::make_unique<AiShopkeeper>();
 		break;
 	default:
 		std::cout << "Error: Ai::create() - unknown AiType" << std::endl;

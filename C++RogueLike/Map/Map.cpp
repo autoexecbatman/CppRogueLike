@@ -21,12 +21,10 @@
 #include "../Actor/Container.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Pickable.h"
-#include "../ActorTypes/Dagger.h"
 #include "../ActorTypes/Fireball.h"
 #include "../ActorTypes/Gold.h"
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/LightningBolt.h"
-#include "../ActorTypes/LongSword.h"
 #include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Player.h"
 #include "../Ai/Ai.h"
@@ -149,10 +147,8 @@ void Map::init(bool withActors)
 	seed = game.d.roll(0, INT_MAX); // for new seed
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
-
-	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
-	
 	bsp(map_width, map_height, *rng_unique, withActors);
+	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
@@ -168,6 +164,9 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 
 void Map::load(TCODZip& zip)
 {
+	// load the map
+	map_height = MAP_HEIGHT;
+	map_width = MAP_WIDTH;
 	seed = zip.getInt();
 	init(false);
 
@@ -179,6 +178,8 @@ void Map::load(TCODZip& zip)
 
 void Map::save(TCODZip& zip)
 {
+	zip.putInt(map_width);
+	zip.putInt(map_height);
 	zip.putInt(seed);
 
 	for (const auto& tile : tiles)
@@ -212,7 +213,7 @@ bool Map::is_water(Vector2D pos) const
 	return tiles.at(get_index(pos)).type == TileType::WATER;
 }
 
-TileType Map::get_tile_t(Vector2D pos) const
+TileType Map::get_tile_type(Vector2D pos) const
 {
 	return tiles.at(get_index(pos)).type;
 }
@@ -273,7 +274,7 @@ void Map::render() const
 	{
 		if (is_in_fov(tile.position) || is_explored(tile.position))
 		{
-			switch (get_tile_t(tile.position))
+			switch (get_tile_type(tile.position))
 			{
 			case TileType::WALL:
 				attron(COLOR_PAIR(WALL_PAIR));
@@ -306,24 +307,28 @@ void Map::render() const
 	refresh(); // Refresh once after all tiles have been drawn
 	game.log("Map::render() end");
 }
-
 void Map::add_weapons(Vector2D pos)
 {
-	// Randomly select a weapon from the list
 	const int weaponIndex{ game.d.roll(1, game.weapons.size()) };
 	const Weapons& selectedWeapon{ game.weapons.at(weaponIndex - 1) };
-	const int rollColor{ game.d.roll(1,3) }; // Randomly select a color for the weapon
+	const int rollColor{ game.d.roll(1, game.weapons.size()) };
 
 	// Create an Actor for the weapon
 	auto weaponItem = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor });
 
-	if (selectedWeapon.name == "Dagger")
+	// Map weapon names to corresponding constructors
+	static const std::unordered_map<std::string, std::function<std::unique_ptr<Pickable>()>> weaponFactory{
+		{"Dagger", []() { return std::make_unique<Dagger>(); }},
+		{"Long Sword", []() { return std::make_unique<LongSword>(); }},
+		{"Short Sword", []() { return std::make_unique<ShortSword>(); }},
+		{"Longbow", []() { return std::make_unique<Longbow>(); }},
+		{"Staff", []() { return std::make_unique<Staff>(); }}
+	};
+
+	auto it = weaponFactory.find(selectedWeapon.name);
+	if (it != weaponFactory.end())
 	{
-		weaponItem->pickable = std::make_unique<Dagger>();
-	}
-	else if (selectedWeapon.name == "Long Sword")
-	{
-		weaponItem->pickable = std::make_unique<LongSword>();
+		weaponItem->pickable = it->second();
 	}
 	else
 	{
@@ -331,6 +336,7 @@ void Map::add_weapons(Vector2D pos)
 		return;
 	}
 
+	// Add the weapon to the game container
 	game.container->add(std::move(weaponItem));
 }
 
@@ -431,7 +437,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			}
 			else if (!secondDoorSet && isDoorSet) // if the first door is set and the second door is not set
 			{
-				if (get_tile_t(thisTile) == TileType::FLOOR || get_tile_t(thisTile) == TileType::WATER)
+				if (get_tile_type(thisTile) == TileType::FLOOR || get_tile_type(thisTile) == TileType::WATER)
 				{
 					set_tile(lastTile, TileType::DOOR); // set the last tile as a door
 					tcodMap->setProperties(lastTile.x, lastTile.y, false, false);
@@ -445,7 +451,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			}
 			else if (!thirdDoorSet && secondDoorSet && isDoorSet)
 			{
-				if (get_tile_t(thisTile) == TileType::WALL)
+				if (get_tile_type(thisTile) == TileType::WALL)
 				{
 					set_tile(thisTile, TileType::DOOR); // set the last tile as a door
 					tcodMap->setProperties(tileX, tileY, false, false);

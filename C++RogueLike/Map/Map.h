@@ -60,25 +60,25 @@ private:
 	void spawn_water(Vector2D begin, Vector2D end);
 	void spawn_items(Vector2D begin, Vector2D end);
 	void spawn_player(Vector2D begin, Vector2D end);
-public:
+	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
+	bool is_wall(Vector2D pos) const;
+	bool is_floor(Vector2D pos) const { return get_tile_type(pos) == TileType::FLOOR;}
+	bool is_water(Vector2D pos) const;
+	void set_explored(Vector2D pos); //set the tile as explored
+
 	int map_height, map_width;
+public:
 
 	Map(int map_height, int map_width);
 
 	void load(TCODZip& zip) override;
 	void save(TCODZip& zip) override;
 
-	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
-
 	void init(bool withActors);
-	bool is_wall(Vector2D pos) const;
-	bool is_floor(Vector2D pos) const { return get_tile_t(pos) == TileType::FLOOR;}
 	bool is_in_fov(Vector2D pos) const;
-	bool is_water(Vector2D pos) const;
-	TileType get_tile_t(Vector2D pos) const;
+	TileType get_tile_type(Vector2D pos) const;
 	bool tile_action(TileType tileType);
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
-	void set_explored(Vector2D pos); //set the tile as explored
 	bool can_walk(Vector2D pos) const;
 	void add_monster(Vector2D pos);
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
@@ -91,15 +91,12 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
 
+	std::unique_ptr<TCODPath> tcodPath;
 protected:
 	std::vector<Tile> tiles;
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;
-
-	std::unique_ptr<TCODPath> tcodPath;
-
 	long seed;
-
 	friend class BspListener;
 	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);

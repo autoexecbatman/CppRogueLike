@@ -82,7 +82,6 @@ int main()
 			//==INIT_GUI==
 			if (!guiInit)
 			{
-
 				gui.gui_init();
 				guiInit = true;
 			}

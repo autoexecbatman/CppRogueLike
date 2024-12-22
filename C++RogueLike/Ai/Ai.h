@@ -8,7 +8,6 @@
 
 #include "../Persistent/Persistent.h"
 
-class Actor; // for no circular dependency with Actor.h
 class Creature; // for no circular dependency with Creature.h
 
 //==AI==

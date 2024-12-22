@@ -11,8 +11,6 @@
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
-#include "../ActorTypes/LongSword.h"
-#include "../ActorTypes/Dagger.h"
 #include "../Ai/AiMonsterConfused.h"
 
 //==PICKABLE==
@@ -73,8 +71,26 @@ std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
 		break;
 	}
 
-
+	case PickableType::SHORTSWORD:
+	{
+		pickable = std::make_unique<ShortSword>();
+		break;
 	}
+
+	case PickableType::LONGBOW:
+	{
+		pickable = std::make_unique<Longbow>();
+		break;
+	}
+
+	case PickableType::STAFF:
+	{
+		pickable = std::make_unique<Staff>();
+		break;
+	}
+
+	} // end of switch (type)
+
 	if (!pickable) {
 		game.log("Pickable create() failed. No pickable type found.");
 		game.err("Pickable create() failed. No pickable type found.");
@@ -85,4 +101,146 @@ std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
 	return pickable;
 }
 
+bool Dagger::use(Item& owner, Creature& wearer)
+{
+	// equip the weapon
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.equip(owner);
+	}
+	// unequip the weapon
+	else
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.unequip(owner);
+	}
+
+	return false;
+}
+
+void Dagger::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::DAGGER));
+	zip.putString(roll.data());
+}
+
+void Dagger::load(TCODZip& zip)
+{
+	this->roll = zip.getString();
+}
+
+bool LongSword::use(Item& owner, Creature& wearer)
+{
+	// equip the weapon
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.equip(owner);
+	}
+	else
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.unequip(owner);
+	}
+
+	return false;
+}
+
+void LongSword::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LONGSWORD));
+	zip.putString(roll.data());
+}
+
+void LongSword::load(TCODZip& zip)
+{
+	this->roll = zip.getString();
+}
+
 // end of file: Pickable.cpp
+
+bool ShortSword::use(Item& owner, Creature& wearer)
+{
+	// equip the weapon
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.equip(owner);
+	}
+	// unequip the weapon
+	else
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.unequip(owner);
+	}
+
+	return false;
+}
+
+void ShortSword::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::SHORTSWORD));
+	zip.putString(roll.data());
+}
+
+void ShortSword::load(TCODZip& zip)
+{
+	this->roll = zip.getString();
+}
+
+bool Longbow::use(Item& owner, Creature& wearer)
+{
+	// equip the weapon
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.equip(owner);
+	}
+	// unequip the weapon
+	else
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.unequip(owner);
+	}
+	return false;
+}
+
+void Longbow::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LONGBOW));
+	zip.putString(roll.data());
+}
+
+void Longbow::load(TCODZip& zip)
+{
+	this->roll = zip.getString();
+}
+
+bool Staff::use(Item& owner, Creature& wearer)
+{
+	// equip the weapon
+	if (!owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.equip(owner);
+	}
+	// unequip the weapon
+	else
+	{
+		wearer.attacker->roll = this->roll;
+		wearer.unequip(owner);
+	}
+	return false;
+}
+
+void Staff::save(TCODZip& zip)
+{
+	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::STAFF));
+	zip.putString(roll.data());
+}
+
+void Staff::load(TCODZip& zip)
+{
+	this->roll = zip.getString();
+}

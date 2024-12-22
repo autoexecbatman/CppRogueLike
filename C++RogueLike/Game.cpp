@@ -47,7 +47,7 @@ void Game::init()
 	game.stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
 
 	//==MAP==
-	game.map->init(true); // set the checker function
+	game.map->init(true); // with actors true
 
 	//==GameStatus==
 	// we set gameStatus to STARTUP because we want to compute the fov only once
@@ -439,9 +439,9 @@ void Game::target()
 
 		// display the FOV in white in row major order
 		Vector2D pos{ 0,0 };
-		for (; pos.y < game.map->map_height; pos.y++)
+		for (; pos.y < MAP_HEIGHT; pos.y++)
 		{
-			for (; pos.x < game.map->map_width; pos.x++)
+			for (; pos.x < MAP_WIDTH; pos.x++)
 			{
 				if (game.map->is_in_fov(pos))
 				{
@@ -456,29 +456,33 @@ void Game::target()
 			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_PAIR, NULL);
 		}
 
-		// draw a line using TCODLine class
-		/*
-		@CppEx
-		// Going from point 5,8 to point 13,4
-		int x = 5, y = 8;
-		TCODLine::init(x, y, 13, 4);
-		do {
-			// update cell x,y
-		} while (!TCODLine::step(&x, &y));
-		*/
-		Vector2D line{ 0,0 };
-		TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
-		while (!TCODLine::step(&line.x, &line.y))
-		{
-			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, NULL);
-		}
-		
-		// the player uses the keyboard to select a target
-		// the target selection cursor is displayed in white
-		// the player can press enter to select the target
-		// or press escape to cancel the target selection
-		// 'X' is the char for the selection cursor in the target selection mode
+		//// draw a line using TCODLine class
+		///*
+		//@CppEx
+		//// Going from point 5,8 to point 13,4
+		//int x = 5, y = 8;
+		//TCODLine::init(x, y, 13, 4);
+		//do {
+		//	// update cell x,y
+		//} while (!TCODLine::step(&x, &y));
+		//*/
+		//Vector2D line{ 0,0 };
+		//TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
+		//while (!TCODLine::step(&line.x, &line.y))
+		//{
+		//	mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, NULL);
+		//}
 
+		// draw the line using TCODPath
+		// first create a path from the player to the target cursor
+		map->tcodPath->compute(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
+		// then iterate over the path
+		int x, y;
+		while (map->tcodPath->walk(&x, &y, true))
+		{
+			mvchgat(y, x, 1, A_REVERSE, WHITE_PAIR, NULL);
+		}
+		// draw the target cursor
 		attron(COLOR_PAIR(HPBARMISSING_PAIR));
 		mvaddch(targetCursor.y,targetCursor.x,'X');
 		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
@@ -495,7 +499,7 @@ void Game::target()
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
-				mvprintw(3, 0, "Roll: %d", actor->attacker->roll);
+				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
 			}
@@ -566,11 +570,10 @@ void Game::load_all()
 
 		zip.loadFromFile("game.sav");
 
-		// load the map
-		int width = zip.getInt();
-		int height = zip.getInt();
-		map->map_height = height;
-		map->map_width = width;
+
+		// load the stairs
+		stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
+		stairs->load(zip);
 
 		map->load(zip);
 
@@ -580,9 +583,6 @@ void Game::load_all()
 		player->load(zip);
 		/*actors.push_back(std::move(player));*/
 
-		// load the stairs
-		stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
-		stairs->load(zip);
 		/*objects.push_back(std::move(stairs_unique));*/
 		/*actors.try_emplace(stairs->index, stairs);*/
 
@@ -627,8 +627,7 @@ void Game::save_all()
 			TCODZip zip; // create a zip object
 
 			// save the map
-			zip.putInt(map->map_width);
-			zip.putInt(map->map_height);
+
 			map->save(zip);
 
 			// save the player

@@ -39,7 +39,7 @@ void Actor::load(TCODZip& zip)
 	actorData.name = _strdup(zip.getString());
 
 	// this block assigns checks if the actor has a component
-	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
+	/*const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };*/
 	
 	// this block assigns the values from the zip file to the actor's components if they exist.
 	
@@ -54,10 +54,24 @@ void Creature::load(TCODZip& zip)
 	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
 
 	// this block assigns the values from the zip file to the actor's components if they exist.
-	if (hasAttacker) { attacker = std::make_unique<Attacker>(""); attacker->load(zip); }
-	if (hasDestructible) { destructible = Destructible::create(zip); }
-	if (hasAi) { ai = Ai::create(zip); }
-	if (hasContainer) { container = std::make_unique<Container>(0); container->load(zip); }
+	if (hasAttacker)
+	{
+		attacker = std::make_unique<Attacker>("");
+		attacker->load(zip);
+	}
+	if (hasDestructible)
+	{
+		destructible = Destructible::create(zip);
+	}
+	if (hasAi)
+	{
+		ai = Ai::create(zip);
+	}
+	if (hasContainer)
+	{
+		container = std::make_unique<Container>(0);
+		container->load(zip);
+	}
 }
 
 void Creature::save(TCODZip& zip)
@@ -78,6 +92,7 @@ void Creature::save(TCODZip& zip)
 	if (attacker) attacker->save(zip);
 	if (destructible) destructible->save(zip);
 	if (ai) ai->save(zip);
+	if (container) container->save(zip);
 }
 
 void Creature::pick()

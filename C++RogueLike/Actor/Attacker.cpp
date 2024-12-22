@@ -9,7 +9,6 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
-#include "../ActorTypes/LongSword.h"
 #include "../ActorTypes/Monsters.h"
 #include "../MenuTrade.h"
 

@@ -7,6 +7,7 @@
 
 class Item;
 class Player;
+class Actor;
 
 class AiShopkeeper : public Ai
 {

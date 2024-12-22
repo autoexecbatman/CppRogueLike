@@ -6,7 +6,6 @@
 #include "../Ai/AiMonster.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Healer.h"
-#include "../ActorTypes/Dagger.h"
 
 //==GOBLIN==
 ActorData goblinData
