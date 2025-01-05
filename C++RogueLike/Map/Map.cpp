@@ -73,13 +73,17 @@ public:
 			const bool withActors = gsl::narrow_cast<bool>(userData);
 			Vector2D end
 			{ 
-				game.d.roll(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
-				game.d.roll(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
+				//game.d.roll(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
+				//game.d.roll(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), // random int from min size to height - 2
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2) // random int from min size to width - 2
 			};
 			Vector2D begin
 			{
-				game.d.roll(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
-				game.d.roll(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
+				//game.d.roll(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
+				//game.d.roll(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
+				map.rng_unique->getInt(node->y + 1, node->y + node->h - end.y - 1), // from node y + 1 to node x + node height - width - 1
+				map.rng_unique->getInt(node->x + 1, node->x + node->w - end.x - 1) // from node x + 1 to node x + node width - width - 1
 			};
 
 			// first create a room
@@ -162,29 +166,45 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 	place_stairs();
 }
 
-void Map::load(TCODZip& zip)
+void Map::load(const json& j)
 {
-	// load the map
-	map_height = MAP_HEIGHT;
-	map_width = MAP_WIDTH;
-	seed = zip.getInt();
-	init(false);
+	map_width = j.at("map_width").get<int>();
+	map_height = j.at("map_height").get<int>();
+	seed = j.at("seed").get<int>();
 
-	for (auto& tile : tiles)
-	{
-		tile.explored = gsl::narrow_cast<bool>(zip.getInt());
+	tiles.clear();
+	for (const auto& tileJson : j.at("tiles")) {
+		Vector2D position(
+			tileJson.at("position").at("y").get<int>(),
+			tileJson.at("position").at("x").get<int>()
+		);
+
+		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
+		bool explored = tileJson.at("explored").get<bool>();
+
+		tiles.emplace_back(position, type);
+		tiles.back().explored = explored;
 	}
+
+	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
+	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
+	bsp(map_width, map_height, *rng_unique, false);
+
 }
 
-void Map::save(TCODZip& zip)
+void Map::save(json& j)
 {
-	zip.putInt(map_width);
-	zip.putInt(map_height);
-	zip.putInt(seed);
+	j["map_width"] = map_width;
+	j["map_height"] = map_height;
+	j["seed"] = seed;
 
-	for (const auto& tile : tiles)
-	{
-		zip.putInt(gsl::narrow_cast<int>(tile.explored));
+	j["tiles"] = json::array();
+	for (const auto& tile : tiles) {
+		j["tiles"].push_back({
+			{"position", {{"y", tile.position.y}, {"x", tile.position.x}}},
+			{"type", static_cast<int>(tile.type)}, // Assuming TileType is an enum
+			{"explored", tile.explored}
+			});
 	}
 }
 

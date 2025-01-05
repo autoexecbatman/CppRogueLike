@@ -13,8 +13,8 @@ class AiMonsterConfused : public Ai
 public:
 	AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept;
 	void update(Creature& owner) override;
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 protected:
 	int nbTurns;

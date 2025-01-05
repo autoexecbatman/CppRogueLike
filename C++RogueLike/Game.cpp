@@ -116,6 +116,11 @@ void Game::spawn_creatures() const
 		// if there are less than 6 monsters on the map
 		if (creatures.size() < MAX_MONSTERS)
 		{
+			// game.rooms must be populated
+			if (game.rooms.empty())
+			{
+				throw std::runtime_error("game.rooms is empty!");
+			}
 			// roll a random index as the size of the rooms vector
 			int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
 			// make the index even
@@ -564,107 +569,141 @@ void Game::target()
 
 void Game::load_all()
 {
-	if (TCODSystem::fileExists("game.sav"))
-	{
-		TCODZip zip;
+	//game.init(); // Reinitialize the game state
+	// Use JSON to load the game
+	/*game.init();*/
+	game.gameInit = true;
 
-		zip.loadFromFile("game.sav");
+	std::ifstream file("game.sav");
+	if (file.is_open())
+	{	
+		json j;
+		file >> j;
+
+		// Load the map
+		map->load(j);
 
 
-		// load the stairs
-		stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
-		stairs->load(zip);
-
-		map->load(zip);
-
-		// load the player
-		/*player = std::make_shared<Actor>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
-		/*player = std::make_shared<Player>(0, 0, 0, "loaded player", EMPTY_PAIR, 0);*/
-		player->load(zip);
-		/*actors.push_back(std::move(player));*/
-
-		/*objects.push_back(std::move(stairs_unique));*/
-		/*actors.try_emplace(stairs->index, stairs);*/
-
-		// then all other actors
-		int nbActors = zip.getInt();
-		while (nbActors > 0)
+		// Load the rooms
+		if (j.contains("rooms") && j["rooms"].is_array())
 		{
-			/*Actor* actor = new Actor(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			/*std::unique_ptr<Actor> actor = std::make_unique<Actor>(0, 0, 0, "loaded other actors", EMPTY_PAIR);*/
-			auto actor = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "loaded other actors", WHITE_PAIR });
-			actor->load(zip);
-			creatures.push_back(std::move(actor));
-			/*actors.try_emplace(actor->index, actor);*/
-			nbActors--;
+			for (const auto& roomData : j["rooms"])
+			{
+				rooms.push_back(Vector2D{ roomData["y"], roomData["x"] });
+			}
 		}
 
-		// finally the message log
-		gui->load(zip);
+		// Load the player
+		if (j.contains("player"))
+		{
+			player->load(j["player"]);
+		}
+
+		// Load the stairs
+		if (j.contains("stairs"))
+		{
+			stairs->load(j["stairs"]);
+		}
+
+		// Load the other creatures (actors)
+		if (j.contains("creatures") && j["creatures"].is_array())
+		{
+			for (const auto& creatureData : j["creatures"])
+			{
+				auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
+				creature->load(creatureData); // Load creature data
+				creatures.push_back(std::move(creature));
+			}
+		}
+
+		// Load items
+		if (j.contains("items") && j["items"].is_array())
+		{
+			for (const auto& itemData : j["items"])
+			{
+				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
+				item->load(itemData);
+				container->inv.push_back(std::move(item));
+			}
+		}
+
+		// Load the message log
+		if (j.contains("gui"))
+		{
+			gui->load(j["gui"]);
+		}
 	}
-	// TODO : Delete this line moved to switch case in game_menu
 	else
 	{
-		game.init();
+		game.init(); // If loading fails, reinitialize the game
+		game.log("Error: Could not open save file. Game initialized with default settings.");
 	}
 }
 
 void Game::save_all()
 {
-	try
+	// Use JSON to save the game
+	std::ofstream file("game.sav");
+	if (file.is_open())
 	{
-		if (!shouldSave) { game.log("You quit without saving."); return; } // don't save if quit from the menu without playing
+		json j;
 
-		if (player->destructible->is_dead() && TCODSystem::fileExists("game.sav"))
+		// Save the map
+		map->save(j);
+
+		// Save game.rooms
+		j["rooms"] = json::array();
+		for (const auto& room : rooms)
 		{
-			// handle the permadeath
-			// delete the save file if the player is dead or the save file is corrupted
-			TCODSystem::deleteFile("game.sav");
-			return;
+			j["rooms"].push_back({ {"x", room.x}, {"y", room.y} });
 		}
-		else // else save the game
+
+		// Save the player
+		json playerJson;
+		player->save(playerJson);
+		j["player"] = playerJson;
+
+		// Save the stairs
+		json stairsJson;
+		stairs->save(stairsJson);
+		j["stairs"] = stairsJson;
+
+		// Save the other creatures (actors)
+		j["creatures"] = json::array(); // Array to hold all creatures
+		for (const auto& creature : creatures)
 		{
-			TCODZip zip; // create a zip object
-
-			// save the map
-
-			map->save(zip);
-
-			// save the player
-			player->save(zip);
-			
-			// save the stairs
-			if (stairs) try { stairs->save(zip); }
-			catch (const std::exception& e) { game.log(e.what()); }
-
-			// save the other actors
-			if (!creatures.empty())
+			if (creature)
 			{
-				const int nbActors = gsl::narrow_cast<int>(creatures.size()); // actors will never be larger than the maximum value of an int, then using gsl::narrow_cast<int> can be considered okay
-				const int nbActorsToSave = nbActors - 2; // -2 because player and stairs are already saved
-				zip.putInt(nbActorsToSave);
-
-				for (const auto& actor : creatures)
-				{
-					if (actor)
-					{
-						actor->save(zip);
-					}
-				}
+				json creatureJson;
+				creature->save(creatureJson); // Save each creature individually
+				j["creatures"].push_back(creatureJson); // Add to array
 			}
-
-			// save the message log
-			if (gui) try { gui->save(zip); }
-			catch (const std::exception& e) { game.log(e.what()); }
-
-			zip.saveToFile("game.sav");
-			game.log("Game saved successfully.");
 		}
+
+		// Save items
+		j["items"] = json::array();
+		for (const auto& item : container->inv)
+		{
+			if (item)
+			{
+				json itemJson;
+				item->save(itemJson);
+				j["items"].push_back(itemJson);
+			}
+		}
+
+		// Save the message log
+		json guiJson;
+		gui->save(guiJson);
+		j["gui"] = guiJson;
+
+		// Write the JSON data to the file
+		file << j.dump(4); // Pretty print with an indentation of 4 spaces
+		file.close();
 	}
-	catch (const std::exception& e)
+	else
 	{
-		game.log("Error occurred while saving: " + std::string(e.what()));
-		throw;
+		game.log("Error occurred while saving the game.");
 	}
 }
 
@@ -841,7 +880,7 @@ void Game::message(int color, const std::string& text, bool isComplete = false)
 	messageColor = color;
 
 	// Always append the message part to attackMessageParts
-	attackMessageParts.push_back({ color, text });
+	attackMessageParts.push_back(LogMessage{ color, text });
 
 	// If isComplete flag is set, consider the message to be finished
 	if (isComplete) {

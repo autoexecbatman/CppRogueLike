@@ -25,13 +25,25 @@ bool Healer::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void Healer::load(TCODZip& zip)
+void Healer::load(const json& j)
 {
-	amountToHeal = zip.getInt();
+	if (j.contains("amountToHeal") && j["amountToHeal"].is_number())
+	{
+		amountToHeal = j["amountToHeal"].get<int>();
+	}
+	else
+	{
+		throw std::runtime_error("Invalid JSON format for Healer");
+	}
 }
 
-void Healer::save(TCODZip& zip)
+void Healer::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::HEALER));
-	zip.putInt(amountToHeal);
+	j["type"] = static_cast<int>(PickableType::HEALER);
+	j["amountToHeal"] = amountToHeal;
+}
+
+Pickable::PickableType Healer::get_type() const
+{
+	return PickableType::HEALER;
 }

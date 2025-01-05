@@ -24,8 +24,8 @@ public:
 	bool add(std::unique_ptr<Item> actor);
 	void remove(std::unique_ptr<Item> actor);
 
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 	void print_container(std::span<std::unique_ptr<Actor>> container);
 };

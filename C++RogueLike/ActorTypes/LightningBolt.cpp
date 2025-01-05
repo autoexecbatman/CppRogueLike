@@ -35,15 +35,15 @@ bool LightningBolt::use(Item& owner, Creature& wearer)
 
 }
 
-void LightningBolt::load(TCODZip& zip)
+void LightningBolt::load(const json& j)
 {
-	maxRange = zip.getInt();
-	damage = zip.getInt();
+	maxRange = j["maxRange"];
+	damage = j["damage"];
 }
 
-void LightningBolt::save(TCODZip& zip)
+void LightningBolt::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LIGHTNING_BOLT));
-	zip.putInt(maxRange);
-	zip.putInt(damage);
+	j["type"] = static_cast<int>(PickableType::LIGHTNING_BOLT);
+	j["maxRange"] = maxRange;
+	j["damage"] = damage;
 }

@@ -15,21 +15,20 @@
 #include <curses.h>
 #include <vector>
 #include <string>
-#include <gsl/pointers>
 
 #include "../Persistent/Persistent.h"
 #include "LogMessage.h"
 
 inline constexpr int GUI_HEIGHT{ 7 };
+inline constexpr int GUI_WIDTH{ 118 };
 
 class Gui : public Persistent
 {
 private:
 	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
-
 	int guiMessageColor{ 0 }; // the color of the message to be displayed on the gui
 	std::string guiMessage{}; // the message to be displayed on the gui
-	std::vector<std::vector<std::pair<int, std::string>>> displayMessages; // a container to read messages from, having a color and a string as a pair
+	std::vector<std::vector<LogMessage>> displayMessages; // a container to read messages from, having a color and a string as a pair
 
 	WINDOW* guiWin{ nullptr };
 
@@ -39,6 +38,8 @@ private:
 	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 public:
+	bool guiInit{ false };
+
 	void gui_init() noexcept; // initialize the gui
 	void gui_shutdown() noexcept; // shutdown the gui
 	void gui_update(); // update the gui
@@ -50,20 +51,15 @@ public:
 
 	void gui() noexcept;
 	
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
-	void addDisplayMessage(const std::vector<std::pair<int, std::string>>& message);
+	void addDisplayMessage(const std::vector<LogMessage>& message);
 	void renderMessages() noexcept;
 
 protected:
-	gsl::owner<WINDOW*> statsWindow{ nullptr };
-	gsl::owner<WINDOW*> messageLogWindow{ nullptr };
-	
-	//==LOG==
-	//std::vector<std::shared_ptr<LogMessage>> log; // the message log
-
-	void print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage);
+	WINDOW* statsWindow{ nullptr };
+	WINDOW* messageLogWindow{ nullptr };
 
 	void renderBar(
 		int x,

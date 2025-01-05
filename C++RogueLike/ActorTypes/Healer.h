@@ -14,9 +14,10 @@ public:
 
 	Healer(int amountToHeal);
 
-	bool use(Item& owner, Creature& wearer);
+	bool use(Item& owner, Creature& wearer) override;
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(const json& j) override;
+	void save(json& j) override;
+	PickableType get_type() const override;
 };
 //====

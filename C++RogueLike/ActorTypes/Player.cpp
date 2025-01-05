@@ -95,21 +95,23 @@ void Player::calculate_thaco()
 	CalculatedTHAC0s thaco;
 	switch (playerClassState)
 	{	
-	case Player::PlayerClassState::FIGHTER:
+	case PlayerClassState::FIGHTER:
 		game.player->destructible->thaco = thaco.getFighter(playerLevel);
 		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
 		break;
-	case Player::PlayerClassState::ROGUE:
+	case PlayerClassState::ROGUE:
 		game.player->destructible->thaco = thaco.getRogue(playerLevel);
 		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
 		break;
-	case Player::PlayerClassState::CLERIC:
+	case PlayerClassState::CLERIC:
 		game.player->destructible->thaco = thaco.getCleric(playerLevel);
 		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
 		break;
-	case Player::PlayerClassState::WIZARD:
+	case PlayerClassState::WIZARD:
 		game.player->destructible->thaco = thaco.getWizard(playerLevel);
 		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
+		break;
+	case PlayerClassState::NONE:
 		break;
 	default:
 		break;

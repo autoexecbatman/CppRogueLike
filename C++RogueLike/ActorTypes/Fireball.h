@@ -16,7 +16,7 @@ public:
 
 	void animation(Vector2D position, int maxRange);
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(const json& j);
+	void save(json& j);
 };
 //====

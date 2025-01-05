@@ -10,6 +10,7 @@
 #include <deque>
 
 #include "Gui/Gui.h"
+#include "Gui/LogMessage.h"
 #include "Map/Map.h"
 #include "Colors/Colors.h"
 #include "Actor/Actor.h"
@@ -21,14 +22,15 @@
 class Game
 {
 private:
-	std::vector<std::pair<int, std::string>> attackMessageParts; // this vector holds the parts of the attack message
+	std::vector<LogMessage> attackMessageParts; // this vector holds the parts of the attack message
 public:
-	std::vector <std::vector<std::pair<int, std::string>>> attackMessagesWhole; // this vector holds all of the attack messages
+	std::vector <std::vector<LogMessage>> attackMessagesWhole; // this vector holds all of the attack messages
 	std::string messageToDisplay{ "Init Message" };
 	int messageColor{ EMPTY_PAIR };
 
 	bool run{ true };
 	bool shouldSave{ true };
+	bool gameInit{ false };
 	int time{ 0 };
 	enum class GameStatus
 	{
@@ -37,20 +39,20 @@ public:
 	gameStatus{ GameStatus::STARTUP };
 	RandomDice d; // Random number generator.
 
-	std::unique_ptr<Stairs> stairs;
+	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0) };
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
-	std::vector<Vector2D> rooms;
 
+	std::vector<Vector2D> rooms; // room coordinates after bsp
 	std::vector<std::unique_ptr<Creature>> creatures; // a vector of actors
 	std::vector< std::unique_ptr<Object>> objects; // a vector of objects
 	std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
 
 	// for loading from json
-	std::vector<Weapons> weapons; // a vector of weapons
-	std::vector<StrengthAttributes> strengthAttributes; // a vector of strength attributes
+	std::vector<Weapons> weapons{ loadWeapons() }; // a vector of weapons
+	std::vector<StrengthAttributes> strengthAttributes{ loadStrengthAttributes() }; // a vector of strength attributes
 
 	// Menu container for que
 	std::deque<std::unique_ptr<BaseMenu>> menus;

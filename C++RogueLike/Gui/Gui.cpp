@@ -1,6 +1,7 @@
 // file: Gui.cpp
 #include <iostream>
 #include <gsl/util>
+#include <span>
 
 #include "Gui.h"
 #include "LogMessage.h"
@@ -38,7 +39,7 @@ constexpr int LOG_X = 60;
 constexpr int LOG_MAX_MESSAGES = 5;
 // ==== ==== ==== ==== ====
 
-void Gui::addDisplayMessage(const std::vector<std::pair<int, std::string>>& message)
+void Gui::addDisplayMessage(const std::vector<LogMessage>& message)
 {
 	displayMessages.push_back(message);
 }
@@ -49,8 +50,8 @@ void Gui::renderMessages() noexcept {
 		// Iterate through each part of the message
 		for (const auto& part : message) {
 			// Extract color and text
-			const int color = part.first;
-			const std::string& text = part.second;
+			const int color = part.logMessageColor;
+			const std::string& text = part.logMessageText;
 
 			// Render logic here using color and text
 		}
@@ -133,16 +134,16 @@ void Gui::gui_print_log()
 
 	for (int i = 0; i < messagesToShow; i++)
 	{
-		const std::vector<std::pair<int, std::string>>& messageParts = game.attackMessagesWhole.at(game.attackMessagesWhole.size() - 1 - i);
+		const std::vector<LogMessage>& messageParts = game.attackMessagesWhole.at(game.attackMessagesWhole.size() - 1 - i);
 
 		int currentX = 0; // starting position for each message
 
 		for (const auto& part : messageParts)
 		{
-			wattron(messageLogWindow, COLOR_PAIR(part.first));  // Turn on color
-			mvwprintw(messageLogWindow, i, currentX, part.second.c_str());
-			wattroff(messageLogWindow, COLOR_PAIR(part.first)); // Turn off color immediately after
-			currentX += part.second.size(); // increment the X position by the length of the message part
+			wattron(messageLogWindow, COLOR_PAIR(part.logMessageColor));  // Turn on color
+			mvwprintw(messageLogWindow, i, currentX, part.logMessageText.c_str());
+			wattroff(messageLogWindow, COLOR_PAIR(part.logMessageColor)); // Turn off color immediately after
+			currentX += part.logMessageText.size(); // increment the X position by the length of the message part
 		}
 	}
 	wattroff(messageLogWindow, COLOR_PAIR(guiMessageColor)); // Turn off color
@@ -187,7 +188,6 @@ void Gui::gui() noexcept
 {
 	refresh();
 
-	/*gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);*/
 	gui_clear();
 	box(guiWin, 0, 0);
 
@@ -265,17 +265,6 @@ void Gui::renderBar(
 	delwin(con);
 }
 
-void Gui::print_container(const std::vector<std::shared_ptr<LogMessage>>& logMessage)
-{
-	int i = 0;
-	for (const auto& m : logMessage)
-	{
-		std::cout << i << m->logMessageText << " ";
-		i++;
-	}
-	std::cout << '\n';
-}
-
 void Gui::renderMouseLook()
 {
 	const int mouseY = Mouse_status.y;
@@ -314,7 +303,7 @@ void Gui::renderMouseLook()
 	);
 }
 
-void Gui::save(TCODZip& zip)
+void Gui::save(json& j)
 {
 	//const int logSize = gsl::narrow_cast<int>(log.size());
 	//zip.putInt(logSize);
@@ -325,7 +314,7 @@ void Gui::save(TCODZip& zip)
 	//}
 }
 
-void Gui::load(TCODZip& zip)
+void Gui::load(const json& j)
 {
 	//int nbMessages = zip.getInt();
 	//while (nbMessages > 0) 

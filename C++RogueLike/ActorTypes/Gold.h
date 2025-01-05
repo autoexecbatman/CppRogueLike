@@ -10,6 +10,7 @@ class Gold : public Pickable
 
 	bool use(Item& owner, Creature& wearer) override;
 
-	void save(TCODZip& zip) override;
-	void load(TCODZip& zip) override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::GOLD; }
 };

@@ -11,8 +11,9 @@
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Monsters.h"
 #include "../MenuTrade.h"
+#include "Attacker.h"
 
-Attacker::Attacker(std::string_view roll) : roll(roll) {}
+Attacker::Attacker(std::string roll) : roll(roll) {}
 
 void Attacker::attack(Creature& attacker, Creature& target)
 {
@@ -79,16 +80,14 @@ void Attacker::attack(Creature& attacker, Creature& target)
 	}
 }
 
-void Attacker::load(TCODZip& zip)
+void Attacker::load(const json& j)
 {
-	/*dmg = zip.getInt();*/
-	roll = zip.getString();
+	roll = j["roll"];
 }
 
-void Attacker::save(TCODZip& zip)
+void Attacker::save(json& j)
 {
-	/*zip.putInt(dmg);*/
-	zip.putString(roll.data());
+	j["roll"] = roll;
 }
 
 // end of file: Attacker.cpp

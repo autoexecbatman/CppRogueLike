@@ -32,29 +32,29 @@ void Container::remove(std::unique_ptr<Item> actor)
 	game.log("Item removed from inventory");
 }
 
-void Container::load(TCODZip& zip)
+void Container::load(const json& j)
 {
-	invSize = zip.getInt();
-	int nbActors = zip.getInt();
-	while (nbActors > 0)
-	{
-		auto actor = std::make_unique<Item>(Vector2D(0, 0), ActorData());
-		actor->load(zip);
-		inv.push_back(std::move(actor));
-		nbActors--;
-	}
+	//invSize = zip.getInt();
+	//int nbActors = zip.getInt();
+	//while (nbActors > 0)
+	//{
+	//	auto actor = std::make_unique<Item>(Vector2D(0, 0), ActorData());
+	//	actor->load(zip);
+	//	inv.push_back(std::move(actor));
+	//	nbActors--;
+	//}
 }
 
-void Container::save(TCODZip& zip)
+void Container::save(json& j)
 {
-	zip.putInt(invSize);
-	const size_t nbActors = inv.size();
-	zip.putInt(nbActors);
-	// iterate through the inventory and save the item
-	for (const auto& actor : inv)
-	{
-		actor->save(zip);
-	}
+	//zip.putInt(invSize);
+	//const size_t nbActors = inv.size();
+	//zip.putInt(nbActors);
+	//// iterate through the inventory and save the item
+	//for (const auto& actor : inv)
+	//{
+	//	actor->save(zip);
+	//}
 }
 
 void Container::print_container(std::span<std::unique_ptr<Actor>> container)

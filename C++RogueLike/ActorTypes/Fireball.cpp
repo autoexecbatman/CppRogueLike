@@ -137,15 +137,15 @@ void Fireball::animation(Vector2D position, int maxRange)
 	}
 }
 
-void Fireball::load(TCODZip& zip)
+void Fireball::load(const json& j)
 {
-	maxRange = zip.getInt();
-	damage = zip.getInt();
+	maxRange = j["maxRange"].get<int>();
+	damage = j["damage"].get<int>();
 }
 
-void Fireball::save(TCODZip& zip)
+void Fireball::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::FIREBALL));
-	zip.putInt(maxRange);
-	zip.putInt(damage);
+	j["type"] = static_cast<int>(PickableType::FIREBALL);
+	j["maxRange"] = maxRange;
+	j["damage"] = damage;
 }

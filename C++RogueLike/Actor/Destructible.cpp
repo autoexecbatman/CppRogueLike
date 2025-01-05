@@ -73,83 +73,68 @@ int Destructible::heal(int hpToHeal)
 	return hpToHeal;
 }
 
-void Destructible::load(TCODZip& zip)
+void Destructible::load(const json& j)
 {
-	hpMax = zip.getInt();
-	hp = zip.getInt();
-	dr = zip.getInt();
-	corpseName = _strdup(zip.getString());
-	xp = zip.getInt();
-	thaco = zip.getInt();
-	armorClass = zip.getInt();
+	hpMax = j.at("hpMax").get<int>();
+	hp = j.at("hp").get<int>();
+	dr = j.at("dr").get<int>();
+	corpseName = j.at("corpseName").get<std::string>();
+	xp = j.at("xp").get<int>();
+	thaco = j.at("thaco").get<int>();
+	armorClass = j.at("armorClass").get<int>();
 }
 
-void Destructible::save(TCODZip& zip)
+void Destructible::save(json& j)
 {
-	zip.putInt(hpMax);
-	zip.putInt(hp);
-	zip.putInt(dr);
-	zip.putString(corpseName.c_str());
-	zip.putInt(xp);
-	zip.putInt(thaco);
-	zip.putInt(armorClass);
+	j["hpMax"] = hpMax;
+	j["hp"] = hp;
+	j["dr"] = dr;
+	j["corpseName"] = corpseName;
+	j["xp"] = xp;
+	j["thaco"] = thaco;
+	j["armorClass"] = armorClass;
 }
 
-//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-//int putEnum(T value) { putInt(static_cast<int>(value)); }
-//
-//template<typename T, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-//T getEnum() { return static_cast<T>(getInt()); }
-
-
-//Usage:
-//putEnum(DestructibleType::PLAYER);
-//auto des_type = getEnum<DestructibleType>();
-
-//template<typename Enum, typename std::enable_if<std::is_enum<T>::value, int>::type = 0>
-//int putEnum(Enum value) { return putInt(static_cast<std::underlying_type_v<Enum>>(value)); }
-
-void PlayerDestructible::save(TCODZip& zip)
+void PlayerDestructible::save(json& j)
 {
-	zip.putInt(static_cast<int>(DestructibleType::PLAYER));
-	Destructible::save(zip);
+	j["type"] = static_cast<int>(DestructibleType::PLAYER);
+	Destructible::save(j);
 }
 
-void MonsterDestructible::save(TCODZip& zip) 
+void MonsterDestructible::save(json& j) 
 {
-	zip.putInt(static_cast<std::underlying_type_t<DestructibleType>>(DestructibleType::MONSTER));
-	
-	Destructible::save(zip);
+	j["type"] = static_cast<int>(DestructibleType::MONSTER);
+	Destructible::save(j);
 }
 
-std::unique_ptr<Destructible> Destructible::create(TCODZip& zip)
+std::unique_ptr<Destructible> Destructible::create(const json& j)
 {
-	DestructibleType type{ (DestructibleType)zip.getInt() };
-	std::unique_ptr<Destructible> destructible{};
-
-	switch (type)
+	if (j.contains("type") && j["type"].is_number())
 	{
-	case DestructibleType::MONSTER:
-	{
-		destructible = std::make_unique<MonsterDestructible>(0, 0, "", 0, 0, 0);
-		break;
+		const auto type = static_cast<DestructibleType>(j["type"].get<int>());
+		std::unique_ptr<Destructible> destructible{};
+		switch (type)
+		{
+		case DestructibleType::MONSTER:
+		{
+			destructible = std::make_unique<MonsterDestructible>(0, 0, "", 0, 0, 0);
+			break;
+		}
+		case DestructibleType::PLAYER:
+		{
+			destructible = std::make_unique<PlayerDestructible>(0, 0, "", 0, 0, 0);
+			break;
+		}
+		default:
+			break;
+		}
+		if (destructible)
+		{
+			destructible->load(j);
+		}
+		return destructible;
 	}
-
-	case DestructibleType::PLAYER:
-	{
-		destructible = std::make_unique<PlayerDestructible>(0, 0, "", 0, 0, 0);
-		break;
-	}
-	default:
-		break;
-	}
-	
-	if (destructible)
-	{
-		destructible->load(zip);
-	}
-	
-	return destructible;
+	return nullptr;
 }
 
 //==PlayerDestructible==

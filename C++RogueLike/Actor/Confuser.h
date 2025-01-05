@@ -18,7 +18,8 @@ public:
 
 	bool use(Item& owner, Creature& wearer);
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(const json& j) override;
+	void save(json& j) override;
+	PickableType get_type() const override { return PickableType::CONFUSER; }
 };
 //====

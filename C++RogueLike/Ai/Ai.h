@@ -18,7 +18,7 @@ public:
 
 	virtual void update(Creature& owner) = 0;
 
-	static std::unique_ptr<Ai> create(TCODZip& zip);
+	static std::unique_ptr<Ai> create(const json& j);
 
 protected:
 	enum class AiType

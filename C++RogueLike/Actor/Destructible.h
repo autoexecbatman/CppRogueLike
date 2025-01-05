@@ -25,15 +25,15 @@ public:
 	Destructible& operator=(const Destructible&) = delete;
 	Destructible& operator=(Destructible&&) = delete;
 
-	bool is_dead() noexcept { return hp <= 0; }
+	bool is_dead() const noexcept { return hp <= 0; }
 	void take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner); // handles death, owner killed
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 
-	void load(TCODZip& zip);
-	void save(TCODZip& zip);
+	void load(const json& j) override;
+	void save(json& j) override;
 
-	static std::unique_ptr<Destructible> create(TCODZip& zip);
+	static std::unique_ptr<Destructible> create(const json& j);
 protected:
 	enum class DestructibleType
 	{
@@ -47,7 +47,7 @@ class MonsterDestructible : public Destructible
 public:
 	MonsterDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void die(Creature& owner) override;
-	void save(TCODZip& zip);
+	void save(json& j);
 };
 //====
 class PlayerDestructible : public Destructible
@@ -55,7 +55,7 @@ class PlayerDestructible : public Destructible
 public:
 	PlayerDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void die(Creature& owner) override;
-	void save(TCODZip& zip);
+	void save(json& j);
 };
 //====
 

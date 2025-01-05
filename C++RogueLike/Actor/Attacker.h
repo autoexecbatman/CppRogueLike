@@ -8,20 +8,20 @@
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 #include "../Persistent/Persistent.h"
-#include "string_view"
+#include <string>
 
 class Creature;
 
 class Attacker : public Persistent
 {
 public:
-	std::string_view roll{ "diceroll" };
-	Attacker(std::string_view roll);
+	std::string roll{ "diceroll" };
+	Attacker(std::string roll);
 
 	void attack(Creature& attacker, Creature& target);
 	
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 };
 
 #endif // !ATTACKER_H

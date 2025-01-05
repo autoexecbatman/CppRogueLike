@@ -37,15 +37,15 @@ void AiMonster::update(Creature& owner)
 	}
 }
 
-void AiMonster::load(TCODZip& zip)
+void AiMonster::load(const json& j)
 {
-	moveCount = zip.getInt();
+	/*moveCount = zip.getInt();*/
 }
 
-void AiMonster::save(TCODZip& zip)
+void AiMonster::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::MONSTER));
-	zip.putInt(moveCount);
+	//zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::MONSTER));
+	//zip.putInt(moveCount);
 }
 
 //====

@@ -51,6 +51,8 @@ struct Tile
 class Map : public Persistent
 {
 private:
+	int map_height, map_width;
+
 	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
 	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else {throw std::out_of_range { "Map::get_index() out of bounds" };} }
@@ -65,14 +67,12 @@ private:
 	bool is_floor(Vector2D pos) const { return get_tile_type(pos) == TileType::FLOOR;}
 	bool is_water(Vector2D pos) const;
 	void set_explored(Vector2D pos); //set the tile as explored
-
-	int map_height, map_width;
 public:
 
 	Map(int map_height, int map_width);
 
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 	void init(bool withActors);
 	bool is_in_fov(Vector2D pos) const;

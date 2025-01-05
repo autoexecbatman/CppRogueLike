@@ -94,11 +94,11 @@ void AiShopkeeper::update(Creature& owner)
 	//}
 }
 
-void AiShopkeeper::load(TCODZip& zip)
+void AiShopkeeper::load(const json& j)
 {
 }
 
-void AiShopkeeper::save(TCODZip& zip)
+void AiShopkeeper::save(json& j)
 {
 }
 // file: AiShopkeeper.cpp

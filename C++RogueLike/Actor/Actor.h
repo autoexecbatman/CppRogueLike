@@ -55,8 +55,8 @@ public:
 	Actor(Vector2D position, ActorData data);
 	virtual ~Actor() = default;
 
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 	int get_tile_distance(Vector2D tilePosition) const noexcept;
 	void render() const noexcept;
@@ -72,8 +72,8 @@ public:
 		/*add_state(ActorState::FOV_ONLY);*/
 	};
 
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 	void update(); // update() will handle the monster turn.
 
@@ -118,8 +118,8 @@ class Item : public Object
 public:
 	Item(Vector2D position, ActorData data);
 
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 
 	int value{ 1 };
 

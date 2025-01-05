@@ -14,8 +14,8 @@ class AiShopkeeper : public Ai
 private:
 	int moveCount = 0;
 	void update(Creature& owner) override;
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 	int calculateStep(int positionDifference);
 	void moveToTarget(Actor& owner, int targetx, int targety);
 public:

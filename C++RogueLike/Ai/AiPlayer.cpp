@@ -61,7 +61,7 @@ void AiPlayer::update(Creature& owner)
 	}
 }
 
-void AiPlayer::load(TCODZip& zip)
+void AiPlayer::load(const json& j)
 {
 	// this is a player, so nothing to load
 	// because the player is always the same ? 
@@ -71,9 +71,10 @@ void AiPlayer::load(TCODZip& zip)
 	// but I don't know how to do it yet
 }
 
-void AiPlayer::save(TCODZip& zip)
+void AiPlayer::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));
+	/*zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));*/
+
 }
 
 int AiPlayer::get_next_level_xp(Creature& owner)

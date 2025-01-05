@@ -12,6 +12,7 @@
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
 #include "../Ai/AiMonsterConfused.h"
+#include "../ActorTypes/Gold.h"
 
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)
@@ -27,77 +28,52 @@ bool Pickable::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-std::unique_ptr<Pickable> Pickable::create(TCODZip& zip)
+std::unique_ptr<Pickable> Pickable::create(const json& j)
 {
-	const PickableType type = static_cast<PickableType>(zip.getInt());
-	std::unique_ptr<Pickable> pickable = nullptr;
+	if (!j.contains("type") || !j["type"].is_number()) {
+		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
+	}
+
+	auto type = static_cast<PickableType>(j["type"].get<int>());
+	std::unique_ptr<Pickable> pickable;
 
 	switch (type)
 	{
-
 	case PickableType::HEALER:
-	{
 		pickable = std::make_unique<Healer>(0);
 		break;
-	}
-
 	case PickableType::LIGHTNING_BOLT:
-	{
 		pickable = std::make_unique<LightningBolt>(0, 0);
 		break;
-	}
-
 	case PickableType::CONFUSER:
-	{
 		pickable = std::make_unique<Confuser>(0, 0);
 		break;
-	}
-
 	case PickableType::FIREBALL:
-	{
 		pickable = std::make_unique<Fireball>(0, 0);
 		break;
-	}
-
-	case PickableType::LONGSWORD:
-	{
-		pickable = std::make_unique<LongSword>();
-		break;
-	}
-
 	case PickableType::DAGGER:
-	{
 		pickable = std::make_unique<Dagger>();
 		break;
-	}
-
+	case PickableType::LONGSWORD:
+		pickable = std::make_unique<LongSword>();
+		break;
 	case PickableType::SHORTSWORD:
-	{
 		pickable = std::make_unique<ShortSword>();
 		break;
-	}
-
 	case PickableType::LONGBOW:
-	{
 		pickable = std::make_unique<Longbow>();
 		break;
-	}
-
 	case PickableType::STAFF:
-	{
 		pickable = std::make_unique<Staff>();
 		break;
-	}
-
+	case PickableType::GOLD:
+		pickable = std::make_unique<Gold>(0);
+		break;
+	default:
+		throw std::runtime_error("Unknown PickableType");
 	} // end of switch (type)
 
-	if (!pickable) {
-		game.log("Pickable create() failed. No pickable type found.");
-		game.err("Pickable create() failed. No pickable type found.");
-		return nullptr;
-	}
-	pickable->load(zip);
-
+	pickable->load(j);
 	return pickable;
 }
 
@@ -119,15 +95,20 @@ bool Dagger::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void Dagger::save(TCODZip& zip)
+void Dagger::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::DAGGER));
-	zip.putString(roll.data());
+	j["type"] = static_cast<int>(PickableType::DAGGER); // Save the type
+	j["roll"] = roll; // Save the roll string
 }
 
-void Dagger::load(TCODZip& zip)
+void Dagger::load(const json& j)
 {
-	this->roll = zip.getString();
+	if (j.contains("roll") && j["roll"].is_string()) {
+		roll = j["roll"].get<std::string>(); // Load the roll string
+	}
+	else {
+		throw std::runtime_error("Invalid JSON format for Dagger");
+	}
 }
 
 bool LongSword::use(Item& owner, Creature& wearer)
@@ -147,15 +128,20 @@ bool LongSword::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void LongSword::save(TCODZip& zip)
+void LongSword::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LONGSWORD));
-	zip.putString(roll.data());
+	j["type"] = static_cast<int>(PickableType::LONGSWORD);
+	j["roll"] = roll;
 }
 
-void LongSword::load(TCODZip& zip)
+void LongSword::load(const json& j)
 {
-	this->roll = zip.getString();
+	if (j.contains("roll") && j["roll"].is_string()) {
+		roll = j["roll"].get<std::string>();
+	}
+	else {
+		throw std::runtime_error("Invalid JSON format for LongSword");
+	}
 }
 
 // end of file: Pickable.cpp
@@ -178,15 +164,20 @@ bool ShortSword::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void ShortSword::save(TCODZip& zip)
+void ShortSword::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::SHORTSWORD));
-	zip.putString(roll.data());
+	j["type"] = static_cast<int>(PickableType::SHORTSWORD);
+	j["roll"] = roll;
 }
 
-void ShortSword::load(TCODZip& zip)
+void ShortSword::load(const json& j)
 {
-	this->roll = zip.getString();
+	if (j.contains("roll") && j["roll"].is_string()) {
+		roll = j["roll"].get<std::string>();
+	}
+	else {
+		throw std::runtime_error("Invalid JSON format for ShortSword");
+	}
 }
 
 bool Longbow::use(Item& owner, Creature& wearer)
@@ -206,15 +197,20 @@ bool Longbow::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void Longbow::save(TCODZip& zip)
+void Longbow::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::LONGBOW));
-	zip.putString(roll.data());
+	j["type"] = static_cast<int>(PickableType::LONGBOW);
+	j["roll"] = roll;
 }
 
-void Longbow::load(TCODZip& zip)
+void Longbow::load(const json& j)
 {
-	this->roll = zip.getString();
+	if (j.contains("roll") && j["roll"].is_string()) {
+		roll = j["roll"].get<std::string>();
+	}
+	else {
+		throw std::runtime_error("Invalid JSON format for Longbow");
+	}
 }
 
 bool Staff::use(Item& owner, Creature& wearer)
@@ -234,13 +230,18 @@ bool Staff::use(Item& owner, Creature& wearer)
 	return false;
 }
 
-void Staff::save(TCODZip& zip)
+void Staff::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::STAFF));
-	zip.putString(roll.data());
+	j["type"] = static_cast<int>(PickableType::STAFF);
+	j["roll"] = roll;
 }
 
-void Staff::load(TCODZip& zip)
+void Staff::load(const json& j)
 {
-	this->roll = zip.getString();
+	if (j.contains("roll") && j["roll"].is_string()) {
+		roll = j["roll"].get<std::string>();
+	}
+	else {
+		throw std::runtime_error("Invalid JSON format for Staff");
+	}
 }

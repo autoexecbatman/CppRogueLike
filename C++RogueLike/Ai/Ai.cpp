@@ -9,14 +9,16 @@
 #include "AiShopkeeper.h"
 
 //==AI==
-std::unique_ptr<Ai> Ai::create(TCODZip& zip)
+std::unique_ptr<Ai> Ai::create(const json& j)
 {
-	// read the type of the ai
-	const AiType type{ gsl::narrow_cast<AiType>(zip.getInt()) };
-	std::unique_ptr<Ai> ai{};
+	if (!j.contains("type") || !j["type"].is_number()) {
+		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
+	}
 
-	switch (type)
-	{
+	auto type = static_cast<AiType>(j["type"].get<int>());
+	std::unique_ptr<Ai> ai;
+
+	switch (type) {
 	case AiType::PLAYER:
 		ai = std::make_unique<AiPlayer>();
 		break;
@@ -24,30 +26,16 @@ std::unique_ptr<Ai> Ai::create(TCODZip& zip)
 		ai = std::make_unique<AiMonster>();
 		break;
 	case AiType::CONFUSED_MONSTER:
-		ai = std::make_unique<AiMonsterConfused>(0, std::make_unique<AiMonster>());
+		ai = std::make_unique<AiMonsterConfused>(0,nullptr);
 		break;
 	case AiType::SHOPKEEPER:
 		ai = std::make_unique<AiShopkeeper>();
 		break;
 	default:
-		std::cout << "Error: Ai::create() - unknown AiType" << std::endl;
-		ai = std::make_unique<AiPlayer>(); // assign default dummy value
-		break;
-	}
+		throw std::runtime_error("Unknown AiType");
+	} // end of switch (type)
 
-	if (ai)
-	{
-		try
-		{
-			ai->load(zip);
-		}
-		catch (const std::exception& e)
-		{
-			std::cout << "Error: Ai::create() - Failed to load ai. Exception: " << e.what() << std::endl;
-			ai = std::make_unique<AiPlayer>(); // assign default dummy value in case of loading failure
-		}
-	}
-
+	ai->load(j);
 	return ai;
 }
 //====

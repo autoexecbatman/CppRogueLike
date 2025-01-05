@@ -47,8 +47,6 @@ int main()
 	game.menus.push_back(std::make_unique<Menu>());
 
 	Gui gui;
-	static bool gInit{ false };
-	static bool guiInit{ false };
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
@@ -70,20 +68,20 @@ int main()
 		}
 		else
 		{
-			if (!gInit)
+			if (!game.gameInit)
 			{
 				game.init();
-				gInit = true;
+				game.gameInit = true;
 			}
 			//==DEBUG==
 			game.log("//====================LOOP====================//");
 			game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
 			//==INIT_GUI==
-			if (!guiInit)
+			if (!gui.guiInit)
 			{
 				gui.gui_init();
-				guiInit = true;
+				gui.guiInit = true;
 			}
 
 			//==UPDATE==

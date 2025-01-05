@@ -28,71 +28,75 @@ Actor::Actor(Vector2D position, ActorData data)
 {}
 
 //====
-void Actor::load(TCODZip& zip)
+void Actor::load(const json& j)
 {
-	// this block assigns the values from the zip file to the actor
-	position.x = zip.getInt();
-	position.y = zip.getInt();
-
-	actorData.ch = zip.getInt();
-	actorData.color = zip.getInt();
-	actorData.name = _strdup(zip.getString());
-
-	// this block assigns checks if the actor has a component
-	/*const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };*/
-	
-	// this block assigns the values from the zip file to the actor's components if they exist.
-	
+	position.x = j["position"]["x"];
+	position.y = j["position"]["y"];
+	direction.x = j["direction"]["x"];
+	direction.y = j["direction"]["y"];
+	actorData.ch = j["actorData"].at("ch").get<char>();
+	actorData.name = j["actorData"].at("name").get<std::string>();
+	actorData.color = j["actorData"].at("color").get<int>();
+	states = j["states"].get<std::vector<ActorState>>(); // Deserialize states
 }
 
-void Creature::load(TCODZip& zip)
+void Actor::save(json& j)
 {
-	// this block assigns checks if the actor has a component
-	const bool hasAttacker{ gsl::narrow_cast<bool>(zip.getInt()) };
-	const bool hasAi{ gsl::narrow_cast<bool>(zip.getInt()) };
-	const bool hasDestructible{ gsl::narrow_cast<bool>(zip.getInt()) };
-	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
+	j["position"] = { {"y", position.y}, {"x", position.x} };
+	j["direction"] = { {"y", direction.y}, {"x", direction.x} };
+	j["actorData"] = {
+		{"ch", actorData.ch},
+		{"name", actorData.name},
+		{"color", actorData.color}
+	};
+	j["states"] = states; // Serialize vector of states
+}
 
-	// this block assigns the values from the zip file to the actor's components if they exist.
-	if (hasAttacker)
-	{
+void Creature::load(const json& j)
+{
+	Actor::load(j); // Call base class load
+	strength = j["strength"];
+	dexterity = j["dexterity"];
+	constitution = j["constitution"];
+	intelligence = j["intelligence"];
+	wisdom = j["wisdom"];
+	charisma = j["charisma"];
+	playerLevel = j["playerLevel"];
+	playerGold = j["playerGold"];
+	gender = j["gender"];
+	weaponEquipped = j["weaponEquipped"];
+	if (j.contains("attacker")) {
 		attacker = std::make_unique<Attacker>("");
-		attacker->load(zip);
+		attacker->load(j["attacker"]);
 	}
-	if (hasDestructible)
-	{
-		destructible = Destructible::create(zip);
-	}
-	if (hasAi)
-	{
-		ai = Ai::create(zip);
-	}
-	if (hasContainer)
-	{
-		container = std::make_unique<Container>(0);
-		container->load(zip);
+	if (j.contains("destructible")) {
+		destructible = Destructible::create(j["destructible"]);
 	}
 }
 
-void Creature::save(TCODZip& zip)
+void Creature::save(json& j)
 {
-	// Add a debug log to display the actor name
-	game.log("Saving actor: " + actorData.name);
-
-	zip.putInt(position.x);
-	zip.putInt(position.y);
-	zip.putInt(actorData.ch);
-	zip.putInt(actorData.color);
-	zip.putString(actorData.name.c_str());
-
-	zip.putInt(attacker != nullptr);
-	zip.putInt(destructible != nullptr);
-	zip.putInt(ai != nullptr);
-
-	if (attacker) attacker->save(zip);
-	if (destructible) destructible->save(zip);
-	if (ai) ai->save(zip);
-	if (container) container->save(zip);
+	Actor::save(j); // Call base class save
+	j["strength"] = strength;
+	j["dexterity"] = dexterity;
+	j["constitution"] = constitution;
+	j["intelligence"] = intelligence;
+	j["wisdom"] = wisdom;
+	j["charisma"] = charisma;
+	j["playerLevel"] = playerLevel;
+	j["playerGold"] = playerGold;
+	j["gender"] = gender;
+	j["weaponEquipped"] = weaponEquipped;
+	if (attacker) {
+		json attackerJson;
+		attacker->save(attackerJson);
+		j["attacker"] = attackerJson;
+	}
+	if (destructible) {
+		json destructibleJson;
+		destructible->save(destructibleJson);
+		j["destructible"] = destructibleJson;
+	}
 }
 
 void Creature::pick()
@@ -127,18 +131,6 @@ void Creature::drop()
 			}
 		}
 	}
-}
-
-void Actor::save(TCODZip& zip)
-{
-	// Add a debug log to display the actor name
-	game.log("Saving actor: " + actorData.name);
-
-	zip.putInt(position.x);
-	zip.putInt(position.y);
-	zip.putInt(actorData.ch);
-	zip.putInt(actorData.color);
-	zip.putString(actorData.name.c_str());
 }
 
 // the actor render function with color
@@ -194,29 +186,24 @@ int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 //==Item==
 Item::Item(Vector2D position, ActorData data) : Object(position, data) {};
 
-void Item::load(TCODZip& zip)
+void Item::load(const json& j)
 {
-	// this block assigns checks if the actor has a component
-	const bool hasPickable{ gsl::narrow_cast<bool>(zip.getInt()) };
-	const bool hasContainer{ gsl::narrow_cast<bool>(zip.getInt()) };
-
-	// this block assigns the values from the zip file to the actor's components if they exist.
-	if (hasPickable) { pickable = Pickable::create(zip); }
+	Object::load(j); // Call base class load
+	value = j["value"];
+	if (j.contains("pickable")) {
+		pickable = Pickable::create(j["pickable"]);
+	}
 }
 
-void Item::save(TCODZip& zip)
+void Item::save(json& j)
 {
-	// Add a debug log to display the actor name
-	game.log("Saving actor: " + actorData.name);
-
-	zip.putInt(position.x);
-	zip.putInt(position.y);
-	zip.putInt(actorData.ch);
-	zip.putInt(actorData.color);
-	zip.putString(actorData.name.c_str());
-
-	zip.putInt(pickable != nullptr);
-	if (pickable) pickable->save(zip);
+	Object::save(j); // Call base class save
+	j["value"] = value;
+	if (pickable) {
+		json pickableJson;
+		pickable->save(pickableJson);
+		j["pickable"] = pickableJson;
+	}
 }
 
 // end of file: Actor.cpp

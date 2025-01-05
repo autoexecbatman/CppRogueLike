@@ -12,8 +12,8 @@ class AiPlayer : public Ai
 {
 public:
 	void update(Creature& owner) override;
-	void load(TCODZip& zip) override;
-	void save(TCODZip& zip) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 	void display_inventory(Creature& owner);
 private:
 	int get_next_level_xp(Creature& owner);

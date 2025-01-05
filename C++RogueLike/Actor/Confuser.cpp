@@ -36,15 +36,15 @@ bool Confuser::use(Item& owner, Creature& wearer)
 	return Pickable::use(owner, wearer);
 }
 
-void Confuser::load(TCODZip& zip)
+void Confuser::load(const json& j)
 {
-	nbTurns = zip.getInt();
-	range = zip.getInt();
+	nbTurns = j["nbTurns"].get<int>();
+	range = j["range"].get<int>();
 }
 
-void Confuser::save(TCODZip& zip)
+void Confuser::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<PickableType>>(PickableType::CONFUSER));
-	zip.putInt(nbTurns);
-	zip.putInt(range);
+	j["type"] = static_cast<int>(PickableType::CONFUSER);
+	j["nbTurns"] = nbTurns;
+	j["range"] = range;
 }

@@ -42,23 +42,23 @@ void AiMonsterConfused::update(Creature& owner)
 	}
 }
 
-void AiMonsterConfused::load(TCODZip& zip)
+void AiMonsterConfused::load(const json& j)
 {
-	nbTurns = zip.getInt();
-	oldAi = Ai::create(zip);
+	//nbTurns = zip.getInt();
+	//oldAi = Ai::create(zip);
 }
 
-void AiMonsterConfused::save(TCODZip& zip)
+void AiMonsterConfused::save(json& j)
 {
-	zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
-	zip.putInt(nbTurns);
-	if (oldAi != nullptr)
-	{
-		oldAi->save(zip);
-	}
-	else
-	{
-		std::cout << "Error: save() called on actor with no oldAi." << std::endl;
-		exit(-1);
-	}
+	//zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
+	//zip.putInt(nbTurns);
+	//if (oldAi != nullptr)
+	//{
+	//	oldAi->save(zip);
+	//}
+	//else
+	//{
+	//	std::cout << "Error: save() called on actor with no oldAi." << std::endl;
+	//	exit(-1);
+	//}
 }
