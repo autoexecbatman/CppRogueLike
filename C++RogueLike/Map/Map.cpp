@@ -392,7 +392,8 @@ void Map::dig(Vector2D begin, Vector2D end)
 	if (begin.x > end.x) { std::swap(begin.x, end.x); }
 	if (begin.y > end.y) { std::swap(begin.y, end.y); }
 
-	const int rollD2 = game.d.d2(); // 50% to dig square or diamond shape
+	//const int rollD2 = game.d.d2(); // 50% to dig square or diamond shape
+	const int rollD2 = rng_unique->getInt(1, 2); // 50% to dig square or diamond shape
 	if (rollD2 == 1)
 	{
 		for (int tileY = begin.y; tileY <= end.y; tileY++)
@@ -534,7 +535,8 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 	{
 		for (waterPos.x = begin.x; waterPos.x <= end.x; ++waterPos.x)
 		{
-			const int rolld100 = game.d.d100();
+			/*const int rolld100 = game.d.d100();*/
+			const int rolld100 = rng_unique->getInt(1, 100);
 			if (rolld100 < waterPercentage)
 			{
 				set_tile(waterPos, TileType::WATER);
