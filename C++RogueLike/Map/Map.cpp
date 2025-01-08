@@ -173,7 +173,8 @@ void Map::load(const json& j)
 	seed = j.at("seed").get<int>();
 
 	tiles.clear();
-	for (const auto& tileJson : j.at("tiles")) {
+	for (const auto& tileJson : j.at("tiles"))
+	{
 		Vector2D position(
 			tileJson.at("position").at("y").get<int>(),
 			tileJson.at("position").at("x").get<int>()
@@ -189,7 +190,7 @@ void Map::load(const json& j)
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	bsp(map_width, map_height, *rng_unique, false);
-
+	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 }
 
 void Map::save(json& j)
@@ -199,12 +200,15 @@ void Map::save(json& j)
 	j["seed"] = seed;
 
 	j["tiles"] = json::array();
-	for (const auto& tile : tiles) {
-		j["tiles"].push_back({
-			{"position", {{"y", tile.position.y}, {"x", tile.position.x}}},
-			{"type", static_cast<int>(tile.type)}, // Assuming TileType is an enum
-			{"explored", tile.explored}
-			});
+	for (const auto& tile : tiles)
+	{
+		j["tiles"].push_back(
+			{
+				{"position", { {"y", tile.position.y}, {"x", tile.position.x} } },
+				{"type", static_cast<int>(tile.type)}, // TileType is an enum
+				{"explored", tile.explored}
+			}
+		);
 	}
 }
 
