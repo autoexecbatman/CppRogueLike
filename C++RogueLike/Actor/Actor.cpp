@@ -64,6 +64,35 @@ void Actor::save(json& j)
 	j["states"] = statesJson;
 }
 
+
+// a function to get the Chebyshev distance from an actor to a specific tile of the map
+int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
+{
+	// using chebyshev distance
+	const int distance = std::max(abs(position.x - tilePosition.x), abs(position.y - tilePosition.y));
+
+	mvprintw(10, 0, "Distance: %d", distance);
+
+	return distance;
+}
+
+// the actor render function with color
+void Actor::render() const noexcept
+{
+	if (is_visible())
+	{
+		attron(COLOR_PAIR(actorData.color));
+		mvaddch(position.y, position.x, actorData.ch);
+		attroff(COLOR_PAIR(actorData.color));
+	}
+}
+
+// check if the actor is visible
+bool Actor::is_visible() const noexcept
+{
+	return (!has_state(ActorState::FOV_ONLY) && game.map->is_explored(position)) || game.map->is_in_fov(position);
+}
+
 void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
@@ -132,6 +161,28 @@ void Creature::save(json& j)
 	}
 }
 
+// the actor update
+void Creature::update()
+{
+	// if the actor has an ai then update the ai
+	if (ai)
+	{
+		ai->update(*this);
+	}
+}
+
+void Creature::equip(Item& item)
+{
+	item.add_state(ActorState::IS_EQUIPPED);
+	weaponEquipped = item.actorData.name;
+}
+
+void Creature::unequip(Item& item)
+{
+	item.remove_state(ActorState::IS_EQUIPPED);
+	weaponEquipped = "None";
+}
+
 void Creature::pick()
 {
 	auto is_null = [](auto&& i) { return !i; };
@@ -164,56 +215,6 @@ void Creature::drop()
 			}
 		}
 	}
-}
-
-// the actor render function with color
-void Actor::render() const noexcept
-{
-	if (is_visible())
-	{
-		attron(COLOR_PAIR(actorData.color));
-		mvaddch(position.y, position.x, actorData.ch);
-		attroff(COLOR_PAIR(actorData.color));
-	}
-}
-
-void Creature::equip(Item& item)
-{
-	item.add_state(ActorState::IS_EQUIPPED);
-	weaponEquipped = item.actorData.name;
-}
-
-void Creature::unequip(Item& item)
-{
-	item.remove_state(ActorState::IS_EQUIPPED);
-	weaponEquipped = "None";
-}
-
-// check if the actor is visible
-bool Actor::is_visible() const noexcept
-{
-	return (!has_state(ActorState::FOV_ONLY) && game.map->is_explored(position)) || game.map->is_in_fov(position);
-}
-
-// the actor update
-void Creature::update()
-{
-	// if the actor has an ai then update the ai
-	if (ai)
-	{
-		ai->update(*this);
-	}
-}
-
-// a function to get the Chebyshev distance from an actor to a specific tile of the map
-int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
-{
-	// using chebyshev distance
-	const int distance = std::max(abs(position.x - tilePosition.x), abs(position.y - tilePosition.y));
-
-	mvprintw(10, 0, "Distance: %d", distance);
-
-	return distance;
 }
 
 //==Item==
