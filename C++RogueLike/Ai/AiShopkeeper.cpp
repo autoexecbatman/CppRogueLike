@@ -96,9 +96,12 @@ void AiShopkeeper::update(Creature& owner)
 
 void AiShopkeeper::load(const json& j)
 {
+	moveCount = j.at("moveCount").get<int>();
 }
 
 void AiShopkeeper::save(json& j)
 {
+	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
+	j["moveCount"] = moveCount;
 }
 // file: AiShopkeeper.cpp

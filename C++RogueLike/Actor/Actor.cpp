@@ -37,7 +37,12 @@ void Actor::load(const json& j)
 	actorData.ch = j["actorData"].at("ch").get<char>();
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = j["actorData"].at("color").get<int>();
-	states = j["states"].get<std::vector<ActorState>>(); // Deserialize states
+
+	// Deserialize vector of states
+	for (const auto& state : j["states"])
+	{
+		states.push_back(state);
+	}
 }
 
 void Actor::save(json& j)
@@ -49,7 +54,14 @@ void Actor::save(json& j)
 		{"name", actorData.name},
 		{"color", actorData.color}
 	};
-	j["states"] = states; // Serialize vector of states
+
+	// Serialize vector of states
+	json statesJson;
+	for (const auto& state : states)
+	{
+		statesJson.push_back(state);
+	}
+	j["states"] = statesJson;
 }
 
 void Creature::load(const json& j)
@@ -65,12 +77,23 @@ void Creature::load(const json& j)
 	playerGold = j["playerGold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
-	if (j.contains("attacker")) {
+	if (j.contains("attacker"))
+	{
 		attacker = std::make_unique<Attacker>("");
 		attacker->load(j["attacker"]);
 	}
-	if (j.contains("destructible")) {
+	if (j.contains("destructible"))
+	{
 		destructible = Destructible::create(j["destructible"]);
+	}
+	if (j.contains("ai"))
+	{
+		ai = Ai::create(j["ai"]);
+	}
+	if (j.contains("container"))
+	{
+		container = std::make_unique<Container>(0);
+		container->load(j["container"]);
 	}
 }
 
@@ -96,6 +119,16 @@ void Creature::save(json& j)
 		json destructibleJson;
 		destructible->save(destructibleJson);
 		j["destructible"] = destructibleJson;
+	}
+	if (ai) {
+		json aiJson;
+		ai->save(aiJson);
+		j["ai"] = aiJson;
+	}
+	if (container) {
+		json containerJson;
+		container->save(containerJson);
+		j["container"] = containerJson;
 	}
 }
 

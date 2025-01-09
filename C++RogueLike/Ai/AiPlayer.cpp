@@ -63,18 +63,12 @@ void AiPlayer::update(Creature& owner)
 
 void AiPlayer::load(const json& j)
 {
-	// this is a player, so nothing to load
-	// because the player is always the same ? 
-	// or is this for loading a saved game ?
-	// if so, then the player is not always the same
-	// so this is not correct
-	// but I don't know how to do it yet
+	/*type is assigned in Ai::create()*/
 }
 
 void AiPlayer::save(json& j)
 {
-	/*zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::PLAYER));*/
-
+	j["type"] = static_cast<int>(AiType::PLAYER);
 }
 
 int AiPlayer::get_next_level_xp(Creature& owner)

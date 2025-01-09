@@ -34,27 +34,31 @@ void Container::remove(std::unique_ptr<Item> actor)
 
 void Container::load(const json& j)
 {
-	//invSize = zip.getInt();
-	//int nbActors = zip.getInt();
-	//while (nbActors > 0)
-	//{
-	//	auto actor = std::make_unique<Item>(Vector2D(0, 0), ActorData());
-	//	actor->load(zip);
-	//	inv.push_back(std::move(actor));
-	//	nbActors--;
-	//}
+	// Deserialize the inventory size
+	invSize = j["invSize"];
+
+	// Deserialize the inventory
+	for (const auto& actorJson : j["inv"])
+	{
+		auto actor = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
+		actor->load(actorJson);
+		inv.push_back(std::move(actor));
+	}
 }
 
 void Container::save(json& j)
 {
-	//zip.putInt(invSize);
-	//const size_t nbActors = inv.size();
-	//zip.putInt(nbActors);
-	//// iterate through the inventory and save the item
-	//for (const auto& actor : inv)
-	//{
-	//	actor->save(zip);
-	//}
+	// Serialize the inventory size
+	j["invSize"] = invSize;
+
+	// Serialize the inventory
+	j["inv"] = json::array();
+	for (const auto& actor : inv)
+	{
+		json actorJson;
+		actor->save(actorJson);
+		j["inv"].push_back(actorJson);
+	}
 }
 
 void Container::print_container(std::span<std::unique_ptr<Actor>> container)

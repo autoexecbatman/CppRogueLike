@@ -39,13 +39,13 @@ void AiMonster::update(Creature& owner)
 
 void AiMonster::load(const json& j)
 {
-	/*moveCount = zip.getInt();*/
+	moveCount = j.at("moveCount").get<int>();
 }
 
 void AiMonster::save(json& j)
 {
-	//zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::MONSTER));
-	//zip.putInt(moveCount);
+	j["type"] = static_cast<int>(AiType::MONSTER);
+	j["moveCount"] = moveCount;
 }
 
 //====
