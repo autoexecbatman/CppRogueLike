@@ -18,7 +18,7 @@ Attacker::Attacker(std::string roll) : roll(roll) {}
 void Attacker::attack(Creature& attacker, Creature& target)
 {
 	// if target is shopkeeper, do not attack
-	if (target.actorData.name == "shopkeeper")
+	if (target.actorData.name == "shopkeeper" && !attacker.has_state(ActorState::IS_RANGED))
 	{
 		game.menus.push_back(std::make_unique<MenuTrade>(target, attacker));
 		return;

@@ -103,7 +103,7 @@ void Creature::load(const json& j)
 	wisdom = j["wisdom"];
 	charisma = j["charisma"];
 	playerLevel = j["playerLevel"];
-	playerGold = j["playerGold"];
+	gold = j["gold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
 	if (j.contains("attacker"))
@@ -136,7 +136,7 @@ void Creature::save(json& j)
 	j["wisdom"] = wisdom;
 	j["charisma"] = charisma;
 	j["playerLevel"] = playerLevel;
-	j["playerGold"] = playerGold;
+	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
 	if (attacker) {

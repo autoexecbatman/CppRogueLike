@@ -27,6 +27,8 @@ Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int
 	wisdom = roll3d6();
 	charisma = roll3d6();
 
+	gold = 100;
+
 	attacker = std::make_unique<Attacker>("D2");
 	destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
 	ai = std::make_unique<AiPlayer>();

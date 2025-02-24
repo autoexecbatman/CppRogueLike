@@ -155,28 +155,30 @@ void Game::render_items(std::span<std::unique_ptr<Item>> items)
 
 void Game::update()
 {
-	switch (gameStatus)
+	if (gameStatus == GameStatus::DEFEAT)
 	{
-	case GameStatus::DEFEAT:
 		game.log("Player is dead!");
 		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
 		game.finalizeMessage();
 		run = false;
-		break;
-	case GameStatus::STARTUP: // to compute the FOV only once
+	}
+	if (gameStatus == GameStatus::STARTUP)
+	{
 		game.map->compute_fov();
 		// adjust the attributes based on players race
 		game.player->racial_ability_adjustments();
 		game.player->calculate_thaco();
 		gameStatus = GameStatus::IDLE;
-		[[fallthrough]];
-	case GameStatus::IDLE:
-		game.map->update(); // sets tiles to explored
-		game.player->update(); // if moved set to NEW_TURN else IDLE
-		[[fallthrough]];
-	case GameStatus::NEW_TURN:
+	}
+
+	game.map->update(); // sets tiles to explored
+	game.player->update(); // if moved set to NEW_TURN else IDLE
+
+	if (gameStatus == GameStatus::NEW_TURN)
+	{
 		game.update_creatures(creatures);
 		game.spawn_creatures();
+		gameStatus = GameStatus::IDLE;
 	}
 }
 
@@ -427,6 +429,12 @@ Vector2D Game::get_mouse_position_old() noexcept
 
 void Game::target()
 {
+	if (!game.player->has_state(ActorState::IS_RANGED))
+	{
+		game.message(WHITE_PAIR, "You are not ranged!", true);
+		return;
+	}
+
 	Vector2D targetCursor = player->position;
 	const Vector2D lastPosition = targetCursor;
 	bool run = true;

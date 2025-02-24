@@ -8,6 +8,7 @@
 
 void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 {
+	menuItems.clear();
 	for (const auto& item : inventory)
 	{
 		if (item)
@@ -51,6 +52,7 @@ void MenuBuy::draw()
 {
 	// print items to buy from shopkeeper
 	menu_clear();
+	populate_items(buyer.container->inv);
 	for (size_t i{ 0 }; i < buyer.container->inv.size(); ++i)
 	{
 		menu_print_state(i);
@@ -63,9 +65,17 @@ void MenuBuy::on_key(int key)
 	switch (key)
 	{
 		case KEY_UP:
+			if (menuItems.empty())
+			{
+				return;
+			}
 			currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 			break;
 		case KEY_DOWN:
+			if (menuItems.empty())
+			{
+				return;
+			}
 			currentState = (currentState + 1) % menuItems.size();
 			break;
 		case 27: // ESC
@@ -82,35 +92,38 @@ void MenuBuy::menu()
 {
 	while (run)
 	{
+		clear();
+		game.render();
 		draw();
 		menu_key_listen();
 		on_key(keyPress);
 	}
 }
-
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
-	if (currentState < shopkeeper.container->inv.size())
+	if (shopkeeper.container->inv.empty() || currentState >= shopkeeper.container->inv.size())
 	{
-		size_t moduloSize = currentState % shopkeeper.container->inv.size();
-		auto& item = shopkeeper.container->inv.at(moduloSize);
+		game.message(WHITE_PAIR, "Invalid selection.", true);
+		return;
+	}
 
-		if (seller.playerGold >= item->value) // Check if player has enough currency
-		{
-			seller.playerGold -= item->value; // Deduct currency
-			seller.container->inv.insert(seller.container->inv.begin(), std::move(item)); // Transfer item from shopkeeper to player
-			//shopkeeper.container->inv.erase(shopkeeper.container->inv.begin() + currentState); // Remove item from shopkeeper
-			std::erase_if(shopkeeper.container->inv, [](const auto& item) { return item == nullptr; });
-			game.message(WHITE_PAIR, "Item purchased successfully.", true);
-		}
-		else
-		{
-			game.message(WHITE_PAIR, "Insufficient currency.", true);
-		}
+	size_t index = currentState % shopkeeper.container->inv.size();
+	auto itemIter = shopkeeper.container->inv.begin() + index;
+	auto& item = *itemIter;
+
+	if (seller.gold >= item->value) // Check if player has enough currency
+	{
+		seller.gold -= item->value; // Deduct currency
+		shopkeeper.gold += item->value; // Add currency
+		seller.container->inv.insert(seller.container->inv.begin(), std::move(item)); // Transfer item
+
+		// Properly erase item from shopkeeper's inventory
+		shopkeeper.container->inv.erase(itemIter);
+
+		game.message(WHITE_PAIR, "Item purchased successfully.", true);
 	}
 	else
 	{
-		game.message(WHITE_PAIR, "Invalid selection.", true);
+		game.message(WHITE_PAIR, "Insufficient currency.", true);
 	}
-
 }

@@ -32,11 +32,17 @@ public:
 	bool shouldSave{ true };
 	bool gameInit{ false };
 	int time{ 0 };
+	bool shouldInput{ true };
 	enum class GameStatus
 	{
 		STARTUP, IDLE, NEW_TURN, VICTORY, DEFEAT
 	}
 	gameStatus{ GameStatus::STARTUP };
+	enum class WindowState
+	{
+		MENU, GAME
+	}
+	windowState{ WindowState::GAME };
 	RandomDice d; // Random number generator.
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };

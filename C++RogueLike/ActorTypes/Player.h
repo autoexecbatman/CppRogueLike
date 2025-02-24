@@ -34,7 +34,6 @@ public:
 	std::string playerGender{ "None" };
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
-	int playerGold{ 100 };
 	int playerLevel{ 1 };
 
 	Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass);

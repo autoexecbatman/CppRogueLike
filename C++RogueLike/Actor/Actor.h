@@ -34,7 +34,8 @@ enum class ActorState
 	BLOCKS,
 	FOV_ONLY,
 	CAN_SWIM,
-	IS_EQUIPPED
+	IS_EQUIPPED,
+	IS_RANGED
 };
 
 //==Actor==
@@ -86,7 +87,7 @@ public:
 	int charisma{ 0 };
 
 	int playerLevel{ 1 };
-	int playerGold{ 0 };
+	int gold{ 0 };
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
 

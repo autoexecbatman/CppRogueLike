@@ -5,11 +5,12 @@
 
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 {
+	menuItems.clear();
 	for (const auto& item : item)
 	{
 		if (item)
 		{
-			menuItems.push_front(item->actorData.name);
+			menuItems.push_back(item->actorData.name);
 		}
 		else
 		{
@@ -25,6 +26,7 @@ void MenuSell::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
+	populate_items(player.container->inv);
 	menu_print(1, state, menu_get_string(state));
 	if (currentState == state)
 	{
@@ -35,28 +37,43 @@ void MenuSell::menu_print_state(size_t state)
 
 void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller)
 {
-	auto& item = seller.container->inv.at(currentState);
-	if (item)
+	if (seller.container->inv.empty() || currentState >= seller.container->inv.size())
 	{
-		auto price = item->value;
-		if (seller.playerGold >= price)
+		game.message(WHITE_PAIR, "Invalid selection.", true);
+		return;
+	} 
+
+	auto itemIter = seller.container->inv.begin() + currentState;
+	auto& item = *itemIter;
+
+	if (!item)
+	{
+		game.log("Error: Attempted to sell a null item.");
+		game.message(WHITE_PAIR, "Error: Invalid item.", true);
+		return;
+	}
+
+	auto price = item->value;
+	if (shopkeeper.gold >= price)
+	{
+		shopkeeper.gold -= price;
+		seller.gold += price;
+		shopkeeper.container->inv.push_back(std::move(item));
+		seller.container->inv.erase(itemIter);
+
+		// Ensure currentState stays within valid bounds
+		if (currentState >= seller.container->inv.size() && !seller.container->inv.empty())
 		{
-			seller.playerGold -= price;
-			seller.playerGold += price;
-			shopkeeper.container->inv.push_back(std::move(item));
-			seller.container->inv.erase(seller.container->inv.begin() + currentState);
+			currentState = seller.container->inv.size() - 1;
 		}
-		else
-		{
-			game.log("You don't have enough gold to buy that.");
-		}
+
+		game.message(WHITE_PAIR, "Item sold successfully.", true);
 	}
 	else
 	{
-		game.log("Item is null.");
-		std::exit(EXIT_FAILURE);
+		game.log("Shopkeeper does not have enough gold to buy the item.");
+		game.message(WHITE_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
 	}
-
 }
 
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), shopkeeper(shopkeeper)
@@ -114,6 +131,8 @@ void MenuSell::menu()
 {
 	while(run)
 	{
+		clear();
+		game.render();
 		draw();
 		on_key(getch());
 	}

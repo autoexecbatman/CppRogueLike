@@ -162,10 +162,13 @@ void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, 
 	//mvwprintw(guiWin, 4, 1, "Attack:%d", damage);
 
 	// print gold
-	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->playerGold);
+	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->gold);
 
-	// print defense
-	mvwprintw(guiWin, 5, 1, "Defense:%d", dr);
+	//// print defense
+	//mvwprintw(guiWin, 5, 1, "Defense:%d", dr);
+
+	// print turn count
+	mvwprintw(guiWin, 5, 1, "Turn: %d", game.time);
 }
 
 void Gui::gui_print_attrs(int strength, int dexterity, int constitution, int intelligence, int wisdom, int charisma) noexcept

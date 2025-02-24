@@ -187,12 +187,14 @@ bool Longbow::use(Item& owner, Creature& wearer)
 	{
 		wearer.attacker->roll = this->roll;
 		wearer.equip(owner);
+		wearer.add_state(ActorState::IS_RANGED);
 	}
 	// unequip the weapon
 	else
 	{
 		wearer.attacker->roll = this->roll;
 		wearer.unequip(owner);
+		wearer.remove_state(ActorState::IS_RANGED);
 	}
 	return false;
 }

@@ -53,6 +53,7 @@ void AiPlayer::update(Creature& owner)
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
+		game.time++;
 		Vector2D targetPosition = owner.position + moveVector;
 		if (move_or_attack(owner, targetPosition))
 		{
@@ -183,7 +184,7 @@ void AiPlayer::display_inventory(Creature& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
+			/*game.gameStatus = Game::GameStatus::NEW_TURN;*/
 		}
 		delwin(inv);
 		clear();
@@ -281,12 +282,14 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::WAIT_ARROW_NUMPAD:
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
+		game.time++;
 		break;
 	}
 
 	case Controls::HIT_SELF:
 	{
 		game.player->attacker->attack(*game.player, *game.player);
+		game.time++;
 		break;
 	}
 
@@ -302,12 +305,14 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::PICK_NUMPAD:
 	{
 		pick_item(owner);
+		game.time++;
 		break;
 	}
 
 	case Controls::DROP:
 	{
 		drop_item(owner);
+		game.time++;
 		break;
 	}
 
@@ -338,6 +343,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		{
 			game.next_level();
 		}
+		game.time++;
 		break;
 	}
 

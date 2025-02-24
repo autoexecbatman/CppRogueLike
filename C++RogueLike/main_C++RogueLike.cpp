@@ -50,23 +50,41 @@ int main()
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
-		//==MENU==
 		if (!game.menus.empty())
 		{
-			game.menus.back()->menu();
-			// if back is pressed, pop the menu
-			if (game.menus.back()->back)
-			{
-				game.menus.pop_back();
-				game.menus.back()->menu_set_run_true();
-			}
-
-			if (!game.menus.back()->run)
-			{
-				game.menus.pop_back();
-			}
+			game.windowState = Game::WindowState::MENU;
 		}
 		else
+		{
+			game.windowState = Game::WindowState::GAME;
+		}
+
+		//==MENU==
+		switch (game.windowState)
+		{
+		case Game::WindowState::MENU:
+		{
+			if (!game.menus.empty())
+			{
+				game.menus.back()->menu();
+				// if back is pressed, pop the menu
+				if (game.menus.back()->back)
+				{
+					game.menus.pop_back();
+					game.menus.back()->menu_set_run_true();
+				}
+
+				if (!game.menus.back()->run)
+				{
+					game.menus.pop_back();
+				}
+
+				game.shouldInput = false;
+			}
+		}
+		break;
+
+		case Game::WindowState::GAME:
 		{
 			if (!game.gameInit)
 			{
@@ -84,11 +102,26 @@ int main()
 				gui.guiInit = true;
 			}
 
+			//==INPUT==
+			game.keyPress = ERR; // reset keyPress
+			if (game.shouldInput)
+			{
+				game.key_store();
+				game.key_listen();
+			}
+			game.shouldInput = true; // reset shouldInput
+
 			//==UPDATE==
 			game.log("Running update...");
 			game.update(); // update map and actors positions
 			gui.gui_update(); // update the gui
 			game.log("Update OK.");
+			// **NEW**: If a menu was added, skip the rest of this loop
+			if (!game.menus.empty())
+			{
+				game.windowState = Game::WindowState::MENU;
+				continue;
+			}
 
 			//==DRAW==
 			game.log("Running render...");
@@ -97,17 +130,14 @@ int main()
 			gui.gui_render(); // render the gui
 			refresh();
 			game.log("Render OK.");
-
-			//==INPUT==
-			if (!game.player->destructible->is_dead())
-			{
-				game.gameStatus = Game::GameStatus::IDLE;
-			}
-			game.key_store();
-			game.key_listen();
-			game.time++;
-			loopNum++;
 		}
+		break;
+
+		default:
+			break;
+		}
+
+		loopNum++;
 	}
 
 	game.save_all();

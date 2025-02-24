@@ -134,6 +134,7 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, shopkeeperData)
 	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 });
 	dagger->pickable = std::make_unique<Dagger>();
 	container->add(std::move(dagger));
+	gold = 200;
 }
 
 // end of file: Goblin.cpp

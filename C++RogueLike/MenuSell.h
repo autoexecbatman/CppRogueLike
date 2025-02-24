@@ -3,7 +3,6 @@
 #include <string>
 #include <span>
 #include <vector>
-#include <deque>
 
 #include "BaseMenu.h"
 #include "Actor/Actor.h"
@@ -17,7 +16,7 @@ class MenuSell : public BaseMenu
 	size_t menu_starty{ static_cast<size_t>((LINES / 2) - 5) };
 	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
 	size_t currentState{ 0 };
-	std::deque<std::string> menuItems;
+	std::vector<std::string> menuItems;
 	Creature& player;
 	Creature& shopkeeper;
 

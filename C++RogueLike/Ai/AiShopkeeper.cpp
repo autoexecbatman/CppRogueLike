@@ -68,6 +68,7 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 {
 	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
+	game.shouldInput = false;
 }
 
 void AiShopkeeper::update(Creature& owner)
