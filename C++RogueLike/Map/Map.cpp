@@ -366,28 +366,34 @@ void Map::add_weapons(Vector2D pos)
 
 void Map::add_item(Vector2D pos)
 {
-	const int dice{ game.d.d100() };
-	if (dice < 60)
-	{
-		add_weapons(pos);
+	// 75% chance to spawn an item at all
+	if (rng_unique->getInt(1, 100) > 75) return;
 
+	const int dice = rng_unique->getInt(1, 100);
+
+	if (dice < 40) {
 		game.create_item<GoldPile>(pos);
+		return;
 	}
-	else if (dice < 70)
-	{
+	if (dice < 50) {
+		add_weapons(pos);
+		return;
+	}
+	if (dice < 60) {
 		game.create_item<HealthPotion>(pos);
+		return;
 	}
-	else if (dice < 70+10)
-	{
-		game.create_item<ScrollOfLightningBolt>(pos);
-	}
-	else if (dice < 70 + 10 + 10)
-	{
-		game.create_item<ScrollOfFireball>(pos);
-	}
-	else
-	{
-		game.create_item<ScrollOfConfusion>(pos);
+	if (dice < 80) {
+		// Randomly pick a scroll from a list
+		std::vector<std::function<void(Vector2D)>> scrolls = {
+			[&](Vector2D p) { game.create_item<ScrollOfLightningBolt>(p); },
+			[&](Vector2D p) { game.create_item<ScrollOfFireball>(p); },
+			[&](Vector2D p) { game.create_item<ScrollOfConfusion>(p); }
+		};
+
+		int randomIndex = rng_unique->getInt(0, scrolls.size() - 1);
+		scrolls[randomIndex](pos);
+		return;
 	}
 }
 
