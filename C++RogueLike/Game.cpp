@@ -178,7 +178,6 @@ void Game::update()
 	{
 		game.update_creatures(creatures);
 		game.spawn_creatures();
-		gameStatus = GameStatus::IDLE;
 	}
 }
 
@@ -558,6 +557,8 @@ void Game::target()
 					run = false;
 				}
 			}
+			game.gameStatus = GameStatus::NEW_TURN;
+			game.time++;
 		}
 		break;
 
