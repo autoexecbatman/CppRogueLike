@@ -289,6 +289,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::HIT_SELF:
 	{
 		game.player->attacker->attack(*game.player, *game.player);
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 		game.time++;
 		break;
 	}
@@ -305,6 +306,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::PICK_NUMPAD:
 	{
 		pick_item(owner);
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 		game.time++;
 		break;
 	}
@@ -312,6 +314,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::DROP:
 	{
 		drop_item(owner);
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 		game.time++;
 		break;
 	}
@@ -331,8 +334,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
-		//Menu menu;
-		//menu.menu();
 		game.menus.push_back(std::make_unique<Menu>());
 		break;
 	}
@@ -341,7 +342,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		if (game.stairs->position == owner.position)
 		{
-			game.next_level();
+			game.next_level(); // sets state to STARTUP
 		}
 		game.time++;
 		break;

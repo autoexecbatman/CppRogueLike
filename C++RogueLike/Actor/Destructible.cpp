@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 
-//#include "../main.h"
 #include "../Game.h"
 #include "../Items.h"
 #include "../Actor/Actor.h"
@@ -138,7 +137,6 @@ std::unique_ptr<Destructible> Destructible::create(const json& j)
 }
 
 //==PlayerDestructible==
-
 PlayerDestructible::PlayerDestructible(
 	int hpMax,
 	int dr,
@@ -154,10 +152,10 @@ PlayerDestructible::PlayerDestructible(
 void PlayerDestructible::die(Creature& owner)
 {
 	game.gameStatus = Game::GameStatus::DEFEAT;
+	game.shouldInput = false;
 }
 
 //==MonsterDestructible==
-
 MonsterDestructible::MonsterDestructible(
 	int hpMax,
 	int dr,

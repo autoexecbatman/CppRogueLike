@@ -578,20 +578,17 @@ void Game::target()
 
 void Game::load_all()
 {
-	//game.init(); // Reinitialize the game state
 	// Use JSON to load the game
-	/*game.init();*/
 	game.gameInit = true;
 
 	std::ifstream file("game.sav");
 	if (file.is_open())
-	{	
+	{
 		json j;
 		file >> j;
 
 		// Load the map
 		map->load(j);
-
 
 		// Load the rooms
 		if (j.contains("rooms") && j["rooms"].is_array())
