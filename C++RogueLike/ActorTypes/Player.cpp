@@ -91,7 +91,7 @@ void Player::racial_ability_adjustments()
 
 void Player::calculate_thaco()
 {
-	game.err("Calculating THAC0...");
+	// game.err("Calculating THAC0...");
 	// print playerClassState
 
 	CalculatedTHAC0s thaco;
@@ -99,19 +99,19 @@ void Player::calculate_thaco()
 	{	
 	case PlayerClassState::FIGHTER:
 		game.player->destructible->thaco = thaco.getFighter(playerLevel);
-		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
 		break;
 	case PlayerClassState::ROGUE:
 		game.player->destructible->thaco = thaco.getRogue(playerLevel);
-		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
 		break;
 	case PlayerClassState::CLERIC:
 		game.player->destructible->thaco = thaco.getCleric(playerLevel);
-		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
 		break;
 	case PlayerClassState::WIZARD:
 		game.player->destructible->thaco = thaco.getWizard(playerLevel);
-		game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
 		break;
 	case PlayerClassState::NONE:
 		break;

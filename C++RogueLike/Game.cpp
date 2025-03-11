@@ -162,22 +162,25 @@ void Game::update()
 		game.finalizeMessage();
 		run = false;
 	}
+
+	game.map->update(); // sets tiles to explored
+	game.player->update(); // if moved set to NEW_TURN else IDLE
+
 	if (gameStatus == GameStatus::STARTUP)
 	{
 		game.map->compute_fov();
 		// adjust the attributes based on players race
 		game.player->racial_ability_adjustments();
 		game.player->calculate_thaco();
-		gameStatus = GameStatus::IDLE;
+		gameStatus = GameStatus::NEW_TURN;
 	}
-
-	game.map->update(); // sets tiles to explored
-	game.player->update(); // if moved set to NEW_TURN else IDLE
 
 	if (gameStatus == GameStatus::NEW_TURN)
 	{
 		game.update_creatures(creatures);
 		game.spawn_creatures();
+		game.time++;
+		gameStatus = GameStatus::IDLE; // reset back to IDLE to prevent getting stuck in NEW_TURN
 	}
 }
 
@@ -558,7 +561,6 @@ void Game::target()
 				}
 			}
 			game.gameStatus = GameStatus::NEW_TURN;
-			game.time++;
 		}
 		break;
 
@@ -715,24 +717,14 @@ void Game::save_all()
 
 void Game::next_level()
 {
-	// increment the dungeon level
-	dungeonLevel++;
-
-	// present a message to the player
-	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true);
-
-	// heal the player
-	player->destructible->heal(player->destructible->hpMax / 2);
-
-	// present a message to the player
-	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true);
+	dungeonLevel++; // increment the dungeon level
+	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true); // present a message to the player
+	player->destructible->heal(player->destructible->hpMax / 2); // heal the player
+	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)
 	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
-
-	map->regenerate();
-
-	// set the game status to STARTUP because we need to recompute the FOV 
-	gameStatus = GameStatus::STARTUP;
+	map->regenerate(); // create a new map
+	gameStatus = GameStatus::STARTUP; // set the game status to STARTUP because we need to recompute the FOV 
 }
 
 Creature* Game::get_actor(Vector2D pos) const noexcept

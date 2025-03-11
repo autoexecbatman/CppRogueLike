@@ -43,17 +43,17 @@ void AiPlayer::update(Creature& owner)
 	if (m.moves.find(key) != m.moves.end())
 	{
 		moveVector = m.moves.at(key);
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 	}
 	else
 	{
+		// if the key is not a movement key, call the action
 		call_action(owner, key);
 	}
 
 	// compute FOV if needed (if player moved)
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
-		game.gameStatus = Game::GameStatus::NEW_TURN;
-		game.time++;
 		Vector2D targetPosition = owner.position + moveVector;
 		if (move_or_attack(owner, targetPosition))
 		{
@@ -90,7 +90,6 @@ void AiPlayer::levelup_update(Creature& owner)
 	{
 		game.player->playerLevel++;
 		owner.destructible->xp -= levelUpXp;
-		/*game.gui->log_message(WHITE_PAIR, "Your battle skills grow stronger! You reached level %d", game.player->playerLevel);*/
 		game.message(WHITE_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
 		game.player->calculate_thaco();
 		game.dispay_levelup(game.player->playerLevel);
@@ -100,13 +99,11 @@ void AiPlayer::levelup_update(Creature& owner)
 void AiPlayer::pick_item(Creature& owner)
 {
 	owner.pick();
-	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
 void AiPlayer::drop_item(Creature& owner)
 {
 	owner.drop();
-	game.gameStatus = Game::GameStatus::NEW_TURN;
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -282,7 +279,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::WAIT_ARROW_NUMPAD:
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		game.time++;
 		break;
 	}
 
@@ -290,7 +286,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		game.player->attacker->attack(*game.player, *game.player);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		game.time++;
 		break;
 	}
 
@@ -307,7 +302,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		pick_item(owner);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		game.time++;
 		break;
 	}
 
@@ -315,7 +309,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		drop_item(owner);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		game.time++;
 		break;
 	}
 
@@ -344,7 +337,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		{
 			game.next_level(); // sets state to STARTUP
 		}
-		game.time++;
 		break;
 	}
 

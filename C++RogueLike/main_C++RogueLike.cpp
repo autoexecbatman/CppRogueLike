@@ -103,13 +103,13 @@ int main()
 			}
 
 			//==INPUT==
-			game.keyPress = ERR; // reset keyPress
+			game.keyPress = ERR; // reset the keyPress so it won't get stuck in a loop
 			if (game.shouldInput)
 			{
 				game.key_store();
 				game.key_listen();
 			}
-			game.shouldInput = true; // reset shouldInput
+			game.shouldInput = true; // reset shouldInput to reset the flag
 
 			//==UPDATE==
 			game.log("Running update...");
