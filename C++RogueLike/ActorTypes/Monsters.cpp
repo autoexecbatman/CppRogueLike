@@ -21,7 +21,6 @@ Goblin::Goblin(Vector2D position) : Creature(position, goblinData)
 	const int hp = d.d8();
 	const int thaco = 20;
 	const int ac = 6;
-
 	strength = d.d6() + d.d6() + d.d6();
 
 	weaponEquipped = "Short Sword";

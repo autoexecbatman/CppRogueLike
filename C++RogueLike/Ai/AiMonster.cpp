@@ -51,39 +51,37 @@ void AiMonster::save(json& j)
 //====
 // how many turns the monster chases the player
 // after losing his sight
+
 void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 {
-	Vector2D target = targetPosition - owner.position;
-
-	int stepX = target.x > 0 ? 1 : -1;
-	int stepY = target.y > 0 ? 1 : -1;
-
-	const double distance = sqrt(target.x * target.x + target.y * target.y); // get the distance
-
-	if (distance >= 2)
+	if(game.map->tile_action(owner, game.map->get_tile_type(owner.position)))
 	{
-		target.x = static_cast<int>(round(target.x / distance));
-		target.y = static_cast<int>(round(target.y / distance));
+		const auto distance = owner.get_tile_distance(targetPosition);
+		if (distance > 1)
+		{
+			game.map->tcodPath->compute(owner.position.x, owner.position.y, targetPosition.x, targetPosition.y);
+			int x, y;
+			while (game.map->tcodPath->walk(&x, &y, true))
+			{
+				Vector2D newPos = Vector2D{ y, x };
+				Vector2D oldPos = owner.position;
+				if (game.map->can_walk(newPos))
+				{
+					owner.position = newPos;
+					break;
+				}
+				else
+				{
 
-		if (game.map->can_walk(owner.position + target))
-		{
-			owner.position.x += target.x;
-			owner.position.y += target.y;
+					owner.position = oldPos;
+					break;
+				}
+			}
 		}
-		else if (game.map->can_walk(Vector2D{ owner.position.y, owner.position.x + stepX }))
+		else
 		{
-			owner.position.x += stepX;
+			owner.attacker->attack(owner, *game.player);
 		}
-		else if (game.map->can_walk(Vector2D{ owner.position.y + stepY, owner.position.x }))
-		{
-			owner.position.y += stepY;
-		}
-	}
-
-	else if (owner.attacker)
-	{
-		owner.attacker->attack(owner, *game.player);
 	}
 }
-
 // file: AiMonster.cpp

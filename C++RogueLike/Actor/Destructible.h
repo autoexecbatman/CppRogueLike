@@ -26,7 +26,7 @@ public:
 	Destructible& operator=(Destructible&&) = delete;
 
 	bool is_dead() const noexcept { return hp <= 0; }
-	void take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
+	bool take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner); // handles death, owner killed
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 

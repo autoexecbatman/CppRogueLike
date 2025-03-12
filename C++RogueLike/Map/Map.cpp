@@ -239,15 +239,21 @@ TileType Map::get_tile_type(Vector2D pos) const
 	return tiles.at(get_index(pos)).type;
 }
 
-bool Map::tile_action(TileType tileType)
+bool Map::tile_action(Creature& owner, TileType tileType)
 {
 	switch (tileType)
 	{
 	case TileType::WATER:
 		game.log("You are in water");
 		game.message(COLOR_WHITE, "You are in water", true);
-		game.player->destructible->take_damage(*game.player, 1);
-		return game.player->has_state(ActorState::CAN_SWIM) ? true : false;
+		if (!owner.destructible->take_damage(owner, 1))
+		{
+			return owner.has_state(ActorState::CAN_SWIM) ? true : false;
+		}
+		else
+		{
+			return false;
+		}
 	case TileType::WALL:
 		game.log("You are against a wall");
 		game.message(COLOR_WHITE, "You are against a wall", true);
@@ -546,6 +552,7 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 			if (rolld100 < waterPercentage)
 			{
 				set_tile(waterPos, TileType::WATER);
+				tcodMap->setProperties(waterPos.x, waterPos.y, true, false); // non-walkable and non-transparent
 			}
 		}
 	}

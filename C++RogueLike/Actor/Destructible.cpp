@@ -22,7 +22,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 	armorClass(armorClass)
 {}
 
-void Destructible::take_damage(Creature& owner, int damage)
+bool Destructible::take_damage(Creature& owner, int damage)
 {
 	// check if damage is greater than 0
 	// if it is, then apply the damage to the actor
@@ -32,11 +32,14 @@ void Destructible::take_damage(Creature& owner, int damage)
 		if (hp <= 0)
 		{
 			owner.destructible->die(owner);
+			return true;
 		}
+		return false;
 	}
 	else
 	{
 		damage = 0;
+		return false;
 	}
 }
 
@@ -152,7 +155,6 @@ PlayerDestructible::PlayerDestructible(
 void PlayerDestructible::die(Creature& owner)
 {
 	game.gameStatus = Game::GameStatus::DEFEAT;
-	game.shouldInput = false;
 }
 
 //==MonsterDestructible==

@@ -77,7 +77,7 @@ public:
 	void init(bool withActors);
 	bool is_in_fov(Vector2D pos) const;
 	TileType get_tile_type(Vector2D pos) const;
-	bool tile_action(TileType tileType);
+	bool tile_action(Creature& owner, TileType tileType);
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos) const;
 	void add_monster(Vector2D pos);

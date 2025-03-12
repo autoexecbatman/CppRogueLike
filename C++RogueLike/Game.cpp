@@ -155,14 +155,6 @@ void Game::render_items(std::span<std::unique_ptr<Item>> items)
 
 void Game::update()
 {
-	if (gameStatus == GameStatus::DEFEAT)
-	{
-		game.log("Player is dead!");
-		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
-		game.finalizeMessage();
-		run = false;
-	}
-
 	game.map->update(); // sets tiles to explored
 	game.player->update(); // if moved set to NEW_TURN else IDLE
 
@@ -180,7 +172,18 @@ void Game::update()
 		game.update_creatures(creatures);
 		game.spawn_creatures();
 		game.time++;
-		gameStatus = GameStatus::IDLE; // reset back to IDLE to prevent getting stuck in NEW_TURN
+		if (gameStatus != GameStatus::DEFEAT) // for killing the player
+		{
+			gameStatus = GameStatus::IDLE; // reset back to IDLE to prevent getting stuck in NEW_TURN
+		}
+	}
+
+	if (gameStatus == GameStatus::DEFEAT)
+	{
+		game.log("Player is dead!");
+		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
+		game.finalizeMessage();
+		run = false;
 	}
 }
 
