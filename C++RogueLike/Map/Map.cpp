@@ -415,7 +415,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 		{
 			for (int tileX = begin.x; tileX <= end.x; tileX++)
 			{
-				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR, 1);
 				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 			}
 		}
@@ -435,7 +435,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 
 			for (int tileX = startX; tileX <= endX; tileX++) {
 				if (tileX >= begin.x && tileX <= end.x) {
-					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR);
+					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR, 1);
 					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
 			}
@@ -461,13 +461,13 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			{
 				if (is_wall(thisTile))
 				{
-					set_tile(thisTile, TileType::DOOR);
+					set_tile(thisTile, TileType::DOOR, 2);
 					tcodMap->setProperties(tileX, tileY, false, false);
 					isDoorSet = true;
 				}
 				else
 				{
-					set_tile(thisTile, TileType::CORRIDOR);
+					set_tile(thisTile, TileType::CORRIDOR, 1);
 					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
 			}
@@ -475,13 +475,13 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			{
 				if (get_tile_type(thisTile) == TileType::FLOOR || get_tile_type(thisTile) == TileType::WATER)
 				{
-					set_tile(lastTile, TileType::DOOR); // set the last tile as a door
+					set_tile(lastTile, TileType::DOOR, 2); // set the last tile as a door
 					tcodMap->setProperties(lastTile.x, lastTile.y, false, false);
 					secondDoorSet = true;
 				}
 				else
 				{
-					set_tile(thisTile, TileType::CORRIDOR);
+					set_tile(thisTile, TileType::CORRIDOR, 1);
 					tcodMap->setProperties(tileX,tileY,true,true); // walkable and transparent
 				}
 			}
@@ -489,19 +489,19 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			{
 				if (get_tile_type(thisTile) == TileType::WALL)
 				{
-					set_tile(thisTile, TileType::DOOR); // set the last tile as a door
+					set_tile(thisTile, TileType::DOOR, 2); // set the last tile as a door
 					tcodMap->setProperties(tileX, tileY, false, false);
 					thirdDoorSet = true;
 				}
 				else
 				{
-					set_tile(thisTile, TileType::CORRIDOR);
+					set_tile(thisTile, TileType::CORRIDOR, 1);
 					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
 			}
 			else
 			{
-				set_tile(thisTile, TileType::CORRIDOR);
+				set_tile(thisTile, TileType::CORRIDOR, 1);
 				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 			}
 
@@ -510,9 +510,10 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	}
 }
 
-void Map::set_tile(Vector2D pos, TileType newType)
+void Map::set_tile(Vector2D pos, TileType newType, double cost)
 {
 	tiles.at(get_index(pos)).type = newType;
+	tiles.at(get_index(pos)).cost = cost;
 }
 
 void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors)
@@ -554,7 +555,7 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 			const int rolld100 = rng_unique->getInt(1, 100);
 			if (rolld100 < waterPercentage)
 			{
-				set_tile(waterPos, TileType::WATER);
+				set_tile(waterPos, TileType::WATER, 10);
 				tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
 			}
 		}
@@ -618,18 +619,18 @@ bool Map::can_walk(Vector2D pos) const
 	{
 		return false;
 	}
-	if (is_water(pos)) // check if the tile is water
-	{
-		return false;
-	}
+	//if (is_water(pos)) // check if the tile is water
+	//{
+	//	return false;
+	//}
 
-	for (const auto& actor : game.creatures) // check if the tile is occupied by an actor
-	{
-		if (actor->has_state(ActorState::BLOCKS) && actor->position == pos)
-		{
-			return false;
-		}
-	}
+	//for (const auto& actor : game.creatures) // check if the tile is occupied by an actor
+	//{
+	//	if (actor->has_state(ActorState::BLOCKS) && actor->position == pos)
+	//	{
+	//		return false;
+	//	}
+	//}
 
 	return true;
 }
@@ -750,9 +751,14 @@ std::vector<Vector2D> Map::neighbors(Vector2D id) const
 	return results;
 }
 
-double Map::cost(Vector2D from_node, Vector2D to_node) const
+double Map::cost(Vector2D from_node, Vector2D to_node)
 {
-	return get_tile_type(to_node) == TileType::WATER ? 2 : 1;
+	// if there is an actor on the tile, return a high cost
+	if (get_actor(to_node) != nullptr)
+	{
+		return 1000.0;
+	}
+	return get_cost(to_node);
 }
 
 // end of file: Map.cpp

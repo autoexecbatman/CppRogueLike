@@ -43,59 +43,6 @@ struct Tile
 	Tile(Vector2D pos, TileType type, double cost) : position(pos), type(type), cost(cost), explored(false) {}
 };
 
-struct SquareGrid
-{
-	int width, height;
-	std::vector<Vector2D> DIRS =
-	{
-		Vector2D{1, 0}, // y, x North
-		Vector2D{0, -1}, // y, x West
-		Vector2D{-1, 0}, // y, x South
-		Vector2D{0, 1} // y, x East
-	};
-	std::unordered_set<Vector2D> walls;
-
-	SquareGrid(int width_, int height_) : width(width_), height(height_) {}
-
-	bool in_bounds(Vector2D id) const
-	{
-		return 0 <= id.x && id.x < width
-			&& 0 <= id.y && id.y < height;
-	}
-
-	bool passable(Vector2D id) const
-	{
-		return walls.find(id) == walls.end();
-	}
-
-	std::vector<Vector2D> neighbors(Vector2D id) const
-	{
-		std::vector<Vector2D> results;
-
-		for (Vector2D dir : DIRS)
-		{
-			Vector2D next{ id.x + dir.x, id.y + dir.y };
-			if (in_bounds(next) && passable(next))
-			{
-				results.push_back(next);
-			}
-		}
-
-		if ((id.x + id.y) % 2 == 0)
-		{
-			// see "Ugly paths" section for an explanation:
-			std::reverse(results.begin(), results.end());
-		}
-
-		return results;
-	}
-
-	double cost(Vector2D from_node, Vector2D to_node) const
-	{
-		return 1;
-	}
-};
-
 //==Map==
 //a class for the game map
 //the map is a 2d array of tiles
@@ -149,10 +96,11 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
 	std::vector<Vector2D> neighbors(Vector2D id) const;
-	double cost(Vector2D from_node, Vector2D to_node) const;
+	double cost(Vector2D from_node, Vector2D to_node);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
+	double get_cost(Vector2D pos) const noexcept { return tiles.at(get_index(pos)).cost; }
 
 	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;
@@ -164,6 +112,6 @@ protected:
 	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
-	void set_tile(Vector2D pos, TileType newType);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
+	void set_tile(Vector2D pos, TileType newType, double cost);
 };

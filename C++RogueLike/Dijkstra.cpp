@@ -98,3 +98,61 @@ std::vector<Vector2D> Dijkstra::reconstruct_path(
 		std::reverse(path.begin(), path.end()); // Reverse the path to get it from start to goal
         return path;
 }
+
+void Dijkstra::a_star_search(
+    Map& graph,
+    Vector2D start,
+    Vector2D goal,
+    std::vector<Vector2D>& cameFrom,
+    std::vector<double>& costSoFar
+)
+{
+    // Determine the total number of tiles in the map
+    size_t gridSize = graph.get_map().size();
+    // Resize vectors to match grid size
+    // cameFrom[i] -> Stores which node led to this node
+    // costSoFar[i] -> Stores the lowest cost found to reach this node
+    cameFrom.resize(gridSize, Vector2D{ -1, -1 }); // Initialize with invalid positions
+    costSoFar.resize(gridSize, infinity); // Initialize all costs as infinite
+
+    // Priority queue for processing nodes, ordered by lowest cost (min-heap)
+    std::priority_queue<FrontierNode, std::vector<FrontierNode>, std::greater<FrontierNode>> frontier;
+    // Push the start node to the frontier
+    frontier.emplace(start, 0);
+
+    // Get the index of the starting position in the 1D vector representation of the grid
+    int startIndex = graph.get_index(start);
+    cameFrom.at(startIndex) = start; // The start node leads to itself
+    costSoFar.at(startIndex) = 0; // Cost to reach the start is 0
+
+    // Process nodes until there are none left in the priority queue
+    while (!frontier.empty())
+    {
+        // Get the node with the lowest cost from the priority queue
+        Vector2D current = frontier.top().vertex;
+        frontier.pop(); // Remove it from the queue
+
+        // If we reached the goal, stop searching (optional optimization)
+        if (current == goal)
+        {
+            break;
+        }
+
+        // Explore all valid neighbors of the current node
+        for (Vector2D next : graph.neighbors(current))
+        {
+            int currentIndex = graph.get_index(current); // Get index of the current node
+            int nextIndex = graph.get_index(next); // Get index of the next node
+
+            // If this new path is better (lower cost) than the previously known cost
+            double new_cost = costSoFar.at(currentIndex) + graph.cost(current, next);
+            if (costSoFar.at(nextIndex) == infinity || new_cost < costSoFar.at(nextIndex))
+            {
+                costSoFar.at(nextIndex) = new_cost; // Update cost to reach this node
+                double priority = new_cost + heuristic(next, goal);
+                frontier.emplace(next, priority);
+                cameFrom.at(nextIndex) = current;
+            }
+        }
+    }
+}

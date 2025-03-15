@@ -29,6 +29,7 @@ Goblin::Goblin(Vector2D position) : Creature(position, goblinData)
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead goblin", 15, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
+	add_state(ActorState::CAN_SWIM);
 }
 //====
 
