@@ -111,8 +111,7 @@ void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 	std::vector<Vector2D> cameFrom;
 	std::vector<double> costSoFar;
 	dijkstra.a_star_search(*game.map, owner.position, targetPosition, cameFrom, costSoFar);
-	/*std::vector<Vector2D> path = dijkstra.reconstruct_path(owner.position, targetPosition, cameFrom);*/
-	std::vector<Vector2D> path = std::vector<Vector2D>{};
+	std::vector<Vector2D> path = dijkstra.reconstruct_path(owner.position, targetPosition, cameFrom);
 
 	int distance = owner.get_tile_distance(targetPosition);
 	auto is_actor = [](const Vector2D& pos) { return game.map->get_actor(pos) != nullptr; };
