@@ -16,7 +16,7 @@ private:
 	void update(Creature& owner) override;
 	void load(const json& j) override;
 	void save(json& j) override;
-	int calculateStep(int positionDifference);
+	int calculate_step(int positionDifference);
 	void moveToTarget(Actor& owner, int targetx, int targety);
 public:
 	AiShopkeeper();

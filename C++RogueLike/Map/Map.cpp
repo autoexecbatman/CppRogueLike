@@ -134,7 +134,7 @@ void Map::init_tiles()
 			Vector2D pos{ 0, 0 };
 			pos.y = y;
 			pos.x = x;
-			tiles.emplace_back(Tile(pos, TileType::WALL));
+			tiles.emplace_back(Tile(pos, TileType::WALL, 0));
 		}
 	}
 }
@@ -179,8 +179,10 @@ void Map::load(const json& j)
 
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
+		int cost = tileJson.at("cost").get<double>();
 
-		tiles.emplace_back(position, type);
+
+		tiles.emplace_back(position, type, cost);
 		tiles.back().explored = explored;
 	}
 
@@ -203,7 +205,8 @@ void Map::save(json& j)
 			{
 				{"position", { {"y", tile.position.y}, {"x", tile.position.x} } },
 				{"type", static_cast<int>(tile.type)}, // TileType is an enum
-				{"explored", tile.explored}
+				{"explored", tile.explored},
+				{ "cost", tile.cost }
 			}
 		);
 	}
@@ -552,7 +555,7 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 			if (rolld100 < waterPercentage)
 			{
 				set_tile(waterPos, TileType::WATER);
-				tcodMap->setProperties(waterPos.x, waterPos.y, true, false); // non-walkable and non-transparent
+				tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
 			}
 		}
 	}
@@ -686,6 +689,18 @@ Creature* Map::get_actor(Vector2D pos) noexcept
 	return nullptr;
 }
 
+// getActor returns the actor at the given coordinates or NULL if there's none
+
+std::vector<std::vector<Tile>> Map::get_map() const
+{
+	std::vector<std::vector<Tile>> map;
+	for (const auto& tile : tiles)
+	{
+		map.push_back({ tile });
+	}
+	return map;
+}
+
 // reveal map
 void Map::reveal()
 {
@@ -707,6 +722,37 @@ void Map::regenerate()
 	game.map->map_height = MAP_HEIGHT;
 	game.map->map_width = MAP_WIDTH;
 	game.map->init(true);
+}
+
+std::vector<Vector2D> Map::neighbors(Vector2D id) const
+{
+	std::vector<Vector2D> results;
+
+	for (Vector2D dir : DIRS)
+	{
+		Vector2D next
+		{
+			id.y + dir.y,
+			id.x + dir.x
+		};
+		if (in_bounds(next) && can_walk(next))
+		{
+			results.push_back(next);
+		}
+	}
+
+	if ((id.x + id.y) % 2 == 0)
+	{
+		// see "Ugly paths" section for an explanation:
+		std::reverse(results.begin(), results.end());
+	}
+
+	return results;
+}
+
+double Map::cost(Vector2D from_node, Vector2D to_node) const
+{
+	return get_tile_type(to_node) == TileType::WATER ? 2 : 1;
 }
 
 // end of file: Map.cpp

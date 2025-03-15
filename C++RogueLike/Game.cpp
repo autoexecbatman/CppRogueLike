@@ -153,6 +153,75 @@ void Game::render_items(std::span<std::unique_ptr<Item>> items)
 	}
 }
 
+void Game::handle_menus()
+{
+	if (!game.menus.empty())
+	{
+		game.menus.back()->menu();
+		// if back is pressed, pop the menu
+		if (game.menus.back()->back)
+		{
+			game.menus.pop_back();
+			game.menus.back()->menu_set_run_true();
+		}
+
+		if (!game.menus.back()->run)
+		{
+			game.menus.pop_back();
+		}
+
+		game.shouldInput = false;
+	}
+}
+
+void Game::handle_gameloop(Gui& gui, int loopNum)
+{
+	if (!game.gameInit)
+	{
+		game.init();
+		game.gameInit = true;
+	}
+	//==DEBUG==
+	game.log("//====================LOOP====================//");
+	game.log("Loop number: " + std::to_string(loopNum) + "\n");
+
+	//==INIT_GUI==
+	if (!gui.guiInit)
+	{
+		gui.gui_init();
+		gui.guiInit = true;
+	}
+
+	//==INPUT==
+	game.keyPress = ERR; // reset the keyPress so it won't get stuck in a loop
+	if (game.shouldInput)
+	{
+		game.key_store();
+		game.key_listen();
+	}
+	game.shouldInput = true; // reset shouldInput to reset the flag
+
+	//==UPDATE==
+	game.log("Running update...");
+	game.update(); // update map and actors positions
+	gui.gui_update(); // update the gui
+	game.log("Update OK.");
+	// **NEW**: If a menu was added, skip the rest of this loop
+	if (!game.menus.empty())
+	{
+		game.windowState = Game::WindowState::MENU;
+		return;
+	}
+
+	//==DRAW==
+	game.log("Running render...");
+	clear();
+	game.render(); // render map and actors to the screen
+	gui.gui_render(); // render the gui
+	refresh();
+	game.log("Render OK.");
+}
+
 void Game::update()
 {
 	game.map->update(); // sets tiles to explored

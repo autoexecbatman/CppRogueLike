@@ -73,6 +73,8 @@ public:
 	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void spawn_creatures() const;
 	void render_items(std::span<std::unique_ptr<Item>> items);
+	void handle_menus();
+	void handle_gameloop(Gui& gui, int loopNum);
 
 	template <typename T>
 	void create_creature(Vector2D position)

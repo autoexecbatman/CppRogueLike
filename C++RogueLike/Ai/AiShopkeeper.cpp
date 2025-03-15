@@ -14,7 +14,7 @@ constexpr auto MIN_TRADE_DISTANCE = 2;  // Minimum distance to initiate a trade
 AiShopkeeper::AiShopkeeper() : moveCount(0) {}
 
 // If positionDifference > 0, return 1; otherwise, return -1
-int AiShopkeeper::calculateStep(int positionDifference)
+int AiShopkeeper::calculate_step(int positionDifference)
 {
 	return positionDifference > 0 ? 1 : -1;
 }
@@ -26,22 +26,22 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	int moveY = targetY - owner.position.y; // Number of squares to move vertically
 
 	// Decide in which direction to take one step horizontally and vertically
-	int stepX = calculateStep(moveX); // Direction to move horizontally (left or right)
-	int stepY = calculateStep(moveY); // Direction to move vertically (up or down)
+	int stepX = calculate_step(moveX); // Direction to move horizontally (left or right)
+	int stepY = calculate_step(moveY); // Direction to move vertically (up or down)
 
 	// List potential moves in order of priority
-	std::vector<std::pair<int, int>> moves
+	std::vector<Vector2D> moves
 	{
-		{stepX, stepY},  // First priority: move diagonally
-		{stepX, 0},      // Second priority: move horizontally only
-		{0, stepY}       // Third priority: move vertically only
+		{stepY,stepX},  // First priority: move diagonally
+		{0, stepX},     // Second priority: move horizontally only 
+		{stepY, 0}      // Third priority: move vertically only
 	};
 
 	// Try each move in order of priority until one is successful
 	for (const auto& move : moves)
 	{
-		int nextX = owner.position.x + move.first;
-		int nextY = owner.position.y + move.second;
+		int nextX = owner.position.x + move.x;
+		int nextY = owner.position.y + move.y;
 		if (game.map->can_walk(Vector2D{ nextY, nextX }))
 		{
 			owner.position.x = nextX;

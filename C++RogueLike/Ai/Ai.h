@@ -20,11 +20,14 @@ public:
 
 	static std::unique_ptr<Ai> create(const json& j);
 
+	int calculate_step(int positionDifference); // utility 
 protected:
 	enum class AiType
 	{
 		MONSTER, CONFUSED_MONSTER, PLAYER, SHOPKEEPER
 	};
+
+
 };
 
 //====

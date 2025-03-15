@@ -1,14 +1,9 @@
-// file: Map.h
-#ifndef MAP_H
-#define MAP_H
-
 #pragma once
+
+#include <unordered_set>
 
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
-
-class Actor;
-class Creature;
 
 inline constexpr int MAP_HEIGHT = 30 - 8;
 inline constexpr int MAP_WIDTH = 119;
@@ -42,7 +37,63 @@ struct Tile
 	Vector2D position;
 	TileType type;
 	bool explored;
-	Tile(Vector2D pos, TileType type) : position(pos), type(type), explored(false) {}	
+	double cost;
+	// overload the greater than operator
+	bool operator>(const Tile& other) const { return cost > other.cost; }
+	Tile(Vector2D pos, TileType type, double cost) : position(pos), type(type), cost(cost), explored(false) {}
+};
+
+struct SquareGrid
+{
+	int width, height;
+	std::vector<Vector2D> DIRS =
+	{
+		Vector2D{1, 0}, // y, x North
+		Vector2D{0, -1}, // y, x West
+		Vector2D{-1, 0}, // y, x South
+		Vector2D{0, 1} // y, x East
+	};
+	std::unordered_set<Vector2D> walls;
+
+	SquareGrid(int width_, int height_) : width(width_), height(height_) {}
+
+	bool in_bounds(Vector2D id) const
+	{
+		return 0 <= id.x && id.x < width
+			&& 0 <= id.y && id.y < height;
+	}
+
+	bool passable(Vector2D id) const
+	{
+		return walls.find(id) == walls.end();
+	}
+
+	std::vector<Vector2D> neighbors(Vector2D id) const
+	{
+		std::vector<Vector2D> results;
+
+		for (Vector2D dir : DIRS)
+		{
+			Vector2D next{ id.x + dir.x, id.y + dir.y };
+			if (in_bounds(next) && passable(next))
+			{
+				results.push_back(next);
+			}
+		}
+
+		if ((id.x + id.y) % 2 == 0)
+		{
+			// see "Ugly paths" section for an explanation:
+			std::reverse(results.begin(), results.end());
+		}
+
+		return results;
+	}
+
+	double cost(Vector2D from_node, Vector2D to_node) const
+	{
+		return 1;
+	}
 };
 
 //==Map==
@@ -52,10 +103,17 @@ class Map : public Persistent
 {
 private:
 	int map_height, map_width;
+	std::vector<Vector2D> DIRS =
+	{
+		Vector2D{1, 0}, // y, x North
+		Vector2D{0, -1}, // y, x West
+		Vector2D{-1, 0}, // y, x South
+		Vector2D{0, 1} // y, x East
+	};
 
 	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
 	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
-	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else {throw std::out_of_range { "Map::get_index() out of bounds" };} }
+	
 	void init_tiles();
 	void place_stairs() const;
 	bool is_stairs(Vector2D pos) const;
@@ -87,13 +145,18 @@ public:
 	void add_weapons(Vector2D pos);
 	void add_item(Vector2D pos);
 	Creature* get_actor(Vector2D pos) noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
-	
+	std::vector<std::vector<Tile>> get_map() const;
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
+	std::vector<Vector2D> neighbors(Vector2D id) const;
+	double cost(Vector2D from_node, Vector2D to_node) const;
+	int get_width() const noexcept { return map_width; }
+	int get_height() const noexcept { return map_height; }
+	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
 
 	std::unique_ptr<TCODPath> tcodPath;
-protected:
 	std::vector<Tile> tiles;
+protected:
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;
 	long seed;
@@ -104,6 +167,3 @@ protected:
 	void set_tile(Vector2D pos, TileType newType);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 };
-
-#endif // !MAP_H
-// end of file: Map.h

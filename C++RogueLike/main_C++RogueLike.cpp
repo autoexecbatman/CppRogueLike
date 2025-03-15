@@ -9,7 +9,6 @@
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ranges>
 
 // https://pdcurses.org/docs/MANUAL.html
 #include <curses.h>
@@ -17,7 +16,6 @@
 #include "Game.h"
 #include "Colors/Colors.h"
 #include "Menu/Menu.h"
-#include "Menu/MenuGender.h"
 #include "Gui/Gui.h"
 
 #include "Attributes/StrengthAttributes.h" // for debugging
@@ -50,86 +48,20 @@ int main()
 	int loopNum{ 0 };
 	while (game.run) // main game loop
 	{
-		if (!game.menus.empty())
-		{
-			game.windowState = Game::WindowState::MENU;
-		}
-		else
-		{
-			game.windowState = Game::WindowState::GAME;
-		}
+		game.menus.empty() ? game.windowState = Game::WindowState::GAME : game.windowState = Game::WindowState::MENU;
 
 		//==MENU==
 		switch (game.windowState)
 		{
 		case Game::WindowState::MENU:
 		{
-			if (!game.menus.empty())
-			{
-				game.menus.back()->menu();
-				// if back is pressed, pop the menu
-				if (game.menus.back()->back)
-				{
-					game.menus.pop_back();
-					game.menus.back()->menu_set_run_true();
-				}
-
-				if (!game.menus.back()->run)
-				{
-					game.menus.pop_back();
-				}
-
-				game.shouldInput = false;
-			}
+			game.handle_menus();
 		}
 		break;
 
 		case Game::WindowState::GAME:
 		{
-			if (!game.gameInit)
-			{
-				game.init();
-				game.gameInit = true;
-			}
-			//==DEBUG==
-			game.log("//====================LOOP====================//");
-			game.log("Loop number: " + std::to_string(loopNum) + "\n");
-
-			//==INIT_GUI==
-			if (!gui.guiInit)
-			{
-				gui.gui_init();
-				gui.guiInit = true;
-			}
-
-			//==INPUT==
-			game.keyPress = ERR; // reset the keyPress so it won't get stuck in a loop
-			if (game.shouldInput)
-			{
-				game.key_store();
-				game.key_listen();
-			}
-			game.shouldInput = true; // reset shouldInput to reset the flag
-
-			//==UPDATE==
-			game.log("Running update...");
-			game.update(); // update map and actors positions
-			gui.gui_update(); // update the gui
-			game.log("Update OK.");
-			// **NEW**: If a menu was added, skip the rest of this loop
-			if (!game.menus.empty())
-			{
-				game.windowState = Game::WindowState::MENU;
-				continue;
-			}
-
-			//==DRAW==
-			game.log("Running render...");
-			clear();
-			game.render(); // render map and actors to the screen
-			gui.gui_render(); // render the gui
-			refresh();
-			game.log("Render OK.");
+			game.handle_gameloop(gui, loopNum);
 		}
 		break;
 

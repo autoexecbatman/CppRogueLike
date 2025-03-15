@@ -77,3 +77,13 @@ struct Vector2D
 		return os;
 	}
 };
+
+namespace std {
+	/* implement hash function so we can put GridLocation into an unordered_set */
+	template <> struct hash<Vector2D> {
+		std::size_t operator()(const Vector2D& id) const noexcept {
+			// I wish built-in std::hash worked on pair and tuple
+			return std::hash<int>()(id.x ^ (id.y << 16));
+		}
+	};
+}

@@ -38,6 +38,12 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	ai->load(j);
 	return ai;
 }
+
+// If positionDifference > 0, return 1; otherwise, return -1
+int Ai::calculate_step(int positionDifference)
+{
+	return positionDifference > 0 ? 1 : -1;
+}
 //====
 
 // end of file: Ai.cpp
