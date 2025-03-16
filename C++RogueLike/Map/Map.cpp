@@ -677,6 +677,7 @@ void Map::add_monster(Vector2D pos)
 	}
 }
 
+// getActor returns the actor at the given coordinates or `nullptr` if there's none
 Creature* Map::get_actor(Vector2D pos) noexcept
 {
 	for (const auto& actor : game.creatures)
@@ -689,8 +690,6 @@ Creature* Map::get_actor(Vector2D pos) noexcept
 
 	return nullptr;
 }
-
-// getActor returns the actor at the given coordinates or NULL if there's none
 
 std::vector<std::vector<Tile>> Map::get_map() const
 {
@@ -731,11 +730,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id) const
 
 	for (Vector2D dir : DIRS)
 	{
-		Vector2D next
-		{
-			id.y + dir.y,
-			id.x + dir.x
-		};
+		Vector2D next{ id.y + dir.y, id.x + dir.x };
 		if (in_bounds(next) && can_walk(next))
 		{
 			results.push_back(next);

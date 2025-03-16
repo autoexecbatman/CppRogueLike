@@ -7,33 +7,19 @@
 #include "Map/Map.h"
 #include "Vector2D.h"
 
-struct Node
-{
-    int vertex{};
-    int weight{};
-};
-
 class Dijkstra
 {
 public:
     Dijkstra(int width, int height);
-    void dijkstra_search(
+    std::vector<Vector2D> a_star_search(
         Map& graph,
         Vector2D start,
         Vector2D goal,
-        std::vector<Vector2D>& cameFrom,
-        std::vector<double>& costSoFar
+        bool AStar
     );
     std::vector<Vector2D> reconstruct_path(
         Vector2D start, Vector2D goal,
         std::vector<Vector2D> cameFrom
-    );
-    void a_star_search(
-        Map& graph,
-        Vector2D start,
-        Vector2D goal,
-        std::vector<Vector2D>& cameFrom,
-        std::vector<double>& costSoFar
     );
 	// Heuristic function for A* search
     double heuristic(Vector2D a, Vector2D b)
@@ -52,7 +38,8 @@ struct FrontierNode
     double weight{};   // The cost to reach this node
 
     // Comparator for priority queue (min-heap behavior)
-    bool operator>(const FrontierNode& other) const {
+    bool operator>(const FrontierNode& other) const
+    {
         return weight > other.weight; // Lower cost = higher priority
     }
 };

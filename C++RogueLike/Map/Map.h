@@ -52,10 +52,14 @@ private:
 	int map_height, map_width;
 	std::vector<Vector2D> DIRS =
 	{
-		Vector2D{1, 0}, // y, x North
-		Vector2D{0, -1}, // y, x West
-		Vector2D{-1, 0}, // y, x South
-		Vector2D{0, 1} // y, x East
+		Vector2D{-1, 0}, // y, x North
+		Vector2D{-1, 1}, // y, x North-West
+		Vector2D{0, 1}, // y, x West
+		Vector2D{1, 1}, // y, x South-West
+		Vector2D{1, 0}, // y, x South
+		Vector2D{1, -1}, // y, x South-East
+		Vector2D{0, -1}, // y, x East
+		Vector2D{-1, -1} // y, x North-East
 	};
 
 	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }

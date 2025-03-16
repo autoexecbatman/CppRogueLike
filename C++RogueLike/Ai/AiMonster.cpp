@@ -108,14 +108,10 @@ void AiMonster::save(json& j)
 void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 {
 	Dijkstra dijkstra{ MAP_WIDTH,MAP_HEIGHT };
-	std::vector<Vector2D> cameFrom;
-	std::vector<double> costSoFar;
-	dijkstra.a_star_search(*game.map, owner.position, targetPosition, cameFrom, costSoFar);
-	std::vector<Vector2D> path = dijkstra.reconstruct_path(owner.position, targetPosition, cameFrom);
-
-	int distance = owner.get_tile_distance(targetPosition);
+	std::vector<Vector2D> path = dijkstra.a_star_search(*game.map, owner.position, targetPosition, false);
+	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	auto is_actor = [](const Vector2D& pos) { return game.map->get_actor(pos) != nullptr; };
-	if (distance > 1)
+	if (distanceToTarget > 1)
 	{
 		if (!path.empty())
 		{
