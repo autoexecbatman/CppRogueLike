@@ -127,14 +127,11 @@ void Map::init_tiles()
 {
 	if (!tiles.empty()) { tiles.clear(); }
 
-	for (auto y{ 0 }; y < map_height; y++)
+	for (int y = 0; y < map_height; y++)
 	{
-		for (auto x{ 0 }; x < map_width; x++)
+		for (int x = 0; x < map_width; x++)
 		{
-			Vector2D pos{ 0, 0 };
-			pos.y = y;
-			pos.x = x;
-			tiles.emplace_back(Tile(pos, TileType::WALL, 0));
+			tiles.emplace_back(Tile(Vector2D{ y, x }, TileType::WALL, 0));
 		}
 	}
 }
