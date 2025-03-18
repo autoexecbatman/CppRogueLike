@@ -51,12 +51,24 @@ void AiPlayer::update(Creature& owner)
 		call_action(owner, key);
 	}
 
-	// compute FOV if needed (if player moved)
+	if (isWaiting) // when waiting tiles are triggered
+	{
+		isWaiting = false;
+		game.map->tile_action(owner, game.map->get_tile_type(owner.position));
+		look_on_floor(owner.position);
+	}
+
+	// if moving
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
 		Vector2D targetPosition = owner.position + moveVector;
-		if (move_or_attack(owner, targetPosition))
+		game.map->tile_action(owner, game.map->get_tile_type(owner.position));
+		look_to_move(owner, targetPosition); // must check colissions before creature dies from attack
+		look_to_attack(targetPosition, owner);
+		look_on_floor(targetPosition);
+		if (shouldComputeFOV)
 		{
+			shouldComputeFOV = false; // reset flag
 			game.map->compute_fov();
 		}
 	}
@@ -70,6 +82,11 @@ void AiPlayer::load(const json& j)
 void AiPlayer::save(json& j)
 {
 	j["type"] = static_cast<int>(AiType::PLAYER);
+}
+
+void AiPlayer::move(Creature& owner, Vector2D target)
+{
+	owner.position = target;
 }
 
 int AiPlayer::get_next_level_xp(Creature& owner)
@@ -216,28 +233,6 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 	}
 }
 
-// returns true if the action was successful
-bool AiPlayer::move_or_attack(Creature& owner, Vector2D target)
-{
-	game.log("Player tries to move or attack");
-
-	// check tile state and if true move the player
-	if (!game.map->tile_action(owner, game.map->get_tile_type(target)))
-	{
-		return false;
-	}
-
-	if (!look_to_attack(target, owner))
-	{
-		return false;
-	}
-
-	look_on_floor(target);
-	owner.position = target; // move player
-
-	return true;
-}
-
 void AiPlayer::look_on_floor(Vector2D target)
 {
 	// look for corpses or items
@@ -271,6 +266,17 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 	return true;
 }
 
+
+void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
+{
+	if (!game.map->is_collision(owner, game.map->get_tile_type(targetPosition), targetPosition))
+	{
+		move(owner, targetPosition);
+		shouldComputeFOV = true;
+	}
+}
+
+
 void AiPlayer::call_action(Creature& owner, Controls key)
 {
 	switch (key)
@@ -279,6 +285,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::WAIT_ARROW_NUMPAD:
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
+		isWaiting = true;
 		break;
 	}
 

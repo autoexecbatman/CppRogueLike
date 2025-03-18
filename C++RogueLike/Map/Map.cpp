@@ -239,40 +239,60 @@ TileType Map::get_tile_type(Vector2D pos) const
 	return tiles.at(get_index(pos)).type;
 }
 
-bool Map::tile_action(Creature& owner, TileType tileType)
+// returns true if the player after a successful move
+void Map::tile_action(Creature& owner, TileType tileType)
 {
 	switch (tileType)
 	{
 	case TileType::WATER:
 		game.log("You are in water");
 		game.message(COLOR_WHITE, "You are in water", true);
-		if (!owner.destructible->take_damage(owner, 1))
-		{
-			return owner.has_state(ActorState::CAN_SWIM) ? true : false;
-		}
-		else
-		{
-			return false;
-		}
+		owner.destructible->take_damage(owner, 1);
+		break;
 	case TileType::WALL:
 		game.log("You are against a wall");
 		game.message(COLOR_WHITE, "You are against a wall", true);
-		return false;
+		break;
 	case TileType::FLOOR:
 		game.log("You are on the floor");
 		game.message(COLOR_WHITE, "You are on the floor", true);
-		return true;
+		break;
 	case TileType::DOOR:
 		game.log("You are at a door");
 		game.message(COLOR_WHITE, "You are at a door", true);
-		return true;
+		break;
 	case TileType::CORRIDOR:
 		game.log("You are in a corridor");
 		game.message(COLOR_WHITE, "You are in a corridor", true);
-		return true;
+		break;
 	default:
 		game.log("You are in an unknown area");
+	}
+}
+
+bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos)
+{
+	// if there is an actor at the position
+	const auto& actor = get_actor(pos);
+	if (actor)
+	{
+		return true;
+	}
+
+	switch (tileType)
+	{
+	case TileType::WATER:
+		return owner.has_state(ActorState::CAN_SWIM) ? false : true;
+	case TileType::WALL:
+		return true;
+	case TileType::FLOOR:
 		return false;
+	case TileType::DOOR:
+		return false;
+	case TileType::CORRIDOR:
+		return false;
+	default:
+		return true;
 	}
 }
 
@@ -616,18 +636,6 @@ bool Map::can_walk(Vector2D pos) const
 	{
 		return false;
 	}
-	//if (is_water(pos)) // check if the tile is water
-	//{
-	//	return false;
-	//}
-
-	//for (const auto& actor : game.creatures) // check if the tile is occupied by an actor
-	//{
-	//	if (actor->has_state(ActorState::BLOCKS) && actor->position == pos)
-	//	{
-	//		return false;
-	//	}
-	//}
 
 	return true;
 }
