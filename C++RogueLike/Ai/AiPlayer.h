@@ -15,13 +15,11 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 	void display_inventory(Creature& owner);
-	void levelup_update(Creature& owner);
 private:
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
 
 	void move(Creature& owner, Vector2D target);
-	int get_next_level_xp(Creature& owner);
 	void pick_item(Creature& owner);
 	void drop_item(Creature& owner);
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;

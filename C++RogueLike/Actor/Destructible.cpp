@@ -181,6 +181,7 @@ void MonsterDestructible::die(Creature& owner)
 
 	// increase the player's experience
 	game.player->destructible->xp += xp;
+	game.player->ai->levelup_update(*game.player);
 
 	Destructible::die(owner);
 }

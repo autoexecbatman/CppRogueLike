@@ -1,12 +1,13 @@
 // file: Ai.cpp
 #include <iostream>
-#include <gsl/util>
 #include <libtcod.h>
+#include <format>
 
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
+#include "../Game.h"
 
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)
@@ -43,6 +44,31 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 int Ai::calculate_step(int positionDifference)
 {
 	return positionDifference > 0 ? 1 : -1;
+}
+
+int Ai::get_next_level_xp(Creature& owner)
+{
+	constexpr int LEVEL_UP_BASE = 200;
+	constexpr int LEVEL_UP_FACTOR = 150;
+
+	return LEVEL_UP_BASE + (owner.playerLevel * LEVEL_UP_FACTOR);
+}
+
+
+void Ai::levelup_update(Creature& owner)
+{
+	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
+	// level up if needed
+	int levelUpXp = get_next_level_xp(owner);
+
+	if (owner.destructible->xp >= levelUpXp)
+	{
+		game.player->playerLevel++;
+		owner.destructible->xp -= levelUpXp;
+		game.message(WHITE_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
+		game.player->calculate_thaco();
+		game.dispay_levelup(game.player->playerLevel);
+	}
 }
 //====
 

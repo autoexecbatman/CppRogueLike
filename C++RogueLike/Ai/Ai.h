@@ -21,6 +21,8 @@ public:
 	static std::unique_ptr<Ai> create(const json& j);
 
 	int calculate_step(int positionDifference); // utility 
+	int get_next_level_xp(Creature& owner);
+	void levelup_update(Creature& owner);
 protected:
 	enum class AiType
 	{

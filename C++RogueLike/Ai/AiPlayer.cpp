@@ -34,8 +34,6 @@ struct PossibleMoves
 
 void AiPlayer::update(Creature& owner)
 {
-	levelup_update(owner); // level up if needed
-
 	const Controls key = static_cast<Controls>(game.keyPress);
 	Vector2D moveVector{ 0, 0 };
 
@@ -62,7 +60,7 @@ void AiPlayer::update(Creature& owner)
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
 		Vector2D targetPosition = owner.position + moveVector;
-		game.map->tile_action(owner, game.map->get_tile_type(owner.position));
+		game.map->tile_action(owner, game.map->get_tile_type(targetPosition));
 		look_to_move(owner, targetPosition); // must check colissions before creature dies from attack
 		look_to_attack(targetPosition, owner);
 		look_on_floor(targetPosition);
@@ -87,30 +85,6 @@ void AiPlayer::save(json& j)
 void AiPlayer::move(Creature& owner, Vector2D target)
 {
 	owner.position = target;
-}
-
-int AiPlayer::get_next_level_xp(Creature& owner)
-{
-	constexpr int LEVEL_UP_BASE = 200;
-	constexpr int LEVEL_UP_FACTOR = 150;
-
-	return LEVEL_UP_BASE + (owner.playerLevel * LEVEL_UP_FACTOR);
-}
-
-void AiPlayer::levelup_update(Creature& owner)
-{
-	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
-	// level up if needed
-	int levelUpXp = get_next_level_xp(owner);
-
-	if (owner.destructible->xp >= levelUpXp)
-	{
-		game.player->playerLevel++;
-		owner.destructible->xp -= levelUpXp;
-		game.message(WHITE_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
-		game.player->calculate_thaco();
-		game.dispay_levelup(game.player->playerLevel);
-	}
 }
 
 void AiPlayer::pick_item(Creature& owner)
