@@ -6,7 +6,7 @@
 
 *Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.*
 
-## *** UNDER CONSTRUCTION! *** :construction:
+## :construction: *** UNDER CONSTRUCTION! *** :construction:
 
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
 
