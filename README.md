@@ -6,7 +6,7 @@
 
 *Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.*
 
-## *** UNDER CONSTRUCTION! ***:construction:
+## *** UNDER CONSTRUCTION! *** :construction:
 
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
 
@@ -41,7 +41,7 @@ Thank you for considering a contribution to CppRogueLike.
       ```
       .\bootstrap-vcpkg.bat
       ```
-    - Integrate vcpkg system-wide **Use this after finishing installation** (optional but recommended):
+    - Integrate vcpkg system-wide:
       ```
       .\vcpkg integrate install
       ```
@@ -49,11 +49,11 @@ Thank you for considering a contribution to CppRogueLike.
 3. **Install Dependencies Using vcpkg**:
     - For x86 architecture:
       ```
-      .\vcpkg install ms-gsl:x86-windows pdcurses:x86-windows libtcod:x86-windows nlohmann-json:x86-windows fmt:x86-windows
+      .\vcpkg install pdcurses:x86-windows libtcod:x86-windows nlohmann-json:x86-windows fmt:x86-windows
       ```
     - For x64 architecture:
       ```
-      .\vcpkg install ms-gsl:x64-windows pdcurses:x64-windows libtcod:x64-windows nlohmann-json:x64-windows fmt:x64-windows
+      .\vcpkg install pdcurses:x64-windows libtcod:x64-windows nlohmann-json:x64-windows fmt:x64-windows
       ```
 
    **Note**: Ensure the names of the packages are correct in vcpkg. Some package names might differ slightly from their GitHub repository names.
