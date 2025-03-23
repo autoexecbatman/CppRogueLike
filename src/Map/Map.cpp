@@ -761,4 +761,41 @@ double Map::cost(Vector2D from_node, Vector2D to_node)
 	return get_cost(to_node);
 }
 
+bool Map::has_los(Vector2D from, Vector2D to) const
+{
+	int x0 = from.x;
+	int y0 = from.y;
+	int x1 = to.x;
+	int y1 = to.y;
+
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
+
+	while (x0 != x1 || y0 != y1) {
+		int e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y0 += sy;
+		}
+
+		// Skip the start and end points
+		if ((x0 != from.x || y0 != from.y) && (x0 != to.x || y0 != to.y))
+		{
+			if (is_wall(Vector2D{ y0, x0 }))
+			{
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 // end of file: Map.cpp

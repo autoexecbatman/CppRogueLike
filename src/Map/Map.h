@@ -106,6 +106,7 @@ public:
 	int get_height() const noexcept { return map_height; }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
 	double get_cost(Vector2D pos) const noexcept { return tiles.at(get_index(pos)).cost; }
+	bool has_los(Vector2D from, Vector2D to) const;
 
 	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;

@@ -1078,4 +1078,17 @@ void Game::transferMessagesToGui()
 	attackMessagesWhole.clear();
 }
 
+void Game::handle_ranged_attack() {
+
+	// Enter targeting mode
+	Vector2D targetPos = targeting.select_target(player->position, 4);
+
+	// If a valid target was selected
+	if (targetPos.x != -1 && targetPos.y != -1) {
+		// Process the ranged attack (including projectile animation)
+		targeting.process_ranged_attack(*player, targetPos);
+	}
+
+}
+
 // end of file: Game.cpp

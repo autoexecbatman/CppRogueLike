@@ -18,6 +18,7 @@
 #include "Ai/AiShopkeeper.h"
 #include "Weapons.h"
 #include "BaseMenu.h"
+#include "TargetingSystem.h"
 
 class Game
 {
@@ -44,6 +45,7 @@ public:
 	}
 	windowState{ WindowState::GAME };
 	RandomDice d; // Random number generator.
+	TargetingSystem targeting;
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0) };
@@ -75,6 +77,7 @@ public:
 	void render_items(std::span<std::unique_ptr<Item>> items);
 	void handle_menus();
 	void handle_gameloop(Gui& gui, int loopNum);
+	void handle_ranged_attack();
 
 	template <typename T>
 	void create_creature(Vector2D position)
@@ -138,6 +141,7 @@ public:
 	void appendMessagePart(int color, const std::string& text);
 	void finalizeMessage();
 	void transferMessagesToGui();
+
 
 private:
 	// Private member variables.

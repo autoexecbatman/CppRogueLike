@@ -323,7 +323,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::TARGET:
 	{
-		game.target();
+		game.handle_ranged_attack();
 		break;
 	}
 

@@ -124,14 +124,16 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/BaseMenu.h
     ${PROJECT_SOURCE_DIR}/BaseMenu.cpp
     ${PROJECT_SOURCE_DIR}/IMenuState.h
-    ${PROJECT_SOURCE_DIR}/MenuTrade.h
     ${PROJECT_SOURCE_DIR}/MenuTrade.cpp
-    ${PROJECT_SOURCE_DIR}/MenuBuy.h
+    ${PROJECT_SOURCE_DIR}/MenuTrade.h
     ${PROJECT_SOURCE_DIR}/MenuBuy.cpp
-    ${PROJECT_SOURCE_DIR}/MenuSell.h
+    ${PROJECT_SOURCE_DIR}/MenuBuy.h
     ${PROJECT_SOURCE_DIR}/MenuSell.cpp
-    ${PROJECT_SOURCE_DIR}/Dijkstra.h
+    ${PROJECT_SOURCE_DIR}/MenuSell.h
     ${PROJECT_SOURCE_DIR}/Dijkstra.cpp
+    ${PROJECT_SOURCE_DIR}/Dijkstra.h
+    ${PROJECT_SOURCE_DIR}/TargetingSystem.cpp
+    ${PROJECT_SOURCE_DIR}/TargetingSystem.h
 
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp
@@ -148,9 +150,9 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 # Enforce UTF-8 encoding on MSVC.
 if (MSVC)
     target_compile_options(${PROJECT_NAME} PRIVATE /MP /utf-8)
-    set_target_properties(${PROJECT_NAME} PROPERTIES # Set the working directory for Visual Studio debugging.
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Debug"
-    )
+
+    # Set the working directory for Visual Studio debugging.
+    set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
 endif()
 
 # Get from Vcpkg.

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 // {y,x} position
 struct Vector2D
 {
@@ -76,14 +78,10 @@ struct Vector2D
 		os << "Vector2D: {y: " << v.y << ", x: " << v.x << "}";
 		return os;
 	}
-};
 
-namespace std {
-	/* implement hash function so we can put GridLocation into an unordered_set */
-	template <> struct hash<Vector2D> {
-		std::size_t operator()(const Vector2D& id) const noexcept {
-			// I wish built-in std::hash worked on pair and tuple
-			return std::hash<int>()(id.x ^ (id.y << 16));
-		}
-	};
-}
+	// Get distance to another position
+	int distance_to(Vector2D other) const
+	{
+		return std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2));
+	}
+};
