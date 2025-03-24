@@ -29,4 +29,5 @@ private:
 	bool look_to_attack(Vector2D& target, Creature& owner);
 	void look_to_move(Creature& owner, const Vector2D& targetPosition);
 	void call_action(Creature& owner, Controls key);
+	Vector2D handle_direction_input(const Creature& owner, int dirKey);
 };

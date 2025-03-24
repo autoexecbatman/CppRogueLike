@@ -16,7 +16,7 @@ class MenuName
 
 	std::string playerName{ "None" };
 
-	char name[40]; // array to store user input in , 39 is the max length of the name, 40 is the max length + 1 for the null terminator
+	char name[40] = { 0 }; // array to store user input in , 39 is the max length of the name, 40 is the max length + 1 for the null terminator
 
 	void menu_name_new() noexcept;
 	void menu_name_clear() noexcept;

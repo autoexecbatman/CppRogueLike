@@ -61,7 +61,7 @@ enum class Controls
 	// input for the player to drop items
 	DROP = 'd',
 
-	CHAR_SHEET = 'c',
+	CHAR_SHEET = '@',
 
 	DESCEND = '>',
 
@@ -79,5 +79,8 @@ enum class Controls
 
 	// the controls for the player to regenerate the map
 	REGEN = 'r',
+
+	OPEN_DOOR = 'o',
+	CLOSE_DOOR = 'c',
 };
 #endif // !CONTROLS_H

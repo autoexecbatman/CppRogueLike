@@ -28,8 +28,15 @@ enum class TileType
 	WALL,
 	WATER,
 	DOOR,
+	OPEN_DOOR,
 	CORRIDOR,
 	// Add more as needed...
+};
+
+enum class DoorState
+{
+	CLOSED,
+	OPEN
 };
 
 struct Tile
@@ -38,9 +45,13 @@ struct Tile
 	TileType type;
 	bool explored;
 	double cost;
+	DoorState doorState{ DoorState::CLOSED }; // New field for door state
+
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }
 	Tile(Vector2D pos, TileType type, double cost) : position(pos), type(type), cost(cost), explored(false) {}
+
+	bool is_door_open() const { return type == TileType::DOOR && doorState == DoorState::OPEN; }
 };
 
 //==Map==
@@ -107,6 +118,9 @@ public:
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
 	double get_cost(Vector2D pos) const noexcept { return tiles.at(get_index(pos)).cost; }
 	bool has_los(Vector2D from, Vector2D to) const;
+	bool open_door(Vector2D pos);
+	bool close_door(Vector2D pos);
+	bool is_door(Vector2D pos) const;
 
 	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;
@@ -118,6 +132,7 @@ protected:
 	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
+	void set_door(Vector2D thisTile, int tileX, int tileY);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
 	void set_tile(Vector2D pos, TileType newType, double cost);
 };

@@ -255,6 +255,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 {
 	switch (key)
 	{
+
 	case Controls::WAIT:
 	case Controls::WAIT_ARROW_NUMPAD:
 	{
@@ -351,7 +352,118 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		break;
 	}
 
+	case Controls::OPEN_DOOR:
+	{
+		// Prompt for direction
+		game.message(WHITE_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		int dirKey = getch();
+		Vector2D doorPos = handle_direction_input(owner, dirKey);
+
+		if (doorPos.x != 0 || doorPos.y != 0) { // Valid position
+			if (game.map->is_door(doorPos)) {
+				if (game.map->open_door(doorPos)) {
+					game.message(WHITE_PAIR, "You open the door.", true);
+					game.gameStatus = Game::GameStatus::NEW_TURN;
+					// FOV is recalculated inside open_door method
+				}
+				else {
+					game.message(WHITE_PAIR, "The door is already open.", true);
+				}
+			}
+			else {
+				game.message(WHITE_PAIR, "There is no door there.", true);
+			}
+		}
+		else {
+			game.message(WHITE_PAIR, "Invalid direction.", true);
+		}
+		break;
+	}
+
+	case Controls::CLOSE_DOOR:
+	{
+		// Prompt for direction
+		game.message(WHITE_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		int dirKey = getch();
+		Vector2D doorPos = handle_direction_input(owner, dirKey);
+
+		if (doorPos.x != 0 || doorPos.y != 0) { // Valid position
+			if (game.map->is_door(doorPos)) {
+				if (game.map->close_door(doorPos)) {
+					game.message(WHITE_PAIR, "You close the door.", true);
+					game.gameStatus = Game::GameStatus::NEW_TURN;
+					// FOV is recalculated inside close_door method
+				}
+				else {
+					// Try to determine why door couldn't be closed
+					if (game.map->get_actor(doorPos) != nullptr) {
+						game.message(WHITE_PAIR, "Something is blocking the door.", true);
+					}
+					else {
+						game.message(WHITE_PAIR, "The door is already closed.", true);
+					}
+				}
+			}
+			else {
+				game.message(WHITE_PAIR, "There is no door there.", true);
+			}
+		}
+		else {
+			game.message(WHITE_PAIR, "Invalid direction.", true);
+		}
+		break;
+	}
+
 	default:
 		break;
 }
+}
+
+Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
+{
+	Vector2D delta{ 0, 0 };
+
+	switch (dirKey) {
+	case KEY_UP:
+	case '8':
+		delta = { -1, 0 }; // North
+		break;
+	case KEY_DOWN:
+	case '2':
+		delta = { 1, 0 }; // South
+		break;
+	case KEY_LEFT:
+	case '4':
+		delta = { 0, -1 }; // West
+		break;
+	case KEY_RIGHT:
+	case '6':
+		delta = { 0, 1 }; // East
+		break;
+	case '7':
+		delta = { -1, -1 }; // Northwest
+		break;
+	case '9':
+		delta = { -1, 1 }; // Northeast
+		break;
+	case '1':
+		delta = { 1, -1 }; // Southwest
+		break;
+	case '3':
+		delta = { 1, 1 }; // Southeast
+		break;
+	default:
+		return { 0, 0 }; // Invalid direction
+	}
+
+	// Calculate the target position
+	Vector2D targetPos = owner.position + delta;
+
+	// Validate the position is within map bounds
+	if (targetPos.x < 0 || targetPos.x >= game.map->get_width() ||
+		targetPos.y < 0 || targetPos.y >= game.map->get_height()) {
+		return { 0, 0 }; // Out of bounds
+	}
+
+	return targetPos;
 }
