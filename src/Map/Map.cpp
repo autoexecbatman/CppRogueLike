@@ -177,14 +177,9 @@ void Map::load(const json& j)
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
 		int cost = tileJson.at("cost").get<double>();
-		DoorState doorState = DoorState::CLOSED;
-		if (tileJson.contains("doorState")) {
-			doorState = static_cast<DoorState>(tileJson.at("doorState").get<int>());
-		}
 
 		tiles.emplace_back(position, type, cost);
 		tiles.back().explored = explored;
-		tiles.back().doorState = doorState;
 	}
 
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
@@ -207,8 +202,7 @@ void Map::save(json& j)
 				{"position", { {"y", tile.position.y}, {"x", tile.position.x} } },
 				{"type", static_cast<int>(tile.type)}, // TileType is an enum
 				{"explored", tile.explored},
-				{ "cost", tile.cost },
-				{ "doorState", static_cast<int>(tile.doorState) }
+				{ "cost", tile.cost }
 			}
 		);
 	}
@@ -262,7 +256,7 @@ void Map::tile_action(Creature& owner, TileType tileType)
 		game.log("You are on the floor");
 		game.message(COLOR_WHITE, "You are on the floor", true);
 		break;
-	case TileType::DOOR:
+	case TileType::CLOSED_DOOR:
 		game.log("You are at a door");
 		game.message(COLOR_WHITE, "You are at a door", true);
 		break;
@@ -292,7 +286,7 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos)
 		return true;
 	case TileType::FLOOR:
 		return false;
-	case TileType::DOOR:
+	case TileType::CLOSED_DOOR:
 		return true;  // Closed doors block movement
 	case TileType::OPEN_DOOR:
 		return false; // Open doors don't block movement
@@ -349,15 +343,9 @@ void Map::render() const
 			case TileType::FLOOR:
 				mvaddch(tile.position.y, tile.position.x, '.');
 				break;
-			case TileType::DOOR:
+			case TileType::CLOSED_DOOR:
 				attron(COLOR_PAIR(DOOR_PAIR));
-				// Check if door is open or closed
-				if (tiles.at(get_index(tile.position)).doorState == DoorState::OPEN) {
-					mvprintw(tile.position.y, tile.position.x, "/"); // Open door character
-				}
-				else {
-					mvprintw(tile.position.y, tile.position.x, "+"); // Closed door character
-				}
+				mvaddch(tile.position.y, tile.position.x, '+'); // Closed door character
 				attroff(COLOR_PAIR(DOOR_PAIR));
 				break;
 			case TileType::OPEN_DOOR:
@@ -553,8 +541,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 
 void Map::set_door(Vector2D thisTile, int tileX, int tileY)
 {
-	set_tile(thisTile, TileType::DOOR, 2);
-	tiles.at(get_index(thisTile)).doorState = DoorState::CLOSED;
+	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
 	tcodMap->setProperties(tileX, tileY, false, false);
 }
 
@@ -669,9 +656,9 @@ bool Map::can_walk(Vector2D pos) const
 	}
 
 	// Check for doors - can only walk through open doors
-	if (is_door(pos))
+	if (get_tile_type(pos) == TileType::CLOSED_DOOR)
 	{
-		return tiles.at(get_index(pos)).doorState == DoorState::OPEN;
+		return false; // Closed doors block movement
 	}
 
 	return true;
@@ -839,22 +826,27 @@ bool Map::is_door(Vector2D pos) const
 {
 	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
 		return false;
-	return tiles.at(get_index(pos)).type == TileType::DOOR;
+
+	TileType tileType = get_tile_type(pos);
+	return tileType == TileType::CLOSED_DOOR || tileType == TileType::OPEN_DOOR;
 }
 
 bool Map::open_door(Vector2D pos)
 {
 	if (!is_door(pos))
-		return false;
-
-	if (game.map->get_tile_type(pos) == TileType::DOOR)
 	{
-		// Change the tile type to OPEN_DOOR
-		game.map->set_tile(pos, TileType::OPEN_DOOR, 1);
-		// Update tcodMap to make it walkable
-		game.map->tcodMap->setProperties(pos.x, pos.y, true, true);
-		game.message(WHITE_PAIR, "You open the door.", true);
+		return false;
 	}
+
+	// Check if the door is already open
+	if (get_tile_type(pos) == TileType::OPEN_DOOR)
+	{
+		return false;
+	}
+
+	set_tile(pos, TileType::OPEN_DOOR, 1);
+	tcodMap->setProperties(pos.x, pos.y, true, true);
+	game.message(WHITE_PAIR, "You open the door.", true);
 
 	if (game.player && game.player->get_tile_distance(pos) <= FOV_RADIUS)
 	{
@@ -867,17 +859,25 @@ bool Map::open_door(Vector2D pos)
 bool Map::close_door(Vector2D pos)
 {
 	if (!is_door(pos))
+	{
 		return false;
+	}
 
-	auto& tile = tiles.at(get_index(pos));
-	if (tile.doorState == DoorState::CLOSED)
-		return false; // Already closed
+	// Check if the door is already closed
+	if (get_tile_type(pos) == TileType::CLOSED_DOOR)
+	{
+		return false;
+	}
 
 	// Check if there's an actor on the door - can't close if occupied
 	if (get_actor(pos) != nullptr)
+	{
 		return false;
+	}
 
-	tile.doorState = DoorState::CLOSED;
+	// Change the tile type to DOOR (closed)
+	set_tile(pos, TileType::CLOSED_DOOR, 2);
+
 	// Make the tile non-walkable and non-transparent
 	tcodMap->setProperties(pos.x, pos.y, false, false);
 

@@ -27,16 +27,10 @@ enum class TileType
 	FLOOR,
 	WALL,
 	WATER,
-	DOOR,
+	CLOSED_DOOR,
 	OPEN_DOOR,
 	CORRIDOR,
 	// Add more as needed...
-};
-
-enum class DoorState
-{
-	CLOSED,
-	OPEN
 };
 
 struct Tile
@@ -45,13 +39,10 @@ struct Tile
 	TileType type;
 	bool explored;
 	double cost;
-	DoorState doorState{ DoorState::CLOSED }; // New field for door state
 
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }
 	Tile(Vector2D pos, TileType type, double cost) : position(pos), type(type), cost(cost), explored(false) {}
-
-	bool is_door_open() const { return type == TileType::DOOR && doorState == DoorState::OPEN; }
 };
 
 //==Map==
