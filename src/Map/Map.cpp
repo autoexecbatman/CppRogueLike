@@ -153,7 +153,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 {
 	float randomRatio = game.d.d100();
 	TCODBsp myBSP(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 1, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
+	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
 
 	BspListener mylistener(*this);
 	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
@@ -505,7 +505,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 				if (get_tile_type(thisTile) == TileType::FLOOR || get_tile_type(thisTile) == TileType::WATER)
 				{
 					// set the last tile as a door
-					set_door(thisTile, tileX, tileY);
+					set_door(lastTile, lastTile.x, lastTile.y);
 					secondDoorSet = true;
 				}
 				else
