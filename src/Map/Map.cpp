@@ -153,7 +153,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 {
 	float randomRatio = game.d.d100();
 	TCODBsp myBSP(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
+	myBSP.splitRecursive(&rng_unique, 1, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
 
 	BspListener mylistener(*this);
 	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
@@ -354,9 +354,9 @@ void Map::render() const
 				attroff(COLOR_PAIR(DOOR_PAIR));
 				break;
 			case TileType::CORRIDOR:
-				attron(COLOR_PAIR(WHITE_PAIR));
+				attron(COLOR_PAIR(HPBARFULL_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '.');
-				attroff(COLOR_PAIR(WHITE_PAIR));
+				attroff(COLOR_PAIR(HPBARFULL_PAIR));
 				break;
 			default:
 				break;
