@@ -68,7 +68,7 @@ public:
 		if (node->isLeaf())
 		{
 			const bool withActors = gsl::narrow_cast<bool>(userData);
-			Vector2D end
+			Vector2D roomHeightWidth
 			{ 
 				//game.d.roll(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
 				//game.d.roll(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
@@ -79,45 +79,47 @@ public:
 			{
 				//game.d.roll(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
 				//game.d.roll(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
-				map.rng_unique->getInt(node->y + 1, node->y + node->h - end.y - 1), // from node y + 1 to node x + node height - width - 1
-				map.rng_unique->getInt(node->x + 1, node->x + node->w - end.x - 1) // from node x + 1 to node x + node width - width - 1
+				map.rng_unique->getInt(node->y + 1, node->y + node->h - roomHeightWidth.y - 1), // from node y + 1 to node x + node height - width - 1
+				map.rng_unique->getInt(node->x + 1, node->x + node->w - roomHeightWidth.x - 1) // from node x + 1 to node x + node width - width - 1
 			};
 
 			// first create a room
-			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + end.x - 1 - 1, begin.y + end.y - 1 - 1, withActors);
+			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + roomHeightWidth.x - 1 - 1, begin.y + roomHeightWidth.y - 1 - 1, withActors);
 
+			int centerX = begin.x + (roomHeightWidth.x / 2);
+			int centerY = begin.y + (roomHeightWidth.y / 2);
 			if (roomNum != 0)
 			{
 				if (game.d.d2() == 1) // 50% chance
 				{
 					// dig a corridor from last room
-					map.dig_corridor(
-						Vector2D{ last.y, begin.x + end.x / 2 },
-						Vector2D{ begin.y + end.y / 2, begin.x + end.x / 2 }
+				map.dig_corridor( // vertical corridor
+						Vector2D{ last.y, centerX },
+						Vector2D{ centerY, centerX }
 					);
-					map.dig_corridor(
+				map.dig_corridor( // horizontal corridor
 						Vector2D{ last.y, last.x },
-						Vector2D{ last.y, begin.x + end.x / 2 }
+						Vector2D{ last.y, centerX }
 					);
 					return true;
-				///*map.dig(1,10,117,10);*/ // test dig
+				/*map.dig(1,10,117,10);*/ // test dig
 				}
 				else
 				{
 					// fixed corridor
 					map.dig_corridor(
 						Vector2D{ last.y, last.x },
-						Vector2D{ last.y, begin.x + end.x / 2 }
+						Vector2D{ last.y, centerX }
 					);
 					map.dig_corridor(
-						Vector2D{ last.y, begin.x + end.x / 2 },
-						Vector2D{ begin.y + end.y / 2, begin.x + end.x / 2 }
+						Vector2D{ last.y, centerX },
+						Vector2D{ centerY, centerX }
 					);
 					return true;
 				}
 			}
 
-			last = Vector2D{ begin.y + end.y / 2,begin.x + end.x / 2 };
+			last = Vector2D{ centerY, centerX };
 			
 			roomNum++;
 		}
@@ -164,7 +166,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 {
 	float randomRatio = game.d.d100();
 	TCODBsp myBSP(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
+	myBSP.splitRecursive(&rng_unique, 1, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
 
 	BspListener mylistener(*this);
 	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
