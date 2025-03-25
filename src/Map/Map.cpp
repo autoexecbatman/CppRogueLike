@@ -59,7 +59,7 @@ class BspListener : public ITCODBspCallback
 private:
 	Map& map; // a map to dig
 	int roomNum{ 0 }; // room number
-	Vector2D last{ 0,0 }; // center of the last room
+	Vector2D lastRoomCenter{ 0,0 }; // center of the last room
 public:
 	BspListener(Map& map) noexcept : map(map), roomNum(0) {}
 
@@ -86,40 +86,33 @@ public:
 			// first create a room
 			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + roomHeightWidth.x - 1 - 1, begin.y + roomHeightWidth.y - 1 - 1, withActors);
 
-			int centerX = begin.x + (roomHeightWidth.x / 2);
-			int centerY = begin.y + (roomHeightWidth.y / 2);
+			Vector2D currentRoomCenter
+			{
+				begin.y + (roomHeightWidth.y / 2),
+				begin.x + (roomHeightWidth.x / 2)
+			};
+			Vector2D intersection
+			{
+				lastRoomCenter.y,
+				currentRoomCenter.x
+			};
+
 			if (roomNum != 0)
 			{
-				if (game.d.d2() == 1) // 50% chance
-				{
-					// dig a corridor from last room
-				map.dig_corridor( // vertical corridor
-						Vector2D{ last.y, centerX },
-						Vector2D{ centerY, centerX }
+					// dig a corridor from last room to the current room
+					map.dig_corridor( // vertical corridor
+						intersection,
+						currentRoomCenter
 					);
-				map.dig_corridor( // horizontal corridor
-						Vector2D{ last.y, last.x },
-						Vector2D{ last.y, centerX }
+					map.dig_corridor( // horizontal corridor
+						lastRoomCenter,
+						intersection
 					);
 					return true;
-				/*map.dig(1,10,117,10);*/ // test dig
-				}
-				else
-				{
-					// fixed corridor
-					map.dig_corridor(
-						Vector2D{ last.y, last.x },
-						Vector2D{ last.y, centerX }
-					);
-					map.dig_corridor(
-						Vector2D{ last.y, centerX },
-						Vector2D{ centerY, centerX }
-					);
-					return true;
-				}
+					/*map.dig(1,10,117,10);*/ // test dig
 			}
 
-			last = Vector2D{ centerY, centerX };
+			lastRoomCenter = currentRoomCenter;
 			
 			roomNum++;
 		}
