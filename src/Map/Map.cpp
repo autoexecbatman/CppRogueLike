@@ -91,16 +91,27 @@ public:
 				if (game.d.d2() == 1) // 50% chance
 				{
 					// dig a corridor from last room
-					map.dig_corridor({ last.y,begin.x + end.x / 2 }, { begin.y + end.y / 2,begin.x + end.x / 2 });
-					map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
+					map.dig_corridor(
+						Vector2D{ last.y, begin.x + end.x / 2 },
+						Vector2D{ begin.y + end.y / 2, begin.x + end.x / 2 }
+					);
+					map.dig_corridor(
+						Vector2D{ last.y, last.x },
+						Vector2D{ last.y, begin.x + end.x / 2 }
+					);
 					return true;
 				///*map.dig(1,10,117,10);*/ // test dig
 				}
 				else
 				{
 					// fixed corridor
-					map.dig_corridor({ last.y,last.x }, { last.y,begin.x + end.x / 2 });
-					map.dig_corridor({ last.y,begin.x + end.x / 2 },{ begin.y + end.y / 2,begin.x + end.x / 2 }
+					map.dig_corridor(
+						Vector2D{ last.y, last.x },
+						Vector2D{ last.y, begin.x + end.x / 2 }
+					);
+					map.dig_corridor(
+						Vector2D{ last.y, begin.x + end.x / 2 },
+						Vector2D{ begin.y + end.y / 2, begin.x + end.x / 2 }
 					);
 					return true;
 				}
