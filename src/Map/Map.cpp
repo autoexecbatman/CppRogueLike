@@ -99,14 +99,14 @@ public:
 
 			if (roomNum != 0)
 			{
+					map.dig_corridor( // horizontal corridor
+						lastRoomCenter,
+						intersection
+					);
 					// dig a corridor from last room to the current room
 					map.dig_corridor( // vertical corridor
 						intersection,
 						currentRoomCenter
-					);
-					map.dig_corridor( // horizontal corridor
-						lastRoomCenter,
-						intersection
 					);
 					return true;
 					/*map.dig(1,10,117,10);*/ // test dig
