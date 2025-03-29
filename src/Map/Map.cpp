@@ -60,6 +60,13 @@ private:
 	Map& map; // a map to dig
 	int roomNum{ 0 }; // room number
 	Vector2D lastRoomCenter{ 0,0 }; // center of the last room
+	Vector2D lastRoomSize{ 0,0 }; // size of the last room
+	Vector2D lastRoomBegin{ 0,0 }; // begin of the last room
+	Vector2D lastRoomEnd{ 0,0 }; // end of the last room
+	Vector2D lastRoomTopMid{ 0,0 };
+	Vector2D lastRoomBottomMid{ 0,0 };
+	Vector2D lastRoomRightMid{ 0,0 };
+	Vector2D lastRoomLeftMid{ 0,0 };
 public:
 	BspListener(Map& map) noexcept : map(map), roomNum(0) {}
 
@@ -68,52 +75,129 @@ public:
 		if (node->isLeaf())
 		{
 			const bool withActors = gsl::narrow_cast<bool>(userData);
-			Vector2D roomHeightWidth
-			{ 
-				//game.d.roll(ROOM_MIN_SIZE, node->h - 2), //random int from min size to height - 2
-				//game.d.roll(ROOM_MIN_SIZE, node->w - 2) //random int from min size to width - 2
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), // random int from min size to height - 2
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2) // random int from min size to width - 2
-			};
-			Vector2D begin
+
+			// Calculate room size
+			Vector2D currentRoomSize
 			{
-				//game.d.roll(node->y + 1, node->y + node->h - end.y - 1), //from node y + 1 to node x + node height - width - 1
-				//game.d.roll(node->x + 1, node->x + node->w - end.x - 1) //from node x + 1 to node x + node width - width - 1
-				map.rng_unique->getInt(node->y + 1, node->y + node->h - roomHeightWidth.y - 1), // from node y + 1 to node x + node height - width - 1
-				map.rng_unique->getInt(node->x + 1, node->x + node->w - roomHeightWidth.x - 1) // from node x + 1 to node x + node width - width - 1
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), // random int from min size to height - 2
+				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2)  // random int from min size to width - 2
 			};
 
-			// first create a room
-			map.create_room(roomNum == 0, begin.x, begin.y, begin.x + roomHeightWidth.x - 1 - 1, begin.y + roomHeightWidth.y - 1 - 1, withActors);
+			// Calculate room position
+			Vector2D currentRoomBegin
+			{
+				map.rng_unique->getInt(node->y + 1, node->y + node->h - currentRoomSize.y - 1), // from node y + 1 to node height - room height - 1
+				map.rng_unique->getInt(node->x + 1, node->x + node->w - currentRoomSize.x - 1)  // from node x + 1 to node width - room width - 1
+			};
 
+			// Calculate room end coordinates
+			Vector2D currentRoomEnd
+			{
+				currentRoomBegin.y + currentRoomSize.y,
+				currentRoomBegin.x + currentRoomSize.x
+			};
+
+			// Create the room
+			map.create_room(
+				roomNum == 0,
+				currentRoomBegin.x,
+				currentRoomBegin.y,
+				currentRoomBegin.x + currentRoomSize.x - 2,
+				currentRoomBegin.y + currentRoomSize.y - 2,
+				withActors
+			);
+
+			// Calculate room center
 			Vector2D currentRoomCenter
 			{
-				begin.y + (roomHeightWidth.y / 2),
-				begin.x + (roomHeightWidth.x / 2)
-			};
-			Vector2D intersection
-			{
-				lastRoomCenter.y,
-				currentRoomCenter.x
+				currentRoomBegin.y + (currentRoomSize.y / 2),
+				currentRoomBegin.x + (currentRoomSize.x / 2)
 			};
 
+			Vector2D currentRoomTopMid
+			{
+				currentRoomBegin.y,
+				currentRoomBegin.x + (currentRoomSize.x / 2)
+			};
+
+			Vector2D currentRoomBottomMid
+			{
+				currentRoomEnd.y - 1,
+				currentRoomBegin.x + (currentRoomSize.x / 2)
+			};
+
+			Vector2D currentRoomLeftMid
+			{
+				currentRoomBegin.y + (currentRoomSize.y / 2),
+				currentRoomBegin.x
+			};
+
+			Vector2D currentRoomRightMid
+			{
+				currentRoomBegin.y + (currentRoomSize.y / 2),
+				currentRoomEnd.x - 1
+			};
+
+			int verticalMidPoint = (lastRoomBegin.y + currentRoomEnd.y) / 2;
+
+			int horizontalMidPoint = (lastRoomBegin.x + currentRoomEnd.x) / 2;
+
+			bool isTopGeneralLeft = lastRoomBegin.y > currentRoomEnd.y && lastRoomCenter.x < currentRoomCenter.x;
+			bool isTopGeneralRight = lastRoomBegin.y > currentRoomEnd.y && lastRoomCenter.x > currentRoomCenter.x;
+
+			bool isLeftGeneralTop = lastRoomEnd.x > currentRoomBegin.x && lastRoomCenter.y > currentRoomCenter.y;
+			bool isLeftGeneralBottom = lastRoomEnd.x > currentRoomBegin.x && lastRoomCenter.y < currentRoomCenter.y;
+
+			bool isBottomGeneralLeft = lastRoomEnd.y < currentRoomBegin.y && lastRoomCenter.x < currentRoomCenter.x;
+			bool isBottomGeneralRight = lastRoomEnd.y < currentRoomBegin.y && lastRoomCenter.x > currentRoomCenter.x;
+
+			bool isRightGeneralTop = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y > currentRoomCenter.y;
+			bool isRightGeneralBottom = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y < currentRoomCenter.y;
+
+			
+			// Connect this room to the previous room (except for the first room)
 			if (roomNum != 0)
 			{
-					map.dig_corridor( // horizontal corridor
-						lastRoomCenter,
-						intersection
-					);
-					// dig a corridor from last room to the current room
-					map.dig_corridor( // vertical corridor
-						intersection,
-						currentRoomCenter
-					);
-					return true;
-					/*map.dig(1,10,117,10);*/ // test dig
+				if (isTopGeneralLeft || isTopGeneralRight)
+				{
+					map.dig_corridor(lastRoomTopMid, Vector2D{ verticalMidPoint, lastRoomCenter.x });
+					map.dig_corridor(Vector2D{ verticalMidPoint, lastRoomCenter.x }, Vector2D{ verticalMidPoint, currentRoomCenter.x });
+					map.dig_corridor(Vector2D{ verticalMidPoint, currentRoomCenter.x }, currentRoomBottomMid);
+				}
+				else if (isLeftGeneralTop || isLeftGeneralBottom)
+				{
+					map.dig_corridor(lastRoomLeftMid, Vector2D{ lastRoomCenter.y, horizontalMidPoint });
+					map.dig_corridor(Vector2D{ lastRoomCenter.y, horizontalMidPoint }, Vector2D{ currentRoomCenter.y, horizontalMidPoint });
+					map.dig_corridor(Vector2D{ currentRoomCenter.y, horizontalMidPoint }, currentRoomRightMid);
+				}
+				else if (isBottomGeneralLeft || isBottomGeneralRight)
+				{
+					map.dig_corridor(lastRoomBottomMid, Vector2D{ verticalMidPoint, lastRoomCenter.x });
+					map.dig_corridor(Vector2D{ verticalMidPoint, lastRoomCenter.x }, Vector2D{ verticalMidPoint, currentRoomCenter.x });
+					map.dig_corridor(Vector2D{ verticalMidPoint, currentRoomCenter.x }, currentRoomTopMid);
+				}
+				else if (isRightGeneralTop || isRightGeneralBottom)
+				{
+					map.dig_corridor(lastRoomRightMid, Vector2D{ lastRoomCenter.y, horizontalMidPoint });
+					map.dig_corridor(Vector2D{ lastRoomCenter.y, horizontalMidPoint }, Vector2D{ currentRoomCenter.y, horizontalMidPoint });
+					map.dig_corridor(Vector2D{ currentRoomCenter.y, horizontalMidPoint }, currentRoomLeftMid);
+				}
+				else
+				{
+					map.dig_corridor(lastRoomCenter, currentRoomCenter);
+				}
 			}
 
+			// Save current room info for next room connection
 			lastRoomCenter = currentRoomCenter;
-			
+			lastRoomSize = currentRoomSize;
+			lastRoomBegin = currentRoomBegin;
+			lastRoomEnd = currentRoomEnd;
+			lastRoomTopMid = currentRoomTopMid;
+			lastRoomBottomMid = currentRoomBottomMid;
+			lastRoomLeftMid = currentRoomLeftMid;
+			lastRoomRightMid = currentRoomRightMid;
+
 			roomNum++;
 		}
 		return true;
@@ -159,7 +243,7 @@ void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withAc
 {
 	float randomRatio = game.d.d100();
 	TCODBsp myBSP(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 1, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
+	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
 
 	BspListener mylistener(*this);
 	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
