@@ -134,6 +134,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Dijkstra.h
     ${PROJECT_SOURCE_DIR}/TargetingSystem.cpp
     ${PROJECT_SOURCE_DIR}/TargetingSystem.h
+    ${PROJECT_SOURCE_DIR}/AiMonsterRanged.cpp
+    ${PROJECT_SOURCE_DIR}/AiMonsterRanged.h
+
 
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp

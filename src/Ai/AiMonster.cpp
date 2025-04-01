@@ -5,8 +5,6 @@
 
 //==MONSTER_AI==
 
-constexpr auto TRACKING_TURNS = 3; // Used in AiMonster::update()
-
 AiMonster::AiMonster() : moveCount(0) {}
 
 void AiMonster::update(Creature& owner)

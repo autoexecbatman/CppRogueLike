@@ -30,6 +30,7 @@
 #include "../Random/RandomDice.h"
 #include "../Weapons.h"
 #include "../Items.h"
+#include "../AiMonsterRanged.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -444,9 +445,9 @@ void Map::render() const
 				attroff(COLOR_PAIR(DOOR_PAIR));
 				break;
 			case TileType::CORRIDOR:
-				attron(COLOR_PAIR(HPBARFULL_PAIR));
+				//attron(COLOR_PAIR(HPBARFULL_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '.');
-				attroff(COLOR_PAIR(HPBARFULL_PAIR));
+				//attroff(COLOR_PAIR(HPBARFULL_PAIR));
 				break;
 			default:
 				break;
@@ -756,43 +757,55 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	static bool dragonPlaced = false; // Flag to track if a dragon has been placed
-	const bool placeDragon = !dragonPlaced && game.d.d100() < 5; // 5% chance for a dragon
+	static bool dragonPlaced = false;
+	const bool placeDragon = !dragonPlaced && game.d.d100() < 5;
 
 	if (placeDragon)
 	{
 		game.create_creature<Dragon>(pos);
-		dragonPlaced = true; // Only one dragon per game
+		dragonPlaced = true;
 	}
 	else
 	{
-		// Determine the monster to spawn based on dungeonLevel
-		int roll = game.d.d100(); // Random roll between 1-100
+		int roll = game.d.d100();
 
 		if (game.dungeonLevel <= 3)
 		{
-			// Early levels: Mostly Goblins, rare chance for Shopkeeper
-			if (roll < 70) game.create_creature<Goblin>(pos); // 70% chance
-			else if (roll < 90) game.create_creature<Orc>(pos); // 20% chance
-			else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 8% chance
-			else game.create_creature<Troll>(pos); // 2% chance
+			// Early levels: Mostly Goblins, occasional ranged monsters
+			if (roll < 65) game.create_creature<Goblin>(pos);      // 65% chance
+			else if (roll < 80) game.create_creature<Orc>(pos);    // 15% chance
+			else if (roll < 90) game.create_creature<Archer>(pos); // 10% chance
+			else if (roll < 95) game.create_creature<Mage>(pos);   // 5% chance
+			else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 3% chance
+			else game.create_creature<Troll>(pos);                 // 2% chance
 		}
 		else if (game.dungeonLevel <= 6)
 		{
-			// Mid levels: Mix of monsters, higher chance for Shopkeeper
-			if (roll < 40) game.create_creature<Goblin>(pos); // 40% chance
-			else if (roll < 75) game.create_creature<Orc>(pos); // 35% chance
-			else if (roll < 90) game.create_creature<Shopkeeper>(pos); // 15% chance
-			else game.create_creature<Troll>(pos); // 10% chance
+			// Mid levels: More varied enemies
+			if (roll < 30) game.create_creature<Goblin>(pos);      // 30% chance
+			else if (roll < 55) game.create_creature<Orc>(pos);    // 25% chance
+			else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
+			else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
+			else if (roll < 95) game.create_creature<Shopkeeper>(pos); // 10% chance
+			else game.create_creature<Troll>(pos);                 // 5% chance
 		}
 		else
 		{
-			// Deep levels: More dangerous creatures, Shopkeeper appears less
-			if (roll < 30) game.create_creature<Goblin>(pos); // 30% chance
-			else if (roll < 60) game.create_creature<Orc>(pos); // 30% chance
-			else if (roll < 85) game.create_creature<Troll>(pos); // 25% chance
-			else game.create_creature<Shopkeeper>(pos); // 15% chance
+			// Deep levels: More dangerous creatures
+			if (roll < 20) game.create_creature<Goblin>(pos);      // 20% chance
+			else if (roll < 40) game.create_creature<Orc>(pos);    // 20% chance
+			else if (roll < 55) game.create_creature<Archer>(pos); // 15% chance
+			else if (roll < 75) game.create_creature<Mage>(pos);   // 20% chance
+			else if (roll < 90) game.create_creature<Troll>(pos);  // 15% chance
+			else game.create_creature<Shopkeeper>(pos);            // 10% chance
 		}
+	}
+
+	// After creating any monster, update its AI if it's ranged
+	Creature* monster = get_actor(pos);
+	if (monster && monster->has_state(ActorState::IS_RANGED)) {
+		// Replace standard AI with ranged AI
+		monster->ai = std::make_unique<AiMonsterRanged>();
 	}
 }
 

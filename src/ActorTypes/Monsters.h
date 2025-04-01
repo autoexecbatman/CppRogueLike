@@ -43,5 +43,19 @@ public:
 	Shopkeeper(Vector2D position);
 };
 
+//==ARCHER==
+class Archer : public Creature
+{
+public:
+	Archer(Vector2D position);
+};
+
+//==MAGE==
+class Mage : public Creature
+{
+public:
+	Mage(Vector2D position);
+};
+
 #endif // MONSTERS_H
 // end of file: Monsters.h

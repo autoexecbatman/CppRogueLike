@@ -137,4 +137,58 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, shopkeeperData)
 	gold = 200;
 }
 
+//==ARCHER==
+ActorData archerData
+{
+	'a',
+	"archer",
+	ORC_PAIR
+};
+
+Archer::Archer(Vector2D position) : Creature(position, archerData)
+{
+	RandomDice d;
+	const int hp = d.d8();
+	const int thaco = 18;
+	const int ac = 7;
+
+	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6() + 2; // Archers have higher dexterity
+
+	weaponEquipped = "Longbow";
+
+	attacker = std::make_unique<Attacker>("D8");
+	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead archer", 40, thaco, ac);
+
+	ai = std::make_unique<AiMonster>();
+	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
+}
+
+//==MAGE==
+ActorData mageData
+{
+	'm',
+	"mage",
+	LIGHTNING_PAIR
+};
+
+Mage::Mage(Vector2D position) : Creature(position, mageData)
+{
+	RandomDice d;
+	const int hp = d.d6();
+	const int thaco = 19;
+	const int ac = 9;
+
+	strength = d.d6() + d.d6();
+	intelligence = d.d6() + d.d6() + d.d6() + 4; // Mages have higher intelligence
+
+	weaponEquipped = "Staff";
+
+	attacker = std::make_unique<Attacker>("D6");
+	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead mage", 60, thaco, ac);
+
+	ai = std::make_unique<AiMonster>();
+	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
+}
+
 // end of file: Goblin.cpp

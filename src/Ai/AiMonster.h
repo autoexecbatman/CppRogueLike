@@ -8,6 +8,8 @@
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 
+inline constexpr auto TRACKING_TURNS = 3; // Used in AiMonster::update()
+
 class AiMonster : public Ai
 {
 public:
