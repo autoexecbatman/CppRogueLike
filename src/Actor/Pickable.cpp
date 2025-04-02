@@ -13,6 +13,7 @@
 #include "../ActorTypes/Fireball.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "../ActorTypes/Gold.h"
+#include "../CorpseFood.h"
 
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)
@@ -68,6 +69,9 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		break;
 	case PickableType::GOLD:
 		pickable = std::make_unique<Gold>(0);
+		break;
+	case PickableType::CORPSE_FOOD:
+		pickable = std::make_unique<CorpseFood>(0);
 		break;
 	default:
 		throw std::runtime_error("Unknown PickableType");

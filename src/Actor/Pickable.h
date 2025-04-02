@@ -34,7 +34,8 @@ protected:
 		LONGBOW,
 		STAFF,
 		GOLD,
-		FOOD
+		FOOD,
+		CORPSE_FOOD
 	};
 
 	virtual PickableType get_type() const = 0;

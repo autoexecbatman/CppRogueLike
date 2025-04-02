@@ -9,6 +9,7 @@
 #include "../Colors/Colors.h"
 #include "../Attributes/StrengthAttributes.h"
 #include "../ActorTypes/Healer.h"
+#include "../CorpseFood.h"
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -47,7 +48,11 @@ void Destructible::die(Creature& owner)
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = corpseName;
 	corpse->actorData.ch = '%';
-	corpse->pickable = std::make_unique<Healer>(10);
+
+	// Replace this line:
+	// corpse->pickable = std::make_unique<Healer>(10);
+	// With this:
+	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
 	// remove the actor from the game
 	std::erase_if(game.creatures, [&owner](const auto& c) { return c.get() == &owner; });
