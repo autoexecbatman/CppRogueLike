@@ -66,11 +66,11 @@ public:
 
 private:
     bool isDisguised = true;
-    int revealDistance = 2;  // Reveal true form when player is this close
-    int confusionDuration = 5; // Turns of confusion
+    int revealDistance = 3;  // Reveal true form when player is this close
+    int confusionDuration = 3; // Turns of confusion
 
     int itemsConsumed = 0;   // Track how many items this mimic has eaten
-
+    int consumptionCooldown = 0;
     // Consume nearby items to grow stronger
     void consumeNearbyItems();
 

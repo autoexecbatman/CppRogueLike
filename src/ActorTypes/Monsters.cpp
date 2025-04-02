@@ -203,14 +203,14 @@ ActorData mimicData
 Mimic::Mimic(Vector2D position) : Creature(position, mimicData)
 {
 	RandomDice d;
-	const int hp = d.d8() + d.d4() + 2;
-	const int thaco = 16;
-	const int ac = 7;
+	const int hp = d.d6() + d.d4(); // Reduced from d8+d4+2 to d6+d4
+	const int thaco = 17; // Increased from 16 (making it harder to hit)
+	const int ac = 7; // Kept the same
 
-	strength = d.d6() + d.d6() + 4;
-	dexterity = d.d6() + 4; // Mimics are dexterous
+	strength = d.d6() + d.d6() + 2; // Reduced from +4 to +2
+	dexterity = d.d6() + 2; // Reduced from +4 to +2
 
-	attacker = std::make_unique<Attacker>("D6");
+	attacker = std::make_unique<Attacker>("D4"); // Reduced from D6
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 50, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
@@ -223,6 +223,10 @@ void Mimic::consumeNearbyItems()
 {
 	// Only consuming items when revealed and active
 	if (isDisguised || destructible->is_dead()) return;
+
+	// Add cooldown mechanic - can only consume items every few turns
+	if (++consumptionCooldown < 3) return; // Can only consume every 3 turns
+	consumptionCooldown = 0;
 
 	std::vector<size_t> itemsToRemove;
 
@@ -239,40 +243,45 @@ void Mimic::consumeNearbyItems()
 			game.appendMessagePart(WHITE_PAIR, "!");
 			game.finalizeMessage();
 
-			// Grow stronger based on item type
+			// Grow stronger based on item type, but with reduced benefits
 			itemsConsumed++;
 
-			// Different bonuses based on item type
+			// Different bonuses based on item type (nerfed)
 			if (item->actorData.name.find("potion") != std::string::npos)
 			{
 				// Health potions give the mimic more HP
-				destructible->hpMax += 2;
-				destructible->hp += 2;
+				destructible->hpMax += 1; // Reduced from 2
+				destructible->hp += 1;    // Reduced from 2
 			}
 			else if (item->actorData.name.find("scroll") != std::string::npos)
 			{
-				// Scrolls make the mimic's confusion more potent
-				confusionDuration += 1;
+				// Scrolls increase confusion, but now with a cap
+				confusionDuration = std::min(confusionDuration + 1, 5); // Cap at 5 turns
 			}
 			else if (item->actorData.name.find("gold") != std::string::npos)
 			{
 				// Gold makes the mimic more defensive
-				destructible->dr += 1;
+				if (destructible->dr < 2) { // Cap DR at 2
+					destructible->dr += 1;
+				}
 			}
 			else if (item->actorData.name.find("weapon") != std::string::npos ||
 				item->actorData.name.find("sword") != std::string::npos ||
 				item->actorData.name.find("dagger") != std::string::npos)
 			{
-				// Weapons make the mimic hit harder
-				int currentDamage = game.d.roll_from_string(attacker->roll);
-				attacker->roll = "D" + std::to_string(currentDamage + 2);
+				// Weapons make the mimic hit harder, but with limits
+				if (attacker->roll != "D6") { // Cap at D6
+					int currentDamage = game.d.roll_from_string(attacker->roll);
+					attacker->roll = "D" + std::to_string(std::min(currentDamage + 1, 6));
+				}
 			}
 
 			// Mark item for removal
 			itemsToRemove.push_back(i);
 
 			// If mimic has consumed enough items, change appearance based on power level
-			if (itemsConsumed >= 3)
+			// Require more items for transformation
+			if (itemsConsumed >= 5) // Increased from 3
 			{
 				actorData.ch = 'W'; // Different character for well-fed mimic
 				actorData.color = FIREBALL_PAIR; // More dangerous color
@@ -382,7 +391,8 @@ void Mimic::render() const noexcept
 		attron(COLOR_PAIR(actorData.color));
 
 		// Every so often, briefly flicker to a different symbol
-		if (game.d.d20() == 1) {
+		// Increased chance from 5% (d20==1) to 10% (d10==1)
+		if (game.d.d10() == 1) {
 			mvaddch(position.y, position.x, 'M'); // Brief flash of true form
 		}
 		else {
