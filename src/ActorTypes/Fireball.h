@@ -10,13 +10,17 @@
 class Fireball : public LightningBolt
 {
 public:
-	Fireball(int range, int damage);
+    Fireball(int range, int damage);
 
-	bool use(Item& owner, Creature& wearer) override;
+    bool use(Item& owner, Creature& wearer) override;
 
-	void animation(Vector2D position, int maxRange);
+    // Creates a dynamic fire explosion effect
+    void create_explosion(Vector2D center);
 
-	void load(const json& j);
-	void save(json& j);
+    // Individual creature animation for being hit by fire
+    void animation(Vector2D position, int maxRange);
+
+    void load(const json& j);
+    void save(json& j);
 };
 //====

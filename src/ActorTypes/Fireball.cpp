@@ -5,147 +5,257 @@
 #include "../Actor/Actor.h"
 #include "../Game.h"
 #include "../Colors/Colors.h"
+#include <cmath>
+#include <random>
 
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
 bool Fireball::use(Item& owner, Creature& wearer)
 {
-	Vector2D tilePicked{ 0, 0 };
+    Vector2D tilePicked{ 0, 0 };
 
-	if (!game.pick_tile(&tilePicked, Fireball::maxRange)) // <-- runs a while loop here
-	{
-		return false;
-	}
+    if (!game.pick_tile(&tilePicked, Fireball::maxRange)) // <-- runs a while loop here
+    {
+        return false;
+    }
 
-	// burn everything in <range> (including player)
-	game.appendMessagePart(WHITE_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
-	game.finalizeMessage();
+    // burn everything in <range> (including player)
+    game.appendMessagePart(WHITE_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
+    game.finalizeMessage();
 
-	// make impact explosion using a circle algorithm and curses library 
-	// (this is a bit of a hack, but it works)
+    // Create a more dynamic, realistic fire explosion
+    create_explosion(tilePicked);
 
-	// get the center of the explosion
-	Vector2D center = tilePicked;
+    // if the player is in range of the fireball animate the player
+    if (game.player->get_tile_distance(tilePicked) <= Fireball::maxRange)
+    {
+        animation(game.player->position, maxRange);
+        // damage the player
+        game.player->destructible->take_damage(*game.player, damage);
+    }
 
-	// get the radius of the explosion
-	int radius = Fireball::maxRange;
+    // First pass to show affected creatures and display messages
+    for (const auto& c : game.creatures)
+    {
+        if (c)
+        {
+            if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
+            {
+                game.appendMessagePart(WHITE_PAIR, std::format("The {} gets engulfed in flames!", c->actorData.name));
+                game.appendMessagePart(WHITE_PAIR, std::format(" ({} damage)", damage));
+                game.finalizeMessage();
+                animation(c->position, maxRange);
+            }
+        }
+    }
 
-	int sideLength = radius * 2 + 1;
+    // Second pass to actually apply damage (separated to prevent issues if creatures die)
+    for (const auto& c : game.creatures)
+    {
+        if (c)
+        {
+            if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
+            {
+                c->destructible->take_damage(*c, damage);
+            }
+        }
+    }
 
-	// calculate the chebyshev distance from the player to maxRange
-	int chebyshev = std::max(abs(center.x - (center.x - radius)), abs(center.y - (center.y - radius)));
+    return Pickable::use(owner, wearer);
+}
 
-	int height = sideLength;
-	int width = sideLength;
+void Fireball::create_explosion(Vector2D center)
+{
+    // Get the radius of the explosion
+    int radius = Fireball::maxRange;
+    int fullDiameter = radius * 2 + 1;
 
-	Vector2D centerOfExplosion{center.y - chebyshev, center.x - chebyshev};
+    // Calculate the area for the explosion window
+    Vector2D topLeft{ center.y - radius, center.x - radius };
 
-	WINDOW* explosionWindow = newwin(
-		height, // number of rows
-		width, // number of columns
-		centerOfExplosion.y, // y position
-		centerOfExplosion.x // x position
-	);
+    // Create an explosion window
+    WINDOW* explosionWindow = newwin(
+        fullDiameter, // height
+        fullDiameter, // width
+        topLeft.y,    // y position
+        topLeft.x     // x position
+    );
 
-	// draw fire inside the window
-	wbkgd(explosionWindow, COLOR_PAIR(FIREBALL_PAIR));
+    // Enable non-blocking mode for animation
+    nodelay(explosionWindow, true);
 
-	// add a character 'x' to the center of the explosion
-	// add a random color to x
+    // Fire colors - use a gradient of colors for more realistic fire
+    const int FIRE_COLORS[] = {
+        FIREBALL_PAIR,    // Base fire color
+        DRAGON_PAIR,      // Another fire-like color
+        HPBARMISSING_PAIR // Red for intense heat
+    };
+    const int COLOR_COUNT = 3;
 
-	bool run = true;
+    // Fire characters for more varied visual effect
+    const char FIRE_CHARS[] = { '*', '#', '&', '@', '%', '+', '=', '^' };
+    const int CHAR_COUNT = 8;
 
-	nodelay(explosionWindow, true);
+    // Fire animation phases
+    const int EXPANSION_FRAMES = 10;  // Frames for expansion
+    const int PEAK_FRAMES = 20;       // Frames at full size
+    const int FADE_FRAMES = 15;       // Frames for fade out
 
-	// Reduce the number of iterations from 1000 to 50
-	for (int numLoops = 0; numLoops < 50; numLoops++) {
-		// Draw the explosion
-		for (int i = 0; i < width; i++) {
-			for (int j = 0; j < height; j++) {
-				int randColor = rand() % 7 + 1;
-				mvwaddch(explosionWindow, j, i, 'x' | COLOR_PAIR(randColor));
-			}
-		}
-		wrefresh(explosionWindow);
-		napms(20);  // Add a small delay between each frame
-	}
+    // Random number generator
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> colorDist(0, COLOR_COUNT - 1);
+    std::uniform_int_distribution<> charDist(0, CHAR_COUNT - 1);
 
-	nodelay(explosionWindow, false);
-	wrefresh(explosionWindow);
-	napms(1000);  // Keep the final frame for 1 second
+    // Animate the explosion
+    // Phase 1: Expansion
+    for (int frame = 0; frame < EXPANSION_FRAMES; frame++) {
+        wclear(explosionWindow);
+        int currentRadius = (radius * frame) / EXPANSION_FRAMES;
 
-	delwin(explosionWindow);
+        // Draw expanding circular fire
+        for (int y = 0; y < fullDiameter; y++) {
+            for (int x = 0; x < fullDiameter; x++) {
+                // Distance from center of the explosion
+                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
 
-	// if the player is in range of the fireball animate the player
-	if (game.player->get_tile_distance(tilePicked) <= Fireball::maxRange)
-	{
-		animation(game.player->position, maxRange);
-		// damage the player
-		game.player->destructible->take_damage(*game.player, damage);
-	}
+                if (distance <= currentRadius) {
+                    int colorIndex = colorDist(gen);
+                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
+                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                }
+            }
+        }
+        wrefresh(explosionWindow);
+        napms(30);  // Control speed of expansion
+    }
 
-	for (const auto& c : game.creatures)
-	{
-		if (c)
-		{
-			if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
-			{
-				/*game.gui->log_message(WHITE_PAIR, "The %s gets burned!\nfor %d hp.", c->actorData.name.c_str(), damage);*/
-				game.appendMessagePart(WHITE_PAIR, std::format("The {} gets burned!", c->actorData.name));
-				game.appendMessagePart(WHITE_PAIR, std::format("for {} hp.", damage));
-				game.finalizeMessage();
-				animation(c->position, maxRange);
-			}
-		}
-	}
+    // Phase 2: Full explosion
+    for (int frame = 0; frame < PEAK_FRAMES; frame++) {
+        // Redraw with flickering
+        for (int y = 0; y < fullDiameter; y++) {
+            for (int x = 0; x < fullDiameter; x++) {
+                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
 
-	for (const auto& c : game.creatures)
-	{
-		if (c)
-		{
-			if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
-			{
-				c->destructible->take_damage(*c, damage);
-			}
-		}
-	}
+                if (distance <= radius) {
+                    // More intense fire at the center, less at the edges
+                    double intensity = 1.0 - (distance / radius);
+                    int colorIndex;
 
-	return Pickable::use(owner, wearer);
+                    // Higher chance of intense colors near center
+                    if (std::bernoulli_distribution(intensity)(gen)) {
+                        colorIndex = colorDist(gen) % 2;  // More intense colors
+                    }
+                    else {
+                        colorIndex = 2;  // Less intense color
+                    }
+
+                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
+                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                }
+            }
+        }
+        wrefresh(explosionWindow);
+        napms(50);  // Longer display at peak
+    }
+
+    // Phase 3: Fade out
+    for (int frame = 0; frame < FADE_FRAMES; frame++) {
+        wclear(explosionWindow);
+        int currentRadius = radius - (radius * frame) / FADE_FRAMES;
+
+        // Draw shrinking fire
+        for (int y = 0; y < fullDiameter; y++) {
+            for (int x = 0; x < fullDiameter; x++) {
+                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
+
+                if (distance <= currentRadius) {
+                    // As fire fades, use less intense colors
+                    int colorIndex = 2; // Least intense color predominates
+
+                    if (std::bernoulli_distribution(0.3)(gen)) {
+                        colorIndex = colorDist(gen);
+                    }
+
+                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
+                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+                }
+            }
+        }
+        wrefresh(explosionWindow);
+        napms(40);  // Control speed of fade
+    }
+
+    // Clean up
+    nodelay(explosionWindow, false);
+    delwin(explosionWindow);
+
+    // Refresh main screen to restore normal display
+    refresh();
 }
 
 void Fireball::animation(Vector2D position, int maxRange)
 {
-	bool run = true;
-	while (run == true)
-	{
-		clear();
-		game.render();
+    bool run = true;
+    while (run == true)
+    {
+        clear();
+        game.render();
 
-		attron(COLOR_PAIR(FIREBALL_PAIR));
-		mvprintw(position.y, position.x, "~");
-		attroff(COLOR_PAIR(FIREBALL_PAIR));
+        // Create a flaming effect with multiple characters and colors
+        static const char fireChars[] = { '~', '*', '#', '^' };
+        static const int fireColors[] = { FIREBALL_PAIR, DRAGON_PAIR, HPBARMISSING_PAIR };
 
-		// ask the player to press a key to continue
-		mvprintw(29, 0, "press 'SPACE' to continue");
-		refresh();
+        // Random index
+        int charIndex = rand() % 4;
+        int colorIndex = rand() % 3;
 
-		if (getch() == ' ')
-		{
-			run = false;
-		}
-	}
+        attron(COLOR_PAIR(fireColors[colorIndex]));
+        mvprintw(position.y, position.x, "%c", fireChars[charIndex]);
+        attroff(COLOR_PAIR(fireColors[colorIndex]));
+
+        // Add ember particles around the main flame
+        for (int i = 0; i < 3; i++) {
+            int offsetY = (rand() % 3) - 1; // -1, 0, or 1
+            int offsetX = (rand() % 3) - 1; // -1, 0, or 1
+
+            if (offsetX == 0 && offsetY == 0) continue; // Skip center position
+
+            int emberY = position.y + offsetY;
+            int emberX = position.x + offsetX;
+
+            // Make sure ember is within bounds
+            if (emberY >= 0 && emberY < MAP_HEIGHT && emberX >= 0 && emberX < MAP_WIDTH) {
+                attron(COLOR_PAIR(fireColors[rand() % 3]));
+                mvprintw(emberY, emberX, "%c", fireChars[rand() % 4]);
+                attroff(COLOR_PAIR(fireColors[rand() % 3]));
+            }
+        }
+
+        // ask the player to press a key to continue
+        mvprintw(29, 0, "press 'SPACE' to continue");
+        refresh();
+
+        if (getch() == ' ')
+        {
+            run = false;
+        }
+    }
 }
 
 void Fireball::load(const json& j)
 {
-	maxRange = j["maxRange"].get<int>();
-	damage = j["damage"].get<int>();
+    maxRange = j["maxRange"].get<int>();
+    damage = j["damage"].get<int>();
 }
 
 void Fireball::save(json& j)
 {
-	j["type"] = static_cast<int>(PickableType::FIREBALL);
-	j["maxRange"] = maxRange;
-	j["damage"] = damage;
+    j["type"] = static_cast<int>(PickableType::FIREBALL);
+    j["maxRange"] = maxRange;
+    j["damage"] = damage;
 }
