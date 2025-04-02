@@ -33,7 +33,8 @@ protected:
 		SHORTSWORD,
 		LONGBOW,
 		STAFF,
-		GOLD
+		GOLD,
+		FOOD
 	};
 
 	virtual PickableType get_type() const = 0;

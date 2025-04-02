@@ -136,6 +136,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/TargetingSystem.h
     ${PROJECT_SOURCE_DIR}/AiMonsterRanged.cpp
     ${PROJECT_SOURCE_DIR}/AiMonsterRanged.h
+    ${PROJECT_SOURCE_DIR}/HungerSystem.cpp
+    ${PROJECT_SOURCE_DIR}/HungerSystem.h
+    ${PROJECT_SOURCE_DIR}/Food.cpp
+    ${PROJECT_SOURCE_DIR}/Food.h
 
 
     # Map

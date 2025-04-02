@@ -31,6 +31,7 @@
 #include "../Weapons.h"
 #include "../Items.h"
 #include "../AiMonsterRanged.h"
+#include "../Food.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -490,26 +491,38 @@ void Map::add_weapons(Vector2D pos)
 	game.container->add(std::move(weaponItem));
 }
 
-void Map::add_item(Vector2D pos)
-{
+void Map::add_item(Vector2D pos) {
 	// 75% chance to spawn an item at all
 	if (rng_unique->getInt(1, 100) > 75) return;
 
 	const int dice = rng_unique->getInt(1, 100);
 
-	if (dice < 40) {
+	if (dice < 30) {  // Reduced from 40% to 30%
 		game.create_item<GoldPile>(pos);
 		return;
 	}
-	if (dice < 50) {
+	if (dice < 40) {  // Reduced from 50% to 40%
 		add_weapons(pos);
 		return;
 	}
-	if (dice < 60) {
+	if (dice < 50) {  // Reduced from 60% to 50%
 		game.create_item<HealthPotion>(pos);
 		return;
 	}
-	if (dice < 80) {
+	if (dice < 60) {  // New: 10% chance for food
+		// Randomly pick a food type
+		std::vector<std::function<void(Vector2D)>> foods = {
+			[&](Vector2D p) { game.create_item<Ration>(p); },
+			[&](Vector2D p) { game.create_item<Fruit>(p); },
+			[&](Vector2D p) { game.create_item<Bread>(p); },
+			[&](Vector2D p) { game.create_item<Meat>(p); }
+		};
+
+		int randomIndex = rng_unique->getInt(0, foods.size() - 1);
+		foods[randomIndex](pos);
+		return;
+	}
+	if (dice < 80) {  // Shifted from 60-80% to 60-80%
 		// Randomly pick a scroll from a list
 		std::vector<std::function<void(Vector2D)>> scrolls = {
 			[&](Vector2D p) { game.create_item<ScrollOfLightningBolt>(p); },

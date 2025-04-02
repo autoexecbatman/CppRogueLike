@@ -37,6 +37,8 @@ private:
 	void gui_print(int x, int y, const std::string& text) noexcept { mvwprintw(guiWin, y, x, text.c_str()); }
 	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
+
+	void render_hunger_status();
 public:
 	bool guiInit{ false };
 

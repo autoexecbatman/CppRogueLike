@@ -49,6 +49,8 @@ public:
 	void racial_ability_adjustments();
 	void calculate_thaco();
 
+	void consume_food(int nutrition);
+
 	std::string get_weapon_equipped() const noexcept { return weaponEquipped; }
 	void set_weapon_equipped(std::string weapon) noexcept { weaponEquipped = weapon; }
 };

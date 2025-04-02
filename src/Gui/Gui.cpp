@@ -122,6 +122,8 @@ void Gui::gui_render()
 		game.player->destructible->dr
 	);
 
+	render_hunger_status();
+
 	gui_print_log();
 
 	gui_refresh();
@@ -327,6 +329,16 @@ void Gui::load(const json& j)
 	//	log_message(col, text);
 	//	nbMessages--;
 	//}
+}
+
+void Gui::render_hunger_status() {
+	const std::string hungerText = game.hunger_system.get_hunger_state_string();
+	const int hungerColor = game.hunger_system.get_hunger_color();
+
+	// Display hunger status next to HP on gui window
+	wattron(guiWin, COLOR_PAIR(hungerColor));
+	mvwprintw(guiWin, 3, 15, "Hunger:%s", hungerText.c_str());
+	wattroff(guiWin, COLOR_PAIR(hungerColor));
 }
 
 // end of file: Gui.cpp

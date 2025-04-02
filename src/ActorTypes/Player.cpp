@@ -120,4 +120,9 @@ void Player::calculate_thaco()
 	}
 }
 
+void Player::consume_food(int nutrition) {
+	// Decrease hunger by nutrition value
+	game.hunger_system.decrease_hunger(nutrition);
+}
+
 // end of file: Player.cpp

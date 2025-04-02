@@ -240,6 +240,13 @@ void Game::update()
 	{
 		game.update_creatures(creatures);
 		game.spawn_creatures();
+
+		// Increase hunger every turn
+		hunger_system.increase_hunger(1);
+
+		// Apply hunger effects
+		hunger_system.apply_hunger_effects();
+
 		game.time++;
 		if (gameStatus != GameStatus::DEFEAT) // for killing the player
 		{

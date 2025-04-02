@@ -19,6 +19,7 @@
 #include "Weapons.h"
 #include "BaseMenu.h"
 #include "TargetingSystem.h"
+#include "HungerSystem.h"
 
 class Game
 {
@@ -46,6 +47,7 @@ public:
 	windowState{ WindowState::GAME };
 	RandomDice d; // Random number generator.
 	TargetingSystem targeting;
+	HungerSystem hunger_system;
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0) };
