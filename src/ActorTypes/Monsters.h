@@ -56,40 +56,31 @@ class Mage : public Creature
 public:
 	Mage(Vector2D position);
 };
+struct Disguise {
+	char ch;
+	std::string name;
+	int color;
+};
 
 class Mimic : public Creature
 {
 public:
     Mimic(Vector2D position);
-    void update();
-    void render() const noexcept;
+
+    // Make these public so AiMimic can access them
+    bool isDisguised = true;
+    int revealDistance = 1;  // Reveal true form when player is this close
+    int confusionDuration = 3; // Turns of confusion
+    int itemsConsumed = 0;   // Track how many items this mimic has eaten
+
+    // Storage for possible disguises
+    std::vector<struct Disguise> possibleDisguises;
+    // Define the Disguise struct
 
 private:
-    bool isDisguised = true;
-    int revealDistance = 3;  // Reveal true form when player is this close
-    int confusionDuration = 3; // Turns of confusion
 
-    int itemsConsumed = 0;   // Track how many items this mimic has eaten
-    int consumptionCooldown = 0;
-    // Consume nearby items to grow stronger
-    void consumeNearbyItems();
-
-    // For disguise changes
-    void changeDisguise();
-    struct Disguise {
-        char ch;
-        std::string name;
-        int color;
-    };
-    std::vector<Disguise> possibleDisguises = {
-        {'$', "gold pile", GOLD_PAIR},
-        {'!', "health potion", HPBARMISSING_PAIR},
-        {'#', "scroll", LIGHTNING_PAIR},
-        {'/', "weapon", WHITE_PAIR},
-        {'%', "food", HPBARFULL_PAIR}
-    };
-    int disguiseChangeCounter = 0;
-    static constexpr int disguiseChangeRate = 200; // How often to change disguise (in turns)
+    // Initialize disguises (called from constructor)
+    void initDisguises();
 };
 
 #endif // MONSTERS_H

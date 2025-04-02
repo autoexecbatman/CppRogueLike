@@ -142,6 +142,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Food.h
     ${PROJECT_SOURCE_DIR}/CorpseFood.cpp
     ${PROJECT_SOURCE_DIR}/CorpseFood.h
+    ${PROJECT_SOURCE_DIR}/AiMimic.cpp
+    ${PROJECT_SOURCE_DIR}/AiMimic.h
 
 
     # Map

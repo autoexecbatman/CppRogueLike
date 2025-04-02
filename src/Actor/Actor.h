@@ -77,7 +77,7 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	void update(); // update() will handle the monster turn.
+	void update();
 
 	//==Actor Attributes==
 	int strength{ 0 };

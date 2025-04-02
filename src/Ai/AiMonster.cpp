@@ -9,31 +9,76 @@ AiMonster::AiMonster() : moveCount(0) {}
 
 void AiMonster::update(Creature& owner)
 {
-	game.log(owner.actorData.name + "AI is updating");
-	if (owner.ai == nullptr) // if the owner has no ai
-	{
-		return; // do nothing
-	}
+    // If the owner has no AI or is dead, do nothing
+    if (owner.ai == nullptr || owner.destructible->is_dead())
+    {
+        return;
+    }
 
-	if (owner.destructible->is_dead()) // if the owner is dead
-	{
-		return; // do nothing
-	}
+    // Check if monster is in FOV - if so, set tracking
+    if (game.map->is_in_fov(owner.position))
+    {
+        // Player can see monster - set maximum tracking
+        moveCount = TRACKING_TURNS;
+    }
+    else
+    {
+        // Player can't see monster
+        if (moveCount > 0)
+        {
+            // If we were previously tracking the player, decrement counter
+            moveCount--;
+        }
+    }
 
-	if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
-	{
-		// move towards the player
-		moveCount = TRACKING_TURNS;
-	}
-	else
-	{
-		moveCount--; // decrement the move count
-	}
+    // Distance to player
+    int distanceToPlayer = owner.get_tile_distance(game.player->position);
 
-	if (moveCount > 0) // if the move count is greater than 0
-	{
-		moveOrAttack(owner, game.player->position); // move or attack the player
-	}
+    // Behavior based on distance and visibility
+    if (moveCount > 0)
+    {
+        // Recently seen player - actively pursue
+        moveOrAttack(owner, game.player->position);
+    }
+    else if (distanceToPlayer <= 15)
+    {
+        // Within a certain range, monsters might still wander toward player
+        // even if they don't have direct line of sight
+        if (game.d.d6() == 1)  // Occasional movement toward player
+        {
+            moveOrAttack(owner, game.player->position);
+        }
+        else if (game.d.d10() == 1)  // Occasional random movement
+        {
+            // Random movement in one of eight directions
+            int dx = game.d.roll(-1, 1);
+            int dy = game.d.roll(-1, 1);
+
+            if (dx != 0 || dy != 0)  // Ensure we're not standing still
+            {
+                Vector2D newPos = owner.position + Vector2D{ dy, dx };
+                if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+                {
+                    owner.position = newPos;
+                }
+            }
+        }
+    }
+    else if (game.d.d20() == 1)  // Very occasional random movement for distant monsters
+    {
+        // Random movement in one of eight directions
+        int dx = game.d.roll(-1, 1);
+        int dy = game.d.roll(-1, 1);
+
+        if (dx != 0 || dy != 0)  // Ensure we're not standing still
+        {
+            Vector2D newPos = owner.position + Vector2D{ dy, dx };
+            if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+            {
+                owner.position = newPos;
+            }
+        }
+    }
 }
 
 void AiMonster::load(const json& j)

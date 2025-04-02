@@ -789,20 +789,21 @@ void Map::add_monster(Vector2D pos)
 
 		if (game.dungeonLevel <= 3)
 		{
-			game.create_creature<Mimic>(pos);
-			// Early levels: Mostly Goblins, occasional ranged monsters
-			if (roll < 65) game.create_creature<Goblin>(pos);      // 65% chance
-			else if (roll < 80) game.create_creature<Orc>(pos);    // 15% chance
-			else if (roll < 90) game.create_creature<Archer>(pos); // 10% chance
-			else if (roll < 95) game.create_creature<Mage>(pos);   // 5% chance
+			// Early levels: Add mimics among other monsters
+			if (roll < 20) game.create_creature<Mimic>(pos);       // 20% chance
+			else if (roll < 60) game.create_creature<Goblin>(pos); // 40% chance
+			else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
+			else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
+			else if (roll < 95) game.create_creature<Mage>(pos);   // 10% chance
 			else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 3% chance
 			else game.create_creature<Troll>(pos);                 // 2% chance
 		}
 		else if (game.dungeonLevel <= 6)
 		{
 			// Mid levels: More varied enemies
-			if (roll < 30) game.create_creature<Goblin>(pos);      // 30% chance
-			else if (roll < 55) game.create_creature<Orc>(pos);    // 25% chance
+			if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance
+			else if (roll < 35) game.create_creature<Goblin>(pos); // 20% chance
+			else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
 			else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
 			else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
 			else if (roll < 95) game.create_creature<Shopkeeper>(pos); // 10% chance
@@ -811,20 +812,26 @@ void Map::add_monster(Vector2D pos)
 		else
 		{
 			// Deep levels: More dangerous creatures
-			if (roll < 20) game.create_creature<Goblin>(pos);      // 20% chance
-			else if (roll < 40) game.create_creature<Orc>(pos);    // 20% chance
-			else if (roll < 55) game.create_creature<Archer>(pos); // 15% chance
-			else if (roll < 75) game.create_creature<Mage>(pos);   // 20% chance
+			if (roll < 10) game.create_creature<Mimic>(pos);       // 10% chance
+			else if (roll < 25) game.create_creature<Goblin>(pos); // 15% chance
+			else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
+			else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
+			else if (roll < 75) game.create_creature<Mage>(pos);   // 15% chance
 			else if (roll < 90) game.create_creature<Troll>(pos);  // 15% chance
 			else game.create_creature<Shopkeeper>(pos);            // 10% chance
 		}
 	}
 
-	// After creating any monster, update its AI if it's ranged
+	// After creating any monster, set the appropriate AI
 	Creature* monster = get_actor(pos);
-	if (monster && monster->has_state(ActorState::IS_RANGED)) {
-		// Replace standard AI with ranged AI
-		monster->ai = std::make_unique<AiMonsterRanged>();
+	if (monster)
+	{
+		// Check if it's a ranged attacker
+		if (monster->has_state(ActorState::IS_RANGED))
+		{
+			// Replace standard AI with ranged AI
+			monster->ai = std::make_unique<AiMonsterRanged>();
+		}
 	}
 }
 
