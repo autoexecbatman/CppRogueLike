@@ -78,9 +78,13 @@ enum class Controls
 	REVEAL = 'm',
 
 	// the controls for the player to regenerate the map
-	REGEN = 'r',
+	REGEN = 'n',
 
 	OPEN_DOOR = 'o',
 	CLOSE_DOOR = 'c',
+
+	REST = 'r',
+
+	HELP = '?',
 };
 #endif // !CONTROLS_H

@@ -504,6 +504,18 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		break;
 	}
 
+	case Controls::REST:
+	{
+		game.player->rest();
+		break;
+	}
+
+	case Controls::HELP:
+	{
+		game.display_help();
+		break;
+	}
+
 	default:
 		break;
 }

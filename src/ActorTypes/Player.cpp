@@ -164,4 +164,108 @@ void Player::render() const noexcept
 	}
 }
 
+bool Player::rest()
+{
+	// Check if player is already at full health
+	if (destructible->hp >= destructible->hpMax)
+	{
+		game.message(WHITE_PAIR, "You're already at full health.", true);
+		return false;
+	}
+
+	// Check if enemies are nearby (within a radius of 5 tiles)
+	for (const auto& creature : game.creatures)
+	{
+		if (creature && !creature->destructible->is_dead())
+		{
+			// Calculate distance to creature
+			int distance = get_tile_distance(creature->position);
+
+			// If enemy is within 5 tiles, can't rest
+			if (distance <= 5)
+			{
+				game.message(WHITE_PAIR, "You can't rest with enemies nearby!", true);
+				return false;
+			}
+		}
+	}
+
+	// Check if player has enough food (hunger isn't too high)
+	if (game.hunger_system.get_hunger_state() == HungerState::STARVING ||
+		game.hunger_system.get_hunger_state() == HungerState::DYING)
+	{
+		game.message(HPBARMISSING_PAIR, "You're too hungry to rest!", true);
+		return false;
+	}
+
+	// Show resting animation
+	animate_resting();
+
+	// Rest - heal 20% of max HP
+	int healAmount = std::max(1, destructible->hpMax / 5);
+	int amountHealed = destructible->heal(healAmount);
+
+	// Capture the hunger state before and after
+	HungerState beforeState = game.hunger_system.get_hunger_state();
+
+	// Consume food (increase hunger)
+	const int hungerCost = 50;
+	game.hunger_system.increase_hunger(hungerCost);
+
+	HungerState afterState = game.hunger_system.get_hunger_state();
+
+	// Display message with more detail
+	game.appendMessagePart(HPBARFULL_PAIR, "You rest and recover ");
+	game.appendMessagePart(HPBARFULL_PAIR, std::to_string(amountHealed));
+	game.appendMessagePart(HPBARFULL_PAIR, " health");
+
+	if (beforeState != afterState) {
+		// If hunger state changed, mention it
+		game.appendMessagePart(WHITE_PAIR, ", but you've become ");
+		game.appendMessagePart(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
+		game.appendMessagePart(WHITE_PAIR, ".");
+	}
+	else {
+		game.appendMessagePart(WHITE_PAIR, ", consuming some of your food reserves.");
+	}
+
+	game.finalizeMessage();
+
+	// Resting takes time
+	game.gameStatus = Game::GameStatus::NEW_TURN;
+	return true;
+}
+
+void Player::animate_resting()
+{
+	// Animation frames - Z's of increasing size
+	const std::vector<char> restSymbols = { 'z', 'Z', 'Z' };
+	const int frames = 3;
+	const int delay = 250; // milliseconds between frames
+
+	// Save original screen
+	clear();
+	game.render();
+
+	// Show animation
+	for (int i = 0; i < frames; i++)
+	{
+		// Draw Zs above player
+		attron(COLOR_PAIR(HPBARFULL_PAIR));
+		mvaddch(position.y - 1, position.x + i, restSymbols[i]);
+		attroff(COLOR_PAIR(HPBARFULL_PAIR));
+
+		refresh();
+		napms(delay);
+	}
+
+	// Pause briefly to show final frame
+	napms(delay * 2);
+
+	// Redraw screen
+	clear();
+	game.render();
+	refresh();
+}
+
 // end of file: Player.cpp

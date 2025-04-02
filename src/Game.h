@@ -81,6 +81,8 @@ public:
 	void handle_gameloop(Gui& gui, int loopNum);
 	void handle_ranged_attack();
 
+	void display_help() noexcept;
+
 	template <typename T>
 	void create_creature(Vector2D position)
 	{

@@ -55,6 +55,8 @@ public:
 	void set_weapon_equipped(std::string weapon) noexcept { weaponEquipped = weapon; }
 
 	void render() const noexcept;
+	bool rest();
+	void animate_resting();
 };
 
 #endif // !PLAYER_H
