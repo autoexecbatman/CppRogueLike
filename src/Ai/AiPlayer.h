@@ -15,9 +15,12 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 	void display_inventory(Creature& owner);
+	void applyConfusion(int duration) { confusionTurns = duration; }
+	bool isConfused() const { return confusionTurns > 0; }
 private:
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
+	int confusionTurns = 0;  // Number of turns player remains confused
 
 	void move(Creature& owner, Vector2D target);
 	void pick_item(Creature& owner);

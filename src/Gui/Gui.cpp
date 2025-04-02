@@ -123,10 +123,24 @@ void Gui::gui_render()
 	);
 
 	render_hunger_status();
+	render_player_status();
 
 	gui_print_log();
 
 	gui_refresh();
+}
+
+void Gui::render_player_status()
+{
+	// Render player status effects
+	int statusY = 6; // Position below gold display
+
+	if (game.player->has_state(ActorState::IS_CONFUSED))
+	{
+		wattron(guiWin, COLOR_PAIR(CONFUSION_PAIR));
+		mvwprintw(guiWin, statusY, 1, "Status: Confused!");
+		wattroff(guiWin, COLOR_PAIR(CONFUSION_PAIR));
+	}
 }
 
 void Gui::gui_print_log()

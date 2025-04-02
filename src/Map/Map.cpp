@@ -789,6 +789,7 @@ void Map::add_monster(Vector2D pos)
 
 		if (game.dungeonLevel <= 3)
 		{
+			game.create_creature<Mimic>(pos);
 			// Early levels: Mostly Goblins, occasional ranged monsters
 			if (roll < 65) game.create_creature<Goblin>(pos);      // 65% chance
 			else if (roll < 80) game.create_creature<Orc>(pos);    // 15% chance

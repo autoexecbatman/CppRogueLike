@@ -125,4 +125,43 @@ void Player::consume_food(int nutrition) {
 	game.hunger_system.decrease_hunger(nutrition);
 }
 
+void Player::render() const noexcept
+{
+	// First, render the player normally
+	Creature::render();
+
+	// If player is confused, add visual indicators around them
+	if (has_state(ActorState::IS_CONFUSED))
+	{
+		// Add swirling indicators around the player in confusion color
+		attron(COLOR_PAIR(CONFUSION_PAIR));
+
+		// Top positions
+		if (position.y > 0) {
+			mvaddch(position.y - 1, position.x, '~');
+			if (position.x > 0)
+				mvaddch(position.y - 1, position.x - 1, '?');
+			if (position.x < MAP_WIDTH - 1)
+				mvaddch(position.y - 1, position.x + 1, '?');
+		}
+
+		// Side positions
+		if (position.x > 0)
+			mvaddch(position.y, position.x - 1, '~');
+		if (position.x < MAP_WIDTH - 1)
+			mvaddch(position.y, position.x + 1, '~');
+
+		// Bottom positions
+		if (position.y < MAP_HEIGHT - 1) {
+			mvaddch(position.y + 1, position.x, '~');
+			if (position.x > 0)
+				mvaddch(position.y + 1, position.x - 1, '?');
+			if (position.x < MAP_WIDTH - 1)
+				mvaddch(position.y + 1, position.x + 1, '?');
+		}
+
+		attroff(COLOR_PAIR(CONFUSION_PAIR));
+	}
+}
+
 // end of file: Player.cpp

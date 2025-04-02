@@ -38,16 +38,71 @@ void AiPlayer::update(Creature& owner)
 	const Controls key = static_cast<Controls>(game.keyPress);
 	Vector2D moveVector{ 0, 0 };
 
-	// Check for movement first
-	if (m.moves.find(key) != m.moves.end())
+	// Handle confused state - randomly move or act
+	if (owner.has_state(ActorState::IS_CONFUSED) && confusionTurns > 0)
 	{
-		moveVector = m.moves.at(key);
-		game.gameStatus = Game::GameStatus::NEW_TURN;
+		// Decrease confusion duration
+		confusionTurns--;
+
+		// If confusion ended, inform the player
+		if (confusionTurns == 0)
+		{
+			owner.remove_state(ActorState::IS_CONFUSED);
+			game.message(WHITE_PAIR, "Your mind clears.", true);
+		}
+		else
+		{
+			// 50% chance of random movement
+			if (game.d.d2() == 1)
+			{
+				// Random direction
+				int randomDir = game.d.roll(0, 7);
+				switch (randomDir)
+				{
+				case 0: moveVector = { -1, 0 }; break;  // North
+				case 1: moveVector = { 1, 0 }; break;   // South
+				case 2: moveVector = { 0, -1 }; break;  // West
+				case 3: moveVector = { 0, 1 }; break;   // East
+				case 4: moveVector = { -1, -1 }; break; // Northwest
+				case 5: moveVector = { -1, 1 }; break;  // Northeast
+				case 6: moveVector = { 1, -1 }; break;  // Southwest
+				case 7: moveVector = { 1, 1 }; break;   // Southeast
+				}
+
+				game.message(CONFUSION_PAIR, "You stumble around in confusion!", true);
+				game.gameStatus = Game::GameStatus::NEW_TURN;
+			}
+			else
+			{
+				// Process normal input but show a message
+				game.message(CONFUSION_PAIR, "You struggle to control your movements...", true);
+
+				// Check for movement keys as normal
+				if (m.moves.find(key) != m.moves.end())
+				{
+					moveVector = m.moves.at(key);
+					game.gameStatus = Game::GameStatus::NEW_TURN;
+				}
+				else
+				{
+					// Non-movement actions proceed as normal
+					call_action(owner, key);
+				}
+			}
+		}
 	}
 	else
 	{
-		// if the key is not a movement key, call the action
-		call_action(owner, key);
+		// Normal movement handling (original code)
+		if (m.moves.find(key) != m.moves.end())
+		{
+			moveVector = m.moves.at(key);
+			game.gameStatus = Game::GameStatus::NEW_TURN;
+		}
+		else
+		{
+			call_action(owner, key);
+		}
 	}
 
 	if (isWaiting) // when waiting tiles are triggered

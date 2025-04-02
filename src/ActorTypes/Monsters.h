@@ -57,5 +57,40 @@ public:
 	Mage(Vector2D position);
 };
 
+class Mimic : public Creature
+{
+public:
+    Mimic(Vector2D position);
+    void update();
+    void render() const noexcept;
+
+private:
+    bool isDisguised = true;
+    int revealDistance = 2;  // Reveal true form when player is this close
+    int confusionDuration = 5; // Turns of confusion
+
+    int itemsConsumed = 0;   // Track how many items this mimic has eaten
+
+    // Consume nearby items to grow stronger
+    void consumeNearbyItems();
+
+    // For disguise changes
+    void changeDisguise();
+    struct Disguise {
+        char ch;
+        std::string name;
+        int color;
+    };
+    std::vector<Disguise> possibleDisguises = {
+        {'$', "gold pile", GOLD_PAIR},
+        {'!', "health potion", HPBARMISSING_PAIR},
+        {'#', "scroll", LIGHTNING_PAIR},
+        {'/', "weapon", WHITE_PAIR},
+        {'%', "food", HPBARFULL_PAIR}
+    };
+    int disguiseChangeCounter = 0;
+    static constexpr int disguiseChangeRate = 200; // How often to change disguise (in turns)
+};
+
 #endif // MONSTERS_H
 // end of file: Monsters.h

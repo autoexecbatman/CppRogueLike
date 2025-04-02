@@ -35,7 +35,8 @@ enum class ActorState
 	FOV_ONLY,
 	CAN_SWIM,
 	IS_EQUIPPED,
-	IS_RANGED
+	IS_RANGED,
+	IS_CONFUSED,
 };
 
 //==Actor==

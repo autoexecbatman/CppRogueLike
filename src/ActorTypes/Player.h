@@ -53,6 +53,8 @@ public:
 
 	std::string get_weapon_equipped() const noexcept { return weaponEquipped; }
 	void set_weapon_equipped(std::string weapon) noexcept { weaponEquipped = weapon; }
+
+	void render() const noexcept;
 };
 
 #endif // !PLAYER_H
