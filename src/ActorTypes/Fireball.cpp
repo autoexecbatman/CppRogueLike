@@ -206,37 +206,12 @@ void Fireball::animation(Vector2D position, int maxRange)
         clear();
         game.render();
 
-        // Create a flaming effect with multiple characters and colors
-        static const char fireChars[] = { '~', '*', '#', '^' };
-        static const int fireColors[] = { FIREBALL_PAIR, DRAGON_PAIR, HPBARMISSING_PAIR };
+        // Create a simple flaming effect with just a single tilde character at the creature's position
+        attron(COLOR_PAIR(FIREBALL_PAIR));
+        mvprintw(position.y, position.x, "~");
+        attroff(COLOR_PAIR(FIREBALL_PAIR));
 
-        // Random index
-        int charIndex = rand() % 4;
-        int colorIndex = rand() % 3;
-
-        attron(COLOR_PAIR(fireColors[colorIndex]));
-        mvprintw(position.y, position.x, "%c", fireChars[charIndex]);
-        attroff(COLOR_PAIR(fireColors[colorIndex]));
-
-        // Add ember particles around the main flame
-        for (int i = 0; i < 3; i++) {
-            int offsetY = (rand() % 3) - 1; // -1, 0, or 1
-            int offsetX = (rand() % 3) - 1; // -1, 0, or 1
-
-            if (offsetX == 0 && offsetY == 0) continue; // Skip center position
-
-            int emberY = position.y + offsetY;
-            int emberX = position.x + offsetX;
-
-            // Make sure ember is within bounds
-            if (emberY >= 0 && emberY < MAP_HEIGHT && emberX >= 0 && emberX < MAP_WIDTH) {
-                attron(COLOR_PAIR(fireColors[rand() % 3]));
-                mvprintw(emberY, emberX, "%c", fireChars[rand() % 4]);
-                attroff(COLOR_PAIR(fireColors[rand() % 3]));
-            }
-        }
-
-        // ask the player to press a key to continue
+        // Ask the player to press a key to continue
         mvprintw(29, 0, "press 'SPACE' to continue");
         refresh();
 
