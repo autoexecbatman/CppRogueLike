@@ -497,8 +497,13 @@ void Map::add_item(Vector2D pos) {
 
 	const int dice = rng_unique->getInt(1, 100);
 
-	if (dice < 30) {  // Reduced from 40% to 30%
-		game.create_item<GoldPile>(pos);
+	if (dice < 30)
+	{  // Gold pile
+		// Create a gold pile with randomized amount based on dungeon level
+		int goldAmount = rng_unique->getInt(5, 10 + game.dungeonLevel * 5);
+		auto goldPile = std::make_unique<Item>(pos, ActorData{ '$', "gold pile", GOLD_PAIR });
+		goldPile->pickable = std::make_unique<Gold>(goldAmount);
+		game.container->add(std::move(goldPile));
 		return;
 	}
 	if (dice < 40) {  // Reduced from 50% to 40%

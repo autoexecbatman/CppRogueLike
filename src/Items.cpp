@@ -30,5 +30,8 @@ ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorDa
 
 GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", GOLD_PAIR })
 {
-	pickable = std::make_unique<Gold>(10);
+	// Create a randomized amount of gold (between 5 and 20, increasing with dungeon level)
+	int goldAmount = game.d.roll(5, 10 + game.dungeonLevel * 3);
+	pickable = std::make_unique<Gold>(goldAmount);
+	value = goldAmount; // Set the value equal to the gold amount for consistency
 }

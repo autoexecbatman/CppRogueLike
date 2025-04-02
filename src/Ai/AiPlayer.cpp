@@ -12,6 +12,7 @@
 #include "../Controls/Controls.h"
 #include "../Actor/Actor.h"
 #include "../Items.h"
+#include "../ActorTypes/Gold.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -89,7 +90,41 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 
 void AiPlayer::pick_item(Creature& owner)
 {
-	owner.pick();
+	auto is_null = [](auto&& i) { return !i; };
+	for (auto& i : game.container->inv)
+	{
+		if (i && i->position == owner.position)
+		{
+			// Special handling for gold
+			if (i->actorData.name == "gold pile" && i->pickable)
+			{
+				auto goldPickable = dynamic_cast<Gold*>(i->pickable.get());
+				if (goldPickable)
+				{
+					// Add gold to player
+					owner.gold += goldPickable->amount;
+
+					// Display message
+					game.appendMessagePart(GOLD_PAIR, "You picked up ");
+					game.appendMessagePart(GOLD_PAIR, std::to_string(goldPickable->amount));
+					game.appendMessagePart(GOLD_PAIR, " gold.");
+					game.finalizeMessage();
+
+					// Remove gold pile from ground
+					i.reset();
+					std::erase_if(game.container->inv, is_null);
+					return;
+				}
+			}
+
+			// Normal item handling
+			if (owner.container->add(std::move(i)))
+			{
+				std::erase_if(game.container->inv, is_null);
+			}
+			return;
+		}
+	}
 }
 
 void AiPlayer::drop_item(Creature& owner)

@@ -19,6 +19,7 @@
 #include "Pickable.h"
 #include "Container.h"
 #include "../Items.h"
+#include "../ActorTypes/Gold.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
@@ -192,6 +193,27 @@ void Creature::pick()
 		{
 			if (position == i->position)
 			{
+				// Check if item is gold
+				if (i->actorData.name == "gold pile")
+				{
+					// Cast to access the gold amount
+					auto goldItem = dynamic_cast<GoldPile*>(i.get());
+					if (goldItem && goldItem->pickable)
+					{
+						// Get the gold amount and add to player's gold
+						auto goldPickable = dynamic_cast<Gold*>(goldItem->pickable.get());
+						if (goldPickable)
+						{
+							gold += goldPickable->amount;
+							game.message(GOLD_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
+							i.reset(); // Remove the gold pile from the map
+							std::erase_if(game.container->inv, is_null);
+							return;
+						}
+					}
+				}
+
+				// Normal item handling
 				if (container->add(std::move(i)))
 				{
 					std::erase_if(game.container->inv, is_null);

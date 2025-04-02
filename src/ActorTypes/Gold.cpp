@@ -1,12 +1,24 @@
 #include "Gold.h"
+#include "../Actor/Actor.h"
+#include "../Game.h"
 
-Gold::Gold(int amount)
+Gold::Gold(int amount) : amount(amount)
 {
 }
 
 bool Gold::use(Item& owner, Creature& wearer)
 {
-	return false;
+    // Add gold amount to player's currency
+    wearer.gold += amount;
+
+    // Display a message
+    game.appendMessagePart(GOLD_PAIR, "You gained ");
+    game.appendMessagePart(GOLD_PAIR, std::to_string(amount));
+    game.appendMessagePart(GOLD_PAIR, " gold.");
+    game.finalizeMessage();
+
+    // Return true to consume the item
+    return Pickable::use(owner, wearer);
 }
 
 void Gold::save(json& j)
