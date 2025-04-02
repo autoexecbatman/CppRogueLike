@@ -789,9 +789,9 @@ void Map::add_monster(Vector2D pos)
 
 		if (game.dungeonLevel <= 3)
 		{
-			// Early levels: Add mimics among other monsters
-			if (roll < 20) game.create_creature<Mimic>(pos);       // 20% chance
-			else if (roll < 60) game.create_creature<Goblin>(pos); // 40% chance
+			// Early levels: Reduced mimic chance from 20% to 8%
+			if (roll < 8) game.create_creature<Mimic>(pos);       // 8% chance, down from 20%
+			else if (roll < 60) game.create_creature<Goblin>(pos); // 52% chance
 			else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
 			else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
 			else if (roll < 95) game.create_creature<Mage>(pos);   // 10% chance
@@ -800,9 +800,9 @@ void Map::add_monster(Vector2D pos)
 		}
 		else if (game.dungeonLevel <= 6)
 		{
-			// Mid levels: More varied enemies
-			if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance
-			else if (roll < 35) game.create_creature<Goblin>(pos); // 20% chance
+			// Mid levels: Increase mimic chance slightly for mid-game challenge
+			if (roll < 12) game.create_creature<Mimic>(pos);       // 12% chance, down from 15%
+			else if (roll < 35) game.create_creature<Goblin>(pos); // 23% chance
 			else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
 			else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
 			else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
@@ -811,9 +811,9 @@ void Map::add_monster(Vector2D pos)
 		}
 		else
 		{
-			// Deep levels: More dangerous creatures
-			if (roll < 10) game.create_creature<Mimic>(pos);       // 10% chance
-			else if (roll < 25) game.create_creature<Goblin>(pos); // 15% chance
+			// Deep levels: More dangerous mimics along with other tough enemies
+			if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance, up from 10%
+			else if (roll < 25) game.create_creature<Goblin>(pos); // 10% chance, down from 15%
 			else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
 			else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
 			else if (roll < 75) game.create_creature<Mage>(pos);   // 15% chance
