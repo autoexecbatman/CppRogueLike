@@ -975,7 +975,6 @@ bool Map::open_door(Vector2D pos)
 
 	set_tile(pos, TileType::OPEN_DOOR, 1);
 	tcodMap->setProperties(pos.x, pos.y, true, true);
-	game.message(WHITE_PAIR, "You open the door.", true);
 
 	if (game.player && game.player->get_tile_distance(pos) <= FOV_RADIUS)
 	{

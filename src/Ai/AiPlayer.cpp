@@ -449,22 +449,28 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		int dirKey = getch();
 		Vector2D doorPos = handle_direction_input(owner, dirKey);
 
-		if (doorPos.x != 0 || doorPos.y != 0) { // Valid position
-			if (game.map->is_door(doorPos)) {
-				if (game.map->open_door(doorPos)) {
+		if (doorPos.x != 0 || doorPos.y != 0)
+		{ // Valid position
+			if (game.map->is_door(doorPos))
+			{
+				if (game.map->open_door(doorPos))
+				{
 					game.message(WHITE_PAIR, "You open the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
 					// FOV is recalculated inside open_door method
 				}
-				else {
+				else
+				{
 					game.message(WHITE_PAIR, "The door is already open.", true);
 				}
 			}
-			else {
+			else
+			{
 				game.message(WHITE_PAIR, "There is no door there.", true);
 			}
 		}
-		else {
+		else
+		{
 			game.message(WHITE_PAIR, "Invalid direction.", true);
 		}
 		break;
@@ -477,28 +483,36 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		int dirKey = getch();
 		Vector2D doorPos = handle_direction_input(owner, dirKey);
 
-		if (doorPos.x != 0 || doorPos.y != 0) { // Valid position
-			if (game.map->is_door(doorPos)) {
-				if (game.map->close_door(doorPos)) {
+		if (doorPos.x != 0 || doorPos.y != 0)
+		{ // Valid position
+			if (game.map->is_door(doorPos))
+			{
+				if (game.map->close_door(doorPos))
+				{
 					game.message(WHITE_PAIR, "You close the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
 					// FOV is recalculated inside close_door method
 				}
-				else {
+				else
+				{
 					// Try to determine why door couldn't be closed
-					if (game.map->get_actor(doorPos) != nullptr) {
+					if (game.map->get_actor(doorPos) != nullptr)
+					{
 						game.message(WHITE_PAIR, "Something is blocking the door.", true);
 					}
-					else {
+					else
+					{
 						game.message(WHITE_PAIR, "The door is already closed.", true);
 					}
 				}
 			}
-			else {
+			else
+			{
 				game.message(WHITE_PAIR, "There is no door there.", true);
 			}
 		}
-		else {
+		else
+		{
 			game.message(WHITE_PAIR, "Invalid direction.", true);
 		}
 		break;
