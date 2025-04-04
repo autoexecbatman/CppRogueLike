@@ -83,6 +83,8 @@ public:
 
 	void display_help() noexcept;
 
+	Web* findWebAt(Vector2D position);
+
 	template <typename T>
 	void create_creature(Vector2D position)
 	{

@@ -32,6 +32,7 @@
 #include "Menu/MenuClass.h"
 #include "Menu/MenuName.h"
 #include "dnd_tables/CalculatedTHAC0s.h"
+#include "Web.h"
 
 //==INIT==
 // When the Game is created, 
@@ -238,6 +239,10 @@ void Game::update()
 
 	if (gameStatus == GameStatus::NEW_TURN)
 	{
+		// Remove destroyed objects
+		auto isNull = [](const auto& obj) { return !obj; };
+		std::erase_if(objects, isNull);
+
 		game.update_creatures(creatures);
 		game.spawn_creatures();
 
@@ -267,6 +272,16 @@ void Game::render()
 {
 	map->render();
 	game.stairs->render();
+
+	// Render any objects (like webs)
+	for (const auto& obj : objects)
+	{
+		if (obj)
+		{
+			obj->render();
+		}
+	}
+
 	render_items(container->inv);
 	render_creatures(creatures);
 	player->render();
@@ -1136,6 +1151,19 @@ void Game::display_help() noexcept
 
 	delwin(help_window);
 	clear();
+}
+
+Web* Game::findWebAt(Vector2D position)
+{
+	for (const auto& obj : objects)
+	{
+		if (obj && obj->position == position &&
+			obj->actorData.name == "spider web")
+		{
+			return dynamic_cast<Web*>(obj.get());
+		}
+	}
+	return nullptr;
 }
 
 // end of file: Game.cpp

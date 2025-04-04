@@ -10,6 +10,7 @@
 #include "../Random/RandomDice.h"
 #include "../Colors/Colors.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../Web.h"
 
 ActorData playerData{ '@', "Player", WHITE_PAIR };
 
@@ -233,6 +234,65 @@ void Player::animate_resting()
 	clear();
 	game.render();
 	refresh();
+}
+
+void Player::getStuckInWeb(int duration, int strength, Web* web)
+{
+	webStuckTurns = duration;
+	webStrength = strength;
+	trappingWeb = web;
+
+	game.message(WHITE_PAIR, "You're caught in a sticky web for " +
+		std::to_string(duration) + " turns!", true);
+}
+
+bool Player::tryBreakWeb()
+{
+	// Calculate chance to break free based on strength vs web strength
+	int breakChance = 20 + (strength * 5) - (webStrength * 10);
+
+	// Ensure some minimum chance
+	breakChance = std::max(10, breakChance);
+
+	// Roll to break free
+	if (game.d.d100() <= breakChance)
+	{
+		// Success!
+		game.message(WHITE_PAIR, "You break free from the web!", true);
+
+		// Destroy the web that trapped the player
+		if (trappingWeb) {
+			trappingWeb->destroy();
+			trappingWeb = nullptr;
+		}
+
+		webStuckTurns = 0;
+		webStrength = 0;
+		return true;
+	}
+
+	// Still stuck
+	webStuckTurns--;
+	if (webStuckTurns <= 0)
+	{
+		// Time expired, free anyway
+		game.message(WHITE_PAIR, "You finally break free from the web!", true);
+
+		// Destroy the web that trapped the player
+		if (trappingWeb) {
+			trappingWeb->destroy();
+			trappingWeb = nullptr;
+		}
+
+		webStuckTurns = 0;
+		webStrength = 0;
+		return true;
+	}
+
+	// Message about remaining stuck
+	game.message(WHITE_PAIR, "You're still stuck in the web. Turns remaining: " +
+		std::to_string(webStuckTurns), true);
+	return false;
 }
 
 // end of file: Player.cpp

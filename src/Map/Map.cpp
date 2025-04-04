@@ -32,6 +32,7 @@
 #include "../Items.h"
 #include "../AiMonsterRanged.h"
 #include "../Food.h"
+#include "../Spider.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -791,6 +792,9 @@ void Map::add_monster(Vector2D pos)
 		{
 			// Early levels: Reduced mimic chance from 20% to 8%
 			if (roll < 8) game.create_creature<Mimic>(pos);       // 8% chance, down from 20%
+			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
 			else if (roll < 60) game.create_creature<Goblin>(pos); // 52% chance
 			else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
 			else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
@@ -802,6 +806,9 @@ void Map::add_monster(Vector2D pos)
 		{
 			// Mid levels: Increase mimic chance slightly for mid-game challenge
 			if (roll < 12) game.create_creature<Mimic>(pos);       // 12% chance, down from 15%
+			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
 			else if (roll < 35) game.create_creature<Goblin>(pos); // 23% chance
 			else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
 			else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
@@ -813,6 +820,9 @@ void Map::add_monster(Vector2D pos)
 		{
 			// Deep levels: More dangerous mimics along with other tough enemies
 			if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance, up from 10%
+			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
 			else if (roll < 25) game.create_creature<Goblin>(pos); // 10% chance, down from 15%
 			else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
 			else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
@@ -875,6 +885,7 @@ void Map::regenerate()
 	game.creatures.clear();
 	game.container->inv.clear();
 	game.rooms.clear(); // we clear the room coordinates
+	game.objects.clear();
 
 	// generate a new map
 	game.map->map_height = MAP_HEIGHT;

@@ -25,6 +25,8 @@ inline constexpr auto CONFUSION_PAIR = 18;
 inline constexpr auto WATER_PAIR = 19;
 inline constexpr auto GOLD_PAIR = 20;
 inline constexpr auto DOOR_PAIR = 21;
+inline constexpr auto SPIDER_PAIR = 22;
+inline constexpr auto WEB_PAIR = 23;
 
 struct Colors
 {

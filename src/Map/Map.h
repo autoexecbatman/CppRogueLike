@@ -74,7 +74,6 @@ private:
 	void spawn_items(Vector2D begin, Vector2D end);
 	void spawn_player(Vector2D begin, Vector2D end);
 	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
-	bool is_wall(Vector2D pos) const;
 	bool is_floor(Vector2D pos) const { return get_tile_type(pos) == TileType::FLOOR;}
 	bool is_water(Vector2D pos) const;
 	void set_explored(Vector2D pos); //set the tile as explored
@@ -112,6 +111,8 @@ public:
 	bool open_door(Vector2D pos);
 	bool close_door(Vector2D pos);
 	bool is_door(Vector2D pos) const;
+	bool is_wall(Vector2D pos) const;
+	void set_tile(Vector2D pos, TileType newType, double cost);
 
 	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;
@@ -125,5 +126,4 @@ protected:
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY);
 	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors);
-	void set_tile(Vector2D pos, TileType newType, double cost);
 };

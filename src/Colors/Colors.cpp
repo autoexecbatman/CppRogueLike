@@ -37,6 +37,8 @@ void Colors::my_init_pair() noexcept
 	// make brown
 	init_color(8, 500, 300, 0);
 	init_pair(21, 8, COLOR_BLACK); // brown color
+	init_pair(22, COLOR_BLACK, COLOR_GREEN);
+	init_pair(23, COLOR_BLACK, COLOR_WHITE);
 }
 
 // end of file: Colors.cpp

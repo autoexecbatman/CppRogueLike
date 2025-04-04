@@ -5,8 +5,7 @@
 #include "../Random/RandomDice.h"
 #include "../Map/Map.h"
 #include "../Actor/Actor.h"
-
-
+#include "../Web.h"
 
 class Player : public Creature
 {
@@ -57,6 +56,20 @@ public:
 	void render() const noexcept;
 	bool rest();
 	void animate_resting();
+
+	// Web effect tracking
+	int webStuckTurns = 0;       // How many turns the player is stuck in a web
+	int webStrength = 0;         // How strong the web is (affects escape difficulty)
+	Web* trappingWeb = nullptr;  // The web that has trapped the player
+
+	// Check if player is stuck in a web
+	bool isWebbed() const { return webStuckTurns > 0; }
+
+	// Attempt to break free from a web
+	bool tryBreakWeb();
+
+	// Get stuck in a web
+	void getStuckInWeb(int duration, int strength, Web* web);
 };
 
 #endif // !PLAYER_H

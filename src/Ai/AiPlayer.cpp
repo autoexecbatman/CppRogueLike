@@ -13,6 +13,7 @@
 #include "../Actor/Actor.h"
 #include "../Items.h"
 #include "../ActorTypes/Gold.h"
+#include "../Web.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -35,6 +36,17 @@ struct PossibleMoves
 
 void AiPlayer::update(Creature& owner)
 {
+	// If stuck in a web, try to break free and skip turn if still stuck
+	if (game.player->isWebbed())
+	{
+		if (!game.player->tryBreakWeb())
+		{
+			// Still stuck, skip the player's turn
+			game.gameStatus = Game::GameStatus::NEW_TURN;
+			return;
+		}
+	}
+
 	const Controls key = static_cast<Controls>(game.keyPress);
 	Vector2D moveVector{ 0, 0 };
 
@@ -335,8 +347,32 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 {
 	if (!game.map->is_collision(owner, game.map->get_tile_type(targetPosition), targetPosition))
 	{
-		move(owner, targetPosition);
-		shouldComputeFOV = true;
+		// Check if there's a web at the target position
+		bool webEffect = false;
+
+		// Search for a web at the target position
+		for (const auto& obj : game.objects)
+		{
+			if (obj && obj->position == targetPosition &&
+				obj->actorData.name == "spider web")
+			{
+				// Found a web, cast to proper type
+				Web* web = dynamic_cast<Web*>(obj.get());
+				if (web)
+				{
+					// Apply the web effect - returns true if player gets caught
+					webEffect = web->applyEffect(owner);
+					break;
+				}
+			}
+		}
+
+		// If the player wasn't caught in a web, proceed with movement
+		if (!webEffect)
+		{
+			move(owner, targetPosition);
+			shouldComputeFOV = true;
+		}
 	}
 }
 
