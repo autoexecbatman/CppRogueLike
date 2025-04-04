@@ -35,7 +35,8 @@ protected:
 		STAFF,
 		GOLD,
 		FOOD,
-		CORPSE_FOOD
+		CORPSE_FOOD,
+		AMULET
 	};
 
 	virtual PickableType get_type() const = 0;

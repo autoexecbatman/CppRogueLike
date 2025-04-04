@@ -225,6 +225,29 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 
 void Game::update()
 {
+	if (gameStatus == GameStatus::VICTORY)
+	{
+		game.log("Player has won the game!");
+		game.appendMessagePart(FIREBALL_PAIR, "Congratulations!");
+		game.appendMessagePart(WHITE_PAIR, " You have obtained the ");
+		game.appendMessagePart(FIREBALL_PAIR, "Amulet of Yendor");
+		game.appendMessagePart(WHITE_PAIR, " and escaped the dungeon!");
+		game.finalizeMessage();
+
+		// Display a victory message and wait for a keypress
+		WINDOW* victoryWin = newwin(10, 50, (LINES / 2) - 5, (COLS / 2) - 25);
+		box(victoryWin, 0, 0);
+		mvwprintw(victoryWin, 2, 10, "VICTORY!");
+		mvwprintw(victoryWin, 4, 5, "You have won the game!");
+		mvwprintw(victoryWin, 6, 5, "Press any key to exit...");
+		wrefresh(victoryWin);
+
+		getch(); // Wait for any key
+		delwin(victoryWin);
+
+		run = false; // End the game
+	}
+
 	game.map->update(); // sets tiles to explored
 	game.player->update(); // if moved set to NEW_TURN else IDLE
 

@@ -150,6 +150,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/AiSpider.h
     ${PROJECT_SOURCE_DIR}/Web.cpp
     ${PROJECT_SOURCE_DIR}/Web.h
+    ${PROJECT_SOURCE_DIR}/Amulet.cpp
+    ${PROJECT_SOURCE_DIR}/Amulet.h
+
 
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp

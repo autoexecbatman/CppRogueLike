@@ -16,6 +16,7 @@ inline constexpr auto ROOM_VERTICAL_MAX_SIZE = 10;
 inline constexpr auto ROOM_MIN_SIZE = 6;
 inline constexpr int MAX_ROOM_ITEMS = 4;
 inline constexpr int MAX_MONSTERS = 6;
+inline constexpr int FINAL_DUNGEON_LEVEL = 10;
 
 //==Tile==
 // A tile of the map
@@ -110,6 +111,7 @@ public:
 	bool has_los(Vector2D from, Vector2D to) const;
 	bool open_door(Vector2D pos);
 	bool close_door(Vector2D pos);
+	void place_amulet() const;
 	bool is_door(Vector2D pos) const;
 	bool is_wall(Vector2D pos) const;
 	void set_tile(Vector2D pos, TileType newType, double cost);

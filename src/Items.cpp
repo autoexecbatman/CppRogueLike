@@ -7,6 +7,7 @@
 #include "ActorTypes/Fireball.h"
 #include "Actor/Confuser.h"
 #include "ActorTypes/Gold.h"
+#include "Amulet.h"
 
 HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", HPBARMISSING_PAIR })
 {
@@ -34,4 +35,10 @@ GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pil
 	int goldAmount = game.d.roll(5, 10 + game.dungeonLevel * 3);
 	pickable = std::make_unique<Gold>(goldAmount);
 	value = goldAmount; // Set the value equal to the gold amount for consistency
+}
+
+AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*', "Amulet of Yendor", FIREBALL_PAIR })
+{
+	pickable = std::make_unique<Amulet>();
+	value = 1000; // Very valuable
 }

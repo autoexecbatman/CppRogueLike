@@ -241,6 +241,8 @@ void Map::init(bool withActors)
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	bsp(map_width, map_height, *rng_unique, withActors);
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
+
+	place_amulet();
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors)
@@ -1018,4 +1020,33 @@ bool Map::close_door(Vector2D pos)
 	return true;
 }
 
+void Map::place_amulet() const
+{
+	// Only place the amulet on the final level
+	if (game.dungeonLevel == FINAL_DUNGEON_LEVEL)
+	{
+		// Choose a random room for the amulet
+		int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
+		index = index % 2 == 0 ? index : index - 1;
+		const Vector2D roomBegin = game.rooms.at(index);
+		const Vector2D roomEnd = game.rooms.at(index + 1);
+
+		// Find a walkable position in the room
+		Vector2D amuletPos{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
+		while (!can_walk(amuletPos) || is_stairs(amuletPos))
+		{
+			amuletPos.x = game.d.roll(roomBegin.x, roomEnd.x);
+			amuletPos.y = game.d.roll(roomBegin.y, roomEnd.y);
+		}
+
+		// Create and place the amulet
+		game.create_item<AmuletOfYendor>(amuletPos);
+
+		// Log the placement (debug info)
+		game.log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
+
+		// Add a hint message
+		game.message(FIREBALL_PAIR, "You sense a powerful artifact somewhere on this level...", true);
+	}
+}
 // end of file: Map.cpp

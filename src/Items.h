@@ -34,4 +34,10 @@ public:
 	GoldPile(Vector2D position);
 };
 
+class AmuletOfYendor : public Item
+{
+public:
+	AmuletOfYendor(Vector2D position);
+};
+
 #endif // !ITEMS_H
