@@ -7,7 +7,7 @@ AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(
 
 void AiMimic::update(Creature& owner)
 {
-    // Cast the owner to a Mimic
+    // Cast the owner to a Mimic - we still need this for type-specific operations
     Mimic* mimic = dynamic_cast<Mimic*>(&owner);
     if (!mimic) {
         // This shouldn't happen - but if it does, use standard monster AI
@@ -21,8 +21,8 @@ void AiMimic::update(Creature& owner)
         return;
     }
 
-    // Check if disguised
-    if (mimic->isDisguised) {
+    // Check if disguised - now using our internal state
+    if (isDisguised) {
         // Increment disguise change counter
         disguiseChangeCounter++;
 
@@ -48,7 +48,7 @@ void AiMimic::update(Creature& owner)
 bool AiMimic::consumeNearbyItems(Mimic& mimic)
 {
     // Only consuming items when revealed and active
-    if (mimic.isDisguised || mimic.destructible->is_dead()) {
+    if (isDisguised || mimic.destructible->is_dead()) {
         return false;
     }
 
@@ -88,7 +88,7 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
             game.log("Mimic consuming item: " + item->actorData.name);
 
             // Grow stronger based on item type
-            mimic.itemsConsumed++;
+            itemsConsumed++;
 
             // Different bonuses based on item type
             if (item->actorData.name.find("potion") != std::string::npos) {
@@ -99,8 +99,8 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
             }
             else if (item->actorData.name.find("scroll") != std::string::npos) {
                 // Scrolls increase confusion duration
-                mimic.confusionDuration = std::min(mimic.confusionDuration + 1, 5);
-                game.log("Mimic increased confusion duration to " + std::to_string(mimic.confusionDuration));
+                confusionDuration = std::min(confusionDuration + 1, 5);
+                game.log("Mimic increased confusion duration to " + std::to_string(confusionDuration));
             }
             else if (item->actorData.name.find("gold") != std::string::npos) {
                 // Gold makes the mimic more defensive
@@ -125,7 +125,7 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
             itemConsumed = true;
 
             // If mimic has consumed enough items, change appearance
-            if (mimic.itemsConsumed >= 5) {
+            if (itemsConsumed >= 5) {
                 mimic.actorData.ch = 'W';
                 mimic.actorData.color = FIREBALL_PAIR;
                 mimic.actorData.name = "greater mimic";
@@ -157,10 +157,10 @@ void AiMimic::checkRevealing(Mimic& mimic)
     int distanceToPlayer = mimic.get_tile_distance(game.player->position);
     game.log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
-    // Check if player is close enough to reveal
-    if (distanceToPlayer <= mimic.revealDistance) {
+    // Check if player is close enough to reveal - using our internal revealDistance
+    if (distanceToPlayer <= revealDistance) {
         // Reveal true form!
-        mimic.isDisguised = false;
+        isDisguised = false;
         mimic.actorData.ch = 'M';
         mimic.actorData.name = "mimic";
         mimic.actorData.color = DRAGON_PAIR;
@@ -181,8 +181,9 @@ void AiMimic::checkRevealing(Mimic& mimic)
             // Apply confusion through player's AI
             auto playerAi = dynamic_cast<AiPlayer*>(game.player->ai.get());
             if (playerAi) {
-                playerAi->applyConfusion(mimic.confusionDuration);
-                game.log("Applied confusion to player for " + std::to_string(mimic.confusionDuration) + " turns");
+                // Using our confusionDuration for consistency
+                playerAi->applyConfusion(confusionDuration);
+                game.log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
             }
         }
         else {
@@ -196,11 +197,15 @@ void AiMimic::checkRevealing(Mimic& mimic)
 
 void AiMimic::changeDisguise(Mimic& mimic)
 {
-    if (!mimic.isDisguised) return; // Don't change if already revealed
+    // Don't change if already revealed - using our isDisguised property
+    if (!isDisguised) return;
 
-    // Select a random disguise from the mimic's disguise list
-    int index = game.d.roll(0, mimic.possibleDisguises.size() - 1);
-    const auto& chosen = mimic.possibleDisguises[index];
+    // Get the possible disguises from the mimic
+    auto possibleDisguises = mimic.get_possible_disguises();
+
+    // Select a random disguise
+    int index = game.d.roll(0, possibleDisguises.size() - 1);
+    const auto& chosen = possibleDisguises[index];
 
     // Apply the disguise
     mimic.actorData.ch = chosen.ch;
@@ -215,13 +220,29 @@ void AiMimic::load(const json& j)
 {
     AiMonster::load(j);
 
-    // Load AiMimic specific data if needed
+    // Load AiMimic specific data
     if (j.contains("disguiseChangeCounter")) {
         disguiseChangeCounter = j.at("disguiseChangeCounter").get<int>();
     }
 
     if (j.contains("consumptionCooldown")) {
         consumptionCooldown = j.at("consumptionCooldown").get<int>();
+    }
+
+    if (j.contains("isDisguised")) {
+        isDisguised = j.at("isDisguised").get<bool>();
+    }
+
+    if (j.contains("revealDistance")) {
+        revealDistance = j.at("revealDistance").get<int>();
+    }
+
+    if (j.contains("confusionDuration")) {
+        confusionDuration = j.at("confusionDuration").get<int>();
+    }
+
+    if (j.contains("itemsConsumed")) {
+        itemsConsumed = j.at("itemsConsumed").get<int>();
     }
 }
 
@@ -232,4 +253,8 @@ void AiMimic::save(json& j)
     // Save AiMimic specific data
     j["disguiseChangeCounter"] = disguiseChangeCounter;
     j["consumptionCooldown"] = consumptionCooldown;
+    j["isDisguised"] = isDisguised;
+    j["revealDistance"] = revealDistance;
+    j["confusionDuration"] = confusionDuration;
+    j["itemsConsumed"] = itemsConsumed;
 }

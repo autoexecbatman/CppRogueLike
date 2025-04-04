@@ -18,10 +18,15 @@ public:
     void load(const json& j) override;
     void save(json& j) override;
 
+    // Functions moved from Spider class
+    bool has_laid_web() const { return webLaid; }
+    void set_web_laid(bool status) { webLaid = status; }
+
 protected:
     int ambushCounter = 0;    // Counter for ambush behavior
     bool isAmbushing = false; // Is this spider currently in ambush mode?
     int poisonCooldown = 0;   // Cooldown for poison attacks
+    bool webLaid = false;     // Tracks if this spider has created a web
 
     // Specialized spider movement pattern that prefers walls and corners
     void moveOrAttack(Creature& owner, Vector2D targetPosition) override;

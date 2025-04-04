@@ -26,18 +26,11 @@ public:
     // Poison attack chance based on spider type
     int get_poison_chance() const;
 
-    // Has this spider already laid a web?
-    bool has_laid_web() const { return webLaid; }
-
-    // Set web laid status
-    void set_web_laid(bool status) { webLaid = status; }
-
     // Get spider type
     SpiderType get_spider_type() const { return spiderType; }
 
 private:
     SpiderType spiderType;
-    bool webLaid = false;  // Tracks if this spider has created a web
 
     // Initialize based on spider type
     void init_spider_type();

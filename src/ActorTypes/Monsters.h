@@ -57,10 +57,11 @@ public:
 	Mage(Vector2D position);
 };
 
+//==MIMIC==
 struct Disguise {
-	char ch;
-	std::string name;
-	int color;
+    char ch;
+    std::string name;
+    int color;
 };
 
 class Mimic : public Creature
@@ -68,20 +69,15 @@ class Mimic : public Creature
 public:
     Mimic(Vector2D position);
 
-    // Make these public so AiMimic can access them
-    bool isDisguised = true;
-    int revealDistance = 1;  // Reveal true form when player is this close
-    int confusionDuration = 3; // Turns of confusion
-    int itemsConsumed = 0;   // Track how many items this mimic has eaten
+    // Only expose what's necessary through getters
+    std::vector<Disguise> get_possible_disguises() const;
+
+private:
+    // Initialize possible disguises
+    void initDisguises();
 
     // Storage for possible disguises
     std::vector<struct Disguise> possibleDisguises;
-    // Define the Disguise struct
-
-private:
-
-    // Initialize disguises (called from constructor)
-    void initDisguises();
 };
 
 #endif // MONSTERS_H

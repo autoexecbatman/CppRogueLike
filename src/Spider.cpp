@@ -70,7 +70,7 @@ void Spider::init_spider_type()
         constitution = d.d6() + 1;
 
         // Combat properties - giant spiders have more HP and do more damage
-        
+
         destructible = std::make_unique<MonsterDestructible>(
             d.d4() + 3,
             1,
@@ -108,8 +108,6 @@ void Spider::update()
 {
     // Call the base class update method
     Creature::update();
-
-    // Any additional spider-specific update logic can go here
 }
 
 int Spider::get_poison_chance() const

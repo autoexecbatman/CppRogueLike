@@ -586,15 +586,24 @@ bool AiWebSpinner::shouldCreateWeb(Creature& owner)
         return false;
     }
 
-    // If player is nearby, moderate chance to create defensive web
-    // Reduced from 70% to 40% chance
-    if (distToPlayer <= 10 && game.d.d100() < 40)
-    {
-        return true;
+    // If spider has already laid a web recently, reduce chance of creating another
+    if (has_laid_web()) {
+        // Reduced chance if already laid a web (20% instead of 40%)
+        if (distToPlayer <= 10 && game.d.d100() < 20)
+        {
+            return true;
+        }
+    }
+    else {
+        // Higher chance if hasn't laid a web yet
+        // If player is nearby, moderate chance to create defensive web
+        if (distToPlayer <= 10 && game.d.d100() < 40)
+        {
+            return true;
+        }
     }
 
     // Even if player is far, occasional web creation for traps (10% chance)
-    // Reduced from 15% to 10%
     if (game.d.d100() < 10)
     {
         return true;
@@ -616,22 +625,26 @@ bool AiWebSpinner::shouldCreateWeb(Creature& owner)
 
 bool AiWebSpinner::tryCreateWeb(Creature& owner)
 {
+    // Cast owner to Spider to access spider-specific methods
+    Spider* spider = dynamic_cast<Spider*>(&owner);
+    if (!spider) {
+        game.log("Error: tryCreateWeb called on non-Spider creature");
+        return false;
+    }
+
     // Determine the web size - bigger webs when player is closer
     int distToPlayer = owner.get_tile_distance(game.player->position);
     int webSize = WEB_MAX_SIZE;
 
-    if (distToPlayer < 5)
-    {
+    if (distToPlayer < 5) {
         // Maximum size defensive web
         webSize = WEB_MAX_SIZE;
     }
-    else if (distToPlayer < 15)
-    {
+    else if (distToPlayer < 15) {
         // Medium size web
         webSize = WEB_MIN_SIZE + 1;
     }
-    else
-    {
+    else {
         // Minimum size trap web
         webSize = WEB_MIN_SIZE;
     }
@@ -639,8 +652,7 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
     // Center the web at the spider's position or at a strategic location
     Vector2D webCenter;
 
-    if (game.map->is_in_fov(owner.position) && distToPlayer < 10)
-    {
+    if (game.map->is_in_fov(owner.position) && distToPlayer < 10) {
         // If player can see spider, create web between spider and player
         int dx = game.player->position.x - owner.position.x;
         int dy = game.player->position.y - owner.position.y;
@@ -655,8 +667,7 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
         webCenter.x = std::max(0, std::min(webCenter.x, game.map->get_width() - 1));
         webCenter.y = std::max(0, std::min(webCenter.y, game.map->get_height() - 1));
     }
-    else
-    {
+    else {
         // If player can't see spider, create web at a nearby location
         webCenter = owner.position;
     }
@@ -666,22 +677,16 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
 
     // Dramatic message about web creation
     game.appendMessagePart(DRAGON_PAIR, owner.actorData.name);
-    if (webSize >= WEB_MAX_SIZE - 1)
-    {
+    if (webSize >= WEB_MAX_SIZE - 1) {
         game.appendMessagePart(WHITE_PAIR, " creates a massive web network!");
     }
-    else
-    {
+    else {
         game.appendMessagePart(WHITE_PAIR, " spins a complex web structure!");
     }
     game.finalizeMessage();
 
-    // Mark this spider as having laid a web
-    Spider* spider = dynamic_cast<Spider*>(&owner);
-    if (spider)
-    {
-        spider->set_web_laid(true);
-    }
+    // Mark this spider as having laid a web - now using our own method
+    set_web_laid(true);
 
     return true;
 }

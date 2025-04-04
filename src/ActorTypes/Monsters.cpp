@@ -245,4 +245,9 @@ void Mimic::initDisguises()
 	};
 }
 
+std::vector<Disguise> Mimic::get_possible_disguises() const
+{
+	return possibleDisguises;
+}
+
 // end of file: Goblin.cpp
