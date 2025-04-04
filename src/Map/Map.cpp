@@ -157,7 +157,7 @@ public:
 			bool isRightGeneralTop = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y > currentRoomCenter.y;
 			bool isRightGeneralBottom = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y < currentRoomCenter.y;
 
-			
+
 			// Connect this room to the previous room (except for the first room)
 			if (roomNum != 0)
 			{
@@ -214,7 +214,8 @@ Map::Map(int map_height, int map_width)
 	map_width(map_width),
 	tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
 	seed(game.d.roll(0, INT_MAX))
-{}
+{
+}
 
 void Map::init_tiles()
 {
@@ -621,7 +622,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 				else
 				{
 					set_tile(thisTile, TileType::CORRIDOR, 1);
-					tcodMap->setProperties(tileX,tileY,true,true); // walkable and transparent
+					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 				}
 			}
 			else if (!thirdDoorSet && secondDoorSet && isDoorSet)
@@ -759,7 +760,7 @@ bool Map::is_stairs(Vector2D pos) const
 
 bool Map::can_walk(Vector2D pos) const
 {
-	
+
 	if (is_wall(pos)) // check if the tile is a wall
 	{
 		return false;
@@ -776,60 +777,49 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	static bool dragonPlaced = false;
-	const bool placeDragon = !dragonPlaced && game.d.d100() < 5;
+	int roll = game.d.d100();
 
-	if (placeDragon)
+	if (game.dungeonLevel <= 3)
 	{
-		game.create_creature<Dragon>(pos);
-		dragonPlaced = true;
+		// Early levels: Reduced mimic chance from 20% to 8%
+		if (roll < 8) game.create_creature<Mimic>(pos);       // 8% chance, down from 20%
+		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
+		else if (roll < 60) game.create_creature<Goblin>(pos); // 52% chance
+		else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
+		else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
+		else if (roll < 95) game.create_creature<Mage>(pos);   // 10% chance
+		else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 3% chance
+		else game.create_creature<Troll>(pos);                 // 2% chance
+	}
+	else if (game.dungeonLevel <= 6)
+	{
+		// Mid levels: Increase mimic chance slightly for mid-game challenge
+		if (roll < 12) game.create_creature<Mimic>(pos);       // 12% chance, down from 15%
+		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
+		else if (roll < 35) game.create_creature<Goblin>(pos); // 23% chance
+		else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
+		else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
+		else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
+		else if (roll < 95) game.create_creature<Shopkeeper>(pos); // 10% chance
+		else game.create_creature<Troll>(pos);                 // 5% chance
 	}
 	else
 	{
-		int roll = game.d.d100();
-
-		if (game.dungeonLevel <= 3)
-		{
-			// Early levels: Reduced mimic chance from 20% to 8%
-			if (roll < 8) game.create_creature<Mimic>(pos);       // 8% chance, down from 20%
-			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-			else if (roll < 60) game.create_creature<Goblin>(pos); // 52% chance
-			else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
-			else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
-			else if (roll < 95) game.create_creature<Mage>(pos);   // 10% chance
-			else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 3% chance
-			else game.create_creature<Troll>(pos);                 // 2% chance
-		}
-		else if (game.dungeonLevel <= 6)
-		{
-			// Mid levels: Increase mimic chance slightly for mid-game challenge
-			if (roll < 12) game.create_creature<Mimic>(pos);       // 12% chance, down from 15%
-			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-			else if (roll < 35) game.create_creature<Goblin>(pos); // 23% chance
-			else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
-			else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
-			else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
-			else if (roll < 95) game.create_creature<Shopkeeper>(pos); // 10% chance
-			else game.create_creature<Troll>(pos);                 // 5% chance
-		}
-		else
-		{
-			// Deep levels: More dangerous mimics along with other tough enemies
-			if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance, up from 10%
-			else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-			else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-			else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-			else if (roll < 25) game.create_creature<Goblin>(pos); // 10% chance, down from 15%
-			else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
-			else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
-			else if (roll < 75) game.create_creature<Mage>(pos);   // 15% chance
-			else if (roll < 90) game.create_creature<Troll>(pos);  // 15% chance
-			else game.create_creature<Shopkeeper>(pos);            // 10% chance
-		}
+		// Deep levels: More dangerous mimics along with other tough enemies
+		if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance, up from 10%
+		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
+		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
+		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
+		else if (roll < 25) game.create_creature<Goblin>(pos); // 10% chance, down from 15%
+		else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
+		else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
+		else if (roll < 75) game.create_creature<Mage>(pos);   // 15% chance
+		else if (roll < 90) game.create_creature<Troll>(pos);  // 15% chance
+		else game.create_creature<Shopkeeper>(pos);            // 10% chance
 	}
 
 	// After creating any monster, set the appropriate AI
@@ -1020,7 +1010,7 @@ bool Map::close_door(Vector2D pos)
 	// Make the tile non-walkable and non-transparent
 	tcodMap->setProperties(pos.x, pos.y, false, false);
 
-	if (game.player && game.player->get_tile_distance(pos) <= FOV_RADIUS) 
+	if (game.player && game.player->get_tile_distance(pos) <= FOV_RADIUS)
 	{
 		compute_fov();
 	}

@@ -31,101 +31,200 @@ AiSpider::AiSpider() : AiMonster(), ambushCounter(0), isAmbushing(false), poison
 
 void AiSpider::update(Creature& owner)
 {
-    // Cast the owner to a Spider if possible
-    Spider* spider = dynamic_cast<Spider*>(&owner);
-
-    if (!spider || owner.destructible->is_dead())
+    // Skip if spider is dead
+    if (owner.destructible->is_dead())
     {
         return;
     }
 
-    // Decrease cooldown counters
+    // Always ensure spiders have strength
+    if (owner.strength <= 0)
+    {
+        owner.strength = 3; // Ensure minimum strength
+    }
+
+    // Reduce poison cooldown if active
     if (poisonCooldown > 0)
     {
         poisonCooldown--;
     }
 
-    // Check if spider is in player's FOV
-    bool inPlayerFOV = game.map->is_in_fov(owner.position);
-
-    // Handle ambush behavior
+    // Handle ambush behavior - this was missing in the previous fix
     if (isAmbushing)
     {
         ambushCounter--;
 
-        // If the player spots us while ambushing, or ambush time is up, stop ambushing
-        if (inPlayerFOV || ambushCounter <= 0)
+        // If player spots us while ambushing, or ambush time is up, stop ambushing
+        if (game.map->is_in_fov(owner.position) || ambushCounter <= 0)
         {
             isAmbushing = false;
-            // If player spots us, get a bonus attack
-            if (inPlayerFOV && game.player->get_tile_distance(owner.position) <= 1)
-            {
-                // Surprise attack on player
-                owner.attacker->attack(owner, *game.player);
 
-                // Try poison attack
-                if (canPoisonAttack(owner))
+            // If player is close when we're discovered, get a surprise attack
+            int distanceToPlayer = owner.get_tile_distance(game.player->position);
+            if (game.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
+            {
+                // Message about being ambushed
+                game.appendMessagePart(owner.actorData.color, owner.actorData.name);
+                game.appendMessagePart(WHITE_PAIR, " ambushes you from hiding!");
+                game.finalizeMessage();
+
+                // If right next to player, get an immediate attack
+                if (distanceToPlayer <= 1)
                 {
-                    poisonAttack(owner, *game.player);
+                    // Surprise attack gets a damage bonus
+                    int normalDamage = game.d.roll_from_string(owner.attacker->roll);
+                    int bonusDamage = game.d.roll(1, 2); // Ambush damage bonus
+                    int totalDamage = normalDamage + bonusDamage;
+
+                    game.appendMessagePart(owner.actorData.color, owner.actorData.name);
+                    game.appendMessagePart(WHITE_PAIR, " strikes with the element of surprise for ");
+                    game.appendMessagePart(HPBARMISSING_PAIR, std::to_string(totalDamage));
+                    game.appendMessagePart(WHITE_PAIR, " damage!");
+                    game.finalizeMessage();
+
+                    // Apply damage directly
+                    game.player->destructible->take_damage(*game.player, totalDamage);
+
+                    // Also try for poison
+                    if (canPoisonAttack(owner))
+                    {
+                        poisonAttack(owner, *game.player);
+                    }
                 }
             }
         }
         else
         {
-            // Stay still while ambushing
+            // Stay still while ambushing - don't reveal position
             return;
         }
     }
-    else if (!inPlayerFOV && game.d.d100() <= AMBUSH_CHANCE)
+    else if (!game.map->is_in_fov(owner.position))
     {
-        // Not seen by player, chance to enter ambush mode
-        Vector2D ambushPos = findAmbushPosition(owner, game.player->position);
+        // Not in player's FOV, consider setting an ambush
+        // Higher chance when player is near but doesn't see the spider
+        int playerDistance = owner.get_tile_distance(game.player->position);
+        int ambushChance = AMBUSH_CHANCE;
 
-        if (ambushPos.x != -1)
+        // Increase chance when player is nearby but doesn't see us
+        if (playerDistance <= 10)
         {
-            // Move to ambush position
-            owner.position = ambushPos;
-            isAmbushing = true;
-            ambushCounter = AMBUSH_DURATION;
-            return;
+            ambushChance += 20; // Higher ambush chance when player is close
+        }
+
+        if (game.d.d100() <= ambushChance)
+        {
+            // Find a good ambush position
+            Vector2D ambushPos = findAmbushPosition(owner, game.player->position);
+
+            if (ambushPos.x != -1) // Valid position found
+            {
+                // Move to ambush position
+                owner.position = ambushPos;
+                isAmbushing = true;
+                ambushCounter = AMBUSH_DURATION;
+
+                // Debug log
+                game.log("Spider setting ambush at " + std::to_string(ambushPos.x) + "," + std::to_string(ambushPos.y));
+
+                return;
+            }
         }
     }
 
-    // Regular monster behavior if not ambushing
-    if (inPlayerFOV)
+    // Special check for being adjacent to player - DIRECT ATTACK CODE
+    int distanceToPlayer = owner.get_tile_distance(game.player->position);
+    if (distanceToPlayer <= 1 && game.map->is_in_fov(owner.position))
+    {
+        // Directly trigger attack
+        game.log("Spider attempting attack with poison");
+
+        // First do the regular attack
+        owner.attacker->attack(owner, *game.player);
+
+        // Then try poison - now independent of the regular attack
+        if (canPoisonAttack(owner))
+        {
+            poisonAttack(owner, *game.player);
+        }
+
+        return;
+    }
+
+    // Handle movement and other behaviors normally
+    if (game.map->is_in_fov(owner.position))
     {
         // Player can see spider - set maximum tracking
         moveCount = TRACKING_TURNS;
     }
-    else
+    else if (moveCount > 0)
     {
-        // Player can't see spider
-        if (moveCount > 0)
-        {
-            // If we were previously tracking the player, decrement counter
-            moveCount--;
-        }
+        // Player can't see spider but we're still tracking
+        moveCount--;
     }
 
-    // Behavior based on distance and visibility
+    // Movement logic
     if (moveCount > 0)
     {
-        // Recently seen player - actively pursue
-        moveOrAttack(owner, game.player->position);
+        // Move toward player
+        moveTowardPlayer(owner);
     }
-    else if (game.d.d20() == 1)  // Occasional random movement for distant spiders
+    else
     {
-        // Random movement in one of eight directions
-        int dx = game.d.roll(-1, 1);
-        int dy = game.d.roll(-1, 1);
-
-        if (dx != 0 || dy != 0)  // Ensure we're not standing still
+        // Occasional random movement
+        if (game.d.d20() == 1)
         {
-            Vector2D newPos = owner.position + Vector2D{ dy, dx };
+            randomMove(owner);
+        }
+    }
+}
+
+void AiSpider::moveTowardPlayer(Creature& owner)
+{
+    // Get direction to player
+    Vector2D dirToPlayer = game.player->position - owner.position;
+    int dx = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
+    int dy = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
+
+    // Try to move in that direction
+    Vector2D newPos = owner.position + Vector2D{ dy, dx };
+
+    // Check if the move is valid
+    if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+    {
+        owner.position = newPos;
+    }
+    else
+    {
+        // Try horizontal move
+        newPos = owner.position + Vector2D{ 0, dx };
+        if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+        {
+            owner.position = newPos;
+        }
+        else
+        {
+            // Try vertical move
+            newPos = owner.position + Vector2D{ dy, 0 };
             if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
             {
                 owner.position = newPos;
             }
+        }
+    }
+}
+
+void AiSpider::randomMove(Creature& owner)
+{
+    int dx = game.d.roll(-1, 1);
+    int dy = game.d.roll(-1, 1);
+
+    if (dx != 0 || dy != 0)
+    {
+        Vector2D newPos = owner.position + Vector2D{ dy, dx };
+        if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+        {
+            owner.position = newPos;
         }
     }
 }
@@ -249,17 +348,18 @@ void AiSpider::poisonAttack(Creature& owner, Creature& target)
     // Apply poison effect to target if it's the player
     if (&target == game.player.get())
     {
-        // Display poison message
+        // Calculate poison damage (1-3 points)
+        int poisonDamage = game.d.roll(1, 3);
+
+        // Display poison message with damage amount
         game.appendMessagePart(ORC_PAIR, owner.actorData.name);
-        game.appendMessagePart(WHITE_PAIR, " injects you with venom!");
+        game.appendMessagePart(WHITE_PAIR, " injects venom for ");
+        game.appendMessagePart(HPBARMISSING_PAIR, std::to_string(poisonDamage));
+        game.appendMessagePart(WHITE_PAIR, " additional poison damage!");
         game.finalizeMessage();
 
-        // TODO: Add poison effect to player
-        // This would need a Poison class or status effect implementation
-        // For now, just deal 1-3 damage per turn for POISON_DURATION turns
-
-        // Deal initial poison damage
-        target.destructible->take_damage(target, game.d.roll(1, 3));
+        // Deal the poison damage
+        target.destructible->take_damage(target, poisonDamage);
 
         // Reset cooldown
         poisonCooldown = POISON_COOLDOWN;
@@ -271,10 +371,10 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition)
     // Look for positions near walls that are good for ambushing
     std::vector<Vector2D> candidates;
 
-    // Search in a 5x5 area around the current position
-    for (int y = -5; y <= 5; y++)
+    // Search in a larger area around the current position (increased from 5x5 to 8x8)
+    for (int y = -8; y <= 8; y++)
     {
-        for (int x = -5; x <= 5; x++)
+        for (int x = -8; x <= 8; x++)
         {
             Vector2D pos = owner.position + Vector2D{ y, x };
 
@@ -288,12 +388,13 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition)
             // Check if position is walkable, not occupied, and a good ambush spot
             if (game.map->can_walk(pos) && !game.map->get_actor(pos) && isGoodAmbushSpot(pos))
             {
-                // Evaluate position - closer to player is better for ambush
+                // Evaluate position - closer to player's path is better for ambush
                 int distToPlayer = std::abs(pos.x - targetPosition.x) + std::abs(pos.y - targetPosition.y);
 
                 // Only consider positions that are not too far and not too close
-                if (distToPlayer >= 3 && distToPlayer <= 8)
+                if (distToPlayer >= 3 && distToPlayer <= 12)
                 {
+                    // Prioritize positions closer to doors, corners, or chokepoints
                     candidates.push_back(pos);
                 }
             }
@@ -313,8 +414,9 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition)
 
 bool AiSpider::isGoodAmbushSpot(Vector2D position)
 {
-    // Good ambush spots are adjacent to walls and ideally in corners
+    // Good ambush spots are adjacent to walls (especially corners) and ideally in shadows
     int wallCount = 0;
+    bool hasCorner = false;
 
     // Check the 8 surrounding tiles
     for (int y = -1; y <= 1; y++)
@@ -329,12 +431,33 @@ bool AiSpider::isGoodAmbushSpot(Vector2D position)
             if (game.map->is_wall(adj))
             {
                 wallCount++;
+
+                // Check if adjacent position forms a corner (has two walls next to it)
+                int cornerWalls = 0;
+                for (int cy = -1; cy <= 1; cy++)
+                {
+                    for (int cx = -1; cx <= 1; cx++)
+                    {
+                        if (cx == 0 && cy == 0) continue;
+
+                        Vector2D cornerAdj = adj + Vector2D{ cy, cx };
+                        if (game.map->is_wall(cornerAdj))
+                        {
+                            cornerWalls++;
+                        }
+                    }
+                }
+
+                if (cornerWalls >= 3)
+                {
+                    hasCorner = true;
+                }
             }
         }
     }
 
-    // Good ambush spots have at least 3 adjacent walls (corner-like)
-    return wallCount >= 3;
+    // Good ambush spots have at least 2 adjacent walls, better if it's a corner
+    return wallCount >= 2 || hasCorner;
 }
 
 void AiSpider::load(const json& j)
@@ -379,69 +502,116 @@ AiWebSpinner::AiWebSpinner()
 
 void AiWebSpinner::update(Creature& owner)
 {
-    // Update cooldown timer
+    // Always ensure spiders have strength
+    if (owner.strength <= 0)
+    {
+        owner.strength = 4; // Ensure minimum strength
+    }
+
+    // Update cooldowns
     if (webCooldown > 0)
     {
         webCooldown--;
     }
+    if (poisonCooldown > 0)
+    {
+        poisonCooldown--;
+    }
 
-    // Check if we can create a web
+    // DIRECT ATTACK CODE - Check if player is adjacent
+    int distanceToPlayer = owner.get_tile_distance(game.player->position);
+    if (distanceToPlayer <= 1 && game.map->is_in_fov(owner.position))
+    {
+        // Directly trigger attack - avoid any inheritance issues
+        game.log("Web spinner attempting attack with poison");
+
+        // First do the regular attack
+        owner.attacker->attack(owner, *game.player);
+
+        // Then check for poison - independent of the regular attack success
+        if (canPoisonAttack(owner))
+        {
+            poisonAttack(owner, *game.player);
+        }
+
+        // Skip web spinning and other behaviors if we're attacking
+        return;
+    }
+
+    // Web spinning logic - only if not attacking
     if (webCooldown == 0 && shouldCreateWeb(owner))
     {
         if (tryCreateWeb(owner))
         {
-            // Web was created, reset cooldown
             webCooldown = WEB_COOLDOWN;
 
-            // Show message
+            // Show message about web spinning
             game.appendMessagePart(owner.actorData.color, owner.actorData.name);
             game.appendMessagePart(WHITE_PAIR, " spins a sticky web!");
             game.finalizeMessage();
 
-            // Return early - web spinning takes a turn
             return;
         }
     }
 
-    // If we didn't create a web, use regular spider behavior
-    AiSpider::update(owner);
+    // Fall back to standard movement behavior
+    if (game.map->is_in_fov(owner.position))
+    {
+        // If player can see us, move toward player
+        moveCount = TRACKING_TURNS;
+        moveTowardPlayer(owner);
+    }
+    else if (moveCount > 0)
+    {
+        // Still tracking player
+        moveCount--;
+        moveTowardPlayer(owner);
+    }
+    else
+    {
+        // Occasional random movement
+        if (game.d.d20() == 1)
+        {
+            randomMove(owner);
+        }
+    }
 }
 
 bool AiWebSpinner::shouldCreateWeb(Creature& owner)
 {
-    // Web spinners are much more aggressive about creating webs
-
-    // Player doesn't need to be in FOV - spiders can lay trap webs anywhere
-
-    // If player is nearby, high chance to create defensive web
+    // If player is directly adjacent, don't create web (attack instead)
     int distToPlayer = owner.get_tile_distance(game.player->position);
-    if (distToPlayer <= 10 && game.d.d100() < 70)
+    if (distToPlayer <= 1)
+    {
+        return false;
+    }
+
+    // If player is nearby, moderate chance to create defensive web
+    // Reduced from 70% to 40% chance
+    if (distToPlayer <= 10 && game.d.d100() < 40)
     {
         return true;
     }
 
-    // Even if player is far, occasional web creation for traps (15% chance)
-    if (game.d.d100() < 15)
+    // Even if player is far, occasional web creation for traps (10% chance)
+    // Reduced from 15% to 10%
+    if (game.d.d100() < 10)
     {
         return true;
     }
 
-    // Check number of existing webs - allow more webs than before
+    // Count actual webs in the game objects
     int webCount = 0;
-    for (int y = 0; y < game.map->get_height(); y++)
+    for (const auto& obj : game.objects)
     {
-        for (int x = 0; x < game.map->get_width(); x++)
+        if (obj && obj->actorData.name == "spider web")
         {
-            // Check if tile is a web
-            //if (game.map->get_tile_type(Vector2D{ y, x }) == TileType::WEB)
-            //{
-            //    webCount++;
-            //}
+            webCount++;
         }
     }
 
-    // Allow up to MAX_WEBS per spider (much higher than before)
-    return webCount < MAX_WEBS * 2;
+    // Allow up to MAX_WEBS per spider (default is 5)
+    return webCount < MAX_WEBS;
 }
 
 bool AiWebSpinner::tryCreateWeb(Creature& owner)

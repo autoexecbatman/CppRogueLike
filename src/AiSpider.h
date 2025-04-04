@@ -13,6 +13,8 @@ class AiSpider : public AiMonster
 public:
     AiSpider();
     void update(Creature& owner) override;
+    void moveTowardPlayer(Creature& owner);
+    void randomMove(Creature& owner);
     void load(const json& j) override;
     void save(json& j) override;
 
@@ -22,7 +24,7 @@ protected:
     int poisonCooldown = 0;   // Cooldown for poison attacks
 
     // Specialized spider movement pattern that prefers walls and corners
-    virtual void moveOrAttack(Creature& owner, Vector2D targetPosition);
+    void moveOrAttack(Creature& owner, Vector2D targetPosition) override;
 
     // Check if the spider can attempt a poison attack
     bool canPoisonAttack(Creature& owner);

@@ -48,12 +48,12 @@ void Spider::init_spider_type()
         actorData = smallSpiderData;
 
         // Stats for small spider
-        strength = d.d4() + 1;
+        strength = std::max(3, d.d4() + 1);  // Minimum strength of 3
         dexterity = d.d8() + 4;  // Small spiders are very agile
         constitution = d.d6();
 
         // Combat properties
-        destructible = std::make_unique<MonsterDestructible>(d.d4() + 2, 0, "dead small spider", 15, 20, 7);
+        destructible = std::make_unique<MonsterDestructible>(d.d2() + 2, 0, "dead small spider", 15, 20, 7);
         attacker = std::make_unique<Attacker>("D4");
 
         // AI - use spider AI for intelligent movement
@@ -65,13 +65,21 @@ void Spider::init_spider_type()
         actorData = giantSpiderData;
 
         // Stats for giant spider
-        strength = d.d6() + 3;
+        strength = d.d6() + 2;
         dexterity = d.d6() + 2;
-        constitution = d.d8() + 2;
+        constitution = d.d6() + 1;
 
         // Combat properties - giant spiders have more HP and do more damage
-        destructible = std::make_unique<MonsterDestructible>(d.d8() + 4, 1, "dead giant spider", 40, 18, 5);
-        attacker = std::make_unique<Attacker>("D6");
+        
+        destructible = std::make_unique<MonsterDestructible>(
+            d.d4() + 3,
+            1,
+            "dead giant spider",
+            40,
+            19,
+            5
+        );
+        attacker = std::make_unique<Attacker>("D4");
 
         // AI - use spider AI for intelligent movement
         ai = std::make_unique<AiSpider>();
@@ -110,11 +118,11 @@ int Spider::get_poison_chance() const
     switch (spiderType)
     {
     case SpiderType::SMALL:
-        return 10;  // 10% chance
+        return 25;
     case SpiderType::GIANT:
-        return 25;  // 25% chance
+        return 15;
     case SpiderType::WEB_SPINNER:
-        return 15;  // 15% chance
+        return 15;
     default:
         return 0;
     }
