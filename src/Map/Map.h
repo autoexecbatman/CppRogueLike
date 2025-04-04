@@ -5,6 +5,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../MonsterFactory.h"
+#include "../ItemFactory.h"
 
 inline constexpr int MAP_HEIGHT = 30 - 8;
 inline constexpr int MAP_WIDTH = 119;
@@ -66,6 +67,7 @@ private:
 		Vector2D{-1, -1} // y, x North-East
 	};
 	std::unique_ptr<MonsterFactory> monsterFactory;
+	std::unique_ptr<ItemFactory> itemFactory;
 
 	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
 	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
@@ -115,6 +117,9 @@ public:
 	bool close_door(Vector2D pos);
 	void place_amulet() const;
 	void display_spawn_rates() const;
+	void create_treasure_room(Vector2D begin, Vector2D end, int quality);
+	bool maybe_create_treasure_room(int dungeonLevel);
+	void display_item_distribution() const;
 	bool is_door(Vector2D pos) const;
 	bool is_wall(Vector2D pos) const;
 	void set_tile(Vector2D pos, TileType newType, double cost);
