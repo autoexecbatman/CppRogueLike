@@ -9,7 +9,7 @@
 MonsterFactory::MonsterFactory() {
     // Initialize with all monster types
     addMonsterType({
-        "Mimic", 8, 1, 0, 0.5f,
+        "Mimic", 6, 2, 0, 0.5f,
         [](Vector2D pos) { game.create_creature<Mimic>(pos); }
         });
 
@@ -29,7 +29,7 @@ MonsterFactory::MonsterFactory() {
         });
 
     addMonsterType({
-        "Goblin", 30, 1, 5, -0.8f,
+        "Goblin", 30, 1, 5, -0.2f,
         [](Vector2D pos) { game.create_creature<Goblin>(pos); }
         });
 
