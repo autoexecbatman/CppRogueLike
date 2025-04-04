@@ -56,6 +56,7 @@ class Mage : public Creature
 public:
 	Mage(Vector2D position);
 };
+
 struct Disguise {
 	char ch;
 	std::string name;

@@ -152,6 +152,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Web.h
     ${PROJECT_SOURCE_DIR}/Amulet.cpp
     ${PROJECT_SOURCE_DIR}/Amulet.h
+    ${PROJECT_SOURCE_DIR}/MonsterFactory.cpp
+    ${PROJECT_SOURCE_DIR}/MonsterFactory.h
 
 
     # Map

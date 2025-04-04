@@ -33,6 +33,7 @@
 #include "../AiMonsterRanged.h"
 #include "../Food.h"
 #include "../Spider.h"
+#include "../MonsterFactory.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -213,7 +214,8 @@ Map::Map(int map_height, int map_width)
 	map_height(map_height),
 	map_width(map_width),
 	tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
-	seed(game.d.roll(0, INT_MAX))
+	seed(game.d.roll(0, INT_MAX)),
+	monsterFactory(std::make_unique<MonsterFactory>())
 {
 }
 
@@ -779,61 +781,13 @@ bool Map::can_walk(Vector2D pos) const
 
 void Map::add_monster(Vector2D pos)
 {
-	int roll = game.d.d100();
+	// Use the monster factory to create a monster appropriate for the current dungeon level
+	monsterFactory->spawnRandomMonster(pos, game.dungeonLevel);
 
-	if (game.dungeonLevel <= 3)
-	{
-		// Early levels: Reduced mimic chance from 20% to 8%
-		if (roll < 8) game.create_creature<Mimic>(pos);       // 8% chance, down from 20%
-		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-		else if (roll < 60) game.create_creature<Goblin>(pos); // 52% chance
-		else if (roll < 75) game.create_creature<Orc>(pos);    // 15% chance
-		else if (roll < 85) game.create_creature<Archer>(pos); // 10% chance
-		else if (roll < 95) game.create_creature<Mage>(pos);   // 10% chance
-		else if (roll < 98) game.create_creature<Shopkeeper>(pos); // 3% chance
-		else game.create_creature<Troll>(pos);                 // 2% chance
-	}
-	else if (game.dungeonLevel <= 6)
-	{
-		// Mid levels: Increase mimic chance slightly for mid-game challenge
-		if (roll < 12) game.create_creature<Mimic>(pos);       // 12% chance, down from 15%
-		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-		else if (roll < 35) game.create_creature<Goblin>(pos); // 23% chance
-		else if (roll < 55) game.create_creature<Orc>(pos);    // 20% chance
-		else if (roll < 70) game.create_creature<Archer>(pos); // 15% chance
-		else if (roll < 85) game.create_creature<Mage>(pos);   // 15% chance
-		else if (roll < 95) game.create_creature<Shopkeeper>(pos); // 10% chance
-		else game.create_creature<Troll>(pos);                 // 5% chance
-	}
-	else
-	{
-		// Deep levels: More dangerous mimics along with other tough enemies
-		if (roll < 15) game.create_creature<Mimic>(pos);       // 15% chance, up from 10%
-		else if (roll < 20) game.create_creature<SmallSpider>(pos); // 8% chance
-		else if (roll < 30) game.create_creature<GiantSpider>(pos); // 10% chance
-		else if (roll < 35) game.create_creature<WebSpinner>(pos);  // 5% chance
-		else if (roll < 25) game.create_creature<Goblin>(pos); // 10% chance, down from 15%
-		else if (roll < 45) game.create_creature<Orc>(pos);    // 20% chance
-		else if (roll < 60) game.create_creature<Archer>(pos); // 15% chance
-		else if (roll < 75) game.create_creature<Mage>(pos);   // 15% chance
-		else if (roll < 90) game.create_creature<Troll>(pos);  // 15% chance
-		else game.create_creature<Shopkeeper>(pos);            // 10% chance
-	}
-
-	// After creating any monster, set the appropriate AI
+	// Log the spawn for debugging
 	Creature* monster = get_actor(pos);
-	if (monster)
-	{
-		// Check if it's a ranged attacker
-		if (monster->has_state(ActorState::IS_RANGED))
-		{
-			// Replace standard AI with ranged AI
-			monster->ai = std::make_unique<AiMonsterRanged>();
-		}
+	if (monster) {
+		game.log("Spawned " + monster->actorData.name + " at level " + std::to_string(game.dungeonLevel));
 	}
 }
 
@@ -1048,5 +1002,37 @@ void Map::place_amulet() const
 		// Add a hint message
 		game.message(FIREBALL_PAIR, "You sense a powerful artifact somewhere on this level...", true);
 	}
+}
+
+void Map::display_spawn_rates() const
+{
+	WINDOW* ratesWindow = newwin(
+		24,  // height (adjust to fit all monsters)
+		50,  // width
+		1,   // y position
+		1    // x position
+	);
+
+	box(ratesWindow, 0, 0);
+	mvwprintw(ratesWindow, 1, 1, "Monster Spawn Rates (Dungeon Level %d)", game.dungeonLevel);
+	mvwprintw(ratesWindow, 2, 1, "--------------------------------------");
+
+	// Get current distribution from monster factory
+	auto distribution = monsterFactory->getCurrentDistribution(game.dungeonLevel);
+
+	// Sort by probability (descending)
+	std::sort(distribution.begin(), distribution.end(),
+		[](const auto& a, const auto& b) { return a.second > b.second; });
+
+	int row = 3;
+	for (const auto& [name, percentage] : distribution) {
+		mvwprintw(ratesWindow, row++, 1, "%-15s: %5.1f%%", name.c_str(), percentage);
+	}
+
+	mvwprintw(ratesWindow, row + 1, 1, "Press any key to close");
+	wrefresh(ratesWindow);
+	getch();  // Wait for key press
+	delwin(ratesWindow);
+	clear();
 }
 // end of file: Map.cpp

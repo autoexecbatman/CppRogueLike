@@ -1105,6 +1105,9 @@ void Game::display_debug_messages() noexcept
 				pad_pos = total_lines - LINES + 2;
 			}
 			break;
+		case 'm':  // For "monsters"
+			map->display_spawn_rates();
+			break;
 		}
 		prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
 	} while (ch != 'q');  // Assuming 'q' or Escape closes the log
