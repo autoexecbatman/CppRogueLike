@@ -34,6 +34,7 @@ Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int
 	destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
+	
 }
 
 void Player::racial_ability_adjustments()

@@ -85,21 +85,60 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 	return pickable;
 }
 
-bool Dagger::use(Item& owner, Creature& wearer)
+// Common weapon equip/unequip logic
+bool Weapon::use(Item& owner, Creature& wearer)
 {
+	// Check if a weapon is already equipped
+	Item* currentWeapon = nullptr;
+	for (const auto& item : wearer.container->inv)
+	{
+		if (item && item->has_state(ActorState::IS_EQUIPPED) && item.get() != &owner)
+		{
+			currentWeapon = item.get();
+			break;
+		}
+	}
+
+	// If we're trying to equip and another weapon is already equipped, unequip it first
+	if (!owner.has_state(ActorState::IS_EQUIPPED) && currentWeapon)
+	{
+		game.message(WHITE_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
+		wearer.unequip(*currentWeapon);
+	}
+
 	// equip the weapon
 	if (!owner.has_state(ActorState::IS_EQUIPPED))
 	{
 		wearer.attacker->roll = this->roll;
 		wearer.equip(owner);
+		game.message(WHITE_PAIR, "You equip the " + owner.actorData.name + ".", true);
+
+		// Apply ranged state if applicable
+		if (isRanged())
+		{
+			wearer.add_state(ActorState::IS_RANGED);
+		}
 	}
 	// unequip the weapon
 	else
 	{
-		wearer.attacker->roll = this->roll;
+		wearer.attacker->roll = "D2"; // Reset to default unarmed attack
 		wearer.unequip(owner);
+		game.message(WHITE_PAIR, "You unequip the " + owner.actorData.name + ".", true);
+
+		// Remove ranged state if applicable
+		if (isRanged())
+		{
+			wearer.remove_state(ActorState::IS_RANGED);
+		}
 	}
 
+	return false; // Don't consume the weapon
+}
+
+// Implement the Dagger class
+bool Dagger::isRanged() const
+{
 	return false;
 }
 
@@ -119,20 +158,9 @@ void Dagger::load(const json& j)
 	}
 }
 
-bool LongSword::use(Item& owner, Creature& wearer)
+// Implement the LongSword class
+bool LongSword::isRanged() const
 {
-	// equip the weapon
-	if (!owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.equip(owner);
-	}
-	else
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.unequip(owner);
-	}
-
 	return false;
 }
 
@@ -152,23 +180,9 @@ void LongSword::load(const json& j)
 	}
 }
 
-// end of file: Pickable.cpp
-
-bool ShortSword::use(Item& owner, Creature& wearer)
+// Implement the ShortSword class
+bool ShortSword::isRanged() const
 {
-	// equip the weapon
-	if (!owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.equip(owner);
-	}
-	// unequip the weapon
-	else
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.unequip(owner);
-	}
-
 	return false;
 }
 
@@ -188,23 +202,10 @@ void ShortSword::load(const json& j)
 	}
 }
 
-bool Longbow::use(Item& owner, Creature& wearer)
+// Implement the Longbow class
+bool Longbow::isRanged() const
 {
-	// equip the weapon
-	if (!owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.equip(owner);
-		wearer.add_state(ActorState::IS_RANGED);
-	}
-	// unequip the weapon
-	else
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.unequip(owner);
-		wearer.remove_state(ActorState::IS_RANGED);
-	}
-	return false;
+	return true;
 }
 
 void Longbow::save(json& j)
@@ -223,20 +224,9 @@ void Longbow::load(const json& j)
 	}
 }
 
-bool Staff::use(Item& owner, Creature& wearer)
+// Implement the Staff class
+bool Staff::isRanged() const
 {
-	// equip the weapon
-	if (!owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.equip(owner);
-	}
-	// unequip the weapon
-	else
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.unequip(owner);
-	}
 	return false;
 }
 

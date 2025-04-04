@@ -17,7 +17,7 @@
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
-constexpr int INVENTORY_WIDTH = 30;
+constexpr int INVENTORY_WIDTH = 60;
 
 //==PLAYER_AI==
 struct PossibleMoves
@@ -188,6 +188,9 @@ void AiPlayer::pick_item(Creature& owner)
 			if (owner.container->add(std::move(i)))
 			{
 				std::erase_if(game.container->inv, is_null);
+
+				// Sync ranged state after picking up an item
+				owner.syncRangedState();
 			}
 			return;
 		}
@@ -197,6 +200,8 @@ void AiPlayer::pick_item(Creature& owner)
 void AiPlayer::drop_item(Creature& owner)
 {
 	owner.drop();
+	// Sync ranged state after dropping items
+	owner.syncRangedState();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -214,17 +219,86 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 		{
 			if (item != nullptr)
 			{
-				mvwprintw(inv, y, 1, "(%c) %s", shortcut, item->actorData.name.c_str());
-				// if the actor is equipped, print a star
+				// Display basic item info
+				mvwprintw(inv, y, 1, "(%c) ", shortcut);
+
+				// Add colors and status indicators
 				if (item->has_state(ActorState::IS_EQUIPPED))
 				{
-					int nameLength = strlen(item->actorData.name.c_str()) + 5;
-					mvwprintw(inv, y, nameLength, "*");
+					wattron(inv, COLOR_PAIR(HPBARFULL_PAIR)); // Green for equipped items
+					wprintw(inv, "[E] ");
+					wattroff(inv, COLOR_PAIR(HPBARFULL_PAIR));
+				}
+
+				// Show the item name with its color
+				wattron(inv, COLOR_PAIR(item->actorData.color));
+				wprintw(inv, "%s", item->actorData.name.c_str());
+				wattroff(inv, COLOR_PAIR(item->actorData.color));
+
+				// Show item information
+				if (item->value > 0)
+				{
+					wattron(inv, COLOR_PAIR(GOLD_PAIR)); // Gold color for value
+					wprintw(inv, " (%d gp)", item->value);
+					wattroff(inv, COLOR_PAIR(GOLD_PAIR));
+				}
+
+				// For weapons, show damage dice
+				if (auto weapon = item->pickable.get(); weapon &&
+					(dynamic_cast<Dagger*>(weapon) ||
+						dynamic_cast<LongSword*>(weapon) ||
+						dynamic_cast<ShortSword*>(weapon) ||
+						dynamic_cast<Longbow*>(weapon) ||
+						dynamic_cast<Staff*>(weapon)))
+				{
+					// Get the roll string - this requires some casting
+					std::string roll;
+					if (auto* dagger = dynamic_cast<Dagger*>(weapon))
+						roll = dagger->roll;
+					else if (auto* sword = dynamic_cast<LongSword*>(weapon))
+						roll = sword->roll;
+					else if (auto* ssword = dynamic_cast<ShortSword*>(weapon))
+						roll = ssword->roll;
+					else if (auto* bow = dynamic_cast<Longbow*>(weapon))
+						roll = bow->roll;
+					else if (auto* staff = dynamic_cast<Staff*>(weapon))
+						roll = staff->roll;
+
+					if (!roll.empty())
+					{
+						wattron(inv, COLOR_PAIR(WHITE_PAIR));
+						wprintw(inv, " [%s dmg]", roll.c_str());
+						wattroff(inv, COLOR_PAIR(WHITE_PAIR));
+					}
+				}
+
+				// Check if it's a ranged weapon
+				if (auto weapon = item->pickable.get(); weapon)
+				{
+					if (auto* bow = dynamic_cast<Longbow*>(weapon))
+					{
+						wattron(inv, COLOR_PAIR(LIGHTNING_PAIR));
+						wprintw(inv, " [Rng]");
+						wattroff(inv, COLOR_PAIR(LIGHTNING_PAIR));
+					}
 				}
 			}
 			y++;
 			shortcut++;
 		}
+
+		// Add a legend at the bottom
+		y += 2;
+		wattron(inv, COLOR_PAIR(HPBARFULL_PAIR));
+		mvwprintw(inv, y, 1, "[E]");
+		wattroff(inv, COLOR_PAIR(HPBARFULL_PAIR));
+		wprintw(inv, " = Equipped item");
+
+		y += 1;
+		wattron(inv, COLOR_PAIR(LIGHTNING_PAIR));
+		mvwprintw(inv, y, 1, "[Rng]");
+		wattroff(inv, COLOR_PAIR(LIGHTNING_PAIR));
+		wprintw(inv, " = Ranged weapon");
 	}
 	catch (const std::exception& e)
 	{
@@ -240,13 +314,20 @@ void AiPlayer::display_inventory(Creature& owner)
 	WINDOW* inv = newwin(INVENTORY_HEIGHT, INVENTORY_WIDTH, 0, 0);
 
 	box(inv, 0, 0);
-	mvwprintw(inv, 0, 0, "Inventory");
+	wattron(inv, A_BOLD);
+	mvwprintw(inv, 0, 1, "Inventory");
+	wattroff(inv, A_BOLD);
 
 	try
 	{
 		if (owner.container->inv.size() > 0)
 		{
 			display_inventory_items(inv, owner);
+
+			// Display controls at the bottom
+			int y = INVENTORY_HEIGHT - 2;
+			mvwprintw(inv, y, 1, "Press a-z to use an item");
+			mvwprintw(inv, y + 1, 1, "ESC to cancel");
 		}
 		else
 		{
@@ -294,7 +375,12 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 		const size_t index = ascii - 'a';
 		if (index >= 0 && index < owner.container->inv.size())
 		{
-			return owner.container->inv.at(index).get();
+			Item* item = owner.container->inv.at(index).get();
+
+			// Sync ranged state since we might use/equip/unequip an item
+			owner.syncRangedState();
+
+			return item;
 		}
 		else
 		{

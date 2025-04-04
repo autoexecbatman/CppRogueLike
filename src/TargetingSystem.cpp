@@ -6,11 +6,12 @@
 
 Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 {
-	//if (!game.player->has_state(ActorState::IS_RANGED))
-	//{
-	//	game.message(WHITE_PAIR, "You are not ranged!", true);
-	//	return Vector2D{ -1,-1 };
-	//}
+	// Check if player is trying to attack but doesn't have a ranged weapon
+	if (!game.player->has_state(ActorState::IS_RANGED))
+	{
+		game.message(WHITE_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
+		// We still continue to the targeting mode, but will restrict actual attacks
+	}
 
 	Vector2D targetCursor = game.player->position;
 	const Vector2D lastPosition = targetCursor;
@@ -19,15 +20,14 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 	{
 		clear();
 
-		// make the line follow the mouse position
-		// if mouse move
+		// Make the line follow the mouse position
 		if (game.mouse_moved())
 		{
 			targetCursor = game.get_mouse_position();
 		}
 		game.render();
 
-		// display the FOV in white in row major order
+		// Display the FOV in white
 		for (int y = 0; y < MAP_HEIGHT; y++)
 		{
 			for (int x = 0; x < MAP_WIDTH; x++)
@@ -40,106 +40,113 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 			}
 		}
 
-		// first color the player position if the cursor has moved from the player position
+		// First color the player position if the cursor has moved from the player position
 		if (targetCursor != game.player->position)
 		{
 			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_PAIR, NULL);
 		}
 
-		draw_range_indicator(startPos, maxRange);
-
+		//draw_range_indicator(startPos, maxRange);
 		draw_los(targetCursor);
 
 		// Check if the target is valid and update appearance accordingly
-		bool valid = is_valid_target(startPos, targetCursor, maxRange);
+		bool validTarget = is_valid_target(startPos, targetCursor, maxRange);
+		bool canAttack = validTarget && (game.player->has_state(ActorState::IS_RANGED));
 
-		// draw the target cursor
-
-		attron(COLOR_PAIR(valid ? 6 : 4)); // Red if valid, blue if invalid
-		/*attron(COLOR_PAIR(HPBARMISSING_PAIR));*/
+		// Draw the target cursor - red if valid target and can attack, yellow if valid but cannot attack, blue if invalid
+		int cursorColor = canAttack ? HPBARMISSING_PAIR : (validTarget ? GOLD_PAIR : WATER_PAIR);
+		attron(COLOR_PAIR(cursorColor));
 		mvaddch(targetCursor.y, targetCursor.x, 'X');
-		attroff(COLOR_PAIR(valid ? 6 : 4));
-		/*attroff(COLOR_PAIR(HPBARMISSING_PAIR));*/
+		attroff(COLOR_PAIR(cursorColor));
 
-		// if the cursor is on a monster then display the monster's name
+		// If the cursor is on a monster then display the monster's name and stats
 		const int distance = game.player->get_tile_distance(targetCursor);
 		if (game.map->is_in_fov(targetCursor))
 		{
 			const auto& actor = game.map->get_actor(targetCursor);
-			// and actor is not an item
 			if (actor != nullptr)
 			{
-				mvprintw(0, 0, actor->actorData.name.c_str());
-				// print the monster's stats
+				// Display target information
+				attron(COLOR_PAIR(actor->actorData.color));
+				mvprintw(0, 0, "%s", actor->actorData.name.c_str());
+				attroff(COLOR_PAIR(actor->actorData.color));
+
+				// Print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
 				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
-				// print the distance from the player to the target cursor
+
+				// Print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
+
+				// Add note about ranged attacks if examining a valid target
+				if (validTarget && !game.player->has_state(ActorState::IS_RANGED))
+				{
+					attron(COLOR_PAIR(GOLD_PAIR));
+					mvprintw(4, 0, "Need a ranged weapon to attack this target");
+					attroff(COLOR_PAIR(GOLD_PAIR));
+				}
 			}
 		}
 
+		// Display legend at bottom
+		mvprintw(MAP_HEIGHT - 2, 0, "Arrow keys: Move cursor | Enter: Select/Attack | Esc: Cancel");
+		mvprintw(MAP_HEIGHT - 1, 0, "Targeting mode: %s",
+			!game.player->has_state(ActorState::IS_RANGED) ? "Attack (needs ranged weapon)" : "Examine");
+
 		refresh();
 
-		// get the key press
+		// Get the key press
 		const int key = getch();
 		switch (key)
 		{
 		case KEY_UP:
-			// move the selection cursor up
 			targetCursor.y--;
 			break;
-
 		case KEY_DOWN:
-			// move the selection cursor down
 			targetCursor.y++;
 			break;
-
 		case KEY_LEFT:
-			// move the selection cursor left
 			targetCursor.x--;
 			break;
-
 		case KEY_RIGHT:
-			// move the selection cursor right
 			targetCursor.x++;
 			break;
-
-		case 10:
-			// if the key enter is pressed then select the target
-			// and return the target position
-			// if the target is a monster then attack it
-		{
-			if (is_valid_target(startPos, targetCursor, maxRange))
+		case 10: // Enter key
+			// If the key enter is pressed then select the target
+			// Only allow attacking if we have a ranged weapon or aren't requiring it
+			if (validTarget)
 			{
-				if (game.map->is_in_fov(targetCursor))
+				if (game.player->has_state(ActorState::IS_RANGED))
 				{
-					const auto& actor = game.map->get_actor(targetCursor);
-					if (actor)
+					if (game.map->is_in_fov(targetCursor))
 					{
-						game.player->attacker->attack(*game.player, *actor);
-						run = false;
-						return targetCursor;
+						const auto& actor = game.map->get_actor(targetCursor);
+						if (actor)
+						{
+							game.player->attacker->attack(*game.player, *actor);
+							run = false;
+							game.gameStatus = Game::GameStatus::NEW_TURN;
+							return targetCursor;
+						}
 					}
 				}
+				else
+				{
+					// Player tried to attack but doesn't have a ranged weapon
+					game.message(WHITE_PAIR, "You need a ranged weapon to attack at a distance!", true);
+				}
 			}
-			game.gameStatus = Game::GameStatus::NEW_TURN;
-		}
-		break;
-
+			break;
 		case 'r':
-		case 27:
-			// if the key escape is pressed then cancel the target selection
+		case 27: // Escape key
+			// If the key escape is pressed then cancel the target selection
 			run = false;
 			break;
-
-		default:
-			break;
-		} // end of switch (key)
-
-	} // end of while (run)
+		}
+	}
 	clear();
-	return Vector2D{ -1,-1 };
+	return Vector2D{ -1, -1 };
 }
 
 void TargetingSystem::draw_los(Vector2D targetCursor)

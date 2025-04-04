@@ -174,14 +174,109 @@ void Creature::update()
 
 void Creature::equip(Item& item)
 {
+	// First check if another item is already equipped
+	std::vector<Item*> equippedItems;
+
+	// Find all equipped items
+	for (const auto& inv_item : container->inv)
+	{
+		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
+		{
+			equippedItems.push_back(inv_item.get());
+		}
+	}
+
+	// If this is a weapon and there's already another weapon equipped, unequip it
+	if (!equippedItems.empty() && &item != equippedItems[0])
+	{
+		for (auto* equipped : equippedItems)
+		{
+			unequip(*equipped);
+		}
+	}
+
+	// Now equip the new item
 	item.add_state(ActorState::IS_EQUIPPED);
 	weaponEquipped = item.actorData.name;
 }
 
 void Creature::unequip(Item& item)
 {
-	item.remove_state(ActorState::IS_EQUIPPED);
-	weaponEquipped = "None";
+	// Check if the item is actually equipped
+	if (item.has_state(ActorState::IS_EQUIPPED))
+	{
+		// Remove the equipped state
+		item.remove_state(ActorState::IS_EQUIPPED);
+		weaponEquipped = "None";
+
+		// Always check if this was a ranged weapon
+		if (item.pickable)
+		{
+			// Check all types that might implement isRanged()
+			auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
+			if (weapon && weapon->isRanged())
+			{
+				// Remove the ranged state
+				if (has_state(ActorState::IS_RANGED))
+				{
+					remove_state(ActorState::IS_RANGED);
+					game.log("Removed IS_RANGED state after unequipping " + item.actorData.name);
+				}
+			}
+		}
+
+		// Double-check all inventory to see if we still should have IS_RANGED
+		bool hasRangedWeapon = false;
+		for (const auto& invItem : container->inv)
+		{
+			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
+			{
+				auto* weapon = dynamic_cast<Weapon*>(invItem->pickable.get());
+				if (weapon && weapon->isRanged())
+				{
+					hasRangedWeapon = true;
+					break;
+				}
+			}
+		}
+
+		// Force sync the IS_RANGED state
+		if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
+		{
+			remove_state(ActorState::IS_RANGED);
+			game.log("Force removed IS_RANGED state - no ranged weapons equipped");
+		}
+	}
+}
+
+void Creature::syncRangedState()
+{
+	// Check if any equipped items are ranged weapons
+	bool hasRangedWeapon = false;
+	for (const auto& item : container->inv)
+	{
+		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
+		{
+			auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
+			if (weapon && weapon->isRanged())
+			{
+				hasRangedWeapon = true;
+				break;
+			}
+		}
+	}
+
+	// Make sure IS_RANGED state matches equipped weapons
+	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
+	{
+		add_state(ActorState::IS_RANGED);
+		game.log("Added missing IS_RANGED state - ranged weapon equipped");
+	}
+	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
+	{
+		remove_state(ActorState::IS_RANGED);
+		game.log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
+	}
 }
 
 void Creature::pick()

@@ -85,6 +85,8 @@ public:
 
 	Web* findWebAt(Vector2D position);
 
+	void add_debug_weapons_at_player_feet();
+
 	template <typename T>
 	void create_creature(Vector2D position)
 	{

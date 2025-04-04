@@ -34,6 +34,8 @@
 #include "dnd_tables/CalculatedTHAC0s.h"
 #include "Web.h"
 
+#include "ActorTypes/Healer.h"
+
 //==INIT==
 // When the Game is created, 
 // We don't know yet if we have to generate a new map or load a previously saved one.
@@ -54,6 +56,8 @@ void Game::init()
 	// we set gameStatus to STARTUP because we want to compute the fov only once
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
+
+	game.add_debug_weapons_at_player_feet();
 
 	//==LOG==
 	game.log("game.init() was called!");
@@ -935,33 +939,54 @@ void Game::display_character_sheet() noexcept
 	auto run{ true };
 	while (run == true)
 	{
-		// display the player stats
-		// using a dnd character sheet
-		// based on https://wiki.roll20.net/ADnD_2nd_Edition_Character_sheet
+		// Display the player stats
+		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str());
+		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
+		mvwprintw(character_sheet, 3, 1, "Race: %s", player->playerRace.c_str());
+		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
+		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
 
-		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str()); // display the player name
-		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str()); // display the player class
-		mvwprintw(character_sheet, 3, 1, "Kit: "); // display the class kit
-		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel); // display the player level
-		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp); // display the player experience
-		mvwprintw(character_sheet, 6, 1, "Alignment: "); // display the player alignment
-		// add character details on the right side
-		mvwprintw(character_sheet, 1, 60, "Race: %s", player->playerRace.c_str()); // display the player race
-		mvwprintw(character_sheet, 2, 60, "Gender: %s", player->gender.c_str()); // display gender
-		mvwprintw(character_sheet, 3, 60, "Hair Color: "); // display hair color
-		mvwprintw(character_sheet, 4, 60, "Eye Color: "); // display eye color
-		mvwprintw(character_sheet, 5, 60, "Complexion: "); // display complexion
-		mvwprintw(character_sheet, 6, 60, "Features: "); // display features 
-		mvwprintw(character_sheet, 7, 60, "Homeland: "); // display homeland
-		mvwprintw(character_sheet, 8, 60, "Deity: "); // display deity
-		mvwprintw(character_sheet, 9, 60, "Vision: "); // display vision
-		mvwprintw(character_sheet, 10, 60, "Secondary Skills: "); // display secondary skills
+		// Add character attributes
+		mvwprintw(character_sheet, 7, 1, "Attributes:");
+		mvwprintw(character_sheet, 8, 3, "Strength: %d", player->strength);
+		mvwprintw(character_sheet, 9, 3, "Dexterity: %d", player->dexterity);
+		mvwprintw(character_sheet, 10, 3, "Constitution: %d", player->constitution);
+		mvwprintw(character_sheet, 11, 3, "Intelligence: %d", player->intelligence);
+		mvwprintw(character_sheet, 12, 3, "Wisdom: %d", player->wisdom);
+		mvwprintw(character_sheet, 13, 3, "Charisma: %d", player->charisma);
+
+		// Add combat stats
+		mvwprintw(character_sheet, 15, 1, "Combat Statistics:");
+		mvwprintw(character_sheet, 16, 3, "HP: %d/%d", player->destructible->hp, player->destructible->hpMax);
+		mvwprintw(character_sheet, 17, 3, "Armor Class: %d", player->destructible->dr);
+		mvwprintw(character_sheet, 18, 3, "To-Hit: %d", player->destructible->thaco);
+
+		// Equipped weapon info with color
+		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
+		mvwprintw(character_sheet, 20, 1, "Equipment:");
+
+		if (player->weaponEquipped != "None") {
+			mvwprintw(character_sheet, 21, 3, "Weapon: %s (%s damage)",
+				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
+		}
+		else {
+			mvwprintw(character_sheet, 21, 3, "Weapon: Unarmed (D2 damage)");
+		}
+		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
+
+		// Add gold and other stats on the right side
+		mvwprintw(character_sheet, 8, 60, "Gender: %s", player->gender.c_str());
+		mvwprintw(character_sheet, 9, 60, "Gold: %d", player->gold);
+		mvwprintw(character_sheet, 10, 60, "Hunger: %s",
+			game.hunger_system.get_hunger_state_string().c_str());
+
+		mvwprintw(character_sheet, 25, 1, "Press any key to close...");
+
 		wrefresh(character_sheet);
 
 		const int key = getch();
-		// if any key was pressed then exit the loop
-		if (key != ERR)
-		{
+		// If any key was pressed then exit the loop
+		if (key != ERR) {
 			run = false;
 		}
 	}
@@ -1129,18 +1154,21 @@ void Game::transferMessagesToGui()
 	attackMessagesWhole.clear();
 }
 
-void Game::handle_ranged_attack() {
+void Game::handle_ranged_attack()
+{
+	// When attackMode is true, we require a ranged weapon for attacks
+	// When attackMode is false, we're just examining and don't require a ranged weapon
 
-	// Enter targeting mode
+	// Enter targeting mode with appropriate requirements
 	Vector2D targetPos = targeting.select_target(player->position, 4);
 
-	// If a valid target was selected
+	// If a valid target was selected and we're in attack mode
 	if (targetPos.x != -1 && targetPos.y != -1) {
 		// Process the ranged attack (including projectile animation)
 		targeting.process_ranged_attack(*player, targetPos);
 	}
-
 }
+
 
 void Game::display_help() noexcept
 {
@@ -1159,18 +1187,19 @@ void Game::display_help() noexcept
 	mvwprintw(help_window, 6, 1, "Drop item: 'd'");
 	mvwprintw(help_window, 7, 1, "Inventory: 'i'");
 	mvwprintw(help_window, 8, 1, "Character sheet: '@'");
-	mvwprintw(help_window, 9, 1, "Ranged attack: 't'");
-	mvwprintw(help_window, 10, 1, "Open door: 'o'");
-	mvwprintw(help_window, 11, 1, "Close door: 'c'");
-	mvwprintw(help_window, 12, 1, "Rest: 'r' (recovers health but costs food)");
-	mvwprintw(help_window, 13, 1, "Descend stairs: '>'");
-	mvwprintw(help_window, 14, 1, "Quit: 'q'");
+	mvwprintw(help_window, 9, 1, "Ranged attack: 't' (requires ranged weapon)");
+	mvwprintw(help_window, 10, 1, "Examine enemies: 'l' (look at entities without attacking)");
+	mvwprintw(help_window, 11, 1, "Open door: 'o'");
+	mvwprintw(help_window, 12, 1, "Close door: 'c'");
+	mvwprintw(help_window, 13, 1, "Rest: 'r' (recovers health but costs food)");
+	mvwprintw(help_window, 14, 1, "Descend stairs: '>'");
+	mvwprintw(help_window, 15, 1, "Quit: 'q'");
 
-	mvwprintw(help_window, 16, 1, "=== RESTING ===");
-	mvwprintw(help_window, 17, 1, "- Resting recovers 20% of your maximum health");
-	mvwprintw(help_window, 18, 1, "- You cannot rest when enemies are nearby (within 5 tiles)");
-	mvwprintw(help_window, 19, 1, "- Resting increases hunger, so make sure to have food");
-	mvwprintw(help_window, 20, 1, "- You cannot rest if you're starving");
+	mvwprintw(help_window, 17, 1, "=== RESTING ===");
+	mvwprintw(help_window, 18, 1, "- Resting recovers 20% of your maximum health");
+	mvwprintw(help_window, 19, 1, "- You cannot rest when enemies are nearby (within 5 tiles)");
+	mvwprintw(help_window, 20, 1, "- Resting increases hunger, so make sure to have food");
+	mvwprintw(help_window, 21, 1, "- You cannot rest if you're starving");
 
 	mvwprintw(help_window, 28, 1, "Press any key to close this window");
 
@@ -1193,6 +1222,40 @@ Web* Game::findWebAt(Vector2D position)
 		}
 	}
 	return nullptr;
+}
+
+void Game::add_debug_weapons_at_player_feet()
+{
+	// Only add weapons if player exists
+	if (!player) {
+		log("Error: Cannot add debug weapons - player not initialized");
+		return;
+	}
+
+	// Create a longsword at player's feet
+	auto longsword = std::make_unique<Item>(player->position, ActorData{ '/', "long sword", WHITE_PAIR });
+	longsword->pickable = std::make_unique<LongSword>();
+	longsword->value = 50; // Set a value for the longsword
+	container->add(std::move(longsword));
+
+	// Create a longbow at player's feet
+	auto longbow = std::make_unique<Item>(player->position, ActorData{ ')', "longbow", LIGHTNING_PAIR });
+	longbow->pickable = std::make_unique<Longbow>();
+	longbow->value = 70; // Set a value for the longbow
+	container->add(std::move(longbow));
+
+	// Add a health potion for good measure
+	auto healthPotion = std::make_unique<Item>(player->position, ActorData{ '!', "health potion", HPBARMISSING_PAIR });
+	healthPotion->pickable = std::make_unique<Healer>(10);
+	healthPotion->value = 25;
+	container->add(std::move(healthPotion));
+
+	log("Debug weapons added at player position: " +
+		std::to_string(player->position.x) + "," +
+		std::to_string(player->position.y));
+
+	// Add a message for the player
+	message(WHITE_PAIR, "Debug weapons placed at your feet.", true);
 }
 
 // end of file: Game.cpp

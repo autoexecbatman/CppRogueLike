@@ -20,7 +20,7 @@ public:
 	static std::unique_ptr<Pickable> create(const json& j);
 	virtual void save(json& j) = 0;
 	virtual void load(const json& j) = 0;
-	
+
 protected:
 	enum class PickableType : int
 	{
@@ -43,61 +43,75 @@ protected:
 };
 //====
 
-class Dagger : public Pickable
+// Base weapon class to reduce code duplication
+class Weapon : public Pickable
+{
+public:
+	std::string roll;
+
+	// Common weapon equip/unequip logic
+	bool use(Item& owner, Creature& wearer) override;
+
+	// Determines if this weapon is a ranged weapon
+	virtual bool isRanged() const = 0;
+};
+
+class Dagger : public Weapon
 {
 public:
 	// dagger roll is 1d4
-	std::string roll{ "D4" };
+	Dagger() { roll = "D4"; }
 
-	bool use(Item& owner, Creature& wearer) override;
-
+	bool isRanged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::DAGGER; }
 };
 
 
-class LongSword : public Pickable
+class LongSword : public Weapon
 {
 public:
 	// longsword roll is 1d8
-	std::string roll{ "D8" };
+	LongSword() { roll = "D8"; }
 
-	bool use(Item& owner, Creature& wearer) override;
-
+	bool isRanged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::LONGSWORD; }
 };
 
-class ShortSword : public Pickable
+class ShortSword : public Weapon
 {
 public:
 	// shortsword roll is 1d6
-	std::string roll{ "D6" };
-	bool use(Item& owner, Creature& wearer) override;
+	ShortSword() { roll = "D6"; }
+
+	bool isRanged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SHORTSWORD; }
 };
 
-class Longbow : public Pickable
+class Longbow : public Weapon
 {
 public:
 	// longbow roll is 1d8
-	std::string roll{ "D8" };
-	bool use(Item& owner, Creature& wearer) override;
+	Longbow() { roll = "D8"; }
+
+	bool isRanged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::LONGBOW; }
 };
 
-class Staff : public Pickable
+class Staff : public Weapon
 {
 public:
 	// staff roll is 1d6
-	std::string roll{ "D6" };
-	bool use(Item& owner, Creature& wearer) override;
+	Staff() { roll = "D6"; }
+
+	bool isRanged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::STAFF; }
