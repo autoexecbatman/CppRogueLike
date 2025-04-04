@@ -44,21 +44,23 @@ void AiMonsterConfused::update(Creature& owner)
 
 void AiMonsterConfused::load(const json& j)
 {
-	//nbTurns = zip.getInt();
-	//oldAi = Ai::create(zip);
+	nbTurns = j.at("nbTurns").get<int>();
+
+	// Create the oldAi if it exists in the JSON
+	if (j.contains("oldAi")) {
+		oldAi = Ai::create(j["oldAi"]);
+	}
 }
 
 void AiMonsterConfused::save(json& j)
 {
-	//zip.putInt(static_cast<std::underlying_type_t<AiType>>(AiType::CONFUSED_MONSTER));
-	//zip.putInt(nbTurns);
-	//if (oldAi != nullptr)
-	//{
-	//	oldAi->save(zip);
-	//}
-	//else
-	//{
-	//	std::cout << "Error: save() called on actor with no oldAi." << std::endl;
-	//	exit(-1);
-	//}
+	j["type"] = static_cast<int>(AiType::CONFUSED_MONSTER);
+	j["nbTurns"] = nbTurns;
+
+	// Save the oldAi if it exists
+	if (oldAi != nullptr) {
+		json oldAiJson;
+		oldAi->save(oldAiJson);
+		j["oldAi"] = oldAiJson;
+	}
 }
