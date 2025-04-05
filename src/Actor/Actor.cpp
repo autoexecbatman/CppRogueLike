@@ -281,6 +281,12 @@ void Creature::syncRangedState()
 
 void Creature::pick()
 {
+	// Check if inventory is already full before attempting to pick
+	if (container && container->invSize > 0 && container->inv.size() >= container->invSize) {
+		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		return;
+	}
+
 	auto is_null = [](auto&& i) { return !i; };
 	for (auto& i : game.container->inv)
 	{
@@ -311,25 +317,37 @@ void Creature::pick()
 				// Normal item handling
 				if (container->add(std::move(i)))
 				{
+					game.message(WHITE_PAIR, "You picked up the " + i->actorData.name + ".", true);
 					std::erase_if(game.container->inv, is_null);
 				}
+				// We don't need an else for failed add since Container::add() now handles the message
 			}
 		}
 	}
 }
 
-void Creature::drop()
+void Creature::drop(Item& item)
 {
-	auto is_null = [](const auto& i) { return !i; };
-	for (auto& i : container->inv)
-	{
-		if (i)
-		{
-			i->position = position;
-			if (game.container->add(std::move(i)))
-			{
-				std::erase_if(container->inv, is_null);
-			}
+	// Check if the item is actually in the inventory first
+	auto it = std::find_if(container->inv.begin(), container->inv.end(),
+		[&item](const auto& invItem) { return invItem.get() == &item; });
+
+	if (it != container->inv.end()) {
+		// Set the item's position to the player's position
+		(*it)->position = position;
+
+		// If the item is equipped, unequip it first
+		if ((*it)->has_state(ActorState::IS_EQUIPPED)) {
+			unequip(*(*it));
+		}
+
+		// Add to game container
+		if (game.container->add(std::move(*it))) {
+			// Erase the null pointer that remains after moving
+			auto is_null = [](const auto& i) { return !i; };
+			std::erase_if(container->inv, is_null);
+
+			game.message(WHITE_PAIR, "You dropped the item.", true);
 		}
 	}
 }

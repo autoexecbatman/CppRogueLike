@@ -96,7 +96,7 @@ public:
 	void unequip(Item& item);
 	void syncRangedState();
 	void pick();
-	void drop();
+	void drop(Item& item);
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed

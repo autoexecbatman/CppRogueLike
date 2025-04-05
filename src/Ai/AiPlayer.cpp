@@ -157,6 +157,12 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 
 void AiPlayer::pick_item(Creature& owner)
 {
+	// Check if the inventory is already full
+	if (owner.container && owner.container->invSize > 0 && owner.container->inv.size() >= owner.container->invSize) {
+		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		return;
+	}
+
 	auto is_null = [](auto&& i) { return !i; };
 	for (auto& i : game.container->inv)
 	{
@@ -184,6 +190,8 @@ void AiPlayer::pick_item(Creature& owner)
 				}
 			}
 
+			auto name = i->actorData.name;
+
 			// Normal item handling
 			if (owner.container->add(std::move(i)))
 			{
@@ -191,7 +199,10 @@ void AiPlayer::pick_item(Creature& owner)
 
 				// Sync ranged state after picking up an item
 				owner.syncRangedState();
+
+				game.message(WHITE_PAIR, std::format("You picked up the {}.", name), true);
 			}
+			// We don't need an else statement since Container::add() now handles the message
 			return;
 		}
 	}
@@ -199,9 +210,83 @@ void AiPlayer::pick_item(Creature& owner)
 
 void AiPlayer::drop_item(Creature& owner)
 {
-	owner.drop();
-	// Sync ranged state after dropping items
-	owner.syncRangedState();
+	// If the inventory is empty, show a message and return
+	if (owner.container->inv.empty()) {
+		game.message(WHITE_PAIR, "Your inventory is empty!", true);
+		return;
+	}
+
+	// Create a window for the drop item menu
+	WINDOW* dropWin = newwin(INVENTORY_HEIGHT, INVENTORY_WIDTH, 0, 0);
+
+	box(dropWin, 0, 0);
+	wattron(dropWin, A_BOLD);
+	mvwprintw(dropWin, 0, 1, "Select an item to drop");
+	wattroff(dropWin, A_BOLD);
+
+	// Display the inventory items
+	int shortcut = 'a';
+	int y = 1;
+
+	for (const auto& item : owner.container->inv) {
+		if (item) {
+			// Display item with shortcut
+			mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
+
+			// Add equipment marker if equipped
+			if (item->has_state(ActorState::IS_EQUIPPED)) {
+				wattron(dropWin, COLOR_PAIR(HPBARFULL_PAIR));
+				wprintw(dropWin, "[E] ");
+				wattroff(dropWin, COLOR_PAIR(HPBARFULL_PAIR));
+			}
+
+			// Display item name with color
+			wattron(dropWin, COLOR_PAIR(item->actorData.color));
+			wprintw(dropWin, "%s", item->actorData.name.c_str());
+			wattroff(dropWin, COLOR_PAIR(item->actorData.color));
+
+			y++;
+			shortcut++;
+		}
+	}
+
+	mvwprintw(dropWin, y + 1, 1, "Press a letter to drop an item, or ESC to cancel");
+	wrefresh(dropWin);
+
+	// Wait for player input
+	int input = getch();
+
+	// Process the input
+	if (input == static_cast<int>(Controls::ESCAPE)) {
+		// Cancel dropping
+		game.message(WHITE_PAIR, "Drop canceled.", true);
+	}
+	else if (input >= 'a' && input < 'a' + static_cast<int>(owner.container->inv.size())) {
+		// Valid item selection
+		int index = input - 'a';
+
+		if (index >= 0 && index < static_cast<int>(owner.container->inv.size())) {
+			// Get the selected item
+			Item* itemToDrop = owner.container->inv[index].get();
+			if (itemToDrop) {
+				// Display the item name before dropping
+				std::string itemName = itemToDrop->actorData.name;
+
+				// Drop the selected item
+				owner.drop(*itemToDrop);
+
+				// Show dropped message with the item name
+				game.message(WHITE_PAIR, "You dropped the " + itemName + ".", true);
+
+				// Set game status to register the turn
+				game.gameStatus = Game::GameStatus::NEW_TURN;
+			}
+		}
+	}
+
+	// Clean up
+	delwin(dropWin);
+	clear();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -286,19 +371,6 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 			y++;
 			shortcut++;
 		}
-
-		// Add a legend at the bottom
-		y += 2;
-		wattron(inv, COLOR_PAIR(HPBARFULL_PAIR));
-		mvwprintw(inv, y, 1, "[E]");
-		wattroff(inv, COLOR_PAIR(HPBARFULL_PAIR));
-		wprintw(inv, " = Equipped item");
-
-		y += 1;
-		wattron(inv, COLOR_PAIR(LIGHTNING_PAIR));
-		mvwprintw(inv, y, 1, "[Rng]");
-		wattroff(inv, COLOR_PAIR(LIGHTNING_PAIR));
-		wprintw(inv, " = Ranged weapon");
 	}
 	catch (const std::exception& e)
 	{
@@ -315,7 +387,12 @@ void AiPlayer::display_inventory(Creature& owner)
 
 	box(inv, 0, 0);
 	wattron(inv, A_BOLD);
-	mvwprintw(inv, 0, 1, "Inventory");
+	if (owner.container->invSize > 0) {
+		mvwprintw(inv, 0, 1, "Inventory (%zu/%zu)", owner.container->inv.size(), owner.container->invSize);
+	}
+	else {
+		mvwprintw(inv, 0, 1, "Inventory");
+	}
 	wattroff(inv, A_BOLD);
 
 	try
@@ -502,7 +579,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::DROP:
 	{
 		drop_item(owner);
-		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	}
 

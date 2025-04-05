@@ -11,9 +11,14 @@ Container::Container(size_t invSize) noexcept : invSize(invSize) {}
 
 // checks that the container is not full.
 bool Container::add(std::unique_ptr<Item> actor)
-{	
+{
 	// check if the inventory is full then return false
-	if (invSize > 0 && inv.size() >= invSize) { return false; }
+	if (invSize > 0 && inv.size() >= invSize) {
+		// Log message and notify the player that inventory is full
+		game.log("Inventory full! Cannot add more items.");
+		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		return false;
+	}
 
 	// if inventory is not full try add the actor to the inventory
 	inv.push_back(std::move(actor));
