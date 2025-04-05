@@ -87,7 +87,11 @@ void Gui::gui_shutdown() noexcept
 
 void Gui::gui_update()
 {
-	if (game.player) { guiHp = game.player->destructible->hp; } // update the gui memory
+	if (game.player)
+	{ // update the gui memory
+		guiHp = game.player->destructible->hp;
+		guiHpMax = game.player->destructible->hpMax;
+	} 
 	
 	// message to display
 	// if an event has occured, store the message in a private variable

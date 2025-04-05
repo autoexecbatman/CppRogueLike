@@ -557,6 +557,8 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	{
 		game.player->attacker->attack(*game.player, *game.player);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
+		// add xp to player
+		game.player->destructible->xp += 1000;
 		break;
 	}
 

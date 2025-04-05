@@ -23,6 +23,10 @@ public:
 	int calculate_step(int positionDifference); // utility 
 	int get_next_level_xp(Creature& owner);
 	void levelup_update(Creature& owner);
+	int calculate_fighter_xp(int level);
+	int calculate_rogue_xp(int level);
+	int calculate_cleric_xp(int level);
+	int calculate_wizard_xp(int level);
 protected:
 	enum class AiType
 	{

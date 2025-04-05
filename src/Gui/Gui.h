@@ -25,7 +25,6 @@ inline constexpr int GUI_WIDTH{ 118 };
 class Gui : public Persistent
 {
 private:
-	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
 	int guiMessageColor{ 0 }; // the color of the message to be displayed on the gui
 	std::string guiMessage{}; // the message to be displayed on the gui
 	std::vector<std::vector<LogMessage>> displayMessages; // a container to read messages from, having a color and a string as a pair
@@ -40,6 +39,7 @@ private:
 
 	void render_hunger_status();
 public:
+	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
 	bool guiInit{ false };
 
 	void gui_init() noexcept; // initialize the gui

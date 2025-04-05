@@ -865,63 +865,172 @@ void Game::dispay_levelup(int xpLevel)
 {
 	RandomDice d;
 
-	WINDOW* stats = newwin(
-		11, // height
-		30, // width
-		1, // y
-		1 // x
+	// Create window for level up display
+	WINDOW* statsWindow = newwin(
+		22, // height
+		60, // width
+		2,  // y
+		10  // x
 	);
-	
-	box(stats, 0, 0);
-	refresh();
 
-	while (true)
+	box(statsWindow, 0, 0);
+
+	// Title
+	wattron(statsWindow, A_BOLD);
+	mvwprintw(statsWindow, 1, 20, "LEVEL UP: %s", player->playerClass.c_str());
+	wattroff(statsWindow, A_BOLD);
+
+	// Display basic character info
+	mvwprintw(statsWindow, 3, 2, "Name: %s", player->actorData.name.c_str());
+	mvwprintw(statsWindow, 3, 30, "Race: %s", player->playerRace.c_str());
+	mvwprintw(statsWindow, 4, 2, "Level: %d -> %d", xpLevel - 1, xpLevel);
+	mvwprintw(statsWindow, 4, 30, "Experience: %d", player->destructible->xp);
+
+	// Store old stats
+	int oldHp = player->destructible->hp;
+	int oldHpMax = player->destructible->hpMax;
+	int oldDr = player->destructible->dr;
+	int oldThac0 = player->destructible->thaco;
+
+	// we calculate inside the function to be able to display the change from old THAC0
+	game.player->calculate_thaco();
+
+	// Calculate and apply HP gains based on class and Constitution
+	int hpGain = 0;
+	int conBonus = 0;
+
+	// Apply Constitution bonus as per AD&D 2e rules
+	if (player->constitution >= 15) conBonus = 1;
+	if (player->constitution >= 16) conBonus = 2;
+	if (player->constitution >= 17) conBonus = 2; // 2e has +2 for 17
+	if (player->constitution >= 18) conBonus = 3; // 2e has +3 for 18
+
+	// Calculate HP gain by class
+	switch (player->playerClassState)
 	{
-		mvwprintw(stats, 1, 1, "Player Stats");
-		mvwprintw(stats, 2, 1, "Level: %d", xpLevel);
-		mvwprintw(stats, 3, 1, "Experience: %d", player->destructible->xp);
-		mvwprintw(stats, 7, 1, "DR: %d", player->destructible->dr);
-		mvwprintw(stats, 8, 1, "Health: %d/%d", player->destructible->hp, player->destructible->hpMax);
-		
-		wrefresh(stats);
-
-		const int key = getch();
-		switch (key)
-		{
-
-		case 'a':
-		{
-			//const int roll = d.d4();
-			//player->attacker->dmg += d.d4();
-			break;
-		}
-
-		case 'd':
-		{
-			/*player->destructible->dr += 1;*/
-			break;
-		}
-
-		case 'h':
-		{
-			//const int roll = d.d8();
-			//player->destructible->hpMax += d.d8();
-			break;
-		}
-
-		default:
-			continue;
-		}
-
+	case Player::PlayerClassState::FIGHTER:
+		hpGain = d.d10() + conBonus;
+		break;
+	case Player::PlayerClassState::ROGUE:
+		hpGain = d.d6() + conBonus;
+		break;
+	case Player::PlayerClassState::CLERIC:
+		hpGain = d.d8() + conBonus;
+		break;
+	case Player::PlayerClassState::WIZARD:
+		hpGain = d.d4() + conBonus;
+		break;
+	default:
+		hpGain = d.d8() + conBonus; // Default fallback
 		break;
 	}
 
-	if (stats)
-	{
-		delwin(stats);
+	// Ensure minimum HP gain (1 per level according to 2e rules)
+	hpGain = std::max(1, hpGain);
+
+	// Apply HP gain
+	player->destructible->hpMax += hpGain;
+	player->destructible->hp += hpGain;
+
+	// Update player level
+	player->playerLevel = xpLevel;
+
+	// Determine if DR should improve (primarily fighters)
+	bool drImproved = false;
+	if ((player->playerClassState == Player::PlayerClassState::FIGHTER && xpLevel % 3 == 0) ||
+		(xpLevel % 4 == 0)) { // Other classes get DR increase every 4 levels
+		player->destructible->dr += 1;
+		drImproved = true;
 	}
 
+	// Display stat changes
+	mvwprintw(statsWindow, 6, 2, "IMPROVEMENTS:");
+
+	// HP improvement
+	wattron(statsWindow, COLOR_PAIR(HPBARFULL_PAIR));
+	mvwprintw(statsWindow, 7, 4, "Hit Points: %d/%d -> %d/%d (+%d)",
+		oldHp, oldHpMax, player->destructible->hp, player->destructible->hpMax, hpGain);
+	wattroff(statsWindow, COLOR_PAIR(HPBARFULL_PAIR));
+
+	// THAC0 difference
+	int difference = player->destructible->thaco - oldThac0;
+
+	// THAC0 improvement
+	if (oldThac0 > game.player->destructible->thaco)
+	{
+		wattron(statsWindow, COLOR_PAIR(WHITE_PAIR));
+		mvwprintw(statsWindow, 8, 4, "THAC0: %d -> %d (Improved by %d)",
+			oldThac0, game.player->destructible->thaco, difference);
+		wattroff(statsWindow, COLOR_PAIR(WHITE_PAIR));
+	}
+	else {
+		mvwprintw(statsWindow, 8, 4, "THAC0: %d (No Change)", game.player->destructible->thaco);
+	}
+
+	// Damage Reduction improvement
+	if (drImproved) {
+		wattron(statsWindow, COLOR_PAIR(TROLL_PAIR));
+		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d -> %d (+1)",
+			oldDr, player->destructible->dr);
+		wattroff(statsWindow, COLOR_PAIR(TROLL_PAIR));
+	}
+	else {
+		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d (No Change)", player->destructible->dr);
+	}
+
+	// Class-specific benefits
+	mvwprintw(statsWindow, 11, 2, "CLASS BENEFITS:");
+
+	switch (player->playerClassState)
+	{
+	case Player::PlayerClassState::FIGHTER:
+		mvwprintw(statsWindow, 12, 4, "- Improved combat prowess");
+		mvwprintw(statsWindow, 13, 4, "- Superior hit point gain (d10)");
+		if (xpLevel % 3 == 0) {
+			mvwprintw(statsWindow, 14, 4, "- Enhanced armor use (+1 DR)");
+		}
+		break;
+
+	case Player::PlayerClassState::ROGUE:
+		mvwprintw(statsWindow, 12, 4, "- Improved thief skills");
+		mvwprintw(statsWindow, 13, 4, "- Enhanced stealth capabilities");
+		if (xpLevel % 4 == 0) {
+			mvwprintw(statsWindow, 14, 4, "- Better trap avoidance (+1 DR)");
+		}
+		break;
+
+	case Player::PlayerClassState::CLERIC:
+		mvwprintw(statsWindow, 12, 4, "- Enhanced divine favor");
+		mvwprintw(statsWindow, 13, 4, "- Improved healing capabilities");
+		if (player->wisdom >= 13 && xpLevel % 2 == 0) {
+			mvwprintw(statsWindow, 14, 4, "- Additional spell slot (Wisdom bonus)");
+		}
+		break;
+
+	case Player::PlayerClassState::WIZARD:
+		mvwprintw(statsWindow, 12, 4, "- Expanded arcane knowledge");
+		mvwprintw(statsWindow, 13, 4, "- New spell research opportunities");
+		if (player->intelligence >= 13 && xpLevel % 2 == 0) {
+			mvwprintw(statsWindow, 14, 4, "- Additional spell slot (Intelligence bonus)");
+		}
+		break;
+
+	default:
+		mvwprintw(statsWindow, 12, 4, "- General combat improvement");
+		break;
+	}
+
+	// Prompt for continue
+	mvwprintw(statsWindow, 18, 15, "Press any key to continue...");
+	wrefresh(statsWindow);
+	getch();
+
+	// Clean up
+	delwin(statsWindow);
 	clear();
+
+	// Force game status to trigger a full update cycle
+	gameStatus = GameStatus::NEW_TURN;
 }
 
 // display character sheet
