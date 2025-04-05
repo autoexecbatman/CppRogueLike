@@ -1053,45 +1053,55 @@ void Game::display_character_sheet() noexcept
 	auto run{ true };
 	while (run == true)
 	{
+		// Calculate XP needed for next level
+		int currentXP = player->destructible->xp;
+		int nextLevelXP = player->ai->get_next_level_xp(*player);
+		int xpNeeded = nextLevelXP - currentXP;
+		float progressPercent = (float)currentXP / nextLevelXP * 100.0f;
+
 		// Display the player stats
 		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str());
 		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
 		mvwprintw(character_sheet, 3, 1, "Race: %s", player->playerRace.c_str());
 		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
-		mvwprintw(character_sheet, 5, 1, "Experience: %d", player->destructible->xp);
+
+		// Enhanced XP display with progress to next level
+		mvwprintw(character_sheet, 5, 1, "Experience: %d / %d (%.1f%% to level %d)",
+			currentXP, nextLevelXP, progressPercent, player->playerLevel + 1);
+		mvwprintw(character_sheet, 6, 1, "XP needed for next level: %d", xpNeeded);
 
 		// Add character attributes
-		mvwprintw(character_sheet, 7, 1, "Attributes:");
-		mvwprintw(character_sheet, 8, 3, "Strength: %d", player->strength);
-		mvwprintw(character_sheet, 9, 3, "Dexterity: %d", player->dexterity);
-		mvwprintw(character_sheet, 10, 3, "Constitution: %d", player->constitution);
-		mvwprintw(character_sheet, 11, 3, "Intelligence: %d", player->intelligence);
-		mvwprintw(character_sheet, 12, 3, "Wisdom: %d", player->wisdom);
-		mvwprintw(character_sheet, 13, 3, "Charisma: %d", player->charisma);
+		mvwprintw(character_sheet, 8, 1, "Attributes:");
+		mvwprintw(character_sheet, 9, 3, "Strength: %d", player->strength);
+		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
+		mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
+		mvwprintw(character_sheet, 12, 3, "Intelligence: %d", player->intelligence);
+		mvwprintw(character_sheet, 13, 3, "Wisdom: %d", player->wisdom);
+		mvwprintw(character_sheet, 14, 3, "Charisma: %d", player->charisma);
 
 		// Add combat stats
-		mvwprintw(character_sheet, 15, 1, "Combat Statistics:");
-		mvwprintw(character_sheet, 16, 3, "HP: %d/%d", player->destructible->hp, player->destructible->hpMax);
-		mvwprintw(character_sheet, 17, 3, "Armor Class: %d", player->destructible->dr);
-		mvwprintw(character_sheet, 18, 3, "To-Hit: %d", player->destructible->thaco);
+		mvwprintw(character_sheet, 16, 1, "Combat Statistics:");
+		mvwprintw(character_sheet, 17, 3, "HP: %d/%d", player->destructible->hp, player->destructible->hpMax);
+		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->dr);
+		mvwprintw(character_sheet, 19, 3, "To-Hit: %d", player->destructible->thaco);
 
 		// Equipped weapon info with color
 		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
-		mvwprintw(character_sheet, 20, 1, "Equipment:");
+		mvwprintw(character_sheet, 21, 1, "Equipment:");
 
 		if (player->weaponEquipped != "None") {
-			mvwprintw(character_sheet, 21, 3, "Weapon: %s (%s damage)",
+			mvwprintw(character_sheet, 22, 3, "Weapon: %s (%s damage)",
 				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
 		}
 		else {
-			mvwprintw(character_sheet, 21, 3, "Weapon: Unarmed (D2 damage)");
+			mvwprintw(character_sheet, 22, 3, "Weapon: Unarmed (D2 damage)");
 		}
 		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
 
 		// Add gold and other stats on the right side
-		mvwprintw(character_sheet, 8, 60, "Gender: %s", player->gender.c_str());
-		mvwprintw(character_sheet, 9, 60, "Gold: %d", player->gold);
-		mvwprintw(character_sheet, 10, 60, "Hunger: %s",
+		mvwprintw(character_sheet, 9, 60, "Gender: %s", player->gender.c_str());
+		mvwprintw(character_sheet, 10, 60, "Gold: %d", player->gold);
+		mvwprintw(character_sheet, 11, 60, "Hunger: %s",
 			game.hunger_system.get_hunger_state_string().c_str());
 
 		mvwprintw(character_sheet, 25, 1, "Press any key to close...");

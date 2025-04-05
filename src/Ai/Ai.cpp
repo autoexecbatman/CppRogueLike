@@ -97,18 +97,17 @@ int Ai::calculate_fighter_xp(int level)
 {
     // AD&D 2e Fighter XP progression
     static const int fighterXP[] = {
-        0,      // Level 0 (not used)
-        0,      // Level 1
-        2000,   // Level 2
-        4000,   // Level 3
-        8000,   // Level 4
-        16000,  // Level 5
-        32000,  // Level 6
-        64000,  // Level 7
-        125000, // Level 8
-        250000, // Level 9
-        500000, // Level 10
-        750000  // Level 11+
+        0,
+		2000, // need 2000 XP to reach level 2
+        4000,  
+        8000,  
+        16000,
+        32000,
+        64000,
+        125000,
+        250000,
+        500000,
+        750000
     };
 
     // Cap at array size, then use linear progression
@@ -124,18 +123,17 @@ int Ai::calculate_rogue_xp(int level)
 {
     // AD&D 2e Thief/Rogue XP progression
     static const int rogueXP[] = {
-        0,      // Level 0 (not used)
-        0,      // Level 1
-        1250,   // Level 2
-        2500,   // Level 3
-        5000,   // Level 4
-        10000,  // Level 5
-        20000,  // Level 6
-        40000,  // Level 7
-        70000,  // Level 8
-        110000, // Level 9
-        160000, // Level 10
-        220000  // Level 11+
+        0,
+		1250, // need 1250 XP to reach level 2
+        2500,
+        5000,
+        10000,
+        20000,
+        40000,
+        70000,
+        110000,
+        160000,
+        220000
     };
 
     // Cap at array size, then use linear progression
@@ -150,20 +148,19 @@ int Ai::calculate_rogue_xp(int level)
 int Ai::calculate_cleric_xp(int level)
 {
     // AD&D 2e Cleric XP progression
-    static const int clericXP[] = {
-        0,      // Level 0 (not used)
-        0,      // Level 1
-        1500,   // Level 2
-        3000,   // Level 3
-        6000,   // Level 4
-        13000,  // Level 5
-        27500,  // Level 6
-        55000,  // Level 7
-        110000, // Level 8
-        225000, // Level 9
-        450000, // Level 10
-        675000  // Level 11+
-    };
+	static const int clericXP[] = {
+		0,
+		1500, // need 1500 XP to reach level 2
+		3000,
+		6000,
+		13000,
+		27500,
+		55000,
+		110000,
+		225000,
+		450000,
+		675000
+	};
 
     // Cap at array size, then use linear progression
     if (level < static_cast<int>(sizeof(clericXP) / sizeof(clericXP[0]))) {
@@ -177,20 +174,19 @@ int Ai::calculate_cleric_xp(int level)
 int Ai::calculate_wizard_xp(int level)
 {
     // AD&D 2e Wizard/Mage XP progression
-    static const int wizardXP[] = {
-        0,      // Level 0 (not used)
-        0,      // Level 1
-        2500,   // Level 2
-        5000,   // Level 3
-        10000,  // Level 4
-        20000,  // Level 5
-        40000,  // Level 6
-        60000,  // Level 7
-        90000,  // Level 8
-        135000, // Level 9
-        250000, // Level 10
-        375000  // Level 11+
-    };
+	static const int wizardXP[] = {
+		0,
+		2500,
+		5000,
+		10000,
+		20000,
+		40000,
+		60000,
+		90000,
+		135000,
+		250000,
+		375000
+	};
 
     // Cap at array size, then use linear progression
     if (level < static_cast<int>(sizeof(wizardXP) / sizeof(wizardXP[0]))) {
