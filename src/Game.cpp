@@ -1020,10 +1020,15 @@ void Game::dispay_levelup(int xpLevel)
 		break;
 	}
 
-	// Prompt for continue
-	mvwprintw(statsWindow, 18, 15, "Press any key to continue...");
+	// Prompt specifically for space bar
+	mvwprintw(statsWindow, 18, 15, "Press SPACE BAR to continue...");
 	wrefresh(statsWindow);
-	getch();
+
+	// Wait for space bar
+	int ch;
+	do {
+		ch = getch();
+	} while (ch != ' '); // Only accept space bar;
 
 	// Clean up
 	delwin(statsWindow);
