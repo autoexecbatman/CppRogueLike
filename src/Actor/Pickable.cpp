@@ -13,6 +13,7 @@
 #include "../ActorTypes/Fireball.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "../ActorTypes/Gold.h"
+#include "../Food.h"
 #include "../CorpseFood.h"
 #include "../Amulet.h"
 
@@ -70,6 +71,9 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		break;
 	case PickableType::GOLD:
 		pickable = std::make_unique<Gold>(0);
+		break;
+	case PickableType::FOOD:
+		pickable = std::make_unique<Food>(0);
 		break;
 	case PickableType::CORPSE_FOOD:
 		pickable = std::make_unique<CorpseFood>(0);
