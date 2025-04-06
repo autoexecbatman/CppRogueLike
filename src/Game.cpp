@@ -634,7 +634,7 @@ void Game::target()
 				mvprintw(0, 0, actor->actorData.name.c_str());
 				// print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
+				mvprintw(2, 0, "AC: %d", actor->destructible->armorClass);
 				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
 				// print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
