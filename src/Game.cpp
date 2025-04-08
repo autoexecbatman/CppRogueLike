@@ -1086,33 +1086,34 @@ void Game::display_character_sheet() noexcept
 		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->dr);
 		mvwprintw(character_sheet, 19, 3, "To-Hit: %d", player->destructible->thaco);
 
-		// Display dexterity missile bonus if it exists
+		// Display dexterity bonuses
 		if (player->dexterity > 0 && player->dexterity <= dexterityAttributes.size()) {
+			// Show missile attack adjustment
 			int missileAdj = dexterityAttributes[player->dexterity - 1].MissileAttackAdj;
-			if (missileAdj != 0) {
-				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
-				mvwprintw(character_sheet, 20, 3, "Ranged Attack Bonus: %+d", missileAdj);
-				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
-			}
+			mvwprintw(character_sheet, 20, 3, "Ranged Attack Bonus: %d", missileAdj);
+
+			// Show defensive adjustment
+			int defensiveAdj = dexterityAttributes[player->dexterity - 1].DefensiveAdj;
+			mvwprintw(character_sheet, 21, 3, "Defensive Adjustment: %d AC", defensiveAdj);
 		}
 
 		// Equipped weapon info with color
 		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
-		mvwprintw(character_sheet, 22, 1, "Equipment:");
+		mvwprintw(character_sheet, 23, 1, "Equipment:");
 
 		if (player->weaponEquipped != "None") {
-			mvwprintw(character_sheet, 23, 3, "Weapon: %s (%s damage)",
+			mvwprintw(character_sheet, 24, 3, "Weapon: %s (%s damage)",
 				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
 
 			// Show if weapon is ranged
 			if (player->has_state(ActorState::IS_RANGED)) {
 				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
-				mvwprintw(character_sheet, 23, 40, "[Ranged]");
+				mvwprintw(character_sheet, 24, 40, "[Ranged]");
 				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
 			}
 		}
 		else {
-			mvwprintw(character_sheet, 23, 3, "Weapon: Unarmed (D2 damage)");
+			mvwprintw(character_sheet, 24, 3, "Weapon: Unarmed (D2 damage)");
 		}
 		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
 
@@ -1122,7 +1123,7 @@ void Game::display_character_sheet() noexcept
 		mvwprintw(character_sheet, 11, 60, "Hunger: %s",
 			game.hunger_system.get_hunger_state_string().c_str());
 
-		mvwprintw(character_sheet, 25, 1, "Press any key to close...");
+		mvwprintw(character_sheet, 26, 1, "Press any key to close...");
 
 		wrefresh(character_sheet);
 

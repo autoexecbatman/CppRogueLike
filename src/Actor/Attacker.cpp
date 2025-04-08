@@ -49,6 +49,23 @@ void Attacker::attack(Creature& attacker, Creature& target)
 			}
 		}
 
+		// Apply defensive adjustment from target's dexterity if target is the player
+		if (&target == game.player.get() && target.dexterity > 0 && target.dexterity <= game.dexterityAttributes.size())
+		{
+			// Get defensive adjustment (negative values make AC better)
+			int defensiveAdj = game.dexterityAttributes.at(target.dexterity - 1).DefensiveAdj;
+
+			// Apply to roll needed (higher roll needed = harder to hit)
+			// Note: The AC system is reversed in AD&D where lower AC is better,
+			// so a negative defensive adjustment actually improves AC
+			rollNeeded += defensiveAdj;
+
+			if (defensiveAdj != 0) {
+				game.log("Applying defensive adjustment: " + std::to_string(defensiveAdj) +
+					" from target dexterity " + std::to_string(target.dexterity));
+			}
+		}
+
 		// Apply the hit modifier (positive is better)
 		rollNeeded -= hitModifier;
 

@@ -48,8 +48,8 @@ void Spider::init_spider_type()
         actorData = smallSpiderData;
 
         // Stats for small spider
-        strength = std::max(3, d.d4() + 1);  // Minimum strength of 3
-        dexterity = d.d8() + 4;  // Small spiders are very agile
+        strength = d.d6() + d.d6() + d.d6();  // Minimum strength of 3
+        dexterity = d.d6() + d.d6() + d.d6();  // Small spiders are very agile
         constitution = d.d6();
 
         // Combat properties
@@ -65,8 +65,8 @@ void Spider::init_spider_type()
         actorData = giantSpiderData;
 
         // Stats for giant spider
-        strength = d.d6() + 2;
-        dexterity = d.d6() + 2;
+        strength = d.d6() + d.d6() + d.d6();
+        dexterity = d.d6() + d.d6() + d.d6();
         constitution = d.d6() + 1;
 
         // Combat properties - giant spiders have more HP and do more damage
@@ -90,9 +90,9 @@ void Spider::init_spider_type()
         actorData = webSpinnerData;
 
         // Stats for web spinner - now much more formidable
-        strength = d.d6() + 4;
-        dexterity = d.d8() + 3;
-        constitution = d.d6() + 3;
+        strength = d.d6() + d.d6() + d.d6();
+        dexterity = d.d6() + d.d6() + d.d6();
+        constitution = d.d6() + d.d6() + d.d6();
 
         // Combat properties - significantly stronger
         destructible = std::make_unique<MonsterDestructible>(d.d8() + 5, 1, "dead web weaver", 60, 17, 5);

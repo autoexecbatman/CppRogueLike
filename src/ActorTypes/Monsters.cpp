@@ -23,7 +23,9 @@ Goblin::Goblin(Vector2D position) : Creature(position, goblinData)
 	const int hp = d.d8();
 	const int thaco = 20;
 	const int ac = 6;
+	const int xp = 35;
 	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	weaponEquipped = "Short Sword";
 
@@ -52,6 +54,7 @@ Orc::Orc(Vector2D position) : Creature(position, orcData)
 	const int ac = 6;
 
 	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	weaponEquipped = "Long Sword";
 
@@ -81,6 +84,7 @@ Troll::Troll(Vector2D position) : Creature(position, trollData)
 	const int ac = 4;
 
 	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>("D10");
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 100, thaco, ac);
@@ -108,6 +112,7 @@ Dragon::Dragon(Vector2D position) : Creature(position, dragonData)
 	const int ac = 1;
 
 	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>("D10");
 	destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 200, thaco, ac);
@@ -155,7 +160,7 @@ Archer::Archer(Vector2D position) : Creature(position, archerData)
 	const int ac = 7;
 
 	strength = d.d6() + d.d6() + d.d6();
-	dexterity = d.d6() + d.d6() + d.d6() + 2; // Archers have higher dexterity
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	weaponEquipped = "Longbow";
 
@@ -181,8 +186,9 @@ Mage::Mage(Vector2D position) : Creature(position, mageData)
 	const int thaco = 19;
 	const int ac = 9;
 
-	strength = d.d6() + d.d6();
-	intelligence = d.d6() + d.d6() + d.d6() + 4; // Mages have higher intelligence
+	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
+	intelligence = d.d6() + d.d6() + d.d6(); // Mages have higher intelligence
 
 	weaponEquipped = "Staff";
 
@@ -208,8 +214,8 @@ Mimic::Mimic(Vector2D position) : Creature(position, mimicData)
 	const int thaco = 17; // Increased from 16 (making it harder to hit)
 	const int ac = 7; // Kept the same
 
-	strength = d.d6() + d.d6() + 2; // Reduced from +4 to +2
-	dexterity = d.d6() + 2; // Reduced from +4 to +2
+	strength = d.d6() + d.d6() + d.d6();
+	dexterity = d.d6() + d.d6() + d.d6();
 
 	attacker = std::make_unique<Attacker>("D4"); // Reduced from D6
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 50, thaco, ac);

@@ -75,6 +75,12 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
 				mvprintw(2, 0, "AC: %d", actor->destructible->armorClass);
 				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
+				mvprintw(4, 0, "Str: %d", actor->strength);
+				mvprintw(5, 0, "Dex: %d", actor->dexterity);
+				mvprintw(6, 0, "Con: %d", actor->constitution);
+				mvprintw(7, 0, "Int: %d", actor->intelligence);
+				mvprintw(8, 0, "Wis: %d", actor->wisdom);
+				mvprintw(9, 0, "Cha: %d", actor->charisma);
 
 				// Print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
@@ -94,7 +100,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				if (validTarget && !game.player->has_state(ActorState::IS_RANGED))
 				{
 					attron(COLOR_PAIR(GOLD_PAIR));
-					mvprintw(4, 0, "Need a ranged weapon to attack this target");
+					mvprintw(10, 0, "Need a ranged weapon to attack this target");
 					attroff(COLOR_PAIR(GOLD_PAIR));
 				}
 			}
