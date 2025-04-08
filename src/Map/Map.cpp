@@ -469,6 +469,8 @@ void Map::render() const
 	refresh(); // Refresh once after all tiles have been drawn
 	game.log("Map::render() end");
 }
+
+// this function is deprecated
 void Map::add_weapons(Vector2D pos)
 {
 	const int weaponIndex{ game.d.roll(1, game.weapons.size()) };

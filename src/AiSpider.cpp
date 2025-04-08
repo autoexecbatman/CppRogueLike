@@ -355,7 +355,7 @@ void AiSpider::poisonAttack(Creature& owner, Creature& target)
         game.appendMessagePart(ORC_PAIR, owner.actorData.name);
         game.appendMessagePart(WHITE_PAIR, " injects venom for ");
         game.appendMessagePart(HPBARMISSING_PAIR, std::to_string(poisonDamage));
-        game.appendMessagePart(WHITE_PAIR, " additional poison damage!");
+        game.appendMessagePart(WHITE_PAIR, " extra poison damage!");
         game.finalizeMessage();
 
         // Deal the poison damage

@@ -10,7 +10,7 @@
 inline constexpr int MAP_HEIGHT = 30 - 8;
 inline constexpr int MAP_WIDTH = 119;
 
-inline constexpr int FOV_RADIUS = 10;
+inline constexpr int FOV_RADIUS = 4;
 
 inline constexpr auto ROOM_MAX_SIZE = 12;
 inline constexpr auto ROOM_HORIZONTAL_MAX_SIZE = 20;

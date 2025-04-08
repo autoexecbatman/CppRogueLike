@@ -57,7 +57,7 @@ void Game::init()
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
 
-	game.add_debug_weapons_at_player_feet();
+	//game.add_debug_weapons_at_player_feet();
 
 	//==LOG==
 	game.log("game.init() was called!");
@@ -550,6 +550,7 @@ Vector2D Game::get_mouse_position_old() noexcept
 	return oldMousePos;
 }
 
+// this function is deprecated
 void Game::target()
 {
 	if (!game.player->has_state(ActorState::IS_RANGED))
@@ -1311,7 +1312,7 @@ void Game::display_help() noexcept
 	mvwprintw(help_window, 6, 1, "Drop item: 'd'");
 	mvwprintw(help_window, 7, 1, "Inventory: 'i'");
 	mvwprintw(help_window, 8, 1, "Character sheet: '@'");
-	mvwprintw(help_window, 9, 1, "Ranged attack: 't' (requires ranged weapon)");
+	mvwprintw(help_window, 9, 1, "Ranged attack or look around: 't' (requires ranged weapon to shoot)");
 	mvwprintw(help_window, 10, 1, "Examine enemies: 'l' (look at entities without attacking)");
 	mvwprintw(help_window, 11, 1, "Open door: 'o'");
 	mvwprintw(help_window, 12, 1, "Close door: 'c'");
