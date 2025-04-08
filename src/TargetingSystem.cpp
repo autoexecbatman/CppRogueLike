@@ -79,6 +79,17 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				// Print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
 
+				// Display dexterity missile attack adjustment if applicable
+				if (game.player->has_state(ActorState::IS_RANGED) && game.player->dexterity > 0 &&
+					game.player->dexterity <= game.dexterityAttributes.size()) {
+					int missileAdj = game.dexterityAttributes[game.player->dexterity - 1].MissileAttackAdj;
+					if (missileAdj != 0) {
+						attron(COLOR_PAIR(LIGHTNING_PAIR));
+						mvprintw(4, 50, "Ranged Attack Bonus: %+d", missileAdj);
+						attroff(COLOR_PAIR(LIGHTNING_PAIR));
+					}
+				}
+
 				// Add note about ranged attacks if examining a valid target
 				if (validTarget && !game.player->has_state(ActorState::IS_RANGED))
 				{
@@ -92,7 +103,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		// Display legend at bottom
 		mvprintw(MAP_HEIGHT - 2, 0, "Arrow keys: Move cursor | Enter: Select/Attack | Esc: Cancel");
 		mvprintw(MAP_HEIGHT - 1, 0, "Targeting mode: %s",
-			!game.player->has_state(ActorState::IS_RANGED) ? "Attack (needs ranged weapon)" : "Examine");
+			game.player->has_state(ActorState::IS_RANGED) ? "Attack" : "Examine");
 
 		refresh();
 

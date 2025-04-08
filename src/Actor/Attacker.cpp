@@ -31,8 +31,26 @@ void Attacker::attack(Creature& attacker, Creature& target)
 		// roll for attack and damage
 		const int rollAttack = game.d.d20();
 		int rollDmg = game.d.roll_from_string(roll);
+
 		// THAC0 calculation
-		const int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass;
+		int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass;
+
+		// Apply dexterity missile attack adjustment if this is a ranged attack
+		int hitModifier = 0;
+		if (attacker.has_state(ActorState::IS_RANGED))
+		{
+			// Get dexterity bonus for missile attacks
+			auto& dexAttributes = game.dexterityAttributes.at(attacker.dexterity - 1);
+			hitModifier = dexAttributes.MissileAttackAdj;
+
+			// Display missile attack bonus info
+			if (hitModifier != 0) {
+				game.log("Applying ranged attack modifier: " + std::to_string(hitModifier) + " from dexterity " + std::to_string(attacker.dexterity));
+			}
+		}
+
+		// Apply the hit modifier (positive is better)
+		rollNeeded -= hitModifier;
 
 		if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
 		{
@@ -46,6 +64,12 @@ void Attacker::attack(Creature& attacker, Creature& target)
 				game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
 				game.appendMessagePart(WHITE_PAIR, " attacks the ");
 				game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
+
+				// Indicate if this was a ranged attack
+				if (attacker.has_state(ActorState::IS_RANGED)) {
+					game.appendMessagePart(WHITE_PAIR, std::format(" from a distance"));
+				}
+
 				game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
 				game.finalizeMessage();
 				// apply damage to target

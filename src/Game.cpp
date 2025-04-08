@@ -1086,16 +1086,33 @@ void Game::display_character_sheet() noexcept
 		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->dr);
 		mvwprintw(character_sheet, 19, 3, "To-Hit: %d", player->destructible->thaco);
 
+		// Display dexterity missile bonus if it exists
+		if (player->dexterity > 0 && player->dexterity <= dexterityAttributes.size()) {
+			int missileAdj = dexterityAttributes[player->dexterity - 1].MissileAttackAdj;
+			if (missileAdj != 0) {
+				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+				mvwprintw(character_sheet, 20, 3, "Ranged Attack Bonus: %+d", missileAdj);
+				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+			}
+		}
+
 		// Equipped weapon info with color
 		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
-		mvwprintw(character_sheet, 21, 1, "Equipment:");
+		mvwprintw(character_sheet, 22, 1, "Equipment:");
 
 		if (player->weaponEquipped != "None") {
-			mvwprintw(character_sheet, 22, 3, "Weapon: %s (%s damage)",
+			mvwprintw(character_sheet, 23, 3, "Weapon: %s (%s damage)",
 				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
+
+			// Show if weapon is ranged
+			if (player->has_state(ActorState::IS_RANGED)) {
+				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+				mvwprintw(character_sheet, 23, 40, "[Ranged]");
+				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+			}
 		}
 		else {
-			mvwprintw(character_sheet, 22, 3, "Weapon: Unarmed (D2 damage)");
+			mvwprintw(character_sheet, 23, 3, "Weapon: Unarmed (D2 damage)");
 		}
 		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
 

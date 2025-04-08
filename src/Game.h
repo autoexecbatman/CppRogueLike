@@ -20,6 +20,7 @@
 #include "BaseMenu.h"
 #include "TargetingSystem.h"
 #include "HungerSystem.h"
+#include "Attributes/DexterityAttributes.h"
 
 class Game
 {
@@ -63,6 +64,7 @@ public:
 	// for loading from json
 	std::vector<Weapons> weapons{ loadWeapons() }; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes{ loadStrengthAttributes() }; // a vector of strength attributes
+	std::vector<DexterityAttributes> dexterityAttributes{ loadDexterityAttributes() }; // a vector of dexterity attributes
 
 	// Menu container for que
 	std::deque<std::unique_ptr<BaseMenu>> menus;
