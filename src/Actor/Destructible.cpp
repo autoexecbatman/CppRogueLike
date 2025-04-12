@@ -16,12 +16,62 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 	:
 	hpMax(hpMax),
 	hp(hpMax),
+	hpBase(hpMax),
 	dr(dr),
 	corpseName(corpseName),
 	xp(xp),
 	thaco(thaco),
-	armorClass(armorClass)
+	armorClass(armorClass),
+	lastConstitution(0)
 {}
+
+void Destructible::update_constitution_bonus(Creature& owner)
+{
+	// Check if Constitution has changed since last update
+	if (owner.constitution == lastConstitution) {
+		return; // No need to recalculate
+	}
+
+	// Get the Constitution bonus from the table
+	int hpAdj = 0;
+	if (owner.constitution >= 1 && owner.constitution <= game.constitutionAttributes.size()) {
+		hpAdj = game.constitutionAttributes[owner.constitution - 1].HPAdj;
+	}
+
+	// Calculate new max HP based on base HP and Constitution bonus
+	int oldHpMax = hpMax; // Store old max HP for comparison
+	hpMax = hpBase + (hpAdj * owner.playerLevel); // Scale bonus by level for player
+
+	if (hpMax <= 0)
+	{
+		hpMax = 1;
+	}
+
+	// Adjust current HP proportionally if max HP changed
+	if (oldHpMax != hpMax && oldHpMax > 0) {
+		float hpRatio = static_cast<float>(hp) / oldHpMax;
+		hp = static_cast<int>(hpRatio * hpMax);
+
+		// Make sure HP is at least 1
+		hp = std::max(1, hp);
+
+		// Don't exceed new maximum
+		hp = std::min(hp, hpMax);
+
+		// Log the HP adjustment if it's the player
+		if (&owner == game.player.get()) {
+			if (oldHpMax < hpMax) {
+				game.log("Your Constitution bonus increased your hit points.");
+			}
+			else if (oldHpMax > hpMax) {
+				game.log("Your Constitution bonus decreased your hit points.");
+			}
+		}
+	}
+
+	// Update the last known Constitution value
+	lastConstitution = owner.constitution;
+}
 
 void Destructible::take_damage(Creature& owner, int damage)
 {
@@ -67,7 +117,7 @@ void Destructible::die(Creature& owner)
 int Destructible::heal(int hpToHeal)
 {
 	hp += hpToHeal;
-	
+
 	if (hp > hpMax)
 	{
 		hpToHeal -= hp - hpMax;
@@ -81,6 +131,8 @@ void Destructible::load(const json& j)
 {
 	hpMax = j.at("hpMax").get<int>();
 	hp = j.at("hp").get<int>();
+	hpBase = j.at("hpBase").get<int>();
+	lastConstitution = j.at("lastConstitution").get<int>();
 	dr = j.at("dr").get<int>();
 	corpseName = j.at("corpseName").get<std::string>();
 	xp = j.at("xp").get<int>();
@@ -92,6 +144,8 @@ void Destructible::save(json& j)
 {
 	j["hpMax"] = hpMax;
 	j["hp"] = hp;
+	j["hpBase"] = hpBase;
+	j["lastConstitution"] = lastConstitution;
 	j["dr"] = dr;
 	j["corpseName"] = corpseName;
 	j["xp"] = xp;

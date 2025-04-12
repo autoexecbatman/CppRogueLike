@@ -9,7 +9,10 @@ class Creature;
 //====
 class Destructible : public Persistent
 {
+private:
+	int lastConstitution{ 0 }; // Last known Constitution value to check for changes
 public:
+	int hpBase{ 0 };  // Base HP without Constitution bonus
 	int hpMax{ 0 }; // maximum health points
 	int hp{ 0 }; // current health points
 	int dr{ 0 }; // hit points deflected
@@ -19,6 +22,7 @@ public:
 	int armorClass{ 0 }; // armor class
 
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
+	void update_constitution_bonus(Creature& owner);
 	virtual ~Destructible() override = default;
 	Destructible(const Destructible&) = delete;
 	Destructible(Destructible&&) = delete;

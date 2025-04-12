@@ -72,7 +72,7 @@ void Game::create_player()
 	const int playerDr = 1; // the player's damage reduction
 	const int playerXp = 0; // the player's experience points
 	const int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
-	const int playerAC = 0; // the player's armor class
+	const int playerAC = 10; // the player's armor class
 
 	// update the player pointer
 	game.player = std::make_unique<Player>(
@@ -272,6 +272,17 @@ void Game::update()
 
 		game.update_creatures(creatures);
 		game.spawn_creatures();
+
+		for (const auto& creature : creatures) {
+			if (creature && creature->destructible) {
+				creature->destructible->update_constitution_bonus(*creature);
+			}
+		}
+
+		// Don't forget the player
+		if (player && player->destructible) {
+			player->destructible->update_constitution_bonus(*player);
+		}
 
 		// Increase hunger every turn
 		hunger_system.increase_hunger(1);
@@ -898,31 +909,25 @@ void Game::dispay_levelup(int xpLevel)
 
 	// Calculate and apply HP gains based on class and Constitution
 	int hpGain = 0;
-	int conBonus = 0;
-
-	// Apply Constitution bonus as per AD&D 2e rules
-	if (player->constitution >= 15) conBonus = 1;
-	if (player->constitution >= 16) conBonus = 2;
-	if (player->constitution >= 17) conBonus = 2; // 2e has +2 for 17
-	if (player->constitution >= 18) conBonus = 3; // 2e has +3 for 18
+	int hpAdj = game.constitutionAttributes[player->constitution - 1].HPAdj;
 
 	// Calculate HP gain by class
 	switch (player->playerClassState)
 	{
 	case Player::PlayerClassState::FIGHTER:
-		hpGain = d.d10() + conBonus;
+		hpGain = d.d10();
 		break;
 	case Player::PlayerClassState::ROGUE:
-		hpGain = d.d6() + conBonus;
+		hpGain = d.d6();
 		break;
 	case Player::PlayerClassState::CLERIC:
-		hpGain = d.d8() + conBonus;
+		hpGain = d.d8();
 		break;
 	case Player::PlayerClassState::WIZARD:
-		hpGain = d.d4() + conBonus;
+		hpGain = d.d4();
 		break;
 	default:
-		hpGain = d.d8() + conBonus; // Default fallback
+		hpGain = d.d8(); // Default fallback
 		break;
 	}
 
@@ -930,8 +935,9 @@ void Game::dispay_levelup(int xpLevel)
 	hpGain = std::max(1, hpGain);
 
 	// Apply HP gain
-	player->destructible->hpMax += hpGain;
-	player->destructible->hp += hpGain;
+	player->destructible->hpMax += hpGain + hpAdj;
+	player->destructible->hp += hpGain + hpAdj;
+	player->destructible->hpBase += hpGain;
 
 	// Update player level
 	player->playerLevel = xpLevel;
@@ -1074,16 +1080,53 @@ void Game::display_character_sheet() noexcept
 		// Add character attributes
 		mvwprintw(character_sheet, 8, 1, "Attributes:");
 		mvwprintw(character_sheet, 9, 3, "Strength: %d", player->strength);
+
+		// Display Constitution with HP bonus effect
+		int conBonus = 0;
+		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
+			conBonus = constitutionAttributes[player->constitution - 1].HPAdj;
+		}
+
+		if (conBonus != 0) {
+			wattron(character_sheet, COLOR_PAIR((conBonus > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			mvwprintw(character_sheet, 11, 3, "Constitution: %d (%+d HP per level)",
+				player->constitution, conBonus);
+			wattroff(character_sheet, COLOR_PAIR((conBonus > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+		}
+		else {
+			mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
+		}
+
 		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
-		mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
 		mvwprintw(character_sheet, 12, 3, "Intelligence: %d", player->intelligence);
 		mvwprintw(character_sheet, 13, 3, "Wisdom: %d", player->wisdom);
 		mvwprintw(character_sheet, 14, 3, "Charisma: %d", player->charisma);
 
-		// Add combat stats
+		// Add combat stats with Constitution effect
 		mvwprintw(character_sheet, 16, 1, "Combat Statistics:");
-		mvwprintw(character_sheet, 17, 3, "HP: %d/%d", player->destructible->hp, player->destructible->hpMax);
-		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->dr);
+
+		// Calculate base HP and Con bonus
+		int baseHP = player->destructible->hpBase;
+		int conBonusTotal = player->destructible->hpMax - baseHP;
+
+		// Show HP with Constitution effect
+		if (conBonusTotal != 0)
+		{
+			mvwprintw(character_sheet, 17, 3, "HP: %d/%d ",
+				player->destructible->hp, player->destructible->hpMax);
+
+			wattron(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wprintw(character_sheet, "(%d base %+d Con bonus)",
+				baseHP, conBonusTotal);
+			wattroff(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+		}
+		else
+		{
+			mvwprintw(character_sheet, 17, 3, "HP: %d/%d",
+				player->destructible->hp, player->destructible->hpMax);
+		}
+
+		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->armorClass);
 		mvwprintw(character_sheet, 19, 3, "To-Hit: %d", player->destructible->thaco);
 
 		// Display dexterity bonuses
@@ -1122,6 +1165,22 @@ void Game::display_character_sheet() noexcept
 		mvwprintw(character_sheet, 10, 60, "Gold: %d", player->gold);
 		mvwprintw(character_sheet, 11, 60, "Hunger: %s",
 			game.hunger_system.get_hunger_state_string().c_str());
+
+		// Add Constitution details panel on the right side
+		mvwprintw(character_sheet, 13, 60, "Constitution Effects:");
+
+		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
+			const auto& conAttr = constitutionAttributes[player->constitution - 1];
+
+			mvwprintw(character_sheet, 14, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
+			mvwprintw(character_sheet, 15, 62, "System Shock: %d%%", conAttr.SystemShock);
+			mvwprintw(character_sheet, 16, 62, "Resurrection Survival: %d%%", conAttr.ResurrectionSurvival);
+			mvwprintw(character_sheet, 17, 62, "Poison Save Modifier: %+d", conAttr.PoisonSave);
+
+			if (conAttr.Regeneration > 0) {
+				mvwprintw(character_sheet, 18, 62, "Regeneration: %d HP per turn", conAttr.Regeneration);
+			}
+		}
 
 		mvwprintw(character_sheet, 26, 1, "Press any key to close...");
 

@@ -20,7 +20,9 @@
 #include "BaseMenu.h"
 #include "TargetingSystem.h"
 #include "HungerSystem.h"
+#include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
+#include "Attributes/ConstitutionAttributes.h"
 
 class Game
 {
@@ -65,6 +67,7 @@ public:
 	std::vector<Weapons> weapons{ loadWeapons() }; // a vector of weapons
 	std::vector<StrengthAttributes> strengthAttributes{ loadStrengthAttributes() }; // a vector of strength attributes
 	std::vector<DexterityAttributes> dexterityAttributes{ loadDexterityAttributes() }; // a vector of dexterity attributes
+	std::vector<ConstitutionAttributes> constitutionAttributes{ loadConstitutionAttributes() }; // a vector of constitution attributes
 
 	// Menu container for que
 	std::deque<std::unique_ptr<BaseMenu>> menus;
