@@ -166,13 +166,10 @@ void Creature::save(json& j)
 // the actor update
 void Creature::update()
 {
-	// Update armor class
-	if (destructible) {
+	// Apply the modifiers from stats and items
+	if (destructible)
+	{
 		destructible->update_armor_class(*this);
-	}
-
-	// Update constitution-based HP
-	if (destructible) {
 		destructible->update_constitution_bonus(*this);
 	}
 
