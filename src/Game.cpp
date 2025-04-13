@@ -1050,15 +1050,40 @@ void Game::display_character_sheet() noexcept
 			currentXP, nextLevelXP, progressPercent, player->playerLevel + 1);
 		mvwprintw(character_sheet, 6, 1, "XP needed for next level: %d", xpNeeded);
 
-		// Add character attributes
+		// Get strength modifiers from attributes table
+		int strHitMod = 0;
+		int strDmgMod = 0;
+		if (player->strength > 0 && player->strength <= strengthAttributes.size()) {
+			strHitMod = strengthAttributes[player->strength - 1].hitProb;
+			strDmgMod = strengthAttributes[player->strength - 1].dmgAdj;
+		}
+
+		// Add character attributes with modifiers
 		mvwprintw(character_sheet, 8, 1, "Attributes:");
+
+		// Display Strength with modifiers
+		wattron(character_sheet, A_BOLD);
 		mvwprintw(character_sheet, 9, 3, "Strength: %d", player->strength);
+		wattroff(character_sheet, A_BOLD);
+
+		// Show hit and damage modifiers from strength
+		if (strHitMod != 0 || strDmgMod != 0) {
+			wattron(character_sheet, COLOR_PAIR((strHitMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			mvwprintw(character_sheet, 9, 20, "To Hit: %+d", strHitMod);
+			wattroff(character_sheet, COLOR_PAIR((strHitMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+
+			wattron(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			mvwprintw(character_sheet, 9, 35, "Damage: %+d", strDmgMod);
+			wattroff(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+		}
 
 		// Display Constitution with HP bonus effect
 		int conBonus = 0;
 		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
 			conBonus = constitutionAttributes[player->constitution - 1].HPAdj;
 		}
+
+		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
 
 		if (conBonus != 0) {
 			wattron(character_sheet, COLOR_PAIR((conBonus > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
@@ -1070,7 +1095,6 @@ void Game::display_character_sheet() noexcept
 			mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
 		}
 
-		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
 		mvwprintw(character_sheet, 12, 3, "Intelligence: %d", player->intelligence);
 		mvwprintw(character_sheet, 13, 3, "Wisdom: %d", player->wisdom);
 		mvwprintw(character_sheet, 14, 3, "Charisma: %d", player->charisma);
@@ -1099,37 +1123,67 @@ void Game::display_character_sheet() noexcept
 				player->destructible->hp, player->destructible->hpMax);
 		}
 
-		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->armorClass);
-		mvwprintw(character_sheet, 19, 3, "THAC0: %d", player->destructible->thaco);
+		// Display attack bonus from strength if applicable
+		if (strHitMod != 0 || strDmgMod != 0) {
+			mvwprintw(character_sheet, 18, 3, "Attack Bonuses: ");
+			if (strHitMod != 0) {
+				wattron(character_sheet, COLOR_PAIR((strHitMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wprintw(character_sheet, "%+d to hit ", strHitMod);
+				wattroff(character_sheet, COLOR_PAIR((strHitMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			}
+			if (strDmgMod != 0) {
+				wattron(character_sheet, COLOR_PAIR((strDmgMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wprintw(character_sheet, "%+d to damage", strDmgMod);
+				wattroff(character_sheet, COLOR_PAIR((strDmgMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			}
+		}
+
+		mvwprintw(character_sheet, 19, 3, "Armor Class: %d", player->destructible->armorClass);
+		mvwprintw(character_sheet, 20, 3, "THAC0: %d", player->destructible->thaco);
 
 		// Display dexterity bonuses
 		if (player->dexterity > 0 && player->dexterity <= dexterityAttributes.size()) {
 			// Show missile attack adjustment
 			int missileAdj = dexterityAttributes[player->dexterity - 1].MissileAttackAdj;
-			mvwprintw(character_sheet, 20, 3, "Ranged Attack Bonus: %d", missileAdj);
+			mvwprintw(character_sheet, 21, 3, "Ranged Attack Bonus: %d", missileAdj);
 
 			// Show defensive adjustment
 			int defensiveAdj = dexterityAttributes[player->dexterity - 1].DefensiveAdj;
-			mvwprintw(character_sheet, 21, 3, "Defensive Adjustment: %d AC", defensiveAdj);
+			mvwprintw(character_sheet, 22, 3, "Defensive Adjustment: %d AC", defensiveAdj);
 		}
 
 		// Equipped weapon info with color
 		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
-		mvwprintw(character_sheet, 23, 1, "Equipment:");
+		mvwprintw(character_sheet, 24, 1, "Equipment:");
 
 		if (player->weaponEquipped != "None") {
-			mvwprintw(character_sheet, 24, 3, "Weapon: %s (%s damage)",
+			mvwprintw(character_sheet, 25, 3, "Weapon: %s (%s damage)",
 				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
 
 			// Show if weapon is ranged
 			if (player->has_state(ActorState::IS_RANGED)) {
 				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
-				mvwprintw(character_sheet, 24, 40, "[Ranged]");
+				mvwprintw(character_sheet, 25, 40, "[Ranged]");
 				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+			}
+
+			// Show effective damage with strength bonus
+			if (strDmgMod != 0) {
+				wattron(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				mvwprintw(character_sheet, 26, 3, "Effective damage: %s %+d",
+					player->attacker->roll.c_str(), strDmgMod);
+				wattroff(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
 			}
 		}
 		else {
-			mvwprintw(character_sheet, 24, 3, "Weapon: Unarmed (D2 damage)");
+			mvwprintw(character_sheet, 25, 3, "Weapon: Unarmed (D2 damage)");
+
+			// Show effective unarmed damage with strength bonus
+			if (strDmgMod != 0) {
+				wattron(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				mvwprintw(character_sheet, 26, 3, "Effective damage: D2 %+d", strDmgMod);
+				wattroff(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+			}
 		}
 		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
 
@@ -1155,7 +1209,20 @@ void Game::display_character_sheet() noexcept
 			}
 		}
 
-		mvwprintw(character_sheet, 26, 1, "Press any key to close...");
+		// Add strength details panel on the right side
+		mvwprintw(character_sheet, 20, 60, "Strength Effects:");
+
+		if (player->strength >= 1 && player->strength <= strengthAttributes.size()) {
+			const auto& strAttr = strengthAttributes[player->strength - 1];
+
+			mvwprintw(character_sheet, 21, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
+			mvwprintw(character_sheet, 22, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
+			mvwprintw(character_sheet, 23, 62, "Weight Allowance: %d lbs", strAttr.wgtAllow);
+			mvwprintw(character_sheet, 24, 62, "Max Press: %d lbs", strAttr.maxPress);
+			mvwprintw(character_sheet, 25, 62, "Open Doors: %d/6", strAttr.openDoors);
+		}
+
+		mvwprintw(character_sheet, 28, 1, "Press any key to close...");
 
 		wrefresh(character_sheet);
 
