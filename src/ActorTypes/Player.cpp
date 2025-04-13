@@ -12,9 +12,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Web.h"
 
-ActorData playerData{ '@', "Player", WHITE_PAIR };
-
-Player::Player(Vector2D position) : Creature(position, playerData)
+Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
 {
 	add_state(ActorState::CAN_SWIM);
 

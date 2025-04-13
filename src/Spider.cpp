@@ -3,31 +3,9 @@
 #include "AiSpider.h"
 #include "Random/RandomDice.h"
 
-// ActorData definitions for different spider types
-ActorData smallSpiderData
-{
-    's',
-    "small spider",
-    TROLL_PAIR  // Using existing color pairs - green on black
-};
-
-ActorData giantSpiderData
-{
-    'S',
-    "giant spider",
-    ORC_PAIR  // Using existing color pairs - red on black
-};
-
-ActorData webSpinnerData
-{
-    'W',
-    "web weaver",  // More impressive name
-    SPIDER_PAIR  // Using existing color pairs - green on red
-};
-
 // Base Spider constructor
 Spider::Spider(Vector2D position, SpiderType type)
-    : Creature(position, smallSpiderData), // Default to small spider data
+    : Creature(position, ActorData{ 's',"small spider",TROLL_PAIR }), // Default to small spider data
     spiderType(type)
 {
     // Initialize based on spider type
@@ -45,7 +23,7 @@ void Spider::init_spider_type()
     {
     case SpiderType::SMALL:
         // Update actor data for small spider
-        actorData = smallSpiderData;
+        actorData = ActorData{ 's',"small spider",TROLL_PAIR };
 
         // Stats for small spider
         strength = d.d6() + d.d6() + d.d6();  // Minimum strength of 3
@@ -62,7 +40,7 @@ void Spider::init_spider_type()
 
     case SpiderType::GIANT:
         // Update actor data for giant spider
-        actorData = giantSpiderData;
+        actorData = ActorData{ 'S',"giant spider",ORC_PAIR };
 
         // Stats for giant spider
         strength = d.d6() + d.d6() + d.d6();
@@ -87,7 +65,7 @@ void Spider::init_spider_type()
 
     case SpiderType::WEB_SPINNER:
         // Update actor data for web spinner
-        actorData = webSpinnerData;
+        actorData = ActorData{ 'W',"web weaver",SPIDER_PAIR };
 
         // Stats for web spinner - now much more formidable
         strength = d.d6() + d.d6() + d.d6();
