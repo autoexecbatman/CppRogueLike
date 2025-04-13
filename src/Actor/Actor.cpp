@@ -20,6 +20,7 @@
 #include "Container.h"
 #include "../Items.h"
 #include "../ActorTypes/Gold.h"
+#include "../Armor.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
@@ -165,6 +166,16 @@ void Creature::save(json& j)
 // the actor update
 void Creature::update()
 {
+	// Update armor class
+	if (destructible) {
+		destructible->update_armor_class(*this);
+	}
+
+	// Update constitution-based HP
+	if (destructible) {
+		destructible->update_constitution_bonus(*this);
+	}
+
 	// if the actor has an ai then update the ai
 	if (ai)
 	{
@@ -174,7 +185,10 @@ void Creature::update()
 
 void Creature::equip(Item& item)
 {
-	// First check if another item is already equipped
+	bool isArmor = item.pickable && dynamic_cast<Armor*>(item.pickable.get());
+	bool isWeapon = item.pickable && dynamic_cast<Weapon*>(item.pickable.get());
+
+	// First check if any equipment of the same type is already equipped
 	std::vector<Item*> equippedItems;
 
 	// Find all equipped items
@@ -182,11 +196,18 @@ void Creature::equip(Item& item)
 	{
 		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
 		{
-			equippedItems.push_back(inv_item.get());
+			bool itemIsArmor = inv_item->pickable && dynamic_cast<Armor*>(inv_item->pickable.get());
+			bool itemIsWeapon = inv_item->pickable && dynamic_cast<Weapon*>(inv_item->pickable.get());
+
+			// Only consider same-type equipment for unequipping
+			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon))
+			{
+				equippedItems.push_back(inv_item.get());
+			}
 		}
 	}
 
-	// If this is a weapon and there's already another weapon equipped, unequip it
+	// If there's already equipment of the same type, unequip it
 	if (!equippedItems.empty() && &item != equippedItems[0])
 	{
 		for (auto* equipped : equippedItems)
@@ -197,7 +218,12 @@ void Creature::equip(Item& item)
 
 	// Now equip the new item
 	item.add_state(ActorState::IS_EQUIPPED);
-	weaponEquipped = item.actorData.name;
+
+	// Update weapon equipped name if it's a weapon
+	if (isWeapon)
+	{
+		weaponEquipped = item.actorData.name;
+	}
 }
 
 void Creature::unequip(Item& item)
@@ -207,12 +233,13 @@ void Creature::unequip(Item& item)
 	{
 		// Remove the equipped state
 		item.remove_state(ActorState::IS_EQUIPPED);
-		weaponEquipped = "None";
 
-		// Always check if this was a ranged weapon
-		if (item.pickable)
+		// If it's a weapon, update the weaponEquipped status
+		if (item.pickable && dynamic_cast<Weapon*>(item.pickable.get()))
 		{
-			// Check all types that might implement isRanged()
+			weaponEquipped = "None";
+
+			// Check for ranged weapon
 			auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
 			if (weapon && weapon->isRanged())
 			{

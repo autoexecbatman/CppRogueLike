@@ -110,6 +110,11 @@ ItemFactory::ItemFactory() {
         [](Vector2D pos) { game.create_item<AmuletOfYendor>(pos); }
         });
 
+    addItemType({
+    "Leather Armor", 15, 1, 0, -0.1f, 30, 50,
+    [](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
+        });
+
     // Populate item categories
     for (size_t i = 0; i < itemTypes.size(); i++) {
         const auto& item = itemTypes[i];
@@ -132,6 +137,9 @@ ItemFactory::ItemFactory() {
             item.name.find("Bread") != std::string::npos ||
             item.name.find("Meat") != std::string::npos) {
             category = "food";
+        }
+        else if (item.name.find("Armor") != std::string::npos) {
+            category = "armor";
         }
         else {
             category = "weapon";

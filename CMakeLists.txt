@@ -156,6 +156,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/MonsterFactory.h
     ${PROJECT_SOURCE_DIR}/ItemFactory.cpp
     ${PROJECT_SOURCE_DIR}/ItemFactory.h
+    ${PROJECT_SOURCE_DIR}/Armor.cpp
+    ${PROJECT_SOURCE_DIR}/Armor.h
 
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp

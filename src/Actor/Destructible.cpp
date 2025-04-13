@@ -10,6 +10,7 @@
 #include "../Attributes/StrengthAttributes.h"
 #include "../ActorTypes/Healer.h"
 #include "../CorpseFood.h"
+#include "../Armor.h"
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -22,6 +23,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 	xp(xp),
 	thaco(thaco),
 	armorClass(armorClass),
+	baseArmorClass(armorClass),
 	lastConstitution(0)
 {}
 
@@ -125,6 +127,29 @@ int Destructible::heal(int hpToHeal)
 	}
 
 	return hpToHeal;
+}
+
+void Destructible::update_armor_class(Creature& owner)
+{
+	// Start with the base armor class
+	int calculatedAC = baseArmorClass;
+
+	// If the owner has a container (inventory)
+	if (owner.container) {
+		// Check all items for equipped armor
+		for (const auto& item : owner.container->inv) {
+			if (item && item->has_state(ActorState::IS_EQUIPPED)) {
+				// Check if it's armor
+				if (auto armor = dynamic_cast<Armor*>(item->pickable.get())) {
+					// Add the armor's AC bonus
+					calculatedAC += armor->getArmorClass();
+				}
+			}
+		}
+	}
+
+	// Update the armor class
+	armorClass = calculatedAC;
 }
 
 void Destructible::load(const json& j)

@@ -16,6 +16,7 @@
 #include "../Food.h"
 #include "../CorpseFood.h"
 #include "../Amulet.h"
+#include "../Armor.h"
 
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)
@@ -81,6 +82,9 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 	case PickableType::AMULET:
 		pickable = std::make_unique<Amulet>();
 		break;
+	case PickableType::LEATHER_ARMOR:
+		pickable = std::make_unique<LeatherArmor>();
+		break;
 	default:
 		throw std::runtime_error("Unknown PickableType");
 	} // end of switch (type)
@@ -92,39 +96,8 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 // Common weapon equip/unequip logic
 bool Weapon::use(Item& owner, Creature& wearer)
 {
-	// Check if a weapon is already equipped
-	Item* currentWeapon = nullptr;
-	for (const auto& item : wearer.container->inv)
-	{
-		if (item && item->has_state(ActorState::IS_EQUIPPED) && item.get() != &owner)
-		{
-			currentWeapon = item.get();
-			break;
-		}
-	}
-
-	// If we're trying to equip and another weapon is already equipped, unequip it first
-	if (!owner.has_state(ActorState::IS_EQUIPPED) && currentWeapon)
-	{
-		game.message(WHITE_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
-		wearer.unequip(*currentWeapon);
-	}
-
-	// equip the weapon
-	if (!owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		wearer.attacker->roll = this->roll;
-		wearer.equip(owner);
-		game.message(WHITE_PAIR, "You equip the " + owner.actorData.name + ".", true);
-
-		// Apply ranged state if applicable
-		if (isRanged())
-		{
-			wearer.add_state(ActorState::IS_RANGED);
-		}
-	}
-	// unequip the weapon
-	else
+	// If this is a direct unequip operation
+	if (owner.has_state(ActorState::IS_EQUIPPED))
 	{
 		wearer.attacker->roll = "D2"; // Reset to default unarmed attack
 		wearer.unequip(owner);
@@ -135,6 +108,42 @@ bool Weapon::use(Item& owner, Creature& wearer)
 		{
 			wearer.remove_state(ActorState::IS_RANGED);
 		}
+
+		return false; // Don't consume the weapon
+	}
+
+	// Check if another weapon is already equipped
+	Item* currentWeapon = nullptr;
+	for (const auto& item : wearer.container->inv)
+	{
+		if (item && item->has_state(ActorState::IS_EQUIPPED) && item.get() != &owner)
+		{
+			// Check if it's a weapon
+			Weapon* weapon = dynamic_cast<Weapon*>(item->pickable.get());
+			if (weapon)
+			{
+				currentWeapon = item.get();
+				break;
+			}
+		}
+	}
+
+	// If another weapon is equipped, unequip it
+	if (currentWeapon)
+	{
+		game.message(WHITE_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
+		wearer.unequip(*currentWeapon);
+	}
+
+	// Equip the new weapon
+	wearer.attacker->roll = this->roll;
+	wearer.equip(owner);
+	game.message(WHITE_PAIR, "You equip the " + owner.actorData.name + ".", true);
+
+	// Apply ranged state if applicable
+	if (isRanged())
+	{
+		wearer.add_state(ActorState::IS_RANGED);
 	}
 
 	return false; // Don't consume the weapon

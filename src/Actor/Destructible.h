@@ -20,6 +20,7 @@ public:
 	int xp{ 0 }; // for awarding experience points
 	int thaco{ 0 }; // to hit armor class 0
 	int armorClass{ 0 }; // armor class
+	int baseArmorClass{ 0 }; // Store the base AC without equipment
 
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void update_constitution_bonus(Creature& owner);
@@ -33,6 +34,7 @@ public:
 	void take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner); // handles death, owner killed
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
+	void update_armor_class(Creature& owner);
 
 	void load(const json& j) override;
 	void save(json& j) override;

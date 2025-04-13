@@ -8,6 +8,7 @@
 #include "Actor/Confuser.h"
 #include "ActorTypes/Gold.h"
 #include "Amulet.h"
+#include "Armor.h"
 
 HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", HPBARMISSING_PAIR })
 {
@@ -41,4 +42,10 @@ AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*
 {
 	pickable = std::make_unique<Amulet>();
 	value = 1000; // Very valuable
+}
+
+LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData{ '[', "leather armor", DOOR_PAIR })
+{
+	pickable = std::make_unique<LeatherArmor>();
+	value = 30; // Set a value for the armor
 }

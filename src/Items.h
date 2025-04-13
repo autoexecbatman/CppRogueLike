@@ -40,4 +40,10 @@ public:
 	AmuletOfYendor(Vector2D position);
 };
 
+class LeatherArmorItem : public Item
+{
+public:
+	LeatherArmorItem(Vector2D position);
+};
+
 #endif // !ITEMS_H

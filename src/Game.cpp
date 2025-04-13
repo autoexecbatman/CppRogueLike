@@ -33,6 +33,7 @@
 #include "Menu/MenuName.h"
 #include "dnd_tables/CalculatedTHAC0s.h"
 #include "Web.h"
+#include "Armor.h"
 
 #include "ActorTypes/Healer.h"
 
@@ -57,7 +58,7 @@ void Game::init()
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
 
-	//game.add_debug_weapons_at_player_feet();
+	game.add_debug_weapons_at_player_feet();
 
 	//==LOG==
 	game.log("game.init() was called!");
@@ -1452,12 +1453,18 @@ void Game::add_debug_weapons_at_player_feet()
 	healthPotion->value = 25;
 	container->add(std::move(healthPotion));
 
+	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", DOOR_PAIR });
+	leatherArmor->pickable = std::make_unique<LeatherArmor>();
+	leatherArmor->value = 30;
+	container->add(std::move(leatherArmor));
+
 	log("Debug weapons added at player position: " +
 		std::to_string(player->position.x) + "," +
 		std::to_string(player->position.y));
 
 	// Add a message for the player
-	message(WHITE_PAIR, "Debug weapons placed at your feet.", true);
+	message(WHITE_PAIR, "Debug weapons and armor placed at your feet.", true);
+
 }
 
 // end of file: Game.cpp
