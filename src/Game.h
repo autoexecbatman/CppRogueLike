@@ -53,7 +53,7 @@ public:
 	HungerSystem hunger_system;
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}, 0, 0, "A", 0, 0, 0) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
 
 	std::unique_ptr<Map> map{ std::make_unique<Map>(MAP_HEIGHT, MAP_WIDTH) };
 	const std::unique_ptr<Gui> gui{ std::make_unique<Gui>() };
@@ -75,7 +75,6 @@ public:
 	
 	// Public member functions.
 	void init();
-	void create_player();
 	void update();
 	void render();
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);

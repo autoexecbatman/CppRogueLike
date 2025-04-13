@@ -20,7 +20,7 @@ ActorData goblinData
 Goblin::Goblin(Vector2D position) : Creature(position, goblinData)
 {
 	RandomDice d;
-	const int hp = d.d8();
+	const int hp = d.roll(1, 8 - 1);
 	const int thaco = 20;
 	const int ac = 6;
 	const int xp = 35;

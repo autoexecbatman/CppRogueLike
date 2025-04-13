@@ -64,34 +64,6 @@ void Game::init()
 	game.log("game.init() was called!");
 }
 
-//==CREATE PLAYER==
-// This function sets the arguments to the player pointer
-void Game::create_player()
-{
-	//==PLAYER==
-	const int playerHp = 20 + d.d10(); // we roll the dice to get the player's hp
-	const int playerDr = 1; // the player's damage reduction
-	const int playerXp = 0; // the player's experience points
-	const int playerTHAC0 = game.player->destructible->thaco; // the player's THAC0
-	const int playerAC = 10; // the player's armor class
-
-	// update the player pointer
-	game.player = std::make_unique<Player>(
-		Vector2D{ 0, 0 },
-		playerHp,
-		playerDr,
-		"your cadaver",
-		playerXp,
-		playerTHAC0,
-		playerAC
-	);
-
-	// TODO :
-	// 1. Set the playerHp to rolls based on class and attribute modifiers.
-	// 2. Set the playerDamage to rolls based on class and attribute modifiers and weapon.
-	// 3. Set the playerAC to be based on base AC and attribute modifiers and armor.
-}
-
 void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
 {
 	for (const auto& creature : creatures)
@@ -1128,7 +1100,7 @@ void Game::display_character_sheet() noexcept
 		}
 
 		mvwprintw(character_sheet, 18, 3, "Armor Class: %d", player->destructible->armorClass);
-		mvwprintw(character_sheet, 19, 3, "To-Hit: %d", player->destructible->thaco);
+		mvwprintw(character_sheet, 19, 3, "THAC0: %d", player->destructible->thaco);
 
 		// Display dexterity bonuses
 		if (player->dexterity > 0 && player->dexterity <= dexterityAttributes.size()) {

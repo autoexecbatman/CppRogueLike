@@ -35,7 +35,7 @@ public:
 	std::string playerRace{ "None" };
 	int playerLevel{ 1 };
 
-	Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass);
+	Player(Vector2D position);
 
 	// Note::
 	// X/Y coordinates set

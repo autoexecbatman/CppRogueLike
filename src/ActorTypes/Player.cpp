@@ -14,9 +14,7 @@
 
 ActorData playerData{ '@', "Player", WHITE_PAIR };
 
-Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int xp, int thaco, int armorClass)
-	:
-	Creature(position, playerData)
+Player::Player(Vector2D position) : Creature(position, playerData)
 {
 	add_state(ActorState::CAN_SWIM);
 
@@ -28,10 +26,23 @@ Player::Player(Vector2D position, int maxHp, int dr, std::string corpseName, int
 	wisdom = roll3d6();
 	charisma = roll3d6();
 
+	//==PLAYER==
+	const int playerHp = 20 + game.d.d10(); // we roll the dice to get the player's hp
+	const int playerDr = 1; // the player's damage reduction
+	const int playerXp = 0; // the player's experience points
+	const int playerAC = 10; // the player's armor class
+
 	gold = 100;
 
 	attacker = std::make_unique<Attacker>("D2");
-	destructible = std::make_unique<PlayerDestructible>(maxHp, dr, corpseName, xp, thaco, armorClass);
+	destructible = std::make_unique<PlayerDestructible>(
+		playerHp,
+		playerDr,
+		"your corpse",
+		playerXp,
+		0, // thaco is caluclated from table
+		playerAC
+	);
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
 	
