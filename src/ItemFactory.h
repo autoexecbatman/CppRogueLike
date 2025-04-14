@@ -20,6 +20,12 @@ struct ItemType
     std::function<void(Vector2D)> createFunc;
 };
 
+struct ItemPercentage
+{
+	std::string name;       // to store in category
+	float percentage;       // Percentage of this item type
+};
+
 class ItemFactory
 {
 public:
@@ -27,7 +33,7 @@ public:
 
     void add_item_type(const ItemType& itemType);
     void generate_treasure(Vector2D position, int dungeonLevel, int quality);
-    std::vector<std::pair<std::string, float>> get_current_distribution(int dungeonLevel);
+    std::vector<ItemPercentage> get_current_distribution(int dungeonLevel);
     void spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category);
     void spawn_random_item(Vector2D position, int dungeonLevel);
 private:

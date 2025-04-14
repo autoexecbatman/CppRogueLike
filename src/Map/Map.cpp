@@ -1001,10 +1001,13 @@ void Map::display_spawn_rates() const
 	clear();
 }
 
-void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality) {
+void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality)
+{
 	// Mark the area for the treasure room
-	for (int y = begin.y; y <= end.y; y++) {
-		for (int x = begin.x; x <= end.x; x++) {
+	for (int y = begin.y; y <= end.y; y++)
+	{
+		for (int x = begin.x; x <= end.x; x++)
+		{
 			set_tile(Vector2D{ y, x }, TileType::FLOOR, 1);
 			tcodMap->setProperties(x, y, true, true);
 		}
@@ -1012,8 +1015,10 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality) {
 
 	// Add some decorative elements (different floor tiles or room features)
 	// Here we're just using special markings for demonstration
-	for (int y = begin.y; y <= end.y; y++) {
-		for (int x = begin.x; x <= end.x; x++) {
+	for (int y = begin.y; y <= end.y; y++)
+	{
+		for (int x = begin.x; x <= end.x; x++)
+		{
 			// Add random decorative elements
 			if (game.d.d100() <= 20) {
 				// This could be replaced with actual decorative elements
@@ -1033,15 +1038,30 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality) {
 
 	// Add guardians or traps based on quality
 	int guardianCount = 0;
-	switch (quality) {
-	case 1: guardianCount = game.d.roll(0, 1); break;
-	case 2: guardianCount = game.d.roll(1, 2); break;
-	case 3: guardianCount = game.d.roll(2, 3); break;
+	switch (quality)
+	{
+	case 1:
+	{
+		guardianCount = game.d.roll(0, 1);
+		break;
+	}
+	case 2:
+	{
+		guardianCount = game.d.roll(1, 2);
+		break;
+	}
+	case 3:
+	{
+		guardianCount = game.d.roll(2, 3);
+		break;
+	}
 	}
 
-	for (int i = 0; i < guardianCount; i++) {
+	for (int i = 0; i < guardianCount; i++)
+	{
 		Vector2D guardPos;
-		do {
+		do
+		{
 			guardPos.y = game.d.roll(begin.y, end.y);
 			guardPos.x = game.d.roll(begin.x, end.x);
 			// Ensure we don't place on the center (where treasure is)
@@ -1059,19 +1079,22 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality) {
 		std::to_string(end.y) + ") with quality " + std::to_string(quality));
 }
 
-bool Map::maybe_create_treasure_room(int dungeonLevel) {
+bool Map::maybe_create_treasure_room(int dungeonLevel)
+{
 	// Probability increases with dungeon level
 	int treasureRoomChance = 5 + (dungeonLevel * 2); // 5% + 2% per level
 
 	// Cap at 25%
 	treasureRoomChance = std::min(treasureRoomChance, 25);
 
-	if (game.d.d100() > treasureRoomChance) {
+	if (game.d.d100() > treasureRoomChance)
+	{
 		return false; // No treasure room this time
 	}
 
 	// Find a suitable room from the rooms list
-	if (game.rooms.size() < 2) {
+	if (game.rooms.size() < 2)
+	{
 		return false; // Need at least one room (which is 2 entries in the vector)
 	}
 
@@ -1079,7 +1102,8 @@ bool Map::maybe_create_treasure_room(int dungeonLevel) {
 	int index = game.d.roll(2, static_cast<int>(game.rooms.size() - 1));
 	index = index % 2 == 0 ? index : index - 1; // Ensure it's even (room starts)
 
-	if (index >= static_cast<int>(game.rooms.size())) {
+	if (index >= static_cast<int>(game.rooms.size()))
+	{
 		return false; // Safety check
 	}
 
@@ -1091,7 +1115,8 @@ bool Map::maybe_create_treasure_room(int dungeonLevel) {
 	int height = roomEnd.y - roomBegin.y;
 
 	// Only use rooms that are large enough
-	if (width < 6 || height < 6) {
+	if (width < 6 || height < 6)
+	{
 		return false;
 	}
 
@@ -1099,10 +1124,12 @@ bool Map::maybe_create_treasure_room(int dungeonLevel) {
 	int quality = 1; // Default is normal
 
 	int qualityRoll = game.d.d100();
-	if (qualityRoll <= 5 + dungeonLevel) {
+	if (qualityRoll <= 5 + dungeonLevel)
+	{
 		quality = 3; // Exceptional (5% + dungeonLevel%)
 	}
-	else if (qualityRoll <= 15 + (dungeonLevel * 2)) {
+	else if (qualityRoll <= 15 + (dungeonLevel * 2))
+	{
 		quality = 2; // Good (15% + dungeonLevel*2%)
 	}
 
@@ -1112,7 +1139,8 @@ bool Map::maybe_create_treasure_room(int dungeonLevel) {
 	return true;
 }
 
-void Map::display_item_distribution() const {
+void Map::display_item_distribution() const
+{
 	WINDOW* distributionWindow = newwin(
 		24,  // height (adjust to fit all items)
 		50,  // width
@@ -1125,39 +1153,47 @@ void Map::display_item_distribution() const {
 	mvwprintw(distributionWindow, 2, 1, "--------------------------------------");
 
 	// Get current distribution from item factory
-	auto distribution = itemFactory->get_current_distribution(game.dungeonLevel);
+	std::vector<ItemPercentage> distribution = itemFactory->get_current_distribution(game.dungeonLevel);
 
 	// Sort by probability (descending)
 	std::sort(distribution.begin(), distribution.end(),
-		[](const auto& a, const auto& b) { return a.second > b.second; });
+		[](const auto& a, const auto& b) { return a.percentage > b.percentage; });
 
 	int row = 3;
 
 	// First display categories
 	std::unordered_map<std::string, float> categoryTotals;
 
-	for (const auto& [name, percentage] : distribution) {
+	for (const auto& [name, percentage] : distribution)
+	{
 		std::string category;
 
-		if (name.find("Potion") != std::string::npos) {
+		if (name.find("Potion") != std::string::npos)
+		{
 			category = "Potions";
 		}
-		else if (name.find("Scroll") != std::string::npos) {
+		else if (name.find("Scroll") != std::string::npos)
+		{
 			category = "Scrolls";
 		}
-		else if (name == "Gold") {
+		else if (name == "Gold")
+		{
 			category = "Gold";
 		}
-		else if (name == "Amulet of Yendor") {
+		else if (name == "Amulet of Yendor")
+		{
 			category = "Artifacts";
 		}
 		else if (name.find("Ration") != std::string::npos ||
 			name.find("Fruit") != std::string::npos ||
 			name.find("Bread") != std::string::npos ||
-			name.find("Meat") != std::string::npos) {
+			name.find("Meat") != std::string::npos
+			)
+		{
 			category = "Food";
 		}
-		else {
+		else
+		{
 			category = "Weapons";
 		}
 
@@ -1165,7 +1201,8 @@ void Map::display_item_distribution() const {
 	}
 
 	mvwprintw(distributionWindow, row++, 1, "Item Categories:");
-	for (const auto& [category, percentage] : categoryTotals) {
+	for (const auto& [category, percentage] : categoryTotals)
+	{
 		mvwprintw(distributionWindow, row++, 1, "%-15s: %5.1f%%", category.c_str(), percentage);
 	}
 
@@ -1173,7 +1210,8 @@ void Map::display_item_distribution() const {
 	mvwprintw(distributionWindow, row++, 1, "Individual Items:");
 
 	// Then list individual items
-	for (const auto& [name, percentage] : distribution) {
+	for (const auto& [name, percentage] : distribution)
+	{
 		mvwprintw(distributionWindow, row++, 1, "%-20s: %5.1f%%", name.c_str(), percentage);
 	}
 

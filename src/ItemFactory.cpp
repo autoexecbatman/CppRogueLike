@@ -256,9 +256,9 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 }
 
 // Get the probability distribution for the current dungeon level
-std::vector<std::pair<std::string, float>> ItemFactory::get_current_distribution(int dungeonLevel)
+std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLevel)
 {
-    std::vector<std::pair<std::string, float>> distribution;
+    std::vector<ItemPercentage> distribution;
 
     // Calculate total weights for current dungeon level
     int totalWeight = 0;
@@ -277,7 +277,7 @@ std::vector<std::pair<std::string, float>> ItemFactory::get_current_distribution
         if (weights[i] > 0)
         {
             float percentage = static_cast<float>(weights[i]) / totalWeight * 100.0f;
-            distribution.push_back({ itemTypes[i].name, percentage });
+            distribution.push_back(ItemPercentage{ itemTypes[i].name, percentage });
         }
     }
 
