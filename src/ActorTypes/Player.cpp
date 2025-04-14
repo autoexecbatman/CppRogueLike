@@ -38,7 +38,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 		playerDr,
 		"your corpse",
 		playerXp,
-		0, // thaco is caluclated from table
+		0, // thaco is calculated from table
 		playerAC
 	);
 	ai = std::make_unique<AiPlayer>();

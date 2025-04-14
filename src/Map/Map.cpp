@@ -509,7 +509,7 @@ void Map::add_item(Vector2D pos) {
 	if (rng_unique->getInt(1, 100) > 75) return;
 
 	// Use our ItemFactory to create a random item
-	itemFactory->spawnRandomItem(pos, game.dungeonLevel);
+	itemFactory->spawn_random_item(pos, game.dungeonLevel);
 }
 
 void Map::dig(Vector2D begin, Vector2D end)
@@ -1029,7 +1029,7 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality) {
 	};
 
 	// Generate treasure at the center of the room
-	itemFactory->generateTreasure(center, game.dungeonLevel, quality);
+	itemFactory->generate_treasure(center, game.dungeonLevel, quality);
 
 	// Add guardians or traps based on quality
 	int guardianCount = 0;
@@ -1125,7 +1125,7 @@ void Map::display_item_distribution() const {
 	mvwprintw(distributionWindow, 2, 1, "--------------------------------------");
 
 	// Get current distribution from item factory
-	auto distribution = itemFactory->getCurrentDistribution(game.dungeonLevel);
+	auto distribution = itemFactory->get_current_distribution(game.dungeonLevel);
 
 	// Sort by probability (descending)
 	std::sort(distribution.begin(), distribution.end(),

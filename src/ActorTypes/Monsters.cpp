@@ -18,6 +18,7 @@ Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",G
 	const int xp = 35;
 	strength = d.d6() + d.d6() + d.d6();
 	dexterity = d.d6() + d.d6() + d.d6();
+	constitution = d.d6() + d.d6() + d.d6();
 
 	weaponEquipped = "Short Sword";
 
