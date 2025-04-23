@@ -52,12 +52,16 @@ jobs:
     - name: Configure CMake
       working-directory: ./build_web
       run: |
-        # Simple configuration without assets preloading and with -Wno-error flag
+        # Check CMakeLists.txt content
+        echo "CMakeLists.txt content:"
+        cat ../CMakeLists.txt
+        
+        # Configure with more aggressive warning suppression
         emcmake cmake .. -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -Wno-error" \
-          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -Wno-error" \
-          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
+          -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
+          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
+          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
     
     - name: Build
       working-directory: ./build_web
