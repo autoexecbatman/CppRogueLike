@@ -28,6 +28,15 @@ jobs:
         version: 'latest'
         no-cache: true
     
+    - name: Debug file structure
+      run: |
+        echo "Checking repository structure:"
+        ls -la
+        echo "Checking for shell.html:"
+        find . -name "shell.html"
+        echo "Checking src/json files:"
+        find ./src -name "*.json"
+    
     - name: Create build directory
       run: mkdir -p build_web
     
@@ -43,20 +52,66 @@ jobs:
       working-directory: ./build_web
       run: cmake --build .
     
+    - name: Debug build output
+      run: |
+        echo "Build directory contents:"
+        ls -la build_web/
+        echo "Binary directory contents:"
+        ls -la build_web/bin/ || echo "bin directory doesn't exist"
+    
     - name: Create web distribution directory
       run: mkdir -p web_dist
     
     - name: Copy build artifacts
       run: |
-        cp build_web/*.html web_dist/ || true
-        cp build_web/*.js web_dist/ || true
-        cp build_web/*.wasm web_dist/ || true
-        cp build_web/*.data web_dist/ || true
+        # Try multiple possible locations for the built files
+        cp -v build_web/*.html web_dist/ || echo "No HTML files in build_web root"
+        cp -v build_web/*.js web_dist/ || echo "No JS files in build_web root"
+        cp -v build_web/*.wasm web_dist/ || echo "No WASM files in build_web root"
+        cp -v build_web/*.data web_dist/ || echo "No data files in build_web root"
+        
+        # Check if bin directory exists and copy from there if it does
+        if [ -d "build_web/bin" ]; then
+          echo "Copying from bin directory"
+          cp -v build_web/bin/*.html web_dist/ || echo "No HTML files in bin directory"
+          cp -v build_web/bin/*.js web_dist/ || echo "No JS files in bin directory"
+          cp -v build_web/bin/*.wasm web_dist/ || echo "No WASM files in bin directory"
+          cp -v build_web/bin/*.data web_dist/ || echo "No data files in bin directory"
+        fi
+        
+        # Also copy project HTML files if they exist
+        if [ -f "shell.html" ]; then
+          cp -v shell.html web_dist/
+        fi
     
     - name: Create index.html if needed
       run: |
-        if [ -f "web_dist/shell.html" ] && [ ! -f "web_dist/index.html" ]; then
-          cp web_dist/shell.html web_dist/index.html
+        # If we have any HTML file but no index.html, use it as index
+        if [ ! -f "web_dist/index.html" ]; then
+          # First try shell.html
+          if [ -f "web_dist/shell.html" ]; then
+            cp web_dist/shell.html web_dist/index.html
+            echo "Created index.html from shell.html"
+          # Then try any other HTML file
+          elif ls web_dist/*.html 1> /dev/null 2>&1; then
+            cp "$(ls web_dist/*.html | head -1)" web_dist/index.html
+            echo "Created index.html from $(ls web_dist/*.html | head -1)"
+          # If no HTML file exists, create a minimal one
+          else
+            echo "<html><head><title>C++ Roguelike</title></head><body><p>Build failed to produce HTML output.</p></body></html>" > web_dist/index.html
+            echo "Created minimal index.html"
+          fi
+        fi
+    
+    - name: Check web distribution
+      run: |
+        echo "Web distribution contents:"
+        ls -la web_dist/
+        echo "Size of web_dist directory:"
+        du -sh web_dist/
+        
+        if [ "$(find web_dist -type f | wc -l)" -eq 0 ]; then
+          echo "ERROR: No files were copied to web_dist!"
         fi
     
     - name: Deploy to GitHub Pages
