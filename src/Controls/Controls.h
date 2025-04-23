@@ -12,7 +12,7 @@ enum class Controls
 	UP_ARROW = KEY_UP,
 	UP_ARROW_NUMPAD = KEY_A2,
 
-	DOWN = '2',
+	DOWN = '2', 
 	DOWN_ARROW = KEY_DOWN,
 	DOWN_ARROW_NUMPAD = KEY_C2,
 
