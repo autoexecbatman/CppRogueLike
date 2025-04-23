@@ -36,20 +36,23 @@ jobs:
     - name: Create build directory
       run: mkdir -p build_web
     
-    - name: Configure CMake
+    - name: Examine CMakeLists.txt and find executable name
+      run: |
+        echo "CMakeLists.txt content:"
+        cat CMakeLists.txt
+        
+        # Try to find the executable name from CMakeLists.txt
+        EXECUTABLE_NAME=$(grep -E "add_executable|project\(" CMakeLists.txt | head -1 | sed -E 's/.*\(([^ ]+).*/\1/')
+        echo "Detected executable name: $EXECUTABLE_NAME"
+        echo "EXECUTABLE_NAME=$EXECUTABLE_NAME" >> $GITHUB_ENV
+    
+    - name: Build with verbose output
       working-directory: ./build_web
       run: |
-        cat ../CMakeLists.txt
+        cmake --build . --verbose
         
-        emcmake cmake .. -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
-          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
-          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
-    
-    - name: Build
-      working-directory: ./build_web
-      run: cmake --build .
+        echo "Files in build directory after build:"
+        find . -type f | sort
     
     - name: List build directory
       run: |
@@ -60,10 +63,40 @@ jobs:
     
     - name: Copy build artifacts to distribution directory
       run: |
-        find build_web -maxdepth 1 -type f -name "*.html" -exec cp {} web_dist/ \;
-        find build_web -maxdepth 1 -type f -name "*.js" -exec cp {} web_dist/ \;
-        find build_web -maxdepth 1 -type f -name "*.wasm" -exec cp {} web_dist/ \;
-        find build_web -maxdepth 1 -type f -name "*.data" -exec cp {} web_dist/ \;
+        mkdir -p web_dist
+        
+        echo "Looking for web files in the build directory..."
+        find build_web -type f -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.data"
+        
+        # Try different executable names
+        for POSSIBLE_NAME in "C++RogueLike" "CppRogueLike" "RogueLike" "$EXECUTABLE_NAME"; do
+          echo "Checking for files with name: $POSSIBLE_NAME"
+          
+          # Copy with specific names if they exist
+          if [ -f "build_web/${POSSIBLE_NAME}.html" ]; then
+            echo "Found ${POSSIBLE_NAME}.html!"
+            cp build_web/${POSSIBLE_NAME}.* web_dist/
+          fi
+          
+          # Sometimes Emscripten outputs lowercase names
+          LOWERCASE_NAME=$(echo "$POSSIBLE_NAME" | tr '[:upper:]' '[:lower:]')
+          if [ -f "build_web/${LOWERCASE_NAME}.html" ]; then
+            echo "Found ${LOWERCASE_NAME}.html!"
+            cp build_web/${LOWERCASE_NAME}.* web_dist/
+          fi
+        done
+        
+        # Try to find any HTML/JS/WASM files if we didn't find anything specific
+        if [ -z "$(ls -A web_dist 2>/dev/null)" ]; then
+          echo "No specific executable files found, looking for any web files..."
+          find build_web -maxdepth 1 -type f -name "*.html" -exec cp {} web_dist/ \;
+          find build_web -maxdepth 1 -type f -name "*.js" -exec cp {} web_dist/ \;
+          find build_web -maxdepth 1 -type f -name "*.wasm" -exec cp {} web_dist/ \;
+          find build_web -maxdepth 1 -type f -name "*.data" -exec cp {} web_dist/ \;
+        fi
+        
+        echo "Files in web_dist directory:"
+        ls -la web_dist/
     
     - name: Create simple index.html
       run: |
