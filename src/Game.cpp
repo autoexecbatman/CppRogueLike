@@ -1420,6 +1420,7 @@ void Game::display_help() noexcept
 		0   // x
 	);
 	box(help_window, 0, 0);
+	refresh();
 
 	mvwprintw(help_window, 1, 1, "=== CONTROLS ===");
 	mvwprintw(help_window, 3, 1, "Movement: Arrow keys or numpad (8,4,6,2,7,9,1,3)");
@@ -1443,8 +1444,6 @@ void Game::display_help() noexcept
 	mvwprintw(help_window, 21, 1, "- You cannot rest if you're starving");
 
 	mvwprintw(help_window, 28, 1, "Press any key to close this window");
-
-	wrefresh(help_window);
 
 	getch(); // Wait for key press
 
