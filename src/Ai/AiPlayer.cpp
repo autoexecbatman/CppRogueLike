@@ -22,25 +22,25 @@ constexpr int INVENTORY_WIDTH = 60;
 struct PossibleMoves
 {
 	std::unordered_map<Controls, Vector2D> moves = {
-		{Controls::UP, {-1, 0}},
+		/*{Controls::UP, {-1, 0}},*/
 		{Controls::UP_ARROW, {-1, 0}},
 		{Controls::UP_ARROW_NUMPAD, {-1, 0}},
-		{Controls::DOWN, {1, 0}},
+		/*{Controls::DOWN, {1, 0}},*/
 		{Controls::DOWN_ARROW, {1, 0}},
 		{Controls::DOWN_ARROW_NUMPAD, {1, 0}},
-		{Controls::LEFT, {0, -1}},
+		/*{Controls::LEFT, {0, -1}},*/
 		{Controls::LEFT_ARROW, {0, -1}},
 		{Controls::LEFT_ARROW_NUMPAD, {0, -1}},
-		{Controls::RIGHT, {0, 1}},
+		/*{Controls::RIGHT, {0, 1}},*/
 		{Controls::RIGHT_ARROW, {0, 1}},
 		{Controls::RIGHT_ARROW_NUMPAD, {0, 1}},
-		{Controls::UP_LEFT, {-1, -1}},
+		/*{Controls::UP_LEFT, {-1, -1}},*/
 		{Controls::UP_LEFT_ARROW_NUMPAD, {-1, -1}},
-		{Controls::UP_RIGHT, {-1, 1}},
+		/*{Controls::UP_RIGHT, {-1, 1}},*/
 		{Controls::UP_RIGHT_ARROW_NUMPAD, {-1, 1}},
-		{Controls::DOWN_LEFT, {1, -1}},
+		/*{Controls::DOWN_LEFT, {1, -1}},*/
 		{Controls::DOWN_LEFT_ARROW_NUMPAD, {1, -1}},
-		{Controls::DOWN_RIGHT, {1, 1}},
+		/*{Controls::DOWN_RIGHT, {1, 1}},*/
 		{Controls::DOWN_RIGHT_ARROW_NUMPAD, {1, 1}},
 	};
 } m;
@@ -556,7 +556,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	switch (key)
 	{
 
-	case Controls::WAIT:
+	/*case Controls::WAIT:*/
 	case Controls::WAIT_ARROW_NUMPAD:
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
