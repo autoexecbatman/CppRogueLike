@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build libsdl2-dev libsdl2-image-dev
+        sudo apt-get install -y build-essential cmake ninja-build
     
     - name: Setup Emscripten
       uses: mymindstorm/setup-emsdk@v11
@@ -28,109 +28,36 @@ jobs:
         version: 'latest'
         no-cache: true
     
-    - name: Verify Emscripten installation
-      run: |
-        emcc --version
-        em++ --version
-    
     - name: Create build directory
       run: mkdir -p build_web
     
-    - name: Examine CMakeLists.txt and find executable name
-      run: |
-        echo "CMakeLists.txt content:"
-        cat CMakeLists.txt
-        
-        # Try to find the executable name from CMakeLists.txt
-        EXECUTABLE_NAME=$(grep -E "add_executable|project\(" CMakeLists.txt | head -1 | sed -E 's/.*\(([^ ]+).*/\1/')
-        echo "Detected executable name: $EXECUTABLE_NAME"
-        echo "EXECUTABLE_NAME=$EXECUTABLE_NAME" >> $GITHUB_ENV
-    
-    - name: Build with verbose output
+    - name: Configure CMake
       working-directory: ./build_web
       run: |
-        cmake --build . --verbose
-        
-        echo "Files in build directory after build:"
-        find . -type f | sort
+        emcmake cmake .. -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
+          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1"
     
-    - name: List build directory
-      run: |
-        ls -la build_web/
+    - name: Build
+      working-directory: ./build_web
+      run: cmake --build .
     
     - name: Create web distribution directory
       run: mkdir -p web_dist
     
-    - name: Copy build artifacts to distribution directory
+    - name: Copy build artifacts
       run: |
-        mkdir -p web_dist
-        
-        echo "Looking for web files in the build directory..."
-        find build_web -type f -name "*.html" -o -name "*.js" -o -name "*.wasm" -o -name "*.data"
-        
-        # Try different executable names
-        for POSSIBLE_NAME in "C++RogueLike" "CppRogueLike" "RogueLike" "$EXECUTABLE_NAME"; do
-          echo "Checking for files with name: $POSSIBLE_NAME"
-          
-          # Copy with specific names if they exist
-          if [ -f "build_web/${POSSIBLE_NAME}.html" ]; then
-            echo "Found ${POSSIBLE_NAME}.html!"
-            cp build_web/${POSSIBLE_NAME}.* web_dist/
-          fi
-          
-          # Sometimes Emscripten outputs lowercase names
-          LOWERCASE_NAME=$(echo "$POSSIBLE_NAME" | tr '[:upper:]' '[:lower:]')
-          if [ -f "build_web/${LOWERCASE_NAME}.html" ]; then
-            echo "Found ${LOWERCASE_NAME}.html!"
-            cp build_web/${LOWERCASE_NAME}.* web_dist/
-          fi
-        done
-        
-        # Try to find any HTML/JS/WASM files if we didn't find anything specific
-        if [ -z "$(ls -A web_dist 2>/dev/null)" ]; then
-          echo "No specific executable files found, looking for any web files..."
-          find build_web -maxdepth 1 -type f -name "*.html" -exec cp {} web_dist/ \;
-          find build_web -maxdepth 1 -type f -name "*.js" -exec cp {} web_dist/ \;
-          find build_web -maxdepth 1 -type f -name "*.wasm" -exec cp {} web_dist/ \;
-          find build_web -maxdepth 1 -type f -name "*.data" -exec cp {} web_dist/ \;
-        fi
-        
-        echo "Files in web_dist directory:"
-        ls -la web_dist/
+        cp build_web/*.html web_dist/ || true
+        cp build_web/*.js web_dist/ || true
+        cp build_web/*.wasm web_dist/ || true
+        cp build_web/*.data web_dist/ || true
     
-    - name: Create simple index.html
+    - name: Create index.html if needed
       run: |
-        echo '<!DOCTYPE html>' > web_dist/index.html
-        echo '<html>' >> web_dist/index.html
-        echo '<head>' >> web_dist/index.html
-        echo '  <meta charset="utf-8">' >> web_dist/index.html
-        echo '  <meta name="viewport" content="width=device-width, initial-scale=1">' >> web_dist/index.html
-        echo '  <title>C++ Roguelike</title>' >> web_dist/index.html
-        echo '  <style>' >> web_dist/index.html
-        echo '    body { margin: 0; background-color: #222; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }' >> web_dist/index.html
-        echo '    canvas { border: 1px solid #444; display: block; margin: 0 auto; }' >> web_dist/index.html
-        echo '    h1 { text-align: center; margin-bottom: 20px; }' >> web_dist/index.html
-        echo '    #loading { text-align: center; margin-top: 20px; }' >> web_dist/index.html
-        echo '  </style>' >> web_dist/index.html
-        echo '</head>' >> web_dist/index.html
-        echo '<body>' >> web_dist/index.html
-        echo '  <h1>C++ Roguelike</h1>' >> web_dist/index.html
-        
-        # Look for HTML files other than index.html
-        HTML_FILES=($(find web_dist -maxdepth 1 -type f -name "*.html" ! -name "index.html"))
-        if [ ${#HTML_FILES[@]} -gt 0 ]; then
-          # Create a redirect to the first HTML file
-          GAME_HTML=$(basename "${HTML_FILES[0]}")
-          echo "  <script>window.location.href = \"$GAME_HTML\";</script>" >> web_dist/index.html
-        else
-          echo "  <div style=\"color: #ff5555; max-width: 600px; text-align: center; padding: 20px;\">" >> web_dist/index.html
-          echo "    <p>No web build files were generated. Please check the GitHub Actions logs for more information.</p>" >> web_dist/index.html
-          echo "  </div>" >> web_dist/index.html
+        if [ -f "web_dist/shell.html" ] && [ ! -f "web_dist/index.html" ]; then
+          cp web_dist/shell.html web_dist/index.html
         fi
-        
-        echo '  <div id="loading">Loading...</div>' >> web_dist/index.html
-        echo '</body>' >> web_dist/index.html
-        echo '</html>' >> web_dist/index.html
     
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
