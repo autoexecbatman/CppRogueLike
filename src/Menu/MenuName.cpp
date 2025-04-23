@@ -56,6 +56,7 @@ void MenuName::menu_name()
 	noecho(); // hide input
 
 	menu_name_delete();
+	clear();
 }
 
 // end of file: MenuName.cpp

@@ -192,11 +192,11 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 
 	//==DRAW==
 	game.log("Running render...");
-	clear();
-	game.render(); // render map and actors to the screen
-	refresh();
 	gui.gui_render(); // render the gui
-	refresh();
+	//clear();
+	//refresh();
+	game.render(); // render map and actors to the screen
+	//refresh();
 	game.log("Render OK.");
 }
 

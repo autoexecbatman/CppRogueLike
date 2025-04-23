@@ -101,7 +101,6 @@ void Gui::gui_update()
 void Gui::gui_render()
 {
 	gui_clear();
-	
 	box(guiWin, 0, 0); // border
 
 	// mouse look
