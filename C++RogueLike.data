@@ -1,0 +1,902 @@
+[
+	{
+		"Cha": 1,
+		"MaxHencmen": 0,
+		"Loyalty": -8,
+		"ReactionAdj": -7
+	},
+	{
+		"Cha": 2,
+		"MaxHencmen": 1,
+		"Loyalty": -7,
+		"ReactionAdj": -6
+	},
+	{
+		"Cha": 3,
+		"MaxHencmen": 1,
+		"Loyalty": -6,
+		"ReactionAdj": -5
+	},
+	{
+		"Cha": 4,
+		"MaxHencmen": 1,
+		"Loyalty": -5,
+		"ReactionAdj": -4
+	},
+	{
+		"Cha": 5,
+		"MaxHencmen": 2,
+		"Loyalty": -4,
+		"ReactionAdj": -3
+	},
+	{
+		"Cha": 6,
+		"MaxHencmen": 2,
+		"Loyalty": -3,
+		"ReactionAdj": -2
+	},
+	{
+		"Cha": 7,
+		"MaxHencmen": 3,
+		"Loyalty": -2,
+		"ReactionAdj": -1
+	},
+	{
+		"Cha": 8,
+		"MaxHencmen": 3,
+		"Loyalty": -1,
+		"ReactionAdj": -0
+	},
+	{
+		"Cha": 9,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 10,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 11,
+		"MaxHencmen": 4,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 12,
+		"MaxHencmen": 5,
+		"Loyalty": 0,
+		"ReactionAdj": 0
+	},
+	{
+		"Cha": 13,
+		"MaxHencmen": 5,
+		"Loyalty": 0,
+		"ReactionAdj": 1
+	},
+	{
+		"Cha": 14,
+		"MaxHencmen": 6,
+		"Loyalty": 1,
+		"ReactionAdj": 2
+	},
+	{
+		"Cha": 15,
+		"MaxHencmen": 7,
+		"Loyalty": 3,
+		"ReactionAdj": 3
+	},
+	{
+		"Cha": 16,
+		"MaxHencmen": 8,
+		"Loyalty": 4,
+		"ReactionAdj": 5
+	},
+	{
+		"Cha": 17,
+		"MaxHencmen": 10,
+		"Loyalty": 6,
+		"ReactionAdj": 6
+	},
+	{
+		"Cha": 18,
+		"MaxHencmen": 15,
+		"Loyalty": 8,
+		"ReactionAdj": 7
+	},
+	{
+		"Cha": 19,
+		"MaxHencmen": 20,
+		"Loyalty": 10,
+		"ReactionAdj": 8
+	}
+][
+	{
+		"Con": 1,
+		"HPAdj": -3,
+		"SystemShock": 25,
+		"ResurrectionSurvival": 30,
+		"PoisonSave": -2,
+		"Regeneration": 0
+	},
+	{
+		"Con": 2,
+		"HPAdj": -2,
+		"SystemShock": 30,
+		"ResurrectionSurvival": 35,
+		"PoisonSave": -1,
+		"Regeneration": 0
+	},
+	{
+		"Con": 3,
+		"HPAdj": -2,
+		"SystemShock": 35,
+		"ResurrectionSurvival": 40,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 4,
+		"HPAdj": -1,
+		"SystemShock": 40,
+		"ResurrectionSurvival": 45,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 5,
+		"HPAdj": -1,
+		"SystemShock": 45,
+		"ResurrectionSurvival": 50,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 6,
+		"HPAdj": -1,
+		"SystemShock": 50,
+		"ResurrectionSurvival": 55,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 7,
+		"HPAdj": 0,
+		"SystemShock": 55,
+		"ResurrectionSurvival": 60,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 8,
+		"HPAdj": 0,
+		"SystemShock": 60,
+		"ResurrectionSurvival": 65,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 9,
+		"HPAdj": 0,
+		"SystemShock": 65,
+		"ResurrectionSurvival": 70,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 10,
+		"HPAdj": 0,
+		"SystemShock": 70,
+		"ResurrectionSurvival": 75,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 11,
+		"HPAdj": 0,
+		"SystemShock": 75,
+		"ResurrectionSurvival": 80,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 12,
+		"HPAdj": 0,
+		"SystemShock": 80,
+		"ResurrectionSurvival": 85,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 13,
+		"HPAdj": 0,
+		"SystemShock": 85,
+		"ResurrectionSurvival": 90,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 14,
+		"HPAdj": 0,
+		"SystemShock": 88,
+		"ResurrectionSurvival": 92,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 15,
+		"HPAdj": 1,
+		"SystemShock": 90,
+		"ResurrectionSurvival": 94,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 16,
+		"HPAdj": 2,
+		"SystemShock": 95,
+		"ResurrectionSurvival": 96,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 17,
+		"HPAdj": 3,
+		"SystemShock": 97,
+		"ResurrectionSurvival": 98,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 18,
+		"HPAdj": 4,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 0,
+		"Regeneration": 0
+	},
+	{
+		"Con": 19,
+		"HPAdj": 5,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 1,
+		"Regeneration": 0
+	}
+]
+[
+	{
+		"Dex": 1,
+		"ReactionAdj": -6,
+		"MissileAttackAdj": -6,
+		"DefensiveAdj": 5
+	},
+	{
+		"Dex": 2,
+		"ReactionAdj": -4,
+		"MissileAttackAdj": -4,
+		"DefensiveAdj": 5
+	},
+	{
+		"Dex": 3,
+		"ReactionAdj": -3,
+		"MissileAttackAdj": -3,
+		"DefensiveAdj": 4
+	},
+	{
+		"Dex": 4,
+		"ReactionAdj": -2,
+		"MissileAttackAdj": -2,
+		"DefensiveAdj": 3
+	},
+	{
+		"Dex": 5,
+		"ReactionAdj": -1,
+		"MissileAttackAdj": -1,
+		"DefensiveAdj": 2
+	},
+	{
+		"Dex": 6,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 1
+	},
+	{
+		"Dex": 7,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 1
+	},
+	{
+		"Dex": 8,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 9,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 10,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 11,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 12,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 13,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 14,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": 0
+	},
+	{
+		"Dex": 15,
+		"ReactionAdj": 0,
+		"MissileAttackAdj": 0,
+		"DefensiveAdj": -1
+	},
+	{
+		"Dex": 16,
+		"ReactionAdj": 1,
+		"MissileAttackAdj": 1,
+		"DefensiveAdj": -2
+	},
+	{
+		"Dex": 17,
+		"ReactionAdj": 2,
+		"MissileAttackAdj": 2,
+		"DefensiveAdj": -3
+	},
+	{
+		"Dex": 18,
+		"ReactionAdj": 2,
+		"MissileAttackAdj": 2,
+		"DefensiveAdj": -4
+	},
+	{
+		"Dex": 19,
+		"ReactionAdj": 3,
+		"MissileAttackAdj": 3,
+		"DefensiveAdj": -4
+	},
+	{
+		"Dex": 20,
+		"ReactionAdj": 3,
+		"MissileAttackAdj": 3,
+		"DefensiveAdj": -4
+	}
+]
+[
+	{
+		"Int": 1,
+		"NumberOfLanguages": 0,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 2,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 3,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 4,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 5,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 6,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 7,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 8,
+		"NumberOfLanguages": 1,
+		"SpellLevel": 0,
+		"ChanceToLearnSpell": 0,
+		"MaxNumberOfSpells": 0,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 9,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 4,
+		"ChanceToLearnSpell": 35,
+		"MaxNumberOfSpells": 6,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 10,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 5,
+		"ChanceToLearnSpell": 40,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 11,
+		"NumberOfLanguages": 2,
+		"SpellLevel": 5,
+		"ChanceToLearnSpell": 45,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 12,
+		"NumberOfLanguages": 3,
+		"SpellLevel": 6,
+		"ChanceToLearnSpell": 50,
+		"MaxNumberOfSpells": 7,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 13,
+		"NumberOfLanguages": 3,
+		"SpellLevel": 6,
+		"ChanceToLearnSpell": 55,
+		"MaxNumberOfSpells": 9,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 14,
+		"NumberOfLanguages": 4,
+		"SpellLevel": 7,
+		"ChanceToLearnSpell": 60,
+		"MaxNumberOfSpells": 9,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 15,
+		"NumberOfLanguages": 4,
+		"SpellLevel": 7,
+		"ChanceToLearnSpell": 65,
+		"MaxNumberOfSpells": 11,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 16,
+		"NumberOfLanguages": 5,
+		"SpellLevel": 8,
+		"ChanceToLearnSpell": 70,
+		"MaxNumberOfSpells": 11,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 17,
+		"NumberOfLanguages": 6,
+		"SpellLevel": 8,
+		"ChanceToLearnSpell": 75,
+		"MaxNumberOfSpells": 14,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 18,
+		"NumberOfLanguages": 7,
+		"SpellLevel": 9,
+		"ChanceToLearnSpell": 85,
+		"MaxNumberOfSpells": 18,
+		"IllusionImmunity": 0
+	},
+	{
+		"Int": 19,
+		"NumberOfLanguages": 8,
+		"SpellLevel": 9,
+		"ChanceToLearnSpell": 95,
+		"MaxNumberOfSpells": 100,
+		"IllusionImmunity": 0
+	}
+]
+[
+	{
+		"Str": 1,
+		"Hit": -5,
+		"Dmg": -4,
+		"Wgt": 1,
+		"MaxPress": 3,
+		"OpenDoors": 1,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 2,
+		"Hit": -3,
+		"Dmg": -2,
+		"Wgt": 1,
+		"MaxPress": 5,
+		"OpenDoors": 1,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 3,
+		"Hit": -3,
+		"Dmg": -1,
+		"Wgt": 5,
+		"MaxPress": 10,
+		"OpenDoors": 2,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 4,
+		"Hit": -2,
+		"Dmg": -1,
+		"Wgt": 10,
+		"MaxPress": 25,
+		"OpenDoors": 3,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 5,
+		"Hit": -2,
+		"Dmg": -1,
+		"Wgt": 10,
+		"MaxPress": 25,
+		"OpenDoors": 3,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 6,
+		"Hit": -1,
+		"Dmg": 0,
+		"Wgt": 20,
+		"MaxPress": 55,
+		"OpenDoors": 4,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 7,
+		"Hit": -1,
+		"Dmg": 0,
+		"Wgt": 20,
+		"MaxPress": 55,
+		"OpenDoors": 4,
+		"BB_LG": 0,
+		"Notes": ""
+	},
+	{
+		"Str": 8,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 35,
+		"MaxPress": 90,
+		"OpenDoors": 5,
+		"BB_LG": 1,
+		"Notes": ""
+	},
+	{
+		"Str": 9,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 35,
+		"MaxPress": 90,
+		"OpenDoors": 5,
+		"BB_LG": 1,
+		"Notes": ""
+	},
+	{
+		"Str": 10,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 40,
+		"MaxPress": 115,
+		"OpenDoors": 6,
+		"BB_LG": 2,
+		"Notes": ""
+	},
+	{
+		"Str": 11,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 40,
+		"MaxPress": 115,
+		"OpenDoors": 6,
+		"BB_LG": 2,
+		"Notes": ""
+	},
+	{
+		"Str": 12,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 45,
+		"MaxPress": 140,
+		"OpenDoors": 7,
+		"BB_LG": 4,
+		"Notes": ""
+	},
+	{
+		"Str": 13,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 45,
+		"MaxPress": 140,
+		"OpenDoors": 7,
+		"BB_LG": 4,
+		"Notes": ""
+	},
+	{
+		"Str": 14,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 55,
+		"MaxPress": 170,
+		"OpenDoors": 8,
+		"BB_LG": 7,
+		"Notes": ""
+	},
+	{
+		"Str": 15,
+		"Hit": 0,
+		"Dmg": 0,
+		"Wgt": 55,
+		"MaxPress": 170,
+		"OpenDoors": 8,
+		"BB_LG": 7,
+		"Notes": ""
+	},
+	{
+		"Str": 16,
+		"Hit": 0,
+		"Dmg": 1,
+		"Wgt": 70,
+		"MaxPress": 195,
+		"OpenDoors": 9,
+		"BB_LG": 10,
+		"Notes": ""
+	},
+	{
+		"Str": 17,
+		"Hit": 1,
+		"Dmg": 1,
+		"Wgt": 85,
+		"MaxPress": 220,
+		"OpenDoors": 10,
+		"BB_LG": 13,
+		"Notes": ""
+	},
+	{
+		"Str": 18,
+		"Hit": 1,
+		"Dmg": 2,
+		"Wgt": 110,
+		"MaxPress": 255,
+		"OpenDoors": 11,
+		"BB_LG": 16,
+		"Notes": ""
+	}
+][
+	{
+		"name": "Long Sword",
+		"type": "Melee",
+		"damageRoll": "1d8",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 1, 4 ],
+		"specialProperties": [ "None", "Flaming", "Frost" ]
+	},
+	{
+		"name": "Short Sword",
+		"type": "Melee",
+		"damageRoll": "1d6",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 0, 3 ],
+		"specialProperties": [ "None", "Piercing" ]
+	},
+	{
+		"name": "Dagger",
+		"type": "Melee",
+		"damageRoll": "1d4",
+		"hitBonusRange": [ 0, 3 ],
+		"damageBonusRange": [ 0, 2 ],
+		"specialProperties": [ "None", "Poisoned" ]
+	},
+	{
+		"name": "Longbow",
+		"type": "Ranged",
+		"damageRoll": "1d8",
+		"hitBonusRange": [ 1, 3 ],
+		"damageBonusRange": [ 0, 3 ],
+		"specialProperties": [ "None", "Piercing" ]
+	},
+	{
+		"name": "Staff",
+		"type": "Magic",
+		"damageRoll": "1d6",
+		"hitBonusRange": [ 0, 1 ],
+		"damageBonusRange": [ 0, 2 ],
+		"specialProperties": [ "None", "Arcane Boost", "Healing Touch" ]
+	}
+][
+	{
+		"Wis": 1,
+		"MagicalDefenseAdj": -6,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 80,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 2,
+		"MagicalDefenseAdj": -4,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 60,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 3,
+		"MagicalDefenseAdj": -3,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 50,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 4,
+		"MagicalDefenseAdj": -2,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 45,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 5,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 40,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 6,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 35,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 7,
+		"MagicalDefenseAdj": -1,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 30,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 8,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 25,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 9,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 20,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 10,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 15,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 11,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 10,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 12,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 0,
+		"ChanceOfSpellFailure": 5,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 13,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 1,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 14,
+		"MagicalDefenseAdj": 0,
+		"BonusSpells": 1,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 15,
+		"MagicalDefenseAdj": 1,
+		"BonusSpells": 2,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 16,
+		"MagicalDefenseAdj": 2,
+		"BonusSpells": 2,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 17,
+		"MagicalDefenseAdj": 3,
+		"BonusSpells": 3,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 18,
+		"MagicalDefenseAdj": 4,
+		"BonusSpells": 4,
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	},
+	{
+		"Wis": 19,
+		"MagicalDefenseAdj": 4,
+		"BonusSpells": "1st,3rd",
+		"ChanceOfSpellFailure": 0,
+		"SpellImmunity": 0
+	}
+]
