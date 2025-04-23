@@ -2,9 +2,9 @@ name: Web Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]  # Support both main and master branch names
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -12,53 +12,163 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/checkout@v3
       with:
-        submodules: recursive
+        submodules: true
+        fetch-depth: 0
+    
+    - name: Get repository structure
+      run: |
+        ls -la
+        find . -type f -name "CMakeLists.txt" | sort
+        find . -type d -name "src" | sort
+        find . -type d -name "include" | sort
+        find . -type d -name "assets" | sort
     
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build
-
+        sudo apt-get install -y build-essential cmake ninja-build libsdl2-dev libsdl2-image-dev
+    
     - name: Setup Emscripten
-      uses: mymindstorm/setup-emsdk@v12
+      uses: mymindstorm/setup-emsdk@v11
       with:
         version: 'latest'
         actions-cache-folder: 'emsdk-cache'
     
     - name: Verify Emscripten installation
-      run: emcc --version
+      run: |
+        emcc --version
+        em++ --version
     
     - name: Create build directory
       run: mkdir -p build_web
     
+    - name: Check for assets directory and create if needed
+      run: |
+        if [ -d "assets" ]; then
+          echo "Assets directory exists"
+        else
+          echo "Creating assets directory"
+          mkdir -p assets
+          echo "This is a placeholder file" > assets/placeholder.txt
+        fi
+    
     - name: Configure CMake
       working-directory: ./build_web
       run: |
-        emcmake cmake .. -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DEMSCRIPTEN=ON \
-          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]' --preload-file ../assets@/assets"
+        # Check if we need to use a different flags approach based on the project structure
+        if grep -q "EMSCRIPTEN" ../CMakeLists.txt; then
+          echo "Using existing EMSCRIPTEN flags in CMakeLists.txt"
+          emcmake cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
+        else
+          echo "Using custom EMSCRIPTEN flags"
+          emcmake cmake .. -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+            -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+            -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
+        fi
     
     - name: Build
       working-directory: ./build_web
-      run: cmake --build .
+      run: |
+        cmake --build . || {
+          echo "Build failed. Checking if we need to preload assets..."
+          
+          # Try alternate build with preloaded assets
+          cd ..
+          rm -rf build_web
+          mkdir -p build_web
+          cd build_web
+          
+          ASSETS_PATH=""
+          if [ -d "../assets" ]; then ASSETS_PATH="../assets"; fi
+          if [ -d "../Assets" ]; then ASSETS_PATH="../Assets"; fi
+          if [ -d "../resource" ]; then ASSETS_PATH="../resource"; fi
+          if [ -d "../resources" ]; then ASSETS_PATH="../resources"; fi
+          if [ -d "../Resources" ]; then ASSETS_PATH="../Resources"; fi
+          
+          if [ ! -z "$ASSETS_PATH" ]; then
+            echo "Found assets at $ASSETS_PATH"
+            emcmake cmake .. -G Ninja \
+              -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+              -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+              -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]' --preload-file $ASSETS_PATH@/assets"
+            
+            cmake --build .
+          else
+            echo "Could not find assets directory"
+            exit 1
+          fi
+        }
+    
+    - name: List build artifacts
+      run: ls -la build_web/
     
     - name: Create web distribution directory
       run: mkdir -p web_dist
     
     - name: Copy build artifacts to distribution directory
       run: |
-        cp build_web/*.html web_dist/
-        cp build_web/*.js web_dist/
-        cp build_web/*.wasm web_dist/
-        cp build_web/*.data web_dist/ || true
+        # Find the executable name (could be different from repository name)
+        # Copy all potential web files
+        find build_web -maxdepth 1 -type f -name "*.html" -exec cp {} web_dist/ \;
+        find build_web -maxdepth 1 -type f -name "*.js" -exec cp {} web_dist/ \;
+        find build_web -maxdepth 1 -type f -name "*.wasm" -exec cp {} web_dist/ \;
+        find build_web -maxdepth 1 -type f -name "*.data" -exec cp {} web_dist/ \;
+        
+        # Create a list of files in the web_dist directory
+        echo "Files in web distribution:"
+        ls -la web_dist/
     
-    - name: Create simple index page
+    - name: Create index page
       run: |
-        if [ ! -f build_web/index.html ]; then
+        HTML_FILES=($(find web_dist -maxdepth 1 -type f -name "*.html"))
+        
+        if [ ${#HTML_FILES[@]} -eq 0 ]; then
+          echo "No HTML files found in the build directory. Creating a placeholder."
           cat > web_dist/index.html << 'EOL'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>C++ Roguelike</title>
+            <style>
+              body {
+                margin: 0;
+                background-color: #222;
+                color: #eee;
+                font-family: sans-serif;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                min-height: 100vh;
+              }
+              .error {
+                color: #ff5555;
+                max-width: 600px;
+                text-align: center;
+                padding: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            <h1>C++ Roguelike Build</h1>
+            <div class="error">
+              <p>No web build files were generated. Please check the GitHub Actions logs for more information.</p>
+            </div>
+          </body>
+          </html>
+          EOL
+        elif [ ${#HTML_FILES[@]} -eq 1 ] && [ ! -f web_dist/index.html ]; then
+          # If there's exactly one HTML file and it's not index.html, create a redirect
+          GAME_HTML=$(basename "${HTML_FILES[0]}")
+          cat > web_dist/index.html << EOL
           <!DOCTYPE html>
           <html>
           <head>
@@ -91,27 +201,23 @@ jobs:
                 margin-top: 20px;
               }
             </style>
+            <script>
+              window.onload = function() {
+                window.location.href = "${GAME_HTML}";
+              }
+            </script>
           </head>
           <body>
             <h1>C++ Roguelike</h1>
             <div id="canvas-container"></div>
             <div id="loading">Loading...</div>
-            <script>
-              // Redirect to the appropriate HTML file that was generated by Emscripten
-              window.onload = function() {
-                // Change this to the actual name of your executable
-                window.location.href = "CppRogueLike.html";
-              }
-            </script>
           </body>
           </html>
           EOL
-        else
-          cp build_web/index.html web_dist/
         fi
     
     - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: web_dist
