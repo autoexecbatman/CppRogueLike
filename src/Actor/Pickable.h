@@ -37,7 +37,9 @@ protected:
 		FOOD,
 		CORPSE_FOOD,
 		AMULET,
-		LEATHER_ARMOR
+		LEATHER_ARMOR,
+		CHAIN_MAIL,
+		PLATE_MAIL
 	};
 
 	virtual PickableType get_type() const = 0;

@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <math.h>
 #include <memory>
-#include <gsl/gsl>
 
 #include <curses.h>
 #pragma warning (push, 0)

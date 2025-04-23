@@ -7,7 +7,6 @@
 #include <random>
 #include <climits>
 #include <cassert>
-#include <gsl/util>
 #include <format>
 #include <span>
 
@@ -1496,6 +1495,16 @@ void Game::add_debug_weapons_at_player_feet()
 	leatherArmor->pickable = std::make_unique<LeatherArmor>();
 	leatherArmor->value = 30;
 	container->add(std::move(leatherArmor));
+
+	auto chainMail = std::make_unique<Item>(player->position, ActorData{ '[', "chain mail", DOOR_PAIR });
+	chainMail->pickable = std::make_unique<ChainMail>();
+	chainMail->value = 75;
+	container->add(std::move(chainMail));
+
+	auto plateMail = std::make_unique<Item>(player->position, ActorData{ '[', "plate mail", DOOR_PAIR });
+	plateMail->pickable = std::make_unique<PlateMail>();
+	plateMail->value = 150;
+	container->add(std::move(plateMail));
 
 	log("Debug weapons added at player position: " +
 		std::to_string(player->position.x) + "," +

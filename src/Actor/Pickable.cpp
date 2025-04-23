@@ -1,5 +1,4 @@
 // file: Pickable.cpp
-#include <gsl/util>
 #include <vector>
 
 #include "Pickable.h"
@@ -85,9 +84,15 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 	case PickableType::LEATHER_ARMOR:
 		pickable = std::make_unique<LeatherArmor>();
 		break;
+	case PickableType::CHAIN_MAIL:
+		pickable = std::make_unique<ChainMail>();
+		break;
+	case PickableType::PLATE_MAIL:
+		pickable = std::make_unique<PlateMail>();
+		break;
 	default:
 		throw std::runtime_error("Unknown PickableType");
-	} // end of switch (type)
+	} // end of switch (type)switch (type)
 
 	pickable->load(j);
 	return pickable;

@@ -1,5 +1,4 @@
 // File: Fireball.cpp
-#include <gsl/util>
 #include "Fireball.h"
 #include "LightningBolt.h"
 #include "../Actor/Actor.h"

@@ -28,3 +28,27 @@ public:
     void load(const json& j) override;
     PickableType get_type() const override { return PickableType::LEATHER_ARMOR; }
 };
+
+// Chain Mail implementation
+class ChainMail : public Armor
+{
+public:
+    // Constructor
+    ChainMail();
+
+    void save(json& j) override;
+    void load(const json& j) override;
+    PickableType get_type() const override { return PickableType::CHAIN_MAIL; }
+};
+
+// Plate Mail implementation
+class PlateMail : public Armor
+{
+public:
+    // Constructor
+    PlateMail();
+
+    void save(json& j) override;
+    void load(const json& j) override;
+    PickableType get_type() const override { return PickableType::PLATE_MAIL; }
+};

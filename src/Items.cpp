@@ -13,6 +13,7 @@
 HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", HPBARMISSING_PAIR })
 {
 	pickable = std::make_unique<Healer>(10);
+	value = 50;
 }
 
 ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{'#', "scroll of lightning bolt", LIGHTNING_PAIR })
@@ -23,6 +24,7 @@ ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position,
 ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR })
 {
 	pickable = std::make_unique<Fireball>(3, 12);
+	value = 100;
 }
 
 ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR })
@@ -48,4 +50,16 @@ LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData
 {
 	pickable = std::make_unique<LeatherArmor>();
 	value = 30; // Set a value for the armor
+}
+
+ChainMailItem::ChainMailItem(Vector2D position) : Item(position, ActorData{ '[', "chain mail", DOOR_PAIR })
+{
+	pickable = std::make_unique<ChainMail>();
+	value = 75; // More expensive than leather armor
+}
+
+PlateMailItem::PlateMailItem(Vector2D position) : Item(position, ActorData{ '[', "plate mail", DOOR_PAIR })
+{
+	pickable = std::make_unique<PlateMail>();
+	value = 150; // Most expensive armor type
 }

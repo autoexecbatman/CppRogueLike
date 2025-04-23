@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDCurses Hello World</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            color: #f0f0f0;
+            font-family: 'Courier New', monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        
+        canvas {
+            border: 1px solid #444;
+            margin: 20px;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        
+        .controls {
+            margin: 10px;
+            text-align: center;
+        }
+        
+        button {
+            background-color: #444;
+            color: #f0f0f0;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+        
+        button:hover {
+            background-color: #666;
+        }
+        
+        #loading {
+            font-size: 1.5em;
+            margin: 20px;
+        }
+
+        .emscripten {
+            padding-right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDCurses Hello World</h1>
+    <div id="loading">Loading WebAssembly module...</div>
+    <div class="emscripten" id="status">Downloading...</div>
+    <progress value="0" max="100" id="progress" hidden=1></progress>
+    
+    <div class="emscripten_border">
+        <canvas class="emscripten" id="canvas" oncontextmenu="event.preventDefault()" width="800" height="600"></canvas>
+    </div>
+    
+    <div class="controls">
+        <button id="fullscreen">Fullscreen</button>
+        <button id="restart">Restart</button>
+    </div>
+    
+    <script>
+        // Show loading message
+        const loadingMessage = document.getElementById('loading');
+        
+        // Handle fullscreen button
+        document.getElementById('fullscreen').addEventListener('click', () => {
+            const canvas = document.getElementById('canvas');
+            if (canvas) {
+                if (canvas.requestFullscreen) {
+                    canvas.requestFullscreen();
+                } else if (canvas.mozRequestFullScreen) {
+                    canvas.mozRequestFullScreen();
+                } else if (canvas.webkitRequestFullscreen) {
+                    canvas.webkitRequestFullscreen();
+                } else if (canvas.msRequestFullscreen) {
+                    canvas.msRequestFullscreen();
+                }
+            }
+        });
+        
+        // Handle restart button
+        document.getElementById('restart').addEventListener('click', () => {
+            location.reload();
+        });
+        
+        var statusElement = document.getElementById('status');
+        var progressElement = document.getElementById('progress');
+        
+        // Module config
+        var Module = {
+            preRun: [],
+            postRun: [],
+            print: function(text) {
+                console.log("STDOUT:", text);
+            },
+            printErr: function(text) {
+                console.error("STDERR:", text);
+            },
+            canvas: (function() {
+                var canvas = document.getElementById('canvas');
+                // As a default initial behavior, pop up an alert when webgl context is lost
+                canvas.addEventListener("webglcontextlost", function(e) { 
+                    alert('WebGL context lost. You will need to reload the page.'); 
+                    e.preventDefault(); 
+                }, false);
+                return canvas;
+            })(),
+            setStatus: function(text) {
+                if (!Module.setStatus.last) Module.setStatus.last = { time: Date.now(), text: '' };
+                if (text === Module.setStatus.last.text) return;
+                
+                var m = text.match(/([^(]+)\((\d+(\.\d+)?)\/(\d+)\)/);
+                var now = Date.now();
+                if (m && now - Module.setStatus.last.time < 30) return; // if this is a progress update, skip it if too soon
+                
+                Module.setStatus.last.time = now;
+                Module.setStatus.last.text = text;
+                
+                if (m) {
+                    text = m[1];
+                    progressElement.value = parseInt(m[2])*100;
+                    progressElement.max = parseInt(m[4])*100;
+                    progressElement.hidden = false;
+                } else {
+                    progressElement.value = null;
+                    progressElement.max = null;
+                    progressElement.hidden = true;
+                }
+                
+                statusElement.innerHTML = text;
+                
+                if (text === '') {
+                    loadingMessage.style.display = 'none';
+                }
+            },
+            totalDependencies: 0,
+            monitorRunDependencies: function(left) {
+                this.totalDependencies = Math.max(this.totalDependencies, left);
+                Module.setStatus(left ? 'Preparing... (' + (this.totalDependencies-left) + '/' + this.totalDependencies + ')' : 'All downloads complete.');
+            }
+        };
+        
+        Module.setStatus('Downloading...');
+        window.onerror = function() {
+            Module.setStatus('Exception thrown, see JavaScript console');
+            Module.setStatus = function(text) {
+                if (text) console.error('[post-exception status] ' + text);
+            };
+        };
+    </script>
+    {{{ SCRIPT }}}
+</body>
+</html>

@@ -113,7 +113,7 @@ public:
 		for (auto i = distance; i > 0; i--)
 		{
 			// swap actor with the previous actor
-			std::swap(gsl::at(creatures, i - 1), gsl::at(creatures, i));
+			std::swap(creatures[i - 1], creatures[i]);
 		}
 	}
 

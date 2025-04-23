@@ -1,6 +1,5 @@
 // file: Container.cpp
 #include <vector>
-#include <gsl/util>
 
 #include "../Game.h"
 #include "Container.h"

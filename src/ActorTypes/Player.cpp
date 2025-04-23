@@ -1,5 +1,4 @@
 // file: Player.cpp
-#include <gsl/util>
 #include <curses.h>
 #include "../Game.h"
 #include "../Map/Map.h"

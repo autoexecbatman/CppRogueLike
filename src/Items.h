@@ -46,4 +46,16 @@ public:
 	LeatherArmorItem(Vector2D position);
 };
 
+class ChainMailItem : public Item
+{
+public:
+	ChainMailItem(Vector2D position);
+};
+
+class PlateMailItem : public Item
+{
+public:
+	PlateMailItem(Vector2D position);
+};
+
 #endif // !ITEMS_H

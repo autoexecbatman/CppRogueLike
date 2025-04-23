@@ -1,6 +1,5 @@
 // file: Gui.cpp
 #include <iostream>
-#include <gsl/util>
 #include <span>
 
 #include "Gui.h"
@@ -232,9 +231,9 @@ void Gui::renderBar(
 )
 {
 	std::cout << "void Gui::renderBar() {}" << std::endl;
-	const float ratio = gsl::narrow_cast<float>(value) / gsl::narrow_cast<float>(maxValue); // ratio of the bar's value to its maximum value
-	const int barWidth = gsl::narrow_cast<int>(ratio * gsl::narrow_cast<float>(bar_width)); // the width of the bar in characters
-	const int nameLength = gsl::narrow_cast<int>(strlen(name)); // the length of the name of the bar
+	const float ratio = static_cast<float>(value) / static_cast<float>(maxValue); // ratio of the bar's value to its maximum value
+	const int barWidth = static_cast<int>(ratio * static_cast<float>(bar_width)); // the width of the bar in characters
+	const int nameLength = static_cast<int>(strlen(name)); // the length of the name of the bar
 
 	WINDOW* con = newwin(
 		0, // int nlines
@@ -280,8 +279,8 @@ void Gui::renderBar(
 		1,
 		24,
 		"%d/%d",
-		gsl::narrow_cast<int>(value),
-		gsl::narrow_cast<int>(maxValue)
+		static_cast<int>(value),
+		static_cast<int>(maxValue)
 		);
 	wrefresh(con);
 	getch();
@@ -328,7 +327,7 @@ void Gui::renderMouseLook()
 
 void Gui::save(json& j)
 {
-	//const int logSize = gsl::narrow_cast<int>(log.size());
+	//const int logSize = static_cast<int>(log.size());
 	//zip.putInt(logSize);
 	//for (const auto& message : log)
 	//{

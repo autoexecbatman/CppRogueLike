@@ -70,6 +70,54 @@ void LeatherArmor::load(const json& j)
     }
     else
     {
-        armorClass = 2; // Default value
+        armorClass = -2; // Default value
+    }
+}
+
+// ChainMail implementation
+ChainMail::ChainMail()
+{
+    armorClass = -4; // Chain mail provides AC 4 bonus (better than leather)
+}
+
+void ChainMail::save(json& j)
+{
+    j["type"] = static_cast<int>(PickableType::CHAIN_MAIL);
+    j["armorClass"] = armorClass;
+}
+
+void ChainMail::load(const json& j)
+{
+    if (j.contains("armorClass") && j["armorClass"].is_number())
+    {
+        armorClass = j["armorClass"].get<int>();
+    }
+    else
+    {
+        armorClass = -4; // Default value
+    }
+}
+
+// PlateMail implementation
+PlateMail::PlateMail()
+{
+    armorClass = -6; // Plate mail provides AC 6 bonus (better than chain mail)
+}
+
+void PlateMail::save(json& j)
+{
+    j["type"] = static_cast<int>(PickableType::PLATE_MAIL);
+    j["armorClass"] = armorClass;
+}
+
+void PlateMail::load(const json& j)
+{
+    if (j.contains("armorClass") && j["armorClass"].is_number())
+    {
+        armorClass = j["armorClass"].get<int>();
+    }
+    else
+    {
+        armorClass = -6; // Default value
     }
 }

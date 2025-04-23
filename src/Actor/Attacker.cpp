@@ -1,8 +1,6 @@
 // file: Attacker.cpp
 #include <iostream>
 #include <string>
-#include <gsl/gsl>
-#include <gsl/util>
 #include <format>
 #include <memory>
 

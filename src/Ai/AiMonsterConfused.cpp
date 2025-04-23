@@ -1,6 +1,5 @@
 #include <iostream>
 #include <memory>
-#include <gsl/gsl>
 
 #include <libtcod.h>
 
@@ -14,7 +13,7 @@ AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noe
 
 void AiMonsterConfused::update(Creature& owner)
 {
-	const gsl::not_null<TCODRandom*> rng = TCODRandom::getInstance();
+	TCODRandom* rng = TCODRandom::getInstance();
 	Vector2D direction{ rng->getInt(-1, 1), rng->getInt(-1, 1) };
 
 	if (direction != Vector2D{0, 0})

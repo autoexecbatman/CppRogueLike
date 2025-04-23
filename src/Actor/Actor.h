@@ -7,8 +7,6 @@
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
-
-#include <gsl/gsl>
 #include <ranges>
 
 #include "../Persistent/Persistent.h"

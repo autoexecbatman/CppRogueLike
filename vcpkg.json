@@ -3,7 +3,6 @@
   "name": "libtcod-template",
   "version-semver": "0.0.0",
   "dependencies": [
-    "fmt",
     {
       "name": "libtcod",
       "default-features": true,
@@ -14,11 +13,8 @@
         "zlib"
       ]
     },
-    "ms-gsl",
     "nlohmann-json",
-    "sdl2",
     "stb",
-    "curl",
     "pdcurses"
   ]
 }

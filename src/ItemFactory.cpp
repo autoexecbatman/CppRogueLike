@@ -115,6 +115,21 @@ ItemFactory::ItemFactory() {
     [](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
         });
 
+    add_item_type({
+"Leather Armor", 15, 1, 0, -0.1f,
+[](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
+        });
+
+    add_item_type({
+    "Chain Mail", 10, 3, 0, 0.0f,
+    [](Vector2D pos) { game.create_item<ChainMailItem>(pos); }
+        });
+
+    add_item_type({
+    "Plate Mail", 5, 5, 0, 0.2f,
+    [](Vector2D pos) { game.create_item<PlateMailItem>(pos); }
+        });
+
     // Populate item categories
     for (size_t i = 0; i < itemTypes.size(); i++) {
         const auto& item = itemTypes[i];

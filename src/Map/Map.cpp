@@ -79,7 +79,7 @@ public:
 	{
 		if (node->isLeaf())
 		{
-			const bool withActors = gsl::narrow_cast<bool>(userData);
+			const bool withActors = static_cast<bool>(userData);
 
 			// Calculate room size
 			Vector2D currentRoomSize

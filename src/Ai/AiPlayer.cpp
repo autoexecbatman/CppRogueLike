@@ -3,7 +3,6 @@
 #include <libtcod.h>
 #include <unordered_map>
 #include <format>
-#include <gsl/util>
 
 #include "Ai.h"
 #include "AiPlayer.h"

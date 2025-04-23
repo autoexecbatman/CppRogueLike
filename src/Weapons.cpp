@@ -1,4 +1,5 @@
 #include <iostream>
+#include <sstream>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -21,7 +22,7 @@ void from_json(const json& j, Weapons& w)
 
 std::vector<Weapons> loadWeapons()
 {
-	std::ifstream i("weapons.json");
+	std::ifstream i("./weapons.json");
 
 	if (!i.is_open()) {
 		game.log("Error: Unable to open weapons.json. Error " + std::to_string(errno));

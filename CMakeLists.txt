@@ -1,19 +1,52 @@
-cmake_minimum_required (VERSION 3.13...3.21)
+cmake_minimum_required(VERSION 3.13...3.21)
 
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    set(CMAKE_TOOLCHAIN_FILE
-        "${ENV:VCPKG_ROOT}/scripts/cmake" # copy your vcpkg path on your machine
-        CACHE STRING "Vcpkg toolchain file")
-endif()
-
+# Project definition
 project(
-    C++RogueLike # Project name, change this as needed.
+    C++RogueLike
     LANGUAGES C CXX
 )
 
-# Ensure the C++20 standard is available.
+# Ensure the C++20 standard is available
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Check if we're compiling with Emscripten
+if(EMSCRIPTEN)
+    message(STATUS "Building with Emscripten")
+    
+    # Common compilation options
+    add_compile_options(-O2 -Wall)
+    
+    # SDL flags for both compiler and linker
+    set(SDL_FLAGS "-sUSE_SDL=2 -sUSE_SDL_TTF=2")
+    
+    # Emscripten flags for linking
+    set(EMCC_FLAGS "-sWASM=1 ${SDL_FLAGS} -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASYNCIFY=1 -sASSERTIONS=1 -sSAFE_HEAP=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING")
+    
+    # Add SDL-specific compile options
+    separate_arguments(SDL_FLAGS_LIST UNIX_COMMAND "${SDL_FLAGS}")
+    add_compile_options(${SDL_FLAGS_LIST})
+    
+    # Copy all JSON files to the build directory
+    file(GLOB JSON_FILES ${CMAKE_SOURCE_DIR}/src/json/*.json)
+    file(COPY ${JSON_FILES} DESTINATION "${CMAKE_BINARY_DIR}")
+
+    # Set linker flags with shell file and preload all JSON files at once
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMCC_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/shell.html")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file weapons.json --preload-file strength.json --preload-file dexterity.json --preload-file constitution.json --preload-file wisdom.json --preload-file intelligence.json --preload-file charisma.json")
+    # Set output suffix for web
+    set(OUTPUT_SUFFIX ".html")
+else()
+    # For native build, use vcpkg if available
+    if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+        set(CMAKE_TOOLCHAIN_FILE
+            "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+            CACHE STRING "Vcpkg toolchain file")
+    endif()
+    
+    # Set output suffix for native
+    set(OUTPUT_SUFFIX "")
+endif()
 
 # Set the output directory
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}/bin")
@@ -23,7 +56,6 @@ set(PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 
 # Set source files
 set(SOURCE_FILES # Add Source Files Here !
-
     # Actor
     ${PROJECT_SOURCE_DIR}/Actor/Actor.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Actor.h
@@ -163,7 +195,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp
     ${PROJECT_SOURCE_DIR}/Map/Map.h
 
-
     ${PROJECT_SOURCE_DIR}/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Weapons.h
 )
@@ -171,45 +202,106 @@ set(SOURCE_FILES # Add Source Files Here !
 # Create an executable with the listed source files
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
-# Enforce UTF-8 encoding on MSVC.
-if (MSVC)
-    target_compile_options(${PROJECT_NAME} PRIVATE /MP /utf-8)
+# Set output suffix based on platform
+set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "${OUTPUT_SUFFIX}")
 
-    # Set the working directory for Visual Studio debugging.
-    set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+if(EMSCRIPTEN)
+    # Check if we need to download nlohmann_json
+    if(NOT EXISTS "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp")
+        message(STATUS "Downloading nlohmann/json...")
+        file(DOWNLOAD 
+            "https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp"
+            "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp"
+            SHOW_PROGRESS
+        )
+    endif()
+
+    # PDCurses paths for Emscripten build
+    set(PDCURSES_DIR ${CMAKE_SOURCE_DIR}/pdcurses)
+    
+    # Check if libtcod.h exists directly in the include directory
+    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
+        message(FATAL_ERROR "libtcod.h not found. Please make sure it exists at ${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
+    endif()
+    
+    # Include directories for all dependencies with higher priority for the binary dir (for json.hpp)
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_SOURCE_DIR}
+        ${CMAKE_SOURCE_DIR}/libtcod/  # For libtcod.h
+        ${PDCURSES_DIR}
+    )
+    
+    # Find PDCurses source files
+    file(GLOB PDCURSES_CORE_SRC "${PDCURSES_DIR}/pdcurses/*.c")
+    file(GLOB PDCURSES_SDL_SRC "${PDCURSES_DIR}/sdl2/*.c")
+
+    file(GLOB LIBTCOD_SRC 
+    "${CMAKE_SOURCE_DIR}/libtcod/*.h"
+    "${CMAKE_SOURCE_DIR}/libtcod/*.hpp"
+    "${CMAKE_SOURCE_DIR}/libtcod/*/*.h"
+    "${CMAKE_SOURCE_DIR}/libtcod/*/*.hpp"
+    )
+
+    set(LIBTCOD_LIBRARIES "${CMAKE_SOURCE_DIR}/libtcod/lib/libtcod.a;")
+    
+    # Add PDCurses sources to the executable
+    target_sources(${PROJECT_NAME} PRIVATE
+        ${PDCURSES_CORE_SRC}
+        ${PDCURSES_SDL_SRC}
+    )
+
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${LIBTCOD_LIBRARIES}
+    )
+    
+    # Add libtcod compile definitions if needed
+    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+        TCOD_SDL2
+        TCOD_EMSCRIPTEN
+    )
+
+else()
+    # For native build, link against required libraries
+    find_package(unofficial-pdcurses CONFIG REQUIRED)
+    find_package(SDL3 CONFIG REQUIRED)
+    find_package(libtcod CONFIG REQUIRED)
+    find_package(nlohmann_json CONFIG REQUIRED)
+    target_link_libraries(
+        ${PROJECT_NAME}
+        PRIVATE
+            unofficial::pdcurses::pdcurses
+            SDL3::SDL3
+            libtcod::libtcod
+            nlohmann_json::nlohmann_json
+    )
+    
+    # Enforce UTF-8 encoding on MSVC
+    if(MSVC)
+        target_compile_options(${PROJECT_NAME} PRIVATE /MP /utf-8)
+        
+        # Set the working directory for Visual Studio debugging
+        set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+    endif()
+
+    
+    # Copy JSON files to build directory (for both native and Emscripten builds)
+    set(JSON_FILES
+        "${PROJECT_SOURCE_DIR}/json/strength.json"
+        "${PROJECT_SOURCE_DIR}/json/dexterity.json"
+        "${PROJECT_SOURCE_DIR}/json/constitution.json"
+        "${PROJECT_SOURCE_DIR}/json/wisdom.json"
+        "${PROJECT_SOURCE_DIR}/json/intelligence.json"
+        "${PROJECT_SOURCE_DIR}/json/charisma.json"
+        "${PROJECT_SOURCE_DIR}/json/weapons.json"
+    )
+
+    foreach(JSON_FILE ${JSON_FILES})
+        get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
+                          COMMAND ${CMAKE_COMMAND} -E echo "Copying ${JSON_FILE} to build directory"
+                          COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                                  ${JSON_FILE}
+                                  $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
+    endforeach()
+
 endif()
-
-# Get from Vcpkg.
-find_package(unofficial-pdcurses CONFIG REQUIRED)
-find_package(SDL2 CONFIG REQUIRED)
-find_package(libtcod CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-target_link_libraries(
-    ${PROJECT_NAME}
-    PRIVATE
-        unofficial::pdcurses::pdcurses
-        SDL2::SDL2
-        SDL2::SDL2main
-        libtcod::libtcod
-        nlohmann_json::nlohmann_json
-)
-
-# Copy JSON files to build directory.
-set(JSON_FILES
-    "${PROJECT_SOURCE_DIR}/json/strength.json"
-    "${PROJECT_SOURCE_DIR}/json/dexterity.json"
-    "${PROJECT_SOURCE_DIR}/json/constitution.json"
-    "${PROJECT_SOURCE_DIR}/json/wisdom.json"
-    "${PROJECT_SOURCE_DIR}/json/intelligence.json"
-    "${PROJECT_SOURCE_DIR}/json/charisma.json"
-    "${PROJECT_SOURCE_DIR}/json/weapons.json"
-)
-
-foreach(JSON_FILE ${JSON_FILES})
-    get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD 
-                       COMMAND ${CMAKE_COMMAND} -E echo "Copying ${JSON_FILE} to build directory"
-                       COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                               ${JSON_FILE}
-                               $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
-endforeach()
