@@ -8,9 +8,6 @@
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
 /* External declarations for PDCurses SDL integration */
-PDCEX SDL_Window* pdc_window;
-PDCEX SDL_Surface* pdc_screen;
-PDCEX int pdc_yoffset;
 #endif
 
 //====
@@ -27,6 +24,12 @@ PDCEX int pdc_yoffset;
 #include "Gui/Gui.h"
 #include "Attributes/StrengthAttributes.h" // for debugging
 #include "Weapons.h" // for debugging
+
+#ifdef EMSCRIPTEN
+PDCEX SDL_Window* pdc_window;
+PDCEX SDL_Surface* pdc_screen;
+PDCEX int pdc_yoffset;				  
+#endif // EMSCRIPTEN
 
 void init_curses(); // declaration of a function that handles curses procedures
 Game game; // create a global game object
