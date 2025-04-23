@@ -85,7 +85,7 @@ enum class Controls
 
 	REST = 'r',
 
-	HELP = '?',
+	HELP = 'h',
 
 };
 #endif // !CONTROLS_H
