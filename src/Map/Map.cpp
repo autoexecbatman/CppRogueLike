@@ -466,7 +466,6 @@ void Map::render() const
 			}
 		}
 	}
-	refresh(); // Refresh once after all tiles have been drawn
 	game.log("Map::render() end");
 }
 
