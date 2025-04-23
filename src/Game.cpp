@@ -1437,7 +1437,7 @@ void Game::display_help() noexcept
 	mvwprintw(help_window, 15, 1, "Quit: 'q'");
 
 	mvwprintw(help_window, 17, 1, "=== RESTING ===");
-	mvwprintw(help_window, 18, 1, "- Resting recovers 20% of your maximum health");
+	mvwprintw(help_window, 18, 1, "- Resting recovers 2 0 % of your maximum health");
 	mvwprintw(help_window, 19, 1, "- You cannot rest when enemies are nearby (within 5 tiles)");
 	mvwprintw(help_window, 20, 1, "- Resting increases hunger, so make sure to have food");
 	mvwprintw(help_window, 21, 1, "- You cannot rest if you're starving");
