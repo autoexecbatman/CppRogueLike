@@ -2,9 +2,9 @@ name: Web Build
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -12,57 +12,51 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    - uses: actions/checkout@v3
       with:
-        submodules: true
-    
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y build-essential cmake ninja-build
-    
+        submodules: recursive
+        
     - name: Setup Emscripten
-      uses: mymindstorm/setup-emsdk@v11
+      uses: mymindstorm/setup-emsdk@v12
       with:
-        version: 'latest'
-        no-cache: true
-    
-    - name: Create build directory
+        version: 3.1.45
+        
+    - name: Create Build Directory
       run: mkdir -p build_web
-    
+      
     - name: Configure CMake
-      working-directory: ./build_web
       run: |
-        emcmake cmake .. -G Ninja \
-          -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
-          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1"
-    
+        cd build_web
+        emcmake cmake .. -DCMAKE_BUILD_TYPE=Release
+      
     - name: Build
-      working-directory: ./build_web
-      run: cmake --build .
-    
-    - name: Create web distribution directory
-      run: mkdir -p web_dist
-    
-    - name: Copy build artifacts
       run: |
-        cp build_web/*.html web_dist/ || true
-        cp build_web/*.js web_dist/ || true
-        cp build_web/*.wasm web_dist/ || true
-        cp build_web/*.data web_dist/ || true
-    
-    - name: Create index.html if needed
+        cd build_web
+        emmake make
+        
+    - name: Create Web Directory
+      run: mkdir -p web_output
+      
+    - name: Copy Build Artifacts
       run: |
-        if [ -f "web_dist/shell.html" ] && [ ! -f "web_dist/index.html" ]; then
-          cp web_dist/shell.html web_dist/index.html
+        cp build_web/*.js web_output/ || true
+        cp build_web/*.wasm web_output/ || true
+        cp build_web/*.html web_output/ || true
+        cp build_web/*.data web_output/ || true
+        # Create a simple index.html if it doesn't exist
+        if [ ! -f web_output/index.html ]; then
+          echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>C++ Roguelike</title></head><body><script src='$(ls web_output/*.js | head -1 | xargs basename)'></script></body></html>" > web_output/index.html
         fi
-    
+        
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: web-build
+        path: web_output/
+        
     - name: Deploy to GitHub Pages
-      if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      if: github.ref == 'refs/heads/main'
       uses: JamesIves/github-pages-deploy-action@v4
       with:
-        folder: web_dist
+        folder: web_output
         branch: gh-pages
-        clean: true
