@@ -2,7 +2,7 @@ name: Web Build
 
 on:
   push:
-    branches: [ main, master ]  # Support both main and master branch names
+    branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
   workflow_dispatch:
@@ -16,15 +16,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         submodules: true
-        fetch-depth: 0
-    
-    - name: Get repository structure
-      run: |
-        ls -la
-        find . -type f -name "CMakeLists.txt" | sort
-        find . -type d -name "src" | sort
-        find . -type d -name "include" | sort
-        find . -type d -name "assets" | sort
     
     - name: Install dependencies
       run: |
@@ -45,18 +36,11 @@ jobs:
     - name: Create build directory
       run: mkdir -p build_web
     
-    - name: Check for assets directory and create if needed
-      run: |
-        echo "Skipping assets check - not required for build"
-    
     - name: Configure CMake
       working-directory: ./build_web
       run: |
-        # Check CMakeLists.txt content
-        echo "CMakeLists.txt content:"
         cat ../CMakeLists.txt
         
-        # Configure with more aggressive warning suppression
         emcmake cmake .. -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
@@ -67,116 +51,53 @@ jobs:
       working-directory: ./build_web
       run: cmake --build .
     
-    - name: List build artifacts
-      run: ls -la build_web/
+    - name: List build directory
+      run: |
+        ls -la build_web/
     
     - name: Create web distribution directory
       run: mkdir -p web_dist
     
     - name: Copy build artifacts to distribution directory
       run: |
-        # Find the executable name (could be different from repository name)
-        # Copy all potential web files
         find build_web -maxdepth 1 -type f -name "*.html" -exec cp {} web_dist/ \;
         find build_web -maxdepth 1 -type f -name "*.js" -exec cp {} web_dist/ \;
         find build_web -maxdepth 1 -type f -name "*.wasm" -exec cp {} web_dist/ \;
         find build_web -maxdepth 1 -type f -name "*.data" -exec cp {} web_dist/ \;
-        
-        # Create a list of files in the web_dist directory
-        echo "Files in web distribution:"
-        ls -la web_dist/
     
-    - name: Create index page
+    - name: Create simple index.html
       run: |
-        HTML_FILES=($(find web_dist -maxdepth 1 -type f -name "*.html"))
+        echo '<!DOCTYPE html>' > web_dist/index.html
+        echo '<html>' >> web_dist/index.html
+        echo '<head>' >> web_dist/index.html
+        echo '  <meta charset="utf-8">' >> web_dist/index.html
+        echo '  <meta name="viewport" content="width=device-width, initial-scale=1">' >> web_dist/index.html
+        echo '  <title>C++ Roguelike</title>' >> web_dist/index.html
+        echo '  <style>' >> web_dist/index.html
+        echo '    body { margin: 0; background-color: #222; color: #eee; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; }' >> web_dist/index.html
+        echo '    canvas { border: 1px solid #444; display: block; margin: 0 auto; }' >> web_dist/index.html
+        echo '    h1 { text-align: center; margin-bottom: 20px; }' >> web_dist/index.html
+        echo '    #loading { text-align: center; margin-top: 20px; }' >> web_dist/index.html
+        echo '  </style>' >> web_dist/index.html
+        echo '</head>' >> web_dist/index.html
+        echo '<body>' >> web_dist/index.html
+        echo '  <h1>C++ Roguelike</h1>' >> web_dist/index.html
         
-        if [ ${#HTML_FILES[@]} -eq 0 ]; then
-          echo "No HTML files found in the build directory. Creating a placeholder."
-          cat > web_dist/index.html << 'EOL'
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>C++ Roguelike</title>
-            <style>
-              body {
-                margin: 0;
-                background-color: #222;
-                color: #eee;
-                font-family: sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-              }
-              .error {
-                color: #ff5555;
-                max-width: 600px;
-                text-align: center;
-                padding: 20px;
-              }
-            </style>
-          </head>
-          <body>
-            <h1>C++ Roguelike Build</h1>
-            <div class="error">
-              <p>No web build files were generated. Please check the GitHub Actions logs for more information.</p>
-            </div>
-          </body>
-          </html>
-          EOL
-        elif [ ${#HTML_FILES[@]} -eq 1 ] && [ ! -f web_dist/index.html ]; then
-          # If there's exactly one HTML file and it's not index.html, create a redirect
+        # Look for HTML files other than index.html
+        HTML_FILES=($(find web_dist -maxdepth 1 -type f -name "*.html" ! -name "index.html"))
+        if [ ${#HTML_FILES[@]} -gt 0 ]; then
+          # Create a redirect to the first HTML file
           GAME_HTML=$(basename "${HTML_FILES[0]}")
-          cat > web_dist/index.html << EOL
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>C++ Roguelike</title>
-            <style>
-              body {
-                margin: 0;
-                background-color: #222;
-                color: #eee;
-                font-family: sans-serif;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                min-height: 100vh;
-              }
-              canvas {
-                border: 1px solid #444;
-                display: block;
-                margin: 0 auto;
-              }
-              h1 {
-                text-align: center;
-                margin-bottom: 20px;
-              }
-              #loading {
-                text-align: center;
-                margin-top: 20px;
-              }
-            </style>
-            <script>
-              window.onload = function() {
-                window.location.href = "${GAME_HTML}";
-              }
-            </script>
-          </head>
-          <body>
-            <h1>C++ Roguelike</h1>
-            <div id="canvas-container"></div>
-            <div id="loading">Loading...</div>
-          </body>
-          </html>
-          EOL
+          echo "  <script>window.location.href = \"$GAME_HTML\";</script>" >> web_dist/index.html
+        else
+          echo "  <div style=\"color: #ff5555; max-width: 600px; text-align: center; padding: 20px;\">" >> web_dist/index.html
+          echo "    <p>No web build files were generated. Please check the GitHub Actions logs for more information.</p>" >> web_dist/index.html
+          echo "  </div>" >> web_dist/index.html
         fi
+        
+        echo '  <div id="loading">Loading...</div>' >> web_dist/index.html
+        echo '</body>' >> web_dist/index.html
+        echo '</html>' >> web_dist/index.html
     
     - name: Deploy to GitHub Pages
       if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
