@@ -47,63 +47,21 @@ jobs:
     
     - name: Check for assets directory and create if needed
       run: |
-        if [ -d "assets" ]; then
-          echo "Assets directory exists"
-        else
-          echo "Creating assets directory"
-          mkdir -p assets
-          echo "This is a placeholder file" > assets/placeholder.txt
-        fi
+        echo "Skipping assets check - not required for build"
     
     - name: Configure CMake
       working-directory: ./build_web
       run: |
-        # Check if we need to use a different flags approach based on the project structure
-        if grep -q "EMSCRIPTEN" ../CMakeLists.txt; then
-          echo "Using existing EMSCRIPTEN flags in CMakeLists.txt"
-          emcmake cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release
-        else
-          echo "Using custom EMSCRIPTEN flags"
-          emcmake cmake .. -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
-            -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
-            -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
-        fi
+        # Simple configuration without assets preloading
+        emcmake cmake .. -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
+          -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]'"
     
     - name: Build
       working-directory: ./build_web
-      run: |
-        cmake --build . || {
-          echo "Build failed. Checking if we need to preload assets..."
-          
-          # Try alternate build with preloaded assets
-          cd ..
-          rm -rf build_web
-          mkdir -p build_web
-          cd build_web
-          
-          ASSETS_PATH=""
-          if [ -d "../assets" ]; then ASSETS_PATH="../assets"; fi
-          if [ -d "../Assets" ]; then ASSETS_PATH="../Assets"; fi
-          if [ -d "../resource" ]; then ASSETS_PATH="../resource"; fi
-          if [ -d "../resources" ]; then ASSETS_PATH="../resources"; fi
-          if [ -d "../Resources" ]; then ASSETS_PATH="../Resources"; fi
-          
-          if [ ! -z "$ASSETS_PATH" ]; then
-            echo "Found assets at $ASSETS_PATH"
-            emcmake cmake .. -G Ninja \
-              -DCMAKE_BUILD_TYPE=Release \
-              -DCMAKE_C_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
-              -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2" \
-              -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"png\"]' -s ALLOW_MEMORY_GROWTH=1 -s WASM=1 -s EXPORTED_RUNTIME_METHODS='[\"ccall\",\"cwrap\"]' --preload-file $ASSETS_PATH@/assets"
-            
-            cmake --build .
-          else
-            echo "Could not find assets directory"
-            exit 1
-          fi
-        }
+      run: cmake --build .
     
     - name: List build artifacts
       run: ls -la build_web/
