@@ -2,9 +2,9 @@ name: Web Build
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
@@ -13,14 +13,13 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
-      with:
-        submodules: recursive
-        
+    
     - name: Setup Emscripten
-      uses: mymindstorm/setup-emsdk@v12
-      with:
-        version: 3.1.45
-        
+      uses: mymindstorm/setup-emsdk@v11
+      
+    - name: Verify Emscripten
+      run: emcc --version
+      
     - name: Create Build Directory
       run: mkdir -p build_web
       
@@ -34,29 +33,20 @@ jobs:
         cd build_web
         emmake make
         
-    - name: Create Web Directory
-      run: mkdir -p web_output
+    - name: List build files
+      run: find build_web -type f -name "*.js" -o -name "*.wasm" -o -name "*.html"
       
-    - name: Copy Build Artifacts
+    - name: Create output directory
+      run: mkdir -p web_build
+      
+    - name: Copy build files
       run: |
-        cp build_web/*.js web_output/ || true
-        cp build_web/*.wasm web_output/ || true
-        cp build_web/*.html web_output/ || true
-        cp build_web/*.data web_output/ || true
-        # Create a simple index.html if it doesn't exist
-        if [ ! -f web_output/index.html ]; then
-          echo "<!DOCTYPE html><html><head><meta charset='utf-8'><title>C++ Roguelike</title></head><body><script src='$(ls web_output/*.js | head -1 | xargs basename)'></script></body></html>" > web_output/index.html
-        fi
-        
-    - name: Upload Artifacts
+        cp build_web/*.js web_build/ || echo "No JS files found"
+        cp build_web/*.wasm web_build/ || echo "No WASM files found"
+        cp build_web/*.html web_build/ || echo "No HTML files found"
+      
+    - name: Upload build artifacts
       uses: actions/upload-artifact@v3
       with:
         name: web-build
-        path: web_output/
-        
-    - name: Deploy to GitHub Pages
-      if: github.ref == 'refs/heads/main'
-      uses: JamesIves/github-pages-deploy-action@v4
-      with:
-        folder: web_output
-        branch: gh-pages
+        path: web_build/
