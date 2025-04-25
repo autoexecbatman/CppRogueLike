@@ -792,6 +792,7 @@ void Map::reveal()
 void Map::regenerate()
 {
 	clear();
+	refresh();
 	// clear the actors container except the player and the stairs
 	game.creatures.clear();
 	game.container->inv.clear();

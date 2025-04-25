@@ -57,6 +57,7 @@ void MenuName::menu_name()
 
 	menu_name_delete();
 	clear();
+	refresh();
 }
 
 // end of file: MenuName.cpp

@@ -35,7 +35,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				if (game.map->is_in_fov(Vector2D{ y, x }))
 				{
 					mvchgat(y, x, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
-					refresh();
+					/*refresh();*/
 				}
 			}
 		}
@@ -111,7 +111,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		mvprintw(MAP_HEIGHT - 1, 0, "Targeting mode: %s",
 			game.player->has_state(ActorState::IS_RANGED) ? "Attack" : "Examine");
 
-		refresh();
+		//refresh();
 
 		// Get the key press
 		const int key = getch();
@@ -163,6 +163,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		}
 	}
 	clear();
+	refresh();
 	return Vector2D{ -1, -1 };
 }
 

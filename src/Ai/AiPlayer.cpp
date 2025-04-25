@@ -436,6 +436,7 @@ void AiPlayer::display_inventory(Creature& owner)
 	{
 		delwin(inv);
 		clear();
+		refresh();
 	}
 	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
 	{
@@ -447,11 +448,13 @@ void AiPlayer::display_inventory(Creature& owner)
 		}
 		delwin(inv);
 		clear();
+		refresh();
 	}
 	else
 	{
 		delwin(inv);
 		clear();
+		refresh();
 	}
 }
 

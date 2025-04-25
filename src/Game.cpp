@@ -1233,7 +1233,11 @@ void Game::display_character_sheet() noexcept
 		}
 	}
 	delwin(character_sheet);
+	//clear();
+	// Redraw screen
 	clear();
+	/*game.render();*/
+	refresh();
 }
 
 // displays the actors as names
@@ -1434,7 +1438,7 @@ void Game::display_help() noexcept
 		mvwprintw(help_window, 7, 1, "Inventory: 'i'");
 		mvwprintw(help_window, 8, 1, "Character sheet: '@'");
 		mvwprintw(help_window, 9, 1, "Ranged attack or look around: 't' (requires ranged weapon to shoot)");
-		mvwprintw(help_window, 10, 1, "Examine enemies: 'l' (look at entities without attacking)");
+
 		mvwprintw(help_window, 11, 1, "Open door: 'o'");
 		mvwprintw(help_window, 12, 1, "Close door: 'c'");
 		mvwprintw(help_window, 13, 1, "Rest: 'r' (recovers health but costs food)");
@@ -1460,6 +1464,7 @@ void Game::display_help() noexcept
 	}
 	delwin(help_window);
 	clear();
+	refresh();
 }
 
 Web* Game::findWebAt(Vector2D position)

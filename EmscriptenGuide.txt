@@ -1,0 +1,7 @@
+cd build
+
+emcmake cmake ..
+
+cmake --build .
+
+python -m http.server 8080
