@@ -298,6 +298,7 @@ void AiPlayer::drop_item(Creature& owner)
 	// Clean up
 	delwin(dropWin);
 	clear();
+	refresh();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const

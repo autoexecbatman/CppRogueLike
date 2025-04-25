@@ -94,10 +94,13 @@ void MenuBuy::menu()
 	{
 		clear();
 		game.render();
+		refresh();
 		draw();
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	clear();
+	refresh();
 }
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {

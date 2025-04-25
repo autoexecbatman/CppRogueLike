@@ -133,7 +133,10 @@ void MenuSell::menu()
 	{
 		clear();
 		game.render();
+		refresh();
 		draw();
 		on_key(getch());
 	}
+	clear();
+	refresh();
 }
