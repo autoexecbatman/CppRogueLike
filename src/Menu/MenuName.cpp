@@ -16,7 +16,7 @@ void MenuName::menu_name_delete() noexcept { delwin(menuNameWindow); }
 
 std::string MenuName::menu_name_input()
 {
-	wgetnstr(menuNameWindow, name, 39);
+	wgetnstr(menuNameWindow, name, 13);
 	// check if name is empty
 	if ( strlen(name) != 0)
 	{
