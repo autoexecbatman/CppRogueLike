@@ -1,6 +1,8 @@
 #include <memory>
 #include <curses.h>
 #include <libtcod.h>
+#include <random>
+#include <cmath>
 
 #include "LightningBolt.h"
 #include "../Game.h"
@@ -17,22 +19,178 @@ bool LightningBolt::use(Item& owner, Creature& wearer)
 	if (!closestMonster)
 	{
 		game.message(HPBARMISSING_PAIR, "No enemy is close enough to strike.", true);
-
 		return false;
 	}
 	else
 	{
-		clear();
-		mvprintw(0, 0, "A lighting bolt strikes the %s with a loud thunder!\n", closestMonster->actorData.name.c_str());
-		refresh();
-		getch();
-		game.message(HPBARMISSING_PAIR, std::format("The damage is {} hit points.", damage), true);
+		game.appendMessagePart(WHITE_PAIR, "A lightning bolt strikes the ");
+		game.appendMessagePart(LIGHTNING_PAIR, closestMonster->actorData.name);
+		game.appendMessagePart(WHITE_PAIR, " with a loud thunder!");
+		game.finalizeMessage();
+		
+		// Animate the lightning bolt effect
+		animate_lightning(wearer.position, closestMonster->position);
 
+		game.message(HPBARMISSING_PAIR, std::format("The damage is {} hit points.", damage), true);
 		closestMonster->destructible->take_damage(*closestMonster, damage);
 
 		return Pickable::use(owner, wearer);
 	}
+}
 
+void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
+{
+	// Random generator for lightning jaggedness
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	std::uniform_int_distribution<> jitterDist(-1, 1);
+	
+	// Calculate direct path
+	std::vector<Vector2D> mainPath;
+	
+	// Use Bresenham's algorithm to get direct path
+	int x0 = from.x;
+	int y0 = from.y;
+	int x1 = to.x;
+	int y1 = to.y;
+	
+	int dx = std::abs(x1 - x0);
+	int dy = std::abs(y1 - y0);
+	int sx = (x0 < x1) ? 1 : -1;
+	int sy = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
+	
+	// Generate the main path
+	while (x0 != x1 || y0 != y1) {
+		int e2 = 2 * err;
+		if (e2 > -dy) {
+			err -= dy;
+			x0 += sx;
+		}
+		if (e2 < dx) {
+			err += dx;
+			y0 += sy;
+		}
+		
+		if (x0 != from.x || y0 != from.y) {
+			mainPath.push_back(Vector2D{ y0, x0 });
+		}
+	}
+	
+	// Lightning bolt characters
+	const char LIGHTNING_CHARS[] = { '/', '\\', '|', '-', '*', '+' };
+	const int CHAR_COUNT = 6;
+	std::uniform_int_distribution<> charDist(0, CHAR_COUNT - 1);
+	
+	// Create lightning flash
+	clear();
+	game.render();
+	
+	// Lightning phases
+	const int FLASH_COUNT = 3;
+	
+	for (int flash = 0; flash < FLASH_COUNT; flash++) {
+		// Generate jagged lightning path with branches
+		std::vector<Vector2D> lightningPath = mainPath;
+		
+		// Add jitter to make the bolt jagged
+		for (size_t i = 1; i < lightningPath.size() - 1; i++) {
+			// Every few segments, add jitter
+			if (i % 2 == 0) {
+				lightningPath[i].x += jitterDist(gen);
+				lightningPath[i].y += jitterDist(gen);
+			}
+		}
+		
+		// Draw lightning path
+		attron(COLOR_PAIR(LIGHTNING_PAIR));
+		for (const auto& pos : lightningPath) {
+			// Choose random lightning character for jagged effect
+			char symbol = LIGHTNING_CHARS[charDist(gen)];
+			mvaddch(pos.y, pos.x, symbol);
+		}
+		
+		// Add branch lightning (smaller offshoots)
+		int branchCount = 2 + flash;  // More branches in later flashes
+		std::uniform_int_distribution<> branchPosDist(0, static_cast<int>(lightningPath.size()) - 1);
+		std::uniform_int_distribution<> branchLengthDist(2, 5);
+		
+		for (int b = 0; b < branchCount; b++) {
+			// Choose a random point along the main path to branch from
+			if (lightningPath.size() > 3) {
+				int branchPos = branchPosDist(gen);
+				Vector2D branchStart = lightningPath[branchPos];
+				
+				// Generate branch in a random direction
+				int branchLength = branchLengthDist(gen);
+				int dirX = jitterDist(gen);
+				int dirY = jitterDist(gen);
+				
+				// Ensure we have a direction (not zero)
+				if (dirX == 0 && dirY == 0) dirX = 1;
+				
+				Vector2D current = branchStart;
+				for (int i = 0; i < branchLength; i++) {
+					current.x += dirX;
+					current.y += dirY;
+					
+					// Add some randomness to branch path
+					if (i > 0 && i % 2 == 0) {
+						current.x += jitterDist(gen);
+						current.y += jitterDist(gen);
+					}
+					
+					// Draw branch segment if it's within bounds
+					if (current.x >= 0 && current.y >= 0 && 
+						current.x < game.map->get_width() && current.y < game.map->get_height()) {
+						char symbol = LIGHTNING_CHARS[charDist(gen)];
+						mvaddch(current.y, current.x, symbol);
+					}
+				}
+			}
+		}
+		
+		// Create a bright flash at target position
+		mvaddch(to.y, to.x, '@');
+		
+		attroff(COLOR_PAIR(LIGHTNING_PAIR));
+		refresh();
+		
+		// Flash timing - quick for lightning
+		napms(70);
+		
+		// Clear for next flash
+		if (flash < FLASH_COUNT - 1) {
+			clear();
+			game.render();
+			napms(50); // Brief darkness between flashes
+		}
+	}
+	
+	// End with a final impact flash
+	attron(COLOR_PAIR(LIGHTNING_PAIR));
+	// Draw impact markers around target
+	for (int dy = -1; dy <= 1; dy++) {
+		for (int dx = -1; dx <= 1; dx++) {
+			if (dx == 0 && dy == 0) {
+				mvaddch(to.y, to.x, '*');
+			} else {
+				int x = to.x + dx;
+				int y = to.y + dy;
+				if (x >= 0 && y >= 0 && x < game.map->get_width() && y < game.map->get_height()) {
+					mvaddch(y, x, '.');
+				}
+			}
+		}
+	}
+	attroff(COLOR_PAIR(LIGHTNING_PAIR));
+	refresh();
+	napms(150);
+	
+	// Redraw game
+	clear();
+	game.render();
+	refresh();
 }
 
 void LightningBolt::load(const json& j)

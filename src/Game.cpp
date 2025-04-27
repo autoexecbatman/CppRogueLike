@@ -34,7 +34,10 @@
 #include "Web.h"
 #include "Armor.h"
 
+// added for DEBUGING AT PLAYER FEET
 #include "ActorTypes/Healer.h"
+#include "ActorTypes/Fireball.h"
+#include "ActorTypes/LightningBolt.h"
 
 //==INIT==
 // When the Game is created, 
@@ -1505,6 +1508,17 @@ void Game::add_debug_weapons_at_player_feet()
 	healthPotion->pickable = std::make_unique<Healer>(10);
 	healthPotion->value = 25;
 	container->add(std::move(healthPotion));
+
+	// Add a scroll of fireball at player's feet
+	auto scrollOfFireball = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR });
+	scrollOfFireball->pickable = std::make_unique<Fireball>(3, 12);
+	scrollOfFireball->value = 100;
+	container->add(std::move(scrollOfFireball));
+
+	auto scrollOfLightning = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of lightning", LIGHTNING_PAIR });
+	scrollOfLightning->pickable = std::make_unique<LightningBolt>(5, 20);
+	scrollOfLightning->value = 150;
+	container->add(std::move(scrollOfLightning));
 
 	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", DOOR_PAIR });
 	leatherArmor->pickable = std::make_unique<LeatherArmor>();
