@@ -82,6 +82,7 @@ private:
 	bool is_floor(Vector2D pos) const { return get_tile_type(pos) == TileType::FLOOR;}
 	bool is_water(Vector2D pos) const;
 	void set_explored(Vector2D pos); //set the tile as explored
+	void post_process_doors();
 public:
 
 	Map(int map_height, int map_width);

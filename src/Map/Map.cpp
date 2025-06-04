@@ -159,7 +159,6 @@ public:
 			bool isRightGeneralTop = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y > currentRoomCenter.y;
 			bool isRightGeneralBottom = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y < currentRoomCenter.y;
 
-
 			// Connect this room to the previous room (except for the first room)
 			if (roomNum != 0)
 			{
@@ -246,6 +245,8 @@ void Map::init(bool withActors)
 	bsp(map_width, map_height, *rng_unique, withActors);
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
+	post_process_doors();
+
 	if (game.dungeonLevel > 1) {
 		maybe_create_treasure_room(game.dungeonLevel);
 	}
@@ -289,6 +290,9 @@ void Map::load(const json& j)
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	bsp(map_width, map_height, *rng_unique, false);
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
+
+	// New: Post-process to place doors after loading map
+	post_process_doors();
 }
 
 void Map::save(json& j)
@@ -554,68 +558,49 @@ void Map::dig(Vector2D begin, Vector2D end)
 
 void Map::dig_corridor(Vector2D begin, Vector2D end)
 {
-	if (begin.x > end.x) { std::swap(begin.x, end.x); }
-	if (begin.y > end.y) { std::swap(begin.y, end.y); }
+    // Ensure begin.x <= end.x and begin.y <= end.y for consistent loops
+    // Original code did this effectively, keeping for consistency.
+    int x1 = begin.x;
+    int y1 = begin.y;
+    int x2 = end.x;
+    int y2 = end.y;
 
-	bool isDoorSet = false;
-	bool secondDoorSet = false;
-	bool thirdDoorSet = false;
-	Vector2D lastTile{ 0,0 };
-	for (int tileY = begin.y; tileY <= end.y; tileY++)
-	{
-		for (int tileX = begin.x; tileX <= end.x; tileX++)
-		{
-			Vector2D thisTile{ tileY, tileX };
-			if (!isDoorSet)
-			{
-				if (is_wall(thisTile))
-				{
-					set_door(thisTile, tileX, tileY);
-					isDoorSet = true;
-				}
-				else
-				{
-					set_tile(thisTile, TileType::CORRIDOR, 1);
-					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
-				}
-			}
-			else if (!secondDoorSet && isDoorSet) // if the first door is set and the second door is not set
-			{
-				if (get_tile_type(thisTile) == TileType::FLOOR || get_tile_type(thisTile) == TileType::WATER)
-				{
-					// set the last tile as a door
-					set_door(lastTile, lastTile.x, lastTile.y);
-					secondDoorSet = true;
-				}
-				else
-				{
-					set_tile(thisTile, TileType::CORRIDOR, 1);
-					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
-				}
-			}
-			else if (!thirdDoorSet && secondDoorSet && isDoorSet)
-			{
-				if (get_tile_type(thisTile) == TileType::WALL)
-				{
-					// set the last tile as a door
-					set_door(thisTile, tileX, tileY);
-					thirdDoorSet = true;
-				}
-				else
-				{
-					set_tile(thisTile, TileType::CORRIDOR, 1);
-					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
-				}
-			}
-			else
-			{
-				set_tile(thisTile, TileType::CORRIDOR, 1);
-				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
-			}
+    // --- CRITICAL FIX 1: Dig 1-tile wide L-shaped corridor ---
+    // This reinterpretation makes "perfect alignment" much more achievable.
+    // Choose a random path direction (horizontal first or vertical first)
+    bool horizontal_first = game.d.roll(0,1);
 
-			lastTile = Vector2D{ tileY, tileX };
-		}
-	}
+    Vector2D current_pos = begin; // Start digging from 'begin'
+
+    if (horizontal_first) {
+        // Dig horizontally first
+        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
+            current_pos = Vector2D{y1, x};
+            set_tile(current_pos, TileType::CORRIDOR, 1);
+            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+        }
+        // Then dig vertically
+        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
+            if (y == y1) continue; // Skip corner - already dug horizontally
+            current_pos = Vector2D{y, x2};
+            set_tile(current_pos, TileType::CORRIDOR, 1);
+            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+        }
+    } else {
+        // Dig vertically first
+        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
+            current_pos = Vector2D{y, x1};
+            set_tile(current_pos, TileType::CORRIDOR, 1);
+            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+        }
+        // Then dig horizontally
+        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
+            if (x == x1) continue; // Skip corner - already dug vertically
+            current_pos = Vector2D{y2, x};
+            set_tile(current_pos, TileType::CORRIDOR, 1);
+            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+        }
+    }
 }
 
 void Map::set_door(Vector2D thisTile, int tileX, int tileY)
@@ -1223,4 +1208,141 @@ void Map::display_item_distribution() const
 	clear();
 }
 
+void Map::post_process_doors()
+{
+    auto isRoom = [this](Vector2D pos) { return in_bounds(pos) && (get_tile_type(pos) == TileType::FLOOR || get_tile_type(pos) == TileType::WATER); };
+    auto isWall = [this](Vector2D pos) { return in_bounds(pos) && (get_tile_type(pos) == TileType::WALL || get_tile_type(pos) == TileType::WATER); };
+
+    for (int y = 0; y < map_height; ++y)
+    {
+        for (int x = 0; x < map_width; ++x)
+        {
+            Vector2D pos{ y, x };
+            if (get_tile_type(pos) == TileType::CORRIDOR)
+            {
+                int roomNeighbors = 0;
+                int wallNeighbors = 0;
+                
+                for (Vector2D dir : {Vector2D{-1, 0}, Vector2D{1, 0}, Vector2D{0, -1}, Vector2D{0, 1}})
+                {
+                    Vector2D neighborPos = {pos.y + dir.y, pos.x + dir.x};
+                    if (!in_bounds(neighborPos)) continue;
+                    
+                    if (isRoom(neighborPos))
+                    {
+                        roomNeighbors++;
+                    }
+                    else if (isWall(neighborPos))
+                    {
+                        wallNeighbors++;
+                    }
+                }
+                
+                if (roomNeighbors >= 1 && wallNeighbors >= 2)
+                {
+                    // Get 3x3 grid around current position
+                    Vector2D upLeft = {pos.y - 1, pos.x - 1};
+                    Vector2D up = {pos.y - 1, pos.x};
+                    Vector2D upRight = {pos.y - 1, pos.x + 1};
+                    Vector2D left = {pos.y, pos.x - 1};
+                    Vector2D right = {pos.y, pos.x + 1};
+                    Vector2D downLeft = {pos.y + 1, pos.x - 1};
+                    Vector2D down = {pos.y + 1, pos.x};
+                    Vector2D downRight = {pos.y + 1, pos.x + 1};
+                    
+                    // Exclude pattern RRR/WCC/WWW (and rotations)
+                    bool shouldExclude = false;
+                    
+                    // Original: RRR/WCC/WWW
+                    if (isRoom(upLeft) && isRoom(up) && isRoom(upRight) &&
+                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+                        isWall(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    // 90° rotation: WWR/CWR/CWR
+                    if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
+                        get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
+                        get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    // 180° rotation: WWW/CCW/RRR
+                    if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
+                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+                        isRoom(downLeft) && isRoom(down) && isRoom(downRight))
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    // 270° rotation: RWC/RWC/RWW
+                    if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
+                        isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
+                        isRoom(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    // Exclude WRR/WCC/WWC pattern
+                    if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
+                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+                        isWall(downLeft) && isWall(down) && get_tile_type(downRight) == TileType::CORRIDOR)
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    // Exclude WRw/WCC/WWW pattern (where w = water)
+                    if (isWall(upLeft) && isRoom(up) && get_tile_type(upRight) == TileType::WATER &&
+                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+                        isWall(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        shouldExclude = true;
+                    }
+                    
+                    if (shouldExclude)
+                    {
+                        continue; // Skip placing door for excluded patterns
+                    }
+                    
+                    // Check for WCW/RDW/RWW pattern (move door UP)
+                    if (isWall(upLeft) && get_tile_type(up) == TileType::CORRIDOR && isWall(upRight) &&
+                        isRoom(left) && isWall(right) &&
+                        isRoom(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        // Move door UP
+                        Vector2D upPos = {pos.y - 1, pos.x};
+                        set_door(upPos, upPos.x, upPos.y);
+                    }
+                    // Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
+                    else if (isWall(upLeft) && 
+                        (get_tile_type(up) == TileType::WATER || get_tile_type(up) == TileType::CORRIDOR) &&
+                        get_tile_type(upRight) == TileType::WATER &&
+                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+                        isWall(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        // Move door UP
+                        Vector2D upPos = {pos.y - 1, pos.x};
+                        set_door(upPos, upPos.x, upPos.y);
+                    }
+                    // Check for Z-pattern: WRR/CCW/WWW (move door left)
+                    else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
+                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+                        isWall(downLeft) && isWall(down) && isWall(downRight))
+                    {
+                        // Move door LEFT  
+                        Vector2D leftPos = {pos.y, pos.x - 1};
+                        set_door(leftPos, leftPos.x, leftPos.y);
+                    }
+                    else
+                    {
+                        // All other doors (including WRR/CCR/WRR pattern)
+                        set_door(pos, pos.x, pos.y);
+                    }
+                }
+            }
+        }
+    }
+}
 // end of file: Map.cpp
