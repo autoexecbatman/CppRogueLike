@@ -22,18 +22,23 @@ constexpr int INVENTORY_WIDTH = 60;
 struct PossibleMoves
 {
 	std::unordered_map<Controls, Vector2D> moves = {
+		// Arrow keys
 		{Controls::UP_ARROW, {-1, 0}},
-		{Controls::UP_ARROW_NUMPAD, {-1, 0}},
 		{Controls::DOWN_ARROW, {1, 0}},
-		{Controls::DOWN_ARROW_NUMPAD, {1, 0}},
 		{Controls::LEFT_ARROW, {0, -1}},
-		{Controls::LEFT_ARROW_NUMPAD, {0, -1}},
 		{Controls::RIGHT_ARROW, {0, 1}},
-		{Controls::RIGHT_ARROW_NUMPAD, {0, 1}},
-		{Controls::UP_LEFT_ARROW_NUMPAD, {-1, -1}},
-		{Controls::UP_RIGHT_ARROW_NUMPAD, {-1, 1}},
-		{Controls::DOWN_LEFT_ARROW_NUMPAD, {1, -1}},
-		{Controls::DOWN_RIGHT_ARROW_NUMPAD, {1, 1}},
+    
+		// WASD movement
+		{Controls::W_KEY, {-1, 0}},
+		{Controls::S_KEY, {1, 0}},
+		{Controls::A_KEY, {0, -1}},
+		{Controls::D_KEY, {0, 1}},
+    
+		// WASD diagonals
+		{Controls::Q_KEY, {-1, -1}},    // up-left
+		{Controls::E_KEY, {-1, 1}},     // up-right
+		{Controls::Z_KEY, {1, -1}},     // down-left  
+		{Controls::X_KEY, {1, 1}},      // down-right
 	};
 } m;
 
@@ -746,33 +751,34 @@ Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
 {
 	Vector2D delta{ 0, 0 };
 
-	switch (dirKey) {
+	switch (dirKey)
+	{
 	case KEY_UP:
-	case '8':
+	case 'w': case 'W':
 		delta = { -1, 0 }; // North
 		break;
 	case KEY_DOWN:
-	case '2':
+	case 's': case 'S':
 		delta = { 1, 0 }; // South
 		break;
 	case KEY_LEFT:
-	case '4':
+	case 'a': case 'A':
 		delta = { 0, -1 }; // West
 		break;
 	case KEY_RIGHT:
-	case '6':
+	case 'd': case 'D':
 		delta = { 0, 1 }; // East
 		break;
-	case '7':
+	case 'q': case 'Q':
 		delta = { -1, -1 }; // Northwest
 		break;
-	case '9':
+	case 'e': case 'E':
 		delta = { -1, 1 }; // Northeast
 		break;
-	case '1':
+	case 'z': case 'Z':
 		delta = { 1, -1 }; // Southwest
 		break;
-	case '3':
+	case 'x': case 'X':
 		delta = { 1, 1 }; // Southeast
 		break;
 	default:

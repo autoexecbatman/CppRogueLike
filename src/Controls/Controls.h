@@ -8,40 +8,29 @@
 enum class Controls
 {
 	// the controls for the player movement
-	UP = '8',
 	UP_ARROW = KEY_UP,
-	UP_ARROW_NUMPAD = KEY_A2,
-
-	DOWN = '2', 
 	DOWN_ARROW = KEY_DOWN,
-	DOWN_ARROW_NUMPAD = KEY_C2,
-
-	LEFT = '4',
 	LEFT_ARROW = KEY_LEFT,
-	LEFT_ARROW_NUMPAD = KEY_B1,
-
-	RIGHT = '6',
 	RIGHT_ARROW = KEY_RIGHT,
-	RIGHT_ARROW_NUMPAD = KEY_B3,
-
-	UP_LEFT = '7',
-	UP_LEFT_ARROW_NUMPAD = KEY_A1,
-
-	UP_RIGHT = '9',
-	UP_RIGHT_ARROW_NUMPAD = KEY_A3,
-
-	DOWN_LEFT = '1',
-	DOWN_LEFT_ARROW_NUMPAD = KEY_C1,
-
-	DOWN_RIGHT = '3',
-	DOWN_RIGHT_ARROW_NUMPAD = KEY_C3,
 
 	// input for the player to wait
-	WAIT = '5',
+	WAIT = ' ',
 	WAIT_ARROW_NUMPAD = KEY_B2,
 
 	// input for the player to hit himself
-	HIT_SELF = ' ',
+	HIT_SELF = 'k',
+
+	// Web-compatible WASD movement  
+	W_KEY = 'w',
+	S_KEY = 's',
+	A_KEY = 'a', 
+	D_KEY = 'd',
+
+	// WASD diagonals
+	Q_KEY = 'q',  // up-left
+	E_KEY = 'e',  // up-right
+	Z_KEY = 'z',  // down-left
+	X_KEY = 'x',  // down-right
 
 	// input for the player to pick items 
 	PICK = 'p',
