@@ -868,6 +868,13 @@ bool Map::is_door(Vector2D pos) const
 	return tileType == TileType::CLOSED_DOOR || tileType == TileType::OPEN_DOOR;
 }
 
+bool Map::is_open_door(Vector2D pos) const
+{
+	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
+		return false;
+	return get_tile_type(pos) == TileType::OPEN_DOOR;
+}
+
 bool Map::open_door(Vector2D pos)
 {
 	if (!is_door(pos))

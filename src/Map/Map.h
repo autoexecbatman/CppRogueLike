@@ -122,6 +122,7 @@ public:
 	bool maybe_create_treasure_room(int dungeonLevel);
 	void display_item_distribution() const;
 	bool is_door(Vector2D pos) const;
+	bool is_open_door(Vector2D pos) const;
 	bool is_wall(Vector2D pos) const;
 	void set_tile(Vector2D pos, TileType newType, double cost);
 
