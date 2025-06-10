@@ -14,6 +14,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 if(EMSCRIPTEN)
     message(STATUS "Building with Emscripten")
     
+    # EMSCRIPTEN ESCAPE KEY FIX: Add compile definitions
+    add_definitions(-DEMSCRIPTEN)
+    
+    # Emscripten-specific PDCurses handling
+    add_compile_definitions(PDCURSES_EMSCRIPTEN)
+    
+    # Force proper refresh behavior
+    add_compile_definitions(FORCE_REFRESH_CALLS)
+    
     # Common compilation options
     add_compile_options(-O2 -Wall)
     

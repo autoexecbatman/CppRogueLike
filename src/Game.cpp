@@ -330,7 +330,8 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 	bool run = true;
 	while (run)
 	{
-		clear();
+		// EMSCRIPTEN FIX: Removed clear() - causes screen corruption in web builds
+		// Use selective rendering instead
 
 		// make the line follow the mouse position
 		// if mouse move
@@ -471,7 +472,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		case 'r':
 		case 27:
 			game.message(WHITE_PAIR, "Target selection canceled", true);
-			// if the key escape is pressed then cancel the target selection
+			// EMSCRIPTEN FIX: Clean exit without screen corruption
 			run = false;
 			break;
 
@@ -552,7 +553,7 @@ void Game::target()
 	bool run = true;
 	while (run)
 	{
-		clear();
+		// EMSCRIPTEN FIX: Removed clear() - causes screen corruption in web builds
 
 		// make the line follow the mouse position
 		// if mouse move
@@ -676,7 +677,7 @@ void Game::target()
 
 		case 'r':
 		case 27:
-			// if the key escape is pressed then cancel the target selection
+			// EMSCRIPTEN FIX: Clean exit without screen corruption
 			run = false;
 			break;
 			
@@ -685,7 +686,8 @@ void Game::target()
 		} // end of switch (key)
 
 	} // end of while (run)
-	clear();
+	// EMSCRIPTEN FIX: Removed problematic clear() at function end
+	// Game rendering will handle screen updates
 }
 
 void Game::load_all()
@@ -1539,6 +1541,33 @@ void Game::add_debug_weapons_at_player_feet()
 	// Add a message for the player
 	message(WHITE_PAIR, "Debug weapons and armor placed at your feet.", true);
 
+}
+
+// EMSCRIPTEN COMPATIBILITY FUNCTIONS
+void Game::safe_screen_clear()
+{
+#ifdef EMSCRIPTEN
+	// For Emscripten: Don't use clear(), just redraw
+	restore_game_display();
+#else
+	// For native builds: Use normal clear
+	clear();
+	refresh();
+#endif
+}
+
+void Game::force_screen_refresh()
+{
+	refresh();
+	doupdate();  // Force immediate update
+}
+
+void Game::restore_game_display()
+{
+	// Clean redraw of entire game state
+	game.render();
+	gui->gui_render();
+	force_screen_refresh();
 }
 
 // end of file: Game.cpp

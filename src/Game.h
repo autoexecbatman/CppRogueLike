@@ -87,6 +87,11 @@ public:
 
 	void display_help() noexcept;
 
+	// EMSCRIPTEN COMPATIBILITY FUNCTIONS
+	void safe_screen_clear();     // Safe clear for web environment
+	void force_screen_refresh();  // Force refresh for Emscripten
+	void restore_game_display();  // Restore clean game state
+
 	Web* findWebAt(Vector2D position);
 
 	void add_debug_weapons_at_player_feet();
