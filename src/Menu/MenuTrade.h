@@ -7,8 +7,8 @@
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
-#include "Actor/Actor.h"
-#include "ActorTypes/Player.h"
+#include "../Actor/Actor.h"
+#include "../ActorTypes/Player.h"
 
 class Buy : public IMenuState
 {

@@ -3,8 +3,8 @@
 #include <memory>
 
 #include "MenuBuy.h"
-#include "Game.h"
-#include "ActorTypes/Player.h"
+#include "../Game.h"
+#include "../ActorTypes/Player.h"
 
 void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 {
@@ -37,6 +37,8 @@ MenuBuy::~MenuBuy()
 
 void MenuBuy::menu_print_state(size_t state)
 {
+	if (state >= menuItems.size()) return; // Bounds check
+	
 	if (currentState == state)
 	{
 		menu_highlight_on();
@@ -53,7 +55,7 @@ void MenuBuy::draw()
 	// print items to buy from shopkeeper
 	menu_clear();
 	populate_items(buyer.container->inv);
-	for (size_t i{ 0 }; i < buyer.container->inv.size(); ++i)
+	for (size_t i{ 0 }; i < menuItems.size(); ++i) // Use menuItems.size() not inv.size()
 	{
 		menu_print_state(i);
 	}
@@ -65,6 +67,7 @@ void MenuBuy::on_key(int key)
 	switch (key)
 	{
 		case KEY_UP:
+		case 'w':
 			if (menuItems.empty())
 			{
 				return;
@@ -72,6 +75,7 @@ void MenuBuy::on_key(int key)
 			currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 			break;
 		case KEY_DOWN:
+		case 's':
 			if (menuItems.empty())
 			{
 				return;
@@ -82,8 +86,10 @@ void MenuBuy::on_key(int key)
 			menu_set_run_false();
 			break;
 		case 10: // ENTER
-			// if selected buy item
-			handle_buy(menuWindow, buyer, *game.player);
+			if (!menuItems.empty()) // Only handle if menu has items
+			{
+				handle_buy(menuWindow, buyer, *game.player);
+			}
 			break;
 	}
 }

@@ -1,15 +1,18 @@
 #pragma once
 
-#include <string>
-#include <span>
 #include <vector>
+#include <string>
+#include <deque>
+#include <span>
 
 #include "BaseMenu.h"
-#include "Actor/Actor.h"
+#include "../Actor/Actor.h"
 
+class Item;
+class Creature;
 class Player;
 
-class MenuSell : public BaseMenu
+class MenuBuy : public BaseMenu
 {
 	size_t menu_height; // set in constructor after items are populated for dynamic sizing
 	size_t menu_width{ 20 };
@@ -17,16 +20,15 @@ class MenuSell : public BaseMenu
 	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
-	Creature& player;
-	Creature& shopkeeper;
+	Creature& buyer;
 
 	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
-	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller);
+	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller);
 public:
-	MenuSell(Creature& shopkeeper, Creature& player);
-	~MenuSell();
+	MenuBuy(Creature& buyer);
+	~MenuBuy();
 
 	void draw();
 	void on_key(int key);

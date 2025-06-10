@@ -5,7 +5,7 @@
 #include "../Random/RandomDice.h"
 #include "../Actor/Actor.h"
 #include "../Items.h"
-#include "../MenuTrade.h"
+#include "../Menu/MenuTrade.h"
 #include "../ActorTypes/Player.h"
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()

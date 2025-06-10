@@ -1,6 +1,6 @@
 #include "MenuSell.h"
-#include "Game.h"
-#include "Actor/Actor.h"
+#include "../Game.h"
+#include "../Actor/Actor.h"
 #include "BaseMenu.h"
 
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
@@ -22,17 +22,17 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 
 void MenuSell::menu_print_state(size_t state)
 {
+	if (state >= menuItems.size()) return; // Bounds check
+	
 	if (currentState == state)
 	{
 		menu_highlight_on();
 	}
-	populate_items(player.container->inv);
 	menu_print(1, state, menu_get_string(state));
 	if (currentState == state)
 	{
 		menu_highlight_off();
 	}
-
 }
 
 void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller)
@@ -91,7 +91,8 @@ MenuSell::~MenuSell()
 void MenuSell::draw()
 {
 	menu_clear();
-	for (size_t i{ 0 }; i < player.container->inv.size(); ++i)
+	populate_items(player.container->inv); // Ensure menuItems is up to date
+	for (size_t i{ 0 }; i < menuItems.size(); ++i) // Use menuItems.size() not inv.size()
 	{
 		menu_print_state(i);
 	}
@@ -103,12 +104,14 @@ void MenuSell::on_key(int key)
 	switch (key)
 	{
 	case KEY_UP:
+		if (menuItems.empty()) return; // Check for empty menu
 		if (currentState > 0)
 		{
 			--currentState;
 		}
 		break;
 	case KEY_DOWN:
+		if (menuItems.empty()) return; // Check for empty menu
 		if (currentState < menuItems.size() - 1)
 		{
 			++currentState;
@@ -116,7 +119,10 @@ void MenuSell::on_key(int key)
 		break;
 	case 10: // Enter key
 	{
-		 handle_sell(menuWindow, shopkeeper, player);
+		if (!menuItems.empty()) // Only handle if menu has items
+		{
+			handle_sell(menuWindow, shopkeeper, player);
+		}
 	}
 	break;
 	case 27: // Escape key

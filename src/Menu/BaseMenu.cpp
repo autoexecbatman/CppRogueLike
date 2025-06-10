@@ -1,5 +1,5 @@
 #include "BaseMenu.h"
-#include "Game.h"
+#include "../Game.h"
 
 void BaseMenu::menu_new(int height, int width, int starty, int startx)
 {

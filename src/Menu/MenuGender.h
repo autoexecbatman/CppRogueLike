@@ -7,8 +7,8 @@
 #include <unordered_map>
 #include <curses.h>
 
-#include "../BaseMenu.h"
-#include "../IMenuState.h"
+#include "BaseMenu.h"
+#include "IMenuState.h"
 
 class IMenuState;
 

@@ -8,7 +8,7 @@
 #include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Monsters.h"
-#include "../MenuTrade.h"
+#include "../Menu/MenuTrade.h"
 #include "Attacker.h"
 
 Attacker::Attacker(std::string roll) : roll(roll) {}

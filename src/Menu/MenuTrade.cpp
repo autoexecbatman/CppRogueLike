@@ -1,9 +1,9 @@
 #include "MenuTrade.h"
-#include "Ai/AiPlayer.h"
-#include "Game.h"
+#include "../Ai/AiPlayer.h"
+#include "../Game.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
-#include "Actor/Actor.h"
+#include "../Actor/Actor.h"
 
 void Buy::on_selection()
 {
@@ -64,12 +64,14 @@ void MenuTrade::on_key(int key)
 	{
 
 	case KEY_UP:
+	case 'w':
 	{
 		currentState = (currentState + iMenuStates.size() - 1) % iMenuStates.size();
 		break;
 	}
 
 	case KEY_DOWN:
+	case 's':
 	{
 		currentState = (currentState + 1) % iMenuStates.size();
 		break;
@@ -100,4 +102,6 @@ void MenuTrade::menu()
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	clear();
+	refresh();
 }

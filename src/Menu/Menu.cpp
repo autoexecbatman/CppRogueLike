@@ -73,15 +73,17 @@ void Menu::on_key(int key)
 	{
 
 	case KEY_UP:
+	case 'w':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
-		break; // break out of switch keep running menu loop
+		break;
 	}
 
 	case KEY_DOWN:
+	case 's':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
-		break; // break out of switch keep running menu loop
+		break;
 	}
 
 	case 10:
@@ -91,7 +93,12 @@ void Menu::on_key(int key)
 		break;
 	}
 
-	case 'N':
+	case 27: // Escape key
+	{
+		menu_set_run_false();
+		break;
+	}
+
 	case 'n':
 	{
 		menu_set_run_false();
@@ -99,7 +106,6 @@ void Menu::on_key(int key)
 		break;
 	}
 
-	case 'L':
 	case 'l':
 	{
 		menu_set_run_false();
@@ -107,7 +113,6 @@ void Menu::on_key(int key)
 		break;
 	}
 
-	case 'O':
 	case 'o':
 	{
 		menu_set_run_false();
@@ -115,7 +120,6 @@ void Menu::on_key(int key)
 		break;
 	}
 
-	case 'Q':
 	case 'q':
 	{
 		menu_set_run_false(); // stop running menu loop
@@ -135,6 +139,8 @@ void Menu::menu()
 		menu_key_listen(); // listen for key presses
 		on_key(keyPress); // run the key press
 	}
+	clear();
+	refresh();
 }
 
 // end of file: Menu.cpp

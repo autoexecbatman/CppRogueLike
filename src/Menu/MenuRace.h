@@ -6,8 +6,8 @@
 #include <unordered_map>
 #include <memory>
 
-#include "../BaseMenu.h"
-#include "../IMenuState.h"
+#include "BaseMenu.h"
+#include "IMenuState.h"
 
 class Human : public IMenuState
 {

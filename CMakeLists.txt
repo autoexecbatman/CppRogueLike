@@ -114,6 +114,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Controls/Controls.h
 
     # Menu
+    ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.h
+    ${PROJECT_SOURCE_DIR}/Menu/IMenuState.h
     ${PROJECT_SOURCE_DIR}/Menu/Menu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/Menu.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuClass.cpp
@@ -124,6 +127,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuName.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuRace.cpp
     ${PROJECT_SOURCE_DIR}/Menu/MenuRace.h
+    ${PROJECT_SOURCE_DIR}/Menu/MenuBuy.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/MenuBuy.h
+    ${PROJECT_SOURCE_DIR}/Menu/MenuSell.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/MenuSell.h
+    ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.h
 
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/ActorTypes/Fireball.cpp
@@ -153,15 +162,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/main_C++RogueLike.cpp
     ${PROJECT_SOURCE_DIR}/Items.h
     ${PROJECT_SOURCE_DIR}/Items.cpp
-    ${PROJECT_SOURCE_DIR}/BaseMenu.h
-    ${PROJECT_SOURCE_DIR}/BaseMenu.cpp
-    ${PROJECT_SOURCE_DIR}/IMenuState.h
-    ${PROJECT_SOURCE_DIR}/MenuTrade.cpp
-    ${PROJECT_SOURCE_DIR}/MenuTrade.h
-    ${PROJECT_SOURCE_DIR}/MenuBuy.cpp
-    ${PROJECT_SOURCE_DIR}/MenuBuy.h
-    ${PROJECT_SOURCE_DIR}/MenuSell.cpp
-    ${PROJECT_SOURCE_DIR}/MenuSell.h
     ${PROJECT_SOURCE_DIR}/Dijkstra.cpp
     ${PROJECT_SOURCE_DIR}/Dijkstra.h
     ${PROJECT_SOURCE_DIR}/TargetingSystem.cpp
