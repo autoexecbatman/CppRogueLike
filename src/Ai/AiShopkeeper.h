@@ -13,6 +13,8 @@ class AiShopkeeper : public Ai
 {
 private:
 	int moveCount = 0;
+	int cooldownCount = 0; // Cooldown turns after interaction  
+	bool tradeMenuOpen = false; // Prevents multiple trade menu opens
 	void update(Creature& owner) override;
 	void load(const json& j) override;
 	void save(json& j) override;

@@ -9,31 +9,31 @@
 ItemFactory::ItemFactory() {
     // Initialize with all item types
 
-    // Potions
+    // HEALING - CLERIC REPLACEMENT (Solo fighter needs reliable healing)
     add_item_type({
-        "Health Potion", 30, 1, 0, -0.2f,
+        "Health Potion", 50, 1, 0, 0.2f,  // MORE COMMON - solo needs healing
         [](Vector2D pos) { game.create_item<HealthPotion>(pos); }
         });
 
-    // Scrolls
+    // MAGIC UTILITY - WIZARD REPLACEMENT (Solo fighter needs magic support)
     add_item_type({
-        "Scroll of Lightning Bolt", 15, 2, 0, 0.1f,
+        "Scroll of Lightning Bolt", 20, 2, 0, 0.2f,  // MORE COMMON - utility magic
         [](Vector2D pos) { game.create_item<ScrollOfLightningBolt>(pos); }
         });
 
     add_item_type({
-        "Scroll of Fireball", 10, 3, 0, 0.2f,
+        "Scroll of Fireball", 15, 3, 0, 0.3f,  // MORE COMMON - AoE for solo
         [](Vector2D pos) { game.create_item<ScrollOfFireball>(pos); }
         });
 
     add_item_type({
-        "Scroll of Confusion", 10, 2, 0, 0.1f,
+        "Scroll of Confusion", 15, 2, 0, 0.2f,  // MORE COMMON - crowd control
         [](Vector2D pos) { game.create_item<ScrollOfConfusion>(pos); }
         });
 
-    // Weapons
+    // WEAPONS - FIGHTER PROGRESSION (Inferior weapons rare, focus on upgrades)
     add_item_type({
-        "Dagger", 15, 1, 5, -0.3f,
+        "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
         [](Vector2D pos) {
             auto item = std::make_unique<Item>(pos, ActorData{ '/', "dagger", 1 });
             item->pickable = std::make_unique<Dagger>();
@@ -42,7 +42,7 @@ ItemFactory::ItemFactory() {
         });
 
     add_item_type({
-        "Short Sword", 10, 2, 0, -0.1f,
+        "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
         [](Vector2D pos) {
             auto item = std::make_unique<Item>(pos, ActorData{ '/', "short sword", 1 });
             item->pickable = std::make_unique<ShortSword>();
@@ -51,7 +51,7 @@ ItemFactory::ItemFactory() {
         });
 
     add_item_type({
-        "Long Sword", 8, 3, 0, 0.2f,
+        "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
         [](Vector2D pos) {
             auto item = std::make_unique<Item>(pos, ActorData{ '/', "long sword", 1 });
             item->pickable = std::make_unique<LongSword>();
@@ -60,7 +60,7 @@ ItemFactory::ItemFactory() {
         });
 
     add_item_type({
-        "Staff", 7, 3, 0, 0.1f,
+        "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
         [](Vector2D pos) {
             auto item = std::make_unique<Item>(pos, ActorData{ '/', "staff", 1 });
             item->pickable = std::make_unique<Staff>();
@@ -69,7 +69,7 @@ ItemFactory::ItemFactory() {
         });
 
     add_item_type({
-        "Longbow", 6, 4, 0, 0.2f,
+        "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
         [](Vector2D pos) {
             auto item = std::make_unique<Item>(pos, ActorData{ ')', "longbow", 1 });
             item->pickable = std::make_unique<Longbow>();
@@ -83,24 +83,24 @@ ItemFactory::ItemFactory() {
         [](Vector2D pos) { game.create_item<GoldPile>(pos); }
         });
 
-    // Food
+    // FOOD - SOLO RESOURCE MANAGEMENT (No party sharing, need reliable food)
     add_item_type({
-        "Ration", 15, 1, 0, -0.1f,
+        "Ration", 25, 1, 0, 0.1f,  // MORE COMMON - solo needs consistent food
         [](Vector2D pos) { game.create_item<Ration>(pos); }
         });
 
     add_item_type({
-        "Fruit", 10, 1, 0, -0.2f,
+        "Fruit", 15, 1, 0, 0.0f,  // STEADY - quick hunger fix
         [](Vector2D pos) { game.create_item<Fruit>(pos); }
         });
 
     add_item_type({
-        "Bread", 8, 1, 0, -0.1f,
+        "Bread", 12, 1, 0, 0.0f,  // STEADY - basic sustenance
         [](Vector2D pos) { game.create_item<Bread>(pos); }
         });
 
     add_item_type({
-        "Meat", 5, 2, 0, 0.0f,
+        "Meat", 8, 2, 0, 0.1f,  // VALUABLE - high nutrition for solo
         [](Vector2D pos) { game.create_item<Meat>(pos); }
         });
 
@@ -111,23 +111,18 @@ ItemFactory::ItemFactory() {
         });
 
     add_item_type({
-    "Leather Armor", 15, 1, 0, -0.1f,
-    [](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
+        "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
+        [](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
         });
 
     add_item_type({
-"Leather Armor", 15, 1, 0, -0.1f,
-[](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
+        "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
+        [](Vector2D pos) { game.create_item<ChainMailItem>(pos); }
         });
 
     add_item_type({
-    "Chain Mail", 10, 3, 0, 0.0f,
-    [](Vector2D pos) { game.create_item<ChainMailItem>(pos); }
-        });
-
-    add_item_type({
-    "Plate Mail", 5, 5, 0, 0.2f,
-    [](Vector2D pos) { game.create_item<PlateMailItem>(pos); }
+        "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
+        [](Vector2D pos) { game.create_item<PlateMailItem>(pos); }
         });
 
     // Populate item categories

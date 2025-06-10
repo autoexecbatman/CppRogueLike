@@ -73,7 +73,7 @@ private:
 	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
 	
 	void init_tiles();
-	void place_stairs() const;
+	void place_stairs();
 	bool is_stairs(Vector2D pos) const;
 	void spawn_water(Vector2D begin, Vector2D end);
 	void spawn_items(Vector2D begin, Vector2D end);
@@ -96,7 +96,7 @@ public:
 	void tile_action(Creature& owner, TileType tileType);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos);
 	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
-	bool can_walk(Vector2D pos) const;
+	bool can_walk(Vector2D pos);
 	void add_monster(Vector2D pos);
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
 	void update();
@@ -107,7 +107,7 @@ public:
 	std::vector<std::vector<Tile>> get_map() const;
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
-	std::vector<Vector2D> neighbors(Vector2D id) const;
+	std::vector<Vector2D> neighbors(Vector2D id);
 	double cost(Vector2D from_node, Vector2D to_node);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
@@ -116,7 +116,7 @@ public:
 	bool has_los(Vector2D from, Vector2D to) const;
 	bool open_door(Vector2D pos);
 	bool close_door(Vector2D pos);
-	void place_amulet() const;
+	void place_amulet();
 	void display_spawn_rates() const;
 	void create_treasure_room(Vector2D begin, Vector2D end, int quality);
 	bool maybe_create_treasure_room(int dungeonLevel);

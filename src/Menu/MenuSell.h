@@ -12,7 +12,7 @@ class Player;
 class MenuSell : public BaseMenu
 {
 	size_t menu_height; // set in constructor after items are populated for dynamic sizing
-	size_t menu_width{ 20 };
+	size_t menu_width{ 35 }; // Increased width to accommodate gold values
 	size_t menu_starty{ static_cast<size_t>((LINES / 2) - 5) };
 	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
 	size_t currentState{ 0 };

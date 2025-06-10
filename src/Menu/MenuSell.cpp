@@ -10,7 +10,17 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 	{
 		if (item)
 		{
-			menuItems.push_back(item->actorData.name);
+			// Display item name with right-aligned gold value
+			std::string itemName = item->actorData.name;
+			std::string goldText = "(" + std::to_string(item->value) + "g)";
+			
+			// Pad to align gold values (assuming max name length ~20)
+			size_t totalWidth = 28;
+			size_t padding = totalWidth > (itemName.length() + goldText.length()) ? 
+							 totalWidth - itemName.length() - goldText.length() : 1;
+			
+			std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
+			menuItems.push_back(itemDisplay);
 		}
 		else
 		{

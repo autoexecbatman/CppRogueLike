@@ -1,10 +1,14 @@
-// MonsterFactory.cpp
+// file: MonsterFactory.cpp
 #include "MonsterFactory.h"
 #include "Game.h"
 #include "ActorTypes/Monsters.h"
 #include "Spider.h"
 #include "Random/RandomDice.h"
 #include "AiMonsterRanged.h"
+#include "ActorTypes/Healer.h"
+#include "ActorTypes/LightningBolt.h"
+#include "ActorTypes/Fireball.h"
+#include "Food.h"
 
 MonsterFactory::MonsterFactory() {
     // Initialize with all monster types
@@ -54,8 +58,40 @@ MonsterFactory::MonsterFactory() {
         });
 
     addMonsterType({
-        "Shopkeeper", 5, 1, 0, 0.0f,
-        [](Vector2D pos) { game.create_creature<Shopkeeper>(pos); }
+        "Shopkeeper", 8, 1, 0, 0.0f,  // INCREASED from 5 to 8 - more shopkeepers
+        [](Vector2D pos) { 
+            game.create_creature<Shopkeeper>(pos);
+            // Get the shopkeeper that was just created (last in creatures vector)
+            auto& shopkeeper = *game.creatures.back();
+            
+            // Give shopkeeper starting inventory with meaningful items
+            auto healthPotion1 = std::make_unique<Item>(pos, ActorData{'!', "health potion", HPBARMISSING_PAIR});
+            healthPotion1->pickable = std::make_unique<Healer>(10);
+            healthPotion1->value = 50;
+            shopkeeper.container->add(std::move(healthPotion1));
+            
+            auto healthPotion2 = std::make_unique<Item>(pos, ActorData{'!', "health potion", HPBARMISSING_PAIR});
+            healthPotion2->pickable = std::make_unique<Healer>(10);
+            healthPotion2->value = 50;
+            shopkeeper.container->add(std::move(healthPotion2));
+            
+            auto scrollLightning = std::make_unique<Item>(pos, ActorData{'#', "scroll of lightning", LIGHTNING_PAIR});
+            scrollLightning->pickable = std::make_unique<LightningBolt>(5, 20);
+            scrollLightning->value = 150;
+            shopkeeper.container->add(std::move(scrollLightning));
+            
+            auto scrollFireball = std::make_unique<Item>(pos, ActorData{'#', "scroll of fireball", FIREBALL_PAIR});
+            scrollFireball->pickable = std::make_unique<Fireball>(3, 12);
+            scrollFireball->value = 100;
+            shopkeeper.container->add(std::move(scrollFireball));
+            
+            auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", DOOR_PAIR});
+            ration->pickable = std::make_unique<Food>(50);  // 50 nutrition value
+            ration->value = 30;
+            shopkeeper.container->add(std::move(ration));
+            
+            shopkeeper.gold = 500;  // Give shopkeeper gold to buy player items
+        }
         });
 }
 

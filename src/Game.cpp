@@ -91,11 +91,11 @@ void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
 
 void Game::spawn_creatures() const
 {
-	// add a new monster every 5 turns
-	if (game.time % 5 == 0)
+	// INCREASED SPAWN RATE - add a new monster every 2 turns (was 5)
+	if (game.time % 2 == 0)
 	{
-		// if there are less than 6 monsters on the map
-		if (creatures.size() < MAX_MONSTERS)
+		// INCREASED MONSTER LIMIT - if there are less than 10 monsters on the map (was 6)
+		if (creatures.size() < 10)
 		{
 			// game.rooms must be populated
 			if (game.rooms.empty())

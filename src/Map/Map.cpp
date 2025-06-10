@@ -690,7 +690,7 @@ void Map::spawn_player(Vector2D begin, Vector2D end)
 	game.player->position.y = playerPos.y;
 }
 
-void Map::place_stairs() const
+void Map::place_stairs()
 {
 	int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
 	index = index % 2 == 0 ? index : index - 1;
@@ -711,21 +711,26 @@ bool Map::is_stairs(Vector2D pos) const
 	return game.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos) const
+bool Map::can_walk(Vector2D pos)
 {
+    if (is_wall(pos)) // check if the tile is a wall
+    {
+        return false;
+    }
 
-	if (is_wall(pos)) // check if the tile is a wall
-	{
-		return false;
-	}
+    // Check for doors - can only walk through open doors
+    if (get_tile_type(pos) == TileType::CLOSED_DOOR)
+    {
+        return false; // Closed doors block movement
+    }
 
-	// Check for doors - can only walk through open doors
-	if (get_tile_type(pos) == TileType::CLOSED_DOOR)
-	{
-		return false; // Closed doors block movement
-	}
+    // CRITICAL FIX: Check if there's already an actor at this position
+    if (get_actor(pos) != nullptr)
+    {
+        return false; // Position occupied by another actor
+    }
 
-	return true;
+    return true;
 }
 
 void Map::add_monster(Vector2D pos)
@@ -790,7 +795,7 @@ void Map::regenerate()
 	game.map->init(true);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id) const
+std::vector<Vector2D> Map::neighbors(Vector2D id)
 {
 	std::vector<Vector2D> results;
 
@@ -932,7 +937,7 @@ bool Map::close_door(Vector2D pos)
 	return true;
 }
 
-void Map::place_amulet() const
+void Map::place_amulet()
 {
 	// Only place the amulet on the final level
 	if (game.dungeonLevel == FINAL_DUNGEON_LEVEL)
@@ -1268,7 +1273,7 @@ void Map::post_process_doors()
                         shouldExclude = true;
                     }
                     
-                    // 90° rotation: WWR/CWR/CWR
+                    // 90ï¿½ rotation: WWR/CWR/CWR
                     if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
                         get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
                         get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
@@ -1276,7 +1281,7 @@ void Map::post_process_doors()
                         shouldExclude = true;
                     }
                     
-                    // 180° rotation: WWW/CCW/RRR
+                    // 180ï¿½ rotation: WWW/CCW/RRR
                     if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
                         get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
                         isRoom(downLeft) && isRoom(down) && isRoom(downRight))
@@ -1284,7 +1289,7 @@ void Map::post_process_doors()
                         shouldExclude = true;
                     }
                     
-                    // 270° rotation: RWC/RWC/RWW
+                    // 270ï¿½ rotation: RWC/RWC/RWW
                     if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
                         isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
                         isRoom(downLeft) && isWall(down) && isWall(downRight))

@@ -9,9 +9,10 @@
 #include "../ActorTypes/Player.h"
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
-constexpr auto MIN_TRADE_DISTANCE = 2;  // Minimum distance to initiate a trade
+constexpr auto MAX_TRADE_DISTANCE = 1;  // Maximum distance to initiate a trade (adjacent only - no diagonals)
+constexpr auto COOLDOWN_TURNS = 10; // Turns to wait after interaction before approaching again
 
-AiShopkeeper::AiShopkeeper() : moveCount(0) {}
+AiShopkeeper::AiShopkeeper() : moveCount(0), cooldownCount(0), tradeMenuOpen(false) {}
 
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
@@ -42,27 +43,51 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	{
 		int nextX = owner.position.x + move.x;
 		int nextY = owner.position.y + move.y;
-		if (game.map->can_walk(Vector2D{ nextY, nextX }))
+		Vector2D nextPos{ nextY, nextX };
+		
+		// ULTIMATE FIX: Multiple collision checks to prevent any overlap
+		if (game.map->can_walk(nextPos))
 		{
+			// EXTRA SAFETY: Explicit player collision check
+			if (game.player && game.player->position == nextPos)
+			{
+				continue; // Skip this move - player is there
+			}
+			
+			// EXTRA SAFETY: Double-check no actor at position
+			if (game.map->get_actor(nextPos) != nullptr)
+			{
+				continue; // Skip this move - position occupied
+			}
+			
+			// SAFE TO MOVE
 			owner.position.x = nextX;
 			owner.position.y = nextY;
 			break; // Exit the loop after a successful move
 		}
 	}
+	// If no valid moves available, shopkeeper stays in place
 }
 
 void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 {
 	const double distance = sqrt(pow(targetx - shopkeeper.position.x, 2) + pow(targety - shopkeeper.position.y, 2));
-
-	if (distance >= MIN_TRADE_DISTANCE)
-	{
-		moveToTarget(shopkeeper, targetx, targety);
-	}
-	else if (!shopkeeper.destructible->is_dead())
+	
+	// Only trade if adjacent (distance exactly 1.0) and menu not already open
+	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.destructible->is_dead() && !tradeMenuOpen)
 	{
 		trade(shopkeeper, *game.player);
+		tradeMenuOpen = true; // Mark that trade menu is open
+		// Start cooldown after trading
+		cooldownCount = COOLDOWN_TURNS;
+		moveCount = 0; // Stop tracking immediately
 	}
+	else if (distance > MAX_TRADE_DISTANCE)
+	{
+		// Only move if not in cooldown and distance is greater than trade distance
+		moveToTarget(shopkeeper, targetx, targety);
+	}
+	// If distance is exactly right but menu is open or shopkeeper is dead, do nothing
 }
 
 void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
@@ -73,36 +98,64 @@ void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 
 void AiShopkeeper::update(Creature& owner)
 {
-	//game.log("Shopkeeper AI update");
-	//if (owner.ai == nullptr || owner.destructible->is_dead()) // if the owner has no ai OR if the owner is dead
-	//{
-	//	return; // do nothing
-	//}
+	// Skip if dead
+	if (owner.ai == nullptr || owner.destructible->is_dead())
+	{
+		return;
+	}
 
-	//if (game.map->is_in_fov(owner.position)) // if the owner is in the fov
-	//{
-	//	// move towards the player
-	//	moveCount = TRACKING_TURNS;
-	//}
-	//else if (moveCount > 0) // if the move count is greater than 0
-	//{
-	//	moveCount--; // decrement the move count
-	//}
+	// Handle cooldown - don't approach player during cooldown
+	if (cooldownCount > 0)
+	{
+		cooldownCount--;
+		// Reset trade menu flag when cooldown ends
+		if (cooldownCount == 0)
+		{
+			tradeMenuOpen = false;
+		}
+		return; // Do nothing during cooldown
+	}
 
-	//if (moveCount > 0) // if the move count is greater than 0
-	//{
-	//	moveOrTrade(owner, game.player->position.x, game.player->position.y); // move or trade with the player
-	//}
+	// Check if player is visible and not already tracking
+	if (game.map->is_in_fov(owner.position))
+	{
+		// Only start tracking if we're not already tracking (prevents constant following)
+		if (moveCount == 0)
+		{
+			moveCount = TRACKING_TURNS;
+		}
+	}
+	else if (moveCount > 0)
+	{
+		// Player not visible but still tracking - countdown
+		moveCount--;
+	}
+
+	// Move towards player only if actively tracking
+	if (moveCount > 0)
+	{
+		moveOrTrade(owner, game.player->position.x, game.player->position.y);
+	}
 }
 
 void AiShopkeeper::load(const json& j)
 {
 	moveCount = j.at("moveCount").get<int>();
+	if (j.contains("cooldownCount"))
+	{
+		cooldownCount = j.at("cooldownCount").get<int>();
+	}
+	if (j.contains("tradeMenuOpen"))
+	{
+		tradeMenuOpen = j.at("tradeMenuOpen").get<bool>();
+	}
 }
 
 void AiShopkeeper::save(json& j)
 {
 	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
 	j["moveCount"] = moveCount;
+	j["cooldownCount"] = cooldownCount;
+	j["tradeMenuOpen"] = tradeMenuOpen;
 }
 // file: AiShopkeeper.cpp
