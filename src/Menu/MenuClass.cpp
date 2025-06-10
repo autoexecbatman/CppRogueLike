@@ -4,11 +4,46 @@
 #include "../Game.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
+#include "../Items.h"
+#include "../Armor.h"
+#include "../ActorTypes/Healer.h"
+
+void equip_fighter_starting_gear() {
+	auto& player = *game.player;
+	
+	// PLATE MAIL (AC 3) - Auto-equipped
+	auto plateMail = std::make_unique<Item>(player.position, ActorData{'[', "plate mail", DOOR_PAIR});
+	plateMail->pickable = std::make_unique<PlateMail>();
+	plateMail->add_state(ActorState::IS_EQUIPPED);
+	player.container->add(std::move(plateMail));
+	
+	// LONG SWORD (1d8) - Auto-equipped
+	auto longSword = std::make_unique<Item>(player.position, ActorData{'/', "long sword", WHITE_PAIR});
+	longSword->pickable = std::make_unique<LongSword>();
+	longSword->add_state(ActorState::IS_EQUIPPED);
+	player.container->add(std::move(longSword));
+	
+	// Update fighter combat stats
+	player.weaponEquipped = "Long Sword";
+	player.attacker = std::make_unique<Attacker>("D8");
+	player.destructible->armorClass = 3; // Plate mail AC
+	player.gold = 200; // Increased starting gold
+	
+	// HEALING POTIONS (3x)
+	for(int i = 0; i < 3; i++) {
+		auto healthPotion = std::make_unique<Item>(player.position, ActorData{'!', "health potion", HPBARMISSING_PAIR});
+		healthPotion->pickable = std::make_unique<Healer>(10);
+		player.container->add(std::move(healthPotion));
+	}
+}
 
 void Fighter::on_selection()
 {
 	game.player->playerClass = "Fighter";
 	game.player->playerClassState = Player::PlayerClassState::FIGHTER;
+	
+	// EQUIP FIGHTER STARTING GEAR
+	equip_fighter_starting_gear();
 }
 
 void Rogue::on_selection()
@@ -38,6 +73,7 @@ void ClassRandom::on_selection()
 	case 1:
 		game.player->playerClass = "Fighter";
 		game.player->playerClassState = Player::PlayerClassState::FIGHTER;
+		equip_fighter_starting_gear();
 		break;
 	case 2:
 		game.player->playerClass = "Rogue";

@@ -8,8 +8,11 @@
 #include "../Actor/Actor.h"
 #include "../Random/RandomDice.h"
 #include "../Colors/Colors.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../ActorTypes/Healer.h"
 #include "../Web.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../Items.h"
+#include "../Armor.h"
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
 {
@@ -29,7 +32,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 	const int playerXp = 0; // the player's experience points
 	const int playerAC = 10; // the player's armor class
 
-	gold = 100;
+	gold = 100; // Default starting gold (increased to 200 for fighters in MenuClass)
 
 	attacker = std::make_unique<Attacker>("D2");
 	destructible = std::make_unique<PlayerDestructible>(
@@ -42,6 +45,8 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 	);
 	ai = std::make_unique<AiPlayer>();
 	container = std::make_unique<Container>(26);
+	
+	// REMOVED: Equipment initialization moved to MenuClass after class selection
 	
 }
 

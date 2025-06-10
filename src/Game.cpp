@@ -60,7 +60,8 @@ void Game::init()
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
 
-	game.add_debug_weapons_at_player_feet();
+	// REMOVED: Debug weapons no longer added
+	// game.add_debug_weapons_at_player_feet();
 
 	//==LOG==
 	game.log("game.init() was called!");
