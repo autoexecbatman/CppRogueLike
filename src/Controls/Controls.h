@@ -13,13 +13,6 @@ enum class Controls
 	LEFT_ARROW = KEY_LEFT,
 	RIGHT_ARROW = KEY_RIGHT,
 
-	// input for the player to wait
-	WAIT = ' ',
-	WAIT_ARROW_NUMPAD = KEY_B2,
-
-	// input for the player to hit himself
-	HIT_SELF = 'k',
-
 	// Web-compatible WASD movement  
 	W_KEY = 'w',
 	S_KEY = 's',
@@ -30,51 +23,27 @@ enum class Controls
 	Q_KEY = 'q',  // up-left
 	E_KEY = 'e',  // up-right
 	Z_KEY = 'z',  // down-left
-	X_KEY = 'x',  // down-right
-
-	// input for the player to pick items 
-	PICK = 'p',
-	PICK_SHIFT_STAR = '*',
-	PICK_NUMPAD = PADSTAR,
-
-	// input for displaying the inventory
-	INVENTORY = 'i',
-
-	// input for displaying the game menu
-	ESCAPE = 27,
+	C_KEY = 'c',  // down-right
 
 	MOUSE = KEY_MOUSE,
 
-	HEAL = 'a',
+	TEST_COMMAND = '{', // test command for debugging
 
-	// input for the player to drop items
-	DROP = 'd',
-
+	WAIT = 'h',
+	PICK = 'p',
+	DROP = 'l',
+	INVENTORY = 'i',
+	ESCAPE = 27,
 	CHAR_SHEET = '@',
-
 	DESCEND = '>',
-
-	// input for the player to target 
 	TARGET = 't',
-
-	// the controls for the player to exit the game
-	QUIT = 'q',
-
-	// the controls for the player to enter debug mode
+	QUIT = '~',
 	DEBUG = 'z',
-
-	// the controls for the player to reveal the map
 	REVEAL = 'm',
-
-	// the controls for the player to regenerate the map
 	REGEN = 'n',
-
 	OPEN_DOOR = 'o',
-	CLOSE_DOOR = 'c',
-
+	CLOSE_DOOR = 'k',
 	REST = 'r',
-
-	HELP = 'h',
-
+	HELP = '?',
 };
 #endif // !CONTROLS_H

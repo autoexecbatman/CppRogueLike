@@ -38,7 +38,7 @@ struct PossibleMoves
 		{Controls::Q_KEY, {-1, -1}},    // up-left
 		{Controls::E_KEY, {-1, 1}},     // up-right
 		{Controls::Z_KEY, {1, -1}},     // down-left  
-		{Controls::X_KEY, {1, 1}},      // down-right
+		{Controls::C_KEY, {1, 1}},      // down-right
 	};
 } m;
 
@@ -557,15 +557,14 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	switch (key)
 	{
 
-	/*case Controls::WAIT:*/
-	case Controls::WAIT_ARROW_NUMPAD:
+	case Controls::WAIT:
 	{
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		isWaiting = true;
 		break;
 	}
 
-	case Controls::HIT_SELF:
+	case Controls::TEST_COMMAND:
 	{
 		game.player->attacker->attack(*game.player, *game.player);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -582,8 +581,6 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	}
 
 	case Controls::PICK:
-	case Controls::PICK_SHIFT_STAR:
-	case Controls::PICK_NUMPAD:
 	{
 		pick_item(owner);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
