@@ -22,51 +22,48 @@ int AiShopkeeper::calculate_step(int positionDifference)
 
 void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target)
 {
-	// Calculate how many squares away the target is horizontally and vertically
-	int moveX = target.x - owner.position.x; // Number of squares to move horizontally
-	int moveY = target.y - owner.position.y; // Number of squares to move vertically
-
-	// Decide in which direction to take one step horizontally and vertically
-	int stepX = calculate_step(moveX); // Direction to move horizontally (left or right)
-	int stepY = calculate_step(moveY); // Direction to move vertically (up or down)
-
-	// List potential moves in order of priority
-	std::vector<Vector2D> moves
-	{
-		{stepY,stepX},  // First priority: move diagonally
-		{0, stepX},     // Second priority: move horizontally only 
-		{stepY, 0}      // Third priority: move vertically only
-	};
-
-	// Try each move in order of priority until one is successful
-	for (const auto& move : moves)
-	{
-		int nextX = owner.position.x + move.x;
-		int nextY = owner.position.y + move.y;
-		Vector2D nextPos{ nextY, nextX };
-		
-		// ULTIMATE FIX: Multiple collision checks to prevent any overlap
-		if (game.map->can_walk(nextPos))
-		{
-			// EXTRA SAFETY: Explicit player collision check
-			if (game.player && game.player->position == nextPos)
-			{
-				continue; // Skip this move - player is there
-			}
-			
-			// EXTRA SAFETY: Double-check no actor at position
-			if (game.map->get_actor(nextPos) != nullptr)
-			{
-				continue; // Skip this move - position occupied
-			}
-			
-			// SAFE TO MOVE
-			owner.position.x = nextX;
-			owner.position.y = nextY;
-			break; // Exit the loop after a successful move
-		}
-	}
-	// If no valid moves available, shopkeeper stays in place
+    // Calculate direction vector using Vector2D operations
+    Vector2D direction = target - owner.position;  // Assumes Vector2D has subtraction operator
+    
+    // Calculate step directions for each axis
+    Vector2D step{
+        direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1),  // Y step direction
+        direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1)   // X step direction
+    };
+    
+    // Define movement priorities using Vector2D directly
+    std::vector<Vector2D> moves{
+        step,                    // First priority: diagonal movement (both Y and X)
+        Vector2D{0, step.x},            // Second priority: horizontal only (X movement)
+        Vector2D{step.y, 0}             // Third priority: vertical only (Y movement)
+    };
+    
+    // Try each move in priority order
+    for (const auto& move : moves)
+    {
+        Vector2D nextPos = owner.position + move;  // Vector2D addition
+        
+        // ULTIMATE FIX: Multiple collision checks to prevent any overlap
+        if (game.map->can_walk(nextPos))
+        {
+            // EXTRA SAFETY: Explicit player collision check
+            if (game.player && game.player->position == nextPos)
+            {
+                continue; // Skip this move - player is there
+            }
+            
+            // EXTRA SAFETY: Double-check no actor at position
+            if (game.map->get_actor(nextPos) != nullptr)
+            {
+                continue; // Skip this move - position occupied
+            }
+            
+            // SAFE TO MOVE - Update position using Vector2D
+            owner.position = nextPos;
+            break; // Exit after successful move
+        }
+    }
+    // If no valid moves available, shopkeeper stays in place
 }
 
 void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
