@@ -111,21 +111,17 @@ void MenuSell::draw()
 
 void MenuSell::on_key(int key)
 {
-	switch (key)
+	switch (keyPress)
 	{
 	case KEY_UP:
+	case 'w':
 		if (menuItems.empty()) return; // Check for empty menu
-		if (currentState > 0)
-		{
-			--currentState;
-		}
+		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 		break;
 	case KEY_DOWN:
+	case 's':
 		if (menuItems.empty()) return; // Check for empty menu
-		if (currentState < menuItems.size() - 1)
-		{
-			++currentState;
-		}
+		currentState = (currentState + 1) % menuItems.size();
 		break;
 	case 10: // Enter key
 	{
@@ -151,7 +147,8 @@ void MenuSell::menu()
 		game.render();
 		refresh();
 		draw();
-		on_key(getch());
+		menu_key_listen();
+		on_key(keyPress);
 	}
 	clear();
 	refresh();

@@ -128,12 +128,14 @@ void MenuRace::on_key(int key)
 	{
 
 	case KEY_UP:
+	case 'w':
 	{
 		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break;
 	}
 
 	case KEY_DOWN:
+	case 's':
 	{
 		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
 		break;
