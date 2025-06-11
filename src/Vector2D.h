@@ -1,12 +1,25 @@
 #pragma once
 
 #include <iostream>
+#include <cmath>
 
 // {y,x} position
 struct Vector2D
 {
 	int y{ 0 };
 	int x{ 0 };
+
+	// C++ Core Guidelines C.21: Rule of Five compliance
+	// Default all special member functions for trivial type
+	Vector2D() = default;
+	Vector2D(const Vector2D&) = default;
+	Vector2D& operator=(const Vector2D&) = default;
+	Vector2D(Vector2D&&) = default;
+	Vector2D& operator=(Vector2D&&) = default;
+	~Vector2D() = default;
+
+	// Custom constructor for convenience
+	constexpr Vector2D(int y_val, int x_val) noexcept : y(y_val), x(x_val) {}
 
 	// operator overloads
 
@@ -80,8 +93,15 @@ struct Vector2D
 	}
 
 	// Get distance to another position
-	int distance_to(Vector2D other) const
+	// Note: Returns double for precision, but cannot be noexcept due to sqrt
+	double distance_to(Vector2D other) const
 	{
 		return std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2));
+	}
+
+	// Manhattan distance (noexcept alternative)
+	int manhattan_distance_to(Vector2D other) const noexcept
+	{
+		return std::abs(x - other.x) + std::abs(y - other.y);
 	}
 };

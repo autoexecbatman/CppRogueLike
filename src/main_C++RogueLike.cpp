@@ -40,9 +40,17 @@ int main()
 	/*_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | *CRTDBG*LEAK_CHECK_DF);*/
 	/*_CrtSetBreakAlloc(1779);*/
 	
-	//==DEBUG_STREAM==
-	std::ofstream debugFile("clog.txt"); // create a file to store debug info
-	std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
+	//==DEBUG_STREAM== - C++ Core Guidelines E.6: Exception-safe file handling
+	std::ofstream debugFile;
+	try {
+		debugFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+		debugFile.open("clog.txt"); // Will throw on failure - proper RAII
+		std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
+	}
+	catch (const std::exception& e) {
+		std::cerr << "Warning: Could not open debug file clog.txt: " << e.what() << std::endl;
+		// Continue execution without debug logging
+	}
 	
 	#ifdef EMSCRIPTEN
 	//==INIT_SDL==
@@ -126,7 +134,18 @@ int main()
 	Weapons weapons;
 	weapons.print_chart(); // print weapons chart for debugging
 	
-	debugFile.close();
+	// C++ Core Guidelines E.6: Explicit close for error handling
+	if (debugFile.is_open()) {
+		try {
+			debugFile.close();
+			if (debugFile.fail()) {
+				std::cerr << "Warning: Error closing debug file" << std::endl;
+			}
+		}
+		catch (const std::exception& e) {
+			std::cerr << "Warning: Exception while closing debug file: " << e.what() << std::endl;
+		}
+	}
 	/*_CrtDumpMemoryLeaks();*/
 	
 	return 0;

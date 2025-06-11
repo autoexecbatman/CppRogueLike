@@ -48,6 +48,7 @@ public:
 	ActorData actorData{ 0,"string",0 };
 
 	std::vector<ActorState> states;
+	// C++ Core Guidelines F.6: noexcept for simple state operations
 	bool has_state(ActorState state) const noexcept { return std::ranges::find(states, state) != states.end(); }
 	void add_state(ActorState state) noexcept { states.push_back(state); }
 	void remove_state(ActorState state) noexcept { std::erase_if(states, [state](ActorState s) { return s == state; }); }

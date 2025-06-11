@@ -135,8 +135,9 @@ public:
 
 	int keyPress{ 0 };
 	int lastKey{ 0 };
-	void key_store() { std::clog << "storing key" << std::endl; lastKey = keyPress; }
-	void key_listen() { std::clog << "getting key" << std::endl; keyPress = getch(); }
+	// C++ Core Guidelines F.6: noexcept for functions that cannot throw
+	void key_store() noexcept { std::clog << "storing key" << std::endl; lastKey = keyPress; }
+	void key_listen() noexcept { std::clog << "getting key" << std::endl; keyPress = getch(); }
 
 	// the player goes down stairs
 	int dungeonLevel{ 1 };
