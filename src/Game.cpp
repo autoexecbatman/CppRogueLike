@@ -187,21 +187,19 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 	game.update(); // update map and actors positions
 	gui.gui_update(); // update the gui
 	game.log("Update OK.");
-	// **NEW**: If a menu was added, skip the rest of this loop
+
+	//==DRAW==
+	game.log("Running render...");
+	gui.gui_render(); // render the gui
+	game.render(); // render map and actors to the screen
+	game.log("Render OK.");
+	
+	// Check for menus AFTER rendering so positions are updated
 	if (!game.menus.empty())
 	{
 		game.windowState = Game::WindowState::MENU;
 		return;
 	}
-
-	//==DRAW==
-	game.log("Running render...");
-	gui.gui_render(); // render the gui
-	//clear();
-	//refresh();
-	game.render(); // render map and actors to the screen
-	//refresh();
-	game.log("Render OK.");
 }
 
 void Game::update()

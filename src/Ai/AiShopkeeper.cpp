@@ -20,11 +20,11 @@ int AiShopkeeper::calculate_step(int positionDifference)
 	return positionDifference > 0 ? 1 : -1;
 }
 
-void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
+void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target)
 {
 	// Calculate how many squares away the target is horizontally and vertically
-	int moveX = targetX - owner.position.x; // Number of squares to move horizontally
-	int moveY = targetY - owner.position.y; // Number of squares to move vertically
+	int moveX = target.x - owner.position.x; // Number of squares to move horizontally
+	int moveY = target.y - owner.position.y; // Number of squares to move vertically
 
 	// Decide in which direction to take one step horizontally and vertically
 	int stepX = calculate_step(moveX); // Direction to move horizontally (left or right)
@@ -69,13 +69,20 @@ void AiShopkeeper::moveToTarget(Actor& owner, int targetX, int targetY)
 	// If no valid moves available, shopkeeper stays in place
 }
 
-void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
+void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
 {
-	const double distance = sqrt(pow(targetx - shopkeeper.position.x, 2) + pow(targety - shopkeeper.position.y, 2));
+	// Use unified distance function - no coordinate confusion!
+	const int distance = shopkeeper.get_tile_distance(target);
+	
+	// DEBUG: Log distance calculation
+	game.log("Shopkeeper distance to player: " + std::to_string(distance) + 
+		" (Shopkeeper: " + std::to_string(shopkeeper.position.x) + "," + std::to_string(shopkeeper.position.y) + 
+		" Player: " + std::to_string(target.x) + "," + std::to_string(target.y) + ")");
 	
 	// Only trade if adjacent (distance exactly 1.0) and menu not already open
 	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.destructible->is_dead() && !tradeMenuOpen)
 	{
+		game.log("TRADE CONDITION MET: Opening trade menu!");
 		trade(shopkeeper, *game.player);
 		tradeMenuOpen = true; // Mark that trade menu is open
 		// Start cooldown after trading
@@ -84,10 +91,16 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, int targetx, int targety)
 	}
 	else if (distance > MAX_TRADE_DISTANCE)
 	{
+		game.log("Distance > MAX_TRADE_DISTANCE, moving toward player");
 		// Only move if not in cooldown and distance is greater than trade distance
-		moveToTarget(shopkeeper, targetx, targety);
+		moveToTarget(shopkeeper, target);
 	}
-	// If distance is exactly right but menu is open or shopkeeper is dead, do nothing
+	else
+	{
+		game.log("Not trading: distance=" + std::to_string(distance) + 
+			" dead=" + std::to_string(shopkeeper.destructible->is_dead()) + 
+			" menuOpen=" + std::to_string(tradeMenuOpen));
+	}
 }
 
 void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
@@ -134,7 +147,8 @@ void AiShopkeeper::update(Creature& owner)
 	// Move towards player only if actively tracking
 	if (moveCount > 0)
 	{
-		moveOrTrade(owner, game.player->position.x, game.player->position.y);
+		// Clean Vector2D usage - no coordinate confusion!
+		moveOrTrade(owner, game.player->position);
 	}
 }
 

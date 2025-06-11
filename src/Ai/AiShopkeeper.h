@@ -4,6 +4,7 @@
 #include <span>
 
 #include "Ai.h"
+#include "../Vector2D.h"
 
 class Item;
 class Player;
@@ -19,11 +20,11 @@ private:
 	void load(const json& j) override;
 	void save(json& j) override;
 	int calculate_step(int positionDifference);
-	void moveToTarget(Actor& owner, int targetx, int targety);
+	void moveToTarget(Actor& owner, Vector2D target);
 public:
 	AiShopkeeper();
 protected:
-	void moveOrTrade(Creature& owner, int targetx, int targety);
+	void moveOrTrade(Creature& owner, Vector2D target);
 public:
 	void trade(Creature& shopkeeper, Creature& player);
 };
