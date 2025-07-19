@@ -83,5 +83,5 @@ Build the project using CMake, follow these steps:
 #### OPEN TO CONTRIBUTION !!! 🤗
 Thank you for considering a contribution to CppRogueLike.
 
-##### TO TEST THE WEB BUILD CLICK:
+# TO TEST THE WEB BUILD CLICK:
 https://autoexecbatman.github.io/CppRogueLike/C++RogueLike.html
