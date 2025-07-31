@@ -828,6 +828,7 @@ void Game::save_all()
 void Game::next_level()
 {
 	dungeonLevel++; // increment the dungeon level
+	shopkeepersOnCurrentLevel = 0; // Reset shopkeeper counter for new level
 	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true); // present a message to the player
 	player->destructible->heal(player->destructible->hpMax / 2); // heal the player
 	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)

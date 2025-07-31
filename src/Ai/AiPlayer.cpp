@@ -136,8 +136,8 @@ void AiPlayer::update(Creature& owner)
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
 		Vector2D targetPosition = owner.position + moveVector;
-		game.map->tile_action(owner, game.map->get_tile_type(targetPosition));
-		look_to_move(owner, targetPosition); // must check colissions before creature dies from attack
+		// Only call tile_action after successful move (inside look_to_move)
+		look_to_move(owner, targetPosition); // must check collisions before creature dies from attack
 		look_to_attack(targetPosition, owner);
 		look_on_floor(targetPosition);
 		if (shouldComputeFOV)
@@ -520,7 +520,9 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 
 void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 {
-	if (!game.map->is_collision(owner, game.map->get_tile_type(targetPosition), targetPosition))
+	TileType targetTileType = game.map->get_tile_type(targetPosition);
+	
+	if (!game.map->is_collision(owner, targetTileType, targetPosition))
 	{
 		// Check if there's a web at the target position
 		bool webEffect = false;
@@ -546,7 +548,31 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 		if (!webEffect)
 		{
 			move(owner, targetPosition);
+			// Call tile_action after successful move
+			game.map->tile_action(owner, targetTileType);
 			shouldComputeFOV = true;
+		}
+	}
+	else
+	{
+		// Handle collision messages
+		switch (targetTileType)
+		{
+		case TileType::WATER:
+			if (!owner.has_state(ActorState::CAN_SWIM))
+			{
+				game.log("You can't swim");
+				game.message(COLOR_WHITE, "You can't swim", true);
+			}
+			break;
+		case TileType::WALL:
+			// Wall collision already handled elsewhere
+			break;
+		case TileType::CLOSED_DOOR:
+			// Door collision - could add message here if desired
+			break;
+		default:
+			break;
 		}
 	}
 }

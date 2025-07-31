@@ -141,6 +141,7 @@ public:
 
 	// the player goes down stairs
 	int dungeonLevel{ 1 };
+	int shopkeepersOnCurrentLevel{ 0 }; // Track shopkeepers per level
 	void next_level();
 	Creature* get_actor(Vector2D pos) const noexcept;
 	void dispay_levelup(int level);

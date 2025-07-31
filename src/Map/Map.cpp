@@ -351,9 +351,9 @@ void Map::tile_action(Creature& owner, TileType tileType)
 	switch (tileType)
 	{
 	case TileType::WATER:
+		// Only called on successful water entry (with swim ability)
 		game.log("You are in water");
 		game.message(COLOR_WHITE, "You are in water", true);
-		owner.destructible->take_damage(owner, 1);
 		break;
 	case TileType::WALL:
 		game.log("You are against a wall");

@@ -16,8 +16,6 @@
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
 {
-	add_state(ActorState::CAN_SWIM);
-
 	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
 	strength = roll3d6();
 	dexterity = roll3d6();
