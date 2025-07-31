@@ -12,7 +12,7 @@ constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MAX_TRADE_DISTANCE = 1;  // Maximum distance to initiate a trade (adjacent only - no diagonals)
 constexpr auto COOLDOWN_TURNS = 10; // Turns to wait after interaction before approaching again
 
-AiShopkeeper::AiShopkeeper() : moveCount(0), cooldownCount(0), tradeMenuOpen(false) {}
+AiShopkeeper::AiShopkeeper() : moveCount(0), cooldownCount(0), tradeMenuOpen(false), hasApproachedPlayer(false) {}
 
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
@@ -114,6 +114,12 @@ void AiShopkeeper::update(Creature& owner)
 		return;
 	}
 
+	// If shopkeeper has already approached player once, don't approach again
+	if (hasApproachedPlayer)
+	{
+		return; // Stay passive after first approach
+	}
+
 	// Handle cooldown - don't approach player during cooldown
 	if (cooldownCount > 0)
 	{
@@ -133,6 +139,7 @@ void AiShopkeeper::update(Creature& owner)
 		if (moveCount == 0)
 		{
 			moveCount = TRACKING_TURNS;
+			hasApproachedPlayer = true; // Mark that shopkeeper has now approached
 		}
 	}
 	else if (moveCount > 0)
@@ -160,6 +167,10 @@ void AiShopkeeper::load(const json& j)
 	{
 		tradeMenuOpen = j.at("tradeMenuOpen").get<bool>();
 	}
+	if (j.contains("hasApproachedPlayer"))
+	{
+		hasApproachedPlayer = j.at("hasApproachedPlayer").get<bool>();
+	}
 }
 
 void AiShopkeeper::save(json& j)
@@ -168,5 +179,6 @@ void AiShopkeeper::save(json& j)
 	j["moveCount"] = moveCount;
 	j["cooldownCount"] = cooldownCount;
 	j["tradeMenuOpen"] = tradeMenuOpen;
+	j["hasApproachedPlayer"] = hasApproachedPlayer;
 }
 // file: AiShopkeeper.cpp

@@ -16,6 +16,7 @@ private:
 	int moveCount = 0;
 	int cooldownCount = 0; // Cooldown turns after interaction  
 	bool tradeMenuOpen = false; // Prevents multiple trade menu opens
+	bool hasApproachedPlayer = false; // Shopkeeper only approaches player once
 	void update(Creature& owner) override;
 	void load(const json& j) override;
 	void save(json& j) override;
