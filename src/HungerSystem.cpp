@@ -11,26 +11,32 @@ HungerSystem::HungerSystem() :
     HUNGRY_THRESHOLD(700),
     STARVING_THRESHOLD(900),
     DYING_THRESHOLD(950),
-    current_state(HungerState::SATIATED)
+    current_state(HungerState::SATIATED),
+    well_fed_message_shown(false)
 {
 }
 
-void HungerSystem::increase_hunger(int amount) {
+void HungerSystem::increase_hunger(int amount)
+{
     hunger_value = std::min(hunger_value + amount, hunger_max);
     update_hunger_state();
 }
 
-void HungerSystem::decrease_hunger(int amount) {
+void HungerSystem::decrease_hunger(int amount)
+{
     hunger_value = std::max(hunger_value - amount, 0);
     update_hunger_state();
 }
 
-HungerState HungerSystem::get_hunger_state() const {
+HungerState HungerSystem::get_hunger_state() const
+{
     return current_state;
 }
 
-std::string HungerSystem::get_hunger_state_string() const {
-    switch (current_state) {
+std::string HungerSystem::get_hunger_state_string() const
+{
+    switch (current_state)
+    {
     case HungerState::WELL_FED:
         return "Well Fed";
     case HungerState::SATIATED:
@@ -46,11 +52,13 @@ std::string HungerSystem::get_hunger_state_string() const {
     }
 }
 
-int HungerSystem::get_hunger_value() const {
+int HungerSystem::get_hunger_value() const
+{
     return hunger_value;
 }
 
-int HungerSystem::get_hunger_color() const {
+int HungerSystem::get_hunger_color() const
+{
     switch (current_state) {
     case HungerState::WELL_FED:
         return HPBARFULL_PAIR;  // Green
@@ -67,30 +75,38 @@ int HungerSystem::get_hunger_color() const {
     }
 }
 
-bool HungerSystem::is_suffering_hunger_penalties() const {
+bool HungerSystem::is_suffering_hunger_penalties() const
+{
     return current_state == HungerState::HUNGRY ||
         current_state == HungerState::STARVING ||
         current_state == HungerState::DYING;
 }
 
-void HungerSystem::apply_hunger_effects() {
+void HungerSystem::apply_hunger_effects()
+{
     if (!game.player) return;
 
     // Reset any previous hunger effects first
     // This is assuming the player's base stats are stored somewhere and can be restored
 
     // Apply effects based on hunger state
-    switch (current_state) {
+    switch (current_state)
+    {
     case HungerState::WELL_FED:
         // Bonuses for being well fed
-        game.appendMessagePart(get_hunger_color(), "You feel strong and energetic!");
-        game.finalizeMessage();
+        if (!well_fed_message_shown)
+        {
+            game.appendMessagePart(get_hunger_color(), "You feel strong and energetic!");
+            game.finalizeMessage();
+            well_fed_message_shown = true;
+        }
         // Potentially give bonus to strength or regen
         break;
 
     case HungerState::HUNGRY:
         // Minor penalties
-        if (game.d.d10() == 1) {  // 10% chance each turn
+        if (game.d.d10() == 1)
+        {  // 10% chance each turn
             game.appendMessagePart(get_hunger_color(), "Your stomach growls.");
             game.finalizeMessage();
         }
@@ -98,13 +114,15 @@ void HungerSystem::apply_hunger_effects() {
 
     case HungerState::STARVING:
         // More severe penalties
-        if (game.d.d6() == 1) {  // ~17% chance each turn
+        if (game.d.d6() == 1)
+        {  // ~17% chance each turn
             game.appendMessagePart(get_hunger_color(), "You are weakened by hunger.");
             game.finalizeMessage();
             // Reduce player's strength temporarily
         }
         // Take small damage occasionally
-        if (game.d.d20() == 1) {  // 5% chance each turn
+        if (game.d.d20() == 1)
+        {  // 5% chance each turn
             game.player->destructible->take_damage(*game.player, 1);
             game.appendMessagePart(get_hunger_color(), "You're starving!");
             game.finalizeMessage();
@@ -124,19 +142,24 @@ void HungerSystem::apply_hunger_effects() {
     }
 }
 
-void HungerSystem::update_hunger_state() {
+void HungerSystem::update_hunger_state()
+{
     HungerState old_state = current_state;
 
-    if (hunger_value <= WELL_FED_THRESHOLD) {
+    if (hunger_value <= WELL_FED_THRESHOLD)
+    {
         current_state = HungerState::WELL_FED;
     }
-    else if (hunger_value <= SATIATED_THRESHOLD) {
+    else if (hunger_value <= SATIATED_THRESHOLD)
+    {
         current_state = HungerState::SATIATED;
     }
-    else if (hunger_value <= HUNGRY_THRESHOLD) {
+    else if (hunger_value <= HUNGRY_THRESHOLD)
+    {
         current_state = HungerState::HUNGRY;
     }
-    else if (hunger_value <= STARVING_THRESHOLD) {
+    else if (hunger_value <= STARVING_THRESHOLD)
+    {
         current_state = HungerState::STARVING;
     }
     else {
@@ -144,8 +167,15 @@ void HungerSystem::update_hunger_state() {
     }
 
     // Notify the player if hunger state has changed
-    if (old_state != current_state) {
+    if (old_state != current_state)
+    {
         game.appendMessagePart(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
         game.finalizeMessage();
+        
+        // Reset well-fed message flag when leaving well-fed state
+        if (old_state == HungerState::WELL_FED && current_state != HungerState::WELL_FED)
+        {
+            well_fed_message_shown = false;
+        }
     }
 }

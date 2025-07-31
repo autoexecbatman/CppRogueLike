@@ -54,4 +54,5 @@ private:
     void update_hunger_state();
 
     HungerState current_state;
+    bool well_fed_message_shown; // Prevents spam of well-fed message
 };
