@@ -801,7 +801,7 @@ Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
 	case 'z': case 'Z':
 		delta = { 1, -1 }; // Southwest
 		break;
-	case 'x': case 'X':
+	case 'c': case 'C':
 		delta = { 1, 1 }; // Southeast
 		break;
 	default:
