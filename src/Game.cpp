@@ -32,6 +32,7 @@
 #include "Menu/MenuName.h"
 #include "dnd_tables/CalculatedTHAC0s.h"
 #include "Web.h"
+#include "ItemCreator.h"
 #include "Armor.h"
 
 // added for DEBUGING AT PLAYER FEET
@@ -730,6 +731,19 @@ void Game::load_all()
 			{
 				auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
 				creature->load(creatureData); // Load creature data
+				
+				// CRITICAL FIX: Ensure creature inventory items have correct values
+				if (creature->container)
+				{
+					for (const auto& item : creature->container->inv)
+					{
+						if (item)
+						{
+							ItemCreator::ensure_correct_value(*item);
+						}
+					}
+				}
+				
 				creatures.push_back(std::move(creature));
 			}
 		}
@@ -741,6 +755,8 @@ void Game::load_all()
 			{
 				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
 				item->load(itemData);
+				// CRITICAL FIX: Ensure loaded items have correct values
+				ItemCreator::ensure_correct_value(*item);
 				container->inv.push_back(std::move(item));
 			}
 		}

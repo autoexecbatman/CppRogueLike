@@ -6,35 +6,47 @@
 #include "../ActorTypes/Player.h"
 #include "../Items.h"
 #include "../Armor.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
+#include "../ItemCreator.h"
 
-void equip_fighter_starting_gear() {
+void equip_fighter_starting_gear()
+{
 	auto& player = *game.player;
 	
+	// AD&D 2e Fighter starting money: 5d4 × 10 gp (50-200 gp)
+	int rollSum = 0;
+	for(int i = 0; i < 5; i++)
+	{
+		rollSum += game.d.d4(); // Use game's RandomDice instance
+	}
+	int startingGold = rollSum * 10;
+	player.gold = startingGold;
+	
+	// Generous starting equipment for solo play
+	
 	// PLATE MAIL (AC 3) - Auto-equipped
-	auto plateMail = std::make_unique<Item>(player.position, ActorData{'[', "plate mail", DOOR_PAIR});
-	plateMail->pickable = std::make_unique<PlateMail>();
-	plateMail->add_state(ActorState::IS_EQUIPPED);
-	player.container->add(std::move(plateMail));
+	player.container->add(ItemCreator::create_plate_mail(player.position));
+	player.container->inv.back()->add_state(ActorState::IS_EQUIPPED);
 	
 	// LONG SWORD (1d8) - Auto-equipped
-	auto longSword = std::make_unique<Item>(player.position, ActorData{'/', "long sword", WHITE_PAIR});
-	longSword->pickable = std::make_unique<LongSword>();
-	longSword->add_state(ActorState::IS_EQUIPPED);
-	player.container->add(std::move(longSword));
+	player.container->add(ItemCreator::create_long_sword(player.position));
+	player.container->inv.back()->add_state(ActorState::IS_EQUIPPED);
 	
 	// Update fighter combat stats
 	player.weaponEquipped = "Long Sword";
 	player.attacker = std::make_unique<Attacker>("D8");
 	player.destructible->armorClass = 3; // Plate mail AC
-	player.gold = 200; // Increased starting gold
 	
 	// HEALING POTIONS (3x)
-	for(int i = 0; i < 3; i++) {
-		auto healthPotion = std::make_unique<Item>(player.position, ActorData{'!', "health potion", HPBARMISSING_PAIR});
-		healthPotion->pickable = std::make_unique<Healer>(10);
-		player.container->add(std::move(healthPotion));
+	for(int i = 0; i < 3; i++)
+	{
+		player.container->add(ItemCreator::create_health_potion(player.position));
 	}
+	
+	// Log the rolled starting gold amount
+	game.log("Fighter starting gold: " + std::to_string(startingGold) + " gp (5d4×10)");
+	game.message(WHITE_PAIR, "You have " + std::to_string(startingGold) + " gold pieces.", true);
 }
 
 void Fighter::on_selection()

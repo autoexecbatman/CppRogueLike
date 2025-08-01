@@ -92,12 +92,10 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"s
 	attacker = std::make_unique<Attacker>("D10");
 	ai = std::make_unique<AiShopkeeper>();
 	container = std::make_unique<Container>(10);
-	auto healthPotion = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '!', "health potion", HPBARMISSING_PAIR });
-	healthPotion->pickable = std::make_unique<Healer>(4);
-	container->add(std::move(healthPotion));
-	auto dagger = std::make_unique<Item>(Vector2D{ 0,0 }, ActorData{ '/', "dagger", 1 });
-	dagger->pickable = std::make_unique<Dagger>();
-	container->add(std::move(dagger));
+	
+	// NOTE: Inventory is populated in MonsterFactory.cpp - do not add items here
+	// This ensures single source of truth for shopkeeper inventory
+	
 	gold = 200;
 }
 

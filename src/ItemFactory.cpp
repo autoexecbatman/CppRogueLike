@@ -5,6 +5,7 @@
 #include "Food.h"
 #include "Random/RandomDice.h"
 #include "Amulet.h"
+#include "ItemCreator.h"
 
 ItemFactory::ItemFactory() {
     // Initialize with all item types
@@ -35,45 +36,35 @@ ItemFactory::ItemFactory() {
     add_item_type({
         "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
         [](Vector2D pos) {
-            auto item = std::make_unique<Item>(pos, ActorData{ '/', "dagger", 1 });
-            item->pickable = std::make_unique<Dagger>();
-            game.container->add(std::move(item));
+            game.container->add(ItemCreator::create_dagger(pos));
         }
         });
 
     add_item_type({
         "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
         [](Vector2D pos) {
-            auto item = std::make_unique<Item>(pos, ActorData{ '/', "short sword", 1 });
-            item->pickable = std::make_unique<ShortSword>();
-            game.container->add(std::move(item));
+            game.container->add(ItemCreator::create_short_sword(pos));
         }
         });
 
     add_item_type({
         "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
         [](Vector2D pos) {
-            auto item = std::make_unique<Item>(pos, ActorData{ '/', "long sword", 1 });
-            item->pickable = std::make_unique<LongSword>();
-            game.container->add(std::move(item));
+            game.container->add(ItemCreator::create_long_sword(pos));
         }
         });
 
     add_item_type({
         "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
         [](Vector2D pos) {
-            auto item = std::make_unique<Item>(pos, ActorData{ '/', "staff", 1 });
-            item->pickable = std::make_unique<Staff>();
-            game.container->add(std::move(item));
+            game.container->add(ItemCreator::create_staff(pos));
         }
         });
 
     add_item_type({
         "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
         [](Vector2D pos) {
-            auto item = std::make_unique<Item>(pos, ActorData{ ')', "longbow", 1 });
-            item->pickable = std::make_unique<Longbow>();
-            game.container->add(std::move(item));
+            game.container->add(ItemCreator::create_longbow(pos));
         }
         });
 
@@ -112,17 +103,23 @@ ItemFactory::ItemFactory() {
 
     add_item_type({
         "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
-        [](Vector2D pos) { game.create_item<LeatherArmorItem>(pos); }
+        [](Vector2D pos) { 
+            game.container->add(ItemCreator::create_leather_armor(pos));
+        }
         });
 
     add_item_type({
         "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
-        [](Vector2D pos) { game.create_item<ChainMailItem>(pos); }
+        [](Vector2D pos) { 
+            game.container->add(ItemCreator::create_chain_mail(pos));
+        }
         });
 
     add_item_type({
         "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
-        [](Vector2D pos) { game.create_item<PlateMailItem>(pos); }
+        [](Vector2D pos) { 
+            game.container->add(ItemCreator::create_plate_mail(pos));
+        }
         });
 
     // Populate item categories

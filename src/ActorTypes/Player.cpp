@@ -16,6 +16,7 @@
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
 {
+	// Rolling for stats
 	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
 	strength = roll3d6();
 	dexterity = roll3d6();
@@ -31,18 +32,17 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 	const int playerAC = 10; // the player's armor class
 
 	gold = 100; // Default starting gold (increased to 200 for fighters in MenuClass)
-
-	attacker = std::make_unique<Attacker>("D2");
-	destructible = std::make_unique<PlayerDestructible>(
-		playerHp,
-		playerDr,
-		"your corpse",
-		playerXp,
+	attacker = std::make_unique<Attacker>("D2"); // Default attack roll, can be changed by equipping a weapon
+	destructible = std::make_unique<PlayerDestructible>( // PlayerDestructible is a subclass of Destructible
+		playerHp, // initial HP
+		playerDr, // initial damage reduction
+		"your corpse", // death message
+		playerXp, // initial experience points
 		0, // thaco is calculated from table
-		playerAC
+		playerAC // initial armor class
 	);
-	ai = std::make_unique<AiPlayer>();
-	container = std::make_unique<Container>(26);
+	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
+	container = std::make_unique<Container>(26); // Player's inventory with 26 slots
 	
 	// REMOVED: Equipment initialization moved to MenuClass after class selection
 	

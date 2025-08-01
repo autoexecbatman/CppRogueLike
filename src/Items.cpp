@@ -19,6 +19,7 @@ HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "
 ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{'#', "scroll of lightning bolt", LIGHTNING_PAIR })
 {
 	pickable = std::make_unique<LightningBolt>(5, 20);
+	value = 150; // 150 gp - powerful lightning magic
 }
 
 ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR })
@@ -30,6 +31,7 @@ ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData
 ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR })
 {
 	pickable = std::make_unique<Confuser>(10, 8);
+	value = 120; // 120 gp - tactical confusion magic
 }
 
 GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", GOLD_PAIR })
@@ -49,17 +51,17 @@ AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*
 LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData{ '[', "leather armor", DOOR_PAIR })
 {
 	pickable = std::make_unique<LeatherArmor>();
-	value = 30; // Set a value for the armor
+	value = 5; // 5 gp - AD&D 2e leather armor price
 }
 
 ChainMailItem::ChainMailItem(Vector2D position) : Item(position, ActorData{ '[', "chain mail", DOOR_PAIR })
 {
 	pickable = std::make_unique<ChainMail>();
-	value = 75; // More expensive than leather armor
+	value = 75; // 75 gp - AD&D 2e chain mail price
 }
 
 PlateMailItem::PlateMailItem(Vector2D position) : Item(position, ActorData{ '[', "plate mail", DOOR_PAIR })
 {
 	pickable = std::make_unique<PlateMail>();
-	value = 150; // Most expensive armor type
+	value = 400; // 400 gp - AD&D 2e plate mail price
 }

@@ -360,16 +360,16 @@ void Map::tile_action(Creature& owner, TileType tileType)
 		game.message(COLOR_WHITE, "You are against a wall", true);
 		break;
 	case TileType::FLOOR:
-		game.log("You are on the floor");
-		game.message(COLOR_WHITE, "You are on the floor", true);
+		//game.log("You are on the floor");
+		//game.message(COLOR_WHITE, "You are on the floor", true);
 		break;
 	case TileType::CLOSED_DOOR:
 		game.log("You are at a door");
 		game.message(COLOR_WHITE, "You are at a door", true);
 		break;
 	case TileType::CORRIDOR:
-		game.log("You are in a corridor");
-		game.message(COLOR_WHITE, "You are in a corridor", true);
+		//game.log("You are in a corridor");
+		//game.message(COLOR_WHITE, "You are in a corridor", true);
 		break;
 	default:
 		game.log("You are in an unknown area");
