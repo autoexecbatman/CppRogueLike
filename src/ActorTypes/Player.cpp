@@ -13,6 +13,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Items.h"
 #include "../Armor.h"
+#include "../Ai/AiShopkeeper.h"
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
 {
@@ -154,14 +155,27 @@ bool Player::rest()
 	}
 
 	// Check if enemies are nearby (within a radius of 5 tiles)
+	// Exclude shopkeepers and other neutral NPCs
 	for (const auto& creature : game.creatures)
 	{
 		if (creature && !creature->destructible->is_dead())
 		{
+			// Skip the player themselves
+			if (creature.get() == this)
+			{
+				continue;
+			}
+
+			// Skip shopkeepers - they're not hostile
+			if (dynamic_cast<AiShopkeeper*>(creature->ai.get()))
+			{
+				continue;
+			}
+
 			// Calculate distance to creature
 			int distance = get_tile_distance(creature->position);
 
-			// If enemy is within 5 tiles, can't rest
+			// If hostile enemy is within 5 tiles, can't rest
 			if (distance <= 5)
 			{
 				game.message(WHITE_PAIR, "You can't rest with enemies nearby!", true);
@@ -195,18 +209,20 @@ bool Player::rest()
 	HungerState afterState = game.hunger_system.get_hunger_state();
 
 	// Display message with more detail
-	game.appendMessagePart(HPBARFULL_PAIR, "You rest and recover ");
+	game.appendMessagePart(WHITE_PAIR, "Resting recovers ");
 	game.appendMessagePart(HPBARFULL_PAIR, std::to_string(amountHealed));
 	game.appendMessagePart(HPBARFULL_PAIR, " health");
 
-	if (beforeState != afterState) {
+	if (beforeState != afterState)
+	{
 		// If hunger state changed, mention it
 		game.appendMessagePart(WHITE_PAIR, ", but you've become ");
 		game.appendMessagePart(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
 		game.appendMessagePart(WHITE_PAIR, ".");
 	}
-	else {
-		game.appendMessagePart(WHITE_PAIR, ", consuming some of your food reserves.");
+	else
+	{
+		game.appendMessagePart(WHITE_PAIR, ", consuming your food.");
 	}
 
 	game.finalizeMessage();
