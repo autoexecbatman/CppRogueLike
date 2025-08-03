@@ -27,7 +27,7 @@ void Quit::on_selection()
 	game.log("You quit without saving!");
 }
 
-Menu::Menu()
+Menu::Menu(bool startup) : isStartupMenu(startup)
 {
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
@@ -43,7 +43,7 @@ Menu::~Menu()
 
 void Menu::menu_print_state(MenuState state)
 {
-	auto row = static_cast<std::underlying_type_t<MenuState>>(state);	
+	auto row = static_cast<std::underlying_type_t<MenuState>>(state) + 1; // Start at row 1 after title
 	if (currentState == state)
 	{
 		menu_highlight_on();
@@ -55,16 +55,29 @@ void Menu::menu_print_state(MenuState state)
 	}
 }
 
-void Menu::draw()
+void Menu::draw_content()
 {
-	menu_clear(); // clear menu window each frame
-	mvwprintw(menuWindow, 0, 0, "%d", currentState); // this is for debugging the currentOption number
-	// print the buttons to the menu window
+	// Debug current state
+	mvwprintw(menuWindow, 0, 0, "%d", currentState);
+	
+	// Draw menu options
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(static_cast<MenuState>(i));
 	}
-	menu_refresh(); // refresh menu window each frame to show changes
+}
+
+void Menu::draw()
+{
+	menu_clear();
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Main Menu");
+	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
+	{
+		menu_print_state(static_cast<MenuState>(i));
+	}
+	menu_refresh();
 }
 
 void Menu::on_key(int key)
@@ -76,6 +89,7 @@ void Menu::on_key(int key)
 	case 'w':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
+		menu_mark_dirty(); // Mark for redraw
 		break;
 	}
 
@@ -83,6 +97,7 @@ void Menu::on_key(int key)
 	case 's':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
+		menu_mark_dirty(); // Mark for redraw
 		break;
 	}
 
@@ -96,6 +111,12 @@ void Menu::on_key(int key)
 	case 27: // Escape key
 	{
 		menu_set_run_false();
+		// Only quit the game if this is the startup menu
+		if (isStartupMenu)
+		{
+			// Use the same quit logic as the Quit menu option
+			iMenuStates.at(MenuState::QUIT)->on_selection();
+		}
 		break;
 	}
 

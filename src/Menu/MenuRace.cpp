@@ -100,7 +100,7 @@ MenuRace::~MenuRace()
 
 void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
 {
-	auto row = static_cast<int>(option);
+	auto row = static_cast<int>(option) + 1; // Start at row 1 after title
 	if (currentState == option)
 	{
 		menu_highlight_on();
@@ -115,6 +115,9 @@ void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
 void MenuRace::draw()
 {
 	menu_clear();
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Select Race");
 	for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
 	{
 		menu_race_print_option(static_cast<MenuRaceOptions>(i));
@@ -170,6 +173,9 @@ void MenuRace::menu()
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	// Clear screen when exiting
+	clear();
+	refresh();
 }
 
 // end of file: MenuRace.cpp

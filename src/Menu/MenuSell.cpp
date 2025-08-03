@@ -98,11 +98,26 @@ MenuSell::~MenuSell()
 	menu_delete();
 }
 
+void MenuSell::draw_content()
+{
+	// Only redraw if content changed
+	populate_items(player.container->inv);
+	
+	// Draw all menu items efficiently
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	{
+		menu_print_state(i);
+	}
+}
+
 void MenuSell::draw()
 {
 	menu_clear();
-	populate_items(player.container->inv); // Ensure menuItems is up to date
-	for (size_t i{ 0 }; i < menuItems.size(); ++i) // Use menuItems.size() not inv.size()
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Sell Items");
+	populate_items(player.container->inv);
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
 		menu_print_state(i);
 	}
@@ -111,29 +126,32 @@ void MenuSell::draw()
 
 void MenuSell::on_key(int key)
 {
-	switch (keyPress)
+	switch (key)
 	{
 	case KEY_UP:
 	case 'w':
 		if (menuItems.empty()) return; // Check for empty menu
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
+		menu_mark_dirty(); // Mark for redraw
 		break;
 	case KEY_DOWN:
 	case 's':
 		if (menuItems.empty()) return; // Check for empty menu
 		currentState = (currentState + 1) % menuItems.size();
+		menu_mark_dirty(); // Mark for redraw
 		break;
 	case 10: // Enter key
 	{
 		if (!menuItems.empty()) // Only handle if menu has items
 		{
 			handle_sell(menuWindow, shopkeeper, player);
+			menu_mark_dirty(); // Redraw after sale
 		}
 	}
 	break;
 	case 27: // Escape key
 	{
-		run = false;
+		menu_set_run_false();
 	}
 	break;
 	}
@@ -141,15 +159,22 @@ void MenuSell::on_key(int key)
 
 void MenuSell::menu()
 {
+	// Initial draw
+	draw();
+	
 	while(run)
 	{
-		clear();
-		game.render();
-		refresh();
-		draw();
+		// Only redraw if needed (navigation/state change)
+		if (menu_needs_redraw())
+		{
+			draw();
+		}
+		
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	
+	// Clear screen when exiting
 	clear();
 	refresh();
 }

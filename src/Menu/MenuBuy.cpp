@@ -60,12 +60,26 @@ void MenuBuy::menu_print_state(size_t state)
 	}
 }
 
+void MenuBuy::draw_content()
+{
+	// Only redraw if content changed
+	populate_items(buyer.container->inv);
+	
+	// Draw all menu items efficiently
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	{
+		menu_print_state(i);
+	}
+}
+
 void MenuBuy::draw()
 {
-	// print items to buy from shopkeeper
 	menu_clear();
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Buy Items");
 	populate_items(buyer.container->inv);
-	for (size_t i{ 0 }; i < menuItems.size(); ++i) // Use menuItems.size() not inv.size()
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
 		menu_print_state(i);
 	}
@@ -83,6 +97,7 @@ void MenuBuy::on_key(int key)
 				return;
 			}
 			currentState = (currentState + menuItems.size() - 1) % menuItems.size();
+			menu_mark_dirty(); // Mark for redraw
 			break;
 		case KEY_DOWN:
 		case 's':
@@ -91,6 +106,7 @@ void MenuBuy::on_key(int key)
 				return;
 			}
 			currentState = (currentState + 1) % menuItems.size();
+			menu_mark_dirty(); // Mark for redraw
 			break;
 		case 27: // ESC
 			menu_set_run_false();
@@ -99,6 +115,7 @@ void MenuBuy::on_key(int key)
 			if (!menuItems.empty()) // Only handle if menu has items
 			{
 				handle_buy(menuWindow, buyer, *game.player);
+				menu_mark_dirty(); // Redraw after purchase
 			}
 			break;
 	}
@@ -106,18 +123,26 @@ void MenuBuy::on_key(int key)
 
 void MenuBuy::menu()
 {
+	// Initial draw
+	draw();
+	
 	while (run)
 	{
-		clear();
-		game.render();
-		refresh();
-		draw();
+		// Only redraw if needed (navigation/state change)
+		if (menu_needs_redraw())
+		{
+			draw();
+		}
+		
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	
+	// Clear screen when exiting
 	clear();
 	refresh();
 }
+
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
 	if (shopkeeper.container->inv.empty() || currentState >= shopkeeper.container->inv.size())
@@ -138,6 +163,12 @@ void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 
 		// Properly erase item from shopkeeper's inventory
 		shopkeeper.container->inv.erase(itemIter);
+
+		// Ensure currentState stays within valid bounds
+		if (currentState >= shopkeeper.container->inv.size() && !shopkeeper.container->inv.empty())
+		{
+			currentState = shopkeeper.container->inv.size() - 1;
+		}
 
 		game.message(WHITE_PAIR, "Item purchased successfully.", true);
 	}

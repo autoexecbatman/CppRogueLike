@@ -1,6 +1,7 @@
 // file: MenuClass.h
 #ifndef MENU_CLASS_H
 #define MENU_CLASS_H
+
 #include <curses.h>
 #include <string>
 #include <unordered_map>
@@ -42,7 +43,7 @@ class ClassBack : public IMenuState
 class MenuClass : public BaseMenu
 {
 	int menu_height{ 10 };
-	int menu_width{ 12 };
+	int menu_width{ 14 };
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
 	enum class MenuState { FIGHTER, ROGUE, CLERIC, WIZARD, RANDOM, BACK }

@@ -27,7 +27,7 @@ enum class Controls
 
 	MOUSE = KEY_MOUSE,
 
-	TEST_COMMAND = '{', // test command for debugging
+	TEST_COMMAND = 'x', // test command for debugging (changed from '{')
 
 	WAIT = 'h',
 	PICK = 'p',

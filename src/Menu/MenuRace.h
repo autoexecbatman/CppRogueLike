@@ -52,7 +52,7 @@ class RaceBack : public IMenuState
 class MenuRace : public BaseMenu
 {
 	int height_{ 10 };
-	int width_{ 20 };
+	int width_{ 13 };
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
 	enum class MenuRaceOptions

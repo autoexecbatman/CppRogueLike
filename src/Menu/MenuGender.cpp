@@ -50,7 +50,7 @@ MenuGender::~MenuGender()
 
 void MenuGender::menu_print_state(MenuState option)
 {
-	auto row = static_cast<int>(option);
+	auto row = static_cast<int>(option) + 1; // Start at row 1 after title
 	if (currentState == option)
 	{
 		menu_highlight_on();
@@ -64,8 +64,10 @@ void MenuGender::menu_print_state(MenuState option)
 
 void MenuGender::draw()
 {
-	menu_clear(); // clear the window
-	mvwprintw(menuWindow, 0, 0, "%d", currentState); // print the menu options to the top of the window
+	menu_clear();
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Select Gender");
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(static_cast<MenuState>(i));
@@ -129,6 +131,9 @@ void MenuGender::menu()
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	// Clear screen when exiting
+	clear();
+	refresh();
 }
 
 // end of file: MenuGender.cpp

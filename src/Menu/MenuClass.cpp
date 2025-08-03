@@ -126,7 +126,7 @@ MenuClass::~MenuClass()
 
 void MenuClass::menu_class_print_option(MenuState option) noexcept
 {
-	auto row = static_cast<int>(option);
+	auto row = static_cast<int>(option) + 1; // Start at row 1 after title
 	if (currentState == option)
 	{
 		menu_highlight_on();
@@ -141,7 +141,9 @@ void MenuClass::menu_class_print_option(MenuState option) noexcept
 void MenuClass::draw()
 {
 	menu_clear();
-	mvwprintw(menuWindow, 0, 0, "%d", currentState);
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Select Class");
 	for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
 	{
 		menu_class_print_option(static_cast<MenuState>(i));
@@ -198,6 +200,9 @@ void MenuClass::menu()
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	// Clear screen when exiting
+	clear();
+	refresh();
 }
 
 // end of file: MenuClass.cpp

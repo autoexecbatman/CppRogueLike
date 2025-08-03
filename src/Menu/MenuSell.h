@@ -24,6 +24,7 @@ class MenuSell : public BaseMenu
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller);
+	void draw_content() override;
 public:
 	MenuSell(Creature& shopkeeper, Creature& player);
 	~MenuSell();

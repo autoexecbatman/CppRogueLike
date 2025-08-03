@@ -34,8 +34,8 @@ class Exit : public IMenuState
 
 class MenuTrade : public BaseMenu
 {
-	int height_{ 3 };
-	int width_{ 12 };
+	int height_{ 5 }; // Title row + 3 menu items + 2 border rows + spacing
+	int width_{ 10 }; // Wide enough for "Trade" title
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
 
@@ -52,6 +52,7 @@ class MenuTrade : public BaseMenu
 
 	std::string menu_get_string(size_t state) { return menuStateStrings.at(state); }
 	void menu_print_state(size_t state);
+	void draw_content() override;
 
 public:
 	MenuTrade(Creature& shopkeeper, Creature& player);

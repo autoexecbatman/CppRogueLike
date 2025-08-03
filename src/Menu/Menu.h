@@ -32,8 +32,9 @@ class Quit : public IMenuState
 
 class Menu : public BaseMenu
 {
-	int menu_height{ 10 };
-	int menu_width{ 12 };
+	bool isStartupMenu{ true }; // Track if this is the startup menu (default true)
+	int menu_height{ 6 }; // Height for the menu, enough for 4 options + title
+	int menu_width{ 11 }; // Wide enough for "Load Game"
 	int menu_starty{ (LINES / 2) - 5 };
 	int menu_startx{ (COLS / 2) - 10 };
 	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, QUIT }
@@ -49,8 +50,9 @@ class Menu : public BaseMenu
 
 	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
 	void menu_print_state(MenuState state);
+	void draw_content() override;
 public:
-	Menu();
+	Menu(bool startup = true);
 	~Menu();
 
 	void draw();

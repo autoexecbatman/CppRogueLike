@@ -34,8 +34,8 @@ class Back : public IMenuState
 
 class MenuGender : public BaseMenu
 {
-	int height_{ 10 };
-	int width_{ 20 };
+	int height_{ 6 };
+	int width_{ 15 };
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
 	enum class MenuState { MALE, FEMALE, RANDOM, BACK }

@@ -13,6 +13,8 @@
 #include "../Items.h"
 #include "../ActorTypes/Gold.h"
 #include "../Web.h"
+#include "../ItemCreator.h"
+#include "../ActorTypes/Monsters.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -592,10 +594,15 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::TEST_COMMAND:
 	{
-		game.player->attacker->attack(*game.player, *game.player);
+		// Spawn shopkeeper using uniform template method
+		game.create_creature<Shopkeeper>(owner.position + Vector2D{1, 0});
+		// Get the shopkeeper that was just created and add inventory
+		auto& shopkeeper = *game.creatures.back();
+		shopkeeper.container->add(ItemCreator::create_health_potion(shopkeeper.position));
+		shopkeeper.container->add(ItemCreator::create_dagger(shopkeeper.position));
+		shopkeeper.gold = 100; // Give shopkeeper gold
+		game.message(WHITE_PAIR, "Shopkeeper summoned!", true);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
-		// add xp to player
-		game.player->destructible->xp += 1000;
 		break;
 	}
 
@@ -634,7 +641,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
-		game.menus.push_back(std::make_unique<Menu>());
+		game.menus.push_back(std::make_unique<Menu>(false)); // false = in-game menu
 		break;
 	}
 

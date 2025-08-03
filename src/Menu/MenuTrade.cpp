@@ -38,19 +38,33 @@ void MenuTrade::menu_print_state(size_t state)
 	if (currentState == state)
 	{
 		menu_highlight_on();
-		menu_print(1, state, menu_get_string(state));
+		menu_print(1, state + 1, menu_get_string(state)); // Start at row 1 after title
 		menu_highlight_off();
 	}
 	else
 	{
-		menu_print(1, state, menu_get_string(state));
+		menu_print(1, state + 1, menu_get_string(state)); // Start at row 1 after title
+	}
+}
+
+void MenuTrade::draw_content()
+{
+	// Debug current state
+	mvwprintw(menuWindow, 0, 0, "%d", currentState);
+	
+	// Draw menu options
+	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
+	{
+		menu_print_state(i);
 	}
 }
 
 void MenuTrade::draw()
 {
 	menu_clear();
-	mvwprintw(menuWindow, 0, 0, "%d", currentState); // for debugging `currentState`
+	box(menuWindow, 0, 0);
+	// Title
+	mvwprintw(menuWindow, 0, 1, "Trade");
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(i);
@@ -96,12 +110,19 @@ void MenuTrade::on_key(int key)
 
 void MenuTrade::menu()
 {
+	// Save background before showing menu
+	clear();
+	game.render();
+	refresh();
+	
 	while (run)
 	{
 		draw();
 		menu_key_listen();
 		on_key(keyPress);
 	}
+	// Restore full game view
 	clear();
+	game.render();
 	refresh();
 }
