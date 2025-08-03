@@ -1331,7 +1331,16 @@ void Game::finalizeMessage()
 
 void Game::display_debug_messages() noexcept
 {
+	// Clear screen and render game background before showing debug screen
 	clear();
+	if (game.gameInit)
+	{
+		// Show the game world behind the debug screen
+		game.render();
+		game.gui->gui_render();
+	}
+	refresh();
+	
 	int total_lines = 0; // To hold the total number of lines in the file
 	std::ifstream logFile("clog.txt");
 	std::string line;
@@ -1418,9 +1427,18 @@ void Game::display_debug_messages() noexcept
 			break;
 		}
 		prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
-	} while (ch != 'q');  // Assuming 'q' or Escape closes the log
+	} while (ch != 'q' && ch != 27);  // Exit on 'q' or Escape
 
 	delwin(log_pad);  // Delete the pad after use
+	
+	// Restore full game view when exiting
+	if (game.gameInit)
+	{
+		clear();
+		game.render();
+		game.gui->gui_render();
+		refresh();
+	}
 }
 
 // A possible function in Game.cpp

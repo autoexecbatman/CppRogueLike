@@ -38,7 +38,7 @@ enum class Controls
 	DESCEND = '>',
 	TARGET = 't',
 	QUIT = '~',
-	DEBUG = 'z',
+	DEBUG = 'b',
 	REVEAL = 'm',
 	REGEN = 'n',
 	OPEN_DOOR = 'o',
