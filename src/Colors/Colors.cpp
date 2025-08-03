@@ -39,8 +39,8 @@ void Colors::my_init_pair() noexcept
 	
 	// === CUSTOM COLORS ===
 	// Create custom brown color
-	init_color(8, 500, 300, 0);
-	init_pair(20, 8, COLOR_BLACK);
+	init_color(100, 500, 300, 0); // Use slot 100 to avoid conflicts
+	init_pair(20, 100, COLOR_BLACK);
 	
 	// Create custom dim green color
 	init_color(9, 0, 400, 0);
