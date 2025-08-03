@@ -10,7 +10,7 @@
 
 std::unique_ptr<Item> ItemCreator::create_health_potion(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'!', "health potion", HPBARMISSING_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'!', "health potion", WHITE_RED_PAIR});
     item->pickable = std::make_unique<Healer>(10);
     item->value = 50; // AD&D 2e price
     return item;
@@ -18,7 +18,7 @@ std::unique_ptr<Item> ItemCreator::create_health_potion(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_scroll_lightning(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of lightning", LIGHTNING_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of lightning", WHITE_BLUE_PAIR});
     item->pickable = std::make_unique<LightningBolt>(5, 20);
     item->value = 150; // AD&D 2e price
     return item;
@@ -26,7 +26,7 @@ std::unique_ptr<Item> ItemCreator::create_scroll_lightning(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_scroll_fireball(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of fireball", FIREBALL_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of fireball", RED_YELLOW_PAIR});
     item->pickable = std::make_unique<Fireball>(3, 12);
     item->value = 100; // AD&D 2e price
     return item;
@@ -34,7 +34,7 @@ std::unique_ptr<Item> ItemCreator::create_scroll_fireball(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_scroll_confusion(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of confusion", CONFUSION_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of confusion", WHITE_GREEN_PAIR});
     item->pickable = std::make_unique<Confuser>(10, 8);
     item->value = 120; // AD&D 2e price
     return item;
@@ -42,7 +42,7 @@ std::unique_ptr<Item> ItemCreator::create_scroll_confusion(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'/', "dagger", WHITE_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "dagger", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Dagger>();
     item->value = 2; // AD&D 2e price
     return item;
@@ -50,7 +50,7 @@ std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_short_sword(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'/', "short sword", WHITE_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "short sword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<ShortSword>();
     item->value = 10; // AD&D 2e price
     return item;
@@ -58,7 +58,7 @@ std::unique_ptr<Item> ItemCreator::create_short_sword(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_long_sword(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'/', "long sword", WHITE_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "long sword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<LongSword>();
     item->value = 15; // AD&D 2e price
     return item;
@@ -66,7 +66,7 @@ std::unique_ptr<Item> ItemCreator::create_long_sword(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_staff(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'/', "staff", WHITE_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "staff", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Staff>();
     item->value = 6; // AD&D 2e price
     return item;
@@ -74,7 +74,7 @@ std::unique_ptr<Item> ItemCreator::create_staff(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_longbow(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{')', "longbow", LIGHTNING_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{')', "longbow", WHITE_BLUE_PAIR});
     item->pickable = std::make_unique<Longbow>();
     item->value = 75; // AD&D 2e price
     return item;
@@ -82,7 +82,7 @@ std::unique_ptr<Item> ItemCreator::create_longbow(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_leather_armor(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'[', "leather armor", DOOR_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "leather armor", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<LeatherArmor>();
     item->value = 5; // AD&D 2e price
     return item;
@@ -90,7 +90,7 @@ std::unique_ptr<Item> ItemCreator::create_leather_armor(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_chain_mail(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'[', "chain mail", DOOR_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "chain mail", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<ChainMail>();
     item->value = 75; // AD&D 2e price
     return item;
@@ -98,7 +98,7 @@ std::unique_ptr<Item> ItemCreator::create_chain_mail(Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_plate_mail(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'[', "plate mail", DOOR_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "plate mail", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<PlateMail>();
     item->value = 400; // AD&D 2e price
     return item;

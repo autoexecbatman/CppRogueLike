@@ -65,9 +65,9 @@ bool CorpseFood::use(Item& owner, Creature& wearer) {
     }
 
     // Display message
-    game.appendMessagePart(WHITE_PAIR, "You eat the ");
-    game.appendMessagePart(DEAD_NPC_PAIR, owner.actorData.name);
-    game.appendMessagePart(WHITE_PAIR, ". " + flavorText);
+    game.appendMessagePart(WHITE_BLACK_PAIR, "You eat the ");
+    game.appendMessagePart(RED_BLACK_PAIR, owner.actorData.name);
+    game.appendMessagePart(WHITE_BLACK_PAIR, ". " + flavorText);
     game.finalizeMessage();
 
     // Corpse is consumed after eating

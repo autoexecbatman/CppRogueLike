@@ -79,10 +79,10 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
 
         if (itemDistance <= 1) {
             // Found an item to consume!
-            game.appendMessagePart(DRAGON_PAIR, "The mimic ");
-            game.appendMessagePart(WHITE_PAIR, "consumes the ");
+            game.appendMessagePart(RED_YELLOW_PAIR, "The mimic ");
+            game.appendMessagePart(WHITE_BLACK_PAIR, "consumes the ");
             game.appendMessagePart(item->actorData.color, item->actorData.name);
-            game.appendMessagePart(WHITE_PAIR, "!");
+            game.appendMessagePart(WHITE_BLACK_PAIR, "!");
             game.finalizeMessage();
 
             game.log("Mimic consuming item: " + item->actorData.name);
@@ -127,7 +127,7 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
             // If mimic has consumed enough items, change appearance
             if (itemsConsumed >= 5) {
                 mimic.actorData.ch = 'W';
-                mimic.actorData.color = FIREBALL_PAIR;
+                mimic.actorData.color = RED_YELLOW_PAIR;
                 mimic.actorData.name = "greater mimic";
                 game.log("Mimic transformed into greater mimic");
             }
@@ -163,16 +163,16 @@ void AiMimic::checkRevealing(Mimic& mimic)
         isDisguised = false;
         mimic.actorData.ch = 'M';
         mimic.actorData.name = "mimic";
-        mimic.actorData.color = DRAGON_PAIR;
+        mimic.actorData.color = RED_YELLOW_PAIR;
         mimic.add_state(ActorState::BLOCKS); // Now it's solid
 
         game.log("Mimic revealed itself!");
 
         // Try to confuse the player
         if (game.d.d20() > game.player->wisdom) {
-            game.appendMessagePart(CONFUSION_PAIR, "The ");
-            game.appendMessagePart(DRAGON_PAIR, "mimic");
-            game.appendMessagePart(CONFUSION_PAIR, " reveals itself and confuses you!");
+            game.appendMessagePart(WHITE_GREEN_PAIR, "The ");
+            game.appendMessagePart(RED_YELLOW_PAIR, "mimic");
+            game.appendMessagePart(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
             game.finalizeMessage();
 
             // Apply confusion to player
@@ -187,8 +187,8 @@ void AiMimic::checkRevealing(Mimic& mimic)
             }
         }
         else {
-            game.appendMessagePart(DRAGON_PAIR, "A mimic");
-            game.appendMessagePart(WHITE_PAIR, " reveals itself but you resist its confusion!");
+            game.appendMessagePart(RED_YELLOW_PAIR, "A mimic");
+            game.appendMessagePart(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
             game.finalizeMessage();
             game.log("Player resisted mimic confusion");
         }

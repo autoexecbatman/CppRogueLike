@@ -301,7 +301,7 @@ void Creature::pick()
 {
 	// Check if inventory is already full before attempting to pick
 	if (container && container->invSize > 0 && container->inv.size() >= container->invSize) {
-		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
@@ -324,7 +324,7 @@ void Creature::pick()
 						if (goldPickable)
 						{
 							gold += goldPickable->amount;
-							game.message(GOLD_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
+							game.message(YELLOW_BLACK_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
 							i.reset(); // Remove the gold pile from the map
 							std::erase_if(game.container->inv, is_null);
 							return;
@@ -335,7 +335,7 @@ void Creature::pick()
 				// Normal item handling
 				if (container->add(std::move(i)))
 				{
-					game.message(WHITE_PAIR, "You picked up the " + i->actorData.name + ".", true);
+					game.message(WHITE_BLACK_PAIR, "You picked up the " + i->actorData.name + ".", true);
 					std::erase_if(game.container->inv, is_null);
 				}
 				// We don't need an else for failed add since Container::add() now handles the message
@@ -365,7 +365,7 @@ void Creature::drop(Item& item)
 			auto is_null = [](const auto& i) { return !i; };
 			std::erase_if(container->inv, is_null);
 
-			game.message(WHITE_PAIR, "You dropped the item.", true);
+			game.message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}
 	}
 }

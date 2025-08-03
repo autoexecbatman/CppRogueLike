@@ -124,6 +124,7 @@ void Gui::gui_render()
 		game.player->destructible->dr
 	);
 
+	render_hp_bar();
 	render_hunger_status();
 	render_player_status();
 
@@ -139,9 +140,9 @@ void Gui::render_player_status()
 
 	if (game.player->has_state(ActorState::IS_CONFUSED))
 	{
-		wattron(guiWin, COLOR_PAIR(CONFUSION_PAIR));
+		wattron(guiWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 		mvwprintw(guiWin, statusY, 1, "Status: Confused!");
-		wattroff(guiWin, COLOR_PAIR(CONFUSION_PAIR));
+		wattroff(guiWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 	}
 }
 
@@ -291,7 +292,11 @@ void Gui::renderMouseLook()
 	const int mouseY = Mouse_status.y;
 	const int mouseX = Mouse_status.x;
 
-	mvprintw(29, 80, "Mouse_status Y: %d, X: %d", mouseY, mouseX); // display the mouse position
+	// Position mouse status to the right of HP bar
+	constexpr int MOUSE_Y = 0; // Same row as HP bar
+	constexpr int MOUSE_X = 35; // After HP bar and values
+	
+	mvwprintw(guiWin, MOUSE_Y, MOUSE_X, "Mouse: Y:%d X:%d", mouseY, mouseX);
 
 	if (!game.map->is_in_fov(Vector2D{ Mouse_status.y, Mouse_status.x }))
 	{
@@ -301,6 +306,8 @@ void Gui::renderMouseLook()
 
 	std::string buf;
 	bool first = true;
+	
+	// Check for creatures at mouse position
 	for (const auto& actor : game.creatures)
 	{
 		if (actor->position.x == mouseX && actor->position.y == mouseY)
@@ -316,12 +323,29 @@ void Gui::renderMouseLook()
 			buf += actor->actorData.name;
 		}
 	}
-	mvwprintw(
-		guiWin,
-		0,
-		1,
-		buf.c_str()
-	);
+	
+	// Check for items at mouse position
+	for (const auto& item : game.container->inv)
+	{
+		if (item && item->position.x == mouseX && item->position.y == mouseY)
+		{
+			if (!first)
+			{
+				buf += ", ";
+			}
+			else
+			{
+				first = false;
+			}
+			buf += item->actorData.name;
+		}
+	}
+	
+	// Display creature and item names to the right of mouse coordinates if any found
+	if (!buf.empty())
+	{
+		mvwprintw(guiWin, MOUSE_Y, MOUSE_X + 20, "[%s]", buf.c_str());
+	}
 }
 
 void Gui::save(json& j)
@@ -345,6 +369,60 @@ void Gui::load(const json& j)
 	//	log_message(col, text);
 	//	nbMessages--;
 	//}
+}
+
+void Gui::render_hp_bar()
+{
+	constexpr int BAR_WIDTH = 20;
+	constexpr int BAR_Y = 0; // Position at top of GUI
+	constexpr int BAR_X = 1;
+	
+	if (guiHpMax <= 0) return; // Prevent division by zero
+	
+	// Calculate HP percentage and bar width
+	const float hpRatio = static_cast<float>(guiHp) / static_cast<float>(guiHpMax);
+	const int filledWidth = static_cast<int>(hpRatio * BAR_WIDTH);
+	
+	// Determine color based on HP percentage
+	int barColor = WHITE_GREEN_PAIR; // Default green (76-100%)
+	if (hpRatio <= 0.25f)
+	{
+		barColor = WHITE_RED_PAIR; // Red for critical HP (0-25%)
+	}
+	else if (hpRatio <= 0.4f)
+	{
+		barColor = BLACK_RED_PAIR; // Orange for low HP (26-40%)
+	}
+	else if (hpRatio <= 0.6f)
+	{
+		barColor = BLACK_YELLOW_PAIR; // Yellow for medium HP (41-60%)
+	}
+	else if (hpRatio <= 0.75f)
+	{
+		barColor = RED_YELLOW_PAIR; // Light orange for good HP (61-75%)
+	}
+	
+	// Print HP bar label
+	mvwprintw(guiWin, BAR_Y, BAR_X, "HP:");
+	
+	// Render filled portion of HP bar
+	wattron(guiWin, COLOR_PAIR(barColor));
+	for (int i = 0; i < filledWidth; ++i)
+	{
+		mvwaddch(guiWin, BAR_Y, BAR_X + 3 + i, '#');
+	}
+	wattroff(guiWin, COLOR_PAIR(barColor));
+	
+	// Render empty portion of HP bar
+	wattron(guiWin, COLOR_PAIR(WHITE_BLACK_PAIR));
+	for (int i = filledWidth; i < BAR_WIDTH; ++i)
+	{
+		mvwaddch(guiWin, BAR_Y, BAR_X + 3 + i, '-');
+	}
+	wattroff(guiWin, COLOR_PAIR(WHITE_BLACK_PAIR));
+	
+	// Print HP values at the end of the bar
+	mvwprintw(guiWin, BAR_Y, BAR_X + 3 + BAR_WIDTH + 1, "%d/%d", guiHp, guiHpMax);
 }
 
 void Gui::render_hunger_status() {

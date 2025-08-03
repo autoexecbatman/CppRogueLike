@@ -46,7 +46,7 @@ void equip_fighter_starting_gear()
 	
 	// Log the rolled starting gold amount
 	game.log("Fighter starting gold: " + std::to_string(startingGold) + " gp (5d4×10)");
-	game.message(WHITE_PAIR, "You have " + std::to_string(startingGold) + " gold pieces.", true);
+	game.message(WHITE_BLACK_PAIR, "You have " + std::to_string(startingGold) + " gold pieces.", true);
 }
 
 void Fighter::on_selection()

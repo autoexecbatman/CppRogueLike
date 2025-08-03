@@ -61,17 +61,17 @@ int HungerSystem::get_hunger_color() const
 {
     switch (current_state) {
     case HungerState::WELL_FED:
-        return HPBARFULL_PAIR;  // Green
+        return WHITE_GREEN_PAIR;  // Green
     case HungerState::SATIATED:
-        return WHITE_PAIR;       // White
+        return WHITE_BLACK_PAIR;       // White
     case HungerState::HUNGRY:
-        return TROLL_PAIR;       // Yellow
+        return GREEN_BLACK_PAIR;       // Yellow
     case HungerState::STARVING:
-        return ORC_PAIR;         // Orange/Brown
+        return RED_BLACK_PAIR;         // Orange/Brown
     case HungerState::DYING:
-        return HPBARMISSING_PAIR; // Red
+        return WHITE_RED_PAIR; // Red
     default:
-        return WHITE_PAIR;
+        return WHITE_BLACK_PAIR;
     }
 }
 

@@ -147,7 +147,7 @@ void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
 	if (shopkeeper.container->inv.empty() || currentState >= shopkeeper.container->inv.size())
 	{
-		game.message(WHITE_PAIR, "Invalid selection.", true);
+		game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
@@ -170,10 +170,10 @@ void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 			currentState = shopkeeper.container->inv.size() - 1;
 		}
 
-		game.message(WHITE_PAIR, "Item purchased successfully.", true);
+		game.message(WHITE_BLACK_PAIR, "Item purchased successfully.", true);
 	}
 	else
 	{
-		game.message(WHITE_PAIR, "Insufficient currency.", true);
+		game.message(WHITE_BLACK_PAIR, "Insufficient currency.", true);
 	}
 }

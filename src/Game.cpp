@@ -221,10 +221,10 @@ void Game::update()
 	if (gameStatus == GameStatus::VICTORY)
 	{
 		game.log("Player has won the game!");
-		game.appendMessagePart(FIREBALL_PAIR, "Congratulations!");
-		game.appendMessagePart(WHITE_PAIR, " You have obtained the ");
-		game.appendMessagePart(FIREBALL_PAIR, "Amulet of Yendor");
-		game.appendMessagePart(WHITE_PAIR, " and escaped the dungeon!");
+		game.appendMessagePart(RED_YELLOW_PAIR, "Congratulations!");
+		game.appendMessagePart(WHITE_BLACK_PAIR, " You have obtained the ");
+		game.appendMessagePart(RED_YELLOW_PAIR, "Amulet of Yendor");
+		game.appendMessagePart(WHITE_BLACK_PAIR, " and escaped the dungeon!");
 		game.finalizeMessage();
 
 		// Display a victory message and wait for a keypress
@@ -356,7 +356,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursor != player->position)
 		{
-			mvchgat(player->position.y, player->position.x, 1, A_NORMAL, WHITE_PAIR, nullptr);
+			mvchgat(player->position.y, player->position.x, 1, A_NORMAL, WHITE_BLACK_PAIR, nullptr);
 		}
 
 		// draw a line using TCODLine class
@@ -374,12 +374,12 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
 		while (!TCODLine::step(&line.x, &line.y))
 		{
-			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, nullptr);
+			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, nullptr);
 		}
 
-		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+		attron(COLOR_PAIR(WHITE_RED_PAIR));
 		mvaddch(targetCursor.y, targetCursor.x, 'X');
-		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
 		if (game.map->is_in_fov(targetCursor))
@@ -420,7 +420,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 			for (int tilePosY = center.y - chebyshevD; tilePosY < centerOfExplosion.y + height; tilePosY++)
 			{
 				{
-					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, LIGHTNING_PAIR, nullptr);
+					mvchgat(tilePosY, tilePosX, 1, A_REVERSE, WHITE_BLUE_PAIR, nullptr);
 				}
 			}
 		}
@@ -456,7 +456,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 			// and the target coordinates are returned
 			
 			// first display a message
-			game.message(WHITE_PAIR, "Target confirmed", true);
+			game.message(WHITE_BLACK_PAIR, "Target confirmed", true);
 			// then return the coordinates
 			*position = targetCursor;
 
@@ -466,7 +466,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		case 10:
 			// if the key enter is pressed then select the target
 			// and return the target position
-			game.message(WHITE_PAIR, "Attack confirmed", true);
+			game.message(WHITE_BLACK_PAIR, "Attack confirmed", true);
 			// if the target is a monster then attack it
 		{
 			if (game.map->is_in_fov(targetCursor))
@@ -483,7 +483,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		break;
 		case 'r':
 		case 27:
-			game.message(WHITE_PAIR, "Target selection canceled", true);
+			game.message(WHITE_BLACK_PAIR, "Target selection canceled", true);
 			// EMSCRIPTEN FIX: Clean exit without screen corruption
 			run = false;
 			break;
@@ -556,7 +556,7 @@ void Game::target()
 {
 	if (!game.player->has_state(ActorState::IS_RANGED))
 	{
-		game.message(WHITE_PAIR, "You are not ranged!", true);
+		game.message(WHITE_BLACK_PAIR, "You are not ranged!", true);
 		return;
 	}
 
@@ -583,7 +583,7 @@ void Game::target()
 			{
 				if (game.map->is_in_fov(pos))
 				{
-					mvchgat(pos.y, pos.x, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+					mvchgat(pos.y, pos.x, 1, A_REVERSE, WHITE_BLUE_PAIR, NULL);
 				}
 			}
 		}
@@ -591,7 +591,7 @@ void Game::target()
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursor != player->position)
 		{
-			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_PAIR, NULL);
+			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_BLACK_PAIR, NULL);
 		}
 
 		//// draw a line using TCODLine class
@@ -608,7 +608,7 @@ void Game::target()
 		//TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
 		//while (!TCODLine::step(&line.x, &line.y))
 		//{
-		//	mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, NULL);
+		//	mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, NULL);
 		//}
 
 		// draw the line using TCODPath
@@ -618,12 +618,12 @@ void Game::target()
 		int x, y;
 		while (map->tcodPath->walk(&x, &y, true))
 		{
-			mvchgat(y, x, 1, A_REVERSE, WHITE_PAIR, NULL);
+			mvchgat(y, x, 1, A_REVERSE, WHITE_BLACK_PAIR, NULL);
 		}
 		// draw the target cursor
-		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+		attron(COLOR_PAIR(WHITE_RED_PAIR));
 		mvaddch(targetCursor.y,targetCursor.x,'X');
-		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
 		const int distance = player->get_tile_distance(targetCursor);
@@ -742,7 +742,7 @@ void Game::load_all()
 		{
 			for (const auto& creatureData : j["creatures"])
 			{
-				auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
+				auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
 				creature->load(creatureData); // Load creature data
 				
 				// CRITICAL FIX: Ensure creature inventory items have correct values
@@ -766,7 +766,7 @@ void Game::load_all()
 		{
 			for (const auto& itemData : j["items"])
 			{
-				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_PAIR });
+				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
 				item->load(itemData);
 				// CRITICAL FIX: Ensure loaded items have correct values
 				ItemCreator::ensure_correct_value(*item);
@@ -858,11 +858,11 @@ void Game::next_level()
 {
 	dungeonLevel++; // increment the dungeon level
 	shopkeepersOnCurrentLevel = 0; // Reset shopkeeper counter for new level
-	game.message(WHITE_PAIR, "You take a moment to rest, and recover your strength.",true); // present a message to the player
+	game.message(WHITE_BLACK_PAIR, "You take a moment to rest, and recover your strength.",true); // present a message to the player
 	player->destructible->heal(player->destructible->hpMax / 2); // heal the player
-	game.message(WHITE_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)
-	game.message(WHITE_PAIR, "After a rare moment of peace, you descend",true);
-	game.message(WHITE_PAIR, std::format("You are now on level {}", dungeonLevel), true);
+	game.message(WHITE_BLACK_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)
+	game.message(WHITE_BLACK_PAIR, "After a rare moment of peace, you descend",true);
+	game.message(WHITE_BLACK_PAIR, std::format("You are now on level {}", dungeonLevel), true);
 	map->regenerate(); // create a new map
 	gameStatus = GameStatus::STARTUP; // set the game status to STARTUP because we need to recompute the FOV 
 }
@@ -961,10 +961,10 @@ void Game::dispay_levelup(int xpLevel)
 	mvwprintw(statsWindow, 6, 2, "IMPROVEMENTS:");
 
 	// HP improvement
-	wattron(statsWindow, COLOR_PAIR(HPBARFULL_PAIR));
+	wattron(statsWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
 	mvwprintw(statsWindow, 7, 4, "Hit Points: %d/%d -> %d/%d (+%d)",
 		oldHp, oldHpMax, player->destructible->hp, player->destructible->hpMax, hpGain);
-	wattroff(statsWindow, COLOR_PAIR(HPBARFULL_PAIR));
+	wattroff(statsWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
 
 	// THAC0 difference
 	int difference = player->destructible->thaco - oldThac0;
@@ -972,10 +972,10 @@ void Game::dispay_levelup(int xpLevel)
 	// THAC0 improvement
 	if (oldThac0 > game.player->destructible->thaco)
 	{
-		wattron(statsWindow, COLOR_PAIR(WHITE_PAIR));
+		wattron(statsWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
 		mvwprintw(statsWindow, 8, 4, "THAC0: %d -> %d (Improved by %d)",
 			oldThac0, game.player->destructible->thaco, difference);
-		wattroff(statsWindow, COLOR_PAIR(WHITE_PAIR));
+		wattroff(statsWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
 	}
 	else {
 		mvwprintw(statsWindow, 8, 4, "THAC0: %d (No Change)", game.player->destructible->thaco);
@@ -983,10 +983,10 @@ void Game::dispay_levelup(int xpLevel)
 
 	// Damage Reduction improvement
 	if (drImproved) {
-		wattron(statsWindow, COLOR_PAIR(TROLL_PAIR));
+		wattron(statsWindow, COLOR_PAIR(GREEN_BLACK_PAIR));
 		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d -> %d (+1)",
 			oldDr, player->destructible->dr);
-		wattroff(statsWindow, COLOR_PAIR(TROLL_PAIR));
+		wattroff(statsWindow, COLOR_PAIR(GREEN_BLACK_PAIR));
 	}
 	else {
 		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d (No Change)", player->destructible->dr);
@@ -1102,13 +1102,13 @@ void Game::display_character_sheet() noexcept
 
 		// Show hit and damage modifiers from strength
 		if (strHitMod != 0 || strDmgMod != 0) {
-			wattron(character_sheet, COLOR_PAIR((strHitMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattron(character_sheet, COLOR_PAIR((strHitMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			mvwprintw(character_sheet, 9, 20, "To Hit: %+d", strHitMod);
-			wattroff(character_sheet, COLOR_PAIR((strHitMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattroff(character_sheet, COLOR_PAIR((strHitMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 
-			wattron(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattron(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			mvwprintw(character_sheet, 9, 35, "Damage: %+d", strDmgMod);
-			wattroff(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattroff(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 		}
 
 		// Display Constitution with HP bonus effect
@@ -1120,10 +1120,10 @@ void Game::display_character_sheet() noexcept
 		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
 
 		if (conBonus != 0) {
-			wattron(character_sheet, COLOR_PAIR((conBonus > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattron(character_sheet, COLOR_PAIR((conBonus > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			mvwprintw(character_sheet, 11, 3, "Constitution: %d (%+d HP per level)",
 				player->constitution, conBonus);
-			wattroff(character_sheet, COLOR_PAIR((conBonus > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattroff(character_sheet, COLOR_PAIR((conBonus > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 		}
 		else {
 			mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
@@ -1146,10 +1146,10 @@ void Game::display_character_sheet() noexcept
 			mvwprintw(character_sheet, 17, 3, "HP: %d/%d ",
 				player->destructible->hp, player->destructible->hpMax);
 
-			wattron(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattron(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			wprintw(character_sheet, "(%d base %+d Con bonus)",
 				baseHP, conBonusTotal);
-			wattroff(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+			wattroff(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 		}
 		else
 		{
@@ -1161,14 +1161,14 @@ void Game::display_character_sheet() noexcept
 		if (strHitMod != 0 || strDmgMod != 0) {
 			mvwprintw(character_sheet, 18, 3, "Attack Bonuses: ");
 			if (strHitMod != 0) {
-				wattron(character_sheet, COLOR_PAIR((strHitMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wattron(character_sheet, COLOR_PAIR((strHitMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 				wprintw(character_sheet, "%+d to hit ", strHitMod);
-				wattroff(character_sheet, COLOR_PAIR((strHitMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wattroff(character_sheet, COLOR_PAIR((strHitMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			}
 			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR((strDmgMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wattron(character_sheet, COLOR_PAIR((strDmgMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 				wprintw(character_sheet, "%+d to damage", strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR((strDmgMod > 0) ? HPBARFULL_PAIR : HPBARMISSING_PAIR));
+				wattroff(character_sheet, COLOR_PAIR((strDmgMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
 			}
 		}
 
@@ -1187,7 +1187,7 @@ void Game::display_character_sheet() noexcept
 		}
 
 		// Equipped weapon info with color
-		wattron(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
+		wattron(character_sheet, COLOR_PAIR(YELLOW_BLACK_PAIR));
 		mvwprintw(character_sheet, 24, 1, "Equipment:");
 
 		if (player->weaponEquipped != "None") {
@@ -1196,17 +1196,17 @@ void Game::display_character_sheet() noexcept
 
 			// Show if weapon is ranged
 			if (player->has_state(ActorState::IS_RANGED)) {
-				wattron(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+				wattron(character_sheet, COLOR_PAIR(WHITE_BLUE_PAIR));
 				mvwprintw(character_sheet, 25, 40, "[Ranged]");
-				wattroff(character_sheet, COLOR_PAIR(LIGHTNING_PAIR));
+				wattroff(character_sheet, COLOR_PAIR(WHITE_BLUE_PAIR));
 			}
 
 			// Show effective damage with strength bonus
 			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				wattron(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
 				mvwprintw(character_sheet, 26, 3, "Effective damage: %s %+d",
 					player->attacker->roll.c_str(), strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				wattroff(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
 			}
 		}
 		else {
@@ -1214,12 +1214,12 @@ void Game::display_character_sheet() noexcept
 
 			// Show effective unarmed damage with strength bonus
 			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				wattron(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
 				mvwprintw(character_sheet, 26, 3, "Effective damage: D2 %+d", strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR(FIREBALL_PAIR));
+				wattroff(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
 			}
 		}
-		wattroff(character_sheet, COLOR_PAIR(GOBLIN_PAIR));
+		wattroff(character_sheet, COLOR_PAIR(YELLOW_BLACK_PAIR));
 
 		// Add gold and other stats on the right side
 		mvwprintw(character_sheet, 9, 60, "Gender: %s", player->gender.c_str());
@@ -1537,45 +1537,45 @@ void Game::add_debug_weapons_at_player_feet()
 	}
 
 	// Create a longsword at player's feet
-	auto longsword = std::make_unique<Item>(player->position, ActorData{ '/', "long sword", WHITE_PAIR });
+	auto longsword = std::make_unique<Item>(player->position, ActorData{ '/', "long sword", WHITE_BLACK_PAIR });
 	longsword->pickable = std::make_unique<LongSword>();
 	longsword->value = 50; // Set a value for the longsword
 	container->add(std::move(longsword));
 
 	// Create a longbow at player's feet
-	auto longbow = std::make_unique<Item>(player->position, ActorData{ ')', "longbow", LIGHTNING_PAIR });
+	auto longbow = std::make_unique<Item>(player->position, ActorData{ ')', "longbow", WHITE_BLUE_PAIR });
 	longbow->pickable = std::make_unique<Longbow>();
 	longbow->value = 70; // Set a value for the longbow
 	container->add(std::move(longbow));
 
 	// Add a health potion for good measure
-	auto healthPotion = std::make_unique<Item>(player->position, ActorData{ '!', "health potion", HPBARMISSING_PAIR });
+	auto healthPotion = std::make_unique<Item>(player->position, ActorData{ '!', "health potion", WHITE_RED_PAIR });
 	healthPotion->pickable = std::make_unique<Healer>(10);
 	healthPotion->value = 25;
 	container->add(std::move(healthPotion));
 
 	// Add a scroll of fireball at player's feet
-	auto scrollOfFireball = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR });
+	auto scrollOfFireball = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of fireball", RED_YELLOW_PAIR });
 	scrollOfFireball->pickable = std::make_unique<Fireball>(3, 12);
 	scrollOfFireball->value = 100;
 	container->add(std::move(scrollOfFireball));
 
-	auto scrollOfLightning = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of lightning", LIGHTNING_PAIR });
+	auto scrollOfLightning = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of lightning", WHITE_BLUE_PAIR });
 	scrollOfLightning->pickable = std::make_unique<LightningBolt>(5, 20);
 	scrollOfLightning->value = 150;
 	container->add(std::move(scrollOfLightning));
 
-	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", DOOR_PAIR });
+	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", BROWN_BLACK_PAIR });
 	leatherArmor->pickable = std::make_unique<LeatherArmor>();
 	leatherArmor->value = 30;
 	container->add(std::move(leatherArmor));
 
-	auto chainMail = std::make_unique<Item>(player->position, ActorData{ '[', "chain mail", DOOR_PAIR });
+	auto chainMail = std::make_unique<Item>(player->position, ActorData{ '[', "chain mail", BROWN_BLACK_PAIR });
 	chainMail->pickable = std::make_unique<ChainMail>();
 	chainMail->value = 75;
 	container->add(std::move(chainMail));
 
-	auto plateMail = std::make_unique<Item>(player->position, ActorData{ '[', "plate mail", DOOR_PAIR });
+	auto plateMail = std::make_unique<Item>(player->position, ActorData{ '[', "plate mail", BROWN_BLACK_PAIR });
 	plateMail->pickable = std::make_unique<PlateMail>();
 	plateMail->value = 150;
 	container->add(std::move(plateMail));
@@ -1585,7 +1585,7 @@ void Game::add_debug_weapons_at_player_feet()
 		std::to_string(player->position.y));
 
 	// Add a message for the player
-	message(WHITE_PAIR, "Debug weapons and armor placed at your feet.", true);
+	message(WHITE_BLACK_PAIR, "Debug weapons and armor placed at your feet.", true);
 
 }
 

@@ -76,7 +76,7 @@ MonsterFactory::MonsterFactory() {
             shopkeeper.container->add(ItemCreator::create_scroll_lightning(pos));
             shopkeeper.container->add(ItemCreator::create_scroll_fireball(pos));
             
-            auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", DOOR_PAIR});
+            auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", BROWN_BLACK_PAIR});
             ration->pickable = std::make_unique<Food>(50);  // 50 nutrition value
             ration->value = 30;
             shopkeeper.container->add(std::move(ration));

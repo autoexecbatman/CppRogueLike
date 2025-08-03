@@ -15,7 +15,7 @@ bool Container::add(std::unique_ptr<Item> actor)
 	if (invSize > 0 && inv.size() >= invSize) {
 		// Log message and notify the player that inventory is full
 		game.log("Inventory full! Cannot add more items.");
-		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return false;
 	}
 

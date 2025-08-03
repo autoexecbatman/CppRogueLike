@@ -49,7 +49,7 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
 {
 	if (seller.container->inv.empty() || currentState >= seller.container->inv.size())
 	{
-		game.message(WHITE_PAIR, "Invalid selection.", true);
+		game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	} 
 
@@ -59,7 +59,7 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
 	if (!item)
 	{
 		game.log("Error: Attempted to sell a null item.");
-		game.message(WHITE_PAIR, "Error: Invalid item.", true);
+		game.message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
 		return;
 	}
 
@@ -77,12 +77,12 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
 			currentState = seller.container->inv.size() - 1;
 		}
 
-		game.message(WHITE_PAIR, "Item sold successfully.", true);
+		game.message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
 	}
 	else
 	{
 		game.log("Shopkeeper does not have enough gold to buy the item.");
-		game.message(WHITE_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+		game.message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
 	}
 }
 

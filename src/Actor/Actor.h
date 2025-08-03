@@ -131,7 +131,7 @@ public:
 class Stairs : public Object
 {
 	public:
-	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_PAIR }) 
+	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_BLACK_PAIR }) 
 	{
 		/*add_state(ActorState::FOV_ONLY);*/
 	};

@@ -438,32 +438,32 @@ void Map::render() const
 			switch (get_tile_type(tile.position))
 			{
 			case TileType::WALL:
-				attron(COLOR_PAIR(WALL_PAIR));
+				attron(COLOR_PAIR(WHITE_BLACK_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '#');
-				attroff(COLOR_PAIR(WALL_PAIR));
+				attroff(COLOR_PAIR(WHITE_BLACK_PAIR));
 				break;
 			case TileType::WATER:
-				attron(COLOR_PAIR(WATER_PAIR));
+				attron(COLOR_PAIR(BLUE_BLACK_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '~');
-				attroff(COLOR_PAIR(WATER_PAIR));
+				attroff(COLOR_PAIR(BLUE_BLACK_PAIR));
 				break;
 			case TileType::FLOOR:
 				mvaddch(tile.position.y, tile.position.x, '.');
 				break;
 			case TileType::CLOSED_DOOR:
-				attron(COLOR_PAIR(DOOR_PAIR));
+				attron(COLOR_PAIR(BROWN_BLACK_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '+'); // Closed door character
-				attroff(COLOR_PAIR(DOOR_PAIR));
+				attroff(COLOR_PAIR(BROWN_BLACK_PAIR));
 				break;
 			case TileType::OPEN_DOOR:
-				attron(COLOR_PAIR(DOOR_PAIR));
+				attron(COLOR_PAIR(BROWN_BLACK_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '/'); // Different symbol for open door
-				attroff(COLOR_PAIR(DOOR_PAIR));
+				attroff(COLOR_PAIR(BROWN_BLACK_PAIR));
 				break;
 			case TileType::CORRIDOR:
-				//attron(COLOR_PAIR(HPBARFULL_PAIR));
+				//attron(COLOR_PAIR(WHITE_GREEN_PAIR));
 				mvaddch(tile.position.y, tile.position.x, '.');
-				//attroff(COLOR_PAIR(HPBARFULL_PAIR));
+				//attroff(COLOR_PAIR(WHITE_GREEN_PAIR));
 				break;
 			default:
 				break;
@@ -963,7 +963,7 @@ void Map::place_amulet()
 		game.log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
 
 		// Add a hint message
-		game.message(FIREBALL_PAIR, "You sense a powerful artifact somewhere on this level...", true);
+		game.message(RED_YELLOW_PAIR, "You sense a powerful artifact somewhere on this level...", true);
 	}
 }
 

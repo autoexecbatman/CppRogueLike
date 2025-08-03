@@ -10,11 +10,11 @@ bool Armor::use(Item& owner, Creature& wearer)
     {
         // Unequip the armor
         owner.remove_state(ActorState::IS_EQUIPPED);
-        game.message(WHITE_PAIR, "You remove the " + owner.actorData.name + ".", true);
+        game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
 
         // Recalculate AC
         wearer.destructible->update_armor_class(wearer);
-        game.message(WHITE_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
+        game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
 
         return false; // Don't consume the armor
     }
@@ -35,17 +35,17 @@ bool Armor::use(Item& owner, Creature& wearer)
     // If we're trying to equip and another armor is already equipped, unequip it first
     if (currentArmor)
     {
-        game.message(WHITE_PAIR, "You remove your " + currentArmor->actorData.name + ".", true);
+        game.message(WHITE_BLACK_PAIR, "You remove your " + currentArmor->actorData.name + ".", true);
         currentArmor->remove_state(ActorState::IS_EQUIPPED);
     }
 
     // Equip the armor
     owner.add_state(ActorState::IS_EQUIPPED);
-    game.message(WHITE_PAIR, "You put on the " + owner.actorData.name + ".", true);
+    game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
 
     // Recalculate AC
     wearer.destructible->update_armor_class(wearer);
-    game.message(WHITE_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
+    game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
 
     return false; // Don't consume the armor
 }

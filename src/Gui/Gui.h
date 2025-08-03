@@ -37,6 +37,7 @@ private:
 	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 
+	void render_hp_bar();
 	void render_hunger_status();
 public:
 	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax

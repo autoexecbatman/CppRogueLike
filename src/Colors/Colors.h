@@ -2,31 +2,39 @@
 #ifndef COLORS_H
 #define COLORS_H
 
-// define the color pairs for the game
-inline constexpr auto DARK_WALL_PAIR = 1;
-inline constexpr auto EMPTY_PAIR = 1;
-inline constexpr auto DARK_GROUND_PAIR = 2;
-inline constexpr auto MOUNTAIN_PAIR = 3;
-inline constexpr auto ORC_PAIR = 4;
-inline constexpr auto PLAYER_PAIR = 5;
-inline constexpr auto WALL_PAIR = 6;
-inline constexpr auto LIGHT_WALL_PAIR = 7;
-inline constexpr auto LIGHT_GROUND_PAIR = 8;
-inline constexpr auto DEAD_NPC_PAIR = 9;
-inline constexpr auto TROLL_PAIR = 10;
-inline constexpr auto HPBARFULL_PAIR = 11;
-inline constexpr auto HPBARMISSING_PAIR = 12;
-inline constexpr auto LIGHTNING_PAIR = 13;
-inline constexpr auto WHITE_PAIR = 14;
-inline constexpr auto GOBLIN_PAIR = 15;
-inline constexpr auto DRAGON_PAIR = 16;
-inline constexpr auto FIREBALL_PAIR = 17;
-inline constexpr auto CONFUSION_PAIR = 18;
-inline constexpr auto WATER_PAIR = 19;
-inline constexpr auto GOLD_PAIR = 20;
-inline constexpr auto DOOR_PAIR = 21;
-inline constexpr auto SPIDER_PAIR = 22;
-inline constexpr auto WEB_PAIR = 23;
+// Color pairs organized by foreground_background pattern
+// Grouped logically for easy editing
+
+// === WHITE FOREGROUND PAIRS ===
+inline constexpr auto WHITE_BLACK_PAIR = 1;
+inline constexpr auto WHITE_RED_PAIR = 2;
+inline constexpr auto WHITE_BLUE_PAIR = 3;
+inline constexpr auto WHITE_GREEN_PAIR = 4;
+
+// === BLACK FOREGROUND PAIRS ===
+inline constexpr auto BLACK_WHITE_PAIR = 5;
+inline constexpr auto BLACK_GREEN_PAIR = 6;
+inline constexpr auto BLACK_YELLOW_PAIR = 7;
+inline constexpr auto BLACK_RED_PAIR = 8;
+
+// === COLORED FOREGROUND ON BLACK ===
+inline constexpr auto RED_BLACK_PAIR = 9;
+inline constexpr auto GREEN_BLACK_PAIR = 10;
+inline constexpr auto YELLOW_BLACK_PAIR = 11;
+inline constexpr auto BLUE_BLACK_PAIR = 12;
+inline constexpr auto CYAN_BLACK_PAIR = 13;
+
+// === SPECIAL COMBINATIONS ===
+inline constexpr auto CYAN_BLUE_PAIR = 14;
+inline constexpr auto RED_WHITE_PAIR = 15;
+inline constexpr auto GREEN_YELLOW_PAIR = 16;
+inline constexpr auto GREEN_MAGENTA_PAIR = 17;
+inline constexpr auto RED_YELLOW_PAIR = 18;
+inline constexpr auto GREEN_RED_PAIR = 19;
+
+// === CUSTOM COLORS ===
+inline constexpr auto BROWN_BLACK_PAIR = 20;
+inline constexpr auto DIM_GREEN_BLACK_PAIR = 21;
 
 struct Colors
 {

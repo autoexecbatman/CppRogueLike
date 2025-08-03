@@ -20,7 +20,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
     }
 
     // burn everything in <range> (including player)
-    game.appendMessagePart(WHITE_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
+    game.appendMessagePart(WHITE_BLACK_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
     game.finalizeMessage();
 
     // Create a more dynamic, realistic fire explosion
@@ -41,8 +41,8 @@ bool Fireball::use(Item& owner, Creature& wearer)
         {
             if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
             {
-                game.appendMessagePart(WHITE_PAIR, std::format("The {} gets engulfed in flames!", c->actorData.name));
-                game.appendMessagePart(WHITE_PAIR, std::format(" ({} damage)", damage));
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames!", c->actorData.name));
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" ({} damage)", damage));
                 game.finalizeMessage();
                 animation(c->position, maxRange);
             }
@@ -86,9 +86,9 @@ void Fireball::create_explosion(Vector2D center)
 
     // Fire colors - use a gradient of colors for more realistic fire
     const int FIRE_COLORS[] = {
-        FIREBALL_PAIR,    // Base fire color
-        DRAGON_PAIR,      // Another fire-like color
-        HPBARMISSING_PAIR // Red for intense heat
+        RED_YELLOW_PAIR,    // Base fire color
+        RED_YELLOW_PAIR,      // Another fire-like color
+        WHITE_RED_PAIR // Red for intense heat
     };
     const int COLOR_COUNT = 3;
 
@@ -206,9 +206,9 @@ void Fireball::animation(Vector2D position, int maxRange)
         game.render();
 
         // Create a simple flaming effect with just a single tilde character at the creature's position
-        attron(COLOR_PAIR(FIREBALL_PAIR));
+        attron(COLOR_PAIR(RED_YELLOW_PAIR));
         mvprintw(position.y, position.x, "~");
-        attroff(COLOR_PAIR(FIREBALL_PAIR));
+        attroff(COLOR_PAIR(RED_YELLOW_PAIR));
 
         // Ask the player to press a key to continue
         mvprintw(29, 0, "press 'SPACE' to continue");

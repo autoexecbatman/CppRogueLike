@@ -18,20 +18,20 @@ bool LightningBolt::use(Item& owner, Creature& wearer)
 
 	if (!closestMonster)
 	{
-		game.message(HPBARMISSING_PAIR, "No enemy is close enough to strike.", true);
+		game.message(WHITE_RED_PAIR, "No enemy is close enough to strike.", true);
 		return false;
 	}
 	else
 	{
-		game.appendMessagePart(WHITE_PAIR, "A lightning bolt strikes the ");
-		game.appendMessagePart(LIGHTNING_PAIR, closestMonster->actorData.name);
-		game.appendMessagePart(WHITE_PAIR, " with a loud thunder!");
+		game.appendMessagePart(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
+		game.appendMessagePart(WHITE_BLUE_PAIR, closestMonster->actorData.name);
+		game.appendMessagePart(WHITE_BLACK_PAIR, " with a loud thunder!");
 		game.finalizeMessage();
 		
 		// Animate the lightning bolt effect
 		animate_lightning(wearer.position, closestMonster->position);
 
-		game.message(HPBARMISSING_PAIR, std::format("The damage is {} hit points.", damage), true);
+		game.message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
 		closestMonster->destructible->take_damage(*closestMonster, damage);
 
 		return Pickable::use(owner, wearer);
@@ -103,7 +103,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 		}
 		
 		// Draw lightning path
-		attron(COLOR_PAIR(LIGHTNING_PAIR));
+		attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 		for (const auto& pos : lightningPath) {
 			// Choose random lightning character for jagged effect
 			char symbol = LIGHTNING_CHARS[charDist(gen)];
@@ -153,7 +153,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 		// Create a bright flash at target position
 		mvaddch(to.y, to.x, '@');
 		
-		attroff(COLOR_PAIR(LIGHTNING_PAIR));
+		attroff(COLOR_PAIR(WHITE_BLUE_PAIR));
 		refresh();
 		
 		// Flash timing - quick for lightning
@@ -168,7 +168,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 	}
 	
 	// End with a final impact flash
-	attron(COLOR_PAIR(LIGHTNING_PAIR));
+	attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 	// Draw impact markers around target
 	for (int dy = -1; dy <= 1; dy++) {
 		for (int dx = -1; dx <= 1; dx++) {
@@ -183,7 +183,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 			}
 		}
 	}
-	attroff(COLOR_PAIR(LIGHTNING_PAIR));
+	attroff(COLOR_PAIR(WHITE_BLUE_PAIR));
 	refresh();
 	napms(150);
 	

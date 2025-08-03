@@ -65,7 +65,7 @@ void AiSpider::update(Creature& owner)
             {
                 // Message about being ambushed
                 game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-                game.appendMessagePart(WHITE_PAIR, " ambushes you from hiding!");
+                game.appendMessagePart(WHITE_BLACK_PAIR, " ambushes you from hiding!");
                 game.finalizeMessage();
 
                 // If right next to player, get an immediate attack
@@ -77,9 +77,9 @@ void AiSpider::update(Creature& owner)
                     int totalDamage = normalDamage + bonusDamage;
 
                     game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-                    game.appendMessagePart(WHITE_PAIR, " strikes with the element of surprise for ");
-                    game.appendMessagePart(HPBARMISSING_PAIR, std::to_string(totalDamage));
-                    game.appendMessagePart(WHITE_PAIR, " damage!");
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
+                    game.appendMessagePart(WHITE_RED_PAIR, std::to_string(totalDamage));
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " damage!");
                     game.finalizeMessage();
 
                     // Apply damage directly
@@ -352,10 +352,10 @@ void AiSpider::poisonAttack(Creature& owner, Creature& target)
         int poisonDamage = game.d.roll(1, 3);
 
         // Display poison message with damage amount
-        game.appendMessagePart(ORC_PAIR, owner.actorData.name);
-        game.appendMessagePart(WHITE_PAIR, " injects venom for ");
-        game.appendMessagePart(HPBARMISSING_PAIR, std::to_string(poisonDamage));
-        game.appendMessagePart(WHITE_PAIR, " extra poison damage!");
+        game.appendMessagePart(RED_BLACK_PAIR, owner.actorData.name);
+        game.appendMessagePart(WHITE_BLACK_PAIR, " injects venom for ");
+        game.appendMessagePart(WHITE_RED_PAIR, std::to_string(poisonDamage));
+        game.appendMessagePart(WHITE_BLACK_PAIR, " extra poison damage!");
         game.finalizeMessage();
 
         // Deal the poison damage
@@ -547,7 +547,7 @@ void AiWebSpinner::update(Creature& owner)
 
             // Show message about web spinning
             game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-            game.appendMessagePart(WHITE_PAIR, " spins a sticky web!");
+            game.appendMessagePart(WHITE_BLACK_PAIR, " spins a sticky web!");
             game.finalizeMessage();
 
             return;
@@ -676,12 +676,12 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
     generateWebEntities(webCenter, webSize);
 
     // Dramatic message about web creation
-    game.appendMessagePart(DRAGON_PAIR, owner.actorData.name);
+    game.appendMessagePart(RED_YELLOW_PAIR, owner.actorData.name);
     if (webSize >= WEB_MAX_SIZE - 1) {
-        game.appendMessagePart(WHITE_PAIR, " creates a massive web network!");
+        game.appendMessagePart(WHITE_BLACK_PAIR, " creates a massive web network!");
     }
     else {
-        game.appendMessagePart(WHITE_PAIR, " spins a complex web structure!");
+        game.appendMessagePart(WHITE_BLACK_PAIR, " spins a complex web structure!");
     }
     game.finalizeMessage();
 

@@ -9,7 +9,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 	// Check if player is trying to attack but doesn't have a ranged weapon
 	if (!game.player->has_state(ActorState::IS_RANGED))
 	{
-		game.message(WHITE_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
+		game.message(WHITE_BLACK_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
 		// We still continue to the targeting mode, but will restrict actual attacks
 	}
 
@@ -34,7 +34,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 			{
 				if (game.map->is_in_fov(Vector2D{ y, x }))
 				{
-					mvchgat(y, x, 1, A_REVERSE, LIGHTNING_PAIR, NULL);
+					mvchgat(y, x, 1, A_REVERSE, WHITE_BLUE_PAIR, NULL);
 					/*refresh();*/
 				}
 			}
@@ -43,7 +43,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		// First color the player position if the cursor has moved from the player position
 		if (targetCursor != game.player->position)
 		{
-			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_PAIR, NULL);
+			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_BLACK_PAIR, NULL);
 		}
 
 		//draw_range_indicator(startPos, maxRange);
@@ -54,7 +54,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		bool canAttack = validTarget && (game.player->has_state(ActorState::IS_RANGED));
 
 		// Draw the target cursor - red if valid target and can attack, yellow if valid but cannot attack, blue if invalid
-		int cursorColor = canAttack ? HPBARMISSING_PAIR : (validTarget ? GOLD_PAIR : WATER_PAIR);
+		int cursorColor = canAttack ? WHITE_RED_PAIR : (validTarget ? YELLOW_BLACK_PAIR : BLUE_BLACK_PAIR);
 		attron(COLOR_PAIR(cursorColor));
 		mvaddch(targetCursor.y, targetCursor.x, 'X');
 		attroff(COLOR_PAIR(cursorColor));
@@ -90,18 +90,18 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 					game.player->dexterity <= game.dexterityAttributes.size()) {
 					int missileAdj = game.dexterityAttributes[game.player->dexterity - 1].MissileAttackAdj;
 					if (missileAdj != 0) {
-						attron(COLOR_PAIR(LIGHTNING_PAIR));
+						attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 						mvprintw(4, 50, "Ranged Attack Bonus: %+d", missileAdj);
-						attroff(COLOR_PAIR(LIGHTNING_PAIR));
+						attroff(COLOR_PAIR(WHITE_BLUE_PAIR));
 					}
 				}
 
 				// Add note about ranged attacks if examining a valid target
 				if (validTarget && !game.player->has_state(ActorState::IS_RANGED))
 				{
-					attron(COLOR_PAIR(GOLD_PAIR));
+					attron(COLOR_PAIR(YELLOW_BLACK_PAIR));
 					mvprintw(10, 0, "Need a ranged weapon to attack this target");
-					attroff(COLOR_PAIR(GOLD_PAIR));
+					attroff(COLOR_PAIR(YELLOW_BLACK_PAIR));
 				}
 			}
 		}
@@ -151,7 +151,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				else
 				{
 					// Player tried to attack but doesn't have a ranged weapon
-					game.message(WHITE_PAIR, "You need a ranged weapon to attack at a distance!", true);
+					game.message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 				}
 			}
 			break;
@@ -183,10 +183,10 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	TCODLine::init(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
 	while (!TCODLine::step(&line.x, &line.y))
 	{
-		mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_PAIR, NULL);
-		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+		mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, NULL);
+		attron(COLOR_PAIR(WHITE_RED_PAIR));
 		mvaddch(line.y, line.x, '*');
-		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 	}
 
 	//// draw the line using TCODPath
@@ -198,10 +198,10 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	//	int x, y;
 	//	while (game.map->tcodPath->walk(&x, &y, true))
 	//	{
-	//		/*mvchgat(y, x, 1, A_REVERSE, WHITE_PAIR, NULL);*/
-	//		attron(COLOR_PAIR(HPBARMISSING_PAIR));
+	//		/*mvchgat(y, x, 1, A_REVERSE, WHITE_BLACK_PAIR, NULL);*/
+	//		attron(COLOR_PAIR(WHITE_RED_PAIR));
 	//		mvaddch(y, x, '*');
-	//		attroff(COLOR_PAIR(HPBARMISSING_PAIR));
+	//		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 	//	}
 	//}
 

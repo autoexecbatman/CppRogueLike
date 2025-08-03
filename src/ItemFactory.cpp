@@ -201,7 +201,7 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
     int goldAmount = game.d.roll(goldMin, goldMax);
 
     // Create gold pile
-    auto goldPile = std::make_unique<Item>(position, ActorData{ '$', "gold pile", GOLD_PAIR });
+    auto goldPile = std::make_unique<Item>(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR });
     goldPile->pickable = std::make_unique<Gold>(goldAmount);
     game.container->add(std::move(goldPile));
 

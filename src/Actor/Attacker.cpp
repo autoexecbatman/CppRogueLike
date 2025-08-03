@@ -67,9 +67,9 @@ void Attacker::attack(Creature& attacker, Creature& target)
         {
             // Display surprise message
             game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
-            game.appendMessagePart(WHITE_PAIR, " catches ");
+            game.appendMessagePart(WHITE_BLACK_PAIR, " catches ");
             game.appendMessagePart(target.actorData.color, target.actorData.name);
-            game.appendMessagePart(WHITE_PAIR, " by surprise!");
+            game.appendMessagePart(WHITE_BLACK_PAIR, " by surprise!");
             game.finalizeMessage();
         }
 
@@ -117,15 +117,15 @@ void Attacker::attack(Creature& attacker, Creature& target)
             if (totaldmg > 0)
             {
                 game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-                game.appendMessagePart(WHITE_PAIR, " attacks the ");
+                game.appendMessagePart(WHITE_BLACK_PAIR, " attacks the ");
                 game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
 
                 // Indicate if this was a ranged attack
                 if (attacker.has_state(ActorState::IS_RANGED)) {
-                    game.appendMessagePart(WHITE_PAIR, std::format(" from a distance"));
+                    game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" from a distance"));
                 }
 
-                game.appendMessagePart(WHITE_PAIR, std::format(" for {} hit points.", totaldmg));
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" for {} hit points.", totaldmg));
                 game.finalizeMessage();
                 // apply damage to target
                 target.destructible->take_damage(target, totaldmg);
@@ -134,27 +134,27 @@ void Attacker::attack(Creature& attacker, Creature& target)
             else
             {
                 game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-                game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
                 game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-                game.appendMessagePart(WHITE_PAIR, std::format(" but it has no effect!"));
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" but it has no effect!"));
                 game.finalizeMessage();
             }
         }
         else
         {
             game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-            game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+            game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
             game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-            game.appendMessagePart(WHITE_PAIR, std::format(" and misses."));
+            game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" and misses."));
             game.finalizeMessage();
         }
     }
     else
     {
         game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-        game.appendMessagePart(WHITE_PAIR, std::format(" attacks "));
+        game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
         game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-        game.appendMessagePart(WHITE_PAIR, std::format(" in vain."));
+        game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" in vain."));
         game.finalizeMessage();
     }
 }

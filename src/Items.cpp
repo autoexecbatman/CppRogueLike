@@ -10,31 +10,31 @@
 #include "Amulet.h"
 #include "Armor.h"
 
-HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", HPBARMISSING_PAIR })
+HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", WHITE_RED_PAIR })
 {
 	pickable = std::make_unique<Healer>(10);
 	value = 50;
 }
 
-ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{'#', "scroll of lightning bolt", LIGHTNING_PAIR })
+ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{'#', "scroll of lightning bolt", WHITE_BLUE_PAIR })
 {
 	pickable = std::make_unique<LightningBolt>(5, 20);
 	value = 150; // 150 gp - powerful lightning magic
 }
 
-ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ '#', "scroll of fireball", FIREBALL_PAIR })
+ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ '#', "scroll of fireball", RED_YELLOW_PAIR })
 {
 	pickable = std::make_unique<Fireball>(3, 12);
 	value = 100;
 }
 
-ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ '#', "scroll of confusion", CONFUSION_PAIR })
+ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ '#', "scroll of confusion", WHITE_GREEN_PAIR })
 {
 	pickable = std::make_unique<Confuser>(10, 8);
 	value = 120; // 120 gp - tactical confusion magic
 }
 
-GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", GOLD_PAIR })
+GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR })
 {
 	// Create a randomized amount of gold (between 5 and 20, increasing with dungeon level)
 	int goldAmount = game.d.roll(5, 10 + game.dungeonLevel * 3);
@@ -42,25 +42,25 @@ GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pil
 	value = goldAmount; // Set the value equal to the gold amount for consistency
 }
 
-AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*', "Amulet of Yendor", FIREBALL_PAIR })
+AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*', "Amulet of Yendor", RED_YELLOW_PAIR })
 {
 	pickable = std::make_unique<Amulet>();
 	value = 1000; // Very valuable
 }
 
-LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData{ '[', "leather armor", DOOR_PAIR })
+LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData{ '[', "leather armor", BROWN_BLACK_PAIR })
 {
 	pickable = std::make_unique<LeatherArmor>();
 	value = 5; // 5 gp - AD&D 2e leather armor price
 }
 
-ChainMailItem::ChainMailItem(Vector2D position) : Item(position, ActorData{ '[', "chain mail", DOOR_PAIR })
+ChainMailItem::ChainMailItem(Vector2D position) : Item(position, ActorData{ '[', "chain mail", BROWN_BLACK_PAIR })
 {
 	pickable = std::make_unique<ChainMail>();
 	value = 75; // 75 gp - AD&D 2e chain mail price
 }
 
-PlateMailItem::PlateMailItem(Vector2D position) : Item(position, ActorData{ '[', "plate mail", DOOR_PAIR })
+PlateMailItem::PlateMailItem(Vector2D position) : Item(position, ActorData{ '[', "plate mail", BROWN_BLACK_PAIR })
 {
 	pickable = std::make_unique<PlateMail>();
 	value = 400; // 400 gp - AD&D 2e plate mail price

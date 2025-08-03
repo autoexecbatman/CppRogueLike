@@ -15,7 +15,7 @@
 #include "../Armor.h"
 #include "../Ai/AiShopkeeper.h"
 
-Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_PAIR })
+Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
 {
 	// Rolling for stats
 	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
@@ -150,7 +150,7 @@ bool Player::rest()
 	// Check if player is already at full health
 	if (destructible->hp >= destructible->hpMax)
 	{
-		game.message(WHITE_PAIR, "You're already at full health.", true);
+		game.message(WHITE_BLACK_PAIR, "You're already at full health.", true);
 		return false;
 	}
 
@@ -178,7 +178,7 @@ bool Player::rest()
 			// If hostile enemy is within 5 tiles, can't rest
 			if (distance <= 5)
 			{
-				game.message(WHITE_PAIR, "You can't rest with enemies nearby!", true);
+				game.message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
 				return false;
 			}
 		}
@@ -188,7 +188,7 @@ bool Player::rest()
 	if (game.hunger_system.get_hunger_state() == HungerState::STARVING ||
 		game.hunger_system.get_hunger_state() == HungerState::DYING)
 	{
-		game.message(HPBARMISSING_PAIR, "You're too hungry to rest!", true);
+		game.message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
 		return false;
 	}
 
@@ -209,20 +209,20 @@ bool Player::rest()
 	HungerState afterState = game.hunger_system.get_hunger_state();
 
 	// Display message with more detail
-	game.appendMessagePart(WHITE_PAIR, "Resting recovers ");
-	game.appendMessagePart(HPBARFULL_PAIR, std::to_string(amountHealed));
-	game.appendMessagePart(HPBARFULL_PAIR, " health");
+	game.appendMessagePart(WHITE_BLACK_PAIR, "Resting recovers ");
+	game.appendMessagePart(WHITE_GREEN_PAIR, std::to_string(amountHealed));
+	game.appendMessagePart(WHITE_GREEN_PAIR, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		game.appendMessagePart(WHITE_PAIR, ", but you've become ");
+		game.appendMessagePart(WHITE_BLACK_PAIR, ", but you've become ");
 		game.appendMessagePart(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
-		game.appendMessagePart(WHITE_PAIR, ".");
+		game.appendMessagePart(WHITE_BLACK_PAIR, ".");
 	}
 	else
 	{
-		game.appendMessagePart(WHITE_PAIR, ", consuming your food.");
+		game.appendMessagePart(WHITE_BLACK_PAIR, ", consuming your food.");
 	}
 
 	game.finalizeMessage();
@@ -247,9 +247,9 @@ void Player::animate_resting()
 	for (int i = 0; i < frames; i++)
 	{
 		// Draw Zs above player
-		attron(COLOR_PAIR(HPBARFULL_PAIR));
+		attron(COLOR_PAIR(WHITE_GREEN_PAIR));
 		mvaddch(position.y - 1, position.x + i, restSymbols[i]);
-		attroff(COLOR_PAIR(HPBARFULL_PAIR));
+		attroff(COLOR_PAIR(WHITE_GREEN_PAIR));
 
 		refresh();
 		napms(delay);
@@ -270,7 +270,7 @@ void Player::getStuckInWeb(int duration, int strength, Web* web)
 	webStrength = strength;
 	trappingWeb = web;
 
-	game.message(WHITE_PAIR, "You're caught in a sticky web for " +
+	game.message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " +
 		std::to_string(duration) + " turns!", true);
 }
 
@@ -286,7 +286,7 @@ bool Player::tryBreakWeb()
 	if (game.d.d100() <= breakChance)
 	{
 		// Success!
-		game.message(WHITE_PAIR, "You break free from the web!", true);
+		game.message(WHITE_BLACK_PAIR, "You break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
@@ -304,7 +304,7 @@ bool Player::tryBreakWeb()
 	if (webStuckTurns <= 0)
 	{
 		// Time expired, free anyway
-		game.message(WHITE_PAIR, "You finally break free from the web!", true);
+		game.message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
@@ -318,7 +318,7 @@ bool Player::tryBreakWeb()
 	}
 
 	// Message about remaining stuck
-	game.message(WHITE_PAIR, "You're still stuck in the web. Turns remaining: " +
+	game.message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " +
 		std::to_string(webStuckTurns), true);
 	return false;
 }

@@ -106,7 +106,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 	{
 		wearer.attacker->roll = "D2"; // Reset to default unarmed attack
 		wearer.unequip(owner);
-		game.message(WHITE_PAIR, "You unequip the " + owner.actorData.name + ".", true);
+		game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
 
 		// Remove ranged state if applicable
 		if (isRanged())
@@ -136,14 +136,14 @@ bool Weapon::use(Item& owner, Creature& wearer)
 	// If another weapon is equipped, unequip it
 	if (currentWeapon)
 	{
-		game.message(WHITE_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
+		game.message(WHITE_BLACK_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
 		wearer.unequip(*currentWeapon);
 	}
 
 	// Equip the new weapon
 	wearer.attacker->roll = this->roll;
 	wearer.equip(owner);
-	game.message(WHITE_PAIR, "You equip the " + owner.actorData.name + ".", true);
+	game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + ".", true);
 
 	// Apply ranged state if applicable
 	if (isRanged())

@@ -1,9 +1,10 @@
 #include "Web.h"
 #include "Game.h"
 #include "ActorTypes/Player.h"
+#include "Colors/Colors.h"
 
 Web::Web(Vector2D position, int strength)
-    : Object(position, ActorData{ '*', "spider web", WEB_PAIR }),
+    : Object(position, ActorData{ '*', "spider web", BLACK_WHITE_PAIR }),
     webStrength(strength)
 {
     // Webs don't block movement but do have their effect when passed through
@@ -28,7 +29,7 @@ bool Web::applyEffect(Creature& creature)
         // Apply the effect
         game.player->getStuckInWeb(stuckTurns, webStrength, this);
 
-        game.message(WHITE_PAIR, "You're caught in a sticky web!", true);
+        game.message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 
         // Player loses their turn
         game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -36,13 +37,13 @@ bool Web::applyEffect(Creature& creature)
     }
     else
     {
-        game.message(WHITE_PAIR, "You carefully navigate through the web.", true);
+        game.message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
 
         // 50% chance to destroy the web
         if (game.d.d2() == 1)
         {
             destroy();
-            game.message(WHITE_PAIR, "You tear through the web, clearing a path.", true);
+            game.message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
         }
 
         return false;

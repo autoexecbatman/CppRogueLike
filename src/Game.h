@@ -31,7 +31,7 @@ private:
 public:
 	std::vector <std::vector<LogMessage>> attackMessagesWhole; // this vector holds all of the attack messages
 	std::string messageToDisplay{ "Init Message" };
-	int messageColor{ EMPTY_PAIR };
+	int messageColor{ WHITE_BLACK_PAIR };
 
 	bool run{ true };
 	bool shouldSave{ true };

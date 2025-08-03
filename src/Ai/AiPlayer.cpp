@@ -70,7 +70,7 @@ void AiPlayer::update(Creature& owner)
 		if (confusionTurns == 0)
 		{
 			owner.remove_state(ActorState::IS_CONFUSED);
-			game.message(WHITE_PAIR, "Your mind clears.", true);
+			game.message(WHITE_BLACK_PAIR, "Your mind clears.", true);
 		}
 		else
 		{
@@ -91,13 +91,13 @@ void AiPlayer::update(Creature& owner)
 				case 7: moveVector = { 1, 1 }; break;   // Southeast
 				}
 
-				game.message(CONFUSION_PAIR, "You stumble around in confusion!", true);
+				game.message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
 				game.gameStatus = Game::GameStatus::NEW_TURN;
 			}
 			else
 			{
 				// Process normal input but show a message
-				game.message(CONFUSION_PAIR, "You struggle to control your movements...", true);
+				game.message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				// Check for movement keys as normal
 				if (m.moves.find(key) != m.moves.end())
@@ -169,7 +169,7 @@ void AiPlayer::pick_item(Creature& owner)
 {
 	// Check if the inventory is already full
 	if (owner.container && owner.container->invSize > 0 && owner.container->inv.size() >= owner.container->invSize) {
-		game.message(WHITE_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
@@ -188,9 +188,9 @@ void AiPlayer::pick_item(Creature& owner)
 					owner.gold += goldPickable->amount;
 
 					// Display message
-					game.appendMessagePart(GOLD_PAIR, "You picked up ");
-					game.appendMessagePart(GOLD_PAIR, std::to_string(goldPickable->amount));
-					game.appendMessagePart(GOLD_PAIR, " gold.");
+					game.appendMessagePart(YELLOW_BLACK_PAIR, "You picked up ");
+					game.appendMessagePart(YELLOW_BLACK_PAIR, std::to_string(goldPickable->amount));
+					game.appendMessagePart(YELLOW_BLACK_PAIR, " gold.");
 					game.finalizeMessage();
 
 					// Remove gold pile from ground
@@ -210,7 +210,7 @@ void AiPlayer::pick_item(Creature& owner)
 				// Sync ranged state after picking up an item
 				owner.syncRangedState();
 
-				game.message(WHITE_PAIR, std::format("You picked up the {}.", name), true);
+				game.message(WHITE_BLACK_PAIR, std::format("You picked up the {}.", name), true);
 			}
 			// We don't need an else statement since Container::add() now handles the message
 			return;
@@ -222,7 +222,7 @@ void AiPlayer::drop_item(Creature& owner)
 {
 	// If the inventory is empty, show a message and return
 	if (owner.container->inv.empty()) {
-		game.message(WHITE_PAIR, "Your inventory is empty!", true);
+		game.message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
 
@@ -245,9 +245,9 @@ void AiPlayer::drop_item(Creature& owner)
 
 			// Add equipment marker if equipped
 			if (item->has_state(ActorState::IS_EQUIPPED)) {
-				wattron(dropWin, COLOR_PAIR(HPBARFULL_PAIR));
+				wattron(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 				wprintw(dropWin, "[E] ");
-				wattroff(dropWin, COLOR_PAIR(HPBARFULL_PAIR));
+				wattroff(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 			}
 
 			// Display item name with color
@@ -269,7 +269,7 @@ void AiPlayer::drop_item(Creature& owner)
 	// Process the input
 	if (input == static_cast<int>(Controls::ESCAPE)) {
 		// Cancel dropping
-		game.message(WHITE_PAIR, "Drop canceled.", true);
+		game.message(WHITE_BLACK_PAIR, "Drop canceled.", true);
 	}
 	else if (input >= 'a' && input < 'a' + static_cast<int>(owner.container->inv.size())) {
 		// Valid item selection
@@ -286,7 +286,7 @@ void AiPlayer::drop_item(Creature& owner)
 				owner.drop(*itemToDrop);
 
 				// Show dropped message with the item name
-				game.message(WHITE_PAIR, "You dropped the " + itemName + ".", true);
+				game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
 
 				// Set game status to register the turn
 				game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -321,9 +321,9 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 				// Add colors and status indicators
 				if (item->has_state(ActorState::IS_EQUIPPED))
 				{
-					wattron(inv, COLOR_PAIR(HPBARFULL_PAIR)); // Green for equipped items
+					wattron(inv, COLOR_PAIR(WHITE_GREEN_PAIR)); // Green for equipped items
 					wprintw(inv, "[E] ");
-					wattroff(inv, COLOR_PAIR(HPBARFULL_PAIR));
+					wattroff(inv, COLOR_PAIR(WHITE_GREEN_PAIR));
 				}
 
 				// Show the item name with its color
@@ -334,9 +334,9 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 				// Show item information
 				if (item->value > 0)
 				{
-					wattron(inv, COLOR_PAIR(GOLD_PAIR)); // Gold color for value
+					wattron(inv, COLOR_PAIR(YELLOW_BLACK_PAIR)); // Gold color for value
 					wprintw(inv, " (%d gp)", item->value);
-					wattroff(inv, COLOR_PAIR(GOLD_PAIR));
+					wattroff(inv, COLOR_PAIR(YELLOW_BLACK_PAIR));
 				}
 
 				// For weapons, show damage dice
@@ -362,9 +362,9 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 
 					if (!roll.empty())
 					{
-						wattron(inv, COLOR_PAIR(WHITE_PAIR));
+						wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
 						wprintw(inv, " [%s dmg]", roll.c_str());
-						wattroff(inv, COLOR_PAIR(WHITE_PAIR));
+						wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
 					}
 				}
 
@@ -373,9 +373,9 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 				{
 					if (auto* bow = dynamic_cast<Longbow*>(weapon))
 					{
-						wattron(inv, COLOR_PAIR(LIGHTNING_PAIR));
+						wattron(inv, COLOR_PAIR(WHITE_BLUE_PAIR));
 						wprintw(inv, " [Rng]");
-						wattroff(inv, COLOR_PAIR(LIGHTNING_PAIR));
+						wattroff(inv, COLOR_PAIR(WHITE_BLUE_PAIR));
 					}
 				}
 			}
@@ -495,7 +495,7 @@ void AiPlayer::look_on_floor(Vector2D target)
 		{
 			if (i->position == target)
 			{
-				game.appendMessagePart(WHITE_PAIR, std::format("There's a {} here\n", i->actorData.name));
+				game.appendMessagePart(WHITE_BLACK_PAIR, std::format("There's a {} here\n", i->actorData.name));
 				game.finalizeMessage();
 			}
 		}
@@ -563,8 +563,8 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 		case TileType::WATER:
 			if (!owner.has_state(ActorState::CAN_SWIM))
 			{
-				game.log("You can't swim");
-				game.message(COLOR_WHITE, "You can't swim", true);
+				game.log("You can't swim.");
+				game.message(WHITE_BLACK_PAIR, "You can't swim.", true);
 			}
 			break;
 		case TileType::WALL:
@@ -601,7 +601,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		shopkeeper.container->add(ItemCreator::create_health_potion(shopkeeper.position));
 		shopkeeper.container->add(ItemCreator::create_dagger(shopkeeper.position));
 		shopkeeper.gold = 100; // Give shopkeeper gold
-		game.message(WHITE_PAIR, "Shopkeeper summoned!", true);
+		game.message(WHITE_BLACK_PAIR, "Shopkeeper summoned!", true);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	}
@@ -635,7 +635,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::QUIT:
 	{
 		game.run = false;
-		game.message(WHITE_PAIR, "You quit the game ! Press any key ...", true);
+		game.message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
 		break;
 	}
 
@@ -687,7 +687,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::OPEN_DOOR:
 	{
 		// Prompt for direction
-		game.message(WHITE_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
 		Vector2D doorPos = handle_direction_input(owner, dirKey);
 
@@ -697,23 +697,23 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 			{
 				if (game.map->open_door(doorPos))
 				{
-					game.message(WHITE_PAIR, "You open the door.", true);
+					game.message(WHITE_BLACK_PAIR, "You open the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
 					// FOV is recalculated inside open_door method
 				}
 				else
 				{
-					game.message(WHITE_PAIR, "The door is already open.", true);
+					game.message(WHITE_BLACK_PAIR, "The door is already open.", true);
 				}
 			}
 			else
 			{
-				game.message(WHITE_PAIR, "There is no door there.", true);
+				game.message(WHITE_BLACK_PAIR, "There is no door there.", true);
 			}
 		}
 		else
 		{
-			game.message(WHITE_PAIR, "Invalid direction.", true);
+			game.message(WHITE_BLACK_PAIR, "Invalid direction.", true);
 		}
 		break;
 	}
@@ -721,7 +721,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::CLOSE_DOOR:
 	{
 		// Prompt for direction
-		game.message(WHITE_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
 		Vector2D doorPos = handle_direction_input(owner, dirKey);
 
@@ -731,7 +731,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 			{
 				if (game.map->close_door(doorPos))
 				{
-					game.message(WHITE_PAIR, "You close the door.", true);
+					game.message(WHITE_BLACK_PAIR, "You close the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
 					// FOV is recalculated inside close_door method
 				}
@@ -740,22 +740,22 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 					// Try to determine why door couldn't be closed
 					if (game.map->get_actor(doorPos) != nullptr)
 					{
-						game.message(WHITE_PAIR, "Something is blocking the door.", true);
+						game.message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
 					}
 					else
 					{
-						game.message(WHITE_PAIR, "The door is already closed.", true);
+						game.message(WHITE_BLACK_PAIR, "The door is already closed.", true);
 					}
 				}
 			}
 			else
 			{
-				game.message(WHITE_PAIR, "There is no door there.", true);
+				game.message(WHITE_BLACK_PAIR, "There is no door there.", true);
 			}
 		}
 		else
 		{
-			game.message(WHITE_PAIR, "Invalid direction.", true);
+			game.message(WHITE_BLACK_PAIR, "Invalid direction.", true);
 		}
 		break;
 	}

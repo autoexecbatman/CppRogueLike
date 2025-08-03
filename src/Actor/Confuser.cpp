@@ -29,8 +29,8 @@ bool Confuser::use(Item& owner, Creature& wearer)
 	auto confusedAi = std::make_unique<AiMonsterConfused>(nbTurns, std::move(actor->ai));
 	actor->ai = std::move(confusedAi);
 
-	game.message(WHITE_PAIR, std::format("as he starts to stumble around!"), true);
-	game.message(WHITE_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), true);
+	game.message(WHITE_BLACK_PAIR, std::format("as he starts to stumble around!"), true);
+	game.message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), true);
 
 
 	return Pickable::use(owner, wearer);

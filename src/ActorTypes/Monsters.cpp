@@ -9,7 +9,7 @@
 #include "../ActorTypes/Healer.h"
 #include "../AiMimic.h"
 
-Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",GOBLIN_PAIR })
+Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",YELLOW_BLACK_PAIR })
 {
 	RandomDice d;
 	const int hp = d.roll(1, 8 - 1);
@@ -29,7 +29,7 @@ Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",G
 	add_state(ActorState::CAN_SWIM);
 }
 
-Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",ORC_PAIR })
+Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",RED_BLACK_PAIR })
 {
 	RandomDice d;
 	const int damage = d.d10();
@@ -48,7 +48,7 @@ Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",ORC_PAIR }
 	ai = std::make_unique<AiMonster>();
 }
 
-Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T',"troll",TROLL_PAIR })
+Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T', "troll",GREEN_BLACK_PAIR })
 {
 	RandomDice d;
 	const int damage = d.d10() + 3;
@@ -67,7 +67,7 @@ Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T',"troll",TROL
 	ai = std::make_unique<AiMonster>();
 }
 
-Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",DRAGON_PAIR })
+Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",RED_YELLOW_PAIR })
 {
 	RandomDice d;
 	const int damage = d.d12() + 5;
@@ -86,7 +86,7 @@ Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",D
 	ai = std::make_unique<AiMonster>();
 }
 
-Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"shopkeeper",WHITE_PAIR })
+Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"shopkeeper",WHITE_BLACK_PAIR })
 {
 	destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 	attacker = std::make_unique<Attacker>("D10");
@@ -99,7 +99,7 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"s
 	gold = 200;
 }
 
-Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",ORC_PAIR })
+Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",RED_BLACK_PAIR })
 {
 	RandomDice d;
 	const int hp = d.d8();
@@ -118,7 +118,7 @@ Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",O
 	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
 }
 
-Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",LIGHTNING_PAIR })
+Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",WHITE_BLUE_PAIR })
 {
 	RandomDice d;
 	const int hp = d.d6();
@@ -138,7 +138,7 @@ Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",LIGHTNI
 	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
 }
 
-Mimic::Mimic(Vector2D position) : Creature(position, ActorData{ 'M',"mimic",DRAGON_PAIR })
+Mimic::Mimic(Vector2D position) : Creature(position, ActorData{ 'M',"mimic",RED_YELLOW_PAIR })
 {
 	RandomDice d;
 	const int hp = d.d6() + d.d4(); // Reduced from d8+d4+2 to d6+d4
@@ -174,11 +174,11 @@ void Mimic::initDisguises()
 {
 	// Define possible disguises
 	possibleDisguises = {
-		{'$', "gold pile", GOLD_PAIR},
-		{'!', "health potion", HPBARMISSING_PAIR},
-		{'#', "scroll", LIGHTNING_PAIR},
-		{'/', "weapon", WHITE_PAIR},
-		{'%', "food", HPBARFULL_PAIR}
+		{'$', "gold pile", YELLOW_BLACK_PAIR},
+		{'!', "health potion", WHITE_RED_PAIR},
+		{'#', "scroll", WHITE_BLUE_PAIR},
+		{'/', "weapon", WHITE_BLACK_PAIR},
+		{'%', "food", WHITE_GREEN_PAIR}
 	};
 }
 
