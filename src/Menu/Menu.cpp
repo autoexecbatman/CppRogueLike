@@ -70,6 +70,10 @@ void Menu::draw_content()
 void Menu::draw()
 {
 	menu_clear();
+	
+	// Fill menu background with solid color to prevent world bleeding
+	wbkgd(menuWindow, ' ' | COLOR_PAIR(0)); // Use default color pair
+	
 	box(menuWindow, 0, 0);
 	// Title
 	mvwprintw(menuWindow, 0, 1, "Main Menu");
@@ -154,14 +158,31 @@ void Menu::on_key(int key)
 
 void Menu::menu()
 {
+	// Clear screen and render game background before showing menu
+	clear();
+	if (game.gameInit && !isStartupMenu)
+	{
+		// For in-game menu, show the game world behind it
+		game.render();
+		game.gui->gui_render();
+	}
+	refresh();
+	
 	while (run) // menu has its own loop
 	{
 		draw(); // draw the menu
 		menu_key_listen(); // listen for key presses
 		on_key(keyPress); // run the key press
 	}
-	clear();
-	refresh();
+	
+	// Restore full game view if returning to game
+	if (game.gameInit && !isStartupMenu)
+	{
+		clear();
+		game.render();
+		game.gui->gui_render();
+		refresh();
+	}
 }
 
 // end of file: Menu.cpp

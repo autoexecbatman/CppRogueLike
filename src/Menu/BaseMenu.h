@@ -24,7 +24,16 @@ public:
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
 	void menu_new(int height, int width, int starty, int startx);
-	void menu_clear() { wclear(menuWindow); needsRedraw = true; };
+	void menu_clear() 
+	{ 
+		if (menuWindow) 
+		{
+			wclear(menuWindow); 
+			// Fill with solid background to prevent bleed-through
+			wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
+		}
+		needsRedraw = true; 
+	};
 	void menu_print(int x, int y, const std::string& text) { mvwprintw(menuWindow, y, x, text.c_str()); };
 	void menu_refresh() { wrefresh(menuWindow); };
 	void menu_delete();

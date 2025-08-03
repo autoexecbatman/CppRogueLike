@@ -25,32 +25,23 @@ void BaseMenu::menu_new(int height, int width, int starty, int startx)
 
 	// create main menu window
 	menuWindow = newwin(height, width, starty, startx);
+	
+	// Set solid background to prevent world bleed-through
+	if (menuWindow)
+	{
+		wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
+		wclear(menuWindow);
+	}
 
-	// create background preservation window (slightly larger to include borders)
-	backgroundWindow = newwin(height + 2, width + 2, 
-							  starty > 0 ? starty - 1 : 0, 
-							  startx > 0 ? startx - 1 : 0);
-
-	// Save background before showing menu
-	menu_save_background();
 	needsRedraw = true;
 }
 
 void BaseMenu::menu_delete()
 {
-	// Restore background before deletion
-	menu_restore_background();
-	
 	if (menuWindow)
 	{
 		delwin(menuWindow);
 		menuWindow = nullptr;
-	}
-	
-	if (backgroundWindow)
-	{
-		delwin(backgroundWindow);
-		backgroundWindow = nullptr;
 	}
 }
 
@@ -81,7 +72,8 @@ void BaseMenu::menu_restore_background()
 			menu_width + 1,   // dest end x
 			FALSE);  // don't overlay
 	
-	// Refresh the restored area
+	// Force refresh of the restored area with touchwin for proper display
+	touchwin(stdscr);
 	refresh();
 }
 

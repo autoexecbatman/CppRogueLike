@@ -139,17 +139,30 @@ void Game::handle_menus()
 {
 	if (!game.menus.empty())
 	{
+		bool menuWasPopped = false;
+		
 		game.menus.back()->menu();
 		// if back is pressed, pop the menu
 		if (game.menus.back()->back)
 		{
 			game.menus.pop_back();
-			game.menus.back()->menu_set_run_true();
+			menuWasPopped = true;
+			if (!game.menus.empty())
+			{
+				game.menus.back()->menu_set_run_true();
+			}
 		}
 
-		if (!game.menus.back()->run)
+		if (!game.menus.empty() && !game.menus.back()->run)
 		{
 			game.menus.pop_back();
+			menuWasPopped = true;
+		}
+
+		// If we just closed a menu and returned to game, restore display
+		if (menuWasPopped && game.menus.empty() && game.gameInit)
+		{
+			game.restore_game_display();
 		}
 
 		game.shouldInput = false;
