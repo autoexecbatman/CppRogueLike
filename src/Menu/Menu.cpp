@@ -12,7 +12,19 @@ void NewGame::on_selection()
 
 void LoadGame::on_selection()
 {
+	// Clear the menu from screen before loading
+	clear();
+	refresh();
+	
+	// Show loading message
+	mvprintw(LINES / 2, (COLS / 2) - 10, "Loading game, please wait...");
+	refresh();
+	
 	game.load_all();
+	
+	// Clear loading message after load completes
+	clear();
+	refresh();
 }
 
 void Options::on_selection()
