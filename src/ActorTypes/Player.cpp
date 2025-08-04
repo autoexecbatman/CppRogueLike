@@ -9,10 +9,10 @@
 #include "../Random/RandomDice.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Healer.h"
-#include "../Web.h"
+#include "../Objects/Web.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
-#include "../Items.h"
-#include "../Armor.h"
+#include "../Items/Items.h"
+#include "../Items/Armor.h"
 #include "../Ai/AiShopkeeper.h"
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })

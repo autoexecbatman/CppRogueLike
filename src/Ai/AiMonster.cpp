@@ -1,7 +1,7 @@
 // file: AiMonster.cpp
 #include "AiMonster.h"
 #include "../Game.h"
-#include "../Dijkstra.h"
+#include "../Utils/Dijkstra.h"
 
 //==MONSTER_AI==
 

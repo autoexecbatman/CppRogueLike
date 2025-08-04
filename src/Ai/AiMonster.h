@@ -27,4 +27,3 @@ protected:
 };
 
 #endif // !AI_MONSTER_H
-// file: AiMonster.h

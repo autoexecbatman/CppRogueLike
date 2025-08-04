@@ -17,9 +17,9 @@
 #include "Destructible.h"
 #include "Pickable.h"
 #include "Container.h"
-#include "../Items.h"
+#include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
-#include "../Armor.h"
+#include "../Items/Armor.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)

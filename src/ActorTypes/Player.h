@@ -5,7 +5,7 @@
 #include "../Random/RandomDice.h"
 #include "../Map/Map.h"
 #include "../Actor/Actor.h"
-#include "../Web.h"
+#include "../Objects/Web.h"
 
 class Player : public Creature
 {

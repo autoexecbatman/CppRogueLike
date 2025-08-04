@@ -4,7 +4,7 @@
 #include "../Game.h"
 #include "../Random/RandomDice.h"
 #include "../Actor/Actor.h"
-#include "../Items.h"
+#include "../Items/Items.h"
 #include "../Menu/MenuTrade.h"
 #include "../ActorTypes/Player.h"
 

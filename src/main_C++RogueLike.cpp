@@ -23,7 +23,7 @@
 #include "Menu/Menu.h"
 #include "Gui/Gui.h"
 #include "Attributes/StrengthAttributes.h" // for debugging
-#include "Weapons.h" // for debugging
+#include "Items/Weapons.h" // for debugging
 
 #ifdef EMSCRIPTEN
 PDCEX SDL_Window* pdc_window;

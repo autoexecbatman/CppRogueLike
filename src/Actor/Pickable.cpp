@@ -12,10 +12,10 @@
 #include "../ActorTypes/Fireball.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "../ActorTypes/Gold.h"
-#include "../Food.h"
-#include "../CorpseFood.h"
-#include "../Amulet.h"
-#include "../Armor.h"
+#include "../Items/Food.h"
+#include "../Items/CorpseFood.h"
+#include "../Items/Amulet.h"
+#include "../Items/Armor.h"
 
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)

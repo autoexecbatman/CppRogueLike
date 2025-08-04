@@ -4,11 +4,11 @@
 #include "../Game.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
-#include "../Items.h"
-#include "../Armor.h"
+#include "../Items/Items.h"
+#include "../Items/Armor.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
-#include "../ItemCreator.h"
+#include "../Factories/ItemCreator.h"
 
 void equip_fighter_starting_gear()
 {

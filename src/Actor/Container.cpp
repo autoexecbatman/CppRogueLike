@@ -4,7 +4,7 @@
 #include "../Game.h"
 #include "Container.h"
 #include "Actor.h"
-#include "../Items.h"
+#include "../Items/Items.h"
 
 Container::Container(size_t invSize) noexcept : invSize(invSize) {}
 

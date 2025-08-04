@@ -18,7 +18,7 @@
 #include "Container.h"
 #include "Pickable.h"
 #include "../Colors/Colors.h"
-#include "../Vector2D.h"
+#include "../Utils/Vector2D.h"
 
 struct ActorData
 {

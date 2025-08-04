@@ -4,7 +4,7 @@
 #include <span>
 
 #include "Ai.h"
-#include "../Vector2D.h"
+#include "../Utils/Vector2D.h"
 
 class Item;
 class Player;

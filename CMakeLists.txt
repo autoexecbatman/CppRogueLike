@@ -83,7 +83,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Persistent/Persistent.cpp
     ${PROJECT_SOURCE_DIR}/Persistent/Persistent.h
 
-    # Ai
+    # Ai - Updated paths
     ${PROJECT_SOURCE_DIR}/Ai/Ai.cpp
     ${PROJECT_SOURCE_DIR}/Ai/Ai.h
     ${PROJECT_SOURCE_DIR}/Ai/AiMonster.cpp
@@ -94,6 +94,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Ai/AiPlayer.h
     ${PROJECT_SOURCE_DIR}/Ai/AiShopkeeper.cpp
     ${PROJECT_SOURCE_DIR}/Ai/AiShopkeeper.h
+    ${PROJECT_SOURCE_DIR}/Ai/AiMimic.cpp
+    ${PROJECT_SOURCE_DIR}/Ai/AiMimic.h
+    ${PROJECT_SOURCE_DIR}/Ai/AiMonsterRanged.cpp
+    ${PROJECT_SOURCE_DIR}/Ai/AiMonsterRanged.h
+    ${PROJECT_SOURCE_DIR}/Ai/AiSpider.cpp
+    ${PROJECT_SOURCE_DIR}/Ai/AiSpider.h
 
     # dnd_tables
     ${PROJECT_SOURCE_DIR}/dnd_tables/CalculatedTHAC0s.h
@@ -156,6 +162,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ActorTypes/LightningBolt.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.h
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters/Spider.cpp
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters/Spider.h
 
     # Gui
     ${PROJECT_SOURCE_DIR}/Gui/Gui.cpp
@@ -165,49 +173,51 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Gui/LogMessage.cpp
     ${PROJECT_SOURCE_DIR}/Gui/LogMessage.h
 
-    # Main
-    ${PROJECT_SOURCE_DIR}/Game.cpp
-    ${PROJECT_SOURCE_DIR}/Game.h
-    ${PROJECT_SOURCE_DIR}/main_C++RogueLike.cpp
-    ${PROJECT_SOURCE_DIR}/Items.h
-    ${PROJECT_SOURCE_DIR}/Items.cpp
-    ${PROJECT_SOURCE_DIR}/Dijkstra.cpp
-    ${PROJECT_SOURCE_DIR}/Dijkstra.h
-    ${PROJECT_SOURCE_DIR}/TargetingSystem.cpp
-    ${PROJECT_SOURCE_DIR}/TargetingSystem.h
-    ${PROJECT_SOURCE_DIR}/AiMonsterRanged.cpp
-    ${PROJECT_SOURCE_DIR}/AiMonsterRanged.h
-    ${PROJECT_SOURCE_DIR}/HungerSystem.cpp
-    ${PROJECT_SOURCE_DIR}/HungerSystem.h
-    ${PROJECT_SOURCE_DIR}/Food.cpp
-    ${PROJECT_SOURCE_DIR}/Food.h
-    ${PROJECT_SOURCE_DIR}/CorpseFood.cpp
-    ${PROJECT_SOURCE_DIR}/CorpseFood.h
-    ${PROJECT_SOURCE_DIR}/AiMimic.cpp
-    ${PROJECT_SOURCE_DIR}/AiMimic.h
-    ${PROJECT_SOURCE_DIR}/Spider.cpp
-    ${PROJECT_SOURCE_DIR}/Spider.h
-    ${PROJECT_SOURCE_DIR}/AiSpider.cpp
-    ${PROJECT_SOURCE_DIR}/AiSpider.h
-    ${PROJECT_SOURCE_DIR}/Web.cpp
-    ${PROJECT_SOURCE_DIR}/Web.h
-    ${PROJECT_SOURCE_DIR}/Amulet.cpp
-    ${PROJECT_SOURCE_DIR}/Amulet.h
-    ${PROJECT_SOURCE_DIR}/MonsterFactory.cpp
-    ${PROJECT_SOURCE_DIR}/MonsterFactory.h
-    ${PROJECT_SOURCE_DIR}/ItemFactory.cpp
-    ${PROJECT_SOURCE_DIR}/ItemFactory.h
-    ${PROJECT_SOURCE_DIR}/ItemCreator.cpp
-    ${PROJECT_SOURCE_DIR}/ItemCreator.h
-    ${PROJECT_SOURCE_DIR}/Armor.cpp
-    ${PROJECT_SOURCE_DIR}/Armor.h
-
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp
     ${PROJECT_SOURCE_DIR}/Map/Map.h
 
-    ${PROJECT_SOURCE_DIR}/Weapons.cpp
-    ${PROJECT_SOURCE_DIR}/Weapons.h
+    # Items - Updated paths
+    ${PROJECT_SOURCE_DIR}/Items/Items.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Items.h
+    ${PROJECT_SOURCE_DIR}/Items/Weapons.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Weapons.h
+    ${PROJECT_SOURCE_DIR}/Items/Armor.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Armor.h
+    ${PROJECT_SOURCE_DIR}/Items/Food.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Food.h
+    ${PROJECT_SOURCE_DIR}/Items/CorpseFood.cpp
+    ${PROJECT_SOURCE_DIR}/Items/CorpseFood.h
+    ${PROJECT_SOURCE_DIR}/Items/Amulet.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Amulet.h
+
+    # Systems - Updated paths
+    ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.h
+
+    # Factories - Updated paths
+    ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.h
+    ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.h
+    ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.h
+
+    # Objects - Updated paths
+    ${PROJECT_SOURCE_DIR}/Objects/Web.cpp
+    ${PROJECT_SOURCE_DIR}/Objects/Web.h
+
+    # Utils - Updated paths
+    ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.cpp
+    ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.h
+    ${PROJECT_SOURCE_DIR}/Utils/Vector2D.h
+
+    # Main
+    ${PROJECT_SOURCE_DIR}/Game.cpp
+    ${PROJECT_SOURCE_DIR}/Game.h
+    ${PROJECT_SOURCE_DIR}/main_C++RogueLike.cpp
 )
 
 # Create an executable with the listed source files

@@ -28,13 +28,13 @@
 #include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
 #include "../Random/RandomDice.h"
-#include "../Weapons.h"
-#include "../Items.h"
-#include "../AiMonsterRanged.h"
-#include "../Food.h"
-#include "../Spider.h"
-#include "../MonsterFactory.h"
-#include "../ItemFactory.h"
+#include "../Items/Weapons.h"
+#include "../Items/Items.h"
+#include "../Ai/AiMonsterRanged.h"
+#include "../Items/Food.h"
+#include "../ActorTypes/Monsters/Spider.h"
+#include "../Factories/MonsterFactory.h"
+#include "../Factories/ItemFactory.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback

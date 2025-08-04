@@ -39,4 +39,3 @@ protected:
 //====
 
 #endif // !AI_H
-// file: Ai.h

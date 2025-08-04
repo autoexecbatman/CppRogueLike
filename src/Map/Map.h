@@ -4,8 +4,8 @@
 
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
-#include "../MonsterFactory.h"
-#include "../ItemFactory.h"
+#include "../Factories/MonsterFactory.h"
+#include "../Factories/ItemFactory.h"
 
 inline constexpr int MAP_HEIGHT = 30 - 8;
 inline constexpr int MAP_WIDTH = 119;

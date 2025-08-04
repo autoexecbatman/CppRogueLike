@@ -11,7 +11,7 @@
 #include <span>
 
 #include "Game.h"
-#include "Items.h"
+#include "Items/Items.h"
 #include "Actor/Actor.h"
 #include "Actor/Attacker.h"
 #include "Actor/Pickable.h"
@@ -31,9 +31,9 @@
 #include "Menu/MenuClass.h"
 #include "Menu/MenuName.h"
 #include "dnd_tables/CalculatedTHAC0s.h"
-#include "Web.h"
-#include "ItemCreator.h"
-#include "Armor.h"
+#include "Objects/Web.h"
+#include "Factories/ItemCreator.h"
+#include "Items/Armor.h"
 
 // added for DEBUGING AT PLAYER FEET
 #include "ActorTypes/Healer.h"

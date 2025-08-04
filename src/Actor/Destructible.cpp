@@ -4,13 +4,13 @@
 #include <algorithm>
 
 #include "../Game.h"
-#include "../Items.h"
+#include "../Items/Items.h"
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 #include "../Attributes/StrengthAttributes.h"
 #include "../ActorTypes/Healer.h"
-#include "../CorpseFood.h"
-#include "../Armor.h"
+#include "../Items/CorpseFood.h"
+#include "../Items/Armor.h"
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)

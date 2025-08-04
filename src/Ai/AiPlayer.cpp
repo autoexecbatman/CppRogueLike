@@ -10,10 +10,10 @@
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
 #include "../Actor/Actor.h"
-#include "../Items.h"
+#include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
-#include "../Web.h"
-#include "../ItemCreator.h"
+#include "../Objects/Web.h"
+#include "../Factories/ItemCreator.h"
 #include "../ActorTypes/Monsters.h"
 
 //==INVENTORY==
