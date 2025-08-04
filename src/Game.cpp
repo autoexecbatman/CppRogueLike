@@ -779,6 +779,10 @@ void Game::load_all()
 		{
 			gui->load(j["gui"]);
 		}
+
+		// CRITICAL FOV FIX: Set gameStatus to STARTUP to ensure FOV is computed
+		gameStatus = GameStatus::STARTUP;
+		game.log("GameStatus set to STARTUP after loading for FOV computation");
 	}
 	else
 	{
