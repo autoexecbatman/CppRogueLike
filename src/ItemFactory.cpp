@@ -36,35 +36,35 @@ ItemFactory::ItemFactory() {
     add_item_type({
         "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_dagger(pos));
+            game.container->add(ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(game.dungeonLevel)));
         }
         });
 
     add_item_type({
         "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_short_sword(pos));
+            game.container->add(ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(game.dungeonLevel)));
         }
         });
 
     add_item_type({
         "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_long_sword(pos));
+            game.container->add(ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(game.dungeonLevel)));
         }
         });
 
     add_item_type({
         "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_staff(pos));
+            game.container->add(ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(game.dungeonLevel)));
         }
         });
 
     add_item_type({
         "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_longbow(pos));
+            game.container->add(ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(game.dungeonLevel)));
         }
         });
 

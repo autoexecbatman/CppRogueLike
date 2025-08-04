@@ -18,6 +18,15 @@ void from_json(const json& j, Weapons& w)
 	j.at("hitBonusRange").get_to(w.hitBonusRange);
 	j.at("damageBonusRange").get_to(w.damageBonusRange);
 	j.at("specialProperties").get_to(w.specialProperties);
+	// enhancementLevel defaults to 0 if not specified in JSON
+	if (j.contains("enhancementLevel"))
+	{
+		j.at("enhancementLevel").get_to(w.enhancementLevel);
+	}
+	else
+	{
+		w.enhancementLevel = 0;
+	}
 }
 
 std::vector<Weapons> loadWeapons()
@@ -50,27 +59,66 @@ std::vector<Weapons> loadWeapons()
 	}
 }
 
+// Enhanced bonus calculation methods
+int Weapons::getMinHitBonus() const
+{
+	if (hitBonusRange.empty()) return enhancementLevel;
+return hitBonusRange[0] + enhancementLevel;
+}
+
+int Weapons::getMaxHitBonus() const
+{
+if (hitBonusRange.empty()) return enhancementLevel;
+return hitBonusRange[1] + enhancementLevel;
+}
+
+int Weapons::getMinDamageBonus() const
+{
+if (damageBonusRange.empty()) return enhancementLevel;
+return damageBonusRange[0] + enhancementLevel;
+}
+
+int Weapons::getMaxDamageBonus() const
+{
+if (damageBonusRange.empty()) return enhancementLevel;
+return damageBonusRange[1] + enhancementLevel;
+}
+
+std::string Weapons::getDisplayName() const
+{
+if (enhancementLevel > 0)
+	{
+		return name + " +" + std::to_string(enhancementLevel);
+	}
+	return name;
+}
+
+// Enhancement methods
+void Weapons::setEnhancementLevel(int level)
+{
+	enhancementLevel = (level >= 0) ? level : 0;
+}
+
+void Weapons::enhanceWeapon(int levels)
+{
+	if (levels > 0)
+	{
+		enhancementLevel += levels;
+	}
+}
+
 void Weapons::print_chart()
 {
 	std::vector<Weapons> weaponChart = loadWeapons();
 
 	for (const auto& weapon : weaponChart)
 	{
-		std::cout << "name: " << weapon.name << std::endl;
+		std::cout << "name: " << weapon.getDisplayName() << std::endl;
 		std::cout << "type: " << weapon.type << std::endl;
 		std::cout << "damageRoll: " << weapon.damageRoll << std::endl;
-		std::cout << "hitBonusRange: ";
-		for (const auto& i : weapon.hitBonusRange)
-		{
-			std::cout << i << ",";
-		}
-		std::cout << std::endl;
-		std::cout << "damageBonusRange: ";
-		for (const auto& i : weapon.damageBonusRange)
-		{
-			std::cout << i << ",";
-		}
-		std::cout << std::endl;
+		std::cout << "hitBonusRange: " << weapon.getMinHitBonus() << "-" << weapon.getMaxHitBonus() << std::endl;
+		std::cout << "damageBonusRange: " << weapon.getMinDamageBonus() << "-" << weapon.getMaxDamageBonus() << std::endl;
+		std::cout << "enhancementLevel: " << weapon.enhancementLevel << std::endl;
 		std::cout << "specialProperties: ";
 		for (const auto& i : weapon.specialProperties)
 		{

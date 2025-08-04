@@ -21,6 +21,22 @@ public:
     static std::unique_ptr<Item> create_chain_mail(Vector2D pos);
     static std::unique_ptr<Item> create_plate_mail(Vector2D pos);
     
+    // Enhanced weapon creation functions
+    static std::unique_ptr<Item> create_enhanced_dagger(Vector2D pos, int enhancementLevel);
+    static std::unique_ptr<Item> create_enhanced_short_sword(Vector2D pos, int enhancementLevel);
+    static std::unique_ptr<Item> create_enhanced_long_sword(Vector2D pos, int enhancementLevel);
+    static std::unique_ptr<Item> create_enhanced_staff(Vector2D pos, int enhancementLevel);
+    static std::unique_ptr<Item> create_enhanced_longbow(Vector2D pos, int enhancementLevel);
+    
+    // Random enhancement chance functions
+    static std::unique_ptr<Item> create_random_weapon(Vector2D pos, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_weapon_with_enhancement_chance(Vector2D pos, int dungeonLevel = 1);
+    
+    // Enhancement utility functions
+    static int calculate_enhancement_chance(int dungeonLevel);
+    static int determine_enhancement_level(int dungeonLevel);
+    static int calculate_enhanced_value(int baseValue, int enhancementLevel);
+    
     // Utility function to fix existing items with incorrect values
     static void ensure_correct_value(Item& item);
 };
