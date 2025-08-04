@@ -288,11 +288,46 @@ void Map::load(const json& j)
 
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	bsp(map_width, map_height, *rng_unique, false);
+	
+	// CRITICAL FOV FIX: Set tcodMap properties based on loaded tile data
+	// instead of regenerating via bsp() which would override our loaded tiles
+	for (const auto& tile : tiles)
+	{
+		bool walkable = false;
+		bool transparent = false;
+		
+		switch (tile.type)
+		{
+		case TileType::FLOOR:
+		case TileType::CORRIDOR:
+		case TileType::OPEN_DOOR:
+			walkable = true;
+			transparent = true;
+			break;
+		case TileType::WATER:
+			walkable = true;  // Can walk if have swim ability, but always transparent
+			transparent = true;
+			break;
+		case TileType::WALL:
+		case TileType::CLOSED_DOOR:
+			walkable = false;
+			transparent = false;
+			break;
+		default:
+			walkable = false;
+			transparent = false;
+			break;
+		}
+		
+		tcodMap->setProperties(tile.position.x, tile.position.y, walkable, transparent);
+	}
+	
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
-	// New: Post-process to place doors after loading map
+	// Post-process to place doors after loading map
 	post_process_doors();
+	
+	game.log("Map loaded with proper tcodMap properties for FOV");
 }
 
 void Map::save(json& j)
