@@ -194,6 +194,13 @@ void Destructible::load(const json& j)
 	xp = j.at("xp").get<int>();
 	thaco = j.at("thaco").get<int>();
 	armorClass = j.at("armorClass").get<int>();
+	
+	// Load baseArmorClass if present, otherwise use armorClass as base
+	if (j.contains("baseArmorClass")) {
+		baseArmorClass = j.at("baseArmorClass").get<int>();
+	} else {
+		baseArmorClass = armorClass;
+	}
 }
 
 void Destructible::save(json& j)
@@ -207,6 +214,7 @@ void Destructible::save(json& j)
 	j["xp"] = xp;
 	j["thaco"] = thaco;
 	j["armorClass"] = armorClass;
+	j["baseArmorClass"] = baseArmorClass;
 }
 
 void PlayerDestructible::save(json& j)

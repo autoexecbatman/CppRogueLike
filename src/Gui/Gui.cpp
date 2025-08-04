@@ -425,13 +425,46 @@ void Gui::render_hp_bar()
 	mvwprintw(guiWin, BAR_Y, BAR_X + 3 + BAR_WIDTH + 1, "%d/%d", guiHp, guiHpMax);
 }
 
-void Gui::render_hunger_status() {
-	const std::string hungerText = game.hunger_system.get_hunger_state_string();
+void Gui::render_hunger_status() 
+{
+	constexpr int BAR_WIDTH = 20;
+	constexpr int BAR_Y = 2; // Position below HP bar
+	constexpr int BAR_X = 1;
+	
+	if (game.hunger_system.get_hunger_max() <= 0) return; // Prevent division by zero
+	
+	// Get hunger information
+	const int hungerValue = game.hunger_system.get_hunger_value();
+	const int hungerMax = game.hunger_system.get_hunger_max();
+	const std::string hungerStateText = game.hunger_system.get_hunger_state_string();
 	const int hungerColor = game.hunger_system.get_hunger_color();
-
-	// Display hunger status next to HP on gui window
+	
+	// Calculate hunger percentage and bar width
+	const float hungerRatio = static_cast<float>(hungerValue) / static_cast<float>(hungerMax);
+	const int filledWidth = static_cast<int>(hungerRatio * BAR_WIDTH);
+	
+	// Print Hunger bar label
+	mvwprintw(guiWin, BAR_Y, BAR_X, "Hunger:");
+	
+	// Render filled portion of hunger bar
 	wattron(guiWin, COLOR_PAIR(hungerColor));
-	mvwprintw(guiWin, 3, 15, "Hunger:%s", hungerText.c_str());
+	for (int i = 0; i < filledWidth; ++i)
+	{
+		mvwaddch(guiWin, BAR_Y, BAR_X + 7 + i, '=');
+	}
+	wattroff(guiWin, COLOR_PAIR(hungerColor));
+	
+	// Render empty portion of hunger bar
+	wattron(guiWin, COLOR_PAIR(WHITE_BLACK_PAIR));
+	for (int i = filledWidth; i < BAR_WIDTH; ++i)
+	{
+		mvwaddch(guiWin, BAR_Y, BAR_X + 7 + i, '-');
+	}
+	wattroff(guiWin, COLOR_PAIR(WHITE_BLACK_PAIR));
+	
+	// Print hunger values and state at the end of the bar
+	wattron(guiWin, COLOR_PAIR(hungerColor));
+	mvwprintw(guiWin, BAR_Y, BAR_X + 7 + BAR_WIDTH + 1, "%d/%d (%s)", hungerValue, hungerMax, hungerStateText.c_str());
 	wattroff(guiWin, COLOR_PAIR(hungerColor));
 }
 

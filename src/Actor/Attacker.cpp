@@ -36,6 +36,18 @@ bool Attacker::checkSurprise(Creature& attacker, Creature& target)
     int attackerRoll = game.d.d6() + game.d.d6() + attackerReactionAdj;
     int targetRoll = game.d.d6() + game.d.d6() + targetReactionAdj;
 
+    // Display surprise roll in GUI log
+    game.appendMessagePart(WHITE_BLACK_PAIR, "[Surprise check: ");
+    game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
+    game.appendMessagePart(WHITE_BLACK_PAIR, " rolled ");
+    game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(attackerRoll));
+    game.appendMessagePart(WHITE_BLACK_PAIR, " vs ");
+    game.appendMessagePart(target.actorData.color, target.actorData.name);
+    game.appendMessagePart(WHITE_BLACK_PAIR, " rolled ");
+    game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(targetRoll));
+    game.appendMessagePart(WHITE_BLACK_PAIR, "]");
+    game.finalizeMessage();
+
     // Log the rolls for debugging
     game.log("Surprise check: " + attacker.actorData.name + " rolled " +
         std::to_string(attackerRoll) + " vs " + target.actorData.name +
@@ -84,7 +96,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
         if (surpriseSuccess)
         {
             rollAttack += 1;
-            game.log("Surprise attack bonus applied: -1 to hit required");
+            game.log("Surprise attack bonus applied: +1 to attack roll, final roll: " + std::to_string(rollAttack));
         }
 
         // Apply dexterity missile attack adjustment if this is a ranged attack
@@ -109,6 +121,19 @@ void Attacker::attack(Creature& attacker, Creature& target)
 
         if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
         {
+            // Display the successful attack roll
+            game.appendMessagePart(WHITE_BLACK_PAIR, "[Attack roll: ");
+            game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(rollAttack));
+            game.appendMessagePart(WHITE_BLACK_PAIR, " vs ");
+            game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
+            game.appendMessagePart(WHITE_BLACK_PAIR, " needed]");
+            game.finalizeMessage();
+            
+            // Debug log the successful attack roll
+            game.log("ATTACK HIT: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
+                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
+                     ", AC:" + std::to_string(target.destructible->armorClass) + ")");
+            
             // calculate the adjusted damage
             const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
             const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
@@ -127,6 +152,30 @@ void Attacker::attack(Creature& attacker, Creature& target)
 
                 game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" for {} hit points.", totaldmg));
                 game.finalizeMessage();
+                
+                // Display the damage roll details
+                game.appendMessagePart(WHITE_BLACK_PAIR, "[Damage roll: ");
+                game.appendMessagePart(RED_BLACK_PAIR, std::to_string(rollDmg));
+                if (strength.dmgAdj != 0) {
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " + ");
+                    game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(strength.dmgAdj));
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " (str)");
+                }
+                if (target.destructible->dr > 0) {
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " - ");
+                    game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(target.destructible->dr));
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " (DR)");
+                }
+                game.appendMessagePart(WHITE_BLACK_PAIR, " = ");
+                game.appendMessagePart(RED_BLACK_PAIR, std::to_string(totaldmg));
+                game.appendMessagePart(WHITE_BLACK_PAIR, "]");
+                game.finalizeMessage();
+                
+                // Debug log the damage roll details
+                game.log("DAMAGE DEALT: " + std::to_string(rollDmg) + " (base) + " + 
+                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+                         " (DR) = " + std::to_string(totaldmg) + " damage to " + target.actorData.name);
+                
                 // apply damage to target
                 target.destructible->take_damage(target, totaldmg);
             }
@@ -138,10 +187,41 @@ void Attacker::attack(Creature& attacker, Creature& target)
                 game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
                 game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" but it has no effect!"));
                 game.finalizeMessage();
+                
+                // Display the damage roll details for no-damage attacks
+                game.appendMessagePart(WHITE_BLACK_PAIR, "[Damage roll: ");
+                game.appendMessagePart(RED_BLACK_PAIR, std::to_string(rollDmg));
+                if (strength.dmgAdj != 0) {
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " + ");
+                    game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(strength.dmgAdj));
+                    game.appendMessagePart(WHITE_BLACK_PAIR, " (str)");
+                }
+                game.appendMessagePart(WHITE_BLACK_PAIR, " - ");
+                game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(target.destructible->dr));
+                game.appendMessagePart(WHITE_BLACK_PAIR, " (DR) = 0]");
+                game.finalizeMessage();
+                
+                // Debug log the no-damage attack
+                game.log("NO DAMAGE: " + std::to_string(rollDmg) + " (base) + " + 
+                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+                         " (DR) = 0 damage to " + target.actorData.name);
             }
         }
         else
         {
+            // Display the failed attack roll
+            game.appendMessagePart(WHITE_BLACK_PAIR, "[Attack roll: ");
+            game.appendMessagePart(RED_BLACK_PAIR, std::to_string(rollAttack));
+            game.appendMessagePart(WHITE_BLACK_PAIR, " vs ");
+            game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
+            game.appendMessagePart(WHITE_BLACK_PAIR, " needed]");
+            game.finalizeMessage();
+            
+            // Debug log the failed attack roll
+            game.log("ATTACK MISS: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
+                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
+                     ", AC:" + std::to_string(target.destructible->armorClass) + ")");
+            
             game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
             game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
             game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));

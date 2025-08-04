@@ -57,6 +57,40 @@ int HungerSystem::get_hunger_value() const
     return hunger_value;
 }
 
+int HungerSystem::get_hunger_max() const
+{
+    return hunger_max;
+}
+
+std::string HungerSystem::get_hunger_numerical_string() const
+{
+    return std::to_string(hunger_value) + "/" + std::to_string(hunger_max);
+}
+
+std::string HungerSystem::get_hunger_bar_string(int bar_width) const
+{
+    // Calculate fill percentage
+    float fill_percentage = static_cast<float>(hunger_value) / hunger_max;
+    int filled_chars = static_cast<int>(fill_percentage * bar_width);
+    
+    std::string bar = "[";
+    
+    // Add filled portion
+    for (int i = 0; i < filled_chars; ++i)
+    {
+        bar += "=";
+    }
+    
+    // Add empty portion
+    for (int i = filled_chars; i < bar_width; ++i)
+    {
+        bar += "-";
+    }
+    
+    bar += "]";
+    return bar;
+}
+
 int HungerSystem::get_hunger_color() const
 {
     switch (current_state) {
@@ -178,4 +212,35 @@ void HungerSystem::update_hunger_state()
             well_fed_message_shown = false;
         }
     }
+}
+
+void HungerSystem::save(json& j) const
+{
+    j["hunger_value"] = hunger_value;
+    j["hunger_max"] = hunger_max;
+    j["current_state"] = static_cast<int>(current_state);
+    j["well_fed_message_shown"] = well_fed_message_shown;
+}
+
+void HungerSystem::load(const json& j)
+{
+    if (j.contains("hunger_value"))
+    {
+        hunger_value = j["hunger_value"];
+    }
+    if (j.contains("hunger_max"))
+    {
+        hunger_max = j["hunger_max"];
+    }
+    if (j.contains("current_state"))
+    {
+        current_state = static_cast<HungerState>(j["current_state"]);
+    }
+    if (j.contains("well_fed_message_shown"))
+    {
+        well_fed_message_shown = j["well_fed_message_shown"];
+    }
+    
+    // Update hunger state based on loaded values to ensure consistency
+    update_hunger_state();
 }

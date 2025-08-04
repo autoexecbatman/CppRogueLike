@@ -779,6 +779,30 @@ void Game::load_all()
 		{
 			gui->load(j["gui"]);
 		}
+		
+		// Load the hunger system
+		if (j.contains("hunger_system"))
+		{
+			hunger_system.load(j["hunger_system"]);
+		}
+		
+		// Load shopkeeper count
+		if (j.contains("shopkeepersOnCurrentLevel"))
+		{
+			shopkeepersOnCurrentLevel = j["shopkeepersOnCurrentLevel"];
+		}
+		
+		// Load dungeon level
+		if (j.contains("dungeonLevel"))
+		{
+			dungeonLevel = j["dungeonLevel"];
+		}
+		
+		// Load game time
+		if (j.contains("time"))
+		{
+			time = j["time"];
+		}
 
 		// CRITICAL FOV FIX: Set gameStatus to STARTUP to ensure FOV is computed
 		gameStatus = GameStatus::STARTUP;
@@ -847,6 +871,16 @@ void Game::save_all()
 		json guiJson;
 		gui->save(guiJson);
 		j["gui"] = guiJson;
+		
+		// Save the hunger system
+		json hungerJson;
+		hunger_system.save(hungerJson);
+		j["hunger_system"] = hungerJson;
+		
+		// Save shopkeeper count and dungeon level
+		j["shopkeepersOnCurrentLevel"] = shopkeepersOnCurrentLevel;
+		j["dungeonLevel"] = dungeonLevel;
+		j["time"] = time;
 
 		// Write the JSON data to the file
 		file << j.dump(4); // Pretty print with an indentation of 4 spaces
@@ -1228,36 +1262,47 @@ void Game::display_character_sheet() noexcept
 		// Add gold and other stats on the right side
 		mvwprintw(character_sheet, 9, 60, "Gender: %s", player->gender.c_str());
 		mvwprintw(character_sheet, 10, 60, "Gold: %d", player->gold);
-		mvwprintw(character_sheet, 11, 60, "Hunger: %s",
+		
+		// Enhanced hunger display with numbers and bar
+		wattron(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
+		mvwprintw(character_sheet, 11, 60, "Hunger: %s (%s)",
+			game.hunger_system.get_hunger_numerical_string().c_str(),
 			game.hunger_system.get_hunger_state_string().c_str());
+		wattroff(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
+		
+		// Display hunger bar on next line
+		wattron(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
+		mvwprintw(character_sheet, 12, 60, "%s",
+			game.hunger_system.get_hunger_bar_string(15).c_str());
+		wattroff(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
 
 		// Add Constitution details panel on the right side
-		mvwprintw(character_sheet, 13, 60, "Constitution Effects:");
+		mvwprintw(character_sheet, 14, 60, "Constitution Effects:");
 
 		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
 			const auto& conAttr = constitutionAttributes[player->constitution - 1];
 
-			mvwprintw(character_sheet, 14, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
-			mvwprintw(character_sheet, 15, 62, "System Shock: %d%%", conAttr.SystemShock);
-			mvwprintw(character_sheet, 16, 62, "Resurrection Survival: %d%%", conAttr.ResurrectionSurvival);
-			mvwprintw(character_sheet, 17, 62, "Poison Save Modifier: %+d", conAttr.PoisonSave);
+			mvwprintw(character_sheet, 15, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
+			mvwprintw(character_sheet, 16, 62, "System Shock: %d%%", conAttr.SystemShock);
+			mvwprintw(character_sheet, 17, 62, "Resurrection Survival: %d%%", conAttr.ResurrectionSurvival);
+			mvwprintw(character_sheet, 18, 62, "Poison Save Modifier: %+d", conAttr.PoisonSave);
 
 			if (conAttr.Regeneration > 0) {
-				mvwprintw(character_sheet, 18, 62, "Regeneration: %d HP per turn", conAttr.Regeneration);
+				mvwprintw(character_sheet, 19, 62, "Regeneration: %d HP per turn", conAttr.Regeneration);
 			}
 		}
 
 		// Add strength details panel on the right side
-		mvwprintw(character_sheet, 20, 60, "Strength Effects:");
+		mvwprintw(character_sheet, 21, 60, "Strength Effects:");
 
 		if (player->strength >= 1 && player->strength <= strengthAttributes.size()) {
 			const auto& strAttr = strengthAttributes[player->strength - 1];
 
-			mvwprintw(character_sheet, 21, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
-			mvwprintw(character_sheet, 22, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
-			mvwprintw(character_sheet, 23, 62, "Weight Allowance: %d lbs", strAttr.wgtAllow);
-			mvwprintw(character_sheet, 24, 62, "Max Press: %d lbs", strAttr.maxPress);
-			mvwprintw(character_sheet, 25, 62, "Open Doors: %d/6", strAttr.openDoors);
+			mvwprintw(character_sheet, 22, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
+			mvwprintw(character_sheet, 23, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
+			mvwprintw(character_sheet, 24, 62, "Weight Allowance: %d lbs", strAttr.wgtAllow);
+			mvwprintw(character_sheet, 25, 62, "Max Press: %d lbs", strAttr.maxPress);
+			mvwprintw(character_sheet, 26, 62, "Open Doors: %d/6", strAttr.openDoors);
 		}
 
 		mvwprintw(character_sheet, 28, 1, "Press any key to close...");

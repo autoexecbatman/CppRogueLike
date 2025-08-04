@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 // Hunger states in ascending order of hunger
 enum class HungerState {
@@ -29,6 +32,15 @@ public:
 
     // Returns hunger value
     int get_hunger_value() const;
+    
+    // Returns maximum hunger value
+    int get_hunger_max() const;
+    
+    // Returns numerical hunger display (e.g., "150/1000")
+    std::string get_hunger_numerical_string() const;
+    
+    // Returns hunger progress bar string
+    std::string get_hunger_bar_string(int bar_width = 20) const;
 
     // Returns color code for hunger UI display
     int get_hunger_color() const;
@@ -38,6 +50,10 @@ public:
 
     // Apply hunger effects to player stats
     void apply_hunger_effects();
+    
+    // Save/Load methods for game persistence
+    void save(json& j) const;
+    void load(const json& j);
 
 private:
     int hunger_value;  // Internal hunger counter
