@@ -18,8 +18,6 @@ public:
 	std::string roll{ "diceroll" };
 	Attacker(std::string roll);
 
-	bool checkSurprise(Creature& attacker, Creature& target);
-
 	void attack(Creature& attacker, Creature& target);
 	
 	void load(const json& j) override;
