@@ -3,7 +3,7 @@
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
-#include "../Actor/Confuser.h"
+#include "../ActorTypes/Confuser.h"
 #include "../Actor/Pickable.h"
 #include "../Items/Armor.h"
 #include "../Colors/Colors.h"

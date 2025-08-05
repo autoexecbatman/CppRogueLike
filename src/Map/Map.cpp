@@ -14,7 +14,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
-#include "../Actor/Confuser.h"
+#include "../ActorTypes/Confuser.h"
 #include "../Actor/Container.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Pickable.h"
