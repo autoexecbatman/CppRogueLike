@@ -296,8 +296,11 @@ void AiPlayer::drop_item(Creature& owner)
 
 	// Clean up
 	delwin(dropWin);
+	
+	// CRITICAL FIX: Restore the game display
 	clear();
 	refresh();
+	game.restore_game_display();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -435,8 +438,10 @@ void AiPlayer::display_inventory(Creature& owner)
 	if (inventoryInput == static_cast<int>(Controls::ESCAPE))
 	{
 		delwin(inv);
+		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
+		game.restore_game_display();
 	}
 	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
 	{
@@ -447,14 +452,18 @@ void AiPlayer::display_inventory(Creature& owner)
 			/*game.gameStatus = Game::GameStatus::NEW_TURN;*/
 		}
 		delwin(inv);
+		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
+		game.restore_game_display();
 	}
 	else
 	{
 		delwin(inv);
+		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
+		game.restore_game_display();
 	}
 }
 

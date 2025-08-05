@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Pickable.h"
+#include "../Actor/Pickable.h"
 
 class TCODZip;
 class Creature;

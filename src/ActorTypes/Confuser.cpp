@@ -1,6 +1,6 @@
 #include <libtcod.h>
 #include "Confuser.h"
-#include "Actor.h"
+#include "../Actor/Actor.h"
 #include "../Game.h"
 #include "../Ai/AiMonsterConfused.h"
 
@@ -14,6 +14,10 @@ bool Confuser::use(Item& owner, Creature& wearer)
 
 	if (!game.pick_tile(&target, 0))
 	{
+		// CRITICAL FIX: Clear screen completely before restore
+		clear();
+		refresh();
+		game.restore_game_display();
 		return false;
 	}
 
@@ -21,6 +25,10 @@ bool Confuser::use(Item& owner, Creature& wearer)
 
 	if (!actor)
 	{
+		// CRITICAL FIX: Clear screen completely before restore
+		clear();
+		refresh();
+		game.restore_game_display();
 		return false;
 	}
 
@@ -32,7 +40,10 @@ bool Confuser::use(Item& owner, Creature& wearer)
 	game.message(WHITE_BLACK_PAIR, std::format("as he starts to stumble around!"), true);
 	game.message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), true);
 
-
+	// CRITICAL FIX: Clear screen completely before restore
+	clear();
+	refresh();
+	game.restore_game_display();
 	return Pickable::use(owner, wearer);
 }
 

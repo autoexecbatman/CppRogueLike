@@ -193,32 +193,50 @@ void Fireball::create_explosion(Vector2D center)
     nodelay(explosionWindow, false);
     delwin(explosionWindow);
 
-    // Refresh main screen to restore normal display
+    // CRITICAL FIX: Clear screen completely then restore game display
+    clear();
     refresh();
+    game.restore_game_display();
 }
 
 void Fireball::animation(Vector2D position, int maxRange)
 {
-    bool run = true;
-    while (run == true)
-    {
-        clear();
-        game.render();
+	// Create a temporary window for animation instead of clearing the main screen
+	WINDOW* animWindow = newwin(7, 50, (LINES/2)-3, (COLS/2)-25);
+	box(animWindow, 0, 0);
+	
+	bool run = true;
+	while (run == true)
+	{
+		// Clear only the animation window
+		werase(animWindow);
+		box(animWindow, 0, 0);
+		
+		// Create a simple flaming effect message
+		mvwprintw(animWindow, 2, 2, "The creature is engulfed in flames!");
+		
+		// Create a simple flame effect with colored characters
+		wattron(animWindow, COLOR_PAIR(RED_YELLOW_PAIR));
+		mvwprintw(animWindow, 3, 20, "~~~*~~~");
+		wattroff(animWindow, COLOR_PAIR(RED_YELLOW_PAIR));
 
-        // Create a simple flaming effect with just a single tilde character at the creature's position
-        attron(COLOR_PAIR(RED_YELLOW_PAIR));
-        mvprintw(position.y, position.x, "~");
-        attroff(COLOR_PAIR(RED_YELLOW_PAIR));
+		// Ask the player to press a key to continue
+		mvwprintw(animWindow, 5, 2, "Press 'SPACE' to continue...");
+		wrefresh(animWindow);
 
-        // Ask the player to press a key to continue
-        mvprintw(29, 0, "press 'SPACE' to continue");
-        refresh();
-
-        if (getch() == ' ')
-        {
-            run = false;
-        }
-    }
+		if (getch() == ' ')
+		{
+			run = false;
+		}
+	}
+	
+	// Clean up the window
+	delwin(animWindow);
+	
+	// CRITICAL FIX: Clear screen completely then restore game display
+	clear();
+	refresh();
+	game.restore_game_display();
 }
 
 void Fireball::load(const json& j)

@@ -118,15 +118,23 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		switch (key)
 		{
 		case KEY_UP:
+		case 'w':
+		case 'W':
 			targetCursor.y--;
 			break;
 		case KEY_DOWN:
+		case 's':
+		case 'S':
 			targetCursor.y++;
 			break;
 		case KEY_LEFT:
+		case 'a':
+		case 'A':
 			targetCursor.x--;
 			break;
 		case KEY_RIGHT:
+		case 'd':
+		case 'D':
 			targetCursor.x++;
 			break;
 		case 10: // Enter key
@@ -162,9 +170,12 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 			break;
 		}
 	}
-	clear();
-	refresh();
-	return Vector2D{ -1, -1 };
+		clear();
+		refresh();
+		
+		// Restore the game display after targeting
+		game.restore_game_display();
+		return Vector2D{ -1, -1 };
 }
 
 void TargetingSystem::draw_los(Vector2D targetCursor)

@@ -57,31 +57,52 @@ void Player::racial_ability_adjustments()
 	case Player::PlayerRaceState::HUMAN:
 		break;
 	case Player::PlayerRaceState::DWARF:
-		// write dwarf stuff
-		clear();
-		mvprintw(0, 0, "You got +1 to constitution and -1 to charisma for being a dwarf.");
-		refresh();
-		getch();
+		// Create a temporary window for racial bonus message
+		{
+			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
+			box(racialWindow, 0, 0);
+			mvwprintw(racialWindow, 2, 2, "You got +1 to constitution and -1 to charisma for being a dwarf.");
+			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
+			wrefresh(racialWindow);
+			getch();
+			delwin(racialWindow);
+			clear();
+			refresh();
+		}
 
 		game.player->constitution += 1;
 		game.player->charisma -= 1;
 		break;
 	case Player::PlayerRaceState::ELF:
-		// write elf stuff
-		clear();
-		mvprintw(0, 0, "You got +1 to dexterity and -1 to constitution for being an elf.");
-		refresh();
-		getch();
+		// Create a temporary window for racial bonus message
+		{
+			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
+			box(racialWindow, 0, 0);
+			mvwprintw(racialWindow, 2, 2, "You got +1 to dexterity and -1 to constitution for being an elf.");
+			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
+			wrefresh(racialWindow);
+			getch();
+			delwin(racialWindow);
+			clear();
+			refresh();
+		}
 
 		game.player->dexterity += 1;
 		game.player->constitution -= 1;
 		break;
 	case Player::PlayerRaceState::GNOME:
-		// write gnome stuff
-		clear();
-		mvprintw(0, 0, "You got +1 to intelligence and -1 to wisdom for being a gnome.");
-		refresh();
-		getch();
+		// Create a temporary window for racial bonus message
+		{
+			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
+			box(racialWindow, 0, 0);
+			mvwprintw(racialWindow, 2, 2, "You got +1 to intelligence and -1 to wisdom for being a gnome.");
+			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
+			wrefresh(racialWindow);
+			getch();
+			delwin(racialWindow);
+			clear();
+			refresh();
+		}
 
 		game.player->intelligence += 1;
 		game.player->wisdom -= 1;
@@ -89,11 +110,18 @@ void Player::racial_ability_adjustments()
 	case Player::PlayerRaceState::HALFELF:
 		break;
 	case Player::PlayerRaceState::HALFLING:
-		// write halfling stuff
-		clear();
-		mvprintw(0, 0, "You got +1 to dexterity and -1 to strength for being a halfling.");
-		refresh();
-		getch();
+		// Create a temporary window for racial bonus message
+		{
+			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
+			box(racialWindow, 0, 0);
+			mvwprintw(racialWindow, 2, 2, "You got +1 to dexterity and -1 to strength for being a halfling.");
+			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
+			wrefresh(racialWindow);
+			getch();
+			delwin(racialWindow);
+			clear();
+			refresh();
+		}
 
 		game.player->dexterity += 1;
 		game.player->strength -= 1;
@@ -101,6 +129,8 @@ void Player::racial_ability_adjustments()
 	default:
 		break;
 	}
+	
+	// Screen is now properly cleared - no need for restore_game_display()
 }
 
 void Player::calculate_thaco()

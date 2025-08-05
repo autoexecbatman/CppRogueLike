@@ -70,8 +70,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/Actor.h
     ${PROJECT_SOURCE_DIR}/Actor/Attacker.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Attacker.h
-    ${PROJECT_SOURCE_DIR}/Actor/Confuser.cpp
-    ${PROJECT_SOURCE_DIR}/Actor/Confuser.h
     ${PROJECT_SOURCE_DIR}/Actor/Container.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Container.h
     ${PROJECT_SOURCE_DIR}/Actor/Destructible.cpp
@@ -150,6 +148,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.h
 
     # ActorTypes
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Confuser.cpp
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Confuser.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Fireball.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Fireball.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.cpp

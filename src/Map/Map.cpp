@@ -220,9 +220,20 @@ Map::Map(int map_height, int map_width)
 {
 }
 
+bool Map::in_bounds(Vector2D pos) const noexcept
+{
+	bool result = pos.y >= 0 && pos.y < map_height && pos.x >= 0 && pos.x < map_width;
+	if (!result) {
+		game.log("in_bounds: Position (" + std::to_string(pos.x) + "," + std::to_string(pos.y) + ") vs bounds (" + std::to_string(map_width) + "," + std::to_string(map_height) + ")");
+	}
+	return result;
+}
+
 void Map::init_tiles()
 {
 	if (!tiles.empty()) { tiles.clear(); }
+
+	game.log("init_tiles: Creating " + std::to_string(map_width * map_height) + " tiles (" + std::to_string(map_width) + " x " + std::to_string(map_height) + ")");
 
 	for (int y = 0; y < map_height; y++)
 	{
@@ -231,6 +242,8 @@ void Map::init_tiles()
 			tiles.emplace_back(Tile(Vector2D{ y, x }, TileType::WALL, 0));
 		}
 	}
+	
+	game.log("init_tiles: Created " + std::to_string(tiles.size()) + " tiles");
 }
 
 //====
@@ -357,11 +370,23 @@ bool Map::is_wall(Vector2D pos) const
 
 bool Map::is_explored(Vector2D pos) const
 {
-	return tiles.at(get_index(pos)).explored;
+	if (!in_bounds(pos)) {
+		game.log("is_explored: Position (" + std::to_string(pos.x) + "," + std::to_string(pos.y) + ") out of bounds");
+		return false;
+	}
+	size_t index = get_index(pos);
+	if (index >= tiles.size()) {
+		game.log("is_explored: Index " + std::to_string(index) + " >= tiles.size() " + std::to_string(tiles.size()));
+		return false;
+	}
+	return tiles.at(index).explored;
 }
 
 void Map::set_explored(Vector2D pos)
 {
+	if (!in_bounds(pos)) {
+		return; // Can't set explored for out of bounds positions
+	}
 	tiles.at(get_index(pos)).explored = true;
 }
 
@@ -372,11 +397,17 @@ bool Map::is_in_fov(Vector2D pos) const
 
 bool Map::is_water(Vector2D pos) const
 {
+	if (!in_bounds(pos)) {
+		return false; // Out of bounds positions are not water
+	}
 	return tiles.at(get_index(pos)).type == TileType::WATER;
 }
 
 TileType Map::get_tile_type(Vector2D pos) const
 {
+	if (!in_bounds(pos)) {
+		return TileType::WALL; // Out of bounds positions are treated as walls
+	}
 	return tiles.at(get_index(pos)).type;
 }
 
@@ -466,6 +497,13 @@ void Map::update()
 void Map::render() const
 {
 	game.log("Map::render()");
+	
+	// Don't render if tiles aren't initialized yet
+	if (tiles.empty()) {
+		game.log("Map::render() - tiles not initialized yet, skipping render");
+		return;
+	}
+	
 	for (const auto& tile : tiles)
 	{
 		if (is_in_fov(tile.position) || is_explored(tile.position))
@@ -646,6 +684,9 @@ void Map::set_door(Vector2D thisTile, int tileX, int tileY)
 
 void Map::set_tile(Vector2D pos, TileType newType, double cost)
 {
+	if (!in_bounds(pos)) {
+		return; // Can't set tile for out of bounds positions
+	}
 	tiles.at(get_index(pos)).type = newType;
 	tiles.at(get_index(pos)).cost = cost;
 }
@@ -860,6 +901,20 @@ double Map::cost(Vector2D from_node, Vector2D to_node)
 		return 1000.0;
 	}
 	return get_cost(to_node);
+}
+
+double Map::get_cost(Vector2D pos) const noexcept
+{
+	if (!in_bounds(pos)) {
+		game.log("get_cost: Position (" + std::to_string(pos.x) + "," + std::to_string(pos.y) + ") out of bounds");
+		return 1000.0; // High cost for out of bounds
+	}
+	size_t index = get_index(pos);
+	if (index >= tiles.size()) {
+		game.log("get_cost: Index " + std::to_string(index) + " >= tiles.size() " + std::to_string(tiles.size()));
+		return 1000.0;
+	}
+	return tiles.at(index).cost;
 }
 
 bool Map::has_los(Vector2D from, Vector2D to) const

@@ -70,7 +70,7 @@ private:
 	std::unique_ptr<ItemFactory> itemFactory;
 
 	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
-	bool in_bounds(Vector2D pos) const noexcept { return pos <= Vector2D{ 0,0 } || pos <= get_map_size(); }
+	bool in_bounds(Vector2D pos) const noexcept;
 	
 	void init_tiles();
 	void place_stairs();
@@ -112,7 +112,7 @@ public:
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
-	double get_cost(Vector2D pos) const noexcept { return tiles.at(get_index(pos)).cost; }
+	double get_cost(Vector2D pos) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const;
 	bool open_door(Vector2D pos);
 	bool close_door(Vector2D pos);

@@ -39,6 +39,7 @@
 #include "ActorTypes/Healer.h"
 #include "ActorTypes/Fireball.h"
 #include "ActorTypes/LightningBolt.h"
+#include "ActorTypes/Confuser.h"
 
 //==INIT==
 // When the Game is created, 
@@ -61,8 +62,8 @@ void Game::init()
 	gameStatus = GameStatus::STARTUP;
 	game.log("GameStatus::STARTUP");
 
-	// REMOVED: Debug weapons no longer added
-	// game.add_debug_weapons_at_player_feet();
+	// Add debug weapons and items at player feet
+	game.add_debug_weapons_at_player_feet();
 
 	//==LOG==
 	game.log("game.init() was called!");
@@ -342,9 +343,9 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 	bool run = true;
 	while (run)
 	{
-		// EMSCRIPTEN FIX: Removed clear() - causes screen corruption in web builds
-		// Use selective rendering instead
-
+		// CRITICAL FIX: Clear screen to remove previous targeting overlays
+		clear();
+		
 		// make the line follow the mouse position
 		// if mouse move
 		if (mouse_moved())
@@ -385,13 +386,14 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		if (game.map->is_in_fov(targetCursor))
 		{
 			const auto& actor = game.map->get_actor(targetCursor);
-			// and actor is not an item
+			// CRITICAL FIX: Don't write directly to main screen - this causes bleeding
+			// Store info for later display or use a separate window
 			if (actor != nullptr)
 			{
-				mvprintw(0, 0, actor->actorData.name.c_str());
-				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->dr);
+				// These direct writes to (0,0) cause screen bleeding - commenting out for now
+				// mvprintw(0, 0, actor->actorData.name.c_str());
+				// mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
+				// mvprintw(2, 0, "AC: %d", actor->destructible->dr);
 			}
 		}
 		
@@ -431,21 +433,29 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		switch (key)
 		{
 		case KEY_UP:
+		case 'w':
+		case 'W':
 			// move the selection cursor up
 			targetCursor.y--;
 			break;
 
 		case KEY_DOWN:
+		case 's':
+		case 'S':
 			// move the selection cursor down
 			targetCursor.y++;
 			break;
 
 		case KEY_LEFT:
+		case 'a':
+		case 'A':
 			// move the selection cursor left
 			targetCursor.x--;
 			break;
 
 		case KEY_RIGHT:
+		case 'd':
+		case 'D':
 			// move the selection cursor right
 			targetCursor.x++;
 			break;
@@ -459,7 +469,9 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 			game.message(WHITE_BLACK_PAIR, "Target confirmed", true);
 			// then return the coordinates
 			*position = targetCursor;
-
+			
+			// Restore game display before returning
+			game.restore_game_display();
 			return true;
 			break;
 
@@ -476,6 +488,8 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 				if (actor != nullptr)
 				{
 					player->attacker->attack(*player, *actor);
+					// Restore game display after attack
+					game.restore_game_display();
 					run = false;
 				}
 			}
@@ -484,7 +498,8 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		case 'r':
 		case 27:
 			game.message(WHITE_BLACK_PAIR, "Target selection canceled", true);
-			// EMSCRIPTEN FIX: Clean exit without screen corruption
+			// Restore game display before exit
+			game.restore_game_display();
 			run = false;
 			break;
 
@@ -650,21 +665,29 @@ void Game::target()
 		switch (key)
 		{
 		case KEY_UP:
+		case 'w':
+		case 'W':
 			// move the selection cursor up
 			targetCursor.y--;
 			break;
 
 		case KEY_DOWN:
+		case 's':
+		case 'S':
 			// move the selection cursor down
 			targetCursor.y++;
 			break;
 
 		case KEY_LEFT:
+		case 'a':
+		case 'A':
 			// move the selection cursor left
 			targetCursor.x--;
 			break;
 
 		case KEY_RIGHT:
+		case 'd':
+		case 'D':
 			// move the selection cursor right
 			targetCursor.x++;
 			break;
@@ -1613,6 +1636,12 @@ void Game::add_debug_weapons_at_player_feet()
 	scrollOfLightning->pickable = std::make_unique<LightningBolt>(5, 20);
 	scrollOfLightning->value = 150;
 	container->add(std::move(scrollOfLightning));
+
+	// Add a scroll of confusion at player's feet
+	auto scrollOfConfusion = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of confusion", YELLOW_BLACK_PAIR });
+	scrollOfConfusion->pickable = std::make_unique<Confuser>(10, 5); // 10 turns confused, 5 range
+	scrollOfConfusion->value = 80;
+	container->add(std::move(scrollOfConfusion));
 
 	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", BROWN_BLACK_PAIR });
 	leatherArmor->pickable = std::make_unique<LeatherArmor>();

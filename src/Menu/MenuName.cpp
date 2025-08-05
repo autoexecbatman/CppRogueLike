@@ -56,8 +56,9 @@ void MenuName::menu_name()
 	noecho(); // hide input
 
 	menu_name_delete();
-	clear();
-	refresh();
+	
+	// Restore the game display after menu
+	game.restore_game_display();
 }
 
 // end of file: MenuName.cpp
