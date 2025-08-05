@@ -201,42 +201,14 @@ void Fireball::create_explosion(Vector2D center)
 
 void Fireball::animation(Vector2D position, int maxRange)
 {
-	// Create a temporary window for animation instead of clearing the main screen
-	WINDOW* animWindow = newwin(7, 50, (LINES/2)-3, (COLS/2)-25);
-	box(animWindow, 0, 0);
-	
-	bool run = true;
-	while (run == true)
-	{
-		// Clear only the animation window
-		werase(animWindow);
-		box(animWindow, 0, 0);
-		
-		// Create a simple flaming effect message
-		mvwprintw(animWindow, 2, 2, "The creature is engulfed in flames!");
-		
-		// Create a simple flame effect with colored characters
-		wattron(animWindow, COLOR_PAIR(RED_YELLOW_PAIR));
-		mvwprintw(animWindow, 3, 20, "~~~*~~~");
-		wattroff(animWindow, COLOR_PAIR(RED_YELLOW_PAIR));
-
-		// Ask the player to press a key to continue
-		mvwprintw(animWindow, 5, 2, "Press 'SPACE' to continue...");
-		wrefresh(animWindow);
-
-		if (getch() == ' ')
-		{
-			run = false;
-		}
-	}
-	
-	// Clean up the window
-	delwin(animWindow);
-	
-	// CRITICAL FIX: Clear screen completely then restore game display
-	clear();
+	// Simple animation: just display '~' character at creature position
+	attron(COLOR_PAIR(RED_YELLOW_PAIR));
+	mvaddch(position.y, position.x, '~');
+	attroff(COLOR_PAIR(RED_YELLOW_PAIR));
 	refresh();
-	game.restore_game_display();
+	
+	// Brief pause to show the effect
+	napms(200);
 }
 
 void Fireball::load(const json& j)
