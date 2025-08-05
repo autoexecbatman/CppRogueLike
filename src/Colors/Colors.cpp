@@ -14,7 +14,9 @@ void Colors::my_init_pair() noexcept
 	init_pair(1, COLOR_WHITE, COLOR_BLACK);
 	init_pair(2, COLOR_WHITE, COLOR_RED);
 	init_pair(3, COLOR_WHITE, COLOR_BLUE);
-	init_pair(4, COLOR_WHITE, COLOR_GREEN);
+	// Create custom dim green for background to reduce brightness
+	init_color(101, 0, 400, 0); // Dim green - same as slot 9 but in slot 101
+	init_pair(4, COLOR_WHITE, 101); // Use dim green background instead of bright COLOR_GREEN
 	
 	// === BLACK FOREGROUND PAIRS ===
 	init_pair(5, COLOR_BLACK, COLOR_WHITE);
