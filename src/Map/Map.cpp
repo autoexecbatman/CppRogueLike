@@ -720,7 +720,7 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 void Map::spawn_water(Vector2D begin, Vector2D end)
 {
 	// Add water tiles
-	constexpr int waterPercentage = 10; // 10% of tiles will be water, adjust as needed
+	constexpr int waterPercentage = 5; // 5% of tiles will be water (reduced from 10%)
 	Vector2D waterPos{ 0,0 };
 	for (waterPos.y = begin.y; waterPos.y <= end.y; ++waterPos.y)
 	{
