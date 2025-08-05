@@ -114,7 +114,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 			wearer.remove_state(ActorState::IS_RANGED);
 		}
 
-		return false; // Don't consume the weapon
+		return true; // FIXED: Unequipping should consume a turn
 	}
 
 	// Check if another weapon is already equipped
@@ -151,7 +151,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 		wearer.add_state(ActorState::IS_RANGED);
 	}
 
-	return false; // Don't consume the weapon
+	return true; // FIXED: Equipping should consume a turn
 }
 
 // Implement the Dagger class

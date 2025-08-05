@@ -16,7 +16,7 @@ bool Armor::use(Item& owner, Creature& wearer)
         wearer.destructible->update_armor_class(wearer);
         game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
 
-        return false; // Don't consume the armor
+        return true; // FIXED: Removing armor should consume a turn
     }
 
     // Check if any armor is already equipped
@@ -47,7 +47,7 @@ bool Armor::use(Item& owner, Creature& wearer)
     wearer.destructible->update_armor_class(wearer);
     game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
 
-    return false; // Don't consume the armor
+    return true; // FIXED: Putting on armor should consume a turn
 }
 
 // LeatherArmor implementation

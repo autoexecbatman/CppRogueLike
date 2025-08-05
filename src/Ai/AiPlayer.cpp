@@ -449,7 +449,7 @@ void AiPlayer::display_inventory(Creature& owner)
 		if (actor)
 		{
 			actor->pickable->use(*actor, owner);
-			/*game.gameStatus = Game::GameStatus::NEW_TURN;*/
+			game.gameStatus = Game::GameStatus::NEW_TURN; // All item usage now consumes a turn
 		}
 		delwin(inv);
 		// CRITICAL FIX: Clear screen completely before restore
