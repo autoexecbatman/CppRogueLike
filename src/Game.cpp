@@ -182,11 +182,8 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 	game.log("Loop number: " + std::to_string(loopNum) + "\n");
 
 	//==INIT_GUI==
-	if (!gui.guiInit)
-	{
-		gui.gui_init();
-		gui.guiInit = true;
-	}
+	// GUI initialization is now handled in STARTUP completion
+	// This ensures it happens after racial bonuses are applied
 
 	//==INPUT==
 	game.keyPress = ERR; // reset the keyPress so it won't get stuck in a loop
@@ -205,8 +202,16 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 
 	//==DRAW==
 	game.log("Running render...");
-	gui.gui_render(); // render the gui
+	// Render game content first, then GUI on top
 	game.render(); // render map and actors to the screen
+	// Render GUI if it's initialized - AFTER game render so it's not overwritten
+	if (gui.guiInit) {
+		// Ensure GUI has latest data before rendering
+		gui.gui_update();
+		gui.gui_render(); // render the gui
+	}
+	// Call the same restore function that inventory uses
+	game.restore_game_display();
 	game.log("Render OK.");
 	
 	// Check for menus AFTER rendering so positions are updated
@@ -248,10 +253,21 @@ void Game::update()
 	if (gameStatus == GameStatus::STARTUP)
 	{
 		game.map->compute_fov();
-		// adjust the attributes based on players race
-		game.player->racial_ability_adjustments();
+		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
+		if (game.dungeonLevel == 1) {
+			game.player->racial_ability_adjustments();
+			// Don't try to restore display here - let normal game flow handle it
+		}
 		game.player->calculate_thaco();
 		gameStatus = GameStatus::NEW_TURN;
+		
+		// Initialize GUI now that STARTUP is complete and player stats are finalized
+		if (!game.gui->guiInit) {
+			game.gui->gui_init();
+			game.gui->guiInit = true;
+			// Immediately update GUI with current player data
+			game.gui->gui_update();
+		}
 	}
 
 	if (gameStatus == GameStatus::NEW_TURN)

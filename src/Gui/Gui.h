@@ -32,9 +32,9 @@ private:
 	WINDOW* guiWin{ nullptr };
 
 	void gui_new(int height, int width, int starty, int startx) noexcept { guiWin = newwin(height, width, starty, startx); }
-	void gui_clear() noexcept { wclear(statsWindow); wclear(messageLogWindow); wclear(guiWin); }
+	void gui_clear() noexcept { wclear(guiWin); }
 	void gui_print(int x, int y, const std::string& text) noexcept { mvwprintw(guiWin, y, x, text.c_str()); }
-	void gui_refresh() noexcept { wrefresh(statsWindow); wrefresh(messageLogWindow); wrefresh(guiWin); }
+	void gui_refresh() noexcept { wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 
 	void render_hp_bar();

@@ -66,8 +66,6 @@ void Player::racial_ability_adjustments()
 			wrefresh(racialWindow);
 			getch();
 			delwin(racialWindow);
-			clear();
-			refresh();
 		}
 
 		game.player->constitution += 1;
@@ -83,8 +81,6 @@ void Player::racial_ability_adjustments()
 			wrefresh(racialWindow);
 			getch();
 			delwin(racialWindow);
-			clear();
-			refresh();
 		}
 
 		game.player->dexterity += 1;
@@ -100,8 +96,6 @@ void Player::racial_ability_adjustments()
 			wrefresh(racialWindow);
 			getch();
 			delwin(racialWindow);
-			clear();
-			refresh();
 		}
 
 		game.player->intelligence += 1;
@@ -119,8 +113,6 @@ void Player::racial_ability_adjustments()
 			wrefresh(racialWindow);
 			getch();
 			delwin(racialWindow);
-			clear();
-			refresh();
 		}
 
 		game.player->dexterity += 1;
@@ -130,7 +122,9 @@ void Player::racial_ability_adjustments()
 		break;
 	}
 	
-	// Screen is now properly cleared - no need for restore_game_display()
+	// Clear screen after all racial bonuses - GUI won't interfere since it doesn't render during STARTUP
+	clear();
+	refresh();
 }
 
 void Player::calculate_thaco()

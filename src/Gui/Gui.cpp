@@ -173,20 +173,10 @@ void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, 
 	// check if the player has no name input then place default name
 	if (game.player->actorData.name.empty()) { game.player->actorData.name = "Player"; }
 
-	// print name
-	mvwprintw(statsWindow, 2, 1, "Name: %s", playerName.data());
-	// print hp
+	// Print everything to main window to avoid sub-window issues
+	mvwprintw(guiWin, 2, 1, "Name: %s", playerName.data());
 	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
-	//// print attack
-	//mvwprintw(guiWin, 4, 1, "Attack:%d", damage);
-
-	// print gold
 	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->gold);
-
-	//// print defense
-	//mvwprintw(guiWin, 5, 1, "Defense:%d", dr);
-
-	// print turn count
 	mvwprintw(guiWin, 5, 1, "Turn: %d", game.time);
 }
 
