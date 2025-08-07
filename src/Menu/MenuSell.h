@@ -11,10 +11,10 @@ class Player;
 
 class MenuSell : public BaseMenu
 {
-	size_t menu_height; // set in constructor after items are populated for dynamic sizing
-	size_t menu_width{ 35 }; // Increased width to accommodate gold values
-	size_t menu_starty{ static_cast<size_t>((LINES / 2) - 5) };
-	size_t menu_startx{ static_cast<size_t>((COLS / 2) - 10) };
+	size_t menu_height; // Full screen height
+	size_t menu_width; // Full screen width
+	size_t menu_starty{ 0 }; // Full screen - start at top
+	size_t menu_startx{ 0 }; // Full screen - start at left
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
 	Creature& player;

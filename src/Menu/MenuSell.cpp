@@ -6,6 +6,14 @@
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 {
 	menuItems.clear();
+	
+	// Handle empty inventory case
+	if (item.empty())
+	{
+		menuItems.push_back("No items to sell");
+		return;
+	}
+	
 	for (const auto& item : item)
 	{
 		if (item)
@@ -38,7 +46,7 @@ void MenuSell::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
-	menu_print(1, state, menu_get_string(state));
+	menu_print(2, state + 4, menu_get_string(state)); // Start at row 4, indent from left border
 	if (currentState == state)
 	{
 		menu_highlight_off();
@@ -88,9 +96,22 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
 
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), shopkeeper(shopkeeper)
 {
-	populate_items(player.container->inv); // must first populate items to get the size of the menu
-	menu_height = menuItems.size();
+	// Use full screen dimensions
+	menu_height = static_cast<size_t>(LINES);
+	menu_width = static_cast<size_t>(COLS);
+	
+	populate_items(player.container->inv);
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	
+	// Reset currentState if inventory is empty
+	if (player.container->inv.empty())
+	{
+		currentState = 0;
+	}
+	else if (currentState >= player.container->inv.size())
+	{
+		currentState = player.container->inv.empty() ? 0 : player.container->inv.size() - 1;
+	}
 }
 
 MenuSell::~MenuSell()
@@ -103,6 +124,16 @@ void MenuSell::draw_content()
 	// Only redraw if content changed
 	populate_items(player.container->inv);
 	
+	// Validate currentState after repopulating
+	if (player.container->inv.empty())
+	{
+		currentState = 0;
+	}
+	else if (currentState >= player.container->inv.size())
+	{
+		currentState = player.container->inv.size() - 1;
+	}
+	
 	// Draw all menu items efficiently
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
@@ -114,9 +145,27 @@ void MenuSell::draw()
 {
 	menu_clear();
 	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Sell Items");
+	
+	// Title centered on screen
+	size_t title_x = (menu_width - 10) / 2; // Center "Sell Items" (10 chars)
+	mvwprintw(menuWindow, 1, title_x, "Sell Items");
+	
+	// Instructions
+	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to sell, ESC to exit");
+	
 	populate_items(player.container->inv);
+	
+	// Validate currentState after repopulating
+	if (player.container->inv.empty())
+	{
+		currentState = 0;
+	}
+	else if (currentState >= player.container->inv.size())
+	{
+		currentState = player.container->inv.size() - 1;
+	}
+	
+	// Start items at row 4 to leave space for title and instructions
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
 		menu_print_state(i);
@@ -130,22 +179,31 @@ void MenuSell::on_key(int key)
 	{
 	case KEY_UP:
 	case 'w':
+		// Don't allow navigation if no sellable items
+		if (player.container->inv.empty()) return;
 		if (menuItems.empty()) return; // Check for empty menu
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 		menu_mark_dirty(); // Mark for redraw
 		break;
 	case KEY_DOWN:
 	case 's':
+		// Don't allow navigation if no sellable items
+		if (player.container->inv.empty()) return;
 		if (menuItems.empty()) return; // Check for empty menu
 		currentState = (currentState + 1) % menuItems.size();
 		menu_mark_dirty(); // Mark for redraw
 		break;
 	case 10: // Enter key
 	{
-		if (!menuItems.empty()) // Only handle if menu has items
+		// Only allow selling if player actually has items
+		if (!player.container->inv.empty() && !menuItems.empty())
 		{
 			handle_sell(menuWindow, shopkeeper, player);
 			menu_mark_dirty(); // Redraw after sale
+		}
+		else
+		{
+			game.message(WHITE_BLACK_PAIR, "No items to sell.", true);
 		}
 	}
 	break;

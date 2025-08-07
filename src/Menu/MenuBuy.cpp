@@ -9,6 +9,14 @@
 void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 {
 	menuItems.clear();
+	
+	// Handle empty inventory case
+	if (inventory.empty())
+	{
+		menuItems.push_back("No items for sale");
+		return;
+	}
+	
 	for (const auto& item : inventory)
 	{
 		if (item)
@@ -35,9 +43,12 @@ void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 
 MenuBuy::MenuBuy(Creature& buyer) : buyer{ buyer }
 {
-	populate_items(buyer.container->inv); // must first populate items to get the size of the menu
-	menu_height = menuItems.size();
-	menu_new( menu_height, menu_width, menu_starty, menu_startx );
+	// Use full screen dimensions
+	menu_height = static_cast<size_t>(LINES);
+	menu_width = static_cast<size_t>(COLS);
+	
+	populate_items(buyer.container->inv);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 }
 
 MenuBuy::~MenuBuy()
@@ -53,7 +64,7 @@ void MenuBuy::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
-	menu_print(1, state, menu_get_string(state));
+	menu_print(2, state + 4, menu_get_string(state)); // Start at row 4, indent from left border
 	if (currentState == state)
 	{
 		menu_highlight_off();
@@ -76,9 +87,17 @@ void MenuBuy::draw()
 {
 	menu_clear();
 	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Buy Items");
+	
+	// Title centered on screen
+	size_t title_x = (menu_width - 9) / 2; // Center "Buy Items" (9 chars)
+	mvwprintw(menuWindow, 1, title_x, "Buy Items");
+	
+	// Instructions
+	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to buy, ESC to exit");
+	
 	populate_items(buyer.container->inv);
+	
+	// Start items at row 4 to leave space for title and instructions
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
 		menu_print_state(i);
@@ -92,6 +111,8 @@ void MenuBuy::on_key(int key)
 	{
 		case KEY_UP:
 		case 'w':
+			// Don't allow navigation if no items for sale
+			if (buyer.container->inv.empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -101,6 +122,8 @@ void MenuBuy::on_key(int key)
 			break;
 		case KEY_DOWN:
 		case 's':
+			// Don't allow navigation if no items for sale
+			if (buyer.container->inv.empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -112,10 +135,15 @@ void MenuBuy::on_key(int key)
 			menu_set_run_false();
 			break;
 		case 10: // ENTER
-			if (!menuItems.empty()) // Only handle if menu has items
+			// Only allow buying if shopkeeper actually has items
+			if (!buyer.container->inv.empty() && !menuItems.empty())
 			{
 				handle_buy(menuWindow, buyer, *game.player);
 				menu_mark_dirty(); // Redraw after purchase
+			}
+			else
+			{
+				game.message(WHITE_BLACK_PAIR, "No items for sale.", true);
 			}
 			break;
 	}
