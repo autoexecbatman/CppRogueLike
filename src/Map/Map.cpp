@@ -730,11 +730,144 @@ void Map::spawn_water(Vector2D begin, Vector2D end)
 			const int rolld100 = rng_unique->getInt(1, 100);
 			if (rolld100 < waterPercentage)
 			{
-				set_tile(waterPos, TileType::WATER, 10);
-				tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
+				// CRITICAL FIX: Check if water would block entrances using pattern matching
+				if (!would_water_block_entrance(waterPos)) {
+					set_tile(waterPos, TileType::WATER, 10);
+					tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
+				}
 			}
 		}
 	}
+}
+
+bool Map::would_water_block_entrance(Vector2D waterPos) const
+{
+	// Pattern matching to prevent water from blocking entrances
+	// Check all 8 directions around the water position for potential entrance patterns
+	
+	// Get surrounding positions
+	std::vector<Vector2D> adjacent = {
+		{waterPos.y - 1, waterPos.x - 1}, {waterPos.y - 1, waterPos.x}, {waterPos.y - 1, waterPos.x + 1}, // Top row
+		{waterPos.y, waterPos.x - 1},                                   {waterPos.y, waterPos.x + 1},     // Middle row (excluding center)
+		{waterPos.y + 1, waterPos.x - 1}, {waterPos.y + 1, waterPos.x}, {waterPos.y + 1, waterPos.x + 1}  // Bottom row
+	};
+	
+	// Count walls and floors around this position
+	int wallCount = 0;
+	int floorCount = 0;
+	
+	for (const auto& pos : adjacent) {
+		if (!in_bounds(pos)) {
+			wallCount++; // Out of bounds = wall
+			continue;
+		}
+		
+		TileType tileType = get_tile_type(pos);
+		if (tileType == TileType::WALL) {
+			wallCount++;
+		} else if (tileType == TileType::FLOOR) {
+			floorCount++;
+		}
+	}
+	
+	// ENTRANCE PATTERN 1: Corner or edge position (high wall density)
+	// If surrounded by 5+ walls, this is likely a corner or edge - safe for water
+	if (wallCount >= 5) {
+		return false; // Safe to place water
+	}
+	
+	// ENTRANCE PATTERN 2: Doorway position (walls on opposite sides)
+	// Check for corridor-like patterns: walls on opposite sides
+	auto isWallOrOOB = [this](Vector2D pos) {
+		return !in_bounds(pos) || get_tile_type(pos) == TileType::WALL;
+	};
+	
+	// Check horizontal corridor pattern: W-F-W (wall-floor-wall)
+	if (isWallOrOOB({waterPos.y, waterPos.x - 1}) && isWallOrOOB({waterPos.y, waterPos.x + 1})) {
+		return true; // Would block horizontal passage
+	}
+	
+	// Check vertical corridor pattern: W
+	//                                    F  
+	//                                    W
+	if (isWallOrOOB({waterPos.y - 1, waterPos.x}) && isWallOrOOB({waterPos.y + 1, waterPos.x})) {
+		return true; // Would block vertical passage
+	}
+	
+	// ENTRANCE PATTERN 3: Near room edge with potential door placement
+	// Check if this position could be part of a future door placement
+	// Look for patterns where this floor tile is adjacent to potential door areas
+	
+	// Check for L-shaped entrance patterns (common near room corners)
+	int adjacentWalls = 0;
+	int adjacentFloors = 0;
+	
+	// Count direct adjacent (not diagonal) walls and floors
+	std::vector<Vector2D> directAdjacent = {
+		{waterPos.y - 1, waterPos.x}, // North
+		{waterPos.y + 1, waterPos.x}, // South  
+		{waterPos.y, waterPos.x - 1}, // West
+		{waterPos.y, waterPos.x + 1}  // East
+	};
+	
+	for (const auto& pos : directAdjacent) {
+		if (!in_bounds(pos)) {
+			adjacentWalls++;
+			continue;
+		}
+		
+		TileType tileType = get_tile_type(pos);
+		if (tileType == TileType::WALL) {
+			adjacentWalls++;
+		} else if (tileType == TileType::FLOOR) {
+			adjacentFloors++;
+		}
+	}
+	
+	// ENTRANCE PATTERN 4: Potential door position
+	// If this position has exactly 2 walls and 2 floors adjacent, it might be a door spot
+	if (adjacentWalls == 2 && adjacentFloors == 2) {
+		// Check if walls are opposite each other (forming a corridor)
+		bool hasOppositeWalls = 
+			(isWallOrOOB({waterPos.y - 1, waterPos.x}) && isWallOrOOB({waterPos.y + 1, waterPos.x})) ||
+			(isWallOrOOB({waterPos.y, waterPos.x - 1}) && isWallOrOOB({waterPos.y, waterPos.x + 1}));
+		
+		if (hasOppositeWalls) {
+			return true; // Would block potential door
+		}
+	}
+	
+	// ENTRANCE PATTERN 5: Room boundary positions
+	// If this floor tile is on the edge of the room, it might be where a corridor connects
+	Vector2D roomBegin = {0, 0};
+	Vector2D roomEnd = {0, 0};
+	
+	// Find which room this position belongs to
+	for (size_t i = 0; i < game.rooms.size(); i += 2) {
+		if (i + 1 < game.rooms.size()) {
+			Vector2D begin = game.rooms[i];
+			Vector2D end = game.rooms[i + 1];
+			
+			if (waterPos.y >= begin.y && waterPos.y <= end.y &&
+				waterPos.x >= begin.x && waterPos.x <= end.x) {
+				roomBegin = begin;
+				roomEnd = end;
+				break;
+			}
+		}
+	}
+	
+	// Check if this position is on the room perimeter (edge positions are potential entrance points)
+	if (waterPos.y == roomBegin.y || waterPos.y == roomEnd.y ||
+		waterPos.x == roomBegin.x || waterPos.x == roomEnd.x) {
+		// This is on room edge - higher chance of being an entrance, so be more cautious
+		if (adjacentWalls >= 1 && adjacentFloors >= 1) {
+			return true; // Potentially blocks room entrance
+		}
+	}
+	
+	// If none of the blocking patterns match, water is safe to place
+	return false;
 }
 
 void Map::spawn_items(Vector2D begin, Vector2D end)

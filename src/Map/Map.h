@@ -76,6 +76,7 @@ private:
 	void place_stairs();
 	bool is_stairs(Vector2D pos) const;
 	void spawn_water(Vector2D begin, Vector2D end);
+	bool would_water_block_entrance(Vector2D waterPos) const;
 	void spawn_items(Vector2D begin, Vector2D end);
 	void spawn_player(Vector2D begin, Vector2D end);
 	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
