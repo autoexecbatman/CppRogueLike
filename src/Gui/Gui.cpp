@@ -67,10 +67,6 @@ void Gui::gui_init() noexcept
 	// message log window
 	messageLogWindow = derwin(guiWin, LOG_HEIGHT, LOG_WIDTH, LOG_Y, LOG_X);
 
-	// set hp and hpMax
-	guiHp = game.player->destructible->hp;
-	guiHpMax = game.player->destructible->hpMax;
-
 	gui_clear();
 	box(guiWin, 0, 0);
 
@@ -86,12 +82,6 @@ void Gui::gui_shutdown() noexcept
 
 void Gui::gui_update()
 {
-	if (game.player)
-	{ // update the gui memory
-		guiHp = game.player->destructible->hp;
-		guiHpMax = game.player->destructible->hpMax;
-	} 
-	
 	// message to display
 	// if an event has occured, store the message in a private variable
 	guiMessage = game.messageToDisplay;
@@ -118,8 +108,8 @@ void Gui::gui_render()
 
 	gui_print_stats(
 		game.player->actorData.name,
-		guiHp,
-		guiHpMax,
+		game.player->destructible->hp,
+		game.player->destructible->hpMax,
 		game.player->attacker->roll,
 		game.player->destructible->dr
 	);
@@ -364,13 +354,17 @@ void Gui::load(const json& j)
 void Gui::render_hp_bar()
 {
 	constexpr int BAR_WIDTH = 20;
-	constexpr int BAR_Y = 0; // Position at top of GUI
+	constexpr int BAR_Y = 0;
 	constexpr int BAR_X = 1;
 	
-	if (guiHpMax <= 0) return; // Prevent division by zero
+	// Get current HP values directly from player
+	const int currentHp = game.player->destructible->hp;
+	const int maxHp = game.player->destructible->hpMax;
+	
+	if (maxHp <= 0) return; // Prevent division by zero
 	
 	// Calculate HP percentage and bar width
-	const float hpRatio = static_cast<float>(guiHp) / static_cast<float>(guiHpMax);
+	const float hpRatio = static_cast<float>(currentHp) / static_cast<float>(maxHp);
 	const int filledWidth = static_cast<int>(hpRatio * BAR_WIDTH);
 	
 	// Determine color based on HP percentage
@@ -412,7 +406,7 @@ void Gui::render_hp_bar()
 	wattroff(guiWin, COLOR_PAIR(WHITE_BLACK_PAIR));
 	
 	// Print HP values at the end of the bar
-	mvwprintw(guiWin, BAR_Y, BAR_X + 3 + BAR_WIDTH + 1, "%d/%d", guiHp, guiHpMax);
+	mvwprintw(guiWin, BAR_Y, BAR_X + 3 + BAR_WIDTH + 1, "%d/%d", currentHp, maxHp);
 }
 
 void Gui::render_hunger_status() 

@@ -42,33 +42,41 @@ void Destructible::update_constitution_bonus(Creature& owner)
 
 	// Calculate new max HP based on base HP and Constitution bonus
 	int oldHpMax = hpMax; // Store old max HP for comparison
-	hpMax = hpBase + (hpAdj * owner.playerLevel); // Scale bonus by level for player
+	int newHpMax = hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)); // Scale bonus by level for player
+
+	// Only update if the calculated value is different AND we're not in a level-up situation
+	// During level-ups, hpMax is already correctly set by the level-up system
+	if (newHpMax != oldHpMax && newHpMax > 0) {
+		// Check if this looks like a level-up scenario (hpMax increased recently)
+		// If hpMax > hpBase + constitution bonus, then level-up system already handled it
+		if (hpMax <= hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1))) {
+			hpMax = newHpMax;
+			
+			// Adjust current HP proportionally if max HP changed
+			float hpRatio = static_cast<float>(hp) / oldHpMax;
+			hp = static_cast<int>(hpRatio * hpMax);
+
+			// Make sure HP is at least 1
+			hp = std::max(1, hp);
+
+			// Don't exceed new maximum
+			hp = std::min(hp, hpMax);
+
+			// Log the HP adjustment if it's the player
+			if (&owner == game.player.get()) {
+				if (oldHpMax < hpMax) {
+					game.log("Your Constitution bonus increased your hit points.");
+				}
+				else if (oldHpMax > hpMax) {
+					game.log("Your Constitution bonus decreased your hit points.");
+				}
+			}
+		}
+	}
 
 	if (hpMax <= 0)
 	{
 		hpMax = 1;
-	}
-
-	// Adjust current HP proportionally if max HP changed
-	if (oldHpMax != hpMax && oldHpMax > 0) {
-		float hpRatio = static_cast<float>(hp) / oldHpMax;
-		hp = static_cast<int>(hpRatio * hpMax);
-
-		// Make sure HP is at least 1
-		hp = std::max(1, hp);
-
-		// Don't exceed new maximum
-		hp = std::min(hp, hpMax);
-
-		// Log the HP adjustment if it's the player
-		if (&owner == game.player.get()) {
-			if (oldHpMax < hpMax) {
-				game.log("Your Constitution bonus increased your hit points.");
-			}
-			else if (oldHpMax > hpMax) {
-				game.log("Your Constitution bonus decreased your hit points.");
-			}
-		}
 	}
 
 	// Update the last known Constitution value

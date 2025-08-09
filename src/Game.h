@@ -20,6 +20,7 @@
 #include "Menu/BaseMenu.h"
 #include "Systems/TargetingSystem.h"
 #include "Systems/HungerSystem.h"
+#include "Systems/LevelUpSystem.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"

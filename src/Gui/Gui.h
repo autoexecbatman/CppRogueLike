@@ -40,7 +40,6 @@ private:
 	void render_hp_bar();
 	void render_hunger_status();
 public:
-	int guiHp{ 0 }, guiHpMax{ 0 }; // a cache of the player's hp and hpMax
 	bool guiInit{ false };
 
 	void gui_init() noexcept; // initialize the gui

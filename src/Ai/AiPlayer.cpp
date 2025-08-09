@@ -15,6 +15,7 @@
 #include "../Objects/Web.h"
 #include "../Factories/ItemCreator.h"
 #include "../ActorTypes/Monsters.h"
+#include "../Systems/LevelUpSystem.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -520,7 +521,52 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 		{
 			if (!c->destructible->is_dead() && c->position == target)
 			{
-				owner.attacker->attack(owner, *c);
+				// Handle multiple attacks for fighters
+				auto playerPtr = dynamic_cast<Player*>(&owner);
+				if (playerPtr)
+				{
+					// Increment round counter for attack pattern tracking
+					playerPtr->roundCounter++;
+					
+					// Calculate number of attacks this round
+					int attacksThisRound = 1; // Default single attack
+					
+					if (playerPtr->attacksPerRound >= 2.0f)
+					{
+						// 2 attacks per round
+						attacksThisRound = 2;
+					}
+					else if (playerPtr->attacksPerRound >= 1.5f)
+					{
+						// 3/2 attacks per round (alternating pattern: 2, 1, 2, 1...)
+						attacksThisRound = (playerPtr->roundCounter % 2 == 1) ? 2 : 1;
+					}
+					
+					// Perform the attacks
+					for (int i = 0; i < attacksThisRound; i++)
+					{
+						if (!c->destructible->is_dead()) // Check if target is still alive
+						{
+							if (i > 0)
+							{
+								// Display follow-up attack message
+								game.appendMessagePart(WHITE_BLACK_PAIR, "Follow-up attack: ");
+								game.finalizeMessage();
+							}
+							owner.attacker->attack(owner, *c);
+						}
+						else
+						{
+							// Target died, no more attacks needed
+							break;
+						}
+					}
+				}
+				else
+				{
+					// Non-player creatures get single attack
+					owner.attacker->attack(owner, *c);
+				}
 				return false;
 			}
 		}
@@ -603,14 +649,24 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::TEST_COMMAND:
 	{
-		// Spawn shopkeeper using uniform template method
-		game.create_creature<Shopkeeper>(owner.position + Vector2D{1, 0});
-		// Get the shopkeeper that was just created and add inventory
-		auto& shopkeeper = *game.creatures.back();
-		shopkeeper.container->add(ItemCreator::create_health_potion(shopkeeper.position));
-		shopkeeper.container->add(ItemCreator::create_dagger(shopkeeper.position));
-		shopkeeper.gold = 100; // Give shopkeeper gold
-		game.message(WHITE_BLACK_PAIR, "Shopkeeper summoned!", true);
+		// Add XP for leveling up debugging (instead of spawning shopkeeper)
+		if (owner.destructible)
+		{
+			const int DEBUG_XP_AMOUNT = 1000;
+			owner.destructible->xp += DEBUG_XP_AMOUNT;
+			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, owner.destructible->xp), true);
+			
+			// Check for level up (basic threshold check)
+			int currentLevel = dynamic_cast<Player*>(&owner)->playerLevel;
+			int xpRequired = currentLevel * 1000; // Simple progression: level 1 = 1000 XP, level 2 = 2000 XP, etc.
+			
+			if (owner.destructible->xp >= xpRequired)
+			{
+				dynamic_cast<Player*>(&owner)->playerLevel++;
+				LevelUpSystem::apply_level_up_benefits(owner, dynamic_cast<Player*>(&owner)->playerLevel);
+				game.message(WHITE_GREEN_PAIR, std::format("LEVEL UP! You are now level {}", dynamic_cast<Player*>(&owner)->playerLevel), true);
+			}
+		}
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	}

@@ -34,6 +34,7 @@
 #include "Objects/Web.h"
 #include "Factories/ItemCreator.h"
 #include "Items/Armor.h"
+#include "Systems/LevelUpSystem.h"
 
 // added for DEBUGING AT PLAYER FEET
 #include "ActorTypes/Healer.h"
@@ -959,7 +960,8 @@ Creature* Game::get_actor(Vector2D pos) const noexcept
 
 void Game::dispay_levelup(int xpLevel)
 {
-	RandomDice d;
+	// Apply all level up benefits through the new LevelUpSystem
+	LevelUpSystem::apply_level_up_benefits(*player, xpLevel);
 
 	// Create window for level up display
 	WINDOW* statsWindow = newwin(
@@ -979,147 +981,68 @@ void Game::dispay_levelup(int xpLevel)
 	// Display basic character info
 	mvwprintw(statsWindow, 3, 2, "Name: %s", player->actorData.name.c_str());
 	mvwprintw(statsWindow, 3, 30, "Race: %s", player->playerRace.c_str());
-	mvwprintw(statsWindow, 4, 2, "Level: %d -> %d", xpLevel - 1, xpLevel);
+	mvwprintw(statsWindow, 4, 2, "Level: %d", xpLevel);
 	mvwprintw(statsWindow, 4, 30, "Experience: %d", player->destructible->xp);
 
-	// Store old stats
-	int oldHp = player->destructible->hp;
-	int oldHpMax = player->destructible->hpMax;
-	int oldDr = player->destructible->dr;
-	int oldThac0 = player->destructible->thaco;
+	// Display current stats
+	mvwprintw(statsWindow, 6, 2, "CURRENT STATS:");
+	mvwprintw(statsWindow, 7, 4, "Hit Points: %d/%d", player->destructible->hp, player->destructible->hpMax);
+	mvwprintw(statsWindow, 8, 4, "THAC0: %d", player->destructible->thaco);
+	mvwprintw(statsWindow, 9, 4, "Armor Class: %d", player->destructible->armorClass);
+	mvwprintw(statsWindow, 10, 4, "Damage Reduction: %d", player->destructible->dr);
 
-	// we calculate inside the function to be able to display the change from old THAC0
-	game.player->calculate_thaco();
-
-	// Calculate and apply HP gains based on class and Constitution
-	int hpGain = 0;
-	int hpAdj = game.constitutionAttributes[player->constitution - 1].HPAdj;
-
-	// Calculate HP gain by class
-	switch (player->playerClassState)
-	{
-	case Player::PlayerClassState::FIGHTER:
-		hpGain = d.d10();
-		break;
-	case Player::PlayerClassState::ROGUE:
-		hpGain = d.d6();
-		break;
-	case Player::PlayerClassState::CLERIC:
-		hpGain = d.d8();
-		break;
-	case Player::PlayerClassState::WIZARD:
-		hpGain = d.d4();
-		break;
-	default:
-		hpGain = d.d8(); // Default fallback
-		break;
-	}
-
-	// Ensure minimum HP gain (1 per level according to 2e rules)
-	hpGain = std::max(1, hpGain);
-
-	// Apply HP gain
-	player->destructible->hpMax += hpGain + hpAdj;
-	player->destructible->hp += hpGain + hpAdj;
-	player->destructible->hpBase += hpGain;
-
-	// Update player level
-	player->playerLevel = xpLevel;
-
-	// Determine if DR should improve (primarily fighters)
-	bool drImproved = false;
-	if ((player->playerClassState == Player::PlayerClassState::FIGHTER && xpLevel % 3 == 0) ||
-		(xpLevel % 4 == 0)) { // Other classes get DR increase every 4 levels
-		player->destructible->dr += 1;
-		drImproved = true;
-	}
-
-	// Display stat changes
-	mvwprintw(statsWindow, 6, 2, "IMPROVEMENTS:");
-
-	// HP improvement
-	wattron(statsWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
-	mvwprintw(statsWindow, 7, 4, "Hit Points: %d/%d -> %d/%d (+%d)",
-		oldHp, oldHpMax, player->destructible->hp, player->destructible->hpMax, hpGain);
-	wattroff(statsWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
-
-	// THAC0 difference
-	int difference = player->destructible->thaco - oldThac0;
-
-	// THAC0 improvement
-	if (oldThac0 > game.player->destructible->thaco)
-	{
-		wattron(statsWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
-		mvwprintw(statsWindow, 8, 4, "THAC0: %d -> %d (Improved by %d)",
-			oldThac0, game.player->destructible->thaco, difference);
-		wattroff(statsWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
-	}
-	else {
-		mvwprintw(statsWindow, 8, 4, "THAC0: %d (No Change)", game.player->destructible->thaco);
-	}
-
-	// Damage Reduction improvement
-	if (drImproved) {
-		wattron(statsWindow, COLOR_PAIR(GREEN_BLACK_PAIR));
-		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d -> %d (+1)",
-			oldDr, player->destructible->dr);
-		wattroff(statsWindow, COLOR_PAIR(GREEN_BLACK_PAIR));
-	}
-	else {
-		mvwprintw(statsWindow, 9, 4, "Damage Reduction: %d (No Change)", player->destructible->dr);
-	}
-
-	// Class-specific benefits
-	mvwprintw(statsWindow, 11, 2, "CLASS BENEFITS:");
+	// Display class-specific improvements that were applied
+	mvwprintw(statsWindow, 12, 2, "CLASS BENEFITS APPLIED:");
 
 	switch (player->playerClassState)
 	{
 	case Player::PlayerClassState::FIGHTER:
-		mvwprintw(statsWindow, 12, 4, "- Improved combat prowess");
-		mvwprintw(statsWindow, 13, 4, "- Superior hit point gain (d10)");
-		if (xpLevel % 3 == 0) {
-			mvwprintw(statsWindow, 14, 4, "- Enhanced armor use (+1 DR)");
-		}
+		mvwprintw(statsWindow, 13, 4, "- Superior combat training applied");
+		mvwprintw(statsWindow, 14, 4, "- Hit dice: d10 + CON bonus");
+		if (xpLevel == 7)
+			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Extra attack gained (3/2)!");
+		else if (xpLevel == 13)
+			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Extra attack gained (2/1)!");
 		break;
 
 	case Player::PlayerClassState::ROGUE:
-		mvwprintw(statsWindow, 12, 4, "- Improved thief skills");
-		mvwprintw(statsWindow, 13, 4, "- Enhanced stealth capabilities");
-		if (xpLevel % 4 == 0) {
-			mvwprintw(statsWindow, 14, 4, "- Better trap avoidance (+1 DR)");
-		}
+		mvwprintw(statsWindow, 13, 4, "- Improved thieving abilities");
+		mvwprintw(statsWindow, 14, 4, "- Hit dice: d6 + CON bonus");
+		mvwprintw(statsWindow, 15, 4, "- Backstab multiplier improved");
 		break;
 
 	case Player::PlayerClassState::CLERIC:
-		mvwprintw(statsWindow, 12, 4, "- Enhanced divine favor");
-		mvwprintw(statsWindow, 13, 4, "- Improved healing capabilities");
-		if (player->wisdom >= 13 && xpLevel % 2 == 0) {
-			mvwprintw(statsWindow, 14, 4, "- Additional spell slot (Wisdom bonus)");
-		}
+		mvwprintw(statsWindow, 13, 4, "- Divine favor strengthened");
+		mvwprintw(statsWindow, 14, 4, "- Hit dice: d8 + CON bonus");
+		if (xpLevel == 3 || xpLevel == 5 || xpLevel == 7 || xpLevel == 9)
+			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Turn undead improved!");
 		break;
 
 	case Player::PlayerClassState::WIZARD:
-		mvwprintw(statsWindow, 12, 4, "- Expanded arcane knowledge");
-		mvwprintw(statsWindow, 13, 4, "- New spell research opportunities");
-		if (player->intelligence >= 13 && xpLevel % 2 == 0) {
-			mvwprintw(statsWindow, 14, 4, "- Additional spell slot (Intelligence bonus)");
-		}
+		mvwprintw(statsWindow, 13, 4, "- Arcane knowledge expanded");
+		mvwprintw(statsWindow, 14, 4, "- Hit dice: d4 + CON bonus");
+		if ((xpLevel % 2 == 1) && xpLevel > 1)
+			mvwprintw(statsWindow, 15, 4, "- SPECIAL: New spell level access!");
 		break;
 
 	default:
-		mvwprintw(statsWindow, 12, 4, "- General combat improvement");
+		mvwprintw(statsWindow, 13, 4, "- General combat improvement");
 		break;
 	}
+
+	// Show next level requirements
+	int nextLevelXP = player->ai->get_next_level_xp(*player);
+	mvwprintw(statsWindow, 17, 2, "XP for next level: %d", nextLevelXP);
 
 	// Prompt specifically for space bar
-	mvwprintw(statsWindow, 18, 15, "Press SPACE BAR to continue...");
+	mvwprintw(statsWindow, 19, 15, "Press SPACE BAR to continue...");
 	wrefresh(statsWindow);
 
 	// Wait for space bar
 	int ch;
 	do {
 		ch = getch();
-	} while (ch != ' '); // Only accept space bar;
+	} while (ch != ' '); // Only accept space bar
 
 	// Clean up
 	delwin(statsWindow);
