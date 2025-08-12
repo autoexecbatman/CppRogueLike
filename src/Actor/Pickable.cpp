@@ -6,6 +6,7 @@
 #include "../Game.h"
 #include "Actor.h"
 #include "Container.h"
+#include "../ActorTypes/Player.h"
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
@@ -69,6 +70,21 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 	case PickableType::STAFF:
 		pickable = std::make_unique<Staff>();
 		break;
+	case PickableType::GREATSWORD:
+		pickable = std::make_unique<Greatsword>();
+		break;
+	case PickableType::BATTLE_AXE:
+		pickable = std::make_unique<BattleAxe>();
+		break;
+	case PickableType::GREAT_AXE:
+		pickable = std::make_unique<GreatAxe>();
+		break;
+	case PickableType::WAR_HAMMER:
+		pickable = std::make_unique<WarHammer>();
+		break;
+	case PickableType::SHIELD:
+		pickable = std::make_unique<Shield>();
+		break;
 	case PickableType::GOLD:
 		pickable = std::make_unique<Gold>(0);
 		break;
@@ -101,57 +117,126 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 // Common weapon equip/unequip logic
 bool Weapon::use(Item& owner, Creature& wearer)
 {
-	// If this is a direct unequip operation
-	if (owner.has_state(ActorState::IS_EQUIPPED))
+	// Cast to Player to access equipment system
+	auto* player = dynamic_cast<Player*>(&wearer);
+	if (!player)
 	{
-		wearer.attacker->roll = "D2"; // Reset to default unarmed attack
-		wearer.unequip(owner);
-		game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
-
-		// Remove ranged state if applicable
-		if (isRanged())
-		{
-			wearer.remove_state(ActorState::IS_RANGED);
-		}
-
-		return true; // FIXED: Unequipping should consume a turn
+		// Fallback to old system for non-player creatures
+		return Pickable::use(owner, wearer);
 	}
 
-	// Check if another weapon is already equipped
-	Item* currentWeapon = nullptr;
-	for (const auto& item : wearer.container->inv)
+	// If this weapon is already equipped, unequip it
+	if (owner.has_state(ActorState::IS_EQUIPPED))
 	{
-		if (item && item->has_state(ActorState::IS_EQUIPPED) && item.get() != &owner)
+		// Find which slot this weapon is in and unequip it
+		for (auto slot : {EquipmentSlot::MAIN_HAND, EquipmentSlot::OFF_HAND})
 		{
-			// Check if it's a weapon
-			Weapon* weapon = dynamic_cast<Weapon*>(item->pickable.get());
-			if (weapon)
+			if (player->getEquippedItem(slot) == &owner)
 			{
-				currentWeapon = item.get();
-				break;
+				player->unequipItem(slot);
+				game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
+				
+				// Remove ranged state if applicable
+				if (isRanged())
+				{
+					wearer.remove_state(ActorState::IS_RANGED);
+				}
+				
+				return true;
 			}
 		}
 	}
 
-	// If another weapon is equipped, unequip it
-	if (currentWeapon)
+	// Determine equipment slot and hand usage for new weapon
+	EquipmentSlot targetSlot = EquipmentSlot::MAIN_HAND;
+	bool useTwoHanded = false;
+
+	// Check weapon type for slot determination
+	if (dynamic_cast<Shield*>(this))
 	{
-		game.message(WHITE_BLACK_PAIR, "You unequip your " + currentWeapon->actorData.name + ".", true);
-		wearer.unequip(*currentWeapon);
+		targetSlot = EquipmentSlot::OFF_HAND;
+	}
+	else if (dynamic_cast<Greatsword*>(this) || dynamic_cast<GreatAxe*>(this) || 
+			 dynamic_cast<Longbow*>(this))
+	{
+		// Pure two-handed weapons
+		targetSlot = EquipmentSlot::MAIN_HAND;
+		useTwoHanded = true;
+	}
+	else if (dynamic_cast<LongSword*>(this) || dynamic_cast<BattleAxe*>(this) || 
+			 dynamic_cast<WarHammer*>(this) || dynamic_cast<Staff*>(this))
+	{
+		// Versatile weapons - check if user wants two-handed
+		targetSlot = EquipmentSlot::MAIN_HAND;
+		
+		// If off-hand is free, ask if they want to use two-handed
+		if (!player->isSlotOccupied(EquipmentSlot::OFF_HAND))
+		{
+			// For now, default to one-handed unless off-hand is empty
+			useTwoHanded = false;
+			game.message(WHITE_BLACK_PAIR, "Using " + owner.actorData.name + " one-handed. Use 'T' to toggle two-handed grip.", true);
+		}
+		else
+		{
+			useTwoHanded = false;
+		}
 	}
 
-	// Equip the new weapon
-	wearer.attacker->roll = this->roll;
-	wearer.equip(owner);
-	game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + ".", true);
-
-	// Apply ranged state if applicable
-	if (isRanged())
+	// Check if we can equip in the target slot
+	if (!player->canEquip(owner, targetSlot, useTwoHanded))
 	{
-		wearer.add_state(ActorState::IS_RANGED);
+		if (useTwoHanded)
+		{
+			game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - your off-hand is occupied!", true);
+		}
+		else if (targetSlot == EquipmentSlot::OFF_HAND)
+		{
+			game.message(WHITE_BLACK_PAIR, "Cannot equip shield - you're using a two-handed weapon!", true);
+		}
+		else
+		{
+			game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - slot is occupied!", true);
+		}
+		return false; // Don't consume turn if can't equip
 	}
 
-	return true; // FIXED: Equipping should consume a turn
+	// Remove the item from inventory and equip it
+	auto compareItems = [&owner](const std::unique_ptr<Item>& item) { return item.get() == &owner; };
+	auto it = std::find_if(wearer.container->inv.begin(), wearer.container->inv.end(), compareItems);
+	
+	if (it != wearer.container->inv.end())
+	{
+		// Move item from inventory to equipment
+		std::unique_ptr<Item> item = std::move(*it);
+		wearer.container->inv.erase(it);
+		
+		// Equip the item in the new equipment system
+		if (player->equipItem(std::move(item), targetSlot, useTwoHanded))
+		{
+			// Update combat stats
+			if (targetSlot == EquipmentSlot::MAIN_HAND)
+			{
+				wearer.attacker->roll = this->roll;
+				
+				// Apply ranged state if applicable
+				if (isRanged())
+				{
+					wearer.add_state(ActorState::IS_RANGED);
+				}
+			}
+			
+			game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + 
+						 (useTwoHanded ? " (two-handed)." : "."), true);
+			return true;
+		}
+		else
+		{
+			// If equipping failed, return item to inventory
+			wearer.container->add(std::move(item));
+		}
+	}
+
+	return false;
 }
 
 // Implement the Dagger class
@@ -256,10 +341,120 @@ void Staff::save(json& j)
 
 void Staff::load(const json& j)
 {
-	if (j.contains("roll") && j["roll"].is_string()) {
-		roll = j["roll"].get<std::string>();
-	}
-	else {
-		throw std::runtime_error("Invalid JSON format for Staff");
-	}
+if (j.contains("roll") && j["roll"].is_string()) {
+roll = j["roll"].get<std::string>();
 }
+else {
+throw std::runtime_error("Invalid JSON format for Staff");
+}
+}
+
+	// Implement the Greatsword class
+	bool Greatsword::isRanged() const
+	{
+		return false;
+	}
+
+	void Greatsword::save(json& j)
+	{
+		j["type"] = static_cast<int>(PickableType::GREATSWORD);
+		j["roll"] = roll;
+	}
+
+	void Greatsword::load(const json& j)
+	{
+		if (j.contains("roll") && j["roll"].is_string()) {
+			roll = j["roll"].get<std::string>();
+		}
+		else {
+			throw std::runtime_error("Invalid JSON format for Greatsword");
+		}
+	}
+
+	// Implement the BattleAxe class
+	bool BattleAxe::isRanged() const
+	{
+		return false;
+	}
+
+	void BattleAxe::save(json& j)
+	{
+		j["type"] = static_cast<int>(PickableType::BATTLE_AXE);
+		j["roll"] = roll;
+	}
+
+	void BattleAxe::load(const json& j)
+	{
+		if (j.contains("roll") && j["roll"].is_string()) {
+			roll = j["roll"].get<std::string>();
+		}
+		else {
+			throw std::runtime_error("Invalid JSON format for BattleAxe");
+		}
+	}
+
+	// Implement the GreatAxe class
+	bool GreatAxe::isRanged() const
+	{
+		return false;
+	}
+
+	void GreatAxe::save(json& j)
+	{
+		j["type"] = static_cast<int>(PickableType::GREAT_AXE);
+		j["roll"] = roll;
+	}
+
+	void GreatAxe::load(const json& j)
+	{
+		if (j.contains("roll") && j["roll"].is_string()) {
+			roll = j["roll"].get<std::string>();
+		}
+		else {
+			throw std::runtime_error("Invalid JSON format for GreatAxe");
+		}
+	}
+
+	// Implement the WarHammer class
+	bool WarHammer::isRanged() const
+	{
+		return false;
+	}
+
+	void WarHammer::save(json& j)
+	{
+		j["type"] = static_cast<int>(PickableType::WAR_HAMMER);
+		j["roll"] = roll;
+	}
+
+	void WarHammer::load(const json& j)
+	{
+		if (j.contains("roll") && j["roll"].is_string()) {
+			roll = j["roll"].get<std::string>();
+		}
+		else {
+			throw std::runtime_error("Invalid JSON format for WarHammer");
+		}
+	}
+
+	// Implement the Shield class
+	bool Shield::isRanged() const
+	{
+		return false;
+	}
+
+	void Shield::save(json& j)
+	{
+		j["type"] = static_cast<int>(PickableType::SHIELD);
+		j["roll"] = roll;
+	}
+
+	void Shield::load(const json& j)
+	{
+		if (j.contains("roll") && j["roll"].is_string()) {
+			roll = j["roll"].get<std::string>();
+		}
+		else {
+			throw std::runtime_error("Invalid JSON format for Shield");
+		}
+	}

@@ -37,6 +37,7 @@ enum class Controls
 	CHAR_SHEET = '@',
 	DESCEND = '>',
 	TARGET = 't',
+	TOGGLE_GRIP = 'T',
 	QUIT = '~',
 	DEBUG = 'b',
 	REVEAL = 'm',

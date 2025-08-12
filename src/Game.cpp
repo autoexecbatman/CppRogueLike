@@ -1559,6 +1559,32 @@ void Game::add_debug_weapons_at_player_feet()
 	longbow->value = 70; // Set a value for the longbow
 	container->add(std::move(longbow));
 
+	// Add two-handed weapons
+	auto greatsword = std::make_unique<Item>(player->position, ActorData{ '/', "greatsword", WHITE_BLACK_PAIR });
+	greatsword->pickable = std::make_unique<Greatsword>();
+	greatsword->value = 50;
+	container->add(std::move(greatsword));
+
+	auto battleAxe = std::make_unique<Item>(player->position, ActorData{ '/', "battle axe", WHITE_BLACK_PAIR });
+	battleAxe->pickable = std::make_unique<BattleAxe>();
+	battleAxe->value = 25;
+	container->add(std::move(battleAxe));
+
+	auto greatAxe = std::make_unique<Item>(player->position, ActorData{ '/', "great axe", WHITE_BLACK_PAIR });
+	greatAxe->pickable = std::make_unique<GreatAxe>();
+	greatAxe->value = 40;
+	container->add(std::move(greatAxe));
+
+	auto warHammer = std::make_unique<Item>(player->position, ActorData{ '/', "war hammer", WHITE_BLACK_PAIR });
+	warHammer->pickable = std::make_unique<WarHammer>();
+	warHammer->value = 20;
+	container->add(std::move(warHammer));
+
+	auto shield = std::make_unique<Item>(player->position, ActorData{ '[', "shield", WHITE_BLACK_PAIR });
+	shield->pickable = std::make_unique<Shield>();
+	shield->value = 10;
+	container->add(std::move(shield));
+
 	// Add a health potion for good measure
 	auto healthPotion = std::make_unique<Item>(player->position, ActorData{ '!', "health potion", WHITE_RED_PAIR });
 	healthPotion->pickable = std::make_unique<Healer>(10);
@@ -1602,7 +1628,7 @@ void Game::add_debug_weapons_at_player_feet()
 		std::to_string(player->position.y));
 
 	// Add a message for the player
-	message(WHITE_BLACK_PAIR, "Debug weapons and armor placed at your feet.", true);
+	message(WHITE_BLACK_PAIR, "Debug weapons, two-handed weapons, armor, and shield placed at your feet.", true);
 
 }
 

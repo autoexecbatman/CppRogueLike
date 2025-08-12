@@ -341,10 +341,194 @@ bool Player::tryBreakWeb()
 		return true;
 	}
 
-	// Message about remaining stuck
 	game.message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " +
 		std::to_string(webStuckTurns), true);
 	return false;
+}
+
+bool Player::equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoHanded)
+{
+	if (!item || !canEquip(*item, slot, twoHanded))
+	{
+		return false;
+	}
+
+	// Unequip existing item in the slot first
+	unequipItem(slot);
+
+	// For two-handed weapons, also unequip off-hand
+	if (twoHanded && slot == EquipmentSlot::MAIN_HAND)
+	{
+		unequipItem(EquipmentSlot::OFF_HAND);
+	}
+
+	// Add equipped item
+	equippedItems.emplace_back(std::move(item), slot, twoHanded);
+	
+	// Mark item as equipped
+	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
+	
+	return true;
+}
+
+// Equipment system implementation
+bool Player::canEquip(const Item& item, EquipmentSlot slot, bool twoHanded) const
+{
+	// Basic slot validation
+	if (slot == EquipmentSlot::NONE)
+	{
+		return false;
+	}
+
+	// Check if item has pickable component (weapons/armor)
+	if (!item.pickable)
+	{
+		return false;
+	}
+
+	// For two-handed weapons or when using versatile weapons two-handed
+	if (twoHanded)
+	{
+		// Cannot equip two-handed if off-hand is occupied
+		if (isSlotOccupied(EquipmentSlot::OFF_HAND))
+		{
+			return false;
+		}
+	}
+
+	// For off-hand items
+	if (slot == EquipmentSlot::OFF_HAND)
+	{
+		// Cannot equip off-hand if already using two-handed weapon
+		if (hasEquippedTwoHandedWeapon())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool Player::unequipItem(EquipmentSlot slot)
+{
+	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
+		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
+	
+	if (it != equippedItems.end())
+	{
+		// Remove equipped state
+		it->item->remove_state(ActorState::IS_EQUIPPED);
+		
+		// Reset combat stats if main hand weapon
+		if (slot == EquipmentSlot::MAIN_HAND)
+		{
+			attacker->roll = "D2"; // Reset to unarmed
+			remove_state(ActorState::IS_RANGED); // Remove ranged state
+		}
+		
+		// Return item to inventory
+		container->add(std::move(it->item));
+		
+		// Remove from equipped items
+		equippedItems.erase(it);
+		return true;
+	}
+	
+	return false;
+}
+
+Item* Player::getEquippedItem(EquipmentSlot slot) const
+{
+	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
+		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
+	
+	return (it != equippedItems.end()) ? it->item.get() : nullptr;
+}
+
+bool Player::isSlotOccupied(EquipmentSlot slot) const
+{
+	return getEquippedItem(slot) != nullptr;
+}
+
+bool Player::hasEquippedTwoHandedWeapon() const
+{
+	// Check main hand for two-handed weapon or versatile weapon used two-handed
+	auto mainHandItem = getEquippedItem(EquipmentSlot::MAIN_HAND);
+	if (!mainHandItem)
+	{
+		return false;
+	}
+	
+	// Find the equipped item details
+	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
+		[](const EquippedItem& equipped) { return equipped.slot == EquipmentSlot::MAIN_HAND; });
+	
+	if (it != equippedItems.end())
+	{
+		// Check if it's being used two-handed
+		return it->twoHandedGrip;
+	}
+	
+	return false;
+}
+
+std::string Player::getEquippedWeaponDamageRoll() const
+{
+	auto mainHandWeapon = getEquippedItem(EquipmentSlot::MAIN_HAND);
+	if (!mainHandWeapon)
+	{
+		return "D2"; // Unarmed damage
+	}
+	
+	// Find if weapon is being used two-handed
+	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
+		[](const EquippedItem& equipped) { return equipped.slot == EquipmentSlot::MAIN_HAND; });
+	
+	bool twoHanded = (it != equippedItems.end()) ? it->twoHandedGrip : false;
+	
+	// Get damage roll based on weapon type
+	if (auto* dagger = dynamic_cast<Dagger*>(mainHandWeapon->pickable.get()))
+	{
+		return dagger->roll;
+	}
+	else if (auto* shortSword = dynamic_cast<ShortSword*>(mainHandWeapon->pickable.get()))
+	{
+		return shortSword->roll;
+	}
+	else if (auto* longSword = dynamic_cast<LongSword*>(mainHandWeapon->pickable.get()))
+	{
+		// For versatile weapons, check if using two-handed
+		return twoHanded ? "D10" : longSword->roll;
+	}
+	else if (auto* longbow = dynamic_cast<Longbow*>(mainHandWeapon->pickable.get()))
+	{
+		return longbow->roll;
+	}
+	else if (auto* staff = dynamic_cast<Staff*>(mainHandWeapon->pickable.get()))
+	{
+		// Staff is versatile: D6 one-handed, D8 two-handed
+		return twoHanded ? "D8" : staff->roll;
+	}
+	else if (auto* greatsword = dynamic_cast<Greatsword*>(mainHandWeapon->pickable.get()))
+	{
+		return greatsword->roll; // D12
+	}
+	else if (auto* battleAxe = dynamic_cast<BattleAxe*>(mainHandWeapon->pickable.get()))
+	{
+		// Battle axe is versatile: D8 one-handed, D10 two-handed
+		return twoHanded ? "D10" : battleAxe->roll;
+	}
+	else if (auto* greatAxe = dynamic_cast<GreatAxe*>(mainHandWeapon->pickable.get()))
+	{
+		return greatAxe->roll; // D12
+	}
+	else if (auto* warHammer = dynamic_cast<WarHammer*>(mainHandWeapon->pickable.get()))
+	{
+		// War hammer is versatile: D8 one-handed, D10 two-handed
+		return twoHanded ? "D10" : warHammer->roll;
+	}
+	
+	return "D2"; // Fallback for unknown weapons
 }
 
 // end of file: Player.cpp

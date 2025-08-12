@@ -1,42 +1,96 @@
 [
 	{
-		"name": "Long Sword",
-		"type": "Melee",
-		"damageRoll": "1d8",
-		"hitBonusRange": [ 0, 2 ],
-		"damageBonusRange": [ 1, 4 ],
-		"specialProperties": [ "None", "Flaming", "Frost" ]
-	},
-	{
-		"name": "Short Sword",
-		"type": "Melee",
-		"damageRoll": "1d6",
-		"hitBonusRange": [ 0, 2 ],
-		"damageBonusRange": [ 0, 3 ],
-		"specialProperties": [ "None", "Piercing" ]
-	},
-	{
 		"name": "Dagger",
 		"type": "Melee",
 		"damageRoll": "1d4",
+		"handRequirement": "ONE_HANDED",
 		"hitBonusRange": [ 0, 3 ],
 		"damageBonusRange": [ 0, 2 ],
 		"specialProperties": [ "None", "Poisoned" ]
 	},
 	{
+		"name": "Short Sword",
+		"type": "Melee",
+		"damageRoll": "1d6",
+		"handRequirement": "ONE_HANDED",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 0, 3 ],
+		"specialProperties": [ "None", "Piercing" ]
+	},
+	{
+		"name": "Long Sword",
+		"type": "Melee",
+		"damageRoll": "1d8",
+		"damageRollTwoHanded": "1d10",
+		"handRequirement": "VERSATILE",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 1, 4 ],
+		"specialProperties": [ "None", "Flaming", "Frost" ]
+	},
+	{
+		"name": "Greatsword",
+		"type": "Melee",
+		"damageRoll": "2d6",
+		"handRequirement": "TWO_HANDED",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 2, 6 ],
+		"specialProperties": [ "None", "Keen", "Flame Tongue" ]
+	},
+	{
+		"name": "Battle Axe",
+		"type": "Melee",
+		"damageRoll": "1d8",
+		"damageRollTwoHanded": "1d10",
+		"handRequirement": "VERSATILE",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 1, 4 ],
+		"specialProperties": [ "None", "Cleaving" ]
+	},
+	{
+		"name": "Great Axe",
+		"type": "Melee",
+		"damageRoll": "1d12",
+		"handRequirement": "TWO_HANDED",
+		"hitBonusRange": [ -1, 1 ],
+		"damageBonusRange": [ 2, 8 ],
+		"specialProperties": [ "None", "Brutal", "Berserker" ]
+	},
+	{
+		"name": "War Hammer",
+		"type": "Melee",
+		"damageRoll": "1d8",
+		"damageRollTwoHanded": "1d10",
+		"handRequirement": "VERSATILE",
+		"hitBonusRange": [ 0, 2 ],
+		"damageBonusRange": [ 1, 4 ],
+		"specialProperties": [ "None", "Armor Piercing" ]
+	},
+	{
 		"name": "Longbow",
 		"type": "Ranged",
 		"damageRoll": "1d8",
+		"handRequirement": "TWO_HANDED",
 		"hitBonusRange": [ 1, 3 ],
 		"damageBonusRange": [ 0, 3 ],
-		"specialProperties": [ "None", "Piercing" ]
+		"specialProperties": [ "None", "Piercing", "Long Range" ]
 	},
 	{
 		"name": "Staff",
 		"type": "Magic",
 		"damageRoll": "1d6",
+		"damageRollTwoHanded": "1d8",
+		"handRequirement": "VERSATILE",
 		"hitBonusRange": [ 0, 1 ],
 		"damageBonusRange": [ 0, 2 ],
 		"specialProperties": [ "None", "Arcane Boost", "Healing Touch" ]
+	},
+	{
+		"name": "Shield",
+		"type": "Defense",
+		"damageRoll": "1d3",
+		"handRequirement": "OFF_HAND_ONLY",
+		"hitBonusRange": [ -1, 0 ],
+		"damageBonusRange": [ -1, 0 ],
+		"specialProperties": [ "AC Bonus +2", "Magic Resistance" ]
 	}
 ]

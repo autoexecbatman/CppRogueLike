@@ -81,6 +81,47 @@ std::unique_ptr<Item> ItemCreator::create_longbow(Vector2D pos)
     return item;
 }
 
+// Two-handed weapon creation functions
+std::unique_ptr<Item> ItemCreator::create_greatsword(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "greatsword", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<Greatsword>();
+    item->value = 50; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_battle_axe(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "battle axe", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<BattleAxe>();
+    item->value = 25; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_great_axe(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "great axe", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<GreatAxe>();
+    item->value = 40; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_war_hammer(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'/', "war hammer", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<WarHammer>();
+    item->value = 20; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_shield(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "shield", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<Shield>();
+    item->value = 10; // AD&D 2e price
+    return item;
+}
+
 // Enhanced weapon creation functions
 std::unique_ptr<Item> ItemCreator::create_enhanced_dagger(Vector2D pos, int enhancementLevel)
 {

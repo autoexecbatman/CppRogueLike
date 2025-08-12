@@ -1,53 +1,76 @@
 #include "Armor.h"
 #include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../ActorTypes/Player.h"
 
 // Common armor equip/unequip logic
 bool Armor::use(Item& owner, Creature& wearer)
 {
-    // Check if this armor is being directly unequipped
-    if (owner.has_state(ActorState::IS_EQUIPPED))
-    {
-        // Unequip the armor
-        owner.remove_state(ActorState::IS_EQUIPPED);
-        game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
-
-        // Recalculate AC
-        wearer.destructible->update_armor_class(wearer);
-        game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
-
-        return true; // FIXED: Removing armor should consume a turn
-    }
-
-    // Check if any armor is already equipped
-    Item* currentArmor = nullptr;
-    for (const auto& item : wearer.container->inv)
-    {
-        if (item && item->has_state(ActorState::IS_EQUIPPED) &&
-            item.get() != &owner &&
-            dynamic_cast<Armor*>(item->pickable.get()))
-        {
-            currentArmor = item.get();
-            break;
-        }
-    }
-
-    // If we're trying to equip and another armor is already equipped, unequip it first
-    if (currentArmor)
-    {
-        game.message(WHITE_BLACK_PAIR, "You remove your " + currentArmor->actorData.name + ".", true);
-        currentArmor->remove_state(ActorState::IS_EQUIPPED);
-    }
-
-    // Equip the armor
-    owner.add_state(ActorState::IS_EQUIPPED);
-    game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
-
-    // Recalculate AC
-    wearer.destructible->update_armor_class(wearer);
-    game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
-
-    return true; // FIXED: Putting on armor should consume a turn
+	// Cast to Player to use the equipment system
+	auto* player = dynamic_cast<Player*>(&wearer);
+	if (!player)
+	{
+		// Fallback for non-player creatures (use old system)
+		if (owner.has_state(ActorState::IS_EQUIPPED))
+		{
+			owner.remove_state(ActorState::IS_EQUIPPED);
+			game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
+			wearer.destructible->update_armor_class(wearer);
+			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
+			return true;
+		}
+		
+		// Old equip logic for non-players
+		owner.add_state(ActorState::IS_EQUIPPED);
+		game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
+		wearer.destructible->update_armor_class(wearer);
+		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
+		return true;
+	}
+	
+	// For players, use the new equipment system
+	// Check if this armor is already equipped
+	Item* currentArmor = player->getEquippedItem(EquipmentSlot::ARMOR);
+	if (currentArmor == &owner)
+	{
+		// Unequip this armor
+		player->unequipItem(EquipmentSlot::ARMOR);
+		game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
+		return true;
+	}
+	
+	// Try to equip the armor
+	// First, find this item in the inventory
+	std::unique_ptr<Item> itemToEquip = nullptr;
+	for (auto it = wearer.container->inv.begin(); it != wearer.container->inv.end(); ++it)
+	{
+		if (it->get() == &owner)
+		{
+			itemToEquip = std::move(*it);
+			wearer.container->inv.erase(it);
+			break;
+		}
+	}
+	
+	if (itemToEquip)
+	{
+		// Equip the armor using the equipment system
+		if (player->equipItem(std::move(itemToEquip), EquipmentSlot::ARMOR))
+		{
+			game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
+			return true;
+		}
+		else
+		{
+			// Failed to equip, return item to inventory
+			wearer.container->inv.push_back(std::move(itemToEquip));
+			game.message(WHITE_BLACK_PAIR, "You can't equip the " + owner.actorData.name + ".", true);
+			return false;
+		}
+	}
+	
+	game.message(WHITE_BLACK_PAIR, "Failed to equip armor.", true);
+	return false;
 }
 
 // LeatherArmor implementation

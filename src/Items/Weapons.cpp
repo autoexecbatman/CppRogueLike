@@ -15,9 +15,45 @@ void from_json(const json& j, Weapons& w)
 	j.at("name").get_to(w.name);
 	j.at("type").get_to(w.type);
 	j.at("damageRoll").get_to(w.damageRoll);
+	
+	// Load optional damageRollTwoHanded for versatile weapons
+	if (j.contains("damageRollTwoHanded"))
+	{
+		j.at("damageRollTwoHanded").get_to(w.damageRollTwoHanded);
+	}
+	
+	// Load hand requirement with default to ONE_HANDED
+	if (j.contains("handRequirement"))
+	{
+		std::string handReqStr;
+		j.at("handRequirement").get_to(handReqStr);
+		
+		if (handReqStr == "TWO_HANDED")
+		{
+			w.handRequirement = HandRequirement::TWO_HANDED;
+		}
+		else if (handReqStr == "VERSATILE")
+		{
+			w.handRequirement = HandRequirement::VERSATILE;
+		}
+		else if (handReqStr == "OFF_HAND_ONLY")
+		{
+			w.handRequirement = HandRequirement::OFF_HAND_ONLY;
+		}
+		else
+		{
+			w.handRequirement = HandRequirement::ONE_HANDED;
+		}
+	}
+	else
+	{
+		w.handRequirement = HandRequirement::ONE_HANDED;
+	}
+	
 	j.at("hitBonusRange").get_to(w.hitBonusRange);
 	j.at("damageBonusRange").get_to(w.damageBonusRange);
 	j.at("specialProperties").get_to(w.specialProperties);
+	
 	// enhancementLevel defaults to 0 if not specified in JSON
 	if (j.contains("enhancementLevel"))
 	{
@@ -27,6 +63,20 @@ void from_json(const json& j, Weapons& w)
 	{
 		w.enhancementLevel = 0;
 	}
+}
+
+// Two-handed weapon methods implementation
+std::string Weapons::getDamageRoll(bool twoHanded) const noexcept
+{
+	// For versatile weapons, use two-handed damage if available and requested
+	if (twoHanded && isVersatile() && !damageRollTwoHanded.empty())
+	{
+		return damageRollTwoHanded;
+	}
+	
+	// For two-handed weapons, always use regular damage roll
+	// For one-handed weapons, always use regular damage roll
+	return damageRoll;
 }
 
 std::vector<Weapons> loadWeapons()

@@ -17,6 +17,11 @@ public:
     static std::unique_ptr<Item> create_long_sword(Vector2D pos);
     static std::unique_ptr<Item> create_staff(Vector2D pos);
     static std::unique_ptr<Item> create_longbow(Vector2D pos);
+    static std::unique_ptr<Item> create_greatsword(Vector2D pos);
+    static std::unique_ptr<Item> create_battle_axe(Vector2D pos);
+    static std::unique_ptr<Item> create_great_axe(Vector2D pos);
+    static std::unique_ptr<Item> create_war_hammer(Vector2D pos);
+    static std::unique_ptr<Item> create_shield(Vector2D pos);
     static std::unique_ptr<Item> create_leather_armor(Vector2D pos);
     static std::unique_ptr<Item> create_chain_mail(Vector2D pos);
     static std::unique_ptr<Item> create_plate_mail(Vector2D pos);

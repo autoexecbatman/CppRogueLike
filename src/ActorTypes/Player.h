@@ -7,6 +7,26 @@
 #include "../Actor/Actor.h"
 #include "../Objects/Web.h"
 
+class Item;
+
+enum class EquipmentSlot
+{
+	MAIN_HAND,
+	OFF_HAND,
+	ARMOR,
+	NONE
+};
+
+struct EquippedItem
+{
+	std::unique_ptr<Item> item;
+	EquipmentSlot slot;
+	bool twoHandedGrip{false}; // For versatile weapons used two-handed
+	
+	EquippedItem(std::unique_ptr<Item> i, EquipmentSlot s, bool twoHanded = false)
+		: item(std::move(i)), slot(s), twoHandedGrip(twoHanded) {}
+};
+
 class Player : public Creature
 {
 public:
@@ -36,6 +56,9 @@ public:
 	int playerLevel{ 1 };
 	float attacksPerRound{ 1.0f }; // Tracks extra attacks (1.0 = 1 attack, 1.5 = 3/2 attacks, 2.0 = 2 attacks)
 	int roundCounter{ 0 }; // Tracks rounds for alternating attack patterns
+
+	// Equipment system
+	std::vector<EquippedItem> equippedItems;
 
 	Player(Vector2D position);
 
@@ -72,6 +95,15 @@ public:
 
 	// Get stuck in a web
 	void getStuckInWeb(int duration, int strength, Web* web);
+
+	// Equipment system methods
+	bool canEquip(const Item& item, EquipmentSlot slot, bool twoHanded = false) const;
+	bool equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoHanded = false);
+	bool unequipItem(EquipmentSlot slot);
+	Item* getEquippedItem(EquipmentSlot slot) const;
+	bool isSlotOccupied(EquipmentSlot slot) const;
+	bool hasEquippedTwoHandedWeapon() const;
+	std::string getEquippedWeaponDamageRoll() const;
 };
 
 #endif // !PLAYER_H

@@ -15,7 +15,9 @@
 #include "../Objects/Web.h"
 #include "../Factories/ItemCreator.h"
 #include "../ActorTypes/Monsters.h"
+#include "../ActorTypes/Player.h"
 #include "../Systems/LevelUpSystem.h"
+#include "../UI/InventoryUI.h"
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -168,8 +170,14 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 
 void AiPlayer::pick_item(Creature& owner)
 {
-	// Check if the inventory is already full
-	if (owner.container && owner.container->invSize > 0 && owner.container->inv.size() >= owner.container->invSize) {
+	// Check if the inventory is already full (including equipped items)
+	auto* player = dynamic_cast<Player*>(&owner);
+	size_t totalItems = owner.container->inv.size();
+	if (player) {
+		totalItems += player->equippedItems.size(); // Count equipped items too
+	}
+	
+	if (owner.container && owner.container->invSize > 0 && totalItems >= owner.container->invSize) {
 		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
@@ -239,17 +247,56 @@ void AiPlayer::drop_item(Creature& owner)
 	int shortcut = 'a';
 	int y = 1;
 
-	for (const auto& item : owner.container->inv) {
-		if (item) {
-			// Display item with shortcut
-			mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
-
-			// Add equipment marker if equipped
-			if (item->has_state(ActorState::IS_EQUIPPED)) {
+	// First, show equipped items
+	auto* player = dynamic_cast<Player*>(&owner);
+	if (player && !player->equippedItems.empty())
+	{
+		mvwprintw(dropWin, y++, 1, "=== EQUIPPED ===");
+		
+		for (const auto& equipped : player->equippedItems)
+		{
+			if (equipped.item)
+			{
+				mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
+				
+				// Show equipped marker
 				wattron(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 				wprintw(dropWin, "[E] ");
 				wattroff(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
+				
+				// Show slot type
+				std::string slotName = (equipped.slot == EquipmentSlot::MAIN_HAND) ? "Main: " : 
+									   (equipped.slot == EquipmentSlot::OFF_HAND) ? "Off: " : "Armor: ";
+				wprintw(dropWin, "%s", slotName.c_str());
+				
+				// Display item name with color
+				wattron(dropWin, COLOR_PAIR(equipped.item->actorData.color));
+				wprintw(dropWin, "%s", equipped.item->actorData.name.c_str());
+				wattroff(dropWin, COLOR_PAIR(equipped.item->actorData.color));
+				
+				if (equipped.twoHandedGrip)
+				{
+					wprintw(dropWin, " (2H)");
+				}
+				
+				y++;
+				shortcut++;
 			}
+		}
+		
+		if (!owner.container->inv.empty())
+		{
+			mvwprintw(dropWin, y++, 1, "=== INVENTORY ===");
+		}
+	}
+
+	// Then show regular inventory items
+	for (const auto& item : owner.container->inv)
+	{
+		if (item)
+		{
+			// Display item with shortcut
+			mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
 
 			// Display item name with color
 			wattron(dropWin, COLOR_PAIR(item->actorData.color));
@@ -272,27 +319,56 @@ void AiPlayer::drop_item(Creature& owner)
 		// Cancel dropping
 		game.message(WHITE_BLACK_PAIR, "Drop canceled.", true);
 	}
-	else if (input >= 'a' && input < 'a' + static_cast<int>(owner.container->inv.size())) {
+	else if (input >= 'a' && input < 'a' + static_cast<int>((player ? player->equippedItems.size() : 0) + owner.container->inv.size())) {
 		// Valid item selection
 		int index = input - 'a';
+		
+		// Check if selecting equipped item
+		if (player && index < static_cast<int>(player->equippedItems.size()))
+		{
+			// Dropping equipped item - unequip it first
+			const auto& equipped = player->equippedItems[index];
+			std::string itemName = equipped.item->actorData.name;
+			
+			// Unequip the item (this returns it to inventory)
+			EquipmentSlot slot = equipped.slot;
+			player->unequipItem(slot);
+			
+			// Find the item in inventory and drop it
+			for (auto& item : owner.container->inv)
+			{
+				if (item && item->actorData.name == itemName)
+				{
+					owner.drop(*item);
+					break;
+				}
+			}
+			
+			game.message(WHITE_BLACK_PAIR, "You unequipped and dropped the " + itemName + ".", true);
+		}
+		else
+		{
+			// Dropping regular inventory item
+			int inventoryIndex = index - (player ? static_cast<int>(player->equippedItems.size()) : 0);
+			
+			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(owner.container->inv.size())) {
+				// Get the selected item
+				Item* itemToDrop = owner.container->inv[inventoryIndex].get();
+				if (itemToDrop) {
+					// Display the item name before dropping
+					std::string itemName = itemToDrop->actorData.name;
 
-		if (index >= 0 && index < static_cast<int>(owner.container->inv.size())) {
-			// Get the selected item
-			Item* itemToDrop = owner.container->inv[index].get();
-			if (itemToDrop) {
-				// Display the item name before dropping
-				std::string itemName = itemToDrop->actorData.name;
+					// Drop the selected item
+					owner.drop(*itemToDrop);
 
-				// Drop the selected item
-				owner.drop(*itemToDrop);
-
-				// Show dropped message with the item name
-				game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
-
-				// Set game status to register the turn
-				game.gameStatus = Game::GameStatus::NEW_TURN;
+					// Show dropped message with the item name
+					game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
+				}
 			}
 		}
+		
+		// Set game status to register the turn
+		game.gameStatus = Game::GameStatus::NEW_TURN;
 	}
 
 	// Clean up
@@ -344,43 +420,12 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 				}
 
 				// For weapons, show damage dice
-				if (auto weapon = item->pickable.get(); weapon &&
-					(dynamic_cast<Dagger*>(weapon) ||
-						dynamic_cast<LongSword*>(weapon) ||
-						dynamic_cast<ShortSword*>(weapon) ||
-						dynamic_cast<Longbow*>(weapon) ||
-						dynamic_cast<Staff*>(weapon)))
+				if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
 				{
-					// Get the roll string - this requires some casting
-					std::string roll;
-					if (auto* dagger = dynamic_cast<Dagger*>(weapon))
-						roll = dagger->roll;
-					else if (auto* sword = dynamic_cast<LongSword*>(weapon))
-						roll = sword->roll;
-					else if (auto* ssword = dynamic_cast<ShortSword*>(weapon))
-						roll = ssword->roll;
-					else if (auto* bow = dynamic_cast<Longbow*>(weapon))
-						roll = bow->roll;
-					else if (auto* staff = dynamic_cast<Staff*>(weapon))
-						roll = staff->roll;
-
-					if (!roll.empty())
-					{
-						wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
-						wprintw(inv, " [%s dmg]", roll.c_str());
-						wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
-					}
-				}
-
-				// Check if it's a ranged weapon
-				if (auto weapon = item->pickable.get(); weapon)
-				{
-					if (auto* bow = dynamic_cast<Longbow*>(weapon))
-					{
-						wattron(inv, COLOR_PAIR(WHITE_BLUE_PAIR));
-						wprintw(inv, " [Rng]");
-						wattroff(inv, COLOR_PAIR(WHITE_BLUE_PAIR));
-					}
+					std::string damageInfo = " [" + weapon->roll + (weapon->isRanged() ? " rng dmg]" : " dmg]");
+					wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
+					wprintw(inv, "%s", damageInfo.c_str());
+					wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
 				}
 			}
 			y++;
@@ -396,76 +441,8 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 
 void AiPlayer::display_inventory(Creature& owner)
 {
-	refresh();
-
-	WINDOW* inv = newwin(INVENTORY_HEIGHT, INVENTORY_WIDTH, 0, 0);
-
-	box(inv, 0, 0);
-	wattron(inv, A_BOLD);
-	if (owner.container->invSize > 0) {
-		mvwprintw(inv, 0, 1, "Inventory (%zu/%zu)", owner.container->inv.size(), owner.container->invSize);
-	}
-	else {
-		mvwprintw(inv, 0, 1, "Inventory");
-	}
-	wattroff(inv, A_BOLD);
-
-	try
-	{
-		if (owner.container->inv.size() > 0)
-		{
-			display_inventory_items(inv, owner);
-
-			// Display controls at the bottom
-			int y = INVENTORY_HEIGHT - 2;
-			mvwprintw(inv, y, 1, "Press a-z to use an item");
-			mvwprintw(inv, y + 1, 1, "ESC to cancel");
-		}
-		else
-		{
-			const int y = 1;
-			mvwprintw(inv, y, 1, "Your inventory is empty.");
-		}
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Error: PlayerAi::display_inventory(Actor& owner). " << e.what() << std::endl;
-		exit(-1);
-	}
-
-	wrefresh(inv);
-
-	const int inventoryInput = getch();
-	if (inventoryInput == static_cast<int>(Controls::ESCAPE))
-	{
-		delwin(inv);
-		// CRITICAL FIX: Clear screen completely before restore
-		clear();
-		refresh();
-		game.restore_game_display();
-	}
-	else if (inventoryInput >= 'a' && inventoryInput <= 'z')
-	{
-		const auto& actor = chose_from_inventory(owner, inventoryInput);
-		if (actor)
-		{
-			actor->pickable->use(*actor, owner);
-			game.gameStatus = Game::GameStatus::NEW_TURN; // All item usage now consumes a turn
-		}
-		delwin(inv);
-		// CRITICAL FIX: Clear screen completely before restore
-		clear();
-		refresh();
-		game.restore_game_display();
-	}
-	else
-	{
-		delwin(inv);
-		// CRITICAL FIX: Clear screen completely before restore
-		clear();
-		refresh();
-		game.restore_game_display();
-	}
+	InventoryUI inventoryUI;
+	inventoryUI.display(owner);
 }
 
 Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)

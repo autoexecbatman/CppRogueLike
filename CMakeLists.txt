@@ -216,6 +216,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.h
     ${PROJECT_SOURCE_DIR}/Utils/Vector2D.h
 
+    # UI - New UI classes
+    ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp
+    ${PROJECT_SOURCE_DIR}/UI/InventoryUI.h
+
     # Main
     ${PROJECT_SOURCE_DIR}/Game.cpp
     ${PROJECT_SOURCE_DIR}/Game.h

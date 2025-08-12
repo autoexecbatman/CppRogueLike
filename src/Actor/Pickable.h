@@ -22,25 +22,30 @@ public:
 	virtual void load(const json& j) = 0;
 
 protected:
-	enum class PickableType : int
-	{
-		HEALER,
-		LIGHTNING_BOLT,
-		CONFUSER,
-		FIREBALL,
-		LONGSWORD,
-		DAGGER,
-		SHORTSWORD,
-		LONGBOW,
-		STAFF,
-		GOLD,
-		FOOD,
-		CORPSE_FOOD,
-		AMULET,
-		LEATHER_ARMOR,
-		CHAIN_MAIL,
-		PLATE_MAIL
-	};
+ enum class PickableType : int
+ {
+  HEALER,
+  LIGHTNING_BOLT,
+  CONFUSER,
+  FIREBALL,
+  LONGSWORD,
+  DAGGER,
+  SHORTSWORD,
+  LONGBOW,
+  STAFF,
+  GREATSWORD,
+  BATTLE_AXE,
+  GREAT_AXE,
+  WAR_HAMMER,
+  SHIELD,
+  GOLD,
+  FOOD,
+ CORPSE_FOOD,
+AMULET,
+LEATHER_ARMOR,
+CHAIN_MAIL,
+PLATE_MAIL
+};
 
 	virtual PickableType get_type() const = 0;
 };
@@ -57,6 +62,9 @@ public:
 
 	// Determines if this weapon is a ranged weapon
 	virtual bool isRanged() const = 0;
+	
+	// Determines if this weapon can be used both one-handed and two-handed
+	virtual bool isVersatile() const { return false; }
 };
 
 class Dagger : public Weapon
@@ -79,6 +87,7 @@ public:
 	LongSword() { roll = "D8"; }
 
 	bool isRanged() const override;
+	bool isVersatile() const override { return true; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::LONGSWORD; }
@@ -115,9 +124,74 @@ public:
 	Staff() { roll = "D6"; }
 
 	bool isRanged() const override;
+	bool isVersatile() const override { return true; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::STAFF; }
+};
+
+// Two-handed weapons
+class Greatsword : public Weapon
+{
+public:
+	// greatsword roll is 1d12 (equivalent to 2d6 average)
+	Greatsword() { roll = "D12"; }
+
+	bool isRanged() const override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::GREATSWORD; }
+};
+
+class BattleAxe : public Weapon
+{
+public:
+	// battle axe roll is 1d8 (1d10 when two-handed)
+	BattleAxe() { roll = "D8"; }
+
+	bool isRanged() const override;
+	bool isVersatile() const override { return true; }
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::BATTLE_AXE; }
+};
+
+class GreatAxe : public Weapon
+{
+public:
+	// great axe roll is 1d12
+	GreatAxe() { roll = "D12"; }
+
+	bool isRanged() const override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::GREAT_AXE; }
+};
+
+class WarHammer : public Weapon
+{
+public:
+	// war hammer roll is 1d8 (1d10 when two-handed)
+	WarHammer() { roll = "D8"; }
+
+	bool isRanged() const override;
+	bool isVersatile() const override { return true; }
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::WAR_HAMMER; }
+};
+
+// Shield (off-hand defensive item)
+class Shield : public Weapon
+{
+public:
+	// shield roll is 1d4 (for shield bash)
+	Shield() { roll = "D4"; }
+
+	bool isRanged() const override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::SHIELD; }
 };
 
 #endif // !PICKABLE_H
