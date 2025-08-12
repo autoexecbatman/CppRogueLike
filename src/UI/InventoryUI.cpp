@@ -298,7 +298,7 @@ bool InventoryUI::handleItemSelection(Creature& owner, Player* player, const std
         {
             if (isEquipped)
             {
-                // Unequip item
+                // Unequip item - stay in inventory to see the change
                 if (player)
                 {
                     for (const auto& equipped : player->equippedItems)
@@ -312,18 +312,45 @@ bool InventoryUI::handleItemSelection(Creature& owner, Player* player, const std
                         }
                     }
                 }
+                return true; // Stay in inventory
             }
             else
             {
-                // Equip/use item
-                selectedItem->pickable->use(*selectedItem, owner);
+                // Store item pointer to detect if it was consumed
+                Item* itemPtr = selectedItem;
+                
+                // Try to equip/use item
+                bool itemUsed = selectedItem->pickable->use(*selectedItem, owner);
+                
+                if (itemUsed)
+                {
+                    game.gameStatus = Game::GameStatus::NEW_TURN;
+                    
+                    // Check if the item still exists in inventory (not consumed)
+                    bool itemStillExists = false;
+                    for (const auto& item : owner.container->inv)
+                    {
+                        if (item.get() == itemPtr)
+                        {
+                            itemStillExists = true;
+                            break;
+                        }
+                    }
+                    
+                    // If item was consumed (no longer exists in inventory), exit inventory
+                    if (!itemStillExists)
+                    {
+                        return false; // Exit inventory
+                    }
+                }
+                
+                // Item was equipped or use failed - stay in inventory to see changes
+                return true;
             }
-            
-            game.gameStatus = Game::GameStatus::NEW_TURN;
         }
     }
     
-    return true; // Stay in inventory to see changes
+    return true; // Stay in inventory by default
 }
 
 bool InventoryUI::handleToggleGrip(Player* player)
