@@ -192,6 +192,9 @@ public:
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SHIELD; }
+	
+	// Shield provides AC bonus
+	virtual int getArmorClassBonus() const { return -1; } // +1 AC bonus in AD&D terms
 };
 
 #endif // !PICKABLE_H

@@ -368,6 +368,13 @@ bool Player::equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoH
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
 	
+	// Update armor class if armor or shield was equipped
+	if (slot == EquipmentSlot::ARMOR || slot == EquipmentSlot::OFF_HAND)
+	{
+		destructible->update_armor_class(*this);
+		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
+	}
+	
 	return true;
 }
 
@@ -431,6 +438,14 @@ bool Player::unequipItem(EquipmentSlot slot)
 		
 		// Remove from equipped items
 		equippedItems.erase(it);
+		
+		// Update armor class if armor or shield was unequipped
+		if (slot == EquipmentSlot::ARMOR || slot == EquipmentSlot::OFF_HAND)
+		{
+			destructible->update_armor_class(*this);
+			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
+		}
+		
 		return true;
 	}
 	

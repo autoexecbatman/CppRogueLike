@@ -11,6 +11,8 @@
 #include "../ActorTypes/Healer.h"
 #include "../Items/CorpseFood.h"
 #include "../Items/Armor.h"
+#include "../ActorTypes/Player.h"
+#include "Pickable.h"
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -143,48 +145,95 @@ void Destructible::update_armor_class(Creature& owner)
 	int calculatedAC = baseArmorClass;
 
 	// Apply Dexterity's Defensive Adjustment
-	if (owner.dexterity > 0 && owner.dexterity <= game.dexterityAttributes.size()) {
+	if (owner.dexterity > 0 && owner.dexterity <= game.dexterityAttributes.size())
+	{
 		int defensiveAdj = game.dexterityAttributes[owner.dexterity - 1].DefensiveAdj;
 		// DefensiveAdj is applied directly to AC
 		// Note: In AD&D, a negative DefensiveAdj value actually improves AC
 		calculatedAC += defensiveAdj;
 
 		// Log the Defensive Adjustment if it's the player
-		if (&owner == game.player.get() && defensiveAdj != 0) {
+		if (&owner == game.player.get() && defensiveAdj != 0)
+		{
 			game.log("Applied Dexterity Defensive Adjustment: " + std::to_string(defensiveAdj) +
 				" to AC. Base AC: " + std::to_string(baseArmorClass) +
 				", New AC: " + std::to_string(calculatedAC));
 		}
 	}
 
-	// If the owner has a container (inventory)
-	if (owner.container) {
+	// Check for Player's new equipment system first
+	if (auto* player = dynamic_cast<Player*>(&owner))
+	{
+		// Use new equipment system for players
+		Item* equippedArmor = player->getEquippedItem(EquipmentSlot::ARMOR);
+		if (equippedArmor)
+		{
+			if (auto armor = dynamic_cast<Armor*>(equippedArmor->pickable.get()))
+			{
+				// Add the armor's AC bonus
+				int armorBonus = armor->getArmorClass();
+				calculatedAC += armorBonus;
+
+				// Log the armor bonus if it's the player
+				if (&owner == game.player.get())
+				{
+					game.log("Applied armor bonus: " + std::to_string(armorBonus) +
+						" from " + equippedArmor->actorData.name);
+				}
+			}
+		}
+		
+		// Check for shield in off-hand
+		Item* equippedShield = player->getEquippedItem(EquipmentSlot::OFF_HAND);
+		if (equippedShield)
+		{
+			if (auto shield = dynamic_cast<Shield*>(equippedShield->pickable.get()))
+			{
+				// Add the shield's AC bonus
+				int shieldBonus = shield->getArmorClassBonus();
+				calculatedAC += shieldBonus;
+
+				// Log the shield bonus if it's the player
+				if (&owner == game.player.get())
+				{
+					game.log("Applied shield bonus: " + std::to_string(shieldBonus) +
+						" from " + equippedShield->actorData.name);
+				}
+			}
+		}
+	}
+	else if (owner.container)
+	{
+		// Use old system for non-player creatures
 		// Check all items for equipped armor
-		for (const auto& item : owner.container->inv) {
-			if (item && item->has_state(ActorState::IS_EQUIPPED)) {
+		for (const auto& item : owner.container->inv)
+		{
+			if (item && item->has_state(ActorState::IS_EQUIPPED))
+			{
 				// Check if it's armor
-				if (auto armor = dynamic_cast<Armor*>(item->pickable.get())) {
+				if (auto armor = dynamic_cast<Armor*>(item->pickable.get()))
+				{
 					// Add the armor's AC bonus
 					int armorBonus = armor->getArmorClass();
 					calculatedAC += armorBonus;
 
-					// Log the armor bonus if it's the player
-					if (&owner == game.player.get()) {
-						game.log("Applied armor bonus: " + std::to_string(armorBonus) +
-							" from " + item->actorData.name);
-					}
+					// Log the armor bonus
+					game.log("Applied armor bonus: " + std::to_string(armorBonus) +
+						" from " + item->actorData.name);
 				}
 			}
 		}
 	}
 
 	// Update the armor class only if it has changed
-	if (armorClass != calculatedAC) {
+	if (armorClass != calculatedAC)
+	{
 		int oldAC = armorClass;
 		armorClass = calculatedAC;
 
 		// Log the AC change if it's the player
-		if (&owner == game.player.get()) {
+		if (&owner == game.player.get())
+		{
 			game.log("Updated Armor Class from " + std::to_string(oldAC) +
 				" to " + std::to_string(armorClass));
 		}
