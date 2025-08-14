@@ -97,10 +97,10 @@ public:
 	void get_stuck_in_web(int duration, int strength, Web* web); // Get stuck in a web
 
 	// Equipment system methods
-	bool can_equip_item(const Item& item, EquipmentSlot slot) const;
+	bool can_equip(const Item& item, EquipmentSlot slot) const;
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot);
 	bool unequip_item(EquipmentSlot slot);
-	Item* get_equipped_item_in_slot(EquipmentSlot slot) const;
+	Item* get_equipped_item(EquipmentSlot slot) const;
 	bool is_slot_occupied(EquipmentSlot slot) const;
 	bool is_dual_wielding() const;
 	std::string get_equipped_weapon_damage_roll() const;

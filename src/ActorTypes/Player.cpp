@@ -348,13 +348,33 @@ bool Player::try_break_web()
 
 bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
-	if (!item || !can_equip_item(*item, slot))
+	if (!item || !can_equip(*item, slot))
 	{
 		return false;
 	}
 
 	// Unequip existing item in the slot first
 	unequip_item(slot);
+	
+	// Special handling for two-handed weapons
+	if (slot == EquipmentSlot::RIGHT_HAND)
+	{
+		auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
+		if (weapon)
+		{
+			// Check if it's a two-handed weapon by class type
+			bool isTwoHanded = (dynamic_cast<Greatsword*>(weapon) || 
+			                   dynamic_cast<GreatAxe*>(weapon) ||
+			                   dynamic_cast<Longbow*>(weapon));
+			
+			if (isTwoHanded)
+			{
+				// Two-handed weapon - also unequip left hand
+				unequip_item(EquipmentSlot::LEFT_HAND);
+				game.message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
+			}
+		}
+	}
 
 	// Add equipped item
 	equippedItems.emplace_back(std::move(item), slot);
@@ -373,7 +393,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 }
 
 // Equipment system implementation
-bool Player::can_equip_item(const Item& item, EquipmentSlot slot) const
+bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 {
 	// Basic slot validation
 	if (slot == EquipmentSlot::NONE)
@@ -387,8 +407,93 @@ bool Player::can_equip_item(const Item& item, EquipmentSlot slot) const
 		return false;
 	}
 
-	// TODO: Add specific item type validation for each slot
-	// For now, allow any item in any slot
+	// Slot-specific validation
+	switch (slot)
+	{
+	case EquipmentSlot::RIGHT_HAND:
+	case EquipmentSlot::LEFT_HAND:
+	{
+		// Hand slots can hold weapons or shields
+		auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
+		auto* shield = dynamic_cast<Shield*>(item.pickable.get());
+		
+		if (!weapon && !shield)
+		{
+			return false; // Not a weapon or shield
+		}
+		
+		// Check for two-handed weapon restrictions
+		if (weapon)
+		{
+			// Check if it's a two-handed weapon by class type
+			bool isTwoHanded = (dynamic_cast<Greatsword*>(weapon) || 
+			                   dynamic_cast<GreatAxe*>(weapon) ||
+			                   dynamic_cast<Longbow*>(weapon));
+			
+			// Two-handed weapons can only go in RIGHT_HAND and require both hands free
+			if (isTwoHanded)
+			{
+				if (slot != EquipmentSlot::RIGHT_HAND)
+				{
+					return false; // Two-handed weapons must go in right hand
+				}
+			}
+			
+			// Check if trying to equip one-handed weapon when two-handed weapon is equipped
+			if (slot == EquipmentSlot::LEFT_HAND)
+			{
+				auto* rightHandItem = get_equipped_item(EquipmentSlot::RIGHT_HAND);
+				if (rightHandItem)
+				{
+					auto* rightHandWeapon = dynamic_cast<Weapon*>(rightHandItem->pickable.get());
+					if (rightHandWeapon)
+					{
+						// Check if right hand has a two-handed weapon
+						bool rightHandIsTwoHanded = (dynamic_cast<Greatsword*>(rightHandWeapon) || 
+						                            dynamic_cast<GreatAxe*>(rightHandWeapon) ||
+						                            dynamic_cast<Longbow*>(rightHandWeapon));
+						if (rightHandIsTwoHanded)
+						{
+							return false; // Can't equip anything in left hand when two-handed weapon equipped
+						}
+					}
+				}
+			}
+		}
+		
+		// Shields can only go in left hand
+		if (shield && slot != EquipmentSlot::LEFT_HAND)
+		{
+			return false;
+		}
+		
+		break;
+	}
+	case EquipmentSlot::BODY:
+	{
+		// Body slot can only hold armor
+		auto* armor = dynamic_cast<Armor*>(item.pickable.get());
+		if (!armor)
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::MISSILE_WEAPON:
+	{
+		// Missile weapon slot can only hold ranged weapons
+		auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
+		if (!weapon || !weapon->is_ranged())
+		{
+			return false;
+		}
+		break;
+	}
+	default:
+		// TODO: Add validation for other slots (HEAD, NECK, etc.)
+		// For now, allow any item in other slots
+		break;
+	}
 
 	return true;
 }
@@ -429,7 +534,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 	return false;
 }
 
-Item* Player::get_equipped_item_in_slot(EquipmentSlot slot) const
+Item* Player::get_equipped_item(EquipmentSlot slot) const
 {
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
@@ -439,14 +544,14 @@ Item* Player::get_equipped_item_in_slot(EquipmentSlot slot) const
 
 bool Player::is_slot_occupied(EquipmentSlot slot) const
 {
-	return get_equipped_item_in_slot(slot) != nullptr;
+	return get_equipped_item(slot) != nullptr;
 }
 
 bool Player::is_dual_wielding() const
 {
 	// Check if both hands have weapons equipped
-	auto rightHand = get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
-	auto leftHand = get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+	auto rightHand = get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	auto leftHand = get_equipped_item(EquipmentSlot::LEFT_HAND);
 	
 	if (!rightHand || !leftHand)
 	{
@@ -470,7 +575,7 @@ bool Player::is_dual_wielding() const
 
 std::string Player::get_equipped_weapon_damage_roll() const
 {
-	auto rightHandWeapon = get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
+	auto rightHandWeapon = get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	if (!rightHandWeapon)
 	{
 		return "D2"; // Unarmed damage
@@ -508,7 +613,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const
 	// - Off-hand penalty becomes -2
 	
 	// Get off-hand weapon damage roll using extensible approach
-	auto leftHandWeapon = get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+	auto leftHandWeapon = get_equipped_item(EquipmentSlot::LEFT_HAND);
 	if (leftHandWeapon)
 	{
 		// Use the weapon's roll property directly

@@ -214,7 +214,7 @@ for (const auto& slotInfo : slots)
  mvwprintw(equipmentWindow, y, 2, "%c - %-15s: ", slotInfo.shortcut, slotInfo.name);
 
 // Get equipped item in this slot
-Item* equippedItem = player->get_equipped_item_in_slot(slotInfo.slot);
+Item* equippedItem = player->get_equipped_item(slotInfo.slot);
 if (equippedItem)
  {
   // Display equipped item
@@ -357,7 +357,7 @@ bool InventoryUI::handle_equipment_selection(Creature& owner, Player* player, in
     }
     
     // Get currently equipped item in this slot
-    Item* equippedItem = player->get_equipped_item_in_slot(targetSlot);
+    Item* equippedItem = player->get_equipped_item(targetSlot);
     
     if (equippedItem)
     {

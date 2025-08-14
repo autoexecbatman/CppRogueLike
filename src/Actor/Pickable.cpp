@@ -210,7 +210,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 		// Find which slot this weapon is in and unequip it
 		for (auto slot : {EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND})
 		{
-			if (player->get_equipped_item_in_slot(slot) == &owner)
+			if (player->get_equipped_item(slot) == &owner)
 			{
 				player->unequip_item(slot);
 				game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
@@ -242,8 +242,8 @@ bool Weapon::use(Item& owner, Creature& wearer)
 	else
 	{
 		// For regular weapons, check dual-wield possibility
-		auto rightHandWeapon = player->get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
-		auto leftHandWeapon = player->get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+		Item* rightHandWeapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		Item* leftHandWeapon = player->get_equipped_item(EquipmentSlot::LEFT_HAND);
 		
 		// Get weapon sizes (need to map from Pickable* to weapon data)
 		WeaponSize currentWeaponSize = get_weapon_size();
@@ -340,7 +340,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 	}
 
 	// Check if we can equip in the target slot
-	if (!player->can_equip_item(owner, targetSlot))
+	if (!player->can_equip(owner, targetSlot))
 	{
 		game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - slot is occupied!", true);
 		return false; // Don't consume turn if can't equip

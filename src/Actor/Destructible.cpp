@@ -169,7 +169,7 @@ void Destructible::update_armor_class(Creature& owner)
 	if (auto* player = dynamic_cast<Player*>(&owner))
 	{
 		// Use new equipment system for players
-		Item* equippedArmor = player->get_equipped_item_in_slot(EquipmentSlot::BODY);
+		Item* equippedArmor = player->get_equipped_item(EquipmentSlot::BODY);
 		if (equippedArmor)
 		{
 			if (auto armor = dynamic_cast<Armor*>(equippedArmor->pickable.get()))
@@ -188,7 +188,7 @@ void Destructible::update_armor_class(Creature& owner)
 		}
 		
 		// Check for shield in left hand
-		Item* equippedShield = player->get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+		Item* equippedShield = player->get_equipped_item(EquipmentSlot::LEFT_HAND);
 		if (equippedShield)
 		{
 			if (auto shield = dynamic_cast<Shield*>(equippedShield->pickable.get()))

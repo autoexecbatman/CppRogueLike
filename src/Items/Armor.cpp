@@ -30,7 +30,7 @@ bool Armor::use(Item& owner, Creature& wearer)
 	
 	// For players, use the new equipment system
 	// Check if this armor is already equipped
-	Item* currentArmor = player->get_equipped_item_in_slot(EquipmentSlot::BODY);
+	Item* currentArmor = player->get_equipped_item(EquipmentSlot::BODY);
 	if (currentArmor == &owner)
 	{
 		// Unequip this armor - the unequipItem method handles AC update and messaging
