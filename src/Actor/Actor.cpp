@@ -65,7 +65,6 @@ void Actor::save(json& j)
 	j["states"] = statesJson;
 }
 
-
 // a function to get the Chebyshev distance from an actor to a specific tile of the map
 int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
@@ -89,6 +88,7 @@ bool Actor::is_visible() const noexcept
 	return (!has_state(ActorState::FOV_ONLY) && game.map->is_explored(position)) || game.map->is_in_fov(position);
 }
 
+//==Creature==
 void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
@@ -232,7 +232,7 @@ void Creature::unequip(Item& item)
 
 			// Check for ranged weapon
 			auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
-			if (weapon && weapon->isRanged())
+			if (weapon && weapon->is_ranged())
 			{
 				// Remove the ranged state
 				if (has_state(ActorState::IS_RANGED))
@@ -250,7 +250,7 @@ void Creature::unequip(Item& item)
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
 			{
 				auto* weapon = dynamic_cast<Weapon*>(invItem->pickable.get());
-				if (weapon && weapon->isRanged())
+				if (weapon && weapon->is_ranged())
 				{
 					hasRangedWeapon = true;
 					break;
@@ -276,7 +276,7 @@ void Creature::syncRangedState()
 		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
 		{
 			auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
-			if (weapon && weapon->isRanged())
+			if (weapon && weapon->is_ranged())
 			{
 				hasRangedWeapon = true;
 				break;

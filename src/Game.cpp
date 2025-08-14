@@ -42,6 +42,8 @@
 #include "ActorTypes/LightningBolt.h"
 #include "ActorTypes/Confuser.h"
 
+#include "Factories/ItemCreator.h"
+
 //==INIT==
 // When the Game is created, 
 // We don't know yet if we have to generate a new map or load a previously saved one.
@@ -79,6 +81,16 @@ void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
 			creature->update();
 		}
 	}
+}
+
+void Game::cleanup_dead_creatures()
+{
+	// Remove dead creatures from the game
+	// This is called at safe points to avoid dangling references during combat
+	std::erase_if(game.creatures, [](const auto& creature) 
+	{
+		return creature && creature->destructible && creature->destructible->is_dead();
+	});
 }
 
 void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
@@ -1542,86 +1554,27 @@ Web* Game::findWebAt(Vector2D position)
 void Game::add_debug_weapons_at_player_feet()
 {
 	// Only add weapons if player exists
-	if (!player) {
+	if (!player)
+	{
 		log("Error: Cannot add debug weapons - player not initialized");
 		return;
 	}
 
-	// Create a longsword at player's feet
-	auto longsword = std::make_unique<Item>(player->position, ActorData{ '/', "long sword", WHITE_BLACK_PAIR });
-	longsword->pickable = std::make_unique<LongSword>();
-	longsword->value = 50; // Set a value for the longsword
-	container->add(std::move(longsword));
-
-	// Create a longbow at player's feet
-	auto longbow = std::make_unique<Item>(player->position, ActorData{ ')', "longbow", WHITE_BLUE_PAIR });
-	longbow->pickable = std::make_unique<Longbow>();
-	longbow->value = 70; // Set a value for the longbow
-	container->add(std::move(longbow));
-
-	// Add two-handed weapons
-	auto greatsword = std::make_unique<Item>(player->position, ActorData{ '/', "greatsword", WHITE_BLACK_PAIR });
-	greatsword->pickable = std::make_unique<Greatsword>();
-	greatsword->value = 50;
-	container->add(std::move(greatsword));
-
-	auto battleAxe = std::make_unique<Item>(player->position, ActorData{ '/', "battle axe", WHITE_BLACK_PAIR });
-	battleAxe->pickable = std::make_unique<BattleAxe>();
-	battleAxe->value = 25;
-	container->add(std::move(battleAxe));
-
-	auto greatAxe = std::make_unique<Item>(player->position, ActorData{ '/', "great axe", WHITE_BLACK_PAIR });
-	greatAxe->pickable = std::make_unique<GreatAxe>();
-	greatAxe->value = 40;
-	container->add(std::move(greatAxe));
-
-	auto warHammer = std::make_unique<Item>(player->position, ActorData{ '/', "war hammer", WHITE_BLACK_PAIR });
-	warHammer->pickable = std::make_unique<WarHammer>();
-	warHammer->value = 20;
-	container->add(std::move(warHammer));
-
-	auto shield = std::make_unique<Item>(player->position, ActorData{ '[', "shield", WHITE_BLACK_PAIR });
-	shield->pickable = std::make_unique<Shield>();
-	shield->value = 10;
-	container->add(std::move(shield));
-
-	// Add a health potion for good measure
-	auto healthPotion = std::make_unique<Item>(player->position, ActorData{ '!', "health potion", WHITE_RED_PAIR });
-	healthPotion->pickable = std::make_unique<Healer>(10);
-	healthPotion->value = 25;
-	container->add(std::move(healthPotion));
-
-	// Add a scroll of fireball at player's feet
-	auto scrollOfFireball = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of fireball", RED_YELLOW_PAIR });
-	scrollOfFireball->pickable = std::make_unique<Fireball>(3, 12);
-	scrollOfFireball->value = 100;
-	container->add(std::move(scrollOfFireball));
-
-	auto scrollOfLightning = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of lightning", WHITE_BLUE_PAIR });
-	scrollOfLightning->pickable = std::make_unique<LightningBolt>(5, 20);
-	scrollOfLightning->value = 150;
-	container->add(std::move(scrollOfLightning));
-
-	// Add a scroll of confusion at player's feet
-	auto scrollOfConfusion = std::make_unique<Item>(player->position, ActorData{ '#', "scroll of confusion", YELLOW_BLACK_PAIR });
-	scrollOfConfusion->pickable = std::make_unique<Confuser>(10, 5); // 10 turns confused, 5 range
-	scrollOfConfusion->value = 80;
-	container->add(std::move(scrollOfConfusion));
-
-	auto leatherArmor = std::make_unique<Item>(player->position, ActorData{ '[', "leather armor", BROWN_BLACK_PAIR });
-	leatherArmor->pickable = std::make_unique<LeatherArmor>();
-	leatherArmor->value = 30;
-	container->add(std::move(leatherArmor));
-
-	auto chainMail = std::make_unique<Item>(player->position, ActorData{ '[', "chain mail", BROWN_BLACK_PAIR });
-	chainMail->pickable = std::make_unique<ChainMail>();
-	chainMail->value = 75;
-	container->add(std::move(chainMail));
-
-	auto plateMail = std::make_unique<Item>(player->position, ActorData{ '[', "plate mail", BROWN_BLACK_PAIR });
-	plateMail->pickable = std::make_unique<PlateMail>();
-	plateMail->value = 150;
-	container->add(std::move(plateMail));
+	container->add(ItemCreator::create_long_sword(player->position));
+	container->add(ItemCreator::create_longbow(player->position));
+	container->add(ItemCreator::create_greatsword(player->position));
+	container->add(ItemCreator::create_battle_axe(player->position));
+	container->add(ItemCreator::create_great_axe(player->position));
+	container->add(ItemCreator::create_war_hammer(player->position));
+	container->add(ItemCreator::create_shield(player->position));
+	container->add(ItemCreator::create_health_potion(player->position));
+	container->add(ItemCreator::create_scroll_fireball(player->position));
+	container->add(ItemCreator::create_scroll_lightning(player->position));
+	container->add(ItemCreator::create_scroll_confusion(player->position));
+	container->add(ItemCreator::create_leather_armor(player->position));
+	container->add(ItemCreator::create_chain_mail(player->position));
+	container->add(ItemCreator::create_plate_mail(player->position));
+	container->add(ItemCreator::create_dagger(player->position));
 
 	log("Debug weapons added at player position: " +
 		std::to_string(player->position.x) + "," +

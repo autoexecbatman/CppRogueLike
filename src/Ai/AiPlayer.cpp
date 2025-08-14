@@ -50,9 +50,9 @@ struct PossibleMoves
 void AiPlayer::update(Creature& owner)
 {
 	// If stuck in a web, try to break free and skip turn if still stuck
-	if (game.player->isWebbed())
+	if (game.player->is_webbed())
 	{
-		if (!game.player->tryBreakWeb())
+		if (!game.player->try_break_web())
 		{
 			// Still stuck, skip the player's turn
 			game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -265,19 +265,15 @@ void AiPlayer::drop_item(Creature& owner)
 				wattroff(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
 				
 				// Show slot type
-				std::string slotName = (equipped.slot == EquipmentSlot::MAIN_HAND) ? "Main: " : 
-									   (equipped.slot == EquipmentSlot::OFF_HAND) ? "Off: " : "Armor: ";
+				std::string slotName = (equipped.slot == EquipmentSlot::RIGHT_HAND) ? "Right: " : 
+									   (equipped.slot == EquipmentSlot::LEFT_HAND) ? "Left: " : 
+									   (equipped.slot == EquipmentSlot::BODY) ? "Body: " : "Other: ";
 				wprintw(dropWin, "%s", slotName.c_str());
 				
 				// Display item name with color
 				wattron(dropWin, COLOR_PAIR(equipped.item->actorData.color));
 				wprintw(dropWin, "%s", equipped.item->actorData.name.c_str());
 				wattroff(dropWin, COLOR_PAIR(equipped.item->actorData.color));
-				
-				if (equipped.twoHandedGrip)
-				{
-					wprintw(dropWin, " (2H)");
-				}
 				
 				y++;
 				shortcut++;
@@ -332,7 +328,7 @@ void AiPlayer::drop_item(Creature& owner)
 			
 			// Unequip the item (this returns it to inventory)
 			EquipmentSlot slot = equipped.slot;
-			player->unequipItem(slot);
+			player->unequip_item(slot);
 			
 			// Find the item in inventory and drop it
 			for (auto& item : owner.container->inv)
@@ -422,7 +418,7 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 				// For weapons, show damage dice
 				if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
 				{
-					std::string damageInfo = " [" + weapon->roll + (weapon->isRanged() ? " rng dmg]" : " dmg]");
+					std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
 					wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
 					wprintw(inv, "%s", damageInfo.c_str());
 					wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
@@ -522,7 +518,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 					// Perform the attacks
 					for (int i = 0; i < attacksThisRound; i++)
 					{
-						if (!c->destructible->is_dead()) // Check if target is still alive
+						if (c->destructible && !c->destructible->is_dead()) // Check if target is still alive
 						{
 							if (i > 0)
 							{
@@ -530,7 +526,8 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 								game.appendMessagePart(WHITE_BLACK_PAIR, "Follow-up attack: ");
 								game.finalizeMessage();
 							}
-							owner.attacker->attack(owner, *c);
+							// Use dual wield attack for players
+							owner.attacker->attack_with_dual_wield(owner, *c);
 						}
 						else
 						{
@@ -538,12 +535,18 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 							break;
 						}
 					}
+					
+					// Clean up dead creatures after combat
+					game.cleanup_dead_creatures();
 				}
 				else
 				{
-					// Non-player creatures get single attack
-					owner.attacker->attack(owner, *c);
+				// Non-player creatures get single attack
+				owner.attacker->attack(owner, *c);
 				}
+				
+				// Clean up dead creatures after combat
+				game.cleanup_dead_creatures();
 				return false;
 			}
 		}

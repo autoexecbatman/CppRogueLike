@@ -27,7 +27,7 @@ bool Web::applyEffect(Creature& creature)
         int stuckTurns = webStrength + game.d.roll(1, 2);
 
         // Apply the effect
-        game.player->getStuckInWeb(stuckTurns, webStrength, this);
+        game.player->get_stuck_in_web(stuckTurns, webStrength, this);
 
         game.message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 

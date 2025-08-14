@@ -11,9 +11,21 @@ class Item;
 
 enum class EquipmentSlot
 {
-	MAIN_HAND,
-	OFF_HAND,
-	ARMOR,
+	HEAD,           // Helmets, hats
+	NECK,           // Amulets, necklaces
+	BODY,           // Armor (chain mail, plate mail, etc.)
+	GIRDLE,         // Belts
+	CLOAK,          // Cloaks, robes
+	RIGHT_HAND,     // Main weapon
+	LEFT_HAND,      // Shield or off-hand weapon
+	RIGHT_RING,     // Rings
+	LEFT_RING,      // Rings
+	BRACERS,        // Bracers
+	GAUNTLETS,      // Gloves, gauntlets
+	BOOTS,          // Boots, shoes
+	MISSILE_WEAPON, // Bows, crossbows
+	MISSILES,       // Arrows, bolts
+	TOOL,           // Tools, instruments
 	NONE
 };
 
@@ -21,16 +33,15 @@ struct EquippedItem
 {
 	std::unique_ptr<Item> item;
 	EquipmentSlot slot;
-	bool twoHandedGrip{false}; // For versatile weapons used two-handed
 	
-	EquippedItem(std::unique_ptr<Item> i, EquipmentSlot s, bool twoHanded = false)
-		: item(std::move(i)), slot(s), twoHandedGrip(twoHanded) {}
+	EquippedItem(std::unique_ptr<Item> i, EquipmentSlot s)
+		: item(std::move(i)), slot(s) {}
 };
 
 class Player : public Creature
 {
 public:
-	enum class PlayerRaceState : int
+	enum class PlayerRaceState
 	{
 		NONE,
 		HUMAN,
@@ -41,7 +52,7 @@ public:
 		HALFELF
 	} playerRaceState{ PlayerRaceState::NONE };
 
-	enum class PlayerClassState : int
+	enum class PlayerClassState
 	{
 		NONE,
 		FIGHTER,
@@ -62,13 +73,7 @@ public:
 
 	Player(Vector2D position);
 
-	// Note::
-	// X/Y coordinates set
-	// in the function create_room()
-	// in Map.cpp
-
-	void setXY(Vector2D pos) noexcept { position = pos; }
-	Vector2D getXY() const noexcept { return position; }
+	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	void racial_ability_adjustments();
 	void calculate_thaco();
@@ -87,23 +92,28 @@ public:
 	int webStrength = 0;         // How strong the web is (affects escape difficulty)
 	Web* trappingWeb = nullptr;  // The web that has trapped the player
 
-	// Check if player is stuck in a web
-	bool isWebbed() const { return webStuckTurns > 0; }
-
-	// Attempt to break free from a web
-	bool tryBreakWeb();
-
-	// Get stuck in a web
-	void getStuckInWeb(int duration, int strength, Web* web);
+	bool is_webbed() const { return webStuckTurns > 0; } // Check if player is stuck in a web
+	bool try_break_web(); // Attempt to break free from a web
+	void get_stuck_in_web(int duration, int strength, Web* web); // Get stuck in a web
 
 	// Equipment system methods
-	bool canEquip(const Item& item, EquipmentSlot slot, bool twoHanded = false) const;
-	bool equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoHanded = false);
-	bool unequipItem(EquipmentSlot slot);
-	Item* getEquippedItem(EquipmentSlot slot) const;
-	bool isSlotOccupied(EquipmentSlot slot) const;
-	bool hasEquippedTwoHandedWeapon() const;
-	std::string getEquippedWeaponDamageRoll() const;
+	bool can_equip_item(const Item& item, EquipmentSlot slot) const;
+	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot);
+	bool unequip_item(EquipmentSlot slot);
+	Item* get_equipped_item_in_slot(EquipmentSlot slot) const;
+	bool is_slot_occupied(EquipmentSlot slot) const;
+	bool is_dual_wielding() const;
+	std::string get_equipped_weapon_damage_roll() const;
+	
+	// Two-weapon fighting mechanics
+	struct DualWieldInfo
+	{
+		bool isDualWielding = false;
+		int mainHandPenalty = 0;
+		int offHandPenalty = 0;
+		std::string offHandDamageRoll = "D2";
+	};
+	DualWieldInfo get_dual_wield_info() const;
 };
 
 #endif // !PLAYER_H

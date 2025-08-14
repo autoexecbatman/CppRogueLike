@@ -13,7 +13,7 @@ InventoryUI::InventoryUI() : inventoryWindow(nullptr), equipmentWindow(nullptr)
 
 InventoryUI::~InventoryUI()
 {
-    destroyWindows();
+    destroy_windows();
 }
 
 void InventoryUI::display(Creature& owner)
@@ -22,44 +22,41 @@ void InventoryUI::display(Creature& owner)
     
     while (true)
     {
-        createWindows();
+        create_windows();
         
-        // Build combined item list
-        auto allItems = buildItemList(owner, player);
+        // Display content - separated backpack and equipment
+        display_inventory_items(player);
+        display_equipment_slots(player);
+        display_instructions();
         
-        // Display content
-        displayInventoryItems(player, allItems);
-        displayEquipmentSlots(player);
-        displayInstructions(static_cast<int>(allItems.size()));
-        
-        refreshWindows();
+        refresh_windows();
         
         // Handle input - returns false to exit inventory
-        if (!handleInput(owner, player, allItems, static_cast<int>(allItems.size())))
+        if (!handle_inventory_input(owner, player))
         {
             break;
         }
         
-        destroyWindows();
+        destroy_windows();
     }
     
-    restoreGameDisplay();
+    restore_game_display();
 }
 
-void InventoryUI::createWindows()
+void InventoryUI::create_windows()
 {
     clear();
     refresh();
     
-    inventoryWindow = newwin(LINES, getInventoryWidth(), 0, 0);
-    equipmentWindow = newwin(LINES, getEquipmentWidth(), 0, getInventoryWidth());
+    inventoryWindow = newwin(LINES, get_inventory_width(), 0, 0);
+    equipmentWindow = newwin(LINES, get_equipment_width(), 0, get_inventory_width());
     
     box(inventoryWindow, 0, 0);
     box(equipmentWindow, 0, 0);
     
     // Window titles
     wattron(inventoryWindow, A_BOLD);
-    mvwprintw(inventoryWindow, 0, 2, " INVENTORY ");
+    mvwprintw(inventoryWindow, 0, 2, " BACKPACK ");
     wattroff(inventoryWindow, A_BOLD);
     
     wattron(equipmentWindow, A_BOLD);
@@ -67,7 +64,7 @@ void InventoryUI::createWindows()
     wattroff(equipmentWindow, A_BOLD);
 }
 
-void InventoryUI::destroyWindows()
+void InventoryUI::destroy_windows()
 {
     if (inventoryWindow)
     {
@@ -81,13 +78,13 @@ void InventoryUI::destroyWindows()
     }
 }
 
-void InventoryUI::refreshWindows()
+void InventoryUI::refresh_windows()
 {
     wrefresh(inventoryWindow);
     wrefresh(equipmentWindow);
 }
 
-std::vector<std::pair<Item*, bool>> InventoryUI::buildItemList(Creature& owner, Player* player)
+std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner, Player* player)
 {
     std::vector<std::pair<Item*, bool>> allItems;
     
@@ -115,43 +112,37 @@ std::vector<std::pair<Item*, bool>> InventoryUI::buildItemList(Creature& owner, 
     return allItems;
 }
 
-void InventoryUI::displayInventoryItems(Player* player, const std::vector<std::pair<Item*, bool>>& allItems)
+void InventoryUI::display_inventory_items(Player* player)
 {
-    // Update title with item count
+    // Update title with backpack item count
     if (player)
     {
-        size_t totalItems = player->container->inv.size() + player->equippedItems.size();
+        size_t backpackItems = player->container->inv.size();
         size_t maxItems = player->container->invSize;
-        mvwprintw(inventoryWindow, 0, 2, " INVENTORY (%zu/%zu) ", totalItems, maxItems);
+        mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
     }
     
     int y = 2;
     char shortcut = 'a';
     
-    if (allItems.empty())
+    // Display only backpack items (not equipped items)
+    const auto& backpackItems = player->container->inv;
+    
+    if (backpackItems.empty())
     {
-        mvwprintw(inventoryWindow, y, 2, "You are not carrying anything.");
+        mvwprintw(inventoryWindow, y, 2, "Your backpack is empty.");
         return;
     }
     
-    for (size_t i = 0; i < allItems.size() && shortcut <= 'z'; i++)
+    for (size_t i = 0; i < backpackItems.size() && shortcut <= 'z'; i++)
     {
-        Item* item = allItems[i].first;
-        bool isEquipped = allItems[i].second;
+        Item* item = backpackItems[i].get();
         
         if (item)
         {
             mvwprintw(inventoryWindow, y, 2, "%c) ", shortcut);
             
-            // Show equipped marker
-            if (isEquipped)
-            {
-                wattron(inventoryWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
-                wprintw(inventoryWindow, "[E] ");
-                wattroff(inventoryWindow, COLOR_PAIR(WHITE_GREEN_PAIR));
-            }
-            
-            showItemInfo(item, y);
+            show_item_info(item, y);
             
             y++;
             shortcut++;
@@ -159,7 +150,7 @@ void InventoryUI::displayInventoryItems(Player* player, const std::vector<std::p
     }
 }
 
-void InventoryUI::showItemInfo(Item* item, int y)
+void InventoryUI::show_item_info(Item* item, int y)
 {
     // Display item name with color
     wattron(inventoryWindow, COLOR_PAIR(item->actorData.color));
@@ -177,92 +168,100 @@ void InventoryUI::showItemInfo(Item* item, int y)
     // Show weapon damage if applicable
     if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
     {
-        std::string damageInfo = " [" + weapon->roll + (weapon->isRanged() ? " rng dmg]" : " dmg]");
+        std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
         wattron(inventoryWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
         wprintw(inventoryWindow, "%s", damageInfo.c_str());
         wattroff(inventoryWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
     }
 }
 
-void InventoryUI::displayEquipmentSlots(Player* player)
+void InventoryUI::display_equipment_slots(Player* player)
 {
-    if (!player) return;
-    
-    int y = 2;
-    
-    // Main Hand
-    mvwprintw(equipmentWindow, y++, 2, "Main Hand:");
-    Item* mainHand = player->getEquippedItem(EquipmentSlot::MAIN_HAND);
-    if (mainHand)
-    {
-        mvwprintw(equipmentWindow, y, 4, "[W] ");
-        wattron(equipmentWindow, COLOR_PAIR(mainHand->actorData.color));
-        wprintw(equipmentWindow, "%s", mainHand->actorData.name.c_str());
-        wattroff(equipmentWindow, COLOR_PAIR(mainHand->actorData.color));
-        
-        // Check if two-handed
-        for (const auto& equipped : player->equippedItems)
-        {
-            if (equipped.slot == EquipmentSlot::MAIN_HAND && equipped.twoHandedGrip)
-            {
-                wprintw(equipmentWindow, " (2H)");
-                break;
-            }
-        }
-    }
-    else
-    {
-        mvwprintw(equipmentWindow, y, 4, "- empty -");
-    }
-    y += 2;
-    
-    // Off Hand
-    mvwprintw(equipmentWindow, y++, 2, "Off Hand:");
-    Item* offHand = player->getEquippedItem(EquipmentSlot::OFF_HAND);
-    if (offHand)
-    {
-        mvwprintw(equipmentWindow, y, 4, "[S] ");
-        wattron(equipmentWindow, COLOR_PAIR(offHand->actorData.color));
-        wprintw(equipmentWindow, "%s", offHand->actorData.name.c_str());
-        wattroff(equipmentWindow, COLOR_PAIR(offHand->actorData.color));
-    }
-    else
-    {
-        mvwprintw(equipmentWindow, y, 4, "- empty -");
-    }
-    y += 2;
-    
-    // Armor
-    mvwprintw(equipmentWindow, y++, 2, "Armor:");
-    Item* armor = player->getEquippedItem(EquipmentSlot::ARMOR);
-    if (armor)
-    {
-        mvwprintw(equipmentWindow, y, 4, "[A] ");
-        wattron(equipmentWindow, COLOR_PAIR(armor->actorData.color));
-        wprintw(equipmentWindow, "%s", armor->actorData.name.c_str());
-        wattroff(equipmentWindow, COLOR_PAIR(armor->actorData.color));
-    }
-    else
-    {
-        mvwprintw(equipmentWindow, y, 4, "- empty -");
-    }
+if (!player) return;
+
+int y = 2;
+
+// Display all equipment slots ADOM-style
+struct SlotInfo
+{
+ EquipmentSlot slot;
+ const char* name;
+char shortcut;
+};
+
+const SlotInfo slots[] = 
+{
+{EquipmentSlot::HEAD, "Head", 'H'},
+{EquipmentSlot::NECK, "Neck", 'N'},
+{EquipmentSlot::BODY, "Body", 'B'},
+{EquipmentSlot::GIRDLE, "Girdle", 'G'},
+{EquipmentSlot::CLOAK, "Cloak", 'C'},
+{EquipmentSlot::RIGHT_HAND, "Right Hand", 'R'},
+{EquipmentSlot::LEFT_HAND, "Left Hand", 'L'},
+{EquipmentSlot::RIGHT_RING, "Right Ring", ')'},
+{EquipmentSlot::LEFT_RING, "Left Ring", '('},
+ {EquipmentSlot::BRACERS, "Bracers", '['},
+ {EquipmentSlot::GAUNTLETS, "Gauntlets", ']'},
+ {EquipmentSlot::BOOTS, "Boots", 'F'},
+{EquipmentSlot::MISSILE_WEAPON, "Missile Weapon", 'M'},
+ {EquipmentSlot::MISSILES, "Missiles", 'A'},
+ {EquipmentSlot::TOOL, "Tool", 'T'}
+};
+
+for (const auto& slotInfo : slots)
+{
+ // Display slot name with shortcut
+ mvwprintw(equipmentWindow, y, 2, "%c - %-15s: ", slotInfo.shortcut, slotInfo.name);
+
+// Get equipped item in this slot
+Item* equippedItem = player->get_equipped_item_in_slot(slotInfo.slot);
+if (equippedItem)
+ {
+  // Display equipped item
+  wattron(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
+ wprintw(equipmentWindow, "%s", equippedItem->actorData.name.c_str());
+  wattroff(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
+  
+  // Show value if applicable
+  if (equippedItem->value > 0)
+  {
+   wattron(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
+   wprintw(equipmentWindow, " (%d gp)", equippedItem->value);
+   wattroff(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
+ }
+}
+else
+{
+  // Empty slot
+  mvwprintw(equipmentWindow, y, 20, "- empty -");
+ }
+
+ y++;
+	}
 }
 
-void InventoryUI::displayInstructions(int itemCount)
+void InventoryUI::display_instructions()
 {
+    // Calculate total weight (simplified - assume 1 weight per item for now)
+    int totalWeight = 0;
+    if (game.player && game.player->container)
+    {
+        totalWeight = static_cast<int>(game.player->container->inv.size());
+    }
+    
     mvwprintw(
         inventoryWindow,
         LINES - INSTRUCTIONS_Y_OFFSET,
         2,
-        "Select item (a-%c), T=toggle grip, ESC=exit",
-        itemCount > 0 ? static_cast<char>('a' + itemCount - 1) : 'a'
+        "Weight: %d stones | Backpack: (a-z), Equipment: (H/N/B/etc), ESC=exit",
+        totalWeight
     );
     
     mvwprintw(equipmentWindow, LINES - 3, 2, "Equipment Slots");
-    mvwprintw(equipmentWindow, LINES - 2, 2, "Auto-updated");
+    mvwprintw(equipmentWindow, LINES - 2, 2, "Select by letter");
 }
 
-bool InventoryUI::handleInput(Creature& owner, Player* player, const std::vector<std::pair<Item*, bool>>& allItems, int itemCount)
+bool InventoryUI::handle_inventory_input(Creature& owner, Player* player)
 {
     int input = getch();
     
@@ -271,139 +270,110 @@ bool InventoryUI::handleInput(Creature& owner, Player* player, const std::vector
         game.message(WHITE_BLACK_PAIR, "Inventory closed.", true);
         return false; // Exit inventory
     }
-    else if (input == static_cast<int>(Controls::TOGGLE_GRIP))
+    
+    // Handle backpack item selection (a-z)
+    if (input >= 'a' && input <= 'z')
     {
-        return handleToggleGrip(player); // Returns true to stay in inventory
+        return handle_backpack_selection(owner, player, input - 'a');
     }
-    else if (input >= 'a' && input <= 'z' && input < 'a' + itemCount)
-    {
-        int itemIndex = input - 'a';
-        return handleItemSelection(owner, player, allItems, itemIndex);
-    }
-    else
-    {
-        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-        return true; // Stay in inventory
-    }
+    
+    // Handle equipment slot selection
+    return handle_equipment_selection(owner, player, input);
 }
 
-bool InventoryUI::handleItemSelection(Creature& owner, Player* player, const std::vector<std::pair<Item*, bool>>& allItems, int itemIndex)
+bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int itemIndex)
 {
-    if (itemIndex >= 0 && itemIndex < static_cast<int>(allItems.size()))
+    const auto& backpackItems = owner.container->inv;
+    
+    if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
     {
-        Item* selectedItem = allItems[itemIndex].first;
-        bool isEquipped = allItems[itemIndex].second;
+        Item* selectedItem = backpackItems[itemIndex].get();
         
         if (selectedItem && selectedItem->pickable)
         {
-            if (isEquipped)
+            // Store item pointer to detect if it was consumed
+            Item* itemPtr = selectedItem;
+            
+            // Try to use item
+            bool itemUsed = selectedItem->pickable->use(*selectedItem, owner);
+            
+            if (itemUsed)
             {
-                // Unequip item - stay in inventory to see the change
-                if (player)
-                {
-                    for (const auto& equipped : player->equippedItems)
-                    {
-                        if (equipped.item.get() == selectedItem)
-                        {
-                            std::string itemName = selectedItem->actorData.name;
-                            player->unequipItem(equipped.slot);
-                            game.message(WHITE_BLACK_PAIR, "You unequipped the " + itemName + ".", true);
-                            break;
-                        }
-                    }
-                }
-                return true; // Stay in inventory
-            }
-            else
-            {
-                // Store item pointer to detect if it was consumed
-                Item* itemPtr = selectedItem;
+                game.gameStatus = Game::GameStatus::NEW_TURN;
                 
-                // Try to equip/use item
-                bool itemUsed = selectedItem->pickable->use(*selectedItem, owner);
-                
-                if (itemUsed)
+                // Check if the item still exists in inventory (not consumed)
+                bool itemStillExists = false;
+                for (const auto& item : owner.container->inv)
                 {
-                    game.gameStatus = Game::GameStatus::NEW_TURN;
-                    
-                    // Check if the item still exists in inventory (not consumed)
-                    bool itemStillExists = false;
-                    for (const auto& item : owner.container->inv)
+                    if (item.get() == itemPtr)
                     {
-                        if (item.get() == itemPtr)
-                        {
-                            itemStillExists = true;
-                            break;
-                        }
-                    }
-                    
-                    // If item was consumed (no longer exists in inventory), exit inventory
-                    if (!itemStillExists)
-                    {
-                        return false; // Exit inventory
+                        itemStillExists = true;
+                        break;
                     }
                 }
                 
-                // Item was equipped or use failed - stay in inventory to see changes
-                return true;
+                // If item was consumed, exit inventory
+                if (!itemStillExists)
+                {
+                    return false; // Exit inventory
+                }
             }
+            
+            return true; // Stay in inventory
         }
     }
     
-    return true; // Stay in inventory by default
+    game.message(WHITE_BLACK_PAIR, "Invalid backpack selection.", true);
+    return true; // Stay in inventory
 }
 
-bool InventoryUI::handleToggleGrip(Player* player)
+bool InventoryUI::handle_equipment_selection(Creature& owner, Player* player, int input)
 {
-    if (!player)
+    if (!player) return true;
+    
+    // Map input characters to equipment slots
+    EquipmentSlot targetSlot = EquipmentSlot::NONE;
+    
+    switch (input)
     {
-        game.message(WHITE_BLACK_PAIR, "Cannot toggle grip.", true);
-        return true;
+        case 'H': targetSlot = EquipmentSlot::HEAD; break;
+        case 'N': targetSlot = EquipmentSlot::NECK; break;
+        case 'B': targetSlot = EquipmentSlot::BODY; break;
+        case 'G': targetSlot = EquipmentSlot::GIRDLE; break;
+        case 'C': targetSlot = EquipmentSlot::CLOAK; break;
+        case 'R': targetSlot = EquipmentSlot::RIGHT_HAND; break;
+        case 'L': targetSlot = EquipmentSlot::LEFT_HAND; break;
+        case ')': targetSlot = EquipmentSlot::RIGHT_RING; break;
+        case '(': targetSlot = EquipmentSlot::LEFT_RING; break;
+        case '[': targetSlot = EquipmentSlot::BRACERS; break;
+        case ']': targetSlot = EquipmentSlot::GAUNTLETS; break;
+        case 'F': targetSlot = EquipmentSlot::BOOTS; break;
+        case 'M': targetSlot = EquipmentSlot::MISSILE_WEAPON; break;
+        case 'A': targetSlot = EquipmentSlot::MISSILES; break;
+        case 'T': targetSlot = EquipmentSlot::TOOL; break;
+        default:
+            game.message(WHITE_BLACK_PAIR, "Invalid equipment selection.", true);
+            return true; // Stay in inventory
     }
     
-    Item* mainHandWeapon = player->getEquippedItem(EquipmentSlot::MAIN_HAND);
-    if (!mainHandWeapon)
+    // Get currently equipped item in this slot
+    Item* equippedItem = player->get_equipped_item_in_slot(targetSlot);
+    
+    if (equippedItem)
     {
-        game.message(WHITE_BLACK_PAIR, "You have no weapon equipped to toggle grip.", true);
-        return true;
+        // Unequip the item
+        player->unequip_item(targetSlot);
+        game.message(WHITE_BLACK_PAIR, "You unequipped the " + equippedItem->actorData.name + ".", true);
     }
-    
-    // Find the equipped item entry
-    auto it = std::find_if(player->equippedItems.begin(), player->equippedItems.end(),
-        [](const EquippedItem& equipped) { return equipped.slot == EquipmentSlot::MAIN_HAND; });
-    
-    if (it != player->equippedItems.end())
+    else
     {
-        auto* weapon = dynamic_cast<Weapon*>(mainHandWeapon->pickable.get());
-        if (weapon && weapon->isVersatile())
-        {
-            // Toggle the two-handed grip
-            it->twoHandedGrip = !it->twoHandedGrip;
-            
-            if (it->twoHandedGrip)
-            {
-                player->unequipItem(EquipmentSlot::OFF_HAND);
-                game.message(WHITE_BLACK_PAIR, "You grip the " + mainHandWeapon->actorData.name + " with both hands.", true);
-            }
-            else
-            {
-                game.message(WHITE_BLACK_PAIR, "You grip the " + mainHandWeapon->actorData.name + " with one hand.", true);
-            }
-            
-            // Update weapon damage roll
-            std::string newRoll = player->getEquippedWeaponDamageRoll();
-            player->attacker->roll = newRoll;
-        }
-        else
-        {
-            game.message(WHITE_BLACK_PAIR, "This weapon cannot be used two-handed.", true);
-        }
+        game.message(WHITE_BLACK_PAIR, "That equipment slot is empty.", true);
     }
     
     return true; // Stay in inventory
 }
 
-void InventoryUI::restoreGameDisplay()
+void InventoryUI::restore_game_display()
 {
     clear();
     refresh();

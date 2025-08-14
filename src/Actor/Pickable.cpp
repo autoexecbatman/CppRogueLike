@@ -32,6 +32,85 @@ bool Pickable::use(Item& owner, Creature& wearer)
 	return false;
 }
 
+// AD&D 2e weapon size and dual-wield validation methods
+WeaponSize Weapon::get_weapon_size() const
+{
+	// Map specific weapon types to their AD&D 2e sizes
+	if (dynamic_cast<const Dagger*>(this))
+	{
+		return WeaponSize::TINY;  // Dagger is TINY
+	}
+	else if (dynamic_cast<const ShortSword*>(this))
+	{
+		return WeaponSize::SMALL; // Short sword is SMALL
+	}
+	else if (dynamic_cast<const LongSword*>(this) || dynamic_cast<const BattleAxe*>(this) || dynamic_cast<const WarHammer*>(this))
+	{
+		return WeaponSize::MEDIUM; // Long sword, battle axe, war hammer are MEDIUM
+	}
+	else if (dynamic_cast<const Greatsword*>(this) || dynamic_cast<const GreatAxe*>(this))
+	{
+		return WeaponSize::LARGE; // Two-handed weapons are LARGE
+	}
+	else if (dynamic_cast<const Staff*>(this))
+	{
+		return WeaponSize::MEDIUM; // Staff is MEDIUM (versatile)
+	}
+	else
+	{
+		return WeaponSize::MEDIUM; // Default to MEDIUM
+	}
+}
+
+bool Weapon::can_be_off_hand(WeaponSize weaponSize) const
+{
+	// AD&D 2e rule: Off-hand weapons must be SMALL or TINY
+	return weaponSize <= WeaponSize::SMALL;
+}
+
+bool Weapon::validate_dual_wield(Item* mainHandWeapon, Item* offHandWeapon) const
+{
+	if (!mainHandWeapon || !offHandWeapon)
+	{
+		return false;
+	}
+	
+	// Get weapon pickables
+	auto* mainWeapon = dynamic_cast<Weapon*>(mainHandWeapon->pickable.get());
+	auto* offWeapon = dynamic_cast<Weapon*>(offHandWeapon->pickable.get());
+	
+	if (!mainWeapon || !offWeapon)
+	{
+		return false; // One of them is not a weapon
+	}
+	
+	// Get weapon sizes
+	WeaponSize mainSize = mainWeapon->get_weapon_size();
+	WeaponSize offSize = offWeapon->get_weapon_size();
+	
+	// AD&D 2e Two-Weapon Fighting Rules:
+	// 1. Main hand weapon must be MEDIUM or smaller
+	// 2. Off-hand weapon must be SMALL or TINY
+	// 3. Off-hand weapon must be smaller than or equal to main hand
+	
+	if (mainSize > WeaponSize::MEDIUM)
+	{
+		return false; // Main hand weapon too large
+	}
+	
+	if (offSize > WeaponSize::SMALL)
+	{
+		return false; // Off-hand weapon too large
+	}
+	
+	if (offSize > mainSize)
+	{
+		return false; // Off-hand larger than main hand
+	}
+	
+	return true;
+}
+
 std::unique_ptr<Pickable> Pickable::create(const json& j)
 {
 	if (!j.contains("type") || !j["type"].is_number()) {
@@ -129,15 +208,15 @@ bool Weapon::use(Item& owner, Creature& wearer)
 	if (owner.has_state(ActorState::IS_EQUIPPED))
 	{
 		// Find which slot this weapon is in and unequip it
-		for (auto slot : {EquipmentSlot::MAIN_HAND, EquipmentSlot::OFF_HAND})
+		for (auto slot : {EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND})
 		{
-			if (player->getEquippedItem(slot) == &owner)
+			if (player->get_equipped_item_in_slot(slot) == &owner)
 			{
-				player->unequipItem(slot);
+				player->unequip_item(slot);
 				game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
 				
 				// Remove ranged state if applicable
-				if (isRanged())
+				if (is_ranged())
 				{
 					wearer.remove_state(ActorState::IS_RANGED);
 				}
@@ -147,56 +226,123 @@ bool Weapon::use(Item& owner, Creature& wearer)
 		}
 	}
 
-	// Determine equipment slot and hand usage for new weapon
-	EquipmentSlot targetSlot = EquipmentSlot::MAIN_HAND;
-	bool useTwoHanded = false;
-
+	// Determine equipment slot for new weapon with AD&D 2e dual-wield rules
+	EquipmentSlot targetSlot = EquipmentSlot::RIGHT_HAND;
+	
 	// Check weapon type for slot determination
 	if (dynamic_cast<Shield*>(this))
 	{
-		targetSlot = EquipmentSlot::OFF_HAND;
+		targetSlot = EquipmentSlot::LEFT_HAND;
 	}
-	else if (dynamic_cast<Greatsword*>(this) || dynamic_cast<GreatAxe*>(this) || 
-			 dynamic_cast<Longbow*>(this))
+	else if (dynamic_cast<Longbow*>(this))
 	{
-		// Pure two-handed weapons
-		targetSlot = EquipmentSlot::MAIN_HAND;
-		useTwoHanded = true;
+		// Bows go in missile weapon slot
+		targetSlot = EquipmentSlot::MISSILE_WEAPON;
 	}
-	else if (dynamic_cast<LongSword*>(this) || dynamic_cast<BattleAxe*>(this) || 
-			 dynamic_cast<WarHammer*>(this) || dynamic_cast<Staff*>(this))
+	else
 	{
-		// Versatile weapons - check if user wants two-handed
-		targetSlot = EquipmentSlot::MAIN_HAND;
+		// For regular weapons, check dual-wield possibility
+		auto rightHandWeapon = player->get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
+		auto leftHandWeapon = player->get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
 		
-		// If off-hand is free, ask if they want to use two-handed
-		if (!player->isSlotOccupied(EquipmentSlot::OFF_HAND))
+		// Get weapon sizes (need to map from Pickable* to weapon data)
+		WeaponSize currentWeaponSize = get_weapon_size();
+		
+		// If right hand is empty, equip there by default
+		if (!rightHandWeapon)
 		{
-			// For now, default to one-handed unless off-hand is empty
-			useTwoHanded = false;
-			game.message(WHITE_BLACK_PAIR, "Using " + owner.actorData.name + " one-handed. Use 'T' to toggle two-handed grip.", true);
+			targetSlot = EquipmentSlot::RIGHT_HAND;
 		}
+		// If left hand is empty and player wants to dual-wield
+		else if (!leftHandWeapon)
+		{
+			// Check if this weapon can be off-hand
+			if (can_be_off_hand(currentWeaponSize))
+			{
+				// Ask player which hand to use
+				game.message(WHITE_BLACK_PAIR, "Equip in: (R)ight hand, (L)eft hand (off-hand), or (C)ancel?", true);
+				int choice = getch();
+				
+				switch (choice)
+				{
+				case 'r': case 'R':
+					// Unequip current right hand weapon first
+					if (rightHandWeapon)
+					{
+						player->unequip_item(EquipmentSlot::RIGHT_HAND);
+						game.message(WHITE_BLACK_PAIR, "You unequip your main hand weapon.", true);
+					}
+					targetSlot = EquipmentSlot::RIGHT_HAND;
+					break;
+				case 'l': case 'L':
+					// Validate dual-wield compatibility
+					if (validate_dual_wield(rightHandWeapon, &owner))
+					{
+						targetSlot = EquipmentSlot::LEFT_HAND;
+						game.message(WHITE_BLACK_PAIR, "Dual-wielding setup!", true);
+					}
+					else
+					{
+						game.message(WHITE_BLACK_PAIR, "Cannot dual-wield: Off-hand weapon must be smaller than main hand.", true);
+						return false;
+					}
+					break;
+				case 'c': case 'C':
+					game.message(WHITE_BLACK_PAIR, "Equipping cancelled.", true);
+					return false;
+				default:
+					game.message(WHITE_BLACK_PAIR, "Invalid choice. Equipping in right hand.", true);
+					targetSlot = EquipmentSlot::RIGHT_HAND;
+					break;
+				}
+			}
+			else
+			{
+				// Weapon too large for off-hand, replace main hand
+				if (rightHandWeapon)
+				{
+					player->unequip_item(EquipmentSlot::RIGHT_HAND);
+					game.message(WHITE_BLACK_PAIR, "You unequip your main hand weapon.", true);
+				}
+				targetSlot = EquipmentSlot::RIGHT_HAND;
+			}
+		}
+		// Both hands occupied
 		else
 		{
-			useTwoHanded = false;
+			game.message(WHITE_BLACK_PAIR, "Both hands occupied. Which to replace: (R)ight hand or (L)eft hand?", true);
+			int choice = getch();
+			
+			switch (choice)
+			{
+			case 'r': case 'R':
+				player->unequip_item(EquipmentSlot::RIGHT_HAND);
+				targetSlot = EquipmentSlot::RIGHT_HAND;
+				break;
+			case 'l': case 'L':
+				// Validate if this weapon can be off-hand
+				if (validate_dual_wield(rightHandWeapon, &owner))
+				{
+					player->unequip_item(EquipmentSlot::LEFT_HAND);
+					targetSlot = EquipmentSlot::LEFT_HAND;
+				}
+				else
+				{
+					game.message(WHITE_BLACK_PAIR, "Cannot use as off-hand weapon.", true);
+					return false;
+				}
+				break;
+			default:
+				game.message(WHITE_BLACK_PAIR, "Invalid choice.", true);
+				return false;
+			}
 		}
 	}
 
 	// Check if we can equip in the target slot
-	if (!player->canEquip(owner, targetSlot, useTwoHanded))
+	if (!player->can_equip_item(owner, targetSlot))
 	{
-		if (useTwoHanded)
-		{
-			game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - your off-hand is occupied!", true);
-		}
-		else if (targetSlot == EquipmentSlot::OFF_HAND)
-		{
-			game.message(WHITE_BLACK_PAIR, "Cannot equip shield - you're using a two-handed weapon!", true);
-		}
-		else
-		{
-			game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - slot is occupied!", true);
-		}
+		game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - slot is occupied!", true);
 		return false; // Don't consume turn if can't equip
 	}
 
@@ -211,22 +357,21 @@ bool Weapon::use(Item& owner, Creature& wearer)
 		wearer.container->inv.erase(it);
 		
 		// Equip the item in the new equipment system
-		if (player->equipItem(std::move(item), targetSlot, useTwoHanded))
+		if (player->equip_item(std::move(item), targetSlot))
 		{
 			// Update combat stats
-			if (targetSlot == EquipmentSlot::MAIN_HAND)
+			if (targetSlot == EquipmentSlot::RIGHT_HAND)
 			{
 				wearer.attacker->roll = this->roll;
 				
 				// Apply ranged state if applicable
-				if (isRanged())
+				if (is_ranged())
 				{
 					wearer.add_state(ActorState::IS_RANGED);
 				}
 			}
 			
-			game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + 
-						 (useTwoHanded ? " (two-handed)." : "."), true);
+			game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + ".", true);
 			return true;
 		}
 		else
@@ -240,7 +385,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 }
 
 // Implement the Dagger class
-bool Dagger::isRanged() const
+bool Dagger::is_ranged() const
 {
 	return false;
 }
@@ -262,7 +407,7 @@ void Dagger::load(const json& j)
 }
 
 // Implement the LongSword class
-bool LongSword::isRanged() const
+bool LongSword::is_ranged() const
 {
 	return false;
 }
@@ -284,7 +429,7 @@ void LongSword::load(const json& j)
 }
 
 // Implement the ShortSword class
-bool ShortSword::isRanged() const
+bool ShortSword::is_ranged() const
 {
 	return false;
 }
@@ -306,7 +451,7 @@ void ShortSword::load(const json& j)
 }
 
 // Implement the Longbow class
-bool Longbow::isRanged() const
+bool Longbow::is_ranged() const
 {
 	return true;
 }
@@ -328,7 +473,7 @@ void Longbow::load(const json& j)
 }
 
 // Implement the Staff class
-bool Staff::isRanged() const
+bool Staff::is_ranged() const
 {
 	return false;
 }
@@ -350,7 +495,7 @@ throw std::runtime_error("Invalid JSON format for Staff");
 }
 
 	// Implement the Greatsword class
-	bool Greatsword::isRanged() const
+	bool Greatsword::is_ranged() const
 	{
 		return false;
 	}
@@ -372,7 +517,7 @@ throw std::runtime_error("Invalid JSON format for Staff");
 	}
 
 	// Implement the BattleAxe class
-	bool BattleAxe::isRanged() const
+	bool BattleAxe::is_ranged() const
 	{
 		return false;
 	}
@@ -394,7 +539,7 @@ throw std::runtime_error("Invalid JSON format for Staff");
 	}
 
 	// Implement the GreatAxe class
-	bool GreatAxe::isRanged() const
+	bool GreatAxe::is_ranged() const
 	{
 		return false;
 	}
@@ -416,7 +561,7 @@ throw std::runtime_error("Invalid JSON format for Staff");
 	}
 
 	// Implement the WarHammer class
-	bool WarHammer::isRanged() const
+	bool WarHammer::is_ranged() const
 	{
 		return false;
 	}
@@ -438,7 +583,7 @@ throw std::runtime_error("Invalid JSON format for Staff");
 	}
 
 	// Implement the Shield class
-	bool Shield::isRanged() const
+	bool Shield::is_ranged() const
 	{
 		return false;
 	}

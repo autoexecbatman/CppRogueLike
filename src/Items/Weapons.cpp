@@ -50,6 +50,38 @@ void from_json(const json& j, Weapons& w)
 		w.handRequirement = HandRequirement::ONE_HANDED;
 	}
 	
+	// Load weapon size with default to MEDIUM
+	if (j.contains("weaponSize"))
+	{
+		std::string sizeStr;
+		j.at("weaponSize").get_to(sizeStr);
+		
+		if (sizeStr == "TINY")
+		{
+			w.weaponSize = WeaponSize::TINY;
+		}
+		else if (sizeStr == "SMALL")
+		{
+			w.weaponSize = WeaponSize::SMALL;
+		}
+		else if (sizeStr == "LARGE")
+		{
+			w.weaponSize = WeaponSize::LARGE;
+		}
+		else if (sizeStr == "HUGE")
+		{
+			w.weaponSize = WeaponSize::HUGE;
+		}
+		else
+		{
+			w.weaponSize = WeaponSize::MEDIUM; // Default
+		}
+	}
+	else
+	{
+		w.weaponSize = WeaponSize::MEDIUM; // Default
+	}
+	
 	j.at("hitBonusRange").get_to(w.hitBonusRange);
 	j.at("damageBonusRange").get_to(w.damageBonusRange);
 	j.at("specialProperties").get_to(w.specialProperties);
@@ -66,10 +98,10 @@ void from_json(const json& j, Weapons& w)
 }
 
 // Two-handed weapon methods implementation
-std::string Weapons::getDamageRoll(bool twoHanded) const noexcept
+std::string Weapons::get_damage_roll(bool twoHanded) const noexcept
 {
 	// For versatile weapons, use two-handed damage if available and requested
-	if (twoHanded && isVersatile() && !damageRollTwoHanded.empty())
+	if (twoHanded && is_versatile() && !damageRollTwoHanded.empty())
 	{
 		return damageRollTwoHanded;
 	}
@@ -110,31 +142,31 @@ std::vector<Weapons> loadWeapons()
 }
 
 // Enhanced bonus calculation methods
-int Weapons::getMinHitBonus() const
+int Weapons::get_min_hit_bonus() const
 {
 	if (hitBonusRange.empty()) return enhancementLevel;
 return hitBonusRange[0] + enhancementLevel;
 }
 
-int Weapons::getMaxHitBonus() const
+int Weapons::get_max_hit_bonus() const
 {
 if (hitBonusRange.empty()) return enhancementLevel;
 return hitBonusRange[1] + enhancementLevel;
 }
 
-int Weapons::getMinDamageBonus() const
+int Weapons::get_min_damage_bonus() const
 {
 if (damageBonusRange.empty()) return enhancementLevel;
 return damageBonusRange[0] + enhancementLevel;
 }
 
-int Weapons::getMaxDamageBonus() const
+int Weapons::get_max_damage_bonus() const
 {
 if (damageBonusRange.empty()) return enhancementLevel;
 return damageBonusRange[1] + enhancementLevel;
 }
 
-std::string Weapons::getDisplayName() const
+std::string Weapons::get_display_name() const
 {
 if (enhancementLevel > 0)
 	{
@@ -144,12 +176,12 @@ if (enhancementLevel > 0)
 }
 
 // Enhancement methods
-void Weapons::setEnhancementLevel(int level)
+void Weapons::set_enhancement_level(int level)
 {
 	enhancementLevel = (level >= 0) ? level : 0;
 }
 
-void Weapons::enhanceWeapon(int levels)
+void Weapons::enhance_weapon(int levels)
 {
 	if (levels > 0)
 	{
@@ -163,11 +195,11 @@ void Weapons::print_chart()
 
 	for (const auto& weapon : weaponChart)
 	{
-		std::cout << "name: " << weapon.getDisplayName() << std::endl;
+		std::cout << "name: " << weapon.get_display_name() << std::endl;
 		std::cout << "type: " << weapon.type << std::endl;
 		std::cout << "damageRoll: " << weapon.damageRoll << std::endl;
-		std::cout << "hitBonusRange: " << weapon.getMinHitBonus() << "-" << weapon.getMaxHitBonus() << std::endl;
-		std::cout << "damageBonusRange: " << weapon.getMinDamageBonus() << "-" << weapon.getMaxDamageBonus() << std::endl;
+		std::cout << "hitBonusRange: " << weapon.get_min_hit_bonus() << "-" << weapon.get_max_hit_bonus() << std::endl;
+		std::cout << "damageBonusRange: " << weapon.get_min_damage_bonus() << "-" << weapon.get_max_damage_bonus() << std::endl;
 		std::cout << "enhancementLevel: " << weapon.enhancementLevel << std::endl;
 		std::cout << "specialProperties: ";
 		for (const auto& i : weapon.specialProperties)
@@ -177,4 +209,34 @@ void Weapons::print_chart()
 		std::cout << std::endl;
 	}
 
+}
+
+// AD&D 2e Two-Weapon Fighting validation methods
+bool Weapons::is_compatible_off_hand(const Weapons& mainHandWeapon) const noexcept
+{
+	// Off-hand weapon must be smaller than or equal to main hand weapon
+	// AND must be SMALL or TINY size
+	return can_be_off_hand() && (weaponSize <= mainHandWeapon.weaponSize);
+}
+
+bool Weapons::can_dual_wield(const Weapons& mainHand, const Weapons& offHand) noexcept
+{
+	// AD&D 2e Two-Weapon Fighting Rules:
+	// 1. Main hand weapon must be one-handed and MEDIUM or smaller
+	// 2. Off-hand weapon must be SMALL or TINY
+	// 3. Off-hand weapon must be smaller than or equal to main hand
+	// 4. Both weapons must be one-handed
+	
+	if (!mainHand.can_be_main_hand() || !offHand.can_be_off_hand())
+	{
+		return false;
+	}
+	
+	// Off-hand must be smaller than or equal to main hand
+	if (offHand.weaponSize > mainHand.weaponSize)
+	{
+		return false;
+	}
+	
+	return true;
 }

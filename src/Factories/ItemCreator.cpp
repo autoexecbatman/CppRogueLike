@@ -135,9 +135,9 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_dagger(Vector2D pos, int enha
         if (weaponData != game.weapons.end())
         {
             Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.setEnhancementLevel(enhancementLevel);
+            enhancedWeapon.set_enhancement_level(enhancementLevel);
             
-            item->actorData.name = enhancedWeapon.getDisplayName();
+            item->actorData.name = enhancedWeapon.get_display_name();
             item->value = calculate_enhanced_value(2, enhancementLevel);
             
             // Enhanced weapons get visual distinction
@@ -158,9 +158,9 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_short_sword(Vector2D pos, int
         if (weaponData != game.weapons.end())
         {
             Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.setEnhancementLevel(enhancementLevel);
+            enhancedWeapon.set_enhancement_level(enhancementLevel);
             
-            item->actorData.name = enhancedWeapon.getDisplayName();
+            item->actorData.name = enhancedWeapon.get_display_name();
             item->value = calculate_enhanced_value(10, enhancementLevel);
             item->actorData.color = WHITE_GREEN_PAIR;
         }
@@ -179,9 +179,9 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_long_sword(Vector2D pos, int 
         if (weaponData != game.weapons.end())
         {
             Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.setEnhancementLevel(enhancementLevel);
+            enhancedWeapon.set_enhancement_level(enhancementLevel);
             
-            item->actorData.name = enhancedWeapon.getDisplayName();
+            item->actorData.name = enhancedWeapon.get_display_name();
             item->value = calculate_enhanced_value(15, enhancementLevel);
             item->actorData.color = WHITE_GREEN_PAIR;
         }
@@ -200,9 +200,9 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_staff(Vector2D pos, int enhan
         if (weaponData != game.weapons.end())
         {
             Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.setEnhancementLevel(enhancementLevel);
+            enhancedWeapon.set_enhancement_level(enhancementLevel);
             
-            item->actorData.name = enhancedWeapon.getDisplayName();
+            item->actorData.name = enhancedWeapon.get_display_name();
             item->value = calculate_enhanced_value(6, enhancementLevel);
             item->actorData.color = WHITE_GREEN_PAIR;
         }
@@ -221,9 +221,9 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_longbow(Vector2D pos, int enh
         if (weaponData != game.weapons.end())
         {
             Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.setEnhancementLevel(enhancementLevel);
+            enhancedWeapon.set_enhancement_level(enhancementLevel);
             
-            item->actorData.name = enhancedWeapon.getDisplayName();
+            item->actorData.name = enhancedWeapon.get_display_name();
             item->value = calculate_enhanced_value(75, enhancementLevel);
             item->actorData.color = WHITE_GREEN_PAIR;
         }

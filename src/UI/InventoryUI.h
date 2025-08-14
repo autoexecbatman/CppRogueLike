@@ -18,32 +18,32 @@ public:
     
 private:
     // Window management
-    void createWindows();
-    void destroyWindows();
-    void refreshWindows();
+    void create_windows();
+    void destroy_windows();
+    void refresh_windows();
     
     // Display methods
-    void displayInventoryItems(Player* player, const std::vector<std::pair<Item*, bool>>& allItems);
-    void displayEquipmentSlots(Player* player);
-    void displayInstructions(int itemCount);
+    void display_inventory_items(Player* player);
+    void display_equipment_slots(Player* player);
+    void display_instructions();
     
     // Input handling
-    bool handleInput(Creature& owner, Player* player, const std::vector<std::pair<Item*, bool>>& allItems, int itemCount);
-    bool handleItemSelection(Creature& owner, Player* player, const std::vector<std::pair<Item*, bool>>& allItems, int itemIndex);
-    bool handleToggleGrip(Player* player);
+    bool handle_inventory_input(Creature& owner, Player* player);
+    bool handle_backpack_selection(Creature& owner, Player* player, int itemIndex);
+    bool handle_equipment_selection(Creature& owner, Player* player, int input);
     
     // Helper methods
-    std::vector<std::pair<Item*, bool>> buildItemList(Creature& owner, Player* player);
-    void showItemInfo(Item* item, int y);
-    void restoreGameDisplay();
+    std::vector<std::pair<Item*, bool>> build_item_list(Creature& owner, Player* player);
+    void show_item_info(Item* item, int y);
+    void restore_game_display();
     
     // Window pointers
     WINDOW* inventoryWindow;
     WINDOW* equipmentWindow;
     
     // Layout calculation methods
-    int getInventoryWidth() const { return COLS / 2; }
-    int getEquipmentWidth() const { return COLS - getInventoryWidth(); }
+    int get_inventory_width() const { return COLS / 2; }
+    int get_equipment_width() const { return COLS - get_inventory_width(); }
     
     // Layout constants
     static constexpr int INSTRUCTIONS_Y_OFFSET = 2;

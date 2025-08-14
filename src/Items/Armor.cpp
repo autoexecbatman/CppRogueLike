@@ -30,11 +30,11 @@ bool Armor::use(Item& owner, Creature& wearer)
 	
 	// For players, use the new equipment system
 	// Check if this armor is already equipped
-	Item* currentArmor = player->getEquippedItem(EquipmentSlot::ARMOR);
+	Item* currentArmor = player->get_equipped_item_in_slot(EquipmentSlot::BODY);
 	if (currentArmor == &owner)
 	{
 		// Unequip this armor - the unequipItem method handles AC update and messaging
-		player->unequipItem(EquipmentSlot::ARMOR);
+		player->unequip_item(EquipmentSlot::BODY);
 		game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
 		return true;
 	}
@@ -55,7 +55,7 @@ bool Armor::use(Item& owner, Creature& wearer)
 	if (itemToEquip)
 	{
 		// Equip the armor using the equipment system - equipItem handles AC update and messaging
-		if (player->equipItem(std::move(itemToEquip), EquipmentSlot::ARMOR))
+		if (player->equip_item(std::move(itemToEquip), EquipmentSlot::BODY))
 		{
 			game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
 			return true;

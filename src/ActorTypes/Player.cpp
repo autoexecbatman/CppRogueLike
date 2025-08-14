@@ -288,7 +288,7 @@ void Player::animate_resting()
 	refresh();
 }
 
-void Player::getStuckInWeb(int duration, int strength, Web* web)
+void Player::get_stuck_in_web(int duration, int strength, Web* web)
 {
 	webStuckTurns = duration;
 	webStrength = strength;
@@ -298,7 +298,7 @@ void Player::getStuckInWeb(int duration, int strength, Web* web)
 		std::to_string(duration) + " turns!", true);
 }
 
-bool Player::tryBreakWeb()
+bool Player::try_break_web()
 {
 	// Calculate chance to break free based on strength vs web strength
 	int breakChance = 20 + (strength * 5) - (webStrength * 10);
@@ -346,30 +346,24 @@ bool Player::tryBreakWeb()
 	return false;
 }
 
-bool Player::equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoHanded)
+bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
-	if (!item || !canEquip(*item, slot, twoHanded))
+	if (!item || !can_equip_item(*item, slot))
 	{
 		return false;
 	}
 
 	// Unequip existing item in the slot first
-	unequipItem(slot);
-
-	// For two-handed weapons, also unequip off-hand
-	if (twoHanded && slot == EquipmentSlot::MAIN_HAND)
-	{
-		unequipItem(EquipmentSlot::OFF_HAND);
-	}
+	unequip_item(slot);
 
 	// Add equipped item
-	equippedItems.emplace_back(std::move(item), slot, twoHanded);
+	equippedItems.emplace_back(std::move(item), slot);
 	
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
 	
 	// Update armor class if armor or shield was equipped
-	if (slot == EquipmentSlot::ARMOR || slot == EquipmentSlot::OFF_HAND)
+	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		destructible->update_armor_class(*this);
 		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
@@ -379,7 +373,7 @@ bool Player::equipItem(std::unique_ptr<Item> item, EquipmentSlot slot, bool twoH
 }
 
 // Equipment system implementation
-bool Player::canEquip(const Item& item, EquipmentSlot slot, bool twoHanded) const
+bool Player::can_equip_item(const Item& item, EquipmentSlot slot) const
 {
 	// Basic slot validation
 	if (slot == EquipmentSlot::NONE)
@@ -393,30 +387,13 @@ bool Player::canEquip(const Item& item, EquipmentSlot slot, bool twoHanded) cons
 		return false;
 	}
 
-	// For two-handed weapons or when using versatile weapons two-handed
-	if (twoHanded)
-	{
-		// Cannot equip two-handed if off-hand is occupied
-		if (isSlotOccupied(EquipmentSlot::OFF_HAND))
-		{
-			return false;
-		}
-	}
-
-	// For off-hand items
-	if (slot == EquipmentSlot::OFF_HAND)
-	{
-		// Cannot equip off-hand if already using two-handed weapon
-		if (hasEquippedTwoHandedWeapon())
-		{
-			return false;
-		}
-	}
+	// TODO: Add specific item type validation for each slot
+	// For now, allow any item in any slot
 
 	return true;
 }
 
-bool Player::unequipItem(EquipmentSlot slot)
+bool Player::unequip_item(EquipmentSlot slot)
 {
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
@@ -427,7 +404,7 @@ bool Player::unequipItem(EquipmentSlot slot)
 		it->item->remove_state(ActorState::IS_EQUIPPED);
 		
 		// Reset combat stats if main hand weapon
-		if (slot == EquipmentSlot::MAIN_HAND)
+		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
 			attacker->roll = "D2"; // Reset to unarmed
 			remove_state(ActorState::IS_RANGED); // Remove ranged state
@@ -440,7 +417,7 @@ bool Player::unequipItem(EquipmentSlot slot)
 		equippedItems.erase(it);
 		
 		// Update armor class if armor or shield was unequipped
-		if (slot == EquipmentSlot::ARMOR || slot == EquipmentSlot::OFF_HAND)
+		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			destructible->update_armor_class(*this);
 			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
@@ -452,7 +429,7 @@ bool Player::unequipItem(EquipmentSlot slot)
 	return false;
 }
 
-Item* Player::getEquippedItem(EquipmentSlot slot) const
+Item* Player::get_equipped_item_in_slot(EquipmentSlot slot) const
 {
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
@@ -460,90 +437,88 @@ Item* Player::getEquippedItem(EquipmentSlot slot) const
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
 }
 
-bool Player::isSlotOccupied(EquipmentSlot slot) const
+bool Player::is_slot_occupied(EquipmentSlot slot) const
 {
-	return getEquippedItem(slot) != nullptr;
+	return get_equipped_item_in_slot(slot) != nullptr;
 }
 
-bool Player::hasEquippedTwoHandedWeapon() const
+bool Player::is_dual_wielding() const
 {
-	// Check main hand for two-handed weapon or versatile weapon used two-handed
-	auto mainHandItem = getEquippedItem(EquipmentSlot::MAIN_HAND);
-	if (!mainHandItem)
+	// Check if both hands have weapons equipped
+	auto rightHand = get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
+	auto leftHand = get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+	
+	if (!rightHand || !leftHand)
 	{
 		return false;
 	}
 	
-	// Find the equipped item details
-	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
-		[](const EquippedItem& equipped) { return equipped.slot == EquipmentSlot::MAIN_HAND; });
-	
-	if (it != equippedItems.end())
+	// Check if left hand item is a weapon (not a shield)
+	if (dynamic_cast<Shield*>(leftHand->pickable.get()))
 	{
-		// Check if it's being used two-handed
-		return it->twoHandedGrip;
+		return false; // Shield, not dual wielding
+	}
+	
+	// Check if left hand item is a weapon
+	if (dynamic_cast<Weapon*>(leftHand->pickable.get()))
+	{
+		return true; // Both hands have weapons
 	}
 	
 	return false;
 }
 
-std::string Player::getEquippedWeaponDamageRoll() const
+std::string Player::get_equipped_weapon_damage_roll() const
 {
-	auto mainHandWeapon = getEquippedItem(EquipmentSlot::MAIN_HAND);
-	if (!mainHandWeapon)
+	auto rightHandWeapon = get_equipped_item_in_slot(EquipmentSlot::RIGHT_HAND);
+	if (!rightHandWeapon)
 	{
 		return "D2"; // Unarmed damage
 	}
 	
-	// Find if weapon is being used two-handed
-	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
-		[](const EquippedItem& equipped) { return equipped.slot == EquipmentSlot::MAIN_HAND; });
-	
-	bool twoHanded = (it != equippedItems.end()) ? it->twoHandedGrip : false;
-	
-	// Get damage roll based on weapon type
-	if (auto* dagger = dynamic_cast<Dagger*>(mainHandWeapon->pickable.get()))
+	// Get damage roll from the weapon's roll property directly
+	if (auto* weapon = dynamic_cast<Weapon*>(rightHandWeapon->pickable.get()))
 	{
-		return dagger->roll;
-	}
-	else if (auto* shortSword = dynamic_cast<ShortSword*>(mainHandWeapon->pickable.get()))
-	{
-		return shortSword->roll;
-	}
-	else if (auto* longSword = dynamic_cast<LongSword*>(mainHandWeapon->pickable.get()))
-	{
-		// For versatile weapons, check if using two-handed
-		return twoHanded ? "D10" : longSword->roll;
-	}
-	else if (auto* longbow = dynamic_cast<Longbow*>(mainHandWeapon->pickable.get()))
-	{
-		return longbow->roll;
-	}
-	else if (auto* staff = dynamic_cast<Staff*>(mainHandWeapon->pickable.get()))
-	{
-		// Staff is versatile: D6 one-handed, D8 two-handed
-		return twoHanded ? "D8" : staff->roll;
-	}
-	else if (auto* greatsword = dynamic_cast<Greatsword*>(mainHandWeapon->pickable.get()))
-	{
-		return greatsword->roll; // D12
-	}
-	else if (auto* battleAxe = dynamic_cast<BattleAxe*>(mainHandWeapon->pickable.get()))
-	{
-		// Battle axe is versatile: D8 one-handed, D10 two-handed
-		return twoHanded ? "D10" : battleAxe->roll;
-	}
-	else if (auto* greatAxe = dynamic_cast<GreatAxe*>(mainHandWeapon->pickable.get()))
-	{
-		return greatAxe->roll; // D12
-	}
-	else if (auto* warHammer = dynamic_cast<WarHammer*>(mainHandWeapon->pickable.get()))
-	{
-		// War hammer is versatile: D8 one-handed, D10 two-handed
-		return twoHanded ? "D10" : warHammer->roll;
+		return weapon->roll; // All weapons have a roll property
 	}
 	
-	return "D2"; // Fallback for unknown weapons
+	return "D2"; // Fallback for non-weapons
+}
+
+Player::DualWieldInfo Player::get_dual_wield_info() const
+{
+	DualWieldInfo info;
+	
+	// Check if dual wielding
+	if (!is_dual_wielding())
+	{
+		return info; // Not dual wielding
+	}
+	
+	info.isDualWielding = true;
+	
+	// AD&D 2e Two-Weapon Fighting penalties
+	// Base penalties: -2 main hand, -4 off-hand
+	info.mainHandPenalty = -2;
+	info.offHandPenalty = -4;
+	
+	// TODO: Add proficiency check to reduce penalties
+	// If player has Two-Weapon Fighting proficiency:
+	// - Main hand penalty becomes 0
+	// - Off-hand penalty becomes -2
+	
+	// Get off-hand weapon damage roll using extensible approach
+	auto leftHandWeapon = get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
+	if (leftHandWeapon)
+	{
+		// Use the weapon's roll property directly
+		if (auto* weapon = dynamic_cast<Weapon*>(leftHandWeapon->pickable.get()))
+		{
+			info.offHandDamageRoll = weapon->roll;
+		}
+	}
+	
+	return info;
 }
 
 // end of file: Player.cpp

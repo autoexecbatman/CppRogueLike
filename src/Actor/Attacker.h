@@ -19,6 +19,8 @@ public:
 	Attacker(std::string roll);
 
 	void attack(Creature& attacker, Creature& target);
+	void attack_with_dual_wield(Creature& attacker, Creature& target);
+	void perform_single_attack(Creature& attacker, Creature& target, const std::string& damageRoll, int attackPenalty, const std::string& handName);
 	
 	void load(const json& j) override;
 	void save(json& j) override;

@@ -116,11 +116,15 @@ void Destructible::die(Creature& owner)
 	// With this:
 	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
-	// remove the actor from the game
-	std::erase_if(game.creatures, [&owner](const auto& c) { return c.get() == &owner; });
-
-	// add the item to the game
+	// DEFERRED CLEANUP: Don't remove immediately, let the game loop handle it
+	// Mark the creature for removal instead of removing it immediately
+	// This prevents dangling references during combat
+	
+	// Add the corpse to the game
 	game.container->add(std::move(corpse));
+	
+	// Note: The creature will be removed from game.creatures later
+	// when it's safe to do so (e.g., at the end of the turn)
 }
 
 //====
@@ -165,7 +169,7 @@ void Destructible::update_armor_class(Creature& owner)
 	if (auto* player = dynamic_cast<Player*>(&owner))
 	{
 		// Use new equipment system for players
-		Item* equippedArmor = player->getEquippedItem(EquipmentSlot::ARMOR);
+		Item* equippedArmor = player->get_equipped_item_in_slot(EquipmentSlot::BODY);
 		if (equippedArmor)
 		{
 			if (auto armor = dynamic_cast<Armor*>(equippedArmor->pickable.get()))
@@ -183,14 +187,14 @@ void Destructible::update_armor_class(Creature& owner)
 			}
 		}
 		
-		// Check for shield in off-hand
-		Item* equippedShield = player->getEquippedItem(EquipmentSlot::OFF_HAND);
+		// Check for shield in left hand
+		Item* equippedShield = player->get_equipped_item_in_slot(EquipmentSlot::LEFT_HAND);
 		if (equippedShield)
 		{
 			if (auto shield = dynamic_cast<Shield*>(equippedShield->pickable.get()))
 			{
 				// Add the shield's AC bonus
-				int shieldBonus = shield->getArmorClassBonus();
+				int shieldBonus = shield->get_ac_bonus();
 				calculatedAC += shieldBonus;
 
 				// Log the shield bonus if it's the player

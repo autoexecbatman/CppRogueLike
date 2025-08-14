@@ -79,6 +79,7 @@ public:
 	void update();
 	void render();
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
+	void cleanup_dead_creatures(); // Remove dead creatures from the game
 	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void spawn_creatures() const;
 	void render_items(std::span<std::unique_ptr<Item>> items);
