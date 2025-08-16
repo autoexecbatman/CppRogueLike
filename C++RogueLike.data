@@ -747,8 +747,7 @@
 		"name": "Long Sword",
 		"type": "Melee",
 		"damageRoll": "1d8",
-		"damageRollTwoHanded": "1d10",
-		"handRequirement": "VERSATILE",
+		"handRequirement": "ONE_HANDED",
 		"hitBonusRange": [ 0, 2 ],
 		"damageBonusRange": [ 1, 4 ],
 		"specialProperties": [ "None", "Flaming", "Frost" ]
@@ -766,8 +765,7 @@
 		"name": "Battle Axe",
 		"type": "Melee",
 		"damageRoll": "1d8",
-		"damageRollTwoHanded": "1d10",
-		"handRequirement": "VERSATILE",
+		"handRequirement": "ONE_HANDED",
 		"hitBonusRange": [ 0, 2 ],
 		"damageBonusRange": [ 1, 4 ],
 		"specialProperties": [ "None", "Cleaving" ]
@@ -785,8 +783,7 @@
 		"name": "War Hammer",
 		"type": "Melee",
 		"damageRoll": "1d8",
-		"damageRollTwoHanded": "1d10",
-		"handRequirement": "VERSATILE",
+		"handRequirement": "ONE_HANDED",
 		"hitBonusRange": [ 0, 2 ],
 		"damageBonusRange": [ 1, 4 ],
 		"specialProperties": [ "None", "Armor Piercing" ]
@@ -804,8 +801,7 @@
 		"name": "Staff",
 		"type": "Magic",
 		"damageRoll": "1d6",
-		"damageRollTwoHanded": "1d8",
-		"handRequirement": "VERSATILE",
+		"handRequirement": "ONE_HANDED",
 		"hitBonusRange": [ 0, 1 ],
 		"damageBonusRange": [ 0, 2 ],
 		"specialProperties": [ "None", "Arcane Boost", "Healing Touch" ]
