@@ -5,9 +5,8 @@
 
 enum class HandRequirement
 {
-	ONE_HANDED,     // Dagger, short sword
-	TWO_HANDED,     // Greatsword, longbow
-	VERSATILE,      // Longsword, battle axe (can be 1H or 2H)
+	ONE_HANDED,     // Dagger, short sword, longsword, battle axe, war hammer, staff
+	TWO_HANDED,     // Greatsword, great axe, longbow
 	OFF_HAND_ONLY   // Shield, buckler
 };
 
@@ -18,7 +17,7 @@ enum class WeaponSize
 	SMALL,    // Short sword, hand axe, club - can be off-hand vs MEDIUM+ main hand
 	MEDIUM,   // Long sword, battle axe, mace - main hand weapon
 	LARGE,    // Two-handed sword, halberd - cannot dual wield
-	HUGE      // Giant weapons - cannot dual wield
+	GIANT      // Giant weapons - cannot dual wield
 };
 
 struct Weapons
@@ -47,9 +46,8 @@ struct Weapons
 
 	// Two-handed weapon methods
 	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
-	bool is_versatile() const noexcept { return handRequirement == HandRequirement::VERSATILE; }
-	bool can_use_one_handed() const noexcept { return handRequirement == HandRequirement::ONE_HANDED || handRequirement == HandRequirement::VERSATILE; }
-	bool can_use_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED || handRequirement == HandRequirement::VERSATILE; }
+	bool can_use_one_handed() const noexcept { return handRequirement == HandRequirement::ONE_HANDED; }
+	bool can_use_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
 	std::string get_damage_roll(bool twoHanded = false) const noexcept;
 	
 	// AD&D 2e Two-Weapon Fighting methods

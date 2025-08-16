@@ -5,7 +5,8 @@
 #pragma once
 
 #include "../Persistent/Persistent.h"
-#include "../Items/Weapons.h" // For WeaponSize enum
+#include "../Items/Weapons.h" // For WeaponSize and HandRequirement enums
+
 class Actor;
 class Creature;
 class Item;
@@ -23,30 +24,30 @@ public:
 	virtual void load(const json& j) = 0;
 
 protected:
- enum class PickableType : int
- {
-  HEALER,
-  LIGHTNING_BOLT,
-  CONFUSER,
-  FIREBALL,
-  LONGSWORD,
-  DAGGER,
-  SHORTSWORD,
-  LONGBOW,
-  STAFF,
-  GREATSWORD,
-  BATTLE_AXE,
-  GREAT_AXE,
-  WAR_HAMMER,
-  SHIELD,
-  GOLD,
-  FOOD,
- CORPSE_FOOD,
-AMULET,
-LEATHER_ARMOR,
-CHAIN_MAIL,
-PLATE_MAIL
-};
+	enum class PickableType : int
+	{
+		HEALER,
+		LIGHTNING_BOLT,
+		CONFUSER,
+		FIREBALL,
+		LONGSWORD,
+		DAGGER,
+		SHORTSWORD,
+		LONGBOW,
+		STAFF,
+		GREATSWORD,
+		BATTLE_AXE,
+		GREAT_AXE,
+		WAR_HAMMER,
+		SHIELD,
+		GOLD,
+		FOOD,
+		CORPSE_FOOD,
+		AMULET,
+		LEATHER_ARMOR,
+		CHAIN_MAIL,
+		PLATE_MAIL
+	};
 
 	virtual PickableType get_type() const = 0;
 };
@@ -65,7 +66,11 @@ public:
 	virtual bool is_ranged() const = 0;
 	
 	// Determines if this weapon can be used both one-handed and two-handed
-	virtual bool is_versatile() const { return false; }
+	// REMOVED: Versatile weapons eliminated for simplicity
+	
+	// Extensible hand requirement system - replaces dynamic_cast chains
+	virtual HandRequirement get_hand_requirement() const { return HandRequirement::ONE_HANDED; }
+	bool is_two_handed() const noexcept { return get_hand_requirement() == HandRequirement::TWO_HANDED; }
 	
 	// AD&D 2e weapon size and dual-wield validation methods
 	virtual WeaponSize get_weapon_size() const;
@@ -94,7 +99,7 @@ public:
 	LongSword() { roll = "D8"; }
 
 	bool is_ranged() const override;
-	bool is_versatile() const override { return true; }
+	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
 	WeaponSize get_weapon_size() const override { return WeaponSize::MEDIUM; }
 	void save(json& j) override;
 	void load(const json& j) override;
@@ -121,6 +126,7 @@ public:
 	Longbow() { roll = "D8"; }
 
 	bool is_ranged() const override;
+	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::LONGBOW; }
@@ -133,7 +139,7 @@ public:
 	Staff() { roll = "D6"; }
 
 	bool is_ranged() const override;
-	bool is_versatile() const override { return true; }
+	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::STAFF; }
@@ -147,6 +153,7 @@ public:
 	Greatsword() { roll = "D12"; }
 
 	bool is_ranged() const override;
+	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::GREATSWORD; }
@@ -155,11 +162,11 @@ public:
 class BattleAxe : public Weapon
 {
 public:
-	// battle axe roll is 1d8 (1d10 when two-handed)
+	// battle axe roll is 1d8
 	BattleAxe() { roll = "D8"; }
 
 	bool is_ranged() const override;
-	bool is_versatile() const override { return true; }
+	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::BATTLE_AXE; }
@@ -172,6 +179,7 @@ public:
 	GreatAxe() { roll = "D12"; }
 
 	bool is_ranged() const override;
+	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::GREAT_AXE; }
@@ -180,11 +188,11 @@ public:
 class WarHammer : public Weapon
 {
 public:
-	// war hammer roll is 1d8 (1d10 when two-handed)
+	// war hammer roll is 1d8
 	WarHammer() { roll = "D8"; }
 
 	bool is_ranged() const override;
-	bool is_versatile() const override { return true; }
+	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::WAR_HAMMER; }
@@ -198,6 +206,7 @@ public:
 	Shield() { roll = "D4"; }
 
 	bool is_ranged() const override;
+	HandRequirement get_hand_requirement() const override { return HandRequirement::OFF_HAND_ONLY; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SHIELD; }

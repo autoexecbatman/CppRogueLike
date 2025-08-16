@@ -362,12 +362,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 		auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
 		if (weapon)
 		{
-			// Check if it's a two-handed weapon by class type
-			bool isTwoHanded = (dynamic_cast<Greatsword*>(weapon) || 
-			                   dynamic_cast<GreatAxe*>(weapon) ||
-			                   dynamic_cast<Longbow*>(weapon));
-			
-			if (isTwoHanded)
+			if (weapon->is_two_handed())
 			{
 				// Two-handed weapon - also unequip left hand
 				unequip_item(EquipmentSlot::LEFT_HAND);
@@ -425,13 +420,8 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 		// Check for two-handed weapon restrictions
 		if (weapon)
 		{
-			// Check if it's a two-handed weapon by class type
-			bool isTwoHanded = (dynamic_cast<Greatsword*>(weapon) || 
-			                   dynamic_cast<GreatAxe*>(weapon) ||
-			                   dynamic_cast<Longbow*>(weapon));
-			
 			// Two-handed weapons can only go in RIGHT_HAND and require both hands free
-			if (isTwoHanded)
+			if (weapon->is_two_handed())
 			{
 				if (slot != EquipmentSlot::RIGHT_HAND)
 				{
@@ -446,16 +436,9 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 				if (rightHandItem)
 				{
 					auto* rightHandWeapon = dynamic_cast<Weapon*>(rightHandItem->pickable.get());
-					if (rightHandWeapon)
+					if (rightHandWeapon && rightHandWeapon->is_two_handed())
 					{
-						// Check if right hand has a two-handed weapon
-						bool rightHandIsTwoHanded = (dynamic_cast<Greatsword*>(rightHandWeapon) || 
-						                            dynamic_cast<GreatAxe*>(rightHandWeapon) ||
-						                            dynamic_cast<Longbow*>(rightHandWeapon));
-						if (rightHandIsTwoHanded)
-						{
-							return false; // Can't equip anything in left hand when two-handed weapon equipped
-						}
+						return false; // Can't equip anything in left hand when two-handed weapon equipped
 					}
 				}
 			}

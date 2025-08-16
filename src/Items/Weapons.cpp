@@ -16,12 +16,6 @@ void from_json(const json& j, Weapons& w)
 	j.at("type").get_to(w.type);
 	j.at("damageRoll").get_to(w.damageRoll);
 	
-	// Load optional damageRollTwoHanded for versatile weapons
-	if (j.contains("damageRollTwoHanded"))
-	{
-		j.at("damageRollTwoHanded").get_to(w.damageRollTwoHanded);
-	}
-	
 	// Load hand requirement with default to ONE_HANDED
 	if (j.contains("handRequirement"))
 	{
@@ -31,10 +25,6 @@ void from_json(const json& j, Weapons& w)
 		if (handReqStr == "TWO_HANDED")
 		{
 			w.handRequirement = HandRequirement::TWO_HANDED;
-		}
-		else if (handReqStr == "VERSATILE")
-		{
-			w.handRequirement = HandRequirement::VERSATILE;
 		}
 		else if (handReqStr == "OFF_HAND_ONLY")
 		{
@@ -70,7 +60,7 @@ void from_json(const json& j, Weapons& w)
 		}
 		else if (sizeStr == "HUGE")
 		{
-			w.weaponSize = WeaponSize::HUGE;
+			w.weaponSize = WeaponSize::GIANT;
 		}
 		else
 		{
@@ -100,14 +90,7 @@ void from_json(const json& j, Weapons& w)
 // Two-handed weapon methods implementation
 std::string Weapons::get_damage_roll(bool twoHanded) const noexcept
 {
-	// For versatile weapons, use two-handed damage if available and requested
-	if (twoHanded && is_versatile() && !damageRollTwoHanded.empty())
-	{
-		return damageRollTwoHanded;
-	}
-	
-	// For two-handed weapons, always use regular damage roll
-	// For one-handed weapons, always use regular damage roll
+	// Always use regular damage roll since VERSATILE removed
 	return damageRoll;
 }
 
