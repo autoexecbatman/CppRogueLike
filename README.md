@@ -6,7 +6,6 @@
 
 *Putting it simply Rouge with adnd2e mechanics and some inpiration from classics like ADOM, BG2 and Rogue.*
 
-## :construction: *** UNDER CONSTRUCTION! *** :construction:
 🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉⚔️🐉
 
 **Clone the repository**: Use Git to clone the repository or download it as a ZIP file.
