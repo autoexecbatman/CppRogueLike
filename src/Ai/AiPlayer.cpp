@@ -636,16 +636,8 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 			owner.destructible->xp += DEBUG_XP_AMOUNT;
 			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, owner.destructible->xp), true);
 			
-			// Check for level up (basic threshold check)
-			int currentLevel = dynamic_cast<Player*>(&owner)->playerLevel;
-			int xpRequired = currentLevel * 1000; // Simple progression: level 1 = 1000 XP, level 2 = 2000 XP, etc.
-			
-			if (owner.destructible->xp >= xpRequired)
-			{
-				dynamic_cast<Player*>(&owner)->playerLevel++;
-				LevelUpSystem::apply_level_up_benefits(owner, dynamic_cast<Player*>(&owner)->playerLevel);
-				game.message(WHITE_GREEN_PAIR, std::format("LEVEL UP! You are now level {}", dynamic_cast<Player*>(&owner)->playerLevel), true);
-			}
+			// Use the same level up system as natural progression
+			game.player->ai->levelup_update(*game.player);
 		}
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;

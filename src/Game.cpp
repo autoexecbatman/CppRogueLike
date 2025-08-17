@@ -975,6 +975,10 @@ void Game::dispay_levelup(int xpLevel)
 	// Apply all level up benefits through the new LevelUpSystem
 	LevelUpSystem::apply_level_up_benefits(*player, xpLevel);
 
+	// Clear screen before showing level up window
+	clear();
+	refresh();
+
 	// Create window for level up display
 	WINDOW* statsWindow = newwin(
 		22, // height
@@ -1058,10 +1062,12 @@ void Game::dispay_levelup(int xpLevel)
 
 	// Clean up
 	delwin(statsWindow);
+	
+	// Clear screen and restore game display properly
 	clear();
-
-	// Force game status to trigger a full update cycle
-	gameStatus = GameStatus::NEW_TURN;
+	game.render();
+	gui->gui_render();
+	refresh();
 }
 
 // display character sheet
