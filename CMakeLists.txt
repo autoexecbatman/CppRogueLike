@@ -219,6 +219,10 @@ set(SOURCE_FILES # Add Source Files Here !
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.h
+    ${PROJECT_SOURCE_DIR}/UI/LevelUpUI.cpp
+    ${PROJECT_SOURCE_DIR}/UI/LevelUpUI.h
+    ${PROJECT_SOURCE_DIR}/UI/CharacterSheetUI.cpp
+    ${PROJECT_SOURCE_DIR}/UI/CharacterSheetUI.h
 
     # Main
     ${PROJECT_SOURCE_DIR}/Game.cpp

@@ -35,6 +35,8 @@
 #include "Factories/ItemCreator.h"
 #include "Items/Armor.h"
 #include "Systems/LevelUpSystem.h"
+#include "UI/LevelUpUI.h"
+#include "UI/CharacterSheetUI.h"
 
 // added for DEBUGING AT PLAYER FEET
 #include "ActorTypes/Healer.h"
@@ -970,337 +972,19 @@ Creature* Game::get_actor(Vector2D pos) const noexcept
 	return nullptr;
 }
 
-void Game::dispay_levelup(int xpLevel)
+void Game::display_levelup(int xpLevel) 
 {
 	// Apply all level up benefits through the new LevelUpSystem
 	LevelUpSystem::apply_level_up_benefits(*player, xpLevel);
 
-	// Clear screen before showing level up window
-	clear();
-	refresh();
-
-	// Create window for level up display
-	WINDOW* statsWindow = newwin(
-		22, // height
-		60, // width
-		2,  // y
-		10  // x
-	);
-
-	box(statsWindow, 0, 0);
-
-	// Title
-	wattron(statsWindow, A_BOLD);
-	mvwprintw(statsWindow, 1, 20, "LEVEL UP: %s", player->playerClass.c_str());
-	wattroff(statsWindow, A_BOLD);
-
-	// Display basic character info
-	mvwprintw(statsWindow, 3, 2, "Name: %s", player->actorData.name.c_str());
-	mvwprintw(statsWindow, 3, 30, "Race: %s", player->playerRace.c_str());
-	mvwprintw(statsWindow, 4, 2, "Level: %d", xpLevel);
-	mvwprintw(statsWindow, 4, 30, "Experience: %d", player->destructible->xp);
-
-	// Display current stats
-	mvwprintw(statsWindow, 6, 2, "CURRENT STATS:");
-	mvwprintw(statsWindow, 7, 4, "Hit Points: %d/%d", player->destructible->hp, player->destructible->hpMax);
-	mvwprintw(statsWindow, 8, 4, "THAC0: %d", player->destructible->thaco);
-	mvwprintw(statsWindow, 9, 4, "Armor Class: %d", player->destructible->armorClass);
-	mvwprintw(statsWindow, 10, 4, "Damage Reduction: %d", player->destructible->dr);
-
-	// Display class-specific improvements that were applied
-	mvwprintw(statsWindow, 12, 2, "CLASS BENEFITS APPLIED:");
-
-	switch (player->playerClassState)
-	{
-	case Player::PlayerClassState::FIGHTER:
-		mvwprintw(statsWindow, 13, 4, "- Superior combat training applied");
-		mvwprintw(statsWindow, 14, 4, "- Hit dice: d10 + CON bonus");
-		if (xpLevel == 7)
-			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Extra attack gained (3/2)!");
-		else if (xpLevel == 13)
-			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Extra attack gained (2/1)!");
-		break;
-
-	case Player::PlayerClassState::ROGUE:
-		mvwprintw(statsWindow, 13, 4, "- Improved thieving abilities");
-		mvwprintw(statsWindow, 14, 4, "- Hit dice: d6 + CON bonus");
-		mvwprintw(statsWindow, 15, 4, "- Backstab multiplier improved");
-		break;
-
-	case Player::PlayerClassState::CLERIC:
-		mvwprintw(statsWindow, 13, 4, "- Divine favor strengthened");
-		mvwprintw(statsWindow, 14, 4, "- Hit dice: d8 + CON bonus");
-		if (xpLevel == 3 || xpLevel == 5 || xpLevel == 7 || xpLevel == 9)
-			mvwprintw(statsWindow, 15, 4, "- SPECIAL: Turn undead improved!");
-		break;
-
-	case Player::PlayerClassState::WIZARD:
-		mvwprintw(statsWindow, 13, 4, "- Arcane knowledge expanded");
-		mvwprintw(statsWindow, 14, 4, "- Hit dice: d4 + CON bonus");
-		if ((xpLevel % 2 == 1) && xpLevel > 1)
-			mvwprintw(statsWindow, 15, 4, "- SPECIAL: New spell level access!");
-		break;
-
-	default:
-		mvwprintw(statsWindow, 13, 4, "- General combat improvement");
-		break;
-	}
-
-	// Show next level requirements
-	int nextLevelXP = player->ai->get_next_level_xp(*player);
-	mvwprintw(statsWindow, 17, 2, "XP for next level: %d", nextLevelXP);
-
-	// Prompt specifically for space bar
-	mvwprintw(statsWindow, 19, 15, "Press SPACE BAR to continue...");
-	wrefresh(statsWindow);
-
-	// Wait for space bar
-	int ch;
-	do {
-		ch = getch();
-	} while (ch != ' '); // Only accept space bar
-
-	// Clean up
-	delwin(statsWindow);
-	
-	// Clear screen and restore game display properly
-	clear();
-	game.render();
-	gui->gui_render();
-	refresh();
+	// Display the level up screen using the dedicated UI class
+	LevelUpUI::display_level_up_screen(*player, xpLevel);
 }
 
 // display character sheet
-void Game::display_character_sheet() noexcept
+void Game::display_character_sheet() const noexcept
 {
-	WINDOW* character_sheet = newwin(
-		30, // height
-		120, // width
-		0, // y
-		0 // x
-	);
-	box(character_sheet, 0, 0);
-	refresh();
-
-	auto run{ true };
-	while (run == true)
-	{
-		// Calculate XP needed for next level
-		int currentXP = player->destructible->xp;
-		int nextLevelXP = player->ai->get_next_level_xp(*player);
-		int xpNeeded = nextLevelXP - currentXP;
-		float progressPercent = (float)currentXP / nextLevelXP * 100.0f;
-
-		// Display the player stats
-		mvwprintw(character_sheet, 1, 1, "Name: %s", player->actorData.name.c_str());
-		mvwprintw(character_sheet, 2, 1, "Class: %s", player->playerClass.c_str());
-		mvwprintw(character_sheet, 3, 1, "Race: %s", player->playerRace.c_str());
-		mvwprintw(character_sheet, 4, 1, "Level: %d", player->playerLevel);
-
-		// Enhanced XP display with progress to next level
-		mvwprintw(character_sheet, 5, 1, "Experience: %d / %d (%.1f%% to level %d)",
-			currentXP, nextLevelXP, progressPercent, player->playerLevel + 1);
-		mvwprintw(character_sheet, 6, 1, "XP needed for next level: %d", xpNeeded);
-
-		// Get strength modifiers from attributes table
-		int strHitMod = 0;
-		int strDmgMod = 0;
-		if (player->strength > 0 && player->strength <= strengthAttributes.size()) {
-			strHitMod = strengthAttributes[player->strength - 1].hitProb;
-			strDmgMod = strengthAttributes[player->strength - 1].dmgAdj;
-		}
-
-		// Add character attributes with modifiers
-		mvwprintw(character_sheet, 8, 1, "Attributes:");
-
-		// Display Strength with modifiers
-		wattron(character_sheet, A_BOLD);
-		mvwprintw(character_sheet, 9, 3, "Strength: %d", player->strength);
-		wattroff(character_sheet, A_BOLD);
-
-		// Show hit and damage modifiers from strength
-		if (strHitMod != 0 || strDmgMod != 0) {
-			wattron(character_sheet, COLOR_PAIR((strHitMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			mvwprintw(character_sheet, 9, 20, "To Hit: %+d", strHitMod);
-			wattroff(character_sheet, COLOR_PAIR((strHitMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-
-			wattron(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			mvwprintw(character_sheet, 9, 35, "Damage: %+d", strDmgMod);
-			wattroff(character_sheet, COLOR_PAIR((strDmgMod >= 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-		}
-
-		// Display Constitution with HP bonus effect
-		int conBonus = 0;
-		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
-			conBonus = constitutionAttributes[player->constitution - 1].HPAdj;
-		}
-
-		mvwprintw(character_sheet, 10, 3, "Dexterity: %d", player->dexterity);
-
-		if (conBonus != 0) {
-			wattron(character_sheet, COLOR_PAIR((conBonus > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			mvwprintw(character_sheet, 11, 3, "Constitution: %d (%+d HP per level)",
-				player->constitution, conBonus);
-			wattroff(character_sheet, COLOR_PAIR((conBonus > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-		}
-		else {
-			mvwprintw(character_sheet, 11, 3, "Constitution: %d", player->constitution);
-		}
-
-		mvwprintw(character_sheet, 12, 3, "Intelligence: %d", player->intelligence);
-		mvwprintw(character_sheet, 13, 3, "Wisdom: %d", player->wisdom);
-		mvwprintw(character_sheet, 14, 3, "Charisma: %d", player->charisma);
-
-		// Add combat stats with Constitution effect
-		mvwprintw(character_sheet, 16, 1, "Combat Statistics:");
-
-		// Calculate base HP and Con bonus
-		int baseHP = player->destructible->hpBase;
-		int conBonusTotal = player->destructible->hpMax - baseHP;
-
-		// Show HP with Constitution effect
-		if (conBonusTotal != 0)
-		{
-			mvwprintw(character_sheet, 17, 3, "HP: %d/%d ",
-				player->destructible->hp, player->destructible->hpMax);
-
-			wattron(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			wprintw(character_sheet, "(%d base %+d Con bonus)",
-				baseHP, conBonusTotal);
-			wattroff(character_sheet, COLOR_PAIR((conBonusTotal > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-		}
-		else
-		{
-			mvwprintw(character_sheet, 17, 3, "HP: %d/%d",
-				player->destructible->hp, player->destructible->hpMax);
-		}
-
-		// Display attack bonus from strength if applicable
-		if (strHitMod != 0 || strDmgMod != 0) {
-			mvwprintw(character_sheet, 18, 3, "Attack Bonuses: ");
-			if (strHitMod != 0) {
-				wattron(character_sheet, COLOR_PAIR((strHitMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-				wprintw(character_sheet, "%+d to hit ", strHitMod);
-				wattroff(character_sheet, COLOR_PAIR((strHitMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			}
-			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR((strDmgMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-				wprintw(character_sheet, "%+d to damage", strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR((strDmgMod > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
-			}
-		}
-
-		mvwprintw(character_sheet, 19, 3, "Armor Class: %d", player->destructible->armorClass);
-		mvwprintw(character_sheet, 20, 3, "THAC0: %d", player->destructible->thaco);
-
-		// Display dexterity bonuses
-		if (player->dexterity > 0 && player->dexterity <= dexterityAttributes.size()) {
-			// Show missile attack adjustment
-			int missileAdj = dexterityAttributes[player->dexterity - 1].MissileAttackAdj;
-			mvwprintw(character_sheet, 21, 3, "Ranged Attack Bonus: %d", missileAdj);
-
-			// Show defensive adjustment
-			int defensiveAdj = dexterityAttributes[player->dexterity - 1].DefensiveAdj;
-			mvwprintw(character_sheet, 22, 3, "Defensive Adjustment: %d AC", defensiveAdj);
-		}
-
-		// Equipped weapon info with color
-		wattron(character_sheet, COLOR_PAIR(YELLOW_BLACK_PAIR));
-		mvwprintw(character_sheet, 24, 1, "Equipment:");
-
-		if (player->weaponEquipped != "None") {
-			mvwprintw(character_sheet, 25, 3, "Weapon: %s (%s damage)",
-				player->weaponEquipped.c_str(), player->attacker->roll.c_str());
-
-			// Show if weapon is ranged
-			if (player->has_state(ActorState::IS_RANGED)) {
-				wattron(character_sheet, COLOR_PAIR(WHITE_BLUE_PAIR));
-				mvwprintw(character_sheet, 25, 40, "[Ranged]");
-				wattroff(character_sheet, COLOR_PAIR(WHITE_BLUE_PAIR));
-			}
-
-			// Show effective damage with strength bonus
-			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
-				mvwprintw(character_sheet, 26, 3, "Effective damage: %s %+d",
-					player->attacker->roll.c_str(), strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
-			}
-		}
-		else {
-			mvwprintw(character_sheet, 25, 3, "Weapon: Unarmed (D2 damage)");
-
-			// Show effective unarmed damage with strength bonus
-			if (strDmgMod != 0) {
-				wattron(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
-				mvwprintw(character_sheet, 26, 3, "Effective damage: D2 %+d", strDmgMod);
-				wattroff(character_sheet, COLOR_PAIR(RED_YELLOW_PAIR));
-			}
-		}
-		wattroff(character_sheet, COLOR_PAIR(YELLOW_BLACK_PAIR));
-
-		// Add gold and other stats on the right side
-		mvwprintw(character_sheet, 9, 60, "Gender: %s", player->gender.c_str());
-		mvwprintw(character_sheet, 10, 60, "Gold: %d", player->gold);
-		
-		// Enhanced hunger display with numbers and bar
-		wattron(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
-		mvwprintw(character_sheet, 11, 60, "Hunger: %s (%s)",
-			game.hunger_system.get_hunger_numerical_string().c_str(),
-			game.hunger_system.get_hunger_state_string().c_str());
-		wattroff(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
-		
-		// Display hunger bar on next line
-		wattron(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
-		mvwprintw(character_sheet, 12, 60, "%s",
-			game.hunger_system.get_hunger_bar_string(15).c_str());
-		wattroff(character_sheet, COLOR_PAIR(game.hunger_system.get_hunger_color()));
-
-		// Add Constitution details panel on the right side
-		mvwprintw(character_sheet, 14, 60, "Constitution Effects:");
-
-		if (player->constitution >= 1 && player->constitution <= constitutionAttributes.size()) {
-			const auto& conAttr = constitutionAttributes[player->constitution - 1];
-
-			mvwprintw(character_sheet, 15, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
-			mvwprintw(character_sheet, 16, 62, "System Shock: %d%%", conAttr.SystemShock);
-			mvwprintw(character_sheet, 17, 62, "Resurrection Survival: %d%%", conAttr.ResurrectionSurvival);
-			mvwprintw(character_sheet, 18, 62, "Poison Save Modifier: %+d", conAttr.PoisonSave);
-
-			if (conAttr.Regeneration > 0) {
-				mvwprintw(character_sheet, 19, 62, "Regeneration: %d HP per turn", conAttr.Regeneration);
-			}
-		}
-
-		// Add strength details panel on the right side
-		mvwprintw(character_sheet, 21, 60, "Strength Effects:");
-
-		if (player->strength >= 1 && player->strength <= strengthAttributes.size()) {
-			const auto& strAttr = strengthAttributes[player->strength - 1];
-
-			mvwprintw(character_sheet, 22, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
-			mvwprintw(character_sheet, 23, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
-			mvwprintw(character_sheet, 24, 62, "Weight Allowance: %d lbs", strAttr.wgtAllow);
-			mvwprintw(character_sheet, 25, 62, "Max Press: %d lbs", strAttr.maxPress);
-			mvwprintw(character_sheet, 26, 62, "Open Doors: %d/6", strAttr.openDoors);
-		}
-
-		mvwprintw(character_sheet, 28, 1, "Press any key to close...");
-
-		wrefresh(character_sheet);
-
-		const int key = getch();
-		// If any key was pressed then exit the loop
-		if (key != ERR) {
-			run = false;
-		}
-	}
-	delwin(character_sheet);
-	//clear();
-	// Redraw screen
-	clear();
-	/*game.render();*/
-	refresh();
+	CharacterSheetUI::display_character_sheet(*player);
 }
 
 // displays the actors as names
@@ -1495,7 +1179,6 @@ void Game::handle_ranged_attack()
 		targeting.process_ranged_attack(*player, targetPos);
 	}
 }
-
 
 void Game::display_help() noexcept
 {

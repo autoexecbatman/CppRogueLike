@@ -17,16 +17,39 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel)
         return; // Only handle player level ups
     }
     
+    // Store old values for comparison in display
+    int oldHP = owner.destructible->hp;
+    int oldMaxHP = owner.destructible->hpMax;
+    int oldTHAC0 = owner.destructible->thaco;
+    
     // Apply THAC0 improvement
     apply_thac0_improvement(owner, newLevel);
     
     // Apply hit point gains
-    apply_hit_point_gain(owner, newLevel);
+    int hpGained = apply_hit_point_gain(owner, newLevel);
     
     // Apply class-specific combat improvements
     apply_class_specific_improvements(owner, newLevel);
     
-    // Log the level up
+    // Apply ability score improvements (AD&D 2e: every 4 levels)
+    if (newLevel % 4 == 0)
+    {
+        apply_ability_score_improvement(owner, newLevel);
+    }
+    
+    // Apply saving throw improvements
+    apply_saving_throw_improvements(owner, newLevel);
+    
+    // Log the level up with summary
+    game.appendMessagePart(YELLOW_BLACK_PAIR, "LEVEL UP! ");
+    game.appendMessagePart(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
+    game.appendMessagePart(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
+    if (oldTHAC0 != owner.destructible->thaco)
+    {
+        game.appendMessagePart(GREEN_BLACK_PAIR, std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->thaco));
+    }
+    game.finalizeMessage();
+    
     game.log(std::format("Level {} reached! Combat abilities improved.", newLevel));
 }
 
@@ -75,12 +98,12 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel)
     }
 }
 
-void LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
+int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
 {
     auto playerPtr = dynamic_cast<Player*>(&owner);
     if (!playerPtr || !owner.destructible)
     {
-        return;
+        return 0;
     }
     
     // Roll hit dice based on class
@@ -141,6 +164,8 @@ void LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     
     game.log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}", 
                          totalHPGain, hitDiceRoll, conBonus, owner.destructible->hpMax));
+    
+    return totalHPGain; // Return HP gained for display
 }
 
 void LevelUpSystem::apply_class_specific_improvements(Creature& owner, int newLevel)
@@ -170,31 +195,31 @@ void LevelUpSystem::apply_class_specific_improvements(Creature& owner, int newLe
 
 void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel)
 {
-auto playerPtr = dynamic_cast<Player*>(&owner);
-if (!playerPtr)
-{
-return;
-}
+    auto playerPtr = dynamic_cast<Player*>(&owner);
+    if (!playerPtr)
+    {
+        return;
+    }
 
-// Fighters get extra attacks at levels 7 and 13
-if (newLevel == 7)
-{
- playerPtr->attacksPerRound = 1.5f; // 3/2 attacks per round
- game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
- game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
-game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
-game.finalizeMessage();
-game.log("Fighter gained extra attack (3/2 attacks per round)");
-}
-else if (newLevel == 13)
-{
- playerPtr->attacksPerRound = 2.0f; // 2 attacks per round
- game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
- game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
- game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
- game.finalizeMessage();
-game.log("Fighter gained extra attack (2 attacks per round)");
-}
+    // Fighters get extra attacks at levels 7 and 13
+    if (newLevel == 7)
+    {
+        playerPtr->attacksPerRound = 1.5f; // 3/2 attacks per round
+        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
+        game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
+        game.finalizeMessage();
+        game.log("Fighter gained extra attack (3/2 attacks per round)");
+    }
+    else if (newLevel == 13)
+    {
+        playerPtr->attacksPerRound = 2.0f; // 2 attacks per round
+        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
+        game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
+        game.finalizeMessage();
+        game.log("Fighter gained extra attack (2 attacks per round)");
+    }
 
 	// Fighters also get better weapon specialization bonuses
 	if (newLevel % 3 == 0) // Every 3 levels
@@ -281,4 +306,107 @@ int LevelUpSystem::calculate_backstab_multiplier(int level)
     if (level >= 5) return 3;
     if (level >= 1) return 2;
     return 1; // Should never happen
+}
+
+void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLevel)
+{
+    auto playerPtr = dynamic_cast<Player*>(&owner);
+    if (!playerPtr)
+    {
+        return;
+    }
+    
+    // AD&D 2e: Players can increase ability scores every 4 levels
+    game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
+    game.appendMessagePart(GREEN_BLACK_PAIR, "Ability Score Improvement!");
+    game.appendMessagePart(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
+    game.finalizeMessage();
+    
+    // TODO: Implement interactive ability score selection
+    // For now, automatically improve the prime requisite for the class
+    switch (playerPtr->playerClassState)
+    {
+    case Player::PlayerClassState::FIGHTER:
+        playerPtr->strength = std::min(18, playerPtr->strength + 1);
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Strength increased to ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->strength));
+        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
+        game.finalizeMessage();
+        break;
+    case Player::PlayerClassState::ROGUE:
+        playerPtr->dexterity = std::min(18, playerPtr->dexterity + 1);
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Dexterity increased to ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->dexterity));
+        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
+        game.finalizeMessage();
+        break;
+    case Player::PlayerClassState::CLERIC:
+        playerPtr->wisdom = std::min(18, playerPtr->wisdom + 1);
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Wisdom increased to ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->wisdom));
+        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
+        game.finalizeMessage();
+        break;
+    case Player::PlayerClassState::WIZARD:
+        playerPtr->intelligence = std::min(18, playerPtr->intelligence + 1);
+        game.appendMessagePart(GREEN_BLACK_PAIR, "Intelligence increased to ");
+        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->intelligence));
+        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
+        game.finalizeMessage();
+        break;
+    }
+    
+    game.log(std::format("Ability score improved at level {}", newLevel));
+}
+
+void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLevel)
+{
+    auto playerPtr = dynamic_cast<Player*>(&owner);
+    if (!playerPtr)
+    {
+        return;
+    }
+    
+    // AD&D 2e saving throws improve at certain levels based on class
+    bool improved = false;
+    
+    switch (playerPtr->playerClassState)
+    {
+    case Player::PlayerClassState::FIGHTER:
+        // Fighters improve saves every 2-3 levels
+        if (newLevel == 3 || newLevel == 6 || newLevel == 9 || newLevel == 12 || newLevel == 15)
+        {
+            improved = true;
+        }
+        break;
+    case Player::PlayerClassState::ROGUE:
+        // Rogues improve saves every 4 levels
+        if (newLevel % 4 == 0)
+        {
+            improved = true;
+        }
+        break;
+    case Player::PlayerClassState::CLERIC:
+        // Clerics improve saves every 3 levels
+        if (newLevel % 3 == 0)
+        {
+            improved = true;
+        }
+        break;
+    case Player::PlayerClassState::WIZARD:
+        // Wizards improve saves every 5 levels
+        if (newLevel % 5 == 0)
+        {
+            improved = true;
+        }
+        break;
+    }
+    
+    if (improved)
+    {
+        game.appendMessagePart(WHITE_BLACK_PAIR, "Saving throws improved!");
+        game.finalizeMessage();
+        game.log(std::format("Saving throws improved at level {}", newLevel));
+        // TODO: Implement actual saving throw system
+    }
 }
