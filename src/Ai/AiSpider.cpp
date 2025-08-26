@@ -64,9 +64,9 @@ void AiSpider::update(Creature& owner)
             if (game.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
             {
                 // Message about being ambushed
-                game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-                game.appendMessagePart(WHITE_BLACK_PAIR, " ambushes you from hiding!");
-                game.finalizeMessage();
+                game.append_message_part(owner.actorData.color, owner.actorData.name);
+                game.append_message_part(WHITE_BLACK_PAIR, " ambushes you from hiding!");
+                game.finalize_message();
 
                 // If right next to player, get an immediate attack
                 if (distanceToPlayer <= 1)
@@ -76,11 +76,11 @@ void AiSpider::update(Creature& owner)
                     int bonusDamage = game.d.roll(1, 2); // Ambush damage bonus
                     int totalDamage = normalDamage + bonusDamage;
 
-                    game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-                    game.appendMessagePart(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
-                    game.appendMessagePart(WHITE_RED_PAIR, std::to_string(totalDamage));
-                    game.appendMessagePart(WHITE_BLACK_PAIR, " damage!");
-                    game.finalizeMessage();
+                    game.append_message_part(owner.actorData.color, owner.actorData.name);
+                    game.append_message_part(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
+                    game.append_message_part(WHITE_RED_PAIR, std::to_string(totalDamage));
+                    game.append_message_part(WHITE_BLACK_PAIR, " damage!");
+                    game.finalize_message();
 
                     // Apply damage directly
                     game.player->destructible->take_damage(*game.player, totalDamage);
@@ -352,11 +352,11 @@ void AiSpider::poisonAttack(Creature& owner, Creature& target)
         int poisonDamage = game.d.roll(1, 3);
 
         // Display poison message with damage amount
-        game.appendMessagePart(RED_BLACK_PAIR, owner.actorData.name);
-        game.appendMessagePart(WHITE_BLACK_PAIR, " injects venom for ");
-        game.appendMessagePart(WHITE_RED_PAIR, std::to_string(poisonDamage));
-        game.appendMessagePart(WHITE_BLACK_PAIR, " extra poison damage!");
-        game.finalizeMessage();
+        game.append_message_part(RED_BLACK_PAIR, owner.actorData.name);
+        game.append_message_part(WHITE_BLACK_PAIR, " injects venom for ");
+        game.append_message_part(WHITE_RED_PAIR, std::to_string(poisonDamage));
+        game.append_message_part(WHITE_BLACK_PAIR, " extra poison damage!");
+        game.finalize_message();
 
         // Deal the poison damage
         target.destructible->take_damage(target, poisonDamage);
@@ -546,9 +546,9 @@ void AiWebSpinner::update(Creature& owner)
             webCooldown = WEB_COOLDOWN;
 
             // Show message about web spinning
-            game.appendMessagePart(owner.actorData.color, owner.actorData.name);
-            game.appendMessagePart(WHITE_BLACK_PAIR, " spins a sticky web!");
-            game.finalizeMessage();
+            game.append_message_part(owner.actorData.color, owner.actorData.name);
+            game.append_message_part(WHITE_BLACK_PAIR, " spins a sticky web!");
+            game.finalize_message();
 
             return;
         }
@@ -676,14 +676,14 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
     generateWebEntities(webCenter, webSize);
 
     // Dramatic message about web creation
-    game.appendMessagePart(RED_YELLOW_PAIR, owner.actorData.name);
+    game.append_message_part(RED_YELLOW_PAIR, owner.actorData.name);
     if (webSize >= WEB_MAX_SIZE - 1) {
-        game.appendMessagePart(WHITE_BLACK_PAIR, " creates a massive web network!");
+        game.append_message_part(WHITE_BLACK_PAIR, " creates a massive web network!");
     }
     else {
-        game.appendMessagePart(WHITE_BLACK_PAIR, " spins a complex web structure!");
+        game.append_message_part(WHITE_BLACK_PAIR, " spins a complex web structure!");
     }
-    game.finalizeMessage();
+    game.finalize_message();
 
     // Mark this spider as having laid a web - now using our own method
     set_web_laid(true);

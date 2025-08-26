@@ -79,11 +79,11 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
 
         if (itemDistance <= 1) {
             // Found an item to consume!
-            game.appendMessagePart(RED_YELLOW_PAIR, "The mimic ");
-            game.appendMessagePart(WHITE_BLACK_PAIR, "consumes the ");
-            game.appendMessagePart(item->actorData.color, item->actorData.name);
-            game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-            game.finalizeMessage();
+            game.append_message_part(RED_YELLOW_PAIR, "The mimic ");
+            game.append_message_part(WHITE_BLACK_PAIR, "consumes the ");
+            game.append_message_part(item->actorData.color, item->actorData.name);
+            game.append_message_part(WHITE_BLACK_PAIR, "!");
+            game.finalize_message();
 
             game.log("Mimic consuming item: " + item->actorData.name);
 
@@ -170,10 +170,10 @@ void AiMimic::checkRevealing(Mimic& mimic)
 
         // Try to confuse the player
         if (game.d.d20() > game.player->wisdom) {
-            game.appendMessagePart(WHITE_GREEN_PAIR, "The ");
-            game.appendMessagePart(RED_YELLOW_PAIR, "mimic");
-            game.appendMessagePart(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
-            game.finalizeMessage();
+            game.append_message_part(WHITE_GREEN_PAIR, "The ");
+            game.append_message_part(RED_YELLOW_PAIR, "mimic");
+            game.append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
+            game.finalize_message();
 
             // Apply confusion to player
             game.player->add_state(ActorState::IS_CONFUSED);
@@ -187,9 +187,9 @@ void AiMimic::checkRevealing(Mimic& mimic)
             }
         }
         else {
-            game.appendMessagePart(RED_YELLOW_PAIR, "A mimic");
-            game.appendMessagePart(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
-            game.finalizeMessage();
+            game.append_message_part(RED_YELLOW_PAIR, "A mimic");
+            game.append_message_part(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
+            game.finalize_message();
             game.log("Player resisted mimic confusion");
         }
     }

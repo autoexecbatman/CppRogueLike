@@ -41,14 +41,14 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel)
     apply_saving_throw_improvements(owner, newLevel);
     
     // Log the level up with summary
-    game.appendMessagePart(YELLOW_BLACK_PAIR, "LEVEL UP! ");
-    game.appendMessagePart(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
-    game.appendMessagePart(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
+    game.append_message_part(YELLOW_BLACK_PAIR, "LEVEL UP! ");
+    game.append_message_part(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
+    game.append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
     if (oldTHAC0 != owner.destructible->thaco)
     {
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->thaco));
+        game.append_message_part(GREEN_BLACK_PAIR, std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->thaco));
     }
-    game.finalizeMessage();
+    game.finalize_message();
     
     game.log(std::format("Level {} reached! Combat abilities improved.", newLevel));
 }
@@ -86,13 +86,13 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel)
         int oldTHAC0 = owner.destructible->thaco;
         owner.destructible->thaco = newTHAC0;
         
-        game.appendMessagePart(GREEN_BLACK_PAIR, "THAC0 improved");
-        game.appendMessagePart(WHITE_BLACK_PAIR, " from ");
-        game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(oldTHAC0));
-        game.appendMessagePart(WHITE_BLACK_PAIR, " to ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(newTHAC0));
-        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-        game.finalizeMessage();
+        game.append_message_part(GREEN_BLACK_PAIR, "THAC0 improved");
+        game.append_message_part(WHITE_BLACK_PAIR, " from ");
+        game.append_message_part(WHITE_BLACK_PAIR, std::to_string(oldTHAC0));
+        game.append_message_part(WHITE_BLACK_PAIR, " to ");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(newTHAC0));
+        game.append_message_part(WHITE_BLACK_PAIR, "!");
+        game.finalize_message();
         
         game.log(std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
     }
@@ -146,21 +146,21 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     owner.destructible->hp += totalHPGain; // Give full HP on level up
     
     // Display HP gain message
-    game.appendMessagePart(GREEN_BLACK_PAIR, "Hit Points increased");
-    game.appendMessagePart(WHITE_BLACK_PAIR, " by ");
-    game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(totalHPGain));
-    game.appendMessagePart(WHITE_BLACK_PAIR, " (");
-    game.appendMessagePart(WHITE_BLACK_PAIR, diceType);
-    game.appendMessagePart(WHITE_BLACK_PAIR, ": ");
-    game.appendMessagePart(YELLOW_BLACK_PAIR, std::to_string(hitDiceRoll));
+    game.append_message_part(GREEN_BLACK_PAIR, "Hit Points increased");
+    game.append_message_part(WHITE_BLACK_PAIR, " by ");
+    game.append_message_part(GREEN_BLACK_PAIR, std::to_string(totalHPGain));
+    game.append_message_part(WHITE_BLACK_PAIR, " (");
+    game.append_message_part(WHITE_BLACK_PAIR, diceType);
+    game.append_message_part(WHITE_BLACK_PAIR, ": ");
+    game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(hitDiceRoll));
     if (conBonus != 0)
     {
-        game.appendMessagePart(WHITE_BLACK_PAIR, " + ");
-        game.appendMessagePart(YELLOW_BLACK_PAIR, std::to_string(conBonus));
-        game.appendMessagePart(WHITE_BLACK_PAIR, " CON");
+        game.append_message_part(WHITE_BLACK_PAIR, " + ");
+        game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(conBonus));
+        game.append_message_part(WHITE_BLACK_PAIR, " CON");
     }
-    game.appendMessagePart(WHITE_BLACK_PAIR, ")");
-    game.finalizeMessage();
+    game.append_message_part(WHITE_BLACK_PAIR, ")");
+    game.finalize_message();
     
     game.log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}", 
                          totalHPGain, hitDiceRoll, conBonus, owner.destructible->hpMax));
@@ -205,27 +205,27 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel)
     if (newLevel == 7)
     {
         playerPtr->attacksPerRound = 1.5f; // 3/2 attacks per round
-        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
-        game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
-        game.finalizeMessage();
+        game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+        game.append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+        game.append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
+        game.finalize_message();
         game.log("Fighter gained extra attack (3/2 attacks per round)");
     }
     else if (newLevel == 13)
     {
         playerPtr->attacksPerRound = 2.0f; // 2 attacks per round
-        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Extra Attack!");
-        game.appendMessagePart(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
-        game.finalizeMessage();
+        game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+        game.append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+        game.append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
+        game.finalize_message();
         game.log("Fighter gained extra attack (2 attacks per round)");
     }
 
 	// Fighters also get better weapon specialization bonuses
 	if (newLevel % 3 == 0) // Every 3 levels
 	{
-		game.appendMessagePart(WHITE_BLACK_PAIR, "Your martial prowess improves!");
-		game.finalizeMessage();
+		game.append_message_part(WHITE_BLACK_PAIR, "Your martial prowess improves!");
+		game.finalize_message();
 	}
 }
 
@@ -235,19 +235,19 @@ void LevelUpSystem::apply_rogue_improvements(Creature& owner, int newLevel)
     int backstabMultiplier = calculate_backstab_multiplier(newLevel);
     if (backstabMultiplier > calculate_backstab_multiplier(newLevel - 1))
     {
-        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Backstab improved!");
-        game.appendMessagePart(WHITE_BLACK_PAIR, " Damage multiplier: x");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(backstabMultiplier));
-        game.finalizeMessage();
+        game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+        game.append_message_part(GREEN_BLACK_PAIR, "Backstab improved!");
+        game.append_message_part(WHITE_BLACK_PAIR, " Damage multiplier: x");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(backstabMultiplier));
+        game.finalize_message();
         game.log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
     }
     
     // Rogue skills improve
     if (newLevel % 2 == 0) // Every 2 levels
     {
-        game.appendMessagePart(WHITE_BLACK_PAIR, "Your thieving skills improve!");
-        game.finalizeMessage();
+        game.append_message_part(WHITE_BLACK_PAIR, "Your thieving skills improve!");
+        game.finalize_message();
         // TODO: Implement thieving skills (hide in shadows, move silently, etc.)
     }
 }
@@ -257,10 +257,10 @@ void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel)
     // Clerics get turn undead improvements and spell slots
     if (newLevel == 3 || newLevel == 5 || newLevel == 7 || newLevel == 9)
     {
-        game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Turn Undead improved!");
-        game.appendMessagePart(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
-        game.finalizeMessage();
+        game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+        game.append_message_part(GREEN_BLACK_PAIR, "Turn Undead improved!");
+        game.append_message_part(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
+        game.finalize_message();
         game.log(std::format("Cleric turn undead ability improved at level {}", newLevel));
         // TODO: Implement turn undead mechanic
     }
@@ -268,8 +268,8 @@ void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel)
     // Spell slots increase
     if (newLevel >= 2)
     {
-        game.appendMessagePart(WHITE_BLACK_PAIR, "Your divine power grows stronger!");
-        game.finalizeMessage();
+        game.append_message_part(WHITE_BLACK_PAIR, "Your divine power grows stronger!");
+        game.finalize_message();
         // TODO: Implement spell system
     }
 }
@@ -282,19 +282,19 @@ void LevelUpSystem::apply_wizard_improvements(Creature& owner, int newLevel)
         int spellLevel = (newLevel + 1) / 2;
         if (spellLevel <= 9) // Max spell level is 9
         {
-            game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-            game.appendMessagePart(GREEN_BLACK_PAIR, "New spell level!");
-            game.appendMessagePart(WHITE_BLACK_PAIR, " You can now cast level ");
-            game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(spellLevel));
-            game.appendMessagePart(WHITE_BLACK_PAIR, " spells.");
-            game.finalizeMessage();
+            game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+            game.append_message_part(GREEN_BLACK_PAIR, "New spell level!");
+            game.append_message_part(WHITE_BLACK_PAIR, " You can now cast level ");
+            game.append_message_part(GREEN_BLACK_PAIR, std::to_string(spellLevel));
+            game.append_message_part(WHITE_BLACK_PAIR, " spells.");
+            game.finalize_message();
             game.log(std::format("Wizard can now cast level {} spells", spellLevel));
         }
     }
     
     // Wizards get better spell power
-    game.appendMessagePart(WHITE_BLACK_PAIR, "Your arcane knowledge deepens!");
-    game.finalizeMessage();
+    game.append_message_part(WHITE_BLACK_PAIR, "Your arcane knowledge deepens!");
+    game.finalize_message();
     // TODO: Implement spell system
 }
 
@@ -317,10 +317,10 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
     }
     
     // AD&D 2e: Players can increase ability scores every 4 levels
-    game.appendMessagePart(YELLOW_BLACK_PAIR, "Special: ");
-    game.appendMessagePart(GREEN_BLACK_PAIR, "Ability Score Improvement!");
-    game.appendMessagePart(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
-    game.finalizeMessage();
+    game.append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+    game.append_message_part(GREEN_BLACK_PAIR, "Ability Score Improvement!");
+    game.append_message_part(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
+    game.finalize_message();
     
     // TODO: Implement interactive ability score selection
     // For now, automatically improve the prime requisite for the class
@@ -328,31 +328,31 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
     {
     case Player::PlayerClassState::FIGHTER:
         playerPtr->strength = std::min(18, playerPtr->strength + 1);
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Strength increased to ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->strength));
-        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-        game.finalizeMessage();
+        game.append_message_part(GREEN_BLACK_PAIR, "Strength increased to ");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->strength));
+        game.append_message_part(WHITE_BLACK_PAIR, "!");
+        game.finalize_message();
         break;
     case Player::PlayerClassState::ROGUE:
         playerPtr->dexterity = std::min(18, playerPtr->dexterity + 1);
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Dexterity increased to ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->dexterity));
-        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-        game.finalizeMessage();
+        game.append_message_part(GREEN_BLACK_PAIR, "Dexterity increased to ");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->dexterity));
+        game.append_message_part(WHITE_BLACK_PAIR, "!");
+        game.finalize_message();
         break;
     case Player::PlayerClassState::CLERIC:
         playerPtr->wisdom = std::min(18, playerPtr->wisdom + 1);
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Wisdom increased to ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->wisdom));
-        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-        game.finalizeMessage();
+        game.append_message_part(GREEN_BLACK_PAIR, "Wisdom increased to ");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->wisdom));
+        game.append_message_part(WHITE_BLACK_PAIR, "!");
+        game.finalize_message();
         break;
     case Player::PlayerClassState::WIZARD:
         playerPtr->intelligence = std::min(18, playerPtr->intelligence + 1);
-        game.appendMessagePart(GREEN_BLACK_PAIR, "Intelligence increased to ");
-        game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(playerPtr->intelligence));
-        game.appendMessagePart(WHITE_BLACK_PAIR, "!");
-        game.finalizeMessage();
+        game.append_message_part(GREEN_BLACK_PAIR, "Intelligence increased to ");
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->intelligence));
+        game.append_message_part(WHITE_BLACK_PAIR, "!");
+        game.finalize_message();
         break;
     }
     
@@ -404,8 +404,8 @@ void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLeve
     
     if (improved)
     {
-        game.appendMessagePart(WHITE_BLACK_PAIR, "Saving throws improved!");
-        game.finalizeMessage();
+        game.append_message_part(WHITE_BLACK_PAIR, "Saving throws improved!");
+        game.finalize_message();
         game.log(std::format("Saving throws improved at level {}", newLevel));
         // TODO: Implement actual saving throw system
     }

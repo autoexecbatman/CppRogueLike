@@ -198,6 +198,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/MessageSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/MessageSystem.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp

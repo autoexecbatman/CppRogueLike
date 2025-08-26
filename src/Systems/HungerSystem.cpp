@@ -130,8 +130,8 @@ void HungerSystem::apply_hunger_effects()
         // Bonuses for being well fed
         if (!well_fed_message_shown)
         {
-            game.appendMessagePart(get_hunger_color(), "You feel strong and energetic!");
-            game.finalizeMessage();
+            game.append_message_part(get_hunger_color(), "You feel strong and energetic!");
+            game.finalize_message();
             well_fed_message_shown = true;
         }
         // Potentially give bonus to strength or regen
@@ -141,8 +141,8 @@ void HungerSystem::apply_hunger_effects()
         // Minor penalties
         if (game.d.d10() == 1)
         {  // 10% chance each turn
-            game.appendMessagePart(get_hunger_color(), "Your stomach growls.");
-            game.finalizeMessage();
+            game.append_message_part(get_hunger_color(), "Your stomach growls.");
+            game.finalize_message();
         }
         break;
 
@@ -150,23 +150,23 @@ void HungerSystem::apply_hunger_effects()
         // More severe penalties
         if (game.d.d6() == 1)
         {  // ~17% chance each turn
-            game.appendMessagePart(get_hunger_color(), "You are weakened by hunger.");
-            game.finalizeMessage();
+            game.append_message_part(get_hunger_color(), "You are weakened by hunger.");
+            game.finalize_message();
             // Reduce player's strength temporarily
         }
         // Take small damage occasionally
         if (game.d.d20() == 1)
         {  // 5% chance each turn
             game.player->destructible->take_damage(*game.player, 1);
-            game.appendMessagePart(get_hunger_color(), "You're starving!");
-            game.finalizeMessage();
+            game.append_message_part(get_hunger_color(), "You're starving!");
+            game.finalize_message();
         }
         break;
 
     case HungerState::DYING:
         // Severe penalties, player is about to die
-        game.appendMessagePart(get_hunger_color(), "You are dying from starvation!");
-        game.finalizeMessage();
+        game.append_message_part(get_hunger_color(), "You are dying from starvation!");
+        game.finalize_message();
         // Take damage every turn
         game.player->destructible->take_damage(*game.player, 1);
         break;
@@ -203,8 +203,8 @@ void HungerSystem::update_hunger_state()
     // Notify the player if hunger state has changed
     if (old_state != current_state)
     {
-        game.appendMessagePart(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
-        game.finalizeMessage();
+        game.append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
+        game.finalize_message();
         
         // Reset well-fed message flag when leaving well-fed state
         if (old_state == HungerState::WELL_FED && current_state != HungerState::WELL_FED)

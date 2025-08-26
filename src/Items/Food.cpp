@@ -9,10 +9,10 @@ bool Food::use(Item& owner, Creature& wearer) {
     game.hunger_system.decrease_hunger(nutrition_value);
 
     // Display message
-    game.appendMessagePart(WHITE_BLACK_PAIR, "You eat the ");
-    game.appendMessagePart(YELLOW_BLACK_PAIR, owner.actorData.name);
-    game.appendMessagePart(WHITE_BLACK_PAIR, ".");
-    game.finalizeMessage();
+    game.append_message_part(WHITE_BLACK_PAIR, "You eat the ");
+    game.append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
+    game.append_message_part(WHITE_BLACK_PAIR, ".");
+    game.finalize_message();
 
     // Food is consumed after being eaten
     return Pickable::use(owner, wearer);

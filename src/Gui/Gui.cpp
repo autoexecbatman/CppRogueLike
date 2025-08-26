@@ -38,12 +38,12 @@ constexpr int LOG_X = 60;
 constexpr int LOG_MAX_MESSAGES = 5;
 // ==== ==== ==== ==== ====
 
-void Gui::addDisplayMessage(const std::vector<LogMessage>& message)
+void Gui::add_display_message(const std::vector<LogMessage>& message)
 {
 	displayMessages.push_back(message);
 }
 
-void Gui::renderMessages() noexcept {
+void Gui::render_messages() noexcept {
 	// Iterate through each message
 	for (const auto& message : displayMessages) {
 		// Iterate through each part of the message
@@ -84,8 +84,8 @@ void Gui::gui_update()
 {
 	// message to display
 	// if an event has occured, store the message in a private variable
-	guiMessage = game.messageToDisplay;
-	guiMessageColor = game.messageColor;
+	set_message(game.message_system.get_current_message());
+	set_message_color(game.message_system.get_current_message_color());
 }
 
 void Gui::gui_render()
@@ -139,11 +139,11 @@ void Gui::render_player_status()
 void Gui::gui_print_log()
 {
 	// messagesToShow is the number of messages to display based on the size of the attackMessagesWhole vector
-	const int messagesToShow = std::min(LOG_MAX_MESSAGES, static_cast<int>(game.attackMessagesWhole.size()));
+	const int messagesToShow = std::min(LOG_MAX_MESSAGES, static_cast<int>(game.message_system.get_stored_message_count()));
 
 	for (int i = 0; i < messagesToShow; i++)
 	{
-		const std::vector<LogMessage>& messageParts = game.attackMessagesWhole.at(game.attackMessagesWhole.size() - 1 - i);
+		const std::vector<LogMessage>& messageParts = game.message_system.get_attack_message_at(game.message_system.get_stored_message_count() - 1 - i);
 
 		int currentX = 0; // starting position for each message
 

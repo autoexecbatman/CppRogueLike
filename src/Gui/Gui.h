@@ -58,8 +58,14 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	void addDisplayMessage(const std::vector<LogMessage>& message);
-	void renderMessages() noexcept;
+	void add_display_message(const std::vector<LogMessage>& message);
+	void render_messages() noexcept;
+
+	// setters and getters
+	void set_message(const std::string& msg) { guiMessage = msg; }
+	void set_message_color(int color) { guiMessageColor = color; }
+	const std::string& get_message() const { return guiMessage; }
+	int get_message_color() const { return guiMessageColor; }
 
 protected:
 	WINDOW* statsWindow{ nullptr };

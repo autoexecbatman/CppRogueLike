@@ -353,15 +353,15 @@ MonsterDestructible::MonsterDestructible(
 void MonsterDestructible::die(Creature& owner)
 {
 	// message which monster is dead
-	game.appendMessagePart(owner.actorData.color, std::format("{}", owner.actorData.name));
-	game.appendMessagePart(WHITE_BLACK_PAIR, " is dead.\n");
-	game.finalizeMessage();
+	game.append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
+	game.append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+	game.finalize_message();
 	
 	// message how much xp you get
-	game.appendMessagePart(WHITE_BLACK_PAIR, "You get ");
-	game.appendMessagePart(YELLOW_BLACK_PAIR, std::format("{}", xp));
-	game.appendMessagePart(WHITE_BLACK_PAIR, " experience points.\n");
-	game.finalizeMessage();
+	game.append_message_part(WHITE_BLACK_PAIR, "You get ");
+	game.append_message_part(YELLOW_BLACK_PAIR, std::format("{}", xp));
+	game.append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+	game.finalize_message();
 
 	// increase the player's experience
 	game.player->destructible->xp += xp;

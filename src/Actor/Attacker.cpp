@@ -63,15 +63,15 @@ void Attacker::attack(Creature& attacker, Creature& target)
             const int finalDamage = std::max(0, totaldmg); // ensure damage is not negative
             
             // Display the successful attack roll with damage
-            game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
-            game.appendMessagePart(WHITE_BLACK_PAIR, " rolls ");
-            game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(rollAttack));
-            game.appendMessagePart(WHITE_BLACK_PAIR, " roll needed ");
-            game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
-            game.appendMessagePart(GREEN_BLACK_PAIR, ". Hit! ");
-            game.appendMessagePart(RED_BLACK_PAIR, std::to_string(finalDamage));
-            game.appendMessagePart(WHITE_BLACK_PAIR, " dmg.");
-            game.finalizeMessage();
+            game.append_message_part(attacker.actorData.color, attacker.actorData.name);
+            game.append_message_part(WHITE_BLACK_PAIR, " rolls ");
+            game.append_message_part(GREEN_BLACK_PAIR, std::to_string(rollAttack));
+            game.append_message_part(WHITE_BLACK_PAIR, " roll needed ");
+            game.append_message_part(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
+            game.append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+            game.append_message_part(RED_BLACK_PAIR, std::to_string(finalDamage));
+            game.append_message_part(WHITE_BLACK_PAIR, " dmg.");
+            game.finalize_message();
             
             // Debug log the successful attack roll
             game.log("ATTACK HIT: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
@@ -100,15 +100,15 @@ void Attacker::attack(Creature& attacker, Creature& target)
         else
         {
             // Display the failed attack roll with 0 damage
-            game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
-            game.appendMessagePart(WHITE_BLACK_PAIR, " rolls ");
-            game.appendMessagePart(RED_BLACK_PAIR, std::to_string(rollAttack));
-            game.appendMessagePart(WHITE_BLACK_PAIR, " roll needed ");
-            game.appendMessagePart(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
-            game.appendMessagePart(RED_BLACK_PAIR, ". Miss! ");
-            game.appendMessagePart(RED_BLACK_PAIR, "0");
-            game.appendMessagePart(WHITE_BLACK_PAIR, " dmg.");
-            game.finalizeMessage();
+            game.append_message_part(attacker.actorData.color, attacker.actorData.name);
+            game.append_message_part(WHITE_BLACK_PAIR, " rolls ");
+            game.append_message_part(RED_BLACK_PAIR, std::to_string(rollAttack));
+            game.append_message_part(WHITE_BLACK_PAIR, " roll needed ");
+            game.append_message_part(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
+            game.append_message_part(RED_BLACK_PAIR, ". Miss! ");
+            game.append_message_part(RED_BLACK_PAIR, "0");
+            game.append_message_part(WHITE_BLACK_PAIR, " dmg.");
+            game.finalize_message();
             
             // Debug log the failed attack roll
             game.log("ATTACK MISS: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
@@ -118,11 +118,11 @@ void Attacker::attack(Creature& attacker, Creature& target)
     }
     else
     {
-        game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-        game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
-        game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-        game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" in vain."));
-        game.finalizeMessage();
+        game.append_message_part(attacker.actorData.color, std::format("{}", attacker.actorData.name));
+        game.append_message_part(WHITE_BLACK_PAIR, std::format(" attacks "));
+        game.append_message_part(target.actorData.color, std::format("{}", target.actorData.name));
+        game.append_message_part(WHITE_BLACK_PAIR, std::format(" in vain."));
+        game.finalize_message();
     }
 }
 
@@ -158,9 +158,9 @@ void Attacker::attack_with_dual_wield(Creature& attacker, Creature& target)
 	}
 	
 	// Dual wielding - perform both attacks
-	game.appendMessagePart(WHITE_BLACK_PAIR, "Dual wielding: ");
-	game.appendMessagePart(GREEN_BLACK_PAIR, "Fighting with both weapons!");
-	game.finalizeMessage();
+	game.append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
+	game.append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
+	game.finalize_message();
 	
 	// Main hand attack
 	perform_single_attack(attacker, target, roll, dualWieldInfo.mainHandPenalty, "main hand");
@@ -227,18 +227,18 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 			const int finalDamage = std::max(0, totaldmg); // ensure damage is not negative
 			
 			// Display the successful attack roll with damage
-			game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
-			game.appendMessagePart(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			game.appendMessagePart(GREEN_BLACK_PAIR, std::to_string(rollAttack));
+			game.append_message_part(attacker.actorData.color, attacker.actorData.name);
+			game.append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
+			game.append_message_part(GREEN_BLACK_PAIR, std::to_string(rollAttack));
 			if (attackPenalty != 0)
 			{
-				game.appendMessagePart(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
+				game.append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
 			}
-			game.appendMessagePart(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			game.appendMessagePart(GREEN_BLACK_PAIR, ". Hit! ");
-			game.appendMessagePart(RED_BLACK_PAIR, std::to_string(finalDamage));
-			game.appendMessagePart(WHITE_BLACK_PAIR, " dmg.");
-			game.finalizeMessage();
+			game.append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
+			game.append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+			game.append_message_part(RED_BLACK_PAIR, std::to_string(finalDamage));
+			game.append_message_part(WHITE_BLACK_PAIR, " dmg.");
+			game.finalize_message();
 			
 			// Debug log the successful attack roll
 			game.log("ATTACK HIT (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
@@ -267,18 +267,18 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		else
 		{
 			// Display the failed attack roll with 0 damage
-			game.appendMessagePart(attacker.actorData.color, attacker.actorData.name);
-			game.appendMessagePart(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			game.appendMessagePart(RED_BLACK_PAIR, std::to_string(rollAttack));
+			game.append_message_part(attacker.actorData.color, attacker.actorData.name);
+			game.append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
+			game.append_message_part(RED_BLACK_PAIR, std::to_string(rollAttack));
 			if (attackPenalty != 0)
 			{
-				game.appendMessagePart(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
+				game.append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
 			}
-			game.appendMessagePart(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			game.appendMessagePart(RED_BLACK_PAIR, ". Miss! ");
-			game.appendMessagePart(RED_BLACK_PAIR, "0");
-			game.appendMessagePart(WHITE_BLACK_PAIR, " dmg.");
-			game.finalizeMessage();
+			game.append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
+			game.append_message_part(RED_BLACK_PAIR, ". Miss! ");
+			game.append_message_part(RED_BLACK_PAIR, "0");
+			game.append_message_part(WHITE_BLACK_PAIR, " dmg.");
+			game.finalize_message();
 			
 			// Debug log the failed attack roll
 			game.log("ATTACK MISS (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
@@ -288,11 +288,11 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 	}
 	else
 	{
-		game.appendMessagePart(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-		game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" attacks "));
-		game.appendMessagePart(target.actorData.color, std::format("{}", target.actorData.name));
-		game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" in vain."));
-		game.finalizeMessage();
+		game.append_message_part(attacker.actorData.color, std::format("{}", attacker.actorData.name));
+		game.append_message_part(WHITE_BLACK_PAIR, std::format(" attacks "));
+		game.append_message_part(target.actorData.color, std::format("{}", target.actorData.name));
+		game.append_message_part(WHITE_BLACK_PAIR, std::format(" in vain."));
+		game.finalize_message();
 	}
 }
 

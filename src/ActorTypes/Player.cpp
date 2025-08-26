@@ -233,23 +233,23 @@ bool Player::rest()
 	HungerState afterState = game.hunger_system.get_hunger_state();
 
 	// Display message with more detail
-	game.appendMessagePart(WHITE_BLACK_PAIR, "Resting recovers ");
-	game.appendMessagePart(WHITE_GREEN_PAIR, std::to_string(amountHealed));
-	game.appendMessagePart(WHITE_GREEN_PAIR, " health");
+	game.append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
+	game.append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
+	game.append_message_part(WHITE_GREEN_PAIR, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		game.appendMessagePart(WHITE_BLACK_PAIR, ", but you've become ");
-		game.appendMessagePart(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
-		game.appendMessagePart(WHITE_BLACK_PAIR, ".");
+		game.append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
+		game.append_message_part(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
+		game.append_message_part(WHITE_BLACK_PAIR, ".");
 	}
 	else
 	{
-		game.appendMessagePart(WHITE_BLACK_PAIR, ", consuming your food.");
+		game.append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
 	}
 
-	game.finalizeMessage();
+	game.finalize_message();
 
 	// Resting takes time
 	game.gameStatus = Game::GameStatus::NEW_TURN;

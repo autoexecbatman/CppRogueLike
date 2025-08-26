@@ -21,18 +21,14 @@
 #include "Systems/TargetingSystem.h"
 #include "Systems/HungerSystem.h"
 #include "Systems/LevelUpSystem.h"
+#include "Systems/MessageSystem.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
 
 class Game
 {
-private:
-	std::vector<LogMessage> attackMessageParts; // this vector holds the parts of the attack message
 public:
-	std::vector <std::vector<LogMessage>> attackMessagesWhole; // this vector holds all of the attack messages
-	std::string messageToDisplay{ "Init Message" };
-	int messageColor{ WHITE_BLACK_PAIR };
 
 	bool run{ true };
 	bool shouldSave{ true };
@@ -52,6 +48,7 @@ public:
 	RandomDice d; // Random number generator.
 	TargetingSystem targeting;
 	HungerSystem hunger_system;
+	MessageSystem message_system;
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
@@ -151,23 +148,22 @@ public:
 
 	//==DEBUG FUNCTIONS==//
 	void wizard_eye() noexcept; // prints Actors names instead of their ASCII chars
-	void err(std::string_view e) noexcept { if (debugMode) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.data()); refresh(); getch(); } }
-	void enableDebugMode() noexcept { debugMode = true; }
-	void disableDebugMode() noexcept { debugMode = false; }
-	void log(std::string_view message) const;
-	void display_debug_messages() noexcept;
+	void err(std::string_view e) noexcept { if (message_system.is_debug_mode()) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.data()); refresh(); getch(); } }
 
 	//==MESSAGE FUNCTIONS==//
-	void message(int color, const std::string& text, bool isComplete);
-	void appendMessagePart(int color, const std::string& text);
-	void finalizeMessage();
-	void transferMessagesToGui();
-
+	// Delegated to MessageSystem
+	void message(int color, std::string_view text, bool isComplete = false) { message_system.message(color, text, isComplete); }
+	void append_message_part(int color, std::string_view text) { message_system.append_message_part(color, text); }
+	void finalize_message() { message_system.finalize_message(); }
+	void transfer_messages_to_gui() { message_system.transfer_messages_to_gui(*gui); }
+	void log(std::string_view message) const { message_system.log(message); }
+	void display_debug_messages() noexcept { message_system.display_debug_messages(); }
+	void enable_debug_mode() noexcept { message_system.enable_debug_mode(); }
+	void disable_debug_mode() noexcept { message_system.disable_debug_mode(); }
 
 private:
 	// Private member variables.
 	bool computeFov{ false };
-	bool debugMode{ true };
 	// Private member functions.
 };
 

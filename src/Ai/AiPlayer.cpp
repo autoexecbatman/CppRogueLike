@@ -197,10 +197,10 @@ void AiPlayer::pick_item(Creature& owner)
 					owner.gold += goldPickable->amount;
 
 					// Display message
-					game.appendMessagePart(YELLOW_BLACK_PAIR, "You picked up ");
-					game.appendMessagePart(YELLOW_BLACK_PAIR, std::to_string(goldPickable->amount));
-					game.appendMessagePart(YELLOW_BLACK_PAIR, " gold.");
-					game.finalizeMessage();
+					game.append_message_part(YELLOW_BLACK_PAIR, "You picked up ");
+					game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(goldPickable->amount));
+					game.append_message_part(YELLOW_BLACK_PAIR, " gold.");
+					game.finalize_message();
 
 					// Remove gold pile from ground
 					i.reset();
@@ -478,8 +478,8 @@ void AiPlayer::look_on_floor(Vector2D target)
 		{
 			if (i->position == target)
 			{
-				game.appendMessagePart(WHITE_BLACK_PAIR, std::format("There's a {} here\n", i->actorData.name));
-				game.finalizeMessage();
+				game.append_message_part(WHITE_BLACK_PAIR, std::format("There's a {} here\n", i->actorData.name));
+				game.finalize_message();
 			}
 		}
 	}
@@ -523,8 +523,8 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 							if (i > 0)
 							{
 								// Display follow-up attack message
-								game.appendMessagePart(WHITE_BLACK_PAIR, "Follow-up attack: ");
-								game.finalizeMessage();
+								game.append_message_part(WHITE_BLACK_PAIR, "Follow-up attack: ");
+								game.finalize_message();
 							}
 							// Use dual wield attack for players
 							owner.attacker->attack_with_dual_wield(owner, *c);

@@ -20,8 +20,8 @@ bool Fireball::use(Item& owner, Creature& wearer)
     }
 
     // burn everything in <range> (including player)
-    game.appendMessagePart(WHITE_BLACK_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
-    game.finalizeMessage();
+    game.append_message_part(WHITE_BLACK_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", Fireball::maxRange));
+    game.finalize_message();
 
     // Create a more dynamic, realistic fire explosion
     create_explosion(tilePicked);
@@ -41,9 +41,9 @@ bool Fireball::use(Item& owner, Creature& wearer)
         {
             if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
             {
-                game.appendMessagePart(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames!", c->actorData.name));
-                game.appendMessagePart(WHITE_BLACK_PAIR, std::format(" ({} damage)", damage));
-                game.finalizeMessage();
+                game.append_message_part(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames!", c->actorData.name));
+                game.append_message_part(WHITE_BLACK_PAIR, std::format(" ({} damage)", damage));
+                game.finalize_message();
                 animation(c->position, maxRange);
             }
         }

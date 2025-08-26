@@ -242,11 +242,11 @@ void Game::update()
 	if (gameStatus == GameStatus::VICTORY)
 	{
 		game.log("Player has won the game!");
-		game.appendMessagePart(RED_YELLOW_PAIR, "Congratulations!");
-		game.appendMessagePart(WHITE_BLACK_PAIR, " You have obtained the ");
-		game.appendMessagePart(RED_YELLOW_PAIR, "Amulet of Yendor");
-		game.appendMessagePart(WHITE_BLACK_PAIR, " and escaped the dungeon!");
-		game.finalizeMessage();
+		game.append_message_part(RED_YELLOW_PAIR, "Congratulations!");
+		game.append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
+		game.append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
+		game.append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
+		game.finalize_message();
 
 		// Display a victory message and wait for a keypress
 		WINDOW* victoryWin = newwin(10, 50, (LINES / 2) - 5, (COLS / 2) - 25);
@@ -321,8 +321,8 @@ void Game::update()
 	if (gameStatus == GameStatus::DEFEAT)
 	{
 		game.log("Player is dead!");
-		game.appendMessagePart(COLOR_RED, "You died! Press any key...");
-		game.finalizeMessage();
+		game.append_message_part(COLOR_RED, "You died! Press any key...");
+		game.finalize_message();
 		run = false;
 	}
 }
@@ -995,174 +995,6 @@ void Game::wizard_eye() noexcept
 		// print the actor's name
 		mvprintw(actor->position.y, actor->position.x, actor->actorData.name.c_str());
 	}
-}
-
-void Game::log(std::string_view message) const
-{
-	if (debugMode)
-	{
-		std::clog << message << "\n";
-		std::cout << message << "\n";
-	}
-}
-
-void Game::message(int color, const std::string& text, bool isComplete = false)
-{
-	// store message in game
-	messageToDisplay = text;
-	messageColor = color;
-
-	// Always append the message part to attackMessageParts
-	attackMessageParts.push_back(LogMessage{ color, text });
-
-	// If isComplete flag is set, consider the message to be finished
-	if (isComplete) {
-		// Add the entire composed message parts to attackMessagesWhole
-		attackMessagesWhole.push_back(attackMessageParts);
-
-		// Clear attackMessageParts for the next message
-		attackMessageParts.clear();
-	}
-
-	game.log("Stored message: '" + messageToDisplay + "'");
-	game.log("Stored message color: " + std::to_string(messageColor));
-
-}
-
-void Game::appendMessagePart(int color, const std::string& text)
-{
-	attackMessageParts.push_back({ color, text });
-}
-
-void Game::finalizeMessage()
-{
-	if (!attackMessageParts.empty()) {
-		attackMessagesWhole.push_back(attackMessageParts);
-		attackMessageParts.clear();
-	}
-}
-
-void Game::display_debug_messages() noexcept
-{
-	// Clear screen and render game background before showing debug screen
-	clear();
-	if (game.gameInit)
-	{
-		// Show the game world behind the debug screen
-		game.render();
-		game.gui->gui_render();
-	}
-	refresh();
-	
-	int total_lines = 0; // To hold the total number of lines in the file
-	std::ifstream logFile("clog.txt");
-	std::string line;
-
-	// First, count the number of lines in the file
-	while (getline(logFile, line))
-	{
-		total_lines++;
-	}
-	logFile.close();
-
-	// Create a pad large enough to hold all the text
-	WINDOW* log_pad = newpad(total_lines + 1, COLS - 2);
-	int y = 0;
-
-	// Open the file again to actually display the text
-	logFile.open("clog.txt");
-	if (logFile.is_open())
-	{
-		while (getline(logFile, line))
-		{
-			mvwprintw(log_pad, y++, 1, "%s", line.c_str());
-		}
-		logFile.close();
-	}
-
-	// Initial display position
-	int pad_pos = 0;
-	prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
-
-	// Scroll interaction
-	int ch;
-	do
-	{
-		ch = getch();
-		switch (ch)
-		{
-		case KEY_DOWN:
-			if (pad_pos + LINES - 2 < total_lines)
-			{
-				pad_pos++;
-			}
-			break;
-		case KEY_UP:
-			if (pad_pos > 0)
-			{
-				pad_pos--;
-			}
-			break;
-		case KEY_NPAGE:  // Handle Page Down
-			if (pad_pos + LINES - 2 < total_lines)
-			{
-				pad_pos += (LINES - 2);  // Move down a page
-				if (pad_pos + LINES - 2 > total_lines)
-				{  // Don't go past the end
-					pad_pos = total_lines - LINES + 2;
-				}
-			}
-			break;
-		case KEY_PPAGE:  // Handle Page Up
-			if (pad_pos > 0)
-			{
-				pad_pos -= (LINES - 2);  // Move up a page
-				if (pad_pos < 0)
-				{
-					pad_pos = 0;  // Don't go past the beginning
-				}
-			}
-			break;
-		case KEY_HOME:  // Jump to the top of the log
-			pad_pos = 0;
-			break;
-		case KEY_END:  // Jump to the bottom of the log
-			if (total_lines > LINES - 2)
-			{
-				pad_pos = total_lines - LINES + 2;
-			}
-			break;
-		case 'm':  // For "monsters"
-			map->display_spawn_rates();
-			break;
-		case 'i':  // For "items"
-			map->display_item_distribution();
-			break;
-		}
-		prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
-	} while (ch != 'q' && ch != 27);  // Exit on 'q' or Escape
-
-	delwin(log_pad);  // Delete the pad after use
-	
-	// Restore full game view when exiting
-	if (game.gameInit)
-	{
-		clear();
-		game.render();
-		game.gui->gui_render();
-		refresh();
-	}
-}
-
-// A possible function in Game.cpp
-
-void Game::transferMessagesToGui()
-{
-	for (const auto& message : attackMessagesWhole)
-	{
-		gui->addDisplayMessage(message);
-	}
-	attackMessagesWhole.clear();
 }
 
 void Game::handle_ranged_attack()

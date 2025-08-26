@@ -12,10 +12,10 @@ bool Gold::use(Item& owner, Creature& wearer)
     wearer.gold += amount;
 
     // Display a message
-    game.appendMessagePart(YELLOW_BLACK_PAIR, "You gained ");
-    game.appendMessagePart(YELLOW_BLACK_PAIR, std::to_string(amount));
-    game.appendMessagePart(YELLOW_BLACK_PAIR, " gold.");
-    game.finalizeMessage();
+    game.append_message_part(YELLOW_BLACK_PAIR, "You gained ");
+    game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(amount));
+    game.append_message_part(YELLOW_BLACK_PAIR, " gold.");
+    game.finalize_message();
 
     // Return true to consume the item
     return Pickable::use(owner, wearer);

@@ -65,10 +65,10 @@ bool CorpseFood::use(Item& owner, Creature& wearer) {
     }
 
     // Display message
-    game.appendMessagePart(WHITE_BLACK_PAIR, "You eat the ");
-    game.appendMessagePart(RED_BLACK_PAIR, owner.actorData.name);
-    game.appendMessagePart(WHITE_BLACK_PAIR, ". " + flavorText);
-    game.finalizeMessage();
+    game.append_message_part(WHITE_BLACK_PAIR, "You eat the ");
+    game.append_message_part(RED_BLACK_PAIR, owner.actorData.name);
+    game.append_message_part(WHITE_BLACK_PAIR, ". " + flavorText);
+    game.finalize_message();
 
     // Corpse is consumed after eating
     return Pickable::use(owner, wearer);

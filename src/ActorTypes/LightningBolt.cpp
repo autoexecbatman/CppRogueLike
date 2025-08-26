@@ -23,10 +23,10 @@ bool LightningBolt::use(Item& owner, Creature& wearer)
 	}
 	else
 	{
-		game.appendMessagePart(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
-		game.appendMessagePart(WHITE_BLUE_PAIR, closestMonster->actorData.name);
-		game.appendMessagePart(WHITE_BLACK_PAIR, " with a loud thunder!");
-		game.finalizeMessage();
+		game.append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
+		game.append_message_part(WHITE_BLUE_PAIR, closestMonster->actorData.name);
+		game.append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
+		game.finalize_message();
 		
 		// Animate the lightning bolt effect
 		animate_lightning(wearer.position, closestMonster->position);
