@@ -209,6 +209,6 @@ void LevelUpUI::cleanup_and_restore()
     // Clear screen and restore game display properly
     clear();
     game.render();
-    game.gui->gui_render();
+    game.gui.gui_render();
     refresh();
 }

@@ -202,6 +202,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/MessageSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/RenderingManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/RenderingManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/InputHandler.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/InputHandler.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp

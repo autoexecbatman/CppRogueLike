@@ -59,4 +59,4 @@ struct Weapons
 	void print_chart();
 };
 
-std::vector<Weapons> loadWeapons();
+std::vector<Weapons> load_weapons();

@@ -31,7 +31,7 @@ public:
     ~MonsterFactory() = default;
 
     // Spawn a random monster at the given position based on dungeon level
-    void spawnRandomMonster(Vector2D position, int dungeonLevel);
+    void spawn_random_monster(Vector2D position, int dungeonLevel);
 
     // Get the probability distribution for the current dungeon level
     std::vector<std::pair<std::string, float>> getCurrentDistribution(int dungeonLevel);
@@ -43,5 +43,5 @@ private:
     std::vector<MonsterType> monsterTypes;
 
     // Calculate actual weight of a monster based on dungeon level
-    int calculateWeight(const MonsterType& monster, int dungeonLevel) const;
+    int calculate_weight(const MonsterType& monster, int dungeonLevel) const;
 };

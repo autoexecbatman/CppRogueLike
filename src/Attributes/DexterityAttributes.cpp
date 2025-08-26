@@ -18,7 +18,7 @@ void from_json(const json& j, DexterityAttributes& p)
 	j.at("DefensiveAdj").get_to(p.DefensiveAdj);
 }
 
-std::vector<DexterityAttributes> loadDexterityAttributes()
+std::vector<DexterityAttributes> load_dexterity_attributes()
 {
 	std::ifstream i("dexterity.json");
 

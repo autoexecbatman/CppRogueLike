@@ -86,15 +86,33 @@ MonsterFactory::MonsterFactory() {
         });
 }
 
-void MonsterFactory::addMonsterType(const MonsterType& monsterType) {
+void MonsterFactory::addMonsterType(const MonsterType& monsterType)
+{
     monsterTypes.push_back(monsterType);
 }
 
-int MonsterFactory::calculateWeight(const MonsterType& monster, int dungeonLevel) const {
+int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLevel) const
+{
+    auto check_level_requirements = [](int level, int min, int max)
+        {
+            if (level < min) // monster can't appear below min level
+            {
+                return false;
+            }
+            else if (max > 0 && level > max) // monster can't appear above max level and has a max level
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        };
+
     // Check level requirements
-    if (dungeonLevel < monster.levelMinimum ||
-        (monster.levelMaximum > 0 && dungeonLevel > monster.levelMaximum)) {
-        return 0;
+    if (!check_level_requirements(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
+    {
+        return 0; // Monster not available at this level
     }
 
     // Calculate scaled weight based on dungeon level
@@ -105,13 +123,14 @@ int MonsterFactory::calculateWeight(const MonsterType& monster, int dungeonLevel
     return std::max(1, weight);
 }
 
-void MonsterFactory::spawnRandomMonster(Vector2D position, int dungeonLevel) {
+void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel)
+{
     // Calculate total weights for current dungeon level
     int totalWeight = 0;
     std::vector<int> weights;
 
     for (const auto& monster : monsterTypes) {
-        int weight = calculateWeight(monster, dungeonLevel);
+        int weight = calculate_weight(monster, dungeonLevel);
         weights.push_back(weight);
         totalWeight += weight;
     }
@@ -152,7 +171,7 @@ std::vector<std::pair<std::string, float>> MonsterFactory::getCurrentDistributio
     std::vector<int> weights;
 
     for (const auto& monster : monsterTypes) {
-        int weight = calculateWeight(monster, dungeonLevel);
+        int weight = calculate_weight(monster, dungeonLevel);
         weights.push_back(weight);
         totalWeight += weight;
     }

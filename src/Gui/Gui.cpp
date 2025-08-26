@@ -278,7 +278,7 @@ void Gui::renderMouseLook()
 	
 	mvwprintw(guiWin, MOUSE_Y, MOUSE_X, "Mouse: Y:%d X:%d", mouseY, mouseX);
 
-	if (!game.map->is_in_fov(Vector2D{ Mouse_status.y, Mouse_status.x }))
+	if (!game.map.is_in_fov(Vector2D{ Mouse_status.y, Mouse_status.x }))
 	{
 		//if the mouse is out of fov, nothing to render
 		return;

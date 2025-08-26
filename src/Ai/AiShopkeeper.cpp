@@ -44,7 +44,7 @@ void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target)
         Vector2D nextPos = owner.position + move;  // Vector2D addition
         
         // ULTIMATE FIX: Multiple collision checks to prevent any overlap
-        if (game.map->can_walk(nextPos))
+        if (game.map.can_walk(nextPos))
         {
             // EXTRA SAFETY: Explicit player collision check
             if (game.player && game.player->position == nextPos)
@@ -53,7 +53,7 @@ void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target)
             }
             
             // EXTRA SAFETY: Double-check no actor at position
-            if (game.map->get_actor(nextPos) != nullptr)
+            if (game.map.get_actor(nextPos) != nullptr)
             {
                 continue; // Skip this move - position occupied
             }
@@ -103,7 +103,7 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
 void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 {
 	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
-	game.shouldInput = false;
+	game.shouldTakeInput = false;
 }
 
 void AiShopkeeper::update(Creature& owner)
@@ -133,7 +133,7 @@ void AiShopkeeper::update(Creature& owner)
 	}
 
 	// Check if player is visible and not already tracking
-	if (game.map->is_in_fov(owner.position))
+	if (game.map.is_in_fov(owner.position))
 	{
 		// Only start tracking if we're not already tracking (prevents constant following)
 		if (moveCount == 0)

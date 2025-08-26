@@ -55,13 +55,13 @@ void AiSpider::update(Creature& owner)
         ambushCounter--;
 
         // If player spots us while ambushing, or ambush time is up, stop ambushing
-        if (game.map->is_in_fov(owner.position) || ambushCounter <= 0)
+        if (game.map.is_in_fov(owner.position) || ambushCounter <= 0)
         {
             isAmbushing = false;
 
             // If player is close when we're discovered, get a surprise attack
             int distanceToPlayer = owner.get_tile_distance(game.player->position);
-            if (game.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
+            if (game.map.is_in_fov(owner.position) && distanceToPlayer <= 3)
             {
                 // Message about being ambushed
                 game.append_message_part(owner.actorData.color, owner.actorData.name);
@@ -99,7 +99,7 @@ void AiSpider::update(Creature& owner)
             return;
         }
     }
-    else if (!game.map->is_in_fov(owner.position))
+    else if (!game.map.is_in_fov(owner.position))
     {
         // Not in player's FOV, consider setting an ambush
         // Higher chance when player is near but doesn't see the spider
@@ -134,7 +134,7 @@ void AiSpider::update(Creature& owner)
 
     // Special check for being adjacent to player - DIRECT ATTACK CODE
     int distanceToPlayer = owner.get_tile_distance(game.player->position);
-    if (distanceToPlayer <= 1 && game.map->is_in_fov(owner.position))
+    if (distanceToPlayer <= 1 && game.map.is_in_fov(owner.position))
     {
         // Directly trigger attack
         game.log("Spider attempting attack with poison");
@@ -152,7 +152,7 @@ void AiSpider::update(Creature& owner)
     }
 
     // Handle movement and other behaviors normally
-    if (game.map->is_in_fov(owner.position))
+    if (game.map.is_in_fov(owner.position))
     {
         // Player can see spider - set maximum tracking
         moveCount = TRACKING_TURNS;
@@ -190,7 +190,7 @@ void AiSpider::moveTowardPlayer(Creature& owner)
     Vector2D newPos = owner.position + Vector2D{ dy, dx };
 
     // Check if the move is valid
-    if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+    if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
     {
         owner.position = newPos;
     }
@@ -198,7 +198,7 @@ void AiSpider::moveTowardPlayer(Creature& owner)
     {
         // Try horizontal move
         newPos = owner.position + Vector2D{ 0, dx };
-        if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+        if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
         {
             owner.position = newPos;
         }
@@ -206,7 +206,7 @@ void AiSpider::moveTowardPlayer(Creature& owner)
         {
             // Try vertical move
             newPos = owner.position + Vector2D{ dy, 0 };
-            if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+            if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
             {
                 owner.position = newPos;
             }
@@ -222,7 +222,7 @@ void AiSpider::randomMove(Creature& owner)
     if (dx != 0 || dy != 0)
     {
         Vector2D newPos = owner.position + Vector2D{ dy, dx };
-        if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+        if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
         {
             owner.position = newPos;
         }
@@ -237,7 +237,7 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition)
     // If adjacent to target, attack
     if (distanceToTarget <= 1)
     {
-        Creature* target = game.map->get_actor(targetPosition);
+        Creature* target = game.map.get_actor(targetPosition);
         if (target)
         {
             // Normal attack
@@ -265,7 +265,7 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition)
             Vector2D newPos = owner.position + Vector2D{ dy, dx };
 
             // Check if position is walkable and not occupied
-            if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+            if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
             {
                 // Check if this position is adjacent to a wall
                 bool adjacentToWall = false;
@@ -276,7 +276,7 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition)
                         if (wx == 0 && wy == 0) continue;
 
                         Vector2D wallCheck = newPos + Vector2D{ wy, wx };
-                        if (game.map->is_wall(wallCheck))
+                        if (game.map.is_wall(wallCheck))
                         {
                             adjacentToWall = true;
                             break;
@@ -379,14 +379,14 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition)
             Vector2D pos = owner.position + Vector2D{ y, x };
 
             // Check boundaries
-            if (pos.y < 0 || pos.y >= game.map->get_height() ||
-                pos.x < 0 || pos.x >= game.map->get_width())
+            if (pos.y < 0 || pos.y >= game.map.get_height() ||
+                pos.x < 0 || pos.x >= game.map.get_width())
             {
                 continue;
             }
 
             // Check if position is walkable, not occupied, and a good ambush spot
-            if (game.map->can_walk(pos) && !game.map->get_actor(pos) && isGoodAmbushSpot(pos))
+            if (game.map.can_walk(pos) && !game.map.get_actor(pos) && isGoodAmbushSpot(pos))
             {
                 // Evaluate position - closer to player's path is better for ambush
                 int distToPlayer = std::abs(pos.x - targetPosition.x) + std::abs(pos.y - targetPosition.y);
@@ -428,7 +428,7 @@ bool AiSpider::isGoodAmbushSpot(Vector2D position)
             Vector2D adj = position + Vector2D{ y, x };
 
             // Check if this position is a wall
-            if (game.map->is_wall(adj))
+            if (game.map.is_wall(adj))
             {
                 wallCount++;
 
@@ -441,7 +441,7 @@ bool AiSpider::isGoodAmbushSpot(Vector2D position)
                         if (cx == 0 && cy == 0) continue;
 
                         Vector2D cornerAdj = adj + Vector2D{ cy, cx };
-                        if (game.map->is_wall(cornerAdj))
+                        if (game.map.is_wall(cornerAdj))
                         {
                             cornerWalls++;
                         }
@@ -520,7 +520,7 @@ void AiWebSpinner::update(Creature& owner)
 
     // DIRECT ATTACK CODE - Check if player is adjacent
     int distanceToPlayer = owner.get_tile_distance(game.player->position);
-    if (distanceToPlayer <= 1 && game.map->is_in_fov(owner.position))
+    if (distanceToPlayer <= 1 && game.map.is_in_fov(owner.position))
     {
         // Directly trigger attack - avoid any inheritance issues
         game.log("Web spinner attempting attack with poison");
@@ -555,7 +555,7 @@ void AiWebSpinner::update(Creature& owner)
     }
 
     // Fall back to standard movement behavior
-    if (game.map->is_in_fov(owner.position))
+    if (game.map.is_in_fov(owner.position))
     {
         // If player can see us, move toward player
         moveCount = TRACKING_TURNS;
@@ -652,7 +652,7 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
     // Center the web at the spider's position or at a strategic location
     Vector2D webCenter;
 
-    if (game.map->is_in_fov(owner.position) && distToPlayer < 10) {
+    if (game.map.is_in_fov(owner.position) && distToPlayer < 10) {
         // If player can see spider, create web between spider and player
         int dx = game.player->position.x - owner.position.x;
         int dy = game.player->position.y - owner.position.y;
@@ -664,8 +664,8 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner)
         webCenter = owner.position + Vector2D{ dy * 2, dx * 2 };
 
         // Make sure center is in bounds
-        webCenter.x = std::max(0, std::min(webCenter.x, game.map->get_width() - 1));
-        webCenter.y = std::max(0, std::min(webCenter.y, game.map->get_height() - 1));
+        webCenter.x = std::max(0, std::min(webCenter.x, game.map.get_width() - 1));
+        webCenter.y = std::max(0, std::min(webCenter.y, game.map.get_height() - 1));
     }
     else {
         // If player can't see spider, create web at a nearby location
@@ -870,7 +870,7 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size)
         }
 
         // Create the web tile (you'll need to add this method to your Map class)
-        /*game.map->set_tile(pos, TileType::WEB, webStrength);*/
+        /*game.map.set_tile(pos, TileType::WEB, webStrength);*/
     }
 }
 
@@ -878,18 +878,18 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size)
 bool AiWebSpinner::isValidWebPosition(Vector2D pos)
 {
     // Check bounds
-    if (pos.y < 0 || pos.y >= game.map->get_height() ||
-        pos.x < 0 || pos.x >= game.map->get_width()) {
+    if (pos.y < 0 || pos.y >= game.map.get_height() ||
+        pos.x < 0 || pos.x >= game.map.get_width()) {
         return false;
     }
 
     // Check if the position is walkable
-    if (!game.map->can_walk(pos)) {
+    if (!game.map.can_walk(pos)) {
         return false;
     }
 
     // Don't place webs on occupied tiles
-    if (game.map->get_actor(pos) != nullptr) {
+    if (game.map.get_actor(pos) != nullptr) {
         return false;
     }
 

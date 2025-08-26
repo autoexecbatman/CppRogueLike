@@ -53,25 +53,25 @@
 void Game::init()
 {
 	//==INIT==
-	game.weapons = loadWeapons();
-	game.strengthAttributes = loadStrengthAttributes();
+	weapons = load_weapons();
+	strengthAttributes = load_strength_attributes();
 
 	//==STAIRS==
-	game.stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
+	stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
 
 	//==MAP==
-	game.map->init(true); // with actors true
+	map.init(true); // with actors true
 
 	//==GameStatus==
 	// we set gameStatus to STARTUP because we want to compute the fov only once
 	gameStatus = GameStatus::STARTUP;
-	game.log("GameStatus::STARTUP");
+	log("GameStatus::STARTUP");
 
 	// Add debug weapons and items at player feet
-	game.add_debug_weapons_at_player_feet();
+	add_debug_weapons_at_player_feet();
 
 	//==LOG==
-	game.log("game.init() was called!");
+	log("game.init() was called!");
 }
 
 void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
@@ -89,7 +89,7 @@ void Game::cleanup_dead_creatures()
 {
 	// Remove dead creatures from the game
 	// This is called at safe points to avoid dangling references during combat
-	std::erase_if(game.creatures, [](const auto& creature) 
+	std::erase_if(creatures, [](const auto& creature) 
 	{
 		return creature && creature->destructible && creature->destructible->is_dead();
 	});
@@ -98,105 +98,111 @@ void Game::cleanup_dead_creatures()
 void Game::spawn_creatures() const
 {
 	// INCREASED SPAWN RATE - add a new monster every 2 turns (was 5)
-	if (game.time % 2 == 0)
+	if (time % 2 == 0)
 	{
 		// INCREASED MONSTER LIMIT - if there are less than 10 monsters on the map (was 6)
 		if (creatures.size() < 10)
 		{
 			// game.rooms must be populated
-			if (game.rooms.empty())
+			if (rooms.empty())
 			{
 				throw std::runtime_error("game.rooms is empty!");
 			}
+
 			// roll a random index as the size of the rooms vector
-			int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
+			int index = game.d.roll(0, static_cast<int>(rooms.size()) - 1);
+
 			// make the index even
 			index = index % 2 == 0 ? index : index - 1;
+
 			// get the room begin and end
-			const Vector2D roomBegin = game.rooms.at(index);
-			const Vector2D roomEnd = game.rooms.at(index + 1);
+			const Vector2D roomBegin = rooms.at(index);
+			const Vector2D roomEnd = rooms.at(index + 1);
+
 			// get a random position in the room
 			Vector2D pos = Vector2D{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
+
 			// if pos is at wall roll again
-			while (!game.map->can_walk(pos))
+			while (!map.can_walk(pos))
 			{
 				pos.x = game.d.roll(roomBegin.x, roomEnd.x);
 				pos.y = game.d.roll(roomBegin.y, roomEnd.y);
 			}
+
 			// add a monster to the map
-			game.map->add_monster(pos);
+			map.add_monster(pos);
 		}
 	}
 }
 
 void Game::handle_menus()
 {
-	if (!game.menus.empty())
+	if (!menus.empty())
 	{
 		bool menuWasPopped = false;
 		
-		game.menus.back()->menu();
+		menus.back()->menu();
 		// if back is pressed, pop the menu
-		if (game.menus.back()->back)
+		if (menus.back()->back)
 		{
-			game.menus.pop_back();
+			menus.pop_back();
 			menuWasPopped = true;
-			if (!game.menus.empty())
+			if (!menus.empty())
 			{
-				game.menus.back()->menu_set_run_true();
+				menus.back()->menu_set_run_true();
 			}
 		}
 
-		if (!game.menus.empty() && !game.menus.back()->run)
+		if (!menus.empty() && !menus.back()->run)
 		{
-			game.menus.pop_back();
+			menus.pop_back();
 			menuWasPopped = true;
 		}
 
 		// If we just closed a menu and returned to game, restore display
-		if (menuWasPopped && game.menus.empty() && game.gameInit)
+		if (menuWasPopped && menus.empty() && gameWasInit)
 		{
-			game.restore_game_display();
+			restore_game_display();
 		}
 
-		game.shouldInput = false;
+		shouldTakeInput = false;
 	}
 }
 
 void Game::handle_gameloop(Gui& gui, int loopNum)
 {
-	if (!game.gameInit)
+	if (!gameWasInit)
 	{
-		game.init();
-		game.gameInit = true;
+		init();
+		gameWasInit = true;
 	}
 	//==DEBUG==
-	game.log("//====================LOOP====================//");
-	game.log("Loop number: " + std::to_string(loopNum) + "\n");
+	log("//====================LOOP====================//");
+	log("Loop number: " + std::to_string(loopNum) + "\n");
 
 	//==INIT_GUI==
 	// GUI initialization is now handled in STARTUP completion
 	// This ensures it happens after racial bonuses are applied
 
 	//==INPUT==
-	game.keyPress = ERR; // reset the keyPress so it won't get stuck in a loop
-	if (game.shouldInput)
+	input_handler.reset_key(); // reset the keyPress so it won't get stuck in a loop
+	if (shouldTakeInput)
 	{
-		game.key_store();
-		game.key_listen();
+		input_handler.key_store();
+		input_handler.key_listen();
 	}
-	game.shouldInput = true; // reset shouldInput to reset the flag
+	shouldTakeInput = true; // reset shouldInput to reset the flag
 
 	//==UPDATE==
-	game.log("Running update...");
-	game.update(); // update map and actors positions
+	log("Running update...");
+	update(); // update map and actors positions
 	gui.gui_update(); // update the gui
-	game.log("Update OK.");
+	log("Update OK.");
 
 	//==DRAW==
-	game.log("Running render...");
+	log("Running render...");
 	// Render game content first, then GUI on top
-	game.render(); // render map and actors to the screen
+	render(); // render map and actors to the screen
 	// Render GUI if it's initialized - AFTER game render so it's not overwritten
 	if (gui.guiInit) {
 		// Ensure GUI has latest data before rendering
@@ -204,13 +210,13 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 		gui.gui_render(); // render the gui
 	}
 	// Call the same restore function that inventory uses
-	game.restore_game_display();
-	game.log("Render OK.");
+	restore_game_display();
+	log("Render OK.");
 	
 	// Check for menus AFTER rendering so positions are updated
-	if (!game.menus.empty())
+	if (!menus.empty())
 	{
-		game.windowState = Game::WindowState::MENU;
+		windowState = Game::WindowState::MENU;
 		return;
 	}
 }
@@ -219,12 +225,12 @@ void Game::update()
 {
 	if (gameStatus == GameStatus::VICTORY)
 	{
-		game.log("Player has won the game!");
-		game.append_message_part(RED_YELLOW_PAIR, "Congratulations!");
-		game.append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
-		game.append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
-		game.append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
-		game.finalize_message();
+		log("Player has won the game!");
+		append_message_part(RED_YELLOW_PAIR, "Congratulations!");
+		append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
+		append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
+		append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
+		finalize_message();
 
 		// Display a victory message and wait for a keypress
 		WINDOW* victoryWin = newwin(10, 50, (LINES / 2) - 5, (COLS / 2) - 25);
@@ -240,26 +246,28 @@ void Game::update()
 		run = false; // End the game
 	}
 
-	game.map->update(); // sets tiles to explored
-	game.player->update(); // if moved set to NEW_TURN else IDLE
+	map.update(); // sets tiles to explored
+	player->update(); // if moved set to NEW_TURN else IDLE
 
 	if (gameStatus == GameStatus::STARTUP)
 	{
-		game.map->compute_fov();
+		map.compute_fov();
 		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
-		if (game.dungeonLevel == 1) {
-			game.player->racial_ability_adjustments();
+		if (dungeonLevel == 1)
+		{
+			player->racial_ability_adjustments();
 			// Don't try to restore display here - let normal game flow handle it
 		}
-		game.player->calculate_thaco();
+		player->calculate_thaco();
 		gameStatus = GameStatus::NEW_TURN;
 		
 		// Initialize GUI now that STARTUP is complete and player stats are finalized
-		if (!game.gui->guiInit) {
-			game.gui->gui_init();
-			game.gui->guiInit = true;
+		if (!gui.guiInit)
+		{
+			gui.gui_init();
+			gui.guiInit = true;
 			// Immediately update GUI with current player data
-			game.gui->gui_update();
+			gui.gui_update();
 		}
 	}
 
@@ -269,17 +277,20 @@ void Game::update()
 		auto isNull = [](const auto& obj) { return !obj; };
 		std::erase_if(objects, isNull);
 
-		game.update_creatures(creatures);
-		game.spawn_creatures();
+		update_creatures(creatures);
+		spawn_creatures();
 
-		for (const auto& creature : creatures) {
-			if (creature && creature->destructible) {
+		for (const auto& creature : creatures)
+		{
+			if (creature && creature->destructible)
+			{
 				creature->destructible->update_constitution_bonus(*creature);
 			}
 		}
 
 		// Don't forget the player
-		if (player && player->destructible) {
+		if (player && player->destructible)
+		{
 			player->destructible->update_constitution_bonus(*player);
 		}
 
@@ -338,9 +349,9 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		
 		// make the line follow the mouse position
 		// if mouse move
-		if (mouse_moved())
+		if (input_handler.mouse_moved())
 		{
-			targetCursor = get_mouse_position();
+			targetCursor = input_handler.get_mouse_position();
 		}
 		game.render();
 
@@ -373,9 +384,9 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		if (game.map->is_in_fov(targetCursor))
+		if (game.map.is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map->get_actor(targetCursor);
+			const auto& actor = game.map.get_actor(targetCursor);
 			// CRITICAL FIX: Don't write directly to main screen - this causes bleeding
 			// Store info for later display or use a separate window
 			if (actor != nullptr)
@@ -471,9 +482,9 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 			game.message(WHITE_BLACK_PAIR, "Attack confirmed", true);
 			// if the target is a monster then attack it
 		{
-			if (game.map->is_in_fov(targetCursor))
+			if (game.map.is_in_fov(targetCursor))
 			{
-				const auto& actor = game.map->get_actor(targetCursor);
+				const auto& actor = game.map.get_actor(targetCursor);
 				// and actor is not an item
 				if (actor != nullptr)
 				{
@@ -501,224 +512,10 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 	return false;
 }
 
-void Game::run_menus() {
-	//Menu mainMenu;
-	//MenuGender menuGender;
-	//MenuRace menuRace;
-	//// If you have more menus, define them here...
-
-	//while (game.run)
-	//{
-	//	// Main menu
-	//	mainMenu.menu_set_run_true();
-	//	mainMenu.menu();
-	//	if (!mainMenu.run) break; // If main menu is quit, break out of loop
-
-	//	// Gender menu
-	//	menuGender.menu_gender_set_run_true();
-	//	/*menuGender.menu_gender();*/
-	//	if (!menuGender.run) continue; // If back is pressed in gender menu, continue to main menu
-
-	//	// Race menu
-	//	menuRace.menu_race_set_run_true();
-	//	menuRace.menu_race();
-	//	if (!menuRace.run) continue; // If back is pressed in race menu, continue to gender menu
-
-	//	// If you have more menus, add them here following the same pattern...
-
-	//	// Init the game after all menus
-	//	game.init();
-	//}
-}
-
-// check if the mouse has moved
-bool Game::mouse_moved() noexcept
-{
-	auto oldMousePos{ get_mouse_position_old() };
-	auto currentMousePos{ get_mouse_position() };
-	return currentMousePos != oldMousePos;
-}
-
-Vector2D Game::get_mouse_position() noexcept
-{
-	request_mouse_pos();
-	Vector2D mousePos{ 0,0 };
-	mousePos.x = Mouse_status.x;
-	mousePos.y = Mouse_status.y;
-	return mousePos;
-}
-
-Vector2D Game::get_mouse_position_old() noexcept
-{
-	Vector2D oldMousePos{ 0,0 };
-	oldMousePos.x = Mouse_status.x;
-	oldMousePos.y = Mouse_status.y;
-	return oldMousePos;
-}
-
-// this function is deprecated
-void Game::target()
-{
-	if (!game.player->has_state(ActorState::IS_RANGED))
-	{
-		game.message(WHITE_BLACK_PAIR, "You are not ranged!", true);
-		return;
-	}
-
-	Vector2D targetCursor = player->position;
-	const Vector2D lastPosition = targetCursor;
-	bool run = true;
-	while (run)
-	{
-		// EMSCRIPTEN FIX: Removed clear() - causes screen corruption in web builds
-
-		// make the line follow the mouse position
-		// if mouse move
-		if (mouse_moved())
-		{
-			targetCursor = get_mouse_position();
-		}
-		game.render();
-
-		// display the FOV in white in row major order
-		Vector2D pos{ 0,0 };
-		for (; pos.y < MAP_HEIGHT; pos.y++)
-		{
-			for (; pos.x < MAP_WIDTH; pos.x++)
-			{
-				if (game.map->is_in_fov(pos))
-				{
-					mvchgat(pos.y, pos.x, 1, A_REVERSE, WHITE_BLUE_PAIR, NULL);
-				}
-			}
-		}
-
-		// first color the player position if the cursor has moved from the player position
-		if (targetCursor != player->position)
-		{
-			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_BLACK_PAIR, NULL);
-		}
-
-		//// draw a line using TCODLine class
-		///*
-		//@CppEx
-		//// Going from point 5,8 to point 13,4
-		//int x = 5, y = 8;
-		//TCODLine::init(x, y, 13, 4);
-		//do {
-		//	// update cell x,y
-		//} while (!TCODLine::step(&x, &y));
-		//*/
-		//Vector2D line{ 0,0 };
-		//TCODLine::init(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
-		//while (!TCODLine::step(&line.x, &line.y))
-		//{
-		//	mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, NULL);
-		//}
-
-		// draw the line using TCODPath
-		// first create a path from the player to the target cursor
-		map->tcodPath->compute(player->position.x, player->position.y, targetCursor.x, targetCursor.y);
-		// then iterate over the path
-		int x, y;
-		while (map->tcodPath->walk(&x, &y, true))
-		{
-			mvchgat(y, x, 1, A_REVERSE, WHITE_BLACK_PAIR, NULL);
-		}
-		// draw the target cursor
-		attron(COLOR_PAIR(WHITE_RED_PAIR));
-		mvaddch(targetCursor.y,targetCursor.x,'X');
-		attroff(COLOR_PAIR(WHITE_RED_PAIR));
-
-		// if the cursor is on a monster then display the monster's name
-		const int distance = player->get_tile_distance(targetCursor);
-		if (game.map->is_in_fov(targetCursor))
-		{
-			const auto& actor = game.map->get_actor(targetCursor);
-			// and actor is not an item
-			if (actor != nullptr)
-			{
-				mvprintw(0, 0, actor->actorData.name.c_str());
-				// print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->armorClass);
-				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
-				// print the distance from the player to the target cursor
-				mvprintw(0, 50, "Distance: %d", distance);
-			}
-		}
-		
-		refresh();
-
-		// get the key press
-		const int key = getch();
-		switch (key)
-		{
-		case KEY_UP:
-		case 'w':
-		case 'W':
-			// move the selection cursor up
-			targetCursor.y--;
-			break;
-
-		case KEY_DOWN:
-		case 's':
-		case 'S':
-			// move the selection cursor down
-			targetCursor.y++;
-			break;
-
-		case KEY_LEFT:
-		case 'a':
-		case 'A':
-			// move the selection cursor left
-			targetCursor.x--;
-			break;
-
-		case KEY_RIGHT:
-		case 'd':
-		case 'D':
-			// move the selection cursor right
-			targetCursor.x++;
-			break;
-			
-		case 10:
-			// if the key enter is pressed then select the target
-			// and return the target position
-			// if the target is a monster then attack it
-		{
-			if (game.map->is_in_fov(targetCursor))
-			{
-				const auto& actor = game.map->get_actor(targetCursor);
-				if (actor)
-				{
-					player->attacker->attack(*player, *actor);
-					run = false;
-				}
-			}
-			game.gameStatus = GameStatus::NEW_TURN;
-		}
-		break;
-
-		case 'r':
-		case 27:
-			// EMSCRIPTEN FIX: Clean exit without screen corruption
-			run = false;
-			break;
-			
-		default:
-			break;
-		} // end of switch (key)
-
-	} // end of while (run)
-	// EMSCRIPTEN FIX: Removed problematic clear() at function end
-	// Game rendering will handle screen updates
-}
-
 void Game::load_all()
 {
 	// Use JSON to load the game
-	game.gameInit = true;
+	game.gameWasInit = true;
 
 	std::ifstream file("game.sav");
 	if (file.is_open())
@@ -727,7 +524,7 @@ void Game::load_all()
 		file >> j;
 
 		// Load the map
-		map->load(j);
+		map.load(j);
 
 		// Load the rooms
 		if (j.contains("rooms") && j["rooms"].is_array())
@@ -790,7 +587,7 @@ void Game::load_all()
 		// Load the message log
 		if (j.contains("gui"))
 		{
-			gui->load(j["gui"]);
+			gui.load(j["gui"]);
 		}
 		
 		// Load the hunger system
@@ -837,7 +634,7 @@ void Game::save_all()
 		json j;
 
 		// Save the map
-		map->save(j);
+		map.save(j);
 
 		// Save game.rooms
 		j["rooms"] = json::array();
@@ -882,7 +679,7 @@ void Game::save_all()
 
 		// Save the message log
 		json guiJson;
-		gui->save(guiJson);
+		gui.save(guiJson);
 		j["gui"] = guiJson;
 		
 		// Save the hunger system
@@ -914,7 +711,7 @@ void Game::next_level()
 	game.message(WHITE_BLACK_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)
 	game.message(WHITE_BLACK_PAIR, "After a rare moment of peace, you descend",true);
 	game.message(WHITE_BLACK_PAIR, std::format("You are now on level {}", dungeonLevel), true);
-	map->regenerate(); // create a new map
+	map.regenerate(); // create a new map
 	gameStatus = GameStatus::STARTUP; // set the game status to STARTUP because we need to recompute the FOV 
 }
 

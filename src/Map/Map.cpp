@@ -920,7 +920,7 @@ bool Map::is_stairs(Vector2D pos) const
 	return game.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos)
+bool Map::can_walk(Vector2D pos) const
 {
     if (is_wall(pos)) // check if the tile is a wall
     {
@@ -942,20 +942,21 @@ bool Map::can_walk(Vector2D pos)
     return true;
 }
 
-void Map::add_monster(Vector2D pos)
+void Map::add_monster(Vector2D pos) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
-	monsterFactory->spawnRandomMonster(pos, game.dungeonLevel);
+	monsterFactory->spawn_random_monster(pos, game.dungeonLevel);
 
 	// Log the spawn for debugging
 	Creature* monster = get_actor(pos);
-	if (monster) {
+	if (monster)
+	{
 		game.log("Spawned " + monster->actorData.name + " at level " + std::to_string(game.dungeonLevel));
 	}
 }
 
 // getActor returns the actor at the given coordinates or `nullptr` if there's none
-Creature* Map::get_actor(Vector2D pos) noexcept
+Creature* Map::get_actor(Vector2D pos) const noexcept
 {
 	for (const auto& actor : game.creatures)
 	{
@@ -999,9 +1000,9 @@ void Map::regenerate()
 	game.objects.clear();
 
 	// generate a new map
-	game.map->map_height = MAP_HEIGHT;
-	game.map->map_width = MAP_WIDTH;
-	game.map->init(true);
+	game.map.map_height = MAP_HEIGHT;
+	game.map.map_width = MAP_WIDTH;
+	game.map.init(true);
 }
 
 std::vector<Vector2D> Map::neighbors(Vector2D id)

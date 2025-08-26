@@ -16,7 +16,7 @@ void AiMonster::update(Creature& owner)
     }
 
     // Check if monster is in FOV - if so, set tracking
-    if (game.map->is_in_fov(owner.position))
+    if (game.map.is_in_fov(owner.position))
     {
         // Player can see monster - set maximum tracking
         moveCount = TRACKING_TURNS;
@@ -57,7 +57,7 @@ void AiMonster::update(Creature& owner)
             if (dx != 0 || dy != 0)  // Ensure we're not standing still
             {
                 Vector2D newPos = owner.position + Vector2D{ dy, dx };
-                if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+                if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
                 {
                     owner.position = newPos;
                 }
@@ -73,7 +73,7 @@ void AiMonster::update(Creature& owner)
         if (dx != 0 || dy != 0)  // Ensure we're not standing still
         {
             Vector2D newPos = owner.position + Vector2D{ dy, dx };
-            if (game.map->can_walk(newPos) && !game.map->get_actor(newPos))
+            if (game.map.can_walk(newPos) && !game.map.get_actor(newPos))
             {
                 owner.position = newPos;
             }
@@ -98,7 +98,7 @@ void AiMonster::save(json& j)
 
 //void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 //{
-//	if(game.map->tile_action(owner, game.map->get_tile_type(owner.position)))
+//	if(game.map.tile_action(owner, game.map.get_tile_type(owner.position)))
 //	{
 //		Vector2D moveDirection = targetPosition - owner.position;
 //
@@ -116,13 +116,13 @@ void AiMonster::save(json& j)
 //		const auto distance = owner.get_tile_distance(targetPosition);
 //		if (distance > 1)
 //		{
-//			game.map->tcodPath->compute(owner.position.x, owner.position.y, targetPosition.x, targetPosition.y);
+//			game.map.tcodPath->compute(owner.position.x, owner.position.y, targetPosition.x, targetPosition.y);
 //			int x, y;
-//			while (game.map->tcodPath->walk(&x, &y, true))
+//			while (game.map.tcodPath->walk(&x, &y, true))
 //			{
 //				Vector2D newPos = Vector2D{ y, x };
 //				Vector2D oldPos = owner.position;
-//				if (game.map->can_walk(newPos))
+//				if (game.map.can_walk(newPos))
 //				{
 //					owner.position = newPos;
 //					break;
@@ -132,7 +132,7 @@ void AiMonster::save(json& j)
 //					for (const auto& m : moves)
 //					{
 //						Vector2D moveTo = owner.position + m;
-//						if (game.map->can_walk(moveTo))
+//						if (game.map.can_walk(moveTo))
 //						{
 //							owner.position = moveTo;
 //						}
@@ -151,9 +151,9 @@ void AiMonster::save(json& j)
 void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 {
 	Dijkstra dijkstra{ MAP_WIDTH,MAP_HEIGHT };
-	std::vector<Vector2D> path = dijkstra.a_star_search(*game.map, owner.position, targetPosition, false);
+	std::vector<Vector2D> path = dijkstra.a_star_search(game.map, owner.position, targetPosition, false);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
-	auto is_actor = [](const Vector2D& pos) { return game.map->get_actor(pos) != nullptr; };
+	auto is_actor = [](const Vector2D& pos) { return game.map.get_actor(pos) != nullptr; };
 	if (distanceToTarget > 1)
 	{
 		if (!path.empty())

@@ -60,7 +60,7 @@ void AiPlayer::update(Creature& owner)
 		}
 	}
 
-	const Controls key = static_cast<Controls>(game.keyPress);
+	const Controls key = static_cast<Controls>(game.input_handler.get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
 	// Handle confused state - randomly move or act
@@ -133,7 +133,7 @@ void AiPlayer::update(Creature& owner)
 	if (isWaiting) // when waiting tiles are triggered
 	{
 		isWaiting = false;
-		game.map->tile_action(owner, game.map->get_tile_type(owner.position));
+		game.map.tile_action(owner, game.map.get_tile_type(owner.position));
 		look_on_floor(owner.position);
 	}
 
@@ -148,7 +148,7 @@ void AiPlayer::update(Creature& owner)
 		if (shouldComputeFOV)
 		{
 			shouldComputeFOV = false; // reset flag
-			game.map->compute_fov();
+			game.map.compute_fov();
 		}
 	}
 }
@@ -557,9 +557,9 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 
 void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 {
-	TileType targetTileType = game.map->get_tile_type(targetPosition);
+	TileType targetTileType = game.map.get_tile_type(targetPosition);
 	
-	if (!game.map->is_collision(owner, targetTileType, targetPosition))
+	if (!game.map.is_collision(owner, targetTileType, targetPosition))
 	{
 		// Check if there's a web at the target position
 		bool webEffect = false;
@@ -586,7 +586,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 		{
 			move(owner, targetPosition);
 			// Call tile_action after successful move
-			game.map->tile_action(owner, targetTileType);
+			game.map.tile_action(owner, targetTileType);
 			shouldComputeFOV = true;
 		}
 	}
@@ -711,13 +711,13 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::REVEAL:
 	{
-		game.map->reveal();
+		game.map.reveal();
 		break;
 	}
 
 	case Controls::REGEN:
 	{
-		game.map->regenerate();
+		game.map.regenerate();
 		break;
 	}
 
@@ -730,9 +730,9 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position
-			if (game.map->is_door(doorPos))
+			if (game.map.is_door(doorPos))
 			{
-				if (game.map->open_door(doorPos))
+				if (game.map.open_door(doorPos))
 				{
 					game.message(WHITE_BLACK_PAIR, "You open the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -764,9 +764,9 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position
-			if (game.map->is_door(doorPos))
+			if (game.map.is_door(doorPos))
 			{
-				if (game.map->close_door(doorPos))
+				if (game.map.close_door(doorPos))
 				{
 					game.message(WHITE_BLACK_PAIR, "You close the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -775,7 +775,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 				else
 				{
 					// Try to determine why door couldn't be closed
-					if (game.map->get_actor(doorPos) != nullptr)
+					if (game.map.get_actor(doorPos) != nullptr)
 					{
 						game.message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
 					}
@@ -856,8 +856,8 @@ Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
 	Vector2D targetPos = owner.position + delta;
 
 	// Validate the position is within map bounds
-	if (targetPos.x < 0 || targetPos.x >= game.map->get_width() ||
-		targetPos.y < 0 || targetPos.y >= game.map->get_height()) {
+	if (targetPos.x < 0 || targetPos.x >= game.map.get_width() ||
+		targetPos.y < 0 || targetPos.y >= game.map.get_height()) {
 		return { 0, 0 }; // Out of bounds
 	}
 

@@ -172,11 +172,11 @@ void Menu::menu()
 {
 	// Clear screen and render game background before showing menu
 	clear();
-	if (game.gameInit && !isStartupMenu)
+	if (game.gameWasInit && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
 		game.render();
-		game.gui->gui_render();
+		game.gui.gui_render();
 	}
 	refresh();
 	
@@ -188,11 +188,11 @@ void Menu::menu()
 	}
 	
 	// Restore full game view if returning to game
-	if (game.gameInit && !isStartupMenu)
+	if (game.gameWasInit && !isStartupMenu)
 	{
 		clear();
 		game.render();
-		game.gui->gui_render();
+		game.gui.gui_render();
 		refresh();
 	}
 }

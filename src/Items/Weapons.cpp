@@ -94,7 +94,7 @@ std::string Weapons::get_damage_roll(bool twoHanded) const noexcept
 	return damageRoll;
 }
 
-std::vector<Weapons> loadWeapons()
+std::vector<Weapons> load_weapons()
 {
 	std::ifstream i("./weapons.json");
 
@@ -174,7 +174,7 @@ void Weapons::enhance_weapon(int levels)
 
 void Weapons::print_chart()
 {
-	std::vector<Weapons> weaponChart = loadWeapons();
+	std::vector<Weapons> weaponChart = load_weapons();
 
 	for (const auto& weapon : weaponChart)
 	{

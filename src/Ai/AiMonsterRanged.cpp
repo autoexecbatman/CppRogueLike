@@ -11,7 +11,7 @@ void AiMonsterRanged::update(Creature& owner)
         return;
     }
 
-    if (game.map->is_in_fov(owner.position)) {
+    if (game.map.is_in_fov(owner.position)) {
         // Move towards the player if we can see them
         moveCount = TRACKING_TURNS;
     }
@@ -29,7 +29,7 @@ void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition)
     int distance = owner.get_tile_distance(targetPosition);
 
     // If at optimal range and have line of sight, try a ranged attack
-    if (distance <= maxRangeDistance && distance >= 2 && game.map->has_los(owner.position, targetPosition)) {
+    if (distance <= maxRangeDistance && distance >= 2 && game.map.has_los(owner.position, targetPosition)) {
         if (tryRangedAttack(owner, targetPosition)) {
             return; // Attack succeeded, end turn
         }
@@ -49,7 +49,7 @@ void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition)
 
         // Try to move away in this direction
         Vector2D newPos = owner.position + moveDir;
-        if (game.map->can_walk(newPos) && !game.map->get_actor(newPos)) {
+        if (game.map.can_walk(newPos) && !game.map.get_actor(newPos)) {
             owner.position = newPos;
             return;
         }
@@ -64,7 +64,7 @@ void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition)
 bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos)
 {
     // Check if there's a clear line of sight
-    if (!game.map->has_los(owner.position, targetPos)) {
+    if (!game.map.has_los(owner.position, targetPos)) {
         return false;
     }
 
@@ -106,7 +106,7 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
         if (x0 == from.x && y0 == from.y) continue;
 
         // Stop at end point or walls
-        if ((x0 == to.x && y0 == to.y) || !game.map->can_walk(Vector2D{ y0, x0 })) break;
+        if ((x0 == to.x && y0 == to.y) || !game.map.can_walk(Vector2D{ y0, x0 })) break;
 
         // Draw projectile and refresh
         mvaddch(y0, x0, projectileChar);
@@ -114,8 +114,8 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
         napms(30); // Short delay
 
         // Erase the projectile by redrawing the original tile
-        if (game.map->is_in_fov(Vector2D{ y0, x0 })) {
-            if (game.map->can_walk(Vector2D{ y0, x0 })) {
+        if (game.map.is_in_fov(Vector2D{ y0, x0 })) {
+            if (game.map.can_walk(Vector2D{ y0, x0 })) {
                 mvaddch(y0, x0, '.');
             }
             else {

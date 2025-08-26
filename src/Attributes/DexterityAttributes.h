@@ -10,4 +10,4 @@ struct DexterityAttributes
 	int DefensiveAdj{};
 };
 
-std::vector<DexterityAttributes> loadDexterityAttributes();
+std::vector<DexterityAttributes> load_dexterity_attributes();

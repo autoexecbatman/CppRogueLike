@@ -214,7 +214,7 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
         itemPos.y += game.d.roll(-1, 1);
 
         // Ensure position is valid
-        if (!game.map->can_walk(itemPos))
+        if (!game.map.can_walk(itemPos))
         {
             itemPos = position; // Fallback to original position
         }

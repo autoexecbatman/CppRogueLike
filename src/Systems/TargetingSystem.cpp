@@ -21,9 +21,9 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		clear();
 
 		// Make the line follow the mouse position
-		if (game.mouse_moved())
+		if (game.input_handler.mouse_moved())
 		{
-			targetCursor = game.get_mouse_position();
+			targetCursor = game.input_handler.get_mouse_position();
 		}
 		game.render();
 
@@ -32,7 +32,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		{
 			for (int x = 0; x < MAP_WIDTH; x++)
 			{
-				if (game.map->is_in_fov(Vector2D{ y, x }))
+				if (game.map.is_in_fov(Vector2D{ y, x }))
 				{
 					mvchgat(y, x, 1, A_REVERSE, WHITE_BLUE_PAIR, NULL);
 					/*refresh();*/
@@ -61,9 +61,9 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 
 		// If the cursor is on a monster then display the monster's name and stats
 		const int distance = game.player->get_tile_distance(targetCursor);
-		if (game.map->is_in_fov(targetCursor))
+		if (game.map.is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map->get_actor(targetCursor);
+			const auto& actor = game.map.get_actor(targetCursor);
 			if (actor != nullptr)
 			{
 				// Display target information
@@ -144,9 +144,9 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 			{
 				if (game.player->has_state(ActorState::IS_RANGED))
 				{
-					if (game.map->is_in_fov(targetCursor))
+					if (game.map.is_in_fov(targetCursor))
 					{
-						const auto& actor = game.map->get_actor(targetCursor);
+						const auto& actor = game.map.get_actor(targetCursor);
 						if (actor)
 						{
 							game.player->attacker->attack(*game.player, *actor);
@@ -204,10 +204,10 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	//// first create a path from the player to the target cursor
 	//if (targetCursor.y < MAP_HEIGHT && targetCursor.x < MAP_WIDTH)
 	//{
-	//	game.map->tcodPath->compute(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
+	//	game.map.tcodPath->compute(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
 	//	// then iterate over the path
 	//	int x, y;
-	//	while (game.map->tcodPath->walk(&x, &y, true))
+	//	while (game.map.tcodPath->walk(&x, &y, true))
 	//	{
 	//		/*mvchgat(y, x, 1, A_REVERSE, WHITE_BLACK_PAIR, NULL);*/
 	//		attron(COLOR_PAIR(WHITE_RED_PAIR));
@@ -246,7 +246,7 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 		// Skip the start and end points for visualization
 		if ((x0 != from.x || y0 != from.y) && (x0 != to.x || y0 != to.y))
 		{
-			if (!game.map->can_walk(Vector2D{ y0, x0 })) 
+			if (!game.map.can_walk(Vector2D{ y0, x0 })) 
 			{
 				blocked = true;
 			}
@@ -265,7 +265,7 @@ void TargetingSystem::draw_range_indicator(Vector2D center, int range)
 
 	for (int y = center.y - range; y <= center.y + range; y++) {
 		for (int x = center.x - range; x <= center.x + range; x++) {
-			if (x >= 0 && x < game.map->get_width() && y >= 0 && y < game.map->get_height()) {
+			if (x >= 0 && x < game.map.get_width() && y >= 0 && y < game.map.get_height()) {
 				// Check if this point is at the edge of the range
 				float distance = std::sqrt(std::pow(x - center.x, 2) + std::pow(y - center.y, 2));
 				if (std::abs(distance - range) < 0.5f) {
@@ -288,13 +288,13 @@ bool TargetingSystem::is_valid_target(Vector2D from, Vector2D to, int maxRange)
 	}
 
 	// Check if there's a clear line of sight
-	if (!game.map->has_los(from, to))
+	if (!game.map.has_los(from, to))
 	{
 		return false;
 	}
 
 	// Check if there's an enemy at the target
-	auto entity = game.map->get_actor(to);
+	auto entity = game.map.get_actor(to);
 	if (!entity)
 	{
 		return false;
@@ -311,7 +311,7 @@ bool TargetingSystem::is_valid_target(Vector2D from, Vector2D to, int maxRange)
 
 // Process a ranged attack
 bool TargetingSystem::process_ranged_attack(Creature& attacker, Vector2D targetPos) {
-	auto target = game.map->get_actor(targetPos);
+	auto target = game.map.get_actor(targetPos);
 	if (!target || target == &attacker)
 	{
 		return false;
@@ -371,7 +371,7 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 		}
 
 		// Stop at walls
-		if (!game.map->can_walk(Vector2D{ y0, x0 }) && (x0 != to.x || y0 != to.y)) {
+		if (!game.map.can_walk(Vector2D{ y0, x0 }) && (x0 != to.x || y0 != to.y)) {
 			break;
 		}
 	}
@@ -411,7 +411,7 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 		napms(50); // Control speed of projectile (lower = faster)
 
 		// Erase the projectile (by redrawing the map tile)
-		if (game.map->can_walk(pos)) {
+		if (game.map.can_walk(pos)) {
 			mvaddch(pos.y, pos.x, '.');
 		}
 		else 
@@ -428,7 +428,7 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 	napms(100); // Brief pause for impact
 
 	// Redraw the target
-	auto entity = game.map->get_actor(to);
+	auto entity = game.map.get_actor(to);
 	if (entity) {
 		entity->render();
 		refresh();

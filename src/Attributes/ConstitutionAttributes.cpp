@@ -20,7 +20,7 @@ void from_json(const json& j, ConstitutionAttributes& c)
     j.at("Regeneration").get_to(c.Regeneration);
 }
 
-std::vector<ConstitutionAttributes> loadConstitutionAttributes()
+std::vector<ConstitutionAttributes> load_constitution_attributes()
 {
     std::ifstream i("constitution.json");
 

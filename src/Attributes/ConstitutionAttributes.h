@@ -12,4 +12,4 @@ struct ConstitutionAttributes
 	int Regeneration{};
 };
 
-std::vector<ConstitutionAttributes> loadConstitutionAttributes();
+std::vector<ConstitutionAttributes> load_constitution_attributes();

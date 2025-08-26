@@ -22,7 +22,7 @@ void from_json(const json& j, StrengthAttributes& p)
 	j.at("Notes").get_to(p.notes);
 }
 
-std::vector<StrengthAttributes> loadStrengthAttributes()
+std::vector<StrengthAttributes> load_strength_attributes()
 {
 	std::ifstream i("strength.json");
 
@@ -59,7 +59,7 @@ std::vector<StrengthAttributes> loadStrengthAttributes()
 
 void StrengthAttributes::print_chart()
 {
-	auto strengthChart = loadStrengthAttributes();
+	auto strengthChart = load_strength_attributes();
 	int strengthIndex = 1;
 	for (const auto& strength : strengthChart)
 	{

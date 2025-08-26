@@ -142,7 +142,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 					
 					// Draw branch segment if it's within bounds
 					if (current.x >= 0 && current.y >= 0 && 
-						current.x < game.map->get_width() && current.y < game.map->get_height()) {
+						current.x < game.map.get_width() && current.y < game.map.get_height()) {
 						char symbol = LIGHTNING_CHARS[charDist(gen)];
 						mvaddch(current.y, current.x, symbol);
 					}
@@ -177,7 +177,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 			} else {
 				int x = to.x + dx;
 				int y = to.y + dy;
-				if (x >= 0 && y >= 0 && x < game.map->get_width() && y < game.map->get_height()) {
+				if (x >= 0 && y >= 0 && x < game.map.get_width() && y < game.map.get_height()) {
 					mvaddch(y, x, '.');
 				}
 			}

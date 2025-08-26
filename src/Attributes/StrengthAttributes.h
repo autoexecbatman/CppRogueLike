@@ -17,4 +17,4 @@ struct StrengthAttributes
     void print_chart();
 };
 
-inline std::vector<StrengthAttributes> loadStrengthAttributes();
+inline std::vector<StrengthAttributes> load_strength_attributes();

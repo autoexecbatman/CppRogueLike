@@ -20,7 +20,7 @@ void AiMonsterConfused::update(Creature& owner)
 	{
 		Vector2D destination = owner.position + direction;
 
-		if (game.map->can_walk(destination))
+		if (game.map.can_walk(destination))
 		{
 			owner.position = destination;
 		}

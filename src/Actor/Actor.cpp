@@ -85,7 +85,7 @@ void Actor::render() const noexcept
 // check if the actor is visible
 bool Actor::is_visible() const noexcept
 {
-	return (!has_state(ActorState::FOV_ONLY) && game.map->is_explored(position)) || game.map->is_in_fov(position);
+	return (!has_state(ActorState::FOV_ONLY) && game.map.is_explored(position)) || game.map.is_in_fov(position);
 }
 
 //==Creature==
