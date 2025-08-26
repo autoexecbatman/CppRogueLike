@@ -95,17 +95,6 @@ void Game::cleanup_dead_creatures()
 	});
 }
 
-void Game::render_creatures(std::span<std::unique_ptr<Creature>> creatures)
-{
-	for (const auto& creature : creatures)
-	{
-		if (creature)
-		{
-			creature->render();
-		}
-	}
-}
-
 void Game::spawn_creatures() const
 {
 	// INCREASED SPAWN RATE - add a new monster every 2 turns (was 5)
@@ -136,17 +125,6 @@ void Game::spawn_creatures() const
 			}
 			// add a monster to the map
 			game.map->add_monster(pos);
-		}
-	}
-}
-
-void Game::render_items(std::span<std::unique_ptr<Item>> items)
-{
-	for (const auto& item : items)
-	{
-		if (item)
-		{
-			item->render();
 		}
 	}
 }
@@ -325,25 +303,6 @@ void Game::update()
 		game.finalize_message();
 		run = false;
 	}
-}
-
-void Game::render()
-{
-	map->render();
-	game.stairs->render();
-
-	// Render any objects (like webs)
-	for (const auto& obj : objects)
-	{
-		if (obj)
-		{
-			obj->render();
-		}
-	}
-
-	render_items(container->inv);
-	render_creatures(creatures);
-	player->render();
 }
 
 Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
@@ -1104,33 +1063,6 @@ void Game::add_debug_weapons_at_player_feet()
 	// Add a message for the player
 	message(WHITE_BLACK_PAIR, "Debug weapons, two-handed weapons, armor, and shield placed at your feet.", true);
 
-}
-
-// EMSCRIPTEN COMPATIBILITY FUNCTIONS
-void Game::safe_screen_clear()
-{
-#ifdef EMSCRIPTEN
-	// For Emscripten: Don't use clear(), just redraw
-	restore_game_display();
-#else
-	// For native builds: Use normal clear
-	clear();
-	refresh();
-#endif
-}
-
-void Game::force_screen_refresh()
-{
-	refresh();
-	doupdate();  // Force immediate update
-}
-
-void Game::restore_game_display()
-{
-	// Clean redraw of entire game state
-	game.render();
-	gui->gui_render();
-	force_screen_refresh();
 }
 
 // end of file: Game.cpp

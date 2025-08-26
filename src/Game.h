@@ -22,6 +22,7 @@
 #include "Systems/HungerSystem.h"
 #include "Systems/LevelUpSystem.h"
 #include "Systems/MessageSystem.h"
+#include "Systems/RenderingManager.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
@@ -49,6 +50,7 @@ public:
 	TargetingSystem targeting;
 	HungerSystem hunger_system;
 	MessageSystem message_system;
+	RenderingManager rendering_manager;
 
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
@@ -74,12 +76,13 @@ public:
 	// Public member functions.
 	void init();
 	void update();
-	void render();
+	// Rendering delegated to RenderingManager
+	void render() { rendering_manager.render_world(*map, *stairs, objects, *container, creatures, *player); }
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
 	void cleanup_dead_creatures(); // Remove dead creatures from the game
-	void render_creatures(std::span<std::unique_ptr<Creature>> creatures);
+	void render_creatures(std::span<std::unique_ptr<Creature>> creatures) { rendering_manager.render_creatures(creatures); }
 	void spawn_creatures() const;
-	void render_items(std::span<std::unique_ptr<Item>> items);
+	void render_items(std::span<std::unique_ptr<Item>> items) { rendering_manager.render_items(items); }
 	void handle_menus();
 	void handle_gameloop(Gui& gui, int loopNum);
 	void handle_ranged_attack();
@@ -87,9 +90,9 @@ public:
 	void display_help() noexcept;
 
 	// EMSCRIPTEN COMPATIBILITY FUNCTIONS
-	void safe_screen_clear();     // Safe clear for web environment
-	void force_screen_refresh();  // Force refresh for Emscripten
-	void restore_game_display();  // Restore clean game state
+	void safe_screen_clear() { rendering_manager.safe_screen_clear(); }     // Safe clear for web environment
+	void force_screen_refresh() { rendering_manager.force_screen_refresh(); }  // Force refresh for Emscripten
+	void restore_game_display() { render(); gui->gui_render(); rendering_manager.force_screen_refresh(); }  // Restore clean game state
 
 	Web* findWebAt(Vector2D position);
 
