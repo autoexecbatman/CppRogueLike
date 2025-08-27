@@ -59,14 +59,14 @@ MonsterFactory::MonsterFactory() {
     "Shopkeeper", 8, 1, 0, 0.0f,  // INCREASED from 5 to 8 - more shopkeepers
     [](Vector2D pos) { 
     // Check if we already have a shopkeeper on this level
-			if (game.shopkeepersOnCurrentLevel >= 1) {
+			if (game.level_manager.get_shopkeepers_count() >= 1) {
 				// Don't spawn shopkeeper, try spawning a different monster instead
 				game.create_creature<Goblin>(pos);
 				return;
 			}
 			
 			game.create_creature<Shopkeeper>(pos);
-			game.shopkeepersOnCurrentLevel++; // Increment counter
+			game.level_manager.increment_shopkeeper_count(); // Increment counter
             // Get the shopkeeper that was just created (last in creatures vector)
             auto& shopkeeper = *game.creatures.back();
             

@@ -253,7 +253,7 @@ void Game::update()
 	{
 		map.compute_fov();
 		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
-		if (dungeonLevel == 1)
+		if (level_manager.get_dungeon_level() == 1)
 		{
 			player->racial_ability_adjustments();
 			// Don't try to restore display here - let normal game flow handle it
@@ -514,205 +514,50 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 
 void Game::load_all()
 {
-	// Use JSON to load the game
-	game.gameWasInit = true;
-
-	std::ifstream file("game.sav");
-	if (file.is_open())
+	gameWasInit = true;
+	if (!state_manager.load_game(
+		map,
+		rooms,
+		*player,
+		*stairs,
+		creatures,
+		*container,
+		gui,
+		hunger_system,
+		level_manager,
+		time))
 	{
-		json j;
-		file >> j;
-
-		// Load the map
-		map.load(j);
-
-		// Load the rooms
-		if (j.contains("rooms") && j["rooms"].is_array())
-		{
-			for (const auto& roomData : j["rooms"])
-			{
-				rooms.push_back(Vector2D{ roomData["y"], roomData["x"] });
-			}
-		}
-
-		// Load the player
-		if (j.contains("player"))
-		{
-			player->load(j["player"]);
-		}
-
-		// Load the stairs
-		if (j.contains("stairs"))
-		{
-			stairs->load(j["stairs"]);
-		}
-
-		// Load the other creatures (actors)
-		if (j.contains("creatures") && j["creatures"].is_array())
-		{
-			for (const auto& creatureData : j["creatures"])
-			{
-				auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
-				creature->load(creatureData); // Load creature data
-				
-				// CRITICAL FIX: Ensure creature inventory items have correct values
-				if (creature->container)
-				{
-					for (const auto& item : creature->container->inv)
-					{
-						if (item)
-						{
-							ItemCreator::ensure_correct_value(*item);
-						}
-					}
-				}
-				
-				creatures.push_back(std::move(creature));
-			}
-		}
-
-		// Load items
-		if (j.contains("items") && j["items"].is_array())
-		{
-			for (const auto& itemData : j["items"])
-			{
-				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
-				item->load(itemData);
-				// CRITICAL FIX: Ensure loaded items have correct values
-				ItemCreator::ensure_correct_value(*item);
-				container->inv.push_back(std::move(item));
-			}
-		}
-
-		// Load the message log
-		if (j.contains("gui"))
-		{
-			gui.load(j["gui"]);
-		}
-		
-		// Load the hunger system
-		if (j.contains("hunger_system"))
-		{
-			hunger_system.load(j["hunger_system"]);
-		}
-		
-		// Load shopkeeper count
-		if (j.contains("shopkeepersOnCurrentLevel"))
-		{
-			shopkeepersOnCurrentLevel = j["shopkeepersOnCurrentLevel"];
-		}
-		
-		// Load dungeon level
-		if (j.contains("dungeonLevel"))
-		{
-			dungeonLevel = j["dungeonLevel"];
-		}
-		
-		// Load game time
-		if (j.contains("time"))
-		{
-			time = j["time"];
-		}
-
-		// CRITICAL FOV FIX: Set gameStatus to STARTUP to ensure FOV is computed
-		gameStatus = GameStatus::STARTUP;
-		game.log("GameStatus set to STARTUP after loading for FOV computation");
+		init();
+		log("Error: Could not open save file. Game initialized with default settings.");
 	}
 	else
 	{
-		game.init(); // If loading fails, reinitialize the game
-		game.log("Error: Could not open save file. Game initialized with default settings.");
+		gameStatus = GameStatus::STARTUP;
+		log("GameStatus set to STARTUP after loading for FOV computation");
 	}
 }
 
 void Game::save_all()
 {
-	// Use JSON to save the game
-	std::ofstream file("game.sav");
-	if (file.is_open())
+	try
 	{
-		json j;
-
-		// Save the map
-		map.save(j);
-
-		// Save game.rooms
-		j["rooms"] = json::array();
-		for (const auto& room : rooms)
-		{
-			j["rooms"].push_back({ {"x", room.x}, {"y", room.y} });
-		}
-
-		// Save the player
-		json playerJson;
-		player->save(playerJson);
-		j["player"] = playerJson;
-
-		// Save the stairs
-		json stairsJson;
-		stairs->save(stairsJson);
-		j["stairs"] = stairsJson;
-
-		// Save the other creatures (actors)
-		j["creatures"] = json::array(); // Array to hold all creatures
-		for (const auto& creature : creatures)
-		{
-			if (creature)
-			{
-				json creatureJson;
-				creature->save(creatureJson); // Save each creature individually
-				j["creatures"].push_back(creatureJson); // Add to array
-			}
-		}
-
-		// Save items
-		j["items"] = json::array();
-		for (const auto& item : container->inv)
-		{
-			if (item)
-			{
-				json itemJson;
-				item->save(itemJson);
-				j["items"].push_back(itemJson);
-			}
-		}
-
-		// Save the message log
-		json guiJson;
-		gui.save(guiJson);
-		j["gui"] = guiJson;
-		
-		// Save the hunger system
-		json hungerJson;
-		hunger_system.save(hungerJson);
-		j["hunger_system"] = hungerJson;
-		
-		// Save shopkeeper count and dungeon level
-		j["shopkeepersOnCurrentLevel"] = shopkeepersOnCurrentLevel;
-		j["dungeonLevel"] = dungeonLevel;
-		j["time"] = time;
-
-		// Write the JSON data to the file
-		file << j.dump(4); // Pretty print with an indentation of 4 spaces
-		file.close();
+		state_manager.save_game(
+			map,
+			rooms,
+			*player,
+			*stairs,
+			creatures,
+			*container,
+			gui,
+			hunger_system,
+			level_manager,
+			time
+		);
 	}
-	else
+	catch (const std::exception& e)
 	{
-		game.log("Error occurred while saving the game.");
+		log("Error occurred while saving the game: " + std::string(e.what()));
 	}
-}
-
-void Game::next_level()
-{
-	dungeonLevel++; // increment the dungeon level
-	shopkeepersOnCurrentLevel = 0; // Reset shopkeeper counter for new level
-	game.message(WHITE_BLACK_PAIR, "You take a moment to rest, and recover your strength.",true); // present a message to the player
-	player->destructible->heal(player->destructible->hpMax / 2); // heal the player
-	game.message(WHITE_BLACK_PAIR, "deeper into the heart of the dungeon...", true); // present a message to the player (the order is reversed)
-	game.message(WHITE_BLACK_PAIR, "After a rare moment of peace, you descend",true);
-	game.message(WHITE_BLACK_PAIR, std::format("You are now on level {}", dungeonLevel), true);
-	map.regenerate(); // create a new map
-	gameStatus = GameStatus::STARTUP; // set the game status to STARTUP because we need to recompute the FOV 
 }
 
 Creature* Game::get_actor(Vector2D pos) const noexcept

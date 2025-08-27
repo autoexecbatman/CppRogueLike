@@ -8,6 +8,7 @@
 #include <memory>
 #include <span>
 #include <deque>
+#include <format>
 
 #include "Gui/Gui.h"
 #include "Gui/LogMessage.h"
@@ -24,6 +25,8 @@
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
 #include "Systems/InputHandler.h"
+#include "Systems/GameStateManager.h"
+#include "Systems/LevelManager.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
@@ -53,12 +56,14 @@ public:
 	MessageSystem message_system;
 	RenderingManager rendering_manager;
 	InputHandler input_handler;
-
-	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
+	GameStateManager state_manager;
+	LevelManager level_manager;
 
 	Map map{ Map{MAP_HEIGHT, MAP_WIDTH} };
 	Gui gui{};
+
+	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D {0, 0}) };
+	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
 
 	std::vector<Vector2D> rooms; // room coordinates after bsp
 	std::vector<std::unique_ptr<Creature>> creatures; // a vector of actors
@@ -127,13 +132,11 @@ public:
 	Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept;
 	bool pick_tile(Vector2D* position, int maxRange);
 
+	// Game state management delegated to GameStateManager
 	void load_all();
 	void save_all();
+	void next_level() { level_manager.advance_to_next_level(map, *player, message_system); gameStatus = GameStatus::STARTUP; }
 
-	// the player goes down stairs
-	int dungeonLevel{ 1 };
-	int shopkeepersOnCurrentLevel{ 0 }; // Track shopkeepers per level
-	void next_level();
 	Creature* get_actor(Vector2D pos) const noexcept;
 	void display_levelup(int level);
 	void display_character_sheet() const noexcept;

@@ -260,8 +260,8 @@ void Map::init(bool withActors)
 
 	post_process_doors();
 
-	if (game.dungeonLevel > 1) {
-		maybe_create_treasure_room(game.dungeonLevel);
+	if (game.level_manager.get_dungeon_level() > 1) {
+		maybe_create_treasure_room(game.level_manager.get_dungeon_level());
 	}
 	place_amulet();
 }
@@ -585,7 +585,7 @@ void Map::add_item(Vector2D pos) {
 	if (rng_unique->getInt(1, 100) > 75) return;
 
 	// Use our ItemFactory to create a random item
-	itemFactory->spawn_random_item(pos, game.dungeonLevel);
+	itemFactory->spawn_random_item(pos, game.level_manager.get_dungeon_level());
 }
 
 void Map::dig(Vector2D begin, Vector2D end)
@@ -945,13 +945,13 @@ bool Map::can_walk(Vector2D pos) const
 void Map::add_monster(Vector2D pos) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
-	monsterFactory->spawn_random_monster(pos, game.dungeonLevel);
+	monsterFactory->spawn_random_monster(pos, game.level_manager.get_dungeon_level());
 
 	// Log the spawn for debugging
 	Creature* monster = get_actor(pos);
 	if (monster)
 	{
-		game.log("Spawned " + monster->actorData.name + " at level " + std::to_string(game.dungeonLevel));
+		game.log("Spawned " + monster->actorData.name + " at level " + std::to_string(game.level_manager.get_dungeon_level()));
 	}
 }
 
@@ -1164,7 +1164,7 @@ bool Map::close_door(Vector2D pos)
 void Map::place_amulet()
 {
 	// Only place the amulet on the final level
-	if (game.dungeonLevel == FINAL_DUNGEON_LEVEL)
+	if (game.level_manager.get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
 		// Choose a random room for the amulet
 		int index = game.d.roll(0, static_cast<int>(game.rooms.size()) - 1);
@@ -1201,11 +1201,11 @@ void Map::display_spawn_rates() const
 	);
 
 	box(ratesWindow, 0, 0);
-	mvwprintw(ratesWindow, 1, 1, "Monster Spawn Rates (Dungeon Level %d)", game.dungeonLevel);
+	mvwprintw(ratesWindow, 1, 1, "Monster Spawn Rates (Dungeon Level %d)", game.level_manager.get_dungeon_level());
 	mvwprintw(ratesWindow, 2, 1, "--------------------------------------");
 
 	// Get current distribution from monster factory
-	auto distribution = monsterFactory->getCurrentDistribution(game.dungeonLevel);
+	auto distribution = monsterFactory->getCurrentDistribution(game.level_manager.get_dungeon_level());
 
 	// Sort by probability (descending)
 	std::sort(distribution.begin(), distribution.end(),
@@ -1256,7 +1256,7 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality)
 	};
 
 	// Generate treasure at the center of the room
-	itemFactory->generate_treasure(center, game.dungeonLevel, quality);
+	itemFactory->generate_treasure(center, game.level_manager.get_dungeon_level(), quality);
 
 	// Add guardians or traps based on quality
 	int guardianCount = 0;
@@ -1371,11 +1371,11 @@ void Map::display_item_distribution() const
 	);
 
 	box(distributionWindow, 0, 0);
-	mvwprintw(distributionWindow, 1, 1, "Item Spawn Rates (Dungeon Level %d)", game.dungeonLevel);
+	mvwprintw(distributionWindow, 1, 1, "Item Spawn Rates (Dungeon Level %d)", game.level_manager.get_dungeon_level());
 	mvwprintw(distributionWindow, 2, 1, "--------------------------------------");
 
 	// Get current distribution from item factory
-	std::vector<ItemPercentage> distribution = itemFactory->get_current_distribution(game.dungeonLevel);
+	std::vector<ItemPercentage> distribution = itemFactory->get_current_distribution(game.level_manager.get_dungeon_level());
 
 	// Sort by probability (descending)
 	std::sort(distribution.begin(), distribution.end(),
