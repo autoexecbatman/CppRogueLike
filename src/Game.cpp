@@ -74,67 +74,6 @@ void Game::init()
 	log("game.init() was called!");
 }
 
-void Game::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
-{
-	for (const auto& creature : creatures)
-	{
-		if (creature)
-		{
-			creature->update();
-		}
-	}
-}
-
-void Game::cleanup_dead_creatures()
-{
-	// Remove dead creatures from the game
-	// This is called at safe points to avoid dangling references during combat
-	std::erase_if(creatures, [](const auto& creature) 
-	{
-		return creature && creature->destructible && creature->destructible->is_dead();
-	});
-}
-
-void Game::spawn_creatures() const
-{
-	// INCREASED SPAWN RATE - add a new monster every 2 turns (was 5)
-	if (time % 2 == 0)
-	{
-		// INCREASED MONSTER LIMIT - if there are less than 10 monsters on the map (was 6)
-		if (creatures.size() < 10)
-		{
-			// game.rooms must be populated
-			if (rooms.empty())
-			{
-				throw std::runtime_error("game.rooms is empty!");
-			}
-
-			// roll a random index as the size of the rooms vector
-			int index = game.d.roll(0, static_cast<int>(rooms.size()) - 1);
-
-			// make the index even
-			index = index % 2 == 0 ? index : index - 1;
-
-			// get the room begin and end
-			const Vector2D roomBegin = rooms.at(index);
-			const Vector2D roomEnd = rooms.at(index + 1);
-
-			// get a random position in the room
-			Vector2D pos = Vector2D{ game.d.roll(roomBegin.y, roomEnd.y), game.d.roll(roomBegin.x, roomEnd.x) };
-
-			// if pos is at wall roll again
-			while (!map.can_walk(pos))
-			{
-				pos.x = game.d.roll(roomBegin.x, roomEnd.x);
-				pos.y = game.d.roll(roomBegin.y, roomEnd.y);
-			}
-
-			// add a monster to the map
-			map.add_monster(pos);
-		}
-	}
-}
-
 void Game::handle_menus()
 {
 	if (!menus.empty())
@@ -314,27 +253,6 @@ void Game::update()
 		game.finalize_message();
 		run = false;
 	}
-}
-
-Creature* Game::get_closest_monster(Vector2D fromPosition, double inRange) const noexcept
-{
-	Creature* closestMonster = nullptr;
-	int bestDistance = INT_MAX;
-
-	for (const auto& actor : creatures)
-	{
-		if (!actor->destructible->is_dead())
-		{
-			const int distance = actor->get_tile_distance(fromPosition);
-			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
-			{
-				bestDistance = distance;
-				closestMonster = actor.get();
-			}
-		}
-	}
-
-	return closestMonster;
 }
 
 bool Game::pick_tile(Vector2D* position, int maxRange)
@@ -558,19 +476,6 @@ void Game::save_all()
 	{
 		log("Error occurred while saving the game: " + std::string(e.what()));
 	}
-}
-
-Creature* Game::get_actor(Vector2D pos) const noexcept
-{
-	for (const auto& actor : creatures)
-	{
-		if (actor->position == pos)
-		{
-			return actor.get();
-		}
-	}
-
-	return nullptr;
 }
 
 void Game::display_levelup(int xpLevel) 

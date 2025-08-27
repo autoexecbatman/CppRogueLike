@@ -27,6 +27,7 @@
 #include "Systems/InputHandler.h"
 #include "Systems/GameStateManager.h"
 #include "Systems/LevelManager.h"
+#include "Systems/CreatureManager.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
@@ -58,6 +59,7 @@ public:
 	InputHandler input_handler;
 	GameStateManager state_manager;
 	LevelManager level_manager;
+	CreatureManager creature_manager;
 
 	Map map{ Map{MAP_HEIGHT, MAP_WIDTH} };
 	Gui gui{};
@@ -85,9 +87,10 @@ public:
 	void update();
 	// Rendering delegated to RenderingManager
 	void render() { rendering_manager.render_world(map, *stairs, objects, *container, creatures, *player); }
-	void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
-	void cleanup_dead_creatures(); // Remove dead creatures from the game
-	void spawn_creatures() const;
+	// Creature management delegated to CreatureManager
+	void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }
+	void cleanup_dead_creatures() { creature_manager.cleanup_dead_creatures(creatures); }
+	void spawn_creatures() { creature_manager.spawn_creatures(creatures, rooms, map, d, time); }
 	void handle_menus();
 	void handle_gameloop(Gui& gui, int loopNum);
 	void handle_ranged_attack();
@@ -117,19 +120,9 @@ public:
 
 	/*void send_to_back(Actor& actor);*/
 	template<typename T>
-	void send_to_back(T& actor)
-	{
-		auto actorIsInVector = [&actor](const auto& a) noexcept { return a.get() == &actor; }; // lambda to check if the actor is in the vector
-		auto it = std::find_if(creatures.begin(), creatures.end(), actorIsInVector); // get the iterator of the actor
-		const auto distance = std::distance(creatures.begin(), it); // get the distance from the begining of the vector to the actor
-		for (auto i = distance; i > 0; i--)
-		{
-			// swap actor with the previous actor
-			std::swap(creatures[i - 1], creatures[i]);
-		}
-	}
+	void send_to_back(T& actor) { creature_manager.send_to_back(creatures, actor); }
 
-	Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept;
+	Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept { return creature_manager.get_closest_monster(creatures, fromPosition, inRange); }
 	bool pick_tile(Vector2D* position, int maxRange);
 
 	// Game state management delegated to GameStateManager
@@ -137,7 +130,7 @@ public:
 	void save_all();
 	void next_level() { level_manager.advance_to_next_level(map, *player, message_system); gameStatus = GameStatus::STARTUP; }
 
-	Creature* get_actor(Vector2D pos) const noexcept;
+	Creature* get_actor(Vector2D pos) const noexcept { return creature_manager.get_actor_at_position(creatures, pos); }
 	void display_levelup(int level);
 	void display_character_sheet() const noexcept;
 
