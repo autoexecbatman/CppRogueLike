@@ -76,44 +76,15 @@ void Game::init()
 
 void Game::handle_menus()
 {
-	if (!menus.empty())
-	{
-		bool menuWasPopped = false;
-		
-		menus.back()->menu();
-		// if back is pressed, pop the menu
-		if (menus.back()->back)
-		{
-			menus.pop_back();
-			menuWasPopped = true;
-			if (!menus.empty())
-			{
-				menus.back()->menu_set_run_true();
-			}
-		}
-
-		if (!menus.empty() && !menus.back()->run)
-		{
-			menus.pop_back();
-			menuWasPopped = true;
-		}
-
-		// If we just closed a menu and returned to game, restore display
-		if (menuWasPopped && menus.empty() && gameWasInit)
-		{
-			restore_game_display();
-		}
-
-		shouldTakeInput = false;
-	}
+	menu_manager.handle_menus(menus);
 }
 
 void Game::handle_gameloop(Gui& gui, int loopNum)
 {
-	if (!gameWasInit)
+	if (!menu_manager.is_game_initialized())
 	{
 		init();
-		gameWasInit = true;
+		menu_manager.set_game_initialized(true);
 	}
 	//==DEBUG==
 	log("//====================LOOP====================//");
@@ -125,12 +96,12 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 
 	//==INPUT==
 	input_handler.reset_key(); // reset the keyPress so it won't get stuck in a loop
-	if (shouldTakeInput)
+	if (menu_manager.should_take_input())
 	{
 		input_handler.key_store();
 		input_handler.key_listen();
 	}
-	shouldTakeInput = true; // reset shouldInput to reset the flag
+	menu_manager.set_should_take_input(true); // reset shouldInput to reset the flag
 
 	//==UPDATE==
 	log("Running update...");
@@ -153,7 +124,7 @@ void Game::handle_gameloop(Gui& gui, int loopNum)
 	log("Render OK.");
 	
 	// Check for menus AFTER rendering so positions are updated
-	if (!menus.empty())
+	if (menu_manager.has_active_menus(menus))
 	{
 		windowState = Game::WindowState::MENU;
 		return;
@@ -432,7 +403,7 @@ bool Game::pick_tile(Vector2D* position, int maxRange)
 
 void Game::load_all()
 {
-	gameWasInit = true;
+	menu_manager.set_game_initialized(true);
 	if (!state_manager.load_game(
 		map,
 		rooms,

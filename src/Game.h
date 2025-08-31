@@ -28,6 +28,7 @@
 #include "Systems/GameStateManager.h"
 #include "Systems/LevelManager.h"
 #include "Systems/CreatureManager.h"
+#include "Systems/MenuManager.h"
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
@@ -38,9 +39,7 @@ public:
 
 	bool run{ true };
 	bool shouldSave{ true };
-	bool gameWasInit{ false };
 	int time{ 0 };
-	bool shouldTakeInput{ true };
 	enum class GameStatus
 	{
 		STARTUP, IDLE, NEW_TURN, VICTORY, DEFEAT
@@ -60,6 +59,7 @@ public:
 	GameStateManager state_manager;
 	LevelManager level_manager;
 	CreatureManager creature_manager;
+	MenuManager menu_manager;
 
 	Map map{ Map{MAP_HEIGHT, MAP_WIDTH} };
 	Gui gui{};
@@ -91,6 +91,7 @@ public:
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }
 	void cleanup_dead_creatures() { creature_manager.cleanup_dead_creatures(creatures); }
 	void spawn_creatures() { creature_manager.spawn_creatures(creatures, rooms, map, d, time); }
+	// Menu management delegated to MenuManager
 	void handle_menus();
 	void handle_gameloop(Gui& gui, int loopNum);
 	void handle_ranged_attack();

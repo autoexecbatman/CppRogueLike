@@ -172,7 +172,7 @@ void Menu::menu()
 {
 	// Clear screen and render game background before showing menu
 	clear();
-	if (game.gameWasInit && !isStartupMenu)
+	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
 		game.render();
@@ -188,7 +188,7 @@ void Menu::menu()
 	}
 	
 	// Restore full game view if returning to game
-	if (game.gameWasInit && !isStartupMenu)
+	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
 	{
 		clear();
 		game.render();

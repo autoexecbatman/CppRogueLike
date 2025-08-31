@@ -103,7 +103,7 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
 void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 {
 	game.menus.push_back(std::make_unique<MenuTrade>(shopkeeper, player));
-	game.shouldTakeInput = false;
+	game.menu_manager.set_should_take_input(false);
 }
 
 void AiShopkeeper::update(Creature& owner)

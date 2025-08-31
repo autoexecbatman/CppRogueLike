@@ -210,6 +210,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/LevelManager.h
     ${PROJECT_SOURCE_DIR}/Systems/CreatureManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/CreatureManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/MenuManager.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/MenuManager.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
