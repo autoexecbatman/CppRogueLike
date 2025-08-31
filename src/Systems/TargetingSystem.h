@@ -8,9 +8,14 @@ class TargetingSystem
 
 public:
 	Vector2D select_target(Vector2D startPos, int maxRange);
+	bool pick_tile(Vector2D* position, int maxRange);  // Game.cpp compatibility method
 	void draw_los(Vector2D targetCursor);
 	void draw_range_indicator(Vector2D center, int range);
+	void draw_aoe_preview(Vector2D center, int radius);  // AOE preview from pick_tile
 	bool is_valid_target(Vector2D from, Vector2D to, int maxRange);
 	bool process_ranged_attack(Creature& attacker, Vector2D targetPos);
 	void animate_projectile(Vector2D from, Vector2D to, char projectileSymbol, int colorPair);
+
+	// Handle ranged attack coordination
+	void handle_ranged_attack();
 };

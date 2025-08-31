@@ -32,6 +32,7 @@
 #include "../Colors/Colors.h"
 #include "../Ai/AiMonster.h"
 #include "../Ai/AiPlayer.h"
+#include "../Ai/AiShopkeeper.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Healer.h"
 #include "../Ai/AiMimic.h"

@@ -434,4 +434,180 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 		refresh();
 	}
 
-};
+}
+
+// AOE preview from pick_tile method
+void TargetingSystem::draw_aoe_preview(Vector2D center, int radius)
+{
+	const int sideLength = radius * 2 + 1;
+	const int chebyshevD = std::max(abs(center.x - (center.x - radius)), abs(center.y - (center.y - radius)));
+	const int height = sideLength;
+	const int width = sideLength;
+
+	// Calculate the position of the aoe window
+	Vector2D centerOfExplosion = center - Vector2D{ chebyshevD, chebyshevD };
+
+	// draw the AOE in white
+	for (int tilePosX = center.x - chebyshevD; tilePosX < centerOfExplosion.x + width; tilePosX++)
+	{
+		for (int tilePosY = center.y - chebyshevD; tilePosY < centerOfExplosion.y + height; tilePosY++)
+		{
+			mvchgat(tilePosY, tilePosX, 1, A_REVERSE, WHITE_BLUE_PAIR, nullptr);
+		}
+	}
+}
+
+// Game.cpp compatibility method - preserves exact behavior
+bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
+{
+	// the target cursor is initialized at the player's position
+	Vector2D targetCursor = game.player->position;
+	bool run = true;
+	while (run)
+	{
+		// CRITICAL FIX: Clear screen to remove previous targeting overlays
+		clear();
+		
+		// make the line follow the mouse position
+		// if mouse move
+		if (game.input_handler.mouse_moved())
+		{
+			targetCursor = game.input_handler.get_mouse_position();
+		}
+		game.render();
+
+		// first color the player position if the cursor has moved from the player position
+		if (targetCursor != game.player->position)
+		{
+			mvchgat(game.player->position.y, game.player->position.x, 1, A_NORMAL, WHITE_BLACK_PAIR, nullptr);
+		}
+
+		// draw a line using TCODLine class
+		Vector2D line{ 0,0 };
+		TCODLine::init(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
+		while (!TCODLine::step(&line.x, &line.y))
+		{
+			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, nullptr);
+		}
+
+		attron(COLOR_PAIR(WHITE_RED_PAIR));
+		mvaddch(targetCursor.y, targetCursor.x, 'X');
+		attroff(COLOR_PAIR(WHITE_RED_PAIR));
+
+		// if the cursor is on a monster then display the monster's name
+		if (game.map.is_in_fov(targetCursor))
+		{
+			const auto& actor = game.map.get_actor(targetCursor);
+			// CRITICAL FIX: Don't write directly to main screen - this causes bleeding
+			// Store info for later display or use a separate window
+			if (actor != nullptr)
+			{
+				// These direct writes to (0,0) cause screen bleeding - commenting out for now
+				// mvprintw(0, 0, actor->actorData.name.c_str());
+				// mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
+				// mvprintw(2, 0, "AC: %d", actor->destructible->dr);
+			}
+		}
+		
+		// highlight the possible range of the explosion make it follow the cursor
+		draw_aoe_preview(targetCursor, maxRange);
+		refresh();
+
+		// get the key press
+		const int key = getch();
+		switch (key)
+		{
+		case KEY_UP:
+		case 'w':
+		case 'W':
+			// move the selection cursor up
+			targetCursor.y--;
+			break;
+
+		case KEY_DOWN:
+		case 's':
+		case 'S':
+			// move the selection cursor down
+			targetCursor.y++;
+			break;
+
+		case KEY_LEFT:
+		case 'a':
+		case 'A':
+			// move the selection cursor left
+			targetCursor.x--;
+			break;
+
+		case KEY_RIGHT:
+		case 'd':
+		case 'D':
+			// move the selection cursor right
+			targetCursor.x++;
+			break;
+
+		case 'f':
+			// if the player presses the 'f' key
+			// then the target selection is confirmed
+			// and the target coordinates are returned
+			
+			// first display a message
+			game.message(WHITE_BLACK_PAIR, "Target confirmed", true);
+			// then return the coordinates
+			*position = targetCursor;
+			
+			// Restore game display before returning
+			game.restore_game_display();
+			return true;
+			break;
+
+		case 10:
+			// if the key enter is pressed then select the target
+			// and return the target position
+			game.message(WHITE_BLACK_PAIR, "Attack confirmed", true);
+			// if the target is a monster then attack it
+		{
+			if (game.map.is_in_fov(targetCursor))
+			{
+				const auto& actor = game.map.get_actor(targetCursor);
+				// and actor is not an item
+				if (actor != nullptr)
+				{
+					game.player->attacker->attack(*game.player, *actor);
+					// Restore game display after attack
+					game.restore_game_display();
+					run = false;
+				}
+			}
+		}
+		break;
+		case 'r':
+		case 27:
+			game.message(WHITE_BLACK_PAIR, "Target selection canceled", true);
+			// Restore game display before exit
+			game.restore_game_display();
+			run = false;
+			break;
+
+		default:break;
+		}
+
+	}
+
+	return false;
+}
+
+// Handle ranged attack coordination
+void TargetingSystem::handle_ranged_attack()
+{
+	// When attackMode is true, we require a ranged weapon for attacks
+	// When attackMode is false, we're just examining and don't require a ranged weapon
+
+	// Enter targeting mode with appropriate requirements
+	Vector2D targetPos = select_target(game.player->position, 4);
+
+	// If a valid target was selected and we're in attack mode
+	if (targetPos.x != -1 && targetPos.y != -1) {
+		// Process the ranged attack (including projectile animation)
+		process_ranged_attack(*game.player, targetPos);
+	}
+}

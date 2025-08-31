@@ -19,12 +19,16 @@ void InputHandler::key_listen() noexcept
 
 bool InputHandler::mouse_moved() const noexcept
 {
-    return currentMousePos != lastMousePos;
+    // Simple approach: just return true and let get_mouse_position handle the detection
+    return true;
 }
 
 Vector2D InputHandler::get_mouse_position() noexcept
 {
-    update_mouse_position();
+    // Direct mouse position reading
+    request_mouse_pos();
+    currentMousePos.x = Mouse_status.x;
+    currentMousePos.y = Mouse_status.y;
     return currentMousePos;
 }
 
@@ -35,8 +39,17 @@ Vector2D InputHandler::get_mouse_position_old() const noexcept
 
 void InputHandler::update_mouse_position() noexcept
 {
-    lastMousePos = currentMousePos;
-    request_mouse_pos();
-    currentMousePos.x = Mouse_status.x;
-    currentMousePos.y = Mouse_status.y;
+    // Check for mouse events without blocking
+    nodelay(stdscr, TRUE);
+    int ch = getch();
+    nodelay(stdscr, FALSE);
+    
+    if (ch == KEY_MOUSE)
+    {
+        lastMousePos = currentMousePos;
+        request_mouse_pos();
+        currentMousePos.x = Mouse_status.x;
+        currentMousePos.y = Mouse_status.y;
+    }
+    // Note: We don't need to ungetch if it's not KEY_MOUSE since we used nodelay
 }

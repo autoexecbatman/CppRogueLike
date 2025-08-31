@@ -212,6 +212,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/CreatureManager.h
     ${PROJECT_SOURCE_DIR}/Systems/MenuManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/MenuManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/DisplayManager.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/DisplayManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/GameLoopCoordinator.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/GameLoopCoordinator.h
+    ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
