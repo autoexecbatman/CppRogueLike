@@ -2,49 +2,18 @@
 #include <iostream>
 #include <fstream>
 #include <curses.h>
-#include <algorithm> // for std::remove in sendToBack(Actor*)
-#include <ranges>
-#include <random>
-#include <climits>
-#include <cassert>
-#include <format>
-#include <span>
+#include <memory>
+#include <string>
 
 #include "Game.h"
-#include "Items/Items.h"
-#include "Actor/Actor.h"
-#include "Actor/Attacker.h"
-#include "Actor/Pickable.h"
-#include "Actor/Container.h"
-#include "ActorTypes/Player.h"
-#include "ActorTypes/Monsters.h"
-#include "Ai/Ai.h"
-#include "Ai/AiPlayer.h"
-#include "Map/Map.h"
-#include "Gui/Gui.h"
-#include "Gui/Window.h"
 #include "Colors/Colors.h"
-#include "Random/RandomDice.h"
-#include "Menu/Menu.h"
-#include "Menu/MenuGender.h"
-#include "Menu/MenuRace.h"
-#include "Menu/MenuClass.h"
-#include "Menu/MenuName.h"
-#include "dnd_tables/CalculatedTHAC0s.h"
-#include "Objects/Web.h"
 #include "Factories/ItemCreator.h"
-#include "Items/Armor.h"
-#include "Systems/LevelUpSystem.h"
-#include "UI/LevelUpUI.h"
-#include "UI/CharacterSheetUI.h"
 
-// added for DEBUGING AT PLAYER FEET
+// Debug weapon types
 #include "ActorTypes/Healer.h"
 #include "ActorTypes/Fireball.h"
 #include "ActorTypes/LightningBolt.h"
 #include "ActorTypes/Confuser.h"
-
-#include "Factories/ItemCreator.h"
 
 //==INIT==
 // When the Game is created, 
