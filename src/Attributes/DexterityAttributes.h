@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 struct DexterityAttributes
 {
 	int Dex{};
@@ -9,5 +7,3 @@ struct DexterityAttributes
 	int MissileAttackAdj{};
 	int DefensiveAdj{};
 };
-
-std::vector<DexterityAttributes> load_dexterity_attributes();

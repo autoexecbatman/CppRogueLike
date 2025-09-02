@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 struct IntelligenceAttributes
 {
 	int Int{};
@@ -11,5 +9,3 @@ struct IntelligenceAttributes
 	int MaxNumberOfSpells{};
 	int IllusionImmunity{};
 };
-
-std::vector<IntelligenceAttributes> loadIntelligenceAttributes();

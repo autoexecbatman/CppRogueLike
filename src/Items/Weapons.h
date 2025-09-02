@@ -55,8 +55,4 @@ struct Weapons
 	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL && can_use_one_handed(); }
 	bool is_compatible_off_hand(const Weapons& mainHandWeapon) const noexcept;
 	static bool can_dual_wield(const Weapons& mainHand, const Weapons& offHand) noexcept;
-
-	void print_chart();
 };
-
-std::vector<Weapons> load_weapons();

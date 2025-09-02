@@ -128,7 +128,7 @@
 	{
 		"Wis": 19,
 		"MagicalDefenseAdj": 4,
-		"BonusSpells": "1st,3rd",
+		"BonusSpells": 2,
 		"ChanceOfSpellFailure": 0,
 		"SpellImmunity": 0
 	}

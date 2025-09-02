@@ -129,10 +129,13 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_dagger(Vector2D pos, int enha
     if (enhancementLevel > 0)
     {
         // Create enhanced weapon data from base weapon stats
-        auto weaponData = std::find_if(game.weapons.begin(), game.weapons.end(),
-            [](const Weapons& w) { return w.name == "Dagger"; });
+        auto weaponData = std::find_if(
+            game.data_manager.get_weapons().begin(),
+            game.data_manager.get_weapons().end(),
+            [](const Weapons& w) { return w.name == "Dagger"; }
+        );
         
-        if (weaponData != game.weapons.end())
+        if (weaponData != game.data_manager.get_weapons().end())
         {
             Weapons enhancedWeapon = *weaponData;
             enhancedWeapon.set_enhancement_level(enhancementLevel);
@@ -152,10 +155,13 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_short_sword(Vector2D pos, int
     auto item = create_short_sword(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(game.weapons.begin(), game.weapons.end(),
-            [](const Weapons& w) { return w.name == "Short Sword"; });
+        auto weaponData = std::find_if(
+            game.data_manager.get_weapons().begin(),
+            game.data_manager.get_weapons().end(),
+            [](const Weapons& w) { return w.name == "Short Sword"; }
+        );
         
-        if (weaponData != game.weapons.end())
+        if (weaponData != game.data_manager.get_weapons().end())
         {
             Weapons enhancedWeapon = *weaponData;
             enhancedWeapon.set_enhancement_level(enhancementLevel);
@@ -173,10 +179,13 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_long_sword(Vector2D pos, int 
     auto item = create_long_sword(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(game.weapons.begin(), game.weapons.end(),
-            [](const Weapons& w) { return w.name == "Long Sword"; });
+        auto weaponData = std::find_if(
+            game.data_manager.get_weapons().begin(),
+            game.data_manager.get_weapons().end(),
+            [](const Weapons& w) { return w.name == "Long Sword"; }
+        );
         
-        if (weaponData != game.weapons.end())
+        if (weaponData != game.data_manager.get_weapons().end())
         {
             Weapons enhancedWeapon = *weaponData;
             enhancedWeapon.set_enhancement_level(enhancementLevel);
@@ -194,10 +203,13 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_staff(Vector2D pos, int enhan
     auto item = create_staff(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(game.weapons.begin(), game.weapons.end(),
-            [](const Weapons& w) { return w.name == "Staff"; });
+        auto weaponData = std::find_if(
+            game.data_manager.get_weapons().begin(),
+            game.data_manager.get_weapons().end(),
+            [](const Weapons& w) { return w.name == "Staff";}
+        );
         
-        if (weaponData != game.weapons.end())
+        if (weaponData != game.data_manager.get_weapons().end())
         {
             Weapons enhancedWeapon = *weaponData;
             enhancedWeapon.set_enhancement_level(enhancementLevel);
@@ -215,10 +227,13 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_longbow(Vector2D pos, int enh
     auto item = create_longbow(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(game.weapons.begin(), game.weapons.end(),
-            [](const Weapons& w) { return w.name == "Longbow"; });
+        auto weaponData = std::find_if(
+            game.data_manager.get_weapons().begin(),
+            game.data_manager.get_weapons().end(),
+            [](const Weapons& w) { return w.name == "Longbow"; }
+        );
         
-        if (weaponData != game.weapons.end())
+        if (weaponData != game.data_manager.get_weapons().end())
         {
             Weapons enhancedWeapon = *weaponData;
             enhancedWeapon.set_enhancement_level(enhancementLevel);

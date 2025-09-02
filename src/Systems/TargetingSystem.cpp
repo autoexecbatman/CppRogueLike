@@ -87,8 +87,8 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 
 				// Display dexterity missile attack adjustment if applicable
 				if (game.player->has_state(ActorState::IS_RANGED) && game.player->dexterity > 0 &&
-					game.player->dexterity <= game.dexterityAttributes.size()) {
-					int missileAdj = game.dexterityAttributes[game.player->dexterity - 1].MissileAttackAdj;
+					game.player->dexterity <= game.data_manager.get_dexterity_attributes().size()) {
+					int missileAdj = game.data_manager.get_dexterity_attributes()[game.player->dexterity - 1].MissileAttackAdj;
 					if (missileAdj != 0) {
 						attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 						mvprintw(4, 50, "Ranged Attack Bonus: %+d", missileAdj);

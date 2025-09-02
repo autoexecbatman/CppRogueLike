@@ -32,11 +32,15 @@
 #include "Systems/DisplayManager.h"
 #include "Systems/GameLoopCoordinator.h"
 #include "Systems/ObjectManager.h"
+#include "Systems/DataManager.h"
 
 // Data structures
 #include "Attributes/StrengthAttributes.h"
 #include "Attributes/DexterityAttributes.h"
 #include "Attributes/ConstitutionAttributes.h"
+#include "Attributes/CharismaAttributes.h"
+#include "Attributes/IntelligenceAttributes.h"
+#include "Attributes/WisdomAttributes.h"
 #include "Items/Weapons.h"
 
 // Forward declarations
@@ -79,6 +83,7 @@ public:
     DisplayManager display_manager;
     GameLoopCoordinator game_loop_coordinator;
     ObjectManager object_manager;
+    DataManager data_manager;
 
     // Game world data
     Map map{ Map{MAP_HEIGHT, MAP_WIDTH} };
@@ -90,12 +95,6 @@ public:
     std::vector<std::unique_ptr<Creature>> creatures;
     std::vector<std::unique_ptr<Object>> objects;
     std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
-
-    // Data loaded from JSON
-    std::vector<Weapons> weapons{ load_weapons() };
-    std::vector<StrengthAttributes> strengthAttributes{ load_strength_attributes() };
-    std::vector<DexterityAttributes> dexterityAttributes{ load_dexterity_attributes() };
-    std::vector<ConstitutionAttributes> constitutionAttributes{ load_constitution_attributes() };
 
     // Menu system
     std::deque<std::unique_ptr<BaseMenu>> menus;

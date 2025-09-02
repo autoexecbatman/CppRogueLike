@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 struct ConstitutionAttributes
 {
 	int Con{};
@@ -11,5 +9,3 @@ struct ConstitutionAttributes
 	int PoisonSave{};
 	int Regeneration{};
 };
-
-std::vector<ConstitutionAttributes> load_constitution_attributes();

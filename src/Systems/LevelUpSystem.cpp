@@ -132,9 +132,9 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     
     // Get Constitution bonus
     int conBonus = 0;
-    if (owner.constitution >= 1 && owner.constitution <= game.constitutionAttributes.size())
+    if (owner.constitution >= 1 && owner.constitution <= game.data_manager.get_constitution_attributes().size())
     {
-        conBonus = game.constitutionAttributes[owner.constitution - 1].HPAdj;
+        conBonus = game.data_manager.get_constitution_attributes()[owner.constitution - 1].HPAdj;
     }
     
     // Calculate total HP gain (minimum 1)

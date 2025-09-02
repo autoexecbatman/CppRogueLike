@@ -26,7 +26,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
 
     if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
     {
-        StrengthAttributes strength = game.strengthAttributes.at(attacker.strength - 1); // get the strength attributes for the attacker
+        const auto& strength = game.data_manager.get_strength_attributes().at(attacker.strength - 1); // get the strength attributes for the attacker
 
         // roll for attack and damage
         int rollAttack = game.d.d20();
@@ -40,7 +40,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
         if (attacker.has_state(ActorState::IS_RANGED))
         {
             // Get dexterity bonus for missile attacks
-            auto& dexAttributes = game.dexterityAttributes.at(attacker.dexterity - 1);
+            const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.dexterity - 1);
             hitModifier = dexAttributes.MissileAttackAdj;
 
             // Display missile attack bonus info
@@ -193,7 +193,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 
 	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
 	{
-		StrengthAttributes strength = game.strengthAttributes.at(attacker.strength - 1); // get the strength attributes for the attacker
+		const auto& strength = game.data_manager.get_strength_attributes().at(attacker.strength - 1); // get the strength attributes for the attacker
 
 		// roll for attack and damage
 		int rollAttack = game.d.d20();
@@ -207,7 +207,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		if (attacker.has_state(ActorState::IS_RANGED))
 		{
 			// Get dexterity bonus for missile attacks
-			auto& dexAttributes = game.dexterityAttributes.at(attacker.dexterity - 1);
+			const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.dexterity - 1);
 			hitModifier += dexAttributes.MissileAttackAdj;
 
 			// Display missile attack bonus info

@@ -549,15 +549,16 @@ void Map::render() const
 // this function is deprecated
 void Map::add_weapons(Vector2D pos)
 {
-	const int weaponIndex{ game.d.roll(1, game.weapons.size()) };
-	const Weapons& selectedWeapon{ game.weapons.at(weaponIndex - 1) };
-	const int rollColor{ game.d.roll(1, game.weapons.size()) };
+	const int weaponIndex{ game.d.roll(1, game.data_manager.get_weapons().size()) };
+	const Weapons& selectedWeapon{ game.data_manager.get_weapons().at(weaponIndex - 1) };
+	const int rollColor{ game.d.roll(1, game.data_manager.get_weapons().size()) };
 
 	// Create an Actor for the weapon
 	auto weaponItem = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor });
 
 	// Map weapon names to corresponding constructors
-	static const std::unordered_map<std::string, std::function<std::unique_ptr<Pickable>()>> weaponFactory{
+	static const std::unordered_map<std::string, std::function<std::unique_ptr<Pickable>()>> weaponFactory
+	{
 		{"Dagger", []() { return std::make_unique<Dagger>(); }},
 		{"Long Sword", []() { return std::make_unique<LongSword>(); }},
 		{"Short Sword", []() { return std::make_unique<ShortSword>(); }},

@@ -10,5 +10,3 @@ struct WisdomAttributes
 	int ChanceOfSpellFailure{};
 	int SpellImmunity{};
 };
-
-std::vector<WisdomAttributes> loadWisdomAttributes();

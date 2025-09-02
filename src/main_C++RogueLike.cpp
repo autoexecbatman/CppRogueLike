@@ -22,8 +22,6 @@
 #include "Colors/Colors.h"
 #include "Menu/Menu.h"
 #include "Gui/Gui.h"
-#include "Attributes/StrengthAttributes.h" // for debugging
-#include "Items/Weapons.h" // for debugging
 
 #ifdef EMSCRIPTEN
 PDCEX SDL_Window* pdc_window;
@@ -128,12 +126,7 @@ int main()
 	// Clean up SDL resources
 	SDL_DestroyWindow(pdc_window);
 	#endif
-	
-	StrengthAttributes strength;
-	strength.print_chart(); // print strength chart for debugging
-	Weapons weapons;
-	weapons.print_chart(); // print weapons chart for debugging
-	
+
 	// C++ Core Guidelines E.6: Explicit close for error handling
 	if (debugFile.is_open()) {
 		try {

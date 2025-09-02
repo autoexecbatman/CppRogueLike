@@ -106,17 +106,11 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Random/RandomDice.h
 
     # Attributes
-    ${PROJECT_SOURCE_DIR}/Attributes/CharismaAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/CharismaAttributes.h
-    ${PROJECT_SOURCE_DIR}/Attributes/ConstitutionAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/ConstitutionAttributes.h
-    ${PROJECT_SOURCE_DIR}/Attributes/DexterityAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/DexterityAttributes.h
-    ${PROJECT_SOURCE_DIR}/Attributes/IntelligenceAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/IntelligenceAttributes.h
-    ${PROJECT_SOURCE_DIR}/Attributes/StrengthAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/StrengthAttributes.h
-    ${PROJECT_SOURCE_DIR}/Attributes/WisdomAttributes.cpp
     ${PROJECT_SOURCE_DIR}/Attributes/WisdomAttributes.h
 
     # Colors
@@ -218,6 +212,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/GameLoopCoordinator.h
     ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/DataManager.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/DataManager.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp

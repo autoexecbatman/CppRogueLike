@@ -195,14 +195,15 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
     mvwprintw(window, 20, 3, "THAC0: %d", player.destructible->thaco);
 
     // Display dexterity bonuses
-    if (player.dexterity > 0 && player.dexterity <= game.dexterityAttributes.size())
+    const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
+    if (player.dexterity > 0 && player.dexterity <= dexterityAttributes.size())
     {
         // Show missile attack adjustment
-        int missileAdj = game.dexterityAttributes.at(player.dexterity - 1).MissileAttackAdj;
+        int missileAdj = dexterityAttributes.at(player.dexterity - 1).MissileAttackAdj;
         mvwprintw(window, 21, 3, "Ranged Attack Bonus: %d", missileAdj);
 
         // Show defensive adjustment
-        int defensiveAdj = game.dexterityAttributes.at(player.dexterity - 1).DefensiveAdj;
+        int defensiveAdj = dexterityAttributes.at(player.dexterity - 1).DefensiveAdj;
         mvwprintw(window, 22, 3, "Defensive Adjustment: %d AC", defensiveAdj);
     }
 }
@@ -299,9 +300,9 @@ void CharacterSheetUI::display_constitution_effects(WINDOW* window, const Player
     // Add Constitution details panel on the right side
     mvwprintw(window, 14, 60, "Constitution Effects:");
 
-    if (player.constitution >= 1 && player.constitution <= game.constitutionAttributes.size())
+    if (player.constitution >= 1 && player.constitution <= game.data_manager.get_constitution_attributes().size())
     {
-        const auto& conAttr = game.constitutionAttributes.at(player.constitution - 1);
+        const auto& conAttr = game.data_manager.get_constitution_attributes().at(player.constitution - 1);
 
         mvwprintw(window, 15, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
         mvwprintw(window, 16, 62, "System Shock: %d%%", conAttr.SystemShock);
@@ -320,9 +321,9 @@ void CharacterSheetUI::display_strength_effects(WINDOW* window, const Player& pl
     // Add strength details panel on the right side
     mvwprintw(window, 21, 60, "Strength Effects:");
 
-    if (player.strength >= 1 && player.strength <= game.strengthAttributes.size())
+    if (player.strength >= 1 && player.strength <= game.data_manager.get_strength_attributes().size())
     {
-        const auto& strAttr = game.strengthAttributes.at(player.strength - 1);
+        const auto& strAttr = game.data_manager.get_strength_attributes().at(player.strength - 1);
 
         mvwprintw(window, 22, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
         mvwprintw(window, 23, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
@@ -334,25 +335,27 @@ void CharacterSheetUI::display_strength_effects(WINDOW* window, const Player& pl
 
 int CharacterSheetUI::get_strength_hit_modifier(const Player& player)
 {
-    if (player.strength > 0 && player.strength <= game.strengthAttributes.size())
+    if (player.strength > 0 && player.strength <= game.data_manager.get_strength_attributes().size())
     {
-        return game.strengthAttributes.at(player.strength - 1).hitProb;
+        return game.data_manager.get_strength_attributes().at(player.strength - 1).hitProb;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_strength_damage_modifier(const Player& player)
 {
-    if (player.strength > 0 && player.strength <= game.strengthAttributes.size()) {
-        return game.strengthAttributes.at(player.strength - 1).dmgAdj;
+    if (player.strength > 0 && player.strength <= game.data_manager.get_strength_attributes().size())
+    {
+        return game.data_manager.get_strength_attributes().at(player.strength - 1).dmgAdj;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_constitution_bonus(const Player& player)
 {
-    if (player.constitution >= 1 && player.constitution <= game.constitutionAttributes.size()) {
-        return game.constitutionAttributes.at(player.constitution - 1).HPAdj;
+    if (player.constitution >= 1 && player.constitution <= game.data_manager.get_constitution_attributes().size())
+    {
+        return game.data_manager.get_constitution_attributes().at(player.constitution - 1).HPAdj;
     }
     return 0;
 }

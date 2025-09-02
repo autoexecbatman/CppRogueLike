@@ -1,7 +1,6 @@
 #pragma once
 
 #include <string>
-#include <vector>
 
 struct StrengthAttributes
 {
@@ -13,8 +12,4 @@ struct StrengthAttributes
     int openDoors{};
     double BB_LG{};
     std::string notes{};
-
-    void print_chart();
 };
-
-inline std::vector<StrengthAttributes> load_strength_attributes();

@@ -32,14 +32,17 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 void Destructible::update_constitution_bonus(Creature& owner)
 {
 	// Check if Constitution has changed since last update
-	if (owner.constitution == lastConstitution) {
+	if (owner.constitution == lastConstitution)
+	{
 		return; // No need to recalculate
 	}
 
 	// Get the Constitution bonus from the table
 	int hpAdj = 0;
-	if (owner.constitution >= 1 && owner.constitution <= game.constitutionAttributes.size()) {
-		hpAdj = game.constitutionAttributes[owner.constitution - 1].HPAdj;
+	const auto& constitutionAttributes = game.data_manager.get_constitution_attributes();
+	if (owner.constitution >= 1 && owner.constitution <= constitutionAttributes.size())
+	{
+		hpAdj = constitutionAttributes[owner.constitution - 1].HPAdj;
 	}
 
 	// Calculate new max HP based on base HP and Constitution bonus
@@ -48,10 +51,12 @@ void Destructible::update_constitution_bonus(Creature& owner)
 
 	// Only update if the calculated value is different AND we're not in a level-up situation
 	// During level-ups, hpMax is already correctly set by the level-up system
-	if (newHpMax != oldHpMax && newHpMax > 0) {
+	if (newHpMax != oldHpMax && newHpMax > 0)
+	{
 		// Check if this looks like a level-up scenario (hpMax increased recently)
 		// If hpMax > hpBase + constitution bonus, then level-up system already handled it
-		if (hpMax <= hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1))) {
+		if (hpMax <= hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)))
+		{
 			hpMax = newHpMax;
 			
 			// Adjust current HP proportionally if max HP changed
@@ -65,11 +70,14 @@ void Destructible::update_constitution_bonus(Creature& owner)
 			hp = std::min(hp, hpMax);
 
 			// Log the HP adjustment if it's the player
-			if (&owner == game.player.get()) {
-				if (oldHpMax < hpMax) {
+			if (&owner == game.player.get())
+			{
+				if (oldHpMax < hpMax)
+				{
 					game.log("Your Constitution bonus increased your hit points.");
 				}
-				else if (oldHpMax > hpMax) {
+				else if (oldHpMax > hpMax)
+				{
 					game.log("Your Constitution bonus decreased your hit points.");
 				}
 			}
@@ -149,9 +157,10 @@ void Destructible::update_armor_class(Creature& owner)
 	int calculatedAC = baseArmorClass;
 
 	// Apply Dexterity's Defensive Adjustment
-	if (owner.dexterity > 0 && owner.dexterity <= game.dexterityAttributes.size())
+	const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
+	if (owner.dexterity > 0 && owner.dexterity <= dexterityAttributes.size())
 	{
-		int defensiveAdj = game.dexterityAttributes[owner.dexterity - 1].DefensiveAdj;
+		int defensiveAdj = dexterityAttributes[owner.dexterity - 1].DefensiveAdj;
 		// DefensiveAdj is applied directly to AC
 		// Note: In AD&D, a negative DefensiveAdj value actually improves AC
 		calculatedAC += defensiveAdj;

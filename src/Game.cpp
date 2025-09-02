@@ -21,9 +21,8 @@
 // Will be called in load_all() when loading and menu() for new game
 void Game::init()
 {
-	//==INIT==
-	weapons = load_weapons();
-	strengthAttributes = load_strength_attributes();
+	//==INIT DATA==
+	data_manager.load_all_data(message_system);
 
 	//==STAIRS==
 	stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
