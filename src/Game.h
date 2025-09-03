@@ -113,7 +113,7 @@ public:
     void display_levelup(int level) { display_manager.display_levelup(*player, level); }
     void display_character_sheet() const noexcept { display_manager.display_character_sheet(*player); }
     bool pick_tile(Vector2D* position, int maxRange) { return targeting.pick_tile(position, maxRange); }
-    Web* findWebAt(Vector2D position) { return object_manager.findWebAt(position, objects); }
+    Web* find_web_at(Vector2D position) { return object_manager.find_web_at(position, objects); }
 
     // Creature management
     void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }

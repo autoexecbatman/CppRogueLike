@@ -7,11 +7,11 @@
 #include <vector>
 #include <memory>
 #include "../Utils/Vector2D.h"
+#include "../Actor/Container.h"
 
 class Object;
 class Web;
 class Creature;
-class Container;
 
 class ObjectManager 
 {
@@ -20,7 +20,7 @@ public:
     ~ObjectManager() = default;
 
     // Object queries
-    Web* findWebAt(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects);
+    Web* find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects);
     
     // Object creation templates - implemented inline to avoid template instantiation issues
     template <typename T>
@@ -30,23 +30,14 @@ public:
     }
 
     template <typename T>
-    void create_item(Vector2D position, Container& container);
+    void create_item(Vector2D position, Container& container)
+    {
+        container.inv.push_back(std::make_unique<T>(position));
+    }
 
     // Object lifecycle management
     void cleanup_destroyed_objects(std::vector<std::unique_ptr<Object>>& objects);
-
-private:
-    // Private helper methods if needed
 };
-
-// Template specialization for create_item - must be in header but after class definition
-#include "../Actor/Container.h"
-
-template <typename T>
-void ObjectManager::create_item(Vector2D position, Container& container)
-{
-    container.inv.push_back(std::make_unique<T>(position));
-}
 
 #endif // OBJECT_MANAGER_H
 // end of file: Systems/ObjectManager.h

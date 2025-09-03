@@ -4,7 +4,7 @@
 #include "../Actor/Container.h"
 #include <algorithm>
 
-Web* ObjectManager::findWebAt(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects)
+Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects)
 {
     for (const auto& obj : objects)
     {
