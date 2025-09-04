@@ -11,13 +11,13 @@
 #include <curses.h>
 
 void RenderingManager::render_world(
-    Map& map,
-    Stairs& stairs,
-    std::span<std::unique_ptr<Object>> objects,
-    Container& container,
-    std::span<std::unique_ptr<Creature>> creatures,
-    Player& player
-)
+    const Map& map,
+    const Stairs& stairs,
+    std::span<const std::unique_ptr<Object>> objects,
+    const Container& container,
+    std::span<const std::unique_ptr<Creature>> creatures,
+    const Player& player
+) const
 {
     map.render();
     stairs.render();
@@ -28,7 +28,7 @@ void RenderingManager::render_world(
     player.render();
 }
 
-void RenderingManager::render_creatures(std::span<std::unique_ptr<Creature>> creatures) const
+void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures) const
 {
     for (const auto& creature : creatures)
     {
@@ -39,7 +39,7 @@ void RenderingManager::render_creatures(std::span<std::unique_ptr<Creature>> cre
     }
 }
 
-void RenderingManager::render_items(std::span<std::unique_ptr<Item>> items) const
+void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items) const
 {
     for (const auto& item : items)
     {
@@ -68,14 +68,13 @@ void RenderingManager::force_screen_refresh() const
     doupdate();  // Force immediate update
 }
 
-void RenderingManager::restore_game_display(Map& map, Gui& gui)
+void RenderingManager::restore_game_display() const
 {
-    // This method coordinates the restoration - actual rendering delegated appropriately
-    // The full game render and gui render will be called from Game class
+    // Force screen refresh for display restoration
     force_screen_refresh();
 }
 
-void RenderingManager::render_objects(std::span<std::unique_ptr<Object>> objects) const
+void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects) const
 {
     // Render any objects (like webs)
     for (const auto& obj : objects)

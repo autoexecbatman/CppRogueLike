@@ -27,25 +27,25 @@ public:
 
     // Core rendering methods
     void render_world(
-        Map& map,
-        Stairs& stairs,
-        std::span<std::unique_ptr<Object>> objects,
-        Container& container,
-        std::span<std::unique_ptr<Creature>> creatures,
-        Player& player
-    );
+        const Map& map,
+        const Stairs& stairs,
+        std::span<const std::unique_ptr<Object>> objects,
+        const Container& container,
+        std::span<const std::unique_ptr<Creature>> creatures,
+        const Player& player
+    ) const;
 
-    void render_creatures(std::span<std::unique_ptr<Creature>> creatures) const;
-    void render_items(std::span<std::unique_ptr<Item>> items) const;
+    void render_creatures(std::span<const std::unique_ptr<Creature>> creatures) const;
+    void render_items(std::span<const std::unique_ptr<Item>> items) const;
 
     // Screen management
     void safe_screen_clear();
     void force_screen_refresh() const;
-    void restore_game_display(Map& map, Gui& gui);
+    void restore_game_display() const;
 
 private:
     // Helper methods
-    void render_objects(std::span<std::unique_ptr<Object>> objects) const;
+    void render_objects(std::span<const std::unique_ptr<Object>> objects) const;
 };
 
 #endif // RENDERINGMANAGER_H
