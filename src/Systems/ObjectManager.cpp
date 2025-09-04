@@ -8,7 +8,10 @@ Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique
 {
     for (const auto& obj : objects)
     {
-        if (obj && obj->position == position &&
+        if (obj
+            &&
+            obj->position == position
+            &&
             obj->actorData.name == "spider web")
         {
             return dynamic_cast<Web*>(obj.get());

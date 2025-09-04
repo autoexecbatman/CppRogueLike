@@ -70,20 +70,20 @@ public:
     windowState{ WindowState::GAME };
 
     // Core systems - All game logic delegated to specialized systems
-    RandomDice d;
-    TargetingSystem targeting;
-    HungerSystem hunger_system;
-    MessageSystem message_system;
-    RenderingManager rendering_manager;
-    InputHandler input_handler;
-    GameStateManager state_manager;
-    LevelManager level_manager;
-    CreatureManager creature_manager;
-    MenuManager menu_manager;
-    DisplayManager display_manager;
-    GameLoopCoordinator game_loop_coordinator;
-    ObjectManager object_manager;
-    DataManager data_manager;
+    RandomDice d{};
+    TargetingSystem targeting{};
+    HungerSystem hunger_system{};
+    MessageSystem message_system{};
+    RenderingManager rendering_manager{};
+    InputHandler input_handler{};
+    GameStateManager state_manager{};
+    LevelManager level_manager{};
+    CreatureManager creature_manager{};
+    MenuManager menu_manager{};
+    DisplayManager display_manager{};
+    GameLoopCoordinator game_loop_coordinator{};
+    ObjectManager object_manager{};
+    DataManager data_manager{};
 
     // Game world data
     Map map{ Map{MAP_HEIGHT, MAP_WIDTH} };
@@ -94,7 +94,7 @@ public:
     std::vector<Vector2D> rooms;
     std::vector<std::unique_ptr<Creature>> creatures;
     std::vector<std::unique_ptr<Object>> objects;
-    std::unique_ptr<Container> container{ std::make_unique<Container>(0) };
+    std::unique_ptr<Container> container{ std::make_unique<Container>(1000) }; // Floor items container
 
     // Menu system
     std::deque<std::unique_ptr<BaseMenu>> menus;
@@ -105,7 +105,7 @@ public:
     void update();
 
     // System delegations - clean interface
-    void render() { rendering_manager.render_world(map, *stairs, objects, *container, creatures, *player); }
+    void render() const { rendering_manager.render_world(map, *stairs, objects, *container, creatures, *player); }
     void handle_menus() { menu_manager.handle_menus(menus); }
     void handle_gameloop(Gui& gui, int loopNum) { game_loop_coordinator.handle_gameloop(*this, gui, loopNum); }
     void handle_ranged_attack() { targeting.handle_ranged_attack(); }

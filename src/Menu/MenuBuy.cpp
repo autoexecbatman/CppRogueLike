@@ -47,7 +47,7 @@ MenuBuy::MenuBuy(Creature& buyer) : buyer{ buyer }
 	menu_height = static_cast<size_t>(LINES);
 	menu_width = static_cast<size_t>(COLS);
 	
-	populate_items(buyer.container->inv);
+	populate_items(buyer.container->get_inventory_mutable());
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 }
 
@@ -74,7 +74,7 @@ void MenuBuy::menu_print_state(size_t state)
 void MenuBuy::draw_content()
 {
 	// Only redraw if content changed
-	populate_items(buyer.container->inv);
+	populate_items(buyer.container->get_inventory_mutable());
 	
 	// Draw all menu items efficiently
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
@@ -95,7 +95,7 @@ void MenuBuy::draw()
 	// Instructions
 	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to buy, ESC to exit");
 	
-	populate_items(buyer.container->inv);
+	populate_items(buyer.container->get_inventory_mutable());
 	
 	// Start items at row 4 to leave space for title and instructions
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
@@ -112,7 +112,7 @@ void MenuBuy::on_key(int key)
 		case KEY_UP:
 		case 'w':
 			// Don't allow navigation if no items for sale
-			if (buyer.container->inv.empty()) return;
+			if (buyer.container->get_inventory_mutable().empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -123,7 +123,7 @@ void MenuBuy::on_key(int key)
 		case KEY_DOWN:
 		case 's':
 			// Don't allow navigation if no items for sale
-			if (buyer.container->inv.empty()) return;
+			if (buyer.container->get_inventory_mutable().empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -136,7 +136,7 @@ void MenuBuy::on_key(int key)
 			break;
 		case 10: // ENTER
 			// Only allow buying if shopkeeper actually has items
-			if (!buyer.container->inv.empty() && !menuItems.empty())
+			if (!buyer.container->get_inventory_mutable().empty() && !menuItems.empty())
 			{
 				handle_buy(menuWindow, buyer, *game.player);
 				menu_mark_dirty(); // Redraw after purchase
@@ -173,29 +173,29 @@ void MenuBuy::menu()
 
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
-	if (shopkeeper.container->inv.empty() || currentState >= shopkeeper.container->inv.size())
+	if (shopkeeper.container->get_inventory_mutable().empty() || currentState >= shopkeeper.container->get_inventory_mutable().size())
 	{
 		game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
-	size_t index = currentState % shopkeeper.container->inv.size();
-	auto itemIter = shopkeeper.container->inv.begin() + index;
+	size_t index = currentState % shopkeeper.container->get_inventory_mutable().size();
+	auto itemIter = shopkeeper.container->get_inventory_mutable().begin() + index;
 	auto& item = *itemIter;
 
 	if (seller.gold >= item->value) // Check if player has enough currency
 	{
 		seller.gold -= item->value; // Deduct currency
 		shopkeeper.gold += item->value; // Add currency
-		seller.container->inv.insert(seller.container->inv.begin(), std::move(item)); // Transfer item
+		seller.container->get_inventory_mutable().insert(seller.container->get_inventory_mutable().begin(), std::move(item)); // Transfer item
 
 		// Properly erase item from shopkeeper's inventory
-		shopkeeper.container->inv.erase(itemIter);
+		shopkeeper.container->get_inventory_mutable().erase(itemIter);
 
 		// Ensure currentState stays within valid bounds
-		if (currentState >= shopkeeper.container->inv.size() && !shopkeeper.container->inv.empty())
+		if (currentState >= shopkeeper.container->get_inventory_mutable().size() && !shopkeeper.container->get_inventory_mutable().empty())
 		{
-			currentState = shopkeeper.container->inv.size() - 1;
+			currentState = shopkeeper.container->get_inventory_mutable().size() - 1;
 		}
 
 		game.message(WHITE_BLACK_PAIR, "Item purchased successfully.", true);

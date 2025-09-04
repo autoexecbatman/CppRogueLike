@@ -205,7 +205,7 @@ void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::ve
             // CRITICAL FIX: Ensure creature inventory items have correct values
             if (creature->container)
             {
-                for (const auto& item : creature->container->inv)
+                for (const auto& item : creature->container->get_inventory())
                 {
                     if (item)
                     {
@@ -222,7 +222,7 @@ void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::ve
 void GameStateManager::save_items_to_json(const Container& container, nlohmann::json& j) const
 {
     j["items"] = json::array();
-    for (const auto& item : container.inv)
+    for (const auto& item : container.get_inventory())
     {
         if (item)
         {
@@ -243,7 +243,7 @@ void GameStateManager::load_items_from_json(const nlohmann::json& j, Container& 
             item->load(itemData);
             // CRITICAL FIX: Ensure loaded items have correct values
             ItemCreator::ensure_correct_value(*item);
-            container.inv.push_back(std::move(item));
+            container.add(std::move(item));
         }
     }
 }

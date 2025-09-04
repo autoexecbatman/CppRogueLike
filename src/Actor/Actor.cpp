@@ -183,7 +183,7 @@ void Creature::equip(Item& item)
 	std::vector<Item*> equippedItems;
 
 	// Find all equipped items
-	for (const auto& inv_item : container->inv)
+	for (const auto& inv_item : container->get_inventory_mutable())
 	{
 		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
 		{
@@ -245,7 +245,7 @@ void Creature::unequip(Item& item)
 
 		// Double-check all inventory to see if we still should have IS_RANGED
 		bool hasRangedWeapon = false;
-		for (const auto& invItem : container->inv)
+		for (const auto& invItem : container->get_inventory_mutable())
 		{
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
 			{
@@ -271,7 +271,7 @@ void Creature::syncRangedState()
 {
 	// Check if any equipped items are ranged weapons
 	bool hasRangedWeapon = false;
-	for (const auto& item : container->inv)
+	for (const auto& item : container->get_inventory_mutable())
 	{
 		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
 		{
@@ -300,13 +300,14 @@ void Creature::syncRangedState()
 void Creature::pick()
 {
 	// Check if inventory is already full before attempting to pick
-	if (container && container->invSize > 0 && container->inv.size() >= container->invSize) {
+	if (container && container->is_full())
+	{
 		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
 	auto is_null = [](auto&& i) { return !i; };
-	for (auto& i : game.container->inv)
+	for (auto& i : game.container->get_inventory_mutable())
 	{
 		if (i)
 		{
@@ -326,7 +327,7 @@ void Creature::pick()
 							gold += goldPickable->amount;
 							game.message(YELLOW_BLACK_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
 							i.reset(); // Remove the gold pile from the map
-							std::erase_if(game.container->inv, is_null);
+							std::erase_if(game.container->get_inventory_mutable(), is_null);
 							return;
 						}
 					}
@@ -336,7 +337,7 @@ void Creature::pick()
 				if (container->add(std::move(i)))
 				{
 					game.message(WHITE_BLACK_PAIR, "You picked up the " + i->actorData.name + ".", true);
-					std::erase_if(game.container->inv, is_null);
+					std::erase_if(game.container->get_inventory_mutable(), is_null);
 				}
 				// We don't need an else for failed add since Container::add() now handles the message
 			}
@@ -347,10 +348,10 @@ void Creature::pick()
 void Creature::drop(Item& item)
 {
 	// Check if the item is actually in the inventory first
-	auto it = std::find_if(container->inv.begin(), container->inv.end(),
+	auto it = std::find_if(container->get_inventory_mutable().begin(), container->get_inventory_mutable().end(),
 		[&item](const auto& invItem) { return invItem.get() == &item; });
 
-	if (it != container->inv.end()) {
+	if (it != container->get_inventory_mutable().end()) {
 		// Set the item's position to the player's position
 		(*it)->position = position;
 
@@ -363,7 +364,7 @@ void Creature::drop(Item& item)
 		if (game.container->add(std::move(*it))) {
 			// Erase the null pointer that remains after moving
 			auto is_null = [](const auto& i) { return !i; };
-			std::erase_if(container->inv, is_null);
+			std::erase_if(container->get_inventory_mutable(), is_null);
 
 			game.message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}

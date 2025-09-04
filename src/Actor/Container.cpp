@@ -1,79 +1,229 @@
-// file: Container.cpp
-#include <vector>
-
-#include "../Game.h"
+// Container.cpp - Modern C++20 implementation with proper encapsulation
 #include "Container.h"
 #include "Actor.h"
 #include "../Items/Items.h"
+#include <iostream>
+#include <algorithm>
+#include <ranges>
 
-Container::Container(size_t invSize) noexcept : invSize(invSize) {}
-
-// checks that the container is not full.
-bool Container::add(std::unique_ptr<Item> actor)
+// Construction with proper initialization
+Container::Container(size_t initial_capacity) noexcept
+    : capacity_(initial_capacity)
+    , event_handler_(nullptr)
 {
-	// check if the inventory is full then return false
-	if (invSize > 0 && inv.size() >= invSize) {
-		// Log message and notify the player that inventory is full
-		game.log("Inventory full! Cannot add more items.");
-		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
-		return false;
-	}
-
-	// if inventory is not full try add the actor to the inventory
-	inv.push_back(std::move(actor));
-
-	return true;
+    inventory_.reserve(initial_capacity);
 }
 
-// remove an item from the inventory
-void Container::remove(std::unique_ptr<Item> actor)
+// Modern add method with proper error handling
+ContainerResult<bool> Container::add(std::unique_ptr<Item> item)
 {
-	game.log("Removing item from inventory");
-	game.container->add(std::move(actor));
-	game.send_to_back(*game.creatures.back().get());
-	auto is_null = [](const auto& a) noexcept { return !a; };
-	std::erase_if(inv, is_null);
-	game.log("Item removed from inventory");
+    if (!item)
+    {
+        return ContainerError::INVALID_ITEM;
+    }
+
+    if (is_full())
+    {
+        fire_event(ContainerEvent::Type::INVENTORY_FULL, item.get());
+        return ContainerError::FULL;
+    }
+
+    const auto* item_ptr = item.get();
+    inventory_.push_back(std::move(item));
+    
+    fire_event(ContainerEvent::Type::ITEM_ADDED, item_ptr);
+    return true;
 }
 
+ContainerResult<std::unique_ptr<Item>> Container::remove(const Item& item)
+{
+    auto it = std::ranges::find_if(inventory_, 
+        [&item](const auto& stored_item) 
+        { 
+            return stored_item.get() == &item; 
+        });
+
+    if (it == inventory_.end())
+    {
+        return ContainerError::ITEM_NOT_FOUND;
+    }
+
+    auto removed_item = std::move(*it);
+    inventory_.erase(it);
+    
+    fire_event(ContainerEvent::Type::ITEM_REMOVED, removed_item.get());
+    optimize_storage();
+    
+    return std::move(removed_item);
+}
+
+ContainerResult<std::unique_ptr<Item>> Container::remove_at(size_t index)
+{
+    if (index >= inventory_.size())
+    {
+        return ContainerError::ITEM_NOT_FOUND;
+    }
+
+    auto removed_item = std::move(inventory_[index]);
+    inventory_.erase(inventory_.begin() + index);
+    
+    fire_event(ContainerEvent::Type::ITEM_REMOVED, removed_item.get());
+    optimize_storage();
+    
+    return std::move(removed_item);
+}
+
+// Legacy remove pattern (unusual but preserved for compatibility)
+void Container::remove_legacy(std::unique_ptr<Item> actor)
+{
+    inventory_.push_back(std::move(actor));
+    auto is_null = [](const auto& a) noexcept { return !a; };
+    std::erase_if(inventory_, is_null);
+}
+
+// Item access methods
+Item* Container::get_item_at(size_t index) noexcept
+{
+    return index < inventory_.size() ? inventory_[index].get() : nullptr;
+}
+
+const Item* Container::get_item_at(size_t index) const noexcept
+{
+    return index < inventory_.size() ? inventory_[index].get() : nullptr;
+}
+
+// Capacity management
+void Container::set_capacity(size_t new_capacity)
+{
+    if (new_capacity < inventory_.size())
+    {
+        inventory_.resize(new_capacity);
+    }
+    
+    capacity_ = new_capacity;
+    inventory_.reserve(capacity_);
+    
+    fire_event(ContainerEvent::Type::CAPACITY_CHANGED);
+}
+
+// Search operations
+const Item* Container::find_item_by_name(std::string_view name) const noexcept
+{
+    auto it = std::ranges::find_if(inventory_, 
+        [name](const auto& item) 
+        { 
+            return item && item->actorData.name == name; 
+        });
+    
+    return it != inventory_.end() ? it->get() : nullptr;
+}
+
+bool Container::contains_item(const Item& item) const noexcept
+{
+    return std::ranges::any_of(inventory_, 
+        [&item](const auto& stored_item) 
+        { 
+            return stored_item.get() == &item; 
+        });
+}
+
+// Event system implementation
+void Container::fire_event(ContainerEvent::Type type, const Item* item)
+{
+    if (event_handler_)
+    {
+        ContainerEvent event
+        {
+            .type = type,
+            .item = item,
+            .current_size = inventory_.size(),
+            .capacity = capacity_
+        };
+        event_handler_(event);
+    }
+}
+
+// Persistence with proper error handling
 void Container::load(const json& j)
 {
-	// Deserialize the inventory size
-	invSize = j["invSize"];
-
-	// Deserialize the inventory
-	for (const auto& actorJson : j["inv"])
-	{
-		auto actor = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
-		actor->load(actorJson);
-		inv.push_back(std::move(actor));
-	}
+    try
+    {
+        capacity_ = j.value("capacity", 0);
+        
+        inventory_.clear();
+        inventory_.reserve(capacity_);
+        
+        if (j.contains("inventory") && j["inventory"].is_array())
+        {
+            for (const auto& item_json : j["inventory"])
+            {
+                auto item = std::make_unique<Item>(
+                    Vector2D{0, 0}, 
+                    ActorData{}
+                );
+                item->load(item_json);
+                inventory_.push_back(std::move(item));
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Container::load error: " << e.what() << std::endl;
+    }
 }
 
 void Container::save(json& j)
 {
-	// Serialize the inventory size
-	j["invSize"] = invSize;
-
-	// Serialize the inventory
-	j["inv"] = json::array();
-	for (const auto& actor : inv)
-	{
-		json actorJson;
-		actor->save(actorJson);
-		j["inv"].push_back(actorJson);
-	}
+    try
+    {
+        j["capacity"] = capacity_;
+        j["inventory"] = json::array();
+        
+        for (const auto& item : inventory_)
+        {
+            if (item)
+            {
+                json item_json;
+                item->save(item_json);
+                j["inventory"].push_back(item_json);
+            }
+        }
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Container::save error: " << e.what() << std::endl;
+    }
 }
 
-void Container::print_container(std::span<std::unique_ptr<Actor>> container)
+// Debug utilities
+void Container::print_container(std::span<std::unique_ptr<Actor>> container) const
 {
-	int i = 0;
-	for (const auto& item : inv)
-	{
-		std::cout << item->actorData.name << i << " ";
-		i++;
-	}
-	std::cout << '\n';
+    int i = 0;
+    for (const auto& item : inventory_)
+    {
+        if (item)
+        {
+            std::cout << item->actorData.name << i << " ";
+            i++;
+        }
+    }
+    std::cout << '\n';
 }
 
-// end of file: Container.cpp
+std::string Container::get_debug_info() const
+{
+    return "Container{items:" + std::to_string(get_item_count()) + 
+           ", capacity:" + std::to_string(get_capacity()) + 
+           ", full:" + (is_full() ? "yes" : "no") + "}";
+}
+
+// Private helper methods
+void Container::optimize_storage()
+{
+    std::erase_if(inventory_, [](const auto& item) { return !item; });
+    
+    if (inventory_.size() * 4 < inventory_.capacity())
+    {
+        inventory_.shrink_to_fit();
+    }
+}

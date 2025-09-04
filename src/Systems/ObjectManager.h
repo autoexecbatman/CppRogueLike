@@ -32,7 +32,9 @@ public:
     template <typename T>
     void create_item(Vector2D position, Container& container)
     {
-        container.inv.push_back(std::make_unique<T>(position));
+        auto item = std::make_unique<T>(position);
+        auto result = container.add(std::move(item));
+        // Note: Error handling could be added here if needed
     }
 
     // Object lifecycle management

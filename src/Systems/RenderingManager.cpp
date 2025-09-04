@@ -23,7 +23,7 @@ void RenderingManager::render_world(
     stairs.render();
 
     render_objects(objects);
-    render_items(container.inv);
+    render_items(container.get_inventory());
     render_creatures(creatures);
     player.render();
 }

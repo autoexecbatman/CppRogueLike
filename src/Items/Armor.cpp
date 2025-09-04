@@ -42,12 +42,12 @@ bool Armor::use(Item& owner, Creature& wearer)
 	// Try to equip the armor
 	// First, find this item in the inventory
 	std::unique_ptr<Item> itemToEquip = nullptr;
-	for (auto it = wearer.container->inv.begin(); it != wearer.container->inv.end(); ++it)
+	for (auto it = wearer.container->get_inventory_mutable().begin(); it != wearer.container->get_inventory_mutable().end(); ++it)
 	{
 		if (it->get() == &owner)
 		{
 			itemToEquip = std::move(*it);
-			wearer.container->inv.erase(it);
+			wearer.container->get_inventory_mutable().erase(it);
 			break;
 		}
 	}
@@ -63,7 +63,7 @@ bool Armor::use(Item& owner, Creature& wearer)
 		else
 		{
 			// Failed to equip, return item to inventory
-			wearer.container->inv.push_back(std::move(itemToEquip));
+			wearer.container->get_inventory_mutable().push_back(std::move(itemToEquip));
 			game.message(WHITE_BLACK_PAIR, "You can't equip the " + owner.actorData.name + ".", true);
 			return false;
 		}

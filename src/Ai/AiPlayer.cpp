@@ -172,18 +172,18 @@ void AiPlayer::pick_item(Creature& owner)
 {
 	// Check if the inventory is already full (including equipped items)
 	auto* player = dynamic_cast<Player*>(&owner);
-	size_t totalItems = owner.container->inv.size();
+	size_t totalItems = owner.container->get_item_count();
 	if (player) {
 		totalItems += player->equippedItems.size(); // Count equipped items too
 	}
 	
-	if (owner.container && owner.container->invSize > 0 && totalItems >= owner.container->invSize) {
+	if (owner.container && owner.container->get_capacity() > 0 && totalItems >= owner.container->get_capacity()) {
 		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
 	auto is_null = [](auto&& i) { return !i; };
-	for (auto& i : game.container->inv)
+	for (auto& i : game.container->get_inventory_mutable())
 	{
 		if (i && i->position == owner.position)
 		{
@@ -204,7 +204,7 @@ void AiPlayer::pick_item(Creature& owner)
 
 					// Remove gold pile from ground
 					i.reset();
-					std::erase_if(game.container->inv, is_null);
+					std::erase_if(game.container->get_inventory_mutable(), is_null);
 					return;
 				}
 			}
@@ -212,16 +212,24 @@ void AiPlayer::pick_item(Creature& owner)
 			auto name = i->actorData.name;
 
 			// Normal item handling
-			if (owner.container->add(std::move(i)))
+			auto result = owner.container->add(std::move(i));
+			if (result)
 			{
-				std::erase_if(game.container->inv, is_null);
+				std::erase_if(game.container->get_inventory_mutable(), is_null);
 
 				// Sync ranged state after picking up an item
 				owner.syncRangedState();
 
 				game.message(WHITE_BLACK_PAIR, std::format("You picked up the {}.", name), true);
 			}
-			// We don't need an else statement since Container::add() now handles the message
+			else
+			{
+				// Handle the error case - Container now provides proper feedback
+				if (result.get_error() == ContainerError::FULL)
+				{
+					game.message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+				}
+			}
 			return;
 		}
 	}
@@ -230,7 +238,7 @@ void AiPlayer::pick_item(Creature& owner)
 void AiPlayer::drop_item(Creature& owner)
 {
 	// If the inventory is empty, show a message and return
-	if (owner.container->inv.empty()) {
+	if (owner.container->is_empty()) {
 		game.message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
@@ -280,14 +288,14 @@ void AiPlayer::drop_item(Creature& owner)
 			}
 		}
 		
-		if (!owner.container->inv.empty())
+		if (!owner.container->is_empty())
 		{
 			mvwprintw(dropWin, y++, 1, "=== INVENTORY ===");
 		}
 	}
 
 	// Then show regular inventory items
-	for (const auto& item : owner.container->inv)
+	for (const auto& item : owner.container->get_inventory())
 	{
 		if (item)
 		{
@@ -315,7 +323,7 @@ void AiPlayer::drop_item(Creature& owner)
 		// Cancel dropping
 		game.message(WHITE_BLACK_PAIR, "Drop canceled.", true);
 	}
-	else if (input >= 'a' && input < 'a' + static_cast<int>((player ? player->equippedItems.size() : 0) + owner.container->inv.size())) {
+	else if (input >= 'a' && input < 'a' + static_cast<int>((player ? player->equippedItems.size() : 0) + owner.container->get_item_count())) {
 		// Valid item selection
 		int index = input - 'a';
 		
@@ -331,7 +339,7 @@ void AiPlayer::drop_item(Creature& owner)
 			player->unequip_item(slot);
 			
 			// Find the item in inventory and drop it
-			for (auto& item : owner.container->inv)
+			for (auto& item : owner.container->get_inventory_mutable())
 			{
 				if (item && item->actorData.name == itemName)
 				{
@@ -347,9 +355,9 @@ void AiPlayer::drop_item(Creature& owner)
 			// Dropping regular inventory item
 			int inventoryIndex = index - (player ? static_cast<int>(player->equippedItems.size()) : 0);
 			
-			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(owner.container->inv.size())) {
-				// Get the selected item
-				Item* itemToDrop = owner.container->inv[inventoryIndex].get();
+			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(owner.container->get_item_count())) {
+			// Get the selected item
+			Item* itemToDrop = owner.container->get_item_at(inventoryIndex);
 				if (itemToDrop) {
 					// Display the item name before dropping
 					std::string itemName = itemToDrop->actorData.name;
@@ -387,7 +395,7 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 	int y = 1;
 	try
 	{
-		for (const auto& item : owner.container->inv)
+		for (const auto& item : owner.container->get_inventory())
 		{
 			if (item != nullptr)
 			{
@@ -447,9 +455,9 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 	if (owner.container != nullptr)
 	{
 		const size_t index = ascii - 'a';
-		if (index >= 0 && index < owner.container->inv.size())
+		if (index >= 0 && index < game.container->get_inventory_mutable().size())
 		{
-			Item* item = owner.container->inv.at(index).get();
+			Item* item = game.container->get_inventory_mutable().at(index).get();
 
 			// Sync ranged state since we might use/equip/unequip an item
 			owner.syncRangedState();
@@ -472,7 +480,7 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 void AiPlayer::look_on_floor(Vector2D target)
 {
 	// look for corpses or items
-	for (const auto& i : game.container->inv)
+	for (const auto& i : game.container->get_inventory_mutable())
 	{
 		if (i)
 		{

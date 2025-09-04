@@ -101,7 +101,7 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner
     }
     
     // Add regular inventory items
-    for (const auto& item : owner.container->inv)
+    for (const auto& item : game.container->get_inventory_mutable())
     {
         if (item)
         {
@@ -117,8 +117,8 @@ void InventoryUI::display_inventory_items(Player* player)
     // Update title with backpack item count
     if (player)
     {
-        size_t backpackItems = player->container->inv.size();
-        size_t maxItems = player->container->invSize;
+        size_t backpackItems = player->container->get_item_count();
+        size_t maxItems = player->container->get_capacity();
         mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
     }
     
@@ -126,7 +126,7 @@ void InventoryUI::display_inventory_items(Player* player)
     char shortcut = 'a';
     
     // Display only backpack items (not equipped items)
-    const auto& backpackItems = player->container->inv;
+    const auto& backpackItems = player->container->get_inventory();
     
     if (backpackItems.empty())
     {
@@ -246,7 +246,7 @@ void InventoryUI::display_instructions()
     int totalWeight = 0;
     if (game.player && game.player->container)
     {
-        totalWeight = static_cast<int>(game.player->container->inv.size());
+        totalWeight = static_cast<int>(game.player->container->get_item_count());
     }
     
     mvwprintw(
@@ -283,7 +283,7 @@ bool InventoryUI::handle_inventory_input(Creature& owner, Player* player)
 
 bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int itemIndex)
 {
-    const auto& backpackItems = owner.container->inv;
+    const auto& backpackItems = game.container->get_inventory_mutable();
     
     if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
     {
@@ -303,7 +303,7 @@ bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
-                for (const auto& item : owner.container->inv)
+                for (const auto& item : game.container->get_inventory_mutable())
                 {
                     if (item.get() == itemPtr)
                     {

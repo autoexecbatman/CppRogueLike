@@ -27,11 +27,11 @@ void equip_fighter_starting_gear()
 	
 	// PLATE MAIL (AC 3) - Auto-equipped
 	player.container->add(ItemCreator::create_plate_mail(player.position));
-	player.container->inv.back()->add_state(ActorState::IS_EQUIPPED);
+	player.container->get_inventory_mutable().back()->add_state(ActorState::IS_EQUIPPED);
 	
 	// LONG SWORD (1d8) - Auto-equipped
 	player.container->add(ItemCreator::create_long_sword(player.position));
-	player.container->inv.back()->add_state(ActorState::IS_EQUIPPED);
+	player.container->get_inventory_mutable().back()->add_state(ActorState::IS_EQUIPPED);
 	
 	// Update fighter combat stats
 	player.weaponEquipped = "Long Sword";

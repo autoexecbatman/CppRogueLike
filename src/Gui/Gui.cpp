@@ -305,7 +305,7 @@ void Gui::renderMouseLook()
 	}
 	
 	// Check for items at mouse position
-	for (const auto& item : game.container->inv)
+	for (const auto& item : game.container->get_inventory_mutable())
 	{
 		if (item && item->position.x == mouseX && item->position.y == mouseY)
 		{

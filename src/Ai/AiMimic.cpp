@@ -65,11 +65,11 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
     bool itemConsumed = false;
     std::vector<size_t> itemsToRemove;
 
-    game.log("Checking for items. Container size: " + std::to_string(game.container->inv.size()));
+    game.log("Checking for items. Container size: " + std::to_string(game.container->get_inventory_mutable().size()));
 
     // First pass - identify items to consume
-    for (size_t i = 0; i < game.container->inv.size(); i++) {
-        auto& item = game.container->inv[i];
+    for (size_t i = 0; i < game.container->get_inventory_mutable().size(); i++) {
+        auto& item = game.container->get_inventory_mutable()[i];
         if (!item) {
             continue;
         }
@@ -142,9 +142,9 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
         size_t index = *it;
         game.log("Removing consumed item at index " + std::to_string(index));
 
-        if (index < game.container->inv.size()) {
-            game.container->inv[index].reset();
-            game.container->inv.erase(game.container->inv.begin() + index);
+        if (index < game.container->get_inventory_mutable().size()) {
+            game.container->get_inventory_mutable()[index].reset();
+            game.container->get_inventory_mutable().erase(game.container->get_inventory_mutable().begin() + index);
         }
     }
 

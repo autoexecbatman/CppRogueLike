@@ -24,7 +24,7 @@ bool Pickable::use(Item& owner, Creature& wearer)
 	if (wearer.container)
 	{
 		auto compareItems = [&owner](const std::unique_ptr<Item>& actor) { return actor.get() == &owner; };
-		std::erase_if(wearer.container->inv, compareItems);
+		std::erase_if(wearer.container->get_inventory_mutable(), compareItems);
 
 		return true;
 	}
@@ -348,13 +348,13 @@ bool Weapon::use(Item& owner, Creature& wearer)
 
 	// Remove the item from inventory and equip it
 	auto compareItems = [&owner](const std::unique_ptr<Item>& item) { return item.get() == &owner; };
-	auto it = std::find_if(wearer.container->inv.begin(), wearer.container->inv.end(), compareItems);
+	auto it = std::find_if(wearer.container->get_inventory_mutable().begin(), wearer.container->get_inventory_mutable().end(), compareItems);
 	
-	if (it != wearer.container->inv.end())
+	if (it != wearer.container->get_inventory_mutable().end())
 	{
 		// Move item from inventory to equipment
 		std::unique_ptr<Item> item = std::move(*it);
-		wearer.container->inv.erase(it);
+		wearer.container->get_inventory_mutable().erase(it);
 		
 		// Equip the item in the new equipment system
 		if (player->equip_item(std::move(item), targetSlot))

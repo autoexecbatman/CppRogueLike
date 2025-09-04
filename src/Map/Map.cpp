@@ -996,7 +996,7 @@ void Map::regenerate()
 	refresh();
 	// clear the actors container except the player and the stairs
 	game.creatures.clear();
-	game.container->inv.clear();
+	game.container->get_inventory_mutable().clear();
 	game.rooms.clear(); // we clear the room coordinates
 	game.objects.clear();
 

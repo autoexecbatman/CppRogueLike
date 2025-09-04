@@ -219,7 +219,7 @@ void Destructible::update_armor_class(Creature& owner)
 	{
 		// Use old system for non-player creatures
 		// Check all items for equipped armor
-		for (const auto& item : owner.container->inv)
+		for (const auto& item : game.container->get_inventory_mutable())
 		{
 			if (item && item->has_state(ActorState::IS_EQUIPPED))
 			{
