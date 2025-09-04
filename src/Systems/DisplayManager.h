@@ -13,8 +13,8 @@ public:
     ~DisplayManager() = default;
 
     // Display management methods
-    void display_help() noexcept;
-    void display_levelup(Player& player, int xpLevel);
+    void display_help() const noexcept;
+    void display_levelup(Player& player, int xpLevel) const;
     void display_character_sheet(const Player& player) const noexcept;
 
 private:

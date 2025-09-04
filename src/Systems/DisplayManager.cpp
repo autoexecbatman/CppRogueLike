@@ -6,7 +6,7 @@
 #include "../UI/CharacterSheetUI.h"
 #include <curses.h>
 
-void DisplayManager::display_help() noexcept
+void DisplayManager::display_help() const noexcept
 {
     WINDOW* help_window = newwin(
         30, // height
@@ -53,7 +53,7 @@ void DisplayManager::display_help() noexcept
     refresh();
 }
 
-void DisplayManager::display_levelup(Player& player, int xpLevel)
+void DisplayManager::display_levelup(Player& player, int xpLevel) const
 {
     // Apply all level up benefits through the new LevelUpSystem
     LevelUpSystem::apply_level_up_benefits(player, xpLevel);

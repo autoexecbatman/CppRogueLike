@@ -20,7 +20,7 @@ public:
     ~ObjectManager() = default;
 
     // Object queries
-    Web* find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects);
+    Web* find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const;
     
     // Object creation templates - implemented inline to avoid template instantiation issues
     template <typename T>
