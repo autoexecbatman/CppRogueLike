@@ -8,8 +8,9 @@
 
 // Construction with proper initialization
 Container::Container(size_t initial_capacity) noexcept
-    : capacity_(initial_capacity)
-    , event_handler_(nullptr)
+    :
+    capacity_(initial_capacity),
+    event_handler_(nullptr)
 {
     inventory_.reserve(initial_capacity);
 }

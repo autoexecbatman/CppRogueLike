@@ -17,6 +17,7 @@
 #include "../Items/CorpseFood.h"
 #include "../Items/Amulet.h"
 #include "../Items/Armor.h"
+#include "../Utils/PickableTypeRegistry.h"
 
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)
@@ -35,31 +36,9 @@ bool Pickable::use(Item& owner, Creature& wearer)
 // AD&D 2e weapon size and dual-wield validation methods
 WeaponSize Weapon::get_weapon_size() const
 {
-	// Map specific weapon types to their AD&D 2e sizes
-	if (dynamic_cast<const Dagger*>(this))
-	{
-		return WeaponSize::TINY;  // Dagger is TINY
-	}
-	else if (dynamic_cast<const ShortSword*>(this))
-	{
-		return WeaponSize::SMALL; // Short sword is SMALL
-	}
-	else if (dynamic_cast<const LongSword*>(this) || dynamic_cast<const BattleAxe*>(this) || dynamic_cast<const WarHammer*>(this))
-	{
-		return WeaponSize::MEDIUM; // Long sword, battle axe, war hammer are MEDIUM
-	}
-	else if (dynamic_cast<const Greatsword*>(this) || dynamic_cast<const GreatAxe*>(this))
-	{
-		return WeaponSize::LARGE; // Two-handed weapons are LARGE
-	}
-	else if (dynamic_cast<const Staff*>(this))
-	{
-		return WeaponSize::MEDIUM; // Staff is MEDIUM (versatile)
-	}
-	else
-	{
-		return WeaponSize::MEDIUM; // Default to MEDIUM
-	}
+	// Use type registry instead of dynamic_cast for weapon size detection
+	auto weaponType = PickableTypeRegistry::get_weapon_type(this);
+	return PickableTypeRegistry::get_weapon_size(weaponType);
 }
 
 bool Weapon::can_be_off_hand(WeaponSize weaponSize) const
@@ -75,18 +54,18 @@ bool Weapon::validate_dual_wield(Item* mainHandWeapon, Item* offHandWeapon) cons
 		return false;
 	}
 	
-	// Get weapon pickables
-	auto* mainWeapon = dynamic_cast<Weapon*>(mainHandWeapon->pickable.get());
-	auto* offWeapon = dynamic_cast<Weapon*>(offHandWeapon->pickable.get());
+	// Use type registry instead of dynamic_cast for weapon validation
+	auto mainType = PickableTypeRegistry::get_item_type(*mainHandWeapon);
+	auto offType = PickableTypeRegistry::get_item_type(*offHandWeapon);
 	
-	if (!mainWeapon || !offWeapon)
+	if (!PickableTypeRegistry::is_weapon(mainType) || !PickableTypeRegistry::is_weapon(offType))
 	{
 		return false; // One of them is not a weapon
 	}
 	
-	// Get weapon sizes
-	WeaponSize mainSize = mainWeapon->get_weapon_size();
-	WeaponSize offSize = offWeapon->get_weapon_size();
+	// Get weapon sizes using type registry
+	WeaponSize mainSize = PickableTypeRegistry::get_weapon_size(mainType);
+	WeaponSize offSize = PickableTypeRegistry::get_weapon_size(offType);
 	
 	// AD&D 2e Two-Weapon Fighting Rules:
 	// 1. Main hand weapon must be MEDIUM or smaller
@@ -193,195 +172,79 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 	return pickable;
 }
 
-// Common weapon equip/unequip logic
+// Clean weapon equip/unequip logic - delegates to Equipment System
 bool Weapon::use(Item& owner, Creature& wearer)
 {
-	// Cast to Player to access equipment system
-	auto* player = dynamic_cast<Player*>(&wearer);
-	if (!player)
-	{
-		// Fallback to old system for non-player creatures
-		return Pickable::use(owner, wearer);
-	}
-
-	// If this weapon is already equipped, unequip it
-	if (owner.has_state(ActorState::IS_EQUIPPED))
-	{
-		// Find which slot this weapon is in and unequip it
-		for (auto slot : {EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND})
-		{
-			if (player->get_equipped_item(slot) == &owner)
-			{
-				player->unequip_item(slot);
-				game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.actorData.name + ".", true);
-				
-				// Remove ranged state if applicable
-				if (is_ranged())
-				{
-					wearer.remove_state(ActorState::IS_RANGED);
-				}
-				
-				return true;
-			}
-		}
-	}
-
-	// Determine equipment slot for new weapon with AD&D 2e dual-wield rules
-	EquipmentSlot targetSlot = EquipmentSlot::RIGHT_HAND;
+	std::string weaponName = owner.actorData.name;
 	
-	// Check weapon type for slot determination
-	if (dynamic_cast<Shield*>(this))
+	// For players, delegate to Equipment System using unique IDs
+	if (wearer.uniqueId == game.player->uniqueId)
 	{
-		targetSlot = EquipmentSlot::LEFT_HAND;
-	}
-	else if (dynamic_cast<Longbow*>(this))
-	{
-		// Bows go in missile weapon slot
-		targetSlot = EquipmentSlot::MISSILE_WEAPON;
-	}
-	else
-	{
-		// For regular weapons, check dual-wield possibility
-		Item* rightHandWeapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-		Item* leftHandWeapon = player->get_equipped_item(EquipmentSlot::LEFT_HAND);
+		Player* player = static_cast<Player*>(&wearer);
 		
-		// Get weapon sizes (need to map from Pickable* to weapon data)
-		WeaponSize currentWeaponSize = get_weapon_size();
+		// Determine weapon type using the existing Pickable type system
+		PickableType weaponType = owner.pickable->get_type();
 		
-		// If right hand is empty, equip there by default
-		if (!rightHandWeapon)
+		if (weaponType == PickableType::SHIELD)
 		{
-			targetSlot = EquipmentSlot::RIGHT_HAND;
-		}
-		// If left hand is empty and player wants to dual-wield
-		else if (!leftHandWeapon)
-		{
-			// Check if this weapon can be off-hand
-			if (can_be_off_hand(currentWeaponSize))
-			{
-				// Ask player which hand to use
-				game.message(WHITE_BLACK_PAIR, "Equip in: (R)ight hand, (L)eft hand (off-hand), or (C)ancel?", true);
-				int choice = getch();
-				
-				switch (choice)
-				{
-				case 'r': case 'R':
-					// Unequip current right hand weapon first
-					if (rightHandWeapon)
-					{
-						player->unequip_item(EquipmentSlot::RIGHT_HAND);
-						game.message(WHITE_BLACK_PAIR, "You unequip your main hand weapon.", true);
-					}
-					targetSlot = EquipmentSlot::RIGHT_HAND;
-					break;
-				case 'l': case 'L':
-					// Validate dual-wield compatibility
-					if (validate_dual_wield(rightHandWeapon, &owner))
-					{
-						targetSlot = EquipmentSlot::LEFT_HAND;
-						game.message(WHITE_BLACK_PAIR, "Dual-wielding setup!", true);
-					}
-					else
-					{
-						game.message(WHITE_BLACK_PAIR, "Cannot dual-wield: Off-hand weapon must be smaller than main hand.", true);
-						return false;
-					}
-					break;
-				case 'c': case 'C':
-					game.message(WHITE_BLACK_PAIR, "Equipping cancelled.", true);
-					return false;
-				default:
-					game.message(WHITE_BLACK_PAIR, "Invalid choice. Equipping in right hand.", true);
-					targetSlot = EquipmentSlot::RIGHT_HAND;
-					break;
-				}
-			}
-			else
-			{
-				// Weapon too large for off-hand, replace main hand
-				if (rightHandWeapon)
-				{
-					player->unequip_item(EquipmentSlot::RIGHT_HAND);
-					game.message(WHITE_BLACK_PAIR, "You unequip your main hand weapon.", true);
-				}
-				targetSlot = EquipmentSlot::RIGHT_HAND;
-			}
-		}
-		// Both hands occupied
-		else
-		{
-			game.message(WHITE_BLACK_PAIR, "Both hands occupied. Which to replace: (R)ight hand or (L)eft hand?", true);
-			int choice = getch();
+			bool wasEquipped = player->is_item_equipped(owner.uniqueId);
+			bool success = player->toggle_shield(owner.uniqueId);
 			
-			switch (choice)
+			if (success)
 			{
-			case 'r': case 'R':
-				player->unequip_item(EquipmentSlot::RIGHT_HAND);
-				targetSlot = EquipmentSlot::RIGHT_HAND;
-				break;
-			case 'l': case 'L':
-				// Validate if this weapon can be off-hand
-				if (validate_dual_wield(rightHandWeapon, &owner))
+				if (wasEquipped)
 				{
-					player->unequip_item(EquipmentSlot::LEFT_HAND);
-					targetSlot = EquipmentSlot::LEFT_HAND;
+					game.message(WHITE_BLACK_PAIR, "You unequip the " + weaponName + ".", true);
 				}
 				else
 				{
-					game.message(WHITE_BLACK_PAIR, "Cannot use as off-hand weapon.", true);
-					return false;
-				}
-				break;
-			default:
-				game.message(WHITE_BLACK_PAIR, "Invalid choice.", true);
-				return false;
-			}
-		}
-	}
-
-	// Check if we can equip in the target slot
-	if (!player->can_equip(owner, targetSlot))
-	{
-		game.message(WHITE_BLACK_PAIR, "Cannot equip " + owner.actorData.name + " - slot is occupied!", true);
-		return false; // Don't consume turn if can't equip
-	}
-
-	// Remove the item from inventory and equip it
-	auto compareItems = [&owner](const std::unique_ptr<Item>& item) { return item.get() == &owner; };
-	auto it = std::find_if(wearer.container->get_inventory_mutable().begin(), wearer.container->get_inventory_mutable().end(), compareItems);
-	
-	if (it != wearer.container->get_inventory_mutable().end())
-	{
-		// Move item from inventory to equipment
-		std::unique_ptr<Item> item = std::move(*it);
-		wearer.container->get_inventory_mutable().erase(it);
-		
-		// Equip the item in the new equipment system
-		if (player->equip_item(std::move(item), targetSlot))
-		{
-			// Update combat stats
-			if (targetSlot == EquipmentSlot::RIGHT_HAND)
-			{
-				wearer.attacker->roll = this->roll;
-				
-				// Apply ranged state if applicable
-				if (is_ranged())
-				{
-					wearer.add_state(ActorState::IS_RANGED);
+					game.message(WHITE_BLACK_PAIR, "You equip the " + weaponName + ".", true);
 				}
 			}
-			
-			game.message(WHITE_BLACK_PAIR, "You equip the " + owner.actorData.name + ".", true);
-			return true;
+			return success;
 		}
 		else
 		{
-			// If equipping failed, return item to inventory
-			wearer.container->add(std::move(item));
+			// Regular weapon
+			bool wasEquipped = player->is_item_equipped(owner.uniqueId);
+			bool success = player->toggle_weapon(owner.uniqueId);
+			
+			if (success)
+			{
+				if (wasEquipped)
+				{
+					game.message(WHITE_BLACK_PAIR, "You unequip the " + weaponName + ".", true);
+					
+					// Remove ranged state if applicable
+					if (is_ranged())
+					{
+						wearer.remove_state(ActorState::IS_RANGED);
+					}
+				}
+				else
+				{
+					game.message(WHITE_BLACK_PAIR, "You equip the " + weaponName + ".", true);
+					
+					// Apply ranged state if applicable
+					if (is_ranged())
+					{
+						wearer.add_state(ActorState::IS_RANGED);
+					}
+					
+					// Update attack roll if equipped in main hand
+					Item* mainHandItem = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+					if (mainHandItem && mainHandItem->uniqueId == owner.uniqueId)
+					{
+						wearer.attacker->roll = this->roll;
+					}
+				}
+			}
+			return success;
 		}
 	}
-
-	return false;
+	
+	// For NPCs, use simple stat modification
+	return Pickable::use(owner, wearer);
 }
 
 // Implement the Dagger class

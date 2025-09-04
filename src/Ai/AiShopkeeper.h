@@ -18,6 +18,8 @@ private:
 	bool tradeMenuOpen = false; // Prevents multiple trade menu opens
 	bool hasApproachedPlayer = false; // Shopkeeper only approaches player once
 	void update(Creature& owner) override;
+	// Shopkeepers are non-hostile - replaces dynamic_cast detection
+	bool is_hostile() const override { return false; }
 	void load(const json& j) override;
 	void save(json& j) override;
 	int calculate_step(int positionDifference);

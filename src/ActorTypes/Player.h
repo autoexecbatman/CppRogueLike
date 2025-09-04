@@ -80,9 +80,6 @@ public:
 
 	void consume_food(int nutrition);
 
-	std::string get_weapon_equipped() const noexcept { return weaponEquipped; }
-	void set_weapon_equipped(std::string weapon) noexcept { weaponEquipped = weapon; }
-
 	void render() const noexcept;
 	bool rest();
 	void animate_resting();
@@ -104,6 +101,12 @@ public:
 	bool is_slot_occupied(EquipmentSlot slot) const;
 	bool is_dual_wielding() const;
 	std::string get_equipped_weapon_damage_roll() const;
+	
+	// Equipment system - unique ID based methods
+	bool toggle_armor(uint32_t item_unique_id);
+	bool is_item_equipped(uint32_t item_unique_id) const;
+	bool toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot = EquipmentSlot::RIGHT_HAND);
+	bool toggle_shield(uint32_t item_unique_id);
 	
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo

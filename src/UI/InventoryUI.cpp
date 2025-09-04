@@ -18,7 +18,11 @@ InventoryUI::~InventoryUI()
 
 void InventoryUI::display(Creature& owner)
 {
-    auto* player = dynamic_cast<Player*>(&owner);
+    // Use type-safe approach instead of dynamic_cast
+    Player* player = nullptr;
+    if (owner.actorData.ch == '@' && owner.actorData.name == "Player") {
+        player = static_cast<Player*>(&owner);
+    }
     
     while (true)
     {
@@ -100,12 +104,15 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner
         }
     }
     
-    // Add regular inventory items
-    for (const auto& item : game.container->get_inventory_mutable())
+    // Add regular inventory items from player's backpack
+    if (player)
     {
-        if (item)
+        for (const auto& item : player->container->get_inventory())
         {
-            allItems.emplace_back(item.get(), false);
+            if (item)
+            {
+                allItems.emplace_back(item.get(), false);
+            }
         }
     }
     
@@ -177,67 +184,66 @@ void InventoryUI::show_item_info(Item* item, int y)
 
 void InventoryUI::display_equipment_slots(Player* player)
 {
-if (!player) return;
+    if (!player) return;
 
-int y = 2;
+    int y = 2;
 
-// Display all equipment slots ADOM-style
-struct SlotInfo
-{
- EquipmentSlot slot;
- const char* name;
-char shortcut;
-};
+    // Display all equipment slots ADOM-style
+    struct SlotInfo
+    {
+        EquipmentSlot slot;
+        const char* name;
+        char shortcut;
+    };
 
-const SlotInfo slots[] = 
-{
-{EquipmentSlot::HEAD, "Head", 'H'},
-{EquipmentSlot::NECK, "Neck", 'N'},
-{EquipmentSlot::BODY, "Body", 'B'},
-{EquipmentSlot::GIRDLE, "Girdle", 'G'},
-{EquipmentSlot::CLOAK, "Cloak", 'C'},
-{EquipmentSlot::RIGHT_HAND, "Right Hand", 'R'},
-{EquipmentSlot::LEFT_HAND, "Left Hand", 'L'},
-{EquipmentSlot::RIGHT_RING, "Right Ring", ')'},
-{EquipmentSlot::LEFT_RING, "Left Ring", '('},
- {EquipmentSlot::BRACERS, "Bracers", '['},
- {EquipmentSlot::GAUNTLETS, "Gauntlets", ']'},
- {EquipmentSlot::BOOTS, "Boots", 'F'},
-{EquipmentSlot::MISSILE_WEAPON, "Missile Weapon", 'M'},
- {EquipmentSlot::MISSILES, "Missiles", 'A'},
- {EquipmentSlot::TOOL, "Tool", 'T'}
-};
+    const SlotInfo slots[] = 
+    {
+        {EquipmentSlot::HEAD, "Head", 'H'},
+        {EquipmentSlot::NECK, "Neck", 'N'},
+        {EquipmentSlot::BODY, "Body", 'B'},
+        {EquipmentSlot::GIRDLE, "Girdle", 'G'},
+        {EquipmentSlot::CLOAK, "Cloak", 'C'},
+        {EquipmentSlot::RIGHT_HAND, "Right Hand", 'R'},
+        {EquipmentSlot::LEFT_HAND, "Left Hand", 'L'},
+        {EquipmentSlot::RIGHT_RING, "Right Ring", ')'},
+        {EquipmentSlot::LEFT_RING, "Left Ring", '('},
+        {EquipmentSlot::BRACERS, "Bracers", '['},
+        {EquipmentSlot::GAUNTLETS, "Gauntlets", ']'},
+        {EquipmentSlot::BOOTS, "Boots", 'F'},
+        {EquipmentSlot::MISSILE_WEAPON, "Missile Weapon", 'M'},
+        {EquipmentSlot::MISSILES, "Missiles", 'A'},
+        {EquipmentSlot::TOOL, "Tool", 'T'}
+    };
 
-for (const auto& slotInfo : slots)
-{
- // Display slot name with shortcut
- mvwprintw(equipmentWindow, y, 2, "%c - %-15s: ", slotInfo.shortcut, slotInfo.name);
+    for (const auto& slotInfo : slots)
+    {
+        // Display slot name with shortcut
+        mvwprintw(equipmentWindow, y, 2, "%c - %-15s: ", slotInfo.shortcut, slotInfo.name);
 
-// Get equipped item in this slot
-Item* equippedItem = player->get_equipped_item(slotInfo.slot);
-if (equippedItem)
- {
-  // Display equipped item
-  wattron(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
- wprintw(equipmentWindow, "%s", equippedItem->actorData.name.c_str());
-  wattroff(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
-  
-  // Show value if applicable
-  if (equippedItem->value > 0)
-  {
-   wattron(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
-   wprintw(equipmentWindow, " (%d gp)", equippedItem->value);
-   wattroff(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
- }
-}
-else
-{
-  // Empty slot
-  mvwprintw(equipmentWindow, y, 20, "- empty -");
- }
+        // Get equipped item in this slot
+        Item* equippedItem = player->get_equipped_item(slotInfo.slot);
+        if (equippedItem)
+        {
+            // Display equipped item
+            wattron(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
+            wprintw(equipmentWindow, "%s", equippedItem->actorData.name.c_str());
+            wattroff(equipmentWindow, COLOR_PAIR(equippedItem->actorData.color));
 
- y++;
-	}
+            // Show value if applicable
+            if (equippedItem->value > 0)
+            {
+                wattron(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
+                wprintw(equipmentWindow, " (%d gp)", equippedItem->value);
+                wattroff(equipmentWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
+            }
+        }
+        else
+        {
+            // Empty slot
+            mvwprintw(equipmentWindow, y, 20, "- empty -");
+        }
+        y++;
+    }
 }
 
 void InventoryUI::display_instructions()
@@ -283,7 +289,9 @@ bool InventoryUI::handle_inventory_input(Creature& owner, Player* player)
 
 bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int itemIndex)
 {
-    const auto& backpackItems = game.container->get_inventory_mutable();
+    if (!player) return true;
+    
+    const auto& backpackItems = player->container->get_inventory();
     
     if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
     {
@@ -303,7 +311,7 @@ bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
-                for (const auto& item : game.container->get_inventory_mutable())
+                for (const auto& item : player->container->get_inventory())
                 {
                     if (item.get() == itemPtr)
                     {

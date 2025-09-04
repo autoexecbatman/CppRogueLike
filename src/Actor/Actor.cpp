@@ -20,12 +20,15 @@
 #include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Armor.h"
+#include "../Utils/ItemTypeUtils.h"
+#include "../Utils/PickableTypeRegistry.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
 	:
 	position(position),
-	actorData(data)
+	actorData(data),
+	uniqueId(UniqueId::Generator::generate())
 {}
 
 //====
@@ -38,6 +41,16 @@ void Actor::load(const json& j)
 	actorData.ch = j["actorData"].at("ch").get<char>();
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = j["actorData"].at("color").get<int>();
+	
+	// Load unique ID (generate new one if missing for backward compatibility)
+	if (j.contains("uniqueId"))
+	{
+		uniqueId = j["uniqueId"].get<UniqueId::IdType>();
+	}
+	else
+	{
+		uniqueId = UniqueId::Generator::generate();
+	}
 
 	// Deserialize vector of states
 	for (const auto& state : j["states"])
@@ -55,6 +68,7 @@ void Actor::save(json& j)
 		{"name", actorData.name},
 		{"color", actorData.color}
 	};
+	j["uniqueId"] = uniqueId;
 
 	// Serialize vector of states
 	json statesJson;
@@ -176,8 +190,9 @@ void Creature::update()
 
 void Creature::equip(Item& item)
 {
-	bool isArmor = item.pickable && dynamic_cast<Armor*>(item.pickable.get());
-	bool isWeapon = item.pickable && dynamic_cast<Weapon*>(item.pickable.get());
+	auto itemType = PickableTypeRegistry::get_item_type(item);
+	bool isArmor = PickableTypeRegistry::is_armor(itemType);
+	bool isWeapon = PickableTypeRegistry::is_weapon(itemType);
 
 	// First check if any equipment of the same type is already equipped
 	std::vector<Item*> equippedItems;
@@ -187,8 +202,9 @@ void Creature::equip(Item& item)
 	{
 		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
 		{
-			bool itemIsArmor = inv_item->pickable && dynamic_cast<Armor*>(inv_item->pickable.get());
-			bool itemIsWeapon = inv_item->pickable && dynamic_cast<Weapon*>(inv_item->pickable.get());
+			auto invItemType = PickableTypeRegistry::get_item_type(*inv_item);
+			bool itemIsArmor = PickableTypeRegistry::is_armor(invItemType);
+			bool itemIsWeapon = PickableTypeRegistry::is_weapon(invItemType);
 
 			// Only consider same-type equipment for unequipping
 			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon))
@@ -213,7 +229,7 @@ void Creature::equip(Item& item)
 	// Update weapon equipped name if it's a weapon
 	if (isWeapon)
 	{
-		weaponEquipped = item.actorData.name;
+		weaponEquipped = PickableTypeRegistry::get_display_name(itemType);
 	}
 }
 
@@ -226,19 +242,19 @@ void Creature::unequip(Item& item)
 		item.remove_state(ActorState::IS_EQUIPPED);
 
 		// If it's a weapon, update the weaponEquipped status
-		if (item.pickable && dynamic_cast<Weapon*>(item.pickable.get()))
+		auto itemType = PickableTypeRegistry::get_item_type(item);
+		if (PickableTypeRegistry::is_weapon(itemType))
 		{
 			weaponEquipped = "None";
 
 			// Check for ranged weapon
-			auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
-			if (weapon && weapon->is_ranged())
+			if (PickableTypeRegistry::is_ranged_weapon(itemType))
 			{
 				// Remove the ranged state
 				if (has_state(ActorState::IS_RANGED))
 				{
 					remove_state(ActorState::IS_RANGED);
-					game.log("Removed IS_RANGED state after unequipping " + item.actorData.name);
+					game.log("Removed IS_RANGED state after unequipping " + PickableTypeRegistry::get_display_name(itemType));
 				}
 			}
 		}
@@ -249,8 +265,8 @@ void Creature::unequip(Item& item)
 		{
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
 			{
-				auto* weapon = dynamic_cast<Weapon*>(invItem->pickable.get());
-				if (weapon && weapon->is_ranged())
+				auto invItemType = PickableTypeRegistry::get_item_type(*invItem);
+				if (PickableTypeRegistry::is_ranged_weapon(invItemType))
 				{
 					hasRangedWeapon = true;
 					break;
@@ -275,8 +291,8 @@ void Creature::syncRangedState()
 	{
 		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
 		{
-			auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
-			if (weapon && weapon->is_ranged())
+			auto itemType = PickableTypeRegistry::get_item_type(*item);
+			if (PickableTypeRegistry::is_ranged_weapon(itemType))
 			{
 				hasRangedWeapon = true;
 				break;
@@ -313,30 +329,28 @@ void Creature::pick()
 		{
 			if (position == i->position)
 			{
-				// Check if item is gold
-				if (i->actorData.name == "gold pile")
+				// Check if item is gold using type registry
+				auto itemType = PickableTypeRegistry::get_item_type(*i);
+				if (PickableTypeRegistry::is_gold(itemType))
 				{
-					// Cast to access the gold amount
-					auto goldItem = dynamic_cast<GoldPile*>(i.get());
-					if (goldItem && goldItem->pickable)
+					// Get the gold amount - we know it's gold so safe to cast
+					auto goldPickable = static_cast<Gold*>(i->pickable.get());
+					if (goldPickable)
 					{
-						// Get the gold amount and add to player's gold
-						auto goldPickable = dynamic_cast<Gold*>(goldItem->pickable.get());
-						if (goldPickable)
-						{
-							gold += goldPickable->amount;
-							game.message(YELLOW_BLACK_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
-							i.reset(); // Remove the gold pile from the map
-							std::erase_if(game.container->get_inventory_mutable(), is_null);
-							return;
-						}
+						gold += goldPickable->amount;
+						game.message(YELLOW_BLACK_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
+						i.reset(); // Remove the gold pile from the map
+						std::erase_if(game.container->get_inventory_mutable(), is_null);
+						return;
 					}
 				}
 
 				// Normal item handling
+				// Store item name before moving since move invalidates the pointer
+				const std::string itemName = i->actorData.name;
 				if (container->add(std::move(i)))
 				{
-					game.message(WHITE_BLACK_PAIR, "You picked up the " + i->actorData.name + ".", true);
+					game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 					std::erase_if(game.container->get_inventory_mutable(), is_null);
 				}
 				// We don't need an else for failed add since Container::add() now handles the message

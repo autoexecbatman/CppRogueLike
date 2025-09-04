@@ -9,6 +9,7 @@
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
+#include "../Utils/ItemTypeUtils.h"
 
 void equip_fighter_starting_gear()
 {
@@ -25,13 +26,33 @@ void equip_fighter_starting_gear()
 	
 	// Generous starting equipment for solo play
 	
-	// PLATE MAIL (AC 3) - Auto-equipped
-	player.container->add(ItemCreator::create_plate_mail(player.position));
-	player.container->get_inventory_mutable().back()->add_state(ActorState::IS_EQUIPPED);
-	
-	// LONG SWORD (1d8) - Auto-equipped
-	player.container->add(ItemCreator::create_long_sword(player.position));
-	player.container->get_inventory_mutable().back()->add_state(ActorState::IS_EQUIPPED);
+	// PLATE MAIL (AC 3) - Add to inventory
+	auto plate_mail = ItemCreator::create_plate_mail(player.position);
+	auto plate_mail_id = plate_mail->uniqueId; // Store ID before moving
+	auto plate_mail_result = player.container->add(std::move(plate_mail));
+	if (plate_mail_result)
+	{
+		// Find plate mail by unique ID and equip it
+		auto item_to_equip = ItemTypeUtils::extract_item_by_id(*player.container, plate_mail_id);
+		if (item_to_equip)
+		{
+			player.equip_item(std::move(item_to_equip), EquipmentSlot::BODY);
+		}
+	}
+
+	// LONG SWORD (1d8) - Add to inventory  
+	auto long_sword = ItemCreator::create_long_sword(player.position);
+	auto long_sword_id = long_sword->uniqueId; // Store ID before moving
+	auto sword_result = player.container->add(std::move(long_sword));
+	if (sword_result)
+	{
+		// Find long sword by unique ID and equip it
+		auto item_to_equip = ItemTypeUtils::extract_item_by_id(*player.container, long_sword_id);
+		if (item_to_equip)
+		{
+			player.equip_item(std::move(item_to_equip), EquipmentSlot::RIGHT_HAND);
+		}
+	}
 	
 	// Update fighter combat stats
 	player.weaponEquipped = "Long Sword";

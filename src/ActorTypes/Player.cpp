@@ -13,6 +13,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Items/Items.h"
 #include "../Items/Armor.h"
+#include "../Utils/PickableTypeRegistry.h"
 #include "../Ai/AiShopkeeper.h"
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
@@ -190,8 +191,8 @@ bool Player::rest()
 				continue;
 			}
 
-			// Skip shopkeepers - they're not hostile
-			if (dynamic_cast<AiShopkeeper*>(creature->ai.get()))
+			// Skip non-hostile creatures (shopkeepers, etc.)
+			if (creature->ai && !creature->ai->is_hostile())
 			{
 				continue;
 			}
@@ -346,6 +347,78 @@ bool Player::try_break_web()
 	return false;
 }
 
+// Clean Weapon Equipment System using Unique IDs
+bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot)
+{
+	// Check if weapon is already equipped
+	if (is_item_equipped(item_unique_id))
+	{
+		// Find which slot and unequip
+		for (auto slot : {EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON})
+		{
+			Item* equipped = get_equipped_item(slot);
+			if (equipped && equipped->uniqueId == item_unique_id)
+			{
+				return unequip_item(slot);
+			}
+		}
+	}
+	else
+	{
+		// Find item in inventory and equip it
+		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		{
+			if ((*it)->uniqueId == item_unique_id)
+			{
+				// Move item from inventory to equipment
+				auto itemToEquip = std::move(*it);
+				container->get_inventory_mutable().erase(it);
+				
+				// Determine appropriate slot based on weapon type
+				auto itemType = PickableTypeRegistry::get_item_type(*itemToEquip);
+				EquipmentSlot target_slot;
+				
+				if (itemType == PickableTypeRegistry::Type::LONGBOW)
+				{
+					target_slot = EquipmentSlot::MISSILE_WEAPON;
+				}
+				else
+				{
+					target_slot = preferred_slot;
+				}
+				
+				return equip_item(std::move(itemToEquip), target_slot);
+			}
+		}
+	}
+	return false;
+}
+
+bool Player::toggle_shield(uint32_t item_unique_id)
+{
+	// Shields always go in LEFT_HAND slot
+	if (is_item_equipped(item_unique_id))
+	{
+		return unequip_item(EquipmentSlot::LEFT_HAND);
+	}
+	else
+	{
+		// Find item in inventory and equip it
+		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		{
+			if ((*it)->uniqueId == item_unique_id)
+			{
+				// Move item from inventory to equipment
+				auto itemToEquip = std::move(*it);
+				container->get_inventory_mutable().erase(it);
+				
+				return equip_item(std::move(itemToEquip), EquipmentSlot::LEFT_HAND);
+			}
+		}
+		return false;
+	}
+}
+
 bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
 	if (!item || !can_equip(*item, slot))
@@ -356,18 +429,15 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	// Unequip existing item in the slot first
 	unequip_item(slot);
 	
-	// Special handling for two-handed weapons
+	// Special handling for two-handed weapons - use type registry
 	if (slot == EquipmentSlot::RIGHT_HAND)
 	{
-		auto* weapon = dynamic_cast<Weapon*>(item->pickable.get());
-		if (weapon)
+		auto itemType = PickableTypeRegistry::get_item_type(*item);
+		if (itemType == PickableTypeRegistry::Type::GREATSWORD || itemType == PickableTypeRegistry::Type::GREAT_AXE || itemType == PickableTypeRegistry::Type::LONGBOW)
 		{
-			if (weapon->is_two_handed())
-			{
-				// Two-handed weapon - also unequip left hand
-				unequip_item(EquipmentSlot::LEFT_HAND);
-				game.message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
-			}
+			// Two-handed weapon - also unequip left hand
+			unequip_item(EquipmentSlot::LEFT_HAND);
+			game.message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
 		}
 	}
 
@@ -408,20 +478,21 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 	case EquipmentSlot::RIGHT_HAND:
 	case EquipmentSlot::LEFT_HAND:
 	{
-		// Hand slots can hold weapons or shields
-		auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
-		auto* shield = dynamic_cast<Shield*>(item.pickable.get());
+		// Hand slots can hold weapons or shields - use type registry
+		auto itemType = PickableTypeRegistry::get_item_type(item);
+		bool isWeapon = PickableTypeRegistry::is_weapon(itemType);
+		bool isShield = (itemType == PickableTypeRegistry::Type::SHIELD);
 		
-		if (!weapon && !shield)
+		if (!isWeapon && !isShield)
 		{
 			return false; // Not a weapon or shield
 		}
 		
 		// Check for two-handed weapon restrictions
-		if (weapon)
+		if (isWeapon)
 		{
-			// Two-handed weapons can only go in RIGHT_HAND and require both hands free
-			if (weapon->is_two_handed())
+			// Two-handed weapons can only go in RIGHT_HAND
+			if (itemType == PickableTypeRegistry::Type::GREATSWORD || itemType == PickableTypeRegistry::Type::GREAT_AXE || itemType == PickableTypeRegistry::Type::LONGBOW)
 			{
 				if (slot != EquipmentSlot::RIGHT_HAND)
 				{
@@ -435,17 +506,24 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 				auto* rightHandItem = get_equipped_item(EquipmentSlot::RIGHT_HAND);
 				if (rightHandItem)
 				{
-					auto* rightHandWeapon = dynamic_cast<Weapon*>(rightHandItem->pickable.get());
-					if (rightHandWeapon && rightHandWeapon->is_two_handed())
+					auto rightType = PickableTypeRegistry::get_item_type(*rightHandItem);
+					if (rightType == PickableTypeRegistry::Type::GREATSWORD || rightType == PickableTypeRegistry::Type::GREAT_AXE || rightType == PickableTypeRegistry::Type::LONGBOW)
 					{
 						return false; // Can't equip anything in left hand when two-handed weapon equipped
 					}
+				}
+				
+				// Check if this weapon can be used in off-hand (must be TINY or SMALL)
+				auto weaponSize = PickableTypeRegistry::get_weapon_size(itemType);
+				if (weaponSize > WeaponSize::SMALL)
+				{
+					return false; // Weapon too large for off-hand
 				}
 			}
 		}
 		
 		// Shields can only go in left hand
-		if (shield && slot != EquipmentSlot::LEFT_HAND)
+		if (isShield && slot != EquipmentSlot::LEFT_HAND)
 		{
 			return false;
 		}
@@ -454,9 +532,9 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 	}
 	case EquipmentSlot::BODY:
 	{
-		// Body slot can only hold armor
-		auto* armor = dynamic_cast<Armor*>(item.pickable.get());
-		if (!armor)
+		// Body slot can only hold armor - use type registry
+		auto itemType = PickableTypeRegistry::get_item_type(item);
+		if (!PickableTypeRegistry::is_armor(itemType))
 		{
 			return false;
 		}
@@ -464,9 +542,9 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const
 	}
 	case EquipmentSlot::MISSILE_WEAPON:
 	{
-		// Missile weapon slot can only hold ranged weapons
-		auto* weapon = dynamic_cast<Weapon*>(item.pickable.get());
-		if (!weapon || !weapon->is_ranged())
+		// Missile weapon slot can only hold ranged weapons - use type registry
+		auto itemType = PickableTypeRegistry::get_item_type(item);
+		if (!PickableTypeRegistry::is_ranged_weapon(itemType))
 		{
 			return false;
 		}
@@ -541,14 +619,15 @@ bool Player::is_dual_wielding() const
 		return false;
 	}
 	
-	// Check if left hand item is a weapon (not a shield)
-	if (dynamic_cast<Shield*>(leftHand->pickable.get()))
+	// Check if left hand item is a weapon (not a shield) - use type registry
+	auto leftType = PickableTypeRegistry::get_item_type(*leftHand);
+	if (leftType == PickableTypeRegistry::Type::SHIELD)
 	{
 		return false; // Shield, not dual wielding
 	}
 	
 	// Check if left hand item is a weapon
-	if (dynamic_cast<Weapon*>(leftHand->pickable.get()))
+	if (PickableTypeRegistry::is_weapon(leftType))
 	{
 		return true; // Both hands have weapons
 	}
@@ -564,10 +643,15 @@ std::string Player::get_equipped_weapon_damage_roll() const
 		return "D2"; // Unarmed damage
 	}
 	
-	// Get damage roll from the weapon's roll property directly
-	if (auto* weapon = dynamic_cast<Weapon*>(rightHandWeapon->pickable.get()))
+	// Get damage roll from the weapon's roll property - use type registry
+	auto weaponType = PickableTypeRegistry::get_item_type(*rightHandWeapon);
+	if (PickableTypeRegistry::is_weapon(weaponType))
 	{
-		return weapon->roll; // All weapons have a roll property
+		// Access weapon roll through pickable interface - weapons are all Weapon subclasses
+		if (auto* weapon = static_cast<Weapon*>(rightHandWeapon->pickable.get()))
+		{
+			return weapon->roll; // All weapons have a roll property
+		}
 	}
 	
 	return "D2"; // Fallback for non-weapons
@@ -595,18 +679,61 @@ Player::DualWieldInfo Player::get_dual_wield_info() const
 	// - Main hand penalty becomes 0
 	// - Off-hand penalty becomes -2
 	
-	// Get off-hand weapon damage roll using extensible approach
+	// Get off-hand weapon damage roll - use type registry
 	auto leftHandWeapon = get_equipped_item(EquipmentSlot::LEFT_HAND);
 	if (leftHandWeapon)
 	{
-		// Use the weapon's roll property directly
-		if (auto* weapon = dynamic_cast<Weapon*>(leftHandWeapon->pickable.get()))
+		// Verify it's a weapon using type registry, then access roll property
+		auto leftType = PickableTypeRegistry::get_item_type(*leftHandWeapon);
+		if (PickableTypeRegistry::is_weapon(leftType))
 		{
-			info.offHandDamageRoll = weapon->roll;
+			if (auto* weapon = static_cast<Weapon*>(leftHandWeapon->pickable.get()))
+			{
+				info.offHandDamageRoll = weapon->roll;
+			}
 		}
 	}
 	
 	return info;
+}
+
+// Clean Equipment System using Unique IDs
+bool Player::toggle_armor(uint32_t item_unique_id)
+{
+	// Check if item is already equipped
+	if (is_item_equipped(item_unique_id))
+	{
+		// Unequip the armor
+		return unequip_item(EquipmentSlot::BODY);
+	}
+	else
+	{
+		// Find item in inventory and equip it
+		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		{
+			if ((*it)->uniqueId == item_unique_id)
+			{
+				// Move item from inventory to equipment
+				auto itemToEquip = std::move(*it);
+				container->get_inventory_mutable().erase(it);
+				
+				return equip_item(std::move(itemToEquip), EquipmentSlot::BODY);
+			}
+		}
+		return false; // Item not found in inventory
+	}
+}
+
+bool Player::is_item_equipped(uint32_t item_unique_id) const
+{
+	for (const auto& equipped : equippedItems)
+	{
+		if (equipped.item->uniqueId == item_unique_id)
+		{
+			return true;
+		}
+	}
+	return false;
 }
 
 // end of file: Player.cpp

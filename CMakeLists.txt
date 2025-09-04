@@ -231,6 +231,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.cpp
     ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.h
     ${PROJECT_SOURCE_DIR}/Utils/Vector2D.h
+    ${PROJECT_SOURCE_DIR}/Utils/ItemTypeUtils.cpp
+    ${PROJECT_SOURCE_DIR}/Utils/ItemTypeUtils.h
+    ${PROJECT_SOURCE_DIR}/Utils/UniqueId.cpp
+    ${PROJECT_SOURCE_DIR}/Utils/UniqueId.h
+    ${PROJECT_SOURCE_DIR}/Utils/PickableTypeRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/Utils/PickableTypeRegistry.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp

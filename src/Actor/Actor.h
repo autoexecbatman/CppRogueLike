@@ -12,6 +12,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Ai/Ai.h"
 #include "../Attributes/StrengthAttributes.h"
+#include "../Utils/UniqueId.h"
 
 #include "Attacker.h"
 #include "Destructible.h"
@@ -46,6 +47,7 @@ public:
 	Vector2D position{ 0,0 };
 	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
+	UniqueId::IdType uniqueId;
 
 	std::vector<ActorState> states;
 	// C++ Core Guidelines F.6: noexcept for simple state operations

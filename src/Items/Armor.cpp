@@ -2,75 +2,58 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Player.h"
+#include "../Utils/PickableTypeRegistry.h"
 
-// Common armor equip/unequip logic
-bool Armor::use(Item& owner, Creature& wearer)
+// Clean armor equip/unequip logic - delegates to Equipment System
+bool Armor::use(Item& item, Creature& wearer)
 {
-	// Cast to Player to use the equipment system
-	auto* player = dynamic_cast<Player*>(&wearer);
-	if (!player)
+	auto itemType = PickableTypeRegistry::get_item_type(item);
+	std::string armorName = PickableTypeRegistry::get_display_name(itemType);
+	
+	// For players, delegate to Equipment System using unique IDs
+	if (wearer.uniqueId == game.player->uniqueId)
 	{
-		// Fallback for non-player creatures (use old system)
-		if (owner.has_state(ActorState::IS_EQUIPPED))
+		Player* player = static_cast<Player*>(&wearer);
+		
+		// Clean delegation using unique ID
+		bool wasEquipped = player->is_item_equipped(item.uniqueId);
+		bool success = player->toggle_armor(item.uniqueId);
+		
+		if (success)
 		{
-			owner.remove_state(ActorState::IS_EQUIPPED);
-			game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
-			wearer.destructible->update_armor_class(wearer);
-			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
-			return true;
+			if (wasEquipped)
+			{
+				game.message(WHITE_BLACK_PAIR, "You remove the " + armorName + ".", true);
+			}
+			else
+			{
+				game.message(WHITE_BLACK_PAIR, "You put on the " + armorName + ".", true);
+			}
 		}
 		
-		// Old equip logic for non-players
+		return success;
+	}
+	
+	// For NPCs, use simple stat modification
+	apply_stat_effects(wearer, item);
+	return true;
+}
+
+// Pure stat effects for NPCs - no inventory management
+void Armor::apply_stat_effects(Creature& creature, Item& owner)
+{
+	if (owner.has_state(ActorState::IS_EQUIPPED))
+	{
+		// Remove armor effects
+		owner.remove_state(ActorState::IS_EQUIPPED);
+		creature.destructible->update_armor_class(creature);
+	}
+	else
+	{
+		// Apply armor effects
 		owner.add_state(ActorState::IS_EQUIPPED);
-		game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
-		wearer.destructible->update_armor_class(wearer);
-		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(wearer.destructible->armorClass) + ".", true);
-		return true;
+		creature.destructible->update_armor_class(creature);
 	}
-	
-	// For players, use the new equipment system
-	// Check if this armor is already equipped
-	Item* currentArmor = player->get_equipped_item(EquipmentSlot::BODY);
-	if (currentArmor == &owner)
-	{
-		// Unequip this armor - the unequipItem method handles AC update and messaging
-		player->unequip_item(EquipmentSlot::BODY);
-		game.message(WHITE_BLACK_PAIR, "You remove the " + owner.actorData.name + ".", true);
-		return true;
-	}
-	
-	// Try to equip the armor
-	// First, find this item in the inventory
-	std::unique_ptr<Item> itemToEquip = nullptr;
-	for (auto it = wearer.container->get_inventory_mutable().begin(); it != wearer.container->get_inventory_mutable().end(); ++it)
-	{
-		if (it->get() == &owner)
-		{
-			itemToEquip = std::move(*it);
-			wearer.container->get_inventory_mutable().erase(it);
-			break;
-		}
-	}
-	
-	if (itemToEquip)
-	{
-		// Equip the armor using the equipment system - equipItem handles AC update and messaging
-		if (player->equip_item(std::move(itemToEquip), EquipmentSlot::BODY))
-		{
-			game.message(WHITE_BLACK_PAIR, "You put on the " + owner.actorData.name + ".", true);
-			return true;
-		}
-		else
-		{
-			// Failed to equip, return item to inventory
-			wearer.container->get_inventory_mutable().push_back(std::move(itemToEquip));
-			game.message(WHITE_BLACK_PAIR, "You can't equip the " + owner.actorData.name + ".", true);
-			return false;
-		}
-	}
-	
-	game.message(WHITE_BLACK_PAIR, "Failed to equip armor.", true);
-	return false;
 }
 
 // LeatherArmor implementation

@@ -18,6 +18,9 @@ public:
 
 	virtual void update(Creature& owner) = 0;
 
+	// Type-safe hostility check - replaces dynamic_cast usage
+	virtual bool is_hostile() const { return true; } // Most AI types are hostile by default
+
 	static std::unique_ptr<Ai> create(const json& j);
 
 	int calculate_step(int positionDifference); // utility 

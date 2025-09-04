@@ -16,14 +16,6 @@ class Item;
 class Pickable : public Persistent
 {
 public:
-	virtual ~Pickable() {};
-
-	virtual bool use(Item& owner, Creature& wearer);
-	static std::unique_ptr<Pickable> create(const json& j);
-	virtual void save(json& j) = 0;
-	virtual void load(const json& j) = 0;
-
-protected:
 	enum class PickableType : int
 	{
 		HEALER,
@@ -49,6 +41,12 @@ protected:
 		PLATE_MAIL
 	};
 
+	virtual ~Pickable() {};
+
+	virtual bool use(Item& owner, Creature& wearer);
+	static std::unique_ptr<Pickable> create(const json& j);
+	virtual void save(json& j) = 0;
+	virtual void load(const json& j) = 0;
 	virtual PickableType get_type() const = 0;
 };
 //====
