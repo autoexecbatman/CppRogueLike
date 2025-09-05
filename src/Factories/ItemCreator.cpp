@@ -8,6 +8,10 @@
 #include "../Items/Armor.h"
 #include "../Colors/Colors.h"
 #include "../Items/Weapons.h"
+#include "../Utils/PickableTypeRegistry.h"
+#include "../ActorTypes/Gold.h"
+#include "../Items/Food.h"
+#include "../Items/Amulet.h"
 
 std::unique_ptr<Item> ItemCreator::create_health_potion(Vector2D pos)
 {
@@ -206,7 +210,7 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_staff(Vector2D pos, int enhan
         auto weaponData = std::find_if(
             game.data_manager.get_weapons().begin(),
             game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Staff";}
+            [](const Weapons& w) { return w.name == "Staff"; }
         );
         
         if (weaponData != game.data_manager.get_weapons().end())
@@ -340,77 +344,114 @@ std::unique_ptr<Item> ItemCreator::create_plate_mail(Vector2D pos)
     return item;
 }
 
+std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'$', "gold pile", YELLOW_BLACK_PAIR});
+    int goldAmount = game.d.roll(10, 50); // Random amount 10-50 gold
+    item->pickable = std::make_unique<Gold>(goldAmount);
+    item->value = goldAmount; // Gold's value is its amount
+    return item;
+}
+
+// Food creation functions
+std::unique_ptr<Item> ItemCreator::create_ration(Vector2D pos)
+{
+    return std::make_unique<Ration>(pos);
+}
+
+std::unique_ptr<Item> ItemCreator::create_fruit(Vector2D pos)
+{
+    return std::make_unique<Fruit>(pos);
+}
+
+std::unique_ptr<Item> ItemCreator::create_bread(Vector2D pos)
+{
+    return std::make_unique<Bread>(pos);
+}
+
+std::unique_ptr<Item> ItemCreator::create_meat(Vector2D pos)
+{
+    return std::make_unique<Meat>(pos);
+}
+
+// Artifact creation functions
+std::unique_ptr<Item> ItemCreator::create_amulet_of_yendor(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'"', "Amulet of Yendor", YELLOW_BLACK_PAIR});
+    item->pickable = std::make_unique<Amulet>();
+    item->value = 50000; // Priceless artifact
+    return item;
+}
+
 void ItemCreator::ensure_correct_value(Item& item)
 {
-    // Fix items with incorrect values based on their name and pickable type
-    if (item.actorData.name == "health potion" && item.value != 50)
+    // Fix items with incorrect values using type-safe approach
+    auto itemType = PickableTypeRegistry::get_item_type(item);
+    
+    // Set correct values based on item type
+    switch (itemType)
     {
-        item.value = 50;
-    }
-    else if (item.actorData.name == "scroll of lightning" && item.value != 150)
-    {
-        item.value = 150;
-    }
-    else if (item.actorData.name == "scroll of fireball" && item.value != 100)
-    {
-        item.value = 100;
-    }
-    else if (item.actorData.name == "scroll of confusion" && item.value != 120)
-    {
-        item.value = 120;
-    }
-    else if (item.actorData.name == "dagger" && item.value != 2)
-    {
-        item.value = 2;
-    }
-    else if (item.actorData.name == "short sword" && item.value != 10)
-    {
-        item.value = 10;
-    }
-    else if (item.actorData.name == "long sword" && item.value != 15)
-    {
-        item.value = 15;
-    }
-    else if (item.actorData.name == "staff" && item.value != 6)
-    {
-        item.value = 6;
-    }
-    else if (item.actorData.name == "longbow" && item.value != 75)
-    {
-        item.value = 75;
-    }
-    else if (item.actorData.name == "leather armor" && item.value != 5)
-    {
-        item.value = 5;
-    }
-    else if (item.actorData.name == "chain mail" && item.value != 75)
-    {
-        item.value = 75;
-    }
-    else if (item.actorData.name == "plate mail" && item.value != 400)
-    {
-        item.value = 400;
-    }
-    // Handle enhanced weapons
-    else if (item.actorData.name.find(" +") != std::string::npos)
-    {
-        // Enhanced weapons - extract base name and enhancement level
-        std::string baseName = item.actorData.name.substr(0, item.actorData.name.find(" +"));
-        std::string enhancementStr = item.actorData.name.substr(item.actorData.name.find("+") + 1);
-        int enhancementLevel = std::stoi(enhancementStr);
-        
-        // Determine base value and calculate enhanced value
-        int baseValue = 0;
-        if (baseName == "dagger") baseValue = 2;
-        else if (baseName == "short sword") baseValue = 10;
-        else if (baseName == "long sword") baseValue = 15;
-        else if (baseName == "staff") baseValue = 6;
-        else if (baseName == "longbow") baseValue = 75;
-        
-        if (baseValue > 0)
+    case PickableTypeRegistry::Type::HEALER:
+        if (item.value != 50) item.value = 50;
+        break;
+    case PickableTypeRegistry::Type::LIGHTNING_BOLT:
+        if (item.value != 150) item.value = 150;
+        break;
+    case PickableTypeRegistry::Type::FIREBALL:
+        if (item.value != 100) item.value = 100;
+        break;
+    case PickableTypeRegistry::Type::CONFUSER:
+        if (item.value != 120) item.value = 120;
+        break;
+    case PickableTypeRegistry::Type::DAGGER:
+        if (item.value != 2) item.value = 2;
+        break;
+    case PickableTypeRegistry::Type::SHORTSWORD:
+        if (item.value != 10) item.value = 10;
+        break;
+    case PickableTypeRegistry::Type::LONGSWORD:
+        if (item.value != 15) item.value = 15;
+        break;
+    case PickableTypeRegistry::Type::STAFF:
+        if (item.value != 6) item.value = 6;
+        break;
+    case PickableTypeRegistry::Type::LONGBOW:
+        if (item.value != 75) item.value = 75;
+        break;
+    case PickableTypeRegistry::Type::LEATHER_ARMOR:
+        if (item.value != 5) item.value = 5;
+        break;
+    case PickableTypeRegistry::Type::CHAIN_MAIL:
+        if (item.value != 75) item.value = 75;
+        break;
+    case PickableTypeRegistry::Type::PLATE_MAIL:
+        if (item.value != 400) item.value = 400;
+        break;
+    default:
+        // Handle enhanced weapons by checking name pattern
+        if (item.actorData.name.find(" +") != std::string::npos)
         {
-            item.value = calculate_enhanced_value(baseValue, enhancementLevel);
+            // Enhanced weapons - extract enhancement level
+            std::string enhancementStr = item.actorData.name.substr(item.actorData.name.find("+") + 1);
+            int enhancementLevel = std::stoi(enhancementStr);
+            
+            // Determine base value from item type
+            int baseValue = 0;
+            switch (itemType)
+            {
+            case PickableTypeRegistry::Type::DAGGER: baseValue = 2; break;
+            case PickableTypeRegistry::Type::SHORTSWORD: baseValue = 10; break;
+            case PickableTypeRegistry::Type::LONGSWORD: baseValue = 15; break;
+            case PickableTypeRegistry::Type::STAFF: baseValue = 6; break;
+            case PickableTypeRegistry::Type::LONGBOW: baseValue = 75; break;
+            default: break;
+            }
+            
+            if (baseValue > 0)
+            {
+                item.value = calculate_enhanced_value(baseValue, enhancementLevel);
+            }
         }
+        break;
     }
 }
- 

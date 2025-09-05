@@ -31,7 +31,6 @@
 #include "Systems/MenuManager.h"
 #include "Systems/DisplayManager.h"
 #include "Systems/GameLoopCoordinator.h"
-#include "Systems/ObjectManager.h"
 #include "Systems/DataManager.h"
 
 // Data structures
@@ -82,7 +81,6 @@ public:
     MenuManager menu_manager{};
     DisplayManager display_manager{};
     GameLoopCoordinator game_loop_coordinator{};
-    ObjectManager object_manager{};
     DataManager data_manager{};
 
     // Game world data
@@ -113,7 +111,6 @@ public:
     void display_levelup(int level) { display_manager.display_levelup(*player, level); }
     void display_character_sheet() const noexcept { display_manager.display_character_sheet(*player); }
     bool pick_tile(Vector2D* position, int maxRange) { return targeting.pick_tile(position, maxRange); }
-    Web* find_web_at(Vector2D position) { return object_manager.find_web_at(position, objects); }
 
     // Creature management
     void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }
@@ -123,12 +120,6 @@ public:
     void send_to_back(T& actor) { creature_manager.send_to_back(creatures, actor); }
     Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept { return creature_manager.get_closest_monster(creatures, fromPosition, inRange); }
     Creature* get_actor(Vector2D pos) const noexcept { return creature_manager.get_actor_at_position(creatures, pos); }
-
-    // Object creation templates
-    template <typename T>
-    void create_creature(Vector2D position) { object_manager.create_creature<T>(position, creatures); }
-    template <typename T>
-    void create_item(Vector2D position) { object_manager.create_item<T>(position, *container); }
 
     // Game state management
     void load_all();

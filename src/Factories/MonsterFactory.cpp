@@ -8,65 +8,69 @@
 #include "ItemCreator.h"
 #include "../Items/Food.h"
 
-MonsterFactory::MonsterFactory() {
+MonsterFactory::MonsterFactory()
+{
     // Initialize with all monster types
     addMonsterType({
         "Mimic", 6, 2, 0, 0.5f,
-        [](Vector2D pos) { game.create_creature<Mimic>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Mimic>(pos)); }
         });
 
     addMonsterType({
         "Small Spider", 10, 1, 0, -0.3f,
-        [](Vector2D pos) { game.create_creature<SmallSpider>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<SmallSpider>(pos)); }
         });
 
     addMonsterType({
         "Giant Spider", 10, 2, 0, 0.0f,
-        [](Vector2D pos) { game.create_creature<GiantSpider>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<GiantSpider>(pos)); }
         });
 
     addMonsterType({
         "Web Spinner", 5, 3, 0, 0.2f,
-        [](Vector2D pos) { game.create_creature<WebSpinner>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<WebSpinner>(pos)); }
         });
 
     addMonsterType({
         "Goblin", 30, 1, 5, -0.2f,
-        [](Vector2D pos) { game.create_creature<Goblin>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Goblin>(pos)); }
         });
 
     addMonsterType({
         "Orc", 15, 2, 0, 0.0f,
-        [](Vector2D pos) { game.create_creature<Orc>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Orc>(pos)); }
         });
 
     addMonsterType({
         "Archer", 10, 2, 0, 0.2f,
-        [](Vector2D pos) { game.create_creature<Archer>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Archer>(pos)); }
         });
 
     addMonsterType({
         "Mage", 10, 3, 0, 0.3f,
-        [](Vector2D pos) { game.create_creature<Mage>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Mage>(pos)); }
         });
 
     addMonsterType({
         "Troll", 7, 4, 0, 0.5f,
-        [](Vector2D pos) { game.create_creature<Troll>(pos); }
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Troll>(pos)); }
         });
 
     addMonsterType({
     "Shopkeeper", 8, 1, 0, 0.0f,  // INCREASED from 5 to 8 - more shopkeepers
-    [](Vector2D pos) { 
-    // Check if we already have a shopkeeper on this level
-			if (game.level_manager.get_shopkeepers_count() >= 1) {
-				// Don't spawn shopkeeper, try spawning a different monster instead
-				game.create_creature<Goblin>(pos);
-				return;
-			}
-			
-			game.create_creature<Shopkeeper>(pos);
-			game.level_manager.increment_shopkeeper_count(); // Increment counter
+    [](Vector2D pos)
+        {
+            // Check if we already have a shopkeeper on this level
+            if (game.level_manager.get_shopkeepers_count() >= 1)
+            {
+                // Don't spawn shopkeeper, try spawning a different monster instead
+                game.creatures.push_back(std::make_unique<Goblin>(pos));
+                return;
+            }
+            
+            game.creatures.push_back(std::make_unique<Shopkeeper>(pos));
+            game.level_manager.increment_shopkeeper_count(); // Increment counter
+            
             // Get the shopkeeper that was just created (last in creatures vector)
             auto& shopkeeper = *game.creatures.back();
             
@@ -75,6 +79,10 @@ MonsterFactory::MonsterFactory() {
             shopkeeper.container->add(ItemCreator::create_health_potion(pos));
             shopkeeper.container->add(ItemCreator::create_scroll_lightning(pos));
             shopkeeper.container->add(ItemCreator::create_scroll_fireball(pos));
+
+            // TODO:
+            // create x random potions in shopkeeper inventory
+            // create x random scrolls in shopkeeper inventory
             
             auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", BROWN_BLACK_PAIR});
             ration->pickable = std::make_unique<Food>(50);  // 50 nutrition value
@@ -85,7 +93,6 @@ MonsterFactory::MonsterFactory() {
         }
         });
 }
-
 void MonsterFactory::addMonsterType(const MonsterType& monsterType)
 {
     monsterTypes.push_back(monsterType);

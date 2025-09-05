@@ -210,65 +210,67 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
 
 void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& player)
 {
-    // Equipped weapon info with color
-    wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-    mvwprintw(window, 24, 1, "Equipment:");
+	// Equipped weapon info with color
+	wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+	mvwprintw(window, 24, 1, "Equipment:");
 
-    if (player.weaponEquipped != "None")
-    {
-        mvwprintw(
-            window,
-            25,
-            3,
-            "Weapon: %s (%s damage)",
-            player.weaponEquipped.c_str(),
-            player.attacker->roll.c_str()
-        );
+	// Get equipped weapon from Equipment System
+	auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	if (equippedWeapon)
+	{
+		mvwprintw(
+			window,
+			25,
+			3,
+			"Weapon: %s (%s damage)",
+			equippedWeapon->actorData.name.c_str(),
+			player.attacker->roll.c_str()
+		);
 
-        // Show if weapon is ranged
-        if (player.has_state(ActorState::IS_RANGED))
-        {
-            wattron(window, COLOR_PAIR(WHITE_BLUE_PAIR));
-            mvwprintw(window, 25, 40, "[Ranged]");
-            wattroff(window, COLOR_PAIR(WHITE_BLUE_PAIR));
-        }
+		// Show if weapon is ranged
+		if (player.has_state(ActorState::IS_RANGED))
+		{
+			wattron(window, COLOR_PAIR(WHITE_BLUE_PAIR));
+			mvwprintw(window, 25, 40, "[Ranged]");
+			wattroff(window, COLOR_PAIR(WHITE_BLUE_PAIR));
+		}
 
-        // Show effective damage with strength bonus
-        int strDmgMod = get_strength_damage_modifier(player);
-        if (strDmgMod != 0)
-        {
-            wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
-            mvwprintw(
-                window,
-                26,
-                3,
-                "Effective damage: %s %+d",
-                player.attacker->roll.c_str(),
-                strDmgMod
-            );
-            wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
-        }
-    }
-    else
-    {
-        mvwprintw(window, 25, 3, "Weapon: Unarmed (D2 damage)");
+		// Show effective damage with strength bonus
+		int strDmgMod = get_strength_damage_modifier(player);
+		if (strDmgMod != 0)
+		{
+			wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
+			mvwprintw(
+				window,
+				26,
+				3,
+				"Effective damage: %s %+d",
+				player.attacker->roll.c_str(),
+				strDmgMod
+			);
+			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
+		}
+	}
+	else
+	{
+		mvwprintw(window, 25, 3, "Weapon: Unarmed (D2 damage)");
 
-        // Show effective unarmed damage with strength bonus
-        int strDmgMod = get_strength_damage_modifier(player);
-        if (strDmgMod != 0)
-        {
-            wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
-            mvwprintw(window, 26, 3, "Effective damage: D2 %+d", strDmgMod);
-            wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
-        }
-    }
-    wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+		// Show effective unarmed damage with strength bonus
+		int strDmgMod = get_strength_damage_modifier(player);
+		if (strDmgMod != 0)
+		{
+			wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
+			mvwprintw(window, 26, 3, "Effective damage: D2 %+d", strDmgMod);
+			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
+		}
+	}
+	wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
 }
 
 void CharacterSheetUI::display_right_panel_info(WINDOW* window, const Player& player)
 {
     // Add gold and other stats on the right side
-    mvwprintw(window, 9, 60, "Gender: %s", player.gender.c_str());
+    mvwprintw(window, 9, 60, "Gender: %s", player.playerGender.c_str());
     mvwprintw(window, 10, 60, "Gold: %d", player.gold);
     
     // Enhanced hunger display with numbers and bar

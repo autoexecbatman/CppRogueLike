@@ -25,6 +25,16 @@ public:
     static std::unique_ptr<Item> create_leather_armor(Vector2D pos);
     static std::unique_ptr<Item> create_chain_mail(Vector2D pos);
     static std::unique_ptr<Item> create_plate_mail(Vector2D pos);
+    static std::unique_ptr<Item> create_gold_pile(Vector2D pos);
+    
+    // Food creation functions
+    static std::unique_ptr<Item> create_ration(Vector2D pos);
+    static std::unique_ptr<Item> create_fruit(Vector2D pos);
+    static std::unique_ptr<Item> create_bread(Vector2D pos);
+    static std::unique_ptr<Item> create_meat(Vector2D pos);
+    
+    // Artifact creation functions
+    static std::unique_ptr<Item> create_amulet_of_yendor(Vector2D pos);
     
     // Enhanced weapon creation functions
     static std::unique_ptr<Item> create_enhanced_dagger(Vector2D pos, int enhancementLevel);

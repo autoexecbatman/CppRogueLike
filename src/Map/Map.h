@@ -102,7 +102,6 @@ public:
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
 	void update();
 	void render() const;
-	void add_weapons(Vector2D pos);
 	void add_item(Vector2D pos);
 	Creature* get_actor(Vector2D pos) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	std::vector<std::vector<Tile>> get_map() const;

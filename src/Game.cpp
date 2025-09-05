@@ -94,8 +94,9 @@ void Game::update()
 
 	if (gameStatus == GameStatus::NEW_TURN)
 	{
-		// Remove destroyed objects - delegated to ObjectManager
-		object_manager.cleanup_destroyed_objects(objects);
+		// Remove destroyed objects
+		auto isNull = [](const auto& obj) { return !obj; };
+		std::erase_if(objects, isNull);
 
 		update_creatures(creatures);
 		spawn_creatures();

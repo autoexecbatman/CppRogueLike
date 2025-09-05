@@ -35,6 +35,7 @@
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Factories/ItemFactory.h"
+#include "../Factories/ItemCreator.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -544,41 +545,6 @@ void Map::render() const
 		}
 	}
 	game.log("Map::render() end");
-}
-
-// this function is deprecated
-void Map::add_weapons(Vector2D pos)
-{
-	const int weaponIndex{ game.d.roll(1, game.data_manager.get_weapons().size()) };
-	const Weapons& selectedWeapon{ game.data_manager.get_weapons().at(weaponIndex - 1) };
-	const int rollColor{ game.d.roll(1, game.data_manager.get_weapons().size()) };
-
-	// Create an Actor for the weapon
-	auto weaponItem = std::make_unique<Item>(pos, ActorData{ '/', selectedWeapon.name, rollColor });
-
-	// Map weapon names to corresponding constructors
-	static const std::unordered_map<std::string, std::function<std::unique_ptr<Pickable>()>> weaponFactory
-	{
-		{"Dagger", []() { return std::make_unique<Dagger>(); }},
-		{"Long Sword", []() { return std::make_unique<LongSword>(); }},
-		{"Short Sword", []() { return std::make_unique<ShortSword>(); }},
-		{"Longbow", []() { return std::make_unique<Longbow>(); }},
-		{"Staff", []() { return std::make_unique<Staff>(); }}
-	};
-
-	auto it = weaponFactory.find(selectedWeapon.name);
-	if (it != weaponFactory.end())
-	{
-		weaponItem->pickable = it->second();
-	}
-	else
-	{
-		game.log("Error: Unknown weapon type");
-		return;
-	}
-
-	// Add the weapon to the game container
-	game.container->add(std::move(weaponItem));
 }
 
 void Map::add_item(Vector2D pos) {
@@ -1182,7 +1148,7 @@ void Map::place_amulet()
 		}
 
 		// Create and place the amulet
-		game.create_item<AmuletOfYendor>(amuletPos);
+		game.container->add(ItemCreator::create_amulet_of_yendor(amuletPos));
 
 		// Log the placement (debug info)
 		game.log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));

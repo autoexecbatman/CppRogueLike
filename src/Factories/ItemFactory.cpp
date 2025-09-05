@@ -7,29 +7,30 @@
 #include "../Items/Amulet.h"
 #include "ItemCreator.h"
 
-ItemFactory::ItemFactory() {
+ItemFactory::ItemFactory()
+{
     // Initialize with all item types
 
     // HEALING - CLERIC REPLACEMENT (Solo fighter needs reliable healing)
     add_item_type({
         "Health Potion", 50, 1, 0, 0.2f,  // MORE COMMON - solo needs healing
-        [](Vector2D pos) { game.create_item<HealthPotion>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_health_potion(pos)); }
         });
 
     // MAGIC UTILITY - WIZARD REPLACEMENT (Solo fighter needs magic support)
     add_item_type({
         "Scroll of Lightning Bolt", 20, 2, 0, 0.2f,  // MORE COMMON - utility magic
-        [](Vector2D pos) { game.create_item<ScrollOfLightningBolt>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_lightning(pos)); }
         });
 
     add_item_type({
         "Scroll of Fireball", 15, 3, 0, 0.3f,  // MORE COMMON - AoE for solo
-        [](Vector2D pos) { game.create_item<ScrollOfFireball>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_fireball(pos)); }
         });
 
     add_item_type({
         "Scroll of Confusion", 15, 2, 0, 0.2f,  // MORE COMMON - crowd control
-        [](Vector2D pos) { game.create_item<ScrollOfConfusion>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_confusion(pos)); }
         });
 
     // WEAPONS - FIGHTER PROGRESSION (Inferior weapons rare, focus on upgrades)
@@ -71,53 +72,53 @@ ItemFactory::ItemFactory() {
     // Gold
     add_item_type({
         "Gold", 25, 1, 0, 0.1f,
-        [](Vector2D pos) { game.create_item<GoldPile>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_gold_pile(pos)); }
         });
 
     // FOOD - SOLO RESOURCE MANAGEMENT (No party sharing, need reliable food)
     add_item_type({
         "Ration", 25, 1, 0, 0.1f,  // MORE COMMON - solo needs consistent food
-        [](Vector2D pos) { game.create_item<Ration>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_ration(pos)); }
         });
 
     add_item_type({
         "Fruit", 15, 1, 0, 0.0f,  // STEADY - quick hunger fix
-        [](Vector2D pos) { game.create_item<Fruit>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_fruit(pos)); }
         });
 
     add_item_type({
         "Bread", 12, 1, 0, 0.0f,  // STEADY - basic sustenance
-        [](Vector2D pos) { game.create_item<Bread>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_bread(pos)); }
         });
 
     add_item_type({
         "Meat", 8, 2, 0, 0.1f,  // VALUABLE - high nutrition for solo
-        [](Vector2D pos) { game.create_item<Meat>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_meat(pos)); }
         });
 
     // Amulet of Yendor - incredibly rare, only appears on deeper levels
     add_item_type({
         "Amulet of Yendor", 1, 8, 0, 2.0f,
-        [](Vector2D pos) { game.create_item<AmuletOfYendor>(pos); }
+        [](Vector2D pos) { game.container->add(ItemCreator::create_amulet_of_yendor(pos)); }
         });
 
     add_item_type({
         "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
-        [](Vector2D pos) { 
+        [](Vector2D pos) {
             game.container->add(ItemCreator::create_leather_armor(pos));
         }
         });
 
     add_item_type({
         "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
-        [](Vector2D pos) { 
+        [](Vector2D pos) {
             game.container->add(ItemCreator::create_chain_mail(pos));
         }
         });
 
     add_item_type({
         "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
-        [](Vector2D pos) { 
+        [](Vector2D pos) {
             game.container->add(ItemCreator::create_plate_mail(pos));
         }
         });
