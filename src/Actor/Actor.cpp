@@ -283,7 +283,7 @@ void Creature::unequip(Item& item)
 	}
 }
 
-void Creature::syncRangedState()
+void Creature::sync_ranged_state()
 {
 	// Check if any equipped items are ranged weapons
 	bool hasRangedWeapon = false;

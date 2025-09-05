@@ -6,6 +6,7 @@
 #include "../Controls/Controls.h"
 #include "../Colors/Colors.h"
 #include <algorithm>
+#include "../Utils/PickableTypeRegistry.h"
 
 InventoryUI::InventoryUI() : inventoryWindow(nullptr), equipmentWindow(nullptr)
 {
@@ -18,10 +19,11 @@ InventoryUI::~InventoryUI()
 
 void InventoryUI::display(Creature& owner)
 {
-    // Use type-safe approach instead of dynamic_cast
+    // Use type-safe approach with unique ID comparison
     Player* player = nullptr;
-    if (owner.actorData.ch == '@' && owner.actorData.name == "Player") {
-        player = static_cast<Player*>(&owner);
+    if (owner.uniqueId == game.player->uniqueId)
+    {
+        player = game.player.get();
     }
     
     while (true)
@@ -173,8 +175,10 @@ void InventoryUI::show_item_info(Item* item, int y)
     }
     
     // Show weapon damage if applicable
-    if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
+    const auto& itemType = PickableTypeRegistry::get_item_type(*item);
+    if (PickableTypeRegistry::is_weapon(itemType))
     {
+        Weapon* weapon = static_cast<Weapon*>(item->pickable.get()); // Safe after type check
         std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
         wattron(inventoryWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
         wprintw(inventoryWindow, "%s", damageInfo.c_str());

@@ -33,7 +33,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
         int rollDmg = game.d.roll_from_string(roll);
 
         // THAC0 calculation
-        int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass;
+        int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
 
         // Apply dexterity missile attack adjustment if this is a ranged attack
         int hitModifier = 0;
@@ -59,7 +59,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
         {
             // calculate the adjusted damage
             const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
-            const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
+            const int totaldmg = adjDmg - target.destructible->get_dr(); // substract damage reduction
             const int finalDamage = std::max(0, totaldmg); // ensure damage is not negative
             
             // Display the successful attack roll with damage
@@ -75,15 +75,15 @@ void Attacker::attack(Creature& attacker, Creature& target)
             
             // Debug log the successful attack roll
             game.log("ATTACK HIT: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
-                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
-                     ", AC:" + std::to_string(target.destructible->armorClass) + ")");
+                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->get_thaco()) + 
+                     ", AC:" + std::to_string(target.destructible->get_armor_class()) + ")");
             
             // Apply damage to target if any
             if (finalDamage > 0)
             {
                 // Debug log the damage roll details
                 game.log("DAMAGE DEALT: " + std::to_string(rollDmg) + " (base) + " + 
-                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) + 
                          " (DR) = " + std::to_string(finalDamage) + " damage to " + target.actorData.name);
                 
                 // apply damage to target
@@ -93,7 +93,7 @@ void Attacker::attack(Creature& attacker, Creature& target)
             {
                 // Debug log the no-damage attack
                 game.log("NO DAMAGE: " + std::to_string(rollDmg) + " (base) + " + 
-                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+                         std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) + 
                          " (DR) = 0 damage to " + target.actorData.name);
             }
         }
@@ -112,8 +112,8 @@ void Attacker::attack(Creature& attacker, Creature& target)
             
             // Debug log the failed attack roll
             game.log("ATTACK MISS: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
-                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
-                     ", AC:" + std::to_string(target.destructible->armorClass) + ")");
+                     " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->get_thaco()) + 
+                     ", AC:" + std::to_string(target.destructible->get_armor_class()) + ")");
         }
     }
     else
@@ -200,7 +200,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		int rollDmg = game.d.roll_from_string(damageRoll);
 
 		// THAC0 calculation
-		int rollNeeded = attacker.destructible->thaco - target.destructible->armorClass;
+		int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
 
 		// Apply dexterity missile attack adjustment if this is a ranged attack
 		int hitModifier = attackPenalty; // Start with dual wield penalty
@@ -223,7 +223,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		{
 			// calculate the adjusted damage
 			const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
-			const int totaldmg = adjDmg - target.destructible->dr; // substract damage reduction
+			const int totaldmg = adjDmg - target.destructible->get_dr(); // substract damage reduction
 			const int finalDamage = std::max(0, totaldmg); // ensure damage is not negative
 			
 			// Display the successful attack roll with damage
@@ -242,15 +242,15 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 			
 			// Debug log the successful attack roll
 			game.log("ATTACK HIT (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
-					 " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
-					 ", AC:" + std::to_string(target.destructible->armorClass) + ", Penalty:" + std::to_string(attackPenalty) + ")");
+					 " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->get_thaco()) + 
+					 ", AC:" + std::to_string(target.destructible->get_armor_class()) + ", Penalty:" + std::to_string(attackPenalty) + ")");
 			
 			// Apply damage to target if any
 			if (finalDamage > 0)
 			{
 				// Debug log the damage roll details
 				game.log("DAMAGE DEALT (" + handName + "): " + std::to_string(rollDmg) + " (base) + " + 
-						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) + 
 						 " (DR) = " + std::to_string(finalDamage) + " damage to " + target.actorData.name);
 				
 				// apply damage to target
@@ -260,7 +260,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 			{
 				// Debug log the no-damage attack
 				game.log("NO DAMAGE (" + handName + "): " + std::to_string(rollDmg) + " (base) + " + 
-						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->dr) + 
+						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) + 
 						 " (DR) = 0 damage to " + target.actorData.name);
 			}
 		}
@@ -282,8 +282,8 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 			
 			// Debug log the failed attack roll
 			game.log("ATTACK MISS (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) + 
-					 " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->thaco) + 
-					 ", AC:" + std::to_string(target.destructible->armorClass) + ", Penalty:" + std::to_string(attackPenalty) + ")");
+					 " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->get_thaco()) + 
+					 ", AC:" + std::to_string(target.destructible->get_armor_class()) + ", Penalty:" + std::to_string(attackPenalty) + ")");
 		}
 	}
 	else

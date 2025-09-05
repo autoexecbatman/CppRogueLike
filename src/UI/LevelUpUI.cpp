@@ -50,16 +50,16 @@ void LevelUpUI::display_basic_info(WINDOW* window, const Player& player, int lev
     mvwprintw(window, 3, 2, "Name: %s", player.actorData.name.c_str());
     mvwprintw(window, 3, 30, "Race: %s", player.playerRace.c_str());
     mvwprintw(window, 4, 2, "Level: %d", level);
-    mvwprintw(window, 4, 30, "Experience: %d", player.destructible->xp);
+    mvwprintw(window, 4, 30, "Experience: %d", player.destructible->get_xp());
 }
 
 void LevelUpUI::display_current_stats(WINDOW* window, const Player& player)
 {
     mvwprintw(window, 6, 2, "CURRENT STATS:");
-    mvwprintw(window, 7, 4, "Hit Points: %d/%d", player.destructible->hp, player.destructible->hpMax);
-    mvwprintw(window, 8, 4, "THAC0: %d", player.destructible->thaco);
-    mvwprintw(window, 9, 4, "Armor Class: %d", player.destructible->armorClass);
-    mvwprintw(window, 10, 4, "Damage Reduction: %d", player.destructible->dr);
+    mvwprintw(window, 7, 4, "Hit Points: %d/%d", player.destructible->get_hp(), player.destructible->get_max_hp());
+    mvwprintw(window, 8, 4, "THAC0: %d", player.destructible->get_thaco());
+    mvwprintw(window, 9, 4, "Armor Class: %d", player.destructible->get_armor_class());
+    mvwprintw(window, 10, 4, "Damage Reduction: %d", player.destructible->get_dr());
 }
 
 void LevelUpUI::display_level_benefits(WINDOW* window, const Player& player, int level)
@@ -75,7 +75,7 @@ void LevelUpUI::display_level_benefits(WINDOW* window, const Player& player, int
     if (has_thac0_improvement(player, level))
     {
         wattron(window, COLOR_PAIR(GREEN_BLACK_PAIR));
-        mvwprintw(window, 14, 4, "+ THAC0 improved to %d", player.destructible->thaco);
+        mvwprintw(window, 14, 4, "+ THAC0 improved to %d", player.destructible->get_thaco());
         wattroff(window, COLOR_PAIR(GREEN_BLACK_PAIR));
     }
     
@@ -174,7 +174,7 @@ void LevelUpUI::display_continue_prompt(WINDOW* window)
 bool LevelUpUI::has_thac0_improvement(const Player& player, int level)
 {
     int expectedTHAC0 = get_expected_thac0(player, level);
-    return player.destructible->thaco <= expectedTHAC0;
+    return player.destructible->get_thaco() <= expectedTHAC0;
 }
 
 int LevelUpUI::get_expected_thac0(const Player& player, int level)
@@ -184,13 +184,13 @@ int LevelUpUI::get_expected_thac0(const Player& player, int level)
     switch (player.playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
-        return thac0Tables.getFighter(level);
+        return thac0Tables.get_fighter(level);
     case Player::PlayerClassState::ROGUE:
-        return thac0Tables.getRogue(level);
+        return thac0Tables.get_rogue(level);
     case Player::PlayerClassState::CLERIC:
-        return thac0Tables.getCleric(level);
+        return thac0Tables.get_cleric(level);
     case Player::PlayerClassState::WIZARD:
-        return thac0Tables.getWizard(level);
+        return thac0Tables.get_wizard(level);
     default:
         return 20;
     }

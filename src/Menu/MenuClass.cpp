@@ -54,10 +54,11 @@ void equip_fighter_starting_gear()
 		}
 	}
 	
-	// Update fighter combat stats
-	player.weaponEquipped = "Long Sword";
-	player.attacker = std::make_unique<Attacker>("D8");
-	player.destructible->armorClass = 3; // Plate mail AC
+	// Sync ranged state and update combat stats from equipped weapons
+	player.sync_ranged_state();
+	
+	// Update AC based on equipped armor (proper way)
+	player.destructible->update_armor_class(player);
 	
 	// HEALING POTIONS (3x)
 	for(int i = 0; i < 3; i++)

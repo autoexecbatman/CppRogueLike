@@ -14,10 +14,13 @@ class Creature;
 
 class Attacker : public Persistent
 {
+private:
+	std::string roll;
 public:
-	std::string roll{ "diceroll" };
 	Attacker(std::string roll);
 
+	const std::string& get_roll() const noexcept { return roll; }
+	void set_roll(const std::string& new_roll) noexcept { roll = new_roll; }
 	void attack(Creature& attacker, Creature& target);
 	void attack_with_dual_wield(Creature& attacker, Creature& target);
 	void perform_single_attack(Creature& attacker, Creature& target, const std::string& damageRoll, int attackPenalty, const std::string& handName);

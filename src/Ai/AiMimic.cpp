@@ -2,6 +2,7 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiPlayer.h"
+#include "../Utils/PickableTypeRegistry.h"
 
 AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(0) {}
 
@@ -9,7 +10,8 @@ void AiMimic::update(Creature& owner)
 {
     // Cast the owner to a Mimic - we still need this for type-specific operations
     Mimic* mimic = dynamic_cast<Mimic*>(&owner);
-    if (!mimic) {
+    if (!mimic)
+    {
         // This shouldn't happen - but if it does, use standard monster AI
         game.log("Error: AiMimic::update called on non-Mimic creature");
         AiMonster::update(owner);
@@ -17,44 +19,50 @@ void AiMimic::update(Creature& owner)
     }
 
     // Skip if mimic is dead
-    if (mimic->destructible->is_dead()) {
+    if (mimic->destructible->is_dead())
+    {
         return;
     }
 
     // Check if disguised - now using our internal state
-    if (isDisguised) {
+    if (isDisguised)
+    {
         // Increment disguise change counter
         disguiseChangeCounter++;
 
         // Occasionally change disguise if still hidden
-        if (disguiseChangeCounter >= disguiseChangeRate) {
-            changeDisguise(*mimic);
+        if (disguiseChangeCounter >= disguiseChangeRate)
+        {
+            change_disguise(*mimic);
             disguiseChangeCounter = 0;
             game.log("Mimic changed disguise");
         }
 
         // Check if player is close enough to reveal
-        checkRevealing(*mimic);
+        check_revealing(*mimic);
     }
-    else {
+    else
+    {
         // Not disguised - can consume items and move
-        consumeNearbyItems(*mimic);
+        consume_nearby_items(*mimic);
 
         // Use standard monster AI for movement and attacks
         AiMonster::update(owner);
     }
 }
 
-bool AiMimic::consumeNearbyItems(Mimic& mimic)
+bool AiMimic::consume_nearby_items(Mimic& mimic)
 {
     // Only consuming items when revealed and active
-    if (isDisguised || mimic.destructible->is_dead()) {
+    if (isDisguised || mimic.destructible->is_dead())
+    {
         return false;
     }
 
     // Add cooldown mechanic - can only consume items every few turns
     consumptionCooldown++;
-    if (consumptionCooldown < 3) {
+    if (consumptionCooldown < 3)
+    {
         return false;
     }
 
@@ -68,16 +76,23 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
     game.log("Checking for items. Container size: " + std::to_string(game.container->get_inventory_mutable().size()));
 
     // First pass - identify items to consume
-    for (size_t i = 0; i < game.container->get_inventory_mutable().size(); i++) {
+    for (size_t i = 0; i < game.container->get_inventory_mutable().size(); i++)
+    {
         auto& item = game.container->get_inventory_mutable()[i];
-        if (!item) {
-            continue;
-        }
+        if (!item) continue;
 
         int itemDistance = mimic.get_tile_distance(item->position);
         game.log("Item at distance " + std::to_string(itemDistance) + ": " + item->actorData.name);
 
-        if (itemDistance <= 1) {
+        if (itemDistance <= 1)
+        {
+            // Found an item to consume - check if it has a pickable component
+            if (!item->pickable)
+            {
+                game.log("Mimic found non-pickable item, skipping: " + item->actorData.name);
+                continue;
+            }
+            
             // Found an item to consume!
             game.append_message_part(RED_YELLOW_PAIR, "The mimic ");
             game.append_message_part(WHITE_BLACK_PAIR, "consumes the ");
@@ -87,37 +102,65 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
 
             game.log("Mimic consuming item: " + item->actorData.name);
 
-            // Grow stronger based on item type
+            // Grow stronger based on item type using PickableTypeRegistry
             itemsConsumed++;
+            
+            // Get item type using modern type registry
+            auto itemType = PickableTypeRegistry::get_item_type(*item);
 
             // Different bonuses based on item type
-            if (item->actorData.name.find("potion") != std::string::npos) {
+            if (itemType == PickableTypeRegistry::Type::HEALER)
+            {
                 // Health potions give the mimic more HP
-                mimic.destructible->hpMax += 1;
-                mimic.destructible->hp += 1;
+                mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
+                mimic.destructible->set_hp(mimic.destructible->get_hp() + 1);
                 game.log("Mimic gained 1 HP from potion");
             }
-            else if (item->actorData.name.find("scroll") != std::string::npos) {
+            else if (PickableTypeRegistry::is_scroll(itemType))
+            {
                 // Scrolls increase confusion duration
                 confusionDuration = std::min(confusionDuration + 1, 5);
                 game.log("Mimic increased confusion duration to " + std::to_string(confusionDuration));
             }
-            else if (item->actorData.name.find("gold") != std::string::npos) {
+            else if (PickableTypeRegistry::is_gold(itemType))
+            {
                 // Gold makes the mimic more defensive
-                if (mimic.destructible->dr < 2) {
-                    mimic.destructible->dr += 1;
+                if (mimic.destructible->get_dr() < 2)
+                {
+                    mimic.destructible->set_dr(mimic.destructible->get_dr() + 1);
                     game.log("Mimic gained 1 DR from gold");
                 }
             }
-            else if (item->actorData.name.find("weapon") != std::string::npos ||
-                item->actorData.name.find("sword") != std::string::npos ||
-                item->actorData.name.find("dagger") != std::string::npos) {
+            else if (PickableTypeRegistry::is_weapon(itemType))
+            {
                 // Weapons make the mimic hit harder
-                if (mimic.attacker->roll != "D6") {
-                    int currentDamage = game.d.roll_from_string(mimic.attacker->roll);
-                    mimic.attacker->roll = "D" + std::to_string(std::min(currentDamage + 1, 6));
-                    game.log("Mimic improved attack to " + mimic.attacker->roll);
+                if (mimic.attacker->get_roll() != "D6")
+                {
+                    int currentDamage = game.d.roll_from_string(mimic.attacker->get_roll());
+                    mimic.attacker->set_roll("D" + std::to_string(std::min(currentDamage + 1, 6)));
+                    game.log("Mimic improved attack to " + mimic.attacker->get_roll());
                 }
+            }
+            else if (PickableTypeRegistry::is_armor(itemType))
+            {
+                // Armor increases defense
+                if (mimic.destructible->get_dr() < 3)
+                {
+                    mimic.destructible->set_dr(mimic.destructible->get_dr() + 1);
+                    game.log("Mimic gained 1 DR from armor");
+                }
+            }
+            else if (PickableTypeRegistry::is_food(itemType))
+            {
+                // Food provides general health boost
+                mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
+                mimic.destructible->set_hp(std::min(mimic.destructible->get_hp() + 1, mimic.destructible->get_max_hp()));
+                game.log("Mimic gained health from food");
+            }
+            else
+            {
+                // Unknown item type - provide minimal benefit
+                game.log("Mimic consumed unknown item type: " + PickableTypeRegistry::get_display_name(itemType));
             }
 
             // Mark item for removal
@@ -151,7 +194,7 @@ bool AiMimic::consumeNearbyItems(Mimic& mimic)
     return itemConsumed;
 }
 
-void AiMimic::checkRevealing(Mimic& mimic)
+void AiMimic::check_revealing(Mimic& mimic)
 {
     // Calculate distance to player
     int distanceToPlayer = mimic.get_tile_distance(game.player->position);
@@ -195,7 +238,7 @@ void AiMimic::checkRevealing(Mimic& mimic)
     }
 }
 
-void AiMimic::changeDisguise(Mimic& mimic)
+void AiMimic::change_disguise(Mimic& mimic)
 {
     // Don't change if already revealed - using our isDisguised property
     if (!isDisguised) return;

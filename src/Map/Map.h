@@ -80,8 +80,8 @@ private:
 	void spawn_items(Vector2D begin, Vector2D end);
 	void spawn_player(Vector2D begin, Vector2D end);
 	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors);
-	bool is_floor(Vector2D pos) const { return get_tile_type(pos) == TileType::FLOOR;}
-	bool is_water(Vector2D pos) const;
+	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR;}
+	bool is_water(Vector2D pos) const noexcept;
 	void set_explored(Vector2D pos); //set the tile as explored
 	void post_process_doors();
 public:
@@ -92,28 +92,28 @@ public:
 	void save(json& j) override;
 
 	void init(bool withActors);
-	bool is_in_fov(Vector2D pos) const;
-	TileType get_tile_type(Vector2D pos) const;
+	bool is_in_fov(Vector2D pos) const noexcept;
+	TileType get_tile_type(Vector2D pos) const noexcept;
 	void tile_action(Creature& owner, TileType tileType);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos);
-	bool is_explored(Vector2D pos) const; //indicates whether this tile has already been seen by the player
-	bool can_walk(Vector2D pos) const;
+	bool is_explored(Vector2D pos) const noexcept; //indicates whether this tile has already been seen by the player
+	bool can_walk(Vector2D pos) const noexcept;
 	void add_monster(Vector2D pos) const;
 	void compute_fov(); // compute the field of view using `TCODMap::computeFov()`
 	void update();
 	void render() const;
 	void add_item(Vector2D pos);
 	Creature* get_actor(Vector2D pos) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
-	std::vector<std::vector<Tile>> get_map() const;
+	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(); // regenerate the map
 	std::vector<Vector2D> neighbors(Vector2D id);
 	double cost(Vector2D from_node, Vector2D to_node);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
-	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } }
+	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } } // Note: Cannot be noexcept due to exception
 	double get_cost(Vector2D pos) const noexcept;
-	bool has_los(Vector2D from, Vector2D to) const;
+	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos);
 	bool close_door(Vector2D pos);
 	void place_amulet();
@@ -121,9 +121,9 @@ public:
 	void create_treasure_room(Vector2D begin, Vector2D end, int quality);
 	bool maybe_create_treasure_room(int dungeonLevel);
 	void display_item_distribution() const;
-	bool is_door(Vector2D pos) const;
-	bool is_open_door(Vector2D pos) const;
-	bool is_wall(Vector2D pos) const;
+	bool is_door(Vector2D pos) const noexcept;
+	bool is_open_door(Vector2D pos) const noexcept;
+	bool is_wall(Vector2D pos) const noexcept;
 	void set_tile(Vector2D pos, TileType newType, double cost);
 
 	std::unique_ptr<TCODPath> tcodPath;

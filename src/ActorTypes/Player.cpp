@@ -137,20 +137,20 @@ void Player::calculate_thaco()
 	switch (playerClassState)
 	{	
 	case PlayerClassState::FIGHTER:
-		game.player->destructible->thaco = thaco.getFighter(playerLevel);
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
+		game.player->destructible->set_thaco(thaco.get_fighter(playerLevel));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
 		break;
 	case PlayerClassState::ROGUE:
-		game.player->destructible->thaco = thaco.getRogue(playerLevel);
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
+		game.player->destructible->set_thaco(thaco.get_rogue(playerLevel));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
 		break;
 	case PlayerClassState::CLERIC:
-		game.player->destructible->thaco = thaco.getCleric(playerLevel);
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
+		game.player->destructible->set_thaco(thaco.get_cleric(playerLevel));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
 		break;
 	case PlayerClassState::WIZARD:
-		game.player->destructible->thaco = thaco.getWizard(playerLevel);
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->thaco));*/
+		game.player->destructible->set_thaco(thaco.get_wizard(playerLevel));
+		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
 		break;
 	case PlayerClassState::NONE:
 		break;
@@ -173,7 +173,7 @@ void Player::render() const noexcept
 bool Player::rest()
 {
 	// Check if player is already at full health
-	if (destructible->hp >= destructible->hpMax)
+	if (destructible->get_hp() >= destructible->get_max_hp())
 	{
 		game.message(WHITE_BLACK_PAIR, "You're already at full health.", true);
 		return false;
@@ -221,7 +221,7 @@ bool Player::rest()
 	animate_resting();
 
 	// Rest - heal 20% of max HP
-	int healAmount = std::max(1, destructible->hpMax / 5);
+	int healAmount = std::max(1, destructible->get_max_hp() / 5);
 	int amountHealed = destructible->heal(healAmount);
 
 	// Capture the hunger state before and after
@@ -451,14 +451,14 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		destructible->update_armor_class(*this);
-		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
+		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 	}
 	
 	return true;
 }
 
 // Equipment system implementation
-bool Player::can_equip(const Item& item, EquipmentSlot slot) const
+bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 {
 	// Basic slot validation
 	if (slot == EquipmentSlot::NONE)
@@ -572,7 +572,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		// Reset combat stats if main hand weapon
 		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
-			attacker->roll = "D2"; // Reset to unarmed
+			attacker->set_roll("D2"); // Reset to unarmed
 			remove_state(ActorState::IS_RANGED); // Remove ranged state
 		}
 		
@@ -586,7 +586,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			destructible->update_armor_class(*this);
-			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->armorClass) + ".", true);
+			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 		}
 		
 		return true;
@@ -595,7 +595,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 	return false;
 }
 
-Item* Player::get_equipped_item(EquipmentSlot slot) const
+Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
 {
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
@@ -603,12 +603,12 @@ Item* Player::get_equipped_item(EquipmentSlot slot) const
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
 }
 
-bool Player::is_slot_occupied(EquipmentSlot slot) const
+bool Player::is_slot_occupied(EquipmentSlot slot) const noexcept
 {
 	return get_equipped_item(slot) != nullptr;
 }
 
-bool Player::is_dual_wielding() const
+bool Player::is_dual_wielding() const noexcept
 {
 	// Check if both hands have weapons equipped
 	auto rightHand = get_equipped_item(EquipmentSlot::RIGHT_HAND);
@@ -635,7 +635,7 @@ bool Player::is_dual_wielding() const
 	return false;
 }
 
-std::string Player::get_equipped_weapon_damage_roll() const
+std::string Player::get_equipped_weapon_damage_roll() const noexcept
 {
 	auto rightHandWeapon = get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	if (!rightHandWeapon)
@@ -657,7 +657,7 @@ std::string Player::get_equipped_weapon_damage_roll() const
 	return "D2"; // Fallback for non-weapons
 }
 
-Player::DualWieldInfo Player::get_dual_wield_info() const
+Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 {
 	DualWieldInfo info;
 	
@@ -724,7 +724,7 @@ bool Player::toggle_armor(uint32_t item_unique_id)
 	}
 }
 
-bool Player::is_item_equipped(uint32_t item_unique_id) const
+bool Player::is_item_equipped(uint32_t item_unique_id) const noexcept
 {
 	for (const auto& equipped : equippedItems)
 	{

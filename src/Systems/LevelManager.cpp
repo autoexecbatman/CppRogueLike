@@ -84,6 +84,6 @@ void LevelManager::heal_player_between_levels(Player& player) const
 {
     if (player.destructible)
     {
-        player.destructible->heal(player.destructible->hpMax / 2);
+        player.destructible->heal(player.destructible->get_max_hp() / 2);
     }
 }

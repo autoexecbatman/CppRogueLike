@@ -95,7 +95,7 @@ public:
 
 	void equip(Item& item);
 	void unequip(Item& item);
-	void syncRangedState();
+	void sync_ranged_state();
 	void pick();
 	void drop(Item& item);
 

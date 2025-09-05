@@ -235,7 +235,7 @@ bool Weapon::use(Item& owner, Creature& wearer)
 					Item* mainHandItem = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
 					if (mainHandItem && mainHandItem->uniqueId == owner.uniqueId)
 					{
-						wearer.attacker->roll = this->roll;
+						wearer.attacker->set_roll(this->roll);
 					}
 				}
 			}

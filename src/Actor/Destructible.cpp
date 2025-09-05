@@ -32,7 +32,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 void Destructible::update_constitution_bonus(Creature& owner)
 {
 	// Check if Constitution has changed since last update
-	if (owner.constitution == lastConstitution)
+	if (owner.constitution == get_last_constitution())
 	{
 		return; // No need to recalculate
 	}
@@ -46,8 +46,8 @@ void Destructible::update_constitution_bonus(Creature& owner)
 	}
 
 	// Calculate new max HP based on base HP and Constitution bonus
-	int oldHpMax = hpMax; // Store old max HP for comparison
-	int newHpMax = hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)); // Scale bonus by level for player
+	int oldHpMax = get_max_hp(); // Store old max HP for comparison
+	int newHpMax = get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)); // Scale bonus by level for player
 
 	// Only update if the calculated value is different AND we're not in a level-up situation
 	// During level-ups, hpMax is already correctly set by the level-up system
@@ -55,28 +55,30 @@ void Destructible::update_constitution_bonus(Creature& owner)
 	{
 		// Check if this looks like a level-up scenario (hpMax increased recently)
 		// If hpMax > hpBase + constitution bonus, then level-up system already handled it
-		if (hpMax <= hpBase + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)))
+		if (get_max_hp() <= get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)))
 		{
-			hpMax = newHpMax;
+			set_max_hp(newHpMax);
 			
 			// Adjust current HP proportionally if max HP changed
-			float hpRatio = static_cast<float>(hp) / oldHpMax;
-			hp = static_cast<int>(hpRatio * hpMax);
+			float hpRatio = static_cast<float>(get_hp()) / oldHpMax;
+			int newHp = static_cast<int>(hpRatio * get_max_hp());
 
 			// Make sure HP is at least 1
-			hp = std::max(1, hp);
+			newHp = std::max(1, newHp);
 
 			// Don't exceed new maximum
-			hp = std::min(hp, hpMax);
+			newHp = std::min(newHp, get_max_hp());
+			
+			set_hp(newHp);
 
 			// Log the HP adjustment if it's the player
 			if (&owner == game.player.get())
 			{
-				if (oldHpMax < hpMax)
+				if (oldHpMax < get_max_hp())
 				{
 					game.log("Your Constitution bonus increased your hit points.");
 				}
-				else if (oldHpMax > hpMax)
+				else if (oldHpMax > get_max_hp())
 				{
 					game.log("Your Constitution bonus decreased your hit points.");
 				}
@@ -84,13 +86,13 @@ void Destructible::update_constitution_bonus(Creature& owner)
 		}
 	}
 
-	if (hpMax <= 0)
+	if (get_max_hp() <= 0)
 	{
-		hpMax = 1;
+		set_max_hp(1);
 	}
 
 	// Update the last known Constitution value
-	lastConstitution = owner.constitution;
+	set_last_constitution(owner.constitution);
 }
 
 void Destructible::take_damage(Creature& owner, int damage)
@@ -99,8 +101,8 @@ void Destructible::take_damage(Creature& owner, int damage)
 	// if it is, then apply the damage to the actor
 	if (damage > 0)
 	{
-		owner.destructible->hp -= damage;
-		if (hp <= 0)
+		set_hp(get_hp() - damage);
+		if (get_hp() <= 0)
 		{
 			owner.destructible->die(owner);
 		}
@@ -116,7 +118,7 @@ void Destructible::die(Creature& owner)
 {
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
-	corpse->actorData.name = corpseName;
+	corpse->actorData.name = get_corpse_name();
 	corpse->actorData.ch = '%';
 
 	// Replace this line:
@@ -140,21 +142,22 @@ void Destructible::die(Creature& owner)
 // The function returns the amount of health point actually restored.
 int Destructible::heal(int hpToHeal)
 {
-	hp += hpToHeal;
+	int newHp = get_hp() + hpToHeal;
 
-	if (hp > hpMax)
+	if (newHp > get_max_hp())
 	{
-		hpToHeal -= hp - hpMax;
-		hp = hpMax;
+		hpToHeal -= newHp - get_max_hp();
+		newHp = get_max_hp();
 	}
-
+	
+	set_hp(newHp);
 	return hpToHeal;
 }
 
 void Destructible::update_armor_class(Creature& owner)
 {
 	// Start with the base armor class
-	int calculatedAC = baseArmorClass;
+	int calculatedAC = get_base_armor_class();
 
 	// Apply Dexterity's Defensive Adjustment
 	const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
@@ -169,7 +172,7 @@ void Destructible::update_armor_class(Creature& owner)
 		if (&owner == game.player.get() && defensiveAdj != 0)
 		{
 			game.log("Applied Dexterity Defensive Adjustment: " + std::to_string(defensiveAdj) +
-				" to AC. Base AC: " + std::to_string(baseArmorClass) +
+				" to AC. Base AC: " + std::to_string(get_base_armor_class()) +
 				", New AC: " + std::to_string(calculatedAC));
 		}
 	}
@@ -239,52 +242,55 @@ void Destructible::update_armor_class(Creature& owner)
 	}
 
 	// Update the armor class only if it has changed
-	if (armorClass != calculatedAC)
+	if (get_armor_class() != calculatedAC)
 	{
-		int oldAC = armorClass;
-		armorClass = calculatedAC;
+		int oldAC = get_armor_class();
+		set_armor_class(calculatedAC);
 
 		// Log the AC change if it's the player
 		if (&owner == game.player.get())
 		{
 			game.log("Updated Armor Class from " + std::to_string(oldAC) +
-				" to " + std::to_string(armorClass));
+				" to " + std::to_string(get_armor_class()));
 		}
 	}
 }
 
 void Destructible::load(const json& j)
 {
-	hpMax = j.at("hpMax").get<int>();
-	hp = j.at("hp").get<int>();
-	hpBase = j.at("hpBase").get<int>();
-	lastConstitution = j.at("lastConstitution").get<int>();
-	dr = j.at("dr").get<int>();
-	corpseName = j.at("corpseName").get<std::string>();
-	xp = j.at("xp").get<int>();
-	thaco = j.at("thaco").get<int>();
-	armorClass = j.at("armorClass").get<int>();
+	set_max_hp(j.at("hpMax").get<int>());
+	set_hp(j.at("hp").get<int>());
+	set_hp_base(j.at("hpBase").get<int>());
+	set_last_constitution(j.at("lastConstitution").get<int>());
+	set_dr(j.at("dr").get<int>());
+	set_corpse_name(j.at("corpseName").get<std::string>());
+	set_xp(j.at("xp").get<int>());
+	set_thaco(j.at("thaco").get<int>());
+	set_armor_class(j.at("armorClass").get<int>());
 	
 	// Load baseArmorClass if present, otherwise use armorClass as base
-	if (j.contains("baseArmorClass")) {
-		baseArmorClass = j.at("baseArmorClass").get<int>();
-	} else {
-		baseArmorClass = armorClass;
+	if (j.contains("baseArmorClass")) 
+	{
+		set_base_armor_class(j.at("baseArmorClass").get<int>());
+	} 
+	else 
+	{
+		set_base_armor_class(get_armor_class());
 	}
 }
 
 void Destructible::save(json& j)
 {
-	j["hpMax"] = hpMax;
-	j["hp"] = hp;
-	j["hpBase"] = hpBase;
-	j["lastConstitution"] = lastConstitution;
-	j["dr"] = dr;
-	j["corpseName"] = corpseName;
-	j["xp"] = xp;
-	j["thaco"] = thaco;
-	j["armorClass"] = armorClass;
-	j["baseArmorClass"] = baseArmorClass;
+	j["hpMax"] = get_max_hp();
+	j["hp"] = get_hp();
+	j["hpBase"] = get_hp_base();
+	j["lastConstitution"] = get_last_constitution();
+	j["dr"] = get_dr();
+	j["corpseName"] = get_corpse_name();
+	j["xp"] = get_xp();
+	j["thaco"] = get_thaco();
+	j["armorClass"] = get_armor_class();
+	j["baseArmorClass"] = get_base_armor_class();
 }
 
 void PlayerDestructible::save(json& j)
@@ -366,14 +372,19 @@ void MonsterDestructible::die(Creature& owner)
 	game.append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
 	game.finalize_message();
 	
+	// get the xp from the monster
+	
+
 	// message how much xp you get
 	game.append_message_part(WHITE_BLACK_PAIR, "You get ");
-	game.append_message_part(YELLOW_BLACK_PAIR, std::format("{}", xp));
+	game.append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
 	game.append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
 	game.finalize_message();
 
 	// increase the player's experience
-	game.player->destructible->xp += xp;
+	/*game.player->destructible->xp += xp;*/
+	game.player->destructible->set_xp(game.player->destructible->get_xp() + get_xp());
+	
 	game.player->ai->levelup_update(*game.player);
 
 	Destructible::die(owner);

@@ -364,12 +364,12 @@ void Map::save(json& j)
 	}
 }
 
-bool Map::is_wall(Vector2D pos) const
+bool Map::is_wall(Vector2D pos) const noexcept
 {
 	return !tcodMap->isWalkable(pos.x, pos.y);
 }
 
-bool Map::is_explored(Vector2D pos) const
+bool Map::is_explored(Vector2D pos) const noexcept
 {
 	if (!in_bounds(pos)) {
 		game.log("is_explored: Position (" + std::to_string(pos.x) + "," + std::to_string(pos.y) + ") out of bounds");
@@ -391,12 +391,12 @@ void Map::set_explored(Vector2D pos)
 	tiles.at(get_index(pos)).explored = true;
 }
 
-bool Map::is_in_fov(Vector2D pos) const
+bool Map::is_in_fov(Vector2D pos) const noexcept
 {
 	return tcodMap->isInFov(pos.x, pos.y);
 }
 
-bool Map::is_water(Vector2D pos) const
+bool Map::is_water(Vector2D pos) const noexcept
 {
 	if (!in_bounds(pos)) {
 		return false; // Out of bounds positions are not water
@@ -404,7 +404,7 @@ bool Map::is_water(Vector2D pos) const
 	return tiles.at(get_index(pos)).type == TileType::WATER;
 }
 
-TileType Map::get_tile_type(Vector2D pos) const
+TileType Map::get_tile_type(Vector2D pos) const noexcept
 {
 	if (!in_bounds(pos)) {
 		return TileType::WALL; // Out of bounds positions are treated as walls
@@ -887,7 +887,7 @@ bool Map::is_stairs(Vector2D pos) const
 	return game.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos) const
+bool Map::can_walk(Vector2D pos) const noexcept
 {
     if (is_wall(pos)) // check if the tile is a wall
     {
@@ -936,7 +936,7 @@ Creature* Map::get_actor(Vector2D pos) const noexcept
 	return nullptr;
 }
 
-std::vector<std::vector<Tile>> Map::get_map() const
+std::vector<std::vector<Tile>> Map::get_map() const noexcept
 {
 	std::vector<std::vector<Tile>> map;
 	for (const auto& tile : tiles)
@@ -1018,7 +1018,7 @@ double Map::get_cost(Vector2D pos) const noexcept
 	return tiles.at(index).cost;
 }
 
-bool Map::has_los(Vector2D from, Vector2D to) const
+bool Map::has_los(Vector2D from, Vector2D to) const noexcept
 {
 	int x0 = from.x;
 	int y0 = from.y;
@@ -1055,7 +1055,7 @@ bool Map::has_los(Vector2D from, Vector2D to) const
 	return true;
 }
 
-bool Map::is_door(Vector2D pos) const
+bool Map::is_door(Vector2D pos) const noexcept
 {
 	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
 		return false;
@@ -1064,7 +1064,7 @@ bool Map::is_door(Vector2D pos) const
 	return tileType == TileType::CLOSED_DOOR || tileType == TileType::OPEN_DOOR;
 }
 
-bool Map::is_open_door(Vector2D pos) const
+bool Map::is_open_door(Vector2D pos) const noexcept
 {
 	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
 		return false;

@@ -18,9 +18,9 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel)
     }
     
     // Store old values for comparison in display
-    int oldHP = owner.destructible->hp;
-    int oldMaxHP = owner.destructible->hpMax;
-    int oldTHAC0 = owner.destructible->thaco;
+    int oldHP = owner.destructible->get_hp();
+    int oldMaxHP = owner.destructible->get_max_hp();
+    int oldTHAC0 = owner.destructible->get_thaco();
     
     // Apply THAC0 improvement
     apply_thac0_improvement(owner, newLevel);
@@ -44,9 +44,9 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel)
     game.append_message_part(YELLOW_BLACK_PAIR, "LEVEL UP! ");
     game.append_message_part(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
     game.append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
-    if (oldTHAC0 != owner.destructible->thaco)
+    if (oldTHAC0 != owner.destructible->get_thaco())
     {
-        game.append_message_part(GREEN_BLACK_PAIR, std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->thaco));
+        game.append_message_part(GREEN_BLACK_PAIR, std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->get_thaco()));
     }
     game.finalize_message();
     
@@ -67,24 +67,24 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel)
     switch (playerPtr->playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
-        newTHAC0 = thac0Tables.getFighter(newLevel);
+        newTHAC0 = thac0Tables.get_fighter(newLevel);
         break;
     case Player::PlayerClassState::ROGUE:
-        newTHAC0 = thac0Tables.getRogue(newLevel);
+        newTHAC0 = thac0Tables.get_rogue(newLevel);
         break;
     case Player::PlayerClassState::CLERIC:
-        newTHAC0 = thac0Tables.getCleric(newLevel);
+        newTHAC0 = thac0Tables.get_cleric(newLevel);
         break;
     case Player::PlayerClassState::WIZARD:
-        newTHAC0 = thac0Tables.getWizard(newLevel);
+        newTHAC0 = thac0Tables.get_wizard(newLevel);
         break;
     }
     
     // Only update if THAC0 improved (lower is better)
-    if (newTHAC0 < owner.destructible->thaco)
+    if (newTHAC0 < owner.destructible->get_thaco())
     {
-        int oldTHAC0 = owner.destructible->thaco;
-        owner.destructible->thaco = newTHAC0;
+        int oldTHAC0 = owner.destructible->get_thaco();
+        owner.destructible->set_thaco(newTHAC0);
         
         game.append_message_part(GREEN_BLACK_PAIR, "THAC0 improved");
         game.append_message_part(WHITE_BLACK_PAIR, " from ");
@@ -141,9 +141,9 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     int totalHPGain = std::max(1, hitDiceRoll + conBonus);
     
     // Update HP values
-    owner.destructible->hpBase += hitDiceRoll; // Base HP without Con bonus
-    owner.destructible->hpMax += totalHPGain;
-    owner.destructible->hp += totalHPGain; // Give full HP on level up
+    owner.destructible->set_hp_base(owner.destructible->get_hp_base() + hitDiceRoll); // Base HP without Con bonus
+    owner.destructible->set_max_hp(owner.destructible->get_max_hp() + totalHPGain);
+    owner.destructible->set_hp(owner.destructible->get_hp() + totalHPGain); // Give full HP on level up
     
     // Display HP gain message
     game.append_message_part(GREEN_BLACK_PAIR, "Hit Points increased");
@@ -163,7 +163,7 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     game.finalize_message();
     
     game.log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}", 
-                         totalHPGain, hitDiceRoll, conBonus, owner.destructible->hpMax));
+                         totalHPGain, hitDiceRoll, conBonus, owner.destructible->get_max_hp()));
     
     return totalHPGain; // Return HP gained for display
 }

@@ -72,7 +72,7 @@ void AiSpider::update(Creature& owner)
                 if (distanceToPlayer <= 1)
                 {
                     // Surprise attack gets a damage bonus
-                    int normalDamage = game.d.roll_from_string(owner.attacker->roll);
+                    int normalDamage = game.d.roll_from_string(owner.attacker->get_roll());
                     int bonusDamage = game.d.roll(1, 2); // Ambush damage bonus
                     int totalDamage = normalDamage + bonusDamage;
 

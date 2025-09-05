@@ -218,7 +218,7 @@ void AiPlayer::pick_item(Creature& owner)
 				std::erase_if(game.container->get_inventory_mutable(), is_null);
 
 				// Sync ranged state after picking up an item
-				owner.syncRangedState();
+				owner.sync_ranged_state();
 
 				game.message(WHITE_BLACK_PAIR, std::format("You picked up the {}.", name), true);
 			}
@@ -460,7 +460,7 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 			Item* item = game.container->get_inventory_mutable().at(index).get();
 
 			// Sync ranged state since we might use/equip/unequip an item
-			owner.syncRangedState();
+			owner.sync_ranged_state();
 
 			return item;
 		}
@@ -641,8 +641,8 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		if (owner.destructible)
 		{
 			const int DEBUG_XP_AMOUNT = 1000;
-			owner.destructible->xp += DEBUG_XP_AMOUNT;
-			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, owner.destructible->xp), true);
+			owner.destructible->add_xp(DEBUG_XP_AMOUNT);
+			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, owner.destructible->get_xp()), true);
 			
 			// Use the same level up system as natural progression
 			game.player->ai->levelup_update(*game.player);

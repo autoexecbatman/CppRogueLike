@@ -76,17 +76,16 @@ int Ai::get_next_level_xp(Creature& owner)
 	}
 }
 
-
 void Ai::levelup_update(Creature& owner)
 {
 	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
 	int levelUpXp = get_next_level_xp(owner);
 
-	if (owner.destructible->xp >= levelUpXp)
+	if (owner.destructible->get_xp() >= levelUpXp)
 	{
 		game.player->playerLevel++;
-		owner.destructible->xp -= levelUpXp;
+		owner.destructible->set_xp(owner.destructible->get_xp() - levelUpXp);
 		game.message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
 		
 		game.display_levelup(game.player->playerLevel);

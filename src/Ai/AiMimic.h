@@ -13,9 +13,9 @@ public:
 
     int revealDistance = 1;  // Reveal true form when player is this close
 private:
-    bool consumeNearbyItems(Mimic& mimic);
-    void checkRevealing(Mimic& mimic);
-    void changeDisguise(Mimic& mimic);
+    bool consume_nearby_items(Mimic& mimic);
+    void check_revealing(Mimic& mimic);
+    void change_disguise(Mimic& mimic);
 
     // Fields moved from Mimic class
     bool isDisguised = true;

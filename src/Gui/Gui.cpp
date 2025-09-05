@@ -108,10 +108,10 @@ void Gui::gui_render()
 
 	gui_print_stats(
 		game.player->actorData.name,
-		game.player->destructible->hp,
-		game.player->destructible->hpMax,
-		game.player->attacker->roll,
-		game.player->destructible->dr
+		game.player->destructible->get_hp(),
+		game.player->destructible->get_max_hp(),
+		game.player->attacker->get_roll(),
+		game.player->destructible->get_dr()
 	);
 
 	render_hp_bar();
@@ -194,7 +194,7 @@ void Gui::gui() noexcept
 	box(guiWin, 0, 0);
 
 	// print the text
-	mvwprintw(guiWin, 1, 1, "HP:%d", game.player->destructible->hp);
+	mvwprintw(guiWin, 1, 1, "HP:%d", game.player->destructible->get_hp());
 
 	gui_refresh();
 }
@@ -358,8 +358,8 @@ void Gui::render_hp_bar()
 	constexpr int BAR_X = 1;
 	
 	// Get current HP values directly from player
-	const int currentHp = game.player->destructible->hp;
-	const int maxHp = game.player->destructible->hpMax;
+	const int currentHp = game.player->destructible->get_hp();
+	const int maxHp = game.player->destructible->get_max_hp();
 	
 	if (maxHp <= 0) return; // Prevent division by zero
 	

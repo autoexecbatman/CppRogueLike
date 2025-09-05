@@ -72,9 +72,9 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				attroff(COLOR_PAIR(actor->actorData.color));
 
 				// Print the monster's stats
-				mvprintw(1, 0, "HP: %d/%d", actor->destructible->hp, actor->destructible->hpMax);
-				mvprintw(2, 0, "AC: %d", actor->destructible->armorClass);
-				mvprintw(3, 0, "Roll: %s", actor->attacker->roll.data());
+				mvprintw(1, 0, "HP: %d/%d", actor->destructible->get_hp(), actor->destructible->get_max_hp());
+				mvprintw(2, 0, "AC: %d", actor->destructible->get_armor_class());
+				mvprintw(3, 0, "Roll: %s", actor->attacker->get_roll());
 				mvprintw(4, 0, "Str: %d", actor->strength);
 				mvprintw(5, 0, "Dex: %d", actor->dexterity);
 				mvprintw(6, 0, "Con: %d", actor->constitution);
@@ -86,8 +86,12 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				mvprintw(0, 50, "Distance: %d", distance);
 
 				// Display dexterity missile attack adjustment if applicable
-				if (game.player->has_state(ActorState::IS_RANGED) && game.player->dexterity > 0 &&
-					game.player->dexterity <= game.data_manager.get_dexterity_attributes().size()) {
+				if (game.player->has_state(ActorState::IS_RANGED)
+					&&
+					game.player->dexterity > 0
+					&&
+					game.player->dexterity <= game.data_manager.get_dexterity_attributes().size())
+				{
 					int missileAdj = game.data_manager.get_dexterity_attributes()[game.player->dexterity - 1].MissileAttackAdj;
 					if (missileAdj != 0) {
 						attron(COLOR_PAIR(WHITE_BLUE_PAIR));

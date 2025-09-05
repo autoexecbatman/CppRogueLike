@@ -9,22 +9,22 @@ struct CalculatedTHAC0s
 	std::vector<int> warrior{ 0,20,19,18,17,16,15,14,13,12,11,10,9,8,7,6,5,4,3,2,1 };
 	std::vector<int> wizard{ 0,20,20,20,19,19,19,18,18,18,17,17,17,16,16,16,15,15,15,14,14 };
 
-	int getFighter(int level)
+	int get_fighter(int level)
 	{
 		if (level > 0) { return warrior.at(level); }
 		else { game.err("Your level is less then 1."); return 1; }
 	}
-	int getRogue(int level)
+	int get_rogue(int level)
 	{
 		if (level > 0) { return rogue.at(level); }
 		else { game.err("Your level is less then 1."); return 1; }
 	}
-	int getCleric(int level)
+	int get_cleric(int level)
 	{
 		if (level > 0) { return cleric.at(level); }
 		else { game.err("Your level is less then 1."); return 1; }
 	}
-	int getWizard(int level)
+	int get_wizard(int level)
 	{
 		if (level > 0) { return wizard.at(level); }
 		else { game.err("Your level is less then 1."); return 1; }

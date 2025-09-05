@@ -58,7 +58,7 @@ void CharacterSheetUI::display_basic_info(WINDOW* window, const Player& player)
 void CharacterSheetUI::display_experience_info(WINDOW* window, const Player& player)
 {
     // Calculate XP needed for next level
-    int currentXP = player.destructible->xp;
+    int currentXP = player.destructible->get_xp();
     int nextLevelXP = player.ai->get_next_level_xp(const_cast<Player&>(player));
     int xpNeeded = nextLevelXP - currentXP;
     float progressPercent = static_cast<float>(currentXP) / static_cast<float>(nextLevelXP) * 100.0f;
@@ -135,8 +135,8 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
     mvwprintw(window, 16, 1, "Combat Statistics:");
 
     // Calculate base HP and Con bonus
-    int baseHP = player.destructible->hpBase;
-    int conBonusTotal = player.destructible->hpMax - baseHP;
+    int baseHP = player.destructible->get_hp_base();
+    int conBonusTotal = player.destructible->get_max_hp() - baseHP;
 
     // Show HP with Constitution effect
     if (conBonusTotal != 0)
@@ -146,8 +146,8 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
             17,
             3,
             "HP: %d/%d ",
-            player.destructible->hp,
-            player.destructible->hpMax
+            player.destructible->get_hp(),
+            player.destructible->get_max_hp()
         );
 
         wattron(window, COLOR_PAIR((conBonusTotal > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
@@ -166,8 +166,8 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
             17,
             3,
             "HP: %d/%d",
-            player.destructible->hp,
-            player.destructible->hpMax
+            player.destructible->get_hp(),
+            player.destructible->get_max_hp()
         );
     }
 
@@ -191,8 +191,8 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
         }
     }
 
-    mvwprintw(window, 19, 3, "Armor Class: %d", player.destructible->armorClass);
-    mvwprintw(window, 20, 3, "THAC0: %d", player.destructible->thaco);
+    mvwprintw(window, 19, 3, "Armor Class: %d", player.destructible->get_armor_class());
+    mvwprintw(window, 20, 3, "THAC0: %d", player.destructible->get_thaco());
 
     // Display dexterity bonuses
     const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
@@ -224,7 +224,7 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 			3,
 			"Weapon: %s (%s damage)",
 			equippedWeapon->actorData.name.c_str(),
-			player.attacker->roll.c_str()
+			player.attacker->get_roll().c_str()
 		);
 
 		// Show if weapon is ranged
@@ -245,7 +245,7 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 				26,
 				3,
 				"Effective damage: %s %+d",
-				player.attacker->roll.c_str(),
+				player.attacker->get_roll().c_str(),
 				strDmgMod
 			);
 			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));

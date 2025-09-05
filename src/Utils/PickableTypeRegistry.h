@@ -68,6 +68,8 @@ namespace PickableTypeRegistry
     inline bool is_armor(Type type) { return get_category(type) == Category::ARMOR; }
     inline bool is_gold(Type type) { return type == Type::GOLD; }
     inline bool is_ranged_weapon(Type type) { return type == Type::LONGBOW; }
+    inline bool is_food(Type type) { return type == Type::FOOD || type == Type::CORPSE_FOOD; }
+    inline bool is_scroll(Type type) { return type == Type::LIGHTNING_BOLT || type == Type::FIREBALL || type == Type::CONFUSER; }
     
     // Get type from item safely
     Type get_item_type(const Item& item);
