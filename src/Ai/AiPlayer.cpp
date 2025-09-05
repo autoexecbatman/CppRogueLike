@@ -194,7 +194,7 @@ void AiPlayer::pick_item(Creature& owner)
 				if (goldPickable)
 				{
 					// Add gold to player
-					owner.gold += goldPickable->amount;
+					owner.adjust_gold(goldPickable->amount);
 
 					// Display message
 					game.append_message_part(YELLOW_BLACK_PAIR, "You picked up ");

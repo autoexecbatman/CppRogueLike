@@ -43,11 +43,11 @@ Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",Y
 	const int thaco = 20;
 	const int ac = 6;
 	const int xp = 105; // TRIPLED from 35 for solo play bonus
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
-	constitution = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
+	set_constitution(game.d.d6() + game.d.d6() + game.d.d6());
 
-	weaponEquipped = "Short Sword";
+	set_weapon_equipped("Short Sword");
 
 	attacker = std::make_unique<Attacker>("D6");
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead goblin", 105, thaco, ac);
@@ -63,10 +63,10 @@ Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",RED_BLACK_
 	const int thaco = 19;
 	const int ac = 6;
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
 
-	weaponEquipped = "Long Sword";
+	set_weapon_equipped("Long Sword");
 
 	attacker = std::make_unique<Attacker>("D10");
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead orc", 105, thaco, ac); // TRIPLED from 35 for solo play bonus
@@ -83,8 +83,8 @@ Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T', "troll",GRE
 	const int thaco = 13;
 	const int ac = 4;
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
 
 	attacker = std::make_unique<Attacker>("D10");
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 300, thaco, ac); // TRIPLED from 100 for solo play bonus
@@ -101,8 +101,8 @@ Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",R
 	const int thaco = 9;
 	const int ac = 1;
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
 
 	attacker = std::make_unique<Attacker>("D10");
 	destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 600, thaco, ac); // TRIPLED from 200 for solo play bonus
@@ -120,7 +120,7 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"s
 	// NOTE: Inventory is populated in MonsterFactory.cpp - do not add items here
 	// This ensures single source of truth for shopkeeper inventory
 	
-	gold = 200;
+	set_gold(200);
 }
 
 Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",RED_BLACK_PAIR })
@@ -129,10 +129,10 @@ Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",R
 	const int thaco = 18;
 	const int ac = 7;
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
 
-	weaponEquipped = "Longbow";
+	set_weapon_equipped("Longbow");
 
 	attacker = std::make_unique<Attacker>("D8");
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead archer", 120, thaco, ac); // TRIPLED from 40 for solo play bonus
@@ -147,11 +147,11 @@ Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",WHITE_B
 	const int thaco = 19;
 	const int ac = 9;
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
-	intelligence = game.d.d6() + game.d.d6() + game.d.d6(); // Mages have higher intelligence
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
+	set_intelligence(game.d.d6() + game.d.d6() + game.d.d6()); // Mages have higher intelligence
 
-	weaponEquipped = "Staff";
+	set_weapon_equipped("Staff");
 
 	attacker = std::make_unique<Attacker>("D6");
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead mage", 180, thaco, ac); // TRIPLED from 60 for solo play bonus
@@ -166,8 +166,8 @@ Mimic::Mimic(Vector2D position) : Creature(position, ActorData{ 'M',"mimic",RED_
 	const int thaco = 17; // Increased from 16 (making it harder to hit)
 	const int ac = 7; // Kept the same
 
-	strength = game.d.d6() + game.d.d6() + game.d.d6();
-	dexterity = game.d.d6() + game.d.d6() + game.d.d6();
+	set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+	set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
 
 	attacker = std::make_unique<Attacker>("D4"); // Reduced from D6
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac); // TRIPLED from 50 for solo play bonus

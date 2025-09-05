@@ -201,7 +201,8 @@ void AiMimic::check_revealing(Mimic& mimic)
     game.log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
     // Check if player is close enough to reveal - using our internal revealDistance
-    if (distanceToPlayer <= revealDistance) {
+    if (distanceToPlayer <= revealDistance)
+    {
         // Reveal true form!
         isDisguised = false;
         mimic.actorData.ch = 'M';
@@ -212,7 +213,8 @@ void AiMimic::check_revealing(Mimic& mimic)
         game.log("Mimic revealed itself!");
 
         // Try to confuse the player
-        if (game.d.d20() > game.player->wisdom) {
+        if (game.d.d20() > game.player->get_wisdom())
+        {
             game.append_message_part(WHITE_GREEN_PAIR, "The ");
             game.append_message_part(RED_YELLOW_PAIR, "mimic");
             game.append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
@@ -223,13 +225,15 @@ void AiMimic::check_revealing(Mimic& mimic)
 
             // Apply confusion through player's AI
             auto playerAi = dynamic_cast<AiPlayer*>(game.player->ai.get());
-            if (playerAi) {
+            if (playerAi)
+            {
                 // Using our confusionDuration for consistency
                 playerAi->applyConfusion(confusionDuration);
                 game.log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
             }
         }
-        else {
+        else
+        {
             game.append_message_part(RED_YELLOW_PAIR, "A mimic");
             game.append_message_part(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
             game.finalize_message();

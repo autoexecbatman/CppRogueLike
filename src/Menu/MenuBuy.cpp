@@ -173,35 +173,45 @@ void MenuBuy::menu()
 
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
-	if (shopkeeper.container->get_inventory_mutable().empty() || currentState >= shopkeeper.container->get_inventory_mutable().size())
-	{
-		game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-		return;
-	}
-
-	size_t index = currentState % shopkeeper.container->get_inventory_mutable().size();
-	auto itemIter = shopkeeper.container->get_inventory_mutable().begin() + index;
-	auto& item = *itemIter;
-
-	if (seller.gold >= item->value) // Check if player has enough currency
-	{
-		seller.gold -= item->value; // Deduct currency
-		shopkeeper.gold += item->value; // Add currency
-		seller.container->get_inventory_mutable().insert(seller.container->get_inventory_mutable().begin(), std::move(item)); // Transfer item
-
-		// Properly erase item from shopkeeper's inventory
-		shopkeeper.container->get_inventory_mutable().erase(itemIter);
-
-		// Ensure currentState stays within valid bounds
-		if (currentState >= shopkeeper.container->get_inventory_mutable().size() && !shopkeeper.container->get_inventory_mutable().empty())
-		{
-			currentState = shopkeeper.container->get_inventory_mutable().size() - 1;
-		}
-
-		game.message(WHITE_BLACK_PAIR, "Item purchased successfully.", true);
-	}
-	else
-	{
-		game.message(WHITE_BLACK_PAIR, "Insufficient currency.", true);
-	}
+    if (shopkeeper.container->is_empty() || currentState >= shopkeeper.container->get_item_count())
+    {
+        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        return;
+    }
+    
+    const Item* item = shopkeeper.container->get_item_at(currentState);
+    if (!item)
+    {
+        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        return;
+    }
+    
+    if (seller.get_gold() >= item->value)
+    {
+        // Remove item from shopkeeper and add to seller
+        auto removed_item = shopkeeper.container->remove_at(currentState);
+        if (removed_item.has_value())
+        {
+            seller.adjust_gold(-item->value);
+            shopkeeper.adjust_gold(item->value);
+            
+            seller.container->add(std::move(*removed_item));
+            
+            // Adjust currentState bounds
+            if (currentState >= shopkeeper.container->get_item_count() && !shopkeeper.container->is_empty())
+            {
+                currentState = shopkeeper.container->get_item_count() - 1;
+            }
+            
+            game.message(WHITE_BLACK_PAIR, "Item purchased successfully.", true);
+        }
+        else
+        {
+            game.message(WHITE_BLACK_PAIR, "Transaction failed.", true);
+        }
+    }
+    else
+    {
+        game.message(WHITE_BLACK_PAIR, "Insufficient currency.", true);
+    }
 }

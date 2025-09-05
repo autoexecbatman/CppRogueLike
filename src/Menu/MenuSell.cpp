@@ -55,43 +55,61 @@ void MenuSell::menu_print_state(size_t state)
 
 void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller)
 {
-	if (seller.container->get_inventory_mutable().empty() || currentState >= seller.container->get_inventory_mutable().size())
-	{
-		game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-		return;
-	} 
-
-	auto itemIter = seller.container->get_inventory_mutable().begin() + currentState;
-	auto& item = *itemIter;
-
-	if (!item)
-	{
-		game.log("Error: Attempted to sell a null item.");
-		game.message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
-		return;
-	}
-
-	auto price = item->value;
-	if (shopkeeper.gold >= price)
-	{
-		shopkeeper.gold -= price;
-		seller.gold += price;
-		shopkeeper.container->get_inventory_mutable().push_back(std::move(item));
-		seller.container->get_inventory_mutable().erase(itemIter);
-
-		// Ensure currentState stays within valid bounds
-		if (currentState >= seller.container->get_inventory_mutable().size() && !seller.container->get_inventory_mutable().empty())
-		{
-			currentState = seller.container->get_inventory_mutable().size() - 1;
-		}
-
-		game.message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
-	}
-	else
-	{
-		game.log("Shopkeeper does not have enough gold to buy the item.");
-		game.message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
-	}
+    if (seller.container->is_empty() || currentState >= seller.container->get_item_count())
+    {
+        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        return;
+    }
+    
+    const Item* item = seller.container->get_item_at(currentState);
+    if (!item)
+    {
+        game.log("Error: Attempted to sell a null item.");
+        game.message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
+        return;
+    }
+    
+    auto price = item->value;
+    
+    if (shopkeeper.get_gold() >= price)
+    {
+        // Remove item from seller
+        auto removed_item = seller.container->remove_at(currentState);
+        if (removed_item.has_value())
+        {
+            shopkeeper.adjust_gold(-price);
+            seller.adjust_gold(price);
+            
+            // Add item to shopkeeper
+            auto add_result = shopkeeper.container->add(std::move(*removed_item));
+            if (!add_result.has_value())
+            {
+                // Handle failure case - return item to seller
+                seller.container->add(std::move(*removed_item));
+                shopkeeper.adjust_gold(price);
+                seller.adjust_gold(-price);
+                game.message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
+                return;
+            }
+            
+            // Adjust currentState bounds
+            if (currentState >= seller.container->get_item_count() && !seller.container->is_empty())
+            {
+                currentState = seller.container->get_item_count() - 1;
+            }
+            
+            game.message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
+        }
+        else
+        {
+            game.message(WHITE_BLACK_PAIR, "Transaction failed.", true);
+        }
+    }
+    else
+    {
+        game.log("Shopkeeper does not have enough gold to buy the item.");
+        game.message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+    }
 }
 
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), shopkeeper(shopkeeper)

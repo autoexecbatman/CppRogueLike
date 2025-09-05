@@ -8,12 +8,12 @@
 
 void Male::on_selection()
 {
-	game.player->gender = "Male";
+	game.player->set_gender("Male");
 }
 
 void Female::on_selection()
 {
-	game.player->gender = "Female";
+	game.player->set_gender("Female");
 }
 
 void Random::on_selection()
@@ -21,11 +21,11 @@ void Random::on_selection()
 	auto roll = game.d.d2();
 	if (roll == 1)
 	{
-		game.player->gender = "Male";
+		game.player->set_gender("Male");
 	}
 	else
 	{
-		game.player->gender = "Female";
+		game.player->set_gender("Female");
 	}
 }
 

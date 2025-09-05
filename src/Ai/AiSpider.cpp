@@ -38,9 +38,9 @@ void AiSpider::update(Creature& owner)
     }
 
     // Always ensure spiders have strength
-    if (owner.strength <= 0)
+    if (owner.get_strength() <= 0)
     {
-        owner.strength = 3; // Ensure minimum strength
+        owner.set_strength(3); // Ensure minimum strength
     }
 
     // Reduce poison cooldown if active
@@ -503,9 +503,9 @@ AiWebSpinner::AiWebSpinner()
 void AiWebSpinner::update(Creature& owner)
 {
     // Always ensure spiders have strength
-    if (owner.strength <= 0)
+    if (owner.get_strength() <= 0)
     {
-        owner.strength = 4; // Ensure minimum strength
+        owner.set_strength(4); // Ensure minimum strength
     }
 
     // Update cooldowns

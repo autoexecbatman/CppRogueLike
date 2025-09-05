@@ -32,7 +32,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 void Destructible::update_constitution_bonus(Creature& owner)
 {
 	// Check if Constitution has changed since last update
-	if (owner.constitution == get_last_constitution())
+	if (owner.get_constitution() == get_last_constitution())
 	{
 		return; // No need to recalculate
 	}
@@ -40,9 +40,9 @@ void Destructible::update_constitution_bonus(Creature& owner)
 	// Get the Constitution bonus from the table
 	int hpAdj = 0;
 	const auto& constitutionAttributes = game.data_manager.get_constitution_attributes();
-	if (owner.constitution >= 1 && owner.constitution <= constitutionAttributes.size())
+	if (owner.get_constitution() >= 1 && owner.get_constitution() <= constitutionAttributes.size())
 	{
-		hpAdj = constitutionAttributes[owner.constitution - 1].HPAdj;
+		hpAdj = constitutionAttributes[owner.get_constitution() - 1].HPAdj;
 	}
 
 	// Calculate new max HP based on base HP and Constitution bonus
@@ -92,7 +92,7 @@ void Destructible::update_constitution_bonus(Creature& owner)
 	}
 
 	// Update the last known Constitution value
-	set_last_constitution(owner.constitution);
+	set_last_constitution(owner.get_constitution());
 }
 
 void Destructible::take_damage(Creature& owner, int damage)
@@ -161,9 +161,9 @@ void Destructible::update_armor_class(Creature& owner)
 
 	// Apply Dexterity's Defensive Adjustment
 	const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
-	if (owner.dexterity > 0 && owner.dexterity <= dexterityAttributes.size())
+	if (owner.get_dexterity() > 0 && owner.get_dexterity() <= dexterityAttributes.size())
 	{
-		int defensiveAdj = dexterityAttributes[owner.dexterity - 1].DefensiveAdj;
+		int defensiveAdj = dexterityAttributes[owner.get_dexterity() - 1].DefensiveAdj;
 		// DefensiveAdj is applied directly to AC
 		// Note: In AD&D, a negative DefensiveAdj value actually improves AC
 		calculatedAC += defensiveAdj;

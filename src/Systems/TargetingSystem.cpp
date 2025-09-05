@@ -75,12 +75,12 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->get_hp(), actor->destructible->get_max_hp());
 				mvprintw(2, 0, "AC: %d", actor->destructible->get_armor_class());
 				mvprintw(3, 0, "Roll: %s", actor->attacker->get_roll());
-				mvprintw(4, 0, "Str: %d", actor->strength);
-				mvprintw(5, 0, "Dex: %d", actor->dexterity);
-				mvprintw(6, 0, "Con: %d", actor->constitution);
-				mvprintw(7, 0, "Int: %d", actor->intelligence);
-				mvprintw(8, 0, "Wis: %d", actor->wisdom);
-				mvprintw(9, 0, "Cha: %d", actor->charisma);
+				mvprintw(4, 0, "Str: %d", actor->get_strength());
+				mvprintw(5, 0, "Dex: %d", actor->get_dexterity());
+				mvprintw(6, 0, "Con: %d", actor->get_constitution());
+				mvprintw(7, 0, "Int: %d", actor->get_intelligence());
+				mvprintw(8, 0, "Wis: %d", actor->get_wisdom());
+				mvprintw(9, 0, "Cha: %d", actor->get_charisma());
 
 				// Print the distance from the player to the target cursor
 				mvprintw(0, 50, "Distance: %d", distance);
@@ -88,11 +88,11 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				// Display dexterity missile attack adjustment if applicable
 				if (game.player->has_state(ActorState::IS_RANGED)
 					&&
-					game.player->dexterity > 0
+					game.player->get_dexterity() > 0
 					&&
-					game.player->dexterity <= game.data_manager.get_dexterity_attributes().size())
+					game.player->get_dexterity() <= game.data_manager.get_dexterity_attributes().size())
 				{
-					int missileAdj = game.data_manager.get_dexterity_attributes()[game.player->dexterity - 1].MissileAttackAdj;
+					int missileAdj = game.data_manager.get_dexterity_attributes()[game.player->get_dexterity() - 1].MissileAttackAdj;
 					if (missileAdj != 0) {
 						attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 						mvprintw(4, 50, "Ranged Attack Bonus: %+d", missileAdj);

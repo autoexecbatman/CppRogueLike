@@ -98,12 +98,12 @@ void Gui::gui_render()
 
 	// print the player's attributes on guiWin
 	gui_print_attrs(
-		game.player->strength,
-		game.player->dexterity,
-		game.player->constitution,
-		game.player->intelligence,
-		game.player->wisdom,
-		game.player->charisma
+		game.player->get_strength(),
+		game.player->get_dexterity(),
+		game.player->get_constitution(),
+		game.player->get_intelligence(),
+		game.player->get_wisdom(),
+		game.player->get_charisma()
 	);
 
 	gui_print_stats(
@@ -166,7 +166,7 @@ void Gui::gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, 
 	// Print everything to main window to avoid sub-window issues
 	mvwprintw(guiWin, 2, 1, "Name: %s", playerName.data());
 	mvwprintw(guiWin, 3, 1, "HP:%d/%d", guiHp, guiHpMax);
-	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->gold);
+	mvwprintw(guiWin, 4, 1, "Gold: %d", game.player->get_gold());
 	mvwprintw(guiWin, 5, 1, "Turn: %d", game.time);
 }
 

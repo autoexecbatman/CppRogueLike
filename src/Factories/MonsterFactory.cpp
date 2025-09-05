@@ -89,7 +89,7 @@ MonsterFactory::MonsterFactory()
             ration->value = 30;
             shopkeeper.container->add(std::move(ration));
             
-            shopkeeper.gold = 500;  // Give shopkeeper gold to buy player items
+            shopkeeper.set_gold(500);  // Give shopkeeper gold to buy player items
         }
         });
 }

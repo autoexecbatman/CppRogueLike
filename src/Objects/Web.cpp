@@ -18,7 +18,7 @@ bool Web::applyEffect(Creature& creature)
     if (&creature != game.player.get()) return false;
 
     // Calculate chance to get caught based on dexterity and web strength
-    int catchChance = 40 + (webStrength * 10) - ((game.player->dexterity - 10) * 3);
+    int catchChance = 40 + (webStrength * 10) - ((game.player->get_dexterity() - 10) * 3);
     catchChance = std::min(90, std::max(10, catchChance));  // Cap between 10-90%
 
     if (game.d.d100() <= catchChance)

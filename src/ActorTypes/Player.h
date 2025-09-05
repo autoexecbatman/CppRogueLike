@@ -61,7 +61,6 @@ public:
 		WIZARD
 	} playerClassState{ PlayerClassState::NONE };
 
-	std::string playerGender{ "None" };
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
 	int playerLevel{ 1 };

@@ -38,9 +38,9 @@ void Spider::init_spider_type()
         actorData = ActorData{ 's',"small spider",GREEN_BLACK_PAIR };
 
         // Stats for small spider
-        strength = game.d.d6() + game.d.d6() + game.d.d6();  // Minimum strength of 3
-        dexterity = game.d.d6() + game.d.d6() + game.d.d6();  // Small spiders are very agile
-        constitution = game.d.d6();
+        set_strength(game.d.d6() + game.d.d6() + game.d.d6());  // Minimum strength of 3
+        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());  // Small spiders are very agile
+        set_constitution(game.d.d6());
 
         // Combat properties - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(game.d.d2() + 2, 0, "dead small spider", 45, 20, 7); // TRIPLED from 15 for solo play bonus
@@ -55,9 +55,9 @@ void Spider::init_spider_type()
         actorData = ActorData{ 'S',"giant spider",RED_BLACK_PAIR };
 
         // Stats for giant spider
-        strength = game.d.d6() + game.d.d6() + game.d.d6();
-        dexterity = game.d.d6() + game.d.d6() + game.d.d6();
-        constitution = game.d.d6() + 1;
+        set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
+        set_constitution(game.d.d6() + 1);
 
         // Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(
@@ -79,9 +79,9 @@ void Spider::init_spider_type()
         actorData = ActorData{ 'W',"web weaver",BLACK_GREEN_PAIR };
 
         // Stats for web spinner - now much more formidable
-        strength = game.d.d6() + game.d.d6() + game.d.d6();
-        dexterity = game.d.d6() + game.d.d6() + game.d.d6();
-        constitution = game.d.d6() + game.d.d6() + game.d.d6();
+        set_strength(game.d.d6() + game.d.d6() + game.d.d6());
+        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
+        set_constitution(game.d.d6() + game.d.d6() + game.d.d6());
 
         // Combat properties - significantly stronger - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(game.d.d8() + 5, 1, "dead web weaver", 180, 17, 5); // TRIPLED from 60 for solo play bonus

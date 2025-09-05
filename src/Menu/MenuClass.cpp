@@ -22,7 +22,7 @@ void equip_fighter_starting_gear()
 		rollSum += game.d.d4(); // Use game's RandomDice instance
 	}
 	int startingGold = rollSum * 10;
-	player.gold = startingGold;
+	player.set_gold(startingGold);
 	
 	// Generous starting equipment for solo play
 	

@@ -24,9 +24,9 @@ void Attacker::attack(Creature& attacker, Creature& target)
         return;
     }
 
-    if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
+    if (!target.destructible->is_dead() && attacker.get_strength() > 0) // if target is not dead and attacker has strength
     {
-        const auto& strength = game.data_manager.get_strength_attributes().at(attacker.strength - 1); // get the strength attributes for the attacker
+        const auto& strength = game.data_manager.get_strength_attributes().at(attacker.get_strength() - 1); // get the strength attributes for the attacker
 
         // roll for attack and damage
         int rollAttack = game.d.d20();
@@ -40,12 +40,12 @@ void Attacker::attack(Creature& attacker, Creature& target)
         if (attacker.has_state(ActorState::IS_RANGED))
         {
             // Get dexterity bonus for missile attacks
-            const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.dexterity - 1);
+            const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.get_dexterity() - 1);
             hitModifier = dexAttributes.MissileAttackAdj;
 
             // Display missile attack bonus info
             if (hitModifier != 0) {
-                game.log("Applying ranged attack modifier: " + std::to_string(hitModifier) + " from dexterity " + std::to_string(attacker.dexterity));
+                game.log("Applying ranged attack modifier: " + std::to_string(hitModifier) + " from dexterity " + std::to_string(attacker.get_dexterity()));
             }
         }
 
@@ -191,9 +191,9 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		return;
 	}
 
-	if (!target.destructible->is_dead() && attacker.strength > 0) // if target is not dead and attacker has strength
+	if (!target.destructible->is_dead() && attacker.get_strength() > 0) // if target is not dead and attacker has strength
 	{
-		const auto& strength = game.data_manager.get_strength_attributes().at(attacker.strength - 1); // get the strength attributes for the attacker
+		const auto& strength = game.data_manager.get_strength_attributes().at(attacker.get_strength() - 1); // get the strength attributes for the attacker
 
 		// roll for attack and damage
 		int rollAttack = game.d.d20();
@@ -207,12 +207,12 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 		if (attacker.has_state(ActorState::IS_RANGED))
 		{
 			// Get dexterity bonus for missile attacks
-			const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.dexterity - 1);
+			const auto& dexAttributes = game.data_manager.get_dexterity_attributes().at(attacker.get_dexterity() - 1);
 			hitModifier += dexAttributes.MissileAttackAdj;
 
 			// Display missile attack bonus info
 			if (dexAttributes.MissileAttackAdj != 0) {
-				game.log("Applying ranged attack modifier: " + std::to_string(dexAttributes.MissileAttackAdj) + " from dexterity " + std::to_string(attacker.dexterity));
+				game.log("Applying ranged attack modifier: " + std::to_string(dexAttributes.MissileAttackAdj) + " from dexterity " + std::to_string(attacker.get_dexterity()));
 			}
 		}
 

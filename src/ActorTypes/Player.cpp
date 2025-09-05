@@ -20,12 +20,12 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 {
 	// Rolling for stats
 	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
-	strength = roll3d6();
-	dexterity = roll3d6();
-	constitution = roll3d6();
-	intelligence = roll3d6();
-	wisdom = roll3d6();
-	charisma = roll3d6();
+	set_strength(roll3d6());
+	set_dexterity(roll3d6());
+	set_constitution(roll3d6());
+	set_intelligence(roll3d6());
+	set_wisdom(roll3d6());
+	set_charisma(roll3d6());
 
 	//==PLAYER==
 	const int playerHp = 20 + game.d.d10(); // we roll the dice to get the player's hp
@@ -33,7 +33,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 	const int playerXp = 0; // the player's experience points
 	const int playerAC = 10; // the player's armor class
 
-	gold = 100; // Default starting gold (increased to 200 for fighters in MenuClass)
+	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
 	attacker = std::make_unique<Attacker>("D2"); // Default attack roll, can be changed by equipping a weapon
 	destructible = std::make_unique<PlayerDestructible>( // PlayerDestructible is a subclass of Destructible
 		playerHp, // initial HP
@@ -69,8 +69,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->constitution += 1;
-		game.player->charisma -= 1;
+		game.player->adjust_constitution(1);
+		game.player->adjust_charisma(-1);
 		break;
 	case Player::PlayerRaceState::ELF:
 		// Create a temporary window for racial bonus message
@@ -84,8 +84,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->dexterity += 1;
-		game.player->constitution -= 1;
+		game.player->adjust_dexterity(1);
+		game.player->adjust_constitution(-1);
 		break;
 	case Player::PlayerRaceState::GNOME:
 		// Create a temporary window for racial bonus message
@@ -99,8 +99,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->intelligence += 1;
-		game.player->wisdom -= 1;
+		game.player->adjust_intelligence(1);
+		game.player->adjust_wisdom(-1);
 		break;
 	case Player::PlayerRaceState::HALFELF:
 		break;
@@ -116,8 +116,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->dexterity += 1;
-		game.player->strength -= 1;
+		game.player->adjust_dexterity(1);
+		game.player->adjust_strength(-1);
 		break;
 	default:
 		break;
@@ -136,16 +136,16 @@ void Player::calculate_thaco()
 	switch (playerClassState)
 	{
 	case PlayerClassState::FIGHTER:
-		destructible->set_thaco(thaco_tables.get_fighter(playerLevel));
+		destructible->set_thaco(thaco_tables.get_fighter(get_player_level()));
 		break;
 	case PlayerClassState::ROGUE:
-		destructible->set_thaco(thaco_tables.get_rogue(playerLevel));
+		destructible->set_thaco(thaco_tables.get_rogue(get_player_level()));
 		break;
 	case PlayerClassState::CLERIC:
-		destructible->set_thaco(thaco_tables.get_cleric(playerLevel));
+		destructible->set_thaco(thaco_tables.get_cleric(get_player_level()));
 		break;
 	case PlayerClassState::WIZARD:
-		destructible->set_thaco(thaco_tables.get_wizard(playerLevel));
+		destructible->set_thaco(thaco_tables.get_wizard(get_player_level()));
 		break;
 	case PlayerClassState::NONE:
 		break;
@@ -297,7 +297,7 @@ void Player::get_stuck_in_web(int duration, int strength, Web* web)
 bool Player::try_break_web()
 {
 	// Calculate chance to break free based on strength vs web strength
-	int breakChance = 20 + (strength * 5) - (webStrength * 10);
+	int breakChance = 20 + (get_strength() * 5) - (webStrength * 10);
 
 	// Ensure some minimum chance
 	breakChance = std::max(10, breakChance);

@@ -87,7 +87,7 @@ void CharacterSheetUI::display_attributes(WINDOW* window, const Player& player)
 
     // Display Strength with modifiers
     wattron(window, A_BOLD);
-    mvwprintw(window, 9, 3, "Strength: %d", player.strength);
+    mvwprintw(window, 9, 3, "Strength: %d", player.get_strength());
     wattroff(window, A_BOLD);
 
     // Show hit and damage modifiers from strength
@@ -105,7 +105,7 @@ void CharacterSheetUI::display_attributes(WINDOW* window, const Player& player)
     // Display Constitution with HP bonus effect
     int conBonus = get_constitution_bonus(player);
 
-    mvwprintw(window, 10, 3, "Dexterity: %d", player.dexterity);
+    mvwprintw(window, 10, 3, "Dexterity: %d", player.get_dexterity());
 
     if (conBonus != 0)
     {
@@ -115,19 +115,19 @@ void CharacterSheetUI::display_attributes(WINDOW* window, const Player& player)
             11,
             3,
             "Constitution: %d (%+d HP per level)",
-            player.constitution,
+            player.get_constitution(),
             conBonus
         );
         wattroff(window, COLOR_PAIR((conBonus > 0) ? WHITE_GREEN_PAIR : WHITE_RED_PAIR));
     }
     else
     {
-        mvwprintw(window, 11, 3, "Constitution: %d", player.constitution);
+        mvwprintw(window, 11, 3, "Constitution: %d", player.get_constitution());
     }
 
-    mvwprintw(window, 12, 3, "Intelligence: %d", player.intelligence);
-    mvwprintw(window, 13, 3, "Wisdom: %d", player.wisdom);
-    mvwprintw(window, 14, 3, "Charisma: %d", player.charisma);
+    mvwprintw(window, 12, 3, "Intelligence: %d", player.get_intelligence());
+    mvwprintw(window, 13, 3, "Wisdom: %d", player.get_wisdom());
+    mvwprintw(window, 14, 3, "Charisma: %d", player.get_charisma());
 }
 
 void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player)
@@ -196,14 +196,14 @@ void CharacterSheetUI::display_combat_stats(WINDOW* window, const Player& player
 
     // Display dexterity bonuses
     const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
-    if (player.dexterity > 0 && player.dexterity <= dexterityAttributes.size())
+    if (player.get_dexterity() > 0 && player.get_dexterity() <= dexterityAttributes.size())
     {
         // Show missile attack adjustment
-        int missileAdj = dexterityAttributes.at(player.dexterity - 1).MissileAttackAdj;
+        int missileAdj = dexterityAttributes.at(player.get_dexterity() - 1).MissileAttackAdj;
         mvwprintw(window, 21, 3, "Ranged Attack Bonus: %d", missileAdj);
 
         // Show defensive adjustment
-        int defensiveAdj = dexterityAttributes.at(player.dexterity - 1).DefensiveAdj;
+        int defensiveAdj = dexterityAttributes.at(player.get_dexterity() - 1).DefensiveAdj;
         mvwprintw(window, 22, 3, "Defensive Adjustment: %d AC", defensiveAdj);
     }
 }
@@ -270,8 +270,8 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 void CharacterSheetUI::display_right_panel_info(WINDOW* window, const Player& player)
 {
     // Add gold and other stats on the right side
-    mvwprintw(window, 9, 60, "Gender: %s", player.playerGender.c_str());
-    mvwprintw(window, 10, 60, "Gold: %d", player.gold);
+    mvwprintw(window, 9, 60, "Gender: %s", player.get_gender().c_str());
+    mvwprintw(window, 10, 60, "Gold: %d", player.get_gold());
     
     // Enhanced hunger display with numbers and bar
     wattron(window, COLOR_PAIR(game.hunger_system.get_hunger_color()));
@@ -302,9 +302,9 @@ void CharacterSheetUI::display_constitution_effects(WINDOW* window, const Player
     // Add Constitution details panel on the right side
     mvwprintw(window, 14, 60, "Constitution Effects:");
 
-    if (player.constitution >= 1 && player.constitution <= game.data_manager.get_constitution_attributes().size())
+    if (player.get_constitution() >= 1 && player.get_constitution() <= game.data_manager.get_constitution_attributes().size())
     {
-        const auto& conAttr = game.data_manager.get_constitution_attributes().at(player.constitution - 1);
+        const auto& conAttr = game.data_manager.get_constitution_attributes().at(player.get_constitution() - 1);
 
         mvwprintw(window, 15, 62, "HP Adjustment: %+d per level", conAttr.HPAdj);
         mvwprintw(window, 16, 62, "System Shock: %d%%", conAttr.SystemShock);
@@ -323,9 +323,9 @@ void CharacterSheetUI::display_strength_effects(WINDOW* window, const Player& pl
     // Add strength details panel on the right side
     mvwprintw(window, 21, 60, "Strength Effects:");
 
-    if (player.strength >= 1 && player.strength <= game.data_manager.get_strength_attributes().size())
+    if (player.get_strength() >= 1 && player.get_strength() <= game.data_manager.get_strength_attributes().size())
     {
-        const auto& strAttr = game.data_manager.get_strength_attributes().at(player.strength - 1);
+        const auto& strAttr = game.data_manager.get_strength_attributes().at(player.get_strength() - 1);
 
         mvwprintw(window, 22, 62, "Hit Probability Adj: %+d", strAttr.hitProb);
         mvwprintw(window, 23, 62, "Damage Adjustment: %+d", strAttr.dmgAdj);
@@ -337,27 +337,27 @@ void CharacterSheetUI::display_strength_effects(WINDOW* window, const Player& pl
 
 int CharacterSheetUI::get_strength_hit_modifier(const Player& player)
 {
-    if (player.strength > 0 && player.strength <= game.data_manager.get_strength_attributes().size())
+    if (player.get_strength() > 0 && player.get_strength() <= game.data_manager.get_strength_attributes().size())
     {
-        return game.data_manager.get_strength_attributes().at(player.strength - 1).hitProb;
+        return game.data_manager.get_strength_attributes().at(player.get_strength() - 1).hitProb;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_strength_damage_modifier(const Player& player)
 {
-    if (player.strength > 0 && player.strength <= game.data_manager.get_strength_attributes().size())
+    if (player.get_strength() > 0 && player.get_strength() <= game.data_manager.get_strength_attributes().size())
     {
-        return game.data_manager.get_strength_attributes().at(player.strength - 1).dmgAdj;
+        return game.data_manager.get_strength_attributes().at(player.get_strength() - 1).dmgAdj;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_constitution_bonus(const Player& player)
 {
-    if (player.constitution >= 1 && player.constitution <= game.data_manager.get_constitution_attributes().size())
+    if (player.get_constitution() >= 1 && player.get_constitution() <= game.data_manager.get_constitution_attributes().size())
     {
-        return game.data_manager.get_constitution_attributes().at(player.constitution - 1).HPAdj;
+        return game.data_manager.get_constitution_attributes().at(player.get_constitution() - 1).HPAdj;
     }
     return 0;
 }

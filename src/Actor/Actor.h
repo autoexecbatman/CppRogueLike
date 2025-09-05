@@ -68,18 +68,7 @@ public:
 
 class Creature : public Actor
 {
-public:
-	Creature(Vector2D position, ActorData data) : Actor(position, data)
-	{
-		add_state(ActorState::BLOCKS);
-		/*add_state(ActorState::FOV_ONLY);*/
-	};
-
-	void load(const json& j) override;
-	void save(json& j) override;
-
-	void update();
-
+private:
 	//==Actor Attributes==
 	int strength{ 0 };
 	int dexterity{ 0 };
@@ -92,6 +81,51 @@ public:
 	int gold{ 0 };
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
+
+public:
+	Creature(Vector2D position, ActorData data) : Actor(position, data)
+	{
+		add_state(ActorState::BLOCKS);
+		/*add_state(ActorState::FOV_ONLY);*/
+	};
+
+	void load(const json& j) override;
+	void save(json& j) override;
+
+	void update();
+
+	// Const-correct getter methods
+	int get_strength() const noexcept { return strength; }
+	int get_dexterity() const noexcept { return dexterity; }
+	int get_constitution() const noexcept { return constitution; }
+	int get_intelligence() const noexcept { return intelligence; }
+	int get_wisdom() const noexcept { return wisdom; }
+	int get_charisma() const noexcept { return charisma; }
+	int get_player_level() const noexcept { return playerLevel; }
+	int get_gold() const noexcept { return gold; }
+	const std::string& get_gender() const noexcept { return gender; }
+	const std::string& get_weapon_equipped() const noexcept { return weaponEquipped; }
+
+	// Setter methods
+	void set_strength(int value) noexcept { strength = value; }
+	void set_dexterity(int value) noexcept { dexterity = value; }
+	void set_constitution(int value) noexcept { constitution = value; }
+	void set_intelligence(int value) noexcept { intelligence = value; }
+	void set_wisdom(int value) noexcept { wisdom = value; }
+	void set_charisma(int value) noexcept { charisma = value; }
+	void set_player_level(int value) noexcept { playerLevel = value; }
+	void set_gold(int value) noexcept { gold = value; }
+	void set_gender(const std::string& new_gender) noexcept { gender = new_gender; }
+	void set_weapon_equipped(const std::string& weapon) noexcept { weaponEquipped = weapon; }
+	
+	// Modifier methods for increment/decrement operations
+	void adjust_strength(int delta) noexcept { strength += delta; }
+	void adjust_dexterity(int delta) noexcept { dexterity += delta; }
+	void adjust_constitution(int delta) noexcept { constitution += delta; }
+	void adjust_intelligence(int delta) noexcept { intelligence += delta; }
+	void adjust_wisdom(int delta) noexcept { wisdom += delta; }
+	void adjust_charisma(int delta) noexcept { charisma += delta; }
+	void adjust_gold(int delta) noexcept { gold += delta; }
 
 	void equip(Item& item);
 	void unequip(Item& item);

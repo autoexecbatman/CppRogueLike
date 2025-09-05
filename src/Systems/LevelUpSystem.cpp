@@ -132,9 +132,9 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel)
     
     // Get Constitution bonus
     int conBonus = 0;
-    if (owner.constitution >= 1 && owner.constitution <= game.data_manager.get_constitution_attributes().size())
+    if (owner.get_constitution() >= 1 && owner.get_constitution() <= game.data_manager.get_constitution_attributes().size())
     {
-        conBonus = game.data_manager.get_constitution_attributes()[owner.constitution - 1].HPAdj;
+        conBonus = game.data_manager.get_constitution_attributes()[owner.get_constitution() - 1].HPAdj;
     }
     
     // Calculate total HP gain (minimum 1)
@@ -327,30 +327,30 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
     switch (playerPtr->playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
-        playerPtr->strength = std::min(18, playerPtr->strength + 1);
+        playerPtr->set_strength(std::min(18, playerPtr->get_strength() + 1));
         game.append_message_part(GREEN_BLACK_PAIR, "Strength increased to ");
-        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->strength));
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->get_strength()));
         game.append_message_part(WHITE_BLACK_PAIR, "!");
         game.finalize_message();
         break;
     case Player::PlayerClassState::ROGUE:
-        playerPtr->dexterity = std::min(18, playerPtr->dexterity + 1);
+        playerPtr->set_dexterity(std::min(18, playerPtr->get_dexterity() + 1));
         game.append_message_part(GREEN_BLACK_PAIR, "Dexterity increased to ");
-        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->dexterity));
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->get_dexterity()));
         game.append_message_part(WHITE_BLACK_PAIR, "!");
         game.finalize_message();
         break;
     case Player::PlayerClassState::CLERIC:
-        playerPtr->wisdom = std::min(18, playerPtr->wisdom + 1);
+        playerPtr->set_wisdom(std::min(18, playerPtr->get_wisdom() + 1));
         game.append_message_part(GREEN_BLACK_PAIR, "Wisdom increased to ");
-        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->wisdom));
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->get_wisdom()));
         game.append_message_part(WHITE_BLACK_PAIR, "!");
         game.finalize_message();
         break;
     case Player::PlayerClassState::WIZARD:
-        playerPtr->intelligence = std::min(18, playerPtr->intelligence + 1);
+        playerPtr->set_intelligence(std::min(18, playerPtr->get_intelligence() + 1));
         game.append_message_part(GREEN_BLACK_PAIR, "Intelligence increased to ");
-        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->intelligence));
+        game.append_message_part(GREEN_BLACK_PAIR, std::to_string(playerPtr->get_intelligence()));
         game.append_message_part(WHITE_BLACK_PAIR, "!");
         game.finalize_message();
         break;

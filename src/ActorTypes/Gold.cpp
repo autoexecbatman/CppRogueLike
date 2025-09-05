@@ -9,7 +9,7 @@ Gold::Gold(int amount) : amount(amount)
 bool Gold::use(Item& owner, Creature& wearer)
 {
     // Add gold amount to player's currency
-    wearer.gold += amount;
+    wearer.adjust_gold(amount);
 
     // Display a message
     game.append_message_part(YELLOW_BLACK_PAIR, "You gained ");
