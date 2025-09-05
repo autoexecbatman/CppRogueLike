@@ -130,27 +130,22 @@ void Player::racial_ability_adjustments()
 
 void Player::calculate_thaco()
 {
-	// game.err("Calculating THAC0...");
-	// print playerClassState
-
-	CalculatedTHAC0s thaco;
+	// Static instance for efficiency - no need to recreate each time
+	static constexpr CalculatedTHAC0s thaco_tables;
+	
 	switch (playerClassState)
-	{	
+	{
 	case PlayerClassState::FIGHTER:
-		game.player->destructible->set_thaco(thaco.get_fighter(playerLevel));
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
+		destructible->set_thaco(thaco_tables.get_fighter(playerLevel));
 		break;
 	case PlayerClassState::ROGUE:
-		game.player->destructible->set_thaco(thaco.get_rogue(playerLevel));
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
+		destructible->set_thaco(thaco_tables.get_rogue(playerLevel));
 		break;
 	case PlayerClassState::CLERIC:
-		game.player->destructible->set_thaco(thaco.get_cleric(playerLevel));
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
+		destructible->set_thaco(thaco_tables.get_cleric(playerLevel));
 		break;
 	case PlayerClassState::WIZARD:
-		game.player->destructible->set_thaco(thaco.get_wizard(playerLevel));
-		/*game.err(playerClass + "you got THAC0: " + std::to_string(game.player->destructible->get_thaco()));*/
+		destructible->set_thaco(thaco_tables.get_wizard(playerLevel));
 		break;
 	case PlayerClassState::NONE:
 		break;
