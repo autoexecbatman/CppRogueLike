@@ -14,6 +14,7 @@
 #include "../Items/Items.h"
 #include "../Items/Armor.h"
 #include "../Utils/PickableTypeRegistry.h"
+#include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
@@ -416,8 +417,22 @@ bool Player::toggle_shield(uint32_t item_unique_id)
 
 bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
-	if (!item || !can_equip(*item, slot))
+	if (!item)
 	{
+		game.log("DEBUG: equip_item failed - null item");
+		return false;
+	}
+	
+	if (!can_equip(*item, slot))
+	{
+		auto itemType = PickableTypeRegistry::get_item_type(*item);
+		game.log("DEBUG: can_equip failed for " + item->actorData.name);
+		game.log("DEBUG: Item type: " + std::to_string(static_cast<int>(itemType)));
+		game.log("DEBUG: Is armor: " + std::string(PickableTypeRegistry::is_armor(itemType) ? "true" : "false"));
+		game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+		game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+		// Return item to inventory since we can't equip it
+		container->add(std::move(item));
 		return false;
 	}
 
@@ -441,6 +456,18 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
+	
+	// Update weapon damage if it's a weapon
+	if (slot == EquipmentSlot::RIGHT_HAND)
+	{
+		auto itemType = PickableTypeRegistry::get_item_type(*equippedItems.back().item);
+		if (PickableTypeRegistry::is_weapon(itemType) && attacker)
+		{
+			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(itemType);
+			attacker->set_roll(weaponDamage);
+			game.log("Equipped " + equippedItems.back().item->actorData.name + " - damage updated to " + weaponDamage);
+		}
+	}
 	
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
@@ -473,63 +500,40 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 	case EquipmentSlot::RIGHT_HAND:
 	case EquipmentSlot::LEFT_HAND:
 	{
-		// Hand slots can hold weapons or shields - use type registry
-		auto itemType = PickableTypeRegistry::get_item_type(item);
-		bool isWeapon = PickableTypeRegistry::is_weapon(itemType);
-		bool isShield = (itemType == PickableTypeRegistry::Type::SHIELD);
-		
-		if (!isWeapon && !isShield)
+		// Hand slots can hold weapons or shields - use proper item type system
+		if (!item.is_weapon() && !item.is_shield())
 		{
 			return false; // Not a weapon or shield
 		}
 		
-		// Check for two-handed weapon restrictions
-		if (isWeapon)
-		{
-			// Two-handed weapons can only go in RIGHT_HAND
-			if (itemType == PickableTypeRegistry::Type::GREATSWORD || itemType == PickableTypeRegistry::Type::GREAT_AXE || itemType == PickableTypeRegistry::Type::LONGBOW)
-			{
-				if (slot != EquipmentSlot::RIGHT_HAND)
-				{
-					return false; // Two-handed weapons must go in right hand
-				}
-			}
-			
-			// Check if trying to equip one-handed weapon when two-handed weapon is equipped
-			if (slot == EquipmentSlot::LEFT_HAND)
-			{
-				auto* rightHandItem = get_equipped_item(EquipmentSlot::RIGHT_HAND);
-				if (rightHandItem)
-				{
-					auto rightType = PickableTypeRegistry::get_item_type(*rightHandItem);
-					if (rightType == PickableTypeRegistry::Type::GREATSWORD || rightType == PickableTypeRegistry::Type::GREAT_AXE || rightType == PickableTypeRegistry::Type::LONGBOW)
-					{
-						return false; // Can't equip anything in left hand when two-handed weapon equipped
-					}
-				}
-				
-				// Check if this weapon can be used in off-hand (must be TINY or SMALL)
-				auto weaponSize = PickableTypeRegistry::get_weapon_size(itemType);
-				if (weaponSize > WeaponSize::SMALL)
-				{
-					return false; // Weapon too large for off-hand
-				}
-			}
-		}
-		
 		// Shields can only go in left hand
-		if (isShield && slot != EquipmentSlot::LEFT_HAND)
+		if (item.is_shield() && slot != EquipmentSlot::LEFT_HAND)
 		{
 			return false;
+		}
+		
+		// Two-handed weapons can only go in right hand
+		if (item.is_two_handed_weapon() && slot != EquipmentSlot::RIGHT_HAND)
+		{
+			return false;
+		}
+		
+		// Check if trying to equip something in left hand when two-handed weapon is equipped
+		if (slot == EquipmentSlot::LEFT_HAND)
+		{
+			auto* rightHandItem = get_equipped_item(EquipmentSlot::RIGHT_HAND);
+			if (rightHandItem && rightHandItem->is_two_handed_weapon())
+			{
+				return false; // Can't equip anything in left hand when two-handed weapon equipped
+			}
 		}
 		
 		break;
 	}
 	case EquipmentSlot::BODY:
 	{
-		// Body slot can only hold armor - use type registry
-		auto itemType = PickableTypeRegistry::get_item_type(item);
-		if (!PickableTypeRegistry::is_armor(itemType))
+		// Body slot can only hold armor - use proper item type system
+		if (!item.is_armor())
 		{
 			return false;
 		}
@@ -567,7 +571,12 @@ bool Player::unequip_item(EquipmentSlot slot)
 		// Reset combat stats if main hand weapon
 		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
-			attacker->set_roll("D2"); // Reset to unarmed
+			auto itemType = PickableTypeRegistry::get_item_type(*it->item);
+			if (PickableTypeRegistry::is_weapon(itemType) && attacker)
+			{
+				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
+				game.log("Unequipped " + it->item->actorData.name + " - damage reset to " + WeaponDamageRegistry::get_unarmed_damage());
+			}
 			remove_state(ActorState::IS_RANGED); // Remove ranged state
 		}
 		

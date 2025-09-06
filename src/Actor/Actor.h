@@ -13,6 +13,7 @@
 #include "../Ai/Ai.h"
 #include "../Attributes/StrengthAttributes.h"
 #include "../Utils/UniqueId.h"
+#include "../Items/ItemClassification.h"
 
 #include "Attacker.h"
 #include "Destructible.h"
@@ -159,9 +160,24 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
+	// Initialize item type from name (temporary bridge until creation system is refactored)
+	void initialize_item_type_from_name();
+
 	int value{ 1 };
+	ItemClass itemClass{ ItemClass::UNKNOWN }; // Proper item classification
 
 	std::unique_ptr<Pickable> pickable; // the actor can be picked
+	
+	// Item classification utility functions
+	ItemCategory get_category() const noexcept { return ItemClassificationUtils::get_category(itemClass); }
+	bool is_weapon() const noexcept { return ItemClassificationUtils::is_weapon(itemClass); }
+	bool is_armor() const noexcept { return ItemClassificationUtils::is_armor(itemClass); }
+	bool is_shield() const noexcept { return ItemClassificationUtils::is_shield(itemClass); }
+	bool is_consumable() const noexcept { return ItemClassificationUtils::is_consumable(itemClass); }
+	bool can_equip_to_right_hand() const noexcept { return ItemClassificationUtils::can_equip_to_right_hand(itemClass); }
+	bool can_equip_to_left_hand() const noexcept { return ItemClassificationUtils::can_equip_to_left_hand(itemClass); }
+	bool can_equip_to_body() const noexcept { return ItemClassificationUtils::can_equip_to_body(itemClass); }
+	bool is_two_handed_weapon() const noexcept { return ItemClassificationUtils::is_two_handed_weapon(itemClass); }
 };
 
 class Stairs : public Object

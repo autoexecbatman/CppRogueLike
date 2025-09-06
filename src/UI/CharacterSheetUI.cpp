@@ -4,6 +4,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../Utils/PickableTypeRegistry.h"
 #include <format>
 
 void CharacterSheetUI::display_character_sheet(const Player& player)
@@ -214,7 +215,7 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 	wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
 	mvwprintw(window, 24, 1, "Equipment:");
 
-	// Get equipped weapon from Equipment System
+	// Get equipped weapon from proper slot-based equipment system
 	auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	if (equippedWeapon)
 	{
@@ -253,14 +254,14 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 	}
 	else
 	{
-		mvwprintw(window, 25, 3, "Weapon: Unarmed (D2 damage)");
+		mvwprintw(window, 25, 3, "Weapon: Unarmed (%s damage)", player.attacker->get_roll().c_str());
 
 		// Show effective unarmed damage with strength bonus
 		int strDmgMod = get_strength_damage_modifier(player);
 		if (strDmgMod != 0)
 		{
 			wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
-			mvwprintw(window, 26, 3, "Effective damage: D2 %+d", strDmgMod);
+			mvwprintw(window, 26, 3, "Effective damage: %s %+d", player.attacker->get_roll().c_str(), strDmgMod);
 			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
 		}
 	}

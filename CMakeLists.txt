@@ -174,6 +174,8 @@ set(SOURCE_FILES # Add Source Files Here !
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/Items/Items.cpp
     ${PROJECT_SOURCE_DIR}/Items/Items.h
+    ${PROJECT_SOURCE_DIR}/Items/ItemClassification.cpp
+    ${PROJECT_SOURCE_DIR}/Items/ItemClassification.h
     ${PROJECT_SOURCE_DIR}/Items/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Items/Weapons.h
     ${PROJECT_SOURCE_DIR}/Items/Armor.cpp
@@ -237,6 +239,11 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Utils/UniqueId.h
     ${PROJECT_SOURCE_DIR}/Utils/PickableTypeRegistry.cpp
     ${PROJECT_SOURCE_DIR}/Utils/PickableTypeRegistry.h
+
+    # Combat - Weapon damage system
+    ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.h
+    ${PROJECT_SOURCE_DIR}/Combat/DamageInfo.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp

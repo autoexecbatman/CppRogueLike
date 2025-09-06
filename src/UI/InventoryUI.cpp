@@ -94,27 +94,28 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner
 {
     std::vector<std::pair<Item*, bool>> allItems;
     
-    // Add equipped items first (with [E] markers)
-    if (player)
+    // Add all items from inventory with their equipped status
+    for (const auto& item : owner.container->get_inventory())
     {
-        for (const auto& equipped : player->equippedItems)
+        if (item)
         {
-            if (equipped.item)
+            bool isEquipped = false;
+            
+            // Check if item is equipped using proper slot-based system
+            if (player)
             {
-                allItems.emplace_back(equipped.item.get(), true);
+                // Check all equipment slots to see if this item is equipped
+                for (const auto& equippedItem : player->equippedItems)
+                {
+                    if (equippedItem.item && equippedItem.item->uniqueId == item->uniqueId)
+                    {
+                        isEquipped = true;
+                        break;
+                    }
+                }
             }
-        }
-    }
-    
-    // Add regular inventory items from player's backpack
-    if (player)
-    {
-        for (const auto& item : player->container->get_inventory())
-        {
-            if (item)
-            {
-                allItems.emplace_back(item.get(), false);
-            }
+            
+            allItems.emplace_back(item.get(), isEquipped);
         }
     }
     

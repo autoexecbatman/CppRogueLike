@@ -22,6 +22,7 @@
 #include "../Items/Armor.h"
 #include "../Utils/ItemTypeUtils.h"
 #include "../Utils/PickableTypeRegistry.h"
+#include "../Combat/WeaponDamageRegistry.h"
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
@@ -226,10 +227,19 @@ void Creature::equip(Item& item)
 	// Now equip the new item
 	item.add_state(ActorState::IS_EQUIPPED);
 
-	// Update weapon equipped name if it's a weapon
+	// Update weapon equipped name and damage if it's a weapon
 	if (isWeapon)
 	{
 		weaponEquipped = PickableTypeRegistry::get_display_name(itemType);
+		
+		// Update attacker damage roll based on weapon type
+		if (attacker)
+		{
+			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(itemType);
+			
+			attacker->set_roll(weaponDamage);
+			game.log("Equipped " + PickableTypeRegistry::get_display_name(itemType) + " - damage updated to " + weaponDamage);
+		}
 	}
 }
 
@@ -241,11 +251,18 @@ void Creature::unequip(Item& item)
 		// Remove the equipped state
 		item.remove_state(ActorState::IS_EQUIPPED);
 
-		// If it's a weapon, update the weaponEquipped status
+		// If it's a weapon, update the weaponEquipped status and reset damage
 		auto itemType = PickableTypeRegistry::get_item_type(item);
 		if (PickableTypeRegistry::is_weapon(itemType))
 		{
 			weaponEquipped = "None";
+			
+			// Reset attacker damage to unarmed
+			if (attacker)
+			{
+				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
+				game.log("Unequipped weapon - damage reset to " + WeaponDamageRegistry::get_unarmed_damage() + " (unarmed)");
+			}
 
 			// Check for ranged weapon
 			if (PickableTypeRegistry::is_ranged_weapon(itemType))
@@ -386,12 +403,31 @@ void Creature::drop(Item& item)
 }
 
 //==Item==
-Item::Item(Vector2D position, ActorData data) : Object(position, data) {};
+Item::Item(Vector2D position, ActorData data) : Object(position, data)
+{
+	// Initialize item type from name when created
+	initialize_item_type_from_name();
+};
 
 void Item::load(const json& j)
 {
 	Object::load(j); // Call base class load
 	value = j["value"];
+	
+	// Load ItemClass if available, otherwise initialize from name
+	if (j.contains("itemClass"))
+	{
+		itemClass = static_cast<ItemClass>(j["itemClass"].get<int>());
+	}
+	else if (j.contains("itemType")) // Backward compatibility
+	{
+		itemClass = static_cast<ItemClass>(j["itemType"].get<int>());
+	}
+	else
+	{
+		initialize_item_type_from_name();
+	}
+	
 	if (j.contains("pickable")) {
 		pickable = Pickable::create(j["pickable"]);
 	}
@@ -401,11 +437,65 @@ void Item::save(json& j)
 {
 	Object::save(j); // Call base class save
 	j["value"] = value;
+	j["itemClass"] = static_cast<int>(itemClass);
+	
 	if (pickable) {
 		json pickableJson;
 		pickable->save(pickableJson);
 		j["pickable"] = pickableJson;
 	}
+}
+
+void Item::initialize_item_type_from_name()
+{
+	// Temporary bridge: Set ItemClass based on item name
+	// This should be replaced when item creation system is properly refactored
+	std::string name = actorData.name;
+	
+	// Convert to lowercase for easier matching
+	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+	
+	// Weapons - Melee
+	if (name.find("dagger") != std::string::npos) itemClass = ItemClass::DAGGER;
+	else if (name.find("short sword") != std::string::npos) itemClass = ItemClass::SHORT_SWORD;
+	else if (name.find("long sword") != std::string::npos) itemClass = ItemClass::LONG_SWORD;
+	else if (name.find("great sword") != std::string::npos) itemClass = ItemClass::GREAT_SWORD;
+	else if (name.find("battle axe") != std::string::npos) itemClass = ItemClass::BATTLE_AXE;
+	else if (name.find("great axe") != std::string::npos) itemClass = ItemClass::GREAT_AXE;
+	else if (name.find("war hammer") != std::string::npos) itemClass = ItemClass::WAR_HAMMER;
+	else if (name.find("staff") != std::string::npos) itemClass = ItemClass::STAFF;
+	
+	// Weapons - Ranged
+	else if (name.find("long bow") != std::string::npos) itemClass = ItemClass::LONG_BOW;
+	else if (name.find("bow") != std::string::npos) itemClass = ItemClass::LONG_BOW; // Default bow type
+	
+	// Armor
+	else if (name.find("leather armor") != std::string::npos) itemClass = ItemClass::LEATHER_ARMOR;
+	else if (name.find("chain mail") != std::string::npos) itemClass = ItemClass::CHAIN_MAIL;
+	else if (name.find("plate mail") != std::string::npos) itemClass = ItemClass::PLATE_MAIL;
+	
+	// Shields
+	else if (name.find("shield") != std::string::npos) itemClass = ItemClass::MEDIUM_SHIELD;
+	
+	// Consumables
+	else if (name.find("health potion") != std::string::npos) itemClass = ItemClass::HEALTH_POTION;
+	else if (name.find("potion") != std::string::npos) itemClass = ItemClass::HEALTH_POTION; // Default potion
+	else if (name.find("bread") != std::string::npos) itemClass = ItemClass::BREAD;
+	else if (name.find("meat") != std::string::npos) itemClass = ItemClass::MEAT;
+	else if (name.find("fruit") != std::string::npos) itemClass = ItemClass::FRUIT;
+	else if (name.find("food") != std::string::npos) itemClass = ItemClass::FOOD_RATION;
+	
+	// Scrolls
+	else if (name.find("lightning") != std::string::npos) itemClass = ItemClass::SCROLL_LIGHTNING;
+	else if (name.find("fireball") != std::string::npos) itemClass = ItemClass::SCROLL_FIREBALL;
+	else if (name.find("confusion") != std::string::npos) itemClass = ItemClass::SCROLL_CONFUSION;
+	
+	// Treasure
+	else if (name.find("gold") != std::string::npos) itemClass = ItemClass::GOLD;
+	else if (name.find("amulet") != std::string::npos) itemClass = ItemClass::AMULET;
+	
+	// Default to unknown if no match found
+	else itemClass = ItemClass::UNKNOWN;
 }
 
 // end of file: Actor.cpp

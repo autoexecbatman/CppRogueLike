@@ -10,6 +10,7 @@
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
 #include "../Utils/ItemTypeUtils.h"
+#include "../Utils/PickableTypeRegistry.h"
 
 void equip_fighter_starting_gear()
 {
@@ -29,29 +30,104 @@ void equip_fighter_starting_gear()
 	// PLATE MAIL (AC 3) - Add to inventory
 	auto plate_mail = ItemCreator::create_plate_mail(player.position);
 	auto plate_mail_id = plate_mail->uniqueId; // Store ID before moving
+	game.log("Created item with name: '" + plate_mail->actorData.name + "' and ID: " + std::to_string(plate_mail_id));
+	game.log("Created plate mail with ID: " + std::to_string(plate_mail_id));
 	auto plate_mail_result = player.container->add(std::move(plate_mail));
-	if (plate_mail_result)
+	if (plate_mail_result.has_value())
 	{
+		game.log("Plate mail added to inventory successfully");
 		// Find plate mail by unique ID and equip it
-		auto item_to_equip = ItemTypeUtils::extract_item_by_id(*player.container, plate_mail_id);
+		auto item_to_equip = ItemTypeUtils::find_item_by_id(player.container->get_inventory_mutable(), plate_mail_id);
 		if (item_to_equip)
 		{
-			player.equip_item(std::move(item_to_equip), EquipmentSlot::BODY);
+			game.log("Found plate mail in inventory, attempting to equip");
+			// Extract item from inventory for equipment
+			auto extracted_item = ItemTypeUtils::extract_item_by_id(*player.container, plate_mail_id);
+			if (extracted_item)
+			{
+				game.log("DEBUG: Extracted item for equipment, proceeding to auto-detect slot");
+				
+				// Auto-detect correct slot based on proper item classification
+				std::string itemName = extracted_item->actorData.name;
+				game.log("DEBUG: Checking item class: " + std::to_string(static_cast<int>(extracted_item->itemClass)));
+				
+				EquipmentSlot targetSlot;
+				
+				// Use proper item classification system instead of name parsing
+				if (extracted_item->is_armor())
+				{
+					targetSlot = EquipmentSlot::BODY;
+					game.log("DEBUG: Detected as armor by classification, targeting BODY slot");
+				}
+				else if (extracted_item->is_shield())
+				{
+					targetSlot = EquipmentSlot::LEFT_HAND;
+					game.log("DEBUG: Detected as shield by classification, targeting LEFT_HAND slot");
+				}
+				else
+				{
+					game.log("ERROR: Unknown armor/shield type for " + itemName);
+					player.container->add(std::move(extracted_item));
+					return;
+				}
+				
+				bool equipped = player.equip_item(std::move(extracted_item), targetSlot);
+				if (equipped)
+				{
+					game.log("SUCCESS: " + itemName + " equipped to correct slot");
+				}
+				else
+				{
+					game.log("ERROR: Failed to equip " + itemName + " - item validation failed or disappeared");
+				}
+			}
 		}
+	}
+	else
+	{
+		game.log("ERROR: Failed to add plate mail to inventory");
 	}
 
 	// LONG SWORD (1d8) - Add to inventory  
 	auto long_sword = ItemCreator::create_long_sword(player.position);
 	auto long_sword_id = long_sword->uniqueId; // Store ID before moving
+	game.log("Created item with name: '" + long_sword->actorData.name + "' and ID: " + std::to_string(long_sword_id));
+	game.log("Created long sword with ID: " + std::to_string(long_sword_id));
 	auto sword_result = player.container->add(std::move(long_sword));
-	if (sword_result)
+	if (sword_result.has_value())
 	{
+		game.log("Long sword added to inventory successfully");
 		// Find long sword by unique ID and equip it
-		auto item_to_equip = ItemTypeUtils::extract_item_by_id(*player.container, long_sword_id);
+		auto item_to_equip = ItemTypeUtils::find_item_by_id(player.container->get_inventory_mutable(), long_sword_id);
 		if (item_to_equip)
 		{
-			player.equip_item(std::move(item_to_equip), EquipmentSlot::RIGHT_HAND);
+			game.log("Found long sword in inventory, attempting to equip");
+			// Extract item from inventory for equipment
+			auto extracted_item = ItemTypeUtils::extract_item_by_id(*player.container, long_sword_id);
+			if (extracted_item)
+			{
+				// Store item name for logging before potential move
+				std::string itemName = extracted_item->actorData.name;
+				bool equipped = player.equip_item(std::move(extracted_item), EquipmentSlot::RIGHT_HAND);
+				if (equipped)
+				{
+					game.log("SUCCESS: " + itemName + " equipped to RIGHT_HAND slot");
+					game.log("Current weapon damage: " + player.attacker->get_roll());
+				}
+				else
+				{
+					game.log("ERROR: Failed to equip " + itemName + " - item validation failed or disappeared");
+				}
+			}
 		}
+		else
+		{
+			game.log("ERROR: Could not find long sword in inventory after adding");
+		}
+	}
+	else
+	{
+		game.log("ERROR: Failed to add long sword to inventory");
 	}
 	
 	// Sync ranged state and update combat stats from equipped weapons
