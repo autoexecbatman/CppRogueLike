@@ -111,7 +111,11 @@ void AiPlayer::update(Creature& owner)
 				else
 				{
 					// Non-movement actions proceed as normal
-					call_action(owner, key);
+					Player* player = dynamic_cast<Player*>(&owner);
+					if (player)
+					{
+						call_action(*player, key);
+					}
 				}
 			}
 		}
@@ -126,7 +130,11 @@ void AiPlayer::update(Creature& owner)
 		}
 		else
 		{
-			call_action(owner, key);
+			Player* player = dynamic_cast<Player*>(&owner);
+			if (player)
+			{
+				call_action(*player, key);
+			}
 		}
 	}
 
@@ -443,10 +451,10 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexc
 	}
 }
 
-void AiPlayer::display_inventory(Creature& owner)
+void AiPlayer::display_inventory(Player& player)
 {
 	InventoryUI inventoryUI;
-	inventoryUI.display(owner);
+	inventoryUI.display(player);
 }
 
 Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
@@ -623,7 +631,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 }
 
 
-void AiPlayer::call_action(Creature& owner, Controls key)
+void AiPlayer::call_action(Player& player, Controls key)
 {
 	switch (key)
 	{
@@ -638,14 +646,14 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 	case Controls::TEST_COMMAND:
 	{
 		// Add XP for leveling up debugging (instead of spawning shopkeeper)
-		if (owner.destructible)
+		if (player.destructible)
 		{
 			const int DEBUG_XP_AMOUNT = 1000;
-			owner.destructible->add_xp(DEBUG_XP_AMOUNT);
-			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, owner.destructible->get_xp()), true);
+			player.destructible->add_xp(DEBUG_XP_AMOUNT);
+			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, player.destructible->get_xp()), true);
 			
 			// Use the same level up system as natural progression
-			game.player->ai->levelup_update(*game.player);
+			player.ai->levelup_update(player);
 		}
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
@@ -660,20 +668,20 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::PICK:
 	{
-		pick_item(owner);
+		pick_item(player);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	}
 
 	case Controls::DROP:
 	{
-		drop_item(owner);
+		drop_item(player);
 		break;
 	}
 
 	case Controls::INVENTORY:
 	{
-		display_inventory(owner);
+		display_inventory(player);
 		break;
 	}
 
@@ -692,7 +700,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 
 	case Controls::DESCEND:
 	{
-		if (game.stairs->position == owner.position)
+		if (game.stairs->position == player.position)
 		{
 			game.next_level(); // sets state to STARTUP
 		}
@@ -734,7 +742,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		// Prompt for direction
 		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
-		Vector2D doorPos = handle_direction_input(owner, dirKey);
+		Vector2D doorPos = handle_direction_input(player, dirKey);
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position
@@ -768,7 +776,7 @@ void AiPlayer::call_action(Creature& owner, Controls key)
 		// Prompt for direction
 		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
-		Vector2D doorPos = handle_direction_input(owner, dirKey);
+		Vector2D doorPos = handle_direction_input(player, dirKey);
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position

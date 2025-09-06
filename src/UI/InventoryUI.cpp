@@ -6,7 +6,6 @@
 #include "../Controls/Controls.h"
 #include "../Colors/Colors.h"
 #include <algorithm>
-#include "../Utils/PickableTypeRegistry.h"
 
 InventoryUI::InventoryUI() : inventoryWindow(nullptr), equipmentWindow(nullptr)
 {
@@ -17,15 +16,8 @@ InventoryUI::~InventoryUI()
     destroy_windows();
 }
 
-void InventoryUI::display(Creature& owner)
+void InventoryUI::display(Player& player)
 {
-    // Use type-safe approach with unique ID comparison
-    Player* player = nullptr;
-    if (owner.uniqueId == game.player->uniqueId)
-    {
-        player = game.player.get();
-    }
-    
     while (true)
     {
         create_windows();
@@ -38,7 +30,7 @@ void InventoryUI::display(Creature& owner)
         refresh_windows();
         
         // Handle input - returns false to exit inventory
-        if (!handle_inventory_input(owner, player))
+        if (!handle_inventory_input(player))
         {
             break;
         }
@@ -90,28 +82,24 @@ void InventoryUI::refresh_windows()
     wrefresh(equipmentWindow);
 }
 
-std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner, Player* player)
+std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(const Player& player)
 {
     std::vector<std::pair<Item*, bool>> allItems;
     
     // Add all items from inventory with their equipped status
-    for (const auto& item : owner.container->get_inventory())
+    for (const auto& item : player.container->get_inventory())
     {
         if (item)
         {
             bool isEquipped = false;
             
             // Check if item is equipped using proper slot-based system
-            if (player)
+            for (const auto& equippedItem : player.equippedItems)
             {
-                // Check all equipment slots to see if this item is equipped
-                for (const auto& equippedItem : player->equippedItems)
+                if (equippedItem.item && equippedItem.item->uniqueId == item->uniqueId)
                 {
-                    if (equippedItem.item && equippedItem.item->uniqueId == item->uniqueId)
-                    {
-                        isEquipped = true;
-                        break;
-                    }
+                    isEquipped = true;
+                    break;
                 }
             }
             
@@ -122,31 +110,28 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(Creature& owner
     return allItems;
 }
 
-void InventoryUI::display_inventory_items(Player* player)
+void InventoryUI::display_inventory_items(const Player& player)
 {
     // Update title with backpack item count
-    if (player)
-    {
-        size_t backpackItems = player->container->get_item_count();
-        size_t maxItems = player->container->get_capacity();
-        mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
-    }
+    size_t backpackItems = player.container->get_item_count();
+    size_t maxItems = player.container->get_capacity();
+    mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
     
     int y = 2;
     char shortcut = 'a';
     
     // Display only backpack items (not equipped items)
-    const auto& backpackItems = player->container->get_inventory();
+    const auto& backpackItems_list = player.container->get_inventory();
     
-    if (backpackItems.empty())
+    if (backpackItems_list.empty())
     {
         mvwprintw(inventoryWindow, y, 2, "Your backpack is empty.");
         return;
     }
     
-    for (size_t i = 0; i < backpackItems.size() && shortcut <= 'z'; i++)
+    for (size_t i = 0; i < backpackItems_list.size() && shortcut <= 'z'; i++)
     {
-        Item* item = backpackItems[i].get();
+        Item* item = backpackItems_list[i].get();
         
         if (item)
         {
@@ -175,9 +160,8 @@ void InventoryUI::show_item_info(Item* item, int y)
         wattroff(inventoryWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
     }
     
-    // Show weapon damage if applicable
-    const auto& itemType = PickableTypeRegistry::get_item_type(*item);
-    if (PickableTypeRegistry::is_weapon(itemType))
+    // Show weapon damage if applicable using Item's classification methods
+    if (item->is_weapon())
     {
         Weapon* weapon = static_cast<Weapon*>(item->pickable.get()); // Safe after type check
         std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
@@ -187,10 +171,8 @@ void InventoryUI::show_item_info(Item* item, int y)
     }
 }
 
-void InventoryUI::display_equipment_slots(Player* player)
+void InventoryUI::display_equipment_slots(const Player& player)
 {
-    if (!player) return;
-
     int y = 2;
 
     // Display all equipment slots ADOM-style
@@ -226,7 +208,7 @@ void InventoryUI::display_equipment_slots(Player* player)
         mvwprintw(equipmentWindow, y, 2, "%c - %-15s: ", slotInfo.shortcut, slotInfo.name);
 
         // Get equipped item in this slot
-        Item* equippedItem = player->get_equipped_item(slotInfo.slot);
+        Item* equippedItem = player.get_equipped_item(slotInfo.slot);
         if (equippedItem)
         {
             // Display equipped item
@@ -272,7 +254,7 @@ void InventoryUI::display_instructions()
     mvwprintw(equipmentWindow, LINES - 2, 2, "Select by letter");
 }
 
-bool InventoryUI::handle_inventory_input(Creature& owner, Player* player)
+bool InventoryUI::handle_inventory_input(Player& player)
 {
     int input = getch();
     
@@ -285,18 +267,16 @@ bool InventoryUI::handle_inventory_input(Creature& owner, Player* player)
     // Handle backpack item selection (a-z)
     if (input >= 'a' && input <= 'z')
     {
-        return handle_backpack_selection(owner, player, input - 'a');
+        return handle_backpack_selection(player, input - 'a');
     }
     
     // Handle equipment slot selection
-    return handle_equipment_selection(owner, player, input);
+    return handle_equipment_selection(player, input);
 }
 
-bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int itemIndex)
+bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
 {
-    if (!player) return true;
-    
-    const auto& backpackItems = player->container->get_inventory();
+    const auto& backpackItems = player.container->get_inventory();
     
     if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
     {
@@ -307,8 +287,8 @@ bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int
             // Store item pointer to detect if it was consumed
             Item* itemPtr = selectedItem;
             
-            // Try to use item
-            bool itemUsed = selectedItem->pickable->use(*selectedItem, owner);
+            // Try to use item - now no cast needed since player is mutable
+            bool itemUsed = selectedItem->pickable->use(*selectedItem, player);
             
             if (itemUsed)
             {
@@ -316,7 +296,7 @@ bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
-                for (const auto& item : player->container->get_inventory())
+                for (const auto& item : player.container->get_inventory())
                 {
                     if (item.get() == itemPtr)
                     {
@@ -340,10 +320,8 @@ bool InventoryUI::handle_backpack_selection(Creature& owner, Player* player, int
     return true; // Stay in inventory
 }
 
-bool InventoryUI::handle_equipment_selection(Creature& owner, Player* player, int input)
+bool InventoryUI::handle_equipment_selection(Player& player, int input)
 {
-    if (!player) return true;
-    
     // Map input characters to equipment slots
     EquipmentSlot targetSlot = EquipmentSlot::NONE;
     
@@ -370,13 +348,13 @@ bool InventoryUI::handle_equipment_selection(Creature& owner, Player* player, in
     }
     
     // Get currently equipped item in this slot
-    Item* equippedItem = player->get_equipped_item(targetSlot);
+    Item* equippedItem = player.get_equipped_item(targetSlot);
     
     if (equippedItem)
     {
-        // Unequip the item
-        player->unequip_item(targetSlot);
-        game.message(WHITE_BLACK_PAIR, "You unequipped the " + equippedItem->actorData.name + ".", true);
+        // Unequip the item - now no cast needed since player is mutable
+        player.unequip_item(targetSlot);
+        game.message(WHITE_BLACK_PAIR, "You unequipped the " + equippedItem->get_name() + ".", true);
     }
     else
     {

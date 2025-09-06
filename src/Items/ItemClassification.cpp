@@ -174,6 +174,19 @@ namespace ItemClassificationUtils
         }
     }
     
+    bool is_ranged_weapon(ItemClass itemClass)
+    {
+        switch (itemClass)
+        {
+            case ItemClass::LONG_BOW:
+            case ItemClass::SHORT_BOW:
+            case ItemClass::CROSSBOW:
+                return true;
+            default:
+                return false;
+        }
+    }
+    
     ItemClass from_string(const std::string& typeName)
     {
         static const std::unordered_map<std::string, ItemClass> classMap = {
@@ -235,5 +248,38 @@ namespace ItemClassificationUtils
         
         auto it = classMap.find(typeName);
         return (it != classMap.end()) ? it->second : ItemClass::UNKNOWN;
+    }
+    
+    WeaponSize get_weapon_size(ItemClass itemClass)
+    {
+        switch (itemClass)
+        {
+            // TINY weapons - can always be off-hand
+            case ItemClass::DAGGER:
+                return WeaponSize::TINY;
+                
+            // SMALL weapons - can be off-hand vs MEDIUM+ main hand
+            case ItemClass::SHORT_SWORD:
+                return WeaponSize::SMALL;
+                
+            // MEDIUM weapons - main hand weapons
+            case ItemClass::LONG_SWORD:
+            case ItemClass::BATTLE_AXE:
+            case ItemClass::WAR_HAMMER:
+                return WeaponSize::MEDIUM;
+                
+            // LARGE weapons - cannot dual wield (two-handed)
+            case ItemClass::GREAT_SWORD:
+            case ItemClass::GREAT_AXE:
+            case ItemClass::LONG_BOW:
+            case ItemClass::SHORT_BOW:
+            case ItemClass::CROSSBOW:
+            case ItemClass::STAFF:
+                return WeaponSize::LARGE;
+                
+            // Non-weapons default to MEDIUM
+            default:
+                return WeaponSize::MEDIUM;
+        }
     }
 }

@@ -13,7 +13,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Items/Items.h"
 #include "../Items/Armor.h"
-#include "../Utils/PickableTypeRegistry.h"
+#include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
 
@@ -370,11 +370,10 @@ bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot
 				auto itemToEquip = std::move(*it);
 				container->get_inventory_mutable().erase(it);
 				
-				// Determine appropriate slot based on weapon type
-				auto itemType = PickableTypeRegistry::get_item_type(*itemToEquip);
+				// Determine appropriate slot based on item classification
 				EquipmentSlot target_slot;
 				
-				if (itemType == PickableTypeRegistry::Type::LONGBOW)
+				if (itemToEquip->itemClass == ItemClass::LONG_BOW)
 				{
 					target_slot = EquipmentSlot::MISSILE_WEAPON;
 				}
@@ -425,10 +424,9 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	
 	if (!can_equip(*item, slot))
 	{
-		auto itemType = PickableTypeRegistry::get_item_type(*item);
 		game.log("DEBUG: can_equip failed for " + item->actorData.name);
-		game.log("DEBUG: Item type: " + std::to_string(static_cast<int>(itemType)));
-		game.log("DEBUG: Is armor: " + std::string(PickableTypeRegistry::is_armor(itemType) ? "true" : "false"));
+		game.log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
+		game.log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
 		game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
 		game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		// Return item to inventory since we can't equip it
@@ -439,11 +437,10 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	// Unequip existing item in the slot first
 	unequip_item(slot);
 	
-	// Special handling for two-handed weapons - use type registry
+	// Special handling for two-handed weapons - use ItemClass system
 	if (slot == EquipmentSlot::RIGHT_HAND)
 	{
-		auto itemType = PickableTypeRegistry::get_item_type(*item);
-		if (itemType == PickableTypeRegistry::Type::GREATSWORD || itemType == PickableTypeRegistry::Type::GREAT_AXE || itemType == PickableTypeRegistry::Type::LONGBOW)
+		if (item->is_two_handed_weapon())
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND);
@@ -460,10 +457,9 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	// Update weapon damage if it's a weapon
 	if (slot == EquipmentSlot::RIGHT_HAND)
 	{
-		auto itemType = PickableTypeRegistry::get_item_type(*equippedItems.back().item);
-		if (PickableTypeRegistry::is_weapon(itemType) && attacker)
+		if (equippedItems.back().item->is_weapon() && attacker)
 		{
-			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(itemType);
+			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemClass);
 			attacker->set_roll(weaponDamage);
 			game.log("Equipped " + equippedItems.back().item->actorData.name + " - damage updated to " + weaponDamage);
 		}
@@ -541,9 +537,8 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 	}
 	case EquipmentSlot::MISSILE_WEAPON:
 	{
-		// Missile weapon slot can only hold ranged weapons - use type registry
-		auto itemType = PickableTypeRegistry::get_item_type(item);
-		if (!PickableTypeRegistry::is_ranged_weapon(itemType))
+		// Missile weapon slot can only hold ranged weapons - use ItemClass system
+		if (!item.is_ranged_weapon())
 		{
 			return false;
 		}
@@ -571,8 +566,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		// Reset combat stats if main hand weapon
 		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
-			auto itemType = PickableTypeRegistry::get_item_type(*it->item);
-			if (PickableTypeRegistry::is_weapon(itemType) && attacker)
+			if (it->item->is_weapon() && attacker)
 			{
 				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
 				game.log("Unequipped " + it->item->actorData.name + " - damage reset to " + WeaponDamageRegistry::get_unarmed_damage());
@@ -623,15 +617,14 @@ bool Player::is_dual_wielding() const noexcept
 		return false;
 	}
 	
-	// Check if left hand item is a weapon (not a shield) - use type registry
-	auto leftType = PickableTypeRegistry::get_item_type(*leftHand);
-	if (leftType == PickableTypeRegistry::Type::SHIELD)
+	// Check if left hand item is a weapon (not a shield) - use ItemClass system
+	if (leftHand->is_shield())
 	{
 		return false; // Shield, not dual wielding
 	}
 	
 	// Check if left hand item is a weapon
-	if (PickableTypeRegistry::is_weapon(leftType))
+	if (leftHand->is_weapon())
 	{
 		return true; // Both hands have weapons
 	}
@@ -644,21 +637,16 @@ std::string Player::get_equipped_weapon_damage_roll() const noexcept
 	auto rightHandWeapon = get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	if (!rightHandWeapon)
 	{
-		return "D2"; // Unarmed damage
+		return WeaponDamageRegistry::get_unarmed_damage();
 	}
 	
-	// Get damage roll from the weapon's roll property - use type registry
-	auto weaponType = PickableTypeRegistry::get_item_type(*rightHandWeapon);
-	if (PickableTypeRegistry::is_weapon(weaponType))
+	// Use pure ItemClass system
+	if (rightHandWeapon->is_weapon())
 	{
-		// Access weapon roll through pickable interface - weapons are all Weapon subclasses
-		if (auto* weapon = static_cast<Weapon*>(rightHandWeapon->pickable.get()))
-		{
-			return weapon->roll; // All weapons have a roll property
-		}
+		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemClass);
 	}
 	
-	return "D2"; // Fallback for non-weapons
+	return WeaponDamageRegistry::get_unarmed_damage();
 }
 
 Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
@@ -683,18 +671,13 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	// - Main hand penalty becomes 0
 	// - Off-hand penalty becomes -2
 	
-	// Get off-hand weapon damage roll - use type registry
+	// Get off-hand weapon damage roll - use pure ItemClass system
 	auto leftHandWeapon = get_equipped_item(EquipmentSlot::LEFT_HAND);
 	if (leftHandWeapon)
 	{
-		// Verify it's a weapon using type registry, then access roll property
-		auto leftType = PickableTypeRegistry::get_item_type(*leftHandWeapon);
-		if (PickableTypeRegistry::is_weapon(leftType))
+		if (leftHandWeapon->is_weapon())
 		{
-			if (auto* weapon = static_cast<Weapon*>(leftHandWeapon->pickable.get()))
-			{
-				info.offHandDamageRoll = weapon->roll;
-			}
+			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemClass);
 		}
 	}
 	

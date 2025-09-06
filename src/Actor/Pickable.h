@@ -83,7 +83,6 @@ public:
 	Dagger() { roll = "D4"; }
 
 	bool is_ranged() const override;
-	WeaponSize get_weapon_size() const override { return WeaponSize::TINY; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::DAGGER; }
@@ -98,7 +97,6 @@ public:
 
 	bool is_ranged() const override;
 	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	WeaponSize get_weapon_size() const override { return WeaponSize::MEDIUM; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::LONGSWORD; }
@@ -111,7 +109,6 @@ public:
 	ShortSword() { roll = "D6"; }
 
 	bool is_ranged() const override;
-	WeaponSize get_weapon_size() const override { return WeaponSize::SMALL; }
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SHORTSWORD; }

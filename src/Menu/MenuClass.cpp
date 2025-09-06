@@ -9,8 +9,7 @@
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
-#include "../Utils/ItemTypeUtils.h"
-#include "../Utils/PickableTypeRegistry.h"
+#include <algorithm>
 
 void equip_fighter_starting_gear()
 {
@@ -36,13 +35,19 @@ void equip_fighter_starting_gear()
 	if (plate_mail_result.has_value())
 	{
 		game.log("Plate mail added to inventory successfully");
-		// Find plate mail by unique ID and equip it
-		auto item_to_equip = ItemTypeUtils::find_item_by_id(player.container->get_inventory_mutable(), plate_mail_id);
-		if (item_to_equip)
+		// Find plate mail by unique ID in inventory
+		auto& inventory = player.container->get_inventory_mutable();
+		auto item_it = std::find_if(inventory.begin(), inventory.end(),
+			[plate_mail_id](const std::unique_ptr<Item>& item) 
+			{
+				return item && item->uniqueId == plate_mail_id;
+			});
+		if (item_it != inventory.end())
 		{
 			game.log("Found plate mail in inventory, attempting to equip");
 			// Extract item from inventory for equipment
-			auto extracted_item = ItemTypeUtils::extract_item_by_id(*player.container, plate_mail_id);
+			auto extracted_item = std::move(*item_it);
+			inventory.erase(item_it);
 			if (extracted_item)
 			{
 				game.log("DEBUG: Extracted item for equipment, proceeding to auto-detect slot");
@@ -97,13 +102,19 @@ void equip_fighter_starting_gear()
 	if (sword_result.has_value())
 	{
 		game.log("Long sword added to inventory successfully");
-		// Find long sword by unique ID and equip it
-		auto item_to_equip = ItemTypeUtils::find_item_by_id(player.container->get_inventory_mutable(), long_sword_id);
-		if (item_to_equip)
+		// Find long sword by unique ID in inventory
+		auto& inventory2 = player.container->get_inventory_mutable();
+		auto sword_it = std::find_if(inventory2.begin(), inventory2.end(),
+			[long_sword_id](const std::unique_ptr<Item>& item) 
+			{
+				return item && item->uniqueId == long_sword_id;
+			});
+		if (sword_it != inventory2.end())
 		{
 			game.log("Found long sword in inventory, attempting to equip");
 			// Extract item from inventory for equipment
-			auto extracted_item = ItemTypeUtils::extract_item_by_id(*player.container, long_sword_id);
+			auto extracted_item = std::move(*sword_it);
+			inventory2.erase(sword_it);
 			if (extracted_item)
 			{
 				// Store item name for logging before potential move

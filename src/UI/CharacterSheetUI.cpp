@@ -4,7 +4,6 @@
 #include "../ActorTypes/Player.h"
 #include "../Game.h"
 #include "../Colors/Colors.h"
-#include "../Utils/PickableTypeRegistry.h"
 #include <format>
 
 void CharacterSheetUI::display_character_sheet(const Player& player)

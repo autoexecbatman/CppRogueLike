@@ -163,6 +163,9 @@ public:
 	// Initialize item type from name (temporary bridge until creation system is refactored)
 	void initialize_item_type_from_name();
 
+	// Name accessor - proper encapsulation
+	const std::string& get_name() const noexcept { return actorData.name; }
+
 	int value{ 1 };
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Proper item classification
 
@@ -178,6 +181,7 @@ public:
 	bool can_equip_to_left_hand() const noexcept { return ItemClassificationUtils::can_equip_to_left_hand(itemClass); }
 	bool can_equip_to_body() const noexcept { return ItemClassificationUtils::can_equip_to_body(itemClass); }
 	bool is_two_handed_weapon() const noexcept { return ItemClassificationUtils::is_two_handed_weapon(itemClass); }
+	bool is_ranged_weapon() const noexcept { return ItemClassificationUtils::is_ranged_weapon(itemClass); }
 };
 
 class Stairs : public Object

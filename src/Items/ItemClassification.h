@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include "Weapons.h" // For WeaponSize enum
 
 enum class ItemClass
 {
@@ -91,6 +92,9 @@ namespace ItemClassificationUtils
     // Get display name for item class
     std::string get_display_name(ItemClass itemClass);
     
+    // Get item class display name (same as above, for consistency)
+    inline std::string get_item_display_name(ItemClass itemClass) { return get_display_name(itemClass); }
+    
     // Type checking functions
     inline bool is_weapon(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::WEAPON; }
     inline bool is_armor(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::ARMOR; }
@@ -102,6 +106,9 @@ namespace ItemClassificationUtils
     inline bool is_tool(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::TOOL; }
     inline bool is_quest_item(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::QUEST_ITEM; }
     
+    // Weapon sub-type checking
+    bool is_ranged_weapon(ItemClass itemClass);
+    
     // Equipment slot detection
     bool can_equip_to_right_hand(ItemClass itemClass);
     bool can_equip_to_left_hand(ItemClass itemClass);
@@ -110,6 +117,9 @@ namespace ItemClassificationUtils
     
     // Convert from string (for loading/creation)
     ItemClass from_string(const std::string& typeName);
+    
+    // Weapon size detection for D&D 2e mechanics
+    WeaponSize get_weapon_size(ItemClass itemClass);
 }
 
 #endif // ITEM_CLASSIFICATION_H

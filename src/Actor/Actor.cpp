@@ -20,8 +20,7 @@
 #include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Armor.h"
-#include "../Utils/ItemTypeUtils.h"
-#include "../Utils/PickableTypeRegistry.h"
+#include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 
 //====
@@ -191,9 +190,8 @@ void Creature::update()
 
 void Creature::equip(Item& item)
 {
-	auto itemType = PickableTypeRegistry::get_item_type(item);
-	bool isArmor = PickableTypeRegistry::is_armor(itemType);
-	bool isWeapon = PickableTypeRegistry::is_weapon(itemType);
+	bool isArmor = item.is_armor();
+	bool isWeapon = item.is_weapon();
 
 	// First check if any equipment of the same type is already equipped
 	std::vector<Item*> equippedItems;
@@ -203,9 +201,8 @@ void Creature::equip(Item& item)
 	{
 		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
 		{
-			auto invItemType = PickableTypeRegistry::get_item_type(*inv_item);
-			bool itemIsArmor = PickableTypeRegistry::is_armor(invItemType);
-			bool itemIsWeapon = PickableTypeRegistry::is_weapon(invItemType);
+			bool itemIsArmor = inv_item->is_armor();
+			bool itemIsWeapon = inv_item->is_weapon();
 
 			// Only consider same-type equipment for unequipping
 			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon))
@@ -230,15 +227,15 @@ void Creature::equip(Item& item)
 	// Update weapon equipped name and damage if it's a weapon
 	if (isWeapon)
 	{
-		weaponEquipped = PickableTypeRegistry::get_display_name(itemType);
+		weaponEquipped = ItemClassificationUtils::get_display_name(item.itemClass);
 		
-		// Update attacker damage roll based on weapon type
+		// Update attacker damage roll based on weapon class
 		if (attacker)
 		{
-			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(itemType);
+			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemClass);
 			
 			attacker->set_roll(weaponDamage);
-			game.log("Equipped " + PickableTypeRegistry::get_display_name(itemType) + " - damage updated to " + weaponDamage);
+			game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " - damage updated to " + weaponDamage);
 		}
 	}
 }
@@ -252,8 +249,7 @@ void Creature::unequip(Item& item)
 		item.remove_state(ActorState::IS_EQUIPPED);
 
 		// If it's a weapon, update the weaponEquipped status and reset damage
-		auto itemType = PickableTypeRegistry::get_item_type(item);
-		if (PickableTypeRegistry::is_weapon(itemType))
+		if (item.is_weapon())
 		{
 			weaponEquipped = "None";
 			
@@ -264,14 +260,14 @@ void Creature::unequip(Item& item)
 				game.log("Unequipped weapon - damage reset to " + WeaponDamageRegistry::get_unarmed_damage() + " (unarmed)");
 			}
 
-			// Check for ranged weapon
-			if (PickableTypeRegistry::is_ranged_weapon(itemType))
+			// Check for ranged weapon - use ItemClass system
+			if (item.is_ranged_weapon())
 			{
 				// Remove the ranged state
 				if (has_state(ActorState::IS_RANGED))
 				{
 					remove_state(ActorState::IS_RANGED);
-					game.log("Removed IS_RANGED state after unequipping " + PickableTypeRegistry::get_display_name(itemType));
+					game.log("Removed IS_RANGED state after unequipping " + item.actorData.name);
 				}
 			}
 		}
@@ -282,8 +278,7 @@ void Creature::unequip(Item& item)
 		{
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
 			{
-				auto invItemType = PickableTypeRegistry::get_item_type(*invItem);
-				if (PickableTypeRegistry::is_ranged_weapon(invItemType))
+				if (invItem->is_ranged_weapon())
 				{
 					hasRangedWeapon = true;
 					break;
@@ -308,8 +303,7 @@ void Creature::sync_ranged_state()
 	{
 		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
 		{
-			auto itemType = PickableTypeRegistry::get_item_type(*item);
-			if (PickableTypeRegistry::is_ranged_weapon(itemType))
+			if (item->is_ranged_weapon())
 			{
 				hasRangedWeapon = true;
 				break;
@@ -339,39 +333,68 @@ void Creature::pick()
 		return;
 	}
 
-	auto is_null = [](auto&& i) { return !i; };
-	for (auto& i : game.container->get_inventory_mutable())
+	// Find item at player's position using proper Container interface
+	Item* itemAtPosition = nullptr;
+	size_t itemIndex = 0;
+	
+	// Search for item at current position
+	for (size_t i = 0; i < game.container->get_item_count(); ++i)
 	{
-		if (i)
+		if (auto* item = game.container->get_item_at(i))
 		{
-			if (position == i->position)
+			if (position == item->position)
 			{
-				// Check if item is gold using type registry
-				auto itemType = PickableTypeRegistry::get_item_type(*i);
-				if (PickableTypeRegistry::is_gold(itemType))
-				{
-					// Get the gold amount - we know it's gold so safe to cast
-					auto goldPickable = static_cast<Gold*>(i->pickable.get());
-					if (goldPickable)
-					{
-						gold += goldPickable->amount;
-						game.message(YELLOW_BLACK_PAIR, "You pick up " + std::to_string(goldPickable->amount) + " gold.", true);
-						i.reset(); // Remove the gold pile from the map
-						std::erase_if(game.container->get_inventory_mutable(), is_null);
-						return;
-					}
-				}
-
-				// Normal item handling
-				// Store item name before moving since move invalidates the pointer
-				const std::string itemName = i->actorData.name;
-				if (container->add(std::move(i)))
-				{
-					game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
-					std::erase_if(game.container->get_inventory_mutable(), is_null);
-				}
-				// We don't need an else for failed add since Container::add() now handles the message
+				itemAtPosition = item;
+				itemIndex = i;
+				break;
 			}
+		}
+	}
+
+	if (!itemAtPosition)
+	{
+		return; // No item at this position
+	}
+
+	// Handle item pickup using proper Container methods
+	if (itemAtPosition->itemClass == ItemClass::GOLD)
+	{
+		// Use the pickable's use() method which handles gold pickup properly
+		if (itemAtPosition->pickable->use(*itemAtPosition, *this))
+		{
+			// Gold was picked up successfully via polymorphic call
+			// Remove gold from map container using proper interface
+			auto removeResult = game.container->remove_at(itemIndex);
+			if (!removeResult.has_value())
+			{
+				game.log("WARNING: Failed to remove gold item from map container");
+			}
+		}
+	}
+	else
+	{
+		// Normal item handling - store name before moving
+		const std::string itemName = itemAtPosition->actorData.name;
+		
+		// Remove from map first
+		auto removeResult = game.container->remove_at(itemIndex);
+		if (removeResult.has_value())
+		{
+			// Add to player inventory
+			auto addResult = container->add(std::move(*removeResult));
+			if (addResult.has_value() && *addResult)
+			{
+				game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+			}
+			else
+			{
+				game.log("WARNING: Failed to add item to player inventory");
+				// Item is lost - this should not happen since we checked is_full() earlier
+			}
+		}
+		else
+		{
+			game.log("WARNING: Failed to remove item from map container");
 		}
 	}
 }

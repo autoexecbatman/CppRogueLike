@@ -1,52 +1,48 @@
-// ItemTypeUtils.cpp - Implementation of ID-based and type-safe item utilities
 #include "ItemTypeUtils.h"
 #include "../Actor/Container.h"
-#include "../Actor/Actor.h"
+#include <algorithm>
 
 namespace ItemTypeUtils
 {
-    Item* find_item_by_id(const std::vector<std::unique_ptr<Item>>& inventory, UniqueId::IdType id)
+    Item* find_item_by_id(std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        for (const auto& item : inventory)
-        {
-            if (item && item->uniqueId == id)
+        auto it = std::find_if(inventory.begin(), inventory.end(),
+            [uniqueId](const std::unique_ptr<Item>& item) 
             {
-                return item.get();
-            }
-        }
-        return nullptr;
+                return item && item->uniqueId == uniqueId;
+            });
+        
+        return (it != inventory.end()) ? it->get() : nullptr;
     }
     
-    Item* find_item_by_id(std::vector<std::unique_ptr<Item>>& inventory, UniqueId::IdType id)
+    const Item* find_item_by_id(const std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        for (auto& item : inventory)
-        {
-            if (item && item->uniqueId == id)
+        auto it = std::find_if(inventory.begin(), inventory.end(),
+            [uniqueId](const std::unique_ptr<Item>& item) 
             {
-                return item.get();
-            }
-        }
-        return nullptr;
+                return item && item->uniqueId == uniqueId;
+            });
+        
+        return (it != inventory.end()) ? it->get() : nullptr;
     }
     
-    std::unique_ptr<Item> extract_item_by_id(Container& container, UniqueId::IdType id)
+    std::unique_ptr<Item> extract_item_by_id(Container& container, int uniqueId)
     {
         auto& inventory = container.get_inventory_mutable();
-        for (auto& item : inventory)
-        {
-            if (item && item->uniqueId == id)
+        
+        auto it = std::find_if(inventory.begin(), inventory.end(),
+            [uniqueId](const std::unique_ptr<Item>& item) 
             {
-                auto extracted = std::move(item);
-                std::erase_if(inventory, [](const auto& item) { return !item; });
-                return extracted;
-            }
+                return item && item->uniqueId == uniqueId;
+            });
+        
+        if (it != inventory.end())
+        {
+            auto extracted_item = std::move(*it);
+            inventory.erase(it);
+            return extracted_item;
         }
+        
         return nullptr;
-    }
-    
-    std::unique_ptr<Item> extract_specific_item(Container& container, Item* target_item)
-    {
-        if (!target_item) return nullptr;
-        return extract_item_by_id(container, target_item->uniqueId);
     }
 }

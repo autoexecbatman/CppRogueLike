@@ -14,7 +14,7 @@ public:
     ~InventoryUI();
     
     // Main entry point - displays inventory and handles all interaction
-    void display(Creature& owner);
+    void display(Player& player);
     
 private:
     // Window management
@@ -23,17 +23,17 @@ private:
     void refresh_windows();
     
     // Display methods
-    void display_inventory_items(Player* player);
-    void display_equipment_slots(Player* player);
+    void display_inventory_items(const Player& player);
+    void display_equipment_slots(const Player& player);
     void display_instructions();
     
     // Input handling
-    bool handle_inventory_input(Creature& owner, Player* player);
-    bool handle_backpack_selection(Creature& owner, Player* player, int itemIndex);
-    bool handle_equipment_selection(Creature& owner, Player* player, int input);
+    bool handle_inventory_input(Player& player);
+    bool handle_backpack_selection(Player& player, int itemIndex);
+    bool handle_equipment_selection(Player& player, int input);
     
     // Helper methods
-    std::vector<std::pair<Item*, bool>> build_item_list(Creature& owner, Player* player);
+    std::vector<std::pair<Item*, bool>> build_item_list(const Player& player);
     void show_item_info(Item* item, int y);
     void restore_game_display();
     

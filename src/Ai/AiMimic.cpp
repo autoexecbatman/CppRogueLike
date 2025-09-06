@@ -2,7 +2,6 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiPlayer.h"
-#include "../Utils/PickableTypeRegistry.h"
 
 AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(0) {}
 
@@ -105,24 +104,26 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
             // Grow stronger based on item type using PickableTypeRegistry
             itemsConsumed++;
             
-            // Get item type using modern type registry
-            auto itemType = PickableTypeRegistry::get_item_type(*item);
+            // Get item type using the ItemClass system (what the item IS, not what component it uses)
+            ItemClass itemClass = item->itemClass;
 
             // Different bonuses based on item type
-            if (itemType == PickableTypeRegistry::Type::HEALER)
+            if (itemClass == ItemClass::HEALTH_POTION)
             {
                 // Health potions give the mimic more HP
                 mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
                 mimic.destructible->set_hp(mimic.destructible->get_hp() + 1);
                 game.log("Mimic gained 1 HP from potion");
             }
-            else if (PickableTypeRegistry::is_scroll(itemType))
+            else if (itemClass == ItemClass::SCROLL_LIGHTNING ||
+                     itemClass == ItemClass::SCROLL_FIREBALL ||
+                     itemClass == ItemClass::SCROLL_CONFUSION)
             {
                 // Scrolls increase confusion duration
                 confusionDuration = std::min(confusionDuration + 1, 5);
                 game.log("Mimic increased confusion duration to " + std::to_string(confusionDuration));
             }
-            else if (PickableTypeRegistry::is_gold(itemType))
+            else if (itemClass == ItemClass::GOLD)
             {
                 // Gold makes the mimic more defensive
                 if (mimic.destructible->get_dr() < 2)
@@ -131,7 +132,15 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
                     game.log("Mimic gained 1 DR from gold");
                 }
             }
-            else if (PickableTypeRegistry::is_weapon(itemType))
+            else if (itemClass == ItemClass::DAGGER ||
+                     itemClass == ItemClass::SHORT_SWORD ||
+                     itemClass == ItemClass::LONG_SWORD ||
+                     itemClass == ItemClass::GREAT_SWORD ||
+                     itemClass == ItemClass::BATTLE_AXE ||
+                     itemClass == ItemClass::GREAT_AXE ||
+                     itemClass == ItemClass::WAR_HAMMER ||
+                     itemClass == ItemClass::STAFF ||
+                     itemClass == ItemClass::LONG_BOW)
             {
                 // Weapons make the mimic hit harder
                 if (mimic.attacker->get_roll() != "D6")
@@ -141,7 +150,9 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
                     game.log("Mimic improved attack to " + mimic.attacker->get_roll());
                 }
             }
-            else if (PickableTypeRegistry::is_armor(itemType))
+            else if (itemClass == ItemClass::LEATHER_ARMOR ||
+                     itemClass == ItemClass::CHAIN_MAIL ||
+                     itemClass == ItemClass::PLATE_MAIL)
             {
                 // Armor increases defense
                 if (mimic.destructible->get_dr() < 3)
@@ -150,7 +161,10 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
                     game.log("Mimic gained 1 DR from armor");
                 }
             }
-            else if (PickableTypeRegistry::is_food(itemType))
+            else if (itemClass == ItemClass::FOOD_RATION ||
+                     itemClass == ItemClass::BREAD ||
+                     itemClass == ItemClass::MEAT ||
+                     itemClass == ItemClass::FRUIT)
             {
                 // Food provides general health boost
                 mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
@@ -160,7 +174,7 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
             else
             {
                 // Unknown item type - provide minimal benefit
-                game.log("Mimic consumed unknown item type: " + PickableTypeRegistry::get_display_name(itemType));
+                game.log("Mimic consumed unknown item type: " + item->get_name());
             }
 
             // Mark item for removal

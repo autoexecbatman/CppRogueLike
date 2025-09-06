@@ -2,13 +2,12 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Player.h"
-#include "../Utils/PickableTypeRegistry.h"
 
 // Clean armor equip/unequip logic - delegates to Equipment System
 bool Armor::use(Item& item, Creature& wearer)
 {
-	auto itemType = PickableTypeRegistry::get_item_type(item);
-	std::string armorName = PickableTypeRegistry::get_display_name(itemType);
+	// Use the item's own name and type directly
+	std::string armorName = item.actorData.name;
 	
 	// For players, delegate to Equipment System using unique IDs
 	if (wearer.uniqueId == game.player->uniqueId)

@@ -1,31 +1,31 @@
-// WeaponDamageRegistry.cpp - Implementation of robust damage value system
+// WeaponDamageRegistry.cpp - Implementation using ItemClass system
 #include "WeaponDamageRegistry.h"
 
 // Static member definition
-const std::unordered_map<PickableTypeRegistry::Type, DamageInfo> WeaponDamageRegistry::weapon_damage_map = 
+const std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::weapon_damage_map = 
     WeaponDamageRegistry::create_weapon_damage_map();
 
-std::unordered_map<PickableTypeRegistry::Type, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
+std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
 {
     return {
         // Melee Weapons - AD&D 2e damage values
-        {PickableTypeRegistry::Type::DAGGER,     DamageValues::Dagger()},      // 1-4 damage
-        {PickableTypeRegistry::Type::SHORTSWORD, DamageValues::ShortSword()},  // 1-6 damage
-        {PickableTypeRegistry::Type::LONGSWORD,  DamageValues::LongSword()},   // 1-8 damage
-        {PickableTypeRegistry::Type::STAFF,      DamageValues::Staff()},       // 1-6 damage
-        {PickableTypeRegistry::Type::BATTLE_AXE, DamageValues::BattleAxe()},   // 1-8 damage
-        {PickableTypeRegistry::Type::GREAT_AXE,  {1, 12, "1d12"}},            // 1-12 damage
-        {PickableTypeRegistry::Type::WAR_HAMMER, DamageValues::WarHammer()},   // 2-5 damage (1d4+1)
-        {PickableTypeRegistry::Type::GREATSWORD, DamageValues::GreatSword()},  // 1-10 damage
+        {ItemClass::DAGGER,     DamageValues::Dagger()},      // 1-4 damage
+        {ItemClass::SHORT_SWORD, DamageValues::ShortSword()},  // 1-6 damage
+        {ItemClass::LONG_SWORD,  DamageValues::LongSword()},   // 1-8 damage
+        {ItemClass::STAFF,      DamageValues::Staff()},       // 1-6 damage
+        {ItemClass::BATTLE_AXE, DamageValues::BattleAxe()},   // 1-8 damage
+        {ItemClass::GREAT_AXE,  {1, 12, "1d12"}},            // 1-12 damage
+        {ItemClass::WAR_HAMMER, DamageValues::WarHammer()},   // 2-5 damage (1d4+1)
+        {ItemClass::GREAT_SWORD, DamageValues::GreatSword()},  // 1-10 damage
         
         // Ranged Weapons
-        {PickableTypeRegistry::Type::LONGBOW,    DamageValues::LongBow()},     // 1-6 damage
+        {ItemClass::LONG_BOW,    DamageValues::LongBow()},     // 1-6 damage
     };
 }
 
-DamageInfo WeaponDamageRegistry::get_damage_info(PickableTypeRegistry::Type weaponType) noexcept
+DamageInfo WeaponDamageRegistry::get_damage_info(ItemClass weaponClass) noexcept
 {
-    auto it = weapon_damage_map.find(weaponType);
+    auto it = weapon_damage_map.find(weaponClass);
     if (it != weapon_damage_map.end())
     {
         return it->second;
@@ -35,13 +35,13 @@ DamageInfo WeaponDamageRegistry::get_damage_info(PickableTypeRegistry::Type weap
     return get_unarmed_damage_info();
 }
 
-std::string WeaponDamageRegistry::get_damage_roll(PickableTypeRegistry::Type weaponType) noexcept
+std::string WeaponDamageRegistry::get_damage_roll(ItemClass weaponClass) noexcept
 {
-    auto damageInfo = get_damage_info(weaponType);
+    auto damageInfo = get_damage_info(weaponClass);
     return damageInfo.displayRoll;
 }
 
-bool WeaponDamageRegistry::is_registered(PickableTypeRegistry::Type weaponType) noexcept
+bool WeaponDamageRegistry::is_registered(ItemClass weaponClass) noexcept
 {
-    return weapon_damage_map.find(weaponType) != weapon_damage_map.end();
+    return weapon_damage_map.find(weaponClass) != weapon_damage_map.end();
 }

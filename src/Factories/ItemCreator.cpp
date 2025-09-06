@@ -8,7 +8,6 @@
 #include "../Items/Armor.h"
 #include "../Colors/Colors.h"
 #include "../Items/Weapons.h"
-#include "../Utils/PickableTypeRegistry.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Food.h"
 #include "../Items/Amulet.h"
@@ -49,6 +48,7 @@ std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "dagger", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Dagger>();
+    item->itemClass = ItemClass::DAGGER;
     item->value = 2; // AD&D 2e price
     return item;
 }
@@ -57,6 +57,7 @@ std::unique_ptr<Item> ItemCreator::create_short_sword(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "short sword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<ShortSword>();
+    item->itemClass = ItemClass::SHORT_SWORD;
     item->value = 10; // AD&D 2e price
     return item;
 }
@@ -65,6 +66,7 @@ std::unique_ptr<Item> ItemCreator::create_long_sword(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "long sword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<LongSword>();
+    item->itemClass = ItemClass::LONG_SWORD;
     item->value = 15; // AD&D 2e price
     return item;
 }
@@ -73,6 +75,7 @@ std::unique_ptr<Item> ItemCreator::create_staff(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "staff", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Staff>();
+    item->itemClass = ItemClass::STAFF;
     item->value = 6; // AD&D 2e price
     return item;
 }
@@ -81,6 +84,7 @@ std::unique_ptr<Item> ItemCreator::create_longbow(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{')', "longbow", WHITE_BLUE_PAIR});
     item->pickable = std::make_unique<Longbow>();
+    item->itemClass = ItemClass::LONG_BOW;
     item->value = 75; // AD&D 2e price
     return item;
 }
@@ -90,6 +94,7 @@ std::unique_ptr<Item> ItemCreator::create_greatsword(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "greatsword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Greatsword>();
+    item->itemClass = ItemClass::GREAT_SWORD; // Fix: Set proper item classification
     item->value = 50; // AD&D 2e price
     return item;
 }
@@ -98,6 +103,7 @@ std::unique_ptr<Item> ItemCreator::create_battle_axe(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "battle axe", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<BattleAxe>();
+    item->itemClass = ItemClass::BATTLE_AXE;
     item->value = 25; // AD&D 2e price
     return item;
 }
@@ -106,6 +112,7 @@ std::unique_ptr<Item> ItemCreator::create_great_axe(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "great axe", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<GreatAxe>();
+    item->itemClass = ItemClass::GREAT_AXE;
     item->value = 40; // AD&D 2e price
     return item;
 }
@@ -114,6 +121,7 @@ std::unique_ptr<Item> ItemCreator::create_war_hammer(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "war hammer", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<WarHammer>();
+    item->itemClass = ItemClass::WAR_HAMMER;
     item->value = 20; // AD&D 2e price
     return item;
 }
@@ -122,6 +130,7 @@ std::unique_ptr<Item> ItemCreator::create_shield(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'[', "shield", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Shield>();
+    item->itemClass = ItemClass::MEDIUM_SHIELD;
     item->value = 10; // AD&D 2e price
     return item;
 }
@@ -324,6 +333,7 @@ std::unique_ptr<Item> ItemCreator::create_leather_armor(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'[', "leather armor", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<LeatherArmor>();
+    item->itemClass = ItemClass::LEATHER_ARMOR;
     item->value = 5; // AD&D 2e price
     return item;
 }
@@ -332,6 +342,7 @@ std::unique_ptr<Item> ItemCreator::create_chain_mail(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'[', "chain mail", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<ChainMail>();
+    item->itemClass = ItemClass::CHAIN_MAIL;
     item->value = 75; // AD&D 2e price
     return item;
 }
@@ -340,6 +351,7 @@ std::unique_ptr<Item> ItemCreator::create_plate_mail(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'[', "plate mail", BROWN_BLACK_PAIR});
     item->pickable = std::make_unique<PlateMail>();
+    item->itemClass = ItemClass::PLATE_MAIL;
     item->value = 400; // AD&D 2e price
     return item;
 }
@@ -385,46 +397,46 @@ std::unique_ptr<Item> ItemCreator::create_amulet_of_yendor(Vector2D pos)
 
 void ItemCreator::ensure_correct_value(Item& item)
 {
-    // Fix items with incorrect values using type-safe approach
-    auto itemType = PickableTypeRegistry::get_item_type(item);
+    // Fix items with incorrect values using the ItemClass system
+    ItemClass itemClass = item.itemClass;
     
-    // Set correct values based on item type
-    switch (itemType)
+    // Set correct values based on item class (what the item IS)
+    switch (itemClass)
     {
-    case PickableTypeRegistry::Type::HEALER:
+    case ItemClass::HEALTH_POTION:
         if (item.value != 50) item.value = 50;
         break;
-    case PickableTypeRegistry::Type::LIGHTNING_BOLT:
+    case ItemClass::SCROLL_LIGHTNING:
         if (item.value != 150) item.value = 150;
         break;
-    case PickableTypeRegistry::Type::FIREBALL:
+    case ItemClass::SCROLL_FIREBALL:
         if (item.value != 100) item.value = 100;
         break;
-    case PickableTypeRegistry::Type::CONFUSER:
+    case ItemClass::SCROLL_CONFUSION:
         if (item.value != 120) item.value = 120;
         break;
-    case PickableTypeRegistry::Type::DAGGER:
+    case ItemClass::DAGGER:
         if (item.value != 2) item.value = 2;
         break;
-    case PickableTypeRegistry::Type::SHORTSWORD:
+    case ItemClass::SHORT_SWORD:
         if (item.value != 10) item.value = 10;
         break;
-    case PickableTypeRegistry::Type::LONGSWORD:
+    case ItemClass::LONG_SWORD:
         if (item.value != 15) item.value = 15;
         break;
-    case PickableTypeRegistry::Type::STAFF:
+    case ItemClass::STAFF:
         if (item.value != 6) item.value = 6;
         break;
-    case PickableTypeRegistry::Type::LONGBOW:
+    case ItemClass::LONG_BOW:
         if (item.value != 75) item.value = 75;
         break;
-    case PickableTypeRegistry::Type::LEATHER_ARMOR:
+    case ItemClass::LEATHER_ARMOR:
         if (item.value != 5) item.value = 5;
         break;
-    case PickableTypeRegistry::Type::CHAIN_MAIL:
+    case ItemClass::CHAIN_MAIL:
         if (item.value != 75) item.value = 75;
         break;
-    case PickableTypeRegistry::Type::PLATE_MAIL:
+    case ItemClass::PLATE_MAIL:
         if (item.value != 400) item.value = 400;
         break;
     default:
@@ -435,15 +447,15 @@ void ItemCreator::ensure_correct_value(Item& item)
             std::string enhancementStr = item.actorData.name.substr(item.actorData.name.find("+") + 1);
             int enhancementLevel = std::stoi(enhancementStr);
             
-            // Determine base value from item type
+            // Determine base value from item class
             int baseValue = 0;
-            switch (itemType)
+            switch (itemClass)
             {
-            case PickableTypeRegistry::Type::DAGGER: baseValue = 2; break;
-            case PickableTypeRegistry::Type::SHORTSWORD: baseValue = 10; break;
-            case PickableTypeRegistry::Type::LONGSWORD: baseValue = 15; break;
-            case PickableTypeRegistry::Type::STAFF: baseValue = 6; break;
-            case PickableTypeRegistry::Type::LONGBOW: baseValue = 75; break;
+            case ItemClass::DAGGER: baseValue = 2; break;
+            case ItemClass::SHORT_SWORD: baseValue = 10; break;
+            case ItemClass::LONG_SWORD: baseValue = 15; break;
+            case ItemClass::STAFF: baseValue = 6; break;
+            case ItemClass::LONG_BOW: baseValue = 75; break;
             default: break;
             }
             

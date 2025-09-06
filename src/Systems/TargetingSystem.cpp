@@ -74,7 +74,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				// Print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->get_hp(), actor->destructible->get_max_hp());
 				mvprintw(2, 0, "AC: %d", actor->destructible->get_armor_class());
-				mvprintw(3, 0, "Roll: %s", actor->attacker->get_roll());
+				mvprintw(3, 0, "Roll: %s", actor->attacker->get_roll().c_str());
 				mvprintw(4, 0, "Str: %d", actor->get_strength());
 				mvprintw(5, 0, "Dex: %d", actor->get_dexterity());
 				mvprintw(6, 0, "Con: %d", actor->get_constitution());
