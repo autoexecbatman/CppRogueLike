@@ -20,7 +20,7 @@ struct DamageInfo
         : minDamage(min), maxDamage(max), displayRoll(display) {}
     
     // Core damage operations
-    int rollDamage() const 
+    int roll_damage() const 
     {
         if (minDamage == maxDamage) return minDamage;
         
@@ -30,10 +30,10 @@ struct DamageInfo
         return dis(gen);
     }
     
-    int getAverageDamage() const { return (minDamage + maxDamage) / 2; }
+    int get_average_damage() const { return (minDamage + maxDamage) / 2; }
     
     // Modification operations
-    DamageInfo& addBonus(int bonus)
+    DamageInfo& add_bonus(int bonus)
     {
         minDamage += bonus;
         maxDamage += bonus;
@@ -45,7 +45,7 @@ struct DamageInfo
         return *this;
     }
     
-    DamageInfo& multiplyDamage(float multiplier)
+    DamageInfo& multiply_damage(float multiplier)
     {
         minDamage = static_cast<int>(minDamage * multiplier);
         maxDamage = static_cast<int>(maxDamage * multiplier);
@@ -54,8 +54,8 @@ struct DamageInfo
     }
     
     // Utility functions
-    bool isValid() const { return minDamage > 0 && maxDamage >= minDamage; }
-    std::string getDamageRange() const 
+    bool is_valid() const { return minDamage > 0 && maxDamage >= minDamage; }
+    std::string get_damage_range() const 
     {
         if (minDamage == maxDamage) {
             return std::to_string(minDamage);
