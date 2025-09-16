@@ -143,13 +143,14 @@ void Game::update()
 void Game::load_all()
 {
 	menu_manager.set_game_initialized(true);
+	data_manager.load_all_data(message_system);
 	if (!state_manager.load_game(
-	map,
-	rooms,
-	*player,
-	*stairs,
-	creatures,
-	inventory_data,
+		map,
+		rooms,
+		*player,
+		*stairs,
+		creatures,
+		inventory_data,
 		gui,
 		hunger_system,
 		level_manager,
@@ -176,10 +177,10 @@ void Game::save_all()
 		*stairs,
 		creatures,
 		inventory_data,
-			gui,
-			hunger_system,
-			level_manager,
-			time
+		gui,
+		hunger_system,
+		level_manager,
+		time
 		);
 	}
 	catch (const std::exception& e)
