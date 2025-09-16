@@ -6,6 +6,7 @@
 #include "../Game.h"
 #include "../Items/Items.h"
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Colors/Colors.h"
 #include "../Attributes/StrengthAttributes.h"
 #include "../ActorTypes/Healer.h"
@@ -13,6 +14,8 @@
 #include "../Items/Armor.h"
 #include "../ActorTypes/Player.h"
 #include "Pickable.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -120,18 +123,10 @@ void Destructible::die(Creature& owner)
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
 	corpse->actorData.ch = '%';
-
-	// Replace this line:
-	// corpse->pickable = std::make_unique<Healer>(10);
-	// With this:
 	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
-	// DEFERRED CLEANUP: Don't remove immediately, let the game loop handle it
-	// Mark the creature for removal instead of removing it immediately
-	// This prevents dangling references during combat
-	
-	// Add the corpse to the game
-	game.container->add(std::move(corpse));
+	// Add the corpse to the floor items
+	add_item(game.inventory_data, std::move(corpse));
 	
 	// Note: The creature will be removed from game.creatures later
 	// when it's safe to do so (e.g., at the end of the turn)
@@ -218,11 +213,11 @@ void Destructible::update_armor_class(Creature& owner)
 			}
 		}
 	}
-	else if (owner.container)
+	else
 	{
 		// Use old system for non-player creatures
 		// Check all items for equipped armor
-		for (const auto& item : game.container->get_inventory_mutable())
+		for (const auto& item : owner.inventory_data.items)
 		{
 			if (item && item->has_state(ActorState::IS_EQUIPPED))
 			{

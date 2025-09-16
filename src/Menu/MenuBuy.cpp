@@ -5,6 +5,9 @@
 #include "MenuBuy.h"
 #include "../Game.h"
 #include "../ActorTypes/Player.h"
+#include "../Actor/InventoryOperations.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 void MenuBuy::populate_items(std::span<std::unique_ptr<Item>> inventory)
 {
@@ -47,7 +50,7 @@ MenuBuy::MenuBuy(Creature& buyer) : buyer{ buyer }
 	menu_height = static_cast<size_t>(LINES);
 	menu_width = static_cast<size_t>(COLS);
 	
-	populate_items(buyer.container->get_inventory_mutable());
+	populate_items(buyer.inventory_data.items);
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 }
 
@@ -74,7 +77,7 @@ void MenuBuy::menu_print_state(size_t state)
 void MenuBuy::draw_content()
 {
 	// Only redraw if content changed
-	populate_items(buyer.container->get_inventory_mutable());
+	populate_items(buyer.inventory_data.items);
 	
 	// Draw all menu items efficiently
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
@@ -95,7 +98,7 @@ void MenuBuy::draw()
 	// Instructions
 	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to buy, ESC to exit");
 	
-	populate_items(buyer.container->get_inventory_mutable());
+	populate_items(buyer.inventory_data.items);
 	
 	// Start items at row 4 to leave space for title and instructions
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
@@ -112,7 +115,7 @@ void MenuBuy::on_key(int key)
 		case KEY_UP:
 		case 'w':
 			// Don't allow navigation if no items for sale
-			if (buyer.container->get_inventory_mutable().empty()) return;
+			if (buyer.inventory_data.items.empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -123,7 +126,7 @@ void MenuBuy::on_key(int key)
 		case KEY_DOWN:
 		case 's':
 			// Don't allow navigation if no items for sale
-			if (buyer.container->get_inventory_mutable().empty()) return;
+			if (buyer.inventory_data.items.empty()) return;
 			if (menuItems.empty())
 			{
 				return;
@@ -136,7 +139,7 @@ void MenuBuy::on_key(int key)
 			break;
 		case 10: // ENTER
 			// Only allow buying if shopkeeper actually has items
-			if (!buyer.container->get_inventory_mutable().empty() && !menuItems.empty())
+			if (!buyer.inventory_data.items.empty() && !menuItems.empty())
 			{
 				handle_buy(menuWindow, buyer, *game.player);
 				menu_mark_dirty(); // Redraw after purchase
@@ -173,13 +176,14 @@ void MenuBuy::menu()
 
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
 {
-    if (shopkeeper.container->is_empty() || currentState >= shopkeeper.container->get_item_count())
+    if (is_inventory_empty(shopkeeper.inventory_data) || 
+        currentState >= get_item_count(shopkeeper.inventory_data))
     {
         game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
         return;
     }
     
-    const Item* item = shopkeeper.container->get_item_at(currentState);
+    const Item* item = get_item_at(shopkeeper.inventory_data, currentState);
     if (!item)
     {
         game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
@@ -189,18 +193,18 @@ void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller)
     if (seller.get_gold() >= item->value)
     {
         // Remove item from shopkeeper and add to seller
-        auto removed_item = shopkeeper.container->remove_at(currentState);
+        auto removed_item = remove_item_at(shopkeeper.inventory_data, currentState);
         if (removed_item.has_value())
         {
             seller.adjust_gold(-item->value);
             shopkeeper.adjust_gold(item->value);
             
-            seller.container->add(std::move(*removed_item));
+            add_item(seller.inventory_data, std::move(*removed_item));
             
             // Adjust currentState bounds
-            if (currentState >= shopkeeper.container->get_item_count() && !shopkeeper.container->is_empty())
+            if (currentState >= get_item_count(shopkeeper.inventory_data) && !is_inventory_empty(shopkeeper.inventory_data))
             {
-                currentState = shopkeeper.container->get_item_count() - 1;
+                currentState = get_item_count(shopkeeper.inventory_data) - 1;
             }
             
             game.message(WHITE_BLACK_PAIR, "Item purchased successfully.", true);

@@ -16,10 +16,10 @@ class Player;
 class Stairs;
 class Creature;
 class Item;
-class Container;
 class Gui;
 class HungerSystem;
 class LevelManager;
+struct InventoryData;
 struct Vector2D;
 
 class GameStateManager
@@ -35,7 +35,7 @@ public:
         Player& player,
         Stairs& stairs,
         const std::vector<std::unique_ptr<Creature>>& creatures,
-        const Container& container,
+        const InventoryData& inventory_data,
         Gui& gui,
         HungerSystem& hunger_system,
         const LevelManager& level_manager,
@@ -48,7 +48,7 @@ public:
         Player& player,
         Stairs& stairs,
         std::vector<std::unique_ptr<Creature>>& creatures,
-        Container& container,
+        InventoryData& inventory_data,
         Gui& gui,
         HungerSystem& hunger_system,
         LevelManager& level_manager,
@@ -70,8 +70,6 @@ private:
     void save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const;
     void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;
     
-    void save_items_to_json(const Container& container, nlohmann::json& j) const;
-    void load_items_from_json(const nlohmann::json& j, Container& container) const;
 };
 
 #endif // GAMESTATEMANAGER_H

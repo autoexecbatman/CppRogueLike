@@ -5,7 +5,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
 #include "../Items/Items.h"
-#include "../Actor/Container.h"
+#include "../Actor/InventoryData.h"
 #include "../Gui/Gui.h"
 #include "../Objects/Web.h"
 #include <curses.h>
@@ -14,7 +14,7 @@ void RenderingManager::render_world(
     const Map& map,
     const Stairs& stairs,
     std::span<const std::unique_ptr<Object>> objects,
-    const Container& container,
+    const InventoryData& inventory_data,
     std::span<const std::unique_ptr<Creature>> creatures,
     const Player& player
 ) const
@@ -23,7 +23,10 @@ void RenderingManager::render_world(
     stairs.render();
 
     render_objects(objects);
-    render_items(container.get_inventory());
+    
+    // Render floor items
+    render_items(inventory_data.items);
+    
     render_creatures(creatures);
     player.render();
 }

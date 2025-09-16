@@ -2,10 +2,13 @@
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Pickable.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Game.h"
 #include "../Controls/Controls.h"
 #include "../Colors/Colors.h"
 #include <algorithm>
+
+using namespace InventoryOperations; // For clean function calls without namespace prefix
 
 InventoryUI::InventoryUI() : inventoryWindow(nullptr), equipmentWindow(nullptr)
 {
@@ -87,25 +90,25 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(const Player& p
     std::vector<std::pair<Item*, bool>> allItems;
     
     // Add all items from inventory with their equipped status
-    for (const auto& item : player.container->get_inventory())
-    {
-        if (item)
+    for (const auto& item : player.inventory_data.items)
         {
-            bool isEquipped = false;
-            
-            // Check if item is equipped using proper slot-based system
-            for (const auto& equippedItem : player.equippedItems)
+            if (item)
             {
-                if (equippedItem.item && equippedItem.item->uniqueId == item->uniqueId)
+                bool isEquipped = false;
+                
+                // Check if item is equipped using proper slot-based system
+                for (const auto& equippedItem : player.equippedItems)
                 {
-                    isEquipped = true;
-                    break;
+                    if (equippedItem.item && equippedItem.item->uniqueId == item->uniqueId)
+                    {
+                        isEquipped = true;
+                        break;
+                    }
                 }
+                
+                allItems.emplace_back(item.get(), isEquipped);
             }
-            
-            allItems.emplace_back(item.get(), isEquipped);
         }
-    }
     
     return allItems;
 }
@@ -113,15 +116,15 @@ std::vector<std::pair<Item*, bool>> InventoryUI::build_item_list(const Player& p
 void InventoryUI::display_inventory_items(const Player& player)
 {
     // Update title with backpack item count
-    size_t backpackItems = player.container->get_item_count();
-    size_t maxItems = player.container->get_capacity();
+    size_t backpackItems = InventoryOperations::get_item_count(player.inventory_data);
+    size_t maxItems = player.inventory_data.capacity;
     mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
     
     int y = 2;
     char shortcut = 'a';
     
     // Display only backpack items (not equipped items)
-    const auto& backpackItems_list = player.container->get_inventory();
+    const auto& backpackItems_list = player.inventory_data.items;
     
     if (backpackItems_list.empty())
     {
@@ -237,10 +240,7 @@ void InventoryUI::display_instructions()
 {
     // Calculate total weight (simplified - assume 1 weight per item for now)
     int totalWeight = 0;
-    if (game.player && game.player->container)
-    {
-        totalWeight = static_cast<int>(game.player->container->get_item_count());
-    }
+    totalWeight = static_cast<int>(get_item_count(game.player->inventory_data));
     
     mvwprintw(
         inventoryWindow,
@@ -276,7 +276,13 @@ bool InventoryUI::handle_inventory_input(Player& player)
 
 bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
 {
-    const auto& backpackItems = player.container->get_inventory();
+    if (is_inventory_empty(player.inventory_data))
+    {
+        game.message(WHITE_BLACK_PAIR, "Your backpack is empty.", true);
+        return true; // Stay in inventory
+    }
+    
+    const auto& backpackItems = player.inventory_data.items;
     
     if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
     {
@@ -296,7 +302,7 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
-                for (const auto& item : player.container->get_inventory())
+                for (const auto& item : player.inventory_data.items)
                 {
                     if (item.get() == itemPtr)
                     {

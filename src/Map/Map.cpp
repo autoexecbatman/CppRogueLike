@@ -15,7 +15,7 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../ActorTypes/Confuser.h"
-#include "../Actor/Container.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Fireball.h"
@@ -962,7 +962,7 @@ void Map::regenerate()
 	refresh();
 	// clear the actors container except the player and the stairs
 	game.creatures.clear();
-	game.container->get_inventory_mutable().clear();
+	game.inventory_data.items.clear();
 	game.rooms.clear(); // we clear the room coordinates
 	game.objects.clear();
 
@@ -1148,7 +1148,7 @@ void Map::place_amulet()
 		}
 
 		// Create and place the amulet
-		game.container->add(ItemCreator::create_amulet_of_yendor(amuletPos));
+		InventoryOperations::add_item(game.player->inventory_data, ItemCreator::create_amulet_of_yendor(amuletPos));
 
 		// Log the placement (debug info)
 		game.log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));

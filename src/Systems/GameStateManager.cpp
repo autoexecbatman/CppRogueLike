@@ -3,7 +3,9 @@
 #include "GameStateManager.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
-#include "../Actor/Container.h"
+#include "../Actor/InventoryOperations.h"
+#include "../Actor/InventoryData.h"
+#include "../Actor/Actor.h"
 #include "../Gui/Gui.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/LevelManager.h"
@@ -14,6 +16,7 @@
 #include <format>
 
 using json = nlohmann::json;
+using namespace InventoryOperations;
 
 void GameStateManager::save_game(
     Map& map,
@@ -21,7 +24,7 @@ void GameStateManager::save_game(
     Player& player,
     Stairs& stairs,
     const std::vector<std::unique_ptr<Creature>>& creatures,
-    const Container& container,
+    const InventoryData& inventory_data,
     Gui& gui,
     HungerSystem& hunger_system,
     const LevelManager& level_manager,
@@ -52,8 +55,8 @@ void GameStateManager::save_game(
         // Save creatures
         save_creatures_to_json(creatures, j);
 
-        // Save items
-        save_items_to_json(container, j);
+        // Save floor items inventory
+        save_inventory(inventory_data, j);
 
         // Save the message log
         json guiJson;
@@ -87,7 +90,7 @@ bool GameStateManager::load_game(
     Player& player,
     Stairs& stairs,
     std::vector<std::unique_ptr<Creature>>& creatures,
-    Container& container,
+    InventoryData& inventory_data,
     Gui& gui,
     HungerSystem& hunger_system,
     LevelManager& level_manager,
@@ -124,8 +127,8 @@ bool GameStateManager::load_game(
     // Load creatures
     load_creatures_from_json(j, creatures);
 
-    // Load items
-    load_items_from_json(j, container);
+    // Load floor items inventory
+    load_inventory(inventory_data, j);
 
     // Load the message log
     if (j.contains("gui"))
@@ -203,47 +206,16 @@ void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::ve
             creature->load(creatureData);
             
             // CRITICAL FIX: Ensure creature inventory items have correct values
-            if (creature->container)
+            for (const auto& item : creature->inventory_data.items)
             {
-                for (const auto& item : creature->container->get_inventory())
+                if (item)
                 {
-                    if (item)
-                    {
-                        ItemCreator::ensure_correct_value(*item);
-                    }
+                    ItemCreator::ensure_correct_value(*item);
                 }
             }
-            
+
             creatures.push_back(std::move(creature));
         }
     }
 }
 
-void GameStateManager::save_items_to_json(const Container& container, nlohmann::json& j) const
-{
-    j["items"] = json::array();
-    for (const auto& item : container.get_inventory())
-    {
-        if (item)
-        {
-            json itemJson;
-            item->save(itemJson);
-            j["items"].push_back(itemJson);
-        }
-    }
-}
-
-void GameStateManager::load_items_from_json(const nlohmann::json& j, Container& container) const
-{
-    if (j.contains("items") && j["items"].is_array())
-    {
-        for (const auto& itemData : j["items"])
-        {
-            auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
-            item->load(itemData);
-            // CRITICAL FIX: Ensure loaded items have correct values
-            ItemCreator::ensure_correct_value(*item);
-            container.add(std::move(item));
-        }
-    }
-}

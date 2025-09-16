@@ -76,6 +76,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/Destructible.h
     ${PROJECT_SOURCE_DIR}/Actor/Pickable.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Pickable.h
+    ${PROJECT_SOURCE_DIR}/Actor/InventoryOperations.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/InventoryOperations.h
+    ${PROJECT_SOURCE_DIR}/Actor/InventoryData.h
 
     # Persistent
     ${PROJECT_SOURCE_DIR}/Persistent/Persistent.cpp

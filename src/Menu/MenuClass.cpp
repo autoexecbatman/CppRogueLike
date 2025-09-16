@@ -7,9 +7,12 @@
 #include "../Items/Items.h"
 #include "../Items/Armor.h"
 #include "../Actor/Pickable.h"
+#include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
 #include <algorithm>
+
+using namespace InventoryOperations; // For clean function calls
 
 void equip_fighter_starting_gear()
 {
@@ -31,12 +34,12 @@ void equip_fighter_starting_gear()
 	auto plate_mail_id = plate_mail->uniqueId; // Store ID before moving
 	game.log("Created item with name: '" + plate_mail->actorData.name + "' and ID: " + std::to_string(plate_mail_id));
 	game.log("Created plate mail with ID: " + std::to_string(plate_mail_id));
-	auto plate_mail_result = player.container->add(std::move(plate_mail));
+	auto plate_mail_result = add_item(player.inventory_data, std::move(plate_mail));
 	if (plate_mail_result.has_value())
 	{
 		game.log("Plate mail added to inventory successfully");
 		// Find plate mail by unique ID in inventory
-		auto& inventory = player.container->get_inventory_mutable();
+		auto& inventory = player.inventory_data.items;
 		auto item_it = std::find_if(inventory.begin(), inventory.end(),
 			[plate_mail_id](const std::unique_ptr<Item>& item) 
 			{
@@ -72,7 +75,7 @@ void equip_fighter_starting_gear()
 				else
 				{
 					game.log("ERROR: Unknown armor/shield type for " + itemName);
-					player.container->add(std::move(extracted_item));
+					add_item(player.inventory_data, std::move(extracted_item));
 					return;
 				}
 				
@@ -98,12 +101,12 @@ void equip_fighter_starting_gear()
 	auto long_sword_id = long_sword->uniqueId; // Store ID before moving
 	game.log("Created item with name: '" + long_sword->actorData.name + "' and ID: " + std::to_string(long_sword_id));
 	game.log("Created long sword with ID: " + std::to_string(long_sword_id));
-	auto sword_result = player.container->add(std::move(long_sword));
+	auto sword_result = add_item(player.inventory_data, std::move(long_sword));
 	if (sword_result.has_value())
 	{
 		game.log("Long sword added to inventory successfully");
 		// Find long sword by unique ID in inventory
-		auto& inventory2 = player.container->get_inventory_mutable();
+		auto& inventory2 = player.inventory_data.items;
 		auto sword_it = std::find_if(inventory2.begin(), inventory2.end(),
 			[long_sword_id](const std::unique_ptr<Item>& item) 
 			{
@@ -150,7 +153,7 @@ void equip_fighter_starting_gear()
 	// HEALING POTIONS (3x)
 	for(int i = 0; i < 3; i++)
 	{
-		player.container->add(ItemCreator::create_health_potion(player.position));
+		add_item(player.inventory_data, ItemCreator::create_health_potion(player.position));
 	}
 	
 	// Log the rolled starting gold amount

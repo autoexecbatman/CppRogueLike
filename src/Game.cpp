@@ -8,12 +8,15 @@
 #include "Game.h"
 #include "Colors/Colors.h"
 #include "Factories/ItemCreator.h"
+#include "Actor/InventoryOperations.h"
 
 // Debug weapon types
 #include "ActorTypes/Healer.h"
 #include "ActorTypes/Fireball.h"
 #include "ActorTypes/LightningBolt.h"
 #include "ActorTypes/Confuser.h"
+
+using namespace InventoryOperations; // For clean function calls without namespace prefix
 
 //==INIT==
 // When the Game is created, 
@@ -141,12 +144,12 @@ void Game::load_all()
 {
 	menu_manager.set_game_initialized(true);
 	if (!state_manager.load_game(
-		map,
-		rooms,
-		*player,
-		*stairs,
-		creatures,
-		*container,
+	map,
+	rooms,
+	*player,
+	*stairs,
+	creatures,
+	inventory_data,
 		gui,
 		hunger_system,
 		level_manager,
@@ -167,12 +170,12 @@ void Game::save_all()
 	try
 	{
 		state_manager.save_game(
-			map,
-			rooms,
-			*player,
-			*stairs,
-			creatures,
-			*container,
+		map,
+		rooms,
+		*player,
+		*stairs,
+		creatures,
+		inventory_data,
 			gui,
 			hunger_system,
 			level_manager,
@@ -202,23 +205,24 @@ void Game::add_debug_weapons_at_player_feet()
 	{
 		log("Error: Cannot add debug weapons - player not initialized");
 		return;
-	}
+	} 
 
-	container->add(ItemCreator::create_long_sword(player->position));
-	container->add(ItemCreator::create_longbow(player->position));
-	container->add(ItemCreator::create_greatsword(player->position));
-	container->add(ItemCreator::create_battle_axe(player->position));
-	container->add(ItemCreator::create_great_axe(player->position));
-	container->add(ItemCreator::create_war_hammer(player->position));
-	container->add(ItemCreator::create_shield(player->position));
-	container->add(ItemCreator::create_health_potion(player->position));
-	container->add(ItemCreator::create_scroll_fireball(player->position));
-	container->add(ItemCreator::create_scroll_lightning(player->position));
-	container->add(ItemCreator::create_scroll_confusion(player->position));
-	container->add(ItemCreator::create_leather_armor(player->position));
-	container->add(ItemCreator::create_chain_mail(player->position));
-	container->add(ItemCreator::create_plate_mail(player->position));
-	container->add(ItemCreator::create_dagger(player->position));
+	// use add_item to ensure proper logging and handling
+	add_item(inventory_data, ItemCreator::create_long_sword(player->position));
+	add_item(inventory_data, ItemCreator::create_longbow(player->position));
+	add_item(inventory_data, ItemCreator::create_greatsword(player->position));
+	add_item(inventory_data, ItemCreator::create_battle_axe(player->position));
+	add_item(inventory_data, ItemCreator::create_great_axe(player->position));
+	add_item(inventory_data, ItemCreator::create_war_hammer(player->position));
+	add_item(inventory_data, ItemCreator::create_shield(player->position));
+	add_item(inventory_data, ItemCreator::create_health_potion(player->position));
+	add_item(inventory_data, ItemCreator::create_scroll_fireball(player->position));
+	add_item(inventory_data, ItemCreator::create_scroll_lightning(player->position));
+	add_item(inventory_data, ItemCreator::create_scroll_confusion(player->position));
+	add_item(inventory_data, ItemCreator::create_leather_armor(player->position));
+	add_item(inventory_data, ItemCreator::create_chain_mail(player->position));
+	add_item(inventory_data, ItemCreator::create_plate_mail(player->position));
+	add_item(inventory_data, ItemCreator::create_dagger(player->position));
 
 	log("Debug weapons added at player position: " +
 		std::to_string(player->position.x) + "," +

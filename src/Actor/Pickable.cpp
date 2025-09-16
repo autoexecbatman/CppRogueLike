@@ -5,7 +5,8 @@
 #include "../Colors/Colors.h"
 #include "../Game.h"
 #include "Actor.h"
-#include "Container.h"
+#include "InventoryData.h"
+#include "InventoryOperations.h"
 #include "../Items/ItemClassification.h"
 #include "../ActorTypes/Player.h"
 #include "../ActorTypes/Healer.h"
@@ -19,18 +20,13 @@
 #include "../Items/Amulet.h"
 #include "../Items/Armor.h"
 
+using namespace InventoryOperations; // For clean function calls
+
 //==PICKABLE==
 bool Pickable::use(Item& owner, Creature& wearer)
 {
-	if (wearer.container)
-	{
-		auto compareItems = [&owner](const std::unique_ptr<Item>& actor) { return actor.get() == &owner; };
-		std::erase_if(wearer.container->get_inventory_mutable(), compareItems);
-
-		return true;
-	}
-
-	return false;
+	auto result = remove_item(wearer.inventory_data, owner);
+	return result.has_value();
 }
 
 // AD&D 2e weapon size and dual-wield validation methods

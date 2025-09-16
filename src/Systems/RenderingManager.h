@@ -16,7 +16,7 @@ class Map;
 class Player;
 class Stairs;
 class Object;
-class Container;
+struct InventoryData;
 class Gui;
 
 class RenderingManager
@@ -30,7 +30,7 @@ public:
         const Map& map,
         const Stairs& stairs,
         std::span<const std::unique_ptr<Object>> objects,
-        const Container& container,
+        const InventoryData& inventory_data,
         std::span<const std::unique_ptr<Creature>> creatures,
         const Player& player
     ) const;

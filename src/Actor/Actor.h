@@ -21,6 +21,7 @@
 #include "Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Utils/Vector2D.h"
+#include "InventoryData.h"
 
 struct ActorData
 {
@@ -84,7 +85,7 @@ private:
 	std::string weaponEquipped{ "None" };
 
 public:
-	Creature(Vector2D position, ActorData data) : Actor(position, data)
+	Creature(Vector2D position, ActorData data) : Actor(position, data), inventory_data(InventoryData(50))
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
@@ -137,7 +138,7 @@ public:
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
-	std::unique_ptr<Container> container; // the actor can be a container
+	InventoryData inventory_data;
 };
 
 class NPC : public Creature

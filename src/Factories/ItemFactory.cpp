@@ -5,7 +5,10 @@
 #include "../Items/Food.h"
 #include "../Random/RandomDice.h"
 #include "../Items/Amulet.h"
+#include "../Actor/InventoryOperations.h"
 #include "ItemCreator.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 ItemFactory::ItemFactory()
 {
@@ -14,112 +17,120 @@ ItemFactory::ItemFactory()
     // HEALING - CLERIC REPLACEMENT (Solo fighter needs reliable healing)
     add_item_type({
         "Health Potion", 50, 1, 0, 0.2f,  // MORE COMMON - solo needs healing
-        [](Vector2D pos) { game.container->add(ItemCreator::create_health_potion(pos)); }
+        [](Vector2D pos) { 
+        add_item(game.inventory_data, ItemCreator::create_health_potion(pos));
+        }
         });
 
     // MAGIC UTILITY - WIZARD REPLACEMENT (Solo fighter needs magic support)
     add_item_type({
         "Scroll of Lightning Bolt", 20, 2, 0, 0.2f,  // MORE COMMON - utility magic
-        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_lightning(pos)); }
+        [](Vector2D pos) { 
+        add_item(game.inventory_data, ItemCreator::create_scroll_lightning(pos));
+        }
         });
 
     add_item_type({
         "Scroll of Fireball", 15, 3, 0, 0.3f,  // MORE COMMON - AoE for solo
-        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_fireball(pos)); }
+        [](Vector2D pos) { 
+        add_item(game.inventory_data, ItemCreator::create_scroll_fireball(pos));
+        }
         });
 
     add_item_type({
         "Scroll of Confusion", 15, 2, 0, 0.2f,  // MORE COMMON - crowd control
-        [](Vector2D pos) { game.container->add(ItemCreator::create_scroll_confusion(pos)); }
+        [](Vector2D pos) { 
+        add_item(game.inventory_data, ItemCreator::create_scroll_confusion(pos));
+        }
         });
 
     // WEAPONS - FIGHTER PROGRESSION (Inferior weapons rare, focus on upgrades)
     add_item_type({
         "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        add_item(game.inventory_data, ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        add_item(game.inventory_data, ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        add_item(game.inventory_data, ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        add_item(game.inventory_data, ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        add_item(game.inventory_data, ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
         }
         });
 
     // Gold
     add_item_type({
         "Gold", 25, 1, 0, 0.1f,
-        [](Vector2D pos) { game.container->add(ItemCreator::create_gold_pile(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_gold_pile(pos)); }
         });
 
     // FOOD - SOLO RESOURCE MANAGEMENT (No party sharing, need reliable food)
     add_item_type({
         "Ration", 25, 1, 0, 0.1f,  // MORE COMMON - solo needs consistent food
-        [](Vector2D pos) { game.container->add(ItemCreator::create_ration(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_ration(pos)); }
         });
 
     add_item_type({
         "Fruit", 15, 1, 0, 0.0f,  // STEADY - quick hunger fix
-        [](Vector2D pos) { game.container->add(ItemCreator::create_fruit(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_fruit(pos)); }
         });
 
     add_item_type({
         "Bread", 12, 1, 0, 0.0f,  // STEADY - basic sustenance
-        [](Vector2D pos) { game.container->add(ItemCreator::create_bread(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_bread(pos)); }
         });
 
     add_item_type({
         "Meat", 8, 2, 0, 0.1f,  // VALUABLE - high nutrition for solo
-        [](Vector2D pos) { game.container->add(ItemCreator::create_meat(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_meat(pos)); }
         });
 
     // Amulet of Yendor - incredibly rare, only appears on deeper levels
     add_item_type({
         "Amulet of Yendor", 1, 8, 0, 2.0f,
-        [](Vector2D pos) { game.container->add(ItemCreator::create_amulet_of_yendor(pos)); }
+        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_amulet_of_yendor(pos)); }
         });
 
     add_item_type({
         "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_leather_armor(pos));
+        add_item(game.inventory_data, ItemCreator::create_leather_armor(pos));
         }
         });
 
     add_item_type({
         "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_chain_mail(pos));
+        add_item(game.inventory_data, ItemCreator::create_chain_mail(pos));
         }
         });
 
     add_item_type({
         "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
         [](Vector2D pos) {
-            game.container->add(ItemCreator::create_plate_mail(pos));
+        add_item(game.inventory_data, ItemCreator::create_plate_mail(pos));
         }
         });
 
@@ -204,7 +215,7 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
     // Create gold pile
     auto goldPile = std::make_unique<Item>(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR });
     goldPile->pickable = std::make_unique<Gold>(goldAmount);
-    game.container->add(std::move(goldPile));
+    add_item(game.inventory_data, std::move(goldPile));
 
     // Generate other random items
     for (int i = 0; i < itemCount; i++)

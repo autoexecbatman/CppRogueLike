@@ -7,6 +7,9 @@
 #include "../Ai/AiMonsterRanged.h"
 #include "ItemCreator.h"
 #include "../Items/Food.h"
+#include "../Actor/InventoryOperations.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 MonsterFactory::MonsterFactory()
 {
@@ -75,10 +78,10 @@ MonsterFactory::MonsterFactory()
             auto& shopkeeper = *game.creatures.back();
             
             // Give shopkeeper starting inventory using centralized creation
-            shopkeeper.container->add(ItemCreator::create_health_potion(pos));
-            shopkeeper.container->add(ItemCreator::create_health_potion(pos));
-            shopkeeper.container->add(ItemCreator::create_scroll_lightning(pos));
-            shopkeeper.container->add(ItemCreator::create_scroll_fireball(pos));
+            add_item(shopkeeper.inventory_data, ItemCreator::create_health_potion(pos));
+            add_item(shopkeeper.inventory_data, ItemCreator::create_health_potion(pos));
+            add_item(shopkeeper.inventory_data, ItemCreator::create_scroll_lightning(pos));
+            add_item(shopkeeper.inventory_data, ItemCreator::create_scroll_fireball(pos));
 
             // TODO:
             // create x random potions in shopkeeper inventory
@@ -87,7 +90,7 @@ MonsterFactory::MonsterFactory()
             auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", BROWN_BLACK_PAIR});
             ration->pickable = std::make_unique<Food>(50);  // 50 nutrition value
             ration->value = 30;
-            shopkeeper.container->add(std::move(ration));
+            add_item(shopkeeper.inventory_data, std::move(ration));
             
             shopkeeper.set_gold(500);  // Give shopkeeper gold to buy player items
         }

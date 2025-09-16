@@ -6,6 +6,7 @@
 #include "../Ai/AiPlayer.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Random/RandomDice.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Healer.h"
@@ -16,6 +17,8 @@
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
 {
@@ -45,7 +48,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 		playerAC // initial armor class
 	);
 	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
-	container = std::make_unique<Container>(26); // Player's inventory with 26 slots
+	// inventory_data is initialized in Creature constructor
 	
 	// REMOVED: Equipment initialization moved to MenuClass after class selection
 	
@@ -362,13 +365,14 @@ bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot
 	else
 	{
 		// Find item in inventory and equip it
-		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		Item* itemToEquip = find_item_by_id(inventory_data, item_unique_id);
+		if (itemToEquip)
 		{
-			if ((*it)->uniqueId == item_unique_id)
+			// Remove item from inventory
+			auto result = remove_item_by_id(inventory_data, item_unique_id);
+			if (result.has_value())
 			{
-				// Move item from inventory to equipment
-				auto itemToEquip = std::move(*it);
-				container->get_inventory_mutable().erase(it);
+				auto itemToEquip = std::move(*result);
 				
 				// Determine appropriate slot based on item classification
 				EquipmentSlot target_slot;
@@ -399,13 +403,13 @@ bool Player::toggle_shield(uint32_t item_unique_id)
 	else
 	{
 		// Find item in inventory and equip it
-		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		for (auto it = inventory_data.items.begin(); it != inventory_data.items.end(); ++it)
 		{
 			if ((*it)->uniqueId == item_unique_id)
 			{
-				// Move item from inventory to equipment
+				// Move item from inventory
 				auto itemToEquip = std::move(*it);
-				container->get_inventory_mutable().erase(it);
+				inventory_data.items.erase(it);
 				
 				return equip_item(std::move(itemToEquip), EquipmentSlot::LEFT_HAND);
 			}
@@ -430,7 +434,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 		game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
 		game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		// Return item to inventory since we can't equip it
-		container->add(std::move(item));
+		InventoryOperations::add_item(inventory_data, std::move(item));
 		return false;
 	}
 
@@ -575,7 +579,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		}
 		
 		// Return item to inventory
-		container->add(std::move(it->item));
+		add_item(inventory_data, std::move(it->item));
 		
 		// Remove from equipped items
 		equippedItems.erase(it);
@@ -696,13 +700,13 @@ bool Player::toggle_armor(uint32_t item_unique_id)
 	else
 	{
 		// Find item in inventory and equip it
-		for (auto it = container->get_inventory_mutable().begin(); it != container->get_inventory_mutable().end(); ++it)
+		for (auto it = inventory_data.items.begin(); it != inventory_data.items.end(); ++it)
 		{
 			if ((*it)->uniqueId == item_unique_id)
 			{
-				// Move item from inventory to equipment
+				// Move item from inventory
 				auto itemToEquip = std::move(*it);
-				container->get_inventory_mutable().erase(it);
+				inventory_data.items.erase(it);
 				
 				return equip_item(std::move(itemToEquip), EquipmentSlot::BODY);
 			}

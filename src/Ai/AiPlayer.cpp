@@ -10,7 +10,9 @@
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Items/Items.h"
+#include "../Items/ItemClassification.h"
 #include "../ActorTypes/Gold.h"
 #include "../Objects/Web.h"
 #include "../Factories/ItemCreator.h"
@@ -18,6 +20,8 @@
 #include "../ActorTypes/Player.h"
 #include "../Systems/LevelUpSystem.h"
 #include "../UI/InventoryUI.h"
+
+using namespace InventoryOperations; // For clean function calls without namespace prefix
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -176,77 +180,86 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 	owner.position = target;
 }
 
-void AiPlayer::pick_item(Creature& owner)
+void AiPlayer::pick_item(Player& player)
 {
 	// Check if the inventory is already full (including equipped items)
-	auto* player = dynamic_cast<Player*>(&owner);
-	size_t totalItems = owner.container->get_item_count();
-	if (player) {
-		totalItems += player->equippedItems.size(); // Count equipped items too
-	}
+	size_t totalItems = get_item_count(player.inventory_data);
+	totalItems += player.equippedItems.size(); // Count equipped items too
 	
-	if (owner.container && owner.container->get_capacity() > 0 && totalItems >= owner.container->get_capacity()) {
+	if (player.inventory_data.capacity > 0 && totalItems >= player.inventory_data.capacity)
+	{
 		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
-	auto is_null = [](auto&& i) { return !i; };
-	for (auto& i : game.container->get_inventory_mutable())
+	// Check if floor inventory is empty
+	if (game.inventory_data.items.empty())
 	{
-		if (i && i->position == owner.position)
+		return; // No floor items to pick up
+	}
+	
+	// Find items at player's position using range-based approach
+	std::vector<std::unique_ptr<Item>*> itemsAtPosition;
+	for (auto& item : game.inventory_data.items)
+	{
+		if (item && item->position == player.position)
 		{
-			// Special handling for gold
-			if (i->actorData.name == "gold pile" && i->pickable)
-			{
-				auto goldPickable = dynamic_cast<Gold*>(i->pickable.get());
-				if (goldPickable)
-				{
-					// Add gold to player
-					owner.adjust_gold(goldPickable->amount);
-
-					// Display message
-					game.append_message_part(YELLOW_BLACK_PAIR, "You picked up ");
-					game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(goldPickable->amount));
-					game.append_message_part(YELLOW_BLACK_PAIR, " gold.");
-					game.finalize_message();
-
-					// Remove gold pile from ground
-					i.reset();
-					std::erase_if(game.container->get_inventory_mutable(), is_null);
-					return;
-				}
-			}
-
-			auto name = i->actorData.name;
-
-			// Normal item handling
-			auto result = owner.container->add(std::move(i));
-			if (result)
-			{
-				std::erase_if(game.container->get_inventory_mutable(), is_null);
-
-				// Sync ranged state after picking up an item
-				owner.sync_ranged_state();
-
-				game.message(WHITE_BLACK_PAIR, std::format("You picked up the {}.", name), true);
-			}
-			else
-			{
-				// Handle the error case - Container now provides proper feedback
-				if (result.get_error() == ContainerError::FULL)
-				{
-					game.message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
-				}
-			}
-			return;
+			itemsAtPosition.push_back(&item);
+		}
+	}
+	
+	if (itemsAtPosition.empty())
+	{
+		game.message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
+		return;
+	}
+	
+	// Process first item found (or implement selection for multiple items)
+	auto& itemPtr = *itemsAtPosition[0];
+	Item* item = itemPtr.get();
+	
+	// Handle gold directly through player's gold system
+	if (item->itemClass == ItemClass::GOLD)
+	{
+		Gold* goldPickable = static_cast<Gold*>(item->pickable.get());
+		player.adjust_gold(goldPickable->amount);
+		game.message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldPickable->amount) + " gold.", true);
+		
+		// Remove gold from floor
+		remove_item(game.inventory_data, *item);
+		return;
+	}
+	
+	// Handle regular items
+	std::string itemName = item->actorData.name;
+	auto result = add_item(player.inventory_data, std::move(itemPtr));
+	
+	if (result.has_value())
+	{
+		// Item successfully added to player inventory
+		optimize_inventory_storage(game.inventory_data);
+		player.sync_ranged_state();
+		game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+	}
+	else
+	{
+		// Handle inventory full error
+		if (result.get_error() == InventoryError::FULL)
+		{
+			game.message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+		}
+		else
+		{
+			game.message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
 		}
 	}
 }
 
-void AiPlayer::drop_item(Creature& owner)
+void AiPlayer::drop_item(Player& player)
 {
 	// If the inventory is empty, show a message and return
-	if (owner.container->is_empty()) {
+	if (player.inventory_data.items.empty())
+	{
 		game.message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
@@ -264,12 +277,11 @@ void AiPlayer::drop_item(Creature& owner)
 	int y = 1;
 
 	// First, show equipped items
-	auto* player = dynamic_cast<Player*>(&owner);
-	if (player && !player->equippedItems.empty())
+	if (!player.equippedItems.empty())
 	{
 		mvwprintw(dropWin, y++, 1, "=== EQUIPPED ===");
 		
-		for (const auto& equipped : player->equippedItems)
+		for (const auto& equipped : player.equippedItems)
 		{
 			if (equipped.item)
 			{
@@ -296,14 +308,14 @@ void AiPlayer::drop_item(Creature& owner)
 			}
 		}
 		
-		if (!owner.container->is_empty())
+		if (!player.inventory_data.items.empty())
 		{
 			mvwprintw(dropWin, y++, 1, "=== INVENTORY ===");
 		}
 	}
 
 	// Then show regular inventory items
-	for (const auto& item : owner.container->get_inventory())
+	for (const auto& item : player.inventory_data.items)
 	{
 		if (item)
 		{
@@ -327,31 +339,33 @@ void AiPlayer::drop_item(Creature& owner)
 	int input = getch();
 
 	// Process the input
-	if (input == static_cast<int>(Controls::ESCAPE)) {
+	if (input == static_cast<int>(Controls::ESCAPE))
+	{
 		// Cancel dropping
 		game.message(WHITE_BLACK_PAIR, "Drop canceled.", true);
 	}
-	else if (input >= 'a' && input < 'a' + static_cast<int>((player ? player->equippedItems.size() : 0) + owner.container->get_item_count())) {
+	else if (input >= 'a' && input < 'a' + static_cast<int>(player.equippedItems.size() + get_item_count(player.inventory_data)))
+	{
 		// Valid item selection
 		int index = input - 'a';
 		
 		// Check if selecting equipped item
-		if (player && index < static_cast<int>(player->equippedItems.size()))
+		if (index < static_cast<int>(player.equippedItems.size()))
 		{
 			// Dropping equipped item - unequip it first
-			const auto& equipped = player->equippedItems[index];
+			const auto& equipped = player.equippedItems[index];
 			std::string itemName = equipped.item->actorData.name;
 			
 			// Unequip the item (this returns it to inventory)
 			EquipmentSlot slot = equipped.slot;
-			player->unequip_item(slot);
+			player.unequip_item(slot);
 			
 			// Find the item in inventory and drop it
-			for (auto& item : owner.container->get_inventory_mutable())
+			for (auto& item : player.inventory_data.items)
 			{
 				if (item && item->actorData.name == itemName)
 				{
-					owner.drop(*item);
+					player.drop(*item);
 					break;
 				}
 			}
@@ -361,17 +375,18 @@ void AiPlayer::drop_item(Creature& owner)
 		else
 		{
 			// Dropping regular inventory item
-			int inventoryIndex = index - (player ? static_cast<int>(player->equippedItems.size()) : 0);
+			int inventoryIndex = index - static_cast<int>(player.equippedItems.size());
 			
-			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(owner.container->get_item_count())) {
-			// Get the selected item
-			Item* itemToDrop = owner.container->get_item_at(inventoryIndex);
-				if (itemToDrop) {
+			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(get_item_count(player.inventory_data))) {
+				// Get the selected item
+				Item* itemToDrop = get_item_at(player.inventory_data, inventoryIndex);
+				if (itemToDrop)
+				{
 					// Display the item name before dropping
 					std::string itemName = itemToDrop->actorData.name;
 
 					// Drop the selected item
-					owner.drop(*itemToDrop);
+					player.drop(*itemToDrop);
 
 					// Show dropped message with the item name
 					game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
@@ -397,13 +412,13 @@ bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) c
 	return actor.position == owner.position;
 }
 
-void AiPlayer::display_inventory_items(WINDOW* inv, const Creature& owner) noexcept
+void AiPlayer::display_inventory_items(WINDOW* inv, const Player& player) noexcept
 {
 	int shortcut = 'a';
 	int y = 1;
 	try
 	{
-		for (const auto& item : owner.container->get_inventory())
+		for (const auto& item : player.inventory_data.items)
 		{
 			if (item != nullptr)
 			{
@@ -457,18 +472,18 @@ void AiPlayer::display_inventory(Player& player)
 	inventoryUI.display(player);
 }
 
-Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
+Item* AiPlayer::chose_from_inventory(Player& player, int ascii)
 {
 	game.log("You chose from inventory");
-	if (owner.container != nullptr)
+	if (player.inventory_data.items.size() > 0)
 	{
 		const size_t index = ascii - 'a';
-		if (index >= 0 && index < game.container->get_inventory_mutable().size())
+		if (index >= 0 && index < player.inventory_data.items.size())
 		{
-			Item* item = game.container->get_inventory_mutable().at(index).get();
+			Item* item = player.inventory_data.items.at(index).get();
 
 			// Sync ranged state since we might use/equip/unequip an item
-			owner.sync_ranged_state();
+			player.sync_ranged_state();
 
 			return item;
 		}
@@ -480,7 +495,7 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 	}
 	else
 	{
-		game.log("Error: choseFromInventory() called on actor with no container.");
+		game.log("Error: choseFromInventory() called on player with no inventory.");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -488,13 +503,19 @@ Item* AiPlayer::chose_from_inventory(Creature& owner, int ascii)
 void AiPlayer::look_on_floor(Vector2D target)
 {
 	// look for corpses or items
-	for (const auto& i : game.container->get_inventory_mutable())
+	// Check if floor inventory is empty
+	if (game.inventory_data.items.empty())
+	{
+		return;
+	}
+
+	for (const auto& i : game.inventory_data.items)
 	{
 		if (i)
 		{
 			if (i->position == target)
 			{
-				game.append_message_part(WHITE_BLACK_PAIR, std::format("There's a {} here\n", i->actorData.name));
+				game.append_message_part(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here\n");
 				game.finalize_message();
 			}
 		}
@@ -650,7 +671,7 @@ void AiPlayer::call_action(Player& player, Controls key)
 		{
 			const int DEBUG_XP_AMOUNT = 1000;
 			player.destructible->add_xp(DEBUG_XP_AMOUNT);
-			game.message(WHITE_BLACK_PAIR, std::format("Debug: Added {} XP (Total: {})", DEBUG_XP_AMOUNT, player.destructible->get_xp()), true);
+			game.message(WHITE_BLACK_PAIR, "Debug: Added " + std::to_string(DEBUG_XP_AMOUNT) + " XP (Total: " + std::to_string(player.destructible->get_xp()) + ")", true);
 			
 			// Use the same level up system as natural progression
 			player.ai->levelup_update(player);

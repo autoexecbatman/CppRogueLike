@@ -115,7 +115,6 @@ Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"s
 	destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
 	attacker = std::make_unique<Attacker>("D10");
 	ai = std::make_unique<AiShopkeeper>();
-	container = std::make_unique<Container>(10);
 	
 	// NOTE: Inventory is populated in MonsterFactory.cpp - do not add items here
 	// This ensures single source of truth for shopkeeper inventory

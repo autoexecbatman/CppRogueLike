@@ -16,12 +16,14 @@
 #include "Attacker.h"
 #include "Destructible.h"
 #include "Pickable.h"
-#include "Container.h"
+#include "InventoryOperations.h"
 #include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Armor.h"
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 //====
 Actor::Actor(Vector2D position, ActorData data)
@@ -129,10 +131,10 @@ void Creature::load(const json& j)
 	{
 		ai = Ai::create(j["ai"]);
 	}
-	if (j.contains("container"))
+	if (j.contains("inventory_data"))
 	{
-		container = std::make_unique<Container>(0);
-		container->load(j["container"]);
+		inventory_data = InventoryData(50); // Default capacity
+		load_inventory(inventory_data, j["inventory_data"]);
 	}
 }
 
@@ -149,26 +151,28 @@ void Creature::save(json& j)
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
-	if (attacker) {
+	if (attacker)
+	{
 		json attackerJson;
 		attacker->save(attackerJson);
 		j["attacker"] = attackerJson;
 	}
-	if (destructible) {
+	if (destructible)
+	{
 		json destructibleJson;
 		destructible->save(destructibleJson);
 		j["destructible"] = destructibleJson;
 	}
-	if (ai) {
+	if (ai)
+	{
 		json aiJson;
 		ai->save(aiJson);
 		j["ai"] = aiJson;
 	}
-	if (container) {
-		json containerJson;
-		container->save(containerJson);
-		j["container"] = containerJson;
-	}
+	// Always save inventory data since it always exists
+	json inventoryJson;
+	save_inventory(inventory_data, inventoryJson);
+	j["inventory_data"] = inventoryJson;
 }
 
 // the actor update
@@ -197,7 +201,7 @@ void Creature::equip(Item& item)
 	std::vector<Item*> equippedItems;
 
 	// Find all equipped items
-	for (const auto& inv_item : container->get_inventory_mutable())
+	for (const auto& inv_item : inventory_data.items)
 	{
 		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
 		{
@@ -274,7 +278,7 @@ void Creature::unequip(Item& item)
 
 		// Double-check all inventory to see if we still should have IS_RANGED
 		bool hasRangedWeapon = false;
-		for (const auto& invItem : container->get_inventory_mutable())
+		for (const auto& invItem : inventory_data.items)
 		{
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
 			{
@@ -299,7 +303,7 @@ void Creature::sync_ranged_state()
 {
 	// Check if any equipped items are ranged weapons
 	bool hasRangedWeapon = false;
-	for (const auto& item : container->get_inventory_mutable())
+	for (const auto& item : inventory_data.items)
 	{
 		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
 		{
@@ -327,24 +331,29 @@ void Creature::sync_ranged_state()
 void Creature::pick()
 {
 	// Check if inventory is already full before attempting to pick
-	if (container && container->is_full())
+	if (is_inventory_full(inventory_data))
 	{
 		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
-	// Find item at player's position using proper Container interface
+	// Find item at player's position using proper inventory interface
 	Item* itemAtPosition = nullptr;
 	size_t itemIndex = 0;
 	
-	// Search for item at current position
-	for (size_t i = 0; i < game.container->get_item_count(); ++i)
+	if (game.inventory_data.items.empty())
 	{
-		if (auto* item = game.container->get_item_at(i))
+		return; // No floor items
+	}
+	
+	// Search for item at current position
+	for (size_t i = 0; i < game.inventory_data.items.size(); ++i)
+	{
+		if (auto& item = game.inventory_data.items[i])
 		{
 			if (position == item->position)
 			{
-				itemAtPosition = item;
+				itemAtPosition = item.get();
 				itemIndex = i;
 				break;
 			}
@@ -356,18 +365,18 @@ void Creature::pick()
 		return; // No item at this position
 	}
 
-	// Handle item pickup using proper Container methods
+	// Handle item pickup using proper inventory operations
 	if (itemAtPosition->itemClass == ItemClass::GOLD)
 	{
 		// Use the pickable's use() method which handles gold pickup properly
 		if (itemAtPosition->pickable->use(*itemAtPosition, *this))
 		{
 			// Gold was picked up successfully via polymorphic call
-			// Remove gold from map container using proper interface
-			auto removeResult = game.container->remove_at(itemIndex);
+			// Remove gold from floor inventory
+			auto removeResult = remove_item_at(game.inventory_data, itemIndex);
 			if (!removeResult.has_value())
 			{
-				game.log("WARNING: Failed to remove gold item from map container");
+				game.log("WARNING: Failed to remove gold item from floor inventory");
 			}
 		}
 	}
@@ -376,13 +385,13 @@ void Creature::pick()
 		// Normal item handling - store name before moving
 		const std::string itemName = itemAtPosition->actorData.name;
 		
-		// Remove from map first
-		auto removeResult = game.container->remove_at(itemIndex);
+		// Remove from floor first
+		auto removeResult = remove_item_at(game.inventory_data, itemIndex);
 		if (removeResult.has_value())
 		{
 			// Add to player inventory
-			auto addResult = container->add(std::move(*removeResult));
-			if (addResult.has_value() && *addResult)
+			auto addResult = add_item(inventory_data, std::move(*removeResult));
+			if (addResult.has_value())
 			{
 				game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 			}
@@ -394,7 +403,7 @@ void Creature::pick()
 		}
 		else
 		{
-			game.log("WARNING: Failed to remove item from map container");
+			game.log("WARNING: Failed to remove item from floor inventory");
 		}
 	}
 }
@@ -402,24 +411,26 @@ void Creature::pick()
 void Creature::drop(Item& item)
 {
 	// Check if the item is actually in the inventory first
-	auto it = std::find_if(container->get_inventory_mutable().begin(), container->get_inventory_mutable().end(),
+	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(),
 		[&item](const auto& invItem) { return invItem.get() == &item; });
 
-	if (it != container->get_inventory_mutable().end()) {
+	if (it != inventory_data.items.end())
+	{
 		// Set the item's position to the player's position
 		(*it)->position = position;
 
 		// If the item is equipped, unequip it first
-		if ((*it)->has_state(ActorState::IS_EQUIPPED)) {
+		if ((*it)->has_state(ActorState::IS_EQUIPPED))
+		{
 			unequip(*(*it));
 		}
 
-		// Add to game container
-		if (game.container->add(std::move(*it))) {
-			// Erase the null pointer that remains after moving
-			auto is_null = [](const auto& i) { return !i; };
-			std::erase_if(container->get_inventory_mutable(), is_null);
-
+		// Add to game floor inventory
+		auto addResult = add_item(game.inventory_data, std::move(*it));
+		if (addResult.has_value())
+		{
+			// Clean up null pointer that remains after moving
+			optimize_inventory_storage(inventory_data);
 			game.message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}
 	}

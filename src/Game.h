@@ -14,7 +14,7 @@
 // Core game components
 #include "Map/Map.h"
 #include "ActorTypes/Player.h"
-#include "Actor/Container.h"
+#include "Actor/InventoryData.h"
 #include "Gui/Gui.h"
 #include "Menu/BaseMenu.h"
 #include "Random/RandomDice.h"
@@ -41,6 +41,7 @@
 #include "Attributes/IntelligenceAttributes.h"
 #include "Attributes/WisdomAttributes.h"
 #include "Items/Weapons.h"
+#include "Actor/InventoryData.h"
 
 // Forward declarations
 class Creature;
@@ -92,7 +93,7 @@ public:
     std::vector<Vector2D> rooms;
     std::vector<std::unique_ptr<Creature>> creatures;
     std::vector<std::unique_ptr<Object>> objects;
-    std::unique_ptr<Container> container{ std::make_unique<Container>(1000) }; // Floor items container
+    InventoryData inventory_data{1000}; // Floor items container
 
     // Menu system
     std::deque<std::unique_ptr<BaseMenu>> menus;
@@ -103,7 +104,7 @@ public:
     void update();
 
     // System delegations - clean interface
-    void render() const { rendering_manager.render_world(map, *stairs, objects, *container, creatures, *player); }
+    void render() const { rendering_manager.render_world(map, *stairs, objects, inventory_data, creatures, *player); }
     void handle_menus() { menu_manager.handle_menus(menus); }
     void handle_gameloop(Gui& gui, int loopNum) { game_loop_coordinator.handle_gameloop(*this, gui, loopNum); }
     void handle_ranged_attack() { targeting.handle_ranged_attack(); }

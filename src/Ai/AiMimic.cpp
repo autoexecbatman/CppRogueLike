@@ -2,6 +2,10 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiPlayer.h"
+#include "../Actor/InventoryOperations.h"
+#include "../Items/ItemClassification.h"
+
+using namespace InventoryOperations; // For clean function calls
 
 AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(0) {}
 
@@ -72,13 +76,19 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
     bool itemConsumed = false;
     std::vector<size_t> itemsToRemove;
 
-    game.log("Checking for items. Container size: " + std::to_string(game.container->get_inventory_mutable().size()));
-
-    // First pass - identify items to consume
-    for (size_t i = 0; i < game.container->get_inventory_mutable().size(); i++)
+    // Check if inventory has no items
+	if (game.inventory_data.items.empty())
     {
-        auto& item = game.container->get_inventory_mutable()[i];
-        if (!item) continue;
+        return false;
+    }
+
+    game.log("Checking for items. Inventory size: " + std::to_string(game.inventory_data.items.size()));
+
+	// First pass - identify items to consume
+	for (size_t i = 0; i < game.inventory_data.items.size(); i++)
+	{
+		auto& item = game.inventory_data.items[i];
+		if (!item) continue;
 
         int itemDistance = mimic.get_tile_distance(item->position);
         game.log("Item at distance " + std::to_string(itemDistance) + ": " + item->actorData.name);
@@ -182,7 +192,8 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
             itemConsumed = true;
 
             // If mimic has consumed enough items, change appearance
-            if (itemsConsumed >= 5) {
+            if (itemsConsumed >= 5)
+            {
                 mimic.actorData.ch = 'W';
                 mimic.actorData.color = RED_YELLOW_PAIR;
                 mimic.actorData.name = "greater mimic";
@@ -194,14 +205,15 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
         }
     }
 
-    // Second pass - remove consumed items (in reverse order to avoid index issues)
-    for (auto it = itemsToRemove.rbegin(); it != itemsToRemove.rend(); ++it) {
+    // Second pass - remove consumed items using proper inventory operations
+    for (auto it = itemsToRemove.rbegin(); it != itemsToRemove.rend(); ++it)
+    {
         size_t index = *it;
         game.log("Removing consumed item at index " + std::to_string(index));
 
-        if (index < game.container->get_inventory_mutable().size()) {
-            game.container->get_inventory_mutable()[index].reset();
-            game.container->get_inventory_mutable().erase(game.container->get_inventory_mutable().begin() + index);
+        if (index < game.inventory_data.items.size() && game.inventory_data.items[index])
+        {
+            remove_item_at(game.inventory_data, index);
         }
     }
 
