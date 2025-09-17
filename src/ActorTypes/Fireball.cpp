@@ -5,7 +5,6 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include <cmath>
-#include <random>
 
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
@@ -66,134 +65,170 @@ bool Fireball::use(Item& owner, Creature& wearer)
 
 void Fireball::create_explosion(Vector2D center)
 {
-    // Get the radius of the explosion
-    int radius = Fireball::maxRange;
-    int fullDiameter = radius * 2 + 1;
+    ExplosionData explosion = initialize_explosion_data(center);
+    
+    animate_expansion_phase(explosion);
+    animate_peak_phase(explosion);
+    animate_fade_phase(explosion);
+    
+    cleanup_explosion_window(explosion.window);
+}
 
-    // Calculate the area for the explosion window
-    Vector2D topLeft{ center.y - radius, center.x - radius };
-
-    // Create an explosion window
-    WINDOW* explosionWindow = newwin(
-        fullDiameter, // height
-        fullDiameter, // width
-        topLeft.y,    // y position
-        topLeft.x     // x position
+ExplosionData Fireball::initialize_explosion_data(Vector2D center)
+{
+    ExplosionData data{};
+    data.radius = Fireball::maxRange;
+    data.fullDiameter = data.radius * 2 + 1;
+    
+    Vector2D topLeft{ center.y - data.radius, center.x - data.radius };
+    
+    data.window = newwin(
+        data.fullDiameter, // height
+        data.fullDiameter, // width
+        topLeft.y,         // y position
+        topLeft.x          // x position
     );
+    
+    nodelay(data.window, true);
+    return data;
+}
 
-    // Enable non-blocking mode for animation
-    nodelay(explosionWindow, true);
+void Fireball::animate_expansion_phase(const ExplosionData& explosion)
+{
+    const int EXPANSION_FRAMES = 10;
+    
+    for (int frame = 0; frame < EXPANSION_FRAMES; frame++)
+    {
+        wclear(explosion.window);
+        int currentRadius = (explosion.radius * frame) / EXPANSION_FRAMES;
+        
+        draw_explosion_frame(explosion, currentRadius);
+        wrefresh(explosion.window);
+        napms(30);
+    }
+}
 
-    // Fire colors - use a gradient of colors for more realistic fire
-    const int FIRE_COLORS[] = {
-        RED_YELLOW_PAIR,    // Base fire color
-        RED_YELLOW_PAIR,      // Another fire-like color
-        WHITE_RED_PAIR // Red for intense heat
-    };
-    const int COLOR_COUNT = 3;
+void Fireball::animate_peak_phase(const ExplosionData& explosion)
+{
+    const int PEAK_FRAMES = 20;
+    
+    for (int frame = 0; frame < PEAK_FRAMES; frame++)
+    {
+        draw_flickering_explosion(explosion);
+        wrefresh(explosion.window);
+        napms(50);
+    }
+}
 
-    // Fire characters for more varied visual effect
-    const char FIRE_CHARS[] = { '*', '#', '&', '@', '%', '+', '=', '^' };
-    const int CHAR_COUNT = 8;
+void Fireball::animate_fade_phase(const ExplosionData& explosion)
+{
+    const int FADE_FRAMES = 15;
+    
+    for (int frame = 0; frame < FADE_FRAMES; frame++)
+    {
+        wclear(explosion.window);
+        int currentRadius = explosion.radius - (explosion.radius * frame) / FADE_FRAMES;
+        
+        draw_fading_explosion(explosion, currentRadius);
+        wrefresh(explosion.window);
+        napms(40);
+    }
+}
 
-    // Fire animation phases
-    const int EXPANSION_FRAMES = 10;  // Frames for expansion
-    const int PEAK_FRAMES = 20;       // Frames at full size
-    const int FADE_FRAMES = 15;       // Frames for fade out
-
-    // Random number generator
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> colorDist(0, COLOR_COUNT - 1);
-    std::uniform_int_distribution<> charDist(0, CHAR_COUNT - 1);
-
-    // Animate the explosion
-    // Phase 1: Expansion
-    for (int frame = 0; frame < EXPANSION_FRAMES; frame++) {
-        wclear(explosionWindow);
-        int currentRadius = (radius * frame) / EXPANSION_FRAMES;
-
-        // Draw expanding circular fire
-        for (int y = 0; y < fullDiameter; y++) {
-            for (int x = 0; x < fullDiameter; x++) {
-                // Distance from center of the explosion
-                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
-
-                if (distance <= currentRadius) {
-                    int colorIndex = colorDist(gen);
-                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
-                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                }
+void Fireball::draw_explosion_frame(const ExplosionData& explosion, int currentRadius)
+{
+    for (int y = 0; y < explosion.fullDiameter; y++)
+    {
+        for (int x = 0; x < explosion.fullDiameter; x++)
+        {
+            if (is_within_explosion_radius(y, x, explosion.radius, currentRadius))
+            {
+                draw_fire_character(explosion.window, y, x, -1);
             }
         }
-        wrefresh(explosionWindow);
-        napms(30);  // Control speed of expansion
     }
+}
 
-    // Phase 2: Full explosion
-    for (int frame = 0; frame < PEAK_FRAMES; frame++) {
-        // Redraw with flickering
-        for (int y = 0; y < fullDiameter; y++) {
-            for (int x = 0; x < fullDiameter; x++) {
-                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
-
-                if (distance <= radius) {
-                    // More intense fire at the center, less at the edges
-                    double intensity = 1.0 - (distance / radius);
-                    int colorIndex;
-
-                    // Higher chance of intense colors near center
-                    if (std::bernoulli_distribution(intensity)(gen)) {
-                        colorIndex = colorDist(gen) % 2;  // More intense colors
-                    }
-                    else {
-                        colorIndex = 2;  // Less intense color
-                    }
-
-                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
-                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                }
+void Fireball::draw_flickering_explosion(const ExplosionData& explosion)
+{
+    for (int y = 0; y < explosion.fullDiameter; y++)
+    {
+        for (int x = 0; x < explosion.fullDiameter; x++)
+        {
+            double distance = calculate_distance_from_center(y, x, explosion.radius);
+            
+            if (distance <= explosion.radius)
+            {
+                double intensity = 1.0 - (distance / explosion.radius);
+                int colorIndex = get_intensity_based_color(intensity);
+                draw_fire_character(explosion.window, y, x, colorIndex);
             }
         }
-        wrefresh(explosionWindow);
-        napms(50);  // Longer display at peak
     }
+}
 
-    // Phase 3: Fade out
-    for (int frame = 0; frame < FADE_FRAMES; frame++) {
-        wclear(explosionWindow);
-        int currentRadius = radius - (radius * frame) / FADE_FRAMES;
-
-        // Draw shrinking fire
-        for (int y = 0; y < fullDiameter; y++) {
-            for (int x = 0; x < fullDiameter; x++) {
-                double distance = std::sqrt(std::pow(y - radius, 2) + std::pow(x - radius, 2));
-
-                if (distance <= currentRadius) {
-                    // As fire fades, use less intense colors
-                    int colorIndex = 2; // Least intense color predominates
-
-                    if (std::bernoulli_distribution(0.3)(gen)) {
-                        colorIndex = colorDist(gen);
-                    }
-
-                    wattron(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                    mvwaddch(explosionWindow, y, x, FIRE_CHARS[charDist(gen)]);
-                    wattroff(explosionWindow, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-                }
+void Fireball::draw_fading_explosion(const ExplosionData& explosion, int currentRadius)
+{
+    for (int y = 0; y < explosion.fullDiameter; y++)
+    {
+        for (int x = 0; x < explosion.fullDiameter; x++)
+        {
+            if (is_within_explosion_radius(y, x, explosion.radius, currentRadius))
+            {
+                int colorIndex = get_fade_color();
+                draw_fire_character(explosion.window, y, x, colorIndex);
             }
         }
-        wrefresh(explosionWindow);
-        napms(40);  // Control speed of fade
     }
+}
 
-    // Clean up
-    nodelay(explosionWindow, false);
-    delwin(explosionWindow);
+bool Fireball::is_within_explosion_radius(int y, int x, int centerRadius, int currentRadius)
+{
+    double distance = calculate_distance_from_center(y, x, centerRadius);
+    return distance <= currentRadius;
+}
 
-    // CRITICAL FIX: Clear screen completely then restore game display
+double Fireball::calculate_distance_from_center(int y, int x, int centerRadius)
+{
+    return std::sqrt(std::pow(y - centerRadius, 2) + std::pow(x - centerRadius, 2));
+}
+
+int Fireball::get_intensity_based_color(double intensity)
+{
+    if (game.d.roll(1, 100) <= static_cast<int>(intensity * 100))
+    {
+        return game.d.roll(1, 2) - 1;  // More intense colors (0 or 1)
+    }
+    return 2;  // Less intense color
+}
+
+int Fireball::get_fade_color()
+{
+    if (game.d.roll(1, 100) <= 30)
+    {
+        return game.d.roll(1, FIRE_COLOR_COUNT) - 1;
+    }
+    return 2;  // Least intense color predominates
+}
+
+void Fireball::draw_fire_character(WINDOW* window, int y, int x, int colorIndex)
+{
+    static const int FIRE_COLORS[] = { RED_YELLOW_PAIR, RED_YELLOW_PAIR, WHITE_RED_PAIR };
+    static const char FIRE_CHARS[] = { '*', '#', '&', '@', '%', '+', '=', '^' };
+    
+    if (colorIndex < 0) 
+        colorIndex = game.d.roll(1, FIRE_COLOR_COUNT) - 1;
+    
+    wattron(window, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+    mvwaddch(window, y, x, FIRE_CHARS[game.d.roll(1, FIRE_CHAR_COUNT) - 1]);
+    wattroff(window, COLOR_PAIR(FIRE_COLORS[colorIndex]));
+}
+
+void Fireball::cleanup_explosion_window(WINDOW* window)
+{
+    nodelay(window, false);
+    delwin(window);
+    
     clear();
     refresh();
     game.restore_game_display();
