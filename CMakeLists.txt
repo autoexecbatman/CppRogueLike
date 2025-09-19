@@ -219,6 +219,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.h
     ${PROJECT_SOURCE_DIR}/Systems/DataManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/DataManager.h
+    ${PROJECT_SOURCE_DIR}/Systems/ShopKeeper.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/ShopKeeper.h
+    ${PROJECT_SOURCE_DIR}/Systems/Shopkeepers/ShopkeeperFactory.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/Shopkeepers/ShopkeeperFactory.h
+    ${PROJECT_SOURCE_DIR}/Systems/ItemEnhancements/ItemEnhancements.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/ItemEnhancements/ItemEnhancements.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
