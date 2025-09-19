@@ -5,6 +5,7 @@
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../Random/RandomDice.h"
 #include "../Ai/AiMonsterRanged.h"
+#include "../Systems/Shopkeepers/ShopkeeperFactory.h"
 #include "ItemCreator.h"
 #include "../Items/Food.h"
 #include "../Actor/InventoryOperations.h"
@@ -195,4 +196,21 @@ std::vector<std::pair<std::string, float>> MonsterFactory::getCurrentDistributio
     }
 
     return distribution;
+}
+
+void MonsterFactory::try_spawn_shopkeeper(Vector2D position, int dungeonLevel) const
+{
+    if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel))
+    {
+        auto shopkeeper = ShopkeeperFactory::create_shopkeeper(position, dungeonLevel);
+        game.creatures.push_back(std::move(shopkeeper));
+        
+        game.log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
+    }
+}
+
+bool MonsterFactory::should_spawn_shopkeeper(int dungeonLevel) const
+{
+    // Delegate to single source factory
+    return ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel);
 }

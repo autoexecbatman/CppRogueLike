@@ -14,6 +14,8 @@
 #include "../Attributes/StrengthAttributes.h"
 #include "../Utils/UniqueId.h"
 #include "../Items/ItemClassification.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
+#include "../Systems/ShopKeeper.h"
 
 #include "Attacker.h"
 #include "Destructible.h"
@@ -138,6 +140,7 @@ public:
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
+	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
 	InventoryData inventory_data;
 };
 
@@ -164,11 +167,24 @@ public:
 	// Initialize item type from name (temporary bridge until creation system is refactored)
 	void initialize_item_type_from_name();
 
-	// Name accessor - proper encapsulation
-	const std::string& get_name() const noexcept { return actorData.name; }
+	// Name accessor - returns enhanced name if item has enhancements
+	const std::string& get_name() const noexcept;
+	const std::string& get_base_name() const noexcept { return actorData.name; }
 
-	int value{ 1 };
+	// Enhancement system
+	void apply_enhancement(const ItemEnhancement& enhancement);
+	void generate_random_enhancement(bool allow_magical = true);
+	const ItemEnhancement& get_enhancement() const noexcept { return enhancement; }
+	bool is_enhanced() const noexcept;
+
+	// Enhanced value calculation
+	int get_base_value() const noexcept { return base_value; }
+	int get_enhanced_value() const noexcept;
+
+	int value{ 1 }; // For backwards compatibility
+	int base_value{ 1 }; // Base value before enhancements
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Proper item classification
+	ItemEnhancement enhancement; // Enhancement data
 
 	std::unique_ptr<Pickable> pickable; // the actor can be picked
 	

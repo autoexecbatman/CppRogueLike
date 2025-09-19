@@ -21,9 +21,17 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 	{
 		if (item)
 		{
-			// Display item name with right-aligned gold value
+			// Display item name with right-aligned sell price
 			std::string itemName = item->actorData.name;
-			std::string goldText = "(" + std::to_string(item->value) + "g)";
+			
+			// Get correct sell price from shopkeeper's shop system
+			int sellPrice = item->value; // fallback
+			if (shopkeeper.shop != nullptr)
+			{
+				sellPrice = shopkeeper.shop->get_sell_price(*item);
+			}
+			
+			std::string goldText = "(" + std::to_string(sellPrice) + "g)";
 			
 			// Pad to align gold values (assuming max name length ~20)
 			size_t totalWidth = 28;
@@ -73,7 +81,12 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
         return;
     }
     
-    auto price = item->value;
+    // Use shopkeeper's pricing system if available
+    int price = item->value; // fallback price
+    if (shopkeeper.shop != nullptr)
+    {
+        price = shopkeeper.shop->get_sell_price(*item);
+    }
     
     if (shopkeeper.get_gold() >= price)
     {

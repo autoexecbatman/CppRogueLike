@@ -12,7 +12,6 @@ Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 bool Fireball::use(Item& owner, Creature& wearer)
 {
     Vector2D tilePicked{ 0, 0 };
-
     if (!game.pick_tile(&tilePicked, Fireball::maxRange)) // <-- runs a while loop here
     {
         return false;

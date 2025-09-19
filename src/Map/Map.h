@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <memory>
 
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"

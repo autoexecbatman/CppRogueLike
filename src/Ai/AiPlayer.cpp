@@ -6,6 +6,7 @@
 
 #include "Ai.h"
 #include "AiPlayer.h"
+#include "AiShopkeeper.h"
 #include "../Game.h"
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
@@ -531,6 +532,27 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 		{
 			if (!c->destructible->is_dead() && c->position == target)
 			{
+				// Check if the creature is hostile before attacking
+				if (c->ai && !c->ai->is_hostile())
+				{
+					// Non-hostile creature - check if it's a shopkeeper for trade
+					AiShopkeeper* shopkeeperAI = dynamic_cast<AiShopkeeper*>(c->ai.get());
+					if (shopkeeperAI && !shopkeeperAI->tradeMenuOpen)
+					{
+						// Player bumped into shopkeeper - initiate trade
+						game.log("Player bumped shopkeeper - initiating trade!");
+						shopkeeperAI->trade(*c, owner);
+						shopkeeperAI->tradeMenuOpen = true;
+						return false; // Block movement but don't attack
+					}
+					else
+					{
+						// Other non-hostile creature - just block movement
+						game.log("Encountered non-hostile creature: " + c->actorData.name);
+						return false; // Block movement
+					}
+				}
+				
 				// Handle multiple attacks for fighters
 				auto playerPtr = dynamic_cast<Player*>(&owner);
 				if (playerPtr)

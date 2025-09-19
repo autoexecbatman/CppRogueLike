@@ -11,6 +11,7 @@
 class Item;
 class Creature;
 class Player;
+class ShopKeeper;
 
 class MenuBuy : public BaseMenu
 {
@@ -21,14 +22,15 @@ class MenuBuy : public BaseMenu
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
 	Creature& buyer;
+	ShopKeeper& shopkeeper; // Store shopkeeper reference
 
-	void populate_items(std::span<std::unique_ptr<Item>> item);
+	void populate_items();
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller);
-	void draw_content() override;
+	void draw_content();
 public:
-	MenuBuy(Creature& buyer);
+	MenuBuy(Creature& buyer, ShopKeeper& shopkeeper);
 	~MenuBuy();
 
 	void draw();

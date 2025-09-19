@@ -196,6 +196,7 @@ void Creature::equip(Item& item)
 {
 	bool isArmor = item.is_armor();
 	bool isWeapon = item.is_weapon();
+	bool isShield = item.is_shield();
 
 	// First check if any equipment of the same type is already equipped
 	std::vector<Item*> equippedItems;
@@ -207,9 +208,10 @@ void Creature::equip(Item& item)
 		{
 			bool itemIsArmor = inv_item->is_armor();
 			bool itemIsWeapon = inv_item->is_weapon();
+			bool itemIsShield = inv_item->is_shield();
 
 			// Only consider same-type equipment for unequipping
-			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon))
+			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon) || (isShield && itemIsShield))
 			{
 				equippedItems.push_back(inv_item.get());
 			}
@@ -241,6 +243,18 @@ void Creature::equip(Item& item)
 			attacker->set_roll(weaponDamage);
 			game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " - damage updated to " + weaponDamage);
 		}
+	}
+	
+	// Log shield equipped
+	if (isShield)
+	{
+		game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " shield");
+	}
+	
+	// Log armor equipped
+	if (isArmor)
+	{
+		game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " armor");
 	}
 }
 
@@ -509,6 +523,8 @@ void Item::initialize_item_type_from_name()
 	else if (name.find("plate mail") != std::string::npos) itemClass = ItemClass::PLATE_MAIL;
 	
 	// Shields
+	else if (name.find("large shield") != std::string::npos) itemClass = ItemClass::LARGE_SHIELD;
+	else if (name.find("small shield") != std::string::npos) itemClass = ItemClass::SMALL_SHIELD;
 	else if (name.find("shield") != std::string::npos) itemClass = ItemClass::MEDIUM_SHIELD;
 	
 	// Consumables
@@ -530,6 +546,53 @@ void Item::initialize_item_type_from_name()
 	
 	// Default to unknown if no match found
 	else itemClass = ItemClass::UNKNOWN;
+}
+
+const std::string& Item::get_name() const noexcept
+{
+	if (is_enhanced())
+	{
+		static std::string enhanced_name;
+		enhanced_name = enhancement.get_full_name(actorData.name);
+		return enhanced_name;
+	}
+	return actorData.name;
+}
+
+void Item::apply_enhancement(const ItemEnhancement& new_enhancement)
+{
+	enhancement = new_enhancement;
+	// Update value based on enhancement
+	value = (base_value * enhancement.value_modifier) / 100;
+}
+
+void Item::generate_random_enhancement(bool allow_magical)
+{
+	if (is_weapon())
+	{
+		enhancement = ItemEnhancement::generate_weapon_enhancement();
+	}
+	else if (is_armor())
+	{
+		enhancement = ItemEnhancement::generate_armor_enhancement();
+	}
+	else
+	{
+		enhancement = ItemEnhancement::generate_random_enhancement(allow_magical);
+	}
+	
+	// Update value based on enhancement
+	value = (base_value * enhancement.value_modifier) / 100;
+}
+
+bool Item::is_enhanced() const noexcept
+{
+	return enhancement.prefix != PrefixType::NONE || enhancement.suffix != SuffixType::NONE;
+}
+
+int Item::get_enhanced_value() const noexcept
+{
+	return (base_value * enhancement.value_modifier) / 100;
 }
 
 // end of file: Actor.cpp

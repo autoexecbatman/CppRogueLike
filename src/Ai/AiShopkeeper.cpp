@@ -10,9 +10,8 @@
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MAX_TRADE_DISTANCE = 1;  // Maximum distance to initiate a trade (adjacent only - no diagonals)
-constexpr auto COOLDOWN_TURNS = 10; // Turns to wait after interaction before approaching again
 
-AiShopkeeper::AiShopkeeper() : moveCount(0), cooldownCount(0), tradeMenuOpen(false), hasApproachedPlayer(false) {}
+AiShopkeeper::AiShopkeeper() : moveCount(0), tradeMenuOpen(false), hasApproachedPlayer(false) {}
 
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
@@ -82,8 +81,6 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
 		game.log("TRADE CONDITION MET: Opening trade menu!");
 		trade(shopkeeper, *game.player);
 		tradeMenuOpen = true; // Mark that trade menu is open
-		// Start cooldown after trading
-		cooldownCount = COOLDOWN_TURNS;
 		moveCount = 0; // Stop tracking immediately
 	}
 	else if (distance > MAX_TRADE_DISTANCE)
@@ -108,28 +105,31 @@ void AiShopkeeper::trade(Creature& shopkeeper, Creature& player)
 
 void AiShopkeeper::update(Creature& owner)
 {
+	// CRITICAL FIX: Detect and repair broken shopkeepers from old system
+	if (!owner.shop)
+	{
+		game.log("Detected broken shopkeeper - repairing with shop component");
+		// Create shop component for broken shopkeeper
+		owner.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE);
+	}
+	
 	// Skip if dead
 	if (owner.ai == nullptr || owner.destructible->is_dead())
 	{
 		return;
 	}
 
+	// Reset trade menu flag when player moves away
+	int distance = owner.get_tile_distance(game.player->position);
+	if (distance > MAX_TRADE_DISTANCE)
+	{
+		tradeMenuOpen = false;
+	}
+
 	// If shopkeeper has already approached player once, don't approach again
 	if (hasApproachedPlayer)
 	{
 		return; // Stay passive after first approach
-	}
-
-	// Handle cooldown - don't approach player during cooldown
-	if (cooldownCount > 0)
-	{
-		cooldownCount--;
-		// Reset trade menu flag when cooldown ends
-		if (cooldownCount == 0)
-		{
-			tradeMenuOpen = false;
-		}
-		return; // Do nothing during cooldown
 	}
 
 	// Check if player is visible and not already tracking
@@ -151,18 +151,14 @@ void AiShopkeeper::update(Creature& owner)
 	// Move towards player only if actively tracking
 	if (moveCount > 0)
 	{
-		// Clean Vector2D usage - no coordinate confusion!
-		moveOrTrade(owner, game.player->position);
+		// Only move, don't trade during approach (trade check handled above)
+		moveToTarget(owner, game.player->position);
 	}
 }
 
 void AiShopkeeper::load(const json& j)
 {
 	moveCount = j.at("moveCount").get<int>();
-	if (j.contains("cooldownCount"))
-	{
-		cooldownCount = j.at("cooldownCount").get<int>();
-	}
 	if (j.contains("tradeMenuOpen"))
 	{
 		tradeMenuOpen = j.at("tradeMenuOpen").get<bool>();
@@ -177,7 +173,6 @@ void AiShopkeeper::save(json& j)
 {
 	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
 	j["moveCount"] = moveCount;
-	j["cooldownCount"] = cooldownCount;
 	j["tradeMenuOpen"] = tradeMenuOpen;
 	j["hasApproachedPlayer"] = hasApproachedPlayer;
 }

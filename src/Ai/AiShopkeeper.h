@@ -14,8 +14,6 @@ class AiShopkeeper : public Ai
 {
 private:
 	int moveCount = 0;
-	int cooldownCount = 0; // Cooldown turns after interaction  
-	bool tradeMenuOpen = false; // Prevents multiple trade menu opens
 	bool hasApproachedPlayer = false; // Shopkeeper only approaches player once
 	void update(Creature& owner) override;
 	// Shopkeepers are non-hostile - replaces dynamic_cast detection
@@ -26,6 +24,7 @@ private:
 	void moveToTarget(Actor& owner, Vector2D target);
 public:
 	AiShopkeeper();
+	bool tradeMenuOpen = false; // Prevents multiple trade menu opens - now public
 protected:
 	void moveOrTrade(Creature& owner, Vector2D target);
 public:

@@ -4,10 +4,19 @@
 #include "MenuBuy.h"
 #include "MenuSell.h"
 #include "../Actor/Actor.h"
+#include "../Systems/ShopKeeper.h"
 
 void Buy::on_selection()
 {
-	game.menus.push_back(std::make_unique<MenuBuy>(shopkeeper));
+	// Use the shopkeeper's attached shop component
+	if (shopkeeper.shop != nullptr)
+	{
+		game.menus.push_back(std::make_unique<MenuBuy>(*game.player, *shopkeeper.shop));
+	}
+	else
+	{
+		game.log("Error: Shopkeeper has no shop component!");
+	}
 }
 
 void Sell::on_selection()

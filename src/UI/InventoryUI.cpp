@@ -123,28 +123,32 @@ void InventoryUI::display_inventory_items(const Player& player)
     int y = 2;
     char shortcut = 'a';
     
-    // Display only backpack items (not equipped items)
-    const auto& backpackItems_list = player.inventory_data.items;
+    // Build list of valid items (same logic as selection)
+    std::vector<Item*> validItems;
+    for (const auto& item : player.inventory_data.items)
+    {
+        if (item)
+        {
+            validItems.push_back(item.get());
+        }
+    }
     
-    if (backpackItems_list.empty())
+    if (validItems.empty())
     {
         mvwprintw(inventoryWindow, y, 2, "Your backpack is empty.");
         return;
     }
     
-    for (size_t i = 0; i < backpackItems_list.size() && shortcut <= 'z'; i++)
+    // Display valid items with consistent indexing
+    for (size_t i = 0; i < validItems.size() && shortcut <= 'z'; i++)
     {
-        Item* item = backpackItems_list[i].get();
+        Item* item = validItems[i];
         
-        if (item)
-        {
-            mvwprintw(inventoryWindow, y, 2, "%c) ", shortcut);
-            
-            show_item_info(item, y);
-            
-            y++;
-            shortcut++;
-        }
+        mvwprintw(inventoryWindow, y, 2, "%c) ", shortcut);
+        show_item_info(item, y);
+        
+        y++;
+        shortcut++;
     }
 }
 
@@ -279,22 +283,39 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
     if (is_inventory_empty(player.inventory_data))
     {
         game.message(WHITE_BLACK_PAIR, "Your backpack is empty.", true);
-        return true; // Stay in inventory
+        return true;
     }
     
-    const auto& backpackItems = player.inventory_data.items;
-    
-    if (itemIndex >= 0 && itemIndex < static_cast<int>(backpackItems.size()))
+    // Build list of valid items (skipping null entries)
+    std::vector<Item*> validItems;
+    for (const auto& item : player.inventory_data.items)
     {
-        Item* selectedItem = backpackItems[itemIndex].get();
+        if (item)
+        {
+            validItems.push_back(item.get());
+        }
+    }
+    
+    // Debug logging
+    game.log("Inventory selection debug:");
+    game.log("Selected index: " + std::to_string(itemIndex));
+    game.log("Valid items count: " + std::to_string(validItems.size()));
+    game.log("Total inventory slots: " + std::to_string(player.inventory_data.items.size()));
+    
+    if (itemIndex >= 0 && itemIndex < static_cast<int>(validItems.size()))
+    {
+        Item* selectedItem = validItems[itemIndex];
+        
+        game.log("Selected item: " + selectedItem->actorData.name);
+        game.log("Has pickable: " + std::string(selectedItem->pickable ? "YES" : "NO"));
         
         if (selectedItem && selectedItem->pickable)
         {
-            // Store item pointer to detect if it was consumed
             Item* itemPtr = selectedItem;
             
-            // Try to use item - now no cast needed since player is mutable
+            game.log("Attempting to use item...");
             bool itemUsed = selectedItem->pickable->use(*selectedItem, player);
+            game.log("Item use result: " + std::string(itemUsed ? "SUCCESS" : "FAILED"));
             
             if (itemUsed)
             {
@@ -311,19 +332,26 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
                     }
                 }
                 
-                // If item was consumed, exit inventory
                 if (!itemStillExists)
                 {
                     return false; // Exit inventory
                 }
             }
             
-            return true; // Stay in inventory
+            return true;
         }
+        else
+        {
+            game.log("Item has no pickable component!");
+        }
+    }
+    else
+    {
+        game.log("Index out of bounds!");
     }
     
     game.message(WHITE_BLACK_PAIR, "Invalid backpack selection.", true);
-    return true; // Stay in inventory
+    return true;
 }
 
 bool InventoryUI::handle_equipment_selection(Player& player, int input)
