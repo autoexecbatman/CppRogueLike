@@ -29,7 +29,7 @@ struct ActorData
 {
 	char ch{ 'f' };
 	std::string name{ "string" };
-	int color{ 0 };
+	int color{ WHITE_BLACK_PAIR };
 };
 
 enum class ActorState
