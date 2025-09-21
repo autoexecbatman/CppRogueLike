@@ -684,14 +684,8 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 
 	spawn_items(begin, end);
 	
-	// Try to spawn a shopkeeper (low chance) 
-	Vector2D shopkeeperPos{ game.d.roll(begin.y, end.y), game.d.roll(begin.x, end.x) };
-	while (!can_walk(shopkeeperPos) || is_stairs(shopkeeperPos))
-	{
-		shopkeeperPos.x = game.d.roll(begin.x, end.x);
-		shopkeeperPos.y = game.d.roll(begin.y, end.y);
-	}
-	monsterFactory->try_spawn_shopkeeper(shopkeeperPos, game.level_manager.get_dungeon_level());
+	// No monster spawning during room creation - monsters spawn procedurally during gameplay
+	// This was the original design - only items spawn during level generation
 }
 
 void Map::spawn_water(Vector2D begin, Vector2D end)

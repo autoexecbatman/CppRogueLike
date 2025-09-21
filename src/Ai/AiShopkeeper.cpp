@@ -45,10 +45,11 @@ void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target)
         // ULTIMATE FIX: Multiple collision checks to prevent any overlap
         if (game.map.can_walk(nextPos))
         {
-            // EXTRA SAFETY: Explicit player collision check
+            // Allow shopkeeper to move adjacent to player for trading
             if (game.player && game.player->position == nextPos)
             {
-                continue; // Skip this move - player is there
+                // Can't occupy same space as player, but can be adjacent
+                continue;
             }
             
             // EXTRA SAFETY: Double-check no actor at position

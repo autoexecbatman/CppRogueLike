@@ -39,10 +39,6 @@ public:
     // Add a monster type to the factory
     void addMonsterType(const MonsterType& monsterType);
 
-    // Shopkeeper spawning system
-    void try_spawn_shopkeeper(Vector2D position, int dungeonLevel) const;
-    bool should_spawn_shopkeeper(int dungeonLevel) const;
-
 private:
     std::vector<MonsterType> monsterTypes;
 

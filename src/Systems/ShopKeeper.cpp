@@ -3,10 +3,7 @@
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
-#include "../Items/Armor.h"
-#include "../ActorTypes/Fireball.h"
-#include "../ActorTypes/LightningBolt.h"
-#include "../ActorTypes/Confuser.h"
+#include "../Factories/ItemCreator.h"  // SINGLE SOURCE OF TRUTH
 #include <algorithm>
 
 using namespace InventoryOperations;
@@ -189,13 +186,22 @@ std::unique_ptr<Item> ShopKeeper::generate_random_armor()
     }
     else
     {
-        // Add armor pickable components for other armor types
+        // Create armor directly using ItemCreator
         if (armor.name == "Leather Armor")
-            item->pickable = std::make_unique<LeatherArmor>();
+        {
+            auto armor_item = ItemCreator::create_leather_armor(Vector2D{0, 0});
+            item->pickable = std::move(armor_item->pickable);
+        }
         else if (armor.name == "Chain Mail")
-            item->pickable = std::make_unique<ChainMail>();
+        {
+            auto armor_item = ItemCreator::create_chain_mail(Vector2D{0, 0});
+            item->pickable = std::move(armor_item->pickable);
+        }
         else if (armor.name == "Plate Mail")
-            item->pickable = std::make_unique<PlateMail>();
+        {
+            auto armor_item = ItemCreator::create_plate_mail(Vector2D{0, 0});
+            item->pickable = std::move(armor_item->pickable);
+        }
     }
     
     // 35% chance for enhancement
@@ -209,186 +215,14 @@ std::unique_ptr<Item> ShopKeeper::generate_random_armor()
 
 std::unique_ptr<Item> ShopKeeper::generate_random_potion()
 {
-    Vector2D shop_pos{0, 0};
-    
-    struct PotionData 
-    {
-        std::string name;
-        int base_price;
-        Pickable::PickableType type;
-        int min_value;
-        int max_value;
-    };
-    
-    static const PotionData potions[] = 
-    {
-        {"Healing Potion", 50, Pickable::PickableType::HEALING_POTION, 15, 35},
-        {"Mana Potion", 40, Pickable::PickableType::MANA_POTION, 10, 25},
-        {"Strength Potion", 75, Pickable::PickableType::STRENGTH_POTION, 2, 4},
-        {"Speed Potion", 60, Pickable::PickableType::SPEED_POTION, 1, 2},
-        {"Poison Antidote", 30, Pickable::PickableType::POISON_ANTIDOTE, 1, 1},
-        {"Fire Resistance Potion", 80, Pickable::PickableType::FIRE_RESISTANCE_POTION, 30, 70},
-        {"Invisibility Potion", 200, Pickable::PickableType::INVISIBILITY_POTION, 20, 50}
-    };
-    
-    const PotionData& potion = potions[rand() % (sizeof(potions) / sizeof(potions[0]))];
-    
-    auto item = std::make_unique<Item>(shop_pos, ActorData{'!', potion.name, RED_BLACK_PAIR});
-    item->base_value = potion.base_price + (rand() % 20) - 10;
-    item->base_value = std::max(5, item->base_value);
-    item->value = item->base_value;
-    item->initialize_item_type_from_name();
-    
-    // Create appropriate potion pickable with random stats
-    switch (potion.type)
-    {
-        case Pickable::PickableType::HEALING_POTION:
-        {
-            int heal_amount = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            item->pickable = std::make_unique<HealingPotion>(heal_amount);
-            break;
-        }
-        case Pickable::PickableType::MANA_POTION:
-        {
-            int mana_amount = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            item->pickable = std::make_unique<ManaPotion>(mana_amount);
-            break;
-        }
-        case Pickable::PickableType::STRENGTH_POTION:
-        {
-            int strength_bonus = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            int duration = 80 + (rand() % 40); // 80-120 turns
-            item->pickable = std::make_unique<StrengthPotion>(strength_bonus, duration);
-            break;
-        }
-        case Pickable::PickableType::SPEED_POTION:
-        {
-            int speed_bonus = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            int duration = 40 + (rand() % 30); // 40-70 turns
-            item->pickable = std::make_unique<SpeedPotion>(speed_bonus, duration);
-            break;
-        }
-        case Pickable::PickableType::POISON_ANTIDOTE:
-        {
-            item->pickable = std::make_unique<PoisonAntidote>();
-            break;
-        }
-        case Pickable::PickableType::FIRE_RESISTANCE_POTION:
-        {
-            int resistance = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            int duration = 150 + (rand() % 100); // 150-250 turns
-            item->pickable = std::make_unique<FireResistancePotion>(resistance, duration);
-            break;
-        }
-        case Pickable::PickableType::INVISIBILITY_POTION:
-        {
-            int duration = potion.min_value + (rand() % (potion.max_value - potion.min_value + 1));
-            item->pickable = std::make_unique<InvisibilityPotion>(duration);
-            break;
-        }
-        default:
-            item->pickable = std::make_unique<HealingPotion>();
-            break;
-    }
-    
-    // 15% chance for enhanced potions (better stats)
-    if (rand() % 100 < 15)
-    {
-        item->generate_random_enhancement(false);
-        // Boost the potion's effectiveness for enhanced versions
-        item->value = static_cast<int>(item->value * 1.3f);
-    }
-    
-    return item;
+    // USE UNIFIED ITEM CREATION - SINGLE SOURCE OF TRUTH
+    return ItemCreator::create_health_potion(Vector2D{0, 0});
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_scroll()
 {
-    Vector2D shop_pos{0, 0};
-    
-    struct ScrollData 
-    {
-        std::string name;
-        int base_price;
-        Pickable::PickableType type;
-        int min_value;
-        int max_value;
-    };
-    
-    static const ScrollData scrolls[] = 
-    {
-        {"Scroll of Fireball", 375, Pickable::PickableType::FIREBALL, 0, 0},
-        {"Scroll of Lightning", 375, Pickable::PickableType::LIGHTNING_BOLT, 0, 0},
-        {"Scroll of Confusion", 100, Pickable::PickableType::CONFUSER, 0, 0},
-        {"Scroll of Identify", 50, Pickable::PickableType::SCROLL_IDENTIFY, 0, 0},
-        {"Scroll of Teleport", 150, Pickable::PickableType::SCROLL_TELEPORT, 8, 15},
-        {"Scroll of Magic Mapping", 300, Pickable::PickableType::SCROLL_MAGIC_MAPPING, 20, 35},
-        {"Scroll of Enchantment", 500, Pickable::PickableType::SCROLL_ENCHANTMENT, 1, 3}
-    };
-    
-    const ScrollData& scroll = scrolls[rand() % (sizeof(scrolls) / sizeof(scrolls[0]))];
-    
-    auto item = std::make_unique<Item>(shop_pos, ActorData{'?', scroll.name, YELLOW_BLACK_PAIR});
-    item->base_value = scroll.base_price + (rand() % 50) - 25;
-    item->base_value = std::max(10, item->base_value);
-    item->value = item->base_value;
-    item->initialize_item_type_from_name();
-    
-    // Create appropriate scroll pickable with random stats where applicable
-    switch (scroll.type)
-    {
-        case Pickable::PickableType::FIREBALL:
-        {
-            int range = 5 + (rand() % 3); // 5-7 range
-            int damage = 20 + (rand() % 15); // 20-35 damage
-            item->pickable = std::make_unique<Fireball>(range, damage);
-            break;
-        }
-        case Pickable::PickableType::LIGHTNING_BOLT:
-        {
-            int range = 8 + (rand() % 4); // 8-11 range
-            int damage = 30 + (rand() % 20); // 30-50 damage
-            item->pickable = std::make_unique<LightningBolt>(range, damage);
-            break;
-        }
-        case Pickable::PickableType::CONFUSER:
-        {
-            int range = 8 + (rand() % 2); // 8-9 range
-            int nb_turns = 10 + (rand() % 10); // 10-20 turns
-            item->pickable = std::make_unique<Confuser>(range, nb_turns);
-            break;
-        }
-        case Pickable::PickableType::SCROLL_IDENTIFY:
-        {
-            item->pickable = std::make_unique<ScrollIdentify>();
-            break;
-        }
-        case Pickable::PickableType::SCROLL_TELEPORT:
-        {
-            int range = scroll.min_value + (rand() % (scroll.max_value - scroll.min_value + 1));
-            item->pickable = std::make_unique<ScrollTeleport>(range);
-            break;
-        }
-        case Pickable::PickableType::SCROLL_MAGIC_MAPPING:
-        {
-            int radius = scroll.min_value + (rand() % (scroll.max_value - scroll.min_value + 1));
-            item->pickable = std::make_unique<ScrollMagicMapping>(radius);
-            break;
-        }
-        case Pickable::PickableType::SCROLL_ENCHANTMENT:
-        {
-            int bonus = scroll.min_value + (rand() % (scroll.max_value - scroll.min_value + 1));
-            item->pickable = std::make_unique<ScrollEnchantment>(bonus);
-            break;
-        }
-        default:
-            item->pickable = std::make_unique<ScrollIdentify>();
-            break;
-    }
-    
-    // Scrolls are inherently magical, no additional enhancements needed
-    
-    return item;
+    // USE UNIFIED ITEM CREATION - SINGLE SOURCE OF TRUTH
+    return ItemCreator::create_scroll_lightning(Vector2D{0, 0});
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_misc_item()

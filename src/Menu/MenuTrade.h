@@ -29,7 +29,7 @@ public:
 
 class Exit : public IMenuState
 {
-	void on_selection() override;
+    void on_selection() override;
 };
 
 class MenuTrade : public BaseMenu
@@ -38,6 +38,7 @@ class MenuTrade : public BaseMenu
 	int width_{ 10 }; // Wide enough for "Trade" title
 	int starty_{ (LINES / 2) - 5 };
 	int startx_{ (COLS / 2) - 10 };
+	Creature& shopkeeper;  // Store reference to shopkeeper
 
 	size_t currentState{ 0 };
 	std::vector<std::unique_ptr<IMenuState>> iMenuStates;

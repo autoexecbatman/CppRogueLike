@@ -61,42 +61,31 @@ MonsterFactory::MonsterFactory()
         });
 
     addMonsterType({
-    "Shopkeeper", 8, 1, 0, 0.0f,  // INCREASED from 5 to 8 - more shopkeepers
-    [](Vector2D pos)
-        {
-            // Check if we already have a shopkeeper on this level
-            if (game.level_manager.get_shopkeepers_count() >= 1)
+        "Dragon", 3, 5, 0, 1.0f,
+        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Dragon>(pos)); }
+        });
+        
+    // Add shopkeeper to the spawn table with proper probability management
+    addMonsterType({
+        "Shopkeeper", 8, 1, 0, 0.0f,  // Weight 8, level 1+, no level scaling
+        [](Vector2D pos) {
+            // Use ShopkeeperFactory's probability system for actual spawning
+            if (ShopkeeperFactory::should_spawn_shopkeeper(game.level_manager.get_dungeon_level()))
             {
-                // Don't spawn shopkeeper, try spawning a different monster instead
-                game.creatures.push_back(std::make_unique<Goblin>(pos));
-                return;
+                auto shopkeeper = ShopkeeperFactory::create_shopkeeper(pos, game.level_manager.get_dungeon_level());
+                game.creatures.push_back(std::move(shopkeeper));
+                game.log("Shopkeeper spawned via MonsterFactory with proper probability at level " + std::to_string(game.level_manager.get_dungeon_level()));
             }
-            
-            game.creatures.push_back(std::make_unique<Shopkeeper>(pos));
-            game.level_manager.increment_shopkeeper_count(); // Increment counter
-            
-            // Get the shopkeeper that was just created (last in creatures vector)
-            auto& shopkeeper = *game.creatures.back();
-            
-            // Give shopkeeper starting inventory using centralized creation
-            add_item(shopkeeper.inventory_data, ItemCreator::create_health_potion(pos));
-            add_item(shopkeeper.inventory_data, ItemCreator::create_health_potion(pos));
-            add_item(shopkeeper.inventory_data, ItemCreator::create_scroll_lightning(pos));
-            add_item(shopkeeper.inventory_data, ItemCreator::create_scroll_fireball(pos));
-
-            // TODO:
-            // create x random potions in shopkeeper inventory
-            // create x random scrolls in shopkeeper inventory
-            
-            auto ration = std::make_unique<Item>(pos, ActorData{'%', "ration", BROWN_BLACK_PAIR});
-            ration->pickable = std::make_unique<Food>(50);  // 50 nutrition value
-            ration->value = 30;
-            add_item(shopkeeper.inventory_data, std::move(ration));
-            
-            shopkeeper.set_gold(500);  // Give shopkeeper gold to buy player items
+            else
+            {
+                // If shopkeeper spawn probability fails, spawn alternative monster
+                game.creatures.push_back(std::make_unique<Goblin>(pos));
+                game.log("Shopkeeper spawn failed, spawned Goblin instead");
+            }
         }
         });
 }
+
 void MonsterFactory::addMonsterType(const MonsterType& monsterType)
 {
     monsterTypes.push_back(monsterType);
@@ -196,21 +185,4 @@ std::vector<std::pair<std::string, float>> MonsterFactory::getCurrentDistributio
     }
 
     return distribution;
-}
-
-void MonsterFactory::try_spawn_shopkeeper(Vector2D position, int dungeonLevel) const
-{
-    if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel))
-    {
-        auto shopkeeper = ShopkeeperFactory::create_shopkeeper(position, dungeonLevel);
-        game.creatures.push_back(std::move(shopkeeper));
-        
-        game.log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
-    }
-}
-
-bool MonsterFactory::should_spawn_shopkeeper(int dungeonLevel) const
-{
-    // Delegate to single source factory
-    return ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel);
 }

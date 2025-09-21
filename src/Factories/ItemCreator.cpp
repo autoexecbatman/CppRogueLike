@@ -7,50 +7,75 @@
 #include "../ActorTypes/Teleporter.h"
 #include "../Actor/Pickable.h"
 #include "../Items/Armor.h"
+#include "../Items/Mace.h"
 #include "../Colors/Colors.h"
 #include "../Items/Weapons.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Food.h"
 #include "../Items/Amulet.h"
 
+// UNIFIED ITEM CREATION - HARDCODED DATA IN ONE PLACE
+
+// Potions - Use existing working classes
 std::unique_ptr<Item> ItemCreator::create_health_potion(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'!', "health potion", WHITE_RED_PAIR});
-    item->pickable = std::make_unique<Healer>(10);
-    item->value = 50; // AD&D 2e price
+    item->pickable = std::make_unique<Healer>(10);  // Hardcoded heal amount
+    item->value = 50;  // Hardcoded value
     return item;
 }
 
+// Scrolls - Use existing working classes with hardcoded values
 std::unique_ptr<Item> ItemCreator::create_scroll_lightning(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of lightning", WHITE_BLUE_PAIR});
-    item->pickable = std::make_unique<LightningBolt>(5, 20);
-    item->value = 150; // AD&D 2e price
+    auto item = std::make_unique<Item>(pos, ActorData{'?', "scroll of lightning bolt", WHITE_BLUE_PAIR});
+    item->pickable = std::make_unique<LightningBolt>(5, 20);  // Hardcoded range, damage
+    item->value = 150;  // Hardcoded value
     return item;
 }
 
 std::unique_ptr<Item> ItemCreator::create_scroll_fireball(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of fireball", RED_YELLOW_PAIR});
-    item->pickable = std::make_unique<Fireball>(3, 12);
-    item->value = 100; // AD&D 2e price
+    auto item = std::make_unique<Item>(pos, ActorData{'?', "scroll of fireball", RED_YELLOW_PAIR});
+    item->pickable = std::make_unique<Fireball>(3, 12);  // Hardcoded range, damage
+    item->value = 100;  // Hardcoded value
     return item;
 }
 
 std::unique_ptr<Item> ItemCreator::create_scroll_confusion(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of confusion", WHITE_GREEN_PAIR});
-    item->pickable = std::make_unique<Confuser>(10, 8);
-    item->value = 120; // AD&D 2e price
+    auto item = std::make_unique<Item>(pos, ActorData{'?', "scroll of confusion", WHITE_GREEN_PAIR});
+    item->pickable = std::make_unique<Confuser>(10, 8);  // Hardcoded range, turns
+    item->value = 120;  // Hardcoded value
     return item;
 }
 
 std::unique_ptr<Item> ItemCreator::create_scroll_teleportation(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of teleportation", MAGENTA_BLACK_PAIR});
+    auto item = std::make_unique<Item>(pos, ActorData{'?', "scroll of teleportation", MAGENTA_BLACK_PAIR});
     item->pickable = std::make_unique<Teleporter>();
-    item->value = 200; // AD&D 2e price
+    item->value = 200;
     return item;
+}
+
+// Random item generation using unified methods
+std::unique_ptr<Item> ItemCreator::create_random_potion(Vector2D pos, int dungeonLevel)
+{
+    // Use unified potion creation
+    return create_health_potion(pos);
+}
+
+std::unique_ptr<Item> ItemCreator::create_random_scroll(Vector2D pos, int dungeonLevel)
+{
+    int roll = game.d.roll(1, 4);
+    switch(roll)
+    {
+        case 1: return create_scroll_lightning(pos);
+        case 2: return create_scroll_fireball(pos);
+        case 3: return create_scroll_confusion(pos);
+        case 4: return create_scroll_teleportation(pos);
+        default: return create_scroll_lightning(pos);
+    }
 }
 
 std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
@@ -132,6 +157,14 @@ std::unique_ptr<Item> ItemCreator::create_war_hammer(Vector2D pos)
     item->pickable = std::make_unique<WarHammer>();
     item->itemClass = ItemClass::WAR_HAMMER;
     item->value = 20; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_mace(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'T', "mace", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<Mace>();  // Use proper Mace class
+    item->value = 8;  // AD&D 2e price
     return item;
 }
 

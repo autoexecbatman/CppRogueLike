@@ -37,12 +37,6 @@ public:
 };
 //====
 
-class Shopkeeper : public Creature
-{
-public:
-	Shopkeeper(Vector2D position);
-};
-
 //==ARCHER==
 class Archer : public Creature
 {

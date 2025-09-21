@@ -1,5 +1,6 @@
 #include "MenuTrade.h"
 #include "../Ai/AiPlayer.h"
+#include "../Ai/AiShopkeeper.h"  // MISSING INCLUDE
 #include "../Game.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
@@ -26,10 +27,9 @@ void Sell::on_selection()
 
 void Exit::on_selection()
 {
-	
 }
 
-MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player)
+MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player) : shopkeeper(shopkeeper)
 {
 	menu_new(height_, width_, starty_, startx_);
 	iMenuStates.push_back(std::make_unique<Buy>(shopkeeper));
@@ -40,6 +40,16 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player)
 MenuTrade::~MenuTrade()
 {
 	menu_delete();
+	
+	// CRITICAL FIX: Reset shopkeeper trade state when menu closes
+	if (shopkeeper.ai)
+	{
+		auto* shopAi = dynamic_cast<AiShopkeeper*>(shopkeeper.ai.get());
+		if (shopAi)
+		{
+			shopAi->tradeMenuOpen = false;
+		}
+	}
 }
 
 void MenuTrade::menu_print_state(size_t state)
@@ -110,6 +120,7 @@ void MenuTrade::on_key(int key)
 	case 27:
 	{
 		menu_set_run_false();
+		break;
 	}
 
 	default:

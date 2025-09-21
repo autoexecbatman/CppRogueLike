@@ -110,18 +110,6 @@ Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",R
 	ai = std::make_unique<AiMonster>();
 }
 
-Shopkeeper::Shopkeeper(Vector2D position) : Creature(position, ActorData{ 'S',"shopkeeper",WHITE_BLACK_PAIR })
-{
-	destructible = std::make_unique<MonsterDestructible>(10, 0, "dead shopkeeper", 10, 10, 10);
-	attacker = std::make_unique<Attacker>("D10");
-	ai = std::make_unique<AiShopkeeper>();
-	
-	// NOTE: Inventory is populated in MonsterFactory.cpp - do not add items here
-	// This ensures single source of truth for shopkeeper inventory
-	
-	set_gold(200);
-}
-
 Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",RED_BLACK_PAIR })
 {
 	const int hp = game.d.d8();

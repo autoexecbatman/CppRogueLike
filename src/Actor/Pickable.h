@@ -36,6 +36,7 @@ public:
 		BATTLE_AXE,
 		GREAT_AXE,
 		WAR_HAMMER,
+		MACE,
 		SHIELD,
 		// Consumables
 		GOLD,
