@@ -13,6 +13,10 @@ bool Teleporter::use(Item& owner, Creature& wearer)
 	if (teleportLocation.x != -1 && teleportLocation.y != -1)
 	{
 		wearer.position = teleportLocation;
+		
+		// Recalculate FOV from new position
+		game.map.compute_fov();
+		
 		game.message(COLOR_BLUE, "You feel disoriented as the world shifts around you!", true);
 		game.message(COLOR_WHITE, "You have been teleported to a new location.", true);
 		
