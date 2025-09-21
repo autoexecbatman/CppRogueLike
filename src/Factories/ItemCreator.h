@@ -12,6 +12,7 @@ public:
     static std::unique_ptr<Item> create_scroll_lightning(Vector2D pos);
     static std::unique_ptr<Item> create_scroll_fireball(Vector2D pos);
     static std::unique_ptr<Item> create_scroll_confusion(Vector2D pos);
+    static std::unique_ptr<Item> create_scroll_teleportation(Vector2D pos);
     static std::unique_ptr<Item> create_dagger(Vector2D pos);
     static std::unique_ptr<Item> create_short_sword(Vector2D pos);
     static std::unique_ptr<Item> create_long_sword(Vector2D pos);

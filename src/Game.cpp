@@ -220,6 +220,7 @@ void Game::add_debug_weapons_at_player_feet()
 	add_item(inventory_data, ItemCreator::create_scroll_fireball(player->position));
 	add_item(inventory_data, ItemCreator::create_scroll_lightning(player->position));
 	add_item(inventory_data, ItemCreator::create_scroll_confusion(player->position));
+	add_item(inventory_data, ItemCreator::create_scroll_teleportation(player->position));
 	add_item(inventory_data, ItemCreator::create_leather_armor(player->position));
 	add_item(inventory_data, ItemCreator::create_chain_mail(player->position));
 	add_item(inventory_data, ItemCreator::create_plate_mail(player->position));

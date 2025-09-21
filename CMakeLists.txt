@@ -157,6 +157,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ActorTypes/Healer.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/LightningBolt.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/LightningBolt.h
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.cpp
+    ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters/Spider.cpp

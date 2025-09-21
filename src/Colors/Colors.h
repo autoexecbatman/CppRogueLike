@@ -23,18 +23,19 @@ inline constexpr auto GREEN_BLACK_PAIR = 10;
 inline constexpr auto YELLOW_BLACK_PAIR = 11;
 inline constexpr auto BLUE_BLACK_PAIR = 12;
 inline constexpr auto CYAN_BLACK_PAIR = 13;
+inline constexpr auto MAGENTA_BLACK_PAIR = 14;
 
 // === SPECIAL COMBINATIONS ===
-inline constexpr auto CYAN_BLUE_PAIR = 14;
-inline constexpr auto RED_WHITE_PAIR = 15;
-inline constexpr auto GREEN_YELLOW_PAIR = 16;
-inline constexpr auto GREEN_MAGENTA_PAIR = 17;
-inline constexpr auto RED_YELLOW_PAIR = 18;
-inline constexpr auto GREEN_RED_PAIR = 19;
+inline constexpr auto CYAN_BLUE_PAIR = 15;
+inline constexpr auto RED_WHITE_PAIR = 16;
+inline constexpr auto GREEN_YELLOW_PAIR = 17;
+inline constexpr auto GREEN_MAGENTA_PAIR = 18;
+inline constexpr auto RED_YELLOW_PAIR = 19;
+inline constexpr auto GREEN_RED_PAIR = 20;
 
 // === CUSTOM COLORS ===
-inline constexpr auto BROWN_BLACK_PAIR = 20;
-inline constexpr auto DIM_GREEN_BLACK_PAIR = 21;
+inline constexpr auto BROWN_BLACK_PAIR = 21;
+inline constexpr auto DIM_GREEN_BLACK_PAIR = 22;
 
 struct Colors
 {

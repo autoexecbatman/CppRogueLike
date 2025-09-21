@@ -4,6 +4,7 @@
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
 #include "../ActorTypes/Confuser.h"
+#include "../ActorTypes/Teleporter.h"
 #include "../Actor/Pickable.h"
 #include "../Items/Armor.h"
 #include "../Colors/Colors.h"
@@ -41,6 +42,14 @@ std::unique_ptr<Item> ItemCreator::create_scroll_confusion(Vector2D pos)
     auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of confusion", WHITE_GREEN_PAIR});
     item->pickable = std::make_unique<Confuser>(10, 8);
     item->value = 120; // AD&D 2e price
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_scroll_teleportation(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'#', "scroll of teleportation", MAGENTA_BLACK_PAIR});
+    item->pickable = std::make_unique<Teleporter>();
+    item->value = 200; // AD&D 2e price
     return item;
 }
 

@@ -28,6 +28,12 @@ public:
 	ScrollOfConfusion(Vector2D position);
 };
 
+class ScrollOfTeleportation : public Item
+{
+public:
+	ScrollOfTeleportation(Vector2D position);
+};
+
 class GoldPile : public Item
 {
 public:

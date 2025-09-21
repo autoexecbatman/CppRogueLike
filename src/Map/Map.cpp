@@ -455,7 +455,8 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos)
 	switch (tileType)
 	{
 	case TileType::WATER:
-		return owner.has_state(ActorState::CAN_SWIM) ? false : true;
+		/*return owner.has_state(ActorState::CAN_SWIM) ? false : true;*/
+		return false;
 	case TileType::WALL:
 		return true;
 	case TileType::FLOOR:

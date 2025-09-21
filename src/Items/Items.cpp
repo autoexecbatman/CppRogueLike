@@ -6,6 +6,7 @@
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
 #include "../ActorTypes/Confuser.h"
+#include "../ActorTypes/Teleporter.h"
 #include "../ActorTypes/Gold.h"
 #include "Amulet.h"
 #include "Armor.h"
@@ -32,6 +33,12 @@ ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorDa
 {
 	pickable = std::make_unique<Confuser>(10, 8);
 	value = 120; // 120 gp - tactical confusion magic
+}
+
+ScrollOfTeleportation::ScrollOfTeleportation(Vector2D position) : Item(position, ActorData{ '#', "scroll of teleportation", MAGENTA_BLACK_PAIR })
+{
+	pickable = std::make_unique<Teleporter>();
+	value = 200; // 200 gp - powerful transportation magic
 }
 
 GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR })
