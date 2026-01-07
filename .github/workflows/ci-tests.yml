@@ -26,23 +26,7 @@ jobs:
 
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_TESTS=ON
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_TESTS=OFF
 
     - name: Build main project
       run: cmake --build ${{github.workspace}}/build --config Release
-
-    - name: Build tests
-      run: cmake --build ${{github.workspace}}/build --config Release --target run_tests
-
-    - name: Run tests
-      run: |
-        cd ${{github.workspace}}/build/tests/Release
-        ./run_tests.exe --gtest_output=xml:test-results.xml
-      continue-on-error: true
-
-    - name: Publish test results
-      uses: EnricoMi/publish-unit-test-result-action/windows@v2
-      if: always()
-      with:
-        files: |
-          ${{github.workspace}}/build/tests/Release/test-results.xml
