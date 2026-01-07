@@ -1,9 +1,10 @@
 // file: Systems/MenuManager.cpp
 #include "MenuManager.h"
 #include "../Menu/BaseMenu.h"
+#include "../Core/GameContext.h"
 #include "../Game.h"
 
-void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus)
+void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx)
 {
     if (!menus.empty())
     {
@@ -30,7 +31,7 @@ void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus)
         // If we just closed a menu and returned to game, restore display
         if (menuWasPopped && menus.empty() && gameWasInit)
         {
-            restore_game_display();
+            restore_game_display(ctx);
         }
 
         shouldTakeInput = false;
@@ -42,8 +43,10 @@ bool MenuManager::has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& 
     return !menus.empty();
 }
 
-void MenuManager::restore_game_display()
+void MenuManager::restore_game_display(GameContext& ctx)
 {
+    // Call Game::restore_game_display using extern game (temporary during migration)
+    extern Game game;
     game.restore_game_display();
 }
 

@@ -45,6 +45,41 @@ void Game::init()
 	log("game.init() was called!");
 }
 
+GameContext Game::get_context() noexcept
+{
+	GameContext ctx;
+
+	// Core game world
+	ctx.map = &map;
+	ctx.gui = &gui;
+	ctx.player = player.get();
+
+	// Core systems
+	ctx.message_system = &message_system;
+	ctx.dice = &d;
+
+	// Managers
+	ctx.creature_manager = &creature_manager;
+	ctx.level_manager = &level_manager;
+	ctx.rendering_manager = &rendering_manager;
+	ctx.input_handler = &input_handler;
+	ctx.state_manager = &state_manager;
+	ctx.menu_manager = &menu_manager;
+	ctx.display_manager = &display_manager;
+	ctx.game_loop_coordinator = &game_loop_coordinator;
+	ctx.data_manager = &data_manager;
+
+	// Specialized systems
+	ctx.targeting = &targeting;
+	ctx.hunger_system = &hunger_system;
+
+	// Game state
+	ctx.time = &time;
+	ctx.run = &run;
+
+	return ctx;
+}
+
 void Game::update()
 {
 	if (gameStatus == GameStatus::VICTORY)

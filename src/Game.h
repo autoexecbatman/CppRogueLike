@@ -18,6 +18,7 @@
 #include "Gui/Gui.h"
 #include "Menu/BaseMenu.h"
 #include "Random/RandomDice.h"
+#include "Core/GameContext.h"
 
 // Systems - All game logic now delegated to these systems
 #include "Systems/TargetingSystem.h"
@@ -103,9 +104,12 @@ public:
     void init();
     void update();
 
+    // Dependency injection - Phase 2: Provide context for refactored code
+    GameContext get_context() noexcept;
+
     // System delegations - clean interface
     void render() const { rendering_manager.render_world(map, *stairs, objects, inventory_data, creatures, *player); }
-    void handle_menus() { menu_manager.handle_menus(menus); }
+    void handle_menus() { auto ctx = get_context(); menu_manager.handle_menus(menus, ctx); }
     void handle_gameloop(Gui& gui, int loopNum) { game_loop_coordinator.handle_gameloop(*this, gui, loopNum); }
     void handle_ranged_attack() { targeting.handle_ranged_attack(); }
     void display_help() noexcept { display_manager.display_help(); }

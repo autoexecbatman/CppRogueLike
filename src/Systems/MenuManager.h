@@ -8,15 +8,16 @@
 #include <memory>
 
 class BaseMenu;
+struct GameContext;
 
-class MenuManager 
+class MenuManager
 {
 public:
     MenuManager() = default;
     ~MenuManager() = default;
 
     // Core menu management
-    void handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus);
+    void handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx);
     
     // Menu state queries
     bool has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& menus) const noexcept;
@@ -31,8 +32,8 @@ public:
 private:
     bool gameWasInit{ false };
     bool shouldTakeInput{ true };
-    
-    void restore_game_display();
+
+    void restore_game_display(GameContext& ctx);
 };
 
 #endif // MENU_MANAGER_H
