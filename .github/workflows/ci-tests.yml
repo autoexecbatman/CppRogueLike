@@ -21,14 +21,6 @@ jobs:
       with:
         vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
 
-    - name: Install dependencies via vcpkg
-      run: |
-        vcpkg install pdcurses:x64-windows
-        vcpkg install sdl3:x64-windows
-        vcpkg install libtcod:x64-windows
-        vcpkg install nlohmann-json:x64-windows
-        vcpkg install gtest:x64-windows
-
     - name: Setup MSVC
       uses: microsoft/setup-msbuild@v2
 
