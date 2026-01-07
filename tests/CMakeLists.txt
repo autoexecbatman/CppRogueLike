@@ -41,6 +41,9 @@ message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} parent source files")
 # Create test executable with both test sources and parent sources
 add_executable(test_exe ${TEST_SOURCES} ${PARENT_SOURCES})
 
+# Add TESTING_MODE definition for test-specific code
+target_compile_definitions(test_exe PRIVATE TESTING_MODE)
+
 # Link against Google Test and required libraries (not gtest_main since we provide our own)
 target_link_libraries(test_exe
     PRIVATE

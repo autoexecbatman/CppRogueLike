@@ -3,6 +3,7 @@
 #define RANDOM_DICE_H
 
 #include <random>
+#include <vector>
 
 // This class is used to generate random numbers for our game.
 // We want this class to be the only random number generator for the game right now.
@@ -48,14 +49,37 @@ public:
 
 	int roll(int min, int max)
 	{
+#ifdef TESTING_MODE
+		// In test mode, use fixed values if set
+		if (m_test_mode && !m_fixed_rolls.empty()) {
+			int value = m_fixed_rolls.front();
+			m_fixed_rolls.erase(m_fixed_rolls.begin());
+			return value;
+		}
+#endif
 		std::uniform_int_distribution<int> dist(min, max);
 		return dist(m_gen);
 	}
+
+#ifdef TESTING_MODE
+	// Test-only methods for deterministic dice rolls
+	void set_test_mode(bool enabled) { m_test_mode = enabled; }
+	void set_next_d20(int value) {
+		m_test_mode = true;
+		m_fixed_rolls.push_back(value);
+	}
+	void clear_fixed_rolls() { m_fixed_rolls.clear(); }
+#endif
 
 private:
 	// we use the mersenne twister engine for our random number generator
 	// we seed it with a random device
 	std::mt19937 m_gen{ std::random_device{}() };
+
+#ifdef TESTING_MODE
+	bool m_test_mode{ false };
+	std::vector<int> m_fixed_rolls;
+#endif
 
 };
 
