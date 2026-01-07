@@ -16,7 +16,6 @@
     "nlohmann-json",
     "stb",
     "pdcurses",
-    "sdl3",
     "gtest"
   ]
 }

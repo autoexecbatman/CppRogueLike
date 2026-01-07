@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find required packages
 find_package(GTest CONFIG REQUIRED)
 find_package(unofficial-pdcurses CONFIG REQUIRED)
-find_package(SDL3 CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
@@ -40,7 +39,6 @@ target_link_libraries(run_tests
         GTest::gtest
         GTest::gtest_main
         unofficial::pdcurses::pdcurses
-        SDL3::SDL3
         libtcod::libtcod
         nlohmann_json::nlohmann_json
 )

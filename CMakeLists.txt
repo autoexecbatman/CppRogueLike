@@ -330,14 +330,12 @@ if(EMSCRIPTEN)
 else()
     # For native build, link against required libraries
     find_package(unofficial-pdcurses CONFIG REQUIRED)
-    find_package(SDL3 CONFIG REQUIRED)
     find_package(libtcod CONFIG REQUIRED)
     find_package(nlohmann_json CONFIG REQUIRED)
     target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
             unofficial::pdcurses::pdcurses
-            SDL3::SDL3
             libtcod::libtcod
             nlohmann_json::nlohmann_json
     )
