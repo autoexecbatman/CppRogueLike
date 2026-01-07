@@ -96,49 +96,22 @@ std::unique_ptr<Item> ShopKeeper::generate_random_weapon()
 {
     Vector2D shop_pos{0, 0};
     
-    struct WeaponData 
-    {
-        std::string name;
-        char symbol;
-        int base_price;
+    static const ItemClass available_weapons[] = {
+        ItemClass::DAGGER,
+        ItemClass::SHORT_SWORD,
+        ItemClass::LONG_SWORD,
+        ItemClass::STAFF,
+        ItemClass::BATTLE_AXE,
+        ItemClass::WAR_HAMMER,
+        ItemClass::MACE,
+        ItemClass::GREAT_SWORD,
+        ItemClass::LONG_BOW
     };
-    
-    static const WeaponData weapons[] = 
-    {
-        {"Iron Sword", '/', 15},
-        {"Steel Sword", '/', 25},
-        {"Dagger", ')', 2},
-        {"War Hammer", 'T', 8},
-        {"Battle Axe", 'r', 12},
-        {"Long Bow", '}', 75},
-        {"Short Sword", '/', 10},
-        {"Great Sword", '/', 50},
-        {"Mace", 'T', 6}
-    };
-    
-    const WeaponData& weapon = weapons[rand() % (sizeof(weapons) / sizeof(weapons[0]))];
-    
-    auto item = std::make_unique<Item>(shop_pos, ActorData{weapon.symbol, weapon.name, WHITE_BLACK_PAIR});
-    item->base_value = weapon.base_price + (rand() % 10) - 5;
-    item->base_value = std::max(1, item->base_value);
-    item->value = item->base_value;
-    item->initialize_item_type_from_name();
-    
-    // Add appropriate pickable component based on weapon type
-    if (weapon.name.find("Dagger") != std::string::npos)
-        item->pickable = std::make_unique<Dagger>();
-    else if (weapon.name.find("Short Sword") != std::string::npos)
-        item->pickable = std::make_unique<ShortSword>();
-    else if (weapon.name.find("Long Bow") != std::string::npos)
-        item->pickable = std::make_unique<Longbow>();
-    else if (weapon.name.find("Great Sword") != std::string::npos)
-        item->pickable = std::make_unique<Greatsword>();
-    else if (weapon.name.find("Battle Axe") != std::string::npos)
-        item->pickable = std::make_unique<BattleAxe>();
-    else if (weapon.name.find("War Hammer") != std::string::npos)
-        item->pickable = std::make_unique<WarHammer>();
-    else // Default to LongSword for swords
-        item->pickable = std::make_unique<LongSword>();
+
+    ItemClass weaponClass = available_weapons[rand() % (sizeof(available_weapons) / sizeof(available_weapons[0]))];
+
+    // Use ItemCreator factory methods for consistency
+    auto item = ItemCreator::create_weapon_by_class(shop_pos, weaponClass);
     
     // 40% chance for enhancement
     if (rand() % 100 < 40)

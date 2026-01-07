@@ -16,6 +16,7 @@ namespace ItemClassificationUtils
             case ItemClass::BATTLE_AXE:
             case ItemClass::GREAT_AXE:
             case ItemClass::WAR_HAMMER:
+            case ItemClass::MACE:
             case ItemClass::STAFF:
             // Weapons - Ranged
             case ItemClass::LONG_BOW:
@@ -88,6 +89,7 @@ namespace ItemClassificationUtils
             case ItemClass::BATTLE_AXE: return "battle axe";
             case ItemClass::GREAT_AXE: return "great axe";
             case ItemClass::WAR_HAMMER: return "war hammer";
+            case ItemClass::MACE: return "mace";
             case ItemClass::STAFF: return "staff";
             
             // Weapons - Ranged
@@ -198,6 +200,7 @@ namespace ItemClassificationUtils
             {"battle_axe", ItemClass::BATTLE_AXE},
             {"great_axe", ItemClass::GREAT_AXE},
             {"war_hammer", ItemClass::WAR_HAMMER},
+            {"mace", ItemClass::MACE},
             {"staff", ItemClass::STAFF},
             
             // Weapons - Ranged
@@ -266,6 +269,7 @@ namespace ItemClassificationUtils
             case ItemClass::LONG_SWORD:
             case ItemClass::BATTLE_AXE:
             case ItemClass::WAR_HAMMER:
+            case ItemClass::MACE:
                 return WeaponSize::MEDIUM;
                 
             // LARGE weapons - cannot dual wield (two-handed)

@@ -20,6 +20,10 @@ enum class WeaponSize
 	GIANT      // Giant weapons - cannot dual wield
 };
 
+// LEGACY: Weapons struct maintained for data loading compatibility only
+// Combat system uses WeaponDamageRegistry + DamageInfo exclusively
+// DO NOT EXPAND - Enhancement system removed, dual-wield removed
+// Usage limited to: DataManager loading, ItemCreator template data
 struct Weapons
 {
 	std::string name{};
@@ -33,16 +37,7 @@ struct Weapons
 	std::vector<std::string> specialProperties{};
 	int enhancementLevel{0};
 
-	// Enhanced bonus calculation methods
-	int get_min_hit_bonus() const;
-	int get_max_hit_bonus() const;
-	int get_min_damage_bonus() const;
-	int get_max_damage_bonus() const;
-	std::string get_display_name() const;
-
-	// Enhancement methods
-	void set_enhancement_level(int level);
-	void enhance_weapon(int levels = 1);
+	// NOTE: Enhancement system removed - was never integrated with combat
 
 	// Two-handed weapon methods
 	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
@@ -50,9 +45,5 @@ struct Weapons
 	bool can_use_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
 	std::string get_damage_roll(bool twoHanded = false) const noexcept;
 	
-	// AD&D 2e Two-Weapon Fighting methods
-	bool can_be_main_hand() const noexcept { return weaponSize <= WeaponSize::MEDIUM && can_use_one_handed(); }
-	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL && can_use_one_handed(); }
-	bool is_compatible_off_hand(const Weapons& mainHandWeapon) const noexcept;
-	static bool can_dual_wield(const Weapons& mainHand, const Weapons& offHand) noexcept;
+	// NOTE: Complex dual-wield logic removed - was never integrated with combat
 };

@@ -69,7 +69,7 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos)
     }
 
     // Animate the projectile
-    char projChar = (owner.actorData.name == "archer") ? '/' : '*';
+    char projChar = (owner.has_state(ActorState::IS_RANGED)) ? '/' : '*';
     animateProjectile(owner.position, targetPos, projChar);
 
     // Perform the attack

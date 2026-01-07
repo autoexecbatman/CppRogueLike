@@ -20,6 +20,7 @@ enum class ItemClass
     BATTLE_AXE,
     GREAT_AXE,
     WAR_HAMMER,
+    MACE,
     STAFF,
     
     // Weapons - Ranged

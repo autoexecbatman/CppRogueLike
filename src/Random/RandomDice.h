@@ -9,22 +9,25 @@
 class RandomDice
 {
 public:
+	// DEPRECATED: DiceType state tracking unused - scheduled for removal
+	[[deprecated("Unused state tracking - scheduled for removal")]]
 	enum class DiceType : int
 	{
 		D2, D4, D6, D8, D10, D12, D20, D100
 	} diceType{ DiceType::D6 };
 
 	// public functions to emulate a set of dice from d2 to d100
-	int d2() { diceType = DiceType::D2; return roll(1, 2); }
-	int d4() { diceType = DiceType::D4; return roll(1, 4); }
-	int d6() { diceType = DiceType::D6; return roll(1, 6); }
-	int d8() { diceType = DiceType::D8; return roll(1, 8); }
-	int d10() { diceType = DiceType::D10; return roll(1, 10); }
-	int d12() { diceType = DiceType::D12; return roll(1, 12); }
-	int d20() { diceType = DiceType::D20; return roll(1, 20); }
-	int d100() { diceType = DiceType::D100; return roll(1, 100); }
+	int d2() { return roll(1, 2); }
+	int d4() { return roll(1, 4); }
+	int d6() { return roll(1, 6); }
+	int d8() { return roll(1, 8); }
+	int d10() { return roll(1, 10); }
+	int d12() { return roll(1, 12); }
+	int d20() { return roll(1, 20); }
+	int d100() { return roll(1, 100); }
 
-	// get dice type
+	// DEPRECATED: Unused state tracking - scheduled for removal
+	[[deprecated("Unused - scheduled for removal")]]
 	std::string get_dice_type()
 	{
 		switch (diceType)
@@ -41,19 +44,7 @@ public:
 		}
 	}
 
-	// set dice using a string
-	int roll_from_string(std::string_view diceType)
-	{
-		if (diceType == "D2") return d2();
-		if (diceType == "D4") return d4();
-		if (diceType == "D6") return d6();
-		if (diceType == "D8") return d8();
-		if (diceType == "D10") return d10();
-		if (diceType == "D12") return d12();
-		if (diceType == "D20") return d20();
-		if (diceType == "D100") return d100();
-		return d6();
-	}
+	// Deprecated roll_from_string method removed - use DamageInfo::roll_damage() instead
 
 	int roll(int min, int max)
 	{

@@ -82,7 +82,10 @@ struct ItemEnhancement
     bool is_cursed = false;
     bool is_blessed = false;
     bool is_magical = false;
-    
+
+    // Numeric enhancement level for traditional "+X" display
+    int enhancement_level = 0;
+
     // Value modifier (percentage)
     int value_modifier = 100; // 100% = no change
     

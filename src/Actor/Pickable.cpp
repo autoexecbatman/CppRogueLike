@@ -117,6 +117,7 @@ WeaponSize Weapon::get_weapon_size() const
 		case PickableType::LONGSWORD: return WeaponSize::MEDIUM;
 		case PickableType::BATTLE_AXE: return WeaponSize::MEDIUM;
 		case PickableType::WAR_HAMMER: return WeaponSize::MEDIUM;
+		case PickableType::MACE: return WeaponSize::MEDIUM;
 		case PickableType::GREATSWORD: return WeaponSize::LARGE;
 		case PickableType::GREAT_AXE: return WeaponSize::LARGE;
 		case PickableType::STAFF: return WeaponSize::LARGE;
@@ -195,6 +196,9 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		break;
 	case PickableType::WAR_HAMMER:
 		pickable = std::make_unique<WarHammer>();
+		break;
+	case PickableType::MACE:
+		pickable = std::make_unique<Mace>();
 		break;
 	case PickableType::SHIELD:
 		pickable = std::make_unique<Shield>();
@@ -476,6 +480,30 @@ void WarHammer::load(const json& j)
 	else 
 	{
 		throw std::runtime_error("Invalid JSON format for WarHammer");
+	}
+}
+
+// Implement the Mace class
+bool Mace::is_ranged() const
+{
+	return false;
+}
+
+void Mace::save(json& j)
+{
+	j["type"] = static_cast<int>(PickableType::MACE);
+	j["roll"] = roll;
+}
+
+void Mace::load(const json& j)
+{
+	if (j.contains("roll") && j["roll"].is_string()) 
+	{
+		roll = j["roll"].get<std::string>();
+	}
+	else 
+	{
+		throw std::runtime_error("Invalid JSON format for Mace");
 	}
 }
 
@@ -817,13 +845,13 @@ void ScrollMagicMapping::load(const json& j)
 
 bool ScrollEnchantment::use(Item& owner, Creature& wearer)
 {
-	// For now, show a message (enchantment system not fully implemented)
-	game.message(WHITE_BLACK_PAIR, "Choose an item to enchant! This scroll will grant +" + std::to_string(enhancement_bonus) + " enhancement.", true);
-	
-	// TODO: Implement item selection and enchantment logic
-	// For now, just consume the scroll
-	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
-	return result.has_value();
+	// BROKEN LOGIC FIXED: Prevent scroll consumption without effect
+	game.message(RED_BLACK_PAIR, "The scroll crumbles to dust - enchantment magic is not yet stable in this realm.", true);
+	game.message(WHITE_BLACK_PAIR, "Enhancement system requires implementation before scrolls function.", true);
+
+	// Do NOT consume the scroll until enhancement system is implemented
+	// This prevents players from losing items to broken functionality
+	return false; // Indicates use failed, item remains in inventory
 }
 
 void ScrollEnchantment::save(json& j)

@@ -53,11 +53,11 @@ void equip_fighter_starting_gear()
 			inventory.erase(item_it);
 			if (extracted_item)
 			{
-				game.log("DEBUG: Extracted item for equipment, proceeding to auto-detect slot");
+				if (game.message_system.is_debug_mode()) game.log("DEBUG: Extracted item for equipment, proceeding to auto-detect slot");
 				
 				// Auto-detect correct slot based on proper item classification
 				std::string itemName = extracted_item->actorData.name;
-				game.log("DEBUG: Checking item class: " + std::to_string(static_cast<int>(extracted_item->itemClass)));
+				if (game.message_system.is_debug_mode()) game.log("DEBUG: Checking item class: " + std::to_string(static_cast<int>(extracted_item->itemClass)));
 				
 				EquipmentSlot targetSlot;
 				
@@ -65,12 +65,12 @@ void equip_fighter_starting_gear()
 				if (extracted_item->is_armor())
 				{
 					targetSlot = EquipmentSlot::BODY;
-					game.log("DEBUG: Detected as armor by classification, targeting BODY slot");
+					if (game.message_system.is_debug_mode()) game.log("DEBUG: Detected as armor by classification, targeting BODY slot");
 				}
 				else if (extracted_item->is_shield())
 				{
 					targetSlot = EquipmentSlot::LEFT_HAND;
-					game.log("DEBUG: Detected as shield by classification, targeting LEFT_HAND slot");
+					if (game.message_system.is_debug_mode()) game.log("DEBUG: Detected as shield by classification, targeting LEFT_HAND slot");
 				}
 				else
 				{

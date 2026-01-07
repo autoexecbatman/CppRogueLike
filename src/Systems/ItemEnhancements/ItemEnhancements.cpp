@@ -55,19 +55,27 @@ std::string ItemEnhancement::get_suffix_name() const
 std::string ItemEnhancement::get_full_name(const std::string& base_name) const
 {
     std::string name = "";
-    
+
+    // Handle traditional "+X" enhancement level first
+    if (enhancement_level > 0)
+    {
+        name = base_name + " +" + std::to_string(enhancement_level);
+        return name;
+    }
+
+    // Handle prefix/suffix system
     if (prefix != PrefixType::NONE)
     {
         name += get_prefix_name() + " ";
     }
-    
+
     name += base_name;
-    
+
     if (suffix != SuffixType::NONE)
     {
         name += " " + get_suffix_name();
     }
-    
+
     return name;
 }
 

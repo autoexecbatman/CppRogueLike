@@ -34,11 +34,11 @@ Game game; // create a global game object
 
 int main()
 {
-	//==DEBUG_MEMORY_LEAKS==
-	/*_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | *CRTDBG*LEAK_CHECK_DF);*/
-	/*_CrtSetBreakAlloc(1779);*/
+	// Memory leak detection (commented - enable only during debugging)
+	// _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+	// _CrtSetBreakAlloc(1779);
 	
-	//==DEBUG_STREAM== - C++ Core Guidelines E.6: Exception-safe file handling
+	// Debug logging setup - C++ Core Guidelines E.6: Exception-safe file handling
 	std::ofstream debugFile;
 	try {
 		debugFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);

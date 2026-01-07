@@ -7,7 +7,6 @@
 #include "../ActorTypes/Teleporter.h"
 #include "../Actor/Pickable.h"
 #include "../Items/Armor.h"
-#include "../Items/Mace.h"
 #include "../Colors/Colors.h"
 #include "../Items/Weapons.h"
 #include "../ActorTypes/Gold.h"
@@ -81,8 +80,8 @@ std::unique_ptr<Item> ItemCreator::create_random_scroll(Vector2D pos, int dungeo
 std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "dagger", WHITE_BLACK_PAIR});
-    item->pickable = std::make_unique<Dagger>();
     item->itemClass = ItemClass::DAGGER;
+    create_pickable_from_itemclass(item.get(), ItemClass::DAGGER);
     item->value = 2; // AD&D 2e price
     return item;
 }
@@ -90,8 +89,8 @@ std::unique_ptr<Item> ItemCreator::create_dagger(Vector2D pos)
 std::unique_ptr<Item> ItemCreator::create_short_sword(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "short sword", WHITE_BLACK_PAIR});
-    item->pickable = std::make_unique<ShortSword>();
     item->itemClass = ItemClass::SHORT_SWORD;
+    create_pickable_from_itemclass(item.get(), ItemClass::SHORT_SWORD);
     item->value = 10; // AD&D 2e price
     return item;
 }
@@ -99,8 +98,8 @@ std::unique_ptr<Item> ItemCreator::create_short_sword(Vector2D pos)
 std::unique_ptr<Item> ItemCreator::create_long_sword(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'/', "long sword", WHITE_BLACK_PAIR});
-    item->pickable = std::make_unique<LongSword>();
     item->itemClass = ItemClass::LONG_SWORD;
+    create_pickable_from_itemclass(item.get(), ItemClass::LONG_SWORD);
     item->value = 15; // AD&D 2e price
     return item;
 }
@@ -129,7 +128,7 @@ std::unique_ptr<Item> ItemCreator::create_greatsword(Vector2D pos)
     auto item = std::make_unique<Item>(pos, ActorData{'/', "greatsword", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<Greatsword>();
     item->itemClass = ItemClass::GREAT_SWORD; // Fix: Set proper item classification
-    item->value = 50; // AD&D 2e price
+    item->value = 50;
     return item;
 }
 
@@ -138,7 +137,7 @@ std::unique_ptr<Item> ItemCreator::create_battle_axe(Vector2D pos)
     auto item = std::make_unique<Item>(pos, ActorData{'/', "battle axe", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<BattleAxe>();
     item->itemClass = ItemClass::BATTLE_AXE;
-    item->value = 25; // AD&D 2e price
+    item->value = 25;
     return item;
 }
 
@@ -147,7 +146,7 @@ std::unique_ptr<Item> ItemCreator::create_great_axe(Vector2D pos)
     auto item = std::make_unique<Item>(pos, ActorData{'/', "great axe", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<GreatAxe>();
     item->itemClass = ItemClass::GREAT_AXE;
-    item->value = 40; // AD&D 2e price
+    item->value = 40;
     return item;
 }
 
@@ -156,15 +155,16 @@ std::unique_ptr<Item> ItemCreator::create_war_hammer(Vector2D pos)
     auto item = std::make_unique<Item>(pos, ActorData{'/', "war hammer", WHITE_BLACK_PAIR});
     item->pickable = std::make_unique<WarHammer>();
     item->itemClass = ItemClass::WAR_HAMMER;
-    item->value = 20; // AD&D 2e price
+    item->value = 20;
     return item;
 }
 
 std::unique_ptr<Item> ItemCreator::create_mace(Vector2D pos)
 {
-    auto item = std::make_unique<Item>(pos, ActorData{'T', "mace", WHITE_BLACK_PAIR});
-    item->pickable = std::make_unique<Mace>();  // Use proper Mace class
-    item->value = 8;  // AD&D 2e price
+    auto item = std::make_unique<Item>(pos, ActorData{'|', "mace", WHITE_BLACK_PAIR});
+    item->itemClass = ItemClass::MACE;
+    create_pickable_from_itemclass(item.get(), ItemClass::MACE);
+    item->value = 8;
     return item;
 }
 
@@ -183,24 +183,16 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_dagger(Vector2D pos, int enha
     auto item = create_dagger(pos);
     if (enhancementLevel > 0)
     {
-        // Create enhanced weapon data from base weapon stats
-        auto weaponData = std::find_if(
-            game.data_manager.get_weapons().begin(),
-            game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Dagger"; }
-        );
-        
-        if (weaponData != game.data_manager.get_weapons().end())
-        {
-            Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.set_enhancement_level(enhancementLevel);
-            
-            item->actorData.name = enhancedWeapon.get_display_name();
-            item->value = calculate_enhanced_value(2, enhancementLevel);
-            
-            // Enhanced weapons get visual distinction
-            item->actorData.color = WHITE_GREEN_PAIR;
-        }
+        // Create and apply enhancement based on enhancement level
+        ItemEnhancement enhancement;
+        enhancement.damage_bonus = enhancementLevel;
+        enhancement.prefix = (enhancementLevel == 1) ? PrefixType::SHARP : PrefixType::KEEN;
+        enhancement.apply_enhancement_effects();
+
+        item->apply_enhancement(enhancement);
+
+        // Enhanced weapons get visual distinction
+        item->actorData.color = WHITE_GREEN_PAIR;
     }
     return item;
 }
@@ -210,21 +202,16 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_short_sword(Vector2D pos, int
     auto item = create_short_sword(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(
-            game.data_manager.get_weapons().begin(),
-            game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Short Sword"; }
-        );
-        
-        if (weaponData != game.data_manager.get_weapons().end())
-        {
-            Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.set_enhancement_level(enhancementLevel);
-            
-            item->actorData.name = enhancedWeapon.get_display_name();
-            item->value = calculate_enhanced_value(10, enhancementLevel);
-            item->actorData.color = WHITE_GREEN_PAIR;
-        }
+        // Create traditional "+X" enhancement
+        ItemEnhancement enhancement;
+        enhancement.enhancement_level = enhancementLevel;
+        enhancement.damage_bonus = enhancementLevel;
+        enhancement.to_hit_bonus = enhancementLevel;
+        enhancement.value_modifier = 100 + (enhancementLevel * 50); // +50% per level
+        enhancement.apply_enhancement_effects();
+
+        item->apply_enhancement(enhancement);
+        item->actorData.color = WHITE_GREEN_PAIR;
     }
     return item;
 }
@@ -234,21 +221,15 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_long_sword(Vector2D pos, int 
     auto item = create_long_sword(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(
-            game.data_manager.get_weapons().begin(),
-            game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Long Sword"; }
-        );
-        
-        if (weaponData != game.data_manager.get_weapons().end())
-        {
-            Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.set_enhancement_level(enhancementLevel);
-            
-            item->actorData.name = enhancedWeapon.get_display_name();
-            item->value = calculate_enhanced_value(15, enhancementLevel);
-            item->actorData.color = WHITE_GREEN_PAIR;
-        }
+        // Create traditional "+X" enhancement
+        ItemEnhancement enhancement;
+        enhancement.enhancement_level = enhancementLevel;
+        enhancement.damage_bonus = enhancementLevel;
+        enhancement.to_hit_bonus = enhancementLevel;
+        enhancement.value_modifier = 100 + (enhancementLevel * 50); // +50% per level
+        enhancement.apply_enhancement_effects();
+        item->apply_enhancement(enhancement);
+        item->actorData.color = WHITE_GREEN_PAIR;
     }
     return item;
 }
@@ -258,21 +239,15 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_staff(Vector2D pos, int enhan
     auto item = create_staff(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(
-            game.data_manager.get_weapons().begin(),
-            game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Staff"; }
-        );
-        
-        if (weaponData != game.data_manager.get_weapons().end())
-        {
-            Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.set_enhancement_level(enhancementLevel);
-            
-            item->actorData.name = enhancedWeapon.get_display_name();
-            item->value = calculate_enhanced_value(6, enhancementLevel);
-            item->actorData.color = WHITE_GREEN_PAIR;
-        }
+        // Create traditional "+X" enhancement
+        ItemEnhancement enhancement;
+        enhancement.enhancement_level = enhancementLevel;
+        enhancement.damage_bonus = enhancementLevel;
+        enhancement.to_hit_bonus = enhancementLevel;
+        enhancement.value_modifier = 100 + (enhancementLevel * 50); // +50% per level
+        enhancement.apply_enhancement_effects();
+        item->apply_enhancement(enhancement);
+        item->actorData.color = WHITE_GREEN_PAIR;
     }
     return item;
 }
@@ -282,21 +257,15 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_longbow(Vector2D pos, int enh
     auto item = create_longbow(pos);
     if (enhancementLevel > 0)
     {
-        auto weaponData = std::find_if(
-            game.data_manager.get_weapons().begin(),
-            game.data_manager.get_weapons().end(),
-            [](const Weapons& w) { return w.name == "Longbow"; }
-        );
-        
-        if (weaponData != game.data_manager.get_weapons().end())
-        {
-            Weapons enhancedWeapon = *weaponData;
-            enhancedWeapon.set_enhancement_level(enhancementLevel);
-            
-            item->actorData.name = enhancedWeapon.get_display_name();
-            item->value = calculate_enhanced_value(75, enhancementLevel);
-            item->actorData.color = WHITE_GREEN_PAIR;
-        }
+        // Create traditional "+X" enhancement
+        ItemEnhancement enhancement;
+        enhancement.enhancement_level = enhancementLevel;
+        enhancement.damage_bonus = enhancementLevel;
+        enhancement.to_hit_bonus = enhancementLevel;
+        enhancement.value_modifier = 100 + (enhancementLevel * 50); // +50% per level
+        enhancement.apply_enhancement_effects();
+        item->apply_enhancement(enhancement);
+        item->actorData.color = WHITE_GREEN_PAIR;
     }
     return item;
 }
@@ -435,6 +404,44 @@ std::unique_ptr<Item> ItemCreator::create_amulet_of_yendor(Vector2D pos)
     item->pickable = std::make_unique<Amulet>();
     item->value = 50000; // Priceless artifact
     return item;
+}
+
+// Factory method to create weapons by ItemClass
+std::unique_ptr<Item> ItemCreator::create_weapon_by_class(Vector2D pos, ItemClass weaponClass)
+{
+    switch (weaponClass)
+    {
+        case ItemClass::DAGGER:      return create_dagger(pos);
+        case ItemClass::SHORT_SWORD: return create_short_sword(pos);
+        case ItemClass::LONG_SWORD:  return create_long_sword(pos);
+        case ItemClass::STAFF:       return create_staff(pos);
+        case ItemClass::BATTLE_AXE:  return create_battle_axe(pos);
+        case ItemClass::GREAT_AXE:   return create_great_axe(pos);
+        case ItemClass::WAR_HAMMER:  return create_war_hammer(pos);
+        case ItemClass::MACE:        return create_mace(pos);
+        case ItemClass::GREAT_SWORD: return create_greatsword(pos);
+        case ItemClass::LONG_BOW:    return create_longbow(pos);
+        default:                     return create_long_sword(pos); // Safe default
+    }
+}
+
+// Proper ItemClass to Pickable mapping (no string comparisons)
+void ItemCreator::create_pickable_from_itemclass(Item* item, ItemClass itemClass)
+{
+    switch (itemClass)
+    {
+        case ItemClass::DAGGER:      item->pickable = std::make_unique<Dagger>(); break;
+        case ItemClass::SHORT_SWORD: item->pickable = std::make_unique<ShortSword>(); break;
+        case ItemClass::LONG_SWORD:  item->pickable = std::make_unique<LongSword>(); break;
+        case ItemClass::STAFF:       item->pickable = std::make_unique<Staff>(); break;
+        case ItemClass::BATTLE_AXE:  item->pickable = std::make_unique<BattleAxe>(); break;
+        case ItemClass::GREAT_AXE:   item->pickable = std::make_unique<GreatAxe>(); break;
+        case ItemClass::WAR_HAMMER:  item->pickable = std::make_unique<WarHammer>(); break;
+        case ItemClass::MACE:        item->pickable = std::make_unique<Mace>(); break;
+        case ItemClass::GREAT_SWORD: item->pickable = std::make_unique<Greatsword>(); break;
+        case ItemClass::LONG_BOW:    item->pickable = std::make_unique<Longbow>(); break;
+        default:                     item->pickable = std::make_unique<LongSword>(); break; // Safe default
+    }
 }
 
 void ItemCreator::ensure_correct_value(Item& item)

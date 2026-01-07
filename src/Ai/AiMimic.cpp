@@ -152,12 +152,14 @@ bool AiMimic::consume_nearby_items(Mimic& mimic)
                      itemClass == ItemClass::STAFF ||
                      itemClass == ItemClass::LONG_BOW)
             {
-                // Weapons make the mimic hit harder
-                if (mimic.attacker->get_roll() != "D6")
+                // Weapons make the mimic hit harder - use proper damage system
+                const auto& currentDamage = mimic.attacker->get_damage_info();
+                if (currentDamage.maxDamage < 6)
                 {
-                    int currentDamage = game.d.roll_from_string(mimic.attacker->get_roll());
-                    mimic.attacker->set_roll("D" + std::to_string(std::min(currentDamage + 1, 6)));
-                    game.log("Mimic improved attack to " + mimic.attacker->get_roll());
+                    DamageInfo improvedDamage(currentDamage.minDamage, std::min(currentDamage.maxDamage + 1, 6),
+                                            "1d" + std::to_string(std::min(currentDamage.maxDamage + 1, 6)));
+                    mimic.attacker->set_damage_info(improvedDamage);
+                    game.log("Mimic improved attack to " + improvedDamage.displayRoll);
                 }
             }
             else if (itemClass == ItemClass::LEATHER_ARMOR ||

@@ -422,17 +422,19 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
 	if (!item)
 	{
-		game.log("DEBUG: equip_item failed - null item");
+		if (game.message_system.is_debug_mode()) game.log("DEBUG: equip_item failed - null item");
 		return false;
 	}
 	
 	if (!can_equip(*item, slot))
 	{
-		game.log("DEBUG: can_equip failed for " + item->actorData.name);
-		game.log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
-		game.log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
-		game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-		game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+		if (game.message_system.is_debug_mode()) {
+			game.log("DEBUG: can_equip failed for " + item->actorData.name);
+			game.log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
+			game.log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
+			game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+			game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+		}
 		// Return item to inventory since we can't equip it
 		InventoryOperations::add_item(inventory_data, std::move(item));
 		return false;

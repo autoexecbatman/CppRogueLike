@@ -7,9 +7,11 @@ void GameLoopCoordinator::handle_gameloop(Game& game, Gui& gui, int loopNum)
 {
     handle_initialization(game);
     
-    //==DEBUG==
-    game.log("//====================LOOP====================//");
-    game.log("Loop number: " + std::to_string(loopNum) + "\n");
+    // Debug game loop tracking
+    if (game.message_system.is_debug_mode()) {
+        game.log("//====================LOOP====================//");
+        game.log("Loop number: " + std::to_string(loopNum) + "\n");
+    }
 
     //==INIT_GUI==
     // GUI initialization is now handled in STARTUP completion

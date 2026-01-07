@@ -66,7 +66,11 @@ public:
     static int calculate_enhancement_chance(int dungeonLevel);
     static int determine_enhancement_level(int dungeonLevel);
     static int calculate_enhanced_value(int baseValue, int enhancementLevel);
-    
+
+    // Centralized weapon creation by ItemClass (proper approach)
+    static std::unique_ptr<Item> create_weapon_by_class(Vector2D pos, ItemClass weaponClass);
+    static void create_pickable_from_itemclass(Item* item, ItemClass itemClass);
+
     // Utility function to fix existing items with incorrect values
     static void ensure_correct_value(Item& item);
 };

@@ -72,9 +72,11 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target)
 	const int distance = shopkeeper.get_tile_distance(target);
 	
 	// DEBUG: Log distance calculation
-	game.log("Shopkeeper distance to player: " + std::to_string(distance) + 
-		" (Shopkeeper: " + std::to_string(shopkeeper.position.x) + "," + std::to_string(shopkeeper.position.y) + 
-		" Player: " + std::to_string(target.x) + "," + std::to_string(target.y) + ")");
+	if (game.message_system.is_debug_mode()) {
+		game.log("Shopkeeper distance to player: " + std::to_string(distance) +
+			" (Shopkeeper: " + std::to_string(shopkeeper.position.x) + "," + std::to_string(shopkeeper.position.y) +
+			" Player: " + std::to_string(target.x) + "," + std::to_string(target.y) + ")");
+	}
 	
 	// Only trade if adjacent (distance exactly 1.0) and menu not already open
 	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.destructible->is_dead() && !tradeMenuOpen)

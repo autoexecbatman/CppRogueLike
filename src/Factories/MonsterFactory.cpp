@@ -67,7 +67,7 @@ MonsterFactory::MonsterFactory()
         
     // Add shopkeeper to the spawn table with proper probability management
     addMonsterType({
-        "Shopkeeper", 8, 1, 0, 0.0f,  // Weight 8, level 1+, no level scaling
+        "Shopkeeper", 20, 1, 0, 0.0f,  // INCREASED weight from 8 to 20 for more frequent spawning
         [](Vector2D pos) {
             // Use ShopkeeperFactory's probability system for actual spawning
             if (ShopkeeperFactory::should_spawn_shopkeeper(game.level_manager.get_dungeon_level()))

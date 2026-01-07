@@ -71,8 +71,8 @@ void AiSpider::update(Creature& owner)
                 // If right next to player, get an immediate attack
                 if (distanceToPlayer <= 1)
                 {
-                    // Surprise attack gets a damage bonus
-                    int normalDamage = game.d.roll_from_string(owner.attacker->get_roll());
+                    // Surprise attack gets a damage bonus - use proper damage system
+                    int normalDamage = owner.attacker->roll_damage();
                     int bonusDamage = game.d.roll(1, 2); // Ambush damage bonus
                     int totalDamage = normalDamage + bonusDamage;
 

@@ -1,0 +1,54 @@
+{
+  "mcpServers": {
+    "enhanced-architecture": {
+      "command": "node",
+      "args": ["D:\\arch_mcp\\enhanced_architecture_server_context.js"],
+      "env": {}
+    },
+    "cot-server": {
+      "command": "node", 
+      "args": ["D:\\arch_mcp\\cot_server.js"],
+      "env": {}
+    },
+    "local-ai-server": {
+      "command": "node",
+      "args": ["D:\\arch_mcp\\local-ai-server.js"],
+      "env": {}
+    },
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "@modelcontextprotocol/server-filesystem",
+        "D:\\",
+        "D:\\arch_mcp\\",
+        "E:\\architecture_docs\\",
+        "E:\\architecture_docs_old\\",
+        "E:\\repo\\temp_raylib\\",
+        "D:\\repo\\",
+        "D:\\repo\\firstNN\\",
+        "D:\\repo\\snakeNN\\",
+        "D:\\repo\\hybridNN\\",
+        "D:\\repo\\emergentSystem\\",
+        "D:\\libtorch-cuda\\libtorch\\",
+        "E:\\repo\\C++RogueLike\\"
+      ],
+      "env": {}
+    },
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {"BRAVE_API_KEY": "BSA6BeKFEOu8cNP0tj0QXcaVcknsMKe"}
+    },
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "env": {}
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"],
+      "env": {}
+    }
+  }
+}

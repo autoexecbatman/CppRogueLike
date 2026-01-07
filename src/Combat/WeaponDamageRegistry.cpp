@@ -1,5 +1,6 @@
 // WeaponDamageRegistry.cpp - Implementation using ItemClass system
 #include "WeaponDamageRegistry.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
 
 // Static member definition
 const std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::weapon_damage_map = 
@@ -16,6 +17,7 @@ std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::create_weapon_da
         {ItemClass::BATTLE_AXE, DamageValues::BattleAxe()},   // 1-8 damage
         {ItemClass::GREAT_AXE,  {1, 12, "1d12"}},            // 1-12 damage
         {ItemClass::WAR_HAMMER, DamageValues::WarHammer()},   // 2-5 damage (1d4+1)
+        {ItemClass::MACE,       {2, 7, "1d6+1"}},            // 2-7 damage (1d6+1)
         {ItemClass::GREAT_SWORD, DamageValues::GreatSword()},  // 1-10 damage
         
         // Ranged Weapons
@@ -30,9 +32,21 @@ DamageInfo WeaponDamageRegistry::get_damage_info(ItemClass weaponClass) noexcept
     {
         return it->second;
     }
-    
+
     // Fallback to unarmed damage for unregistered weapons
     return get_unarmed_damage_info();
+}
+
+DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(ItemClass weaponClass, const ItemEnhancement* enhancement) noexcept
+{
+    DamageInfo baseDamage = get_damage_info(weaponClass);
+
+    if (enhancement && enhancement->damage_bonus != 0)
+    {
+        return baseDamage.with_enhancement(enhancement->damage_bonus);
+    }
+
+    return baseDamage;
 }
 
 std::string WeaponDamageRegistry::get_damage_roll(ItemClass weaponClass) noexcept

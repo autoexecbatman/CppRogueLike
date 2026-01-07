@@ -183,8 +183,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Items/ItemClassification.h
     ${PROJECT_SOURCE_DIR}/Items/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Items/Weapons.h
-    ${PROJECT_SOURCE_DIR}/Items/Mace.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Mace.h
     ${PROJECT_SOURCE_DIR}/Items/Armor.cpp
     ${PROJECT_SOURCE_DIR}/Items/Armor.h
     ${PROJECT_SOURCE_DIR}/Items/Food.cpp
@@ -361,7 +359,6 @@ else()
         "${PROJECT_SOURCE_DIR}/json/wisdom.json"
         "${PROJECT_SOURCE_DIR}/json/intelligence.json"
         "${PROJECT_SOURCE_DIR}/json/charisma.json"
-        "${PROJECT_SOURCE_DIR}/json/weapons.json"
     )
 
     foreach(JSON_FILE ${JSON_FILES})

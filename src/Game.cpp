@@ -225,6 +225,7 @@ void Game::add_debug_weapons_at_player_feet()
 	add_item(inventory_data, ItemCreator::create_chain_mail(player->position));
 	add_item(inventory_data, ItemCreator::create_plate_mail(player->position));
 	add_item(inventory_data, ItemCreator::create_dagger(player->position));
+	add_item(inventory_data, ItemCreator::create_mace(player->position));
 
 	log("Debug weapons added at player position: " +
 		std::to_string(player->position.x) + "," +

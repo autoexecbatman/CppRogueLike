@@ -220,6 +220,19 @@ public:
 	PickableType get_type() const override { return PickableType::WAR_HAMMER; }
 };
 
+class Mace : public Weapon
+{
+public:
+	// mace roll is 1d6+1
+	Mace() { roll = "D6+1"; }
+
+	bool is_ranged() const override;
+	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::MACE; }
+};
+
 // Potion classes - consumable items with various effects
 class HealingPotion : public Pickable
 {

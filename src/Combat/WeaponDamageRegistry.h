@@ -9,15 +9,21 @@
 #include "DamageInfo.h"
 #include "../Items/ItemClassification.h"
 
+// Forward declarations
+struct ItemEnhancement;
+
 class WeaponDamageRegistry
 {
 public:
     // Get damage info for weapon class (main interface)
     static DamageInfo get_damage_info(ItemClass weaponClass) noexcept;
-    
+
+    // Get enhanced damage info with weapon modifiers
+    static DamageInfo get_enhanced_damage_info(ItemClass weaponClass, const ItemEnhancement* enhancement) noexcept;
+
     // Legacy support - get damage roll string for display
     static std::string get_damage_roll(ItemClass weaponClass) noexcept;
-    
+
     // Check if weapon class is registered
     static bool is_registered(ItemClass weaponClass) noexcept;
     
