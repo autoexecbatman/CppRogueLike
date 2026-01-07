@@ -1,0 +1,48 @@
+{
+  "ai": {
+    "model": "deepseek-coder-v2:16b-lite-instruct-q4_K_M",
+    "base_url": "http://localhost:11434",
+    "timeout": 120
+  },
+  "priorities": {
+    "build_errors": 100,
+    "test_failures": 90,
+    "magic_numbers": 70,
+    "string_literals": 60,
+    "long_functions": 50,
+    "duplicates": 40,
+    "const_correctness": 30
+  },
+  "limits": {
+    "batch_size": 10,
+    "max_function_length": 50,
+    "min_duplicate_lines": 5,
+    "magic_number_skip": [0, 1, -1, 2, 10, 100, 1000]
+  },
+  "build": {
+    "build_dir": "build",
+    "config": "Debug",
+    "target": "test_exe",
+    "cmake_command": "cmake",
+    "build_command": "cmake --build"
+  },
+  "paths": {
+    "source_dir": "src",
+    "output_dir": ".ai-tools/output",
+    "config_output": "src/config",
+    "test_dir": "tests"
+  },
+  "safety": {
+    "dry_run_default": true,
+    "require_tests": true,
+    "max_warnings_increase": 5,
+    "auto_rollback": true,
+    "backup_before_changes": true
+  },
+  "refactoring": {
+    "config_namespace": "Config",
+    "config_header": "src/Config/Config.h",
+    "config_impl": "src/Config/Config.cpp",
+    "config_json": "src/config/game_config.json"
+  }
+}
