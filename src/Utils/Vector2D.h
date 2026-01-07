@@ -43,6 +43,12 @@ struct Vector2D
 		return { y - rhs.y, x - rhs.x };
 	}
 
+	// scalar multiplication
+	Vector2D operator*(int scalar) const noexcept
+	{
+		return { y * scalar, x * scalar };
+	}
+
 	// compare two vectors
 	bool operator==(const Vector2D& rhs) const noexcept
 	{
