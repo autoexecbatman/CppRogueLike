@@ -45,13 +45,12 @@ jobs:
     - name: Run tests
       run: |
         cd ${{github.workspace}}/build/tests/Release
-        ./run_tests.exe
+        ./run_tests.exe --gtest_output=xml:test-results.xml
+      continue-on-error: true
 
-    - name: Test Report
-      uses: dorny/test-reporter@v1
+    - name: Publish test results
+      uses: EnricoMi/publish-unit-test-result-action/windows@v2
       if: always()
       with:
-        name: Test Results
-        path: '**/test-results.xml'
-        reporter: jest-junit
-        fail-on-error: true
+        files: |
+          ${{github.workspace}}/build/tests/Release/test-results.xml
