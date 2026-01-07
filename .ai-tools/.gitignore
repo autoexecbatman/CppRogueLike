@@ -1,7 +1,0 @@
-# AI Tools Output - Ignore analysis and generated files
-analysis/
-configs/
-generated_tests/
-workflow_report.txt
-*.pyc
-__pycache__/
