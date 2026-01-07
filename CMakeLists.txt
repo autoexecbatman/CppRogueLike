@@ -370,4 +370,11 @@ else()
                                   $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
     endforeach()
 
+    # Add tests subdirectory (only for native builds)
+    option(BUILD_TESTS "Build unit tests" ON)
+    if(BUILD_TESTS)
+        enable_testing()
+        add_subdirectory(tests)
+    endif()
+
 endif()

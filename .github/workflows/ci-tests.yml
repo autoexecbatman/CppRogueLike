@@ -1,0 +1,57 @@
+name: C++ CI Tests
+
+on:
+  push:
+    branches: [ master, main, develop ]
+  pull_request:
+    branches: [ master, main, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build and Run Tests
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'
+
+    - name: Install dependencies via vcpkg
+      run: |
+        vcpkg install pdcurses:x64-windows
+        vcpkg install sdl3:x64-windows
+        vcpkg install libtcod:x64-windows
+        vcpkg install nlohmann-json:x64-windows
+        vcpkg install gtest:x64-windows
+
+    - name: Setup MSVC
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Configure CMake
+      run: |
+        cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=Release -DCMAKE_TOOLCHAIN_FILE=${{github.workspace}}/vcpkg/scripts/buildsystems/vcpkg.cmake -DBUILD_TESTS=ON
+
+    - name: Build main project
+      run: cmake --build ${{github.workspace}}/build --config Release
+
+    - name: Build tests
+      run: cmake --build ${{github.workspace}}/build --config Release --target run_tests
+
+    - name: Run tests
+      run: |
+        cd ${{github.workspace}}/build/tests/Release
+        ./run_tests.exe
+
+    - name: Test Report
+      uses: dorny/test-reporter@v1
+      if: always()
+      with:
+        name: Test Results
+        path: '**/test-results.xml'
+        reporter: jest-junit
+        fail-on-error: true
