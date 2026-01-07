@@ -16,9 +16,20 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Workflow disabled due to vcpkg infrastructure failure
+    - name: Setup vcpkg
       run: |
-        echo "vcpkg MSYS2 mirrors returning 404 for pkgconf"
-        echo "Native Windows build requires working vcpkg mirrors"
-        echo "See: https://github.com/microsoft/vcpkg/issues"
-        exit 0
+        git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        C:\vcpkg\bootstrap-vcpkg.bat
+
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . -DBUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+
+    - name: Build tests
+      run: |
+        cmake --build build --config Debug --target test_exe
+
+    - name: Run tests
+      run: |
+        cd build\bin\Debug
+        .\test_exe.exe
