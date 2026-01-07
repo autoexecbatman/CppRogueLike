@@ -1,5 +1,9 @@
 #include "HungerSystem.h"
+#include "../Core/GameContext.h"
 #include "../Game.h"
+#include "../Random/RandomDice.h"
+#include "../Systems/MessageSystem.h"
+#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include <algorithm>
 
@@ -16,16 +20,31 @@ HungerSystem::HungerSystem() :
 {
 }
 
-void HungerSystem::increase_hunger(int amount)
+void HungerSystem::increase_hunger(GameContext& ctx, int amount)
 {
     hunger_value = std::min(hunger_value + amount, hunger_max);
-    update_hunger_state();
+    update_hunger_state(ctx);
 }
 
-void HungerSystem::decrease_hunger(int amount)
+void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
 {
     hunger_value = std::max(hunger_value - amount, 0);
-    update_hunger_state();
+    update_hunger_state(ctx);
+}
+
+// TEMPORARY: Backward-compatible overloads during migration
+void HungerSystem::increase_hunger(int amt)
+{
+    extern Game game;
+    GameContext ctx = game.get_context();
+    HungerSystem::increase_hunger(ctx, amt);
+}
+
+void HungerSystem::decrease_hunger(int amt)
+{
+    extern Game game;
+    GameContext ctx = game.get_context();
+    HungerSystem::decrease_hunger(ctx, amt);
 }
 
 HungerState HungerSystem::get_hunger_state() const
@@ -116,9 +135,9 @@ bool HungerSystem::is_suffering_hunger_penalties() const
         current_state == HungerState::DYING;
 }
 
-void HungerSystem::apply_hunger_effects()
+void HungerSystem::apply_hunger_effects(GameContext& ctx)
 {
-    if (!game.player) return;
+    if (!ctx.player) return;
 
     // Reset any previous hunger effects first
     // This is assuming the player's base stats are stored somewhere and can be restored
@@ -130,8 +149,8 @@ void HungerSystem::apply_hunger_effects()
         // Bonuses for being well fed
         if (!well_fed_message_shown)
         {
-            game.append_message_part(get_hunger_color(), "You feel strong and energetic!");
-            game.finalize_message();
+            ctx.message_system->append_message_part(get_hunger_color(), "You feel strong and energetic!");
+            ctx.message_system->finalize_message();
             well_fed_message_shown = true;
         }
         // Potentially give bonus to strength or regen
@@ -139,36 +158,36 @@ void HungerSystem::apply_hunger_effects()
 
     case HungerState::HUNGRY:
         // Minor penalties
-        if (game.d.d10() == 1)
+        if (ctx.dice->d10() == 1)
         {  // 10% chance each turn
-            game.append_message_part(get_hunger_color(), "Your stomach growls.");
-            game.finalize_message();
+            ctx.message_system->append_message_part(get_hunger_color(), "Your stomach growls.");
+            ctx.message_system->finalize_message();
         }
         break;
 
     case HungerState::STARVING:
         // More severe penalties
-        if (game.d.d6() == 1)
+        if (ctx.dice->d6() == 1)
         {  // ~17% chance each turn
-            game.append_message_part(get_hunger_color(), "You are weakened by hunger.");
-            game.finalize_message();
+            ctx.message_system->append_message_part(get_hunger_color(), "You are weakened by hunger.");
+            ctx.message_system->finalize_message();
             // Reduce player's strength temporarily
         }
         // Take small damage occasionally
-        if (game.d.d20() == 1)
+        if (ctx.dice->d20() == 1)
         {  // 5% chance each turn
-            game.player->destructible->take_damage(*game.player, 1);
-            game.append_message_part(get_hunger_color(), "You're starving!");
-            game.finalize_message();
+            ctx.player->destructible->take_damage(*ctx.player, 1);
+            ctx.message_system->append_message_part(get_hunger_color(), "You're starving!");
+            ctx.message_system->finalize_message();
         }
         break;
 
     case HungerState::DYING:
         // Severe penalties, player is about to die
-        game.append_message_part(get_hunger_color(), "You are dying from starvation!");
-        game.finalize_message();
+        ctx.message_system->append_message_part(get_hunger_color(), "You are dying from starvation!");
+        ctx.message_system->finalize_message();
         // Take damage every turn
-        game.player->destructible->take_damage(*game.player, 1);
+        ctx.player->destructible->take_damage(*ctx.player, 1);
         break;
 
     default:
@@ -176,7 +195,7 @@ void HungerSystem::apply_hunger_effects()
     }
 }
 
-void HungerSystem::update_hunger_state()
+void HungerSystem::update_hunger_state(GameContext& ctx)
 {
     HungerState old_state = current_state;
 
@@ -203,9 +222,9 @@ void HungerSystem::update_hunger_state()
     // Notify the player if hunger state has changed
     if (old_state != current_state)
     {
-        game.append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
-        game.finalize_message();
-        
+        ctx.message_system->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
+        ctx.message_system->finalize_message();
+
         // Reset well-fed message flag when leaving well-fed state
         if (old_state == HungerState::WELL_FED && current_state != HungerState::WELL_FED)
         {
@@ -222,7 +241,7 @@ void HungerSystem::save(json& j) const
     j["well_fed_message_shown"] = well_fed_message_shown;
 }
 
-void HungerSystem::load(const json& j)
+void HungerSystem::load(GameContext& ctx, const json& j)
 {
     if (j.contains("hunger_value"))
     {
@@ -240,7 +259,7 @@ void HungerSystem::load(const json& j)
     {
         well_fed_message_shown = j["well_fed_message_shown"];
     }
-    
+
     // Update hunger state based on loaded values to ensure consistency
-    update_hunger_state();
+    update_hunger_state(ctx);
 }

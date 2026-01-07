@@ -154,10 +154,11 @@ void Game::update()
 		}
 
 		// Increase hunger every turn
-		hunger_system.increase_hunger(1);
+		auto ctx = get_context();
+		hunger_system.increase_hunger(ctx, 1);
 
 		// Apply hunger effects
-		hunger_system.apply_hunger_effects();
+		hunger_system.apply_hunger_effects(ctx);
 
 		game.time++;
 		if (gameStatus != GameStatus::DEFEAT) // for killing the player

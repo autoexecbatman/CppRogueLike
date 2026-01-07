@@ -1,6 +1,7 @@
 // GameStateManager.cpp - Handles game state persistence and level management
 
 #include "GameStateManager.h"
+#include "../Game.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/InventoryOperations.h"
@@ -139,7 +140,10 @@ bool GameStateManager::load_game(
     // Load the hunger system
     if (j.contains("hunger_system"))
     {
-        hunger_system.load(j["hunger_system"]);
+        // Temporary: Create GameContext from available components
+        extern Game game;
+        auto ctx = game.get_context();
+        hunger_system.load(ctx, j["hunger_system"]);
     }
     
     // Load the level manager

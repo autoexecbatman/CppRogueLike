@@ -5,6 +5,8 @@
 
 using json = nlohmann::json;
 
+struct GameContext;
+
 // Hunger states in ascending order of hunger
 enum class HungerState {
     WELL_FED,  // Recently ate, receive bonuses
@@ -19,9 +21,13 @@ public:
     HungerSystem();
 
     // Increases hunger by the specified amount (or default amount)
-    void increase_hunger(int amount = 1);
+    void increase_hunger(GameContext& ctx, int amount = 1);
 
     // Decreases hunger by the specified amount
+    void decrease_hunger(GameContext& ctx, int amount);
+
+    // TEMPORARY: Backward-compatible overloads during migration
+    void increase_hunger(int amount = 1);
     void decrease_hunger(int amount);
 
     // Returns current hunger state
@@ -49,11 +55,11 @@ public:
     bool is_suffering_hunger_penalties() const;
 
     // Apply hunger effects to player stats
-    void apply_hunger_effects();
-    
+    void apply_hunger_effects(GameContext& ctx);
+
     // Save/Load methods for game persistence
     void save(json& j) const;
-    void load(const json& j);
+    void load(GameContext& ctx, const json& j);
 
 private:
     int hunger_value;  // Internal hunger counter
@@ -67,7 +73,7 @@ private:
     const int DYING_THRESHOLD;
 
     // Updates internal hunger state based on hunger value
-    void update_hunger_state();
+    void update_hunger_state(GameContext& ctx);
 
     HungerState current_state;
     bool well_fed_message_shown; // Prevents spam of well-fed message
