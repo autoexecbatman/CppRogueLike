@@ -1,0 +1,85 @@
+name: AI Code Improvements
+
+on:
+  workflow_dispatch:  # Manual trigger
+    inputs:
+      mode:
+        description: 'Run mode'
+        required: true
+        default: 'analyze'
+        type: choice
+        options:
+          - analyze
+          - full-dry-run
+  schedule:
+    - cron: '0 2 * * 0'  # Weekly on Sunday at 2 AM
+
+jobs:
+  ai-analysis:
+    name: AI Code Analysis and Improvements
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Create analysis report
+      run: |
+        echo "# AI Code Analysis Report" > ai-report.md
+        echo "" >> ai-report.md
+        echo "This is a placeholder for AI-powered code analysis." >> ai-report.md
+        echo "" >> ai-report.md
+        echo "To use the full AI workflow locally:" >> ai-report.md
+        echo "1. Install Ollama with deepseek-coder-v2 model" >> ai-report.md
+        echo "2. Run: python .ai-tools/ai_workflow.py" >> ai-report.md
+        echo "" >> ai-report.md
+        echo "## Quick Stats" >> ai-report.md
+        echo "- Total C++ files: $(find src -name '*.cpp' -o -name '*.h' | wc -l)" >> ai-report.md
+        echo "- Test files: $(find tests -name '*Test.cpp' 2>/dev/null | wc -l)" >> ai-report.md
+        echo "" >> ai-report.md
+        echo "## Suggested Improvements" >> ai-report.md
+        echo "Run the local AI workflow for:" >> ai-report.md
+        echo "- Magic number detection and extraction" >> ai-report.md
+        echo "- Automated test generation" >> ai-report.md
+        echo "- Data/behavior separation" >> ai-report.md
+
+    - name: Upload analysis report
+      uses: actions/upload-artifact@v3
+      with:
+        name: ai-analysis-report
+        path: ai-report.md
+
+    - name: Create issue for improvements (if scheduled)
+      if: github.event_name == 'schedule'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const report = fs.readFileSync('ai-report.md', 'utf8');
+
+          await github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: 'Weekly AI Code Analysis Report',
+            body: report,
+            labels: ['ai-generated', 'code-quality']
+          });
+
+    - name: Comment on workflow
+      run: |
+        echo "=========================================="
+        echo "AI Analysis Complete"
+        echo "=========================================="
+        echo ""
+        echo "For full AI-powered improvements, run locally:"
+        echo "  python .ai-tools/ai_workflow.py"
+        echo ""
+        echo "This will use your local Ollama instance to:"
+        echo "- Detect and extract magic numbers"
+        echo "- Generate comprehensive unit tests"
+        echo "- Suggest code refactoring opportunities"
