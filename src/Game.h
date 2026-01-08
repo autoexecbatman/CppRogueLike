@@ -110,12 +110,12 @@ public:
     // System delegations - clean interface
     void render() const { rendering_manager.render_world(map, *stairs, objects, inventory_data, creatures, *player); }
     void handle_menus() { auto ctx = get_context(); menu_manager.handle_menus(menus, ctx); }
-    void handle_gameloop(Gui& gui, int loopNum) { game_loop_coordinator.handle_gameloop(*this, gui, loopNum); }
-    void handle_ranged_attack() { targeting.handle_ranged_attack(); }
+    void handle_gameloop(Gui& gui, int loopNum) { auto ctx = get_context(); game_loop_coordinator.handle_gameloop(ctx, gui, loopNum); }
+    void handle_ranged_attack() { auto ctx = get_context(); targeting.handle_ranged_attack(ctx); }
     void display_help() noexcept { display_manager.display_help(); }
     void display_levelup(int level) { display_manager.display_levelup(*player, level); }
     void display_character_sheet() const noexcept { display_manager.display_character_sheet(*player); }
-    bool pick_tile(Vector2D* position, int maxRange) { return targeting.pick_tile(position, maxRange); }
+    bool pick_tile(Vector2D* position, int maxRange) { auto ctx = get_context(); return targeting.pick_tile(ctx, position, maxRange); }
 
     // Creature management
     void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }

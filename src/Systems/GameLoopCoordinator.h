@@ -4,25 +4,25 @@
 
 #pragma once
 
-class Game;
 class Gui;
+struct GameContext;
 
-class GameLoopCoordinator 
+class GameLoopCoordinator
 {
 public:
     GameLoopCoordinator() = default;
     ~GameLoopCoordinator() = default;
 
     // Core game loop coordination
-    void handle_gameloop(Game& game, Gui& gui, int loopNum);
+    void handle_gameloop(GameContext& ctx, Gui& gui, int loopNum);
 
 private:
     // Helper methods for game loop phases
-    void handle_initialization(Game& game);
-    void handle_input_phase(Game& game);
-    void handle_update_phase(Game& game, Gui& gui);
-    void handle_render_phase(Game& game, Gui& gui);
-    void handle_menu_check(Game& game);
+    void handle_initialization(GameContext& ctx);
+    void handle_input_phase(GameContext& ctx);
+    void handle_update_phase(GameContext& ctx, Gui& gui);
+    void handle_render_phase(GameContext& ctx, Gui& gui);
+    void handle_menu_check(GameContext& ctx);
 };
 
 #endif // GAME_LOOP_COORDINATOR_H
