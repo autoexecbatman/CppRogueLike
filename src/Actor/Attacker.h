@@ -13,6 +13,7 @@
 #include <string>
 
 class Creature;
+struct GameContext;
 
 class Attacker : public Persistent
 {
@@ -35,13 +36,13 @@ public:
 		roll = new_roll;
 		damageInfo = parse_damage_from_roll_string(new_roll);
 	}
-	void attack(Creature& attacker, Creature& target);
-	void attack_with_dual_wield(Creature& attacker, Creature& target);
+	void attack(Creature& attacker, Creature& target, GameContext& ctx);
+	void attack_with_dual_wield(Creature& attacker, Creature& target, GameContext& ctx);
 	// Modern clean interface for single attacks
-	void perform_single_attack(Creature& attacker, Creature& target, int attackPenalty, const std::string& handName);
+	void perform_single_attack(Creature& attacker, Creature& target, int attackPenalty, const std::string& handName, GameContext& ctx);
 
 	// Legacy compatibility for string-based damage rolls
-	void perform_single_attack(Creature& attacker, Creature& target, const std::string& damageRoll, int attackPenalty, const std::string& handName);
+	void perform_single_attack(Creature& attacker, Creature& target, const std::string& damageRoll, int attackPenalty, const std::string& handName, GameContext& ctx);
 
 	// Clean unified damage interface - determines the correct damage source and calculates enhanced damage
 	DamageInfo get_attack_damage(Creature& attacker) const;

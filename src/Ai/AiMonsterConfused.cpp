@@ -29,7 +29,8 @@ void AiMonsterConfused::update(Creature& owner)
 			const auto& actor = game.get_actor(destination);
 			if (actor)
 			{
-				owner.attacker->attack(owner, *actor);
+				auto ctx = game.get_context();
+				owner.attacker->attack(owner, *actor, ctx);
 			}
 		}
 	}

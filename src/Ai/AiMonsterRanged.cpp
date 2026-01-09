@@ -73,7 +73,8 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos)
     animateProjectile(owner.position, targetPos, projChar);
 
     // Perform the attack
-    owner.attacker->attack(owner, *game.player);
+    auto ctx = game.get_context();
+    owner.attacker->attack(owner, *game.player, ctx);
     return true;
 }
 

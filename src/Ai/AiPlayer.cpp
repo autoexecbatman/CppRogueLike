@@ -588,7 +588,8 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 								game.finalize_message();
 							}
 							// Use dual wield attack for players
-							owner.attacker->attack_with_dual_wield(owner, *c);
+							auto ctx = game.get_context();
+							owner.attacker->attack_with_dual_wield(owner, *c, ctx);
 						}
 						else
 						{
@@ -596,14 +597,15 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 							break;
 						}
 					}
-					
+
 					// Clean up dead creatures after combat
 					game.cleanup_dead_creatures();
 				}
 				else
 				{
 				// Non-player creatures get single attack
-				owner.attacker->attack(owner, *c);
+				auto ctx = game.get_context();
+				owner.attacker->attack(owner, *c, ctx);
 				}
 				
 				// Clean up dead creatures after combat

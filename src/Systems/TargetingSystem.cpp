@@ -154,7 +154,7 @@ const Vector2D TargetingSystem::select_target(const GameContext& ctx, Vector2D s
 						const auto& actor = ctx.map->get_actor(targetCursor);
 						if (actor)
 						{
-							ctx.player->attacker->attack(*ctx.player, *actor);
+							ctx.player->attacker->attack(*ctx.player, *actor, ctx);
 							run = false;
 							*ctx.game_status = static_cast<int>(1);  // Game::GameStatus::NEW_TURN
 							return targetCursor;
@@ -581,7 +581,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 				// and actor is not an item
 				if (actor != nullptr)
 				{
-					ctx.player->attacker->attack(*ctx.player, *actor);
+					ctx.player->attacker->attack(*ctx.player, *actor, ctx);
 					// Restore game display after attack
 					ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
 		ctx.gui->gui_render(ctx);

@@ -167,7 +167,8 @@ void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 	}
 	else
 	{
-		owner.attacker->attack(owner, *game.player);
+		auto ctx = game.get_context();
+		owner.attacker->attack(owner, *game.player, ctx);
 	}
 }
 
