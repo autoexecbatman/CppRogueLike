@@ -146,7 +146,8 @@ void AiPlayer::update(Creature& owner)
 	if (isWaiting) // when waiting tiles are triggered
 	{
 		isWaiting = false;
-		game.map.tile_action(owner, game.map.get_tile_type(owner.position));
+		auto ctx = game.get_context();
+		game.map.tile_action(owner, game.map.get_tile_type(owner.position), ctx);
 		look_on_floor(owner.position);
 	}
 
@@ -161,7 +162,8 @@ void AiPlayer::update(Creature& owner)
 		if (shouldComputeFOV)
 		{
 			shouldComputeFOV = false; // reset flag
-			game.map.compute_fov();
+			auto ctx = game.get_context();
+			game.map.compute_fov(ctx);
 		}
 	}
 }
@@ -645,7 +647,8 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 		{
 			move(owner, targetPosition);
 			// Call tile_action after successful move
-			game.map.tile_action(owner, targetTileType);
+			auto ctx = game.get_context();
+			game.map.tile_action(owner, targetTileType, ctx);
 			shouldComputeFOV = true;
 		}
 	}
@@ -694,9 +697,10 @@ void AiPlayer::call_action(Player& player, Controls key)
 			const int DEBUG_XP_AMOUNT = 1000;
 			player.destructible->add_xp(DEBUG_XP_AMOUNT);
 			game.message(WHITE_BLACK_PAIR, "Debug: Added " + std::to_string(DEBUG_XP_AMOUNT) + " XP (Total: " + std::to_string(player.destructible->get_xp()) + ")", true);
-			
+
 			// Use the same level up system as natural progression
-			player.ai->levelup_update(player);
+			auto ctx = game.get_context();
+			player.ai->levelup_update(ctx, player);
 		}
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
@@ -776,7 +780,8 @@ void AiPlayer::call_action(Player& player, Controls key)
 
 	case Controls::REGEN:
 	{
-		game.map.regenerate();
+		auto ctx = game.get_context();
+		game.map.regenerate(ctx);
 		break;
 	}
 
@@ -791,7 +796,8 @@ void AiPlayer::call_action(Player& player, Controls key)
 		{ // Valid position
 			if (game.map.is_door(doorPos))
 			{
-				if (game.map.open_door(doorPos))
+				auto ctx = game.get_context();
+				if (game.map.open_door(doorPos, ctx))
 				{
 					game.message(WHITE_BLACK_PAIR, "You open the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -825,7 +831,8 @@ void AiPlayer::call_action(Player& player, Controls key)
 		{ // Valid position
 			if (game.map.is_door(doorPos))
 			{
-				if (game.map.close_door(doorPos))
+				auto ctx = game.get_context();
+				if (game.map.close_door(doorPos, ctx))
 				{
 					game.message(WHITE_BLACK_PAIR, "You close the door.", true);
 					game.gameStatus = Game::GameStatus::NEW_TURN;

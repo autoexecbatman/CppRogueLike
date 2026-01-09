@@ -1,5 +1,6 @@
 #include "MenuBuy.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Systems/ShopKeeper.h"
@@ -36,12 +37,13 @@ void MenuBuy::populate_items()
 	}
 }
 
-MenuBuy::MenuBuy(Creature& buyer, ShopKeeper& shopkeeper) : buyer{ buyer }, shopkeeper{ shopkeeper }
+MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
+	: buyer{ buyer }, shopkeeper{ shopkeeper }, ctx{ ctx }
 {
 	// Use full screen dimensions
 	menu_height = static_cast<size_t>(LINES);
 	menu_width = static_cast<size_t>(COLS);
-	
+
 	populate_items();
 	menu_new(menu_height, menu_width, menu_starty, menu_startx);
 }
@@ -133,12 +135,12 @@ void MenuBuy::on_key(int key)
 			// Only allow buying if shopkeeper actually has items
 			if (!buyer.inventory_data.items.empty() && !menuItems.empty())
 			{
-				handle_buy(menuWindow, buyer, *game.player);
+				handle_buy(menuWindow, buyer, *ctx.player);
 				menu_mark_dirty(); // Redraw after purchase
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "No items for sale.", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "No items for sale.", true);
 			}
 			break;
 	}
@@ -168,32 +170,32 @@ void MenuBuy::menu()
 
 void MenuBuy::handle_buy(WINDOW* tradeWin, Creature& shopkeeper_creature, Player& buyer)
 {
-    if (is_inventory_empty(shopkeeper.shop_inventory) || 
+    if (is_inventory_empty(shopkeeper.shop_inventory) ||
         currentState >= get_item_count(shopkeeper.shop_inventory))
     {
-        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
         return;
     }
-    
+
     Item* item = get_item_at(shopkeeper.shop_inventory, currentState);
     if (!item)
     {
-        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
         return;
     }
-    
+
     // Use ShopKeeper's purchase processing
-    if (shopkeeper.process_player_purchase(*item, buyer))
+    if (shopkeeper.process_player_purchase(ctx, *item, buyer))
     {
         // Remove item from shop inventory after successful purchase
         auto removed_item = remove_item_at(shopkeeper.shop_inventory, currentState);
-        
+
         // Adjust currentState bounds
         if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
         {
             currentState = get_item_count(shopkeeper.shop_inventory) - 1;
         }
-        
+
         // Refresh the display
         populate_items();
     }

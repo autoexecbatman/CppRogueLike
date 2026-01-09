@@ -3,17 +3,18 @@
 #include <curses.h>
 
 #include "../Game.h"
+#include "../Core/GameContext.h"
 
-Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
+const Vector2D TargetingSystem::select_target(const GameContext& ctx, Vector2D startPos, int maxRange) const
 {
 	// Check if player is trying to attack but doesn't have a ranged weapon
-	if (!game.player->has_state(ActorState::IS_RANGED))
+	if (!ctx.player->has_state(ActorState::IS_RANGED))
 	{
-		game.message(WHITE_BLACK_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
 		// We still continue to the targeting mode, but will restrict actual attacks
 	}
 
-	Vector2D targetCursor = game.player->position;
+	Vector2D targetCursor = ctx.player->position;
 	const Vector2D lastPosition = targetCursor;
 	bool run = true;
 	while (run)
@@ -21,18 +22,18 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		clear();
 
 		// Make the line follow the mouse position
-		if (game.input_handler.mouse_moved())
+		if (ctx.input_handler->mouse_moved())
 		{
-			targetCursor = game.input_handler.get_mouse_position();
+			targetCursor = ctx.input_handler->get_mouse_position();
 		}
-		game.render();
+		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
 
 		// Display the FOV in white
 		for (int y = 0; y < MAP_HEIGHT; y++)
 		{
 			for (int x = 0; x < MAP_WIDTH; x++)
 			{
-				if (game.map.is_in_fov(Vector2D{ y, x }))
+				if (ctx.map->is_in_fov(Vector2D{ y, x }))
 				{
 					mvchgat(y, x, 1, A_REVERSE, WHITE_BLUE_PAIR, NULL);
 					/*refresh();*/
@@ -41,17 +42,17 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		}
 
 		// First color the player position if the cursor has moved from the player position
-		if (targetCursor != game.player->position)
+		if (targetCursor != ctx.player->position)
 		{
 			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_BLACK_PAIR, NULL);
 		}
 
-		//draw_range_indicator(startPos, maxRange);
-		draw_los(targetCursor);
+		//draw_range_indicator(ctx, startPos, maxRange);
+		draw_los(ctx, targetCursor);
 
 		// Check if the target is valid and update appearance accordingly
-		bool validTarget = is_valid_target(startPos, targetCursor, maxRange);
-		bool canAttack = validTarget && (game.player->has_state(ActorState::IS_RANGED));
+		bool validTarget = is_valid_target(ctx, startPos, targetCursor, maxRange);
+		bool canAttack = validTarget && (ctx.player->has_state(ActorState::IS_RANGED));
 
 		// Draw the target cursor - red if valid target and can attack, yellow if valid but cannot attack, blue if invalid
 		int cursorColor = canAttack ? WHITE_RED_PAIR : (validTarget ? YELLOW_BLACK_PAIR : BLUE_BLACK_PAIR);
@@ -60,10 +61,10 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		attroff(COLOR_PAIR(cursorColor));
 
 		// If the cursor is on a monster then display the monster's name and stats
-		const int distance = game.player->get_tile_distance(targetCursor);
-		if (game.map.is_in_fov(targetCursor))
+		const int distance = ctx.player->get_tile_distance(targetCursor);
+		if (ctx.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map.get_actor(targetCursor);
+			const auto& actor = ctx.map->get_actor(targetCursor);
 			if (actor != nullptr)
 			{
 				// Display target information
@@ -86,13 +87,13 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				mvprintw(0, 50, "Distance: %d", distance);
 
 				// Display dexterity missile attack adjustment if applicable
-				if (game.player->has_state(ActorState::IS_RANGED)
+				if (ctx.player->has_state(ActorState::IS_RANGED)
 					&&
-					game.player->get_dexterity() > 0
+					ctx.player->get_dexterity() > 0
 					&&
-					game.player->get_dexterity() <= game.data_manager.get_dexterity_attributes().size())
+					ctx.player->get_dexterity() <= ctx.data_manager->get_dexterity_attributes().size())
 				{
-					int missileAdj = game.data_manager.get_dexterity_attributes()[game.player->get_dexterity() - 1].MissileAttackAdj;
+					int missileAdj = ctx.data_manager->get_dexterity_attributes()[ctx.player->get_dexterity() - 1].MissileAttackAdj;
 					if (missileAdj != 0) {
 						attron(COLOR_PAIR(WHITE_BLUE_PAIR));
 						mvprintw(4, 50, "Ranged Attack Bonus: %+d", missileAdj);
@@ -101,7 +102,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				}
 
 				// Add note about ranged attacks if examining a valid target
-				if (validTarget && !game.player->has_state(ActorState::IS_RANGED))
+				if (validTarget && !ctx.player->has_state(ActorState::IS_RANGED))
 				{
 					attron(COLOR_PAIR(YELLOW_BLACK_PAIR));
 					mvprintw(10, 0, "Need a ranged weapon to attack this target");
@@ -113,7 +114,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 		// Display legend at bottom
 		mvprintw(MAP_HEIGHT - 2, 0, "Arrow keys: Move cursor | Enter: Select/Attack | Esc: Cancel");
 		mvprintw(MAP_HEIGHT - 1, 0, "Targeting mode: %s",
-			game.player->has_state(ActorState::IS_RANGED) ? "Attack" : "Examine");
+			ctx.player->has_state(ActorState::IS_RANGED) ? "Attack" : "Examine");
 
 		//refresh();
 
@@ -146,16 +147,16 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 			// Only allow attacking if we have a ranged weapon or aren't requiring it
 			if (validTarget)
 			{
-				if (game.player->has_state(ActorState::IS_RANGED))
+				if (ctx.player->has_state(ActorState::IS_RANGED))
 				{
-					if (game.map.is_in_fov(targetCursor))
+					if (ctx.map->is_in_fov(targetCursor))
 					{
-						const auto& actor = game.map.get_actor(targetCursor);
+						const auto& actor = ctx.map->get_actor(targetCursor);
 						if (actor)
 						{
-							game.player->attacker->attack(*game.player, *actor);
+							ctx.player->attacker->attack(*ctx.player, *actor);
 							run = false;
-							game.gameStatus = Game::GameStatus::NEW_TURN;
+							*ctx.game_status = static_cast<int>(1);  // Game::GameStatus::NEW_TURN
 							return targetCursor;
 						}
 					}
@@ -163,7 +164,7 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 				else
 				{
 					// Player tried to attack but doesn't have a ranged weapon
-					game.message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
+					ctx.message_system->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 				}
 			}
 			break;
@@ -176,13 +177,15 @@ Vector2D TargetingSystem::select_target(Vector2D startPos, int maxRange)
 	}
 		clear();
 		refresh();
-		
+
 		// Restore the game display after targeting
-		game.restore_game_display();
+		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 		return Vector2D{ -1, -1 };
 }
 
-void TargetingSystem::draw_los(Vector2D targetCursor)
+void TargetingSystem::draw_los(const GameContext& ctx, Vector2D targetCursor) const
 {
 	// draw a line using TCODLine class
 	/*
@@ -195,7 +198,7 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	} while (!TCODLine::step(&x, &y));
 	*/
 	Vector2D line{ 0,0 };
-	TCODLine::init(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
+	TCODLine::init(ctx.player->position.x, ctx.player->position.y, targetCursor.x, targetCursor.y);
 	while (!TCODLine::step(&line.x, &line.y))
 	{
 		mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, NULL);
@@ -220,7 +223,7 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	//	}
 	//}
 
-	Vector2D from = game.player->position;
+	Vector2D from = ctx.player->position;
 	Vector2D to = targetCursor;
 
 	int x0 = from.x;
@@ -250,7 +253,7 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 		// Skip the start and end points for visualization
 		if ((x0 != from.x || y0 != from.y) && (x0 != to.x || y0 != to.y))
 		{
-			if (!game.map.can_walk(Vector2D{ y0, x0 })) 
+			if (!ctx.map->can_walk(Vector2D{ y0, x0 }))
 			{
 				blocked = true;
 			}
@@ -263,13 +266,13 @@ void TargetingSystem::draw_los(Vector2D targetCursor)
 	}
 }
 
-void TargetingSystem::draw_range_indicator(Vector2D center, int range)
+void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, int range) const
 {
 	attron(COLOR_PAIR(5)); // Dim color for range indicator
 
 	for (int y = center.y - range; y <= center.y + range; y++) {
 		for (int x = center.x - range; x <= center.x + range; x++) {
-			if (x >= 0 && x < game.map.get_width() && y >= 0 && y < game.map.get_height()) {
+			if (x >= 0 && x < ctx.map->get_width() && y >= 0 && y < ctx.map->get_height()) {
 				// Check if this point is at the edge of the range
 				float distance = std::sqrt(std::pow(x - center.x, 2) + std::pow(y - center.y, 2));
 				if (std::abs(distance - range) < 0.5f) {
@@ -283,7 +286,7 @@ void TargetingSystem::draw_range_indicator(Vector2D center, int range)
 }
 
 // Check if a target position is valid
-bool TargetingSystem::is_valid_target(Vector2D from, Vector2D to, int maxRange)
+bool TargetingSystem::is_valid_target(const GameContext& ctx, Vector2D from, Vector2D to, int maxRange) const
 {
 	// Check if the target is within range
 	if (from.distance_to(to) > maxRange)
@@ -292,20 +295,20 @@ bool TargetingSystem::is_valid_target(Vector2D from, Vector2D to, int maxRange)
 	}
 
 	// Check if there's a clear line of sight
-	if (!game.map.has_los(from, to))
+	if (!ctx.map->has_los(from, to))
 	{
 		return false;
 	}
 
 	// Check if there's an enemy at the target
-	auto entity = game.map.get_actor(to);
+	auto entity = ctx.map->get_actor(to);
 	if (!entity)
 	{
 		return false;
 	}
 
 	// Make sure it's not the player
-	if (entity == game.player.get())
+	if (entity == ctx.player)
 	{
 		return false;
 	}
@@ -314,15 +317,15 @@ bool TargetingSystem::is_valid_target(Vector2D from, Vector2D to, int maxRange)
 }
 
 // Process a ranged attack
-bool TargetingSystem::process_ranged_attack(Creature& attacker, Vector2D targetPos) {
-	auto target = game.map.get_actor(targetPos);
+bool TargetingSystem::process_ranged_attack(GameContext& ctx, Creature& attacker, Vector2D targetPos) const {
+	auto target = ctx.map->get_actor(targetPos);
 	if (!target || target == &attacker)
 	{
 		return false;
 	}
 
 	// Check range and line of sight
-	if (!is_valid_target(attacker.position, targetPos, 4))
+	if (!is_valid_target(ctx, attacker.position, targetPos, 4))
 	{
 		return false;
 	}
@@ -332,7 +335,7 @@ bool TargetingSystem::process_ranged_attack(Creature& attacker, Vector2D targetP
 	int projectileColor = COLOR_PAIR(2);
 
 	// Animate the projectile
-	animate_projectile(attacker.position, targetPos, projectileSymbol, projectileColor);
+	animate_projectile(ctx, attacker.position, targetPos, projectileSymbol, projectileColor);
 
 	//// Perform the attack
 	//target->takeDamage(attacker->getAttackDamage());
@@ -341,7 +344,7 @@ bool TargetingSystem::process_ranged_attack(Creature& attacker, Vector2D targetP
 }
 
 // Animate a projectile flying from source to target
-void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projectileSymbol, int colorPair)
+void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector2D to, char projectileSymbol, int colorPair) const
 {
 	// Calculate the path using Bresenham's algorithm
 	int x0 = from.x;
@@ -375,13 +378,13 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 		}
 
 		// Stop at walls
-		if (!game.map.can_walk(Vector2D{ y0, x0 }) && (x0 != to.x || y0 != to.y)) {
+		if (!ctx.map->can_walk(Vector2D{ y0, x0 }) && (x0 != to.x || y0 != to.y)) {
 			break;
 		}
 	}
 
 	// Redraw the map before animation
-	game.render();
+	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
 	refresh();
 
 	// Animate along the path
@@ -415,10 +418,10 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 		napms(50); // Control speed of projectile (lower = faster)
 
 		// Erase the projectile (by redrawing the map tile)
-		if (game.map.can_walk(pos)) {
+		if (ctx.map->can_walk(pos)) {
 			mvaddch(pos.y, pos.x, '.');
 		}
-		else 
+		else
 		{
 			mvaddch(pos.y, pos.x, '#');
 		}
@@ -432,7 +435,7 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 	napms(100); // Brief pause for impact
 
 	// Redraw the target
-	auto entity = game.map.get_actor(to);
+	auto entity = ctx.map->get_actor(to);
 	if (entity) {
 		entity->render();
 		refresh();
@@ -441,7 +444,7 @@ void TargetingSystem::animate_projectile(Vector2D from, Vector2D to, char projec
 }
 
 // AOE preview from pick_tile method
-void TargetingSystem::draw_aoe_preview(Vector2D center, int radius)
+void TargetingSystem::draw_aoe_preview(Vector2D center, int radius) const
 {
 	const int sideLength = radius * 2 + 1;
 	const int chebyshevD = std::max(abs(center.x - (center.x - radius)), abs(center.y - (center.y - radius)));
@@ -462,33 +465,33 @@ void TargetingSystem::draw_aoe_preview(Vector2D center, int radius)
 }
 
 // Game.cpp compatibility method - preserves exact behavior
-bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
+bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRange) const
 {
 	// the target cursor is initialized at the player's position
-	Vector2D targetCursor = game.player->position;
+	Vector2D targetCursor = ctx.player->position;
 	bool run = true;
 	while (run)
 	{
 		// CRITICAL FIX: Clear screen to remove previous targeting overlays
 		clear();
-		
+
 		// make the line follow the mouse position
 		// if mouse move
-		if (game.input_handler.mouse_moved())
+		if (ctx.input_handler->mouse_moved())
 		{
-			targetCursor = game.input_handler.get_mouse_position();
+			targetCursor = ctx.input_handler->get_mouse_position();
 		}
-		game.render();
+		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
 
 		// first color the player position if the cursor has moved from the player position
-		if (targetCursor != game.player->position)
+		if (targetCursor != ctx.player->position)
 		{
-			mvchgat(game.player->position.y, game.player->position.x, 1, A_NORMAL, WHITE_BLACK_PAIR, nullptr);
+			mvchgat(ctx.player->position.y, ctx.player->position.x, 1, A_NORMAL, WHITE_BLACK_PAIR, nullptr);
 		}
 
 		// draw a line using TCODLine class
 		Vector2D line{ 0,0 };
-		TCODLine::init(game.player->position.x, game.player->position.y, targetCursor.x, targetCursor.y);
+		TCODLine::init(ctx.player->position.x, ctx.player->position.y, targetCursor.x, targetCursor.y);
 		while (!TCODLine::step(&line.x, &line.y))
 		{
 			mvchgat(line.y, line.x, 1, A_STANDOUT, WHITE_BLACK_PAIR, nullptr);
@@ -499,9 +502,9 @@ bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
 		attroff(COLOR_PAIR(WHITE_RED_PAIR));
 
 		// if the cursor is on a monster then display the monster's name
-		if (game.map.is_in_fov(targetCursor))
+		if (ctx.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = game.map.get_actor(targetCursor);
+			const auto& actor = ctx.map->get_actor(targetCursor);
 			// CRITICAL FIX: Don't write directly to main screen - this causes bleeding
 			// Store info for later display or use a separate window
 			if (actor != nullptr)
@@ -553,32 +556,36 @@ bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
 			// if the player presses the 'f' key
 			// then the target selection is confirmed
 			// and the target coordinates are returned
-			
+
 			// first display a message
-			game.message(WHITE_BLACK_PAIR, "Target confirmed", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Target confirmed", true);
 			// then return the coordinates
 			*position = targetCursor;
-			
+
 			// Restore game display before returning
-			game.restore_game_display();
+			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 			return true;
 			break;
 
 		case 10:
 			// if the key enter is pressed then select the target
 			// and return the target position
-			game.message(WHITE_BLACK_PAIR, "Attack confirmed", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Attack confirmed", true);
 			// if the target is a monster then attack it
 		{
-			if (game.map.is_in_fov(targetCursor))
+			if (ctx.map->is_in_fov(targetCursor))
 			{
-				const auto& actor = game.map.get_actor(targetCursor);
+				const auto& actor = ctx.map->get_actor(targetCursor);
 				// and actor is not an item
 				if (actor != nullptr)
 				{
-					game.player->attacker->attack(*game.player, *actor);
+					ctx.player->attacker->attack(*ctx.player, *actor);
 					// Restore game display after attack
-					game.restore_game_display();
+					ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 					run = false;
 				}
 			}
@@ -586,9 +593,11 @@ bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
 		break;
 		case 'r':
 		case 27:
-			game.message(WHITE_BLACK_PAIR, "Target selection canceled", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Target selection canceled", true);
 			// Restore game display before exit
-			game.restore_game_display();
+			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 			run = false;
 			break;
 
@@ -601,17 +610,17 @@ bool TargetingSystem::pick_tile(Vector2D* position, int maxRange)
 }
 
 // Handle ranged attack coordination
-void TargetingSystem::handle_ranged_attack()
+void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 {
 	// When attackMode is true, we require a ranged weapon for attacks
 	// When attackMode is false, we're just examining and don't require a ranged weapon
 
 	// Enter targeting mode with appropriate requirements
-	Vector2D targetPos = select_target(game.player->position, 4);
+	Vector2D targetPos = select_target(ctx, ctx.player->position, 4);
 
 	// If a valid target was selected and we're in attack mode
 	if (targetPos.x != -1 && targetPos.y != -1) {
 		// Process the ranged attack (including projectile animation)
-		process_ranged_attack(*game.player, targetPos);
+		process_ranged_attack(ctx, *ctx.player, targetPos);
 	}
 }

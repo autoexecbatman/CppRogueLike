@@ -18,12 +18,13 @@ enum class ShopType
 enum class ShopQuality
 {
     POOR,      // 70% base price
-    AVERAGE,   // 100% base price  
+    AVERAGE,   // 100% base price
     GOOD,      // 130% base price
     EXCELLENT  // 160% base price
 };
 
 // Forward declarations
+struct GameContext;
 class Item;
 class Creature;
 
@@ -48,8 +49,8 @@ public:
     void generate_initial_inventory();
     
     // Transaction handling
-    bool process_player_purchase(Item& item, Creature& player);
-    bool process_player_sale(Item& item, Creature& player);
+    bool process_player_purchase(GameContext& ctx, Item& item, Creature& player);
+    bool process_player_sale(GameContext& ctx, Item& item, Creature& player);
     
     // Static utility function for creating random shopkeepers
     static std::unique_ptr<ShopKeeper> create_random_shopkeeper();

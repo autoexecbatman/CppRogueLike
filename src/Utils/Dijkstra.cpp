@@ -11,7 +11,8 @@ std::vector<Vector2D> Dijkstra::a_star_search(
     Map& graph,
     Vector2D start,
     Vector2D goal,
-    bool AStar
+    bool AStar,
+    GameContext& ctx
 )
 {
     std::vector<Vector2D> cameFrom;
@@ -54,7 +55,7 @@ std::vector<Vector2D> Dijkstra::a_star_search(
             int nextIndex = graph.get_index(next); // Get index of the next node
 
             // If this new path is better (lower cost) than the previously known cost
-            double new_cost = costSoFar.at(currentIndex) + graph.cost(current, next);
+            double new_cost = costSoFar.at(currentIndex) + graph.cost(current, next, ctx);
 
             if (costSoFar.at(nextIndex) == infinity || new_cost < costSoFar.at(nextIndex))
             {

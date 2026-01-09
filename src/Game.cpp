@@ -31,7 +31,8 @@ void Game::init()
 	stairs = std::make_unique<Stairs>(Vector2D{ 0,0 });
 
 	//==MAP==
-	map.init(true); // with actors true
+	auto ctx = get_context();
+	map.init(true, ctx); // with actors true
 
 	//==GameStatus==
 	// we set gameStatus to STARTUP because we want to compute the fov only once
@@ -73,9 +74,17 @@ GameContext Game::get_context() noexcept
 	ctx.targeting = &targeting;
 	ctx.hunger_system = &hunger_system;
 
+	// Game world data
+	ctx.stairs = stairs.get();
+	ctx.objects = &objects;
+	ctx.inventory_data = &inventory_data;
+	ctx.creatures = &creatures;
+	ctx.rooms = &rooms;
+
 	// Game state
 	ctx.time = &time;
 	ctx.run = &run;
+	ctx.game_status = reinterpret_cast<int*>(&gameStatus);
 
 	return ctx;
 }
@@ -110,7 +119,8 @@ void Game::update()
 
 	if (gameStatus == GameStatus::STARTUP)
 	{
-		map.compute_fov();
+		auto ctx = get_context();
+		map.compute_fov(ctx);
 		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
 		if (level_manager.get_dungeon_level() == 1)
 		{
@@ -126,7 +136,8 @@ void Game::update()
 			gui.gui_init();
 			gui.guiInit = true;
 			// Immediately update GUI with current player data
-			gui.gui_update();
+			auto ctx = get_context();
+			gui.gui_update(ctx);
 		}
 	}
 

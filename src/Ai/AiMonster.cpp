@@ -150,8 +150,9 @@ void AiMonster::save(json& j)
 
 void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
 {
+	auto ctx = game.get_context();
 	Dijkstra dijkstra{ MAP_WIDTH,MAP_HEIGHT };
-	std::vector<Vector2D> path = dijkstra.a_star_search(game.map, owner.position, targetPosition, false);
+	std::vector<Vector2D> path = dijkstra.a_star_search(game.map, owner.position, targetPosition, false, ctx);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	auto is_actor = [](const Vector2D& pos) { return game.map.get_actor(pos) != nullptr; };
 	if (distanceToTarget > 1)

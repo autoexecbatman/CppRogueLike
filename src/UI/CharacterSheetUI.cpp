@@ -58,8 +58,9 @@ void CharacterSheetUI::display_basic_info(WINDOW* window, const Player& player)
 void CharacterSheetUI::display_experience_info(WINDOW* window, const Player& player)
 {
     // Calculate XP needed for next level
+    auto ctx = game.get_context();
     int currentXP = player.destructible->get_xp();
-    int nextLevelXP = player.ai->get_next_level_xp(const_cast<Player&>(player));
+    int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
     int xpNeeded = nextLevelXP - currentXP;
     float progressPercent = static_cast<float>(currentXP) / static_cast<float>(nextLevelXP) * 100.0f;
 

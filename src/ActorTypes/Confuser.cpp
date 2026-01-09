@@ -32,13 +32,13 @@ bool Confuser::use(Item& owner, Creature& wearer)
 		return false;
 	}
 
-	// replace the monster's AI with a confused one; 
+	// replace the monster's AI with a confused one;
 	// after <nbTurns> turns the old AI will be restored
 	auto confusedAi = std::make_unique<AiMonsterConfused>(nbTurns, std::move(actor->ai));
 	actor->ai = std::move(confusedAi);
 
-	game.message(WHITE_BLACK_PAIR, std::format("as he starts to stumble around!"), true);
-	game.message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), true);
+	game.message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), false);
+	game.message(WHITE_BLACK_PAIR, " as he starts to stumble around!", true);
 
 	// CRITICAL FIX: Clear screen completely before restore
 	clear();

@@ -1,5 +1,6 @@
 #include "ShopKeeper.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
@@ -237,30 +238,30 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item()
     return item;
 }
 
-bool ShopKeeper::process_player_purchase(Item& item, Creature& player)
+bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& player)
 {
     int price = get_buy_price(item);
-    
-    if (player.get_gold() < price) 
+
+    if (player.get_gold() < price)
     {
-        game.message(WHITE_RED_PAIR, "You don't have enough gold!", true);
+        ctx.message_system->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
         return false;
     }
-    
-    if (is_inventory_full(player.inventory_data)) 
+
+    if (is_inventory_full(player.inventory_data))
     {
-        game.message(WHITE_RED_PAIR, "Your inventory is full!", true);
+        ctx.message_system->message(WHITE_RED_PAIR, "Your inventory is full!", true);
         return false;
     }
-    
+
     player.adjust_gold(-price);
-    
+
     auto player_item = std::make_unique<Item>(item.position, item.actorData);
     player_item->value = get_sell_price(item);
     player_item->base_value = item.base_value;
     player_item->enhancement = item.enhancement; // Copy enhancement
     player_item->itemClass = item.itemClass;
-    
+
     // Copy pickable component if it exists
     if (item.pickable)
     {
@@ -269,42 +270,42 @@ bool ShopKeeper::process_player_purchase(Item& item, Creature& player)
         item.pickable->save(pickableJson);
         player_item->pickable = Pickable::create(pickableJson);
     }
-    
+
     add_item(player.inventory_data, std::move(player_item));
-    
-    game.append_message_part(WHITE_BLACK_PAIR, "You bought ");
-    game.append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-    game.append_message_part(WHITE_BLACK_PAIR, " for ");
-    game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-    game.append_message_part(WHITE_BLACK_PAIR, " gold.");
-    game.finalize_message();
-    
+
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You bought ");
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " for ");
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " gold.");
+    ctx.message_system->finalize_message();
+
     return true;
 }
 
-bool ShopKeeper::process_player_sale(Item& item, Creature& player)
+bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& player)
 {
     int price = get_sell_price(item);
-    
+
     player.adjust_gold(price);
-    
+
     auto removed_item = remove_item(player.inventory_data, item);
-    if (removed_item.has_value()) 
+    if (removed_item.has_value())
     {
-        if (!is_inventory_full(shop_inventory)) 
+        if (!is_inventory_full(shop_inventory))
         {
             (*removed_item)->value = get_buy_price(*(*removed_item));
             add_item(shop_inventory, std::move(*removed_item));
         }
     }
-    
-    game.append_message_part(WHITE_BLACK_PAIR, "You sold ");
-    game.append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-    game.append_message_part(WHITE_BLACK_PAIR, " for ");
-    game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-    game.append_message_part(WHITE_BLACK_PAIR, " gold.");
-    game.finalize_message();
-    
+
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You sold ");
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " for ");
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " gold.");
+    ctx.message_system->finalize_message();
+
     return true;
 }
 

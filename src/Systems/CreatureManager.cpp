@@ -5,6 +5,7 @@
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
+#include "../Game.h"
 #include <algorithm>
 #include <climits>
 
@@ -45,7 +46,8 @@ void CreatureManager::spawn_creatures(
         if (can_spawn_creature(creatures, max_creatures))
         {
             Vector2D spawnPos = find_spawn_position(rooms, map, dice);
-            map.add_monster(spawnPos);
+            auto ctx = game.get_context();
+            map.add_monster(spawnPos, ctx);
         }
     }
 }

@@ -161,7 +161,8 @@ void LevelUpUI::display_class_benefits(WINDOW* window, const Player& player, int
 void LevelUpUI::display_next_level_info(WINDOW* window, const Player& player)
 {
     // Show next level requirements
-    int nextLevelXP = player.ai->get_next_level_xp(const_cast<Player&>(player));
+    auto ctx = game.get_context();
+    int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
     mvwprintw(window, 17, 2, "XP for next level: %d", nextLevelXP);
 }
 
@@ -207,8 +208,9 @@ void LevelUpUI::wait_for_spacebar()
 void LevelUpUI::cleanup_and_restore()
 {
     // Clear screen and restore game display properly
+    auto ctx = game.get_context();
     clear();
     game.render();
-    game.gui.gui_render();
+    game.gui.gui_render(ctx);
     refresh();
 }

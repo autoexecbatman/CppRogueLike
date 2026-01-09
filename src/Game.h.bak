@@ -134,7 +134,7 @@ public:
     // Emscripten compatibility
     void safe_screen_clear() { rendering_manager.safe_screen_clear(); }
     void force_screen_refresh() { rendering_manager.force_screen_refresh(); }
-    void restore_game_display() { auto ctx = get_context(); render(); gui.gui_render(ctx); rendering_manager.force_screen_refresh(); }
+    void restore_game_display() { render(); gui.gui_render(); rendering_manager.force_screen_refresh(); }
 
     // Debug utilities
     void wizard_eye() noexcept;

@@ -7,6 +7,8 @@
 #include "../Map/Map.h"
 #include "Vector2D.h"
 
+struct GameContext;
+
 class Dijkstra
 {
 public:
@@ -15,7 +17,8 @@ public:
         Map& graph,
         Vector2D start,
         Vector2D goal,
-        bool AStar
+        bool AStar,
+        GameContext& ctx
     );
     std::vector<Vector2D> reconstruct_path(
         Vector2D start, Vector2D goal,

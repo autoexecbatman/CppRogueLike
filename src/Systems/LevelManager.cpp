@@ -4,8 +4,11 @@
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Systems/MessageSystem.h"
+#include "../Game.h"
 #include <nlohmann/json.hpp>
 #include <format>
+
+extern Game game;
 
 void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem& message_system)
 {
@@ -19,7 +22,8 @@ void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem
     heal_player_between_levels(player);
     
     // Regenerate the map for new level
-    map.regenerate();
+    auto ctx = game.get_context();
+    map.regenerate(ctx);
 }
 
 void LevelManager::reset_to_first_level()

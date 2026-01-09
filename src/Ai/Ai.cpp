@@ -7,6 +7,7 @@
 #include "AiMonsterConfused.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
+#include "../Core/GameContext.h"
 #include "../Game.h"
 
 //==AI==
@@ -46,13 +47,13 @@ int Ai::calculate_step(int positionDifference)
 	return positionDifference > 0 ? 1 : -1;
 }
 
-int Ai::get_next_level_xp(Creature& owner)
+int Ai::get_next_level_xp(GameContext& ctx, Creature& owner)
 {
 	// Retrieve the player's current level
-	int currentLevel = game.player->playerLevel;
+	int currentLevel = ctx.player->playerLevel;
 
 	// Use AD&D 2e XP tables based on class
-	switch (game.player->playerClassState)
+	switch (ctx.player->playerClassState)
 	{
 	case Player::PlayerClassState::FIGHTER:
 		// Fighters use a moderate progression
@@ -76,19 +77,19 @@ int Ai::get_next_level_xp(Creature& owner)
 	}
 }
 
-void Ai::levelup_update(Creature& owner)
+void Ai::levelup_update(GameContext& ctx, Creature& owner)
 {
-	game.log("AiPlayer::levelUpUpdate(Actor& owner)");
+	ctx.message_system->log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
-	int levelUpXp = get_next_level_xp(owner);
+	int levelUpXp = get_next_level_xp(ctx, owner);
 
 	if (owner.destructible->get_xp() >= levelUpXp)
 	{
-		game.player->playerLevel++;
+		ctx.player->playerLevel++;
 		owner.destructible->set_xp(owner.destructible->get_xp() - levelUpXp);
-		game.message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", game.player->playerLevel), true);
-		
-		game.display_levelup(game.player->playerLevel);
+		ctx.message_system->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->playerLevel), true);
+
+		ctx.display_manager->display_levelup(*ctx.player, ctx.player->playerLevel);
 	}
 }
 

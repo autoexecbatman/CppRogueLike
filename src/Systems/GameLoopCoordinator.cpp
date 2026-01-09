@@ -54,7 +54,7 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
     // TEMPORARY: Use extern game during migration for non-migrated methods
     extern Game game;
     game.update(); // update map and actors positions
-    gui.gui_update(); // update the gui
+    gui.gui_update(ctx); // update the gui
     ctx.message_system->log("Update OK.");
 }
 
@@ -69,8 +69,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
     // Render GUI if it's initialized - AFTER game render so it's not overwritten
     if (gui.guiInit) {
         // Ensure GUI has latest data before rendering
-        gui.gui_update();
-        gui.gui_render(); // render the gui
+        gui.gui_update(ctx);
+        gui.gui_render(ctx); // render the gui
     }
     // Call the same restore function that inventory uses
     game.restore_game_display();

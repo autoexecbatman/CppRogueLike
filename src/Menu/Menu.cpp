@@ -175,8 +175,9 @@ void Menu::menu()
 	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
+		auto ctx = game.get_context();
 		game.render();
-		game.gui.gui_render();
+		game.gui.gui_render(ctx);
 	}
 	refresh();
 	
@@ -191,8 +192,9 @@ void Menu::menu()
 	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
 	{
 		clear();
+		auto ctx = game.get_context();
 		game.render();
-		game.gui.gui_render();
+		game.gui.gui_render(ctx);
 		refresh();
 	}
 }

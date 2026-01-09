@@ -10,7 +10,7 @@
 // The constructor and destructor are empty
 // because the gui window is initialized and deleted
 // using explicit calls to the gui_init() and gui_delete() functions.
-// 
+//
 
 #include <curses.h>
 #include <vector>
@@ -18,6 +18,9 @@
 
 #include "../Persistent/Persistent.h"
 #include "LogMessage.h"
+
+// Forward declaration
+struct GameContext;
 
 inline constexpr int GUI_HEIGHT{ 7 };
 inline constexpr int GUI_WIDTH{ 118 };
@@ -37,23 +40,21 @@ private:
 	void gui_refresh() noexcept { wrefresh(guiWin); }
 	void gui_delete() noexcept { delwin(guiWin); }
 
-	void render_hp_bar();
-	void render_hunger_status();
 public:
 	bool guiInit{ false };
 
 	void gui_init() noexcept; // initialize the gui
 	void gui_shutdown() noexcept; // shutdown the gui
-	void gui_update(); // update the gui
-	void gui_render(); // render the gui
+	void gui_update(GameContext& ctx); // update the gui
+	void gui_render(const GameContext& ctx); // render the gui
 
-	void render_player_status();
+	void render_player_status(const GameContext& ctx);
 
-	void gui_print_stats(std::string_view playerName, int guiHp, int guiHpMax, std::string_view roll, int dr) noexcept;
-	void gui_print_log();
+	void gui_print_stats(const GameContext& ctx, std::string_view playerName, int guiHp, int guiHpMax, std::string_view roll, int dr) noexcept;
+	void gui_print_log(const GameContext& ctx);
 	void gui_print_attrs(int str, int dex, int con, int inte, int wis, int cha) noexcept;
 
-	void gui() noexcept;
+	void gui(GameContext& ctx) noexcept;
 	
 	void load(const json& j) override;
 	void save(json& j) override;
@@ -76,13 +77,15 @@ protected:
 		int y,
 		int width,
 		const char* name,
-		int value, 
-		int maxValue, 
-		int barColor, 
+		int value,
+		int maxValue,
+		int barColor,
 		int backColor
 	);
 
-	void renderMouseLook();
+	void renderMouseLook(const GameContext& ctx);
+	void render_hp_bar(const GameContext& ctx);
+	void render_hunger_status(const GameContext& ctx);
 };
 
 #endif // !GUI_H

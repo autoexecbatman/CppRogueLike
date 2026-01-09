@@ -1,5 +1,8 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+
 // Forward declarations
 class Map;
 class Gui;
@@ -17,6 +20,9 @@ class DataManager;
 class TargetingSystem;
 class HungerSystem;
 class Player;
+class Stairs;
+class Object;
+struct Vector2D;
 
 /**
  * GameContext - Dependency injection container
@@ -51,7 +57,15 @@ struct GameContext {
     TargetingSystem* targeting{ nullptr };
     HungerSystem* hunger_system{ nullptr };
 
+    // Game world data
+    Stairs* stairs{ nullptr };
+    std::vector<std::unique_ptr<Object>>* objects{ nullptr };
+    class InventoryData* inventory_data{ nullptr };
+    std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
+    std::vector<Vector2D>* rooms{ nullptr };
+
     // Game state (pointer to allow mutation)
     int* time{ nullptr };
     bool* run{ nullptr };
+    int* game_status{ nullptr };  // Pointer to Game::GameStatus enum
 };

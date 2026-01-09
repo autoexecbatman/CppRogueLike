@@ -11,7 +11,11 @@
       "mcp__memory__add_observations",
       "Bash(build/bin/Debug/test_exe.exe:*)",
       "Bash(test:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(cat:*)",
+      "Bash(del /F nul)"
     ],
     "deny": [],
     "ask": []

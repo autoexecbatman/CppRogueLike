@@ -8,6 +8,7 @@
 #include "BaseMenu.h"
 #include "../Actor/Actor.h"
 
+struct GameContext;
 class Item;
 class Creature;
 class Player;
@@ -23,6 +24,7 @@ class MenuBuy : public BaseMenu
 	std::vector<std::string> menuItems;
 	Creature& buyer;
 	ShopKeeper& shopkeeper; // Store shopkeeper reference
+	GameContext& ctx; // Game context for message system
 
 	void populate_items();
 	void menu_print_state(size_t state);
@@ -30,7 +32,7 @@ class MenuBuy : public BaseMenu
 	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller);
 	void draw_content();
 public:
-	MenuBuy(Creature& buyer, ShopKeeper& shopkeeper);
+	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);
 	~MenuBuy();
 
 	void draw();
