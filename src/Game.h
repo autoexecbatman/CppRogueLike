@@ -113,7 +113,7 @@ public:
     void handle_gameloop(Gui& gui, int loopNum) { auto ctx = get_context(); game_loop_coordinator.handle_gameloop(ctx, gui, loopNum); }
     void handle_ranged_attack() { auto ctx = get_context(); targeting.handle_ranged_attack(ctx); }
     void display_help() noexcept { display_manager.display_help(); }
-    void display_levelup(int level) { display_manager.display_levelup(*player, level); }
+    void display_levelup(int level) { auto ctx = get_context(); display_manager.display_levelup(*player, level, ctx); }
     void display_character_sheet() const noexcept { display_manager.display_character_sheet(*player); }
     bool pick_tile(Vector2D* position, int maxRange) { auto ctx = get_context(); return targeting.pick_tile(ctx, position, maxRange); }
 

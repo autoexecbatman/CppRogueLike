@@ -1,0 +1,11 @@
+File,Line,Method,Game Reference,Current Call,Proposed Change,GameContext Member,Complexity
+src/ActorTypes/Healer.cpp,14,use(),game.message,game.message(COLOR_WHITE "You heal " false),ctx.message_system->message(COLOR_WHITE "You heal " false),message_system,Simple
+src/ActorTypes/Healer.cpp,15,use(),game.message,game.message(COLOR_RED std::to_string(amountHealed) false),ctx.message_system->message(COLOR_RED std::to_string(amountHealed) false),message_system,Simple
+src/ActorTypes/Healer.cpp,16,use(),game.message,game.message(COLOR_WHITE " hit points." true),ctx.message_system->message(COLOR_WHITE " hit points." true),message_system,Simple
+src/ActorTypes/Healer.cpp,22,use(),game.message,game.message(COLOR_RED "Health is already maxed out!" true),ctx.message_system->message(COLOR_RED "Health is already maxed out!" true),message_system,Simple
+src/ActorTypes/Healer.cpp,2,include,#include "../Game.h",Remove or keep for backward compat,Not needed after refactor,N/A,N/A
+src/ActorTypes/Healer.h,,,No direct game references,,,
+src/ActorTypes/Healer.cpp,6-7,Constructor,No game references,Healer(int),,N/A,
+src/ActorTypes/Healer.cpp,28-37,load(),No game references,void load(const json& j),,N/A,
+src/ActorTypes/Healer.cpp,40-43,save(),No game references,void save(json& j),,N/A,
+src/ActorTypes/Healer.cpp,46-48,get_type(),No game references,PickableType get_type() const,,N/A,

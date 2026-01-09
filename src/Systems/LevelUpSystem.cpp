@@ -9,14 +9,6 @@
 #include "../Colors/Colors.h"
 #include <format>
 
-// Backward compatibility overload
-void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel)
-{
-    extern Game game;
-    GameContext ctx = game.get_context();
-    apply_level_up_benefits(owner, newLevel, &ctx);
-}
-
 void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
 {
     if (!ctx) return;
@@ -61,9 +53,8 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameC
     }
     ctx->message_system->finalize_message();
 
-    // Log is in Game, but we can still use game.log for now or replace with a context method
-    extern Game game;
-    game.log(std::format("Level {} reached! Combat abilities improved.", newLevel));
+    // Announce level up
+    ctx->message_system->log(std::format("Level {} reached! Combat abilities improved.", newLevel));
 }
 
 void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
@@ -109,8 +100,7 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
         ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "!");
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log(std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
+            ctx->message_system->log(std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
     }
 }
 
@@ -180,8 +170,7 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel, GameConte
     ctx->message_system->append_message_part(WHITE_BLACK_PAIR, ")");
     ctx->message_system->finalize_message();
 
-    extern Game game;
-    game.log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
+    ctx->message_system->log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
                          totalHPGain, hitDiceRoll, conBonus, owner.destructible->get_max_hp()));
 
     return totalHPGain; // Return HP gained for display
@@ -233,8 +222,7 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
         ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log("Fighter gained extra attack (3/2 attacks per round)");
+            ctx->message_system->log("Fighter gained extra attack (3/2 attacks per round)");
     }
     else if (newLevel == 13)
     {
@@ -244,8 +232,7 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
         ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log("Fighter gained extra attack (2 attacks per round)");
+            ctx->message_system->log("Fighter gained extra attack (2 attacks per round)");
     }
 
     // Fighters also get better weapon specialization bonuses
@@ -270,8 +257,7 @@ void LevelUpSystem::apply_rogue_improvements(Creature& owner, int newLevel, Game
         ctx->message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(backstabMultiplier));
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
+            ctx->message_system->log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
     }
 
     // Rogue skills improve
@@ -295,8 +281,7 @@ void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel, Gam
         ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log(std::format("Cleric turn undead ability improved at level {}", newLevel));
+            ctx->message_system->log(std::format("Cleric turn undead ability improved at level {}", newLevel));
         // NOTE: Turn undead mechanic deferred - tracking implemented but mechanic unused
     }
 
@@ -326,8 +311,7 @@ void LevelUpSystem::apply_wizard_improvements(Creature& owner, int newLevel, Gam
             ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " spells.");
             ctx->message_system->finalize_message();
 
-            extern Game game;
-            game.log(std::format("Wizard can now cast level {} spells", spellLevel));
+                    ctx->message_system->log(std::format("Wizard can now cast level {} spells", spellLevel));
         }
     }
 
@@ -397,8 +381,7 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
         break;
     }
 
-    extern Game game;
-    game.log(std::format("Ability score improved at level {}", newLevel));
+    ctx->message_system->log(std::format("Ability score improved at level {}", newLevel));
 }
 
 void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext* ctx)
@@ -451,8 +434,7 @@ void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLeve
         ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Saving throws improved!");
         ctx->message_system->finalize_message();
 
-        extern Game game;
-        game.log(std::format("Saving throws improved at level {}", newLevel));
+            ctx->message_system->log(std::format("Saving throws improved at level {}", newLevel));
         // NOTE: Saving throw mechanics deferred - bonuses tracked but system unused
     }
 }

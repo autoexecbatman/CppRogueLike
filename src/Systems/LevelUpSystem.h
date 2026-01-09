@@ -17,9 +17,6 @@ public:
     // Helper functions (public for display purposes)
     static int calculate_backstab_multiplier(int level);
 
-    // Backward compatibility overloads during migration
-    static void apply_level_up_benefits(Creature& owner, int newLevel);
-
 private:
     // Core combat improvements
     static void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx);

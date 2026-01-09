@@ -89,7 +89,7 @@ void Ai::levelup_update(GameContext& ctx, Creature& owner)
 		owner.destructible->set_xp(owner.destructible->get_xp() - levelUpXp);
 		ctx.message_system->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->playerLevel), true);
 
-		ctx.display_manager->display_levelup(*ctx.player, ctx.player->playerLevel);
+		ctx.display_manager->display_levelup(*ctx.player, ctx.player->playerLevel, ctx);
 	}
 }
 

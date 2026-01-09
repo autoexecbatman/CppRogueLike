@@ -53,10 +53,10 @@ void DisplayManager::display_help() const noexcept
     refresh();
 }
 
-void DisplayManager::display_levelup(Player& player, int xpLevel) const
+void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& ctx) const
 {
     // Apply all level up benefits through the new LevelUpSystem
-    LevelUpSystem::apply_level_up_benefits(player, xpLevel);
+    LevelUpSystem::apply_level_up_benefits(player, xpLevel, &ctx);
 
     // Display the level up screen using the dedicated UI class
     LevelUpUI::display_level_up_screen(player, xpLevel);
