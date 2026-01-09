@@ -28,9 +28,7 @@ void GameLoopCoordinator::handle_initialization(GameContext& ctx)
 {
     if (!ctx.menu_manager->is_game_initialized())
     {
-        // TEMPORARY: Use extern game during migration for non-migrated methods
-        extern Game game;
-        game.init();
+        ctx.game->init();
         ctx.menu_manager->set_game_initialized(true);
     }
 }
@@ -51,9 +49,7 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
     //==UPDATE==
     ctx.message_system->log("Running update...");
-    // TEMPORARY: Use extern game during migration for non-migrated methods
-    extern Game game;
-    game.update(); // update map and actors positions
+    ctx.game->update(); // update map and actors positions
     gui.gui_update(ctx); // update the gui
     ctx.message_system->log("Update OK.");
 }
@@ -62,10 +58,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
     //==DRAW==
     ctx.message_system->log("Running render...");
-    // TEMPORARY: Use extern game during migration for non-migrated methods
-    extern Game game;
     // Render game content first, then GUI on top
-    game.render(); // render map and actors to the screen
+    ctx.game->render(); // render map and actors to the screen
     // Render GUI if it's initialized - AFTER game render so it's not overwritten
     if (gui.guiInit) {
         // Ensure GUI has latest data before rendering
@@ -73,18 +67,16 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
         gui.gui_render(ctx); // render the gui
     }
     // Call the same restore function that inventory uses
-    game.restore_game_display();
+    ctx.game->restore_game_display();
     ctx.message_system->log("Render OK.");
 }
 
 void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 {
-    // TEMPORARY: Use extern game during migration for menus and windowState
-    extern Game game;
     // Check for menus AFTER rendering so positions are updated
-    if (ctx.menu_manager->has_active_menus(game.menus))
+    if (ctx.menu_manager->has_active_menus(ctx.game->menus))
     {
-        game.windowState = Game::WindowState::MENU;
+        ctx.game->windowState = Game::WindowState::MENU;
         return;
     }
 }

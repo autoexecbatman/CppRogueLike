@@ -4,6 +4,7 @@
 #include <memory>
 
 // Forward declarations
+class Game;
 class Map;
 class Gui;
 class MessageSystem;
@@ -33,6 +34,9 @@ struct Vector2D;
  * Phase 3: Replace game.X with ctx->X incrementally (1,196 references)
  */
 struct GameContext {
+    // Top-level coordinator
+    Game* game{ nullptr };
+
     // Core game world
     Map* map{ nullptr };
     Gui* gui{ nullptr };

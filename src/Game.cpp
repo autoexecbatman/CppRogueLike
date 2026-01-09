@@ -50,6 +50,9 @@ GameContext Game::get_context() noexcept
 {
 	GameContext ctx;
 
+	// Top-level coordinator
+	ctx.game = this;
+
 	// Core game world
 	ctx.map = &map;
 	ctx.gui = &gui;
