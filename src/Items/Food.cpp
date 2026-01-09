@@ -6,7 +6,8 @@ Food::Food(int nutrition_value) : nutrition_value(nutrition_value) {}
 
 bool Food::use(Item& owner, Creature& wearer) {
     // Reduce hunger by the nutrition value of the food
-    game.hunger_system.decrease_hunger(nutrition_value);
+    auto ctx = game.get_context();
+    game.hunger_system.decrease_hunger(ctx, nutrition_value);
 
     // Display message
     game.append_message_part(WHITE_BLACK_PAIR, "You eat the ");

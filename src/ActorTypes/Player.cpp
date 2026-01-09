@@ -160,7 +160,8 @@ void Player::calculate_thaco()
 
 void Player::consume_food(int nutrition) {
 	// Decrease hunger by nutrition value
-	game.hunger_system.decrease_hunger(nutrition);
+	auto ctx = game.get_context();
+	game.hunger_system.decrease_hunger(ctx, nutrition);
 }
 
 void Player::render() const noexcept
@@ -228,7 +229,8 @@ bool Player::rest()
 
 	// Consume food (increase hunger)
 	const int hungerCost = 50;
-	game.hunger_system.increase_hunger(hungerCost);
+	auto ctx = game.get_context();
+	game.hunger_system.increase_hunger(ctx, hungerCost);
 
 	HungerState afterState = game.hunger_system.get_hunger_state();
 

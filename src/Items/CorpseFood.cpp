@@ -36,7 +36,8 @@ bool CorpseFood::use(Item& owner, Creature& wearer) {
     actualNutrition = std::max(10, actualNutrition); // Minimum 10 nutrition
 
     // Reduce hunger by the nutrition value of the corpse
-    game.hunger_system.decrease_hunger(actualNutrition);
+    auto ctx = game.get_context();
+    game.hunger_system.decrease_hunger(ctx, actualNutrition);
 
     // Generate flavor text based on the corpse type
     std::string flavorText;

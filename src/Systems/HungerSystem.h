@@ -26,10 +26,6 @@ public:
     // Decreases hunger by the specified amount
     void decrease_hunger(GameContext& ctx, int amount);
 
-    // TEMPORARY: Backward-compatible overloads during migration
-    void increase_hunger(int amount = 1);
-    void decrease_hunger(int amount);
-
     // Returns current hunger state
     HungerState get_hunger_state() const;
 

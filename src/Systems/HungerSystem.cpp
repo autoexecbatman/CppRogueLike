@@ -32,21 +32,6 @@ void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
     update_hunger_state(ctx);
 }
 
-// TEMPORARY: Backward-compatible overloads during migration
-void HungerSystem::increase_hunger(int amt)
-{
-    extern Game game;
-    GameContext ctx = game.get_context();
-    HungerSystem::increase_hunger(ctx, amt);
-}
-
-void HungerSystem::decrease_hunger(int amt)
-{
-    extern Game game;
-    GameContext ctx = game.get_context();
-    HungerSystem::decrease_hunger(ctx, amt);
-}
-
 HungerState HungerSystem::get_hunger_state() const
 {
     return current_state;
