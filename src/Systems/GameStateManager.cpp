@@ -95,7 +95,8 @@ bool GameStateManager::load_game(
     Gui& gui,
     HungerSystem& hunger_system,
     LevelManager& level_manager,
-    int& game_time
+    int& game_time,
+    GameContext& ctx
 )
 {
     std::ifstream file(SAVE_FILE_NAME);
@@ -140,9 +141,6 @@ bool GameStateManager::load_game(
     // Load the hunger system
     if (j.contains("hunger_system"))
     {
-        // Temporary: Create GameContext from available components
-        extern Game game;
-        auto ctx = game.get_context();
         hunger_system.load(ctx, j["hunger_system"]);
     }
     

@@ -191,6 +191,7 @@ void Game::load_all()
 {
 	menu_manager.set_game_initialized(true);
 	data_manager.load_all_data(message_system);
+	auto ctx = get_context();
 	if (!state_manager.load_game(
 		map,
 		rooms,
@@ -201,7 +202,8 @@ void Game::load_all()
 		gui,
 		hunger_system,
 		level_manager,
-		time))
+		time,
+		ctx))
 	{
 		init();
 		log("Error: Could not open save file. Game initialized with default settings.");

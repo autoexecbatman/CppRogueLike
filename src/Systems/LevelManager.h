@@ -12,6 +12,7 @@
 class Map;
 class Player;
 class MessageSystem;
+struct GameContext;
 
 class LevelManager
 {
@@ -24,7 +25,7 @@ public:
     int get_shopkeepers_count() const noexcept { return shopkeepers_on_current_level; }
     
     // Level management
-    void advance_to_next_level(Map& map, Player& player, MessageSystem& message_system);
+    void advance_to_next_level(Map& map, Player& player, MessageSystem& message_system, GameContext& ctx);
     void reset_to_first_level();
     
     // Shopkeeper management

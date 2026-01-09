@@ -21,6 +21,7 @@ class HungerSystem;
 class LevelManager;
 struct InventoryData;
 struct Vector2D;
+struct GameContext;
 
 class GameStateManager
 {
@@ -52,7 +53,8 @@ public:
         Gui& gui,
         HungerSystem& hunger_system,
         LevelManager& level_manager,
-        int& game_time
+        int& game_time,
+        GameContext& ctx
     );
 
 

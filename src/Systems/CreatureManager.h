@@ -14,6 +14,7 @@ class Creature;
 class Map;
 class RandomDice;
 struct Vector2D;
+struct GameContext;
 
 class CreatureManager
 {
@@ -32,6 +33,7 @@ public:
         Map& map,
         RandomDice& dice,
         int game_time,
+        GameContext& ctx,
         int max_creatures = 10,
         int spawn_rate = 2
     );
