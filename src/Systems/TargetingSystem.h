@@ -8,7 +8,7 @@ struct GameContext;
 class TargetingSystem
 {
 public:
-	const Vector2D select_target(const GameContext& ctx, Vector2D startPos, int maxRange) const;
+	const Vector2D select_target(GameContext& ctx, Vector2D startPos, int maxRange) const;
 	bool pick_tile(GameContext& ctx, Vector2D* position, int maxRange) const;  // Game.cpp compatibility method
 	void draw_los(const GameContext& ctx, Vector2D targetCursor) const;
 	void draw_range_indicator(GameContext& ctx, Vector2D center, int range) const;

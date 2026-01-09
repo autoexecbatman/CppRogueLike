@@ -18,7 +18,7 @@ public:
 
 	LightningBolt(int range, int damage) noexcept;
 
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	
 	// Lightning animation between two points
 	void animate_lightning(Vector2D from, Vector2D to);

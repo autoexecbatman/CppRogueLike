@@ -6,7 +6,7 @@
 //==TELEPORTER==
 Teleporter::Teleporter() {}
 
-bool Teleporter::use(Item& owner, Creature& wearer)
+bool Teleporter::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	Vector2D teleportLocation = find_valid_teleport_location();
 	
@@ -15,13 +15,12 @@ bool Teleporter::use(Item& owner, Creature& wearer)
 		wearer.position = teleportLocation;
 
 		// Recalculate FOV from new position
-		auto ctx = game.get_context();
 		game.map.compute_fov(ctx);
-		
+
 		game.message(COLOR_BLUE, "You feel disoriented as the world shifts around you!", true);
 		game.message(COLOR_WHITE, "You have been teleported to a new location.", true);
-		
-		return Pickable::use(owner, wearer);
+
+		return Pickable::use(owner, wearer, ctx);
 	}
 	else
 	{

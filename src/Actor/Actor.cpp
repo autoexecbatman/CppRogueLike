@@ -178,11 +178,12 @@ void Creature::save(json& j)
 // the actor update
 void Creature::update()
 {
+	auto ctx = game.get_context();
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{
-		destructible->update_armor_class(*this);
-		destructible->update_constitution_bonus(*this);
+		destructible->update_armor_class(*this, ctx);
+		destructible->update_constitution_bonus(*this, ctx);
 	}
 
 	// if the actor has an ai then update the ai
@@ -344,6 +345,7 @@ void Creature::sync_ranged_state()
 
 void Creature::pick()
 {
+	auto ctx = game.get_context();
 	// Check if inventory is already full before attempting to pick
 	if (is_inventory_full(inventory_data))
 	{
@@ -383,7 +385,7 @@ void Creature::pick()
 	if (itemAtPosition->itemClass == ItemClass::GOLD)
 	{
 		// Use the pickable's use() method which handles gold pickup properly
-		if (itemAtPosition->pickable->use(*itemAtPosition, *this))
+		if (itemAtPosition->pickable->use(*itemAtPosition, *this, ctx))
 		{
 			// Gold was picked up successfully via polymorphic call
 			// Remove gold from floor inventory

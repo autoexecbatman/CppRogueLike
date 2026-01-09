@@ -4,9 +4,8 @@
 
 Food::Food(int nutrition_value) : nutrition_value(nutrition_value) {}
 
-bool Food::use(Item& owner, Creature& wearer) {
+bool Food::use(Item& owner, Creature& wearer, GameContext& ctx) {
     // Reduce hunger by the nutrition value of the food
-    auto ctx = game.get_context();
     game.hunger_system.decrease_hunger(ctx, nutrition_value);
 
     // Display message
@@ -16,7 +15,7 @@ bool Food::use(Item& owner, Creature& wearer) {
     game.finalize_message();
 
     // Food is consumed after being eaten
-    return Pickable::use(owner, wearer);
+    return Pickable::use(owner, wearer, ctx);
 }
 
 void Food::load(const json& j) {

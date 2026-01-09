@@ -6,7 +6,7 @@ Mace::Mace()
 {
 }
 
-bool Mace::use(Item& owner, Creature& wearer)
+bool Mace::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
     // Mace is a weapon, attempt to equip it
     // Check if wearer has equipment capability (likely Player class)

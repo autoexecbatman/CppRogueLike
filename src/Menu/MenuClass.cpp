@@ -16,6 +16,7 @@ using namespace InventoryOperations; // For clean function calls
 
 void equip_fighter_starting_gear()
 {
+	auto ctx = game.get_context();
 	auto& player = *game.player;
 	
 	// AD&D 2e Fighter starting money: 5d4 × 10 gp (50-200 gp)
@@ -148,8 +149,8 @@ void equip_fighter_starting_gear()
 	player.sync_ranged_state();
 	
 	// Update AC based on equipped armor (proper way)
-	player.destructible->update_armor_class(player);
-	
+	player.destructible->update_armor_class(player, ctx);
+
 	// HEALING POTIONS (3x)
 	for(int i = 0; i < 3; i++)
 	{

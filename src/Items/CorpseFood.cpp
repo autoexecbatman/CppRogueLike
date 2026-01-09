@@ -18,7 +18,7 @@ const std::unordered_map<std::string, int> CORPSE_NUTRITION_VALUES = {
 
 CorpseFood::CorpseFood(int nutrition_value) : nutrition_value(nutrition_value) {}
 
-bool CorpseFood::use(Item& owner, Creature& wearer) {
+bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     // Dynamically calculate nutrition based on corpse type if it wasn't set
     if (nutrition_value <= 0) {
         auto it = CORPSE_NUTRITION_VALUES.find(owner.actorData.name);
@@ -36,7 +36,6 @@ bool CorpseFood::use(Item& owner, Creature& wearer) {
     actualNutrition = std::max(10, actualNutrition); // Minimum 10 nutrition
 
     // Reduce hunger by the nutrition value of the corpse
-    auto ctx = game.get_context();
     game.hunger_system.decrease_hunger(ctx, actualNutrition);
 
     // Generate flavor text based on the corpse type
@@ -72,7 +71,7 @@ bool CorpseFood::use(Item& owner, Creature& wearer) {
     game.finalize_message();
 
     // Corpse is consumed after eating
-    return Pickable::use(owner, wearer);
+    return Pickable::use(owner, wearer, ctx);
 }
 
 void CorpseFood::load(const json& j) {

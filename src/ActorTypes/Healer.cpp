@@ -5,7 +5,7 @@
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}
 
-bool Healer::use(Item& owner, Creature& wearer)
+bool Healer::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	int amountHealed = wearer.destructible->heal(amountToHeal);
 
@@ -15,7 +15,7 @@ bool Healer::use(Item& owner, Creature& wearer)
 		game.message(COLOR_RED, std::to_string(amountHealed), false);
 		game.message(COLOR_WHITE, " hit points.", true);
 
-		return Pickable::use(owner, wearer);
+		return Pickable::use(owner, wearer, ctx);
 	}
 	else
 	{

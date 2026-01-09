@@ -422,6 +422,7 @@ bool Player::toggle_shield(uint32_t item_unique_id)
 
 bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
+	auto ctx = game.get_context();
 	if (!item)
 	{
 		if (game.message_system.is_debug_mode()) game.log("DEBUG: equip_item failed - null item");
@@ -476,7 +477,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
-		destructible->update_armor_class(*this);
+		destructible->update_armor_class(*this, ctx);
 		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 	}
 	
@@ -563,6 +564,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 bool Player::unequip_item(EquipmentSlot slot)
 {
+	auto ctx = game.get_context();
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
 	
@@ -591,7 +593,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		// Update armor class if armor or shield was unequipped
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
-			destructible->update_armor_class(*this);
+			destructible->update_armor_class(*this, ctx);
 			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 		}
 		

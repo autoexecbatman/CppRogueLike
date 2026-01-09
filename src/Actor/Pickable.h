@@ -11,6 +11,7 @@ class Actor;
 class Creature;
 class Item;
 class Player; // Forward declaration for smart slot selection
+struct GameContext; // Forward declaration for dependency injection
 
 // Forward declaration - EquipmentSlot is defined in Player.h
 enum class EquipmentSlot;
@@ -64,7 +65,7 @@ public:
 
 	virtual ~Pickable() {};
 
-	virtual bool use(Item& owner, Creature& wearer);
+	virtual bool use(Item& owner, Creature& wearer, GameContext& ctx);
 	static std::unique_ptr<Pickable> create(const json& j);
 	virtual void save(json& j) = 0;
 	virtual void load(const json& j) = 0;
@@ -79,7 +80,7 @@ public:
 	std::string roll;
 
 	// Common weapon equip/unequip logic
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
 	// Determines if this weapon is a ranged weapon
 	virtual bool is_ranged() const = 0;
@@ -241,7 +242,7 @@ public:
 	
 	HealingPotion(int amount = 20) : heal_amount(amount) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::HEALING_POTION; }
@@ -254,7 +255,7 @@ public:
 	
 	ManaPotion(int amount = 15) : mana_amount(amount) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::MANA_POTION; }
@@ -268,7 +269,7 @@ public:
 	
 	StrengthPotion(int bonus = 2, int dur = 100) : strength_bonus(bonus), duration(dur) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::STRENGTH_POTION; }
@@ -282,7 +283,7 @@ public:
 	
 	SpeedPotion(int bonus = 1, int dur = 50) : speed_bonus(bonus), duration(dur) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SPEED_POTION; }
@@ -293,7 +294,7 @@ class PoisonAntidote : public Pickable
 public:
 	PoisonAntidote() {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::POISON_ANTIDOTE; }
@@ -307,7 +308,7 @@ public:
 	
 	FireResistancePotion(int resistance = 50, int dur = 200) : resistance_amount(resistance), duration(dur) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::FIRE_RESISTANCE_POTION; }
@@ -320,7 +321,7 @@ public:
 	
 	InvisibilityPotion(int dur = 30) : duration(dur) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::INVISIBILITY_POTION; }
@@ -332,7 +333,7 @@ class ScrollIdentify : public Pickable
 public:
 	ScrollIdentify() {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SCROLL_IDENTIFY; }
@@ -345,7 +346,7 @@ public:
 	
 	ScrollTeleport(int teleport_range = 10) : range(teleport_range) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SCROLL_TELEPORT; }
@@ -358,7 +359,7 @@ public:
 	
 	ScrollMagicMapping(int map_radius = 25) : radius(map_radius) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SCROLL_MAGIC_MAPPING; }
@@ -371,7 +372,7 @@ public:
 	
 	ScrollEnchantment(int bonus = 1) : enhancement_bonus(bonus) {}
 	
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;
 	void load(const json& j) override;
 	PickableType get_type() const override { return PickableType::SCROLL_ENCHANTMENT; }
@@ -385,7 +386,7 @@ public:
 	Shield() { roll = "D4"; }
 
 	// Override use method to work like armor
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
 	bool is_ranged() const override;
 	HandRequirement get_hand_requirement() const override { return HandRequirement::OFF_HAND_ONLY; }

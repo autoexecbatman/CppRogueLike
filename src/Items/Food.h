@@ -7,7 +7,7 @@ class Food : public Pickable {
 public:
     Food(int nutrition_value);
 
-    bool use(Item& owner, Creature& wearer) override;
+    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
     void load(const json& j) override;
     void save(json& j) override;
     PickableType get_type() const override { return PickableType::FOOD; }

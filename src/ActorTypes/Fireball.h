@@ -24,7 +24,7 @@ class Fireball : public LightningBolt
 public:
     Fireball(int range, int damage);
 
-    bool use(Item& owner, Creature& wearer) override;
+    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
     // Creates a dynamic fire explosion effect
     void create_explosion(Vector2D center);

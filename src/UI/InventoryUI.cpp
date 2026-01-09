@@ -311,10 +311,11 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
         
         if (selectedItem && selectedItem->pickable)
         {
+            auto ctx = game.get_context();
             Item* itemPtr = selectedItem;
-            
+
             game.log("Attempting to use item...");
-            bool itemUsed = selectedItem->pickable->use(*selectedItem, player);
+            bool itemUsed = selectedItem->pickable->use(*selectedItem, player, ctx);
             game.log("Item use result: " + std::string(itemUsed ? "SUCCESS" : "FAILED"));
             
             if (itemUsed)

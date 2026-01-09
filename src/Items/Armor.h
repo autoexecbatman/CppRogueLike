@@ -8,13 +8,13 @@
 class Armor : public Pickable
 {
 public:
-    int armorClass;   // Bonus to character's AC
+    int armorClass{};   // Bonus to character's AC
 
     // Clean armor equip/unequip logic - delegates to Equipment System
-    bool use(Item& owner, Creature& wearer) override;
+    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
     // Pure stat effects for NPCs - no inventory management
-    void apply_stat_effects(Creature& creature, Item& owner);
+    void apply_stat_effects(Creature& creature, Item& owner, GameContext& ctx);
 
     // Gets the armor class bonus
     virtual int getArmorClass() const { return armorClass; }

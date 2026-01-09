@@ -82,7 +82,7 @@ void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
             
             if (finalDamage > 0)
             {
-                target.destructible->take_damage(target, finalDamage);
+                target.destructible->take_damage(target, finalDamage, ctx);
             }
         }
         else
@@ -242,7 +242,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 						 " (DR) = " + std::to_string(finalDamage) + " damage to " + target.actorData.name);
 
 				// apply damage to target
-				target.destructible->take_damage(target, finalDamage);
+				target.destructible->take_damage(target, finalDamage, ctx);
 			}
 			else
 			{
@@ -359,7 +359,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 
 			if (finalDamage > 0)
 			{
-				target.destructible->take_damage(target, finalDamage);
+				target.destructible->take_damage(target, finalDamage, ctx);
 			}
 		}
 		else

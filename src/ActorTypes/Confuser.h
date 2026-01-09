@@ -16,7 +16,7 @@ public:
 
 	Confuser(int nbTurns, int range) noexcept;
 
-	bool use(Item& owner, Creature& wearer);
+	bool use(Item& owner, Creature& wearer, GameContext& ctx);
 
 	void load(const json& j) override;
 	void save(json& j) override;

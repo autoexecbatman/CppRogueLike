@@ -5,6 +5,7 @@
 #include "../Persistent/Persistent.h"
 
 class Creature;
+struct GameContext;
 
 //====
 class Destructible : public Persistent
@@ -23,7 +24,7 @@ private:
 
 public:
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	void update_constitution_bonus(Creature& owner);
+	void update_constitution_bonus(Creature& owner, GameContext& ctx);
 	virtual ~Destructible() override = default;
 	Destructible(const Destructible&) = delete;
 	Destructible(Destructible&&) = delete;
@@ -76,10 +77,10 @@ public:
 	void set_last_constitution(int value) noexcept { lastConstitution = value; }
 
 	// Action methods
-	void take_damage(Creature& owner, int damage); // handles damage, owner attacked, returns (dam - def)
-	virtual void die(Creature& owner); // handles death, owner killed
+	void take_damage(Creature& owner, int damage, GameContext& ctx); // handles damage, owner attacked, returns (dam - def)
+	virtual void die(Creature& owner, GameContext& ctx); // handles death, owner killed
 	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
-	void update_armor_class(Creature& owner);
+	void update_armor_class(Creature& owner, GameContext& ctx);
 
 	void load(const json& j) override;
 	void save(json& j) override;
@@ -98,7 +99,7 @@ class MonsterDestructible : public Destructible
 {
 public:
 	MonsterDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	void die(Creature& owner) override;
+	void die(Creature& owner, GameContext& ctx) override;
 	void save(json& j);
 };
 
@@ -107,7 +108,7 @@ class PlayerDestructible : public Destructible
 {
 public:
 	PlayerDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	void die(Creature& owner) override;
+	void die(Creature& owner, GameContext& ctx) override;
 	void save(json& j);
 };
 

@@ -9,7 +9,7 @@
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}
 
-bool Fireball::use(Item& owner, Creature& wearer)
+bool Fireball::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
     Vector2D tilePicked{ 0, 0 };
     if (!game.pick_tile(&tilePicked, Fireball::maxRange)) // <-- runs a while loop here
@@ -29,7 +29,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
     {
         animation(game.player->position, maxRange);
         // damage the player
-        game.player->destructible->take_damage(*game.player, damage);
+        game.player->destructible->take_damage(*game.player, damage, ctx);
     }
 
     // First pass to show affected creatures and display messages
@@ -54,7 +54,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
         {
             if (!c->destructible->is_dead() && c->get_tile_distance(tilePicked) <= Fireball::maxRange)
             {
-                c->destructible->take_damage(*c, damage);
+                c->destructible->take_damage(*c, damage, ctx);
             }
         }
     }
@@ -62,7 +62,7 @@ bool Fireball::use(Item& owner, Creature& wearer)
     // CRITICAL FIX: Immediately cleanup dead creatures to show corpses
     game.cleanup_dead_creatures();
 
-    return Pickable::use(owner, wearer);
+    return Pickable::use(owner, wearer, ctx);
 }
 
 void Fireball::create_explosion(Vector2D center)

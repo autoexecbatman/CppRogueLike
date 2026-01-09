@@ -94,6 +94,9 @@ GameContext Game::get_context() noexcept
 
 void Game::update()
 {
+	// Get context for systems that need it
+	auto ctx = get_context();
+
 	if (gameStatus == GameStatus::VICTORY)
 	{
 		log("Player has won the game!");
@@ -122,7 +125,6 @@ void Game::update()
 
 	if (gameStatus == GameStatus::STARTUP)
 	{
-		auto ctx = get_context();
 		map.compute_fov(ctx);
 		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
 		if (level_manager.get_dungeon_level() == 1)
@@ -139,7 +141,6 @@ void Game::update()
 			gui.gui_init();
 			gui.guiInit = true;
 			// Immediately update GUI with current player data
-			auto ctx = get_context();
 			gui.gui_update(ctx);
 		}
 	}
@@ -157,18 +158,17 @@ void Game::update()
 		{
 			if (creature && creature->destructible)
 			{
-				creature->destructible->update_constitution_bonus(*creature);
+				creature->destructible->update_constitution_bonus(*creature, ctx);
 			}
 		}
 
 		// Don't forget the player
 		if (player && player->destructible)
 		{
-			player->destructible->update_constitution_bonus(*player);
+			player->destructible->update_constitution_bonus(*player, ctx);
 		}
 
 		// Increase hunger every turn
-		auto ctx = get_context();
 		hunger_system.increase_hunger(ctx, 1);
 
 		// Apply hunger effects

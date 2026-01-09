@@ -5,7 +5,7 @@
 #include "../Game.h"
 #include "../Core/GameContext.h"
 
-const Vector2D TargetingSystem::select_target(const GameContext& ctx, Vector2D startPos, int maxRange) const
+const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
 {
 	// Check if player is trying to attack but doesn't have a ranged weapon
 	if (!ctx.player->has_state(ActorState::IS_RANGED))

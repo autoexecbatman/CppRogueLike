@@ -2,9 +2,10 @@
 #include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Player.h"
+#include "../Core/GameContext.h"
 
 // Clean armor equip/unequip logic - delegates to Equipment System
-bool Armor::use(Item& item, Creature& wearer)
+bool Armor::use(Item& item, Creature& wearer, GameContext& ctx)
 {
 	// Use the item's own name and type directly
 	std::string armorName = item.actorData.name;
@@ -34,24 +35,25 @@ bool Armor::use(Item& item, Creature& wearer)
 	}
 	
 	// For NPCs, use simple stat modification
-	apply_stat_effects(wearer, item);
+	apply_stat_effects(wearer, item, ctx);
 	return true;
 }
 
 // Pure stat effects for NPCs - no inventory management
-void Armor::apply_stat_effects(Creature& creature, Item& owner)
+void Armor::apply_stat_effects(Creature& creature, Item& owner, GameContext& ctx)
 {
+	
 	if (owner.has_state(ActorState::IS_EQUIPPED))
 	{
 		// Remove armor effects
 		owner.remove_state(ActorState::IS_EQUIPPED);
-		creature.destructible->update_armor_class(creature);
+		creature.destructible->update_armor_class(creature, ctx);
 	}
 	else
 	{
 		// Apply armor effects
 		owner.add_state(ActorState::IS_EQUIPPED);
-		creature.destructible->update_armor_class(creature);
+		creature.destructible->update_armor_class(creature, ctx);
 	}
 }
 

@@ -6,7 +6,7 @@ Gold::Gold(int amount) : amount(amount)
 {
 }
 
-bool Gold::use(Item& owner, Creature& wearer)
+bool Gold::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
     // Add gold amount to player's currency
     wearer.adjust_gold(amount);
@@ -18,7 +18,7 @@ bool Gold::use(Item& owner, Creature& wearer)
     game.finalize_message();
 
     // Return true to consume the item
-    return Pickable::use(owner, wearer);
+    return Pickable::use(owner, wearer, ctx);
 }
 
 void Gold::save(json& j)

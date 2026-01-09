@@ -4,6 +4,7 @@
 #include <algorithm>
 
 #include "../Game.h"
+#include "../Core/GameContext.h"
 #include "../Items/Items.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
@@ -32,7 +33,7 @@ Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int x
 	lastConstitution(0)
 {}
 
-void Destructible::update_constitution_bonus(Creature& owner)
+void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 {
 	// Check if Constitution has changed since last update
 	if (owner.get_constitution() == get_last_constitution())
@@ -42,7 +43,7 @@ void Destructible::update_constitution_bonus(Creature& owner)
 
 	// Get the Constitution bonus from the table
 	int hpAdj = 0;
-	const auto& constitutionAttributes = game.data_manager.get_constitution_attributes();
+	const auto& constitutionAttributes = ctx.data_manager->get_constitution_attributes();
 	if (owner.get_constitution() >= 1 && owner.get_constitution() <= constitutionAttributes.size())
 	{
 		hpAdj = constitutionAttributes[owner.get_constitution() - 1].HPAdj;
@@ -75,15 +76,15 @@ void Destructible::update_constitution_bonus(Creature& owner)
 			set_hp(newHp);
 
 			// Log the HP adjustment if it's the player
-			if (&owner == game.player.get())
+			if (&owner == ctx.player)
 			{
 				if (oldHpMax < get_max_hp())
 				{
-					game.log("Your Constitution bonus increased your hit points.");
+					ctx.message_system->log("Your Constitution bonus increased your hit points.");
 				}
 				else if (oldHpMax > get_max_hp())
 				{
-					game.log("Your Constitution bonus decreased your hit points.");
+					ctx.message_system->log("Your Constitution bonus decreased your hit points.");
 				}
 			}
 		}
@@ -98,7 +99,7 @@ void Destructible::update_constitution_bonus(Creature& owner)
 	set_last_constitution(owner.get_constitution());
 }
 
-void Destructible::take_damage(Creature& owner, int damage)
+void Destructible::take_damage(Creature& owner, int damage, GameContext& ctx)
 {
 	// check if damage is greater than 0
 	// if it is, then apply the damage to the actor
@@ -107,7 +108,7 @@ void Destructible::take_damage(Creature& owner, int damage)
 		set_hp(get_hp() - damage);
 		if (get_hp() <= 0)
 		{
-			owner.destructible->die(owner);
+			owner.destructible->die(owner, ctx);
 		}
 	}
 	else
@@ -117,7 +118,7 @@ void Destructible::take_damage(Creature& owner, int damage)
 }
 
 // Transform the actor into a corpse !
-void Destructible::die(Creature& owner)
+void Destructible::die(Creature& owner, GameContext& ctx)
 {
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
@@ -126,8 +127,8 @@ void Destructible::die(Creature& owner)
 	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
 	// Add the corpse to the floor items
-	add_item(game.inventory_data, std::move(corpse));
-	
+	add_item(*ctx.inventory_data, std::move(corpse));
+
 	// Note: The creature will be removed from game.creatures later
 	// when it's safe to do so (e.g., at the end of the turn)
 }
@@ -149,13 +150,13 @@ int Destructible::heal(int hpToHeal)
 	return hpToHeal;
 }
 
-void Destructible::update_armor_class(Creature& owner)
+void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 {
 	// Start with the base armor class
 	int calculatedAC = get_base_armor_class();
 
 	// Apply Dexterity's Defensive Adjustment
-	const auto& dexterityAttributes = game.data_manager.get_dexterity_attributes();
+	const auto& dexterityAttributes = ctx.data_manager->get_dexterity_attributes();
 	if (owner.get_dexterity() > 0 && owner.get_dexterity() <= dexterityAttributes.size())
 	{
 		int defensiveAdj = dexterityAttributes[owner.get_dexterity() - 1].DefensiveAdj;
@@ -164,9 +165,9 @@ void Destructible::update_armor_class(Creature& owner)
 		calculatedAC += defensiveAdj;
 
 		// Log the Defensive Adjustment if it's the player
-		if (&owner == game.player.get() && defensiveAdj != 0)
+		if (&owner == ctx.player && defensiveAdj != 0)
 		{
-			game.log("Applied Dexterity Defensive Adjustment: " + std::to_string(defensiveAdj) +
+			ctx.message_system->log("Applied Dexterity Defensive Adjustment: " + std::to_string(defensiveAdj) +
 				" to AC. Base AC: " + std::to_string(get_base_armor_class()) +
 				", New AC: " + std::to_string(calculatedAC));
 		}
@@ -186,9 +187,9 @@ void Destructible::update_armor_class(Creature& owner)
 				calculatedAC += armorBonus;
 
 				// Log the armor bonus if it's the player
-				if (&owner == game.player.get())
+				if (&owner == ctx.player)
 				{
-					game.log("Applied armor bonus: " + std::to_string(armorBonus) +
+					ctx.message_system->log("Applied armor bonus: " + std::to_string(armorBonus) +
 						" from " + equippedArmor->actorData.name);
 				}
 			}
@@ -205,9 +206,9 @@ void Destructible::update_armor_class(Creature& owner)
 				calculatedAC += shieldBonus;
 
 				// Log the shield bonus if it's the player
-				if (&owner == game.player.get())
+				if (&owner == ctx.player)
 				{
-					game.log("Applied shield bonus: " + std::to_string(shieldBonus) +
+					ctx.message_system->log("Applied shield bonus: " + std::to_string(shieldBonus) +
 						" from " + equippedShield->actorData.name);
 				}
 			}
@@ -229,7 +230,7 @@ void Destructible::update_armor_class(Creature& owner)
 					calculatedAC += armorBonus;
 
 					// Log the armor bonus
-					game.log("Applied armor bonus: " + std::to_string(armorBonus) +
+					ctx.message_system->log("Applied armor bonus: " + std::to_string(armorBonus) +
 						" from " + item->actorData.name);
 				}
 			}
@@ -243,9 +244,9 @@ void Destructible::update_armor_class(Creature& owner)
 		set_armor_class(calculatedAC);
 
 		// Log the AC change if it's the player
-		if (&owner == game.player.get())
+		if (&owner == ctx.player)
 		{
-			game.log("Updated Armor Class from " + std::to_string(oldAC) +
+			ctx.message_system->log("Updated Armor Class from " + std::to_string(oldAC) +
 				" to " + std::to_string(get_armor_class()));
 		}
 	}
@@ -343,9 +344,9 @@ PlayerDestructible::PlayerDestructible(
 {
 }
 
-void PlayerDestructible::die(Creature& owner)
+void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
-	game.gameStatus = Game::GameStatus::DEFEAT;
+	ctx.game->gameStatus = Game::GameStatus::DEFEAT;
 }
 
 //==MonsterDestructible==
@@ -360,30 +361,29 @@ MonsterDestructible::MonsterDestructible(
 	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
 {}
 
-void MonsterDestructible::die(Creature& owner)
+void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 {
 	// message which monster is dead
-	game.append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
-	game.append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
-	game.finalize_message();
-	
+	ctx.message_system->append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+	ctx.message_system->finalize_message();
+
 	// get the xp from the monster
-	
+
 
 	// message how much xp you get
-	game.append_message_part(WHITE_BLACK_PAIR, "You get ");
-	game.append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
-	game.append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
-	game.finalize_message();
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You get ");
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+	ctx.message_system->finalize_message();
 
 	// increase the player's experience
 	/*game.player->destructible->xp += xp;*/
-	game.player->destructible->set_xp(game.player->destructible->get_xp() + get_xp());
+	ctx.player->destructible->set_xp(ctx.player->destructible->get_xp() + get_xp());
 
-	auto ctx = game.get_context();
-	game.player->ai->levelup_update(ctx, *game.player);
+	ctx.player->ai->levelup_update(ctx, *ctx.player);
 
-	Destructible::die(owner);
+	Destructible::die(owner, ctx);
 }
 
 // end of file: Destructible.cpp

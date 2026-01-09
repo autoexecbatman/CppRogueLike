@@ -7,7 +7,7 @@
 //==Confuser==
 Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(range) {}
 
-bool Confuser::use(Item& owner, Creature& wearer)
+bool Confuser::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	//int x{ 0 }, y{ 0 }; // we modify these in pick_tile to get the target position
 	Vector2D target{ 0, 0 };
@@ -44,7 +44,7 @@ bool Confuser::use(Item& owner, Creature& wearer)
 	clear();
 	refresh();
 	game.restore_game_display();
-	return Pickable::use(owner, wearer);
+	return Pickable::use(owner, wearer, ctx);
 }
 
 void Confuser::load(const json& j)

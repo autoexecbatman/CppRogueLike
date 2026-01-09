@@ -11,7 +11,7 @@
 //==LIGHTNING_BOLT==
 LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRange), damage(damage) {}
 
-bool LightningBolt::use(Item& owner, Creature& wearer)
+bool LightningBolt::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// find closest enemy (inside a maximum range)
 	const auto& closestMonster = game.get_closest_monster(wearer.position, maxRange);
@@ -27,14 +27,14 @@ bool LightningBolt::use(Item& owner, Creature& wearer)
 		game.append_message_part(WHITE_BLUE_PAIR, closestMonster->actorData.name);
 		game.append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
 		game.finalize_message();
-		
+
 		// Animate the lightning bolt effect
 		animate_lightning(wearer.position, closestMonster->position);
 
 		game.message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
-		closestMonster->destructible->take_damage(*closestMonster, damage);
+		closestMonster->destructible->take_damage(*closestMonster, damage, ctx);
 
-		return Pickable::use(owner, wearer);
+		return Pickable::use(owner, wearer, ctx);
 	}
 }
 

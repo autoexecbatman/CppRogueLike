@@ -12,7 +12,7 @@ class Teleporter : public Pickable
 public:
 	Teleporter();
 
-	bool use(Item& owner, Creature& wearer) override;
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
 	void load(const json& j) override;
 	void save(json& j) override;
