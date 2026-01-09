@@ -45,9 +45,7 @@ bool MenuManager::has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& 
 
 void MenuManager::restore_game_display(GameContext& ctx)
 {
-    // Call Game::restore_game_display using extern game (temporary during migration)
-    extern Game game;
-    game.restore_game_display();
+    ctx.game->restore_game_display();
 }
 
 // end of file: Systems/MenuManager.cpp
