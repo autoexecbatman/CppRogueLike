@@ -8,9 +8,7 @@
 #include <nlohmann/json.hpp>
 #include <format>
 
-extern Game game;
-
-void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem& message_system)
+void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem& message_system, GameContext& ctx)
 {
     dungeon_level++;
     shopkeepers_on_current_level = 0; // Reset shopkeeper counter for new level
@@ -22,7 +20,6 @@ void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem
     heal_player_between_levels(player);
     
     // Regenerate the map for new level
-    auto ctx = game.get_context();
     map.regenerate(ctx);
 }
 

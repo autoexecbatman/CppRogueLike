@@ -36,6 +36,7 @@ void CreatureManager::spawn_creatures(
     Map& map,
     RandomDice& dice,
     int game_time,
+    GameContext& ctx,
     int max_creatures,
     int spawn_rate
 )
@@ -46,7 +47,6 @@ void CreatureManager::spawn_creatures(
         if (can_spawn_creature(creatures, max_creatures))
         {
             Vector2D spawnPos = find_spawn_position(rooms, map, dice);
-            auto ctx = game.get_context();
             map.add_monster(spawnPos, ctx);
         }
     }
@@ -108,7 +108,7 @@ Vector2D CreatureManager::find_spawn_position(
 {
     if (rooms.empty())
     {
-        throw std::runtime_error("game.rooms is empty!");
+        throw std::runtime_error("rooms vector is empty!");
     }
 
     // Roll a random index as the size of the rooms vector

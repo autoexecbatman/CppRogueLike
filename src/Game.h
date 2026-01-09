@@ -120,7 +120,7 @@ public:
     // Creature management
     void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }
     void cleanup_dead_creatures() { creature_manager.cleanup_dead_creatures(creatures); }
-    void spawn_creatures() { creature_manager.spawn_creatures(creatures, rooms, map, d, time); }
+    void spawn_creatures() { auto ctx = get_context(); creature_manager.spawn_creatures(creatures, rooms, map, d, time, ctx); }
     template<typename T>
     void send_to_back(T& actor) { creature_manager.send_to_back(creatures, actor); }
     Creature* get_closest_monster(Vector2D fromPosition, double inRange) const noexcept { return creature_manager.get_closest_monster(creatures, fromPosition, inRange); }
@@ -129,7 +129,7 @@ public:
     // Game state management
     void load_all();
     void save_all();
-    void next_level() { level_manager.advance_to_next_level(map, *player, message_system); gameStatus = GameStatus::STARTUP; }
+    void next_level() { auto ctx = get_context(); level_manager.advance_to_next_level(map, *player, message_system, ctx); gameStatus = GameStatus::STARTUP; }
 
     // Emscripten compatibility
     void safe_screen_clear() { rendering_manager.safe_screen_clear(); }
