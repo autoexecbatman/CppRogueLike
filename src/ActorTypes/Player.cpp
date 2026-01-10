@@ -163,10 +163,10 @@ void Player::consume_food(int nutrition, GameContext& ctx) {
 	ctx.hunger_system->decrease_hunger(ctx, nutrition);
 }
 
-void Player::render() const noexcept
+void Player::render(const GameContext& ctx) const noexcept
 {
 	// First, render the player normally
-	Creature::render();
+	Creature::render(ctx);
 }
 
 bool Player::rest(GameContext& ctx)

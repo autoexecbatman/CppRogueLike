@@ -66,8 +66,8 @@ public:
 	void save(json& j) override;
 
 	int get_tile_distance(Vector2D tilePosition) const noexcept;
-	void render() const noexcept;
-	bool is_visible() const noexcept;
+	void render(const GameContext& ctx) const noexcept;
+	bool is_visible(const GameContext& ctx) const noexcept;
 };
 
 class Creature : public Actor
@@ -131,11 +131,11 @@ public:
 	void adjust_charisma(int delta) noexcept { charisma += delta; }
 	void adjust_gold(int delta) noexcept { gold += delta; }
 
-	void equip(Item& item);
-	void unequip(Item& item);
-	void sync_ranged_state();
-	void pick();
-	void drop(Item& item);
+	void equip(Item& item, GameContext& ctx);
+	void unequip(Item& item, GameContext& ctx);
+	void sync_ranged_state(GameContext& ctx);
+	void pick(GameContext& ctx);
+	void drop(Item& item, GameContext& ctx);
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed

@@ -88,9 +88,9 @@ int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 }
 
 // the actor render function with color
-void Actor::render() const noexcept
+void Actor::render(const GameContext& ctx) const noexcept
 {
-	if (is_visible())
+	if (is_visible(ctx))
 	{
 		attron(COLOR_PAIR(actorData.color));
 		mvaddch(position.y, position.x, actorData.ch);
@@ -99,9 +99,9 @@ void Actor::render() const noexcept
 }
 
 // check if the actor is visible
-bool Actor::is_visible() const noexcept
+bool Actor::is_visible(const GameContext& ctx) const noexcept
 {
-	return (!has_state(ActorState::FOV_ONLY) && game.map.is_explored(position)) || game.map.is_in_fov(position);
+	return (!has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position)) || ctx.map->is_in_fov(position);
 }
 
 //==Creature==
@@ -193,7 +193,7 @@ void Creature::update()
 	}
 }
 
-void Creature::equip(Item& item)
+void Creature::equip(Item& item, GameContext& ctx)
 {
 	bool isArmor = item.is_armor();
 	bool isWeapon = item.is_weapon();
@@ -224,7 +224,7 @@ void Creature::equip(Item& item)
 	{
 		for (auto* equipped : equippedItems)
 		{
-			unequip(*equipped);
+			unequip(*equipped, ctx);
 		}
 	}
 
@@ -242,24 +242,24 @@ void Creature::equip(Item& item)
 			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemClass);
 			
 			attacker->set_roll(weaponDamage);
-			game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " - damage updated to " + weaponDamage);
+			ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " - damage updated to " + weaponDamage);
 		}
 	}
-	
+
 	// Log shield equipped
 	if (isShield)
 	{
-		game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " shield");
+		ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " shield");
 	}
-	
+
 	// Log armor equipped
 	if (isArmor)
 	{
-		game.log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " armor");
+		ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " armor");
 	}
 }
 
-void Creature::unequip(Item& item)
+void Creature::unequip(Item& item, GameContext& ctx)
 {
 	// Check if the item is actually equipped
 	if (item.has_state(ActorState::IS_EQUIPPED))
@@ -276,7 +276,7 @@ void Creature::unequip(Item& item)
 			if (attacker)
 			{
 				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
-				game.log("Unequipped weapon - damage reset to " + WeaponDamageRegistry::get_unarmed_damage() + " (unarmed)");
+				ctx.message_system->log("Unequipped weapon - damage reset to " + WeaponDamageRegistry::get_unarmed_damage() + " (unarmed)");
 			}
 
 			// Check for ranged weapon - use ItemClass system
@@ -286,7 +286,7 @@ void Creature::unequip(Item& item)
 				if (has_state(ActorState::IS_RANGED))
 				{
 					remove_state(ActorState::IS_RANGED);
-					game.log("Removed IS_RANGED state after unequipping " + item.actorData.name);
+					ctx.message_system->log("Removed IS_RANGED state after unequipping " + item.actorData.name);
 				}
 			}
 		}
@@ -309,12 +309,12 @@ void Creature::unequip(Item& item)
 		if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
 		{
 			remove_state(ActorState::IS_RANGED);
-			game.log("Force removed IS_RANGED state - no ranged weapons equipped");
+			ctx.message_system->log("Force removed IS_RANGED state - no ranged weapons equipped");
 		}
 	}
 }
 
-void Creature::sync_ranged_state()
+void Creature::sync_ranged_state(GameContext& ctx)
 {
 	// Check if any equipped items are ranged weapons
 	bool hasRangedWeapon = false;
@@ -334,38 +334,37 @@ void Creature::sync_ranged_state()
 	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
 	{
 		add_state(ActorState::IS_RANGED);
-		game.log("Added missing IS_RANGED state - ranged weapon equipped");
+		ctx.message_system->log("Added missing IS_RANGED state - ranged weapon equipped");
 	}
 	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
 	{
 		remove_state(ActorState::IS_RANGED);
-		game.log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
+		ctx.message_system->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
 	}
 }
 
-void Creature::pick()
+void Creature::pick(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	// Check if inventory is already full before attempting to pick
 	if (is_inventory_full(inventory_data))
 	{
-		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
 	// Find item at player's position using proper inventory interface
 	Item* itemAtPosition = nullptr;
 	size_t itemIndex = 0;
-	
-	if (game.inventory_data.items.empty())
+
+	if (ctx.inventory_data->items.empty())
 	{
 		return; // No floor items
 	}
 	
 	// Search for item at current position
-	for (size_t i = 0; i < game.inventory_data.items.size(); ++i)
+	for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
 	{
-		if (auto& item = game.inventory_data.items[i])
+		if (auto& item = ctx.inventory_data->items[i])
 		{
 			if (position == item->position)
 			{
@@ -389,10 +388,10 @@ void Creature::pick()
 		{
 			// Gold was picked up successfully via polymorphic call
 			// Remove gold from floor inventory
-			auto removeResult = remove_item_at(game.inventory_data, itemIndex);
+			auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
 			if (!removeResult.has_value())
 			{
-				game.log("WARNING: Failed to remove gold item from floor inventory");
+				ctx.message_system->log("WARNING: Failed to remove gold item from floor inventory");
 			}
 		}
 	}
@@ -400,31 +399,31 @@ void Creature::pick()
 	{
 		// Normal item handling - store name before moving
 		const std::string itemName = itemAtPosition->actorData.name;
-		
+
 		// Remove from floor first
-		auto removeResult = remove_item_at(game.inventory_data, itemIndex);
+		auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
 		if (removeResult.has_value())
 		{
 			// Add to player inventory
 			auto addResult = add_item(inventory_data, std::move(*removeResult));
 			if (addResult.has_value())
 			{
-				game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 			}
 			else
 			{
-				game.log("WARNING: Failed to add item to player inventory");
+				ctx.message_system->log("WARNING: Failed to add item to player inventory");
 				// Item is lost - this should not happen since we checked is_full() earlier
 			}
 		}
 		else
 		{
-			game.log("WARNING: Failed to remove item from floor inventory");
+			ctx.message_system->log("WARNING: Failed to remove item from floor inventory");
 		}
 	}
 }
 
-void Creature::drop(Item& item)
+void Creature::drop(Item& item, GameContext& ctx)
 {
 	// Check if the item is actually in the inventory first
 	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(),
@@ -438,16 +437,16 @@ void Creature::drop(Item& item)
 		// If the item is equipped, unequip it first
 		if ((*it)->has_state(ActorState::IS_EQUIPPED))
 		{
-			unequip(*(*it));
+			unequip(*(*it), ctx);
 		}
 
 		// Add to game floor inventory
-		auto addResult = add_item(game.inventory_data, std::move(*it));
+		auto addResult = add_item(*ctx.inventory_data, std::move(*it));
 		if (addResult.has_value())
 		{
 			// Clean up null pointer that remains after moving
 			optimize_inventory_storage(inventory_data);
-			game.message(WHITE_BLACK_PAIR, "You dropped the item.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}
 	}
 }

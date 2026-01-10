@@ -185,7 +185,7 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 	owner.position = target;
 }
 
-void AiPlayer::pick_item(Player& player)
+void AiPlayer::pick_item(Player& player, GameContext& ctx)
 {
 	// Check if the inventory is already full (including equipped items)
 	size_t totalItems = get_item_count(player.inventory_data);
@@ -243,7 +243,7 @@ void AiPlayer::pick_item(Player& player)
 	{
 		// Item successfully added to player inventory
 		optimize_inventory_storage(game.inventory_data);
-		player.sync_ranged_state();
+		player.sync_ranged_state(ctx);
 		game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
@@ -260,7 +260,7 @@ void AiPlayer::pick_item(Player& player)
 	}
 }
 
-void AiPlayer::drop_item(Player& player)
+void AiPlayer::drop_item(Player& player, GameContext& ctx)
 {
 	// If the inventory is empty, show a message and return
 	if (player.inventory_data.items.empty())
@@ -370,7 +370,7 @@ void AiPlayer::drop_item(Player& player)
 			{
 				if (item && item->actorData.name == itemName)
 				{
-					player.drop(*item);
+					player.drop(*item, ctx);
 					break;
 				}
 			}
@@ -391,7 +391,7 @@ void AiPlayer::drop_item(Player& player)
 					std::string itemName = itemToDrop->actorData.name;
 
 					// Drop the selected item
-					player.drop(*itemToDrop);
+					player.drop(*itemToDrop, ctx);
 
 					// Show dropped message with the item name
 					game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
@@ -477,7 +477,7 @@ void AiPlayer::display_inventory(Player& player)
 	inventoryUI.display(player);
 }
 
-Item* AiPlayer::chose_from_inventory(Player& player, int ascii)
+Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
 {
 	game.log("You chose from inventory");
 	if (player.inventory_data.items.size() > 0)
@@ -488,7 +488,7 @@ Item* AiPlayer::chose_from_inventory(Player& player, int ascii)
 			Item* item = player.inventory_data.items.at(index).get();
 
 			// Sync ranged state since we might use/equip/unequip an item
-			player.sync_ranged_state();
+			player.sync_ranged_state(ctx);
 
 			return item;
 		}
@@ -719,14 +719,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::PICK:
 	{
-		pick_item(player);
+		pick_item(player, ctx);
 		game.gameStatus = Game::GameStatus::NEW_TURN;
 		break;
 	}
 
 	case Controls::DROP:
 	{
-		drop_item(player);
+		drop_item(player, ctx);
 		break;
 	}
 

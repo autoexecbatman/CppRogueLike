@@ -17,6 +17,7 @@ class Player;
 class Stairs;
 class Object;
 struct InventoryData;
+struct GameContext;
 class Gui;
 
 class RenderingManager
@@ -32,11 +33,12 @@ public:
         std::span<const std::unique_ptr<Object>> objects,
         const InventoryData& inventory_data,
         std::span<const std::unique_ptr<Creature>> creatures,
-        const Player& player
+        const Player& player,
+        const GameContext& ctx
     ) const;
 
-    void render_creatures(std::span<const std::unique_ptr<Creature>> creatures) const;
-    void render_items(std::span<const std::unique_ptr<Item>> items) const;
+    void render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const;
+    void render_items(std::span<const std::unique_ptr<Item>> items, const GameContext& ctx) const;
 
     // Screen management
     void safe_screen_clear();
@@ -45,7 +47,7 @@ public:
 
 private:
     // Helper methods
-    void render_objects(std::span<const std::unique_ptr<Object>> objects) const;
+    void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
 };
 
 #endif // RENDERINGMANAGER_H

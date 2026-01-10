@@ -16,39 +16,40 @@ void RenderingManager::render_world(
     std::span<const std::unique_ptr<Object>> objects,
     const InventoryData& inventory_data,
     std::span<const std::unique_ptr<Creature>> creatures,
-    const Player& player
+    const Player& player,
+    const GameContext& ctx
 ) const
 {
     map.render();
-    stairs.render();
+    stairs.render(ctx);
 
-    render_objects(objects);
-    
+    render_objects(objects, ctx);
+
     // Render floor items
-    render_items(inventory_data.items);
-    
-    render_creatures(creatures);
-    player.render();
+    render_items(inventory_data.items, ctx);
+
+    render_creatures(creatures, ctx);
+    player.render(ctx);
 }
 
-void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures) const
+void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const
 {
     for (const auto& creature : creatures)
     {
         if (creature)
         {
-            creature->render();
+            creature->render(ctx);
         }
     }
 }
 
-void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items) const
+void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items, const GameContext& ctx) const
 {
     for (const auto& item : items)
     {
         if (item)
         {
-            item->render();
+            item->render(ctx);
         }
     }
 }
@@ -77,14 +78,14 @@ void RenderingManager::restore_game_display() const
     force_screen_refresh();
 }
 
-void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects) const
+void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const
 {
     // Render any objects (like webs)
     for (const auto& obj : objects)
     {
         if (obj)
         {
-            obj->render();
+            obj->render(ctx);
         }
     }
 }

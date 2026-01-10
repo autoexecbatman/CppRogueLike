@@ -146,7 +146,7 @@ void equip_fighter_starting_gear()
 	}
 	
 	// Sync ranged state and update combat stats from equipped weapons
-	player.sync_ranged_state();
+	player.sync_ranged_state(ctx);
 	
 	// Update AC based on equipped armor (proper way)
 	player.destructible->update_armor_class(player, ctx);

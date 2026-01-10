@@ -108,7 +108,7 @@ public:
     GameContext get_context() noexcept;
 
     // System delegations - clean interface
-    void render() const { rendering_manager.render_world(map, *stairs, objects, inventory_data, creatures, *player); }
+    void render() { auto ctx = get_context(); rendering_manager.render_world(map, *stairs, objects, inventory_data, creatures, *player, ctx); }
     void handle_menus() { auto ctx = get_context(); menu_manager.handle_menus(menus, ctx); }
     void handle_gameloop(Gui& gui, int loopNum) { auto ctx = get_context(); game_loop_coordinator.handle_gameloop(ctx, gui, loopNum); }
     void handle_ranged_attack() { auto ctx = get_context(); targeting.handle_ranged_attack(ctx); }

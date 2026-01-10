@@ -62,7 +62,7 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 	}
 	
 	// For NPCs, use simple equip toggle
-	wearer.equip(owner);
+	wearer.equip(owner, ctx);
 	return true;
 }
 
@@ -101,7 +101,7 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 	}
 	
 	// For NPCs, use simple equip toggle
-	wearer.equip(owner);
+	wearer.equip(owner, ctx);
 	return true;
 }
 

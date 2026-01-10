@@ -80,7 +80,7 @@ public:
 
 	void consume_food(int nutrition, GameContext& ctx);
 
-	void render() const noexcept;
+	void render(const GameContext& ctx) const noexcept;
 	bool rest(GameContext& ctx);
 	void animate_resting(GameContext& ctx);
 
