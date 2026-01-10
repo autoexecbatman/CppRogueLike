@@ -14,6 +14,8 @@ Web::Web(Vector2D position, int strength)
 // Apply web effect when a creature tries to pass through
 bool Web::applyEffect(Creature& creature)
 {
+    auto ctx = game.get_context();
+
     // Only players can get stuck (for simplicity)
     if (&creature != game.player.get()) return false;
 
@@ -27,7 +29,7 @@ bool Web::applyEffect(Creature& creature)
         int stuckTurns = webStrength + game.d.roll(1, 2);
 
         // Apply the effect
-        game.player->get_stuck_in_web(stuckTurns, webStrength, this);
+        game.player->get_stuck_in_web(stuckTurns, webStrength, this, ctx);
 
         game.message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 

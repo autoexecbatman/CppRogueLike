@@ -8,6 +8,7 @@
 #include "../Objects/Web.h"
 
 class Item;
+struct GameContext;
 
 enum class EquipmentSlot
 {
@@ -77,11 +78,11 @@ public:
 	void racial_ability_adjustments();
 	void calculate_thaco();
 
-	void consume_food(int nutrition);
+	void consume_food(int nutrition, GameContext& ctx);
 
 	void render() const noexcept;
-	bool rest();
-	void animate_resting();
+	bool rest(GameContext& ctx);
+	void animate_resting(GameContext& ctx);
 
 	// Web effect tracking
 	int webStuckTurns = 0;       // How many turns the player is stuck in a web
@@ -89,8 +90,8 @@ public:
 	Web* trappingWeb = nullptr;  // The web that has trapped the player
 
 	bool is_webbed() const noexcept { return webStuckTurns > 0; } // Check if player is stuck in a web
-	bool try_break_web(); // Attempt to break free from a web
-	void get_stuck_in_web(int duration, int strength, Web* web); // Get stuck in a web
+	bool try_break_web(GameContext& ctx); // Attempt to break free from a web
+	void get_stuck_in_web(int duration, int strength, Web* web, GameContext& ctx); // Get stuck in a web
 
 	// Equipment system methods
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;

@@ -57,7 +57,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 void Player::racial_ability_adjustments()
 {
 	// switch player state
-	switch (game.player->playerRaceState)
+	switch (playerRaceState)
 	{
 	case Player::PlayerRaceState::HUMAN:
 		break;
@@ -73,8 +73,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->adjust_constitution(1);
-		game.player->adjust_charisma(-1);
+		adjust_constitution(1);
+		adjust_charisma(-1);
 		break;
 	case Player::PlayerRaceState::ELF:
 		// Create a temporary window for racial bonus message
@@ -88,8 +88,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->adjust_dexterity(1);
-		game.player->adjust_constitution(-1);
+		adjust_dexterity(1);
+		adjust_constitution(-1);
 		break;
 	case Player::PlayerRaceState::GNOME:
 		// Create a temporary window for racial bonus message
@@ -103,8 +103,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->adjust_intelligence(1);
-		game.player->adjust_wisdom(-1);
+		adjust_intelligence(1);
+		adjust_wisdom(-1);
 		break;
 	case Player::PlayerRaceState::HALFELF:
 		break;
@@ -120,8 +120,8 @@ void Player::racial_ability_adjustments()
 			delwin(racialWindow);
 		}
 
-		game.player->adjust_dexterity(1);
-		game.player->adjust_strength(-1);
+		adjust_dexterity(1);
+		adjust_strength(-1);
 		break;
 	default:
 		break;
@@ -158,10 +158,9 @@ void Player::calculate_thaco()
 	}
 }
 
-void Player::consume_food(int nutrition) {
+void Player::consume_food(int nutrition, GameContext& ctx) {
 	// Decrease hunger by nutrition value
-	auto ctx = game.get_context();
-	game.hunger_system.decrease_hunger(ctx, nutrition);
+	ctx.hunger_system->decrease_hunger(ctx, nutrition);
 }
 
 void Player::render() const noexcept
@@ -170,18 +169,18 @@ void Player::render() const noexcept
 	Creature::render();
 }
 
-bool Player::rest()
+bool Player::rest(GameContext& ctx)
 {
 	// Check if player is already at full health
 	if (destructible->get_hp() >= destructible->get_max_hp())
 	{
-		game.message(WHITE_BLACK_PAIR, "You're already at full health.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You're already at full health.", true);
 		return false;
 	}
 
 	// Check if enemies are nearby (within a radius of 5 tiles)
 	// Exclude shopkeepers and other neutral NPCs
-	for (const auto& creature : game.creatures)
+	for (const auto& creature : *ctx.creatures)
 	{
 		if (creature && !creature->destructible->is_dead())
 		{
@@ -203,62 +202,61 @@ bool Player::rest()
 			// If hostile enemy is within 5 tiles, can't rest
 			if (distance <= 5)
 			{
-				game.message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
 				return false;
 			}
 		}
 	}
 
 	// Check if player has enough food (hunger isn't too high)
-	if (game.hunger_system.get_hunger_state() == HungerState::STARVING ||
-		game.hunger_system.get_hunger_state() == HungerState::DYING)
+	if (ctx.hunger_system->get_hunger_state() == HungerState::STARVING ||
+		ctx.hunger_system->get_hunger_state() == HungerState::DYING)
 	{
-		game.message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
+		ctx.message_system->message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
 		return false;
 	}
 
 	// Show resting animation
-	animate_resting();
+	animate_resting(ctx);
 
 	// Rest - heal 20% of max HP
 	int healAmount = std::max(1, destructible->get_max_hp() / 5);
 	int amountHealed = destructible->heal(healAmount);
 
 	// Capture the hunger state before and after
-	HungerState beforeState = game.hunger_system.get_hunger_state();
+	HungerState beforeState = ctx.hunger_system->get_hunger_state();
 
 	// Consume food (increase hunger)
 	const int hungerCost = 50;
-	auto ctx = game.get_context();
-	game.hunger_system.increase_hunger(ctx, hungerCost);
+	ctx.hunger_system->increase_hunger(ctx, hungerCost);
 
-	HungerState afterState = game.hunger_system.get_hunger_state();
+	HungerState afterState = ctx.hunger_system->get_hunger_state();
 
 	// Display message with more detail
-	game.append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
-	game.append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
-	game.append_message_part(WHITE_GREEN_PAIR, " health");
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
+	ctx.message_system->append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
+	ctx.message_system->append_message_part(WHITE_GREEN_PAIR, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		game.append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
-		game.append_message_part(game.hunger_system.get_hunger_color(), game.hunger_system.get_hunger_state_string().c_str());
-		game.append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
+		ctx.message_system->append_message_part(ctx.hunger_system->get_hunger_color(), ctx.hunger_system->get_hunger_state_string().c_str());
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ".");
 	}
 	else
 	{
-		game.append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
 	}
 
-	game.finalize_message();
+	ctx.message_system->finalize_message();
 
 	// Resting takes time
-	game.gameStatus = Game::GameStatus::NEW_TURN;
+	ctx.game->gameStatus = Game::GameStatus::NEW_TURN;
 	return true;
 }
 
-void Player::animate_resting()
+void Player::animate_resting(GameContext& ctx)
 {
 	// Animation frames - Z's of increasing size
 	const std::vector<char> restSymbols = { 'z', 'Z', 'Z' };
@@ -267,7 +265,7 @@ void Player::animate_resting()
 
 	// Save original screen
 	clear();
-	game.render();
+	ctx.game->render();
 
 	// Show animation
 	for (int i = 0; i < frames; i++)
@@ -286,21 +284,21 @@ void Player::animate_resting()
 
 	// Redraw screen
 	clear();
-	game.render();
+	ctx.game->render();
 	refresh();
 }
 
-void Player::get_stuck_in_web(int duration, int strength, Web* web)
+void Player::get_stuck_in_web(int duration, int strength, Web* web, GameContext& ctx)
 {
 	webStuckTurns = duration;
 	webStrength = strength;
 	trappingWeb = web;
 
-	game.message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " +
+	ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " +
 		std::to_string(duration) + " turns!", true);
 }
 
-bool Player::try_break_web()
+bool Player::try_break_web(GameContext& ctx)
 {
 	// Calculate chance to break free based on strength vs web strength
 	int breakChance = 20 + (get_strength() * 5) - (webStrength * 10);
@@ -309,10 +307,10 @@ bool Player::try_break_web()
 	breakChance = std::max(10, breakChance);
 
 	// Roll to break free
-	if (game.d.d100() <= breakChance)
+	if (ctx.dice->d100() <= breakChance)
 	{
 		// Success!
-		game.message(WHITE_BLACK_PAIR, "You break free from the web!", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
@@ -330,7 +328,7 @@ bool Player::try_break_web()
 	if (webStuckTurns <= 0)
 	{
 		// Time expired, free anyway
-		game.message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
@@ -343,7 +341,7 @@ bool Player::try_break_web()
 		return true;
 	}
 
-	game.message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " +
+	ctx.message_system->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " +
 		std::to_string(webStuckTurns), true);
 	return false;
 }
@@ -425,18 +423,18 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	auto ctx = game.get_context();
 	if (!item)
 	{
-		if (game.message_system.is_debug_mode()) game.log("DEBUG: equip_item failed - null item");
+		if (ctx.message_system->is_debug_mode()) ctx.message_system->log("DEBUG: equip_item failed - null item");
 		return false;
 	}
-	
+
 	if (!can_equip(*item, slot))
 	{
-		if (game.message_system.is_debug_mode()) {
-			game.log("DEBUG: can_equip failed for " + item->actorData.name);
-			game.log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
-			game.log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
-			game.log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-			game.log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+		if (ctx.message_system->is_debug_mode()) {
+			ctx.message_system->log("DEBUG: can_equip failed for " + item->actorData.name);
+			ctx.message_system->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
+			ctx.message_system->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
+			ctx.message_system->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+			ctx.message_system->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
 		InventoryOperations::add_item(inventory_data, std::move(item));
@@ -453,7 +451,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND);
-			game.message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
 		}
 	}
 
@@ -470,7 +468,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 		{
 			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemClass);
 			attacker->set_roll(weaponDamage);
-			game.log("Equipped " + equippedItems.back().item->actorData.name + " - damage updated to " + weaponDamage);
+			ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage updated to " + weaponDamage);
 		}
 	}
 	
@@ -478,7 +476,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		destructible->update_armor_class(*this, ctx);
-		game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 	}
 	
 	return true;
@@ -579,7 +577,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 			if (it->item->is_weapon() && attacker)
 			{
 				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
-				game.log("Unequipped " + it->item->actorData.name + " - damage reset to " + WeaponDamageRegistry::get_unarmed_damage());
+				ctx.message_system->log("Unequipped " + it->item->actorData.name + " - damage reset to " + WeaponDamageRegistry::get_unarmed_damage());
 			}
 			remove_state(ActorState::IS_RANGED); // Remove ranged state
 		}
@@ -594,7 +592,7 @@ bool Player::unequip_item(EquipmentSlot slot)
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			destructible->update_armor_class(*this, ctx);
-			game.message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 		}
 		
 		return true;

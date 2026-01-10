@@ -54,10 +54,12 @@ struct PossibleMoves
 
 void AiPlayer::update(Creature& owner)
 {
+	auto ctx = game.get_context();
+
 	// If stuck in a web, try to break free and skip turn if still stuck
 	if (game.player->is_webbed())
 	{
-		if (!game.player->try_break_web())
+		if (!game.player->try_break_web(ctx))
 		{
 			// Still stuck, skip the player's turn
 			game.gameStatus = Game::GameStatus::NEW_TURN;
@@ -119,7 +121,7 @@ void AiPlayer::update(Creature& owner)
 					Player* player = dynamic_cast<Player*>(&owner);
 					if (player)
 					{
-						call_action(*player, key);
+						call_action(*player, key, ctx);
 					}
 				}
 			}
@@ -138,7 +140,7 @@ void AiPlayer::update(Creature& owner)
 			Player* player = dynamic_cast<Player*>(&owner);
 			if (player)
 			{
-				call_action(*player, key);
+				call_action(*player, key, ctx);
 			}
 		}
 	}
@@ -679,7 +681,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 }
 
 
-void AiPlayer::call_action(Player& player, Controls key)
+void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -867,7 +869,7 @@ void AiPlayer::call_action(Player& player, Controls key)
 
 	case Controls::REST:
 	{
-		game.player->rest();
+		game.player->rest(ctx);
 		break;
 	}
 
