@@ -14,10 +14,10 @@ public:
     void setStrength(int strength) { webStrength = strength; }
 
     // Apply web effect to a creature trying to pass through
-    bool applyEffect(Creature& creature);
+    bool applyEffect(Creature& creature, GameContext& ctx);
 
     // Destroy this web
-    void destroy();
+    void destroy(GameContext& ctx);
 
 private:
     int webStrength;    // How strong the web is (affects escape difficulty)

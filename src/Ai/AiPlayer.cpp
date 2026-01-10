@@ -156,9 +156,10 @@ void AiPlayer::update(Creature& owner)
 	// if moving
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
+		auto ctx = game.get_context();
 		Vector2D targetPosition = owner.position + moveVector;
 		// Only call tile_action after successful move (inside look_to_move)
-		look_to_move(owner, targetPosition); // must check collisions before creature dies from attack
+		look_to_move(owner, targetPosition, ctx); // must check collisions before creature dies from attack
 		look_to_attack(targetPosition, owner);
 		look_on_floor(targetPosition);
 		if (shouldComputeFOV)
@@ -620,10 +621,10 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 }
 
 
-void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
+void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx)
 {
 	TileType targetTileType = game.map.get_tile_type(targetPosition);
-	
+
 	if (!game.map.is_collision(owner, targetTileType, targetPosition))
 	{
 		// Check if there's a web at the target position
@@ -640,7 +641,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition)
 				if (web)
 				{
 					// Apply the web effect - returns true if player gets caught
-					webEffect = web->applyEffect(owner);
+					webEffect = web->applyEffect(owner, ctx);
 					break;
 				}
 			}

@@ -31,7 +31,7 @@ private:
 	Item* chose_from_inventory(Player& player, int ascii, GameContext& ctx);
 	void look_on_floor(Vector2D target);
 	bool look_to_attack(Vector2D& target, Creature& owner);
-	void look_to_move(Creature& owner, const Vector2D& targetPosition);
+	void look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx);
 	void call_action(Player& player, Controls key, GameContext& ctx);
 	Vector2D handle_direction_input(const Creature& owner, int dirKey);
 };

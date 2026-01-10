@@ -314,7 +314,7 @@ bool Player::try_break_web(GameContext& ctx)
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
-			trappingWeb->destroy();
+			trappingWeb->destroy(ctx);
 			trappingWeb = nullptr;
 		}
 
@@ -332,7 +332,7 @@ bool Player::try_break_web(GameContext& ctx)
 
 		// Destroy the web that trapped the player
 		if (trappingWeb) {
-			trappingWeb->destroy();
+			trappingWeb->destroy(ctx);
 			trappingWeb = nullptr;
 		}
 
