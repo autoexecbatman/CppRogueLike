@@ -7,69 +7,76 @@
 
 void Human::on_selection()
 {
-	game.player->playerRace = "Human";
-	game.player->playerRaceState = Player::PlayerRaceState::HUMAN;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Human";
+	ctx.player->playerRaceState = Player::PlayerRaceState::HUMAN;
 }
 
 void Dwarf::on_selection()
 {
-	game.player->playerRace = "Dwarf";
-	game.player->playerRaceState = Player::PlayerRaceState::DWARF;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Dwarf";
+	ctx.player->playerRaceState = Player::PlayerRaceState::DWARF;
 }
 
 void Elf::on_selection()
 {
-	game.player->playerRace = "Elf";
-	game.player->playerRaceState = Player::PlayerRaceState::ELF;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Elf";
+	ctx.player->playerRaceState = Player::PlayerRaceState::ELF;
 }
 
 void Gnome::on_selection()
 {
-	game.player->playerRace = "Gnome";
-	game.player->playerRaceState = Player::PlayerRaceState::GNOME;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Gnome";
+	ctx.player->playerRaceState = Player::PlayerRaceState::GNOME;
 }
 
 void HalfElf::on_selection()
 {
-	game.player->playerRace = "Half-Elf";
-	game.player->playerRaceState = Player::PlayerRaceState::HALFELF;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Half-Elf";
+	ctx.player->playerRaceState = Player::PlayerRaceState::HALFELF;
 }
 
 void Halfling::on_selection()
 {
-	game.player->playerRace = "Halfling";
-	game.player->playerRaceState = Player::PlayerRaceState::HALFLING;
+	auto ctx = game.get_context();
+	ctx.player->playerRace = "Halfling";
+	ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 }
 
 void RaceRandom::on_selection()
 {
+	auto ctx = game.get_context();
 	RandomDice d;
 	const int rng = d.d6();
 	switch (rng)
 	{
 	case 1:
-		game.player->playerRace = "Human";
-		game.player->playerRaceState = Player::PlayerRaceState::HUMAN;
+		ctx.player->playerRace = "Human";
+		ctx.player->playerRaceState = Player::PlayerRaceState::HUMAN;
 		break;
 	case 2:
-		game.player->playerRace = "Dwarf";
-		game.player->playerRaceState = Player::PlayerRaceState::DWARF;
+		ctx.player->playerRace = "Dwarf";
+		ctx.player->playerRaceState = Player::PlayerRaceState::DWARF;
 		break;
 	case 3:
-		game.player->playerRace = "Elf";
-		game.player->playerRaceState = Player::PlayerRaceState::ELF;
+		ctx.player->playerRace = "Elf";
+		ctx.player->playerRaceState = Player::PlayerRaceState::ELF;
 		break;
 	case 4:
-		game.player->playerRace = "Gnome";
-		game.player->playerRaceState = Player::PlayerRaceState::GNOME;
+		ctx.player->playerRace = "Gnome";
+		ctx.player->playerRaceState = Player::PlayerRaceState::GNOME;
 		break;
 	case 5:
-		game.player->playerRace = "Half-Elf";
-		game.player->playerRaceState = Player::PlayerRaceState::HALFELF;
+		ctx.player->playerRace = "Half-Elf";
+		ctx.player->playerRaceState = Player::PlayerRaceState::HALFELF;
 		break;
 	case 6:
-		game.player->playerRace = "Halfling";
-		game.player->playerRaceState = Player::PlayerRaceState::HALFLING;
+		ctx.player->playerRace = "Halfling";
+		ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 		break;
 	default:break;
 	}
