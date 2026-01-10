@@ -33,7 +33,7 @@ private:
     SpiderType spiderType;
 
     // Initialize based on spider type
-    void init_spider_type();
+    void init_spider_type(GameContext& ctx);
 };
 
 // Small Spider - faster but weaker

@@ -23,10 +23,11 @@ Spider::Spider(Vector2D position, SpiderType type)
     spiderType(type)
 {
     // Initialize based on spider type
-    init_spider_type();
+    auto ctx = game.get_context();
+    init_spider_type(ctx);
 }
 
-void Spider::init_spider_type()
+void Spider::init_spider_type(GameContext& ctx)
 {
     // Common spider traits
     add_state(ActorState::CAN_SWIM); // Spiders can walk on water (they're light)
@@ -38,12 +39,12 @@ void Spider::init_spider_type()
         actorData = ActorData{ 's',"small spider",GREEN_BLACK_PAIR };
 
         // Stats for small spider
-        set_strength(game.d.d6() + game.d.d6() + game.d.d6());  // Minimum strength of 3
-        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());  // Small spiders are very agile
-        set_constitution(game.d.d6());
+        set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());  // Minimum strength of 3
+        set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());  // Small spiders are very agile
+        set_constitution(ctx.dice->d6());
 
         // Combat properties - TRIPLED XP for solo play
-        destructible = std::make_unique<MonsterDestructible>(game.d.d2() + 2, 0, "dead small spider", 45, 20, 7); // TRIPLED from 15 for solo play bonus
+        destructible = std::make_unique<MonsterDestructible>(ctx.dice->d2() + 2, 0, "dead small spider", 45, 20, 7); // TRIPLED from 15 for solo play bonus
         attacker = std::make_unique<Attacker>("D4");
 
         // AI - use spider AI for intelligent movement
@@ -55,13 +56,13 @@ void Spider::init_spider_type()
         actorData = ActorData{ 'S',"giant spider",RED_BLACK_PAIR };
 
         // Stats for giant spider
-        set_strength(game.d.d6() + game.d.d6() + game.d.d6());
-        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
-        set_constitution(game.d.d6() + 1);
+        set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+        set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+        set_constitution(ctx.dice->d6() + 1);
 
         // Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(
-            game.d.d4() + 3,
+            ctx.dice->d4() + 3,
             1,
             "dead giant spider",
             120, // TRIPLED from 40 for solo play bonus
@@ -79,12 +80,12 @@ void Spider::init_spider_type()
         actorData = ActorData{ 'W',"web weaver",BLACK_GREEN_PAIR };
 
         // Stats for web spinner - now much more formidable
-        set_strength(game.d.d6() + game.d.d6() + game.d.d6());
-        set_dexterity(game.d.d6() + game.d.d6() + game.d.d6());
-        set_constitution(game.d.d6() + game.d.d6() + game.d.d6());
+        set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+        set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+        set_constitution(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 
         // Combat properties - significantly stronger - TRIPLED XP for solo play
-        destructible = std::make_unique<MonsterDestructible>(game.d.d8() + 5, 1, "dead web weaver", 180, 17, 5); // TRIPLED from 60 for solo play bonus
+        destructible = std::make_unique<MonsterDestructible>(ctx.dice->d8() + 5, 1, "dead web weaver", 180, 17, 5); // TRIPLED from 60 for solo play bonus
         attacker = std::make_unique<Attacker>("D6");
 
         // AI - use web spinner AI for web creation and movement
