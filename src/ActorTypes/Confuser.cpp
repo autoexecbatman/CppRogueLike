@@ -12,23 +12,23 @@ bool Confuser::use(Item& owner, Creature& wearer, GameContext& ctx)
 	//int x{ 0 }, y{ 0 }; // we modify these in pick_tile to get the target position
 	Vector2D target{ 0, 0 };
 
-	if (!game.pick_tile(&target, 0))
+	if (!ctx.targeting_system->pick_tile(ctx, &target, 0))
 	{
 		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
-		game.restore_game_display();
+		ctx.game->restore_game_display();
 		return false;
 	}
 
-	auto actor = game.get_actor(target); // get the actor at the target position
+	auto actor = ctx.game->get_actor(target); // get the actor at the target position
 
 	if (!actor)
 	{
 		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
-		game.restore_game_display();
+		ctx.game->restore_game_display();
 		return false;
 	}
 
@@ -37,13 +37,13 @@ bool Confuser::use(Item& owner, Creature& wearer, GameContext& ctx)
 	auto confusedAi = std::make_unique<AiMonsterConfused>(nbTurns, std::move(actor->ai));
 	actor->ai = std::move(confusedAi);
 
-	game.message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), false);
-	game.message(WHITE_BLACK_PAIR, " as he starts to stumble around!", true);
+	ctx.message_system->message(WHITE_BLACK_PAIR, std::format("The eyes of the {} look vacant,", actor->actorData.name), false);
+	ctx.message_system->message(WHITE_BLACK_PAIR, " as he starts to stumble around!", true);
 
 	// CRITICAL FIX: Clear screen completely before restore
 	clear();
 	refresh();
-	game.restore_game_display();
+	ctx.game->restore_game_display();
 	return Pickable::use(owner, wearer, ctx);
 }
 

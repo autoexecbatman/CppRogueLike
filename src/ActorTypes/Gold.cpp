@@ -12,10 +12,10 @@ bool Gold::use(Item& owner, Creature& wearer, GameContext& ctx)
     wearer.adjust_gold(amount);
 
     // Display a message
-    game.append_message_part(YELLOW_BLACK_PAIR, "You gained ");
-    game.append_message_part(YELLOW_BLACK_PAIR, std::to_string(amount));
-    game.append_message_part(YELLOW_BLACK_PAIR, " gold.");
-    game.finalize_message();
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "You gained ");
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(amount));
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, " gold.");
+    ctx.message_system->finalize_message();
 
     // Return true to consume the item
     return Pickable::use(owner, wearer, ctx);

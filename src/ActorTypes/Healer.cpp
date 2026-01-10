@@ -11,15 +11,15 @@ bool Healer::use(Item& owner, Creature& wearer, GameContext& ctx)
 
 	if (amountHealed > 0)
 	{
-		game.message(COLOR_WHITE, "You heal ", false);
-		game.message(COLOR_RED, std::to_string(amountHealed), false);
-		game.message(COLOR_WHITE, " hit points.", true);
+		ctx.message_system->message(COLOR_WHITE, "You heal ", false);
+		ctx.message_system->message(COLOR_RED, std::to_string(amountHealed), false);
+		ctx.message_system->message(COLOR_WHITE, " hit points.", true);
 
 		return Pickable::use(owner, wearer, ctx);
 	}
 	else
 	{
-		game.message(COLOR_RED, "Health is already maxed out!", true);
+		ctx.message_system->message(COLOR_RED, "Health is already maxed out!", true);
 	}
 
 	return false;
