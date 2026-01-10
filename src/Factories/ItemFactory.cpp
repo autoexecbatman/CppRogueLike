@@ -17,120 +17,120 @@ ItemFactory::ItemFactory()
     // HEALING - CLERIC REPLACEMENT (Solo fighter needs reliable healing)
     add_item_type({
         "Health Potion", 50, 1, 0, 0.2f,  // MORE COMMON - solo needs healing
-        [](Vector2D pos) { 
-        add_item(game.inventory_data, ItemCreator::create_health_potion(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_health_potion(pos));
         }
         });
 
     // MAGIC UTILITY - WIZARD REPLACEMENT (Solo fighter needs magic support)
     add_item_type({
         "Scroll of Lightning Bolt", 20, 2, 0, 0.2f,  // MORE COMMON - utility magic
-        [](Vector2D pos) { 
-        add_item(game.inventory_data, ItemCreator::create_scroll_lightning(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_scroll_lightning(pos));
         }
         });
 
     add_item_type({
         "Scroll of Fireball", 15, 3, 0, 0.3f,  // MORE COMMON - AoE for solo
-        [](Vector2D pos) { 
-        add_item(game.inventory_data, ItemCreator::create_scroll_fireball(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_scroll_fireball(pos));
         }
         });
 
     add_item_type({
         "Scroll of Confusion", 15, 2, 0, 0.2f,  // MORE COMMON - crowd control
-        [](Vector2D pos) { 
-        add_item(game.inventory_data, ItemCreator::create_scroll_confusion(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_scroll_confusion(pos));
         }
         });
 
     // WEAPONS - FIGHTER PROGRESSION (Inferior weapons rare, focus on upgrades)
     add_item_type({
         "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
         "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(game.level_manager.get_dungeon_level())));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     // Gold
     add_item_type({
         "Gold", 25, 1, 0, 0.1f,
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_gold_pile(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_gold_pile(pos, ctx)); }
         });
 
     // FOOD - SOLO RESOURCE MANAGEMENT (No party sharing, need reliable food)
     add_item_type({
         "Ration", 25, 1, 0, 0.1f,  // MORE COMMON - solo needs consistent food
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_ration(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_ration(pos)); }
         });
 
     add_item_type({
         "Fruit", 15, 1, 0, 0.0f,  // STEADY - quick hunger fix
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_fruit(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_fruit(pos)); }
         });
 
     add_item_type({
         "Bread", 12, 1, 0, 0.0f,  // STEADY - basic sustenance
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_bread(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_bread(pos)); }
         });
 
     add_item_type({
         "Meat", 8, 2, 0, 0.1f,  // VALUABLE - high nutrition for solo
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_meat(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_meat(pos)); }
         });
 
     // Amulet of Yendor - incredibly rare, only appears on deeper levels
     add_item_type({
         "Amulet of Yendor", 1, 8, 0, 2.0f,
-        [](Vector2D pos) { add_item(game.inventory_data, ItemCreator::create_amulet_of_yendor(pos)); }
+        [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_amulet_of_yendor(pos)); }
         });
 
     add_item_type({
         "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_leather_armor(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_leather_armor(pos));
         }
         });
 
     add_item_type({
         "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_chain_mail(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_chain_mail(pos));
         }
         });
 
     add_item_type({
         "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
-        [](Vector2D pos) {
-        add_item(game.inventory_data, ItemCreator::create_plate_mail(pos));
+        [](Vector2D pos, GameContext& ctx) {
+        add_item(*ctx.inventory_data, ItemCreator::create_plate_mail(pos));
         }
         });
 
@@ -174,7 +174,7 @@ void ItemFactory::add_item_type(const ItemType& itemType)
     itemTypes.push_back(itemType);
 }
 
-void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality)
+void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dungeonLevel, int quality)
 {
     // quality is 1-3: 1=normal, 2=good, 3=exceptional
 
@@ -185,19 +185,19 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
 
     case 1:
     {
-        itemCount = game.d.roll(1, 2);
+        itemCount = ctx.dice->roll(1, 2);
         break;
     }
 
     case 2:
     {
-        itemCount = game.d.roll(2, 3);
+        itemCount = ctx.dice->roll(2, 3);
         break;
     }
 
     case 3:
     {
-        itemCount = game.d.roll(3, 5);
+        itemCount = ctx.dice->roll(3, 5);
         break;
     }
 
@@ -210,67 +210,67 @@ void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int qua
     // Always include gold with amount based on quality
     int goldMin = 10 * dungeonLevel * quality;
     int goldMax = 20 * dungeonLevel * quality;
-    int goldAmount = game.d.roll(goldMin, goldMax);
+    int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
     // Create gold pile
     auto goldPile = std::make_unique<Item>(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR });
     goldPile->pickable = std::make_unique<Gold>(goldAmount);
-    add_item(game.inventory_data, std::move(goldPile));
+    add_item(*ctx.inventory_data, std::move(goldPile));
 
     // Generate other random items
     for (int i = 0; i < itemCount; i++)
     {
         // Small offset to avoid items on same tile
         Vector2D itemPos = position;
-        itemPos.x += game.d.roll(-1, 1);
-        itemPos.y += game.d.roll(-1, 1);
+        itemPos.x += ctx.dice->roll(-1, 1);
+        itemPos.y += ctx.dice->roll(-1, 1);
 
         // Ensure position is valid
-        if (!game.map.can_walk(itemPos))
+        if (!ctx.game->map.can_walk(itemPos))
         {
             itemPos = position; // Fallback to original position
         }
 
         // Determine item type with biased probabilities
-        int roll = game.d.d100();
+        int roll = ctx.dice->d100();
 
         if (quality == 3 && roll <= 5)
         {
             // 5% chance of very special items in exceptional quality treasure
-            if (effectiveLevel >= 8 && game.d.d100() <= 10)
+            if (effectiveLevel >= 8 && ctx.dice->d100() <= 10)
             {
                 // 10% chance for Amulet at high enough level
-                spawn_item_of_category(itemPos, effectiveLevel, "artifact");
+                spawn_item_of_category(itemPos, ctx, effectiveLevel, "artifact");
             }
             else
             {
                 // High quality weapons
-                spawn_item_of_category(itemPos, effectiveLevel + 2, "weapon");
+                spawn_item_of_category(itemPos, ctx, effectiveLevel + 2, "weapon");
             }
         }
         else if (roll <= 25)
         {
             // 25% chance of weapon
-            spawn_item_of_category(itemPos, effectiveLevel, "weapon");
+            spawn_item_of_category(itemPos, ctx, effectiveLevel, "weapon");
         }
         else if (roll <= 50)
         {
             // 25% chance of scroll
-            spawn_item_of_category(itemPos, effectiveLevel, "scroll");
+            spawn_item_of_category(itemPos, ctx, effectiveLevel, "scroll");
         }
         else if (roll <= 75)
         {
             // 25% chance of potion
-            spawn_item_of_category(itemPos, effectiveLevel, "potion");
+            spawn_item_of_category(itemPos, ctx, effectiveLevel, "potion");
         }
         else
         {
             // 25% chance of food
-            spawn_item_of_category(itemPos, effectiveLevel, "food");
+            spawn_item_of_category(itemPos, ctx, effectiveLevel, "food");
         }
     }
 
-    game.log("Generated treasure of quality " + std::to_string(quality) +
+    ctx.game->log("Generated treasure of quality " + std::to_string(quality) +
         " with " + std::to_string(itemCount + 1) + " items including gold");
 }
 
@@ -304,13 +304,13 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 }
 
 // Spawn a specific item category (weapon, potion, scroll, etc.)
-void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category)
+void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category)
 {
     // Get indices of items in this category
     auto it = itemCategories.find(category);
     if (it == itemCategories.end() || it->second.empty())
     {
-        game.log("No items found in category: " + category);
+        ctx.game->log("No items found in category: " + category);
         return;
     }
 
@@ -330,12 +330,12 @@ void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, co
     // If no valid items for this level in this category, do nothing
     if (totalWeight <= 0)
     {
-        game.log("No valid items in category " + category + " for this dungeon level!");
+        ctx.game->log("No valid items in category " + category + " for this dungeon level!");
         return;
     }
 
     // Roll random number and select item
-    int roll = game.d.roll(1, totalWeight);
+    int roll = ctx.dice->roll(1, totalWeight);
     int runningTotal = 0;
 
     for (size_t i = 0; i < indices.size(); i++)
@@ -344,14 +344,14 @@ void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, co
         if (roll <= runningTotal)
         {
             // Create the item
-            itemTypes[indices[i]].createFunc(position);
+            itemTypes[indices[i]].createFunc(position, ctx);
             break;
         }
     }
 }
 
 // Spawn a random item at the given position based on dungeon level
-void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel)
+void ItemFactory::spawn_random_item(Vector2D position, GameContext& ctx, int dungeonLevel)
 {
     // Calculate total weights for current dungeon level
     int totalWeight = 0;
@@ -367,12 +367,12 @@ void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel)
     // If no valid items for this level, do nothing
     if (totalWeight <= 0)
     {
-        game.log("No valid items for this dungeon level!");
+        ctx.game->log("No valid items for this dungeon level!");
         return;
     }
 
     // Roll random number and select item
-    int roll = game.d.roll(1, totalWeight);
+    int roll = ctx.dice->roll(1, totalWeight);
     int runningTotal = 0;
 
     for (size_t i = 0; i < itemTypes.size(); i++)
@@ -381,7 +381,7 @@ void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel)
         if (roll <= runningTotal)
         {
             // Create the item
-            itemTypes[i].createFunc(position);
+            itemTypes[i].createFunc(position, ctx);
             break;
         }
     }

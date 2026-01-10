@@ -64,9 +64,9 @@ std::unique_ptr<Item> ItemCreator::create_random_potion(Vector2D pos, int dungeo
     return create_health_potion(pos);
 }
 
-std::unique_ptr<Item> ItemCreator::create_random_scroll(Vector2D pos, int dungeonLevel)
+std::unique_ptr<Item> ItemCreator::create_random_scroll(Vector2D pos, GameContext& ctx, int dungeonLevel)
 {
-    int roll = game.d.roll(1, 4);
+    int roll = ctx.dice->roll(1, 4);
     switch(roll)
     {
         case 1: return create_scroll_lightning(pos);
@@ -271,30 +271,30 @@ std::unique_ptr<Item> ItemCreator::create_enhanced_longbow(Vector2D pos, int enh
 }
 
 // Random enhancement chance functions
-std::unique_ptr<Item> ItemCreator::create_random_weapon(Vector2D pos, int dungeonLevel)
+std::unique_ptr<Item> ItemCreator::create_random_weapon(Vector2D pos, GameContext& ctx, int dungeonLevel)
 {
     // Random weapon type selection
-    int weaponType = game.d.roll(1, 5);
+    int weaponType = ctx.dice->roll(1, 5);
     
     switch (weaponType)
     {
-        case 1: return create_weapon_with_enhancement_chance(pos, dungeonLevel); // Dagger
-        case 2: return create_enhanced_short_sword(pos, determine_enhancement_level(dungeonLevel));
-        case 3: return create_enhanced_long_sword(pos, determine_enhancement_level(dungeonLevel));
-        case 4: return create_enhanced_staff(pos, determine_enhancement_level(dungeonLevel));
-        case 5: return create_enhanced_longbow(pos, determine_enhancement_level(dungeonLevel));
-        default: return create_enhanced_dagger(pos, determine_enhancement_level(dungeonLevel));
+        case 1: return create_weapon_with_enhancement_chance(pos, ctx, dungeonLevel); // Dagger
+        case 2: return create_enhanced_short_sword(pos, determine_enhancement_level(ctx, dungeonLevel));
+        case 3: return create_enhanced_long_sword(pos, determine_enhancement_level(ctx, dungeonLevel));
+        case 4: return create_enhanced_staff(pos, determine_enhancement_level(ctx, dungeonLevel));
+        case 5: return create_enhanced_longbow(pos, determine_enhancement_level(ctx, dungeonLevel));
+        default: return create_enhanced_dagger(pos, determine_enhancement_level(ctx, dungeonLevel));
     }
 }
 
-std::unique_ptr<Item> ItemCreator::create_weapon_with_enhancement_chance(Vector2D pos, int dungeonLevel)
+std::unique_ptr<Item> ItemCreator::create_weapon_with_enhancement_chance(Vector2D pos, GameContext& ctx, int dungeonLevel)
 {
     int enhancementChance = calculate_enhancement_chance(dungeonLevel);
-    int roll = game.d.roll(1, 100);
+    int roll = ctx.dice->roll(1, 100);
     
     if (roll <= enhancementChance)
     {
-        int enhancementLevel = determine_enhancement_level(dungeonLevel);
+        int enhancementLevel = determine_enhancement_level(ctx, dungeonLevel);
         return create_enhanced_dagger(pos, enhancementLevel);
     }
     else
@@ -312,9 +312,9 @@ int ItemCreator::calculate_enhancement_chance(int dungeonLevel)
     return std::min(5 + (dungeonLevel - 1) * 3, 35);
 }
 
-int ItemCreator::determine_enhancement_level(int dungeonLevel)
+int ItemCreator::determine_enhancement_level(GameContext& ctx, int dungeonLevel)
 {
-    int roll = game.d.roll(1, 100);
+    int roll = ctx.dice->roll(1, 100);
     
     // Higher dungeon levels get better enhancement chances
     if (dungeonLevel >= 5)
@@ -367,10 +367,10 @@ std::unique_ptr<Item> ItemCreator::create_plate_mail(Vector2D pos)
     return item;
 }
 
-std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos)
+std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos, GameContext& ctx)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'$', "gold pile", YELLOW_BLACK_PAIR});
-    int goldAmount = game.d.roll(10, 50); // Random amount 10-50 gold
+    int goldAmount = ctx.dice->roll(10, 50); // Random amount 10-50 gold
     item->pickable = std::make_unique<Gold>(goldAmount);
     item->value = goldAmount; // Gold's value is its amount
     return item;

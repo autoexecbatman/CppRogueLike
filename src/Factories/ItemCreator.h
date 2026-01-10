@@ -22,8 +22,8 @@ public:
     static std::unique_ptr<Item> create_leather_armor(Vector2D pos);
     static std::unique_ptr<Item> create_chain_mail(Vector2D pos);
     static std::unique_ptr<Item> create_plate_mail(Vector2D pos);
-    static std::unique_ptr<Item> create_gold_pile(Vector2D pos);
-    
+    static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
+
     // Food creation functions
     static std::unique_ptr<Item> create_ration(Vector2D pos);
     static std::unique_ptr<Item> create_fruit(Vector2D pos);
@@ -56,15 +56,15 @@ public:
     static std::unique_ptr<Item> create_scale_mail(Vector2D pos);
     
     // Random generation with single source
-    static std::unique_ptr<Item> create_random_weapon(Vector2D pos, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_random_weapon(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
     static std::unique_ptr<Item> create_random_armor(Vector2D pos, int dungeonLevel = 1);
     static std::unique_ptr<Item> create_random_potion(Vector2D pos, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_scroll(Vector2D pos, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_weapon_with_enhancement_chance(Vector2D pos, int dungeonLevel = 1);
-    
+    static std::unique_ptr<Item> create_random_scroll(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_weapon_with_enhancement_chance(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
+
     // Enhancement utility functions
     static int calculate_enhancement_chance(int dungeonLevel);
-    static int determine_enhancement_level(int dungeonLevel);
+    static int determine_enhancement_level(GameContext& ctx, int dungeonLevel);
     static int calculate_enhanced_value(int baseValue, int enhancementLevel);
 
     // Centralized weapon creation by ItemClass (proper approach)

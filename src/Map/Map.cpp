@@ -578,7 +578,7 @@ void Map::add_item(Vector2D pos, GameContext& ctx) {
 	// Use our ItemFactory to create a random item
 	if (ctx.level_manager)
 	{
-		itemFactory->spawn_random_item(pos, ctx.level_manager->get_dungeon_level());
+		itemFactory->spawn_random_item(pos, ctx, ctx.level_manager->get_dungeon_level());
 	}
 }
 
@@ -1294,7 +1294,7 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameCo
 	};
 
 	// Generate treasure at the center of the room
-	itemFactory->generate_treasure(center, ctx.level_manager->get_dungeon_level(), quality);
+	itemFactory->generate_treasure(center, ctx, ctx.level_manager->get_dungeon_level(), quality);
 
 	// Add guardians or traps based on quality
 	int guardianCount = 0;

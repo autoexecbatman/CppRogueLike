@@ -22,8 +22,10 @@ using namespace InventoryOperations; // For clean function calls
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
 {
+	auto ctx = game.get_context();
+
 	// Rolling for stats
-	auto roll3d6 = []() { return game.d.d6() + game.d.d6() + game.d.d6(); };
+	auto roll3d6 = [&ctx]() { return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(); };
 	set_strength(roll3d6());
 	set_dexterity(roll3d6());
 	set_constitution(roll3d6());
@@ -32,7 +34,7 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player",
 	set_charisma(roll3d6());
 
 	//==PLAYER==
-	const int playerHp = 20 + game.d.d10(); // we roll the dice to get the player's hp
+	const int playerHp = 20 + ctx.dice->d10(); // we roll the dice to get the player's hp
 	const int playerDr = 1; // the player's damage reduction
 	const int playerXp = 0; // the player's experience points
 	const int playerAC = 10; // the player's armor class
