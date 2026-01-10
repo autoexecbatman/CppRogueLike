@@ -19,6 +19,6 @@ public:
 	PickableType get_type() const override;
 
 private:
-	Vector2D find_valid_teleport_location();
+	Vector2D find_valid_teleport_location(GameContext& ctx);
 };
 //====
