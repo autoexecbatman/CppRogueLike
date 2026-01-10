@@ -33,7 +33,7 @@ bool Pickable::use(Item& owner, Creature& wearer, GameContext& ctx)
 bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For players, use the slot-based equipment system with smart slot selection
-	if (wearer.uniqueId == game.player->uniqueId)
+	if (wearer.uniqueId == ctx.player->uniqueId)
 	{
 		Player* player = static_cast<Player*>(&wearer);
 		
@@ -50,11 +50,11 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 			if (equippedWeapon && equippedWeapon->uniqueId == owner.uniqueId)
 			{
 				std::string slotName = (preferredSlot == EquipmentSlot::LEFT_HAND) ? "off-hand" : "main hand";
-				game.message(WHITE_BLACK_PAIR, "You equip the " + owner.get_name() + " in your " + slotName + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You equip the " + owner.get_name() + " in your " + slotName + ".", true);
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "You unequip the " + owner.get_name() + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You unequip the " + owner.get_name() + ".", true);
 			}
 		}
 		
@@ -76,7 +76,7 @@ EquipmentSlot Weapon::get_preferred_slot(const Player* player) const
 bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For players, use the proper slot-based equipment system
-	if (wearer.uniqueId == game.player->uniqueId)
+	if (wearer.uniqueId == ctx.player->uniqueId)
 	{
 		Player* player = static_cast<Player*>(&wearer);
 		
@@ -89,11 +89,11 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 			Item* equippedShield = player->get_equipped_item(EquipmentSlot::LEFT_HAND);
 			if (equippedShield && equippedShield->uniqueId == owner.uniqueId)
 			{
-				game.message(WHITE_BLACK_PAIR, "You raise the " + owner.get_name() + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You raise the " + owner.get_name() + ".", true);
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "You lower the " + owner.get_name() + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You lower the " + owner.get_name() + ".", true);
 			}
 		}
 		
@@ -572,7 +572,7 @@ bool HealingPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 	{
 		int healedAmount = std::min(heal_amount, wearer.destructible->get_max_hp() - wearer.destructible->get_hp());
 		wearer.destructible->heal(healedAmount);
-		game.message(GREEN_BLACK_PAIR, "You feel better! (+" + std::to_string(healedAmount) + " HP)", true);
+		ctx.message_system->message(GREEN_BLACK_PAIR, "You feel better! (+" + std::to_string(healedAmount) + " HP)", true);
 		
 		// Remove the potion from inventory
 		auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -580,7 +580,7 @@ bool HealingPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 	}
 	else
 	{
-		game.message(WHITE_BLACK_PAIR, "You are already at full health.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
 		return false;
 	}
 }
@@ -606,7 +606,7 @@ void HealingPotion::load(const json& j)
 bool ManaPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (mana system not implemented)
-	game.message(BLUE_BLACK_PAIR, "You feel magical energy surge through you! (+" + std::to_string(mana_amount) + " Mana)", true);
+	ctx.message_system->message(BLUE_BLACK_PAIR, "You feel magical energy surge through you! (+" + std::to_string(mana_amount) + " Mana)", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -634,7 +634,7 @@ void ManaPotion::load(const json& j)
 bool StrengthPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (buff system not fully implemented)
-	game.message(RED_BLACK_PAIR, "You feel much stronger! (+" + std::to_string(strength_bonus) + " Strength for " + std::to_string(duration) + " turns)", true);
+	ctx.message_system->message(RED_BLACK_PAIR, "You feel much stronger! (+" + std::to_string(strength_bonus) + " Strength for " + std::to_string(duration) + " turns)", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -663,7 +663,7 @@ void StrengthPotion::load(const json& j)
 bool SpeedPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (speed system not fully implemented)
-	game.message(YELLOW_BLACK_PAIR, "You feel much faster! (+" + std::to_string(speed_bonus) + " Speed for " + std::to_string(duration) + " turns)", true);
+	ctx.message_system->message(YELLOW_BLACK_PAIR, "You feel much faster! (+" + std::to_string(speed_bonus) + " Speed for " + std::to_string(duration) + " turns)", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -692,7 +692,7 @@ void SpeedPotion::load(const json& j)
 bool PoisonAntidote::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (poison system not fully implemented)
-	game.message(GREEN_BLACK_PAIR, "You feel the poison leave your system!", true);
+	ctx.message_system->message(GREEN_BLACK_PAIR, "You feel the poison leave your system!", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -712,7 +712,7 @@ void PoisonAntidote::load(const json& j)
 bool FireResistancePotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (resistance system not fully implemented)
-	game.message(YELLOW_BLACK_PAIR, "You feel protected from fire! (" + std::to_string(resistance_amount) + "% resistance for " + std::to_string(duration) + " turns)", true);
+	ctx.message_system->message(YELLOW_BLACK_PAIR, "You feel protected from fire! (" + std::to_string(resistance_amount) + "% resistance for " + std::to_string(duration) + " turns)", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -741,7 +741,7 @@ void FireResistancePotion::load(const json& j)
 bool InvisibilityPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, just show a message (invisibility system not fully implemented)
-	game.message(CYAN_BLACK_PAIR, "You fade from view! (Invisible for " + std::to_string(duration) + " turns)", true);
+	ctx.message_system->message(CYAN_BLACK_PAIR, "You fade from view! (Invisible for " + std::to_string(duration) + " turns)", true);
 	
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -770,7 +770,7 @@ void InvisibilityPotion::load(const json& j)
 bool ScrollIdentify::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, show a message (identify system not fully implemented)
-	game.message(CYAN_BLACK_PAIR, "You feel a surge of knowledge! Items around you reveal their secrets.", true);
+	ctx.message_system->message(CYAN_BLACK_PAIR, "You feel a surge of knowledge! Items around you reveal their secrets.", true);
 	
 	// Remove the scroll from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -790,7 +790,7 @@ void ScrollIdentify::load(const json& j)
 bool ScrollTeleport::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, show a message (teleport system not fully implemented)
-	game.message(CYAN_BLACK_PAIR, "Reality bends around you! You feel yourself being transported (Range: " + std::to_string(range) + " tiles).", true);
+	ctx.message_system->message(CYAN_BLACK_PAIR, "Reality bends around you! You feel yourself being transported (Range: " + std::to_string(range) + " tiles).", true);
 	
 	// Remove the scroll from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -818,7 +818,7 @@ void ScrollTeleport::load(const json& j)
 bool ScrollMagicMapping::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// For now, show a message (magic mapping not fully implemented)
-	game.message(YELLOW_BLACK_PAIR, "The layout of the area becomes clear in your mind! (Radius: " + std::to_string(radius) + " tiles)", true);
+	ctx.message_system->message(YELLOW_BLACK_PAIR, "The layout of the area becomes clear in your mind! (Radius: " + std::to_string(radius) + " tiles)", true);
 	
 	// Remove the scroll from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
@@ -846,8 +846,8 @@ void ScrollMagicMapping::load(const json& j)
 bool ScrollEnchantment::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// BROKEN LOGIC FIXED: Prevent scroll consumption without effect
-	game.message(RED_BLACK_PAIR, "The scroll crumbles to dust - enchantment magic is not yet stable in this realm.", true);
-	game.message(WHITE_BLACK_PAIR, "Enhancement system requires implementation before scrolls function.", true);
+	ctx.message_system->message(RED_BLACK_PAIR, "The scroll crumbles to dust - enchantment magic is not yet stable in this realm.", true);
+	ctx.message_system->message(WHITE_BLACK_PAIR, "Enhancement system requires implementation before scrolls function.", true);
 
 	// Do NOT consume the scroll until enhancement system is implemented
 	// This prevents players from losing items to broken functionality

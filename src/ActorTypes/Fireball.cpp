@@ -60,7 +60,7 @@ bool Fireball::use(Item& owner, Creature& wearer, GameContext& ctx)
     }
 
     // CRITICAL FIX: Immediately cleanup dead creatures to show corpses
-    ctx.creature_manager->cleanup_dead_creatures();
+    ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 
     return Pickable::use(owner, wearer, ctx);
 }
