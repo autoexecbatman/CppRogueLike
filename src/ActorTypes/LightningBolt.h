@@ -19,9 +19,9 @@ public:
 	LightningBolt(int range, int damage) noexcept;
 
 	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	
+
 	// Lightning animation between two points
-	void animate_lightning(Vector2D from, Vector2D to);
+	void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx);
 
 	void load(const json& j) override;
 	void save(json& j) override;

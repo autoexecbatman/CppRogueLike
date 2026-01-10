@@ -14,52 +14,52 @@ LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRa
 bool LightningBolt::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
 	// find closest enemy (inside a maximum range)
-	const auto& closestMonster = game.get_closest_monster(wearer.position, maxRange);
+	const auto& closestMonster = ctx.creature_manager->get_closest_monster(wearer.position, maxRange);
 
 	if (!closestMonster)
 	{
-		game.message(WHITE_RED_PAIR, "No enemy is close enough to strike.", true);
+		ctx.message_system->message(WHITE_RED_PAIR, "No enemy is close enough to strike.", true);
 		return false;
 	}
 	else
 	{
-		game.append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
-		game.append_message_part(WHITE_BLUE_PAIR, closestMonster->actorData.name);
-		game.append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
-		game.finalize_message();
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
+		ctx.message_system->append_message_part(WHITE_BLUE_PAIR, closestMonster->actorData.name);
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
+		ctx.message_system->finalize_message();
 
 		// Animate the lightning bolt effect
-		animate_lightning(wearer.position, closestMonster->position);
+		animate_lightning(wearer.position, closestMonster->position, ctx);
 
-		game.message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
+		ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
 		closestMonster->destructible->take_damage(*closestMonster, damage, ctx);
 
 		return Pickable::use(owner, wearer, ctx);
 	}
 }
 
-void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
+void LightningBolt::animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 {
 	// Random generator for lightning jaggedness
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	std::uniform_int_distribution<> jitterDist(-1, 1);
-	
+
 	// Calculate direct path
 	std::vector<Vector2D> mainPath;
-	
+
 	// Use Bresenham's algorithm to get direct path
 	int x0 = from.x;
 	int y0 = from.y;
 	int x1 = to.x;
 	int y1 = to.y;
-	
+
 	int dx = std::abs(x1 - x0);
 	int dy = std::abs(y1 - y0);
 	int sx = (x0 < x1) ? 1 : -1;
 	int sy = (y0 < y1) ? 1 : -1;
 	int err = dx - dy;
-	
+
 	// Generate the main path
 	while (x0 != x1 || y0 != y1) {
 		int e2 = 2 * err;
@@ -71,20 +71,21 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 			err += dx;
 			y0 += sy;
 		}
-		
+
 		if (x0 != from.x || y0 != from.y) {
 			mainPath.push_back(Vector2D{ y0, x0 });
 		}
 	}
-	
+
 	// Lightning bolt characters
 	const char LIGHTNING_CHARS[] = { '/', '\\', '|', '-', '*', '+' };
 	const int CHAR_COUNT = 6;
 	std::uniform_int_distribution<> charDist(0, CHAR_COUNT - 1);
-	
+
 	// Create lightning flash
 	clear();
-	game.render();
+	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.gui->gui_render(ctx);
 	
 	// Lightning phases
 	const int FLASH_COUNT = 3;
@@ -141,8 +142,8 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 					}
 					
 					// Draw branch segment if it's within bounds
-					if (current.x >= 0 && current.y >= 0 && 
-						current.x < game.map.get_width() && current.y < game.map.get_height()) {
+					if (current.x >= 0 && current.y >= 0 &&
+						current.x < ctx.map->get_width() && current.y < ctx.map->get_height()) {
 						char symbol = LIGHTNING_CHARS[charDist(gen)];
 						mvaddch(current.y, current.x, symbol);
 					}
@@ -162,7 +163,8 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 		// Clear for next flash
 		if (flash < FLASH_COUNT - 1) {
 			clear();
-			game.render();
+			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+			ctx.gui->gui_render(ctx);
 			napms(50); // Brief darkness between flashes
 		}
 	}
@@ -177,7 +179,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 			} else {
 				int x = to.x + dx;
 				int y = to.y + dy;
-				if (x >= 0 && y >= 0 && x < game.map.get_width() && y < game.map.get_height()) {
+				if (x >= 0 && y >= 0 && x < ctx.map->get_width() && y < ctx.map->get_height()) {
 					mvaddch(y, x, '.');
 				}
 			}
@@ -186,10 +188,11 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to)
 	attroff(COLOR_PAIR(WHITE_BLUE_PAIR));
 	refresh();
 	napms(150);
-	
+
 	// Redraw game
 	clear();
-	game.render();
+	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.gui->gui_render(ctx);
 	refresh();
 }
 
