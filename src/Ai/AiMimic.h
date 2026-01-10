@@ -3,6 +3,8 @@
 #include "../Ai/AiMonster.h"
 #include "../ActorTypes/Monsters.h"
 
+struct GameContext; // Forward declaration
+
 class AiMimic : public AiMonster
 {
 public:
@@ -13,9 +15,9 @@ public:
 
     int revealDistance = 1;  // Reveal true form when player is this close
 private:
-    bool consume_nearby_items(Mimic& mimic);
-    void check_revealing(Mimic& mimic);
-    void change_disguise(Mimic& mimic);
+    bool consume_nearby_items(Mimic& mimic, GameContext& ctx);
+    void check_revealing(Mimic& mimic, GameContext& ctx);
+    void change_disguise(Mimic& mimic, GameContext& ctx);
 
     // Fields moved from Mimic class
     bool isDisguised = true;
