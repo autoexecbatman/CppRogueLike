@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <chrono>
 #include "src/Combat/WeaponDamageRegistry.h"
 #include "src/Combat/DamageInfo.h"
 #include "src/Items/ItemClassification.h"
