@@ -7,9 +7,8 @@
 
 AiMonster::AiMonster() : moveCount(0) {}
 
-void AiMonster::update(Creature& owner)
+void AiMonster::update(Creature& owner, GameContext& ctx)
 {
-    auto ctx = game.get_context();
 
     // If the owner has no AI or is dead, do nothing
     if (owner.ai == nullptr || owner.destructible->is_dead())
@@ -40,7 +39,7 @@ void AiMonster::update(Creature& owner)
     if (moveCount > 0)
     {
         // Recently seen player - actively pursue
-        moveOrAttack(owner, ctx.player->position);
+        moveOrAttack(owner, ctx.player->position, ctx);
     }
     else if (distanceToPlayer <= 15)
     {
@@ -48,7 +47,7 @@ void AiMonster::update(Creature& owner)
         // even if they don't have direct line of sight
         if (ctx.dice->d6() == 1)  // Occasional movement toward player
         {
-            moveOrAttack(owner, ctx.player->position);
+            moveOrAttack(owner, ctx.player->position, ctx);
         }
         else if (ctx.dice->d10() == 1)  // Occasional random movement
         {
@@ -59,7 +58,7 @@ void AiMonster::update(Creature& owner)
             if (dx != 0 || dy != 0)  // Ensure we're not standing still
             {
                 Vector2D newPos = owner.position + Vector2D{ dy, dx };
-                if (ctx.map->can_walk(newPos) && !ctx.map->get_actor(newPos))
+                if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
                 {
                     owner.position = newPos;
                 }
@@ -75,7 +74,7 @@ void AiMonster::update(Creature& owner)
         if (dx != 0 || dy != 0)  // Ensure we're not standing still
         {
             Vector2D newPos = owner.position + Vector2D{ dy, dx };
-            if (ctx.map->can_walk(newPos) && !ctx.map->get_actor(newPos))
+            if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
             {
                 owner.position = newPos;
             }
@@ -150,13 +149,12 @@ void AiMonster::save(json& j)
 //	}
 //}
 
-void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
+void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	Dijkstra dijkstra{ MAP_WIDTH,MAP_HEIGHT };
 	std::vector<Vector2D> path = dijkstra.a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
-	auto is_actor = [&ctx](const Vector2D& pos) { return ctx.map->get_actor(pos) != nullptr; };
+	auto is_actor = [&ctx](const Vector2D& pos) { return ctx.map->get_actor(pos, ctx) != nullptr; };
 	if (distanceToTarget > 1)
 	{
 		if (!path.empty())

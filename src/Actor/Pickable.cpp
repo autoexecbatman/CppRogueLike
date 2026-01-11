@@ -41,7 +41,7 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 		EquipmentSlot preferredSlot = get_preferred_slot(player);
 
 		// Use toggle_weapon with preferred slot
-		bool success = player->toggle_weapon(owner.uniqueId, preferredSlot);
+		bool success = player->toggle_weapon(owner.uniqueId, preferredSlot, ctx);
 
 		if (success)
 		{
@@ -81,7 +81,7 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 		Player* player = static_cast<Player*>(&wearer);
 
 		// Use the dedicated toggle_shield method
-		bool success = player->toggle_shield(owner.uniqueId);
+		bool success = player->toggle_shield(owner.uniqueId, ctx);
 
 		if (success)
 		{

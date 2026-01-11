@@ -6,6 +6,7 @@
 class Creature;
 class Item;
 class Player;
+struct GameContext;
 
 class InventoryUI
 {
@@ -14,7 +15,7 @@ public:
     ~InventoryUI();
     
     // Main entry point - displays inventory and handles all interaction
-    void display(Player& player);
+    void display(Player& player, GameContext& ctx);
     
 private:
     // Window management
@@ -25,17 +26,17 @@ private:
     // Display methods
     void display_inventory_items(const Player& player);
     void display_equipment_slots(const Player& player);
-    void display_instructions();
+    void display_instructions(GameContext& ctx);
     
     // Input handling
-    bool handle_inventory_input(Player& player);
-    bool handle_backpack_selection(Player& player, int itemIndex);
-    bool handle_equipment_selection(Player& player, int input);
+    bool handle_inventory_input(Player& player, GameContext& ctx);
+    bool handle_backpack_selection(Player& player, int itemIndex, GameContext& ctx);
+    bool handle_equipment_selection(Player& player, int input, GameContext& ctx);
     
     // Helper methods
     std::vector<std::pair<Item*, bool>> build_item_list(const Player& player);
     void show_item_info(Item* item, int y);
-    void restore_game_display();
+    void restore_game_display(GameContext& ctx);
     
     // Window pointers
     WINDOW* inventoryWindow;

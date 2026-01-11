@@ -7,7 +7,7 @@
 #include "../Actor/Actor.h"
 #include "../Systems/ShopKeeper.h"
 
-void Buy::on_selection()
+void Buy::on_selection(GameContext& ctx)
 {
 	// Use the shopkeeper's attached shop component
 	if (shopkeeper.shop != nullptr)
@@ -21,18 +21,18 @@ void Buy::on_selection()
 	}
 }
 
-void Sell::on_selection()
+void Sell::on_selection(GameContext& ctx)
 {
-	game.menus.push_back(std::make_unique<MenuSell>(shopkeeper, player));
+	ctx.menus->push_back(std::make_unique<MenuSell>(shopkeeper, player, ctx));
 }
 
-void Exit::on_selection()
+void Exit::on_selection(GameContext& ctx)
 {
 }
 
-MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player) : shopkeeper(shopkeeper)
+MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx) : shopkeeper(shopkeeper)
 {
-	menu_new(height_, width_, starty_, startx_);
+	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.push_back(std::make_unique<Buy>(shopkeeper));
 	iMenuStates.push_back(std::make_unique<Sell>(shopkeeper, player));
 	iMenuStates.push_back(std::make_unique<Exit>());
@@ -92,7 +92,7 @@ void MenuTrade::draw()
 	menu_refresh();
 }
 
-void MenuTrade::on_key(int key)
+void MenuTrade::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -114,7 +114,7 @@ void MenuTrade::on_key(int key)
 	case 10:
 	{ // if a selection is made
 		menu_set_run_false();
-		iMenuStates.at(currentState)->on_selection();
+		iMenuStates.at(currentState)->on_selection(ctx);
 		break;
 	}
 
@@ -129,21 +129,21 @@ void MenuTrade::on_key(int key)
 	}
 }
 
-void MenuTrade::menu()
+void MenuTrade::menu(GameContext& ctx)
 {
 	// Save background before showing menu
 	clear();
-	game.render();
+	ctx.game->render();
 	refresh();
 	
 	while (run)
 	{
 		draw();
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	// Restore full game view
 	clear();
-	game.render();
+	ctx.game->render();
 	refresh();
 }

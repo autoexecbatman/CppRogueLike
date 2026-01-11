@@ -23,7 +23,7 @@ public:
     ~CreatureManager() = default;
 
     // Creature lifecycle
-    void update_creatures(std::span<std::unique_ptr<Creature>> creatures);
+    void update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx);
     void cleanup_dead_creatures(std::vector<std::unique_ptr<Creature>>& creatures);
     
     // Spawning
@@ -73,7 +73,8 @@ private:
     Vector2D find_spawn_position(
         std::span<const Vector2D> rooms,
         Map& map,
-        RandomDice& dice
+        RandomDice& dice,
+        GameContext& ctx
     );
 };
 

@@ -5,6 +5,8 @@
 #include <curses.h>
 #include <string>
 
+struct GameContext;
+
 class MenuName
 {
 	WINDOW* menuNameWindow{ nullptr };
@@ -30,12 +32,12 @@ class MenuName
 	std::string menu_name_input(); // take user input and return it as a string
 
 	void menu_name_store();
-	void menu_name_assign();
+	void menu_name_assign(GameContext& ctx);
 
 public:
 	bool run{ true };
 
-	void menu_name();
+	void menu_name(GameContext& ctx);
 };
 
 #endif // !MENU_NAME_H

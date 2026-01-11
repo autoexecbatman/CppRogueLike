@@ -24,7 +24,7 @@ void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
     // if target is shopkeeper, do not attack
     if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
     {
-        ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker));
+        ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
         return;
     }
 
@@ -171,7 +171,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, const
 	// if target is shopkeeper, do not attack
 	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
 	{
-		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker));
+		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
 		return;
 	}
 
@@ -297,7 +297,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 	// if target is shopkeeper, do not attack
 	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
 	{
-		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker));
+		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
 		return;
 	}
 

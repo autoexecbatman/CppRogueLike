@@ -9,10 +9,13 @@
 #include "IMenuState.h"
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
+#include "../Core/GameContext.h"
+
+struct GameContext;
 
 class Buy : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 	Creature& shopkeeper;
 public:
 	Buy(Creature& shopkeeper) : shopkeeper{ shopkeeper } {}
@@ -20,7 +23,7 @@ public:
 
 class Sell : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 	Creature& player;
 	Creature& shopkeeper;
 public:
@@ -29,7 +32,7 @@ public:
 
 class Exit : public IMenuState
 {
-    void on_selection() override;
+    void on_selection(GameContext& ctx) override;
 };
 
 class MenuTrade : public BaseMenu
@@ -44,11 +47,11 @@ class MenuTrade : public BaseMenu
 	std::vector<std::unique_ptr<IMenuState>> iMenuStates;
 	std::vector<std::string> menuStateStrings{ "Buy","Sell","Exit" };
 
-	std::unordered_map<size_t, std::function<void()>> menuCallbacks
+	std::unordered_map<size_t, std::function<void(GameContext& ctx)>> menuCallbacks
 	{
-		{ 0, [&] { iMenuStates.at(currentState)->on_selection(); } },
-		{ 1, [&] { iMenuStates.at(currentState)->on_selection(); } },
-		{ 2, [&] { iMenuStates.at(currentState)->on_selection(); } }
+		{ 0, [&](GameContext& ctx) { iMenuStates.at(currentState)->on_selection(ctx); } },
+		{ 1, [&](GameContext& ctx) { iMenuStates.at(currentState)->on_selection(ctx); } },
+		{ 2, [&](GameContext& ctx) { iMenuStates.at(currentState)->on_selection(ctx); } }
 	};
 
 	std::string menu_get_string(size_t state) { return menuStateStrings.at(state); }
@@ -56,10 +59,10 @@ class MenuTrade : public BaseMenu
 	void draw_content() override;
 
 public:
-	MenuTrade(Creature& shopkeeper, Creature& player);
+	MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
 	~MenuTrade();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };

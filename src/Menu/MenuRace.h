@@ -11,42 +11,42 @@
 
 class Human : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Dwarf : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Elf : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Gnome : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class HalfElf : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Halfling : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class RaceRandom : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class RaceBack : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class MenuRace : public BaseMenu
@@ -77,12 +77,12 @@ class MenuRace : public BaseMenu
 	void menu_race_print_option(MenuRaceOptions option) noexcept;
 
 public:
-	MenuRace();
+	MenuRace(GameContext& ctx);
 	~MenuRace();
 
 	void draw();
-	void menu() override;
-	void on_key(int key);
+	void menu(GameContext& ctx) override;
+	void on_key(int key, GameContext& ctx);
 };
 
 #endif // !MENU_RACE_H

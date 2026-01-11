@@ -17,7 +17,7 @@ class Ai : public Persistent
 public:
 	virtual ~Ai() {};
 
-	virtual void update(Creature& owner) = 0;
+	virtual void update(Creature& owner, GameContext& ctx) = 0;
 
 	// Type-safe hostility check - replaces dynamic_cast usage
 	virtual bool is_hostile() const { return true; } // Most AI types are hostile by default

@@ -11,25 +11,26 @@
 #include "IMenuState.h"
 
 class IMenuState;
+struct GameContext;
 
 class Male : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Female : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Random : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Back : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class MenuGender : public BaseMenu
@@ -52,12 +53,12 @@ class MenuGender : public BaseMenu
 	std::string menu_gender_get_string(MenuState option) { return menuStateStrings.at(option); }
 	void menu_print_state(MenuState option);
 public:
-	MenuGender();
+	MenuGender(GameContext& ctx);
 	~MenuGender();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };
 
 #endif // !MENU_H

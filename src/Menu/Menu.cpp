@@ -5,12 +5,12 @@
 #include "MenuGender.h"
 #include "../Game.h"
 
-void NewGame::on_selection()
+void NewGame::on_selection(GameContext& ctx)
 {
-	game.menus.push_back(std::make_unique<MenuGender>());
+	ctx.menus->push_back(std::make_unique<MenuGender>(ctx));
 }
 
-void LoadGame::on_selection()
+void LoadGame::on_selection(GameContext& ctx)
 {
 	// Clear the menu from screen before loading
 	clear();
@@ -20,28 +20,28 @@ void LoadGame::on_selection()
 	mvprintw(LINES / 2, (COLS / 2) - 10, "Loading game, please wait...");
 	refresh();
 	
-	game.load_all();
+	ctx.game->load_all();
 	
 	// Clear loading message after load completes
 	clear();
 	refresh();
 }
 
-void Options::on_selection()
+void Options::on_selection(GameContext& ctx)
 {
 	// do nothing
 }
 
-void Quit::on_selection()
+void Quit::on_selection(GameContext& ctx)
 {
-	game.run = false;
-	game.shouldSave = false;
-	game.log("You quit without saving!");
+    *ctx.run = false;
+    ctx.game->shouldSave = false;
+    ctx.message_system->log("You quit without saving!");
 }
 
-Menu::Menu(bool startup) : isStartupMenu(startup)
+Menu::Menu(bool startup, GameContext& ctx) : isStartupMenu(startup)
 {
-	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
 	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
 	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
@@ -96,7 +96,7 @@ void Menu::draw()
 	menu_refresh();
 }
 
-void Menu::on_key(int key)
+void Menu::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -120,7 +120,7 @@ void Menu::on_key(int key)
 	case 10:
 	{ // if a selection is made
 		menu_set_run_false(); // stop running this menu loop
-		iMenuStates.at(currentState)->on_selection(); // run the selected option
+		iMenuStates.at(currentState)->on_selection(ctx); // run the selected option
 		break;
 	}
 
@@ -131,7 +131,7 @@ void Menu::on_key(int key)
 		if (isStartupMenu)
 		{
 			// Use the same quit logic as the Quit menu option
-			iMenuStates.at(MenuState::QUIT)->on_selection();
+			iMenuStates.at(MenuState::QUIT)->on_selection(ctx);
 		}
 		break;
 	}
@@ -139,28 +139,28 @@ void Menu::on_key(int key)
 	case 'n':
 	{
 		menu_set_run_false();
-		iMenuStates.at(MenuState::NEW_GAME)->on_selection();
+		iMenuStates.at(MenuState::NEW_GAME)->on_selection(ctx);
 		break;
 	}
 
 	case 'l':
 	{
 		menu_set_run_false();
-		iMenuStates.at(MenuState::LOAD_GAME)->on_selection();
+		iMenuStates.at(MenuState::LOAD_GAME)->on_selection(ctx);
 		break;
 	}
 
 	case 'o':
 	{
 		menu_set_run_false();
-		iMenuStates.at(MenuState::OPTIONS)->on_selection();
+		iMenuStates.at(MenuState::OPTIONS)->on_selection(ctx);
 		break;
 	}
 
 	case 'q':
 	{
 		menu_set_run_false(); // stop running menu loop
-		iMenuStates.at(MenuState::QUIT)->on_selection();
+		iMenuStates.at(MenuState::QUIT)->on_selection(ctx);
 		break; // break out of switch and start closing the game
 	}
 
@@ -168,16 +168,15 @@ void Menu::on_key(int key)
 	}
 }
 
-void Menu::menu()
+void Menu::menu(GameContext& ctx)
 {
 	// Clear screen and render game background before showing menu
 	clear();
-	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
+	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
-		auto ctx = game.get_context();
-		game.render();
-		game.gui.gui_render(ctx);
+		ctx.game->render();
+		ctx.gui->gui_render(ctx);
 	}
 	refresh();
 	
@@ -185,17 +184,16 @@ void Menu::menu()
 	{
 		draw(); // draw the menu
 		menu_key_listen(); // listen for key presses
-		on_key(keyPress); // run the key press
+		on_key(keyPress, ctx); // run the key press
 	}
 	
 	// Restore full game view if returning to game
-	if (game.menu_manager.is_game_initialized() && !isStartupMenu)
+	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
-		clear();
-		auto ctx = game.get_context();
-		game.render();
-		game.gui.gui_render(ctx);
-		refresh();
+        clear();
+        ctx.game->render();
+        ctx.gui->gui_render(ctx);
+        refresh();
 	}
 }
 

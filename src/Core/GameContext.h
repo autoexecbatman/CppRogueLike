@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <memory>
+#include <deque>
 
 // Forward declarations
 class Game;
@@ -23,7 +24,18 @@ class HungerSystem;
 class Player;
 class Stairs;
 class Object;
+class BaseMenu;
 struct Vector2D;
+
+// Game status enumeration - moved here to avoid circular dependency
+enum class GameStatus
+{
+    STARTUP, 
+    IDLE, 
+    NEW_TURN, 
+    VICTORY, 
+    DEFEAT
+};
 
 /**
  * GameContext - Dependency injection container
@@ -70,8 +82,11 @@ struct GameContext {
     std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
     std::vector<Vector2D>* rooms{ nullptr };
 
+    // UI Collections
+    std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
+
     // Game state (pointer to allow mutation)
     int* time{ nullptr };
     bool* run{ nullptr };
-    int* game_status{ nullptr };  // Pointer to Game::GameStatus enum
+    GameStatus* game_status{ nullptr };  // Pointer to actual enum type
 };

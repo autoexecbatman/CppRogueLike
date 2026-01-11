@@ -8,7 +8,7 @@
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include <format>
 
-void LevelUpUI::display_level_up_screen(Player& player, int newLevel)
+void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)
 {
     // Clear screen before showing level up window
     clear();
@@ -26,7 +26,7 @@ void LevelUpUI::display_level_up_screen(Player& player, int newLevel)
     int currentLine = 12; // Start benefits section here
     display_level_benefits(statsWindow, player, newLevel);
     display_class_benefits(statsWindow, player, newLevel, currentLine);
-    display_next_level_info(statsWindow, player);
+    display_next_level_info(statsWindow, player, ctx);
     display_continue_prompt(statsWindow);
 
     // Refresh and wait for input
@@ -35,7 +35,7 @@ void LevelUpUI::display_level_up_screen(Player& player, int newLevel)
 
     // Clean up
     delwin(statsWindow);
-    cleanup_and_restore();
+    cleanup_and_restore(ctx);
 }
 
 void LevelUpUI::display_title(WINDOW* window, const Player& player, int level)
@@ -158,10 +158,9 @@ void LevelUpUI::display_class_benefits(WINDOW* window, const Player& player, int
     currentLine = benefitLine;
 }
 
-void LevelUpUI::display_next_level_info(WINDOW* window, const Player& player)
+void LevelUpUI::display_next_level_info(WINDOW* window, const Player& player, GameContext& ctx)
 {
     // Show next level requirements
-    auto ctx = game.get_context();
     int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
     mvwprintw(window, 17, 2, "XP for next level: %d", nextLevelXP);
 }
@@ -205,12 +204,11 @@ void LevelUpUI::wait_for_spacebar()
     } while (ch != ' '); // Only accept space bar
 }
 
-void LevelUpUI::cleanup_and_restore()
+void LevelUpUI::cleanup_and_restore(GameContext& ctx)
 {
     // Clear screen and restore game display properly
-    auto ctx = game.get_context();
     clear();
-    game.render();
-    game.gui.gui_render(ctx);
+    ctx.game->render();
+    ctx.gui->gui_render(ctx);
     refresh();
 }

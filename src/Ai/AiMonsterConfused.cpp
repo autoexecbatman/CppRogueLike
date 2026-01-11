@@ -11,7 +11,7 @@
 //==ConfusedMonsterAi==
 AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(std::move(oldAi)) {}
 
-void AiMonsterConfused::update(Creature& owner)
+void AiMonsterConfused::update(Creature& owner, GameContext& ctx)
 {
 	TCODRandom* rng = TCODRandom::getInstance();
 	Vector2D direction{ rng->getInt(-1, 1), rng->getInt(-1, 1) };
@@ -20,16 +20,15 @@ void AiMonsterConfused::update(Creature& owner)
 	{
 		Vector2D destination = owner.position + direction;
 
-		if (game.map.can_walk(destination))
+		if (ctx.map->can_walk(destination, ctx))
 		{
 			owner.position = destination;
 		}
 		else
 		{
-			const auto& actor = game.get_actor(destination);
+			const auto& actor = ctx.map->get_actor(destination, ctx);
 			if (actor)
 			{
-				auto ctx = game.get_context();
 				owner.attacker->attack(owner, *actor, ctx);
 			}
 		}

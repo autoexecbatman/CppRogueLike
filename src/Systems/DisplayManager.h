@@ -16,7 +16,7 @@ public:
     // Display management methods
     void display_help() const noexcept;
     void display_levelup(Player& player, int xpLevel, GameContext& ctx) const;
-    void display_character_sheet(const Player& player) const noexcept;
+    void display_character_sheet(const Player& player, GameContext& ctx) const noexcept;
 
 private:
     // Private helper methods if needed

@@ -19,7 +19,7 @@ InventoryUI::~InventoryUI()
     destroy_windows();
 }
 
-void InventoryUI::display(Player& player)
+void InventoryUI::display(Player& player, GameContext& ctx)
 {
     while (true)
     {
@@ -28,12 +28,12 @@ void InventoryUI::display(Player& player)
         // Display content - separated backpack and equipment
         display_inventory_items(player);
         display_equipment_slots(player);
-        display_instructions();
+        display_instructions(ctx);
         
         refresh_windows();
         
         // Handle input - returns false to exit inventory
-        if (!handle_inventory_input(player))
+        if (!handle_inventory_input(player, ctx))
         {
             break;
         }
@@ -41,7 +41,7 @@ void InventoryUI::display(Player& player)
         destroy_windows();
     }
     
-    restore_game_display();
+    restore_game_display(ctx);
 }
 
 void InventoryUI::create_windows()
@@ -240,11 +240,11 @@ void InventoryUI::display_equipment_slots(const Player& player)
     }
 }
 
-void InventoryUI::display_instructions()
+void InventoryUI::display_instructions(GameContext& ctx)
 {
     // Calculate total weight (simplified - assume 1 weight per item for now)
     int totalWeight = 0;
-    totalWeight = static_cast<int>(get_item_count(game.player->inventory_data));
+    totalWeight = static_cast<int>(get_item_count(ctx.player->inventory_data));
     
     mvwprintw(
         inventoryWindow,
@@ -258,31 +258,31 @@ void InventoryUI::display_instructions()
     mvwprintw(equipmentWindow, LINES - 2, 2, "Select by letter");
 }
 
-bool InventoryUI::handle_inventory_input(Player& player)
+bool InventoryUI::handle_inventory_input(Player& player, GameContext& ctx)
 {
     int input = getch();
     
     if (input == static_cast<int>(Controls::ESCAPE))
     {
-        game.message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
         return false; // Exit inventory
     }
     
     // Handle backpack item selection (a-z)
     if (input >= 'a' && input <= 'z')
     {
-        return handle_backpack_selection(player, input - 'a');
+        return handle_backpack_selection(player, input - 'a', ctx);
     }
     
     // Handle equipment slot selection
-    return handle_equipment_selection(player, input);
+    return handle_equipment_selection(player, input, ctx);
 }
 
-bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
+bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex, GameContext& ctx)
 {
     if (is_inventory_empty(player.inventory_data))
     {
-        game.message(WHITE_BLACK_PAIR, "Your backpack is empty.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Your backpack is empty.", true);
         return true;
     }
     
@@ -297,30 +297,29 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
     }
     
     // Debug logging
-    game.log("Inventory selection debug:");
-    game.log("Selected index: " + std::to_string(itemIndex));
-    game.log("Valid items count: " + std::to_string(validItems.size()));
-    game.log("Total inventory slots: " + std::to_string(player.inventory_data.items.size()));
+    ctx.message_system->log("Inventory selection debug:");
+    ctx.message_system->log("Selected index: " + std::to_string(itemIndex));
+    ctx.message_system->log("Valid items count: " + std::to_string(validItems.size()));
+    ctx.message_system->log("Total inventory slots: " + std::to_string(player.inventory_data.items.size()));
     
     if (itemIndex >= 0 && itemIndex < static_cast<int>(validItems.size()))
     {
         Item* selectedItem = validItems[itemIndex];
         
-        game.log("Selected item: " + selectedItem->actorData.name);
-        game.log("Has pickable: " + std::string(selectedItem->pickable ? "YES" : "NO"));
+        ctx.message_system->log("Selected item: " + selectedItem->actorData.name);
+        ctx.message_system->log("Has pickable: " + std::string(selectedItem->pickable ? "YES" : "NO"));
         
         if (selectedItem && selectedItem->pickable)
         {
-            auto ctx = game.get_context();
             Item* itemPtr = selectedItem;
 
-            game.log("Attempting to use item...");
+            ctx.message_system->log("Attempting to use item...");
             bool itemUsed = selectedItem->pickable->use(*selectedItem, player, ctx);
-            game.log("Item use result: " + std::string(itemUsed ? "SUCCESS" : "FAILED"));
+            ctx.message_system->log("Item use result: " + std::string(itemUsed ? "SUCCESS" : "FAILED"));
             
             if (itemUsed)
             {
-                game.gameStatus = Game::GameStatus::NEW_TURN;
+                ctx.game->gameStatus = GameStatus::NEW_TURN;
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
@@ -343,19 +342,19 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex)
         }
         else
         {
-            game.log("Item has no pickable component!");
+            ctx.message_system->log("Item has no pickable component!");
         }
     }
     else
     {
-        game.log("Index out of bounds!");
+        ctx.message_system->log("Index out of bounds!");
     }
     
-    game.message(WHITE_BLACK_PAIR, "Invalid backpack selection.", true);
+    ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid backpack selection.", true);
     return true;
 }
 
-bool InventoryUI::handle_equipment_selection(Player& player, int input)
+bool InventoryUI::handle_equipment_selection(Player& player, int input, GameContext& ctx)
 {
     // Map input characters to equipment slots
     EquipmentSlot targetSlot = EquipmentSlot::NONE;
@@ -378,7 +377,7 @@ bool InventoryUI::handle_equipment_selection(Player& player, int input)
         case 'A': targetSlot = EquipmentSlot::MISSILES; break;
         case 'T': targetSlot = EquipmentSlot::TOOL; break;
         default:
-            game.message(WHITE_BLACK_PAIR, "Invalid equipment selection.", true);
+            ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid equipment selection.", true);
             return true; // Stay in inventory
     }
     
@@ -388,20 +387,20 @@ bool InventoryUI::handle_equipment_selection(Player& player, int input)
     if (equippedItem)
     {
         // Unequip the item - now no cast needed since player is mutable
-        player.unequip_item(targetSlot);
-        game.message(WHITE_BLACK_PAIR, "You unequipped the " + equippedItem->get_name() + ".", true);
+        player.unequip_item(targetSlot, ctx);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "You unequipped the " + equippedItem->get_name() + ".", true);
     }
     else
     {
-        game.message(WHITE_BLACK_PAIR, "That equipment slot is empty.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "That equipment slot is empty.", true);
     }
     
     return true; // Stay in inventory
 }
 
-void InventoryUI::restore_game_display()
+void InventoryUI::restore_game_display(GameContext& ctx)
 {
     clear();
     refresh();
-    game.restore_game_display();
+    ctx.game->restore_game_display();
 }

@@ -23,13 +23,13 @@ class MenuSell : public BaseMenu
 	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
-	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller);
+	void handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx);
 	void draw_content() override;
 public:
-	MenuSell(Creature& shopkeeper, Creature& player);
+	MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
 	~MenuSell();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };

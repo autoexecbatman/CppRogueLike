@@ -16,14 +16,14 @@
 #include "Spider.h"
 #include "../../Game.h"
 #include "../../Ai/AiSpider.h"
+#include "../../Core/GameContext.h"
 
 // Base Spider constructor
-Spider::Spider(Vector2D position, SpiderType type)
+Spider::Spider(Vector2D position, GameContext& ctx,SpiderType type)
     : Creature(position, ActorData{ 's',"small spider",GREEN_BLACK_PAIR }), // Default to small spider data
     spiderType(type)
 {
     // Initialize based on spider type
-    auto ctx = game.get_context();
     init_spider_type(ctx);
 }
 
@@ -94,10 +94,10 @@ void Spider::init_spider_type(GameContext& ctx)
     }
 }
 
-void Spider::update()
+void Spider::update(GameContext& ctx)
 {
     // Call the base class update method
-    Creature::update();
+    Creature::update(ctx);
 }
 
 int Spider::get_poison_chance() const
@@ -117,19 +117,19 @@ int Spider::get_poison_chance() const
 }
 
 // Small Spider implementation
-SmallSpider::SmallSpider(Vector2D position) : Spider(position, SpiderType::SMALL)
+SmallSpider::SmallSpider(Vector2D position, GameContext& ctx) : Spider(position, ctx, SpiderType::SMALL)
 {
     // Any additional small spider initialization
 }
 
 // Giant Spider implementation
-GiantSpider::GiantSpider(Vector2D position) : Spider(position, SpiderType::GIANT)
+GiantSpider::GiantSpider(Vector2D position, GameContext& ctx) : Spider(position, ctx, SpiderType::GIANT)
 {
     // Any additional giant spider initialization
 }
 
 // Web Spinner implementation
-WebSpinner::WebSpinner(Vector2D position) : Spider(position, SpiderType::WEB_SPINNER)
+WebSpinner::WebSpinner(Vector2D position, GameContext& ctx) : Spider(position, ctx, SpiderType::WEB_SPINNER)
 {
     // Any additional web spinner initialization
 }

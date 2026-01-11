@@ -17,18 +17,22 @@ bool Confuser::use(Item& owner, Creature& wearer, GameContext& ctx)
 		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
-		ctx.game->restore_game_display();
+		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 		return false;
 	}
 
-	auto actor = ctx.game->get_actor(target); // get the actor at the target position
+	auto actor = ctx.map->get_actor(target, ctx); // get the actor at the target position
 
 	if (!actor)
 	{
 		// CRITICAL FIX: Clear screen completely before restore
 		clear();
 		refresh();
-		ctx.game->restore_game_display();
+		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+		ctx.gui->gui_render(ctx);
+		ctx.rendering_manager->force_screen_refresh();
 		return false;
 	}
 
@@ -43,7 +47,9 @@ bool Confuser::use(Item& owner, Creature& wearer, GameContext& ctx)
 	// CRITICAL FIX: Clear screen completely before restore
 	clear();
 	refresh();
-	ctx.game->restore_game_display();
+	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.gui->gui_render(ctx);
+	ctx.rendering_manager->force_screen_refresh();
 	return Pickable::use(owner, wearer, ctx);
 }
 

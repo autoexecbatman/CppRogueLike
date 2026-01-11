@@ -59,12 +59,12 @@ void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& c
     LevelUpSystem::apply_level_up_benefits(player, xpLevel, &ctx);
 
     // Display the level up screen using the dedicated UI class
-    LevelUpUI::display_level_up_screen(player, xpLevel);
+    LevelUpUI::display_level_up_screen(player, xpLevel, ctx);
 }
 
-void DisplayManager::display_character_sheet(const Player& player) const noexcept
+void DisplayManager::display_character_sheet(const Player& player, GameContext& ctx) const noexcept
 {
-    CharacterSheetUI::display_character_sheet(player);
+    CharacterSheetUI::display_character_sheet(player, ctx);
 }
 
 // end of file: Systems/DisplayManager.cpp

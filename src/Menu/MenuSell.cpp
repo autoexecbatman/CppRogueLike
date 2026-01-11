@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "MenuSell.h"
 #include "../Game.h"
 #include "../Actor/Actor.h"
@@ -43,7 +45,7 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 		}
 		else
 		{
-			game.log("MenuSell Item is null.");
+			std::cerr << "MenuSell Item is null." << std::endl;
 			std::exit(EXIT_FAILURE);
 		}
 	}
@@ -64,20 +66,20 @@ void MenuSell::menu_print_state(size_t state)
 	}
 }
 
-void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller)
+void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
 {
     if (is_inventory_empty(seller.inventory_data) ||
         currentState >= get_item_count(seller.inventory_data))
     {
-        game.message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
         return;
     }
     
     const Item* item = get_item_at(seller.inventory_data, currentState);
     if (!item)
     {
-        game.log("Error: Attempted to sell a null item.");
-        game.message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
+        ctx.message_system->log("Error: Attempted to sell a null item.");
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
         return;
     }
     
@@ -103,7 +105,7 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
                 add_item(seller.inventory_data, std::move(*removed_item));
                 shopkeeper.adjust_gold(price);
                 seller.adjust_gold(-price);
-                game.message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
+                ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
                 return;
             }
             
@@ -113,21 +115,21 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
                 currentState = get_item_count(seller.inventory_data) - 1;
             }
             
-            game.message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
+            ctx.message_system->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
         }
         else
         {
-            game.message(WHITE_BLACK_PAIR, "Transaction failed.", true);
+            ctx.message_system->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
         }
     }
     else
     {
-        game.log("Shopkeeper does not have enough gold to buy the item.");
-        game.message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+        ctx.message_system->log("Shopkeeper does not have enough gold to buy the item.");
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
     }
 }
 
-MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), shopkeeper(shopkeeper)
+MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx) : player(player), shopkeeper(shopkeeper)
 {
 	// Use full screen dimensions
 	menu_height = static_cast<size_t>(LINES);
@@ -135,7 +137,7 @@ MenuSell::MenuSell(Creature& shopkeeper, Creature& player) : player(player), sho
 	
 	// Player inventory is always initialized - no need to check
 	populate_items(player.inventory_data.items);
-	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 	
 	// Reset currentState if inventory is empty
 	if (is_inventory_empty(player.inventory_data))
@@ -208,7 +210,7 @@ void MenuSell::draw()
 	menu_refresh();
 }
 
-void MenuSell::on_key(int key)
+void MenuSell::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -233,12 +235,12 @@ void MenuSell::on_key(int key)
 		// Only allow selling if player actually has items
 		if (!is_inventory_empty(player.inventory_data) && !menuItems.empty())
 		{
-			handle_sell(menuWindow, shopkeeper, player);
+			handle_sell(menuWindow, shopkeeper, player, ctx);
 			menu_mark_dirty(); // Redraw after sale
 		}
 		else
 		{
-			game.message(WHITE_BLACK_PAIR, "No items to sell.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "No items to sell.", true);
 		}
 	}
 	break;
@@ -250,7 +252,7 @@ void MenuSell::on_key(int key)
 	}
 }
 
-void MenuSell::menu()
+void MenuSell::menu(GameContext& ctx)
 {
 	// Initial draw
 	draw();
@@ -264,7 +266,7 @@ void MenuSell::menu()
 		}
 		
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	
 	// Clear screen when exiting

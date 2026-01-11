@@ -176,9 +176,8 @@ void Creature::save(json& j)
 }
 
 // the actor update
-void Creature::update()
+void Creature::update(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{

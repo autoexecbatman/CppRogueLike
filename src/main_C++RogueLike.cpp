@@ -30,10 +30,12 @@ PDCEX int pdc_yoffset;
 #endif // EMSCRIPTEN
 
 void init_curses(); // declaration of a function that handles curses procedures
-Game game; // create a global game object
 
 int main()
 {
+	// Create the main game object
+	Game game;
+	game.init();
 	// Memory leak detection (commented - enable only during debugging)
 	// _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	// _CrtSetBreakAlloc(1779);
@@ -79,8 +81,9 @@ int main()
 	//==INIT_CURSES==
 	init_curses();
 	
+	auto ctx = game.get_context();
 	//==INIT_MENU==
-	game.menus.push_back(std::make_unique<Menu>());
+	game.menus.push_back(std::make_unique<Menu>(true, ctx));
 	Gui gui;
 	int loopNum{ 0 };
 	
@@ -149,8 +152,10 @@ void init_curses()
 {
 	//==INIT_CURSES==
 	initscr(); // initialize the screen in curses
-	if (!has_colors()) {
-		game.log("Colors not supported.");
+
+	if (!has_colors())
+	{
+		std::cerr << "Error: Terminal does not support colors." << std::endl;
 	}
 	else
 	{
@@ -158,21 +163,23 @@ void init_curses()
 		Colors colors;
 		colors.my_init_pair();
 	}
+
 	cbreak(); // disable line buffering
 	noecho(); // turn off echoing of keys to the screen
 	curs_set(0); // remove the blinking cursor
 	keypad(stdscr, true); // enable the keypad for non-char keys
+
 	if (has_mouse())
 	{
 		mousemask(ALL_MOUSE_EVENTS, nullptr); // enable mouse events * #define ALL_MOUSE_EVENTS        0x1fffffffL
 	}
 	else
 	{
-		game.log("Mouse not supported.");
+		std::cerr << "Warning: Mouse not supported in this terminal." << std::endl;
 	}
+
 	printw("Welcome to C++RogueLike!"); // print a welcome message
 	printw("Console size: %d x %d", COLS, LINES); // print the console size
 	refresh(); // refresh the screen
-	game.log("refresh called"); // log the refresh call
 }
 // end of file: main_C++RogueLike.cpp

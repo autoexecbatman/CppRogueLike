@@ -9,17 +9,15 @@ using namespace InventoryOperations; // For clean function calls
 
 AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(0) {}
 
-void AiMimic::update(Creature& owner)
+void AiMimic::update(Creature& owner, GameContext& ctx)
 {
-    auto ctx = game.get_context();
-
     // Cast the owner to a Mimic - we still need this for type-specific operations
     Mimic* mimic = dynamic_cast<Mimic*>(&owner);
     if (!mimic)
     {
         // This shouldn't happen - but if it does, use standard monster AI
         ctx.message_system->log("Error: AiMimic::update called on non-Mimic creature");
-        AiMonster::update(owner);
+        AiMonster::update(owner, ctx);
         return;
     }
 
@@ -52,7 +50,7 @@ void AiMimic::update(Creature& owner)
         consume_nearby_items(*mimic, ctx);
 
         // Use standard monster AI for movement and attacks
-        AiMonster::update(owner);
+        AiMonster::update(owner, ctx);
     }
 }
 

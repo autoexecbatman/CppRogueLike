@@ -1,13 +1,13 @@
 #include "BaseMenu.h"
 #include "../Game.h"
 
-void BaseMenu::menu_new(int height, int width, int starty, int startx)
+void BaseMenu::menu_new(int height, int width, int starty, int startx, GameContext& ctx)
 {
 	// check bound before creating window - allow full screen dimensions
 	if (height > LINES || width > COLS)
 	{
-		game.log("Menu window size is too big. Height: " + std::to_string(height) + ", Width: " + std::to_string(width));
-		game.log("Terminal size - LINES: " + std::to_string(LINES) + ", COLS: " + std::to_string(COLS));
+		ctx.message_system->log("Menu window size is too big. Height: " + std::to_string(height) + ", Width: " + std::to_string(width));
+		ctx.message_system->log("Terminal size - LINES: " + std::to_string(LINES) + ", COLS: " + std::to_string(COLS));
 		std::exit(EXIT_FAILURE);
 	}
 
@@ -16,7 +16,7 @@ void BaseMenu::menu_new(int height, int width, int starty, int startx)
 		(starty > 0 && starty >= LINES) || 
 		(startx > 0 && startx >= COLS))
 	{
-		game.log("Menu window start position is out of bounds. StartY: " + std::to_string(starty) + ", StartX: " + std::to_string(startx));
+		ctx.message_system->log("Menu window start position is out of bounds. StartY: " + std::to_string(starty) + ", StartX: " + std::to_string(startx));
 		std::exit(EXIT_FAILURE);
 	}
 

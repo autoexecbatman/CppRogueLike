@@ -346,7 +346,7 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
-	ctx.game->gameStatus = Game::GameStatus::DEFEAT;
+	ctx.game->gameStatus = GameStatus::DEFEAT;
 }
 
 //==MonsterDestructible==

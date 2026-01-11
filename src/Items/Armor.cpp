@@ -11,23 +11,23 @@ bool Armor::use(Item& item, Creature& wearer, GameContext& ctx)
 	std::string armorName = item.actorData.name;
 	
 	// For players, delegate to Equipment System using unique IDs
-	if (wearer.uniqueId == game.player->uniqueId)
+	if (wearer.uniqueId == ctx.player->uniqueId)
 	{
 		Player* player = static_cast<Player*>(&wearer);
 		
 		// Clean delegation using unique ID
 		bool wasEquipped = player->is_item_equipped(item.uniqueId);
-		bool success = player->toggle_armor(item.uniqueId);
+		bool success = player->toggle_armor(item.uniqueId, ctx);
 		
 		if (success)
 		{
 			if (wasEquipped)
 			{
-				game.message(WHITE_BLACK_PAIR, "You remove the " + armorName + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You remove the " + armorName + ".", true);
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "You put on the " + armorName + ".", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You put on the " + armorName + ".", true);
 			}
 		}
 		

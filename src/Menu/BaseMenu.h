@@ -2,6 +2,8 @@
 #include <curses.h>
 #include <string>
 
+struct GameContext;
+
 class BaseMenu
 {
 protected:
@@ -23,7 +25,7 @@ public:
 	BaseMenu(BaseMenu&&) = delete;
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
-	void menu_new(int height, int width, int starty, int startx);
+	void menu_new(int height, int width, int starty, int startx, GameContext& ctx);
 	void menu_clear() 
 	{ 
 		if (menuWindow) 
@@ -52,6 +54,6 @@ public:
 	void menu_draw_box(); // Draw menu box with title
 	void menu_efficient_refresh(); // Only refresh if needed
 
-	virtual void menu() = 0;
+	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}; // Default empty implementation
 };

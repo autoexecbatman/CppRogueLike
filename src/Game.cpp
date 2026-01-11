@@ -34,6 +34,9 @@ void Game::init()
 	auto ctx = get_context();
 	map.init(true, ctx); // with actors true
 
+	//==PLAYER==
+	player->roll_new_character(ctx);
+
 	//==GameStatus==
 	// we set gameStatus to STARTUP because we want to compute the fov only once
 	gameStatus = GameStatus::STARTUP;
@@ -84,19 +87,19 @@ GameContext Game::get_context() noexcept
 	ctx.creatures = &creatures;
 	ctx.rooms = &rooms;
 
+	// UI Collections
+	ctx.menus = &menus;
+
 	// Game state
 	ctx.time = &time;
 	ctx.run = &run;
-	ctx.game_status = reinterpret_cast<int*>(&gameStatus);
+	ctx.game_status = &gameStatus;
 
 	return ctx;
 }
 
-void Game::update()
+void Game::update(GameContext& ctx)
 {
-	// Get context for systems that need it
-	auto ctx = get_context();
-
 	if (gameStatus == GameStatus::VICTORY)
 	{
 		log("Player has won the game!");
@@ -121,7 +124,7 @@ void Game::update()
 	}
 
 	map.update(); // sets tiles to explored
-	player->update(); // if moved set to NEW_TURN else IDLE
+	player->update(ctx); // if moved set to NEW_TURN else IDLE
 
 	if (gameStatus == GameStatus::STARTUP)
 	{
@@ -174,7 +177,7 @@ void Game::update()
 		// Apply hunger effects
 		hunger_system.apply_hunger_effects(ctx);
 
-		game.time++;
+		ctx.time++;
 		if (gameStatus != GameStatus::DEFEAT) // for killing the player
 		{
 			gameStatus = GameStatus::IDLE; // reset back to IDLE to prevent getting stuck in NEW_TURN
@@ -183,10 +186,10 @@ void Game::update()
 
 	if (gameStatus == GameStatus::DEFEAT)
 	{
-		game.log("Player is dead!");
-		game.append_message_part(COLOR_RED, "You died! Press any key...");
-		game.finalize_message();
-		run = false;
+		ctx.message_system->log("Player is dead!");
+		ctx.message_system->append_message_part(COLOR_RED, "You died! Press any key...");
+		ctx.message_system->finalize_message();
+		*ctx.run = false;
 	}
 }
 
@@ -238,16 +241,6 @@ void Game::save_all()
 	catch (const std::exception& e)
 	{
 		log("Error occurred while saving the game: " + std::string(e.what()));
-	}
-}
-
-// displays the actors as names
-void Game::wizard_eye() noexcept
-{
-	for (const auto& actor : game.creatures)
-	{
-		// print the actor's name
-		mvprintw(actor->position.y, actor->position.x, actor->actorData.name.c_str());
 	}
 }
 

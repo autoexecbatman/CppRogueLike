@@ -45,7 +45,7 @@ MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 	menu_width = static_cast<size_t>(COLS);
 
 	populate_items();
-	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 }
 
 MenuBuy::~MenuBuy()
@@ -102,7 +102,7 @@ void MenuBuy::draw()
 	menu_refresh();
 }
 
-void MenuBuy::on_key(int key)
+void MenuBuy::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -146,7 +146,7 @@ void MenuBuy::on_key(int key)
 	}
 }
 
-void MenuBuy::menu()
+void MenuBuy::menu(GameContext& ctx)
 {
 	// Initial draw
 	draw();
@@ -160,7 +160,7 @@ void MenuBuy::menu()
 		}
 		
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	
 	// Clear screen when exiting

@@ -10,24 +10,26 @@
 #include "BaseMenu.h"
 #include "IMenuState.h"
 
+struct GameContext;
+
 class NewGame : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class LoadGame : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Options : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Quit : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Menu : public BaseMenu
@@ -52,12 +54,12 @@ class Menu : public BaseMenu
 	void menu_print_state(MenuState state);
 	void draw_content() override;
 public:
-	Menu(bool startup = true);
+	Menu(bool startup, GameContext& ctx);
 	~Menu();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };
 
 #endif // !MENU_H

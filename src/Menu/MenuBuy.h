@@ -36,6 +36,6 @@ public:
 	~MenuBuy();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };

@@ -30,9 +30,9 @@ std::string MenuName::menu_name_input()
 
 void MenuName::menu_name_store() { playerName = name; }
 
-void MenuName::menu_name_assign() { game.player->actorData.name = playerName; }
+void MenuName::menu_name_assign(GameContext& ctx) { ctx.player->actorData.name = playerName; }
 
-void MenuName::menu_name()
+void MenuName::menu_name(GameContext& ctx)
 {
 	menu_name_new();
 	curs_set(1); // show cursor
@@ -48,7 +48,7 @@ void MenuName::menu_name()
 
 	menu_name_input();
 	menu_name_store();
-	menu_name_assign();
+	menu_name_assign(ctx);
 
 	menu_name_refresh();
 
@@ -58,7 +58,7 @@ void MenuName::menu_name()
 	menu_name_delete();
 	
 	// Restore the game display after menu
-	game.restore_game_display();
+	ctx.game->restore_game_display();
 }
 
 // end of file: MenuName.cpp

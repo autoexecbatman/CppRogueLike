@@ -10,7 +10,7 @@ void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, Gam
     {
         bool menuWasPopped = false;
         
-        menus.back()->menu();
+        menus.back()->menu(ctx);
         // if back is pressed, pop the menu
         if (menus.back()->back)
         {

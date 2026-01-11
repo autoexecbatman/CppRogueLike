@@ -1,4 +1,6 @@
 // CreatureManager.cpp - Handles all creature lifecycle and management
+#include <algorithm>
+#include <climits>
 
 #include "CreatureManager.h"
 #include "../Actor/Actor.h"
@@ -6,16 +8,15 @@
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
 #include "../Game.h"
-#include <algorithm>
-#include <climits>
+#include "../Core/GameContext.h"
 
-void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures)
+void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx)
 {
     for (const auto& creature : creatures)
     {
         if (creature)
         {
-            creature->update();
+            creature->update(ctx);
         }
     }
 }
@@ -46,7 +47,7 @@ void CreatureManager::spawn_creatures(
     {
         if (can_spawn_creature(creatures, max_creatures))
         {
-            Vector2D spawnPos = find_spawn_position(rooms, map, dice);
+            Vector2D spawnPos = find_spawn_position(rooms, map, dice, ctx);
             map.add_monster(spawnPos, ctx);
         }
     }
@@ -103,7 +104,8 @@ bool CreatureManager::can_spawn_creature(
 Vector2D CreatureManager::find_spawn_position(
     std::span<const Vector2D> rooms,
     Map& map,
-    RandomDice& dice
+    RandomDice& dice,
+    GameContext& ctx
 )
 {
     if (rooms.empty())
@@ -125,7 +127,7 @@ Vector2D CreatureManager::find_spawn_position(
     Vector2D pos = Vector2D{ dice.roll(roomBegin.y, roomEnd.y), dice.roll(roomBegin.x, roomEnd.x) };
 
     // If pos is at wall roll again
-    while (!map.can_walk(pos))
+    while (!map.can_walk(pos, ctx))
     {
         pos.x = dice.roll(roomBegin.x, roomEnd.x);
         pos.y = dice.roll(roomBegin.y, roomEnd.y);

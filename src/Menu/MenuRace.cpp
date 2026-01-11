@@ -5,54 +5,45 @@
 #include "MenuGender.h"
 #include "../Game.h"
 
-void Human::on_selection()
+void Human::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Human";
 	ctx.player->playerRaceState = Player::PlayerRaceState::HUMAN;
 }
 
-void Dwarf::on_selection()
+void Dwarf::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Dwarf";
 	ctx.player->playerRaceState = Player::PlayerRaceState::DWARF;
 }
 
-void Elf::on_selection()
+void Elf::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Elf";
 	ctx.player->playerRaceState = Player::PlayerRaceState::ELF;
 }
 
-void Gnome::on_selection()
+void Gnome::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Gnome";
 	ctx.player->playerRaceState = Player::PlayerRaceState::GNOME;
 }
 
-void HalfElf::on_selection()
+void HalfElf::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Half-Elf";
 	ctx.player->playerRaceState = Player::PlayerRaceState::HALFELF;
 }
 
-void Halfling::on_selection()
+void Halfling::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerRace = "Halfling";
 	ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 }
 
-void RaceRandom::on_selection()
+void RaceRandom::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
-	RandomDice d;
-	const int rng = d.d6();
-	switch (rng)
+	switch (ctx.dice->d6())
 	{
 	case 1:
 		ctx.player->playerRace = "Human";
@@ -82,14 +73,14 @@ void RaceRandom::on_selection()
 	}
 }
 
-void RaceBack::on_selection()
+void RaceBack::on_selection(GameContext& ctx)
 {
-	game.menus.back()->back = true;
+	ctx.menus->back()->back = true;
 }
 
-MenuRace::MenuRace()
+MenuRace::MenuRace(GameContext& ctx)
 {
-	menu_new(height_, width_, starty_, startx_);
+	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.emplace(MenuRaceOptions::HUMAN, std::make_unique<Human>());
 	iMenuStates.emplace(MenuRaceOptions::DWARF, std::make_unique<Dwarf>());
 	iMenuStates.emplace(MenuRaceOptions::ELF, std::make_unique<Elf>());
@@ -132,7 +123,7 @@ void MenuRace::draw()
 	menu_refresh();
 }
 
-void MenuRace::on_key(int key)
+void MenuRace::on_key(int key, GameContext& ctx)
 {
 	switch (keyPress)
 	{
@@ -154,10 +145,10 @@ void MenuRace::on_key(int key)
 	case 10: // enter
 	{
 		menu_set_run_false(); // exit current menu loop either way if a selection was made
-		iMenuStates.at(currentState)->on_selection(); // call on_selection for the selected menu option
+		iMenuStates.at(currentState)->on_selection(ctx); // call on_selection for the selected menu option
 		if (currentState != MenuRaceOptions::BACK)
 		{
-			game.menus.push_back(std::make_unique<MenuClass>());
+			ctx.menus->push_back(std::make_unique<MenuClass>(ctx));
 		}
 		break; // break and go back to previous menu (menuGender)
 	}
@@ -171,14 +162,14 @@ void MenuRace::on_key(int key)
 	} // end switch (input)
 }
 
-void MenuRace::menu()
+void MenuRace::menu(GameContext& ctx)
 {
-	MenuClass menuClass;
+	MenuClass menuClass(ctx);
 	while (run)
 	{
 		draw();
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	// Clear screen when exiting
 	clear();

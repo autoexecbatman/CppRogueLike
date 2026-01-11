@@ -49,7 +49,7 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
     //==UPDATE==
     ctx.message_system->log("Running update...");
-    ctx.game->update(); // update map and actors positions
+    ctx.game->update(ctx); // update map and actors positions
     gui.gui_update(ctx); // update the gui
     ctx.message_system->log("Update OK.");
 }

@@ -99,19 +99,19 @@ public:
 	bool is_in_fov(Vector2D pos) const noexcept;
 	TileType get_tile_type(Vector2D pos) const noexcept;
 	void tile_action(Creature& owner, TileType tileType, GameContext& ctx);
-	bool is_collision(Creature& owner, TileType tileType, Vector2D pos);
+	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);
 	bool is_explored(Vector2D pos) const noexcept; //indicates whether this tile has already been seen by the player
-	bool can_walk(Vector2D pos) const noexcept;
+	bool can_walk(Vector2D pos, GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx); // compute the field of view using `TCODMap::computeFov()`
 	void update();
 	void render() const;
 	void add_item(Vector2D pos, GameContext& ctx);
-	Creature* get_actor(Vector2D pos) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	Creature* get_actor(Vector2D pos, GameContext& ctx) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
-	std::vector<Vector2D> neighbors(Vector2D id);
+	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx);
 	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }

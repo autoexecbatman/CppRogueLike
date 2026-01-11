@@ -10,6 +10,7 @@
 #include "../ActorTypes/Gold.h"
 #include "Amulet.h"
 #include "Armor.h"
+#include "../Core/GameContext.h"
 
 HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", WHITE_RED_PAIR })
 {
@@ -41,10 +42,10 @@ ScrollOfTeleportation::ScrollOfTeleportation(Vector2D position) : Item(position,
 	value = 200; // 200 gp - powerful transportation magic
 }
 
-GoldPile::GoldPile(Vector2D position) : Item(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR })
+GoldPile::GoldPile(Vector2D position, GameContext& ctx) : Item(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR })
 {
 	// Create a randomized amount of gold (between 5 and 20, increasing with dungeon level)
-	int goldAmount = game.d.roll(5, 10 + game.level_manager.get_dungeon_level() * 3);
+	int goldAmount = ctx.dice->roll(5, 10 + ctx.level_manager->get_dungeon_level() * 3);
 	pickable = std::make_unique<Gold>(goldAmount);
 	value = goldAmount; // Set the value equal to the gold amount for consistency
 }

@@ -32,11 +32,11 @@ bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     }
 
     // Add a small random variation to make it interesting
-    int actualNutrition = nutrition_value + game.d.roll(-10, 10);
+    int actualNutrition = nutrition_value + ctx.dice->roll(-10, 10);
     actualNutrition = std::max(10, actualNutrition); // Minimum 10 nutrition
 
     // Reduce hunger by the nutrition value of the corpse
-    game.hunger_system.decrease_hunger(ctx, actualNutrition);
+    ctx.hunger_system->decrease_hunger(ctx, actualNutrition);
 
     // Generate flavor text based on the corpse type
     std::string flavorText;
@@ -65,10 +65,10 @@ bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     }
 
     // Display message
-    game.append_message_part(WHITE_BLACK_PAIR, "You eat the ");
-    game.append_message_part(RED_BLACK_PAIR, owner.actorData.name);
-    game.append_message_part(WHITE_BLACK_PAIR, ". " + flavorText);
-    game.finalize_message();
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
+    ctx.message_system->append_message_part(RED_BLACK_PAIR, owner.actorData.name);
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ". " + flavorText);
+    ctx.message_system->finalize_message();
 
     // Corpse is consumed after eating
     return Pickable::use(owner, wearer, ctx);

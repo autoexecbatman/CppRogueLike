@@ -37,6 +37,7 @@
 #include "../Factories/MonsterFactory.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/ItemCreator.h"
+#include "../Core/GameContext.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -462,10 +463,10 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 	}
 }
 
-bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos)
+bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx)
 {
 	// if there is an actor at the position
-	const auto& actor = get_actor(pos);
+	const auto& actor = get_actor(pos, ctx);
 	if (actor)
 	{
 		return true;
@@ -883,7 +884,7 @@ void Map::spawn_items(Vector2D begin, Vector2D end, GameContext& ctx)
 	for (int i = 0; i < numItems; i++)
 	{
 		Vector2D itemPos{ ctx.dice ? ctx.dice->roll(begin.y, end.y) : begin.y, ctx.dice ? ctx.dice->roll(begin.x, end.x) : begin.x };
-		while (!can_walk(itemPos) || is_stairs(itemPos, ctx))
+		while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
 		{
 			itemPos.x = ctx.dice ? ctx.dice->roll(begin.x, end.x) : begin.x;
 			itemPos.y = ctx.dice ? ctx.dice->roll(begin.y, end.y) : begin.y;
@@ -898,7 +899,7 @@ void Map::spawn_player(Vector2D begin, Vector2D end, GameContext& ctx)
 	if (!ctx.player || !ctx.dice) return;
 
 	Vector2D playerPos{ ctx.dice->roll(begin.y, end.y), ctx.dice->roll(begin.x, end.x) };
-	while (!can_walk(playerPos))
+	while (!can_walk(playerPos, ctx))
 	{
 		playerPos.x = ctx.dice->roll(begin.x, end.x);
 		playerPos.y = ctx.dice->roll(begin.y, end.y);
@@ -916,7 +917,7 @@ void Map::place_stairs(GameContext& ctx)
 	const Vector2D roomBegin = ctx.rooms->at(index);
 	const Vector2D roomEnd = ctx.rooms->at(index + 1);
 	Vector2D stairsPos{ ctx.dice->roll(roomBegin.y, roomEnd.y), ctx.dice->roll(roomBegin.x, roomEnd.x) };
-	while (!can_walk(stairsPos))
+	while (!can_walk(stairsPos, ctx))
 	{
 		stairsPos.x = ctx.dice->roll(roomBegin.x, roomEnd.x);
 		stairsPos.y = ctx.dice->roll(roomBegin.y, roomEnd.y);
@@ -930,7 +931,7 @@ bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 	return ctx.stairs && ctx.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos) const noexcept
+bool Map::can_walk(Vector2D pos, GameContext& ctx) const noexcept
 {
     if (is_wall(pos)) // check if the tile is a wall
     {
@@ -944,7 +945,7 @@ bool Map::can_walk(Vector2D pos) const noexcept
     }
 
     // CRITICAL FIX: Check if there's already an actor at this position
-    if (get_actor(pos) != nullptr)
+    if (get_actor(pos, ctx) != nullptr)
     {
         return false; // Position occupied by another actor
     }
@@ -957,10 +958,10 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 	// Use the monster factory to create a monster appropriate for the current dungeon level
 	if (ctx.level_manager)
 	{
-		monsterFactory->spawn_random_monster(pos, ctx.level_manager->get_dungeon_level());
+		monsterFactory->spawn_random_monster(pos, ctx.level_manager->get_dungeon_level(), ctx);
 
 		// Log the spawn for debugging
-		Creature* monster = get_actor(pos);
+		Creature* monster = get_actor(pos, ctx);
 		if (monster && ctx.message_system)
 		{
 			ctx.message_system->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.level_manager->get_dungeon_level()));
@@ -971,11 +972,9 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 // getActor returns the actor at the given coordinates or `nullptr` if there's none
 // NOTE: This method accesses game.creatures directly - still uses global for now
 // TODO: Accept GameContext parameter when all callers are updated
-Creature* Map::get_actor(Vector2D pos) const noexcept
+Creature* Map::get_actor(Vector2D pos, GameContext& ctx) const noexcept
 {
-	// Temporarily uses global game reference - to be refactored with GameContext
-	extern class Game game;  // Forward declaration of global
-	for (const auto& actor : game.creatures)
+	for (const auto& actor : *ctx.creatures)
 	{
 		if (actor->position == pos)
 		{
@@ -1034,14 +1033,14 @@ void Map::regenerate(GameContext& ctx)
 	init(true, ctx);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id)
+std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx)
 {
 	std::vector<Vector2D> results;
 
 	for (Vector2D dir : DIRS)
 	{
 		Vector2D next{ id.y + dir.y, id.x + dir.x };
-		if (in_bounds(next) && can_walk(next))
+		if (in_bounds(next) && can_walk(next, ctx))
 		{
 			results.push_back(next);
 		}
@@ -1059,7 +1058,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id)
 double Map::cost(Vector2D from_node, Vector2D to_node, GameContext& ctx)
 {
 	// if there is an actor on the tile, return a high cost
-	if (get_actor(to_node) != nullptr)
+	if (get_actor(to_node, ctx) != nullptr)
 	{
 		return 1000.0;
 	}
@@ -1171,7 +1170,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if there's an actor on the door - can't close if occupied
-	if (get_actor(pos) != nullptr)
+	if (get_actor(pos, ctx) != nullptr)
 	{
 		return false;
 	}
@@ -1205,7 +1204,7 @@ void Map::place_amulet(GameContext& ctx)
 
 		// Find a walkable position in the room
 		Vector2D amuletPos{ ctx.dice->roll(roomBegin.y, roomEnd.y), ctx.dice->roll(roomBegin.x, roomEnd.x) };
-		while (!can_walk(amuletPos) || is_stairs(amuletPos, ctx))
+		while (!can_walk(amuletPos, ctx) || is_stairs(amuletPos, ctx))
 		{
 			amuletPos.x = ctx.dice->roll(roomBegin.x, roomEnd.x);
 			amuletPos.y = ctx.dice->roll(roomBegin.y, roomEnd.y);
@@ -1327,8 +1326,8 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameCo
 			// Ensure we don't place on the center (where treasure is)
 			// and the position is valid
 		} while ((guardPos.y == center.y && guardPos.x == center.x) ||
-			!can_walk(guardPos) ||
-			get_actor(guardPos) != nullptr);
+			!can_walk(guardPos, ctx) ||
+			get_actor(guardPos, ctx) != nullptr);
 
 		// Create a guardian appropriate for the treasure quality
 		add_monster(guardPos, ctx);

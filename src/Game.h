@@ -42,7 +42,6 @@
 #include "Attributes/IntelligenceAttributes.h"
 #include "Attributes/WisdomAttributes.h"
 #include "Items/Weapons.h"
-#include "Actor/InventoryData.h"
 
 // Forward declarations
 class Creature;
@@ -57,12 +56,7 @@ public:
     bool run{ true };
     bool shouldSave{ true };
     int time{ 0 };
-
-    enum class GameStatus
-    {
-        STARTUP, IDLE, NEW_TURN, VICTORY, DEFEAT
-    }
-    gameStatus{ GameStatus::STARTUP };
+    GameStatus gameStatus{ GameStatus::STARTUP };
 
     enum class WindowState
     {
@@ -102,7 +96,7 @@ public:
 
     // Core game methods - minimal interface, everything delegated to systems
     void init();
-    void update();
+    void update(GameContext& ctx);
 
     // Dependency injection - Phase 2: Provide context for refactored code
     GameContext get_context() noexcept;
@@ -114,11 +108,11 @@ public:
     void handle_ranged_attack() { auto ctx = get_context(); targeting.handle_ranged_attack(ctx); }
     void display_help() noexcept { display_manager.display_help(); }
     void display_levelup(int level) { auto ctx = get_context(); display_manager.display_levelup(*player, level, ctx); }
-    void display_character_sheet() const noexcept { display_manager.display_character_sheet(*player); }
+    void display_character_sheet() { auto ctx = get_context(); display_manager.display_character_sheet(*player, ctx); }
     bool pick_tile(Vector2D* position, int maxRange) { auto ctx = get_context(); return targeting.pick_tile(ctx, position, maxRange); }
 
     // Creature management
-    void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { creature_manager.update_creatures(creatures); }
+    void update_creatures(std::span<std::unique_ptr<Creature>> creatures) { auto ctx = get_context(); creature_manager.update_creatures(creatures, ctx); }
     void cleanup_dead_creatures() { creature_manager.cleanup_dead_creatures(creatures); }
     void spawn_creatures() { auto ctx = get_context(); creature_manager.spawn_creatures(creatures, rooms, map, d, time, ctx); }
     template<typename T>
@@ -137,7 +131,6 @@ public:
     void restore_game_display() { auto ctx = get_context(); render(); gui.gui_render(ctx); rendering_manager.force_screen_refresh(); }
 
     // Debug utilities
-    void wizard_eye() noexcept;
     void add_debug_weapons_at_player_feet();
     void err(std::string_view e) noexcept { if (message_system.is_debug_mode()) { clear(); mvprintw(MAP_HEIGHT / 2, MAP_WIDTH / 2, e.data()); refresh(); getch(); } }
 
@@ -154,9 +147,6 @@ public:
 private:
     bool computeFov{ false };
 };
-
-// Global game instance
-extern Game game;
 
 // Utility template
 template<typename T>

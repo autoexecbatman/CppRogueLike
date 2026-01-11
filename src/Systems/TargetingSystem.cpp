@@ -64,7 +64,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		const int distance = ctx.player->get_tile_distance(targetCursor);
 		if (ctx.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = ctx.map->get_actor(targetCursor);
+			const auto& actor = ctx.map->get_actor(targetCursor, ctx);
 			if (actor != nullptr)
 			{
 				// Display target information
@@ -151,12 +151,12 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 				{
 					if (ctx.map->is_in_fov(targetCursor))
 					{
-						const auto& actor = ctx.map->get_actor(targetCursor);
+						const auto& actor = ctx.map->get_actor(targetCursor, ctx);
 						if (actor)
 						{
 							ctx.player->attacker->attack(*ctx.player, *actor, ctx);
 							run = false;
-							*ctx.game_status = static_cast<int>(1);  // Game::GameStatus::NEW_TURN
+							*ctx.game_status = GameStatus::NEW_TURN;
 							return targetCursor;
 						}
 					}
@@ -185,7 +185,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		return Vector2D{ -1, -1 };
 }
 
-void TargetingSystem::draw_los(const GameContext& ctx, Vector2D targetCursor) const
+void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
 	// draw a line using TCODLine class
 	/*
@@ -253,7 +253,7 @@ void TargetingSystem::draw_los(const GameContext& ctx, Vector2D targetCursor) co
 		// Skip the start and end points for visualization
 		if ((x0 != from.x || y0 != from.y) && (x0 != to.x || y0 != to.y))
 		{
-			if (!ctx.map->can_walk(Vector2D{ y0, x0 }))
+			if (!ctx.map->can_walk(Vector2D{ y0, x0 }, ctx))
 			{
 				blocked = true;
 			}
@@ -286,7 +286,7 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 }
 
 // Check if a target position is valid
-bool TargetingSystem::is_valid_target(const GameContext& ctx, Vector2D from, Vector2D to, int maxRange) const
+bool TargetingSystem::is_valid_target(GameContext& ctx, Vector2D from, Vector2D to, int maxRange) const
 {
 	// Check if the target is within range
 	if (from.distance_to(to) > maxRange)
@@ -301,7 +301,7 @@ bool TargetingSystem::is_valid_target(const GameContext& ctx, Vector2D from, Vec
 	}
 
 	// Check if there's an enemy at the target
-	auto entity = ctx.map->get_actor(to);
+	auto entity = ctx.map->get_actor(to, ctx);
 	if (!entity)
 	{
 		return false;
@@ -318,7 +318,7 @@ bool TargetingSystem::is_valid_target(const GameContext& ctx, Vector2D from, Vec
 
 // Process a ranged attack
 bool TargetingSystem::process_ranged_attack(GameContext& ctx, Creature& attacker, Vector2D targetPos) const {
-	auto target = ctx.map->get_actor(targetPos);
+	auto target = ctx.map->get_actor(targetPos, ctx);
 	if (!target || target == &attacker)
 	{
 		return false;
@@ -361,24 +361,29 @@ void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector
 	std::vector<Vector2D> path;
 
 	// Generate the path
-	while (x0 != x1 || y0 != y1) {
+	while (x0 != x1 || y0 != y1)
+	{
 		int e2 = 2 * err;
-		if (e2 > -dy) {
+		if (e2 > -dy)
+		{
 			err -= dy;
 			x0 += sx;
 		}
-		if (e2 < dx) {
+		if (e2 < dx)
+		{
 			err += dx;
 			y0 += sy;
 		}
 
 		// Skip the start point
-		if (x0 != from.x || y0 != from.y) {
+		if (x0 != from.x || y0 != from.y)
+		{
 			path.push_back(Vector2D{ y0, x0 });
 		}
 
 		// Stop at walls
-		if (!ctx.map->can_walk(Vector2D{ y0, x0 }) && (x0 != to.x || y0 != to.y)) {
+		if (!ctx.map->can_walk(Vector2D{ y0, x0 }, ctx) && (x0 != to.x || y0 != to.y))
+		{
 			break;
 		}
 	}
@@ -390,22 +395,27 @@ void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector
 	// Animate along the path
 	for (const auto& pos : path) {
 		// Skip the end point for rendering
-		if (pos.x == to.x && pos.y == to.y) {
+		if (pos.x == to.x && pos.y == to.y)
+		{
 			continue;
 		}
 
 		// Determine projectile orientation based on direction
 		char symbol = projectileSymbol;
-		if (pos.x > from.x && std::abs(pos.x - from.x) > std::abs(pos.y - from.y)) {
+		if (pos.x > from.x && std::abs(pos.x - from.x) > std::abs(pos.y - from.y))
+		{
 			symbol = '>'; // Right
 		}
-		else if (pos.x < from.x && std::abs(pos.x - from.x) > std::abs(pos.y - from.y)) {
+		else if (pos.x < from.x && std::abs(pos.x - from.x) > std::abs(pos.y - from.y))
+		{
 			symbol = '<'; // Left
 		}
-		else if (pos.y < from.y) {
+		else if (pos.y < from.y)
+		{
 			symbol = '^'; // Up
 		}
-		else if (pos.y > from.y) {
+		else if (pos.y > from.y)
+		{
 			symbol = 'v'; // Down
 		}
 
@@ -418,7 +428,8 @@ void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector
 		napms(50); // Control speed of projectile (lower = faster)
 
 		// Erase the projectile (by redrawing the map tile)
-		if (ctx.map->can_walk(pos)) {
+		if (ctx.map->can_walk(pos, ctx))
+		{
 			mvaddch(pos.y, pos.x, '.');
 		}
 		else
@@ -435,8 +446,9 @@ void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector
 	napms(100); // Brief pause for impact
 
 	// Redraw the target
-	auto entity = ctx.map->get_actor(to);
-	if (entity) {
+	auto entity = ctx.map->get_actor(to, ctx);
+	if (entity)
+	{
 		entity->render(ctx);
 		refresh();
 	}
@@ -504,7 +516,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 		// if the cursor is on a monster then display the monster's name
 		if (ctx.map->is_in_fov(targetCursor))
 		{
-			const auto& actor = ctx.map->get_actor(targetCursor);
+			const auto& actor = ctx.map->get_actor(targetCursor, ctx);
 			// CRITICAL FIX: Don't write directly to main screen - this causes bleeding
 			// Store info for later display or use a separate window
 			if (actor != nullptr)
@@ -577,7 +589,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 		{
 			if (ctx.map->is_in_fov(targetCursor))
 			{
-				const auto& actor = ctx.map->get_actor(targetCursor);
+				const auto& actor = ctx.map->get_actor(targetCursor, ctx);
 				// and actor is not an item
 				if (actor != nullptr)
 				{

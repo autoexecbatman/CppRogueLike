@@ -6,37 +6,37 @@
 #include "../Game.h"
 #include "../ActorTypes/Player.h"
 
-void Male::on_selection()
+void Male::on_selection(GameContext& ctx)
 {
-	game.player->set_gender("Male");
+	ctx.player->set_gender("Male");
 }
 
-void Female::on_selection()
+void Female::on_selection(GameContext& ctx)
 {
-	game.player->set_gender("Female");
+	ctx.player->set_gender("Female");
 }
 
-void Random::on_selection()
+void Random::on_selection(GameContext& ctx)
 {
-	auto roll = game.d.d2();
+	auto roll = ctx.dice->d2();
 	if (roll == 1)
 	{
-		game.player->set_gender("Male");
+		ctx.player->set_gender("Male");
 	}
 	else
 	{
-		game.player->set_gender("Female");
+		ctx.player->set_gender("Female");
 	}
 }
 
-void Back::on_selection() 
+void Back::on_selection(GameContext& ctx) 
 {
-	game.menus.back()->back = true;
+	ctx.menus->back()->back = true;
 }
 
-MenuGender::MenuGender()
+MenuGender::MenuGender(GameContext& ctx)
 {
-	menu_new(height_, width_, starty_, startx_);
+	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.emplace(MenuState::MALE, std::make_unique<Male>());
 	iMenuStates.emplace(MenuState::FEMALE, std::make_unique<Female>());
 	iMenuStates.emplace(MenuState::RANDOM, std::make_unique<Random>());
@@ -75,7 +75,7 @@ void MenuGender::draw()
 	menu_refresh();
 }
 
-void MenuGender::on_key(int key)
+void MenuGender::on_key(int key, GameContext& ctx)
 {
 	switch (keyPress)
 	{
@@ -97,24 +97,24 @@ void MenuGender::on_key(int key)
 	case 'M':
 	case 'm':
 	{
-		iMenuStates.at(MenuState::MALE)->on_selection();
+		iMenuStates.at(MenuState::MALE)->on_selection(ctx);
 		break;
 	}
 
 	case 'F':
 	case 'f':
 	{
-		iMenuStates.at(MenuState::FEMALE)->on_selection();
+		iMenuStates.at(MenuState::FEMALE)->on_selection(ctx);
 		break;
 	}
 
 	case 10:
 	{
 		menu_set_run_false();
-		iMenuStates.at(currentState)->on_selection(); // run the selected option
+		iMenuStates.at(currentState)->on_selection(ctx); // run the selected option
 		if (currentState != MenuState::BACK)
 		{
-			game.menus.push_back(std::make_unique<MenuRace>());
+			ctx.menus->push_back(std::make_unique<MenuRace>(ctx));
 		}
 		break;
 	}
@@ -123,13 +123,13 @@ void MenuGender::on_key(int key)
 	} // !end switch keyPress
 }
 
-void MenuGender::menu()
+void MenuGender::menu(GameContext& ctx)
 {
 	while (run) // menu has its own loop
 	{
 		draw();
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	// Clear screen when exiting
 	clear();

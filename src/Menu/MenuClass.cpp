@@ -14,9 +14,8 @@
 
 using namespace InventoryOperations; // For clean function calls
 
-void equip_fighter_starting_gear()
+void equip_fighter_starting_gear(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	auto& player = *ctx.player;
 
 	// AD&D 2e Fighter starting money: 5d4 × 10 gp (50-200 gp)
@@ -80,7 +79,7 @@ void equip_fighter_starting_gear()
 					return;
 				}
 				
-				bool equipped = player.equip_item(std::move(extracted_item), targetSlot);
+				bool equipped = player.equip_item(std::move(extracted_item), targetSlot, ctx);
 				if (equipped)
 				{
 					ctx.message_system->log("SUCCESS: " + itemName + " equipped to correct slot");
@@ -123,7 +122,7 @@ void equip_fighter_starting_gear()
 			{
 				// Store item name for logging before potential move
 				std::string itemName = extracted_item->actorData.name;
-				bool equipped = player.equip_item(std::move(extracted_item), EquipmentSlot::RIGHT_HAND);
+				bool equipped = player.equip_item(std::move(extracted_item), EquipmentSlot::RIGHT_HAND, ctx);
 				if (equipped)
 				{
 					ctx.message_system->log("SUCCESS: " + itemName + " equipped to RIGHT_HAND slot");
@@ -162,48 +161,41 @@ void equip_fighter_starting_gear()
 	ctx.message_system->message(WHITE_BLACK_PAIR, "You have " + std::to_string(startingGold) + " gold pieces.", true);
 }
 
-void Fighter::on_selection()
+void Fighter::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerClass = "Fighter";
 	ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
 
 	// EQUIP FIGHTER STARTING GEAR
-	equip_fighter_starting_gear();
+	equip_fighter_starting_gear(ctx);
 }
 
-void Rogue::on_selection()
+void Rogue::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerClass = "Rogue";
 	ctx.player->playerClassState = Player::PlayerClassState::ROGUE;
 }
 
-void Cleric::on_selection()
+void Cleric::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerClass = "Cleric";
 	ctx.player->playerClassState = Player::PlayerClassState::CLERIC;
 }
 
-void Wizard::on_selection()
+void Wizard::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	ctx.player->playerClass = "Wizard";
 	ctx.player->playerClassState = Player::PlayerClassState::WIZARD;
 }
 
-void ClassRandom::on_selection()
+void ClassRandom::on_selection(GameContext& ctx)
 {
-	auto ctx = game.get_context();
-	RandomDice d;
-	const int rng = d.d4();
-	switch (rng)
+	switch (ctx.dice->d4())
 	{
 	case 1:
 		ctx.player->playerClass = "Fighter";
 		ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
-		equip_fighter_starting_gear();
+		equip_fighter_starting_gear(ctx);
 		break;
 	case 2:
 		ctx.player->playerClass = "Rogue";
@@ -221,14 +213,14 @@ void ClassRandom::on_selection()
 	}
 }
 
-void ClassBack::on_selection()
+void ClassBack::on_selection(GameContext& ctx)
 {
-	game.menus.back()->back = true;
+	ctx.menus->back()->back = true;
 }
 
-MenuClass::MenuClass()
+MenuClass::MenuClass(GameContext& ctx)
 {
-	menu_new(menu_height, menu_width, menu_starty, menu_startx);
+	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 	iMenuStates.emplace(MenuState::FIGHTER, std::make_unique<Fighter>());
 	iMenuStates.emplace(MenuState::ROGUE, std::make_unique<Rogue>());
 	iMenuStates.emplace(MenuState::CLERIC, std::make_unique<Cleric>());
@@ -269,7 +261,7 @@ void MenuClass::draw()
 	menu_refresh();
 }
 
-void MenuClass::on_key(int key)
+void MenuClass::on_key(int key, GameContext& ctx)
 {
 	switch (keyPress)
 	{
@@ -291,11 +283,11 @@ void MenuClass::on_key(int key)
 	case 10: // enter
 	{
 		menu_set_run_false();
-		iMenuStates.at(currentState)->on_selection();
+		iMenuStates.at(currentState)->on_selection(ctx);
 		if (currentState != MenuState::BACK)
 		{
 			MenuName menuName;
-			menuName.menu_name();
+			menuName.menu_name(ctx);
 		}
 		break;
 	}
@@ -310,13 +302,13 @@ void MenuClass::on_key(int key)
 	}
 }
 
-void MenuClass::menu()
+void MenuClass::menu(GameContext& ctx)
 {
 	while (run)
 	{
 		draw();
 		menu_key_listen();
-		on_key(keyPress);
+		on_key(keyPress, ctx);
 	}
 	// Clear screen when exiting
 	clear();

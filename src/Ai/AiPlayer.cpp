@@ -52,22 +52,20 @@ struct PossibleMoves
 	};
 } m;
 
-void AiPlayer::update(Creature& owner)
+void AiPlayer::update(Creature& owner, GameContext& ctx)
 {
-	auto ctx = game.get_context();
-
 	// If stuck in a web, try to break free and skip turn if still stuck
-	if (game.player->is_webbed())
+	if (ctx.player->is_webbed())
 	{
-		if (!game.player->try_break_web(ctx))
+		if (!ctx.player->try_break_web(ctx))
 		{
 			// Still stuck, skip the player's turn
-			game.gameStatus = Game::GameStatus::NEW_TURN;
+			ctx.game->gameStatus = GameStatus::NEW_TURN;
 			return;
 		}
 	}
 
-	const Controls key = static_cast<Controls>(game.input_handler.get_current_key());
+	const Controls key = static_cast<Controls>(ctx.input_handler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
 	// Handle confused state - randomly move or act
@@ -80,15 +78,15 @@ void AiPlayer::update(Creature& owner)
 		if (confusionTurns == 0)
 		{
 			owner.remove_state(ActorState::IS_CONFUSED);
-			game.message(WHITE_BLACK_PAIR, "Your mind clears.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Your mind clears.", true);
 		}
 		else
 		{
 			// 50% chance of random movement
-			if (game.d.d2() == 1)
+			if (ctx.dice->d2() == 1)
 			{
 				// Random direction
-				int randomDir = game.d.roll(0, 7);
+				int randomDir = ctx.dice->roll(0, 7);
 				switch (randomDir)
 				{
 				case 0: moveVector = { -1, 0 }; break;  // North
@@ -101,19 +99,19 @@ void AiPlayer::update(Creature& owner)
 				case 7: moveVector = { 1, 1 }; break;   // Southeast
 				}
 
-				game.message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
-				game.gameStatus = Game::GameStatus::NEW_TURN;
+				ctx.message_system->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
+				ctx.game->gameStatus = GameStatus::NEW_TURN;
 			}
 			else
 			{
 				// Process normal input but show a message
-				game.message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
+				ctx.message_system->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				// Check for movement keys as normal
 				if (m.moves.find(key) != m.moves.end())
 				{
 					moveVector = m.moves.at(key);
-					game.gameStatus = Game::GameStatus::NEW_TURN;
+					ctx.game->gameStatus = GameStatus::NEW_TURN;
 				}
 				else
 				{
@@ -133,7 +131,7 @@ void AiPlayer::update(Creature& owner)
 		if (m.moves.find(key) != m.moves.end())
 		{
 			moveVector = m.moves.at(key);
-			game.gameStatus = Game::GameStatus::NEW_TURN;
+			ctx.game->gameStatus = GameStatus::NEW_TURN;
 		}
 		else
 		{
@@ -148,25 +146,22 @@ void AiPlayer::update(Creature& owner)
 	if (isWaiting) // when waiting tiles are triggered
 	{
 		isWaiting = false;
-		auto ctx = game.get_context();
-		game.map.tile_action(owner, game.map.get_tile_type(owner.position), ctx);
-		look_on_floor(owner.position);
+		ctx.map->tile_action(owner, ctx.map->get_tile_type(owner.position), ctx);
+		look_on_floor(owner.position, ctx);
 	}
 
 	// if moving
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
-		auto ctx = game.get_context();
 		Vector2D targetPosition = owner.position + moveVector;
 		// Only call tile_action after successful move (inside look_to_move)
 		look_to_move(owner, targetPosition, ctx); // must check collisions before creature dies from attack
-		look_to_attack(targetPosition, owner);
-		look_on_floor(targetPosition);
+		look_to_attack(targetPosition, owner, ctx);
+		look_on_floor(targetPosition, ctx);
 		if (shouldComputeFOV)
 		{
 			shouldComputeFOV = false; // reset flag
-			auto ctx = game.get_context();
-			game.map.compute_fov(ctx);
+			ctx.map->compute_fov(ctx);
 		}
 	}
 }
@@ -191,72 +186,72 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	// Check if the inventory is already full (including equipped items)
 	size_t totalItems = get_item_count(player.inventory_data);
 	totalItems += player.equippedItems.size(); // Count equipped items too
-	
+
 	if (player.inventory_data.capacity > 0 && totalItems >= player.inventory_data.capacity)
 	{
-		game.message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
 	// Check if floor inventory is empty
-	if (game.inventory_data.items.empty())
+	if (ctx.game->inventory_data.items.empty())
 	{
 		return; // No floor items to pick up
 	}
-	
+
 	// Find items at player's position using range-based approach
 	std::vector<std::unique_ptr<Item>*> itemsAtPosition;
-	for (auto& item : game.inventory_data.items)
+	for (auto& item : ctx.game->inventory_data.items)
 	{
 		if (item && item->position == player.position)
 		{
 			itemsAtPosition.push_back(&item);
 		}
 	}
-	
+
 	if (itemsAtPosition.empty())
 	{
-		game.message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
 		return;
 	}
-	
+
 	// Process first item found (or implement selection for multiple items)
 	auto& itemPtr = *itemsAtPosition[0];
 	Item* item = itemPtr.get();
-	
+
 	// Handle gold directly through player's gold system
 	if (item->itemClass == ItemClass::GOLD)
 	{
 		Gold* goldPickable = static_cast<Gold*>(item->pickable.get());
 		player.adjust_gold(goldPickable->amount);
-		game.message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldPickable->amount) + " gold.", true);
-		
+		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldPickable->amount) + " gold.", true);
+
 		// Remove gold from floor
-		remove_item(game.inventory_data, *item);
+		remove_item(ctx.game->inventory_data, *item);
 		return;
 	}
-	
+
 	// Handle regular items
 	std::string itemName = item->actorData.name;
 	auto result = add_item(player.inventory_data, std::move(itemPtr));
-	
+
 	if (result.has_value())
 	{
 		// Item successfully added to player inventory
-		optimize_inventory_storage(game.inventory_data);
+		optimize_inventory_storage(ctx.game->inventory_data);
 		player.sync_ranged_state(ctx);
-		game.message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
 	{
 		// Handle inventory full error
 		if (result.get_error() == InventoryError::FULL)
 		{
-			game.message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
 		}
 		else
 		{
-			game.message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
 		}
 	}
 }
@@ -266,7 +261,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 	// If the inventory is empty, show a message and return
 	if (player.inventory_data.items.empty())
 	{
-		game.message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
 
@@ -348,7 +343,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 	if (input == static_cast<int>(Controls::ESCAPE))
 	{
 		// Cancel dropping
-		game.message(WHITE_BLACK_PAIR, "Drop canceled.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Drop canceled.", true);
 	}
 	else if (input >= 'a' && input < 'a' + static_cast<int>(player.equippedItems.size() + get_item_count(player.inventory_data)))
 	{
@@ -364,7 +359,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 			
 			// Unequip the item (this returns it to inventory)
 			EquipmentSlot slot = equipped.slot;
-			player.unequip_item(slot);
+			player.unequip_item(slot, ctx);
 			
 			// Find the item in inventory and drop it
 			for (auto& item : player.inventory_data.items)
@@ -376,13 +371,13 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 				}
 			}
 			
-			game.message(WHITE_BLACK_PAIR, "You unequipped and dropped the " + itemName + ".", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You unequipped and dropped the " + itemName + ".", true);
 		}
 		else
 		{
 			// Dropping regular inventory item
 			int inventoryIndex = index - static_cast<int>(player.equippedItems.size());
-			
+
 			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(get_item_count(player.inventory_data))) {
 				// Get the selected item
 				Item* itemToDrop = get_item_at(player.inventory_data, inventoryIndex);
@@ -395,22 +390,22 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 					player.drop(*itemToDrop, ctx);
 
 					// Show dropped message with the item name
-					game.message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
+					ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
 				}
 			}
 		}
-		
+
 		// Set game status to register the turn
-		game.gameStatus = Game::GameStatus::NEW_TURN;
+		ctx.game->gameStatus = GameStatus::NEW_TURN;
 	}
 
 	// Clean up
 	delwin(dropWin);
-	
+
 	// CRITICAL FIX: Restore the game display
 	clear();
 	refresh();
-	game.restore_game_display();
+	ctx.game->restore_game_display();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -472,15 +467,15 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Player& player) noexce
 	}
 }
 
-void AiPlayer::display_inventory(Player& player)
+void AiPlayer::display_inventory(Player& player, GameContext& ctx)
 {
 	InventoryUI inventoryUI;
-	inventoryUI.display(player);
+	inventoryUI.display(player, ctx);
 }
 
 Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
 {
-	game.log("You chose from inventory");
+	ctx.message_system->log("You chose from inventory");
 	if (player.inventory_data.items.size() > 0)
 	{
 		const size_t index = ascii - 'a';
@@ -501,37 +496,36 @@ Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx
 	}
 	else
 	{
-		game.log("Error: choseFromInventory() called on player with no inventory.");
+		ctx.message_system->log("Error: choseFromInventory() called on player with no inventory.");
 		exit(EXIT_FAILURE);
 	}
 }
 
-void AiPlayer::look_on_floor(Vector2D target)
+void AiPlayer::look_on_floor(Vector2D target, GameContext& ctx)
 {
 	// look for corpses or items
 	// Check if floor inventory is empty
-	if (game.inventory_data.items.empty())
+	if (ctx.game->inventory_data.items.empty())
 	{
 		return;
 	}
 
-	for (const auto& i : game.inventory_data.items)
+	for (const auto& i : ctx.game->inventory_data.items)
 	{
 		if (i)
 		{
 			if (i->position == target)
 			{
-				game.append_message_part(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here\n");
-				game.finalize_message();
+				ctx.message_system->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here\n", true);
 			}
 		}
 	}
 }
 
-bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
+bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ctx)
 {
 	// look for living actors to attack
-	for (const auto& c : game.creatures)
+	for (const auto& c : ctx.game->creatures)
 	{
 		if (c)
 		{
@@ -545,29 +539,29 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 					if (shopkeeperAI && !shopkeeperAI->tradeMenuOpen)
 					{
 						// Player bumped into shopkeeper - initiate trade
-						game.log("Player bumped shopkeeper - initiating trade!");
-						shopkeeperAI->trade(*c, owner);
+						ctx.message_system->log("Player bumped shopkeeper - initiating trade!");
+						shopkeeperAI->trade(*c, owner, ctx);
 						shopkeeperAI->tradeMenuOpen = true;
 						return false; // Block movement but don't attack
 					}
 					else
 					{
 						// Other non-hostile creature - just block movement
-						game.log("Encountered non-hostile creature: " + c->actorData.name);
+						ctx.message_system->log("Encountered non-hostile creature: " + c->actorData.name);
 						return false; // Block movement
 					}
 				}
-				
+
 				// Handle multiple attacks for fighters
 				auto playerPtr = dynamic_cast<Player*>(&owner);
 				if (playerPtr)
 				{
 					// Increment round counter for attack pattern tracking
 					playerPtr->roundCounter++;
-					
+
 					// Calculate number of attacks this round
 					int attacksThisRound = 1; // Default single attack
-					
+
 					if (playerPtr->attacksPerRound >= 2.0f)
 					{
 						// 2 attacks per round
@@ -578,7 +572,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 						// 3/2 attacks per round (alternating pattern: 2, 1, 2, 1...)
 						attacksThisRound = (playerPtr->roundCounter % 2 == 1) ? 2 : 1;
 					}
-					
+
 					// Perform the attacks
 					for (int i = 0; i < attacksThisRound; i++)
 					{
@@ -587,11 +581,9 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 							if (i > 0)
 							{
 								// Display follow-up attack message
-								game.append_message_part(WHITE_BLACK_PAIR, "Follow-up attack: ");
-								game.finalize_message();
+								ctx.message_system->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
 							}
 							// Use dual wield attack for players
-							auto ctx = game.get_context();
 							owner.attacker->attack_with_dual_wield(owner, *c, ctx);
 						}
 						else
@@ -602,17 +594,16 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 					}
 
 					// Clean up dead creatures after combat
-					game.cleanup_dead_creatures();
+					ctx.game->cleanup_dead_creatures();
 				}
 				else
 				{
 				// Non-player creatures get single attack
-				auto ctx = game.get_context();
 				owner.attacker->attack(owner, *c, ctx);
 				}
-				
+
 				// Clean up dead creatures after combat
-				game.cleanup_dead_creatures();
+				ctx.game->cleanup_dead_creatures();
 				return false;
 			}
 		}
@@ -623,15 +614,15 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner)
 
 void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx)
 {
-	TileType targetTileType = game.map.get_tile_type(targetPosition);
+	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
-	if (!game.map.is_collision(owner, targetTileType, targetPosition))
+	if (!ctx.map->is_collision(owner, targetTileType, targetPosition, ctx))
 	{
 		// Check if there's a web at the target position
 		bool webEffect = false;
 
 		// Search for a web at the target position
-		for (const auto& obj : game.objects)
+		for (const auto& obj : *ctx.objects)
 		{
 			if (obj && obj->position == targetPosition &&
 				obj->actorData.name == "spider web")
@@ -652,8 +643,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 		{
 			move(owner, targetPosition);
 			// Call tile_action after successful move
-			auto ctx = game.get_context();
-			game.map.tile_action(owner, targetTileType, ctx);
+			ctx.map->tile_action(owner, targetTileType, ctx);
 			shouldComputeFOV = true;
 		}
 	}
@@ -665,8 +655,8 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 		case TileType::WATER:
 			if (!owner.has_state(ActorState::CAN_SWIM))
 			{
-				game.log("You can't swim.");
-				game.message(WHITE_BLACK_PAIR, "You can't swim.", true);
+				ctx.message_system->log("You can't swim.");
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You can't swim.", true);
 			}
 			break;
 		case TileType::WALL:
@@ -689,7 +679,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::WAIT:
 	{
-		game.gameStatus = Game::GameStatus::NEW_TURN;
+		ctx.game->gameStatus = GameStatus::NEW_TURN;
 		isWaiting = true;
 		break;
 	}
@@ -701,13 +691,12 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		{
 			const int DEBUG_XP_AMOUNT = 1000;
 			player.destructible->add_xp(DEBUG_XP_AMOUNT);
-			game.message(WHITE_BLACK_PAIR, "Debug: Added " + std::to_string(DEBUG_XP_AMOUNT) + " XP (Total: " + std::to_string(player.destructible->get_xp()) + ")", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Debug: Added " + std::to_string(DEBUG_XP_AMOUNT) + " XP (Total: " + std::to_string(player.destructible->get_xp()) + ")", true);
 
 			// Use the same level up system as natural progression
-			auto ctx = game.get_context();
 			player.ai->levelup_update(ctx, player);
 		}
-		game.gameStatus = Game::GameStatus::NEW_TURN;
+		ctx.game->gameStatus = GameStatus::NEW_TURN;
 		break;
 	}
 
@@ -721,7 +710,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::PICK:
 	{
 		pick_item(player, ctx);
-		game.gameStatus = Game::GameStatus::NEW_TURN;
+		ctx.game->gameStatus = GameStatus::NEW_TURN;
 		break;
 	}
 
@@ -733,94 +722,92 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::INVENTORY:
 	{
-		display_inventory(player);
+		display_inventory(player, ctx);
 		break;
 	}
 
 	case Controls::QUIT:
 	{
-		game.run = false;
-		game.message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
+		ctx.game->run = false;
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
 		break;
 	}
 
 	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
-		game.menus.push_back(std::make_unique<Menu>(false)); // false = in-game menu
+		ctx.game->menus.push_back(std::make_unique<Menu>(false, ctx)); // false = in-game menu
 		break;
 	}
 
 	case Controls::DESCEND:
 	{
-		if (game.stairs->position == player.position)
+		if (ctx.game->stairs->position == player.position)
 		{
-			game.next_level(); // sets state to STARTUP
+			ctx.game->next_level(); // sets state to STARTUP
 		}
 		break;
 	}
 
 	case Controls::TARGET:
 	{
-		game.handle_ranged_attack();
+		ctx.game->handle_ranged_attack();
 		break;
 	}
 
 	case Controls::CHAR_SHEET:
 	{
-		game.display_character_sheet();
+		ctx.game->display_character_sheet();
 		break;
 	}
 
 	case Controls::DEBUG:
 	{
-		game.display_debug_messages();
+		ctx.game->display_debug_messages();
 		break;
 	}
 
 	case Controls::REVEAL:
 	{
-		game.map.reveal();
+		ctx.map->reveal();
 		break;
 	}
 
 	case Controls::REGEN:
 	{
-		auto ctx = game.get_context();
-		game.map.regenerate(ctx);
+		ctx.map->regenerate(ctx);
 		break;
 	}
 
 	case Controls::OPEN_DOOR:
 	{
 		// Prompt for direction
-		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
-		Vector2D doorPos = handle_direction_input(player, dirKey);
+		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position
-			if (game.map.is_door(doorPos))
+			if (ctx.map->is_door(doorPos))
 			{
-				auto ctx = game.get_context();
-				if (game.map.open_door(doorPos, ctx))
+				if (ctx.map->open_door(doorPos, ctx))
 				{
-					game.message(WHITE_BLACK_PAIR, "You open the door.", true);
-					game.gameStatus = Game::GameStatus::NEW_TURN;
+					ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
+					ctx.game->gameStatus = GameStatus::NEW_TURN;
 					// FOV is recalculated inside open_door method
 				}
 				else
 				{
-					game.message(WHITE_BLACK_PAIR, "The door is already open.", true);
+					ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already open.", true);
 				}
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "There is no door there.", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
 			}
 		}
 		else
 		{
-			game.message(WHITE_BLACK_PAIR, "Invalid direction.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
 		}
 		break;
 	}
@@ -828,55 +815,54 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::CLOSE_DOOR:
 	{
 		// Prompt for direction
-		game.message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
 		int dirKey = getch();
-		Vector2D doorPos = handle_direction_input(player, dirKey);
+		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
 
 		if (doorPos.x != 0 || doorPos.y != 0)
 		{ // Valid position
-			if (game.map.is_door(doorPos))
+			if (ctx.map->is_door(doorPos))
 			{
-				auto ctx = game.get_context();
-				if (game.map.close_door(doorPos, ctx))
+				if (ctx.map->close_door(doorPos, ctx))
 				{
-					game.message(WHITE_BLACK_PAIR, "You close the door.", true);
-					game.gameStatus = Game::GameStatus::NEW_TURN;
+					ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
+					ctx.game->gameStatus = GameStatus::NEW_TURN;
 					// FOV is recalculated inside close_door method
 				}
 				else
 				{
 					// Try to determine why door couldn't be closed
-					if (game.map.get_actor(doorPos) != nullptr)
+					if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 					{
-						game.message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
+						ctx.message_system->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
 					}
 					else
 					{
-						game.message(WHITE_BLACK_PAIR, "The door is already closed.", true);
+						ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
 					}
 				}
 			}
 			else
 			{
-				game.message(WHITE_BLACK_PAIR, "There is no door there.", true);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
 			}
 		}
 		else
 		{
-			game.message(WHITE_BLACK_PAIR, "Invalid direction.", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
 		}
 		break;
 	}
 
 	case Controls::REST:
 	{
-		game.player->rest(ctx);
+		ctx.player->rest(ctx);
 		break;
 	}
 
 	case Controls::HELP:
 	{
-		game.display_help();
+		ctx.game->display_help();
 		break;
 	}
 
@@ -885,7 +871,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 }
 }
 
-Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
+Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx)
 {
 	Vector2D delta{ 0, 0 };
 
@@ -927,8 +913,8 @@ Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey)
 	Vector2D targetPos = owner.position + delta;
 
 	// Validate the position is within map bounds
-	if (targetPos.x < 0 || targetPos.x >= game.map.get_width() ||
-		targetPos.y < 0 || targetPos.y >= game.map.get_height()) {
+	if (targetPos.x < 0 || targetPos.x >= ctx.map->get_width() ||
+		targetPos.y < 0 || targetPos.y >= ctx.map->get_height()) {
 		return { 0, 0 }; // Out of bounds
 	}
 

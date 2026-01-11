@@ -12,32 +12,32 @@
 
 class Fighter : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Rogue : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Cleric : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class Wizard : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class ClassRandom : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class ClassBack : public IMenuState
 {
-	void on_selection() override;
+	void on_selection(GameContext& ctx) override;
 };
 
 class MenuClass : public BaseMenu
@@ -62,12 +62,12 @@ class MenuClass : public BaseMenu
 	std::string menu_class_get_string(MenuState option) { return menuClassStrings.at(option); };
 	void menu_class_print_option(MenuState option) noexcept;
 public:
-	MenuClass();
+	MenuClass(GameContext& ctx);
 	~MenuClass();
 
 	void draw();
-	void on_key(int key);
-	void menu() override;
+	void on_key(int key, GameContext& ctx);
+	void menu(GameContext& ctx) override;
 };
 
 #endif // !MENU_CLASS_H

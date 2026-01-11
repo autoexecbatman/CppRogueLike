@@ -9,7 +9,7 @@ class AiMimic : public AiMonster
 {
 public:
     AiMimic();
-    void update(Creature& owner) override;
+    void update(Creature& owner, GameContext& ctx) override;
     void load(const json& j) override;
     void save(json& j) override;
 

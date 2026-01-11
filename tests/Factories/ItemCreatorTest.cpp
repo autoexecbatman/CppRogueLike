@@ -5,10 +5,12 @@
 // Include the target header files
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
+#include "src/Game.h"
 
 class ItemCreatorTest : public ::testing::Test {
 protected:
     ItemCreator creator;
+    Game testGame;  // Local Game instance for testing
 };
 
 TEST_F(ItemCreatorTest, CreateHealthPotion) {
@@ -59,11 +61,12 @@ TEST_F(ItemCreatorTest, CalculateEnhancementChance) {
 }
 
 TEST_F(ItemCreatorTest, DetermineEnhancementLevel) {
-    int level = creator.determine_enhancement_level(1);
+    auto ctx = testGame.get_context();
+    int level = creator.determine_enhancement_level(ctx, 1);
     EXPECT_GE(level, 0);
     EXPECT_LE(level, 3);
 
-    level = creator.determine_enhancement_level(5);
+    level = creator.determine_enhancement_level(ctx, 5);
     EXPECT_GE(level, 0);
     EXPECT_LE(level, 3);
 }

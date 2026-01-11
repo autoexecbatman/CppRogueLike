@@ -226,7 +226,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
         itemPos.y += ctx.dice->roll(-1, 1);
 
         // Ensure position is valid
-        if (!ctx.game->map.can_walk(itemPos))
+        if (!ctx.map->can_walk(itemPos, ctx))
         {
             itemPos = position; // Fallback to original position
         }
@@ -270,7 +270,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
         }
     }
 
-    ctx.game->log("Generated treasure of quality " + std::to_string(quality) +
+    ctx.message_system->log("Generated treasure of quality " + std::to_string(quality) +
         " with " + std::to_string(itemCount + 1) + " items including gold");
 }
 
@@ -310,7 +310,7 @@ void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, in
     auto it = itemCategories.find(category);
     if (it == itemCategories.end() || it->second.empty())
     {
-        ctx.game->log("No items found in category: " + category);
+        ctx.message_system->log("No items found in category: " + category);
         return;
     }
 
@@ -330,7 +330,7 @@ void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, in
     // If no valid items for this level in this category, do nothing
     if (totalWeight <= 0)
     {
-        ctx.game->log("No valid items in category " + category + " for this dungeon level!");
+        ctx.message_system->log("No valid items in category " + category + " for this dungeon level!");
         return;
     }
 
@@ -367,7 +367,7 @@ void ItemFactory::spawn_random_item(Vector2D position, GameContext& ctx, int dun
     // If no valid items for this level, do nothing
     if (totalWeight <= 0)
     {
-        ctx.game->log("No valid items for this dungeon level!");
+        ctx.message_system->log("No valid items for this dungeon level!");
         return;
     }
 

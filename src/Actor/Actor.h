@@ -96,7 +96,7 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	void update();
+	void update(GameContext& ctx);
 
 	// Const-correct getter methods
 	int get_strength() const noexcept { return strength; }

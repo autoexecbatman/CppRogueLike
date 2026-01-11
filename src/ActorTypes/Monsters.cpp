@@ -37,9 +37,8 @@
 #include "../ActorTypes/Healer.h"
 #include "../Ai/AiMimic.h"
 
-Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",YELLOW_BLACK_PAIR })
+Goblin::Goblin(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'g',"goblin",YELLOW_BLACK_PAIR })
 {
-	auto ctx = game.get_context();
 	const int hp = ctx.dice->roll(1, 8 - 1);
 	const int thaco = 20;
 	const int ac = 6;
@@ -57,9 +56,8 @@ Goblin::Goblin(Vector2D position) : Creature(position, ActorData{ 'g',"goblin",Y
 	add_state(ActorState::CAN_SWIM);
 }
 
-Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",RED_BLACK_PAIR })
+Orc::Orc(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'o',"orc",RED_BLACK_PAIR })
 {
-	auto ctx = game.get_context();
 	const int damage = ctx.dice->d10();
 	const int hp = ctx.dice->d10();
 	const int thaco = 19;
@@ -76,9 +74,8 @@ Orc::Orc(Vector2D position) : Creature(position, ActorData{ 'o',"orc",RED_BLACK_
 	ai = std::make_unique<AiMonster>();
 }
 
-Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T', "troll",GREEN_BLACK_PAIR })
+Troll::Troll(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'T', "troll",GREEN_BLACK_PAIR })
 {
-	auto ctx = game.get_context();
 	const int damage = ctx.dice->d10() + 3;
 	const int dmgMin = 1;
 	const int dmgMax = 13;
@@ -95,9 +92,8 @@ Troll::Troll(Vector2D position) : Creature(position, ActorData{ 'T', "troll",GRE
 	ai = std::make_unique<AiMonster>();
 }
 
-Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",RED_YELLOW_PAIR })
+Dragon::Dragon(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'D',"dragon",RED_YELLOW_PAIR })
 {
-	auto ctx = game.get_context();
 	const int damage = ctx.dice->d12() + 5;
 	const int dmgMin = 1;
 	const int dmgMax = 17;
@@ -114,9 +110,8 @@ Dragon::Dragon(Vector2D position) : Creature(position, ActorData{ 'D',"dragon",R
 	ai = std::make_unique<AiMonster>();
 }
 
-Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",RED_BLACK_PAIR })
+Archer::Archer(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'a',"archer",RED_BLACK_PAIR })
 {
-	auto ctx = game.get_context();
 	const int hp = ctx.dice->d8();
 	const int thaco = 18;
 	const int ac = 7;
@@ -133,9 +128,8 @@ Archer::Archer(Vector2D position) : Creature(position, ActorData{ 'a',"archer",R
 	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
 }
 
-Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",WHITE_BLUE_PAIR })
+Mage::Mage(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'm',"mage",WHITE_BLUE_PAIR })
 {
-	auto ctx = game.get_context();
 	const int hp = ctx.dice->d6();
 	const int thaco = 19;
 	const int ac = 9;
@@ -153,9 +147,8 @@ Mage::Mage(Vector2D position) : Creature(position, ActorData{ 'm',"mage",WHITE_B
 	add_state(ActorState::IS_RANGED); // Mark as a ranged attacker
 }
 
-Mimic::Mimic(Vector2D position) : Creature(position, ActorData{ 'M',"mimic",RED_YELLOW_PAIR })
+Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'M',"mimic",RED_YELLOW_PAIR })
 {
-	auto ctx = game.get_context();
 	const int hp = ctx.dice->d6() + ctx.dice->d4(); // Reduced from d8+d4+2 to d6+d4
 	const int thaco = 17; // Increased from 16 (making it harder to hit)
 	const int ac = 7; // Kept the same

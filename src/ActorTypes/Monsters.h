@@ -5,11 +5,13 @@
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 
+struct GameContext;
+
 //==GOBLIN==
 class Goblin : public Creature
 {
 public:
-	Goblin(Vector2D position);
+	Goblin(Vector2D position, GameContext& ctx);
 };
 //====
 
@@ -17,7 +19,7 @@ public:
 class Orc : public Creature
 {
 public:
-	Orc(Vector2D position);
+	Orc(Vector2D position, GameContext& ctx);
 };
 //====
 
@@ -25,7 +27,7 @@ public:
 class Troll : public Creature
 {
 public:
-	Troll(Vector2D position);
+	Troll(Vector2D position, GameContext& ctx);
 };
 //====
 
@@ -33,7 +35,7 @@ public:
 class Dragon : public Creature
 {
 public:
-	Dragon(Vector2D position);
+	Dragon(Vector2D position, GameContext& ctx);
 };
 //====
 
@@ -41,14 +43,14 @@ public:
 class Archer : public Creature
 {
 public:
-	Archer(Vector2D position);
+	Archer(Vector2D position, GameContext& ctx);
 };
 
 //==MAGE==
 class Mage : public Creature
 {
 public:
-	Mage(Vector2D position);
+	Mage(Vector2D position, GameContext& ctx);
 };
 
 //==MIMIC==
@@ -61,7 +63,7 @@ struct Disguise {
 class Mimic : public Creature
 {
 public:
-    Mimic(Vector2D position);
+    Mimic(Vector2D position, GameContext& ctx);
 
     // Only expose what's necessary through getters
     std::vector<Disguise> get_possible_disguises() const;

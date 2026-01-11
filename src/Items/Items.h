@@ -1,8 +1,8 @@
 #pragma once
-#ifndef ITEMS_H
-#define ITEMS_H
 
 #include "../Actor/Actor.h"
+
+struct GameContext;
 
 class HealthPotion : public Item
 {
@@ -37,7 +37,7 @@ public:
 class GoldPile : public Item
 {
 public:
-	GoldPile(Vector2D position);
+	GoldPile(Vector2D position, GameContext& ctx);
 };
 
 class AmuletOfYendor : public Item
@@ -63,5 +63,3 @@ class PlateMailItem : public Item
 public:
 	PlateMailItem(Vector2D position);
 };
-
-#endif // !ITEMS_H

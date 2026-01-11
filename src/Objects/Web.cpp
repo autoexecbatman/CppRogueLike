@@ -2,6 +2,7 @@
 #include "../Game.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
 
 Web::Web(Vector2D position, int strength)
     : Object(position, ActorData{ '*', "spider web", BLACK_WHITE_PAIR }),
@@ -32,7 +33,7 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
         ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 
         // Player loses their turn
-        *ctx.game_status = static_cast<int>(Game::GameStatus::NEW_TURN);
+        *ctx.game_status = GameStatus::NEW_TURN;
         return true;
     }
     else

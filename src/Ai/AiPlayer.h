@@ -12,10 +12,10 @@ enum class Controls;
 class AiPlayer : public Ai
 {
 public:
-	void update(Creature& owner) override;
+	void update(Creature& owner, GameContext& ctx) override;
 	void load(const json& j) override;
 	void save(json& j) override;
-	void display_inventory(Player& player);
+	void display_inventory(Player& player, GameContext& ctx);
 	void applyConfusion(int duration) { confusionTurns = duration; }
 	bool isConfused() const { return confusionTurns > 0; }
 private:
@@ -29,9 +29,9 @@ private:
 	bool is_pickable_at_position(const Actor& actor, const Actor& owner) const;
 	void display_inventory_items(WINDOW* inv, const Player& player) noexcept;
 	Item* chose_from_inventory(Player& player, int ascii, GameContext& ctx);
-	void look_on_floor(Vector2D target);
-	bool look_to_attack(Vector2D& target, Creature& owner);
+	void look_on_floor(Vector2D target, GameContext& ctx);
+	bool look_to_attack(Vector2D& target, Creature& owner, GameContext& ctx);
 	void look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx);
 	void call_action(Player& player, Controls key, GameContext& ctx);
-	Vector2D handle_direction_input(const Creature& owner, int dirKey);
+	Vector2D handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx);
 };

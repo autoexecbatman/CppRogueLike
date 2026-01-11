@@ -17,43 +17,39 @@
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
+#include "../Core/GameContext.h"
 
 using namespace InventoryOperations; // For clean function calls
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
 {
-	auto ctx = game.get_context();
-
-	// Rolling for stats
-	auto roll3d6 = [&ctx]() { return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(); };
-	set_strength(roll3d6());
-	set_dexterity(roll3d6());
-	set_constitution(roll3d6());
-	set_intelligence(roll3d6());
-	set_wisdom(roll3d6());
-	set_charisma(roll3d6());
-
-	//==PLAYER==
-	const int playerHp = 20 + ctx.dice->d10(); // we roll the dice to get the player's hp
-	const int playerDr = 1; // the player's damage reduction
-	const int playerXp = 0; // the player's experience points
-	const int playerAC = 10; // the player's armor class
-
 	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
-	attacker = std::make_unique<Attacker>("D2"); // Default attack roll, can be changed by equipping a weapon
-	destructible = std::make_unique<PlayerDestructible>( // PlayerDestructible is a subclass of Destructible
-		playerHp, // initial HP
-		playerDr, // initial damage reduction
-		"your corpse", // death message
-		playerXp, // initial experience points
-		0, // thaco is calculated from table
-		playerAC // initial armor class
-	);
 	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
-	// inventory_data is initialized in Creature constructor
-	
-	// REMOVED: Equipment initialization moved to MenuClass after class selection
-	
+}
+
+void Player::roll_new_character(GameContext& ctx)
+{
+    // Rolling for stats
+    auto roll3d6 = [&ctx]() { 
+        return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(); 
+    };
+    
+    set_strength(roll3d6());
+    set_dexterity(roll3d6());
+    set_constitution(roll3d6());
+    set_intelligence(roll3d6());
+    set_wisdom(roll3d6());
+    set_charisma(roll3d6());
+
+    const int playerHp = 20 + ctx.dice->d10();
+    const int playerDr = 1;
+    const int playerXp = 0;
+    const int playerAC = 10;
+
+    attacker = std::make_unique<Attacker>("D2");
+    destructible = std::make_unique<PlayerDestructible>(
+        playerHp, playerDr, "your corpse", playerXp, 0, playerAC
+    );
 }
 
 void Player::racial_ability_adjustments()
@@ -254,7 +250,7 @@ bool Player::rest(GameContext& ctx)
 	ctx.message_system->finalize_message();
 
 	// Resting takes time
-	ctx.game->gameStatus = Game::GameStatus::NEW_TURN;
+	ctx.game->gameStatus = GameStatus::NEW_TURN;
 	return true;
 }
 
@@ -349,7 +345,7 @@ bool Player::try_break_web(GameContext& ctx)
 }
 
 // Clean Weapon Equipment System using Unique IDs
-bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot)
+bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx)
 {
 	// Check if weapon is already equipped
 	if (is_item_equipped(item_unique_id))
@@ -360,7 +356,7 @@ bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot
 			Item* equipped = get_equipped_item(slot);
 			if (equipped && equipped->uniqueId == item_unique_id)
 			{
-				return unequip_item(slot);
+				return unequip_item(slot, ctx);
 			}
 		}
 	}
@@ -388,19 +384,19 @@ bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot
 					target_slot = preferred_slot;
 				}
 				
-				return equip_item(std::move(itemToEquip), target_slot);
+				return equip_item(std::move(itemToEquip), target_slot, ctx);
 			}
 		}
 	}
 	return false;
 }
 
-bool Player::toggle_shield(uint32_t item_unique_id)
+bool Player::toggle_shield(uint32_t item_unique_id, GameContext& ctx)
 {
 	// Shields always go in LEFT_HAND slot
 	if (is_item_equipped(item_unique_id))
 	{
-		return unequip_item(EquipmentSlot::LEFT_HAND);
+		return unequip_item(EquipmentSlot::LEFT_HAND, ctx);
 	}
 	else
 	{
@@ -413,16 +409,15 @@ bool Player::toggle_shield(uint32_t item_unique_id)
 				auto itemToEquip = std::move(*it);
 				inventory_data.items.erase(it);
 				
-				return equip_item(std::move(itemToEquip), EquipmentSlot::LEFT_HAND);
+				return equip_item(std::move(itemToEquip), EquipmentSlot::LEFT_HAND, ctx);
 			}
 		}
 		return false;
 	}
 }
 
-bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
+bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	if (!item)
 	{
 		if (ctx.message_system->is_debug_mode()) ctx.message_system->log("DEBUG: equip_item failed - null item");
@@ -444,7 +439,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 	}
 
 	// Unequip existing item in the slot first
-	unequip_item(slot);
+	unequip_item(slot, ctx);
 	
 	// Special handling for two-handed weapons - use ItemClass system
 	if (slot == EquipmentSlot::RIGHT_HAND)
@@ -452,7 +447,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot)
 		if (item->is_two_handed_weapon())
 		{
 			// Two-handed weapon - also unequip left hand
-			unequip_item(EquipmentSlot::LEFT_HAND);
+			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
 			ctx.message_system->message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
 		}
 	}
@@ -562,9 +557,8 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 	return true;
 }
 
-bool Player::unequip_item(EquipmentSlot slot)
+bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
-	auto ctx = game.get_context();
 	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
 		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
 	
@@ -695,13 +689,13 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 }
 
 // Clean Equipment System using Unique IDs
-bool Player::toggle_armor(uint32_t item_unique_id)
+bool Player::toggle_armor(uint32_t item_unique_id, GameContext& ctx)
 {
 	// Check if item is already equipped
 	if (is_item_equipped(item_unique_id))
 	{
 		// Unequip the armor
-		return unequip_item(EquipmentSlot::BODY);
+		return unequip_item(EquipmentSlot::BODY, ctx);
 	}
 	else
 	{
@@ -714,7 +708,7 @@ bool Player::toggle_armor(uint32_t item_unique_id)
 				auto itemToEquip = std::move(*it);
 				inventory_data.items.erase(it);
 				
-				return equip_item(std::move(itemToEquip), EquipmentSlot::BODY);
+				return equip_item(std::move(itemToEquip), EquipmentSlot::BODY, ctx);
 			}
 		}
 		return false; // Item not found in inventory

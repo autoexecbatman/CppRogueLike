@@ -72,6 +72,7 @@ public:
 	std::vector<EquippedItem> equippedItems;
 
 	Player(Vector2D position);
+	void roll_new_character(GameContext& ctx);
 
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
@@ -95,18 +96,18 @@ public:
 
 	// Equipment system methods
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
-	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot);
-	bool unequip_item(EquipmentSlot slot);
+	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
+	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
 	Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
 	bool is_dual_wielding() const noexcept;
 	std::string get_equipped_weapon_damage_roll() const noexcept;
 	
 	// Equipment system - unique ID based methods
-	bool toggle_armor(uint32_t item_unique_id);
+	bool toggle_armor(uint32_t item_unique_id, GameContext& ctx);
 	bool is_item_equipped(uint32_t item_unique_id) const noexcept;
-	bool toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot = EquipmentSlot::RIGHT_HAND);
-	bool toggle_shield(uint32_t item_unique_id);
+	bool toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx);
+	bool toggle_shield(uint32_t item_unique_id, GameContext& ctx);
 	
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo
