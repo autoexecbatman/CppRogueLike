@@ -189,7 +189,7 @@ void Creature::update()
 	// if the actor has an ai then update the ai
 	if (ai)
 	{
-		ai->update(*this);
+		ai->update(*this, ctx);
 	}
 }
 
