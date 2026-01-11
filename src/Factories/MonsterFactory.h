@@ -10,8 +10,7 @@
 #include <vector>
 
 // Forward declarations
-//class Game;
-//class Creature;
+struct GameContext;
 
 // A struct to represent a monster type with its spawn probability
 struct MonsterType {
@@ -22,7 +21,7 @@ struct MonsterType {
     float levelScaling;     // How much to scale weight by level (can be negative)
 
     // Factory function to create the monster
-    std::function<void(Vector2D)> createFunc;
+    std::function<void(Vector2D, GameContext&)> createFunc;
 };
 
 class MonsterFactory {
@@ -31,7 +30,7 @@ public:
     ~MonsterFactory() = default;
 
     // Spawn a random monster at the given position based on dungeon level
-    void spawn_random_monster(Vector2D position, int dungeonLevel);
+    void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);
 
     // Get the probability distribution for the current dungeon level
     std::vector<std::pair<std::string, float>> getCurrentDistribution(int dungeonLevel);

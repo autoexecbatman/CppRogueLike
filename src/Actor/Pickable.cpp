@@ -36,13 +36,13 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 	if (wearer.uniqueId == ctx.player->uniqueId)
 	{
 		Player* player = static_cast<Player*>(&wearer);
-		
+
 		// Get the preferred slot for this weapon type based on current equipment
 		EquipmentSlot preferredSlot = get_preferred_slot(player);
-		
+
 		// Use toggle_weapon with preferred slot
 		bool success = player->toggle_weapon(owner.uniqueId, preferredSlot);
-		
+
 		if (success)
 		{
 			// Check if weapon is now equipped in preferred slot
@@ -57,10 +57,10 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 				ctx.message_system->message(WHITE_BLACK_PAIR, "You unequip the " + owner.get_name() + ".", true);
 			}
 		}
-		
+
 		return success;
 	}
-	
+
 	// For NPCs, use simple equip toggle
 	wearer.equip(owner, ctx);
 	return true;
@@ -79,10 +79,10 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 	if (wearer.uniqueId == ctx.player->uniqueId)
 	{
 		Player* player = static_cast<Player*>(&wearer);
-		
+
 		// Use the dedicated toggle_shield method
 		bool success = player->toggle_shield(owner.uniqueId);
-		
+
 		if (success)
 		{
 			// Check if shield is now equipped by looking in LEFT_HAND slot
@@ -96,10 +96,10 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 				ctx.message_system->message(WHITE_BLACK_PAIR, "You lower the " + owner.get_name() + ".", true);
 			}
 		}
-		
+
 		return success;
 	}
-	
+
 	// For NPCs, use simple equip toggle
 	wearer.equip(owner, ctx);
 	return true;

@@ -17,70 +17,71 @@ MonsterFactory::MonsterFactory()
     // Initialize with all monster types
     addMonsterType({
         "Mimic", 6, 2, 0, 0.5f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Mimic>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Mimic>(pos, ctx)); }
         });
 
     addMonsterType({
         "Small Spider", 10, 1, 0, -0.3f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<SmallSpider>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<SmallSpider>(pos, ctx)); }
         });
 
     addMonsterType({
         "Giant Spider", 10, 2, 0, 0.0f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<GiantSpider>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<GiantSpider>(pos, ctx)); }
         });
 
     addMonsterType({
         "Web Spinner", 5, 3, 0, 0.2f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<WebSpinner>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<WebSpinner>(pos, ctx)); }
         });
 
     addMonsterType({
         "Goblin", 30, 1, 5, -0.2f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Goblin>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Goblin>(pos, ctx)); }
         });
 
     addMonsterType({
         "Orc", 15, 2, 0, 0.0f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Orc>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Orc>(pos, ctx)); }
         });
 
     addMonsterType({
         "Archer", 10, 2, 0, 0.2f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Archer>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Archer>(pos, ctx)); }
         });
 
     addMonsterType({
         "Mage", 10, 3, 0, 0.3f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Mage>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Mage>(pos, ctx)); }
         });
 
     addMonsterType({
         "Troll", 7, 4, 0, 0.5f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Troll>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Troll>(pos, ctx)); }
         });
 
     addMonsterType({
         "Dragon", 3, 5, 0, 1.0f,
-        [](Vector2D pos) { game.creatures.push_back(std::make_unique<Dragon>(pos)); }
+        [](Vector2D pos, GameContext& ctx) { ctx.creatures->push_back(std::make_unique<Dragon>(pos, ctx)); }
         });
-        
+
     // Add shopkeeper to the spawn table with proper probability management
     addMonsterType({
         "Shopkeeper", 20, 1, 0, 0.0f,  // INCREASED weight from 8 to 20 for more frequent spawning
-        [](Vector2D pos) {
+        [](Vector2D pos, GameContext& ctx) {
+            int dungeonLevel = ctx.level_manager->get_dungeon_level();
             // Use ShopkeeperFactory's probability system for actual spawning
-            if (ShopkeeperFactory::should_spawn_shopkeeper(game.level_manager.get_dungeon_level()))
+            if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
             {
-                auto shopkeeper = ShopkeeperFactory::create_shopkeeper(pos, game.level_manager.get_dungeon_level());
-                game.creatures.push_back(std::move(shopkeeper));
-                game.log("Shopkeeper spawned via MonsterFactory with proper probability at level " + std::to_string(game.level_manager.get_dungeon_level()));
+                auto shopkeeper = ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx);
+                ctx.creatures->push_back(std::move(shopkeeper));
+                ctx.message_system->log("Shopkeeper spawned via MonsterFactory with proper probability at level " + std::to_string(dungeonLevel));
             }
             else
             {
                 // If shopkeeper spawn probability fails, spawn alternative monster
-                game.creatures.push_back(std::make_unique<Goblin>(pos));
-                game.log("Shopkeeper spawn failed, spawned Goblin instead");
+                ctx.creatures->push_back(std::make_unique<Goblin>(pos, ctx));
+                ctx.message_system->log("Shopkeeper spawn failed, spawned Goblin instead");
             }
         }
         });
@@ -123,7 +124,7 @@ int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLeve
     return std::max(1, weight);
 }
 
-void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel)
+void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
     // Calculate total weights for current dungeon level
     int totalWeight = 0;
@@ -137,22 +138,22 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel)
 
     // If no valid monsters for this level, do nothing
     if (totalWeight <= 0) {
-        game.log("No valid monsters for this dungeon level!");
+        ctx.message_system->log("No valid monsters for this dungeon level!");
         return;
     }
 
     // Roll random number and select monster
-    int roll = game.d.roll(1, totalWeight);
+    int roll = ctx.dice->roll(1, totalWeight);
     int runningTotal = 0;
 
     for (size_t i = 0; i < monsterTypes.size(); i++) {
         runningTotal += weights[i];
         if (roll <= runningTotal) {
             // Create the monster
-            monsterTypes[i].createFunc(position);
+            monsterTypes[i].createFunc(position, ctx);
 
             // Check if special AI needed for ranged attackers
-            Creature* monster = game.get_actor(position);
+            Creature* monster = ctx.game->get_actor(position);
             if (monster && monster->has_state(ActorState::IS_RANGED)) {
                 // Replace standard AI with ranged AI
                 monster->ai = std::make_unique<AiMonsterRanged>();
