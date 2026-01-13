@@ -59,15 +59,8 @@ if(MSVC)
     set_target_properties(test_exe PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:test_exe>")
 endif()
 
-# Copy JSON files to test binary directory
-set(JSON_FILES
-    "${PARENT_SOURCE_DIR}/json/strength.json"
-    "${PARENT_SOURCE_DIR}/json/dexterity.json"
-    "${PARENT_SOURCE_DIR}/json/constitution.json"
-    "${PARENT_SOURCE_DIR}/json/wisdom.json"
-    "${PARENT_SOURCE_DIR}/json/intelligence.json"
-    "${PARENT_SOURCE_DIR}/json/charisma.json"
-)
+# Copy all JSON files from source to test binary directory
+file(GLOB JSON_FILES "${PARENT_SOURCE_DIR}/json/*.json")
 
 foreach(JSON_FILE ${JSON_FILES})
     get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)

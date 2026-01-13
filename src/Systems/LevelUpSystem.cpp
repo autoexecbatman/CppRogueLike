@@ -214,25 +214,33 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
     }
 
     // Fighters get extra attacks at levels 7 and 13
-    if (newLevel == 7)
+    // Use >= to ensure we don't miss the upgrade if jumping levels
+    // Check highest level first to ensure correct value
+    if (newLevel >= 13)
     {
-        playerPtr->attacksPerRound = 1.5f; // 3/2 attacks per round
-        ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-        ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
-        ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
-        ctx->message_system->finalize_message();
-
-            ctx->message_system->log("Fighter gained extra attack (3/2 attacks per round)");
-    }
-    else if (newLevel == 13)
-    {
-        playerPtr->attacksPerRound = 2.0f; // 2 attacks per round
-        ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-        ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
-        ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
-        ctx->message_system->finalize_message();
+        if (playerPtr->attacksPerRound < 2.0f)
+        {
+            playerPtr->attacksPerRound = 2.0f; // 2 attacks per round
+            ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+            ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+            ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
+            ctx->message_system->finalize_message();
 
             ctx->message_system->log("Fighter gained extra attack (2 attacks per round)");
+        }
+    }
+    else if (newLevel >= 7)
+    {
+        if (playerPtr->attacksPerRound < 1.5f)
+        {
+            playerPtr->attacksPerRound = 1.5f; // 3/2 attacks per round
+            ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+            ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+            ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
+            ctx->message_system->finalize_message();
+
+            ctx->message_system->log("Fighter gained extra attack (3/2 attacks per round)");
+        }
     }
 
     // Fighters also get better weapon specialization bonuses
