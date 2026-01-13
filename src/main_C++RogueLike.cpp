@@ -42,19 +42,22 @@ int main()
 	
 	// Debug logging setup - C++ Core Guidelines E.6: Exception-safe file handling
 	std::ofstream debugFile;
-	try {
+	try
+	{
 		debugFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
 		debugFile.open("clog.txt"); // Will throw on failure - proper RAII
 		std::clog.rdbuf(debugFile.rdbuf()); // redirect std::clog to the file
 	}
-	catch (const std::exception& e) {
+	catch (const std::exception& e)
+	{
 		std::cerr << "Warning: Could not open debug file clog.txt: " << e.what() << std::endl;
 		// Continue execution without debug logging
 	}
 	
 	#ifdef EMSCRIPTEN
 	//==INIT_SDL==
-	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	{
 		std::cerr << "Could not initialize SDL: " << SDL_GetError() << std::endl;
 		return 1;
 	}
@@ -66,7 +69,8 @@ int main()
 		SDL_WINDOWPOS_UNDEFINED,
 		SDL_WINDOWPOS_UNDEFINED,
 		1190, 600, 0);  // Approximate size to accommodate 119x30 console
-	if (!pdc_window) {
+	if (!pdc_window)
+	{
 		std::cerr << "Could not create window: " << SDL_GetError() << std::endl;
 		return 1;
 	}
@@ -131,14 +135,18 @@ int main()
 	#endif
 
 	// C++ Core Guidelines E.6: Explicit close for error handling
-	if (debugFile.is_open()) {
-		try {
+	if (debugFile.is_open())
+	{
+		try
+		{
 			debugFile.close();
-			if (debugFile.fail()) {
+			if (debugFile.fail())
+			{
 				std::cerr << "Warning: Error closing debug file" << std::endl;
 			}
 		}
-		catch (const std::exception& e) {
+		catch (const std::exception& e)
+		{
 			std::cerr << "Warning: Exception while closing debug file: " << e.what() << std::endl;
 		}
 	}
