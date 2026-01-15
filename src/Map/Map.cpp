@@ -970,15 +970,24 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 }
 
 // getActor returns the actor at the given coordinates or `nullptr` if there's none
-// NOTE: This method accesses game.creatures directly - still uses global for now
-// TODO: Accept GameContext parameter when all callers are updated
 Creature* Map::get_actor(Vector2D pos, GameContext& ctx) const noexcept
 {
+	// Check player position first
+	if (ctx.player && ctx.player->position == pos)
+	{
+		return ctx.player;
+	}
+
+	// Check all creatures (excluding dead ones - they shouldn't block)
 	for (const auto& actor : *ctx.creatures)
 	{
-		if (actor->position == pos)
+		if (actor && actor->position == pos)
 		{
-			return actor.get();
+			// Only return living creatures as blockers
+			if (actor->destructible && !actor->destructible->is_dead())
+			{
+				return actor.get();
+			}
 		}
 	}
 
@@ -1033,16 +1042,29 @@ void Map::regenerate(GameContext& ctx)
 	init(true, ctx);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx)
+std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D target)
 {
 	std::vector<Vector2D> results;
 
 	for (Vector2D dir : DIRS)
 	{
 		Vector2D next{ id.y + dir.y, id.x + dir.x };
-		if (in_bounds(next) && can_walk(next, ctx))
+		if (in_bounds(next))
 		{
-			results.push_back(next);
+			// Allow target position even if occupied (for pathfinding to reach goal)
+			bool isTarget = (target.x != -1 && next == target);
+			if (isTarget)
+			{
+				// For target, only check terrain (walls, doors) not actors
+				if (!is_wall(next) && get_tile_type(next) != TileType::CLOSED_DOOR)
+				{
+					results.push_back(next);
+				}
+			}
+			else if (can_walk(next, ctx))
+			{
+				results.push_back(next);
+			}
 		}
 	}
 

@@ -86,6 +86,8 @@ Troll::Troll(Vector2D position, GameContext& ctx) : Creature(position, ActorData
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 
+	set_weapon_equipped("Claws");
+
 	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 10, "1d10" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 300, thaco, ac); // TRIPLED from 100 for solo play bonus
 
@@ -103,6 +105,8 @@ Dragon::Dragon(Vector2D position, GameContext& ctx) : Creature(position, ActorDa
 
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
+
+	set_weapon_equipped("Fiery breath");
 
 	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 10, "1d10" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 600, thaco, ac); // TRIPLED from 200 for solo play bonus
@@ -155,7 +159,9 @@ Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData
 
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-	
+
+	set_weapon_equipped("Pseudopod");
+
 	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 4, "1d4" }); // Reduced from D6
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac); // TRIPLED from 50 for solo play bonus
 

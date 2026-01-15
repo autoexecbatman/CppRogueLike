@@ -48,8 +48,8 @@ std::vector<Vector2D> Dijkstra::a_star_search(
             break;
         }
 
-        // Explore all valid neighbors of the current node
-        for (Vector2D next : graph.neighbors(current, ctx))
+        // Explore all valid neighbors of the current node (pass goal to allow reaching target)
+        for (Vector2D next : graph.neighbors(current, ctx, goal))
         {
             int currentIndex = graph.get_index(current); // Get index of the current node
             int nextIndex = graph.get_index(next); // Get index of the next node

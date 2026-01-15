@@ -115,7 +115,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
             // Find a good ambush position
             Vector2D ambushPos = findAmbushPosition(owner, ctx.player->position, ctx);
 
-            if (ambushPos.x != -1) // Valid position found
+            if (ambushPos.x != -1 && !ctx.map->get_actor(ambushPos, ctx)) // Valid position found and not occupied
             {
                 // Move to ambush position
                 owner.position = ambushPos;
@@ -317,8 +317,11 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContex
         }
     }
 
-    // Move to best position
-    owner.position = bestMove;
+    // Move to best position - final validation to prevent stacking
+    if (bestMove != owner.position && !ctx.map->get_actor(bestMove, ctx))
+    {
+        owner.position = bestMove;
+    }
 }
 
 bool AiSpider::canPoisonAttack(Creature& owner, GameContext& ctx)

@@ -56,9 +56,12 @@ void MenuName::menu_name(GameContext& ctx)
 	noecho(); // hide input
 
 	menu_name_delete();
-	
-	// Restore the game display after menu
-	ctx.game->restore_game_display();
+
+	// Only restore game display if game was initialized (not during character creation)
+	if (ctx.menu_manager->is_game_initialized())
+	{
+		ctx.game->restore_game_display();
+	}
 }
 
 // end of file: MenuName.cpp

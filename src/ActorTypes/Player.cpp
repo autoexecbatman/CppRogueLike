@@ -18,6 +18,7 @@
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Core/GameContext.h"
+#include "../Factories/ItemCreator.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -50,6 +51,25 @@ void Player::roll_new_character(GameContext& ctx)
     destructible = std::make_unique<PlayerDestructible>(
         playerHp, playerDr, "your corpse", playerXp, 0, playerAC
     );
+}
+
+void Player::equip_class_starting_gear(GameContext& ctx)
+{
+	if (playerClassState != PlayerClassState::FIGHTER)
+	{
+		return; // Only fighters get starting gear for now
+	}
+
+	// Fighter starting gold: 5d4 x 10
+	int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
+	set_gold(startingGold);
+
+	// Equip plate mail, long sword, and shield
+	equip_item(ItemCreator::create_plate_mail(position), EquipmentSlot::BODY, ctx);
+	equip_item(ItemCreator::create_long_sword(position), EquipmentSlot::RIGHT_HAND, ctx);
+	equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
+
+	ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
 }
 
 void Player::racial_ability_adjustments()

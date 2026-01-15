@@ -165,9 +165,7 @@ void Fighter::on_selection(GameContext& ctx)
 {
 	ctx.player->playerClass = "Fighter";
 	ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
-
-	// EQUIP FIGHTER STARTING GEAR
-	equip_fighter_starting_gear(ctx);
+	// Starting gear equipped in Game::update() STARTUP phase after init()
 }
 
 void Rogue::on_selection(GameContext& ctx)
@@ -195,7 +193,6 @@ void ClassRandom::on_selection(GameContext& ctx)
 	case 1:
 		ctx.player->playerClass = "Fighter";
 		ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
-		equip_fighter_starting_gear(ctx);
 		break;
 	case 2:
 		ctx.player->playerClass = "Rogue";

@@ -111,7 +111,7 @@ public:
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
-	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx);
+	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{-1, -1});
 	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }

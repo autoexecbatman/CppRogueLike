@@ -77,6 +77,7 @@ public:
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	void racial_ability_adjustments();
+	void equip_class_starting_gear(GameContext& ctx);
 	void calculate_thaco();
 
 	void consume_food(int nutrition, GameContext& ctx);

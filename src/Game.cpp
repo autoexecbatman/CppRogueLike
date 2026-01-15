@@ -129,11 +129,11 @@ void Game::update(GameContext& ctx)
 	if (gameStatus == GameStatus::STARTUP)
 	{
 		map.compute_fov(ctx);
-		// Only adjust racial abilities on initial character creation (dungeonLevel 1)
+		// Only adjust racial abilities and equip starting gear on initial character creation (dungeonLevel 1)
 		if (level_manager.get_dungeon_level() == 1)
 		{
 			player->racial_ability_adjustments();
-			// Don't try to restore display here - let normal game flow handle it
+			player->equip_class_starting_gear(ctx);
 		}
 		player->calculate_thaco();
 		gameStatus = GameStatus::NEW_TURN;

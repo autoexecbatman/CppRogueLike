@@ -34,8 +34,9 @@ void init_curses(); // declaration of a function that handles curses procedures
 int main()
 {
 	// Create the main game object
+	// Note: init() is called by menu system after user chooses New Game or Load
 	Game game;
-	game.init();
+
 	// Memory leak detection (commented - enable only during debugging)
 	// _CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	// _CrtSetBreakAlloc(1779);
