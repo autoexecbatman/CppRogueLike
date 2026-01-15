@@ -45,7 +45,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
         // Combat properties - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(ctx.dice->d2() + 2, 0, "dead small spider", 45, 20, 7); // TRIPLED from 15 for solo play bonus
-        attacker = std::make_unique<Attacker>("D4");
+        attacker = std::make_unique<Attacker>(DamageInfo{ 1, 4, "1d4" });
 
         // AI - use spider AI for intelligent movement
         ai = std::make_unique<AiSpider>();
@@ -69,7 +69,7 @@ void Spider::init_spider_type(GameContext& ctx)
             19,
             5
         );
-        attacker = std::make_unique<Attacker>("D4");
+        attacker = std::make_unique<Attacker>(DamageInfo{ 1, 6, "1d6" });
 
         // AI - use spider AI for intelligent movement
         ai = std::make_unique<AiSpider>();
@@ -86,7 +86,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
         // Combat properties - significantly stronger - TRIPLED XP for solo play
         destructible = std::make_unique<MonsterDestructible>(ctx.dice->d8() + 5, 1, "dead web weaver", 180, 17, 5); // TRIPLED from 60 for solo play bonus
-        attacker = std::make_unique<Attacker>("D6");
+        attacker = std::make_unique<Attacker>(DamageInfo{ 1, 8, "1d8" });
 
         // AI - use web spinner AI for web creation and movement
         ai = std::make_unique<AiWebSpinner>();

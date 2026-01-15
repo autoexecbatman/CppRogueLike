@@ -117,7 +117,7 @@ void Gui::gui_render(const GameContext& ctx)
 		ctx.player->actorData.name,
 		ctx.player->destructible->get_hp(),
 		ctx.player->destructible->get_max_hp(),
-		ctx.player->attacker->get_roll(),
+		ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll,
 		ctx.player->destructible->get_dr()
 	);
 

@@ -1,6 +1,3 @@
-// file: Attacker.cpp
-#include <iostream>
-#include <string>
 #include <format>
 #include <memory>
 
@@ -8,456 +5,186 @@
 #include "../Core/GameContext.h"
 #include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
-#include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Player.h"
 #include "../Menu/MenuTrade.h"
 #include "Attacker.h"
 #include "../Ai/AiShopkeeper.h"
 
-Attacker::Attacker(std::string roll) : roll(roll), damageInfo(parse_damage_from_roll_string(roll)) {}
+Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 
-Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage), roll(damage.displayRoll) {}
-
-// Now modify the attack function in Attacker.cpp to incorporate the surprise check:
 void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 {
-    // if target is shopkeeper, do not attack
-    if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
-    {
-        ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
-        return;
-    }
+	auto* player = dynamic_cast<Player*>(&attacker);
+	if (player)
+	{
+		// Check for dual wielding
+		auto dualWieldInfo = player->get_dual_wield_info();
+		if (dualWieldInfo.isDualWielding)
+		{
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
+			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
+			ctx.message_system->finalize_message();
 
-    if (!target.destructible->is_dead() && attacker.get_strength() > 0)
-    {
-        const auto& strength = ctx.data_manager->get_strength_attributes().at(attacker.get_strength() - 1);
+			perform_single_attack(attacker, target, dualWieldInfo.mainHandPenalty, "main hand", ctx);
 
-        // Roll for attack and damage using enhanced DamageInfo system
-        int rollAttack = ctx.dice->d20();
+			if (target.destructible && !target.destructible->is_dead())
+			{
+				perform_single_attack(attacker, target, dualWieldInfo.offHandPenalty, "off hand", ctx);
+			}
+			return;
+		}
 
-        // Get unified damage using clean interface
-        DamageInfo attackDamage = get_attack_damage(attacker);
-        int rollDmg = attackDamage.roll_damage();
+		// Single source of truth: derive weapon name from equipped item
+		Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
+		perform_single_attack(attacker, target, 0, weaponName, ctx);
+		return;
+	}
 
-        // THAC0 calculation
-        int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
+	// Monster attack - use stored weapon name
+	perform_single_attack(attacker, target, 0, attacker.get_weapon_equipped(), ctx);
+}
 
-        // Apply dexterity missile attack adjustment if this is a ranged attack
-        int hitModifier = 0;
-        if (attacker.has_state(ActorState::IS_RANGED))
-        {
-            const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes().at(attacker.get_dexterity() - 1);
-            hitModifier = dexAttributes.MissileAttackAdj;
+void Attacker::perform_single_attack(Creature& attacker, Creature& target, int attackPenalty, const std::string& handName, GameContext& ctx)
+{
+	if (!target.destructible)
+	{
+		ctx.message_system->log("WARNING: Target has no destructible component");
+		return;
+	}
 
-            if (hitModifier != 0) {
-                ctx.message_system->log("Applying ranged attack modifier: " + std::to_string(hitModifier) + " from dexterity " + std::to_string(attacker.get_dexterity()));
-            }
-        }
+	// Shopkeeper interaction (melee only)
+	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
+	{
+		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
+		return;
+	}
 
-        rollNeeded -= hitModifier;
+	// Cannot attack dead targets or without strength
+	if (target.destructible->is_dead() || attacker.get_strength() <= 0)
+	{
+		ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " attacks ");
+		ctx.message_system->append_message_part(target.actorData.color, target.actorData.name);
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " in vain.");
+		ctx.message_system->finalize_message();
+		return;
+	}
 
-        if (rollAttack >= rollNeeded)
-        {
-            // Calculate damage with proper bounds checking
-            const int adjDmg = rollDmg + strength.dmgAdj;
-            const int totaldmg = adjDmg - target.destructible->get_dr();
-            const int finalDamage = std::max(0, totaldmg);
-            
-            // Display attack with proper damage range info
-            ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " rolls ");
-            ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(rollAttack));
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " roll needed ");
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
-            ctx.message_system->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
-            ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(finalDamage));
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " dmg (" + attackDamage.displayRoll + ").");
-            ctx.message_system->finalize_message();
+	// Validate strength attribute
+	const int strIndex = attacker.get_strength() - 1;
+	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.data_manager->get_strength_attributes().size())
+	{
+		ctx.message_system->log(std::format("ERROR: Invalid strength {} for {}", attacker.get_strength(), attacker.actorData.name));
+		return;
+	}
+	const auto& strengthAttr = ctx.data_manager->get_strength_attributes().at(strIndex);
 
-            // Enhanced debug logging with damage range
-            ctx.message_system->log("ATTACK HIT: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-                     " vs " + std::to_string(rollNeeded) + " needed | Damage: " + std::to_string(rollDmg) +
-                     " (" + attackDamage.get_damage_range() + ") + " + std::to_string(strength.dmgAdj) +
-                     " str - " + std::to_string(target.destructible->get_dr()) + " DR = " + std::to_string(finalDamage));
-            
-            if (finalDamage > 0)
-            {
-                target.destructible->take_damage(target, finalDamage, ctx);
-            }
-        }
-        else
-        {
-            // Miss display
-            ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " rolls ");
-            ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(rollAttack));
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " roll needed ");
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::to_string(rollNeeded));
-            ctx.message_system->append_message_part(RED_BLACK_PAIR, ". Miss!");
-            ctx.message_system->finalize_message();
+	// Get damage and roll
+	const DamageInfo attackDamage = get_attack_damage(attacker);
+	const int attackRoll = ctx.dice->d20();
+	const int damageRoll = attackDamage.roll_damage();
 
-            ctx.message_system->log("ATTACK MISS: " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-                     " vs " + std::to_string(rollNeeded) + " needed");
-        }
-    }
-    else
-    {
-        ctx.message_system->append_message_part(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" attacks "));
-        ctx.message_system->append_message_part(target.actorData.color, std::format("{}", target.actorData.name));
-        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" in vain."));
-        ctx.message_system->finalize_message();
-    }
+	// THAC0 calculation
+	int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
+	int hitModifier = attackPenalty;
+
+	// Ranged: apply dexterity modifier
+	if (attacker.has_state(ActorState::IS_RANGED))
+	{
+		const int dexIndex = attacker.get_dexterity() - 1;
+		if (dexIndex >= 0 && static_cast<size_t>(dexIndex) < ctx.data_manager->get_dexterity_attributes().size())
+		{
+			const auto& dexAttr = ctx.data_manager->get_dexterity_attributes().at(dexIndex);
+			hitModifier += dexAttr.MissileAttackAdj;
+
+			if (dexAttr.MissileAttackAdj != 0)
+			{
+				ctx.message_system->log(std::format("Ranged modifier: {} from DEX {}", dexAttr.MissileAttackAdj, attacker.get_dexterity()));
+			}
+		}
+	}
+
+	rollNeeded -= hitModifier;
+	const bool isHit = (attackRoll >= rollNeeded);
+
+	if (isHit)
+	{
+		const int finalDamage = std::max(0, damageRoll + strengthAttr.dmgAdj - target.destructible->get_dr());
+
+		ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
+		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::format("{}", attackRoll));
+		if (attackPenalty != 0)
+		{
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		}
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
+		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+		ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}", finalDamage));
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" dmg ({}).", attackDamage.displayRoll));
+		ctx.message_system->finalize_message();
+
+		ctx.message_system->log(std::format(
+			"HIT ({}): {} rolled {} vs {} | {} ({}) + {} str - {} DR = {} dmg",
+			handName, attacker.actorData.name, attackRoll, rollNeeded,
+			damageRoll, attackDamage.get_damage_range(), strengthAttr.dmgAdj,
+			target.destructible->get_dr(), finalDamage
+		));
+
+		if (finalDamage > 0)
+		{
+			target.destructible->take_damage(target, finalDamage, ctx);
+		}
+	}
+	else
+	{
+		ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
+		ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}", attackRoll));
+		if (attackPenalty != 0)
+		{
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		}
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
+		ctx.message_system->append_message_part(RED_BLACK_PAIR, ". Miss!");
+		ctx.message_system->finalize_message();
+
+		ctx.message_system->log(std::format(
+			"MISS ({}): {} rolled {} vs {} (THAC0:{}, AC:{}, Penalty:{})",
+			handName, attacker.actorData.name, attackRoll, rollNeeded,
+			attacker.destructible->get_thaco(), target.destructible->get_armor_class(), attackPenalty
+		));
+	}
+}
+
+DamageInfo Attacker::get_attack_damage(Creature& attacker) const
+{
+	auto* player = dynamic_cast<Player*>(&attacker);
+	if (player)
+	{
+		Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		if (weapon && weapon->is_weapon())
+		{
+			const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
+			return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemClass, enhancement);
+		}
+		return WeaponDamageRegistry::get_unarmed_damage_info();
+	}
+
+	return damageInfo;
 }
 
 void Attacker::load(const json& j)
 {
-	roll = j["roll"];
+	damageInfo.minDamage = j["damageInfo"]["min"];
+	damageInfo.maxDamage = j["damageInfo"]["max"];
+	damageInfo.displayRoll = j["damageInfo"]["display"];
 }
 
 void Attacker::save(json& j)
 {
-	j["roll"] = roll;
+	j["damageInfo"]["min"] = damageInfo.minDamage;
+	j["damageInfo"]["max"] = damageInfo.maxDamage;
+	j["damageInfo"]["display"] = damageInfo.displayRoll;
 }
-
-void Attacker::attack_with_dual_wield(Creature& attacker, Creature& target, GameContext& ctx)
-{
-	// Cast to Player to check dual wielding
-	auto* player = dynamic_cast<Player*>(&attacker);
-	if (!player)
-	{
-		// Fallback to normal attack for non-players
-		attack(attacker, target, ctx);
-		return;
-	}
-
-	// Get dual wield information
-	auto dualWieldInfo = player->get_dual_wield_info();
-
-	if (!dualWieldInfo.isDualWielding)
-	{
-		// Not dual wielding, use normal attack
-		attack(attacker, target, ctx);
-		return;
-	}
-
-	// Dual wielding - perform both attacks
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
-	ctx.message_system->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
-	ctx.message_system->finalize_message();
-
-	// Main hand attack using clean interface
-	perform_single_attack(attacker, target, dualWieldInfo.mainHandPenalty, "main hand", ctx);
-
-	// Check if target is still alive (is_dead() is safe to call even if HP <= 0)
-	if (target.destructible && !target.destructible->is_dead())
-	{
-		// Target survived main hand attack, proceed with off-hand using clean interface
-		perform_single_attack(attacker, target, dualWieldInfo.offHandPenalty, "off hand", ctx);
-	}
-	// Note: If target died, it's marked as dead but not yet removed from vector
-	// Cleanup happens later in the game loop
-}
-
-void Attacker::perform_single_attack(Creature& attacker, Creature& target, const std::string& damageRoll, int attackPenalty, const std::string& handName, GameContext& ctx)
-{
-	// Safety check: ensure target has valid destructible component
-	if (!target.destructible)
-	{
-		ctx.message_system->log("WARNING: Target has no destructible component in performSingleAttack");
-		return;
-	}
-
-	// if target is shopkeeper, do not attack
-	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
-	{
-		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
-		return;
-	}
-
-	if (!target.destructible->is_dead() && attacker.get_strength() > 0) // if target is not dead and attacker has strength
-	{
-		const auto& strength = ctx.data_manager->get_strength_attributes().at(attacker.get_strength() - 1); // get the strength attributes for the attacker
-
-		// Get proper damage info for dual wield attacks
-		DamageInfo weaponDamage = parse_damage_from_roll_string(damageRoll);
-
-		// roll for attack and damage
-		int rollAttack = ctx.dice->d20();
-		int rollDmg = weaponDamage.roll_damage();
-
-		// THAC0 calculation
-		int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
-
-		// Apply dexterity missile attack adjustment if this is a ranged attack
-		int hitModifier = attackPenalty; // Start with dual wield penalty
-		if (attacker.has_state(ActorState::IS_RANGED))
-		{
-			// Get dexterity bonus for missile attacks
-			const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes().at(attacker.get_dexterity() - 1);
-			hitModifier += dexAttributes.MissileAttackAdj;
-
-			// Display missile attack bonus info
-			if (dexAttributes.MissileAttackAdj != 0) {
-				ctx.message_system->log("Applying ranged attack modifier: " + std::to_string(dexAttributes.MissileAttackAdj) + " from dexterity " + std::to_string(attacker.get_dexterity()));
-			}
-		}
-
-		// Apply the hit modifier (positive is better, so subtract from roll needed)
-		rollNeeded -= hitModifier;
-
-		if (rollAttack >= rollNeeded) // if the attack roll is greater than or equal to the roll needed
-		{
-			// calculate the adjusted damage
-			const int adjDmg = rollDmg + strength.dmgAdj; // add strength bonus
-			const int totaldmg = adjDmg - target.destructible->get_dr(); // substract damage reduction
-			const int finalDamage = std::max(0, totaldmg); // ensure damage is not negative
-
-			// Display the successful attack roll with damage
-			ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(rollAttack));
-			if (attackPenalty != 0)
-			{
-				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
-			}
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(finalDamage));
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " dmg (" + weaponDamage.displayRoll + ").");
-			ctx.message_system->finalize_message();
-
-			// Enhanced debug logging with damage range
-			ctx.message_system->log("ATTACK HIT (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-					 " vs " + std::to_string(rollNeeded) + " needed | Damage: " + std::to_string(rollDmg) +
-					 " (" + weaponDamage.get_damage_range() + ") + " + std::to_string(strength.dmgAdj) +
-					 " str - " + std::to_string(target.destructible->get_dr()) + " DR = " + std::to_string(finalDamage));
-
-			// Apply damage to target if any
-			if (finalDamage > 0)
-			{
-				// Debug log the damage roll details
-				ctx.message_system->log("DAMAGE DEALT (" + handName + "): " + std::to_string(rollDmg) + " (base) + " +
-						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) +
-						 " (DR) = " + std::to_string(finalDamage) + " damage to " + target.actorData.name);
-
-				// apply damage to target
-				target.destructible->take_damage(target, finalDamage, ctx);
-			}
-			else
-			{
-				// Debug log the no-damage attack
-				ctx.message_system->log("NO DAMAGE (" + handName + "): " + std::to_string(rollDmg) + " (base) + " +
-						 std::to_string(strength.dmgAdj) + " (str) - " + std::to_string(target.destructible->get_dr()) +
-						 " (DR) = 0 damage to " + target.actorData.name);
-			}
-		}
-		else
-		{
-			// Display the failed attack roll with 0 damage
-			ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(rollAttack));
-			if (attackPenalty != 0)
-			{
-				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
-			}
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, ". Miss! ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, "0");
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " dmg.");
-			ctx.message_system->finalize_message();
-
-			// Debug log the failed attack roll
-			ctx.message_system->log("ATTACK MISS (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-					 " vs " + std::to_string(rollNeeded) + " needed (THAC0:" + std::to_string(attacker.destructible->get_thaco()) +
-					 ", AC:" + std::to_string(target.destructible->get_armor_class()) + ", Penalty:" + std::to_string(attackPenalty) + ")");
-		}
-	}
-	else
-	{
-		ctx.message_system->append_message_part(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" attacks "));
-		ctx.message_system->append_message_part(target.actorData.color, std::format("{}", target.actorData.name));
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" in vain."));
-		ctx.message_system->finalize_message();
-	}
-}
-
-// Modern clean interface for single attacks
-void Attacker::perform_single_attack(Creature& attacker, Creature& target, int attackPenalty, const std::string& handName, GameContext& ctx)
-{
-	// Safety check: ensure target has valid destructible component
-	if (!target.destructible)
-	{
-		ctx.message_system->log("WARNING: Target has no destructible component in perform_single_attack");
-		return;
-	}
-
-	// if target is shopkeeper, do not attack
-	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
-	{
-		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
-		return;
-	}
-
-	if (!target.destructible->is_dead() && attacker.get_strength() > 0)
-	{
-		const auto& strength = ctx.data_manager->get_strength_attributes().at(attacker.get_strength() - 1);
-
-		// Get unified damage using clean interface
-		DamageInfo attackDamage = get_attack_damage(attacker);
-
-		// Roll for attack and damage
-		int rollAttack = ctx.dice->d20();
-		int rollDmg = attackDamage.roll_damage();
-
-		// THAC0 calculation
-		int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
-
-		// Apply dexterity missile attack adjustment if this is a ranged attack
-		int hitModifier = attackPenalty; // Start with dual wield penalty
-		if (attacker.has_state(ActorState::IS_RANGED))
-		{
-			const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes().at(attacker.get_dexterity() - 1);
-			hitModifier += dexAttributes.MissileAttackAdj;
-
-			if (dexAttributes.MissileAttackAdj != 0) {
-				ctx.message_system->log("Applying ranged attack modifier: " + std::to_string(dexAttributes.MissileAttackAdj) + " from dexterity " + std::to_string(attacker.get_dexterity()));
-			}
-		}
-
-		// Apply the hit modifier (positive is better, so subtract from roll needed)
-		rollNeeded -= hitModifier;
-
-		if (rollAttack >= rollNeeded)
-		{
-			// Calculate damage
-			const int adjDmg = rollDmg + strength.dmgAdj;
-			const int totaldmg = adjDmg - target.destructible->get_dr();
-			const int finalDamage = std::max(0, totaldmg);
-
-			// Display attack with unified damage info
-			ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(rollAttack));
-			if (attackPenalty != 0)
-			{
-				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
-			}
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(finalDamage));
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " dmg (" + attackDamage.displayRoll + ").");
-			ctx.message_system->finalize_message();
-
-			// Enhanced debug logging
-			ctx.message_system->log("ATTACK HIT (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-					 " vs " + std::to_string(rollNeeded) + " needed | Damage: " + std::to_string(rollDmg) +
-					 " (" + attackDamage.get_damage_range() + ") + " + std::to_string(strength.dmgAdj) +
-					 " str - " + std::to_string(target.destructible->get_dr()) + " DR = " + std::to_string(finalDamage));
-
-			if (finalDamage > 0)
-			{
-				target.destructible->take_damage(target, finalDamage, ctx);
-			}
-		}
-		else
-		{
-			// Display miss
-			ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + handName + ") rolls ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, std::to_string(rollAttack));
-			if (attackPenalty != 0)
-			{
-				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " (" + std::to_string(attackPenalty) + ")");
-			}
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " vs " + std::to_string(rollNeeded));
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, ". Miss! ");
-			ctx.message_system->append_message_part(RED_BLACK_PAIR, "0");
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " dmg.");
-			ctx.message_system->finalize_message();
-
-			ctx.message_system->log("ATTACK MISS (" + handName + "): " + attacker.actorData.name + " rolled " + std::to_string(rollAttack) +
-					 " vs " + std::to_string(rollNeeded) + " needed");
-		}
-	}
-	else
-	{
-		ctx.message_system->append_message_part(attacker.actorData.color, std::format("{}", attacker.actorData.name));
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" attacks "));
-		ctx.message_system->append_message_part(target.actorData.color, std::format("{}", target.actorData.name));
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" in vain."));
-		ctx.message_system->finalize_message();
-	}
-}
-
-// Clean unified damage interface - determines the correct damage source and calculates enhanced damage
-DamageInfo Attacker::get_attack_damage(Creature& attacker) const
-{
-    // Try to cast to Player to access equipped weapon
-    auto* player = dynamic_cast<Player*>(&attacker);
-    if (player)
-    {
-        // Get equipped weapon from right hand
-        Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-        if (weapon && weapon->is_weapon())
-        {
-            // Use WeaponDamageRegistry with enhancement data for players with weapons
-            const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-            return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemClass, enhancement);
-        }
-
-        // Player has no weapon equipped - use unarmed damage
-        return WeaponDamageRegistry::get_unarmed_damage_info();
-    }
-
-    // For monsters and other creatures, use the legacy damageInfo
-    return damageInfo;
-}
-
-// Legacy compatibility - delegates to the unified interface
-// Get enhanced damage info considering weapon enhancements
-DamageInfo Attacker::get_enhanced_weapon_damage(Creature& attacker) const
-{
-    // Try to cast to Player to access equipped weapon
-    auto* player = dynamic_cast<Player*>(&attacker);
-    if (player)
-    {
-        // Get equipped weapon from right hand
-        Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-        if (weapon && weapon->is_weapon())
-        {
-            // Use WeaponDamageRegistry with enhancement data
-            const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-            return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemClass, enhancement);
-        }
-
-        // Player has no weapon equipped - use unarmed damage
-        return WeaponDamageRegistry::get_unarmed_damage_info();
-    }
-
-    // For monsters, use the legacy damageInfo (no enhancements for monsters yet)
-    return damageInfo;
-}
-
-// Helper function to convert legacy roll strings to DamageInfo
-DamageInfo Attacker::parse_damage_from_roll_string(const std::string& rollStr) const
-{
-    // Map common legacy strings to proper DamageInfo
-    if (rollStr == "1d4" || rollStr == "D4") return DamageValues::Dagger();
-    if (rollStr == "1d6" || rollStr == "D6") return DamageValues::ShortSword();
-    if (rollStr == "1d8" || rollStr == "D8") return DamageValues::LongSword();
-    if (rollStr == "1d10" || rollStr == "D10") return DamageValues::GreatSword();
-    if (rollStr == "1d12" || rollStr == "D12") return {1, 12, "1d12"};
-    if (rollStr == "1d20" || rollStr == "D20") return {1, 20, "1d20"};
-    if (rollStr == "1d4+1") return DamageValues::WarHammer();
-    if (rollStr == "1d6+1") return {2, 7, "1d6+1"};
-    if (rollStr == "2d6") return {2, 12, "2d6"};
-    if (rollStr == "1d2") return DamageValues::Unarmed();
-
-    // Default fallback for unrecognized strings
-    return DamageValues::Unarmed();
-}
-
-// end of file: Attacker.cpp

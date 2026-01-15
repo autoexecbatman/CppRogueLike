@@ -1,7 +1,3 @@
-// file: Actor.h
-#ifndef ACTOR_H
-#define ACTOR_H
-
 #pragma once
 
 #pragma warning (push, 0)
@@ -209,6 +205,3 @@ class Stairs : public Object
 		/*add_state(ActorState::FOV_ONLY);*/
 	};
 };
-
-#endif // !ACTOR_H
-// end of file: Actor.h

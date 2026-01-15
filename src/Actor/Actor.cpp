@@ -1,9 +1,9 @@
-// file: Actor.cpp
 #include <iostream>
 #include <string>
 #include <algorithm>
 #include <math.h>
 #include <memory>
+#include <format>
 
 #include <curses.h>
 #pragma warning (push, 0)
@@ -120,7 +120,7 @@ void Creature::load(const json& j)
 	weaponEquipped = j["weaponEquipped"];
 	if (j.contains("attacker"))
 	{
-		attacker = std::make_unique<Attacker>("");
+		attacker = std::make_unique<Attacker>(DamageInfo{});
 		attacker->load(j["attacker"]);
 	}
 	if (j.contains("destructible"))
@@ -234,27 +234,20 @@ void Creature::equip(Item& item, GameContext& ctx)
 	if (isWeapon)
 	{
 		weaponEquipped = ItemClassificationUtils::get_display_name(item.itemClass);
-		
-		// Update attacker damage roll based on weapon class
-		if (attacker)
-		{
-			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemClass);
-			
-			attacker->set_roll(weaponDamage);
-			ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " - damage updated to " + weaponDamage);
-		}
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemClass);
+		ctx.message_system->log(std::format("Equipped {} - damage: {}", ItemClassificationUtils::get_display_name(item.itemClass), weaponDamage));
 	}
 
 	// Log shield equipped
 	if (isShield)
 	{
-		ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " shield");
+		ctx.message_system->log(std::format("Equipped {} shield", ItemClassificationUtils::get_display_name(item.itemClass)));
 	}
 
 	// Log armor equipped
 	if (isArmor)
 	{
-		ctx.message_system->log("Equipped " + ItemClassificationUtils::get_display_name(item.itemClass) + " armor");
+		ctx.message_system->log(std::format("Equipped {} armor", ItemClassificationUtils::get_display_name(item.itemClass)));
 	}
 }
 
@@ -266,17 +259,11 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		// Remove the equipped state
 		item.remove_state(ActorState::IS_EQUIPPED);
 
-		// If it's a weapon, update the weaponEquipped status and reset damage
+		// If it's a weapon, update the weaponEquipped status
 		if (item.is_weapon())
 		{
 			weaponEquipped = "None";
-			
-			// Reset attacker damage to unarmed
-			if (attacker)
-			{
-				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
-				ctx.message_system->log("Unequipped weapon - damage reset to " + WeaponDamageRegistry::get_unarmed_damage() + " (unarmed)");
-			}
+			ctx.message_system->log("Unequipped weapon - now unarmed");
 
 			// Check for ranged weapon - use ItemClass system
 			if (item.is_ranged_weapon())

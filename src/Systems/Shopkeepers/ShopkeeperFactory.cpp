@@ -33,7 +33,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 
     // Set combat stats - non-hostile defensive stats
     shopkeeper.destructible = std::make_unique<Destructible>(100, 20, "the shopkeeper's corpse", 0, 20, 10);
-    shopkeeper.attacker = std::make_unique<Attacker>("1d4");
+    shopkeeper.attacker = std::make_unique<Attacker>(DamageValues::Dagger());
 
     // Create shop component with level-appropriate configuration
     ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);

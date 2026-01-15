@@ -46,7 +46,7 @@ void Player::roll_new_character(GameContext& ctx)
     const int playerXp = 0;
     const int playerAC = 10;
 
-    attacker = std::make_unique<Attacker>("D2");
+    attacker = std::make_unique<Attacker>(DamageValues::Unarmed());
     destructible = std::make_unique<PlayerDestructible>(
         playerHp, playerDr, "your corpse", playerXp, 0, playerAC
     );
@@ -458,15 +458,11 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
 	
-	// Update weapon damage if it's a weapon
-	if (slot == EquipmentSlot::RIGHT_HAND)
+	// Log weapon equip
+	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
-		if (equippedItems.back().item->is_weapon() && attacker)
-		{
-			std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemClass);
-			attacker->set_roll(weaponDamage);
-			ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage updated to " + weaponDamage);
-		}
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemClass);
+		ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
 	
 	// Update armor class if armor or shield was equipped
@@ -567,15 +563,14 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// Remove equipped state
 		it->item->remove_state(ActorState::IS_EQUIPPED);
 		
-		// Reset combat stats if main hand weapon
+		// Reset combat state if main hand weapon
 		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
-			if (it->item->is_weapon() && attacker)
+			if (it->item->is_weapon())
 			{
-				attacker->set_roll(WeaponDamageRegistry::get_unarmed_damage());
-				ctx.message_system->log("Unequipped " + it->item->actorData.name + " - damage reset to " + WeaponDamageRegistry::get_unarmed_damage());
+				ctx.message_system->log("Unequipped " + it->item->actorData.name + " - now unarmed");
 			}
-			remove_state(ActorState::IS_RANGED); // Remove ranged state
+			remove_state(ActorState::IS_RANGED);
 		}
 		
 		// Return item to inventory

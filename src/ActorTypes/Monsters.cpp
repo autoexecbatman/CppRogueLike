@@ -49,7 +49,7 @@ Goblin::Goblin(Vector2D position, GameContext& ctx) : Creature(position, ActorDa
 
 	set_weapon_equipped("Short Sword");
 
-	attacker = std::make_unique<Attacker>("D6");
+	attacker = std::make_unique<Attacker>(DamageValues::ShortSword());
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead goblin", 105, thaco, ac);
 
 	ai = std::make_unique<AiMonster>();
@@ -68,7 +68,7 @@ Orc::Orc(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'o
 
 	set_weapon_equipped("Long Sword");
 
-	attacker = std::make_unique<Attacker>("D10");
+	attacker = std::make_unique<Attacker>(DamageValues::LongSword());
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead orc", 105, thaco, ac); // TRIPLED from 35 for solo play bonus
 
 	ai = std::make_unique<AiMonster>();
@@ -86,7 +86,7 @@ Troll::Troll(Vector2D position, GameContext& ctx) : Creature(position, ActorData
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 
-	attacker = std::make_unique<Attacker>("D10");
+	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 10, "1d10" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead troll", 300, thaco, ac); // TRIPLED from 100 for solo play bonus
 
 	ai = std::make_unique<AiMonster>();
@@ -104,7 +104,7 @@ Dragon::Dragon(Vector2D position, GameContext& ctx) : Creature(position, ActorDa
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 
-	attacker = std::make_unique<Attacker>("D10");
+	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 10, "1d10" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 2, "dead dragon", 600, thaco, ac); // TRIPLED from 200 for solo play bonus
 
 	ai = std::make_unique<AiMonster>();
@@ -121,7 +121,7 @@ Archer::Archer(Vector2D position, GameContext& ctx) : Creature(position, ActorDa
 
 	set_weapon_equipped("Longbow");
 
-	attacker = std::make_unique<Attacker>("D8");
+	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 8, "1d8" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead archer", 120, thaco, ac); // TRIPLED from 40 for solo play bonus
 
 	ai = std::make_unique<AiMonster>();
@@ -140,7 +140,7 @@ Mage::Mage(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 
 
 	set_weapon_equipped("Staff");
 
-	attacker = std::make_unique<Attacker>("D6");
+	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 6, "1d6" });
 	destructible = std::make_unique<MonsterDestructible>(hp, 0, "dead mage", 180, thaco, ac); // TRIPLED from 60 for solo play bonus
 
 	ai = std::make_unique<AiMonster>();
@@ -155,8 +155,8 @@ Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData
 
 	set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 	set_dexterity(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
-
-	attacker = std::make_unique<Attacker>("D4"); // Reduced from D6
+	
+	attacker = std::make_unique<Attacker>(DamageInfo{ 1, 4, "1d4" }); // Reduced from D6
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac); // TRIPLED from 50 for solo play bonus
 
 	// Create a specialized AI for this mimic

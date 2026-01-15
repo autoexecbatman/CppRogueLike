@@ -217,18 +217,23 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 
 	// Get equipped weapon from proper slot-based equipment system
 	auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
+
+	// Get damage display string
+	std::string damageDisplay;
+	if (equippedWeapon && equippedWeapon->is_weapon())
+	{
+		const ItemEnhancement* enh = equippedWeapon->is_enhanced() ? &equippedWeapon->get_enhancement() : nullptr;
+		damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(equippedWeapon->itemClass, enh).displayRoll;
+	}
+	else
+	{
+		damageDisplay = WeaponDamageRegistry::get_unarmed_damage_info().displayRoll;
+	}
+
 	if (equippedWeapon)
 	{
-		mvwprintw(
-			window,
-			25,
-			3,
-			"Weapon: %s (%s damage)",
-			equippedWeapon->actorData.name.c_str(),
-			player.attacker->get_roll().c_str()
-		);
+		mvwprintw(window, 25, 3, "Weapon: %s (%s damage)", equippedWeapon->actorData.name.c_str(), damageDisplay.c_str());
 
-		// Show if weapon is ranged
 		if (player.has_state(ActorState::IS_RANGED))
 		{
 			wattron(window, COLOR_PAIR(WHITE_BLUE_PAIR));
@@ -236,32 +241,23 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 			wattroff(window, COLOR_PAIR(WHITE_BLUE_PAIR));
 		}
 
-		// Show effective damage with strength bonus
 		int strDmgMod = get_strength_damage_modifier(player, ctx);
 		if (strDmgMod != 0)
 		{
 			wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
-			mvwprintw(
-				window,
-				26,
-				3,
-				"Effective damage: %s %+d",
-				player.attacker->get_roll().c_str(),
-				strDmgMod
-			);
+			mvwprintw(window, 26, 3, "Effective damage: %s %+d", damageDisplay.c_str(), strDmgMod);
 			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
 		}
 	}
 	else
 	{
-		mvwprintw(window, 25, 3, "Weapon: Unarmed (%s damage)", player.attacker->get_roll().c_str());
+		mvwprintw(window, 25, 3, "Weapon: Unarmed (%s damage)", damageDisplay.c_str());
 
-		// Show effective unarmed damage with strength bonus
 		int strDmgMod = get_strength_damage_modifier(player, ctx);
 		if (strDmgMod != 0)
 		{
 			wattron(window, COLOR_PAIR(RED_YELLOW_PAIR));
-			mvwprintw(window, 26, 3, "Effective damage: %s %+d", player.attacker->get_roll().c_str(), strDmgMod);
+			mvwprintw(window, 26, 3, "Effective damage: %s %+d", damageDisplay.c_str(), strDmgMod);
 			wattroff(window, COLOR_PAIR(RED_YELLOW_PAIR));
 		}
 	}

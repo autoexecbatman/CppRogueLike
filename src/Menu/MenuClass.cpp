@@ -126,7 +126,7 @@ void equip_fighter_starting_gear(GameContext& ctx)
 				if (equipped)
 				{
 					ctx.message_system->log("SUCCESS: " + itemName + " equipped to RIGHT_HAND slot");
-					ctx.message_system->log("Current weapon damage: " + player.attacker->get_roll());
+					ctx.message_system->log("Current weapon damage: " + player.attacker->get_attack_damage(player).displayRoll);
 				}
 				else
 				{

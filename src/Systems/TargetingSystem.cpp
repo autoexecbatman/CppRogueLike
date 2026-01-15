@@ -75,7 +75,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 				// Print the monster's stats
 				mvprintw(1, 0, "HP: %d/%d", actor->destructible->get_hp(), actor->destructible->get_max_hp());
 				mvprintw(2, 0, "AC: %d", actor->destructible->get_armor_class());
-				mvprintw(3, 0, "Roll: %s", actor->attacker->get_roll().c_str());
+				mvprintw(3, 0, "Dmg: %s", actor->attacker->get_attack_damage(*actor).displayRoll.c_str());
 				mvprintw(4, 0, "Str: %d", actor->get_strength());
 				mvprintw(5, 0, "Dex: %d", actor->get_dexterity());
 				mvprintw(6, 0, "Con: %d", actor->get_constitution());
@@ -576,8 +576,8 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 
 			// Restore game display before returning
 			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
-		ctx.gui->gui_render(ctx);
-		ctx.rendering_manager->force_screen_refresh();
+			ctx.gui->gui_render(ctx);
+			ctx.rendering_manager->force_screen_refresh();
 			return true;
 			break;
 
@@ -596,8 +596,8 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 					ctx.player->attacker->attack(*ctx.player, *actor, ctx);
 					// Restore game display after attack
 					ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
-		ctx.gui->gui_render(ctx);
-		ctx.rendering_manager->force_screen_refresh();
+					ctx.gui->gui_render(ctx);
+					ctx.rendering_manager->force_screen_refresh();
 					run = false;
 				}
 			}
@@ -608,8 +608,8 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 			ctx.message_system->message(WHITE_BLACK_PAIR, "Target selection canceled", true);
 			// Restore game display before exit
 			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
-		ctx.gui->gui_render(ctx);
-		ctx.rendering_manager->force_screen_refresh();
+			ctx.gui->gui_render(ctx);
+			ctx.rendering_manager->force_screen_refresh();
 			run = false;
 			break;
 
@@ -628,10 +628,11 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 	// When attackMode is false, we're just examining and don't require a ranged weapon
 
 	// Enter targeting mode with appropriate requirements
-	Vector2D targetPos = select_target(ctx, ctx.player->position, 4);
+	Vector2D targetPos = select_target(ctx, ctx.player->position, 4); // TODO: Replace 4 with actual weapon range
 
 	// If a valid target was selected and we're in attack mode
-	if (targetPos.x != -1 && targetPos.y != -1) {
+	if (targetPos.x != -1 && targetPos.y != -1)
+	{
 		// Process the ranged attack (including projectile animation)
 		process_ranged_attack(ctx, *ctx.player, targetPos);
 	}

@@ -583,8 +583,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 								// Display follow-up attack message
 								ctx.message_system->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
 							}
-							// Use dual wield attack for players
-							owner.attacker->attack_with_dual_wield(owner, *c, ctx);
+							owner.attacker->attack(owner, *c, ctx);
 						}
 						else
 						{
