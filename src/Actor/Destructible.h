@@ -23,6 +23,9 @@ private:
 	int baseArmorClass{ 0 }; // Store the base AC without equipment
 
 public:
+	// Type enum for serialization - must be public for tests
+	enum class DestructibleType { MONSTER, PLAYER };
+
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void update_constitution_bonus(Creature& owner, GameContext& ctx);
 	virtual ~Destructible() override = default;
@@ -86,12 +89,6 @@ public:
 	void save(json& j) override;
 
 	static std::unique_ptr<Destructible> create(const json& j);
-	
-protected:
-	enum class DestructibleType
-	{
-		MONSTER, PLAYER
-	};
 };
 
 //====
