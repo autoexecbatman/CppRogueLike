@@ -116,8 +116,8 @@ void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 		owner.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE);
 	}
 
-	// Skip if dead
-	if (owner.ai == nullptr || owner.destructible->is_dead())
+	// Skip if dead or missing destructible
+	if (owner.ai == nullptr || !owner.destructible || owner.destructible->is_dead())
 	{
 		return;
 	}

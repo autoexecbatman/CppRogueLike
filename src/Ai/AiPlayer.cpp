@@ -527,7 +527,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 	// look for living actors to attack
 	for (const auto& c : ctx.game->creatures)
 	{
-		if (c)
+		if (c && c->destructible)
 		{
 			if (!c->destructible->is_dead() && c->position == target)
 			{

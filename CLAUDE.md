@@ -47,6 +47,7 @@ System managers with fewest dependencies:
 3. Commit frequency: Every successful refactoring
 4. No override patterns: Design prevention at source
 5. Backward compatibility: Temporary wrappers until migration complete
+6. **NEVER add Co-Authored-By lines to commits**
 
 ### Quality Standards
 ISO quality compliance:
