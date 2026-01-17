@@ -34,6 +34,9 @@ bool LightningBolt::use(Item& owner, Creature& wearer, GameContext& ctx)
 		ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
 		closestMonster->destructible->take_damage(*closestMonster, damage, ctx);
 
+		// Clean up dead creatures after damage
+		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+
 		return Pickable::use(owner, wearer, ctx);
 	}
 }

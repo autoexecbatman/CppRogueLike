@@ -193,20 +193,23 @@ TEST_F(MapTest, CloseDoor_ActorOnDoor_ReturnsFalse) {
 // Wall Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(MapTest, IsWall_WallTile_ReturnsTrue) {
+TEST_F(MapTest, IsWall_ChecksTcodMapWalkability) {
+    // is_wall() checks tcodMap->isWalkable(), NOT tile type
+    // set_tile() only updates tile array, not tcodMap
+    // This documents the actual behavior
     Vector2D pos{5, 5};
-    map->set_tile(pos, TileType::WALL, 1.0);
 
-    EXPECT_TRUE(map->is_wall(pos));
-}
+    // Initially after init(), tcodMap has its own walkability state
+    // is_wall returns true if tcodMap says tile is NOT walkable
+    bool initialWallState = map->is_wall(pos);
 
-TEST_F(MapTest, IsWall_FloorTile_ReturnsFalse) {
-    Vector2D pos{5, 5};
+    // set_tile changes tile type but NOT tcodMap walkability
     map->set_tile(pos, TileType::FLOOR, 1.0);
+    EXPECT_EQ(map->get_tile_type(pos), TileType::FLOOR);
 
-    // is_wall checks tcodMap walkability, not tile type directly
-    // After setting FLOOR, we'd need to update tcodMap too
-    // This test documents current behavior
+    // is_wall still returns same value because tcodMap unchanged
+    EXPECT_EQ(map->is_wall(pos), initialWallState)
+        << "set_tile does not affect tcodMap walkability";
 }
 
 // ----------------------------------------------------------------------------

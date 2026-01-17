@@ -16,8 +16,10 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+
 // https://pdcurses.org/docs/MANUAL.html
 #include <curses.h>
+
 #include "Game.h"
 #include "Colors/Colors.h"
 #include "Menu/Menu.h"

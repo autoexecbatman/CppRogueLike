@@ -472,3 +472,55 @@ TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible) {
     EXPECT_EQ(result->get_hp(), 80);
     EXPECT_EQ(result->get_xp(), 5000);
 }
+
+// ----------------------------------------------------------------------------
+// Spell Damage / Cleanup Dead Creatures Tests
+// Regression: Lightning bolt didn't call cleanup, spiders didn't die visually
+// ----------------------------------------------------------------------------
+
+TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_RemovesDeadFromVector) {
+    // Add monster to creatures vector
+    game.creatures.push_back(std::move(monster));
+    ASSERT_EQ(game.creatures.size(), 1);
+
+    // Kill the creature via take_damage (simulates spell damage)
+    game.creatures[0]->destructible->take_damage(*game.creatures[0], 1000, ctx);
+    EXPECT_TRUE(game.creatures[0]->destructible->is_dead());
+
+    // Cleanup should remove dead creatures
+    game.creature_manager.cleanup_dead_creatures(game.creatures);
+
+    EXPECT_EQ(game.creatures.size(), 0) << "Dead creatures should be removed after cleanup";
+}
+
+TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_KeepsAliveCreatures) {
+    // Add monster to creatures vector
+    game.creatures.push_back(std::move(monster));
+
+    // Damage but don't kill
+    game.creatures[0]->destructible->set_hp(50);
+    game.creatures[0]->destructible->take_damage(*game.creatures[0], 10, ctx);
+    EXPECT_FALSE(game.creatures[0]->destructible->is_dead());
+
+    // Cleanup should NOT remove alive creatures
+    game.creature_manager.cleanup_dead_creatures(game.creatures);
+
+    EXPECT_EQ(game.creatures.size(), 1) << "Alive creatures should not be removed";
+}
+
+TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup) {
+    // This test documents the bug: spell damage kills (HP=0) but creature
+    // remains in list until cleanup_dead_creatures is called
+    game.creatures.push_back(std::move(monster));
+
+    // Simulate spell damage (like lightning bolt)
+    game.creatures[0]->destructible->take_damage(*game.creatures[0], 1000, ctx);
+
+    // Creature is dead but still in list
+    EXPECT_TRUE(game.creatures[0]->destructible->is_dead());
+    EXPECT_EQ(game.creatures.size(), 1) << "Dead creature still in list before cleanup";
+
+    // After cleanup, it should be removed
+    game.creature_manager.cleanup_dead_creatures(game.creatures);
+    EXPECT_EQ(game.creatures.size(), 0) << "Dead creature removed after cleanup";
+}
