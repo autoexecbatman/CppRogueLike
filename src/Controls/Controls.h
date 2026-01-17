@@ -1,5 +1,4 @@
-#ifndef CONTROLS_H
-#define CONTROLS_H
+#pragma once
 
 #include <curses.h>
 
@@ -46,5 +45,5 @@ enum class Controls
 	CLOSE_DOOR = 'k',
 	REST = 'r',
 	HELP = '?',
+	HIDE = 'H',
 };
-#endif // !CONTROLS_H

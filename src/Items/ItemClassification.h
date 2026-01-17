@@ -41,6 +41,7 @@ enum class ItemClass
     // Consumables
     HEALTH_POTION,
     MANA_POTION,
+    INVISIBILITY_POTION,
     FOOD_RATION,
     BREAD,
     MEAT,

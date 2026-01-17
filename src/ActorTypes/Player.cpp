@@ -56,25 +56,40 @@ void Player::roll_new_character(GameContext& ctx)
     );
 }
 
+ 
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
-	if (playerClassState != PlayerClassState::FIGHTER)
+	switch (playerClassState)
 	{
-		return; // Only fighters get starting gear for now
+	case PlayerClassState::FIGHTER:
+	{
+		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
+		set_gold(startingGold);
+		equip_item(ItemCreator::create_plate_mail(position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create_long_sword(position), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
+		break;
+	}
+	case PlayerClassState::ROGUE:
+	{
+		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
+		set_gold(startingGold);
+		equip_item(ItemCreator::create_leather_armor(position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create_dagger(position), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_invisibility_potion(position));
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger. Invisibility potion in inventory.", true);
+
+		break;
+
 	}
 
-	// Fighter starting gold: 5d4 x 10
-	int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
-	set_gold(startingGold);
+	default:
 
-	// Equip plate mail, long sword, and shield
-	equip_item(ItemCreator::create_plate_mail(position), EquipmentSlot::BODY, ctx);
-	equip_item(ItemCreator::create_long_sword(position), EquipmentSlot::RIGHT_HAND, ctx);
-	equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
+		break;
 
-	ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
-}
-
+	}
+  }
 void Player::racial_ability_adjustments()
 {
 	// switch player state

@@ -868,6 +868,50 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
+	case Controls::HIDE:
+	{
+		// Only rogues can hide
+		if (player.playerClassState != Player::PlayerClassState::ROGUE)
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
+			break;
+		}
+
+		// Already invisible
+		if (player.is_invisible())
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
+			break;
+		}
+
+		// Check if enemies can see player
+		bool observed = false;
+		for (const auto& creature : *ctx.creatures)
+		{
+			if (creature && creature->destructible && !creature->destructible->is_dead())
+			{
+				if (ctx.map->is_in_fov(creature->position))
+				{
+					observed = true;
+					break;
+				}
+			}
+		}
+
+		if (observed)      
+		{
+			ctx.message_system->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true); 
+			break;
+		}
+
+		// Success - hide duration based on level      
+		int hideDuration = 10 + player.get_player_level() * 2;
+		player.set_invisible(hideDuration);
+		ctx.message_system->message(CYAN_BLACK_PAIR,"You melt into the shadows... (Hidden for " + std::to_string(hideDuration) + " turns)", true);
+		*ctx.game_status = GameStatus::NEW_TURN;
+		break;
+	}
+
 	case Controls::HELP:
 	{
 		ctx.display_manager->display_help();

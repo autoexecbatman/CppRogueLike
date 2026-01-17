@@ -85,13 +85,27 @@ int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 }
 
 // the actor render function with color
+
 void Actor::render(const GameContext& ctx) const noexcept
 {
 	if (is_visible(ctx))
 	{
-		attron(COLOR_PAIR(actorData.color));
-		mvaddch(position.y, position.x, actorData.ch);
-		attroff(COLOR_PAIR(actorData.color));
+		char displayChar = actorData.ch;
+		int displayColor = actorData.color;
+
+		// Check if this is an invisible creature (player hiding)          
+		if (auto* creature = dynamic_cast<const Creature*>(this))
+		{
+			if (creature->is_invisible())     
+			{
+				displayChar = '_';     
+				displayColor = CYAN_BLACK_PAIR;
+			}
+		}
+ 
+		attron(COLOR_PAIR(displayColor));          
+		mvaddch(position.y, position.x, displayChar);
+		attroff(COLOR_PAIR(displayColor)); 
 	}
 }
 
@@ -137,6 +151,11 @@ void Creature::load(const json& j)
 	{
 		shop = ShopKeeper::create(j["shop"]);
 	}
+	if (j.contains("invisibleTurnsRemaining"))
+	{
+		invisibleTurnsRemaining = j.at("invisibleTurnsRemaining").get<int>();
+		if (invisibleTurnsRemaining > 0) add_state(ActorState::IS_INVISIBLE);
+	}
 }
 
 void Creature::save(json& j)
@@ -180,11 +199,13 @@ void Creature::save(json& j)
 		shop->save(shopJson);
 		j["shop"] = shopJson;
 	}
+	j["invisibleTurnsRemaining"] = invisibleTurnsRemaining;
 }
 
 // the actor update
 void Creature::update(GameContext& ctx)
 {
+	decrement_invisible();
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{

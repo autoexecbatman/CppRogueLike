@@ -741,9 +741,9 @@ void FireResistancePotion::load(const json& j)
 
 bool InvisibilityPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
-	// For now, just show a message (invisibility system not fully implemented)
+	wearer.set_invisible(duration);
 	ctx.message_system->message(CYAN_BLACK_PAIR, "You fade from view! (Invisible for " + std::to_string(duration) + " turns)", true);
-	
+
 	// Remove the potion from inventory
 	auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
 	return result.has_value();

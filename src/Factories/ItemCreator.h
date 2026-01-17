@@ -45,6 +45,7 @@ public:
     static std::unique_ptr<Item> create_scroll_lightning(Vector2D pos);
     static std::unique_ptr<Item> create_scroll_fireball(Vector2D pos);
     static std::unique_ptr<Item> create_scroll_confusion(Vector2D pos);
+    static std::unique_ptr<Item> create_invisibility_potion(Vector2D pos);
     
     // Weapons - UNIFIED creation
     static std::unique_ptr<Item> create_iron_sword(Vector2D pos);

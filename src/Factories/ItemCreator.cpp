@@ -50,6 +50,17 @@ std::unique_ptr<Item> ItemCreator::create_scroll_confusion(Vector2D pos)
     return item;
 }
 
+
+std::unique_ptr<Item> ItemCreator::create_invisibility_potion(Vector2D position)
+{
+    auto item = std::make_unique<Item>(position, ActorData{'!', "Invisibility Potion", CYAN_BLACK_PAIR});
+    item->pickable = std::make_unique<InvisibilityPotion>(30);
+    item->itemClass = ItemClass::INVISIBILITY_POTION;
+    item->set_value(150);
+    return item;
+}
+
+
 std::unique_ptr<Item> ItemCreator::create_scroll_teleportation(Vector2D pos)
 {
     auto item = std::make_unique<Item>(pos, ActorData{'?', "scroll of teleportation", MAGENTA_BLACK_PAIR});

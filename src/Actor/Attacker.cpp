@@ -11,6 +11,7 @@
 #include "../Attributes/DexterityAttributes.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/DataManager.h"
+#include "../Systems/LevelUpSystem.h"
 
 Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 
@@ -107,12 +108,35 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 		}
 	}
 
+	// Backstab: invisible attackers get +4 to hit and damage multiplier (rogues)
+	int backstabMultiplier = 1;
+	bool isBackstab = false;
+	if (attacker.is_invisible())
+	{
+		isBackstab = true;
+		hitModifier += 4; // +4 to hit from behind/invisible
+
+		auto* player = dynamic_cast<Player*>(&attacker);
+		if (player && player->playerClassState == Player::PlayerClassState::ROGUE)
+		{
+			backstabMultiplier = LevelUpSystem::calculate_backstab_multiplier(player->get_player_level());
+		}
+		// Break invisibility after attack
+		attacker.clear_invisible();
+	}
+
 	rollNeeded -= hitModifier;
 	const bool isHit = (attackRoll >= rollNeeded);
 
 	if (isHit)
 	{
-		const int finalDamage = std::max(0, damageRoll + strengthAttr.dmgAdj - target.destructible->get_dr());
+		int baseDamage = damageRoll + strengthAttr.dmgAdj;
+		if (isBackstab && backstabMultiplier > 1)
+		{
+			baseDamage *= backstabMultiplier;
+			ctx.message_system->append_message_part(MAGENTA_BLACK_PAIR, std::format(" BACKSTAB x{}! ", backstabMultiplier));
+		}
+		const int finalDamage = std::max(0, baseDamage - target.destructible->get_dr());
 
 		ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
 		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));

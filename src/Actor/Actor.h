@@ -36,6 +36,7 @@ enum class ActorState
 	IS_EQUIPPED,
 	IS_RANGED,
 	IS_CONFUSED,
+	IS_INVISIBLE,
 };
 
 //==Actor==
@@ -81,7 +82,7 @@ private:
 	int gold{ 0 };
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
-
+	int invisibleTurnsRemaining{ 0 };
 public:
 	Creature(Vector2D position, ActorData data) : Actor(position, data), inventory_data(InventoryData(50))
 	{
@@ -132,6 +133,31 @@ public:
 	void sync_ranged_state(GameContext& ctx);
 	void pick(GameContext& ctx);
 	void drop(Item& item, GameContext& ctx);
+
+	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
+	void set_invisible(int turns) noexcept
+	{
+		invisibleTurnsRemaining = turns;
+		if (turns > 0)
+		{
+			add_state(ActorState::IS_INVISIBLE);
+		}
+	}
+	void clear_invisible() noexcept
+	{
+		invisibleTurnsRemaining = 0;
+		remove_state(ActorState::IS_INVISIBLE);
+	}
+	int get_invisible_turns() const noexcept { return invisibleTurnsRemaining; }
+	void decrement_invisible() noexcept
+	{
+
+		if (invisibleTurnsRemaining > 0)
+		{
+			--invisibleTurnsRemaining;
+			if (invisibleTurnsRemaining == 0) remove_state(ActorState::IS_INVISIBLE);
+		}
+	}
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed

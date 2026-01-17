@@ -24,7 +24,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
     handle_initialization(ctx);
 
     // Debug game loop tracking
-    if (ctx.message_system->is_debug_mode()) {
+    if (ctx.message_system->is_debug_mode())
+    {
         ctx.message_system->log("//====================LOOP====================//");
         ctx.message_system->log("Loop number: " + std::to_string(loopNum) + "\n");
     }
