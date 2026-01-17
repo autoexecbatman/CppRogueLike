@@ -22,6 +22,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Systems/SpellSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -79,17 +80,35 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create_dagger(position), EquipmentSlot::RIGHT_HAND, ctx);
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_invisibility_potion(position));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger. Invisibility potion in inventory.", true);
-
 		break;
-
 	}
-
+	case PlayerClassState::CLERIC:
+	{
+		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
+		set_gold(startingGold);
+		equip_item(ItemCreator::create_chain_mail(position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create_mace(position), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_health_potion(position));
+		SpellSystem::show_memorization_menu(*this, ctx);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
+		break;
+	}
+	case PlayerClassState::WIZARD:
+	{
+		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
+		set_gold(startingGold);
+		equip_item(ItemCreator::create_staff(position), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_scroll_fireball(position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_scroll_lightning(position));
+		SpellSystem::show_memorization_menu(*this, ctx);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
+		break;
+	}
 	default:
-
 		break;
-
 	}
-  }
+}
 void Player::racial_ability_adjustments()
 {
 	// switch player state
@@ -286,6 +305,12 @@ bool Player::rest(GameContext& ctx)
 	}
 
 	ctx.message_system->finalize_message();
+
+	// Memorize spells for casters
+	if (playerClassState == PlayerClassState::CLERIC || playerClassState == PlayerClassState::WIZARD)
+	{
+		SpellSystem::show_memorization_menu(*this, ctx);
+	}
 
 	// Resting takes time
 	*ctx.game_status = GameStatus::NEW_TURN;

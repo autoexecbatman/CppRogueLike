@@ -29,6 +29,7 @@
 #include "../Systems/LevelManager.h"
 #include "../Systems/TargetingSystem.h"
 #include "../Systems/DisplayManager.h"
+#include "../Systems/SpellSystem.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 
@@ -910,6 +911,12 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		ctx.message_system->message(CYAN_BLACK_PAIR,"You melt into the shadows... (Hidden for " + std::to_string(hideDuration) + " turns)", true);
 		*ctx.game_status = GameStatus::NEW_TURN;
 		break;
+	}
+
+	case Controls::CAST:
+	{
+		SpellSystem::show_casting_menu(player, ctx);
+		break;  
 	}
 
 	case Controls::HELP:

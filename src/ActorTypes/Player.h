@@ -1,11 +1,10 @@
-// file: Player.h
-#ifndef PLAYER_H
-#define PLAYER_H
+#pragma once
 
 #include "../Random/RandomDice.h"
 #include "../Map/Map.h"
 #include "../Actor/Actor.h"
 #include "../Objects/Web.h"
+#include "../Systems/SpellSystem.h"
 
 class Item;
 struct GameContext;
@@ -67,6 +66,7 @@ public:
 	int playerLevel{ 1 };
 	float attacksPerRound{ 1.0f }; // Tracks extra attacks (1.0 = 1 attack, 1.5 = 3/2 attacks, 2.0 = 2 attacks)
 	int roundCounter{ 0 }; // Tracks rounds for alternating attack patterns
+	std::vector<SpellId> memorizedSpells;
 
 	// Equipment system
 	std::vector<EquippedItem> equippedItems;
@@ -124,6 +124,3 @@ public:
 	};
 	DualWieldInfo get_dual_wield_info() const noexcept;
 };
-
-#endif // !PLAYER_H
-// end of file: Player.h

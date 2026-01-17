@@ -227,6 +227,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/Shopkeepers/ShopkeeperFactory.h
     ${PROJECT_SOURCE_DIR}/Systems/ItemEnhancements/ItemEnhancements.cpp
     ${PROJECT_SOURCE_DIR}/Systems/ItemEnhancements/ItemEnhancements.h
+    ${PROJECT_SOURCE_DIR}/Systems/SpellSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/SpellSystem.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp

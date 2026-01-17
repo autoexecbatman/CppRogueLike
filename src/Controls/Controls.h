@@ -46,4 +46,5 @@ enum class Controls
 	REST = 'r',
 	HELP = '?',
 	HIDE = 'H',
+	CAST = 'C',
 };
