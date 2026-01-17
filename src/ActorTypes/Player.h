@@ -63,7 +63,6 @@ public:
 
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
-	int playerLevel{ 1 };
 	float attacksPerRound{ 1.0f }; // Tracks extra attacks (1.0 = 1 attack, 1.5 = 3/2 attacks, 2.0 = 2 attacks)
 	int roundCounter{ 0 }; // Tracks rounds for alternating attack patterns
 	std::vector<SpellId> memorizedSpells;

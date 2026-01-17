@@ -127,6 +127,7 @@ public:
 	void adjust_wisdom(int delta) noexcept { wisdom += delta; }
 	void adjust_charisma(int delta) noexcept { charisma += delta; }
 	void adjust_gold(int delta) noexcept { gold += delta; }
+	void adjust_level(int delta) noexcept { playerLevel += delta; }
 
 	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);

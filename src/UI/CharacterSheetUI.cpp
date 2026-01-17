@@ -55,7 +55,7 @@ void CharacterSheetUI::display_basic_info(WINDOW* window, const Player& player)
     mvwprintw(window, 1, 1, "Name: %s", player.actorData.name.c_str());
     mvwprintw(window, 2, 1, "Class: %s", player.playerClass.c_str());
     mvwprintw(window, 3, 1, "Race: %s", player.playerRace.c_str());
-    mvwprintw(window, 4, 1, "Level: %d", player.playerLevel);
+    mvwprintw(window, 4, 1, "Level: %d", player.get_player_level());
 }
 
 void CharacterSheetUI::display_experience_info(WINDOW* window, const Player& player, GameContext& ctx)
@@ -75,7 +75,7 @@ void CharacterSheetUI::display_experience_info(WINDOW* window, const Player& pla
         currentXP,
         nextLevelXP,
         progressPercent,
-        player.playerLevel + 1
+        player.get_player_level() + 1
     );
     mvwprintw(window, 6, 1, "XP needed for next level: %d", xpNeeded);
 }

@@ -1,6 +1,8 @@
 #include <curses.h>
 #include <format>
 #include <cmath>
+#include <algorithm>
+#include <unordered_map>
 
 #include "SpellSystem.h"
 #include "../Core/GameContext.h"
@@ -198,8 +200,12 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
     return true;
 }
 
-static void animate_magic_missile(const Vector2D& from, const Vector2D& to)
+static void animate_magic_missile(const Vector2D& from, const Vector2D& to, int missileNum)
 {
+    // Different colors for each missile
+    static const int colors[] = {MAGENTA_BLACK_PAIR, CYAN_BLACK_PAIR, BLUE_BLACK_PAIR, GREEN_BLACK_PAIR, WHITE_BLACK_PAIR};
+    int color = colors[missileNum % 5];
+
     // Bresenham's line for projectile path
     int dx = std::abs(to.x - from.x);
     int dy = std::abs(to.y - from.y);
@@ -212,13 +218,12 @@ static void animate_magic_missile(const Vector2D& from, const Vector2D& to)
 
     while (x != to.x || y != to.y)
     {
-        attron(COLOR_PAIR(MAGENTA_BLACK_PAIR));
+        attron(COLOR_PAIR(color));
         mvaddch(y, x, '*');
-        attroff(COLOR_PAIR(MAGENTA_BLACK_PAIR));
+        attroff(COLOR_PAIR(color));
         refresh();
-        napms(40);
+        napms(25);
 
-        // Restore tile (will be redrawn properly on next render)
         mvaddch(y, x, ' ');
 
         int e2 = 2 * err;
@@ -239,49 +244,81 @@ static void animate_magic_missile(const Vector2D& from, const Vector2D& to)
     mvaddch(to.y, to.x, '*');
     attroff(COLOR_PAIR(YELLOW_BLACK_PAIR));
     refresh();
-    napms(100);
+    napms(50);
+}
+
+static int calculate_num_missiles(int casterLevel)
+{
+    // AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+    return std::min(5, 1 + (casterLevel - 1) / 2);
 }
 
 bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 {
-    // Find nearest enemy in FOV
-    Creature* target = nullptr;
-    int minDist = 999;
+    // Get caster level
+    auto* player = dynamic_cast<Player*>(&caster);
+    int casterLevel = player ? player->get_player_level() : 1;
+    int numMissiles = calculate_num_missiles(casterLevel);
+    ctx.message_system->log(std::format("DEBUG: casterLevel={}, numMissiles={}", casterLevel, numMissiles));
 
+    // Find all valid targets in FOV
+    std::vector<Creature*> targets;
     for (const auto& creature : *ctx.creatures)
     {
         if (creature && creature->destructible && !creature->destructible->is_dead())
         {
             if (ctx.map->is_in_fov(creature->position))
             {
-                int dist = caster.get_tile_distance(creature->position);
-                if (dist < minDist)
-                {
-                    minDist = dist;
-                    target = creature.get();
-                }
+                targets.push_back(creature.get());
             }
         }
     }
 
-    if (!target)
+    if (targets.empty())
     {
         ctx.message_system->message(RED_BLACK_PAIR, "No valid target in sight!", true);
         return false;
     }
 
-    animate_magic_missile(caster.position, target->position);
+    // Sort by distance (nearest first)
+    std::sort(targets.begin(), targets.end(), [&caster](Creature* a, Creature* b) {
+        return caster.get_tile_distance(a->position) < caster.get_tile_distance(b->position);
+    });
 
-    int damage = ctx.dice->roll(1, 4) + 1;
+    int totalDamage = 0;
+    std::unordered_map<Creature*, int> damagePerTarget;
 
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Magic Missile! ");
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Strikes ");
-    ctx.message_system->append_message_part(target->actorData.color, target->actorData.name);
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " for ");
-    ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", damage));
+    // Fire missiles - distribute among targets, prioritizing nearest
+    for (int i = 0; i < numMissiles; ++i)
+    {
+        // Target nearest living enemy
+        Creature* target = nullptr;
+        for (Creature* t : targets)
+        {
+            if (t->destructible && !t->destructible->is_dead())
+            {
+                target = t;
+                break;
+            }
+        }
+
+        if (!target) break;
+
+        animate_magic_missile(caster.position, target->position, i);
+
+        int damage = ctx.dice->roll(1, 4) + 1;
+        totalDamage += damage;
+        damagePerTarget[target] += damage;
+
+        target->destructible->take_damage(*target, damage, ctx);
+    }
+
+    // Message
+    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, std::format("Magic Missile ({})! ", numMissiles));
+    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Total ");
+    ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
     ctx.message_system->finalize_message();
 
-    target->destructible->take_damage(*target, damage, ctx);
     ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 
     return true;

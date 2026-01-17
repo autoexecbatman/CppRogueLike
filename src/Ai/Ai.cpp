@@ -52,7 +52,7 @@ int Ai::calculate_step(int positionDifference)
 int Ai::get_next_level_xp(GameContext& ctx, Creature& owner)
 {
 	// Retrieve the player's current level
-	int currentLevel = ctx.player->playerLevel;
+	int currentLevel = ctx.player->get_player_level();
 
 	// Use AD&D 2e XP tables based on class
 	switch (ctx.player->playerClassState)
@@ -87,11 +87,10 @@ void Ai::levelup_update(GameContext& ctx, Creature& owner)
 
 	if (owner.destructible->get_xp() >= levelUpXp)
 	{
-		ctx.player->playerLevel++;
+		ctx.player->adjust_level(1);
 		owner.destructible->set_xp(owner.destructible->get_xp() - levelUpXp);
-		ctx.message_system->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->playerLevel), true);
-
-		ctx.display_manager->display_levelup(*ctx.player, ctx.player->playerLevel, ctx);
+		ctx.message_system->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->get_player_level()), true);
+		ctx.display_manager->display_levelup(*ctx.player, ctx.player->get_player_level(), ctx);
 	}
 }
 

@@ -54,7 +54,7 @@ void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 
 	// Calculate new max HP based on base HP and Constitution bonus
 	int oldHpMax = get_max_hp(); // Store old max HP for comparison
-	int newHpMax = get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)); // Scale bonus by level for player
+	int newHpMax = get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->get_player_level() : 1)); // Scale bonus by level for player
 
 	// Only update if the calculated value is different AND we're not in a level-up situation
 	// During level-ups, hpMax is already correctly set by the level-up system
@@ -62,7 +62,7 @@ void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 	{
 		// Check if this looks like a level-up scenario (hpMax increased recently)
 		// If hpMax > hpBase + constitution bonus, then level-up system already handled it
-		if (get_max_hp() <= get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->playerLevel : 1)))
+		if (get_max_hp() <= get_hp_base() + (hpAdj * (dynamic_cast<Player*>(&owner) ? dynamic_cast<Player*>(&owner)->get_player_level() : 1)))
 		{
 			set_max_hp(newHpMax);
 			
