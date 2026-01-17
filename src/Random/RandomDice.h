@@ -68,6 +68,10 @@ public:
 		m_test_mode = true;
 		m_fixed_rolls.push_back(value);
 	}
+	void set_next_roll(int value) {
+		m_test_mode = true;
+		m_fixed_rolls.push_back(value);
+	}
 	void clear_fixed_rolls() { m_fixed_rolls.clear(); }
 #endif
 

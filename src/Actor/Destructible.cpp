@@ -263,16 +263,7 @@ void Destructible::load(const json& j)
 	set_xp(j.at("xp").get<int>());
 	set_thaco(j.at("thaco").get<int>());
 	set_armor_class(j.at("armorClass").get<int>());
-	
-	// Load baseArmorClass if present, otherwise use armorClass as base
-	if (j.contains("baseArmorClass")) 
-	{
-		set_base_armor_class(j.at("baseArmorClass").get<int>());
-	} 
-	else 
-	{
-		set_base_armor_class(get_armor_class());
-	}
+	set_base_armor_class(j.at("baseArmorClass").get<int>());
 }
 
 void Destructible::save(json& j)

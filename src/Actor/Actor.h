@@ -176,9 +176,10 @@ public:
 	// Enhanced value calculation
 	int get_base_value() const noexcept { return base_value; }
 	int get_enhanced_value() const noexcept;
+	void set_value(int v) noexcept { base_value = v; value = v; }
 
-	int value{ 1 }; // For backwards compatibility
-	int base_value{ 1 }; // Base value before enhancements
+	int value{ 1 };
+	int base_value{ 1 };
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Proper item classification
 	ItemEnhancement enhancement; // Enhancement data
 

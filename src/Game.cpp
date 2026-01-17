@@ -64,6 +64,7 @@ GameContext Game::get_context() noexcept
 	// Core systems
 	ctx.message_system = &message_system;
 	ctx.dice = &d;
+	ctx.dice_roller = &d;  // Alias for backward compatibility
 
 	// Managers
 	ctx.creature_manager = &creature_manager;
@@ -78,6 +79,7 @@ GameContext Game::get_context() noexcept
 
 	// Specialized systems
 	ctx.targeting = &targeting;
+	ctx.targeting_system = &targeting;  // Alias for backward compatibility
 	ctx.hunger_system = &hunger_system;
 
 	// Game world data
@@ -129,12 +131,13 @@ void Game::update(GameContext& ctx)
 	if (gameStatus == GameStatus::STARTUP)
 	{
 		map.compute_fov(ctx);
-		// Only adjust racial abilities and equip starting gear on initial character creation (dungeonLevel 1)
-		if (level_manager.get_dungeon_level() == 1)
+		// Only adjust racial abilities and equip starting gear on initial character creation (not loading)
+		if (level_manager.get_dungeon_level() == 1 && !isLoadedGame)
 		{
 			player->racial_ability_adjustments();
 			player->equip_class_starting_gear(ctx);
 		}
+		isLoadedGame = false;  // Reset flag after STARTUP processing
 		player->calculate_thaco();
 		gameStatus = GameStatus::NEW_TURN;
 		
@@ -216,6 +219,7 @@ void Game::load_all()
 	}
 	else
 	{
+		isLoadedGame = true;  // Mark as loaded game to skip starting gear in STARTUP
 		gameStatus = GameStatus::STARTUP;
 		log("GameStatus set to STARTUP after loading for FOV computation");
 	}

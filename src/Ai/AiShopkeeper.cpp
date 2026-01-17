@@ -108,14 +108,6 @@ void AiShopkeeper::trade(Creature& shopkeeper, Creature& player, GameContext& ct
 
 void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 {
-	// CRITICAL FIX: Detect and repair broken shopkeepers from old system
-	if (!owner.shop)
-	{
-		ctx.message_system->log("Detected broken shopkeeper - repairing with shop component");
-		// Create shop component for broken shopkeeper
-		owner.shop = std::make_unique<ShopKeeper>(ShopType::GENERAL_STORE, ShopQuality::AVERAGE);
-	}
-
 	// Skip if dead or missing destructible
 	if (owner.ai == nullptr || !owner.destructible || owner.destructible->is_dead())
 	{

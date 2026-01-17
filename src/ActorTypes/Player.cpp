@@ -742,4 +742,61 @@ bool Player::is_item_equipped(uint32_t item_unique_id) const noexcept
 	return false;
 }
 
+void Player::save(json& j)
+{
+	Creature::save(j); // Call base class save
+
+	// Player-specific fields
+	j["playerRaceState"] = static_cast<int>(playerRaceState);
+	j["playerClassState"] = static_cast<int>(playerClassState);
+	j["playerClass"] = playerClass;
+	j["playerRace"] = playerRace;
+	j["attacksPerRound"] = attacksPerRound;
+	j["roundCounter"] = roundCounter;
+	j["webStuckTurns"] = webStuckTurns;
+	j["webStrength"] = webStrength;
+
+	// Save equipped items
+	json equippedJson = json::array();
+	for (const auto& equipped : equippedItems)
+	{
+		json itemEntry;
+		itemEntry["slot"] = static_cast<int>(equipped.slot);
+		json itemJson;
+		equipped.item->save(itemJson);
+		itemEntry["item"] = itemJson;
+		equippedJson.push_back(itemEntry);
+	}
+	j["equippedItems"] = equippedJson;
+}
+
+void Player::load(const json& j)
+{
+	Creature::load(j); // Call base class load
+
+	// Player-specific fields
+	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
+	playerClassState = static_cast<PlayerClassState>(j.at("playerClassState").get<int>());
+	playerClass = j.at("playerClass").get<std::string>();
+	playerRace = j.at("playerRace").get<std::string>();
+	attacksPerRound = j.at("attacksPerRound").get<float>();
+	roundCounter = j.at("roundCounter").get<int>();
+	webStuckTurns = j.at("webStuckTurns").get<int>();
+	webStrength = j.at("webStrength").get<int>();
+	// trappingWeb is not serialized - it's a map reference that needs to be re-established
+
+	// Load equipped items
+	equippedItems.clear();
+	if (j.contains("equippedItems"))
+	{
+		for (const auto& itemEntry : j["equippedItems"])
+		{
+			EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
+			auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+			item->load(itemEntry["item"]);
+			equippedItems.emplace_back(std::move(item), slot);
+		}
+	}
+}
+
 // end of file: Player.cpp

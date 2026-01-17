@@ -22,6 +22,7 @@
 #include "../Items/Armor.h"
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
+#include "../Systems/ShopKeeper.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -43,16 +44,10 @@ void Actor::load(const json& j)
 	actorData.ch = j["actorData"].at("ch").get<char>();
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = j["actorData"].at("color").get<int>();
-	
-	// Load unique ID (generate new one if missing for backward compatibility)
-	if (j.contains("uniqueId"))
-	{
-		uniqueId = j["uniqueId"].get<UniqueId::IdType>();
-	}
-	else
-	{
-		uniqueId = UniqueId::Generator::generate();
-	}
+	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
+
+	// Clear existing states before loading saved states
+	states.clear();
 
 	// Deserialize vector of states
 	for (const auto& state : j["states"])
@@ -136,6 +131,10 @@ void Creature::load(const json& j)
 		inventory_data = InventoryData(50); // Default capacity
 		load_inventory(inventory_data, j["inventory_data"]);
 	}
+	if (j.contains("shop"))
+	{
+		shop = ShopKeeper::create(j["shop"]);
+	}
 }
 
 void Creature::save(json& j)
@@ -173,6 +172,12 @@ void Creature::save(json& j)
 	json inventoryJson;
 	save_inventory(inventory_data, inventoryJson);
 	j["inventory_data"] = inventoryJson;
+	if (shop)
+	{
+		json shopJson;
+		shop->save(shopJson);
+		j["shop"] = shopJson;
+	}
 }
 
 // the actor update
@@ -447,22 +452,37 @@ Item::Item(Vector2D position, ActorData data) : Object(position, data)
 void Item::load(const json& j)
 {
 	Object::load(j); // Call base class load
-	value = j["value"];
-	
-	// Load ItemClass if available, otherwise initialize from name
-	if (j.contains("itemClass"))
+	value = j.at("value").get<int>();
+	base_value = j.at("base_value").get<int>();
+	itemClass = static_cast<ItemClass>(j.at("itemClass").get<int>());
+
+	// Load enhancement data
+	if (j.contains("enhancement"))
 	{
-		itemClass = static_cast<ItemClass>(j["itemClass"].get<int>());
+		const auto& enh = j["enhancement"];
+		enhancement.prefix = static_cast<PrefixType>(enh.at("prefix").get<int>());
+		enhancement.suffix = static_cast<SuffixType>(enh.at("suffix").get<int>());
+		enhancement.damage_bonus = enh.at("damage_bonus").get<int>();
+		enhancement.to_hit_bonus = enh.at("to_hit_bonus").get<int>();
+		enhancement.ac_bonus = enh.at("ac_bonus").get<int>();
+		enhancement.strength_bonus = enh.at("strength_bonus").get<int>();
+		enhancement.dexterity_bonus = enh.at("dexterity_bonus").get<int>();
+		enhancement.intelligence_bonus = enh.at("intelligence_bonus").get<int>();
+		enhancement.hp_bonus = enh.at("hp_bonus").get<int>();
+		enhancement.mana_bonus = enh.at("mana_bonus").get<int>();
+		enhancement.speed_bonus = enh.at("speed_bonus").get<int>();
+		enhancement.stealth_bonus = enh.at("stealth_bonus").get<int>();
+		enhancement.fire_resistance = enh.at("fire_resistance").get<int>();
+		enhancement.cold_resistance = enh.at("cold_resistance").get<int>();
+		enhancement.lightning_resistance = enh.at("lightning_resistance").get<int>();
+		enhancement.poison_resistance = enh.at("poison_resistance").get<int>();
+		enhancement.is_cursed = enh.at("is_cursed").get<bool>();
+		enhancement.is_blessed = enh.at("is_blessed").get<bool>();
+		enhancement.is_magical = enh.at("is_magical").get<bool>();
+		enhancement.enhancement_level = enh.at("enhancement_level").get<int>();
+		enhancement.value_modifier = enh.at("value_modifier").get<int>();
 	}
-	else if (j.contains("itemType")) // Backward compatibility
-	{
-		itemClass = static_cast<ItemClass>(j["itemType"].get<int>());
-	}
-	else
-	{
-		initialize_item_type_from_name();
-	}
-	
+
 	if (j.contains("pickable")) {
 		pickable = Pickable::create(j["pickable"]);
 	}
@@ -472,8 +492,34 @@ void Item::save(json& j)
 {
 	Object::save(j); // Call base class save
 	j["value"] = value;
+	j["base_value"] = base_value;
 	j["itemClass"] = static_cast<int>(itemClass);
-	
+
+	// Save enhancement data
+	json enh;
+	enh["prefix"] = static_cast<int>(enhancement.prefix);
+	enh["suffix"] = static_cast<int>(enhancement.suffix);
+	enh["damage_bonus"] = enhancement.damage_bonus;
+	enh["to_hit_bonus"] = enhancement.to_hit_bonus;
+	enh["ac_bonus"] = enhancement.ac_bonus;
+	enh["strength_bonus"] = enhancement.strength_bonus;
+	enh["dexterity_bonus"] = enhancement.dexterity_bonus;
+	enh["intelligence_bonus"] = enhancement.intelligence_bonus;
+	enh["hp_bonus"] = enhancement.hp_bonus;
+	enh["mana_bonus"] = enhancement.mana_bonus;
+	enh["speed_bonus"] = enhancement.speed_bonus;
+	enh["stealth_bonus"] = enhancement.stealth_bonus;
+	enh["fire_resistance"] = enhancement.fire_resistance;
+	enh["cold_resistance"] = enhancement.cold_resistance;
+	enh["lightning_resistance"] = enhancement.lightning_resistance;
+	enh["poison_resistance"] = enhancement.poison_resistance;
+	enh["is_cursed"] = enhancement.is_cursed;
+	enh["is_blessed"] = enhancement.is_blessed;
+	enh["is_magical"] = enhancement.is_magical;
+	enh["enhancement_level"] = enhancement.enhancement_level;
+	enh["value_modifier"] = enhancement.value_modifier;
+	j["enhancement"] = enh;
+
 	if (pickable) {
 		json pickableJson;
 		pickable->save(pickableJson);

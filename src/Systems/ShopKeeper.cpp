@@ -394,3 +394,50 @@ std::unique_ptr<ShopKeeper> ShopKeeper::create_random_shopkeeper()
     
     return std::make_unique<ShopKeeper>(randomType, randomQuality);
 }
+
+// Default constructor for deserialization
+ShopKeeper::ShopKeeper()
+    : shop_type(ShopType::GENERAL_STORE)
+    , shop_quality(ShopQuality::AVERAGE)
+    , markup_percent(120)
+    , sellback_percent(60)
+{
+    // Don't generate inventory - will be loaded from save
+}
+
+void ShopKeeper::save(json& j)
+{
+    j["shop_type"] = static_cast<int>(shop_type);
+    j["shop_quality"] = static_cast<int>(shop_quality);
+    j["shop_name"] = shop_name;
+    j["markup_percent"] = markup_percent;
+    j["sellback_percent"] = sellback_percent;
+
+    // Save shop inventory
+    json inventoryJson;
+    save_inventory(shop_inventory, inventoryJson);
+    j["shop_inventory"] = inventoryJson;
+}
+
+void ShopKeeper::load(const json& j)
+{
+    shop_type = static_cast<ShopType>(j.at("shop_type").get<int>());
+    shop_quality = static_cast<ShopQuality>(j.at("shop_quality").get<int>());
+    shop_name = j.at("shop_name").get<std::string>();
+    markup_percent = j.at("markup_percent").get<int>();
+    sellback_percent = j.at("sellback_percent").get<int>();
+
+    // Load shop inventory
+    if (j.contains("shop_inventory"))
+    {
+        shop_inventory = InventoryData(50);
+        load_inventory(shop_inventory, j["shop_inventory"]);
+    }
+}
+
+std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& j)
+{
+    auto shopkeeper = std::make_unique<ShopKeeper>();
+    shopkeeper->load(j);
+    return shopkeeper;
+}

@@ -71,14 +71,7 @@ void LeatherArmor::save(json& j)
 
 void LeatherArmor::load(const json& j)
 {
-    if (j.contains("armorClass") && j["armorClass"].is_number())
-    {
-        armorClass = j["armorClass"].get<int>();
-    }
-    else
-    {
-        armorClass = -2; // Default value
-    }
+    armorClass = j.at("armorClass").get<int>();
 }
 
 // ChainMail implementation
@@ -95,14 +88,7 @@ void ChainMail::save(json& j)
 
 void ChainMail::load(const json& j)
 {
-    if (j.contains("armorClass") && j["armorClass"].is_number())
-    {
-        armorClass = j["armorClass"].get<int>();
-    }
-    else
-    {
-        armorClass = -4; // Default value
-    }
+    armorClass = j.at("armorClass").get<int>();
 }
 
 // PlateMail implementation
@@ -119,12 +105,5 @@ void PlateMail::save(json& j)
 
 void PlateMail::load(const json& j)
 {
-    if (j.contains("armorClass") && j["armorClass"].is_number())
-    {
-        armorClass = j["armorClass"].get<int>();
-    }
-    else
-    {
-        armorClass = -6; // Default value
-    }
+    armorClass = j.at("armorClass").get<int>();
 }

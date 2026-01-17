@@ -18,10 +18,24 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/src
 )
 
-# Collect all test source files
-file(GLOB_RECURSE TEST_SOURCES
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/**/*.cpp"
+# Test source files - explicitly listed
+set(TEST_SOURCES
+    ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Vector2DTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/DamageInfoTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WeaponDamageRegistryTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemCreatorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnhancementSystemTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/DestructibleSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/DestructibleEdgeCaseTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")

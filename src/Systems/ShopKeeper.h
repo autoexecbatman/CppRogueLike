@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include "../Actor/InventoryData.h"
+#include "../Persistent/Persistent.h"
 
 enum class ShopType
 {
@@ -28,7 +29,7 @@ struct GameContext;
 class Item;
 class Creature;
 
-class ShopKeeper
+class ShopKeeper : public Persistent
 {
 public:
     ShopType shop_type;
@@ -37,8 +38,18 @@ public:
     InventoryData shop_inventory{50}; // Shop's items for sale
     int markup_percent{120};    // Buy price percentage
     int sellback_percent{60};   // Sell price percentage
-    
+
     ShopKeeper(ShopType type, ShopQuality quality);
+
+    // Default constructor for deserialization
+    ShopKeeper();
+
+    // Serialization - required by Persistent interface
+    void load(const json& j) override;
+    void save(json& j) override;
+
+    // Factory method for deserialization
+    static std::unique_ptr<ShopKeeper> create(const json& j);
     
     // Trading operations - simplified for now
     bool can_buy_item(const Item& item) const { return true; } // Accept all items for now

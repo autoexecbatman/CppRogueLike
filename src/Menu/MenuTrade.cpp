@@ -12,12 +12,11 @@ void Buy::on_selection(GameContext& ctx)
 	// Use the shopkeeper's attached shop component
 	if (shopkeeper.shop != nullptr)
 	{
-		// Note: Will require GameContext& ctx parameter in MenuTrade
-		// game.menus.push_back(std::make_unique<MenuBuy>(ctx, *game.player, *shopkeeper.shop));
+		ctx.game->menus.push_back(std::make_unique<MenuBuy>(ctx, *ctx.player, *shopkeeper.shop));
 	}
 	else
 	{
-		// game.log("Error: Shopkeeper has no shop component!");
+		ctx.message_system->message(WHITE_BLACK_PAIR, "This shopkeeper has nothing to sell.", true);
 	}
 }
 

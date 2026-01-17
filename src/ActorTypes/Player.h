@@ -74,6 +74,10 @@ public:
 	Player(Vector2D position);
 	void roll_new_character(GameContext& ctx);
 
+	// Serialization - overrides Creature
+	void load(const json& j) override;
+	void save(json& j) override;
+
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	void racial_ability_adjustments();

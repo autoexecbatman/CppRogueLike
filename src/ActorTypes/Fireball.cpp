@@ -215,14 +215,28 @@ int Fireball::get_fade_color(GameContext& ctx)
 
 void Fireball::draw_fire_character(WINDOW* window, int y, int x, int colorIndex, GameContext& ctx)
 {
-    static const int FIRE_COLORS[] = { RED_YELLOW_PAIR, RED_YELLOW_PAIR, WHITE_RED_PAIR };
-    static const char FIRE_CHARS[] = { '*', '#', '&', '@', '%', '+', '=', '^' };
+    static const int FIRE_COLORS[] = {
+        RED_YELLOW_PAIR,
+        RED_YELLOW_PAIR,
+        WHITE_RED_PAIR
+    };
 
-    if (colorIndex < 0)
-        colorIndex = ctx.dice_roller->roll(1, FIRE_COLOR_COUNT) - 1;
+    static const char FIRE_CHARS[] = {
+        '*', '#', '&', '@', '%', '+', '=', '^'
+    };
+
+    constexpr int FIRE_COLOR_COUNT = std::size(FIRE_COLORS);
+    constexpr int FIRE_CHAR_COUNT  = std::size(FIRE_CHARS);
+
+    if (colorIndex < 0 || colorIndex >= FIRE_COLOR_COUNT)
+    {
+        colorIndex = ctx.dice_roller->roll(0, FIRE_COLOR_COUNT - 1);
+    }
 
     wattron(window, COLOR_PAIR(FIRE_COLORS[colorIndex]));
-    mvwaddch(window, y, x, FIRE_CHARS[ctx.dice_roller->roll(1, FIRE_CHAR_COUNT) - 1]);
+    mvwaddch(window, y, x,
+        FIRE_CHARS[ctx.dice_roller->roll(0, FIRE_CHAR_COUNT - 1)]
+    );
     wattroff(window, COLOR_PAIR(FIRE_COLORS[colorIndex]));
 }
 

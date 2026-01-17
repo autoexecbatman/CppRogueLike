@@ -55,6 +55,7 @@ public:
     // Core game state
     bool run{ true };
     bool shouldSave{ true };
+    bool isLoadedGame{ false };  // Track new game vs loaded game for STARTUP handling
     int time{ 0 };
     GameStatus gameStatus{ GameStatus::STARTUP };
 
