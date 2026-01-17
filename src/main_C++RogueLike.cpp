@@ -1,8 +1,13 @@
 // file: main_C++RogueLike.cpp
-// C++ Core Guidelines compliant entry point - no God class
-
 #include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <memory>
+#include <vector>
+#include <deque>
 
+#include <curses.h>
 #ifdef EMSCRIPTEN
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -10,14 +15,6 @@ PDCEX SDL_Window* pdc_window;
 PDCEX SDL_Surface* pdc_screen;
 PDCEX int pdc_yoffset;
 #endif
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <memory>
-#include <vector>
-#include <deque>
-#include <curses.h>
 
 #include "Core/GameContext.h"
 #include "Map/Map.h"
