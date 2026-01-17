@@ -10,13 +10,6 @@
 class RandomDice
 {
 public:
-	// DEPRECATED: DiceType state tracking unused - scheduled for removal
-	[[deprecated("Unused state tracking - scheduled for removal")]]
-	enum class DiceType : int
-	{
-		D2, D4, D6, D8, D10, D12, D20, D100
-	} diceType{ DiceType::D6 };
-
 	// public functions to emulate a set of dice from d2 to d100
 	int d2() { return roll(1, 2); }
 	int d4() { return roll(1, 4); }
@@ -26,24 +19,6 @@ public:
 	int d12() { return roll(1, 12); }
 	int d20() { return roll(1, 20); }
 	int d100() { return roll(1, 100); }
-
-	// DEPRECATED: Unused state tracking - scheduled for removal
-	[[deprecated("Unused - scheduled for removal")]]
-	std::string get_dice_type()
-	{
-		switch (diceType)
-		{
-		case DiceType::D2: return "D2";
-		case DiceType::D4: return "D4";
-		case DiceType::D6: return "D6";
-		case DiceType::D8: return "D8";
-		case DiceType::D10: return "D10";
-		case DiceType::D12: return "D12";
-		case DiceType::D20: return "D20";
-		case DiceType::D100: return "D100";
-		default: return "D6";
-		}
-	}
 
 	// Deprecated roll_from_string method removed - use DamageInfo::roll_damage() instead
 

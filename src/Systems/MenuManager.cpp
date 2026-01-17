@@ -2,7 +2,7 @@
 #include "MenuManager.h"
 #include "../Menu/BaseMenu.h"
 #include "../Core/GameContext.h"
-#include "../Game.h"
+#include "../Systems/RenderingManager.h"
 
 void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx)
 {

@@ -2,71 +2,85 @@
 #include "src/Actor/Destructible.h"
 #include "src/Actor/Actor.h"
 #include "src/ActorTypes/Player.h"
-#include "src/Game.h"
 #include "src/Core/GameContext.h"
+#include "src/Systems/MessageSystem.h"
+#include "src/Systems/DataManager.h"
+#include "src/Systems/CreatureManager.h"
 
 // ============================================================================
 // DESTRUCTIBLE EDGE CASE TESTS
 // Tests healing limits, damage edge cases, HP clamping, death mechanics
 // ============================================================================
 
-class DestructibleEdgeCaseTest : public ::testing::Test {
-protected:
-    Game game;
-    std::unique_ptr<Player> player;
-    std::unique_ptr<Creature> monster;
-    GameContext ctx;
+  class DestructibleEdgeCaseTest : public ::testing::Test
+  {
+  protected:
+      CreatureManager creature_manager;
+      std::vector<std::unique_ptr<Creature>> creatures;
+      std::unique_ptr<Player> player;
+      std::unique_ptr<Creature> monster;
+      GameContext ctx;
 
-    void SetUp() override {
-        try {
-            game.data_manager.load_all_data(game.message_system);
-        } catch (...) {}
+      // Own required systems directly
+      RandomDice dice;
+      MessageSystem message_system;
+      DataManager data_manager;
 
-        player = std::make_unique<Player>(Vector2D{0, 0});
-        player->destructible = std::make_unique<PlayerDestructible>(
-            100, 5, "your corpse", 0, 20, 10
-        );
-        player->set_constitution(10);
+      void SetUp() override
+      {
+          try
+          {
+              data_manager.load_all_data(message_system);
+          }
+          catch (...) {}
 
-        monster = std::make_unique<Creature>(Vector2D{1, 0}, ActorData{'o', "orc", 1});
-        monster->destructible = std::make_unique<MonsterDestructible>(
-            50, 2, "orc corpse", 75, 19, 7
-        );
+          player = std::make_unique<Player>(Vector2D{0, 0});
+          player->destructible = std::make_unique<PlayerDestructible>(100, 5, "your corpse", 0, 20, 10);
+          player->set_constitution(10);
 
-        ctx = game.get_context();
-        ctx.player = player.get();
+          monster = std::make_unique<Creature>(Vector2D{1, 0}, ActorData{'o', "orc", 1});
+          monster->destructible = std::make_unique<MonsterDestructible>(50, 2, "orc corpse", 75, 19, 7);
 
-        game.d.set_test_mode(true);
-    }
+          ctx.player = player.get();
+          ctx.dice = &dice;
+          ctx.message_system = &message_system;
+          ctx.creatures = &creatures;
 
-    void TearDown() override {
-        game.d.set_test_mode(false);
-        game.d.clear_fixed_rolls();
-    }
-};
+          dice.set_test_mode(true);
+      }
 
+      void TearDown() override
+      {
+          dice.set_test_mode(false);
+          dice.clear_fixed_rolls();
+      }
+  };
 // ----------------------------------------------------------------------------
 // HP Setter Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, SetHp_ClampsToZero) {
+TEST_F(DestructibleEdgeCaseTest, SetHp_ClampsToZero)
+{
     monster->destructible->set_hp(-50);
     EXPECT_EQ(monster->destructible->get_hp(), 0);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetHp_ClampsToMax) {
+TEST_F(DestructibleEdgeCaseTest, SetHp_ClampsToMax)
+{
     monster->destructible->set_max_hp(50);
     monster->destructible->set_hp(999);
     EXPECT_EQ(monster->destructible->get_hp(), 50);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetHp_AcceptsValidValue) {
+TEST_F(DestructibleEdgeCaseTest, SetHp_AcceptsValidValue)
+{
     monster->destructible->set_max_hp(100);
     monster->destructible->set_hp(75);
     EXPECT_EQ(monster->destructible->get_hp(), 75);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetHp_ZeroIsValid) {
+TEST_F(DestructibleEdgeCaseTest, SetHp_ZeroIsValid)
+{
     monster->destructible->set_hp(0);
     EXPECT_EQ(monster->destructible->get_hp(), 0);
     EXPECT_TRUE(monster->destructible->is_dead());
@@ -76,17 +90,20 @@ TEST_F(DestructibleEdgeCaseTest, SetHp_ZeroIsValid) {
 // Max HP Setter Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, SetMaxHp_MinimumIsOne) {
+TEST_F(DestructibleEdgeCaseTest, SetMaxHp_MinimumIsOne)
+{
     monster->destructible->set_max_hp(0);
     EXPECT_EQ(monster->destructible->get_max_hp(), 1);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetMaxHp_NegativeBecomesOne) {
+TEST_F(DestructibleEdgeCaseTest, SetMaxHp_NegativeBecomesOne)
+{
     monster->destructible->set_max_hp(-100);
     EXPECT_EQ(monster->destructible->get_max_hp(), 1);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetMaxHp_ReducesClampsCurrentHp) {
+TEST_F(DestructibleEdgeCaseTest, SetMaxHp_ReducesClampsCurrentHp)
+{
     monster->destructible->set_max_hp(100);
     monster->destructible->set_hp(100);
 
@@ -102,12 +119,14 @@ TEST_F(DestructibleEdgeCaseTest, SetMaxHp_ReducesClampsCurrentHp) {
 // HP Base Setter Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, SetHpBase_MinimumIsOne) {
+TEST_F(DestructibleEdgeCaseTest, SetHpBase_MinimumIsOne)
+{
     monster->destructible->set_hp_base(0);
     EXPECT_EQ(monster->destructible->get_hp_base(), 1);
 }
 
-TEST_F(DestructibleEdgeCaseTest, SetHpBase_NegativeBecomesOne) {
+TEST_F(DestructibleEdgeCaseTest, SetHpBase_NegativeBecomesOne)
+{
     monster->destructible->set_hp_base(-999);
     EXPECT_EQ(monster->destructible->get_hp_base(), 1);
 }
@@ -116,7 +135,8 @@ TEST_F(DestructibleEdgeCaseTest, SetHpBase_NegativeBecomesOne) {
 // Healing Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, Heal_ReturnsActualHealed) {
+TEST_F(DestructibleEdgeCaseTest, Heal_ReturnsActualHealed)
+{
     monster->destructible->set_max_hp(100);
     monster->destructible->set_hp(90);
 
@@ -127,7 +147,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_ReturnsActualHealed) {
     EXPECT_EQ(monster->destructible->get_hp(), 100);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Heal_AtMaxHp_ReturnsZero) {
+TEST_F(DestructibleEdgeCaseTest, Heal_AtMaxHp_ReturnsZero)
+{
     monster->destructible->set_max_hp(50);
     monster->destructible->set_hp(50);
 
@@ -137,7 +158,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_AtMaxHp_ReturnsZero) {
     EXPECT_EQ(monster->destructible->get_hp(), 50);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Heal_FromZeroHp) {
+TEST_F(DestructibleEdgeCaseTest, Heal_FromZeroHp)
+{
     monster->destructible->set_max_hp(100);
     monster->destructible->set_hp(0);
 
@@ -147,7 +169,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_FromZeroHp) {
     EXPECT_EQ(monster->destructible->get_hp(), 50);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Heal_ExactAmountToMax) {
+TEST_F(DestructibleEdgeCaseTest, Heal_ExactAmountToMax)
+{
     monster->destructible->set_max_hp(100);
     monster->destructible->set_hp(70);
 
@@ -157,7 +180,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_ExactAmountToMax) {
     EXPECT_EQ(monster->destructible->get_hp(), 100);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Heal_ZeroAmount) {
+TEST_F(DestructibleEdgeCaseTest, Heal_ZeroAmount)
+{
     monster->destructible->set_hp(50);
     int hpBefore = monster->destructible->get_hp();
 
@@ -167,7 +191,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_ZeroAmount) {
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Heal_NegativeAmount_TreatedAsHeal) {
+TEST_F(DestructibleEdgeCaseTest, Heal_NegativeAmount_TreatedAsHeal)
+{
     // Negative healing is technically possible in the implementation
     // This tests current behavior (may be unintended)
     monster->destructible->set_max_hp(100);
@@ -185,7 +210,8 @@ TEST_F(DestructibleEdgeCaseTest, Heal_NegativeAmount_TreatedAsHeal) {
 // Take Damage Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_ZeroDamage_NoEffect) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_ZeroDamage_NoEffect)
+{
     int hpBefore = monster->destructible->get_hp();
 
     monster->destructible->take_damage(*monster, 0, ctx);
@@ -193,7 +219,8 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_ZeroDamage_NoEffect) {
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_NegativeDamage_NoEffect) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_NegativeDamage_NoEffect)
+{
     int hpBefore = monster->destructible->get_hp();
 
     monster->destructible->take_damage(*monster, -10, ctx);
@@ -201,7 +228,8 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_NegativeDamage_NoEffect) {
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_ExactlyLethal) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_ExactlyLethal)
+{
     monster->destructible->set_hp(10);
 
     monster->destructible->take_damage(*monster, 10, ctx);
@@ -210,7 +238,8 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_ExactlyLethal) {
     EXPECT_EQ(monster->destructible->get_hp(), 0);
 }
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_Overkill) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_Overkill)
+{
     monster->destructible->set_hp(10);
 
     monster->destructible->take_damage(*monster, 1000, ctx);
@@ -219,7 +248,8 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_Overkill) {
     EXPECT_EQ(monster->destructible->get_hp(), 0);
 }
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_OneDamage) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_OneDamage)
+{
     monster->destructible->set_hp(10);
 
     monster->destructible->take_damage(*monster, 1, ctx);
@@ -228,7 +258,8 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_OneDamage) {
     EXPECT_FALSE(monster->destructible->is_dead());
 }
 
-TEST_F(DestructibleEdgeCaseTest, TakeDamage_AlreadyDead_NoFurtherEffect) {
+TEST_F(DestructibleEdgeCaseTest, TakeDamage_AlreadyDead_NoFurtherEffect)
+{
     monster->destructible->set_hp(0);
     ASSERT_TRUE(monster->destructible->is_dead());
 
@@ -243,17 +274,20 @@ TEST_F(DestructibleEdgeCaseTest, TakeDamage_AlreadyDead_NoFurtherEffect) {
 // Death State Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, IsDead_TrueAtZeroHp) {
+TEST_F(DestructibleEdgeCaseTest, IsDead_TrueAtZeroHp)
+{
     monster->destructible->set_hp(0);
     EXPECT_TRUE(monster->destructible->is_dead());
 }
 
-TEST_F(DestructibleEdgeCaseTest, IsDead_FalseAtOneHp) {
+TEST_F(DestructibleEdgeCaseTest, IsDead_FalseAtOneHp)
+{
     monster->destructible->set_hp(1);
     EXPECT_FALSE(monster->destructible->is_dead());
 }
 
-TEST_F(DestructibleEdgeCaseTest, IsDead_TrueWithNegativeClampedHp) {
+TEST_F(DestructibleEdgeCaseTest, IsDead_TrueWithNegativeClampedHp)
+{
     // Even though set_hp clamps negative to 0, verify is_dead works
     monster->destructible->set_hp(-100);
     EXPECT_TRUE(monster->destructible->is_dead());
@@ -263,13 +297,15 @@ TEST_F(DestructibleEdgeCaseTest, IsDead_TrueWithNegativeClampedHp) {
 // Attribute Getter/Setter Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, ArmorClass_CanBeNegative) {
+TEST_F(DestructibleEdgeCaseTest, ArmorClass_CanBeNegative)
+{
     // In AD&D, negative AC is better
     monster->destructible->set_armor_class(-5);
     EXPECT_EQ(monster->destructible->get_armor_class(), -5);
 }
 
-TEST_F(DestructibleEdgeCaseTest, THAC0_CanBeSetToAnyValue) {
+TEST_F(DestructibleEdgeCaseTest, THAC0_CanBeSetToAnyValue)
+{
     monster->destructible->set_thaco(5);
     EXPECT_EQ(monster->destructible->get_thaco(), 5);
 
@@ -277,7 +313,8 @@ TEST_F(DestructibleEdgeCaseTest, THAC0_CanBeSetToAnyValue) {
     EXPECT_EQ(monster->destructible->get_thaco(), 25);
 }
 
-TEST_F(DestructibleEdgeCaseTest, DamageReduction_AcceptsAnyValue) {
+TEST_F(DestructibleEdgeCaseTest, DamageReduction_AcceptsAnyValue)
+{
     monster->destructible->set_dr(0);
     EXPECT_EQ(monster->destructible->get_dr(), 0);
 
@@ -285,7 +322,8 @@ TEST_F(DestructibleEdgeCaseTest, DamageReduction_AcceptsAnyValue) {
     EXPECT_EQ(monster->destructible->get_dr(), 100);
 }
 
-TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified) {
+TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified)
+{
     monster->destructible->set_xp(100);
     EXPECT_EQ(monster->destructible->get_xp(), 100);
 
@@ -293,7 +331,8 @@ TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified) {
     EXPECT_EQ(monster->destructible->get_xp(), 150);
 }
 
-TEST_F(DestructibleEdgeCaseTest, CorpseName_Preserved) {
+TEST_F(DestructibleEdgeCaseTest, CorpseName_Preserved)
+{
     monster->destructible->set_corpse_name("dead orc");
     EXPECT_EQ(monster->destructible->get_corpse_name(), "dead orc");
 }
@@ -302,20 +341,22 @@ TEST_F(DestructibleEdgeCaseTest, CorpseName_Preserved) {
 // Player Death Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, PlayerDeath_SetsDefeatStatus) {
+TEST_F(DestructibleEdgeCaseTest, PlayerDeath_SetsDefeatStatus)
+{
     player->destructible->set_hp(1);
 
     player->destructible->take_damage(*player, 10, ctx);
 
     EXPECT_TRUE(player->destructible->is_dead());
-    EXPECT_EQ(ctx.game->gameStatus, GameStatus::DEFEAT);
+    EXPECT_EQ(*ctx.game_status, GameStatus::DEFEAT);
 }
 
 // ----------------------------------------------------------------------------
 // Monster Death Tests (XP Award)
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, MonsterDeath_AwardsXPToPlayer) {
+TEST_F(DestructibleEdgeCaseTest, MonsterDeath_AwardsXPToPlayer)
+{
     monster->destructible->set_hp(1);
     monster->destructible->set_xp(200);
 
@@ -327,7 +368,8 @@ TEST_F(DestructibleEdgeCaseTest, MonsterDeath_AwardsXPToPlayer) {
     EXPECT_EQ(player->destructible->get_xp(), playerXpBefore + 200);
 }
 
-TEST_F(DestructibleEdgeCaseTest, MonsterDeath_ZeroXPMonster) {
+TEST_F(DestructibleEdgeCaseTest, MonsterDeath_ZeroXPMonster)
+{
     monster->destructible->set_hp(1);
     monster->destructible->set_xp(0);
 
@@ -342,7 +384,8 @@ TEST_F(DestructibleEdgeCaseTest, MonsterDeath_ZeroXPMonster) {
 // Serialization Regression Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved) {
+TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
+{
     monster->destructible->set_max_hp(75);
     monster->destructible->set_hp(60);
     monster->destructible->set_hp_base(50);
@@ -372,7 +415,8 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved) {
     EXPECT_EQ(loaded->get_last_constitution(), 14);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Serialization_DeadState_Preserved) {
+TEST_F(DestructibleEdgeCaseTest, Serialization_DeadState_Preserved)
+{
     monster->destructible->set_hp(0);
     ASSERT_TRUE(monster->destructible->is_dead());
 
@@ -386,7 +430,8 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_DeadState_Preserved) {
     EXPECT_EQ(loaded->get_hp(), 0);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Serialization_NegativeAC_Preserved) {
+TEST_F(DestructibleEdgeCaseTest, Serialization_NegativeAC_Preserved)
+{
     monster->destructible->set_armor_class(-10);
 
     json j;
@@ -401,7 +446,8 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_NegativeAC_Preserved) {
 // Factory Create Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, Create_InvalidType_ReturnsNullptr) {
+TEST_F(DestructibleEdgeCaseTest, Create_InvalidType_ReturnsNullptr)
+{
     json j;
     j["type"] = 999; // Invalid type
     j["hpMax"] = 10;
@@ -420,7 +466,8 @@ TEST_F(DestructibleEdgeCaseTest, Create_InvalidType_ReturnsNullptr) {
     EXPECT_EQ(result, nullptr);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_MissingType_ReturnsNullptr) {
+TEST_F(DestructibleEdgeCaseTest, Create_MissingType_ReturnsNullptr)
+{
     json j;
     // No "type" field
     j["hpMax"] = 10;
@@ -431,7 +478,8 @@ TEST_F(DestructibleEdgeCaseTest, Create_MissingType_ReturnsNullptr) {
     EXPECT_EQ(result, nullptr);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible) {
+TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible)
+{
     json j;
     j["type"] = static_cast<int>(Destructible::DestructibleType::MONSTER);
     j["hpMax"] = 50;
@@ -452,7 +500,8 @@ TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible) 
     // Verify it's actually a MonsterDestructible by checking behavior would be harder
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible) {
+TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible)
+{
     json j;
     j["type"] = static_cast<int>(Destructible::DestructibleType::PLAYER);
     j["hpMax"] = 100;
@@ -478,49 +527,41 @@ TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible) {
 // Regression: Lightning bolt didn't call cleanup, spiders didn't die visually
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_RemovesDeadFromVector) {
-    // Add monster to creatures vector
-    game.creatures.push_back(std::move(monster));
-    ASSERT_EQ(game.creatures.size(), 1);
+TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_RemovesDeadFromVector)
+{
+    creatures.push_back(std::move(monster));
+    ASSERT_EQ(creatures.size(), 1);
 
-    // Kill the creature via take_damage (simulates spell damage)
-    game.creatures[0]->destructible->take_damage(*game.creatures[0], 1000, ctx);
-    EXPECT_TRUE(game.creatures[0]->destructible->is_dead());
+    creatures[0]->destructible->take_damage(*creatures[0], 1000, ctx);
+    EXPECT_TRUE(creatures[0]->destructible->is_dead());
 
-    // Cleanup should remove dead creatures
-    game.creature_manager.cleanup_dead_creatures(game.creatures);
+    creature_manager.cleanup_dead_creatures(creatures);
 
-    EXPECT_EQ(game.creatures.size(), 0) << "Dead creatures should be removed after cleanup";
+    EXPECT_EQ(creatures.size(), 0) << "Dead creatures should be removed after cleanup";
 }
 
-TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_KeepsAliveCreatures) {
-    // Add monster to creatures vector
-    game.creatures.push_back(std::move(monster));
+TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_KeepsAliveCreatures)
+{
+    creatures.push_back(std::move(monster));
 
-    // Damage but don't kill
-    game.creatures[0]->destructible->set_hp(50);
-    game.creatures[0]->destructible->take_damage(*game.creatures[0], 10, ctx);
-    EXPECT_FALSE(game.creatures[0]->destructible->is_dead());
+    creatures[0]->destructible->set_hp(50);
+    creatures[0]->destructible->take_damage(*creatures[0], 10, ctx);
+    EXPECT_FALSE(creatures[0]->destructible->is_dead());
 
-    // Cleanup should NOT remove alive creatures
-    game.creature_manager.cleanup_dead_creatures(game.creatures);
+    creature_manager.cleanup_dead_creatures(creatures);
 
-    EXPECT_EQ(game.creatures.size(), 1) << "Alive creatures should not be removed";
+    EXPECT_EQ(creatures.size(), 1) << "Alive creatures should not be removed";
 }
 
-TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup) {
-    // This test documents the bug: spell damage kills (HP=0) but creature
-    // remains in list until cleanup_dead_creatures is called
-    game.creatures.push_back(std::move(monster));
+TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup)
+{
+    creatures.push_back(std::move(monster));
 
-    // Simulate spell damage (like lightning bolt)
-    game.creatures[0]->destructible->take_damage(*game.creatures[0], 1000, ctx);
+    creatures[0]->destructible->take_damage(*creatures[0], 1000, ctx);
 
-    // Creature is dead but still in list
-    EXPECT_TRUE(game.creatures[0]->destructible->is_dead());
-    EXPECT_EQ(game.creatures.size(), 1) << "Dead creature still in list before cleanup";
+    EXPECT_TRUE(creatures[0]->destructible->is_dead());
+    EXPECT_EQ(creatures.size(), 1) << "Dead creature still in list before cleanup";
 
-    // After cleanup, it should be removed
-    game.creature_manager.cleanup_dead_creatures(game.creatures);
-    EXPECT_EQ(game.creatures.size(), 0) << "Dead creature removed after cleanup";
+    creature_manager.cleanup_dead_creatures(creatures);
+    EXPECT_EQ(creatures.size(), 0) << "Dead creature removed after cleanup";
 }

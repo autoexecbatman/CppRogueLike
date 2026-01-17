@@ -8,7 +8,9 @@
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
 #include "../Core/GameContext.h"
-#include "../Game.h"
+#include "../ActorTypes/Player.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/DisplayManager.h"
 
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)

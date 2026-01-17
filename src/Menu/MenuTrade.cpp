@@ -1,11 +1,13 @@
 #include "MenuTrade.h"
 #include "../Ai/AiPlayer.h"
-#include "../Ai/AiShopkeeper.h"  // MISSING INCLUDE
-#include "../Game.h"
+#include "../Ai/AiShopkeeper.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
 #include "../Actor/Actor.h"
 #include "../Systems/ShopKeeper.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
 
 void Buy::on_selection(GameContext& ctx)
 {

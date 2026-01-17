@@ -3,7 +3,6 @@
 #include "Menu.h"
 #include "MenuClass.h"
 #include "MenuRace.h"
-#include "../Game.h"
 #include "../ActorTypes/Player.h"
 
 void Male::on_selection(GameContext& ctx)

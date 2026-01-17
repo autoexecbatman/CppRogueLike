@@ -1,5 +1,4 @@
 #include "ItemCreator.h"
-#include "../Game.h"
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Fireball.h"
@@ -12,6 +11,8 @@
 #include "../ActorTypes/Gold.h"
 #include "../Items/Food.h"
 #include "../Items/Amulet.h"
+#include "../Random/RandomDice.h"
+#include "../Core/GameContext.h"
 
 // UNIFIED ITEM CREATION - HARDCODED DATA IN ONE PLACE
 

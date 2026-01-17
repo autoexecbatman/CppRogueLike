@@ -1,5 +1,4 @@
 #include "ItemFactory.h"
-#include "../Game.h"
 #include "../Items/Items.h"
 #include "../ActorTypes/Gold.h"
 #include "../Items/Food.h"
@@ -7,6 +6,10 @@
 #include "../Items/Amulet.h"
 #include "../Actor/InventoryOperations.h"
 #include "ItemCreator.h"
+#include "../Core/GameContext.h"
+#include "../Systems/LevelManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Map/Map.h"
 
 using namespace InventoryOperations; // For clean function calls
 

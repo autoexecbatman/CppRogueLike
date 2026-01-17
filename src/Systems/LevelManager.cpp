@@ -1,12 +1,12 @@
 // LevelManager.cpp - Handles dungeon level progression and level-specific state
+#include <nlohmann/json.hpp>
+#include <format>
 
 #include "LevelManager.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Systems/MessageSystem.h"
-#include "../Game.h"
-#include <nlohmann/json.hpp>
-#include <format>
+#include "../Core/GameContext.h"
 
 void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem& message_system, GameContext& ctx)
 {

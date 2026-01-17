@@ -4,26 +4,37 @@
 #include "src/Actor/Actor.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Combat/DamageInfo.h"
-#include "src/Game.h"
 #include "src/Core/GameContext.h"
+#include "src/Systems/MessageSystem.h"
+#include "src/Random/RandomDice.h"
+#include "src/Systems/DataManager.h"
 
 // ============================================================================
 // ATTACKER TESTS
 // Tests combat calculations, hit/miss logic, damage application
 // ============================================================================
 
-class AttackerTest : public ::testing::Test {
+class AttackerTest : public ::testing::Test
+{
 protected:
-    Game game;
     std::unique_ptr<Player> player;
     std::unique_ptr<Creature> monster;
     GameContext ctx;
+      
+    // Own required systems
+    RandomDice dice;
+    MessageSystem message_system;
+    DataManager data_manager;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         // Load data for attribute tables
-        try {
-            game.data_manager.load_all_data(game.message_system);
-        } catch (...) {
+        try
+        {
+            data_manager.load_all_data(message_system);
+        }
+        catch (...)
+        {
             // Tests will run without attribute bonuses
         }
 
@@ -47,16 +58,18 @@ protected:
         monster->set_weapon_equipped("claws");
 
         // Setup GameContext
-        ctx = game.get_context();
         ctx.player = player.get();
+        ctx.dice = &dice;
+        ctx.message_system = &message_system;
 
         // Enable deterministic dice
-        game.d.set_test_mode(true);
+        dice.set_test_mode(true);
     }
 
-    void TearDown() override {
-        game.d.set_test_mode(false);
-        game.d.clear_fixed_rolls();
+    void TearDown() override
+    {
+        dice.set_test_mode(false);
+        dice.clear_fixed_rolls();
     }
 };
 
@@ -64,7 +77,8 @@ protected:
 // Attacker Serialization Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, Serialization_RoundTrip) {
+TEST_F(AttackerTest, Serialization_RoundTrip)
+{
     Attacker original(DamageInfo{2, 8, "2d4"});
 
     json j;
@@ -78,7 +92,8 @@ TEST_F(AttackerTest, Serialization_RoundTrip) {
     EXPECT_EQ(loaded.get_damage_info().displayRoll, "2d4");
 }
 
-TEST_F(AttackerTest, Serialization_PreservesAllFields) {
+TEST_F(AttackerTest, Serialization_PreservesAllFields)
+{
     DamageInfo damage{3, 12, "1d10+2"};
     Attacker original(damage);
 
@@ -96,7 +111,8 @@ TEST_F(AttackerTest, Serialization_PreservesAllFields) {
 // Damage Info Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, GetDamageInfo_ReturnsStoredDamage) {
+TEST_F(AttackerTest, GetDamageInfo_ReturnsStoredDamage)
+{
     DamageInfo expected{2, 8, "2d4"};
     Attacker attacker(expected);
 
@@ -107,7 +123,8 @@ TEST_F(AttackerTest, GetDamageInfo_ReturnsStoredDamage) {
     EXPECT_EQ(actual.displayRoll, expected.displayRoll);
 }
 
-TEST_F(AttackerTest, SetDamageInfo_UpdatesDamage) {
+TEST_F(AttackerTest, SetDamageInfo_UpdatesDamage)
+{
     Attacker attacker(DamageInfo{1, 4, "1d4"});
 
     attacker.set_damage_info(DamageInfo{2, 12, "2d6"});
@@ -116,7 +133,8 @@ TEST_F(AttackerTest, SetDamageInfo_UpdatesDamage) {
     EXPECT_EQ(attacker.get_damage_info().maxDamage, 12);
 }
 
-TEST_F(AttackerTest, RollDamage_RespectsMinMax) {
+TEST_F(AttackerTest, RollDamage_RespectsMinMax)
+{
     Attacker attacker(DamageInfo{3, 10, "1d8+2"});
 
     // Roll many times and verify bounds
@@ -131,7 +149,8 @@ TEST_F(AttackerTest, RollDamage_RespectsMinMax) {
 // GetAttackDamage Tests (Player vs Monster)
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, GetAttackDamage_MonsterUsesBaseDamage) {
+TEST_F(AttackerTest, GetAttackDamage_MonsterUsesBaseDamage)
+{
     // Monster's attacker should return base damage, not look for weapons
     DamageInfo monsterDamage{2, 8, "2d4"};
     monster->attacker = std::make_unique<Attacker>(monsterDamage);
@@ -142,7 +161,8 @@ TEST_F(AttackerTest, GetAttackDamage_MonsterUsesBaseDamage) {
     EXPECT_EQ(result.maxDamage, 8);
 }
 
-TEST_F(AttackerTest, GetAttackDamage_UnarmedPlayerReturnsUnarmedDamage) {
+TEST_F(AttackerTest, GetAttackDamage_UnarmedPlayerReturnsUnarmedDamage)
+{
     // Player without equipped weapon should get unarmed damage (1d2)
     DamageInfo result = player->attacker->get_attack_damage(*player);
 
@@ -155,7 +175,8 @@ TEST_F(AttackerTest, GetAttackDamage_UnarmedPlayerReturnsUnarmedDamage) {
 // Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, Attack_TargetWithoutDestructible_DoesNotCrash) {
+TEST_F(AttackerTest, Attack_TargetWithoutDestructible_DoesNotCrash)
+{
     // Create creature without destructible
     auto targetNoDestructible = std::make_unique<Creature>(
         Vector2D{2, 0}, ActorData{'?', "ghost", 1}
@@ -167,7 +188,8 @@ TEST_F(AttackerTest, Attack_TargetWithoutDestructible_DoesNotCrash) {
     EXPECT_NO_THROW(player->attacker->attack(*player, *targetNoDestructible, ctx));
 }
 
-TEST_F(AttackerTest, Attack_DeadTarget_AttacksInVain) {
+TEST_F(AttackerTest, Attack_DeadTarget_AttacksInVain)
+{
     // Kill the monster first
     monster->destructible->set_hp(0);
     ASSERT_TRUE(monster->destructible->is_dead());
@@ -175,20 +197,21 @@ TEST_F(AttackerTest, Attack_DeadTarget_AttacksInVain) {
     int hpBefore = monster->destructible->get_hp();
 
     // Attack should not deal damage
-    game.d.set_next_d20(20); // Natural 20
+    dice.set_next_d20(20); // Natural 20
     player->attacker->attack(*player, *monster, ctx);
 
     // HP should remain unchanged
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(AttackerTest, Attack_AttackerWithZeroStrength_AttacksInVain) {
+TEST_F(AttackerTest, Attack_AttackerWithZeroStrength_AttacksInVain)
+{
     player->set_strength(0);
 
     int hpBefore = monster->destructible->get_hp();
 
     // Attack should fail
-    game.d.set_next_d20(20);
+    dice.set_next_d20(20);
     player->attacker->attack(*player, *monster, ctx);
 
     // HP should remain unchanged (attack was in vain)
@@ -199,7 +222,8 @@ TEST_F(AttackerTest, Attack_AttackerWithZeroStrength_AttacksInVain) {
 // THAC0 Calculation Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, THAC0_RollNeeded_Calculation) {
+TEST_F(AttackerTest, THAC0_RollNeeded_Calculation)
+{
     // THAC0 20 vs AC 10 means you need to roll 10+
     // THAC0 20 vs AC 6 means you need to roll 14+
     // THAC0 19 vs AC 6 means you need to roll 13+
@@ -208,8 +232,8 @@ TEST_F(AttackerTest, THAC0_RollNeeded_Calculation) {
     // Roll needed = THAC0 - AC = 20 - 6 = 14
 
     // Set dice to roll exactly 14 (should hit)
-    game.d.set_next_d20(14);
-    game.d.set_next_roll(4); // damage roll
+    dice.set_next_d20(14);
+    dice.set_next_roll(4); // damage roll
 
     int hpBefore = monster->destructible->get_hp();
     player->attacker->attack(*player, *monster, ctx);
@@ -218,10 +242,11 @@ TEST_F(AttackerTest, THAC0_RollNeeded_Calculation) {
     EXPECT_LT(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses) {
+TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
+{
     // Roll needed = 20 - 6 = 14
     // Roll 13 should miss
-    game.d.set_next_d20(13);
+    dice.set_next_d20(13);
 
     int hpBefore = monster->destructible->get_hp();
     player->attacker->attack(*player, *monster, ctx);
@@ -230,12 +255,13 @@ TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses) {
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(AttackerTest, THAC0_LowAC_EasierToHit) {
+TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
+{
     // Better (lower) AC should be harder to hit
     // AC 0 with THAC0 20 = need to roll 20
     monster->destructible->set_armor_class(0);
 
-    game.d.set_next_d20(19);
+    dice.set_next_d20(19);
 
     int hpBefore = monster->destructible->get_hp();
     player->attacker->attack(*player, *monster, ctx);
@@ -244,13 +270,14 @@ TEST_F(AttackerTest, THAC0_LowAC_EasierToHit) {
     EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
 }
 
-TEST_F(AttackerTest, THAC0_HighAC_EasierToHit) {
+TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
+{
     // Worse (higher) AC should be easier to hit
     // AC 15 with THAC0 20 = need to roll 5
     monster->destructible->set_armor_class(15);
 
-    game.d.set_next_d20(5);
-    game.d.set_next_roll(4);
+    dice.set_next_d20(5);
+    dice.set_next_roll(4);
 
     int hpBefore = monster->destructible->get_hp();
     player->attacker->attack(*player, *monster, ctx);
@@ -263,14 +290,15 @@ TEST_F(AttackerTest, THAC0_HighAC_EasierToHit) {
 // Damage Reduction Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, DamageReduction_ReducesDamage) {
+TEST_F(AttackerTest, DamageReduction_ReducesDamage)
+{
     // Monster with DR 3
     monster->destructible->set_dr(3);
     monster->destructible->set_armor_class(20); // Easy to hit
 
     // Guaranteed hit with known damage
-    game.d.set_next_d20(20);
-    game.d.set_next_roll(5); // 5 damage
+    dice.set_next_d20(20);
+    dice.set_next_roll(5); // 5 damage
 
     // With strength 10 and standard tables, damage bonus should be 0
     // Final damage = max(0, 5 + 0 - 3) = 2
@@ -285,13 +313,14 @@ TEST_F(AttackerTest, DamageReduction_ReducesDamage) {
     EXPECT_GE(actualDamage, 0) << "Damage should not be negative";
 }
 
-TEST_F(AttackerTest, DamageReduction_CanReduceToZero) {
+TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
+{
     // Monster with high DR
     monster->destructible->set_dr(10);
     monster->destructible->set_armor_class(20);
 
-    game.d.set_next_d20(20);
-    game.d.set_next_roll(4); // 4 damage, will be reduced to 0
+    dice.set_next_d20(20);
+    dice.set_next_roll(4); // 4 damage, will be reduced to 0
 
     int hpBefore = monster->destructible->get_hp();
     player->attacker->attack(*player, *monster, ctx);
@@ -304,27 +333,29 @@ TEST_F(AttackerTest, DamageReduction_CanReduceToZero) {
 // Monster Attack Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName) {
+TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
+{
     monster->set_weapon_equipped("sharp claws");
     monster->destructible->set_armor_class(10);
     player->destructible->set_armor_class(15); // Easy to hit
 
-    game.d.set_next_d20(10);
-    game.d.set_next_roll(5);
+    dice.set_next_d20(10);
+    dice.set_next_roll(5);
 
     // Should not crash and should use weapon name
     EXPECT_NO_THROW(monster->attacker->attack(*monster, *player, ctx));
 }
 
-TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage) {
+TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
+{
     // Monster with 1d6 damage attacks player
     monster->attacker = std::make_unique<Attacker>(DamageInfo{1, 6, "1d6"});
     player->destructible->set_armor_class(20); // Very easy to hit
     player->destructible->set_dr(0);
 
     // Roll to hit and damage
-    game.d.set_next_d20(15);
-    game.d.set_next_roll(4); // Roll 4 damage
+    dice.set_next_d20(15);
+    dice.set_next_roll(4); // Roll 4 damage
 
     int hpBefore = player->destructible->get_hp();
     monster->attacker->attack(*monster, *player, ctx);
@@ -341,14 +372,15 @@ TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage) {
 // Kill Confirmation Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(AttackerTest, Attack_CanKillTarget) {
+TEST_F(AttackerTest, Attack_CanKillTarget)
+{
     // Set monster to 1 HP
     monster->destructible->set_hp(1);
     monster->destructible->set_armor_class(20);
     monster->destructible->set_dr(0);
 
-    game.d.set_next_d20(20);
-    game.d.set_next_roll(5);
+    dice.set_next_d20(20);
+    dice.set_next_roll(5);
 
     ASSERT_FALSE(monster->destructible->is_dead());
     player->attacker->attack(*player, *monster, ctx);
@@ -357,14 +389,15 @@ TEST_F(AttackerTest, Attack_CanKillTarget) {
     EXPECT_TRUE(monster->destructible->is_dead());
 }
 
-TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP) {
+TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
+{
     monster->destructible->set_hp(1);
     monster->destructible->set_armor_class(20);
     monster->destructible->set_dr(0);
     monster->destructible->set_xp(100);
 
-    game.d.set_next_d20(20);
-    game.d.set_next_roll(10);
+    dice.set_next_d20(20);
+    dice.set_next_roll(10);
 
     int xpBefore = player->destructible->get_xp();
     player->attacker->attack(*player, *monster, ctx);

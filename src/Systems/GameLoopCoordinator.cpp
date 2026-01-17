@@ -1,18 +1,23 @@
 // file: Systems/GameLoopCoordinator.cpp
-#include <curses.h>
 #include <algorithm>
+
+#include <curses.h>
 
 #include "GameLoopCoordinator.h"
 #include "CreatureManager.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
 #include "../Core/GameContext.h"
-#include "../Game.h"
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/MenuManager.h"
+#include "../Systems/InputHandler.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/GameStateManager.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {

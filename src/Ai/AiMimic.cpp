@@ -1,9 +1,11 @@
 #include "AiMimic.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiPlayer.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Items/ItemClassification.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../ActorTypes/Player.h"
 
 using namespace InventoryOperations; // For clean function calls
 

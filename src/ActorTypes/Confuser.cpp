@@ -1,8 +1,14 @@
 #include <libtcod.h>
+
 #include "Confuser.h"
+#include "../Core/GameContext.h"
 #include "../Actor/Actor.h"
-#include "../Game.h"
 #include "../Ai/AiMonsterConfused.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/TargetingSystem.h"
+#include "../Systems/MessageSystem.h"
+#include "../Gui/Gui.h"
+#include "../Map/Map.h"
 
 //==Confuser==
 Confuser::Confuser(int nbTurns, int range) noexcept : nbTurns(nbTurns), range(range) {}

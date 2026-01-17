@@ -1,13 +1,14 @@
 // LevelUpSystem.cpp - Handles combat improvements on level up according to AD&D 2e rules
+#include <format>
 
 #include "LevelUpSystem.h"
 #include "../Core/GameContext.h"
-#include "../Game.h"
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Colors/Colors.h"
-#include <format>
+#include "../Systems/MessageSystem.h"
+#include "../Systems/DataManager.h"
 
 void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
 {

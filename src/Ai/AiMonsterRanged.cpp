@@ -1,7 +1,10 @@
-#include "AiMonsterRanged.h"
-#include "../Game.h"
-#include "../Utils/Vector2D.h"
 #include <curses.h>
+
+#include "AiMonsterRanged.h"
+#include "../Utils/Vector2D.h"
+#include "../Core/GameContext.h"
+#include "../Map/Map.h"
+#include "../ActorTypes/Player.h"
 
 AiMonsterRanged::AiMonsterRanged() : AiMonster() {}
 

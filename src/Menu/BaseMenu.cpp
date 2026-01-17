@@ -1,5 +1,6 @@
 #include "BaseMenu.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 void BaseMenu::menu_new(int height, int width, int starty, int startx, GameContext& ctx)
 {

@@ -1,7 +1,10 @@
 #include "Teleporter.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Map/Map.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Random/RandomDice.h"
+#include "../ActorTypes/Player.h"
 
 //==TELEPORTER==
 Teleporter::Teleporter() {}

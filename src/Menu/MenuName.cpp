@@ -2,7 +2,10 @@
 #include <string>
 
 #include "MenuName.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../ActorTypes/Player.h"
+#include "../Systems/MenuManager.h"
+#include "../Systems/RenderingManager.h"
 
 void MenuName::menu_name_new() noexcept { menuNameWindow = newwin(menuNameHeight, menuNameWidth, menuNameY, menuNameX); }
 

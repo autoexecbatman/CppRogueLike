@@ -1,6 +1,7 @@
 #include "Amulet.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 Amulet::Amulet() {}
 

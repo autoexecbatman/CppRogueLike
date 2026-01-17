@@ -1,6 +1,5 @@
 // file: MonsterFactory.cpp
 #include "MonsterFactory.h"
-#include "../Game.h"
 #include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../Random/RandomDice.h"
@@ -9,6 +8,10 @@
 #include "ItemCreator.h"
 #include "../Items/Food.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/LevelManager.h"
+#include "../Map/Map.h"
 
 using namespace InventoryOperations; // For clean function calls
 

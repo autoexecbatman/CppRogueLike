@@ -1,6 +1,7 @@
 #include "Gold.h"
 #include "../Actor/Actor.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 Gold::Gold(int amount) : amount(amount)
 {

@@ -3,7 +3,8 @@
 #include "MenuName.h"
 #include "MenuClass.h"
 #include "MenuGender.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../ActorTypes/Player.h"
 
 void Human::on_selection(GameContext& ctx)
 {

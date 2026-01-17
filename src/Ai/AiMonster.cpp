@@ -1,7 +1,10 @@
 // file: AiMonster.cpp
 #include "AiMonster.h"
-#include "../Game.h"
 #include "../Utils/Dijkstra.h"
+#include "../Core/GameContext.h"
+#include "../Map/Map.h"
+#include "../ActorTypes/Player.h"
+
 
 //==MONSTER_AI==
 

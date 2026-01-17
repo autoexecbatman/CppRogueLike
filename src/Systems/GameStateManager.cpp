@@ -5,7 +5,6 @@
 #include <nlohmann/json.hpp>
 
 #include "GameStateManager.h"
-#include "../Game.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/InventoryOperations.h"
@@ -16,6 +15,10 @@
 #include "../Systems/LevelManager.h"
 #include "../Factories/ItemCreator.h"
 #include "../Utils/Vector2D.h"
+#include "../Core/GameContext.h"
+#include "../Systems/DataManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/MenuManager.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;

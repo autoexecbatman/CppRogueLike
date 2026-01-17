@@ -1,12 +1,18 @@
 #include <memory>
-#include <curses.h>
-#include <libtcod.h>
 #include <random>
 #include <cmath>
 
+#include <curses.h>
+#include <libtcod.h>
+
 #include "LightningBolt.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
+#include "../Gui/Gui.h"
+#include "../Map/Map.h"
 
 //==LIGHTNING_BOLT==
 LightningBolt::LightningBolt(int maxRange, int damage) noexcept : maxRange(maxRange), damage(damage) {}

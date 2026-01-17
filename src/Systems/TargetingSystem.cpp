@@ -1,9 +1,13 @@
-#include "TargetingSystem.h"
-
 #include <curses.h>
 
-#include "../Game.h"
+#include "TargetingSystem.h"
 #include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../ActorTypes/Player.h"
+#include "../Systems/InputHandler.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/DataManager.h"
+#include "../Gui/Gui.h"
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
 {

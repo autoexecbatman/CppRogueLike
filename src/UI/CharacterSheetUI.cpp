@@ -1,11 +1,13 @@
 // CharacterSheetUI.cpp - Handles character sheet display
 #include <format>
+#include <curses.h>
 
 #include "CharacterSheetUI.h"
 #include "../ActorTypes/Player.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Systems/DataManager.h"
+#include "../Systems/HungerSystem.h"
 
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
 {

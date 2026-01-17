@@ -1,6 +1,8 @@
 #include "Food.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Systems/HungerSystem.h"
+#include "../Systems/MessageSystem.h"
 
 Food::Food(int nutrition_value) : nutrition_value(nutrition_value) {}
 

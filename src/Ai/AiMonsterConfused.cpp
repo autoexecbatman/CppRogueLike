@@ -3,10 +3,11 @@
 
 #include <libtcod.h>
 
-#include "../Game.h"
 #include "../Actor/Actor.h"
 #include "Ai.h"
 #include "AiMonsterConfused.h"
+#include "../Core/GameContext.h"
+#include "../Map/Map.h"
 
 //==ConfusedMonsterAi==
 AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept : nbTurns(nbTurns), oldAi(std::move(oldAi)) {}

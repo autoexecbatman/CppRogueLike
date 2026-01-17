@@ -10,7 +10,6 @@
 #include <libtcod.h>
 #pragma warning (pop)
 
-#include "../Game.h"
 #include "../Ai/Ai.h"
 #include "Actor.h"
 #include "Attacker.h"
@@ -23,6 +22,9 @@
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Systems/ShopKeeper.h"
+#include "../Core/GameContext.h"
+#include "../Map/Map.h"
+#include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 

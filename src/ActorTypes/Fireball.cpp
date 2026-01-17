@@ -1,10 +1,17 @@
 // File: Fireball.cpp
+#include <cmath>
+
 #include "Fireball.h"
 #include "LightningBolt.h"
 #include "../Actor/Actor.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
-#include <cmath>
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/TargetingSystem.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/RenderingManager.h"
+#include "../Gui/Gui.h"
+#include "../ActorTypes/Player.h"
 
 //==Fireball==
 Fireball::Fireball(int range, int damage) : LightningBolt(range, damage) {}

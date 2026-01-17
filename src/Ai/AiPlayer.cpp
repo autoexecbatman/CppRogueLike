@@ -1,13 +1,13 @@
 // file: AiPlayer.cpp
-#include <curses.h>
-#include <libtcod.h>
 #include <unordered_map>
 #include <format>
+
+#include <curses.h>
+#include <libtcod.h>
 
 #include "Ai.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
-#include "../Game.h"
 #include "../Menu/Menu.h"
 #include "../Controls/Controls.h"
 #include "../Actor/Actor.h"
@@ -21,6 +21,14 @@
 #include "../ActorTypes/Player.h"
 #include "../Systems/LevelUpSystem.h"
 #include "../UI/InventoryUI.h"
+#include "../Core/GameContext.h"
+#include "../Systems/InputHandler.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/LevelManager.h"
+#include "../Systems/TargetingSystem.h"
+#include "../Systems/DisplayManager.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 

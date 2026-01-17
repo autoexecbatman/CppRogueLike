@@ -3,7 +3,6 @@
 
 #include "Pickable.h"
 #include "../Colors/Colors.h"
-#include "../Game.h"
 #include "Actor.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
@@ -19,6 +18,8 @@
 #include "../Items/CorpseFood.h"
 #include "../Items/Amulet.h"
 #include "../Items/Armor.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 

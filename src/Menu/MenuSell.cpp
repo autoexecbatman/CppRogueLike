@@ -1,10 +1,11 @@
 #include <iostream>
 
 #include "MenuSell.h"
-#include "../Game.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
 #include "BaseMenu.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 

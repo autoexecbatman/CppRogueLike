@@ -1,8 +1,12 @@
-#include "CorpseFood.h"
-#include "../Game.h"
-#include "../Colors/Colors.h"
 #include <algorithm>
 #include <unordered_map>
+
+#include "CorpseFood.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Random/RandomDice.h"
+#include "../Systems/HungerSystem.h"
+#include "../Systems/MessageSystem.h"
 
 // Define nutrition values for different monster types
 const std::unordered_map<std::string, int> CORPSE_NUTRITION_VALUES = {

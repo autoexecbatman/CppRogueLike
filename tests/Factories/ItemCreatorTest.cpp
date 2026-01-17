@@ -5,15 +5,17 @@
 // Include the target header files
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
-#include "src/Game.h"
+#include "src/Core/GameContext.h"
 
-class ItemCreatorTest : public ::testing::Test {
+class ItemCreatorTest : public ::testing::Test
+{
 protected:
     ItemCreator creator;
-    Game testGame;  // Local Game instance for testing
+    GameContext ctx;
 };
 
-TEST_F(ItemCreatorTest, CreateHealthPotion) {
+TEST_F(ItemCreatorTest, CreateHealthPotion)
+{
     Vector2D pos(0, 0);
     auto item = creator.create_health_potion(pos);
 
@@ -23,7 +25,8 @@ TEST_F(ItemCreatorTest, CreateHealthPotion) {
     EXPECT_EQ(item->value, 50);
 }
 
-TEST_F(ItemCreatorTest, CreateScrollLightning) {
+TEST_F(ItemCreatorTest, CreateScrollLightning)
+{
     Vector2D pos(0, 0);
     auto item = creator.create_scroll_lightning(pos);
 
@@ -33,7 +36,8 @@ TEST_F(ItemCreatorTest, CreateScrollLightning) {
     EXPECT_EQ(item->value, 150);
 }
 
-TEST_F(ItemCreatorTest, CreateRandomPotion) {
+TEST_F(ItemCreatorTest, CreateRandomPotion)
+{
     Vector2D pos(0, 0);
     auto item = creator.create_random_potion(pos, 1);
 
@@ -43,7 +47,8 @@ TEST_F(ItemCreatorTest, CreateRandomPotion) {
     EXPECT_EQ(item->value, 50);
 }
 
-TEST_F(ItemCreatorTest, CalculateEnhancementChance) {
+TEST_F(ItemCreatorTest, CalculateEnhancementChance)
+{
     int chance = creator.calculate_enhancement_chance(1);
     EXPECT_EQ(chance, 5);
 
@@ -60,8 +65,8 @@ TEST_F(ItemCreatorTest, CalculateEnhancementChance) {
     EXPECT_EQ(chance, 35);  // 5 + (11-1)*3 = 35 (capped)
 }
 
-TEST_F(ItemCreatorTest, DetermineEnhancementLevel) {
-    auto ctx = testGame.get_context();
+TEST_F(ItemCreatorTest, DetermineEnhancementLevel)
+{
     int level = creator.determine_enhancement_level(ctx, 1);
     EXPECT_GE(level, 0);
     EXPECT_LE(level, 3);
@@ -71,7 +76,8 @@ TEST_F(ItemCreatorTest, DetermineEnhancementLevel) {
     EXPECT_LE(level, 3);
 }
 
-TEST_F(ItemCreatorTest, CreateEnhancedDagger) {
+TEST_F(ItemCreatorTest, CreateEnhancedDagger)
+{
     Vector2D pos(0, 0);
     auto item = creator.create_enhanced_dagger(pos, 1);
 
@@ -80,7 +86,8 @@ TEST_F(ItemCreatorTest, CreateEnhancedDagger) {
     // Note: value calculation depends on game state and enhancement system
 }
 
-TEST_F(ItemCreatorTest, CreateLeatherArmor) {
+TEST_F(ItemCreatorTest, CreateLeatherArmor)
+{
     Vector2D pos(0, 0);
     auto item = creator.create_leather_armor(pos);
 

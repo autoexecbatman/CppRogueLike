@@ -77,7 +77,7 @@ struct GameContext {
     // Game world data
     Stairs* stairs{ nullptr };
     std::vector<std::unique_ptr<Object>>* objects{ nullptr };
-    class InventoryData* inventory_data{ nullptr };
+    struct InventoryData* inventory_data{ nullptr };
     std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
     std::vector<Vector2D>* rooms{ nullptr };
 

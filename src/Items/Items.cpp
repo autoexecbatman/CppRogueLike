@@ -1,5 +1,4 @@
 #include "Items.h"
-#include "../Game.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
@@ -11,6 +10,8 @@
 #include "Amulet.h"
 #include "Armor.h"
 #include "../Core/GameContext.h"
+#include "../Systems/LevelManager.h"
+#include "../Random/RandomDice.h"
 
 HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "health potion", WHITE_RED_PAIR })
 {

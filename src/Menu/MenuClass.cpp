@@ -1,7 +1,8 @@
 // file: MenuClass.cpp
+#include <algorithm>
+
 #include "MenuClass.h"
 #include "MenuName.h"
-#include "../Game.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
 #include "../Items/Items.h"
@@ -10,7 +11,8 @@
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
-#include <algorithm>
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 

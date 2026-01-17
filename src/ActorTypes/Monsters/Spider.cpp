@@ -14,9 +14,9 @@
  * creatures in the solo AD&D 2e experience system.
  */
 #include "Spider.h"
-#include "../../Game.h"
 #include "../../Ai/AiSpider.h"
 #include "../../Core/GameContext.h"
+#include "../../Random/RandomDice.h"
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx,SpiderType type)

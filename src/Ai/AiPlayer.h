@@ -6,7 +6,7 @@ class Actor;
 class Creature;
 class Player;
 class Item;
-class Vector2D;
+struct Vector2D;
 enum class Controls;
 
 class AiPlayer : public Ai

@@ -3,7 +3,6 @@
 #include <string>
 #include <algorithm>
 
-#include "../Game.h"
 #include "../Core/GameContext.h"
 #include "../Items/Items.h"
 #include "../Actor/Actor.h"
@@ -17,6 +16,8 @@
 #include "Pickable.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
+#include "../Systems/DataManager.h"
+#include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 

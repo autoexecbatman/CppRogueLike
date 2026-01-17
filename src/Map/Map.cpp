@@ -10,7 +10,6 @@
 #pragma warning (pop)
 
 #include "Map.h"
-#include "../Game.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
@@ -37,7 +36,8 @@
 #include "../Factories/MonsterFactory.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/ItemCreator.h"
-#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/LevelManager.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback

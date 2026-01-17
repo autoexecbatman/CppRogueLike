@@ -1,23 +1,32 @@
 #include <gtest/gtest.h>
 #include "src/Systems/LevelUpSystem.h"
-#include "src/Game.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Core/GameContext.h"
 #include "src/Actor/Destructible.h"
+#include "src/Systems/DataManager.h"
+#include "src/Systems/MessageSystem.h"
+#include "src/Random/RandomDice.h"
 
-class LevelUpSystemTest : public ::testing::Test {
+class LevelUpSystemTest : public ::testing::Test
+{
 protected:
-    Game game;
     std::unique_ptr<Player> player;
     GameContext ctx;
+    DataManager data_manager;
+    MessageSystem message_system;
+    RandomDice dice;
 
-    void SetUp() override {
+    void SetUp() override
+    {
         // Initialize game data
         // We need to load data for constitution bonuses etc.
         // Assuming JSON files are present in the test execution directory (handled by CMake)
-        try {
-            game.data_manager.load_all_data(game.message_system);
-        } catch (...) {
+        try
+        {
+            data_manager.load_all_data(message_system);
+        }
+        catch (...)
+        {
             // Ignore errors if files are missing, tests will just run without bonuses
         }
 
@@ -31,20 +40,22 @@ protected:
         player->destructible->set_hp_base(10);
         
         // Setup GameContext
-        ctx = game.get_context();
         ctx.player = player.get();
+        ctx.data_manager = &data_manager;
+        ctx.message_system = &message_system;
         
         // Enable testing mode for dice to have deterministic results
-        game.d.set_test_mode(true);
+        dice.set_test_mode(true);
     }
 
     void TearDown() override {
-        game.d.set_test_mode(false);
-        game.d.clear_fixed_rolls();
+        dice.set_test_mode(false);
+        dice.clear_fixed_rolls();
     }
 };
 
-TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier) {
+TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier)
+{
     EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(1), 2);
     EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(4), 2);
     EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(5), 3);
@@ -55,7 +66,8 @@ TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier) {
     EXPECT_EQ(LevelUpSystem::calculate_backstab_multiplier(20), 5);
 }
 
-TEST_F(LevelUpSystemTest, FighterLevelUpHPGain) {
+TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
+{
     // Setup player as Fighter
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_constitution(10); // Average constitution, no bonus
@@ -66,7 +78,7 @@ TEST_F(LevelUpSystemTest, FighterLevelUpHPGain) {
     player->destructible->set_hp(10);
 
     // Predictable dice roll: 8
-    game.d.set_next_d20(8);
+    dice.set_next_d20(8);
 
     // Apply level up
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
@@ -78,7 +90,8 @@ TEST_F(LevelUpSystemTest, FighterLevelUpHPGain) {
     EXPECT_EQ(player->destructible->get_hp(), 18);
 }
 
-TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus) {
+TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
+{
     // Setup player as Wizard
     player->playerClassState = Player::PlayerClassState::WIZARD;
     
@@ -91,9 +104,9 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus) {
     
     // Check if we have data loaded to know what to expect
     int expectedBonus = 0;
-    if (!game.data_manager.get_constitution_attributes().empty()) {
-        if (player->get_constitution() <= game.data_manager.get_constitution_attributes().size()) {
-            expectedBonus = game.data_manager.get_constitution_attributes()[player->get_constitution() - 1].HPAdj;
+    if (!data_manager.get_constitution_attributes().empty()) {
+        if (player->get_constitution() <= data_manager.get_constitution_attributes().size()) {
+            expectedBonus = data_manager.get_constitution_attributes()[player->get_constitution() - 1].HPAdj;
         }
     }
 
@@ -105,7 +118,7 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus) {
     int oldMaxHP = player->destructible->get_max_hp();
 
     // Predictable dice roll: 3
-    game.d.set_next_d20(3);
+    dice.set_next_d20(3);
 
     // Apply level up
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
@@ -116,7 +129,8 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus) {
     EXPECT_EQ(player->destructible->get_max_hp(), oldMaxHP + gained);
 }
 
-TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7) {
+TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->attacksPerRound = 1.0f;
 
@@ -126,7 +140,8 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7) {
     EXPECT_FLOAT_EQ(player->attacksPerRound, 1.5f);
 }
 
-TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13) {
+TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->attacksPerRound = 1.5f;
 
@@ -136,7 +151,8 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13) {
     EXPECT_FLOAT_EQ(player->attacksPerRound, 2.0f);
 }
 
-TEST_F(LevelUpSystemTest, AbilityScoreImprovement) {
+TEST_F(LevelUpSystemTest, AbilityScoreImprovement)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_strength(15);
     
@@ -146,7 +162,8 @@ TEST_F(LevelUpSystemTest, AbilityScoreImprovement) {
     EXPECT_EQ(player->get_strength(), 16);
 }
 
-TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel) {
+TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_strength(15);
     
@@ -156,7 +173,8 @@ TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel) {
     EXPECT_EQ(player->get_strength(), 15);
 }
 
-TEST_F(LevelUpSystemTest, FighterTHAC0Improvement) {
+TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     
     // Level 1 Fighter THAC0 is 20
@@ -164,20 +182,21 @@ TEST_F(LevelUpSystemTest, FighterTHAC0Improvement) {
     
     // Apply level up to 2 (Fighter THAC0 becomes 19)
     // We need to consume the dice rolls for HP calculation (1 roll for d10)
-    game.d.set_next_d20(5); 
+    dice.set_next_d20(5); 
     
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
     
     EXPECT_EQ(player->destructible->get_thaco(), 19);
 }
 
-TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel) {
+TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
+{
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->attacksPerRound = 1.0f;
     
     // Jump from level 6 to 8 (skipping 7)
     // Needs dice roll for HP
-    game.d.set_next_d20(5);
+    dice.set_next_d20(5);
 
     LevelUpSystem::apply_level_up_benefits(*player, 8, &ctx);
     

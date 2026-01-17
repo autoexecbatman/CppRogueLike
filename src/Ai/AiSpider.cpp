@@ -1,9 +1,12 @@
 #include <cmath>
+
 #include "AiSpider.h"
-#include "../Game.h"
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../Map/Map.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../ActorTypes/Player.h"
+#include "../Systems/MessageSystem.h"
 
 // Spider AI constants
 const int AMBUSH_DURATION = 5;      // How long spiders stay in ambush mode

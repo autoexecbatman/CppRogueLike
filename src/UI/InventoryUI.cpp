@@ -1,12 +1,15 @@
+#include <algorithm>
+
 #include "InventoryUI.h"
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Pickable.h"
 #include "../Actor/InventoryOperations.h"
-#include "../Game.h"
 #include "../Controls/Controls.h"
 #include "../Colors/Colors.h"
-#include <algorithm>
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 

@@ -7,7 +7,6 @@
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
-#include "../Game.h"
 #include "../Core/GameContext.h"
 
 void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx)

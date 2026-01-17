@@ -1,10 +1,12 @@
 #include "ShopkeeperFactory.h"
-#include "../../Game.h"
 #include "../../Actor/Actor.h"
 #include "../../Ai/AiShopkeeper.h"
 #include "../../Colors/Colors.h"
 #include "../../Actor/Attacker.h"
 #include "../../Actor/Destructible.h"
+#include "../../Random/RandomDice.h"
+#include "../../Core/GameContext.h"
+#include "../../Systems/MessageSystem.h"
 
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {

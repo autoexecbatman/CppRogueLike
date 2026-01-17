@@ -1,11 +1,11 @@
+#include <algorithm>
+
 #include "HungerSystem.h"
 #include "../Core/GameContext.h"
-#include "../Game.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
-#include <algorithm>
 
 HungerSystem::HungerSystem() :
     hunger_value(0),

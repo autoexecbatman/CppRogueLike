@@ -27,7 +27,6 @@
  * while maintaining the tactical challenge of AD&D 2e combat.
  */
 #include "Monsters.h"
-#include "../Game.h"
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiMonster.h"
@@ -36,6 +35,7 @@
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Healer.h"
 #include "../Ai/AiMimic.h"
+#include "../Core/GameContext.h"
 
 Goblin::Goblin(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'g',"goblin",YELLOW_BLACK_PAIR })
 {

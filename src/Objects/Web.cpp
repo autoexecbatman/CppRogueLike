@@ -1,8 +1,8 @@
 #include "Web.h"
-#include "../Game.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 Web::Web(Vector2D position, int strength)
     : Object(position, ActorData{ '*', "spider web", BLACK_WHITE_PAIR }),

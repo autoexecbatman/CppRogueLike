@@ -1,8 +1,8 @@
 #include "Armor.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 // Clean armor equip/unequip logic - delegates to Equipment System
 bool Armor::use(Item& item, Creature& wearer, GameContext& ctx)

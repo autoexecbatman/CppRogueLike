@@ -3,7 +3,12 @@
 
 #include "Menu.h"
 #include "MenuGender.h"
-#include "../Game.h"
+#include "../Core/GameContext.h"
+#include "../Systems/GameStateManager.h"
+#include "../Systems/MenuManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
+#include "../Gui/Gui.h"
 
 void NewGame::on_selection(GameContext& ctx)
 {

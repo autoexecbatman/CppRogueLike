@@ -1,6 +1,7 @@
 #include "Healer.h"
-#include "../Game.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Systems/MessageSystem.h"
 
 //==HEALER==
 Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}

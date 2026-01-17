@@ -1,7 +1,6 @@
 #include <format>
 #include <memory>
 
-#include "../Game.h"
 #include "../Core/GameContext.h"
 #include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
@@ -10,6 +9,8 @@
 #include "Attacker.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Attributes/DexterityAttributes.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/DataManager.h"
 
 Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 
