@@ -247,7 +247,7 @@ void Fireball::cleanup_explosion_window(WINDOW* window, GameContext& ctx)
 
     clear();
     refresh();
-    ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+    ctx.rendering_manager->render(ctx);
     ctx.gui->gui_render(ctx);
     ctx.rendering_manager->force_screen_refresh();
 }

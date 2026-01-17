@@ -208,7 +208,7 @@ void LevelUpUI::cleanup_and_restore(GameContext& ctx)
 {
     // Clear screen and restore game display properly
     clear();
-    ctx.game->render();
+    ctx.rendering_manager->render(ctx);
     ctx.gui->gui_render(ctx);
     refresh();
 }

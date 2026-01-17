@@ -60,7 +60,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		if (!ctx.player->try_break_web(ctx))
 		{
 			// Still stuck, skip the player's turn
-			ctx.game->gameStatus = GameStatus::NEW_TURN;
+			*ctx.game_status = GameStatus::NEW_TURN;
 			return;
 		}
 	}
@@ -100,7 +100,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				}
 
 				ctx.message_system->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
-				ctx.game->gameStatus = GameStatus::NEW_TURN;
+				*ctx.game_status = GameStatus::NEW_TURN;
 			}
 			else
 			{
@@ -111,7 +111,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				if (m.moves.find(key) != m.moves.end())
 				{
 					moveVector = m.moves.at(key);
-					ctx.game->gameStatus = GameStatus::NEW_TURN;
+					*ctx.game_status = GameStatus::NEW_TURN;
 				}
 				else
 				{
@@ -131,7 +131,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		if (m.moves.find(key) != m.moves.end())
 		{
 			moveVector = m.moves.at(key);
-			ctx.game->gameStatus = GameStatus::NEW_TURN;
+			*ctx.game_status = GameStatus::NEW_TURN;
 		}
 		else
 		{
@@ -194,14 +194,14 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	}
 
 	// Check if floor inventory is empty
-	if (ctx.game->inventory_data.items.empty())
+	if (ctx.inventory_data->items.empty())
 	{
 		return; // No floor items to pick up
 	}
 
 	// Find items at player's position using range-based approach
 	std::vector<std::unique_ptr<Item>*> itemsAtPosition;
-	for (auto& item : ctx.game->inventory_data.items)
+	for (auto& item : ctx.inventory_data->items)
 	{
 		if (item && item->position == player.position)
 		{
@@ -227,7 +227,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldPickable->amount) + " gold.", true);
 
 		// Remove gold from floor
-		remove_item(ctx.game->inventory_data, *item);
+		remove_item(*ctx.inventory_data, *item);
 		return;
 	}
 
@@ -238,7 +238,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	if (result.has_value())
 	{
 		// Item successfully added to player inventory
-		optimize_inventory_storage(ctx.game->inventory_data);
+		optimize_inventory_storage(*ctx.inventory_data);
 		player.sync_ranged_state(ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
@@ -396,7 +396,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 		}
 
 		// Set game status to register the turn
-		ctx.game->gameStatus = GameStatus::NEW_TURN;
+		*ctx.game_status = GameStatus::NEW_TURN;
 	}
 
 	// Clean up
@@ -405,7 +405,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 	// CRITICAL FIX: Restore the game display
 	clear();
 	refresh();
-	ctx.game->restore_game_display();
+	ctx.rendering_manager->restore_game_display();
 }
 
 bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
@@ -505,12 +505,12 @@ void AiPlayer::look_on_floor(Vector2D target, GameContext& ctx)
 {
 	// look for corpses or items
 	// Check if floor inventory is empty
-	if (ctx.game->inventory_data.items.empty())
+	if (ctx.inventory_data->items.empty())
 	{
 		return;
 	}
 
-	for (const auto& i : ctx.game->inventory_data.items)
+	for (const auto& i : ctx.inventory_data->items)
 	{
 		if (i)
 		{
@@ -525,7 +525,7 @@ void AiPlayer::look_on_floor(Vector2D target, GameContext& ctx)
 bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ctx)
 {
 	// look for living actors to attack
-	for (const auto& c : ctx.game->creatures)
+	for (const auto& c : *ctx.creatures)
 	{
 		if (c && c->destructible)
 		{
@@ -593,7 +593,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					}
 
 					// Clean up dead creatures after combat
-					ctx.game->cleanup_dead_creatures();
+					ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 				}
 				else
 				{
@@ -602,7 +602,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 				}
 
 				// Clean up dead creatures after combat
-				ctx.game->cleanup_dead_creatures();
+				ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 				return false;
 			}
 		}
@@ -678,7 +678,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::WAIT:
 	{
-		ctx.game->gameStatus = GameStatus::NEW_TURN;
+		*ctx.game_status = GameStatus::NEW_TURN;
 		isWaiting = true;
 		break;
 	}
@@ -695,7 +695,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 			// Use the same level up system as natural progression
 			player.ai->levelup_update(ctx, player);
 		}
-		ctx.game->gameStatus = GameStatus::NEW_TURN;
+		*ctx.game_status = GameStatus::NEW_TURN;
 		break;
 	}
 
@@ -709,7 +709,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::PICK:
 	{
 		pick_item(player, ctx);
-		ctx.game->gameStatus = GameStatus::NEW_TURN;
+		*ctx.game_status = GameStatus::NEW_TURN;
 		break;
 	}
 
@@ -727,41 +727,42 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::QUIT:
 	{
-		ctx.game->run = false;
+		*ctx.run = false;
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
 		break;
 	}
 
 	case Controls::ESCAPE: // if escape key is pressed bring the game menu
 	{
-		ctx.game->menus.push_back(std::make_unique<Menu>(false, ctx)); // false = in-game menu
+		ctx.menus->push_back(std::make_unique<Menu>(false, ctx)); // false = in-game menu
 		break;
 	}
 
 	case Controls::DESCEND:
 	{
-		if (ctx.game->stairs->position == player.position)
+		if (ctx.stairs->position == player.position)
 		{
-			ctx.game->next_level(); // sets state to STARTUP
+			ctx.level_manager->advance_to_next_level(*ctx.map, *ctx.player, *ctx.message_system, ctx);
+			*ctx.game_status = GameStatus::STARTUP;
 		}
 		break;
 	}
 
 	case Controls::TARGET:
 	{
-		ctx.game->handle_ranged_attack();
+		ctx.targeting->handle_ranged_attack(ctx);
 		break;
 	}
 
 	case Controls::CHAR_SHEET:
 	{
-		ctx.game->display_character_sheet();
+		ctx.display_manager->display_character_sheet(*ctx.player, ctx);
 		break;
 	}
 
 	case Controls::DEBUG:
 	{
-		ctx.game->display_debug_messages();
+		ctx.message_system->display_debug_messages();
 		break;
 	}
 
@@ -791,7 +792,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 				if (ctx.map->open_door(doorPos, ctx))
 				{
 					ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
-					ctx.game->gameStatus = GameStatus::NEW_TURN;
+					*ctx.game_status = GameStatus::NEW_TURN;
 					// FOV is recalculated inside open_door method
 				}
 				else
@@ -825,7 +826,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 				if (ctx.map->close_door(doorPos, ctx))
 				{
 					ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
-					ctx.game->gameStatus = GameStatus::NEW_TURN;
+					*ctx.game_status = GameStatus::NEW_TURN;
 					// FOV is recalculated inside close_door method
 				}
 				else
@@ -861,7 +862,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::HELP:
 	{
-		ctx.game->display_help();
+		ctx.display_manager->display_help();
 		break;
 	}
 

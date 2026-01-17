@@ -87,7 +87,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to, GameContext& c
 
 	// Create lightning flash
 	clear();
-	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.rendering_manager->render(ctx);
 	ctx.gui->gui_render(ctx);
 	
 	// Lightning phases
@@ -166,7 +166,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to, GameContext& c
 		// Clear for next flash
 		if (flash < FLASH_COUNT - 1) {
 			clear();
-			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+			ctx.rendering_manager->render(ctx);
 			ctx.gui->gui_render(ctx);
 			napms(50); // Brief darkness between flashes
 		}
@@ -194,7 +194,7 @@ void LightningBolt::animate_lightning(Vector2D from, Vector2D to, GameContext& c
 
 	// Redraw game
 	clear();
-	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.rendering_manager->render(ctx);
 	ctx.gui->gui_render(ctx);
 	refresh();
 }

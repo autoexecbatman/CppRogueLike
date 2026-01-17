@@ -9,6 +9,7 @@
 #include "../Menu/MenuTrade.h"
 #include "Attacker.h"
 #include "../Ai/AiShopkeeper.h"
+#include "../Attributes/DexterityAttributes.h"
 
 Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 
@@ -56,7 +57,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 	// Shopkeeper interaction (melee only)
 	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
 	{
-		ctx.game->menus.push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
+		ctx.menus->push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
 		return;
 	}
 

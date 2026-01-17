@@ -1,6 +1,8 @@
 // RenderingManager.cpp - Handles all rendering and screen management
+#include <curses.h>
 
 #include "RenderingManager.h"
+#include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
@@ -8,7 +10,11 @@
 #include "../Actor/InventoryData.h"
 #include "../Gui/Gui.h"
 #include "../Objects/Web.h"
-#include <curses.h>
+
+void RenderingManager::render(GameContext& ctx) const
+{
+    render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+}
 
 void RenderingManager::render_world(
     const Map& map,

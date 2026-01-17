@@ -27,15 +27,7 @@ public:
     ~RenderingManager() = default;
 
     // Core rendering methods
-    void render_world(
-        const Map& map,
-        const Stairs& stairs,
-        std::span<const std::unique_ptr<Object>> objects,
-        const InventoryData& inventory_data,
-        std::span<const std::unique_ptr<Creature>> creatures,
-        const Player& player,
-        const GameContext& ctx
-    ) const;
+    void render(GameContext& ctx) const;
 
     void render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const;
     void render_items(std::span<const std::unique_ptr<Item>> items, const GameContext& ctx) const;
@@ -48,6 +40,15 @@ public:
 private:
     // Helper methods
     void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
+    void render_world(
+        const Map& map,
+        const Stairs& stairs,
+        std::span<const std::unique_ptr<Object>> objects,
+        const InventoryData& inventory_data,
+        std::span<const std::unique_ptr<Creature>> creatures,
+        const Player& player,
+        const GameContext& ctx
+    ) const;
 };
 
 #endif // RENDERINGMANAGER_H

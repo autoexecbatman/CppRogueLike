@@ -60,7 +60,7 @@ void MenuName::menu_name(GameContext& ctx)
 	// Only restore game display if game was initialized (not during character creation)
 	if (ctx.menu_manager->is_game_initialized())
 	{
-		ctx.game->restore_game_display();
+		ctx.rendering_manager->restore_game_display();
 	}
 }
 

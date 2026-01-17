@@ -29,6 +29,10 @@ public:
     GameStateManager() = default;
     ~GameStateManager() = default;
 
+    // High-level game state operations
+    bool load_all(GameContext& ctx);
+    void init_new_game(GameContext& ctx);
+
     // Save/Load operations
     void save_game(
         Map& map,

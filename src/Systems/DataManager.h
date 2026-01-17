@@ -7,14 +7,14 @@
 #include <vector>
 #include <string>
 
-// Forward declarations
-struct Weapons;
-struct StrengthAttributes;
-struct DexterityAttributes;
-struct ConstitutionAttributes;
-struct CharismaAttributes;
-struct IntelligenceAttributes;
-struct WisdomAttributes;
+#include "../Items/Weapons.h"
+#include "../Attributes/StrengthAttributes.h"
+#include "../Attributes/DexterityAttributes.h"
+#include "../Attributes/ConstitutionAttributes.h"
+#include "../Attributes/CharismaAttributes.h"
+#include "../Attributes/IntelligenceAttributes.h"
+#include "../Attributes/WisdomAttributes.h"
+
 class MessageSystem;
 
 class DataManager 

@@ -26,7 +26,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		{
 			targetCursor = ctx.input_handler->get_mouse_position();
 		}
-		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+		ctx.rendering_manager->render(ctx);
 
 		// Display the FOV in white
 		for (int y = 0; y < MAP_HEIGHT; y++)
@@ -179,7 +179,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		refresh();
 
 		// Restore the game display after targeting
-		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+		ctx.rendering_manager->render(ctx);
 		ctx.gui->gui_render(ctx);
 		ctx.rendering_manager->force_screen_refresh();
 		return Vector2D{ -1, -1 };
@@ -389,7 +389,7 @@ void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector
 	}
 
 	// Redraw the map before animation
-	ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	ctx.rendering_manager->render(ctx);
 	refresh();
 
 	// Animate along the path
@@ -493,7 +493,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 		{
 			targetCursor = ctx.input_handler->get_mouse_position();
 		}
-		ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+		ctx.rendering_manager->render(ctx);
 
 		// first color the player position if the cursor has moved from the player position
 		if (targetCursor != ctx.player->position)
@@ -575,7 +575,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 			*position = targetCursor;
 
 			// Restore game display before returning
-			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+			ctx.rendering_manager->render(ctx);
 			ctx.gui->gui_render(ctx);
 			ctx.rendering_manager->force_screen_refresh();
 			return true;
@@ -595,7 +595,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 				{
 					ctx.player->attacker->attack(*ctx.player, *actor, ctx);
 					// Restore game display after attack
-					ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+					ctx.rendering_manager->render(ctx);
 					ctx.gui->gui_render(ctx);
 					ctx.rendering_manager->force_screen_refresh();
 					run = false;
@@ -607,7 +607,7 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 		case 27:
 			ctx.message_system->message(WHITE_BLACK_PAIR, "Target selection canceled", true);
 			// Restore game display before exit
-			ctx.rendering_manager->render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+			ctx.rendering_manager->render(ctx);
 			ctx.gui->gui_render(ctx);
 			ctx.rendering_manager->force_screen_refresh();
 			run = false;

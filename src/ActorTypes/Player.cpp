@@ -1,6 +1,6 @@
 // file: Player.cpp
 #include <curses.h>
-#include "../Game.h"
+
 #include "../Map/Map.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiPlayer.h"
@@ -19,6 +19,9 @@
 #include "../Ai/AiShopkeeper.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/HungerSystem.h"
+#include "../Systems/RenderingManager.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -270,7 +273,7 @@ bool Player::rest(GameContext& ctx)
 	ctx.message_system->finalize_message();
 
 	// Resting takes time
-	ctx.game->gameStatus = GameStatus::NEW_TURN;
+	*ctx.game_status = GameStatus::NEW_TURN;
 	return true;
 }
 
@@ -283,7 +286,7 @@ void Player::animate_resting(GameContext& ctx)
 
 	// Save original screen
 	clear();
-	ctx.game->render();
+	ctx.rendering_manager->render(ctx);
 
 	// Show animation
 	for (int i = 0; i < frames; i++)
@@ -302,7 +305,7 @@ void Player::animate_resting(GameContext& ctx)
 
 	// Redraw screen
 	clear();
-	ctx.game->render();
+	ctx.rendering_manager->render(ctx);
 	refresh();
 }
 

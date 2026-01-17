@@ -15,6 +15,8 @@
 #include "../Items/Armor.h"
 #include "../ActorTypes/Player.h"
 #include "Pickable.h"
+#include "../Attributes/ConstitutionAttributes.h"
+#include "../Attributes/DexterityAttributes.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -337,7 +339,7 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
-	ctx.game->gameStatus = GameStatus::DEFEAT;
+	*ctx.game_status = GameStatus::DEFEAT;
 }
 
 //==MonsterDestructible==

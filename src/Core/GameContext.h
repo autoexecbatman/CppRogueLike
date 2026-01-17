@@ -30,12 +30,14 @@ struct Vector2D;
 // Game status enumeration - moved here to avoid circular dependency
 enum class GameStatus
 {
-    STARTUP, 
-    IDLE, 
-    NEW_TURN, 
-    VICTORY, 
+    STARTUP,
+    IDLE,
+    NEW_TURN,
+    VICTORY,
     DEFEAT
 };
+
+enum class WindowState { MENU, GAME };
 
 /**
  * GameContext - Dependency injection container
@@ -46,9 +48,6 @@ enum class GameStatus
  * Phase 3: Replace game.X with ctx->X incrementally (1,196 references)
  */
 struct GameContext {
-    // Top-level coordinator
-    Game* game{ nullptr };
-
     // Core game world
     Map* map{ nullptr };
     Gui* gui{ nullptr };
@@ -85,8 +84,11 @@ struct GameContext {
     // UI Collections
     std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
 
-    // Game state (pointer to allow mutation)
+    // Game state (pointers to allow mutation)
     int* time{ nullptr };
     bool* run{ nullptr };
-    GameStatus* game_status{ nullptr };  // Pointer to actual enum type
+    bool* shouldSave{ nullptr };
+    bool* isLoadedGame{ nullptr };  // Track new game vs loaded game
+    GameStatus* game_status{ nullptr };
+    WindowState* window_state{ nullptr };
 };

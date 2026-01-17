@@ -261,8 +261,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/UI/CharacterSheetUI.h
 
     # Main
-    ${PROJECT_SOURCE_DIR}/Game.cpp
-    ${PROJECT_SOURCE_DIR}/Game.h
     ${PROJECT_SOURCE_DIR}/main_C++RogueLike.cpp
 )
 

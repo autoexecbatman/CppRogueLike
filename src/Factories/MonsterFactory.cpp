@@ -153,7 +153,7 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
             monsterTypes[i].createFunc(position, ctx);
 
             // Check if special AI needed for ranged attackers
-            Creature* monster = ctx.game->get_actor(position);
+            Creature* monster = ctx.map->get_actor(position, ctx);
             if (monster && monster->has_state(ActorState::IS_RANGED)) {
                 // Replace standard AI with ranged AI
                 monster->ai = std::make_unique<AiMonsterRanged>();

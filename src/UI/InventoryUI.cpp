@@ -319,7 +319,7 @@ bool InventoryUI::handle_backpack_selection(Player& player, int itemIndex, GameC
             
             if (itemUsed)
             {
-                ctx.game->gameStatus = GameStatus::NEW_TURN;
+                *ctx.game_status = GameStatus::NEW_TURN;
                 
                 // Check if the item still exists in inventory (not consumed)
                 bool itemStillExists = false;
@@ -402,5 +402,5 @@ void InventoryUI::restore_game_display(GameContext& ctx)
 {
     clear();
     refresh();
-    ctx.game->restore_game_display();
+    ctx.rendering_manager->restore_game_display();
 }

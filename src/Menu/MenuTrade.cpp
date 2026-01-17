@@ -12,7 +12,7 @@ void Buy::on_selection(GameContext& ctx)
 	// Use the shopkeeper's attached shop component
 	if (shopkeeper.shop != nullptr)
 	{
-		ctx.game->menus.push_back(std::make_unique<MenuBuy>(ctx, *ctx.player, *shopkeeper.shop));
+		ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player, *shopkeeper.shop));
 	}
 	else
 	{
@@ -132,7 +132,7 @@ void MenuTrade::menu(GameContext& ctx)
 {
 	// Save background before showing menu
 	clear();
-	ctx.game->render();
+	ctx.rendering_manager->render(ctx);
 	refresh();
 	
 	while (run)
@@ -143,6 +143,6 @@ void MenuTrade::menu(GameContext& ctx)
 	}
 	// Restore full game view
 	clear();
-	ctx.game->render();
+	ctx.rendering_manager->render(ctx);
 	refresh();
 }

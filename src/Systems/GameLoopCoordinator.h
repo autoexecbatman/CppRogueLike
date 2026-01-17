@@ -15,6 +15,7 @@ public:
 
     // Core game loop coordination
     void handle_gameloop(GameContext& ctx, Gui& gui, int loopNum);
+    void update(GameContext& ctx);
 
 private:
     // Helper methods for game loop phases

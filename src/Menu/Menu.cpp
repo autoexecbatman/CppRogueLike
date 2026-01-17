@@ -20,7 +20,7 @@ void LoadGame::on_selection(GameContext& ctx)
 	mvprintw(LINES / 2, (COLS / 2) - 10, "Loading game, please wait...");
 	refresh();
 	
-	ctx.game->load_all();
+	ctx.state_manager->load_all(ctx);
 	
 	// Clear loading message after load completes
 	clear();
@@ -35,7 +35,7 @@ void Options::on_selection(GameContext& ctx)
 void Quit::on_selection(GameContext& ctx)
 {
     *ctx.run = false;
-    ctx.game->shouldSave = false;
+    *ctx.shouldSave = false;
     ctx.message_system->log("You quit without saving!");
 }
 
@@ -175,7 +175,7 @@ void Menu::menu(GameContext& ctx)
 	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
-		ctx.game->render();
+		ctx.rendering_manager->render(ctx);
 		ctx.gui->gui_render(ctx);
 	}
 	refresh();
@@ -191,7 +191,7 @@ void Menu::menu(GameContext& ctx)
 	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
         clear();
-        ctx.game->render();
+        ctx.rendering_manager->render(ctx);
         ctx.gui->gui_render(ctx);
         refresh();
 	}

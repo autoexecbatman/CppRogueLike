@@ -1,4 +1,8 @@
 // GameStateManager.cpp - Handles game state persistence and level management
+#include <fstream>
+#include <format>
+
+#include <nlohmann/json.hpp>
 
 #include "GameStateManager.h"
 #include "../Game.h"
@@ -12,12 +16,37 @@
 #include "../Systems/LevelManager.h"
 #include "../Factories/ItemCreator.h"
 #include "../Utils/Vector2D.h"
-#include <fstream>
-#include <nlohmann/json.hpp>
-#include <format>
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
+
+void GameStateManager::init_new_game(GameContext& ctx)
+{
+    ctx.data_manager->load_all_data(*ctx.message_system);
+    ctx.map->init(true, ctx);
+    ctx.player->roll_new_character(ctx);
+    *ctx.game_status = GameStatus::STARTUP;
+    ctx.message_system->log("New game initialized");
+}
+
+bool GameStateManager::load_all(GameContext& ctx)
+{
+    ctx.menu_manager->set_game_initialized(true);
+    ctx.data_manager->load_all_data(*ctx.message_system);
+
+    if (!load_game(*ctx.map, *ctx.rooms, *ctx.player, *ctx.stairs, *ctx.creatures,
+                   *ctx.inventory_data, *ctx.gui, *ctx.hunger_system,
+                   *ctx.level_manager, *ctx.time, ctx))
+    {
+        ctx.message_system->log("Error: Could not open save file.");
+        return false;
+    }
+
+    if (ctx.isLoadedGame) *ctx.isLoadedGame = true;
+    *ctx.game_status = GameStatus::STARTUP;
+    ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
+    return true;
+}
 
 void GameStateManager::save_game(
     Map& map,
