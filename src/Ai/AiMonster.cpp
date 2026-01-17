@@ -20,7 +20,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
     }
 
     // Check if monster is in FOV - if so, set tracking
-    if (ctx.map->is_in_fov(owner.position))
+    if (ctx.map->is_in_fov(owner.position) && !ctx.player->is_invisible())
     {
         // Player can see monster - set maximum tracking
         moveCount = TRACKING_TURNS;
@@ -39,12 +39,12 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
     int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
 
     // Behavior based on distance and visibility
-    if (moveCount > 0)
+    if (moveCount > 0 && !ctx.player->is_invisible())
     {
         // Recently seen player - actively pursue
         moveOrAttack(owner, ctx.player->position, ctx);
     }
-    else if (distanceToPlayer <= 15)
+    else if (distanceToPlayer <= 15 && !ctx.player->is_invisible())
     {
         // Within a certain range, monsters might still wander toward player
         // even if they don't have direct line of sight
