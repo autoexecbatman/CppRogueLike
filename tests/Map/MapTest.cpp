@@ -17,6 +17,7 @@ class MapTest : public ::testing::Test
 protected:
     std::unique_ptr<Map> map;
     std::unique_ptr<Player> player;
+    std::vector<std::unique_ptr<Creature>> creatures;
     GameContext ctx;
     DataManager data_manager;
     MessageSystem message_system;
@@ -43,6 +44,9 @@ protected:
         ctx.player = player.get();
         ctx.data_manager = &data_manager;
         ctx.message_system = &message_system;
+        ctx.dice = &dice;
+        ctx.creatures = &creatures;
+        ctx.map = map.get();
 
         dice.set_test_mode(true);
 

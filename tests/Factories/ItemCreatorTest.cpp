@@ -2,16 +2,21 @@
 #include <vector>
 #include <string>
 
-// Include the target header files
+#include "src/Game.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
-#include "src/Core/GameContext.h"
 
 class ItemCreatorTest : public ::testing::Test
 {
 protected:
-    ItemCreator creator;
+    Game game;
     GameContext ctx;
+    ItemCreator creator;
+
+    void SetUp() override
+    {
+        ctx = game.context();
+    }
 };
 
 TEST_F(ItemCreatorTest, CreateHealthPotion)
@@ -59,10 +64,10 @@ TEST_F(ItemCreatorTest, CalculateEnhancementChance)
     EXPECT_EQ(chance, 11);
 
     chance = creator.calculate_enhancement_chance(10);
-    EXPECT_EQ(chance, 32);  // 5 + (10-1)*3 = 32
+    EXPECT_EQ(chance, 32);
 
     chance = creator.calculate_enhancement_chance(11);
-    EXPECT_EQ(chance, 35);  // 5 + (11-1)*3 = 35 (capped)
+    EXPECT_EQ(chance, 35);
 }
 
 TEST_F(ItemCreatorTest, DetermineEnhancementLevel)
@@ -83,7 +88,6 @@ TEST_F(ItemCreatorTest, CreateEnhancedDagger)
 
     EXPECT_EQ(item->actorData.color, WHITE_GREEN_PAIR);
     EXPECT_NE(item, nullptr);
-    // Note: value calculation depends on game state and enhancement system
 }
 
 TEST_F(ItemCreatorTest, CreateLeatherArmor)

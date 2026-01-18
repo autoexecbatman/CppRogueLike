@@ -1,11 +1,8 @@
 #include <gtest/gtest.h>
+#include "src/Game.h"
 #include "src/Actor/Destructible.h"
 #include "src/Actor/Actor.h"
 #include "src/ActorTypes/Player.h"
-#include "src/Core/GameContext.h"
-#include "src/Systems/MessageSystem.h"
-#include "src/Systems/DataManager.h"
-#include "src/Systems/CreatureManager.h"
 
 // ============================================================================
 // DESTRUCTIBLE EDGE CASE TESTS
@@ -15,22 +12,17 @@
   class DestructibleEdgeCaseTest : public ::testing::Test
   {
   protected:
-      CreatureManager creature_manager;
+      Game game;
+      GameContext ctx;
       std::vector<std::unique_ptr<Creature>> creatures;
       std::unique_ptr<Player> player;
       std::unique_ptr<Creature> monster;
-      GameContext ctx;
-
-      // Own required systems directly
-      RandomDice dice;
-      MessageSystem message_system;
-      DataManager data_manager;
 
       void SetUp() override
       {
           try
           {
-              data_manager.load_all_data(message_system);
+              game.data_manager.load_all_data(game.message_system);
           }
           catch (...) {}
 
@@ -41,18 +33,17 @@
           monster = std::make_unique<Creature>(Vector2D{1, 0}, ActorData{'o', "orc", 1});
           monster->destructible = std::make_unique<MonsterDestructible>(50, 2, "orc corpse", 75, 19, 7);
 
+          ctx = game.context();
           ctx.player = player.get();
-          ctx.dice = &dice;
-          ctx.message_system = &message_system;
           ctx.creatures = &creatures;
 
-          dice.set_test_mode(true);
+          game.dice.set_test_mode(true);
       }
 
       void TearDown() override
       {
-          dice.set_test_mode(false);
-          dice.clear_fixed_rolls();
+          game.dice.set_test_mode(false);
+          game.dice.clear_fixed_rolls();
       }
   };
 // ----------------------------------------------------------------------------
@@ -535,7 +526,7 @@ TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_RemovesDeadFromVector)
     creatures[0]->destructible->take_damage(*creatures[0], 1000, ctx);
     EXPECT_TRUE(creatures[0]->destructible->is_dead());
 
-    creature_manager.cleanup_dead_creatures(creatures);
+    ctx.creature_manager->cleanup_dead_creatures(creatures);
 
     EXPECT_EQ(creatures.size(), 0) << "Dead creatures should be removed after cleanup";
 }
@@ -548,7 +539,7 @@ TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_KeepsAliveCreatures)
     creatures[0]->destructible->take_damage(*creatures[0], 10, ctx);
     EXPECT_FALSE(creatures[0]->destructible->is_dead());
 
-    creature_manager.cleanup_dead_creatures(creatures);
+    ctx.creature_manager->cleanup_dead_creatures(creatures);
 
     EXPECT_EQ(creatures.size(), 1) << "Alive creatures should not be removed";
 }
@@ -562,6 +553,6 @@ TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup)
     EXPECT_TRUE(creatures[0]->destructible->is_dead());
     EXPECT_EQ(creatures.size(), 1) << "Dead creature still in list before cleanup";
 
-    creature_manager.cleanup_dead_creatures(creatures);
+    ctx.creature_manager->cleanup_dead_creatures(creatures);
     EXPECT_EQ(creatures.size(), 0) << "Dead creature removed after cleanup";
 }

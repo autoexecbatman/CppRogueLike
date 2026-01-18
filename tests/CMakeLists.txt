@@ -91,3 +91,9 @@ add_custom_target(test_run
     WORKING_DIRECTORY $<TARGET_FILE_DIR:test_exe>
     COMMENT "Running unit tests"
 )
+
+# Enable CTest and add test with proper working directory
+include(CTest)
+enable_testing()
+add_test(NAME unit_tests COMMAND test_exe)
+set_tests_properties(unit_tests PROPERTIES WORKING_DIRECTORY $<TARGET_FILE_DIR:test_exe>)

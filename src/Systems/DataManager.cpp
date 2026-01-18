@@ -1,6 +1,7 @@
 // file: Systems/DataManager.cpp
 #include <iostream>
 #include <fstream>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 
 #include "DataManager.h"
@@ -15,18 +16,37 @@
 #include "../Attributes/IntelligenceAttributes.h"
 #include "../Attributes/WisdomAttributes.h"
 
+namespace {
+    // Search multiple paths for a JSON file
+    std::string find_data_file(const std::string& filename) {
+        std::vector<std::string> searchPaths = {
+            "./" + filename,                    // Current directory
+            "./bin/Debug/" + filename,          // Build output (Debug)
+            "./bin/Release/" + filename,        // Build output (Release)
+            "../src/json/" + filename,          // From build dir to source
+            "./src/json/" + filename,           // From project root
+        };
+
+        for (const auto& path : searchPaths) {
+            if (std::filesystem::exists(path)) {
+                return path;
+            }
+        }
+        return "./" + filename; // Fallback to original behavior
+    }
+}
+
 void DataManager::load_all_data(MessageSystem& message_system)
 {
     message_system.log("DataManager: Starting data load...");
-    
-    weapons = load_weapons("./weapons.json", message_system);
-    strengthAttributes = load_strength("./strength.json", message_system);
-    dexterityAttributes = load_dexterity("./dexterity.json", message_system);
-    constitutionAttributes = load_constitution("./constitution.json", message_system);
-    charismaAttributes = load_charisma("./charisma.json", message_system);
-    intelligenceAttributes = load_intelligence("./intelligence.json", message_system);
-    wisdomAttributes = load_wisdom("./wisdom.json", message_system);
-    
+
+    strengthAttributes = load_strength(find_data_file("strength.json"), message_system);
+    dexterityAttributes = load_dexterity(find_data_file("dexterity.json"), message_system);
+    constitutionAttributes = load_constitution(find_data_file("constitution.json"), message_system);
+    charismaAttributes = load_charisma(find_data_file("charisma.json"), message_system);
+    intelligenceAttributes = load_intelligence(find_data_file("intelligence.json"), message_system);
+    wisdomAttributes = load_wisdom(find_data_file("wisdom.json"), message_system);
+
     message_system.log("DataManager: All game data loaded successfully");
 }
 

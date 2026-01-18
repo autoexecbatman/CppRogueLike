@@ -86,7 +86,7 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 	// Get damage and roll
 	const DamageInfo attackDamage = get_attack_damage(attacker);
 	const int attackRoll = ctx.dice->d20();
-	const int damageRoll = attackDamage.roll_damage();
+	const int damageRoll = ctx.dice->roll(attackDamage.minDamage, attackDamage.maxDamage);
 
 	// THAC0 calculation
 	int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
