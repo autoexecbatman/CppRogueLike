@@ -2,7 +2,7 @@
 #include <format>
 #include <cmath>
 #include <algorithm>
-#include <unordered_map>
+#include <map>
 
 #include "SpellSystem.h"
 #include "../Core/GameContext.h"
@@ -24,9 +24,9 @@ static CasterClass to_caster_class(Player::PlayerClassState state)
     }
 }
 
-const std::unordered_map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
+const std::map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
 {
-    static const std::unordered_map<SpellId, SpellDefinition> spells = {
+    static const std::map<SpellId, SpellDefinition> spells = {
         // Cleric Level 1
         {SpellId::CURE_LIGHT_WOUNDS, {SpellId::CURE_LIGHT_WOUNDS, "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP"}},
         {SpellId::BLESS, {SpellId::BLESS, "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns"}},
@@ -132,7 +132,7 @@ std::vector<SpellId> SpellSystem::get_available_spells(CasterClass classState, i
             available.push_back(id);
         }
     }
-    return available;
+    return available;  // std::map iteration is already ordered by SpellId
 }
 
 bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)

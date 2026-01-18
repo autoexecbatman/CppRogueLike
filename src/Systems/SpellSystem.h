@@ -2,7 +2,7 @@
 
 #include <vector>
 #include <string>
-#include <unordered_map>
+#include <map>
 
 // Forward declarations
 class Player;
@@ -70,7 +70,7 @@ public:
     static void show_casting_menu(Player& player, GameContext& ctx);
 
 private:
-    static const std::unordered_map<SpellId, SpellDefinition>& get_spell_table();
+    static const std::map<SpellId, SpellDefinition>& get_spell_table();
 
     // Spell effects
     static bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
