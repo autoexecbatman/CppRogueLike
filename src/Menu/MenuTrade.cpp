@@ -59,12 +59,12 @@ void MenuTrade::menu_print_state(size_t state)
 	if (currentState == state)
 	{
 		menu_highlight_on();
-		menu_print(1, state + 1, menu_get_string(state)); // Start at row 1 after title
+		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state)); // Start at row 1 after title
 		menu_highlight_off();
 	}
 	else
 	{
-		menu_print(1, state + 1, menu_get_string(state)); // Start at row 1 after title
+		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state)); // Start at row 1 after title
 	}
 }
 

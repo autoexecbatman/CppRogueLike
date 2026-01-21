@@ -3,7 +3,7 @@
 #include "../../Actor/Actor.h"
 
 // Forward declarations
-class Vector2D;
+struct Vector2D;
 struct GameContext;
 
 // Enumeration for different spider types

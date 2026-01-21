@@ -31,7 +31,7 @@ std::vector<Vector2D> Dijkstra::a_star_search(
     frontier.emplace(start, 0);
 
     // Get the index of the starting position in the 1D vector representation of the grid
-    int startIndex = graph.get_index(start);
+    const size_t startIndex = graph.get_index(start);
     cameFrom.at(startIndex) = start; // The start node leads to itself
     costSoFar.at(startIndex) = 0; // Cost to reach the start is 0
 
@@ -51,8 +51,8 @@ std::vector<Vector2D> Dijkstra::a_star_search(
         // Explore all valid neighbors of the current node (pass goal to allow reaching target)
         for (Vector2D next : graph.neighbors(current, ctx, goal))
         {
-            int currentIndex = graph.get_index(current); // Get index of the current node
-            int nextIndex = graph.get_index(next); // Get index of the next node
+            const size_t currentIndex = graph.get_index(current); // Get index of the current node
+            const size_t nextIndex = graph.get_index(next); // Get index of the next node
 
             // If this new path is better (lower cost) than the previously known cost
             double new_cost = costSoFar.at(currentIndex) + graph.cost(current, next, ctx);

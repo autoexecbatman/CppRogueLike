@@ -170,8 +170,6 @@ set(SOURCE_FILES # Add Source Files Here !
     # Gui
     ${PROJECT_SOURCE_DIR}/Gui/Gui.cpp
     ${PROJECT_SOURCE_DIR}/Gui/Gui.h
-    ${PROJECT_SOURCE_DIR}/Gui/Window.cpp
-    ${PROJECT_SOURCE_DIR}/Gui/Window.h
     ${PROJECT_SOURCE_DIR}/Gui/LogMessage.cpp
     ${PROJECT_SOURCE_DIR}/Gui/LogMessage.h
 

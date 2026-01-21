@@ -108,10 +108,10 @@ public:
 	std::string get_equipped_weapon_damage_roll() const noexcept;
 	
 	// Equipment system - unique ID based methods
-	bool toggle_armor(uint32_t item_unique_id, GameContext& ctx);
-	bool is_item_equipped(uint32_t item_unique_id) const noexcept;
-	bool toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx);
-	bool toggle_shield(uint32_t item_unique_id, GameContext& ctx);
+	bool toggle_armor(uint64_t item_unique_id, GameContext& ctx);
+	bool is_item_equipped(uint64_t item_unique_id) const noexcept;
+	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx);
+	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx);
 	
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo

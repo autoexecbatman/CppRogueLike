@@ -60,7 +60,7 @@ void MenuSell::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
-	menu_print(2, state + 4, menu_get_string(state)); // Start at row 4, indent from left border
+	menu_print(2, static_cast<int>(state) + 4, menu_get_string(state)); // Start at row 4, indent from left border
 	if (currentState == state)
 	{
 		menu_highlight_off();
@@ -185,7 +185,7 @@ void MenuSell::draw()
 	
 	// Title centered on screen
 	size_t title_x = (menu_width - 10) / 2; // Center "Sell Items" (10 chars)
-	mvwprintw(menuWindow, 1, title_x, "Sell Items");
+	mvwprintw(menuWindow, 1, static_cast<int>(title_x), "Sell Items");
 	
 	// Instructions
 	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to sell, ESC to exit");

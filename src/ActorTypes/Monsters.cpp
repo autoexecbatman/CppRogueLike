@@ -176,13 +176,19 @@ Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData
 	initDisguises();
 
 	// Randomly choose initial disguise
-	int index = ctx.dice->roll(0, possibleDisguises.size() - 1);
-	const auto& chosen = possibleDisguises[index];
-
-	// Apply initial disguise
-	actorData.ch = chosen.ch;
-	actorData.name = chosen.name;
-	actorData.color = chosen.color;
+	if (!possibleDisguises.empty())
+	{
+		const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
+		const auto& chosen = possibleDisguises.at(index);
+		// Apply initial disguise
+		actorData.ch = chosen.ch;
+		actorData.name = chosen.name;
+		actorData.color = chosen.color;
+	}
+	else
+	{
+		throw ("possibleDisguises is empty from initDisguises()!");
+	}
 
 	// Remove BLOCKS state while disguised
 	remove_state(ActorState::BLOCKS);

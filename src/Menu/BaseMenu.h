@@ -10,10 +10,10 @@ class BaseMenu
 protected:
 	WINDOW* menuWindow{ nullptr };
 	WINDOW* backgroundWindow{ nullptr }; // For background preservation
-	int menu_height{ 0 };
-	int menu_width{ 0 };
-	int menu_starty{ 0 };
-	int menu_startx{ 0 };
+	size_t menu_height{ 0 };
+	size_t menu_width{ 0 };
+	size_t menu_starty{ 0 };
+	size_t menu_startx{ 0 };
 	int keyPress{ 0 };
 	bool needsRedraw{ true }; // Track when redraw is needed
 public:
@@ -26,7 +26,7 @@ public:
 	BaseMenu(BaseMenu&&) = delete;
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
-	void menu_new(int height, int width, int starty, int startx, GameContext& ctx);
+	void menu_new(size_t height, size_t width, size_t starty, size_t startx, GameContext& ctx);
 	void menu_clear() 
 	{ 
 		if (menuWindow) 

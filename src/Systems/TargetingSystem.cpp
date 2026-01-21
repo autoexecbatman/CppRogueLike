@@ -274,12 +274,16 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 {
 	attron(COLOR_PAIR(5)); // Dim color for range indicator
 
-	for (int y = center.y - range; y <= center.y + range; y++) {
-		for (int x = center.x - range; x <= center.x + range; x++) {
-			if (x >= 0 && x < ctx.map->get_width() && y >= 0 && y < ctx.map->get_height()) {
+	for (int y = center.y - range; y <= center.y + range; y++)
+	{
+		for (int x = center.x - range; x <= center.x + range; x++)
+		{
+			if (x >= 0 && x < ctx.map->get_width() && y >= 0 && y < ctx.map->get_height())
+			{
 				// Check if this point is at the edge of the range
-				float distance = std::sqrt(std::pow(x - center.x, 2) + std::pow(y - center.y, 2));
-				if (std::abs(distance - range) < 0.5f) {
+				double distance = std::sqrt(std::pow(x - center.x, 2) + std::pow(y - center.y, 2));
+				if (std::abs(distance - range) < 0.5f)
+				{
 					mvaddch(y, x, 'X');
 				}
 			}

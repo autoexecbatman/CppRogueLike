@@ -2,7 +2,7 @@
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
 
-void BaseMenu::menu_new(int height, int width, int starty, int startx, GameContext& ctx)
+void BaseMenu::menu_new(size_t height, size_t width, size_t starty, size_t startx, GameContext& ctx)
 {
 	// check bound before creating window - allow full screen dimensions
 	if (height > LINES || width > COLS)
@@ -13,8 +13,12 @@ void BaseMenu::menu_new(int height, int width, int starty, int startx, GameConte
 	}
 
 	// For full screen menus, allow start position (0,0)
-	if (starty < 0 || startx < 0 || 
-		(starty > 0 && starty >= LINES) || 
+	if (starty < 0
+		||
+		startx < 0
+		|| 
+		(starty > 0 && starty >= LINES)
+		|| 
 		(startx > 0 && startx >= COLS))
 	{
 		ctx.message_system->log("Menu window start position is out of bounds. StartY: " + std::to_string(starty) + ", StartX: " + std::to_string(startx));
@@ -28,7 +32,12 @@ void BaseMenu::menu_new(int height, int width, int starty, int startx, GameConte
 	menu_startx = startx;
 
 	// create main menu window
-	menuWindow = newwin(height, width, starty, startx);
+	menuWindow = newwin(
+		static_cast<int>(height),
+		static_cast<int>(width),
+		static_cast<int>(starty),
+		static_cast<int>(startx)
+	);
 	
 	// Set solid background to prevent world bleed-through
 	if (menuWindow)
@@ -55,11 +64,11 @@ void BaseMenu::menu_save_background()
 	
 	// Copy the screen area that will be covered by the menu
 	copywin(stdscr, backgroundWindow, 
-			menu_starty > 0 ? menu_starty - 1 : 0,  // source start y
-			menu_startx > 0 ? menu_startx - 1 : 0,  // source start x
+			menu_starty > 0 ? static_cast<int>(menu_starty) - 1 : 0,  // source start y
+			menu_startx > 0 ? static_cast<int>(menu_startx) - 1 : 0,  // source start x
 			0, 0,  // dest start y, x
-			menu_height + 1,  // dest end y
-			menu_width + 1,   // dest end x
+			static_cast<int>(menu_height) + 1,  // dest end y
+			static_cast<int>(menu_width) + 1,   // dest end x
 			FALSE);  // don't overlay
 }
 
@@ -70,10 +79,10 @@ void BaseMenu::menu_restore_background()
 	// Restore the saved background
 	copywin(backgroundWindow, stdscr,
 			0, 0,  // source start y, x
-			menu_starty > 0 ? menu_starty - 1 : 0,  // dest start y
-			menu_startx > 0 ? menu_startx - 1 : 0,  // dest start x
-			menu_height + 1,  // dest end y
-			menu_width + 1,   // dest end x
+			menu_starty > 0 ? static_cast<int>(menu_starty) - 1 : 0,  // dest start y
+			menu_startx > 0 ? static_cast<int>(menu_startx) - 1 : 0,  // dest start x
+			static_cast<int>(menu_height) + 1,  // dest end y
+			static_cast<int>(menu_width) + 1,   // dest end x
 			FALSE);  // don't overlay
 	
 	// Force refresh of the restored area with touchwin for proper display

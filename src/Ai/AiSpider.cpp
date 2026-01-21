@@ -408,8 +408,12 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition, 
     // Pick a random good position if available
     if (!candidates.empty())
     {
-        int index = ctx.dice->roll(0, candidates.size() - 1);
+        int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
         return candidates[index];
+    }
+    else
+    {
+        throw ("candidates is empty in findAmbushPosition()");
     }
 
     // No good ambush position found

@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <span>
 #include <limits>
+#include <cmath>
 
 #include <curses.h>
 #pragma warning (push, 0)
@@ -303,7 +304,7 @@ void Map::load(const json& j)
 
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
-		int cost = tileJson.at("cost").get<double>();
+		double cost = tileJson.at("cost").get<double>();
 
 		tiles.emplace_back(position, type, cost);
 		tiles.back().explored = explored;
@@ -605,20 +606,29 @@ void Map::dig(Vector2D begin, Vector2D end)
 	else
 	{
 		int width = end.x - begin.x + 1;
-		int height = end.y - begin.y + 1;
 		int centerX = (begin.x + end.x) / 2;
 		int centerY = (begin.y + end.y) / 2;
 
-		for (int tileY = begin.y; tileY <= end.y; tileY++) {
-			// Calculate the horizontal range to create a slightly diamond shape
-			int halfWidth = (width / 2) * (1 - abs(tileY - centerY) / (float)centerY);
-			int startX = centerX - halfWidth;
+		for (int tileY = begin.y; tileY <= end.y; tileY++)
+		{
+			// Proper casting to float for the math
+			float verticalDist = static_cast<float>(std::abs(tileY - centerY));
+			float verticalRatio = verticalDist / static_cast<float>(centerY);
+
+			// Explicitly cast the final result to int to silence "loss of data" warnings    
+			int halfWidth = static_cast<int>(static_cast<float>(width / 2) * (1.0f - verticalRatio));
+
+			int startX = centerX - halfWidth;    
 			int endX = centerX + halfWidth;
 
-			for (int tileX = startX; tileX <= endX; tileX++) {
-				if (tileX >= begin.x && tileX <= end.x) {
+			for (int tileX = startX; tileX <= endX; tileX++)     
+			{
+				if (tileX >= begin.x && tileX <= end.x) 
+				{
+					// Vector2D is {y, x}
 					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR, 1);
-					tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
+					// NOTE: libtcod's setProperties expects (x, y)
+					tcodMap->setProperties(tileX, tileY, true, true);
 				}
 			}
 		}

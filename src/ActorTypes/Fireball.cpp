@@ -232,8 +232,8 @@ void Fireball::draw_fire_character(WINDOW* window, int y, int x, int colorIndex,
         '*', '#', '&', '@', '%', '+', '=', '^'
     };
 
-    constexpr int FIRE_COLOR_COUNT = std::size(FIRE_COLORS);
-    constexpr int FIRE_CHAR_COUNT  = std::size(FIRE_CHARS);
+    constexpr size_t FIRE_COLOR_COUNT = std::size(FIRE_COLORS);
+    constexpr size_t FIRE_CHAR_COUNT  = std::size(FIRE_CHARS);
 
     if (colorIndex < 0 || colorIndex >= FIRE_COLOR_COUNT)
     {

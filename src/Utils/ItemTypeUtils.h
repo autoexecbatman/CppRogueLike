@@ -2,8 +2,8 @@
 
 #include <memory>
 #include <vector>
-#include "../Actor/Actor.h"
 
+class Item;
 class Container;
 
 // Utility functions for item type operations

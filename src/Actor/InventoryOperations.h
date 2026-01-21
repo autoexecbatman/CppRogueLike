@@ -47,9 +47,9 @@ const Item* get_item_at(const InventoryData& inventory, size_t index) noexcept;
 
 // Const-correct search functions
 const Item* find_item_by_name(const InventoryData& inventory, std::string_view name) noexcept;
-Item* find_item_by_id(InventoryData& inventory, uint32_t unique_id) noexcept;
-const Item* find_item_by_id(const InventoryData& inventory, uint32_t unique_id) noexcept;
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint32_t unique_id);
+Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept;
+const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) noexcept;
+InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t unique_id);
 bool contains_item(const InventoryData& inventory, const Item& item) noexcept;
 
 // ===== EVENT SYSTEM =====

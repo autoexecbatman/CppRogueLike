@@ -152,12 +152,12 @@ void Gui::gui_print_log(const GameContext& ctx)
 	{
 		const std::vector<LogMessage>& messageParts = ctx.message_system->get_attack_message_at(ctx.message_system->get_stored_message_count() - 1 - i);
 
-		int currentX = 0; // starting position for each message
+		size_t currentX = 0; // starting position for each message
 
 		for (const auto& part : messageParts)
 		{
 			wattron(messageLogWindow, COLOR_PAIR(part.logMessageColor));  // Turn on color
-			mvwprintw(messageLogWindow, i, currentX, part.logMessageText.c_str());
+			mvwprintw(messageLogWindow, i, static_cast<int>(currentX), part.logMessageText.c_str());
 			wattroff(messageLogWindow, COLOR_PAIR(part.logMessageColor)); // Turn off color immediately after
 			currentX += part.logMessageText.size(); // increment the X position by the length of the message part
 		}

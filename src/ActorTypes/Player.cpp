@@ -408,7 +408,7 @@ bool Player::try_break_web(GameContext& ctx)
 }
 
 // Clean Weapon Equipment System using Unique IDs
-bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx)
+bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx)
 {
 	// Check if weapon is already equipped
 	if (is_item_equipped(item_unique_id))
@@ -454,7 +454,7 @@ bool Player::toggle_weapon(uint32_t item_unique_id, EquipmentSlot preferred_slot
 	return false;
 }
 
-bool Player::toggle_shield(uint32_t item_unique_id, GameContext& ctx)
+bool Player::toggle_shield(uint64_t item_unique_id, GameContext& ctx)
 {
 	// Shields always go in LEFT_HAND slot
 	if (is_item_equipped(item_unique_id))
@@ -747,7 +747,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 }
 
 // Clean Equipment System using Unique IDs
-bool Player::toggle_armor(uint32_t item_unique_id, GameContext& ctx)
+bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
 {
 	// Check if item is already equipped
 	if (is_item_equipped(item_unique_id))
@@ -773,7 +773,7 @@ bool Player::toggle_armor(uint32_t item_unique_id, GameContext& ctx)
 	}
 }
 
-bool Player::is_item_equipped(uint32_t item_unique_id) const noexcept
+bool Player::is_item_equipped(uint64_t item_unique_id) const noexcept
 {
 	for (const auto& equipped : equippedItems)
 	{

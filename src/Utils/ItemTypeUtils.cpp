@@ -1,7 +1,10 @@
+#include <memory>
+#include <vector>
 #include <algorithm>
 
 #include "ItemTypeUtils.h"
 #include "../Actor/Container.h"
+#include "../Actor/Actor.h"
 
 namespace ItemTypeUtils
 {

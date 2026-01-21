@@ -278,16 +278,22 @@ void AiMimic::change_disguise(Mimic& mimic, GameContext& ctx)
     if (!isDisguised) return;
 
     // Get the possible disguises from the mimic
-    auto possibleDisguises = mimic.get_possible_disguises();
+    const auto& possibleDisguises = mimic.get_possible_disguises();
 
     // Select a random disguise
-    int index = ctx.dice->roll(0, possibleDisguises.size() - 1);
-    const auto& chosen = possibleDisguises[index];
-
-    // Apply the disguise
-    mimic.actorData.ch = chosen.ch;
-    mimic.actorData.name = chosen.name;
-    mimic.actorData.color = chosen.color;
+    if (!possibleDisguises.empty())
+    {
+        const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
+        const auto& chosen = possibleDisguises.at(index);
+        // Apply the disguise
+        mimic.actorData.ch = chosen.ch;
+        mimic.actorData.name = chosen.name;
+        mimic.actorData.color = chosen.color;
+    }
+    else
+    {
+        throw "possibleDisguises is empty in change_disguise()";
+    }
 
     // Remove the BLOCKS state while disguised
     mimic.remove_state(ActorState::BLOCKS);

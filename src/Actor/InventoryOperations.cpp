@@ -131,7 +131,7 @@ const Item* find_item_by_name(const InventoryData& inventory, std::string_view n
     return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-Item* find_item_by_id(InventoryData& inventory, uint32_t unique_id) noexcept
+Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept
 {
     auto it = std::ranges::find_if(inventory.items,
         [unique_id](const auto& item)
@@ -142,7 +142,7 @@ Item* find_item_by_id(InventoryData& inventory, uint32_t unique_id) noexcept
     return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-const Item* find_item_by_id(const InventoryData& inventory, uint32_t unique_id) noexcept
+const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) noexcept
 {
     auto it = std::ranges::find_if(inventory.items,
         [unique_id](const auto& item)
@@ -153,7 +153,7 @@ const Item* find_item_by_id(const InventoryData& inventory, uint32_t unique_id) 
     return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint32_t unique_id)
+InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t unique_id)
 {
     auto it = std::ranges::find_if(inventory.items,
         [unique_id](const auto& item)
