@@ -1,8 +1,3 @@
-// CreatureManager.h - Handles all creature lifecycle and management
-
-#ifndef CREATUREMANAGER_H
-#define CREATUREMANAGER_H
-
 #pragma once
 
 #include <memory>
@@ -16,6 +11,7 @@ class RandomDice;
 struct Vector2D;
 struct GameContext;
 
+// - Handles all creature lifecycle and management
 class CreatureManager
 {
 public:
@@ -77,5 +73,3 @@ private:
         GameContext& ctx
     );
 };
-
-#endif // CREATUREMANAGER_H

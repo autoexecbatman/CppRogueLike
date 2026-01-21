@@ -2,9 +2,9 @@
 
 #include "../Actor/Pickable.h"
 
-class TCODZip;
 class Creature;
 class Item;
+struct GameContext;
 
 //==CONFUSER==
 //==

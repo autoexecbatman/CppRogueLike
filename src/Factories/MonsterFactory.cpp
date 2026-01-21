@@ -1,4 +1,3 @@
-// file: MonsterFactory.cpp
 #include "MonsterFactory.h"
 #include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Monsters/Spider.h"

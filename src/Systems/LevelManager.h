@@ -1,8 +1,3 @@
-// LevelManager.h - Handles dungeon level progression and level-specific state
-
-#ifndef LEVELMANAGER_H
-#define LEVELMANAGER_H
-
 #pragma once
 
 #include <string>
@@ -14,6 +9,7 @@ class Player;
 class MessageSystem;
 struct GameContext;
 
+// - Handles dungeon level progression and level-specific state
 class LevelManager
 {
 public:
@@ -44,5 +40,3 @@ private:
     void display_level_messages(MessageSystem& message_system) const;
     void heal_player_between_levels(Player& player) const;
 };
-
-#endif // LEVELMANAGER_H

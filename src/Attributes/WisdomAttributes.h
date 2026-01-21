@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 struct WisdomAttributes
 {
 	int Wis{};

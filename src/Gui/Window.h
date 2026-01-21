@@ -1,6 +1,4 @@
-// file: Window.h
-#ifndef WINDOW_H
-#define WINDOW_H
+#pragma once
 
 #include <iostream>
 #include <curses.h>
@@ -43,6 +41,3 @@ public:
 	void windowrefresh();
 
 };
-
-#endif // !WINDOW_H
-// end of file: Window.h

@@ -1,10 +1,14 @@
 #pragma once
 
 #include "../Actor/Pickable.h"
-#include "../Actor/Actor.h"
+
+class Creature;
+class Item;
+struct GameContext;
 
 // Amulet class - the item needed to win the game
-class Amulet : public Pickable {
+class Amulet : public Pickable
+{
 public:
     Amulet();
 

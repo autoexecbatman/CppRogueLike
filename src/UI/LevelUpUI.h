@@ -1,8 +1,3 @@
-// LevelUpUI.h - Handles level up screen display
-
-#ifndef LEVELUPUI_H
-#define LEVELUPUI_H
-
 #pragma once
 
 #include <curses.h>
@@ -11,6 +6,7 @@ class Player;
 class Creature;
 struct GameContext;
 
+// - Handles level up screen display
 class LevelUpUI
 {
 public:
@@ -39,5 +35,3 @@ private:
     static void wait_for_spacebar();
     static void cleanup_and_restore(GameContext& ctx);
 };
-
-#endif // LEVELUPUI_H

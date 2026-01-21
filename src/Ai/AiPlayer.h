@@ -1,4 +1,7 @@
 #pragma once
+
+#include <curses.h>
+
 #include "Ai.h"
 
 class TCODZip;
@@ -7,6 +10,7 @@ class Creature;
 class Player;
 class Item;
 struct Vector2D;
+
 enum class Controls;
 
 class AiPlayer : public Ai

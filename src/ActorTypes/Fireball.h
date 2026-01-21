@@ -1,9 +1,14 @@
 #pragma once
 
-#include <libtcod.h>
+#include <curses.h>
 
-#include "../Actor/Actor.h"
+#include "../Persistent/Persistent.h"
 #include "LightningBolt.h"
+
+class Item;
+class Creature;
+struct Vector2D;
+struct GameContext;
 
 // Constants moved to class scope
 static constexpr int FIRE_COLOR_COUNT = 3;
@@ -11,9 +16,9 @@ static constexpr int FIRE_CHAR_COUNT = 8;
 
 struct ExplosionData
 {
-    WINDOW* window;
-    int radius;
-    int fullDiameter;
+    WINDOW* window{};
+    int radius{};
+    int fullDiameter{};
 };
 
 

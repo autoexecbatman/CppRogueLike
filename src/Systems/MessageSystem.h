@@ -1,18 +1,14 @@
-// MessageSystem.h - Handles all messaging and logging functionality
-
-#ifndef MESSAGESYSTEM_H
-#define MESSAGESYSTEM_H
-
 #pragma once
 
 #include <string>
 #include <string_view>
 #include <vector>
-#include <fstream>
+
 #include "../Gui/LogMessage.h"
 
 class Gui;
 
+// - Handles all messaging and logging functionality
 class MessageSystem
 {
 public:
@@ -60,5 +56,3 @@ private:
     void render_debug_background() const;
     void create_debug_pad(int total_lines) const;
 };
-
-#endif // MESSAGESYSTEM_H

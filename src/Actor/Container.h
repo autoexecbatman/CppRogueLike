@@ -1,7 +1,3 @@
-// Container.h - Modern C++20 inventory management with proper encapsulation
-#ifndef CONTAINER_H
-#define CONTAINER_H
-
 #pragma once
 
 #include <vector>
@@ -63,6 +59,7 @@ struct ContainerEvent
 
 using ContainerEventHandler = std::function<void(const ContainerEvent&)>;
 
+// - Modern C++20 inventory management with proper encapsulation
 class Container : public Persistent
 {
 public:
@@ -123,5 +120,3 @@ private:
     void fire_event(ContainerEvent::Type type, const Item* item = nullptr);
     void optimize_storage();
 };
-
-#endif // CONTAINER_H

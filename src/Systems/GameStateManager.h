@@ -1,8 +1,3 @@
-// GameStateManager.h - Handles game state persistence and level management
-
-#ifndef GAMESTATEMANAGER_H
-#define GAMESTATEMANAGER_H
-
 #pragma once
 
 #include <memory>
@@ -23,6 +18,7 @@ struct InventoryData;
 struct Vector2D;
 struct GameContext;
 
+// - Handles game state persistence and level management
 class GameStateManager
 {
 public:
@@ -77,5 +73,3 @@ private:
     void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;
     
 };
-
-#endif // GAMESTATEMANAGER_H

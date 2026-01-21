@@ -1,6 +1,6 @@
-// CreatureManager.cpp - Handles all creature lifecycle and management
 #include <algorithm>
-#include <climits>
+#include <limits>
+#include <vector>
 
 #include "CreatureManager.h"
 #include "../Actor/Actor.h"
@@ -59,7 +59,7 @@ Creature* CreatureManager::get_closest_monster(
 ) const noexcept
 {
     Creature* closestMonster = nullptr;
-    int bestDistance = INT_MAX;
+    int bestDistance = std::numeric_limits<int>::max();
 
     for (const auto& actor : creatures)
     {

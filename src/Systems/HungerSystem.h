@@ -16,7 +16,8 @@ enum class HungerState {
     DYING      // About to die from starvation
 };
 
-class HungerSystem {
+class HungerSystem
+{
 public:
     HungerSystem();
 

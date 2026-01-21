@@ -1,6 +1,4 @@
-// file: RandomDice.h
-#ifndef RANDOM_DICE_H
-#define RANDOM_DICE_H
+#pragma once
 
 #include <random>
 #include <vector>
@@ -61,6 +59,3 @@ private:
 #endif
 
 };
-
-#endif // RANDOM_DICE_H
-// end of file: RandomDice.h

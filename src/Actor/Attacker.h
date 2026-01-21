@@ -1,12 +1,13 @@
 #pragma once
 
+#include <string>
+
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 
 #include "../Persistent/Persistent.h"
 #include "../Combat/DamageInfo.h"
-#include "../Combat/WeaponDamageRegistry.h"
 
 class Creature;
 struct GameContext;

@@ -1,9 +1,6 @@
-// file: Monsters.h
-#ifndef MONSTERS_H
-#define MONSTERS_H
+#pragma once
 
 #include "../Actor/Actor.h"
-#include "../Colors/Colors.h"
 
 struct GameContext;
 
@@ -54,7 +51,8 @@ public:
 };
 
 //==MIMIC==
-struct Disguise {
+struct Disguise
+{
     char ch;
     std::string name;
     int color;
@@ -75,6 +73,3 @@ private:
     // Storage for possible disguises
     std::vector<struct Disguise> possibleDisguises;
 };
-
-#endif // MONSTERS_H
-// end of file: Monsters.h

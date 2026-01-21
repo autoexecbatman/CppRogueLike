@@ -1,12 +1,9 @@
-// ItemClassification.h - Proper item classification system separate from pickable components
-#ifndef ITEM_CLASSIFICATION_H
-#define ITEM_CLASSIFICATION_H
-
 #pragma once
 
 #include <string>
 #include "Weapons.h" // For WeaponSize enum
 
+// - Proper item classification system separate from pickable components
 enum class ItemClass
 {
     // Unknown/Default
@@ -123,5 +120,3 @@ namespace ItemClassificationUtils
     // Weapon size detection for D&D 2e mechanics
     WeaponSize get_weapon_size(ItemClass itemClass);
 }
-
-#endif // ITEM_CLASSIFICATION_H

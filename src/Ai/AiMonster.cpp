@@ -1,12 +1,12 @@
-// file: AiMonster.cpp
+#include <vector>
+
 #include "AiMonster.h"
 #include "../Utils/Dijkstra.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
-
-
-//==MONSTER_AI==
+#include "../Actor/Destructible.h"
+#include "../Actor/Attacker.h"
 
 AiMonster::AiMonster() : moveCount(0) {}
 

@@ -1,9 +1,8 @@
 #pragma once
 
-#include <libtcod.h>
-
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
+#include "../Persistent/Persistent.h"
 
 //==TELEPORTER==
 //==

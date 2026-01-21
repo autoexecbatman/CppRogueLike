@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../../Actor/Actor.h"
-#include "../../Colors/Colors.h"
 
 // Forward declarations
 class Vector2D;

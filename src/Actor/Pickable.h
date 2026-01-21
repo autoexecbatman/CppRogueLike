@@ -1,7 +1,3 @@
-// file: Pickable.h
-#ifndef PICKABLE_H
-#define PICKABLE_H
-
 #pragma once
 
 #include "../Persistent/Persistent.h"
@@ -397,6 +393,3 @@ public:
 	// Shield provides AC bonus
 	virtual int get_ac_bonus() const { return -1; } // +1 AC bonus in AD&D terms
 };
-
-#endif // !PICKABLE_H
-// end of file: Pickable.h

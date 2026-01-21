@@ -1,9 +1,11 @@
 #pragma once
 
-#include <libtcod.h>
-
-#include "../Actor/Actor.h"
+#include "../Persistent/Persistent.h"
 #include "../Actor/Pickable.h"
+
+class Creature;
+class Item;
+struct GameContext;
 
 //==HEALER==
 //==

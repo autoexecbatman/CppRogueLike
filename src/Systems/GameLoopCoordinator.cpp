@@ -181,5 +181,3 @@ void GameLoopCoordinator::update(GameContext& ctx)
         *ctx.run = false;
     }
 }
-
-// end of file: Systems/GameLoopCoordinator.cpp

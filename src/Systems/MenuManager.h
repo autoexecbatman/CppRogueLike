@@ -1,7 +1,3 @@
-// file: Systems/MenuManager.h
-#ifndef MENU_MANAGER_H
-#define MENU_MANAGER_H
-
 #pragma once
 
 #include <deque>
@@ -35,6 +31,3 @@ private:
 
     void restore_game_display(GameContext& ctx);
 };
-
-#endif // MENU_MANAGER_H
-// end of file: Systems/MenuManager.h

@@ -1,9 +1,13 @@
 #pragma once
 
+#include "../Persistent/Persistent.h"
 #include "../Actor/Pickable.h"
-#include "../Actor/Actor.h"
 
-class CorpseFood : public Pickable {
+class Creature;
+struct GameContext;
+
+class CorpseFood : public Pickable
+{
 public:
     CorpseFood(int nutrition_value);
 

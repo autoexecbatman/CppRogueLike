@@ -1,4 +1,5 @@
 #include <cmath>
+#include <limits>
 
 #include "AiSpider.h"
 #include "../ActorTypes/Monsters/Spider.h"
@@ -308,7 +309,7 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContex
 
     // Find best move toward target
     Vector2D bestMove = owner.position;
-    int bestDistance = INT_MAX;
+    int bestDistance = std::numeric_limits<int>::max();
 
     for (const auto& move : possibleMoves)
     {

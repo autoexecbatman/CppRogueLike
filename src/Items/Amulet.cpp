@@ -5,7 +5,8 @@
 
 Amulet::Amulet() {}
 
-bool Amulet::use(Item& owner, Creature& wearer, GameContext& ctx) {
+bool Amulet::use(Item& owner, Creature& wearer, GameContext& ctx)
+{
     // When used, trigger the victory condition
     ctx.message_system->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
     ctx.message_system->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
@@ -17,7 +18,8 @@ bool Amulet::use(Item& owner, Creature& wearer, GameContext& ctx) {
     return false;
 }
 
-void Amulet::load(const json& j) {
+void Amulet::load(const json& j)
+{
     // Nothing to load for the Amulet
 }
 

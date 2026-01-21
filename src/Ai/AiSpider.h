@@ -1,11 +1,11 @@
 #pragma once
 
 #include "AiMonster.h"
-#include "../Utils/Vector2D.h"
 
 // Forward declarations
 class Creature;
-class Map;
+struct Vector2D;
+struct GameContext;
 
 // Base spider AI class - handles spider movement patterns
 class AiSpider : public AiMonster

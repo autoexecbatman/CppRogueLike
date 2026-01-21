@@ -1,7 +1,3 @@
-// file: Systems/DataManager.h
-#ifndef DATA_MANAGER_H
-#define DATA_MANAGER_H
-
 #pragma once
 
 #include <vector>
@@ -54,6 +50,3 @@ private:
     std::vector<IntelligenceAttributes> load_intelligence(const std::string& filename, MessageSystem& message_system);
     std::vector<WisdomAttributes> load_wisdom(const std::string& filename, MessageSystem& message_system);
 };
-
-#endif // DATA_MANAGER_H
-// end of file: Systems/DataManager.h

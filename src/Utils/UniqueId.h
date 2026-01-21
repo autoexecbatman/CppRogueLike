@@ -1,12 +1,9 @@
-// UniqueId.h - Unique ID system for game objects
-#ifndef UNIQUE_ID_H
-#define UNIQUE_ID_H
-
 #pragma once
 
 #include <cstdint>
 #include <atomic>
 
+// - Unique ID system for game objects
 namespace UniqueId
 {
     using IdType = uint64_t;
@@ -38,5 +35,3 @@ namespace UniqueId
     // Invalid/null ID constant
     constexpr IdType INVALID_ID = 0;
 }
-
-#endif // UNIQUE_ID_H

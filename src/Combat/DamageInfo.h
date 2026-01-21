@@ -1,12 +1,9 @@
-// DamageInfo.h - Robust damage value system replacing fragile roll strings
-#ifndef DAMAGE_INFO_H
-#define DAMAGE_INFO_H
-
 #pragma once
 
 #include <string>
 #include <random>
 
+// - Robust damage value system replacing fragile roll strings
 struct DamageInfo
 {
     int minDamage;
@@ -65,7 +62,8 @@ struct DamageInfo
     bool is_valid() const { return minDamage > 0 && maxDamage >= minDamage; }
     std::string get_damage_range() const 
     {
-        if (minDamage == maxDamage) {
+        if (minDamage == maxDamage)
+        {
             return std::to_string(minDamage);
         }
         return std::to_string(minDamage) + "-" + std::to_string(maxDamage);
@@ -93,5 +91,3 @@ namespace DamageValues
     inline DamageInfo Staff() { return {1, 6, "1d6"}; }
     inline DamageInfo LongBow() { return {1, 6, "1d6"}; }
 }
-
-#endif // DAMAGE_INFO_H

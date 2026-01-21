@@ -1,11 +1,8 @@
-// file: Systems/ObjectManager.h
-#ifndef OBJECT_MANAGER_H
-#define OBJECT_MANAGER_H
-
 #pragma once
 
 #include <vector>
 #include <memory>
+
 #include "../Utils/Vector2D.h"
 #include "../Actor/Container.h"
 
@@ -40,6 +37,3 @@ public:
     // Object lifecycle management
     void cleanup_destroyed_objects(std::vector<std::unique_ptr<Object>>& objects);
 };
-
-#endif // OBJECT_MANAGER_H
-// end of file: Systems/ObjectManager.h

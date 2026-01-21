@@ -1,20 +1,19 @@
-// InventoryOperations.h - Free functions for inventory management
-#ifndef INVENTORY_OPERATIONS_H
-#define INVENTORY_OPERATIONS_H
-
 #pragma once
 
-#include "InventoryData.h"
+#include <memory>
 #include <string_view>
 #include <span>
-#include <ranges>
+
 #include <nlohmann/json.hpp>
+
+#include "InventoryData.h"
 
 // Forward declarations
 class Item;
 class Actor;
 using json = nlohmann::json;
 
+// - Free functions for inventory management
 namespace InventoryOperations
 {
 
@@ -77,5 +76,3 @@ std::string get_inventory_debug_info(const InventoryData& inventory);
 void optimize_inventory_storage(InventoryData& inventory);
 
 } // namespace InventoryOperations
-
-#endif // INVENTORY_OPERATIONS_H

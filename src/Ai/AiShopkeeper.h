@@ -1,14 +1,12 @@
 // file: AiShopkeeper.h
 #pragma once
 
-#include <span>
-
 #include "Ai.h"
-#include "../Utils/Vector2D.h"
 
 class Item;
 class Player;
 class Actor;
+struct Vector2D;
 
 class AiShopkeeper : public Ai
 {

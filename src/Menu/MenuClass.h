@@ -1,11 +1,10 @@
-// file: MenuClass.h
-#ifndef MENU_CLASS_H
-#define MENU_CLASS_H
+#pragma once
 
-#include <curses.h>
 #include <string>
 #include <unordered_map>
 #include <memory>
+
+#include <curses.h>
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
@@ -69,6 +68,3 @@ public:
 	void on_key(int key, GameContext& ctx);
 	void menu(GameContext& ctx) override;
 };
-
-#endif // !MENU_CLASS_H
-// end of file: MenuClass.h

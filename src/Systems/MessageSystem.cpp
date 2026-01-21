@@ -1,11 +1,12 @@
-// MessageSystem.cpp - Handles all messaging and logging functionality
+#include <iostream>
+#include <format>
+#include <fstream>
+
+#include <curses.h>
 
 #include "MessageSystem.h"
 #include "../Gui/Gui.h"
 #include "../Colors/Colors.h"
-#include <curses.h>
-#include <iostream>
-#include <format>
 
 MessageSystem::MessageSystem() = default;
 

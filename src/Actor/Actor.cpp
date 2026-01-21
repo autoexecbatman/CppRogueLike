@@ -1,14 +1,10 @@
-#include <iostream>
 #include <string>
 #include <algorithm>
-#include <math.h>
+#include <cmath>
 #include <memory>
 #include <format>
 
 #include <curses.h>
-#pragma warning (push, 0)
-#include <libtcod.h>
-#pragma warning (pop)
 
 #include "../Ai/Ai.h"
 #include "Actor.h"
@@ -16,9 +12,6 @@
 #include "Destructible.h"
 #include "Pickable.h"
 #include "InventoryOperations.h"
-#include "../Items/Items.h"
-#include "../ActorTypes/Gold.h"
-#include "../Items/Armor.h"
 #include "../Items/ItemClassification.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Systems/ShopKeeper.h"
@@ -81,7 +74,7 @@ void Actor::save(json& j)
 // a function to get the Chebyshev distance from an actor to a specific tile of the map
 int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
-	return std::max(abs(position.x - tilePosition.x), abs(position.y - tilePosition.y));
+	return std::max(std::abs(position.x - tilePosition.x), std::abs(position.y - tilePosition.y));
 }
 
 // the actor render function with color

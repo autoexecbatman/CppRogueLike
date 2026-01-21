@@ -1,8 +1,12 @@
 #pragma once
 
 #include <memory>
+
 #include "../Actor/Actor.h"
-#include "../Utils/Vector2D.h"
+
+struct Vector2D;
+struct GameContext;
+enum class ItemClass;
 
 class ItemCreator
 {

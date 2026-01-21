@@ -7,6 +7,7 @@
 #include "../Random/RandomDice.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
+#include "../Actor/Actor.h"
 
 // Define nutrition values for different monster types
 const std::unordered_map<std::string, int> CORPSE_NUTRITION_VALUES = {
@@ -46,25 +47,33 @@ bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     std::string flavorText;
 
     // Determine flavor text based on corpse name
-    if (owner.actorData.name.find("goblin") != std::string::npos) {
+    // TODO: remove fragile string comparison.
+    if (owner.actorData.name.find("goblin") != std::string::npos)
+    {
         flavorText = "It's greasy and gamey.";
     }
-    else if (owner.actorData.name.find("orc") != std::string::npos) {
+    else if (owner.actorData.name.find("orc") != std::string::npos)
+    {
         flavorText = "It's tough and stringy.";
     }
-    else if (owner.actorData.name.find("troll") != std::string::npos) {
+    else if (owner.actorData.name.find("troll") != std::string::npos)
+    {
         flavorText = "It's surprisingly filling, if you can stomach it.";
     }
-    else if (owner.actorData.name.find("dragon") != std::string::npos) {
+    else if (owner.actorData.name.find("dragon") != std::string::npos)
+    {
         flavorText = "It tastes exotic and somewhat spicy!";
     }
-    else if (owner.actorData.name.find("mage") != std::string::npos) {
+    else if (owner.actorData.name.find("mage") != std::string::npos)
+    {
         flavorText = "There's a strange aftertaste of magical residue.";
     }
-    else if (owner.actorData.name.find("shopkeeper") != std::string::npos) {
+    else if (owner.actorData.name.find("shopkeeper") != std::string::npos)
+    {
         flavorText = "Well-marbled, but you feel guilty...";
     }
-    else {
+    else
+    {
         flavorText = "It tastes... questionable.";
     }
 
@@ -78,16 +87,20 @@ bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     return Pickable::use(owner, wearer, ctx);
 }
 
-void CorpseFood::load(const json& j) {
-    if (j.contains("nutrition_value") && j["nutrition_value"].is_number()) {
+void CorpseFood::load(const json& j)
+{
+    if (j.contains("nutrition_value") && j["nutrition_value"].is_number())
+    {
         nutrition_value = j["nutrition_value"].get<int>();
     }
-    else {
+    else
+    {
         nutrition_value = 50; // Default value
     }
 }
 
-void CorpseFood::save(json& j) {
+void CorpseFood::save(json& j)
+{
     j["type"] = static_cast<int>(PickableType::CORPSE_FOOD);
     j["nutrition_value"] = nutrition_value;
 }

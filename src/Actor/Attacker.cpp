@@ -12,6 +12,8 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/LevelUpSystem.h"
+#include "../Combat/WeaponDamageRegistry.h"
+#include "../Actor/Destructible.h"
 
 Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 

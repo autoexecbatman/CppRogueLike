@@ -1,8 +1,10 @@
-// file: Systems/ObjectManager.cpp
+#include <algorithm>
+#include <vector>
+#include <memory>
+
 #include "ObjectManager.h"
 #include "../Objects/Web.h"
 #include "../Actor/Container.h"
-#include <algorithm>
 
 Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const
 {
@@ -26,5 +28,3 @@ void ObjectManager::cleanup_destroyed_objects(std::vector<std::unique_ptr<Object
     auto isNull = [](const auto& obj) { return !obj; };
     std::erase_if(objects, isNull);
 }
-
-// end of file: Systems/ObjectManager.cpp

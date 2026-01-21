@@ -1,9 +1,11 @@
 #pragma once
 
-#include <curses.h>
+#include <functional>
 #include <string>
 #include <memory>
 #include <unordered_map>
+
+#include <curses.h>
 
 #include "BaseMenu.h"
 #include "IMenuState.h"

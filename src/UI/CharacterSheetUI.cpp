@@ -8,6 +8,7 @@
 #include "../Core/GameContext.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/HungerSystem.h"
+#include "../Combat/WeaponDamageRegistry.h"
 
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
 {

@@ -1,6 +1,4 @@
-// file: Menu.h
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 #include <curses.h>
 #include <string>
@@ -61,6 +59,3 @@ public:
 	void on_key(int key, GameContext& ctx);
 	void menu(GameContext& ctx) override;
 };
-
-#endif // !MENU_H
-// end of file: Menu.h

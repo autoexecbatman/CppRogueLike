@@ -5,24 +5,30 @@
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
+#include "../Actor/Destructible.h"
+#include "../Actor/Attacker.h"
 
 AiMonsterRanged::AiMonsterRanged() : AiMonster() {}
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
-    if (owner.destructible->is_dead()) {
+    if (owner.destructible->is_dead())
+    {
         return;
     }
 
-    if (ctx.map->is_in_fov(owner.position)) {
+    if (ctx.map->is_in_fov(owner.position))
+    {
         // Move towards the player if we can see them
         moveCount = TRACKING_TURNS;
     }
-    else {
+    else
+    {
         moveCount--;
     }
 
-    if (moveCount > 0) {
+    if (moveCount > 0)
+    {
         moveOrAttack(owner, ctx.player->position, ctx);
     }
 }
@@ -73,7 +79,8 @@ void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition, Gam
 bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameContext& ctx)
 {
     // Check if there's a clear line of sight
-    if (!ctx.map->has_los(owner.position, targetPos)) {
+    if (!ctx.map->has_los(owner.position, targetPos))
+    {
         return false;
     }
 
@@ -100,13 +107,16 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
     int sy = (y0 < y1) ? 1 : -1;
     int err = dx - dy;
 
-    while (x0 != x1 || y0 != y1) {
+    while (x0 != x1 || y0 != y1)
+    {
         int e2 = 2 * err;
-        if (e2 > -dy) {
+        if (e2 > -dy)
+        {
             err -= dy;
             x0 += sx;
         }
-        if (e2 < dx) {
+        if (e2 < dx)
+        {
             err += dx;
             y0 += sy;
         }
@@ -129,11 +139,13 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
             {
                 mvaddch(y0, x0, '.');
             }
-            else {
+            else
+            {
                 mvaddch(y0, x0, '#');
             }
         }
-        else {
+        else
+        {
             mvaddch(y0, x0, ' ');
         }
     }

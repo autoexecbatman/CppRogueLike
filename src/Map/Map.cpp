@@ -3,6 +3,7 @@
 #include <random>
 #include <algorithm>
 #include <span>
+#include <limits>
 
 #include <curses.h>
 #pragma warning (push, 0)
@@ -261,7 +262,7 @@ void Map::init_tiles(GameContext& ctx)
 void Map::init(bool withActors, GameContext& ctx)
 {
 	init_tiles(ctx);
-	seed = ctx.dice ? ctx.dice->roll(0, INT_MAX) : 0; // for new seed
+	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0; // for new seed
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	bsp(map_width, map_height, *rng_unique, withActors, ctx);

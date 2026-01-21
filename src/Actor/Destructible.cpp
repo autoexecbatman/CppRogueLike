@@ -1,6 +1,7 @@
 // file: Destructible.cpp
 #include <iostream>
 #include <string>
+#include <string_view>
 #include <algorithm>
 
 #include "../Core/GameContext.h"

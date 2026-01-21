@@ -1,16 +1,4 @@
-// file: Gui.h
-#ifndef GUI_H
-#define GUI_H
-
-// Description:
-// The Gui class is responsible for displaying the gui window
-// and all of the information that is displayed in the gui window.
-//
-// Functions:
-// The constructor and destructor are empty
-// because the gui window is initialized and deleted
-// using explicit calls to the gui_init() and gui_delete() functions.
-//
+#pragma once
 
 #include <curses.h>
 #include <vector>
@@ -25,6 +13,15 @@ struct GameContext;
 inline constexpr int GUI_HEIGHT{ 7 };
 inline constexpr int GUI_WIDTH{ 118 };
 
+// Description:
+// The Gui class is responsible for displaying the gui window
+// and all of the information that is displayed in the gui window.
+//
+// Functions:
+// The constructor and destructor are empty
+// because the gui window is initialized and deleted
+// using explicit calls to the gui_init() and gui_delete() functions.
+//
 class Gui : public Persistent
 {
 private:
@@ -87,6 +84,3 @@ protected:
 	void render_hp_bar(const GameContext& ctx);
 	void render_hunger_status(const GameContext& ctx);
 };
-
-#endif // !GUI_H
-// end of file: Gui.h

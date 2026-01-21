@@ -4,6 +4,7 @@
 #include "MenuClass.h"
 #include "MenuRace.h"
 #include "../ActorTypes/Player.h"
+#include "../Core/GameContext.h"
 
 void Male::on_selection(GameContext& ctx)
 {

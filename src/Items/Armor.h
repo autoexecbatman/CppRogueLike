@@ -1,8 +1,10 @@
-// Armor.h
 #pragma once
 
 #include "../Actor/Pickable.h"
-#include "../Actor/Actor.h"
+
+class Creature;
+class Item;
+struct GameContext;
 
 // Base armor class (similar to the weapon class in Pickable.h)
 class Armor : public Pickable

@@ -1,12 +1,11 @@
-// file: AiMonsterConfused.h
-#ifndef AI_MONSTER_CONFUSED_H
-#define AI_MONSTER_CONFUSED_H
+#pragma once
 
 #include <memory>
-#include <libtcod.h>
 
-#include "../Actor/Actor.h"
 #include "Ai.h"
+
+class Creature;
+struct GameContext;
 
 class AiMonsterConfused : public Ai
 {
@@ -20,5 +19,3 @@ protected:
 	int nbTurns;
 	std::unique_ptr<Ai> oldAi;
 };
-
-#endif // !AI_MONSTER_CONFUSED_H

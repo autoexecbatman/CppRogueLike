@@ -1,6 +1,4 @@
-// file: Colors.h
-#ifndef COLORS_H
-#define COLORS_H
+#pragma once
 
 // Color pairs organized by foreground_background pattern
 // Grouped logically for easy editing
@@ -41,6 +39,3 @@ struct Colors
 {
 	void my_init_pair() noexcept;
 };
-
-#endif // !COLORS_H
-// file: Colors.h

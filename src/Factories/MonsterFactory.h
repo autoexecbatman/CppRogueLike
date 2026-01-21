@@ -1,19 +1,19 @@
-// MonsterFactory.h
 #pragma once
 
-#include "../Utils/Vector2D.h"
-#include "../Actor/Actor.h"
-#include <unordered_map>
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
+#include "../Utils/Vector2D.h"
+#include "../Actor/Actor.h"
+
 // Forward declarations
 struct GameContext;
 
 // A struct to represent a monster type with its spawn probability
-struct MonsterType {
+struct MonsterType
+{
     std::string name;
     int baseWeight;         // Base weight/probability
     int levelMinimum;       // Minimum dungeon level for this monster
@@ -24,7 +24,8 @@ struct MonsterType {
     std::function<void(Vector2D, GameContext&)> createFunc;
 };
 
-class MonsterFactory {
+class MonsterFactory
+{
 public:
     MonsterFactory();
     ~MonsterFactory() = default;

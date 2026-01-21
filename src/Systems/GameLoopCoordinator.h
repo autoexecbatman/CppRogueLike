@@ -1,7 +1,3 @@
-// file: Systems/GameLoopCoordinator.h
-#ifndef GAME_LOOP_COORDINATOR_H
-#define GAME_LOOP_COORDINATOR_H
-
 #pragma once
 
 class Gui;
@@ -25,6 +21,3 @@ private:
     void handle_render_phase(GameContext& ctx, Gui& gui);
     void handle_menu_check(GameContext& ctx);
 };
-
-#endif // GAME_LOOP_COORDINATOR_H
-// end of file: Systems/GameLoopCoordinator.h

@@ -26,6 +26,8 @@
  * This system ensures solo players can enjoy meaningful character progression
  * while maintaining the tactical challenge of AD&D 2e combat.
  */
+#include <memory>
+
 #include "Monsters.h"
 #include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
@@ -36,6 +38,8 @@
 #include "../ActorTypes/Healer.h"
 #include "../Ai/AiMimic.h"
 #include "../Core/GameContext.h"
+#include "../Combat/DamageInfo.h"
+#include "../Actor/Destructible.h"
 
 Goblin::Goblin(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'g',"goblin",YELLOW_BLACK_PAIR })
 {
@@ -200,5 +204,3 @@ std::vector<Disguise> Mimic::get_possible_disguises() const
 {
 	return possibleDisguises;
 }
-
-// end of file: Goblin.cpp

@@ -1,8 +1,9 @@
 #pragma once
 
+#include <memory>
+
 #include "../../Utils/Vector2D.h"
 #include "../ShopKeeper.h"
-#include <memory>
 
 // Forward declarations
 class Creature;

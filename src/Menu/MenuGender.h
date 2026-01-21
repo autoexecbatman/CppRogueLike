@@ -1,10 +1,9 @@
-// file: MenuGender.h
-#ifndef MENU_GENDER_H
-#define MENU_GENDER_H
+#pragma once
 
-#include <iostream>
+#include <memory>
 #include <string>
 #include <unordered_map>
+
 #include <curses.h>
 
 #include "BaseMenu.h"
@@ -60,6 +59,3 @@ public:
 	void on_key(int key, GameContext& ctx);
 	void menu(GameContext& ctx) override;
 };
-
-#endif // !MENU_H
-// file: MenuGender.h

@@ -1,13 +1,9 @@
-// LevelUpSystem.h - Handles combat improvements on level up according to AD&D 2e rules
-
-#ifndef LEVELUPSYSTEM_H
-#define LEVELUPSYSTEM_H
-
 #pragma once
 
 class Creature;
 struct GameContext;
 
+// - Handles combat improvements on level up according to AD&D 2e rules
 class LevelUpSystem
 {
 public:
@@ -33,5 +29,3 @@ private:
     static void apply_cleric_improvements(Creature& owner, int newLevel, GameContext* ctx);
     static void apply_wizard_improvements(Creature& owner, int newLevel, GameContext* ctx);
 };
-
-#endif // LEVELUPSYSTEM_H

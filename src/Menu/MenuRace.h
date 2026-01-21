@@ -1,13 +1,15 @@
-// file: MenuRace.h
-#ifndef MENU_RACE_H
-#define MENU_RACE_H
-#include <curses.h>
+#pragma once
+
 #include <string>
 #include <unordered_map>
 #include <memory>
 
+#include <curses.h>
+
 #include "BaseMenu.h"
 #include "IMenuState.h"
+
+struct GameContext;
 
 class Human : public IMenuState
 {
@@ -84,6 +86,3 @@ public:
 	void menu(GameContext& ctx) override;
 	void on_key(int key, GameContext& ctx);
 };
-
-#endif // !MENU_RACE_H
-// end of file: MenuRace.h

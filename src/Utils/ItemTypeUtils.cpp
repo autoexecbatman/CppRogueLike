@@ -1,6 +1,7 @@
+#include <algorithm>
+
 #include "ItemTypeUtils.h"
 #include "../Actor/Container.h"
-#include <algorithm>
 
 namespace ItemTypeUtils
 {

@@ -1,9 +1,8 @@
-// file: MenuName.h
-#ifndef MENU_NAME_H
-#define MENU_NAME_H
+#pragma once
+
+#include <string>
 
 #include <curses.h>
-#include <string>
 
 struct GameContext;
 
@@ -39,6 +38,3 @@ public:
 
 	void menu_name(GameContext& ctx);
 };
-
-#endif // !MENU_NAME_H
-// file: MenuName.h

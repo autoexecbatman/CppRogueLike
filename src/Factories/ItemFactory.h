@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../Utils/Vector2D.h"
-#include "../Actor/Actor.h"
-#include "../Core/GameContext.h"
 #include <functional>
 #include <memory>
 #include <string>
 #include <vector>
+
+struct Vector2D;
+struct GameContext;
 
 // A struct to represent an item type with its spawn probability
 struct ItemType

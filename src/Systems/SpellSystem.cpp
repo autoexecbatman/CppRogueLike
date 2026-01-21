@@ -1,8 +1,9 @@
-#include <curses.h>
 #include <format>
 #include <cmath>
 #include <algorithm>
 #include <map>
+
+#include <curses.h>
 
 #include "SpellSystem.h"
 #include "../Core/GameContext.h"

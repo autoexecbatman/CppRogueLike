@@ -1,7 +1,3 @@
-// InventoryData.h - Data structures for inventory management
-#ifndef INVENTORY_DATA_H
-#define INVENTORY_DATA_H
-
 #pragma once
 
 #include <vector>
@@ -11,6 +7,8 @@
 
 // Forward declarations
 class Item;
+
+// - Data structures for inventory management
 
 // Error handling for inventory operations
 enum class InventoryError
@@ -79,5 +77,3 @@ struct InventoryData
     InventoryData(const InventoryData&) = delete;
     InventoryData& operator=(const InventoryData&) = delete;
 };
-
-#endif // INVENTORY_DATA_H

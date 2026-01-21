@@ -1,3 +1,5 @@
+#include <curses.h>
+
 #include "Teleporter.h"
 #include "../Colors/Colors.h"
 #include "../Map/Map.h"

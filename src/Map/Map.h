@@ -3,6 +3,8 @@
 #include <unordered_set>
 #include <memory>
 
+#include <libtcod.h>
+
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Factories/MonsterFactory.h"

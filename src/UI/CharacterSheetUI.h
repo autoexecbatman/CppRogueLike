@@ -1,8 +1,3 @@
-// CharacterSheetUI.h - Handles character sheet display
-
-#ifndef CHARACTERSHEETUI_H
-#define CHARACTERSHEETUI_H
-
 #pragma once
 
 #include <curses.h>
@@ -10,6 +5,7 @@
 class Player;
 struct GameContext;
 
+// - Handles character sheet display
 class CharacterSheetUI
 {
 public:
@@ -37,8 +33,5 @@ private:
     static int get_strength_hit_modifier(const Player& player, GameContext& ctx);
     static int get_strength_damage_modifier(const Player& player, GameContext& ctx);
     static int get_constitution_bonus(const Player& player, GameContext& ctx);
-    static void wait_for_key_press();
     static void cleanup_and_restore();
 };
-
-#endif // CHARACTERSHEETUI_H

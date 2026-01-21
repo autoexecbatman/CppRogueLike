@@ -1,6 +1,7 @@
-// file Destructible.h
-#ifndef DESTRUCTIBLE_H
-#define DESTRUCTIBLE_H
+#pragma once
+
+#include <string>
+#include <string_view>
 
 #include "../Persistent/Persistent.h"
 
@@ -108,6 +109,3 @@ public:
 	void die(Creature& owner, GameContext& ctx) override;
 	void save(json& j);
 };
-
-#endif // !DESTRUCTIBLE_H
-// end of file: Destructible.h

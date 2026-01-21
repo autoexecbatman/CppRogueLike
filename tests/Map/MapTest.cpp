@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+#include <limits>
+
 #include "src/Map/Map.h"
 #include "src/Core/GameContext.h"
 #include "src/ActorTypes/Player.h"
@@ -358,8 +360,8 @@ TEST_F(MapTest, SingleTileMap)
 TEST_F(MapTest, LargeCoordinates_HandledGracefully)
 {
     // Very large coordinates should not crash
-    EXPECT_NO_THROW(map->get_tile_type(Vector2D{INT_MAX, INT_MAX}));
-    EXPECT_NO_THROW(map->get_tile_type(Vector2D{INT_MIN, INT_MIN}));
+    EXPECT_NO_THROW(map->get_tile_type(Vector2D{std::numeric_limits<int>::max(), std::numeric_limits<int>::max()}));
+    EXPECT_NO_THROW(map->get_tile_type(Vector2D{std::numeric_limits<int>::min(), std::numeric_limits<int>::min()}));
 }
 
 // ----------------------------------------------------------------------------

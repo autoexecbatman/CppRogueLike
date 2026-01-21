@@ -1,10 +1,4 @@
-// file: Ai.h
-#ifndef AI_H
-#define AI_H
-
 #pragma once
-
-#include <curses.h>
 
 #include "../Persistent/Persistent.h"
 
@@ -36,10 +30,4 @@ protected:
 	{
 		MONSTER, CONFUSED_MONSTER, PLAYER, SHOPKEEPER
 	};
-
-
 };
-
-//====
-
-#endif // !AI_H

@@ -1,11 +1,8 @@
-// WeaponDamageRegistry.h - Centralized weapon damage mapping with ItemClass
-#ifndef WEAPON_DAMAGE_REGISTRY_H
-#define WEAPON_DAMAGE_REGISTRY_H
-
 #pragma once
 
-#include <unordered_map>
 #include <string>
+#include <unordered_map>
+
 #include "DamageInfo.h"
 #include "../Items/ItemClassification.h"
 
@@ -38,5 +35,3 @@ private:
     // Initialize static data
     static std::unordered_map<ItemClass, DamageInfo> create_weapon_damage_map();
 };
-
-#endif // WEAPON_DAMAGE_REGISTRY_H

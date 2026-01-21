@@ -1,13 +1,9 @@
-// InputHandler.h - Handles all input processing (keyboard/mouse)
-
-#ifndef INPUTHANDLER_H
-#define INPUTHANDLER_H
-
 #pragma once
 
 #include <curses.h>
 #include "../Utils/Vector2D.h"
 
+// - Handles all input processing (keyboard/mouse)
 class InputHandler
 {
 public:
@@ -41,5 +37,3 @@ private:
     // Helper methods
     void update_mouse_position() noexcept;
 };
-
-#endif // INPUTHANDLER_H

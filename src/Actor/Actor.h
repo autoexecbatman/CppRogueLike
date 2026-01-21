@@ -1,25 +1,24 @@
 #pragma once
 
-#pragma warning (push, 0)
-#include <libtcod/libtcod.hpp>
-#pragma warning (pop)
+#include <string>
 #include <ranges>
+#include <vector>
+#include <memory>
 
 #include "../Persistent/Persistent.h"
-#include "../Ai/Ai.h"
-#include "../Attributes/StrengthAttributes.h"
 #include "../Utils/UniqueId.h"
 #include "../Items/ItemClassification.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
-#include "../Systems/ShopKeeper.h"
-
-#include "Attacker.h"
-#include "Destructible.h"
-#include "Container.h"
-#include "Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Utils/Vector2D.h"
 #include "InventoryData.h"
+#include "../Systems/ShopKeeper.h"
+#include "../Ai/Ai.h"
+#include "../Actor/Destructible.h"
+#include "../Actor/Attacker.h"
+
+class Pickable;
+struct GameContext;
 
 struct ActorData
 {
@@ -48,7 +47,7 @@ public:
 	Vector2D position{ 0,0 };
 	Vector2D direction{ 0,0 };
 	ActorData actorData{ 0,"string",0 };
-	UniqueId::IdType uniqueId;
+	UniqueId::IdType uniqueId{};
 
 	std::vector<ActorState> states;
 	// C++ Core Guidelines F.6: noexcept for simple state operations

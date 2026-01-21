@@ -1,8 +1,3 @@
-// RenderingManager.h - Handles all rendering and screen management
-
-#ifndef RENDERINGMANAGER_H
-#define RENDERINGMANAGER_H
-
 #pragma once
 
 #include <span>
@@ -20,6 +15,7 @@ struct InventoryData;
 struct GameContext;
 class Gui;
 
+// - Handles all rendering and screen management
 class RenderingManager
 {
 public:
@@ -50,5 +46,3 @@ private:
         const GameContext& ctx
     ) const;
 };
-
-#endif // RENDERINGMANAGER_H

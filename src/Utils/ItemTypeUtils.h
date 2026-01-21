@@ -4,6 +4,8 @@
 #include <vector>
 #include "../Actor/Actor.h"
 
+class Container;
+
 // Utility functions for item type operations
 namespace ItemTypeUtils
 {

@@ -1,20 +1,18 @@
-#ifndef LIGHTNING_BOLT_H
-#define LIGHTNING_BOLT_H
-
 #pragma once
 
-#include <libtcod.h>
-
-#include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
+#include "../Persistent/Persistent.h"
 
-//==LIGHTNING_BOLT==
-//==
+class Creature;
+class Item;
+struct GameContext;
+struct Vector2D;
+
 class LightningBolt : public Pickable
 {
 public:
-	int maxRange = 0;
-	int damage = 0;
+	int maxRange{};
+	int damage{};
 
 	LightningBolt(int range, int damage) noexcept;
 
@@ -27,5 +25,3 @@ public:
 	void save(json& j) override;
 	PickableType get_type() const override { return PickableType::LIGHTNING_BOLT; }
 };
-//====
-#endif // !LIGHTNING_BOLT_H
