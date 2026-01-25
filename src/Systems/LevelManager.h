@@ -21,7 +21,7 @@ public:
     int get_shopkeepers_count() const noexcept { return shopkeepers_on_current_level; }
     
     // Level management
-    void advance_to_next_level(Map& map, Player& player, MessageSystem& message_system, GameContext& ctx);
+    void advance_to_next_level(GameContext& ctx);
     void reset_to_first_level();
     
     // Shopkeeper management
@@ -38,5 +38,5 @@ private:
     
     // Helper methods
     void display_level_messages(MessageSystem& message_system) const;
-    void heal_player_between_levels(Player& player) const;
+    void heal_player_between_levels(GameContext& ctx) const;
 };

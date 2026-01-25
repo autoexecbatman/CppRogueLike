@@ -1,3 +1,6 @@
+#include <format>
+#include <ranges>  // For std::views::reverse
+
 #include "AiMimic.h"
 #include "../Colors/Colors.h"
 #include "../Ai/AiPlayer.h"
@@ -6,10 +9,9 @@
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
+#include "../ActorTypes/Monsters.h"
 
 using namespace InventoryOperations; // For clean function calls
-
-AiMimic::AiMimic() : AiMonster(), disguiseChangeCounter(0), consumptionCooldown(0) {}
 
 void AiMimic::update(Creature& owner, GameContext& ctx)
 {
@@ -36,7 +38,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
         disguiseChangeCounter++;
 
         // Occasionally change disguise if still hidden
-        if (disguiseChangeCounter >= disguiseChangeRate)
+        if (disguiseChangeCounter >= DISGUISE_CHANGE_RATE)
         {
             change_disguise(*mimic, ctx);
             disguiseChangeCounter = 0;
@@ -49,172 +51,93 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
     else
     {
         // Not disguised - can consume items and move
-        consume_nearby_items(*mimic, ctx);
-
-        // Use standard monster AI for movement and attacks
-        AiMonster::update(owner, ctx);
+        const bool itemConsumed = consume_nearby_items(*mimic, ctx);
+        
+        // Only move/attack if we didn't just consume an item
+        if (!itemConsumed)
+        {
+            // Use standard monster AI for movement and attacks
+            AiMonster::update(owner, ctx);
+        }
     }
 }
 
-bool AiMimic::consume_nearby_items(Mimic& mimic, GameContext& ctx)
+[[nodiscard]] bool AiMimic::consume_nearby_items(Mimic& mimic, GameContext& ctx)
 {
-    // Only consuming items when revealed and active
+    // Only consume items when revealed and active
     if (isDisguised || mimic.destructible->is_dead())
     {
         return false;
     }
 
-    // Add cooldown mechanic - can only consume items every few turns
-    consumptionCooldown++;
-    if (consumptionCooldown < 3)
+    // Apply cooldown mechanic
+    ++consumptionCooldown;
+    if (consumptionCooldown < CONSUMPTION_COOLDOWN_TURNS)
     {
         return false;
     }
-
-    // Reset cooldown
     consumptionCooldown = 0;
 
-    // Check for items in a 1-tile radius
-    bool itemConsumed = false;
-    std::vector<size_t> itemsToRemove;
-
-    // Check if inventory has no items
-	if (ctx.inventory_data->items.empty())
+    // Early exit if no items exist
+    if (ctx.inventory_data->items.empty())
     {
         return false;
     }
 
-    ctx.message_system->log("Checking for items. Inventory size: " + std::to_string(ctx.inventory_data->items.size()));
+    ctx.message_system->log(std::format("Checking for items. Inventory size: {}", ctx.inventory_data->items.size()));
 
-	// First pass - identify items to consume
-	for (size_t i = 0; i < ctx.inventory_data->items.size(); i++)
-	{
-		auto& item = ctx.inventory_data->items[i];
-		if (!item) continue;
+    // Find and consume one item within range
+    std::vector<size_t> itemsToRemove;
+    bool itemConsumed = false;
 
-        int itemDistance = mimic.get_tile_distance(item->position);
-        ctx.message_system->log("Item at distance " + std::to_string(itemDistance) + ": " + item->actorData.name);
+    for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
+    {
+        const auto& item = ctx.inventory_data->items[i];
+        if (!item) continue;
 
-        if (itemDistance <= 1)
+        const int itemDistance = mimic.get_tile_distance(item->position);
+        ctx.message_system->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
+
+        if (itemDistance <= CONSUMPTION_RADIUS)
         {
-            // Found an item to consume - check if it has a pickable component
+            // Verify item is pickable
             if (!item->pickable)
             {
-                ctx.message_system->log("Mimic found non-pickable item, skipping: " + item->actorData.name);
+                ctx.message_system->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
                 continue;
             }
-            
-            // Found an item to consume!
+
+            // Display consumption message
             ctx.message_system->append_message_part(RED_YELLOW_PAIR, "The mimic ");
             ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "consumes the ");
             ctx.message_system->append_message_part(item->actorData.color, item->actorData.name);
             ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "!");
             ctx.message_system->finalize_message();
 
-            ctx.message_system->log("Mimic consuming item: " + item->actorData.name);
+            ctx.message_system->log(std::format("Mimic consuming item: {}", item->actorData.name));
 
-            // Grow stronger based on item type using PickableTypeRegistry
-            itemsConsumed++;
-            
-            // Get item type using the ItemClass system (what the item IS, not what component it uses)
-            ItemClass itemClass = item->itemClass;
+            // Apply item-specific bonuses
+            ++itemsConsumed;
+            apply_item_bonus(mimic, item->itemClass, ctx);
 
-            // Different bonuses based on item type
-            if (itemClass == ItemClass::HEALTH_POTION)
+            // Check for transformation
+            if (itemsConsumed >= ITEMS_FOR_TRANSFORMATION)
             {
-                // Health potions give the mimic more HP
-                mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
-                mimic.destructible->set_hp(mimic.destructible->get_hp() + 1);
-                ctx.message_system->log("Mimic gained 1 HP from potion");
-            }
-            else if (itemClass == ItemClass::SCROLL_LIGHTNING ||
-                     itemClass == ItemClass::SCROLL_FIREBALL ||
-                     itemClass == ItemClass::SCROLL_CONFUSION)
-            {
-                // Scrolls increase confusion duration
-                confusionDuration = std::min(confusionDuration + 1, 5);
-                ctx.message_system->log("Mimic increased confusion duration to " + std::to_string(confusionDuration));
-            }
-            else if (itemClass == ItemClass::GOLD)
-            {
-                // Gold makes the mimic more defensive
-                if (mimic.destructible->get_dr() < 2)
-                {
-                    mimic.destructible->set_dr(mimic.destructible->get_dr() + 1);
-                    ctx.message_system->log("Mimic gained 1 DR from gold");
-                }
-            }
-            else if (itemClass == ItemClass::DAGGER ||
-                     itemClass == ItemClass::SHORT_SWORD ||
-                     itemClass == ItemClass::LONG_SWORD ||
-                     itemClass == ItemClass::GREAT_SWORD ||
-                     itemClass == ItemClass::BATTLE_AXE ||
-                     itemClass == ItemClass::GREAT_AXE ||
-                     itemClass == ItemClass::WAR_HAMMER ||
-                     itemClass == ItemClass::STAFF ||
-                     itemClass == ItemClass::LONG_BOW)
-            {
-                // Weapons make the mimic hit harder - use proper damage system
-                const auto& currentDamage = mimic.attacker->get_damage_info();
-                if (currentDamage.maxDamage < 6)
-                {
-                    DamageInfo improvedDamage(currentDamage.minDamage, std::min(currentDamage.maxDamage + 1, 6),
-                                            "1d" + std::to_string(std::min(currentDamage.maxDamage + 1, 6)));
-                    mimic.attacker->set_damage_info(improvedDamage);
-                    ctx.message_system->log("Mimic improved attack to " + improvedDamage.displayRoll);
-                }
-            }
-            else if (itemClass == ItemClass::LEATHER_ARMOR ||
-                     itemClass == ItemClass::CHAIN_MAIL ||
-                     itemClass == ItemClass::PLATE_MAIL)
-            {
-                // Armor increases defense
-                if (mimic.destructible->get_dr() < 3)
-                {
-                    mimic.destructible->set_dr(mimic.destructible->get_dr() + 1);
-                    ctx.message_system->log("Mimic gained 1 DR from armor");
-                }
-            }
-            else if (itemClass == ItemClass::FOOD_RATION ||
-                     itemClass == ItemClass::BREAD ||
-                     itemClass == ItemClass::MEAT ||
-                     itemClass == ItemClass::FRUIT)
-            {
-                // Food provides general health boost
-                mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + 1);
-                mimic.destructible->set_hp(std::min(mimic.destructible->get_hp() + 1, mimic.destructible->get_max_hp()));
-                ctx.message_system->log("Mimic gained health from food");
-            }
-            else
-            {
-                // Unknown item type - provide minimal benefit
-                ctx.message_system->log("Mimic consumed unknown item type: " + item->get_name());
+                transform_to_greater_mimic(mimic, ctx);
             }
 
-            // Mark item for removal
+            // Mark for removal and stop (one item per turn)
             itemsToRemove.push_back(i);
             itemConsumed = true;
-
-            // If mimic has consumed enough items, change appearance
-            if (itemsConsumed >= 5)
-            {
-                mimic.actorData.ch = 'W';
-                mimic.actorData.color = RED_YELLOW_PAIR;
-                mimic.actorData.name = "greater mimic";
-                ctx.message_system->log("Mimic transformed into greater mimic");
-            }
-
-            // Only consume one item per turn to give player a chance
             break;
         }
     }
 
-    // Second pass - remove consumed items using proper inventory operations
-    for (auto it = itemsToRemove.rbegin(); it != itemsToRemove.rend(); ++it)
+    // Remove consumed items in reverse order to maintain indices
+    for (size_t index : std::views::reverse(itemsToRemove))
     {
-        size_t index = *it;
-        ctx.message_system->log("Removing consumed item at index " + std::to_string(index));
-
+        ctx.message_system->log(std::format("Removing consumed item at index {}", index));
+        
         if (index < ctx.inventory_data->items.size() && ctx.inventory_data->items[index])
         {
             remove_item_at(*ctx.inventory_data, index);
@@ -222,6 +145,115 @@ bool AiMimic::consume_nearby_items(Mimic& mimic, GameContext& ctx)
     }
 
     return itemConsumed;
+}
+
+void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& ctx)
+{
+    switch (itemClass)
+    {
+        case ItemClass::HEALTH_POTION:
+            boost_health(mimic, HEALTH_BONUS, ctx);
+            ctx.message_system->log(std::format("Mimic gained {} HP from potion", HEALTH_BONUS));
+            break;
+
+        case ItemClass::SCROLL_LIGHTNING:
+        case ItemClass::SCROLL_FIREBALL:
+        case ItemClass::SCROLL_CONFUSION:
+            boost_confusion_power(ctx);
+            break;
+
+        case ItemClass::GOLD:
+            boost_defense(mimic, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
+            if (mimic.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
+            {
+                ctx.message_system->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
+            }
+            break;
+
+        case ItemClass::DAGGER:
+        case ItemClass::SHORT_SWORD:
+        case ItemClass::LONG_SWORD:
+        case ItemClass::GREAT_SWORD:
+        case ItemClass::BATTLE_AXE:
+        case ItemClass::GREAT_AXE:
+        case ItemClass::WAR_HAMMER:
+        case ItemClass::STAFF:
+        case ItemClass::LONG_BOW:
+            boost_attack(mimic, ctx);
+            break;
+
+        case ItemClass::LEATHER_ARMOR:
+        case ItemClass::CHAIN_MAIL:
+        case ItemClass::PLATE_MAIL:
+            boost_defense(mimic, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
+            if (mimic.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
+            {
+                ctx.message_system->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
+            }
+            break;
+
+        case ItemClass::FOOD_RATION:
+        case ItemClass::BREAD:
+        case ItemClass::MEAT:
+        case ItemClass::FRUIT:
+            boost_health(mimic, HEALTH_BONUS, ctx);
+            ctx.message_system->log("Mimic gained health from food");
+            break;
+
+        default:
+            ctx.message_system->log(std::format("Mimic consumed unknown item type: {}", static_cast<int>(itemClass)));
+            break;
+    }
+}
+
+void AiMimic::boost_health(Mimic & mimic, int amount, GameContext & ctx)
+{
+    mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + amount);
+    const int newCurrentHp = std::min(
+        mimic.destructible->get_hp() + amount,
+        mimic.destructible->get_max_hp()
+    );
+    mimic.destructible->set_hp(newCurrentHp);
+    ctx.message_system->log(std::format("Mimic gained {} health from food", amount));
+}
+
+void AiMimic::boost_defense(Mimic& mimic, int amount, int maxDR, GameContext& ctx)
+{
+    const int currentDR = mimic.destructible->get_dr();
+    if (currentDR < maxDR)
+    {
+        mimic.destructible->set_dr(currentDR + amount);
+    }
+}
+
+void AiMimic::boost_attack(Mimic& mimic, GameContext& ctx)
+{
+    const auto& currentDamage = mimic.attacker->get_damage_info();
+    if (currentDamage.maxDamage < MAX_WEAPON_DAMAGE)
+    {
+        const int newMaxDamage = std::min(currentDamage.maxDamage + 1, MAX_WEAPON_DAMAGE);
+        const DamageInfo improvedDamage(
+            currentDamage.minDamage,
+            newMaxDamage,
+            std::format("1d{}", newMaxDamage)
+        );
+        mimic.attacker->set_damage_info(improvedDamage);
+        ctx.message_system->log(std::format("Mimic improved attack to {}", improvedDamage.displayRoll));
+    }
+}
+
+void AiMimic::boost_confusion_power(GameContext& ctx)
+{
+    confusionDuration = std::min(confusionDuration + CONFUSION_BONUS, MAX_CONFUSION_DURATION);
+    ctx.message_system->log(std::format("Mimic increased confusion duration to {}", confusionDuration));
+}
+
+void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
+{
+    mimic.actorData.ch = 'W';
+    mimic.actorData.color = RED_YELLOW_PAIR;
+    mimic.actorData.name = "greater mimic";
+    ctx.message_system->log("Mimic transformed into greater mimic");
 }
 
 void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
@@ -304,27 +336,33 @@ void AiMimic::load(const json& j)
     AiMonster::load(j);
 
     // Load AiMimic specific data
-    if (j.contains("disguiseChangeCounter")) {
+    if (j.contains("disguiseChangeCounter"))
+    {
         disguiseChangeCounter = j.at("disguiseChangeCounter").get<int>();
     }
 
-    if (j.contains("consumptionCooldown")) {
+    if (j.contains("consumptionCooldown"))
+    {
         consumptionCooldown = j.at("consumptionCooldown").get<int>();
     }
 
-    if (j.contains("isDisguised")) {
+    if (j.contains("isDisguised"))
+    {
         isDisguised = j.at("isDisguised").get<bool>();
     }
 
-    if (j.contains("revealDistance")) {
+    if (j.contains("revealDistance"))
+    {
         revealDistance = j.at("revealDistance").get<int>();
     }
 
-    if (j.contains("confusionDuration")) {
+    if (j.contains("confusionDuration"))
+    {
         confusionDuration = j.at("confusionDuration").get<int>();
     }
 
-    if (j.contains("itemsConsumed")) {
+    if (j.contains("itemsConsumed"))
+    {
         itemsConsumed = j.at("itemsConsumed").get<int>();
     }
 }

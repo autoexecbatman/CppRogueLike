@@ -29,7 +29,7 @@ protected:
     bool webLaid = false;     // Tracks if this spider has created a web
 
     // Specialized spider movement pattern that prefers walls and corners
-    void moveOrAttack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
+    void move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
 
     // Check if the spider can attempt a poison attack
     bool canPoisonAttack(Creature& owner, GameContext& ctx);
@@ -55,7 +55,7 @@ public:
 
 private:
     int webCooldown = 0;       // Cooldown timer for creating webs
-    static const int MAX_WEBS = 5; // Maximum number of webs that can exist at once per spider
+    static constexpr int MAX_WEBS = 5; // Maximum number of webs that can exist at once per spider
 
     // Try to create a web at the current position
     bool tryCreateWeb(Creature& owner, GameContext& ctx);

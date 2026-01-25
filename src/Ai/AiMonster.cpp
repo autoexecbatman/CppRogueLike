@@ -8,8 +8,6 @@
 #include "../Actor/Destructible.h"
 #include "../Actor/Attacker.h"
 
-AiMonster::AiMonster() : moveCount(0) {}
-
 void AiMonster::update(Creature& owner, GameContext& ctx)
 {
 
@@ -42,7 +40,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
     if (moveCount > 0 && !ctx.player->is_invisible())
     {
         // Recently seen player - actively pursue
-        moveOrAttack(owner, ctx.player->position, ctx);
+        move_or_attack(owner, ctx.player->position, ctx);
     }
     else if (distanceToPlayer <= 15 && !ctx.player->is_invisible())
     {
@@ -50,7 +48,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
         // even if they don't have direct line of sight
         if (ctx.dice->d6() == 1)  // Occasional movement toward player
         {
-            moveOrAttack(owner, ctx.player->position, ctx);
+            move_or_attack(owner, ctx.player->position, ctx);
         }
         else if (ctx.dice->d10() == 1)  // Occasional random movement
         {
@@ -152,7 +150,7 @@ void AiMonster::save(json& j)
 //	}
 //}
 
-void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
 	Dijkstra dijkstra{ MAP_WIDTH,MAP_HEIGHT };
 	std::vector<Vector2D> path = dijkstra.a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);

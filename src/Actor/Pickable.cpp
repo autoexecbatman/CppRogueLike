@@ -569,21 +569,28 @@ EquipmentSlot Dagger::get_preferred_slot(const Player* player) const
 // Potion implementations
 bool HealingPotion::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
-	if (wearer.destructible && wearer.destructible->get_hp() < wearer.destructible->get_max_hp())
-	{
-		int healedAmount = std::min(heal_amount, wearer.destructible->get_max_hp() - wearer.destructible->get_hp());
-		wearer.destructible->heal(healedAmount);
-		ctx.message_system->message(GREEN_BLACK_PAIR, "You feel better! (+" + std::to_string(healedAmount) + " HP)", true);
-		
-		// Remove the potion from inventory
-		auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
-		return result.has_value();
-	}
-	else
-	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
-		return false;
-	}
+    // Early return if no destructible component
+    if (!wearer.destructible)
+    {
+        return false;
+    }
+    
+    // Check if at full health
+    if (wearer.destructible->get_hp() >= wearer.destructible->get_max_hp())
+    {
+        ctx.message_system->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
+        return false;
+    }
+    
+    // Heal and get actual amount healed (heal() handles clamping to max HP)
+    const int actualHealed = wearer.destructible->heal(heal_amount);
+    
+    // Display healing message
+    ctx.message_system->message(GREEN_BLACK_PAIR, std::format("You feel better! (+{} HP)", actualHealed), true);
+    
+    // Remove potion from inventory
+    const auto result = InventoryOperations::remove_item(wearer.inventory_data, owner);
+    return result.has_value();
 }
 
 void HealingPotion::save(json& j)

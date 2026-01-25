@@ -140,18 +140,15 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 //====
 
 // The function returns the amount of health point actually restored.
-int Destructible::heal(int hpToHeal)
+[[nodiscard]] int Destructible::heal(int hpToHeal)
 {
-	int newHp = get_hp() + hpToHeal;
-
-	if (newHp > get_max_hp())
-	{
-		hpToHeal -= newHp - get_max_hp();
-		newHp = get_max_hp();
-	}
-	
-	set_hp(newHp);
-	return hpToHeal;
+    const int currentHp = get_hp();
+    const int maxHp = get_max_hp();
+    const int newHp = std::min(currentHp + hpToHeal, maxHp);
+    const int actualHealed = newHp - currentHp;
+    
+    set_hp(newHp);
+    return actualHealed;
 }
 
 void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
@@ -296,7 +293,7 @@ void MonsterDestructible::save(json& j)
 	Destructible::save(j);
 }
 
-std::unique_ptr<Destructible> Destructible::create(const json& j)
+[[nodiscard]] std::unique_ptr<Destructible> Destructible::create(const json& j)
 {
 	if (j.contains("type") && j["type"].is_number())
 	{

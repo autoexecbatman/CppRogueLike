@@ -8,19 +8,19 @@
 #include "../Systems/MessageSystem.h"
 #include "../Core/GameContext.h"
 
-void LevelManager::advance_to_next_level(Map& map, Player& player, MessageSystem& message_system, GameContext& ctx)
+void LevelManager::advance_to_next_level(GameContext& ctx)
 {
     dungeon_level++;
     shopkeepers_on_current_level = 0; // Reset shopkeeper counter for new level
     
     // Display progression messages
-    display_level_messages(message_system);
+    display_level_messages(*ctx.message_system);
     
     // Heal player between levels
-    heal_player_between_levels(player);
+    heal_player_between_levels(ctx);
     
     // Regenerate the map for new level
-    map.regenerate(ctx);
+    ctx.map->regenerate(ctx);
 }
 
 void LevelManager::reset_to_first_level()
@@ -81,10 +81,19 @@ void LevelManager::display_level_messages(MessageSystem& message_system) const
     message_system.message(WHITE_BLACK_PAIR, std::format("You are now on level {}", dungeon_level), true);
 }
 
-void LevelManager::heal_player_between_levels(Player& player) const
+void LevelManager::heal_player_between_levels(GameContext& ctx) const
 {
-    if (player.destructible)
+    if (!ctx.player || !ctx.player->destructible)
     {
-        player.destructible->heal(player.destructible->get_max_hp() / 2);
+        return;
+    }
+    
+    const int healAmount = ctx.player->destructible->get_max_hp() / 2;
+    const int actualHealed = ctx.player->destructible->heal(healAmount);
+    
+    if (actualHealed > 0)
+    {
+        ctx.message_system->message(GREEN_BLACK_PAIR, 
+            std::format("You rest between levels and recover {} HP.", actualHealed), true);
     }
 }

@@ -10,17 +10,17 @@
 #include "../Systems/MessageSystem.h"
 
 // Spider AI constants
-const int AMBUSH_DURATION = 5;      // How long spiders stay in ambush mode
-const int AMBUSH_CHANCE = 30;       // % chance to enter ambush mode when not seen
-const int POISON_DURATION = 3;      // Duration of poison effect in turns
-const int POISON_COOLDOWN = 6;      // Turns between poison attacks
-const int WEB_COOLDOWN = 8;         // Turns between web creation
+constexpr int AMBUSH_DURATION = 5;      // How long spiders stay in ambush mode
+constexpr int AMBUSH_CHANCE = 30;       // % chance to enter ambush mode when not seen
+constexpr int POISON_DURATION = 3;      // Duration of poison effect in turns
+constexpr int POISON_COOLDOWN = 6;      // Turns between poison attacks
+constexpr int WEB_COOLDOWN = 8;         // Turns between web creation
 
 // Web structure constants
-const int WEB_MIN_SIZE = 3;     // Minimum web size (diameter)
-const int WEB_MAX_SIZE = 5;     // Maximum web size (diameter)
-const int WEB_STRENGTH = 3;     // Web strength (turns to escape)
-const int WEB_TRAP_CHANCE = 40; // Chance (%) for instant immobilization
+constexpr int WEB_MIN_SIZE = 3;     // Minimum web size (diameter)
+constexpr int WEB_MAX_SIZE = 5;     // Maximum web size (diameter)
+constexpr int WEB_STRENGTH = 3;     // Web strength (turns to escape)
+constexpr int WEB_TRAP_CHANCE = 40; // Chance (%) for instant immobilization
 
 // Web tile definition - you would need to add this to your TileType enum in Map.h
 // enum class TileType { ..., WEB, ... };
@@ -29,9 +29,7 @@ const int WEB_TRAP_CHANCE = 40; // Chance (%) for instant immobilization
 // AiSpider Implementation
 //=============================================================================
 
-AiSpider::AiSpider() : AiMonster(), ambushCounter(0), isAmbushing(false), poisonCooldown(0)
-{
-}
+AiSpider::AiSpider() : AiMonster(), ambushCounter(0), isAmbushing(false), poisonCooldown(0) {}
 
 void AiSpider::update(Creature& owner, GameContext& ctx)
 {
@@ -231,7 +229,7 @@ void AiSpider::randomMove(Creature& owner, GameContext& ctx)
     }
 }
 
-void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
     // Get distance to target
     int distanceToTarget = owner.get_tile_distance(targetPosition);
@@ -303,7 +301,7 @@ void AiSpider::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContex
     // If we have no moves, use default pathfinding
     if (possibleMoves.empty())
     {
-        AiMonster::moveOrAttack(owner, targetPosition, ctx);
+        AiMonster::move_or_attack(owner, targetPosition, ctx);
         return;
     }
 
@@ -383,14 +381,23 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition, 
             Vector2D pos = owner.position + Vector2D{ y, x };
 
             // Check boundaries
-            if (pos.y < 0 || pos.y >= ctx.map->get_height() ||
-                pos.x < 0 || pos.x >= ctx.map->get_width())
+            if (pos.y < 0
+                ||
+                pos.y >= ctx.map->get_height()
+                ||
+                pos.x < 0
+                ||
+                pos.x >= ctx.map->get_width())
             {
                 continue;
             }
 
             // Check if position is walkable, not occupied, and a good ambush spot
-            if (ctx.map->can_walk(pos, ctx) && !ctx.map->get_actor(pos, ctx) && isGoodAmbushSpot(pos, ctx))
+            if (ctx.map->can_walk(pos, ctx)
+                &&
+                !ctx.map->get_actor(pos, ctx)
+                &&
+                isGoodAmbushSpot(pos, ctx))
             {
                 // Evaluate position - closer to player's path is better for ambush
                 int distToPlayer = std::abs(pos.x - targetPosition.x) + std::abs(pos.y - targetPosition.y);
@@ -409,15 +416,13 @@ Vector2D AiSpider::findAmbushPosition(Creature& owner, Vector2D targetPosition, 
     if (!candidates.empty())
     {
         int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
-        return candidates[index];
+        return candidates.at(index);
     }
     else
     {
-        throw ("candidates is empty in findAmbushPosition()");
+        // No good ambush position found
+        return Vector2D{ -1, -1 };
     }
-
-    // No good ambush position found
-    return Vector2D{ -1, -1 };
 }
 
 bool AiSpider::isGoodAmbushSpot(Vector2D position, GameContext& ctx)
@@ -594,14 +599,16 @@ bool AiWebSpinner::shouldCreateWeb(Creature& owner, GameContext& ctx)
     }
 
     // If spider has already laid a web recently, reduce chance of creating another
-    if (has_laid_web()) {
+    if (has_laid_web())
+    {
         // Reduced chance if already laid a web (20% instead of 40%)
         if (distToPlayer <= 10 && ctx.dice->d100() < 20)
         {
             return true;
         }
     }
-    else {
+    else
+    {
         // Higher chance if hasn't laid a web yet
         // If player is nearby, moderate chance to create defensive web
         if (distToPlayer <= 10 && ctx.dice->d100() < 40)
@@ -634,7 +641,8 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner, GameContext& ctx)
 {
     // Cast owner to Spider to access spider-specific methods
     Spider* spider = dynamic_cast<Spider*>(&owner);
-    if (!spider) {
+    if (!spider)
+    {
         ctx.message_system->log("Error: tryCreateWeb called on non-Spider creature");
         return false;
     }
@@ -643,15 +651,18 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner, GameContext& ctx)
     int distToPlayer = owner.get_tile_distance(ctx.player->position);
     int webSize = WEB_MAX_SIZE;
 
-    if (distToPlayer < 5) {
+    if (distToPlayer < 5)
+    {
         // Maximum size defensive web
         webSize = WEB_MAX_SIZE;
     }
-    else if (distToPlayer < 15) {
+    else if (distToPlayer < 15)
+    {
         // Medium size web
         webSize = WEB_MIN_SIZE + 1;
     }
-    else {
+    else
+    {
         // Minimum size trap web
         webSize = WEB_MIN_SIZE;
     }
@@ -659,7 +670,8 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner, GameContext& ctx)
     // Center the web at the spider's position or at a strategic location
     Vector2D webCenter;
 
-    if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10) {
+    if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10) 
+    {
         // If player can see spider, create web between spider and player
         int dx = ctx.player->position.x - owner.position.x;
         int dy = ctx.player->position.y - owner.position.y;
@@ -674,7 +686,8 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner, GameContext& ctx)
         webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
         webCenter.y = std::max(0, std::min(webCenter.y, ctx.map->get_height() - 1));
     }
-    else {
+    else
+    {
         // If player can't see spider, create web at a nearby location
         webCenter = owner.position;
     }
@@ -684,10 +697,12 @@ bool AiWebSpinner::tryCreateWeb(Creature& owner, GameContext& ctx)
 
     // Dramatic message about web creation
     ctx.message_system->message(RED_YELLOW_PAIR, owner.actorData.name);
-    if (webSize >= WEB_MAX_SIZE - 1) {
+    if (webSize >= WEB_MAX_SIZE - 1)
+    {
         ctx.message_system->message(WHITE_BLACK_PAIR, " creates a massive web network!", true);
     }
-    else {
+    else
+    {
         ctx.message_system->message(WHITE_BLACK_PAIR, " spins a complex web structure!", true);
     }
 
@@ -703,7 +718,8 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
     // with size determining the radius/complexity
 
     // Different web patterns
-    enum class WebPattern {
+    enum class WebPattern
+    {
         CIRCULAR,
         SPIRAL,
         RADIAL,
@@ -716,20 +732,26 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
     // Track positions that have been converted to web
     std::vector<Vector2D> webPositions;
 
-    switch (pattern) {
+    switch (pattern)
+    {
     case WebPattern::CIRCULAR:
         // Create a circular/oval web
-        for (int y = -size; y <= size; y++) {
-            for (int x = -size; x <= size; x++) {
+        for (int y = -size; y <= size; y++)
+        {
+            for (int x = -size; x <= size; x++)
+            {
                 
                 float normalizedDist = ((float)(x * x) / (size * size)) + ((float)(y * y) / (size * size));
 
                 // Create web with higher density near the edges
-                if (normalizedDist <= 1.0f &&
-                    (normalizedDist >= 0.7f || ctx.dice->d100() < 40)) {
+                if (normalizedDist <= 1.0f
+                    &&
+                    (normalizedDist >= 0.7f || ctx.dice->d100() < 40))
+                {
 
                     Vector2D pos = center + Vector2D{ y, x };
-                    if (isValidWebPosition(pos, ctx)) {
+                    if (isValidWebPosition(pos, ctx))
+                    {
                         webPositions.push_back(pos);
                     }
                 }
@@ -743,7 +765,8 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
         float angle = 0.0f;
         float radiusStep = (float)size / 20.0f;
 
-        for (int i = 0; i < 20 * size; i++) {
+        for (int i = 0; i < 20 * size; i++)
+        {
             float radius = radiusStep * i;
             if (radius > size) break;
 
@@ -751,20 +774,24 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
             int y = center.y + (int)(radius * sin(angle));
 
             Vector2D pos{ y, x };
-            if (isValidWebPosition(pos, ctx)) {
+            if (isValidWebPosition(pos, ctx))
+            {
                 webPositions.push_back(pos);
             }
 
             angle += 0.5f;
 
             // Add some random offshoots from the spiral
-            if (ctx.dice->d100() < 30) {
-                for (int j = 1; j <= 3; j++) {
+            if (ctx.dice->d100() < 30)
+            {
+                for (int j = 1; j <= 3; j++)
+                {
                     int offX = x + ctx.dice->roll(-1, 1);
                     int offY = y + ctx.dice->roll(-1, 1);
 
                     Vector2D offPos{ offY, offX };
-                    if (isValidWebPosition(offPos, ctx)) {
+                    if (isValidWebPosition(offPos, ctx))
+                    {
                         webPositions.push_back(offPos);
                     }
                 }
@@ -779,28 +806,34 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
         // First create the spokes
         int numSpokes = 6 + ctx.dice->roll(0, 4); // 6-10 spokes
 
-        for (int i = 0; i < numSpokes; i++) {
+        for (int i = 0; i < numSpokes; i++)
+        {
             float angle = (float)i * (2.0f * 3.14159f / numSpokes);
 
-            for (int dist = 1; dist <= size; dist++) {
+            for (int dist = 1; dist <= size; dist++)
+            {
                 int x = center.x + (int)(dist * cos(angle));
                 int y = center.y + (int)(dist * sin(angle));
 
                 Vector2D pos{ y, x };
-                if (isValidWebPosition(pos, ctx)) {
+                if (isValidWebPosition(pos, ctx))
+                {
                     webPositions.push_back(pos);
                 }
             }
         }
 
         // Now create concentric circles connecting the spokes
-        for (int radius = 1; radius <= size; radius += 1 + (size / 5)) {
-            for (float angle = 0; angle < 2.0f * 3.14159f; angle += 0.2f) {
+        for (int radius = 1; radius <= size; radius += 1 + (size / 5))
+        {
+            for (float angle = 0; angle < 2.0f * 3.14159f; angle += 0.2f)
+            {
                 int x = center.x + (int)(radius * cos(angle));
                 int y = center.y + (int)(radius * sin(angle));
 
                 Vector2D pos{ y, x };
-                if (isValidWebPosition(pos, ctx)) {
+                if (isValidWebPosition(pos, ctx))
+                {
                     webPositions.push_back(pos);
                 }
             }
@@ -812,11 +845,15 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
         // Create a chaotic, asymmetric web
     {
         // Start with a dense center
-        for (int y = -2; y <= 2; y++) {
-            for (int x = -2; x <= 2; x++) {
-                if (abs(x) + abs(y) <= 3) {
+        for (int y = -2; y <= 2; y++)
+        {
+            for (int x = -2; x <= 2; x++)
+            {
+                if (abs(x) + abs(y) <= 3)
+                {
                     Vector2D pos = center + Vector2D{ y, x };
-                    if (isValidWebPosition(pos, ctx)) {
+                    if (isValidWebPosition(pos, ctx))
+                    {
                         webPositions.push_back(pos);
                     }
                 }
@@ -824,11 +861,13 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
         }
 
         // Then create random strands extending outward
-        for (int strand = 0; strand < 8 + ctx.dice->roll(0, 7); strand++) {
+        for (int strand = 0; strand < 8 + ctx.dice->roll(0, 7); strand++)
+        {
             Vector2D strandPos = center;
             int strandLength = ctx.dice->roll(3, size);
 
-            for (int step = 0; step < strandLength; step++) {
+            for (int step = 0; step < strandLength; step++)
+            {
                 // Random direction but with bias toward continuing current direction
                 int dx = ctx.dice->roll(-1, 1);
                 int dy = ctx.dice->roll(-1, 1);
@@ -836,26 +875,32 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
                 strandPos.x += dx;
                 strandPos.y += dy;
 
-                if (isValidWebPosition(strandPos, ctx)) {
+                if (isValidWebPosition(strandPos, ctx))
+                {
                     webPositions.push_back(strandPos);
                 }
-                else {
+                else
+                {
                     break; // Hit a wall or invalid position
                 }
 
                 // Occasionally branch the strand
-                if (ctx.dice->d100() < 30) {
+                if (ctx.dice->d100() < 30)
+                {
                     Vector2D branchPos = strandPos;
                     int branchLength = ctx.dice->roll(2, 4);
 
-                    for (int bStep = 0; bStep < branchLength; bStep++) {
+                    for (int bStep = 0; bStep < branchLength; bStep++)
+                    {
                         branchPos.x += ctx.dice->roll(-1, 1);
                         branchPos.y += ctx.dice->roll(-1, 1);
 
-                        if (isValidWebPosition(branchPos, ctx)) {
+                        if (isValidWebPosition(branchPos, ctx))
+                        {
                             webPositions.push_back(branchPos);
                         }
-                        else {
+                        else
+                        {
                             break;
                         }
                     }
@@ -867,10 +912,12 @@ void AiWebSpinner::generateWebPattern(Vector2D center, int size, GameContext& ct
     }
 
     // Place all the web tiles
-    for (const auto& pos : webPositions) {
+    for (const auto& pos : webPositions)
+    {
         // Set the tile to web with variable strength
         int webStrength = WEB_STRENGTH;
-        if (ctx.dice->d100() < 25) {
+        if (ctx.dice->d100() < 25)
+        {
             // Some webs are stronger or weaker
             webStrength += ctx.dice->roll(-1, 2);
         }
@@ -966,6 +1013,7 @@ void AiWebSpinner::generateWebEntities(Vector2D center, int size, GameContext& c
         break;
 
         // ... other patterns as before ...
+        // TODO: Check why there is no patterns here?
     }
 
     // Create Web entities at these positions

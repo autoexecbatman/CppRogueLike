@@ -8,8 +8,6 @@
 #include "../Actor/Destructible.h"
 #include "../Actor/Attacker.h"
 
-AiMonsterRanged::AiMonsterRanged() : AiMonster() {}
-
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
     if (owner.destructible->is_dead())
@@ -29,11 +27,11 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
     if (moveCount > 0)
     {
-        moveOrAttack(owner, ctx.player->position, ctx);
+        move_or_attack(owner, ctx.player->position, ctx);
     }
 }
 
-void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+void AiMonsterRanged::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
     int distance = owner.get_tile_distance(targetPosition);
 
@@ -72,7 +70,7 @@ void AiMonsterRanged::moveOrAttack(Creature& owner, Vector2D targetPosition, Gam
     // If too far or couldn't back up, use regular pathfinding to approach
     if (distance > maxRangeDistance || distance < optimalDistance)
     {
-        AiMonster::moveOrAttack(owner, targetPosition, ctx);
+        AiMonster::move_or_attack(owner, targetPosition, ctx);
     }
 }
 

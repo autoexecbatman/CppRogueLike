@@ -751,7 +751,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		if (ctx.stairs->position == player.position)
 		{
-			ctx.level_manager->advance_to_next_level(*ctx.map, *ctx.player, *ctx.message_system, ctx);
+			ctx.level_manager->advance_to_next_level(ctx);
 			*ctx.game_status = GameStatus::STARTUP;
 		}
 		break;

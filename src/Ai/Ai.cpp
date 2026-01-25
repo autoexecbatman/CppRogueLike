@@ -1,7 +1,7 @@
 // file: Ai.cpp
 #include <iostream>
-#include <libtcod.h>
 #include <format>
+#include <array>
 
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
@@ -15,14 +15,16 @@
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)
 {
-	if (!j.contains("type") || !j["type"].is_number()) {
+	if (!j.contains("type") || !j["type"].is_number())
+	{
 		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
 	}
 
 	auto type = static_cast<AiType>(j["type"].get<int>());
 	std::unique_ptr<Ai> ai;
 
-	switch (type) {
+	switch (type)
+	{
 	case AiType::PLAYER:
 		ai = std::make_unique<AiPlayer>();
 		break;
@@ -30,7 +32,7 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 		ai = std::make_unique<AiMonster>();
 		break;
 	case AiType::CONFUSED_MONSTER:
-		ai = std::make_unique<AiMonsterConfused>(0,nullptr);
+		ai = std::make_unique<AiMonsterConfused>(0, nullptr);
 		break;
 	case AiType::SHOPKEEPER:
 		ai = std::make_unique<AiShopkeeper>();
@@ -84,7 +86,6 @@ void Ai::levelup_update(GameContext& ctx, Creature& owner)
 	ctx.message_system->log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
 	int levelUpXp = get_next_level_xp(ctx, owner);
-
 	if (owner.destructible->get_xp() >= levelUpXp)
 	{
 		ctx.player->adjust_level(1);
@@ -94,108 +95,44 @@ void Ai::levelup_update(GameContext& ctx, Creature& owner)
 	}
 }
 
-int Ai::calculate_fighter_xp(int level)
+[[nodiscard]] constexpr int Ai::calculate_fighter_xp(int level) noexcept
 {
     // AD&D 2e Fighter XP progression
-    static const int fighterXP[] = {
-        0,
-		2000, // need 2000 XP to reach level 2
-        4000,  
-        8000,  
-        16000,
-        32000,
-        64000,
-        125000,
-        250000,
-        500000,
-        750000
+    constexpr std::array fighter_xp = {
+        0, 2000, 4000, 8000, 16000, 32000, 
+        64000, 125000, 250000, 500000, 750000
     };
-
-    // Cap at array size, then use linear progression
-    if (level < static_cast<int>(sizeof(fighterXP) / sizeof(fighterXP[0]))) {
-        return fighterXP[level];
-    }
-    else {
-        return fighterXP[10] + (level - 10) * 250000;
-    }
+    return calculate_xp_for_level(level, fighter_xp, 250000);
 }
 
-int Ai::calculate_rogue_xp(int level)
+[[nodiscard]] constexpr int Ai::calculate_rogue_xp(int level) noexcept
 {
     // AD&D 2e Thief/Rogue XP progression
-    static const int rogueXP[] = {
-        0,
-		1250, // need 1250 XP to reach level 2
-        2500,
-        5000,
-        10000,
-        20000,
-        40000,
-        70000,
-        110000,
-        160000,
-        220000
+    constexpr std::array rogue_xp = {
+        0, 1250, 2500, 5000, 10000, 20000,
+        40000, 70000, 110000, 160000, 220000
     };
-
-    // Cap at array size, then use linear progression
-    if (level < static_cast<int>(sizeof(rogueXP) / sizeof(rogueXP[0]))) {
-        return rogueXP[level];
-    }
-    else {
-        return rogueXP[10] + (level - 10) * 60000;
-    }
+    return calculate_xp_for_level(level, rogue_xp, 60000);
 }
 
-int Ai::calculate_cleric_xp(int level)
+[[nodiscard]] constexpr int Ai::calculate_cleric_xp(int level) noexcept
 {
     // AD&D 2e Cleric XP progression
-	static const int clericXP[] = {
-		0,
-		1500, // need 1500 XP to reach level 2
-		3000,
-		6000,
-		13000,
-		27500,
-		55000,
-		110000,
-		225000,
-		450000,
-		675000
-	};
-
-    // Cap at array size, then use linear progression
-    if (level < static_cast<int>(sizeof(clericXP) / sizeof(clericXP[0]))) {
-        return clericXP[level];
-    }
-    else {
-        return clericXP[10] + (level - 10) * 225000;
-    }
+    constexpr std::array cleric_xp = {
+        0, 1500, 3000, 6000, 13000, 27500,
+        55000, 110000, 225000, 450000, 675000
+    };
+    return calculate_xp_for_level(level, cleric_xp, 225000);
 }
 
-int Ai::calculate_wizard_xp(int level)
+[[nodiscard]] constexpr int Ai::calculate_wizard_xp(int level) noexcept
 {
     // AD&D 2e Wizard/Mage XP progression
-	static const int wizardXP[] = {
-		0,
-		2500,
-		5000,
-		10000,
-		20000,
-		40000,
-		60000,
-		90000,
-		135000,
-		250000,
-		375000
-	};
-
-    // Cap at array size, then use linear progression
-    if (level < static_cast<int>(sizeof(wizardXP) / sizeof(wizardXP[0]))) {
-        return wizardXP[level];
-    }
-    else {
-        return wizardXP[10] + (level - 10) * 125000;
-    }
+    constexpr std::array wizard_xp = {
+        0, 2500, 5000, 10000, 20000, 40000,
+        60000, 90000, 135000, 250000, 375000
+    };
+    return calculate_xp_for_level(level, wizard_xp, 125000);
 }
 
 // end of file: Ai.cpp

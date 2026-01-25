@@ -36,17 +36,17 @@ public:
 	Destructible& operator=(Destructible&&) = delete;
 
 	// Query methods - const-correct
-	bool is_dead() const noexcept { return hp <= 0; }
-	int get_hp() const noexcept { return hp; }
-	int get_max_hp() const noexcept { return hpMax; }
-	int get_armor_class() const noexcept { return armorClass; }
-	int get_base_armor_class() const noexcept { return baseArmorClass; }
-	int get_thaco() const noexcept { return thaco; }
-	int get_dr() const noexcept { return dr; }
-	const std::string& get_corpse_name() const noexcept { return corpseName; }
-	int get_xp() const noexcept { return xp; }
-	int get_last_constitution() const noexcept { return lastConstitution; }
-	int get_hp_base() const noexcept { return hpBase; }
+	[[nodiscard]] bool is_dead() const noexcept { return hp <= 0; }
+	[[nodiscard]] int get_hp() const noexcept { return hp; }
+	[[nodiscard]] int get_max_hp() const noexcept { return hpMax; }
+	[[nodiscard]] int get_armor_class() const noexcept { return armorClass; }
+	[[nodiscard]] int get_base_armor_class() const noexcept { return baseArmorClass; }
+	[[nodiscard]] int get_thaco() const noexcept { return thaco; }
+	[[nodiscard]] int get_dr() const noexcept { return dr; }
+	[[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
+	[[nodiscard]] int get_xp() const noexcept { return xp; }
+	[[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
+	[[nodiscard]] int get_hp_base() const noexcept { return hpBase; }
 
 	// Modifier methods - non-const
 	void set_hp(int value) noexcept 
@@ -83,13 +83,13 @@ public:
 	// Action methods
 	void take_damage(Creature& owner, int damage, GameContext& ctx); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner, GameContext& ctx); // handles death, owner killed
-	int heal(int hpToHeal); // The function returns the amount of health point actually restored.
+	[[nodiscard]] int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 	void update_armor_class(Creature& owner, GameContext& ctx);
 
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	static std::unique_ptr<Destructible> create(const json& j);
+	[[nodiscard]] static std::unique_ptr<Destructible> create(const json& j);
 };
 
 //====
