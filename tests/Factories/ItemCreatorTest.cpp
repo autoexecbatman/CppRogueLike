@@ -1,22 +1,13 @@
 #include <gtest/gtest.h>
-#include <vector>
-#include <string>
-
-#include "src/Game.h"
+#include "tests/mocks/MockGameContext.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
 
 class ItemCreatorTest : public ::testing::Test
 {
 protected:
-    Game game;
-    GameContext ctx;
+    MockGameContext mock;
     ItemCreator creator;
-
-    void SetUp() override
-    {
-        ctx = game.context();
-    }
 };
 
 TEST_F(ItemCreatorTest, CreateHealthPotion)
@@ -54,24 +45,17 @@ TEST_F(ItemCreatorTest, CreateRandomPotion)
 
 TEST_F(ItemCreatorTest, CalculateEnhancementChance)
 {
-    int chance = creator.calculate_enhancement_chance(1);
-    EXPECT_EQ(chance, 5);
-
-    chance = creator.calculate_enhancement_chance(2);
-    EXPECT_EQ(chance, 8);
-
-    chance = creator.calculate_enhancement_chance(3);
-    EXPECT_EQ(chance, 11);
-
-    chance = creator.calculate_enhancement_chance(10);
-    EXPECT_EQ(chance, 32);
-
-    chance = creator.calculate_enhancement_chance(11);
-    EXPECT_EQ(chance, 35);
+    EXPECT_EQ(creator.calculate_enhancement_chance(1), 5);
+    EXPECT_EQ(creator.calculate_enhancement_chance(2), 8);
+    EXPECT_EQ(creator.calculate_enhancement_chance(3), 11);
+    EXPECT_EQ(creator.calculate_enhancement_chance(10), 32);
+    EXPECT_EQ(creator.calculate_enhancement_chance(11), 35);
 }
 
 TEST_F(ItemCreatorTest, DetermineEnhancementLevel)
 {
+    auto ctx = mock.to_game_context();
+
     int level = creator.determine_enhancement_level(ctx, 1);
     EXPECT_GE(level, 0);
     EXPECT_LE(level, 3);

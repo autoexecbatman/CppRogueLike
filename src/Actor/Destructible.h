@@ -6,34 +6,49 @@
 #include "../Persistent/Persistent.h"
 
 class Creature;
+class Player;
 struct GameContext;
 
 //====
 class Destructible : public Persistent
 {
 private:
-	int lastConstitution{ 0 }; // Last known Constitution value to check for changes
-	int hpBase{ 0 };  // Base HP without Constitution bonus
-	int hpMax{ 0 }; // maximum health points
-	int hp{ 0 }; // current health points
-	int dr{ 0 }; // hit points deflected
-	std::string corpseName{ "corpseName" }; // the actor's name once it is dead/destroyed
-	int xp{ 0 }; // for awarding experience points
-	int thaco{ 0 }; // to hit armor class 0
-	int armorClass{ 0 }; // armor class
-	int baseArmorClass{ 0 }; // Store the base AC without equipment
+	int hpBase;  // Base HP without Constitution bonus
+	int hpMax; // maximum health points
+	int hp; // current health points
+	int dr; // hit points deflected
+	std::string corpseName; // the actor's name once it is dead/destroyed
+	int xp; // for awarding experience points
+	int thaco; // to hit armor class 0
+	int armorClass; // armor class
+	int baseArmorClass; // Store the base AC without equipment
+	int lastConstitution; // Last known Constitution value to check for changes
+	int tempHp; // Temporary hit points such as from aid spell
 
+    [[nodiscard]] int calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const;
+    [[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const;
+    [[nodiscard]] int calculate_player_equipment_ac(const Player& player, GameContext& ctx) const;
+    [[nodiscard]] int calculate_creature_equipment_ac(const Creature& owner, GameContext& ctx) const;
+
+    [[nodiscard]] int calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const;
+    [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
+    [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
+
+    void handle_stat_drain_death(Creature& owner, GameContext& ctx);
+    void log_constitution_change(const Creature& owner, GameContext& ctx, 
+                                int oldCon, int newCon, int hpChange) const;
 public:
 	// Type enum for serialization - must be public for tests
 	enum class DestructibleType { MONSTER, PLAYER };
 
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
-	void update_constitution_bonus(Creature& owner, GameContext& ctx);
 	virtual ~Destructible() override = default;
 	Destructible(const Destructible&) = delete;
 	Destructible(Destructible&&) = delete;
 	Destructible& operator=(const Destructible&) = delete;
 	Destructible& operator=(Destructible&&) = delete;
+
+	void update_constitution_bonus(Creature& owner, GameContext& ctx);
 
 	// Query methods - const-correct
 	[[nodiscard]] bool is_dead() const noexcept { return hp <= 0; }
@@ -47,27 +62,18 @@ public:
 	[[nodiscard]] int get_xp() const noexcept { return xp; }
 	[[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
 	[[nodiscard]] int get_hp_base() const noexcept { return hpBase; }
+	// Temporary HP accessors
+    [[nodiscard]] int get_temp_hp() const { return tempHp; }
+    void set_temp_hp(int value) { tempHp = std::max(0, value); }
+    void add_temp_hp(int amount) { tempHp += amount; }
+    
+    // Total effective HP (for display)
+    [[nodiscard]] int get_effective_hp() const { return hp + tempHp; }
 
 	// Modifier methods - non-const
-	void set_hp(int value) noexcept 
-	{
-		hp = value;
-		if (hp < 0) hp = 0;
-		if (hp > hpMax) hp = hpMax;
-	}
-	
-	void set_max_hp(int value) noexcept 
-	{
-		hpMax = value;
-		if (hpMax <= 0) hpMax = 1;
-		if (hp > hpMax) hp = hpMax;
-	}
-	
-	void set_hp_base(int value) noexcept 
-	{
-		hpBase = value;
-		if (hpBase <= 0) hpBase = 1;
-	}
+	void set_hp(int value) noexcept { hp = value; }
+	void set_max_hp(int value) noexcept { hpMax = value; }
+	void set_hp_base(int value) noexcept { hpBase = value; }
 	
 	void set_armor_class(int value) noexcept { armorClass = value; }
 	void set_base_armor_class(int value) noexcept { baseArmorClass = value; }
@@ -75,13 +81,12 @@ public:
 	void set_dr(int value) noexcept { dr = value; }
 	void set_corpse_name(std::string_view name) { corpseName = name; }
 	void set_xp(int value) noexcept { xp = value; }
+	void set_last_constitution(int value) noexcept { lastConstitution = value; }
 	
 	void add_xp(int amount) noexcept { xp += amount; }
 	
-	void set_last_constitution(int value) noexcept { lastConstitution = value; }
-
 	// Action methods
-	void take_damage(Creature& owner, int damage, GameContext& ctx); // handles damage, owner attacked, returns (dam - def)
+	int take_damage(Creature& owner, int damage, GameContext& ctx); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner, GameContext& ctx); // handles death, owner killed
 	[[nodiscard]] int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 	void update_armor_class(Creature& owner, GameContext& ctx);

@@ -64,6 +64,11 @@ public:
 	int get_tile_distance(Vector2D tilePosition) const noexcept;
 	void render(const GameContext& ctx) const noexcept;
 	bool is_visible(const GameContext& ctx) const noexcept;
+
+	[[nodiscard]] std::string_view get_name() const
+	{
+		return actorData.name;
+	}
 };
 
 class Creature : public Actor
