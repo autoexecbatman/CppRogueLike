@@ -16,8 +16,8 @@
 #include "../Ai/Ai.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Attacker.h"
+#include "../Actor/Pickable.h"
 
-class Pickable;
 struct GameContext;
 
 struct ActorData
