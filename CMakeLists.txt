@@ -10,6 +10,11 @@ project(
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Enable parallel builds for MSVC
+if(MSVC)
+    add_compile_options(/MP)
+endif()
+
 # Check if we're compiling with Emscripten
 if(EMSCRIPTEN)
     message(STATUS "Building with Emscripten")
@@ -186,6 +191,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Items/Weapons.h
     ${PROJECT_SOURCE_DIR}/Items/Armor.cpp
     ${PROJECT_SOURCE_DIR}/Items/Armor.h
+    ${PROJECT_SOURCE_DIR}/Items/Jewelry.cpp
+    ${PROJECT_SOURCE_DIR}/Items/Jewelry.h
+    ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.cpp
+    ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.h
     ${PROJECT_SOURCE_DIR}/Items/Food.cpp
     ${PROJECT_SOURCE_DIR}/Items/Food.h
     ${PROJECT_SOURCE_DIR}/Items/CorpseFood.cpp

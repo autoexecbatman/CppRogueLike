@@ -397,3 +397,7 @@ FodyWeavers.xsd
 /.claude/settings.local.json
 /nul
 /Testing/Temporary
+
+# D&D Reference Materials
+*.pdf
+add-2e-the-complete-advanced-dungeons-dragons-2nd-edition-archive_compress.pdf

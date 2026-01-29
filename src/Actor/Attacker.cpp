@@ -19,6 +19,16 @@ Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
 
 void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 {
+	// AD&D 2e: Attacking breaks invisibility
+	if (attacker.is_invisible())
+	{
+		attacker.clear_invisible();
+		if (attacker.uniqueId == ctx.player->uniqueId)
+		{
+			ctx.message_system->message(CYAN_BLACK_PAIR, "Your invisibility fades as you attack!", true);
+		}
+	}
+
 	auto* player = dynamic_cast<Player*>(&attacker);
 	if (player)
 	{

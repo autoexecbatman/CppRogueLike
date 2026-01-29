@@ -3,6 +3,8 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
+#include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
 
 Web::Web(Vector2D position, int strength)
     : Object(position, ActorData{ '*', "spider web", BLACK_WHITE_PAIR }),
@@ -17,6 +19,24 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
 {
     // Only players can get stuck (for simplicity)
     if (&creature != ctx.player) return false;
+
+    // Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
+    Player* player = static_cast<Player*>(&creature);
+    for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
+    {
+        if (Item* equippedRing = player->get_equipped_item(slot))
+        {
+            if (const auto* magicRing = dynamic_cast<const MagicalRing*>(equippedRing->pickable.get()))
+            {
+                if (magicRing->effect == MagicalEffect::FREE_ACTION)
+                {
+                    ctx.message_system->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
+                    destroy(ctx);
+                    return false;
+                }
+            }
+        }
+    }
 
     // Calculate chance to get caught based on dexterity and web strength
     int catchChance = 40 + (webStrength * 10) - ((ctx.player->get_dexterity() - 10) * 3);

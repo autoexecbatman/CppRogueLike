@@ -220,8 +220,12 @@ public:
 	ItemCategory get_category() const noexcept { return ItemClassificationUtils::get_category(itemClass); }
 	bool is_weapon() const noexcept { return ItemClassificationUtils::is_weapon(itemClass); }
 	bool is_armor() const noexcept { return ItemClassificationUtils::is_armor(itemClass); }
+	bool is_helmet() const noexcept { return ItemClassificationUtils::is_helmet(itemClass); }
 	bool is_shield() const noexcept { return ItemClassificationUtils::is_shield(itemClass); }
 	bool is_consumable() const noexcept { return ItemClassificationUtils::is_consumable(itemClass); }
+	bool is_jewelry() const noexcept { return ItemClassificationUtils::is_jewelry(itemClass); }
+	bool is_amulet() const noexcept { return ItemClassificationUtils::is_amulet(itemClass); }
+	bool is_ring() const noexcept { return ItemClassificationUtils::is_ring(itemClass); }
 	bool can_equip_to_right_hand() const noexcept { return ItemClassificationUtils::can_equip_to_right_hand(itemClass); }
 	bool can_equip_to_left_hand() const noexcept { return ItemClassificationUtils::can_equip_to_left_hand(itemClass); }
 	bool can_equip_to_body() const noexcept { return ItemClassificationUtils::can_equip_to_body(itemClass); }

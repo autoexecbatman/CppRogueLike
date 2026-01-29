@@ -472,3 +472,148 @@ TEST_F(MapTest, Cost_WaterTile_IsHigher)
 
     EXPECT_GT(waterCost, floorCost);
 }
+
+// ----------------------------------------------------------------------------
+// Stairs Placement Tests
+// ----------------------------------------------------------------------------
+
+TEST_F(MapTest, StairsPlacement_AfterInit_StairsExist)
+{
+    // BUG INVESTIGATION: Stairs not placed
+    // After map init, stairs should be placed in a valid room
+
+    // Stairs object must exist in context
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
+    ctx.stairs = stairs.get();
+
+    // Rooms must exist
+    std::vector<Vector2D> rooms;
+    ctx.rooms = &rooms;
+
+    // Re-initialize map with stairs and rooms
+    map->init(false, ctx);
+
+    // Stairs should have been placed at a valid position
+    Vector2D stairsPos = stairs->position;
+
+    // Verify stairs are within map bounds
+    EXPECT_GE(stairsPos.y, 0);
+    EXPECT_LT(stairsPos.y, TEST_MAP_HEIGHT);
+    EXPECT_GE(stairsPos.x, 0);
+    EXPECT_LT(stairsPos.x, TEST_MAP_WIDTH);
+
+    // Verify stairs are not at origin (should have been moved)
+    // If rooms were generated, stairs should not still be at {0,0}
+    if (!rooms.empty())
+    {
+        EXPECT_TRUE(stairsPos.x != 0 || stairsPos.y != 0)
+            << "Stairs should be placed in a room, not at origin";
+    }
+}
+
+TEST_F(MapTest, StairsPlacement_NoStairsInContext_DoesNotCrash)
+{
+    // BUG: If ctx.stairs is null, place_stairs should return early
+    ctx.stairs = nullptr;
+    std::vector<Vector2D> rooms;
+    ctx.rooms = &rooms;
+
+    // Should not crash when stairs is null
+    EXPECT_NO_THROW(map->init(false, ctx));
+}
+
+TEST_F(MapTest, StairsPlacement_NoRooms_DoesNotCrash)
+{
+    // BSP will populate rooms during traversal, so stairs will be placed
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
+    ctx.stairs = stairs.get();
+
+    std::vector<Vector2D> rooms;  // Empty at start, populated by BSP
+    ctx.rooms = &rooms;
+
+    // Should not crash even if rooms starts empty
+    EXPECT_NO_THROW(map->init(false, ctx));
+
+    // After init, rooms should be populated and stairs placed
+    EXPECT_FALSE(rooms.empty());
+    EXPECT_NE(stairs->position, Vector2D(0, 0));  // Stairs moved from initial position
+}
+
+TEST_F(MapTest, StairsPlacement_NullRooms_DoesNotCrash)
+{
+    // BUG: If ctx.rooms is null, place_stairs should return early
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
+    ctx.stairs = stairs.get();
+    ctx.rooms = nullptr;
+
+    // Should not crash when rooms pointer is null
+    EXPECT_NO_THROW(map->init(false, ctx));
+}
+
+TEST_F(MapTest, StairsPlacement_RoomGeneration_StairsInWalkableTile)
+{
+    // Integration test: After full map generation, stairs should be walkable
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
+    ctx.stairs = stairs.get();
+
+    std::vector<Vector2D> rooms;
+    ctx.rooms = &rooms;
+
+    // Generate map with actors
+    map->init(true, ctx);
+
+    // If rooms were generated, stairs should be on a walkable tile
+    if (!rooms.empty())
+    {
+        Vector2D stairsPos = stairs->position;
+
+        // Stairs position should be walkable
+        EXPECT_TRUE(map->can_walk(stairsPos, ctx))
+            << "Stairs at (" << stairsPos.x << ", " << stairsPos.y
+            << ") should be on walkable tile";
+    }
+}
+
+TEST_F(MapTest, StairsPlacement_AfterRegenerate_StairsPlaced)
+{
+    // Simulate descending to next level
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{5, 5});
+    ctx.stairs = stairs.get();
+
+    std::vector<Vector2D> rooms;
+    ctx.rooms = &rooms;
+
+    // Initial map generation
+    map->init(true, ctx);
+    Vector2D firstLevelStairs = stairs->position;
+
+    // Regenerate map (descending to next level)
+    map->regenerate(ctx);
+    Vector2D secondLevelStairs = stairs->position;
+
+    // Stairs should be placed at new position after regenerate
+    EXPECT_NE(secondLevelStairs, Vector2D(0, 0)) << "Stairs should be placed after regenerate";
+    EXPECT_TRUE(map->can_walk(secondLevelStairs, ctx)) << "Stairs should be on walkable tile";
+
+    // Stairs position should likely be different (unless by chance same room)
+    // This is not a strict requirement but helps verify new map was generated
+}
+
+TEST_F(MapTest, StairsPlacement_NoDiceInContext_StairsNotPlaced)
+{
+    // BUG: If ctx.dice is null, place_stairs returns early and stairs remain at initial position
+    std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
+    ctx.stairs = stairs.get();
+
+    std::vector<Vector2D> rooms;
+    ctx.rooms = &rooms;
+    ctx.dice = nullptr;  // No dice in context
+
+    // Should not crash when dice is null
+    EXPECT_NO_THROW(map->init(false, ctx));
+
+    // Stairs should remain at initial position since place_stairs returns early
+    // This is the bug: stairs are not placed when dice is missing
+    EXPECT_EQ(stairs->position, Vector2D(0, 0)) << "Stairs remain unplaced when dice is null";
+}
+

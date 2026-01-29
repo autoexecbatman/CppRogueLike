@@ -122,10 +122,10 @@ void InventoryUI::display_inventory_items(const Player& player)
     size_t backpackItems = InventoryOperations::get_item_count(player.inventory_data);
     size_t maxItems = player.inventory_data.capacity;
     mvwprintw(inventoryWindow, 0, 2, " BACKPACK (%zu/%zu) ", backpackItems, maxItems);
-    
+
     int y = 2;
     char shortcut = 'a';
-    
+
     // Build list of valid items (same logic as selection)
     std::vector<Item*> validItems;
     for (const auto& item : player.inventory_data.items)
@@ -135,21 +135,21 @@ void InventoryUI::display_inventory_items(const Player& player)
             validItems.push_back(item.get());
         }
     }
-    
+
     if (validItems.empty())
     {
         mvwprintw(inventoryWindow, y, 2, "Your backpack is empty.");
         return;
     }
-    
+
     // Display valid items with consistent indexing
     for (size_t i = 0; i < validItems.size() && shortcut <= 'z'; i++)
     {
         Item* item = validItems[i];
-        
+
         mvwprintw(inventoryWindow, y, 2, "%c) ", shortcut);
         show_item_info(item, y);
-        
+
         y++;
         shortcut++;
     }

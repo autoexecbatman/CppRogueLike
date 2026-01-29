@@ -18,6 +18,7 @@
 #include "../Items/CorpseFood.h"
 #include "../Items/Amulet.h"
 #include "../Items/Armor.h"
+#include "../Items/Jewelry.h"
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
 
@@ -250,6 +251,18 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		break;
 	case PickableType::AMULET:
 		pickable = std::make_unique<Amulet>();
+		break;
+	case PickableType::RING:
+		pickable = std::make_unique<Ring>();
+		break;
+	case PickableType::HELMET:
+		pickable = std::make_unique<Helmet>();
+		break;
+	case PickableType::GAUNTLETS:
+		pickable = std::make_unique<Gauntlets>();
+		break;
+	case PickableType::GIRDLE:
+		pickable = std::make_unique<Girdle>();
 		break;
 	case PickableType::LEATHER_ARMOR:
 		pickable = std::make_unique<LeatherArmor>();
