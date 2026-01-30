@@ -14,8 +14,6 @@
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MAX_TRADE_DISTANCE = 1;  // Maximum distance to initiate a trade (adjacent only - no diagonals)
 
-AiShopkeeper::AiShopkeeper() : moveCount(0), tradeMenuOpen(false), hasApproachedPlayer(false) {}
-
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
 {

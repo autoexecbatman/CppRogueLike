@@ -13,6 +13,9 @@
 #include "MessageSystem.h"
 #include "CreatureManager.h"
 #include "../Map/Map.h"
+#include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
+#include "../Menu/MenuSpellCast.h"
 
 // Helper to convert PlayerClassState to CasterClass
 static CasterClass to_caster_class(Player::PlayerClassState state)
@@ -45,6 +48,9 @@ const std::map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
         // Wizard Level 2
         {SpellId::INVISIBILITY, {SpellId::INVISIBILITY, "Invisibility", 2, SpellClass::WIZARD, "Become invisible for 20 turns"}},
         {SpellId::WEB, {SpellId::WEB, "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies"}},
+
+        // Wizard Level 3
+        {SpellId::TELEPORT, {SpellId::TELEPORT, "Teleport", 3, SpellClass::WIZARD, "Teleport to random location"}},
 
         {SpellId::NONE, {SpellId::NONE, "None", 0, SpellClass::BOTH, ""}}
     };
@@ -152,6 +158,8 @@ bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
         return cast_sleep(caster, ctx);
     case SpellId::INVISIBILITY:
         return cast_invisibility(caster, ctx);
+    case SpellId::TELEPORT:
+        return cast_teleport(caster, ctx);
     default:
         ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
         return false;
@@ -194,7 +202,7 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
-    // TODO: Add buff system for temporary bonuses
+    caster.set_bless(6);
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
     ctx.message_system->finalize_message();
@@ -260,7 +268,6 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
     auto* player = dynamic_cast<Player*>(&caster);
     int casterLevel = player ? player->get_player_level() : 1;
     int numMissiles = calculate_num_missiles(casterLevel);
-    ctx.message_system->log(std::format("DEBUG: casterLevel={}, numMissiles={}", casterLevel, numMissiles));
 
     // Find all valid targets in FOV
     std::vector<Creature*> targets;
@@ -327,7 +334,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
-    // TODO: Add buff system for temporary AC bonus
+    caster.set_shield(5);
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
     ctx.message_system->finalize_message();
@@ -382,6 +389,48 @@ bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
     return true;
 }
 
+bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
+{
+    // Try to find a valid teleport location (up to 50 attempts)
+    for (int attempts = 0; attempts < 50; attempts++)
+    {
+        int x = ctx.dice_roller->roll(2, MAP_WIDTH - 2);
+        int y = ctx.dice_roller->roll(2, MAP_HEIGHT - 2);
+        Vector2D teleportPos{y, x};
+
+        // Check if the tile is a floor and walkable
+        if (ctx.map->get_tile_type(teleportPos) == TileType::FLOOR && ctx.map->can_walk(teleportPos, ctx))
+        {
+            // Check if any creature is at this position
+            bool occupied = false;
+            for (const auto& creature : *ctx.creatures)
+            {
+                if (creature && creature->position == teleportPos)
+                {
+                    occupied = true;
+                    break;
+                }
+            }
+
+            if (!occupied)
+            {
+                // Teleport successful
+                caster.position = teleportPos;
+                ctx.map->compute_fov(ctx);
+
+                ctx.message_system->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
+                ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
+                ctx.message_system->finalize_message();
+                return true;
+            }
+        }
+    }
+
+    // Failed to find a valid location
+    ctx.message_system->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
+    return false;
+}
+
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
     CasterClass casterClass = to_caster_class(player.playerClassState);
@@ -423,49 +472,41 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 
 void SpellSystem::show_casting_menu(Player& player, GameContext& ctx)
 {
-    if (player.memorizedSpells.empty())
+    MenuSpellCast menu(ctx, player);
+    menu.menu(ctx);
+}
+
+std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(const Player& player)
+{
+    std::vector<ItemGrantedSpell> itemSpells;
+
+    // Check for Ring of Invisibility
+    for (auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
     {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "No spells memorized. Rest to memorize spells.", true);
-        return;
-    }
-
-    // Create spell selection window
-    int height = static_cast<int>(player.memorizedSpells.size()) + 4;
-    int width = 40;
-    int startY = (LINES - height) / 2;
-    int startX = (COLS - width) / 2;
-
-    WINDOW* spellWin = newwin(height, width, startY, startX);
-    box(spellWin, 0, 0);
-    mvwprintw(spellWin, 1, 2, "Cast Spell (ESC to cancel):");
-
-    for (size_t i = 0; i < player.memorizedSpells.size(); ++i)
-    {
-        const auto& def = get_spell_definition(player.memorizedSpells[i]);
-        mvwprintw(spellWin, static_cast<int>(i) + 2, 2, "%c) %s (L%d)",
-            'a' + static_cast<int>(i), def.name.c_str(), def.level);
-    }
-
-    wrefresh(spellWin);
-    int input = getch();
-    delwin(spellWin);
-    touchwin(stdscr);
-    refresh();
-
-    if (input == 27) // ESC
-    {
-        return;
-    }
-
-    int selection = input - 'a';
-    if (selection >= 0 && selection < static_cast<int>(player.memorizedSpells.size()))
-    {
-        SpellId spell = player.memorizedSpells[selection];
-        if (cast_spell(spell, player, ctx))
+        if (Item* ring = player.get_equipped_item(slot))
         {
-            // Remove spell from memorized list
-            player.memorizedSpells.erase(player.memorizedSpells.begin() + selection);
-            *ctx.game_status = GameStatus::NEW_TURN;
+            if (const auto* magicRing = dynamic_cast<const MagicalRing*>(ring->pickable.get()))
+            {
+                if (magicRing->effect == MagicalEffect::INVISIBILITY)
+                {
+                    itemSpells.push_back({SpellId::INVISIBILITY, "Ring"});
+                    break; // Only add once even if wearing two
+                }
+            }
         }
     }
+
+    // Check for Helm of Teleportation
+    if (Item* helm = player.get_equipped_item(EquipmentSlot::HEAD))
+    {
+        if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(helm->pickable.get()))
+        {
+            if (magicHelm->effect == MagicalEffect::TELEPORTATION)
+            {
+                itemSpells.push_back({SpellId::TELEPORT, "Helm"});
+            }
+        }
+    }
+
+    return itemSpells;
 }

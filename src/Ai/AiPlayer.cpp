@@ -19,7 +19,6 @@
 #include "../Factories/ItemCreator.h"
 #include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Player.h"
-#include "../Systems/LevelUpSystem.h"
 #include "../UI/InventoryUI.h"
 #include "../Core/GameContext.h"
 #include "../Systems/InputHandler.h"
@@ -689,22 +688,6 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		*ctx.game_status = GameStatus::NEW_TURN;
 		isWaiting = true;
-		break;
-	}
-
-	case Controls::TEST_COMMAND:
-	{
-		// Add XP for leveling up debugging (instead of spawning shopkeeper)
-		if (player.destructible)
-		{
-			const int DEBUG_XP_AMOUNT = 1000;
-			player.destructible->add_xp(DEBUG_XP_AMOUNT);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Debug: Added " + std::to_string(DEBUG_XP_AMOUNT) + " XP (Total: " + std::to_string(player.destructible->get_xp()) + ")", true);
-
-			// Use the same level up system as natural progression
-			player.ai->levelup_update(ctx, player);
-		}
-		*ctx.game_status = GameStatus::NEW_TURN;
 		break;
 	}
 

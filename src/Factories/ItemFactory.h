@@ -16,6 +16,7 @@ struct ItemType
     int levelMinimum;       // Minimum dungeon level for this item
     int levelMaximum;       // Maximum dungeon level for this item (0 = no maximum)
     float levelScaling;     // How much to scale weight by level (can be negative)
+    std::string category;   // Item category for filtering
 
     // Factory function to create the item
     std::function<void(Vector2D, GameContext&)> createFunc;

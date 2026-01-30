@@ -120,6 +120,12 @@ void Attacker::perform_single_attack(Creature& attacker, Creature& target, int a
 		}
 	}
 
+	// Bless: +1 to hit
+	if (attacker.get_bless_turns() > 0)
+	{
+		hitModifier += 1;
+	}
+
 	// Backstab: invisible attackers get +4 to hit and damage multiplier (rogues)
 	int backstabMultiplier = 1;
 	bool isBackstab = false;

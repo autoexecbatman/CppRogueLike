@@ -34,7 +34,6 @@
 #include "../Items/Items.h"
 #include "../Ai/AiMonsterRanged.h"
 #include "../Items/Food.h"
-#include "../ActorTypes/Monsters/Spider.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/ItemCreator.h"
@@ -703,9 +702,7 @@ void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActor
 	Vector2D begin{ y1,x1 };
 	Vector2D end{ y2,x2 };
 
-	// store the room coordinates
-	// Note: BspListener needs access to game.rooms - passed via GameContext
-	// TODO: Refactor BspListener to use GameContext instead of raw game reference
+	// Store room coordinates via GameContext
 	if (ctx.rooms)
 	{
 		ctx.rooms->emplace_back(begin);

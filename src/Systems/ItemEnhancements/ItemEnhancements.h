@@ -55,37 +55,37 @@ enum class SuffixType
 
 struct ItemEnhancement
 {
-    PrefixType prefix = PrefixType::NONE;
-    SuffixType suffix = SuffixType::NONE;
-    
+    PrefixType prefix{ PrefixType::NONE };
+    SuffixType suffix{ SuffixType::NONE };
+
     // Modifier values
-    int damage_bonus = 0;
-    int to_hit_bonus = 0;
-    int ac_bonus = 0;
-    int strength_bonus = 0;
-    int dexterity_bonus = 0;
-    int intelligence_bonus = 0;
-    int hp_bonus = 0;
-    int mana_bonus = 0;
-    int speed_bonus = 0;
-    int stealth_bonus = 0;
-    
+    int damage_bonus{ 0 };
+    int to_hit_bonus{ 0 };
+    int ac_bonus{ 0 };
+    int strength_bonus{ 0 };
+    int dexterity_bonus{ 0 };
+    int intelligence_bonus{ 0 };
+    int hp_bonus{ 0 };
+    int mana_bonus{ 0 };
+    int speed_bonus{ 0 };
+    int stealth_bonus{ 0 };
+
     // Resistances (0-100%)
-    int fire_resistance = 0;
-    int cold_resistance = 0;
-    int lightning_resistance = 0;
-    int poison_resistance = 0;
-    
+    int fire_resistance{ 0 };
+    int cold_resistance{ 0 };
+    int lightning_resistance{ 0 };
+    int poison_resistance{ 0 };
+
     // Special properties
-    bool is_cursed = false;
-    bool is_blessed = false;
-    bool is_magical = false;
+    bool is_cursed{ false };
+    bool is_blessed{ false };
+    bool is_magical{ false };
 
     // Numeric enhancement level for traditional "+X" display
-    int enhancement_level = 0;
+    int enhancement_level{ 0 };
 
     // Value modifier (percentage)
-    int value_modifier = 100; // 100% = no change
+    int value_modifier{ 100 }; // 100% = no change
     
     // Generate enhancement name
     std::string get_prefix_name() const;
@@ -99,8 +99,6 @@ struct ItemEnhancement
     static ItemEnhancement generate_random_enhancement(bool allow_magical = true);
     static ItemEnhancement generate_weapon_enhancement();
     static ItemEnhancement generate_armor_enhancement();
-    static ItemEnhancement generate_potion_enhancement();
-    static ItemEnhancement generate_scroll_enhancement();
     
     // Rarity-based generation
     static ItemEnhancement generate_by_rarity(int rarity_level); // 1-5

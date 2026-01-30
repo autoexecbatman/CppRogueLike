@@ -7,6 +7,7 @@
 #include "../Systems/InputHandler.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/DataManager.h"
+#include "../Items/ItemClassification.h"
 #include "../Gui/Gui.h"
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
@@ -632,16 +633,36 @@ bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRan
 // Handle ranged attack coordination
 void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 {
-	// When attackMode is true, we require a ranged weapon for attacks
-	// When attackMode is false, we're just examining and don't require a ranged weapon
+	// Get equipped missile weapon to determine range
+	Item* missileWeapon = ctx.player->get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	const int weaponRange = get_weapon_range(missileWeapon);
 
-	// Enter targeting mode with appropriate requirements
-	Vector2D targetPos = select_target(ctx, ctx.player->position, 4); // TODO: Replace 4 with actual weapon range
+	// Enter targeting mode with weapon-specific range
+	Vector2D targetPos = select_target(ctx, ctx.player->position, weaponRange);
 
 	// If a valid target was selected and we're in attack mode
 	if (targetPos.x != -1 && targetPos.y != -1)
 	{
 		// Process the ranged attack (including projectile animation)
 		process_ranged_attack(ctx, *ctx.player, targetPos);
+	}
+}
+
+// Get weapon range based on weapon type (AD&D 2e ranges)
+int TargetingSystem::get_weapon_range(const Item* weapon)
+{
+	if (!weapon)
+		return 4; // Default fallback range
+
+	switch (weapon->itemClass)
+	{
+		case ItemClass::LONG_BOW:
+			return 7; // AD&D 2e: 70 yards (~7 dungeon tiles)
+		case ItemClass::SHORT_BOW:
+			return 5; // AD&D 2e: 50 yards (~5 dungeon tiles)
+		case ItemClass::CROSSBOW:
+			return 6; // AD&D 2e: 60 yards (~6 dungeon tiles)
+		default:
+			return 4; // Default for unknown weapons
 	}
 }

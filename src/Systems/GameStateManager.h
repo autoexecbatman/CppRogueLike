@@ -61,6 +61,7 @@ public:
 
     // File operations
     static bool save_file_exists() noexcept;
+    static void delete_save_file() noexcept;
     
 private:
     static constexpr const char* SAVE_FILE_NAME = "game.sav";

@@ -90,9 +90,9 @@ public:
 	void animate_resting(GameContext& ctx);
 
 	// Web effect tracking
-	int webStuckTurns = 0;       // How many turns the player is stuck in a web
-	int webStrength = 0;         // How strong the web is (affects escape difficulty)
-	Web* trappingWeb = nullptr;  // The web that has trapped the player
+	int webStuckTurns{ 0 };       // How many turns the player is stuck in a web
+	int webStrength{ 0 };         // How strong the web is (affects escape difficulty)
+	Web* trappingWeb{ nullptr };  // The web that has trapped the player
 
 	bool is_webbed() const noexcept { return webStuckTurns > 0; } // Check if player is stuck in a web
 	bool try_break_web(GameContext& ctx); // Attempt to break free from a web
@@ -112,14 +112,19 @@ public:
 	bool is_item_equipped(uint64_t item_unique_id) const noexcept;
 	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx);
 	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx);
-	
+	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx);
+
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo
 	{
-		bool isDualWielding = false;
-		int mainHandPenalty = 0;
-		int offHandPenalty = 0;
-		std::string offHandDamageRoll = "D2";
+		bool isDualWielding{ false };
+		int mainHandPenalty{ 0 };
+		int offHandPenalty{ 0 };
+		std::string offHandDamageRoll{ "D2" };
 	};
 	DualWieldInfo get_dual_wield_info() const noexcept;
+
+private:
+	// Helper for removing stat bonuses when unequipping stat-boost equipment
+	void remove_stat_bonuses_from_equipment(Item& item);
 };

@@ -28,6 +28,30 @@ public:
     static std::unique_ptr<Item> create_plate_mail(Vector2D pos);
     static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
 
+    // Amulet creation functions
+    static std::unique_ptr<Item> create_amulet_of_health(Vector2D pos);
+    static std::unique_ptr<Item> create_amulet_of_wisdom(Vector2D pos);
+    static std::unique_ptr<Item> create_amulet_of_protection(Vector2D pos);
+
+    // Authentic AD&D 2e magical helms
+    static std::unique_ptr<Item> create_helm_of_brilliance(Vector2D pos);
+    static std::unique_ptr<Item> create_helm_of_teleportation(Vector2D pos);
+
+    // Authentic AD&D 2e magical rings
+    static std::unique_ptr<Item> create_ring_of_protection_plus_1(Vector2D pos);
+    static std::unique_ptr<Item> create_ring_of_protection_plus_2(Vector2D pos);
+    static std::unique_ptr<Item> create_ring_of_free_action(Vector2D pos);
+    static std::unique_ptr<Item> create_ring_of_regeneration(Vector2D pos);
+    static std::unique_ptr<Item> create_ring_of_invisibility(Vector2D pos);
+
+    // Authentic AD&D 2e gauntlets (stat bonuses)
+    static std::unique_ptr<Item> create_gauntlets_of_ogre_power(Vector2D pos);
+    static std::unique_ptr<Item> create_gauntlets_of_dexterity(Vector2D pos);
+
+    // Authentic AD&D 2e girdles (stat bonuses)
+    static std::unique_ptr<Item> create_girdle_of_hill_giant_strength(Vector2D pos);
+    static std::unique_ptr<Item> create_girdle_of_frost_giant_strength(Vector2D pos);
+
     // Food creation functions
     static std::unique_ptr<Item> create_ration(Vector2D pos);
     static std::unique_ptr<Item> create_fruit(Vector2D pos);
@@ -75,7 +99,4 @@ public:
     // Centralized weapon creation by ItemClass (proper approach)
     static std::unique_ptr<Item> create_weapon_by_class(Vector2D pos, ItemClass weaponClass);
     static void create_pickable_from_itemclass(Item* item, ItemClass itemClass);
-
-    // Utility function to fix existing items with incorrect values
-    static void ensure_correct_value(Item& item);
 };

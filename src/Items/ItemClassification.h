@@ -29,12 +29,21 @@ enum class ItemClass
     LEATHER_ARMOR,
     CHAIN_MAIL,
     PLATE_MAIL,
-    
+
+    // Helmets
+    HELMET,  // Generic helmet for magical helms
+
     // Shields
     SMALL_SHIELD,
     MEDIUM_SHIELD,
     LARGE_SHIELD,
-    
+
+    // Gloves/Gauntlets
+    GAUNTLETS,
+
+    // Belts/Girdles
+    GIRDLE,
+
     // Consumables
     HEALTH_POTION,
     MANA_POTION,
@@ -73,7 +82,10 @@ enum class ItemCategory
     UNKNOWN = 0,
     WEAPON,
     ARMOR,
+    HELMET,
     SHIELD,
+    GAUNTLETS,
+    GIRDLE,
     CONSUMABLE,
     SCROLL,
     JEWELRY,
@@ -97,13 +109,20 @@ namespace ItemClassificationUtils
     // Type checking functions
     inline bool is_weapon(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::WEAPON; }
     inline bool is_armor(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::ARMOR; }
+    inline bool is_helmet(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::HELMET; }
     inline bool is_shield(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::SHIELD; }
+    inline bool is_gauntlets(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::GAUNTLETS; }
+    inline bool is_girdle(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::GIRDLE; }
     inline bool is_consumable(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::CONSUMABLE; }
     inline bool is_scroll(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::SCROLL; }
     inline bool is_jewelry(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::JEWELRY; }
     inline bool is_treasure(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::TREASURE; }
     inline bool is_tool(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::TOOL; }
     inline bool is_quest_item(ItemClass itemClass) { return get_category(itemClass) == ItemCategory::QUEST_ITEM; }
+
+    // Jewelry sub-type checking
+    inline bool is_amulet(ItemClass itemClass) { return itemClass == ItemClass::AMULET || itemClass == ItemClass::AMULET_OF_YENDOR; }
+    inline bool is_ring(ItemClass itemClass) { return itemClass == ItemClass::RING; }
     
     // Weapon sub-type checking
     bool is_ranged_weapon(ItemClass itemClass);

@@ -178,5 +178,75 @@
 		"OpenDoors": 11,
 		"BB_LG": 16,
 		"Notes": ""
+	},
+	{
+		"Str": 19,
+		"Hit": 3,
+		"Dmg": 7,
+		"Wgt": 485,
+		"MaxPress": 640,
+		"OpenDoors": 16,
+		"BB_LG": 50,
+		"Notes": "Hill Giant"
+	},
+	{
+		"Str": 20,
+		"Hit": 3,
+		"Dmg": 8,
+		"Wgt": 535,
+		"MaxPress": 700,
+		"OpenDoors": 17,
+		"BB_LG": 60,
+		"Notes": "Stone Giant"
+	},
+	{
+		"Str": 21,
+		"Hit": 4,
+		"Dmg": 9,
+		"Wgt": 635,
+		"MaxPress": 810,
+		"OpenDoors": 17,
+		"BB_LG": 70,
+		"Notes": "Frost Giant"
+	},
+	{
+		"Str": 22,
+		"Hit": 4,
+		"Dmg": 10,
+		"Wgt": 785,
+		"MaxPress": 970,
+		"OpenDoors": 18,
+		"BB_LG": 80,
+		"Notes": "Fire Giant"
+	},
+	{
+		"Str": 23,
+		"Hit": 5,
+		"Dmg": 11,
+		"Wgt": 935,
+		"MaxPress": 1130,
+		"OpenDoors": 18,
+		"BB_LG": 90,
+		"Notes": "Cloud Giant"
+	},
+	{
+		"Str": 24,
+		"Hit": 6,
+		"Dmg": 12,
+		"Wgt": 1235,
+		"MaxPress": 1440,
+		"OpenDoors": 19,
+		"BB_LG": 95,
+		"Notes": "Storm Giant"
+	},
+	{
+		"Str": 25,
+		"Hit": 7,
+		"Dmg": 14,
+		"Wgt": 1535,
+		"MaxPress": 1750,
+		"OpenDoors": 19,
+		"BB_LG": 99,
+		"Notes": "Maximum"
 	}
 ]

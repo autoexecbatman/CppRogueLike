@@ -151,6 +151,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuSell.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.cpp
     ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.h
+    ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.h
 
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/ActorTypes/Confuser.cpp
@@ -273,7 +275,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/UI/CharacterSheetUI.h
 
     # Main
-    ${PROJECT_SOURCE_DIR}/main_C++RogueLike.cpp
+    ${PROJECT_SOURCE_DIR}/main.cpp
 )
 
 # Create an executable with the listed source files

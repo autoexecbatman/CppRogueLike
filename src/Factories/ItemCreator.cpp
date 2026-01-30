@@ -6,6 +6,8 @@
 #include "../ActorTypes/Teleporter.h"
 #include "../Actor/Pickable.h"
 #include "../Items/Armor.h"
+#include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
 #include "../Colors/Colors.h"
 #include "../Items/Weapons.h"
 #include "../ActorTypes/Gold.h"
@@ -388,6 +390,153 @@ std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos, GameContext& c
     return item;
 }
 
+// Authentic AD&D 2e Magical Helms - provide special abilities, NOT AC bonuses
+std::unique_ptr<Item> ItemCreator::create_helm_of_brilliance(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'^', "helm of brilliance", YELLOW_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalHelm>(MagicalEffect::BRILLIANCE);
+    item->itemClass = ItemClass::HELMET;
+    item->set_value(12000); // Very rare and powerful
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_helm_of_teleportation(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'^', "helm of teleportation", MAGENTA_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalHelm>(MagicalEffect::TELEPORTATION);
+    item->itemClass = ItemClass::HELMET;
+    item->set_value(7500);
+    return item;
+}
+
+// Authentic AD&D 2e Magical Rings
+std::unique_ptr<Item> ItemCreator::create_ring_of_protection_plus_1(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'=', "ring of protection +1", CYAN_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalRing>(MagicalEffect::PROTECTION_PLUS_1);
+    item->itemClass = ItemClass::RING;
+    item->set_value(2000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_ring_of_protection_plus_2(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'=', "ring of protection +2", CYAN_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalRing>(MagicalEffect::PROTECTION_PLUS_2);
+    item->itemClass = ItemClass::RING;
+    item->set_value(5000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_ring_of_free_action(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'=', "ring of free action", GREEN_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalRing>(MagicalEffect::FREE_ACTION);
+    item->itemClass = ItemClass::RING;
+    item->set_value(4000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_ring_of_regeneration(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'=', "ring of regeneration", RED_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalRing>(MagicalEffect::REGENERATION);
+    item->itemClass = ItemClass::RING;
+    item->set_value(8000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_ring_of_invisibility(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'=', "ring of invisibility", WHITE_BLACK_PAIR});
+    item->pickable = std::make_unique<MagicalRing>(MagicalEffect::INVISIBILITY);
+    item->itemClass = ItemClass::RING;
+    item->set_value(6000);
+    return item;
+}
+
+// Amulet creation functions (simplified - not authentic AD&D 2e)
+std::unique_ptr<Item> ItemCreator::create_amulet_of_health(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'"', "amulet of health", RED_BLACK_PAIR});
+    auto amulet = std::make_unique<JewelryAmulet>();
+    amulet->con_bonus = 1;
+    item->pickable = std::move(amulet);
+    item->itemClass = ItemClass::AMULET;
+    item->set_value(200);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_amulet_of_wisdom(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'"', "amulet of wisdom", BLUE_BLACK_PAIR});
+    auto amulet = std::make_unique<JewelryAmulet>();
+    amulet->wis_bonus = 1;
+    item->pickable = std::move(amulet);
+    item->itemClass = ItemClass::AMULET;
+    item->set_value(200);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_amulet_of_protection(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'"', "amulet of protection", CYAN_BLACK_PAIR});
+    auto amulet = std::make_unique<JewelryAmulet>();
+    item->pickable = std::move(amulet);
+    item->itemClass = ItemClass::AMULET;
+    item->set_value(150);
+    return item;
+}
+
+// Authentic AD&D 2e Gauntlets - stat bonuses from gauntlets, not rings
+std::unique_ptr<Item> ItemCreator::create_gauntlets_of_ogre_power(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "gauntlets of ogre power", RED_BLACK_PAIR});
+    auto gauntlets = std::make_unique<Gauntlets>();
+    gauntlets->str_bonus = 18;
+    gauntlets->is_set_mode = true;  // Sets STR to 18/00, not adds
+    item->pickable = std::move(gauntlets);
+    item->itemClass = ItemClass::GAUNTLETS;
+    item->set_value(3000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_gauntlets_of_dexterity(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "gauntlets of dexterity", GREEN_BLACK_PAIR});
+    auto gauntlets = std::make_unique<Gauntlets>();
+    gauntlets->dex_bonus = 2;  // +2 DEX (adds, not sets)
+    item->pickable = std::move(gauntlets);
+    item->itemClass = ItemClass::GAUNTLETS;
+    item->set_value(2000);
+    return item;
+}
+
+// Authentic AD&D 2e Girdles - giant strength
+std::unique_ptr<Item> ItemCreator::create_girdle_of_hill_giant_strength(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "girdle of hill giant", BROWN_BLACK_PAIR});
+    auto girdle = std::make_unique<Girdle>();
+    girdle->str_bonus = 19;
+    girdle->is_set_mode = true;  // Sets STR to 19, not adds
+    item->pickable = std::move(girdle);
+    item->itemClass = ItemClass::GIRDLE;
+    item->set_value(5000);
+    return item;
+}
+
+std::unique_ptr<Item> ItemCreator::create_girdle_of_frost_giant_strength(Vector2D pos)
+{
+    auto item = std::make_unique<Item>(pos, ActorData{'[', "girdle of frost giant", CYAN_BLACK_PAIR});
+    auto girdle = std::make_unique<Girdle>();
+    girdle->str_bonus = 21;
+    girdle->is_set_mode = true;  // Sets STR to 21, not adds
+    item->pickable = std::move(girdle);
+    item->itemClass = ItemClass::GIRDLE;
+    item->set_value(8000);
+    return item;
+}
+
 // Food creation functions
 std::unique_ptr<Item> ItemCreator::create_ration(Vector2D pos)
 {
@@ -453,78 +602,5 @@ void ItemCreator::create_pickable_from_itemclass(Item* item, ItemClass itemClass
         case ItemClass::GREAT_SWORD: item->pickable = std::make_unique<Greatsword>(); break;
         case ItemClass::LONG_BOW:    item->pickable = std::make_unique<Longbow>(); break;
         default:                     item->pickable = std::make_unique<LongSword>(); break; // Safe default
-    }
-}
-
-void ItemCreator::ensure_correct_value(Item& item)
-{
-    // Fix items with incorrect values using the ItemClass system
-    ItemClass itemClass = item.itemClass;
-    
-    // Set correct values based on item class (what the item IS)
-    switch (itemClass)
-    {
-    case ItemClass::HEALTH_POTION:
-        if (item.value != 50) item.value = 50;
-        break;
-    case ItemClass::SCROLL_LIGHTNING:
-        if (item.value != 150) item.value = 150;
-        break;
-    case ItemClass::SCROLL_FIREBALL:
-        if (item.value != 100) item.value = 100;
-        break;
-    case ItemClass::SCROLL_CONFUSION:
-        if (item.value != 120) item.value = 120;
-        break;
-    case ItemClass::DAGGER:
-        if (item.value != 2) item.value = 2;
-        break;
-    case ItemClass::SHORT_SWORD:
-        if (item.value != 10) item.value = 10;
-        break;
-    case ItemClass::LONG_SWORD:
-        if (item.value != 15) item.value = 15;
-        break;
-    case ItemClass::STAFF:
-        if (item.value != 6) item.value = 6;
-        break;
-    case ItemClass::LONG_BOW:
-        if (item.value != 75) item.value = 75;
-        break;
-    case ItemClass::LEATHER_ARMOR:
-        if (item.value != 5) item.value = 5;
-        break;
-    case ItemClass::CHAIN_MAIL:
-        if (item.value != 75) item.value = 75;
-        break;
-    case ItemClass::PLATE_MAIL:
-        if (item.value != 400) item.value = 400;
-        break;
-    default:
-        // Handle enhanced weapons by checking name pattern
-        if (item.actorData.name.find(" +") != std::string::npos)
-        {
-            // Enhanced weapons - extract enhancement level
-            std::string enhancementStr = item.actorData.name.substr(item.actorData.name.find("+") + 1);
-            int enhancementLevel = std::stoi(enhancementStr);
-            
-            // Determine base value from item class
-            int baseValue = 0;
-            switch (itemClass)
-            {
-            case ItemClass::DAGGER: baseValue = 2; break;
-            case ItemClass::SHORT_SWORD: baseValue = 10; break;
-            case ItemClass::LONG_SWORD: baseValue = 15; break;
-            case ItemClass::STAFF: baseValue = 6; break;
-            case ItemClass::LONG_BOW: baseValue = 75; break;
-            default: break;
-            }
-            
-            if (baseValue > 0)
-            {
-                item.value = calculate_enhanced_value(baseValue, enhancementLevel);
-            }
-        }
-        break;
     }
 }

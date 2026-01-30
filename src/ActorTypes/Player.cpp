@@ -15,6 +15,7 @@
 #include "../Items/Items.h"
 #include "../Items/Armor.h"
 #include "../Items/ItemClassification.h"
+#include "../Items/Jewelry.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Core/GameContext.h"
@@ -25,6 +26,26 @@
 #include "../Systems/SpellSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
+
+// Equipment comparison predicates for DRY compliance
+namespace
+{
+	constexpr auto matches_slot = [](EquipmentSlot slot)
+	{
+		return [slot](const EquippedItem& equipped)
+		{
+			return equipped.slot == slot;
+		};
+	};
+
+	constexpr auto matches_unique_id = [](uint64_t unique_id)
+	{
+		return [unique_id](const EquippedItem& equipped)
+		{
+			return equipped.item->uniqueId == unique_id;
+		};
+	};
+}
 
 Player::Player(Vector2D position) : Creature(position, ActorData{ '@', "Player", WHITE_BLACK_PAIR })
 {
@@ -463,17 +484,29 @@ bool Player::toggle_shield(uint64_t item_unique_id, GameContext& ctx)
 	}
 	else
 	{
-		// Find item in inventory and equip it
-		for (auto it = inventory_data.items.begin(); it != inventory_data.items.end(); ++it)
+		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		if (result.has_value())
 		{
-			if ((*it)->uniqueId == item_unique_id)
-			{
-				// Move item from inventory
-				auto itemToEquip = std::move(*it);
-				inventory_data.items.erase(it);
-				
-				return equip_item(std::move(itemToEquip), EquipmentSlot::LEFT_HAND, ctx);
-			}
+			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
+		}
+		return false;
+	}
+}
+
+bool Player::toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx)
+{
+	// Check if item is already equipped
+	if (is_item_equipped(item_unique_id))
+	{
+		// Unequip the item
+		return unequip_item(slot, ctx);
+	}
+	else
+	{
+		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		if (result.has_value())
+		{
+			return equip_item(std::move(*result), slot, ctx);
 		}
 		return false;
 	}
@@ -607,9 +640,57 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+	case EquipmentSlot::HEAD:
+	{
+		if (!item.is_helmet())
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::NECK:
+	{
+		if (!item.is_amulet())
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::RIGHT_RING:
+	case EquipmentSlot::LEFT_RING:
+	{
+		if (!item.is_ring())
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::GAUNTLETS:
+	{
+		if (!item.is_gauntlets())
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::GIRDLE:
+	{
+		if (!item.is_girdle())
+		{
+			return false;
+		}
+		break;
+	}
+	case EquipmentSlot::TOOL:
+	{
+		if (!item.is_tool())
+		{
+			return false;
+		}
+		break;
+	}
 	default:
-		// TODO: Add validation for other slots (HEAD, NECK, etc.)
-		// For now, allow any item in other slots
+		// Other slots (CLOAK, BRACERS, BOOTS, MISSILES) - no items defined yet
 		break;
 	}
 
@@ -618,14 +699,15 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
-	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
-		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
-	
+	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
+
 	if (it != equippedItems.end())
 	{
+		remove_stat_bonuses_from_equipment(*it->item);
+
 		// Remove equipped state
 		it->item->remove_state(ActorState::IS_EQUIPPED);
-		
+
 		// Reset combat state if main hand weapon
 		if (slot == EquipmentSlot::RIGHT_HAND)
 		{
@@ -635,7 +717,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			}
 			remove_state(ActorState::IS_RANGED);
 		}
-		
+
 		// Return item to inventory
 		add_item(inventory_data, std::move(it->item));
 		
@@ -657,9 +739,8 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
 {
-	auto it = std::find_if(equippedItems.begin(), equippedItems.end(),
-		[slot](const EquippedItem& equipped) { return equipped.slot == slot; });
-	
+	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
+
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
 }
 
@@ -722,17 +803,17 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	}
 	
 	info.isDualWielding = true;
-	
+
 	// AD&D 2e Two-Weapon Fighting penalties
 	// Base penalties: -2 main hand, -4 off-hand
 	info.mainHandPenalty = -2;
 	info.offHandPenalty = -4;
-	
+
 	// TODO: Add proficiency check to reduce penalties
 	// If player has Two-Weapon Fighting proficiency:
 	// - Main hand penalty becomes 0
 	// - Off-hand penalty becomes -2
-	
+
 	// Get off-hand weapon damage roll - use pure ItemClass system
 	auto leftHandWeapon = get_equipped_item(EquipmentSlot::LEFT_HAND);
 	if (leftHandWeapon)
@@ -757,32 +838,18 @@ bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
 	}
 	else
 	{
-		// Find item in inventory and equip it
-		for (auto it = inventory_data.items.begin(); it != inventory_data.items.end(); ++it)
+		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		if (result.has_value())
 		{
-			if ((*it)->uniqueId == item_unique_id)
-			{
-				// Move item from inventory
-				auto itemToEquip = std::move(*it);
-				inventory_data.items.erase(it);
-				
-				return equip_item(std::move(itemToEquip), EquipmentSlot::BODY, ctx);
-			}
+			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
 		}
-		return false; // Item not found in inventory
+		return false;
 	}
 }
 
 bool Player::is_item_equipped(uint64_t item_unique_id) const noexcept
 {
-	for (const auto& equipped : equippedItems)
-	{
-		if (equipped.item->uniqueId == item_unique_id)
-		{
-			return true;
-		}
-	}
-	return false;
+	return std::ranges::any_of(equippedItems, matches_unique_id(item_unique_id));
 }
 
 void Player::save(json& j)
@@ -839,6 +906,35 @@ void Player::load(const json& j)
 			item->load(itemEntry["item"]);
 			equippedItems.emplace_back(std::move(item), slot);
 		}
+	}
+}
+
+void Player::remove_stat_bonuses_from_equipment(Item& item)
+{
+	if (!item.pickable)
+		return;
+
+	auto* statBoost = dynamic_cast<StatBoostEquipment*>(item.pickable.get());
+	if (!statBoost)
+		return;
+
+	if (statBoost->is_set_mode)
+	{
+		if (statBoost->str_bonus != 0) set_strength(statBoost->original_stats.str);
+		if (statBoost->dex_bonus != 0) set_dexterity(statBoost->original_stats.dex);
+		if (statBoost->con_bonus != 0) set_constitution(statBoost->original_stats.con);
+		if (statBoost->int_bonus != 0) set_intelligence(statBoost->original_stats.intel);
+		if (statBoost->wis_bonus != 0) set_wisdom(statBoost->original_stats.wis);
+		if (statBoost->cha_bonus != 0) set_charisma(statBoost->original_stats.cha);
+	}
+	else
+	{
+		set_strength(get_strength() - statBoost->str_bonus);
+		set_dexterity(get_dexterity() - statBoost->dex_bonus);
+		set_constitution(get_constitution() - statBoost->con_bonus);
+		set_intelligence(get_intelligence() - statBoost->int_bonus);
+		set_wisdom(get_wisdom() - statBoost->wis_bonus);
+		set_charisma(get_charisma() - statBoost->cha_bonus);
 	}
 }
 

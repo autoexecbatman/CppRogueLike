@@ -19,155 +19,227 @@ ItemFactory::ItemFactory()
 
     // HEALING - CLERIC REPLACEMENT (Solo fighter needs reliable healing)
     add_item_type({
-        "Health Potion", 50, 1, 0, 0.2f,  // MORE COMMON - solo needs healing
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_health_potion(pos));
+        // TODO: Storing types as string is error prone we should remedy this.
+        "Health Potion", 50, 1, 0, 0.2f, "potion",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_health_potion(pos));
         }
         });
 
     // MAGIC UTILITY - WIZARD REPLACEMENT (Solo fighter needs magic support)
     add_item_type({
-        "Scroll of Lightning Bolt", 20, 2, 0, 0.2f,  // MORE COMMON - utility magic
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_scroll_lightning(pos));
+        "Scroll of Lightning Bolt", 20, 2, 0, 0.2f, "scroll",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_scroll_lightning(pos));
         }
         });
 
     add_item_type({
-        "Scroll of Fireball", 15, 3, 0, 0.3f,  // MORE COMMON - AoE for solo
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_scroll_fireball(pos));
+        "Scroll of Fireball", 15, 3, 0, 0.3f, "scroll",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_scroll_fireball(pos));
         }
         });
 
     add_item_type({
-        "Scroll of Confusion", 15, 2, 0, 0.2f,  // MORE COMMON - crowd control
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_scroll_confusion(pos));
+        "Scroll of Confusion", 15, 2, 0, 0.2f, "scroll",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_scroll_confusion(pos));
         }
         });
 
     // WEAPONS - FIGHTER PROGRESSION (Inferior weapons rare, focus on upgrades)
     add_item_type({
-        "Dagger", 3, 1, 3, -0.5f,  // RARE - worthless to armed fighter
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
+        "Dagger", 3, 1, 3, -0.5f, "weapon",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_enhanced_dagger(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
-        "Short Sword", 5, 1, 4, -0.4f,  // RARE - minor downgrade
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
+        "Short Sword", 5, 1, 4, -0.4f, "weapon",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_enhanced_short_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
-        "Long Sword", 6, 1, 0, -0.2f,  // UNCOMMON - backup weapon
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
+        "Long Sword", 6, 1, 0, -0.2f, "weapon",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_enhanced_long_sword(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
-        "Staff", 8, 2, 0, 0.1f,  // UTILITY - for caster items
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
+        "Staff", 8, 2, 0, 0.1f, "weapon",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_enhanced_staff(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     add_item_type({
-        "Longbow", 12, 3, 0, 0.3f,  // VALUABLE - ranged option for solo
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
+        "Longbow", 12, 3, 0, 0.3f, "weapon",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_enhanced_longbow(pos, ItemCreator::determine_enhancement_level(ctx, ctx.level_manager->get_dungeon_level())));
         }
         });
 
     // Gold
     add_item_type({
-        "Gold", 25, 1, 0, 0.1f,
+        "Gold", 25, 1, 0, 0.1f, "gold",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_gold_pile(pos, ctx)); }
         });
 
     // FOOD - SOLO RESOURCE MANAGEMENT (No party sharing, need reliable food)
     add_item_type({
-        "Ration", 25, 1, 0, 0.1f,  // MORE COMMON - solo needs consistent food
+        "Ration", 25, 1, 0, 0.1f, "food",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_ration(pos)); }
         });
 
     add_item_type({
-        "Fruit", 15, 1, 0, 0.0f,  // STEADY - quick hunger fix
+        "Fruit", 15, 1, 0, 0.0f, "food",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_fruit(pos)); }
         });
 
     add_item_type({
-        "Bread", 12, 1, 0, 0.0f,  // STEADY - basic sustenance
+        "Bread", 12, 1, 0, 0.0f, "food",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_bread(pos)); }
         });
 
     add_item_type({
-        "Meat", 8, 2, 0, 0.1f,  // VALUABLE - high nutrition for solo
+        "Meat", 8, 2, 0, 0.1f, "food",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_meat(pos)); }
         });
 
     // Amulet of Yendor - incredibly rare, only appears on deeper levels
     add_item_type({
-        "Amulet of Yendor", 1, 8, 0, 2.0f,
+        "Amulet of Yendor", 1, 8, 0, 2.0f, "artifact",
         [](Vector2D pos, GameContext& ctx) { add_item(*ctx.inventory_data, ItemCreator::create_amulet_of_yendor(pos)); }
         });
 
     add_item_type({
-        "Leather Armor", 2, 1, 0, -0.4f,  // VERY RARE - worthless with plate mail start
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_leather_armor(pos));
+        "Leather Armor", 2, 1, 0, -0.4f, "armor",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_leather_armor(pos));
         }
         });
 
     add_item_type({
-        "Chain Mail", 3, 3, 0, -0.3f,  // RARE - minimal upgrade from plate mail
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_chain_mail(pos));
+        "Chain Mail", 3, 3, 0, -0.3f, "armor",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_chain_mail(pos));
         }
         });
 
     add_item_type({
-        "Plate Mail", 1, 5, 0, -0.5f,  // EXTREMELY RARE - already equipped
-        [](Vector2D pos, GameContext& ctx) {
-        add_item(*ctx.inventory_data, ItemCreator::create_plate_mail(pos));
+        "Plate Mail", 1, 5, 0, -0.5f, "armor",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_plate_mail(pos));
         }
         });
 
-    // Populate item categories
-    for (size_t i = 0; i < itemTypes.size(); i++) {
-        const auto& item = itemTypes[i];
-        std::string category;
+    // AUTHENTIC AD&D 2e MAGICAL ITEMS
 
-        if (item.name.find("Potion") != std::string::npos) {
-            category = "potion";
+    // Magical Helms (very rare, special abilities)
+    add_item_type({
+        "Helm of Brilliance", 1, 6, 0, 0.15f, "magical_helm",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_helm_of_brilliance(pos));
         }
-        else if (item.name.find("Scroll") != std::string::npos) {
-            category = "scroll";
-        }
-        else if (item.name == "Gold") {
-            category = "gold";
-        }
-        else if (item.name == "Amulet of Yendor") {
-            category = "artifact";
-        }
-        else if (item.name.find("Ration") != std::string::npos ||
-            item.name.find("Fruit") != std::string::npos ||
-            item.name.find("Bread") != std::string::npos ||
-            item.name.find("Meat") != std::string::npos) {
-            category = "food";
-        }
-        else if (item.name.find("Armor") != std::string::npos) {
-            category = "armor";
-        }
-        else {
-            category = "weapon";
-        }
+        });
 
-        itemCategories[category].push_back(i);
+    // Magical Rings (rare, valuable)
+    add_item_type({
+        "Ring of Protection +1", 2, 3, 0, 0.3f, "magical_ring",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_ring_of_protection_plus_1(pos));
+        }
+        });
+
+    add_item_type({
+        "Ring of Protection +2", 1, 6, 0, 0.4f, "magical_ring",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_ring_of_protection_plus_2(pos));
+        }
+        });
+
+    add_item_type({
+        "Ring of Free Action", 1, 4, 0, 0.3f, "magical_ring",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_ring_of_free_action(pos));
+        }
+        });
+
+    add_item_type({
+        "Ring of Regeneration", 1, 7, 0, 0.5f, "magical_ring",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_ring_of_regeneration(pos));
+        }
+        });
+
+    add_item_type({
+        "Ring of Invisibility", 1, 6, 0, 0.4f, "magical_ring",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_ring_of_invisibility(pos));
+        }
+        });
+
+    // Gauntlets (rare, stat bonuses)
+    add_item_type({
+        "Gauntlets of Ogre Power", 1, 5, 0, 0.4f, "gauntlets",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_gauntlets_of_ogre_power(pos));
+        }
+        });
+
+    add_item_type({
+        "Gauntlets of Dexterity", 1, 4, 0, 0.3f, "gauntlets",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_gauntlets_of_dexterity(pos));
+        }
+        });
+
+    // Girdles (extremely rare, giant strength)
+    add_item_type({
+        "Girdle of Hill Giant", 1, 6, 0, 0.5f, "girdle",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_girdle_of_hill_giant_strength(pos));
+        }
+        });
+
+    add_item_type({
+        "Girdle of Frost Giant", 1, 8, 0, 0.6f, "girdle",
+        [](Vector2D pos, GameContext& ctx)
+        {
+            add_item(*ctx.inventory_data, ItemCreator::create_girdle_of_frost_giant_strength(pos));
+        }
+        });
+
+    // Populate item categories from category field
+    for (size_t i = 0; i < itemTypes.size(); i++)
+    {
+        itemCategories[itemTypes[i].category].push_back(i);
     }
 }
 

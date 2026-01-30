@@ -87,6 +87,8 @@ private:
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
 	int invisibleTurnsRemaining{ 0 };
+	int blessTurnsRemaining{ 0 };
+	int shieldTurnsRemaining{ 0 };
 public:
 	Creature(Vector2D position, ActorData data) : Actor(position, data), inventory_data(InventoryData(50))
 	{
@@ -164,6 +166,42 @@ public:
 		}
 	}
 
+	void set_bless(int turns) noexcept { blessTurnsRemaining = turns; }
+	void clear_bless() noexcept { blessTurnsRemaining = 0; }
+	int get_bless_turns() const noexcept { return blessTurnsRemaining; }
+	void decrement_bless() noexcept
+	{
+		if (blessTurnsRemaining > 0)
+		{
+			--blessTurnsRemaining;
+		}
+	}
+
+	void set_shield(int turns) noexcept { shieldTurnsRemaining = turns; }
+	void clear_shield() noexcept { shieldTurnsRemaining = 0; }
+	int get_shield_turns() const noexcept { return shieldTurnsRemaining; }
+	void decrement_shield() noexcept
+	{
+		if (shieldTurnsRemaining > 0)
+		{
+			--shieldTurnsRemaining;
+		}
+	}
+
+	void decrement_all_buffs() noexcept
+	{
+		decrement_invisible();
+		decrement_bless();
+		decrement_shield();
+	}
+
+	int get_temporary_ac_bonus() const noexcept
+	{
+		int bonus = 0;
+		if (shieldTurnsRemaining > 0) bonus -= 4;
+		return bonus;
+	}
+
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
@@ -222,10 +260,13 @@ public:
 	bool is_armor() const noexcept { return ItemClassificationUtils::is_armor(itemClass); }
 	bool is_helmet() const noexcept { return ItemClassificationUtils::is_helmet(itemClass); }
 	bool is_shield() const noexcept { return ItemClassificationUtils::is_shield(itemClass); }
+	bool is_gauntlets() const noexcept { return ItemClassificationUtils::is_gauntlets(itemClass); }
+	bool is_girdle() const noexcept { return ItemClassificationUtils::is_girdle(itemClass); }
 	bool is_consumable() const noexcept { return ItemClassificationUtils::is_consumable(itemClass); }
 	bool is_jewelry() const noexcept { return ItemClassificationUtils::is_jewelry(itemClass); }
 	bool is_amulet() const noexcept { return ItemClassificationUtils::is_amulet(itemClass); }
 	bool is_ring() const noexcept { return ItemClassificationUtils::is_ring(itemClass); }
+	bool is_tool() const noexcept { return ItemClassificationUtils::is_tool(itemClass); }
 	bool can_equip_to_right_hand() const noexcept { return ItemClassificationUtils::can_equip_to_right_hand(itemClass); }
 	bool can_equip_to_left_hand() const noexcept { return ItemClassificationUtils::can_equip_to_left_hand(itemClass); }
 	bool can_equip_to_body() const noexcept { return ItemClassificationUtils::can_equip_to_body(itemClass); }

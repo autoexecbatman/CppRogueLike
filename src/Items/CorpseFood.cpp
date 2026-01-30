@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <unordered_map>
+#include <string_view>
 
 #include "CorpseFood.h"
 #include "../Colors/Colors.h"
@@ -18,22 +19,44 @@ const std::unordered_map<std::string, int> CORPSE_NUTRITION_VALUES = {
     {"dead archer", 70},
     {"dead mage", 60},
     {"dead shopkeeper", 100},
-    // Default value for unknown monster types will be assigned in constructor
 };
 
+// Define flavor text for different monster types
+const std::unordered_map<std::string, std::string> CORPSE_FLAVOR_TEXT = {
+    {"dead goblin", "It's greasy and gamey."},
+    {"dead orc", "It's tough and stringy."},
+    {"dead troll", "It's surprisingly filling, if you can stomach it."},
+    {"dead dragon", "It tastes exotic and somewhat spicy!"},
+    {"dead archer", "It tastes... questionable."},
+    {"dead mage", "There's a strange aftertaste of magical residue."},
+    {"dead shopkeeper", "Well-marbled, but you feel guilty..."},
+};
+
+namespace
+{
+    // Named lambda for map lookups without iterator boilerplate
+    constexpr auto get_or_default = []<typename K, typename V>(
+        const std::unordered_map<K, V>& map,
+        const K& key,
+        const V& default_value) noexcept -> V
+    {
+        if (const auto it = map.find(key); it != map.end())
+        {
+            return it->second;
+        }
+        return default_value;
+    };
+}
+
+// TODO: Rule of 5.
 CorpseFood::CorpseFood(int nutrition_value) : nutrition_value(nutrition_value) {}
 
-bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
+bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx)
+{
     // Dynamically calculate nutrition based on corpse type if it wasn't set
-    if (nutrition_value <= 0) {
-        auto it = CORPSE_NUTRITION_VALUES.find(owner.actorData.name);
-        if (it != CORPSE_NUTRITION_VALUES.end()) {
-            nutrition_value = it->second;
-        }
-        else {
-            // Default value for unknown corpse types
-            nutrition_value = 50;
-        }
+    if (nutrition_value <= 0)
+    {
+        nutrition_value = get_or_default(CORPSE_NUTRITION_VALUES, owner.actorData.name, 50);
     }
 
     // Add a small random variation to make it interesting
@@ -44,38 +67,11 @@ bool CorpseFood::use(Item& owner, Creature& wearer, GameContext& ctx) {
     ctx.hunger_system->decrease_hunger(ctx, actualNutrition);
 
     // Generate flavor text based on the corpse type
-    std::string flavorText;
-
-    // Determine flavor text based on corpse name
-    // TODO: remove fragile string comparison.
-    if (owner.actorData.name.find("goblin") != std::string::npos)
-    {
-        flavorText = "It's greasy and gamey.";
-    }
-    else if (owner.actorData.name.find("orc") != std::string::npos)
-    {
-        flavorText = "It's tough and stringy.";
-    }
-    else if (owner.actorData.name.find("troll") != std::string::npos)
-    {
-        flavorText = "It's surprisingly filling, if you can stomach it.";
-    }
-    else if (owner.actorData.name.find("dragon") != std::string::npos)
-    {
-        flavorText = "It tastes exotic and somewhat spicy!";
-    }
-    else if (owner.actorData.name.find("mage") != std::string::npos)
-    {
-        flavorText = "There's a strange aftertaste of magical residue.";
-    }
-    else if (owner.actorData.name.find("shopkeeper") != std::string::npos)
-    {
-        flavorText = "Well-marbled, but you feel guilty...";
-    }
-    else
-    {
-        flavorText = "It tastes... questionable.";
-    }
+    const std::string flavorText = get_or_default(
+        CORPSE_FLAVOR_TEXT,
+        owner.actorData.name,
+        std::string{"It tastes... questionable."}
+    );
 
     // Display message
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You eat the ");

@@ -25,7 +25,7 @@ public:
 private:
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
-	int confusionTurns = 0;  // Number of turns player remains confused
+	int confusionTurns{ 0 };  // Number of turns player remains confused
 
 	void move(Creature& owner, Vector2D target);
 	void pick_item(Player& player, GameContext& ctx);

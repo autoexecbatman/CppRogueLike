@@ -149,6 +149,14 @@ void Creature::load(const json& j)
 		invisibleTurnsRemaining = j.at("invisibleTurnsRemaining").get<int>();
 		if (invisibleTurnsRemaining > 0) add_state(ActorState::IS_INVISIBLE);
 	}
+	if (j.contains("blessTurnsRemaining"))
+	{
+		blessTurnsRemaining = j.at("blessTurnsRemaining").get<int>();
+	}
+	if (j.contains("shieldTurnsRemaining"))
+	{
+		shieldTurnsRemaining = j.at("shieldTurnsRemaining").get<int>();
+	}
 }
 
 void Creature::save(json& j)
@@ -193,12 +201,14 @@ void Creature::save(json& j)
 		j["shop"] = shopJson;
 	}
 	j["invisibleTurnsRemaining"] = invisibleTurnsRemaining;
+	j["blessTurnsRemaining"] = blessTurnsRemaining;
+	j["shieldTurnsRemaining"] = shieldTurnsRemaining;
 }
 
 // the actor update
 void Creature::update(GameContext& ctx)
 {
-	decrement_invisible();
+	decrement_all_buffs();
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{

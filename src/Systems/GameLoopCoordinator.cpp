@@ -131,9 +131,18 @@ void GameLoopCoordinator::update(GameContext& ctx)
             ctx.player->racial_ability_adjustments();
             ctx.player->equip_class_starting_gear(ctx);
         }
+        bool wasLoadedGame = *ctx.isLoadedGame;
         *ctx.isLoadedGame = false;
         ctx.player->calculate_thaco();
-        *ctx.game_status = GameStatus::NEW_TURN;
+
+        if (wasLoadedGame)
+        {
+            *ctx.game_status = GameStatus::IDLE;
+        }
+        else
+        {
+            *ctx.game_status = GameStatus::NEW_TURN;
+        }
 
         if (!ctx.gui->guiInit)
         {

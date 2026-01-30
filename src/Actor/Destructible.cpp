@@ -14,12 +14,15 @@
 #include "../ActorTypes/Healer.h"
 #include "../Items/CorpseFood.h"
 #include "../Items/Armor.h"
+#include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
 #include "../ActorTypes/Player.h"
 #include "Pickable.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/GameStateManager.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -233,20 +236,21 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
     const int baseAC = get_base_armor_class();
     const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
     const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-    const int calculatedAC = baseAC + dexBonus + equipBonus;
-    
+    const int tempBonus = owner.get_temporary_ac_bonus();
+    const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
+
     // Only update if changed
     if (get_armor_class() != calculatedAC)
     {
         const int oldAC = get_armor_class();
         set_armor_class(calculatedAC);
-        
+
         // Log for player
         if (&owner == ctx.player)
         {
             ctx.message_system->log(std::format(
-                "Armor Class updated: {} → {} (Base: {}, Dex: {:+}, Equipment: {:+})",
-                oldAC, calculatedAC, baseAC, dexBonus, equipBonus));
+                "Armor Class updated: {} → {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
+                oldAC, calculatedAC, baseAC, dexBonus, equipBonus, tempBonus));
         }
     }
 }
@@ -290,7 +294,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 [[nodiscard]] int Destructible::calculate_player_equipment_ac(const Player& player, GameContext& ctx) const
 {
     int totalBonus = 0;
-    
+
     // Check body armor
     if (Item* equippedArmor = player.get_equipped_item(EquipmentSlot::BODY))
     {
@@ -298,7 +302,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
         {
             const int armorBonus = armor->getArmorClass();
             totalBonus += armorBonus;
-            
+
             if (&player == ctx.player)
             {
                 ctx.message_system->log(std::format(
@@ -307,7 +311,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
             }
         }
     }
-    
+
     // Check shield in left hand
     if (Item* equippedShield = player.get_equipped_item(EquipmentSlot::LEFT_HAND))
     {
@@ -315,7 +319,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
         {
             const int shieldBonus = shield->get_ac_bonus();
             totalBonus += shieldBonus;
-            
+
             if (&player == ctx.player)
             {
                 ctx.message_system->log(std::format(
@@ -324,7 +328,59 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
             }
         }
     }
-    
+
+    // Check rings for protection bonuses (AD&D 2e: best ring applies, no stacking)
+    int bestRingBonus = 0;
+    const Item* bestRing = nullptr;
+
+    for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
+    {
+        if (Item* equippedRing = player.get_equipped_item(slot))
+        {
+            if (const auto* magicRing = dynamic_cast<const MagicalRing*>(equippedRing->pickable.get()))
+            {
+                const int ringBonus = MagicalEffectUtils::get_protection_bonus(magicRing->effect);
+                if (ringBonus < bestRingBonus)
+                {
+                    bestRingBonus = ringBonus;
+                    bestRing = equippedRing;
+                }
+            }
+        }
+    }
+
+    if (bestRingBonus < 0 && bestRing)
+    {
+        totalBonus += bestRingBonus;
+
+        if (&player == ctx.player)
+        {
+            ctx.message_system->log(std::format(
+                "Ring bonus: {:+} from {}",
+                bestRingBonus, bestRing->actorData.name));
+        }
+    }
+
+    // Check helm for AC bonuses (extensible for any magical effect)
+    if (Item* equippedHelm = player.get_equipped_item(EquipmentSlot::HEAD))
+    {
+        if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(equippedHelm->pickable.get()))
+        {
+            const int helmBonus = MagicalEffectUtils::get_ac_bonus(magicHelm->effect);
+            if (helmBonus < 0)
+            {
+                totalBonus += helmBonus;
+
+                if (&player == ctx.player)
+                {
+                    ctx.message_system->log(std::format(
+                        "Helm bonus: {:+} from {}",
+                        helmBonus, equippedHelm->actorData.name));
+                }
+            }
+        }
+    }
+
     return totalBonus;
 }
 
@@ -439,6 +495,7 @@ PlayerDestructible::PlayerDestructible(
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
 	*ctx.game_status = GameStatus::DEFEAT;
+	ctx.state_manager->delete_save_file();
 }
 
 //==MonsterDestructible==

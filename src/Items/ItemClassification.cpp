@@ -29,16 +29,29 @@ namespace ItemClassificationUtils
             case ItemClass::CHAIN_MAIL:
             case ItemClass::PLATE_MAIL:
                 return ItemCategory::ARMOR;
-                
+
+            // Helmets
+            case ItemClass::HELMET:
+                return ItemCategory::HELMET;
+
             // Shields
             case ItemClass::SMALL_SHIELD:
             case ItemClass::MEDIUM_SHIELD:
             case ItemClass::LARGE_SHIELD:
                 return ItemCategory::SHIELD;
-                
+
+            // Gauntlets
+            case ItemClass::GAUNTLETS:
+                return ItemCategory::GAUNTLETS;
+
+            // Girdles
+            case ItemClass::GIRDLE:
+                return ItemCategory::GIRDLE;
+
             // Consumables
             case ItemClass::HEALTH_POTION:
             case ItemClass::MANA_POTION:
+            case ItemClass::INVISIBILITY_POTION:
             case ItemClass::FOOD_RATION:
             case ItemClass::BREAD:
             case ItemClass::MEAT:
@@ -101,15 +114,25 @@ namespace ItemClassificationUtils
             case ItemClass::LEATHER_ARMOR: return "leather armor";
             case ItemClass::CHAIN_MAIL: return "chain mail";
             case ItemClass::PLATE_MAIL: return "plate mail";
-            
+
+            // Helmets
+            case ItemClass::HELMET: return "helmet";
+
             // Shields
             case ItemClass::SMALL_SHIELD: return "small shield";
             case ItemClass::MEDIUM_SHIELD: return "shield";
             case ItemClass::LARGE_SHIELD: return "large shield";
-            
+
+            // Gauntlets
+            case ItemClass::GAUNTLETS: return "gauntlets";
+
+            // Girdles
+            case ItemClass::GIRDLE: return "girdle";
+
             // Consumables
             case ItemClass::HEALTH_POTION: return "health potion";
             case ItemClass::MANA_POTION: return "mana potion";
+            case ItemClass::INVISIBILITY_POTION: return "invisibility potion";
             case ItemClass::FOOD_RATION: return "food ration";
             case ItemClass::BREAD: return "bread";
             case ItemClass::MEAT: return "meat";
@@ -217,10 +240,17 @@ namespace ItemClassificationUtils
             {"small_shield", ItemClass::SMALL_SHIELD},
             {"shield", ItemClass::MEDIUM_SHIELD},
             {"large_shield", ItemClass::LARGE_SHIELD},
-            
+
+            // Gauntlets
+            {"gauntlets", ItemClass::GAUNTLETS},
+
+            // Girdles
+            {"girdle", ItemClass::GIRDLE},
+
             // Consumables
             {"health_potion", ItemClass::HEALTH_POTION},
             {"mana_potion", ItemClass::MANA_POTION},
+            {"invisibility_potion", ItemClass::INVISIBILITY_POTION},
             {"food_ration", ItemClass::FOOD_RATION},
             {"bread", ItemClass::BREAD},
             {"meat", ItemClass::MEAT},

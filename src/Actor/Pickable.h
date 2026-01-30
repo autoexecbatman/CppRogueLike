@@ -63,7 +63,14 @@ public:
 		PLATE_MAIL
 	};
 
-	virtual ~Pickable() {};
+	virtual ~Pickable() = default;
+
+	// Polymorphic base class - disable copy, enable move
+	Pickable() = default;
+	Pickable(const Pickable&) = delete;
+	Pickable& operator=(const Pickable&) = delete;
+	Pickable(Pickable&&) = default;
+	Pickable& operator=(Pickable&&) = default;
 
 	virtual bool use(Item& owner, Creature& wearer, GameContext& ctx);
 	static std::unique_ptr<Pickable> create(const json& j);

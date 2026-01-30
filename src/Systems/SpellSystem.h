@@ -33,6 +33,9 @@ enum class SpellId
     INVISIBILITY,
     WEB,
 
+    // Wizard Level 3
+    TELEPORT,
+
     // Shared/Special
     NONE
 };
@@ -41,11 +44,11 @@ enum class SpellClass { CLERIC, WIZARD, BOTH };
 
 struct SpellDefinition
 {
-    SpellId id;
-    std::string name;
-    int level;
-    SpellClass spellClass;
-    std::string description;
+    SpellId id{};
+    std::string name{};
+    int level{};
+    SpellClass spellClass{};
+    std::string description{};
 };
 
 class SpellSystem
@@ -65,6 +68,14 @@ public:
     static int get_spell_level(SpellId id);
     static const std::string& get_spell_name(SpellId id);
 
+    // Item-granted spells
+    struct ItemGrantedSpell
+    {
+        SpellId spell{};
+        std::string source{}; // "Ring", "Helm", etc.
+    };
+    static std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
+
     // Memorization
     static void show_memorization_menu(Player& player, GameContext& ctx);
     static void show_casting_menu(Player& player, GameContext& ctx);
@@ -79,4 +90,5 @@ private:
     static bool cast_shield(Creature& caster, GameContext& ctx);
     static bool cast_sleep(Creature& caster, GameContext& ctx);
     static bool cast_invisibility(Creature& caster, GameContext& ctx);
+    static bool cast_teleport(Creature& caster, GameContext& ctx);
 };

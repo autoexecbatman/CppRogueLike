@@ -1,6 +1,7 @@
 // GameStateManager.cpp - Handles game state persistence and level management
 #include <fstream>
 #include <format>
+#include <filesystem>
 
 #include <nlohmann/json.hpp>
 
@@ -196,6 +197,14 @@ bool GameStateManager::save_file_exists() noexcept
     return file.good();
 }
 
+void GameStateManager::delete_save_file()
+{
+    if (std::filesystem::exists(SAVE_FILE_NAME))
+    {    
+        std::filesystem::remove(SAVE_FILE_NAME);
+    }
+}
+
 void GameStateManager::save_rooms_to_json(const std::vector<Vector2D>& rooms, nlohmann::json& j) const
 {
     j["rooms"] = json::array();
@@ -238,16 +247,6 @@ void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::ve
         {
             auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
             creature->load(creatureData);
-            
-            // CRITICAL FIX: Ensure creature inventory items have correct values
-            for (const auto& item : creature->inventory_data.items)
-            {
-                if (item)
-                {
-                    ItemCreator::ensure_correct_value(*item);
-                }
-            }
-
             creatures.push_back(std::move(creature));
         }
     }

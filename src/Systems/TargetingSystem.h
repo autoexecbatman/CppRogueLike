@@ -19,4 +19,8 @@ public:
 
 	// Handle ranged attack coordination
 	void handle_ranged_attack(GameContext& ctx) const;
+
+private:
+	// Get weapon range based on weapon type (AD&D 2e ranges in dungeon tiles)
+	static int get_weapon_range(const Item* weapon);
 };
