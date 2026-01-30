@@ -23,7 +23,11 @@ class MenuSpellCast : public BaseMenu
 
 public:
 	MenuSpellCast(GameContext& ctx, Player& player);
-	~MenuSpellCast() = default;
+	~MenuSpellCast() override = default;
+	MenuSpellCast(const MenuSpellCast&) = delete;
+	MenuSpellCast& operator=(const MenuSpellCast&) = delete;
+	MenuSpellCast(MenuSpellCast&&) = delete;
+	MenuSpellCast& operator=(MenuSpellCast&&) = delete;
 
 	void menu(GameContext& ctx) override;
 };

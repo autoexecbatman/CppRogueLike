@@ -10,6 +10,11 @@ class CorpseFood : public Pickable
 {
 public:
     CorpseFood(int nutrition_value);
+    ~CorpseFood() override = default;
+    CorpseFood(const CorpseFood&) = delete;
+    CorpseFood& operator=(const CorpseFood&) = delete;
+    CorpseFood(CorpseFood&&) noexcept = default;
+    CorpseFood& operator=(CorpseFood&&) noexcept = default;
 
     bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
     void load(const json& j) override;

@@ -7,7 +7,6 @@
 #include "../Systems/RenderingManager.h"
 #include "../Colors/Colors.h"
 
-// TODO: Rule of 5.
 MenuSpellCast::MenuSpellCast(GameContext& ctx, Player& player)
 	: player(player), ctx(ctx)
 {
