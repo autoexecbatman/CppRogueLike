@@ -35,16 +35,27 @@ const std::unordered_map<std::string, std::string> CORPSE_FLAVOR_TEXT = {
 namespace
 {
     // Named lambda for map lookups without iterator boilerplate
+    //
+    // C++20 Templated Lambda Explanation:
+    // - `constexpr auto` = Lambda can be evaluated at compile-time when possible
+    // - `[]<typename K, typename V>` = C++20 syntax for generic lambda with explicit template parameters
+    //   (Before C++20, you'd need to use a template function instead)
+    // - `noexcept` = Guarantees this function won't throw exceptions (optimization hint)
+    // - `-> V` = Trailing return type (explicit return type specification)
+    //
+    // Usage: get_or_default(myMap, "key", "default_value")
+    // Returns the value if key exists, otherwise returns the default_value
     constexpr auto get_or_default = []<typename K, typename V>(
         const std::unordered_map<K, V>& map,
         const K& key,
         const V& default_value) noexcept -> V
     {
+        // C++17 if-with-initializer: declare 'it' in the if statement scope
         if (const auto it = map.find(key); it != map.end())
         {
-            return it->second;
+            return it->second;  // Key found, return the value
         }
-        return default_value;
+        return default_value;  // Key not found, return default
     };
 }
 

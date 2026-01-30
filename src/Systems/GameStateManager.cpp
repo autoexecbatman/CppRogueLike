@@ -2,6 +2,7 @@
 #include <fstream>
 #include <format>
 #include <filesystem>
+#include <system_error>
 
 #include <nlohmann/json.hpp>
 
@@ -197,12 +198,21 @@ bool GameStateManager::save_file_exists() noexcept
     return file.good();
 }
 
-void GameStateManager::delete_save_file()
+bool GameStateManager::delete_save_file() noexcept
 {
-    if (std::filesystem::exists(SAVE_FILE_NAME))
-    {    
-        std::filesystem::remove(SAVE_FILE_NAME);
+    std::error_code ec;
+
+    // Check if file exists (no-throw version)
+    if (!std::filesystem::exists(SAVE_FILE_NAME, ec))
+    {
+        return true;  // File doesn't exist, nothing to delete
     }
+
+    // Attempt to remove the file (no-throw version)
+    const bool removed = std::filesystem::remove(SAVE_FILE_NAME, ec);
+
+    // Return true if removed successfully or if error_code indicates success
+    return removed && !ec;
 }
 
 void GameStateManager::save_rooms_to_json(const std::vector<Vector2D>& rooms, nlohmann::json& j) const
