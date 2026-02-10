@@ -2,11 +2,13 @@
 
 #include <functional>
 #include <memory>
+#include <span>
 #include <string>
 #include <vector>
 
 struct Vector2D;
 struct GameContext;
+struct EnhancedItemSpawnRule;
 
 // A struct to represent an item type with its spawn probability
 struct ItemType
@@ -24,8 +26,9 @@ struct ItemType
 
 struct ItemPercentage
 {
-	std::string name;       // to store in category
-	float percentage;       // Percentage of this item type
+	std::string name;
+	std::string category;
+	float percentage;
 };
 
 class ItemFactory
@@ -34,6 +37,8 @@ public:
     ItemFactory();
 
     void add_item_type(const ItemType& itemType);
+    void load_from_registry();
+    void load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rules);
     void generate_treasure(Vector2D position, GameContext& ctx, int dungeonLevel, int quality);
     std::vector<ItemPercentage> get_current_distribution(int dungeonLevel);
     void spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category);

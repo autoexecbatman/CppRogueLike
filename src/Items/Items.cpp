@@ -55,20 +55,3 @@ AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ '*
 	value = 1000; // Very valuable
 }
 
-LeatherArmorItem::LeatherArmorItem(Vector2D position) : Item(position, ActorData{ '[', "leather armor", BROWN_BLACK_PAIR })
-{
-	pickable = std::make_unique<LeatherArmor>();
-	value = 5; // 5 gp - AD&D 2e leather armor price
-}
-
-ChainMailItem::ChainMailItem(Vector2D position) : Item(position, ActorData{ '[', "chain mail", BROWN_BLACK_PAIR })
-{
-	pickable = std::make_unique<ChainMail>();
-	value = 75; // 75 gp - AD&D 2e chain mail price
-}
-
-PlateMailItem::PlateMailItem(Vector2D position) : Item(position, ActorData{ '[', "plate mail", BROWN_BLACK_PAIR })
-{
-	pickable = std::make_unique<PlateMail>();
-	value = 400; // 400 gp - AD&D 2e plate mail price
-}

@@ -70,7 +70,7 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		pickable = std::make_unique<CorpseFood>(0);
 		break;
 	case PickableType::ARMOR:
-		pickable = std::make_unique<LeatherArmor>();
+		pickable = std::make_unique<Armor>(0);
 		break;
 	case PickableType::MAGICAL_HELM:
 		pickable = std::make_unique<MagicalHelm>(MagicalEffect::NONE, 0);

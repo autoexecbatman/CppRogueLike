@@ -129,9 +129,19 @@ namespace ItemClassificationUtils
                 return ItemClass::CROSSBOW;
 
             // Armor
+            case ItemId::PADDED_ARMOR:
             case ItemId::LEATHER_ARMOR:
+            case ItemId::STUDDED_LEATHER:
+            case ItemId::HIDE_ARMOR:
+            case ItemId::RING_MAIL:
+            case ItemId::SCALE_MAIL:
             case ItemId::CHAIN_MAIL:
+            case ItemId::BRIGANDINE:
+            case ItemId::SPLINT_MAIL:
+            case ItemId::BANDED_MAIL:
             case ItemId::PLATE_MAIL:
+            case ItemId::FIELD_PLATE:
+            case ItemId::FULL_PLATE:
                 return ItemClass::ARMOR;
 
             // Shields

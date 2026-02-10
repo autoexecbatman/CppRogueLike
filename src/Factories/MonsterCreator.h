@@ -70,7 +70,6 @@ struct MonsterParams
 
     // Behaviour
     MonsterAiType ai_type{ MonsterAiType::MELEE };
-    bool is_levitating{ false };
     bool can_swim{ false };
 
     // Spawn table

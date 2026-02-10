@@ -1,5 +1,6 @@
 // file: Map.cpp
 #include <iostream>
+#include <map>
 #include <random>
 #include <algorithm>
 #include <span>
@@ -1296,7 +1297,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(ctx.player->inventory_data, ItemCreator::create(ItemId::AMULET_OF_YENDOR, amuletPos));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::AMULET_OF_YENDOR, amuletPos));
 
 		// Log the placement (debug info)
 		if (ctx.message_system)
@@ -1492,85 +1493,64 @@ void Map::display_item_distribution(GameContext& ctx) const
 {
 	if (!ctx.level_manager) return;
 
-	WINDOW* distributionWindow = newwin(
-		24,  // height (adjust to fit all items)
-		50,  // width
-		1,   // y position
-		1    // x position
-	);
+	WINDOW* win = newwin(LINES, COLS, 0, 0);
+	wclear(win);
+	box(win, 0, 0);
 
-	box(distributionWindow, 0, 0);
-	mvwprintw(distributionWindow, 1, 1, "Item Spawn Rates (Dungeon Level %d)", ctx.level_manager->get_dungeon_level());
-	mvwprintw(distributionWindow, 2, 1, "--------------------------------------");
+	const int dungeonLevel = ctx.level_manager->get_dungeon_level();
+	mvwprintw(win, 1, 2, "Item Spawn Rates - Dungeon Level %d", dungeonLevel);
 
-	// Get current distribution from item factory
-	std::vector<ItemPercentage> distribution = itemFactory->get_current_distribution(ctx.level_manager->get_dungeon_level());
+	std::vector<ItemPercentage> distribution =
+		itemFactory->get_current_distribution(dungeonLevel);
 
-	// Sort by probability (descending)
-	std::sort(distribution.begin(), distribution.end(),
+	std::sort(
+		distribution.begin(),
+		distribution.end(),
 		[](const auto& a, const auto& b) { return a.percentage > b.percentage; });
 
-	int row = 3;
-
-	// First display categories
-	std::unordered_map<std::string, float> categoryTotals;
-
-	for (const auto& [name, percentage] : distribution)
+	// --- Left column: categories ---
+	std::map<std::string, float> categoryTotals;
+	for (const auto& [name, category, percentage] : distribution)
 	{
-		std::string category;
-
-		if (name.find("Potion") != std::string::npos)
-		{
-			category = "Potions";
-		}
-		else if (name.find("Scroll") != std::string::npos)
-		{
-			category = "Scrolls";
-		}
-		else if (name == "Gold")
-		{
-			category = "Gold";
-		}
-		else if (name == "Amulet of Yendor")
-		{
-			category = "Artifacts";
-		}
-		else if (name.find("Ration") != std::string::npos ||
-			name.find("Fruit") != std::string::npos ||
-			name.find("Bread") != std::string::npos ||
-			name.find("Meat") != std::string::npos
-			)
-		{
-			category = "Food";
-		}
-		else
-		{
-			category = "Weapons";
-		}
-
 		categoryTotals[category] += percentage;
 	}
 
-	mvwprintw(distributionWindow, row++, 1, "Item Categories:");
-	for (const auto& [category, percentage] : categoryTotals)
+	// Sort categories by total percentage descending
+	std::vector<std::pair<std::string, float>> sortedCategories(
+		categoryTotals.begin(), categoryTotals.end());
+	std::sort(
+		sortedCategories.begin(),
+		sortedCategories.end(),
+		[](const auto& a, const auto& b) { return a.second > b.second; });
+
+	const int leftCol = 2;
+	const int rightCol = COLS / 2;
+	int row = 3;
+
+	mvwprintw(win, row++, leftCol, "%-22s  %s", "Category", "Chance");
+	mvwprintw(win, row++, leftCol, "------------------------------");
+	for (const auto& [category, percentage] : sortedCategories)
 	{
-		mvwprintw(distributionWindow, row++, 1, "%-15s: %5.1f%%", category.c_str(), percentage);
+		if (row >= LINES - 3) break;
+		mvwprintw(win, row++, leftCol, "%-22s  %5.1f%%", category.c_str(), percentage);
 	}
 
-	row++;
-	mvwprintw(distributionWindow, row++, 1, "Individual Items:");
-
-	// Then list individual items
-	for (const auto& [name, percentage] : distribution)
+	// --- Right column: individual items ---
+	row = 3;
+	mvwprintw(win, row++, rightCol, "%-28s  %s", "Item", "Chance");
+	mvwprintw(win, row++, rightCol, "------------------------------------");
+	for (const auto& [name, category, percentage] : distribution)
 	{
-		mvwprintw(distributionWindow, row++, 1, "%-20s: %5.1f%%", name.c_str(), percentage);
+		if (row >= LINES - 3) break;
+		mvwprintw(win, row++, rightCol, "%-28s  %5.1f%%", name.c_str(), percentage);
 	}
 
-	mvwprintw(distributionWindow, row + 1, 1, "Press any key to close");
-	wrefresh(distributionWindow);
-	getch();  // Wait for key press
-	delwin(distributionWindow);
+	mvwprintw(win, LINES - 2, 2, "Press any key to close");
+	wrefresh(win);
+	getch();
+	delwin(win);
 	clear();
+	refresh();
 }
 
 void Map::post_process_doors()

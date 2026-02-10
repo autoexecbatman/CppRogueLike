@@ -250,6 +250,18 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.h
     ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.cpp
     ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.h
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/PotionItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/ScrollItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/MeleeWeaponItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/RangedWeaponItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/ArmorItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/HelmItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/RingItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/JewelryItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/GirdleItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/FoodItems.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedWeaponRules.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedArmorRules.cpp
 
     # Objects - Updated paths
     ${PROJECT_SOURCE_DIR}/Objects/Web.cpp

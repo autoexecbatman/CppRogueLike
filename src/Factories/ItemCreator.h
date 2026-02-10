@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <string_view>
+#include <unordered_map>
+#include <span>
 
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"  // For Pickable::PickableType
@@ -30,8 +32,8 @@ struct ItemParams
 
     // Gameplay properties (use what you need, rest default to 0/NONE/false)
 
-    // Healing
-    int heal_amount{ 0 };
+    // Consumable value: heal amount (HEAL) or buff value (ADD_BUFF)
+    int consumable_amount{ 0 };
 
     // Ranged effects (scrolls: lightning, fireball)
     int range{ 0 };
@@ -62,6 +64,9 @@ struct ItemParams
     // Treasure
     int gold_amount{ 0 };
 
+    // Armor
+    int ac_bonus{ 0 };              // AD&D 2e AC bonus (negative = better AC)
+
     // Weapon mechanical properties (all weapons in registry should set these)
     bool ranged{ false };
     HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
@@ -74,6 +79,32 @@ struct ItemParams
     // Targeted scroll properties
     TargetMode target_mode{ TargetMode::AUTO_NEAREST };
     ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
+
+    // Spawn / ItemFactory integration
+    int base_weight{ 0 };              // Spawn weight (0 = not spawnable)
+    int level_minimum{ 1 };            // Min dungeon level
+    int level_maximum{ 0 };            // Max dungeon level (0 = no cap)
+    float level_scaling{ 0.0f };       // Weight scaling per level (can be negative)
+    std::string_view category{ "" };   // "potion", "weapon", "armor", etc.
+};
+
+struct ItemRegistryEntry
+{
+    ItemId id;
+    ItemParams params;
+};
+
+enum class EnhancedItemCategory { WEAPON, ARMOR };
+
+struct EnhancedItemSpawnRule
+{
+    std::span<const ItemId> item_pool;
+    EnhancedItemCategory enhancement_category;
+    int base_weight;
+    int level_minimum;
+    int level_maximum;   // 0 = no cap
+    float level_scaling;
+    std::string_view category;
 };
 
 class ItemCreator
@@ -94,6 +125,7 @@ private:
 public:
     // Registry access
     static const ItemParams& get_params(ItemId itemId);
+    static const std::unordered_map<ItemId, ItemParams>& get_all_params();
 
     // Single source of truth - data-driven item creation
     static std::unique_ptr<Item> create(ItemId itemId, Vector2D pos);

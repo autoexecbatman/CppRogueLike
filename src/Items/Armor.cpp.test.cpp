@@ -5,13 +5,11 @@
 #include <string>
 #include <stdexcept>
 
-// Include the target file specifically
 #include "E:/repo/C++RogueLike/src/Items/Armor.h"
 #include "E:/repo/C++RogueLike/src/Game.h"
 #include "E:/repo/C++RogueLike/src/Colors/Colors.h"
 #include "E:/repo/C++RogueLike/src/ActorTypes/Player.h"
 
-// Mock classes to simulate dependencies
 class Creature {
 public:
     class Destructible {
@@ -41,59 +39,27 @@ public:
     bool toggle_armor(int id) { return true; }
 };
 
-Game game; // Global instance for testing purposes
+Game game;
 
-void test_ArmorUse() {
-    Player player;
-    Item item;
-    Armor::apply_stat_effects(player, item);
-    assert(item.has_state(ActorState::IS_EQUIPPED) && "Item should be equipped after applying effects.");
+void test_Armor_ac_bonus()
+{
+    Armor leather(-2);
+    assert(leather.get_ac_bonus() == -2 && "Leather armor AC bonus should be -2.");
 
-    // Test use function for player
-    bool result = Armor::use(item, player);
-    assert(result && "Use function should return true when successful.");
+    Armor chain(-5);
+    assert(chain.get_ac_bonus() == -5 && "Chain mail AC bonus should be -5.");
 
-    // Check messages based on equip/unequip status
-    std::string message;
-    if (player.is_item_equipped(item.uniqueId)) {
-        message = "You remove the " + item.actorData.name + ".";
-    } else {
-        message = "You put on the " + item.actorData.name + ".";
-    }
-    assert(game.message(WHITE_BLACK_PAIR, message, true) && "Message should be displayed.");
+    Armor plate(-7);
+    assert(plate.get_ac_bonus() == -7 && "Plate mail AC bonus should be -7.");
+
+    Armor fullPlate(-9);
+    assert(fullPlate.get_ac_bonus() == -9 && "Full plate AC bonus should be -9.");
 }
 
-void test_LeatherArmor() {
-    LeatherArmor leather;
-    assert(leather.armorClass == -2 && "Leather armor should have AC of -2.");
-}
-
-void test_ChainMail() {
-    ChainMail chainmail;
-    assert(chainmail.armorClass == -4 && "Chain mail should have AC of -4.");
-}
-
-void test_PlateMail() {
-    PlateMail platemail;
-    assert(platemail.armorClass == -6 && "Plate mail should have AC of -6.");
-}
-
-int main() {
-    // Run tests
-    std::cout << "Running Armor use function test..." << std::endl;
-    test_ArmorUse();
-    std::cout << "Passed." << std::endl;
-
-    std::cout << "Running LeatherArmor test..." << std::endl;
-    test_LeatherArmor();
-    std::cout << "Passed." << std::endl;
-
-    std::cout << "Running ChainMail test..." << std::endl;
-    test_ChainMail();
-    std::cout << "Passed." << std::endl;
-
-    std::cout << "Running PlateMail test..." << std::endl;
-    test_PlateMail();
+int main()
+{
+    std::cout << "Running Armor AC bonus test..." << std::endl;
+    test_Armor_ac_bonus();
     std::cout << "Passed." << std::endl;
 
     return 0;

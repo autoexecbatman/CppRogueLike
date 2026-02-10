@@ -780,6 +780,12 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
+	case Controls::ITEM_DISTRIBUTION:
+	{
+		ctx.map->display_item_distribution(ctx);
+		break;
+	}
+
 	case Controls::OPEN_DOOR:
 	{
 		// Prompt for direction

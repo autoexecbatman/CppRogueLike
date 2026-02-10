@@ -38,7 +38,6 @@ enum class ActorState
 	IS_RANGED,
 	IS_CONFUSED,
 	IS_INVISIBLE,
-	IS_LEVITATING,  // For flying creatures like bats
 };
 
 //==Actor==

@@ -332,7 +332,6 @@ namespace
                 .weapon_name = "Bite",
                 .damage = DamageValues::Unarmed(),
                 .ai_type = MonsterAiType::MELEE,
-                .is_levitating = true,
                 .base_weight = 15,
                 .level_minimum = 1,
                 .level_maximum = 3,
@@ -394,6 +393,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(Vector2D pos, const
 
     c->attacker = std::make_unique<Attacker>(params.damage);
     c->destructible = std::make_unique<MonsterDestructible>(hp, params.dr, params.corpse_name, params.xp, params.thaco, params.ac);
+    c->destructible->set_last_constitution(c->get_constitution());
 
     if (params.ai_type == MonsterAiType::RANGED)
     {
@@ -404,9 +404,6 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(Vector2D pos, const
     {
         c->ai = std::make_unique<AiMonster>();
     }
-
-    if (params.is_levitating)
-        c->add_state(ActorState::IS_LEVITATING);
 
     if (params.can_swim)
         c->add_state(ActorState::CAN_SWIM);

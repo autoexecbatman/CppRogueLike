@@ -83,32 +83,6 @@ void test_AmuletOfYendor() {
     assert(dynamic_cast<Amulet*>(amulet.getPickable().get()) != nullptr);
 }
 
-void test_LeatherArmorItem() {
-    Vector2D pos(0, 0);
-    LeatherArmorItem armor(pos);
-    assert(armor.getSymbol() == '[');
-    assert(armor.getName() == "leather armor");
-    assert(armor.getValue() == 5);
-    assert(dynamic_cast<LeatherArmor*>(armor.getPickable().get()) != nullptr);
-}
-
-void test_ChainMailItem() {
-    Vector2D pos(0, 0);
-    ChainMailItem armor(pos);
-    assert(armor.getSymbol() == '[');
-    assert(armor.getName() == "chain mail");
-    assert(armor.getValue() == 75);
-    assert(dynamic_cast<ChainMail*>(armor.getPickable().get()) != nullptr);
-}
-
-void test_PlateMailItem() {
-    Vector2D pos(0, 0);
-    PlateMailItem armor(pos);
-    assert(armor.getSymbol() == '[');
-    assert(armor.getName() == "plate mail");
-    assert(armor.getValue() == 400);
-    assert(dynamic_cast<PlateMail*>(armor.getPickable().get()) != nullptr);
-}
 
 int main() {
     try {
@@ -126,12 +100,6 @@ int main() {
         std::cout << "GoldPile test passed." << std::endl;
         test_AmuletOfYendor();
         std::cout << "AmuletOfYendor test passed." << std::endl;
-        test_LeatherArmorItem();
-        std::cout << "LeatherArmorItem test passed." << std::endl;
-        test_ChainMailItem();
-        std::cout << "ChainMailItem test passed." << std::endl;
-        test_PlateMailItem();
-        std::cout << "PlateMailItem test passed." << std::endl;
     } catch (const std::exception& e) {
         std::cerr << "Test failed: " << e.what() << std::endl;
     }
