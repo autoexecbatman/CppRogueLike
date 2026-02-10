@@ -83,12 +83,13 @@ class Consumable : public Pickable
 {
 public:
 	ConsumableEffect effect;
-	int amount;    // heal_amount (HEAL) or unused
-	int duration;  // buff duration (ADD_BUFF)
-	BuffType buff_type; // buff effect type (ADD_BUFF)
+	int amount;           // heal_amount (HEAL) or buff value (ADD_BUFF)
+	int duration;         // buff duration (ADD_BUFF)
+	BuffType buff_type;   // buff effect type (ADD_BUFF)
+	bool is_set_effect;   // true = SET stat to value (potions), false = ADD value
 
-	Consumable(ConsumableEffect e, int amt, int dur, BuffType bt)
-		: effect(e), amount(amt), duration(dur), buff_type(bt) {}
+	Consumable(ConsumableEffect e, int amt, int dur, BuffType bt, bool set_effect = false)
+		: effect(e), amount(amt), duration(dur), buff_type(bt), is_set_effect(set_effect) {}
 
 	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 	void save(json& j) override;

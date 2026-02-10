@@ -117,7 +117,7 @@ bool Consumable::use(Item& owner, Creature& wearer, GameContext& ctx)
 		break;
 	}
 	case ConsumableEffect::ADD_BUFF:
-		ctx.buff_system->add_buff(wearer, buff_type, 0, duration, false);
+		ctx.buff_system->add_buff(wearer, buff_type, amount, duration, is_set_effect);
 		ctx.message_system->message(CYAN_BLACK_PAIR, std::format("You feel the effect of the {} for {} turns.", owner.get_name(), duration), true);
 		break;
 	case ConsumableEffect::NONE:
@@ -139,6 +139,7 @@ void Consumable::save(json& j)
 	j["amount"] = amount;
 	j["duration"] = duration;
 	j["buff_type"] = static_cast<int>(buff_type);
+	j["is_set_effect"] = is_set_effect;
 }
 
 void Consumable::load(const json& j)
@@ -147,6 +148,7 @@ void Consumable::load(const json& j)
 	if (j.contains("amount")) amount = j["amount"].get<int>();
 	if (j.contains("duration")) duration = j["duration"].get<int>();
 	if (j.contains("buff_type")) buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
+	if (j.contains("is_set_effect")) is_set_effect = j["is_set_effect"].get<bool>();
 }
 
 //==WEAPON==

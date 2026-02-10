@@ -63,15 +63,17 @@ namespace
             .consumable_buff_type = BuffType::INVISIBILITY}},
 
         {ItemId::POTION_OF_GIANT_STRENGTH, {
-            .symbol = '!', 
-            .name = "potion of giant strength", 
-            .color = YELLOW_BLACK_PAIR, 
-            .itemClass = ItemClass::POTION, 
-            .value = 200, 
-            .pickable_type = PickableType::CONSUMABLE, 
-            .duration = 50, 
-            .str_bonus = 4, 
-            .consumable_effect = ConsumableEffect::NONE}},
+            .symbol = '!',
+            .name = "potion of giant strength",
+            .color = YELLOW_BLACK_PAIR,
+            .itemClass = ItemClass::POTION,
+            .value = 200,
+            .pickable_type = PickableType::CONSUMABLE,
+            .heal_amount = 19,  // Sets STR to 19 (Hill Giant)
+            .duration = 50,
+            .is_set_mode = true,
+            .consumable_effect = ConsumableEffect::ADD_BUFF,
+            .consumable_buff_type = BuffType::STRENGTH}},
 
         {ItemId::POTION_OF_LEVITATION, { // TODO: Check validity of item.
             .symbol = '!', 
@@ -904,7 +906,8 @@ namespace
                     params.consumable_effect,
                     params.heal_amount,
                     params.duration,
-                    params.consumable_buff_type
+                    params.consumable_buff_type,
+                    params.is_set_mode
                 );
 
             case PickableType::TARGETED_SCROLL:
