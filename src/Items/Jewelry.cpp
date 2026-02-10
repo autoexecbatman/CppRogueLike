@@ -3,6 +3,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/BuffSystem.h"
 
 // ===== MAGICAL EQUIPMENT (Helms, Rings with special effects) =====
 
@@ -10,57 +11,54 @@ bool MagicalEquipment::use(Item& item, Creature& wearer, GameContext& ctx)
 {
     const std::string& itemName = item.actorData.name;
 
-    // For players, delegate to Equipment System
-    if (wearer.uniqueId == ctx.player->uniqueId)
+    // Check if item was equipped before toggle
+    const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+
+    EquipmentSlot slot = get_equipment_slot();
+
+    // For rings, intelligently choose available slot
+    if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
     {
-        Player* player = static_cast<Player*>(&wearer);
-        const bool wasEquipped = player->is_item_equipped(item.uniqueId);
-
-        EquipmentSlot slot = get_equipment_slot();
-
-        // For rings, intelligently choose available slot
-        if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
+        // If right ring is occupied, try left ring
+        if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
         {
-            // If right ring is occupied, try left ring
-            if (player->is_slot_occupied(EquipmentSlot::RIGHT_RING))
-            {
-                slot = EquipmentSlot::LEFT_RING;
-            }
+            slot = EquipmentSlot::LEFT_RING;
         }
-
-        const bool success = player->toggle_equipment(item.uniqueId, slot, ctx);
-        if (success)
-        {
-            if (wasEquipped)
-            {
-                // Unequipping - clear any active effects
-                if (effect == MagicalEffect::INVISIBILITY && player->is_invisible())
-                {
-                    player->clear_invisible();
-                    ctx.message_system->message(CYAN_BLACK_PAIR, "Your invisibility fades.", true);
-                }
-                ctx.message_system->message(WHITE_BLACK_PAIR, "You remove the " + itemName + ".", true);
-            }
-            else
-            {
-                // Equipping - special message for Ring of Invisibility
-                if (effect == MagicalEffect::INVISIBILITY)
-                {
-                    ctx.message_system->message(CYAN_BLACK_PAIR, "The ring pulses with arcane power. Press Ctrl+C to cast.", true);
-                }
-                ctx.message_system->message(WHITE_BLACK_PAIR, "You put on the " + itemName + ".", true);
-            }
-
-            // Update AC if this is a protection ring or Helm of Brilliance
-            if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
-            {
-                player->destructible->update_armor_class(*player, ctx);
-            }
-        }
-        return success;
     }
 
-    // For NPCs, apply magical effect
+    // Try slot-based equipment system (Player returns true, NPC returns false)
+    const bool success = wearer.toggle_equipment(item.uniqueId, slot, ctx);
+    if (success)
+    {
+        if (wasEquipped)
+        {
+            // Unequipping - clear any active effects
+            if (effect == MagicalEffect::INVISIBILITY && wearer.is_invisible())
+            {
+                ctx.buff_system->remove_buff(wearer, BuffType::INVISIBILITY);
+                ctx.message_system->message(CYAN_BLACK_PAIR, "Your invisibility fades.", true);
+            }
+            ctx.message_system->message(WHITE_BLACK_PAIR, "You remove the " + itemName + ".", true);
+        }
+        else
+        {
+            // Equipping - special message for Ring of Invisibility
+            if (effect == MagicalEffect::INVISIBILITY)
+            {
+                ctx.message_system->message(CYAN_BLACK_PAIR, "The ring pulses with arcane power. Press Ctrl+C to cast.", true);
+            }
+            ctx.message_system->message(WHITE_BLACK_PAIR, "You put on the " + itemName + ".", true);
+        }
+
+        // Update AC if this is a protection ring or Helm of Brilliance
+        if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
+        {
+            wearer.destructible->update_armor_class(wearer, ctx);
+        }
+        return true;
+    }
+
+    // For NPCs, fall back to simple magical effect application
     apply_effect(wearer, item, ctx);
     return true;
 }
@@ -100,7 +98,7 @@ void MagicalEquipment::load_magical_effect(const json& j)
 
 void MagicalHelm::save(json& j)
 {
-    save_magical_effect(j, PickableType::HELMET);
+    save_magical_effect(j, PickableType::MAGICAL_HELM);
 }
 
 void MagicalHelm::load(const json& j)
@@ -113,11 +111,16 @@ EquipmentSlot MagicalHelm::get_equipment_slot() const
     return EquipmentSlot::HEAD;
 }
 
+int MagicalHelm::get_ac_bonus() const noexcept
+{
+    return MagicalEffectUtils::get_ac_bonus(effect, bonus);
+}
+
 // ===== MAGICAL RINGS =====
 
 void MagicalRing::save(json& j)
 {
-    save_magical_effect(j, PickableType::RING);
+    save_magical_effect(j, PickableType::MAGICAL_RING);
 }
 
 void MagicalRing::load(const json& j)
@@ -130,75 +133,78 @@ EquipmentSlot MagicalRing::get_equipment_slot() const
     return EquipmentSlot::RIGHT_RING;
 }
 
+int MagicalRing::get_ac_bonus() const noexcept
+{
+    return MagicalEffectUtils::get_protection_bonus(effect);
+}
+
 // ===== STAT BOOST EQUIPMENT (Gauntlets, Girdles) =====
 
 bool StatBoostEquipment::use(Item& item, Creature& wearer, GameContext& ctx)
 {
     const std::string& itemName = item.actorData.name;
 
-    if (wearer.uniqueId == ctx.player->uniqueId)
+    const EquipmentSlot slot = get_equipment_slot();
+    const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+
+    // Try slot-based equipment system (Player returns true, NPC returns false)
+    const bool success = wearer.toggle_equipment(item.uniqueId, slot, ctx);
+    if (success)
     {
-        Player* player = static_cast<Player*>(&wearer);
-        const EquipmentSlot slot = get_equipment_slot();
-        const bool wasEquipped = player->is_item_equipped(item.uniqueId);
-
-        const bool success = player->toggle_equipment(item.uniqueId, slot, ctx);
-        if (success)
+        if (wasEquipped)
         {
-            if (wasEquipped)
+            // Restore/remove stats
+            if (is_set_mode)
             {
-                // Restore/remove stats
-                if (is_set_mode)
-                {
-                    if (str_bonus != 0) player->set_strength(original_stats.str);
-                    if (dex_bonus != 0) player->set_dexterity(original_stats.dex);
-                    if (con_bonus != 0) player->set_constitution(original_stats.con);
-                    if (int_bonus != 0) player->set_intelligence(original_stats.intel);
-                    if (wis_bonus != 0) player->set_wisdom(original_stats.wis);
-                    if (cha_bonus != 0) player->set_charisma(original_stats.cha);
-                }
-                else
-                {
-                    player->set_strength(player->get_strength() - str_bonus);
-                    player->set_dexterity(player->get_dexterity() - dex_bonus);
-                    player->set_constitution(player->get_constitution() - con_bonus);
-                    player->set_intelligence(player->get_intelligence() - int_bonus);
-                    player->set_wisdom(player->get_wisdom() - wis_bonus);
-                    player->set_charisma(player->get_charisma() - cha_bonus);
-                }
-
-                player->destructible->update_armor_class(*player, ctx);
-                ctx.message_system->message(WHITE_BLACK_PAIR, "You remove the " + itemName + ".", true);
+                if (str_bonus != 0) wearer.set_strength(original_stats.str);
+                if (dex_bonus != 0) wearer.set_dexterity(original_stats.dex);
+                if (con_bonus != 0) wearer.set_constitution(original_stats.con);
+                if (int_bonus != 0) wearer.set_intelligence(original_stats.intel);
+                if (wis_bonus != 0) wearer.set_wisdom(original_stats.wis);
+                if (cha_bonus != 0) wearer.set_charisma(original_stats.cha);
             }
             else
             {
-                // Apply/set stats
-                if (is_set_mode)
-                {
-                    if (str_bonus != 0) { original_stats.str = player->get_strength(); player->set_strength(str_bonus); }
-                    if (dex_bonus != 0) { original_stats.dex = player->get_dexterity(); player->set_dexterity(dex_bonus); }
-                    if (con_bonus != 0) { original_stats.con = player->get_constitution(); player->set_constitution(con_bonus); }
-                    if (int_bonus != 0) { original_stats.intel = player->get_intelligence(); player->set_intelligence(int_bonus); }
-                    if (wis_bonus != 0) { original_stats.wis = player->get_wisdom(); player->set_wisdom(wis_bonus); }
-                    if (cha_bonus != 0) { original_stats.cha = player->get_charisma(); player->set_charisma(cha_bonus); }
-                }
-                else
-                {
-                    player->set_strength(player->get_strength() + str_bonus);
-                    player->set_dexterity(player->get_dexterity() + dex_bonus);
-                    player->set_constitution(player->get_constitution() + con_bonus);
-                    player->set_intelligence(player->get_intelligence() + int_bonus);
-                    player->set_wisdom(player->get_wisdom() + wis_bonus);
-                    player->set_charisma(player->get_charisma() + cha_bonus);
-                }
-
-                player->destructible->update_armor_class(*player, ctx);
-                ctx.message_system->message(WHITE_BLACK_PAIR, "You put on the " + itemName + ".", true);
+                wearer.set_strength(wearer.get_strength() - str_bonus);
+                wearer.set_dexterity(wearer.get_dexterity() - dex_bonus);
+                wearer.set_constitution(wearer.get_constitution() - con_bonus);
+                wearer.set_intelligence(wearer.get_intelligence() - int_bonus);
+                wearer.set_wisdom(wearer.get_wisdom() - wis_bonus);
+                wearer.set_charisma(wearer.get_charisma() - cha_bonus);
             }
+
+            wearer.destructible->update_armor_class(wearer, ctx);
+            ctx.message_system->message(WHITE_BLACK_PAIR, "You remove the " + itemName + ".", true);
         }
-        return success;
+        else
+        {
+            // Apply/set stats
+            if (is_set_mode)
+            {
+                if (str_bonus != 0) { original_stats.str = wearer.get_strength(); wearer.set_strength(str_bonus); }
+                if (dex_bonus != 0) { original_stats.dex = wearer.get_dexterity(); wearer.set_dexterity(dex_bonus); }
+                if (con_bonus != 0) { original_stats.con = wearer.get_constitution(); wearer.set_constitution(con_bonus); }
+                if (int_bonus != 0) { original_stats.intel = wearer.get_intelligence(); wearer.set_intelligence(int_bonus); }
+                if (wis_bonus != 0) { original_stats.wis = wearer.get_wisdom(); wearer.set_wisdom(wis_bonus); }
+                if (cha_bonus != 0) { original_stats.cha = wearer.get_charisma(); wearer.set_charisma(cha_bonus); }
+            }
+            else
+            {
+                wearer.set_strength(wearer.get_strength() + str_bonus);
+                wearer.set_dexterity(wearer.get_dexterity() + dex_bonus);
+                wearer.set_constitution(wearer.get_constitution() + con_bonus);
+                wearer.set_intelligence(wearer.get_intelligence() + int_bonus);
+                wearer.set_wisdom(wearer.get_wisdom() + wis_bonus);
+                wearer.set_charisma(wearer.get_charisma() + cha_bonus);
+            }
+
+            wearer.destructible->update_armor_class(wearer, ctx);
+            ctx.message_system->message(WHITE_BLACK_PAIR, "You put on the " + itemName + ".", true);
+        }
+        return true;
     }
 
+    // For NPCs, fall back to simple stat bonus application
     apply_stat_bonuses(wearer, item, ctx);
     return true;
 }
@@ -308,7 +314,7 @@ void StatBoostEquipment::load_stat_bonuses(const json& j)
 
 void JewelryAmulet::save(json& j)
 {
-    save_stat_bonuses(j, PickableType::AMULET);
+    save_stat_bonuses(j, PickableType::JEWELRY_AMULET);
 }
 
 void JewelryAmulet::load(const json& j)

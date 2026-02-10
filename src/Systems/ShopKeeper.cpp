@@ -1,5 +1,6 @@
 #include "ShopKeeper.h"
 #include "../Core/GameContext.h"
+#include "../Random/RandomDice.h"
 #include "../Systems/MessageSystem.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Actor.h"
@@ -32,9 +33,9 @@ ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality)
             sellback_percent = 80;
             break;
     }
-    
+
     generate_shop_name();
-    generate_initial_inventory();
+    // Note: generate_initial_inventory(ctx) must be called separately after construction
 }
 
 int ShopKeeper::get_buy_price(const Item& item) const
@@ -49,16 +50,16 @@ int ShopKeeper::get_sell_price(const Item& item) const
     return (base_price * sellback_percent) / 100;
 }
 
-void ShopKeeper::generate_initial_inventory()
+void ShopKeeper::generate_initial_inventory(GameContext& ctx)
 {
     shop_inventory.items.clear();
-    
+
     // Generate 3-7 random items based on shop type
-    int item_count = 3 + (rand() % 5);
-    
+    int item_count = ctx.dice->roll(3, 7);
+
     for (int i = 0; i < item_count; i++)
     {
-        std::unique_ptr<Item> item = generate_random_item_by_type();
+        std::unique_ptr<Item> item = generate_random_item_by_type(ctx);
         if (item)
         {
             add_item(shop_inventory, std::move(item));
@@ -66,175 +67,107 @@ void ShopKeeper::generate_initial_inventory()
     }
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type()
+std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(GameContext& ctx)
 {
     switch (shop_type)
     {
         case ShopType::WEAPON_SHOP:
-            return generate_random_weapon();
+            return generate_random_weapon(ctx);
         case ShopType::ARMOR_SHOP:
-            return generate_random_armor();
+            return generate_random_armor(ctx);
         case ShopType::POTION_SHOP:
-            return generate_random_potion();
+            return generate_random_potion(ctx);
         case ShopType::SCROLL_SHOP:
-            return generate_random_scroll();
+            return generate_random_scroll(ctx);
         case ShopType::GENERAL_STORE:
-            switch (rand() % 4)
+            switch (ctx.dice->roll(0, 3))
             {
-                case 0: return generate_random_weapon();
-                case 1: return generate_random_armor();
-                case 2: return generate_random_potion();
-                case 3: return generate_random_scroll();
+                case 0: return generate_random_weapon(ctx);
+                case 1: return generate_random_armor(ctx);
+                case 2: return generate_random_potion(ctx);
+                case 3: return generate_random_scroll(ctx);
             }
             break;
         default:
-            return generate_random_misc_item();
+            return generate_random_misc_item(ctx);
     }
     return nullptr;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_weapon()
+std::unique_ptr<Item> ShopKeeper::generate_random_weapon(GameContext& ctx)
 {
-    Vector2D shop_pos{0, 0};
-    
-    static const ItemClass available_weapons[] = {
-        ItemClass::DAGGER,
-        ItemClass::SHORT_SWORD,
-        ItemClass::LONG_SWORD,
-        ItemClass::STAFF,
-        ItemClass::BATTLE_AXE,
-        ItemClass::WAR_HAMMER,
-        ItemClass::MACE,
-        ItemClass::GREAT_SWORD,
-        ItemClass::LONG_BOW
-    };
+    Vector2D shop_pos{ 0, 0 };
 
-    ItemClass weaponClass = available_weapons[rand() % (sizeof(available_weapons) / sizeof(available_weapons[0]))];
+    // Delegate to ItemCreator - single source of truth
+    auto item = ItemCreator::create_random_weapon(shop_pos, ctx);
 
-    // Use ItemCreator factory methods for consistency
-    auto item = ItemCreator::create_weapon_by_class(shop_pos, weaponClass);
-    
     // 40% chance for enhancement
-    if (rand() % 100 < 40)
+    if (ctx.dice->roll(1, 100) <= 40)
     {
         item->generate_random_enhancement(true);
     }
-    
+
     return item;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_armor()
+std::unique_ptr<Item> ShopKeeper::generate_random_armor(GameContext& ctx)
 {
-    Vector2D shop_pos{0, 0};
-    
-    struct ArmorData 
-    {
-        std::string name;
-        char symbol;
-        int base_price;
-    };
-    
-    static const ArmorData armors[] = 
-    {
-        {"Leather Armor", '[', 5},
-        {"Chain Mail", '[', 75},
-        {"Plate Mail", '[', 600},
-        {"Small Shield", ')', 10},
-        {"Large Shield", ')', 25},
-        {"Studded Leather", '[', 20},
-        {"Scale Mail", '[', 120},
-        {"Ring Mail", '[', 30}
-    };
-    
-    const ArmorData& armor = armors[rand() % (sizeof(armors) / sizeof(armors[0]))];
-    
-    auto item = std::make_unique<Item>(shop_pos, ActorData{armor.symbol, armor.name, CYAN_BLACK_PAIR});
-    item->base_value = armor.base_price + (rand() % (armor.base_price / 5 + 1));
-    item->value = item->base_value;
-    item->initialize_item_type_from_name();
-    
-    // Add appropriate pickable component based on item type
-    if (armor.name.find("Shield") != std::string::npos)
-    {
-        item->pickable = std::make_unique<Shield>();
-    }
-    else
-    {
-        // Create armor directly using ItemCreator
-        if (armor.name == "Leather Armor")
-        {
-            auto armor_item = ItemCreator::create_leather_armor(Vector2D{0, 0});
-            item->pickable = std::move(armor_item->pickable);
-        }
-        else if (armor.name == "Chain Mail")
-        {
-            auto armor_item = ItemCreator::create_chain_mail(Vector2D{0, 0});
-            item->pickable = std::move(armor_item->pickable);
-        }
-        else if (armor.name == "Plate Mail")
-        {
-            auto armor_item = ItemCreator::create_plate_mail(Vector2D{0, 0});
-            item->pickable = std::move(armor_item->pickable);
-        }
-    }
-    
+    Vector2D shop_pos{ 0, 0 };
+
+    // Delegate to ItemCreator - single source of truth
+    auto item = ItemCreator::create_random_armor(shop_pos, ctx);
+
     // 35% chance for enhancement
-    if (rand() % 100 < 35)
+    if (ctx.dice->roll(1, 100) <= 35)
     {
         item->generate_random_enhancement(true);
     }
-    
+
     return item;
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_potion()
+std::unique_ptr<Item> ShopKeeper::generate_random_potion(GameContext& ctx)
 {
-    // USE UNIFIED ITEM CREATION - SINGLE SOURCE OF TRUTH
-    return ItemCreator::create_health_potion(Vector2D{0, 0});
+    // Delegate to ItemCreator - single source of truth
+    return ItemCreator::create_random_potion(Vector2D{ 0, 0 }, ctx);
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_scroll()
+std::unique_ptr<Item> ShopKeeper::generate_random_scroll(GameContext& ctx)
 {
-    // USE UNIFIED ITEM CREATION - SINGLE SOURCE OF TRUTH
-    return ItemCreator::create_scroll_lightning(Vector2D{0, 0});
+    // Delegate to ItemCreator - single source of truth
+    return ItemCreator::create_random_scroll(Vector2D{ 0, 0 }, ctx);
 }
 
-std::unique_ptr<Item> ShopKeeper::generate_random_misc_item()
+std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(GameContext& ctx)
 {
-    Vector2D shop_pos{0, 0};
-    
-    struct MiscData 
+    Vector2D shop_pos{ 0, 0 };
+
+    // Delegate to ItemCreator category functions - OCP compliant
+    std::unique_ptr<Item> item;
+    const int category = ctx.dice->roll(0, 3);
+    switch (category)
     {
-        std::string name;
-        char symbol;
-        int base_price;
-    };
-    
-    static const MiscData misc[] = 
-    {
-        {"Torch", '~', 2},
-        {"Rope", '%', 5},
-        {"Rations", '%', 3},
-        {"Thieves Tools", '(', 25},
-        {"Holy Symbol", '*', 15},
-        {"Gems", '*', 100},
-        {"Gold Ring", '=', 50}
-    };
-    
-    const MiscData& item_data = misc[rand() % (sizeof(misc) / sizeof(misc[0]))];
-    
-    auto item = std::make_unique<Item>(shop_pos, ActorData{item_data.symbol, item_data.name, WHITE_BLACK_PAIR});
-    item->base_value = item_data.base_price + (rand() % 10) - 5;
+        case 0: item = ItemCreator::create_random_weapon(shop_pos, ctx); break;
+        case 1: item = ItemCreator::create_random_armor(shop_pos, ctx); break;
+        case 2: item = ItemCreator::create_random_potion(shop_pos, ctx); break;
+        case 3: item = ItemCreator::create(ItemId::FOOD_RATION, shop_pos); break;
+    }
+
+    // Apply price variation (±5)
+    const int baseValue = item->base_value;
+    item->base_value = baseValue + ctx.dice->roll(-5, 5);
     item->base_value = std::max(1, item->base_value);
     item->value = item->base_value;
-    item->initialize_item_type_from_name();
-    
-    // 15% chance for enhancement
-    if (rand() % 100 < 15)
+
+    // 15% chance for enhancement (only for equipment)
+    if (item->is_weapon() || item->is_armor())
     {
-        item->generate_random_enhancement(false);
+        if (ctx.dice->roll(1, 100) <= 15)
+        {
+            item->generate_random_enhancement(false);
+        }
     }
-    
+
     return item;
 }
 

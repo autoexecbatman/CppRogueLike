@@ -19,6 +19,8 @@
 #include "../Actor/Pickable.h"
 
 struct GameContext;
+enum class EquipmentSlot;
+
 
 struct ActorData
 {
@@ -36,6 +38,7 @@ enum class ActorState
 	IS_RANGED,
 	IS_CONFUSED,
 	IS_INVISIBLE,
+	IS_LEVITATING,  // For flying creatures like bats
 };
 
 //==Actor==
@@ -74,22 +77,26 @@ public:
 class Creature : public Actor
 {
 private:
-	//==Actor Attributes==
-	int strength{ 0 };
-	int dexterity{ 0 };
-	int constitution{ 0 };
-	int intelligence{ 0 };
-	int wisdom{ 0 };
-	int charisma{ 0 };
+	//==Actor Attributes - Base values (buffs calculated dynamically)==
+	int base_strength{ 0 };
+	int base_dexterity{ 0 };
+	int base_constitution{ 0 };
+	int base_intelligence{ 0 };
+	int base_wisdom{ 0 };
+	int base_charisma{ 0 };
 
 	int playerLevel{ 1 };
 	int gold{ 0 };
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
-	int invisibleTurnsRemaining{ 0 };
-	int blessTurnsRemaining{ 0 };
-	int shieldTurnsRemaining{ 0 };
+
+	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD)
+	int calculate_effective_stat(int base_value, BuffType type) const noexcept;
+
 public:
+	// Unified buff system - modifier stack pattern (managed by BuffSystem)
+	// Note: active_buffs vector is public for BuffSystem access
+	std::vector<Buff> active_buffs;
 	Creature(Vector2D position, ActorData data) : Actor(position, data), inventory_data(InventoryData(50))
 	{
 		add_state(ActorState::BLOCKS);
@@ -101,39 +108,49 @@ public:
 
 	void update(GameContext& ctx);
 
-	// Const-correct getter methods
-	int get_strength() const noexcept { return strength; }
-	int get_dexterity() const noexcept { return dexterity; }
-	int get_constitution() const noexcept { return constitution; }
-	int get_intelligence() const noexcept { return intelligence; }
-	int get_wisdom() const noexcept { return wisdom; }
-	int get_charisma() const noexcept { return charisma; }
+	// Const-correct getter methods - return effective values (AD&D 2e: MAX(base, SET) + ADD)
+	int get_strength() const noexcept { return calculate_effective_stat(base_strength, BuffType::STRENGTH); }
+	int get_dexterity() const noexcept { return calculate_effective_stat(base_dexterity, BuffType::DEXTERITY); }
+	int get_constitution() const noexcept { return calculate_effective_stat(base_constitution, BuffType::CONSTITUTION); }
+	int get_intelligence() const noexcept { return calculate_effective_stat(base_intelligence, BuffType::INTELLIGENCE); }
+	int get_wisdom() const noexcept { return calculate_effective_stat(base_wisdom, BuffType::WISDOM); }
+	int get_charisma() const noexcept { return calculate_effective_stat(base_charisma, BuffType::CHARISMA); }
 	int get_player_level() const noexcept { return playerLevel; }
+
+	// Virtual for polymorphism - monsters use HD, players override
+	virtual int get_level() const noexcept { return playerLevel; }
+
+	// AD&D 2e: Virtual method for Constitution HP bonus multiplier cap
+	// Monsters: no cap (return level), Players: class-specific caps
+	virtual int get_constitution_hp_multiplier() const noexcept { return get_level(); }
+
 	int get_gold() const noexcept { return gold; }
 	const std::string& get_gender() const noexcept { return gender; }
 	const std::string& get_weapon_equipped() const noexcept { return weaponEquipped; }
 
-	// Setter methods
-	void set_strength(int value) noexcept { strength = value; }
-	void set_dexterity(int value) noexcept { dexterity = value; }
-	void set_constitution(int value) noexcept { constitution = value; }
-	void set_intelligence(int value) noexcept { intelligence = value; }
-	void set_wisdom(int value) noexcept { wisdom = value; }
-	void set_charisma(int value) noexcept { charisma = value; }
+	// Setter methods - modify base stats
+	void set_strength(int value) noexcept { base_strength = value; }
+	void set_dexterity(int value) noexcept { base_dexterity = value; }
+	void set_constitution(int value) noexcept { base_constitution = value; }
+	void set_intelligence(int value) noexcept { base_intelligence = value; }
+	void set_wisdom(int value) noexcept { base_wisdom = value; }
+	void set_charisma(int value) noexcept { base_charisma = value; }
 	void set_player_level(int value) noexcept { playerLevel = value; }
 	void set_gold(int value) noexcept { gold = value; }
 	void set_gender(const std::string& new_gender) noexcept { gender = new_gender; }
 	void set_weapon_equipped(const std::string& weapon) noexcept { weaponEquipped = weapon; }
-	
-	// Modifier methods for increment/decrement operations
-	void adjust_strength(int delta) noexcept { strength += delta; }
-	void adjust_dexterity(int delta) noexcept { dexterity += delta; }
-	void adjust_constitution(int delta) noexcept { constitution += delta; }
-	void adjust_intelligence(int delta) noexcept { intelligence += delta; }
-	void adjust_wisdom(int delta) noexcept { wisdom += delta; }
-	void adjust_charisma(int delta) noexcept { charisma += delta; }
+
+	// Modifier methods for increment/decrement operations - modify base stats
+	void adjust_strength(int delta) noexcept { base_strength += delta; }
+	void adjust_dexterity(int delta) noexcept { base_dexterity += delta; }
+	void adjust_constitution(int delta) noexcept { base_constitution += delta; }
+	void adjust_intelligence(int delta) noexcept { base_intelligence += delta; }
+	void adjust_wisdom(int delta) noexcept { base_wisdom += delta; }
+	void adjust_charisma(int delta) noexcept { base_charisma += delta; }
 	void adjust_gold(int delta) noexcept { gold += delta; }
 	void adjust_level(int delta) noexcept { playerLevel += delta; }
+
+	void apply_confusion(int nbTurns);
 
 	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);
@@ -142,65 +159,16 @@ public:
 	void drop(Item& item, GameContext& ctx);
 
 	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
-	void set_invisible(int turns) noexcept
-	{
-		invisibleTurnsRemaining = turns;
-		if (turns > 0)
-		{
-			add_state(ActorState::IS_INVISIBLE);
-		}
-	}
-	void clear_invisible() noexcept
-	{
-		invisibleTurnsRemaining = 0;
-		remove_state(ActorState::IS_INVISIBLE);
-	}
-	int get_invisible_turns() const noexcept { return invisibleTurnsRemaining; }
-	void decrement_invisible() noexcept
-	{
 
-		if (invisibleTurnsRemaining > 0)
-		{
-			--invisibleTurnsRemaining;
-			if (invisibleTurnsRemaining == 0) remove_state(ActorState::IS_INVISIBLE);
-		}
-	}
-
-	void set_bless(int turns) noexcept { blessTurnsRemaining = turns; }
-	void clear_bless() noexcept { blessTurnsRemaining = 0; }
-	int get_bless_turns() const noexcept { return blessTurnsRemaining; }
-	void decrement_bless() noexcept
-	{
-		if (blessTurnsRemaining > 0)
-		{
-			--blessTurnsRemaining;
-		}
-	}
-
-	void set_shield(int turns) noexcept { shieldTurnsRemaining = turns; }
-	void clear_shield() noexcept { shieldTurnsRemaining = 0; }
-	int get_shield_turns() const noexcept { return shieldTurnsRemaining; }
-	void decrement_shield() noexcept
-	{
-		if (shieldTurnsRemaining > 0)
-		{
-			--shieldTurnsRemaining;
-		}
-	}
-
-	void decrement_all_buffs() noexcept
-	{
-		decrement_invisible();
-		decrement_bless();
-		decrement_shield();
-	}
-
-	int get_temporary_ac_bonus() const noexcept
-	{
-		int bonus = 0;
-		if (shieldTurnsRemaining > 0) bonus -= 4;
-		return bonus;
-	}
+	// Virtual equipment interface - LSP compliant polymorphic equipment operations
+	// Default implementations for NPCs (do nothing/return false)
+	// Player overrides these with actual slot-based equipment system
+	virtual bool toggle_equipment(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
+	virtual bool toggle_weapon(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
+	virtual bool toggle_shield(uint64_t item_id, GameContext& ctx) { return false; }
+	virtual bool is_item_equipped(uint64_t item_id) const noexcept { return false; }
+	virtual bool is_slot_occupied(EquipmentSlot slot) const noexcept { return false; }
+	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept { return nullptr; }
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
@@ -229,9 +197,6 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	// Initialize item type from name (temporary bridge until creation system is refactored)
-	void initialize_item_type_from_name();
-
 	// Name accessor - returns enhanced name if item has enhancements
 	const std::string& get_name() const noexcept;
 	const std::string& get_base_name() const noexcept { return actorData.name; }
@@ -249,7 +214,8 @@ public:
 
 	int value{ 1 };
 	int base_value{ 1 };
-	ItemClass itemClass{ ItemClass::UNKNOWN }; // Proper item classification
+	ItemId itemId{ ItemId::UNKNOWN }; // Specific item identity
+	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
 
 	std::unique_ptr<Pickable> pickable; // the actor can be picked

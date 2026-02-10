@@ -21,8 +21,9 @@ protected:
         );
         item->value = 100;
         item->base_value = 80;
-        item->itemClass = ItemClass::LONG_SWORD;
-        item->pickable = std::make_unique<LongSword>();
+        item->itemId = ItemId::LONG_SWORD;
+        item->itemClass = ItemClass::SWORD;
+        item->pickable = std::make_unique<Weapon>(false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM);
         return item;
     }
 };
@@ -38,7 +39,8 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
 
     EXPECT_EQ(loaded->value, 100);
     EXPECT_EQ(loaded->base_value, 80);
-    EXPECT_EQ(loaded->itemClass, ItemClass::LONG_SWORD);
+    EXPECT_EQ(loaded->itemId, ItemId::LONG_SWORD);
+    EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
     EXPECT_EQ(loaded->actorData.name, "Test Sword");
 }
 
@@ -140,13 +142,13 @@ TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
 TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
     std::vector<ItemClass> classes = {
         ItemClass::DAGGER,
-        ItemClass::SHORT_SWORD,
-        ItemClass::LONG_SWORD,
-        ItemClass::HEALTH_POTION,
-        ItemClass::LEATHER_ARMOR,
-        ItemClass::CHAIN_MAIL,
-        ItemClass::PLATE_MAIL,
-        ItemClass::SMALL_SHIELD
+        ItemClass::SWORD,
+        ItemClass::GREAT_SWORD,
+        ItemClass::POTION,
+        ItemClass::ARMOR,
+        ItemClass::SHIELD,
+        ItemClass::SCROLL,
+        ItemClass::FOOD
     };
 
     for (ItemClass itemClass : classes) {

@@ -16,12 +16,8 @@ namespace MagicalEffectUtils
                 return "Regenerate 1 HP per turn";
             case MagicalEffect::INVISIBILITY:
                 return "Turn invisible at will";
-            case MagicalEffect::PROTECTION_PLUS_1:
-                return "Protection +1 to AC and saves";
-            case MagicalEffect::PROTECTION_PLUS_2:
-                return "Protection +2 to AC and saves";
-            case MagicalEffect::PROTECTION_PLUS_3:
-                return "Protection +3 to AC and saves";
+            case MagicalEffect::PROTECTION:
+                return "Protection to AC and saves";
             default:
                 return "No special effect";
         }
@@ -29,30 +25,20 @@ namespace MagicalEffectUtils
 
     bool is_protection_effect(MagicalEffect effect)
     {
-        return effect == MagicalEffect::PROTECTION_PLUS_1 ||
-               effect == MagicalEffect::PROTECTION_PLUS_2 ||
-               effect == MagicalEffect::PROTECTION_PLUS_3;
+        return effect == MagicalEffect::PROTECTION;
     }
 
     int get_protection_bonus(MagicalEffect effect)
     {
-        switch (effect)
-        {
-            case MagicalEffect::PROTECTION_PLUS_1: return -1;
-            case MagicalEffect::PROTECTION_PLUS_2: return -2;
-            case MagicalEffect::PROTECTION_PLUS_3: return -3;
-            default: return 0;
-        }
+        return effect == MagicalEffect::PROTECTION ? -1 : 0;
     }
 
-    int get_ac_bonus(MagicalEffect effect)
+    int get_ac_bonus(MagicalEffect effect, int bonus)
     {
         switch (effect)
         {
             case MagicalEffect::BRILLIANCE: return -4;
-            case MagicalEffect::PROTECTION_PLUS_1: return -1;
-            case MagicalEffect::PROTECTION_PLUS_2: return -2;
-            case MagicalEffect::PROTECTION_PLUS_3: return -3;
+            case MagicalEffect::PROTECTION: return -bonus;
             default: return 0;
         }
     }

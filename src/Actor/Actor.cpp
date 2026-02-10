@@ -7,6 +7,7 @@
 #include <curses.h>
 
 #include "../Ai/Ai.h"
+#include "../Ai/AiMonsterConfused.h"
 #include "Actor.h"
 #include "Attacker.h"
 #include "Destructible.h"
@@ -18,6 +19,7 @@
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/BuffSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -112,12 +114,12 @@ bool Actor::is_visible(const GameContext& ctx) const noexcept
 void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
-	strength = j["strength"];
-	dexterity = j["dexterity"];
-	constitution = j["constitution"];
-	intelligence = j["intelligence"];
-	wisdom = j["wisdom"];
-	charisma = j["charisma"];
+	base_strength = j["strength"];
+	base_dexterity = j["dexterity"];
+	base_constitution = j["constitution"];
+	base_intelligence = j["intelligence"];
+	base_wisdom = j["wisdom"];
+	base_charisma = j["charisma"];
 	playerLevel = j["playerLevel"];
 	gold = j["gold"];
 	gender = j["gender"];
@@ -144,30 +146,32 @@ void Creature::load(const json& j)
 	{
 		shop = ShopKeeper::create(j["shop"]);
 	}
-	if (j.contains("invisibleTurnsRemaining"))
+
+	// Load unified buff system
+	if (j.contains("active_buffs"))
 	{
-		invisibleTurnsRemaining = j.at("invisibleTurnsRemaining").get<int>();
-		if (invisibleTurnsRemaining > 0) add_state(ActorState::IS_INVISIBLE);
-	}
-	if (j.contains("blessTurnsRemaining"))
-	{
-		blessTurnsRemaining = j.at("blessTurnsRemaining").get<int>();
-	}
-	if (j.contains("shieldTurnsRemaining"))
-	{
-		shieldTurnsRemaining = j.at("shieldTurnsRemaining").get<int>();
+		active_buffs.clear();
+		for (const auto& buffJson : j["active_buffs"])
+		{
+			Buff buff{ };
+			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());
+			buff.value = buffJson.at("value").get<int>();
+			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
+			buff.is_set_effect = buffJson.at("is_set_effect").get<bool>();
+			active_buffs.push_back(buff);
+		}
 	}
 }
 
 void Creature::save(json& j)
 {
 	Actor::save(j); // Call base class save
-	j["strength"] = strength;
-	j["dexterity"] = dexterity;
-	j["constitution"] = constitution;
-	j["intelligence"] = intelligence;
-	j["wisdom"] = wisdom;
-	j["charisma"] = charisma;
+	j["strength"] = base_strength;
+	j["dexterity"] = base_dexterity;
+	j["constitution"] = base_constitution;
+	j["intelligence"] = base_intelligence;
+	j["wisdom"] = base_wisdom;
+	j["charisma"] = base_charisma;
 	j["playerLevel"] = playerLevel;
 	j["gold"] = gold;
 	j["gender"] = gender;
@@ -200,15 +204,26 @@ void Creature::save(json& j)
 		shop->save(shopJson);
 		j["shop"] = shopJson;
 	}
-	j["invisibleTurnsRemaining"] = invisibleTurnsRemaining;
-	j["blessTurnsRemaining"] = blessTurnsRemaining;
-	j["shieldTurnsRemaining"] = shieldTurnsRemaining;
+
+	// Save unified buff system
+	json buffsJson = json::array();
+	for (const auto& buff : active_buffs)
+	{
+		json buffJson;
+		buffJson["type"] = static_cast<int>(buff.type);
+		buffJson["value"] = buff.value;
+		buffJson["turnsRemaining"] = buff.turnsRemaining;
+		buffJson["is_set_effect"] = buff.is_set_effect;
+		buffsJson.push_back(buffJson);
+	}
+	j["active_buffs"] = buffsJson;
 }
 
 // the actor update
 void Creature::update(GameContext& ctx)
 {
-	decrement_all_buffs();
+	ctx.buff_system->restore_loaded_buff_states(*this);  // Restore states after deserialization (idempotent)
+	ctx.buff_system->update_creature_buffs(*this);  // Unified buff system
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{
@@ -221,6 +236,11 @@ void Creature::update(GameContext& ctx)
 	{
 		ai->update(*this, ctx);
 	}
+}
+
+void Creature::apply_confusion(int nbTurns)
+{
+	ai = std::make_unique<AiMonsterConfused>(nbTurns, std::move(ai));
 }
 
 void Creature::equip(Item& item, GameContext& ctx)
@@ -264,21 +284,21 @@ void Creature::equip(Item& item, GameContext& ctx)
 	// Update weapon equipped name and damage if it's a weapon
 	if (isWeapon)
 	{
-		weaponEquipped = ItemClassificationUtils::get_display_name(item.itemClass);
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemClass);
-		ctx.message_system->log(std::format("Equipped {} - damage: {}", ItemClassificationUtils::get_display_name(item.itemClass), weaponDamage));
+		weaponEquipped = item.get_name();
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemId);
+		ctx.message_system->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
 	}
 
 	// Log shield equipped
 	if (isShield)
 	{
-		ctx.message_system->log(std::format("Equipped {} shield", ItemClassificationUtils::get_display_name(item.itemClass)));
+		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
 	}
 
 	// Log armor equipped
 	if (isArmor)
 	{
-		ctx.message_system->log(std::format("Equipped {} armor", ItemClassificationUtils::get_display_name(item.itemClass)));
+		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
 	}
 }
 
@@ -468,11 +488,43 @@ void Creature::drop(Item& item, GameContext& ctx)
 	}
 }
 
+//==Unified Buff System - Modifier Stack Pattern==
+// Note: Buff lifecycle managed by BuffSystem, not Creature
+
+// Helper to sum all buff values of a specific type using ranges
+// AD&D 2e: Calculate effective stat value combining base, SET, and ADD effects
+// LOGIC: effective = MAX(base, highest_SET) + SUM(all_ADDs)
+
+int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
+{
+	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matching_buffs = active_buffs | std::views::filter(matches_type);
+
+	int highest_set = 0;    // Highest SET effect (Potion of Giant Strength → 18)
+	int sum_of_adds = 0;    // Sum of ADD effects (Strength spell +1, Gauntlets +2)
+
+	for (const auto& buff : matching_buffs)
+	{
+		if (buff.is_set_effect)
+		{
+			highest_set = std::max(highest_set, buff.value);
+		}
+		else
+		{
+			sum_of_adds += buff.value;
+		}
+	}
+
+	// AD&D 2e: SET effects replace base (if higher), ADD effects always stack
+	// Example: base=14, SET=18, ADD=+2 → MAX(14,18) + 2 = 20
+	int effective_base = (highest_set > 0) ? std::max(base_value, highest_set) : base_value;
+	return effective_base + sum_of_adds;
+}
+
 //==Item==
 Item::Item(Vector2D position, ActorData data) : Object(position, data)
 {
-	// Initialize item type from name when created
-	initialize_item_type_from_name();
+	// ItemClass should be set by ItemCreator, not by fragile string matching
 };
 
 void Item::load(const json& j)
@@ -480,6 +532,10 @@ void Item::load(const json& j)
 	Object::load(j); // Call base class load
 	value = j.at("value").get<int>();
 	base_value = j.at("base_value").get<int>();
+	if (j.contains("itemId"))
+	{
+		itemId = static_cast<ItemId>(j.at("itemId").get<int>());
+	}
 	itemClass = static_cast<ItemClass>(j.at("itemClass").get<int>());
 
 	// Load enhancement data
@@ -509,7 +565,8 @@ void Item::load(const json& j)
 		enhancement.value_modifier = enh.at("value_modifier").get<int>();
 	}
 
-	if (j.contains("pickable")) {
+	if (j.contains("pickable"))
+	{
 		pickable = Pickable::create(j["pickable"]);
 	}
 }
@@ -519,6 +576,7 @@ void Item::save(json& j)
 	Object::save(j); // Call base class save
 	j["value"] = value;
 	j["base_value"] = base_value;
+	j["itemId"] = static_cast<int>(itemId);
 	j["itemClass"] = static_cast<int>(itemClass);
 
 	// Save enhancement data
@@ -553,60 +611,6 @@ void Item::save(json& j)
 	}
 }
 
-void Item::initialize_item_type_from_name()
-{
-	// Temporary bridge: Set ItemClass based on item name
-	// This should be replaced when item creation system is properly refactored
-	std::string name = actorData.name;
-	
-	// Convert to lowercase for easier matching
-	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-	
-	// Weapons - Melee
-	if (name.find("dagger") != std::string::npos) itemClass = ItemClass::DAGGER;
-	else if (name.find("short sword") != std::string::npos) itemClass = ItemClass::SHORT_SWORD;
-	else if (name.find("long sword") != std::string::npos) itemClass = ItemClass::LONG_SWORD;
-	else if (name.find("great sword") != std::string::npos) itemClass = ItemClass::GREAT_SWORD;
-	else if (name.find("battle axe") != std::string::npos) itemClass = ItemClass::BATTLE_AXE;
-	else if (name.find("great axe") != std::string::npos) itemClass = ItemClass::GREAT_AXE;
-	else if (name.find("war hammer") != std::string::npos) itemClass = ItemClass::WAR_HAMMER;
-	else if (name.find("staff") != std::string::npos) itemClass = ItemClass::STAFF;
-	
-	// Weapons - Ranged
-	else if (name.find("long bow") != std::string::npos) itemClass = ItemClass::LONG_BOW;
-	else if (name.find("bow") != std::string::npos) itemClass = ItemClass::LONG_BOW; // Default bow type
-	
-	// Armor
-	else if (name.find("leather armor") != std::string::npos) itemClass = ItemClass::LEATHER_ARMOR;
-	else if (name.find("chain mail") != std::string::npos) itemClass = ItemClass::CHAIN_MAIL;
-	else if (name.find("plate mail") != std::string::npos) itemClass = ItemClass::PLATE_MAIL;
-	
-	// Shields
-	else if (name.find("large shield") != std::string::npos) itemClass = ItemClass::LARGE_SHIELD;
-	else if (name.find("small shield") != std::string::npos) itemClass = ItemClass::SMALL_SHIELD;
-	else if (name.find("shield") != std::string::npos) itemClass = ItemClass::MEDIUM_SHIELD;
-	
-	// Consumables
-	else if (name.find("health potion") != std::string::npos) itemClass = ItemClass::HEALTH_POTION;
-	else if (name.find("potion") != std::string::npos) itemClass = ItemClass::HEALTH_POTION; // Default potion
-	else if (name.find("bread") != std::string::npos) itemClass = ItemClass::BREAD;
-	else if (name.find("meat") != std::string::npos) itemClass = ItemClass::MEAT;
-	else if (name.find("fruit") != std::string::npos) itemClass = ItemClass::FRUIT;
-	else if (name.find("food") != std::string::npos) itemClass = ItemClass::FOOD_RATION;
-	
-	// Scrolls
-	else if (name.find("lightning") != std::string::npos) itemClass = ItemClass::SCROLL_LIGHTNING;
-	else if (name.find("fireball") != std::string::npos) itemClass = ItemClass::SCROLL_FIREBALL;
-	else if (name.find("confusion") != std::string::npos) itemClass = ItemClass::SCROLL_CONFUSION;
-	
-	// Treasure
-	else if (name.find("gold") != std::string::npos) itemClass = ItemClass::GOLD;
-	else if (name.find("amulet") != std::string::npos) itemClass = ItemClass::AMULET;
-	
-	// Default to unknown if no match found
-	else itemClass = ItemClass::UNKNOWN;
-}
-
 const std::string& Item::get_name() const noexcept
 {
 	if (is_enhanced())
@@ -623,6 +627,8 @@ void Item::apply_enhancement(const ItemEnhancement& new_enhancement)
 	enhancement = new_enhancement;
 	// Update value based on enhancement
 	value = (base_value * enhancement.value_modifier) / 100;
+	// Update name to reflect enhancement
+	actorData.name = enhancement.get_full_name(get_base_name());
 }
 
 void Item::generate_random_enhancement(bool allow_magical)

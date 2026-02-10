@@ -2,6 +2,7 @@
 
 #include "TargetingSystem.h"
 #include "../Core/GameContext.h"
+#include "../Systems/CreatureManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
 #include "../Systems/InputHandler.h"
@@ -656,13 +657,58 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 
 	switch (weapon->itemClass)
 	{
-		case ItemClass::LONG_BOW:
-			return 7; // AD&D 2e: 70 yards (~7 dungeon tiles)
-		case ItemClass::SHORT_BOW:
-			return 5; // AD&D 2e: 50 yards (~5 dungeon tiles)
+		case ItemClass::BOW:
+			if (weapon->itemId == ItemId::LONG_BOW)
+				return 7; // AD&D 2e: 70 yards (~7 dungeon tiles)
+			else
+				return 5; // AD&D 2e: 50 yards (~5 dungeon tiles) for short bow
 		case ItemClass::CROSSBOW:
 			return 6; // AD&D 2e: 60 yards (~6 dungeon tiles)
 		default:
 			return 4; // Default for unknown weapons
 	}
+}
+
+TargetResult TargetingSystem::acquire_targets(GameContext& ctx, TargetMode mode, Vector2D origin, int range, int aoe_radius) const
+{
+    switch (mode)
+    {
+    case TargetMode::AUTO_NEAREST:  return target_auto_nearest(ctx, origin, range);
+    case TargetMode::PICK_TILE_SINGLE: return target_pick_single(ctx);
+    case TargetMode::PICK_TILE_AOE:    return target_pick_aoe(ctx, aoe_radius);
+    }
+    return {};
+}
+
+TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const
+{
+    const auto& monster = ctx.creature_manager->get_closest_monster(*ctx.creatures, origin, range);
+    if (!monster)
+        return {};
+    return {true, monster->position, {monster}};
+}
+
+TargetResult TargetingSystem::target_pick_single(GameContext& ctx) const
+{
+    Vector2D pos{0, 0};
+    if (!pick_tile(ctx, &pos, 0))
+        return {};
+    Creature* actor = ctx.map->get_actor(pos, ctx);
+    if (!actor)
+        return {};
+    return {true, pos, {actor}};
+}
+
+TargetResult TargetingSystem::target_pick_aoe(GameContext& ctx, int aoe_radius) const
+{
+    Vector2D center{0, 0};
+    if (!pick_tile(ctx, &center, aoe_radius))
+        return {};
+    std::vector<Creature*> targets;
+    for (const auto& c : *ctx.creatures)
+    {
+        if (c && !c->destructible->is_dead() && c->get_tile_distance(center) <= aoe_radius)
+            targets.push_back(c.get());
+    }
+    return {true, center, targets};
 }

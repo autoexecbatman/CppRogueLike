@@ -21,6 +21,7 @@ class GameLoopCoordinator;
 class DataManager;
 class TargetingSystem;
 class HungerSystem;
+class BuffSystem;
 class Player;
 class Stairs;
 class Object;
@@ -56,7 +57,6 @@ struct GameContext {
     // Core systems
     MessageSystem* message_system{ nullptr };
     RandomDice* dice{ nullptr };
-    RandomDice* dice_roller{ nullptr };  // Alias for dice (backward compatibility)
 
     // Managers
     CreatureManager* creature_manager{ nullptr };
@@ -71,8 +71,8 @@ struct GameContext {
 
     // Specialized systems
     TargetingSystem* targeting{ nullptr };
-    TargetingSystem* targeting_system{ nullptr };  // Alias for targeting (backward compatibility)
     HungerSystem* hunger_system{ nullptr };
+    BuffSystem* buff_system{ nullptr };
 
     // Game world data
     Stairs* stairs{ nullptr };

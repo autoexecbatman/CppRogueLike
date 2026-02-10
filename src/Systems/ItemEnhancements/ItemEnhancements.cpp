@@ -1,5 +1,6 @@
-#include "ItemEnhancements.h"
 #include <random>
+
+#include "ItemEnhancements.h"
 
 // Enhancement name getters
 std::string ItemEnhancement::get_prefix_name() const

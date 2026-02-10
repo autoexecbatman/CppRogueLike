@@ -80,12 +80,9 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Menu/MenuSpellCast.cpp
 
     # ActorTypes
-    ${PARENT_SOURCE_DIR}/ActorTypes/Confuser.cpp
-    ${PARENT_SOURCE_DIR}/ActorTypes/Fireball.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Monsters.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Gold.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Healer.cpp
-    ${PARENT_SOURCE_DIR}/ActorTypes/LightningBolt.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Teleporter.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Player.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Monsters/Spider.cpp
@@ -110,7 +107,9 @@ set(PARENT_SOURCES
 
     # Systems
     ${PARENT_SOURCE_DIR}/Systems/TargetingSystem.cpp
+    ${PARENT_SOURCE_DIR}/Systems/SpellAnimations.cpp
     ${PARENT_SOURCE_DIR}/Systems/HungerSystem.cpp
+    ${PARENT_SOURCE_DIR}/Systems/BuffSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/LevelUpSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/MessageSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/RenderingManager.cpp
@@ -130,6 +129,7 @@ set(PARENT_SOURCES
 
     # Factories
     ${PARENT_SOURCE_DIR}/Factories/MonsterFactory.cpp
+    ${PARENT_SOURCE_DIR}/Factories/MonsterCreator.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemFactory.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemCreator.cpp
 

@@ -43,11 +43,11 @@ void Healer::load(const json& j)
 
 void Healer::save(json& j)
 {
-	j["type"] = static_cast<int>(PickableType::HEALER);
+	j["type"] = static_cast<int>(PickableType::CONSUMABLE);
 	j["amountToHeal"] = amountToHeal;
 }
 
 Pickable::PickableType Healer::get_type() const
 {
-	return PickableType::HEALER;
+	return PickableType::CONSUMABLE;
 }

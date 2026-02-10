@@ -2,10 +2,8 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
-#include "../ActorTypes/LightningBolt.h"
-#include "../ActorTypes/Fireball.h"
-#include "../ActorTypes/Confuser.h"
 #include "../ActorTypes/Teleporter.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Gold.h"
 #include "Amulet.h"
 #include "Armor.h"
@@ -21,19 +19,19 @@ HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ '!', "
 
 ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{'#', "scroll of lightning bolt", WHITE_BLUE_PAIR })
 {
-	pickable = std::make_unique<LightningBolt>(5, 20);
+	pickable = std::make_unique<TargetedScroll>(TargetMode::AUTO_NEAREST, ScrollAnimation::LIGHTNING, 5, 20, 0);
 	value = 150; // 150 gp - powerful lightning magic
 }
 
 ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ '#', "scroll of fireball", RED_YELLOW_PAIR })
 {
-	pickable = std::make_unique<Fireball>(3, 12);
+	pickable = std::make_unique<TargetedScroll>(TargetMode::PICK_TILE_AOE, ScrollAnimation::EXPLOSION, 3, 12, 0);
 	value = 100;
 }
 
 ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ '#', "scroll of confusion", WHITE_GREEN_PAIR })
 {
-	pickable = std::make_unique<Confuser>(10, 8);
+	pickable = std::make_unique<TargetedScroll>(TargetMode::PICK_TILE_SINGLE, ScrollAnimation::NONE, 10, 0, 8);
 	value = 120; // 120 gp - tactical confusion magic
 }
 

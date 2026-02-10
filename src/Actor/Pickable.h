@@ -2,65 +2,50 @@
 
 #include "../Persistent/Persistent.h"
 #include "../Items/Weapons.h" // For WeaponSize and HandRequirement enums
+#include "../Systems/TargetMode.h"
+#include "../Systems/BuffType.h"
 
 class Actor;
 class Creature;
 class Item;
-class Player; // Forward declaration for smart slot selection
-struct GameContext; // Forward declaration for dependency injection
+struct GameContext;
 
 // Forward declaration - EquipmentSlot is defined in Player.h
 enum class EquipmentSlot;
 
 //==PICKABLE==
-//==
 class Pickable : public Persistent
 {
 public:
-	enum class PickableType : int
+	// Behavioral category tags - NOT item identity (ItemId is the identity)
+	enum class PickableType
 	{
-		HEALER,
-		LIGHTNING_BOLT,
-		CONFUSER,
-		FIREBALL,
+		// Scroll / ranged effects (complex targeting behavior)
+		TARGETED_SCROLL,
+		TELEPORTER,
+
 		// Weapons
-		LONGSWORD,
-		DAGGER,
-		SHORTSWORD,
-		LONGBOW,
-		STAFF,
-		GREATSWORD,
-		BATTLE_AXE,
-		GREAT_AXE,
-		WAR_HAMMER,
-		MACE,
-		SHIELD,
-		// Consumables
+		WEAPON,  // all weapons - config stored as data in Weapon
+		SHIELD,  // special: off-hand only, toggle_shield dispatch
+
+		// Consumables (potions + simple scrolls)
+		CONSUMABLE,
+
+		// Treasure & food
 		GOLD,
 		FOOD,
 		CORPSE_FOOD,
-		// Potions
-		HEALING_POTION,
-		MANA_POTION,
-		STRENGTH_POTION,
-		SPEED_POTION,
-		POISON_ANTIDOTE,
-		FIRE_RESISTANCE_POTION,
-		INVISIBILITY_POTION,
-		// Scrolls
-		SCROLL_IDENTIFY,
-		SCROLL_TELEPORT,
-		SCROLL_MAGIC_MAPPING,
-		SCROLL_ENCHANTMENT,
+
 		// Equipment
-		AMULET,
-		RING,
-		HELMET,
+		ARMOR,
+		MAGICAL_HELM,
+		MAGICAL_RING,
+		JEWELRY_AMULET,
 		GAUNTLETS,
 		GIRDLE,
-		LEATHER_ARMOR,
-		CHAIN_MAIL,
-		PLATE_MAIL
+
+		// Special
+		QUEST_ITEM,
 	};
 
 	virtual ~Pickable() = default;
@@ -77,330 +62,100 @@ public:
 	virtual void save(json& j) = 0;
 	virtual void load(const json& j) = 0;
 	virtual PickableType get_type() const = 0;
+
+	// Virtual AC bonus - allows polymorphic AC calculation without dynamic_cast
+	virtual int get_ac_bonus() const noexcept { return 0; }
 };
 //====
 
-// Base weapon class to reduce code duplication
-class Weapon : public Pickable
+// Effect type for Consumable - what happens when the item is used
+enum class ConsumableEffect : int
+{
+	NONE = 0,  // Show message, consume item
+	HEAL,      // Heal HP, consume item
+	ADD_BUFF,  // Add timed buff via BuffSystem, consume item
+	FAIL,      // Show message, do NOT consume (feature not yet implemented)
+};
+
+// Single class for all consumable items (potions, simple scrolls)
+// All behavior is data-driven: effect type + parameters set at construction
+class Consumable : public Pickable
 {
 public:
-	std::string roll;
+	ConsumableEffect effect;
+	int amount;    // heal_amount (HEAL) or unused
+	int duration;  // buff duration (ADD_BUFF)
+	BuffType buff_type; // buff effect type (ADD_BUFF)
+
+	Consumable(ConsumableEffect e, int amt, int dur, BuffType bt)
+		: effect(e), amount(amt), duration(dur), buff_type(bt) {}
+
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::CONSUMABLE; }
+};
+
+// Data-driven weapon class - all config stored as member data
+class Weapon : public Pickable
+{
+protected:
+	bool ranged;
+	HandRequirement hand_requirement;
+	WeaponSize weapon_size;
+
+public:
+	Weapon(bool is_ranged, HandRequirement hands, WeaponSize size)
+		: ranged(is_ranged), hand_requirement(hands), weapon_size(size) {}
 
 	// Common weapon equip/unequip logic
 	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
-	// Determines if this weapon is a ranged weapon
-	virtual bool is_ranged() const = 0;
-	
-	// Determines if this weapon can be used both one-handed and two-handed
-	// REMOVED: Versatile weapons eliminated for simplicity
-	
-	// Extensible hand requirement system - replaces dynamic_cast chains
-	virtual HandRequirement get_hand_requirement() const { return HandRequirement::ONE_HANDED; }
-	bool is_two_handed() const noexcept { return get_hand_requirement() == HandRequirement::TWO_HANDED; }
-	
-	// AD&D 2e weapon size and dual-wield validation methods
-	virtual WeaponSize get_weapon_size() const;
+	// Data accessors
+	bool is_ranged() const noexcept { return ranged; }
+	HandRequirement get_hand_requirement() const noexcept { return hand_requirement; }
+	bool is_two_handed() const noexcept { return hand_requirement == HandRequirement::TWO_HANDED; }
+	WeaponSize get_weapon_size() const noexcept { return weapon_size; }
+
+	// AD&D 2e dual-wield validation
 	bool can_be_off_hand(WeaponSize weaponSize) const;
 	bool validate_dual_wield(Item* mainHandWeapon, Item* offHandWeapon) const;
-	
-	// Virtual method for preferred equipment slot - implemented in .cpp to avoid enum forward declaration issues
-	virtual EquipmentSlot get_preferred_slot(const Player* player) const;
-};
 
-class Dagger : public Weapon
-{
-public:
-	// dagger roll is 1d4
-	Dagger() { roll = "D4"; }
+	// Virtual for slot selection (e.g. can_be_off_hand weapons)
+	virtual EquipmentSlot get_preferred_slot(const Creature* creature) const;
 
-	bool is_ranged() const override;
 	void save(json& j) override;
 	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::DAGGER; }
-	
-	// Daggers use smart slot selection - off-hand when main hand occupied by larger weapon
-	EquipmentSlot get_preferred_slot(const Player* player) const override;
+	PickableType get_type() const override { return PickableType::WEAPON; }
 };
 
-
-class LongSword : public Weapon
+class TargetedScroll : public Pickable
 {
 public:
-	// longsword roll is 1d8
-	LongSword() { roll = "D8"; }
+    TargetMode target_mode{TargetMode::AUTO_NEAREST};
+    ScrollAnimation scroll_animation{ScrollAnimation::NONE};
+    int range{0};
+    int damage{0};
+    int confuse_turns{0};
 
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::LONGSWORD; }
-};
+    TargetedScroll(TargetMode mode, ScrollAnimation anim, int rng, int dmg, int confuse)
+        : target_mode(mode), scroll_animation(anim), range(rng), damage(dmg), confuse_turns(confuse) {}
 
-class ShortSword : public Weapon
-{
-public:
-	// shortsword roll is 1d6
-	ShortSword() { roll = "D6"; }
-
-	bool is_ranged() const override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SHORTSWORD; }
-};
-
-class Longbow : public Weapon
-{
-public:
-	// longbow roll is 1d8
-	Longbow() { roll = "D8"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::LONGBOW; }
-};
-
-class Staff : public Weapon
-{
-public:
-	// staff roll is 1d6
-	Staff() { roll = "D6"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::STAFF; }
-};
-
-// Two-handed weapons
-class Greatsword : public Weapon
-{
-public:
-	// greatsword roll is 1d12 (equivalent to 2d6 average)
-	Greatsword() { roll = "D12"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::GREATSWORD; }
-};
-
-class BattleAxe : public Weapon
-{
-public:
-	// battle axe roll is 1d8
-	BattleAxe() { roll = "D8"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::BATTLE_AXE; }
-};
-
-class GreatAxe : public Weapon
-{
-public:
-	// great axe roll is 1d12
-	GreatAxe() { roll = "D12"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::TWO_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::GREAT_AXE; }
-};
-
-class WarHammer : public Weapon
-{
-public:
-	// war hammer roll is 1d8
-	WarHammer() { roll = "D8"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::WAR_HAMMER; }
-};
-
-class Mace : public Weapon
-{
-public:
-	// mace roll is 1d6+1
-	Mace() { roll = "D6+1"; }
-
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::ONE_HANDED; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::MACE; }
-};
-
-// Potion classes - consumable items with various effects
-class HealingPotion : public Pickable
-{
-public:
-	int heal_amount;
-	
-	HealingPotion(int amount = 20) : heal_amount(amount) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::HEALING_POTION; }
-};
-
-class ManaPotion : public Pickable
-{
-public:
-	int mana_amount;
-	
-	ManaPotion(int amount = 15) : mana_amount(amount) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::MANA_POTION; }
-};
-
-class StrengthPotion : public Pickable
-{
-public:
-	int strength_bonus;
-	int duration;
-	
-	StrengthPotion(int bonus = 2, int dur = 100) : strength_bonus(bonus), duration(dur) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::STRENGTH_POTION; }
-};
-
-class SpeedPotion : public Pickable
-{
-public:
-	int speed_bonus;
-	int duration;
-	
-	SpeedPotion(int bonus = 1, int dur = 50) : speed_bonus(bonus), duration(dur) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SPEED_POTION; }
-};
-
-class PoisonAntidote : public Pickable
-{
-public:
-	PoisonAntidote() {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::POISON_ANTIDOTE; }
-};
-
-class FireResistancePotion : public Pickable
-{
-public:
-	int resistance_amount;
-	int duration;
-	
-	FireResistancePotion(int resistance = 50, int dur = 200) : resistance_amount(resistance), duration(dur) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::FIRE_RESISTANCE_POTION; }
-};
-
-class InvisibilityPotion : public Pickable
-{
-public:
-	int duration;
-	
-	InvisibilityPotion(int dur = 30) : duration(dur) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::INVISIBILITY_POTION; }
-};
-
-// Scroll classes - single-use magical effects
-class ScrollIdentify : public Pickable
-{
-public:
-	ScrollIdentify() {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SCROLL_IDENTIFY; }
-};
-
-class ScrollTeleport : public Pickable
-{
-public:
-	int range;
-	
-	ScrollTeleport(int teleport_range = 10) : range(teleport_range) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SCROLL_TELEPORT; }
-};
-
-class ScrollMagicMapping : public Pickable
-{
-public:
-	int radius;
-	
-	ScrollMagicMapping(int map_radius = 25) : radius(map_radius) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SCROLL_MAGIC_MAPPING; }
-};
-
-class ScrollEnchantment : public Pickable
-{
-public:
-	int enhancement_bonus;
-	
-	ScrollEnchantment(int bonus = 1) : enhancement_bonus(bonus) {}
-	
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SCROLL_ENCHANTMENT; }
+    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
+    void save(json& j) override;
+    void load(const json& j) override;
+    PickableType get_type() const override { return PickableType::TARGETED_SCROLL; }
 };
 
 // Shield (off-hand defensive item)
 class Shield : public Weapon
 {
 public:
-	// shield roll is 1d4 (for shield bash)
-	Shield() { roll = "D4"; }
+	Shield() : Weapon(false, HandRequirement::OFF_HAND_ONLY, WeaponSize::MEDIUM) {}
 
-	// Override use method to work like armor
+	// Override use method - shield equips to left hand via toggle_shield
 	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
 
-	bool is_ranged() const override;
-	HandRequirement get_hand_requirement() const override { return HandRequirement::OFF_HAND_ONLY; }
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::SHIELD; }
-	
 	// Shield provides AC bonus
-	virtual int get_ac_bonus() const { return -1; } // +1 AC bonus in AD&D terms
+	int get_ac_bonus() const noexcept override { return -1; } // +1 AC bonus in AD&D terms
 };

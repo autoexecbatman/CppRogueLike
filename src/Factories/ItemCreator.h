@@ -1,93 +1,114 @@
 #pragma once
 
 #include <memory>
+#include <string_view>
 
 #include "../Actor/Actor.h"
+#include "../Actor/Pickable.h"  // For Pickable::PickableType
+#include "../Items/MagicalItemEffects.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
+#include "../Systems/TargetMode.h"
 
 struct Vector2D;
 struct GameContext;
+enum class ItemId;
 enum class ItemClass;
+
+// Use Pickable::PickableType - single source of truth
+using PickableType = Pickable::PickableType;
+
+// Unified compositional item parameters - supports any combination of properties
+struct ItemParams
+{
+    // Display & Classification
+    char symbol{ '\0' };
+    std::string_view name{ "" };
+    int color{ 0 };
+    ItemClass itemClass{ ItemClass::UNKNOWN };
+    int value{ 0 };
+    PickableType pickable_type{ PickableType::WEAPON };
+
+    // Gameplay properties (use what you need, rest default to 0/NONE/false)
+
+    // Healing
+    int heal_amount{ 0 };
+
+    // Ranged effects (scrolls: lightning, fireball)
+    int range{ 0 };
+    int damage{ 0 };
+
+    // Confusion
+    int confuse_turns{ 0 };
+
+    // Duration effects (potions, buffs)
+    int duration{ 0 };
+
+    // Magical effects (rings, helms, protection items)
+    MagicalEffect effect{ MagicalEffect::NONE };
+    int effect_bonus{ 0 };
+
+    // Stat modifications (amulets, gauntlets, girdles)
+    int str_bonus{ 0 };
+    int dex_bonus{ 0 };
+    int con_bonus{ 0 };
+    int int_bonus{ 0 };
+    int wis_bonus{ 0 };
+    int cha_bonus{ 0 };
+    bool is_set_mode{ false };  // If true, non-zero bonuses SET stats instead of adding
+
+    // Food
+    int nutrition_value{ 0 };
+
+    // Treasure
+    int gold_amount{ 0 };
+
+    // Weapon mechanical properties (all weapons in registry should set these)
+    bool ranged{ false };
+    HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
+    WeaponSize weapon_size{ WeaponSize::MEDIUM };
+
+    // Consumable effect (potions and simple scrolls)
+    ConsumableEffect consumable_effect{ ConsumableEffect::NONE };
+    BuffType consumable_buff_type{ BuffType::INVISIBILITY }; // for ADD_BUFF effect
+
+    // Targeted scroll properties
+    TargetMode target_mode{ TargetMode::AUTO_NEAREST };
+    ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
+};
 
 class ItemCreator
 {
 public:
-    // Centralized item creation functions with guaranteed AD&D 2e values
-    static std::unique_ptr<Item> create_scroll_teleportation(Vector2D pos);
-    static std::unique_ptr<Item> create_dagger(Vector2D pos);
-    static std::unique_ptr<Item> create_short_sword(Vector2D pos);
-    static std::unique_ptr<Item> create_long_sword(Vector2D pos);
-    static std::unique_ptr<Item> create_staff(Vector2D pos);
-    static std::unique_ptr<Item> create_longbow(Vector2D pos);
-    static std::unique_ptr<Item> create_greatsword(Vector2D pos);
-    static std::unique_ptr<Item> create_battle_axe(Vector2D pos);
-    static std::unique_ptr<Item> create_great_axe(Vector2D pos);
-    static std::unique_ptr<Item> create_war_hammer(Vector2D pos);
-    static std::unique_ptr<Item> create_shield(Vector2D pos);
-    static std::unique_ptr<Item> create_leather_armor(Vector2D pos);
-    static std::unique_ptr<Item> create_chain_mail(Vector2D pos);
-    static std::unique_ptr<Item> create_plate_mail(Vector2D pos);
+
+private:
+    // TODO: why are the not implemented? Investigate please if this is correct.
+    template <typename TPickable, typename... Args>
+    static std::unique_ptr<Item> base_create(Vector2D pos, ItemId itemId, Args&&... args);
+
+    template <typename TWeapon>
+    static std::unique_ptr<Item> create_enhanced(Vector2D pos, ItemId itemId, int enhancementLevel);
+
+    template <typename TPickable, typename ConfigFunc>
+    static std::unique_ptr<Item> base_create_with_config(Vector2D pos, ItemId itemId, ConfigFunc&& config);
+
+public:
+    // Registry access
+    static const ItemParams& get_params(ItemId itemId);
+
+    // Single source of truth - data-driven item creation
+    static std::unique_ptr<Item> create(ItemId itemId, Vector2D pos);
+    static std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount);
+    static std::unique_ptr<Item> create_enhanced_weapon(ItemId weaponId, Vector2D pos, int enhancementLevel);
+    static std::unique_ptr<Item> create_with_enhancement(ItemId itemId, Vector2D pos, PrefixType prefix, SuffixType suffix);
+
+public:
+    // Special item creation functions
     static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
 
-    // Amulet creation functions
-    static std::unique_ptr<Item> create_amulet_of_health(Vector2D pos);
-    static std::unique_ptr<Item> create_amulet_of_wisdom(Vector2D pos);
-    static std::unique_ptr<Item> create_amulet_of_protection(Vector2D pos);
-
-    // Authentic AD&D 2e magical helms
-    static std::unique_ptr<Item> create_helm_of_brilliance(Vector2D pos);
-    static std::unique_ptr<Item> create_helm_of_teleportation(Vector2D pos);
-
-    // Authentic AD&D 2e magical rings
-    static std::unique_ptr<Item> create_ring_of_protection_plus_1(Vector2D pos);
-    static std::unique_ptr<Item> create_ring_of_protection_plus_2(Vector2D pos);
-    static std::unique_ptr<Item> create_ring_of_free_action(Vector2D pos);
-    static std::unique_ptr<Item> create_ring_of_regeneration(Vector2D pos);
-    static std::unique_ptr<Item> create_ring_of_invisibility(Vector2D pos);
-
-    // Authentic AD&D 2e gauntlets (stat bonuses)
-    static std::unique_ptr<Item> create_gauntlets_of_ogre_power(Vector2D pos);
-    static std::unique_ptr<Item> create_gauntlets_of_dexterity(Vector2D pos);
-
-    // Authentic AD&D 2e girdles (stat bonuses)
-    static std::unique_ptr<Item> create_girdle_of_hill_giant_strength(Vector2D pos);
-    static std::unique_ptr<Item> create_girdle_of_frost_giant_strength(Vector2D pos);
-
-    // Food creation functions
-    static std::unique_ptr<Item> create_ration(Vector2D pos);
-    static std::unique_ptr<Item> create_fruit(Vector2D pos);
-    static std::unique_ptr<Item> create_bread(Vector2D pos);
-    static std::unique_ptr<Item> create_meat(Vector2D pos);
-    
-    // Artifact creation functions
-    static std::unique_ptr<Item> create_amulet_of_yendor(Vector2D pos);
-    
-    // Enhanced weapon creation functions
-    static std::unique_ptr<Item> create_enhanced_dagger(Vector2D pos, int enhancementLevel);
-    static std::unique_ptr<Item> create_enhanced_short_sword(Vector2D pos, int enhancementLevel);
-    static std::unique_ptr<Item> create_enhanced_long_sword(Vector2D pos, int enhancementLevel);
-    static std::unique_ptr<Item> create_enhanced_staff(Vector2D pos, int enhancementLevel);
-    static std::unique_ptr<Item> create_enhanced_longbow(Vector2D pos, int enhancementLevel);
-    
-    // SINGLE SOURCE OF TRUTH - All item creation hardcoded here
-    static std::unique_ptr<Item> create_health_potion(Vector2D pos);
-    static std::unique_ptr<Item> create_scroll_lightning(Vector2D pos);
-    static std::unique_ptr<Item> create_scroll_fireball(Vector2D pos);
-    static std::unique_ptr<Item> create_scroll_confusion(Vector2D pos);
-    static std::unique_ptr<Item> create_invisibility_potion(Vector2D pos);
-    
-    // Weapons - UNIFIED creation
-    static std::unique_ptr<Item> create_iron_sword(Vector2D pos);
-    static std::unique_ptr<Item> create_steel_sword(Vector2D pos);
-    static std::unique_ptr<Item> create_mace(Vector2D pos);
-    
-    // Armor - UNIFIED creation  
-    static std::unique_ptr<Item> create_studded_leather(Vector2D pos);
-    static std::unique_ptr<Item> create_scale_mail(Vector2D pos);
-    
     // Random generation with single source
     static std::unique_ptr<Item> create_random_weapon(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_armor(Vector2D pos, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_potion(Vector2D pos, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_random_armor(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_random_potion(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
     static std::unique_ptr<Item> create_random_scroll(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
     static std::unique_ptr<Item> create_weapon_with_enhancement_chance(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
 
@@ -95,8 +116,4 @@ public:
     static int calculate_enhancement_chance(int dungeonLevel);
     static int determine_enhancement_level(GameContext& ctx, int dungeonLevel);
     static int calculate_enhanced_value(int baseValue, int enhancementLevel);
-
-    // Centralized weapon creation by ItemClass (proper approach)
-    static std::unique_ptr<Item> create_weapon_by_class(Vector2D pos, ItemClass weaponClass);
-    static void create_pickable_from_itemclass(Item* item, ItemClass itemClass);
 };

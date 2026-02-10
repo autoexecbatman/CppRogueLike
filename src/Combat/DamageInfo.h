@@ -1,7 +1,21 @@
 #pragma once
 
 #include <string>
-#include <random>
+#include <format>
+
+#include "../Random/RandomDice.h"
+
+// Damage type classification for resistance calculations
+enum class DamageType
+{
+    PHYSICAL,    // Normal weapon damage
+    FIRE,        // Fire damage
+    COLD,        // Cold/ice damage
+    LIGHTNING,   // Lightning/shock damage
+    POISON,      // Poison damage
+    ACID,        // Acid damage
+    MAGIC,       // Pure magical damage
+};
 
 // - Robust damage value system replacing fragile roll strings
 struct DamageInfo
@@ -9,22 +23,19 @@ struct DamageInfo
     int minDamage;
     int maxDamage;
     std::string displayRoll; // For UI display only: "1d8", "1d6+1", etc.
-    
+    DamageType damageType;    // Type of damage for resistance calculations
+
     // Constructors
-    DamageInfo() : minDamage(1), maxDamage(2), displayRoll("1d2") {}
-    
-    DamageInfo(int min, int max, const std::string& display)
-        : minDamage(min), maxDamage(max), displayRoll(display) {}
+    DamageInfo() : minDamage(1), maxDamage(2), displayRoll("1d2"), damageType(DamageType::PHYSICAL) {}
+
+    DamageInfo(int min, int max, const std::string& display, DamageType type = DamageType::PHYSICAL)
+        : minDamage(min), maxDamage(max), displayRoll(display), damageType(type) {}
     
     // Core damage operations
-    int roll_damage() const 
+    int roll_damage(RandomDice* dice) const
     {
         if (minDamage == maxDamage) return minDamage;
-        
-        static std::random_device rd;
-        static std::mt19937 gen(rd());
-        std::uniform_int_distribution<> dis(minDamage, maxDamage);
-        return dis(gen);
+        return dice->roll(minDamage, maxDamage);
     }
     
     int get_average_damage() const { return (minDamage + maxDamage) / 2; }
@@ -34,16 +45,18 @@ struct DamageInfo
     {
         minDamage += bonus;
         maxDamage += bonus;
-        if (bonus > 0) {
-            displayRoll += "+" + std::to_string(bonus);
-        } else if (bonus < 0) {
-            displayRoll += std::to_string(bonus); // Already has minus sign
+        if (bonus > 0)
+        {
+            displayRoll += std::format("+{}", bonus);
+        } else if (bonus < 0)
+        {
+            displayRoll += std::format("{}", bonus); // Already has minus sign
         }
         return *this;
     }
 
     // Create enhanced version with bonus (non-mutating)
-    DamageInfo with_enhancement(int damage_bonus, int hit_bonus = 0) const
+    DamageInfo with_enhancement(int damage_bonus, int hit_bonus) const
     {
         DamageInfo enhanced = *this;
         enhanced.add_bonus(damage_bonus);
@@ -60,13 +73,13 @@ struct DamageInfo
     
     // Utility functions
     bool is_valid() const { return minDamage > 0 && maxDamage >= minDamage; }
-    std::string get_damage_range() const 
+    std::string get_damage_range() const
     {
         if (minDamage == maxDamage)
         {
-            return std::to_string(minDamage);
+            return std::format("{}", minDamage);
         }
-        return std::to_string(minDamage) + "-" + std::to_string(maxDamage);
+        return std::format("{}-{}", minDamage, maxDamage);
     }
     
     // Comparison operators

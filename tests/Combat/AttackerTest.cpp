@@ -63,7 +63,7 @@ protected:
 
 TEST_F(AttackerTest, Serialization_RoundTrip)
 {
-    Attacker original(DamageInfo{2, 8, "2d4"});
+    Attacker original(DamageInfo{2, 8, "2d4", DamageType::FIRE});
 
     json j;
     original.save(j);
@@ -74,6 +74,7 @@ TEST_F(AttackerTest, Serialization_RoundTrip)
     EXPECT_EQ(loaded.get_damage_info().minDamage, 2);
     EXPECT_EQ(loaded.get_damage_info().maxDamage, 8);
     EXPECT_EQ(loaded.get_damage_info().displayRoll, "2d4");
+    EXPECT_EQ(loaded.get_damage_info().damageType, DamageType::FIRE);
 }
 
 // ----------------------------------------------------------------------------

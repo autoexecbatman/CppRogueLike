@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "src/Combat/DamageInfo.h"
+#include "src/Random/RandomDice.h"
 
 // ============================================================================
 // THE WIZARD'S DAMAGE SYSTEM TESTS
@@ -8,6 +9,7 @@
 
 class DamageInfoTest : public ::testing::Test {
 protected:
+    RandomDice dice;
     DamageInfo dagger{1, 4, "1d4"};
     DamageInfo longsword{1, 8, "1d8"};
     DamageInfo warhammer{2, 5, "1d4+1"};
@@ -32,7 +34,7 @@ TEST_F(DamageInfoTest, ParameterizedConstructor) {
 TEST_F(DamageInfoTest, RollDamage_RespectsMinMax) {
     // Roll 1000 times, all results must be in valid range
     for (int i = 0; i < 1000; ++i) {
-        int damage = longsword.roll_damage();
+        int damage = longsword.roll_damage(&dice);
         EXPECT_GE(damage, longsword.minDamage) << "Damage below minimum on roll " << i;
         EXPECT_LE(damage, longsword.maxDamage) << "Damage above maximum on roll " << i;
     }
@@ -40,9 +42,9 @@ TEST_F(DamageInfoTest, RollDamage_RespectsMinMax) {
 
 TEST_F(DamageInfoTest, RollDamage_FixedValue) {
     DamageInfo fixed(5, 5, "5");
-    EXPECT_EQ(fixed.roll_damage(), 5);
-    EXPECT_EQ(fixed.roll_damage(), 5);
-    EXPECT_EQ(fixed.roll_damage(), 5);
+    EXPECT_EQ(fixed.roll_damage(&dice), 5);
+    EXPECT_EQ(fixed.roll_damage(&dice), 5);
+    EXPECT_EQ(fixed.roll_damage(&dice), 5);
 }
 
 TEST_F(DamageInfoTest, GetAverageDamage) {
@@ -89,7 +91,7 @@ TEST_F(DamageInfoTest, AddBonus_Chaining) {
 
 TEST_F(DamageInfoTest, WithEnhancement_NonMutating) {
     DamageInfo original = longsword;
-    DamageInfo enhanced = original.with_enhancement(3);
+    DamageInfo enhanced = original.with_enhancement(3, 0);
 
     // Original unchanged
     EXPECT_EQ(original.minDamage, 1);
@@ -180,14 +182,14 @@ TEST_F(DamageInfoTest, Regression_StrengthBonus_AddedCorrectly) {
     DamageInfo base_dagger = DamageValues::Dagger();
     int strength_bonus = 2;  // 18 Strength = +2 damage
 
-    DamageInfo enhanced = base_dagger.with_enhancement(strength_bonus);
+    DamageInfo enhanced = base_dagger.with_enhancement(strength_bonus, 0);
 
     EXPECT_EQ(enhanced.minDamage, 3);  // 1 + 2
     EXPECT_EQ(enhanced.maxDamage, 6);  // 4 + 2
 
     // Verify roll respects new range
     for (int i = 0; i < 100; ++i) {
-        int damage = enhanced.roll_damage();
+        int damage = enhanced.roll_damage(&dice);
         EXPECT_GE(damage, 3);
         EXPECT_LE(damage, 6);
     }

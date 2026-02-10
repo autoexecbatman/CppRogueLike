@@ -226,7 +226,7 @@ void CharacterSheetUI::display_equipment_info(WINDOW* window, const Player& play
 	if (equippedWeapon && equippedWeapon->is_weapon())
 	{
 		const ItemEnhancement* enh = equippedWeapon->is_enhanced() ? &equippedWeapon->get_enhancement() : nullptr;
-		damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(equippedWeapon->itemClass, enh).displayRoll;
+		damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(equippedWeapon->itemId, enh).displayRoll;
 	}
 	else
 	{

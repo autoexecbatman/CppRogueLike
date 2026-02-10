@@ -8,6 +8,7 @@
 #include "SpellSystem.h"
 #include "../Core/GameContext.h"
 #include "../Colors/Colors.h"
+#include "BuffSystem.h"
 #include "../ActorTypes/Player.h"
 #include "../Utils/Vector2D.h"
 #include "MessageSystem.h"
@@ -202,7 +203,7 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
-    caster.set_bless(6);
+    ctx.buff_system->add_buff(caster, BuffType::BLESS, 0, 6, false);  // Spell: ADD effect
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
     ctx.message_system->finalize_message();
@@ -334,7 +335,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
-    caster.set_shield(5);
+    ctx.buff_system->add_buff(caster, BuffType::SHIELD, 4, 5, false);  // Spell: ADD +4 AC
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
     ctx.message_system->finalize_message();
@@ -382,7 +383,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 {
-    caster.set_invisible(20);
+    ctx.buff_system->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false);  // Spell: ADD effect
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
     ctx.message_system->finalize_message();
@@ -394,8 +395,8 @@ bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
     // Try to find a valid teleport location (up to 50 attempts)
     for (int attempts = 0; attempts < 50; attempts++)
     {
-        int x = ctx.dice_roller->roll(2, MAP_WIDTH - 2);
-        int y = ctx.dice_roller->roll(2, MAP_HEIGHT - 2);
+        int x = ctx.dice->roll(2, MAP_WIDTH - 2);
+        int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
         Vector2D teleportPos{y, x};
 
         // Check if the tile is a floor and walkable

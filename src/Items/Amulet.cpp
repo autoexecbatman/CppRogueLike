@@ -24,5 +24,5 @@ void Amulet::load(const json& j)
 }
 
 void Amulet::save(json& j) {
-    j["type"] = static_cast<int>(PickableType::AMULET);
+    j["type"] = static_cast<int>(PickableType::QUEST_ITEM);
 }

@@ -17,6 +17,7 @@
 
 #include "Systems/TargetingSystem.h"
 #include "Systems/HungerSystem.h"
+#include "Systems/BuffSystem.h"
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
 #include "Systems/InputHandler.h"
@@ -46,7 +47,6 @@ public:
             // Core systems
             .message_system = &message_system,
             .dice = &dice,
-            .dice_roller = &dice,
 
             // Managers
             .creature_manager = &creature_manager,
@@ -61,8 +61,8 @@ public:
 
             // Specialized systems
             .targeting = &targeting,
-            .targeting_system = &targeting,
             .hunger_system = &hunger_system,
+            .buff_system = &buff_system,
 
             // Game world data
             .stairs = stairs.get(),
@@ -146,6 +146,7 @@ public:
     DataManager data_manager{};
     TargetingSystem targeting{};
     HungerSystem hunger_system{};
+    BuffSystem buff_system{};
 
     // Game world
     Map map{ MAP_HEIGHT, MAP_WIDTH };

@@ -21,10 +21,9 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
     if (&creature != ctx.player) return false;
 
     // Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
-    Player* player = static_cast<Player*>(&creature);
     for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
     {
-        if (Item* equippedRing = player->get_equipped_item(slot))
+        if (Item* equippedRing = creature.get_equipped_item(slot))
         {
             if (const auto* magicRing = dynamic_cast<const MagicalRing*>(equippedRing->pickable.get()))
             {
@@ -42,10 +41,10 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
     int catchChance = 40 + (webStrength * 10) - ((ctx.player->get_dexterity() - 10) * 3);
     catchChance = std::min(90, std::max(10, catchChance));  // Cap between 10-90%
 
-    if (ctx.dice_roller->d100() <= catchChance)
+    if (ctx.dice->d100() <= catchChance)
     {
         // Calculate number of turns stuck based on web strength
-        int stuckTurns = webStrength + ctx.dice_roller->roll(1, 2);
+        int stuckTurns = webStrength + ctx.dice->roll(1, 2);
 
         // Apply the effect
         ctx.player->get_stuck_in_web(stuckTurns, webStrength, this, ctx);
@@ -61,7 +60,7 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
         ctx.message_system->message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
 
         // 50% chance to destroy the web
-        if (ctx.dice_roller->d2() == 1)
+        if (ctx.dice->d2() == 1)
         {
             destroy(ctx);
             ctx.message_system->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
@@ -78,11 +77,11 @@ void Web::destroy(GameContext& ctx)
     // We don't delete it here directly because it could be mid-update
     // Instead we set a flag or use a system that safely removes objects
 
-    // For now, just remove it from the game's object list
-    auto it = std::find_if(ctx.objects->begin(), ctx.objects->end(),
+    // C++20 ranges: find and reset the web object
+    auto found = std::ranges::find_if(*ctx.objects,
         [this](const auto& obj) { return obj.get() == this; });
 
-    if (it != ctx.objects->end()) {
-        it->reset();
+    if (found != ctx.objects->end()) {
+        found->reset();
     }
 }

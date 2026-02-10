@@ -113,10 +113,12 @@ public:
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
+	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
 	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{-1, -1});
 	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
+	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < map_width && pos.y >= 0 && pos.y < map_height; }
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } } // Note: Cannot be noexcept due to exception
 	double get_cost(Vector2D pos, GameContext& ctx) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const noexcept;

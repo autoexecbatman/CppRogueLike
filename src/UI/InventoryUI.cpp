@@ -10,6 +10,8 @@
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Combat/DamageInfo.h"
+#include "../Combat/WeaponDamageRegistry.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 
@@ -174,7 +176,8 @@ void InventoryUI::show_item_info(Item* item, int y)
     if (item->is_weapon())
     {
         Weapon* weapon = static_cast<Weapon*>(item->pickable.get()); // Safe after type check
-        std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
+        DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(item->itemId, &item->enhancement);
+        std::string damageInfo = " [" + damage.displayRoll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
         wattron(inventoryWindow, COLOR_PAIR(WHITE_BLACK_PAIR));
         wprintw(inventoryWindow, "%s", damageInfo.c_str());
         wattroff(inventoryWindow, COLOR_PAIR(WHITE_BLACK_PAIR));

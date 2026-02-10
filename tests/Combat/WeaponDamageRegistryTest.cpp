@@ -16,7 +16,7 @@ protected:
 
 // Basic Lookups
 TEST_F(WeaponDamageRegistryTest, GetDamageInfo_Dagger) {
-    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemClass::DAGGER);
+    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemId::DAGGER);
 
     EXPECT_EQ(info.minDamage, 1);
     EXPECT_EQ(info.maxDamage, 4);
@@ -24,7 +24,7 @@ TEST_F(WeaponDamageRegistryTest, GetDamageInfo_Dagger) {
 }
 
 TEST_F(WeaponDamageRegistryTest, GetDamageInfo_LongSword) {
-    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemClass::LONG_SWORD);
+    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemId::LONG_SWORD);
 
     EXPECT_EQ(info.minDamage, 1);
     EXPECT_EQ(info.maxDamage, 8);
@@ -32,14 +32,14 @@ TEST_F(WeaponDamageRegistryTest, GetDamageInfo_LongSword) {
 }
 
 TEST_F(WeaponDamageRegistryTest, GetDamageInfo_GreatSword) {
-    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemClass::GREAT_SWORD);
+    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemId::GREAT_SWORD);
 
     EXPECT_EQ(info.minDamage, 1);
     EXPECT_EQ(info.maxDamage, 10);
 }
 
 TEST_F(WeaponDamageRegistryTest, GetDamageInfo_BattleAxe) {
-    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemClass::BATTLE_AXE);
+    DamageInfo info = WeaponDamageRegistry::get_damage_info(ItemId::BATTLE_AXE);
 
     EXPECT_EQ(info.minDamage, 1);
     EXPECT_EQ(info.maxDamage, 8);
@@ -47,19 +47,19 @@ TEST_F(WeaponDamageRegistryTest, GetDamageInfo_BattleAxe) {
 
 // Registration Status
 TEST_F(WeaponDamageRegistryTest, IsRegistered_ValidWeapons) {
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::DAGGER));
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::SHORT_SWORD));
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::LONG_SWORD));
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::GREAT_SWORD));
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::BATTLE_AXE));
-    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemClass::WAR_HAMMER));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::DAGGER));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::SHORT_SWORD));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::LONG_SWORD));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::GREAT_SWORD));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::BATTLE_AXE));
+    EXPECT_TRUE(WeaponDamageRegistry::is_registered(ItemId::WAR_HAMMER));
 }
 
 TEST_F(WeaponDamageRegistryTest, IsRegistered_NonWeapons) {
     // These are valid items but not weapons
-    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemClass::HEALTH_POTION));
-    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemClass::LEATHER_ARMOR));
-    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemClass::SCROLL_LIGHTNING));
+    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemId::HEALTH_POTION));
+    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemId::LEATHER_ARMOR));
+    EXPECT_FALSE(WeaponDamageRegistry::is_registered(ItemId::SCROLL_LIGHTNING));
 }
 
 // Unarmed Damage
@@ -78,35 +78,35 @@ TEST_F(WeaponDamageRegistryTest, GetUnarmedDamageString) {
 
 // Legacy Display Strings
 TEST_F(WeaponDamageRegistryTest, GetDamageRoll_DisplayStrings) {
-    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemClass::DAGGER), "1d4");
-    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemClass::LONG_SWORD), "1d8");
-    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemClass::GREAT_SWORD), "1d10");
+    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemId::DAGGER), "1d4");
+    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemId::LONG_SWORD), "1d8");
+    EXPECT_EQ(WeaponDamageRegistry::get_damage_roll(ItemId::GREAT_SWORD), "1d10");
 }
 
 // All Weapon Types Coverage
 TEST_F(WeaponDamageRegistryTest, AllWeaponsHaveValidDamage) {
     // Comprehensive check: Every registered weapon must have valid damage
-    std::vector<ItemClass> weapons = {
-        ItemClass::DAGGER,
-        ItemClass::SHORT_SWORD,
-        ItemClass::LONG_SWORD,
-        ItemClass::GREAT_SWORD,
-        ItemClass::BATTLE_AXE,
-        ItemClass::GREAT_AXE,
-        ItemClass::WAR_HAMMER,
-        ItemClass::MACE,
-        ItemClass::STAFF,
-        ItemClass::LONG_BOW,
-        ItemClass::SHORT_BOW,
-        ItemClass::CROSSBOW
+    std::vector<ItemId> weapons = {
+        ItemId::DAGGER,
+        ItemId::SHORT_SWORD,
+        ItemId::LONG_SWORD,
+        ItemId::GREAT_SWORD,
+        ItemId::BATTLE_AXE,
+        ItemId::GREAT_AXE,
+        ItemId::WAR_HAMMER,
+        ItemId::MACE,
+        ItemId::STAFF,
+        ItemId::LONG_BOW,
+        ItemId::SHORT_BOW,
+        ItemId::CROSSBOW
     };
 
-    for (ItemClass weapon : weapons) {
+    for (ItemId weapon : weapons) {
         if (WeaponDamageRegistry::is_registered(weapon)) {
             DamageInfo info = WeaponDamageRegistry::get_damage_info(weapon);
 
             EXPECT_TRUE(info.is_valid())
-                << "Invalid damage for weapon class " << static_cast<int>(weapon);
+                << "Invalid damage for weapon ID " << static_cast<int>(weapon);
 
             EXPECT_GT(info.maxDamage, 0)
                 << "Zero max damage for weapon class " << static_cast<int>(weapon);
@@ -123,9 +123,9 @@ TEST_F(WeaponDamageRegistryTest, AllWeaponsHaveValidDamage) {
 // Regression: Verify No Duplicate Damage Values
 TEST_F(WeaponDamageRegistryTest, Regression_UniqueWeaponDamage) {
     // Each weapon type should have its own identity
-    DamageInfo dagger = WeaponDamageRegistry::get_damage_info(ItemClass::DAGGER);
-    DamageInfo longsword = WeaponDamageRegistry::get_damage_info(ItemClass::LONG_SWORD);
-    DamageInfo greatsword = WeaponDamageRegistry::get_damage_info(ItemClass::GREAT_SWORD);
+    DamageInfo dagger = WeaponDamageRegistry::get_damage_info(ItemId::DAGGER);
+    DamageInfo longsword = WeaponDamageRegistry::get_damage_info(ItemId::LONG_SWORD);
+    DamageInfo greatsword = WeaponDamageRegistry::get_damage_info(ItemId::GREAT_SWORD);
 
     // Dagger < Longsword < Greatsword in max damage
     EXPECT_LT(dagger.maxDamage, longsword.maxDamage);
@@ -135,7 +135,7 @@ TEST_F(WeaponDamageRegistryTest, Regression_UniqueWeaponDamage) {
 // AD&D 2e Compliance
 TEST_F(WeaponDamageRegistryTest, ADD2E_Compliance_WarHammer) {
     // War hammer in AD&D 2e: 1d4+1 (min 2, max 5)
-    DamageInfo warhammer = WeaponDamageRegistry::get_damage_info(ItemClass::WAR_HAMMER);
+    DamageInfo warhammer = WeaponDamageRegistry::get_damage_info(ItemId::WAR_HAMMER);
 
     EXPECT_EQ(warhammer.minDamage, 2);
     EXPECT_EQ(warhammer.maxDamage, 5);
@@ -144,7 +144,7 @@ TEST_F(WeaponDamageRegistryTest, ADD2E_Compliance_WarHammer) {
 
 TEST_F(WeaponDamageRegistryTest, ADD2E_Compliance_TwoHandedSword) {
     // Great sword (2H sword) in AD&D 2e: 1d10
-    DamageInfo greatsword = WeaponDamageRegistry::get_damage_info(ItemClass::GREAT_SWORD);
+    DamageInfo greatsword = WeaponDamageRegistry::get_damage_info(ItemId::GREAT_SWORD);
 
     EXPECT_EQ(greatsword.minDamage, 1);
     EXPECT_EQ(greatsword.maxDamage, 10);
@@ -156,7 +156,7 @@ TEST_F(WeaponDamageRegistryTest, Performance_FastLookup) {
     auto start = std::chrono::high_resolution_clock::now();
 
     for (int i = 0; i < 10000; ++i) {
-        WeaponDamageRegistry::get_damage_info(ItemClass::LONG_SWORD);
+        WeaponDamageRegistry::get_damage_info(ItemId::LONG_SWORD);
     }
 
     auto end = std::chrono::high_resolution_clock::now();

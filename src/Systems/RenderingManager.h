@@ -32,6 +32,7 @@ public:
     void safe_screen_clear();
     void force_screen_refresh() const;
     void restore_game_display() const;
+    void restore_screen(GameContext& ctx) const;
 
 private:
     // Helper methods

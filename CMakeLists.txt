@@ -155,18 +155,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.h
 
     # ActorTypes
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Confuser.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Confuser.h
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Fireball.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Fireball.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Gold.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Gold.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Healer.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Healer.h
-    ${PROJECT_SOURCE_DIR}/ActorTypes/LightningBolt.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/LightningBolt.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.cpp
@@ -207,8 +201,13 @@ set(SOURCE_FILES # Add Source Files Here !
     # Systems - Updated paths
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/SpellAnimations.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/SpellAnimations.h
+    ${PROJECT_SOURCE_DIR}/Systems/TargetMode.h
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/BuffSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/BuffSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/MessageSystem.cpp
@@ -245,6 +244,8 @@ set(SOURCE_FILES # Add Source Files Here !
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.h
+    ${PROJECT_SOURCE_DIR}/Factories/MonsterCreator.cpp
+    ${PROJECT_SOURCE_DIR}/Factories/MonsterCreator.h
     ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.cpp
     ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.h
     ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.cpp

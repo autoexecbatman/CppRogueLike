@@ -16,15 +16,13 @@
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
-#include "../ActorTypes/Confuser.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Pickable.h"
-#include "../ActorTypes/Fireball.h"
 #include "../ActorTypes/Gold.h"
 #include "../ActorTypes/Healer.h"
-#include "../ActorTypes/LightningBolt.h"
 #include "../ActorTypes/Monsters.h"
+#include "../Factories/MonsterCreator.h"
 #include "../ActorTypes/Player.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiShopkeeper.h"
@@ -274,6 +272,50 @@ void Map::init(bool withActors, GameContext& ctx)
 		maybe_create_treasure_room(ctx.level_manager->get_dungeon_level(), ctx);
 	}
 	place_amulet(ctx);
+
+	// DEBUG: Spawn fire and ice wolves in player's starting room for testing fire/cold damage
+	if (ctx.level_manager && ctx.level_manager->get_dungeon_level() == 1 && ctx.rooms && ctx.rooms->size() >= 2)
+	{
+		// Get first room bounds (rooms are stored as begin/end pairs)
+		Vector2D roomBegin = (*ctx.rooms)[0];
+		Vector2D roomEnd = (*ctx.rooms)[1];
+
+		Vector2D spawnPos1{ 0, 0 };
+		Vector2D spawnPos2{ 0, 0 };
+
+		// Find valid positions within the first room
+		for (int attempt = 0; attempt < 100; ++attempt)
+		{
+			int x = ctx.dice->roll(roomBegin.x + 1, roomEnd.x - 1);
+			int y = ctx.dice->roll(roomBegin.y + 1, roomEnd.y - 1);
+			Vector2D testPos{ y, x };
+
+			if (get_tile_type(testPos) == TileType::FLOOR && !get_actor(testPos, ctx))
+			{
+				if (spawnPos1.x == 0 && spawnPos1.y == 0)
+				{
+					spawnPos1 = testPos;
+				}
+				else if (spawnPos2.x == 0 && spawnPos2.y == 0)
+				{
+					spawnPos2 = testPos;
+					break;
+				}
+			}
+		}
+
+		if (spawnPos1.x != 0 || spawnPos1.y != 0)
+		{
+			ctx.creatures->push_back(MonsterCreator::create(spawnPos1, MonsterId::FIRE_WOLF, ctx));
+			ctx.message_system->log("DEBUG: Spawned fire wolf in starting room at " + std::to_string(spawnPos1.x) + "," + std::to_string(spawnPos1.y));
+		}
+
+		if (spawnPos2.x != 0 || spawnPos2.y != 0)
+		{
+			ctx.creatures->push_back(MonsterCreator::create(spawnPos2, MonsterId::ICE_WOLF, ctx));
+			ctx.message_system->log("DEBUG: Spawned ice wolf in starting room at " + std::to_string(spawnPos2.x) + "," + std::to_string(spawnPos2.y));
+		}
+	}
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors, GameContext& ctx)
@@ -1109,6 +1151,7 @@ double Map::get_cost(Vector2D pos, GameContext& ctx) const noexcept
 	return tiles.at(index).cost;
 }
 
+// TODO: why implement bresenham zillion times?
 bool Map::has_los(Vector2D from, Vector2D to) const noexcept
 {
 	int x0 = from.x;
@@ -1148,7 +1191,7 @@ bool Map::has_los(Vector2D from, Vector2D to) const noexcept
 
 bool Map::is_door(Vector2D pos) const noexcept
 {
-	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
+	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width) // TODO: i think i saw this logic before? DRY violation.
 		return false;
 
 	TileType tileType = get_tile_type(pos);
@@ -1241,7 +1284,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(ctx.player->inventory_data, ItemCreator::create_amulet_of_yendor(amuletPos));
+		InventoryOperations::add_item(ctx.player->inventory_data, ItemCreator::create(ItemId::AMULET_OF_YENDOR, amuletPos));
 
 		// Log the placement (debug info)
 		if (ctx.message_system)
@@ -1254,6 +1297,7 @@ void Map::place_amulet(GameContext& ctx)
 	}
 }
 
+// TODO: wohoo ! i found this very useful function finally. SHOULD IT BE IN MAP?!
 void Map::display_spawn_rates(GameContext& ctx) const
 {
 	if (!ctx.level_manager) return;
@@ -1433,6 +1477,7 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 	return true;
 }
 
+// TODO: found another useful function! I like these but i could not find them and use them before.
 void Map::display_item_distribution(GameContext& ctx) const
 {
 	if (!ctx.level_manager) return;
@@ -1655,4 +1700,10 @@ void Map::post_process_doors()
         }
     }
 }
+
+void Map::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
+{
+    itemFactory->spawn_all_enhanced_items_debug(position, ctx);
+}
+
 // end of file: Map.cpp

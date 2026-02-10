@@ -12,9 +12,11 @@ class MagicalEquipment : public Pickable
 {
 public:
     MagicalEffect effect{MagicalEffect::NONE};
+    int bonus{0};  // For effects that have levels (e.g., PROTECTION +1, +2, +3)
 
     MagicalEquipment() = default;
-    explicit MagicalEquipment(MagicalEffect magical_effect) : effect(magical_effect) {}
+    explicit MagicalEquipment(MagicalEffect magical_effect, int effect_bonus)
+        : effect(magical_effect), bonus(effect_bonus) {}
 
     // Equip/unequip logic - delegates to Equipment System
     bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
@@ -36,12 +38,16 @@ class MagicalHelm : public MagicalEquipment
 {
 public:
     MagicalHelm() = default;
-    explicit MagicalHelm(MagicalEffect helm_effect) : MagicalEquipment(helm_effect) {}
+    explicit MagicalHelm(MagicalEffect helm_effect, int helm_bonus)
+        : MagicalEquipment(helm_effect, helm_bonus) {}
 
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::HELMET; }
+    PickableType get_type() const override { return PickableType::MAGICAL_HELM; }
     EquipmentSlot get_equipment_slot() const override;
+
+    // Polymorphic AC bonus - uses MagicalEffectUtils for effect-based bonuses
+    int get_ac_bonus() const noexcept override;
 };
 
 // Authentic AD&D 2e Magical Rings
@@ -49,12 +55,16 @@ class MagicalRing : public MagicalEquipment
 {
 public:
     MagicalRing() = default;
-    explicit MagicalRing(MagicalEffect ring_effect) : MagicalEquipment(ring_effect) {}
+    explicit MagicalRing(MagicalEffect ring_effect, int ring_bonus)
+        : MagicalEquipment(ring_effect, ring_bonus) {}
 
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::RING; }
+    PickableType get_type() const override { return PickableType::MAGICAL_RING; }
     EquipmentSlot get_equipment_slot() const override;
+
+    // Polymorphic AC bonus - Ring of Protection provides AC bonus
+    int get_ac_bonus() const noexcept override;
 };
 
 // Base class for equipment with stat bonuses (gauntlets, girdles)
@@ -67,6 +77,10 @@ public:
     int int_bonus{0};
     int wis_bonus{0};
     int cha_bonus{0};
+
+    // Magical effect support (unified protection system)
+    MagicalEffect effect{MagicalEffect::NONE};
+    int bonus{0};
 
     // If true, non-zero bonuses SET stats to that value instead of adding
     bool is_set_mode{false};
@@ -100,13 +114,13 @@ protected:
 class Helmet : public MagicalHelm
 {
 public:
-    Helmet() : MagicalHelm(MagicalEffect::NONE) {}
+    Helmet() : MagicalHelm(MagicalEffect::NONE, 0) {}
 };
 
 class Ring : public MagicalRing
 {
 public:
-    Ring() : MagicalRing(MagicalEffect::NONE) {}
+    Ring() : MagicalRing(MagicalEffect::NONE, 0) {}
 };
 
 // Amulet placeholder
@@ -115,11 +129,11 @@ class JewelryAmulet : public StatBoostEquipment
 public:
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::AMULET; }
+    PickableType get_type() const override { return PickableType::JEWELRY_AMULET; }
     EquipmentSlot get_equipment_slot() const override;
 };
 
-// Authentic AD&D 2e Gauntlets - provide stat bonuses
+// Authentic AD&D 2e Gauntlets - provide stat bonuses or magical effects
 class Gauntlets : public StatBoostEquipment
 {
 public:

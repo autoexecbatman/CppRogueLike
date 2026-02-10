@@ -3,6 +3,8 @@
 #include "src/Systems/ShopKeeper.h"
 #include "src/Actor/InventoryOperations.h"
 #include "src/Factories/ItemCreator.h"
+#include "src/Game.h"
+#include "src/Core/GameContext.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -14,8 +16,16 @@ using namespace InventoryOperations;
 
 class ShopKeeperSerializationTest : public ::testing::Test {
 protected:
+    Game game;
+    GameContext ctx;
+
+    void SetUp() override {
+        ctx = game.context();
+    }
+
     std::unique_ptr<ShopKeeper> create_test_shop() {
         auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD);
+        shop->generate_initial_inventory(ctx);
         return shop;
     }
 };
@@ -38,6 +48,7 @@ TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip) {
 
 TEST_F(ShopKeeperSerializationTest, Inventory_Preserved) {
     ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE);
+    original.generate_initial_inventory(ctx);
 
     // Shop should have generated 3-7 items
     size_t original_count = get_item_count(original.shop_inventory);
@@ -65,6 +76,7 @@ TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad) {
 
     for (ShopType type : types) {
         ShopKeeper original(type, ShopQuality::AVERAGE);
+        original.generate_initial_inventory(ctx);
 
         json j;
         original.save(j);
@@ -86,6 +98,7 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad) {
 
     for (ShopQuality quality : qualities) {
         ShopKeeper original(ShopType::GENERAL_STORE, quality);
+        original.generate_initial_inventory(ctx);
 
         json j;
         original.save(j);

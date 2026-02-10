@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "../Persistent/Persistent.h"
+#include "../Combat/DamageInfo.h"
 
 class Creature;
 class Player;
@@ -26,9 +27,10 @@ private:
 	int tempHp; // Temporary hit points such as from aid spell
 
     [[nodiscard]] int calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const;
-    [[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const;
-    [[nodiscard]] int calculate_player_equipment_ac(const Player& player, GameContext& ctx) const;
-    [[nodiscard]] int calculate_creature_equipment_ac(const Creature& owner, GameContext& ctx) const;
+
+    // Single source of truth: slot-based equipment AC via virtual get_equipped_item()
+    // Players: returns items from slots, NPCs: returns nullptr (0 AC bonus)
+	[[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const;
 
     [[nodiscard]] int calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const;
     [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
@@ -63,12 +65,12 @@ public:
 	[[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
 	[[nodiscard]] int get_hp_base() const noexcept { return hpBase; }
 	// Temporary HP accessors
-    [[nodiscard]] int get_temp_hp() const { return tempHp; }
-    void set_temp_hp(int value) { tempHp = std::max(0, value); }
-    void add_temp_hp(int amount) { tempHp += amount; }
-    
+    [[nodiscard]] int get_temp_hp() const noexcept { return tempHp; }
+    void set_temp_hp(int value) noexcept { tempHp = std::max(0, value); }
+    void add_temp_hp(int amount) noexcept { tempHp += amount; }
+
     // Total effective HP (for display)
-    [[nodiscard]] int get_effective_hp() const { return hp + tempHp; }
+    [[nodiscard]] int get_effective_hp() const noexcept { return hp + tempHp; }
 
 	// Modifier methods - non-const
 	void set_hp(int value) noexcept { hp = value; }
@@ -86,7 +88,7 @@ public:
 	void add_xp(int amount) noexcept { xp += amount; }
 	
 	// Action methods
-	int take_damage(Creature& owner, int damage, GameContext& ctx); // handles damage, owner attacked, returns (dam - def)
+	int take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL); // handles damage, owner attacked, returns (dam - def)
 	virtual void die(Creature& owner, GameContext& ctx); // handles death, owner killed
 	[[nodiscard]] int heal(int hpToHeal); // The function returns the amount of health point actually restored.
 	void update_armor_class(Creature& owner, GameContext& ctx);
@@ -103,7 +105,7 @@ class MonsterDestructible : public Destructible
 public:
 	MonsterDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void die(Creature& owner, GameContext& ctx) override;
-	void save(json& j);
+	void save(json& j) override;
 };
 
 //====
@@ -112,5 +114,5 @@ class PlayerDestructible : public Destructible
 public:
 	PlayerDestructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	void die(Creature& owner, GameContext& ctx) override;
-	void save(json& j);
+	void save(json& j) override;
 };

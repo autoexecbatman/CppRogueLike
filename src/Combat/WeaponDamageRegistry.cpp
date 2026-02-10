@@ -1,61 +1,60 @@
-// WeaponDamageRegistry.cpp - Implementation using ItemClass system
+// WeaponDamageRegistry.cpp - Implementation using ItemId system
 #include "WeaponDamageRegistry.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 
 // Static member definition
-const std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::weapon_damage_map = 
+const std::unordered_map<ItemId, DamageInfo> WeaponDamageRegistry::weapon_damage_map =
     WeaponDamageRegistry::create_weapon_damage_map();
 
-std::unordered_map<ItemClass, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
+std::unordered_map<ItemId, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
 {
     return {
         // Melee Weapons - AD&D 2e damage values
-        {ItemClass::DAGGER,     DamageValues::Dagger()},      // 1-4 damage
-        {ItemClass::SHORT_SWORD, DamageValues::ShortSword()},  // 1-6 damage
-        {ItemClass::LONG_SWORD,  DamageValues::LongSword()},   // 1-8 damage
-        {ItemClass::STAFF,      DamageValues::Staff()},       // 1-6 damage
-        {ItemClass::BATTLE_AXE, DamageValues::BattleAxe()},   // 1-8 damage
-        {ItemClass::GREAT_AXE,  {1, 12, "1d12"}},            // 1-12 damage
-        {ItemClass::WAR_HAMMER, DamageValues::WarHammer()},   // 2-5 damage (1d4+1)
-        {ItemClass::MACE,       {2, 7, "1d6+1"}},            // 2-7 damage (1d6+1)
-        {ItemClass::GREAT_SWORD, DamageValues::GreatSword()},  // 1-10 damage
-        
+        {ItemId::DAGGER,      DamageValues::Dagger()},       // 1-4 damage
+        {ItemId::SHORT_SWORD, DamageValues::ShortSword()},   // 1-6 damage
+        {ItemId::LONG_SWORD,  DamageValues::LongSword()},    // 1-8 damage
+        {ItemId::STAFF,       DamageValues::Staff()},        // 1-6 damage
+        {ItemId::BATTLE_AXE,  DamageValues::BattleAxe()},    // 1-8 damage
+        {ItemId::GREAT_AXE,   {1, 12, "1d12"}},             // 1-12 damage
+        {ItemId::WAR_HAMMER,  DamageValues::WarHammer()},    // 2-5 damage (1d4+1)
+        {ItemId::MACE,        {2, 7, "1d6+1"}},             // 2-7 damage (1d6+1)
+        {ItemId::GREAT_SWORD, DamageValues::GreatSword()},   // 1-10 damage
+
         // Ranged Weapons
-        {ItemClass::LONG_BOW,    DamageValues::LongBow()},     // 1-6 damage
+        {ItemId::LONG_BOW,    DamageValues::LongBow()},      // 1-6 damage
     };
 }
 
-DamageInfo WeaponDamageRegistry::get_damage_info(ItemClass weaponClass) noexcept
+DamageInfo WeaponDamageRegistry::get_damage_info(ItemId weaponId) noexcept
 {
-    auto it = weapon_damage_map.find(weaponClass);
-    if (it != weapon_damage_map.end())
+    if (weapon_damage_map.contains(weaponId))
     {
-        return it->second;
+        return weapon_damage_map.at(weaponId);
     }
 
     // Fallback to unarmed damage for unregistered weapons
     return get_unarmed_damage_info();
 }
 
-DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(ItemClass weaponClass, const ItemEnhancement* enhancement) noexcept
+DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(ItemId weaponId, const ItemEnhancement* enhancement) noexcept
 {
-    DamageInfo baseDamage = get_damage_info(weaponClass);
+    DamageInfo baseDamage = get_damage_info(weaponId);
 
     if (enhancement && enhancement->damage_bonus != 0)
     {
-        return baseDamage.with_enhancement(enhancement->damage_bonus);
+        return baseDamage.with_enhancement(enhancement->damage_bonus, 0);
     }
 
     return baseDamage;
 }
 
-std::string WeaponDamageRegistry::get_damage_roll(ItemClass weaponClass) noexcept
+std::string WeaponDamageRegistry::get_damage_roll(ItemId weaponId) noexcept
 {
-    auto damageInfo = get_damage_info(weaponClass);
+    auto damageInfo = get_damage_info(weaponId);
     return damageInfo.displayRoll;
 }
 
-bool WeaponDamageRegistry::is_registered(ItemClass weaponClass) noexcept
+bool WeaponDamageRegistry::is_registered(ItemId weaponId) noexcept
 {
-    return weapon_damage_map.find(weaponClass) != weapon_damage_map.end();
+    return weapon_damage_map.contains(weaponId);
 }

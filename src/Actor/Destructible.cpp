@@ -4,6 +4,7 @@
 #include <string_view>
 #include <algorithm>
 #include <format>
+#include <unordered_map>
 
 #include "../Core/GameContext.h"
 #include "../Items/Items.h"
@@ -23,8 +24,29 @@
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/GameStateManager.h"
+#include "../Systems/BuffSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
+
+// OCP: Data-driven damage resistance mapping
+static const std::unordered_map<DamageType, BuffType> damage_resistance_buffs = {
+	{DamageType::FIRE, BuffType::FIRE_RESISTANCE},
+	{DamageType::COLD, BuffType::COLD_RESISTANCE},
+	{DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE},
+	{DamageType::POISON, BuffType::POISON_RESISTANCE},
+	// DamageType::PHYSICAL, ACID, MAGIC have no resistance buffs
+};
+
+// OCP: Data-driven damage type names for logging
+static const std::unordered_map<DamageType, std::string_view> damage_type_names = {
+	{DamageType::PHYSICAL, "physical"},
+	{DamageType::FIRE, "fire"},
+	{DamageType::COLD, "cold"},
+	{DamageType::LIGHTNING, "lightning"},
+	{DamageType::POISON, "poison"},
+	{DamageType::ACID, "acid"},
+	{DamageType::MAGIC, "magic"},
+};
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
@@ -97,31 +119,10 @@ void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 
 [[nodiscard]] int Destructible::calculate_level_multiplier(const Creature& owner) const
 {
-    // Monsters always use 1x
-    const auto* player = dynamic_cast<const Player*>(&owner);
-    if (!player)
-    {
-        return 1;
-    }
-    
-    const int level = player->get_player_level();
-    
-    // AD&D 2e: Constitution bonus caps at level 9 for warriors/priests, 10 for others
-    switch (player->playerClassState)
-    {
-        case Player::PlayerClassState::FIGHTER:
-            return std::min(level, 9);  // Warriors cap at 9
-            
-        case Player::PlayerClassState::CLERIC:
-            return std::min(level, 9);  // Priests cap at 9
-            
-        case Player::PlayerClassState::ROGUE:
-        case Player::PlayerClassState::WIZARD:
-            return std::min(level, 10); // Others cap at 10
-            
-        default:
-            return std::min(level, 10); // Default cap at 10
-    }
+	// AD&D 2e: Polymorphic Constitution HP multiplier
+	// - Monsters: Use Hit Dice (no cap)
+	// - Players: Class-specific caps (Fighter=9, Priest=9, Rogue/Wizard=10)
+	return owner.get_constitution_hp_multiplier();
 }
 
 void Destructible::handle_stat_drain_death(Creature& owner, GameContext& ctx)
@@ -159,7 +160,7 @@ void Destructible::log_constitution_change(const Creature& owner, GameContext& c
     }
 }
 
-int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx)
+int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType)
 {
     // Negative or zero damage has no effect
     if (damage <= 0)
@@ -167,7 +168,41 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx)
         return 0;
     }
 
-    // AD&D 2e: Temp HP absorbs damage first
+    const int originalDamage = damage;
+
+    // AD&D 2e: Apply resistance based on damage type (data-driven, OCP compliant)
+    if (damage_resistance_buffs.contains(damageType))
+    {
+        const BuffType resistanceBuff = damage_resistance_buffs.at(damageType);
+        if (ctx.buff_system->has_buff(owner, resistanceBuff))
+        {
+            const int resistancePercent = ctx.buff_system->get_buff_value(owner, resistanceBuff);
+
+            if (resistancePercent > 0)
+            {
+                // AD&D 2e: Resistance reduces damage by percentage (validated: logic correct)
+                const int damageReduced = (damage * resistancePercent) / 100;
+                damage -= damageReduced;
+                damage = std::max(0, damage); // Defensive: ensure non-negative
+
+                // Log resistance message
+                const std::string_view typeName = damage_type_names.contains(damageType)
+                    ? damage_type_names.at(damageType)
+                    : "unknown";
+
+                ctx.message_system->log(std::format(
+                    "You resisted {} {} damage! ({}% resistance, {} -> {})",
+                    damageReduced,
+                    typeName,
+                    resistancePercent,
+                    originalDamage,
+                    damage
+                ));
+            }
+        }
+    }
+
+    // AD&D 2e: Temp HP absorbs damage first (validated: logic correct)
     if (get_temp_hp() > 0)
     {
         const int tempAbsorbed = std::min(damage, get_temp_hp());
@@ -236,7 +271,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
     const int baseAC = get_base_armor_class();
     const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
     const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-    const int tempBonus = owner.get_temporary_ac_bonus();
+    const int tempBonus = ctx.buff_system->calculate_ac_bonus(owner);
     const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
 
     // Only update if changed
@@ -279,133 +314,99 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
     return defensiveAdj;
 }
 
+// Single source of truth: slot-based equipment AC calculation
+// Works polymorphically via virtual get_equipped_item():
+//   - Players: returns items from equipment slots
+//   - NPCs: returns nullptr (no slot-based equipment, 0 AC bonus)
 [[nodiscard]] int Destructible::calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const
 {
-    // Check if owner is a player (use new equipment system)
-    if (const auto* player = dynamic_cast<const Player*>(&owner))
-    {
-        return calculate_player_equipment_ac(*player, ctx);
-    }
-    
-    // Use old system for creatures
-    return calculate_creature_equipment_ac(owner, ctx);
-}
+	int totalBonus = 0;
 
-[[nodiscard]] int Destructible::calculate_player_equipment_ac(const Player& player, GameContext& ctx) const
-{
-    int totalBonus = 0;
+	// Check body armor - polymorphic via virtual get_ac_bonus()
+	if (Item* equippedArmor = owner.get_equipped_item(EquipmentSlot::BODY))
+	{
+		const int armorBonus = equippedArmor->pickable->get_ac_bonus();
+		if (armorBonus != 0)
+		{
+			totalBonus += armorBonus;
 
-    // Check body armor
-    if (Item* equippedArmor = player.get_equipped_item(EquipmentSlot::BODY))
-    {
-        if (const auto* armor = dynamic_cast<const Armor*>(equippedArmor->pickable.get()))
-        {
-            const int armorBonus = armor->getArmorClass();
-            totalBonus += armorBonus;
+			if (&owner == ctx.player)
+			{
+				ctx.message_system->log(std::format(
+					"Armor bonus: {:+} from {}",
+					armorBonus,
+					equippedArmor->actorData.name
+				));
+			}
+		}
+	}
 
-            if (&player == ctx.player)
-            {
-                ctx.message_system->log(std::format(
-                    "Armor bonus: {:+} from {}",
-                    armorBonus, equippedArmor->actorData.name));
-            }
-        }
-    }
+	// Check shield in left hand - polymorphic via virtual get_ac_bonus()
+	if (Item* equippedShield = owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
+	{
+		const int shieldBonus = equippedShield->pickable->get_ac_bonus();
+		if (shieldBonus != 0)
+		{
+			totalBonus += shieldBonus;
 
-    // Check shield in left hand
-    if (Item* equippedShield = player.get_equipped_item(EquipmentSlot::LEFT_HAND))
-    {
-        if (const auto* shield = dynamic_cast<const Shield*>(equippedShield->pickable.get()))
-        {
-            const int shieldBonus = shield->get_ac_bonus();
-            totalBonus += shieldBonus;
+			if (&owner == ctx.player)
+			{
+				ctx.message_system->log(std::format(
+					"Shield bonus: {:+} from {}",
+					shieldBonus,
+					equippedShield->actorData.name
+				));
+			}
+		}
+	}
 
-            if (&player == ctx.player)
-            {
-                ctx.message_system->log(std::format(
-                    "Shield bonus: {:+} from {}",
-                    shieldBonus, equippedShield->actorData.name));
-            }
-        }
-    }
+	// Check rings for protection bonuses (AD&D 2e: best ring applies, no stacking)
+	int bestRingBonus = 0;
+	const Item* bestRing = nullptr;
 
-    // Check rings for protection bonuses (AD&D 2e: best ring applies, no stacking)
-    int bestRingBonus = 0;
-    const Item* bestRing = nullptr;
+	for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
+	{
+		if (Item* equippedRing = owner.get_equipped_item(slot))
+		{
+			const int ringBonus = equippedRing->pickable->get_ac_bonus();
+			if (ringBonus < bestRingBonus)
+			{
+				bestRingBonus = ringBonus;
+				bestRing = equippedRing;
+			}
+		}
+	}
 
-    for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
-    {
-        if (Item* equippedRing = player.get_equipped_item(slot))
-        {
-            if (const auto* magicRing = dynamic_cast<const MagicalRing*>(equippedRing->pickable.get()))
-            {
-                const int ringBonus = MagicalEffectUtils::get_protection_bonus(magicRing->effect);
-                if (ringBonus < bestRingBonus)
-                {
-                    bestRingBonus = ringBonus;
-                    bestRing = equippedRing;
-                }
-            }
-        }
-    }
+	if (bestRingBonus < 0 && bestRing)
+	{
+		totalBonus += bestRingBonus;
 
-    if (bestRingBonus < 0 && bestRing)
-    {
-        totalBonus += bestRingBonus;
+		if (&owner == ctx.player)
+		{
+			ctx.message_system->log(std::format(
+				"Ring bonus: {:+} from {}",
+				bestRingBonus, bestRing->actorData.name));
+		}
+	}
 
-        if (&player == ctx.player)
-        {
-            ctx.message_system->log(std::format(
-                "Ring bonus: {:+} from {}",
-                bestRingBonus, bestRing->actorData.name));
-        }
-    }
+	// Check helm for AC bonuses - polymorphic via virtual get_ac_bonus()
+	if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
+	{
+		const int helmBonus = equippedHelm->pickable->get_ac_bonus();
+		if (helmBonus < 0)
+		{
+			totalBonus += helmBonus;
 
-    // Check helm for AC bonuses (extensible for any magical effect)
-    if (Item* equippedHelm = player.get_equipped_item(EquipmentSlot::HEAD))
-    {
-        if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(equippedHelm->pickable.get()))
-        {
-            const int helmBonus = MagicalEffectUtils::get_ac_bonus(magicHelm->effect);
-            if (helmBonus < 0)
-            {
-                totalBonus += helmBonus;
+			if (&owner == ctx.player)
+			{
+				ctx.message_system->log(std::format(
+					"Helm bonus: {:+} from {}",
+					helmBonus, equippedHelm->actorData.name));
+			}
+		}
+	}
 
-                if (&player == ctx.player)
-                {
-                    ctx.message_system->log(std::format(
-                        "Helm bonus: {:+} from {}",
-                        helmBonus, equippedHelm->actorData.name));
-                }
-            }
-        }
-    }
-
-    return totalBonus;
-}
-
-[[nodiscard]] int Destructible::calculate_creature_equipment_ac(const Creature& owner, GameContext& ctx) const
-{
-    int totalBonus = 0;
-    
-    // Check all equipped items
-    for (const auto& item : owner.inventory_data.items)
-    {
-        if (!item || !item->has_state(ActorState::IS_EQUIPPED))
-        {
-            continue;
-        }
-        
-        if (const auto* armor = dynamic_cast<const Armor*>(item->pickable.get()))
-        {
-            const int armorBonus = armor->getArmorClass();
-            totalBonus += armorBonus;
-            
-            ctx.message_system->log(std::format("{} armor bonus: {:+} from {}", owner.get_name(), armorBonus, item->actorData.name));
-        }
-    }
-    
-    return totalBonus;
+	return totalBonus;
 }
 
 void Destructible::load(const json& j)

@@ -13,6 +13,34 @@
 
 using namespace InventoryOperations; // For clean function calls
 
+// OCP-compliant: data-driven item bonus mapping
+enum class MimicBonusType
+{
+	HEALTH,
+	CONFUSION,
+	ATTACK,
+	DEFENSE_GOLD,
+	DEFENSE_ARMOR,
+	NONE
+};
+
+static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
+	{ItemClass::POTION, MimicBonusType::HEALTH},
+	{ItemClass::FOOD, MimicBonusType::HEALTH},
+	{ItemClass::SCROLL, MimicBonusType::CONFUSION},
+	{ItemClass::GOLD, MimicBonusType::DEFENSE_GOLD},
+	{ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR},
+	{ItemClass::DAGGER, MimicBonusType::ATTACK},
+	{ItemClass::SWORD, MimicBonusType::ATTACK},
+	{ItemClass::GREAT_SWORD, MimicBonusType::ATTACK},
+	{ItemClass::AXE, MimicBonusType::ATTACK},
+	{ItemClass::HAMMER, MimicBonusType::ATTACK},
+	{ItemClass::MACE, MimicBonusType::ATTACK},
+	{ItemClass::STAFF, MimicBonusType::ATTACK},
+	{ItemClass::BOW, MimicBonusType::ATTACK},
+	{ItemClass::CROSSBOW, MimicBonusType::ATTACK},
+};
+
 void AiMimic::update(Creature& owner, GameContext& ctx)
 {
     // Cast the owner to a Mimic - we still need this for type-specific operations
@@ -147,22 +175,28 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
     return itemConsumed;
 }
 
+// OCP-compliant: data-driven item bonus application
 void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& ctx)
 {
-    switch (itemClass)
+    if (!item_bonus_map.contains(itemClass))
     {
-        case ItemClass::HEALTH_POTION:
+        return; // Unknown item class - no bonus
+    }
+
+    const MimicBonusType bonusType = item_bonus_map.at(itemClass);
+
+    switch (bonusType)
+    {
+        case MimicBonusType::HEALTH:
             boost_health(mimic, HEALTH_BONUS, ctx);
-            ctx.message_system->log(std::format("Mimic gained {} HP from potion", HEALTH_BONUS));
+            ctx.message_system->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
             break;
 
-        case ItemClass::SCROLL_LIGHTNING:
-        case ItemClass::SCROLL_FIREBALL:
-        case ItemClass::SCROLL_CONFUSION:
+        case MimicBonusType::CONFUSION:
             boost_confusion_power(ctx);
             break;
 
-        case ItemClass::GOLD:
+        case MimicBonusType::DEFENSE_GOLD:
             boost_defense(mimic, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
             if (mimic.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
             {
@@ -170,21 +204,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
             }
             break;
 
-        case ItemClass::DAGGER:
-        case ItemClass::SHORT_SWORD:
-        case ItemClass::LONG_SWORD:
-        case ItemClass::GREAT_SWORD:
-        case ItemClass::BATTLE_AXE:
-        case ItemClass::GREAT_AXE:
-        case ItemClass::WAR_HAMMER:
-        case ItemClass::STAFF:
-        case ItemClass::LONG_BOW:
-            boost_attack(mimic, ctx);
-            break;
-
-        case ItemClass::LEATHER_ARMOR:
-        case ItemClass::CHAIN_MAIL:
-        case ItemClass::PLATE_MAIL:
+        case MimicBonusType::DEFENSE_ARMOR:
             boost_defense(mimic, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
             if (mimic.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
             {
@@ -192,16 +212,11 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
             }
             break;
 
-        case ItemClass::FOOD_RATION:
-        case ItemClass::BREAD:
-        case ItemClass::MEAT:
-        case ItemClass::FRUIT:
-            boost_health(mimic, HEALTH_BONUS, ctx);
-            ctx.message_system->log("Mimic gained health from food");
+        case MimicBonusType::ATTACK:
+            boost_attack(mimic, ctx);
             break;
 
-        default:
-            ctx.message_system->log(std::format("Mimic consumed unknown item type: {}", static_cast<int>(itemClass)));
+        case MimicBonusType::NONE:
             break;
     }
 }

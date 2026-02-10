@@ -39,8 +39,8 @@ Vector2D Teleporter::find_valid_teleport_location(GameContext& ctx)
 	// Try up to 50 times to find a valid location
 	for (int attempts = 0; attempts < 50; attempts++)
 	{
-		int x = ctx.dice_roller->roll(2, MAP_WIDTH - 2);
-		int y = ctx.dice_roller->roll(2, MAP_HEIGHT - 2);
+		int x = ctx.dice->roll(2, MAP_WIDTH - 2);
+		int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
 
 		// Check if the tile is a floor and not occupied by any creature
 		if (ctx.map->get_tile_type(Vector2D{y, x}) == TileType::FLOOR)
@@ -56,6 +56,7 @@ Vector2D Teleporter::find_valid_teleport_location(GameContext& ctx)
 				}
 			}
 
+			// TODO: Probably should be a named lambda check if we don't have helpers that already do this.
 			// Check if player is at this position
 			if (!occupied && ctx.player && (ctx.player->position.x != x || ctx.player->position.y != y))
 			{
@@ -75,10 +76,10 @@ void Teleporter::load(const json& j)
 
 void Teleporter::save(json& j)
 {
-	j["type"] = static_cast<int>(PickableType::SCROLL_TELEPORT);
+	j["type"] = static_cast<int>(PickableType::TELEPORTER);
 }
 
 Pickable::PickableType Teleporter::get_type() const
 {
-	return PickableType::SCROLL_TELEPORT;
+	return PickableType::TELEPORTER;
 }

@@ -65,7 +65,7 @@ LeatherArmor::LeatherArmor()
 
 void LeatherArmor::save(json& j)
 {
-    j["type"] = static_cast<int>(PickableType::LEATHER_ARMOR);
+    j["type"] = static_cast<int>(PickableType::ARMOR);
     j["armorClass"] = armorClass;
 }
 
@@ -82,7 +82,7 @@ ChainMail::ChainMail()
 
 void ChainMail::save(json& j)
 {
-    j["type"] = static_cast<int>(PickableType::CHAIN_MAIL);
+    j["type"] = static_cast<int>(PickableType::ARMOR);
     j["armorClass"] = armorClass;
 }
 
@@ -99,7 +99,7 @@ PlateMail::PlateMail()
 
 void PlateMail::save(json& j)
 {
-    j["type"] = static_cast<int>(PickableType::PLATE_MAIL);
+    j["type"] = static_cast<int>(PickableType::ARMOR);
     j["armorClass"] = armorClass;
 }
 

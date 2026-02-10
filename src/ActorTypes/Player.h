@@ -77,6 +77,9 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
+	// AD&D 2e: Class-specific Constitution HP multiplier caps
+	int get_constitution_hp_multiplier() const noexcept override;
+
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	void racial_ability_adjustments();
@@ -88,6 +91,7 @@ public:
 	void render(const GameContext& ctx) const noexcept;
 	bool rest(GameContext& ctx);
 	void animate_resting(GameContext& ctx);
+	bool attempt_hide(GameContext& ctx);
 
 	// Web effect tracking
 	int webStuckTurns{ 0 };       // How many turns the player is stuck in a web
@@ -102,17 +106,17 @@ public:
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
 	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
-	Item* get_equipped_item(EquipmentSlot slot) const noexcept;
-	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
+	Item* get_equipped_item(EquipmentSlot slot) const noexcept override;
+	bool is_slot_occupied(EquipmentSlot slot) const noexcept override;
 	bool is_dual_wielding() const noexcept;
 	std::string get_equipped_weapon_damage_roll() const noexcept;
-	
+
 	// Equipment system - unique ID based methods
 	bool toggle_armor(uint64_t item_unique_id, GameContext& ctx);
-	bool is_item_equipped(uint64_t item_unique_id) const noexcept;
-	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx);
-	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx);
-	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx);
+	bool is_item_equipped(uint64_t item_unique_id) const noexcept override;
+	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx) override;
+	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx) override;
+	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx) override;
 
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo

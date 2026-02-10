@@ -16,6 +16,7 @@
 
 using namespace InventoryOperations; // For clean function calls
 
+// TODO: This monster function should not exist.
 void equip_fighter_starting_gear(GameContext& ctx)
 {
 	auto& player = *ctx.player;
@@ -32,7 +33,7 @@ void equip_fighter_starting_gear(GameContext& ctx)
 	// Generous starting equipment for solo play
 	
 	// PLATE MAIL (AC 3) - Add to inventory
-	auto plate_mail = ItemCreator::create_plate_mail(player.position);
+	auto plate_mail = ItemCreator::create(ItemId::PLATE_MAIL, player.position);
 	auto plate_mail_id = plate_mail->uniqueId; // Store ID before moving
 	ctx.message_system->log("Created item with name: '" + plate_mail->actorData.name + "' and ID: " + std::to_string(plate_mail_id));
 	ctx.message_system->log("Created plate mail with ID: " + std::to_string(plate_mail_id));
@@ -98,8 +99,8 @@ void equip_fighter_starting_gear(GameContext& ctx)
 		ctx.message_system->log("ERROR: Failed to add plate mail to inventory");
 	}
 
-	// LONG SWORD (1d8) - Add to inventory  
-	auto long_sword = ItemCreator::create_long_sword(player.position);
+	// LONG SWORD (1d8) - Add to inventory
+	auto long_sword = ItemCreator::create(ItemId::LONG_SWORD, player.position);
 	auto long_sword_id = long_sword->uniqueId; // Store ID before moving
 	ctx.message_system->log("Created item with name: '" + long_sword->actorData.name + "' and ID: " + std::to_string(long_sword_id));
 	ctx.message_system->log("Created long sword with ID: " + std::to_string(long_sword_id));
@@ -155,7 +156,7 @@ void equip_fighter_starting_gear(GameContext& ctx)
 	// HEALING POTIONS (3x)
 	for(int i = 0; i < 3; i++)
 	{
-		add_item(player.inventory_data, ItemCreator::create_health_potion(player.position));
+		add_item(player.inventory_data, ItemCreator::create(ItemId::HEALTH_POTION, player.position));
 	}
 	
 	// Log the rolled starting gold amount

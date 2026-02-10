@@ -401,3 +401,5 @@ FodyWeavers.xsd
 # D&D Reference Materials
 *.pdf
 add-2e-the-complete-advanced-dungeons-dragons-2nd-edition-archive_compress.pdf
+/CLAUDE.md
+/test_detail.json

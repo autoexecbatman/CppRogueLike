@@ -1,9 +1,17 @@
 #pragma once
 
+#include <vector>
 #include "../Utils/Vector2D.h"
 #include "../Actor/Actor.h"
+#include "TargetMode.h"
 
 struct GameContext;
+
+struct TargetResult {
+    bool success{false};
+    Vector2D impact_pos{0, 0};
+    std::vector<Creature*> creatures;
+};
 
 class TargetingSystem
 {
@@ -20,7 +28,13 @@ public:
 	// Handle ranged attack coordination
 	void handle_ranged_attack(GameContext& ctx) const;
 
+	TargetResult acquire_targets(GameContext& ctx, TargetMode mode, Vector2D origin, int range, int aoe_radius = 0) const;
+
 private:
 	// Get weapon range based on weapon type (AD&D 2e ranges in dungeon tiles)
 	static int get_weapon_range(const Item* weapon);
+
+	TargetResult target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const;
+	TargetResult target_pick_single(GameContext& ctx) const;
+	TargetResult target_pick_aoe(GameContext& ctx, int aoe_radius) const;
 };

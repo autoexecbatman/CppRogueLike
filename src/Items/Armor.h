@@ -20,6 +20,9 @@ public:
 
     // Gets the armor class bonus
     virtual int getArmorClass() const { return armorClass; }
+
+    // Polymorphic AC bonus - eliminates dynamic_cast
+    int get_ac_bonus() const noexcept override { return getArmorClass(); }
 };
 
 // Leather Armor implementation
@@ -31,7 +34,7 @@ public:
 
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::LEATHER_ARMOR; }
+    PickableType get_type() const override { return PickableType::ARMOR; }
 };
 
 // Chain Mail implementation
@@ -43,7 +46,7 @@ public:
 
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::CHAIN_MAIL; }
+    PickableType get_type() const override { return PickableType::ARMOR; }
 };
 
 // Plate Mail implementation
@@ -55,5 +58,5 @@ public:
 
     void save(json& j) override;
     void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::PLATE_MAIL; }
+    PickableType get_type() const override { return PickableType::ARMOR; }
 };

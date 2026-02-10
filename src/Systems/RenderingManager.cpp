@@ -84,6 +84,15 @@ void RenderingManager::restore_game_display() const
     force_screen_refresh();
 }
 
+void RenderingManager::restore_screen(GameContext& ctx) const
+{
+    clear();
+    refresh();
+    render(ctx);
+    ctx.gui->gui_render(ctx);
+    force_screen_refresh();
+}
+
 void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const
 {
     // Render any objects (like webs)

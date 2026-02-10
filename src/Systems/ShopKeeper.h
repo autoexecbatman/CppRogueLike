@@ -7,6 +7,8 @@
 #include "../Actor/InventoryData.h"
 #include "../Persistent/Persistent.h"
 
+struct GameContext;
+
 enum class ShopType
 {
     WEAPON_SHOP,
@@ -58,7 +60,7 @@ public:
     int get_sell_price(const Item& item) const;
     
     // Inventory management
-    void generate_initial_inventory();
+    void generate_initial_inventory(GameContext& ctx);
     
     // Transaction handling
     bool process_player_purchase(GameContext& ctx, Item& item, Creature& player);
@@ -69,12 +71,12 @@ public:
     
 private:
     void generate_shop_name();
-    
+
     // Random item generation methods
-    std::unique_ptr<Item> generate_random_item_by_type();
-    std::unique_ptr<Item> generate_random_weapon();
-    std::unique_ptr<Item> generate_random_armor();
-    std::unique_ptr<Item> generate_random_potion();
-    std::unique_ptr<Item> generate_random_scroll();
-    std::unique_ptr<Item> generate_random_misc_item();
+    std::unique_ptr<Item> generate_random_item_by_type(GameContext& ctx);
+    std::unique_ptr<Item> generate_random_weapon(GameContext& ctx);
+    std::unique_ptr<Item> generate_random_armor(GameContext& ctx);
+    std::unique_ptr<Item> generate_random_potion(GameContext& ctx);
+    std::unique_ptr<Item> generate_random_scroll(GameContext& ctx);
+    std::unique_ptr<Item> generate_random_misc_item(GameContext& ctx);
 };

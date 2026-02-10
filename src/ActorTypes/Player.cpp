@@ -24,6 +24,7 @@
 #include "../Systems/HungerSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
+#include "../Systems/BuffSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -87,9 +88,14 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create_plate_mail(position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create_long_sword(position), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
+		equip_item(ItemCreator::create(ItemId::PLATE_MAIL, position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create(ItemId::LONG_SWORD, position), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
+		// DEBUG: Add potions for testing
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::INVISIBILITY_POTION, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_GIANT_STRENGTH, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_FIRE_RESISTANCE, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_COLD_RESISTANCE, position));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
 		break;
 	}
@@ -97,9 +103,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create_leather_armor(position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create_dagger(position), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_invisibility_potion(position));
+		equip_item(ItemCreator::create(ItemId::LEATHER_ARMOR, position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create(ItemId::DAGGER, position), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::INVISIBILITY_POTION, position));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger. Invisibility potion in inventory.", true);
 		break;
 	}
@@ -107,10 +113,10 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create_chain_mail(position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create_mace(position), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create_shield(position), EquipmentSlot::LEFT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_health_potion(position));
+		equip_item(ItemCreator::create(ItemId::CHAIN_MAIL, position), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create(ItemId::MACE, position), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::HEALTH_POTION, position));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -119,9 +125,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create_staff(position), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_scroll_fireball(position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create_scroll_lightning(position));
+		equip_item(ItemCreator::create(ItemId::STAFF, position), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_FIREBALL, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_LIGHTNING, position));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
@@ -340,34 +346,66 @@ bool Player::rest(GameContext& ctx)
 
 void Player::animate_resting(GameContext& ctx)
 {
-	// Animation frames - Z's of increasing size
-	const std::vector<char> restSymbols = { 'z', 'Z', 'Z' };
-	const int frames = 3;
-	const int delay = 250; // milliseconds between frames
+	const std::vector<char> restSymbols = { 'z', 'z', 'Z', 'Z', 'Z' };
+	const int delay = 80; // milliseconds between frames
 
-	// Save original screen
-	clear();
-	ctx.rendering_manager->render(ctx);
-
-	// Show animation
-	for (int i = 0; i < frames; i++)
+	for (int i = 0; i < static_cast<int>(restSymbols.size()); i++)
 	{
-		// Draw Zs above player
+		clear();
+		ctx.rendering_manager->render(ctx);
 		attron(COLOR_PAIR(WHITE_GREEN_PAIR));
 		mvaddch(position.y - 1, position.x + i, restSymbols[i]);
 		attroff(COLOR_PAIR(WHITE_GREEN_PAIR));
-
 		refresh();
 		napms(delay);
 	}
 
-	// Pause briefly to show final frame
-	napms(delay * 2);
-
-	// Redraw screen
 	clear();
 	ctx.rendering_manager->render(ctx);
 	refresh();
+}
+
+bool Player::attempt_hide(GameContext& ctx)
+{
+	// Only rogues can hide
+	if (playerClassState != PlayerClassState::ROGUE)
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
+		return false;
+	}
+
+	// Already invisible
+	if (is_invisible())
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
+		return false;
+	}
+
+	// Check if enemies can see player
+	bool observed = false;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (creature && creature->destructible && !creature->destructible->is_dead())
+		{
+			if (ctx.map->is_in_fov(creature->position))
+			{
+				observed = true;
+				break;
+			}
+		}
+	}
+
+	if (observed)
+	{
+		ctx.message_system->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true);
+		return false;
+	}
+
+	// Success - hide duration based on level
+	int hideDuration = 10 + get_player_level() * 2;
+	ctx.buff_system->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
+	ctx.message_system->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
+	return true;
 }
 
 void Player::get_stuck_in_web(int duration, int strength, Web* web, GameContext& ctx)
@@ -459,7 +497,7 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 				// Determine appropriate slot based on item classification
 				EquipmentSlot target_slot;
 				
-				if (itemToEquip->itemClass == ItemClass::LONG_BOW)
+				if (ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass))
 				{
 					target_slot = EquipmentSlot::MISSILE_WEAPON;
 				}
@@ -557,7 +595,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemClass);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemId);
 		ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
 	
@@ -699,6 +737,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
+	// C++20 ranges - modern approach for finding elements
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	if (it != equippedItems.end())
@@ -739,6 +778,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
 {
+	// C++20 ranges - modern approach for finding elements
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
@@ -786,7 +826,7 @@ std::string Player::get_equipped_weapon_damage_roll() const noexcept
 	// Use pure ItemClass system
 	if (rightHandWeapon->is_weapon())
 	{
-		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemClass);
+		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemId);
 	}
 	
 	return WeaponDamageRegistry::get_unarmed_damage();
@@ -809,10 +849,12 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	info.mainHandPenalty = -2;
 	info.offHandPenalty = -4;
 
-	// TODO: Add proficiency check to reduce penalties
-	// If player has Two-Weapon Fighting proficiency:
-	// - Main hand penalty becomes 0
-	// - Off-hand penalty becomes -2
+	// Fighters have Two-Weapon Fighting proficiency: penalties reduce to 0/-2
+	if (playerClassState == PlayerClassState::FIGHTER)
+	{
+		info.mainHandPenalty = 0;
+		info.offHandPenalty = -2;
+	}
 
 	// Get off-hand weapon damage roll - use pure ItemClass system
 	auto leftHandWeapon = get_equipped_item(EquipmentSlot::LEFT_HAND);
@@ -820,7 +862,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	{
 		if (leftHandWeapon->is_weapon())
 		{
-			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemClass);
+			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemId);
 		}
 	}
 	
@@ -850,6 +892,32 @@ bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
 bool Player::is_item_equipped(uint64_t item_unique_id) const noexcept
 {
 	return std::ranges::any_of(equippedItems, matches_unique_id(item_unique_id));
+}
+
+int Player::get_constitution_hp_multiplier() const noexcept
+{
+	const int level = get_player_level();
+
+	// AD&D 2e: Constitution HP bonus per level caps by class
+	// Source: https://www.dragonsfoot.org/forums/viewtopic.php?t=78913&start=120
+	// - Fighters: 9 Hit Dice (levels 1-9), then +3 HP/level without Constitution bonus
+	// - Priests: 9 Hit Dice (levels 1-9), then fixed HP/level without Constitution bonus
+	// - Rogues/Wizards: 10 Hit Dice (levels 1-10), then fixed HP/level without Constitution bonus
+	switch (playerClassState)
+	{
+		case PlayerClassState::FIGHTER:
+			return std::min(level, 9);  // AD&D 2e: Fighters get Con bonus for 9 levels
+
+		case PlayerClassState::CLERIC:
+			return std::min(level, 9);  // AD&D 2e: Priests get Con bonus for 9 levels
+
+		case PlayerClassState::ROGUE:
+		case PlayerClassState::WIZARD:
+			return std::min(level, 10); // AD&D 2e: Rogues/Wizards get Con bonus for 10 levels
+
+		default:
+			return std::min(level, 10);
+	}
 }
 
 void Player::save(json& j)

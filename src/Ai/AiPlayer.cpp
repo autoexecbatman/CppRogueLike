@@ -28,7 +28,10 @@
 #include "../Systems/LevelManager.h"
 #include "../Systems/TargetingSystem.h"
 #include "../Systems/DisplayManager.h"
+#include "../Systems/BuffSystem.h"
 #include "../Systems/SpellSystem.h"
+#include "../Combat/DamageInfo.h"
+#include "../Combat/WeaponDamageRegistry.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 
@@ -458,7 +461,8 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Player& player) noexce
 				// For weapons, show damage dice
 				if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
 				{
-					std::string damageInfo = " [" + weapon->roll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
+					DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(item->itemId, &item->enhancement);
+					std::string damageInfo = " [" + damage.displayRoll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
 					wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
 					wprintw(inv, "%s", damageInfo.c_str());
 					wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
@@ -770,6 +774,12 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
+	case Controls::TEST_COMMAND:
+	{
+		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
+		break;
+	}
+
 	case Controls::OPEN_DOOR:
 	{
 		// Prompt for direction
@@ -854,45 +864,10 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::HIDE:
 	{
-		// Only rogues can hide
-		if (player.playerClassState != Player::PlayerClassState::ROGUE)
+		if (player.attempt_hide(ctx))
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
-			break;
+			*ctx.game_status = GameStatus::NEW_TURN;
 		}
-
-		// Already invisible
-		if (player.is_invisible())
-		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
-			break;
-		}
-
-		// Check if enemies can see player
-		bool observed = false;
-		for (const auto& creature : *ctx.creatures)
-		{
-			if (creature && creature->destructible && !creature->destructible->is_dead())
-			{
-				if (ctx.map->is_in_fov(creature->position))
-				{
-					observed = true;
-					break;
-				}
-			}
-		}
-
-		if (observed)      
-		{
-			ctx.message_system->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true); 
-			break;
-		}
-
-		// Success - hide duration based on level      
-		int hideDuration = 10 + player.get_player_level() * 2;
-		player.set_invisible(hideDuration);
-		ctx.message_system->message(CYAN_BLACK_PAIR,"You melt into the shadows... (Hidden for " + std::to_string(hideDuration) + " turns)", true);
-		*ctx.game_status = GameStatus::NEW_TURN;
 		break;
 	}
 
@@ -915,49 +890,16 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx)
 {
-	Vector2D delta{ 0, 0 };
-
-	switch (dirKey)
+	const auto it = m.moves.find(static_cast<Controls>(dirKey));
+	if (it == m.moves.end())
 	{
-	case KEY_UP:
-	case 'w': case 'W':
-		delta = { -1, 0 }; // North
-		break;
-	case KEY_DOWN:
-	case 's': case 'S':
-		delta = { 1, 0 }; // South
-		break;
-	case KEY_LEFT:
-	case 'a': case 'A':
-		delta = { 0, -1 }; // West
-		break;
-	case KEY_RIGHT:
-	case 'd': case 'D':
-		delta = { 0, 1 }; // East
-		break;
-	case 'q': case 'Q':
-		delta = { -1, -1 }; // Northwest
-		break;
-	case 'e': case 'E':
-		delta = { -1, 1 }; // Northeast
-		break;
-	case 'z': case 'Z':
-		delta = { 1, -1 }; // Southwest
-		break;
-	case 'c': case 'C':
-		delta = { 1, 1 }; // Southeast
-		break;
-	default:
-		return { 0, 0 }; // Invalid direction
+		return { 0, 0 };
 	}
 
-	// Calculate the target position
-	Vector2D targetPos = owner.position + delta;
-
-	// Validate the position is within map bounds
-	if (targetPos.x < 0 || targetPos.x >= ctx.map->get_width() ||
-		targetPos.y < 0 || targetPos.y >= ctx.map->get_height()) {
-		return { 0, 0 }; // Out of bounds
+	const Vector2D targetPos = owner.position + it->second;
+	if (!ctx.map->is_in_bounds(targetPos))
+	{
+		return { 0, 0 };
 	}
 
 	return targetPos;

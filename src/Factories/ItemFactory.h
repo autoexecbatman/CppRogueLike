@@ -38,6 +38,7 @@ public:
     std::vector<ItemPercentage> get_current_distribution(int dungeonLevel);
     void spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category);
     void spawn_random_item(Vector2D position, GameContext& ctx, int dungeonLevel);
+    void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx);
 private:
     std::vector<ItemType> itemTypes;
 

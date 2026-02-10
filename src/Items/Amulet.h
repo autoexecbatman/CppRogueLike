@@ -15,5 +15,5 @@ public:
     bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
     void load(const json& j) override;
     void save(json& j) override;
-    PickableType get_type() const override { return PickableType::AMULET; }
+    PickableType get_type() const override { return PickableType::QUEST_ITEM; }
 };

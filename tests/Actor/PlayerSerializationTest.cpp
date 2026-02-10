@@ -109,12 +109,12 @@ TEST_F(PlayerSerializationTest, EquippedItems_Preserved) {
     auto original = create_test_player();
 
     // Create and equip a sword
-    auto sword = ItemCreator::create_long_sword(Vector2D{0, 0});
+    auto sword = ItemCreator::create(ItemId::LONG_SWORD, Vector2D{0, 0});
     sword->value = 100;
     original->equippedItems.emplace_back(std::move(sword), EquipmentSlot::RIGHT_HAND);
 
     // Create and equip armor
-    auto armor = ItemCreator::create_chain_mail(Vector2D{0, 0});
+    auto armor = ItemCreator::create(ItemId::CHAIN_MAIL, Vector2D{0, 0});
     armor->value = 200;
     original->equippedItems.emplace_back(std::move(armor), EquipmentSlot::BODY);
 
