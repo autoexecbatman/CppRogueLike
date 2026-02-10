@@ -2,6 +2,7 @@
 
 #include <unordered_set>
 #include <memory>
+#include <vector>
 
 #include <libtcod.h>
 
@@ -119,6 +120,7 @@ public:
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < map_width && pos.y >= 0 && pos.y < map_height; }
+	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } } // Note: Cannot be noexcept due to exception
 	double get_cost(Vector2D pos, GameContext& ctx) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const noexcept;

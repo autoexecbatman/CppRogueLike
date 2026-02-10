@@ -36,32 +36,26 @@ bool Teleporter::use(Item& owner, Creature& wearer, GameContext& ctx)
 
 Vector2D Teleporter::find_valid_teleport_location(GameContext& ctx)
 {
-	// Try up to 50 times to find a valid location
+	const auto is_position_free = [&](int x, int y) -> bool
+	{
+		for (const auto& creature : *ctx.creatures)
+		{
+			if (creature && creature->position.x == x && creature->position.y == y)
+				return false;
+		}
+		if (ctx.player && ctx.player->position.x == x && ctx.player->position.y == y)
+			return false;
+		return true;
+	};
+
 	for (int attempts = 0; attempts < 50; attempts++)
 	{
-		int x = ctx.dice->roll(2, MAP_WIDTH - 2);
-		int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
+		const int x = ctx.dice->roll(2, MAP_WIDTH - 2);
+		const int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
 
-		// Check if the tile is a floor and not occupied by any creature
-		if (ctx.map->get_tile_type(Vector2D{y, x}) == TileType::FLOOR)
+		if (ctx.map->get_tile_type(Vector2D{y, x}) == TileType::FLOOR && is_position_free(x, y))
 		{
-			// Check if any creature is at this position
-			bool occupied = false;
-			for (const auto& creature : *ctx.creatures)
-			{
-				if (creature && creature->position.x == x && creature->position.y == y)
-				{
-					occupied = true;
-					break;
-				}
-			}
-
-			// TODO: Probably should be a named lambda check if we don't have helpers that already do this.
-			// Check if player is at this position
-			if (!occupied && ctx.player && (ctx.player->position.x != x || ctx.player->position.y != y))
-			{
-				return Vector2D{y, x};
-			}
+			return Vector2D{y, x};
 		}
 	}
 

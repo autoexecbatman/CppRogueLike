@@ -1151,47 +1151,59 @@ double Map::get_cost(Vector2D pos, GameContext& ctx) const noexcept
 	return tiles.at(index).cost;
 }
 
-// TODO: why implement bresenham zillion times?
-bool Map::has_los(Vector2D from, Vector2D to) const noexcept
+std::vector<Vector2D> Map::bresenham_line(Vector2D from, Vector2D to)
 {
+	std::vector<Vector2D> path;
+
 	int x0 = from.x;
 	int y0 = from.y;
-	int x1 = to.x;
-	int y1 = to.y;
+	const int x1 = to.x;
+	const int y1 = to.y;
 
-	int dx = std::abs(x1 - x0);
-	int dy = std::abs(y1 - y0);
-	int sx = (x0 < x1) ? 1 : -1;
-	int sy = (y0 < y1) ? 1 : -1;
+	const int dx = std::abs(x1 - x0);
+	const int dy = std::abs(y1 - y0);
+	const int sx = (x0 < x1) ? 1 : -1;
+	const int sy = (y0 < y1) ? 1 : -1;
 	int err = dx - dy;
 
-	while (x0 != x1 || y0 != y1) {
+	while (x0 != x1 || y0 != y1)
+	{
 		int e2 = 2 * err;
-		if (e2 > -dy) {
+		if (e2 > -dy)
+		{
 			err -= dy;
 			x0 += sx;
 		}
-		if (e2 < dx) {
+		if (e2 < dx)
+		{
 			err += dx;
 			y0 += sy;
 		}
+		path.push_back(Vector2D{ y0, x0 });
+	}
 
-		// Skip the start and end points
-		if ((x0 != from.x || y0 != from.y) && (x0 != to.x || y0 != to.y))
+	return path;
+}
+
+bool Map::has_los(Vector2D from, Vector2D to) const noexcept
+{
+	for (const auto& pos : bresenham_line(from, to))
+	{
+		// Skip endpoints
+		if ((pos.x != from.x || pos.y != from.y) && (pos.x != to.x || pos.y != to.y))
 		{
-			if (is_wall(Vector2D{ y0, x0 }))
+			if (is_wall(pos))
 			{
 				return false;
 			}
 		}
 	}
-
 	return true;
 }
 
 bool Map::is_door(Vector2D pos) const noexcept
 {
-	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width) // TODO: i think i saw this logic before? DRY violation.
+	if (!is_in_bounds(pos))
 		return false;
 
 	TileType tileType = get_tile_type(pos);
@@ -1297,7 +1309,6 @@ void Map::place_amulet(GameContext& ctx)
 	}
 }
 
-// TODO: wohoo ! i found this very useful function finally. SHOULD IT BE IN MAP?!
 void Map::display_spawn_rates(GameContext& ctx) const
 {
 	if (!ctx.level_manager) return;
@@ -1477,7 +1488,6 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 	return true;
 }
 
-// TODO: found another useful function! I like these but i could not find them and use them before.
 void Map::display_item_distribution(GameContext& ctx) const
 {
 	if (!ctx.level_manager) return;

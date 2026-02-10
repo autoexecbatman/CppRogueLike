@@ -3,7 +3,6 @@
 #include <curses.h>
 #include <cmath>
 #include <memory>
-#include <random>
 #include <vector>
 
 #include "../Core/GameContext.h"
@@ -185,54 +184,10 @@ namespace SpellAnimations
 {
     void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
     {
-        // TODO: We already have a random generator in ctx.
-        // Random generator for lightning jaggedness
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> jitterDist(-1, 1);
+        const std::vector<Vector2D> mainPath = Map::bresenham_line(from, to);
 
-        // Calculate direct path
-        std::vector<Vector2D> mainPath;
-
-        // TODO: We need to use utility function for all this is a recipe for bugs.
-        // Use Bresenham's algorithm to get direct path
-        int x0 = from.x;
-        int y0 = from.y;
-        int x1 = to.x;
-        int y1 = to.y;
-
-        int dx = std::abs(x1 - x0);
-        int dy = std::abs(y1 - y0);
-        int sx = (x0 < x1) ? 1 : -1;
-        int sy = (y0 < y1) ? 1 : -1;
-        int err = dx - dy;
-
-        // Generate the main path
-        while (x0 != x1 || y0 != y1)
-        {
-            int e2 = 2 * err;
-            if (e2 > -dy)
-            {
-                err -= dy;
-                x0 += sx;
-            }
-            if (e2 < dx)
-            {
-                err += dx;
-                y0 += sy;
-            }
-
-            if (x0 != from.x || y0 != from.y)
-            {
-                mainPath.push_back(Vector2D{ y0, x0 });
-            }
-        }
-
-        // TODO: This feels like a yolo attempt at something review this whole animation this is long and probably violates SRP.
-        // Lightning bolt characters
         const char LIGHTNING_CHARS[] = { '/', '\\', '|', '-', '*', '+' };
         const int CHAR_COUNT = 6;
-        std::uniform_int_distribution<> charDist(0, CHAR_COUNT - 1);
 
         // Create lightning flash
         clear();
@@ -253,8 +208,8 @@ namespace SpellAnimations
                 // Every few segments, add jitter
                 if (i % 2 == 0)
                 {
-                    lightningPath[i].x += jitterDist(gen);
-                    lightningPath[i].y += jitterDist(gen);
+                    lightningPath[i].x += ctx.dice->roll(-1, 1);
+                    lightningPath[i].y += ctx.dice->roll(-1, 1);
                 }
             }
 
@@ -263,7 +218,7 @@ namespace SpellAnimations
             for (const auto& pos : lightningPath)
             {
                 // Choose random lightning character for jagged effect
-                char symbol = LIGHTNING_CHARS[charDist(gen)];
+                char symbol = LIGHTNING_CHARS[ctx.dice->roll(0, CHAR_COUNT - 1)];
                 mvaddch(pos.y, pos.x, symbol);
             }
 
@@ -277,13 +232,13 @@ namespace SpellAnimations
                 // Choose a random point along the main path to branch from
                 if (lightningPath.size() > 3)
                 {
-                    int branchPos = branchPosDist(gen);
+                    int branchPos = ctx.dice->roll(0, static_cast<int>(lightningPath.size()) - 1);
                     Vector2D branchStart = lightningPath[branchPos];
 
                     // Generate branch in a random direction
-                    int branchLength = branchLengthDist(gen);
-                    int dirX = jitterDist(gen);
-                    int dirY = jitterDist(gen);
+                    int branchLength = ctx.dice->roll(2, 5);
+                    int dirX = ctx.dice->roll(-1, 1);
+                    int dirY = ctx.dice->roll(-1, 1);
 
                     // Ensure we have a direction (not zero)
                     if (dirX == 0 && dirY == 0) dirX = 1;
@@ -297,27 +252,13 @@ namespace SpellAnimations
                         // Add some randomness to branch path
                         if (i > 0 && i % 2 == 0)
                         {
-                            current.x += jitterDist(gen);
-                            current.y += jitterDist(gen);
+                            current.x += ctx.dice->roll(-1, 1);
+                            current.y += ctx.dice->roll(-1, 1);
                         }
 
-                        // TODO: this if statement is to long should be a named lambda.
-                        // Draw branch segment if it's within bounds
-                        if (current.x >= 0
-                            &&
-                            current.y
-                            >=
-                            0
-                            &&
-                            current.x
-                            <
-                            ctx.map->get_width()
-                            &&
-                            current.y
-                            <
-                            ctx.map->get_height())
+                        if (ctx.map->is_in_bounds(current))
                         {
-                            char symbol = LIGHTNING_CHARS[charDist(gen)];
+                            char symbol = LIGHTNING_CHARS[ctx.dice->roll(0, CHAR_COUNT - 1)];
                             mvaddch(current.y, current.x, symbol);
                         }
                     }
