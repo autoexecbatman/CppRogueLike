@@ -42,7 +42,7 @@ public:
 	void menu_delete();
 	void menu_highlight_on() { wattron(menuWindow, A_REVERSE); };
 	void menu_highlight_off() { wattroff(menuWindow, A_REVERSE); };
-	void menu_key_listen() { keyPress = getch(); };
+	void menu_key_listen() { keyPress = wgetch(menuWindow); };
 	void menu_set_run_true() { run = true; };
 	void menu_set_run_false() { run = false; };
 	void menu_mark_dirty() { needsRedraw = true; }; // Mark for redraw

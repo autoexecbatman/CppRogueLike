@@ -44,6 +44,7 @@ void BaseMenu::menu_new(size_t height, size_t width, size_t starty, size_t start
 	{
 		wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
 		wclear(menuWindow);
+		keypad(menuWindow, TRUE);
 	}
 
 	needsRedraw = true;
