@@ -269,6 +269,9 @@ void TargetedScroll::load(const json& j)
 }
 EquipmentSlot Weapon::get_preferred_slot(const Creature* creature) const
 {
+	if (ranged)
+		return EquipmentSlot::MISSILE_WEAPON;
+
 	// AD&D 2e: small or smaller weapons can go off-hand when main hand holds a larger weapon
 	if (!can_be_off_hand(weapon_size))
 		return EquipmentSlot::RIGHT_HAND;

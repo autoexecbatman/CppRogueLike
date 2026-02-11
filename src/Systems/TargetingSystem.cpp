@@ -1,4 +1,6 @@
 #include <curses.h>
+#include <algorithm>
+#include <ranges>
 
 #include "TargetingSystem.h"
 #include "../Core/GameContext.h"
@@ -16,22 +18,40 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 	// Check if player is trying to attack but doesn't have a ranged weapon
 	if (!ctx.player->has_state(ActorState::IS_RANGED))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You can look around, but need a ranged weapon to attack at a distance!", true);
-		// We still continue to the targeting mode, but will restrict actual attacks
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
+		return Vector2D{ -1, -1 };
 	}
 
-	Vector2D targetCursor = ctx.player->position;
-	const Vector2D lastPosition = targetCursor;
+	// Build sorted list of valid targets (visible + in range + LOS)
+	std::vector<Creature*> valid_targets;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (!creature || creature->destructible->is_dead())
+			continue;
+		if (!ctx.map->is_in_fov(creature->position))
+			continue;
+		if (!is_valid_target(ctx, startPos, creature->position, maxRange))
+			continue;
+		valid_targets.push_back(creature.get());
+	}
+
+	auto by_distance = [&startPos](const Creature* a, const Creature* b)
+	{
+		return a->get_tile_distance(startPos) < b->get_tile_distance(startPos);
+	};
+	std::ranges::sort(valid_targets, by_distance);
+
+	// Start on the nearest target, or player position if no targets in range
+	int target_index = 0;
+	Vector2D targetCursor = valid_targets.empty()
+		? ctx.player->position
+		: valid_targets[0]->position;
+
 	bool run = true;
 	while (run)
 	{
 		clear();
 
-		// Make the line follow the mouse position
-		if (ctx.input_handler->mouse_moved())
-		{
-			targetCursor = ctx.input_handler->get_mouse_position();
-		}
 		ctx.rendering_manager->render(ctx);
 
 		// Display the FOV in white
@@ -47,11 +67,6 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 			}
 		}
 
-		// First color the player position if the cursor has moved from the player position
-		if (targetCursor != ctx.player->position)
-		{
-			mvchgat(lastPosition.y, lastPosition.x, 1, A_NORMAL, WHITE_BLACK_PAIR, NULL);
-		}
 
 		//draw_range_indicator(ctx, startPos, maxRange);
 		draw_los(ctx, targetCursor);
@@ -118,16 +133,32 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		}
 
 		// Display legend at bottom
-		mvprintw(MAP_HEIGHT - 2, 0, "Arrow keys: Move cursor | Enter: Select/Attack | Esc: Cancel");
-		mvprintw(MAP_HEIGHT - 1, 0, "Targeting mode: %s",
-			ctx.player->has_state(ActorState::IS_RANGED) ? "Attack" : "Examine");
+		mvprintw(MAP_HEIGHT - 2, 0, "Tab/Shift+Tab: Cycle targets | Arrow keys: Fine aim | Enter: Fire | Esc: Cancel");
+		if (!valid_targets.empty())
+			mvprintw(MAP_HEIGHT - 1, 0, "Target %d/%d", target_index + 1, static_cast<int>(valid_targets.size()));
+		else
+			mvprintw(MAP_HEIGHT - 1, 0, "No targets in range");
 
-		//refresh();
+		refresh();
 
 		// Get the key press
 		const int key = getch();
 		switch (key)
 		{
+		case '\t': // Tab - cycle forward through valid targets
+			if (!valid_targets.empty())
+			{
+				target_index = (target_index + 1) % static_cast<int>(valid_targets.size());
+				targetCursor = valid_targets[target_index]->position;
+			}
+			break;
+		case KEY_BTAB: // Shift+Tab - cycle backward through valid targets
+			if (!valid_targets.empty())
+			{
+				target_index = (target_index - 1 + static_cast<int>(valid_targets.size())) % static_cast<int>(valid_targets.size());
+				targetCursor = valid_targets[target_index]->position;
+			}
+			break;
 		case KEY_UP:
 		case 'w':
 		case 'W':
@@ -149,34 +180,23 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 			targetCursor.x++;
 			break;
 		case 10: // Enter key
-			// If the key enter is pressed then select the target
-			// Only allow attacking if we have a ranged weapon or aren't requiring it
 			if (validTarget)
 			{
-				if (ctx.player->has_state(ActorState::IS_RANGED))
+				if (ctx.map->is_in_fov(targetCursor))
 				{
-					if (ctx.map->is_in_fov(targetCursor))
+					const auto& actor = ctx.map->get_actor(targetCursor, ctx);
+					if (actor)
 					{
-						const auto& actor = ctx.map->get_actor(targetCursor, ctx);
-						if (actor)
-						{
-							ctx.player->attacker->attack(*ctx.player, *actor, ctx);
-							run = false;
-							*ctx.game_status = GameStatus::NEW_TURN;
-							return targetCursor;
-						}
+						ctx.player->attacker->attack(*ctx.player, *actor, ctx);
+						run = false;
+						*ctx.game_status = GameStatus::NEW_TURN;
+						return targetCursor;
 					}
-				}
-				else
-				{
-					// Player tried to attack but doesn't have a ranged weapon
-					ctx.message_system->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 				}
 			}
 			break;
 		case 'r':
 		case 27: // Escape key
-			// If the key escape is pressed then cancel the target selection
 			run = false;
 			break;
 		}
@@ -347,8 +367,8 @@ bool TargetingSystem::process_ranged_attack(GameContext& ctx, Creature& attacker
 	// Animate the projectile
 	animate_projectile(ctx, attacker.position, targetPos, projectileSymbol, projectileColor);
 
-	//// Perform the attack
-	//target->takeDamage(attacker->getAttackDamage());
+	// Perform the attack
+	attacker.attacker->attack(attacker, *target, ctx);
 
 	return true;
 }
@@ -646,6 +666,9 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 	{
 		// Process the ranged attack (including projectile animation)
 		process_ranged_attack(ctx, *ctx.player, targetPos);
+
+		// Clean up dead creatures after ranged combat
+		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 	}
 }
 

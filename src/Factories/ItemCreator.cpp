@@ -201,59 +201,48 @@ std::unique_ptr<Item> ItemCreator::create_gold_pile(Vector2D pos, GameContext& c
     return create_with_gold_amount(pos, goldAmount);
 }
 
-std::unique_ptr<Item> ItemCreator::create_random_weapon(Vector2D pos, GameContext& ctx, int dungeonLevel)
+std::unique_ptr<Item> ItemCreator::create_random_of_category(
+    std::string_view category,
+    Vector2D pos,
+    GameContext& ctx,
+    int dungeonLevel)
 {
-    static const std::vector<ItemId> weapons = {
-        ItemId::DAGGER, ItemId::SHORT_SWORD, ItemId::LONG_SWORD, ItemId::GREAT_SWORD,
-        ItemId::BATTLE_AXE, ItemId::GREAT_AXE, ItemId::WAR_HAMMER, ItemId::MACE, ItemId::STAFF, ItemId::LONG_BOW
-    };
-    const ItemId weaponId = weapons[ctx.dice->roll(0, static_cast<int>(weapons.size()) - 1)];
-    return create(weaponId, pos);
-}
-
-std::unique_ptr<Item> ItemCreator::create_random_armor(Vector2D pos, GameContext& ctx, int dungeonLevel)
-{
-    // Only include armor types that are actually implemented in the factory
-    static const std::vector<ItemId> armor = {
-        ItemId::LEATHER_ARMOR,
-        ItemId::CHAIN_MAIL,
-        ItemId::PLATE_MAIL
-    };
-    const ItemId armorId = armor[ctx.dice->roll(0, static_cast<int>(armor.size()) - 1)];
-    return create(armorId, pos);
-}
-
-// TODO: same as scrolls...
-std::unique_ptr<Item> ItemCreator::create_random_potion(Vector2D pos, GameContext& ctx, int dungeonLevel)
-{
-    static const std::vector<ItemId> potions = {
-        ItemId::HEALTH_POTION, ItemId::MANA_POTION, ItemId::INVISIBILITY_POTION
-    };
-    const ItemId potionId = potions[ctx.dice->roll(0, static_cast<int>(potions.size()) - 1)];
-    return create(potionId, pos);
-}
-
-// TODO: can't we query? why always add new scrolls?
-std::unique_ptr<Item> ItemCreator::create_random_scroll(Vector2D pos, GameContext& ctx, int dungeonLevel)
-{
-    static const std::vector<ItemId> scrolls = {
-        ItemId::SCROLL_LIGHTNING, ItemId::SCROLL_FIREBALL, ItemId::SCROLL_CONFUSION, ItemId::SCROLL_TELEPORT
-    };
-    const ItemId scrollId = scrolls[ctx.dice->roll(0, static_cast<int>(scrolls.size()) - 1)];
-    return create(scrollId, pos);
-}
-
-std::unique_ptr<Item> ItemCreator::create_weapon_with_enhancement_chance(Vector2D pos, GameContext& ctx, int dungeonLevel)
-{
-    auto weapon = create_random_weapon(pos, ctx, dungeonLevel);
-    const int enhancementChance = calculate_enhancement_chance(dungeonLevel);
-    if (ctx.dice->roll(1, 100) <= enhancementChance)
+    struct Candidate
     {
-        const int enhancementLevel = determine_enhancement_level(ctx, dungeonLevel);
-        weapon->set_value(calculate_enhanced_value(weapon->base_value, enhancementLevel));
-        weapon->actorData.name = "+" + std::to_string(enhancementLevel) + " " + weapon->actorData.name;
+        ItemId id;
+        int weight;
+    };
+
+    std::vector<Candidate> candidates;
+    int totalWeight = 0;
+
+    for (const auto& [id, params] : get_all_params())
+    {
+        if (params.category != category || params.base_weight <= 0)
+            continue;
+        if (dungeonLevel < params.level_minimum)
+            continue;
+        if (params.level_maximum > 0 && dungeonLevel > params.level_maximum)
+            continue;
+
+        const float levelFactor = 1.0f + (params.level_scaling * (dungeonLevel - 1));
+        const int weight = std::max(1, static_cast<int>(params.base_weight * levelFactor));
+        candidates.push_back({ id, weight });
+        totalWeight += weight;
     }
-    return weapon;
+
+    if (candidates.empty())
+        return nullptr;
+
+    int roll = ctx.dice->roll(1, totalWeight);
+    for (const auto& [id, weight] : candidates)
+    {
+        roll -= weight;
+        if (roll <= 0)
+            return create(id, pos);
+    }
+
+    return create(candidates.back().id, pos);
 }
 
 int ItemCreator::calculate_enhancement_chance(int dungeonLevel)

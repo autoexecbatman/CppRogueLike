@@ -1,6 +1,7 @@
 #include "ShopKeeper.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
+#include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Actor.h"
@@ -96,60 +97,50 @@ std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(GameContext& ctx)
 
 std::unique_ptr<Item> ShopKeeper::generate_random_weapon(GameContext& ctx)
 {
-    Vector2D shop_pos{ 0, 0 };
+    const int level = ctx.level_manager->get_dungeon_level();
+    auto item = ItemCreator::create_random_of_category("weapon", { 0, 0 }, ctx, level);
 
-    // Delegate to ItemCreator - single source of truth
-    auto item = ItemCreator::create_random_weapon(shop_pos, ctx);
-
-    // 40% chance for enhancement
-    if (ctx.dice->roll(1, 100) <= 40)
-    {
+    if (item && ctx.dice->roll(1, 100) <= 40)
         item->generate_random_enhancement(true);
-    }
 
     return item;
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_armor(GameContext& ctx)
 {
-    Vector2D shop_pos{ 0, 0 };
+    const int level = ctx.level_manager->get_dungeon_level();
+    auto item = ItemCreator::create_random_of_category("armor", { 0, 0 }, ctx, level);
 
-    // Delegate to ItemCreator - single source of truth
-    auto item = ItemCreator::create_random_armor(shop_pos, ctx);
-
-    // 35% chance for enhancement
-    if (ctx.dice->roll(1, 100) <= 35)
-    {
+    if (item && ctx.dice->roll(1, 100) <= 35)
         item->generate_random_enhancement(true);
-    }
 
     return item;
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_potion(GameContext& ctx)
 {
-    // Delegate to ItemCreator - single source of truth
-    return ItemCreator::create_random_potion(Vector2D{ 0, 0 }, ctx);
+    const int level = ctx.level_manager->get_dungeon_level();
+    return ItemCreator::create_random_of_category("potion", { 0, 0 }, ctx, level);
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_scroll(GameContext& ctx)
 {
-    // Delegate to ItemCreator - single source of truth
-    return ItemCreator::create_random_scroll(Vector2D{ 0, 0 }, ctx);
+    const int level = ctx.level_manager->get_dungeon_level();
+    return ItemCreator::create_random_of_category("scroll", { 0, 0 }, ctx, level);
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(GameContext& ctx)
 {
     Vector2D shop_pos{ 0, 0 };
+    const int level = ctx.level_manager->get_dungeon_level();
 
-    // Delegate to ItemCreator category functions - OCP compliant
     std::unique_ptr<Item> item;
     const int category = ctx.dice->roll(0, 3);
     switch (category)
     {
-        case 0: item = ItemCreator::create_random_weapon(shop_pos, ctx); break;
-        case 1: item = ItemCreator::create_random_armor(shop_pos, ctx); break;
-        case 2: item = ItemCreator::create_random_potion(shop_pos, ctx); break;
+        case 0: item = ItemCreator::create_random_of_category("weapon", shop_pos, ctx, level); break;
+        case 1: item = ItemCreator::create_random_of_category("armor", shop_pos, ctx, level); break;
+        case 2: item = ItemCreator::create_random_of_category("potion", shop_pos, ctx, level); break;
         case 3: item = ItemCreator::create(ItemId::FOOD_RATION, shop_pos); break;
     }
 

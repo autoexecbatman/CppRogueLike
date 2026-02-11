@@ -48,4 +48,5 @@ enum class Controls
 	HELP = '?',
 	HIDE = 'H',
 	CAST = 'C',
+	USE = 'u',
 };

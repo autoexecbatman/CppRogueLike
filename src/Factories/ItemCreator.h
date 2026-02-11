@@ -111,17 +111,6 @@ class ItemCreator
 {
 public:
 
-private:
-    // TODO: why are the not implemented? Investigate please if this is correct.
-    template <typename TPickable, typename... Args>
-    static std::unique_ptr<Item> base_create(Vector2D pos, ItemId itemId, Args&&... args);
-
-    template <typename TWeapon>
-    static std::unique_ptr<Item> create_enhanced(Vector2D pos, ItemId itemId, int enhancementLevel);
-
-    template <typename TPickable, typename ConfigFunc>
-    static std::unique_ptr<Item> base_create_with_config(Vector2D pos, ItemId itemId, ConfigFunc&& config);
-
 public:
     // Registry access
     static const ItemParams& get_params(ItemId itemId);
@@ -138,11 +127,7 @@ public:
     static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
 
     // Random generation with single source
-    static std::unique_ptr<Item> create_random_weapon(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_armor(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_potion(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_random_scroll(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
-    static std::unique_ptr<Item> create_weapon_with_enhancement_chance(Vector2D pos, GameContext& ctx, int dungeonLevel = 1);
+    static std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);
 
     // Enhancement utility functions
     static int calculate_enhancement_chance(int dungeonLevel);

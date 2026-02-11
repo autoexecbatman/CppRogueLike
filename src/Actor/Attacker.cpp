@@ -49,7 +49,10 @@ void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 		}
 
 		// Single source of truth: derive weapon name from equipped item
-		Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		const EquipmentSlot weaponSlot = attacker.has_state(ActorState::IS_RANGED)
+			? EquipmentSlot::MISSILE_WEAPON
+			: EquipmentSlot::RIGHT_HAND;
+		Item* weapon = player->get_equipped_item(weaponSlot);
 		std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
 		perform_single_attack(attacker, target, 0, weaponName, ctx);
 		return;
@@ -325,7 +328,10 @@ DamageInfo Attacker::get_attack_damage(Creature& attacker) const
 	auto* player = dynamic_cast<Player*>(&attacker);
 	if (player)
 	{
-		Item* weapon = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+		const EquipmentSlot weaponSlot = attacker.has_state(ActorState::IS_RANGED)
+			? EquipmentSlot::MISSILE_WEAPON
+			: EquipmentSlot::RIGHT_HAND;
+		Item* weapon = player->get_equipped_item(weaponSlot);
 		if (weapon && weapon->is_weapon())
 		{
 			const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;

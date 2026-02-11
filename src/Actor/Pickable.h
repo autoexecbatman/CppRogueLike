@@ -10,8 +10,7 @@ class Creature;
 class Item;
 struct GameContext;
 
-// Forward declaration - EquipmentSlot is defined in Player.h
-enum class EquipmentSlot;
+#include "EquipmentSlot.h"
 
 //==PICKABLE==
 class Pickable : public Persistent

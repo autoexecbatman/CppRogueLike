@@ -38,9 +38,9 @@ constexpr int STATS_X = 0;
 // messageLogWindow is the window that displays the message log
 // ==== ==== ==== ==== ====
 constexpr int LOG_HEIGHT = PANEL_HEIGHT - 2;
-constexpr int LOG_WIDTH = 56;
+constexpr int LOG_WIDTH = 63;
 constexpr int LOG_Y = 1;
-constexpr int LOG_X = 60;
+constexpr int LOG_X = 53;
 constexpr int LOG_MAX_MESSAGES = 5;
 // ==== ==== ==== ==== ====
 

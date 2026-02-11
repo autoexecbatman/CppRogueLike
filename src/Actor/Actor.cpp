@@ -20,6 +20,7 @@
 #include "../Map/Map.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/BuffSystem.h"
+#include "EquipmentSlot.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -353,19 +354,9 @@ void Creature::unequip(Item& item, GameContext& ctx)
 
 void Creature::sync_ranged_state(GameContext& ctx)
 {
-	// Check if any equipped items are ranged weapons
-	bool hasRangedWeapon = false;
-	for (const auto& item : inventory_data.items)
-	{
-		if (item && item->has_state(ActorState::IS_EQUIPPED) && item->pickable)
-		{
-			if (item->is_ranged_weapon())
-			{
-				hasRangedWeapon = true;
-				break;
-			}
-		}
-	}
+	// Check if the MISSILE_WEAPON slot holds a ranged weapon
+	Item* missileSlot = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	bool hasRangedWeapon = missileSlot && missileSlot->is_ranged_weapon();
 
 	// Make sure IS_RANGED state matches equipped weapons
 	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
@@ -627,8 +618,7 @@ void Item::apply_enhancement(const ItemEnhancement& new_enhancement)
 	enhancement = new_enhancement;
 	// Update value based on enhancement
 	value = (base_value * enhancement.value_modifier) / 100;
-	// Update name to reflect enhancement
-	actorData.name = enhancement.get_full_name(get_base_name());
+	// Name is computed dynamically by get_name() -- do not modify actorData.name
 }
 
 void Item::generate_random_enhancement(bool allow_magical)

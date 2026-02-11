@@ -482,7 +482,7 @@ void AiPlayer::display_inventory_items(WINDOW* inv, const Player& player) noexce
 void AiPlayer::display_inventory(Player& player, GameContext& ctx)
 {
 	InventoryUI inventoryUI;
-	inventoryUI.display(player, ctx);
+	inventoryUI.display(player, ctx, InventoryScreen::EQUIPMENT);
 }
 
 Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
@@ -721,6 +721,13 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
+	case Controls::USE:
+	{
+		InventoryUI usablesUI;
+		usablesUI.display(player, ctx, InventoryScreen::USABLES);
+		break;
+	}
+
 	case Controls::QUIT:
 	{
 		*ctx.run = false;
@@ -777,6 +784,8 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
+		InventoryOperations::add_item(player.inventory_data, ItemCreator::create(ItemId::LONG_BOW, player.position));
+		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 		break;
 	}
 

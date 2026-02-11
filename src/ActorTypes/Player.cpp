@@ -605,7 +605,11 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 		destructible->update_armor_class(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 	}
-	
+
+	// Set ranged state when a ranged weapon is equipped
+	if (slot == EquipmentSlot::MISSILE_WEAPON)
+		add_state(ActorState::IS_RANGED);
+
 	return true;
 }
 
@@ -747,15 +751,9 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// Remove equipped state
 		it->item->remove_state(ActorState::IS_EQUIPPED);
 
-		// Reset combat state if main hand weapon
-		if (slot == EquipmentSlot::RIGHT_HAND)
-		{
-			if (it->item->is_weapon())
-			{
-				ctx.message_system->log("Unequipped " + it->item->actorData.name + " - now unarmed");
-			}
+		// Reset ranged state when the missile weapon slot is vacated
+		if (slot == EquipmentSlot::MISSILE_WEAPON)
 			remove_state(ActorState::IS_RANGED);
-		}
 
 		// Return item to inventory
 		add_item(inventory_data, std::move(it->item));
