@@ -77,9 +77,16 @@ int main()
     }
     atexit(SDL_Quit);
 
+    // PDCurses built-in font is 8x16 pixels per cell
+    // Window must be COLS*8 x LINES*16 to eliminate dead space
+    constexpr int PDC_CELL_W = 8;
+    constexpr int PDC_CELL_H = 16;
+    constexpr int WEB_COLS = 119;
+    constexpr int WEB_LINES = 30;
+
     pdc_window = SDL_CreateWindow("C++RogueLike",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        1190, 600, 0);
+        WEB_COLS * PDC_CELL_W, WEB_LINES * PDC_CELL_H, 0);
     if (!pdc_window)
     {
         std::cerr << "Could not create window: " << SDL_GetError() << std::endl;
