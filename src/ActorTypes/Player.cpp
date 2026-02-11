@@ -91,11 +91,6 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create(ItemId::PLATE_MAIL, position), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create(ItemId::LONG_SWORD, position), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
-		// DEBUG: Add potions for testing
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::INVISIBILITY_POTION, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_GIANT_STRENGTH, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_FIRE_RESISTANCE, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::POTION_OF_COLD_RESISTANCE, position));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
 		break;
 	}
@@ -105,8 +100,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create(ItemId::LEATHER_ARMOR, position), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create(ItemId::DAGGER, position), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::INVISIBILITY_POTION, position));
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger. Invisibility potion in inventory.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
 	case PlayerClassState::CLERIC:

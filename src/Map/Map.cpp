@@ -274,49 +274,6 @@ void Map::init(bool withActors, GameContext& ctx)
 	}
 	place_amulet(ctx);
 
-	// DEBUG: Spawn fire and ice wolves in player's starting room for testing fire/cold damage
-	if (ctx.level_manager && ctx.level_manager->get_dungeon_level() == 1 && ctx.rooms && ctx.rooms->size() >= 2)
-	{
-		// Get first room bounds (rooms are stored as begin/end pairs)
-		Vector2D roomBegin = (*ctx.rooms)[0];
-		Vector2D roomEnd = (*ctx.rooms)[1];
-
-		Vector2D spawnPos1{ 0, 0 };
-		Vector2D spawnPos2{ 0, 0 };
-
-		// Find valid positions within the first room
-		for (int attempt = 0; attempt < 100; ++attempt)
-		{
-			int x = ctx.dice->roll(roomBegin.x + 1, roomEnd.x - 1);
-			int y = ctx.dice->roll(roomBegin.y + 1, roomEnd.y - 1);
-			Vector2D testPos{ y, x };
-
-			if (get_tile_type(testPos) == TileType::FLOOR && !get_actor(testPos, ctx))
-			{
-				if (spawnPos1.x == 0 && spawnPos1.y == 0)
-				{
-					spawnPos1 = testPos;
-				}
-				else if (spawnPos2.x == 0 && spawnPos2.y == 0)
-				{
-					spawnPos2 = testPos;
-					break;
-				}
-			}
-		}
-
-		if (spawnPos1.x != 0 || spawnPos1.y != 0)
-		{
-			ctx.creatures->push_back(MonsterCreator::create(spawnPos1, MonsterId::FIRE_WOLF, ctx));
-			ctx.message_system->log("DEBUG: Spawned fire wolf in starting room at " + std::to_string(spawnPos1.x) + "," + std::to_string(spawnPos1.y));
-		}
-
-		if (spawnPos2.x != 0 || spawnPos2.y != 0)
-		{
-			ctx.creatures->push_back(MonsterCreator::create(spawnPos2, MonsterId::ICE_WOLF, ctx));
-			ctx.message_system->log("DEBUG: Spawned ice wolf in starting room at " + std::to_string(spawnPos2.x) + "," + std::to_string(spawnPos2.y));
-		}
-	}
 }
 
 void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors, GameContext& ctx)
