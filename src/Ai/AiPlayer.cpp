@@ -763,6 +763,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
+#ifndef NDEBUG
 	case Controls::DEBUG:
 	{
 		ctx.message_system->display_debug_messages();
@@ -794,6 +795,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		ctx.map->display_item_distribution(ctx);
 		break;
 	}
+#endif
 
 	case Controls::OPEN_DOOR:
 	{
