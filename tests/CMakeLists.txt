@@ -132,6 +132,18 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Factories/MonsterCreator.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemFactory.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemCreator.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/PotionItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/ScrollItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/MeleeWeaponItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/RangedWeaponItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/ArmorItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/HelmItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/RingItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/JewelryItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/GirdleItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/FoodItems.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedWeaponRules.cpp
+    ${PARENT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedArmorRules.cpp
 
     # Objects
     ${PARENT_SOURCE_DIR}/Objects/Web.cpp

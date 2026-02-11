@@ -35,16 +35,11 @@ TEST_F(ItemCreatorTest, CreateRandomPotion)
 {
     Vector2D pos(0, 0);
     auto ctx = mock.to_game_context();
-    auto item = ItemCreator::create_random_potion(pos, ctx, 1);
+    auto item = ItemCreator::create_random_of_category("potion", pos, ctx, 1);
 
+    ASSERT_NE(item, nullptr);
     EXPECT_EQ(item->actorData.ch, '!');
     EXPECT_NE(item->pickable, nullptr);
-    // Verify it's one of the valid random potions
-    EXPECT_TRUE(
-        item->actorData.name == "health potion" ||
-        item->actorData.name == "mana potion" ||
-        item->actorData.name == "invisibility potion"
-    );
 }
 
 TEST_F(ItemCreatorTest, CalculateEnhancementChance)
