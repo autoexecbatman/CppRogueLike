@@ -358,7 +358,16 @@ if(EMSCRIPTEN)
     )
 
     # Bundle Consolas font for web build
-    file(COPY "C:/Windows/Fonts/consola.ttf" DESTINATION "${CMAKE_BINARY_DIR}")
+    if(EXISTS "C:/Windows/Fonts/consola.ttf")
+        file(COPY "C:/Windows/Fonts/consola.ttf" DESTINATION "${CMAKE_BINARY_DIR}")
+    elseif(EXISTS "${CMAKE_SOURCE_DIR}/consola.ttf")
+        file(COPY "${CMAKE_SOURCE_DIR}/consola.ttf" DESTINATION "${CMAKE_BINARY_DIR}")
+    elseif(EXISTS "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf")
+        file(COPY "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf" DESTINATION "${CMAKE_BINARY_DIR}")
+        file(RENAME "${CMAKE_BINARY_DIR}/DejaVuSansMono.ttf" "${CMAKE_BINARY_DIR}/consola.ttf")
+    else()
+        message(WARNING "No suitable TTF font found for web build. Place consola.ttf in the project root.")
+    endif()
 
 else()
     # For native build, link against required libraries
