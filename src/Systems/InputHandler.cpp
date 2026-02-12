@@ -16,8 +16,10 @@ void InputHandler::key_store() noexcept
 void InputHandler::key_listen() noexcept
 {
     std::clog << "getting key" << std::endl;
+#ifndef EMSCRIPTEN
     int anim_timeout = pdc_tileset_anim_ms > 0 ? pdc_tileset_anim_ms : -1;
     timeout(anim_timeout);
+#endif
     keyPress = getch();
     animationTick = (keyPress == ERR);
     if (keyPress == KEY_RESIZE)
