@@ -55,9 +55,9 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 		ctx.rendering_manager->render(ctx);
 
 		// Display the FOV in white
-		for (int y = 0; y < MAP_HEIGHT; y++)
+		for (int y = 0; y < get_map_height(); y++)
 		{
-			for (int x = 0; x < MAP_WIDTH; x++)
+			for (int x = 0; x < get_map_width(); x++)
 			{
 				if (ctx.map->is_in_fov(Vector2D{ y, x }))
 				{
@@ -132,12 +132,13 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 			}
 		}
 
-		// Display legend at bottom
-		mvprintw(MAP_HEIGHT - 2, 0, "Tab/Shift+Tab: Cycle targets | Arrow keys: Fine aim | Enter: Fire | Esc: Cancel");
+		// Display legend at bottom of map area
+		const int legendY = get_map_height();
+		mvprintw(legendY - 2, 0, "Tab/Shift+Tab: Cycle targets | Arrow keys: Fine aim | Enter: Fire | Esc: Cancel");
 		if (!valid_targets.empty())
-			mvprintw(MAP_HEIGHT - 1, 0, "Target %d/%d", target_index + 1, static_cast<int>(valid_targets.size()));
+			mvprintw(legendY - 1, 0, "Target %d/%d", target_index + 1, static_cast<int>(valid_targets.size()));
 		else
-			mvprintw(MAP_HEIGHT - 1, 0, "No targets in range");
+			mvprintw(legendY - 1, 0, "No targets in range");
 
 		refresh();
 

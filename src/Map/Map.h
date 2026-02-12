@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include <curses.h>
 #include <libtcod.h>
 
 #include "../Persistent/Persistent.h"
@@ -14,8 +15,15 @@
 // Forward declaration
 struct GameContext;
 
-inline constexpr int MAP_HEIGHT = 30 - 8;
-inline constexpr int MAP_WIDTH = 119;
+inline constexpr int GUI_RESERVE = 8; // 7 GUI rows + 1 buffer
+inline constexpr int DEFAULT_MAP_WIDTH = 119;
+inline constexpr int DEFAULT_MAP_HEIGHT = 22; // 30 - 8
+
+inline int get_map_width() { return (COLS > 0) ? COLS : DEFAULT_MAP_WIDTH; }
+inline int get_map_height()
+{
+    return (LINES > GUI_RESERVE) ? (LINES - GUI_RESERVE) : DEFAULT_MAP_HEIGHT;
+}
 
 inline constexpr int FOV_RADIUS = 4;
 

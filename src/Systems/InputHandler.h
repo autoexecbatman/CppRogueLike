@@ -24,11 +24,20 @@ public:
     int get_last_key() const noexcept { return lastKey; }
     
     // Input state management
-    void reset_key() noexcept { keyPress = ERR; }
+    void reset_key() noexcept { keyPress = ERR; animationTick = false; }
+
+    // Animation tick detection (timeout with no keypress)
+    bool is_animation_tick() const noexcept { return animationTick; }
+
+    // Resize detection
+    bool was_resized() const noexcept { return screenResized; }
+    void clear_resize() noexcept { screenResized = false; }
 
 private:
     int keyPress{ 0 };
     int lastKey{ 0 };
+    bool screenResized{ false };
+    bool animationTick{ false };
     
     // Mouse position tracking
     Vector2D lastMousePos{ 0, 0 };

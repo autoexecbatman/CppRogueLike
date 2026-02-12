@@ -28,7 +28,8 @@ int pdc_font_size =
 #endif
 
 SDL_Window *pdc_window = NULL;
-SDL_Surface *pdc_screen = NULL, *pdc_font = NULL, *pdc_icon = NULL,
+SDL_Surface *pdc_screen = NULL, *pdc_window_surface = NULL,
+            *pdc_font = NULL, *pdc_icon = NULL,
             *pdc_back = NULL, *pdc_tileback = NULL;
 int pdc_sheight = 0, pdc_swidth = 0, pdc_yoffset = 0, pdc_xoffset = 0;
 
@@ -36,6 +37,82 @@ SDL_Color pdc_color[PDC_MAXCOL];
 Uint32 pdc_mapped[PDC_MAXCOL];
 int pdc_fheight, pdc_fwidth, pdc_fthick, pdc_flastc;
 bool pdc_own_window;
+SDL_Surface *pdc_tileset = NULL;
+SDL_Surface *pdc_tileset1 = NULL;
+int pdc_tileset_cols = 16;
+int pdc_tileset_active = 0;
+int pdc_tileset_anim_ms = 500;
+bool pdc_tile_present[256];
+
+static SDL_Surface *_load_tileset(const char *path)
+{
+    SDL_Surface *surface = SDL_LoadBMP(path);
+    if (!surface)
+        return NULL;
+
+    Uint32 magenta = SDL_MapRGB(surface->format, 255, 0, 255);
+    SDL_SetColorKey(surface, SDL_TRUE, magenta);
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_BLEND);
+
+    return surface;
+}
+
+/* Scan each 16x16 tile for any non-transparent pixel.
+   Tiles with content use the tileset; empty tiles fall through to TTF. */
+
+static void _scan_tileset(int tw, int th)
+{
+    int bpp = pdc_tileset->format->BytesPerPixel;
+    Uint32 colorkey = 0;
+
+    SDL_GetColorKey(pdc_tileset, &colorkey);
+    memset(pdc_tile_present, 0, sizeof(pdc_tile_present));
+    SDL_LockSurface(pdc_tileset);
+
+    for (int i = 0; i < 256; i++)
+    {
+        int tx = (i % pdc_tileset_cols) * tw;
+        int ty = (i / pdc_tileset_cols) * th;
+
+        for (int y = 0; y < th && !pdc_tile_present[i]; y++)
+        {
+            Uint8 *row = (Uint8 *)pdc_tileset->pixels
+                       + (ty + y) * pdc_tileset->pitch
+                       + tx * bpp;
+
+            for (int x = 0; x < tw; x++)
+            {
+                Uint32 pixel = 0;
+                switch (bpp)
+                {
+                case 3:
+                {
+                    Uint8 *p = row + x * 3;
+                    if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                        pixel = ((Uint32)p[0] << 16) | ((Uint32)p[1] << 8) | p[2];
+                    else
+                        pixel = p[0] | ((Uint32)p[1] << 8) | ((Uint32)p[2] << 16);
+                    break;
+                }
+                case 4:
+                    pixel = ((Uint32 *)row)[x];
+                    break;
+                default:
+                    pixel = colorkey;
+                    break;
+                }
+
+                if (pixel != colorkey)
+                {
+                    pdc_tile_present[i] = TRUE;
+                    break;
+                }
+            }
+        }
+    }
+
+    SDL_UnlockSurface(pdc_tileset);
+}
 
 static void _clean(void)
 {
@@ -46,10 +123,16 @@ static void _clean(void)
         TTF_Quit();
     }
 #endif
+    SDL_FreeSurface(pdc_tileset);
+    pdc_tileset = NULL;
+    SDL_FreeSurface(pdc_tileset1);
+    pdc_tileset1 = NULL;
     SDL_FreeSurface(pdc_tileback);
     SDL_FreeSurface(pdc_back);
     SDL_FreeSurface(pdc_icon);
     SDL_FreeSurface(pdc_font);
+    SDL_FreeSurface(pdc_screen);
+    pdc_screen = NULL;
     SDL_DestroyWindow(pdc_window);
     SDL_Quit();
 }
@@ -248,6 +331,23 @@ int PDC_scr_open(void)
 #ifdef PDC_WIDE
     TTF_SizeText(pdc_ttffont, "W", &pdc_fwidth, &pdc_fheight);
     pdc_fthick = pdc_font_size / 20 + 1;
+
+    /* Try to load tileset for sprite rendering */
+    if (!pdc_tileset)
+    {
+        const char *ts_path = getenv("PDC_TILESET");
+        pdc_tileset = _load_tileset(ts_path ? ts_path : "tileset.bmp");
+        if (pdc_tileset)
+        {
+            pdc_fwidth = pdc_tileset->w / pdc_tileset_cols;
+            pdc_fheight = pdc_tileset->h / pdc_tileset_cols;
+            pdc_fthick = pdc_fheight / 20 + 1;
+            _scan_tileset(pdc_fwidth, pdc_fheight);
+
+            /* Load animation frame 1 if available */
+            pdc_tileset1 = _load_tileset("tileset1.bmp");
+        }
+    }
 #else
     pdc_fheight = pdc_font->h / 8;
     pdc_fwidth = pdc_font->w / 32;
@@ -301,11 +401,11 @@ int PDC_scr_open(void)
             SDL_WINDOWEVENT_EXPOSED == event.window.event)
             break;
 
-    if (!pdc_screen)
+    if (!pdc_window_surface)
     {
-        pdc_screen = SDL_GetWindowSurface(pdc_window);
+        pdc_window_surface = SDL_GetWindowSurface(pdc_window);
 
-        if (!pdc_screen)
+        if (!pdc_window_surface)
         {
             fprintf(stderr, "Could not open SDL window surface: %s\n",
                     SDL_GetError());
@@ -314,10 +414,28 @@ int PDC_scr_open(void)
     }
 
     if (!pdc_sheight)
-        pdc_sheight = pdc_screen->h - pdc_yoffset;
+        pdc_sheight = pdc_window_surface->h - pdc_yoffset;
 
     if (!pdc_swidth)
-        pdc_swidth = pdc_screen->w - pdc_xoffset;
+        pdc_swidth = pdc_window_surface->w - pdc_xoffset;
+
+    if (!pdc_screen)
+    {
+        pdc_screen = SDL_CreateRGBSurface(0,
+            pdc_swidth, pdc_sheight,
+            pdc_window_surface->format->BitsPerPixel,
+            pdc_window_surface->format->Rmask,
+            pdc_window_surface->format->Gmask,
+            pdc_window_surface->format->Bmask,
+            pdc_window_surface->format->Amask);
+
+        if (!pdc_screen)
+        {
+            fprintf(stderr, "Could not create render surface: %s\n",
+                    SDL_GetError());
+            return ERR;
+        }
+    }
 
     if (SP->orig_attr)
         PDC_retile();
@@ -368,7 +486,18 @@ int PDC_resize_screen(int nlines, int ncols)
         pdc_swidth = ncols * pdc_fwidth;
 
         SDL_SetWindowSize(pdc_window, pdc_swidth, pdc_sheight);
-        pdc_screen = SDL_GetWindowSurface(pdc_window);
+        pdc_window_surface = SDL_GetWindowSurface(pdc_window);
+
+        if (pdc_screen)
+            SDL_FreeSurface(pdc_screen);
+
+        pdc_screen = SDL_CreateRGBSurface(0,
+            pdc_swidth, pdc_sheight,
+            pdc_window_surface->format->BitsPerPixel,
+            pdc_window_surface->format->Rmask,
+            pdc_window_surface->format->Gmask,
+            pdc_window_surface->format->Bmask,
+            pdc_window_surface->format->Amask);
     }
 
     if (pdc_tileback)

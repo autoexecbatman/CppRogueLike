@@ -5,14 +5,11 @@
 #include <iostream>
 #include <fstream>
 
-#include <curses.h>
 #ifdef EMSCRIPTEN
 #define SDL_MAIN_HANDLED
-#include <SDL.h>
-PDCEX SDL_Window* pdc_window;
-PDCEX SDL_Surface* pdc_screen;
-PDCEX int pdc_yoffset;
 #endif
+
+#include <curses.h>
 
 #include "Game.h"
 #include "Menu/Menu.h"
@@ -69,35 +66,10 @@ int main()
         std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
     }
 
-#ifdef EMSCRIPTEN
-    if (SDL_Init(SDL_INIT_VIDEO) < 0)
-    {
-        std::cerr << "Could not initialize SDL: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    atexit(SDL_Quit);
-
-    // PDCurses built-in font is 8x16 pixels per cell
-    // Window must be COLS*8 x LINES*16 to eliminate dead space
-    constexpr int PDC_CELL_W = 8;
-    constexpr int PDC_CELL_H = 16;
-    constexpr int WEB_COLS = 119;
-    constexpr int WEB_LINES = 30;
-
-    pdc_window = SDL_CreateWindow("C++RogueLike",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
-        WEB_COLS * PDC_CELL_W, WEB_LINES * PDC_CELL_H, 0);
-    if (!pdc_window)
-    {
-        std::cerr << "Could not create window: " << SDL_GetError() << std::endl;
-        return 1;
-    }
-    pdc_screen = SDL_GetWindowSurface(pdc_window);
-    pdc_yoffset = 0;
-
-    putenv((char*)"COLS=119");
-    putenv((char*)"LINES=30");
-#endif
+    // Set initial window size for PDCurses SDL2 (both native and web)
+    // PDCurses SDL2 reads PDC_COLS/PDC_LINES when it creates its own window
+    putenv((char*)"PDC_COLS=119");
+    putenv((char*)"PDC_LINES=30");
 
     init_curses();
 
@@ -120,10 +92,6 @@ int main()
         game.message_system.log("Curses shutdown failed.");
         return EXIT_FAILURE;
     }
-
-#ifdef EMSCRIPTEN
-    SDL_DestroyWindow(pdc_window);
-#endif
 
     if (debugFile.is_open())
     {

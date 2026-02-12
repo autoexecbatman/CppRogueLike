@@ -50,6 +50,58 @@ void BaseMenu::menu_new(size_t height, size_t width, size_t starty, size_t start
 	needsRedraw = true;
 }
 
+void BaseMenu::handle_resize()
+{
+	// Detect full-screen menus before updating terminal dimensions
+	bool wasFullScreen = (menu_starty == 0
+		&& menu_startx == 0
+		&& menu_height == static_cast<size_t>(LINES)
+		&& menu_width == static_cast<size_t>(COLS));
+
+	resize_term(0, 0);
+
+	if (menuWindow)
+	{
+		delwin(menuWindow);
+		menuWindow = nullptr;
+	}
+
+	if (wasFullScreen)
+	{
+		menu_height = static_cast<size_t>(LINES);
+		menu_width = static_cast<size_t>(COLS);
+	}
+	else
+	{
+		// Recenter at same dimensions
+		int newStartY = (LINES - static_cast<int>(menu_height)) / 2;
+		int newStartX = (COLS - static_cast<int>(menu_width)) / 2;
+		if (newStartY < 0) { newStartY = 0; }
+		if (newStartX < 0) { newStartX = 0; }
+		menu_starty = static_cast<size_t>(newStartY);
+		menu_startx = static_cast<size_t>(newStartX);
+	}
+
+	clear();
+	refresh();
+
+	menuWindow = newwin(
+		static_cast<int>(menu_height),
+		static_cast<int>(menu_width),
+		static_cast<int>(menu_starty),
+		static_cast<int>(menu_startx)
+	);
+
+	if (menuWindow)
+	{
+		wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
+		wclear(menuWindow);
+		keypad(menuWindow, TRUE);
+	}
+
+	needsRedraw = true;
+}
+
 void BaseMenu::menu_delete()
 {
 	if (menuWindow)

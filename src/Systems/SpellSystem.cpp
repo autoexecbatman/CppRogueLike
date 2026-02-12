@@ -395,8 +395,8 @@ bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
     // Try to find a valid teleport location (up to 50 attempts)
     for (int attempts = 0; attempts < 50; attempts++)
     {
-        int x = ctx.dice->roll(2, MAP_WIDTH - 2);
-        int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
+        int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
+        int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
         Vector2D teleportPos{y, x};
 
         // Check if the tile is a floor and walkable

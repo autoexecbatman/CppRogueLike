@@ -12,7 +12,7 @@
 
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
 {
-    WINDOW* character_sheet = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_Y, WINDOW_X);
+    WINDOW* character_sheet = newwin(window_height(), window_width(), WINDOW_Y, WINDOW_X);
     box(character_sheet, 0, 0);
     refresh();
 
@@ -20,9 +20,9 @@ void CharacterSheetUI::display_character_sheet(const Player& player, GameContext
     while (run)
     {
         // Clear the window content (but keep the border)
-        for (int y = 1; y < WINDOW_HEIGHT - 1; y++)
+        for (int y = 1; y < window_height() - 1; y++)
         {
-            for (int x = 1; x < WINDOW_WIDTH - 1; x++)
+            for (int x = 1; x < window_width() - 1; x++)
             {
                 mvwaddch(character_sheet, y, x, ' ');
             }

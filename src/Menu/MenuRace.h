@@ -55,8 +55,8 @@ class MenuRace : public BaseMenu
 {
 	int height_{ 10 };
 	int width_{ 13 };
-	int starty_{ (LINES / 2) - 5 };
-	int startx_{ (COLS / 2) - 10 };
+	int starty_{ (LINES - height_) / 2 };
+	int startx_{ (COLS - width_) / 2 };
 	enum class MenuRaceOptions
 	{
 		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK

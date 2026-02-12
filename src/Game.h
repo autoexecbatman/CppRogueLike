@@ -149,7 +149,7 @@ public:
     BuffSystem buff_system{};
 
     // Game world
-    Map map{ MAP_HEIGHT, MAP_WIDTH };
+    Map map{ get_map_height(), get_map_width() };
     Gui gui{};
     std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D{0, 0}) };
     std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };

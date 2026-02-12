@@ -11,7 +11,7 @@
 struct GameContext;
 
 inline constexpr int GUI_HEIGHT{ 7 };
-inline constexpr int GUI_WIDTH{ 118 };
+inline int gui_width() { return COLS - 1; }
 
 // Description:
 // The Gui class is responsible for displaying the gui window

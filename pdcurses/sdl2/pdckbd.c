@@ -322,9 +322,11 @@ static int _process_mouse_event(void)
     if (event.type == SDL_MOUSEMOTION)
     {
         int i;
+        int lx = event.motion.x * pdc_swidth / pdc_window_surface->w;
+        int ly = event.motion.y * pdc_sheight / pdc_window_surface->h;
 
-        SP->mouse_status.x = (event.motion.x - pdc_xoffset) / pdc_fwidth;
-        SP->mouse_status.y = (event.motion.y - pdc_yoffset) / pdc_fheight;
+        SP->mouse_status.x = (lx - pdc_xoffset) / pdc_fwidth;
+        SP->mouse_status.y = (ly - pdc_yoffset) / pdc_fheight;
 
         if (!event.motion.state ||
            (SP->mouse_status.x == old_mouse_status.x &&
@@ -347,6 +349,8 @@ static int _process_mouse_event(void)
         int x, y;
 
         SDL_GetMouseState(&x, &y);
+        x = x * pdc_swidth / pdc_window_surface->w;
+        y = y * pdc_sheight / pdc_window_surface->h;
         SP->mouse_status.x = (x - pdc_xoffset) / pdc_fwidth;
         SP->mouse_status.y = (y - pdc_yoffset) / pdc_fheight;
 
@@ -390,8 +394,12 @@ static int _process_mouse_event(void)
             }
         }
 
-        SP->mouse_status.x = (event.button.x - pdc_xoffset) / pdc_fwidth;
-        SP->mouse_status.y = (event.button.y - pdc_yoffset) / pdc_fheight;
+        {
+            int bx = event.button.x * pdc_swidth / pdc_window_surface->w;
+            int by = event.button.y * pdc_sheight / pdc_window_surface->h;
+            SP->mouse_status.x = (bx - pdc_xoffset) / pdc_fwidth;
+            SP->mouse_status.y = (by - pdc_yoffset) / pdc_fheight;
+        }
 
         btn--;
 
@@ -416,18 +424,10 @@ int PDC_get_key(void)
     case SDL_WINDOWEVENT:
         if (SDL_WINDOWEVENT_SIZE_CHANGED == event.window.event)
         {
-            pdc_screen = SDL_GetWindowSurface(pdc_window);
-            pdc_sheight = pdc_screen->h - pdc_xoffset;
-            pdc_swidth = pdc_screen->w - pdc_yoffset;
+            /* Update window surface but keep logical size fixed */
+            pdc_window_surface = SDL_GetWindowSurface(pdc_window);
             touchwin(curscr);
             wrefresh(curscr);
-
-            if (!SP->resized)
-            {
-                SP->resized = TRUE;
-                SP->key_code = TRUE;
-                return KEY_RESIZE;
-            }
         }
         break;
     case SDL_MOUSEMOTION:

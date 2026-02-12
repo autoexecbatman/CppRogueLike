@@ -13,9 +13,9 @@ public:
     static void display_character_sheet(const Player& player, GameContext& ctx);
 
 private:
-    // UI Layout constants
-    static constexpr int WINDOW_HEIGHT = 30;
-    static constexpr int WINDOW_WIDTH = 120;
+    // UI Layout -- dynamic to match current terminal size
+    static int window_height() { return LINES; }
+    static int window_width() { return COLS; }
     static constexpr int WINDOW_Y = 0;
     static constexpr int WINDOW_X = 0;
 

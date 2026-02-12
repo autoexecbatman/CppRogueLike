@@ -47,7 +47,17 @@ if(EMSCRIPTEN)
 
     # Set linker flags with shell file and preload all JSON files at once
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMCC_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/shell.html")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file strength.json --preload-file dexterity.json --preload-file constitution.json --preload-file wisdom.json --preload-file intelligence.json --preload-file charisma.json")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file strength.json --preload-file dexterity.json --preload-file constitution.json --preload-file wisdom.json --preload-file intelligence.json --preload-file charisma.json --preload-file consola.ttf")
+    # Copy tilesets for web build (optional - enables tile rendering)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset.bmp")
+        file(COPY "${CMAKE_SOURCE_DIR}/tileset.bmp" DESTINATION "${CMAKE_BINARY_DIR}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file tileset.bmp")
+    endif()
+    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset1.bmp")
+        file(COPY "${CMAKE_SOURCE_DIR}/tileset1.bmp" DESTINATION "${CMAKE_BINARY_DIR}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file tileset1.bmp")
+    endif()
+
     # Set output suffix for web
     set(OUTPUT_SUFFIX ".html")
 else()
@@ -297,37 +307,37 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 # Set output suffix based on platform
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "${OUTPUT_SUFFIX}")
 
+## Vendored PDCurses SDL2 -- shared between native and Emscripten builds
+set(PDCURSES_DIR ${CMAKE_SOURCE_DIR}/pdcurses)
+file(GLOB PDCURSES_CORE_SRC "${PDCURSES_DIR}/pdcurses/*.c")
+file(GLOB PDCURSES_SDL_SRC "${PDCURSES_DIR}/sdl2/*.c")
+target_sources(${PROJECT_NAME} PRIVATE ${PDCURSES_CORE_SRC} ${PDCURSES_SDL_SRC})
+target_include_directories(${PROJECT_NAME} PRIVATE ${PDCURSES_DIR})
+target_compile_definitions(${PROJECT_NAME} PRIVATE PDC_WIDE)
+
 if(EMSCRIPTEN)
     # Check if we need to download nlohmann_json
     if(NOT EXISTS "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp")
         message(STATUS "Downloading nlohmann/json...")
-        file(DOWNLOAD 
+        file(DOWNLOAD
             "https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp"
             "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp"
             SHOW_PROGRESS
         )
     endif()
 
-    # PDCurses paths for Emscripten build
-    set(PDCURSES_DIR ${CMAKE_SOURCE_DIR}/pdcurses)
-    
     # Check if libtcod.h exists directly in the include directory
     if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
         message(FATAL_ERROR "libtcod.h not found. Please make sure it exists at ${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
     endif()
-    
+
     # Include directories for all dependencies with higher priority for the binary dir (for json.hpp)
     target_include_directories(${PROJECT_NAME} PRIVATE
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/libtcod/  # For libtcod.h
-        ${PDCURSES_DIR}
     )
-    
-    # Find PDCurses source files
-    file(GLOB PDCURSES_CORE_SRC "${PDCURSES_DIR}/pdcurses/*.c")
-    file(GLOB PDCURSES_SDL_SRC "${PDCURSES_DIR}/sdl2/*.c")
 
-    file(GLOB LIBTCOD_SRC 
+    file(GLOB LIBTCOD_SRC
     "${CMAKE_SOURCE_DIR}/libtcod/*.h"
     "${CMAKE_SOURCE_DIR}/libtcod/*.hpp"
     "${CMAKE_SOURCE_DIR}/libtcod/*/*.h"
@@ -335,32 +345,39 @@ if(EMSCRIPTEN)
     )
 
     set(LIBTCOD_LIBRARIES "${CMAKE_SOURCE_DIR}/libtcod/lib/libtcod.a;")
-    
-    # Add PDCurses sources to the executable
-    target_sources(${PROJECT_NAME} PRIVATE
-        ${PDCURSES_CORE_SRC}
-        ${PDCURSES_SDL_SRC}
-    )
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${LIBTCOD_LIBRARIES}
     )
-    
+
     # Add libtcod compile definitions if needed
-    target_compile_definitions(${PROJECT_NAME} PRIVATE 
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
         TCOD_SDL2
         TCOD_EMSCRIPTEN
+        PDC_FONT_PATH="consola.ttf"
     )
+
+    # Bundle Consolas font for web build
+    file(COPY "C:/Windows/Fonts/consola.ttf" DESTINATION "${CMAKE_BINARY_DIR}")
 
 else()
     # For native build, link against required libraries
-    find_package(unofficial-pdcurses CONFIG REQUIRED)
+    # Find SDL2 without imported targets to avoid INTERFACE_SDL_VERSION
+    # conflict with SDL3 (pulled by libtcod)
+    find_path(SDL2_INCLUDE_DIR SDL.h PATH_SUFFIXES SDL2)
+    find_library(SDL2_LIBRARY SDL2)
+    find_library(SDL2MAIN_LIBRARY SDL2main)
+    find_library(SDL2_TTF_LIBRARY SDL2_ttf)
+    target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIR})
+
     find_package(libtcod CONFIG REQUIRED)
     find_package(nlohmann_json CONFIG REQUIRED)
     target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
-            unofficial::pdcurses::pdcurses
+            ${SDL2MAIN_LIBRARY}
+            ${SDL2_LIBRARY}
+            ${SDL2_TTF_LIBRARY}
             libtcod::libtcod
             nlohmann_json::nlohmann_json
     )
@@ -374,6 +391,23 @@ else()
     endif()
 
     
+    # Copy runtime DLLs (SDL2, SDL2_ttf, freetype and deps) to build directory
+    get_filename_component(SDL2_DLL_DIR "${SDL2_LIBRARY}" DIRECTORY)
+    set(VCPKG_BIN_DIR "${SDL2_DLL_DIR}/../bin")
+    set(RUNTIME_DLLS
+        SDL2.dll SDL2_ttf.dll freetype.dll
+        bz2.dll brotlicommon.dll brotlidec.dll
+        libpng16.dll zlib1.dll
+    )
+    foreach(DLL_NAME ${RUNTIME_DLLS})
+        find_file(${DLL_NAME}_PATH ${DLL_NAME} PATHS "${VCPKG_BIN_DIR}" NO_DEFAULT_PATH)
+        if(${DLL_NAME}_PATH)
+            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${${DLL_NAME}_PATH}" $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+        endif()
+    endforeach()
+
     # Copy JSON files to build directory (for both native and Emscripten builds)
     set(JSON_FILES
         "${PROJECT_SOURCE_DIR}/json/strength.json"
@@ -392,6 +426,20 @@ else()
                                   ${JSON_FILE}
                                   $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
     endforeach()
+
+    # Copy tileset BMPs to build directory (optional - enables tile rendering)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset.bmp")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_SOURCE_DIR}/tileset.bmp"
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>/tileset.bmp)
+    endif()
+    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset1.bmp")
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "${CMAKE_SOURCE_DIR}/tileset1.bmp"
+                $<TARGET_FILE_DIR:${PROJECT_NAME}>/tileset1.bmp)
+    endif()
 
     # Add tests subdirectory (only for native builds)
     option(BUILD_TESTS "Build unit tests" ON)

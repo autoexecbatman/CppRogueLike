@@ -17,8 +17,8 @@
 // guiWin is the main gui window
 // ==== ==== ==== ==== ====
 constexpr int PANEL_HEIGHT = 7;
-constexpr int PANEL_WIDTH = 118;
-constexpr int GUI_Y = 22;
+inline int panel_width() { return COLS - 1; }
+inline int gui_y() { return LINES - 7; }
 constexpr int GUI_X = 0;
 // ==== ==== ==== ==== ====
 
@@ -38,7 +38,7 @@ constexpr int STATS_X = 0;
 // messageLogWindow is the window that displays the message log
 // ==== ==== ==== ==== ====
 constexpr int LOG_HEIGHT = PANEL_HEIGHT - 2;
-constexpr int LOG_WIDTH = 63;
+inline int log_width() { return COLS - 56; }
 constexpr int LOG_Y = 1;
 constexpr int LOG_X = 53;
 constexpr int LOG_MAX_MESSAGES = 5;
@@ -66,12 +66,12 @@ void Gui::render_messages() noexcept {
 void Gui::gui_init() noexcept
 {
 	// main gui window
-	gui_new(PANEL_HEIGHT, PANEL_WIDTH, GUI_Y, GUI_X);
+	gui_new(PANEL_HEIGHT, panel_width(), gui_y(), GUI_X);
 
 	// stats window
 	statsWindow = derwin(guiWin, STATS_HEIGHT, STATS_WIDTH, STATS_Y, STATS_X);
 	// message log window
-	messageLogWindow = derwin(guiWin, LOG_HEIGHT, LOG_WIDTH, LOG_Y, LOG_X);
+	messageLogWindow = derwin(guiWin, LOG_HEIGHT, log_width(), LOG_Y, LOG_X);
 
 	gui_clear();
 	box(guiWin, 0, 0);
@@ -225,7 +225,7 @@ void Gui::renderBar(
 	WINDOW* con = newwin(
 		0, // int nlines
 		0, // int ncols
-		22, // int begy
+		gui_y(), // int begy
 		0 // int begx
 	);
 

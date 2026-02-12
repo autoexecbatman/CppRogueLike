@@ -5,6 +5,9 @@
 
 #include "GameLoopCoordinator.h"
 #include "CreatureManager.h"
+
+extern "C" int pdc_tileset_active;
+extern "C" void PDC_animate_tiles(int first_line, int last_line);
 #include "HungerSystem.h"
 #include "LevelManager.h"
 #include "../Core/GameContext.h"
@@ -35,6 +38,43 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
     // This ensures it happens after racial bonuses are applied
 
     handle_input_phase(ctx);
+
+    if (ctx.input_handler->was_resized())
+    {
+        ctx.input_handler->clear_resize();
+
+        // Regenerate map at new window dimensions
+        ctx.map->regenerate(ctx);
+        ctx.map->compute_fov(ctx);
+
+        // Recreate GUI at new position
+        if (ctx.gui->guiInit)
+        {
+            ctx.gui->gui_shutdown();
+        }
+        ctx.gui->gui_init();
+        ctx.gui->guiInit = true;
+        ctx.gui->gui_update(ctx);
+
+        // Render everything immediately
+        pdc_tileset_active = 1;
+        ctx.rendering_manager->render(ctx);
+        refresh();
+        pdc_tileset_active = 0;
+        ctx.gui->gui_render(ctx);
+        ctx.rendering_manager->force_screen_refresh();
+
+        *ctx.game_status = GameStatus::IDLE;
+        return;
+    }
+
+    // Animation tick: no real input, reblit map tile sprites for animation
+    if (ctx.input_handler->is_animation_tick())
+    {
+        PDC_animate_tiles(0, LINES - GUI_HEIGHT - 1);
+        return;
+    }
+
     handle_update_phase(ctx, gui);
     handle_render_phase(ctx, gui);
     handle_menu_check(ctx);
@@ -74,15 +114,16 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
     //==DRAW==
     ctx.message_system->log("Running render...");
-    // Render game content first, then GUI on top
-    ctx.rendering_manager->render(ctx); // render map and actors to the screen
-    // Render GUI if it's initialized - AFTER game render so it's not overwritten
+    // Render game content first with tileset sprites
+    pdc_tileset_active = 1;
+    ctx.rendering_manager->render(ctx);
+    refresh();
+    pdc_tileset_active = 0;
+    // Render GUI with TTF text - AFTER game render so it's not overwritten
     if (gui.guiInit) {
-        // Ensure GUI has latest data before rendering
         gui.gui_update(ctx);
-        gui.gui_render(ctx); // render the gui
+        gui.gui_render(ctx);
     }
-    // Call the same restore function that inventory uses
     ctx.rendering_manager->restore_game_display();
     ctx.message_system->log("Render OK.");
 }

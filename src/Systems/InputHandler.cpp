@@ -3,6 +3,8 @@
 #include "InputHandler.h"
 #include <iostream>
 
+extern "C" int pdc_tileset_anim_ms;
+
 InputHandler::InputHandler() = default;
 
 void InputHandler::key_store() noexcept
@@ -14,7 +16,15 @@ void InputHandler::key_store() noexcept
 void InputHandler::key_listen() noexcept
 {
     std::clog << "getting key" << std::endl;
+    int anim_timeout = pdc_tileset_anim_ms > 0 ? pdc_tileset_anim_ms : -1;
+    timeout(anim_timeout);
     keyPress = getch();
+    animationTick = (keyPress == ERR);
+    if (keyPress == KEY_RESIZE)
+    {
+        resize_term(0, 0);
+        screenResized = true;
+    }
 }
 
 bool InputHandler::mouse_moved() const noexcept

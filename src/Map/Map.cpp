@@ -558,7 +558,7 @@ void Map::render() const
 				break;
 			case TileType::OPEN_DOOR:
 				attron(COLOR_PAIR(BROWN_BLACK_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '/'); // Different symbol for open door
+				mvaddch(tile.position.y, tile.position.x, '\'');
 				attroff(COLOR_PAIR(BROWN_BLACK_PAIR));
 				break;
 			case TileType::CORRIDOR:
@@ -1044,9 +1044,14 @@ void Map::regenerate(GameContext& ctx)
 		ctx.objects->clear();
 	}
 
-	// generate a new map
-	map_height = MAP_HEIGHT;
-	map_width = MAP_WIDTH;
+	// generate a new map at current window dimensions (keep old size if curses not active)
+	const int newH = get_map_height();
+	const int newW = get_map_width();
+	if (newH > 0 && newW > 0)
+	{
+		map_height = newH;
+		map_width = newW;
+	}
 	init(true, ctx);
 }
 

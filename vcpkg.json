@@ -15,7 +15,8 @@
     },
     "nlohmann-json",
     "stb",
-    "pdcurses",
+    "sdl2",
+    "sdl2-ttf",
     "gtest"
   ]
 }

@@ -1,4 +1,6 @@
 // file: Systems/DisplayManager.cpp
+#include <algorithm>
+
 #include "DisplayManager.h"
 #include "../ActorTypes/Player.h"
 #include "../Systems/LevelUpSystem.h"
@@ -8,11 +10,13 @@
 
 void DisplayManager::display_help() const noexcept
 {
+    const int helpH = std::min(LINES, 30);
+    const int helpW = std::min(COLS, 70);
     WINDOW* help_window = newwin(
-        30, // height
-        70, // width
-        0,  // y
-        0   // x
+        helpH, // height
+        helpW, // width
+        0,     // y
+        0      // x
     );
     box(help_window, 0, 0);
     refresh();

@@ -21,51 +21,26 @@ static int rectcount = 0;              /* index into uprect */
 static short foregr = -2, backgr = -2; /* current foreground, background */
 static bool blinked_off = FALSE;
 
+/* Return the active tileset surface for the current animation frame */
+static SDL_Surface *_current_tileset(void)
+{
+    if (pdc_tileset1 && pdc_tileset_anim_ms > 0)
+    {
+        Uint32 frame = (SDL_GetTicks() / pdc_tileset_anim_ms) % 2;
+        return frame ? pdc_tileset1 : pdc_tileset;
+    }
+    return pdc_tileset;
+}
+
 /* do the real updates on a delay */
 
 void PDC_update_rects(void)
 {
-    int i;
-
     if (rectcount)
     {
-        /* if the maximum number of rects has been reached, we're
-           probably better off doing a full screen update */
-
-        if (rectcount == MAXRECT)
-            SDL_UpdateWindowSurface(pdc_window);
-        else
-        {
-            int w = pdc_screen->w;
-            int h = pdc_screen->h;
-
-            for (i = 0; i < rectcount; i++)
-            {
-                if (uprect[i].x > w ||
-                    uprect[i].y > h ||
-                    !uprect[i].w || !uprect[i].h)
-                {
-                    if (i + 1 < rectcount)
-                    {
-                        memmove(uprect + i, uprect + i + 1,
-                                (rectcount - i + 1) * sizeof(*uprect));
-                        --i;
-                    }
-                    rectcount--;
-                    continue;
-                }
-
-                if (uprect[i].x + uprect[i].w > w)
-                    uprect[i].w = min(w, w - uprect[i].x);
-
-                if (uprect[i].y + uprect[i].h > h)
-                    uprect[i].h = min(h, h - uprect[i].y);
-            }
-
-            if (rectcount > 0)
-                SDL_UpdateWindowSurfaceRects(pdc_window, uprect, rectcount);
-        }
-
+        /* Scale the fixed-size render surface to the window surface */
+        SDL_BlitScaled(pdc_screen, NULL, pdc_window_surface, NULL);
+        SDL_UpdateWindowSurface(pdc_window);
         rectcount = 0;
     }
 }
@@ -296,21 +271,37 @@ void PDC_gotoyx(int row, int col)
         if (ch & A_ALTCHARSET && !(ch & 0xff80))
             ch = acs_map[ch & 0x7f];
 
-        chstr[0] = ch & A_CHARTEXT;
-
-        pdc_font = TTF_RenderUNICODE_Blended(pdc_ttffont, chstr,
-                                             pdc_color[foregr]);
-        if (pdc_font)
+        if (pdc_tileset && pdc_tile_present[(ch & A_CHARTEXT) & 0xFF]
+            && pdc_tileset_active)
         {
-            int center = pdc_fwidth > pdc_font->w ?
-                        (pdc_fwidth - pdc_font->w) >> 1 : 0;
-            src.x = 0;
-            src.y = pdc_fheight - src.h;
-            dest.x += center;
-            SDL_BlitSurface(pdc_font, &src, pdc_screen, &dest);
-            dest.x -= center;
-            SDL_FreeSurface(pdc_font);
-            pdc_font = NULL;
+            SDL_Rect tile_src;
+            int tile_ch = (ch & A_CHARTEXT) & 0xFF;
+            tile_src.x = (tile_ch % pdc_tileset_cols) * pdc_fwidth;
+            tile_src.y = (tile_ch / pdc_tileset_cols) * pdc_fheight
+                       + (pdc_fheight - src.h);
+            tile_src.w = pdc_fwidth;
+            tile_src.h = src.h;
+
+            SDL_BlitSurface(_current_tileset(), &tile_src, pdc_screen, &dest);
+        }
+        else
+        {
+            chstr[0] = ch & A_CHARTEXT;
+
+            pdc_font = TTF_RenderUNICODE_Blended(pdc_ttffont, chstr,
+                                                 pdc_color[foregr]);
+            if (pdc_font)
+            {
+                int center = pdc_fwidth > pdc_font->w ?
+                            (pdc_fwidth - pdc_font->w) >> 1 : 0;
+                src.x = 0;
+                src.y = pdc_fheight - src.h;
+                dest.x += center;
+                SDL_BlitSurface(pdc_font, &src, pdc_screen, &dest);
+                dest.x -= center;
+                SDL_FreeSurface(pdc_font);
+                pdc_font = NULL;
+            }
         }
     }
 #else
@@ -414,24 +405,39 @@ void _new_packet(attr_t attr, int lineno, int x, int len, const chtype *srcp)
 
         if (ch != ' ')
         {
-            if (chstr[0] != ch)
+            if (pdc_tileset && pdc_tile_present[ch & 0xFF]
+                && pdc_tileset_active)
             {
-                chstr[0] = ch;
+                SDL_Rect tile_src;
+                int tile_ch = ch & 0xFF;
+                tile_src.x = (tile_ch % pdc_tileset_cols) * pdc_fwidth;
+                tile_src.y = (tile_ch / pdc_tileset_cols) * pdc_fheight;
+                tile_src.w = pdc_fwidth;
+                tile_src.h = pdc_fheight;
+
+                SDL_BlitSurface(_current_tileset(), &tile_src, pdc_screen, &dest);
+            }
+            else
+            {
+                if (chstr[0] != ch)
+                {
+                    chstr[0] = ch;
+
+                    if (pdc_font)
+                        SDL_FreeSurface(pdc_font);
+
+                    pdc_font = TTF_RenderUNICODE_Blended(pdc_ttffont, chstr,
+                                                         pdc_color[foregr]);
+                }
 
                 if (pdc_font)
-                    SDL_FreeSurface(pdc_font);
-
-                pdc_font = TTF_RenderUNICODE_Blended(pdc_ttffont, chstr,
-                                                     pdc_color[foregr]);
-            }
-
-            if (pdc_font)
-            {
-                int center = pdc_fwidth > pdc_font->w ?
-                    (pdc_fwidth - pdc_font->w) >> 1 : 0;
-                dest.x += center;
-                SDL_BlitSurface(pdc_font, &src, pdc_screen, &dest);
-                dest.x -= center;
+                {
+                    int center = pdc_fwidth > pdc_font->w ?
+                        (pdc_fwidth - pdc_font->w) >> 1 : 0;
+                    dest.x += center;
+                    SDL_BlitSurface(pdc_font, &src, pdc_screen, &dest);
+                    dest.x -= center;
+                }
             }
         }
 #else
@@ -561,6 +567,66 @@ void PDC_doupdate(void)
     PDC_update_rects();
 }
 
+/* Reblit tile cells directly on the SDL surface for animation.
+   Only touches cells with pdc_tile_present, in the given line range.
+   Bypasses PDCurses dirty tracking entirely. */
+
+void PDC_animate_tiles(int first_line, int last_line)
+{
+    SDL_Surface *ts;
+
+    if (!pdc_tileset || !pdc_tileset1 || pdc_tileset_anim_ms <= 0)
+        return;
+    if (!curscr || !SP)
+        return;
+
+    ts = _current_tileset();
+
+    for (int y = first_line; y <= last_line && y < SP->lines; y++)
+    {
+        chtype *line = curscr->_y[y];
+
+        for (int x = 0; x < SP->cols; x++)
+        {
+            chtype cell = line[x];
+            int ch = (int)((cell & A_CHARTEXT) & 0xFF);
+            short fg, bg;
+            SDL_Rect dest, tile_src;
+
+            if (!pdc_tile_present[ch] || ch == ' ')
+                continue;
+
+            dest.x = x * pdc_fwidth + pdc_xoffset;
+            dest.y = y * pdc_fheight + pdc_yoffset;
+            dest.w = pdc_fwidth;
+            dest.h = pdc_fheight;
+
+            pair_content(PAIR_NUMBER(cell), &fg, &bg);
+            if (cell & A_REVERSE)
+            {
+                short tmp = fg;
+                fg = bg;
+                bg = tmp;
+            }
+
+            if (bg >= 0)
+                SDL_FillRect(pdc_screen, &dest, pdc_mapped[bg]);
+            else if (pdc_tileback)
+                SDL_BlitSurface(pdc_tileback, &dest, pdc_screen, &dest);
+
+            tile_src.x = (ch % pdc_tileset_cols) * pdc_fwidth;
+            tile_src.y = (ch / pdc_tileset_cols) * pdc_fheight;
+            tile_src.w = pdc_fwidth;
+            tile_src.h = pdc_fheight;
+
+            SDL_BlitSurface(ts, &tile_src, pdc_screen, &dest);
+        }
+    }
+
+    SDL_BlitScaled(pdc_screen, NULL, pdc_window_surface, NULL);
+    SDL_UpdateWindowSurface(pdc_window);
+}
+
 void PDC_pump_and_peep(void)
 {
     SDL_Event event;
@@ -572,6 +638,7 @@ void PDC_pump_and_peep(void)
              SDL_WINDOWEVENT_EXPOSED == event.window.event ||
              SDL_WINDOWEVENT_SHOWN == event.window.event))
         {
+            SDL_BlitScaled(pdc_screen, NULL, pdc_window_surface, NULL);
             SDL_UpdateWindowSurface(pdc_window);
             rectcount = 0;
         }

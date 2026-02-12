@@ -50,8 +50,8 @@ Vector2D Teleporter::find_valid_teleport_location(GameContext& ctx)
 
 	for (int attempts = 0; attempts < 50; attempts++)
 	{
-		const int x = ctx.dice->roll(2, MAP_WIDTH - 2);
-		const int y = ctx.dice->roll(2, MAP_HEIGHT - 2);
+		const int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
+		const int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
 
 		if (ctx.map->get_tile_type(Vector2D{y, x}) == TileType::FLOOR && is_position_free(x, y))
 		{

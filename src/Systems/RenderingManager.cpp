@@ -3,6 +3,8 @@
 
 #include "RenderingManager.h"
 #include "../Core/GameContext.h"
+
+extern "C" int pdc_tileset_active;
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
@@ -88,7 +90,10 @@ void RenderingManager::restore_screen(GameContext& ctx) const
 {
     clear();
     refresh();
+    pdc_tileset_active = 1;
     render(ctx);
+    refresh();
+    pdc_tileset_active = 0;
     ctx.gui->gui_render(ctx);
     force_screen_refresh();
 }
