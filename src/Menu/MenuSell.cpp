@@ -67,7 +67,7 @@ void MenuSell::menu_print_state(size_t state)
 	}
 }
 
-void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
+void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
 {
     if (is_inventory_empty(seller.inventory_data) ||
         currentState >= get_item_count(seller.inventory_data))
@@ -133,8 +133,8 @@ void MenuSell::handle_sell(WINDOW* tradeWin, Creature& shopkeeper, Creature& sel
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx) : player(player), shopkeeper(shopkeeper)
 {
 	// Use full screen dimensions
-	menu_height = static_cast<size_t>(LINES);
-	menu_width = static_cast<size_t>(COLS);
+	menu_height = 30;
+	menu_width = 119;
 	
 	// Player inventory is always initialized - no need to check
 	populate_items(player.inventory_data.items);
@@ -180,20 +180,8 @@ void MenuSell::draw_content()
 
 void MenuSell::draw()
 {
-	menu_clear();
-	box(menuWindow, 0, 0);
-	
-	// Title centered on screen
-	size_t title_x = (menu_width - 10) / 2; // Center "Sell Items" (10 chars)
-	mvwprintw(menuWindow, 1, static_cast<int>(title_x), "Sell Items");
-	
-	// Instructions
-	mvwprintw(menuWindow, 2, 2, "Use UP/DOWN or W/S to navigate, ENTER to sell, ESC to exit");
-	
-	// Player inventory is always initialized - no need to check
+	// TODO: Reimplement with Panel+Renderer
 	populate_items(player.inventory_data.items);
-	
-	// Validate currentState after repopulating
 	if (player.inventory_data.items.empty())
 	{
 		currentState = 0;
@@ -202,20 +190,13 @@ void MenuSell::draw()
 	{
 		currentState = player.inventory_data.items.size() - 1;
 	}
-	
-	// Start items at row 4 to leave space for title and instructions
-	for (size_t i{ 0 }; i < menuItems.size(); ++i)
-	{
-		menu_print_state(i);
-	}
-	menu_refresh();
 }
 
 void MenuSell::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
-	case KEY_UP:
+	case 0x103:
 	case 'w':
 		// Don't allow navigation if no sellable items
 		if (is_inventory_empty(player.inventory_data)) return;
@@ -223,7 +204,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 		menu_mark_dirty(); // Mark for redraw
 		break;
-	case KEY_DOWN:
+	case 0x102:
 	case 's':
 		// Don't allow navigation if no sellable items
 		if (is_inventory_empty(player.inventory_data)) return;
@@ -236,7 +217,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		// Only allow selling if player actually has items
 		if (!is_inventory_empty(player.inventory_data) && !menuItems.empty())
 		{
-			handle_sell(menuWindow, shopkeeper, player, ctx);
+			handle_sell(nullptr, shopkeeper, player, ctx);
 			menu_mark_dirty(); // Redraw after sale
 		}
 		else
@@ -261,16 +242,11 @@ void MenuSell::menu(GameContext& ctx)
 	while(run)
 	{
 		// Only redraw if needed (navigation/state change)
-		if (menu_needs_redraw())
-		{
-			draw();
-		}
+		draw();
 		
 		menu_key_listen();
 		on_key(keyPress, ctx);
 	}
 	
-	// Clear screen when exiting
-	clear();
-	refresh();
+	// TODO: screen clearing handled by Renderer
 }

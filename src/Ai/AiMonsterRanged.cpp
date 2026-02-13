@@ -1,5 +1,3 @@
-#include <curses.h>
-
 #include "AiMonsterRanged.h"
 #include "../Utils/Vector2D.h"
 #include "../Core/GameContext.h"
@@ -125,27 +123,8 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
         // Stop at end point or walls
         if ((x0 == to.x && y0 == to.y) || !ctx.map->can_walk(Vector2D{ y0, x0 }, ctx)) break;
 
-        // Draw projectile and refresh
-        mvaddch(y0, x0, projectileChar);
-        refresh();
-        napms(30); // Short delay
-
-        // Erase the projectile by redrawing the original tile
-        if (ctx.map->is_in_fov(Vector2D{ y0, x0 }))
-        {
-            if (ctx.map->can_walk(Vector2D{ y0, x0 }, ctx))
-            {
-                mvaddch(y0, x0, '.');
-            }
-            else
-            {
-                mvaddch(y0, x0, '#');
-            }
-        }
-        else
-        {
-            mvaddch(y0, x0, ' ');
-        }
+        // TODO: Reimplement projectile drawing without curses
+        // Previously used mvaddch/refresh/napms for projectile animation
     }
 }
 

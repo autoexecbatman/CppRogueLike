@@ -4,7 +4,6 @@
 #include <memory>
 #include <vector>
 
-#include <curses.h>
 #include <libtcod.h>
 
 #include "../Persistent/Persistent.h"
@@ -19,11 +18,8 @@ inline constexpr int GUI_RESERVE = 8; // 7 GUI rows + 1 buffer
 inline constexpr int DEFAULT_MAP_WIDTH = 119;
 inline constexpr int DEFAULT_MAP_HEIGHT = 22; // 30 - 8
 
-inline int get_map_width() { return (COLS > 0) ? COLS : DEFAULT_MAP_WIDTH; }
-inline int get_map_height()
-{
-    return (LINES > GUI_RESERVE) ? (LINES - GUI_RESERVE) : DEFAULT_MAP_HEIGHT;
-}
+inline int get_map_width() { return DEFAULT_MAP_WIDTH; }
+inline int get_map_height() { return DEFAULT_MAP_HEIGHT; }
 
 inline constexpr int FOV_RADIUS = 4;
 
@@ -116,7 +112,7 @@ public:
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx); // compute the field of view using `TCODMap::computeFov()`
 	void update();
-	void render() const;
+	void render(const GameContext& ctx) const;
 	void add_item(Vector2D pos, GameContext& ctx);
 	Creature* get_actor(Vector2D pos, GameContext& ctx) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	std::vector<std::vector<Tile>> get_map() const noexcept;

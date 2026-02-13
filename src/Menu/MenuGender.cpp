@@ -65,9 +65,8 @@ void MenuGender::menu_print_state(MenuState option)
 void MenuGender::draw()
 {
 	menu_clear();
-	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Select Gender");
+	// TODO: draw box (was curses box)
+	// TODO: draw title "Select Gender" (was curses mvwprintw)
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(static_cast<MenuState>(i));
@@ -80,14 +79,14 @@ void MenuGender::on_key(int key, GameContext& ctx)
 	switch (keyPress)
 	{
 
-	case KEY_UP:
+	case 0x103: // KEY_UP
 	case 'w':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break;
 	}
 
-	case KEY_DOWN:
+	case 0x102: // KEY_DOWN
 	case 's':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
@@ -131,9 +130,7 @@ void MenuGender::menu(GameContext& ctx)
 		menu_key_listen();
 		on_key(keyPress, ctx);
 	}
-	// Clear screen when exiting
-	clear();
-	refresh();
+	// TODO: clear screen when exiting (was curses clear/refresh)
 }
 
 // end of file: MenuGender.cpp

@@ -2,7 +2,6 @@
 #include <unordered_map>
 #include <format>
 
-#include <curses.h>
 #include <libtcod.h>
 
 #include "Ai.h"
@@ -276,146 +275,26 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 		return;
 	}
 
-	// Create a window for the drop item menu
-	WINDOW* dropWin = newwin(INVENTORY_HEIGHT, INVENTORY_WIDTH, 0, 0);
-
-	box(dropWin, 0, 0);
-	wattron(dropWin, A_BOLD);
-	mvwprintw(dropWin, 0, 1, "Select an item to drop");
-	wattroff(dropWin, A_BOLD);
-
-	// Display the inventory items
+	// TODO: Reimplement drop_item UI without curses (was a curses WINDOW-based menu)
+	// For now, drop the first inventory item as a fallback
 	int shortcut = 'a';
-	int y = 1;
 
-	// First, show equipped items
-	if (!player.equippedItems.empty())
+	// Skip equipped items in shortcut count
+	shortcut += static_cast<int>(player.equippedItems.size());
+
+	// Drop the first regular inventory item
+	if (!player.inventory_data.items.empty())
 	{
-		mvwprintw(dropWin, y++, 1, "=== EQUIPPED ===");
-		
-		for (const auto& equipped : player.equippedItems)
+		Item* itemToDrop = player.inventory_data.items.front().get();
+		if (itemToDrop)
 		{
-			if (equipped.item)
-			{
-				mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
-				
-				// Show equipped marker
-				wattron(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
-				wprintw(dropWin, "[E] ");
-				wattroff(dropWin, COLOR_PAIR(WHITE_GREEN_PAIR));
-				
-				// Show slot type
-				std::string slotName = (equipped.slot == EquipmentSlot::RIGHT_HAND) ? "Right: " : 
-									   (equipped.slot == EquipmentSlot::LEFT_HAND) ? "Left: " : 
-									   (equipped.slot == EquipmentSlot::BODY) ? "Body: " : "Other: ";
-				wprintw(dropWin, "%s", slotName.c_str());
-				
-				// Display item name with color
-				wattron(dropWin, COLOR_PAIR(equipped.item->actorData.color));
-				wprintw(dropWin, "%s", equipped.item->actorData.name.c_str());
-				wattroff(dropWin, COLOR_PAIR(equipped.item->actorData.color));
-				
-				y++;
-				shortcut++;
-			}
-		}
-		
-		if (!player.inventory_data.items.empty())
-		{
-			mvwprintw(dropWin, y++, 1, "=== INVENTORY ===");
+			std::string itemName = itemToDrop->actorData.name;
+			player.drop(*itemToDrop, ctx);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
+			*ctx.game_status = GameStatus::NEW_TURN;
 		}
 	}
 
-	// Then show regular inventory items
-	for (const auto& item : player.inventory_data.items)
-	{
-		if (item)
-		{
-			// Display item with shortcut
-			mvwprintw(dropWin, y, 1, "(%c) ", shortcut);
-
-			// Display item name with color
-			wattron(dropWin, COLOR_PAIR(item->actorData.color));
-			wprintw(dropWin, "%s", item->actorData.name.c_str());
-			wattroff(dropWin, COLOR_PAIR(item->actorData.color));
-
-			y++;
-			shortcut++;
-		}
-	}
-
-	mvwprintw(dropWin, y + 1, 1, "Press a letter to drop an item, or ESC to cancel");
-	wrefresh(dropWin);
-
-	// Wait for player input
-	int input = getch();
-
-	// Process the input
-	if (input == static_cast<int>(Controls::ESCAPE))
-	{
-		// Cancel dropping
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Drop canceled.", true);
-	}
-	else if (input >= 'a' && input < 'a' + static_cast<int>(player.equippedItems.size() + get_item_count(player.inventory_data)))
-	{
-		// Valid item selection
-		int index = input - 'a';
-		
-		// Check if selecting equipped item
-		if (index < static_cast<int>(player.equippedItems.size()))
-		{
-			// Dropping equipped item - unequip it first
-			const auto& equipped = player.equippedItems[index];
-			std::string itemName = equipped.item->actorData.name;
-			
-			// Unequip the item (this returns it to inventory)
-			EquipmentSlot slot = equipped.slot;
-			player.unequip_item(slot, ctx);
-			
-			// Find the item in inventory and drop it
-			for (auto& item : player.inventory_data.items)
-			{
-				if (item && item->actorData.name == itemName)
-				{
-					player.drop(*item, ctx);
-					break;
-				}
-			}
-			
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You unequipped and dropped the " + itemName + ".", true);
-		}
-		else
-		{
-			// Dropping regular inventory item
-			int inventoryIndex = index - static_cast<int>(player.equippedItems.size());
-
-			if (inventoryIndex >= 0 && inventoryIndex < static_cast<int>(get_item_count(player.inventory_data))) {
-				// Get the selected item
-				Item* itemToDrop = get_item_at(player.inventory_data, inventoryIndex);
-				if (itemToDrop)
-				{
-					// Display the item name before dropping
-					std::string itemName = itemToDrop->actorData.name;
-
-					// Drop the selected item
-					player.drop(*itemToDrop, ctx);
-
-					// Show dropped message with the item name
-					ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
-				}
-			}
-		}
-
-		// Set game status to register the turn
-		*ctx.game_status = GameStatus::NEW_TURN;
-	}
-
-	// Clean up
-	delwin(dropWin);
-
-	// CRITICAL FIX: Restore the game display
-	clear();
-	refresh();
 	ctx.rendering_manager->restore_game_display();
 }
 
@@ -424,59 +303,10 @@ bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) c
 	return actor.position == owner.position;
 }
 
-void AiPlayer::display_inventory_items(WINDOW* inv, const Player& player) noexcept
+void AiPlayer::display_inventory_items(void* /*inv*/, const Player& /*player*/) noexcept
 {
-	int shortcut = 'a';
-	int y = 1;
-	try
-	{
-		for (const auto& item : player.inventory_data.items)
-		{
-			if (item != nullptr)
-			{
-				// Display basic item info
-				mvwprintw(inv, y, 1, "(%c) ", shortcut);
-
-				// Add colors and status indicators
-				if (item->has_state(ActorState::IS_EQUIPPED))
-				{
-					wattron(inv, COLOR_PAIR(WHITE_GREEN_PAIR)); // Green for equipped items
-					wprintw(inv, "[E] ");
-					wattroff(inv, COLOR_PAIR(WHITE_GREEN_PAIR));
-				}
-
-				// Show the item name with its color
-				wattron(inv, COLOR_PAIR(item->actorData.color));
-				wprintw(inv, "%s", item->actorData.name.c_str());
-				wattroff(inv, COLOR_PAIR(item->actorData.color));
-
-				// Show item information
-				if (item->value > 0)
-				{
-					wattron(inv, COLOR_PAIR(YELLOW_BLACK_PAIR)); // Gold color for value
-					wprintw(inv, " (%d gp)", item->value);
-					wattroff(inv, COLOR_PAIR(YELLOW_BLACK_PAIR));
-				}
-
-				// For weapons, show damage dice
-				if (auto* weapon = dynamic_cast<Weapon*>(item->pickable.get()))
-				{
-					DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(item->itemId, &item->enhancement);
-					std::string damageInfo = " [" + damage.displayRoll + (weapon->is_ranged() ? " rng dmg]" : " dmg]");
-					wattron(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
-					wprintw(inv, "%s", damageInfo.c_str());
-					wattroff(inv, COLOR_PAIR(WHITE_BLACK_PAIR));
-				}
-			}
-			y++;
-			shortcut++;
-		}
-	}
-	catch (const std::exception& e)
-	{
-		std::cout << "Error: PlayerAi::displayInventoryItems(WINDOW* inv, const Actor& owner). " << e.what() << std::endl;
-		exit(-1);
-	}
+	// TODO: Reimplement display_inventory_items without curses
+	// Previously rendered inventory items into a curses WINDOW
 }
 
 void AiPlayer::display_inventory(Player& player, GameContext& ctx)
@@ -697,8 +527,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::MOUSE:
 	{
-		std::cout << "mouse" << std::endl;
-		request_mouse_pos();
+		// TODO: Reimplement mouse handling without curses request_mouse_pos()
 		break;
 	}
 
@@ -801,7 +630,8 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		// Prompt for direction
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
-		int dirKey = getch();
+		// TODO: Replace with proper non-curses input wait for direction key
+		int dirKey = ctx.input_handler->get_current_key();
 		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
 
 		if (doorPos.x != 0 || doorPos.y != 0)
@@ -835,7 +665,8 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		// Prompt for direction
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
-		int dirKey = getch();
+		// TODO: Replace with proper non-curses input wait for direction key
+		int dirKey = ctx.input_handler->get_current_key();
 		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
 
 		if (doorPos.x != 0 || doorPos.y != 0)

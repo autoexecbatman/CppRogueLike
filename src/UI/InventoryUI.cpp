@@ -10,6 +10,8 @@
 #include "../Controls/Controls.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Combat/DamageInfo.h"
@@ -20,20 +22,13 @@
 using namespace InventoryOperations;
 
 InventoryUI::InventoryUI()
-	: mainWindow(nullptr)
-	, detailWindow(nullptr)
-	, activeScreen(InventoryScreen::EQUIPMENT)
+	: activeScreen(InventoryScreen::EQUIPMENT)
 	, equipmentCursor(0)
 	, listCursor(0)
 	, scrollOffset(0)
 	, filterMode(false)
 	, filterSlot(EquipmentSlot::NONE)
 {
-}
-
-InventoryUI::~InventoryUI()
-{
-	destroy_windows();
 }
 
 void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen startScreen)
@@ -46,25 +41,27 @@ void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen star
 	filterSlot = EquipmentSlot::NONE;
 
 	rebuild_item_list(player);
-	create_windows();
 
 	while (true)
 	{
-		redraw_frame();
+		ctx.renderer->begin_frame();
+
+		render_tab_bar(ctx);
 
 		if (activeScreen == InventoryScreen::EQUIPMENT)
 		{
-			render_equipment_screen(player);
+			render_equipment_screen(player, ctx);
 		}
 		else
 		{
-			render_item_list_screen();
+			render_item_list_screen(ctx);
 		}
 
-		render_tab_bar();
 		render_detail_bar(player, ctx);
-		refresh_windows();
 
+		ctx.renderer->end_frame();
+
+		ctx.input_system->poll();
 		if (!handle_input(player, ctx))
 		{
 			break;
@@ -72,55 +69,6 @@ void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen star
 
 		rebuild_item_list(player);
 	}
-
-	destroy_windows();
-	restore_game_display(ctx);
-}
-
-// ============================================================
-// Window Management
-// ============================================================
-
-void InventoryUI::create_windows()
-{
-	clear();
-	refresh();
-
-	int mainHeight = LINES - DETAIL_BAR_HEIGHT;
-	mainWindow = newwin(mainHeight, COLS, 0, 0);
-	detailWindow = newwin(DETAIL_BAR_HEIGHT, COLS, mainHeight, 0);
-
-	keypad(mainWindow, TRUE);
-}
-
-void InventoryUI::redraw_frame()
-{
-	werase(mainWindow);
-	werase(detailWindow);
-
-	box(mainWindow, 0, 0);
-	box(detailWindow, 0, 0);
-}
-
-void InventoryUI::destroy_windows()
-{
-	if (mainWindow)
-	{
-		delwin(mainWindow);
-		mainWindow = nullptr;
-	}
-	if (detailWindow)
-	{
-		delwin(detailWindow);
-		detailWindow = nullptr;
-	}
-}
-
-void InventoryUI::refresh_windows()
-{
-	wnoutrefresh(mainWindow);
-	wnoutrefresh(detailWindow);
-	doupdate();
 }
 
 // ============================================================
@@ -131,7 +79,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 {
 	listEntries.clear();
 
-	// Collect non-null, non-equipped items from inventory
 	std::vector<Item*> items;
 	for (const auto& item : player.inventory_data.items)
 	{
@@ -140,7 +87,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 			continue;
 		}
 
-		// Exclude equipped items
 		auto is_equipped = [&item](const EquippedItem& eq)
 		{
 			return eq.item && eq.item->uniqueId == item->uniqueId;
@@ -150,7 +96,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 			continue;
 		}
 
-		// Filter mode: only items fitting the slot
 		if (filterMode && !item_fits_slot(*item, filterSlot))
 		{
 			continue;
@@ -158,7 +103,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 
 		ItemCategory effectiveCat = get_effective_category(*item);
 
-		// Usables tab: only show usable categories
 		if (activeScreen == InventoryScreen::USABLES && !is_usable_category(effectiveCat))
 		{
 			continue;
@@ -167,7 +111,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 		items.push_back(item.get());
 	}
 
-	// Determine which category list to use
 	const auto& categories = (activeScreen == InventoryScreen::USABLES)
 		? std::vector<ItemCategory>(USABLE_CATEGORIES.begin(), USABLE_CATEGORIES.end())
 		: std::vector<ItemCategory>(CATEGORY_ORDER.begin(), CATEGORY_ORDER.end());
@@ -211,7 +154,6 @@ void InventoryUI::rebuild_item_list(const Player& player)
 		}
 	}
 
-	// Clamp cursor and skip headers
 	if (listEntries.empty())
 	{
 		listCursor = 0;
@@ -236,8 +178,7 @@ void InventoryUI::rebuild_item_list(const Player& player)
 		}
 	}
 
-	// Clamp scroll offset
-	int contentHeight = LINES - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
+	int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 	if (scrollOffset > listCursor)
 	{
 		scrollOffset = listCursor;
@@ -312,12 +253,11 @@ ItemCategory InventoryUI::get_effective_category(const Item& item) const
 // Rendering
 // ============================================================
 
-void InventoryUI::render_tab_bar()
+void InventoryUI::render_tab_bar(GameContext& ctx)
 {
-	int y = 0;
+	int ts = ctx.renderer->get_tile_size();
 	int x = 2;
 
-	// Draw tab labels on the top border of mainWindow
 	struct TabLabel
 	{
 		InventoryScreen screen;
@@ -333,31 +273,18 @@ void InventoryUI::render_tab_bar()
 
 	for (const auto& tab : tabs)
 	{
-		if (tab.screen == activeScreen)
-		{
-			wattron(mainWindow, A_BOLD | A_REVERSE);
-			mvwprintw(mainWindow, y, x, "%s", tab.text);
-			wattroff(mainWindow, A_BOLD | A_REVERSE);
-		}
-		else
-		{
-			wattron(mainWindow, A_DIM);
-			mvwprintw(mainWindow, y, x, "%s", tab.text);
-			wattroff(mainWindow, A_DIM);
-		}
+		int colorPair = (tab.screen == activeScreen) ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
+		ctx.renderer->draw_text(x * ts, 0, tab.text, colorPair);
 		x += static_cast<int>(strlen(tab.text)) + 1;
 	}
 
-	// Tab key hint on the right
-	wattron(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-	mvwprintw(mainWindow, y, COLS - 14, "[Tab] Switch");
-	wattroff(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
+	ctx.renderer->draw_text((SCREEN_COLS - 14) * ts, 0, "[Tab] Switch", CYAN_BLACK_PAIR);
 }
 
-void InventoryUI::render_equipment_screen(const Player& player)
+void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
 {
+	int ts = ctx.renderer->get_tile_size();
 	int startY = 1 + TAB_BAR_HEIGHT;
-	int contentWidth = COLS - 4;
 
 	for (int i = 0; i < SLOT_COUNT; ++i)
 	{
@@ -365,34 +292,16 @@ void InventoryUI::render_equipment_screen(const Player& player)
 		int y = startY + i;
 		bool isCursorRow = (i == equipmentCursor);
 
-		if (isCursorRow)
-		{
-			wattron(mainWindow, A_REVERSE);
-		}
+		int rowColor = isCursorRow ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
 
-		// Clear the row
-		mvwprintw(mainWindow, y, 1, "%-*s", contentWidth, "");
-
-		// Slot label
-		mvwprintw(mainWindow, y, 3, "%-14s: ", slotInfo.label);
+		std::string slotLabel = std::format("{:<14}: ", slotInfo.label);
 
 		Item* equipped = player.get_equipped_item(slotInfo.slot);
+		std::string line;
 		if (equipped)
 		{
-			if (!isCursorRow)
-			{
-				wattron(mainWindow, COLOR_PAIR(equipped->actorData.color));
-			}
+			line = slotLabel + std::string(equipped->get_name());
 
-			std::string name = std::string(equipped->get_name());
-			wprintw(mainWindow, "%s", name.c_str());
-
-			if (!isCursorRow)
-			{
-				wattroff(mainWindow, COLOR_PAIR(equipped->actorData.color));
-			}
-
-			// Inline stats after the name
 			std::string stats;
 			if (equipped->is_weapon())
 			{
@@ -402,74 +311,49 @@ void InventoryUI::render_equipment_screen(const Player& player)
 			{
 				stats = format_armor_info(*equipped);
 			}
-
 			if (!stats.empty())
 			{
-				wprintw(mainWindow, " %s", stats.c_str());
+				line += " " + stats;
 			}
-
 			if (equipped->value > 0)
 			{
-				if (!isCursorRow)
-				{
-					wattron(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
-				}
-				wprintw(mainWindow, " (%d gp)", equipped->value);
-				if (!isCursorRow)
-				{
-					wattroff(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
-				}
+				line += std::format(" ({} gp)", equipped->value);
 			}
 		}
 		else
 		{
-			if (!isCursorRow)
-			{
-				wattron(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-			}
-			wprintw(mainWindow, "(empty)");
-			if (!isCursorRow)
-			{
-				wattroff(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-			}
+			line = slotLabel + "(empty)";
 		}
 
-		if (isCursorRow)
-		{
-			wattroff(mainWindow, A_REVERSE);
-		}
+		ctx.renderer->draw_text(3 * ts, y * ts, line, rowColor);
 	}
 
-	// Filter mode indicator
 	if (filterMode)
 	{
 		int filterY = startY + SLOT_COUNT + 1;
-		wattron(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR) | A_BOLD);
-		mvwprintw(mainWindow, filterY, 3, "FILTER: %s", SLOT_TABLE[equipmentCursor].label);
-		wattroff(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR) | A_BOLD);
+		std::string filterText = std::format("FILTER: {}", SLOT_TABLE[equipmentCursor].label);
+		ctx.renderer->draw_text(3 * ts, filterY * ts, filterText, YELLOW_BLACK_PAIR);
 	}
 }
 
-void InventoryUI::render_item_list_screen()
+void InventoryUI::render_item_list_screen(GameContext& ctx)
 {
+	int ts = ctx.renderer->get_tile_size();
 	int startY = 1 + TAB_BAR_HEIGHT;
-	int contentHeight = LINES - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
-	int contentWidth = COLS - 4;
+	int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 
 	if (listEntries.empty())
 	{
+		const char* msg = "Your backpack is empty.";
 		if (activeScreen == InventoryScreen::USABLES)
 		{
-			mvwprintw(mainWindow, startY + 1, 3, "No usable items.");
+			msg = "No usable items.";
 		}
 		else if (filterMode)
 		{
-			mvwprintw(mainWindow, startY + 1, 3, "No items fit this slot.");
+			msg = "No items fit this slot.";
 		}
-		else
-		{
-			mvwprintw(mainWindow, startY + 1, 3, "Your backpack is empty.");
-		}
+		ctx.renderer->draw_text(3 * ts, (startY + 1) * ts, msg, WHITE_BLACK_PAIR);
 		return;
 	}
 
@@ -481,42 +365,18 @@ void InventoryUI::render_item_list_screen()
 		const auto& entry = listEntries[i];
 		bool isCursorRow = (i == listCursor);
 
-		if (isCursorRow)
-		{
-			wattron(mainWindow, A_REVERSE);
-		}
-
-		// Clear row
-		mvwprintw(mainWindow, y, 1, "%-*s", contentWidth, "");
+		int rowColor = isCursorRow ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
 
 		if (entry.kind == BackpackEntry::Kind::CATEGORY_HEADER)
 		{
-			if (!isCursorRow)
-			{
-				wattron(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR) | A_BOLD);
-			}
-			mvwprintw(mainWindow, y, 3, "%s", entry.header_text.c_str());
-			if (!isCursorRow)
-			{
-				wattroff(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR) | A_BOLD);
-			}
+			int headerColor = isCursorRow ? BLACK_WHITE_PAIR : YELLOW_BLACK_PAIR;
+			ctx.renderer->draw_text(3 * ts, y * ts, entry.header_text, headerColor);
 		}
 		else if (entry.item)
 		{
 			char letter = (nextLetter <= 'z') ? nextLetter++ : ' ';
-			mvwprintw(mainWindow, y, 3, "%c) ", letter);
+			std::string line = std::format("{}) {}", letter, std::string(entry.item->get_name()));
 
-			if (!isCursorRow)
-			{
-				wattron(mainWindow, COLOR_PAIR(entry.item->actorData.color));
-			}
-			wprintw(mainWindow, "%s", std::string(entry.item->get_name()).c_str());
-			if (!isCursorRow)
-			{
-				wattroff(mainWindow, COLOR_PAIR(entry.item->actorData.color));
-			}
-
-			// Inline stats
 			std::string stats;
 			if (entry.item->is_weapon())
 			{
@@ -528,49 +388,37 @@ void InventoryUI::render_item_list_screen()
 			}
 			if (!stats.empty())
 			{
-				wprintw(mainWindow, " %s", stats.c_str());
+				line += " " + stats;
 			}
 
 			if (entry.item->value > 0)
 			{
-				if (!isCursorRow)
-				{
-					wattron(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
-				}
-				wprintw(mainWindow, " (%d gp)", entry.item->value);
-				if (!isCursorRow)
-				{
-					wattroff(mainWindow, COLOR_PAIR(YELLOW_BLACK_PAIR));
-				}
+				line += std::format(" ({} gp)", entry.item->value);
 			}
-		}
 
-		if (isCursorRow)
-		{
-			wattroff(mainWindow, A_REVERSE);
+			int itemColor = isCursorRow ? BLACK_WHITE_PAIR : entry.item->actorData.color;
+			ctx.renderer->draw_text(3 * ts, y * ts, line, itemColor);
 		}
 
 		y++;
 	}
 
-	// Scroll indicators
 	int totalEntries = static_cast<int>(listEntries.size());
 	if (scrollOffset > 0)
 	{
-		wattron(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-		mvwprintw(mainWindow, startY, contentWidth - 2, "^^^");
-		wattroff(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
+		ctx.renderer->draw_text((SCREEN_COLS - 5) * ts, startY * ts, "^^^", CYAN_BLACK_PAIR);
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		wattron(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-		mvwprintw(mainWindow, startY + contentHeight - 1, contentWidth - 2, "vvv");
-		wattroff(mainWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
+		ctx.renderer->draw_text((SCREEN_COLS - 5) * ts, (startY + contentHeight - 1) * ts, "vvv", CYAN_BLACK_PAIR);
 	}
 }
 
 void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 {
+	int ts = ctx.renderer->get_tile_size();
+	int detailY = SCREEN_ROWS - DETAIL_BAR_HEIGHT;
+
 	Item* selectedItem = get_selected_item();
 
 	if (!selectedItem && activeScreen == InventoryScreen::EQUIPMENT)
@@ -580,10 +428,7 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 
 	if (selectedItem)
 	{
-		// Line 1: Item name + primary stat + value
-		wattron(detailWindow, A_BOLD | COLOR_PAIR(selectedItem->actorData.color));
-		mvwprintw(detailWindow, 1, 2, "%s", std::string(selectedItem->get_name()).c_str());
-		wattroff(detailWindow, A_BOLD | COLOR_PAIR(selectedItem->actorData.color));
+		std::string nameLine = std::string(selectedItem->get_name());
 
 		std::string primaryStat;
 		if (selectedItem->is_weapon())
@@ -597,16 +442,17 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 
 		if (!primaryStat.empty())
 		{
-			wprintw(detailWindow, "  %s", primaryStat.c_str());
+			nameLine += "  " + primaryStat;
 		}
 
 		std::string valueStr = format_value_info(*selectedItem);
 		if (!valueStr.empty())
 		{
-			wprintw(detailWindow, "  %s", valueStr.c_str());
+			nameLine += "  " + valueStr;
 		}
 
-		// Line 2: Enhancement and stat bonuses
+		ctx.renderer->draw_text(2 * ts, (detailY + 1) * ts, nameLine, selectedItem->actorData.color);
+
 		std::string enhStr = format_enhancement_info(*selectedItem);
 		std::string statStr = format_stat_bonus_info(*selectedItem);
 		std::string line2;
@@ -624,35 +470,19 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		}
 		if (!line2.empty())
 		{
-			mvwprintw(detailWindow, 2, 2, "%s", line2.c_str());
+			ctx.renderer->draw_text(2 * ts, (detailY + 2) * ts, line2, WHITE_BLACK_PAIR);
 		}
 	}
 	else if (activeScreen == InventoryScreen::EQUIPMENT)
 	{
-		mvwprintw(detailWindow, 1, 2, "Press [Enter] to browse items for this slot.");
+		ctx.renderer->draw_text(2 * ts, (detailY + 1) * ts, "Press [Enter] to browse items for this slot.", WHITE_BLACK_PAIR);
 	}
 
-	// Keybinds help
-	wattron(detailWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
-	if (activeScreen == InventoryScreen::EQUIPMENT)
-	{
-		mvwprintw(
-			detailWindow,
-			DETAIL_BAR_HEIGHT - 2,
-			2,
-			"[Enter] Unequip/Browse  [d] Drop  [Tab] Switch  [ESC] Close"
-		);
-	}
-	else
-	{
-		mvwprintw(
-			detailWindow,
-			DETAIL_BAR_HEIGHT - 2,
-			2,
-			"[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Tab] Switch  [ESC] Close"
-		);
-	}
-	wattroff(detailWindow, COLOR_PAIR(CYAN_BLACK_PAIR));
+	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
+		? "[Enter] Unequip/Browse  [d] Drop  [Tab] Switch  [ESC] Close"
+		: "[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Tab] Switch  [ESC] Close";
+
+	ctx.renderer->draw_text(2 * ts, (detailY + DETAIL_BAR_HEIGHT - 1) * ts, keybinds, CYAN_BLACK_PAIR);
 }
 
 // ============================================================
@@ -786,11 +616,11 @@ std::string InventoryUI::get_category_name(ItemCategory cat) const
 
 bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 {
-	int input = wgetch(mainWindow);
+	GameKey key = ctx.input_system->get_key();
 
-	switch (input)
+	switch (key)
 	{
-	case static_cast<int>(Controls::ESCAPE):
+	case GameKey::ESCAPE:
 	{
 		if (filterMode)
 		{
@@ -803,21 +633,21 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		return false;
 	}
 
-	case '\t':
+	case GameKey::TAB:
 		handle_tab_switch();
 		return true;
 
-	case KEY_UP:
+	case GameKey::UP:
+	case GameKey::W:
 		handle_cursor_up();
 		return true;
 
-	case KEY_DOWN:
+	case GameKey::DOWN:
+	case GameKey::S:
 		handle_cursor_down();
 		return true;
 
-	case '\n':
-	case '\r':
-	case KEY_ENTER:
+	case GameKey::ENTER:
 	{
 		if (activeScreen == InventoryScreen::EQUIPMENT)
 		{
@@ -830,7 +660,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		return true;
 	}
 
-	case 'd':
+	case GameKey::DROP:
 	{
 		handle_drop(player, ctx);
 		return true;
@@ -839,10 +669,11 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	default:
 	{
 		// Letter shortcuts for Backpack/Usables screens
+		int charInput = ctx.input_system->get_char_input();
 		if (activeScreen != InventoryScreen::EQUIPMENT
-			&& input >= 'a' && input <= 'z' && input != 'd')
+			&& charInput >= 'a' && charInput <= 'z' && charInput != 'd')
 		{
-			int letterIndex = input - 'a';
+			int letterIndex = charInput - 'a';
 			int itemCount = 0;
 			for (int i = 0; i < static_cast<int>(listEntries.size()); ++i)
 			{
@@ -901,7 +732,7 @@ void InventoryUI::handle_cursor_down()
 		if (next >= 0)
 		{
 			listCursor = next;
-			int contentHeight = LINES - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
+			int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 			if (listCursor >= scrollOffset + contentHeight)
 			{
 				scrollOffset = listCursor - contentHeight + 1;
@@ -912,7 +743,6 @@ void InventoryUI::handle_cursor_down()
 
 void InventoryUI::handle_tab_switch()
 {
-	// Cycle: Equipment -> Backpack -> Usables -> Equipment
 	switch (activeScreen)
 	{
 	case InventoryScreen::EQUIPMENT:
@@ -926,14 +756,12 @@ void InventoryUI::handle_tab_switch()
 		break;
 	}
 
-	// Reset filter when switching away
 	if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
 	{
 		filterMode = false;
 		filterSlot = EquipmentSlot::NONE;
 	}
 
-	// Reset list cursor for the new screen
 	listCursor = 0;
 	scrollOffset = 0;
 }
@@ -955,7 +783,6 @@ void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
 	}
 	else
 	{
-		// Enter filter mode on the Backpack tab
 		filterMode = true;
 		filterSlot = slot;
 		activeScreen = InventoryScreen::BACKPACK;
@@ -983,14 +810,12 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 		return;
 	}
 
-	Item* itemPtr = selectedItem;
 	bool itemUsed = selectedItem->pickable->use(*selectedItem, player, ctx);
 
 	if (itemUsed)
 	{
 		*ctx.game_status = GameStatus::NEW_TURN;
 
-		// Exit filter mode after equipping
 		if (filterMode)
 		{
 			filterMode = false;
@@ -1087,11 +912,4 @@ Item* InventoryUI::get_selected_item() const
 	}
 
 	return nullptr;
-}
-
-void InventoryUI::restore_game_display(GameContext& ctx)
-{
-	clear();
-	refresh();
-	ctx.rendering_manager->restore_game_display();
 }

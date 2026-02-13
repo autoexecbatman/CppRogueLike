@@ -12,165 +12,134 @@
 
 void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)
 {
-    // Clear screen before showing level up window
-    clear();
-    refresh();
+    // TODO: render level up window via new renderer
+    void* statsWindow = nullptr;
 
-    // Create window for level up display
-    WINDOW* statsWindow = newwin(WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_Y, WINDOW_X);
-    box(statsWindow, 0, 0);
-
-    // Display all sections
+    // Display all sections (currently no-ops pending renderer)
     display_title(statsWindow, player, newLevel);
     display_basic_info(statsWindow, player, newLevel);
     display_current_stats(statsWindow, player);
-    
+
     int currentLine = 12; // Start benefits section here
     display_level_benefits(statsWindow, player, newLevel);
     display_class_benefits(statsWindow, player, newLevel, currentLine);
     display_next_level_info(statsWindow, player, ctx);
     display_continue_prompt(statsWindow);
 
-    // Refresh and wait for input
-    wrefresh(statsWindow);
+    // Wait for input then clean up
     wait_for_spacebar();
-
-    // Clean up
-    delwin(statsWindow);
     cleanup_and_restore(ctx);
 }
 
-void LevelUpUI::display_title(WINDOW* window, const Player& player, int level)
+void LevelUpUI::display_title(void* window, const Player& player, int level)
 {
-    wattron(window, A_BOLD);
-    mvwprintw(window, 1, 20, "LEVEL UP: %s", player.playerClass.c_str());
-    wattroff(window, A_BOLD);
+    // TODO: render title via new renderer
+    (void)window;
+    (void)player;
+    (void)level;
 }
 
-void LevelUpUI::display_basic_info(WINDOW* window, const Player& player, int level)
+void LevelUpUI::display_basic_info(void* window, const Player& player, int level)
 {
-    mvwprintw(window, 3, 2, "Name: %s", player.actorData.name.c_str());
-    mvwprintw(window, 3, 30, "Race: %s", player.playerRace.c_str());
-    mvwprintw(window, 4, 2, "Level: %d", level);
-    mvwprintw(window, 4, 30, "Experience: %d", player.destructible->get_xp());
+    // TODO: render basic info via new renderer
+    (void)window;
+    (void)player;
+    (void)level;
 }
 
-void LevelUpUI::display_current_stats(WINDOW* window, const Player& player)
+void LevelUpUI::display_current_stats(void* window, const Player& player)
 {
-    mvwprintw(window, 6, 2, "CURRENT STATS:");
-    mvwprintw(window, 7, 4, "Hit Points: %d/%d", player.destructible->get_hp(), player.destructible->get_max_hp());
-    mvwprintw(window, 8, 4, "THAC0: %d", player.destructible->get_thaco());
-    mvwprintw(window, 9, 4, "Armor Class: %d", player.destructible->get_armor_class());
-    mvwprintw(window, 10, 4, "Damage Reduction: %d", player.destructible->get_dr());
+    // TODO: render current stats via new renderer
+    (void)window;
+    (void)player;
 }
 
-void LevelUpUI::display_level_benefits(WINDOW* window, const Player& player, int level)
+void LevelUpUI::display_level_benefits(void* window, const Player& player, int level)
 {
-    mvwprintw(window, 12, 2, "AD&D 2e LEVEL %d BENEFITS:", level);
-
-    // Show HP gain this level
-    wattron(window, COLOR_PAIR(GREEN_BLACK_PAIR));
-    mvwprintw(window, 13, 4, "+ Hit Points gained this level");
-    wattroff(window, COLOR_PAIR(GREEN_BLACK_PAIR));
-    
-    // Show THAC0 improvement if any
-    if (has_thac0_improvement(player, level))
-    {
-        wattron(window, COLOR_PAIR(GREEN_BLACK_PAIR));
-        mvwprintw(window, 14, 4, "+ THAC0 improved to %d", player.destructible->get_thaco());
-        wattroff(window, COLOR_PAIR(GREEN_BLACK_PAIR));
-    }
-    
-    // Show ability score improvement at levels 4, 8, 12, 16, 20
-    if (level % 4 == 0)
-    {
-        wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-        mvwprintw(window, 15, 4, "+ Ability Score Improvement!");
-        wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-    }
+    // TODO: render level benefits via new renderer
+    (void)window;
+    (void)player;
+    (void)level;
 }
 
-void LevelUpUI::display_class_benefits(WINDOW* window, const Player& player, int level, int& currentLine)
+void LevelUpUI::display_class_benefits(void* window, const Player& player, int level, int& currentLine)
 {
     int benefitLine = 16;
-    
+
     switch (player.playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
-        mvwprintw(window, benefitLine++, 4, "Class: Fighter (d10 hit dice)");
+        // Fighter: d10 hit dice, extra attacks at 7 and 13
         if (level == 7)
         {
-            wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-            mvwprintw(window, benefitLine++, 4, "+ SPECIAL: Extra Attack (3/2 per round)!");
-            wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+            // SPECIAL: Extra Attack (3/2 per round)
         }
         else if (level == 13)
         {
-            wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-            mvwprintw(window, benefitLine++, 4, "+ SPECIAL: Extra Attack (2 per round)!");
-            wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+            // SPECIAL: Extra Attack (2 per round)
         }
+        benefitLine++;
         break;
 
     case Player::PlayerClassState::ROGUE:
-        mvwprintw(window, benefitLine++, 4, "Class: Rogue (d6 hit dice)");
+        // Rogue: d6 hit dice, backstab multiplier increases
         if (LevelUpSystem::calculate_backstab_multiplier(level) > LevelUpSystem::calculate_backstab_multiplier(level - 1))
         {
-            wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-            mvwprintw(
-                window,
-                benefitLine++,
-                4,
-                "+ SPECIAL: Backstab multiplier x%d!", 
-                LevelUpSystem::calculate_backstab_multiplier(level)
-            );
-            wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+            // SPECIAL: Backstab multiplier increased
+            benefitLine++;
         }
+        benefitLine++;
         break;
 
     case Player::PlayerClassState::CLERIC:
-        mvwprintw(window, benefitLine++, 4, "Class: Cleric (d8 hit dice)");
+        // Cleric: d8 hit dice, Turn Undead improvements
         if (level == 3 || level == 5 || level == 7 || level == 9)
         {
-            wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-            mvwprintw(window, benefitLine++, 4, "+ SPECIAL: Turn Undead improved!");
-            wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+            // SPECIAL: Turn Undead improved
+            benefitLine++;
         }
+        benefitLine++;
         break;
 
     case Player::PlayerClassState::WIZARD:
-        mvwprintw(window, benefitLine++, 4, "Class: Wizard (d4 hit dice)");
+        // Wizard: d4 hit dice, new spell levels at odd levels
         if ((level % 2 == 1) && level > 1)
         {
             int spellLevel = (level + 1) / 2;
             if (spellLevel <= 9)
             {
-                wattron(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
-                mvwprintw(window, benefitLine++, 4, "+ SPECIAL: Level %d spells available!", spellLevel);
-                wattroff(window, COLOR_PAIR(YELLOW_BLACK_PAIR));
+                // SPECIAL: New spell level available
+                benefitLine++;
             }
         }
+        benefitLine++;
         break;
 
     default:
-        mvwprintw(window, benefitLine++, 4, "Class: Unknown");
+        benefitLine++;
         break;
     }
-    
+
     currentLine = benefitLine;
+
+    // TODO: render class benefits via new renderer
+    (void)window;
 }
 
-void LevelUpUI::display_next_level_info(WINDOW* window, const Player& player, GameContext& ctx)
+void LevelUpUI::display_next_level_info(void* window, const Player& player, GameContext& ctx)
 {
     // Show next level requirements
     int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
-    mvwprintw(window, 17, 2, "XP for next level: %d", nextLevelXP);
+
+    // TODO: render next level info via new renderer
+    (void)window;
+    (void)nextLevelXP;
 }
 
-void LevelUpUI::display_continue_prompt(WINDOW* window)
+void LevelUpUI::display_continue_prompt(void* window)
 {
-    // Prompt specifically for space bar
-    mvwprintw(window, 19, 15, "Press SPACE BAR to continue...");
+    // TODO: render continue prompt via new renderer
+    (void)window;
 }
 
 bool LevelUpUI::has_thac0_improvement(const Player& player, int level)
@@ -182,7 +151,7 @@ bool LevelUpUI::has_thac0_improvement(const Player& player, int level)
 int LevelUpUI::get_expected_thac0(const Player& player, int level)
 {
     CalculatedTHAC0s thac0Tables;
-    
+
     switch (player.playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
@@ -200,17 +169,12 @@ int LevelUpUI::get_expected_thac0(const Player& player, int level)
 
 void LevelUpUI::wait_for_spacebar()
 {
-    int ch;
-    do {
-        ch = getch();
-    } while (ch != ' '); // Only accept space bar
+    // TODO: wait for spacebar via new input system
 }
 
 void LevelUpUI::cleanup_and_restore(GameContext& ctx)
 {
-    // Clear screen and restore game display properly
-    clear();
+    // Restore game display
     ctx.rendering_manager->render(ctx);
     ctx.gui->gui_render(ctx);
-    refresh();
 }

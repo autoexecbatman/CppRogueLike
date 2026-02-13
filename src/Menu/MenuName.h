@@ -2,13 +2,11 @@
 
 #include <string>
 
-#include <curses.h>
-
 struct GameContext;
 
 class MenuName
 {
-	WINDOW* menuNameWindow{ nullptr };
+	void* menuNameWindow{ nullptr };
 
 	int menuNameX{ 0 };
 	int menuNameY{ 0 };

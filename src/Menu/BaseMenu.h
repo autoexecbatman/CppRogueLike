@@ -1,24 +1,27 @@
 #pragma once
 
-#include <curses.h>
 #include <string>
 
+class Renderer;
+class InputSystem;
 struct GameContext;
 
 class BaseMenu
 {
 protected:
-	WINDOW* menuWindow{ nullptr };
-	WINDOW* backgroundWindow{ nullptr }; // For background preservation
-	size_t menu_height{ 0 };
-	size_t menu_width{ 0 };
-	size_t menu_starty{ 0 };
-	size_t menu_startx{ 0 };
-	int keyPress{ 0 };
-	bool needsRedraw{ true }; // Track when redraw is needed
+	Renderer* renderer{nullptr};
+	InputSystem* input_system{nullptr};
+	size_t menu_height{0};
+	size_t menu_width{0};
+	size_t menu_starty{0};
+	size_t menu_startx{0};
+	int keyPress{0};
+	bool isHighlighted{false};
+
 public:
-	bool run{ true };
-	bool back{ false };
+	bool run{true};
+	bool back{false};
+
 	BaseMenu() = default;
 	virtual ~BaseMenu() = default;
 	BaseMenu(const BaseMenu&) = delete;
@@ -27,42 +30,18 @@ public:
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
 	void menu_new(size_t height, size_t width, size_t starty, size_t startx, GameContext& ctx);
-	void handle_resize();
-	void menu_clear() 
-	{ 
-		if (menuWindow) 
-		{
-			wclear(menuWindow); 
-			// Fill with solid background to prevent bleed-through
-			wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
-		}
-		needsRedraw = true; 
-	};
-	void menu_print(int x, int y, const std::string& text) { mvwprintw(menuWindow, y, x, text.c_str()); };
-	void menu_refresh() { wrefresh(menuWindow); };
-	void menu_delete();
-	void menu_highlight_on() { wattron(menuWindow, A_REVERSE); };
-	void menu_highlight_off() { wattroff(menuWindow, A_REVERSE); };
-	void menu_key_listen()
-	{
-		keyPress = wgetch(menuWindow);
-		if (keyPress == KEY_RESIZE)
-		{
-			handle_resize();
-		}
-	}
-	void menu_set_run_true() { run = true; };
-	void menu_set_run_false() { run = false; };
-	void menu_mark_dirty() { needsRedraw = true; }; // Mark for redraw
-	bool menu_needs_redraw() const { return needsRedraw; };
-	void menu_clear_dirty() { needsRedraw = false; };
-
-	// Web-optimized rendering methods
-	void menu_save_background(); // Save screen area behind menu
-	void menu_restore_background(); // Restore background when closing
-	void menu_draw_box(); // Draw menu box with title
-	void menu_efficient_refresh(); // Only refresh if needed
+	void menu_clear();
+	void menu_print(int x, int y, const std::string& text);
+	void menu_refresh();
+	void menu_delete() {}
+	void menu_highlight_on() { isHighlighted = true; }
+	void menu_highlight_off() { isHighlighted = false; }
+	void menu_key_listen();
+	void menu_set_run_true() { run = true; }
+	void menu_set_run_false() { run = false; }
+	void menu_mark_dirty() {}
+	void menu_draw_box();
 
 	virtual void menu(GameContext& ctx) = 0;
-	virtual void draw_content() {}; // Default empty implementation
+	virtual void draw_content() {}
 };

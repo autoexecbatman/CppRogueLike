@@ -26,7 +26,7 @@ class MenuBuy : public BaseMenu
 	void populate_items();
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
-	void handle_buy(WINDOW* tradeWin, Creature& shopkeeper, Player& seller);
+	void handle_buy(void* tradeWin, Creature& shopkeeper, Player& seller);
 	void draw_content();
 public:
 	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);

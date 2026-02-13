@@ -8,17 +8,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find required packages
 find_package(GTest CONFIG REQUIRED)
-find_path(SDL2_INCLUDE_DIR SDL.h PATH_SUFFIXES SDL2)
-find_library(SDL2_LIBRARY SDL2)
-find_library(SDL2MAIN_LIBRARY SDL2main)
-find_library(SDL2_TTF_LIBRARY SDL2_ttf)
+find_package(raylib CONFIG REQUIRED)
 find_package(libtcod CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-
-# Vendored PDCurses SDL2
-set(PDCURSES_DIR ${CMAKE_SOURCE_DIR}/pdcurses)
-file(GLOB PDCURSES_CORE_SRC "${PDCURSES_DIR}/pdcurses/*.c")
-file(GLOB PDCURSES_SDL_SRC "${PDCURSES_DIR}/sdl2/*.c")
 
 # Include directories from main project
 include_directories(
@@ -51,6 +43,11 @@ message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOU
 # Explicitly list parent project sources (excludes main.cpp)
 set(PARENT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(PARENT_SOURCES
+    # Renderer (raylib)
+    ${PARENT_SOURCE_DIR}/Renderer/Renderer.cpp
+    ${PARENT_SOURCE_DIR}/Renderer/InputSystem.cpp
+    ${PARENT_SOURCE_DIR}/Renderer/Panel.cpp
+
     # Actor
     ${PARENT_SOURCE_DIR}/Actor/Actor.cpp
     ${PARENT_SOURCE_DIR}/Actor/Attacker.cpp
@@ -172,21 +169,16 @@ set(PARENT_SOURCES
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} parent source files")
 
 # Create test executable with both test sources and parent sources
-add_executable(test_exe ${TEST_SOURCES} ${PARENT_SOURCES} ${PDCURSES_CORE_SRC} ${PDCURSES_SDL_SRC})
+add_executable(test_exe ${TEST_SOURCES} ${PARENT_SOURCES})
 
 # Add TESTING_MODE definition for test-specific code
-target_compile_definitions(test_exe PRIVATE TESTING_MODE PDC_WIDE)
+target_compile_definitions(test_exe PRIVATE TESTING_MODE)
 
-# Add PDCurses and SDL2 include directories
-target_include_directories(test_exe PRIVATE ${PDCURSES_DIR} ${SDL2_INCLUDE_DIR})
-
-# Link against Google Test and required libraries (not gtest_main since we provide our own)
+# Link against Google Test and required libraries
 target_link_libraries(test_exe
     PRIVATE
         GTest::gtest
-        ${SDL2MAIN_LIBRARY}
-        ${SDL2_LIBRARY}
-        ${SDL2_TTF_LIBRARY}
+        raylib
         libtcod::libtcod
         nlohmann_json::nlohmann_json
 )

@@ -1,165 +1,97 @@
 #include "BaseMenu.h"
 #include "../Core/GameContext.h"
-#include "../Systems/MessageSystem.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
+#include "../Colors/Colors.h"
 
-void BaseMenu::menu_new(size_t height, size_t width, size_t starty, size_t startx, GameContext& ctx)
+void BaseMenu::menu_new(
+	size_t height,
+	size_t width,
+	size_t starty,
+	size_t startx,
+	GameContext& ctx
+)
 {
-	// check bound before creating window - allow full screen dimensions
-	if (height > LINES || width > COLS)
-	{
-		ctx.message_system->log("Menu window size is too big. Height: " + std::to_string(height) + ", Width: " + std::to_string(width));
-		ctx.message_system->log("Terminal size - LINES: " + std::to_string(LINES) + ", COLS: " + std::to_string(COLS));
-		std::exit(EXIT_FAILURE);
-	}
-
-	// For full screen menus, allow start position (0,0)
-	if (starty < 0
-		||
-		startx < 0
-		|| 
-		(starty > 0 && starty >= LINES)
-		|| 
-		(startx > 0 && startx >= COLS))
-	{
-		ctx.message_system->log("Menu window start position is out of bounds. StartY: " + std::to_string(starty) + ", StartX: " + std::to_string(startx));
-		std::exit(EXIT_FAILURE);
-	}
-
-	// Store dimensions
 	menu_height = height;
 	menu_width = width;
 	menu_starty = starty;
 	menu_startx = startx;
-
-	// create main menu window
-	menuWindow = newwin(
-		static_cast<int>(height),
-		static_cast<int>(width),
-		static_cast<int>(starty),
-		static_cast<int>(startx)
-	);
-	
-	// Set solid background to prevent world bleed-through
-	if (menuWindow)
-	{
-		wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
-		wclear(menuWindow);
-		keypad(menuWindow, TRUE);
-	}
-
-	needsRedraw = true;
+	renderer = ctx.renderer;
+	input_system = ctx.input_system;
 }
 
-void BaseMenu::handle_resize()
+void BaseMenu::menu_clear()
 {
-	// Detect full-screen menus before updating terminal dimensions
-	bool wasFullScreen = (menu_starty == 0
-		&& menu_startx == 0
-		&& menu_height == static_cast<size_t>(LINES)
-		&& menu_width == static_cast<size_t>(COLS));
+	if (!renderer) return;
+	renderer->begin_frame();
+}
 
-	resize_term(0, 0);
+void BaseMenu::menu_print(int x, int y, const std::string& text)
+{
+	if (!renderer) return;
 
-	if (menuWindow)
+	int ts = renderer->get_tile_size();
+	int px = static_cast<int>(menu_startx + x) * ts;
+	int py = static_cast<int>(menu_starty + y) * ts;
+
+	if (isHighlighted)
 	{
-		delwin(menuWindow);
-		menuWindow = nullptr;
-	}
-
-	if (wasFullScreen)
-	{
-		menu_height = static_cast<size_t>(LINES);
-		menu_width = static_cast<size_t>(COLS);
+		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
+		int tw = static_cast<int>(text.size()) * ts;
+		DrawRectangle(px, py, tw, ts, pair.bg);
+		renderer->draw_text(px, py, text, BLACK_WHITE_PAIR);
 	}
 	else
 	{
-		// Recenter at same dimensions
-		int newStartY = (LINES - static_cast<int>(menu_height)) / 2;
-		int newStartX = (COLS - static_cast<int>(menu_width)) / 2;
-		if (newStartY < 0) { newStartY = 0; }
-		if (newStartX < 0) { newStartX = 0; }
-		menu_starty = static_cast<size_t>(newStartY);
-		menu_startx = static_cast<size_t>(newStartX);
+		renderer->draw_text(px, py, text, WHITE_BLACK_PAIR);
 	}
+}
 
-	clear();
-	refresh();
+void BaseMenu::menu_refresh()
+{
+	if (!renderer) return;
+	renderer->end_frame();
+}
 
-	menuWindow = newwin(
-		static_cast<int>(menu_height),
-		static_cast<int>(menu_width),
-		static_cast<int>(menu_starty),
-		static_cast<int>(menu_startx)
-	);
+void BaseMenu::menu_key_listen()
+{
+	if (!input_system) return;
 
-	if (menuWindow)
+	input_system->poll();
+
+	int ch = input_system->get_char_input();
+	if (ch != 0)
 	{
-		wbkgd(menuWindow, ' ' | COLOR_PAIR(0));
-		wclear(menuWindow);
-		keypad(menuWindow, TRUE);
+		keyPress = ch;
+		return;
 	}
 
-	needsRedraw = true;
-}
-
-void BaseMenu::menu_delete()
-{
-	if (menuWindow)
+	GameKey gk = input_system->get_key();
+	switch (gk)
 	{
-		delwin(menuWindow);
-		menuWindow = nullptr;
+	case GameKey::UP:        keyPress = 0x103; break;
+	case GameKey::DOWN:      keyPress = 0x102; break;
+	case GameKey::LEFT:      keyPress = 0x104; break;
+	case GameKey::RIGHT:     keyPress = 0x105; break;
+	case GameKey::ENTER:     keyPress = 10; break;
+	case GameKey::ESCAPE:    keyPress = 27; break;
+	case GameKey::TAB:       keyPress = 9; break;
+	case GameKey::SPACE:     keyPress = ' '; break;
+	case GameKey::BACKSPACE: keyPress = 8; break;
+	default:                 keyPress = 0; break;
 	}
-}
-
-void BaseMenu::menu_save_background()
-{
-	if (!backgroundWindow) return;
-	
-	// Copy the screen area that will be covered by the menu
-	copywin(stdscr, backgroundWindow, 
-			menu_starty > 0 ? static_cast<int>(menu_starty) - 1 : 0,  // source start y
-			menu_startx > 0 ? static_cast<int>(menu_startx) - 1 : 0,  // source start x
-			0, 0,  // dest start y, x
-			static_cast<int>(menu_height) + 1,  // dest end y
-			static_cast<int>(menu_width) + 1,   // dest end x
-			FALSE);  // don't overlay
-}
-
-void BaseMenu::menu_restore_background()
-{
-	if (!backgroundWindow) return;
-	
-	// Restore the saved background
-	copywin(backgroundWindow, stdscr,
-			0, 0,  // source start y, x
-			menu_starty > 0 ? static_cast<int>(menu_starty) - 1 : 0,  // dest start y
-			menu_startx > 0 ? static_cast<int>(menu_startx) - 1 : 0,  // dest start x
-			static_cast<int>(menu_height) + 1,  // dest end y
-			static_cast<int>(menu_width) + 1,   // dest end x
-			FALSE);  // don't overlay
-	
-	// Force refresh of the restored area with touchwin for proper display
-	touchwin(stdscr);
-	refresh();
 }
 
 void BaseMenu::menu_draw_box()
 {
-	if (!menuWindow) return;
-	
-	// Clear the window first
-	wclear(menuWindow);
-	// Draw border box
-	box(menuWindow, 0, 0);
-}
+	if (!renderer) return;
 
-void BaseMenu::menu_efficient_refresh()
-{
-	if (!needsRedraw) return;
-	
-	// Only refresh menu window, not entire screen
-	wnoutrefresh(menuWindow);
-	doupdate(); // Single screen update for all windows
-	
-	needsRedraw = false;
+	int ts = renderer->get_tile_size();
+	int px = static_cast<int>(menu_startx) * ts;
+	int py = static_cast<int>(menu_starty) * ts;
+	int pw = static_cast<int>(menu_width) * ts;
+	int ph = static_cast<int>(menu_height) * ts;
+
+	ColorPair pair = renderer->get_color_pair(WHITE_BLACK_PAIR);
+	DrawRectangleLines(px, py, pw, ph, pair.fg);
 }

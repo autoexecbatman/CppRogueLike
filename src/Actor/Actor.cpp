@@ -4,8 +4,6 @@
 #include <memory>
 #include <format>
 
-#include <curses.h>
-
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "Actor.h"
@@ -17,6 +15,7 @@
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Systems/ShopKeeper.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../Map/Map.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/BuffSystem.h"
@@ -84,24 +83,22 @@ int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 
 void Actor::render(const GameContext& ctx) const noexcept
 {
-	if (is_visible(ctx))
+	if (is_visible(ctx) && ctx.renderer)
 	{
 		char displayChar = actorData.ch;
 		int displayColor = actorData.color;
 
-		// Check if this is an invisible creature (player hiding)          
+		// Check if this is an invisible creature (player hiding)
 		if (auto* creature = dynamic_cast<const Creature*>(this))
 		{
-			if (creature->is_invisible())     
+			if (creature->is_invisible())
 			{
-				displayChar = '_';     
+				displayChar = '_';
 				displayColor = CYAN_BLACK_PAIR;
 			}
 		}
- 
-		attron(COLOR_PAIR(displayColor));          
-		mvaddch(position.y, position.x, displayChar);
-		attroff(COLOR_PAIR(displayColor)); 
+
+		ctx.renderer->draw_tile(position.y, position.x, displayChar, displayColor);
 	}
 }
 

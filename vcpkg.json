@@ -15,8 +15,7 @@
     },
     "nlohmann-json",
     "stb",
-    "sdl2",
-    "sdl2-ttf",
+    "raylib",
     "gtest"
   ]
 }

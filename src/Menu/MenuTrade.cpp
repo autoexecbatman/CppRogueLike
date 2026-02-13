@@ -11,7 +11,6 @@
 
 void Buy::on_selection(GameContext& ctx)
 {
-	// Use the shopkeeper's attached shop component
 	if (shopkeeper.shop != nullptr)
 	{
 		ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player, *shopkeeper.shop));
@@ -42,8 +41,7 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx) :
 MenuTrade::~MenuTrade()
 {
 	menu_delete();
-	
-	// CRITICAL FIX: Reset shopkeeper trade state when menu closes
+
 	if (shopkeeper.ai)
 	{
 		auto* shopAi = dynamic_cast<AiShopkeeper*>(shopkeeper.ai.get());
@@ -59,21 +57,18 @@ void MenuTrade::menu_print_state(size_t state)
 	if (currentState == state)
 	{
 		menu_highlight_on();
-		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state)); // Start at row 1 after title
+		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
 		menu_highlight_off();
 	}
 	else
 	{
-		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state)); // Start at row 1 after title
+		menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
 	}
 }
 
 void MenuTrade::draw_content()
 {
-	// Debug current state
-	mvwprintw(menuWindow, 0, 0, "%d", currentState);
-	
-	// Draw menu options
+	// TODO: Reimplement with Panel+Renderer
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(i);
@@ -82,10 +77,8 @@ void MenuTrade::draw_content()
 
 void MenuTrade::draw()
 {
+	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
-	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Trade");
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(i);
@@ -97,15 +90,14 @@ void MenuTrade::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
-
-	case KEY_UP:
+	case 0x103: // UP
 	case 'w':
 	{
 		currentState = (currentState + iMenuStates.size() - 1) % iMenuStates.size();
 		break;
 	}
 
-	case KEY_DOWN:
+	case 0x102: // DOWN
 	case 's':
 	{
 		currentState = (currentState + 1) % iMenuStates.size();
@@ -113,7 +105,7 @@ void MenuTrade::on_key(int key, GameContext& ctx)
 	}
 
 	case 10:
-	{ // if a selection is made
+	{
 		menu_set_run_false();
 		iMenuStates.at(currentState)->on_selection(ctx);
 		break;
@@ -132,19 +124,13 @@ void MenuTrade::on_key(int key, GameContext& ctx)
 
 void MenuTrade::menu(GameContext& ctx)
 {
-	// Save background before showing menu
-	clear();
 	ctx.rendering_manager->render(ctx);
-	refresh();
-	
+
 	while (run)
 	{
 		draw();
 		menu_key_listen();
 		on_key(keyPress, ctx);
 	}
-	// Restore full game view
-	clear();
 	ctx.rendering_manager->render(ctx);
-	refresh();
 }

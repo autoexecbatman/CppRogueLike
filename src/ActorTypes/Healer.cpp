@@ -1,5 +1,3 @@
-#include <curses.h>
-
 #include "Healer.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -15,15 +13,15 @@ bool Healer::use(Item& owner, Creature& wearer, GameContext& ctx)
 
 	if (amountHealed > 0)
 	{
-		ctx.message_system->message(COLOR_WHITE, "You heal ", false);
-		ctx.message_system->message(COLOR_RED, std::to_string(amountHealed), false);
-		ctx.message_system->message(COLOR_WHITE, " hit points.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You heal ", false);
+		ctx.message_system->message(RED_BLACK_PAIR, std::to_string(amountHealed), false);
+		ctx.message_system->message(WHITE_BLACK_PAIR, " hit points.", true);
 
 		return Pickable::use(owner, wearer, ctx);
 	}
 	else
 	{
-		ctx.message_system->message(COLOR_RED, "Health is already maxed out!", true);
+		ctx.message_system->message(RED_BLACK_PAIR, "Health is already maxed out!", true);
 	}
 
 	return false;

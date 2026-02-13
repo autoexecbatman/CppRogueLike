@@ -113,10 +113,8 @@ void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
 
 void MenuRace::draw()
 {
+	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
-	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Select Race");
 	for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
 	{
 		menu_race_print_option(static_cast<MenuRaceOptions>(i));
@@ -129,14 +127,14 @@ void MenuRace::on_key(int key, GameContext& ctx)
 	switch (keyPress)
 	{
 
-	case KEY_UP:
+	case 0x103:
 	case 'w':
 	{
 		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
 		break;
 	}
 
-	case KEY_DOWN:
+	case 0x102:
 	case 's':
 	{
 		currentState = static_cast<MenuRaceOptions>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
@@ -172,9 +170,7 @@ void MenuRace::menu(GameContext& ctx)
 		menu_key_listen();
 		on_key(keyPress, ctx);
 	}
-	// Clear screen when exiting
-	clear();
-	refresh();
+	// TODO: screen clearing handled by Renderer
 }
 
 // end of file: MenuRace.cpp

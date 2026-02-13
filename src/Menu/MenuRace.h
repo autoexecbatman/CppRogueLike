@@ -4,8 +4,6 @@
 #include <unordered_map>
 #include <memory>
 
-#include <curses.h>
-
 #include "BaseMenu.h"
 #include "IMenuState.h"
 
@@ -55,8 +53,8 @@ class MenuRace : public BaseMenu
 {
 	int height_{ 10 };
 	int width_{ 13 };
-	int starty_{ (LINES - height_) / 2 };
-	int startx_{ (COLS - width_) / 2 };
+	int starty_{ (30 - height_) / 2 };
+	int startx_{ (119 - width_) / 2 };
 	enum class MenuRaceOptions
 	{
 		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK

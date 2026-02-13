@@ -1,67 +1,65 @@
-// InputHandler.cpp - Handles all input processing (keyboard/mouse)
-
 #include "InputHandler.h"
-#include <iostream>
-
-extern "C" int pdc_tileset_anim_ms;
-
-InputHandler::InputHandler() = default;
+#include "../Renderer/InputSystem.h"
 
 void InputHandler::key_store() noexcept
 {
-    std::clog << "storing key" << std::endl;
     lastKey = keyPress;
 }
 
-void InputHandler::key_listen() noexcept
+void InputHandler::key_listen(InputSystem& input) noexcept
 {
-    std::clog << "getting key" << std::endl;
-#ifndef EMSCRIPTEN
-    int anim_timeout = pdc_tileset_anim_ms > 0 ? pdc_tileset_anim_ms : -1;
-    timeout(anim_timeout);
-#endif
-    keyPress = getch();
-    animationTick = (keyPress == ERR);
-    if (keyPress == KEY_RESIZE)
+    // Check for window resize
+    if (input.window_resized())
     {
-        resize_term(0, 0);
         screenResized = true;
+        keyPress = -1;
+        animationTick = false;
+        return;
     }
+
+    // Character keys first (ASCII values match Controls enum)
+    int ch = input.get_char_input();
+    if (ch != 0)
+    {
+        keyPress = ch;
+        animationTick = false;
+        return;
+    }
+
+    // Special keys mapped to legacy keycodes
+    GameKey gk = input.get_key();
+    switch (gk)
+    {
+    case GameKey::UP:         keyPress = 0x103; break;
+    case GameKey::DOWN:       keyPress = 0x102; break;
+    case GameKey::LEFT:       keyPress = 0x104; break;
+    case GameKey::RIGHT:      keyPress = 0x105; break;
+    case GameKey::ENTER:      keyPress = 10; break;
+    case GameKey::ESCAPE:     keyPress = 27; break;
+    case GameKey::TAB:        keyPress = 9; break;
+    case GameKey::SPACE:      keyPress = ' '; break;
+    case GameKey::MOUSE_LEFT: keyPress = 0x199; break;
+    default:
+        keyPress = -1;
+        animationTick = true;
+        return;
+    }
+    animationTick = false;
 }
 
 bool InputHandler::mouse_moved() const noexcept
 {
-    // Simple approach: just return true and let get_mouse_position handle the detection
-    return true;
+    return lastMousePos.x != currentMousePos.x || lastMousePos.y != currentMousePos.y;
 }
 
-Vector2D InputHandler::get_mouse_position() noexcept
+Vector2D InputHandler::get_mouse_position(InputSystem& input, int tile_size) noexcept
 {
-    // Direct mouse position reading
-    request_mouse_pos();
-    currentMousePos.x = Mouse_status.x;
-    currentMousePos.y = Mouse_status.y;
+    lastMousePos = currentMousePos;
+    currentMousePos = input.get_mouse_tile(tile_size);
     return currentMousePos;
 }
 
 Vector2D InputHandler::get_mouse_position_old() const noexcept
 {
     return lastMousePos;
-}
-
-void InputHandler::update_mouse_position() noexcept
-{
-    // Check for mouse events without blocking
-    nodelay(stdscr, TRUE);
-    int ch = getch();
-    nodelay(stdscr, FALSE);
-    
-    if (ch == KEY_MOUSE)
-    {
-        lastMousePos = currentMousePos;
-        request_mouse_pos();
-        currentMousePos.x = Mouse_status.x;
-        currentMousePos.y = Mouse_status.y;
-    }
-    // Note: We don't need to ungetch if it's not KEY_MOUSE since we used nodelay
 }

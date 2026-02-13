@@ -1,7 +1,5 @@
 #pragma once
 
-#include <curses.h>
-
 class Player;
 class Creature;
 struct GameContext;
@@ -21,13 +19,13 @@ private:
     static constexpr int WINDOW_X = 10;
 
     // Display sections
-    static void display_title(WINDOW* window, const Player& player, int level);
-    static void display_basic_info(WINDOW* window, const Player& player, int level);
-    static void display_current_stats(WINDOW* window, const Player& player);
-    static void display_level_benefits(WINDOW* window, const Player& player, int level);
-    static void display_class_benefits(WINDOW* window, const Player& player, int level, int& currentLine);
-    static void display_next_level_info(WINDOW* window, const Player& player, GameContext& ctx);
-    static void display_continue_prompt(WINDOW* window);
+    static void display_title(void* window, const Player& player, int level);
+    static void display_basic_info(void* window, const Player& player, int level);
+    static void display_current_stats(void* window, const Player& player);
+    static void display_level_benefits(void* window, const Player& player, int level);
+    static void display_class_benefits(void* window, const Player& player, int level, int& currentLine);
+    static void display_next_level_info(void* window, const Player& player, GameContext& ctx);
+    static void display_continue_prompt(void* window);
 
     // Helper methods
     static bool has_thac0_improvement(const Player& player, int level);

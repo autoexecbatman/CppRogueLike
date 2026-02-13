@@ -1,13 +1,9 @@
 // file: Systems/GameLoopCoordinator.cpp
 #include <algorithm>
-
-#include <curses.h>
+#include <format>
 
 #include "GameLoopCoordinator.h"
 #include "CreatureManager.h"
-
-extern "C" int pdc_tileset_active;
-extern "C" void PDC_animate_tiles(int first_line, int last_line);
 #include "HungerSystem.h"
 #include "LevelManager.h"
 #include "../Core/GameContext.h"
@@ -21,33 +17,27 @@ extern "C" void PDC_animate_tiles(int first_line, int last_line);
 #include "../Systems/InputHandler.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/GameStateManager.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
     handle_initialization(ctx);
 
-    // Debug game loop tracking
     if (ctx.message_system->is_debug_mode())
     {
         ctx.message_system->log("//====================LOOP====================//");
-        ctx.message_system->log("Loop number: " + std::to_string(loopNum) + "\n");
+        ctx.message_system->log(std::format("Loop number: {}\n", loopNum));
     }
-
-    //==INIT_GUI==
-    // GUI initialization is now handled in STARTUP completion
-    // This ensures it happens after racial bonuses are applied
 
     handle_input_phase(ctx);
 
     if (ctx.input_handler->was_resized())
     {
         ctx.input_handler->clear_resize();
-
-        // Regenerate map at new window dimensions
         ctx.map->regenerate(ctx);
         ctx.map->compute_fov(ctx);
 
-        // Recreate GUI at new position
         if (ctx.gui->guiInit)
         {
             ctx.gui->gui_shutdown();
@@ -56,26 +46,16 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
         ctx.gui->guiInit = true;
         ctx.gui->gui_update(ctx);
 
-        // Render everything immediately
-        pdc_tileset_active = 1;
-        ctx.rendering_manager->render(ctx);
-        refresh();
-        pdc_tileset_active = 0;
-        ctx.gui->gui_render(ctx);
-        ctx.rendering_manager->force_screen_refresh();
-
         *ctx.game_status = GameStatus::IDLE;
-        return;
     }
 
-    // Animation tick: no real input, reblit map tile sprites for animation
-    if (ctx.input_handler->is_animation_tick())
+    // Update game state only when player provides input
+    if (!ctx.input_handler->is_animation_tick())
     {
-        PDC_animate_tiles(0, LINES - GUI_HEIGHT - 1);
-        return;
+        handle_update_phase(ctx, gui);
     }
 
-    handle_update_phase(ctx, gui);
+    // Always render every frame
     handle_render_phase(ctx, gui);
     handle_menu_check(ctx);
 }
@@ -91,46 +71,42 @@ void GameLoopCoordinator::handle_initialization(GameContext& ctx)
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 {
-    //==INPUT==
-    ctx.input_handler->reset_key(); // reset the keyPress so it won't get stuck in a loop
+    ctx.input_handler->reset_key();
     if (ctx.menu_manager->should_take_input())
     {
+        ctx.input_system->poll();
         ctx.input_handler->key_store();
-        ctx.input_handler->key_listen();
+        ctx.input_handler->key_listen(*ctx.input_system);
     }
-    ctx.menu_manager->set_should_take_input(true); // reset shouldInput to reset the flag
+    ctx.menu_manager->set_should_take_input(true);
 }
 
 void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
-    //==UPDATE==
     ctx.message_system->log("Running update...");
-    ctx.game_loop_coordinator->update(ctx); // update map and actors positions
-    gui.gui_update(ctx); // update the gui
+    ctx.game_loop_coordinator->update(ctx);
+    gui.gui_update(ctx);
     ctx.message_system->log("Update OK.");
 }
 
 void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
-    //==DRAW==
     ctx.message_system->log("Running render...");
-    // Render game content first with tileset sprites
-    pdc_tileset_active = 1;
+    ctx.renderer->begin_frame();
+
     ctx.rendering_manager->render(ctx);
-    refresh();
-    pdc_tileset_active = 0;
-    // Render GUI with TTF text - AFTER game render so it's not overwritten
-    if (gui.guiInit) {
-        gui.gui_update(ctx);
+
+    if (gui.guiInit)
+    {
         gui.gui_render(ctx);
     }
-    ctx.rendering_manager->restore_game_display();
+
+    ctx.renderer->end_frame();
     ctx.message_system->log("Render OK.");
 }
 
 void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 {
-    // Check for menus AFTER rendering so positions are updated
     if (ctx.menu_manager->has_active_menus(*ctx.menus))
     {
         *ctx.window_state = WindowState::MENU;
@@ -148,16 +124,6 @@ void GameLoopCoordinator::update(GameContext& ctx)
         ctx.message_system->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
         ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
         ctx.message_system->finalize_message();
-
-        WINDOW* victoryWin = newwin(10, 50, (LINES / 2) - 5, (COLS / 2) - 25);
-        box(victoryWin, 0, 0);
-        mvwprintw(victoryWin, 2, 10, "VICTORY!");
-        mvwprintw(victoryWin, 4, 5, "You have won the game!");
-        mvwprintw(victoryWin, 6, 5, "Press any key to exit...");
-        wrefresh(victoryWin);
-        getch();
-        delwin(victoryWin);
-
         *ctx.run = false;
     }
 
@@ -198,7 +164,14 @@ void GameLoopCoordinator::update(GameContext& ctx)
         std::erase_if(*ctx.objects, [](const auto& obj) { return !obj; });
 
         ctx.creature_manager->update_creatures(*ctx.creatures, ctx);
-        ctx.creature_manager->spawn_creatures(*ctx.creatures, *ctx.rooms, *ctx.map, *ctx.dice, *ctx.time, ctx);
+        ctx.creature_manager->spawn_creatures(
+            *ctx.creatures,
+            *ctx.rooms,
+            *ctx.map,
+            *ctx.dice,
+            *ctx.time,
+            ctx
+        );
 
         for (const auto& creature : *ctx.creatures)
         {
@@ -226,7 +199,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
     if (*ctx.game_status == GameStatus::DEFEAT)
     {
         ctx.message_system->log("Player is dead!");
-        ctx.message_system->append_message_part(COLOR_RED, "You died! Press any key...");
+        ctx.message_system->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
         ctx.message_system->finalize_message();
         *ctx.run = false;
     }

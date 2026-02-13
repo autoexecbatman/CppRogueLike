@@ -1,6 +1,5 @@
 #pragma once
 
-#include <curses.h>
 #include <string>
 #include <unordered_map>
 #include <memory>
@@ -35,8 +34,8 @@ class Menu : public BaseMenu
 	bool isStartupMenu{ true }; // Track if this is the startup menu (default true)
 	int menu_height{ 6 }; // Height for the menu, enough for 4 options + title
 	int menu_width{ 11 }; // Wide enough for "Load Game"
-	int menu_starty{ (LINES - menu_height) / 2 };
-	int menu_startx{ (COLS - menu_width) / 2 };
+	int menu_starty{ (30 - menu_height) / 2 };
+	int menu_startx{ (119 - menu_width) / 2 };
 	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, QUIT }
 	currentState { MenuState::NEW_GAME };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;

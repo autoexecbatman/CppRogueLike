@@ -1,6 +1,4 @@
 // file: AiShopkeeper.cpp
-#include <curses.h>
-
 #include "AiShopkeeper.h"
 #include "../Random/RandomDice.h"
 #include "../Actor/Actor.h"

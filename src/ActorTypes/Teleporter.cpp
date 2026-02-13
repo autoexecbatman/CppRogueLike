@@ -1,5 +1,3 @@
-#include <curses.h>
-
 #include "Teleporter.h"
 #include "../Colors/Colors.h"
 #include "../Map/Map.h"
@@ -22,14 +20,14 @@ bool Teleporter::use(Item& owner, Creature& wearer, GameContext& ctx)
 		// Recalculate FOV from new position
 		ctx.map->compute_fov(ctx);
 
-		ctx.message_system->message(COLOR_BLUE, "You feel disoriented as the world shifts around you!", true);
-		ctx.message_system->message(COLOR_WHITE, "You have been teleported to a new location.", true);
+		ctx.message_system->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
 
 		return Pickable::use(owner, wearer, ctx);
 	}
 	else
 	{
-		ctx.message_system->message(COLOR_RED, "The teleportation magic fizzles out - no safe location found!", true);
+		ctx.message_system->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
 		return false;
 	}
 }

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <curses.h>
 #include <vector>
 #include <string>
 #include <array>
@@ -13,7 +12,6 @@ class Item;
 class Player;
 struct GameContext;
 
-// Three full-screen tabs: Equipment, Backpack (all items), Usables (consumables only)
 enum class InventoryScreen
 {
 	EQUIPMENT,
@@ -64,7 +62,6 @@ inline constexpr std::array<SlotDisplayInfo, SLOT_COUNT> SLOT_TABLE
 	{EquipmentSlot::TOOL,           "Tool"},
 }};
 
-// Category display order for Backpack tab (all items)
 inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER
 {{
 	ItemCategory::CONSUMABLE,
@@ -82,7 +79,6 @@ inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER
 	ItemCategory::UNKNOWN,
 }};
 
-// Categories shown in the Usables tab
 inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES
 {{
 	ItemCategory::CONSUMABLE,
@@ -94,26 +90,20 @@ class InventoryUI
 {
 public:
 	InventoryUI();
-	~InventoryUI();
+	~InventoryUI() = default;
 
 	void display(Player& player, GameContext& ctx, InventoryScreen startScreen);
 
 private:
-	// Window management
-	void create_windows();
-	void redraw_frame();
-	void destroy_windows();
-	void refresh_windows();
-
 	// Data building
 	void rebuild_item_list(const Player& player);
 	bool item_fits_slot(const Item& item, EquipmentSlot slot) const;
 	bool is_usable_category(ItemCategory cat) const;
 
-	// Rendering
-	void render_tab_bar();
-	void render_equipment_screen(const Player& player);
-	void render_item_list_screen();
+	// Rendering (all use Renderer via GameContext)
+	void render_tab_bar(GameContext& ctx);
+	void render_equipment_screen(const Player& player, GameContext& ctx);
+	void render_item_list_screen(GameContext& ctx);
 	void render_detail_bar(const Player& player, GameContext& ctx);
 
 	// Format helpers
@@ -125,7 +115,7 @@ private:
 	std::string get_category_name(ItemCategory cat) const;
 	ItemCategory get_effective_category(const Item& item) const;
 
-	// Input handling
+	// Input handling (uses InputSystem via GameContext)
 	bool handle_input(Player& player, GameContext& ctx);
 	void handle_cursor_up();
 	void handle_cursor_down();
@@ -134,16 +124,13 @@ private:
 	void handle_enter_item(Player& player, GameContext& ctx);
 	void handle_drop(Player& player, GameContext& ctx);
 
-	// Restore game display on close
-	void restore_game_display(GameContext& ctx);
-
 	// Cursor helpers
 	int get_next_item_index(int from, int direction) const;
 	Item* get_selected_item() const;
 
-	// Windows
-	WINDOW* mainWindow;
-	WINDOW* detailWindow;
+	// Layout constants
+	static constexpr int SCREEN_COLS = 119;
+	static constexpr int SCREEN_ROWS = 30;
 
 	// State
 	InventoryScreen activeScreen;

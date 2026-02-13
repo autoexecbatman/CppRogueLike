@@ -1,5 +1,6 @@
 // file: MenuName.cpp
 #include <string>
+#include <cstring>
 
 #include "MenuName.h"
 #include "../Core/GameContext.h"
@@ -7,28 +8,21 @@
 #include "../Systems/MenuManager.h"
 #include "../Systems/RenderingManager.h"
 
-void MenuName::menu_name_new() noexcept { menuNameWindow = newwin(menuNameHeight, menuNameWidth, menuNameY, menuNameX); }
+void MenuName::menu_name_new() noexcept { /* TODO: Reimplement with Panel+Renderer */ }
 
-void MenuName::menu_name_clear() noexcept { wclear(menuNameWindow); }
+void MenuName::menu_name_clear() noexcept { /* TODO: Reimplement with Panel+Renderer */ }
 
-void MenuName::menu_name_print(int x, int y, const std::string& text) noexcept { mvwprintw(menuNameWindow, y, x, text.c_str()); }
+void MenuName::menu_name_print(int x, int y, const std::string& text) noexcept { /* TODO: Reimplement with Panel+Renderer */ }
 
-void MenuName::menu_name_refresh() noexcept { wrefresh(menuNameWindow); }
+void MenuName::menu_name_refresh() noexcept { /* TODO: Reimplement with Panel+Renderer */ }
 
-void MenuName::menu_name_delete() noexcept { delwin(menuNameWindow); }
+void MenuName::menu_name_delete() noexcept { /* TODO: Reimplement with Panel+Renderer */ }
 
 std::string MenuName::menu_name_input()
 {
-	wgetnstr(menuNameWindow, name, 13);
-	// check if name is empty
-	if ( strlen(name) != 0)
-	{
-		return name;
-	}
-	else
-	{
-		return "Player";
-	}
+	// TODO: Reimplement text input with InputSystem::get_char_input()
+	// For now return default name
+	return "Player";
 }
 
 void MenuName::menu_name_store() { playerName = name; }
@@ -38,29 +32,20 @@ void MenuName::menu_name_assign(GameContext& ctx) { ctx.player->actorData.name =
 void MenuName::menu_name(GameContext& ctx)
 {
 	menu_name_new();
-	curs_set(1); // show cursor
-	echo(); // show input
-
 	menu_name_clear();
 
-	menu_name_print(
-		0,
-		0,
-		"Enter your name: "
-	);
+	menu_name_print(0, 0, "Enter your name: ");
 
-	menu_name_input();
+	std::string inputName = menu_name_input();
+	std::strncpy(name, inputName.c_str(), sizeof(name) - 1);
+	name[sizeof(name) - 1] = '\0';
+
 	menu_name_store();
 	menu_name_assign(ctx);
 
 	menu_name_refresh();
-
-	curs_set(0); // hide cursor
-	noecho(); // hide input
-
 	menu_name_delete();
 
-	// Only restore game display if game was initialized (not during character creation)
 	if (ctx.menu_manager->is_game_initialized())
 	{
 		ctx.rendering_manager->restore_game_display();

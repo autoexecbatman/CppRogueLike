@@ -27,6 +27,8 @@ class Stairs;
 class Object;
 class BaseMenu;
 struct Vector2D;
+class Renderer;
+class InputSystem;
 
 // Game status enumeration - moved here to avoid circular dependency
 enum class GameStatus
@@ -68,6 +70,10 @@ struct GameContext {
     DisplayManager* display_manager{ nullptr };
     GameLoopCoordinator* game_loop_coordinator{ nullptr };
     DataManager* data_manager{ nullptr };
+
+    // Rendering
+    Renderer* renderer{ nullptr };
+    InputSystem* input_system{ nullptr };
 
     // Specialized systems
     TargetingSystem* targeting{ nullptr };

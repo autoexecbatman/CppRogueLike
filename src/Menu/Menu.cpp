@@ -17,19 +17,11 @@ void NewGame::on_selection(GameContext& ctx)
 
 void LoadGame::on_selection(GameContext& ctx)
 {
-	// Clear the menu from screen before loading
-	clear();
-	refresh();
-	
-	// Show loading message
-	mvprintw(LINES / 2, (COLS / 2) - 10, "Loading game, please wait...");
-	refresh();
-	
+	// TODO: clear screen and show loading message (was curses clear/mvprintw/refresh)
+
 	ctx.state_manager->load_all(ctx);
-	
-	// Clear loading message after load completes
-	clear();
-	refresh();
+
+	// TODO: clear loading message after load completes (was curses clear/refresh)
 }
 
 void Options::on_selection(GameContext& ctx)
@@ -74,9 +66,8 @@ void Menu::menu_print_state(MenuState state)
 
 void Menu::draw_content()
 {
-	// Debug current state
-	mvwprintw(menuWindow, 0, 0, "%d", currentState);
-	
+	// TODO: debug current state display (was curses mvwprintw)
+
 	// Draw menu options
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
@@ -87,13 +78,11 @@ void Menu::draw_content()
 void Menu::draw()
 {
 	menu_clear();
-	
-	// Fill menu background with solid color to prevent world bleeding
-	wbkgd(menuWindow, ' ' | COLOR_PAIR(0)); // Use default color pair
-	
-	box(menuWindow, 0, 0);
-	// Title
-	mvwprintw(menuWindow, 0, 1, "Main Menu");
+
+	// TODO: fill menu background (was curses wbkgd/COLOR_PAIR)
+	// TODO: draw box (was curses box)
+	// TODO: draw title "Main Menu" (was curses mvwprintw)
+
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(static_cast<MenuState>(i));
@@ -106,7 +95,7 @@ void Menu::on_key(int key, GameContext& ctx)
 	switch (key)
 	{
 
-	case KEY_UP:
+	case 0x103: // KEY_UP
 	case 'w':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
@@ -114,7 +103,7 @@ void Menu::on_key(int key, GameContext& ctx)
 		break;
 	}
 
-	case KEY_DOWN:
+	case 0x102: // KEY_DOWN
 	case 's':
 	{
 		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
@@ -175,30 +164,27 @@ void Menu::on_key(int key, GameContext& ctx)
 
 void Menu::menu(GameContext& ctx)
 {
-	// Clear screen and render game background before showing menu
-	clear();
+	// TODO: clear screen (was curses clear/refresh)
 	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
 		ctx.rendering_manager->render(ctx);
 		ctx.gui->gui_render(ctx);
 	}
-	refresh();
-	
+
 	while (run) // menu has its own loop
 	{
 		draw(); // draw the menu
 		menu_key_listen(); // listen for key presses
 		on_key(keyPress, ctx); // run the key press
 	}
-	
+
 	// Restore full game view if returning to game
 	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
 	{
-        clear();
-        ctx.rendering_manager->render(ctx);
-        ctx.gui->gui_render(ctx);
-        refresh();
+		// TODO: clear screen (was curses clear/refresh)
+		ctx.rendering_manager->render(ctx);
+		ctx.gui->gui_render(ctx);
 	}
 }
 

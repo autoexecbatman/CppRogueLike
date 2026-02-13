@@ -3,8 +3,6 @@
 #include <algorithm>
 #include <map>
 
-#include <curses.h>
-
 #include "SpellSystem.h"
 #include "../Core/GameContext.h"
 #include "../Colors/Colors.h"
@@ -169,15 +167,8 @@ bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
 
 static void animate_heal(const Vector2D& pos)
 {
-    const char* frames[] = {"+", "*", "+"};
-    for (int i = 0; i < 3; ++i)
-    {
-        attron(COLOR_PAIR(GREEN_BLACK_PAIR));
-        mvaddch(pos.y, pos.x, frames[i][0]);
-        attroff(COLOR_PAIR(GREEN_BLACK_PAIR));
-        refresh();
-        napms(100);
-    }
+    // TODO: stub - heal animation requires renderer replacement
+    // Previously drew "+", "*", "+" frames at pos with COLOR_PAIR(GREEN_BLACK_PAIR) and napms(100)
 }
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
@@ -212,49 +203,8 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 
 static void animate_magic_missile(const Vector2D& from, const Vector2D& to, int missileNum)
 {
-    // Different colors for each missile
-    static const int colors[] = {MAGENTA_BLACK_PAIR, CYAN_BLACK_PAIR, BLUE_BLACK_PAIR, GREEN_BLACK_PAIR, WHITE_BLACK_PAIR};
-    int color = colors[missileNum % 5];
-
-    // Bresenham's line for projectile path
-    int dx = std::abs(to.x - from.x);
-    int dy = std::abs(to.y - from.y);
-    int sx = (from.x < to.x) ? 1 : -1;
-    int sy = (from.y < to.y) ? 1 : -1;
-    int err = dx - dy;
-
-    int x = from.x;
-    int y = from.y;
-
-    while (x != to.x || y != to.y)
-    {
-        attron(COLOR_PAIR(color));
-        mvaddch(y, x, '*');
-        attroff(COLOR_PAIR(color));
-        refresh();
-        napms(25);
-
-        mvaddch(y, x, ' ');
-
-        int e2 = 2 * err;
-        if (e2 > -dy)
-        {
-            err -= dy;
-            x += sx;
-        }
-        if (e2 < dx)
-        {
-            err += dx;
-            y += sy;
-        }
-    }
-
-    // Impact flash
-    attron(COLOR_PAIR(YELLOW_BLACK_PAIR));
-    mvaddch(to.y, to.x, '*');
-    attroff(COLOR_PAIR(YELLOW_BLACK_PAIR));
-    refresh();
-    napms(50);
+    // TODO: stub - magic missile animation requires renderer replacement
+    // Previously animated projectile path using attron/mvaddch/refresh/napms
 }
 
 static int calculate_num_missiles(int casterLevel)

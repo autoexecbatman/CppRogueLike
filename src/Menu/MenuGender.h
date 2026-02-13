@@ -4,8 +4,6 @@
 #include <string>
 #include <unordered_map>
 
-#include <curses.h>
-
 #include "BaseMenu.h"
 #include "IMenuState.h"
 
@@ -36,8 +34,8 @@ class MenuGender : public BaseMenu
 {
 	int height_{ 6 };
 	int width_{ 15 };
-	int starty_{ (LINES - height_) / 2 };
-	int startx_{ (COLS - width_) / 2 };
+	int starty_{ (30 - height_) / 2 };
+	int startx_{ (119 - width_) / 2 };
 	enum class MenuState { MALE, FEMALE, RANDOM, BACK }
 	currentState{ MenuState::MALE };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;

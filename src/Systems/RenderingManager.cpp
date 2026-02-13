@@ -1,10 +1,7 @@
 // RenderingManager.cpp - Handles all rendering and screen management
-#include <curses.h>
-
 #include "RenderingManager.h"
 #include "../Core/GameContext.h"
-
-extern "C" int pdc_tileset_active;
+#include "../Renderer/Renderer.h"
 #include "../Map/Map.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
@@ -28,7 +25,7 @@ void RenderingManager::render_world(
     const GameContext& ctx
 ) const
 {
-    map.render();
+    map.render(ctx);
     stairs.render(ctx);
 
     render_objects(objects, ctx);
@@ -64,20 +61,12 @@ void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items
 
 void RenderingManager::safe_screen_clear()
 {
-#ifdef EMSCRIPTEN
-    // For Emscripten: Don't use clear(), just redraw
-    // Note: restore_game_display will be called separately
-#else
-    // For native builds: Use normal clear
-    clear();
-    refresh();
-#endif
+    // No-op: Renderer handles frame clearing via ClearBackground(BLACK) in begin_frame()
 }
 
 void RenderingManager::force_screen_refresh() const
 {
-    refresh();
-    doupdate();  // Force immediate update
+    // No-op: frame-based rendering handles this via Renderer::end_frame()
 }
 
 void RenderingManager::restore_game_display() const
@@ -88,14 +77,8 @@ void RenderingManager::restore_game_display() const
 
 void RenderingManager::restore_screen(GameContext& ctx) const
 {
-    clear();
-    refresh();
-    pdc_tileset_active = 1;
     render(ctx);
-    refresh();
-    pdc_tileset_active = 0;
     ctx.gui->gui_render(ctx);
-    force_screen_refresh();
 }
 
 void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const

@@ -2,8 +2,6 @@
 #include <format>
 #include <fstream>
 
-#include <curses.h>
-
 #include "MessageSystem.h"
 #include "../Gui/Gui.h"
 #include "../Colors/Colors.h"
@@ -20,7 +18,7 @@ void MessageSystem::message(int color, std::string_view text, bool isComplete)
     attackMessageParts.push_back(LogMessage{ color, std::string(text) });
 
     // If isComplete flag is set, consider the message to be finished
-    if (isComplete) 
+    if (isComplete)
     {
         // Add the entire composed message parts to attackMessagesWhole
         attackMessagesWhole.push_back(attackMessageParts);
@@ -40,7 +38,7 @@ void MessageSystem::append_message_part(int color, std::string_view text)
 
 void MessageSystem::finalize_message()
 {
-    if (!attackMessageParts.empty()) 
+    if (!attackMessageParts.empty())
     {
         attackMessagesWhole.push_back(attackMessageParts);
         attackMessageParts.clear();
@@ -68,7 +66,7 @@ void MessageSystem::log(std::string_view message) const
 void MessageSystem::display_debug_messages() const noexcept
 {
     render_debug_background();
-    
+
     int total_lines = 0;
     std::ifstream logFile("clog.txt");
     std::string line;
@@ -85,84 +83,14 @@ void MessageSystem::display_debug_messages() const noexcept
 
 void MessageSystem::render_debug_background() const
 {
-    // Clear screen and render game background before showing debug screen
-    clear();
-    refresh();
+    // TODO: stub - clear screen and render game background without curses
 }
 
 void MessageSystem::create_debug_pad(int total_lines) const
 {
-    // Create a pad large enough to hold all the text
-    WINDOW* log_pad = newpad(total_lines + 1, COLS - 2);
-    int y = 0;
-
-    // Open the file again to actually display the text
-    std::ifstream logFile("clog.txt");
-    if (logFile.is_open())
-    {
-        std::string line;
-        while (getline(logFile, line))
-        {
-            mvwprintw(log_pad, y++, 1, "%s", line.c_str());
-        }
-        logFile.close();
-    }
-
-    // Initial display position
-    int pad_pos = 0;
-    prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
-
-    // Scroll interaction
-    int ch;
-    do
-    {
-        ch = getch();
-        switch (ch)
-        {
-        case KEY_DOWN:
-            if (pad_pos + LINES - 2 < total_lines)
-            {
-                pad_pos++;
-            }
-            break;
-        case KEY_UP:
-            if (pad_pos > 0)
-            {
-                pad_pos--;
-            }
-            break;
-        case KEY_NPAGE:  // Handle Page Down
-            if (pad_pos + LINES - 2 < total_lines)
-            {
-                pad_pos += (LINES - 2);  // Move down a page
-                if (pad_pos + LINES - 2 > total_lines)
-                {  // Don't go past the end
-                    pad_pos = total_lines - LINES + 2;
-                }
-            }
-            break;
-        case KEY_PPAGE:  // Handle Page Up
-            if (pad_pos > 0)
-            {
-                pad_pos -= (LINES - 2);  // Move up a page
-                if (pad_pos < 0)
-                {
-                    pad_pos = 0;  // Don't go past the beginning
-                }
-            }
-            break;
-        case KEY_HOME:  // Jump to the top of the log
-            pad_pos = 0;
-            break;
-        case KEY_END:  // Jump to the bottom of the log
-            if (total_lines > LINES - 2)
-            {
-                pad_pos = total_lines - LINES + 2;
-            }
-            break;
-        }
-        prefresh(log_pad, pad_pos, 0, 1, 1, LINES - 2, COLS - 2);
-    } while (ch != 'q' && ch != 27);  // Exit on 'q' or Escape
-
-    delwin(log_pad);  // Delete the pad after use
+    // TODO: stub - debug log pad display requires curses replacement
+    // Previously used newpad/prefresh/getch/delwin for scrollable log viewer
+    // Key constants for reference:
+    //   KEY_DOWN = 0x102, KEY_UP = 0x103
+    //   KEY_HOME = 0x106, KEY_END = 0x166
 }

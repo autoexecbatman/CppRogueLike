@@ -28,6 +28,8 @@
 #include "Systems/DisplayManager.h"
 #include "Systems/GameLoopCoordinator.h"
 #include "Systems/DataManager.h"
+#include "Renderer/Renderer.h"
+#include "Renderer/InputSystem.h"
 
 class Game
 {
@@ -58,6 +60,10 @@ public:
             .display_manager = &display_manager,
             .game_loop_coordinator = &game_loop_coordinator,
             .data_manager = &data_manager,
+
+            // Rendering
+            .renderer = &renderer,
+            .input_system = &input_system,
 
             // Specialized systems
             .targeting = &targeting,
@@ -131,6 +137,10 @@ public:
     int time{ 0 };
     GameStatus gameStatus{ GameStatus::STARTUP };
     WindowState windowState{ WindowState::GAME };
+
+    // Rendering (raylib)
+    Renderer renderer{};
+    InputSystem input_system{};
 
     // Core systems
     RandomDice dice{};

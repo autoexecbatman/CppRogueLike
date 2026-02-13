@@ -35,8 +35,8 @@ void MenuSpellCast::populate_spells()
 
 void MenuSpellCast::draw_content()
 {
+	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
-	box(menuWindow, 0, 0);
 	menu_print(2, 1, "Cast Spell (ESC to cancel):");
 
 	for (size_t i = 0; i < availableSpells.size(); ++i)
@@ -103,8 +103,8 @@ void MenuSpellCast::menu(GameContext& ctx)
 
 	const int height = static_cast<int>(availableSpells.size()) + 4;
 	const int width = 45;
-	const size_t startY = (LINES - height) / 2;
-	const size_t startX = (COLS - width) / 2;
+	const size_t startY = (30 - height) / 2;
+	const size_t startX = (119 - width) / 2;
 
 	menu_new(height, width, startY, startX, ctx);
 
@@ -119,14 +119,14 @@ void MenuSpellCast::menu(GameContext& ctx)
 			menu_set_run_false();
 			break;
 
-		case KEY_UP:
+		case 0x103:
 			if (selectedIndex > 0)
 			{
 				selectedIndex--;
 			}
 			break;
 
-		case KEY_DOWN:
+		case 0x102:
 			if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
 			{
 				selectedIndex++;
@@ -153,9 +153,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 		}
 	}
 
-	clear();
 	ctx.rendering_manager->render(ctx);
-	refresh();
 
 	menu_delete();
 }

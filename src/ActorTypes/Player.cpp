@@ -1,6 +1,4 @@
 // file: Player.cpp
-#include <curses.h>
-
 #include "../Map/Map.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiPlayer.h"
@@ -138,46 +136,22 @@ void Player::racial_ability_adjustments()
 	case Player::PlayerRaceState::HUMAN:
 		break;
 	case Player::PlayerRaceState::DWARF:
-		// Create a temporary window for racial bonus message
-		{
-			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
-			box(racialWindow, 0, 0);
-			mvwprintw(racialWindow, 2, 2, "You got +1 to constitution and -1 to charisma for being a dwarf.");
-			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
-			wrefresh(racialWindow);
-			getch();
-			delwin(racialWindow);
-		}
+		// TODO: Display racial bonus message via Renderer
+		// "You got +1 to constitution and -1 to charisma for being a dwarf."
 
 		adjust_constitution(1);
 		adjust_charisma(-1);
 		break;
 	case Player::PlayerRaceState::ELF:
-		// Create a temporary window for racial bonus message
-		{
-			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
-			box(racialWindow, 0, 0);
-			mvwprintw(racialWindow, 2, 2, "You got +1 to dexterity and -1 to constitution for being an elf.");
-			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
-			wrefresh(racialWindow);
-			getch();
-			delwin(racialWindow);
-		}
+		// TODO: Display racial bonus message via Renderer
+		// "You got +1 to dexterity and -1 to constitution for being an elf."
 
 		adjust_dexterity(1);
 		adjust_constitution(-1);
 		break;
 	case Player::PlayerRaceState::GNOME:
-		// Create a temporary window for racial bonus message
-		{
-			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
-			box(racialWindow, 0, 0);
-			mvwprintw(racialWindow, 2, 2, "You got +1 to intelligence and -1 to wisdom for being a gnome.");
-			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
-			wrefresh(racialWindow);
-			getch();
-			delwin(racialWindow);
-		}
+		// TODO: Display racial bonus message via Renderer
+		// "You got +1 to intelligence and -1 to wisdom for being a gnome."
 
 		adjust_intelligence(1);
 		adjust_wisdom(-1);
@@ -185,16 +159,8 @@ void Player::racial_ability_adjustments()
 	case Player::PlayerRaceState::HALFELF:
 		break;
 	case Player::PlayerRaceState::HALFLING:
-		// Create a temporary window for racial bonus message
-		{
-			WINDOW* racialWindow = newwin(7, 80, (LINES/2)-3, (COLS/2)-40);
-			box(racialWindow, 0, 0);
-			mvwprintw(racialWindow, 2, 2, "You got +1 to dexterity and -1 to strength for being a halfling.");
-			mvwprintw(racialWindow, 4, 2, "Press any key to continue...");
-			wrefresh(racialWindow);
-			getch();
-			delwin(racialWindow);
-		}
+		// TODO: Display racial bonus message via Renderer
+		// "You got +1 to dexterity and -1 to strength for being a halfling."
 
 		adjust_dexterity(1);
 		adjust_strength(-1);
@@ -203,9 +169,7 @@ void Player::racial_ability_adjustments()
 		break;
 	}
 	
-	// Clear screen after all racial bonuses - GUI won't interfere since it doesn't render during STARTUP
-	clear();
-	refresh();
+	// TODO: Clear screen after all racial bonuses via Renderer
 }
 
 void Player::calculate_thaco()
@@ -340,23 +304,10 @@ bool Player::rest(GameContext& ctx)
 
 void Player::animate_resting(GameContext& ctx)
 {
-	const std::vector<char> restSymbols = { 'z', 'z', 'Z', 'Z', 'Z' };
-	const int delay = 80; // milliseconds between frames
-
-	for (int i = 0; i < static_cast<int>(restSymbols.size()); i++)
-	{
-		clear();
-		ctx.rendering_manager->render(ctx);
-		attron(COLOR_PAIR(WHITE_GREEN_PAIR));
-		mvaddch(position.y - 1, position.x + i, restSymbols[i]);
-		attroff(COLOR_PAIR(WHITE_GREEN_PAIR));
-		refresh();
-		napms(delay);
-	}
-
-	clear();
+	// TODO: Implement resting animation via Renderer
+	// Should display 'z', 'z', 'Z', 'Z', 'Z' symbols above player
+	// with WHITE_GREEN_PAIR color and 80ms delay between frames
 	ctx.rendering_manager->render(ctx);
-	refresh();
 }
 
 bool Player::attempt_hide(GameContext& ctx)

@@ -7,13 +7,13 @@
 #include <limits>
 #include <cmath>
 
-#include <curses.h>
 #pragma warning (push, 0)
 #include <libtcod/libtcod.hpp>
 #pragma warning (pop)
 
 #include "Map.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
@@ -431,30 +431,30 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 		if (ctx.message_system)
 		{
 			ctx.message_system->log("You are in water");
-			ctx.message_system->message(COLOR_WHITE, "You are in water", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You are in water", true);
 		}
 		break;
 	case TileType::WALL:
 		if (ctx.message_system)
 		{
 			ctx.message_system->log("You are against a wall");
-			ctx.message_system->message(COLOR_WHITE, "You are against a wall", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You are against a wall", true);
 		}
 		break;
 	case TileType::FLOOR:
 		//ctx.message_system->log("You are on the floor");
-		//ctx.message_system->message(COLOR_WHITE, "You are on the floor", true);
+		//ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
 		break;
 	case TileType::CLOSED_DOOR:
 		if (ctx.message_system)
 		{
 			ctx.message_system->log("You are at a door");
-			ctx.message_system->message(COLOR_WHITE, "You are at a door", true);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You are at a door", true);
 		}
 		break;
 	case TileType::CORRIDOR:
 		//ctx.message_system->log("You are in a corridor");
-		//ctx.message_system->message(COLOR_WHITE, "You are in a corridor", true);
+		//ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
 		break;
 	default:
 		if (ctx.message_system)
@@ -523,15 +523,14 @@ void Map::update()
 	}
 }
 
-void Map::render() const
+void Map::render(const GameContext& ctx) const
 {
-	// Logging moved to callers with GameContext access
-
 	// Don't render if tiles aren't initialized yet
-	if (tiles.empty()) {
+	if (tiles.empty() || !ctx.renderer)
+	{
 		return;
 	}
-	
+
 	for (const auto& tile : tiles)
 	{
 		if (is_in_fov(tile.position) || is_explored(tile.position))
@@ -539,32 +538,22 @@ void Map::render() const
 			switch (get_tile_type(tile.position))
 			{
 			case TileType::WALL:
-				attron(COLOR_PAIR(WHITE_BLACK_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '#');
-				attroff(COLOR_PAIR(WHITE_BLACK_PAIR));
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '#', WHITE_BLACK_PAIR);
 				break;
 			case TileType::WATER:
-				attron(COLOR_PAIR(BLUE_BLACK_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '~');
-				attroff(COLOR_PAIR(BLUE_BLACK_PAIR));
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '~', BLUE_BLACK_PAIR);
 				break;
 			case TileType::FLOOR:
-				mvaddch(tile.position.y, tile.position.x, '.');
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '.', WHITE_BLACK_PAIR);
 				break;
 			case TileType::CLOSED_DOOR:
-				attron(COLOR_PAIR(BROWN_BLACK_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '+'); // Closed door character
-				attroff(COLOR_PAIR(BROWN_BLACK_PAIR));
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '+', BROWN_BLACK_PAIR);
 				break;
 			case TileType::OPEN_DOOR:
-				attron(COLOR_PAIR(BROWN_BLACK_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '\'');
-				attroff(COLOR_PAIR(BROWN_BLACK_PAIR));
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '\'', BROWN_BLACK_PAIR);
 				break;
 			case TileType::CORRIDOR:
-				//attron(COLOR_PAIR(WHITE_GREEN_PAIR));
-				mvaddch(tile.position.y, tile.position.x, '.');
-				//attroff(COLOR_PAIR(WHITE_GREEN_PAIR));
+				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '.', WHITE_BLACK_PAIR);
 				break;
 			default:
 				break;
@@ -1024,8 +1013,7 @@ void Map::reveal()
 // regenerate map
 void Map::regenerate(GameContext& ctx)
 {
-	clear();
-	refresh();
+	// Renderer handles frame clearing
 	// clear the actors container except the player and the stairs
 	if (ctx.creatures)
 	{
@@ -1274,36 +1262,7 @@ void Map::place_amulet(GameContext& ctx)
 
 void Map::display_spawn_rates(GameContext& ctx) const
 {
-	if (!ctx.level_manager) return;
-
-	WINDOW* ratesWindow = newwin(
-		24,  // height (adjust to fit all monsters)
-		50,  // width
-		1,   // y position
-		1    // x position
-	);
-
-	box(ratesWindow, 0, 0);
-	mvwprintw(ratesWindow, 1, 1, "Monster Spawn Rates (Dungeon Level %d)", ctx.level_manager->get_dungeon_level());
-	mvwprintw(ratesWindow, 2, 1, "--------------------------------------");
-
-	// Get current distribution from monster factory
-	auto distribution = monsterFactory->getCurrentDistribution(ctx.level_manager->get_dungeon_level());
-
-	// Sort by probability (descending)
-	std::sort(distribution.begin(), distribution.end(),
-		[](const auto& a, const auto& b) { return a.second > b.second; });
-
-	int row = 3;
-	for (const auto& [name, percentage] : distribution) {
-		mvwprintw(ratesWindow, row++, 1, "%-15s: %5.1f%%", name.c_str(), percentage);
-	}
-
-	mvwprintw(ratesWindow, row + 1, 1, "Press any key to close");
-	wrefresh(ratesWindow);
-	getch();  // Wait for key press
-	delwin(ratesWindow);
-	clear();
+	// TODO: Reimplement with Panel+Renderer
 }
 
 void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameContext& ctx)
@@ -1453,66 +1412,7 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 
 void Map::display_item_distribution(GameContext& ctx) const
 {
-	if (!ctx.level_manager) return;
-
-	WINDOW* win = newwin(LINES, COLS, 0, 0);
-	wclear(win);
-	box(win, 0, 0);
-
-	const int dungeonLevel = ctx.level_manager->get_dungeon_level();
-	mvwprintw(win, 1, 2, "Item Spawn Rates - Dungeon Level %d", dungeonLevel);
-
-	std::vector<ItemPercentage> distribution =
-		itemFactory->get_current_distribution(dungeonLevel);
-
-	std::sort(
-		distribution.begin(),
-		distribution.end(),
-		[](const auto& a, const auto& b) { return a.percentage > b.percentage; });
-
-	// --- Left column: categories ---
-	std::map<std::string, float> categoryTotals;
-	for (const auto& [name, category, percentage] : distribution)
-	{
-		categoryTotals[category] += percentage;
-	}
-
-	// Sort categories by total percentage descending
-	std::vector<std::pair<std::string, float>> sortedCategories(
-		categoryTotals.begin(), categoryTotals.end());
-	std::sort(
-		sortedCategories.begin(),
-		sortedCategories.end(),
-		[](const auto& a, const auto& b) { return a.second > b.second; });
-
-	const int leftCol = 2;
-	const int rightCol = COLS / 2;
-	int row = 3;
-
-	mvwprintw(win, row++, leftCol, "%-22s  %s", "Category", "Chance");
-	mvwprintw(win, row++, leftCol, "------------------------------");
-	for (const auto& [category, percentage] : sortedCategories)
-	{
-		if (row >= LINES - 3) break;
-		mvwprintw(win, row++, leftCol, "%-22s  %5.1f%%", category.c_str(), percentage);
-	}
-
-	// --- Right column: individual items ---
-	row = 3;
-	mvwprintw(win, row++, rightCol, "%-28s  %s", "Item", "Chance");
-	mvwprintw(win, row++, rightCol, "------------------------------------");
-	for (const auto& [name, category, percentage] : distribution)
-	{
-		if (row >= LINES - 3) break;
-		mvwprintw(win, row++, rightCol, "%-28s  %5.1f%%", name.c_str(), percentage);
-	}
-
-	mvwprintw(win, LINES - 2, 2, "Press any key to close");
-	wrefresh(win);
-	getch();
-	delwin(win);
-	clear();
-	refresh();
+	// TODO: Reimplement with Panel+Renderer
 }
 
 void Map::post_process_doors()

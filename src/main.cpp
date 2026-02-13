@@ -1,55 +1,33 @@
-// file: main_C++RogueLike.cpp
-// Clean entry point using header-only Game
-
-#include <stdlib.h>
+// file: main.cpp
 #include <iostream>
 #include <fstream>
 
 #ifdef EMSCRIPTEN
-#define SDL_MAIN_HANDLED
+#include <emscripten/emscripten.h>
 #endif
-
-#include <curses.h>
 
 #include "Game.h"
 #include "Menu/Menu.h"
-#include "Colors/Colors.h"
 
-namespace {
-    void init_curses()
+#ifdef EMSCRIPTEN
+struct LoopData
+{
+    Game* game;
+    int loopNum;
+};
+
+void emscripten_loop(void* arg)
+{
+    auto* data = static_cast<LoopData*>(arg);
+    if (!data->game->run)
     {
-        initscr();
-
-        if (!has_colors())
-        {
-            std::cerr << "Error: Terminal does not support colors." << std::endl;
-        }
-        else
-        {
-            start_color();
-            Colors colors;
-            colors.my_init_pair();
-        }
-
-        cbreak();
-        noecho();
-        curs_set(0);
-        keypad(stdscr, true);
-
-        if (has_mouse())
-        {
-            mousemask(ALL_MOUSE_EVENTS, nullptr);
-        }
-        else
-        {
-            std::cerr << "Warning: Mouse not supported in this terminal." << std::endl;
-        }
-
-        printw("Welcome to C++RogueLike!");
-        printw("Console size: %d x %d", COLS, LINES);
-        refresh();
+        emscripten_cancel_main_loop();
+        return;
     }
+
+    data->game->tick(data->loopNum);
 }
+#endif
 
 int main()
 {
@@ -66,32 +44,34 @@ int main()
         std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
     }
 
-    // Set initial window size for PDCurses SDL2 (both native and web)
-    // PDCurses SDL2 reads PDC_COLS/PDC_LINES when it creates its own window
-    putenv((char*)"PDC_COLS=119");
-    putenv((char*)"PDC_LINES=30");
-
-    init_curses();
-
-    // Game owns everything
+    // Game owns everything including Renderer and InputSystem
     Game game;
+
+    // Initialize raylib window
+    game.renderer.init(119, 30);
+    game.renderer.load_tilesets("tileset.bmp", "tileset1.bmp");
+
     auto ctx = game.context();
     game.menus.push_back(std::make_unique<Menu>(true, ctx));
 
-    // Game loop
     int loopNum{ 0 };
-    while (game.tick(loopNum)) {}
+
+#ifdef EMSCRIPTEN
+    LoopData loopData{ &game, loopNum };
+    emscripten_set_main_loop_arg(emscripten_loop, &loopData, 60, 1);
+#else
+    // Frame-based game loop
+    // Menus and game loop manage their own begin_frame/end_frame internally.
+    // Main loop just drives tick(). Input polling happens inside each subsystem.
+    while (!WindowShouldClose() && game.run)
+    {
+        game.tick(loopNum);
+    }
+#endif
 
     // Shutdown
     game.shutdown();
-    game.gui.gui_shutdown();
-    endwin();
-
-    if (!isendwin())
-    {
-        game.message_system.log("Curses shutdown failed.");
-        return EXIT_FAILURE;
-    }
+    game.renderer.shutdown();
 
     if (debugFile.is_open())
     {
