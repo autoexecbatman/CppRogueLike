@@ -24,8 +24,19 @@ if(EMSCRIPTEN)
     # Common compilation options
     add_compile_options(-O2 -Wall)
 
-    # raylib Emscripten flags (no ASYNCIFY needed - frame-based loop)
-    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3")
+    # Fetch raylib for Emscripten build
+    include(FetchContent)
+    set(PLATFORM Web CACHE INTERNAL "")
+    set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+    FetchContent_Declare(
+        raylib
+        GIT_REPOSITORY https://github.com/raysan5/raylib.git
+        GIT_TAG 5.5
+    )
+    FetchContent_MakeAvailable(raylib)
+
+    # Emscripten flags: ASYNCIFY enables blocking menu loops to yield to browser
+    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sGL_ENABLE_GET_PROC_ADDRESS=1")
 
     # Copy all JSON files to the build directory
     file(GLOB JSON_FILES ${CMAKE_SOURCE_DIR}/src/json/*.json)
@@ -319,6 +330,7 @@ if(EMSCRIPTEN)
 
     # Include directories for all dependencies
     target_include_directories(${PROJECT_NAME} PRIVATE
+        ${CMAKE_BINARY_DIR}/include
         ${CMAKE_SOURCE_DIR}
         ${CMAKE_SOURCE_DIR}/libtcod/
     )
@@ -334,6 +346,7 @@ if(EMSCRIPTEN)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${LIBTCOD_LIBRARIES}
+        raylib
     )
 
     target_compile_definitions(${PROJECT_NAME} PRIVATE

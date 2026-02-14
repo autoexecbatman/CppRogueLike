@@ -3,6 +3,10 @@
 #include <format>
 #include <string>
 
+#ifdef EMSCRIPTEN
+#include <emscripten/emscripten.h>
+#endif
+
 // Local color constants (raylib macros are #undef'd in Renderer.h)
 static constexpr Color RL_WHITE   = { 255, 255, 255, 255 };
 static constexpr Color RL_BLACK   = { 0, 0, 0, 255 };
@@ -80,6 +84,9 @@ void Renderer::begin_frame()
 void Renderer::end_frame()
 {
     EndDrawing();
+#ifdef EMSCRIPTEN
+    emscripten_sleep(0);
+#endif
 }
 
 void Renderer::draw_tile(int grid_y, int grid_x, int cp437_code, int color_pair_id) const
