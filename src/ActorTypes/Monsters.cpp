@@ -13,7 +13,7 @@
 #include "../Factories/ItemCreator.h"
 #include "../Items/ItemClassification.h"
 
-Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ 'M', "mimic", RED_YELLOW_PAIR })
+Mimic::Mimic(Vector2D position, GameContext& ctx) : Creature(position, ActorData{ TILE_MIMIC, "mimic", RED_YELLOW_PAIR })
 {
     const int hp = ctx.dice->d6() + ctx.dice->d4();
     const int thaco = 17;

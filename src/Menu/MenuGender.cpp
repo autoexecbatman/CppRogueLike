@@ -5,6 +5,7 @@
 #include "MenuRace.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 
 void Male::on_selection(GameContext& ctx)
 {
@@ -36,6 +37,10 @@ void Back::on_selection(GameContext& ctx)
 
 MenuGender::MenuGender(GameContext& ctx)
 {
+	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	starty_ = (vrows - height_) / 2;
+	startx_ = (vcols - width_) / 2;
 	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.emplace(MenuState::MALE, std::make_unique<Male>());
 	iMenuStates.emplace(MenuState::FEMALE, std::make_unique<Female>());

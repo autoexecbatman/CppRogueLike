@@ -3,6 +3,7 @@
 
 #include "AiMimic.h"
 #include "../Colors/Colors.h"
+#include "../Renderer/TileId.h"
 #include "../Ai/AiPlayer.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Items/ItemClassification.h"
@@ -265,7 +266,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
 {
-    mimic.actorData.ch = 'W';
+    mimic.actorData.ch = TILE_MIMIC;
     mimic.actorData.color = RED_YELLOW_PAIR;
     mimic.actorData.name = "greater mimic";
     ctx.message_system->log("Mimic transformed into greater mimic");
@@ -282,7 +283,7 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
     {
         // Reveal true form!
         isDisguised = false;
-        mimic.actorData.ch = 'M';
+        mimic.actorData.ch = TILE_MIMIC;
         mimic.actorData.name = "mimic";
         mimic.actorData.color = RED_YELLOW_PAIR;
         mimic.add_state(ActorState::BLOCKS); // Now it's solid

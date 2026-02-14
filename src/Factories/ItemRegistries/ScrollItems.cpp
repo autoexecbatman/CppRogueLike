@@ -2,13 +2,14 @@
 #include "ScrollItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::SCROLL_LIGHTNING, {
-            .symbol = '?',
+            .symbol = TILE_SCROLL,
             .name = "scroll of lightning bolt",
             .color = WHITE_BLUE_PAIR,
             .itemClass = ItemClass::SCROLL,
@@ -24,7 +25,7 @@ namespace
             .category = "scroll"}},
 
         {ItemId::SCROLL_FIREBALL, {
-            .symbol = '?',
+            .symbol = TILE_SCROLL,
             .name = "scroll of fireball",
             .color = RED_YELLOW_PAIR,
             .itemClass = ItemClass::SCROLL,
@@ -40,7 +41,7 @@ namespace
             .category = "scroll"}},
 
         {ItemId::SCROLL_CONFUSION, {
-            .symbol = '?',
+            .symbol = TILE_SCROLL,
             .name = "scroll of confusion",
             .color = WHITE_GREEN_PAIR,
             .itemClass = ItemClass::SCROLL,
@@ -56,7 +57,7 @@ namespace
             .category = "scroll"}},
 
         {ItemId::SCROLL_TELEPORT, {
-            .symbol = '?',
+            .symbol = TILE_SCROLL,
             .name = "scroll of teleportation",
             .color = MAGENTA_BLACK_PAIR,
             .itemClass = ItemClass::SCROLL,

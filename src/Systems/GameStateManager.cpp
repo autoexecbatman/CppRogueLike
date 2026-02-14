@@ -255,7 +255,7 @@ void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::ve
     {
         for (const auto& creatureData : j["creatures"])
         {
-            auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ ' ', "Unnamed", WHITE_BLACK_PAIR });
+            auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
             creature->load(creatureData);
             creatures.push_back(std::move(creature));
         }

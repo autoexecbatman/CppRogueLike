@@ -13,6 +13,7 @@
 
 #include "Map.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/TileId.h"
 #include "../Renderer/Renderer.h"
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
@@ -525,39 +526,86 @@ void Map::update()
 
 void Map::render(const GameContext& ctx) const
 {
-	// Don't render if tiles aren't initialized yet
 	if (tiles.empty() || !ctx.renderer)
 	{
 		return;
 	}
 
-	for (const auto& tile : tiles)
+	// Compute visible tile range from camera
+	int ts = ctx.renderer->get_tile_size();
+	int cam_x = ctx.renderer->get_camera_x();
+	int cam_y = ctx.renderer->get_camera_y();
+	int vis_cols = ctx.renderer->get_viewport_cols();
+	int vis_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+
+	int start_col = std::max(0, cam_x / ts);
+	int start_row = std::max(0, cam_y / ts);
+	int end_col = std::min(map_width, start_col + vis_cols + 2);
+	int end_row = std::min(map_height, start_row + vis_rows + 2);
+
+	auto is_wall_neighbor = [&](Vector2D pos) -> bool
 	{
-		if (is_in_fov(tile.position) || is_explored(tile.position))
+		if (!in_bounds(pos)) return true;
+		TileType t = get_tile_type(pos);
+		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
+	};
+
+	auto is_walkable_neighbor = [&](Vector2D pos) -> bool
+	{
+		if (!in_bounds(pos)) return false;
+		TileType t = get_tile_type(pos);
+		return t == TileType::FLOOR || t == TileType::CORRIDOR
+			|| t == TileType::OPEN_DOOR || t == TileType::WATER;
+	};
+
+	for (int row = start_row; row < end_row; row++)
+	{
+		for (int col = start_col; col < end_col; col++)
 		{
-			switch (get_tile_type(tile.position))
+			Vector2D pos{ row, col };
+			if (!is_in_fov(pos) && !is_explored(pos))
+			{
+				continue;
+			}
+
+			TileType type = get_tile_type(pos);
+			int tile_id = 0;
+
+			switch (type)
 			{
 			case TileType::WALL:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '#', WHITE_BLACK_PAIR);
-				break;
-			case TileType::WATER:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '~', BLUE_BLACK_PAIR);
-				break;
-			case TileType::FLOOR:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '.', WHITE_BLACK_PAIR);
-				break;
-			case TileType::CLOSED_DOOR:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '+', BROWN_BLACK_PAIR);
-				break;
-			case TileType::OPEN_DOOR:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '\'', BROWN_BLACK_PAIR);
-				break;
-			case TileType::CORRIDOR:
-				ctx.renderer->draw_tile(tile.position.y, tile.position.x, '.', WHITE_BLACK_PAIR);
-				break;
-			default:
+			{
+				bool n = is_wall_neighbor({ row - 1, col });
+				bool e = is_wall_neighbor({ row, col + 1 });
+				bool s = is_wall_neighbor({ row + 1, col });
+				bool w = is_wall_neighbor({ row, col - 1 });
+				tile_id = autotile_resolve(AUTOTILE_WALL_STONE, n, e, s, w);
 				break;
 			}
+			case TileType::FLOOR:
+			case TileType::CORRIDOR:
+			{
+				bool n = is_walkable_neighbor({ row - 1, col });
+				bool e = is_walkable_neighbor({ row, col + 1 });
+				bool s = is_walkable_neighbor({ row + 1, col });
+				bool w = is_walkable_neighbor({ row, col - 1 });
+				tile_id = autotile_resolve(AUTOTILE_FLOOR_STONE, n, e, s, w);
+				break;
+			}
+			case TileType::WATER:
+				tile_id = TILE_WATER;
+				break;
+			case TileType::CLOSED_DOOR:
+				tile_id = TILE_DOOR_CLOSED;
+				break;
+			case TileType::OPEN_DOOR:
+				tile_id = TILE_DOOR_OPEN;
+				break;
+			default:
+				continue;
+			}
+
+			ctx.renderer->draw_tile(row, col, tile_id, WHITE_BLACK_PAIR);
 		}
 	}
 }

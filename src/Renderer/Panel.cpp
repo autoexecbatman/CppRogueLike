@@ -22,7 +22,7 @@ void Panel::draw_text_reversed(Renderer& renderer, int row, int col, std::string
     int py = panel_rect.y + row * tile_size;
 
     ColorPair pair = renderer.get_color_pair(color_pair);
-    int text_w = static_cast<int>(text.size()) * tile_size;
+    int text_w = renderer.measure_text(text) + 4;
     int text_h = tile_size;
 
     DrawRectangle(px, py, text_w, text_h, pair.fg);

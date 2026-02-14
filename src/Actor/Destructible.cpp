@@ -235,7 +235,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
-	corpse->actorData.ch = '%';
+	corpse->actorData.ch = TILE_CORPSE;
 	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
 	// Add the corpse to the floor items

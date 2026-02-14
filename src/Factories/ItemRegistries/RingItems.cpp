@@ -2,13 +2,14 @@
 #include "RingItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::RING_OF_PROTECTION_PLUS_1, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of protection +1",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -22,7 +23,7 @@ namespace
             .category = "magical_ring"}},
 
         {ItemId::RING_OF_PROTECTION_PLUS_2, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of protection +2",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -36,7 +37,7 @@ namespace
             .category = "magical_ring"}},
 
         {ItemId::RING_OF_FREE_ACTION, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of free action",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -49,7 +50,7 @@ namespace
             .category = "magical_ring"}},
 
         {ItemId::RING_OF_REGENERATION, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of regeneration",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -62,7 +63,7 @@ namespace
             .category = "magical_ring"}},
 
         {ItemId::RING_OF_INVISIBILITY, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of invisibility",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -75,7 +76,7 @@ namespace
             .category = "magical_ring"}},
 
         {ItemId::RING_OF_FIRE_RESISTANCE, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of fire resistance",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -84,7 +85,7 @@ namespace
             .effect = MagicalEffect::FIRE_RESISTANCE}},
 
         {ItemId::RING_OF_COLD_RESISTANCE, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of cold resistance",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::RING,
@@ -93,7 +94,7 @@ namespace
             .effect = MagicalEffect::COLD_RESISTANCE}},
 
         {ItemId::RING_OF_SPELL_STORING, {
-            .symbol = '=',
+            .symbol = TILE_RING,
             .name = "ring of spell storing",
             .color = MAGENTA_BLACK_PAIR,
             .itemClass = ItemClass::RING,

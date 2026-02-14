@@ -38,7 +38,7 @@ void Actor::load(const json& j)
 	position.y = j["position"]["y"];
 	direction.x = j["direction"]["x"];
 	direction.y = j["direction"]["y"];
-	actorData.ch = j["actorData"].at("ch").get<char>();
+	actorData.ch = j["actorData"].at("ch").get<int>();
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = j["actorData"].at("color").get<int>();
 	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
@@ -85,7 +85,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 {
 	if (is_visible(ctx) && ctx.renderer)
 	{
-		char displayChar = actorData.ch;
+		int displayChar = actorData.ch;
 		int displayColor = actorData.color;
 
 		// Check if this is an invisible creature (player hiding)
@@ -93,7 +93,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 		{
 			if (creature->is_invisible())
 			{
-				displayChar = '_';
+				displayChar = TILE_INVISIBLE;
 				displayColor = CYAN_BLACK_PAIR;
 			}
 		}

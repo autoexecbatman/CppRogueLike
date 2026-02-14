@@ -2,6 +2,7 @@
 #include "Renderer.h"
 #include <format>
 #include <string>
+#include <algorithm>
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>
@@ -16,17 +17,51 @@ static constexpr Color RL_BLUE    = { 0, 121, 241, 255 };
 static constexpr Color RL_YELLOW  = { 253, 249, 0, 255 };
 static constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
 
-void Renderer::init(int cols, int rows)
+// DawnLike uses magenta (255,0,255) as the transparency key.
+// Load a PNG, replace magenta pixels with alpha=0, return as Texture2D.
+static Texture2D load_dawnlike_texture(const char* path)
 {
-    window_cols = cols;
-    window_rows = rows;
+    Image img = LoadImage(path);
+    if (img.data == nullptr)
+    {
+        return Texture2D{};
+    }
+    ImageColorReplace(&img, RL_MAGENTA, Color{ 0, 0, 0, 0 });
+    Texture2D tex = LoadTextureFromImage(img);
+    SetTextureFilter(tex, TEXTURE_FILTER_POINT);
+    UnloadImage(img);
+    return tex;
+}
 
-    int pixel_w = cols * tile_size;
-    int pixel_h = rows * tile_size;
-
-    InitWindow(pixel_w, pixel_h, "C++RogueLike");
+void Renderer::init()
+{
+#ifdef EMSCRIPTEN
+    screen_w = 960;
+    screen_h = 544;
+    InitWindow(screen_w, screen_h, "C++RogueLike");
+    SetTargetFPS(60);
+#else
+    // Create initial window to query monitor
+    InitWindow(800, 600, "C++RogueLike");
     SetTargetFPS(60);
     SetExitKey(0);
+
+    int monitor = GetCurrentMonitor();
+    screen_w = GetMonitorWidth(monitor);
+    screen_h = GetMonitorHeight(monitor);
+
+    // Go fullscreen at monitor resolution
+    SetWindowSize(screen_w, screen_h);
+    SetWindowPosition(0, 0);
+    ToggleFullscreen();
+#endif
+
+    // Viewport in tile units
+    viewport_cols = screen_w / tile_size;
+    viewport_rows = screen_h / tile_size;
+
+    // Font scaled proportionally to tile size
+    font_size = tile_size * 3 / 4;
 
     init_color_pairs();
     initialized = true;
@@ -34,12 +69,19 @@ void Renderer::init(int cols, int rows)
 
 void Renderer::shutdown()
 {
-    if (tilesets_loaded)
+    for (auto& sheet : sheets)
     {
-        UnloadTexture(tileset_frame0);
-        UnloadTexture(tileset_frame1);
-        tilesets_loaded = false;
+        if (sheet.loaded)
+        {
+            UnloadTexture(sheet.frame0);
+            if (sheet.animated)
+            {
+                UnloadTexture(sheet.frame1);
+            }
+            sheet.loaded = false;
+        }
     }
+    sheets_loaded = false;
 
     if (font_loaded)
     {
@@ -54,11 +96,83 @@ void Renderer::shutdown()
     }
 }
 
-void Renderer::load_tilesets(const char* frame0_path, const char* frame1_path)
+void Renderer::load_sheet(int sheet_id, const char* path0, const char* path1)
 {
-    tileset_frame0 = LoadTexture(frame0_path);
-    tileset_frame1 = LoadTexture(frame1_path);
-    tilesets_loaded = (tileset_frame0.id > 0 && tileset_frame1.id > 0);
+    auto& s = sheets[sheet_id];
+    s.frame0 = load_dawnlike_texture(path0);
+    s.frame1 = load_dawnlike_texture(path1);
+    s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
+    s.animated = true;
+    s.loaded = (s.frame0.id > 0);
+}
+
+void Renderer::load_sheet_static(int sheet_id, const char* path)
+{
+    auto& s = sheets[sheet_id];
+    s.frame0 = load_dawnlike_texture(path);
+    s.frame1 = s.frame0;
+    s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
+    s.animated = false;
+    s.loaded = (s.frame0.id > 0);
+}
+
+void Renderer::load_dawnlike(const char* base_path)
+{
+    std::string base(base_path);
+    if (!base.empty() && base.back() != '/')
+    {
+        base += '/';
+    }
+
+    auto load_animated = [&](int id, const char* dir, const char* name)
+    {
+        std::string p0 = std::format("{}{}{}0.png", base, dir, name);
+        std::string p1 = std::format("{}{}{}1.png", base, dir, name);
+        load_sheet(id, p0.c_str(), p1.c_str());
+    };
+
+    auto load_static = [&](int id, const char* dir, const char* name)
+    {
+        std::string p = std::format("{}{}{}.png", base, dir, name);
+        load_sheet_static(id, p.c_str());
+    };
+
+    // Objects
+    load_static(SHEET_FLOOR, "Objects/", "Floor");
+    load_static(SHEET_WALL, "Objects/", "Wall");
+    load_static(SHEET_DOOR0, "Objects/", "Door0");
+    load_animated(SHEET_DECOR0, "Objects/", "Decor");
+    load_animated(SHEET_EFFECT0, "Objects/", "Effect");
+    load_static(SHEET_TILE, "Objects/", "Tile");
+
+    // Characters (all animated with 0/1 pairs)
+    load_animated(SHEET_PLAYER0, "Characters/", "Player");
+    load_animated(SHEET_HUMANOID0, "Characters/", "Humanoid");
+    load_animated(SHEET_REPTILE0, "Characters/", "Reptile");
+    load_animated(SHEET_PEST0, "Characters/", "Pest");
+    load_animated(SHEET_DOG0, "Characters/", "Dog");
+    load_animated(SHEET_AVIAN0, "Characters/", "Avian");
+    load_animated(SHEET_UNDEAD0, "Characters/", "Undead");
+    load_animated(SHEET_QUADRAPED0, "Characters/", "Quadraped");
+    load_animated(SHEET_DEMON0, "Characters/", "Demon");
+    load_animated(SHEET_MISC0, "Characters/", "Misc");
+
+    // Items (static -- no animation frames)
+    load_static(SHEET_POTION, "Items/", "Potion");
+    load_static(SHEET_SCROLL, "Items/", "Scroll");
+    load_static(SHEET_SHORT_WEP, "Items/", "ShortWep");
+    load_static(SHEET_MED_WEP, "Items/", "MedWep");
+    load_static(SHEET_LONG_WEP, "Items/", "LongWep");
+    load_static(SHEET_ARMOR, "Items/", "Armor");
+    load_static(SHEET_SHIELD, "Items/", "Shield");
+    load_static(SHEET_HAT, "Items/", "Hat");
+    load_static(SHEET_RING, "Items/", "Ring");
+    load_static(SHEET_AMULET_ITEM, "Items/", "Amulet");
+    load_static(SHEET_FOOD, "Items/", "Food");
+    load_static(SHEET_FLESH, "Items/", "Flesh");
+    load_static(SHEET_MONEY, "Items/", "Money");
+
+    sheets_loaded = true;
 }
 
 void Renderer::load_font(const char* font_path, int size)
@@ -89,33 +203,56 @@ void Renderer::end_frame()
 #endif
 }
 
-void Renderer::draw_tile(int grid_y, int grid_x, int cp437_code, int color_pair_id) const
+void Renderer::draw_tile(int grid_y, int grid_x, int tile_id, int /*color_pair_id*/) const
 {
-    if (!tilesets_loaded)
+    if (!sheets_loaded)
     {
         return;
     }
 
-    const Texture2D& tileset = (current_anim_frame == 0) ? tileset_frame0 : tileset_frame1;
+    int sid = tile_sheet(tile_id);
+    if (sid < 0 || sid >= SHEET_COUNT)
+    {
+        return;
+    }
 
-    int tiles_per_row = tileset.width / tile_size;
-    int src_x = (cp437_code % tiles_per_row) * tile_size;
-    int src_y = (cp437_code / tiles_per_row) * tile_size;
+    const auto& sheet = sheets[sid];
+    if (!sheet.loaded || sheet.tiles_per_row <= 0)
+    {
+        return;
+    }
 
+    // Screen position with camera offset
+    float dest_x = static_cast<float>(grid_x * tile_size - camera.x);
+    float dest_y = static_cast<float>(grid_y * tile_size - camera.y);
+
+    // Cull tiles outside the visible area
+    float ts_f = static_cast<float>(tile_size);
+    if (dest_x + ts_f < 0.0f || dest_x >= static_cast<float>(screen_w) ||
+        dest_y + ts_f < 0.0f || dest_y >= static_cast<float>(screen_h))
+    {
+        return;
+    }
+
+    const Texture2D& tex = (sheet.animated && current_anim_frame == 1)
+        ? sheet.frame1
+        : sheet.frame0;
+
+    int col = tile_col(tile_id);
+    int row = tile_row(tile_id);
+
+    // Source rect in the 16x16 sprite sheet
     Rectangle src_rect = {
-        static_cast<float>(src_x),
-        static_cast<float>(src_y),
-        static_cast<float>(tile_size),
-        static_cast<float>(tile_size)
+        static_cast<float>(col * SPRITE_SIZE),
+        static_cast<float>(row * SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE)
     };
 
-    Vector2 dest = {
-        static_cast<float>(grid_x * tile_size),
-        static_cast<float>(grid_y * tile_size)
-    };
+    // Destination rect scaled to display tile size
+    Rectangle dest_rect = { dest_x, dest_y, ts_f, ts_f };
 
-    ColorPair pair = get_color_pair(color_pair_id);
-    DrawTextureRec(tileset, src_rect, dest, pair.fg);
+    DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
 void Renderer::draw_text(int px, int py, std::string_view text, int color_pair_id) const
@@ -145,6 +282,22 @@ void Renderer::draw_bar(int px, int py, int w, int h, float ratio, Color filled,
     }
 }
 
+void Renderer::set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h)
+{
+    int map_viewport_rows = viewport_rows - GUI_RESERVE_ROWS;
+    int viewport_px_w = viewport_cols * tile_size;
+    int viewport_px_h = map_viewport_rows * tile_size;
+
+    camera.x = world_tile_x * tile_size - viewport_px_w / 2;
+    camera.y = world_tile_y * tile_size - viewport_px_h / 2;
+
+    int map_px_w = map_w * tile_size;
+    int map_px_h = map_h * tile_size;
+
+    camera.x = std::clamp(camera.x, 0, std::max(0, map_px_w - viewport_px_w));
+    camera.y = std::clamp(camera.y, 0, std::max(0, map_px_h - viewport_px_h));
+}
+
 ColorPair Renderer::get_color_pair(int id) const
 {
     if (id >= 0 && id < MAX_COLOR_PAIRS)
@@ -159,12 +312,23 @@ ScreenMetrics Renderer::metrics() const
     return ScreenMetrics{
         .tile_w = tile_size,
         .tile_h = tile_size,
-        .map_cols = window_cols,
-        .map_rows = window_rows - GUI_RESERVE_ROWS,
+        .map_cols = viewport_cols,
+        .map_rows = viewport_rows - GUI_RESERVE_ROWS,
         .gui_rows = GUI_RESERVE_ROWS,
-        .window_w = window_cols * tile_size,
-        .window_h = window_rows * tile_size
+        .window_w = screen_w,
+        .window_h = screen_h
     };
+}
+
+int Renderer::measure_text(std::string_view text) const
+{
+    std::string text_str(text);
+    if (font_loaded)
+    {
+        Vector2 size = MeasureTextEx(game_font, text_str.c_str(), static_cast<float>(font_size), 1.0f);
+        return static_cast<int>(size.x);
+    }
+    return MeasureText(text_str.c_str(), font_size);
 }
 
 void Renderer::init_color_pairs()

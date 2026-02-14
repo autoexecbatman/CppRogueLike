@@ -1,5 +1,6 @@
 #include "Food.h"
 #include "../Colors/Colors.h"
+#include "../Renderer/TileId.h"
 #include "../Core/GameContext.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
@@ -33,25 +34,25 @@ void Food::save(json& j)
 }
 
 // Implementations for different food types
-Ration::Ration(Vector2D position) : Item(position, ActorData{ '%', "ration", WHITE_GREEN_PAIR })
+Ration::Ration(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "ration", WHITE_GREEN_PAIR })
 {
     pickable = std::make_unique<Food>(300);  // High nutritional value
     value = 10;  // Base gold value
 }
 
-Fruit::Fruit(Vector2D position) : Item(position, ActorData{ '%', "fruit", GREEN_BLACK_PAIR })
+Fruit::Fruit(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "fruit", GREEN_BLACK_PAIR })
 {
     pickable = std::make_unique<Food>(100);  // Medium nutritional value
     value = 3;  // Base gold value
 }
 
-Bread::Bread(Vector2D position) : Item(position, ActorData{ '%', "bread", RED_YELLOW_PAIR })
+Bread::Bread(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "bread", RED_YELLOW_PAIR })
 {
     pickable = std::make_unique<Food>(200);  // Medium-high nutritional value
     value = 5;  // Base gold value
 }
 
-Meat::Meat(Vector2D position) : Item(position, ActorData{ '%', "meat", RED_BLACK_PAIR })
+Meat::Meat(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "meat", RED_BLACK_PAIR })
 {
     pickable = std::make_unique<Food>(250);  // High nutritional value
     value = 8;  // Base gold value

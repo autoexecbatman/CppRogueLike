@@ -37,7 +37,7 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 	if (isHighlighted)
 	{
 		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
-		int tw = static_cast<int>(text.size()) * ts;
+		int tw = renderer->measure_text(text) + 4;
 		DrawRectangle(px, py, tw, ts, pair.bg);
 		renderer->draw_text(px, py, text, BLACK_WHITE_PAIR);
 	}

@@ -4,6 +4,7 @@
 #include "MenuClass.h"
 #include "MenuGender.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../ActorTypes/Player.h"
 
 void Human::on_selection(GameContext& ctx)
@@ -81,6 +82,10 @@ void RaceBack::on_selection(GameContext& ctx)
 
 MenuRace::MenuRace(GameContext& ctx)
 {
+	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	starty_ = (vrows - height_) / 2;
+	startx_ = (vcols - width_) / 2;
 	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.emplace(MenuRaceOptions::HUMAN, std::make_unique<Human>());
 	iMenuStates.emplace(MenuRaceOptions::DWARF, std::make_unique<Dwarf>());

@@ -6,17 +6,18 @@
 
 // Include the target file specifically
 #include "Factories/ItemCreator.cpp"
+#include "Renderer/TileId.h"
 
 void test_create_health_potion() {
     ItemCreator creator;
     Vector2D pos(0, 0);
     auto item = creator.create_health_potion(pos);
     
-    assert(item->actorData.ch == '!');
+    assert(item->actorData.ch == TILE_POTION);
     assert(item->actorData.name == "health potion");
     assert(item->pickable != nullptr);
     assert(item->value == 50);
-    
+
     std::cout << "test_create_health_potion passed\n";
 }
 
@@ -24,12 +25,12 @@ void test_create_scroll_lightning() {
     ItemCreator creator;
     Vector2D pos(0, 0);
     auto item = creator.create_scroll_lightning(pos);
-    
-    assert(item->actorData.ch == '?');
+
+    assert(item->actorData.ch == TILE_SCROLL);
     assert(item->actorData.name == "scroll of lightning bolt");
     assert(item->pickable != nullptr);
     assert(item->value == 150);
-    
+
     std::cout << "test_create_scroll_lightning passed\n";
 }
 
@@ -37,8 +38,8 @@ void test_create_random_potion() {
     ItemCreator creator;
     Vector2D pos(0, 0);
     auto item = creator.create_random_potion(pos, 1);
-    
-    assert(item->actorData.ch == '!');
+
+    assert(item->actorData.ch == TILE_POTION);
     assert(item->actorData.name == "health potion");
     assert(item->pickable != nullptr);
     assert(item->value == 50);
@@ -90,7 +91,7 @@ void test_create_leather_armor() {
     Vector2D pos(0, 0);
     auto item = creator.create_leather_armor(pos);
     
-    assert(item->actorData.ch == '[');
+    assert(item->actorData.ch == TILE_ARMOR);
     assert(item->actorData.name == "leather armor");
     assert(item->pickable != nullptr);
     assert(item->value == 5);

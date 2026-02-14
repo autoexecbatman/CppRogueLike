@@ -3,6 +3,7 @@
 #include "JewelryItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
@@ -10,7 +11,7 @@ namespace
     {
         // === AMULETS ===
         {ItemId::AMULET_OF_HEALTH, {
-            .symbol = '"',
+            .symbol = TILE_AMULET,
             .name = "amulet of health",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::AMULET,
@@ -19,7 +20,7 @@ namespace
             .con_bonus = 1}},
 
         {ItemId::AMULET_OF_WISDOM, {
-            .symbol = '"',
+            .symbol = TILE_AMULET,
             .name = "amulet of wisdom",
             .color = BLUE_BLACK_PAIR,
             .itemClass = ItemClass::AMULET,
@@ -28,7 +29,7 @@ namespace
             .wis_bonus = 1}},
 
         {ItemId::AMULET_OF_PROTECTION, {
-            .symbol = '"',
+            .symbol = TILE_AMULET,
             .name = "amulet of protection",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::AMULET,
@@ -36,7 +37,7 @@ namespace
             .pickable_type = PickableType::JEWELRY_AMULET}},
 
         {ItemId::AMULET_OF_OGRE_POWER, {
-            .symbol = '"',
+            .symbol = TILE_AMULET,
             .name = "amulet of ogre power",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::AMULET,
@@ -48,7 +49,7 @@ namespace
             .is_set_mode = true}},
 
         {ItemId::AMULET_OF_YENDOR, {
-            .symbol = '"',
+            .symbol = TILE_AMULET_YENDOR,
             .name = "Amulet of Yendor",
             .color = YELLOW_BLACK_PAIR,
             .itemClass = ItemClass::QUEST_ITEM,
@@ -57,7 +58,7 @@ namespace
 
         // === GAUNTLETS ===
         {ItemId::GAUNTLETS_OF_OGRE_POWER, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "gauntlets of ogre power",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -71,7 +72,7 @@ namespace
             .category = "gauntlets"}},
 
         {ItemId::GAUNTLETS_OF_DEXTERITY, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "gauntlets of dexterity",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -84,7 +85,7 @@ namespace
             .category = "gauntlets"}},
 
         {ItemId::GAUNTLETS_OF_SWIMMING_AND_CLIMBING, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "gauntlets of swimming and climbing",
             .color = BLUE_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -93,7 +94,7 @@ namespace
             .str_bonus = 2}},
 
         {ItemId::GAUNTLETS_OF_FUMBLING, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "gauntlets of fumbling",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -103,7 +104,7 @@ namespace
 
         // === BOOTS ===
         {ItemId::BOOTS_OF_SPEED, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "boots of speed",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -112,7 +113,7 @@ namespace
             .dex_bonus = 2}},
 
         {ItemId::BOOTS_OF_ELVENKIND, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "boots of elvenkind",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -122,7 +123,7 @@ namespace
 
 // === CLOAKS ===
         {ItemId::CLOAK_OF_PROTECTION, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "cloak of protection",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -132,7 +133,7 @@ namespace
             .effect_bonus = 1}},
 
         {ItemId::CLOAK_OF_DISPLACEMENT, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "cloak of displacement",
             .color = MAGENTA_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,
@@ -140,7 +141,7 @@ namespace
             .pickable_type = PickableType::GAUNTLETS}},
 
         {ItemId::CLOAK_OF_ELVENKIND, {
-            .symbol = '[',
+            .symbol = TILE_GAUNTLETS,
             .name = "cloak of elvenkind",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::GAUNTLETS,

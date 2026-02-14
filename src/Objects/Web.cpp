@@ -7,7 +7,7 @@
 #include "../Items/MagicalItemEffects.h"
 
 Web::Web(Vector2D position, int strength)
-    : Object(position, ActorData{ '*', "spider web", BLACK_WHITE_PAIR }),
+    : Object(position, ActorData{ TILE_WEB, "spider web", BLACK_WHITE_PAIR }),
     webStrength(strength)
 {
     // Webs don't block movement but do have their effect when passed through

@@ -12,6 +12,7 @@
 #include "../ActorTypes/Healer.h"
 #include "../Factories/ItemCreator.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
@@ -72,6 +73,10 @@ void ClassBack::on_selection(GameContext& ctx)
 
 MenuClass::MenuClass(GameContext& ctx)
 {
+	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	menu_starty = (vrows - menu_height) / 2;
+	menu_startx = (vcols - menu_width) / 2;
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 	iMenuStates.emplace(MenuState::FIGHTER, std::make_unique<Fighter>());
 	iMenuStates.emplace(MenuState::ROGUE, std::make_unique<Rogue>());

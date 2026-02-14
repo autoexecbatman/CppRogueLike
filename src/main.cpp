@@ -47,9 +47,10 @@ int main()
     // Game owns everything including Renderer and InputSystem
     Game game;
 
-    // Initialize raylib window
-    game.renderer.init(119, 30);
-    game.renderer.load_tilesets("tileset.bmp", "tileset1.bmp");
+    // Initialize raylib window (fullscreen, auto-detect resolution)
+    game.renderer.init();
+    game.renderer.load_dawnlike("DawnLike");
+    game.renderer.load_font("C:/Windows/Fonts/consola.ttf", game.renderer.get_tile_size() * 3 / 4);
 
     auto ctx = game.context();
     game.menus.push_back(std::make_unique<Menu>(true, ctx));
@@ -61,8 +62,6 @@ int main()
     emscripten_set_main_loop_arg(emscripten_loop, &loopData, 60, 1);
 #else
     // Frame-based game loop
-    // Menus and game loop manage their own begin_frame/end_frame internally.
-    // Main loop just drives tick(). Input polling happens inside each subsystem.
     while (!WindowShouldClose() && game.run)
     {
         game.tick(loopNum);

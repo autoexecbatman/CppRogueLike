@@ -2,13 +2,14 @@
 #include "GirdleItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::GIRDLE_OF_HILL_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of hill giant strength",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,
@@ -22,7 +23,7 @@ namespace
             .category = "girdle"}},
 
         {ItemId::GIRDLE_OF_STONE_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of stone giant strength",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,
@@ -32,7 +33,7 @@ namespace
             .is_set_mode = true}},
 
         {ItemId::GIRDLE_OF_FROST_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of frost giant strength",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,
@@ -46,7 +47,7 @@ namespace
             .category = "girdle"}},
 
         {ItemId::GIRDLE_OF_FIRE_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of fire giant strength",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,
@@ -56,7 +57,7 @@ namespace
             .is_set_mode = true}},
 
         {ItemId::GIRDLE_OF_CLOUD_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of cloud giant strength",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,
@@ -66,7 +67,7 @@ namespace
             .is_set_mode = true}},
 
         {ItemId::GIRDLE_OF_STORM_GIANT_STRENGTH, {
-            .symbol = '[',
+            .symbol = TILE_GIRDLE,
             .name = "girdle of storm giant strength",
             .color = YELLOW_BLACK_PAIR,
             .itemClass = ItemClass::GIRDLE,

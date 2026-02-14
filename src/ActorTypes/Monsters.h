@@ -7,7 +7,7 @@ struct GameContext;
 // Disguise data for Mimic class
 struct Disguise
 {
-    char ch;
+    int ch;
     std::string name;
     int color;
 };

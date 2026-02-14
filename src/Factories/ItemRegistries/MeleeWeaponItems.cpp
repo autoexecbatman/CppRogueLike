@@ -2,13 +2,14 @@
 #include "MeleeWeaponItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::DAGGER, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "dagger",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::DAGGER,
@@ -23,7 +24,7 @@ namespace
             .category = "weapon"}},
 
         {ItemId::SHORT_SWORD, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "short sword",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SWORD,
@@ -38,7 +39,7 @@ namespace
             .category = "weapon"}},
 
         {ItemId::LONG_SWORD, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "long sword",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SWORD,
@@ -52,7 +53,7 @@ namespace
             .category = "weapon"}},
 
         {ItemId::BASTARD_SWORD, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "bastard sword",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SWORD,
@@ -62,7 +63,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::SCIMITAR, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "scimitar",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SWORD,
@@ -72,7 +73,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::RAPIER, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "rapier",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SWORD,
@@ -82,7 +83,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::GREAT_SWORD, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "greatsword",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::GREAT_SWORD,
@@ -92,7 +93,7 @@ namespace
             .weapon_size = WeaponSize::LARGE}},
 
         {ItemId::TWO_HANDED_SWORD, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "two-handed sword",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::GREAT_SWORD,
@@ -102,7 +103,7 @@ namespace
             .weapon_size = WeaponSize::LARGE}},
 
         {ItemId::HAND_AXE, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "hand axe",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::AXE,
@@ -112,7 +113,7 @@ namespace
             .weapon_size = WeaponSize::SMALL}},
 
         {ItemId::BATTLE_AXE, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "battle axe",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::AXE,
@@ -122,7 +123,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::GREAT_AXE, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "great axe",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::AXE,
@@ -132,7 +133,7 @@ namespace
             .weapon_size = WeaponSize::LARGE}},
 
         {ItemId::CLUB, {
-            .symbol = '|',
+            .symbol = TILE_TWO_HANDED,
             .name = "club",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::MACE,
@@ -142,7 +143,7 @@ namespace
             .weapon_size = WeaponSize::SMALL}},
 
         {ItemId::MACE, {
-            .symbol = '|',
+            .symbol = TILE_TWO_HANDED,
             .name = "mace",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::MACE,
@@ -152,7 +153,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::WAR_HAMMER, {
-            .symbol = '|',
+            .symbol = TILE_TWO_HANDED,
             .name = "war hammer",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::HAMMER,
@@ -162,7 +163,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::MORNING_STAR, {
-            .symbol = '|',
+            .symbol = TILE_TWO_HANDED,
             .name = "morning star",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::MACE,
@@ -172,7 +173,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::FLAIL, {
-            .symbol = '|',
+            .symbol = TILE_TWO_HANDED,
             .name = "flail",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::MACE,
@@ -182,7 +183,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::STAFF, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "staff",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::STAFF,
@@ -196,7 +197,7 @@ namespace
             .category = "weapon"}},
 
         {ItemId::QUARTERSTAFF, {
-            .symbol = '/',
+            .symbol = TILE_MELEE_WEAPON,
             .name = "quarterstaff",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::STAFF,

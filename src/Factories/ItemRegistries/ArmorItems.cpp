@@ -2,6 +2,7 @@
 #include "ArmorItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
@@ -9,7 +10,7 @@ namespace
     {
         // AC 8 — appears early, fades out quickly
         {ItemId::PADDED_ARMOR, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "padded armor",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -24,7 +25,7 @@ namespace
 
         // AC 8 — common early, tapers off
         {ItemId::LEATHER_ARMOR, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "leather armor",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -38,7 +39,7 @@ namespace
 
         // AC 7 — early to mid
         {ItemId::STUDDED_LEATHER, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "studded leather",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -53,7 +54,7 @@ namespace
 
         // AC 7 — early to mid, rarer than leather
         {ItemId::HIDE_ARMOR, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "hide armor",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -68,7 +69,7 @@ namespace
 
         // AC 7 — starts lvl 2, mid game
         {ItemId::RING_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "ring mail",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -83,7 +84,7 @@ namespace
 
         // AC 6 — mid game
         {ItemId::SCALE_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "scale mail",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -98,7 +99,7 @@ namespace
 
         // AC 5 — mid game, stays relevant longer
         {ItemId::CHAIN_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "chain mail",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -112,7 +113,7 @@ namespace
 
         // AC 6 — mid game, comparable to scale
         {ItemId::BRIGANDINE, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "brigandine",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -127,7 +128,7 @@ namespace
 
         // AC 4 — late mid, grows with level
         {ItemId::SPLINT_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "splint mail",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -141,7 +142,7 @@ namespace
 
         // AC 4 — late mid, grows with level
         {ItemId::BANDED_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "banded mail",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -155,7 +156,7 @@ namespace
 
         // AC 3 — late game, uncommon
         {ItemId::PLATE_MAIL, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "plate mail",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -169,7 +170,7 @@ namespace
 
         // AC 2 — rare, deep dungeon
         {ItemId::FIELD_PLATE, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "field plate",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,
@@ -183,7 +184,7 @@ namespace
 
         // AC 1 — very rare, endgame only
         {ItemId::FULL_PLATE, {
-            .symbol = '[',
+            .symbol = TILE_ARMOR,
             .name = "full plate",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::ARMOR,

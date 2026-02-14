@@ -11,6 +11,13 @@ struct Vector2D;
 
 enum class Controls;
 
+enum class PendingDoorAction
+{
+	NONE,
+	OPEN,
+	CLOSE
+};
+
 class AiPlayer : public Ai
 {
 public:
@@ -24,6 +31,7 @@ private:
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
 	int confusionTurns{ 0 };  // Number of turns player remains confused
+	PendingDoorAction pendingDoorAction{ PendingDoorAction::NONE };
 
 	void move(Creature& owner, Vector2D target);
 	void pick_item(Player& player, GameContext& ctx);
@@ -35,5 +43,6 @@ private:
 	bool look_to_attack(Vector2D& target, Creature& owner, GameContext& ctx);
 	void look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx);
 	void call_action(Player& player, Controls key, GameContext& ctx);
+	bool resolve_pending_door(Creature& owner, GameContext& ctx);
 	Vector2D handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx);
 };

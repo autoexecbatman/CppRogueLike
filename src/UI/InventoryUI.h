@@ -96,7 +96,7 @@ public:
 
 private:
 	// Data building
-	void rebuild_item_list(const Player& player);
+	void rebuild_item_list(const Player& player, GameContext& ctx);
 	bool item_fits_slot(const Item& item, EquipmentSlot slot) const;
 	bool is_usable_category(ItemCategory cat) const;
 
@@ -118,7 +118,7 @@ private:
 	// Input handling (uses InputSystem via GameContext)
 	bool handle_input(Player& player, GameContext& ctx);
 	void handle_cursor_up();
-	void handle_cursor_down();
+	void handle_cursor_down(GameContext& ctx);
 	void handle_tab_switch();
 	void handle_enter_equipment(Player& player, GameContext& ctx);
 	void handle_enter_item(Player& player, GameContext& ctx);
@@ -128,9 +128,9 @@ private:
 	int get_next_item_index(int from, int direction) const;
 	Item* get_selected_item() const;
 
-	// Layout constants
-	static constexpr int SCREEN_COLS = 119;
-	static constexpr int SCREEN_ROWS = 30;
+	// Layout: derived from renderer viewport at runtime
+	int screen_cols(GameContext& ctx) const;
+	int screen_rows(GameContext& ctx) const;
 
 	// State
 	InventoryScreen activeScreen;

@@ -10,6 +10,7 @@
 #include "../Items/ItemClassification.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Colors/Colors.h"
+#include "../Renderer/TileId.h"
 #include "../Utils/Vector2D.h"
 #include "InventoryData.h"
 #include "../Systems/ShopKeeper.h"
@@ -24,7 +25,7 @@ enum class EquipmentSlot;
 
 struct ActorData
 {
-	char ch{ 'f' };
+	int ch{ 0 };
 	std::string name{ "string" };
 	int color{ WHITE_BLACK_PAIR };
 };
@@ -242,7 +243,7 @@ public:
 class Stairs : public Object
 {
 	public:
-	Stairs(Vector2D position) : Object(position, ActorData{ '>', "stairs", WHITE_BLACK_PAIR }) 
+	Stairs(Vector2D position) : Object(position, ActorData{ TILE_STAIRS, "stairs", WHITE_BLACK_PAIR }) 
 	{
 		/*add_state(ActorState::FOV_ONLY);*/
 	};

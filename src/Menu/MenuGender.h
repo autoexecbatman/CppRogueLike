@@ -34,8 +34,8 @@ class MenuGender : public BaseMenu
 {
 	int height_{ 6 };
 	int width_{ 15 };
-	int starty_{ (30 - height_) / 2 };
-	int startx_{ (119 - width_) / 2 };
+	int starty_{ 0 };
+	int startx_{ 0 };
 	enum class MenuState { MALE, FEMALE, RANDOM, BACK }
 	currentState{ MenuState::MALE };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;

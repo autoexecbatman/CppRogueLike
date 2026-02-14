@@ -19,6 +19,16 @@
 #include "../Items/Jewelry.h"
 #include "../Items/Armor.h"
 
+int InventoryUI::screen_cols(GameContext& ctx) const
+{
+	return ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+}
+
+int InventoryUI::screen_rows(GameContext& ctx) const
+{
+	return ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+}
+
 using namespace InventoryOperations;
 
 InventoryUI::InventoryUI()
@@ -40,7 +50,7 @@ void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen star
 	filterMode = false;
 	filterSlot = EquipmentSlot::NONE;
 
-	rebuild_item_list(player);
+	rebuild_item_list(player, ctx);
 
 	while (true)
 	{
@@ -67,7 +77,7 @@ void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen star
 			break;
 		}
 
-		rebuild_item_list(player);
+		rebuild_item_list(player, ctx);
 	}
 }
 
@@ -75,7 +85,7 @@ void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen star
 // Data Building
 // ============================================================
 
-void InventoryUI::rebuild_item_list(const Player& player)
+void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 {
 	listEntries.clear();
 
@@ -178,7 +188,7 @@ void InventoryUI::rebuild_item_list(const Player& player)
 		}
 	}
 
-	int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
+	int contentHeight = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 	if (scrollOffset > listCursor)
 	{
 		scrollOffset = listCursor;
@@ -278,7 +288,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		x += static_cast<int>(strlen(tab.text)) + 1;
 	}
 
-	ctx.renderer->draw_text((SCREEN_COLS - 14) * ts, 0, "[Tab] Switch", CYAN_BLACK_PAIR);
+	ctx.renderer->draw_text((screen_cols(ctx) - 14) * ts, 0, "[Tab] Switch", CYAN_BLACK_PAIR);
 }
 
 void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
@@ -340,7 +350,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 {
 	int ts = ctx.renderer->get_tile_size();
 	int startY = 1 + TAB_BAR_HEIGHT;
-	int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
+	int contentHeight = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 
 	if (listEntries.empty())
 	{
@@ -406,18 +416,18 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 	int totalEntries = static_cast<int>(listEntries.size());
 	if (scrollOffset > 0)
 	{
-		ctx.renderer->draw_text((SCREEN_COLS - 5) * ts, startY * ts, "^^^", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text((screen_cols(ctx) - 5) * ts, startY * ts, "^^^", CYAN_BLACK_PAIR);
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		ctx.renderer->draw_text((SCREEN_COLS - 5) * ts, (startY + contentHeight - 1) * ts, "vvv", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text((screen_cols(ctx) - 5) * ts, (startY + contentHeight - 1) * ts, "vvv", CYAN_BLACK_PAIR);
 	}
 }
 
 void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 {
 	int ts = ctx.renderer->get_tile_size();
-	int detailY = SCREEN_ROWS - DETAIL_BAR_HEIGHT;
+	int detailY = screen_rows(ctx) - DETAIL_BAR_HEIGHT;
 
 	Item* selectedItem = get_selected_item();
 
@@ -644,7 +654,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 	case GameKey::DOWN:
 	case GameKey::S:
-		handle_cursor_down();
+		handle_cursor_down(ctx);
 		return true;
 
 	case GameKey::ENTER:
@@ -717,7 +727,7 @@ void InventoryUI::handle_cursor_up()
 	}
 }
 
-void InventoryUI::handle_cursor_down()
+void InventoryUI::handle_cursor_down(GameContext& ctx)
 {
 	if (activeScreen == InventoryScreen::EQUIPMENT)
 	{
@@ -732,7 +742,7 @@ void InventoryUI::handle_cursor_down()
 		if (next >= 0)
 		{
 			listCursor = next;
-			int contentHeight = SCREEN_ROWS - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
+			int contentHeight = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 2 - TAB_BAR_HEIGHT;
 			if (listCursor >= scrollOffset + contentHeight)
 			{
 				scrollOffset = listCursor - contentHeight + 1;

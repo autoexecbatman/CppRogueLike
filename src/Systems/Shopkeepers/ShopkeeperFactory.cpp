@@ -11,7 +11,7 @@
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
     // Create base creature
-    auto shopkeeper = std::make_unique<Creature>(position, ActorData{ 'S', "Shopkeeper", YELLOW_BLACK_PAIR });
+    auto shopkeeper = std::make_unique<Creature>(position, ActorData{ TILE_SHOPKEEPER, "Shopkeeper", YELLOW_BLACK_PAIR });
 
     // Configure all shopkeeper components in one place
     configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);

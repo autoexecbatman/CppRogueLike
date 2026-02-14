@@ -75,6 +75,11 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		}
 	}
 
+	if (resolve_pending_door(owner, ctx))
+	{
+		return;
+	}
+
 	const Controls key = static_cast<Controls>(ctx.input_handler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
@@ -628,79 +633,15 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::OPEN_DOOR:
 	{
-		// Prompt for direction
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
-		// TODO: Replace with proper non-curses input wait for direction key
-		int dirKey = ctx.input_handler->get_current_key();
-		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
-
-		if (doorPos.x != 0 || doorPos.y != 0)
-		{ // Valid position
-			if (ctx.map->is_door(doorPos))
-			{
-				if (ctx.map->open_door(doorPos, ctx))
-				{
-					ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
-					*ctx.game_status = GameStatus::NEW_TURN;
-					// FOV is recalculated inside open_door method
-				}
-				else
-				{
-					ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already open.", true);
-				}
-			}
-			else
-			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
-			}
-		}
-		else
-		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
-		}
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		pendingDoorAction = PendingDoorAction::OPEN;
 		break;
 	}
 
 	case Controls::CLOSE_DOOR:
 	{
-		// Prompt for direction
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys or numpad)", true);
-		// TODO: Replace with proper non-curses input wait for direction key
-		int dirKey = ctx.input_handler->get_current_key();
-		Vector2D doorPos = handle_direction_input(player, dirKey, ctx);
-
-		if (doorPos.x != 0 || doorPos.y != 0)
-		{ // Valid position
-			if (ctx.map->is_door(doorPos))
-			{
-				if (ctx.map->close_door(doorPos, ctx))
-				{
-					ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
-					*ctx.game_status = GameStatus::NEW_TURN;
-					// FOV is recalculated inside close_door method
-				}
-				else
-				{
-					// Try to determine why door couldn't be closed
-					if (ctx.map->get_actor(doorPos, ctx) != nullptr)
-					{
-						ctx.message_system->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
-					}
-					else
-					{
-						ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
-					}
-				}
-			}
-			else
-			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
-			}
-		}
-		else
-		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
-		}
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		pendingDoorAction = PendingDoorAction::CLOSE;
 		break;
 	}
 
@@ -734,6 +675,73 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	default:
 		break;
 }
+}
+
+bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
+{
+	if (pendingDoorAction == PendingDoorAction::NONE)
+	{
+		return false;
+	}
+
+	int dirKey = ctx.input_handler->get_current_key();
+	if (dirKey == 27)
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Cancelled.", true);
+		pendingDoorAction = PendingDoorAction::NONE;
+		return true;
+	}
+	if (dirKey == -1)
+	{
+		return true;
+	}
+
+	Vector2D doorPos = handle_direction_input(owner, dirKey, ctx);
+	if (doorPos.x == 0 && doorPos.y == 0)
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
+		pendingDoorAction = PendingDoorAction::NONE;
+		return true;
+	}
+
+	if (!ctx.map->is_door(doorPos))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
+		pendingDoorAction = PendingDoorAction::NONE;
+		return true;
+	}
+
+	if (pendingDoorAction == PendingDoorAction::OPEN)
+	{
+		if (ctx.map->open_door(doorPos, ctx))
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
+			*ctx.game_status = GameStatus::NEW_TURN;
+		}
+		else
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already open.", true);
+		}
+	}
+	else
+	{
+		if (ctx.map->close_door(doorPos, ctx))
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
+			*ctx.game_status = GameStatus::NEW_TURN;
+		}
+		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
+		}
+		else
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
+		}
+	}
+
+	pendingDoorAction = PendingDoorAction::NONE;
+	return true;
 }
 
 Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx)

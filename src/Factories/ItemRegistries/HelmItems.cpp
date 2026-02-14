@@ -2,13 +2,14 @@
 #include "HelmItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::HELM_OF_BRILLIANCE, {
-            .symbol = '^',
+            .symbol = TILE_HELM,
             .name = "helm of brilliance",
             .color = YELLOW_BLACK_PAIR,
             .itemClass = ItemClass::HELMET,
@@ -21,7 +22,7 @@ namespace
             .category = "magical_helm"}},
 
         {ItemId::HELM_OF_TELEPORTATION, {
-            .symbol = '^',
+            .symbol = TILE_HELM,
             .name = "helm of teleportation",
             .color = MAGENTA_BLACK_PAIR,
             .itemClass = ItemClass::HELMET,
@@ -30,7 +31,7 @@ namespace
             .effect = MagicalEffect::TELEPORTATION}},
 
         {ItemId::HELM_OF_TELEPATHY, {
-            .symbol = '^',
+            .symbol = TILE_HELM,
             .name = "helm of telepathy",
             .color = BLUE_BLACK_PAIR,
             .itemClass = ItemClass::HELMET,
@@ -39,7 +40,7 @@ namespace
             .effect = MagicalEffect::TELEPATHY}},
 
         {ItemId::HELM_OF_UNDERWATER_ACTION, {
-            .symbol = '^',
+            .symbol = TILE_HELM,
             .name = "helm of underwater action",
             .color = CYAN_BLACK_PAIR,
             .itemClass = ItemClass::HELMET,

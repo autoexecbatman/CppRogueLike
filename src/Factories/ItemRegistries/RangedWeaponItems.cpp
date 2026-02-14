@@ -2,13 +2,14 @@
 #include "RangedWeaponItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::SLING, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "sling",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::BOW,
@@ -19,7 +20,7 @@ namespace
             .weapon_size = WeaponSize::SMALL}},
 
         {ItemId::SHORT_BOW, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "short bow",
             .color = BROWN_BLACK_PAIR,
             .itemClass = ItemClass::BOW,
@@ -30,7 +31,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::LONG_BOW, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "longbow",
             .color = WHITE_BLUE_PAIR,
             .itemClass = ItemClass::BOW,
@@ -45,7 +46,7 @@ namespace
             .category = "weapon"}},
 
         {ItemId::COMPOSITE_BOW, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "composite bow",
             .color = YELLOW_BLACK_PAIR,
             .itemClass = ItemClass::BOW,
@@ -56,7 +57,7 @@ namespace
             .weapon_size = WeaponSize::LARGE}},
 
         {ItemId::LIGHT_CROSSBOW, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "light crossbow",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::CROSSBOW,
@@ -67,7 +68,7 @@ namespace
             .weapon_size = WeaponSize::MEDIUM}},
 
         {ItemId::HEAVY_CROSSBOW, {
-            .symbol = ')',
+            .symbol = TILE_RANGED_WEAPON,
             .name = "heavy crossbow",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::CROSSBOW,
@@ -78,7 +79,7 @@ namespace
             .weapon_size = WeaponSize::LARGE}},
 
         {ItemId::MEDIUM_SHIELD, {
-            .symbol = '[',
+            .symbol = TILE_SHIELD_ITEM,
             .name = "shield",
             .color = WHITE_BLACK_PAIR,
             .itemClass = ItemClass::SHIELD,

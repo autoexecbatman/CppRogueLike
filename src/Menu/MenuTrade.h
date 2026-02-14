@@ -39,8 +39,8 @@ class MenuTrade : public BaseMenu
 {
 	int height_{ 5 }; // Title row + 3 menu items + 2 border rows + spacing
 	int width_{ 10 }; // Wide enough for "Trade" title
-	int starty_{ (30 - height_) / 2 };
-	int startx_{ (119 - width_) / 2 };
+	int starty_{ 0 };
+	int startx_{ 0 };
 	Creature& shopkeeper;  // Store reference to shopkeeper
 
 	size_t currentState{ 0 };

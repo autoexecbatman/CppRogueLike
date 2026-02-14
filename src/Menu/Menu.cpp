@@ -4,6 +4,7 @@
 #include "Menu.h"
 #include "MenuGender.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
@@ -38,6 +39,10 @@ void Quit::on_selection(GameContext& ctx)
 
 Menu::Menu(bool startup, GameContext& ctx) : isStartupMenu(startup)
 {
+	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	menu_starty = (vrows - menu_height) / 2;
+	menu_startx = (vcols - menu_width) / 2;
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
 	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());

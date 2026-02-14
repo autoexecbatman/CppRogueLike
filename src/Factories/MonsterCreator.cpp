@@ -10,6 +10,7 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
+#include "../Renderer/TileId.h"
 
 namespace
 {
@@ -43,7 +44,7 @@ namespace
         {
             MonsterId::GOBLIN,
             {
-                .symbol = 'g',
+                .symbol = TILE_GOBLIN,
                 .name = "goblin",
                 .color = YELLOW_BLACK_PAIR,
                 .corpse_name = "dead goblin",
@@ -74,7 +75,7 @@ namespace
         {
             MonsterId::ORC,
             {
-                .symbol = 'o',
+                .symbol = TILE_ORC,
                 .name = "orc",
                 .color = RED_BLACK_PAIR,
                 .corpse_name = "dead orc",
@@ -104,7 +105,7 @@ namespace
         {
             MonsterId::TROLL,
             {
-                .symbol = 'T',
+                .symbol = TILE_TROLL,
                 .name = "troll",
                 .color = GREEN_BLACK_PAIR,
                 .corpse_name = "dead troll",
@@ -134,7 +135,7 @@ namespace
         {
             MonsterId::DRAGON,
             {
-                .symbol = 'D',
+                .symbol = TILE_DRAGON,
                 .name = "dragon",
                 .color = RED_YELLOW_PAIR,
                 .corpse_name = "dead dragon",
@@ -164,7 +165,7 @@ namespace
         {
             MonsterId::ARCHER,
             {
-                .symbol = 'a',
+                .symbol = TILE_ARCHER,
                 .name = "archer",
                 .color = RED_BLACK_PAIR,
                 .corpse_name = "dead archer",
@@ -194,7 +195,7 @@ namespace
         {
             MonsterId::MAGE,
             {
-                .symbol = 'm',
+                .symbol = TILE_MAGE,
                 .name = "mage",
                 .color = WHITE_BLUE_PAIR,
                 .corpse_name = "dead mage",
@@ -224,7 +225,7 @@ namespace
         {
             MonsterId::WOLF,
             {
-                .symbol = 'w',
+                .symbol = TILE_WOLF,
                 .name = "wolf",
                 .color = BROWN_BLACK_PAIR,
                 .corpse_name = "dead wolf",
@@ -254,7 +255,7 @@ namespace
         {
             MonsterId::FIRE_WOLF,
             {
-                .symbol = 'w',
+                .symbol = TILE_FIRE_WOLF,
                 .name = "fire wolf",
                 .color = RED_YELLOW_PAIR,
                 .corpse_name = "charred wolf corpse",
@@ -284,7 +285,7 @@ namespace
         {
             MonsterId::ICE_WOLF,
             {
-                .symbol = 'w',
+                .symbol = TILE_ICE_WOLF,
                 .name = "ice wolf",
                 .color = CYAN_BLUE_PAIR,
                 .corpse_name = "frozen wolf corpse",
@@ -314,7 +315,7 @@ namespace
         {
             MonsterId::BAT,
             {
-                .symbol = 'b',
+                .symbol = TILE_BAT,
                 .name = "bat",
                 .color = MAGENTA_BLACK_PAIR,
                 .corpse_name = "dead bat",
@@ -344,7 +345,7 @@ namespace
         {
             MonsterId::KOBOLD,
             {
-                .symbol = 'k',
+                .symbol = TILE_KOBOLD,
                 .name = "kobold",
                 .color = RED_BLACK_PAIR,
                 .corpse_name = "dead kobold",

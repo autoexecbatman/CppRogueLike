@@ -2,6 +2,7 @@
 #include "tests/mocks/MockGameContext.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
+#include "src/Renderer/TileId.h"
 
 class ItemCreatorTest : public ::testing::Test
 {
@@ -14,7 +15,7 @@ TEST_F(ItemCreatorTest, CreateHealthPotion)
     Vector2D pos(0, 0);
     auto item = ItemCreator::create(ItemId::HEALTH_POTION, pos);
 
-    EXPECT_EQ(item->actorData.ch, '!');
+    EXPECT_EQ(item->actorData.ch, TILE_POTION);
     EXPECT_EQ(item->actorData.name, "health potion");
     EXPECT_NE(item->pickable, nullptr);
     EXPECT_EQ(item->value, 50);
@@ -25,7 +26,7 @@ TEST_F(ItemCreatorTest, CreateScrollLightning)
     Vector2D pos(0, 0);
     auto item = ItemCreator::create(ItemId::SCROLL_LIGHTNING, pos);
 
-    EXPECT_EQ(item->actorData.ch, '?');
+    EXPECT_EQ(item->actorData.ch, TILE_SCROLL);
     EXPECT_EQ(item->actorData.name, "scroll of lightning bolt");
     EXPECT_NE(item->pickable, nullptr);
     EXPECT_EQ(item->value, 150);
@@ -38,7 +39,7 @@ TEST_F(ItemCreatorTest, CreateRandomPotion)
     auto item = ItemCreator::create_random_of_category("potion", pos, ctx, 1);
 
     ASSERT_NE(item, nullptr);
-    EXPECT_EQ(item->actorData.ch, '!');
+    EXPECT_EQ(item->actorData.ch, TILE_POTION);
     EXPECT_NE(item->pickable, nullptr);
 }
 
@@ -78,7 +79,7 @@ TEST_F(ItemCreatorTest, CreateLeatherArmor)
     Vector2D pos(0, 0);
     auto item = ItemCreator::create(ItemId::LEATHER_ARMOR, pos);
 
-    EXPECT_EQ(item->actorData.ch, '[');
+    EXPECT_EQ(item->actorData.ch, TILE_ARMOR);
     EXPECT_EQ(item->actorData.name, "leather armor");
     EXPECT_NE(item->pickable, nullptr);
     EXPECT_EQ(item->value, 5);

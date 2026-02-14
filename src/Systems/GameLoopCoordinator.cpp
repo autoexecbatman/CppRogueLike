@@ -92,6 +92,15 @@ void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
     ctx.message_system->log("Running render...");
+
+    // Center camera on player before rendering
+    ctx.renderer->set_camera_center(
+        ctx.player->position.x,
+        ctx.player->position.y,
+        ctx.map->get_width(),
+        ctx.map->get_height()
+    );
+
     ctx.renderer->begin_frame();
 
     ctx.rendering_manager->render(ctx);

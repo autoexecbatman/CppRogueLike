@@ -13,6 +13,7 @@
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "ItemRegistries/EnhancedWeaponRules.h"
 #include "ItemRegistries/EnhancedArmorRules.h"
+#include "../Renderer/TileId.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -150,7 +151,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
     int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
     // Create gold pile
-    auto goldPile = std::make_unique<Item>(position, ActorData{ '$', "gold pile", YELLOW_BLACK_PAIR });
+    auto goldPile = std::make_unique<Item>(position, ActorData{ TILE_GOLD, "gold pile", YELLOW_BLACK_PAIR });
     goldPile->pickable = std::make_unique<Gold>(goldAmount);
     add_item(*ctx.inventory_data, std::move(goldPile));
 

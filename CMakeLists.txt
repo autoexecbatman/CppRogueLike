@@ -33,7 +33,9 @@ if(EMSCRIPTEN)
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
         GIT_TAG 5.5
     )
+    set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
     FetchContent_MakeAvailable(raylib)
+    set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
     # Emscripten flags: ASYNCIFY enables blocking menu loops to yield to browser
     set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536 -sGL_ENABLE_GET_PROC_ADDRESS=1")
@@ -45,14 +47,10 @@ if(EMSCRIPTEN)
     # Set linker flags with shell file and preload all JSON files at once
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${EMCC_FLAGS} --shell-file ${CMAKE_SOURCE_DIR}/shell.html")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file strength.json --preload-file dexterity.json --preload-file constitution.json --preload-file wisdom.json --preload-file intelligence.json --preload-file charisma.json")
-    # Copy tilesets for web build
-    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset.bmp")
-        file(COPY "${CMAKE_SOURCE_DIR}/tileset.bmp" DESTINATION "${CMAKE_BINARY_DIR}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file tileset.bmp")
-    endif()
-    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset1.bmp")
-        file(COPY "${CMAKE_SOURCE_DIR}/tileset1.bmp" DESTINATION "${CMAKE_BINARY_DIR}")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file tileset1.bmp")
+    # Copy DawnLike tileset for web build
+    if(EXISTS "${CMAKE_SOURCE_DIR}/DawnLike")
+        file(COPY "${CMAKE_SOURCE_DIR}/DawnLike" DESTINATION "${CMAKE_BINARY_DIR}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file DawnLike")
     endif()
 
     # Set output suffix for web
@@ -395,18 +393,12 @@ else()
                                   $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})
     endforeach()
 
-    # Copy tileset BMPs to build directory (optional - enables tile rendering)
-    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset.bmp")
+    # Copy DawnLike tileset directory to build output
+    if(EXISTS "${CMAKE_SOURCE_DIR}/DawnLike")
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_SOURCE_DIR}/tileset.bmp"
-                $<TARGET_FILE_DIR:${PROJECT_NAME}>/tileset.bmp)
-    endif()
-    if(EXISTS "${CMAKE_SOURCE_DIR}/tileset1.bmp")
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_SOURCE_DIR}/tileset1.bmp"
-                $<TARGET_FILE_DIR:${PROJECT_NAME}>/tileset1.bmp)
+            COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "${CMAKE_SOURCE_DIR}/DawnLike"
+                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/DawnLike")
     endif()
 
     # Add tests subdirectory (only for native builds)

@@ -3,13 +3,14 @@
 #include "FoodItems.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Colors/Colors.h"
+#include "../../Renderer/TileId.h"
 
 namespace
 {
     const ItemRegistryEntry entries[] =
     {
         {ItemId::FOOD_RATION, {
-            .symbol = '%',
+            .symbol = TILE_FOOD,
             .name = "ration",
             .color = WHITE_GREEN_PAIR,
             .itemClass = ItemClass::FOOD,
@@ -22,7 +23,7 @@ namespace
             .category = "food"}},
 
         {ItemId::FRUIT, {
-            .symbol = '%',
+            .symbol = TILE_FOOD,
             .name = "fruit",
             .color = GREEN_BLACK_PAIR,
             .itemClass = ItemClass::FOOD,
@@ -34,7 +35,7 @@ namespace
             .category = "food"}},
 
         {ItemId::BREAD, {
-            .symbol = '%',
+            .symbol = TILE_FOOD,
             .name = "bread",
             .color = RED_YELLOW_PAIR,
             .itemClass = ItemClass::FOOD,
@@ -46,7 +47,7 @@ namespace
             .category = "food"}},
 
         {ItemId::MEAT, {
-            .symbol = '%',
+            .symbol = TILE_FOOD,
             .name = "meat",
             .color = RED_BLACK_PAIR,
             .itemClass = ItemClass::FOOD,
@@ -59,7 +60,7 @@ namespace
             .category = "food"}},
 
         {ItemId::GOLD, {
-            .symbol = '$',
+            .symbol = TILE_GOLD,
             .name = "gold pile",
             .color = YELLOW_BLACK_PAIR,
             .itemClass = ItemClass::GOLD,

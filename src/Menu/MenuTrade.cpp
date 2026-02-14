@@ -6,6 +6,7 @@
 #include "../Actor/Actor.h"
 #include "../Systems/ShopKeeper.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 
@@ -32,6 +33,10 @@ void Exit::on_selection(GameContext& ctx)
 
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx) : shopkeeper(shopkeeper)
 {
+	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	starty_ = (vrows - height_) / 2;
+	startx_ = (vcols - width_) / 2;
 	menu_new(height_, width_, starty_, startx_, ctx);
 	iMenuStates.push_back(std::make_unique<Buy>(shopkeeper));
 	iMenuStates.push_back(std::make_unique<Sell>(shopkeeper, player));

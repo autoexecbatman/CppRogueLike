@@ -14,9 +14,8 @@
 // Forward declaration
 struct GameContext;
 
-inline constexpr int GUI_RESERVE = 8; // 7 GUI rows + 1 buffer
-inline constexpr int DEFAULT_MAP_WIDTH = 119;
-inline constexpr int DEFAULT_MAP_HEIGHT = 22; // 30 - 8
+inline constexpr int DEFAULT_MAP_WIDTH = 120;
+inline constexpr int DEFAULT_MAP_HEIGHT = 80;
 
 inline int get_map_width() { return DEFAULT_MAP_WIDTH; }
 inline int get_map_height() { return DEFAULT_MAP_HEIGHT; }

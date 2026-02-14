@@ -44,7 +44,7 @@ struct DiceExpr
 struct MonsterParams
 {
     // Identity
-    char symbol{};
+    int symbol{};
     std::string name;
     int color{ 0 };
     std::string corpse_name;
