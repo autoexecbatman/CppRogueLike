@@ -72,8 +72,8 @@ inline constexpr int TILE_CORRIDOR    = make_tile(SHEET_FLOOR, 1, 7);   // mediu
 inline constexpr int TILE_WATER       = make_tile(SHEET_FLOOR, 1, 13);  // dark navy floor
 inline constexpr int TILE_WALL_STONE  = make_tile(SHEET_WALL, 1, 5);    // stone wall body
 inline constexpr int TILE_DOOR_CLOSED = make_tile(SHEET_DOOR0, 0, 0);   // solid closed door
-inline constexpr int TILE_DOOR_OPEN   = make_tile(SHEET_DOOR0, 0, 3);   // open door frame
-inline constexpr int TILE_STAIRS      = make_tile(SHEET_TILE, 0, 2);    // staircase
+inline constexpr int TILE_DOOR_OPEN   = make_tile(SHEET_DOOR0, 1, 0);   // open door frame
+inline constexpr int TILE_STAIRS      = make_tile(SHEET_TILE, 5, 3);    // staircase
 
 // ---------------------------------------------------------------------------
 // Autotile groups (3x3 blocks, origin = top-left corner of the group)
