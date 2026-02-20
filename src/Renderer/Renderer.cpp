@@ -36,8 +36,14 @@ static Texture2D load_dawnlike_texture(const char* path)
 void Renderer::init()
 {
 #ifdef EMSCRIPTEN
-    screen_w = 960;
-    screen_h = 544;
+    // Query the actual browser window size and snap to tile grid so no partial
+    // tiles appear at the edges.
+    {
+        int raw_w = EM_ASM_INT({ return window.innerWidth;  });
+        int raw_h = EM_ASM_INT({ return window.innerHeight; });
+        screen_w  = (raw_w / tile_size) * tile_size;
+        screen_h  = (raw_h / tile_size) * tile_size;
+    }
     InitWindow(screen_w, screen_h, "C++RogueLike");
     SetTargetFPS(60);
 #else
