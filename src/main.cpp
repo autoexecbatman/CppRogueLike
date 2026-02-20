@@ -51,7 +51,7 @@ int main()
     game.renderer.init();
     game.renderer.load_dawnlike("DawnLike");
 
-    game.renderer.load_font("DawnLike/GUI/SDS_8x8.ttf", 24);
+    game.renderer.load_font("DawnLike/GUI/SDS_8x8.ttf", 16);
 
     auto ctx = game.context();
     game.menus.push_back(std::make_unique<Menu>(true, ctx));

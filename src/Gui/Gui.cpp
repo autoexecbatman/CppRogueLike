@@ -26,8 +26,11 @@ constexpr int LOG_MAX_MESSAGES = 5;
 //   Stat panel : cols (div1+1) .. (div2-1)
 //   Log panel  : cols (div2+1) .. (vcols-2)
 // ---------------------------------------------------------------------------
-static int hud_div1(int vcols) { return vcols * 28 / 100; }
-static int hud_div2(int vcols) { return vcols * 55 / 100; }
+// Bar panel ends at ~18 % of viewport width.
+// Stat panel is a fixed 11-tile interior (div1 + 1 divider + 11 content + 1 divider).
+// Everything to the right of div2 belongs to the combat log.
+static int hud_div1(int vcols) { return vcols * 18 / 100; }
+static int hud_div2(int vcols) { return hud_div1(vcols) + 13; }
 
 // Vertical centering offset for text inside a tile-height row
 static int font_row_off(const Renderer& r)
@@ -237,52 +240,51 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		ctx.player->actorData.name = "Player";
 	}
 
-	// Row 1: Name (highlighted)
-	ctx.renderer->draw_text(
-		statsX,
-		baseY + 1 * ts + fontOff,
+	// Row 1: Name / class / level on one line
+	auto nameLine = std::format(
+		"{} ({} Lv.{})",
 		ctx.player->actorData.name,
-		YELLOW_BLACK_PAIR
+		ctx.player->playerClass,
+		ctx.player->get_level()
 	);
+	ctx.renderer->draw_text(statsX, baseY + 1 * ts + fontOff, nameLine, YELLOW_BLACK_PAIR);
 
-	// Row 2: Class + level
-	auto classLine = std::format(
-		"{}  Lv.{}", ctx.player->playerClass, ctx.player->get_level()
-	);
-	ctx.renderer->draw_text(statsX, baseY + 2 * ts + fontOff, classLine, WHITE_BLACK_PAIR);
-
-	// Row 3: THAC0 / AC / DR
+	// Row 2: Combat -- T0 = THAC0 abbreviation
 	auto combatLine = std::format(
-		"THAC0:{}  AC:{}  DR:{}",
+		"T0:{}  AC:{}  DR:{}",
 		ctx.player->destructible->get_thaco(),
 		ctx.player->destructible->get_armor_class(),
 		ctx.player->destructible->get_dr()
 	);
-	ctx.renderer->draw_text(statsX, baseY + 3 * ts + fontOff, combatLine, WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(statsX, baseY + 2 * ts + fontOff, combatLine, WHITE_BLACK_PAIR);
 
-	// Row 4: Attack roll
+	// Row 3: Attack roll
 	auto atkLine = std::format(
 		"Atk: {}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll
 	);
-	ctx.renderer->draw_text(statsX, baseY + 4 * ts + fontOff, atkLine, GREEN_BLACK_PAIR);
+	ctx.renderer->draw_text(statsX, baseY + 3 * ts + fontOff, atkLine, GREEN_BLACK_PAIR);
 
-	// Row 5: STR / DEX / CON
-	auto line5 = std::format(
-		"STR:{:2d} DEX:{:2d} CON:{:2d}",
+	// Row 4: Physical attributes
+	auto physLine = std::format(
+		"S:{} D:{} C:{}",
 		ctx.player->get_strength(),
 		ctx.player->get_dexterity(),
 		ctx.player->get_constitution()
 	);
-	ctx.renderer->draw_text(statsX, baseY + 5 * ts + fontOff, line5, WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(statsX, baseY + 4 * ts + fontOff, physLine, WHITE_BLACK_PAIR);
 
-	// Row 6: INT / WIS / CHA
-	auto line6 = std::format(
-		"INT:{:2d} WIS:{:2d} CHA:{:2d}",
+	// Row 5: Mental attributes
+	auto mentLine = std::format(
+		"I:{} W:{} Ch:{}",
 		ctx.player->get_intelligence(),
 		ctx.player->get_wisdom(),
 		ctx.player->get_charisma()
 	);
-	ctx.renderer->draw_text(statsX, baseY + 6 * ts + fontOff, line6, WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(statsX, baseY + 5 * ts + fontOff, mentLine, WHITE_BLACK_PAIR);
+
+	// Row 6: Gold
+	auto goldLine = std::format("Gold: {} gp", ctx.player->get_gold());
+	ctx.renderer->draw_text(statsX, baseY + 6 * ts + fontOff, goldLine, YELLOW_BLACK_PAIR);
 }
 
 // No-op: content merged into gui_print_stats
