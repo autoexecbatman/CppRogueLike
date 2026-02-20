@@ -69,7 +69,7 @@ protected:
         {
             for (int x = x1; x <= x2; ++x) 
             {
-                map->set_tile(Vector2D{y, x}, TileType::FLOOR, 1.0);
+                map->set_tile(Vector2D{x, y}, TileType::FLOOR, 1.0);
             }
         }
     }
@@ -89,10 +89,10 @@ TEST_F(MapTest, GetTileType_DefaultIsWall)
 
 TEST_F(MapTest, GetTileType_OutOfBounds_ReturnsWall)
 {
-    EXPECT_EQ(map->get_tile_type(Vector2D{-1, 0}), TileType::WALL);
     EXPECT_EQ(map->get_tile_type(Vector2D{0, -1}), TileType::WALL);
-    EXPECT_EQ(map->get_tile_type(Vector2D{TEST_MAP_HEIGHT, 0}), TileType::WALL);
-    EXPECT_EQ(map->get_tile_type(Vector2D{0, TEST_MAP_WIDTH}), TileType::WALL);
+    EXPECT_EQ(map->get_tile_type(Vector2D{-1, 0}), TileType::WALL);
+    EXPECT_EQ(map->get_tile_type(Vector2D{0, TEST_MAP_HEIGHT}), TileType::WALL);
+    EXPECT_EQ(map->get_tile_type(Vector2D{TEST_MAP_WIDTH, 0}), TileType::WALL);
     EXPECT_EQ(map->get_tile_type(Vector2D{999, 999}), TileType::WALL);
 }
 
@@ -265,16 +265,16 @@ TEST_F(MapTest, GetIndex_ValidPosition)
     // Index = y * width + x
     EXPECT_EQ(map->get_index(Vector2D{0, 0}), 0);
     EXPECT_EQ(map->get_index(Vector2D{0, 5}), 5);
-    EXPECT_EQ(map->get_index(Vector2D{1, 0}), TEST_MAP_WIDTH);
-    EXPECT_EQ(map->get_index(Vector2D{2, 3}), 2 * TEST_MAP_WIDTH + 3);
+    EXPECT_EQ(map->get_index(Vector2D{0, 1}), TEST_MAP_WIDTH);
+    EXPECT_EQ(map->get_index(Vector2D{3, 2}), 2 * TEST_MAP_WIDTH + 3);
 }
 
 TEST_F(MapTest, GetIndex_OutOfBounds_Throws)
 {
-    EXPECT_THROW(map->get_index(Vector2D{-1, 0}), std::out_of_range);
     EXPECT_THROW(map->get_index(Vector2D{0, -1}), std::out_of_range);
-    EXPECT_THROW(map->get_index(Vector2D{TEST_MAP_HEIGHT, 0}), std::out_of_range);
-    EXPECT_THROW(map->get_index(Vector2D{0, TEST_MAP_WIDTH}), std::out_of_range);
+    EXPECT_THROW(map->get_index(Vector2D{-1, 0}), std::out_of_range);
+    EXPECT_THROW(map->get_index(Vector2D{0, TEST_MAP_HEIGHT}), std::out_of_range);
+    EXPECT_THROW(map->get_index(Vector2D{TEST_MAP_WIDTH, 0}), std::out_of_range);
 }
 
 // ----------------------------------------------------------------------------
@@ -422,7 +422,7 @@ TEST_F(MapTest, Reveal_MarksAllExplored)
     // Check a few positions
     EXPECT_TRUE(map->is_explored(Vector2D{1, 1}));
     EXPECT_TRUE(map->is_explored(Vector2D{5, 5}));
-    EXPECT_TRUE(map->is_explored(Vector2D{TEST_MAP_HEIGHT - 2, TEST_MAP_WIDTH - 2}));
+    EXPECT_TRUE(map->is_explored(Vector2D{TEST_MAP_WIDTH - 2, TEST_MAP_HEIGHT - 2}));
 }
 
 // ----------------------------------------------------------------------------

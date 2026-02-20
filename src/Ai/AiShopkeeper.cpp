@@ -31,9 +31,9 @@ void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target, GameContext& ctx)
 
     // Define movement priorities using Vector2D directly
     std::vector<Vector2D> moves{
-        step,                    // First priority: diagonal movement (both Y and X)
-        Vector2D{0, step.x},            // Second priority: horizontal only (X movement)
-        Vector2D{step.y, 0}             // Third priority: vertical only (Y movement)
+        step,                             // First priority: diagonal movement (both Y and X)
+        Vector2D{ step.x, 0 },            // Second priority: horizontal only (X movement)
+        Vector2D{ 0, step.y }             // Third priority: vertical only (Y movement)
     };
 
     // Try each move in priority order

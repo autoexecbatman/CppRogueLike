@@ -58,7 +58,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 
             if (dx != 0 || dy != 0)  // Ensure we're not standing still
             {
-                Vector2D newPos = owner.position + Vector2D{ dy, dx };
+                Vector2D newPos = owner.position + Vector2D{ dx, dy };
                 if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
                 {
                     owner.position = newPos;
@@ -74,7 +74,7 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 
         if (dx != 0 || dy != 0)  // Ensure we're not standing still
         {
-            Vector2D newPos = owner.position + Vector2D{ dy, dx };
+            Vector2D newPos = owner.position + Vector2D{ dx, dy };
             if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
             {
                 owner.position = newPos;
@@ -93,62 +93,6 @@ void AiMonster::save(json& j)
 	j["type"] = static_cast<int>(AiType::MONSTER);
 	j["moveCount"] = moveCount;
 }
-
-//====
-// how many turns the monster chases the player
-// after losing his sight
-
-//void AiMonster::moveOrAttack(Creature& owner, Vector2D targetPosition)
-//{
-//	if(ctx.map->tile_action(owner, ctx.map->get_tile_type(owner.position)))
-//	{
-//		Vector2D moveDirection = targetPosition - owner.position;
-//
-//		Vector2D diagonalMove = Vector2D{
-//			calculate_step(moveDirection.y),
-//			calculate_step(moveDirection.x)
-//		};
-//
-//		std::vector<Vector2D> moves = {
-//			diagonalMove,
-//			Vector2D{0, diagonalMove.x},
-//			Vector2D{diagonalMove.y, 0}
-//		};
-//
-//		const auto distance = owner.get_tile_distance(targetPosition);
-//		if (distance > 1)
-//		{
-//			ctx.map->tcodPath->compute(owner.position.x, owner.position.y, targetPosition.x, targetPosition.y);
-//			int x, y;
-//			while (ctx.map->tcodPath->walk(&x, &y, true))
-//			{
-//				Vector2D newPos = Vector2D{ y, x };
-//				Vector2D oldPos = owner.position;
-//				if (ctx.map->can_walk(newPos))
-//				{
-//					owner.position = newPos;
-//					break;
-//				}
-//				else
-//				{
-//					for (const auto& m : moves)
-//					{
-//						Vector2D moveTo = owner.position + m;
-//						if (ctx.map->can_walk(moveTo))
-//						{
-//							owner.position = moveTo;
-//						}
-//					}
-//					break;
-//				}
-//			}
-//		}
-//		else
-//		{
-//			owner.attacker->attack(owner, *ctx.player);
-//		}
-//	}
-//}
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {

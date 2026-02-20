@@ -16,7 +16,7 @@ using json = nlohmann::json;
 class PlayerSerializationTest : public ::testing::Test {
 protected:
     std::unique_ptr<Player> create_test_player() {
-        auto player = std::make_unique<Player>(Vector2D{10, 20});
+        auto player = std::make_unique<Player>(Vector2D{20, 10});
 
         // Set up basic stats
         player->set_strength(16);

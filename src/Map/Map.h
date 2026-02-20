@@ -65,17 +65,7 @@ class Map : public Persistent
 {
 private:
 	int map_height, map_width;
-	std::vector<Vector2D> DIRS =
-	{
-		Vector2D{-1, 0}, // y, x North
-		Vector2D{-1, 1}, // y, x North-West
-		Vector2D{0, 1}, // y, x West
-		Vector2D{1, 1}, // y, x South-West
-		Vector2D{1, 0}, // y, x South
-		Vector2D{1, -1}, // y, x South-East
-		Vector2D{0, -1}, // y, x East
-		Vector2D{-1, -1} // y, x North-East
-	};
+	std::vector<Vector2D> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
 

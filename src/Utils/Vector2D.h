@@ -3,11 +3,11 @@
 #include <iostream>
 #include <cmath>
 
-// {y,x} position
+// {x,y} position
 struct Vector2D
 {
-	int y{ 0 };
 	int x{ 0 };
+	int y{ 0 };
 
 	// C++ Core Guidelines C.21: Rule of Five compliance
 	// Default all special member functions for trivial type
@@ -19,14 +19,14 @@ struct Vector2D
 	~Vector2D() = default;
 
 	// Custom constructor for convenience
-	constexpr Vector2D(int y_val, int x_val) noexcept : y(y_val), x(x_val) {}
+	constexpr Vector2D(int x_val, int y_val) noexcept : x(x_val), y(y_val) {}
 
 	// operator overloads
 
 	// add two vectors
 	Vector2D operator+(const Vector2D& rhs) const noexcept
 	{
-		return { y + rhs.y, x + rhs.x };
+		return { x + rhs.x, y + rhs.y };
 	}
 
 	// add two vectors
@@ -40,13 +40,13 @@ struct Vector2D
 	// subtract two vectors
 	Vector2D operator-(const Vector2D& rhs) const noexcept
 	{
-		return { y - rhs.y, x - rhs.x };
+		return { x - rhs.x, y - rhs.y };
 	}
 
 	// scalar multiplication
 	Vector2D operator*(int scalar) const noexcept
 	{
-		return { y * scalar, x * scalar };
+		return { x * scalar, y * scalar };
 	}
 
 	// compare two vectors
@@ -111,3 +111,13 @@ struct Vector2D
 		return std::abs(x - other.x) + std::abs(y - other.y);
 	}
 };
+
+// Cardinal and diagonal direction constants (x,y)
+inline constexpr Vector2D DIR_N { 0, -1};
+inline constexpr Vector2D DIR_S { 0,  1};
+inline constexpr Vector2D DIR_E { 1,  0};
+inline constexpr Vector2D DIR_W {-1,  0};
+inline constexpr Vector2D DIR_NE{ 1, -1};
+inline constexpr Vector2D DIR_SE{ 1,  1};
+inline constexpr Vector2D DIR_SW{-1,  1};
+inline constexpr Vector2D DIR_NW{-1, -1};

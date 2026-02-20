@@ -185,7 +185,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
     int dy = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
 
     // Try to move in that direction
-    Vector2D newPos = owner.position + Vector2D{ dy, dx };
+    Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
     // Check if the move is valid
     if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
@@ -195,7 +195,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
     else
     {
         // Try horizontal move
-        newPos = owner.position + Vector2D{ 0, dx };
+        newPos = owner.position + Vector2D{ dx, 0 };
         if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
         {
             owner.position = newPos;
@@ -203,7 +203,7 @@ void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
         else
         {
             // Try vertical move
-            newPos = owner.position + Vector2D{ dy, 0 };
+            newPos = owner.position + Vector2D{ 0, dy };
             if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
             {
                 owner.position = newPos;
@@ -219,7 +219,7 @@ void AiSpider::random_move(Creature& owner, GameContext& ctx)
 
     if (dx != 0 || dy != 0)
     {
-        Vector2D newPos = owner.position + Vector2D{ dy, dx };
+        Vector2D newPos = owner.position + Vector2D{ dx, dy };
         if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
         {
             owner.position = newPos;
@@ -260,7 +260,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
         {
             if (dx == 0 && dy == 0) continue; // Skip current position
 
-            Vector2D newPos = owner.position + Vector2D{ dy, dx };
+            Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
             // Check if position is walkable and not occupied
             if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
@@ -273,7 +273,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
                     {
                         if (wx == 0 && wy == 0) continue;
 
-                        Vector2D wallCheck = newPos + Vector2D{ wy, wx };
+                        Vector2D wallCheck = newPos + Vector2D{ wx, wy };
                         if (ctx.map->is_wall(wallCheck))
                         {
                             adjacentToWall = true;
@@ -376,7 +376,7 @@ Vector2D AiSpider::find_ambush_position(Creature& owner, Vector2D targetPosition
     {
         for (int x = -8; x <= 8; x++)
         {
-            Vector2D pos = owner.position + Vector2D{ y, x };
+            Vector2D pos = owner.position + Vector2D{ x, y };
 
             // Check boundaries
             if (pos.y < 0
@@ -436,7 +436,7 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
         {
             if (x == 0 && y == 0) continue; // Skip center
 
-            Vector2D adj = position + Vector2D{ y, x };
+            Vector2D adj = position + Vector2D{ x, y };
 
             // Check if this position is a wall
             if (ctx.map->is_wall(adj))
@@ -451,7 +451,7 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
                     {
                         if (cx == 0 && cy == 0) continue;
 
-                        Vector2D cornerAdj = adj + Vector2D{ cy, cx };
+                        Vector2D cornerAdj = adj + Vector2D{ cx, cy };
                         if (ctx.map->is_wall(cornerAdj))
                         {
                             cornerWalls++;
@@ -673,7 +673,7 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
         if (dy != 0) dy = dy / std::abs(dy);
 
         // Position web to block player's path
-        webCenter = owner.position + Vector2D{ dy * 2, dx * 2 };
+        webCenter = owner.position + Vector2D{ dx * 2, dy * 2 };
 
         // Make sure center is in bounds
         webCenter.x = std::max(0, std::min(webCenter.x, ctx.map->get_width() - 1));
@@ -780,7 +780,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
                     (normalizedDist >= 0.7f || ctx.dice->d100() < 40))
                 {
 
-                    Vector2D pos = center + Vector2D{ y, x };
+                    Vector2D pos = center + Vector2D{ x, y };
                     if (is_valid_web_position(pos, ctx))
                     {
                         webPositions.push_back(pos);
@@ -882,7 +882,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
             {
                 if (abs(x) + abs(y) <= 3)
                 {
-                    Vector2D pos = center + Vector2D{ y, x };
+                    Vector2D pos = center + Vector2D{ x, y };
                     if (is_valid_web_position(pos, ctx))
                     {
                         webPositions.push_back(pos);

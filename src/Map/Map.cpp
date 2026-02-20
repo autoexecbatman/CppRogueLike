@@ -170,27 +170,115 @@ public:
 			{
 				if (isTopGeneralLeft || isTopGeneralRight)
 				{
-					map.dig_corridor(lastRoomTopMid, Vector2D{ verticalMidPoint, lastRoomCenter.x });
-					map.dig_corridor(Vector2D{ verticalMidPoint, lastRoomCenter.x }, Vector2D{ verticalMidPoint, currentRoomCenter.x });
-					map.dig_corridor(Vector2D{ verticalMidPoint, currentRoomCenter.x }, currentRoomBottomMid);
+					map.dig_corridor(
+						lastRoomTopMid, 
+						Vector2D
+						{ 
+							lastRoomCenter.x, 
+							verticalMidPoint 
+						});
+					map.dig_corridor(
+						Vector2D
+						{
+							lastRoomCenter.x, 
+							verticalMidPoint
+						}, 
+						Vector2D
+						{ 
+							currentRoomCenter.x,
+							verticalMidPoint
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							currentRoomCenter.x,
+							verticalMidPoint
+						},
+						currentRoomBottomMid);
 				}
 				else if (isLeftGeneralTop || isLeftGeneralBottom)
 				{
-					map.dig_corridor(lastRoomLeftMid, Vector2D{ lastRoomCenter.y, horizontalMidPoint });
-					map.dig_corridor(Vector2D{ lastRoomCenter.y, horizontalMidPoint }, Vector2D{ currentRoomCenter.y, horizontalMidPoint });
-					map.dig_corridor(Vector2D{ currentRoomCenter.y, horizontalMidPoint }, currentRoomRightMid);
+					map.dig_corridor(
+						lastRoomLeftMid,
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							lastRoomCenter.y
+						});
+					map.dig_corridor(
+						Vector2D
+						{
+							horizontalMidPoint,
+							lastRoomCenter.y
+						}, 
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							currentRoomCenter.y
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							currentRoomCenter.y
+						}, 
+						currentRoomRightMid);
 				}
 				else if (isBottomGeneralLeft || isBottomGeneralRight)
 				{
-					map.dig_corridor(lastRoomBottomMid, Vector2D{ verticalMidPoint, lastRoomCenter.x });
-					map.dig_corridor(Vector2D{ verticalMidPoint, lastRoomCenter.x }, Vector2D{ verticalMidPoint, currentRoomCenter.x });
-					map.dig_corridor(Vector2D{ verticalMidPoint, currentRoomCenter.x }, currentRoomTopMid);
+					map.dig_corridor(
+						lastRoomBottomMid, 
+						Vector2D
+						{ 
+							lastRoomCenter.x, 
+							verticalMidPoint 
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							lastRoomCenter.x, 
+							verticalMidPoint
+						}, 
+						Vector2D
+						{ 
+							currentRoomCenter.x,
+							verticalMidPoint
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							currentRoomCenter.x,
+							verticalMidPoint 
+						}, 
+						currentRoomTopMid);
 				}
 				else if (isRightGeneralTop || isRightGeneralBottom)
 				{
-					map.dig_corridor(lastRoomRightMid, Vector2D{ lastRoomCenter.y, horizontalMidPoint });
-					map.dig_corridor(Vector2D{ lastRoomCenter.y, horizontalMidPoint }, Vector2D{ currentRoomCenter.y, horizontalMidPoint });
-					map.dig_corridor(Vector2D{ currentRoomCenter.y, horizontalMidPoint }, currentRoomLeftMid);
+					map.dig_corridor(
+						lastRoomRightMid, 
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							lastRoomCenter.y
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							lastRoomCenter.y
+						}, 
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							currentRoomCenter.y
+						});
+					map.dig_corridor(
+						Vector2D
+						{ 
+							horizontalMidPoint,
+							currentRoomCenter.y
+						}, 
+						currentRoomLeftMid);
 				}
 				else
 				{
@@ -246,7 +334,7 @@ void Map::init_tiles(GameContext& ctx)
 	{
 		for (int x = 0; x < map_width; x++)
 		{
-			tiles.emplace_back(Tile(Vector2D{ y, x }, TileType::WALL, 0));
+			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL, 0));
 		}
 	}
 
@@ -550,10 +638,10 @@ void Map::render(const GameContext& ctx) const
 	constexpr uint8_t W_BIT = 1;
 	const NeighborDef CARDINALS[4] =
 	{
-		{ {-1,  0}, N_BIT },
-		{ { 0,  1}, E_BIT },
-		{ { 1,  0}, S_BIT },
-		{ { 0, -1}, W_BIT }
+		{ DIR_N, N_BIT },
+		{ DIR_E, E_BIT },
+		{ DIR_S, S_BIT },
+		{ DIR_W, W_BIT }
 	};
 
 	auto build_mask = [&](Vector2D center, auto predicate) -> uint8_t
@@ -586,9 +674,9 @@ void Map::render(const GameContext& ctx) const
 
 	constexpr Vector2D ALL_DIRS[8] =
 	{
-		{-1, -1}, {-1, 0}, {-1, 1},
-		{ 0, -1},           { 0, 1},
-		{ 1, -1}, { 1, 0}, { 1, 1}
+		DIR_NW, DIR_N, DIR_NE,
+		DIR_W,         DIR_E,
+		DIR_SW, DIR_S, DIR_SE
 	};
 
 	// A border wall is a wall/door with at least one walkable tile
@@ -632,9 +720,9 @@ void Map::render(const GameContext& ctx) const
 
 		if (t == TileType::WALL)
 		{
-			bool floor_south = is_walkable(p + Vector2D{1, 0});
-			bool floor_east  = is_walkable(p + Vector2D{0, 1});
-			bool floor_west  = is_walkable(p + Vector2D{0,-1});
+			bool floor_south   = is_walkable(p + DIR_S);
+			bool floor_east    = is_walkable(p + DIR_E);
+			bool floor_west    = is_walkable(p + DIR_W);
 			bool is_north_wall = floor_south && !floor_east && !floor_west;
 			if (is_north_wall)
 			{
@@ -653,10 +741,10 @@ void Map::render(const GameContext& ctx) const
 
 		if (t == TileType::FLOOR || t == TileType::CORRIDOR)
 		{
-			bool wN = is_wall_or_door(p + Vector2D{-1, 0});
-			bool wE = is_wall_or_door(p + Vector2D{ 0, 1});
-			bool wS = is_wall_or_door(p + Vector2D{ 1, 0});
-			bool wW = is_wall_or_door(p + Vector2D{ 0,-1});
+			bool wN = is_wall_or_door(p + DIR_N);
+			bool wE = is_wall_or_door(p + DIR_E);
+			bool wS = is_wall_or_door(p + DIR_S);
+			bool wW = is_wall_or_door(p + DIR_W);
 
 			bool is_corner = (wN && wW) || (wN && wE) || (wS && wW) || (wS && wE);
 			bool near_wall = wN || wE || wS || wW;
@@ -679,7 +767,7 @@ void Map::render(const GameContext& ctx) const
 	{
 		for (int col = start_col; col < end_col; col++)
 		{
-			Vector2D pos{ row, col };
+			Vector2D pos{ col, row };
 			if (!is_visible(pos))
 			{
 				continue;
@@ -774,7 +862,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 		{
 			for (int tileX = begin.x; tileX <= end.x; tileX++)
 			{
-				set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR, 1);
+				set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
 				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
 			}
 		}
@@ -802,7 +890,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 				if (tileX >= begin.x && tileX <= end.x) 
 				{
 					// Vector2D is {y, x}
-					set_tile(Vector2D{ tileY, tileX }, TileType::FLOOR, 1);
+					set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
 					// NOTE: libtcod's setProperties expects (x, y)
 					tcodMap->setProperties(tileX, tileY, true, true);
 				}
@@ -831,28 +919,28 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
     if (horizontal_first) {
         // Dig horizontally first
         for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
-            current_pos = Vector2D{y1, x};
+            current_pos = Vector2D{ x, y1 };
             set_tile(current_pos, TileType::CORRIDOR, 1);
             tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
         }
         // Then dig vertically
         for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
             if (y == y1) continue; // Skip corner - already dug horizontally
-            current_pos = Vector2D{y, x2};
+            current_pos = Vector2D{ x2, y };
             set_tile(current_pos, TileType::CORRIDOR, 1);
             tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
         }
     } else {
         // Dig vertically first
         for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
-            current_pos = Vector2D{y, x1};
+            current_pos = Vector2D{ x1, y };
             set_tile(current_pos, TileType::CORRIDOR, 1);
             tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
         }
         // Then dig horizontally
         for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
             if (x == x1) continue; // Skip corner - already dug vertically
-            current_pos = Vector2D{y2, x};
+            current_pos = Vector2D{ x, y2 };
             set_tile(current_pos, TileType::CORRIDOR, 1);
             tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
         }
@@ -1318,7 +1406,7 @@ std::vector<Vector2D> Map::bresenham_line(Vector2D from, Vector2D to)
 			err += dx;
 			y0 += sy;
 		}
-		path.push_back(Vector2D{ y0, x0 });
+		path.push_back(Vector2D{ x0, y0 });
 	}
 
 	return path;
@@ -1462,7 +1550,7 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameCo
 	{
 		for (int x = begin.x; x <= end.x; x++)
 		{
-			set_tile(Vector2D{ y, x }, TileType::FLOOR, 1);
+			set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
 			tcodMap->setProperties(x, y, true, true);
 		}
 	}
@@ -1612,15 +1700,15 @@ void Map::post_process_doors()
     {
         for (int x = 0; x < map_width; ++x)
         {
-            Vector2D pos{ y, x };
+            Vector2D pos{ x, y };
             if (get_tile_type(pos) == TileType::CORRIDOR)
             {
                 int roomNeighbors = 0;
                 int wallNeighbors = 0;
-                
-                for (Vector2D dir : {Vector2D{-1, 0}, Vector2D{1, 0}, Vector2D{0, -1}, Vector2D{0, 1}})
+
+                for (Vector2D dir : {DIR_N, DIR_S, DIR_E, DIR_W})
                 {
-                    Vector2D neighborPos = {pos.y + dir.y, pos.x + dir.x};
+                    Vector2D neighborPos = pos + dir;
                     if (!in_bounds(neighborPos)) continue;
                     
                     if (isRoom(neighborPos))

@@ -153,8 +153,8 @@ Vector2D InputSystem::get_mouse_tile(int tile_size) const
 
     ::Vector2 mouse_pos = GetMousePosition();
     return Vector2D{
-        static_cast<int>(mouse_pos.x) / tile_size,
-        static_cast<int>(mouse_pos.y) / tile_size
+        static_cast<int>(mouse_pos.x) / tile_size,   // x = screen col
+        static_cast<int>(mouse_pos.y) / tile_size    // y = screen row
     };
 }
 

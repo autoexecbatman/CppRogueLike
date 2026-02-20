@@ -20,4 +20,5 @@ private:
     void handle_update_phase(GameContext& ctx, Gui& gui);
     void handle_render_phase(GameContext& ctx, Gui& gui);
     void handle_menu_check(GameContext& ctx);
+    void draw_hover_tooltip(GameContext& ctx);
 };

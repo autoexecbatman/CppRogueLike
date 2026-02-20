@@ -35,7 +35,7 @@ protected:
         player->set_strength(10);
         player->set_dexterity(10);
 
-        monster = std::make_unique<Creature>(Vector2D{1, 0}, ActorData{'g', "goblin", 1});
+        monster = std::make_unique<Creature>(Vector2D{0, 1}, ActorData{'g', "goblin", 1});
         monster->destructible = std::make_unique<MonsterDestructible>(
             10, 0, "goblin corpse", 50, 19, 6
         );

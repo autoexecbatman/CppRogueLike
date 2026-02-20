@@ -121,7 +121,7 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
         if (x0 == from.x && y0 == from.y) continue;
 
         // Stop at end point or walls
-        if ((x0 == to.x && y0 == to.y) || !ctx.map->can_walk(Vector2D{ y0, x0 }, ctx)) break;
+        if ((x0 == to.x && y0 == to.y) || !ctx.map->can_walk(Vector2D{ x0, y0 }, ctx)) break;
 
         // TODO: Reimplement projectile drawing without curses
         // Previously used mvaddch/refresh/napms for projectile animation

@@ -1,5 +1,6 @@
 // file: Systems/GameLoopCoordinator.cpp
 #include <algorithm>
+#include <cmath>
 #include <format>
 
 #include "GameLoopCoordinator.h"
@@ -110,6 +111,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
         gui.gui_render(ctx);
     }
 
+    draw_hover_tooltip(ctx);
+
     ctx.renderer->end_frame();
     ctx.message_system->log("Render OK.");
 }
@@ -121,6 +124,127 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
         *ctx.window_state = WindowState::MENU;
         return;
     }
+}
+
+void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
+{
+    if (!ctx.renderer || !ctx.input_system || !ctx.map) return;
+    int ts = ctx.renderer->get_tile_size();
+    if (ts <= 0) return;
+
+    Vector2D screen_tile = ctx.input_system->get_mouse_tile(ts);
+
+    // Ignore cursor over the GUI panel rows at the bottom
+    int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+    if (screen_tile.y < 0 || screen_tile.y >= map_rows) return;
+    if (screen_tile.x < 0 || screen_tile.x >= ctx.renderer->get_viewport_cols()) return;
+
+    Vector2D world_tile
+    {
+        screen_tile.x + ctx.renderer->get_camera_x() / ts,
+        screen_tile.y + ctx.renderer->get_camera_y() / ts
+    };
+
+    if (!ctx.map->is_in_bounds(world_tile)) return;
+    if (!ctx.map->is_explored(world_tile)) return;
+
+    bool in_fov = ctx.map->is_in_fov(world_tile);
+
+    // Build description; pick highlight tint based on content
+    std::string desc;
+    switch (ctx.map->get_tile_type(world_tile))
+    {
+    case TileType::FLOOR:       desc = "Floor";       break;
+    case TileType::WALL:        desc = "Wall";        break;
+    case TileType::WATER:       desc = "Water";       break;
+    case TileType::CLOSED_DOOR: desc = "Closed door"; break;
+    case TileType::OPEN_DOOR:   desc = "Open door";   break;
+    case TileType::CORRIDOR:    desc = "Corridor";    break;
+    default:                    desc = "Unknown";     break;
+    }
+
+    // Tint: cyan (terrain), amber (creature), pale green (item)
+    unsigned char hr = 0, hg = 220, hb = 255;
+
+    if (in_fov)
+    {
+        Creature* actor = ctx.map->get_actor(world_tile, ctx);
+        if (actor)
+        {
+            desc  = actor->actorData.name;
+            hr = 255; hg = 180; hb = 0;    // amber
+        }
+        for (const auto& item : ctx.inventory_data->items)
+        {
+            if (item && item->position == world_tile)
+            {
+                desc += " [" + item->actorData.name + "]";
+                if (!actor) { hr = 100; hg = 255; hb = 120; }   // pale green
+                break;
+            }
+        }
+    }
+
+    // Pulse: 3 Hz sine, range [0, 1]
+    float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 3.0f) + 1.0f) * 0.5f;
+
+    int   tx   = screen_tile.x * ts;
+    int   ty   = screen_tile.y * ts;
+    float tx_f = static_cast<float>(tx);
+    float ty_f = static_cast<float>(ty);
+    float ts_f = static_cast<float>(ts);
+
+    // Inner fill: very subtle tint
+    unsigned char fill_a = static_cast<unsigned char>(10 + static_cast<int>(15.0f * pulse));
+    DrawRectangle(tx, ty, ts, ts, Color{ hr, hg, hb, fill_a });
+
+    // Full perimeter: thin line, pulsing alpha
+    unsigned char border_a = static_cast<unsigned char>(70 + static_cast<int>(80.0f * pulse));
+    DrawRectangleLinesEx(Rectangle{ tx_f, ty_f, ts_f, ts_f }, 1.0f, Color{ hr, hg, hb, border_a });
+
+    // Corner L-accents: bright, 2 px thick, clen px long
+    int           clen     = ts / 4;
+    int           clw      = 2;
+    unsigned char corner_a = static_cast<unsigned char>(160 + static_cast<int>(95.0f * pulse));
+    Color         cc       = Color{ hr, hg, hb, corner_a };
+
+    // Top-left
+    DrawRectangle(tx,              ty,              clen, clw,  cc);
+    DrawRectangle(tx,              ty,              clw,  clen, cc);
+    // Top-right
+    DrawRectangle(tx + ts - clen,  ty,              clen, clw,  cc);
+    DrawRectangle(tx + ts - clw,   ty,              clw,  clen, cc);
+    // Bottom-left
+    DrawRectangle(tx,              ty + ts - clw,   clen, clw,  cc);
+    DrawRectangle(tx,              ty + ts - clen,  clw,  clen, cc);
+    // Bottom-right
+    DrawRectangle(tx + ts - clen,  ty + ts - clw,   clen, clw,  cc);
+    DrawRectangle(tx + ts - clw,   ty + ts - clen,  clw,  clen, cc);
+
+    // Tooltip box below (or above if near bottom)
+    int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+    int text_w   = ctx.renderer->measure_text(desc);
+    int pad      = ts / 4;
+    int box_w    = text_w + pad * 2;
+    int box_h    = ts;
+    int tip_px   = tx;
+    int tip_py   = ty + ts;
+
+    if (tip_px + box_w > ctx.renderer->get_screen_width())
+        tip_px = ctx.renderer->get_screen_width() - box_w;
+    if (tip_py + box_h > ctx.renderer->get_screen_height())
+        tip_py = ty - box_h;
+
+    // Dark background + matching accent border on tooltip
+    DrawRectangle(tip_px, tip_py, box_w, box_h, Color{ 8, 8, 16, 220 });
+    DrawRectangleLinesEx(
+        Rectangle{
+            static_cast<float>(tip_px), static_cast<float>(tip_py),
+            static_cast<float>(box_w),  static_cast<float>(box_h)
+        },
+        1.0f, Color{ hr, hg, hb, 180 }
+    );
+    ctx.renderer->draw_text(tip_px + pad, tip_py + font_off, desc, WHITE_BLACK_PAIR);
 }
 
 void GameLoopCoordinator::update(GameContext& ctx)

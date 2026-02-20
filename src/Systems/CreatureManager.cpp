@@ -123,7 +123,10 @@ Vector2D CreatureManager::find_spawn_position(
     const Vector2D roomEnd = rooms[index + 1];
 
     // Get a random position in the room
-    Vector2D pos = Vector2D{ dice.roll(roomBegin.y, roomEnd.y), dice.roll(roomBegin.x, roomEnd.x) };
+    Vector2D pos = Vector2D{
+        dice.roll(roomBegin.x, roomEnd.x), 
+        dice.roll(roomBegin.y, roomEnd.y) 
+    };
 
     // If pos is at wall roll again
     while (!map.can_walk(pos, ctx))

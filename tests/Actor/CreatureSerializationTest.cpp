@@ -16,7 +16,7 @@ class CreatureSerializationTest : public ::testing::Test {
 protected:
     std::unique_ptr<Creature> create_test_creature() {
         auto creature = std::make_unique<Creature>(
-            Vector2D{10, 20},
+            Vector2D{ 20, 10 },
             ActorData{'g', "goblin", 1}
         );
         creature->set_strength(14);

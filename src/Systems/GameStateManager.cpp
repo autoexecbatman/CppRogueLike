@@ -230,7 +230,7 @@ void GameStateManager::load_rooms_from_json(const nlohmann::json& j, std::vector
     {
         for (const auto& roomData : j["rooms"])
         {
-            rooms.push_back(Vector2D{ roomData["y"], roomData["x"] });
+            rooms.push_back(Vector2D{ roomData["x"], roomData["y"] });
         }
     }
 }

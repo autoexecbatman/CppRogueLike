@@ -30,7 +30,7 @@
           player->ai = std::make_unique<AiPlayer>();
           player->set_constitution(10);
 
-          monster = std::make_unique<Creature>(Vector2D{1, 0}, ActorData{'o', "orc", 1});
+          monster = std::make_unique<Creature>(Vector2D{0, 1}, ActorData{'o', "orc", 1});
           monster->destructible = std::make_unique<MonsterDestructible>(50, 2, "orc corpse", 75, 19, 7);
           monster->set_constitution(10);
 
