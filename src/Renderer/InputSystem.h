@@ -112,5 +112,15 @@ private:
     int char_input{ 0 };
     bool resized{ false };
 
-    [[nodiscard]] GameKey translate_raylib_key(int key) const;
+    // Controlled key-repeat state
+    // Repeatable keys (movement + wait) fire once on press, then again after
+    // REPEAT_DELAY, and every REPEAT_INTERVAL thereafter while held.
+    int     held_raylib_key{ 0 };
+    GameKey held_game_key{ GameKey::NONE };
+    int     held_char_input{ 0 };
+    double  hold_start{ 0.0 };
+    double  last_repeat{ 0.0 };
+
+    static constexpr double REPEAT_DELAY    = 0.30;  // seconds before repeat begins
+    static constexpr double REPEAT_INTERVAL = 0.10;  // seconds between repeat fires
 };
