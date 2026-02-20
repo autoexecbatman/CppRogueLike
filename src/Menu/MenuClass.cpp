@@ -3,6 +3,7 @@
 
 #include "MenuClass.h"
 #include "MenuName.h"
+#include "../Colors/Colors.h"
 #include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
 #include "../Items/Items.h"
@@ -108,12 +109,10 @@ void MenuClass::menu_class_print_option(MenuState option) noexcept
 void MenuClass::draw()
 {
 	menu_clear();
-	// TODO: draw box (was curses box)
-	// TODO: draw title "Select Class" (was curses mvwprintw)
+	menu_draw_box();
+	menu_draw_title("SELECT CLASS", YELLOW_BLACK_PAIR);
 	for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
-	{
 		menu_class_print_option(static_cast<MenuState>(i));
-	}
 	menu_refresh();
 }
 
@@ -142,7 +141,7 @@ void MenuClass::on_key(int key, GameContext& ctx)
 		iMenuStates.at(currentState)->on_selection(ctx);
 		if (currentState != MenuState::BACK)
 		{
-			MenuName menuName;
+			MenuName menuName(ctx);
 			menuName.menu_name(ctx);
 		}
 		break;

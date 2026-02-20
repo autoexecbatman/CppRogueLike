@@ -6,6 +6,7 @@
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 
 void Human::on_selection(GameContext& ctx)
 {
@@ -118,12 +119,11 @@ void MenuRace::menu_race_print_option(MenuRaceOptions option) noexcept
 
 void MenuRace::draw()
 {
-	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
+	menu_draw_box();
+	menu_draw_title("SELECT RACE", YELLOW_BLACK_PAIR);
 	for (size_t i{ 0 }; i < menuRaceStrings.size(); ++i)
-	{
 		menu_race_print_option(static_cast<MenuRaceOptions>(i));
-	}
 	menu_refresh();
 }
 

@@ -30,20 +30,22 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 {
 	if (!renderer) return;
 
-	int ts = renderer->get_tile_size();
-	int px = static_cast<int>(menu_startx + x) * ts;
-	int py = static_cast<int>(menu_starty + y) * ts;
+	int ts       = renderer->get_tile_size();
+	int px       = (static_cast<int>(menu_startx) + x) * ts;
+	int py       = (static_cast<int>(menu_starty) + y) * ts;
+	int font_off = (ts - renderer->get_font_size()) / 2;
 
 	if (isHighlighted)
 	{
+		int bar_x = (static_cast<int>(menu_startx) + 1) * ts;
+		int bar_w = (static_cast<int>(menu_width) - 2) * ts;
 		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
-		int tw = renderer->measure_text(text) + 4;
-		DrawRectangle(px, py, tw, ts, pair.bg);
-		renderer->draw_text(px, py, text, BLACK_WHITE_PAIR);
+		DrawRectangle(bar_x, py, bar_w, ts, pair.bg);
+		renderer->draw_text(px, py + font_off, text, BLACK_WHITE_PAIR);
 	}
 	else
 	{
-		renderer->draw_text(px, py, text, WHITE_BLACK_PAIR);
+		renderer->draw_text(px, py + font_off, text, WHITE_BLACK_PAIR);
 	}
 }
 
@@ -89,9 +91,19 @@ void BaseMenu::menu_draw_box()
 	int ts = renderer->get_tile_size();
 	int px = static_cast<int>(menu_startx) * ts;
 	int py = static_cast<int>(menu_starty) * ts;
-	int pw = static_cast<int>(menu_width) * ts;
-	int ph = static_cast<int>(menu_height) * ts;
 
-	ColorPair pair = renderer->get_color_pair(WHITE_BLACK_PAIR);
-	DrawRectangleLines(px, py, pw, ph, pair.fg);
+	renderer->draw_frame(px, py, static_cast<int>(menu_width), static_cast<int>(menu_height));
+}
+
+void BaseMenu::menu_draw_title(std::string_view title, int color_pair)
+{
+	if (!renderer) return;
+
+	int ts         = renderer->get_tile_size();
+	int font_off   = (ts - renderer->get_font_size()) / 2;
+	int interior_w = (static_cast<int>(menu_width) - 2) * ts;
+	int text_w     = renderer->measure_text(title);
+	int px         = (static_cast<int>(menu_startx) + 1) * ts + (interior_w - text_w) / 2;
+	int py         = static_cast<int>(menu_starty) * ts + font_off;
+	renderer->draw_text(px, py, title, color_pair);
 }

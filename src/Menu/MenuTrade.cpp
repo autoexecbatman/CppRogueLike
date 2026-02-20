@@ -7,6 +7,7 @@
 #include "../Systems/ShopKeeper.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
+#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 
@@ -82,8 +83,9 @@ void MenuTrade::draw_content()
 
 void MenuTrade::draw()
 {
-	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
+	menu_draw_box();
+	menu_draw_title("TRADE", YELLOW_BLACK_PAIR);
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{
 		menu_print_state(i);

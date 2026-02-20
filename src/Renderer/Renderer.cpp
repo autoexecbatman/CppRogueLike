@@ -321,6 +321,38 @@ void Renderer::draw_text(int px, int py, std::string_view text, int color_pair_i
     }
 }
 
+void Renderer::draw_frame(int px, int py, int w_tiles, int h_tiles) const
+{
+    if (!sheets_loaded) return;
+
+    DrawRectangle(px, py, w_tiles * tile_size, h_tiles * tile_size, Color{ 8, 8, 16, 255 });
+
+    int ts = tile_size;
+
+    // Top border
+    draw_tile_screen(px, py, GUI_FRAME_TL);
+    for (int col = 1; col < w_tiles - 1; ++col)
+    {
+        draw_tile_screen(px + col * ts, py, GUI_FRAME_T);
+    }
+    draw_tile_screen(px + (w_tiles - 1) * ts, py, GUI_FRAME_TR);
+
+    // Left and right borders
+    for (int row = 1; row < h_tiles - 1; ++row)
+    {
+        draw_tile_screen(px,                       py + row * ts, GUI_FRAME_L);
+        draw_tile_screen(px + (w_tiles - 1) * ts, py + row * ts, GUI_FRAME_R);
+    }
+
+    // Bottom border
+    draw_tile_screen(px, py + (h_tiles - 1) * ts, GUI_FRAME_BL);
+    for (int col = 1; col < w_tiles - 1; ++col)
+    {
+        draw_tile_screen(px + col * ts, py + (h_tiles - 1) * ts, GUI_FRAME_B);
+    }
+    draw_tile_screen(px + (w_tiles - 1) * ts, py + (h_tiles - 1) * ts, GUI_FRAME_BR);
+}
+
 void Renderer::draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const
 {
     DrawRectangle(px, py, w, h, empty);

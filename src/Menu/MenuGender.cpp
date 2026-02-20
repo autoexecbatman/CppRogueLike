@@ -6,6 +6,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
+#include "../Colors/Colors.h"
 
 void Male::on_selection(GameContext& ctx)
 {
@@ -70,12 +71,10 @@ void MenuGender::menu_print_state(MenuState option)
 void MenuGender::draw()
 {
 	menu_clear();
-	// TODO: draw box (was curses box)
-	// TODO: draw title "Select Gender" (was curses mvwprintw)
+	menu_draw_box();
+	menu_draw_title("SELECT GENDER", YELLOW_BLACK_PAIR);
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
-	{
 		menu_print_state(static_cast<MenuState>(i));
-	}
 	menu_refresh();
 }
 

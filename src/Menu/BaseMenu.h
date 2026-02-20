@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <string_view>
 
 class Renderer;
 class InputSystem;
@@ -41,6 +42,7 @@ public:
 	void menu_set_run_false() { run = false; }
 	void menu_mark_dirty() {}
 	void menu_draw_box();
+	void menu_draw_title(std::string_view title, int color_pair);
 
 	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}

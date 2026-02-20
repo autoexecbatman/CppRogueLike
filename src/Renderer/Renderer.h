@@ -101,6 +101,10 @@ public:
     void draw_text(int px, int py, std::string_view text, int color_pair_id) const;
     void draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const;
 
+    // Draw a DawnLike-tiled frame with dark background fill.
+    // px/py = top-left in pixels; w_tiles/h_tiles = dimensions in tiles.
+    void draw_frame(int px, int py, int w_tiles, int h_tiles) const;
+
     void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
 
     [[nodiscard]] ColorPair get_color_pair(int id) const;

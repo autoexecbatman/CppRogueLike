@@ -5,6 +5,7 @@
 #include "MenuGender.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
+#include "../Colors/Colors.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
@@ -83,10 +84,8 @@ void Menu::draw_content()
 void Menu::draw()
 {
 	menu_clear();
-
-	// TODO: fill menu background (was curses wbkgd/COLOR_PAIR)
-	// TODO: draw box (was curses box)
-	// TODO: draw title "Main Menu" (was curses mvwprintw)
+	menu_draw_box();
+	menu_draw_title("MAIN MENU", YELLOW_BLACK_PAIR);
 
 	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
 	{

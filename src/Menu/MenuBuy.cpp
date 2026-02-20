@@ -1,5 +1,7 @@
 #include "MenuBuy.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
+#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/InventoryOperations.h"
@@ -37,8 +39,16 @@ void MenuBuy::populate_items()
 MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 	: buyer{ buyer }, shopkeeper{ shopkeeper }, ctx{ ctx }
 {
-	menu_height = 30;
-	menu_width = 119;
+	if (ctx.renderer)
+	{
+		menu_height = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+		menu_width  = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+	}
+	else
+	{
+		menu_height = 26;
+		menu_width  = 60;
+	}
 
 	populate_items();
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
@@ -57,7 +67,7 @@ void MenuBuy::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
-	menu_print(2, static_cast<int>(state) + 4, menu_get_string(state));
+	menu_print(1, static_cast<int>(state) + 2, menu_get_string(state));
 	if (currentState == state)
 	{
 		menu_highlight_off();
@@ -75,8 +85,20 @@ void MenuBuy::draw_content()
 
 void MenuBuy::draw()
 {
-	// TODO: Reimplement with Panel+Renderer
 	menu_clear();
+	menu_draw_box();
+	menu_draw_title("BUY ITEMS", YELLOW_BLACK_PAIR);
+
+	// Column header at row 1
+	if (renderer)
+	{
+		int ts       = renderer->get_tile_size();
+		int font_off = (ts - renderer->get_font_size()) / 2;
+		int hdr_x    = (static_cast<int>(menu_startx) + 1) * ts;
+		int hdr_y    = (static_cast<int>(menu_starty) + 1) * ts + font_off;
+		renderer->draw_text(hdr_x, hdr_y, "Item                       Price", CYAN_BLACK_PAIR);
+	}
+
 	populate_items();
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
@@ -91,14 +113,12 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 	{
 		case 0x103: // UP
 		case 'w':
-			if (buyer.inventory_data.items.empty()) return;
 			if (menuItems.empty()) return;
 			currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 			menu_mark_dirty();
 			break;
 		case 0x102: // DOWN
 		case 's':
-			if (buyer.inventory_data.items.empty()) return;
 			if (menuItems.empty()) return;
 			currentState = (currentState + 1) % menuItems.size();
 			menu_mark_dirty();
@@ -107,7 +127,7 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 			menu_set_run_false();
 			break;
 		case 10: // ENTER
-			if (!buyer.inventory_data.items.empty() && !menuItems.empty())
+			if (!is_inventory_empty(shopkeeper.shop_inventory))
 			{
 				handle_buy(nullptr, buyer, *ctx.player);
 				menu_mark_dirty();

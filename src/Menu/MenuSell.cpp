@@ -5,6 +5,8 @@
 #include "../Actor/InventoryOperations.h"
 #include "BaseMenu.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
+#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
@@ -54,17 +56,12 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 
 void MenuSell::menu_print_state(size_t state)
 {
-	if (state >= menuItems.size()) return; // Bounds check
-	
+	if (state >= menuItems.size()) return;
 	if (currentState == state)
-	{
 		menu_highlight_on();
-	}
-	menu_print(2, static_cast<int>(state) + 4, menu_get_string(state)); // Start at row 4, indent from left border
+	menu_print(1, static_cast<int>(state) + 2, menu_get_string(state));
 	if (currentState == state)
-	{
 		menu_highlight_off();
-	}
 }
 
 void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
@@ -132,22 +129,27 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx) : player(player), shopkeeper(shopkeeper)
 {
-	// Use full screen dimensions
-	menu_height = 30;
-	menu_width = 119;
-	
-	// Player inventory is always initialized - no need to check
+	if (ctx.renderer)
+	{
+		menu_height = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+		menu_width  = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+	}
+	else
+	{
+		menu_height = 26;
+		menu_width  = 60;
+	}
+
 	populate_items(player.inventory_data.items);
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
-	
-	// Reset currentState if inventory is empty
+
 	if (is_inventory_empty(player.inventory_data))
 	{
 		currentState = 0;
 	}
 	else if (currentState >= player.inventory_data.items.size())
 	{
-		currentState = is_inventory_empty(player.inventory_data) ? 0 : player.inventory_data.items.size() - 1;
+		currentState = player.inventory_data.items.size() - 1;
 	}
 }
 
@@ -180,16 +182,21 @@ void MenuSell::draw_content()
 
 void MenuSell::draw()
 {
-	// TODO: Reimplement with Panel+Renderer
-	populate_items(player.inventory_data.items);
-	if (player.inventory_data.items.empty())
+	menu_clear();
+	menu_draw_box();
+	menu_draw_title("SELL ITEMS", YELLOW_BLACK_PAIR);
+
+	if (renderer)
 	{
-		currentState = 0;
+		int ts       = renderer->get_tile_size();
+		int font_off = (ts - renderer->get_font_size()) / 2;
+		int hdr_x    = (static_cast<int>(menu_startx) + 1) * ts;
+		int hdr_y    = (static_cast<int>(menu_starty) + 1) * ts + font_off;
+		renderer->draw_text(hdr_x, hdr_y, "Item                       Price", CYAN_BLACK_PAIR);
 	}
-	else if (currentState >= player.inventory_data.items.size())
-	{
-		currentState = player.inventory_data.items.size() - 1;
-	}
+
+	draw_content();
+	menu_refresh();
 }
 
 void MenuSell::on_key(int key, GameContext& ctx)

@@ -132,6 +132,9 @@ private:
 	int screen_cols(GameContext& ctx) const;
 	int screen_rows(GameContext& ctx) const;
 
+	void draw_frame(GameContext& ctx);
+	void draw_highlight_row(int px, int y_tile, GameContext& ctx);
+
 	// State
 	InventoryScreen activeScreen;
 	int equipmentCursor;
