@@ -13,28 +13,40 @@
 #include "../Map/Map.h"
 #include "../Systems/CreatureManager.h"
 #include "../Renderer/Renderer.h"
+#include "../Renderer/TileId.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/Attacker.h"
 
-constexpr int BAR_WIDTH = 15;
+// Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
+
+// ---------------------------------------------------------------------------
+// HUD column layout (all as fraction of viewport width)
+//   Bar panel  : cols 1 .. (div1-1)
+//   Stat panel : cols (div1+1) .. (div2-1)
+//   Log panel  : cols (div2+1) .. (vcols-2)
+// ---------------------------------------------------------------------------
+static int hud_div1(int vcols) { return vcols * 28 / 100; }
+static int hud_div2(int vcols) { return vcols * 55 / 100; }
+
+// Vertical centering offset for text inside a tile-height row
+static int font_row_off(const Renderer& r)
+{
+    return (r.get_tile_size() - r.get_font_size()) / 2;
+}
+
+// ---------------------------------------------------------------------------
 
 void Gui::add_display_message(const std::vector<LogMessage>& message)
 {
 	displayMessages.push_back(message);
 }
 
-void Gui::render_messages() noexcept
-{
-}
+void Gui::render_messages() noexcept {}
 
-void Gui::gui_init() noexcept
-{
-}
+void Gui::gui_init() noexcept {}
 
-void Gui::gui_shutdown() noexcept
-{
-}
+void Gui::gui_shutdown() noexcept {}
 
 void Gui::gui_update(GameContext& ctx)
 {
@@ -42,231 +54,306 @@ void Gui::gui_update(GameContext& ctx)
 	set_message_color(ctx.message_system->get_current_message_color());
 }
 
+// ---------------------------------------------------------------------------
+// gui_render -- master HUD draw
+// ---------------------------------------------------------------------------
 void Gui::gui_render(const GameContext& ctx)
 {
 	if (!ctx.renderer) return;
 
-	int ts = ctx.renderer->get_tile_size();
-	int vcols = ctx.renderer->get_viewport_cols();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	int pw = vcols * ts;
-	int ph = ctx.renderer->get_screen_height() - baseY;
+	const int ts    = ctx.renderer->get_tile_size();
+	const int vcols = ctx.renderer->get_viewport_cols();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int pw    = vcols * ts;
+	const int ph    = ctx.renderer->get_screen_height() - baseY;
+	const int div1  = hud_div1(vcols);
+	const int div2  = hud_div2(vcols);
 
-	// Dark background for GUI area
-	ColorPair bgPair = ctx.renderer->get_color_pair(WHITE_BLUE_PAIR);
-	DrawRectangle(0, baseY, pw, ph, bgPair.bg);
+	// ---- Background -------------------------------------------------------
+	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
 
-	// Border line at top of GUI
-	ColorPair borderPair = ctx.renderer->get_color_pair(WHITE_BLACK_PAIR);
-	DrawLine(0, baseY, pw, baseY, borderPair.fg);
+	// ---- Top border row (TL + T... + TR) ----------------------------------
+	ctx.renderer->draw_tile_screen(0, baseY, GUI_FRAME_TL);
+	for (int col = 1; col < vcols - 1; ++col)
+	{
+		ctx.renderer->draw_tile_screen(col * ts, baseY, GUI_FRAME_T);
+	}
+	ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY, GUI_FRAME_TR);
 
+	// ---- Left and right outer edges ---------------------------------------
+	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	{
+		ctx.renderer->draw_tile_screen(0,                  baseY + row * ts, GUI_FRAME_L);
+		ctx.renderer->draw_tile_screen((vcols - 1) * ts,   baseY + row * ts, GUI_FRAME_R);
+	}
+
+	// ---- Divider 1: bar panel | stat panel --------------------------------
+	ctx.renderer->draw_tile_screen(div1 * ts, baseY, GUI_FRAME_T);
+	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	{
+		ctx.renderer->draw_tile_screen(div1 * ts, baseY + row * ts, GUI_FRAME_L);
+	}
+
+	// ---- Divider 2: stat panel | log panel --------------------------------
+	ctx.renderer->draw_tile_screen(div2 * ts, baseY, GUI_FRAME_T);
+	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	{
+		ctx.renderer->draw_tile_screen(div2 * ts, baseY + row * ts, GUI_FRAME_L);
+	}
+
+	// ---- Panel content ----------------------------------------------------
 	render_hp_bar(ctx);
 	render_hunger_status(ctx);
 	gui_print_stats(ctx);
-	gui_print_attrs(ctx);
 	gui_print_log(ctx);
 	render_player_status(ctx);
 }
 
-void Gui::render_player_status(const GameContext& ctx)
-{
-	if (!ctx.renderer) return;
-
-	int ts = ctx.renderer->get_tile_size();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	int stats_col = BAR_WIDTH + 2;
-
-	if (ctx.player->has_state(ActorState::IS_CONFUSED))
-	{
-		ctx.renderer->draw_text(stats_col * ts, baseY + 6 * ts, "CONFUSED", RED_BLACK_PAIR);
-	}
-}
-
-void Gui::gui_print_log(const GameContext& ctx)
-{
-	if (!ctx.renderer) return;
-
-	int ts = ctx.renderer->get_tile_size();
-	int vcols = ctx.renderer->get_viewport_cols();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-
-	// Log starts at roughly 55% across the viewport
-	int log_x = (vcols * 55 / 100) * ts;
-
-	int messagesToShow = std::min(
-		LOG_MAX_MESSAGES,
-		static_cast<int>(ctx.message_system->get_stored_message_count())
-	);
-
-	for (int i = 0; i < messagesToShow; i++)
-	{
-		const std::vector<LogMessage>& messageParts =
-			ctx.message_system->get_attack_message_at(
-				ctx.message_system->get_stored_message_count() - 1 - i
-			);
-
-		int x = log_x;
-		int y = baseY + (1 + i) * ts;
-		int currentX = 0;
-
-		for (const auto& part : messageParts)
-		{
-			ctx.renderer->draw_text(
-				x + currentX,
-				y,
-				part.logMessageText,
-				part.logMessageColor
-			);
-			currentX += ctx.renderer->measure_text(part.logMessageText) + 2;
-		}
-	}
-}
-
-void Gui::gui_print_stats(const GameContext& ctx) noexcept
-{
-	if (!ctx.renderer) return;
-
-	int ts = ctx.renderer->get_tile_size();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	int stats_col = BAR_WIDTH + 2;
-
-	if (ctx.player->actorData.name.empty())
-	{
-		ctx.player->actorData.name = "Player";
-	}
-
-	auto nameStr = std::format("{}", ctx.player->actorData.name);
-	ctx.renderer->draw_text(1 * ts, baseY + 1 * ts, nameStr, WHITE_BLACK_PAIR);
-
-	int hp = ctx.player->destructible->get_hp();
-	int hpMax = ctx.player->destructible->get_max_hp();
-	auto hpStr = std::format("HP:{}/{}", hp, hpMax);
-	ctx.renderer->draw_text(stats_col * ts, baseY + 0 * ts, hpStr, WHITE_BLACK_PAIR);
-
-	auto rollStr = std::format("Atk:{}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll);
-	ctx.renderer->draw_text(stats_col * ts, baseY + 1 * ts, rollStr, WHITE_BLACK_PAIR);
-
-	int dr = ctx.player->destructible->get_dr();
-	auto drStr = std::format("DR:{}", dr);
-	ctx.renderer->draw_text(stats_col * ts, baseY + 2 * ts, drStr, WHITE_BLACK_PAIR);
-}
-
-void Gui::gui_print_attrs(const GameContext& ctx) noexcept
-{
-	if (!ctx.renderer) return;
-
-	int ts = ctx.renderer->get_tile_size();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	int stats_col = BAR_WIDTH + 2;
-
-	int str = ctx.player->get_strength();
-	int dex = ctx.player->get_dexterity();
-	int con = ctx.player->get_constitution();
-	int inte = ctx.player->get_intelligence();
-	int wis = ctx.player->get_wisdom();
-	int cha = ctx.player->get_charisma();
-
-	auto line1 = std::format("STR:{} DEX:{} CON:{}", str, dex, con);
-	auto line2 = std::format("INT:{} WIS:{} CHA:{}", inte, wis, cha);
-
-	ctx.renderer->draw_text(stats_col * ts, baseY + 4 * ts, line1, WHITE_BLACK_PAIR);
-	ctx.renderer->draw_text(stats_col * ts, baseY + 5 * ts, line2, WHITE_BLACK_PAIR);
-}
-
-void Gui::gui(GameContext& ctx) noexcept
-{
-}
-
+// ---------------------------------------------------------------------------
+// Bar panel -- left section
+// ---------------------------------------------------------------------------
 void Gui::render_hp_bar(const GameContext& ctx)
 {
 	if (!ctx.renderer) return;
 
-	int ts = ctx.renderer->get_tile_size();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int ts    = ctx.renderer->get_tile_size();
+	const int vcols = ctx.renderer->get_viewport_cols();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int div1  = hud_div1(vcols);
 
-	int currentHp = ctx.player->destructible->get_hp();
-	int maxHp = ctx.player->destructible->get_max_hp();
+	const int hp    = ctx.player->destructible->get_hp();
+	const int maxHp = ctx.player->destructible->get_max_hp();
 	if (maxHp <= 0) return;
 
-	float hpRatio = static_cast<float>(currentHp) / static_cast<float>(maxHp);
-	if (hpRatio < 0.0f) hpRatio = 0.0f;
-	if (hpRatio > 1.0f) hpRatio = 1.0f;
+	const float ratio = std::clamp(
+		static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f
+	);
 
-	// Color based on HP percentage
+	const int rowY    = baseY + 1 * ts;
+	const int fontOff = font_row_off(*ctx.renderer);
+
+	// Heart icon at col 1
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, GUI_HEART_FULL);
+
+	// Bar: col 2 to div1-1
+	const int barX = 2 * ts;
+	const int barW = (div1 - 3) * ts;
+	const int barH = ts - 6;
+	const int barY = rowY + 3;
+
 	Color filled;
-	if (hpRatio <= 0.25f)
+	if (ratio > 0.5f)
 	{
-		filled = ctx.renderer->get_color_pair(RED_BLACK_PAIR).fg;
+		filled = ctx.renderer->get_color_pair(GREEN_BLACK_PAIR).fg;
 	}
-	else if (hpRatio <= 0.5f)
+	else if (ratio > 0.25f)
 	{
 		filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
 	}
 	else
 	{
-		filled = ctx.renderer->get_color_pair(GREEN_BLACK_PAIR).fg;
+		filled = ctx.renderer->get_color_pair(RED_BLACK_PAIR).fg;
 	}
 
-	Color empty = ctx.renderer->get_color_pair(WHITE_BLACK_PAIR).bg;
+	Color barEmpty = { 20, 20, 30, 255 };
+	ctx.renderer->draw_bar(barX, barY, barW, barH, ratio, filled, barEmpty);
 
-	int barX = 1 * ts;
-	int barY = baseY;
-	int barW = BAR_WIDTH * ts;
-	int barH = ts;
-
-	ctx.renderer->draw_bar(barX, barY, barW, barH, hpRatio, filled, empty);
-
-	auto hpText = std::format("HP: {}/{}", currentHp, maxHp);
-	ctx.renderer->draw_text(barX + 2, barY + (ts - ctx.renderer->get_font_size()) / 2, hpText, WHITE_BLACK_PAIR);
+	// "HP 45/50" centered on the bar
+	auto hpText = std::format("HP {}/{}", hp, maxHp);
+	const int textW = ctx.renderer->measure_text(hpText);
+	ctx.renderer->draw_text(
+		barX + (barW - textW) / 2,
+		rowY + fontOff,
+		hpText,
+		WHITE_BLACK_PAIR
+	);
 }
 
 void Gui::render_hunger_status(const GameContext& ctx)
 {
 	if (!ctx.renderer) return;
 
-	int ts = ctx.renderer->get_tile_size();
-	int vrows = ctx.renderer->get_viewport_rows();
-	int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int ts    = ctx.renderer->get_tile_size();
+	const int vcols = ctx.renderer->get_viewport_cols();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int div1  = hud_div1(vcols);
 
 	if (ctx.hunger_system->get_hunger_max() <= 0) return;
 
-	int hungerValue = ctx.hunger_system->get_hunger_value();
-	int hungerMax = ctx.hunger_system->get_hunger_max();
-	std::string hungerText = ctx.hunger_system->get_hunger_state_string();
-	int hungerColor = ctx.hunger_system->get_hunger_color();
+	const int hungerVal = ctx.hunger_system->get_hunger_value();
+	const int hungerMax = ctx.hunger_system->get_hunger_max();
+	const std::string hungerText  = ctx.hunger_system->get_hunger_state_string();
+	const int         hungerColor = ctx.hunger_system->get_hunger_color();
 
-	float hungerRatio = static_cast<float>(hungerValue) / static_cast<float>(hungerMax);
-	if (hungerRatio < 0.0f) hungerRatio = 0.0f;
-	if (hungerRatio > 1.0f) hungerRatio = 1.0f;
+	const float ratio = std::clamp(
+		static_cast<float>(hungerVal) / static_cast<float>(hungerMax), 0.0f, 1.0f
+	);
 
-	Color filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
-	Color empty = ctx.renderer->get_color_pair(WHITE_BLACK_PAIR).bg;
+	const int rowY    = baseY + 2 * ts;
+	const int fontOff = font_row_off(*ctx.renderer);
 
-	int barX = 1 * ts;
-	int barY = baseY + 2 * ts;
-	int barW = BAR_WIDTH * ts;
-	int barH = ts;
+	// Food icon at col 1 (from the Items/Food sheet)
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, make_tile(SHEET_FOOD, 0, 0));
 
-	ctx.renderer->draw_bar(barX, barY, barW, barH, hungerRatio, filled, empty);
-	ctx.renderer->draw_text(barX + 2, barY + (ts - ctx.renderer->get_font_size()) / 2, hungerText, hungerColor);
+	// Bar: col 2 to div1-1
+	const int barX = 2 * ts;
+	const int barW = (div1 - 3) * ts;
+	const int barH = ts - 6;
+	const int barY = rowY + 3;
+
+	Color filled   = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
+	Color barEmpty = { 20, 20, 30, 255 };
+	ctx.renderer->draw_bar(barX, barY, barW, barH, ratio, filled, barEmpty);
+
+	// Hunger state centered on bar
+	const int textW = ctx.renderer->measure_text(hungerText);
+	ctx.renderer->draw_text(
+		barX + (barW - textW) / 2,
+		rowY + fontOff,
+		hungerText,
+		hungerColor
+	);
 }
 
-void Gui::renderMouseLook(const GameContext& ctx)
+// ---------------------------------------------------------------------------
+// Stat panel -- middle section
+// ---------------------------------------------------------------------------
+void Gui::gui_print_stats(const GameContext& ctx) noexcept
 {
+	if (!ctx.renderer) return;
+
+	const int ts      = ctx.renderer->get_tile_size();
+	const int vcols   = ctx.renderer->get_viewport_cols();
+	const int vrows   = ctx.renderer->get_viewport_rows();
+	const int baseY   = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int statsX  = (hud_div1(vcols) + 1) * ts;
+	const int fontOff = font_row_off(*ctx.renderer);
+
+	if (ctx.player->actorData.name.empty())
+	{
+		ctx.player->actorData.name = "Player";
+	}
+
+	// Row 1: Name (highlighted)
+	ctx.renderer->draw_text(
+		statsX,
+		baseY + 1 * ts + fontOff,
+		ctx.player->actorData.name,
+		YELLOW_BLACK_PAIR
+	);
+
+	// Row 2: Class + level
+	auto classLine = std::format(
+		"{}  Lv.{}", ctx.player->playerClass, ctx.player->get_level()
+	);
+	ctx.renderer->draw_text(statsX, baseY + 2 * ts + fontOff, classLine, WHITE_BLACK_PAIR);
+
+	// Row 3: THAC0 / AC / DR
+	auto combatLine = std::format(
+		"THAC0:{}  AC:{}  DR:{}",
+		ctx.player->destructible->get_thaco(),
+		ctx.player->destructible->get_armor_class(),
+		ctx.player->destructible->get_dr()
+	);
+	ctx.renderer->draw_text(statsX, baseY + 3 * ts + fontOff, combatLine, WHITE_BLACK_PAIR);
+
+	// Row 4: Attack roll
+	auto atkLine = std::format(
+		"Atk: {}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll
+	);
+	ctx.renderer->draw_text(statsX, baseY + 4 * ts + fontOff, atkLine, GREEN_BLACK_PAIR);
+
+	// Row 5: STR / DEX / CON
+	auto line5 = std::format(
+		"STR:{:2d} DEX:{:2d} CON:{:2d}",
+		ctx.player->get_strength(),
+		ctx.player->get_dexterity(),
+		ctx.player->get_constitution()
+	);
+	ctx.renderer->draw_text(statsX, baseY + 5 * ts + fontOff, line5, WHITE_BLACK_PAIR);
+
+	// Row 6: INT / WIS / CHA
+	auto line6 = std::format(
+		"INT:{:2d} WIS:{:2d} CHA:{:2d}",
+		ctx.player->get_intelligence(),
+		ctx.player->get_wisdom(),
+		ctx.player->get_charisma()
+	);
+	ctx.renderer->draw_text(statsX, baseY + 6 * ts + fontOff, line6, WHITE_BLACK_PAIR);
 }
 
-void Gui::save(json& j)
+// No-op: content merged into gui_print_stats
+void Gui::gui_print_attrs(const GameContext& /*ctx*/) noexcept {}
+
+// ---------------------------------------------------------------------------
+// Log panel -- right section
+// ---------------------------------------------------------------------------
+void Gui::gui_print_log(const GameContext& ctx)
 {
+	if (!ctx.renderer) return;
+
+	const int ts    = ctx.renderer->get_tile_size();
+	const int vcols = ctx.renderer->get_viewport_cols();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int logX  = (hud_div2(vcols) + 1) * ts;
+
+	const int messagesToShow = std::min(
+		LOG_MAX_MESSAGES,
+		static_cast<int>(ctx.message_system->get_stored_message_count())
+	);
+
+	for (int i = 0; i < messagesToShow; ++i)
+	{
+		const std::vector<LogMessage>& parts =
+			ctx.message_system->get_attack_message_at(
+				ctx.message_system->get_stored_message_count() - 1 - i
+			);
+
+		int x = logX;
+		const int y = baseY + (1 + i) * ts;
+		int curX = 0;
+
+		for (const auto& part : parts)
+		{
+			ctx.renderer->draw_text(x + curX, y, part.logMessageText, part.logMessageColor);
+			curX += ctx.renderer->measure_text(part.logMessageText) + 2;
+		}
+	}
 }
 
-void Gui::load(const json& j)
+// ---------------------------------------------------------------------------
+// Status effects (bar panel row 3)
+// ---------------------------------------------------------------------------
+void Gui::render_player_status(const GameContext& ctx)
 {
+	if (!ctx.renderer) return;
+
+	const int ts      = ctx.renderer->get_tile_size();
+	const int vrows   = ctx.renderer->get_viewport_rows();
+	const int baseY   = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int fontOff = font_row_off(*ctx.renderer);
+
+	if (ctx.player->has_state(ActorState::IS_CONFUSED))
+	{
+		ctx.renderer->draw_text(
+			2 * ts,
+			baseY + 3 * ts + fontOff,
+			"CONFUSED",
+			RED_BLACK_PAIR
+		);
+	}
 }
+
+void Gui::gui(GameContext& /*ctx*/) noexcept {}
+
+void Gui::renderMouseLook(const GameContext& /*ctx*/) {}
+
+void Gui::save(json& /*j*/) {}
+
+void Gui::load(const json& /*j*/) {}
 
 // end of file: Gui.cpp

@@ -8,111 +8,172 @@
 #include "../Systems/DataManager.h"
 #include "../Systems/HungerSystem.h"
 #include "../Combat/WeaponDamageRegistry.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
 
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
 {
-    // TODO: render character sheet via new renderer
-    void* character_sheet = nullptr;
-
     bool run = true;
     while (run)
     {
-        // Display all sections (currently no-ops pending renderer)
-        display_basic_info(character_sheet, player);
-        display_experience_info(character_sheet, player, ctx);
-        display_attributes(character_sheet, player, ctx);
-        display_combat_stats(character_sheet, player, ctx);
-        display_equipment_info(character_sheet, player, ctx);
-        display_right_panel_info(character_sheet, player, ctx);
-        display_constitution_effects(character_sheet, player, ctx);
-        display_strength_effects(character_sheet, player, ctx);
+        ctx.renderer->begin_frame();
 
-        // TODO: wait for key input via new input system
-        run = false;
+        int row = 0;
+        display_basic_info(player, ctx, row);
+        display_experience_info(player, ctx, row);
+        display_attributes(player, ctx, row);
+        display_combat_stats(player, ctx, row);
+        display_equipment_info(player, ctx, row);
+        display_right_panel_info(player, ctx, row);
+
+        int ts = ctx.renderer->get_tile_size();
+        ctx.renderer->draw_text(ts, (row + 1) * ts, "[ESC] or [SPACE] to close", CYAN_BLACK_PAIR);
+
+        ctx.renderer->end_frame();
+
+        ctx.input_system->poll();
+        GameKey key = ctx.input_system->get_key();
+        if (key == GameKey::ESCAPE || key == GameKey::SPACE)
+        {
+            run = false;
+        }
     }
-
-    cleanup_and_restore();
 }
 
-void CharacterSheetUI::display_basic_info(void* window, const Player& player)
+void CharacterSheetUI::display_basic_info(const Player& player, GameContext& ctx, int& row)
 {
-    // TODO: render basic info via new renderer
-    // Name, Class, Race, Level
-    (void)window;
-    (void)player;
+    int ts = ctx.renderer->get_tile_size();
+
+    ctx.renderer->draw_text(ts, row * ts, "=== CHARACTER SHEET ===", YELLOW_BLACK_PAIR);
+    row++;
+
+    std::string line = std::format(
+        "Name: {}   Class: {}   Race: {}   Level: {}",
+        player.get_name(),
+        player.playerClass,
+        player.playerRace,
+        player.get_level()
+    );
+    ctx.renderer->draw_text(ts, row * ts, line, WHITE_BLACK_PAIR);
+    row += 2;
 }
 
-void CharacterSheetUI::display_experience_info(void* window, const Player& player, GameContext& ctx)
+void CharacterSheetUI::display_experience_info(const Player& player, GameContext& ctx, int& row)
 {
-    // Calculate XP needed for next level
-    int currentXP = player.destructible->get_xp();
+    int ts = ctx.renderer->get_tile_size();
+
+    int currentXP  = player.destructible->get_xp();
     int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
-    int xpNeeded = nextLevelXP - currentXP;
-    float progressPercent = static_cast<float>(currentXP) / static_cast<float>(nextLevelXP) * 100.0f;
+    int xpNeeded   = nextLevelXP - currentXP;
 
-    // TODO: render experience info via new renderer
-    (void)window;
-    (void)xpNeeded;
-    (void)progressPercent;
+    ctx.renderer->draw_text(
+        ts,
+        row * ts,
+        std::format("XP: {} / {}   (Need: {})", currentXP, nextLevelXP, xpNeeded),
+        CYAN_BLACK_PAIR
+    );
+    row += 2;
 }
 
-void CharacterSheetUI::display_attributes(void* window, const Player& player, GameContext& ctx)
+void CharacterSheetUI::display_attributes(const Player& player, GameContext& ctx, int& row)
 {
-    // Get strength modifiers from attributes table
+    int ts = ctx.renderer->get_tile_size();
+
     int strHitMod = get_strength_hit_modifier(player, ctx);
     int strDmgMod = get_strength_damage_modifier(player, ctx);
+    int conBonus  = get_constitution_bonus(player, ctx);
 
-    // Display Constitution with HP bonus effect
-    int conBonus = get_constitution_bonus(player, ctx);
-
-    // TODO: render attributes via new renderer
-    (void)window;
-    (void)strHitMod;
-    (void)strDmgMod;
-    (void)conBonus;
-}
-
-void CharacterSheetUI::display_combat_stats(void* window, const Player& player, GameContext& ctx)
-{
-    // Calculate base HP and Con bonus
-    int baseHP = player.destructible->get_hp_base();
-    int conBonusTotal = player.destructible->get_max_hp() - baseHP;
-
-    // Display attack bonus from strength if applicable
-    int strHitMod = get_strength_hit_modifier(player, ctx);
-    int strDmgMod = get_strength_damage_modifier(player, ctx);
-
-    // Dexterity bonuses
-    const auto& dexterityAttributes = ctx.data_manager->get_dexterity_attributes();
-    int missileAdj = 0;
+    int missileAdj   = 0;
     int defensiveAdj = 0;
-    if (player.get_dexterity() > 0 && player.get_dexterity() <= dexterityAttributes.size())
+    const auto& dexAttr = ctx.data_manager->get_dexterity_attributes();
+    if (player.get_dexterity() > 0 &&
+        player.get_dexterity() <= static_cast<int>(dexAttr.size()))
     {
-        missileAdj = dexterityAttributes.at(player.get_dexterity() - 1).MissileAttackAdj;
-        defensiveAdj = dexterityAttributes.at(player.get_dexterity() - 1).DefensiveAdj;
+        missileAdj   = dexAttr.at(player.get_dexterity() - 1).MissileAttackAdj;
+        defensiveAdj = dexAttr.at(player.get_dexterity() - 1).DefensiveAdj;
     }
 
-    // TODO: render combat stats via new renderer
-    (void)window;
-    (void)baseHP;
-    (void)conBonusTotal;
-    (void)strHitMod;
-    (void)strDmgMod;
-    (void)missileAdj;
-    (void)defensiveAdj;
+    ctx.renderer->draw_text(ts, row * ts, "--- ATTRIBUTES ---", YELLOW_BLACK_PAIR);
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("STR: {:2d}  ({:+d} hit, {:+d} dmg)", player.get_strength(), strHitMod, strDmgMod),
+        WHITE_BLACK_PAIR
+    );
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("DEX: {:2d}  ({:+d} missile, {:+d} defensive)", player.get_dexterity(), missileAdj, defensiveAdj),
+        WHITE_BLACK_PAIR
+    );
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("CON: {:2d}  ({:+d} HP/level)", player.get_constitution(), conBonus),
+        WHITE_BLACK_PAIR
+    );
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("INT: {:2d}   WIS: {:2d}   CHA: {:2d}",
+            player.get_intelligence(), player.get_wisdom(), player.get_charisma()),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
 }
 
-void CharacterSheetUI::display_equipment_info(void* window, const Player& player, GameContext& ctx)
+void CharacterSheetUI::display_combat_stats(const Player& player, GameContext& ctx, int& row)
 {
-    // Get equipped weapon from proper slot-based equipment system
+    int ts = ctx.renderer->get_tile_size();
+
+    int hp          = player.destructible->get_hp();
+    int maxHp       = player.destructible->get_max_hp();
+    int baseHP      = player.destructible->get_hp_base();
+    int conBonusTotal = maxHp - baseHP;
+
+    ctx.renderer->draw_text(ts, row * ts, "--- COMBAT ---", YELLOW_BLACK_PAIR);
+    row++;
+
+    int hpColor = (hp > maxHp / 2)
+        ? GREEN_BLACK_PAIR
+        : (hp > maxHp / 4 ? YELLOW_BLACK_PAIR : RED_BLACK_PAIR);
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("HP: {} / {}  (Base: {}, Con Bonus: {:+d})", hp, maxHp, baseHP, conBonusTotal),
+        hpColor
+    );
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("THAC0: {}   AC: {}   DR: {}",
+            player.destructible->get_thaco(),
+            player.destructible->get_armor_class(),
+            player.destructible->get_dr()),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
+}
+
+void CharacterSheetUI::display_equipment_info(const Player& player, GameContext& ctx, int& row)
+{
+    int ts = ctx.renderer->get_tile_size();
+
     auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
 
-    // Get damage display string
     std::string damageDisplay;
     if (equippedWeapon && equippedWeapon->is_weapon())
     {
-        const ItemEnhancement* enh = equippedWeapon->is_enhanced() ? &equippedWeapon->get_enhancement() : nullptr;
-        damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(equippedWeapon->itemId, enh).displayRoll;
+        const ItemEnhancement* enh = equippedWeapon->is_enhanced()
+            ? &equippedWeapon->get_enhancement()
+            : nullptr;
+        damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(
+            equippedWeapon->itemId, enh).displayRoll;
     }
     else
     {
@@ -121,66 +182,70 @@ void CharacterSheetUI::display_equipment_info(void* window, const Player& player
 
     int strDmgMod = get_strength_damage_modifier(player, ctx);
 
-    // TODO: render equipment info via new renderer
-    (void)window;
-    (void)equippedWeapon;
-    (void)damageDisplay;
-    (void)strDmgMod;
+    ctx.renderer->draw_text(ts, row * ts, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
+    row++;
+
+    std::string weaponName = equippedWeapon
+        ? std::string(equippedWeapon->get_name())
+        : "(unarmed)";
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("Weapon: {}   Damage: {}  (STR bonus: {:+d})", weaponName, damageDisplay, strDmgMod),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
 }
 
-void CharacterSheetUI::display_right_panel_info(void* window, const Player& player, GameContext& ctx)
+void CharacterSheetUI::display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 {
-    // TODO: render right panel info via new renderer
-    // Gender, Gold, Hunger display
-    (void)window;
-    (void)player;
-    (void)ctx;
-}
+    int ts = ctx.renderer->get_tile_size();
 
-void CharacterSheetUI::display_constitution_effects(void* window, const Player& player, GameContext& ctx)
-{
-    // TODO: render constitution effects via new renderer
-    (void)window;
-    (void)player;
-    (void)ctx;
-}
+    std::string hungerStr = ctx.hunger_system
+        ? ctx.hunger_system->get_hunger_state_string()
+        : "Unknown";
 
-void CharacterSheetUI::display_strength_effects(void* window, const Player& player, GameContext& ctx)
-{
-    // TODO: render strength effects via new renderer
-    (void)window;
-    (void)player;
-    (void)ctx;
+    ctx.renderer->draw_text(ts, row * ts, "--- OTHER ---", YELLOW_BLACK_PAIR);
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("Gender: {}   Gold: {} gp   Hunger: {}",
+            player.get_gender(), player.get_gold(), hungerStr),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
 }
 
 int CharacterSheetUI::get_strength_hit_modifier(const Player& player, GameContext& ctx)
 {
-    if (player.get_strength() > 0 && player.get_strength() <= ctx.data_manager->get_strength_attributes().size())
+    const auto& attrs = ctx.data_manager->get_strength_attributes();
+    if (player.get_strength() > 0 &&
+        player.get_strength() <= static_cast<int>(attrs.size()))
     {
-        return ctx.data_manager->get_strength_attributes().at(player.get_strength() - 1).hitProb;
+        return attrs.at(player.get_strength() - 1).hitProb;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_strength_damage_modifier(const Player& player, GameContext& ctx)
 {
-    if (player.get_strength() > 0 && player.get_strength() <= ctx.data_manager->get_strength_attributes().size())
+    const auto& attrs = ctx.data_manager->get_strength_attributes();
+    if (player.get_strength() > 0 &&
+        player.get_strength() <= static_cast<int>(attrs.size()))
     {
-        return ctx.data_manager->get_strength_attributes().at(player.get_strength() - 1).dmgAdj;
+        return attrs.at(player.get_strength() - 1).dmgAdj;
     }
     return 0;
 }
 
 int CharacterSheetUI::get_constitution_bonus(const Player& player, GameContext& ctx)
 {
-    if (player.get_constitution() >= 1 && player.get_constitution() <= ctx.data_manager->get_constitution_attributes().size())
+    const auto& attrs = ctx.data_manager->get_constitution_attributes();
+    if (player.get_constitution() >= 1 &&
+        player.get_constitution() <= static_cast<int>(attrs.size()))
     {
-        return ctx.data_manager->get_constitution_attributes().at(player.get_constitution() - 1).HPAdj;
+        return attrs.at(player.get_constitution() - 1).HPAdj;
     }
     return 0;
-}
-
-void CharacterSheetUI::cleanup_and_restore()
-{
-    // TODO: restore game display via new renderer
 }

@@ -7,139 +7,193 @@
 #include "../Systems/LevelUpSystem.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Core/GameContext.h"
-#include "../Systems/RenderingManager.h"
-#include "../Gui/Gui.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
 
 void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)
 {
-    // TODO: render level up window via new renderer
-    void* statsWindow = nullptr;
+    bool run = true;
+    while (run)
+    {
+        ctx.renderer->begin_frame();
 
-    // Display all sections (currently no-ops pending renderer)
-    display_title(statsWindow, player, newLevel);
-    display_basic_info(statsWindow, player, newLevel);
-    display_current_stats(statsWindow, player);
+        int row = 0;
+        draw_title(player, newLevel, ctx, row);
+        draw_current_stats(player, ctx, row);
+        draw_level_benefits(player, newLevel, ctx, row);
+        draw_next_level_info(player, ctx, row);
 
-    int currentLine = 12; // Start benefits section here
-    display_level_benefits(statsWindow, player, newLevel);
-    display_class_benefits(statsWindow, player, newLevel, currentLine);
-    display_next_level_info(statsWindow, player, ctx);
-    display_continue_prompt(statsWindow);
+        int ts = ctx.renderer->get_tile_size();
+        ctx.renderer->draw_text(ts, row * ts, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
 
-    // Wait for input then clean up
-    wait_for_spacebar();
-    cleanup_and_restore(ctx);
+        ctx.renderer->end_frame();
+
+        ctx.input_system->poll();
+        GameKey key = ctx.input_system->get_key();
+        if (key == GameKey::SPACE || key == GameKey::ESCAPE || key == GameKey::ENTER)
+        {
+            run = false;
+        }
+    }
 }
 
-void LevelUpUI::display_title(void* window, const Player& player, int level)
+void LevelUpUI::draw_title(const Player& player, int level, GameContext& ctx, int& row)
 {
-    // TODO: render title via new renderer
-    (void)window;
-    (void)player;
-    (void)level;
+    int ts = ctx.renderer->get_tile_size();
+
+    ctx.renderer->draw_text(ts, row * ts, "*** LEVEL UP! ***", YELLOW_BLACK_PAIR);
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("{} has attained level {}!", player.get_name(), level),
+        WHITE_BLACK_PAIR
+    );
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("Class: {}", player.playerClass),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
 }
 
-void LevelUpUI::display_basic_info(void* window, const Player& player, int level)
+void LevelUpUI::draw_current_stats(const Player& player, GameContext& ctx, int& row)
 {
-    // TODO: render basic info via new renderer
-    (void)window;
-    (void)player;
-    (void)level;
+    int ts = ctx.renderer->get_tile_size();
+
+    ctx.renderer->draw_text(ts, row * ts, "--- CURRENT STATS ---", YELLOW_BLACK_PAIR);
+    row++;
+
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("HP: {} / {}   THAC0: {}   AC: {}",
+            player.destructible->get_hp(),
+            player.destructible->get_max_hp(),
+            player.destructible->get_thaco(),
+            player.destructible->get_armor_class()),
+        GREEN_BLACK_PAIR
+    );
+    row += 2;
 }
 
-void LevelUpUI::display_current_stats(void* window, const Player& player)
+void LevelUpUI::draw_level_benefits(const Player& player, int level, GameContext& ctx, int& row)
 {
-    // TODO: render current stats via new renderer
-    (void)window;
-    (void)player;
-}
+    int ts = ctx.renderer->get_tile_size();
 
-void LevelUpUI::display_level_benefits(void* window, const Player& player, int level)
-{
-    // TODO: render level benefits via new renderer
-    (void)window;
-    (void)player;
-    (void)level;
-}
+    ctx.renderer->draw_text(ts, row * ts, "--- LEVEL BENEFITS ---", YELLOW_BLACK_PAIR);
+    row++;
 
-void LevelUpUI::display_class_benefits(void* window, const Player& player, int level, int& currentLine)
-{
-    int benefitLine = 16;
+    if (has_thac0_improvement(player, level))
+    {
+        ctx.renderer->draw_text(
+            ts, row * ts,
+            std::format("THAC0 improved to {}", player.destructible->get_thaco()),
+            GREEN_BLACK_PAIR
+        );
+        row++;
+    }
 
     switch (player.playerClassState)
     {
     case Player::PlayerClassState::FIGHTER:
-        // Fighter: d10 hit dice, extra attacks at 7 and 13
+    {
+        ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d10", WHITE_BLACK_PAIR);
+        row++;
         if (level == 7)
         {
-            // SPECIAL: Extra Attack (3/2 per round)
+            ctx.renderer->draw_text(
+                ts, row * ts,
+                "Special: Extra Attack (3 attacks per 2 rounds)",
+                YELLOW_BLACK_PAIR
+            );
+            row++;
         }
         else if (level == 13)
         {
-            // SPECIAL: Extra Attack (2 per round)
+            ctx.renderer->draw_text(
+                ts, row * ts,
+                "Special: Extra Attack (2 attacks per round)",
+                YELLOW_BLACK_PAIR
+            );
+            row++;
         }
-        benefitLine++;
         break;
-
+    }
     case Player::PlayerClassState::ROGUE:
-        // Rogue: d6 hit dice, backstab multiplier increases
-        if (LevelUpSystem::calculate_backstab_multiplier(level) > LevelUpSystem::calculate_backstab_multiplier(level - 1))
+    {
+        ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d6", WHITE_BLACK_PAIR);
+        row++;
+        int newMult = LevelUpSystem::calculate_backstab_multiplier(level);
+        int oldMult = LevelUpSystem::calculate_backstab_multiplier(level - 1);
+        if (newMult > oldMult)
         {
-            // SPECIAL: Backstab multiplier increased
-            benefitLine++;
+            ctx.renderer->draw_text(
+                ts, row * ts,
+                std::format("Special: Backstab multiplier increased to x{}", newMult),
+                YELLOW_BLACK_PAIR
+            );
+            row++;
         }
-        benefitLine++;
         break;
-
+    }
     case Player::PlayerClassState::CLERIC:
-        // Cleric: d8 hit dice, Turn Undead improvements
+    {
+        ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d8", WHITE_BLACK_PAIR);
+        row++;
         if (level == 3 || level == 5 || level == 7 || level == 9)
         {
-            // SPECIAL: Turn Undead improved
-            benefitLine++;
+            ctx.renderer->draw_text(
+                ts, row * ts,
+                "Special: Turn Undead ability improved",
+                YELLOW_BLACK_PAIR
+            );
+            row++;
         }
-        benefitLine++;
         break;
-
+    }
     case Player::PlayerClassState::WIZARD:
-        // Wizard: d4 hit dice, new spell levels at odd levels
+    {
+        ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d4", WHITE_BLACK_PAIR);
+        row++;
         if ((level % 2 == 1) && level > 1)
         {
             int spellLevel = (level + 1) / 2;
             if (spellLevel <= 9)
             {
-                // SPECIAL: New spell level available
-                benefitLine++;
+                ctx.renderer->draw_text(
+                    ts, row * ts,
+                    std::format("Special: Level {} spells now available", spellLevel),
+                    YELLOW_BLACK_PAIR
+                );
+                row++;
             }
         }
-        benefitLine++;
         break;
-
+    }
     default:
-        benefitLine++;
         break;
     }
 
-    currentLine = benefitLine;
-
-    // TODO: render class benefits via new renderer
-    (void)window;
+    row++;
 }
 
-void LevelUpUI::display_next_level_info(void* window, const Player& player, GameContext& ctx)
+void LevelUpUI::draw_next_level_info(const Player& player, GameContext& ctx, int& row)
 {
-    // Show next level requirements
+    int ts = ctx.renderer->get_tile_size();
+
     int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
 
-    // TODO: render next level info via new renderer
-    (void)window;
-    (void)nextLevelXP;
-}
+    ctx.renderer->draw_text(ts, row * ts, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
+    row++;
 
-void LevelUpUI::display_continue_prompt(void* window)
-{
-    // TODO: render continue prompt via new renderer
-    (void)window;
+    ctx.renderer->draw_text(
+        ts, row * ts,
+        std::format("XP needed for next level: {}", nextLevelXP),
+        WHITE_BLACK_PAIR
+    );
+    row += 2;
 }
 
 bool LevelUpUI::has_thac0_improvement(const Player& player, int level)
@@ -165,16 +219,4 @@ int LevelUpUI::get_expected_thac0(const Player& player, int level)
     default:
         return 20;
     }
-}
-
-void LevelUpUI::wait_for_spacebar()
-{
-    // TODO: wait for spacebar via new input system
-}
-
-void LevelUpUI::cleanup_and_restore(GameContext& ctx)
-{
-    // Restore game display
-    ctx.rendering_manager->render(ctx);
-    ctx.gui->gui_render(ctx);
 }

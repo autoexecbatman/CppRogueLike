@@ -7,6 +7,13 @@ void InputSystem::poll()
     char_input = 0;
     resized = false;
 
+    // ALT+ENTER toggles fullscreen/windowed
+    if (IsKeyPressed(KEY_ENTER) && (IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT)))
+    {
+        ToggleFullscreen();
+        return;
+    }
+
     if (IsWindowResized())
     {
         resized = true;

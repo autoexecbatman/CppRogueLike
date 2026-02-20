@@ -97,6 +97,7 @@ public:
     void draw_tile(int grid_y, int grid_x, int tile_id, int color_pair_id) const;
 
     // Screen-space drawing (no camera offset)
+    void draw_tile_screen(int px, int py, int tile_id) const;
     void draw_text(int px, int py, std::string_view text, int color_pair_id) const;
     void draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const;
 

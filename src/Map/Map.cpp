@@ -531,7 +531,6 @@ void Map::render(const GameContext& ctx) const
 		return;
 	}
 
-	// Compute visible tile range from camera
 	int ts = ctx.renderer->get_tile_size();
 	int cam_x = ctx.renderer->get_camera_x();
 	int cam_y = ctx.renderer->get_camera_y();
@@ -543,19 +542,137 @@ void Map::render(const GameContext& ctx) const
 	int end_col = std::min(map_width, start_col + vis_cols + 2);
 	int end_row = std::min(map_height, start_row + vis_rows + 2);
 
-	auto is_wall_neighbor = [&](Vector2D pos) -> bool
+	// Cardinal neighbor definitions: offset + bitmask bit
+	struct NeighborDef { Vector2D offset; uint8_t bit; };
+	constexpr uint8_t N_BIT = 8;
+	constexpr uint8_t E_BIT = 4;
+	constexpr uint8_t S_BIT = 2;
+	constexpr uint8_t W_BIT = 1;
+	const NeighborDef CARDINALS[4] =
 	{
-		if (!in_bounds(pos)) return true;
-		TileType t = get_tile_type(pos);
+		{ {-1,  0}, N_BIT },
+		{ { 0,  1}, E_BIT },
+		{ { 1,  0}, S_BIT },
+		{ { 0, -1}, W_BIT }
+	};
+
+	auto build_mask = [&](Vector2D center, auto predicate) -> uint8_t
+	{
+		uint8_t mask = 0;
+		for (const auto& dir : CARDINALS)
+		{
+			if (predicate(center + dir.offset))
+			{
+				mask |= dir.bit;
+			}
+		}
+		return mask;
+	};
+
+	auto is_wall_or_door = [&](Vector2D p) -> bool
+	{
+		if (!in_bounds(p)) return false;
+		TileType t = get_tile_type(p);
 		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
 	};
 
-	auto is_walkable_neighbor = [&](Vector2D pos) -> bool
+	auto is_walkable = [&](Vector2D p) -> bool
 	{
-		if (!in_bounds(pos)) return false;
-		TileType t = get_tile_type(pos);
+		if (!in_bounds(p)) return false;
+		TileType t = get_tile_type(p);
 		return t == TileType::FLOOR || t == TileType::CORRIDOR
 			|| t == TileType::OPEN_DOOR || t == TileType::WATER;
+	};
+
+	constexpr Vector2D ALL_DIRS[8] =
+	{
+		{-1, -1}, {-1, 0}, {-1, 1},
+		{ 0, -1},           { 0, 1},
+		{ 1, -1}, { 1, 0}, { 1, 1}
+	};
+
+	// A border wall is a wall/door with at least one walkable tile
+	// in its 8 neighbors. Only border walls form the visible room outline.
+	auto is_border_wall = [&](Vector2D p) -> bool
+	{
+		if (!is_wall_or_door(p)) return false;
+		for (const auto& d : ALL_DIRS)
+		{
+			if (is_walkable(p + d))
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	auto is_visible = [&](Vector2D p) -> bool
+	{
+		return is_in_fov(p) || is_explored(p);
+	};
+
+	// Deterministic hash for decoration placement (stable per map seed).
+	auto decor_hash = [&](int y, int x, int salt) -> unsigned int
+	{
+		unsigned int h = static_cast<unsigned int>(
+			y * 7919 + x * 6271 + static_cast<int>(seed) * 1013 + salt * 3571
+		);
+		h ^= h >> 16;
+		h *= 0x45d9f3bU;
+		h ^= h >> 16;
+		return h;
+	};
+
+	// Resolve decoration overlay for a given tile position and type.
+	// Walls: candles anywhere, vines only on north walls (floor to the south).
+	// Floors: cobwebs in corners, torches near walls.
+	auto resolve_decor = [&](Vector2D p, TileType t) -> int
+	{
+		unsigned int h = decor_hash(p.y, p.x, 42);
+
+		if (t == TileType::WALL)
+		{
+			bool floor_south = is_walkable(p + Vector2D{1, 0});
+			bool floor_east  = is_walkable(p + Vector2D{0, 1});
+			bool floor_west  = is_walkable(p + Vector2D{0,-1});
+			bool is_north_wall = floor_south && !floor_east && !floor_west;
+			if (is_north_wall)
+			{
+				if ((h % 100) < 3)
+				{
+					return TILE_VINE;
+				}
+				unsigned int h2 = decor_hash(p.y, p.x, 77);
+				if ((h2 % 100) < 5)
+				{
+					return TILE_CANDLE_SMALL;
+				}
+			}
+			return 0;
+		}
+
+		if (t == TileType::FLOOR || t == TileType::CORRIDOR)
+		{
+			bool wN = is_wall_or_door(p + Vector2D{-1, 0});
+			bool wE = is_wall_or_door(p + Vector2D{ 0, 1});
+			bool wS = is_wall_or_door(p + Vector2D{ 1, 0});
+			bool wW = is_wall_or_door(p + Vector2D{ 0,-1});
+
+			bool is_corner = (wN && wW) || (wN && wE) || (wS && wW) || (wS && wE);
+			bool near_wall = wN || wE || wS || wW;
+
+			if (is_corner && (h % 100) < 15)
+			{
+				constexpr int COBWEBS[] = {
+					TILE_COBWEB_1, TILE_COBWEB_2,
+					TILE_COBWEB_3, TILE_COBWEB_4
+				};
+				return COBWEBS[h % 4];
+			}
+			return 0;
+		}
+
+		return 0;
 	};
 
 	for (int row = start_row; row < end_row; row++)
@@ -563,7 +680,7 @@ void Map::render(const GameContext& ctx) const
 		for (int col = start_col; col < end_col; col++)
 		{
 			Vector2D pos{ row, col };
-			if (!is_in_fov(pos) && !is_explored(pos))
+			if (!is_visible(pos))
 			{
 				continue;
 			}
@@ -575,37 +692,60 @@ void Map::render(const GameContext& ctx) const
 			{
 			case TileType::WALL:
 			{
-				bool n = is_wall_neighbor({ row - 1, col });
-				bool e = is_wall_neighbor({ row, col + 1 });
-				bool s = is_wall_neighbor({ row + 1, col });
-				bool w = is_wall_neighbor({ row, col - 1 });
-				tile_id = autotile_resolve(AUTOTILE_WALL_STONE, n, e, s, w);
+				if (!is_border_wall(pos))
+				{
+					continue; // Interior wall -- no walkable neighbor, render as void
+				}
+				tile_id = wall_autotile_resolve_mask(
+					WALL_AUTOTILE_STONE,
+					build_mask(pos, is_border_wall)
+				);
 				break;
 			}
 			case TileType::FLOOR:
+			{
+				tile_id = autotile_resolve_mask(
+					AUTOTILE_FLOOR_STONE,
+					build_mask(pos, is_walkable)
+				);
+				break;
+			}
 			case TileType::CORRIDOR:
 			{
-				bool n = is_walkable_neighbor({ row - 1, col });
-				bool e = is_walkable_neighbor({ row, col + 1 });
-				bool s = is_walkable_neighbor({ row + 1, col });
-				bool w = is_walkable_neighbor({ row, col - 1 });
-				tile_id = autotile_resolve(AUTOTILE_FLOOR_STONE, n, e, s, w);
+				tile_id = autotile_resolve_mask(
+					AUTOTILE_CORRIDOR,
+					build_mask(pos, is_walkable)
+				);
 				break;
 			}
 			case TileType::WATER:
 				tile_id = TILE_WATER;
 				break;
 			case TileType::CLOSED_DOOR:
-				tile_id = TILE_DOOR_CLOSED;
-				break;
 			case TileType::OPEN_DOOR:
-				tile_id = TILE_DOOR_OPEN;
+			{
+				// Draw floor underneath -- door sprites have transparency
+				int floor_id = autotile_resolve_mask(
+					AUTOTILE_FLOOR_STONE,
+					build_mask(pos, is_walkable)
+				);
+				ctx.renderer->draw_tile(row, col, floor_id, WHITE_BLACK_PAIR);
+				tile_id = (type == TileType::CLOSED_DOOR)
+					? TILE_DOOR_CLOSED
+					: TILE_DOOR_OPEN;
 				break;
+			}
 			default:
 				continue;
 			}
 
 			ctx.renderer->draw_tile(row, col, tile_id, WHITE_BLACK_PAIR);
+
+			int decor_id = resolve_decor(pos, type);
+			if (decor_id != 0)
+			{
+				ctx.renderer->draw_tile(row, col, decor_id, WHITE_BLACK_PAIR);
+			}
 		}
 	}
 }

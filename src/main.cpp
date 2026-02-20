@@ -50,7 +50,8 @@ int main()
     // Initialize raylib window (fullscreen, auto-detect resolution)
     game.renderer.init();
     game.renderer.load_dawnlike("DawnLike");
-    game.renderer.load_font("C:/Windows/Fonts/consola.ttf", game.renderer.get_tile_size() * 3 / 4);
+
+    game.renderer.load_font("DawnLike/GUI/SDS_8x8.ttf", 24);
 
     auto ctx = game.context();
     game.menus.push_back(std::make_unique<Menu>(true, ctx));

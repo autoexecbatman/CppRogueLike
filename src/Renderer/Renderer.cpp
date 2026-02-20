@@ -144,6 +144,8 @@ void Renderer::load_dawnlike(const char* base_path)
     load_animated(SHEET_DECOR0, "Objects/", "Decor");
     load_animated(SHEET_EFFECT0, "Objects/", "Effect");
     load_static(SHEET_TILE, "Objects/", "Tile");
+    load_animated(SHEET_PIT0, "Objects/", "Pit");
+    load_animated(SHEET_GUI0, "GUI/", "GUI");
 
     // Characters (all animated with 0/1 pairs)
     load_animated(SHEET_PLAYER0, "Characters/", "Player");
@@ -180,6 +182,10 @@ void Renderer::load_font(const char* font_path, int size)
     font_size = size;
     game_font = LoadFontEx(font_path, size, nullptr, 256);
     font_loaded = (game_font.glyphCount > 0);
+    if (font_loaded)
+    {
+        SetTextureFilter(game_font.texture, TEXTURE_FILTER_POINT);
+    }
 }
 
 void Renderer::begin_frame()
@@ -251,6 +257,50 @@ void Renderer::draw_tile(int grid_y, int grid_x, int tile_id, int /*color_pair_i
 
     // Destination rect scaled to display tile size
     Rectangle dest_rect = { dest_x, dest_y, ts_f, ts_f };
+
+    DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
+}
+
+void Renderer::draw_tile_screen(int px, int py, int tile_id) const
+{
+    if (!sheets_loaded)
+    {
+        return;
+    }
+
+    int sid = tile_sheet(tile_id);
+    if (sid < 0 || sid >= SHEET_COUNT)
+    {
+        return;
+    }
+
+    const auto& sheet = sheets[sid];
+    if (!sheet.loaded || sheet.tiles_per_row <= 0)
+    {
+        return;
+    }
+
+    const Texture2D& tex = (sheet.animated && current_anim_frame == 1)
+        ? sheet.frame1
+        : sheet.frame0;
+
+    int col = tile_col(tile_id);
+    int row = tile_row(tile_id);
+
+    Rectangle src_rect = {
+        static_cast<float>(col * SPRITE_SIZE),
+        static_cast<float>(row * SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE)
+    };
+
+    float ts_f = static_cast<float>(tile_size);
+    Rectangle dest_rect = {
+        static_cast<float>(px),
+        static_cast<float>(py),
+        ts_f,
+        ts_f
+    };
 
     DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
