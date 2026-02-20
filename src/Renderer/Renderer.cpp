@@ -108,7 +108,7 @@ void Renderer::load_sheet(int sheet_id, const char* path0, const char* path1)
     s.frame0 = load_dawnlike_texture(path0);
     s.frame1 = load_dawnlike_texture(path1);
     s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
-    s.animated = true;
+    s.animated = (s.frame1.id > 0);
     s.loaded = (s.frame0.id > 0);
 }
 

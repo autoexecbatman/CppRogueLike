@@ -34,6 +34,7 @@ enum class SpellId
     WEB,
 
     // Wizard Level 3
+    FIREBALL,
     TELEPORT,
 
     // Shared/Special
@@ -89,6 +90,7 @@ private:
     static bool cast_magic_missile(Creature& caster, GameContext& ctx);
     static bool cast_shield(Creature& caster, GameContext& ctx);
     static bool cast_sleep(Creature& caster, GameContext& ctx);
+    static bool cast_fireball(Creature& caster, GameContext& ctx);
     static bool cast_invisibility(Creature& caster, GameContext& ctx);
     static bool cast_teleport(Creature& caster, GameContext& ctx);
 };

@@ -322,6 +322,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
         ctx.hunger_system->increase_hunger(ctx, 1);
         ctx.hunger_system->apply_hunger_effects(ctx);
 
+        ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+
         (*ctx.time)++;
         if (*ctx.game_status != GameStatus::DEFEAT)
         {

@@ -89,7 +89,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create(ItemId::PLATE_MAIL, position), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create(ItemId::LONG_SWORD, position), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, and shield.", true);
+		equip_item(ItemCreator::create(ItemId::LONG_BOW, position), EquipmentSlot::MISSILE_WEAPON, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_FIREBALL, position));
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
 	case PlayerClassState::ROGUE:

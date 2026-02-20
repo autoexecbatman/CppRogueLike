@@ -1,6 +1,4 @@
-#include <algorithm>
 #include <cmath>
-#include <ranges>
 
 #include "TargetingSystem.h"
 #include "../Core/GameContext.h"
@@ -18,64 +16,27 @@
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
 {
-	// Check if player is trying to attack but doesn't have a ranged weapon
 	if (!ctx.player->has_state(ActorState::IS_RANGED))
 	{
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 		return Vector2D{ -1, -1 };
 	}
 
-	// Build sorted list of valid targets (visible + in range + LOS)
-	std::vector<Creature*> valid_targets;
-	for (const auto& creature : *ctx.creatures)
+	Vector2D targetPos{ 0, 0 };
+	if (!pick_tile(ctx, &targetPos, maxRange))
+		return Vector2D{ -1, -1 };
+
+	if (!ctx.map->is_in_fov(targetPos))
+		return Vector2D{ -1, -1 };
+
+	Creature* actor = ctx.map->get_actor(targetPos, ctx);
+	if (!actor || actor == ctx.player)
 	{
-		if (!creature || creature->destructible->is_dead())
-			continue;
-		if (!ctx.map->is_in_fov(creature->position))
-			continue;
-		if (!is_valid_target(ctx, startPos, creature->position, maxRange))
-			continue;
-		valid_targets.push_back(creature.get());
+		ctx.message_system->message(WHITE_BLACK_PAIR, "No valid target there.", true);
+		return Vector2D{ -1, -1 };
 	}
 
-	auto by_distance = [&startPos](const Creature* a, const Creature* b)
-	{
-		return a->get_tile_distance(startPos) < b->get_tile_distance(startPos);
-	};
-	std::ranges::sort(valid_targets, by_distance);
-
-	// Start on the nearest target, or player position if no targets in range
-	int target_index = 0;
-	Vector2D targetCursor = valid_targets.empty()
-		? ctx.player->position
-		: valid_targets[0]->position;
-
-	// TODO: stub - targeting UI loop requires curses replacement
-	// Previously used clear/render/mvchgat/mvaddch/mvprintw/attron/attroff/refresh/getch
-	// Key constants: UP=0x103, DOWN=0x102, LEFT=0x104, RIGHT=0x105
-	// Game logic for target cycling (Tab/Shift+Tab), fine aim (arrow keys),
-	// fire (Enter), cancel (Esc) needs to be reimplemented with new renderer
-
-	// For now, auto-select nearest target if available
-	if (!valid_targets.empty())
-	{
-		targetCursor = valid_targets[0]->position;
-		if (is_valid_target(ctx, startPos, targetCursor, maxRange))
-		{
-			if (ctx.map->is_in_fov(targetCursor))
-			{
-				const auto& actor = ctx.map->get_actor(targetCursor, ctx);
-				if (actor)
-				{
-					ctx.player->attacker->attack(*ctx.player, *actor, ctx);
-					*ctx.game_status = GameStatus::NEW_TURN;
-					return targetCursor;
-				}
-			}
-		}
-	}
-
-	return Vector2D{ -1, -1 };
+	return targetPos;
 }
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const

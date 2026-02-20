@@ -1263,7 +1263,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D tar
 
 	for (Vector2D dir : DIRS)
 	{
-		Vector2D next{ id.y + dir.y, id.x + dir.x };
+		Vector2D next{ id.x + dir.x, id.y + dir.y };
 		if (in_bounds(next))
 		{
 			// Allow target position even if occupied (for pathfinding to reach goal)

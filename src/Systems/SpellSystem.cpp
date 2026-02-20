@@ -15,6 +15,8 @@
 #include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
 #include "../Menu/MenuSpellCast.h"
+#include "TargetingSystem.h"
+#include "SpellAnimations.h"
 
 // Helper to convert PlayerClassState to CasterClass
 static CasterClass to_caster_class(Player::PlayerClassState state)
@@ -49,6 +51,7 @@ const std::map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
         {SpellId::WEB, {SpellId::WEB, "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies"}},
 
         // Wizard Level 3
+        {SpellId::FIREBALL, {SpellId::FIREBALL, "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half"}},
         {SpellId::TELEPORT, {SpellId::TELEPORT, "Teleport", 3, SpellClass::WIZARD, "Teleport to random location"}},
 
         {SpellId::NONE, {SpellId::NONE, "None", 0, SpellClass::BOTH, ""}}
@@ -149,6 +152,8 @@ bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
         return cast_cure_light_wounds(caster, ctx);
     case SpellId::BLESS:
         return cast_bless(caster, ctx);
+    case SpellId::FIREBALL:
+        return cast_fireball(caster, ctx);
     case SpellId::MAGIC_MISSILE:
         return cast_magic_missile(caster, ctx);
     case SpellId::SHIELD:
@@ -198,6 +203,58 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
     ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
     ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
     ctx.message_system->finalize_message();
+    return true;
+}
+
+bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
+{
+    auto* player = dynamic_cast<Player*>(&caster);
+    int casterLevel = player ? player->get_player_level() : 1;
+
+    // AD&D 2e: range 10" + 1"/level (tiles), AoE 20-ft radius (2 tiles)
+    int range  = 10 + casterLevel;
+    int radius = 2;
+
+    TargetingSystem targeting;
+    Vector2D center{0, 0};
+    if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
+    {
+        ctx.message_system->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
+        return false;
+    }
+
+    SpellAnimations::animate_explosion(center, radius, ctx);
+
+    // AD&D 2e: 1d6 per caster level, max 10d6
+    int diceCnt = std::min(casterLevel, 10);
+    int totalDamage = 0;
+    for (int i = 0; i < diceCnt; ++i)
+        totalDamage += ctx.dice->roll(1, 6);
+
+    int affected = 0;
+    for (const auto& creature : *ctx.creatures)
+    {
+        if (!creature || creature->destructible->is_dead())
+            continue;
+        if (creature->get_tile_distance(center) > static_cast<double>(radius))
+            continue;
+
+        // AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
+        int save  = ctx.dice->roll(1, 20);
+        int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
+        creature->destructible->take_damage(*creature, dealt, ctx);
+        ++affected;
+    }
+
+    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
+    ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
+    if (affected > 0)
+    {
+        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
+    }
+    ctx.message_system->finalize_message();
+
+    ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
     return true;
 }
 
