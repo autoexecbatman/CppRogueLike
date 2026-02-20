@@ -168,8 +168,7 @@ void MenuRace::on_key(int key, GameContext& ctx)
 
 void MenuRace::menu(GameContext& ctx)
 {
-	MenuClass menuClass(ctx);
-	while (run)
+	while (run && !WindowShouldClose())
 	{
 		draw();
 		menu_key_listen();

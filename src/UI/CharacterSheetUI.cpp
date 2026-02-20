@@ -14,7 +14,7 @@
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
 {
     bool run = true;
-    while (run)
+    while (run && !WindowShouldClose())
     {
         ctx.renderer->begin_frame();
 

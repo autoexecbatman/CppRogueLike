@@ -96,8 +96,8 @@ public:
 			// Calculate room position
 			Vector2D currentRoomBegin
 			{
-				map.rng_unique->getInt(node->y + 1, node->y + node->h - currentRoomSize.y - 1), // from node y + 1 to node height - room height - 1
-				map.rng_unique->getInt(node->x + 1, node->x + node->w - currentRoomSize.x - 1)  // from node x + 1 to node width - room width - 1
+				map.rng_unique->getInt(node->y + 1, node->y + node->h - currentRoomSize.x - 1), // row: bounded by height (currentRoomSize.x)
+				map.rng_unique->getInt(node->x + 1, node->x + node->w - currentRoomSize.y - 1)  // col: bounded by width  (currentRoomSize.y)
 			};
 
 			// Calculate room end coordinates
@@ -125,159 +125,97 @@ public:
 				currentRoomBegin.x + (currentRoomSize.x / 2)
 			};
 
+			// x = col_center, y = top_row
 			Vector2D currentRoomTopMid
-			{
-				currentRoomBegin.y,
-				currentRoomBegin.x + (currentRoomSize.x / 2)
-			};
-
-			Vector2D currentRoomBottomMid
-			{
-				currentRoomEnd.y - 1,
-				currentRoomBegin.x + (currentRoomSize.x / 2)
-			};
-
-			Vector2D currentRoomLeftMid
 			{
 				currentRoomBegin.y + (currentRoomSize.y / 2),
 				currentRoomBegin.x
 			};
 
-			Vector2D currentRoomRightMid
+			// x = col_center, y = bottom_row
+			Vector2D currentRoomBottomMid
 			{
 				currentRoomBegin.y + (currentRoomSize.y / 2),
-				currentRoomEnd.x - 1
+				currentRoomEnd.y - 1
 			};
 
-			int verticalMidPoint = (lastRoomBegin.y + currentRoomEnd.y) / 2;
+			// x = left_col, y = row_center
+			Vector2D currentRoomLeftMid
+			{
+				currentRoomBegin.y,
+				currentRoomBegin.x + (currentRoomSize.x / 2)
+			};
 
-			int horizontalMidPoint = (lastRoomBegin.x + currentRoomEnd.x) / 2;
+			// x = right_col, y = row_center
+			Vector2D currentRoomRightMid
+			{
+				currentRoomEnd.x - 1,
+				currentRoomBegin.x + (currentRoomSize.x / 2)
+			};
 
-			bool isTopGeneralLeft = lastRoomBegin.y > currentRoomEnd.y && lastRoomCenter.x < currentRoomCenter.x;
-			bool isTopGeneralRight = lastRoomBegin.y > currentRoomEnd.y && lastRoomCenter.x > currentRoomCenter.x;
-
-			bool isLeftGeneralTop = lastRoomEnd.x > currentRoomBegin.x && lastRoomCenter.y > currentRoomCenter.y;
-			bool isLeftGeneralBottom = lastRoomEnd.x > currentRoomBegin.x && lastRoomCenter.y < currentRoomCenter.y;
-
-			bool isBottomGeneralLeft = lastRoomEnd.y < currentRoomBegin.y && lastRoomCenter.x < currentRoomCenter.x;
-			bool isBottomGeneralRight = lastRoomEnd.y < currentRoomBegin.y && lastRoomCenter.x > currentRoomCenter.x;
-
-			bool isRightGeneralTop = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y > currentRoomCenter.y;
-			bool isRightGeneralBottom = lastRoomBegin.x < currentRoomEnd.x && lastRoomCenter.y < currentRoomCenter.y;
+			// Spatial relationship conditions using correct field semantics:
+			//   currentRoomBegin.x = row_begin (R_begin stored in .x)
+			//   currentRoomBegin.y = col_begin (C_begin stored in .y)
+			//   currentRoomEnd.x   = col_end
+			//   currentRoomEnd.y   = row_end
+			bool lastBelowCurrent   = lastRoomBegin.x    > currentRoomEnd.y;   // row_begin_last > row_end_current
+			bool lastRightOfCurrent = lastRoomBegin.y    > currentRoomEnd.x;   // col_begin_last > col_end_current
+			bool lastAboveCurrent   = lastRoomEnd.y      < currentRoomBegin.x; // row_end_last   < row_begin_current
+			bool lastLeftOfCurrent  = lastRoomEnd.x      < currentRoomBegin.y; // col_end_last   < col_begin_current
 
 			// Connect this room to the previous room (except for the first room)
 			if (roomNum != 0)
 			{
-				if (isTopGeneralLeft || isTopGeneralRight)
+				if (lastBelowCurrent) // last room is below: connect last.top -> current.bottom
 				{
+					int vMid = (currentRoomEnd.y + lastRoomBegin.x) / 2;
 					map.dig_corridor(
-						lastRoomTopMid, 
-						Vector2D
-						{ 
-							lastRoomCenter.x, 
-							verticalMidPoint 
-						});
+						lastRoomTopMid,
+						Vector2D{ lastRoomCenter.x, vMid });
 					map.dig_corridor(
-						Vector2D
-						{
-							lastRoomCenter.x, 
-							verticalMidPoint
-						}, 
-						Vector2D
-						{ 
-							currentRoomCenter.x,
-							verticalMidPoint
-						});
+						Vector2D{ lastRoomCenter.x, vMid },
+						Vector2D{ currentRoomCenter.x, vMid });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							currentRoomCenter.x,
-							verticalMidPoint
-						},
+						Vector2D{ currentRoomCenter.x, vMid },
 						currentRoomBottomMid);
 				}
-				else if (isLeftGeneralTop || isLeftGeneralBottom)
+				else if (lastRightOfCurrent) // last room is to the right: connect last.left -> current.right
 				{
+					int hMid = (lastRoomBegin.y + currentRoomEnd.x) / 2;
 					map.dig_corridor(
 						lastRoomLeftMid,
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							lastRoomCenter.y
-						});
+						Vector2D{ hMid, lastRoomCenter.y });
 					map.dig_corridor(
-						Vector2D
-						{
-							horizontalMidPoint,
-							lastRoomCenter.y
-						}, 
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							currentRoomCenter.y
-						});
+						Vector2D{ hMid, lastRoomCenter.y },
+						Vector2D{ hMid, currentRoomCenter.y });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							currentRoomCenter.y
-						}, 
+						Vector2D{ hMid, currentRoomCenter.y },
 						currentRoomRightMid);
 				}
-				else if (isBottomGeneralLeft || isBottomGeneralRight)
+				else if (lastAboveCurrent) // last room is above: connect last.bottom -> current.top
 				{
+					int vMid = (lastRoomEnd.y + currentRoomBegin.x) / 2;
 					map.dig_corridor(
-						lastRoomBottomMid, 
-						Vector2D
-						{ 
-							lastRoomCenter.x, 
-							verticalMidPoint 
-						});
+						lastRoomBottomMid,
+						Vector2D{ lastRoomCenter.x, vMid });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							lastRoomCenter.x, 
-							verticalMidPoint
-						}, 
-						Vector2D
-						{ 
-							currentRoomCenter.x,
-							verticalMidPoint
-						});
+						Vector2D{ lastRoomCenter.x, vMid },
+						Vector2D{ currentRoomCenter.x, vMid });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							currentRoomCenter.x,
-							verticalMidPoint 
-						}, 
+						Vector2D{ currentRoomCenter.x, vMid },
 						currentRoomTopMid);
 				}
-				else if (isRightGeneralTop || isRightGeneralBottom)
+				else if (lastLeftOfCurrent) // last room is to the left: connect last.right -> current.left
 				{
+					int hMid = (lastRoomEnd.x + currentRoomBegin.y) / 2;
 					map.dig_corridor(
-						lastRoomRightMid, 
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							lastRoomCenter.y
-						});
+						lastRoomRightMid,
+						Vector2D{ hMid, lastRoomCenter.y });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							lastRoomCenter.y
-						}, 
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							currentRoomCenter.y
-						});
+						Vector2D{ hMid, lastRoomCenter.y },
+						Vector2D{ hMid, currentRoomCenter.y });
 					map.dig_corridor(
-						Vector2D
-						{ 
-							horizontalMidPoint,
-							currentRoomCenter.y
-						}, 
+						Vector2D{ hMid, currentRoomCenter.y },
 						currentRoomLeftMid);
 				}
 				else
@@ -1024,9 +962,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	
 	// Get surrounding positions
 	std::vector<Vector2D> adjacent = {
-		{waterPos.y - 1, waterPos.x - 1}, {waterPos.y - 1, waterPos.x}, {waterPos.y - 1, waterPos.x + 1}, // Top row
-		{waterPos.y, waterPos.x - 1},                                   {waterPos.y, waterPos.x + 1},     // Middle row (excluding center)
-		{waterPos.y + 1, waterPos.x - 1}, {waterPos.y + 1, waterPos.x}, {waterPos.y + 1, waterPos.x + 1}  // Bottom row
+		{waterPos.x - 1, waterPos.y - 1}, {waterPos.x, waterPos.y - 1}, {waterPos.x + 1, waterPos.y - 1}, // Top row    (NW, N, NE)
+		{waterPos.x - 1, waterPos.y    },                                {waterPos.x + 1, waterPos.y    }, // Middle row (W, E)
+		{waterPos.x - 1, waterPos.y + 1}, {waterPos.x, waterPos.y + 1}, {waterPos.x + 1, waterPos.y + 1}  // Bottom row (SW, S, SE)
 	};
 	
 	// Count walls and floors around this position
@@ -1060,14 +998,14 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	};
 	
 	// Check horizontal corridor pattern: W-F-W (wall-floor-wall)
-	if (isWallOrOOB({waterPos.y, waterPos.x - 1}) && isWallOrOOB({waterPos.y, waterPos.x + 1})) {
+	if (isWallOrOOB({waterPos.x - 1, waterPos.y}) && isWallOrOOB({waterPos.x + 1, waterPos.y})) {
 		return true; // Would block horizontal passage
 	}
-	
+
 	// Check vertical corridor pattern: W
-	//                                    F  
+	//                                    F
 	//                                    W
-	if (isWallOrOOB({waterPos.y - 1, waterPos.x}) && isWallOrOOB({waterPos.y + 1, waterPos.x})) {
+	if (isWallOrOOB({waterPos.x, waterPos.y - 1}) && isWallOrOOB({waterPos.x, waterPos.y + 1})) {
 		return true; // Would block vertical passage
 	}
 	
@@ -1081,10 +1019,10 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	
 	// Count direct adjacent (not diagonal) walls and floors
 	std::vector<Vector2D> directAdjacent = {
-		{waterPos.y - 1, waterPos.x}, // North
-		{waterPos.y + 1, waterPos.x}, // South  
-		{waterPos.y, waterPos.x - 1}, // West
-		{waterPos.y, waterPos.x + 1}  // East
+		{waterPos.x,     waterPos.y - 1}, // North
+		{waterPos.x,     waterPos.y + 1}, // South
+		{waterPos.x - 1, waterPos.y    }, // West
+		{waterPos.x + 1, waterPos.y    }  // East
 	};
 	
 	for (const auto& pos : directAdjacent) {
@@ -1105,9 +1043,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	// If this position has exactly 2 walls and 2 floors adjacent, it might be a door spot
 	if (adjacentWalls == 2 && adjacentFloors == 2) {
 		// Check if walls are opposite each other (forming a corridor)
-		bool hasOppositeWalls = 
-			(isWallOrOOB({waterPos.y - 1, waterPos.x}) && isWallOrOOB({waterPos.y + 1, waterPos.x})) ||
-			(isWallOrOOB({waterPos.y, waterPos.x - 1}) && isWallOrOOB({waterPos.y, waterPos.x + 1}));
+		bool hasOppositeWalls =
+			(isWallOrOOB({waterPos.x,     waterPos.y - 1}) && isWallOrOOB({waterPos.x,     waterPos.y + 1})) ||
+			(isWallOrOOB({waterPos.x - 1, waterPos.y    }) && isWallOrOOB({waterPos.x + 1, waterPos.y    }));
 		
 		if (hasOppositeWalls) {
 			return true; // Would block potential door

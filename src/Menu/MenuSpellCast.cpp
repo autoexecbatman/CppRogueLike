@@ -1,5 +1,6 @@
 #include "MenuSpellCast.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "../ActorTypes/Player.h"
 #include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
@@ -108,7 +109,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 
 	menu_new(height, width, startY, startX, ctx);
 
-	while (run)
+	while (run && !WindowShouldClose())
 	{
 		draw_content();
 		menu_key_listen();

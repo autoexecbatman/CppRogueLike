@@ -13,7 +13,7 @@
 void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)
 {
     bool run = true;
-    while (run)
+    while (run && !WindowShouldClose())
     {
         ctx.renderer->begin_frame();
 

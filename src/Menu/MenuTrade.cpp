@@ -133,7 +133,7 @@ void MenuTrade::menu(GameContext& ctx)
 {
 	ctx.rendering_manager->render(ctx);
 
-	while (run)
+	while (run && !WindowShouldClose())
 	{
 		draw();
 		menu_key_listen();

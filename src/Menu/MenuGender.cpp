@@ -128,7 +128,7 @@ void MenuGender::on_key(int key, GameContext& ctx)
 
 void MenuGender::menu(GameContext& ctx)
 {
-	while (run) // menu has its own loop
+	while (run && !WindowShouldClose()) // menu has its own loop
 	{
 		draw();
 		menu_key_listen();

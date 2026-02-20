@@ -144,7 +144,7 @@ void MenuBuy::menu(GameContext& ctx)
 {
 	draw();
 
-	while (run)
+	while (run && !WindowShouldClose())
 	{
 		draw();
 		menu_key_listen();

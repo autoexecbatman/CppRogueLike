@@ -176,7 +176,7 @@ void Menu::menu(GameContext& ctx)
 		ctx.gui->gui_render(ctx);
 	}
 
-	while (run) // menu has its own loop
+	while (run && !WindowShouldClose()) // menu has its own loop
 	{
 		draw(); // draw the menu
 		menu_key_listen(); // listen for key presses

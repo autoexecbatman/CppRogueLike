@@ -647,6 +647,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
 		InventoryOperations::add_item(player.inventory_data, ItemCreator::create(ItemId::LONG_BOW, player.position));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
+
+		// Give wizard spells for animation/targeting testing
+		player.memorizedSpells.push_back(SpellId::MAGIC_MISSILE);
+		player.memorizedSpells.push_back(SpellId::MAGIC_MISSILE);
+		player.memorizedSpells.push_back(SpellId::SLEEP);
+		player.memorizedSpells.push_back(SpellId::WEB);
+		player.memorizedSpells.push_back(SpellId::TELEPORT);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
 		break;
 	}
 

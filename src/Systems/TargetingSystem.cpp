@@ -1,8 +1,11 @@
 #include <algorithm>
+#include <cmath>
 #include <ranges>
 
 #include "TargetingSystem.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/InputSystem.h"
 #include "../Systems/CreatureManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../ActorTypes/Player.h"
@@ -10,6 +13,7 @@
 #include "../Systems/RenderingManager.h"
 #include "../Systems/DataManager.h"
 #include "../Items/ItemClassification.h"
+#include "../Colors/Colors.h"
 #include "../Gui/Gui.h"
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
@@ -76,15 +80,53 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
-	// TODO: stub - LOS line drawing requires curses replacement
-	// Previously used TCODLine + mvchgat/attron/mvaddch/attroff for LOS visualization
-	// and Bresenham line with blocked/clear color indicators
+	if (!ctx.renderer || !ctx.map || !ctx.player) return;
+
+	auto path = Map::bresenham_line(ctx.player->position, targetCursor);
+	int  ts    = ctx.renderer->get_tile_size();
+	int  cam_x = ctx.renderer->get_camera_x();
+	int  cam_y = ctx.renderer->get_camera_y();
+
+	bool clear = ctx.map->has_los(ctx.player->position, targetCursor);
+
+	for (const auto& pos : path)
+	{
+		if (pos == ctx.player->position) continue;
+		int sx = pos.x * ts - cam_x;
+		int sy = pos.y * ts - cam_y;
+		// Green tint = clear LOS, red = blocked
+		Color c = clear
+			? Color{50, 220, 100, 50}
+			: Color{220, 50,  50,  50};
+		DrawRectangle(sx, sy, ts, ts, c);
+	}
 }
 
 void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, int range) const
 {
-	// TODO: stub - range indicator drawing requires curses replacement
-	// Previously used attron/mvaddch/attroff to highlight range boundary
+	if (!ctx.renderer || !ctx.map || range <= 0) return;
+
+	int ts    = ctx.renderer->get_tile_size();
+	int cam_x = ctx.renderer->get_camera_x();
+	int cam_y = ctx.renderer->get_camera_y();
+
+	for (int dy = -range; dy <= range; ++dy)
+	{
+		for (int dx = -range; dx <= range; ++dx)
+		{
+			Vector2D pos{ center.x + dx, center.y + dy };
+			if (!ctx.map->is_in_bounds(pos)) continue;
+
+			double dist = pos.distance_to(center);
+			// Draw only tiles near the edge of the range (ring, not filled circle)
+			if (dist < static_cast<double>(range) - 0.5) continue;
+			if (dist > static_cast<double>(range) + 0.5) continue;
+
+			int sx = pos.x * ts - cam_x;
+			int sy = pos.y * ts - cam_y;
+			DrawRectangle(sx, sy, ts, ts, Color{100, 200, 255, 35});
+		}
+	}
 }
 
 // Check if a target position is valid
@@ -147,27 +189,167 @@ bool TargetingSystem::process_ranged_attack(GameContext& ctx, Creature& attacker
 }
 
 // Animate a projectile flying from source to target
-void TargetingSystem::animate_projectile(GameContext& ctx, Vector2D from, Vector2D to, char projectileSymbol, int colorPair) const
+void TargetingSystem::animate_projectile(
+	GameContext& ctx,
+	Vector2D from,
+	Vector2D to,
+	char projectileSymbol,
+	int colorPair
+) const
 {
-	// TODO: stub - projectile animation requires curses replacement
-	// Previously animated along Bresenham path using attron/mvaddch/attroff/refresh/napms
+	if (!ctx.renderer || !ctx.rendering_manager) return;
+
+	auto path = Map::bresenham_line(from, to);
+	if (path.size() < 2) return;
+
+	int   ts   = ctx.renderer->get_tile_size();
+	int   half = ts / 2;
+	float r    = static_cast<float>(ts) / 4.0f;
+
+	static constexpr double STEP_DURATION = 0.05; // 50 ms per tile
+
+	for (int i = 1; i < static_cast<int>(path.size()); ++i)
+	{
+		const auto& pos = path[i];
+
+		double start = GetTime();
+		while (GetTime() - start < STEP_DURATION && !WindowShouldClose())
+		{
+			int sx = pos.x * ts - ctx.renderer->get_camera_x() + half;
+			int sy = pos.y * ts - ctx.renderer->get_camera_y() + half;
+
+			ctx.renderer->begin_frame();
+			ctx.rendering_manager->render(ctx);
+			DrawCircle(sx, sy, r,         Color{255, 220,  50, 230}); // yellow shell
+			DrawCircle(sx, sy, r * 0.5f,  Color{255, 255, 255, 220}); // white core
+			ctx.renderer->end_frame();
+		}
+	}
 }
 
-// AOE preview from pick_tile method
-void TargetingSystem::draw_aoe_preview(Vector2D center, int radius) const
+void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int radius) const
 {
-	// TODO: stub - AOE preview drawing requires curses replacement
-	// Previously used mvchgat with A_REVERSE and WHITE_BLUE_PAIR
+	if (!ctx.renderer || !ctx.map || radius <= 0) return;
+
+	int ts    = ctx.renderer->get_tile_size();
+	int cam_x = ctx.renderer->get_camera_x();
+	int cam_y = ctx.renderer->get_camera_y();
+
+	for (int dy = -radius; dy <= radius; ++dy)
+	{
+		for (int dx = -radius; dx <= radius; ++dx)
+		{
+			Vector2D pos{ center.x + dx, center.y + dy };
+			if (!ctx.map->is_in_bounds(pos)) continue;
+			if (pos.distance_to(center) > static_cast<double>(radius)) continue;
+
+			int sx = pos.x * ts - cam_x;
+			int sy = pos.y * ts - cam_y;
+			DrawRectangle(sx, sy, ts, ts, Color{255, 140, 0, 50}); // orange AoE tint
+		}
+	}
 }
 
-// Game.cpp compatibility method - preserves exact behavior
 bool TargetingSystem::pick_tile(GameContext& ctx, Vector2D* position, int maxRange) const
 {
-	// TODO: stub - tile picking UI loop requires curses replacement
-	// Previously used clear/render/mvchgat/mvaddch/attron/attroff/refresh/getch
-	// Key constants: UP=0x103, DOWN=0x102, LEFT=0x104, RIGHT=0x105
-	// Game logic for cursor movement, target confirm (f/Enter), cancel (r/Esc)
-	// needs to be reimplemented with new renderer
+	return run_targeting_loop(ctx, position, maxRange, 0);
+}
+
+bool TargetingSystem::pick_tile_aoe(
+	GameContext& ctx,
+	Vector2D* position,
+	int maxRange,
+	int aoe_radius
+) const
+{
+	return run_targeting_loop(ctx, position, maxRange, aoe_radius);
+}
+
+bool TargetingSystem::run_targeting_loop(
+	GameContext& ctx,
+	Vector2D* position,
+	int maxRange,
+	int aoe_radius
+) const
+{
+	if (!ctx.renderer || !ctx.rendering_manager || !ctx.input_system || !ctx.map || !ctx.player)
+		return false;
+
+	Vector2D cursor = ctx.player->position;
+	bool picking    = true;
+	bool confirmed  = false;
+
+	while (picking && !WindowShouldClose())
+	{
+		ctx.renderer->begin_frame();
+		ctx.rendering_manager->render(ctx);
+
+		draw_range_indicator(ctx, ctx.player->position, maxRange);
+		draw_los(ctx, cursor);
+		if (aoe_radius > 0) draw_aoe_preview(ctx, cursor, aoe_radius);
+
+		// Pulsing cursor highlight
+		{
+			int   ts      = ctx.renderer->get_tile_size();
+			int   sx      = cursor.x * ts - ctx.renderer->get_camera_x();
+			int   sy      = cursor.y * ts - ctx.renderer->get_camera_y();
+			float pulse   = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) * 0.5f;
+			auto  fill_a  = static_cast<unsigned char>(40.0f  + 30.0f  * pulse);
+			auto  ring_a  = static_cast<unsigned char>(120.0f + 100.0f * pulse);
+
+			DrawRectangle(sx, sy, ts, ts, Color{255, 255, 50, fill_a});
+			DrawRectangleLinesEx(
+				Rectangle{
+					static_cast<float>(sx), static_cast<float>(sy),
+					static_cast<float>(ts), static_cast<float>(ts)
+				},
+				2.0f,
+				Color{255, 255, 50, ring_a}
+			);
+		}
+
+		ctx.renderer->draw_text(4, 4, "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel", WHITE_BLACK_PAIR);
+		ctx.renderer->end_frame();
+
+		ctx.input_system->poll();
+		GameKey key = ctx.input_system->get_key();
+
+		Vector2D move{ 0, 0 };
+		switch (key)
+		{
+		case GameKey::UP:    move = DIR_N;  break;
+		case GameKey::W:     move = DIR_N;  break;
+		case GameKey::DOWN:  move = DIR_S;  break;
+		case GameKey::S:     move = DIR_S;  break;
+		case GameKey::LEFT:  move = DIR_W;  break;
+		case GameKey::A:     move = DIR_W;  break;
+		case GameKey::RIGHT: move = DIR_E;  break;
+		case GameKey::D:     move = DIR_E;  break;
+		case GameKey::Q:     move = DIR_NW; break;
+		case GameKey::E:     move = DIR_NE; break;
+		case GameKey::Z:     move = DIR_SW; break;
+		case GameKey::C:     move = DIR_SE; break;
+		case GameKey::ENTER:  confirmed = true;  picking = false; break;
+		case GameKey::ESCAPE: picking = false;                     break;
+		default: break;
+		}
+
+		if (move.x != 0 || move.y != 0)
+		{
+			Vector2D next      = cursor + move;
+			bool in_bounds     = ctx.map->is_in_bounds(next);
+			bool in_range      = maxRange <= 0
+				|| next.distance_to(ctx.player->position) <= static_cast<double>(maxRange);
+			if (in_bounds && in_range)
+				cursor = next;
+		}
+	}
+
+	if (confirmed && ctx.map->is_in_bounds(cursor))
+	{
+		*position = cursor;
+		return true;
+	}
 	return false;
 }
 
@@ -245,7 +427,7 @@ TargetResult TargetingSystem::target_pick_single(GameContext& ctx) const
 TargetResult TargetingSystem::target_pick_aoe(GameContext& ctx, int aoe_radius) const
 {
     Vector2D center{0, 0};
-    if (!pick_tile(ctx, &center, aoe_radius))
+    if (!pick_tile_aoe(ctx, &center, aoe_radius, aoe_radius))
         return {};
     std::vector<Creature*> targets;
     for (const auto& c : *ctx.creatures)

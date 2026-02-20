@@ -212,14 +212,14 @@ bool TargetedScroll::use(Item& owner, Creature& wearer, GameContext& ctx)
         SpellAnimations::animate_explosion(result.impact_pos, range, ctx);
         if (ctx.player->get_tile_distance(result.impact_pos) <= range)
         {
-            SpellAnimations::animate_creature_hit(ctx.player->position);
+            SpellAnimations::animate_creature_hit(ctx.player->position, ctx);
             ctx.player->destructible->take_damage(*ctx.player, damage, ctx);
         }
         for (auto* t : result.creatures)
         {
             if (!t->destructible->is_dead())
             {
-                SpellAnimations::animate_creature_hit(t->position);
+                SpellAnimations::animate_creature_hit(t->position, ctx);
                 ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, damage));
                 ctx.message_system->finalize_message();
             }

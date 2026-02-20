@@ -246,7 +246,7 @@ void MenuSell::menu(GameContext& ctx)
 	// Initial draw
 	draw();
 	
-	while(run)
+	while (run && !WindowShouldClose())
 	{
 		// Only redraw if needed (navigation/state change)
 		draw();

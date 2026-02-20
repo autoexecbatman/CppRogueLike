@@ -54,7 +54,7 @@ void MenuName::menu_name(GameContext& ctx)
 	inputText.clear();
 	run = true;
 
-	while (run)
+	while (run && !WindowShouldClose())
 	{
 		draw_name_screen(ctx);
 

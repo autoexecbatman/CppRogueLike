@@ -291,4 +291,21 @@ inline constexpr int GUI_HEART_FULL  = make_tile(SHEET_GUI0, 0, 1);
 inline constexpr int GUI_HEART_HALF  = make_tile(SHEET_GUI0, 2, 1);
 inline constexpr int GUI_HEART_EMPTY = make_tile(SHEET_GUI0, 3, 1);
 
+// ---------------------------------------------------------------------------
+// Effect tiles (SHEET_EFFECT0) -- human: verify row/col against Effect0.png
+// ---------------------------------------------------------------------------
+inline constexpr int TILE_EFFECT_SPARK      = make_tile(SHEET_EFFECT0, 2, 0);  // sparkle / magic particle
+inline constexpr int TILE_EFFECT_BLOOD      = make_tile(SHEET_EFFECT0, 0, 1);  // hit splatter
+inline constexpr int TILE_EFFECT_FIRE_SM    = make_tile(SHEET_EFFECT0, 0, 2);  // small flame
+inline constexpr int TILE_EFFECT_FIRE_MD    = make_tile(SHEET_EFFECT0, 1, 2);  // medium flame
+inline constexpr int TILE_EFFECT_FIRE_LG    = make_tile(SHEET_EFFECT0, 2, 2);  // large flame
+inline constexpr int TILE_EFFECT_BOLT       = make_tile(SHEET_EFFECT0, 0, 3);  // magic bolt
+inline constexpr int TILE_EFFECT_MISSILE    = make_tile(SHEET_EFFECT0, 1, 3);  // magic missile
+inline constexpr int TILE_EFFECT_EXPLODE_SM = make_tile(SHEET_EFFECT0, 0, 4);  // small explosion
+inline constexpr int TILE_EFFECT_EXPLODE_MD = make_tile(SHEET_EFFECT0, 1, 4);  // medium explosion
+inline constexpr int TILE_EFFECT_EXPLODE_LG = make_tile(SHEET_EFFECT0, 2, 4);  // large explosion
+inline constexpr int TILE_EFFECT_ICE        = make_tile(SHEET_EFFECT0, 0, 5);  // ice shard
+inline constexpr int TILE_EFFECT_LIGHTNING  = make_tile(SHEET_EFFECT0, 0, 6);  // lightning bolt segment
+inline constexpr int TILE_EFFECT_HEAL       = make_tile(SHEET_EFFECT0, 0, 7);  // heal sparkle
+
 // end of file: TileId.h
