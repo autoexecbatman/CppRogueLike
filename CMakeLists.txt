@@ -77,6 +77,7 @@ set(PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 set(SOURCE_FILES # Add Source Files Here !
     # Game
     ${PROJECT_SOURCE_DIR}/Game.h
+    ${PROJECT_SOURCE_DIR}/Core/Paths.h
 
     # Renderer (raylib)
     ${PROJECT_SOURCE_DIR}/Renderer/Renderer.cpp
@@ -191,6 +192,9 @@ set(SOURCE_FILES # Add Source Files Here !
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp
     ${PROJECT_SOURCE_DIR}/Map/Map.h
+    ${PROJECT_SOURCE_DIR}/Map/DungeonRoom.h
+    ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.cpp
+    ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.h
 
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/Items/Items.cpp
@@ -254,6 +258,18 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/ItemEnhancements/ItemEnhancements.h
     ${PROJECT_SOURCE_DIR}/Systems/SpellSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/SpellSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/FloatingTextSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/AnimationSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/AnimationSystem.h
+
+    # Tools
+    ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.h
+    ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.h
+    ${PROJECT_SOURCE_DIR}/Tools/RoomEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/RoomEditor.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp
@@ -372,7 +388,7 @@ else()
         target_compile_options(${PROJECT_NAME} PRIVATE /MP /utf-8)
 
         # Set the working directory for Visual Studio debugging
-        set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:${PROJECT_NAME}>")
+        set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
     endif()
 
     # Copy JSON files to build directory
@@ -385,10 +401,12 @@ else()
         "${PROJECT_SOURCE_DIR}/json/charisma.json"
     )
 
+    # Ensure the data directory exists in the source tree (editor-authored files live here)
+    file(MAKE_DIRECTORY "${CMAKE_SOURCE_DIR}/data")
+
     foreach(JSON_FILE ${JSON_FILES})
         get_filename_component(JSON_FILENAME ${JSON_FILE} NAME)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                          COMMAND ${CMAKE_COMMAND} -E echo "Copying ${JSON_FILE} to build directory"
                           COMMAND ${CMAKE_COMMAND} -E copy_if_different
                                   ${JSON_FILE}
                                   $<TARGET_FILE_DIR:${PROJECT_NAME}>/${JSON_FILENAME})

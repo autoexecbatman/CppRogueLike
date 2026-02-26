@@ -22,11 +22,17 @@ class DataManager;
 class TargetingSystem;
 class HungerSystem;
 class BuffSystem;
+class FloatingTextSystem;
+class AnimationSystem;
+class DecorEditor;
+class RoomEditor;
+class PrefabLibrary;
 class Player;
 class Stairs;
 class Object;
 class BaseMenu;
 struct Vector2D;
+struct DungeonRoom;
 class Renderer;
 class InputSystem;
 
@@ -40,7 +46,7 @@ enum class GameStatus
     DEFEAT
 };
 
-enum class WindowState { MENU, GAME };
+enum class WindowState { MENU, GAME, ROOM_EDITOR };
 
 /**
  * GameContext - Dependency injection container
@@ -79,13 +85,18 @@ struct GameContext {
     TargetingSystem* targeting{ nullptr };
     HungerSystem* hunger_system{ nullptr };
     BuffSystem* buff_system{ nullptr };
+    FloatingTextSystem* floating_text{ nullptr };
+    AnimationSystem* anim_system{ nullptr };
+    DecorEditor* decor_editor{ nullptr };
+    RoomEditor* room_editor{ nullptr };
+    PrefabLibrary* prefab_library{ nullptr };
 
     // Game world data
     Stairs* stairs{ nullptr };
     std::vector<std::unique_ptr<Object>>* objects{ nullptr };
     struct InventoryData* inventory_data{ nullptr };
     std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
-    std::vector<Vector2D>* rooms{ nullptr };
+    std::vector<DungeonRoom>* rooms{ nullptr };
 
     // UI Collections
     std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };

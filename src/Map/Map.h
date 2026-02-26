@@ -6,6 +6,7 @@
 
 #include <libtcod.h>
 
+#include "DungeonRoom.h"
 #include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Factories/MonsterFactory.h"
@@ -22,10 +23,9 @@ inline int get_map_height() { return DEFAULT_MAP_HEIGHT; }
 
 inline constexpr int FOV_RADIUS = 4;
 
-inline constexpr auto ROOM_MAX_SIZE = 12;
-inline constexpr auto ROOM_HORIZONTAL_MAX_SIZE = 20;
-inline constexpr auto ROOM_VERTICAL_MAX_SIZE = 10;
-inline constexpr auto ROOM_MIN_SIZE = 6;
+inline constexpr int ROOM_HORIZONTAL_MAX_SIZE = 14;
+inline constexpr int ROOM_VERTICAL_MAX_SIZE   = 9;
+inline constexpr int ROOM_MIN_SIZE            = 6;
 inline constexpr int MAX_ROOM_ITEMS = 4;
 inline constexpr int MAX_MONSTERS = 6;
 inline constexpr int FINAL_DUNGEON_LEVEL = 10;
@@ -75,18 +75,18 @@ private:
 	void init_tiles(GameContext& ctx);
 	void place_stairs(GameContext& ctx);
 	bool is_stairs(Vector2D pos, GameContext& ctx) const;
-	void spawn_water(Vector2D begin, Vector2D end, GameContext& ctx);
+	void spawn_water(const DungeonRoom& room, GameContext& ctx);
 	bool would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const;
-	void spawn_items(Vector2D begin, Vector2D end, GameContext& ctx);
-	void spawn_player(Vector2D begin, Vector2D end, GameContext& ctx);
-	void bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors, GameContext& ctx);
+	void spawn_items(const DungeonRoom& room, GameContext& ctx);
+	void spawn_player(const DungeonRoom& room, GameContext& ctx);
+	void generate_rooms(bool withActors, GameContext& ctx);
 	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR;}
 	bool is_water(Vector2D pos) const noexcept;
 	void set_explored(Vector2D pos); //set the tile as explored
 	void post_process_doors();
 public:
 
-	Map(int map_height, int map_width);
+	Map(int map_width, int map_height);
 
 	void load(const json& j) override;
 	void save(json& j) override;
@@ -112,6 +112,7 @@ public:
 	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
+	long get_seed() const noexcept { return seed; }
 	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < map_width && pos.y >= 0 && pos.y < map_height; }
 	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
 	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } } // Note: Cannot be noexcept due to exception
@@ -121,7 +122,7 @@ public:
 	bool close_door(Vector2D pos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
 	void display_spawn_rates(GameContext& ctx) const;
-	void create_treasure_room(Vector2D begin, Vector2D end, int quality, GameContext& ctx);
+	void create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx);
 	bool maybe_create_treasure_room(int dungeonLevel, GameContext& ctx);
 	void display_item_distribution(GameContext& ctx) const;
 	bool is_door(Vector2D pos) const noexcept;
@@ -135,10 +136,10 @@ protected:
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;
 	long seed;
-	friend class BspListener;
+	friend class DungeonGenerator;
 	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY);
-	void create_room(bool first, int x1, int y1, int x2, int y2, bool withActors, GameContext& ctx);
+	void create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx);
 };

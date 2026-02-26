@@ -18,6 +18,11 @@
 #include "Systems/TargetingSystem.h"
 #include "Systems/HungerSystem.h"
 #include "Systems/BuffSystem.h"
+#include "Systems/FloatingTextSystem.h"
+#include "Systems/AnimationSystem.h"
+#include "Tools/DecorEditor.h"
+#include "Tools/RoomEditor.h"
+#include "Tools/PrefabLibrary.h"
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
 #include "Systems/InputHandler.h"
@@ -69,6 +74,11 @@ public:
             .targeting = &targeting,
             .hunger_system = &hunger_system,
             .buff_system = &buff_system,
+            .floating_text = &floating_text,
+            .anim_system = &anim_system,
+            .decor_editor = &decor_editor,
+            .room_editor = &room_editor,
+            .prefab_library = &prefab_library,
 
             // Game world data
             .stairs = stairs.get(),
@@ -95,7 +105,11 @@ public:
     {
         if (!run) return false;
 
-        windowState = menus.empty() ? WindowState::GAME : WindowState::MENU;
+        if (room_editor.is_active())
+            windowState = WindowState::ROOM_EDITOR;
+        else
+            windowState = menus.empty() ? WindowState::GAME : WindowState::MENU;
+
         auto ctx = context();
 
         switch (windowState)
@@ -105,6 +119,9 @@ public:
             break;
         case WindowState::GAME:
             game_loop_coordinator.handle_gameloop(ctx, gui, loopNum);
+            break;
+        case WindowState::ROOM_EDITOR:
+            room_editor.tick(ctx);
             break;
         }
 
@@ -157,14 +174,19 @@ public:
     TargetingSystem targeting{};
     HungerSystem hunger_system{};
     BuffSystem buff_system{};
+    FloatingTextSystem floating_text{};
+    AnimationSystem anim_system{};
+    DecorEditor decor_editor{};
+    RoomEditor room_editor{};
+    PrefabLibrary prefab_library{};
 
     // Game world
-    Map map{ get_map_height(), get_map_width() };
+    Map map{ get_map_width(), get_map_height() };
     Gui gui{};
     std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D{0, 0}) };
     std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{0, 0}) };
 
-    std::vector<Vector2D> rooms{};
+    std::vector<DungeonRoom> rooms{};
     std::vector<std::unique_ptr<Creature>> creatures{};
     std::vector<std::unique_ptr<Object>> objects{};
     InventoryData inventory_data{ 1000 };

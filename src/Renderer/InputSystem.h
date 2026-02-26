@@ -86,6 +86,17 @@ enum class GameKey
 
     // Window
     WINDOW_RESIZE,
+
+    // Zoom
+    ZOOM_IN,
+    ZOOM_OUT,
+
+    // Decor editor
+    DECOR_EDIT_TOGGLE,
+    DECOR_PREV,
+    DECOR_NEXT,
+    DECOR_SAVE,
+    DECOR_BROWSER
 };
 
 class InputSystem
@@ -104,6 +115,7 @@ public:
     [[nodiscard]] GameKey get_key() const { return current_key; }
     [[nodiscard]] int get_char_input() const { return char_input; }
     [[nodiscard]] Vector2D get_mouse_tile(int tile_size) const;
+    [[nodiscard]] Vector2D get_mouse_world_tile(int cam_x, int cam_y, int tile_size) const;
     [[nodiscard]] bool has_player_action() const { return current_key != GameKey::NONE; }
     [[nodiscard]] bool window_resized() const { return resized; }
 

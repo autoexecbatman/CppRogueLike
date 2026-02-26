@@ -16,6 +16,7 @@ class HungerSystem;
 class LevelManager;
 struct InventoryData;
 struct Vector2D;
+struct DungeonRoom;
 struct GameContext;
 
 // - Handles game state persistence and level management
@@ -32,7 +33,7 @@ public:
     // Save/Load operations
     void save_game(
         Map& map,
-        const std::vector<Vector2D>& rooms,
+        const std::vector<DungeonRoom>& rooms,
         Player& player,
         Stairs& stairs,
         const std::vector<std::unique_ptr<Creature>>& creatures,
@@ -45,7 +46,7 @@ public:
 
     bool load_game(
         Map& map,
-        std::vector<Vector2D>& rooms,
+        std::vector<DungeonRoom>& rooms,
         Player& player,
         Stairs& stairs,
         std::vector<std::unique_ptr<Creature>>& creatures,
@@ -65,8 +66,8 @@ private:
     static constexpr const char* SAVE_FILE_NAME = "game.sav";
     
     // Helper methods for JSON operations
-    void save_rooms_to_json(const std::vector<Vector2D>& rooms, nlohmann::json& j) const;
-    void load_rooms_from_json(const nlohmann::json& j, std::vector<Vector2D>& rooms) const;
+    void save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const;
+    void load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const;
     
     void save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const;
     void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;

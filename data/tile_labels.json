@@ -1,0 +1,43 @@
+{
+  "tiles": [
+    { "sheet": 38, "col": 0, "row": 2, "label": "Cobweb",         "symbol": "W" },
+    { "sheet": 38, "col": 1, "row": 2, "label": "Cobweb Alt",     "symbol": "" },
+    { "sheet": 38, "col": 3, "row": 2, "label": "Vine Light",     "symbol": "" },
+    { "sheet": 38, "col": 4, "row": 2, "label": "Vine",           "symbol": "" },
+
+    { "sheet": 38, "col": 0, "row": 3, "label": "Vase Brown",     "symbol": "V" },
+    { "sheet": 38, "col": 1, "row": 3, "label": "Pot Orange",     "symbol": "P" },
+    { "sheet": 38, "col": 2, "row": 3, "label": "Vase Tall",      "symbol": "" },
+    { "sheet": 38, "col": 3, "row": 3, "label": "Vase Striped",   "symbol": "v" },
+    { "sheet": 38, "col": 4, "row": 3, "label": "Vase Fancy",     "symbol": "" },
+    { "sheet": 38, "col": 5, "row": 3, "label": "Pot Small",      "symbol": "p" },
+
+    { "sheet": 38, "col": 4, "row": 4, "label": "Bookshelf",      "symbol": "B" },
+    { "sheet": 38, "col": 6, "row": 4, "label": "Bookshelf Alt",  "symbol": "" },
+
+    { "sheet": 38, "col": 0, "row": 7, "label": "Table Oval",     "symbol": "" },
+    { "sheet": 38, "col": 1, "row": 7, "label": "Chair",          "symbol": "" },
+    { "sheet": 38, "col": 2, "row": 7, "label": "Chair Alt",      "symbol": "" },
+    { "sheet": 38, "col": 3, "row": 7, "label": "Throne",         "symbol": "" },
+
+    { "sheet": 38, "col": 0, "row": 8, "label": "Torch",          "symbol": "T" },
+    { "sheet": 38, "col": 1, "row": 8, "label": "Torch Alt",      "symbol": "t" },
+    { "sheet": 38, "col": 2, "row": 8, "label": "Candelabra",     "symbol": "C" },
+    { "sheet": 38, "col": 3, "row": 8, "label": "Campfire",       "symbol": "f" },
+    { "sheet": 38, "col": 4, "row": 8, "label": "Candle Small",   "symbol": "" },
+
+    { "sheet": 38, "col": 0, "row": 9, "label": "Sack Red",       "symbol": "" },
+    { "sheet": 38, "col": 1, "row": 9, "label": "Sack Blue",      "symbol": "" },
+    { "sheet": 38, "col": 2, "row": 9, "label": "Shelf",          "symbol": "S" },
+    { "sheet": 38, "col": 5, "row": 9, "label": "Barrel",         "symbol": "R" },
+
+    { "sheet": 38, "col": 0, "row": 10, "label": "Bookcase",      "symbol": "b" },
+    { "sheet": 38, "col": 6, "row": 10, "label": "Altar Dark",    "symbol": "A" },
+    { "sheet": 38, "col": 7, "row": 10, "label": "Altar Gold",    "symbol": "G" },
+
+    { "sheet": 38, "col": 0, "row": 11, "label": "Weapon Rack",   "symbol": "w" },
+    { "sheet": 38, "col": 1, "row": 11, "label": "Armor Stand",   "symbol": "a" },
+    { "sheet": 38, "col": 2, "row": 11, "label": "Bow Rack",      "symbol": "" },
+    { "sheet": 38, "col": 3, "row": 11, "label": "Crossed Swords","symbol": "" }
+  ]
+}

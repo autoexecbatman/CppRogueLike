@@ -24,6 +24,11 @@ class Options : public IMenuState
 	void on_selection(GameContext& ctx) override;
 };
 
+class RoomEditorEntry : public IMenuState
+{
+	void on_selection(GameContext& ctx) override;
+};
+
 class Quit : public IMenuState
 {
 	void on_selection(GameContext& ctx) override;
@@ -32,19 +37,20 @@ class Quit : public IMenuState
 class Menu : public BaseMenu
 {
 	bool isStartupMenu{ true }; // Track if this is the startup menu (default true)
-	int menu_height{ 6 };
+	int menu_height{ 7 };
 	int menu_width{ 11 };
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
-	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, QUIT }
+	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, ROOM_EDITOR, QUIT }
 	currentState { MenuState::NEW_GAME };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
 	std::unordered_map<MenuState, std::string> menuStateStrings
 	{
-		{ MenuState::NEW_GAME, "New Game" },
-		{ MenuState::LOAD_GAME, "Load Game" },
-		{ MenuState::OPTIONS, "Options" },
-		{ MenuState::QUIT, "Quit" }
+		{ MenuState::NEW_GAME,     "New Game"    },
+		{ MenuState::LOAD_GAME,    "Load Game"   },
+		{ MenuState::OPTIONS,      "Options"     },
+		{ MenuState::ROOM_EDITOR,  "Room Editor" },
+		{ MenuState::QUIT,         "Quit"        }
 	};
 
 	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }

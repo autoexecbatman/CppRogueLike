@@ -86,7 +86,13 @@ void InputSystem::poll()
     // WASD movement and diagonals (repeatable)
     if (IsKeyPressed(KEY_W)) { register_key(KEY_W, GameKey::W, 'w', true);  return; }
     if (IsKeyPressed(KEY_A)) { register_key(KEY_A, GameKey::A, 'a', true);  return; }
-    if (IsKeyPressed(KEY_S)) { register_key(KEY_S, GameKey::S, 's', true);  return; }
+    if (IsKeyPressed(KEY_S))
+    {
+        bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
+        if (ctrl) register_key(KEY_S, GameKey::DECOR_SAVE, 0,   false);
+        else      register_key(KEY_S, GameKey::S,          's', true);
+        return;
+    }
     if (IsKeyPressed(KEY_D)) { register_key(KEY_D, GameKey::D, 'd', true);  return; }
     if (IsKeyPressed(KEY_Q)) { register_key(KEY_Q, GameKey::Q, 'q', true);  return; }
     if (IsKeyPressed(KEY_E)) { register_key(KEY_E, GameKey::E, 'e', true);  return; }
@@ -130,6 +136,15 @@ void InputSystem::poll()
         return;
     }
 
+    // Zoom keys (non-repeatable)
+    if (IsKeyPressed(KEY_EQUAL)) { register_key(KEY_EQUAL, GameKey::ZOOM_IN,  '=', false); return; }
+    if (IsKeyPressed(KEY_MINUS)) { register_key(KEY_MINUS, GameKey::ZOOM_OUT, '-', false); return; }
+
+    // Decor editor keys
+    if (IsKeyPressed(KEY_F2))     { register_key(KEY_F2,     GameKey::DECOR_EDIT_TOGGLE, 0, false); return; }
+    if (IsKeyPressed(KEY_COMMA))  { register_key(KEY_COMMA,  GameKey::DECOR_PREV,        0, false); return; }
+    if (IsKeyPressed(KEY_PERIOD)) { register_key(KEY_PERIOD, GameKey::DECOR_NEXT,        0, false); return; }
+
     // Shift+symbol keys (keyboard-layout-dependent) and char_input for text fields
     int ch = GetCharPressed();
     if (ch > 0)
@@ -153,8 +168,20 @@ Vector2D InputSystem::get_mouse_tile(int tile_size) const
 
     ::Vector2 mouse_pos = GetMousePosition();
     return Vector2D{
-        static_cast<int>(mouse_pos.x) / tile_size,   // x = screen col
-        static_cast<int>(mouse_pos.y) / tile_size    // y = screen row
+        static_cast<int>(mouse_pos.x) / tile_size,
+        static_cast<int>(mouse_pos.y) / tile_size
+    };
+}
+
+Vector2D InputSystem::get_mouse_world_tile(int cam_x, int cam_y, int tile_size) const
+{
+    if (tile_size <= 0)
+        return Vector2D{ 0, 0 };
+
+    ::Vector2 mouse_pos = GetMousePosition();
+    return Vector2D{
+        (static_cast<int>(mouse_pos.x) + cam_x) / tile_size,
+        (static_cast<int>(mouse_pos.y) + cam_y) / tile_size
     };
 }
 

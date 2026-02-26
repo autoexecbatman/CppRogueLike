@@ -15,6 +15,7 @@
 #include "../Systems/DataManager.h"
 #include "../Systems/LevelUpSystem.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/AnimationSystem.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Actor/Destructible.h"
 
@@ -135,6 +136,10 @@ void Attacker::perform_single_attack(
 
 		if (finalDamage > 0)
 		{
+			if (ctx.anim_system)
+			{
+				ctx.anim_system->spawn_melee_hit(target.position.x, target.position.y);
+			}
 			target.destructible->take_damage(target, finalDamage, ctx, attackDamage.damageType);
 		}
 	}

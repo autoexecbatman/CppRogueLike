@@ -91,8 +91,9 @@ struct AutotileGroup
     int origin_row;
 };
 
-inline constexpr AutotileGroup AUTOTILE_FLOOR_STONE = { SHEET_FLOOR, 0, 3 };
-inline constexpr AutotileGroup AUTOTILE_CORRIDOR    = { SHEET_FLOOR, 0, 6 };
+inline constexpr AutotileGroup AUTOTILE_FLOOR_STONE = { SHEET_FLOOR, 0, 3 };  // light grey stone
+inline constexpr AutotileGroup AUTOTILE_CORRIDOR    = { SHEET_FLOOR, 0, 6 };  // medium grey stone
+// AUTOTILE_FLOOR_DARK and AUTOTILE_FLOOR_TILE defined below (line ~307)
 // Wall autotile uses WallAutotileGroup (6-column format) below.
 
 // Compute floor autotile variant from 4-neighbor presence flags.
@@ -234,22 +235,14 @@ inline constexpr int TILE_AMULET_YENDOR = make_tile(SHEET_AMULET_ITEM, 2, 0);
 inline constexpr int TILE_INVISIBLE     = make_tile(SHEET_EFFECT0, 1, 0);
 
 // ---------------------------------------------------------------------------
-// Decorations (Decor0/Decor1 -- animated pair for torches/flames)
+// Decorations -- only constants referenced by game code are kept here.
+// All other decor tile positions are defined in data/tile_labels.json and
+// managed at runtime through the DecorEditor tile browser.
 // ---------------------------------------------------------------------------
-inline constexpr int TILE_TORCH_1      = make_tile(SHEET_DECOR0, 0, 7);
-inline constexpr int TILE_TORCH_2      = make_tile(SHEET_DECOR0, 1, 7);
-inline constexpr int TILE_CAMPFIRE     = make_tile(SHEET_DECOR0, 2, 7);
-inline constexpr int TILE_CANDELABRA   = make_tile(SHEET_DECOR0, 4, 7);
-inline constexpr int TILE_COBWEB_1     = make_tile(SHEET_DECOR0, 0, 8);
-inline constexpr int TILE_COBWEB_2     = make_tile(SHEET_DECOR0, 1, 8);
-inline constexpr int TILE_COBWEB_3     = make_tile(SHEET_DECOR0, 2, 8);
-inline constexpr int TILE_COBWEB_4     = make_tile(SHEET_DECOR0, 3, 8);
-inline constexpr int TILE_VASE_BROWN   = make_tile(SHEET_DECOR0, 0, 3);
-inline constexpr int TILE_VASE_BLUE    = make_tile(SHEET_DECOR0, 2, 3);
-inline constexpr int TILE_VASE_FANCY   = make_tile(SHEET_DECOR0, 4, 3);
-inline constexpr int TILE_POT_SMALL    = make_tile(SHEET_DECOR0, 6, 3);
-inline constexpr int TILE_VINE         = make_tile(SHEET_DECOR0, 4, 2);
-inline constexpr int TILE_CANDLE_SMALL = make_tile(SHEET_DECOR0, 0, 2);
+
+// Used by Map.cpp for procedural torch/candelabra placement in zones.
+inline constexpr int TILE_TORCH_1    = make_tile(SHEET_DECOR0, 0, 8);
+inline constexpr int TILE_CANDELABRA = make_tile(SHEET_DECOR0, 2, 8);
 
 // ---------------------------------------------------------------------------
 // Extra wall autotile groups (6x3 blocks in Wall.png, after 3-row guide)

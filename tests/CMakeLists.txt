@@ -125,6 +125,11 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/MenuManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/DisplayManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/GameLoopCoordinator.cpp
+    ${PARENT_SOURCE_DIR}/Systems/AnimationSystem.cpp
+    ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
+    ${PARENT_SOURCE_DIR}/Tools/DecorEditor.cpp
+    ${PARENT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
+    ${PARENT_SOURCE_DIR}/Tools/RoomEditor.cpp
     ${PARENT_SOURCE_DIR}/Systems/ObjectManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/DataManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/ShopKeeper.cpp

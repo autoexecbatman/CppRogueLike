@@ -8,6 +8,7 @@
 
 #include "Game.h"
 #include "Menu/Menu.h"
+#include "Core/Paths.h"
 
 #ifdef EMSCRIPTEN
 struct LoopData
@@ -36,7 +37,7 @@ int main()
     try
     {
         debugFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
-        debugFile.open("clog.txt");
+        debugFile.open(Paths::LOG);
         std::clog.rdbuf(debugFile.rdbuf());
     }
     catch (const std::exception& e)
@@ -49,11 +50,16 @@ int main()
 
     // Initialize raylib window (fullscreen, auto-detect resolution)
     game.renderer.init();
-    game.renderer.load_dawnlike("DawnLike");
+    game.renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
-    game.renderer.load_font("DawnLike/GUI/SDS_8x8.ttf", 16);
+    game.renderer.load_font(Paths::DAWNLIKE_FONT, 16);
 
     auto ctx = game.context();
+    game.decor_editor.load(Paths::DECOR_OVERRIDES);
+    game.decor_editor.load_palette(Paths::TILE_LABELS);
+    game.prefab_library.load_tile_labels(Paths::TILE_LABELS);
+    game.prefab_library.load(Paths::PREFABS);
+
     game.menus.push_back(std::make_unique<Menu>(true, ctx));
 
     int loopNum{ 0 };

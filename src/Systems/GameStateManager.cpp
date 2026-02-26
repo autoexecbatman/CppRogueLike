@@ -8,6 +8,7 @@
 
 #include "GameStateManager.h"
 #include "../Map/Map.h"
+#include "../Map/DungeonRoom.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/InventoryData.h"
@@ -28,7 +29,14 @@ using namespace InventoryOperations;
 void GameStateManager::init_new_game(GameContext& ctx)
 {
     ctx.data_manager->load_all_data(*ctx.message_system);
-    ctx.map->init(true, ctx);
+
+    if (ctx.level_manager) ctx.level_manager->reset_to_first_level();
+    if (ctx.time)          *ctx.time = 0;
+    if (ctx.isLoadedGame)  *ctx.isLoadedGame = false;
+
+    // regenerate clears creatures, inventory, rooms, objects, then calls init()
+    ctx.map->regenerate(ctx);
+
     ctx.player->roll_new_character(ctx);
     *ctx.game_status = GameStatus::STARTUP;
     ctx.message_system->log("New game initialized");
@@ -55,7 +63,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 
 void GameStateManager::save_game(
     Map& map,
-    const std::vector<Vector2D>& rooms,
+    const std::vector<DungeonRoom>& rooms,
     Player& player,
     Stairs& stairs,
     const std::vector<std::unique_ptr<Creature>>& creatures,
@@ -121,7 +129,7 @@ void GameStateManager::save_game(
 
 bool GameStateManager::load_game(
     Map& map,
-    std::vector<Vector2D>& rooms,
+    std::vector<DungeonRoom>& rooms,
     Player& player,
     Stairs& stairs,
     std::vector<std::unique_ptr<Creature>>& creatures,
@@ -215,23 +223,33 @@ bool GameStateManager::delete_save_file() noexcept
     return removed && !ec;
 }
 
-void GameStateManager::save_rooms_to_json(const std::vector<Vector2D>& rooms, nlohmann::json& j) const
+void GameStateManager::save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const
 {
     j["rooms"] = json::array();
     for (const auto& room : rooms)
     {
-        j["rooms"].push_back({ {"x", room.x}, {"y", room.y} });
+        j["rooms"].push_back({
+            {"col",    room.col},
+            {"row",    room.row},
+            {"width",  room.width},
+            {"height", room.height}
+        });
     }
 }
 
-void GameStateManager::load_rooms_from_json(const nlohmann::json& j, std::vector<Vector2D>& rooms) const
+void GameStateManager::load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const
 {
-    if (j.contains("rooms") && j["rooms"].is_array())
+    if (!j.contains("rooms") || !j["rooms"].is_array())
+        return;
+
+    for (const auto& d : j["rooms"])
     {
-        for (const auto& roomData : j["rooms"])
-        {
-            rooms.push_back(Vector2D{ roomData["x"], roomData["y"] });
-        }
+        rooms.push_back(DungeonRoom{
+            d.value("col",    0),
+            d.value("row",    0),
+            d.value("width",  1),
+            d.value("height", 1)
+        });
     }
 }
 

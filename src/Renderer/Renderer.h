@@ -63,6 +63,7 @@ struct SpriteSheet
     Texture2D frame0{};
     Texture2D frame1{};
     int tiles_per_row{ 0 };
+    int tiles_per_col{ 0 };
     bool animated{ false };
     bool loaded{ false };
 };
@@ -87,18 +88,22 @@ public:
     void init();
     void shutdown();
 
-    void load_dawnlike(const char* base_path);
-    void load_font(const char* font_path, int size);
+    void load_dawnlike(std::string_view base_path);
+    void load_font(std::string_view font_path, int size);
 
     void begin_frame();
     void end_frame();
 
     // World-space tile drawing (camera offset applied)
-    void draw_tile(int grid_y, int grid_x, int tile_id, int color_pair_id) const;
+    void draw_tile(int grid_x, int grid_y, int tile_id, int color_pair_id, Color tint) const;
 
     // Screen-space drawing (no camera offset)
     void draw_tile_screen(int px, int py, int tile_id) const;
+
+    // Screen-space drawing at an explicit pixel size (used by tile picker).
+    void draw_tile_screen_sized(int px, int py, int tile_id, int display_size) const;
     void draw_text(int px, int py, std::string_view text, int color_pair_id) const;
+    void draw_text_color(int px, int py, std::string_view text, Color color) const;
     void draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const;
 
     // Draw a DawnLike-tiled frame with dark background fill.
@@ -106,6 +111,9 @@ public:
     void draw_frame(int px, int py, int w_tiles, int h_tiles) const;
 
     void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
+    void update_viewport();
+    void zoom_in();
+    void zoom_out();
 
     [[nodiscard]] ColorPair get_color_pair(int id) const;
     [[nodiscard]] ScreenMetrics metrics() const;
@@ -120,6 +128,9 @@ public:
     [[nodiscard]] int get_screen_height() const { return screen_h; }
     [[nodiscard]] int get_camera_x() const { return camera.x; }
     [[nodiscard]] int get_camera_y() const { return camera.y; }
+    [[nodiscard]] int get_sheet_cols(int sheet_id) const;
+    [[nodiscard]] int get_sheet_rows(int sheet_id) const;
+    [[nodiscard]] bool sheet_is_loaded(int sheet_id) const;
 
 private:
     void init_color_pairs();

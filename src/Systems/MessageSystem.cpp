@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "MessageSystem.h"
+#include "../Core/Paths.h"
 #include "../Gui/Gui.h"
 #include "../Colors/Colors.h"
 
@@ -68,7 +69,7 @@ void MessageSystem::display_debug_messages() const noexcept
     render_debug_background();
 
     int total_lines = 0;
-    std::ifstream logFile("clog.txt");
+    std::ifstream logFile(Paths::LOG.data());
     std::string line;
 
     // First, count the number of lines in the file

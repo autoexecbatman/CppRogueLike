@@ -7,6 +7,11 @@
 #include "CreatureManager.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
+#include "FloatingTextSystem.h"
+#include "AnimationSystem.h"
+#include "../Tools/DecorEditor.h"
+#include "../Core/Paths.h"
+#include "../Tools/PrefabLibrary.h"
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
@@ -36,7 +41,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
     if (ctx.input_handler->was_resized())
     {
         ctx.input_handler->clear_resize();
-        ctx.map->regenerate(ctx);
+        ctx.renderer->update_viewport();
         ctx.map->compute_fov(ctx);
 
         if (ctx.gui->guiInit)
@@ -76,8 +81,63 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
     if (ctx.menu_manager->should_take_input())
     {
         ctx.input_system->poll();
-        ctx.input_handler->key_store();
-        ctx.input_handler->key_listen(*ctx.input_system);
+
+        auto handle_zoom = [&]() -> bool
+        {
+            GameKey key = ctx.input_system->get_key();
+            if (key == GameKey::ZOOM_IN)
+            {
+                ctx.renderer->zoom_in();
+                ctx.map->compute_fov(ctx);
+                return true;
+            }
+            if (key == GameKey::ZOOM_OUT)
+            {
+                ctx.renderer->zoom_out();
+                ctx.map->compute_fov(ctx);
+                return true;
+            }
+            if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decor_editor)
+            {
+                ctx.decor_editor->toggle();
+                return true;
+            }
+            if (ctx.decor_editor && ctx.decor_editor->is_active())
+            {
+                if (key == GameKey::DECOR_PREV)  { ctx.decor_editor->cycle_prev(); return true; }
+                if (key == GameKey::DECOR_NEXT)  { ctx.decor_editor->cycle_next(); return true; }
+                if (key == GameKey::DECOR_SAVE)
+                {
+                    ctx.decor_editor->save(Paths::DECOR_OVERRIDES);
+                    ctx.decor_editor->save_palette(Paths::TILE_LABELS);
+                    return true;
+                }
+                // Handle placement -- blocked while sheet browser is open
+                if (!ctx.decor_editor->is_browser_open()
+                    && (key == GameKey::MOUSE_LEFT || key == GameKey::MOUSE_RIGHT))
+                {
+                    Vector2D world = ctx.input_system->get_mouse_world_tile(
+                        ctx.renderer->get_camera_x(),
+                        ctx.renderer->get_camera_y(),
+                        ctx.renderer->get_tile_size()
+                    );
+                    int world_x = world.x;
+                    int world_y = world.y;
+                    if (key == GameKey::MOUSE_LEFT)
+                        ctx.decor_editor->place(world_x, world_y);
+                    else
+                        ctx.decor_editor->erase(world_x, world_y);
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        if (!handle_zoom())
+        {
+            ctx.input_handler->key_store();
+            ctx.input_handler->key_listen(*ctx.input_system);
+        }
     }
     ctx.menu_manager->set_should_take_input(true);
 }
@@ -105,6 +165,21 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
     ctx.renderer->begin_frame();
 
     ctx.rendering_manager->render(ctx);
+
+    if (ctx.anim_system)
+    {
+        ctx.anim_system->update_and_render(*ctx.renderer);
+    }
+
+    if (ctx.floating_text)
+    {
+        ctx.floating_text->update_and_render(*ctx.renderer);
+    }
+
+    if (ctx.decor_editor)
+    {
+        ctx.decor_editor->update_and_render(*ctx.renderer);
+    }
 
     if (gui.guiInit)
     {
@@ -265,6 +340,26 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
     if (*ctx.game_status == GameStatus::STARTUP)
     {
+        if (ctx.decor_editor && ctx.map && ctx.level_manager)
+        {
+            ctx.decor_editor->set_active_map(
+                ctx.map->get_seed(),
+                ctx.level_manager->get_dungeon_level()
+            );
+
+            if (ctx.prefab_library && ctx.rooms
+                && ctx.decor_editor->is_active_map_empty()
+                && !*ctx.isLoadedGame)
+            {
+                ctx.prefab_library->apply_to_rooms(
+                    *ctx.rooms,
+                    ctx.map->get_seed(),
+                    ctx.level_manager->get_dungeon_level(),
+                    *ctx.decor_editor
+                );
+            }
+        }
+
         ctx.map->compute_fov(ctx);
         if (ctx.level_manager->get_dungeon_level() == 1 && !*ctx.isLoadedGame)
         {

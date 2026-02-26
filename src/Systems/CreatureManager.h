@@ -9,6 +9,7 @@ class Creature;
 class Map;
 class RandomDice;
 struct Vector2D;
+struct DungeonRoom;
 struct GameContext;
 
 // - Handles all creature lifecycle and management
@@ -25,7 +26,7 @@ public:
     // Spawning
     void spawn_creatures(
         std::vector<std::unique_ptr<Creature>>& creatures,
-        std::span<const Vector2D> rooms,
+        std::span<const DungeonRoom> rooms,
         Map& map,
         RandomDice& dice,
         int game_time,
@@ -67,7 +68,7 @@ private:
     ) const noexcept;
     
     Vector2D find_spawn_position(
-        std::span<const Vector2D> rooms,
+        std::span<const DungeonRoom> rooms,
         Map& map,
         RandomDice& dice,
         GameContext& ctx

@@ -5,6 +5,7 @@
 #include "CreatureManager.h"
 #include "../Actor/Actor.h"
 #include "../Map/Map.h"
+#include "../Map/DungeonRoom.h"
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
 #include "../Core/GameContext.h"
@@ -32,7 +33,7 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 
 void CreatureManager::spawn_creatures(
     std::vector<std::unique_ptr<Creature>>& creatures,
-    std::span<const Vector2D> rooms,
+    std::span<const DungeonRoom> rooms,
     Map& map,
     RandomDice& dice,
     int game_time,
@@ -101,38 +102,23 @@ bool CreatureManager::can_spawn_creature(
 }
 
 Vector2D CreatureManager::find_spawn_position(
-    std::span<const Vector2D> rooms,
+    std::span<const DungeonRoom> rooms,
     Map& map,
     RandomDice& dice,
     GameContext& ctx
 )
 {
     if (rooms.empty())
-    {
         throw std::runtime_error("rooms vector is empty!");
-    }
 
-    // Roll a random index as the size of the rooms vector
-    int index = dice.roll(0, static_cast<int>(rooms.size()) - 1);
+    const int index = dice.roll(0, static_cast<int>(rooms.size()) - 1);
+    const DungeonRoom& room = rooms[index];
 
-    // Make the index even
-    index = index % 2 == 0 ? index : index - 1;
-
-    // Get the room begin and end
-    const Vector2D roomBegin = rooms[index];
-    const Vector2D roomEnd = rooms[index + 1];
-
-    // Get a random position in the room
-    Vector2D pos = Vector2D{
-        dice.roll(roomBegin.x, roomEnd.x), 
-        dice.roll(roomBegin.y, roomEnd.y) 
-    };
-
-    // If pos is at wall roll again
+    Vector2D pos{ dice.roll(room.col, room.col_end()), dice.roll(room.row, room.row_end()) };
     while (!map.can_walk(pos, ctx))
     {
-        pos.x = dice.roll(roomBegin.x, roomEnd.x);
-        pos.y = dice.roll(roomBegin.y, roomEnd.y);
+        pos.x = dice.roll(room.col, room.col_end());
+        pos.y = dice.roll(room.row, room.row_end());
     }
 
     return pos;

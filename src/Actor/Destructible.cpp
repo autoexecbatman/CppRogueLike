@@ -25,6 +25,8 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/FloatingTextSystem.h"
+#include "../Systems/AnimationSystem.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -224,6 +226,16 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, Dam
     {
         set_hp(0);
         die(owner, ctx);
+    }
+
+    // Floating damage number: red for player damage, yellow for monster damage
+    if (ctx.floating_text)
+    {
+        bool hit_player = (&owner == ctx.player);
+        unsigned char r = hit_player ? 255 : 255;
+        unsigned char g = hit_player ?  80 : 220;
+        unsigned char b = hit_player ?  80 :  50;
+        ctx.floating_text->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
     }
 
     return damage;
@@ -534,6 +546,11 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 	ctx.player->destructible->set_xp(ctx.player->destructible->get_xp() + get_xp());
 
 	ctx.player->ai->levelup_update(ctx, *ctx.player);
+
+	if (ctx.anim_system)
+	{
+		ctx.anim_system->spawn_death(owner.position.x, owner.position.y);
+	}
 
 	Destructible::die(owner, ctx);
 }

@@ -98,7 +98,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 			}
 		}
 
-		ctx.renderer->draw_tile(position.y, position.x, displayChar, displayColor);
+		ctx.renderer->draw_tile(position.x, position.y, displayChar, displayColor, Color{255, 255, 255, 255});
 	}
 }
 

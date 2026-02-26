@@ -12,6 +12,8 @@
 #pragma warning (pop)
 
 #include "Map.h"
+#include "DungeonRoom.h"
+#include "DungeonGenerator.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/TileId.h"
 #include "../Renderer/Renderer.h"
@@ -39,6 +41,7 @@
 #include "../Factories/ItemCreator.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/LevelManager.h"
+#include "../Tools/DecorEditor.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -61,187 +64,7 @@ public:
 };
 
 //====
-
-// a binary space partition listener class (BSP)
-class BspListener : public ITCODBspCallback
-{
-private:
-	Map& map; // a map to dig
-	GameContext& ctx; // Game context for dependency access
-	int roomNum{ 0 }; // room number
-	Vector2D lastRoomCenter{ 0,0 }; // center of the last room
-	Vector2D lastRoomSize{ 0,0 }; // size of the last room
-	Vector2D lastRoomBegin{ 0,0 }; // begin of the last room
-	Vector2D lastRoomEnd{ 0,0 }; // end of the last room
-	Vector2D lastRoomTopMid{ 0,0 };
-	Vector2D lastRoomBottomMid{ 0,0 };
-	Vector2D lastRoomRightMid{ 0,0 };
-	Vector2D lastRoomLeftMid{ 0,0 };
-public:
-	BspListener(Map& map, GameContext& ctx) noexcept : map(map), ctx(ctx), roomNum(0) {}
-
-	bool visitNode(TCODBsp* node, void* userData) override
-	{
-		if (node->isLeaf())
-		{
-			const bool withActors = static_cast<bool>(userData);
-
-			// Calculate room size
-			Vector2D currentRoomSize
-			{
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->h - 2), // random int from min size to height - 2
-				map.rng_unique->getInt(ROOM_MIN_SIZE, node->w - 2)  // random int from min size to width - 2
-			};
-
-			// Calculate room position
-			Vector2D currentRoomBegin
-			{
-				map.rng_unique->getInt(node->y + 1, node->y + node->h - currentRoomSize.x - 1), // row: bounded by height (currentRoomSize.x)
-				map.rng_unique->getInt(node->x + 1, node->x + node->w - currentRoomSize.y - 1)  // col: bounded by width  (currentRoomSize.y)
-			};
-
-			// Calculate room end coordinates
-			Vector2D currentRoomEnd
-			{
-				currentRoomBegin.y + currentRoomSize.y,
-				currentRoomBegin.x + currentRoomSize.x
-			};
-
-			// Create the room
-			map.create_room(
-				roomNum == 0,
-				currentRoomBegin.x,
-				currentRoomBegin.y,
-				currentRoomBegin.x + currentRoomSize.x - 2,
-				currentRoomBegin.y + currentRoomSize.y - 2,
-				withActors,
-				ctx
-			);
-
-			// Calculate room center
-			Vector2D currentRoomCenter
-			{
-				currentRoomBegin.y + (currentRoomSize.y / 2),
-				currentRoomBegin.x + (currentRoomSize.x / 2)
-			};
-
-			// x = col_center, y = top_row
-			Vector2D currentRoomTopMid
-			{
-				currentRoomBegin.y + (currentRoomSize.y / 2),
-				currentRoomBegin.x
-			};
-
-			// x = col_center, y = bottom_row
-			Vector2D currentRoomBottomMid
-			{
-				currentRoomBegin.y + (currentRoomSize.y / 2),
-				currentRoomEnd.y - 1
-			};
-
-			// x = left_col, y = row_center
-			Vector2D currentRoomLeftMid
-			{
-				currentRoomBegin.y,
-				currentRoomBegin.x + (currentRoomSize.x / 2)
-			};
-
-			// x = right_col, y = row_center
-			Vector2D currentRoomRightMid
-			{
-				currentRoomEnd.x - 1,
-				currentRoomBegin.x + (currentRoomSize.x / 2)
-			};
-
-			// Spatial relationship conditions using correct field semantics:
-			//   currentRoomBegin.x = row_begin (R_begin stored in .x)
-			//   currentRoomBegin.y = col_begin (C_begin stored in .y)
-			//   currentRoomEnd.x   = col_end
-			//   currentRoomEnd.y   = row_end
-			bool lastBelowCurrent   = lastRoomBegin.x    > currentRoomEnd.y;   // row_begin_last > row_end_current
-			bool lastRightOfCurrent = lastRoomBegin.y    > currentRoomEnd.x;   // col_begin_last > col_end_current
-			bool lastAboveCurrent   = lastRoomEnd.y      < currentRoomBegin.x; // row_end_last   < row_begin_current
-			bool lastLeftOfCurrent  = lastRoomEnd.x      < currentRoomBegin.y; // col_end_last   < col_begin_current
-
-			// Connect this room to the previous room (except for the first room)
-			if (roomNum != 0)
-			{
-				if (lastBelowCurrent) // last room is below: connect last.top -> current.bottom
-				{
-					int vMid = (currentRoomEnd.y + lastRoomBegin.x) / 2;
-					map.dig_corridor(
-						lastRoomTopMid,
-						Vector2D{ lastRoomCenter.x, vMid });
-					map.dig_corridor(
-						Vector2D{ lastRoomCenter.x, vMid },
-						Vector2D{ currentRoomCenter.x, vMid });
-					map.dig_corridor(
-						Vector2D{ currentRoomCenter.x, vMid },
-						currentRoomBottomMid);
-				}
-				else if (lastRightOfCurrent) // last room is to the right: connect last.left -> current.right
-				{
-					int hMid = (lastRoomBegin.y + currentRoomEnd.x) / 2;
-					map.dig_corridor(
-						lastRoomLeftMid,
-						Vector2D{ hMid, lastRoomCenter.y });
-					map.dig_corridor(
-						Vector2D{ hMid, lastRoomCenter.y },
-						Vector2D{ hMid, currentRoomCenter.y });
-					map.dig_corridor(
-						Vector2D{ hMid, currentRoomCenter.y },
-						currentRoomRightMid);
-				}
-				else if (lastAboveCurrent) // last room is above: connect last.bottom -> current.top
-				{
-					int vMid = (lastRoomEnd.y + currentRoomBegin.x) / 2;
-					map.dig_corridor(
-						lastRoomBottomMid,
-						Vector2D{ lastRoomCenter.x, vMid });
-					map.dig_corridor(
-						Vector2D{ lastRoomCenter.x, vMid },
-						Vector2D{ currentRoomCenter.x, vMid });
-					map.dig_corridor(
-						Vector2D{ currentRoomCenter.x, vMid },
-						currentRoomTopMid);
-				}
-				else if (lastLeftOfCurrent) // last room is to the left: connect last.right -> current.left
-				{
-					int hMid = (lastRoomEnd.x + currentRoomBegin.y) / 2;
-					map.dig_corridor(
-						lastRoomRightMid,
-						Vector2D{ hMid, lastRoomCenter.y });
-					map.dig_corridor(
-						Vector2D{ hMid, lastRoomCenter.y },
-						Vector2D{ hMid, currentRoomCenter.y });
-					map.dig_corridor(
-						Vector2D{ hMid, currentRoomCenter.y },
-						currentRoomLeftMid);
-				}
-				else
-				{
-					map.dig_corridor(lastRoomCenter, currentRoomCenter);
-				}
-			}
-
-			// Save current room info for next room connection
-			lastRoomCenter = currentRoomCenter;
-			lastRoomSize = currentRoomSize;
-			lastRoomBegin = currentRoomBegin;
-			lastRoomEnd = currentRoomEnd;
-			lastRoomTopMid = currentRoomTopMid;
-			lastRoomBottomMid = currentRoomBottomMid;
-			lastRoomLeftMid = currentRoomLeftMid;
-			lastRoomRightMid = currentRoomRightMid;
-
-			roomNum++;
-		}
-		return true;
-	}
-};
-
-//====
-Map::Map(int map_height, int map_width)
+Map::Map(int map_width, int map_height)
 	:
 	map_height(map_height),
 	map_width(map_width),
@@ -288,10 +111,10 @@ void Map::init_tiles(GameContext& ctx)
 void Map::init(bool withActors, GameContext& ctx)
 {
 	init_tiles(ctx);
-	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0; // for new seed
+	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
-	bsp(map_width, map_height, *rng_unique, withActors, ctx);
+	generate_rooms(withActors, ctx);
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
 	post_process_doors();
@@ -303,14 +126,10 @@ void Map::init(bool withActors, GameContext& ctx)
 
 }
 
-void Map::bsp(int map_width, int map_height, TCODRandom& rng_unique, bool withActors, GameContext& ctx)
+void Map::generate_rooms(bool withActors, GameContext& ctx)
 {
-	float randomRatio = ctx.dice ? ctx.dice->d100() : 50.0f;
-	TCODBsp myBSP(0, 0, map_width, map_height);
-	myBSP.splitRecursive(&rng_unique, 4, ROOM_HORIZONTAL_MAX_SIZE, ROOM_VERTICAL_MAX_SIZE, randomRatio, randomRatio);
-
-	BspListener mylistener(*this, ctx);
-	myBSP.traverseInvertedLevelOrder(&mylistener, (void*)withActors);
+	DungeonGenerator gen;
+	gen.generate(map_width, map_height, *rng_unique, withActors, ctx, *this);
 	place_stairs(ctx);
 }
 
@@ -602,6 +421,19 @@ void Map::render(const GameContext& ctx) const
 		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
 	};
 
+	auto is_wall_only = [&](Vector2D p) -> bool
+	{
+		if (!in_bounds(p)) return false;
+		return get_tile_type(p) == TileType::WALL;
+	};
+
+	auto is_door = [&](Vector2D p) -> bool
+	{
+		if (!in_bounds(p)) return false;
+		TileType t = get_tile_type(p);
+		return t == TileType::CLOSED_DOOR || t == TileType::OPEN_DOOR;
+	};
+
 	auto is_walkable = [&](Vector2D p) -> bool
 	{
 		if (!in_bounds(p)) return false;
@@ -649,56 +481,35 @@ void Map::render(const GameContext& ctx) const
 		return h;
 	};
 
-	// Resolve decoration overlay for a given tile position and type.
-	// Walls: candles anywhere, vines only on north walls (floor to the south).
-	// Floors: cobwebs in corners, torches near walls.
+	// ---------------------------------------------------------------------------
+	// Zone-based decoration system.
+	// 20-tile grid cells match room scale -- most rooms fall within one zone.
+	// Zones: 0=dungeon, 1=library, 2=armory, 3=storage, 4=chapel
+	// ---------------------------------------------------------------------------
+	constexpr int ZONE_DUNGEON = 0;
+	constexpr int ZONE_LIBRARY = 1;
+	constexpr int ZONE_ARMORY  = 2;
+	constexpr int ZONE_STORAGE = 3;
+	constexpr int ZONE_CHAPEL  = 4;
+
 	auto resolve_decor = [&](Vector2D p, TileType t) -> int
 	{
-		unsigned int h = decor_hash(p.y, p.x, 42);
-
-		if (t == TileType::WALL)
-		{
-			bool floor_south   = is_walkable(p + DIR_S);
-			bool floor_east    = is_walkable(p + DIR_E);
-			bool floor_west    = is_walkable(p + DIR_W);
-			bool is_north_wall = floor_south && !floor_east && !floor_west;
-			if (is_north_wall)
-			{
-				if ((h % 100) < 3)
-				{
-					return TILE_VINE;
-				}
-				unsigned int h2 = decor_hash(p.y, p.x, 77);
-				if ((h2 % 100) < 5)
-				{
-					return TILE_CANDLE_SMALL;
-				}
-			}
+		// Torches only -- the floor itself carries the visual weight.
+		if (t != TileType::WALL)
 			return 0;
-		}
 
-		if (t == TileType::FLOOR || t == TileType::CORRIDOR)
-		{
-			bool wN = is_wall_or_door(p + DIR_N);
-			bool wE = is_wall_or_door(p + DIR_E);
-			bool wS = is_wall_or_door(p + DIR_S);
-			bool wW = is_wall_or_door(p + DIR_W);
-
-			bool is_corner = (wN && wW) || (wN && wE) || (wS && wW) || (wS && wE);
-			bool near_wall = wN || wE || wS || wW;
-
-			if (is_corner && (h % 100) < 15)
-			{
-				constexpr int COBWEBS[] = {
-					TILE_COBWEB_1, TILE_COBWEB_2,
-					TILE_COBWEB_3, TILE_COBWEB_4
-				};
-				return COBWEBS[h % 4];
-			}
+		bool floor_south = is_walkable(p + DIR_S);
+		bool floor_east  = is_walkable(p + DIR_E);
+		bool floor_west  = is_walkable(p + DIR_W);
+		if (!floor_south || floor_east || floor_west)
 			return 0;
-		}
 
-		return 0;
+		int row_phase    = static_cast<int>(decor_hash(p.y, 0, 88) % 4);
+		if ((p.x % 4 + 4) % 4 != row_phase)
+			return 0;
+
+		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
+		return (zone == ZONE_CHAPEL) ? TILE_CANDELABRA : TILE_TORCH_1;
 	};
 
 	for (int row = start_row; row < end_row; row++)
@@ -710,6 +521,12 @@ void Map::render(const GameContext& ctx) const
 			{
 				continue;
 			}
+
+			// In FOV: full colour. Explored but not visible: dimmed memory tint.
+			bool in_fov = is_in_fov(pos);
+			Color tint = in_fov
+				? Color{255, 255, 255, 255}
+				: Color{ 90, 90, 110, 255 };
 
 			TileType type = get_tile_type(pos);
 			int tile_id = 0;
@@ -755,7 +572,7 @@ void Map::render(const GameContext& ctx) const
 					AUTOTILE_FLOOR_STONE,
 					build_mask(pos, is_walkable)
 				);
-				ctx.renderer->draw_tile(row, col, floor_id, WHITE_BLACK_PAIR);
+				ctx.renderer->draw_tile(col, row, floor_id, WHITE_BLACK_PAIR, tint);
 				tile_id = (type == TileType::CLOSED_DOOR)
 					? TILE_DOOR_CLOSED
 					: TILE_DOOR_OPEN;
@@ -765,12 +582,17 @@ void Map::render(const GameContext& ctx) const
 				continue;
 			}
 
-			ctx.renderer->draw_tile(row, col, tile_id, WHITE_BLACK_PAIR);
+			ctx.renderer->draw_tile(col, row, tile_id, WHITE_BLACK_PAIR, tint);
 
-			int decor_id = resolve_decor(pos, type);
-			if (decor_id != 0)
+			// Decorations: hand-placed overrides take priority over procedural.
 			{
-				ctx.renderer->draw_tile(row, col, decor_id, WHITE_BLACK_PAIR);
+				int decor_id = ctx.decor_editor
+					? ctx.decor_editor->get_override(col, row)
+					: 0;
+				if (decor_id == 0)
+					decor_id = resolve_decor(pos, type);
+				if (decor_id != 0)
+					ctx.renderer->draw_tile(col, row, decor_id, WHITE_BLACK_PAIR, tint);
 			}
 		}
 	}
@@ -792,95 +614,55 @@ void Map::dig(Vector2D begin, Vector2D end)
 	if (begin.x > end.x) { std::swap(begin.x, end.x); }
 	if (begin.y > end.y) { std::swap(begin.y, end.y); }
 
-	//const int rollD2 = game.d.d2(); // 50% to dig square or diamond shape
-	const int rollD2 = rng_unique->getInt(1, 2); // 50% to dig square or diamond shape
-	if (rollD2 == 1)
+	for (int tileY = begin.y; tileY <= end.y; tileY++)
 	{
-		for (int tileY = begin.y; tileY <= end.y; tileY++)
+		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
-			for (int tileX = begin.x; tileX <= end.x; tileX++)
-			{
-				set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
-				tcodMap->setProperties(tileX, tileY, true, true); // walkable and transparent
-			}
-		}
-	}
-	else
-	{
-		int width = end.x - begin.x + 1;
-		int centerX = (begin.x + end.x) / 2;
-		int centerY = (begin.y + end.y) / 2;
-
-		for (int tileY = begin.y; tileY <= end.y; tileY++)
-		{
-			// Proper casting to float for the math
-			float verticalDist = static_cast<float>(std::abs(tileY - centerY));
-			float verticalRatio = verticalDist / static_cast<float>(centerY);
-
-			// Explicitly cast the final result to int to silence "loss of data" warnings    
-			int halfWidth = static_cast<int>(static_cast<float>(width / 2) * (1.0f - verticalRatio));
-
-			int startX = centerX - halfWidth;    
-			int endX = centerX + halfWidth;
-
-			for (int tileX = startX; tileX <= endX; tileX++)     
-			{
-				if (tileX >= begin.x && tileX <= end.x) 
-				{
-					// Vector2D is {y, x}
-					set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
-					// NOTE: libtcod's setProperties expects (x, y)
-					tcodMap->setProperties(tileX, tileY, true, true);
-				}
-			}
+			set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
+			tcodMap->setProperties(tileX, tileY, true, true);
 		}
 	}
 }
 
 void Map::dig_corridor(Vector2D begin, Vector2D end)
 {
-    // Ensure begin.x <= end.x and begin.y <= end.y for consistent loops
-    // Original code did this effectively, keeping for consistency.
-    int x1 = begin.x;
-    int y1 = begin.y;
-    int x2 = end.x;
-    int y2 = end.y;
+    const int x1 = begin.x;
+    const int y1 = begin.y;
+    const int x2 = end.x;
+    const int y2 = end.y;
 
-    // --- CRITICAL FIX 1: Dig 1-tile wide L-shaped corridor ---
-    // This reinterpretation makes "perfect alignment" much more achievable.
-    // Choose a random path direction (horizontal first or vertical first)
-    // Note: Random generation uses internal rng_unique, not GameContext
-    bool horizontal_first = rng_unique->getInt(0, 1) == 1;
+    const bool horizontal_first = rng_unique->getInt(0, 1) == 1;
 
-    Vector2D current_pos = begin; // Start digging from 'begin'
+    // Only carve WALL tiles -- floor/corridor tiles keep their existing type.
+    // This prevents corridors from visually scarring room interiors when the
+    // MST path passes through another room's bounding box.
+    auto dig_one = [&](Vector2D pos)
+    {
+        if (!in_bounds(pos))
+            return;
+        if (get_tile_type(pos) == TileType::WALL)
+            set_tile(pos, TileType::CORRIDOR, 1);
+        tcodMap->setProperties(pos.x, pos.y, true, true);
+    };
 
-    if (horizontal_first) {
-        // Dig horizontally first
-        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
-            current_pos = Vector2D{ x, y1 };
-            set_tile(current_pos, TileType::CORRIDOR, 1);
-            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+    if (horizontal_first)
+    {
+        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+            dig_one(Vector2D{ x, y1 });
+        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+        {
+            if (y == y1) continue;
+            dig_one(Vector2D{ x2, y });
         }
-        // Then dig vertically
-        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
-            if (y == y1) continue; // Skip corner - already dug horizontally
-            current_pos = Vector2D{ x2, y };
-            set_tile(current_pos, TileType::CORRIDOR, 1);
-            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
-        }
-    } else {
-        // Dig vertically first
-        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y) {
-            current_pos = Vector2D{ x1, y };
-            set_tile(current_pos, TileType::CORRIDOR, 1);
-            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
-        }
-        // Then dig horizontally
-        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x) {
-            if (x == x1) continue; // Skip corner - already dug vertically
-            current_pos = Vector2D{ x, y2 };
-            set_tile(current_pos, TileType::CORRIDOR, 1);
-            tcodMap->setProperties(current_pos.x, current_pos.y, true, true);
+    }
+    else
+    {
+        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+            dig_one(Vector2D{ x1, y });
+        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+        {
+            if (x == x1) continue;
+            dig_one(Vector2D{ x, y2 });
         }
     }
 }
@@ -900,46 +682,30 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 	tiles.at(get_index(pos)).cost = cost;
 }
 
-void Map::create_room(bool first, int x1, int y1, int x2, int y2, bool withActors, GameContext& ctx)
+void Map::create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx)
 {
-	Vector2D begin{ y1,x1 };
-	Vector2D end{ y2,x2 };
+    if (ctx.rooms)
+        ctx.rooms->push_back(room);
 
-	// Store room coordinates via GameContext
-	if (ctx.rooms)
-	{
-		ctx.rooms->emplace_back(begin);
-		ctx.rooms->emplace_back(end);
-	}
+    dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 
-	dig(begin, end); // dig the corridors
+    spawn_water(room, ctx);
 
-	spawn_water(begin, end, ctx);
+    if (!withActors) return;
 
-	if (!withActors)
-	{
-		return;
-	}
+    if (first) spawn_player(room, ctx);
 
-	if (first) // if this is the first room, we need to place the player in it
-	{
-		spawn_player(begin, end, ctx);
-	}
-
-	spawn_items(begin, end, ctx);
-
-	// No monster spawning during room creation - monsters spawn procedurally during gameplay
-	// This was the original design - only items spawn during level generation
+    spawn_items(room, ctx);
 }
 
-void Map::spawn_water(Vector2D begin, Vector2D end, GameContext& ctx)
+void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 {
 	// Add water tiles
 	constexpr int waterPercentage = 5; // 5% of tiles will be water (reduced from 10%)
 	Vector2D waterPos{ 0,0 };
-	for (waterPos.y = begin.y; waterPos.y <= end.y; ++waterPos.y)
+	for (waterPos.y = room.row; waterPos.y <= room.row_end(); ++waterPos.y)
 	{
-		for (waterPos.x = begin.x; waterPos.x <= end.x; ++waterPos.x)
+		for (waterPos.x = room.col; waterPos.x <= room.col_end(); ++waterPos.x)
 		{
 			/*const int rolld100 = game.d.d100();*/
 			const int rolld100 = rng_unique->getInt(1, 100);
@@ -1054,33 +820,20 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	
 	// ENTRANCE PATTERN 5: Room boundary positions
 	// If this floor tile is on the edge of the room, it might be where a corridor connects
-	Vector2D roomBegin = {0, 0};
-	Vector2D roomEnd = {0, 0};
-
-	// Find which room this position belongs to
 	if (ctx.rooms)
 	{
-		for (size_t i = 0; i < ctx.rooms->size(); i += 2) {
-			if (i + 1 < ctx.rooms->size()) {
-				Vector2D begin = (*ctx.rooms)[i];
-				Vector2D end = (*ctx.rooms)[i + 1];
+		for (const DungeonRoom& room : *ctx.rooms)
+		{
+			if (!room.contains(waterPos.x, waterPos.y)) continue;
 
-				if (waterPos.y >= begin.y && waterPos.y <= end.y &&
-					waterPos.x >= begin.x && waterPos.x <= end.x) {
-					roomBegin = begin;
-					roomEnd = end;
-					break;
-				}
-			}
-		}
-	}
-	
-	// Check if this position is on the room perimeter (edge positions are potential entrance points)
-	if (waterPos.y == roomBegin.y || waterPos.y == roomEnd.y ||
-		waterPos.x == roomBegin.x || waterPos.x == roomEnd.x) {
-		// This is on room edge - higher chance of being an entrance, so be more cautious
-		if (adjacentWalls >= 1 && adjacentFloors >= 1) {
-			return true; // Potentially blocks room entrance
+			// On the floor perimeter -- corridor likely connects here.
+			const bool on_edge =
+				waterPos.x == room.col     || waterPos.x == room.col_end() ||
+				waterPos.y == room.row     || waterPos.y == room.row_end();
+
+			if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
+				return true;
+			break;
 		}
 	}
 	
@@ -1088,53 +841,47 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 	return false;
 }
 
-void Map::spawn_items(Vector2D begin, Vector2D end, GameContext& ctx)
+void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 {
-	// add items
-	const int numItems = ctx.dice ? ctx.dice->roll(0, MAX_ROOM_ITEMS) : 0;
-	for (int i = 0; i < numItems; i++)
-	{
-		Vector2D itemPos{ ctx.dice ? ctx.dice->roll(begin.y, end.y) : begin.y, ctx.dice ? ctx.dice->roll(begin.x, end.x) : begin.x };
-		while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
-		{
-			itemPos.x = ctx.dice ? ctx.dice->roll(begin.x, end.x) : begin.x;
-			itemPos.y = ctx.dice ? ctx.dice->roll(begin.y, end.y) : begin.y;
-		}
-		add_item(itemPos, ctx);
-	}
+    const int numItems = ctx.dice ? ctx.dice->roll(0, MAX_ROOM_ITEMS) : 0;
+    for (int i = 0; i < numItems; i++)
+    {
+        Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+        while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
+        {
+            itemPos.x = ctx.dice->roll(room.col, room.col_end());
+            itemPos.y = ctx.dice->roll(room.row, room.row_end());
+        }
+        add_item(itemPos, ctx);
+    }
 }
 
-void Map::spawn_player(Vector2D begin, Vector2D end, GameContext& ctx)
+void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
-	// add player
-	if (!ctx.player || !ctx.dice) return;
+    if (!ctx.player || !ctx.dice) return;
 
-	Vector2D playerPos{ ctx.dice->roll(begin.y, end.y), ctx.dice->roll(begin.x, end.x) };
-	while (!can_walk(playerPos, ctx))
-	{
-		playerPos.x = ctx.dice->roll(begin.x, end.x);
-		playerPos.y = ctx.dice->roll(begin.y, end.y);
-	}
-	ctx.player->position.x = playerPos.x;
-	ctx.player->position.y = playerPos.y;
+    Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+    while (!can_walk(pos, ctx))
+    {
+        pos.x = ctx.dice->roll(room.col, room.col_end());
+        pos.y = ctx.dice->roll(room.row, room.row_end());
+    }
+    ctx.player->position = pos;
 }
 
 void Map::place_stairs(GameContext& ctx)
 {
-	if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice) return;
+    if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice) return;
 
-	int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
-	index = index % 2 == 0 ? index : index - 1;
-	const Vector2D roomBegin = ctx.rooms->at(index);
-	const Vector2D roomEnd = ctx.rooms->at(index + 1);
-	Vector2D stairsPos{ ctx.dice->roll(roomBegin.y, roomEnd.y), ctx.dice->roll(roomBegin.x, roomEnd.x) };
-	while (!can_walk(stairsPos, ctx))
-	{
-		stairsPos.x = ctx.dice->roll(roomBegin.x, roomEnd.x);
-		stairsPos.y = ctx.dice->roll(roomBegin.y, roomEnd.y);
-	}
-	ctx.stairs->position.x = stairsPos.x;
-	ctx.stairs->position.y = stairsPos.y;
+    const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
+    const DungeonRoom& room = ctx.rooms->at(index);
+    Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+    while (!can_walk(stairsPos, ctx))
+    {
+        stairsPos.x = ctx.dice->roll(room.col, room.col_end());
+        stairsPos.y = ctx.dice->roll(room.row, room.row_end());
+    }
+    ctx.stairs->position = stairsPos;
 }
 
 bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
@@ -1447,17 +1194,15 @@ void Map::place_amulet(GameContext& ctx)
 	if (ctx.level_manager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
 		// Choose a random room for the amulet
-		int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
-		index = index % 2 == 0 ? index : index - 1;
-		const Vector2D roomBegin = ctx.rooms->at(index);
-		const Vector2D roomEnd = ctx.rooms->at(index + 1);
+		const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
+		const DungeonRoom& room = ctx.rooms->at(index);
 
 		// Find a walkable position in the room
-		Vector2D amuletPos{ ctx.dice->roll(roomBegin.y, roomEnd.y), ctx.dice->roll(roomBegin.x, roomEnd.x) };
+		Vector2D amuletPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 		while (!can_walk(amuletPos, ctx) || is_stairs(amuletPos, ctx))
 		{
-			amuletPos.x = ctx.dice->roll(roomBegin.x, roomEnd.x);
-			amuletPos.y = ctx.dice->roll(roomBegin.y, roomEnd.y);
+			amuletPos.x = ctx.dice->roll(room.col, room.col_end());
+			amuletPos.y = ctx.dice->roll(room.row, room.row_end());
 		}
 
 		// Create and place the amulet
@@ -1479,39 +1224,22 @@ void Map::display_spawn_rates(GameContext& ctx) const
 	// TODO: Reimplement with Panel+Renderer
 }
 
-void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameContext& ctx)
+void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx)
 {
 	if (!ctx.level_manager || !ctx.dice) return;
 
 	// Mark the area for the treasure room
-	for (int y = begin.y; y <= end.y; y++)
+	for (int y = room.row; y <= room.row_end(); y++)
 	{
-		for (int x = begin.x; x <= end.x; x++)
+		for (int x = room.col; x <= room.col_end(); x++)
 		{
 			set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
 			tcodMap->setProperties(x, y, true, true);
 		}
 	}
 
-	// Add some decorative elements (different floor tiles or room features)
-	// Here we're just using special markings for demonstration
-	for (int y = begin.y; y <= end.y; y++)
-	{
-		for (int x = begin.x; x <= end.x; x++)
-		{
-			// Add random decorative elements
-			if (ctx.dice->d100() <= 20) {
-				// This could be replaced with actual decorative elements
-				// Currently just marking for demonstration
-			}
-		}
-	}
-
 	// Calculate the center of the room
-	Vector2D center = {
-		begin.y + (end.y - begin.y) / 2,
-		begin.x + (end.x - begin.x) / 2
-	};
+	const Vector2D center{ room.center_col(), room.center_row() };
 
 	// Generate treasure at the center of the room
 	itemFactory->generate_treasure(center, ctx, ctx.level_manager->get_dungeon_level(), quality);
@@ -1542,23 +1270,21 @@ void Map::create_treasure_room(Vector2D begin, Vector2D end, int quality, GameCo
 		Vector2D guardPos;
 		do
 		{
-			guardPos.y = ctx.dice->roll(begin.y, end.y);
-			guardPos.x = ctx.dice->roll(begin.x, end.x);
-			// Ensure we don't place on the center (where treasure is)
-			// and the position is valid
-		} while ((guardPos.y == center.y && guardPos.x == center.x) ||
+			guardPos.x = ctx.dice->roll(room.col, room.col_end());
+			guardPos.y = ctx.dice->roll(room.row, room.row_end());
+		} while ((guardPos == center) ||
 			!can_walk(guardPos, ctx) ||
 			get_actor(guardPos, ctx) != nullptr);
 
-		// Create a guardian appropriate for the treasure quality
 		add_monster(guardPos, ctx);
 	}
 
 	if (ctx.message_system)
 	{
-		ctx.message_system->log("Created treasure room at (" + std::to_string(begin.x) + "," +
-			std::to_string(begin.y) + ") to (" + std::to_string(end.x) + "," +
-			std::to_string(end.y) + ") with quality " + std::to_string(quality));
+		ctx.message_system->log(std::format(
+            "Created treasure room at ({},{}) size {}x{} quality {}",
+            room.col, room.row, room.width, room.height, quality
+        ));
 	}
 }
 
@@ -1577,49 +1303,27 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 		return false; // No treasure room this time
 	}
 
-	// Find a suitable room from the rooms list
+	// Need at least 2 rooms to skip the player's starting room
 	if (ctx.rooms->size() < 2)
-	{
-		return false; // Need at least one room (which is 2 entries in the vector)
-	}
+		return false;
 
-	// Select a random room (skipping the first room, which usually has the player)
-	int index = ctx.dice->roll(2, static_cast<int>(ctx.rooms->size() - 1));
-	index = index % 2 == 0 ? index : index - 1; // Ensure it's even (room starts)
-
-	if (index >= static_cast<int>(ctx.rooms->size()))
-	{
-		return false; // Safety check
-	}
-
-	const Vector2D roomBegin = ctx.rooms->at(index);
-	const Vector2D roomEnd = ctx.rooms->at(index + 1);
-
-	// Calculate room size
-	int width = roomEnd.x - roomBegin.x;
-	int height = roomEnd.y - roomBegin.y;
+	// Select a random room, skipping index 0 (player's starting room)
+	const int index = ctx.dice->roll(1, static_cast<int>(ctx.rooms->size()) - 1);
+	const DungeonRoom& room = ctx.rooms->at(index);
 
 	// Only use rooms that are large enough
-	if (width < 6 || height < 6)
-	{
+	if (room.width < 6 || room.height < 6)
 		return false;
-	}
 
 	// Determine the quality of the treasure room based on dungeon level and luck
-	int quality = 1; // Default is normal
-
-	int qualityRoll = ctx.dice->d100();
+	int quality = 1;
+	const int qualityRoll = ctx.dice->d100();
 	if (qualityRoll <= 5 + dungeonLevel)
-	{
-		quality = 3; // Exceptional (5% + dungeonLevel%)
-	}
+		quality = 3;
 	else if (qualityRoll <= 15 + (dungeonLevel * 2))
-	{
-		quality = 2; // Good (15% + dungeonLevel*2%)
-	}
+		quality = 2;
 
-	// Create the treasure room
-	create_treasure_room(roomBegin, roomEnd, quality, ctx);
+	create_treasure_room(room, quality, ctx);
 
 	return true;
 }

@@ -73,6 +73,14 @@ void Renderer::init()
     initialized = true;
 }
 
+void Renderer::update_viewport()
+{
+    screen_w      = GetScreenWidth();
+    screen_h      = GetScreenHeight();
+    viewport_cols = screen_w / tile_size;
+    viewport_rows = screen_h / tile_size;
+}
+
 void Renderer::shutdown()
 {
     for (auto& sheet : sheets)
@@ -107,7 +115,8 @@ void Renderer::load_sheet(int sheet_id, const char* path0, const char* path1)
     auto& s = sheets[sheet_id];
     s.frame0 = load_dawnlike_texture(path0);
     s.frame1 = load_dawnlike_texture(path1);
-    s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
+    s.tiles_per_row = s.frame0.width  / SPRITE_SIZE;
+    s.tiles_per_col = s.frame0.height / SPRITE_SIZE;
     s.animated = (s.frame1.id > 0);
     s.loaded = (s.frame0.id > 0);
 }
@@ -117,12 +126,31 @@ void Renderer::load_sheet_static(int sheet_id, const char* path)
     auto& s = sheets[sheet_id];
     s.frame0 = load_dawnlike_texture(path);
     s.frame1 = s.frame0;
-    s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
+    s.tiles_per_row = s.frame0.width  / SPRITE_SIZE;
+    s.tiles_per_col = s.frame0.height / SPRITE_SIZE;
     s.animated = false;
     s.loaded = (s.frame0.id > 0);
 }
 
-void Renderer::load_dawnlike(const char* base_path)
+int Renderer::get_sheet_cols(int sheet_id) const
+{
+    if (sheet_id < 0 || sheet_id >= SHEET_COUNT) return 0;
+    return sheets[sheet_id].tiles_per_row;
+}
+
+int Renderer::get_sheet_rows(int sheet_id) const
+{
+    if (sheet_id < 0 || sheet_id >= SHEET_COUNT) return 0;
+    return sheets[sheet_id].tiles_per_col;
+}
+
+bool Renderer::sheet_is_loaded(int sheet_id) const
+{
+    if (sheet_id < 0 || sheet_id >= SHEET_COUNT) return false;
+    return sheets[sheet_id].loaded;
+}
+
+void Renderer::load_dawnlike(std::string_view base_path)
 {
     std::string base(base_path);
     if (!base.empty() && base.back() != '/')
@@ -183,10 +211,10 @@ void Renderer::load_dawnlike(const char* base_path)
     sheets_loaded = true;
 }
 
-void Renderer::load_font(const char* font_path, int size)
+void Renderer::load_font(std::string_view font_path, int size)
 {
     font_size = size;
-    game_font = LoadFontEx(font_path, size, nullptr, 256);
+    game_font = LoadFontEx(font_path.data(), size, nullptr, 256);
     font_loaded = (game_font.glyphCount > 0);
     if (font_loaded)
     {
@@ -215,7 +243,7 @@ void Renderer::end_frame()
 #endif
 }
 
-void Renderer::draw_tile(int grid_y, int grid_x, int tile_id, int /*color_pair_id*/) const
+void Renderer::draw_tile(int grid_x, int grid_y, int tile_id, int /*color_pair_id*/, Color tint) const
 {
     if (!sheets_loaded)
     {
@@ -264,7 +292,7 @@ void Renderer::draw_tile(int grid_y, int grid_x, int tile_id, int /*color_pair_i
     // Destination rect scaled to display tile size
     Rectangle dest_rect = { dest_x, dest_y, ts_f, ts_f };
 
-    DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
+    DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
 void Renderer::draw_tile_screen(int px, int py, int tile_id) const
@@ -311,6 +339,38 @@ void Renderer::draw_tile_screen(int px, int py, int tile_id) const
     DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
+void Renderer::draw_tile_screen_sized(int px, int py, int tile_id, int display_size) const
+{
+    if (!sheets_loaded) return;
+
+    int sid = tile_sheet(tile_id);
+    if (sid < 0 || sid >= SHEET_COUNT) return;
+
+    const auto& sheet = sheets[sid];
+    if (!sheet.loaded || sheet.tiles_per_row <= 0) return;
+
+    const Texture2D& tex = (sheet.animated && current_anim_frame == 1)
+        ? sheet.frame1
+        : sheet.frame0;
+
+    Rectangle src_rect = {
+        static_cast<float>(tile_col(tile_id) * SPRITE_SIZE),
+        static_cast<float>(tile_row(tile_id) * SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE),
+        static_cast<float>(SPRITE_SIZE)
+    };
+
+    float ds_f = static_cast<float>(display_size);
+    Rectangle dest_rect = {
+        static_cast<float>(px),
+        static_cast<float>(py),
+        ds_f,
+        ds_f
+    };
+
+    DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
+}
+
 void Renderer::draw_text(int px, int py, std::string_view text, int color_pair_id) const
 {
     ColorPair pair = get_color_pair(color_pair_id);
@@ -324,6 +384,51 @@ void Renderer::draw_text(int px, int py, std::string_view text, int color_pair_i
     else
     {
         DrawText(text_str.c_str(), px, py, font_size, pair.fg);
+    }
+}
+
+void Renderer::draw_text_color(int px, int py, std::string_view text, Color color) const
+{
+    std::string text_str(text);
+
+    if (font_loaded)
+    {
+        Vector2 pos = { static_cast<float>(px), static_cast<float>(py) };
+        DrawTextEx(game_font, text_str.c_str(), pos, static_cast<float>(font_size), 1.0f, color);
+    }
+    else
+    {
+        DrawText(text_str.c_str(), px, py, font_size, color);
+    }
+}
+
+void Renderer::zoom_in()
+{
+    static constexpr int zoom_levels[] = { 16, 24, 32, 48 };
+    for (int i = 0; i < 3; ++i)
+    {
+        if (tile_size == zoom_levels[i])
+        {
+            tile_size = zoom_levels[i + 1];
+            font_size = tile_size * 3 / 4;
+            update_viewport();
+            return;
+        }
+    }
+}
+
+void Renderer::zoom_out()
+{
+    static constexpr int zoom_levels[] = { 16, 24, 32, 48 };
+    for (int i = 1; i < 4; ++i)
+    {
+        if (tile_size == zoom_levels[i])
+        {
+            tile_size = zoom_levels[i - 1];
+            font_size = tile_size * 3 / 4;
+            update_viewport();
+            return;
+        }
     }
 }
 
