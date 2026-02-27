@@ -1,42 +1,27 @@
 // file: DecorEditor.cpp
 #include <algorithm>
+#include <cstdint>
 #include <filesystem>
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <string>
+#include <unordered_map>
+#include <vector>
 
 #pragma warning(push, 0)
 #include <raylib.h>
 #pragma warning(pop)
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
+#include "../Core/Paths.h"
 #include "../Renderer/Renderer.h"
 #include "../Renderer/TileId.h"
 #include "DecorEditor.h"
 
 using json = nlohmann::json;
-
-// ---------------------------------------------------------------------------
-// Resolves a relative path like "data/foo.json" by searching upward from the
-// current working directory until a parent containing "data/" is found.
-// This makes saves/loads work regardless of where the debugger sets the CWD.
-// ---------------------------------------------------------------------------
-static std::filesystem::path resolve_data_path(std::string_view relative)
-{
-	namespace fs = std::filesystem;
-	auto dir = fs::current_path();
-	for (int i = 0; i < 8; ++i)
-	{
-		if (fs::is_directory(dir / "data"))
-			return dir / relative;
-		auto parent = dir.parent_path();
-		if (parent == dir)
-			break;
-		dir = parent;
-	}
-	return fs::current_path() / relative;
-}
 
 // ---------------------------------------------------------------------------
 // Sheet name table (indexed by TileSheet enum value)
@@ -124,7 +109,7 @@ void DecorEditor::save_palette(std::string_view path) const
 	json j;
 	j["tiles"] = palette;
 
-	auto abs = resolve_data_path(path);
+	auto abs = Paths::resolve(path);
 	std::filesystem::create_directories(abs.parent_path());
 	std::ofstream out(abs);
 	out << j.dump(2);
@@ -137,7 +122,7 @@ void DecorEditor::load_palette(std::string_view path)
 	palette.clear();
 	palette_index = 0;
 
-	auto abs = resolve_data_path(path);
+	auto abs = Paths::resolve(path);
 	std::ifstream in(abs);
 	if (!in.is_open())
 	{
@@ -182,7 +167,7 @@ void DecorEditor::save(std::string_view path) const
 		j[map_key] = arr;
 	}
 
-	auto abs = resolve_data_path(path);
+	auto abs = Paths::resolve(path);
 	std::filesystem::create_directories(abs.parent_path());
 	std::ofstream out(abs);
 	out << j.dump(2);
@@ -192,7 +177,7 @@ void DecorEditor::save(std::string_view path) const
 
 void DecorEditor::load(std::string_view path)
 {
-	auto abs_load = resolve_data_path(path);
+	auto abs_load = Paths::resolve(path);
 	std::ifstream in(abs_load);
 	if (!in.is_open())
 	{

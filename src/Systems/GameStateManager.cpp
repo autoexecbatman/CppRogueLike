@@ -1,18 +1,22 @@
 // GameStateManager.cpp - Handles game state persistence and level management
+#include <cassert>
 #include <filesystem>
-#include <format>
 #include <fstream>
+#include <memory>
+#include <stdexcept>
 #include <system_error>
+#include <utility>
+#include <vector>
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
-#include "../Factories/ItemCreator.h"
 #include "../Gui/Gui.h"
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
@@ -30,17 +34,22 @@ using namespace InventoryOperations;
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
+	assert(ctx.data_manager != nullptr);
+	assert(ctx.message_system != nullptr);
+	assert(ctx.level_manager != nullptr);
+	assert(ctx.time != nullptr);
+	assert(ctx.isLoadedGame != nullptr);
+	assert(ctx.map != nullptr);
+	assert(ctx.player != nullptr);
+	assert(ctx.game_status != nullptr);
+
 	ContentRegistry::instance().load(Paths::CONTENT_TILES);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
-	if (ctx.level_manager)
-		ctx.level_manager->reset_to_first_level();
-	if (ctx.time)
-		*ctx.time = 0;
-	if (ctx.isLoadedGame)
-		*ctx.isLoadedGame = false;
+	ctx.level_manager->reset_to_first_level();
+	*ctx.time = 0;
+	*ctx.isLoadedGame = false;
 
-	// regenerate clears creatures, inventory, rooms, objects, then calls init()
 	ctx.map->regenerate(ctx);
 
 	ctx.player->roll_new_character(ctx);
@@ -50,35 +59,41 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 bool GameStateManager::load_all(GameContext& ctx)
 {
+	assert(ctx.menu_manager != nullptr);
+	assert(ctx.data_manager != nullptr);
+	assert(ctx.message_system != nullptr);
+	assert(ctx.isLoadedGame != nullptr);
+	assert(ctx.game_status != nullptr);
+
 	ContentRegistry::instance().load(Paths::CONTENT_TILES);
 	ctx.menu_manager->set_game_initialized(true);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
-	if (!load_game(*ctx.map, *ctx.rooms, *ctx.player, *ctx.stairs, *ctx.creatures, *ctx.inventory_data, *ctx.gui, *ctx.hunger_system, *ctx.level_manager, *ctx.time, ctx))
+	if (!load_game(ctx))
 	{
 		ctx.message_system->log("Error: Could not open save file.");
 		return false;
 	}
 
-	if (ctx.isLoadedGame)
-		*ctx.isLoadedGame = true;
+	*ctx.isLoadedGame = true;
 	*ctx.game_status = GameStatus::STARTUP;
 	ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
 	return true;
 }
 
-void GameStateManager::save_game(
-	Map& map,
-	const std::vector<DungeonRoom>& rooms,
-	Player& player,
-	Stairs& stairs,
-	const std::vector<std::unique_ptr<Creature>>& creatures,
-	const InventoryData& inventory_data,
-	Gui& gui,
-	HungerSystem& hunger_system,
-	const LevelManager& level_manager,
-	int game_time)
+void GameStateManager::save_game(GameContext& ctx)
 {
+	assert(ctx.map != nullptr);
+	assert(ctx.rooms != nullptr);
+	assert(ctx.player != nullptr);
+	assert(ctx.stairs != nullptr);
+	assert(ctx.creatures != nullptr);
+	assert(ctx.inventory_data != nullptr);
+	assert(ctx.gui != nullptr);
+	assert(ctx.hunger_system != nullptr);
+	assert(ctx.level_manager != nullptr);
+	assert(ctx.time != nullptr);
+
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 	std::filesystem::create_directories(save_path.parent_path());
 	std::ofstream file(save_path);
@@ -86,43 +101,30 @@ void GameStateManager::save_game(
 	{
 		json j;
 
-		// Save the map
-		map.save(j);
+		ctx.map->save(j);
+		save_rooms_to_json(*ctx.rooms, j);
 
-		// Save rooms
-		save_rooms_to_json(rooms, j);
-
-		// Save the player
 		json playerJson;
-		player.save(playerJson);
+		ctx.player->save(playerJson);
 		j["player"] = playerJson;
 
-		// Save the stairs
 		json stairsJson;
-		stairs.save(stairsJson);
+		ctx.stairs->save(stairsJson);
 		j["stairs"] = stairsJson;
 
-		// Save creatures
-		save_creatures_to_json(creatures, j);
+		save_creatures_to_json(*ctx.creatures, j);
+		save_inventory(*ctx.inventory_data, j);
 
-		// Save floor items inventory
-		save_inventory(inventory_data, j);
-
-		// Save the message log
 		json guiJson;
-		gui.save(guiJson);
+		ctx.gui->save(guiJson);
 		j["gui"] = guiJson;
 
-		// Save the hunger system
 		json hungerJson;
-		hunger_system.save(hungerJson);
+		ctx.hunger_system->save(hungerJson);
 		j["hunger_system"] = hungerJson;
 
-		// Save the level manager
-		level_manager.save_to_json(j);
-
-		// Save game time
-		j["time"] = game_time;
+		ctx.level_manager->save_to_json(j);
+		j["time"] = *ctx.time;
 
 		// Write the JSON data to the file
 		file << j.dump(4); // Pretty print with an indentation of 4 spaces
@@ -134,71 +136,59 @@ void GameStateManager::save_game(
 	}
 }
 
-bool GameStateManager::load_game(
-	Map& map,
-	std::vector<DungeonRoom>& rooms,
-	Player& player,
-	Stairs& stairs,
-	std::vector<std::unique_ptr<Creature>>& creatures,
-	InventoryData& inventory_data,
-	Gui& gui,
-	HungerSystem& hunger_system,
-	LevelManager& level_manager,
-	int& game_time,
-	GameContext& ctx)
+bool GameStateManager::load_game(GameContext& ctx)
 {
+	assert(ctx.map != nullptr);
+	assert(ctx.rooms != nullptr);
+	assert(ctx.player != nullptr);
+	assert(ctx.stairs != nullptr);
+	assert(ctx.creatures != nullptr);
+	assert(ctx.inventory_data != nullptr);
+	assert(ctx.gui != nullptr);
+	assert(ctx.hunger_system != nullptr);
+	assert(ctx.level_manager != nullptr);
+	assert(ctx.time != nullptr);
+
 	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
 	if (!file.is_open())
 	{
-		return false; // File doesn't exist or can't be opened
+		return false;
 	}
 
 	json j;
 	file >> j;
 
-	// Load the map
-	map.load(j);
+	ctx.map->load(j);
+	load_rooms_from_json(j, *ctx.rooms);
 
-	// Load the rooms
-	load_rooms_from_json(j, rooms);
-
-	// Load the player
 	if (j.contains("player"))
 	{
-		player.load(j["player"]);
+		ctx.player->load(j["player"]);
 	}
 
-	// Load the stairs
 	if (j.contains("stairs"))
 	{
-		stairs.load(j["stairs"]);
+		ctx.stairs->load(j["stairs"]);
 	}
 
-	// Load creatures
-	load_creatures_from_json(j, creatures);
+	load_creatures_from_json(j, *ctx.creatures);
+	load_inventory(*ctx.inventory_data, j);
 
-	// Load floor items inventory
-	load_inventory(inventory_data, j);
-
-	// Load the message log
 	if (j.contains("gui"))
 	{
-		gui.load(j["gui"]);
+		ctx.gui->load(j["gui"]);
 	}
 
-	// Load the hunger system
 	if (j.contains("hunger_system"))
 	{
-		hunger_system.load(ctx, j["hunger_system"]);
+		ctx.hunger_system->load(ctx, j["hunger_system"]);
 	}
 
-	// Load the level manager
-	level_manager.load_from_json(j);
+	ctx.level_manager->load_from_json(j);
 
-	// Load game time
 	if (j.contains("time"))
 	{
-		game_time = j["time"];
+		*ctx.time = j["time"];
 	}
 
 	return true; // Successfully loaded

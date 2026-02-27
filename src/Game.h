@@ -4,17 +4,20 @@
 // C++ Core Guidelines: C.9 minimize exposure, Rule of Zero
 
 #include <deque>
+#include <exception>
 #include <memory>
+#include <string>
 #include <vector>
 
+#include "Actor/Actor.h"
 #include "Actor/InventoryData.h"
 #include "ActorTypes/Player.h"
 #include "Core/GameContext.h"
 #include "Gui/Gui.h"
+#include "Map/DungeonRoom.h"
 #include "Map/Map.h"
 #include "Menu/BaseMenu.h"
 #include "Random/RandomDice.h"
-
 #include "Renderer/InputSystem.h"
 #include "Renderer/Renderer.h"
 #include "Systems/AnimationSystem.h"
@@ -35,6 +38,7 @@
 #include "Tools/DecorEditor.h"
 #include "Tools/PrefabLibrary.h"
 #include "Tools/RoomEditor.h"
+#include "Utils/Vector2D.h"
 
 class Game
 {
@@ -137,7 +141,8 @@ public:
 		{
 			try
 			{
-				state_manager.save_game(map, rooms, *player, *stairs, creatures, inventory_data, gui, hunger_system, level_manager, time);
+				auto ctx = context();
+				state_manager.save_game(ctx);
 			}
 			catch (const std::exception& e)
 			{

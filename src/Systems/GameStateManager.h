@@ -31,30 +31,8 @@ public:
 	void init_new_game(GameContext& ctx);
 
 	// Save/Load operations
-	void save_game(
-		Map& map,
-		const std::vector<DungeonRoom>& rooms,
-		Player& player,
-		Stairs& stairs,
-		const std::vector<std::unique_ptr<Creature>>& creatures,
-		const InventoryData& inventory_data,
-		Gui& gui,
-		HungerSystem& hunger_system,
-		const LevelManager& level_manager,
-		int game_time);
-
-	bool load_game(
-		Map& map,
-		std::vector<DungeonRoom>& rooms,
-		Player& player,
-		Stairs& stairs,
-		std::vector<std::unique_ptr<Creature>>& creatures,
-		InventoryData& inventory_data,
-		Gui& gui,
-		HungerSystem& hunger_system,
-		LevelManager& level_manager,
-		int& game_time,
-		GameContext& ctx);
+	void save_game(GameContext& ctx);
+	bool load_game(GameContext& ctx);
 
 	// File operations
 	static bool save_file_exists();
