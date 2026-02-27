@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
-#include <string>
 #include <array>
+#include <string>
+#include <vector>
 
 #include "../Actor/EquipmentSlot.h"
 #include "../Items/ItemClassification.h"
@@ -43,27 +43,25 @@ inline constexpr int DETAIL_BAR_HEIGHT = 4;
 inline constexpr int TAB_BAR_HEIGHT = 1;
 inline constexpr int SLOT_COUNT = 15;
 
-inline constexpr std::array<SlotDisplayInfo, SLOT_COUNT> SLOT_TABLE
-{{
-	{EquipmentSlot::HEAD,           "Head"},
-	{EquipmentSlot::NECK,           "Neck"},
-	{EquipmentSlot::BODY,           "Body"},
-	{EquipmentSlot::GIRDLE,         "Girdle"},
-	{EquipmentSlot::CLOAK,          "Cloak"},
-	{EquipmentSlot::RIGHT_HAND,     "Right Hand"},
-	{EquipmentSlot::LEFT_HAND,      "Left Hand"},
-	{EquipmentSlot::RIGHT_RING,     "Right Ring"},
-	{EquipmentSlot::LEFT_RING,      "Left Ring"},
-	{EquipmentSlot::BRACERS,        "Bracers"},
-	{EquipmentSlot::GAUNTLETS,      "Gauntlets"},
-	{EquipmentSlot::BOOTS,          "Boots"},
-	{EquipmentSlot::MISSILE_WEAPON, "Missile"},
-	{EquipmentSlot::MISSILES,       "Ammo"},
-	{EquipmentSlot::TOOL,           "Tool"},
-}};
+inline constexpr std::array<SlotDisplayInfo, SLOT_COUNT> SLOT_TABLE{ {
+	{ EquipmentSlot::HEAD, "Head" },
+	{ EquipmentSlot::NECK, "Neck" },
+	{ EquipmentSlot::BODY, "Body" },
+	{ EquipmentSlot::GIRDLE, "Girdle" },
+	{ EquipmentSlot::CLOAK, "Cloak" },
+	{ EquipmentSlot::RIGHT_HAND, "Right Hand" },
+	{ EquipmentSlot::LEFT_HAND, "Left Hand" },
+	{ EquipmentSlot::RIGHT_RING, "Right Ring" },
+	{ EquipmentSlot::LEFT_RING, "Left Ring" },
+	{ EquipmentSlot::BRACERS, "Bracers" },
+	{ EquipmentSlot::GAUNTLETS, "Gauntlets" },
+	{ EquipmentSlot::BOOTS, "Boots" },
+	{ EquipmentSlot::MISSILE_WEAPON, "Missile" },
+	{ EquipmentSlot::MISSILES, "Ammo" },
+	{ EquipmentSlot::TOOL, "Tool" },
+} };
 
-inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER
-{{
+inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER{ {
 	ItemCategory::CONSUMABLE,
 	ItemCategory::SCROLL,
 	ItemCategory::WEAPON,
@@ -77,14 +75,13 @@ inline constexpr std::array<ItemCategory, 13> CATEGORY_ORDER
 	ItemCategory::TREASURE,
 	ItemCategory::QUEST_ITEM,
 	ItemCategory::UNKNOWN,
-}};
+} };
 
-inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES
-{{
+inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES{ {
 	ItemCategory::CONSUMABLE,
 	ItemCategory::SCROLL,
 	ItemCategory::UNKNOWN,
-}};
+} };
 
 class InventoryUI
 {

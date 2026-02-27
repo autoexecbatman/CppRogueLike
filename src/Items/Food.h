@@ -1,8 +1,8 @@
 #pragma once
 
+#include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
 #include "../Persistent/Persistent.h"
-#include "../Actor/Actor.h"
 
 struct GameContext;
 struct Vector2D;
@@ -10,38 +10,38 @@ struct Vector2D;
 class Food : public Pickable
 {
 public:
-    Food(int nutrition_value);
+	Food(int nutrition_value);
 
-    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-    void load(const json& j) override;
-    void save(json& j) override;
-    PickableType get_type() const override { return PickableType::FOOD; }
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
+	void load(const json& j) override;
+	void save(json& j) override;
+	PickableType get_type() const override { return PickableType::FOOD; }
 
 private:
-    int nutrition_value{};  // How much hunger this food reduces
+	int nutrition_value{}; // How much hunger this food reduces
 };
 
 // Different food types with varying nutritional values
 class Ration : public Item
 {
 public:
-    Ration(Vector2D position);
+	Ration(Vector2D position);
 };
 
 class Fruit : public Item
 {
 public:
-    Fruit(Vector2D position);
+	Fruit(Vector2D position);
 };
 
 class Bread : public Item
 {
 public:
-    Bread(Vector2D position);
+	Bread(Vector2D position);
 };
 
 class Meat : public Item
 {
 public:
-    Meat(Vector2D position);
+	Meat(Vector2D position);
 };

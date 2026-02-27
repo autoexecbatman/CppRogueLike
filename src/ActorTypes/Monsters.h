@@ -7,21 +7,21 @@ struct GameContext;
 // Disguise data for Mimic class
 struct Disguise
 {
-    int ch;
-    std::string name;
-    int color;
+	int ch;
+	std::string name;
+	int color;
 };
 
 // Mimic has unique disguise logic — kept as a class
 class Mimic : public Creature
 {
 public:
-    Mimic(Vector2D position, GameContext& ctx);
+	Mimic(Vector2D position, GameContext& ctx);
 
-    std::vector<Disguise> get_possible_disguises() const;
+	std::vector<Disguise> get_possible_disguises() const;
 
 private:
-    void initDisguises();
+	void initDisguises();
 
-    std::vector<Disguise> possibleDisguises;
+	std::vector<Disguise> possibleDisguises;
 };

@@ -1,59 +1,64 @@
 #include "Food.h"
 #include "../Colors/Colors.h"
-#include "../Renderer/TileId.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/TileId.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 
-Food::Food(int nutrition_value) : nutrition_value(nutrition_value) {}
+Food::Food(int nutrition_value)
+	: nutrition_value(nutrition_value) {}
 
 bool Food::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
-    // Reduce hunger by the nutrition value of the food
-    ctx.hunger_system->decrease_hunger(ctx, nutrition_value);
+	// Reduce hunger by the nutrition value of the food
+	ctx.hunger_system->decrease_hunger(ctx, nutrition_value);
 
-    // Display message
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
-    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ".");
-    ctx.message_system->finalize_message();
+	// Display message
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ".");
+	ctx.message_system->finalize_message();
 
-    // Food is consumed after being eaten
-    return Pickable::use(owner, wearer, ctx);
+	// Food is consumed after being eaten
+	return Pickable::use(owner, wearer, ctx);
 }
 
 void Food::load(const json& j)
 {
-    nutrition_value = j["nutrition_value"].get<int>();
+	nutrition_value = j["nutrition_value"].get<int>();
 }
 
 void Food::save(json& j)
 {
-    j["type"] = static_cast<int>(PickableType::FOOD);
-    j["nutrition_value"] = nutrition_value;
+	j["type"] = static_cast<int>(PickableType::FOOD);
+	j["nutrition_value"] = nutrition_value;
 }
 
 // Implementations for different food types
-Ration::Ration(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "ration", WHITE_GREEN_PAIR })
+Ration::Ration(Vector2D position)
+	: Item(position, ActorData{ TILE_FOOD, "ration", WHITE_GREEN_PAIR })
 {
-    pickable = std::make_unique<Food>(300);  // High nutritional value
-    value = 10;  // Base gold value
+	pickable = std::make_unique<Food>(300);
+	set_value(10);
 }
 
-Fruit::Fruit(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "fruit", GREEN_BLACK_PAIR })
+Fruit::Fruit(Vector2D position)
+	: Item(position, ActorData{ TILE_FOOD, "fruit", GREEN_BLACK_PAIR })
 {
-    pickable = std::make_unique<Food>(100);  // Medium nutritional value
-    value = 3;  // Base gold value
+	pickable = std::make_unique<Food>(100);
+	set_value(3);
 }
 
-Bread::Bread(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "bread", RED_YELLOW_PAIR })
+Bread::Bread(Vector2D position)
+	: Item(position, ActorData{ TILE_FOOD, "bread", RED_YELLOW_PAIR })
 {
-    pickable = std::make_unique<Food>(200);  // Medium-high nutritional value
-    value = 5;  // Base gold value
+	pickable = std::make_unique<Food>(200);
+	set_value(5);
 }
 
-Meat::Meat(Vector2D position) : Item(position, ActorData{ TILE_FOOD, "meat", RED_BLACK_PAIR })
+Meat::Meat(Vector2D position)
+	: Item(position, ActorData{ TILE_FOOD, "meat", RED_BLACK_PAIR })
 {
-    pickable = std::make_unique<Food>(250);  // High nutritional value
-    value = 8;  // Base gold value
+	pickable = std::make_unique<Food>(250);
+	set_value(8);
 }

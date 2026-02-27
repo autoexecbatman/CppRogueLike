@@ -284,7 +284,7 @@ TEST_F(EnhancementSystemTest, ColdResistance_InValidRange) {
 // ----------------------------------------------------------------------------
 
 TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
-    auto enhancement = ItemEnhancement::generate_random_enhancement();
+    auto enhancement = ItemEnhancement::generate_random_enhancement(true);
 
     // Should have at least one enhancement (prefix or suffix or level)
     bool hasEnhancement = (enhancement.prefix != PrefixType::NONE) ||

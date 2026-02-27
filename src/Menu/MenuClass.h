@@ -1,8 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
@@ -43,11 +43,17 @@ class MenuClass : public BaseMenu
 	int menu_width{ 14 };
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
-	enum class MenuState { FIGHTER, ROGUE, CLERIC, WIZARD, RANDOM, BACK }
-	currentState{ MenuState::FIGHTER };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuClassStrings
+	enum class MenuState
 	{
+		FIGHTER,
+		ROGUE,
+		CLERIC,
+		WIZARD,
+		RANDOM,
+		BACK
+	} currentState{ MenuState::FIGHTER };
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
+	std::unordered_map<MenuState, std::string> menuClassStrings{
 		{ MenuState::FIGHTER, "Fighter" },
 		{ MenuState::ROGUE, "Rogue" },
 		{ MenuState::CLERIC, "Cleric" },
@@ -58,6 +64,7 @@ class MenuClass : public BaseMenu
 
 	std::string menu_class_get_string(MenuState option) { return menuClassStrings.at(option); };
 	void menu_class_print_option(MenuState option) noexcept;
+
 public:
 	MenuClass(GameContext& ctx);
 	~MenuClass();

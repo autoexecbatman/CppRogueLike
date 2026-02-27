@@ -18,9 +18,11 @@ private:
 	void load(const json& j) override;
 	void save(json& j) override;
 	int calculate_step(int positionDifference);
-	void moveToTarget(Actor& owner, Vector2D target, GameContext& ctx);
+	void move_to_target(Actor& owner, Vector2D target, GameContext& ctx);
+
 protected:
-	void moveOrTrade(Creature& owner, Vector2D target, GameContext& ctx);
+	void move_or_trade(Creature& owner, Vector2D target, GameContext& ctx);
+
 public:
 	bool tradeMenuOpen{ false }; // Prevents multiple trade menu opens - now public
 	void trade(Creature& shopkeeper, Creature& player, GameContext& ctx);

@@ -1,16 +1,16 @@
 // file: AiShopkeeper.cpp
 #include "AiShopkeeper.h"
-#include "../Random/RandomDice.h"
 #include "../Actor/Actor.h"
-#include "../Items/Items.h"
-#include "../Menu/MenuTrade.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
-#include "../Systems/MessageSystem.h"
+#include "../Items/Items.h"
+#include "../Menu/MenuTrade.h"
+#include "../Random/RandomDice.h"
 #include "../Systems/MenuManager.h"
+#include "../Systems/MessageSystem.h"
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
-constexpr auto MAX_TRADE_DISTANCE = 1;  // Maximum distance to initiate a trade (adjacent only - no diagonals)
+constexpr auto MAX_TRADE_DISTANCE = 1; // Maximum distance to initiate a trade (adjacent only - no diagonals)
 
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
@@ -18,60 +18,61 @@ int AiShopkeeper::calculate_step(int positionDifference)
 	return positionDifference > 0 ? 1 : -1;
 }
 
-void AiShopkeeper::moveToTarget(Actor& owner, Vector2D target, GameContext& ctx)
+void AiShopkeeper::move_to_target(Actor& owner, Vector2D target, GameContext& ctx)
 {
-    // Calculate direction vector using Vector2D operations
-    Vector2D direction = target - owner.position;  // Assumes Vector2D has subtraction operator
+	// Calculate direction vector using Vector2D operations
+	Vector2D direction = target - owner.position; // Assumes Vector2D has subtraction operator
 
-    // Calculate step directions for each axis
-    Vector2D step{
-        direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1),  // Y step direction
-        direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1)   // X step direction
-    };
+	// Calculate step directions for each axis
+	Vector2D step{
+		direction.y == 0 ? 0 : (direction.y > 0 ? 1 : -1), // Y step direction
+		direction.x == 0 ? 0 : (direction.x > 0 ? 1 : -1) // X step direction
+	};
 
-    // Define movement priorities using Vector2D directly
-    std::vector<Vector2D> moves{
-        step,                             // First priority: diagonal movement (both Y and X)
-        Vector2D{ step.x, 0 },            // Second priority: horizontal only (X movement)
-        Vector2D{ 0, step.y }             // Third priority: vertical only (Y movement)
-    };
+	// Define movement priorities using Vector2D directly
+	std::vector<Vector2D> moves{
+		step, // First priority: diagonal movement (both Y and X)
+		Vector2D{ step.x, 0 }, // Second priority: horizontal only (X movement)
+		Vector2D{ 0, step.y } // Third priority: vertical only (Y movement)
+	};
 
-    // Try each move in priority order
-    for (const auto& move : moves)
-    {
-        Vector2D nextPos = owner.position + move;  // Vector2D addition
+	// Try each move in priority order
+	for (const auto& move : moves)
+	{
+		Vector2D nextPos = owner.position + move; // Vector2D addition
 
-        // ULTIMATE FIX: Multiple collision checks to prevent any overlap
-        if (ctx.map->can_walk(nextPos, ctx))
-        {
-            // Allow shopkeeper to move adjacent to player for trading
-            if (ctx.player && ctx.player->position == nextPos)
-            {
-                // Can't occupy same space as player, but can be adjacent
-                continue;
-            }
+		// ULTIMATE FIX: Multiple collision checks to prevent any overlap
+		if (ctx.map->can_walk(nextPos, ctx))
+		{
+			// Allow shopkeeper to move adjacent to player for trading
+			if (ctx.player && ctx.player->position == nextPos)
+			{
+				// Can't occupy same space as player, but can be adjacent
+				continue;
+			}
 
-            // EXTRA SAFETY: Double-check no actor at position
-            if (ctx.map->get_actor(nextPos, ctx) != nullptr)
-            {
-                continue; // Skip this move - position occupied
-            }
+			// EXTRA SAFETY: Double-check no actor at position
+			if (ctx.map->get_actor(nextPos, ctx) != nullptr)
+			{
+				continue; // Skip this move - position occupied
+			}
 
-            // SAFE TO MOVE - Update position using Vector2D
-            owner.position = nextPos;
-            break; // Exit after successful move
-        }
-    }
-    // If no valid moves available, shopkeeper stays in place
+			// SAFE TO MOVE - Update position using Vector2D
+			owner.position = nextPos;
+			break; // Exit after successful move
+		}
+	}
+	// If no valid moves available, shopkeeper stays in place
 }
 
-void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target, GameContext& ctx)
+void AiShopkeeper::move_or_trade(Creature& shopkeeper, Vector2D target, GameContext& ctx)
 {
 	// Use unified distance function - no coordinate confusion!
 	const int distance = shopkeeper.get_tile_distance(target);
 
 	// DEBUG: Log distance calculation
-	if (ctx.message_system->is_debug_mode()) {
+	if (ctx.message_system->is_debug_mode())
+	{
 		ctx.message_system->log("Shopkeeper distance to player: " + std::to_string(distance) +
 			" (Shopkeeper: " + std::to_string(shopkeeper.position.x) + "," + std::to_string(shopkeeper.position.y) +
 			" Player: " + std::to_string(target.x) + "," + std::to_string(target.y) + ")");
@@ -89,7 +90,7 @@ void AiShopkeeper::moveOrTrade(Creature& shopkeeper, Vector2D target, GameContex
 	{
 		ctx.message_system->log("Distance > MAX_TRADE_DISTANCE, moving toward player");
 		// Only move if not in cooldown and distance is greater than trade distance
-		moveToTarget(shopkeeper, target, ctx);
+		move_to_target(shopkeeper, target, ctx);
 	}
 	else
 	{
@@ -146,7 +147,7 @@ void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 	if (moveCount > 0)
 	{
 		// Only move, don't trade during approach (trade check handled above)
-		moveToTarget(owner, ctx.player->position, ctx);
+		move_to_target(owner, ctx.player->position, ctx);
 	}
 }
 

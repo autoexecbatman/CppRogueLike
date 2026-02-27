@@ -1,20 +1,20 @@
 // file: MenuClass.cpp
 #include <algorithm>
 
-#include "MenuClass.h"
-#include "MenuName.h"
-#include "../Colors/Colors.h"
-#include "../Random/RandomDice.h"
-#include "../ActorTypes/Player.h"
-#include "../Items/Items.h"
-#include "../Items/Armor.h"
-#include "../Actor/Pickable.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Healer.h"
-#include "../Factories/ItemCreator.h"
+#include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Factories/ItemCreator.h"
+#include "../Items/Armor.h"
+#include "../Items/Items.h"
+#include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
+#include "MenuClass.h"
+#include "MenuName.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -63,7 +63,8 @@ void ClassRandom::on_selection(GameContext& ctx)
 		ctx.player->playerClass = "Cleric";
 		ctx.player->playerClassState = Player::PlayerClassState::CLERIC;
 		break;
-	default:break;
+	default:
+		break;
 	}
 }
 

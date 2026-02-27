@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Persistent/Persistent.h"
 #include "../Actor/Pickable.h"
+#include "../Persistent/Persistent.h"
 
 class Creature;
 class Item;

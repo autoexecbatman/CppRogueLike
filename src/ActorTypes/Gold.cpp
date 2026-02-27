@@ -3,23 +3,24 @@
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
 
-Gold::Gold(int amount) : amount(amount)
+Gold::Gold(int amount)
+	: amount(amount)
 {
 }
 
 bool Gold::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
-    // Add gold amount to player's currency
-    wearer.adjust_gold(amount);
+	// Add gold amount to player's currency
+	wearer.adjust_gold(amount);
 
-    // Display a message
-    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "You gained ");
-    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(amount));
-    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, " gold.");
-    ctx.message_system->finalize_message();
+	// Display a message
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "You gained ");
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(amount));
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, " gold.");
+	ctx.message_system->finalize_message();
 
-    // Return true to consume the item
-    return Pickable::use(owner, wearer, ctx);
+	// Return true to consume the item
+	return Pickable::use(owner, wearer, ctx);
 }
 
 void Gold::save(json& j)
@@ -30,10 +31,12 @@ void Gold::save(json& j)
 
 void Gold::load(const json& j)
 {
-	if (j.contains("amount") && j["amount"].is_number_integer()) {
+	if (j.contains("amount") && j["amount"].is_number_integer())
+	{
 		amount = j["amount"].get<int>(); // Load the amount
 	}
-	else {
+	else
+	{
 		throw std::runtime_error("Invalid JSON format for Gold");
 	}
 }

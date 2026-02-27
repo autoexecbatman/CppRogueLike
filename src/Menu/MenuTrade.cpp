@@ -1,15 +1,15 @@
 #include "MenuTrade.h"
+#include "../Actor/Actor.h"
 #include "../Ai/AiPlayer.h"
 #include "../Ai/AiShopkeeper.h"
-#include "MenuBuy.h"
-#include "MenuSell.h"
-#include "../Actor/Actor.h"
-#include "../Systems/ShopKeeper.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
-#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Systems/ShopKeeper.h"
+#include "MenuBuy.h"
+#include "MenuSell.h"
 
 void Buy::on_selection(GameContext& ctx)
 {
@@ -32,7 +32,8 @@ void Exit::on_selection(GameContext& ctx)
 {
 }
 
-MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx) : shopkeeper(shopkeeper)
+MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
+	: shopkeeper(shopkeeper)
 {
 	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
 	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;

@@ -1,520 +1,526 @@
-#include <format>
-#include <cmath>
 #include <algorithm>
+#include <cmath>
+#include <format>
 #include <map>
 
-#include "SpellSystem.h"
-#include "../Core/GameContext.h"
-#include "../Colors/Colors.h"
-#include "BuffSystem.h"
 #include "../ActorTypes/Player.h"
-#include "../Utils/Vector2D.h"
-#include "MessageSystem.h"
-#include "CreatureManager.h"
-#include "../Map/Map.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
 #include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
+#include "../Map/Map.h"
 #include "../Menu/MenuSpellCast.h"
-#include "TargetingSystem.h"
+#include "../Utils/Vector2D.h"
+#include "BuffSystem.h"
+#include "CreatureManager.h"
+#include "MessageSystem.h"
 #include "SpellAnimations.h"
+#include "SpellSystem.h"
+#include "TargetingSystem.h"
 
 // Helper to convert PlayerClassState to CasterClass
 static CasterClass to_caster_class(Player::PlayerClassState state)
 {
-    switch (state)
-    {
-    case Player::PlayerClassState::CLERIC: return CasterClass::CLERIC;
-    case Player::PlayerClassState::WIZARD: return CasterClass::WIZARD;
-    default: return CasterClass::NONE;
-    }
+	switch (state)
+	{
+	case Player::PlayerClassState::CLERIC:
+		return CasterClass::CLERIC;
+	case Player::PlayerClassState::WIZARD:
+		return CasterClass::WIZARD;
+	default:
+		return CasterClass::NONE;
+	}
 }
 
 const std::map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
 {
-    static const std::map<SpellId, SpellDefinition> spells = {
-        // Cleric Level 1
-        {SpellId::CURE_LIGHT_WOUNDS, {SpellId::CURE_LIGHT_WOUNDS, "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP"}},
-        {SpellId::BLESS, {SpellId::BLESS, "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns"}},
-        {SpellId::SANCTUARY, {SpellId::SANCTUARY, "Sanctuary", 1, SpellClass::CLERIC, "Enemies ignore you for 3 turns"}},
+	static const std::map<SpellId, SpellDefinition> spells = {
+		// Cleric Level 1
+		{ SpellId::CURE_LIGHT_WOUNDS, { SpellId::CURE_LIGHT_WOUNDS, "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP" } },
+		{ SpellId::BLESS, { SpellId::BLESS, "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns" } },
+		{ SpellId::SANCTUARY, { SpellId::SANCTUARY, "Sanctuary", 1, SpellClass::CLERIC, "Enemies ignore you for 3 turns" } },
 
-        // Cleric Level 2
-        {SpellId::HOLD_PERSON, {SpellId::HOLD_PERSON, "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns"}},
-        {SpellId::SILENCE, {SpellId::SILENCE, "Silence", 2, SpellClass::CLERIC, "Prevent target from casting"}},
+		// Cleric Level 2
+		{ SpellId::HOLD_PERSON, { SpellId::HOLD_PERSON, "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns" } },
+		{ SpellId::SILENCE, { SpellId::SILENCE, "Silence", 2, SpellClass::CLERIC, "Prevent target from casting" } },
 
-        // Wizard Level 1
-        {SpellId::MAGIC_MISSILE, {SpellId::MAGIC_MISSILE, "Magic Missile", 1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit"}},
-        {SpellId::SHIELD, {SpellId::SHIELD, "Shield", 1, SpellClass::WIZARD, "+4 AC for 5 turns"}},
-        {SpellId::SLEEP, {SpellId::SLEEP, "Sleep", 1, SpellClass::WIZARD, "Put weak enemies to sleep"}},
+		// Wizard Level 1
+		{ SpellId::MAGIC_MISSILE, { SpellId::MAGIC_MISSILE, "Magic Missile", 1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit" } },
+		{ SpellId::SHIELD, { SpellId::SHIELD, "Shield", 1, SpellClass::WIZARD, "+4 AC for 5 turns" } },
+		{ SpellId::SLEEP, { SpellId::SLEEP, "Sleep", 1, SpellClass::WIZARD, "Put weak enemies to sleep" } },
 
-        // Wizard Level 2
-        {SpellId::INVISIBILITY, {SpellId::INVISIBILITY, "Invisibility", 2, SpellClass::WIZARD, "Become invisible for 20 turns"}},
-        {SpellId::WEB, {SpellId::WEB, "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies"}},
+		// Wizard Level 2
+		{ SpellId::INVISIBILITY, { SpellId::INVISIBILITY, "Invisibility", 2, SpellClass::WIZARD, "Become invisible for 20 turns" } },
+		{ SpellId::WEB, { SpellId::WEB, "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies" } },
 
-        // Wizard Level 3
-        {SpellId::FIREBALL, {SpellId::FIREBALL, "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half"}},
-        {SpellId::TELEPORT, {SpellId::TELEPORT, "Teleport", 3, SpellClass::WIZARD, "Teleport to random location"}},
+		// Wizard Level 3
+		{ SpellId::FIREBALL, { SpellId::FIREBALL, "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half" } },
+		{ SpellId::TELEPORT, { SpellId::TELEPORT, "Teleport", 3, SpellClass::WIZARD, "Teleport to random location" } },
 
-        {SpellId::NONE, {SpellId::NONE, "None", 0, SpellClass::BOTH, ""}}
-    };
-    return spells;
+		{ SpellId::NONE, { SpellId::NONE, "None", 0, SpellClass::BOTH, "" } }
+	};
+	return spells;
 }
 
 const SpellDefinition& SpellSystem::get_spell_definition(SpellId id)
 {
-    const auto& table = get_spell_table();
-    auto it = table.find(id);
-    if (it != table.end())
-    {
-        return it->second;
-    }
-    return table.at(SpellId::NONE);
+	const auto& table = get_spell_table();
+	auto it = table.find(id);
+	if (it != table.end())
+	{
+		return it->second;
+	}
+	return table.at(SpellId::NONE);
 }
 
 int SpellSystem::get_spell_level(SpellId id)
 {
-    return get_spell_definition(id).level;
+	return get_spell_definition(id).level;
 }
 
 const std::string& SpellSystem::get_spell_name(SpellId id)
 {
-    return get_spell_definition(id).name;
+	return get_spell_definition(id).name;
 }
 
 std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 {
-    // AD&D 2e spell progression tables
-    // Returns slots per spell level [level1, level2, level3, ...]
+	// AD&D 2e spell progression tables
+	// Returns slots per spell level [level1, level2, level3, ...]
 
-    if (classState == CasterClass::CLERIC)
-    {
-        // Cleric spell progression
-        static const std::vector<std::vector<int>> clericSlots = {
-            {1},           // Level 1
-            {2},           // Level 2
-            {2, 1},        // Level 3
-            {3, 2},        // Level 4
-            {3, 3, 1},     // Level 5
-            {3, 3, 2},     // Level 6
-            {3, 3, 2, 1},  // Level 7
-            {3, 3, 3, 2},  // Level 8
-            {4, 4, 3, 2, 1}, // Level 9
-            {4, 4, 3, 3, 2}, // Level 10
-        };
-        int idx = std::min(level, 10) - 1;
-        return idx >= 0 ? clericSlots[idx] : std::vector<int>{};
-    }
-    else if (classState == CasterClass::WIZARD)
-    {
-        // Wizard spell progression
-        static const std::vector<std::vector<int>> wizardSlots = {
-            {1},           // Level 1
-            {2},           // Level 2
-            {2, 1},        // Level 3
-            {3, 2},        // Level 4
-            {4, 2, 1},     // Level 5
-            {4, 2, 2},     // Level 6
-            {4, 3, 2, 1},  // Level 7
-            {4, 3, 3, 2},  // Level 8
-            {4, 3, 3, 2, 1}, // Level 9
-            {4, 4, 3, 2, 2}, // Level 10
-        };
-        int idx = std::min(level, 10) - 1;
-        return idx >= 0 ? wizardSlots[idx] : std::vector<int>{};
-    }
+	if (classState == CasterClass::CLERIC)
+	{
+		// Cleric spell progression
+		static const std::vector<std::vector<int>> clericSlots = {
+			{ 1 }, // Level 1
+			{ 2 }, // Level 2
+			{ 2, 1 }, // Level 3
+			{ 3, 2 }, // Level 4
+			{ 3, 3, 1 }, // Level 5
+			{ 3, 3, 2 }, // Level 6
+			{ 3, 3, 2, 1 }, // Level 7
+			{ 3, 3, 3, 2 }, // Level 8
+			{ 4, 4, 3, 2, 1 }, // Level 9
+			{ 4, 4, 3, 3, 2 }, // Level 10
+		};
+		int idx = std::min(level, 10) - 1;
+		return idx >= 0 ? clericSlots[idx] : std::vector<int>{};
+	}
+	else if (classState == CasterClass::WIZARD)
+	{
+		// Wizard spell progression
+		static const std::vector<std::vector<int>> wizardSlots = {
+			{ 1 }, // Level 1
+			{ 2 }, // Level 2
+			{ 2, 1 }, // Level 3
+			{ 3, 2 }, // Level 4
+			{ 4, 2, 1 }, // Level 5
+			{ 4, 2, 2 }, // Level 6
+			{ 4, 3, 2, 1 }, // Level 7
+			{ 4, 3, 3, 2 }, // Level 8
+			{ 4, 3, 3, 2, 1 }, // Level 9
+			{ 4, 4, 3, 2, 2 }, // Level 10
+		};
+		int idx = std::min(level, 10) - 1;
+		return idx >= 0 ? wizardSlots[idx] : std::vector<int>{};
+	}
 
-    return {};
+	return {};
 }
 
 std::vector<SpellId> SpellSystem::get_available_spells(CasterClass classState, int maxSpellLevel)
 {
-    std::vector<SpellId> available;
-    SpellClass targetClass = (classState == CasterClass::CLERIC)
-        ? SpellClass::CLERIC
-        : SpellClass::WIZARD;
+	std::vector<SpellId> available;
+	SpellClass targetClass = (classState == CasterClass::CLERIC)
+		? SpellClass::CLERIC
+		: SpellClass::WIZARD;
 
-    for (const auto& [id, def] : get_spell_table())
-    {
-        if (id == SpellId::NONE) continue;
-        if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH)
-            && def.level <= maxSpellLevel)
-        {
-            available.push_back(id);
-        }
-    }
-    return available;  // std::map iteration is already ordered by SpellId
+	for (const auto& [id, def] : get_spell_table())
+	{
+		if (id == SpellId::NONE)
+			continue;
+		if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH) && def.level <= maxSpellLevel)
+		{
+			available.push_back(id);
+		}
+	}
+	return available; // std::map iteration is already ordered by SpellId
 }
 
 bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
 {
-    switch (spell)
-    {
-    case SpellId::CURE_LIGHT_WOUNDS:
-        return cast_cure_light_wounds(caster, ctx);
-    case SpellId::BLESS:
-        return cast_bless(caster, ctx);
-    case SpellId::FIREBALL:
-        return cast_fireball(caster, ctx);
-    case SpellId::MAGIC_MISSILE:
-        return cast_magic_missile(caster, ctx);
-    case SpellId::SHIELD:
-        return cast_shield(caster, ctx);
-    case SpellId::SLEEP:
-        return cast_sleep(caster, ctx);
-    case SpellId::INVISIBILITY:
-        return cast_invisibility(caster, ctx);
-    case SpellId::TELEPORT:
-        return cast_teleport(caster, ctx);
-    default:
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
-        return false;
-    }
+	switch (spell)
+	{
+	case SpellId::CURE_LIGHT_WOUNDS:
+		return cast_cure_light_wounds(caster, ctx);
+	case SpellId::BLESS:
+		return cast_bless(caster, ctx);
+	case SpellId::FIREBALL:
+		return cast_fireball(caster, ctx);
+	case SpellId::MAGIC_MISSILE:
+		return cast_magic_missile(caster, ctx);
+	case SpellId::SHIELD:
+		return cast_shield(caster, ctx);
+	case SpellId::SLEEP:
+		return cast_sleep(caster, ctx);
+	case SpellId::INVISIBILITY:
+		return cast_invisibility(caster, ctx);
+	case SpellId::TELEPORT:
+		return cast_teleport(caster, ctx);
+	default:
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
+		return false;
+	}
 }
 
 static void animate_heal(const Vector2D& pos)
 {
-    // TODO: stub - heal animation requires renderer replacement
-    // Previously drew "+", "*", "+" frames at pos with COLOR_PAIR(GREEN_BLACK_PAIR) and napms(100)
+	// TODO: stub - heal animation requires renderer replacement
+	// Previously drew "+", "*", "+" frames at pos with COLOR_PAIR(GREEN_BLACK_PAIR) and napms(100)
 }
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
-    if (!caster.destructible) return false;
+	if (!caster.destructible)
+		return false;
 
-    animate_heal(caster.position);
+	animate_heal(caster.position);
 
-    int healing = ctx.dice->roll(1, 8);
-    int oldHp = caster.destructible->get_hp();
-    int maxHp = caster.destructible->get_max_hp();
-    int newHp = std::min(oldHp + healing, maxHp);
-    int actualHealing = newHp - oldHp;
+	int healing = ctx.dice->roll(1, 8);
+	int oldHp = caster.destructible->get_hp();
+	int maxHp = caster.destructible->get_max_hp();
+	int newHp = std::min(oldHp + healing, maxHp);
+	int actualHealing = newHp - oldHp;
 
-    caster.destructible->set_hp(newHp);
+	caster.destructible->set_hp(newHp);
 
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
-    ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));
-    ctx.message_system->finalize_message();
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
+	ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));
+	ctx.message_system->finalize_message();
 
-    return true;
+	return true;
 }
 
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
-    ctx.buff_system->add_buff(caster, BuffType::BLESS, 0, 6, false);  // Spell: ADD effect
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
-    ctx.message_system->finalize_message();
-    return true;
+	ctx.buff_system->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
+	ctx.message_system->finalize_message();
+	return true;
 }
 
 bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 {
-    auto* player = dynamic_cast<Player*>(&caster);
-    int casterLevel = player ? player->get_player_level() : 1;
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
 
-    // AD&D 2e: range 10" + 1"/level (tiles), AoE 20-ft radius (2 tiles)
-    int range  = 10 + casterLevel;
-    int radius = 2;
+	// AD&D 2e: range 10" + 1"/level (tiles), AoE 20-ft radius (2 tiles)
+	int range = 10 + casterLevel;
+	int radius = 2;
 
-    TargetingSystem targeting;
-    Vector2D center{0, 0};
-    if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
-        return false;
-    }
+	TargetingSystem targeting;
+	Vector2D center{ 0, 0 };
+	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
+		return false;
+	}
 
-    SpellAnimations::animate_explosion(center, radius, ctx);
+	SpellAnimations::animate_explosion(center, radius, ctx);
 
-    // AD&D 2e: 1d6 per caster level, max 10d6
-    int diceCnt = std::min(casterLevel, 10);
-    int totalDamage = 0;
-    for (int i = 0; i < diceCnt; ++i)
-        totalDamage += ctx.dice->roll(1, 6);
+	// AD&D 2e: 1d6 per caster level, max 10d6
+	int diceCnt = std::min(casterLevel, 10);
+	int totalDamage = 0;
+	for (int i = 0; i < diceCnt; ++i)
+		totalDamage += ctx.dice->roll(1, 6);
 
-    int affected = 0;
-    for (const auto& creature : *ctx.creatures)
-    {
-        if (!creature || creature->destructible->is_dead())
-            continue;
-        if (creature->get_tile_distance(center) > static_cast<double>(radius))
-            continue;
+	int affected = 0;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (!creature || creature->destructible->is_dead())
+			continue;
+		if (creature->get_tile_distance(center) > static_cast<double>(radius))
+			continue;
 
-        // AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
-        int save  = ctx.dice->roll(1, 20);
-        int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
-        creature->destructible->take_damage(*creature, dealt, ctx);
-        ++affected;
-    }
+		// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
+		int save = ctx.dice->roll(1, 20);
+		int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
+		creature->destructible->take_damage(*creature, dealt, ctx);
+		++affected;
+	}
 
-    ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
-    ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
-    if (affected > 0)
-    {
-        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
-    }
-    ctx.message_system->finalize_message();
+	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
+	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
+	if (affected > 0)
+	{
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
+	}
+	ctx.message_system->finalize_message();
 
-    ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
-    return true;
+	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+	return true;
 }
 
 static void animate_magic_missile(const Vector2D& from, const Vector2D& to, int missileNum)
 {
-    // TODO: stub - magic missile animation requires renderer replacement
-    // Previously animated projectile path using attron/mvaddch/refresh/napms
+	// TODO: stub - magic missile animation requires renderer replacement
+	// Previously animated projectile path using attron/mvaddch/refresh/napms
 }
 
 static int calculate_num_missiles(int casterLevel)
 {
-    // AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
-    return std::min(5, 1 + (casterLevel - 1) / 2);
+	// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+	return std::min(5, 1 + (casterLevel - 1) / 2);
 }
 
 bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 {
-    // Get caster level
-    auto* player = dynamic_cast<Player*>(&caster);
-    int casterLevel = player ? player->get_player_level() : 1;
-    int numMissiles = calculate_num_missiles(casterLevel);
+	// Get caster level
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
+	int numMissiles = calculate_num_missiles(casterLevel);
 
-    // Find all valid targets in FOV
-    std::vector<Creature*> targets;
-    for (const auto& creature : *ctx.creatures)
-    {
-        if (creature && creature->destructible && !creature->destructible->is_dead())
-        {
-            if (ctx.map->is_in_fov(creature->position))
-            {
-                targets.push_back(creature.get());
-            }
-        }
-    }
+	// Find all valid targets in FOV
+	std::vector<Creature*> targets;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (creature && creature->destructible && !creature->destructible->is_dead())
+		{
+			if (ctx.map->is_in_fov(creature->position))
+			{
+				targets.push_back(creature.get());
+			}
+		}
+	}
 
-    if (targets.empty())
-    {
-        ctx.message_system->message(RED_BLACK_PAIR, "No valid target in sight!", true);
-        return false;
-    }
+	if (targets.empty())
+	{
+		ctx.message_system->message(RED_BLACK_PAIR, "No valid target in sight!", true);
+		return false;
+	}
 
-    // Sort by distance (nearest first)
-    std::sort(targets.begin(), targets.end(), [&caster](Creature* a, Creature* b) {
-        return caster.get_tile_distance(a->position) < caster.get_tile_distance(b->position);
-    });
+	// Sort by distance (nearest first)
+	std::sort(targets.begin(), targets.end(), [&caster](Creature* a, Creature* b)
+		{ return caster.get_tile_distance(a->position) < caster.get_tile_distance(b->position); });
 
-    int totalDamage = 0;
-    std::unordered_map<Creature*, int> damagePerTarget;
+	int totalDamage = 0;
+	std::unordered_map<Creature*, int> damagePerTarget;
 
-    // Fire missiles - distribute among targets, prioritizing nearest
-    for (int i = 0; i < numMissiles; ++i)
-    {
-        // Target nearest living enemy
-        Creature* target = nullptr;
-        for (Creature* t : targets)
-        {
-            if (t->destructible && !t->destructible->is_dead())
-            {
-                target = t;
-                break;
-            }
-        }
+	// Fire missiles - distribute among targets, prioritizing nearest
+	for (int i = 0; i < numMissiles; ++i)
+	{
+		// Target nearest living enemy
+		Creature* target = nullptr;
+		for (Creature* t : targets)
+		{
+			if (t->destructible && !t->destructible->is_dead())
+			{
+				target = t;
+				break;
+			}
+		}
 
-        if (!target) break;
+		if (!target)
+			break;
 
-        animate_magic_missile(caster.position, target->position, i);
+		animate_magic_missile(caster.position, target->position, i);
 
-        int damage = ctx.dice->roll(1, 4) + 1;
-        totalDamage += damage;
-        damagePerTarget[target] += damage;
+		int damage = ctx.dice->roll(1, 4) + 1;
+		totalDamage += damage;
+		damagePerTarget[target] += damage;
 
-        target->destructible->take_damage(*target, damage, ctx);
-    }
+		target->destructible->take_damage(*target, damage, ctx);
+	}
 
-    // Message
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, std::format("Magic Missile ({})! ", numMissiles));
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Total ");
-    ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
-    ctx.message_system->finalize_message();
+	// Message
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, std::format("Magic Missile ({})! ", numMissiles));
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Total ");
+	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
+	ctx.message_system->finalize_message();
 
-    ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 
-    return true;
+	return true;
 }
 
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
-    ctx.buff_system->add_buff(caster, BuffType::SHIELD, 4, 5, false);  // Spell: ADD +4 AC
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
-    ctx.message_system->finalize_message();
-    return true;
+	ctx.buff_system->add_buff(caster, BuffType::SHIELD, 4, 5, false); // Spell: ADD +4 AC
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
+	ctx.message_system->finalize_message();
+	return true;
 }
 
 bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 {
-    int affected = 0;
-    int hdAffected = ctx.dice->roll(2, 8); // 2d8 HD worth of creatures
+	int affected = 0;
+	int hdAffected = ctx.dice->roll(2, 8); // 2d8 HD worth of creatures
 
-    for (const auto& creature : *ctx.creatures)
-    {
-        if (creature && creature->destructible && !creature->destructible->is_dead())
-        {
-            if (ctx.map->is_in_fov(creature->position))
-            {
-                // Simple: affect creatures with low HP (simulating HD)
-                if (creature->destructible->get_max_hp() <= hdAffected * 4)
-                {
-                    // Put to sleep = instant kill for simplicity
-                    creature->destructible->take_damage(*creature, 9999, ctx);
-                    affected++;
-                    hdAffected -= creature->destructible->get_max_hp() / 4;
-                    if (hdAffected <= 0) break;
-                }
-            }
-        }
-    }
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (creature && creature->destructible && !creature->destructible->is_dead())
+		{
+			if (ctx.map->is_in_fov(creature->position))
+			{
+				// Simple: affect creatures with low HP (simulating HD)
+				if (creature->destructible->get_max_hp() <= hdAffected * 4)
+				{
+					// Put to sleep = instant kill for simplicity
+					creature->destructible->take_damage(*creature, 9999, ctx);
+					affected++;
+					hdAffected -= creature->destructible->get_max_hp() / 4;
+					if (hdAffected <= 0)
+						break;
+				}
+			}
+		}
+	}
 
-    if (affected > 0)
-    {
-        ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sleep! ");
-        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("{} creatures fall into eternal slumber.", affected));
-        ctx.message_system->finalize_message();
-        ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
-    }
-    else
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Sleep spell has no effect on these creatures.", true);
-    }
+	if (affected > 0)
+	{
+		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sleep! ");
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("{} creatures fall into eternal slumber.", affected));
+		ctx.message_system->finalize_message();
+		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+	}
+	else
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Sleep spell has no effect on these creatures.", true);
+	}
 
-    return true;
+	return true;
 }
 
 bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 {
-    ctx.buff_system->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false);  // Spell: ADD effect
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
-    ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
-    ctx.message_system->finalize_message();
-    return true;
+	ctx.buff_system->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false); // Spell: ADD effect
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
+	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
+	ctx.message_system->finalize_message();
+	return true;
 }
 
 bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
 {
-    // Try to find a valid teleport location (up to 50 attempts)
-    for (int attempts = 0; attempts < 50; attempts++)
-    {
-        int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
-        int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
-        Vector2D teleportPos{y, x};
+	// Try to find a valid teleport location (up to 50 attempts)
+	for (int attempts = 0; attempts < 50; attempts++)
+	{
+		int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
+		int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
+		Vector2D teleportPos{ y, x };
 
-        // Check if the tile is a floor and walkable
-        if (ctx.map->get_tile_type(teleportPos) == TileType::FLOOR && ctx.map->can_walk(teleportPos, ctx))
-        {
-            // Check if any creature is at this position
-            bool occupied = false;
-            for (const auto& creature : *ctx.creatures)
-            {
-                if (creature && creature->position == teleportPos)
-                {
-                    occupied = true;
-                    break;
-                }
-            }
+		// Check if the tile is a floor and walkable
+		if (ctx.map->get_tile_type(teleportPos) == TileType::FLOOR && ctx.map->can_walk(teleportPos, ctx))
+		{
+			// Check if any creature is at this position
+			bool occupied = false;
+			for (const auto& creature : *ctx.creatures)
+			{
+				if (creature && creature->position == teleportPos)
+				{
+					occupied = true;
+					break;
+				}
+			}
 
-            if (!occupied)
-            {
-                // Teleport successful
-                caster.position = teleportPos;
-                ctx.map->compute_fov(ctx);
+			if (!occupied)
+			{
+				// Teleport successful
+				caster.position = teleportPos;
+				ctx.map->compute_fov(ctx);
 
-                ctx.message_system->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
-                ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
-                ctx.message_system->finalize_message();
-                return true;
-            }
-        }
-    }
+				ctx.message_system->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
+				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
+				ctx.message_system->finalize_message();
+				return true;
+			}
+		}
+	}
 
-    // Failed to find a valid location
-    ctx.message_system->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
-    return false;
+	// Failed to find a valid location
+	ctx.message_system->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
+	return false;
 }
 
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
-    CasterClass casterClass = to_caster_class(player.playerClassState);
-    auto slots = get_spell_slots(casterClass, player.get_player_level());
-    if (slots.empty())
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "You cannot cast spells.", true);
-        return;
-    }
+	CasterClass casterClass = to_caster_class(player.playerClassState);
+	auto slots = get_spell_slots(casterClass, player.get_creature_level());
+	if (slots.empty())
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You cannot cast spells.", true);
+		return;
+	}
 
-    int maxSpellLevel = static_cast<int>(slots.size());
-    auto available = get_available_spells(casterClass, maxSpellLevel);
+	int maxSpellLevel = static_cast<int>(slots.size());
+	auto available = get_available_spells(casterClass, maxSpellLevel);
 
-    // Clear current memorized spells
-    player.memorizedSpells.clear();
+	// Clear current memorized spells
+	player.memorizedSpells.clear();
 
-    // Auto-memorize spells to fill slots (simplified)
-    for (int level = 1; level <= maxSpellLevel; ++level)
-    {
-        int slotsAtLevel = slots[level - 1];
-        for (SpellId id : available)
-        {
-            if (get_spell_level(id) == level && slotsAtLevel > 0)
-            {
-                player.memorizedSpells.push_back(id);
-                --slotsAtLevel;
-            }
-        }
-    }
+	// Auto-memorize spells to fill slots (simplified)
+	for (int level = 1; level <= maxSpellLevel; ++level)
+	{
+		int slotsAtLevel = slots[level - 1];
+		for (SpellId id : available)
+		{
+			if (get_spell_level(id) == level && slotsAtLevel > 0)
+			{
+				player.memorizedSpells.push_back(id);
+				--slotsAtLevel;
+			}
+		}
+	}
 
-    ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Spells memorized: ");
-    for (size_t i = 0; i < player.memorizedSpells.size(); ++i)
-    {
-        if (i > 0) ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", ");
-        ctx.message_system->append_message_part(GREEN_BLACK_PAIR, get_spell_name(player.memorizedSpells[i]));
-    }
-    ctx.message_system->finalize_message();
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Spells memorized: ");
+	for (size_t i = 0; i < player.memorizedSpells.size(); ++i)
+	{
+		if (i > 0)
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", ");
+		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, get_spell_name(player.memorizedSpells[i]));
+	}
+	ctx.message_system->finalize_message();
 }
 
 void SpellSystem::show_casting_menu(Player& player, GameContext& ctx)
 {
-    MenuSpellCast menu(ctx, player);
-    menu.menu(ctx);
+	MenuSpellCast menu(ctx, player);
+	menu.menu(ctx);
 }
 
 std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(const Player& player)
 {
-    std::vector<ItemGrantedSpell> itemSpells;
+	std::vector<ItemGrantedSpell> itemSpells;
 
-    // Check for Ring of Invisibility
-    for (auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
-    {
-        if (Item* ring = player.get_equipped_item(slot))
-        {
-            if (const auto* magicRing = dynamic_cast<const MagicalRing*>(ring->pickable.get()))
-            {
-                if (magicRing->effect == MagicalEffect::INVISIBILITY)
-                {
-                    itemSpells.push_back({SpellId::INVISIBILITY, "Ring"});
-                    break; // Only add once even if wearing two
-                }
-            }
-        }
-    }
+	// Check for Ring of Invisibility
+	for (auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
+	{
+		if (Item* ring = player.get_equipped_item(slot))
+		{
+			if (const auto* magicRing = dynamic_cast<const MagicalRing*>(ring->pickable.get()))
+			{
+				if (magicRing->effect == MagicalEffect::INVISIBILITY)
+				{
+					itemSpells.push_back({ SpellId::INVISIBILITY, "Ring" });
+					break; // Only add once even if wearing two
+				}
+			}
+		}
+	}
 
-    // Check for Helm of Teleportation
-    if (Item* helm = player.get_equipped_item(EquipmentSlot::HEAD))
-    {
-        if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(helm->pickable.get()))
-        {
-            if (magicHelm->effect == MagicalEffect::TELEPORTATION)
-            {
-                itemSpells.push_back({SpellId::TELEPORT, "Helm"});
-            }
-        }
-    }
+	// Check for Helm of Teleportation
+	if (Item* helm = player.get_equipped_item(EquipmentSlot::HEAD))
+	{
+		if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(helm->pickable.get()))
+		{
+			if (magicHelm->effect == MagicalEffect::TELEPORTATION)
+			{
+				itemSpells.push_back({ SpellId::TELEPORT, "Helm" });
+			}
+		}
+	}
 
-    return itemSpells;
+	return itemSpells;
 }

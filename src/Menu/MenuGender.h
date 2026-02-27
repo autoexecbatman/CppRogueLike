@@ -36,19 +36,24 @@ class MenuGender : public BaseMenu
 	int width_{ 15 };
 	int starty_{ 0 };
 	int startx_{ 0 };
-	enum class MenuState { MALE, FEMALE, RANDOM, BACK }
-	currentState{ MenuState::MALE };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuStateStrings
+	enum class MenuState
 	{
-		{ MenuState::MALE, "Male"},
-		{ MenuState::FEMALE, "Female"},
-		{ MenuState::RANDOM, "Random"},
-		{ MenuState::BACK, "Back"}
+		MALE,
+		FEMALE,
+		RANDOM,
+		BACK
+	} currentState{ MenuState::MALE };
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
+	std::unordered_map<MenuState, std::string> menuStateStrings{
+		{ MenuState::MALE, "Male" },
+		{ MenuState::FEMALE, "Female" },
+		{ MenuState::RANDOM, "Random" },
+		{ MenuState::BACK, "Back" }
 	};
 
 	std::string menu_gender_get_string(MenuState option) { return menuStateStrings.at(option); }
 	void menu_print_state(MenuState option);
+
 public:
 	MenuGender(GameContext& ctx);
 	~MenuGender();

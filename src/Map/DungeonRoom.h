@@ -9,32 +9,32 @@
 
 struct DungeonRoom
 {
-    int col;    // leftmost floor column
-    int row;    // topmost  floor row
-    int width;  // floor column count
-    int height; // floor row    count
+	int col; // leftmost floor column
+	int row; // topmost  floor row
+	int width; // floor column count
+	int height; // floor row    count
 
-    // Floor bounds (inclusive)
-    [[nodiscard]] int col_end()     const { return col + width  - 1; }
-    [[nodiscard]] int row_end()     const { return row + height - 1; }
+	// Floor bounds (inclusive)
+	[[nodiscard]] int col_end() const { return col + width - 1; }
+	[[nodiscard]] int row_end() const { return row + height - 1; }
 
-    // Surrounding wall positions
-    [[nodiscard]] int left_wall()   const { return col - 1; }
-    [[nodiscard]] int right_wall()  const { return col + width; }
-    [[nodiscard]] int top_wall()    const { return row - 1; }
-    [[nodiscard]] int bottom_wall() const { return row + height; }
+	// Surrounding wall positions
+	[[nodiscard]] int left_wall() const { return col - 1; }
+	[[nodiscard]] int right_wall() const { return col + width; }
+	[[nodiscard]] int top_wall() const { return row - 1; }
+	[[nodiscard]] int bottom_wall() const { return row + height; }
 
-    // Geometric centre (used for corridor midpoints)
-    [[nodiscard]] int center_col()  const { return col + width  / 2; }
-    [[nodiscard]] int center_row()  const { return row + height / 2; }
+	// Geometric centre (used for corridor midpoints)
+	[[nodiscard]] int center_col() const { return col + width / 2; }
+	[[nodiscard]] int center_row() const { return row + height / 2; }
 
-    // Total tile count including the wall ring
-    [[nodiscard]] int total_width()  const { return width  + 2; }
-    [[nodiscard]] int total_height() const { return height + 2; }
+	// Total tile count including the wall ring
+	[[nodiscard]] int total_width() const { return width + 2; }
+	[[nodiscard]] int total_height() const { return height + 2; }
 
-    // True if (c, r) lies inside the floor area
-    [[nodiscard]] bool contains(int c, int r) const
-    {
-        return c >= col && c <= col_end() && r >= row && r <= row_end();
-    }
+	// True if (c, r) lies inside the floor area
+	[[nodiscard]] bool contains(int c, int r) const
+	{
+		return c >= col && c <= col_end() && r >= row && r <= row_end();
+	}
 };

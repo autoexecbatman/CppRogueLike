@@ -1,8 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
@@ -41,21 +41,27 @@ class Menu : public BaseMenu
 	int menu_width{ 11 };
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
-	enum class MenuState { NEW_GAME, LOAD_GAME, OPTIONS, ROOM_EDITOR, QUIT }
-	currentState { MenuState::NEW_GAME };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuStateStrings
+	enum class MenuState
 	{
-		{ MenuState::NEW_GAME,     "New Game"    },
-		{ MenuState::LOAD_GAME,    "Load Game"   },
-		{ MenuState::OPTIONS,      "Options"     },
-		{ MenuState::ROOM_EDITOR,  "Room Editor" },
-		{ MenuState::QUIT,         "Quit"        }
+		NEW_GAME,
+		LOAD_GAME,
+		OPTIONS,
+		ROOM_EDITOR,
+		QUIT
+	} currentState{ MenuState::NEW_GAME };
+	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
+	std::unordered_map<MenuState, std::string> menuStateStrings{
+		{ MenuState::NEW_GAME, "New Game" },
+		{ MenuState::LOAD_GAME, "Load Game" },
+		{ MenuState::OPTIONS, "Options" },
+		{ MenuState::ROOM_EDITOR, "Room Editor" },
+		{ MenuState::QUIT, "Quit" }
 	};
 
 	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
 	void menu_print_state(MenuState state);
 	void draw_content() override;
+
 public:
 	Menu(bool startup, GameContext& ctx);
 	~Menu();

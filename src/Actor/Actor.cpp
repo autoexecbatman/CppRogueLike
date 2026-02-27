@@ -1,35 +1,55 @@
-#include <string>
 #include <algorithm>
 #include <cmath>
-#include <memory>
 #include <format>
+#include <memory>
+#include <string>
 
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
+#include "../Combat/WeaponDamageRegistry.h"
+#include "../Core/GameContext.h"
+#include "../Items/ItemClassification.h"
+#include "../Map/Map.h"
+#include "../Renderer/Renderer.h"
+#include "../Systems/BuffSystem.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/ShopKeeper.h"
 #include "Actor.h"
 #include "Attacker.h"
 #include "Destructible.h"
-#include "Pickable.h"
-#include "InventoryOperations.h"
-#include "../Items/ItemClassification.h"
-#include "../Combat/WeaponDamageRegistry.h"
-#include "../Systems/ShopKeeper.h"
-#include "../Core/GameContext.h"
-#include "../Renderer/Renderer.h"
-#include "../Map/Map.h"
-#include "../Systems/MessageSystem.h"
-#include "../Systems/BuffSystem.h"
 #include "EquipmentSlot.h"
+#include "InventoryOperations.h"
+#include "Pickable.h"
 
 using namespace InventoryOperations; // For clean function calls
 
+// C++ Core Guidelines F.6: noexcept for simple state operations
+bool Actor::has_state(ActorState state) const noexcept
+{
+	return std::ranges::find(states, state) != states.end();
+}
+
+inline void Actor::add_state(ActorState state) noexcept
+{
+	states.push_back(state);
+}
+
+inline void Actor::remove_state(ActorState state) noexcept
+{
+	std::erase_if(states,
+		[state](ActorState s)
+		{
+			return s == state;
+		});
+}
+
 //====
 Actor::Actor(Vector2D position, ActorData data)
-	:
-	position(position),
-	actorData(data),
-	uniqueId(UniqueId::Generator::generate())
-{}
+	: position(position),
+	  actorData(data),
+	  uniqueId(UniqueId::Generator::generate())
+{
+}
 
 //====
 void Actor::load(const json& j)
@@ -55,12 +75,12 @@ void Actor::load(const json& j)
 
 void Actor::save(json& j)
 {
-	j["position"] = { {"y", position.y}, {"x", position.x} };
-	j["direction"] = { {"y", direction.y}, {"x", direction.x} };
+	j["position"] = { { "y", position.y }, { "x", position.x } };
+	j["direction"] = { { "y", direction.y }, { "x", direction.x } };
 	j["actorData"] = {
-		{"ch", actorData.ch},
-		{"name", actorData.name},
-		{"color", actorData.color}
+		{ "ch", actorData.ch },
+		{ "name", actorData.name },
+		{ "color", actorData.color }
 	};
 	j["uniqueId"] = uniqueId;
 
@@ -98,7 +118,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 			}
 		}
 
-		ctx.renderer->draw_tile(position.x, position.y, displayChar, displayColor, Color{255, 255, 255, 255});
+		ctx.renderer->draw_tile(position.x, position.y, displayChar, displayColor, Color{ 255, 255, 255, 255 });
 	}
 }
 
@@ -112,13 +132,13 @@ bool Actor::is_visible(const GameContext& ctx) const noexcept
 void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
-	base_strength = j["strength"];
-	base_dexterity = j["dexterity"];
-	base_constitution = j["constitution"];
-	base_intelligence = j["intelligence"];
-	base_wisdom = j["wisdom"];
-	base_charisma = j["charisma"];
-	playerLevel = j["playerLevel"];
+	baseStrength = j["strength"];
+	baseDexterity = j["dexterity"];
+	baseConstitution = j["constitution"];
+	baseIntelligence = j["intelligence"];
+	baseWisdom = j["wisdom"];
+	baseCharisma = j["charisma"];
+	creatureLevel = j["playerLevel"];
 	gold = j["gold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
@@ -151,7 +171,7 @@ void Creature::load(const json& j)
 		active_buffs.clear();
 		for (const auto& buffJson : j["active_buffs"])
 		{
-			Buff buff{ };
+			Buff buff{};
 			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());
 			buff.value = buffJson.at("value").get<int>();
 			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
@@ -164,13 +184,13 @@ void Creature::load(const json& j)
 void Creature::save(json& j)
 {
 	Actor::save(j); // Call base class save
-	j["strength"] = base_strength;
-	j["dexterity"] = base_dexterity;
-	j["constitution"] = base_constitution;
-	j["intelligence"] = base_intelligence;
-	j["wisdom"] = base_wisdom;
-	j["charisma"] = base_charisma;
-	j["playerLevel"] = playerLevel;
+	j["strength"] = baseStrength;
+	j["dexterity"] = baseDexterity;
+	j["constitution"] = baseConstitution;
+	j["intelligence"] = baseIntelligence;
+	j["wisdom"] = baseWisdom;
+	j["charisma"] = baseCharisma;
+	j["playerLevel"] = creatureLevel;
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
@@ -220,8 +240,8 @@ void Creature::save(json& j)
 // the actor update
 void Creature::update(GameContext& ctx)
 {
-	ctx.buff_system->restore_loaded_buff_states(*this);  // Restore states after deserialization (idempotent)
-	ctx.buff_system->update_creature_buffs(*this);  // Unified buff system
+	ctx.buff_system->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
+	ctx.buff_system->update_creature_buffs(*this); // Unified buff system
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{
@@ -385,7 +405,7 @@ void Creature::pick(GameContext& ctx)
 	{
 		return; // No floor items
 	}
-	
+
 	// Search for item at current position
 	for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
 	{
@@ -451,8 +471,8 @@ void Creature::pick(GameContext& ctx)
 void Creature::drop(Item& item, GameContext& ctx)
 {
 	// Check if the item is actually in the inventory first
-	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(),
-		[&item](const auto& invItem) { return invItem.get() == &item; });
+	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(), [&item](const auto& invItem)
+		{ return invItem.get() == &item; });
 
 	if (it != inventory_data.items.end())
 	{
@@ -485,11 +505,14 @@ void Creature::drop(Item& item, GameContext& ctx)
 
 int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	auto matching_buffs = active_buffs | std::views::filter(matches_type);
 
-	int highest_set = 0;    // Highest SET effect (Potion of Giant Strength → 18)
-	int sum_of_adds = 0;    // Sum of ADD effects (Strength spell +1, Gauntlets +2)
+	int highest_set = 0; // Highest SET effect (Potion of Giant Strength → 18)
+	int sum_of_adds = 0; // Sum of ADD effects (Strength spell +1, Gauntlets +2)
 
 	for (const auto& buff : matching_buffs)
 	{
@@ -510,16 +533,15 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 }
 
 //==Item==
-Item::Item(Vector2D position, ActorData data) : Object(position, data)
-{
-	// ItemClass should be set by ItemCreator, not by fragile string matching
-};
+Item::Item(Vector2D position, ActorData data)
+	: Object(position, data) {
+		  // ItemClass should be set by ItemCreator, not by fragile string matching
+	  };
 
 void Item::load(const json& j)
 {
 	Object::load(j); // Call base class load
-	value = j.at("value").get<int>();
-	base_value = j.at("base_value").get<int>();
+	baseValue = j.at("baseValue").get<int>();
 	if (j.contains("itemId"))
 	{
 		itemId = static_cast<ItemId>(j.at("itemId").get<int>());
@@ -562,8 +584,7 @@ void Item::load(const json& j)
 void Item::save(json& j)
 {
 	Object::save(j); // Call base class save
-	j["value"] = value;
-	j["base_value"] = base_value;
+	j["baseValue"] = baseValue;
 	j["itemId"] = static_cast<int>(itemId);
 	j["itemClass"] = static_cast<int>(itemClass);
 
@@ -592,7 +613,8 @@ void Item::save(json& j)
 	enh["value_modifier"] = enhancement.value_modifier;
 	j["enhancement"] = enh;
 
-	if (pickable) {
+	if (pickable)
+	{
 		json pickableJson;
 		pickable->save(pickableJson);
 		j["pickable"] = pickableJson;
@@ -613,8 +635,6 @@ const std::string& Item::get_name() const noexcept
 void Item::apply_enhancement(const ItemEnhancement& new_enhancement)
 {
 	enhancement = new_enhancement;
-	// Update value based on enhancement
-	value = (base_value * enhancement.value_modifier) / 100;
 	// Name is computed dynamically by get_name() -- do not modify actorData.name
 }
 
@@ -632,9 +652,6 @@ void Item::generate_random_enhancement(bool allow_magical)
 	{
 		enhancement = ItemEnhancement::generate_random_enhancement(allow_magical);
 	}
-	
-	// Update value based on enhancement
-	value = (base_value * enhancement.value_modifier) / 100;
 }
 
 bool Item::is_enhanced() const noexcept
@@ -642,9 +659,7 @@ bool Item::is_enhanced() const noexcept
 	return enhancement.prefix != PrefixType::NONE || enhancement.suffix != SuffixType::NONE;
 }
 
-int Item::get_enhanced_value() const noexcept
-{
-	return (base_value * enhancement.value_modifier) / 100;
-}
+Stairs::Stairs(Vector2D position)
+	: Object(position, ActorData{ TILE_STAIRS, "stairs", WHITE_BLACK_PAIR }) {};
 
 // end of file: Actor.cpp

@@ -1,10 +1,10 @@
 #include "Teleporter.h"
-#include "../Colors/Colors.h"
-#include "../Map/Map.h"
-#include "../Core/GameContext.h"
-#include "../Systems/MessageSystem.h"
-#include "../Random/RandomDice.h"
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Map/Map.h"
+#include "../Random/RandomDice.h"
+#include "../Systems/MessageSystem.h"
 
 //==TELEPORTER==
 Teleporter::Teleporter() {}
@@ -51,9 +51,9 @@ Vector2D Teleporter::find_valid_teleport_location(GameContext& ctx)
 		const int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
 		const int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
 
-		if (ctx.map->get_tile_type(Vector2D{x, y}) == TileType::FLOOR && is_position_free(x, y))
+		if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::FLOOR && is_position_free(x, y))
 		{
-			return Vector2D{x, y};
+			return Vector2D{ x, y };
 		}
 	}
 

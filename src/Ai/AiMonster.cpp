@@ -1,86 +1,86 @@
 #include <vector>
 
-#include "AiMonster.h"
-#include "../Utils/Dijkstra.h"
+#include "../Actor/Attacker.h"
+#include "../Actor/Destructible.h"
+#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
-#include "../ActorTypes/Player.h"
-#include "../Actor/Destructible.h"
-#include "../Actor/Attacker.h"
+#include "../Utils/Dijkstra.h"
+#include "AiMonster.h"
 
 void AiMonster::update(Creature& owner, GameContext& ctx)
 {
 
-    // If the owner has no AI or is dead, do nothing
-    if (owner.ai == nullptr || owner.destructible->is_dead())
-    {
-        return;
-    }
+	// If the owner has no AI or is dead, do nothing
+	if (owner.ai == nullptr || owner.destructible->is_dead())
+	{
+		return;
+	}
 
-    // Check if monster is in FOV - if so, set tracking
-    if (ctx.map->is_in_fov(owner.position) && !ctx.player->is_invisible())
-    {
-        // Player can see monster - set maximum tracking
-        moveCount = TRACKING_TURNS;
-    }
-    else
-    {
-        // Player can't see monster
-        if (moveCount > 0)
-        {
-            // If we were previously tracking the player, decrement counter
-            moveCount--;
-        }
-    }
+	// Check if monster is in FOV - if so, set tracking
+	if (ctx.map->is_in_fov(owner.position) && !ctx.player->is_invisible())
+	{
+		// Player can see monster - set maximum tracking
+		moveCount = TRACKING_TURNS;
+	}
+	else
+	{
+		// Player can't see monster
+		if (moveCount > 0)
+		{
+			// If we were previously tracking the player, decrement counter
+			moveCount--;
+		}
+	}
 
-    // Distance to player
-    int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+	// Distance to player
+	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
 
-    // Behavior based on distance and visibility
-    if (moveCount > 0 && !ctx.player->is_invisible())
-    {
-        // Recently seen player - actively pursue
-        move_or_attack(owner, ctx.player->position, ctx);
-    }
-    else if (distanceToPlayer <= 15 && !ctx.player->is_invisible())
-    {
-        // Within a certain range, monsters might still wander toward player
-        // even if they don't have direct line of sight
-        if (ctx.dice->d6() == 1)  // Occasional movement toward player
-        {
-            move_or_attack(owner, ctx.player->position, ctx);
-        }
-        else if (ctx.dice->d10() == 1)  // Occasional random movement
-        {
-            // Random movement in one of eight directions
-            int dx = ctx.dice->roll(-1, 1);
-            int dy = ctx.dice->roll(-1, 1);
+	// Behavior based on distance and visibility
+	if (moveCount > 0 && !ctx.player->is_invisible())
+	{
+		// Recently seen player - actively pursue
+		move_or_attack(owner, ctx.player->position, ctx);
+	}
+	else if (distanceToPlayer <= 15 && !ctx.player->is_invisible())
+	{
+		// Within a certain range, monsters might still wander toward player
+		// even if they don't have direct line of sight
+		if (ctx.dice->d6() == 1) // Occasional movement toward player
+		{
+			move_or_attack(owner, ctx.player->position, ctx);
+		}
+		else if (ctx.dice->d10() == 1) // Occasional random movement
+		{
+			// Random movement in one of eight directions
+			int dx = ctx.dice->roll(-1, 1);
+			int dy = ctx.dice->roll(-1, 1);
 
-            if (dx != 0 || dy != 0)  // Ensure we're not standing still
-            {
-                Vector2D newPos = owner.position + Vector2D{ dx, dy };
-                if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
-                {
-                    owner.position = newPos;
-                }
-            }
-        }
-    }
-    else if (ctx.dice->d20() == 1)  // Very occasional random movement for distant monsters
-    {
-        // Random movement in one of eight directions
-        int dx = ctx.dice->roll(-1, 1);
-        int dy = ctx.dice->roll(-1, 1);
+			if (dx != 0 || dy != 0) // Ensure we're not standing still
+			{
+				Vector2D newPos = owner.position + Vector2D{ dx, dy };
+				if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+				{
+					owner.position = newPos;
+				}
+			}
+		}
+	}
+	else if (ctx.dice->d20() == 1) // Very occasional random movement for distant monsters
+	{
+		// Random movement in one of eight directions
+		int dx = ctx.dice->roll(-1, 1);
+		int dy = ctx.dice->roll(-1, 1);
 
-        if (dx != 0 || dy != 0)  // Ensure we're not standing still
-        {
-            Vector2D newPos = owner.position + Vector2D{ dx, dy };
-            if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
-            {
-                owner.position = newPos;
-            }
-        }
-    }
+		if (dx != 0 || dy != 0) // Ensure we're not standing still
+		{
+			Vector2D newPos = owner.position + Vector2D{ dx, dy };
+			if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+			{
+				owner.position = newPos;
+			}
+		}
+	}
 }
 
 void AiMonster::load(const json& j)
@@ -99,12 +99,15 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	Dijkstra dijkstra{ ctx.map->get_width(), ctx.map->get_height() };
 	std::vector<Vector2D> path = dijkstra.a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
-	auto is_actor = [&ctx](const Vector2D& pos) { return ctx.map->get_actor(pos, ctx) != nullptr; };
+	auto is_actor = [&ctx](const Vector2D& pos)
+	{
+		return ctx.map->get_actor(pos, ctx) != nullptr;
+	};
 	if (distanceToTarget > 1)
 	{
 		if (!path.empty())
 		{
-			if(!is_actor(path.at(1)))
+			if (!is_actor(path.at(1)))
 			{
 				owner.position = path.at(1);
 			}

@@ -1,122 +1,122 @@
 ﻿// file: Destructible.cpp
+#include <algorithm>
+#include <format>
 #include <iostream>
 #include <string>
 #include <string_view>
-#include <algorithm>
-#include <format>
 #include <unordered_map>
 
-#include "../Core/GameContext.h"
-#include "../Items/Items.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../Colors/Colors.h"
-#include "../Attributes/StrengthAttributes.h"
 #include "../ActorTypes/Healer.h"
-#include "../Items/CorpseFood.h"
-#include "../Items/Armor.h"
-#include "../Items/Jewelry.h"
-#include "../Items/MagicalItemEffects.h"
 #include "../ActorTypes/Player.h"
-#include "Pickable.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
-#include "../Systems/DataManager.h"
-#include "../Systems/MessageSystem.h"
-#include "../Systems/GameStateManager.h"
-#include "../Systems/BuffSystem.h"
-#include "../Systems/FloatingTextSystem.h"
+#include "../Attributes/StrengthAttributes.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Items/Armor.h"
+#include "../Items/CorpseFood.h"
+#include "../Items/Items.h"
+#include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
 #include "../Systems/AnimationSystem.h"
+#include "../Systems/BuffSystem.h"
+#include "../Systems/DataManager.h"
+#include "../Systems/FloatingTextSystem.h"
+#include "../Systems/GameStateManager.h"
+#include "../Systems/MessageSystem.h"
+#include "Pickable.h"
 
 using namespace InventoryOperations; // For clean function calls
 
 // OCP: Data-driven damage resistance mapping
 static const std::unordered_map<DamageType, BuffType> damage_resistance_buffs = {
-	{DamageType::FIRE, BuffType::FIRE_RESISTANCE},
-	{DamageType::COLD, BuffType::COLD_RESISTANCE},
-	{DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE},
-	{DamageType::POISON, BuffType::POISON_RESISTANCE},
+	{ DamageType::FIRE, BuffType::FIRE_RESISTANCE },
+	{ DamageType::COLD, BuffType::COLD_RESISTANCE },
+	{ DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
+	{ DamageType::POISON, BuffType::POISON_RESISTANCE },
 	// DamageType::PHYSICAL, ACID, MAGIC have no resistance buffs
 };
 
 // OCP: Data-driven damage type names for logging
 static const std::unordered_map<DamageType, std::string_view> damage_type_names = {
-	{DamageType::PHYSICAL, "physical"},
-	{DamageType::FIRE, "fire"},
-	{DamageType::COLD, "cold"},
-	{DamageType::LIGHTNING, "lightning"},
-	{DamageType::POISON, "poison"},
-	{DamageType::ACID, "acid"},
-	{DamageType::MAGIC, "magic"},
+	{ DamageType::PHYSICAL, "physical" },
+	{ DamageType::FIRE, "fire" },
+	{ DamageType::COLD, "cold" },
+	{ DamageType::LIGHTNING, "lightning" },
+	{ DamageType::POISON, "poison" },
+	{ DamageType::ACID, "acid" },
+	{ DamageType::MAGIC, "magic" },
 };
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
-	:
-	hpMax(hpMax),
-	dr(dr),
-	corpseName(corpseName),
-	xp(xp),
-	thaco(thaco),
-	armorClass(armorClass),
-	hp(hpMax),
-	hpBase(hpMax),
-	baseArmorClass(armorClass),
-	lastConstitution(0),
-    tempHp(0)
-{}
+	: hpMax(hpMax),
+	  dr(dr),
+	  corpseName(corpseName),
+	  xp(xp),
+	  thaco(thaco),
+	  armorClass(armorClass),
+	  hp(hpMax),
+	  hpBase(hpMax),
+	  baseArmorClass(armorClass),
+	  lastConstitution(0),
+	  tempHp(0)
+{
+}
 
 void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 {
-    const int currentConstitution = owner.get_constitution();
-    const int lastConstitution = get_last_constitution();
-    
-    if (currentConstitution == lastConstitution)
-    {
-        return;
-    }
-    
-    const int oldBonus = calculate_constitution_hp_bonus_for_value(lastConstitution, ctx);
-    const int newBonus = calculate_constitution_hp_bonus(owner, ctx);
-    const int level = calculate_level_multiplier(owner);
-    const int hpDifference = (newBonus - oldBonus) * level;
-    
-    if (hpDifference != 0)
-    {
-        // Constitution changes affect both max HP and current HP
-        // Temporary HP are NOT affected by Constitution changes
-        set_max_hp(get_max_hp() + hpDifference);
-        set_hp(get_hp() + hpDifference);
+	const int currentConstitution = owner.get_constitution();
+	const int lastConstitution = get_last_constitution();
 
-        log_constitution_change(owner, ctx, lastConstitution, currentConstitution, hpDifference);
+	if (currentConstitution == lastConstitution)
+	{
+		return;
+	}
 
-        // Check for stat drain death
-        if (get_hp() <= 0)
-        {
-            set_hp(0);
-            handle_stat_drain_death(owner, ctx);
-        }
-    }
-    
-    set_last_constitution(currentConstitution);
+	const int oldBonus = calculate_constitution_hp_bonus_for_value(lastConstitution, ctx);
+	const int newBonus = calculate_constitution_hp_bonus(owner, ctx);
+	const int level = calculate_level_multiplier(owner);
+	const int hpDifference = (newBonus - oldBonus) * level;
+
+	if (hpDifference != 0)
+	{
+		// Constitution changes affect both max HP and current HP
+		// Temporary HP are NOT affected by Constitution changes
+		set_max_hp(get_max_hp() + hpDifference);
+		set_hp(get_hp() + hpDifference);
+
+		log_constitution_change(owner, ctx, lastConstitution, currentConstitution, hpDifference);
+
+		// Check for stat drain death
+		if (get_hp() <= 0)
+		{
+			set_hp(0);
+			handle_stat_drain_death(owner, ctx);
+		}
+	}
+
+	set_last_constitution(currentConstitution);
 }
 
 [[nodiscard]] int Destructible::calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const
 {
-    return calculate_constitution_hp_bonus_for_value(owner.get_constitution(), ctx);
+	return calculate_constitution_hp_bonus_for_value(owner.get_constitution(), ctx);
 }
 
 [[nodiscard]] int Destructible::calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const
 {
-    const auto& constitutionAttributes = ctx.data_manager->get_constitution_attributes();
-    
-    // Validate constitution is in valid range (1-based indexing)
-    if (constitution < 1 || constitution > static_cast<int>(constitutionAttributes.size()))
-    {
-        return 0;
-    }
-    
-    return constitutionAttributes[constitution - 1].HPAdj;
+	const auto& constitutionAttributes = ctx.data_manager->get_constitution_attributes();
+
+	// Validate constitution is in valid range (1-based indexing)
+	if (constitution < 1 || constitution > static_cast<int>(constitutionAttributes.size()))
+	{
+		return 0;
+	}
+
+	return constitutionAttributes[constitution - 1].HPAdj;
 }
 
 [[nodiscard]] int Destructible::calculate_level_multiplier(const Creature& owner) const
@@ -129,116 +129,117 @@ void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 
 void Destructible::handle_stat_drain_death(Creature& owner, GameContext& ctx)
 {
-    if (&owner == ctx.player)
-    {
-        ctx.message_system->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
-    }
-    else
-    {
-        ctx.message_system->log(std::format("{} dies from stat drain.", owner.get_name()));
-    }
-    
-    // Trigger death system
-    die(owner, ctx);
+	if (&owner == ctx.player)
+	{
+		ctx.message_system->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
+	}
+	else
+	{
+		ctx.message_system->log(std::format("{} dies from stat drain.", owner.get_name()));
+	}
+
+	// Trigger death system
+	die(owner, ctx);
 }
 
 void Destructible::log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const
 {
-    // Only log for player
-    if (&owner != ctx.player)
-    {
-        return;
-    }
-    
-    if (hpChange > 0)
-    {
-        ctx.message_system->message(GREEN_BLACK_PAIR,
-            std::format("Constitution increased from {} to {}! You gain {} hit points.", oldCon, newCon, hpChange), true);
-    }
-    else
-    {
-        ctx.message_system->message(RED_BLACK_PAIR,
-            std::format("Constitution decreased from {} to {}! You lose {} hit points.", oldCon, newCon, -hpChange), true);
-    }
+	// Only log for player
+	if (&owner != ctx.player)
+	{
+		return;
+	}
+
+	if (hpChange > 0)
+	{
+		ctx.message_system->message(GREEN_BLACK_PAIR,
+			std::format("Constitution increased from {} to {}! You gain {} hit points.", oldCon, newCon, hpChange),
+			true);
+	}
+	else
+	{
+		ctx.message_system->message(RED_BLACK_PAIR,
+			std::format("Constitution decreased from {} to {}! You lose {} hit points.", oldCon, newCon, -hpChange),
+			true);
+	}
 }
 
 int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType)
 {
-    // Negative or zero damage has no effect
-    if (damage <= 0)
-    {
-        return 0;
-    }
+	// Negative or zero damage has no effect
+	if (damage <= 0)
+	{
+		return 0;
+	}
 
-    const int originalDamage = damage;
+	const int originalDamage = damage;
 
-    // AD&D 2e: Apply resistance based on damage type (data-driven, OCP compliant)
-    if (damage_resistance_buffs.contains(damageType))
-    {
-        const BuffType resistanceBuff = damage_resistance_buffs.at(damageType);
-        if (ctx.buff_system->has_buff(owner, resistanceBuff))
-        {
-            const int resistancePercent = ctx.buff_system->get_buff_value(owner, resistanceBuff);
+	// AD&D 2e: Apply resistance based on damage type (data-driven, OCP compliant)
+	if (damage_resistance_buffs.contains(damageType))
+	{
+		const BuffType resistanceBuff = damage_resistance_buffs.at(damageType);
+		if (ctx.buff_system->has_buff(owner, resistanceBuff))
+		{
+			const int resistancePercent = ctx.buff_system->get_buff_value(owner, resistanceBuff);
 
-            if (resistancePercent > 0)
-            {
-                // AD&D 2e: Resistance reduces damage by percentage (validated: logic correct)
-                const int damageReduced = (damage * resistancePercent) / 100;
-                damage -= damageReduced;
-                damage = std::max(0, damage); // Defensive: ensure non-negative
+			if (resistancePercent > 0)
+			{
+				// AD&D 2e: Resistance reduces damage by percentage (validated: logic correct)
+				const int damageReduced = (damage * resistancePercent) / 100;
+				damage -= damageReduced;
+				damage = std::max(0, damage); // Defensive: ensure non-negative
 
-                // Log resistance message
-                const std::string_view typeName = damage_type_names.contains(damageType)
-                    ? damage_type_names.at(damageType)
-                    : "unknown";
+				// Log resistance message
+				const std::string_view typeName = damage_type_names.contains(damageType)
+					? damage_type_names.at(damageType)
+					: "unknown";
 
-                ctx.message_system->log(std::format(
-                    "You resisted {} {} damage! ({}% resistance, {} -> {})",
-                    damageReduced,
-                    typeName,
-                    resistancePercent,
-                    originalDamage,
-                    damage
-                ));
-            }
-        }
-    }
+				ctx.message_system->log(std::format(
+					"You resisted {} {} damage! ({}% resistance, {} -> {})",
+					damageReduced,
+					typeName,
+					resistancePercent,
+					originalDamage,
+					damage));
+			}
+		}
+	}
 
-    // AD&D 2e: Temp HP absorbs damage first (validated: logic correct)
-    if (get_temp_hp() > 0)
-    {
-        const int tempAbsorbed = std::min(damage, get_temp_hp());
-        set_temp_hp(get_temp_hp() - tempAbsorbed);
-        damage -= tempAbsorbed;
+	// AD&D 2e: Temp HP absorbs damage first (validated: logic correct)
+	if (get_temp_hp() > 0)
+	{
+		const int tempAbsorbed = std::min(damage, get_temp_hp());
+		set_temp_hp(get_temp_hp() - tempAbsorbed);
+		damage -= tempAbsorbed;
 
-        if (damage == 0)
-        {
-            return 0;  // All damage absorbed by temp HP
-        }
-    }
+		if (damage == 0)
+		{
+			return 0; // All damage absorbed by temp HP
+		}
+	}
 
-    // Remaining damage hits real HP
-    const int newHp = get_hp() - damage;
-    set_hp(newHp);
+	// Remaining damage hits real HP
+	const int newHp = get_hp() - damage;
+	set_hp(newHp);
 
-    // Explicit clamping and death check
-    if (get_hp() <= 0)
-    {
-        set_hp(0);
-        die(owner, ctx);
-    }
+	// Explicit clamping and death check
+	if (get_hp() <= 0)
+	{
+		set_hp(0);
+		die(owner, ctx);
+	}
 
-    // Floating damage number: red for player damage, yellow for monster damage
-    if (ctx.floating_text)
-    {
-        bool hit_player = (&owner == ctx.player);
-        unsigned char r = hit_player ? 255 : 255;
-        unsigned char g = hit_player ?  80 : 220;
-        unsigned char b = hit_player ?  80 :  50;
-        ctx.floating_text->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
-    }
+	// Floating damage number: red for player damage, yellow for monster damage
+	if (ctx.floating_text)
+	{
+		bool hit_player = (&owner == ctx.player);
+		unsigned char r = hit_player ? 255 : 255;
+		unsigned char g = hit_player ? 80 : 220;
+		unsigned char b = hit_player ? 80 : 50;
+		ctx.floating_text->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
+	}
 
-    return damage;
+	return damage;
 }
 
 // Transform the actor into a corpse !
@@ -262,68 +263,74 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 // The function returns the amount of health point actually restored.
 [[nodiscard]] int Destructible::heal(int hpToHeal)
 {
-    const int currentHp = get_hp();
-    const int maxHp = get_max_hp();
-    const int newHp = std::min(currentHp + hpToHeal, maxHp);
-    const int actualHealed = newHp - currentHp;
+	const int currentHp = get_hp();
+	const int maxHp = get_max_hp();
+	const int newHp = std::min(currentHp + hpToHeal, maxHp);
+	const int actualHealed = newHp - currentHp;
 
-    set_hp(newHp);
+	set_hp(newHp);
 
-    // Explicit clamping
-    if (get_hp() > get_max_hp())
-    {
-        set_hp(get_max_hp());
-    }
+	// Explicit clamping
+	if (get_hp() > get_max_hp())
+	{
+		set_hp(get_max_hp());
+	}
 
-    return actualHealed;
+	return actualHealed;
 }
 
 void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 {
-    const int baseAC = get_base_armor_class();
-    const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
-    const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-    const int tempBonus = ctx.buff_system->calculate_ac_bonus(owner);
-    const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
+	const int baseAC = get_base_armor_class();
+	const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
+	const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
+	const int tempBonus = ctx.buff_system->calculate_ac_bonus(owner);
+	const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
 
-    // Only update if changed
-    if (get_armor_class() != calculatedAC)
-    {
-        const int oldAC = get_armor_class();
-        set_armor_class(calculatedAC);
+	// Only update if changed
+	if (get_armor_class() != calculatedAC)
+	{
+		const int oldAC = get_armor_class();
+		set_armor_class(calculatedAC);
 
-        // Log for player
-        if (&owner == ctx.player)
-        {
-            ctx.message_system->log(std::format(
-                "Armor Class updated: {} → {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
-                oldAC, calculatedAC, baseAC, dexBonus, equipBonus, tempBonus));
-        }
-    }
+		// Log for player
+		if (&owner == ctx.player)
+		{
+			ctx.message_system->log(std::format(
+				"Armor Class updated: {} → {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
+				oldAC,
+				calculatedAC,
+				baseAC,
+				dexBonus,
+				equipBonus,
+				tempBonus));
+		}
+	}
 }
 
 [[nodiscard]] int Destructible::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
 {
-    const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes();
-    const int dexterity = owner.get_dexterity();
-    
-    // Validate dexterity is in valid range (1-based indexing)
-    if (dexterity <= 0 || dexterity > static_cast<int>(dexAttributes.size()))
-    {
-        return 0;
-    }
-    
-    const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
-    
-    // Log for player if non-zero
-    if (&owner == ctx.player && defensiveAdj != 0)
-    {
-        ctx.message_system->log(std::format(
-            "Dexterity Defensive Adjustment: {:+} (Dex: {})",
-            defensiveAdj, dexterity));
-    }
-    
-    return defensiveAdj;
+	const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes();
+	const int dexterity = owner.get_dexterity();
+
+	// Validate dexterity is in valid range (1-based indexing)
+	if (dexterity <= 0 || dexterity > static_cast<int>(dexAttributes.size()))
+	{
+		return 0;
+	}
+
+	const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
+
+	// Log for player if non-zero
+	if (&owner == ctx.player && defensiveAdj != 0)
+	{
+		ctx.message_system->log(std::format(
+			"Dexterity Defensive Adjustment: {:+} (Dex: {})",
+			defensiveAdj,
+			dexterity));
+	}
+
+	return defensiveAdj;
 }
 
 // Single source of truth: slot-based equipment AC calculation
@@ -347,8 +354,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 				ctx.message_system->log(std::format(
 					"Armor bonus: {:+} from {}",
 					armorBonus,
-					equippedArmor->actorData.name
-				));
+					equippedArmor->actorData.name));
 			}
 		}
 	}
@@ -366,8 +372,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 				ctx.message_system->log(std::format(
 					"Shield bonus: {:+} from {}",
 					shieldBonus,
-					equippedShield->actorData.name
-				));
+					equippedShield->actorData.name));
 			}
 		}
 	}
@@ -376,7 +381,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	int bestRingBonus = 0;
 	const Item* bestRing = nullptr;
 
-	for (const auto slot : {EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING})
+	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
 	{
 		if (Item* equippedRing = owner.get_equipped_item(slot))
 		{
@@ -397,7 +402,8 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 		{
 			ctx.message_system->log(std::format(
 				"Ring bonus: {:+} from {}",
-				bestRingBonus, bestRing->actorData.name));
+				bestRingBonus,
+				bestRing->actorData.name));
 		}
 	}
 
@@ -413,7 +419,8 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 			{
 				ctx.message_system->log(std::format(
 					"Helm bonus: {:+} from {}",
-					helmBonus, equippedHelm->actorData.name));
+					helmBonus,
+					equippedHelm->actorData.name));
 			}
 		}
 	}
@@ -448,7 +455,7 @@ void Destructible::save(json& j)
 	j["thaco"] = get_thaco();
 	j["armorClass"] = get_armor_class();
 	j["baseArmorClass"] = get_base_armor_class();
-    j["tempHp"] = get_temp_hp();
+	j["tempHp"] = get_temp_hp();
 }
 
 void PlayerDestructible::save(json& j)
@@ -457,7 +464,7 @@ void PlayerDestructible::save(json& j)
 	Destructible::save(j);
 }
 
-void MonsterDestructible::save(json& j) 
+void MonsterDestructible::save(json& j)
 {
 	j["type"] = static_cast<int>(DestructibleType::MONSTER);
 	Destructible::save(j);
@@ -500,10 +507,10 @@ PlayerDestructible::PlayerDestructible(
 	std::string_view corpseName,
 	int xp,
 	int thaco,
-	int armorClass
-) :
-	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
-{}
+	int armorClass)
+	: Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
+{
+}
 
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
@@ -520,10 +527,10 @@ MonsterDestructible::MonsterDestructible(
 	std::string_view corpseName,
 	int xp,
 	int thaco,
-	int armorClass
-) :
-	Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
-{}
+	int armorClass)
+	: Destructible(hpMax, dr, corpseName, xp, thaco, armorClass)
+{
+}
 
 void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 {
@@ -533,7 +540,6 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 	ctx.message_system->finalize_message();
 
 	// get the xp from the monster
-
 
 	// message how much xp you get
 	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You get ");

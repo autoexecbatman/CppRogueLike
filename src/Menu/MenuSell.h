@@ -1,11 +1,11 @@
 #pragma once
 
-#include <string>
 #include <span>
+#include <string>
 #include <vector>
 
-#include "BaseMenu.h"
 #include "../Actor/Actor.h"
+#include "BaseMenu.h"
 
 class Player;
 
@@ -25,6 +25,7 @@ class MenuSell : public BaseMenu
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 	void handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx);
 	void draw_content() override;
+
 public:
 	MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
 	~MenuSell();

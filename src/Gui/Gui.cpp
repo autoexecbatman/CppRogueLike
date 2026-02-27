@@ -1,21 +1,21 @@
 // file: Gui.cpp
-#include <format>
 #include <algorithm>
+#include <format>
 #include <span>
 
-#include "Gui.h"
-#include "LogMessage.h"
+#include "../Actor/Attacker.h"
+#include "../Actor/Destructible.h"
+#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Systems/MessageSystem.h"
-#include "../Systems/HungerSystem.h"
-#include "../ActorTypes/Player.h"
 #include "../Map/Map.h"
-#include "../Systems/CreatureManager.h"
 #include "../Renderer/Renderer.h"
 #include "../Renderer/TileId.h"
-#include "../Actor/Destructible.h"
-#include "../Actor/Attacker.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/HungerSystem.h"
+#include "../Systems/MessageSystem.h"
+#include "Gui.h"
+#include "LogMessage.h"
 
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
@@ -29,13 +29,19 @@ constexpr int LOG_MAX_MESSAGES = 5;
 // Bar panel ends at ~18 % of viewport width.
 // Stat panel is a fixed 11-tile interior (div1 + 1 divider + 11 content + 1 divider).
 // Everything to the right of div2 belongs to the combat log.
-static int hud_div1(int vcols) { return vcols * 18 / 100; }
-static int hud_div2(int vcols) { return hud_div1(vcols) + 13; }
+static int hud_div1(int vcols)
+{
+	return vcols * 18 / 100;
+}
+static int hud_div2(int vcols)
+{
+	return hud_div1(vcols) + 13;
+}
 
 // Vertical centering offset for text inside a tile-height row
 static int font_row_off(const Renderer& r)
 {
-    return (r.get_tile_size() - r.get_font_size()) / 2;
+	return (r.get_tile_size() - r.get_font_size()) / 2;
 }
 
 // ---------------------------------------------------------------------------
@@ -62,16 +68,17 @@ void Gui::gui_update(GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::gui_render(const GameContext& ctx)
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts    = ctx.renderer->get_tile_size();
+	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int pw    = vcols * ts;
-	const int ph    = ctx.renderer->get_screen_height() - baseY;
-	const int div1  = hud_div1(vcols);
-	const int div2  = hud_div2(vcols);
+	const int pw = vcols * ts;
+	const int ph = ctx.renderer->get_screen_height() - baseY;
+	const int div1 = hud_div1(vcols);
+	const int div2 = hud_div2(vcols);
 
 	// ---- Background -------------------------------------------------------
 	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
@@ -87,8 +94,8 @@ void Gui::gui_render(const GameContext& ctx)
 	// ---- Left and right outer edges ---------------------------------------
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(0,                  baseY + row * ts, GUI_FRAME_L);
-		ctx.renderer->draw_tile_screen((vcols - 1) * ts,   baseY + row * ts, GUI_FRAME_R);
+		ctx.renderer->draw_tile_screen(0, baseY + row * ts, GUI_FRAME_L);
+		ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY + row * ts, GUI_FRAME_R);
 	}
 
 	// ---- Divider 1: bar panel | stat panel --------------------------------
@@ -118,23 +125,24 @@ void Gui::gui_render(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_hp_bar(const GameContext& ctx)
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts    = ctx.renderer->get_tile_size();
+	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int div1  = hud_div1(vcols);
+	const int div1 = hud_div1(vcols);
 
-	const int hp    = ctx.player->destructible->get_hp();
+	const int hp = ctx.player->destructible->get_hp();
 	const int maxHp = ctx.player->destructible->get_max_hp();
-	if (maxHp <= 0) return;
+	if (maxHp <= 0)
+		return;
 
 	const float ratio = std::clamp(
-		static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f
-	);
+		static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f);
 
-	const int rowY    = baseY + 1 * ts;
+	const int rowY = baseY + 1 * ts;
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Heart icon at col 1
@@ -170,32 +178,32 @@ void Gui::render_hp_bar(const GameContext& ctx)
 		barX + (barW - textW) / 2,
 		rowY + fontOff,
 		hpText,
-		WHITE_BLACK_PAIR
-	);
+		WHITE_BLACK_PAIR);
 }
 
 void Gui::render_hunger_status(const GameContext& ctx)
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts    = ctx.renderer->get_tile_size();
+	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int div1  = hud_div1(vcols);
+	const int div1 = hud_div1(vcols);
 
-	if (ctx.hunger_system->get_hunger_max() <= 0) return;
+	if (ctx.hunger_system->get_hunger_max() <= 0)
+		return;
 
 	const int hungerVal = ctx.hunger_system->get_hunger_value();
 	const int hungerMax = ctx.hunger_system->get_hunger_max();
-	const std::string hungerText  = ctx.hunger_system->get_hunger_state_string();
-	const int         hungerColor = ctx.hunger_system->get_hunger_color();
+	const std::string hungerText = ctx.hunger_system->get_hunger_state_string();
+	const int hungerColor = ctx.hunger_system->get_hunger_color();
 
 	const float ratio = std::clamp(
-		static_cast<float>(hungerVal) / static_cast<float>(hungerMax), 0.0f, 1.0f
-	);
+		static_cast<float>(hungerVal) / static_cast<float>(hungerMax), 0.0f, 1.0f);
 
-	const int rowY    = baseY + 2 * ts;
+	const int rowY = baseY + 2 * ts;
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Food icon at col 1 (from the Items/Food sheet)
@@ -207,7 +215,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int barH = ts - 6;
 	const int barY = rowY + 3;
 
-	Color filled   = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
+	Color filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
 	Color barEmpty = { 20, 20, 30, 255 };
 	ctx.renderer->draw_bar(barX, barY, barW, barH, ratio, filled, barEmpty);
 
@@ -217,8 +225,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 		barX + (barW - textW) / 2,
 		rowY + fontOff,
 		hungerText,
-		hungerColor
-	);
+		hungerColor);
 }
 
 // ---------------------------------------------------------------------------
@@ -226,13 +233,14 @@ void Gui::render_hunger_status(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::gui_print_stats(const GameContext& ctx) noexcept
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts      = ctx.renderer->get_tile_size();
-	const int vcols   = ctx.renderer->get_viewport_cols();
-	const int vrows   = ctx.renderer->get_viewport_rows();
-	const int baseY   = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int statsX  = (hud_div1(vcols) + 1) * ts;
+	const int ts = ctx.renderer->get_tile_size();
+	const int vcols = ctx.renderer->get_viewport_cols();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int statsX = (hud_div1(vcols) + 1) * ts;
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	if (ctx.player->actorData.name.empty())
@@ -245,8 +253,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		"{} ({} Lv.{})",
 		ctx.player->actorData.name,
 		ctx.player->playerClass,
-		ctx.player->get_level()
-	);
+		ctx.player->get_level());
 	ctx.renderer->draw_text(statsX, baseY + 1 * ts + fontOff, nameLine, YELLOW_BLACK_PAIR);
 
 	// Row 2: Combat -- T0 = THAC0 abbreviation
@@ -254,14 +261,12 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		"T0:{}  AC:{}  DR:{}",
 		ctx.player->destructible->get_thaco(),
 		ctx.player->destructible->get_armor_class(),
-		ctx.player->destructible->get_dr()
-	);
+		ctx.player->destructible->get_dr());
 	ctx.renderer->draw_text(statsX, baseY + 2 * ts + fontOff, combatLine, WHITE_BLACK_PAIR);
 
 	// Row 3: Attack roll
 	auto atkLine = std::format(
-		"Atk: {}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll
-	);
+		"Atk: {}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll);
 	ctx.renderer->draw_text(statsX, baseY + 3 * ts + fontOff, atkLine, GREEN_BLACK_PAIR);
 
 	// Row 4: Physical attributes
@@ -269,8 +274,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		"S:{} D:{} C:{}",
 		ctx.player->get_strength(),
 		ctx.player->get_dexterity(),
-		ctx.player->get_constitution()
-	);
+		ctx.player->get_constitution());
 	ctx.renderer->draw_text(statsX, baseY + 4 * ts + fontOff, physLine, WHITE_BLACK_PAIR);
 
 	// Row 5: Mental attributes
@@ -278,8 +282,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 		"I:{} W:{} Ch:{}",
 		ctx.player->get_intelligence(),
 		ctx.player->get_wisdom(),
-		ctx.player->get_charisma()
-	);
+		ctx.player->get_charisma());
 	ctx.renderer->draw_text(statsX, baseY + 5 * ts + fontOff, mentLine, WHITE_BLACK_PAIR);
 
 	// Row 6: Gold
@@ -295,25 +298,24 @@ void Gui::gui_print_attrs(const GameContext& /*ctx*/) noexcept {}
 // ---------------------------------------------------------------------------
 void Gui::gui_print_log(const GameContext& ctx)
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts    = ctx.renderer->get_tile_size();
+	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int logX  = (hud_div2(vcols) + 1) * ts;
+	const int logX = (hud_div2(vcols) + 1) * ts;
 
 	const int messagesToShow = std::min(
 		LOG_MAX_MESSAGES,
-		static_cast<int>(ctx.message_system->get_stored_message_count())
-	);
+		static_cast<int>(ctx.message_system->get_stored_message_count()));
 
 	for (int i = 0; i < messagesToShow; ++i)
 	{
 		const std::vector<LogMessage>& parts =
 			ctx.message_system->get_attack_message_at(
-				ctx.message_system->get_stored_message_count() - 1 - i
-			);
+				ctx.message_system->get_stored_message_count() - 1 - i);
 
 		int x = logX;
 		const int y = baseY + (1 + i) * ts;
@@ -332,11 +334,12 @@ void Gui::gui_print_log(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_player_status(const GameContext& ctx)
 {
-	if (!ctx.renderer) return;
+	if (!ctx.renderer)
+		return;
 
-	const int ts      = ctx.renderer->get_tile_size();
-	const int vrows   = ctx.renderer->get_viewport_rows();
-	const int baseY   = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int ts = ctx.renderer->get_tile_size();
+	const int vrows = ctx.renderer->get_viewport_rows();
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	if (ctx.player->has_state(ActorState::IS_CONFUSED))
@@ -345,8 +348,7 @@ void Gui::render_player_status(const GameContext& ctx)
 			2 * ts,
 			baseY + 3 * ts + fontOff,
 			"CONFUSED",
-			RED_BLACK_PAIR
-		);
+			RED_BLACK_PAIR);
 	}
 }
 

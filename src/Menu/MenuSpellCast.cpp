@@ -1,12 +1,12 @@
 #include "MenuSpellCast.h"
-#include "../Core/GameContext.h"
-#include "../Renderer/Renderer.h"
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
 #include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
-#include "../Colors/Colors.h"
 
 MenuSpellCast::MenuSpellCast(GameContext& ctx, Player& player)
 	: player(player), ctx(ctx)
@@ -51,13 +51,11 @@ void MenuSpellCast::draw_content()
 
 		if (!spellSources[i].empty())
 		{
-			menu_print(2, static_cast<int>(i) + 2,
-				std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " [" + spellSources[i] + "]");
+			menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " [" + spellSources[i] + "]");
 		}
 		else
 		{
-			menu_print(2, static_cast<int>(i) + 2,
-				std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " (L" + std::to_string(def.level) + ")");
+			menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " (L" + std::to_string(def.level) + ")");
 		}
 
 		if (static_cast<int>(i) == selectedIndex)
@@ -135,7 +133,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 			break;
 
 		case '\n': // Enter
-		case ' ':  // Space
+		case ' ': // Space
 			handle_selection();
 			break;
 

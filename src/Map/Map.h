@@ -1,16 +1,16 @@
 #pragma once
 
-#include <unordered_set>
 #include <memory>
+#include <unordered_set>
 #include <vector>
 
 #include <libtcod.h>
 
-#include "DungeonRoom.h"
-#include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
-#include "../Factories/MonsterFactory.h"
 #include "../Factories/ItemFactory.h"
+#include "../Factories/MonsterFactory.h"
+#include "../Persistent/Persistent.h"
+#include "DungeonRoom.h"
 
 // Forward declaration
 struct GameContext;
@@ -18,14 +18,20 @@ struct GameContext;
 inline constexpr int DEFAULT_MAP_WIDTH = 120;
 inline constexpr int DEFAULT_MAP_HEIGHT = 80;
 
-inline int get_map_width() { return DEFAULT_MAP_WIDTH; }
-inline int get_map_height() { return DEFAULT_MAP_HEIGHT; }
+inline int get_map_width()
+{
+	return DEFAULT_MAP_WIDTH;
+}
+inline int get_map_height()
+{
+	return DEFAULT_MAP_HEIGHT;
+}
 
 inline constexpr int FOV_RADIUS = 4;
 
 inline constexpr int ROOM_HORIZONTAL_MAX_SIZE = 14;
-inline constexpr int ROOM_VERTICAL_MAX_SIZE   = 9;
-inline constexpr int ROOM_MIN_SIZE            = 6;
+inline constexpr int ROOM_VERTICAL_MAX_SIZE = 9;
+inline constexpr int ROOM_MIN_SIZE = 6;
 inline constexpr int MAX_ROOM_ITEMS = 4;
 inline constexpr int MAX_MONSTERS = 6;
 inline constexpr int FINAL_DUNGEON_LEVEL = 10;
@@ -55,12 +61,13 @@ struct Tile
 
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }
-	Tile(Vector2D pos, TileType type, double cost) : position(pos), type(type), cost(cost), explored(false) {}
+	Tile(Vector2D pos, TileType type, double cost)
+		: position(pos), type(type), cost(cost), explored(false) {}
 };
 
 //==Map==
-//a class for the game map
-//the map is a 2d array of tiles
+// a class for the game map
+// the map is a 2d array of tiles
 class Map : public Persistent
 {
 private:
@@ -69,7 +76,13 @@ private:
 	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
 
-	Vector2D get_map_size() const noexcept { Vector2D size{ 0,0 }; size.x = map_width; size.y = map_height; return size; }
+	Vector2D get_map_size() const noexcept
+	{
+		Vector2D size{ 0, 0 };
+		size.x = map_width;
+		size.y = map_height;
+		return size;
+	}
 	bool in_bounds(Vector2D pos) const noexcept;
 
 	void init_tiles(GameContext& ctx);
@@ -80,12 +93,12 @@ private:
 	void spawn_items(const DungeonRoom& room, GameContext& ctx);
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
 	void generate_rooms(bool withActors, GameContext& ctx);
-	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR;}
+	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
 	bool is_water(Vector2D pos) const noexcept;
-	void set_explored(Vector2D pos); //set the tile as explored
+	void set_explored(Vector2D pos); // set the tile as explored
 	void post_process_doors();
-public:
 
+public:
 	Map(int map_width, int map_height);
 
 	void load(const json& j) override;
@@ -96,7 +109,7 @@ public:
 	TileType get_tile_type(Vector2D pos) const noexcept;
 	void tile_action(Creature& owner, TileType tileType, GameContext& ctx);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);
-	bool is_explored(Vector2D pos) const noexcept; //indicates whether this tile has already been seen by the player
+	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos, GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx); // compute the field of view using `TCODMap::computeFov()`
@@ -108,14 +121,24 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
-	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{-1, -1});
+	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{ -1, -1 });
 	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	long get_seed() const noexcept { return seed; }
 	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < map_width && pos.y >= 0 && pos.y < map_height; }
 	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
-	size_t get_index(Vector2D pos) const { if (in_bounds(pos)) { return pos.y * map_width + pos.x; } else { throw std::out_of_range{ "Map::get_index() out of bounds" }; } } // Note: Cannot be noexcept due to exception
+	size_t get_index(Vector2D pos) const
+	{
+		if (in_bounds(pos))
+		{
+			return pos.y * map_width + pos.x;
+		}
+		else
+		{
+			throw std::out_of_range{ "Map::get_index() out of bounds" };
+		}
+	} // Note: Cannot be noexcept due to exception
 	double get_cost(Vector2D pos, GameContext& ctx) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
@@ -132,6 +155,7 @@ public:
 
 	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;
+
 protected:
 	std::unique_ptr<TCODMap> tcodMap;
 	std::unique_ptr<TCODRandom> rng_unique;

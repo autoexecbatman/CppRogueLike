@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Persistent/Persistent.h"
 #include "../Items/Weapons.h" // For WeaponSize and HandRequirement enums
-#include "../Systems/TargetMode.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/BuffType.h"
+#include "../Systems/TargetMode.h"
 
 class Actor;
 class Creature;
@@ -24,8 +24,8 @@ public:
 		TELEPORTER,
 
 		// Weapons
-		WEAPON,  // all weapons - config stored as data in Weapon
-		SHIELD,  // special: off-hand only, toggle_shield dispatch
+		WEAPON, // all weapons - config stored as data in Weapon
+		SHIELD, // special: off-hand only, toggle_shield dispatch
 
 		// Consumables (potions + simple scrolls)
 		CONSUMABLE,
@@ -70,10 +70,10 @@ public:
 // Effect type for Consumable - what happens when the item is used
 enum class ConsumableEffect : int
 {
-	NONE = 0,  // Show message, consume item
-	HEAL,      // Heal HP, consume item
-	ADD_BUFF,  // Add timed buff via BuffSystem, consume item
-	FAIL,      // Show message, do NOT consume (feature not yet implemented)
+	NONE = 0, // Show message, consume item
+	HEAL, // Heal HP, consume item
+	ADD_BUFF, // Add timed buff via BuffSystem, consume item
+	FAIL, // Show message, do NOT consume (feature not yet implemented)
 };
 
 // Single class for all consumable items (potions, simple scrolls)
@@ -82,10 +82,10 @@ class Consumable : public Pickable
 {
 public:
 	ConsumableEffect effect;
-	int amount;           // heal_amount (HEAL) or buff value (ADD_BUFF)
-	int duration;         // buff duration (ADD_BUFF)
-	BuffType buff_type;   // buff effect type (ADD_BUFF)
-	bool is_set_effect;   // true = SET stat to value (potions), false = ADD value
+	int amount; // heal_amount (HEAL) or buff value (ADD_BUFF)
+	int duration; // buff duration (ADD_BUFF)
+	BuffType buff_type; // buff effect type (ADD_BUFF)
+	bool is_set_effect; // true = SET stat to value (potions), false = ADD value
 
 	Consumable(ConsumableEffect e, int amt, int dur, BuffType bt, bool set_effect = false)
 		: effect(e), amount(amt), duration(dur), buff_type(bt), is_set_effect(set_effect) {}
@@ -132,26 +132,27 @@ public:
 class TargetedScroll : public Pickable
 {
 public:
-    TargetMode target_mode{TargetMode::AUTO_NEAREST};
-    ScrollAnimation scroll_animation{ScrollAnimation::NONE};
-    int range{0};
-    int damage{0};
-    int confuse_turns{0};
+	TargetMode target_mode{ TargetMode::AUTO_NEAREST };
+	ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
+	int range{ 0 };
+	int damage{ 0 };
+	int confuse_turns{ 0 };
 
-    TargetedScroll(TargetMode mode, ScrollAnimation anim, int rng, int dmg, int confuse)
-        : target_mode(mode), scroll_animation(anim), range(rng), damage(dmg), confuse_turns(confuse) {}
+	TargetedScroll(TargetMode mode, ScrollAnimation anim, int rng, int dmg, int confuse)
+		: target_mode(mode), scroll_animation(anim), range(rng), damage(dmg), confuse_turns(confuse) {}
 
-    bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-    void save(json& j) override;
-    void load(const json& j) override;
-    PickableType get_type() const override { return PickableType::TARGETED_SCROLL; }
+	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
+	void save(json& j) override;
+	void load(const json& j) override;
+	PickableType get_type() const override { return PickableType::TARGETED_SCROLL; }
 };
 
 // Shield (off-hand defensive item)
 class Shield : public Weapon
 {
 public:
-	Shield() : Weapon(false, HandRequirement::OFF_HAND_ONLY, WeaponSize::MEDIUM) {}
+	Shield()
+		: Weapon(false, HandRequirement::OFF_HAND_ONLY, WeaponSize::MEDIUM) {}
 
 	// Override use method - shield equips to left hand via toggle_shield
 	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;

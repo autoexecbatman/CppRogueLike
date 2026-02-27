@@ -1,26 +1,26 @@
 // file: Pickable.cpp
 #include <format>
 
-#include "Pickable.h"
+#include "../ActorTypes/Gold.h"
+#include "../ActorTypes/Player.h"
+#include "../ActorTypes/Teleporter.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Items/Amulet.h"
+#include "../Items/Armor.h"
+#include "../Items/CorpseFood.h"
+#include "../Items/Food.h"
+#include "../Items/Jewelry.h"
+#include "../Systems/BuffSystem.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/SpellAnimations.h"
+#include "../Systems/TargetingSystem.h"
 #include "Actor.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
-#include "../ActorTypes/Player.h"
-#include "../ActorTypes/Teleporter.h"
-#include "../Systems/SpellAnimations.h"
-#include "../Systems/TargetingSystem.h"
-#include "../Systems/CreatureManager.h"
-#include "../Systems/RenderingManager.h"
-#include "../ActorTypes/Gold.h"
-#include "../Items/Food.h"
-#include "../Items/CorpseFood.h"
-#include "../Items/Amulet.h"
-#include "../Items/Armor.h"
-#include "../Items/Jewelry.h"
-#include "../Core/GameContext.h"
-#include "../Systems/MessageSystem.h"
-#include "../Systems/BuffSystem.h"
+#include "Pickable.h"
 
 using namespace InventoryOperations;
 
@@ -144,11 +144,16 @@ void Consumable::save(json& j)
 
 void Consumable::load(const json& j)
 {
-	if (j.contains("effect")) effect = static_cast<ConsumableEffect>(j["effect"].get<int>());
-	if (j.contains("amount")) amount = j["amount"].get<int>();
-	if (j.contains("duration")) duration = j["duration"].get<int>();
-	if (j.contains("buff_type")) buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
-	if (j.contains("is_set_effect")) is_set_effect = j["is_set_effect"].get<bool>();
+	if (j.contains("effect"))
+		effect = static_cast<ConsumableEffect>(j["effect"].get<int>());
+	if (j.contains("amount"))
+		amount = j["amount"].get<int>();
+	if (j.contains("duration"))
+		duration = j["duration"].get<int>();
+	if (j.contains("buff_type"))
+		buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
+	if (j.contains("is_set_effect"))
+		is_set_effect = j["is_set_effect"].get<bool>();
 }
 
 //==WEAPON==
@@ -179,93 +184,99 @@ bool Weapon::use(Item& owner, Creature& wearer, GameContext& ctx)
 //==TARGETED_SCROLL==
 bool TargetedScroll::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
-    TargetResult result = ctx.targeting->acquire_targets(ctx, target_mode, wearer.position, range, range);
+	TargetResult result = ctx.targeting->acquire_targets(ctx, target_mode, wearer.position, range, range);
 
-    if (!result.success)
-    {
-        ctx.rendering_manager->restore_screen(ctx);
-        return false;
-    }
+	if (!result.success)
+	{
+		ctx.rendering_manager->restore_screen(ctx);
+		return false;
+	}
 
-    switch (target_mode)
-    {
-    case TargetMode::AUTO_NEAREST:
-    {
-        if (!result.creatures.empty())
-        {
-            auto* target = result.creatures[0];
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
-            ctx.message_system->append_message_part(WHITE_BLUE_PAIR, target->actorData.name);
-            ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
-            ctx.message_system->finalize_message();
-            SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
-            ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
-            target->destructible->take_damage(*target, damage, ctx);
-            ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
-        }
-        break;
-    }
-    case TargetMode::PICK_TILE_AOE:
-    {
-        ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", range));
-        ctx.message_system->finalize_message();
-        SpellAnimations::animate_explosion(result.impact_pos, range, ctx);
-        if (ctx.player->get_tile_distance(result.impact_pos) <= range)
-        {
-            SpellAnimations::animate_creature_hit(ctx.player->position, ctx);
-            ctx.player->destructible->take_damage(*ctx.player, damage, ctx);
-        }
-        for (auto* t : result.creatures)
-        {
-            if (!t->destructible->is_dead())
-            {
-                SpellAnimations::animate_creature_hit(t->position, ctx);
-                ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, damage));
-                ctx.message_system->finalize_message();
-            }
-        }
-        for (auto* t : result.creatures)
-        {
-            if (!t->destructible->is_dead())
-                t->destructible->take_damage(*t, damage, ctx);
-        }
-        ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
-        break;
-    }
-    case TargetMode::PICK_TILE_SINGLE:
-    {
-        if (!result.creatures.empty())
-        {
-            auto* target = result.creatures[0];
-            target->apply_confusion(confuse_turns);
-            ctx.message_system->message(WHITE_BLACK_PAIR,
-                std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name), true);
-        }
-        break;
-    }
-    }
+	switch (target_mode)
+	{
+	case TargetMode::AUTO_NEAREST:
+	{
+		if (!result.creatures.empty())
+		{
+			auto* target = result.creatures[0];
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
+			ctx.message_system->append_message_part(WHITE_BLUE_PAIR, target->actorData.name);
+			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
+			ctx.message_system->finalize_message();
+			SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
+			ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", damage), true);
+			target->destructible->take_damage(*target, damage, ctx);
+			ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+		}
+		break;
+	}
+	case TargetMode::PICK_TILE_AOE:
+	{
+		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("The fireball explodes, burning everything within {} tiles!", range));
+		ctx.message_system->finalize_message();
+		SpellAnimations::animate_explosion(result.impact_pos, range, ctx);
+		if (ctx.player->get_tile_distance(result.impact_pos) <= range)
+		{
+			SpellAnimations::animate_creature_hit(ctx.player->position, ctx);
+			ctx.player->destructible->take_damage(*ctx.player, damage, ctx);
+		}
+		for (auto* t : result.creatures)
+		{
+			if (!t->destructible->is_dead())
+			{
+				SpellAnimations::animate_creature_hit(t->position, ctx);
+				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, damage));
+				ctx.message_system->finalize_message();
+			}
+		}
+		for (auto* t : result.creatures)
+		{
+			if (!t->destructible->is_dead())
+				t->destructible->take_damage(*t, damage, ctx);
+		}
+		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+		break;
+	}
+	case TargetMode::PICK_TILE_SINGLE:
+	{
+		if (!result.creatures.empty())
+		{
+			auto* target = result.creatures[0];
+			target->apply_confusion(confuse_turns);
+			ctx.message_system->message(WHITE_BLACK_PAIR,
+				std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
+				true);
+		}
+		break;
+	}
+	}
 
-    ctx.rendering_manager->restore_screen(ctx);
-    return Pickable::use(owner, wearer, ctx);
+	ctx.rendering_manager->restore_screen(ctx);
+	return Pickable::use(owner, wearer, ctx);
 }
 
 void TargetedScroll::save(json& j)
 {
-    j["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
-    j["target_mode"] = static_cast<int>(target_mode);
-    j["animation"] = static_cast<int>(scroll_animation);
-    j["range"] = range;
-    j["damage"] = damage;
-    j["confuse_turns"] = confuse_turns;
+	j["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
+	j["target_mode"] = static_cast<int>(target_mode);
+	j["animation"] = static_cast<int>(scroll_animation);
+	j["range"] = range;
+	j["damage"] = damage;
+	j["confuse_turns"] = confuse_turns;
 }
 
 void TargetedScroll::load(const json& j)
 {
-    if (j.contains("target_mode")) target_mode = static_cast<TargetMode>(j["target_mode"].get<int>());
-    if (j.contains("animation")) scroll_animation = static_cast<ScrollAnimation>(j["animation"].get<int>());
-    if (j.contains("range")) range = j["range"].get<int>();
-    if (j.contains("damage")) damage = j["damage"].get<int>();
-    if (j.contains("confuse_turns")) confuse_turns = j["confuse_turns"].get<int>();
+	if (j.contains("target_mode"))
+		target_mode = static_cast<TargetMode>(j["target_mode"].get<int>());
+	if (j.contains("animation"))
+		scroll_animation = static_cast<ScrollAnimation>(j["animation"].get<int>());
+	if (j.contains("range"))
+		range = j["range"].get<int>();
+	if (j.contains("damage"))
+		damage = j["damage"].get<int>();
+	if (j.contains("confuse_turns"))
+		confuse_turns = j["confuse_turns"].get<int>();
 }
 EquipmentSlot Weapon::get_preferred_slot(const Creature* creature) const
 {
@@ -304,9 +315,12 @@ void Weapon::save(json& j)
 
 void Weapon::load(const json& j)
 {
-	if (j.contains("ranged")) ranged = j["ranged"].get<bool>();
-	if (j.contains("hand_req")) hand_requirement = static_cast<HandRequirement>(j["hand_req"].get<int>());
-	if (j.contains("weapon_size")) weapon_size = static_cast<WeaponSize>(j["weapon_size"].get<int>());
+	if (j.contains("ranged"))
+		ranged = j["ranged"].get<bool>();
+	if (j.contains("hand_req"))
+		hand_requirement = static_cast<HandRequirement>(j["hand_req"].get<int>());
+	if (j.contains("weapon_size"))
+		weapon_size = static_cast<WeaponSize>(j["weapon_size"].get<int>());
 }
 
 bool Weapon::can_be_off_hand(WeaponSize weaponSize) const
@@ -341,4 +355,3 @@ bool Shield::use(Item& owner, Creature& wearer, GameContext& ctx)
 	wearer.equip(owner, ctx);
 	return true;
 }
-

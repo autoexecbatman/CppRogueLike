@@ -1,16 +1,17 @@
 #pragma once
 
-#include <vector>
-#include "../Utils/Vector2D.h"
 #include "../Actor/Actor.h"
+#include "../Utils/Vector2D.h"
 #include "TargetMode.h"
+#include <vector>
 
 struct GameContext;
 
-struct TargetResult {
-    bool success{false};
-    Vector2D impact_pos{0, 0};
-    std::vector<Creature*> creatures;
+struct TargetResult
+{
+	bool success{ false };
+	Vector2D impact_pos{ 0, 0 };
+	std::vector<Creature*> creatures;
 };
 
 class TargetingSystem

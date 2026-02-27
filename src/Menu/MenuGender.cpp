@@ -1,12 +1,12 @@
 // file: MenuGender.cpp
 #include "MenuGender.h"
+#include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
 #include "Menu.h"
 #include "MenuClass.h"
 #include "MenuRace.h"
-#include "../ActorTypes/Player.h"
-#include "../Core/GameContext.h"
-#include "../Renderer/Renderer.h"
-#include "../Colors/Colors.h"
 
 void Male::on_selection(GameContext& ctx)
 {
@@ -31,7 +31,7 @@ void Random::on_selection(GameContext& ctx)
 	}
 }
 
-void Back::on_selection(GameContext& ctx) 
+void Back::on_selection(GameContext& ctx)
 {
 	ctx.menus->back()->back = true;
 }
@@ -122,7 +122,8 @@ void MenuGender::on_key(int key, GameContext& ctx)
 		break;
 	}
 
-	default:break;
+	default:
+		break;
 	} // !end switch keyPress
 }
 

@@ -1,18 +1,18 @@
 // file: Menu.cpp
 #include <string>
 
-#include "Menu.h"
-#include "MenuGender.h"
-#include "../Core/GameContext.h"
-#include "../Tools/RoomEditor.h"
-#include "../Tools/PrefabLibrary.h"
-#include "../Renderer/Renderer.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Gui/Gui.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
-#include "../Gui/Gui.h"
+#include "../Tools/PrefabLibrary.h"
+#include "../Tools/RoomEditor.h"
+#include "Menu.h"
+#include "MenuGender.h"
 
 void NewGame::on_selection(GameContext& ctx)
 {
@@ -40,12 +40,13 @@ void Options::on_selection(GameContext& ctx)
 
 void Quit::on_selection(GameContext& ctx)
 {
-    *ctx.run = false;
-    *ctx.shouldSave = false;
-    ctx.message_system->log("You quit without saving!");
+	*ctx.run = false;
+	*ctx.shouldSave = false;
+	ctx.message_system->log("You quit without saving!");
 }
 
-Menu::Menu(bool startup, GameContext& ctx) : isStartupMenu(startup)
+Menu::Menu(bool startup, GameContext& ctx)
+	: isStartupMenu(startup)
 {
 	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
 	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
@@ -53,11 +54,11 @@ Menu::Menu(bool startup, GameContext& ctx) : isStartupMenu(startup)
 
 	menu_startx = (vcols - menu_width) / 2;
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
-	iMenuStates.emplace(MenuState::NEW_GAME,    std::make_unique<NewGame>());
-	iMenuStates.emplace(MenuState::LOAD_GAME,   std::make_unique<LoadGame>());
-	iMenuStates.emplace(MenuState::OPTIONS,     std::make_unique<Options>());
+	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
+	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
+	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
 	iMenuStates.emplace(MenuState::ROOM_EDITOR, std::make_unique<RoomEditorEntry>());
-	iMenuStates.emplace(MenuState::QUIT,        std::make_unique<Quit>());
+	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
 Menu::~Menu()
@@ -178,7 +179,8 @@ void Menu::on_key(int key, GameContext& ctx)
 		break; // break out of switch and start closing the game
 	}
 
-	default:break;
+	default:
+		break;
 	}
 }
 

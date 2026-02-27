@@ -25,12 +25,13 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 	void display_inventory(Player& player, GameContext& ctx);
-	void applyConfusion(int duration) { confusionTurns = duration; }
-	bool isConfused() const { return confusionTurns > 0; }
+	void apply_confusion(int duration) { confusionTurns = duration; }
+	bool is_confused() const { return confusionTurns > 0; }
+
 private:
 	bool shouldComputeFOV{ false };
 	bool isWaiting{ false };
-	int confusionTurns{ 0 };  // Number of turns player remains confused
+	int confusionTurns{ 0 }; // Number of turns player remains confused
 	PendingDoorAction pendingDoorAction{ PendingDoorAction::NONE };
 
 	void move(Creature& owner, Vector2D target);

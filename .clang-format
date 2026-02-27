@@ -1,1 +1,32 @@
-DisableFormat: true
+BasedOnStyle: Microsoft
+Language: Cpp
+
+UseTab: Always
+IndentWidth: 4
+TabWidth: 4
+
+BreakBeforeBraces: Allman
+
+AccessModifierOffset: -4
+IndentAccessModifiers: false
+
+AlignConsecutiveDeclarations: false
+AlignConsecutiveAssignments: false
+AlignOperands: false
+AlignTrailingComments: false
+AlignAfterOpenBracket: DontAlign
+
+BinPackParameters: false
+BinPackArguments: false
+
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLambdasOnASingleLine: Inline
+AllowShortBlocksOnASingleLine: Never
+
+PointerAlignment: Left
+ColumnLimit: 0
+
+Cpp11BracedListStyle: false
+SpaceBeforeCpp11BracedList: false
+SpacesInContainerLiterals: true

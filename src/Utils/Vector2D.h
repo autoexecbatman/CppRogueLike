@@ -1,7 +1,7 @@
 #pragma once
 
-#include <iostream>
 #include <cmath>
+#include <iostream>
 
 // {x,y} position
 struct Vector2D
@@ -19,7 +19,8 @@ struct Vector2D
 	~Vector2D() = default;
 
 	// Custom constructor for convenience
-	constexpr Vector2D(int x_val, int y_val) noexcept : x(x_val), y(y_val) {}
+	constexpr Vector2D(int x_val, int y_val) noexcept
+		: x(x_val), y(y_val) {}
 
 	// operator overloads
 
@@ -113,11 +114,11 @@ struct Vector2D
 };
 
 // Cardinal and diagonal direction constants (x,y)
-inline constexpr Vector2D DIR_N { 0, -1};
-inline constexpr Vector2D DIR_S { 0,  1};
-inline constexpr Vector2D DIR_E { 1,  0};
-inline constexpr Vector2D DIR_W {-1,  0};
-inline constexpr Vector2D DIR_NE{ 1, -1};
-inline constexpr Vector2D DIR_SE{ 1,  1};
-inline constexpr Vector2D DIR_SW{-1,  1};
-inline constexpr Vector2D DIR_NW{-1, -1};
+inline constexpr Vector2D DIR_N{ 0, -1 };
+inline constexpr Vector2D DIR_S{ 0, 1 };
+inline constexpr Vector2D DIR_E{ 1, 0 };
+inline constexpr Vector2D DIR_W{ -1, 0 };
+inline constexpr Vector2D DIR_NE{ 1, -1 };
+inline constexpr Vector2D DIR_SE{ 1, 1 };
+inline constexpr Vector2D DIR_SW{ -1, 1 };
+inline constexpr Vector2D DIR_NW{ -1, -1 };

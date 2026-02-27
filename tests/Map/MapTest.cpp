@@ -2,6 +2,7 @@
 #include <limits>
 
 #include "src/Map/Map.h"
+#include "src/Map/DungeonRoom.h"
 #include "src/Core/GameContext.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Destructible.h"
@@ -487,7 +488,7 @@ TEST_F(MapTest, StairsPlacement_AfterInit_StairsExist)
     ctx.stairs = stairs.get();
 
     // Rooms must exist
-    std::vector<Vector2D> rooms;
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
 
     // Re-initialize map with stairs and rooms
@@ -515,7 +516,7 @@ TEST_F(MapTest, StairsPlacement_NoStairsInContext_DoesNotCrash)
 {
     // BUG: If ctx.stairs is null, place_stairs should return early
     ctx.stairs = nullptr;
-    std::vector<Vector2D> rooms;
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
 
     // Should not crash when stairs is null
@@ -528,7 +529,7 @@ TEST_F(MapTest, StairsPlacement_NoRooms_DoesNotCrash)
     std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
     ctx.stairs = stairs.get();
 
-    std::vector<Vector2D> rooms;  // Empty at start, populated by BSP
+    std::vector<DungeonRoom> rooms;  // Empty at start, populated by BSP
     ctx.rooms = &rooms;
 
     // Should not crash even if rooms starts empty
@@ -556,7 +557,7 @@ TEST_F(MapTest, StairsPlacement_RoomGeneration_StairsInWalkableTile)
     std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
     ctx.stairs = stairs.get();
 
-    std::vector<Vector2D> rooms;
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
 
     // Generate map with actors
@@ -580,7 +581,7 @@ TEST_F(MapTest, StairsPlacement_AfterRegenerate_StairsPlaced)
     std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{5, 5});
     ctx.stairs = stairs.get();
 
-    std::vector<Vector2D> rooms;
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
 
     // Initial map generation
@@ -605,7 +606,7 @@ TEST_F(MapTest, StairsPlacement_NoDiceInContext_StairsNotPlaced)
     std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
     ctx.stairs = stairs.get();
 
-    std::vector<Vector2D> rooms;
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
     ctx.dice = nullptr;  // No dice in context
 

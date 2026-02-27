@@ -1,38 +1,38 @@
 // file: AiPlayer.cpp
-#include <unordered_map>
 #include <format>
+#include <unordered_map>
 
 #include <libtcod.h>
 
+#include "../Actor/Actor.h"
+#include "../Actor/InventoryOperations.h"
+#include "../ActorTypes/Gold.h"
+#include "../ActorTypes/Monsters.h"
+#include "../ActorTypes/Player.h"
+#include "../Combat/DamageInfo.h"
+#include "../Combat/WeaponDamageRegistry.h"
+#include "../Controls/Controls.h"
+#include "../Core/GameContext.h"
+#include "../Factories/ItemCreator.h"
+#include "../Items/ItemClassification.h"
+#include "../Items/Items.h"
+#include "../Menu/Menu.h"
+#include "../Objects/Web.h"
+#include "../Renderer/InputSystem.h"
+#include "../Renderer/Renderer.h"
+#include "../Systems/BuffSystem.h"
+#include "../Systems/CreatureManager.h"
+#include "../Systems/DisplayManager.h"
+#include "../Systems/InputHandler.h"
+#include "../Systems/LevelManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/RenderingManager.h"
+#include "../Systems/SpellSystem.h"
+#include "../Systems/TargetingSystem.h"
+#include "../UI/InventoryUI.h"
 #include "Ai.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
-#include "../Menu/Menu.h"
-#include "../Controls/Controls.h"
-#include "../Actor/Actor.h"
-#include "../Actor/InventoryOperations.h"
-#include "../Items/Items.h"
-#include "../Items/ItemClassification.h"
-#include "../ActorTypes/Gold.h"
-#include "../Objects/Web.h"
-#include "../Factories/ItemCreator.h"
-#include "../ActorTypes/Monsters.h"
-#include "../ActorTypes/Player.h"
-#include "../UI/InventoryUI.h"
-#include "../Core/GameContext.h"
-#include "../Systems/InputHandler.h"
-#include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
-#include "../Systems/CreatureManager.h"
-#include "../Systems/LevelManager.h"
-#include "../Systems/TargetingSystem.h"
-#include "../Systems/DisplayManager.h"
-#include "../Systems/BuffSystem.h"
-#include "../Systems/SpellSystem.h"
-#include "../Combat/DamageInfo.h"
-#include "../Combat/WeaponDamageRegistry.h"
-#include "../Renderer/Renderer.h"
-#include "../Renderer/InputSystem.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 
@@ -45,22 +45,22 @@ struct PossibleMoves
 {
 	std::unordered_map<Controls, Vector2D> moves = {
 		// Arrow keys
-		{Controls::UP_ARROW,    {0, -1}},
-		{Controls::DOWN_ARROW,  {0,  1}},
-		{Controls::LEFT_ARROW,  {-1, 0}},
-		{Controls::RIGHT_ARROW, {1,  0}},
+		{ Controls::UP_ARROW, { 0, -1 } },
+		{ Controls::DOWN_ARROW, { 0, 1 } },
+		{ Controls::LEFT_ARROW, { -1, 0 } },
+		{ Controls::RIGHT_ARROW, { 1, 0 } },
 
 		// WASD movement
-		{Controls::W_KEY, {0, -1}},
-		{Controls::S_KEY, {0,  1}},
-		{Controls::A_KEY, {-1, 0}},
-		{Controls::D_KEY, {1,  0}},
+		{ Controls::W_KEY, { 0, -1 } },
+		{ Controls::S_KEY, { 0, 1 } },
+		{ Controls::A_KEY, { -1, 0 } },
+		{ Controls::D_KEY, { 1, 0 } },
 
 		// WASD diagonals
-		{Controls::Q_KEY, {-1, -1}},  // up-left
-		{Controls::E_KEY, {1,  -1}},  // up-right
-		{Controls::Z_KEY, {-1,  1}},  // down-left
-		{Controls::C_KEY, {1,   1}},  // down-right
+		{ Controls::Q_KEY, { -1, -1 } }, // up-left
+		{ Controls::E_KEY, { 1, -1 } }, // up-right
+		{ Controls::Z_KEY, { -1, 1 } }, // down-left
+		{ Controls::C_KEY, { 1, 1 } }, // down-right
 	};
 } m;
 
@@ -106,14 +106,30 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				int randomDir = ctx.dice->roll(0, 7);
 				switch (randomDir)
 				{
-				case 0: moveVector = { 0, -1 }; break;  // North
-				case 1: moveVector = { 0,  1 }; break;  // South
-				case 2: moveVector = { -1, 0 }; break;  // West
-				case 3: moveVector = { 1,  0 }; break;  // East
-				case 4: moveVector = { -1,-1 }; break;  // Northwest
-				case 5: moveVector = { 1, -1 }; break;  // Northeast
-				case 6: moveVector = { -1, 1 }; break;  // Southwest
-				case 7: moveVector = { 1,  1 }; break;  // Southeast
+				case 0:
+					moveVector = { 0, -1 };
+					break; // North
+				case 1:
+					moveVector = { 0, 1 };
+					break; // South
+				case 2:
+					moveVector = { -1, 0 };
+					break; // West
+				case 3:
+					moveVector = { 1, 0 };
+					break; // East
+				case 4:
+					moveVector = { -1, -1 };
+					break; // Northwest
+				case 5:
+					moveVector = { 1, -1 };
+					break; // Northeast
+				case 6:
+					moveVector = { -1, 1 };
+					break; // Southwest
+				case 7:
+					moveVector = { 1, 1 };
+					break; // Southeast
 				}
 
 				ctx.message_system->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
@@ -446,8 +462,8 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 				}
 				else
 				{
-				// Non-player creatures get single attack
-				owner.attacker->attack(owner, *c, ctx);
+					// Non-player creatures get single attack
+					owner.attacker->attack(owner, *c, ctx);
 				}
 
 				// Clean up dead creatures after combat
@@ -458,7 +474,6 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 	}
 	return true;
 }
-
 
 void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx)
 {
@@ -519,7 +534,6 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 	}
 }
 
-
 void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 {
 	switch (key)
@@ -534,21 +548,26 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::MOUSE:
 	{
-		if (!ctx.renderer || !ctx.input_system) break;
+		if (!ctx.renderer || !ctx.input_system)
+			break;
 		int ts = ctx.renderer->get_tile_size();
-		if (ts <= 0) break;
+		if (ts <= 0)
+			break;
 		Vector2D screen_tile = ctx.input_system->get_mouse_tile(ts);
-		Vector2D world_tile
-		{
+		Vector2D world_tile{
 			screen_tile.x + ctx.renderer->get_camera_x() / ts,
 			screen_tile.y + ctx.renderer->get_camera_y() / ts
 		};
-		if (!ctx.map->is_in_bounds(world_tile)) break;
-		if (world_tile == player.position) break;
+		if (!ctx.map->is_in_bounds(world_tile))
+			break;
+		if (world_tile == player.position)
+			break;
 		int step_x = (world_tile.x > player.position.x) ? 1
-		           : (world_tile.x < player.position.x) ? -1 : 0;
+			: (world_tile.x < player.position.x)		? -1
+														: 0;
 		int step_y = (world_tile.y > player.position.y) ? 1
-		           : (world_tile.y < player.position.y) ? -1 : 0;
+			: (world_tile.y < player.position.y)		? -1
+														: 0;
 		Vector2D target_pos{ player.position.x + step_x, player.position.y + step_y };
 		look_to_move(player, target_pos, ctx);
 		look_to_attack(target_pos, player, ctx);
@@ -697,7 +716,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::CAST:
 	{
 		SpellSystem::show_casting_menu(player, ctx);
-		break;  
+		break;
 	}
 
 	case Controls::HELP:
@@ -708,7 +727,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	default:
 		break;
-}
+	}
 }
 
 bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)

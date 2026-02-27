@@ -1,10 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
-#include "BaseMenu.h"
 #include "../Systems/SpellSystem.h"
+#include "BaseMenu.h"
 
 struct GameContext;
 class Player;

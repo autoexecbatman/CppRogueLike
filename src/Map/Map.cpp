@@ -1,47 +1,47 @@
 // file: Map.cpp
+#include <algorithm>
+#include <cmath>
 #include <iostream>
+#include <limits>
 #include <map>
 #include <random>
-#include <algorithm>
 #include <span>
-#include <limits>
-#include <cmath>
 
-#pragma warning (push, 0)
+#pragma warning(push, 0)
 #include <libtcod/libtcod.hpp>
-#pragma warning (pop)
+#pragma warning(pop)
 
-#include "Map.h"
-#include "DungeonRoom.h"
-#include "DungeonGenerator.h"
-#include "../Core/GameContext.h"
-#include "../Renderer/TileId.h"
-#include "../Renderer/Renderer.h"
-#include "../Persistent/Persistent.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
-#include "../Actor/InventoryOperations.h"
 #include "../Actor/Destructible.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Gold.h"
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/Monsters.h"
-#include "../Factories/MonsterCreator.h"
 #include "../ActorTypes/Player.h"
 #include "../Ai/Ai.h"
+#include "../Ai/AiMonsterRanged.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
-#include "../Random/RandomDice.h"
-#include "../Items/Weapons.h"
-#include "../Items/Items.h"
-#include "../Ai/AiMonsterRanged.h"
-#include "../Items/Food.h"
-#include "../Factories/MonsterFactory.h"
-#include "../Factories/ItemFactory.h"
+#include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
-#include "../Systems/MessageSystem.h"
+#include "../Factories/ItemFactory.h"
+#include "../Factories/MonsterCreator.h"
+#include "../Factories/MonsterFactory.h"
+#include "../Items/Food.h"
+#include "../Items/Items.h"
+#include "../Items/Weapons.h"
+#include "../Persistent/Persistent.h"
+#include "../Random/RandomDice.h"
+#include "../Renderer/Renderer.h"
+#include "../Renderer/TileId.h"
 #include "../Systems/LevelManager.h"
+#include "../Systems/MessageSystem.h"
 #include "../Tools/DecorEditor.h"
+#include "DungeonGenerator.h"
+#include "DungeonRoom.h"
+#include "Map.h"
 
 // tcod path listener
 class PathListener : public ITCODPathCallback
@@ -50,7 +50,8 @@ private:
 	Map& map;
 
 public:
-	PathListener(Map& map) noexcept : map(map) {}
+	PathListener(Map& map) noexcept
+		: map(map) {}
 
 	// callback to handle pathfinding
 	// returns the cost of the path from (xFrom, yFrom) to (xTo, yTo)
@@ -65,13 +66,12 @@ public:
 
 //====
 Map::Map(int map_width, int map_height)
-	:
-	map_height(map_height),
-	map_width(map_width),
-	tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
-	seed(0), // Will be set in init() with GameContext access
-	monsterFactory(std::make_unique<MonsterFactory>()),
-	itemFactory(std::make_unique<ItemFactory>())
+	: map_height(map_height),
+	  map_width(map_width),
+	  tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
+	  seed(0), // Will be set in init() with GameContext access
+	  monsterFactory(std::make_unique<MonsterFactory>()),
+	  itemFactory(std::make_unique<ItemFactory>())
 {
 }
 
@@ -84,7 +84,10 @@ bool Map::in_bounds(Vector2D pos) const noexcept
 
 void Map::init_tiles(GameContext& ctx)
 {
-	if (!tiles.empty()) { tiles.clear(); }
+	if (!tiles.empty())
+	{
+		tiles.clear();
+	}
 
 	if (ctx.message_system)
 	{
@@ -119,11 +122,11 @@ void Map::init(bool withActors, GameContext& ctx)
 
 	post_process_doors();
 
-	if (ctx.level_manager && ctx.level_manager->get_dungeon_level() > 1) {
+	if (ctx.level_manager && ctx.level_manager->get_dungeon_level() > 1)
+	{
 		maybe_create_treasure_room(ctx.level_manager->get_dungeon_level(), ctx);
 	}
 	place_amulet(ctx);
-
 }
 
 void Map::generate_rooms(bool withActors, GameContext& ctx)
@@ -144,8 +147,7 @@ void Map::load(const json& j)
 	{
 		Vector2D position(
 			tileJson.at("position").at("y").get<int>(),
-			tileJson.at("position").at("x").get<int>()
-		);
+			tileJson.at("position").at("x").get<int>());
 
 		TileType type = static_cast<TileType>(tileJson.at("type").get<int>());
 		bool explored = tileJson.at("explored").get<bool>();
@@ -157,14 +159,14 @@ void Map::load(const json& j)
 
 	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
 	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	
+
 	// CRITICAL FOV FIX: Set tcodMap properties based on loaded tile data
 	// instead of regenerating via bsp() which would override our loaded tiles
 	for (const auto& tile : tiles)
 	{
 		bool walkable = false;
 		bool transparent = false;
-		
+
 		switch (tile.type)
 		{
 		case TileType::FLOOR:
@@ -174,7 +176,7 @@ void Map::load(const json& j)
 			transparent = true;
 			break;
 		case TileType::WATER:
-			walkable = true;  // Can walk if have swim ability, but always transparent
+			walkable = true; // Can walk if have swim ability, but always transparent
 			transparent = true;
 			break;
 		case TileType::WALL:
@@ -187,10 +189,10 @@ void Map::load(const json& j)
 			transparent = false;
 			break;
 		}
-		
+
 		tcodMap->setProperties(tile.position.x, tile.position.y, walkable, transparent);
 	}
-	
+
 	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
 	// Post-process to place doors after loading map
@@ -209,13 +211,10 @@ void Map::save(json& j)
 	for (const auto& tile : tiles)
 	{
 		j["tiles"].push_back(
-			{
-				{"position", { {"y", tile.position.y}, {"x", tile.position.x} } },
-				{"type", static_cast<int>(tile.type)}, // TileType is an enum
-				{"explored", tile.explored},
-				{ "cost", tile.cost }
-			}
-		);
+			{ { "position", { { "y", tile.position.y }, { "x", tile.position.x } } },
+				{ "type", static_cast<int>(tile.type) }, // TileType is an enum
+				{ "explored", tile.explored },
+				{ "cost", tile.cost } });
 	}
 }
 
@@ -226,12 +225,14 @@ bool Map::is_wall(Vector2D pos) const noexcept
 
 bool Map::is_explored(Vector2D pos) const noexcept
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		// Logging moved to callers with GameContext access
 		return false;
 	}
 	size_t index = get_index(pos);
-	if (index >= tiles.size()) {
+	if (index >= tiles.size())
+	{
 		// Logging moved to callers with GameContext access
 		return false;
 	}
@@ -240,7 +241,8 @@ bool Map::is_explored(Vector2D pos) const noexcept
 
 void Map::set_explored(Vector2D pos)
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		return; // Can't set explored for out of bounds positions
 	}
 	tiles.at(get_index(pos)).explored = true;
@@ -253,7 +255,8 @@ bool Map::is_in_fov(Vector2D pos) const noexcept
 
 bool Map::is_water(Vector2D pos) const noexcept
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		return false; // Out of bounds positions are not water
 	}
 	return tiles.at(get_index(pos)).type == TileType::WATER;
@@ -261,7 +264,8 @@ bool Map::is_water(Vector2D pos) const noexcept
 
 TileType Map::get_tile_type(Vector2D pos) const noexcept
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		return TileType::WALL; // Out of bounds positions are treated as walls
 	}
 	return tiles.at(get_index(pos)).type;
@@ -288,8 +292,8 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 		}
 		break;
 	case TileType::FLOOR:
-		//ctx.message_system->log("You are on the floor");
-		//ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
+		// ctx.message_system->log("You are on the floor");
+		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
 		break;
 	case TileType::CLOSED_DOOR:
 		if (ctx.message_system)
@@ -299,8 +303,8 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 		}
 		break;
 	case TileType::CORRIDOR:
-		//ctx.message_system->log("You are in a corridor");
-		//ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
+		// ctx.message_system->log("You are in a corridor");
+		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
 		break;
 	default:
 		if (ctx.message_system)
@@ -329,7 +333,7 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 	case TileType::FLOOR:
 		return false;
 	case TileType::CLOSED_DOOR:
-		return true;  // Closed doors block movement
+		return true; // Closed doors block movement
 	case TileType::OPEN_DOOR:
 		return false; // Open doors don't block movement
 	case TileType::CORRIDOR:
@@ -348,7 +352,8 @@ void Map::compute_fov(GameContext& ctx)
 	// Safety check for valid player position
 	if (!ctx.player ||
 		ctx.player->position.x < 0 || ctx.player->position.x >= map_width ||
-		ctx.player->position.y < 0 || ctx.player->position.y >= map_height) {
+		ctx.player->position.y < 0 || ctx.player->position.y >= map_height)
+	{
 		if (ctx.message_system)
 		{
 			ctx.message_system->log("Warning: Can't compute FOV - invalid player position");
@@ -388,13 +393,16 @@ void Map::render(const GameContext& ctx) const
 	int end_row = std::min(map_height, start_row + vis_rows + 2);
 
 	// Cardinal neighbor definitions: offset + bitmask bit
-	struct NeighborDef { Vector2D offset; uint8_t bit; };
+	struct NeighborDef
+	{
+		Vector2D offset;
+		uint8_t bit;
+	};
 	constexpr uint8_t N_BIT = 8;
 	constexpr uint8_t E_BIT = 4;
 	constexpr uint8_t S_BIT = 2;
 	constexpr uint8_t W_BIT = 1;
-	const NeighborDef CARDINALS[4] =
-	{
+	const NeighborDef CARDINALS[4] = {
 		{ DIR_N, N_BIT },
 		{ DIR_E, E_BIT },
 		{ DIR_S, S_BIT },
@@ -416,44 +424,45 @@ void Map::render(const GameContext& ctx) const
 
 	auto is_wall_or_door = [&](Vector2D p) -> bool
 	{
-		if (!in_bounds(p)) return false;
+		if (!in_bounds(p))
+			return false;
 		TileType t = get_tile_type(p);
 		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
 	};
 
 	auto is_wall_only = [&](Vector2D p) -> bool
 	{
-		if (!in_bounds(p)) return false;
+		if (!in_bounds(p))
+			return false;
 		return get_tile_type(p) == TileType::WALL;
 	};
 
 	auto is_door = [&](Vector2D p) -> bool
 	{
-		if (!in_bounds(p)) return false;
+		if (!in_bounds(p))
+			return false;
 		TileType t = get_tile_type(p);
 		return t == TileType::CLOSED_DOOR || t == TileType::OPEN_DOOR;
 	};
 
 	auto is_walkable = [&](Vector2D p) -> bool
 	{
-		if (!in_bounds(p)) return false;
+		if (!in_bounds(p))
+			return false;
 		TileType t = get_tile_type(p);
-		return t == TileType::FLOOR || t == TileType::CORRIDOR
-			|| t == TileType::OPEN_DOOR || t == TileType::WATER;
+		return t == TileType::FLOOR || t == TileType::CORRIDOR || t == TileType::OPEN_DOOR || t == TileType::WATER;
 	};
 
-	constexpr Vector2D ALL_DIRS[8] =
-	{
-		DIR_NW, DIR_N, DIR_NE,
-		DIR_W,         DIR_E,
-		DIR_SW, DIR_S, DIR_SE
+	constexpr Vector2D ALL_DIRS[8] = {
+		DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE
 	};
 
 	// A border wall is a wall/door with at least one walkable tile
 	// in its 8 neighbors. Only border walls form the visible room outline.
 	auto is_border_wall = [&](Vector2D p) -> bool
 	{
-		if (!is_wall_or_door(p)) return false;
+		if (!is_wall_or_door(p))
+			return false;
 		for (const auto& d : ALL_DIRS)
 		{
 			if (is_walkable(p + d))
@@ -473,8 +482,7 @@ void Map::render(const GameContext& ctx) const
 	auto decor_hash = [&](int y, int x, int salt) -> unsigned int
 	{
 		unsigned int h = static_cast<unsigned int>(
-			y * 7919 + x * 6271 + static_cast<int>(seed) * 1013 + salt * 3571
-		);
+			y * 7919 + x * 6271 + static_cast<int>(seed) * 1013 + salt * 3571);
 		h ^= h >> 16;
 		h *= 0x45d9f3bU;
 		h ^= h >> 16;
@@ -488,9 +496,9 @@ void Map::render(const GameContext& ctx) const
 	// ---------------------------------------------------------------------------
 	constexpr int ZONE_DUNGEON = 0;
 	constexpr int ZONE_LIBRARY = 1;
-	constexpr int ZONE_ARMORY  = 2;
+	constexpr int ZONE_ARMORY = 2;
 	constexpr int ZONE_STORAGE = 3;
-	constexpr int ZONE_CHAPEL  = 4;
+	constexpr int ZONE_CHAPEL = 4;
 
 	auto resolve_decor = [&](Vector2D p, TileType t) -> int
 	{
@@ -499,12 +507,12 @@ void Map::render(const GameContext& ctx) const
 			return 0;
 
 		bool floor_south = is_walkable(p + DIR_S);
-		bool floor_east  = is_walkable(p + DIR_E);
-		bool floor_west  = is_walkable(p + DIR_W);
+		bool floor_east = is_walkable(p + DIR_E);
+		bool floor_west = is_walkable(p + DIR_W);
 		if (!floor_south || floor_east || floor_west)
 			return 0;
 
-		int row_phase    = static_cast<int>(decor_hash(p.y, 0, 88) % 4);
+		int row_phase = static_cast<int>(decor_hash(p.y, 0, 88) % 4);
 		if ((p.x % 4 + 4) % 4 != row_phase)
 			return 0;
 
@@ -525,7 +533,7 @@ void Map::render(const GameContext& ctx) const
 			// In FOV: full colour. Explored but not visible: dimmed memory tint.
 			bool in_fov = is_in_fov(pos);
 			Color tint = in_fov
-				? Color{255, 255, 255, 255}
+				? Color{ 255, 255, 255, 255 }
 				: Color{ 90, 90, 110, 255 };
 
 			TileType type = get_tile_type(pos);
@@ -541,24 +549,21 @@ void Map::render(const GameContext& ctx) const
 				}
 				tile_id = wall_autotile_resolve_mask(
 					WALL_AUTOTILE_STONE,
-					build_mask(pos, is_border_wall)
-				);
+					build_mask(pos, is_border_wall));
 				break;
 			}
 			case TileType::FLOOR:
 			{
 				tile_id = autotile_resolve_mask(
 					AUTOTILE_FLOOR_STONE,
-					build_mask(pos, is_walkable)
-				);
+					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::CORRIDOR:
 			{
 				tile_id = autotile_resolve_mask(
 					AUTOTILE_CORRIDOR,
-					build_mask(pos, is_walkable)
-				);
+					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::WATER:
@@ -570,8 +575,7 @@ void Map::render(const GameContext& ctx) const
 				// Draw floor underneath -- door sprites have transparency
 				int floor_id = autotile_resolve_mask(
 					AUTOTILE_FLOOR_STONE,
-					build_mask(pos, is_walkable)
-				);
+					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(col, row, floor_id, WHITE_BLACK_PAIR, tint);
 				tile_id = (type == TileType::CLOSED_DOOR)
 					? TILE_DOOR_CLOSED
@@ -598,9 +602,11 @@ void Map::render(const GameContext& ctx) const
 	}
 }
 
-void Map::add_item(Vector2D pos, GameContext& ctx) {
+void Map::add_item(Vector2D pos, GameContext& ctx)
+{
 	// 75% chance to spawn an item at all
-	if (rng_unique->getInt(1, 100) > 75) return;
+	if (rng_unique->getInt(1, 100) > 75)
+		return;
 
 	// Use our ItemFactory to create a random item
 	if (ctx.level_manager)
@@ -611,8 +617,14 @@ void Map::add_item(Vector2D pos, GameContext& ctx) {
 
 void Map::dig(Vector2D begin, Vector2D end)
 {
-	if (begin.x > end.x) { std::swap(begin.x, end.x); }
-	if (begin.y > end.y) { std::swap(begin.y, end.y); }
+	if (begin.x > end.x)
+	{
+		std::swap(begin.x, end.x);
+	}
+	if (begin.y > end.y)
+	{
+		std::swap(begin.y, end.y);
+	}
 
 	for (int tileY = begin.y; tileY <= end.y; tileY++)
 	{
@@ -626,45 +638,47 @@ void Map::dig(Vector2D begin, Vector2D end)
 
 void Map::dig_corridor(Vector2D begin, Vector2D end)
 {
-    const int x1 = begin.x;
-    const int y1 = begin.y;
-    const int x2 = end.x;
-    const int y2 = end.y;
+	const int x1 = begin.x;
+	const int y1 = begin.y;
+	const int x2 = end.x;
+	const int y2 = end.y;
 
-    const bool horizontal_first = rng_unique->getInt(0, 1) == 1;
+	const bool horizontal_first = rng_unique->getInt(0, 1) == 1;
 
-    // Only carve WALL tiles -- floor/corridor tiles keep their existing type.
-    // This prevents corridors from visually scarring room interiors when the
-    // MST path passes through another room's bounding box.
-    auto dig_one = [&](Vector2D pos)
-    {
-        if (!in_bounds(pos))
-            return;
-        if (get_tile_type(pos) == TileType::WALL)
-            set_tile(pos, TileType::CORRIDOR, 1);
-        tcodMap->setProperties(pos.x, pos.y, true, true);
-    };
+	// Only carve WALL tiles -- floor/corridor tiles keep their existing type.
+	// This prevents corridors from visually scarring room interiors when the
+	// MST path passes through another room's bounding box.
+	auto dig_one = [&](Vector2D pos)
+	{
+		if (!in_bounds(pos))
+			return;
+		if (get_tile_type(pos) == TileType::WALL)
+			set_tile(pos, TileType::CORRIDOR, 1);
+		tcodMap->setProperties(pos.x, pos.y, true, true);
+	};
 
-    if (horizontal_first)
-    {
-        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
-            dig_one(Vector2D{ x, y1 });
-        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
-        {
-            if (y == y1) continue;
-            dig_one(Vector2D{ x2, y });
-        }
-    }
-    else
-    {
-        for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
-            dig_one(Vector2D{ x1, y });
-        for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
-        {
-            if (x == x1) continue;
-            dig_one(Vector2D{ x, y2 });
-        }
-    }
+	if (horizontal_first)
+	{
+		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+			dig_one(Vector2D{ x, y1 });
+		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+		{
+			if (y == y1)
+				continue;
+			dig_one(Vector2D{ x2, y });
+		}
+	}
+	else
+	{
+		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+			dig_one(Vector2D{ x1, y });
+		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+		{
+			if (x == x1)
+				continue;
+			dig_one(Vector2D{ x, y2 });
+		}
+	}
 }
 
 void Map::set_door(Vector2D thisTile, int tileX, int tileY)
@@ -675,7 +689,8 @@ void Map::set_door(Vector2D thisTile, int tileX, int tileY)
 
 void Map::set_tile(Vector2D pos, TileType newType, double cost)
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		return; // Can't set tile for out of bounds positions
 	}
 	tiles.at(get_index(pos)).type = newType;
@@ -684,25 +699,27 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 
 void Map::create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx)
 {
-    if (ctx.rooms)
-        ctx.rooms->push_back(room);
+	if (ctx.rooms)
+		ctx.rooms->push_back(room);
 
-    dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 
-    spawn_water(room, ctx);
+	spawn_water(room, ctx);
 
-    if (!withActors) return;
+	if (!withActors)
+		return;
 
-    if (first) spawn_player(room, ctx);
+	if (first)
+		spawn_player(room, ctx);
 
-    spawn_items(room, ctx);
+	spawn_items(room, ctx);
 }
 
 void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 {
 	// Add water tiles
 	constexpr int waterPercentage = 5; // 5% of tiles will be water (reduced from 10%)
-	Vector2D waterPos{ 0,0 };
+	Vector2D waterPos{ 0, 0 };
 	for (waterPos.y = room.row; waterPos.y <= room.row_end(); ++waterPos.y)
 	{
 		for (waterPos.x = room.col; waterPos.x <= room.col_end(); ++waterPos.x)
@@ -712,7 +729,8 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 			if (rolld100 < waterPercentage)
 			{
 				// CRITICAL FIX: Check if water would block entrances using pattern matching
-				if (!would_water_block_entrance(waterPos, ctx)) {
+				if (!would_water_block_entrance(waterPos, ctx))
+				{
 					set_tile(waterPos, TileType::WATER, 10);
 					tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
 				}
@@ -725,163 +743,185 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 {
 	// Pattern matching to prevent water from blocking entrances
 	// Check all 8 directions around the water position for potential entrance patterns
-	
+
 	// Get surrounding positions
 	std::vector<Vector2D> adjacent = {
-		{waterPos.x - 1, waterPos.y - 1}, {waterPos.x, waterPos.y - 1}, {waterPos.x + 1, waterPos.y - 1}, // Top row    (NW, N, NE)
-		{waterPos.x - 1, waterPos.y    },                                {waterPos.x + 1, waterPos.y    }, // Middle row (W, E)
-		{waterPos.x - 1, waterPos.y + 1}, {waterPos.x, waterPos.y + 1}, {waterPos.x + 1, waterPos.y + 1}  // Bottom row (SW, S, SE)
+		{ waterPos.x - 1, waterPos.y - 1 }, { waterPos.x, waterPos.y - 1 }, { waterPos.x + 1, waterPos.y - 1 }, // Top row    (NW, N, NE)
+		{ waterPos.x - 1, waterPos.y },
+		{ waterPos.x + 1, waterPos.y }, // Middle row (W, E)
+		{ waterPos.x - 1, waterPos.y + 1 },
+		{ waterPos.x, waterPos.y + 1 },
+		{ waterPos.x + 1, waterPos.y + 1 } // Bottom row (SW, S, SE)
 	};
-	
+
 	// Count walls and floors around this position
 	int wallCount = 0;
 	int floorCount = 0;
-	
-	for (const auto& pos : adjacent) {
-		if (!in_bounds(pos)) {
+
+	for (const auto& pos : adjacent)
+	{
+		if (!in_bounds(pos))
+		{
 			wallCount++; // Out of bounds = wall
 			continue;
 		}
-		
+
 		TileType tileType = get_tile_type(pos);
-		if (tileType == TileType::WALL) {
+		if (tileType == TileType::WALL)
+		{
 			wallCount++;
-		} else if (tileType == TileType::FLOOR) {
+		}
+		else if (tileType == TileType::FLOOR)
+		{
 			floorCount++;
 		}
 	}
-	
+
 	// ENTRANCE PATTERN 1: Corner or edge position (high wall density)
 	// If surrounded by 5+ walls, this is likely a corner or edge - safe for water
-	if (wallCount >= 5) {
+	if (wallCount >= 5)
+	{
 		return false; // Safe to place water
 	}
-	
+
 	// ENTRANCE PATTERN 2: Doorway position (walls on opposite sides)
 	// Check for corridor-like patterns: walls on opposite sides
-	auto isWallOrOOB = [this](Vector2D pos) {
+	auto isWallOrOOB = [this](Vector2D pos)
+	{
 		return !in_bounds(pos) || get_tile_type(pos) == TileType::WALL;
 	};
-	
+
 	// Check horizontal corridor pattern: W-F-W (wall-floor-wall)
-	if (isWallOrOOB({waterPos.x - 1, waterPos.y}) && isWallOrOOB({waterPos.x + 1, waterPos.y})) {
+	if (isWallOrOOB({ waterPos.x - 1, waterPos.y }) && isWallOrOOB({ waterPos.x + 1, waterPos.y }))
+	{
 		return true; // Would block horizontal passage
 	}
 
 	// Check vertical corridor pattern: W
 	//                                    F
 	//                                    W
-	if (isWallOrOOB({waterPos.x, waterPos.y - 1}) && isWallOrOOB({waterPos.x, waterPos.y + 1})) {
+	if (isWallOrOOB({ waterPos.x, waterPos.y - 1 }) && isWallOrOOB({ waterPos.x, waterPos.y + 1 }))
+	{
 		return true; // Would block vertical passage
 	}
-	
+
 	// ENTRANCE PATTERN 3: Near room edge with potential door placement
 	// Check if this position could be part of a future door placement
 	// Look for patterns where this floor tile is adjacent to potential door areas
-	
+
 	// Check for L-shaped entrance patterns (common near room corners)
 	int adjacentWalls = 0;
 	int adjacentFloors = 0;
-	
+
 	// Count direct adjacent (not diagonal) walls and floors
 	std::vector<Vector2D> directAdjacent = {
-		{waterPos.x,     waterPos.y - 1}, // North
-		{waterPos.x,     waterPos.y + 1}, // South
-		{waterPos.x - 1, waterPos.y    }, // West
-		{waterPos.x + 1, waterPos.y    }  // East
+		{ waterPos.x, waterPos.y - 1 }, // North
+		{ waterPos.x, waterPos.y + 1 }, // South
+		{ waterPos.x - 1, waterPos.y }, // West
+		{ waterPos.x + 1, waterPos.y } // East
 	};
-	
-	for (const auto& pos : directAdjacent) {
-		if (!in_bounds(pos)) {
+
+	for (const auto& pos : directAdjacent)
+	{
+		if (!in_bounds(pos))
+		{
 			adjacentWalls++;
 			continue;
 		}
-		
+
 		TileType tileType = get_tile_type(pos);
-		if (tileType == TileType::WALL) {
+		if (tileType == TileType::WALL)
+		{
 			adjacentWalls++;
-		} else if (tileType == TileType::FLOOR) {
+		}
+		else if (tileType == TileType::FLOOR)
+		{
 			adjacentFloors++;
 		}
 	}
-	
+
 	// ENTRANCE PATTERN 4: Potential door position
 	// If this position has exactly 2 walls and 2 floors adjacent, it might be a door spot
-	if (adjacentWalls == 2 && adjacentFloors == 2) {
+	if (adjacentWalls == 2 && adjacentFloors == 2)
+	{
 		// Check if walls are opposite each other (forming a corridor)
 		bool hasOppositeWalls =
-			(isWallOrOOB({waterPos.x,     waterPos.y - 1}) && isWallOrOOB({waterPos.x,     waterPos.y + 1})) ||
-			(isWallOrOOB({waterPos.x - 1, waterPos.y    }) && isWallOrOOB({waterPos.x + 1, waterPos.y    }));
-		
-		if (hasOppositeWalls) {
+			(isWallOrOOB({ waterPos.x, waterPos.y - 1 }) && isWallOrOOB({ waterPos.x, waterPos.y + 1 })) ||
+			(isWallOrOOB({ waterPos.x - 1, waterPos.y }) && isWallOrOOB({ waterPos.x + 1, waterPos.y }));
+
+		if (hasOppositeWalls)
+		{
 			return true; // Would block potential door
 		}
 	}
-	
+
 	// ENTRANCE PATTERN 5: Room boundary positions
 	// If this floor tile is on the edge of the room, it might be where a corridor connects
 	if (ctx.rooms)
 	{
 		for (const DungeonRoom& room : *ctx.rooms)
 		{
-			if (!room.contains(waterPos.x, waterPos.y)) continue;
+			if (!room.contains(waterPos.x, waterPos.y))
+				continue;
 
 			// On the floor perimeter -- corridor likely connects here.
 			const bool on_edge =
-				waterPos.x == room.col     || waterPos.x == room.col_end() ||
-				waterPos.y == room.row     || waterPos.y == room.row_end();
+				waterPos.x == room.col || waterPos.x == room.col_end() ||
+				waterPos.y == room.row || waterPos.y == room.row_end();
 
 			if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
 				return true;
 			break;
 		}
 	}
-	
+
 	// If none of the blocking patterns match, water is safe to place
 	return false;
 }
 
 void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 {
-    const int numItems = ctx.dice ? ctx.dice->roll(0, MAX_ROOM_ITEMS) : 0;
-    for (int i = 0; i < numItems; i++)
-    {
-        Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-        while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
-        {
-            itemPos.x = ctx.dice->roll(room.col, room.col_end());
-            itemPos.y = ctx.dice->roll(room.row, room.row_end());
-        }
-        add_item(itemPos, ctx);
-    }
+	const int numItems = ctx.dice ? ctx.dice->roll(0, MAX_ROOM_ITEMS) : 0;
+	for (int i = 0; i < numItems; i++)
+	{
+		Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+		while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
+		{
+			itemPos.x = ctx.dice->roll(room.col, room.col_end());
+			itemPos.y = ctx.dice->roll(room.row, room.row_end());
+		}
+		add_item(itemPos, ctx);
+	}
 }
 
 void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
-    if (!ctx.player || !ctx.dice) return;
+	if (!ctx.player || !ctx.dice)
+		return;
 
-    Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-    while (!can_walk(pos, ctx))
-    {
-        pos.x = ctx.dice->roll(room.col, room.col_end());
-        pos.y = ctx.dice->roll(room.row, room.row_end());
-    }
-    ctx.player->position = pos;
+	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+	while (!can_walk(pos, ctx))
+	{
+		pos.x = ctx.dice->roll(room.col, room.col_end());
+		pos.y = ctx.dice->roll(room.row, room.row_end());
+	}
+	ctx.player->position = pos;
 }
 
 void Map::place_stairs(GameContext& ctx)
 {
-    if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice) return;
+	if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice)
+		return;
 
-    const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
-    const DungeonRoom& room = ctx.rooms->at(index);
-    Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-    while (!can_walk(stairsPos, ctx))
-    {
-        stairsPos.x = ctx.dice->roll(room.col, room.col_end());
-        stairsPos.y = ctx.dice->roll(room.row, room.row_end());
-    }
-    ctx.stairs->position = stairsPos;
+	const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
+	const DungeonRoom& room = ctx.rooms->at(index);
+	Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
+	while (!can_walk(stairsPos, ctx))
+	{
+		stairsPos.x = ctx.dice->roll(room.col, room.col_end());
+		stairsPos.y = ctx.dice->roll(room.row, room.row_end());
+	}
+	ctx.stairs->position = stairsPos;
 }
 
 bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
@@ -891,24 +931,24 @@ bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 
 bool Map::can_walk(Vector2D pos, GameContext& ctx) const noexcept
 {
-    if (is_wall(pos)) // check if the tile is a wall
-    {
-        return false;
-    }
+	if (is_wall(pos)) // check if the tile is a wall
+	{
+		return false;
+	}
 
-    // Check for doors - can only walk through open doors
-    if (get_tile_type(pos) == TileType::CLOSED_DOOR)
-    {
-        return false; // Closed doors block movement
-    }
+	// Check for doors - can only walk through open doors
+	if (get_tile_type(pos) == TileType::CLOSED_DOOR)
+	{
+		return false; // Closed doors block movement
+	}
 
-    // CRITICAL FIX: Check if there's already an actor at this position
-    if (get_actor(pos, ctx) != nullptr)
-    {
-        return false; // Position occupied by another actor
-    }
+	// CRITICAL FIX: Check if there's already an actor at this position
+	if (get_actor(pos, ctx) != nullptr)
+	{
+		return false; // Position occupied by another actor
+	}
 
-    return true;
+	return true;
 }
 
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
@@ -1051,12 +1091,14 @@ double Map::cost(Vector2D from_node, Vector2D to_node, GameContext& ctx)
 
 double Map::get_cost(Vector2D pos, GameContext& ctx) const noexcept
 {
-	if (!in_bounds(pos)) {
+	if (!in_bounds(pos))
+	{
 		// Logging moved to callers with GameContext access
 		return 1000.0; // High cost for out of bounds
 	}
 	size_t index = get_index(pos);
-	if (index >= tiles.size()) {
+	if (index >= tiles.size())
+	{
 		// Logging moved to callers with GameContext access
 		return 1000.0;
 	}
@@ -1189,7 +1231,8 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 void Map::place_amulet(GameContext& ctx)
 {
 	// Only place the amulet on the final level
-	if (!ctx.level_manager || !ctx.player || !ctx.rooms || !ctx.dice) return;
+	if (!ctx.level_manager || !ctx.player || !ctx.rooms || !ctx.dice)
+		return;
 
 	if (ctx.level_manager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
@@ -1226,7 +1269,8 @@ void Map::display_spawn_rates(GameContext& ctx) const
 
 void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx)
 {
-	if (!ctx.level_manager || !ctx.dice) return;
+	if (!ctx.level_manager || !ctx.dice)
+		return;
 
 	// Mark the area for the treasure room
 	for (int y = room.row; y <= room.row_end(); y++)
@@ -1282,15 +1326,19 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	if (ctx.message_system)
 	{
 		ctx.message_system->log(std::format(
-            "Created treasure room at ({},{}) size {}x{} quality {}",
-            room.col, room.row, room.width, room.height, quality
-        ));
+			"Created treasure room at ({},{}) size {}x{} quality {}",
+			room.col,
+			room.row,
+			room.width,
+			room.height,
+			quality));
 	}
 }
 
 bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 {
-	if (!ctx.dice || !ctx.rooms) return false;
+	if (!ctx.dice || !ctx.rooms)
+		return false;
 
 	// Probability increases with dungeon level
 	int treasureRoomChance = 5 + (dungeonLevel * 2); // 5% + 2% per level
@@ -1335,145 +1383,152 @@ void Map::display_item_distribution(GameContext& ctx) const
 
 void Map::post_process_doors()
 {
-    auto isRoom = [this](Vector2D pos) { return in_bounds(pos) && (get_tile_type(pos) == TileType::FLOOR || get_tile_type(pos) == TileType::WATER); };
-    auto isWall = [this](Vector2D pos) { return in_bounds(pos) && (get_tile_type(pos) == TileType::WALL || get_tile_type(pos) == TileType::WATER); };
+	auto isRoom = [this](Vector2D pos)
+	{
+		return in_bounds(pos) && (get_tile_type(pos) == TileType::FLOOR || get_tile_type(pos) == TileType::WATER);
+	};
+	auto isWall = [this](Vector2D pos)
+	{
+		return in_bounds(pos) && (get_tile_type(pos) == TileType::WALL || get_tile_type(pos) == TileType::WATER);
+	};
 
-    for (int y = 0; y < map_height; ++y)
-    {
-        for (int x = 0; x < map_width; ++x)
-        {
-            Vector2D pos{ x, y };
-            if (get_tile_type(pos) == TileType::CORRIDOR)
-            {
-                int roomNeighbors = 0;
-                int wallNeighbors = 0;
+	for (int y = 0; y < map_height; ++y)
+	{
+		for (int x = 0; x < map_width; ++x)
+		{
+			Vector2D pos{ x, y };
+			if (get_tile_type(pos) == TileType::CORRIDOR)
+			{
+				int roomNeighbors = 0;
+				int wallNeighbors = 0;
 
-                for (Vector2D dir : {DIR_N, DIR_S, DIR_E, DIR_W})
-                {
-                    Vector2D neighborPos = pos + dir;
-                    if (!in_bounds(neighborPos)) continue;
-                    
-                    if (isRoom(neighborPos))
-                    {
-                        roomNeighbors++;
-                    }
-                    else if (isWall(neighborPos))
-                    {
-                        wallNeighbors++;
-                    }
-                }
-                
-                if (roomNeighbors >= 1 && wallNeighbors >= 2)
-                {
-                    // Get 3x3 grid around current position
-                    Vector2D upLeft = {pos.y - 1, pos.x - 1};
-                    Vector2D up = {pos.y - 1, pos.x};
-                    Vector2D upRight = {pos.y - 1, pos.x + 1};
-                    Vector2D left = {pos.y, pos.x - 1};
-                    Vector2D right = {pos.y, pos.x + 1};
-                    Vector2D downLeft = {pos.y + 1, pos.x - 1};
-                    Vector2D down = {pos.y + 1, pos.x};
-                    Vector2D downRight = {pos.y + 1, pos.x + 1};
-                    
-                    // Exclude pattern RRR/WCC/WWW (and rotations)
-                    bool shouldExclude = false;
-                    
-                    // Original: RRR/WCC/WWW
-                    if (isRoom(upLeft) && isRoom(up) && isRoom(upRight) &&
-                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
-                        isWall(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    // 90� rotation: WWR/CWR/CWR
-                    if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
-                        get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
-                        get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    // 180� rotation: WWW/CCW/RRR
-                    if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
-                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-                        isRoom(downLeft) && isRoom(down) && isRoom(downRight))
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    // 270� rotation: RWC/RWC/RWW
-                    if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
-                        isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
-                        isRoom(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    // Exclude WRR/WCC/WWC pattern
-                    if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
-                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
-                        isWall(downLeft) && isWall(down) && get_tile_type(downRight) == TileType::CORRIDOR)
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    // Exclude WRw/WCC/WWW pattern (where w = water)
-                    if (isWall(upLeft) && isRoom(up) && get_tile_type(upRight) == TileType::WATER &&
-                        isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
-                        isWall(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        shouldExclude = true;
-                    }
-                    
-                    if (shouldExclude)
-                    {
-                        continue; // Skip placing door for excluded patterns
-                    }
-                    
-                    // Check for WCW/RDW/RWW pattern (move door UP)
-                    if (isWall(upLeft) && get_tile_type(up) == TileType::CORRIDOR && isWall(upRight) &&
-                        isRoom(left) && isWall(right) &&
-                        isRoom(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        // Move door UP
-                        Vector2D upPos = {pos.y - 1, pos.x};
-                        set_door(upPos, upPos.x, upPos.y);
-                    }
-                    // Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
-                    else if (isWall(upLeft) && 
-                        (get_tile_type(up) == TileType::WATER || get_tile_type(up) == TileType::CORRIDOR) &&
-                        get_tile_type(upRight) == TileType::WATER &&
-                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-                        isWall(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        // Move door UP
-                        Vector2D upPos = {pos.y - 1, pos.x};
-                        set_door(upPos, upPos.x, upPos.y);
-                    }
-                    // Check for Z-pattern: WRR/CCW/WWW (move door left)
-                    else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
-                        get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
-                        isWall(downLeft) && isWall(down) && isWall(downRight))
-                    {
-                        // Move door LEFT  
-                        Vector2D leftPos = {pos.y, pos.x - 1};
-                        set_door(leftPos, leftPos.x, leftPos.y);
-                    }
-                    else
-                    {
-                        // All other doors (including WRR/CCR/WRR pattern)
-                        set_door(pos, pos.x, pos.y);
-                    }
-                }
-            }
-        }
-    }
+				for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+				{
+					Vector2D neighborPos = pos + dir;
+					if (!in_bounds(neighborPos))
+						continue;
+
+					if (isRoom(neighborPos))
+					{
+						roomNeighbors++;
+					}
+					else if (isWall(neighborPos))
+					{
+						wallNeighbors++;
+					}
+				}
+
+				if (roomNeighbors >= 1 && wallNeighbors >= 2)
+				{
+					// Get 3x3 grid around current position
+					Vector2D upLeft = { pos.y - 1, pos.x - 1 };
+					Vector2D up = { pos.y - 1, pos.x };
+					Vector2D upRight = { pos.y - 1, pos.x + 1 };
+					Vector2D left = { pos.y, pos.x - 1 };
+					Vector2D right = { pos.y, pos.x + 1 };
+					Vector2D downLeft = { pos.y + 1, pos.x - 1 };
+					Vector2D down = { pos.y + 1, pos.x };
+					Vector2D downRight = { pos.y + 1, pos.x + 1 };
+
+					// Exclude pattern RRR/WCC/WWW (and rotations)
+					bool shouldExclude = false;
+
+					// Original: RRR/WCC/WWW
+					if (isRoom(upLeft) && isRoom(up) && isRoom(upRight) &&
+						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+						isWall(downLeft) && isWall(down) && isWall(downRight))
+					{
+						shouldExclude = true;
+					}
+
+					// 90� rotation: WWR/CWR/CWR
+					if (isWall(upLeft) && isWall(up) && isRoom(upRight) &&
+						get_tile_type(left) == TileType::CORRIDOR && isRoom(right) &&
+						get_tile_type(downLeft) == TileType::CORRIDOR && isWall(down) && isRoom(downRight))
+					{
+						shouldExclude = true;
+					}
+
+					// 180� rotation: WWW/CCW/RRR
+					if (isWall(upLeft) && isWall(up) && isWall(upRight) &&
+						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+						isRoom(downLeft) && isRoom(down) && isRoom(downRight))
+					{
+						shouldExclude = true;
+					}
+
+					// 270� rotation: RWC/RWC/RWW
+					if (isRoom(upLeft) && isWall(up) && get_tile_type(upRight) == TileType::CORRIDOR &&
+						isRoom(left) && get_tile_type(right) == TileType::CORRIDOR &&
+						isRoom(downLeft) && isWall(down) && isWall(downRight))
+					{
+						shouldExclude = true;
+					}
+
+					// Exclude WRR/WCC/WWC pattern
+					if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
+						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+						isWall(downLeft) && isWall(down) && get_tile_type(downRight) == TileType::CORRIDOR)
+					{
+						shouldExclude = true;
+					}
+
+					// Exclude WRw/WCC/WWW pattern (where w = water)
+					if (isWall(upLeft) && isRoom(up) && get_tile_type(upRight) == TileType::WATER &&
+						isWall(left) && get_tile_type(right) == TileType::CORRIDOR &&
+						isWall(downLeft) && isWall(down) && isWall(downRight))
+					{
+						shouldExclude = true;
+					}
+
+					if (shouldExclude)
+					{
+						continue; // Skip placing door for excluded patterns
+					}
+
+					// Check for WCW/RDW/RWW pattern (move door UP)
+					if (isWall(upLeft) && get_tile_type(up) == TileType::CORRIDOR && isWall(upRight) &&
+						isRoom(left) && isWall(right) &&
+						isRoom(downLeft) && isWall(down) && isWall(downRight))
+					{
+						// Move door UP
+						Vector2D upPos = { pos.y - 1, pos.x };
+						set_door(upPos, upPos.x, upPos.y);
+					}
+					// Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
+					else if (isWall(upLeft) &&
+						(get_tile_type(up) == TileType::WATER || get_tile_type(up) == TileType::CORRIDOR) &&
+						get_tile_type(upRight) == TileType::WATER &&
+						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+						isWall(downLeft) && isWall(down) && isWall(downRight))
+					{
+						// Move door UP
+						Vector2D upPos = { pos.y - 1, pos.x };
+						set_door(upPos, upPos.x, upPos.y);
+					}
+					// Check for Z-pattern: WRR/CCW/WWW (move door left)
+					else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
+						get_tile_type(left) == TileType::CORRIDOR && isWall(right) &&
+						isWall(downLeft) && isWall(down) && isWall(downRight))
+					{
+						// Move door LEFT
+						Vector2D leftPos = { pos.y, pos.x - 1 };
+						set_door(leftPos, leftPos.x, leftPos.y);
+					}
+					else
+					{
+						// All other doors (including WRR/CCR/WRR pattern)
+						set_door(pos, pos.x, pos.y);
+					}
+				}
+			}
+		}
+	}
 }
 
 void Map::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 {
-    itemFactory->spawn_all_enhanced_items_debug(position, ctx);
+	itemFactory->spawn_all_enhanced_items_debug(position, ctx);
 }
 
 // end of file: Map.cpp

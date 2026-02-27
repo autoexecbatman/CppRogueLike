@@ -5,5 +5,5 @@
 
 void Colors::my_init_pair() noexcept
 {
-    // No-op: color pairs are now managed by Renderer::init_color_pairs()
+	// No-op: color pairs are now managed by Renderer::init_color_pairs()
 }

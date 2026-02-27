@@ -1,25 +1,28 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "../Persistent/Persistent.h"
 #include "LogMessage.h"
 
 struct GameContext;
 
-inline constexpr int GUI_HEIGHT{7};
-inline int gui_width() { return 118; }
+inline constexpr int GUI_HEIGHT{ 7 };
+inline int gui_width()
+{
+	return 118;
+}
 
 class Gui : public Persistent
 {
 private:
-	int guiMessageColor{0};
+	int guiMessageColor{ 0 };
 	std::string guiMessage{};
 	std::vector<std::vector<LogMessage>> displayMessages;
 
 public:
-	bool guiInit{false};
+	bool guiInit{ false };
 
 	void gui_init() noexcept;
 	void gui_shutdown() noexcept;

@@ -1,48 +1,47 @@
 #include <iostream>
 
-#include "MenuSell.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "BaseMenu.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
-#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
+#include "BaseMenu.h"
+#include "MenuSell.h"
 
 using namespace InventoryOperations; // For clean function calls without namespace prefix
 
 void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 {
 	menuItems.clear();
-	
+
 	// Handle empty inventory case
 	if (item.empty())
 	{
 		menuItems.push_back("No items to sell");
 		return;
 	}
-	
+
 	for (const auto& item : item)
 	{
 		if (item)
 		{
 			// Display item name with right-aligned sell price
 			std::string itemName = item->actorData.name;
-			
+
 			// Get correct sell price from shopkeeper's shop system
-			int sellPrice = item->value; // fallback
+			int sellPrice = item->get_value();
 			if (shopkeeper.shop != nullptr)
 			{
 				sellPrice = shopkeeper.shop->get_sell_price(*item);
 			}
-			
+
 			std::string goldText = "(" + std::to_string(sellPrice) + "g)";
-			
+
 			// Pad to align gold values (assuming max name length ~20)
 			size_t totalWidth = 28;
-			size_t padding = totalWidth > (itemName.length() + goldText.length()) ? 
-							 totalWidth - itemName.length() - goldText.length() : 1;
-			
+			size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+
 			std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
 			menuItems.push_back(itemDisplay);
 		}
@@ -56,7 +55,8 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 
 void MenuSell::menu_print_state(size_t state)
 {
-	if (state >= menuItems.size()) return;
+	if (state >= menuItems.size())
+		return;
 	if (currentState == state)
 		menu_highlight_on();
 	menu_print(1, static_cast<int>(state) + 2, menu_get_string(state));
@@ -66,78 +66,79 @@ void MenuSell::menu_print_state(size_t state)
 
 void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
 {
-    if (is_inventory_empty(seller.inventory_data) ||
-        currentState >= get_item_count(seller.inventory_data))
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-        return;
-    }
-    
-    const Item* item = get_item_at(seller.inventory_data, currentState);
-    if (!item)
-    {
-        ctx.message_system->log("Error: Attempted to sell a null item.");
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
-        return;
-    }
-    
-    // Use shopkeeper's pricing system if available
-    int price = item->value; // fallback price
-    if (shopkeeper.shop != nullptr)
-    {
-        price = shopkeeper.shop->get_sell_price(*item);
-    }
-    
-    if (shopkeeper.get_gold() >= price)
-    {
-        // Remove item from seller
-        auto removed_item = remove_item_at(seller.inventory_data, currentState);
-        if (removed_item.has_value())
-        {
-            shopkeeper.adjust_gold(-price);
-            seller.adjust_gold(price);
-            
-            auto add_result = add_item(shopkeeper.inventory_data, std::move(*removed_item));
-            if (!add_result.has_value())
-            {
-                add_item(seller.inventory_data, std::move(*removed_item));
-                shopkeeper.adjust_gold(price);
-                seller.adjust_gold(-price);
-                ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
-                return;
-            }
-            
-            // Adjust currentState bounds
-            if (currentState >= get_item_count(seller.inventory_data) && !is_inventory_empty(seller.inventory_data))
-            {
-                currentState = get_item_count(seller.inventory_data) - 1;
-            }
-            
-            ctx.message_system->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
-        }
-        else
-        {
-            ctx.message_system->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
-        }
-    }
-    else
-    {
-        ctx.message_system->log("Shopkeeper does not have enough gold to buy the item.");
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
-    }
+	if (is_inventory_empty(seller.inventory_data) ||
+		currentState >= get_item_count(seller.inventory_data))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		return;
+	}
+
+	const Item* item = get_item_at(seller.inventory_data, currentState);
+	if (!item)
+	{
+		ctx.message_system->log("Error: Attempted to sell a null item.");
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
+		return;
+	}
+
+	// Use shopkeeper's pricing system if available
+	int price = item->get_value();
+	if (shopkeeper.shop != nullptr)
+	{
+		price = shopkeeper.shop->get_sell_price(*item);
+	}
+
+	if (shopkeeper.get_gold() >= price)
+	{
+		// Remove item from seller
+		auto removed_item = remove_item_at(seller.inventory_data, currentState);
+		if (removed_item.has_value())
+		{
+			shopkeeper.adjust_gold(-price);
+			seller.adjust_gold(price);
+
+			auto add_result = add_item(shopkeeper.inventory_data, std::move(*removed_item));
+			if (!add_result.has_value())
+			{
+				add_item(seller.inventory_data, std::move(*removed_item));
+				shopkeeper.adjust_gold(price);
+				seller.adjust_gold(-price);
+				ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
+				return;
+			}
+
+			// Adjust currentState bounds
+			if (currentState >= get_item_count(seller.inventory_data) && !is_inventory_empty(seller.inventory_data))
+			{
+				currentState = get_item_count(seller.inventory_data) - 1;
+			}
+
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
+		}
+		else
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
+		}
+	}
+	else
+	{
+		ctx.message_system->log("Shopkeeper does not have enough gold to buy the item.");
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+	}
 }
 
-MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx) : player(player), shopkeeper(shopkeeper)
+MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
+	: player(player), shopkeeper(shopkeeper)
 {
 	if (ctx.renderer)
 	{
 		menu_height = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
-		menu_width  = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+		menu_width = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 	}
 	else
 	{
 		menu_height = 26;
-		menu_width  = 60;
+		menu_width = 60;
 	}
 
 	populate_items(player.inventory_data.items);
@@ -162,7 +163,7 @@ void MenuSell::draw_content()
 {
 	// Player inventory is always initialized - no need to check
 	populate_items(player.inventory_data.items);
-	
+
 	// Validate currentState after repopulating
 	if (is_inventory_empty(player.inventory_data))
 	{
@@ -172,7 +173,7 @@ void MenuSell::draw_content()
 	{
 		currentState = player.inventory_data.items.size() - 1;
 	}
-	
+
 	// Draw all menu items efficiently
 	for (size_t i{ 0 }; i < menuItems.size(); ++i)
 	{
@@ -188,10 +189,10 @@ void MenuSell::draw()
 
 	if (renderer)
 	{
-		int ts       = renderer->get_tile_size();
+		int ts = renderer->get_tile_size();
 		int font_off = (ts - renderer->get_font_size()) / 2;
-		int hdr_x    = (static_cast<int>(menu_startx) + 1) * ts;
-		int hdr_y    = (static_cast<int>(menu_starty) + 1) * ts + font_off;
+		int hdr_x = (static_cast<int>(menu_startx) + 1) * ts;
+		int hdr_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
 		renderer->draw_text(hdr_x, hdr_y, "Item                       Price", CYAN_BLACK_PAIR);
 	}
 
@@ -206,16 +207,20 @@ void MenuSell::on_key(int key, GameContext& ctx)
 	case 0x103:
 	case 'w':
 		// Don't allow navigation if no sellable items
-		if (is_inventory_empty(player.inventory_data)) return;
-		if (menuItems.empty()) return; // Check for empty menu
+		if (is_inventory_empty(player.inventory_data))
+			return;
+		if (menuItems.empty())
+			return; // Check for empty menu
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 		menu_mark_dirty(); // Mark for redraw
 		break;
 	case 0x102:
 	case 's':
 		// Don't allow navigation if no sellable items
-		if (is_inventory_empty(player.inventory_data)) return;
-		if (menuItems.empty()) return; // Check for empty menu
+		if (is_inventory_empty(player.inventory_data))
+			return;
+		if (menuItems.empty())
+			return; // Check for empty menu
 		currentState = (currentState + 1) % menuItems.size();
 		menu_mark_dirty(); // Mark for redraw
 		break;
@@ -245,15 +250,15 @@ void MenuSell::menu(GameContext& ctx)
 {
 	// Initial draw
 	draw();
-	
+
 	while (run && !WindowShouldClose())
 	{
 		// Only redraw if needed (navigation/state change)
 		draw();
-		
+
 		menu_key_listen();
 		on_key(keyPress, ctx);
 	}
-	
+
 	// TODO: screen clearing handled by Renderer
 }

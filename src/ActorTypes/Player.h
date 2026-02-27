@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../Random/RandomDice.h"
-#include "../Map/Map.h"
 #include "../Actor/Actor.h"
+#include "../Map/Map.h"
 #include "../Objects/Web.h"
+#include "../Random/RandomDice.h"
 #include "../Systems/SpellSystem.h"
 
 class Item;
@@ -15,7 +15,7 @@ struct EquippedItem
 {
 	std::unique_ptr<Item> item;
 	EquipmentSlot slot;
-	
+
 	EquippedItem(std::unique_ptr<Item> i, EquipmentSlot s)
 		: item(std::move(i)), slot(s) {}
 };
@@ -76,9 +76,9 @@ public:
 	bool attempt_hide(GameContext& ctx);
 
 	// Web effect tracking
-	int webStuckTurns{ 0 };       // How many turns the player is stuck in a web
-	int webStrength{ 0 };         // How strong the web is (affects escape difficulty)
-	Web* trappingWeb{ nullptr };  // The web that has trapped the player
+	int webStuckTurns{ 0 }; // How many turns the player is stuck in a web
+	int webStrength{ 0 }; // How strong the web is (affects escape difficulty)
+	Web* trappingWeb{ nullptr }; // The web that has trapped the player
 
 	bool is_webbed() const noexcept { return webStuckTurns > 0; } // Check if player is stuck in a web
 	bool try_break_web(GameContext& ctx); // Attempt to break free from a web

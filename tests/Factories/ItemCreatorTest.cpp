@@ -18,7 +18,7 @@ TEST_F(ItemCreatorTest, CreateHealthPotion)
     EXPECT_EQ(item->actorData.ch, TILE_POTION);
     EXPECT_EQ(item->actorData.name, "health potion");
     EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->value, 50);
+    EXPECT_EQ(item->get_value(), 50);
 }
 
 TEST_F(ItemCreatorTest, CreateScrollLightning)
@@ -29,7 +29,7 @@ TEST_F(ItemCreatorTest, CreateScrollLightning)
     EXPECT_EQ(item->actorData.ch, TILE_SCROLL);
     EXPECT_EQ(item->actorData.name, "scroll of lightning bolt");
     EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->value, 150);
+    EXPECT_EQ(item->get_value(), 150);
 }
 
 TEST_F(ItemCreatorTest, CreateRandomPotion)
@@ -82,5 +82,5 @@ TEST_F(ItemCreatorTest, CreateLeatherArmor)
     EXPECT_EQ(item->actorData.ch, TILE_ARMOR);
     EXPECT_EQ(item->actorData.name, "leather armor");
     EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->value, 5);
+    EXPECT_EQ(item->get_value(), 5);
 }

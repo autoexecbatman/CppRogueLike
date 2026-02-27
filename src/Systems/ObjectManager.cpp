@@ -1,30 +1,31 @@
 #include <algorithm>
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "ObjectManager.h"
-#include "../Objects/Web.h"
 #include "../Actor/Container.h"
+#include "../Objects/Web.h"
+#include "ObjectManager.h"
 
 Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const
 {
-    for (const auto& obj : objects)
-    {
-        if (obj
-            &&
-            obj->position == position
-            &&
-            obj->actorData.name == "spider web")
-        {
-            return dynamic_cast<Web*>(obj.get());
-        }
-    }
-    return nullptr;
+	for (const auto& obj : objects)
+	{
+		if (obj &&
+			obj->position == position &&
+			obj->actorData.name == "spider web")
+		{
+			return dynamic_cast<Web*>(obj.get());
+		}
+	}
+	return nullptr;
 }
 
 void ObjectManager::cleanup_destroyed_objects(std::vector<std::unique_ptr<Object>>& objects)
 {
-    // Remove destroyed objects
-    auto isNull = [](const auto& obj) { return !obj; };
-    std::erase_if(objects, isNull);
+	// Remove destroyed objects
+	auto isNull = [](const auto& obj)
+	{
+		return !obj;
+	};
+	std::erase_if(objects, isNull);
 }

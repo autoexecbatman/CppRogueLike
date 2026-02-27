@@ -1,58 +1,63 @@
 #include "Items.h"
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
+#include "../ActorTypes/Gold.h"
 #include "../ActorTypes/Healer.h"
 #include "../ActorTypes/Teleporter.h"
-#include "../Actor/Pickable.h"
-#include "../ActorTypes/Gold.h"
-#include "Amulet.h"
-#include "Armor.h"
 #include "../Core/GameContext.h"
-#include "../Systems/LevelManager.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/TileId.h"
+#include "../Systems/LevelManager.h"
+#include "Amulet.h"
+#include "Armor.h"
 
-HealthPotion::HealthPotion(Vector2D position) : Item(position, ActorData{ TILE_POTION, "health potion", WHITE_RED_PAIR })
+HealthPotion::HealthPotion(Vector2D position)
+	: Item(position, ActorData{ TILE_POTION, "health potion", WHITE_RED_PAIR })
 {
 	pickable = std::make_unique<Healer>(10);
-	value = 50;
+	set_value(50);
 }
 
-ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position) : Item(position, ActorData{TILE_SCROLL, "scroll of lightning bolt", WHITE_BLUE_PAIR })
+ScrollOfLightningBolt::ScrollOfLightningBolt(Vector2D position)
+	: Item(position, ActorData{ TILE_SCROLL, "scroll of lightning bolt", WHITE_BLUE_PAIR })
 {
 	pickable = std::make_unique<TargetedScroll>(TargetMode::AUTO_NEAREST, ScrollAnimation::LIGHTNING, 5, 20, 0);
-	value = 150; // 150 gp - powerful lightning magic
+	set_value(150);
 }
 
-ScrollOfFireball::ScrollOfFireball(Vector2D position) : Item(position, ActorData{ TILE_SCROLL, "scroll of fireball", RED_YELLOW_PAIR })
+ScrollOfFireball::ScrollOfFireball(Vector2D position)
+	: Item(position, ActorData{ TILE_SCROLL, "scroll of fireball", RED_YELLOW_PAIR })
 {
 	pickable = std::make_unique<TargetedScroll>(TargetMode::PICK_TILE_AOE, ScrollAnimation::EXPLOSION, 3, 12, 0);
-	value = 100;
+	set_value(100);
 }
 
-ScrollOfConfusion::ScrollOfConfusion(Vector2D position) : Item(position, ActorData{ TILE_SCROLL, "scroll of confusion", WHITE_GREEN_PAIR })
+ScrollOfConfusion::ScrollOfConfusion(Vector2D position)
+	: Item(position, ActorData{ TILE_SCROLL, "scroll of confusion", WHITE_GREEN_PAIR })
 {
 	pickable = std::make_unique<TargetedScroll>(TargetMode::PICK_TILE_SINGLE, ScrollAnimation::NONE, 10, 0, 8);
-	value = 120; // 120 gp - tactical confusion magic
+	set_value(120);
 }
 
-ScrollOfTeleportation::ScrollOfTeleportation(Vector2D position) : Item(position, ActorData{ TILE_SCROLL, "scroll of teleportation", MAGENTA_BLACK_PAIR })
+ScrollOfTeleportation::ScrollOfTeleportation(Vector2D position)
+	: Item(position, ActorData{ TILE_SCROLL, "scroll of teleportation", MAGENTA_BLACK_PAIR })
 {
 	pickable = std::make_unique<Teleporter>();
-	value = 200; // 200 gp - powerful transportation magic
+	set_value(200);
 }
 
-GoldPile::GoldPile(Vector2D position, GameContext& ctx) : Item(position, ActorData{ TILE_GOLD, "gold pile", YELLOW_BLACK_PAIR })
+GoldPile::GoldPile(Vector2D position, GameContext& ctx)
+	: Item(position, ActorData{ TILE_GOLD, "gold pile", YELLOW_BLACK_PAIR })
 {
 	// Create a randomized amount of gold (between 5 and 20, increasing with dungeon level)
 	int goldAmount = ctx.dice->roll(5, 10 + ctx.level_manager->get_dungeon_level() * 3);
 	pickable = std::make_unique<Gold>(goldAmount);
-	value = goldAmount; // Set the value equal to the gold amount for consistency
+	set_value(goldAmount);
 }
 
-AmuletOfYendor::AmuletOfYendor(Vector2D position) : Item(position, ActorData{ TILE_AMULET_YENDOR, "Amulet of Yendor", RED_YELLOW_PAIR })
+AmuletOfYendor::AmuletOfYendor(Vector2D position)
+	: Item(position, ActorData{ TILE_AMULET_YENDOR, "Amulet of Yendor", RED_YELLOW_PAIR })
 {
 	pickable = std::make_unique<Amulet>();
-	value = 1000; // Very valuable
+	set_value(1000);
 }
-

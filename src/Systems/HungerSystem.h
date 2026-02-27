@@ -1,77 +1,78 @@
 #pragma once
 
-#include <string>
 #include <nlohmann/json.hpp>
+#include <string>
 
 using json = nlohmann::json;
 
 struct GameContext;
 
 // Hunger states in ascending order of hunger
-enum class HungerState {
-    WELL_FED,  // Recently ate, receive bonuses
-    SATIATED,  // Normal state, no effects
-    HUNGRY,    // Beginning to get hungry, minor penalties
-    STARVING,  // Very hungry, major penalties
-    DYING      // About to die from starvation
+enum class HungerState
+{
+	WELL_FED, // Recently ate, receive bonuses
+	SATIATED, // Normal state, no effects
+	HUNGRY, // Beginning to get hungry, minor penalties
+	STARVING, // Very hungry, major penalties
+	DYING // About to die from starvation
 };
 
 class HungerSystem
 {
 public:
-    HungerSystem();
+	HungerSystem();
 
-    // Increases hunger by the specified amount (or default amount)
-    void increase_hunger(GameContext& ctx, int amount = 1);
+	// Increases hunger by the specified amount (or default amount)
+	void increase_hunger(GameContext& ctx, int amount = 1);
 
-    // Decreases hunger by the specified amount
-    void decrease_hunger(GameContext& ctx, int amount);
+	// Decreases hunger by the specified amount
+	void decrease_hunger(GameContext& ctx, int amount);
 
-    // Returns current hunger state
-    HungerState get_hunger_state() const;
+	// Returns current hunger state
+	HungerState get_hunger_state() const;
 
-    // Returns string representation of the current hunger state
-    std::string get_hunger_state_string() const;
+	// Returns string representation of the current hunger state
+	std::string get_hunger_state_string() const;
 
-    // Returns hunger value
-    int get_hunger_value() const;
-    
-    // Returns maximum hunger value
-    int get_hunger_max() const;
-    
-    // Returns numerical hunger display (e.g., "150/1000")
-    std::string get_hunger_numerical_string() const;
-    
-    // Returns hunger progress bar string
-    std::string get_hunger_bar_string(int bar_width = 20) const;
+	// Returns hunger value
+	int get_hunger_value() const;
 
-    // Returns color code for hunger UI display
-    int get_hunger_color() const;
+	// Returns maximum hunger value
+	int get_hunger_max() const;
 
-    // Returns true if player is hungry enough to suffer penalties
-    bool is_suffering_hunger_penalties() const;
+	// Returns numerical hunger display (e.g., "150/1000")
+	std::string get_hunger_numerical_string() const;
 
-    // Apply hunger effects to player stats
-    void apply_hunger_effects(GameContext& ctx);
+	// Returns hunger progress bar string
+	std::string get_hunger_bar_string(int bar_width = 20) const;
 
-    // Save/Load methods for game persistence
-    void save(json& j) const;
-    void load(GameContext& ctx, const json& j);
+	// Returns color code for hunger UI display
+	int get_hunger_color() const;
+
+	// Returns true if player is hungry enough to suffer penalties
+	bool is_suffering_hunger_penalties() const;
+
+	// Apply hunger effects to player stats
+	void apply_hunger_effects(GameContext& ctx);
+
+	// Save/Load methods for game persistence
+	void save(json& j) const;
+	void load(GameContext& ctx, const json& j);
 
 private:
-    int hunger_value;  // Internal hunger counter
-    int hunger_max;    // Maximum hunger value
+	int hunger_value; // Internal hunger counter
+	int hunger_max; // Maximum hunger value
 
-    // Thresholds for different hunger states
-    const int WELL_FED_THRESHOLD;
-    const int SATIATED_THRESHOLD;
-    const int HUNGRY_THRESHOLD;
-    const int STARVING_THRESHOLD;
-    const int DYING_THRESHOLD;
+	// Thresholds for different hunger states
+	const int WELL_FED_THRESHOLD;
+	const int SATIATED_THRESHOLD;
+	const int HUNGRY_THRESHOLD;
+	const int STARVING_THRESHOLD;
+	const int DYING_THRESHOLD;
 
-    // Updates internal hunger state based on hunger value
-    void update_hunger_state(GameContext& ctx);
+	// Updates internal hunger state based on hunger value
+	void update_hunger_state(GameContext& ctx);
 
-    HungerState current_state;
-    bool well_fed_message_shown; // Prevents spam of well-fed message
+	HungerState current_state;
+	bool well_fed_message_shown; // Prevents spam of well-fed message
 };

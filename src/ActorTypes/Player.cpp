@@ -1,52 +1,53 @@
 // file: Player.cpp
-#include "../Map/Map.h"
-#include "../Ai/Ai.h"
-#include "../Ai/AiPlayer.h"
 #include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../Random/RandomDice.h"
-#include "../Colors/Colors.h"
 #include "../ActorTypes/Healer.h"
-#include "../Objects/Web.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
-#include "../Items/Items.h"
-#include "../Items/Armor.h"
-#include "../Items/ItemClassification.h"
-#include "../Items/Jewelry.h"
-#include "../Combat/WeaponDamageRegistry.h"
+#include "../Ai/Ai.h"
+#include "../Ai/AiPlayer.h"
 #include "../Ai/AiShopkeeper.h"
+#include "../Colors/Colors.h"
+#include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
-#include "../Systems/MessageSystem.h"
+#include "../Items/Armor.h"
+#include "../Items/ItemClassification.h"
+#include "../Items/Items.h"
+#include "../Items/Jewelry.h"
+#include "../Map/Map.h"
+#include "../Objects/Web.h"
+#include "../Random/RandomDice.h"
+#include "../Systems/BuffSystem.h"
 #include "../Systems/HungerSystem.h"
+#include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
-#include "../Systems/BuffSystem.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
 
 using namespace InventoryOperations; // For clean function calls
 
 // Equipment comparison predicates for DRY compliance
 namespace
 {
-	constexpr auto matches_slot = [](EquipmentSlot slot)
+constexpr auto matches_slot = [](EquipmentSlot slot)
+{
+	return [slot](const EquippedItem& equipped)
 	{
-		return [slot](const EquippedItem& equipped)
-		{
-			return equipped.slot == slot;
-		};
+		return equipped.slot == slot;
 	};
+};
 
-	constexpr auto matches_unique_id = [](uint64_t unique_id)
+constexpr auto matches_unique_id = [](uint64_t unique_id)
+{
+	return [unique_id](const EquippedItem& equipped)
 	{
-		return [unique_id](const EquippedItem& equipped)
-		{
-			return equipped.item->uniqueId == unique_id;
-		};
+		return equipped.item->uniqueId == unique_id;
 	};
-}
+};
+} // namespace
 
-Player::Player(Vector2D position) : Creature(position, ActorData{ TILE_PLAYER, "Player", WHITE_BLACK_PAIR })
+Player::Player(Vector2D position)
+	: Creature(position, ActorData{ TILE_PLAYER, "Player", WHITE_BLACK_PAIR })
 {
 	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
 	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
@@ -54,30 +55,29 @@ Player::Player(Vector2D position) : Creature(position, ActorData{ TILE_PLAYER, "
 
 void Player::roll_new_character(GameContext& ctx)
 {
-    // Rolling for stats
-    auto roll3d6 = [&ctx]() { 
-        return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6(); 
-    };
-    
-    set_strength(roll3d6());
-    set_dexterity(roll3d6());
-    set_constitution(roll3d6());
-    set_intelligence(roll3d6());
-    set_wisdom(roll3d6());
-    set_charisma(roll3d6());
+	// Rolling for stats
+	auto roll3d6 = [&ctx]()
+	{
+		return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6();
+	};
 
-    const int playerHp = 20 + ctx.dice->d10();
-    const int playerDr = 1;
-    const int playerXp = 0;
-    const int playerAC = 10;
+	set_strength(roll3d6());
+	set_dexterity(roll3d6());
+	set_constitution(roll3d6());
+	set_intelligence(roll3d6());
+	set_wisdom(roll3d6());
+	set_charisma(roll3d6());
 
-    attacker = std::make_unique<Attacker>(DamageValues::Unarmed());
-    destructible = std::make_unique<PlayerDestructible>(
-        playerHp, playerDr, "your corpse", playerXp, 0, playerAC
-    );
+	const int playerHp = 20 + ctx.dice->d10();
+	const int playerDr = 1;
+	const int playerXp = 0;
+	const int playerAC = 10;
+
+	attacker = std::make_unique<Attacker>(DamageValues::Unarmed());
+	destructible = std::make_unique<PlayerDestructible>(
+		playerHp, playerDr, "your corpse", playerXp, 0, playerAC);
 }
 
- 
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
 	switch (playerClassState)
@@ -170,7 +170,7 @@ void Player::racial_ability_adjustments()
 	default:
 		break;
 	}
-	
+
 	// TODO: Clear screen after all racial bonuses via Renderer
 }
 
@@ -178,20 +178,20 @@ void Player::calculate_thaco()
 {
 	// Static instance for efficiency - no need to recreate each time
 	static constexpr CalculatedTHAC0s thaco_tables;
-	
+
 	switch (playerClassState)
 	{
 	case PlayerClassState::FIGHTER:
-		destructible->set_thaco(thaco_tables.get_fighter(get_player_level()));
+		destructible->set_thaco(thaco_tables.get_fighter(get_creature_level()));
 		break;
 	case PlayerClassState::ROGUE:
-		destructible->set_thaco(thaco_tables.get_rogue(get_player_level()));
+		destructible->set_thaco(thaco_tables.get_rogue(get_creature_level()));
 		break;
 	case PlayerClassState::CLERIC:
-		destructible->set_thaco(thaco_tables.get_cleric(get_player_level()));
+		destructible->set_thaco(thaco_tables.get_cleric(get_creature_level()));
 		break;
 	case PlayerClassState::WIZARD:
-		destructible->set_thaco(thaco_tables.get_wizard(get_player_level()));
+		destructible->set_thaco(thaco_tables.get_wizard(get_creature_level()));
 		break;
 	case PlayerClassState::NONE:
 		break;
@@ -200,7 +200,8 @@ void Player::calculate_thaco()
 	}
 }
 
-void Player::consume_food(int nutrition, GameContext& ctx) {
+void Player::consume_food(int nutrition, GameContext& ctx)
+{
 	// Decrease hunger by nutrition value
 	ctx.hunger_system->decrease_hunger(ctx, nutrition);
 }
@@ -349,7 +350,7 @@ bool Player::attempt_hide(GameContext& ctx)
 	}
 
 	// Success - hide duration based on level
-	int hideDuration = 10 + get_player_level() * 2;
+	int hideDuration = 10 + get_creature_level() * 2;
 	ctx.buff_system->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
 	ctx.message_system->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
 	return true;
@@ -361,8 +362,7 @@ void Player::get_stuck_in_web(int duration, int strength, Web* web, GameContext&
 	webStrength = strength;
 	trappingWeb = web;
 
-	ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " +
-		std::to_string(duration) + " turns!", true);
+	ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " + std::to_string(duration) + " turns!", true);
 }
 
 bool Player::try_break_web(GameContext& ctx)
@@ -380,7 +380,8 @@ bool Player::try_break_web(GameContext& ctx)
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
 
 		// Destroy the web that trapped the player
-		if (trappingWeb) {
+		if (trappingWeb)
+		{
 			trappingWeb->destroy(ctx);
 			trappingWeb = nullptr;
 		}
@@ -398,7 +399,8 @@ bool Player::try_break_web(GameContext& ctx)
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
 
 		// Destroy the web that trapped the player
-		if (trappingWeb) {
+		if (trappingWeb)
+		{
 			trappingWeb->destroy(ctx);
 			trappingWeb = nullptr;
 		}
@@ -408,8 +410,7 @@ bool Player::try_break_web(GameContext& ctx)
 		return true;
 	}
 
-	ctx.message_system->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " +
-		std::to_string(webStuckTurns), true);
+	ctx.message_system->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " + std::to_string(webStuckTurns), true);
 	return false;
 }
 
@@ -420,7 +421,7 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 	if (is_item_equipped(item_unique_id))
 	{
 		// Find which slot and unequip
-		for (auto slot : {EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON})
+		for (auto slot : { EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON })
 		{
 			Item* equipped = get_equipped_item(slot);
 			if (equipped && equipped->uniqueId == item_unique_id)
@@ -440,10 +441,10 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 			if (result.has_value())
 			{
 				auto itemToEquip = std::move(*result);
-				
+
 				// Determine appropriate slot based on item classification
 				EquipmentSlot target_slot;
-				
+
 				if (ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass))
 				{
 					target_slot = EquipmentSlot::MISSILE_WEAPON;
@@ -452,7 +453,7 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 				{
 					target_slot = preferred_slot;
 				}
-				
+
 				return equip_item(std::move(itemToEquip), target_slot, ctx);
 			}
 		}
@@ -501,13 +502,15 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 {
 	if (!item)
 	{
-		if (ctx.message_system->is_debug_mode()) ctx.message_system->log("DEBUG: equip_item failed - null item");
+		if (ctx.message_system->is_debug_mode())
+			ctx.message_system->log("DEBUG: equip_item failed - null item");
 		return false;
 	}
 
 	if (!can_equip(*item, slot))
 	{
-		if (ctx.message_system->is_debug_mode()) {
+		if (ctx.message_system->is_debug_mode())
+		{
 			ctx.message_system->log("DEBUG: can_equip failed for " + item->actorData.name);
 			ctx.message_system->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
 			ctx.message_system->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
@@ -521,7 +524,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 
 	// Unequip existing item in the slot first
 	unequip_item(slot, ctx);
-	
+
 	// Special handling for two-handed weapons - use ItemClass system
 	if (slot == EquipmentSlot::RIGHT_HAND)
 	{
@@ -535,17 +538,17 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 
 	// Add equipped item
 	equippedItems.emplace_back(std::move(item), slot);
-	
+
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
-	
+
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
 		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemId);
 		ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
-	
+
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
@@ -586,19 +589,19 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		{
 			return false; // Not a weapon or shield
 		}
-		
+
 		// Shields can only go in left hand
 		if (item.is_shield() && slot != EquipmentSlot::LEFT_HAND)
 		{
 			return false;
 		}
-		
+
 		// Two-handed weapons can only go in right hand
 		if (item.is_two_handed_weapon() && slot != EquipmentSlot::RIGHT_HAND)
 		{
 			return false;
 		}
-		
+
 		// Check if trying to equip something in left hand when two-handed weapon is equipped
 		if (slot == EquipmentSlot::LEFT_HAND)
 		{
@@ -608,7 +611,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 				return false; // Can't equip anything in left hand when two-handed weapon equipped
 			}
 		}
-		
+
 		break;
 	}
 	case EquipmentSlot::BODY:
@@ -704,20 +707,20 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 		// Return item to inventory
 		add_item(inventory_data, std::move(it->item));
-		
+
 		// Remove from equipped items
 		equippedItems.erase(it);
-		
+
 		// Update armor class if armor or shield was unequipped
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			destructible->update_armor_class(*this, ctx);
 			ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 		}
-		
+
 		return true;
 	}
-	
+
 	return false;
 }
 
@@ -739,24 +742,24 @@ bool Player::is_dual_wielding() const noexcept
 	// Check if both hands have weapons equipped
 	auto rightHand = get_equipped_item(EquipmentSlot::RIGHT_HAND);
 	auto leftHand = get_equipped_item(EquipmentSlot::LEFT_HAND);
-	
+
 	if (!rightHand || !leftHand)
 	{
 		return false;
 	}
-	
+
 	// Check if left hand item is a weapon (not a shield) - use ItemClass system
 	if (leftHand->is_shield())
 	{
 		return false; // Shield, not dual wielding
 	}
-	
+
 	// Check if left hand item is a weapon
 	if (leftHand->is_weapon())
 	{
 		return true; // Both hands have weapons
 	}
-	
+
 	return false;
 }
 
@@ -767,26 +770,26 @@ std::string Player::get_equipped_weapon_damage_roll() const noexcept
 	{
 		return WeaponDamageRegistry::get_unarmed_damage();
 	}
-	
+
 	// Use pure ItemClass system
 	if (rightHandWeapon->is_weapon())
 	{
 		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemId);
 	}
-	
+
 	return WeaponDamageRegistry::get_unarmed_damage();
 }
 
 Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 {
 	DualWieldInfo info;
-	
+
 	// Check if dual wielding
 	if (!is_dual_wielding())
 	{
 		return info; // Not dual wielding
 	}
-	
+
 	info.isDualWielding = true;
 
 	// AD&D 2e Two-Weapon Fighting penalties
@@ -810,7 +813,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemId);
 		}
 	}
-	
+
 	return info;
 }
 
@@ -841,7 +844,7 @@ bool Player::is_item_equipped(uint64_t item_unique_id) const noexcept
 
 int Player::get_constitution_hp_multiplier() const noexcept
 {
-	const int level = get_player_level();
+	const int level = get_creature_level();
 
 	// AD&D 2e: Constitution HP bonus per level caps by class
 	// Source: https://www.dragonsfoot.org/forums/viewtopic.php?t=78913&start=120
@@ -850,18 +853,18 @@ int Player::get_constitution_hp_multiplier() const noexcept
 	// - Rogues/Wizards: 10 Hit Dice (levels 1-10), then fixed HP/level without Constitution bonus
 	switch (playerClassState)
 	{
-		case PlayerClassState::FIGHTER:
-			return std::min(level, 9);  // AD&D 2e: Fighters get Con bonus for 9 levels
+	case PlayerClassState::FIGHTER:
+		return std::min(level, 9); // AD&D 2e: Fighters get Con bonus for 9 levels
 
-		case PlayerClassState::CLERIC:
-			return std::min(level, 9);  // AD&D 2e: Priests get Con bonus for 9 levels
+	case PlayerClassState::CLERIC:
+		return std::min(level, 9); // AD&D 2e: Priests get Con bonus for 9 levels
 
-		case PlayerClassState::ROGUE:
-		case PlayerClassState::WIZARD:
-			return std::min(level, 10); // AD&D 2e: Rogues/Wizards get Con bonus for 10 levels
+	case PlayerClassState::ROGUE:
+	case PlayerClassState::WIZARD:
+		return std::min(level, 10); // AD&D 2e: Rogues/Wizards get Con bonus for 10 levels
 
-		default:
-			return std::min(level, 10);
+	default:
+		return std::min(level, 10);
 	}
 }
 
@@ -915,7 +918,7 @@ void Player::load(const json& j)
 		for (const auto& itemEntry : j["equippedItems"])
 		{
 			EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
-			auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{0, "temp", 0});
+			auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ 0, "temp", 0 });
 			item->load(itemEntry["item"]);
 			equippedItems.emplace_back(std::move(item), slot);
 		}
@@ -933,12 +936,18 @@ void Player::remove_stat_bonuses_from_equipment(Item& item)
 
 	if (statBoost->is_set_mode)
 	{
-		if (statBoost->str_bonus != 0) set_strength(statBoost->original_stats.str);
-		if (statBoost->dex_bonus != 0) set_dexterity(statBoost->original_stats.dex);
-		if (statBoost->con_bonus != 0) set_constitution(statBoost->original_stats.con);
-		if (statBoost->int_bonus != 0) set_intelligence(statBoost->original_stats.intel);
-		if (statBoost->wis_bonus != 0) set_wisdom(statBoost->original_stats.wis);
-		if (statBoost->cha_bonus != 0) set_charisma(statBoost->original_stats.cha);
+		if (statBoost->str_bonus != 0)
+			set_strength(statBoost->original_stats.str);
+		if (statBoost->dex_bonus != 0)
+			set_dexterity(statBoost->original_stats.dex);
+		if (statBoost->con_bonus != 0)
+			set_constitution(statBoost->original_stats.con);
+		if (statBoost->int_bonus != 0)
+			set_intelligence(statBoost->original_stats.intel);
+		if (statBoost->wis_bonus != 0)
+			set_wisdom(statBoost->original_stats.wis);
+		if (statBoost->cha_bonus != 0)
+			set_charisma(statBoost->original_stats.cha);
 	}
 	else
 	{

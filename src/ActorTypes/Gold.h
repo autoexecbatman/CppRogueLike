@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../Persistent/Persistent.h"
 #include "../Actor/Pickable.h"
+#include "../Persistent/Persistent.h"
 
 class Item;
 class Creature;
@@ -9,7 +9,7 @@ struct GameContext;
 
 class Gold : public Pickable
 {
-	public:
+public:
 	int amount{ 0 };
 
 	Gold(int amount);

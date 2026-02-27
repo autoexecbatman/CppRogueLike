@@ -1,8 +1,8 @@
 #pragma once
 
+#include <memory>
 #include <string>
 #include <unordered_map>
-#include <memory>
 
 #include "BaseMenu.h"
 #include "IMenuState.h"
@@ -57,12 +57,17 @@ class MenuRace : public BaseMenu
 	int startx_{ 0 };
 	enum class MenuRaceOptions
 	{
-		HUMAN, DWARF, ELF, GNOME, HALFELF, HALFLING, RANDOM, BACK
-	}
-	currentState{ MenuRaceOptions::HUMAN };
+		HUMAN,
+		DWARF,
+		ELF,
+		GNOME,
+		HALFELF,
+		HALFLING,
+		RANDOM,
+		BACK
+	} currentState{ MenuRaceOptions::HUMAN };
 	std::unordered_map<MenuRaceOptions, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuRaceOptions, std::string> menuRaceStrings
-	{
+	std::unordered_map<MenuRaceOptions, std::string> menuRaceStrings{
 		{ MenuRaceOptions::HUMAN, "Human" },
 		{ MenuRaceOptions::DWARF, "Dwarf" },
 		{ MenuRaceOptions::ELF, "Elf" },

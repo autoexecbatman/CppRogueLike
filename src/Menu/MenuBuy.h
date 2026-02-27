@@ -1,7 +1,7 @@
 #pragma once
 
-#include <vector>
 #include <string>
+#include <vector>
 
 #include "BaseMenu.h"
 
@@ -28,6 +28,7 @@ class MenuBuy : public BaseMenu
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
 	void handle_buy(void* tradeWin, Creature& shopkeeper, Player& seller);
 	void draw_content();
+
 public:
 	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);
 	~MenuBuy();

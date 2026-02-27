@@ -1,9 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <vector>
-#include <string_view>
 #include <nlohmann/json.hpp>
+#include <string_view>
+#include <vector>
 
 // Forward declarations
 class Map;
@@ -23,53 +23,48 @@ struct GameContext;
 class GameStateManager
 {
 public:
-    GameStateManager() = default;
-    ~GameStateManager() = default;
+	GameStateManager() = default;
+	~GameStateManager() = default;
 
-    // High-level game state operations
-    bool load_all(GameContext& ctx);
-    void init_new_game(GameContext& ctx);
+	// High-level game state operations
+	bool load_all(GameContext& ctx);
+	void init_new_game(GameContext& ctx);
 
-    // Save/Load operations
-    void save_game(
-        Map& map,
-        const std::vector<DungeonRoom>& rooms,
-        Player& player,
-        Stairs& stairs,
-        const std::vector<std::unique_ptr<Creature>>& creatures,
-        const InventoryData& inventory_data,
-        Gui& gui,
-        HungerSystem& hunger_system,
-        const LevelManager& level_manager,
-        int game_time
-    );
+	// Save/Load operations
+	void save_game(
+		Map& map,
+		const std::vector<DungeonRoom>& rooms,
+		Player& player,
+		Stairs& stairs,
+		const std::vector<std::unique_ptr<Creature>>& creatures,
+		const InventoryData& inventory_data,
+		Gui& gui,
+		HungerSystem& hunger_system,
+		const LevelManager& level_manager,
+		int game_time);
 
-    bool load_game(
-        Map& map,
-        std::vector<DungeonRoom>& rooms,
-        Player& player,
-        Stairs& stairs,
-        std::vector<std::unique_ptr<Creature>>& creatures,
-        InventoryData& inventory_data,
-        Gui& gui,
-        HungerSystem& hunger_system,
-        LevelManager& level_manager,
-        int& game_time,
-        GameContext& ctx
-    );
+	bool load_game(
+		Map& map,
+		std::vector<DungeonRoom>& rooms,
+		Player& player,
+		Stairs& stairs,
+		std::vector<std::unique_ptr<Creature>>& creatures,
+		InventoryData& inventory_data,
+		Gui& gui,
+		HungerSystem& hunger_system,
+		LevelManager& level_manager,
+		int& game_time,
+		GameContext& ctx);
 
-    // File operations
-    static bool save_file_exists() noexcept;
-    static bool delete_save_file() noexcept;
-    
+	// File operations
+	static bool save_file_exists();
+	static bool delete_save_file();
+
 private:
-    static constexpr const char* SAVE_FILE_NAME = "game.sav";
-    
-    // Helper methods for JSON operations
-    void save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const;
-    void load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const;
-    
-    void save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const;
-    void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;
-    
+	// Helper methods for JSON operations
+	void save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const;
+	void load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const;
+
+	void save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const;
+	void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;
 };

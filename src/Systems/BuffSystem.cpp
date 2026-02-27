@@ -6,7 +6,7 @@
 
 // OCP: Data-driven buff state mapping - add new buffs here without modifying methods
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
-	{BuffType::INVISIBILITY, ActorState::IS_INVISIBLE},
+	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	// Future extensions: {BuffType::HOLD_PERSON, ActorState::IS_PARALYZED},
 };
 
@@ -27,14 +27,17 @@ static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 // OCP: Data-driven hit calculation - BuffTypes that modify to-hit rolls
 // AD&D 2e: Bless gives +1 to hit, future buffs may give other bonuses
 static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
-	{BuffType::BLESS, 1},
+	{ BuffType::BLESS, 1 },
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
 
 void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int duration, bool is_set_effect) noexcept
 {
 	// Find if buff already exists
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
 
 	if (it != creature.active_buffs.end())
@@ -42,9 +45,9 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		// AD&D 2e: Same buff type - take highest value, extend duration
 		if (value > it->value)
 		{
-			it->value = value;  // Better buff, update value
-			it->turnsRemaining = duration;  // Reset duration
-			it->is_set_effect = is_set_effect;  // Update effect type
+			it->value = value; // Better buff, update value
+			it->turnsRemaining = duration; // Reset duration
+			it->is_set_effect = is_set_effect; // Update effect type
 		}
 		else
 		{
@@ -55,7 +58,7 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 	else
 	{
 		// Add new buff
-		Buff newBuff{ };
+		Buff newBuff{};
 		newBuff.type = type;
 		newBuff.value = value;
 		newBuff.turnsRemaining = duration;
@@ -80,7 +83,10 @@ void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 	}
 
 	// Remove buff - no stat restoration needed, getters calculate on the fly
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	std::erase_if(creature.active_buffs, matches_type);
 }
 
@@ -112,7 +118,10 @@ void BuffSystem::update_creature_buffs(Creature& creature) noexcept
 	}
 
 	// Remove expired buffs using std::erase_if (ranges-friendly)
-	auto is_expired = [](const Buff& b) { return b.turnsRemaining == 0; };
+	auto is_expired = [](const Buff& b)
+	{
+		return b.turnsRemaining == 0;
+	};
 	std::erase_if(creature.active_buffs, is_expired);
 }
 
@@ -133,21 +142,30 @@ void BuffSystem::restore_loaded_buff_states(Creature& creature) noexcept
 
 int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
 	return it != creature.active_buffs.end() ? it->value : 0;
 }
 
 int BuffSystem::get_buff_turns(const Creature& creature, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
 	return it != creature.active_buffs.end() ? it->turnsRemaining : 0;
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b) { return b.type == type; };
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
 	return std::ranges::find_if(creature.active_buffs, matches_type) != creature.active_buffs.end();
 }
 

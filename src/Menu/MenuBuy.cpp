@@ -1,10 +1,10 @@
 #include "MenuBuy.h"
+#include "../Actor/InventoryOperations.h"
+#include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
-#include "../Colors/Colors.h"
 #include "../Systems/MessageSystem.h"
-#include "../ActorTypes/Player.h"
-#include "../Actor/InventoryOperations.h"
 #include "../Systems/ShopKeeper.h"
 
 using namespace InventoryOperations;
@@ -42,12 +42,12 @@ MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 	if (ctx.renderer)
 	{
 		menu_height = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
-		menu_width  = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+		menu_width = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 	}
 	else
 	{
 		menu_height = 26;
-		menu_width  = 60;
+		menu_width = 60;
 	}
 
 	populate_items();
@@ -61,7 +61,8 @@ MenuBuy::~MenuBuy()
 
 void MenuBuy::menu_print_state(size_t state)
 {
-	if (state >= menuItems.size()) return;
+	if (state >= menuItems.size())
+		return;
 
 	if (currentState == state)
 	{
@@ -92,10 +93,10 @@ void MenuBuy::draw()
 	// Column header at row 1
 	if (renderer)
 	{
-		int ts       = renderer->get_tile_size();
+		int ts = renderer->get_tile_size();
 		int font_off = (ts - renderer->get_font_size()) / 2;
-		int hdr_x    = (static_cast<int>(menu_startx) + 1) * ts;
-		int hdr_y    = (static_cast<int>(menu_starty) + 1) * ts + font_off;
+		int hdr_x = (static_cast<int>(menu_startx) + 1) * ts;
+		int hdr_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
 		renderer->draw_text(hdr_x, hdr_y, "Item                       Price", CYAN_BLACK_PAIR);
 	}
 
@@ -111,32 +112,34 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
-		case 0x103: // UP
-		case 'w':
-			if (menuItems.empty()) return;
-			currentState = (currentState + menuItems.size() - 1) % menuItems.size();
+	case 0x103: // UP
+	case 'w':
+		if (menuItems.empty())
+			return;
+		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
+		menu_mark_dirty();
+		break;
+	case 0x102: // DOWN
+	case 's':
+		if (menuItems.empty())
+			return;
+		currentState = (currentState + 1) % menuItems.size();
+		menu_mark_dirty();
+		break;
+	case 27: // ESC
+		menu_set_run_false();
+		break;
+	case 10: // ENTER
+		if (!is_inventory_empty(shopkeeper.shop_inventory))
+		{
+			handle_buy(nullptr, buyer, *ctx.player);
 			menu_mark_dirty();
-			break;
-		case 0x102: // DOWN
-		case 's':
-			if (menuItems.empty()) return;
-			currentState = (currentState + 1) % menuItems.size();
-			menu_mark_dirty();
-			break;
-		case 27: // ESC
-			menu_set_run_false();
-			break;
-		case 10: // ENTER
-			if (!is_inventory_empty(shopkeeper.shop_inventory))
-			{
-				handle_buy(nullptr, buyer, *ctx.player);
-				menu_mark_dirty();
-			}
-			else
-			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "No items for sale.", true);
-			}
-			break;
+		}
+		else
+		{
+			ctx.message_system->message(WHITE_BLACK_PAIR, "No items for sale.", true);
+		}
+		break;
 	}
 }
 
@@ -154,29 +157,29 @@ void MenuBuy::menu(GameContext& ctx)
 
 void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Player& buyer)
 {
-    if (is_inventory_empty(shopkeeper.shop_inventory) ||
-        currentState >= get_item_count(shopkeeper.shop_inventory))
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-        return;
-    }
+	if (is_inventory_empty(shopkeeper.shop_inventory) ||
+		currentState >= get_item_count(shopkeeper.shop_inventory))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		return;
+	}
 
-    Item* item = get_item_at(shopkeeper.shop_inventory, currentState);
-    if (!item)
-    {
-        ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
-        return;
-    }
+	Item* item = get_item_at(shopkeeper.shop_inventory, currentState);
+	if (!item)
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		return;
+	}
 
-    if (shopkeeper.process_player_purchase(ctx, *item, buyer))
-    {
-        auto removed_item = remove_item_at(shopkeeper.shop_inventory, currentState);
+	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
+	{
+		auto removed_item = remove_item_at(shopkeeper.shop_inventory, currentState);
 
-        if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
-        {
-            currentState = get_item_count(shopkeeper.shop_inventory) - 1;
-        }
+		if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
+		{
+			currentState = get_item_count(shopkeeper.shop_inventory) - 1;
+		}
 
-        populate_items();
-    }
+		populate_items();
+	}
 }

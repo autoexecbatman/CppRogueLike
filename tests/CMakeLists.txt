@@ -98,6 +98,7 @@ set(PARENT_SOURCES
 
     # Map
     ${PARENT_SOURCE_DIR}/Map/Map.cpp
+    ${PARENT_SOURCE_DIR}/Map/DungeonGenerator.cpp
 
     # Items
     ${PARENT_SOURCE_DIR}/Items/Items.cpp
@@ -126,6 +127,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/DisplayManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/GameLoopCoordinator.cpp
     ${PARENT_SOURCE_DIR}/Systems/AnimationSystem.cpp
+    ${PARENT_SOURCE_DIR}/Systems/ContentRegistry.cpp
     ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
     ${PARENT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/PrefabLibrary.cpp

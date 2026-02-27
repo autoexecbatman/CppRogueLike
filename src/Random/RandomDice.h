@@ -24,7 +24,8 @@ public:
 	{
 #ifdef TESTING_MODE
 		// In test mode, use fixed values if set
-		if (m_test_mode && !m_fixed_rolls.empty()) {
+		if (m_test_mode && !m_fixed_rolls.empty())
+		{
 			int value = m_fixed_rolls.front();
 			m_fixed_rolls.erase(m_fixed_rolls.begin());
 			return value;
@@ -37,11 +38,13 @@ public:
 #ifdef TESTING_MODE
 	// Test-only methods for deterministic dice rolls
 	void set_test_mode(bool enabled) { m_test_mode = enabled; }
-	void set_next_d20(int value) {
+	void set_next_d20(int value)
+	{
 		m_test_mode = true;
 		m_fixed_rolls.push_back(value);
 	}
-	void set_next_roll(int value) {
+	void set_next_roll(int value)
+	{
 		m_test_mode = true;
 		m_fixed_rolls.push_back(value);
 	}
@@ -57,5 +60,4 @@ private:
 	bool m_test_mode{ false };
 	std::vector<int> m_fixed_rolls;
 #endif
-
 };

@@ -1,31 +1,32 @@
 #include <format>
 #include <memory>
-#include <unordered_map>
 #include <string_view>
+#include <unordered_map>
 
-#include "../Core/GameContext.h"
-#include "../Colors/Colors.h"
 #include "../Actor/Actor.h"
+#include "../Actor/Destructible.h"
 #include "../ActorTypes/Player.h"
-#include "../Menu/MenuTrade.h"
-#include "Attacker.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Attributes/DexterityAttributes.h"
-#include "../Systems/MessageSystem.h"
+#include "../Colors/Colors.h"
+#include "../Combat/WeaponDamageRegistry.h"
+#include "../Core/GameContext.h"
+#include "../Menu/MenuTrade.h"
+#include "../Systems/AnimationSystem.h"
+#include "../Systems/BuffSystem.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/LevelUpSystem.h"
-#include "../Systems/BuffSystem.h"
-#include "../Systems/AnimationSystem.h"
-#include "../Combat/WeaponDamageRegistry.h"
-#include "../Actor/Destructible.h"
+#include "../Systems/MessageSystem.h"
+#include "Attacker.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> buff_break_messages = {
-	{BuffType::INVISIBILITY, "Your invisibility fades as you attack!"},
+	{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
 	// Future extensions: {BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!"},
 };
 
-Attacker::Attacker(const DamageInfo& damage) : damageInfo(damage) {}
+Attacker::Attacker(const DamageInfo& damage)
+	: damageInfo(damage) {}
 
 void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 {
@@ -68,8 +69,7 @@ void Attacker::perform_single_attack(
 	Creature& target,
 	int attackPenalty,
 	const std::string& handName,
-	GameContext& ctx
-)
+	GameContext& ctx)
 {
 	if (!target.destructible)
 	{
@@ -131,8 +131,7 @@ void Attacker::perform_single_attack(
 			strengthAttr.dmgAdj,
 			target.destructible->get_dr(),
 			handName,
-			ctx
-		);
+			ctx);
 
 		if (finalDamage > 0)
 		{
@@ -152,8 +151,7 @@ void Attacker::perform_single_attack(
 			rollNeeded,
 			attackPenalty,
 			handName,
-			ctx
-		);
+			ctx);
 	}
 
 	// AD&D 2e: Remove buffs that break when attacking (Invisibility, Sanctuary, etc.) - OCP compliant
@@ -169,8 +167,7 @@ void Attacker::perform_single_attack(
 				ctx.message_system->message(
 					CYAN_BLACK_PAIR,
 					std::string(buff_break_messages.at(buff_type)),
-					true
-				);
+					true);
 			}
 		}
 	}
@@ -184,7 +181,7 @@ BackstabInfo Attacker::calculate_backstab_bonus(Creature& attacker) const noexce
 		return BackstabInfo{ false, 0, 1 };
 	}
 
-	BackstabInfo info{ };
+	BackstabInfo info{};
 	info.isBackstab = true;
 	info.hitBonus = 4; // +4 to hit from behind/invisible
 	info.damageMultiplier = 1;
@@ -192,7 +189,7 @@ BackstabInfo Attacker::calculate_backstab_bonus(Creature& attacker) const noexce
 	auto* player = dynamic_cast<Player*>(&attacker);
 	if (player && player->playerClassState == Player::PlayerClassState::ROGUE)
 	{
-		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(player->get_player_level());
+		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(player->get_creature_level());
 	}
 
 	return info;
@@ -203,8 +200,7 @@ int Attacker::calculate_to_hit_roll(
 	const Creature& target,
 	int attackPenalty,
 	const BackstabInfo& backstab,
-	GameContext& ctx
-) const noexcept
+	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
 	int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
@@ -224,8 +220,7 @@ int Attacker::calculate_to_hit_roll(
 				ctx.message_system->log(std::format(
 					"Ranged modifier: {} from DEX {}",
 					dexAttr.MissileAttackAdj,
-					attacker.get_dexterity()
-				));
+					attacker.get_dexterity()));
 			}
 		}
 	}
@@ -243,8 +238,7 @@ int Attacker::calculate_damage_with_backstab(
 	int damageRoll,
 	int strengthBonus,
 	const BackstabInfo& backstab,
-	GameContext& ctx
-) const noexcept
+	GameContext& ctx) const noexcept
 {
 	int baseDamage = damageRoll + strengthBonus;
 
@@ -253,8 +247,7 @@ int Attacker::calculate_damage_with_backstab(
 		baseDamage *= backstab.damageMultiplier;
 		ctx.message_system->append_message_part(
 			MAGENTA_BLACK_PAIR,
-			std::format(" BACKSTAB x{}! ", backstab.damageMultiplier)
-		);
+			std::format(" BACKSTAB x{}! ", backstab.damageMultiplier));
 	}
 
 	return baseDamage;
@@ -272,8 +265,7 @@ void Attacker::log_attack_hit(
 	int strengthBonus,
 	int dr,
 	const std::string& handName,
-	GameContext& ctx
-) const noexcept
+	GameContext& ctx) const noexcept
 {
 	ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
 	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
@@ -290,9 +282,15 @@ void Attacker::log_attack_hit(
 
 	ctx.message_system->log(std::format(
 		"HIT ({}): {} rolled {} vs {} | {} ({}) + {} str - {} DR = {} dmg",
-		handName, attacker.actorData.name, attackRoll, rollNeeded,
-		damageRoll, attackDamage.get_damage_range(), strengthBonus, dr, finalDamage
-	));
+		handName,
+		attacker.actorData.name,
+		attackRoll,
+		rollNeeded,
+		damageRoll,
+		attackDamage.get_damage_range(),
+		strengthBonus,
+		dr,
+		finalDamage));
 }
 
 void Attacker::log_attack_miss(
@@ -302,8 +300,7 @@ void Attacker::log_attack_miss(
 	int rollNeeded,
 	int attackPenalty,
 	const std::string& handName,
-	GameContext& ctx
-) const noexcept
+	GameContext& ctx) const noexcept
 {
 	ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
 	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
@@ -324,8 +321,7 @@ void Attacker::log_attack_miss(
 		rollNeeded,
 		attacker.destructible->get_thaco(),
 		target.destructible->get_armor_class(),
-		attackPenalty
-	));
+		attackPenalty));
 }
 
 DamageInfo Attacker::get_attack_damage(Creature& attacker) const

@@ -19,8 +19,7 @@ protected:
             Vector2D{5, 10},
             ActorData{'/', "Test Sword", 1}
         );
-        item->value = 100;
-        item->base_value = 80;
+        item->set_value(80);
         item->itemId = ItemId::LONG_SWORD;
         item->itemClass = ItemClass::SWORD;
         item->pickable = std::make_unique<Weapon>(false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM);
@@ -37,8 +36,7 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
     loaded->load(j);
 
-    EXPECT_EQ(loaded->value, 100);
-    EXPECT_EQ(loaded->base_value, 80);
+    EXPECT_EQ(loaded->get_value(), 80);
     EXPECT_EQ(loaded->itemId, ItemId::LONG_SWORD);
     EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
     EXPECT_EQ(loaded->actorData.name, "Test Sword");
@@ -154,8 +152,7 @@ TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
     for (ItemClass itemClass : classes) {
         auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{'?', "test", 1});
         item->itemClass = itemClass;
-        item->value = 50;
-        item->base_value = 40;
+        item->set_value(40);
 
         json j;
         item->save(j);

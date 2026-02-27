@@ -1,12 +1,12 @@
 // file: MenuRace.cpp
 #include "MenuRace.h"
-#include "MenuName.h"
-#include "MenuClass.h"
-#include "MenuGender.h"
-#include "../Core/GameContext.h"
-#include "../Renderer/Renderer.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Core/GameContext.h"
+#include "../Renderer/Renderer.h"
+#include "MenuClass.h"
+#include "MenuGender.h"
+#include "MenuName.h"
 
 void Human::on_selection(GameContext& ctx)
 {
@@ -72,7 +72,8 @@ void RaceRandom::on_selection(GameContext& ctx)
 		ctx.player->playerRace = "Halfling";
 		ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
 		break;
-	default:break;
+	default:
+		break;
 	}
 }
 

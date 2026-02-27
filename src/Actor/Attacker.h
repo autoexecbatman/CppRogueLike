@@ -2,12 +2,8 @@
 
 #include <string>
 
-#pragma warning (push, 0)
-#include <libtcod/libtcod.hpp>
-#pragma warning (pop)
-
-#include "../Persistent/Persistent.h"
 #include "../Combat/DamageInfo.h"
+#include "../Persistent/Persistent.h"
 
 class Creature;
 struct GameContext;
@@ -29,8 +25,7 @@ private:
 		Creature& target,
 		int attackPenalty,
 		const std::string& handName,
-		GameContext& ctx
-	);
+		GameContext& ctx);
 
 	BackstabInfo calculate_backstab_bonus(Creature& attacker) const noexcept;
 
@@ -39,15 +34,13 @@ private:
 		const Creature& target,
 		int attackPenalty,
 		const BackstabInfo& backstab,
-		GameContext& ctx
-	) const noexcept;
+		GameContext& ctx) const noexcept;
 
 	int calculate_damage_with_backstab(
 		int damageRoll,
 		int strengthBonus,
 		const BackstabInfo& backstab,
-		GameContext& ctx
-	) const noexcept;
+		GameContext& ctx) const noexcept;
 
 	void log_attack_hit(
 		const Creature& attacker,
@@ -61,8 +54,7 @@ private:
 		int strengthBonus,
 		int dr,
 		const std::string& handName,
-		GameContext& ctx
-	) const noexcept;
+		GameContext& ctx) const noexcept;
 
 	void log_attack_miss(
 		const Creature& attacker,
@@ -71,8 +63,7 @@ private:
 		int rollNeeded,
 		int attackPenalty,
 		const std::string& handName,
-		GameContext& ctx
-	) const noexcept;
+		GameContext& ctx) const noexcept;
 
 public:
 	explicit Attacker(const DamageInfo& damage);

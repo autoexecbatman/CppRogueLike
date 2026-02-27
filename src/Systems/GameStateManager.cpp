@@ -1,282 +1,277 @@
 // GameStateManager.cpp - Handles game state persistence and level management
-#include <fstream>
-#include <format>
 #include <filesystem>
+#include <format>
+#include <fstream>
 #include <system_error>
 
 #include <nlohmann/json.hpp>
 
-#include "GameStateManager.h"
-#include "../Map/Map.h"
-#include "../Map/DungeonRoom.h"
-#include "../ActorTypes/Player.h"
-#include "../Actor/InventoryOperations.h"
-#include "../Actor/InventoryData.h"
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryData.h"
+#include "../Actor/InventoryOperations.h"
+#include "../ActorTypes/Player.h"
+#include "../Core/GameContext.h"
+#include "../Core/Paths.h"
+#include "../Factories/ItemCreator.h"
 #include "../Gui/Gui.h"
+#include "../Map/DungeonRoom.h"
+#include "../Map/Map.h"
+#include "../Systems/DataManager.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/LevelManager.h"
-#include "../Factories/ItemCreator.h"
-#include "../Utils/Vector2D.h"
-#include "../Core/GameContext.h"
-#include "../Systems/DataManager.h"
-#include "../Systems/MessageSystem.h"
 #include "../Systems/MenuManager.h"
+#include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
+#include "ContentRegistry.h"
+#include "GameStateManager.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
-    ctx.data_manager->load_all_data(*ctx.message_system);
+	ContentRegistry::instance().load(Paths::CONTENT_TILES);
+	ctx.data_manager->load_all_data(*ctx.message_system);
 
-    if (ctx.level_manager) ctx.level_manager->reset_to_first_level();
-    if (ctx.time)          *ctx.time = 0;
-    if (ctx.isLoadedGame)  *ctx.isLoadedGame = false;
+	if (ctx.level_manager)
+		ctx.level_manager->reset_to_first_level();
+	if (ctx.time)
+		*ctx.time = 0;
+	if (ctx.isLoadedGame)
+		*ctx.isLoadedGame = false;
 
-    // regenerate clears creatures, inventory, rooms, objects, then calls init()
-    ctx.map->regenerate(ctx);
+	// regenerate clears creatures, inventory, rooms, objects, then calls init()
+	ctx.map->regenerate(ctx);
 
-    ctx.player->roll_new_character(ctx);
-    *ctx.game_status = GameStatus::STARTUP;
-    ctx.message_system->log("New game initialized");
+	ctx.player->roll_new_character(ctx);
+	*ctx.game_status = GameStatus::STARTUP;
+	ctx.message_system->log("New game initialized");
 }
 
 bool GameStateManager::load_all(GameContext& ctx)
 {
-    ctx.menu_manager->set_game_initialized(true);
-    ctx.data_manager->load_all_data(*ctx.message_system);
+	ContentRegistry::instance().load(Paths::CONTENT_TILES);
+	ctx.menu_manager->set_game_initialized(true);
+	ctx.data_manager->load_all_data(*ctx.message_system);
 
-    if (!load_game(*ctx.map, *ctx.rooms, *ctx.player, *ctx.stairs, *ctx.creatures,
-                   *ctx.inventory_data, *ctx.gui, *ctx.hunger_system,
-                   *ctx.level_manager, *ctx.time, ctx))
-    {
-        ctx.message_system->log("Error: Could not open save file.");
-        return false;
-    }
+	if (!load_game(*ctx.map, *ctx.rooms, *ctx.player, *ctx.stairs, *ctx.creatures, *ctx.inventory_data, *ctx.gui, *ctx.hunger_system, *ctx.level_manager, *ctx.time, ctx))
+	{
+		ctx.message_system->log("Error: Could not open save file.");
+		return false;
+	}
 
-    if (ctx.isLoadedGame) *ctx.isLoadedGame = true;
-    *ctx.game_status = GameStatus::STARTUP;
-    ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
-    return true;
+	if (ctx.isLoadedGame)
+		*ctx.isLoadedGame = true;
+	*ctx.game_status = GameStatus::STARTUP;
+	ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
+	return true;
 }
 
 void GameStateManager::save_game(
-    Map& map,
-    const std::vector<DungeonRoom>& rooms,
-    Player& player,
-    Stairs& stairs,
-    const std::vector<std::unique_ptr<Creature>>& creatures,
-    const InventoryData& inventory_data,
-    Gui& gui,
-    HungerSystem& hunger_system,
-    const LevelManager& level_manager,
-    int game_time
-)
+	Map& map,
+	const std::vector<DungeonRoom>& rooms,
+	Player& player,
+	Stairs& stairs,
+	const std::vector<std::unique_ptr<Creature>>& creatures,
+	const InventoryData& inventory_data,
+	Gui& gui,
+	HungerSystem& hunger_system,
+	const LevelManager& level_manager,
+	int game_time)
 {
-    std::ofstream file(SAVE_FILE_NAME);
-    if (file.is_open())
-    {
-        json j;
+	auto save_path = Paths::resolve(Paths::SAVE_FILE);
+	std::filesystem::create_directories(save_path.parent_path());
+	std::ofstream file(save_path);
+	if (file.is_open())
+	{
+		json j;
 
-        // Save the map
-        map.save(j);
+		// Save the map
+		map.save(j);
 
-        // Save rooms
-        save_rooms_to_json(rooms, j);
+		// Save rooms
+		save_rooms_to_json(rooms, j);
 
-        // Save the player
-        json playerJson;
-        player.save(playerJson);
-        j["player"] = playerJson;
+		// Save the player
+		json playerJson;
+		player.save(playerJson);
+		j["player"] = playerJson;
 
-        // Save the stairs
-        json stairsJson;
-        stairs.save(stairsJson);
-        j["stairs"] = stairsJson;
+		// Save the stairs
+		json stairsJson;
+		stairs.save(stairsJson);
+		j["stairs"] = stairsJson;
 
-        // Save creatures
-        save_creatures_to_json(creatures, j);
+		// Save creatures
+		save_creatures_to_json(creatures, j);
 
-        // Save floor items inventory
-        save_inventory(inventory_data, j);
+		// Save floor items inventory
+		save_inventory(inventory_data, j);
 
-        // Save the message log
-        json guiJson;
-        gui.save(guiJson);
-        j["gui"] = guiJson;
-        
-        // Save the hunger system
-        json hungerJson;
-        hunger_system.save(hungerJson);
-        j["hunger_system"] = hungerJson;
-        
-        // Save the level manager
-        level_manager.save_to_json(j);
-        
-        // Save game time
-        j["time"] = game_time;
+		// Save the message log
+		json guiJson;
+		gui.save(guiJson);
+		j["gui"] = guiJson;
 
-        // Write the JSON data to the file
-        file << j.dump(4); // Pretty print with an indentation of 4 spaces
-        file.close();
-    }
-    else
-    {
-        throw std::runtime_error("Error occurred while saving the game.");
-    }
+		// Save the hunger system
+		json hungerJson;
+		hunger_system.save(hungerJson);
+		j["hunger_system"] = hungerJson;
+
+		// Save the level manager
+		level_manager.save_to_json(j);
+
+		// Save game time
+		j["time"] = game_time;
+
+		// Write the JSON data to the file
+		file << j.dump(4); // Pretty print with an indentation of 4 spaces
+		file.close();
+	}
+	else
+	{
+		throw std::runtime_error("Error occurred while saving the game.");
+	}
 }
 
 bool GameStateManager::load_game(
-    Map& map,
-    std::vector<DungeonRoom>& rooms,
-    Player& player,
-    Stairs& stairs,
-    std::vector<std::unique_ptr<Creature>>& creatures,
-    InventoryData& inventory_data,
-    Gui& gui,
-    HungerSystem& hunger_system,
-    LevelManager& level_manager,
-    int& game_time,
-    GameContext& ctx
-)
+	Map& map,
+	std::vector<DungeonRoom>& rooms,
+	Player& player,
+	Stairs& stairs,
+	std::vector<std::unique_ptr<Creature>>& creatures,
+	InventoryData& inventory_data,
+	Gui& gui,
+	HungerSystem& hunger_system,
+	LevelManager& level_manager,
+	int& game_time,
+	GameContext& ctx)
 {
-    std::ifstream file(SAVE_FILE_NAME);
-    if (!file.is_open())
-    {
-        return false; // File doesn't exist or can't be opened
-    }
+	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
+	if (!file.is_open())
+	{
+		return false; // File doesn't exist or can't be opened
+	}
 
-    json j;
-    file >> j;
+	json j;
+	file >> j;
 
-    // Load the map
-    map.load(j);
+	// Load the map
+	map.load(j);
 
-    // Load the rooms
-    load_rooms_from_json(j, rooms);
+	// Load the rooms
+	load_rooms_from_json(j, rooms);
 
-    // Load the player
-    if (j.contains("player"))
-    {
-        player.load(j["player"]);
-    }
+	// Load the player
+	if (j.contains("player"))
+	{
+		player.load(j["player"]);
+	}
 
-    // Load the stairs
-    if (j.contains("stairs"))
-    {
-        stairs.load(j["stairs"]);
-    }
+	// Load the stairs
+	if (j.contains("stairs"))
+	{
+		stairs.load(j["stairs"]);
+	}
 
-    // Load creatures
-    load_creatures_from_json(j, creatures);
+	// Load creatures
+	load_creatures_from_json(j, creatures);
 
-    // Load floor items inventory
-    load_inventory(inventory_data, j);
+	// Load floor items inventory
+	load_inventory(inventory_data, j);
 
-    // Load the message log
-    if (j.contains("gui"))
-    {
-        gui.load(j["gui"]);
-    }
-    
-    // Load the hunger system
-    if (j.contains("hunger_system"))
-    {
-        hunger_system.load(ctx, j["hunger_system"]);
-    }
-    
-    // Load the level manager
-    level_manager.load_from_json(j);
-    
-    // Load game time
-    if (j.contains("time"))
-    {
-        game_time = j["time"];
-    }
+	// Load the message log
+	if (j.contains("gui"))
+	{
+		gui.load(j["gui"]);
+	}
 
-    return true; // Successfully loaded
+	// Load the hunger system
+	if (j.contains("hunger_system"))
+	{
+		hunger_system.load(ctx, j["hunger_system"]);
+	}
+
+	// Load the level manager
+	level_manager.load_from_json(j);
+
+	// Load game time
+	if (j.contains("time"))
+	{
+		game_time = j["time"];
+	}
+
+	return true; // Successfully loaded
 }
 
-
-
-bool GameStateManager::save_file_exists() noexcept
+bool GameStateManager::save_file_exists()
 {
-    std::ifstream file(SAVE_FILE_NAME);
-    return file.good();
+	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
+	return file.good();
 }
 
-bool GameStateManager::delete_save_file() noexcept
+bool GameStateManager::delete_save_file()
 {
-    std::error_code ec;
+	std::error_code ec;
+	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 
-    // Check if file exists (no-throw version)
-    if (!std::filesystem::exists(SAVE_FILE_NAME, ec))
-    {
-        return true;  // File doesn't exist, nothing to delete
-    }
+	if (!std::filesystem::exists(save_path, ec))
+		return true; // File doesn't exist, nothing to delete
 
-    // Attempt to remove the file (no-throw version)
-    const bool removed = std::filesystem::remove(SAVE_FILE_NAME, ec);
-
-    // Return true if removed successfully or if error_code indicates success
-    return removed && !ec;
+	const bool removed = std::filesystem::remove(save_path, ec);
+	return removed && !ec;
 }
 
 void GameStateManager::save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const
 {
-    j["rooms"] = json::array();
-    for (const auto& room : rooms)
-    {
-        j["rooms"].push_back({
-            {"col",    room.col},
-            {"row",    room.row},
-            {"width",  room.width},
-            {"height", room.height}
-        });
-    }
+	j["rooms"] = json::array();
+	for (const auto& room : rooms)
+	{
+		j["rooms"].push_back({ { "col", room.col },
+			{ "row", room.row },
+			{ "width", room.width },
+			{ "height", room.height } });
+	}
 }
 
 void GameStateManager::load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const
 {
-    if (!j.contains("rooms") || !j["rooms"].is_array())
-        return;
+	if (!j.contains("rooms") || !j["rooms"].is_array())
+		return;
 
-    for (const auto& d : j["rooms"])
-    {
-        rooms.push_back(DungeonRoom{
-            d.value("col",    0),
-            d.value("row",    0),
-            d.value("width",  1),
-            d.value("height", 1)
-        });
-    }
+	for (const auto& d : j["rooms"])
+	{
+		rooms.push_back(DungeonRoom{
+			d.value("col", 0),
+			d.value("row", 0),
+			d.value("width", 1),
+			d.value("height", 1) });
+	}
 }
 
 void GameStateManager::save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const
 {
-    j["creatures"] = json::array();
-    for (const auto& creature : creatures)
-    {
-        if (creature)
-        {
-            json creatureJson;
-            creature->save(creatureJson);
-            j["creatures"].push_back(creatureJson);
-        }
-    }
+	j["creatures"] = json::array();
+	for (const auto& creature : creatures)
+	{
+		if (creature)
+		{
+			json creatureJson;
+			creature->save(creatureJson);
+			j["creatures"].push_back(creatureJson);
+		}
+	}
 }
 
 void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const
 {
-    if (j.contains("creatures") && j["creatures"].is_array())
-    {
-        for (const auto& creatureData : j["creatures"])
-        {
-            auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
-            creature->load(creatureData);
-            creatures.push_back(std::move(creature));
-        }
-    }
+	if (j.contains("creatures") && j["creatures"].is_array())
+	{
+		for (const auto& creatureData : j["creatures"])
+		{
+			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
+			creature->load(creatureData);
+			creatures.push_back(std::move(creature));
+		}
+	}
 }
-

@@ -10,18 +10,18 @@ struct GameContext;
 class BaseMenu
 {
 protected:
-	Renderer* renderer{nullptr};
-	InputSystem* input_system{nullptr};
-	size_t menu_height{0};
-	size_t menu_width{0};
-	size_t menu_starty{0};
-	size_t menu_startx{0};
-	int keyPress{0};
-	bool isHighlighted{false};
+	Renderer* renderer{ nullptr };
+	InputSystem* input_system{ nullptr };
+	size_t menu_height{ 0 };
+	size_t menu_width{ 0 };
+	size_t menu_starty{ 0 };
+	size_t menu_startx{ 0 };
+	int keyPress{ 0 };
+	bool isHighlighted{ false };
 
 public:
-	bool run{true};
-	bool back{false};
+	bool run{ true };
+	bool back{ false };
 
 	BaseMenu() = default;
 	virtual ~BaseMenu() = default;

@@ -13,10 +13,10 @@ class AiMonsterConfused : public Ai
 public:
 	AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept;
 
-    AiMonsterConfused(const AiMonsterConfused&) = delete;
-    AiMonsterConfused& operator=(const AiMonsterConfused&) = delete;
-    AiMonsterConfused(AiMonsterConfused&&) noexcept = delete;
-    AiMonsterConfused& operator=(AiMonsterConfused&&) noexcept = delete;
+	AiMonsterConfused(const AiMonsterConfused&) = delete;
+	AiMonsterConfused& operator=(const AiMonsterConfused&) = delete;
+	AiMonsterConfused(AiMonsterConfused&&) noexcept = delete;
+	AiMonsterConfused& operator=(AiMonsterConfused&&) noexcept = delete;
 
 	void update(Creature& owner, GameContext& ctx) override;
 	void load(const json& j) override;
@@ -24,7 +24,7 @@ public:
 
 private:
 	static constexpr int MIN_DIRECTION = -1;
-    static constexpr int MAX_DIRECTION = 1;
+	static constexpr int MAX_DIRECTION = 1;
 
 	int nbTurns;
 	std::unique_ptr<Ai> oldAi;

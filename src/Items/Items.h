@@ -46,4 +46,3 @@ class AmuletOfYendor : public Item
 public:
 	AmuletOfYendor(Vector2D position);
 };
-

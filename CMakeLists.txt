@@ -262,6 +262,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/FloatingTextSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/AnimationSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/AnimationSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.h
 
     # Tools
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp

@@ -1,11 +1,12 @@
 #include "Healer.h"
+#include "../Actor/Actor.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
-#include "../Actor/Actor.h"
 
 //==HEALER==
-Healer::Healer(int amountToHeal) : amountToHeal(amountToHeal) {}
+Healer::Healer(int amountToHeal)
+	: amountToHeal(amountToHeal) {}
 
 bool Healer::use(Item& owner, Creature& wearer, GameContext& ctx)
 {
