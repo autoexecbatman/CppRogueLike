@@ -1,116 +1,556 @@
 {
     "items": {
-        "amulet_of_health":                     { "sheet": 33, "col": 0, "row": 0 },
-        "amulet_of_ogre_power":                 { "sheet": 33, "col": 4, "row": 0 },
-        "amulet_of_protection":                 { "sheet": 33, "col": 3, "row": 0 },
-        "amulet_of_wisdom":                     { "sheet": 33, "col": 1, "row": 0 },
-        "amulet_of_yendor":                     { "sheet": 33, "col": 2, "row": 0 },
-        "banded_mail":                          { "sheet": 29, "col": 1, "row": 1 },
-        "bastard_sword":                        { "sheet": 27, "col": 1, "row": 0 },
-        "battle_axe":                           { "sheet": 27, "col": 2, "row": 0 },
-        "boots_of_elvenkind":                   { "sheet": 29, "col": 1, "row": 4 },
-        "boots_of_speed":                       { "sheet": 29, "col": 0, "row": 4 },
-        "bread":                                { "sheet": 34, "col": 1, "row": 0 },
-        "brigandine":                           { "sheet": 29, "col": 7, "row": 0 },
-        "chain_mail":                           { "sheet": 29, "col": 6, "row": 0 },
-        "cloak_of_displacement":                { "sheet": 29, "col": 3, "row": 4 },
-        "cloak_of_elvenkind":                   { "sheet": 29, "col": 4, "row": 4 },
-        "cloak_of_protection":                  { "sheet": 29, "col": 2, "row": 4 },
-        "club":                                 { "sheet": 26, "col": 6, "row": 0 },
-        "composite_bow":                        { "sheet": 26, "col": 2, "row": 4 },
-        "crossbow":                             { "sheet": 26, "col": 5, "row": 4 },
-        "dagger":                               { "sheet": 26, "col": 0, "row": 0 },
-        "field_plate":                          { "sheet": 29, "col": 3, "row": 1 },
-        "flail":                                { "sheet": 27, "col": 5, "row": 0 },
-        "food_ration":                          { "sheet": 34, "col": 0, "row": 0 },
-        "fruit":                                { "sheet": 34, "col": 3, "row": 0 },
-        "full_plate":                           { "sheet": 29, "col": 4, "row": 1 },
-        "gauntlets_of_dexterity":               { "sheet": 29, "col": 1, "row": 3 },
-        "gauntlets_of_fumbling":                { "sheet": 29, "col": 3, "row": 3 },
-        "gauntlets_of_ogre_power":              { "sheet": 29, "col": 0, "row": 3 },
-        "gauntlets_of_swimming_and_climbing":   { "sheet": 29, "col": 2, "row": 3 },
-        "gem":                                  { "sheet": 36, "col": 1, "row": 0 },
-        "girdle_of_cloud_giant_strength":       { "sheet": 29, "col": 4, "row": 2 },
-        "girdle_of_fire_giant_strength":        { "sheet": 29, "col": 3, "row": 2 },
-        "girdle_of_frost_giant_strength":       { "sheet": 29, "col": 2, "row": 2 },
-        "girdle_of_hill_giant_strength":        { "sheet": 29, "col": 0, "row": 2 },
-        "girdle_of_stone_giant_strength":       { "sheet": 29, "col": 1, "row": 2 },
-        "girdle_of_storm_giant_strength":       { "sheet": 29, "col": 5, "row": 2 },
-        "gold":                                 { "sheet": 36, "col": 0, "row": 0 },
-        "great_axe":                            { "sheet": 28, "col": 2, "row": 0 },
-        "great_sword":                          { "sheet": 28, "col": 1, "row": 0 },
-        "hand_axe":                             { "sheet": 26, "col": 4, "row": 0 },
-        "health_potion":                        { "sheet": 24, "col": 0, "row": 0 },
-        "heavy_crossbow":                       { "sheet": 26, "col": 4, "row": 4 },
-        "helm_of_brilliance":                   { "sheet": 31, "col": 0, "row": 0 },
-        "helm_of_telepathy":                    { "sheet": 31, "col": 2, "row": 0 },
-        "helm_of_teleportation":                { "sheet": 31, "col": 1, "row": 0 },
-        "helm_of_underwater_action":            { "sheet": 31, "col": 3, "row": 0 },
-        "hide_armor":                           { "sheet": 29, "col": 3, "row": 0 },
-        "invisibility_potion":                  { "sheet": 24, "col": 3, "row": 0 },
-        "large_shield":                         { "sheet": 30, "col": 2, "row": 0 },
-        "leather_armor":                        { "sheet": 29, "col": 1, "row": 0 },
-        "light_crossbow":                       { "sheet": 26, "col": 3, "row": 4 },
-        "lockpick":                             { "sheet": 22, "col": 2, "row": 0 },
-        "long_bow":                             { "sheet": 26, "col": 1, "row": 4 },
-        "long_sword":                           { "sheet": 27, "col": 0, "row": 0 },
-        "mace":                                 { "sheet": 26, "col": 5, "row": 0 },
-        "mana_potion":                          { "sheet": 24, "col": 2, "row": 0 },
-        "meat":                                 { "sheet": 34, "col": 2, "row": 0 },
-        "medium_shield":                        { "sheet": 30, "col": 1, "row": 0 },
-        "morning_star":                         { "sheet": 27, "col": 4, "row": 0 },
-        "padded_armor":                         { "sheet": 29, "col": 0, "row": 0 },
-        "plate_mail":                           { "sheet": 29, "col": 2, "row": 1 },
-        "potion_of_cold_resistance":            { "sheet": 24, "col": 6, "row": 0 },
-        "potion_of_extra_healing":              { "sheet": 24, "col": 1, "row": 0 },
-        "potion_of_fire_resistance":            { "sheet": 24, "col": 5, "row": 0 },
-        "potion_of_giant_strength":             { "sheet": 24, "col": 4, "row": 0 },
-        "potion_of_speed":                      { "sheet": 24, "col": 7, "row": 0 },
-        "quarterstaff":                         { "sheet": 28, "col": 3, "row": 0 },
-        "rapier":                               { "sheet": 26, "col": 3, "row": 0 },
-        "ring_mail":                            { "sheet": 29, "col": 4, "row": 0 },
-        "ring_of_cold_resistance":              { "sheet": 32, "col": 6, "row": 0 },
-        "ring_of_fire_resistance":              { "sheet": 32, "col": 5, "row": 0 },
-        "ring_of_free_action":                  { "sheet": 32, "col": 2, "row": 0 },
-        "ring_of_invisibility":                 { "sheet": 32, "col": 4, "row": 0 },
-        "ring_of_protection_plus_1":            { "sheet": 32, "col": 0, "row": 0 },
-        "ring_of_protection_plus_2":            { "sheet": 32, "col": 1, "row": 0 },
-        "ring_of_regeneration":                 { "sheet": 32, "col": 3, "row": 0 },
-        "ring_of_spell_storing":                { "sheet": 32, "col": 7, "row": 0 },
-        "rope":                                 { "sheet": 22, "col": 1, "row": 0 },
-        "scale_mail":                           { "sheet": 29, "col": 5, "row": 0 },
-        "scimitar":                             { "sheet": 26, "col": 2, "row": 0 },
-        "scroll_confusion":                     { "sheet": 25, "col": 2, "row": 0 },
-        "scroll_fireball":                      { "sheet": 25, "col": 1, "row": 0 },
-        "scroll_lightning":                     { "sheet": 25, "col": 0, "row": 0 },
-        "scroll_teleport":                      { "sheet": 25, "col": 3, "row": 0 },
-        "short_bow":                            { "sheet": 26, "col": 0, "row": 4 },
-        "short_sword":                          { "sheet": 26, "col": 1, "row": 0 },
-        "sling":                                { "sheet": 26, "col": 6, "row": 4 },
-        "small_shield":                         { "sheet": 30, "col": 0, "row": 0 },
-        "splint_mail":                          { "sheet": 29, "col": 0, "row": 1 },
-        "staff":                                { "sheet": 28, "col": 4, "row": 0 },
-        "studded_leather":                      { "sheet": 29, "col": 2, "row": 0 },
-        "torch":                                { "sheet": 22, "col": 0, "row": 0 },
-        "two_handed_sword":                     { "sheet": 28, "col": 0, "row": 0 },
-        "war_hammer":                           { "sheet": 27, "col": 3, "row": 0 }
+        "amulet_of_health": {
+            "col": 0,
+            "row": 0,
+            "sheet": 33
+        },
+        "amulet_of_ogre_power": {
+            "col": 4,
+            "row": 0,
+            "sheet": 33
+        },
+        "amulet_of_protection": {
+            "col": 3,
+            "row": 0,
+            "sheet": 33
+        },
+        "amulet_of_wisdom": {
+            "col": 1,
+            "row": 0,
+            "sheet": 33
+        },
+        "amulet_of_yendor": {
+            "col": 2,
+            "row": 0,
+            "sheet": 33
+        },
+        "banded_mail": {
+            "col": 1,
+            "row": 1,
+            "sheet": 29
+        },
+        "bastard_sword": {
+            "col": 1,
+            "row": 0,
+            "sheet": 27
+        },
+        "battle_axe": {
+            "col": 2,
+            "row": 0,
+            "sheet": 27
+        },
+        "boots_of_elvenkind": {
+            "col": 1,
+            "row": 4,
+            "sheet": 29
+        },
+        "boots_of_speed": {
+            "col": 0,
+            "row": 4,
+            "sheet": 29
+        },
+        "bread": {
+            "col": 1,
+            "row": 0,
+            "sheet": 34
+        },
+        "brigandine": {
+            "col": 7,
+            "row": 0,
+            "sheet": 29
+        },
+        "chain_mail": {
+            "col": 6,
+            "row": 0,
+            "sheet": 29
+        },
+        "cloak_of_displacement": {
+            "col": 3,
+            "row": 4,
+            "sheet": 29
+        },
+        "cloak_of_elvenkind": {
+            "col": 4,
+            "row": 4,
+            "sheet": 29
+        },
+        "cloak_of_protection": {
+            "col": 2,
+            "row": 4,
+            "sheet": 29
+        },
+        "club": {
+            "col": 6,
+            "row": 0,
+            "sheet": 26
+        },
+        "composite_bow": {
+            "col": 2,
+            "row": 4,
+            "sheet": 26
+        },
+        "crossbow": {
+            "col": 5,
+            "row": 4,
+            "sheet": 26
+        },
+        "dagger": {
+            "col": 0,
+            "row": 0,
+            "sheet": 26
+        },
+        "field_plate": {
+            "col": 3,
+            "row": 1,
+            "sheet": 29
+        },
+        "flail": {
+            "col": 5,
+            "row": 0,
+            "sheet": 27
+        },
+        "food_ration": {
+            "col": 0,
+            "row": 0,
+            "sheet": 34
+        },
+        "fruit": {
+            "col": 3,
+            "row": 0,
+            "sheet": 34
+        },
+        "full_plate": {
+            "col": 4,
+            "row": 1,
+            "sheet": 29
+        },
+        "gauntlets_of_dexterity": {
+            "col": 1,
+            "row": 3,
+            "sheet": 29
+        },
+        "gauntlets_of_fumbling": {
+            "col": 3,
+            "row": 3,
+            "sheet": 29
+        },
+        "gauntlets_of_ogre_power": {
+            "col": 0,
+            "row": 3,
+            "sheet": 29
+        },
+        "gauntlets_of_swimming_and_climbing": {
+            "col": 2,
+            "row": 3,
+            "sheet": 29
+        },
+        "gem": {
+            "col": 1,
+            "row": 0,
+            "sheet": 36
+        },
+        "girdle_of_cloud_giant_strength": {
+            "col": 4,
+            "row": 2,
+            "sheet": 29
+        },
+        "girdle_of_fire_giant_strength": {
+            "col": 3,
+            "row": 2,
+            "sheet": 29
+        },
+        "girdle_of_frost_giant_strength": {
+            "col": 2,
+            "row": 2,
+            "sheet": 29
+        },
+        "girdle_of_hill_giant_strength": {
+            "col": 0,
+            "row": 2,
+            "sheet": 29
+        },
+        "girdle_of_stone_giant_strength": {
+            "col": 1,
+            "row": 2,
+            "sheet": 29
+        },
+        "girdle_of_storm_giant_strength": {
+            "col": 5,
+            "row": 2,
+            "sheet": 29
+        },
+        "gold": {
+            "col": 0,
+            "row": 0,
+            "sheet": 36
+        },
+        "great_axe": {
+            "col": 2,
+            "row": 0,
+            "sheet": 28
+        },
+        "great_sword": {
+            "col": 1,
+            "row": 0,
+            "sheet": 28
+        },
+        "hand_axe": {
+            "col": 4,
+            "row": 0,
+            "sheet": 26
+        },
+        "health_potion": {
+            "col": 0,
+            "row": 0,
+            "sheet": 24
+        },
+        "heavy_crossbow": {
+            "col": 4,
+            "row": 4,
+            "sheet": 26
+        },
+        "helm_of_brilliance": {
+            "col": 0,
+            "row": 0,
+            "sheet": 31
+        },
+        "helm_of_telepathy": {
+            "col": 2,
+            "row": 0,
+            "sheet": 31
+        },
+        "helm_of_teleportation": {
+            "col": 1,
+            "row": 0,
+            "sheet": 31
+        },
+        "helm_of_underwater_action": {
+            "col": 3,
+            "row": 0,
+            "sheet": 31
+        },
+        "hide_armor": {
+            "col": 3,
+            "row": 0,
+            "sheet": 29
+        },
+        "invisibility_potion": {
+            "col": 3,
+            "row": 0,
+            "sheet": 24
+        },
+        "large_shield": {
+            "col": 2,
+            "row": 0,
+            "sheet": 30
+        },
+        "leather_armor": {
+            "col": 1,
+            "row": 0,
+            "sheet": 29
+        },
+        "light_crossbow": {
+            "col": 3,
+            "row": 4,
+            "sheet": 26
+        },
+        "lockpick": {
+            "col": 2,
+            "row": 0,
+            "sheet": 22
+        },
+        "long_bow": {
+            "col": 1,
+            "row": 4,
+            "sheet": 26
+        },
+        "long_sword": {
+            "col": 0,
+            "row": 0,
+            "sheet": 27
+        },
+        "mace": {
+            "col": 5,
+            "row": 0,
+            "sheet": 26
+        },
+        "mana_potion": {
+            "col": 2,
+            "row": 0,
+            "sheet": 24
+        },
+        "meat": {
+            "col": 2,
+            "row": 0,
+            "sheet": 34
+        },
+        "medium_shield": {
+            "col": 1,
+            "row": 0,
+            "sheet": 30
+        },
+        "morning_star": {
+            "col": 4,
+            "row": 0,
+            "sheet": 27
+        },
+        "padded_armor": {
+            "col": 0,
+            "row": 0,
+            "sheet": 29
+        },
+        "plate_mail": {
+            "col": 2,
+            "row": 1,
+            "sheet": 29
+        },
+        "potion_of_cold_resistance": {
+            "col": 6,
+            "row": 0,
+            "sheet": 24
+        },
+        "potion_of_extra_healing": {
+            "col": 1,
+            "row": 0,
+            "sheet": 24
+        },
+        "potion_of_fire_resistance": {
+            "col": 5,
+            "row": 0,
+            "sheet": 24
+        },
+        "potion_of_giant_strength": {
+            "col": 4,
+            "row": 0,
+            "sheet": 24
+        },
+        "potion_of_speed": {
+            "col": 7,
+            "row": 0,
+            "sheet": 24
+        },
+        "quarterstaff": {
+            "col": 3,
+            "row": 0,
+            "sheet": 28
+        },
+        "rapier": {
+            "col": 3,
+            "row": 0,
+            "sheet": 26
+        },
+        "ring_mail": {
+            "col": 4,
+            "row": 0,
+            "sheet": 29
+        },
+        "ring_of_cold_resistance": {
+            "col": 6,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_fire_resistance": {
+            "col": 5,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_free_action": {
+            "col": 2,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_invisibility": {
+            "col": 4,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_protection_plus_1": {
+            "col": 0,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_protection_plus_2": {
+            "col": 1,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_regeneration": {
+            "col": 3,
+            "row": 0,
+            "sheet": 32
+        },
+        "ring_of_spell_storing": {
+            "col": 7,
+            "row": 0,
+            "sheet": 32
+        },
+        "rope": {
+            "col": 1,
+            "row": 0,
+            "sheet": 22
+        },
+        "scale_mail": {
+            "col": 5,
+            "row": 0,
+            "sheet": 29
+        },
+        "scimitar": {
+            "col": 2,
+            "row": 0,
+            "sheet": 26
+        },
+        "scroll_confusion": {
+            "col": 2,
+            "row": 0,
+            "sheet": 25
+        },
+        "scroll_fireball": {
+            "col": 1,
+            "row": 0,
+            "sheet": 25
+        },
+        "scroll_lightning": {
+            "col": 0,
+            "row": 0,
+            "sheet": 25
+        },
+        "scroll_teleport": {
+            "col": 3,
+            "row": 0,
+            "sheet": 25
+        },
+        "short_bow": {
+            "col": 0,
+            "row": 4,
+            "sheet": 26
+        },
+        "short_sword": {
+            "col": 1,
+            "row": 0,
+            "sheet": 26
+        },
+        "sling": {
+            "col": 6,
+            "row": 4,
+            "sheet": 26
+        },
+        "small_shield": {
+            "col": 0,
+            "row": 0,
+            "sheet": 30
+        },
+        "splint_mail": {
+            "col": 0,
+            "row": 1,
+            "sheet": 29
+        },
+        "staff": {
+            "col": 4,
+            "row": 0,
+            "sheet": 28
+        },
+        "studded_leather": {
+            "col": 2,
+            "row": 0,
+            "sheet": 29
+        },
+        "torch": {
+            "col": 0,
+            "row": 0,
+            "sheet": 22
+        },
+        "two_handed_sword": {
+            "col": 0,
+            "row": 0,
+            "sheet": 28
+        },
+        "war_hammer": {
+            "col": 3,
+            "row": 0,
+            "sheet": 27
+        }
     },
     "monsters": {
-        "archer":        { "sheet": 6,  "col": 2,  "row": 12 },
-        "bat":           { "sheet": 14, "col": 0,  "row": 11 },
-        "dragon":        { "sheet": 8,  "col": 3,  "row": 3  },
-        "fire_wolf":     { "sheet": 12, "col": 0,  "row": 5  },
-        "goblin":        { "sheet": 6,  "col": 0,  "row": 4  },
-        "ice_wolf":      { "sheet": 12, "col": 2,  "row": 1  },
-        "kobold":        { "sheet": 4,  "col": 0,  "row": 14 },
-        "mage":          { "sheet": 6,  "col": 5,  "row": 2  },
-        "mimic":         { "sheet": 20, "col": 1,  "row": 2  },
-        "orc":           { "sheet": 6,  "col": 3,  "row": 4  },
-        "shopkeeper":    { "sheet": 6,  "col": 2,  "row": 9  },
-        "spider_giant":  { "sheet": 10, "col": 2,  "row": 4  },
-        "spider_small":  { "sheet": 10, "col": 0,  "row": 4  },
-        "spider_weaver": { "sheet": 10, "col": 1,  "row": 4  },
-        "troll":         { "sheet": 6,  "col": 0,  "row": 14 },
-        "wolf":          { "sheet": 12, "col": 0,  "row": 1  }
+        "archer": {
+            "col": 2,
+            "row": 12,
+            "sheet": 6
+        },
+        "bat": {
+            "col": 0,
+            "row": 11,
+            "sheet": 14
+        },
+        "dragon": {
+            "col": 3,
+            "row": 3,
+            "sheet": 8
+        },
+        "fire_wolf": {
+            "col": 0,
+            "row": 5,
+            "sheet": 12
+        },
+        "goblin": {
+            "col": 0,
+            "row": 4,
+            "sheet": 6
+        },
+        "ice_wolf": {
+            "col": 2,
+            "row": 1,
+            "sheet": 12
+        },
+        "kobold": {
+            "col": 0,
+            "row": 14,
+            "sheet": 4
+        },
+        "mage": {
+            "col": 5,
+            "row": 2,
+            "sheet": 6
+        },
+        "mimic": {
+            "col": 1,
+            "row": 2,
+            "sheet": 20
+        },
+        "orc": {
+            "col": 3,
+            "row": 4,
+            "sheet": 6
+        },
+        "shopkeeper": {
+            "col": 2,
+            "row": 9,
+            "sheet": 6
+        },
+        "spider_giant": {
+            "col": 2,
+            "row": 4,
+            "sheet": 10
+        },
+        "spider_small": {
+            "col": 0,
+            "row": 4,
+            "sheet": 10
+        },
+        "spider_weaver": {
+            "col": 1,
+            "row": 4,
+            "sheet": 10
+        },
+        "troll": {
+            "col": 0,
+            "row": 14,
+            "sheet": 6
+        },
+        "wolf": {
+            "col": 0,
+            "row": 1,
+            "sheet": 12
+        }
     }
 }
