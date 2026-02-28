@@ -9,7 +9,6 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
-#include "../Renderer/TileId.h"
 #include "../Systems/ContentRegistry.h"
 #include "MonsterCreator.h"
 
@@ -44,7 +43,7 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::GOBLIN,
 		{
-			.symbol = TILE_GOBLIN,
+	
 			.name = "goblin",
 			.color = YELLOW_BLACK_PAIR,
 			.corpse_name = "dead goblin",
@@ -74,7 +73,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::ORC,
 		{
-			.symbol = TILE_ORC,
 			.name = "orc",
 			.color = RED_BLACK_PAIR,
 			.corpse_name = "dead orc",
@@ -103,7 +101,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::TROLL,
 		{
-			.symbol = TILE_TROLL,
 			.name = "troll",
 			.color = GREEN_BLACK_PAIR,
 			.corpse_name = "dead troll",
@@ -132,7 +129,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::DRAGON,
 		{
-			.symbol = TILE_DRAGON,
 			.name = "dragon",
 			.color = RED_YELLOW_PAIR,
 			.corpse_name = "dead dragon",
@@ -161,7 +157,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::ARCHER,
 		{
-			.symbol = TILE_ARCHER,
 			.name = "archer",
 			.color = RED_BLACK_PAIR,
 			.corpse_name = "dead archer",
@@ -190,7 +185,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::MAGE,
 		{
-			.symbol = TILE_MAGE,
 			.name = "mage",
 			.color = WHITE_BLUE_PAIR,
 			.corpse_name = "dead mage",
@@ -219,7 +213,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::WOLF,
 		{
-			.symbol = TILE_WOLF,
 			.name = "wolf",
 			.color = BROWN_BLACK_PAIR,
 			.corpse_name = "dead wolf",
@@ -248,7 +241,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::FIRE_WOLF,
 		{
-			.symbol = TILE_FIRE_WOLF,
 			.name = "fire wolf",
 			.color = RED_YELLOW_PAIR,
 			.corpse_name = "charred wolf corpse",
@@ -277,7 +269,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::ICE_WOLF,
 		{
-			.symbol = TILE_ICE_WOLF,
 			.name = "ice wolf",
 			.color = CYAN_BLUE_PAIR,
 			.corpse_name = "frozen wolf corpse",
@@ -306,7 +297,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::BAT,
 		{
-			.symbol = TILE_BAT,
 			.name = "bat",
 			.color = MAGENTA_BLACK_PAIR,
 			.corpse_name = "dead bat",
@@ -335,7 +325,6 @@ const std::unordered_map<MonsterId, MonsterParams> s_registry = {
 	{
 		MonsterId::KOBOLD,
 		{
-			.symbol = TILE_KOBOLD,
 			.name = "kobold",
 			.color = RED_BLACK_PAIR,
 			.corpse_name = "dead kobold",

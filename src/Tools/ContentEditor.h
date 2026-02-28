@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-class Renderer;
+#include "../Renderer/Renderer.h"
 
 // ContentEditor -- developer tool for assigning sprite tiles to items and monsters.
 //
@@ -34,8 +34,8 @@ private:
 		int entity_key;
 	};
 
-	[[nodiscard]] int current_tile() const;
-	void assign_tile(int tile_id);
+	[[nodiscard]] TileRef current_tile() const;
+	void assign_tile(TileRef tile);
 
 	void draw_header(const Renderer& renderer);
 	void draw_list(const Renderer& renderer, int list_x, int list_y, int list_w, int list_h);

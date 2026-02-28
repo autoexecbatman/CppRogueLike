@@ -86,7 +86,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Renderer/InputSystem.h
     ${PROJECT_SOURCE_DIR}/Renderer/Panel.cpp
     ${PROJECT_SOURCE_DIR}/Renderer/Panel.h
-    ${PROJECT_SOURCE_DIR}/Renderer/TileId.h
 
     # Actor
     ${PROJECT_SOURCE_DIR}/Actor/Actor.cpp
@@ -266,6 +265,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.h
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.h
+    ${PROJECT_SOURCE_DIR}/Systems/TileConfig.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/TileConfig.h
 
     # Tools
     ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.cpp

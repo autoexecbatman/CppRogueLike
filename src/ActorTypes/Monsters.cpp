@@ -11,14 +11,15 @@
 #include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
+#include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Random/RandomDice.h"
-#include "../Renderer/TileId.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Utils/Vector2D.h"
 #include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
-	: Creature(position, ActorData{ TILE_MIMIC, "mimic", RED_YELLOW_PAIR })
+	: Creature(position, ActorData{ ContentRegistry::instance().get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
 {
 	const int hp = ctx.dice->d6() + ctx.dice->d4();
 	const int thaco = 17;
@@ -46,7 +47,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	{
 		const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
 		const auto& chosen = possibleDisguises.at(index);
-		actorData.ch = chosen.ch;
+		actorData.tile = chosen.tile;
 		actorData.name = chosen.name;
 		actorData.color = chosen.color;
 	}
@@ -60,11 +61,11 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 void Mimic::initDisguises()
 {
-	// Pull symbol/name/color directly from the item registry — single source of truth.
+	// Pull tile/name/color from registries — single source of truth.
 	auto from_item = [](ItemId id) -> Disguise
 	{
 		const auto& p = ItemCreator::get_params(id);
-		return { p.symbol, std::string(p.name), p.color };
+		return { ContentRegistry::instance().get_tile(id), std::string(p.name), p.color };
 	};
 
 	possibleDisguises = {

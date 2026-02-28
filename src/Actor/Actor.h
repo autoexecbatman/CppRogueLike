@@ -1,7 +1,7 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
-#include <ranges>
 #include <string>
 #include <vector>
 
@@ -12,19 +12,20 @@
 #include "../Colors/Colors.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
-#include "../Renderer/TileId.h"
+#include "../Renderer/Renderer.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/ShopKeeper.h"
 #include "../Utils/UniqueId.h"
 #include "../Utils/Vector2D.h"
+#include "EquipmentSlot.h"
 #include "InventoryData.h"
 
 struct GameContext;
-enum class EquipmentSlot;
 
 struct ActorData
 {
-	int ch{ 0 };
+	TileRef tile{};
 	std::string name{ "string" };
 	int color{ WHITE_BLACK_PAIR };
 };
@@ -48,7 +49,7 @@ class Actor : public Persistent
 public:
 	Vector2D position{ 0, 0 };
 	Vector2D direction{ 0, 0 };
-	ActorData actorData{ 0, "string", 0 };
+	ActorData actorData{ TileRef{}, "string", 0 };
 	UniqueId::IdType uniqueId{};
 	std::vector<ActorState> states;
 

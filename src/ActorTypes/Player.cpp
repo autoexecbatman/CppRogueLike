@@ -22,6 +22,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
+#include "../Systems/TileConfig.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
 
 using namespace InventoryOperations; // For clean function calls
@@ -47,7 +48,7 @@ constexpr auto matches_unique_id = [](uint64_t unique_id)
 } // namespace
 
 Player::Player(Vector2D position)
-	: Creature(position, ActorData{ TILE_PLAYER, "Player", WHITE_BLACK_PAIR })
+	: Creature(position, ActorData{ TileConfig::instance().get("TILE_PLAYER"), "Player", WHITE_BLACK_PAIR })
 {
 	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
 	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
@@ -918,7 +919,7 @@ void Player::load(const json& j)
 		for (const auto& itemEntry : j["equippedItems"])
 		{
 			EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
-			auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ 0, "temp", 0 });
+			auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
 			item->load(itemEntry["item"]);
 			equippedItems.emplace_back(std::move(item), slot);
 		}

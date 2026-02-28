@@ -1,13 +1,17 @@
 #pragma once
+#include <string>
+#include <vector>
 
 #include "../Actor/Actor.h"
+#include "../Renderer/Renderer.h"
+#include "../Utils/Vector2D.h"
 
 struct GameContext;
 
 // Disguise data for Mimic class
 struct Disguise
 {
-	int ch;
+	TileRef tile;
 	std::string name;
 	int color;
 };

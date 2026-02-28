@@ -3,13 +3,13 @@
 
 #include <vector>
 
-class Renderer;
+#include "../Renderer/Renderer.h"
 
 struct AnimEntry
 {
 	int world_x;
 	int world_y;
-	int tile_id;
+	TileRef tile;
 	unsigned char r, g, b;
 	float spawn_time;
 	float duration;
@@ -24,7 +24,7 @@ public:
 	void spawn_effect(
 		int world_x,
 		int world_y,
-		int tile_id,
+		TileRef tile,
 		unsigned char r,
 		unsigned char g,
 		unsigned char b,

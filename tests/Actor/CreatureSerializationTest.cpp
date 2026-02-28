@@ -17,7 +17,7 @@ protected:
     std::unique_ptr<Creature> create_test_creature() {
         auto creature = std::make_unique<Creature>(
             Vector2D{ 20, 10 },
-            ActorData{'g', "goblin", 1}
+            ActorData{TileRef{}, "goblin", 1}
         );
         creature->set_strength(14);
         creature->set_dexterity(12);
@@ -45,7 +45,7 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     original->save(j);
 
     // Load into new creature
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     // Verify position (Vector2D is {y, x})
@@ -77,7 +77,7 @@ TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     ASSERT_NE(loaded->destructible, nullptr);
@@ -93,7 +93,7 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     ASSERT_NE(loaded->destructible, nullptr);
@@ -102,7 +102,7 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
 
 TEST_F(CreatureSerializationTest, Creature_NoDestructible_HandledGracefully) {
     // Create creature without destructible
-    auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{'?', "mystery", 1});
+    auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", 1});
     // Don't add destructible
 
     json j;
@@ -111,7 +111,7 @@ TEST_F(CreatureSerializationTest, Creature_NoDestructible_HandledGracefully) {
     // Verify destructible section not in JSON
     EXPECT_FALSE(j.contains("destructible"));
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     // Should be null, not crash
@@ -124,7 +124,7 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     ASSERT_NE(loaded->attacker, nullptr);

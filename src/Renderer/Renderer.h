@@ -1,12 +1,86 @@
 #pragma once
 
 #include <array>
+#include <functional>
 #include <string>
 #include <unordered_map>
 
 #include <raylib.h>
 
-#include "TileId.h"
+// DawnLike sprite sheet indices.
+// Sheets with 0/1 suffixes are animation frame pairs.
+enum class TileSheet
+{
+	SHEET_FLOOR,
+	SHEET_WALL,
+	SHEET_DOOR0,
+	SHEET_DOOR1,
+	SHEET_PLAYER0,
+	SHEET_PLAYER1,
+	SHEET_HUMANOID0,
+	SHEET_HUMANOID1,
+	SHEET_REPTILE0,
+	SHEET_REPTILE1,
+	SHEET_PEST0,
+	SHEET_PEST1,
+	SHEET_DOG0,
+	SHEET_DOG1,
+	SHEET_AVIAN0,
+	SHEET_AVIAN1,
+	SHEET_UNDEAD0,
+	SHEET_UNDEAD1,
+	SHEET_QUADRAPED0,
+	SHEET_QUADRAPED1,
+	SHEET_DEMON0,
+	SHEET_DEMON1,
+	SHEET_MISC0,
+	SHEET_MISC1,
+	SHEET_POTION,
+	SHEET_SCROLL,
+	SHEET_SHORT_WEP,
+	SHEET_MED_WEP,
+	SHEET_LONG_WEP,
+	SHEET_ARMOR,
+	SHEET_SHIELD,
+	SHEET_HAT,
+	SHEET_RING,
+	SHEET_AMULET_ITEM,
+	SHEET_FOOD,
+	SHEET_FLESH,
+	SHEET_MONEY,
+	SHEET_TILE,
+	SHEET_DECOR0,
+	SHEET_DECOR1,
+	SHEET_EFFECT0,
+	SHEET_EFFECT1,
+	SHEET_PIT0,
+	SHEET_GUI0,
+	SHEET_GUI1,
+};
+
+template <>
+struct std::hash<TileSheet>
+{
+	std::size_t operator()(TileSheet s) const noexcept
+	{
+		return std::hash<int>{}(static_cast<int>(s));
+	}
+};
+
+// Unencoded tile reference: sheet + grid position.
+// Default-constructed TileRef (col == -1) means "no tile".
+struct TileRef
+{
+	TileSheet sheet{};
+	int col{ -1 };
+	int row{ -1 };
+
+	[[nodiscard]] bool is_valid() const noexcept { return col >= 0; }
+	[[nodiscard]] bool operator==(const TileRef& o) const noexcept
+	{
+		return sheet == o.sheet && col == o.col && row == o.row;
+	}
+};
 
 struct ScreenMetrics
 {
@@ -69,13 +143,13 @@ public:
 	void end_frame();
 
 	// World-space tile drawing (camera offset applied)
-	void draw_tile(int grid_x, int grid_y, int tile_id, int color_pair_id, Color tint) const;
+	void draw_tile(int grid_x, int grid_y, TileRef tile, int color_pair_id, Color tint) const;
 
 	// Screen-space drawing (no camera offset)
-	void draw_tile_screen(int px, int py, int tile_id) const;
+	void draw_tile_screen(int px, int py, TileRef tile) const;
 
 	// Screen-space drawing at an explicit pixel size (used by tile picker).
-	void draw_tile_screen_sized(int px, int py, int tile_id, int display_size) const;
+	void draw_tile_screen_sized(int px, int py, TileRef tile, int display_size) const;
 	void draw_text(int px, int py, std::string_view text, int color_pair_id) const;
 	void draw_text_color(int px, int py, std::string_view text, Color color) const;
 	void draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const;

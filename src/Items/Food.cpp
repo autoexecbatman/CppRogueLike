@@ -1,7 +1,8 @@
 #include "Food.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Renderer/TileId.h"
+#include "../Items/ItemClassification.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 
@@ -36,28 +37,28 @@ void Food::save(json& j)
 
 // Implementations for different food types
 Ration::Ration(Vector2D position)
-	: Item(position, ActorData{ TILE_FOOD, "ration", WHITE_GREEN_PAIR })
+	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::FOOD_RATION), "ration", WHITE_GREEN_PAIR })
 {
 	pickable = std::make_unique<Food>(300);
 	set_value(10);
 }
 
 Fruit::Fruit(Vector2D position)
-	: Item(position, ActorData{ TILE_FOOD, "fruit", GREEN_BLACK_PAIR })
+	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::FRUIT), "fruit", GREEN_BLACK_PAIR })
 {
 	pickable = std::make_unique<Food>(100);
 	set_value(3);
 }
 
 Bread::Bread(Vector2D position)
-	: Item(position, ActorData{ TILE_FOOD, "bread", RED_YELLOW_PAIR })
+	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::BREAD), "bread", RED_YELLOW_PAIR })
 {
 	pickable = std::make_unique<Food>(200);
 	set_value(5);
 }
 
 Meat::Meat(Vector2D position)
-	: Item(position, ActorData{ TILE_FOOD, "meat", RED_BLACK_PAIR })
+	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::MEAT), "meat", RED_BLACK_PAIR })
 {
 	pickable = std::make_unique<Food>(250);
 	set_value(8);

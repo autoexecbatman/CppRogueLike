@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include "../Combat/DamageInfo.h"
+#include "../Renderer/Renderer.h"
 
 // Forward declarations
 class Creature;
@@ -49,7 +50,7 @@ struct DiceExpr
 struct MonsterParams
 {
 	// Identity
-	int symbol{};
+	TileRef symbol{};
 	std::string name;
 	int color{ 0 };
 	std::string corpse_name;

@@ -10,7 +10,7 @@
 
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
-#include "../Renderer/TileId.h"
+#include "../Renderer/Renderer.h"
 #include "DecorEditor.h"
 #include "PrefabLibrary.h"
 
@@ -28,7 +28,7 @@ void PrefabLibrary::build_structural_symbols()
 
 	auto reg = [&](char sym, std::string label)
 	{
-		symbol_to_tile[sym] = 0;
+		symbol_to_tile[sym] = TileRef{};
 		symbol_to_label[sym] = label;
 		palette_order.emplace_back(sym, std::move(label));
 	};
@@ -60,13 +60,14 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 				continue;
 
 			char sym = sym_str[0];
-			int sheet = e.value("sheet", 0);
-			int col = e.value("col", 0);
-			int row = e.value("row", 0);
-			int tile_id = make_tile(static_cast<TileSheet>(sheet), col, row);
+			TileRef tile{
+				static_cast<TileSheet>(e.value("sheet", 0)),
+				e.value("col", -1),
+				e.value("row", -1)
+			};
 			std::string label = e.value("label", sym_str);
 
-			symbol_to_tile[sym] = tile_id;
+			symbol_to_tile[sym] = tile;
 			symbol_to_label[sym] = label;
 			palette_order.emplace_back(sym, label);
 		}
@@ -80,15 +81,15 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 // Public interface
 // ---------------------------------------------------------------------------
 
-int PrefabLibrary::resolve_decor(char c) const
+TileRef PrefabLibrary::resolve_decor(char c) const
 {
 	auto it = symbol_to_tile.find(c);
-	return (it != symbol_to_tile.end()) ? it->second : 0;
+	return (it != symbol_to_tile.end()) ? it->second : TileRef{};
 }
 
 bool PrefabLibrary::is_decoration(char c) const
 {
-	return resolve_decor(c) != 0;
+	return resolve_decor(c).is_valid();
 }
 
 std::string PrefabLibrary::symbol_label(char c) const
@@ -159,9 +160,9 @@ void PrefabLibrary::save(std::string_view path) const
 	out << j.dump(2);
 }
 
-void PrefabLibrary::set_symbol_tile(char sym, int tile_id)
+void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
 {
-	symbol_to_tile[sym] = tile_id;
+	symbol_to_tile[sym] = tile;
 }
 
 void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
@@ -299,8 +300,8 @@ void PrefabLibrary::apply_to_rooms(
 			for (int c = 0; c < static_cast<int>(row_str.size()); ++c)
 			{
 				char sym = row_str[c];
-				int tile_id = resolve_decor(sym);
-				if (tile_id == 0)
+				TileRef tile = resolve_decor(sym);
+				if (!tile.is_valid())
 					continue;
 
 				const int world_x = base_x + offset_x + c;
@@ -320,7 +321,7 @@ void PrefabLibrary::apply_to_rooms(
 				if (map.get_tile_type({ world_x, world_y }) != TileType::FLOOR)
 					continue;
 
-				editor.place_tile(world_x, world_y, tile_id);
+				editor.place_tile(world_x, world_y, tile);
 			}
 		}
 	}

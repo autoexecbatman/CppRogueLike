@@ -273,7 +273,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
 {
-	mimic.actorData.ch = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
+	mimic.actorData.tile = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
 	mimic.actorData.color = RED_YELLOW_PAIR;
 	mimic.actorData.name = "greater mimic";
 	ctx.message_system->log("Mimic transformed into greater mimic");
@@ -290,7 +290,7 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 	{
 		// Reveal true form!
 		isDisguised = false;
-		mimic.actorData.ch = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
+		mimic.actorData.tile = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
 		mimic.actorData.name = "mimic";
 		mimic.actorData.color = RED_YELLOW_PAIR;
 		mimic.add_state(ActorState::BLOCKS); // Now it's solid
@@ -342,7 +342,7 @@ void AiMimic::change_disguise(Mimic& mimic, GameContext& ctx)
 		const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
 		const auto& chosen = possibleDisguises.at(index);
 		// Apply the disguise
-		mimic.actorData.ch = chosen.ch;
+		mimic.actorData.tile = chosen.tile;
 		mimic.actorData.name = chosen.name;
 		mimic.actorData.color = chosen.color;
 	}

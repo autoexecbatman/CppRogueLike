@@ -19,12 +19,12 @@
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/ShopKeeper.h"
+#include "../Systems/TileConfig.h"
 #include "../Utils/UniqueId.h"
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
@@ -72,7 +72,12 @@ void Actor::load(const json& j)
 	position.y = j["position"]["y"];
 	direction.x = j["direction"]["x"];
 	direction.y = j["direction"]["y"];
-	actorData.ch = j["actorData"].at("ch").get<int>();
+	const auto& tileJ = j["actorData"].at("tile");
+	actorData.tile = TileRef{
+		static_cast<TileSheet>(tileJ.at("sheet").get<int>()),
+		tileJ.at("col").get<int>(),
+		tileJ.at("row").get<int>()
+	};
 	actorData.name = j["actorData"].at("name").get<std::string>();
 	actorData.color = j["actorData"].at("color").get<int>();
 	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
@@ -92,7 +97,7 @@ void Actor::save(json& j)
 	j["position"] = { { "y", position.y }, { "x", position.x } };
 	j["direction"] = { { "y", direction.y }, { "x", direction.x } };
 	j["actorData"] = {
-		{ "ch", actorData.ch },
+		{ "tile", { { "sheet", static_cast<int>(actorData.tile.sheet) }, { "col", actorData.tile.col }, { "row", actorData.tile.row } } },
 		{ "name", actorData.name },
 		{ "color", actorData.color }
 	};
@@ -119,7 +124,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 {
 	if (is_visible(ctx) && ctx.renderer)
 	{
-		int displayChar = actorData.ch;
+		TileRef displayTile = actorData.tile;
 		int displayColor = actorData.color;
 
 		// Check if this is an invisible creature (player hiding)
@@ -127,12 +132,12 @@ void Actor::render(const GameContext& ctx) const noexcept
 		{
 			if (creature->is_invisible())
 			{
-				displayChar = TILE_INVISIBLE;
+				displayTile = TileConfig::instance().get("TILE_INVISIBLE");
 				displayColor = CYAN_BLACK_PAIR;
 			}
 		}
 
-		ctx.renderer->draw_tile(position.x, position.y, displayChar, displayColor, Color{ 255, 255, 255, 255 });
+		ctx.renderer->draw_tile(position.x, position.y, displayTile, displayColor, Color{ 255, 255, 255, 255 });
 	}
 }
 
@@ -674,6 +679,6 @@ bool Item::is_enhanced() const noexcept
 }
 
 Stairs::Stairs(Vector2D position)
-	: Object(position, ActorData{ TILE_STAIRS, "stairs", WHITE_BLACK_PAIR }) {};
+	: Object(position, ActorData{ TileConfig::instance().get("TILE_STAIRS"), "stairs", WHITE_BLACK_PAIR }) {}
 
 // end of file: Actor.cpp

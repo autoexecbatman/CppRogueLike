@@ -23,7 +23,6 @@ using PickableType = Pickable::PickableType;
 struct ItemParams
 {
 	// Display & Classification
-	int symbol{ 0 };
 	std::string_view name{ "" };
 	int color{ 0 };
 	ItemClass itemClass{ ItemClass::UNKNOWN };

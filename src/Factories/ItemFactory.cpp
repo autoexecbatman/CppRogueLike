@@ -14,8 +14,8 @@
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
-#include "../Renderer/TileId.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
+#include "../Systems/TileConfig.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Utils/Vector2D.h"
@@ -157,7 +157,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
 	// Create gold pile
-	auto goldPile = std::make_unique<Item>(position, ActorData{ TILE_GOLD, "gold pile", YELLOW_BLACK_PAIR });
+	auto goldPile = std::make_unique<Item>(position, ActorData{ TileConfig::instance().get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
 	goldPile->pickable = std::make_unique<Gold>(goldAmount);
 	add_item(*ctx.inventory_data, std::move(goldPile));
 

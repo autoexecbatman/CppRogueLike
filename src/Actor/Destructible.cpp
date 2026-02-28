@@ -1,31 +1,30 @@
 ﻿// file: Destructible.cpp
 #include <algorithm>
 #include <format>
-#include <iostream>
+#include <memory>
 #include <string>
-#include <string_view>
 #include <unordered_map>
+#include <utility>
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Healer.h"
-#include "../ActorTypes/Player.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
-#include "../Attributes/StrengthAttributes.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
-#include "../Items/Armor.h"
 #include "../Items/CorpseFood.h"
-#include "../Items/Items.h"
-#include "../Items/Jewelry.h"
-#include "../Items/MagicalItemEffects.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/FloatingTextSystem.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/TileConfig.h"
+#include "Destructible.h"
+#include "EquipmentSlot.h"
 #include "Pickable.h"
 
 using namespace InventoryOperations; // For clean function calls
@@ -248,7 +247,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
-	corpse->actorData.ch = TILE_CORPSE;
+	corpse->actorData.tile = TileConfig::instance().get("TILE_CORPSE");
 	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
 
 	// Add the corpse to the floor items

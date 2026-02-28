@@ -9,6 +9,7 @@
 #include "Core/Paths.h"
 #include "Game.h"
 #include "Menu/Menu.h"
+#include "Systems/TileConfig.h"
 
 #ifdef EMSCRIPTEN
 struct LoopData
@@ -44,6 +45,9 @@ int main()
 	{
 		std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
 	}
+
+	// Load tile config before Game construction (Stairs ctor needs TILE_STAIRS)
+	TileConfig::instance().load(Paths::TILE_CONFIG);
 
 	// Game owns everything including Renderer and InputSystem
 	Game game;

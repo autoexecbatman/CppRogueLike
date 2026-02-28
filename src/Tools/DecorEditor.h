@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-class Renderer;
+#include "../Renderer/Renderer.h"
 
 // ---------------------------------------------------------------------------
 // DecorEditor -- in-game decoration placement and tile labeling tool.
@@ -37,7 +37,7 @@ public:
 
 	struct PaletteEntry
 	{
-		int tile_id{};
+		TileRef tile{};
 		std::string label;
 		char symbol{ 0 }; // 0 = no symbol (tile not usable in prefabs)
 	};
@@ -61,13 +61,13 @@ public:
 	[[nodiscard]] bool is_active() const { return active; }
 	[[nodiscard]] bool is_browser_open() const { return browser_open; }
 
-	[[nodiscard]] int get_override(int world_x, int world_y) const;
+	[[nodiscard]] TileRef get_override(int world_x, int world_y) const;
 
 	void place(int world_x, int world_y);
 	void erase(int world_x, int world_y);
 
 	// Direct tile placement bypassing the palette -- used by PrefabLibrary.
-	void place_tile(int world_x, int world_y, int tile_id);
+	void place_tile(int world_x, int world_y, TileRef tile);
 
 	[[nodiscard]] bool is_active_map_empty() const;
 
@@ -81,7 +81,7 @@ private:
 	std::string active_key;
 	std::string last_saved_key;
 
-	std::unordered_map<std::string, std::unordered_map<uint32_t, int>> all_overrides;
+	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> all_overrides;
 
 	// Dynamic palette -- loaded from tile_labels.json, editable at runtime.
 	std::vector<PaletteEntry> palette;
@@ -90,7 +90,7 @@ private:
 	bool browser_open{ false };
 	int browser_sheet{ 0 };
 	int browser_scroll{ 0 };
-	int browser_selected{ -1 }; // tile_id of selected tile, -1 = none
+	TileRef browser_selected{}; // selected tile, is_valid() == false means none
 
 	// Palette list panel state
 	int list_cursor{ -1 }; // selected palette index; -1 = none
@@ -109,8 +109,8 @@ private:
 		return (static_cast<uint32_t>(y) << 16) | static_cast<uint32_t>(x & 0xFFFF);
 	}
 
-	[[nodiscard]] std::unordered_map<uint32_t, int>& current_map();
-	[[nodiscard]] const std::unordered_map<uint32_t, int>& current_map() const;
+	[[nodiscard]] std::unordered_map<uint32_t, TileRef>& current_map();
+	[[nodiscard]] const std::unordered_map<uint32_t, TileRef>& current_map() const;
 
 	// Normal editor overlay
 	void draw_cursor(const Renderer& renderer, int world_x, int world_y) const;
@@ -121,7 +121,7 @@ private:
 	void update_browser(const Renderer& renderer, std::string_view palette_path);
 
 	// Palette helpers
-	[[nodiscard]] int palette_find(int tile_id) const;
-	void palette_add_or_update(int tile_id, std::string_view label, char symbol);
-	void palette_remove(int tile_id);
+	[[nodiscard]] int palette_find(TileRef tile) const;
+	void palette_add_or_update(TileRef tile, std::string_view label, char symbol);
+	void palette_remove(TileRef tile);
 };

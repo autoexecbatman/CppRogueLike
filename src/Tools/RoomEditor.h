@@ -20,10 +20,11 @@
 #include <string>
 #include <vector>
 
+#include "../Renderer/Renderer.h"
+
 class PrefabLibrary;
 struct Prefab;
 struct GameContext;
-class Renderer;
 
 class RoomEditor
 {
@@ -132,11 +133,11 @@ private:
 	// Returns palette index from screen pixel in left panel, -1 if none.
 	[[nodiscard]] int screen_to_palette_index(const Renderer& r, int mouse_px, int mouse_py) const;
 
-	// Tile id to draw for a symbol in the canvas and palette.
-	[[nodiscard]] int symbol_tile_id(char sym) const;
+	// Tile to draw for a symbol in the canvas and palette.
+	[[nodiscard]] TileRef symbol_tile_id(char sym) const;
 
-	// Position-aware tile id that resolves wall/floor auto-tiling.
-	[[nodiscard]] int canvas_tile_id(int col, int row) const;
+	// Position-aware tile that resolves wall/floor auto-tiling.
+	[[nodiscard]] TileRef canvas_tile_id(int col, int row) const;
 
 	// 4-bit NESW bitmask: neighbour is '#' (or out-of-bounds) = wall.
 	[[nodiscard]] int canvas_wall_mask(int col, int row) const;

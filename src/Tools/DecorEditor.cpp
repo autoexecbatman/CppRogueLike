@@ -15,7 +15,6 @@
 
 #include "../Core/Paths.h"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
 #include "DecorEditor.h"
 
 using json = nlohmann::json;
@@ -28,22 +27,22 @@ DecorEditor::DecorEditor() = default;
 // Palette helpers
 // ---------------------------------------------------------------------------
 
-int DecorEditor::palette_find(int tile_id) const
+int DecorEditor::palette_find(TileRef tile) const
 {
 	for (int i = 0; i < static_cast<int>(palette.size()); ++i)
 	{
-		if (palette[i].tile_id == tile_id)
+		if (palette[i].tile == tile)
 			return i;
 	}
 	return -1;
 }
 
 void DecorEditor::palette_add_or_update(
-	int tile_id,
+	TileRef tile,
 	std::string_view label,
 	char symbol)
 {
-	int idx = palette_find(tile_id);
+	int idx = palette_find(tile);
 	if (idx >= 0)
 	{
 		palette[idx].label = label;
@@ -51,29 +50,29 @@ void DecorEditor::palette_add_or_update(
 	}
 	else
 	{
-		palette.push_back({ tile_id, std::string(label), symbol });
+		palette.push_back({ tile, std::string(label), symbol });
 	}
 }
 
-void DecorEditor::palette_remove(int tile_id)
+void DecorEditor::palette_remove(TileRef tile)
 {
-	std::erase_if(palette, [tile_id](const PaletteEntry& e)
-		{ return e.tile_id == tile_id; });
+	std::erase_if(palette, [tile](const PaletteEntry& e)
+		{ return e.tile == tile; });
 	if (palette_index >= static_cast<int>(palette.size()))
 		palette_index = std::max(0, static_cast<int>(palette.size()) - 1);
 }
 
 // ---------------------------------------------------------------------------
 // nlohmann serialization for PaletteEntry
-// tile_id is stored as human-readable sheet/col/row rather than raw int.
+// tile is stored as human-readable sheet/col/row.
 // ---------------------------------------------------------------------------
 
 static void to_json(json& j, const DecorEditor::PaletteEntry& e)
 {
 	j = {
-		{ "sheet", tile_sheet(e.tile_id) },
-		{ "col", tile_col(e.tile_id) },
-		{ "row", tile_row(e.tile_id) },
+		{ "sheet", static_cast<int>(e.tile.sheet) },
+		{ "col", e.tile.col },
+		{ "row", e.tile.row },
 		{ "label", e.label },
 		{ "symbol", e.symbol ? std::string(1, e.symbol) : std::string{} }
 	};
@@ -81,10 +80,11 @@ static void to_json(json& j, const DecorEditor::PaletteEntry& e)
 
 static void from_json(const json& j, DecorEditor::PaletteEntry& e)
 {
-	e.tile_id = make_tile(
+	e.tile = TileRef{
 		static_cast<TileSheet>(j.value("sheet", 0)),
-		j.value("col", 0),
-		j.value("row", 0));
+		j.value("col", -1),
+		j.value("row", -1)
+	};
 	e.label = j.value("label", "");
 	std::string sym = j.value("symbol", "");
 	e.symbol = sym.empty() ? 0 : sym[0];
@@ -148,11 +148,19 @@ void DecorEditor::save(std::string_view path) const
 	for (const auto& [map_key, tile_map] : all_overrides)
 	{
 		json arr = json::array();
-		for (const auto& [coord_key, tile_id] : tile_map)
+		for (const auto& [coord_key, tile] : tile_map)
 		{
 			int x = static_cast<int>(coord_key & 0xFFFF);
 			int y = static_cast<int>((coord_key >> 16) & 0xFFFF);
-			arr.push_back({ { "x", x }, { "y", y }, { "tile", tile_id } });
+			arr.push_back({
+				{ "x", x },
+				{ "y", y },
+				{ "tile", {
+					{ "sheet", static_cast<int>(tile.sheet) },
+					{ "col", tile.col },
+					{ "row", tile.row }
+				}}
+			});
 		}
 		j[map_key] = arr;
 	}
@@ -196,8 +204,13 @@ void DecorEditor::load(std::string_view path)
 			{
 				int x = entry["x"].get<int>();
 				int y = entry["y"].get<int>();
-				int tile_id = entry["tile"].get<int>();
-				tile_map[make_key(x, y)] = tile_id;
+				const auto& t = entry["tile"];
+				TileRef tile{
+					static_cast<TileSheet>(t.value("sheet", 0)),
+					t.value("col", -1),
+					t.value("row", -1)
+				};
+				tile_map[make_key(x, y)] = tile;
 			}
 		}
 	}
@@ -242,7 +255,7 @@ void DecorEditor::place(int world_x, int world_y)
 {
 	if (palette.empty())
 		return;
-	current_map()[make_key(world_x, world_y)] = palette[palette_index].tile_id;
+	current_map()[make_key(world_x, world_y)] = palette[palette_index].tile;
 }
 
 void DecorEditor::erase(int world_x, int world_y)
@@ -250,9 +263,9 @@ void DecorEditor::erase(int world_x, int world_y)
 	current_map().erase(make_key(world_x, world_y));
 }
 
-void DecorEditor::place_tile(int world_x, int world_y, int tile_id)
+void DecorEditor::place_tile(int world_x, int world_y, TileRef tile)
 {
-	current_map()[make_key(world_x, world_y)] = tile_id;
+	current_map()[make_key(world_x, world_y)] = tile;
 }
 
 bool DecorEditor::is_active_map_empty() const
@@ -260,25 +273,25 @@ bool DecorEditor::is_active_map_empty() const
 	return current_map().empty();
 }
 
-int DecorEditor::get_override(int world_x, int world_y) const
+TileRef DecorEditor::get_override(int world_x, int world_y) const
 {
 	const auto& m = current_map();
 	auto it = m.find(make_key(world_x, world_y));
-	return (it != m.end()) ? it->second : 0;
+	return (it != m.end()) ? it->second : TileRef{};
 }
 
-std::unordered_map<uint32_t, int>& DecorEditor::current_map()
+std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map()
 {
 	return all_overrides[active_key];
 }
 
-const std::unordered_map<uint32_t, int>& DecorEditor::current_map() const
+const std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map() const
 {
 	auto it = all_overrides.find(active_key);
 	if (it != all_overrides.end())
 		return it->second;
 
-	static const std::unordered_map<uint32_t, int> empty;
+	static const std::unordered_map<uint32_t, TileRef> empty;
 	return empty;
 }
 
@@ -303,8 +316,6 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 
 	if (browser_open)
 	{
-		// Determine the palette path for auto-save (passed from caller via Paths)
-		// We use a fixed path here matching what main.cpp uses.
 		update_browser(renderer, "data/tile_labels.json");
 		return;
 	}
@@ -342,7 +353,7 @@ void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y
 	DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 60 });
 	DrawRectangleLines(px, py, tile_size, tile_size, Color{ 255, 255, 0, 220 });
 
-	renderer.draw_tile(world_x, world_y, palette[palette_index].tile_id, 0, Color{ 255, 255, 255, 180 });
+	renderer.draw_tile(world_x, world_y, palette[palette_index].tile, 0, Color{ 255, 255, 255, 180 });
 }
 
 void DecorEditor::draw_palette_strip(const Renderer& renderer) const
@@ -373,7 +384,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 		if (is_current)
 			DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 80 });
 
-		renderer.draw_tile_screen(px, py, palette[idx].tile_id);
+		renderer.draw_tile_screen(px, py, palette[idx].tile);
 
 		if (is_current)
 			DrawRectangleLines(px, py, tile_size, tile_size, Color{ 255, 255, 0, 255 });
@@ -441,7 +452,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				break;
 		}
 		browser_scroll = 0;
-		browser_selected = -1;
+		browser_selected = TileRef{};
 		editing = false;
 	};
 
@@ -513,10 +524,10 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		return s;
 	};
 
-	// Single point that opens the edit panel for any tile_id.
+	// Single point that opens the edit panel for any TileRef.
 	// Looks up whether the tile is already in the palette and initialises
 	// all editing state from that one source.
-	auto begin_edit = [this, &renderer](int tid)
+	auto begin_edit = [this, &renderer](TileRef tid)
 	{
 		browser_selected = tid;
 		int pi = palette_find(tid);
@@ -530,9 +541,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		{
 			list_cursor = -1;
 			label_buf = std::format("{} {},{}",
-				renderer.get_sheet_name(static_cast<TileSheet>(tile_sheet(tid))),
-				tile_col(tid),
-				tile_row(tid));
+				renderer.get_sheet_name(tid.sheet),
+				tid.col,
+				tid.row);
 			sym_buf = 0;
 		}
 		editing = true;
@@ -559,7 +570,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		renderer.draw_tile_screen_sized(
 			PAD,
 			iy + (LIST_ITEM_H - LIST_TILE) / 2,
-			palette[i].tile_id,
+			palette[i].tile,
 			LIST_TILE);
 
 		// Label -- show live edit buffer inline when this row is being renamed.
@@ -599,10 +610,10 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 
 			if (del_hot && clicked)
 			{
-				palette_remove(palette[i].tile_id);
+				palette_remove(palette[i].tile);
 				save_palette(palette_path);
 				list_cursor = -1;
-				browser_selected = -1;
+				browser_selected = TileRef{};
 				editing = false;
 				break; // vector modified -- exit loop safely
 			}
@@ -611,13 +622,12 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		// Entry click (outside [X] button) -- navigate browser to tile's sheet then edit.
 		if (hovered && clicked && mouse.x < del_x)
 		{
-			int entry_sheet = tile_sheet(palette[i].tile_id);
-			if (renderer.sheet_is_loaded(static_cast<TileSheet>(entry_sheet)))
+			if (renderer.sheet_is_loaded(palette[i].tile.sheet))
 			{
-				browser_sheet = entry_sheet;
-				browser_scroll = std::max(0, tile_row(palette[i].tile_id) - 2);
+				browser_sheet = static_cast<int>(palette[i].tile.sheet);
+				browser_scroll = std::max(0, palette[i].tile.row - 2);
 			}
-			begin_edit(palette[i].tile_id);
+			begin_edit(palette[i].tile);
 		}
 	}
 	EndScissorMode();
@@ -644,7 +654,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = LIST_W + PAD + col * (BROWSER_TILE + 2);
-			int tid = make_tile(static_cast<TileSheet>(browser_sheet), col, row);
+			TileRef tid{ static_cast<TileSheet>(browser_sheet), col, row };
 
 			bool is_sel = (tid == browser_selected);
 			bool in_pal = (palette_find(tid) >= 0);
@@ -689,12 +699,12 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	EndScissorMode();
 
 	// Delete key
-	if (browser_selected >= 0 && IsKeyPressed(KEY_DELETE))
+	if (browser_selected.is_valid() && IsKeyPressed(KEY_DELETE))
 	{
 		palette_remove(browser_selected);
 		save_palette(palette_path);
 		editing = false;
-		browser_selected = -1;
+		browser_selected = TileRef{};
 		list_cursor = -1;
 	}
 
@@ -716,10 +726,10 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		// Sprite info (read-only -- set by clicking in browser)
 		std::string sprite_info = std::format(
 			"Sprite: {} sheet:{} col:{} row:{}",
-			renderer.get_sheet_name(static_cast<TileSheet>(tile_sheet(browser_selected))),
-			tile_sheet(browser_selected),
-			tile_col(browser_selected),
-			tile_row(browser_selected));
+			renderer.get_sheet_name(browser_selected.sheet),
+			static_cast<int>(browser_selected.sheet),
+			browser_selected.col,
+			browser_selected.row);
 		Color sprite_col = list_cursor >= 0
 			? Color{ 255, 180, 80, 255 }
 			: Color{ 140, 200, 255, 255 };
@@ -752,7 +762,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		if (IsKeyPressed(KEY_ESCAPE))
 		{
 			editing = false;
-			browser_selected = -1;
+			browser_selected = TileRef{};
 			list_cursor = -1;
 			label_all_selected = false;
 		}

@@ -14,8 +14,8 @@
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
 #include "../Systems/HungerSystem.h"
+#include "../Systems/TileConfig.h"
 #include "../Systems/MessageSystem.h"
 #include "Gui.h"
 #include "LogMessage.h"
@@ -87,32 +87,33 @@ void Gui::gui_render(const GameContext& ctx)
 	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
-	ctx.renderer->draw_tile_screen(0, baseY, GUI_FRAME_TL);
+	auto& tc = TileConfig::instance();
+	ctx.renderer->draw_tile_screen(0, baseY, tc.get("GUI_FRAME_TL"));
 	for (int col = 1; col < vcols - 1; ++col)
 	{
-		ctx.renderer->draw_tile_screen(col * ts, baseY, GUI_FRAME_T);
+		ctx.renderer->draw_tile_screen(col * ts, baseY, tc.get("GUI_FRAME_T"));
 	}
-	ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY, GUI_FRAME_TR);
+	ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY, tc.get("GUI_FRAME_TR"));
 
 	// ---- Left and right outer edges ---------------------------------------
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(0, baseY + row * ts, GUI_FRAME_L);
-		ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY + row * ts, GUI_FRAME_R);
+		ctx.renderer->draw_tile_screen(0, baseY + row * ts, tc.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen((vcols - 1) * ts, baseY + row * ts, tc.get("GUI_FRAME_R"));
 	}
 
 	// ---- Divider 1: bar panel | stat panel --------------------------------
-	ctx.renderer->draw_tile_screen(div1 * ts, baseY, GUI_FRAME_T);
+	ctx.renderer->draw_tile_screen(div1 * ts, baseY, tc.get("GUI_FRAME_T"));
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(div1 * ts, baseY + row * ts, GUI_FRAME_L);
+		ctx.renderer->draw_tile_screen(div1 * ts, baseY + row * ts, tc.get("GUI_FRAME_L"));
 	}
 
 	// ---- Divider 2: stat panel | log panel --------------------------------
-	ctx.renderer->draw_tile_screen(div2 * ts, baseY, GUI_FRAME_T);
+	ctx.renderer->draw_tile_screen(div2 * ts, baseY, tc.get("GUI_FRAME_T"));
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(div2 * ts, baseY + row * ts, GUI_FRAME_L);
+		ctx.renderer->draw_tile_screen(div2 * ts, baseY + row * ts, tc.get("GUI_FRAME_L"));
 	}
 
 	// ---- Panel content ----------------------------------------------------
@@ -149,7 +150,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Heart icon at col 1
-	ctx.renderer->draw_tile_screen(1 * ts, rowY, GUI_HEART_FULL);
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, TileConfig::instance().get("GUI_HEART_FULL"));
 
 	// Bar: col 2 to div1-1
 	const int barX = 2 * ts;
@@ -210,7 +211,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Food icon at col 1 (from the Items/Food sheet)
-	ctx.renderer->draw_tile_screen(1 * ts, rowY, make_tile(TileSheet::SHEET_FOOD, 0, 0));
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, TileRef{ TileSheet::SHEET_FOOD, 0, 0 });
 
 	// Bar: col 2 to div1-1
 	const int barX = 2 * ts;

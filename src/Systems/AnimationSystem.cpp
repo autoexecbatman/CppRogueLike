@@ -4,14 +4,14 @@
 #include <algorithm>
 
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
+#include "TileConfig.h"
 
 void AnimationSystem::spawn_melee_hit(int world_x, int world_y)
 {
 	entries.push_back(AnimEntry{
 		.world_x = world_x,
 		.world_y = world_y,
-		.tile_id = TILE_EFFECT_BLOOD,
+		.tile = TileConfig::instance().get("TILE_EFFECT_BLOOD"),
 		.r = 255,
 		.g = 60,
 		.b = 60,
@@ -24,7 +24,7 @@ void AnimationSystem::spawn_death(int world_x, int world_y)
 	entries.push_back(AnimEntry{
 		.world_x = world_x,
 		.world_y = world_y,
-		.tile_id = TILE_EFFECT_BLOOD,
+		.tile = TileConfig::instance().get("TILE_EFFECT_BLOOD"),
 		.r = 200,
 		.g = 0,
 		.b = 0,
@@ -35,7 +35,7 @@ void AnimationSystem::spawn_death(int world_x, int world_y)
 void AnimationSystem::spawn_effect(
 	int world_x,
 	int world_y,
-	int tile_id,
+	TileRef tile,
 	unsigned char r,
 	unsigned char g,
 	unsigned char b,
@@ -44,7 +44,7 @@ void AnimationSystem::spawn_effect(
 	entries.push_back(AnimEntry{
 		.world_x = world_x,
 		.world_y = world_y,
-		.tile_id = tile_id,
+		.tile = tile,
 		.r = r,
 		.g = g,
 		.b = b,
@@ -75,7 +75,7 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
 		Color tint{ e.r, e.g, e.b, alpha };
-		renderer.draw_tile(e.world_x, e.world_y, e.tile_id, 0, tint);
+		renderer.draw_tile(e.world_x, e.world_y, e.tile, 0, tint);
 	}
 
 	std::erase_if(entries, is_expired);

@@ -19,6 +19,7 @@ inline constexpr std::string_view PREFABS = "data/prefabs.json";
 inline constexpr std::string_view DECOR_OVERRIDES = "data/decor_overrides.json";
 inline constexpr std::string_view TILE_LABELS = "data/tile_labels.json";
 inline constexpr std::string_view CONTENT_TILES = "data/content/tiles.json";
+inline constexpr std::string_view TILE_CONFIG = "data/tiles/tile_config.json";
 
 // Walks upward from cwd until a directory containing "data/" is found,
 // then resolves 'relative' against that root.

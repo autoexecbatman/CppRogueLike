@@ -1,18 +1,23 @@
 #include <cmath>
+#include <vector>
 
+#include <raylib.h>
+
+#include "../Actor/Actor.h"
+#include "../Actor/EquipmentSlot.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Gui/Gui.h"
 #include "../Items/ItemClassification.h"
+#include "../Map/Map.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/CreatureManager.h"
-#include "../Systems/DataManager.h"
-#include "../Systems/InputHandler.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Utils/Vector2D.h"
 #include "TargetingSystem.h"
+#include "TargetMode.h"
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
 {

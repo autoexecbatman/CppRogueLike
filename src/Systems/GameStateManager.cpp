@@ -82,7 +82,7 @@ void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creat
 	{
 		for (const auto& creatureData : j["creatures"])
 		{
-			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
+			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", WHITE_BLACK_PAIR });
 			creature->load(creatureData);
 			creatures.push_back(std::move(creature));
 		}

@@ -1,15 +1,19 @@
 #pragma once
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "../Actor/Actor.h"
-#include "../Map/Map.h"
+#include "../Actor/EquipmentSlot.h"
 #include "../Objects/Web.h"
-#include "../Random/RandomDice.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/SpellSystem.h"
+#include "../Utils/Vector2D.h"
 
 class Item;
 struct GameContext;
-
-#include "../Actor/EquipmentSlot.h"
 
 struct EquippedItem
 {

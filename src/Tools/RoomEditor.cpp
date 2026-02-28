@@ -11,7 +11,7 @@
 #include "../Core/Paths.h"
 #include "../Menu/Menu.h"
 #include "../Renderer/Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
-#include "../Renderer/TileId.h"
+#include "../Systems/TileConfig.h"
 #include "PrefabLibrary.h"
 #include "RoomEditor.h"
 
@@ -593,24 +593,25 @@ char RoomEditor::selected_sym() const
 	return pal[palette_index].first;
 }
 
-int RoomEditor::symbol_tile_id(char sym) const
+TileRef RoomEditor::symbol_tile_id(char sym) const
 {
+	auto& tc = TileConfig::instance();
 	switch (sym)
 	{
 	case '#':
-		return TILE_WALL_STONE;
+		return tc.get("TILE_WALL_STONE");
 	case '.':
-		return TILE_FLOOR_STONE;
+		return tc.get("TILE_FLOOR_STONE");
 	case ',':
-		return TILE_CORRIDOR;
+		return tc.get("TILE_CORRIDOR");
 	case '+':
-		return TILE_DOOR_CLOSED;
+		return tc.get("TILE_DOOR_CLOSED");
 	case '~':
-		return TILE_WATER;
+		return tc.get("TILE_WATER");
 	default:
 		if (library)
 			return library->resolve_decor(sym);
-		return 0;
+		return TileRef{};
 	}
 }
 
@@ -631,12 +632,12 @@ int RoomEditor::canvas_wall_mask(int col, int row) const
 	return (n ? 8 : 0) | (e ? 4 : 0) | (s ? 2 : 0) | (w ? 1 : 0);
 }
 
-int RoomEditor::canvas_tile_id(int col, int row) const
+TileRef RoomEditor::canvas_tile_id(int col, int row) const
 {
 	char sym = canvas[row][col];
 
 	if (sym == '#')
-		return wall_autotile_resolve_mask(WALL_AUTOTILE_STONE, canvas_wall_mask(col, row));
+		return wall_autotile_resolve_mask(TileConfig::instance().get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
 
 	if (sym == '.')
 	{
@@ -647,7 +648,7 @@ int RoomEditor::canvas_tile_id(int col, int row) const
 			return canvas[r][c] == '.';
 		};
 		return autotile_resolve(
-			AUTOTILE_FLOOR_STONE,
+			TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
 			is_floor(col, row - 1),
 			is_floor(col + 1, row),
 			is_floor(col, row + 1),
@@ -739,14 +740,14 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 		if (selected)
 			DrawRectangle(0, py, panel_w, ts, Color{ 60, 60, 100, 200 });
 
-		int tile_id = symbol_tile_id(sym);
+		TileRef tile = symbol_tile_id(sym);
 		bool is_structural = (sym == '#' || sym == '.' || sym == ',' ||
 			sym == '+' || sym == '~');
 
 		if (is_structural)
 		{
-			if (tile_id != 0)
-				r.draw_tile_screen(2, py, tile_id);
+			if (tile.is_valid())
+				r.draw_tile_screen(2, py, tile);
 			else
 			{
 				Color block{};
@@ -768,8 +769,8 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 		else
 		{
 			DrawRectangle(2, py, ts, ts, Color{ 70, 58, 42, 255 });
-			if (tile_id != 0)
-				r.draw_tile_screen(2, py, tile_id);
+			if (tile.is_valid())
+				r.draw_tile_screen(2, py, tile);
 		}
 
 		// Label
@@ -813,9 +814,9 @@ void RoomEditor::render_canvas(const Renderer& r) const
 			int py = area_y + row * ts - pan_y;
 
 			// Base layer (structural)
-			int base_tile_id = canvas_tile_id(col, row);
-			if (base_tile_id != 0)
-				r.draw_tile_screen(px, py, base_tile_id);
+			TileRef base_tile = canvas_tile_id(col, row);
+			if (base_tile.is_valid())
+				r.draw_tile_screen(px, py, base_tile);
 			else
 				DrawRectangle(px, py, ts, ts, FLOOR_BG);
 
@@ -828,9 +829,9 @@ void RoomEditor::render_canvas(const Renderer& r) const
 
 			if (decor_sym != ' ')
 			{
-				int decor_tile_id = symbol_tile_id(decor_sym);
-				if (decor_tile_id != 0)
-					r.draw_tile_screen(px, py, decor_tile_id);
+				TileRef decor_tile = symbol_tile_id(decor_sym);
+				if (decor_tile.is_valid())
+					r.draw_tile_screen(px, py, decor_tile);
 			}
 
 			DrawRectangleLines(px, py, ts, ts, GRID_COLOR);
@@ -1024,8 +1025,8 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 		if (palette_index >= 0 && palette_index < static_cast<int>(pal.size()))
 		{
 			char sym = pal[palette_index].first;
-			int tile_id = make_tile(sheet_id, picker_col, picker_row);
-			library->set_symbol_tile(sym, tile_id);
+			TileRef tile{ sheet_id, picker_col, picker_row };
+			library->set_symbol_tile(sym, tile);
 			library->save(Paths::PREFABS);
 			set_status(std::format("'{}' -> tile ({},{}) sheet {}", sym, picker_col, picker_row, PICKER_SHEET_NAMES[picker_sheet_list_idx]));
 		}
@@ -1064,37 +1065,12 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 		{
 			int px = off_x + col * PICK_TS;
 			int py = off_y + row * PICK_TS;
-			int tile_id = make_tile(sheet_id, col, row);
+			TileRef tile_ref{ sheet_id, col, row };
 
 			// Dark bg so decor tiles are visible
 			DrawRectangle(px, py, PICK_TS, PICK_TS, Color{ 20, 16, 12, 255 });
 
-			// Draw at fixed PICK_TS size -- use a manual DrawTexturePro call
-			// through the tile_id so we stay consistent with Renderer's sheet.
-			// We have draw_tile_screen which uses current tile_size; instead
-			// we call r.draw_tile_screen and scale using scissor trick.
-			// Simplest: just use r.draw_tile_screen at current tile_size and
-			// then undo -- but tile_size might differ.  Use a small wrapper:
-			// draw at native scaled to PICK_TS manually.
-
-			// For simplicity rely on r.draw_tile_screen at current tile_size;
-			// if tile_size != PICK_TS the tiles will be wrong size.
-			// Instead: direct DrawTexturePro using make_tile decomposition.
-			Rectangle src = {
-				static_cast<float>(tile_col(tile_id) * SPRITE_SIZE),
-				static_cast<float>(tile_row(tile_id) * SPRITE_SIZE),
-				static_cast<float>(SPRITE_SIZE),
-				static_cast<float>(SPRITE_SIZE)
-			};
-			Rectangle dst = {
-				static_cast<float>(px),
-				static_cast<float>(py),
-				static_cast<float>(PICK_TS),
-				static_cast<float>(PICK_TS)
-			};
-			(void)src;
-			(void)dst;
-			r.draw_tile_screen_sized(px, py, tile_id, PICK_TS);
+			r.draw_tile_screen_sized(px, py, tile_ref, PICK_TS);
 
 			// Selected cell highlight
 			if (col == picker_col && row == picker_row)
@@ -1116,13 +1092,12 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 
 	std::string header = std::format(
 		"TILE PICKER  |  {}  |  Sheet {}/{}  [Tab=next  Shift+Tab=prev]  "
-		"|  col={} row={}  tile_id={}  |  [Enter]=assign  [Esc]=cancel",
+		"|  col={} row={}  |  [Enter]=assign  [Esc]=cancel",
 		sym_info,
 		picker_sheet_list_idx + 1,
 		PICKER_SHEET_COUNT,
 		picker_col,
-		picker_row,
-		make_tile(sheet_id, picker_col, picker_row));
+		picker_row);
 
 	DrawRectangle(0, 0, sw, 40, Color{ 20, 20, 35, 240 });
 	r.draw_text_color(8, 10, header, Color{ 220, 220, 255, 255 });

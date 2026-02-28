@@ -17,6 +17,8 @@
 #include <utility>
 #include <vector>
 
+#include "../Renderer/Renderer.h"
+
 class DecorEditor;
 class Map;
 struct DungeonRoom;
@@ -53,8 +55,8 @@ public:
 	int count() const { return static_cast<int>(prefabs.size()); }
 	const std::vector<Prefab>& all() const { return prefabs; }
 
-	// Returns decoration tile_id for symbol, 0 for structural symbols (wall/floor/corridor/door/water).
-	int resolve_decor(char c) const;
+	// Returns decoration TileRef for symbol; invalid TileRef for structural symbols (wall/floor/corridor/door/water).
+	TileRef resolve_decor(char c) const;
 
 	// Returns true if symbol maps to a decoration (has a sprite to overlay).
 	bool is_decoration(char c) const;
@@ -66,7 +68,7 @@ public:
 	const std::vector<std::pair<char, std::string>>& ordered_palette() const { return palette_order; }
 
 	// Overwrite the tile sprite assigned to a symbol in the map.
-	void set_symbol_tile(char sym, int tile_id);
+	void set_symbol_tile(char sym, TileRef tile);
 
 	// Overwrite the display label for a symbol.
 	void set_symbol_label(char sym, const std::string& label);
@@ -82,7 +84,7 @@ public:
 
 private:
 	std::vector<Prefab> prefabs;
-	std::unordered_map<char, int> symbol_to_tile; // char -> tile_id (0 = structural)
+	std::unordered_map<char, TileRef> symbol_to_tile; // char -> tile (invalid = structural)
 	std::unordered_map<char, std::string> symbol_to_label;
 	std::vector<std::pair<char, std::string>> palette_order; // stable display order
 

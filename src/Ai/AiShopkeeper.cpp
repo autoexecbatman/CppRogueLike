@@ -1,13 +1,18 @@
 // file: AiShopkeeper.cpp
-#include "AiShopkeeper.h"
+#include <memory>
+#include <string>
+#include <vector>
+
 #include "../Actor/Actor.h"
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
-#include "../Items/Items.h"
+#include "../Map/Map.h"
 #include "../Menu/MenuTrade.h"
-#include "../Random/RandomDice.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
+#include "Ai.h"
+#include "AiShopkeeper.h"
 
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MAX_TRADE_DISTANCE = 1; // Maximum distance to initiate a trade (adjacent only - no diagonals)

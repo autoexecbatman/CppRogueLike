@@ -18,6 +18,7 @@
 #include "../Items/ItemClassification.h"
 #include "../Items/Jewelry.h"
 #include "../Random/RandomDice.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Utils/Vector2D.h"
@@ -139,8 +140,8 @@ std::unique_ptr<Pickable> create_pickable_from_blueprint(ItemId itemId, const It
 std::unique_ptr<Item> create_from_blueprint(Vector2D pos, ItemId itemId)
 {
 	const auto& params = ItemRegistry.at(itemId);
-	int tile_id = ContentRegistry::instance().get_tile(itemId);
-	auto item = std::make_unique<Item>(pos, ActorData{ tile_id, std::string{ params.name }, params.color });
+	TileRef tile = ContentRegistry::instance().get_tile(itemId);
+	auto item = std::make_unique<Item>(pos, ActorData{ tile, std::string{ params.name }, params.color });
 	item->pickable = create_pickable_from_blueprint(itemId, params);
 	item->itemId = itemId;
 	item->itemClass = params.itemClass;
@@ -172,7 +173,7 @@ std::unique_ptr<Item> ItemCreator::create(ItemId itemId, Vector2D pos)
 std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount)
 {
 	const auto& params = ItemRegistry.at(ItemId::GOLD_COIN);
-	auto item = std::make_unique<Item>(pos, ActorData{ params.symbol, std::string{ params.name }, params.color });
+	auto item = std::make_unique<Item>(pos, ActorData{ ContentRegistry::instance().get_tile(ItemId::GOLD_COIN), std::string{ params.name }, params.color });
 	item->pickable = std::make_unique<Gold>(goldAmount);
 	item->itemId = ItemId::GOLD_COIN;
 	item->itemClass = params.itemClass;

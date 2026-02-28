@@ -8,7 +8,6 @@
 #include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/ContentRegistryIO.h"
 #include "ContentEditor.h"
@@ -177,27 +176,27 @@ void ContentEditor::toggle()
 	}
 }
 
-int ContentEditor::current_tile() const
+TileRef ContentEditor::current_tile() const
 {
 	const auto& entries = active_entries();
 	if (entries.empty())
-		return 0;
+		return TileRef{};
 	int key = entries[m_list_cursor].entity_key;
 	if (m_tab == 0)
 		return ContentRegistry::instance().get_tile(static_cast<ItemId>(key));
 	return ContentRegistry::instance().get_tile(static_cast<MonsterId>(key));
 }
 
-void ContentEditor::assign_tile(int tile_id)
+void ContentEditor::assign_tile(TileRef tile)
 {
 	auto& entries = active_entries();
 	if (entries.empty())
 		return;
 	int key = entries[m_list_cursor].entity_key;
 	if (m_tab == 0)
-		ContentRegistry::instance().set_tile(static_cast<ItemId>(key), tile_id);
+		ContentRegistry::instance().set_tile(static_cast<ItemId>(key), tile);
 	else
-		ContentRegistry::instance().set_tile(static_cast<MonsterId>(key), tile_id);
+		ContentRegistry::instance().set_tile(static_cast<MonsterId>(key), tile);
 }
 
 // ---------------------------------------------------------------------------
@@ -315,11 +314,11 @@ void ContentEditor::draw_list(
 		else if (hovered)
 			DrawRectangle(list_x, iy, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
 
-		int tile_id = (m_tab == 0)
+		TileRef tile = (m_tab == 0)
 			? ContentRegistry::instance().get_tile(static_cast<ItemId>(entries[i].entity_key))
 			: ContentRegistry::instance().get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
-		renderer.draw_tile_screen_sized(list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2, tile_id, TILE_SZ);
+		renderer.draw_tile_screen_sized(list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
 
 		Color tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
 		renderer.draw_text_color(list_x + PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2, entries[i].name, tc);
@@ -394,7 +393,7 @@ void ContentEditor::draw_browser(
 		}
 	}
 
-	int selected_tile = current_tile();
+	TileRef selected_tile = current_tile();
 
 	BeginScissorMode(ox, grid_y, bw, grid_h);
 
@@ -407,7 +406,7 @@ void ContentEditor::draw_browser(
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = ox + PAD + col * (BROWSER_TILE + 2);
-			int tid = make_tile(static_cast<TileSheet>(m_browser_sheet), col, row);
+			TileRef tid{ static_cast<TileSheet>(m_browser_sheet), col, row };
 
 			bool is_sel = (tid == selected_tile);
 			bool hovered_tile = mouse.x >= px && mouse.x < px + BROWSER_TILE &&

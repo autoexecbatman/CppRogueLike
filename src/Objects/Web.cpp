@@ -1,5 +1,6 @@
 #include "Web.h"
 #include "../ActorTypes/Player.h"
+#include "../Systems/TileConfig.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Items/Jewelry.h"
@@ -7,7 +8,7 @@
 #include "../Systems/MessageSystem.h"
 
 Web::Web(Vector2D position, int strength)
-	: Object(position, ActorData{ TILE_WEB, "spider web", BLACK_WHITE_PAIR }),
+	: Object(position, ActorData{ TileConfig::instance().get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through

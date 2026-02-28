@@ -17,7 +17,7 @@ protected:
     std::unique_ptr<Item> create_test_item() {
         auto item = std::make_unique<Item>(
             Vector2D{5, 10},
-            ActorData{'/', "Test Sword", 1}
+            ActorData{TileRef{}, "Test Sword", 1}
         );
         item->set_value(80);
         item->itemId = ItemId::LONG_SWORD;
@@ -33,7 +33,7 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_value(), 80);
@@ -58,7 +58,7 @@ TEST_F(ItemSerializationTest, Enhancement_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::SHARP);
@@ -82,7 +82,7 @@ TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.fire_resistance, 25);
@@ -100,7 +100,7 @@ TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_TRUE(loaded->enhancement.is_cursed);
@@ -113,7 +113,7 @@ TEST_F(ItemSerializationTest, Pickable_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     ASSERT_NE(loaded->pickable, nullptr) << "Pickable component not loaded";
@@ -126,7 +126,7 @@ TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
@@ -150,14 +150,14 @@ TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
     };
 
     for (ItemClass itemClass : classes) {
-        auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{'?', "test", 1});
+        auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "test", 1});
         item->itemClass = itemClass;
         item->set_value(40);
 
         json j;
         item->save(j);
 
-        auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+        auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
         loaded->load(j);
 
         EXPECT_EQ(loaded->itemClass, itemClass) << "ItemClass mismatch for " << static_cast<int>(itemClass);
@@ -175,7 +175,7 @@ TEST_F(ItemSerializationTest, States_SavedAndLoaded) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
@@ -188,7 +188,7 @@ TEST_F(ItemSerializationTest, States_NotEquipped_StaysUnequipped) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_FALSE(loaded->has_state(ActorState::IS_EQUIPPED));
@@ -203,7 +203,7 @@ TEST_F(ItemSerializationTest, States_LoadClearsPreviousStates) {
     original->save(j);
 
     // Create item and give it a state BEFORE loading
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->add_state(ActorState::IS_EQUIPPED);  // Pre-existing state
     ASSERT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
 
@@ -223,7 +223,7 @@ TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{' ', "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
     EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));

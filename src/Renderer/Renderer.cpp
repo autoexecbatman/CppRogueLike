@@ -10,8 +10,8 @@
 #include <emscripten/emscripten.h>
 #endif
 
-#include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
-#include "TileId.h"
+#include "Renderer.h"
+#include "../Systems/TileConfig.h"
 
 // Local color constants (raylib macros are #undef'd in Renderer.h)
 static constexpr Color RL_WHITE = { 255, 255, 255, 255 };
@@ -265,19 +265,18 @@ void Renderer::end_frame()
 #endif
 }
 
-void Renderer::draw_tile(int grid_x, int grid_y, int tile_id, int /*color_pair_id*/, Color tint) const
+void Renderer::draw_tile(int grid_x, int grid_y, TileRef tile, int /*color_pair_id*/, Color tint) const
 {
-	if (!sheets_loaded)
+	if (!sheets_loaded || !tile.is_valid())
 	{
 		return;
 	}
 
-	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
-	if (!sheets.contains(sheet_key))
+	if (!sheets.contains(tile.sheet))
 	{
 		return;
 	}
-	const SpriteSheet& sheet = sheets.at(sheet_key);
+	const SpriteSheet& sheet = sheets.at(tile.sheet);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 	{
 		return;
@@ -299,13 +298,10 @@ void Renderer::draw_tile(int grid_x, int grid_y, int tile_id, int /*color_pair_i
 		? sheet.frame1
 		: sheet.frame0;
 
-	int col = tile_col(tile_id);
-	int row = tile_row(tile_id);
-
 	// Source rect in the 16x16 sprite sheet
 	Rectangle src_rect = {
-		static_cast<float>(col * SPRITE_SIZE),
-		static_cast<float>(row * SPRITE_SIZE),
+		static_cast<float>(tile.col * SPRITE_SIZE),
+		static_cast<float>(tile.row * SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE)
 	};
@@ -316,19 +312,18 @@ void Renderer::draw_tile(int grid_x, int grid_y, int tile_id, int /*color_pair_i
 	DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
-void Renderer::draw_tile_screen(int px, int py, int tile_id) const
+void Renderer::draw_tile_screen(int px, int py, TileRef tile) const
 {
-	if (!sheets_loaded)
+	if (!sheets_loaded || !tile.is_valid())
 	{
 		return;
 	}
 
-	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
-	if (!sheets.contains(sheet_key))
+	if (!sheets.contains(tile.sheet))
 	{
 		return;
 	}
-	const SpriteSheet& sheet = sheets.at(sheet_key);
+	const SpriteSheet& sheet = sheets.at(tile.sheet);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 	{
 		return;
@@ -338,12 +333,9 @@ void Renderer::draw_tile_screen(int px, int py, int tile_id) const
 		? sheet.frame1
 		: sheet.frame0;
 
-	int col = tile_col(tile_id);
-	int row = tile_row(tile_id);
-
 	Rectangle src_rect = {
-		static_cast<float>(col * SPRITE_SIZE),
-		static_cast<float>(row * SPRITE_SIZE),
+		static_cast<float>(tile.col * SPRITE_SIZE),
+		static_cast<float>(tile.row * SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE)
 	};
@@ -359,15 +351,14 @@ void Renderer::draw_tile_screen(int px, int py, int tile_id) const
 	DrawTexturePro(tex, src_rect, dest_rect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
-void Renderer::draw_tile_screen_sized(int px, int py, int tile_id, int display_size) const
+void Renderer::draw_tile_screen_sized(int px, int py, TileRef tile, int display_size) const
 {
-	if (!sheets_loaded)
+	if (!sheets_loaded || !tile.is_valid())
 		return;
 
-	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
-	if (!sheets.contains(sheet_key))
+	if (!sheets.contains(tile.sheet))
 		return;
-	const SpriteSheet& sheet = sheets.at(sheet_key);
+	const SpriteSheet& sheet = sheets.at(tile.sheet);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 		return;
 
@@ -376,8 +367,8 @@ void Renderer::draw_tile_screen_sized(int px, int py, int tile_id, int display_s
 		: sheet.frame0;
 
 	Rectangle src_rect = {
-		static_cast<float>(tile_col(tile_id) * SPRITE_SIZE),
-		static_cast<float>(tile_row(tile_id) * SPRITE_SIZE),
+		static_cast<float>(tile.col * SPRITE_SIZE),
+		static_cast<float>(tile.row * SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE),
 		static_cast<float>(SPRITE_SIZE)
 	};
@@ -464,27 +455,28 @@ void Renderer::draw_frame(int px, int py, int w_tiles, int h_tiles) const
 	int ts = tile_size;
 
 	// Top border
-	draw_tile_screen(px, py, GUI_FRAME_TL);
+	auto& tc = TileConfig::instance();
+	draw_tile_screen(px, py, tc.get("GUI_FRAME_TL"));
 	for (int col = 1; col < w_tiles - 1; ++col)
 	{
-		draw_tile_screen(px + col * ts, py, GUI_FRAME_T);
+		draw_tile_screen(px + col * ts, py, tc.get("GUI_FRAME_T"));
 	}
-	draw_tile_screen(px + (w_tiles - 1) * ts, py, GUI_FRAME_TR);
+	draw_tile_screen(px + (w_tiles - 1) * ts, py, tc.get("GUI_FRAME_TR"));
 
 	// Left and right borders
 	for (int row = 1; row < h_tiles - 1; ++row)
 	{
-		draw_tile_screen(px, py + row * ts, GUI_FRAME_L);
-		draw_tile_screen(px + (w_tiles - 1) * ts, py + row * ts, GUI_FRAME_R);
+		draw_tile_screen(px, py + row * ts, tc.get("GUI_FRAME_L"));
+		draw_tile_screen(px + (w_tiles - 1) * ts, py + row * ts, tc.get("GUI_FRAME_R"));
 	}
 
 	// Bottom border
-	draw_tile_screen(px, py + (h_tiles - 1) * ts, GUI_FRAME_BL);
+	draw_tile_screen(px, py + (h_tiles - 1) * ts, tc.get("GUI_FRAME_BL"));
 	for (int col = 1; col < w_tiles - 1; ++col)
 	{
-		draw_tile_screen(px + col * ts, py + (h_tiles - 1) * ts, GUI_FRAME_B);
+		draw_tile_screen(px + col * ts, py + (h_tiles - 1) * ts, tc.get("GUI_FRAME_B"));
 	}
-	draw_tile_screen(px + (w_tiles - 1) * ts, py + (h_tiles - 1) * ts, GUI_FRAME_BR);
+	draw_tile_screen(px + (w_tiles - 1) * ts, py + (h_tiles - 1) * ts, tc.get("GUI_FRAME_BR"));
 }
 
 void Renderer::draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const

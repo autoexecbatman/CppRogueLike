@@ -35,7 +35,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
-#include "../Renderer/TileId.h"
+#include "../Systems/TileConfig.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Tools/DecorEditor.h"
@@ -500,24 +500,25 @@ void Map::render(const GameContext& ctx) const
 	constexpr int ZONE_STORAGE = 3;
 	constexpr int ZONE_CHAPEL = 4;
 
-	auto resolve_decor = [&](Vector2D p, TileType t) -> int
+	auto resolve_decor = [&](Vector2D p, TileType t) -> TileRef
 	{
 		// Torches only -- the floor itself carries the visual weight.
 		if (t != TileType::WALL)
-			return 0;
+			return TileRef{};
 
 		bool floor_south = is_walkable(p + DIR_S);
 		bool floor_east = is_walkable(p + DIR_E);
 		bool floor_west = is_walkable(p + DIR_W);
 		if (!floor_south || floor_east || floor_west)
-			return 0;
+			return TileRef{};
 
 		int row_phase = static_cast<int>(decor_hash(p.y, 0, 88) % 4);
 		if ((p.x % 4 + 4) % 4 != row_phase)
-			return 0;
+			return TileRef{};
 
 		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
-		return (zone == ZONE_CHAPEL) ? TILE_CANDELABRA : TILE_TORCH_1;
+		auto& tc = TileConfig::instance();
+		return (zone == ZONE_CHAPEL) ? tc.get("TILE_CANDELABRA") : tc.get("TILE_TORCH_1");
 	};
 
 	for (int row = start_row; row < end_row; row++)
@@ -537,7 +538,7 @@ void Map::render(const GameContext& ctx) const
 				: Color{ 90, 90, 110, 255 };
 
 			TileType type = get_tile_type(pos);
-			int tile_id = 0;
+			TileRef tile_ref{};
 
 			switch (type)
 			{
@@ -547,56 +548,56 @@ void Map::render(const GameContext& ctx) const
 				{
 					continue; // Interior wall -- no walkable neighbor, render as void
 				}
-				tile_id = wall_autotile_resolve_mask(
-					WALL_AUTOTILE_STONE,
+				tile_ref = wall_autotile_resolve_mask(
+					TileConfig::instance().get_wall_autotile("WALL_AUTOTILE_STONE"),
 					build_mask(pos, is_border_wall));
 				break;
 			}
 			case TileType::FLOOR:
 			{
-				tile_id = autotile_resolve_mask(
-					AUTOTILE_FLOOR_STONE,
+				tile_ref = autotile_resolve_mask(
+					TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::CORRIDOR:
 			{
-				tile_id = autotile_resolve_mask(
-					AUTOTILE_CORRIDOR,
+				tile_ref = autotile_resolve_mask(
+					TileConfig::instance().get_autotile("AUTOTILE_CORRIDOR"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::WATER:
-				tile_id = TILE_WATER;
+				tile_ref = TileConfig::instance().get("TILE_WATER");
 				break;
 			case TileType::CLOSED_DOOR:
 			case TileType::OPEN_DOOR:
 			{
 				// Draw floor underneath -- door sprites have transparency
-				int floor_id = autotile_resolve_mask(
-					AUTOTILE_FLOOR_STONE,
+				TileRef floor_ref = autotile_resolve_mask(
+					TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
-				ctx.renderer->draw_tile(col, row, floor_id, WHITE_BLACK_PAIR, tint);
-				tile_id = (type == TileType::CLOSED_DOOR)
-					? TILE_DOOR_CLOSED
-					: TILE_DOOR_OPEN;
+				ctx.renderer->draw_tile(col, row, floor_ref, WHITE_BLACK_PAIR, tint);
+				tile_ref = (type == TileType::CLOSED_DOOR)
+					? TileConfig::instance().get("TILE_DOOR_CLOSED")
+					: TileConfig::instance().get("TILE_DOOR_OPEN");
 				break;
 			}
 			default:
 				continue;
 			}
 
-			ctx.renderer->draw_tile(col, row, tile_id, WHITE_BLACK_PAIR, tint);
+			ctx.renderer->draw_tile(col, row, tile_ref, WHITE_BLACK_PAIR, tint);
 
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
-				int decor_id = ctx.decor_editor
+				TileRef decor_ref = ctx.decor_editor
 					? ctx.decor_editor->get_override(col, row)
-					: 0;
-				if (decor_id == 0)
-					decor_id = resolve_decor(pos, type);
-				if (decor_id != 0)
-					ctx.renderer->draw_tile(col, row, decor_id, WHITE_BLACK_PAIR, tint);
+					: TileRef{};
+				if (!decor_ref.is_valid())
+					decor_ref = resolve_decor(pos, type);
+				if (decor_ref.is_valid())
+					ctx.renderer->draw_tile(col, row, decor_ref, WHITE_BLACK_PAIR, tint);
 			}
 		}
 	}
