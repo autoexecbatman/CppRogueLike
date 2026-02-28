@@ -1,17 +1,26 @@
-#include "ItemFactory.h"
+#include <algorithm>
+#include <functional>
+#include <memory>
+#include <span>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Gold.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Items/Amulet.h"
-#include "../Items/Food.h"
-#include "../Items/Items.h"
+#include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/TileId.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
 #include "ItemCreator.h"
+#include "ItemFactory.h"
 #include "ItemRegistries/EnhancedArmorRules.h"
 #include "ItemRegistries/EnhancedWeaponRules.h"
 
@@ -45,7 +54,7 @@ void ItemFactory::load_from_registry()
 			continue;
 
 		ItemId capturedId = id;
-		auto createFunc = (capturedId == ItemId::GOLD)
+		auto createFunc = (capturedId == ItemId::GOLD_COIN)
 			? std::function<void(Vector2D, GameContext&)>{
 				  [](Vector2D pos, GameContext& ctx)
 				  {

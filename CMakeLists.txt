@@ -264,8 +264,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/AnimationSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.cpp
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.h
+    ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.h
 
     # Tools
+    ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.cpp

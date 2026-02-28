@@ -1,14 +1,23 @@
 // InventoryOperations.cpp - Free function implementations
 #include <algorithm>
+#include <cstdint>
+#include <exception>
 #include <iostream>
-#include <ranges>
+#include <memory>
+#include <span>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
-#include "../Items/Items.h"
+#include "../Utils/Vector2D.h"
 #include "Actor.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
+
+using json = nlohmann::json;
 
 namespace InventoryOperations
 {

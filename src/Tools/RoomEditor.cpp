@@ -1,24 +1,16 @@
 // file: RoomEditor.cpp
 #include <algorithm>
 #include <format>
+#include <memory>
+#include <string>
+#include <utility>
 
-#pragma warning(push, 0)
 #include <raylib.h>
-#pragma warning(pop)
-
-// Undefine raylib color macros that clash with game enums
-#undef YELLOW
-#undef WHITE
-#undef BLACK
-#undef GRAY
-#undef DARKGRAY
-#undef GREEN
-#undef RED
 
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Menu/Menu.h"
-#include "../Renderer/Renderer.h"
+#include "../Renderer/Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
 #include "../Renderer/TileId.h"
 #include "PrefabLibrary.h"
 #include "RoomEditor.h"
@@ -987,11 +979,11 @@ void RoomEditor::render_input_overlay(const Renderer& r) const
 // ---------------------------------------------------------------------------
 
 // Sheets available in the picker, in Tab-cycle order.
-static constexpr int PICKER_SHEETS[] = {
-	SHEET_DECOR0, SHEET_DECOR1, SHEET_FLOOR, SHEET_WALL, SHEET_TILE
+static constexpr TileSheet PICKER_SHEETS[] = {
+	TileSheet::SHEET_DECOR0, TileSheet::SHEET_DECOR1, TileSheet::SHEET_FLOOR, TileSheet::SHEET_WALL, TileSheet::SHEET_TILE
 };
 static constexpr int PICKER_SHEET_COUNT = 5;
-static constexpr const char* PICKER_SHEET_NAMES[] = {
+static constexpr std::string_view PICKER_SHEET_NAMES[] = {
 	"Decor0", "Decor1", "Floor", "Wall", "Tile"
 };
 
@@ -1004,7 +996,7 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 	}
 
 	const Renderer& r = *ctx.renderer;
-	int sheet_id = PICKER_SHEETS[picker_sheet_list_idx];
+	TileSheet sheet_id = PICKER_SHEETS[picker_sheet_list_idx];
 	int cols = std::max(1, r.get_sheet_cols(sheet_id));
 	int rows = std::max(1, r.get_sheet_rows(sheet_id));
 
@@ -1052,7 +1044,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 	// Picker tile display size -- 2x native for visibility
 	static constexpr int PICK_TS = SPRITE_SIZE * 2;
 
-	int sheet_id = PICKER_SHEETS[picker_sheet_list_idx];
+	TileSheet sheet_id = PICKER_SHEETS[picker_sheet_list_idx];
 	int cols = std::max(1, r.get_sheet_cols(sheet_id));
 	int rows = std::max(1, r.get_sheet_rows(sheet_id));
 

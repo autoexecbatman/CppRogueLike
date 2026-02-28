@@ -1,10 +1,12 @@
 // file: PrefabLibrary.cpp
-#include <algorithm>
-#include <cmath>
-#include <format>
+#include <cstdlib>
 #include <fstream>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
@@ -61,7 +63,7 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 			int sheet = e.value("sheet", 0);
 			int col = e.value("col", 0);
 			int row = e.value("row", 0);
-			int tile_id = make_tile(sheet, col, row);
+			int tile_id = make_tile(static_cast<TileSheet>(sheet), col, row);
 			std::string label = e.value("label", sym_str);
 
 			symbol_to_tile[sym] = tile_id;
@@ -71,38 +73,6 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	}
 	catch (...)
 	{
-	}
-}
-
-void PrefabLibrary::load_symbol_map(const json& j)
-{
-	if (!j.contains("symbol_map"))
-		return;
-
-	for (const auto& [key, val] : j["symbol_map"].items())
-	{
-		if (key.empty())
-			continue;
-		char sym = key[0];
-		int tile = val.value("tile_id", symbol_to_tile.count(sym) ? symbol_to_tile[sym] : 0);
-		std::string lbl = val.value("label", symbol_to_label.count(sym) ? symbol_to_label[sym] : key);
-
-		symbol_to_tile[sym] = tile;
-		symbol_to_label[sym] = lbl;
-
-		// Keep palette_order consistent -- update existing or append
-		bool found = false;
-		for (auto& entry : palette_order)
-		{
-			if (entry.first == sym)
-			{
-				entry.second = lbl;
-				found = true;
-				break;
-			}
-		}
-		if (!found)
-			palette_order.emplace_back(sym, lbl);
 	}
 }
 

@@ -35,6 +35,7 @@
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
 #include "Systems/TargetingSystem.h"
+#include "Tools/ContentEditor.h"
 #include "Tools/DecorEditor.h"
 #include "Tools/PrefabLibrary.h"
 #include "Tools/RoomEditor.h"
@@ -80,6 +81,7 @@ public:
 			.buff_system = &buff_system,
 			.floating_text = &floating_text,
 			.anim_system = &anim_system,
+			.content_editor = &content_editor,
 			.decor_editor = &decor_editor,
 			.room_editor = &room_editor,
 			.prefab_library = &prefab_library,
@@ -108,26 +110,37 @@ public:
 	bool tick(int& loopNum)
 	{
 		if (!run)
+		{
 			return false;
+		}
 
 		if (room_editor.is_active())
+		{
 			windowState = WindowState::ROOM_EDITOR;
+		}
 		else
+		{
 			windowState = menus.empty() ? WindowState::GAME : WindowState::MENU;
+		}
 
 		auto ctx = context();
-
 		switch (windowState)
 		{
 		case WindowState::MENU:
+		{
 			menu_manager.handle_menus(menus, ctx);
 			break;
+		}
 		case WindowState::GAME:
+		{
 			game_loop_coordinator.handle_gameloop(ctx, gui, loopNum);
 			break;
+		}
 		case WindowState::ROOM_EDITOR:
+		{
 			room_editor.tick(ctx);
 			break;
+		}
 		}
 
 		++loopNum;
@@ -180,6 +193,7 @@ public:
 	BuffSystem buff_system{};
 	FloatingTextSystem floating_text{};
 	AnimationSystem anim_system{};
+	ContentEditor content_editor{};
 	DecorEditor decor_editor{};
 	RoomEditor room_editor{};
 	PrefabLibrary prefab_library{};

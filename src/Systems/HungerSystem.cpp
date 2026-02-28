@@ -1,11 +1,16 @@
 #include <algorithm>
+#include <string>
 
-#include "../ActorTypes/Player.h"
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
+
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/MessageSystem.h"
 #include "HungerSystem.h"
+
+using json = nlohmann::json;
 
 HungerSystem::HungerSystem()
 	: hunger_value(0),

@@ -1,5 +1,7 @@
 // file: Monsters.cpp
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
@@ -11,6 +13,8 @@
 #include "../Factories/ItemCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Random/RandomDice.h"
+#include "../Renderer/TileId.h"
+#include "../Utils/Vector2D.h"
 #include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
@@ -64,7 +68,7 @@ void Mimic::initDisguises()
 	};
 
 	possibleDisguises = {
-		from_item(ItemId::GOLD),
+		from_item(ItemId::GOLD_COIN),
 		from_item(ItemId::HEALTH_POTION),
 		from_item(ItemId::SCROLL_LIGHTNING),
 		from_item(ItemId::SHORT_SWORD),

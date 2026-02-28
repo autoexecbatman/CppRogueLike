@@ -12,10 +12,9 @@
 //   Prefab (col=0, row=0) = top-left wall corner of room (world_x = begin.x - 1, world_y = begin.y - 1)
 //   Prefab includes the wall border ('#' characters on all four edges).
 
-#include <nlohmann/json_fwd.hpp>
 #include <string>
-#include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 class DecorEditor;
@@ -88,7 +87,6 @@ private:
 	std::vector<std::pair<char, std::string>> palette_order; // stable display order
 
 	void build_structural_symbols();
-	void load_symbol_map(const nlohmann::json& j);
 
 	// Deterministic prefab selection for a room of (total_w x total_h) including walls.
 	// Returns prefab index, or -1 if none fits.

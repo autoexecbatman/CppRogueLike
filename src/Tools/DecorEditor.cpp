@@ -9,12 +9,9 @@
 #include <unordered_map>
 #include <vector>
 
-#pragma warning(push, 0)
-#include <raylib.h>
-#pragma warning(pop)
-
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
+#include <raylib.h>
 
 #include "../Core/Paths.h"
 #include "../Renderer/Renderer.h"
@@ -22,13 +19,6 @@
 #include "DecorEditor.h"
 
 using json = nlohmann::json;
-
-// ---------------------------------------------------------------------------
-// Sheet name table (indexed by TileSheet enum value)
-// ---------------------------------------------------------------------------
-static constexpr const char* SHEET_NAMES[SHEET_COUNT] = {
-	"Floor", "Wall", "Door0", "Door1", "Player0", "Player1", "Humanoid0", "Humanoid1", "Reptile0", "Reptile1", "Pest0", "Pest1", "Dog0", "Dog1", "Avian0", "Avian1", "Undead0", "Undead1", "Quadraped0", "Quadraped1", "Demon0", "Demon1", "Misc0", "Misc1", "Potion", "Scroll", "ShortWeapon", "MedWeapon", "LongWeapon", "Armor", "Shield", "Hat", "Ring", "Amulet", "Food", "Flesh", "Money", "Tile", "Decor0", "Decor1", "Effect0", "Effect1", "Pit0", "GUI0", "GUI1"
-};
 
 // ---------------------------------------------------------------------------
 
@@ -92,7 +82,7 @@ static void to_json(json& j, const DecorEditor::PaletteEntry& e)
 static void from_json(const json& j, DecorEditor::PaletteEntry& e)
 {
 	e.tile_id = make_tile(
-		j.value("sheet", 0),
+		static_cast<TileSheet>(j.value("sheet", 0)),
 		j.value("col", 0),
 		j.value("row", 0));
 	e.label = j.value("label", "");
@@ -441,12 +431,13 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 220 });
 
 	// --- Sheet navigation (Left/Right arrow) ---
+	const int total_sheets = renderer.get_loaded_sheet_count();
 	auto advance_sheet = [&](int dir)
 	{
-		for (int i = 0; i < SHEET_COUNT; ++i)
+		for (int i = 0; i < total_sheets; ++i)
 		{
-			browser_sheet = (browser_sheet + dir + SHEET_COUNT) % SHEET_COUNT;
-			if (renderer.sheet_is_loaded(browser_sheet))
+			browser_sheet = (browser_sheet + dir + total_sheets) % total_sheets;
+			if (renderer.sheet_is_loaded(static_cast<TileSheet>(browser_sheet)))
 				break;
 		}
 		browser_scroll = 0;
@@ -459,20 +450,20 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	if (IsKeyPressed(KEY_RIGHT))
 		advance_sheet(1);
 
-	if (!renderer.sheet_is_loaded(browser_sheet))
+	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(browser_sheet)))
 		advance_sheet(1);
 
-	const int sheet_cols = renderer.get_sheet_cols(browser_sheet);
-	const int sheet_rows = renderer.get_sheet_rows(browser_sheet);
+	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(browser_sheet));
+	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browser_sheet));
 
 	// --- Header (two lines) ---
 	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
 
 	std::string h1 = std::format(
 		"TILE BROWSER  |  {} ({}/{})  |  {}x{} tiles",
-		SHEET_NAMES[browser_sheet],
+		renderer.get_sheet_name(static_cast<TileSheet>(browser_sheet)),
 		browser_sheet + 1,
-		static_cast<int>(SHEET_COUNT),
+		total_sheets,
 		sheet_cols,
 		sheet_rows);
 
@@ -525,7 +516,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	// Single point that opens the edit panel for any tile_id.
 	// Looks up whether the tile is already in the palette and initialises
 	// all editing state from that one source.
-	auto begin_edit = [this](int tid)
+	auto begin_edit = [this, &renderer](int tid)
 	{
 		browser_selected = tid;
 		int pi = palette_find(tid);
@@ -539,7 +530,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		{
 			list_cursor = -1;
 			label_buf = std::format("{} {},{}",
-				SHEET_NAMES[tile_sheet(tid)],
+				renderer.get_sheet_name(static_cast<TileSheet>(tile_sheet(tid))),
 				tile_col(tid),
 				tile_row(tid));
 			sym_buf = 0;
@@ -621,7 +612,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		if (hovered && clicked && mouse.x < del_x)
 		{
 			int entry_sheet = tile_sheet(palette[i].tile_id);
-			if (renderer.sheet_is_loaded(entry_sheet))
+			if (renderer.sheet_is_loaded(static_cast<TileSheet>(entry_sheet)))
 			{
 				browser_sheet = entry_sheet;
 				browser_scroll = std::max(0, tile_row(palette[i].tile_id) - 2);
@@ -653,7 +644,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		for (int col = 0; col < sheet_cols; ++col)
 		{
 			int px = LIST_W + PAD + col * (BROWSER_TILE + 2);
-			int tid = make_tile(browser_sheet, col, row);
+			int tid = make_tile(static_cast<TileSheet>(browser_sheet), col, row);
 
 			bool is_sel = (tid == browser_selected);
 			bool in_pal = (palette_find(tid) >= 0);
@@ -725,7 +716,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		// Sprite info (read-only -- set by clicking in browser)
 		std::string sprite_info = std::format(
 			"Sprite: {} sheet:{} col:{} row:{}",
-			SHEET_NAMES[tile_sheet(browser_selected)],
+			renderer.get_sheet_name(static_cast<TileSheet>(tile_sheet(browser_selected))),
 			tile_sheet(browser_selected),
 			tile_col(browser_selected),
 			tile_row(browser_selected));

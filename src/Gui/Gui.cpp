@@ -1,17 +1,20 @@
 // file: Gui.cpp
 #include <algorithm>
 #include <format>
-#include <span>
+#include <string>
+#include <vector>
 
+#include <raylib.h>
+
+#include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Destructible.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Map/Map.h"
+#include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
 #include "../Renderer/TileId.h"
-#include "../Systems/CreatureManager.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "Gui.h"
@@ -207,7 +210,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Food icon at col 1 (from the Items/Food sheet)
-	ctx.renderer->draw_tile_screen(1 * ts, rowY, make_tile(SHEET_FOOD, 0, 0));
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, make_tile(TileSheet::SHEET_FOOD, 0, 0));
 
 	// Bar: col 2 to div1-1
 	const int barX = 2 * ts;

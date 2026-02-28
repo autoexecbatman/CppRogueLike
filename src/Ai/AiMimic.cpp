@@ -1,16 +1,24 @@
+#include <algorithm>
 #include <format>
 #include <ranges> // For std::views::reverse
+#include <string>
+#include <unordered_map>
+#include <vector>
 
+#include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Monsters.h"
-#include "../ActorTypes/Player.h"
 #include "../Ai/AiPlayer.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
+#include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
-#include "../Renderer/TileId.h"
+#include "../Persistent/Persistent.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/MessageSystem.h"
 #include "AiMimic.h"
+#include "AiMonster.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -29,7 +37,7 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::POTION, MimicBonusType::HEALTH },
 	{ ItemClass::FOOD, MimicBonusType::HEALTH },
 	{ ItemClass::SCROLL, MimicBonusType::CONFUSION },
-	{ ItemClass::GOLD, MimicBonusType::DEFENSE_GOLD },
+	{ ItemClass::GOLD_COIN, MimicBonusType::DEFENSE_GOLD },
 	{ ItemClass::ARMOR, MimicBonusType::DEFENSE_ARMOR },
 	{ ItemClass::DAGGER, MimicBonusType::ATTACK },
 	{ ItemClass::SWORD, MimicBonusType::ATTACK },
@@ -265,7 +273,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
 {
-	mimic.actorData.ch = TILE_MIMIC;
+	mimic.actorData.ch = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
 	mimic.actorData.color = RED_YELLOW_PAIR;
 	mimic.actorData.name = "greater mimic";
 	ctx.message_system->log("Mimic transformed into greater mimic");
@@ -282,7 +290,7 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 	{
 		// Reveal true form!
 		isDisguised = false;
-		mimic.actorData.ch = TILE_MIMIC;
+		mimic.actorData.ch = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
 		mimic.actorData.name = "mimic";
 		mimic.actorData.color = RED_YELLOW_PAIR;
 		mimic.add_state(ActorState::BLOCKS); // Now it's solid

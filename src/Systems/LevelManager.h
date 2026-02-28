@@ -1,7 +1,6 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
-#include <string>
+#include <nlohmann/json_fwd.hpp>
 
 // Forward declarations
 class Map;

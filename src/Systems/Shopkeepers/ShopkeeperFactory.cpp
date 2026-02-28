@@ -1,17 +1,26 @@
-#include "ShopkeeperFactory.h"
+#include <algorithm>
+#include <memory>
+#include <string>
+
 #include "../../Actor/Actor.h"
 #include "../../Actor/Attacker.h"
 #include "../../Actor/Destructible.h"
 #include "../../Ai/AiShopkeeper.h"
 #include "../../Colors/Colors.h"
+#include "../../Combat/DamageInfo.h"
 #include "../../Core/GameContext.h"
+#include "../../Factories/MonsterCreator.h"
 #include "../../Random/RandomDice.h"
+#include "../../Systems/ContentRegistry.h"
 #include "../../Systems/MessageSystem.h"
+#include "../../Utils/Vector2D.h"
+#include "../ShopKeeper.h"
+#include "ShopkeeperFactory.h"
 
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
 	// Create base creature
-	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ TILE_SHOPKEEPER, "Shopkeeper", YELLOW_BLACK_PAIR });
+	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ ContentRegistry::instance().get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
 
 	// Configure all shopkeeper components in one place
 	configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);

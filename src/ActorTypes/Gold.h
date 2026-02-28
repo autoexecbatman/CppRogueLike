@@ -18,5 +18,5 @@ public:
 
 	void save(json& j) override;
 	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::GOLD; }
+	PickableType get_type() const override { return PickableType::GOLD_COIN; }
 };

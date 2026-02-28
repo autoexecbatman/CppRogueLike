@@ -1,8 +1,10 @@
 // file: Pickable.cpp
 #include <format>
+#include <memory>
+#include <stdexcept>
+#include <string>
 
 #include "../ActorTypes/Gold.h"
-#include "../ActorTypes/Player.h"
 #include "../ActorTypes/Teleporter.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -11,13 +13,19 @@
 #include "../Items/CorpseFood.h"
 #include "../Items/Food.h"
 #include "../Items/Jewelry.h"
+#include "../Items/MagicalItemEffects.h"
+#include "../Items/Weapons.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/CreatureManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellAnimations.h"
 #include "../Systems/TargetingSystem.h"
+#include "../Systems/TargetMode.h"
 #include "Actor.h"
+#include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Pickable.h"
@@ -60,7 +68,7 @@ std::unique_ptr<Pickable> Pickable::create(const json& j)
 		// Defaults overwritten by load() below
 		pickable = std::make_unique<Consumable>(ConsumableEffect::NONE, 0, 0, BuffType::INVISIBILITY);
 		break;
-	case PickableType::GOLD:
+	case PickableType::GOLD_COIN:
 		pickable = std::make_unique<Gold>(0);
 		break;
 	case PickableType::FOOD:

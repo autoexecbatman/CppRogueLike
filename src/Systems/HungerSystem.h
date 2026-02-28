@@ -1,9 +1,7 @@
 #pragma once
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 #include <string>
-
-using json = nlohmann::json;
 
 struct GameContext;
 
@@ -56,8 +54,8 @@ public:
 	void apply_hunger_effects(GameContext& ctx);
 
 	// Save/Load methods for game persistence
-	void save(json& j) const;
-	void load(GameContext& ctx, const json& j);
+	void save(nlohmann::json& j) const;
+	void load(GameContext& ctx, const nlohmann::json& j);
 
 private:
 	int hunger_value; // Internal hunger counter

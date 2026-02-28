@@ -1,26 +1,27 @@
 // file: AiPlayer.cpp
-#include <format>
+#include <cstdlib>
+#include <memory>
+#include <string>
 #include <unordered_map>
-
-#include <libtcod.h>
+#include <utility>
+#include <vector>
 
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Gold.h"
-#include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Player.h"
-#include "../Combat/DamageInfo.h"
-#include "../Combat/WeaponDamageRegistry.h"
+#include "../Colors/Colors.h"
 #include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
 #include "../Items/ItemClassification.h"
-#include "../Items/Items.h"
+#include "../Map/Map.h"
 #include "../Menu/Menu.h"
 #include "../Objects/Web.h"
+#include "../Persistent/Persistent.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/BuffSystem.h"
 #include "../Systems/CreatureManager.h"
 #include "../Systems/DisplayManager.h"
 #include "../Systems/InputHandler.h"
@@ -30,6 +31,7 @@
 #include "../Systems/SpellSystem.h"
 #include "../Systems/TargetingSystem.h"
 #include "../UI/InventoryUI.h"
+#include "../Utils/Vector2D.h"
 #include "Ai.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
@@ -253,7 +255,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	Item* item = itemPtr.get();
 
 	// Handle gold directly through player's gold system
-	if (item->itemClass == ItemClass::GOLD)
+	if (item->itemClass == ItemClass::GOLD_COIN)
 	{
 		Gold* goldPickable = static_cast<Gold*>(item->pickable.get());
 		player.adjust_gold(goldPickable->amount);

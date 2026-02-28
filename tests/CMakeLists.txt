@@ -128,7 +128,9 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/GameLoopCoordinator.cpp
     ${PARENT_SOURCE_DIR}/Systems/AnimationSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/ContentRegistry.cpp
+    ${PARENT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
     ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
+    ${PARENT_SOURCE_DIR}/Tools/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
     ${PARENT_SOURCE_DIR}/Tools/RoomEditor.cpp

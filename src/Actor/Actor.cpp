@@ -2,22 +2,36 @@
 #include <cmath>
 #include <format>
 #include <memory>
+#include <ranges>
 #include <string>
+#include <utility>
+#include <vector>
+
+#include <raylib.h>
 
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
+#include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
+#include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
+#include "../Renderer/TileId.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/ShopKeeper.h"
+#include "../Utils/UniqueId.h"
+#include "../Utils/Vector2D.h"
 #include "Actor.h"
 #include "Attacker.h"
 #include "Destructible.h"
 #include "EquipmentSlot.h"
+#include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Pickable.h"
 
@@ -426,7 +440,7 @@ void Creature::pick(GameContext& ctx)
 	}
 
 	// Handle item pickup using proper inventory operations
-	if (itemAtPosition->itemClass == ItemClass::GOLD)
+	if (itemAtPosition->itemClass == ItemClass::GOLD_COIN)
 	{
 		// Use the pickable's use() method which handles gold pickup properly
 		if (itemAtPosition->pickable->use(*itemAtPosition, *this, ctx))

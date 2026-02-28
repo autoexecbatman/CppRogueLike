@@ -1,8 +1,12 @@
 #pragma once
 
-#include <vector>
-#include <memory>
 #include <deque>
+#include <memory>
+#include <vector>
+
+#include "../Actor/Actor.h"
+#include "../Actor/InventoryData.h"
+#include "../ActorTypes/Player.h"
 
 // Forward declarations
 class Game;
@@ -24,10 +28,10 @@ class HungerSystem;
 class BuffSystem;
 class FloatingTextSystem;
 class AnimationSystem;
+class ContentEditor;
 class DecorEditor;
 class RoomEditor;
 class PrefabLibrary;
-class Player;
 class Stairs;
 class Object;
 class BaseMenu;
@@ -39,14 +43,19 @@ class InputSystem;
 // Game status enumeration - moved here to avoid circular dependency
 enum class GameStatus
 {
-    STARTUP,
-    IDLE,
-    NEW_TURN,
-    VICTORY,
-    DEFEAT
+	STARTUP,
+	IDLE,
+	NEW_TURN,
+	VICTORY,
+	DEFEAT
 };
 
-enum class WindowState { MENU, GAME, ROOM_EDITOR };
+enum class WindowState
+{
+	MENU,
+	GAME,
+	ROOM_EDITOR
+};
 
 /**
  * GameContext - Dependency injection container
@@ -56,56 +65,58 @@ enum class WindowState { MENU, GAME, ROOM_EDITOR };
  * Phase 2: Add get_context() to Game class
  * Phase 3: Replace game.X with ctx->X incrementally (1,196 references)
  */
-struct GameContext {
-    // Core game world
-    Map* map{ nullptr };
-    Gui* gui{ nullptr };
-    Player* player{ nullptr };
+struct GameContext
+{
+	// Core game world
+	Map* map{ nullptr };
+	Gui* gui{ nullptr };
+	Player* player{ nullptr };
 
-    // Core systems
-    MessageSystem* message_system{ nullptr };
-    RandomDice* dice{ nullptr };
+	// Core systems
+	MessageSystem* message_system{ nullptr };
+	RandomDice* dice{ nullptr };
 
-    // Managers
-    CreatureManager* creature_manager{ nullptr };
-    LevelManager* level_manager{ nullptr };
-    RenderingManager* rendering_manager{ nullptr };
-    InputHandler* input_handler{ nullptr };
-    GameStateManager* state_manager{ nullptr };
-    MenuManager* menu_manager{ nullptr };
-    DisplayManager* display_manager{ nullptr };
-    GameLoopCoordinator* game_loop_coordinator{ nullptr };
-    DataManager* data_manager{ nullptr };
+	// Managers
+	CreatureManager* creature_manager{ nullptr };
+	LevelManager* level_manager{ nullptr };
+	RenderingManager* rendering_manager{ nullptr };
+	InputHandler* input_handler{ nullptr };
+	GameStateManager* state_manager{ nullptr };
+	MenuManager* menu_manager{ nullptr };
+	DisplayManager* display_manager{ nullptr };
+	GameLoopCoordinator* game_loop_coordinator{ nullptr };
+	DataManager* data_manager{ nullptr };
 
-    // Rendering
-    Renderer* renderer{ nullptr };
-    InputSystem* input_system{ nullptr };
+	// Rendering
+	Renderer* renderer{ nullptr };
+	InputSystem* input_system{ nullptr };
 
-    // Specialized systems
-    TargetingSystem* targeting{ nullptr };
-    HungerSystem* hunger_system{ nullptr };
-    BuffSystem* buff_system{ nullptr };
-    FloatingTextSystem* floating_text{ nullptr };
-    AnimationSystem* anim_system{ nullptr };
-    DecorEditor* decor_editor{ nullptr };
-    RoomEditor* room_editor{ nullptr };
-    PrefabLibrary* prefab_library{ nullptr };
+	// Specialized systems
+	TargetingSystem* targeting{ nullptr };
+	HungerSystem* hunger_system{ nullptr };
+	BuffSystem* buff_system{ nullptr };
+	FloatingTextSystem* floating_text{ nullptr };
+	AnimationSystem* anim_system{ nullptr };
+	ContentEditor* content_editor{ nullptr };
+	DecorEditor* decor_editor{ nullptr };
+	RoomEditor* room_editor{ nullptr };
+	PrefabLibrary* prefab_library{ nullptr };
 
-    // Game world data
-    Stairs* stairs{ nullptr };
-    std::vector<std::unique_ptr<Object>>* objects{ nullptr };
-    struct InventoryData* inventory_data{ nullptr };
-    std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
-    std::vector<DungeonRoom>* rooms{ nullptr };
+	// Game world data
+	Stairs* stairs{ nullptr };
+	std::vector<std::unique_ptr<Object>>* objects{ nullptr };
+	struct InventoryData* inventory_data{ nullptr };
+	std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
+	std::vector<DungeonRoom>* rooms{ nullptr };
 
-    // UI Collections
-    std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
+	// UI Collections
+	std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
 
-    // Game state (pointers to allow mutation)
-    int* time{ nullptr };
-    bool* run{ nullptr };
-    bool* shouldSave{ nullptr };
-    bool* isLoadedGame{ nullptr };  // Track new game vs loaded game
-    GameStatus* game_status{ nullptr };
-    WindowState* window_state{ nullptr };
+	// Game state (pointers to allow mutation)
+	int* time{ nullptr };
+	bool* run{ nullptr };
+	bool* shouldSave{ nullptr };
+	bool* isLoadedGame{ nullptr }; // Track new game vs loaded game
+	GameStatus* game_status{ nullptr };
+	WindowState* window_state{ nullptr };
 };

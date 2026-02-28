@@ -47,7 +47,7 @@ void test_get_category() {
     assert(get_category(ItemClass::AMULET) == ItemCategory::JEWELRY);
     assert(get_category(ItemClass::RING) == ItemCategory::JEWELRY);
     
-    assert(get_category(ItemClass::GOLD) == ItemCategory::TREASURE);
+    assert(get_category(ItemClass::GOLD_COIN) == ItemCategory::TREASURE);
     assert(get_category(ItemClass::GEM) == ItemCategory::TREASURE);
     
     assert(get_category(ItemClass::TORCH) == ItemCategory::TOOL);
@@ -101,7 +101,7 @@ void test_get_display_name() {
     assert(get_display_name(ItemClass::AMULET) == "amulet");
     assert(get_display_name(ItemClass::RING) == "ring");
     
-    assert(get_display_name(ItemClass::GOLD) == "gold");
+    assert(get_display_name(ItemClass::GOLD_COIN) == "gold");
     assert(get_display_name(ItemClass::GEM) == "gem");
     
     assert(get_display_name(ItemClass::TORCH) == "torch");
@@ -150,7 +150,7 @@ void test_can_equip_to_right_hand() {
     assert(!can_equip_to_right_hand(ItemClass::AMULET));
     assert(!can_equip_to_right_hand(ItemClass::RING));
     
-    assert(!can_equip_to_right_hand(ItemClass::GOLD));
+    assert(!can_equip_to_right_hand(ItemClass::GOLD_COIN));
     assert(!can_equip_to_right_hand(ItemClass::GEM));
     
     assert(!can_equip_to_right_hand(ItemClass::TORCH));
@@ -198,7 +198,7 @@ void test_can_equip_to_left_hand() {
     assert(!can_equip_to_left_hand(ItemClass::AMULET));
     assert(!can_equip_to_left_hand(ItemClass::RING));
     
-    assert(!can_equip_to_left_hand(ItemClass::GOLD));
+    assert(!can_equip_to_left_hand(ItemClass::GOLD_COIN));
     assert(!can_equip_to_left_hand(ItemClass::GEM));
     
     assert(!can_equip_to_left_hand(ItemClass::TORCH));
@@ -290,7 +290,7 @@ void test_from_string() {
     assert(from_string("amulet") == ItemClass::AMULET);
     assert(from_string("ring") == ItemClass::RING);
     
-    assert(from_string("gold") == ItemClass::GOLD);
+    assert(from_string("gold") == ItemClass::GOLD_COIN);
     assert(from_string("gem") == ItemClass::GEM);
     
     assert(from_string("torch") == ItemClass::TORCH);

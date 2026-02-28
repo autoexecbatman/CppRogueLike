@@ -1,12 +1,17 @@
 // file: Renderer.cpp
-#include "Renderer.h"
 #include <algorithm>
 #include <format>
+#include <ranges>
 #include <string>
+
+#include <raylib.h>
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>
 #endif
+
+#include "Renderer.h" // includes RaylibIncludes.h -> raylib.h + undefs
+#include "TileId.h"
 
 // Local color constants (raylib macros are #undef'd in Renderer.h)
 static constexpr Color RL_WHITE = { 255, 255, 255, 255 };
@@ -83,7 +88,7 @@ void Renderer::update_viewport()
 
 void Renderer::shutdown()
 {
-	for (auto& sheet : sheets)
+	for (SpriteSheet& sheet : sheets | std::views::values)
 	{
 		if (sheet.loaded)
 		{
@@ -110,21 +115,23 @@ void Renderer::shutdown()
 	}
 }
 
-void Renderer::load_sheet(int sheet_id, const char* path0, const char* path1)
+void Renderer::load_sheet(TileSheet id, std::string_view name, const std::string& path0, const std::string& path1)
 {
-	auto& s = sheets[sheet_id];
-	s.frame0 = load_dawnlike_texture(path0);
-	s.frame1 = load_dawnlike_texture(path1);
+	auto& s = sheets[id];
+	s.name = name;
+	s.frame0 = load_dawnlike_texture(path0.c_str());
+	s.frame1 = load_dawnlike_texture(path1.c_str());
 	s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
 	s.tiles_per_col = s.frame0.height / SPRITE_SIZE;
 	s.animated = (s.frame1.id > 0);
 	s.loaded = (s.frame0.id > 0);
 }
 
-void Renderer::load_sheet_static(int sheet_id, const char* path)
+void Renderer::load_sheet_static(TileSheet id, std::string_view name, const std::string& path)
 {
-	auto& s = sheets[sheet_id];
-	s.frame0 = load_dawnlike_texture(path);
+	auto& s = sheets[id];
+	s.name = name;
+	s.frame0 = load_dawnlike_texture(path.c_str());
 	s.frame1 = s.frame0;
 	s.tiles_per_row = s.frame0.width / SPRITE_SIZE;
 	s.tiles_per_col = s.frame0.height / SPRITE_SIZE;
@@ -132,25 +139,37 @@ void Renderer::load_sheet_static(int sheet_id, const char* path)
 	s.loaded = (s.frame0.id > 0);
 }
 
-int Renderer::get_sheet_cols(int sheet_id) const
+int Renderer::get_sheet_cols(TileSheet sheet) const
 {
-	if (sheet_id < 0 || sheet_id >= SHEET_COUNT)
+	if (!sheets.contains(sheet))
 		return 0;
-	return sheets[sheet_id].tiles_per_row;
+	return sheets.at(sheet).tiles_per_row;
 }
 
-int Renderer::get_sheet_rows(int sheet_id) const
+int Renderer::get_sheet_rows(TileSheet sheet) const
 {
-	if (sheet_id < 0 || sheet_id >= SHEET_COUNT)
+	if (!sheets.contains(sheet))
 		return 0;
-	return sheets[sheet_id].tiles_per_col;
+	return sheets.at(sheet).tiles_per_col;
 }
 
-bool Renderer::sheet_is_loaded(int sheet_id) const
+bool Renderer::sheet_is_loaded(TileSheet sheet) const
 {
-	if (sheet_id < 0 || sheet_id >= SHEET_COUNT)
+	if (!sheets.contains(sheet))
 		return false;
-	return sheets[sheet_id].loaded;
+	return sheets.at(sheet).loaded;
+}
+
+std::string_view Renderer::get_sheet_name(TileSheet sheet) const
+{
+	if (!sheets.contains(sheet))
+		return {};
+	return sheets.at(sheet).name;
+}
+
+int Renderer::get_loaded_sheet_count() const
+{
+	return static_cast<int>(sheets.size());
 }
 
 void Renderer::load_dawnlike(std::string_view base_path)
@@ -161,55 +180,55 @@ void Renderer::load_dawnlike(std::string_view base_path)
 		base += '/';
 	}
 
-	auto load_animated = [&](int id, const char* dir, const char* name)
+	auto load_animated = [&](TileSheet id, std::string_view name, const char* dir, const char* file)
 	{
-		std::string p0 = std::format("{}{}{}0.png", base, dir, name);
-		std::string p1 = std::format("{}{}{}1.png", base, dir, name);
-		load_sheet(id, p0.c_str(), p1.c_str());
+		std::string p0 = std::format("{}{}{}0.png", base, dir, file);
+		std::string p1 = std::format("{}{}{}1.png", base, dir, file);
+		load_sheet(id, name, p0, p1);
 	};
 
-	auto load_static = [&](int id, const char* dir, const char* name)
+	auto load_static = [&](TileSheet id, std::string_view name, const char* dir, const char* file)
 	{
-		std::string p = std::format("{}{}{}.png", base, dir, name);
-		load_sheet_static(id, p.c_str());
+		std::string p = std::format("{}{}{}.png", base, dir, file);
+		load_sheet_static(id, name, p);
 	};
 
 	// Objects
-	load_static(SHEET_FLOOR, "Objects/", "Floor");
-	load_static(SHEET_WALL, "Objects/", "Wall");
-	load_static(SHEET_DOOR0, "Objects/", "Door0");
-	load_animated(SHEET_DECOR0, "Objects/", "Decor");
-	load_animated(SHEET_EFFECT0, "Objects/", "Effect");
-	load_static(SHEET_TILE, "Objects/", "Tile");
-	load_animated(SHEET_PIT0, "Objects/", "Pit");
-	load_animated(SHEET_GUI0, "GUI/", "GUI");
+	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor");
+	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall");
+	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0");
+	load_animated(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor");
+	load_animated(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect");
+	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile");
+	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit");
+	load_animated(TileSheet::SHEET_GUI0, "GUI0", "GUI/", "GUI");
 
 	// Characters (all animated with 0/1 pairs)
-	load_animated(SHEET_PLAYER0, "Characters/", "Player");
-	load_animated(SHEET_HUMANOID0, "Characters/", "Humanoid");
-	load_animated(SHEET_REPTILE0, "Characters/", "Reptile");
-	load_animated(SHEET_PEST0, "Characters/", "Pest");
-	load_animated(SHEET_DOG0, "Characters/", "Dog");
-	load_animated(SHEET_AVIAN0, "Characters/", "Avian");
-	load_animated(SHEET_UNDEAD0, "Characters/", "Undead");
-	load_animated(SHEET_QUADRAPED0, "Characters/", "Quadraped");
-	load_animated(SHEET_DEMON0, "Characters/", "Demon");
-	load_animated(SHEET_MISC0, "Characters/", "Misc");
+	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player");
+	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid");
+	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile");
+	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest");
+	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog");
+	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian");
+	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead");
+	load_animated(TileSheet::SHEET_QUADRAPED0, "Quadraped0", "Characters/", "Quadraped");
+	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon");
+	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc");
 
 	// Items (static -- no animation frames)
-	load_static(SHEET_POTION, "Items/", "Potion");
-	load_static(SHEET_SCROLL, "Items/", "Scroll");
-	load_static(SHEET_SHORT_WEP, "Items/", "ShortWep");
-	load_static(SHEET_MED_WEP, "Items/", "MedWep");
-	load_static(SHEET_LONG_WEP, "Items/", "LongWep");
-	load_static(SHEET_ARMOR, "Items/", "Armor");
-	load_static(SHEET_SHIELD, "Items/", "Shield");
-	load_static(SHEET_HAT, "Items/", "Hat");
-	load_static(SHEET_RING, "Items/", "Ring");
-	load_static(SHEET_AMULET_ITEM, "Items/", "Amulet");
-	load_static(SHEET_FOOD, "Items/", "Food");
-	load_static(SHEET_FLESH, "Items/", "Flesh");
-	load_static(SHEET_MONEY, "Items/", "Money");
+	load_static(TileSheet::SHEET_POTION, "Potion", "Items/", "Potion");
+	load_static(TileSheet::SHEET_SCROLL, "Scroll", "Items/", "Scroll");
+	load_static(TileSheet::SHEET_SHORT_WEP, "ShortWep", "Items/", "ShortWep");
+	load_static(TileSheet::SHEET_MED_WEP, "MedWep", "Items/", "MedWep");
+	load_static(TileSheet::SHEET_LONG_WEP, "LongWep", "Items/", "LongWep");
+	load_static(TileSheet::SHEET_ARMOR, "Armor", "Items/", "Armor");
+	load_static(TileSheet::SHEET_SHIELD, "Shield", "Items/", "Shield");
+	load_static(TileSheet::SHEET_HAT, "Hat", "Items/", "Hat");
+	load_static(TileSheet::SHEET_RING, "Ring", "Items/", "Ring");
+	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet");
+	load_static(TileSheet::SHEET_FOOD, "Food", "Items/", "Food");
+	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh");
+	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money");
 
 	sheets_loaded = true;
 }
@@ -253,13 +272,12 @@ void Renderer::draw_tile(int grid_x, int grid_y, int tile_id, int /*color_pair_i
 		return;
 	}
 
-	int sid = tile_sheet(tile_id);
-	if (sid < 0 || sid >= SHEET_COUNT)
+	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
+	if (!sheets.contains(sheet_key))
 	{
 		return;
 	}
-
-	const auto& sheet = sheets[sid];
+	const SpriteSheet& sheet = sheets.at(sheet_key);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 	{
 		return;
@@ -305,13 +323,12 @@ void Renderer::draw_tile_screen(int px, int py, int tile_id) const
 		return;
 	}
 
-	int sid = tile_sheet(tile_id);
-	if (sid < 0 || sid >= SHEET_COUNT)
+	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
+	if (!sheets.contains(sheet_key))
 	{
 		return;
 	}
-
-	const auto& sheet = sheets[sid];
+	const SpriteSheet& sheet = sheets.at(sheet_key);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 	{
 		return;
@@ -347,11 +364,10 @@ void Renderer::draw_tile_screen_sized(int px, int py, int tile_id, int display_s
 	if (!sheets_loaded)
 		return;
 
-	int sid = tile_sheet(tile_id);
-	if (sid < 0 || sid >= SHEET_COUNT)
+	const TileSheet sheet_key = static_cast<TileSheet>(tile_sheet(tile_id));
+	if (!sheets.contains(sheet_key))
 		return;
-
-	const auto& sheet = sheets[sid];
+	const SpriteSheet& sheet = sheets.at(sheet_key);
 	if (!sheet.loaded || sheet.tiles_per_row <= 0)
 		return;
 

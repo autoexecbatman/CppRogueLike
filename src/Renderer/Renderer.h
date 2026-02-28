@@ -1,39 +1,12 @@
 #pragma once
 
 #include <array>
+#include <string>
+#include <unordered_map>
+
 #include <raylib.h>
-#include <string_view>
 
 #include "TileId.h"
-
-// Undefine raylib color macros that conflict with game enum values
-// (e.g. ItemId::GOLD, ItemClass::GOLD, PickableType::GOLD)
-#undef LIGHTGRAY
-#undef GRAY
-#undef DARKGRAY
-#undef YELLOW
-#undef GOLD
-#undef ORANGE
-#undef PINK
-#undef RED
-#undef MAROON
-#undef GREEN
-#undef LIME
-#undef DARKGREEN
-#undef SKYBLUE
-#undef BLUE
-#undef DARKBLUE
-#undef PURPLE
-#undef VIOLET
-#undef DARKPURPLE
-#undef BEIGE
-#undef BROWN
-#undef DARKBROWN
-#undef WHITE
-#undef BLACK
-#undef BLANK
-#undef MAGENTA
-#undef RAYWHITE
 
 struct ScreenMetrics
 {
@@ -66,6 +39,7 @@ struct SpriteSheet
 	int tiles_per_col{ 0 };
 	bool animated{ false };
 	bool loaded{ false };
+	std::string_view name;
 };
 
 struct GameCamera
@@ -128,14 +102,16 @@ public:
 	[[nodiscard]] int get_screen_height() const { return screen_h; }
 	[[nodiscard]] int get_camera_x() const { return camera.x; }
 	[[nodiscard]] int get_camera_y() const { return camera.y; }
-	[[nodiscard]] int get_sheet_cols(int sheet_id) const;
-	[[nodiscard]] int get_sheet_rows(int sheet_id) const;
-	[[nodiscard]] bool sheet_is_loaded(int sheet_id) const;
+	[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
+	[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
+	[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
+	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
+	[[nodiscard]] int get_loaded_sheet_count() const;
 
 private:
 	void init_color_pairs();
-	void load_sheet(int sheet_id, const char* path0, const char* path1);
-	void load_sheet_static(int sheet_id, const char* path);
+	void load_sheet(TileSheet id, std::string_view name, const std::string& path0, const std::string& path1);
+	void load_sheet_static(TileSheet id, std::string_view name, const std::string& path);
 
 	bool initialized{ false };
 	int tile_size{ DISPLAY_TILE_SIZE };
@@ -146,7 +122,7 @@ private:
 
 	GameCamera camera{};
 
-	std::array<SpriteSheet, SHEET_COUNT> sheets{};
+	std::unordered_map<TileSheet, SpriteSheet> sheets;
 	bool sheets_loaded{ false };
 
 	Font game_font{};

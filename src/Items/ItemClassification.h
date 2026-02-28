@@ -1,7 +1,7 @@
 #pragma once
+#include <string>
 
 #include "Weapons.h" // For WeaponSize enum
-#include <string>
 
 // IDENTITY - Unique identifier for each specific item variant
 enum class ItemId
@@ -125,7 +125,7 @@ enum class ItemId
 	FRUIT,
 
 	// Treasure
-	GOLD,
+	GOLD_COIN,
 	GEM,
 
 	// Tools
@@ -167,7 +167,7 @@ enum class ItemClass
 	FOOD,
 
 	// Other
-	GOLD,
+	GOLD_COIN,
 	GEM,
 	TOOL,
 	QUEST_ITEM,
@@ -259,7 +259,7 @@ inline bool is_ring(ItemClass itemClass)
 }
 inline bool is_treasure(ItemClass itemClass)
 {
-	return itemClass == ItemClass::GOLD || itemClass == ItemClass::GEM;
+	return itemClass == ItemClass::GOLD_COIN || itemClass == ItemClass::GEM;
 }
 inline bool is_tool(ItemClass itemClass)
 {

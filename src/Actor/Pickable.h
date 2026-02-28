@@ -1,16 +1,17 @@
 #pragma once
 
+#include <memory>
+
 #include "../Items/Weapons.h" // For WeaponSize and HandRequirement enums
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/TargetMode.h"
+#include "EquipmentSlot.h"
 
 class Actor;
 class Creature;
 class Item;
 struct GameContext;
-
-#include "EquipmentSlot.h"
 
 //==PICKABLE==
 class Pickable : public Persistent
@@ -31,7 +32,7 @@ public:
 		CONSUMABLE,
 
 		// Treasure & food
-		GOLD,
+		GOLD_COIN,
 		FOOD,
 		CORPSE_FOOD,
 
@@ -68,9 +69,9 @@ public:
 //====
 
 // Effect type for Consumable - what happens when the item is used
-enum class ConsumableEffect : int
+enum class ConsumableEffect
 {
-	NONE = 0, // Show message, consume item
+	NONE, // Show message, consume item
 	HEAL, // Heal HP, consume item
 	ADD_BUFF, // Add timed buff via BuffSystem, consume item
 	FAIL, // Show message, do NOT consume (feature not yet implemented)

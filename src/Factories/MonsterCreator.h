@@ -5,7 +5,6 @@
 #include <unordered_map>
 
 #include "../Combat/DamageInfo.h"
-#include "../Systems/TargetMode.h" // for ScrollAnimation, not needed but TargetMode pulls nothing bad
 
 // Forward declarations
 class Creature;
@@ -25,6 +24,12 @@ enum class MonsterId
 	ICE_WOLF,
 	BAT,
 	KOBOLD,
+	// Special creatures -- not spawned via MonsterCreator but tile-editable
+	MIMIC,
+	SHOPKEEPER,
+	SPIDER_SMALL,
+	SPIDER_GIANT,
+	SPIDER_WEAVER,
 };
 
 enum class MonsterAiType

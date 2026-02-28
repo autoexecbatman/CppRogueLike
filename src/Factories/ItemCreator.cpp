@@ -1,4 +1,12 @@
-#include "ItemCreator.h"
+#include <algorithm>
+#include <memory>
+#include <span>
+#include <stdexcept>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Gold.h"
 #include "../ActorTypes/Teleporter.h"
@@ -7,13 +15,13 @@
 #include "../Items/Amulet.h"
 #include "../Items/Armor.h"
 #include "../Items/Food.h"
+#include "../Items/ItemClassification.h"
 #include "../Items/Jewelry.h"
-#include "../Items/MagicalItemEffects.h"
-#include "../Items/Weapons.h"
 #include "../Random/RandomDice.h"
-#include "../Systems/BuffSystem.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
+#include "../Utils/Vector2D.h"
+#include "ItemCreator.h"
 #include "ItemRegistries/ArmorItems.h"
 #include "ItemRegistries/FoodItems.h"
 #include "ItemRegistries/GirdleItems.h"
@@ -24,10 +32,6 @@
 #include "ItemRegistries/RangedWeaponItems.h"
 #include "ItemRegistries/RingItems.h"
 #include "ItemRegistries/ScrollItems.h"
-#include <span>
-#include <stdexcept>
-#include <string_view>
-#include <unordered_map>
 
 namespace
 {
@@ -124,7 +128,7 @@ std::unique_ptr<Pickable> create_pickable_from_blueprint(ItemId itemId, const It
 	case PickableType::FOOD:
 		return std::make_unique<Food>(params.nutrition_value);
 
-	case PickableType::GOLD:
+	case PickableType::GOLD_COIN:
 		return nullptr;
 
 	default:
@@ -167,10 +171,10 @@ std::unique_ptr<Item> ItemCreator::create(ItemId itemId, Vector2D pos)
 
 std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount)
 {
-	const auto& params = ItemRegistry.at(ItemId::GOLD);
+	const auto& params = ItemRegistry.at(ItemId::GOLD_COIN);
 	auto item = std::make_unique<Item>(pos, ActorData{ params.symbol, std::string{ params.name }, params.color });
 	item->pickable = std::make_unique<Gold>(goldAmount);
-	item->itemId = ItemId::GOLD;
+	item->itemId = ItemId::GOLD_COIN;
 	item->itemClass = params.itemClass;
 	item->set_value(goldAmount);
 	return item;

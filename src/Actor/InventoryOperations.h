@@ -2,16 +2,16 @@
 
 #include <memory>
 #include <span>
-#include <string_view>
+#include <cstdint>
+#include <string>
 
-#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "InventoryData.h"
 
 // Forward declarations
 class Item;
 class Actor;
-using json = nlohmann::json;
 
 // - Free functions for inventory management
 namespace InventoryOperations
@@ -61,8 +61,8 @@ void fire_inventory_event(InventoryData& inventory, InventoryEvent::Type type, c
 // ===== PERSISTENCE =====
 
 // JSON load/save operations
-void load_inventory(InventoryData& inventory, const json& j);
-void save_inventory(const InventoryData& inventory, json& j);
+void load_inventory(InventoryData& inventory, const nlohmann::json& j);
+void save_inventory(const InventoryData& inventory, nlohmann::json& j);
 
 // ===== DEBUG UTILITIES =====
 

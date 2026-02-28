@@ -1,9 +1,13 @@
 // file: FoodItems.cpp
 // Food and gold
-#include "FoodItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
 #include "../../Renderer/TileId.h"
+#include "../ItemCreator.h"
+#include "FoodItems.h"
 
 namespace
 {
@@ -16,7 +20,7 @@ const ItemRegistryEntry entries[] = {
 
 	{ ItemId::MEAT, { .symbol = TILE_FOOD, .name = "meat", .color = RED_BLACK_PAIR, .itemClass = ItemClass::FOOD, .value = 8, .pickable_type = PickableType::FOOD, .nutrition_value = 250, .base_weight = 8, .level_minimum = 2, .level_scaling = 0.1f, .category = "food" } },
 
-	{ ItemId::GOLD, { .symbol = TILE_GOLD, .name = "gold pile", .color = YELLOW_BLACK_PAIR, .itemClass = ItemClass::GOLD, .value = 0, .pickable_type = PickableType::GOLD, .base_weight = 25, .level_minimum = 1, .level_scaling = 0.1f, .category = "gold" } },
+	{ ItemId::GOLD_COIN, { .symbol = TILE_GOLD, .name = "gold pile", .color = YELLOW_BLACK_PAIR, .itemClass = ItemClass::GOLD_COIN, .value = 0, .pickable_type = PickableType::GOLD_COIN, .base_weight = 25, .level_minimum = 1, .level_scaling = 0.1f, .category = "gold" } },
 };
 }
 

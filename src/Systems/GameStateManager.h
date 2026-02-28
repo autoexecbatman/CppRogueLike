@@ -1,10 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <nlohmann/json.hpp>
-#include <string_view>
-#include <vector>
-
 // Forward declarations
 class Map;
 class Player;
@@ -37,12 +32,4 @@ public:
 	// File operations
 	static bool save_file_exists();
 	static bool delete_save_file();
-
-private:
-	// Helper methods for JSON operations
-	void save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const;
-	void load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const;
-
-	void save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const;
-	void load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const;
 };

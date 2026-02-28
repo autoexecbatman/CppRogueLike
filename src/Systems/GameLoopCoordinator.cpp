@@ -1,8 +1,12 @@
 // file: Systems/GameLoopCoordinator.cpp
-#include <algorithm>
 #include <cmath>
 #include <format>
+#include <string>
+#include <vector>
 
+#include <raylib.h>
+
+#include "../Actor/Actor.h"
 #include "../Actor/Destructible.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
@@ -17,8 +21,10 @@
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Tools/ContentEditor.h"
 #include "../Tools/DecorEditor.h"
 #include "../Tools/PrefabLibrary.h"
+#include "../Utils/Vector2D.h"
 #include "AnimationSystem.h"
 #include "CreatureManager.h"
 #include "FloatingTextSystem.h"
@@ -56,7 +62,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	}
 
 	// Update game state only when player provides input and editor is not open
-	const bool editor_active = ctx.decor_editor && ctx.decor_editor->is_active();
+	const bool editor_active = (ctx.decor_editor && ctx.decor_editor->is_active()) ||
+		(ctx.content_editor && ctx.content_editor->is_active());
 	if (!editor_active && !ctx.input_handler->is_animation_tick())
 	{
 		handle_update_phase(ctx, gui);
@@ -103,6 +110,11 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.decor_editor->toggle();
 				return true;
 			}
+			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.content_editor)
+			{
+				ctx.content_editor->toggle();
+				return true;
+			}
 			if (ctx.decor_editor && ctx.decor_editor->is_active())
 			{
 				if (key == GameKey::DECOR_PREV)
@@ -140,8 +152,14 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			return false;
 		};
 
-		// Editor is active: consume all input -- game gets nothing.
-		// Forward the char that poll() already popped from raylib's queue.
+		// Editor active: consume all input -- game gets nothing.
+		if (ctx.content_editor && ctx.content_editor->is_active())
+		{
+			handle_zoom();
+			ctx.menu_manager->set_should_take_input(true);
+			return;
+		}
+
 		if (ctx.decor_editor && ctx.decor_editor->is_active())
 		{
 			handle_zoom();
@@ -195,6 +213,11 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 	if (ctx.decor_editor)
 	{
 		ctx.decor_editor->update_and_render(*ctx.renderer);
+	}
+
+	if (ctx.content_editor)
+	{
+		ctx.content_editor->update_and_render(*ctx.renderer);
 	}
 
 	if (gui.guiInit)

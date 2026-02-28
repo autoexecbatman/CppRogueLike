@@ -1,4 +1,7 @@
 // file: InputSystem.cpp
+#include <raylib.h>
+
+#include "../Utils/Vector2D.h"
 #include "InputSystem.h"
 
 void InputSystem::poll()

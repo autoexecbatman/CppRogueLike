@@ -1,7 +1,13 @@
-#include "Gold.h"
+#include <stdexcept>
+#include <string>
+
 #include "../Actor/Actor.h"
+#include "../Actor/Pickable.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/MessageSystem.h"
+#include "Gold.h"
 
 Gold::Gold(int amount)
 	: amount(amount)
@@ -25,7 +31,7 @@ bool Gold::use(Item& owner, Creature& wearer, GameContext& ctx)
 
 void Gold::save(json& j)
 {
-	j["type"] = static_cast<int>(PickableType::GOLD); // Save the type
+	j["type"] = static_cast<int>(PickableType::GOLD_COIN); // Save the type
 	j["amount"] = amount; // Save the amount
 }
 

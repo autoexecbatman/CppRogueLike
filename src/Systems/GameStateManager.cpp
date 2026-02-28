@@ -11,7 +11,6 @@
 #include <nlohmann/json_fwd.hpp>
 
 #include "../Actor/Actor.h"
-#include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
@@ -27,10 +26,70 @@
 #include "../Systems/MessageSystem.h"
 #include "../Utils/Vector2D.h"
 #include "ContentRegistry.h"
+#include "ContentRegistryIO.h"
 #include "GameStateManager.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
+
+namespace
+{
+
+void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
+{
+	j["rooms"] = json::array();
+	for (const auto& room : rooms)
+	{
+		j["rooms"].push_back({ { "col", room.col },
+			{ "row", room.row },
+			{ "width", room.width },
+			{ "height", room.height } });
+	}
+}
+
+void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
+{
+	if (!j.contains("rooms") || !j["rooms"].is_array())
+		return;
+
+	for (const auto& d : j["rooms"])
+	{
+		rooms.push_back(DungeonRoom{
+			d.value("col", 0),
+			d.value("row", 0),
+			d.value("width", 1),
+			d.value("height", 1) });
+	}
+}
+
+void save_creatures(const std::vector<std::unique_ptr<Creature>>& creatures, json& j)
+{
+	j["creatures"] = json::array();
+	for (const auto& creature : creatures)
+	{
+		if (creature)
+		{
+			json creatureJson;
+			creature->save(creatureJson);
+			j["creatures"].push_back(creatureJson);
+		}
+	}
+}
+
+void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creatures)
+{
+	if (j.contains("creatures") && j["creatures"].is_array())
+	{
+		for (const auto& creatureData : j["creatures"])
+		{
+			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
+			creature->load(creatureData);
+			creatures.push_back(std::move(creature));
+		}
+	}
+}
+
+} // namespace
 
 void GameStateManager::init_new_game(GameContext& ctx)
 {
@@ -43,7 +102,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.player != nullptr);
 	assert(ctx.game_status != nullptr);
 
-	ContentRegistry::instance().load(Paths::CONTENT_TILES);
+	ContentRegistryIO::load(ContentRegistry::instance(), Paths::CONTENT_TILES);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
 	ctx.level_manager->reset_to_first_level();
@@ -65,7 +124,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.isLoadedGame != nullptr);
 	assert(ctx.game_status != nullptr);
 
-	ContentRegistry::instance().load(Paths::CONTENT_TILES);
+	ContentRegistryIO::load(ContentRegistry::instance(), Paths::CONTENT_TILES);
 	ctx.menu_manager->set_game_initialized(true);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
@@ -102,7 +161,7 @@ void GameStateManager::save_game(GameContext& ctx)
 		json j;
 
 		ctx.map->save(j);
-		save_rooms_to_json(*ctx.rooms, j);
+		save_rooms(*ctx.rooms, j);
 
 		json playerJson;
 		ctx.player->save(playerJson);
@@ -112,7 +171,7 @@ void GameStateManager::save_game(GameContext& ctx)
 		ctx.stairs->save(stairsJson);
 		j["stairs"] = stairsJson;
 
-		save_creatures_to_json(*ctx.creatures, j);
+		save_creatures(*ctx.creatures, j);
 		save_inventory(*ctx.inventory_data, j);
 
 		json guiJson;
@@ -159,7 +218,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 	file >> j;
 
 	ctx.map->load(j);
-	load_rooms_from_json(j, *ctx.rooms);
+	load_rooms(j, *ctx.rooms);
 
 	if (j.contains("player"))
 	{
@@ -171,7 +230,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 		ctx.stairs->load(j["stairs"]);
 	}
 
-	load_creatures_from_json(j, *ctx.creatures);
+	load_creatures(j, *ctx.creatures);
 	load_inventory(*ctx.inventory_data, j);
 
 	if (j.contains("gui"))
@@ -210,58 +269,4 @@ bool GameStateManager::delete_save_file()
 
 	const bool removed = std::filesystem::remove(save_path, ec);
 	return removed && !ec;
-}
-
-void GameStateManager::save_rooms_to_json(const std::vector<DungeonRoom>& rooms, nlohmann::json& j) const
-{
-	j["rooms"] = json::array();
-	for (const auto& room : rooms)
-	{
-		j["rooms"].push_back({ { "col", room.col },
-			{ "row", room.row },
-			{ "width", room.width },
-			{ "height", room.height } });
-	}
-}
-
-void GameStateManager::load_rooms_from_json(const nlohmann::json& j, std::vector<DungeonRoom>& rooms) const
-{
-	if (!j.contains("rooms") || !j["rooms"].is_array())
-		return;
-
-	for (const auto& d : j["rooms"])
-	{
-		rooms.push_back(DungeonRoom{
-			d.value("col", 0),
-			d.value("row", 0),
-			d.value("width", 1),
-			d.value("height", 1) });
-	}
-}
-
-void GameStateManager::save_creatures_to_json(const std::vector<std::unique_ptr<Creature>>& creatures, nlohmann::json& j) const
-{
-	j["creatures"] = json::array();
-	for (const auto& creature : creatures)
-	{
-		if (creature)
-		{
-			json creatureJson;
-			creature->save(creatureJson);
-			j["creatures"].push_back(creatureJson);
-		}
-	}
-}
-
-void GameStateManager::load_creatures_from_json(const nlohmann::json& j, std::vector<std::unique_ptr<Creature>>& creatures) const
-{
-	if (j.contains("creatures") && j["creatures"].is_array())
-	{
-		for (const auto& creatureData : j["creatures"])
-		{
-			auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ 0, "Unnamed", WHITE_BLACK_PAIR });
-			creature->load(creatureData);
-			creatures.push_back(std::move(creature));
-		}
-	}
 }

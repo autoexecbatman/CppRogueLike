@@ -1,6 +1,9 @@
 // ItemClassification.cpp - Implementation of proper item classification system
-#include "ItemClassification.h"
+#include <string>
 #include <unordered_map>
+
+#include "ItemClassification.h"
+#include "Weapons.h"
 
 namespace ItemClassificationUtils
 {
@@ -55,7 +58,7 @@ ItemCategory get_category(ItemClass itemClass)
 		return ItemCategory::JEWELRY;
 
 	// Treasure
-	case ItemClass::GOLD:
+	case ItemClass::GOLD_COIN:
 	case ItemClass::GEM:
 		return ItemCategory::TREASURE;
 
@@ -187,8 +190,8 @@ ItemClass get_class_from_id(ItemId itemId)
 		return ItemClass::FOOD;
 
 	// Treasure
-	case ItemId::GOLD:
-		return ItemClass::GOLD;
+	case ItemId::GOLD_COIN:
+		return ItemClass::GOLD_COIN;
 	case ItemId::GEM:
 		return ItemClass::GEM;
 
@@ -324,7 +327,7 @@ std::string get_display_name(ItemId itemId)
 		return "fruit";
 
 	// Treasure
-	case ItemId::GOLD:
+	case ItemId::GOLD_COIN:
 		return "gold";
 	case ItemId::GEM:
 		return "gem";
@@ -423,7 +426,7 @@ ItemId item_id_from_string(const std::string& typeName)
 		{ "fruit", ItemId::FRUIT },
 
 		// Treasure
-		{ "gold", ItemId::GOLD },
+		{ "gold", ItemId::GOLD_COIN },
 		{ "gem", ItemId::GEM },
 
 		// Tools
@@ -467,7 +470,7 @@ ItemClass item_class_from_string(const std::string& typeName)
 		{ "food", ItemClass::FOOD },
 
 		// Other
-		{ "gold", ItemClass::GOLD },
+		{ "gold", ItemClass::GOLD_COIN },
 		{ "gem", ItemClass::GEM },
 		{ "tool", ItemClass::TOOL },
 		{ "quest_item", ItemClass::QUEST_ITEM }

@@ -13,14 +13,24 @@
  * This ensures spiders provide equivalent progression rewards as other
  * creatures in the solo AD&D 2e experience system.
  */
-#include "Spider.h"
+#include <memory>
+
+#include "../../Actor/Actor.h"
+#include "../../Actor/Attacker.h"
+#include "../../Actor/Destructible.h"
 #include "../../Ai/AiSpider.h"
+#include "../../Colors/Colors.h"
+#include "../../Combat/DamageInfo.h"
 #include "../../Core/GameContext.h"
+#include "../../Factories/MonsterCreator.h"
 #include "../../Random/RandomDice.h"
+#include "../../Systems/ContentRegistry.h"
+#include "../../Utils/Vector2D.h"
+#include "Spider.h"
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
-	: Creature(position, ActorData{ TILE_SPIDER_SMALL, "small spider", GREEN_BLACK_PAIR }), // Default to small spider data
+	: Creature(position, ActorData{ ContentRegistry::instance().get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR }), // Default to small spider data
 	  spiderType(type)
 {
 	// Initialize based on spider type
@@ -36,7 +46,7 @@ void Spider::init_spider_type(GameContext& ctx)
 	{
 	case SpiderType::SMALL:
 		// Update actor data for small spider
-		actorData = ActorData{ TILE_SPIDER_SMALL, "small spider", GREEN_BLACK_PAIR };
+		actorData = ActorData{ ContentRegistry::instance().get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR };
 
 		// Stats for small spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Minimum strength of 3
@@ -54,7 +64,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::GIANT:
 		// Update actor data for giant spider
-		actorData = ActorData{ TILE_SPIDER_GIANT, "giant spider", RED_BLACK_PAIR };
+		actorData = ActorData{ ContentRegistry::instance().get_tile(MonsterId::SPIDER_GIANT), "giant spider", RED_BLACK_PAIR };
 
 		// Stats for giant spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
@@ -78,7 +88,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::WEB_SPINNER:
 		// Update actor data for web spinner
-		actorData = ActorData{ TILE_SPIDER_WEAVER, "web weaver", BLACK_GREEN_PAIR };
+		actorData = ActorData{ ContentRegistry::instance().get_tile(MonsterId::SPIDER_WEAVER), "web weaver", BLACK_GREEN_PAIR };
 
 		// Stats for web spinner - now much more formidable
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
