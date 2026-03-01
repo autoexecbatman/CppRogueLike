@@ -221,4 +221,7 @@ void DungeonGenerator::generate(
 		map.create_room(rooms[i], i == 0, withActors, ctx);
 
 	connect_all(rooms, rng, map);
+
+	if (ctx.rooms)
+		*ctx.rooms = rooms;
 }

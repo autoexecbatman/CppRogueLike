@@ -37,7 +37,7 @@ protected:
         }
         catch (...) {}
 
-        map = std::make_unique<Map>(TEST_MAP_HEIGHT, TEST_MAP_WIDTH);
+        map = std::make_unique<Map>(TEST_MAP_WIDTH, TEST_MAP_HEIGHT);
 
         player = std::make_unique<Player>(Vector2D{5, 5});
         player->destructible = std::make_unique<PlayerDestructible>(
@@ -265,7 +265,7 @@ TEST_F(MapTest, GetIndex_ValidPosition)
 {
     // Index = y * width + x
     EXPECT_EQ(map->get_index(Vector2D{0, 0}), 0);
-    EXPECT_EQ(map->get_index(Vector2D{0, 5}), 5);
+    EXPECT_EQ(map->get_index(Vector2D{5, 0}), 5);
     EXPECT_EQ(map->get_index(Vector2D{0, 1}), TEST_MAP_WIDTH);
     EXPECT_EQ(map->get_index(Vector2D{3, 2}), 2 * TEST_MAP_WIDTH + 3);
 }
