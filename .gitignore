@@ -397,6 +397,9 @@ FodyWeavers.xsd
 /.claude/settings.local.json
 /nul
 /Testing/Temporary
+/.vscode
+/tile_debug
+/tile_previews
 
 # D&D Reference Materials
 *.pdf

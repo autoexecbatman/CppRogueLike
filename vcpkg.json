@@ -4,7 +4,6 @@
   "version-semver": "0.0.0",
   "dependencies": [
     "nlohmann-json",
-    "stb",
     "raylib",
     "gtest"
   ]
