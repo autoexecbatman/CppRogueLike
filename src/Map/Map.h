@@ -4,13 +4,13 @@
 #include <unordered_set>
 #include <vector>
 
-#include <libtcod.h>
-
 #include "../Actor/Actor.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Persistent/Persistent.h"
+#include "../Random/RandomDice.h"
 #include "DungeonRoom.h"
+#include "FovMap.h"
 
 // Forward declaration
 struct GameContext;
@@ -112,7 +112,7 @@ public:
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos, GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
-	void compute_fov(GameContext& ctx); // compute the field of view using `TCODMap::computeFov()`
+	void compute_fov(GameContext& ctx);
 	void update();
 	void render(const GameContext& ctx) const;
 	void add_item(Vector2D pos, GameContext& ctx);
@@ -153,15 +153,13 @@ public:
 	bool is_wall(Vector2D pos) const noexcept;
 	void set_tile(Vector2D pos, TileType newType, double cost);
 
-	std::unique_ptr<TCODPath> tcodPath;
 	std::vector<Tile> tiles;
 
 protected:
-	std::unique_ptr<TCODMap> tcodMap;
-	std::unique_ptr<TCODRandom> rng_unique;
+	std::unique_ptr<FovMap> fovMap;
+	RandomDice mapRng_;
 	long seed;
 	friend class DungeonGenerator;
-	friend class PathListener;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY);

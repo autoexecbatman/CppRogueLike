@@ -188,6 +188,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Map/DungeonRoom.h
     ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.cpp
     ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.h
+    ${PROJECT_SOURCE_DIR}/Map/FovMap.cpp
+    ${PROJECT_SOURCE_DIR}/Map/FovMap.h
 
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/Items/Items.cpp
@@ -321,58 +323,24 @@ add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "${OUTPUT_SUFFIX}")
 
 if(EMSCRIPTEN)
-    # Check if we need to download nlohmann_json
-    if(NOT EXISTS "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp")
-        message(STATUS "Downloading nlohmann/json...")
-        file(DOWNLOAD
-            "https://github.com/nlohmann/json/releases/download/v3.11.2/json.hpp"
-            "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp"
-            SHOW_PROGRESS
-        )
-    endif()
-
-    # Check if libtcod.h exists directly in the include directory
-    if(NOT EXISTS "${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
-        message(FATAL_ERROR "libtcod.h not found. Please make sure it exists at ${CMAKE_SOURCE_DIR}/libtcod/libtcod.h")
-    endif()
-
     # Include directories for all dependencies
     target_include_directories(${PROJECT_NAME} PRIVATE
-        ${CMAKE_BINARY_DIR}/include
         ${CMAKE_SOURCE_DIR}
-        ${CMAKE_SOURCE_DIR}/libtcod/
     )
-
-    file(GLOB LIBTCOD_SRC
-    "${CMAKE_SOURCE_DIR}/libtcod/*.h"
-    "${CMAKE_SOURCE_DIR}/libtcod/*.hpp"
-    "${CMAKE_SOURCE_DIR}/libtcod/*/*.h"
-    "${CMAKE_SOURCE_DIR}/libtcod/*/*.hpp"
-    )
-
-    set(LIBTCOD_LIBRARIES "${CMAKE_SOURCE_DIR}/libtcod/lib/libtcod.a;")
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
-        ${LIBTCOD_LIBRARIES}
         raylib
-    )
-
-    target_compile_definitions(${PROJECT_NAME} PRIVATE
-        TCOD_SDL2
-        TCOD_EMSCRIPTEN
     )
 
 else()
     # For native build, link against required libraries
     find_package(raylib CONFIG REQUIRED)
-    find_package(libtcod CONFIG REQUIRED)
     find_package(nlohmann_json CONFIG REQUIRED)
 
     target_link_libraries(
         ${PROJECT_NAME}
         PRIVATE
             raylib
-            libtcod::libtcod
             nlohmann_json::nlohmann_json
     )
 

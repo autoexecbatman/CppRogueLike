@@ -15,7 +15,7 @@
 #include <vector>
 
 class Map;
-class TCODRandom;
+class RandomDice;
 struct GameContext;
 
 class DungeonGenerator
@@ -24,7 +24,7 @@ public:
 	void generate(
 		int map_width,
 		int map_height,
-		TCODRandom& rng,
+		RandomDice& rng,
 		bool withActors,
 		GameContext& ctx,
 		Map& map) const;
@@ -33,11 +33,11 @@ private:
 	std::vector<DungeonRoom> place_rooms(
 		int map_width,
 		int map_height,
-		TCODRandom& rng) const;
+		RandomDice& rng) const;
 
 	void connect_all(
 		const std::vector<DungeonRoom>& rooms,
-		TCODRandom& rng,
+		RandomDice& rng,
 		Map& map) const;
 
 	void connect_pair(

@@ -9,7 +9,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Find required packages
 find_package(GTest CONFIG REQUIRED)
 find_package(raylib CONFIG REQUIRED)
-find_package(libtcod CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
 # Include directories from main project
@@ -96,6 +95,7 @@ set(PARENT_SOURCES
     # Map
     ${PARENT_SOURCE_DIR}/Map/Map.cpp
     ${PARENT_SOURCE_DIR}/Map/DungeonGenerator.cpp
+    ${PARENT_SOURCE_DIR}/Map/FovMap.cpp
 
     # Items
     ${PARENT_SOURCE_DIR}/Items/Items.cpp
@@ -182,7 +182,6 @@ target_link_libraries(test_exe
     PRIVATE
         GTest::gtest
         raylib
-        libtcod::libtcod
         nlohmann_json::nlohmann_json
 )
 

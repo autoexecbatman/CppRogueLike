@@ -3,11 +3,8 @@
 #include <limits>
 #include <ranges>
 
-#pragma warning(push, 0)
-#include <libtcod/libtcod.hpp>
-#pragma warning(pop)
-
 #include "../Core/GameContext.h"
+#include "../Random/RandomDice.h"
 #include "DungeonGenerator.h"
 #include "Map.h"
 
@@ -23,7 +20,7 @@ static Vector2D v(int col, int row) noexcept
 std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	int map_width,
 	int map_height,
-	TCODRandom& rng) const
+	RandomDice& rng) const
 {
 	// Each cell is wide/tall enough to hold the largest room plus a corridor
 	// gap on every side so rooms never share a wall tile.
@@ -41,14 +38,14 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	{
 		for (int gc = 0; gc < grid_cols; ++gc)
 		{
-			if (rng.getInt(0, 99) < SKIP_PCTG)
+			if (rng.roll(0, 99) < SKIP_PCTG)
 				continue;
 
 			const int cell_x = gc * CELL_W;
 			const int cell_y = gr * CELL_H;
 
-			const int room_w = rng.getInt(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
-			const int room_h = rng.getInt(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
+			const int room_w = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
+			const int room_h = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
 
 			// Random position inside the cell -- at least 1 tile from each edge.
 			const int max_col = cell_x + CELL_W - room_w - 1;
@@ -57,8 +54,8 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			if (max_col < cell_x + 1 || max_row < cell_y + 1)
 				continue;
 
-			const int room_col = rng.getInt(cell_x + 1, max_col);
-			const int room_row = rng.getInt(cell_y + 1, max_row);
+			const int room_col = rng.roll(cell_x + 1, max_col);
+			const int room_row = rng.roll(cell_y + 1, max_row);
 
 			// Keep rooms inside map interior (wall ring must always exist).
 			if (room_col < 1 || room_row < 1)
@@ -130,7 +127,7 @@ void DungeonGenerator::connect_pair(
 
 void DungeonGenerator::connect_all(
 	const std::vector<DungeonRoom>& rooms,
-	TCODRandom& rng,
+	RandomDice& rng,
 	Map& map) const
 {
 	if (rooms.size() < 2)
@@ -185,8 +182,8 @@ void DungeonGenerator::connect_all(
 
 	for (int attempt = 0; attempt < max_attempts && added < extra_target; ++attempt)
 	{
-		const int a = rng.getInt(0, n - 1);
-		const int b = rng.getInt(0, n - 1);
+		const int a = rng.roll(0, n - 1);
+		const int b = rng.roll(0, n - 1);
 		if (a == b)
 			continue;
 
@@ -206,7 +203,7 @@ void DungeonGenerator::connect_all(
 void DungeonGenerator::generate(
 	int map_width,
 	int map_height,
-	TCODRandom& rng,
+	RandomDice& rng,
 	bool withActors,
 	GameContext& ctx,
 	Map& map) const

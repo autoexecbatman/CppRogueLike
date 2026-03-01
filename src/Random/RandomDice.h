@@ -8,6 +8,13 @@
 class RandomDice
 {
 public:
+	RandomDice() = default;
+
+	explicit RandomDice(unsigned int seed) noexcept
+		: m_gen(seed)
+	{
+	}
+
 	// public functions to emulate a set of dice from d2 to d100
 	int d2() { return roll(1, 2); }
 	int d4() { return roll(1, 4); }

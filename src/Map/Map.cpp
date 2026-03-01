@@ -9,13 +9,6 @@
 #include <utility>
 #include <vector>
 
-#pragma warning(push, 0)
-#include <libtcod/fov.hpp>
-#include <libtcod/fov_types.h>
-#include <libtcod/mersenne.hpp>
-#include <libtcod/mersenne_types.h>
-#include <libtcod/path.hpp>
-#pragma warning(pop)
 #include <raylib.h>
 
 #include "../Actor/Actor.h"
@@ -39,32 +32,11 @@
 #include "DungeonRoom.h"
 #include "Map.h"
 
-// tcod path listener
-class PathListener : public ITCODPathCallback
-{
-private:
-	Map& map;
-
-public:
-	PathListener(Map& map) noexcept
-		: map(map) {}
-
-	// callback to handle pathfinding
-	// returns the cost of the path from (xFrom, yFrom) to (xTo, yTo)
-	// if the cost is 0, the path is blocked
-	// if the cost is 1, the path is open
-	// if the path is empty returns an empty path
-	float getWalkCost(int xFrom, int yFrom, int xTo, int yTo, void* userData) const override
-	{
-		return map.tcodMap->isWalkable(xTo, yTo) ? 1.0f : 0.0f;
-	}
-};
-
 //====
 Map::Map(int map_width, int map_height)
 	: map_height(map_height),
 	  map_width(map_width),
-	  tcodMap(std::make_unique<TCODMap>(map_width, map_height)),
+	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
 	  seed(0), // Will be set in init() with GameContext access
 	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>())
@@ -111,10 +83,9 @@ void Map::init(bool withActors, GameContext& ctx)
 {
 	init_tiles(ctx);
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
-	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
-	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
+	mapRng_ = RandomDice{ static_cast<unsigned int>(seed) };
+	fovMap = std::make_unique<FovMap>(map_width, map_height);
 	generate_rooms(withActors, ctx);
-	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
 	post_process_doors();
 
@@ -128,7 +99,7 @@ void Map::init(bool withActors, GameContext& ctx)
 void Map::generate_rooms(bool withActors, GameContext& ctx)
 {
 	DungeonGenerator gen;
-	gen.generate(map_width, map_height, *rng_unique, withActors, ctx, *this);
+	gen.generate(map_width, map_height, mapRng_, withActors, ctx, *this);
 	place_stairs(ctx);
 }
 
@@ -153,11 +124,10 @@ void Map::load(const json& j)
 		tiles.back().explored = explored;
 	}
 
-	tcodMap = std::make_unique<TCODMap>(map_width, map_height);
-	rng_unique = std::make_unique<TCODRandom>(seed, TCOD_RNG_CMWC);
+	fovMap = std::make_unique<FovMap>(map_width, map_height);
+	mapRng_ = RandomDice{ static_cast<unsigned int>(seed) };
 
-	// CRITICAL FOV FIX: Set tcodMap properties based on loaded tile data
-	// instead of regenerating via bsp() which would override our loaded tiles
+	// Rebuild FOV grid from loaded tile data.
 	for (const auto& tile : tiles)
 	{
 		bool walkable = false;
@@ -172,7 +142,7 @@ void Map::load(const json& j)
 			transparent = true;
 			break;
 		case TileType::WATER:
-			walkable = true; // Can walk if have swim ability, but always transparent
+			walkable = true;
 			transparent = true;
 			break;
 		case TileType::WALL:
@@ -186,10 +156,8 @@ void Map::load(const json& j)
 			break;
 		}
 
-		tcodMap->setProperties(tile.position.x, tile.position.y, walkable, transparent);
+		fovMap->set_properties(tile.position.x, tile.position.y, walkable, transparent);
 	}
-
-	tcodPath = std::make_unique<TCODPath>(tcodMap.get(), 1.41f);
 
 	// Post-process to place doors after loading map
 	post_process_doors();
@@ -216,7 +184,7 @@ void Map::save(json& j)
 
 bool Map::is_wall(Vector2D pos) const noexcept
 {
-	return !tcodMap->isWalkable(pos.x, pos.y);
+	return !fovMap->is_walkable(pos.x, pos.y);
 }
 
 bool Map::is_explored(Vector2D pos) const noexcept
@@ -246,7 +214,7 @@ void Map::set_explored(Vector2D pos)
 
 bool Map::is_in_fov(Vector2D pos) const noexcept
 {
-	return tcodMap->isInFov(pos.x, pos.y);
+	return fovMap->is_in_fov(pos.x, pos.y);
 }
 
 bool Map::is_water(Vector2D pos) const noexcept
@@ -356,7 +324,7 @@ void Map::compute_fov(GameContext& ctx)
 		}
 		return;
 	}
-	tcodMap->computeFov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS, true, FOV_SYMMETRIC_SHADOWCAST);
+	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
 }
 
 void Map::update()
@@ -602,7 +570,7 @@ void Map::render(const GameContext& ctx) const
 void Map::add_item(Vector2D pos, GameContext& ctx)
 {
 	// 75% chance to spawn an item at all
-	if (rng_unique->getInt(1, 100) > 75)
+	if (mapRng_.roll(1, 100) > 75)
 		return;
 
 	// Use our ItemFactory to create a random item
@@ -628,7 +596,7 @@ void Map::dig(Vector2D begin, Vector2D end)
 		for (int tileX = begin.x; tileX <= end.x; tileX++)
 		{
 			set_tile(Vector2D{ tileX, tileY }, TileType::FLOOR, 1);
-			tcodMap->setProperties(tileX, tileY, true, true);
+			fovMap->set_properties(tileX, tileY, true, true);
 		}
 	}
 }
@@ -640,7 +608,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	const int x2 = end.x;
 	const int y2 = end.y;
 
-	const bool horizontal_first = rng_unique->getInt(0, 1) == 1;
+	const bool horizontal_first = mapRng_.roll(0, 1) == 1;
 
 	// Only carve WALL tiles -- floor/corridor tiles keep their existing type.
 	// This prevents corridors from visually scarring room interiors when the
@@ -651,7 +619,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 			return;
 		if (get_tile_type(pos) == TileType::WALL)
 			set_tile(pos, TileType::CORRIDOR, 1);
-		tcodMap->setProperties(pos.x, pos.y, true, true);
+		fovMap->set_properties(pos.x, pos.y, true, true);
 	};
 
 	if (horizontal_first)
@@ -681,7 +649,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 void Map::set_door(Vector2D thisTile, int tileX, int tileY)
 {
 	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
-	tcodMap->setProperties(tileX, tileY, false, false);
+	fovMap->set_properties(tileX, tileY, false, false);
 }
 
 void Map::set_tile(Vector2D pos, TileType newType, double cost)
@@ -722,14 +690,14 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 		for (waterPos.x = room.col; waterPos.x <= room.col_end(); ++waterPos.x)
 		{
 			/*const int rolld100 = game.d.d100();*/
-			const int rolld100 = rng_unique->getInt(1, 100);
+			const int rolld100 = mapRng_.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
 				// CRITICAL FIX: Check if water would block entrances using pattern matching
 				if (!would_water_block_entrance(waterPos, ctx))
 				{
 					set_tile(waterPos, TileType::WATER, 10);
-					tcodMap->setProperties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
+					fovMap->set_properties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
 				}
 			}
 		}
@@ -1182,7 +1150,7 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 	}
 
 	set_tile(pos, TileType::OPEN_DOOR, 1);
-	tcodMap->setProperties(pos.x, pos.y, true, true);
+	fovMap->set_properties(pos.x, pos.y, true, true);
 
 	if (ctx.player && ctx.player->get_tile_distance(pos) <= FOV_RADIUS)
 	{
@@ -1215,7 +1183,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	set_tile(pos, TileType::CLOSED_DOOR, 2);
 
 	// Make the tile non-walkable and non-transparent
-	tcodMap->setProperties(pos.x, pos.y, false, false);
+	fovMap->set_properties(pos.x, pos.y, false, false);
 
 	if (ctx.player && ctx.player->get_tile_distance(pos) <= FOV_RADIUS)
 	{
@@ -1275,7 +1243,7 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 		for (int x = room.col; x <= room.col_end(); x++)
 		{
 			set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
-			tcodMap->setProperties(x, y, true, true);
+			fovMap->set_properties(x, y, true, true);
 		}
 	}
 
