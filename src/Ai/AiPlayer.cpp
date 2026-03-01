@@ -430,12 +430,12 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					// Calculate number of attacks this round
 					int attacksThisRound = 1; // Default single attack
 
-					if (playerPtr->attacksPerRound >= 2.0f)
+					if (playerPtr->get_attacks_per_round() >= 2.0f)
 					{
 						// 2 attacks per round
 						attacksThisRound = 2;
 					}
-					else if (playerPtr->attacksPerRound >= 1.5f)
+					else if (playerPtr->get_attacks_per_round() >= 1.5f)
 					{
 						// 3/2 attacks per round (alternating pattern: 2, 1, 2, 1...)
 						attacksThisRound = (playerPtr->roundCounter % 2 == 1) ? 2 : 1;

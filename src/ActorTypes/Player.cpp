@@ -875,7 +875,6 @@ void Player::save(json& j)
 	j["playerClassState"] = static_cast<int>(playerClassState);
 	j["playerClass"] = playerClass;
 	j["playerRace"] = playerRace;
-	j["attacksPerRound"] = attacksPerRound;
 	j["roundCounter"] = roundCounter;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
@@ -903,7 +902,6 @@ void Player::load(const json& j)
 	playerClassState = static_cast<PlayerClassState>(j.at("playerClassState").get<int>());
 	playerClass = j.at("playerClass").get<std::string>();
 	playerRace = j.at("playerRace").get<std::string>();
-	attacksPerRound = j.at("attacksPerRound").get<float>();
 	roundCounter = j.at("roundCounter").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();

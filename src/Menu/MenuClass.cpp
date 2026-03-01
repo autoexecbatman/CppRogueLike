@@ -15,6 +15,8 @@ void Fighter::on_selection(GameContext& ctx)
 {
 	ctx.player->playerClass = "Fighter";
 	ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
+	ctx.player->set_creature_class(CreatureClass::FIGHTER);
+	ctx.player->set_hit_die(10);
 	// Starting gear equipped in Game::update() STARTUP phase after init()
 }
 
@@ -22,18 +24,24 @@ void Rogue::on_selection(GameContext& ctx)
 {
 	ctx.player->playerClass = "Rogue";
 	ctx.player->playerClassState = Player::PlayerClassState::ROGUE;
+	ctx.player->set_creature_class(CreatureClass::ROGUE);
+	ctx.player->set_hit_die(6);
 }
 
 void Cleric::on_selection(GameContext& ctx)
 {
 	ctx.player->playerClass = "Cleric";
 	ctx.player->playerClassState = Player::PlayerClassState::CLERIC;
+	ctx.player->set_creature_class(CreatureClass::CLERIC);
+	ctx.player->set_hit_die(8);
 }
 
 void Wizard::on_selection(GameContext& ctx)
 {
 	ctx.player->playerClass = "Wizard";
 	ctx.player->playerClassState = Player::PlayerClassState::WIZARD;
+	ctx.player->set_creature_class(CreatureClass::WIZARD);
+	ctx.player->set_hit_die(4);
 }
 
 void ClassRandom::on_selection(GameContext& ctx)
@@ -43,18 +51,26 @@ void ClassRandom::on_selection(GameContext& ctx)
 	case 1:
 		ctx.player->playerClass = "Fighter";
 		ctx.player->playerClassState = Player::PlayerClassState::FIGHTER;
+		ctx.player->set_creature_class(CreatureClass::FIGHTER);
+		ctx.player->set_hit_die(10);
 		break;
 	case 2:
 		ctx.player->playerClass = "Rogue";
 		ctx.player->playerClassState = Player::PlayerClassState::ROGUE;
+		ctx.player->set_creature_class(CreatureClass::ROGUE);
+		ctx.player->set_hit_die(6);
 		break;
 	case 3:
 		ctx.player->playerClass = "Wizard";
 		ctx.player->playerClassState = Player::PlayerClassState::WIZARD;
+		ctx.player->set_creature_class(CreatureClass::WIZARD);
+		ctx.player->set_hit_die(4);
 		break;
 	case 4:
 		ctx.player->playerClass = "Cleric";
 		ctx.player->playerClassState = Player::PlayerClassState::CLERIC;
+		ctx.player->set_creature_class(CreatureClass::CLERIC);
+		ctx.player->set_hit_die(8);
 		break;
 	default:
 		break;

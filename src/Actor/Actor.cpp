@@ -161,6 +161,9 @@ void Creature::load(const json& j)
 	gold = j["gold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
+	creatureClass = static_cast<CreatureClass>(j.value("creatureClass", static_cast<int>(CreatureClass::MONSTER)));
+	hitDie = j.value("hitDie", 8);
+	attacksPerRound = j.value("attacksPerRound", 1.0f);
 	if (j.contains("attacker"))
 	{
 		attacker = std::make_unique<Attacker>(DamageInfo{});
@@ -213,6 +216,9 @@ void Creature::save(json& j)
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
+	j["creatureClass"] = static_cast<int>(creatureClass);
+	j["hitDie"] = hitDie;
+	j["attacksPerRound"] = attacksPerRound;
 	if (attacker)
 	{
 		json attackerJson;

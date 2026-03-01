@@ -32,7 +32,7 @@ protected:
         player->playerRaceState = Player::PlayerRaceState::HUMAN;
         player->playerClass = "Fighter";
         player->playerRace = "Human";
-        player->attacksPerRound = 1.5f;
+        player->set_attacks_per_round(1.5f);
         player->roundCounter = 3;
 
         // Set up components
@@ -86,7 +86,7 @@ TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->load(j);
 
-    EXPECT_FLOAT_EQ(loaded->attacksPerRound, 1.5f);
+    EXPECT_FLOAT_EQ(loaded->get_attacks_per_round(), 1.5f);
     EXPECT_EQ(loaded->roundCounter, 3);
 }
 

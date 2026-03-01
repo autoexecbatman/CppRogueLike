@@ -51,6 +51,8 @@ TEST_F(LevelUpSystemTest, CalculateBackstabMultiplier)
 TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
     player->set_constitution(10);
 
     player->destructible->set_hp_base(10);
@@ -69,6 +71,8 @@ TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
 TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
 {
     player->playerClassState = Player::PlayerClassState::WIZARD;
+    player->set_creature_class(CreatureClass::WIZARD);
+    player->set_hit_die(4);
     player->set_constitution(16);
 
     int expectedBonus = 0;
@@ -95,26 +99,32 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
 TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
-    player->attacksPerRound = 1.0f;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
+    player->set_attacks_per_round(1.0f);
 
     LevelUpSystem::apply_level_up_benefits(*player, 7, &ctx);
 
-    EXPECT_FLOAT_EQ(player->attacksPerRound, 1.5f);
+    EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }
 
 TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
-    player->attacksPerRound = 1.5f;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
+    player->set_attacks_per_round(1.5f);
 
     LevelUpSystem::apply_level_up_benefits(*player, 13, &ctx);
 
-    EXPECT_FLOAT_EQ(player->attacksPerRound, 2.0f);
+    EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 2.0f);
 }
 
 TEST_F(LevelUpSystemTest, AbilityScoreImprovement)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
     player->set_strength(15);
 
     LevelUpSystem::apply_level_up_benefits(*player, 4, &ctx);
@@ -125,6 +135,8 @@ TEST_F(LevelUpSystemTest, AbilityScoreImprovement)
 TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
     player->set_strength(15);
 
     LevelUpSystem::apply_level_up_benefits(*player, 5, &ctx);
@@ -135,6 +147,8 @@ TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel)
 TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
     player->destructible->set_thaco(20);
 
     game.dice.set_next_d20(5);
@@ -147,11 +161,13 @@ TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
 TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
-    player->attacksPerRound = 1.0f;
+    player->set_creature_class(CreatureClass::FIGHTER);
+    player->set_hit_die(10);
+    player->set_attacks_per_round(1.0f);
 
     game.dice.set_next_d20(5);
 
     LevelUpSystem::apply_level_up_benefits(*player, 8, &ctx);
 
-    EXPECT_FLOAT_EQ(player->attacksPerRound, 1.5f);
+    EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }

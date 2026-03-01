@@ -74,6 +74,15 @@ public:
 	[[nodiscard]] std::string_view get_name() const { return actorData.name; }
 };
 
+enum class CreatureClass
+{
+	FIGHTER,
+	ROGUE,
+	CLERIC,
+	WIZARD,
+	MONSTER,
+};
+
 class Creature : public Actor
 {
 private:
@@ -92,6 +101,11 @@ private:
 	// Creature gender and weapon
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
+
+	// Combat class and hit die (set by class selection or monster registry)
+	CreatureClass creatureClass{ CreatureClass::MONSTER };
+	int hitDie{ 8 };
+	float attacksPerRound{ 1.0f };
 
 	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD)
 	int calculate_effective_stat(int base_value, BuffType type) const noexcept;
@@ -153,6 +167,13 @@ public:
 	void adjust_charisma(int delta) noexcept { baseCharisma += delta; }
 	void adjust_gold(int delta) noexcept { gold += delta; }
 	void adjust_level(int delta) noexcept { creatureLevel += delta; }
+
+	CreatureClass get_creature_class() const noexcept { return creatureClass; }
+	int get_hit_die() const noexcept { return hitDie; }
+	float get_attacks_per_round() const noexcept { return attacksPerRound; }
+	void set_creature_class(CreatureClass cc) noexcept { creatureClass = cc; }
+	void set_hit_die(int hd) noexcept { hitDie = hd; }
+	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
 
 	void apply_confusion(int nbTurns);
 
