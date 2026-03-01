@@ -24,7 +24,7 @@ if(EMSCRIPTEN)
     # Common compilation options
     add_compile_options(-O2 -Wall)
 
-    # Fetch raylib for Emscripten build
+    # Fetch dependencies for Emscripten build
     include(FetchContent)
     set(PLATFORM Web CACHE INTERNAL "")
     set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
@@ -33,8 +33,13 @@ if(EMSCRIPTEN)
         GIT_REPOSITORY https://github.com/raysan5/raylib.git
         GIT_TAG 5.5
     )
+    FetchContent_Declare(
+        nlohmann_json
+        GIT_REPOSITORY https://github.com/nlohmann/json.git
+        GIT_TAG v3.12.0
+    )
     set(CMAKE_WARN_DEPRECATED OFF CACHE BOOL "" FORCE)
-    FetchContent_MakeAvailable(raylib)
+    FetchContent_MakeAvailable(raylib nlohmann_json)
     set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
     # Emscripten flags: ASYNCIFY enables blocking menu loops to yield to browser
@@ -330,6 +335,7 @@ if(EMSCRIPTEN)
 
     target_link_libraries(${PROJECT_NAME} PRIVATE
         raylib
+        nlohmann_json::nlohmann_json
     )
 
 else()
