@@ -58,6 +58,12 @@ if(EMSCRIPTEN)
         set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file DawnLike")
     endif()
 
+    # Copy data directory for web build (tile configs, prefabs, content)
+    if(EXISTS "${CMAKE_SOURCE_DIR}/data")
+        file(COPY "${CMAKE_SOURCE_DIR}/data" DESTINATION "${CMAKE_BINARY_DIR}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --preload-file data")
+    endif()
+
     # Set output suffix for web
     set(OUTPUT_SUFFIX ".html")
 else()
