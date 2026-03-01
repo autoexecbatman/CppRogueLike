@@ -81,6 +81,8 @@ struct InventoryData
 	InventoryData(InventoryData&&) noexcept = default;
 	InventoryData& operator=(InventoryData&&) noexcept = default;
 
+	~InventoryData() = default;
+
 	// No copying - unique ownership
 	InventoryData(const InventoryData&) = delete;
 	InventoryData& operator=(const InventoryData&) = delete;

@@ -29,6 +29,10 @@ class MonsterFactory
 public:
 	MonsterFactory();
 	~MonsterFactory() = default;
+	MonsterFactory(const MonsterFactory&) = delete;
+	MonsterFactory& operator=(const MonsterFactory&) = delete;
+	MonsterFactory(MonsterFactory&&) = delete;
+	MonsterFactory& operator=(MonsterFactory&&) = delete;
 
 	// Spawn a random monster at the given position based on dungeon level
 	void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);

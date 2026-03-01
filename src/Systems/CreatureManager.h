@@ -16,9 +16,6 @@ struct GameContext;
 class CreatureManager
 {
 public:
-	CreatureManager() = default;
-	~CreatureManager() = default;
-
 	// Creature lifecycle
 	void update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx);
 	void cleanup_dead_creatures(std::vector<std::unique_ptr<Creature>>& creatures);

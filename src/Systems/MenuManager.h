@@ -9,9 +9,6 @@ struct GameContext;
 class MenuManager
 {
 public:
-	MenuManager() = default;
-	~MenuManager() = default;
-
 	// Core menu management
 	void handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx);
 

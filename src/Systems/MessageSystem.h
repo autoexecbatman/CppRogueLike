@@ -14,6 +14,10 @@ class MessageSystem
 public:
 	MessageSystem();
 	~MessageSystem() = default;
+	MessageSystem(const MessageSystem&) = delete;
+	MessageSystem& operator=(const MessageSystem&) = delete;
+	MessageSystem(MessageSystem&&) = delete;
+	MessageSystem& operator=(MessageSystem&&) = delete;
 
 	// Core message functionality
 	void message(int color, std::string_view text, bool isComplete = false);

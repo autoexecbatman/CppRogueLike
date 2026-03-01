@@ -9,9 +9,6 @@ class Creature;
 class BuffSystem
 {
 public:
-	BuffSystem() = default;
-	~BuffSystem() = default;
-
 	// Buff lifecycle management
 	void add_buff(Creature& creature, BuffType type, int value, int duration, bool is_set_effect) noexcept;
 	void remove_buff(Creature& creature, BuffType type) noexcept;

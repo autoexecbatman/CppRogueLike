@@ -19,9 +19,6 @@ class Gui;
 class RenderingManager
 {
 public:
-	RenderingManager() = default;
-	~RenderingManager() = default;
-
 	// Core rendering methods
 	void render(GameContext& ctx) const;
 

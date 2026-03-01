@@ -12,9 +12,6 @@ struct GameContext;
 class LevelManager
 {
 public:
-	LevelManager() = default;
-	~LevelManager() = default;
-
 	// Level state
 	int get_dungeon_level() const noexcept { return dungeon_level; }
 	int get_shopkeepers_count() const noexcept { return shopkeepers_on_current_level; }

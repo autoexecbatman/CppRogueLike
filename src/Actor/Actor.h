@@ -58,6 +58,10 @@ public:
 
 	Actor(Vector2D position, ActorData data);
 	virtual ~Actor() = default;
+	Actor(const Actor&) = delete;
+	Actor& operator=(const Actor&) = delete;
+	Actor(Actor&&) = delete;
+	Actor& operator=(Actor&&) = delete;
 
 	// C++ Core Guidelines F.6: noexcept for simple state operations
 	bool has_state(ActorState state) const noexcept;

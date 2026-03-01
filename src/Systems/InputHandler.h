@@ -7,9 +7,6 @@ class InputSystem;
 class InputHandler
 {
 public:
-	InputHandler() = default;
-	~InputHandler() = default;
-
 	void key_store() noexcept;
 	void key_listen(InputSystem& input) noexcept;
 

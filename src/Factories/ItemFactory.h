@@ -35,6 +35,11 @@ class ItemFactory
 {
 public:
 	ItemFactory();
+	~ItemFactory() = default;
+	ItemFactory(const ItemFactory&) = delete;
+	ItemFactory& operator=(const ItemFactory&) = delete;
+	ItemFactory(ItemFactory&&) = delete;
+	ItemFactory& operator=(ItemFactory&&) = delete;
 
 	void add_item_type(const ItemType& itemType);
 	void load_from_registry();

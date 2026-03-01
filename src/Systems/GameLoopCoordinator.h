@@ -6,9 +6,6 @@ struct GameContext;
 class GameLoopCoordinator
 {
 public:
-	GameLoopCoordinator() = default;
-	~GameLoopCoordinator() = default;
-
 	// Core game loop coordination
 	void handle_gameloop(GameContext& ctx, Gui& gui, int loopNum);
 	void update(GameContext& ctx);

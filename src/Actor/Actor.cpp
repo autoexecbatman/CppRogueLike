@@ -43,12 +43,12 @@ bool Actor::has_state(ActorState state) const noexcept
 	return std::ranges::find(states, state) != states.end();
 }
 
-inline void Actor::add_state(ActorState state) noexcept
+void Actor::add_state(ActorState state) noexcept
 {
 	states.push_back(state);
 }
 
-inline void Actor::remove_state(ActorState state) noexcept
+void Actor::remove_state(ActorState state) noexcept
 {
 	std::erase_if(states,
 		[state](ActorState s)

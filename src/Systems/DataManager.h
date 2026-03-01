@@ -16,9 +16,6 @@ class MessageSystem;
 class DataManager
 {
 public:
-	DataManager() = default;
-	~DataManager() = default;
-
 	// Load all game data
 	void load_all_data(MessageSystem& message_system);
 

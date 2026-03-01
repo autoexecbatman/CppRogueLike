@@ -19,6 +19,11 @@ class HungerSystem
 {
 public:
 	HungerSystem();
+	~HungerSystem() = default;
+	HungerSystem(const HungerSystem&) = delete;
+	HungerSystem& operator=(const HungerSystem&) = delete;
+	HungerSystem(HungerSystem&&) = delete;
+	HungerSystem& operator=(HungerSystem&&) = delete;
 
 	// Increases hunger by the specified amount (or default amount)
 	void increase_hunger(GameContext& ctx, int amount = 1);
