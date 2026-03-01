@@ -398,6 +398,7 @@ FodyWeavers.xsd
 /nul
 /Testing/Temporary
 /.vscode
+/.mcp.json
 /tile_debug
 /tile_previews
 
