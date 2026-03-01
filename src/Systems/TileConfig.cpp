@@ -7,8 +7,10 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "../Core/Paths.h"
+#include "../Renderer/Renderer.h"
 
 using json = nlohmann::json;
 

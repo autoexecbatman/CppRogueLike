@@ -369,7 +369,7 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		bool hasRangedWeapon = false;
 		for (const auto& invItem : inventory_data.items)
 		{
-			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->pickable)
+			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
 			{
 				if (invItem->is_ranged_weapon())
 				{
@@ -448,7 +448,7 @@ void Creature::pick(GameContext& ctx)
 	if (itemAtPosition->itemClass == ItemClass::GOLD_COIN)
 	{
 		// Use the pickable's use() method which handles gold pickup properly
-		if (itemAtPosition->pickable->use(*itemAtPosition, *this, ctx))
+		if (itemAtPosition->behavior && use_item(*itemAtPosition->behavior, *itemAtPosition, *this, ctx))
 		{
 			// Gold was picked up successfully via polymorphic call
 			// Remove gold from floor inventory
@@ -595,9 +595,7 @@ void Item::load(const json& j)
 	}
 
 	if (j.contains("pickable"))
-	{
-		pickable = Pickable::create(j["pickable"]);
-	}
+		behavior = load_behavior(j["pickable"]);
 }
 
 void Item::save(json& j)
@@ -632,10 +630,10 @@ void Item::save(json& j)
 	enh["value_modifier"] = enhancement.value_modifier;
 	j["enhancement"] = enh;
 
-	if (pickable)
+	if (behavior)
 	{
 		json pickableJson;
-		pickable->save(pickableJson);
+		save_behavior(*behavior, pickableJson);
 		j["pickable"] = pickableJson;
 	}
 }

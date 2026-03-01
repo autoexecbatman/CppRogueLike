@@ -22,7 +22,7 @@ protected:
         item->set_value(80);
         item->itemId = ItemId::LONG_SWORD;
         item->itemClass = ItemClass::SWORD;
-        item->pickable = std::make_unique<Weapon>(false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM);
+        item->behavior = Weapon{ false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM };
         return item;
     }
 };
@@ -116,7 +116,7 @@ TEST_F(ItemSerializationTest, Pickable_Preserved) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
-    ASSERT_NE(loaded->pickable, nullptr) << "Pickable component not loaded";
+    ASSERT_TRUE(loaded->behavior.has_value()) << "Pickable component not loaded";
 }
 
 TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {

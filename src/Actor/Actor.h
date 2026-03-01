@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -39,6 +40,8 @@ enum class ActorState
 	IS_RANGED,
 	IS_CONFUSED,
 	IS_INVISIBLE,
+	IS_SLEEPING,
+	IS_HELD,
 };
 
 //==Actor==
@@ -221,7 +224,7 @@ public:
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
 
-	std::unique_ptr<Pickable> pickable; // the actor can be picked
+	std::optional<ItemBehavior> behavior; // item behavior (replaces pickable hierarchy)
 
 	// Item classification utility functions
 	ItemCategory get_category() const noexcept { return ItemClassificationUtils::get_category(itemClass); }

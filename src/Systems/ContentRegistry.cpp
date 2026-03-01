@@ -16,7 +16,6 @@ ContentRegistry& ContentRegistry::instance()
 	return reg;
 }
 
-
 // ---------------------------------------------------------------------------
 // Getters / setters
 // ---------------------------------------------------------------------------
@@ -79,6 +78,10 @@ std::string_view ContentRegistry::item_key(ItemId id)
 		return "scroll_confusion";
 	case ItemId::SCROLL_TELEPORT:
 		return "scroll_teleport";
+	case ItemId::SCROLL_SLEEP:
+		return "scroll_sleep";
+	case ItemId::SCROLL_HOLD_PERSON:
+		return "scroll_hold_person";
 	// Melee weapons
 	case ItemId::DAGGER:
 		return "dagger";

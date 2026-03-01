@@ -8,15 +8,9 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
-#include "../ActorTypes/Gold.h"
-#include "../ActorTypes/Teleporter.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Items/Amulet.h"
-#include "../Items/Armor.h"
-#include "../Items/Food.h"
 #include "../Items/ItemClassification.h"
-#include "../Items/Jewelry.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/ContentRegistry.h"
@@ -61,76 +55,81 @@ const std::unordered_map<ItemId, ItemParams> ItemRegistry = []()
 }();
 
 template <typename T>
-std::unique_ptr<T> create_stat_item(const ItemParams& p)
+T create_stat_behavior(const ItemParams& p)
 {
-	auto item = std::make_unique<T>();
-	item->str_bonus = p.str_bonus;
-	item->dex_bonus = p.dex_bonus;
-	item->con_bonus = p.con_bonus;
-	item->int_bonus = p.int_bonus;
-	item->wis_bonus = p.wis_bonus;
-	item->cha_bonus = p.cha_bonus;
-	item->effect = p.effect;
-	item->bonus = p.effect_bonus;
-	item->is_set_mode = p.is_set_mode;
+	T item;
+	item.str_bonus = p.str_bonus;
+	item.dex_bonus = p.dex_bonus;
+	item.con_bonus = p.con_bonus;
+	item.int_bonus = p.int_bonus;
+	item.wis_bonus = p.wis_bonus;
+	item.cha_bonus = p.cha_bonus;
+	item.effect = p.effect;
+	item.bonus = p.effect_bonus;
+	item.is_set_mode = p.is_set_mode;
 	return item;
 }
 
-std::unique_ptr<Pickable> create_pickable_from_blueprint(ItemId itemId, const ItemParams& params)
+ItemBehavior create_behavior_from_blueprint(ItemId itemId, const ItemParams& params)
 {
+	(void)itemId;
 	switch (params.pickable_type)
 	{
 	case PickableType::CONSUMABLE:
-		return std::make_unique<Consumable>(
+		return Consumable{
 			params.consumable_effect,
 			params.consumable_amount,
 			params.duration,
 			params.consumable_buff_type,
-			params.is_set_mode);
+			params.is_set_mode
+		};
 
 	case PickableType::TARGETED_SCROLL:
-		return std::make_unique<TargetedScroll>(
+		return TargetedScroll{
 			params.target_mode,
 			params.scroll_animation,
 			params.range,
 			params.damage,
-			params.confuse_turns);
+			params.confuse_turns,
+			params.consumable_buff_type,
+			params.duration
+		};
 
 	case PickableType::TELEPORTER:
-		return std::make_unique<Teleporter>();
+		return Teleporter{};
 
 	case PickableType::WEAPON:
-		return std::make_unique<Weapon>(params.ranged, params.hand_requirement, params.weapon_size);
+		return Weapon{ params.ranged, params.hand_requirement, params.weapon_size };
 
 	case PickableType::SHIELD:
-		return std::make_unique<Shield>();
+		return Shield{};
 
 	case PickableType::ARMOR:
-		return std::make_unique<Armor>(params.ac_bonus);
+		return Armor{ params.ac_bonus };
 
 	case PickableType::QUEST_ITEM:
-		return std::make_unique<Amulet>();
+		return Amulet{};
 
 	case PickableType::MAGICAL_HELM:
-		return std::make_unique<MagicalHelm>(params.effect, params.effect_bonus);
+		return MagicalHelm{ params.effect, params.effect_bonus };
 
 	case PickableType::MAGICAL_RING:
-		return std::make_unique<MagicalRing>(params.effect, params.effect_bonus);
+		return MagicalRing{ params.effect, params.effect_bonus };
 
 	case PickableType::JEWELRY_AMULET:
-		return create_stat_item<JewelryAmulet>(params);
+		return create_stat_behavior<JewelryAmulet>(params);
 
 	case PickableType::GAUNTLETS:
-		return create_stat_item<Gauntlets>(params);
+		return create_stat_behavior<Gauntlets>(params);
 
 	case PickableType::GIRDLE:
-		return create_stat_item<Girdle>(params);
+		return create_stat_behavior<Girdle>(params);
 
 	case PickableType::FOOD:
-		return std::make_unique<Food>(params.nutrition_value);
+		return Food{ params.nutrition_value };
 
 	case PickableType::GOLD_COIN:
-		return nullptr;
+		return Gold{ 0 }; // amount set by caller
 
 	default:
 		throw std::runtime_error("Unknown pickable type: " + std::to_string(static_cast<int>(params.pickable_type)));
@@ -142,7 +141,7 @@ std::unique_ptr<Item> create_from_blueprint(Vector2D pos, ItemId itemId)
 	const auto& params = ItemRegistry.at(itemId);
 	TileRef tile = ContentRegistry::instance().get_tile(itemId);
 	auto item = std::make_unique<Item>(pos, ActorData{ tile, std::string{ params.name }, params.color });
-	item->pickable = create_pickable_from_blueprint(itemId, params);
+	item->behavior = create_behavior_from_blueprint(itemId, params);
 	item->itemId = itemId;
 	item->itemClass = params.itemClass;
 	item->set_value(params.value);
@@ -174,7 +173,7 @@ std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int gol
 {
 	const auto& params = ItemRegistry.at(ItemId::GOLD_COIN);
 	auto item = std::make_unique<Item>(pos, ActorData{ ContentRegistry::instance().get_tile(ItemId::GOLD_COIN), std::string{ params.name }, params.color });
-	item->pickable = std::make_unique<Gold>(goldAmount);
+	item->behavior = Gold{ goldAmount };
 	item->itemId = ItemId::GOLD_COIN;
 	item->itemClass = params.itemClass;
 	item->set_value(goldAmount);

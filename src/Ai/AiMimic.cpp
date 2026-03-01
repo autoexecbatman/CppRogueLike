@@ -139,7 +139,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		if (itemDistance <= CONSUMPTION_RADIUS)
 		{
 			// Verify item is pickable
-			if (!item->pickable)
+			if (!item->behavior)
 			{
 				ctx.message_system->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
 				continue;

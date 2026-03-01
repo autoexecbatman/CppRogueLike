@@ -1,22 +1,26 @@
 #include <algorithm>
+#include <cstdint>
 #include <format>
-#include <ranges>
+#include <memory>
+#include <raylib.h>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+#include <vector>
 
 #include "../Actor/Actor.h"
-#include "../Actor/InventoryOperations.h"
+#include "../Actor/EquipmentSlot.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
-#include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
-#include "../Items/Armor.h"
-#include "../Items/Jewelry.h"
+#include "../Items/ItemClassification.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
 #include "InventoryUI.h"
 
 int InventoryUI::screen_cols(GameContext& ctx) const
@@ -60,8 +64,6 @@ void InventoryUI::draw_highlight_row(int px, int y_tile, GameContext& ctx)
 	ColorPair pair = ctx.renderer->get_color_pair(BLACK_WHITE_PAIR);
 	DrawRectangle(bar_x, y_tile * ts, bar_w, ts, pair.bg);
 }
-
-using namespace InventoryOperations;
 
 InventoryUI::InventoryUI()
 	: activeScreen(InventoryScreen::EQUIPMENT), equipmentCursor(0), listCursor(0), scrollOffset(0), filterMode(false), filterSlot(EquipmentSlot::NONE)
@@ -276,7 +278,7 @@ bool InventoryUI::is_usable_category(ItemCategory cat) const
 
 ItemCategory InventoryUI::get_effective_category(const Item& item) const
 {
-	if (item.pickable && item.pickable->get_type() == Pickable::PickableType::CORPSE_FOOD)
+	if (item.behavior && std::holds_alternative<CorpseFood>(*item.behavior))
 	{
 		return ItemCategory::CONSUMABLE;
 	}
@@ -552,18 +554,16 @@ std::string InventoryUI::format_weapon_info(const Item& item) const
 	DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(
 		item.itemId,
 		&item.get_enhancement());
-	Weapon* weapon = dynamic_cast<Weapon*>(item.pickable.get());
+	const Weapon* weapon = item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
 	bool ranged = weapon && weapon->is_ranged();
 	return std::format("[{} {}]", damage.displayRoll, ranged ? "rng" : "dmg");
 }
 
 std::string InventoryUI::format_armor_info(const Item& item) const
 {
-	if (!item.pickable)
-	{
+	if (!item.behavior)
 		return "";
-	}
-	int acBonus = item.pickable->get_ac_bonus();
+	int acBonus = get_item_ac_bonus(*item.behavior);
 	if (acBonus != 0)
 	{
 		return std::format("[AC {}]", acBonus);
@@ -573,11 +573,33 @@ std::string InventoryUI::format_armor_info(const Item& item) const
 
 std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 {
-	auto* statEquip = dynamic_cast<StatBoostEquipment*>(item.pickable.get());
-	if (!statEquip)
-	{
+	if (!item.behavior)
 		return "";
-	}
+
+	// Extract stat bonuses from whichever stat-boost type is active
+	int str_b = 0, dex_b = 0, con_b = 0, int_b = 0, wis_b = 0, cha_b = 0;
+	bool has_stats = false;
+
+	auto extract_stats = [&](const auto& sb) -> bool
+	{
+		using T = std::decay_t<decltype(sb)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			str_b = sb.str_bonus;
+			dex_b = sb.dex_bonus;
+			con_b = sb.con_bonus;
+			int_b = sb.int_bonus;
+			wis_b = sb.wis_bonus;
+			cha_b = sb.cha_bonus;
+			return true;
+		}
+		return false;
+	};
+
+	has_stats = std::visit(extract_stats, *item.behavior);
+
+	if (!has_stats)
+		return "";
 
 	std::string result;
 	auto append_stat = [&result](const char* name, int val)
@@ -585,19 +607,17 @@ std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 		if (val != 0)
 		{
 			if (!result.empty())
-			{
 				result += " ";
-			}
 			result += std::format("{} {:+d}", name, val);
 		}
 	};
 
-	append_stat("STR", statEquip->str_bonus);
-	append_stat("DEX", statEquip->dex_bonus);
-	append_stat("CON", statEquip->con_bonus);
-	append_stat("INT", statEquip->int_bonus);
-	append_stat("WIS", statEquip->wis_bonus);
-	append_stat("CHA", statEquip->cha_bonus);
+	append_stat("STR", str_b);
+	append_stat("DEX", dex_b);
+	append_stat("CON", con_b);
+	append_stat("INT", int_b);
+	append_stat("WIS", wis_b);
+	append_stat("CHA", cha_b);
 
 	return result;
 }
@@ -874,12 +894,10 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 	}
 
 	Item* selectedItem = entry.item;
-	if (!selectedItem->pickable)
-	{
+	if (!selectedItem->behavior)
 		return;
-	}
 
-	bool itemUsed = selectedItem->pickable->use(*selectedItem, player, ctx);
+	bool itemUsed = use_item(*selectedItem->behavior, *selectedItem, player, ctx);
 
 	if (itemUsed)
 	{

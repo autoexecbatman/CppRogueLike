@@ -171,12 +171,6 @@ set(SOURCE_FILES # Add Source Files Here !
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.h
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Gold.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Gold.h
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Healer.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Healer.h
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.cpp
-    ${PROJECT_SOURCE_DIR}/ActorTypes/Teleporter.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.cpp
     ${PROJECT_SOURCE_DIR}/ActorTypes/Player.h
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters/Spider.cpp
@@ -202,18 +196,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Items/ItemClassification.h
     ${PROJECT_SOURCE_DIR}/Items/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Items/Weapons.h
-    ${PROJECT_SOURCE_DIR}/Items/Armor.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Armor.h
-    ${PROJECT_SOURCE_DIR}/Items/Jewelry.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Jewelry.h
     ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.cpp
     ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.h
     ${PROJECT_SOURCE_DIR}/Items/Food.cpp
     ${PROJECT_SOURCE_DIR}/Items/Food.h
-    ${PROJECT_SOURCE_DIR}/Items/CorpseFood.cpp
-    ${PROJECT_SOURCE_DIR}/Items/CorpseFood.h
-    ${PROJECT_SOURCE_DIR}/Items/Amulet.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Amulet.h
 
     # Systems - Updated paths
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.cpp

@@ -1,11 +1,17 @@
-#include "Web.h"
+#include <algorithm>
+#include <variant>
+
+#include "../Actor/Actor.h"
+#include "../Actor/EquipmentSlot.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
-#include "../Systems/TileConfig.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/TileConfig.h"
+#include "../Utils/Vector2D.h"
+#include "Web.h"
 
 Web::Web(Vector2D position, int strength)
 	: Object(position, ActorData{ TileConfig::instance().get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
@@ -27,7 +33,7 @@ bool Web::applyEffect(Creature& creature, GameContext& ctx)
 	{
 		if (Item* equippedRing = creature.get_equipped_item(slot))
 		{
-			if (const auto* magicRing = dynamic_cast<const MagicalRing*>(equippedRing->pickable.get()))
+			if (const auto* magicRing = equippedRing->behavior ? std::get_if<MagicalRing>(&*equippedRing->behavior) : nullptr)
 			{
 				if (magicRing->effect == MagicalEffect::FREE_ACTION)
 				{

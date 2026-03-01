@@ -1,81 +1,83 @@
-#include <gtest/gtest.h>
-#include "tests/mocks/MockGameContext.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
+#include "tests/mocks/MockGameContext.h"
+#include <Colors/Colors.h>
+#include <gtest/gtest.h>
+#include <Items/ItemClassification.h>
 
 class ItemCreatorTest : public ::testing::Test
 {
 protected:
-    MockGameContext mock;
+	MockGameContext mock;
 };
 
 TEST_F(ItemCreatorTest, CreateHealthPotion)
 {
-    Vector2D pos(0, 0);
-    auto item = ItemCreator::create(ItemId::HEALTH_POTION, pos);
+	Vector2D pos(0, 0);
+	auto item = ItemCreator::create(ItemId::HEALTH_POTION, pos);
 
-    EXPECT_EQ(item->actorData.name, "health potion");
-    EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->get_value(), 50);
+	EXPECT_EQ(item->actorData.name, "health potion");
+	EXPECT_TRUE(item->behavior.has_value());
+	EXPECT_EQ(item->get_value(), 50);
 }
 
 TEST_F(ItemCreatorTest, CreateScrollLightning)
 {
-    Vector2D pos(0, 0);
-    auto item = ItemCreator::create(ItemId::SCROLL_LIGHTNING, pos);
+	Vector2D pos(0, 0);
+	auto item = ItemCreator::create(ItemId::SCROLL_LIGHTNING, pos);
 
-    EXPECT_EQ(item->actorData.name, "scroll of lightning bolt");
-    EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->get_value(), 150);
+	EXPECT_EQ(item->actorData.name, "scroll of lightning bolt");
+	EXPECT_TRUE(item->behavior.has_value());
+	EXPECT_EQ(item->get_value(), 150);
 }
 
 TEST_F(ItemCreatorTest, CreateRandomPotion)
 {
-    Vector2D pos(0, 0);
-    auto ctx = mock.to_game_context();
-    auto item = ItemCreator::create_random_of_category("potion", pos, ctx, 1);
+	Vector2D pos(0, 0);
+	auto ctx = mock.to_game_context();
+	auto item = ItemCreator::create_random_of_category("potion", pos, ctx, 1);
 
-    ASSERT_NE(item, nullptr);
-    EXPECT_NE(item->pickable, nullptr);
+	ASSERT_NE(item, nullptr);
+	EXPECT_TRUE(item->behavior.has_value());
 }
 
 TEST_F(ItemCreatorTest, CalculateEnhancementChance)
 {
-    EXPECT_EQ(ItemCreator::calculate_enhancement_chance(1), 5);
-    EXPECT_EQ(ItemCreator::calculate_enhancement_chance(2), 8);
-    EXPECT_EQ(ItemCreator::calculate_enhancement_chance(3), 11);
-    EXPECT_EQ(ItemCreator::calculate_enhancement_chance(10), 32);
-    EXPECT_EQ(ItemCreator::calculate_enhancement_chance(11), 35);
+	EXPECT_EQ(ItemCreator::calculate_enhancement_chance(1), 5);
+	EXPECT_EQ(ItemCreator::calculate_enhancement_chance(2), 8);
+	EXPECT_EQ(ItemCreator::calculate_enhancement_chance(3), 11);
+	EXPECT_EQ(ItemCreator::calculate_enhancement_chance(10), 32);
+	EXPECT_EQ(ItemCreator::calculate_enhancement_chance(11), 35);
 }
 
 TEST_F(ItemCreatorTest, DetermineEnhancementLevel)
 {
-    auto ctx = mock.to_game_context();
+	auto ctx = mock.to_game_context();
 
-    int level = ItemCreator::determine_enhancement_level(ctx, 1);
-    EXPECT_GE(level, 0);
-    EXPECT_LE(level, 3);
+	int level = ItemCreator::determine_enhancement_level(ctx, 1);
+	EXPECT_GE(level, 0);
+	EXPECT_LE(level, 3);
 
-    level = ItemCreator::determine_enhancement_level(ctx, 5);
-    EXPECT_GE(level, 0);
-    EXPECT_LE(level, 3);
+	level = ItemCreator::determine_enhancement_level(ctx, 5);
+	EXPECT_GE(level, 0);
+	EXPECT_LE(level, 3);
 }
 
 TEST_F(ItemCreatorTest, CreateEnhancedDagger)
 {
-    Vector2D pos(0, 0);
-    auto item = ItemCreator::create_enhanced_weapon(ItemId::DAGGER, pos, 1);
+	Vector2D pos(0, 0);
+	auto item = ItemCreator::create_enhanced_weapon(ItemId::DAGGER, pos, 1);
 
-    EXPECT_EQ(item->actorData.color, WHITE_GREEN_PAIR);
-    EXPECT_NE(item, nullptr);
+	EXPECT_EQ(item->actorData.color, WHITE_GREEN_PAIR);
+	EXPECT_NE(item, nullptr);
 }
 
 TEST_F(ItemCreatorTest, CreateLeatherArmor)
 {
-    Vector2D pos(0, 0);
-    auto item = ItemCreator::create(ItemId::LEATHER_ARMOR, pos);
+	Vector2D pos(0, 0);
+	auto item = ItemCreator::create(ItemId::LEATHER_ARMOR, pos);
 
-    EXPECT_EQ(item->actorData.name, "leather armor");
-    EXPECT_NE(item->pickable, nullptr);
-    EXPECT_EQ(item->get_value(), 5);
+	EXPECT_EQ(item->actorData.name, "leather armor");
+	EXPECT_TRUE(item->behavior.has_value());
+	EXPECT_EQ(item->get_value(), 5);
 }

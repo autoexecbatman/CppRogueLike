@@ -1,13 +1,22 @@
 #include <algorithm>
+#include <cstdlib>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "../Actor/Actor.h"
+#include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
-#include "../Actor/Pickable.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h" // SINGLE SOURCE OF TRUTH
+#include "../Items/ItemClassification.h"
+#include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
 #include "ShopKeeper.h"
 
 using namespace InventoryOperations;
@@ -195,14 +204,8 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	player_item->enhancement = item.enhancement;
 	player_item->itemClass = item.itemClass;
 
-	// Copy pickable component if it exists
-	if (item.pickable)
-	{
-		// Create a copy of the pickable component
-		json pickableJson;
-		item.pickable->save(pickableJson);
-		player_item->pickable = Pickable::create(pickableJson);
-	}
+	// Copy behavior (variant is value-copyable)
+	player_item->behavior = item.behavior;
 
 	add_item(player.inventory_data, std::move(player_item));
 

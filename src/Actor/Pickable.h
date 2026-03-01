@@ -1,163 +1,243 @@
+// file: Pickable.h
 #pragma once
 
-#include <memory>
+#include <variant>
 
-#include "../Items/Weapons.h" // For WeaponSize and HandRequirement enums
+#include "../Items/MagicalItemEffects.h"
+#include "../Items/Weapons.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/TargetMode.h"
 #include "EquipmentSlot.h"
 
-class Actor;
-class Creature;
 class Item;
+class Creature;
 struct GameContext;
 
-//==PICKABLE==
-class Pickable : public Persistent
+// ========== Serialization discriminator ==========
+
+enum class PickableType
 {
-public:
-	// Behavioral category tags - NOT item identity (ItemId is the identity)
-	enum class PickableType
-	{
-		// Scroll / ranged effects (complex targeting behavior)
-		TARGETED_SCROLL,
-		TELEPORTER,
-
-		// Weapons
-		WEAPON, // all weapons - config stored as data in Weapon
-		SHIELD, // special: off-hand only, toggle_shield dispatch
-
-		// Consumables (potions + simple scrolls)
-		CONSUMABLE,
-
-		// Treasure & food
-		GOLD_COIN,
-		FOOD,
-		CORPSE_FOOD,
-
-		// Equipment
-		ARMOR,
-		MAGICAL_HELM,
-		MAGICAL_RING,
-		JEWELRY_AMULET,
-		GAUNTLETS,
-		GIRDLE,
-
-		// Special
-		QUEST_ITEM,
-	};
-
-	virtual ~Pickable() = default;
-
-	// Polymorphic base class - disable copy, enable move
-	Pickable() = default;
-	Pickable(const Pickable&) = delete;
-	Pickable& operator=(const Pickable&) = delete;
-	Pickable(Pickable&&) = default;
-	Pickable& operator=(Pickable&&) = default;
-
-	virtual bool use(Item& owner, Creature& wearer, GameContext& ctx);
-	static std::unique_ptr<Pickable> create(const json& j);
-	virtual void save(json& j) = 0;
-	virtual void load(const json& j) = 0;
-	virtual PickableType get_type() const = 0;
-
-	// Virtual AC bonus - allows polymorphic AC calculation without dynamic_cast
-	virtual int get_ac_bonus() const noexcept { return 0; }
+	TARGETED_SCROLL,
+	TELEPORTER,
+	WEAPON,
+	SHIELD,
+	CONSUMABLE,
+	GOLD_COIN,
+	FOOD,
+	CORPSE_FOOD,
+	ARMOR,
+	MAGICAL_HELM,
+	MAGICAL_RING,
+	JEWELRY_AMULET,
+	GAUNTLETS,
+	GIRDLE,
+	QUEST_ITEM,
 };
-//====
 
-// Effect type for Consumable - what happens when the item is used
+// Effect type for Consumable
 enum class ConsumableEffect
 {
-	NONE, // Show message, consume item
-	HEAL, // Heal HP, consume item
-	ADD_BUFF, // Add timed buff via BuffSystem, consume item
-	FAIL, // Show message, do NOT consume (feature not yet implemented)
+	NONE,
+	HEAL,
+	ADD_BUFF,
+	FAIL,
 };
 
-// Single class for all consumable items (potions, simple scrolls)
-// All behavior is data-driven: effect type + parameters set at construction
-class Consumable : public Pickable
+// ========== Plain data structs (no base class, no virtuals) ==========
+
+struct Consumable
 {
-public:
-	ConsumableEffect effect;
-	int amount; // heal_amount (HEAL) or buff value (ADD_BUFF)
-	int duration; // buff duration (ADD_BUFF)
-	BuffType buff_type; // buff effect type (ADD_BUFF)
-	bool is_set_effect; // true = SET stat to value (potions), false = ADD value
-
-	Consumable(ConsumableEffect e, int amt, int dur, BuffType bt, bool set_effect = false)
-		: effect(e), amount(amt), duration(dur), buff_type(bt), is_set_effect(set_effect) {}
-
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::CONSUMABLE; }
+	ConsumableEffect effect{ ConsumableEffect::NONE };
+	int amount{ 0 };
+	int duration{ 0 };
+	BuffType buff_type{ BuffType::NONE };
+	bool is_set_effect{ false };
 };
 
-// Data-driven weapon class - all config stored as member data
-class Weapon : public Pickable
+struct Weapon
 {
-protected:
-	bool ranged;
-	HandRequirement hand_requirement;
-	WeaponSize weapon_size;
+	bool ranged{ false };
+	HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
+	WeaponSize weapon_size{ WeaponSize::MEDIUM };
 
-public:
-	Weapon(bool is_ranged, HandRequirement hands, WeaponSize size)
-		: ranged(is_ranged), hand_requirement(hands), weapon_size(size) {}
-
-	// Common weapon equip/unequip logic
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-
-	// Data accessors
 	bool is_ranged() const noexcept { return ranged; }
-	HandRequirement get_hand_requirement() const noexcept { return hand_requirement; }
 	bool is_two_handed() const noexcept { return hand_requirement == HandRequirement::TWO_HANDED; }
 	WeaponSize get_weapon_size() const noexcept { return weapon_size; }
-
-	// AD&D 2e dual-wield validation
-	bool can_be_off_hand(WeaponSize weaponSize) const;
-	bool validate_dual_wield(Item* mainHandWeapon, Item* offHandWeapon) const;
-
-	// Virtual for slot selection (e.g. can_be_off_hand weapons)
-	virtual EquipmentSlot get_preferred_slot(const Creature* creature) const;
-
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::WEAPON; }
+	HandRequirement get_hand_requirement() const noexcept { return hand_requirement; }
+	bool can_be_off_hand() const noexcept { return weapon_size <= WeaponSize::SMALL; }
+	bool validate_dual_wield(const Item* main_hand, const Item* off_hand) const;
+	EquipmentSlot get_preferred_slot(const Creature* creature) const;
 };
 
-class TargetedScroll : public Pickable
+struct Shield
 {
-public:
+};
+
+struct TargetedScroll
+{
 	TargetMode target_mode{ TargetMode::AUTO_NEAREST };
 	ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
 	int range{ 0 };
 	int damage{ 0 };
 	int confuse_turns{ 0 };
-
-	TargetedScroll(TargetMode mode, ScrollAnimation anim, int rng, int dmg, int confuse)
-		: target_mode(mode), scroll_animation(anim), range(rng), damage(dmg), confuse_turns(confuse) {}
-
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void save(json& j) override;
-	void load(const json& j) override;
-	PickableType get_type() const override { return PickableType::TARGETED_SCROLL; }
+	BuffType buff_type{ BuffType::NONE };
+	int buff_duration{ 0 };
 };
 
-// Shield (off-hand defensive item)
-class Shield : public Weapon
+struct Teleporter
 {
-public:
-	Shield()
-		: Weapon(false, HandRequirement::OFF_HAND_ONLY, WeaponSize::MEDIUM) {}
-
-	// Override use method - shield equips to left hand via toggle_shield
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-
-	// Shield provides AC bonus
-	int get_ac_bonus() const noexcept override { return -1; } // +1 AC bonus in AD&D terms
 };
+
+struct Gold
+{
+	int amount{ 0 };
+};
+
+struct Food
+{
+	int nutrition_value{ 0 };
+};
+
+struct CorpseFood
+{
+	int nutrition_value{ 0 };
+};
+
+struct Armor
+{
+	int armor_class{ 0 };
+};
+
+struct MagicalHelm
+{
+	MagicalEffect effect{ MagicalEffect::NONE };
+	int bonus{ 0 };
+};
+
+struct MagicalRing
+{
+	MagicalEffect effect{ MagicalEffect::NONE };
+	int bonus{ 0 };
+};
+
+// Original stats before a SET operation (stored on equip, restored on unequip)
+struct OriginalStats
+{
+	int str{ 0 };
+	int dex{ 0 };
+	int con{ 0 };
+	int intel{ 0 };
+	int wis{ 0 };
+	int cha{ 0 };
+};
+
+struct JewelryAmulet
+{
+	int str_bonus{ 0 };
+	int dex_bonus{ 0 };
+	int con_bonus{ 0 };
+	int int_bonus{ 0 };
+	int wis_bonus{ 0 };
+	int cha_bonus{ 0 };
+	MagicalEffect effect{ MagicalEffect::NONE };
+	int bonus{ 0 };
+	bool is_set_mode{ false };
+	OriginalStats original_stats{};
+};
+
+struct Gauntlets
+{
+	int str_bonus{ 0 };
+	int dex_bonus{ 0 };
+	int con_bonus{ 0 };
+	int int_bonus{ 0 };
+	int wis_bonus{ 0 };
+	int cha_bonus{ 0 };
+	MagicalEffect effect{ MagicalEffect::NONE };
+	int bonus{ 0 };
+	bool is_set_mode{ false };
+	OriginalStats original_stats{};
+};
+
+struct Girdle
+{
+	int str_bonus{ 0 };
+	int dex_bonus{ 0 };
+	int con_bonus{ 0 };
+	int int_bonus{ 0 };
+	int wis_bonus{ 0 };
+	int cha_bonus{ 0 };
+	MagicalEffect effect{ MagicalEffect::NONE };
+	int bonus{ 0 };
+	bool is_set_mode{ false };
+	OriginalStats original_stats{};
+};
+
+struct Amulet
+{
+};
+
+// ========== The variant ==========
+
+using ItemBehavior = std::variant<
+	Consumable,
+	Weapon,
+	Shield,
+	TargetedScroll,
+	Teleporter,
+	Gold,
+	Food,
+	CorpseFood,
+	Armor,
+	MagicalHelm,
+	MagicalRing,
+	JewelryAmulet,
+	Gauntlets,
+	Girdle,
+	Amulet>;
+
+// ========== use() overloads - one per behavior type ==========
+
+bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Armor& a, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(MagicalHelm& mh, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx);
+
+// ========== get_ac_bonus() overloads ==========
+
+int get_ac_bonus(const Consumable&) noexcept;
+int get_ac_bonus(const Weapon&) noexcept;
+int get_ac_bonus(const Shield&) noexcept;
+int get_ac_bonus(const TargetedScroll&) noexcept;
+int get_ac_bonus(const Teleporter&) noexcept;
+int get_ac_bonus(const Gold&) noexcept;
+int get_ac_bonus(const Food&) noexcept;
+int get_ac_bonus(const CorpseFood&) noexcept;
+int get_ac_bonus(const Armor& a) noexcept;
+int get_ac_bonus(const MagicalHelm& mh) noexcept;
+int get_ac_bonus(const MagicalRing& mr) noexcept;
+int get_ac_bonus(const JewelryAmulet&) noexcept;
+int get_ac_bonus(const Gauntlets&) noexcept;
+int get_ac_bonus(const Girdle&) noexcept;
+int get_ac_bonus(const Amulet&) noexcept;
+
+// ========== Variant-level dispatchers ==========
+
+bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx);
+int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
+
+// Serialization
+void save_behavior(const ItemBehavior& behavior, json& j);
+ItemBehavior load_behavior(const json& j);

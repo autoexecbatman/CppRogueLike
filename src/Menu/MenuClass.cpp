@@ -1,22 +1,15 @@
 // file: MenuClass.cpp
-#include <algorithm>
+#include <memory>
 
-#include "../Actor/InventoryOperations.h"
-#include "../Actor/Pickable.h"
-#include "../ActorTypes/Healer.h"
+#include <raylib.h>
+
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Factories/ItemCreator.h"
-#include "../Items/Armor.h"
-#include "../Items/Items.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/MessageSystem.h"
 #include "MenuClass.h"
 #include "MenuName.h"
-
-using namespace InventoryOperations; // For clean function calls
 
 void Fighter::on_selection(GameContext& ctx)
 {

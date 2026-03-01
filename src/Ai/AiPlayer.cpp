@@ -4,12 +4,13 @@
 #include <string>
 #include <unordered_map>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Gold.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Controls/Controls.h"
@@ -257,9 +258,9 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	// Handle gold directly through player's gold system
 	if (item->itemClass == ItemClass::GOLD_COIN)
 	{
-		Gold* goldPickable = static_cast<Gold*>(item->pickable.get());
-		player.adjust_gold(goldPickable->amount);
-		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldPickable->amount) + " gold.", true);
+		Gold& goldBehavior = std::get<Gold>(*item->behavior);
+		player.adjust_gold(goldBehavior.amount);
+		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
 
 		// Remove gold from floor
 		remove_item(*ctx.inventory_data, *item);

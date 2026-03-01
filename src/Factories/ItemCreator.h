@@ -2,12 +2,15 @@
 
 #include <memory>
 #include <span>
-#include <string_view>
+#include <string>
 #include <unordered_map>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Pickable.h" // For Pickable::PickableType
+#include "../Actor/Pickable.h"
+#include "../Items/ItemClassification.h"
 #include "../Items/MagicalItemEffects.h"
+#include "../Items/Weapons.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/TargetMode.h"
 
@@ -15,9 +18,6 @@ struct Vector2D;
 struct GameContext;
 enum class ItemId;
 enum class ItemClass;
-
-// Use Pickable::PickableType - single source of truth
-using PickableType = Pickable::PickableType;
 
 // Unified compositional item parameters - supports any combination of properties
 struct ItemParams

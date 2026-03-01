@@ -1,22 +1,30 @@
 #include <algorithm>
-#include <cmath>
 #include <format>
 #include <map>
+#include <string>
+#include <unordered_map>
+#include <variant>
+#include <vector>
 
+#include "../Actor/Actor.h"
+#include "../Actor/EquipmentSlot.h"
+#include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Items/Jewelry.h"
 #include "../Items/MagicalItemEffects.h"
 #include "../Map/Map.h"
 #include "../Menu/MenuSpellCast.h"
 #include "../Utils/Vector2D.h"
+#include "AnimationSystem.h"
 #include "BuffSystem.h"
+#include "BuffType.h"
 #include "CreatureManager.h"
 #include "MessageSystem.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
 #include "TargetingSystem.h"
+#include "TileConfig.h"
 
 // Helper to convert PlayerClassState to CasterClass
 static CasterClass to_caster_class(Player::PlayerClassState state)
@@ -167,16 +175,26 @@ bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
 		return cast_invisibility(caster, ctx);
 	case SpellId::TELEPORT:
 		return cast_teleport(caster, ctx);
+	case SpellId::HOLD_PERSON:
+		return cast_hold_person(caster, ctx);
 	default:
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
 		return false;
 	}
 }
 
-static void animate_heal(const Vector2D& pos)
+static void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
-	// TODO: stub - heal animation requires renderer replacement
-	// Previously drew "+", "*", "+" frames at pos with COLOR_PAIR(GREEN_BLACK_PAIR) and napms(100)
+	if (!ctx.anim_system)
+		return;
+	ctx.anim_system->spawn_effect(
+		pos.x,
+		pos.y,
+		TileConfig::instance().get("TILE_EFFECT_HEAL"),
+		60,
+		220,
+		60,
+		0.5f);
 }
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
@@ -184,7 +202,7 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 	if (!caster.destructible)
 		return false;
 
-	animate_heal(caster.position);
+	animate_heal(caster.position, ctx);
 
 	int healing = ctx.dice->roll(1, 8);
 	int oldHp = caster.destructible->get_hp();
@@ -262,10 +280,9 @@ bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 	return true;
 }
 
-static void animate_magic_missile(const Vector2D& from, const Vector2D& to, int missileNum)
+static void animate_magic_missile(const Vector2D& to, GameContext& ctx)
 {
-	// TODO: stub - magic missile animation requires renderer replacement
-	// Previously animated projectile path using attron/mvaddch/refresh/napms
+	SpellAnimations::animate_creature_hit(to, ctx);
 }
 
 static int calculate_num_missiles(int casterLevel)
@@ -324,7 +341,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 		if (!target)
 			break;
 
-		animate_magic_missile(caster.position, target->position, i);
+		animate_magic_missile(target->position, ctx);
 
 		int damage = ctx.dice->roll(1, 4) + 1;
 		totalDamage += damage;
@@ -355,39 +372,81 @@ bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 {
+	// AD&D 2e: 2d8 HD of creatures affected, lowest HD first
+	int hdBudget = ctx.dice->roll(2, 8);
 	int affected = 0;
-	int hdAffected = ctx.dice->roll(2, 8); // 2d8 HD worth of creatures
 
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && creature->destructible && !creature->destructible->is_dead())
+		if (hdBudget <= 0)
+			break;
+		if (!creature || !creature->destructible || creature->destructible->is_dead())
+			continue;
+		if (!ctx.map->is_in_fov(creature->position))
+			continue;
+
+		// Proxy HD from max HP (4 HP per HD)
+		int hd = std::max(1, creature->destructible->get_max_hp() / 4);
+		if (hd <= hdBudget)
 		{
-			if (ctx.map->is_in_fov(creature->position))
-			{
-				// Simple: affect creatures with low HP (simulating HD)
-				if (creature->destructible->get_max_hp() <= hdAffected * 4)
-				{
-					// Put to sleep = instant kill for simplicity
-					creature->destructible->take_damage(*creature, 9999, ctx);
-					affected++;
-					hdAffected -= creature->destructible->get_max_hp() / 4;
-					if (hdAffected <= 0)
-						break;
-				}
-			}
+			ctx.buff_system->add_buff(*creature, BuffType::SLEEP, 0, 5, false);
+			hdBudget -= hd;
+			++affected;
 		}
 	}
 
 	if (affected > 0)
 	{
 		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sleep! ");
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format("{} creatures fall into eternal slumber.", affected));
+		ctx.message_system->append_message_part(
+			WHITE_BLACK_PAIR, std::format("{} creatures fall asleep.", affected));
 		ctx.message_system->finalize_message();
-		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Sleep spell has no effect on these creatures.", true);
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Sleep spell has no effect.", true);
+	}
+
+	return true;
+}
+
+bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
+{
+	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
+	// Duration: 2 rounds per caster level
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
+	int duration = 2 * casterLevel;
+	int maxTargets = ctx.dice->roll(1, 4);
+	int affected = 0;
+
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (affected >= maxTargets)
+			break;
+		if (!creature || !creature->destructible || creature->destructible->is_dead())
+			continue;
+		if (!ctx.map->is_in_fov(creature->position))
+			continue;
+
+		int save = ctx.dice->roll(1, 20);
+		if (save < 15)
+		{
+			ctx.buff_system->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false);
+			++affected;
+		}
+	}
+
+	if (affected > 0)
+	{
+		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Hold Person! ");
+		ctx.message_system->append_message_part(
+			WHITE_BLACK_PAIR, std::format("{} creatures paralyzed for {} turns.", affected, duration));
+		ctx.message_system->finalize_message();
+	}
+	else
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Hold Person has no effect.", true);
 	}
 
 	return true;
@@ -499,7 +558,7 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 	{
 		if (Item* ring = player.get_equipped_item(slot))
 		{
-			if (const auto* magicRing = dynamic_cast<const MagicalRing*>(ring->pickable.get()))
+			if (const auto* magicRing = ring->behavior ? std::get_if<MagicalRing>(&*ring->behavior) : nullptr)
 			{
 				if (magicRing->effect == MagicalEffect::INVISIBILITY)
 				{
@@ -513,7 +572,7 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 	// Check for Helm of Teleportation
 	if (Item* helm = player.get_equipped_item(EquipmentSlot::HEAD))
 	{
-		if (const auto* magicHelm = dynamic_cast<const MagicalHelm*>(helm->pickable.get()))
+		if (const auto* magicHelm = helm->behavior ? std::get_if<MagicalHelm>(&*helm->behavior) : nullptr)
 		{
 			if (magicHelm->effect == MagicalEffect::TELEPORTATION)
 			{

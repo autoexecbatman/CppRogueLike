@@ -1,12 +1,15 @@
-#include "MenuSpellCast.h"
+#include <algorithm>
+#include <string>
+
+#include <raylib.h>
+
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Items/Jewelry.h"
-#include "../Items/MagicalItemEffects.h"
-#include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Systems/SpellSystem.h"
+#include "MenuSpellCast.h"
 
 MenuSpellCast::MenuSpellCast(GameContext& ctx, Player& player)
 	: player(player), ctx(ctx)

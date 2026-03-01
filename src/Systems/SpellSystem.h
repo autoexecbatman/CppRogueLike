@@ -103,4 +103,5 @@ private:
 	static bool cast_fireball(Creature& caster, GameContext& ctx);
 	static bool cast_invisibility(Creature& caster, GameContext& ctx);
 	static bool cast_teleport(Creature& caster, GameContext& ctx);
+	static bool cast_hold_person(Creature& caster, GameContext& ctx);
 };

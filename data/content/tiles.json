@@ -420,6 +420,16 @@
             "row": 0,
             "sheet": 25
         },
+        "scroll_sleep": {
+            "col": 0,
+            "row": 1,
+            "sheet": 25
+        },
+        "scroll_hold_person": {
+            "col": 1,
+            "row": 1,
+            "sheet": 25
+        },
         "short_bow": {
             "col": 0,
             "row": 4,

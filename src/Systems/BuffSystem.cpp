@@ -1,13 +1,19 @@
-#include "BuffSystem.h"
-#include "../Actor/Actor.h"
 #include <algorithm>
+#include <iterator>
+#include <ranges>
 #include <unordered_map>
 #include <unordered_set>
+#include <vector>
+
+#include "../Actor/Actor.h"
+#include "BuffSystem.h"
+#include "BuffType.h"
 
 // OCP: Data-driven buff state mapping - add new buffs here without modifying methods
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
-	// Future extensions: {BuffType::HOLD_PERSON, ActorState::IS_PARALYZED},
+	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
+	{ BuffType::HOLD_PERSON, ActorState::IS_HELD },
 };
 
 // OCP: Data-driven AC calculation - BuffTypes that affect armor class

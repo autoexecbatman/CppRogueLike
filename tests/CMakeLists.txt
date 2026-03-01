@@ -86,9 +86,6 @@ set(PARENT_SOURCES
 
     # ActorTypes
     ${PARENT_SOURCE_DIR}/ActorTypes/Monsters.cpp
-    ${PARENT_SOURCE_DIR}/ActorTypes/Gold.cpp
-    ${PARENT_SOURCE_DIR}/ActorTypes/Healer.cpp
-    ${PARENT_SOURCE_DIR}/ActorTypes/Teleporter.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Player.cpp
     ${PARENT_SOURCE_DIR}/ActorTypes/Monsters/Spider.cpp
 
@@ -104,12 +101,8 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Items/Items.cpp
     ${PARENT_SOURCE_DIR}/Items/ItemClassification.cpp
     ${PARENT_SOURCE_DIR}/Items/Weapons.cpp
-    ${PARENT_SOURCE_DIR}/Items/Armor.cpp
-    ${PARENT_SOURCE_DIR}/Items/Jewelry.cpp
     ${PARENT_SOURCE_DIR}/Items/MagicalItemEffects.cpp
     ${PARENT_SOURCE_DIR}/Items/Food.cpp
-    ${PARENT_SOURCE_DIR}/Items/CorpseFood.cpp
-    ${PARENT_SOURCE_DIR}/Items/Amulet.cpp
 
     # Systems
     ${PARENT_SOURCE_DIR}/Systems/TargetingSystem.cpp

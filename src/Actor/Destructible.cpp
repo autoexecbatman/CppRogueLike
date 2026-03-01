@@ -13,7 +13,6 @@
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
-#include "../Items/CorpseFood.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/BuffSystem.h"
@@ -248,7 +247,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
 	corpse->actorData.tile = TileConfig::instance().get("TILE_CORPSE");
-	corpse->pickable = std::make_unique<CorpseFood>(0); // 0 means calculate from type
+	corpse->behavior = CorpseFood{ 0 }; // 0 means calculate from type
 
 	// Add the corpse to the floor items
 	add_item(*ctx.inventory_data, std::move(corpse));
@@ -343,7 +342,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Check body armor - polymorphic via virtual get_ac_bonus()
 	if (Item* equippedArmor = owner.get_equipped_item(EquipmentSlot::BODY))
 	{
-		const int armorBonus = equippedArmor->pickable->get_ac_bonus();
+		const int armorBonus = equippedArmor->behavior ? get_item_ac_bonus(*equippedArmor->behavior) : 0;
 		if (armorBonus != 0)
 		{
 			totalBonus += armorBonus;
@@ -361,7 +360,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Check shield in left hand - polymorphic via virtual get_ac_bonus()
 	if (Item* equippedShield = owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
 	{
-		const int shieldBonus = equippedShield->pickable->get_ac_bonus();
+		const int shieldBonus = equippedShield->behavior ? get_item_ac_bonus(*equippedShield->behavior) : 0;
 		if (shieldBonus != 0)
 		{
 			totalBonus += shieldBonus;
@@ -384,7 +383,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	{
 		if (Item* equippedRing = owner.get_equipped_item(slot))
 		{
-			const int ringBonus = equippedRing->pickable->get_ac_bonus();
+			const int ringBonus = equippedRing->behavior ? get_item_ac_bonus(*equippedRing->behavior) : 0;
 			if (ringBonus < bestRingBonus)
 			{
 				bestRingBonus = ringBonus;
@@ -409,7 +408,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Check helm for AC bonuses - polymorphic via virtual get_ac_bonus()
 	if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
 	{
-		const int helmBonus = equippedHelm->pickable->get_ac_bonus();
+		const int helmBonus = equippedHelm->behavior ? get_item_ac_bonus(*equippedHelm->behavior) : 0;
 		if (helmBonus < 0)
 		{
 			totalBonus += helmBonus;

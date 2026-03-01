@@ -1,11 +1,14 @@
 #include <vector>
 
+#include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Destructible.h"
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
+#include "../Persistent/Persistent.h"
 #include "../Utils/Dijkstra.h"
+#include "../Utils/Vector2D.h"
+#include "Ai.h"
 #include "AiMonster.h"
 
 void AiMonster::update(Creature& owner, GameContext& ctx)
@@ -13,6 +16,12 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 
 	// If the owner has no AI or is dead, do nothing
 	if (owner.ai == nullptr || owner.destructible->is_dead())
+	{
+		return;
+	}
+
+	// Sleeping or paralyzed creatures skip their turn
+	if (owner.has_state(ActorState::IS_SLEEPING) || owner.has_state(ActorState::IS_HELD))
 	{
 		return;
 	}

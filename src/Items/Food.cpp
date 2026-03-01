@@ -1,65 +1,36 @@
-#include "Food.h"
+// file: Food.cpp
+#include "../Actor/Actor.h"
+#include "../Actor/Pickable.h"
 #include "../Colors/Colors.h"
-#include "../Core/GameContext.h"
 #include "../Items/ItemClassification.h"
 #include "../Systems/ContentRegistry.h"
-#include "../Systems/HungerSystem.h"
-#include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
+#include "Food.h"
 
-Food::Food(int nutrition_value)
-	: nutrition_value(nutrition_value) {}
-
-bool Food::use(Item& owner, Creature& wearer, GameContext& ctx)
-{
-	// Reduce hunger by the nutrition value of the food
-	ctx.hunger_system->decrease_hunger(ctx, nutrition_value);
-
-	// Display message
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ".");
-	ctx.message_system->finalize_message();
-
-	// Food is consumed after being eaten
-	return Pickable::use(owner, wearer, ctx);
-}
-
-void Food::load(const json& j)
-{
-	nutrition_value = j["nutrition_value"].get<int>();
-}
-
-void Food::save(json& j)
-{
-	j["type"] = static_cast<int>(PickableType::FOOD);
-	j["nutrition_value"] = nutrition_value;
-}
-
-// Implementations for different food types
 Ration::Ration(Vector2D position)
 	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::FOOD_RATION), "ration", WHITE_GREEN_PAIR })
 {
-	pickable = std::make_unique<Food>(300);
+	behavior = Food{ 300 };
 	set_value(10);
 }
 
 Fruit::Fruit(Vector2D position)
 	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::FRUIT), "fruit", GREEN_BLACK_PAIR })
 {
-	pickable = std::make_unique<Food>(100);
+	behavior = Food{ 100 };
 	set_value(3);
 }
 
 Bread::Bread(Vector2D position)
 	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::BREAD), "bread", RED_YELLOW_PAIR })
 {
-	pickable = std::make_unique<Food>(200);
+	behavior = Food{ 200 };
 	set_value(5);
 }
 
 Meat::Meat(Vector2D position)
 	: Item(position, ActorData{ ContentRegistry::instance().get_tile(ItemId::MEAT), "meat", RED_BLACK_PAIR })
 {
-	pickable = std::make_unique<Food>(250);
+	behavior = Food{ 250 };
 	set_value(8);
 }

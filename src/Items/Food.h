@@ -1,27 +1,12 @@
+// file: Food.h
+// Food struct is now in Pickable.h
 #pragma once
 
 #include "../Actor/Actor.h"
-#include "../Actor/Pickable.h"
-#include "../Persistent/Persistent.h"
 
-struct GameContext;
 struct Vector2D;
 
-class Food : public Pickable
-{
-public:
-	Food(int nutrition_value);
-
-	bool use(Item& owner, Creature& wearer, GameContext& ctx) override;
-	void load(const json& j) override;
-	void save(json& j) override;
-	PickableType get_type() const override { return PickableType::FOOD; }
-
-private:
-	int nutrition_value{}; // How much hunger this food reduces
-};
-
-// Different food types with varying nutritional values
+// Concrete Item subclasses for food items
 class Ration : public Item
 {
 public:

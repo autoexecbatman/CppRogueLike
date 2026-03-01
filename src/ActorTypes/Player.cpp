@@ -1,19 +1,17 @@
 // file: Player.cpp
-#include "../ActorTypes/Player.h"
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Healer.h"
+#include "../ActorTypes/Player.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiPlayer.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Factories/ItemCreator.h"
-#include "../Items/Armor.h"
 #include "../Items/ItemClassification.h"
 #include "../Items/Items.h"
-#include "../Items/Jewelry.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
 #include "../Random/RandomDice.h"
@@ -23,7 +21,6 @@
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
 #include "../Systems/TileConfig.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -112,6 +109,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create(ItemId::MACE, position), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::HEALTH_POTION, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_HOLD_PERSON, position));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -123,6 +121,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create(ItemId::STAFF, position), EquipmentSlot::RIGHT_HAND, ctx);
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_FIREBALL, position));
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_LIGHTNING, position));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_SLEEP, position));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
@@ -573,11 +572,9 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		return false;
 	}
 
-	// Check if item has pickable component (weapons/armor)
-	if (!item.pickable)
-	{
+	// Check if item has behavior component (weapons/armor)
+	if (!item.behavior)
 		return false;
-	}
 
 	// Slot-specific validation
 	switch (slot)
@@ -928,37 +925,42 @@ void Player::load(const json& j)
 
 void Player::remove_stat_bonuses_from_equipment(Item& item)
 {
-	if (!item.pickable)
+	if (!item.behavior)
 		return;
 
-	auto* statBoost = dynamic_cast<StatBoostEquipment*>(item.pickable.get());
-	if (!statBoost)
-		return;
+	auto remove_stats = [this](auto& sb)
+	{
+		using T = std::decay_t<decltype(sb)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			if (sb.is_set_mode)
+			{
+				if (sb.str_bonus != 0)
+					set_strength(sb.original_stats.str);
+				if (sb.dex_bonus != 0)
+					set_dexterity(sb.original_stats.dex);
+				if (sb.con_bonus != 0)
+					set_constitution(sb.original_stats.con);
+				if (sb.int_bonus != 0)
+					set_intelligence(sb.original_stats.intel);
+				if (sb.wis_bonus != 0)
+					set_wisdom(sb.original_stats.wis);
+				if (sb.cha_bonus != 0)
+					set_charisma(sb.original_stats.cha);
+			}
+			else
+			{
+				set_strength(get_strength() - sb.str_bonus);
+				set_dexterity(get_dexterity() - sb.dex_bonus);
+				set_constitution(get_constitution() - sb.con_bonus);
+				set_intelligence(get_intelligence() - sb.int_bonus);
+				set_wisdom(get_wisdom() - sb.wis_bonus);
+				set_charisma(get_charisma() - sb.cha_bonus);
+			}
+		}
+	};
 
-	if (statBoost->is_set_mode)
-	{
-		if (statBoost->str_bonus != 0)
-			set_strength(statBoost->original_stats.str);
-		if (statBoost->dex_bonus != 0)
-			set_dexterity(statBoost->original_stats.dex);
-		if (statBoost->con_bonus != 0)
-			set_constitution(statBoost->original_stats.con);
-		if (statBoost->int_bonus != 0)
-			set_intelligence(statBoost->original_stats.intel);
-		if (statBoost->wis_bonus != 0)
-			set_wisdom(statBoost->original_stats.wis);
-		if (statBoost->cha_bonus != 0)
-			set_charisma(statBoost->original_stats.cha);
-	}
-	else
-	{
-		set_strength(get_strength() - statBoost->str_bonus);
-		set_dexterity(get_dexterity() - statBoost->dex_bonus);
-		set_constitution(get_constitution() - statBoost->con_bonus);
-		set_intelligence(get_intelligence() - statBoost->int_bonus);
-		set_wisdom(get_wisdom() - statBoost->wis_bonus);
-		set_charisma(get_charisma() - statBoost->cha_bonus);
-	}
+	std::visit(remove_stats, *item.behavior);
 }
 
 // end of file: Player.cpp

@@ -8,16 +8,16 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Gold.h"
+#include "../Actor/Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
-#include "../Systems/TileConfig.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/TileConfig.h"
 #include "../Utils/Vector2D.h"
 #include "ItemCreator.h"
 #include "ItemFactory.h"
@@ -158,7 +158,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 
 	// Create gold pile
 	auto goldPile = std::make_unique<Item>(position, ActorData{ TileConfig::instance().get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
-	goldPile->pickable = std::make_unique<Gold>(goldAmount);
+	goldPile->behavior = Gold{ goldAmount };
 	add_item(*ctx.inventory_data, std::move(goldPile));
 
 	// Generate other random items
