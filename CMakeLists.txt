@@ -42,10 +42,10 @@ if(EMSCRIPTEN)
     FetchContent_MakeAvailable(raylib nlohmann_json)
     set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
-    # Emscripten flags: emscripten_set_main_loop_arg drives the frame loop so
-    # ASYNCIFY is not needed and would split every tick across two browser frames
-    # (breaking IsKeyPressed), so it is intentionally omitted.
-    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sGL_ENABLE_GET_PROC_ADDRESS=1")
+    # Emscripten flags: ASYNCIFY is required because raylib 5.5 calls
+    # emscripten_sleep internally. Our own code does NOT call emscripten_sleep
+    # (removed from Renderer::end_frame), so input is not split across frames.
+    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sGL_ENABLE_GET_PROC_ADDRESS=1 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536")
 
     # Copy all JSON files to the build directory
     file(GLOB JSON_FILES ${CMAKE_SOURCE_DIR}/src/json/*.json)

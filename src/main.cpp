@@ -69,7 +69,7 @@ int main()
 
 #ifdef EMSCRIPTEN
 	LoopData loopData{ &game, loopNum };
-	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 60, 1);
+	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
 #else
 	// Frame-based game loop
 	while (!WindowShouldClose() && game.run)
