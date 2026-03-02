@@ -56,6 +56,33 @@ enum class TileSheet
 	SHEET_PIT0,
 	SHEET_GUI0,
 	SHEET_GUI1,
+	// Items -- appended to preserve existing enum integer values
+	SHEET_AMMO,
+	SHEET_WAND,
+	SHEET_BOOK,
+	SHEET_BOOT,
+	SHEET_GLOVE,
+	SHEET_KEY,
+	SHEET_LIGHT,
+	SHEET_TOOL,
+	SHEET_ROCK,
+	SHEET_MUSIC,
+	SHEET_CHEST0,
+	// Characters -- appended to preserve existing enum integer values
+	SHEET_SLIME0,
+	SHEET_CAT0,
+	SHEET_RODENT0,
+	SHEET_PLANT0,
+	SHEET_ELEMENTAL0,
+	SHEET_AQUATIC0,
+	// Objects -- appended to preserve existing enum integer values
+	SHEET_ORE0,
+	SHEET_HILL0,
+	SHEET_TREE0,
+	SHEET_GROUND0,
+	SHEET_TRAP0,
+	SHEET_FENCE,
+	SHEET_MAP0,
 };
 
 template <>

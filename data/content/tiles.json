@@ -31,13 +31,13 @@
             "sheet": 29
         },
         "bastard_sword": {
-            "col": 1,
-            "row": 0,
-            "sheet": 27
+            "col": 2,
+            "row": 1,
+            "sheet": 28
         },
         "battle_axe": {
-            "col": 2,
-            "row": 0,
+            "col": 1,
+            "row": 1,
             "sheet": 27
         },
         "boots_of_elvenkind": {
@@ -81,19 +81,19 @@
             "sheet": 29
         },
         "club": {
-            "col": 6,
-            "row": 0,
+            "col": 0,
+            "row": 2,
             "sheet": 26
         },
         "composite_bow": {
-            "col": 2,
-            "row": 4,
-            "sheet": 26
+            "col": 1,
+            "row": 1,
+            "sheet": 45
         },
         "crossbow": {
             "col": 5,
-            "row": 4,
-            "sheet": 26
+            "row": 1,
+            "sheet": 45
         },
         "dagger": {
             "col": 0,
@@ -106,9 +106,9 @@
             "sheet": 29
         },
         "flail": {
-            "col": 5,
-            "row": 0,
-            "sheet": 27
+            "col": 1,
+            "row": 4,
+            "sheet": 26
         },
         "food_ration": {
             "col": 0,
@@ -186,19 +186,19 @@
             "sheet": 36
         },
         "great_axe": {
-            "col": 2,
-            "row": 0,
+            "col": 0,
+            "row": 4,
             "sheet": 28
         },
         "great_sword": {
-            "col": 1,
-            "row": 0,
+            "col": 3,
+            "row": 1,
             "sheet": 28
         },
         "hand_axe": {
-            "col": 4,
-            "row": 0,
-            "sheet": 26
+            "col": 0,
+            "row": 1,
+            "sheet": 27
         },
         "health_potion": {
             "col": 0,
@@ -206,9 +206,9 @@
             "sheet": 24
         },
         "heavy_crossbow": {
-            "col": 4,
-            "row": 4,
-            "sheet": 26
+            "col": 5,
+            "row": 1,
+            "sheet": 45
         },
         "helm_of_brilliance": {
             "col": 0,
@@ -251,9 +251,9 @@
             "sheet": 29
         },
         "light_crossbow": {
-            "col": 3,
-            "row": 4,
-            "sheet": 26
+            "col": 5,
+            "row": 1,
+            "sheet": 45
         },
         "lockpick": {
             "col": 2,
@@ -261,18 +261,18 @@
             "sheet": 22
         },
         "long_bow": {
-            "col": 1,
-            "row": 4,
-            "sheet": 26
+            "col": 0,
+            "row": 1,
+            "sheet": 45
         },
         "long_sword": {
             "col": 0,
-            "row": 0,
-            "sheet": 27
+            "row": 1,
+            "sheet": 28
         },
         "mace": {
-            "col": 5,
-            "row": 0,
+            "col": 0,
+            "row": 4,
             "sheet": 26
         },
         "mana_potion": {
@@ -291,9 +291,9 @@
             "sheet": 30
         },
         "morning_star": {
-            "col": 4,
-            "row": 0,
-            "sheet": 27
+            "col": 0,
+            "row": 4,
+            "sheet": 26
         },
         "padded_armor": {
             "col": 0,
@@ -336,7 +336,7 @@
             "sheet": 28
         },
         "rapier": {
-            "col": 3,
+            "col": 7,
             "row": 0,
             "sheet": 26
         },
@@ -396,9 +396,9 @@
             "sheet": 29
         },
         "scimitar": {
-            "col": 2,
+            "col": 5,
             "row": 0,
-            "sheet": 26
+            "sheet": 27
         },
         "scroll_confusion": {
             "col": 2,
@@ -431,19 +431,19 @@
             "sheet": 25
         },
         "short_bow": {
-            "col": 0,
-            "row": 4,
-            "sheet": 26
+            "col": 2,
+            "row": 1,
+            "sheet": 45
         },
         "short_sword": {
-            "col": 1,
+            "col": 0,
             "row": 0,
-            "sheet": 26
+            "sheet": 27
         },
         "sling": {
-            "col": 6,
-            "row": 4,
-            "sheet": 26
+            "col": 4,
+            "row": 1,
+            "sheet": 45
         },
         "small_shield": {
             "col": 0,
@@ -471,14 +471,14 @@
             "sheet": 22
         },
         "two_handed_sword": {
-            "col": 0,
-            "row": 0,
+            "col": 3,
+            "row": 1,
             "sheet": 28
         },
         "war_hammer": {
-            "col": 3,
-            "row": 0,
-            "sheet": 27
+            "col": 0,
+            "row": 6,
+            "sheet": 28
         }
     },
     "monsters": {

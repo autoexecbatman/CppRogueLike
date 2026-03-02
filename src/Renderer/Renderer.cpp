@@ -6,9 +6,6 @@
 
 #include <raylib.h>
 
-#ifdef EMSCRIPTEN
-#include <emscripten/emscripten.h>
-#endif
 
 #include "Renderer.h"
 #include "../Systems/TileConfig.h"
@@ -230,6 +227,36 @@ void Renderer::load_dawnlike(std::string_view base_path)
 	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh");
 	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money");
 
+	// Previously unloaded item sheets
+	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo");
+	load_static(TileSheet::SHEET_WAND, "Wand", "Items/", "Wand");
+	load_static(TileSheet::SHEET_BOOK, "Book", "Items/", "Book");
+	load_static(TileSheet::SHEET_BOOT, "Boot", "Items/", "Boot");
+	load_static(TileSheet::SHEET_GLOVE, "Glove", "Items/", "Glove");
+	load_static(TileSheet::SHEET_KEY, "Key", "Items/", "Key");
+	load_static(TileSheet::SHEET_LIGHT, "Light", "Items/", "Light");
+	load_static(TileSheet::SHEET_TOOL, "Tool", "Items/", "Tool");
+	load_static(TileSheet::SHEET_ROCK, "Rock", "Items/", "Rock");
+	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music");
+	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest");
+
+	// Previously unloaded character sheets
+	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime");
+	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat");
+	load_animated(TileSheet::SHEET_RODENT0, "Rodent0", "Characters/", "Rodent");
+	load_animated(TileSheet::SHEET_PLANT0, "Plant0", "Characters/", "Plant");
+	load_animated(TileSheet::SHEET_ELEMENTAL0, "Elemental0", "Characters/", "Elemental");
+	load_animated(TileSheet::SHEET_AQUATIC0, "Aquatic0", "Characters/", "Aquatic");
+
+	// Previously unloaded object sheets
+	load_animated(TileSheet::SHEET_ORE0, "Ore0", "Objects/", "Ore");
+	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill");
+	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree");
+	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground");
+	load_animated(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap");
+	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence");
+	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map");
+
 	sheets_loaded = true;
 }
 
@@ -260,9 +287,6 @@ void Renderer::begin_frame()
 void Renderer::end_frame()
 {
 	EndDrawing();
-#ifdef EMSCRIPTEN
-	emscripten_sleep(0);
-#endif
 }
 
 void Renderer::draw_tile(int grid_x, int grid_y, TileRef tile, int /*color_pair_id*/, Color tint) const
