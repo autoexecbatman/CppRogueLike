@@ -8,10 +8,11 @@
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
+#include <rlgl.h>
 #endif
 
-#include "Renderer.h"
 #include "../Systems/TileConfig.h"
+#include "Renderer.h"
 
 // Local color constants (raylib macros are #undef'd in Renderer.h)
 static constexpr Color RL_WHITE = { 255, 255, 255, 255 };
@@ -290,7 +291,15 @@ void Renderer::begin_frame()
 
 void Renderer::end_frame()
 {
+#ifdef EMSCRIPTEN
+	// EndDrawing calls PollInputEvents AFTER emscripten_sleep resumes, which
+	// advances prev=curr and makes IsKeyPressed always return false.
+	// Flush the render batch and swap buffers directly instead.
+	rlDrawRenderBatchActive();
+	SwapScreenBuffer();
+#else
 	EndDrawing();
+#endif
 }
 
 void Renderer::draw_tile(int grid_x, int grid_y, TileRef tile, int /*color_pair_id*/, Color tint) const
