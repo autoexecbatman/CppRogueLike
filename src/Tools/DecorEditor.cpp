@@ -96,19 +96,30 @@ static void from_json(const json& j, DecorEditor::PaletteEntry& e)
 
 void DecorEditor::save_palette(std::string_view path) const
 {
-	json j;
-	j["tiles"] = palette;
-
 	auto abs = Paths::resolve(path);
+
+	// Read the existing file so other sections are preserved.
+	json j = json::object();
+	{
+		std::ifstream in(abs);
+		if (in.is_open())
+		{
+			try { in >> j; } catch (...) {}
+		}
+	}
+
+	j["palette"] = palette;
+
 	std::filesystem::create_directories(abs.parent_path());
 	std::ofstream out(abs);
-	out << j.dump(2);
+	out << j.dump(4);
 	last_save_time = GetTime();
 	std::clog << std::format("[DecorEditor] palette saved: {}\n", abs.string());
 }
 
 void DecorEditor::load_palette(std::string_view path)
 {
+	palette_path = std::string(path);
 	palette.clear();
 	palette_index = 0;
 
@@ -125,94 +136,11 @@ void DecorEditor::load_palette(std::string_view path)
 	{
 		json j;
 		in >> j;
-		palette = j["tiles"].get<std::vector<PaletteEntry>>();
+		if (!j.contains("palette"))
+			return;
+		palette = j["palette"].get<std::vector<PaletteEntry>>();
 		std::erase_if(palette, [](const PaletteEntry& e)
 			{ return e.label.empty(); });
-	}
-	catch (...)
-	{
-	}
-}
-
-// ---------------------------------------------------------------------------
-// Persistence -- decor overrides
-// ---------------------------------------------------------------------------
-
-void DecorEditor::save(std::string_view path) const
-{
-	json j = json::object();
-
-	if (!active_key.empty())
-		j["_last_saved"] = active_key;
-
-	for (const auto& [map_key, tile_map] : all_overrides)
-	{
-		json arr = json::array();
-		for (const auto& [coord_key, tile] : tile_map)
-		{
-			int x = static_cast<int>(coord_key & 0xFFFF);
-			int y = static_cast<int>((coord_key >> 16) & 0xFFFF);
-			arr.push_back({
-				{ "x", x },
-				{ "y", y },
-				{ "tile", {
-					{ "sheet", static_cast<int>(tile.sheet) },
-					{ "col", tile.col },
-					{ "row", tile.row }
-				}}
-			});
-		}
-		j[map_key] = arr;
-	}
-
-	auto abs = Paths::resolve(path);
-	std::filesystem::create_directories(abs.parent_path());
-	std::ofstream out(abs);
-	out << j.dump(2);
-	last_save_time = GetTime();
-	std::clog << std::format("[DecorEditor] overrides saved: {}\n", abs.string());
-}
-
-void DecorEditor::load(std::string_view path)
-{
-	auto abs_load = Paths::resolve(path);
-	std::ifstream in(abs_load);
-	if (!in.is_open())
-	{
-		std::clog << std::format("[DecorEditor] overrides not found: {}\n", abs_load.string());
-		return;
-	}
-	std::clog << std::format("[DecorEditor] overrides loaded: {}\n", abs_load.string());
-
-	json j;
-	try
-	{
-		in >> j;
-		all_overrides.clear();
-		last_saved_key.clear();
-
-		if (j.contains("_last_saved"))
-			last_saved_key = j["_last_saved"].get<std::string>();
-
-		for (auto& [map_key, arr] : j.items())
-		{
-			if (map_key.starts_with('_'))
-				continue;
-
-			auto& tile_map = all_overrides[map_key];
-			for (const auto& entry : arr)
-			{
-				int x = entry["x"].get<int>();
-				int y = entry["y"].get<int>();
-				const auto& t = entry["tile"];
-				TileRef tile{
-					static_cast<TileSheet>(t.value("sheet", 0)),
-					t.value("col", -1),
-					t.value("row", -1)
-				};
-				tile_map[make_key(x, y)] = tile;
-			}
-		}
 	}
 	catch (...)
 	{
@@ -310,13 +238,13 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 		if (!browser_open)
 		{
 			editing = false;
-			save_palette("data/tile_labels.json");
+			save_palette(palette_path);
 		}
 	}
 
 	if (browser_open)
 	{
-		update_browser(renderer, "data/tile_labels.json");
+		update_browser(renderer, palette_path);
 		return;
 	}
 

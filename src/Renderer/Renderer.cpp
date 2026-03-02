@@ -6,6 +6,9 @@
 
 #include <raylib.h>
 
+#ifdef EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
 #include "Renderer.h"
 #include "../Systems/TileConfig.h"

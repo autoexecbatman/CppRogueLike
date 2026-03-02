@@ -49,9 +49,7 @@ public:
 
 	void set_active_map(long seed, int dungeon_level);
 
-	void save(std::string_view path) const;
-	void load(std::string_view path);
-
+	// Palette persistence -- both read/write the "palette" array in tile_config.json.
 	void save_palette(std::string_view path) const;
 	void load_palette(std::string_view path);
 
@@ -79,7 +77,7 @@ private:
 	mutable double last_save_time{ -10.0 };
 
 	std::string active_key;
-	std::string last_saved_key;
+	std::string palette_path; // set during load_palette, used by save_palette and browser
 
 	std::unordered_map<std::string, std::unordered_map<uint32_t, TileRef>> all_overrides;
 

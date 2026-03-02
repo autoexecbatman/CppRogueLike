@@ -59,9 +59,8 @@ int main()
 	game.renderer.load_font(Paths::DAWNLIKE_FONT, 16);
 
 	auto ctx = game.context();
-	game.decor_editor.load(Paths::DECOR_OVERRIDES);
-	game.decor_editor.load_palette(Paths::TILE_LABELS);
-	game.prefab_library.load_tile_labels(Paths::TILE_LABELS);
+	game.decor_editor.load_palette(Paths::TILE_CONFIG);
+	game.prefab_library.load_tile_labels(Paths::TILE_CONFIG);
 	game.prefab_library.load(Paths::PREFABS);
 
 	game.menus.push_back(std::make_unique<Menu>(true, ctx));

@@ -129,8 +129,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				}
 				if (key == GameKey::DECOR_SAVE)
 				{
-					ctx.decor_editor->save(Paths::DECOR_OVERRIDES);
-					ctx.decor_editor->save_palette(Paths::TILE_LABELS);
+					ctx.decor_editor->save_palette(Paths::TILE_CONFIG);
 					return true;
 				}
 				// Handle placement -- blocked while sheet browser is open

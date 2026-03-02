@@ -53,7 +53,9 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	try
 	{
 		in >> j;
-		for (const auto& e : j["tiles"])
+		if (!j.contains("palette"))
+			return;
+		for (const auto& e : j["palette"])
 		{
 			std::string sym_str = e.value("symbol", "");
 			if (sym_str.empty())
