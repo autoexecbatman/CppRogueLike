@@ -42,10 +42,9 @@ if(EMSCRIPTEN)
     FetchContent_MakeAvailable(raylib nlohmann_json)
     set(CMAKE_WARN_DEPRECATED ON CACHE BOOL "" FORCE)
 
-    # Emscripten flags: ASYNCIFY is required because raylib 5.5 calls emscripten_sleep
-    # internally. Input correctness is achieved by calling BeginDrawing (PollInputEvents)
-    # before handle_input_phase so the key state is fresh when we read it.
-    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sGL_ENABLE_GET_PROC_ADDRESS=1 -sASYNCIFY -sASYNCIFY_STACK_SIZE=65536")
+    # end_frame uses rlDrawRenderBatchActive+SwapScreenBuffer instead of EndDrawing
+    # so WaitTime (emscripten_sleep) is never called; ASYNCIFY is not required.
+    set(EMCC_FLAGS "-sWASM=1 -sALLOW_MEMORY_GROWTH=1 -sEXPORTED_RUNTIME_METHODS=['cwrap'] -sASSERTIONS=1 -sERROR_ON_UNDEFINED_SYMBOLS=0 -sEXPORTED_FUNCTIONS=['_main','_malloc'] -sNO_DISABLE_EXCEPTION_CATCHING -sUSE_GLFW=3 -sGL_ENABLE_GET_PROC_ADDRESS=1")
 
     # Copy all JSON files to the build directory
     file(GLOB JSON_FILES ${CMAKE_SOURCE_DIR}/src/json/*.json)

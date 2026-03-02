@@ -8,6 +8,7 @@
 
 #ifdef EMSCRIPTEN
 #include <emscripten.h>
+#include <rlgl.h>
 #endif
 
 #include "Renderer.h"
@@ -290,7 +291,14 @@ void Renderer::begin_frame()
 
 void Renderer::end_frame()
 {
+#ifdef EMSCRIPTEN
+	// Flush draw calls and present the frame without calling WaitTime.
+	// Browser rAF drives frame timing so emscripten_sleep is not needed.
+	rlDrawRenderBatchActive();
+	SwapScreenBuffer();
+#else
 	EndDrawing();
+#endif
 }
 
 void Renderer::draw_tile(int grid_x, int grid_y, TileRef tile, int /*color_pair_id*/, Color tint) const
