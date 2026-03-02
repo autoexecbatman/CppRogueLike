@@ -108,8 +108,10 @@ void DecorEditor::save_palette(std::string_view path) const
 			{
 				in >> j;
 			}
-			catch (...)
+			catch (const json::exception& e)
 			{
+				std::clog << std::format("[DecorEditor] tile_config.json error, starting fresh: {}\n", e.what());
+				j = json::object();
 			}
 		}
 	}
@@ -148,8 +150,10 @@ void DecorEditor::load_palette(std::string_view path)
 		std::erase_if(palette, [](const PaletteEntry& e)
 			{ return e.label.empty(); });
 	}
-	catch (...)
+	catch (const json::exception& e)
 	{
+		std::clog << std::format("[DecorEditor] palette error, clearing: {}\n", e.what());
+		palette.clear();
 	}
 }
 

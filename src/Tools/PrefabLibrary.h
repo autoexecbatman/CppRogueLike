@@ -89,6 +89,7 @@ private:
 	std::vector<std::pair<char, std::string>> palette_order; // stable display order
 
 	void build_structural_symbols();
+	void register_symbol(char sym, TileRef tile, std::string_view label);
 
 	// Deterministic prefab selection for a room of (total_w x total_h) including walls.
 	// Returns prefab index, or -1 if none fits.
