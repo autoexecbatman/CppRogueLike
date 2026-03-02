@@ -42,10 +42,6 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 		ctx.message_system->log(std::format("Loop number: {}\n", loopNum));
 	}
 
-	// BeginDrawing calls PollInputEvents -- must happen before handle_input_phase
-	// so IsKeyPressed reads a fresh previousKeyState even when ASYNCIFY splits the frame.
-	ctx.renderer->begin_frame();
-
 	handle_input_phase(ctx);
 
 	if (ctx.input_handler->was_resized())
@@ -199,7 +195,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 		ctx.map->get_width(),
 		ctx.map->get_height());
 
-	// begin_frame() already called at the top of handle_gameloop
+	ctx.renderer->begin_frame();
 
 	ctx.rendering_manager->render(ctx);
 

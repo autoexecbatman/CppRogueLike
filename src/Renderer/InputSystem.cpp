@@ -6,6 +6,10 @@
 
 void InputSystem::poll()
 {
+	// Ensure raylib's input state reflects OS events that arrived since the
+	// last frame even when ASYNCIFY splits EndDrawing across browser tasks.
+	PollInputEvents();
+
 	current_key = GameKey::NONE;
 	char_input = 0;
 	resized = false;
