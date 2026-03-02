@@ -525,19 +525,23 @@ TEST_F(MapTest, StairsPlacement_NoStairsInContext_DoesNotCrash)
 
 TEST_F(MapTest, StairsPlacement_NoRooms_DoesNotCrash)
 {
-    // BSP will populate rooms during traversal, so stairs will be placed
+    // 20x15 fits only one dungeon cell (CELL_W=17, CELL_H=13) which has a
+    // 20% SKIP_PCTG chance of producing zero rooms.  Use a map large enough
+    // (80x50 -> 4x3 = 12 cells) to make P(all skipped) < 0.001%.
+    map = std::make_unique<Map>(80, 50);
+    ctx.map = map.get();
+    map->init(false, ctx);  // initial tile setup on the bigger map
+
     std::unique_ptr<Stairs> stairs = std::make_unique<Stairs>(Vector2D{0, 0});
     ctx.stairs = stairs.get();
 
-    std::vector<DungeonRoom> rooms;  // Empty at start, populated by BSP
+    std::vector<DungeonRoom> rooms;
     ctx.rooms = &rooms;
 
-    // Should not crash even if rooms starts empty
     EXPECT_NO_THROW(map->init(false, ctx));
 
-    // After init, rooms should be populated and stairs placed
     EXPECT_FALSE(rooms.empty());
-    EXPECT_NE(stairs->position, Vector2D(0, 0));  // Stairs moved from initial position
+    EXPECT_NE(stairs->position, (Vector2D{0, 0}));
 }
 
 TEST_F(MapTest, StairsPlacement_NullRooms_DoesNotCrash)
