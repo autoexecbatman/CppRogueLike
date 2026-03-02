@@ -104,7 +104,13 @@ void DecorEditor::save_palette(std::string_view path) const
 		std::ifstream in(abs);
 		if (in.is_open())
 		{
-			try { in >> j; } catch (...) {}
+			try
+			{
+				in >> j;
+			}
+			catch (...)
+			{
+			}
 		}
 	}
 

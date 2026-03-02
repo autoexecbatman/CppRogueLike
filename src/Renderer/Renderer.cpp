@@ -50,7 +50,8 @@ void Renderer::init()
 		screen_h = (raw_h / tile_size) * tile_size;
 	}
 	InitWindow(screen_w, screen_h, "C++RogueLike");
-	SetTargetFPS(60);
+	// Browser rAF drives timing -- disable raylib's internal WaitTime/emscripten_sleep.
+	SetTargetFPS(0);
 #else
 	// Create initial window to query monitor
 	InitWindow(800, 600, "C++RogueLike");
