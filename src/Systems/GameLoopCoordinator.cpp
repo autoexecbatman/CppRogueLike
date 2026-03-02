@@ -88,11 +88,6 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 	ctx.input_handler->reset_key();
 	if (ctx.menu_manager->should_take_input())
 	{
-#ifdef EMSCRIPTEN
-		// EndDrawing is not called on web -- PollInputEvents never runs otherwise.
-		// Call it here, once per frame, before reading key state.
-		PollInputEvents();
-#endif
 		ctx.input_system->poll();
 
 		auto handle_zoom = [&]() -> bool

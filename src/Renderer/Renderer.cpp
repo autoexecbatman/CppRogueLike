@@ -292,10 +292,14 @@ void Renderer::begin_frame()
 void Renderer::end_frame()
 {
 #ifdef EMSCRIPTEN
-	// EndDrawing calls PollInputEvents AFTER emscripten_sleep resumes, which
-	// advances prev=curr and makes IsKeyPressed always return false.
-	// Flush the render batch and swap buffers directly instead.
+	// EndDrawing's order is: flush -> swap -> WaitTime -> PollInputEvents.
+	// glfwSwapBuffers may yield (emscripten_sleep), so events can fire between
+	// swap and PollInputEvents, causing PollInputEvents to see prev=curr=1 and
+	// making IsKeyPressed permanently false.
+	// Fix: flush -> PollInputEvents -> swap.
+	// Events that arrive during the swap yield are captured next frame with prev=0.
 	rlDrawRenderBatchActive();
+	PollInputEvents();
 	SwapScreenBuffer();
 #else
 	EndDrawing();
