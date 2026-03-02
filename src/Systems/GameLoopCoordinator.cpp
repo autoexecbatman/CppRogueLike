@@ -88,6 +88,12 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 	ctx.input_handler->reset_key();
 	if (ctx.menu_manager->should_take_input())
 	{
+#ifdef EMSCRIPTEN
+		// With ASYNCIFY, raylib's emscripten_sleep splits the frame. By the time
+		// the next rAF tick calls poll(), PollInputEvents may not have run yet for
+		// this tick. Force a snapshot here so IsKeyPressed sees fresh state.
+		PollInputEvents();
+#endif
 		ctx.input_system->poll();
 
 		auto handle_zoom = [&]() -> bool
