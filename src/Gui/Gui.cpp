@@ -15,8 +15,8 @@
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/HungerSystem.h"
-#include "../Systems/TileConfig.h"
 #include "../Systems/MessageSystem.h"
+#include "../Systems/TileConfig.h"
 #include "Gui.h"
 #include "LogMessage.h"
 
@@ -72,7 +72,9 @@ void Gui::gui_update(GameContext& ctx)
 void Gui::gui_render(const GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -87,7 +89,7 @@ void Gui::gui_render(const GameContext& ctx)
 	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
-	auto& tc = TileConfig::instance();
+	const auto& tc = *ctx.tile_config;
 	ctx.renderer->draw_tile_screen(0, baseY, tc.get("GUI_FRAME_TL"));
 	for (int col = 1; col < vcols - 1; ++col)
 	{
@@ -130,7 +132,9 @@ void Gui::gui_render(const GameContext& ctx)
 void Gui::render_hp_bar(const GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -141,7 +145,9 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int hp = ctx.player->destructible->get_hp();
 	const int maxHp = ctx.player->destructible->get_max_hp();
 	if (maxHp <= 0)
+	{
 		return;
+	}
 
 	const float ratio = std::clamp(
 		static_cast<float>(hp) / static_cast<float>(maxHp), 0.0f, 1.0f);
@@ -150,7 +156,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Heart icon at col 1
-	ctx.renderer->draw_tile_screen(1 * ts, rowY, TileConfig::instance().get("GUI_HEART_FULL"));
+	ctx.renderer->draw_tile_screen(1 * ts, rowY, ctx.tile_config->get("GUI_HEART_FULL"));
 
 	// Bar: col 2 to div1-1
 	const int barX = 2 * ts;
@@ -188,7 +194,9 @@ void Gui::render_hp_bar(const GameContext& ctx)
 void Gui::render_hunger_status(const GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -197,7 +205,9 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int div1 = hud_div1(vcols);
 
 	if (ctx.hunger_system->get_hunger_max() <= 0)
+	{
 		return;
+	}
 
 	const int hungerVal = ctx.hunger_system->get_hunger_value();
 	const int hungerMax = ctx.hunger_system->get_hunger_max();
@@ -238,7 +248,9 @@ void Gui::render_hunger_status(const GameContext& ctx)
 void Gui::gui_print_stats(const GameContext& ctx) noexcept
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -303,7 +315,9 @@ void Gui::gui_print_attrs(const GameContext& /*ctx*/) noexcept {}
 void Gui::gui_print_log(const GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -339,7 +353,9 @@ void Gui::gui_print_log(const GameContext& ctx)
 void Gui::render_player_status(const GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
 	const int ts = ctx.renderer->get_tile_size();
 	const int vrows = ctx.renderer->get_viewport_rows();

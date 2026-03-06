@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../Actor/Actor.h"
+#include "../Core/GameContext.h"
+#include "../Persistent/Persistent.h"
 #include "AiMonster.h"
 
 // Forward declarations

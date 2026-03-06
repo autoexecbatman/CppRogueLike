@@ -1,11 +1,11 @@
 // file: Systems/DataManager.cpp
 #include <filesystem>
 #include <fstream>
-#include <iostream>
-#include <nlohmann/json.hpp>
+#include <string>
+#include <vector>
 
-#include "DataManager.h"
-#include "MessageSystem.h"
+#include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 // Include only the struct definitions
 #include "../Attributes/CharismaAttributes.h"
@@ -15,6 +15,8 @@
 #include "../Attributes/StrengthAttributes.h"
 #include "../Attributes/WisdomAttributes.h"
 #include "../Items/Weapons.h"
+#include "DataManager.h"
+#include "MessageSystem.h"
 
 namespace
 {
@@ -79,23 +81,39 @@ std::vector<Weapons> DataManager::load_weapons(const std::string& filename, Mess
 		// Handle enum values with defaults
 		std::string handReq = item.value("handRequirement", "ONE_HANDED");
 		if (handReq == "TWO_HANDED")
+		{
 			w.handRequirement = HandRequirement::TWO_HANDED;
+		}
 		else if (handReq == "OFF_HAND_ONLY")
+		{
 			w.handRequirement = HandRequirement::OFF_HAND_ONLY;
+		}
 		else
+		{
 			w.handRequirement = HandRequirement::ONE_HANDED;
+		}
 
 		std::string weapSize = item.value("weaponSize", "MEDIUM");
 		if (weapSize == "TINY")
+		{
 			w.weaponSize = WeaponSize::TINY;
+		}
 		else if (weapSize == "SMALL")
+		{
 			w.weaponSize = WeaponSize::SMALL;
+		}
 		else if (weapSize == "LARGE")
+		{
 			w.weaponSize = WeaponSize::LARGE;
+		}
 		else if (weapSize == "GIANT")
+		{
 			w.weaponSize = WeaponSize::GIANT;
+		}
 		else
+		{
 			w.weaponSize = WeaponSize::MEDIUM;
+		}
 
 		// Handle arrays if they exist in JSON
 		if (item.contains("hitBonusRange") && item["hitBonusRange"].is_array())

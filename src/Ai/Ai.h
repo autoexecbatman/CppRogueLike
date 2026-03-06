@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <memory>
 
 #include "../Persistent/Persistent.h"
 
@@ -50,7 +51,6 @@ public:
 
 	[[nodiscard]] static std::unique_ptr<Ai> create(const json& j);
 
-	[[nodiscard]] int calculate_step(int positionDifference); // utility
 	[[nodiscard]] int get_next_level_xp(GameContext& ctx, Creature& owner);
 	void levelup_update(GameContext& ctx, Creature& owner);
 	[[nodiscard]] static constexpr int calculate_fighter_xp(int level) noexcept;

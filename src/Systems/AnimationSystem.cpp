@@ -1,17 +1,23 @@
 // file: AnimationSystem.cpp
-#include "AnimationSystem.h"
+#include <vector>
 
-#include <algorithm>
+#include <raylib.h>
 
 #include "../Renderer/Renderer.h"
+#include "AnimationSystem.h"
 #include "TileConfig.h"
+
+void AnimationSystem::init(const TileConfig& tc)
+{
+	m_blood_tile = tc.get("TILE_EFFECT_BLOOD");
+}
 
 void AnimationSystem::spawn_melee_hit(int world_x, int world_y)
 {
 	entries.push_back(AnimEntry{
 		.world_x = world_x,
 		.world_y = world_y,
-		.tile = TileConfig::instance().get("TILE_EFFECT_BLOOD"),
+		.tile = m_blood_tile,
 		.r = 255,
 		.g = 60,
 		.b = 60,
@@ -24,7 +30,7 @@ void AnimationSystem::spawn_death(int world_x, int world_y)
 	entries.push_back(AnimEntry{
 		.world_x = world_x,
 		.world_y = world_y,
-		.tile = TileConfig::instance().get("TILE_EFFECT_BLOOD"),
+		.tile = m_blood_tile,
 		.r = 200,
 		.g = 0,
 		.b = 0,
@@ -64,7 +70,9 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 	for (const auto& e : entries)
 	{
 		if (is_expired(e))
+		{
 			continue;
+		}
 
 		float t = (now - e.spawn_time) / e.duration;
 

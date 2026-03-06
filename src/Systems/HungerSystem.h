@@ -18,7 +18,7 @@ enum class HungerState
 class HungerSystem
 {
 public:
-	HungerSystem();
+	HungerSystem() = default;
 	~HungerSystem() = default;
 	HungerSystem(const HungerSystem&) = delete;
 	HungerSystem& operator=(const HungerSystem&) = delete;
@@ -63,19 +63,19 @@ public:
 	void load(GameContext& ctx, const nlohmann::json& j);
 
 private:
-	int hunger_value; // Internal hunger counter
-	int hunger_max; // Maximum hunger value
+	int hunger_value{ 0 }; // Internal hunger counter
+	int hunger_max{ 1000 }; // Maximum hunger value
 
 	// Thresholds for different hunger states
-	const int WELL_FED_THRESHOLD;
-	const int SATIATED_THRESHOLD;
-	const int HUNGRY_THRESHOLD;
-	const int STARVING_THRESHOLD;
-	const int DYING_THRESHOLD;
+	const int WELL_FED_THRESHOLD{ 200 };
+	const int SATIATED_THRESHOLD{ 400 };
+	const int HUNGRY_THRESHOLD{ 700 };
+	const int STARVING_THRESHOLD{ 900 };
+	const int DYING_THRESHOLD{ 950 };
 
 	// Updates internal hunger state based on hunger value
 	void update_hunger_state(GameContext& ctx);
 
-	HungerState current_state;
-	bool well_fed_message_shown; // Prevents spam of well-fed message
+	HungerState current_state{ HungerState::SATIATED };
+	bool well_fed_message_shown{ false }; // Prevents spam of well-fed message
 };

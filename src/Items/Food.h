@@ -2,7 +2,7 @@
 // Food struct is now in Pickable.h
 #pragma once
 
-#include "../Actor/Actor.h"
+#include "../Actor/Item.h"
 
 struct Vector2D;
 

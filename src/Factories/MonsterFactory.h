@@ -1,11 +1,10 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Utils/Vector2D.h"
 
 // Forward declarations

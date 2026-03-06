@@ -1,10 +1,10 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 
 class Renderer;
 class InputSystem;
+class TileConfig;
 struct GameContext;
 
 class BaseMenu
@@ -12,6 +12,7 @@ class BaseMenu
 protected:
 	Renderer* renderer{ nullptr };
 	InputSystem* input_system{ nullptr };
+	const TileConfig* tile_config{ nullptr };
 	size_t menu_height{ 0 };
 	size_t menu_width{ 0 };
 	size_t menu_starty{ 0 };

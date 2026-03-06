@@ -10,9 +10,9 @@
 //   3. Sort rooms top-left first so room[0] is always the player start.
 //   4. Build a minimum spanning tree (Prim) connecting every room.
 //   5. Add ~20 % extra short-range edges to create loop paths.
+#include <vector>
 
 #include "DungeonRoom.h"
-#include <vector>
 
 class Map;
 class RandomDice;

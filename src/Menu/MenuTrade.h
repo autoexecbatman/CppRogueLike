@@ -4,14 +4,14 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 #include "../Actor/Actor.h"
-#include "../ActorTypes/Player.h"
-#include "../Core/GameContext.h"
 #include "BaseMenu.h"
 #include "IMenuState.h"
 
 struct GameContext;
+class Player;
 
 class Buy : public IMenuState
 {

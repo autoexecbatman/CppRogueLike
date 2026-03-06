@@ -6,18 +6,18 @@
 #include <utility>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Actor/Item.h"
 #include "../Actor/Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Systems/TileConfig.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/TileConfig.h"
 #include "../Utils/Vector2D.h"
 #include "ItemCreator.h"
 #include "ItemFactory.h"
@@ -94,8 +94,7 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 			std::string{ rule.category },
 			[rule](Vector2D pos, GameContext& ctx)
 			{
-				const int idx = ctx.dice->roll(
-					0, static_cast<int>(rule.item_pool.size()) - 1);
+				const int idx = ctx.dice->roll(0, static_cast<int>(rule.item_pool.size()) - 1);
 				const ItemId baseId = rule.item_pool[idx];
 				if (rule.enhancement_category == EnhancedItemCategory::WEAPON)
 				{
@@ -145,7 +144,9 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	}
 
 	default:
+	{
 		itemCount = 1;
+	}
 	}
 
 	// Boost dungeon level for item generation to get better items
@@ -157,7 +158,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
 	// Create gold pile
-	auto goldPile = std::make_unique<Item>(position, ActorData{ TileConfig::instance().get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
+	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tile_config->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
 	goldPile->behavior = Gold{ goldAmount };
 	add_item(*ctx.inventory_data, std::move(goldPile));
 
@@ -335,8 +336,7 @@ void ItemFactory::spawn_random_item(Vector2D position, GameContext& ctx, int dun
 int ItemFactory::calculate_weight(const ItemType& item, int dungeonLevel) const
 {
 	// Check level requirements
-	if (dungeonLevel < item.levelMinimum ||
-		(item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
+	if (dungeonLevel < item.levelMinimum || (item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
 	{
 		return 0;
 	}
@@ -365,16 +365,14 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 				auto enh = ItemEnhancement::generate_weapon_enhancement();
 				InventoryOperations::add_item(
 					*ctx.inventory_data,
-					ItemCreator::create_with_enhancement(
-						baseId, position, enh.prefix, enh.suffix));
+					ItemCreator::create_with_enhancement(baseId, position, enh.prefix, enh.suffix));
 			}
 			else
 			{
 				auto enh = ItemEnhancement::generate_armor_enhancement();
 				InventoryOperations::add_item(
 					*ctx.inventory_data,
-					ItemCreator::create_with_enhancement(
-						baseId, position, enh.prefix, enh.suffix));
+					ItemCreator::create_with_enhancement(baseId, position, enh.prefix, enh.suffix));
 			}
 		}
 	};

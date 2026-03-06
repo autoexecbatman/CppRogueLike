@@ -32,7 +32,9 @@ int DecorEditor::palette_find(TileRef tile) const
 	for (int i = 0; i < static_cast<int>(palette.size()); ++i)
 	{
 		if (palette[i].tile == tile)
+		{
 			return i;
+		}
 	}
 	return -1;
 }
@@ -56,10 +58,14 @@ void DecorEditor::palette_add_or_update(
 
 void DecorEditor::palette_remove(TileRef tile)
 {
-	std::erase_if(palette, [tile](const PaletteEntry& e)
+	std::erase_if(palette,
+		[tile](const PaletteEntry& e)
 		{ return e.tile == tile; });
+
 	if (palette_index >= static_cast<int>(palette.size()))
+	{
 		palette_index = std::max(0, static_cast<int>(palette.size()) - 1);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -145,9 +151,13 @@ void DecorEditor::load_palette(std::string_view path)
 		json j;
 		in >> j;
 		if (!j.contains("palette"))
+		{
 			return;
+		}
+
 		palette = j["palette"].get<std::vector<PaletteEntry>>();
-		std::erase_if(palette, [](const PaletteEntry& e)
+		std::erase_if(palette,
+			[](const PaletteEntry& e)
 			{ return e.label.empty(); });
 	}
 	catch (const json::exception& e)
@@ -177,14 +187,20 @@ void DecorEditor::toggle()
 void DecorEditor::cycle_next()
 {
 	if (palette.empty())
+	{
 		return;
+	}
+
 	palette_index = (palette_index + 1) % static_cast<int>(palette.size());
 }
 
 void DecorEditor::cycle_prev()
 {
 	if (palette.empty())
+	{
 		return;
+	}
+
 	int sz = static_cast<int>(palette.size());
 	palette_index = (palette_index - 1 + sz) % sz;
 }
@@ -192,7 +208,10 @@ void DecorEditor::cycle_prev()
 void DecorEditor::place(int world_x, int world_y)
 {
 	if (palette.empty())
+	{
 		return;
+	}
+
 	current_map()[make_key(world_x, world_y)] = palette[palette_index].tile;
 }
 
@@ -227,7 +246,9 @@ const std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map() const
 {
 	auto it = all_overrides.find(active_key);
 	if (it != all_overrides.end())
+	{
 		return it->second;
+	}
 
 	static const std::unordered_map<uint32_t, TileRef> empty;
 	return empty;
@@ -240,7 +261,9 @@ const std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map() const
 void DecorEditor::update_and_render(const Renderer& renderer)
 {
 	if (!active)
+	{
 		return;
+	}
 
 	if (IsKeyPressed(KEY_TAB) && !editing)
 	{
@@ -279,7 +302,9 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y) const
 {
 	if (palette.empty())
+	{
 		return;
+	}
 
 	const int tile_size = renderer.get_tile_size();
 	const int cam_x = renderer.get_camera_x();
@@ -297,7 +322,9 @@ void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y
 void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 {
 	if (palette.empty())
+	{
 		return;
+	}
 
 	const int tile_size = renderer.get_tile_size();
 	const int sw = renderer.get_screen_width();
@@ -312,7 +339,9 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 	{
 		int idx = palette_index - half + slot;
 		if (idx < 0 || idx >= sz)
+		{
 			continue;
+		}
 
 		int px = slot * tile_size + (sw - VISIBLE * tile_size) / 2;
 		int py = 2;
@@ -320,12 +349,16 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 		bool is_current = (idx == palette_index);
 
 		if (is_current)
+		{
 			DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 80 });
+		}
 
 		renderer.draw_tile_screen(px, py, palette[idx].tile);
 
 		if (is_current)
+		{
 			DrawRectangleLines(px, py, tile_size, tile_size, Color{ 255, 255, 0, 255 });
+		}
 	}
 }
 
@@ -387,7 +420,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		{
 			browser_sheet = (browser_sheet + dir + total_sheets) % total_sheets;
 			if (renderer.sheet_is_loaded(static_cast<TileSheet>(browser_sheet)))
+			{
 				break;
+			}
 		}
 		browser_scroll = 0;
 		browser_selected = TileRef{};
@@ -395,12 +430,18 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	};
 
 	if (IsKeyPressed(KEY_LEFT))
+	{
 		advance_sheet(-1);
+	}
 	if (IsKeyPressed(KEY_RIGHT))
+	{
 		advance_sheet(1);
+	}
 
 	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(browser_sheet)))
+	{
 		advance_sheet(1);
+	}
 
 	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(browser_sheet));
 	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browser_sheet));
@@ -445,7 +486,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	{
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
+		{
 			list_scroll = std::clamp(list_scroll - static_cast<int>(wheel), 0, max_scroll);
+		}
 	}
 
 	// Delete button column on the right edge of each list item.
@@ -458,7 +501,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	auto truncate = [&](std::string s) -> std::string
 	{
 		if (static_cast<int>(s.size()) > max_chars)
+		{
 			return s.substr(0, max_chars - 3) + "...";
+		}
 		return s;
 	};
 
@@ -495,15 +540,21 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	{
 		int iy = list_top + (i - list_scroll) * LIST_ITEM_H;
 		if (iy >= list_top + list_vis_h)
+		{
 			break;
+		}
 
 		bool is_sel = (i == list_cursor);
 		bool hovered = mouse_in_list && mouse.y >= iy && mouse.y < iy + LIST_ITEM_H;
 
 		if (is_sel)
+		{
 			DrawRectangle(0, iy, LIST_W, LIST_ITEM_H, Color{ 60, 60, 0, 220 });
+		}
 		else if (hovered)
+		{
 			DrawRectangle(0, iy, LIST_W, LIST_ITEM_H, Color{ 30, 30, 30, 180 });
+		}
 
 		renderer.draw_tile_screen_sized(
 			PAD,
@@ -521,7 +572,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				? std::format("[{}]", label_buf) // selected-all state
 				: std::format("{}|", label_buf); // normal typing cursor
 			if (sym_buf)
+			{
 				live += std::format(" ({})", sym_buf);
+			}
 			entry_text = truncate(live);
 			tc = Color{ 255, 220, 60, 255 };
 		}
@@ -529,7 +582,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		{
 			entry_text = palette[i].label;
 			if (palette[i].symbol)
+			{
 				entry_text += std::format(" [{}]", palette[i].symbol);
+			}
 			entry_text = truncate(entry_text);
 			tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
 		}
@@ -587,7 +642,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	{
 		int py = grid_y + (row - browser_scroll) * (BROWSER_TILE + 2);
 		if (py >= grid_y + grid_h)
+		{
 			break;
+		}
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
@@ -600,18 +657,28 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				mouse.y >= py && mouse.y < py + BROWSER_TILE);
 
 			if (in_pal)
+			{
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 20, 60, 20, 200 });
+			}
 			if (is_sel)
+			{
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 0, 220 });
+			}
 			if (hovered_tile && !is_sel)
+			{
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 30, 160 });
+			}
 
 			renderer.draw_tile_screen_sized(px, py, tid, BROWSER_TILE);
 
 			if (is_sel)
+			{
 				DrawRectangleLines(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 255, 255, 0, 255 });
+			}
 			else if (in_pal)
+			{
 				DrawRectangleLines(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 220, 60, 200 });
+			}
 
 			if (hovered_tile)
 			{
@@ -621,7 +688,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 					const auto& pe = palette[pi];
 					std::string tip = pe.label;
 					if (pe.symbol)
+					{
 						tip += std::format(" [{}]", pe.symbol);
+					}
 					int tip_x = static_cast<int>(mouse.x) + 14;
 					int tip_y = static_cast<int>(mouse.y) - 18;
 					DrawRectangle(tip_x - 2, tip_y - 2, static_cast<int>(tip.size()) * 8 + 6, 18, Color{ 0, 0, 0, 200 });
@@ -630,7 +699,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 			}
 
 			if (hovered_tile && clicked)
+			{
 				begin_edit(tid);
+			}
 		}
 	}
 
@@ -710,7 +781,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 			palette_add_or_update(browser_selected, label_buf, sym_buf);
 			list_cursor = palette_find(browser_selected);
 			if (list_cursor >= 0)
+			{
 				list_scroll = std::max(0, list_cursor - visible_rows + 1);
+			}
 			save_palette(palette_path);
 			editing = false;
 		}
@@ -742,10 +815,14 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		else
 		{
 			if (IsKeyPressed(KEY_BACKSPACE))
+			{
 				sym_buf = 0;
+			}
 
 			if (ch > 32 && ch < 127)
+			{
 				sym_buf = static_cast<char>(ch);
+			}
 		}
 	}
 }

@@ -21,6 +21,7 @@
 #include "Renderer/InputSystem.h"
 #include "Renderer/Renderer.h"
 #include "Systems/AnimationSystem.h"
+#include "Systems/TileConfig.h"
 #include "Systems/BuffSystem.h"
 #include "Systems/CreatureManager.h"
 #include "Systems/DataManager.h"
@@ -37,6 +38,8 @@
 #include "Systems/TargetingSystem.h"
 #include "Tools/ContentEditor.h"
 #include "Tools/DecorEditor.h"
+#include "Tools/MonsterEditor.h"
+#include "Tools/SpellEditor.h"
 #include "Tools/PrefabLibrary.h"
 #include "Tools/RoomEditor.h"
 #include "Utils/Vector2D.h"
@@ -84,7 +87,10 @@ public:
 			.content_editor = &content_editor,
 			.decor_editor = &decor_editor,
 			.room_editor = &room_editor,
+			.monster_editor = &monster_editor,
+			.spell_editor = &spell_editor,
 			.prefab_library = &prefab_library,
+			.tile_config = &tile_config,
 
 			// Game world data
 			.stairs = stairs.get(),
@@ -118,6 +124,14 @@ public:
 		{
 			windowState = WindowState::ROOM_EDITOR;
 		}
+		else if (monster_editor.is_active())
+		{
+			windowState = WindowState::MONSTER_EDITOR;
+		}
+		else if (spell_editor.is_active())
+		{
+			windowState = WindowState::SPELL_EDITOR;
+		}
 		else
 		{
 			windowState = menus.empty() ? WindowState::GAME : WindowState::MENU;
@@ -141,10 +155,29 @@ public:
 			room_editor.tick(ctx);
 			break;
 		}
+		case WindowState::MONSTER_EDITOR:
+		{
+			monster_editor.tick(ctx);
+			break;
+		}
+		case WindowState::SPELL_EDITOR:
+		{
+			spell_editor.tick(ctx);
+			break;
+		}
 		}
 
 		++loopNum;
 		return run;
+	}
+
+	// Set tile refs for objects constructed before tile_config was loaded.
+	// Call after tile_config.load().
+	void init_world()
+	{
+		player->actorData.tile = tile_config.get("TILE_PLAYER");
+		stairs->actorData.tile = tile_config.get("TILE_STAIRS");
+		anim_system.init(tile_config);
 	}
 
 	// Save on exit if needed
@@ -172,6 +205,9 @@ public:
 	GameStatus gameStatus{ GameStatus::STARTUP };
 	WindowState windowState{ WindowState::GAME };
 
+	// Tile configuration (must be loaded before init_world)
+	TileConfig tile_config{};
+
 	// Rendering (raylib)
 	Renderer renderer{};
 	InputSystem input_system{};
@@ -196,6 +232,8 @@ public:
 	ContentEditor content_editor{};
 	DecorEditor decor_editor{};
 	RoomEditor room_editor{};
+	MonsterEditor monster_editor{};
+	SpellEditor spell_editor{};
 	PrefabLibrary prefab_library{};
 
 	// Game world

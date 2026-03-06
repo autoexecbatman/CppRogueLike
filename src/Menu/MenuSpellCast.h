@@ -11,7 +11,7 @@ class Player;
 
 class MenuSpellCast : public BaseMenu
 {
-	std::vector<SpellId> availableSpells;
+	std::vector<std::string> availableSpells;
 	std::vector<std::string> spellSources; // "" = memorized, "Ring", "Helm", etc.
 	Player& player;
 	GameContext& ctx;

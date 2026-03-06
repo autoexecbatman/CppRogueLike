@@ -7,6 +7,8 @@
 
 #include <raylib.h>
 
+class TileConfig;
+
 // DawnLike sprite sheet indices.
 // Sheets with 0/1 suffixes are animation frame pairs.
 enum class TileSheet
@@ -183,7 +185,7 @@ public:
 
 	// Draw a DawnLike-tiled frame with dark background fill.
 	// px/py = top-left in pixels; w_tiles/h_tiles = dimensions in tiles.
-	void draw_frame(int px, int py, int w_tiles, int h_tiles) const;
+	void draw_frame(int px, int py, int w_tiles, int h_tiles, const TileConfig& tc) const;
 
 	void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
 	void update_viewport();

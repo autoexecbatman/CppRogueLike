@@ -7,6 +7,7 @@
 
 #include <raylib.h>
 
+#include "../Actor/Item.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Menu/Menu.h"
@@ -40,6 +41,7 @@ void RoomEditor::exit(GameContext& ctx)
 
 void RoomEditor::tick(GameContext& ctx)
 {
+	m_tile_config = ctx.tile_config;
 	handle_input(ctx);
 
 	ctx.renderer->begin_frame();
@@ -595,7 +597,11 @@ char RoomEditor::selected_sym() const
 
 TileRef RoomEditor::symbol_tile_id(char sym) const
 {
-	auto& tc = TileConfig::instance();
+	if (!m_tile_config)
+	{
+		return TileRef{};
+	}
+	const auto& tc = *m_tile_config;
 	switch (sym)
 	{
 	case '#':
@@ -636,10 +642,10 @@ TileRef RoomEditor::canvas_tile_id(int col, int row) const
 {
 	char sym = canvas[row][col];
 
-	if (sym == '#')
-		return wall_autotile_resolve_mask(TileConfig::instance().get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
+	if (sym == '#' && m_tile_config)
+		return wall_autotile_resolve_mask(m_tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
 
-	if (sym == '.')
+	if (sym == '.' && m_tile_config)
 	{
 		auto is_floor = [&](int c, int r) -> bool
 		{
@@ -648,7 +654,7 @@ TileRef RoomEditor::canvas_tile_id(int col, int row) const
 			return canvas[r][c] == '.';
 		};
 		return autotile_resolve(
-			TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
+			m_tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
 			is_floor(col, row - 1),
 			is_floor(col + 1, row),
 			is_floor(col, row + 1),

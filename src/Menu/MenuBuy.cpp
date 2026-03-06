@@ -1,4 +1,8 @@
-#include "MenuBuy.h"
+#include <string>
+
+#include <raylib.h>
+
+#include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
@@ -6,6 +10,7 @@
 #include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/ShopKeeper.h"
+#include "MenuBuy.h"
 
 using namespace InventoryOperations;
 

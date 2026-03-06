@@ -1,11 +1,23 @@
 // file: Player.cpp
+#include <algorithm>
+#include <cstdint>
+#include <format>
+#include <memory>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <variant>
+
 #include "../Actor/Actor.h"
+#include "../Actor/Attacker.h"
+#include "../Actor/Destructible.h"
+#include "../Actor/EquipmentSlot.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Player.h"
+#include "../Actor/Pickable.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiPlayer.h"
-#include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
@@ -14,13 +26,17 @@
 #include "../Items/Items.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
+#include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
-#include "../Systems/TileConfig.h"
+#include "../Utils/Vector2D.h"
+#include "Player.h"
 
 using namespace InventoryOperations; // For clean function calls
 
@@ -45,7 +61,7 @@ constexpr auto matches_unique_id = [](uint64_t unique_id)
 } // namespace
 
 Player::Player(Vector2D position)
-	: Creature(position, ActorData{ TileConfig::instance().get("TILE_PLAYER"), "Player", WHITE_BLACK_PAIR })
+	: Creature(position, ActorData{ TileRef{}, "Player", WHITE_BLACK_PAIR })
 {
 	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
 	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input

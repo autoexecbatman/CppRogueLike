@@ -5,8 +5,7 @@
 #include <optional>
 #include <vector>
 
-// Forward declarations
-class Item;
+#include "Item.h"
 
 // - Data structures for inventory management
 

@@ -49,15 +49,15 @@ ScrollOfTeleportation::ScrollOfTeleportation(Vector2D position)
 }
 
 GoldPile::GoldPile(Vector2D position, GameContext& ctx)
-	: Item(position, ActorData{ TileConfig::instance().get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR })
+	: Item(position, ActorData{ ctx.tile_config->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR })
 {
 	const int goldAmount = ctx.dice->roll(5, 10 + ctx.level_manager->get_dungeon_level() * 3);
 	behavior = Gold{ goldAmount };
 	set_value(goldAmount);
 }
 
-AmuletOfYendor::AmuletOfYendor(Vector2D position)
-	: Item(position, ActorData{ TileConfig::instance().get("TILE_AMULET_YENDOR"), "Amulet of Yendor", RED_YELLOW_PAIR })
+AmuletOfYendor::AmuletOfYendor(Vector2D position, const TileConfig& tc)
+	: Item(position, ActorData{ tc.get("TILE_AMULET_YENDOR"), "Amulet of Yendor", RED_YELLOW_PAIR })
 {
 	behavior = Amulet{};
 	set_value(1000);

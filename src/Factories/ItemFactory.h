@@ -1,9 +1,9 @@
 #pragma once
 
 #include <functional>
-#include <memory>
 #include <span>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 struct Vector2D;
@@ -13,12 +13,12 @@ struct EnhancedItemSpawnRule;
 // A struct to represent an item type with its spawn probability
 struct ItemType
 {
-	std::string name; // to store in category
-	int baseWeight; // Base weight/probability
-	int levelMinimum; // Minimum dungeon level for this item
-	int levelMaximum; // Maximum dungeon level for this item (0 = no maximum)
-	float levelScaling; // How much to scale weight by level (can be negative)
-	std::string category; // Item category for filtering
+	std::string name{}; // to store in category
+	int baseWeight{}; // Base weight/probability
+	int levelMinimum{}; // Minimum dungeon level for this item
+	int levelMaximum{}; // Maximum dungeon level for this item (0 = no maximum)
+	float levelScaling{}; // How much to scale weight by level (can be negative)
+	std::string category{}; // Item category for filtering
 
 	// Factory function to create the item
 	std::function<void(Vector2D, GameContext&)> createFunc;
@@ -26,9 +26,9 @@ struct ItemType
 
 struct ItemPercentage
 {
-	std::string name;
-	std::string category;
-	float percentage;
+	std::string name{};
+	std::string category{};
+	float percentage{};
 };
 
 class ItemFactory

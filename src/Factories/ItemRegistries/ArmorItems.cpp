@@ -1,7 +1,11 @@
 // file: ArmorItems.cpp
-#include "ArmorItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../ItemCreator.h"
+#include "ArmorItems.h"
 
 namespace
 {

@@ -1,9 +1,10 @@
 #pragma once
 
+#include <vector>
+
 #include "../Actor/Actor.h"
 #include "../Utils/Vector2D.h"
 #include "TargetMode.h"
-#include <vector>
 
 struct GameContext;
 

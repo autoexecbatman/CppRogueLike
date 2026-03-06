@@ -54,6 +54,9 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Actor/Destructible.cpp
     ${PARENT_SOURCE_DIR}/Actor/Pickable.cpp
     ${PARENT_SOURCE_DIR}/Actor/InventoryOperations.cpp
+    ${PARENT_SOURCE_DIR}/Actor/Stairs.cpp
+    ${PARENT_SOURCE_DIR}/Actor/Creature.cpp
+    ${PARENT_SOURCE_DIR}/Actor/Item.cpp
 
     # Persistent
     ${PARENT_SOURCE_DIR}/Persistent/Persistent.cpp
@@ -126,8 +129,10 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
     ${PARENT_SOURCE_DIR}/Tools/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/DecorEditor.cpp
+    ${PARENT_SOURCE_DIR}/Tools/MonsterEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
     ${PARENT_SOURCE_DIR}/Tools/RoomEditor.cpp
+    ${PARENT_SOURCE_DIR}/Tools/SpellEditor.cpp
     ${PARENT_SOURCE_DIR}/Systems/ObjectManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/DataManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/ShopKeeper.cpp

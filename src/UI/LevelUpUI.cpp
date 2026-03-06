@@ -1,13 +1,15 @@
 // LevelUpUI.cpp - Handles level up screen display
 #include <format>
 
+#include <raylib.h>
+
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/LevelUpSystem.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
 #include "LevelUpUI.h"
 
 void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)

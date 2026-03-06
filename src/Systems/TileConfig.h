@@ -2,7 +2,6 @@
 #pragma once
 
 #include <string>
-#include <string_view>
 #include <unordered_map>
 
 #include "../Renderer/Renderer.h"
@@ -12,15 +11,17 @@
 // ---------------------------------------------------------------------------
 struct AutotileGroup
 {
-	TileSheet sheet;
-	int origin_col;
-	int origin_row;
+	TileSheet sheet{};
+	int origin_col{};
+	int origin_row{};
 };
 
 constexpr TileRef autotile_resolve(AutotileGroup g, bool n, bool e, bool s, bool w)
 {
-	int col_offset = (!w && e) ? 0 : (w && !e) ? 2 : 1;
-	int row_offset = (!n && s) ? 0 : (n && !s) ? 2 : 1;
+	int col_offset = (!w && e) ? 0 : (w && !e) ? 2
+											   : 1;
+	int row_offset = (!n && s) ? 0 : (n && !s) ? 2
+											   : 1;
 	return TileRef{ g.sheet, g.origin_col + col_offset, g.origin_row + row_offset };
 }
 
@@ -37,7 +38,11 @@ constexpr TileRef autotile_resolve_mask(AutotileGroup g, int mask)
 // ---------------------------------------------------------------------------
 // Wall autotile (6-column DawnLike format)
 // ---------------------------------------------------------------------------
-struct TileOffset { int col; int row; };
+struct TileOffset
+{
+	int col{};
+	int row{};
+};
 
 inline constexpr TileOffset WALL_AUTOTILE_TABLE[16] = {
 	{ 3, 0 }, //  0: ....  Isolated pillar
@@ -60,9 +65,9 @@ inline constexpr TileOffset WALL_AUTOTILE_TABLE[16] = {
 
 struct WallAutotileGroup
 {
-	TileSheet sheet;
-	int origin_col;
-	int origin_row;
+	TileSheet sheet{};
+	int origin_col{};
+	int origin_row{};
 };
 
 constexpr TileRef wall_autotile_resolve(WallAutotileGroup g, bool n, bool e, bool s, bool w)
@@ -89,17 +94,12 @@ constexpr TileRef wall_autotile_resolve_mask(WallAutotileGroup g, int mask)
 class TileConfig
 {
 public:
-	[[nodiscard]] static TileConfig& instance();
-
 	[[nodiscard]] TileRef get(std::string_view key) const;
 	[[nodiscard]] AutotileGroup get_autotile(std::string_view key) const;
 	[[nodiscard]] WallAutotileGroup get_wall_autotile(std::string_view key) const;
-
 	void load(std::string_view path);
 
 private:
-	TileConfig() = default;
-
 	std::unordered_map<std::string, TileRef> m_tiles;
 	std::unordered_map<std::string, AutotileGroup> m_autotile_groups;
 	std::unordered_map<std::string, WallAutotileGroup> m_wall_autotile_groups;

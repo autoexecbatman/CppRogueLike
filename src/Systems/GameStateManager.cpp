@@ -19,6 +19,7 @@
 #include "../Gui/Gui.h"
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
+#include "../Renderer/Renderer.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/LevelManager.h"
@@ -50,7 +51,9 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
 void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 {
 	if (!j.contains("rooms") || !j["rooms"].is_array())
+	{
 		return;
+	}
 
 	for (const auto& d : j["rooms"])
 	{
@@ -265,7 +268,9 @@ bool GameStateManager::delete_save_file()
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 
 	if (!std::filesystem::exists(save_path, ec))
+	{
 		return true; // File doesn't exist, nothing to delete
+	}
 
 	const bool removed = std::filesystem::remove(save_path, ec);
 	return removed && !ec;

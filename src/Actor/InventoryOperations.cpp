@@ -16,6 +16,7 @@
 #include "Actor.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
+#include "Item.h"
 
 using json = nlohmann::json;
 
@@ -295,7 +296,8 @@ std::string get_inventory_debug_info(const InventoryData& inventory)
 
 void optimize_inventory_storage(InventoryData& inventory)
 {
-	std::erase_if(inventory.items, [](const auto& item)
+	std::erase_if(inventory.items,
+		[](const auto& item)
 		{ return !item; });
 
 	if (inventory.items.size() * 4 < inventory.items.capacity())

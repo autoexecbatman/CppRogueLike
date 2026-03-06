@@ -1,10 +1,10 @@
-#include <format>
 #include <fstream>
 #include <iostream>
+#include <string>
 
-#include "../Colors/Colors.h"
 #include "../Core/Paths.h"
 #include "../Gui/Gui.h"
+#include "../Gui/LogMessage.h"
 #include "MessageSystem.h"
 
 MessageSystem::MessageSystem() = default;

@@ -1,7 +1,12 @@
 // file: MeleeWeaponItems.cpp
-#include "MeleeWeaponItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../../Items/Weapons.h"
+#include "../ItemCreator.h"
+#include "MeleeWeaponItems.h"
 
 namespace
 {

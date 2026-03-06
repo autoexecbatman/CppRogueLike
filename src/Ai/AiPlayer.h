@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../Core/GameContext.h"
+#include "../Persistent/Persistent.h"
 #include "Ai.h"
 
 class TCODZip;

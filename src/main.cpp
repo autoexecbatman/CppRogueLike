@@ -1,15 +1,19 @@
 // file: main.cpp
+#include <exception>
 #include <fstream>
 #include <iostream>
+#include <memory>
 
 #ifdef EMSCRIPTEN
 #include <emscripten/emscripten.h>
 #endif
+#include <raylib.h>
 
 #include "Core/Paths.h"
+#include "Factories/MonsterCreator.h"
 #include "Game.h"
 #include "Menu/Menu.h"
-#include "Systems/TileConfig.h"
+#include "Systems/SpellSystem.h"
 
 #ifdef EMSCRIPTEN
 struct LoopData
@@ -46,11 +50,14 @@ int main()
 		std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
 	}
 
-	// Load tile config before Game construction (Stairs ctor needs TILE_STAIRS)
-	TileConfig::instance().load(Paths::TILE_CONFIG);
+	// Load data before Game construction (MonsterFactory is built inside Map ctor).
+	MonsterCreator::load(Paths::MONSTERS);
+	SpellSystem::load(Paths::SPELLS);
 
 	// Game owns everything including Renderer and InputSystem
 	Game game;
+	game.tile_config.load(Paths::TILE_CONFIG);
+	game.init_world();
 
 	// Initialize raylib window (fullscreen, auto-detect resolution)
 	game.renderer.init();

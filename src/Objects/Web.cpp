@@ -9,12 +9,12 @@
 #include "../Core/GameContext.h"
 #include "../Items/MagicalItemEffects.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/TileConfig.h"
+#include "../Systems/TileConfig.h" // for TileConfig type used in ctor
 #include "../Utils/Vector2D.h"
 #include "Web.h"
 
-Web::Web(Vector2D position, int strength)
-	: Object(position, ActorData{ TileConfig::instance().get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
+Web::Web(Vector2D position, int strength, const TileConfig& tc)
+	: Object(position, ActorData{ tc.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through
@@ -22,7 +22,7 @@ Web::Web(Vector2D position, int strength)
 }
 
 // Apply web effect when a creature tries to pass through
-bool Web::applyEffect(Creature& creature, GameContext& ctx)
+bool Web::apply_effect(Creature& creature, GameContext& ctx)
 {
 	// Only players can get stuck (for simplicity)
 	if (&creature != ctx.player)

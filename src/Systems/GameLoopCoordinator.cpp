@@ -142,9 +142,13 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 					int world_x = world.x;
 					int world_y = world.y;
 					if (key == GameKey::MOUSE_LEFT)
+					{
 						ctx.decor_editor->place(world_x, world_y);
+					}
 					else
+					{
 						ctx.decor_editor->erase(world_x, world_y);
+					}
 					return true;
 				}
 			}
@@ -242,19 +246,30 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 {
 	if (!ctx.renderer || !ctx.input_system || !ctx.map)
+	{
 		return;
+	}
+
 	int ts = ctx.renderer->get_tile_size();
 	if (ts <= 0)
+	{
 		return;
+	}
 
 	Vector2D screen_tile = ctx.input_system->get_mouse_tile(ts);
 
 	// Ignore cursor over the GUI panel rows at the bottom
 	int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+
 	if (screen_tile.y < 0 || screen_tile.y >= map_rows)
+	{
 		return;
+	}
+
 	if (screen_tile.x < 0 || screen_tile.x >= ctx.renderer->get_viewport_cols())
+	{
 		return;
+	}
 
 	Vector2D world_tile{
 		screen_tile.x + ctx.renderer->get_camera_x() / ts,
@@ -262,9 +277,13 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	};
 
 	if (!ctx.map->is_in_bounds(world_tile))
+	{
 		return;
+	}
 	if (!ctx.map->is_explored(world_tile))
+	{
 		return;
+	}
 
 	bool in_fov = ctx.map->is_in_fov(world_tile);
 
@@ -272,27 +291,48 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	std::string desc;
 	switch (ctx.map->get_tile_type(world_tile))
 	{
+
 	case TileType::FLOOR:
+	{
 		desc = "Floor";
 		break;
+	}
+
 	case TileType::WALL:
+	{
 		desc = "Wall";
 		break;
+	}
+
 	case TileType::WATER:
+	{
 		desc = "Water";
 		break;
+	}
+
 	case TileType::CLOSED_DOOR:
+	{
 		desc = "Closed door";
 		break;
+	}
+
 	case TileType::OPEN_DOOR:
+	{
 		desc = "Open door";
 		break;
+	}
+
 	case TileType::CORRIDOR:
+	{
 		desc = "Corridor";
 		break;
+	}
+
 	default:
+	{
 		desc = "Unknown";
 		break;
+	}
 	}
 
 	// Tint: cyan (terrain), amber (creature), pale green (item)
@@ -370,9 +410,14 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	int tip_py = ty + ts;
 
 	if (tip_px + box_w > ctx.renderer->get_screen_width())
+	{
 		tip_px = ctx.renderer->get_screen_width() - box_w;
+	}
+
 	if (tip_py + box_h > ctx.renderer->get_screen_height())
+	{
 		tip_py = ty - box_h;
+	}
 
 	// Dark background + matching accent border on tooltip
 	DrawRectangle(tip_px, tip_py, box_w, box_h, Color{ 8, 8, 16, 220 });
@@ -448,17 +493,12 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (*ctx.game_status == GameStatus::NEW_TURN)
 	{
-		std::erase_if(*ctx.objects, [](const auto& obj)
+		std::erase_if(*ctx.objects, 
+			[](const auto& obj)
 			{ return !obj; });
 
 		ctx.creature_manager->update_creatures(*ctx.creatures, ctx);
-		ctx.creature_manager->spawn_creatures(
-			*ctx.creatures,
-			*ctx.rooms,
-			*ctx.map,
-			*ctx.dice,
-			*ctx.time,
-			ctx);
+		ctx.creature_manager->spawn_creatures(ctx);
 
 		for (const auto& creature : *ctx.creatures)
 		{

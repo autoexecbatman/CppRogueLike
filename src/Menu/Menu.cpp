@@ -1,5 +1,8 @@
 // file: Menu.cpp
-#include <string>
+#include <memory>
+#include <type_traits>
+
+#include <raylib.h>
 
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -9,10 +12,12 @@
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
-#include "../Tools/PrefabLibrary.h"
+#include "../Tools/MonsterEditor.h"
 #include "../Tools/RoomEditor.h"
+#include "../Tools/SpellEditor.h"
 #include "Menu.h"
 #include "MenuGender.h"
+#include "../Actor/Item.h"
 
 void NewGame::on_selection(GameContext& ctx)
 {
@@ -31,6 +36,16 @@ void LoadGame::on_selection(GameContext& ctx)
 void RoomEditorEntry::on_selection(GameContext& ctx)
 {
 	ctx.room_editor->enter(*ctx.prefab_library);
+}
+
+void MonsterEditorEntry::on_selection(GameContext& ctx)
+{
+	ctx.monster_editor->enter();
+}
+
+void SpellEditorEntry::on_selection(GameContext& ctx)
+{
+	ctx.spell_editor->enter();
 }
 
 void Options::on_selection(GameContext& ctx)
@@ -58,6 +73,8 @@ Menu::Menu(bool startup, GameContext& ctx)
 	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
 	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
 	iMenuStates.emplace(MenuState::ROOM_EDITOR, std::make_unique<RoomEditorEntry>());
+	iMenuStates.emplace(MenuState::MONSTER_EDITOR, std::make_unique<MonsterEditorEntry>());
+	iMenuStates.emplace(MenuState::SPELL_EDITOR, std::make_unique<SpellEditorEntry>());
 	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
@@ -169,6 +186,20 @@ void Menu::on_key(int key, GameContext& ctx)
 	{
 		menu_set_run_false();
 		iMenuStates.at(MenuState::ROOM_EDITOR)->on_selection(ctx);
+		break;
+	}
+
+	case 'm':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::MONSTER_EDITOR)->on_selection(ctx);
+		break;
+	}
+
+	case 'p':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::SPELL_EDITOR)->on_selection(ctx);
 		break;
 	}
 

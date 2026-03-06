@@ -1,9 +1,10 @@
-#include <iostream>
 #include <memory>
+#include <utility>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
+#include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
 #include "Ai.h"

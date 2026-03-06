@@ -1,10 +1,12 @@
 #pragma once
 
+#include <memory>
 #include <span>
 #include <string>
 #include <vector>
 
 #include "../Actor/Actor.h"
+#include "../Core/GameContext.h"
 #include "BaseMenu.h"
 
 class Player;
@@ -27,6 +29,7 @@ class MenuSell : public BaseMenu
 	void draw_content() override;
 
 public:
+	// TODO: Add rule of 5.
 	MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
 	~MenuSell();
 

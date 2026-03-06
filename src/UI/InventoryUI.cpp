@@ -43,7 +43,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	int vrows = screen_rows(ctx);
 	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
 
-	ctx.renderer->draw_frame(0, 0, vcols, vrows);
+	ctx.renderer->draw_frame(0, 0, vcols, vrows, *ctx.tile_config);
 
 	std::string_view title = "INVENTORY";
 	int title_w = ctx.renderer->measure_text(title);
@@ -725,18 +725,24 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	}
 
 	case GameKey::TAB:
+	{
 		handle_tab_switch();
 		return true;
+	}
 
 	case GameKey::UP:
 	case GameKey::W:
+	{
 		handle_cursor_up();
 		return true;
+	}
 
 	case GameKey::DOWN:
 	case GameKey::S:
+	{
 		handle_cursor_down(ctx);
 		return true;
+	}
 
 	case GameKey::ENTER:
 	{

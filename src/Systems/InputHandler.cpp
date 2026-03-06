@@ -1,5 +1,6 @@
-#include "InputHandler.h"
 #include "../Renderer/InputSystem.h"
+#include "../Utils/Vector2D.h"
+#include "InputHandler.h"
 
 void InputHandler::key_store() noexcept
 {
@@ -30,38 +31,67 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 	GameKey gk = input.get_key();
 	switch (gk)
 	{
+
 	case GameKey::UP:
+	{
 		keyPress = 0x103;
 		break;
+	}
+
 	case GameKey::DOWN:
+	{
 		keyPress = 0x102;
 		break;
+	}
+
 	case GameKey::LEFT:
+	{
 		keyPress = 0x104;
 		break;
+	}
+
 	case GameKey::RIGHT:
+	{
 		keyPress = 0x105;
 		break;
+	}
+
 	case GameKey::ENTER:
+	{
 		keyPress = 10;
 		break;
+	}
+
 	case GameKey::ESCAPE:
+	{
 		keyPress = 27;
 		break;
+	}
 	case GameKey::TAB:
+	{
 		keyPress = 9;
 		break;
+	}
 	case GameKey::SPACE:
+	{
 		keyPress = ' ';
 		break;
+	}
+
 	case GameKey::MOUSE_LEFT:
+	{
 		keyPress = 0x199;
 		break;
+	}
+
 	default:
+	{
 		keyPress = -1;
 		animationTick = true;
 		return;
 	}
+	}
+
 	animationTick = false;
 }
 

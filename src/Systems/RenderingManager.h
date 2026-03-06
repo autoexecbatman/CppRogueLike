@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <span>
-#include <vector>
 
 // Forward declarations
 class Creature;

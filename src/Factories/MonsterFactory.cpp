@@ -1,5 +1,10 @@
 // file: MonsterFactory.cpp
-#include "MonsterFactory.h"
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../Core/GameContext.h"
@@ -7,7 +12,9 @@
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/Shopkeepers/ShopkeeperFactory.h"
+#include "../Utils/Vector2D.h"
 #include "MonsterCreator.h"
+#include "MonsterFactory.h"
 
 MonsterFactory::MonsterFactory()
 {
@@ -25,6 +32,27 @@ MonsterFactory::MonsterFactory()
 				.createFunc = [id](Vector2D pos, GameContext& ctx)
 				{
 					ctx.creatures->push_back(MonsterCreator::create(pos, id, ctx));
+				},
+			});
+	}
+
+	// Custom monsters — composed via editor, spawned from saved params
+	for (const auto& key : MonsterCreator::get_all_keys())
+	{
+		if (MonsterCreator::is_builtin(key) || MonsterCreator::is_class_key(key))
+			continue;
+		const MonsterParams& p = MonsterCreator::get_params(key);
+		addMonsterType(
+			{
+				.name = p.name,
+				.baseWeight = p.base_weight,
+				.levelMinimum = p.level_minimum,
+				.levelMaximum = p.level_maximum,
+				.levelScaling = p.level_scaling,
+				.createFunc = [key](Vector2D pos, GameContext& ctx)
+				{
+					ctx.creatures->push_back(
+						MonsterCreator::create_from_params(pos, MonsterCreator::get_params(key), ctx));
 				},
 			});
 	}

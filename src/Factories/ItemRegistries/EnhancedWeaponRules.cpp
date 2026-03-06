@@ -1,6 +1,9 @@
 // file: EnhancedWeaponRules.cpp
-#include "EnhancedWeaponRules.h"
+#include <span>
+
 #include "../../Items/ItemClassification.h"
+#include "../ItemCreator.h"
+#include "EnhancedWeaponRules.h"
 
 namespace
 {

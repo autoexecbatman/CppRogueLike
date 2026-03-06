@@ -1,7 +1,12 @@
 // file: RangedWeaponItems.cpp
-#include "RangedWeaponItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../../Items/Weapons.h"
+#include "../ItemCreator.h"
+#include "RangedWeaponItems.h"
 
 namespace
 {

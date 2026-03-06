@@ -1,8 +1,8 @@
 // file: DecorEditor.h
 #pragma once
 
+#include <cstdint>
 #include <string>
-#include <string_view>
 #include <unordered_map>
 #include <vector>
 
@@ -38,7 +38,7 @@ public:
 	struct PaletteEntry
 	{
 		TileRef tile{};
-		std::string label;
+		std::string label{};
 		char symbol{ 0 }; // 0 = no symbol (tile not usable in prefabs)
 	};
 

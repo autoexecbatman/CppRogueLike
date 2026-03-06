@@ -7,7 +7,6 @@
 #include "BaseMenu.h"
 #include "IMenuState.h"
 
-class IMenuState;
 struct GameContext;
 
 class Male : public IMenuState

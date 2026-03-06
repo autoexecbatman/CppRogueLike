@@ -1,12 +1,16 @@
 // file: Ai.cpp
-#include <array>
 #include <format>
-#include <iostream>
+#include <memory>
+#include <stdexcept>
 
+#include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/DisplayManager.h"
 #include "../Systems/MessageSystem.h"
+#include "Ai.h"
 #include "AiMonster.h"
 #include "AiMonsterConfused.h"
 #include "AiPlayer.h"
@@ -25,30 +29,40 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 
 	switch (type)
 	{
+
 	case AiType::PLAYER:
+	{
 		ai = std::make_unique<AiPlayer>();
 		break;
+	}
+
 	case AiType::MONSTER:
+	{
 		ai = std::make_unique<AiMonster>();
 		break;
+	}
+
 	case AiType::CONFUSED_MONSTER:
+	{
 		ai = std::make_unique<AiMonsterConfused>(0, nullptr);
 		break;
+	}
+
 	case AiType::SHOPKEEPER:
+	{
 		ai = std::make_unique<AiShopkeeper>();
 		break;
+	}
+
 	default:
+	{
 		throw std::runtime_error("Unknown AiType");
+	}
+
 	} // end of switch (type)
 
 	ai->load(j);
 	return ai;
-}
-
-// If positionDifference > 0, return 1; otherwise, return -1
-int Ai::calculate_step(int positionDifference)
-{
-	return positionDifference > 0 ? 1 : -1;
 }
 
 int Ai::get_next_level_xp(GameContext& ctx, Creature& owner)
@@ -59,25 +73,37 @@ int Ai::get_next_level_xp(GameContext& ctx, Creature& owner)
 	// Use AD&D 2e XP tables based on class
 	switch (ctx.player->playerClassState)
 	{
+
 	case Player::PlayerClassState::FIGHTER:
+	{
 		// Fighters use a moderate progression
 		return calculate_fighter_xp(currentLevel);
+	}
 
 	case Player::PlayerClassState::ROGUE:
+	{
 		// Rogues level up more quickly in early levels
 		return calculate_rogue_xp(currentLevel);
+	}
 
 	case Player::PlayerClassState::CLERIC:
+	{
 		// Clerics have a steady progression
 		return calculate_cleric_xp(currentLevel);
+	}
 
 	case Player::PlayerClassState::WIZARD:
+	{
 		// Wizards require the most XP
 		return calculate_wizard_xp(currentLevel);
+	}
 
 	default:
+	{
 		// Default fallback (simplified progression)
 		return 2000 * currentLevel;
+	}
+
 	}
 }
 

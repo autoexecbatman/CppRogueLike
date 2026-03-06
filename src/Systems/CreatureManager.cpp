@@ -1,8 +1,10 @@
-#include <algorithm>
 #include <limits>
+#include <memory>
+#include <span>
+#include <stdexcept>
 #include <vector>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
@@ -29,23 +31,15 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 		{ return creature && creature->destructible && creature->destructible->is_dead(); });
 }
 
-void CreatureManager::spawn_creatures(
-	std::vector<std::unique_ptr<Creature>>& creatures,
-	std::span<const DungeonRoom> rooms,
-	Map& map,
-	RandomDice& dice,
-	int game_time,
-	GameContext& ctx,
-	int max_creatures,
-	int spawn_rate)
+void CreatureManager::spawn_creatures(GameContext& ctx)
 {
 	// INCREASED SPAWN RATE - add a new monster every spawn_rate turns (default 2)
-	if (game_time % spawn_rate == 0)
+	if (*ctx.time % spawnRate == 0)
 	{
-		if (can_spawn_creature(creatures, max_creatures))
+		if (can_spawn_creature(*ctx.creatures, maxCreatures))
 		{
-			Vector2D spawnPos = find_spawn_position(rooms, map, dice, ctx);
-			map.add_monster(spawnPos, ctx);
+			Vector2D spawnPos = find_spawn_position(ctx);
+			ctx.map->add_monster(spawnPos, ctx);
 		}
 	}
 }
@@ -53,7 +47,7 @@ void CreatureManager::spawn_creatures(
 Creature* CreatureManager::get_closest_monster(
 	std::span<const std::unique_ptr<Creature>> creatures,
 	Vector2D fromPosition,
-	double inRange) const noexcept
+	int inRange) const noexcept
 {
 	Creature* closestMonster = nullptr;
 	int bestDistance = std::numeric_limits<int>::max();
@@ -63,7 +57,7 @@ Creature* CreatureManager::get_closest_monster(
 		if (!actor->destructible->is_dead())
 		{
 			const int distance = actor->get_tile_distance(fromPosition);
-			if (distance < bestDistance && (distance <= inRange || inRange == 0.0f))
+			if (distance < bestDistance && (distance <= inRange || inRange == 0))
 			{
 				bestDistance = distance;
 				closestMonster = actor.get();
@@ -95,23 +89,22 @@ bool CreatureManager::can_spawn_creature(
 	return creatures.size() < static_cast<size_t>(max_creatures);
 }
 
-Vector2D CreatureManager::find_spawn_position(
-	std::span<const DungeonRoom> rooms,
-	Map& map,
-	RandomDice& dice,
-	GameContext& ctx)
+Vector2D CreatureManager::find_spawn_position(GameContext& ctx)
 {
-	if (rooms.empty())
-		throw std::runtime_error("rooms vector is empty!");
-
-	const int index = dice.roll(0, static_cast<int>(rooms.size()) - 1);
-	const DungeonRoom& room = rooms[index];
-
-	Vector2D pos{ dice.roll(room.col, room.col_end()), dice.roll(room.row, room.row_end()) };
-	while (!map.can_walk(pos, ctx))
+	const auto& dice = ctx.dice;
+	if (ctx.rooms->empty())
 	{
-		pos.x = dice.roll(room.col, room.col_end());
-		pos.y = dice.roll(room.row, room.row_end());
+		throw std::runtime_error("rooms vector is empty!");
+	}
+
+	const size_t index = static_cast<size_t>(dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1));
+	const DungeonRoom& room = ctx.rooms->at(index);
+
+	Vector2D pos{ dice->roll(room.col, room.col_end()), dice->roll(room.row, room.row_end()) };
+	while (!ctx.map->can_walk(pos, ctx))
+	{
+		pos.x = dice->roll(room.col, room.col_end());
+		pos.y = dice->roll(room.row, room.row_end());
 	}
 
 	return pos;

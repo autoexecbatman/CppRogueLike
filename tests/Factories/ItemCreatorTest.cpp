@@ -1,5 +1,6 @@
 #include "src/Factories/ItemCreator.h"
 #include "src/Utils/Vector2D.h"
+#include "src/Actor/Item.h"
 #include "tests/mocks/MockGameContext.h"
 #include <Colors/Colors.h>
 #include <gtest/gtest.h>

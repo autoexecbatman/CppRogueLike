@@ -1,9 +1,9 @@
-#include <algorithm>
 #include <memory>
 #include <vector>
 
-#include "../Actor/Container.h"
+#include "../Actor/Actor.h"
 #include "../Objects/Web.h"
+#include "../Utils/Vector2D.h"
 #include "ObjectManager.h"
 
 Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const

@@ -4,6 +4,7 @@
 
 #include "../Combat/DamageInfo.h"
 #include "../Persistent/Persistent.h"
+#include "../Random/RandomDice.h"
 
 class Creature;
 struct GameContext;

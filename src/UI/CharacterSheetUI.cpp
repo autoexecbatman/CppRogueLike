@@ -1,6 +1,10 @@
 // CharacterSheetUI.cpp - Handles character sheet display
 #include <format>
+#include <string>
 
+#include <raylib.h>
+
+#include "../Actor/EquipmentSlot.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Combat/WeaponDamageRegistry.h"
@@ -9,6 +13,7 @@
 #include "../Renderer/Renderer.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/HungerSystem.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "CharacterSheetUI.h"
 
 void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
@@ -23,7 +28,7 @@ void CharacterSheetUI::display_character_sheet(const Player& player, GameContext
 		int vcols = ctx.renderer->get_viewport_cols();
 		int vrows = ctx.renderer->get_viewport_rows();
 
-		ctx.renderer->draw_frame(0, 0, vcols, vrows);
+		ctx.renderer->draw_frame(0, 0, vcols, vrows, *ctx.tile_config);
 
 		std::string_view title = "CHARACTER SHEET";
 		int title_w = ctx.renderer->measure_text(title);

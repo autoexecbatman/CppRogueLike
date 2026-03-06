@@ -1,12 +1,23 @@
+#include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
+#include "../Actor/Actor.h"
+#include "../Actor/Stairs.h"
 #include "../ActorTypes/Monsters/Spider.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
+#include "../Objects/Web.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/MessageSystem.h"
+#include "../Utils/Vector2D.h"
+#include "AiMonster.h"
 #include "AiSpider.h"
 
 // Spider AI constants
@@ -259,7 +270,9 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 		for (int dx = -1; dx <= 1; dx++)
 		{
 			if (dx == 0 && dy == 0)
+			{
 				continue; // Skip current position
+			}
 
 			Vector2D newPos = owner.position + Vector2D{ dx, dy };
 
@@ -273,7 +286,9 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 					for (int wx = -1; wx <= 1; wx++)
 					{
 						if (wx == 0 && wy == 0)
+						{
 							continue;
+						}
 
 						Vector2D wallCheck = newPos + Vector2D{ wx, wy };
 						if (ctx.map->is_wall(wallCheck))
@@ -283,7 +298,9 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 						}
 					}
 					if (adjacentToWall)
+					{
 						break;
+					}
 				}
 
 				// If adjacent to wall, add to list (higher priority)
@@ -433,7 +450,9 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 		for (int x = -1; x <= 1; x++)
 		{
 			if (x == 0 && y == 0)
+			{
 				continue; // Skip center
+			}
 
 			Vector2D adj = position + Vector2D{ x, y };
 
@@ -449,7 +468,9 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 					for (int cx = -1; cx <= 1; cx++)
 					{
 						if (cx == 0 && cy == 0)
+						{
 							continue;
+						}
 
 						Vector2D cornerAdj = adj + Vector2D{ cx, cy };
 						if (ctx.map->is_wall(cornerAdj))
@@ -670,9 +691,13 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 		int dy = ctx.player->position.y - owner.position.y;
 
 		if (dx != 0)
+		{
 			dx = dx / std::abs(dx);
+		}
 		if (dy != 0)
+		{
 			dy = dy / std::abs(dy);
+		}
 
 		// Position web to block player's path
 		webCenter = owner.position + Vector2D{ dx * 2, dy * 2 };
@@ -799,7 +824,9 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 			{
 				float radius = radiusStep * i;
 				if (radius > size)
+				{
 					break;
+				}
 
 				int x = center.x + (int)(radius * cos(angle));
 				int y = center.y + (int)(radius * sin(angle));
@@ -954,7 +981,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 		}
 
 		// Create a new Web entity
-		auto web = std::make_unique<Web>(pos, webStrength);
+		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tile_config);
 		ctx.objects->emplace_back(std::move(web));
 	}
 }

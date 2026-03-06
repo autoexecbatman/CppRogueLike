@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include <span>
-#include <cstdint>
 #include <string>
 
 #include <nlohmann/json_fwd.hpp>

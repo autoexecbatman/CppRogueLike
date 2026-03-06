@@ -1,15 +1,19 @@
-#include "MenuTrade.h"
+#include <memory>
+
+#include <raylib.h>
+
 #include "../Actor/Actor.h"
-#include "../Ai/AiPlayer.h"
+#include "../Actor/Stairs.h"
+#include "../ActorTypes/Player.h"
 #include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
-#include "../Systems/ShopKeeper.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
+#include "MenuTrade.h"
 
 void Buy::on_selection(GameContext& ctx)
 {

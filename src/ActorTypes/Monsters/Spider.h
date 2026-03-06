@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../Actor/Actor.h"
+#include "../../Actor/Creature.h"
 
 // Forward declarations
 struct Vector2D;

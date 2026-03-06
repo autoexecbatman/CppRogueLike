@@ -23,6 +23,7 @@
 #include "../Renderer/Renderer.h"
 
 class PrefabLibrary;
+class TileConfig;
 struct Prefab;
 struct GameContext;
 
@@ -48,6 +49,7 @@ private:
 
 	bool active{ false };
 	PrefabLibrary* library{ nullptr };
+	const TileConfig* m_tile_config{ nullptr };
 
 	// Canvas (two layers)
 	std::vector<std::string> canvas; // base layer: structural symbols (#  .  ,  +  ~)

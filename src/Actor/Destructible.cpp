@@ -6,8 +6,9 @@
 #include <unordered_map>
 #include <utility>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
+#include "../ActorTypes/Player.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Colors/Colors.h"
@@ -246,7 +247,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
-	corpse->actorData.tile = TileConfig::instance().get("TILE_CORPSE");
+	corpse->actorData.tile = ctx.tile_config->get("TILE_CORPSE");
 	corpse->behavior = CorpseFood{ 0 }; // 0 means calculate from type
 
 	// Add the corpse to the floor items
@@ -476,25 +477,34 @@ void MonsterDestructible::save(json& j)
 		std::unique_ptr<Destructible> destructible{};
 		switch (type)
 		{
+
 		case DestructibleType::MONSTER:
 		{
 			destructible = std::make_unique<MonsterDestructible>(0, 0, "", 0, 0, 0);
 			break;
 		}
+
 		case DestructibleType::PLAYER:
 		{
 			destructible = std::make_unique<PlayerDestructible>(0, 0, "", 0, 0, 0);
 			break;
 		}
+
 		default:
+		{
 			break;
 		}
+
+		}
+
 		if (destructible)
 		{
 			destructible->load(j);
 		}
+
 		return destructible;
 	}
+
 	return nullptr;
 }
 

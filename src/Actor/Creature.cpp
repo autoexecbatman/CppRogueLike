@@ -1,0 +1,464 @@
+﻿#include <algorithm>
+#include <format>
+#include <memory>
+#include <ranges>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "../Actor/InventoryOperations.h"
+#include "../Ai/Ai.h"
+#include "../Ai/AiMonsterConfused.h"
+#include "../Systems/TileConfig.h"
+#include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
+#include "../Combat/WeaponDamageRegistry.h"
+#include "../Core/GameContext.h"
+#include "../Items/ItemClassification.h"
+#include "../Persistent/Persistent.h"
+#include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
+#include "../Systems/MessageSystem.h"
+#include "../Systems/ShopKeeper.h"
+#include "Actor.h"
+#include "Attacker.h"
+#include "Creature.h"
+#include "Destructible.h"
+#include "EquipmentSlot.h"
+#include "InventoryData.h"
+#include "Item.h"
+#include "Pickable.h"
+
+using namespace InventoryOperations;
+
+//==Creature==
+void Creature::load(const json& j)
+{
+	Actor::load(j); // Call base class load
+	baseStrength = j["strength"];
+	baseDexterity = j["dexterity"];
+	baseConstitution = j["constitution"];
+	baseIntelligence = j["intelligence"];
+	baseWisdom = j["wisdom"];
+	baseCharisma = j["charisma"];
+	creatureLevel = j["playerLevel"];
+	gold = j["gold"];
+	gender = j["gender"];
+	weaponEquipped = j["weaponEquipped"];
+	creatureClass = static_cast<CreatureClass>(j.value("creatureClass", static_cast<int>(CreatureClass::MONSTER)));
+	hitDie = j.value("hitDie", 8);
+	attacksPerRound = j.value("attacksPerRound", 1.0f);
+	if (j.contains("attacker"))
+	{
+		attacker = std::make_unique<Attacker>(DamageInfo{});
+		attacker->load(j["attacker"]);
+	}
+	if (j.contains("destructible"))
+	{
+		destructible = Destructible::create(j["destructible"]);
+	}
+	if (j.contains("ai"))
+	{
+		ai = Ai::create(j["ai"]);
+	}
+	if (j.contains("inventory_data"))
+	{
+		inventory_data = InventoryData(50); // Default capacity
+		load_inventory(inventory_data, j["inventory_data"]);
+	}
+	if (j.contains("shop"))
+	{
+		shop = ShopKeeper::create(j["shop"]);
+	}
+
+	// Load unified buff system
+	if (j.contains("active_buffs"))
+	{
+		active_buffs.clear();
+		for (const auto& buffJson : j["active_buffs"])
+		{
+			Buff buff{};
+			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());
+			buff.value = buffJson.at("value").get<int>();
+			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
+			buff.is_set_effect = buffJson.at("is_set_effect").get<bool>();
+			active_buffs.push_back(buff);
+		}
+	}
+}
+
+void Creature::save(json& j)
+{
+	Actor::save(j); // Call base class save
+	j["strength"] = baseStrength;
+	j["dexterity"] = baseDexterity;
+	j["constitution"] = baseConstitution;
+	j["intelligence"] = baseIntelligence;
+	j["wisdom"] = baseWisdom;
+	j["charisma"] = baseCharisma;
+	j["playerLevel"] = creatureLevel;
+	j["gold"] = gold;
+	j["gender"] = gender;
+	j["weaponEquipped"] = weaponEquipped;
+	j["creatureClass"] = static_cast<int>(creatureClass);
+	j["hitDie"] = hitDie;
+	j["attacksPerRound"] = attacksPerRound;
+	if (attacker)
+	{
+		json attackerJson;
+		attacker->save(attackerJson);
+		j["attacker"] = attackerJson;
+	}
+	if (destructible)
+	{
+		json destructibleJson;
+		destructible->save(destructibleJson);
+		j["destructible"] = destructibleJson;
+	}
+	if (ai)
+	{
+		json aiJson;
+		ai->save(aiJson);
+		j["ai"] = aiJson;
+	}
+	// Always save inventory data since it always exists
+	json inventoryJson;
+	save_inventory(inventory_data, inventoryJson);
+	j["inventory_data"] = inventoryJson;
+	if (shop)
+	{
+		json shopJson;
+		shop->save(shopJson);
+		j["shop"] = shopJson;
+	}
+
+	// Save unified buff system
+	json buffsJson = json::array();
+	for (const auto& buff : active_buffs)
+	{
+		json buffJson;
+		buffJson["type"] = static_cast<int>(buff.type);
+		buffJson["value"] = buff.value;
+		buffJson["turnsRemaining"] = buff.turnsRemaining;
+		buffJson["is_set_effect"] = buff.is_set_effect;
+		buffsJson.push_back(buffJson);
+	}
+	j["active_buffs"] = buffsJson;
+}
+
+// the actor update
+void Creature::update(GameContext& ctx)
+{
+	if (!invisibleTile.is_valid() && ctx.tile_config)
+	{
+		invisibleTile = ctx.tile_config->get("TILE_INVISIBLE");
+	}
+	ctx.buff_system->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
+	ctx.buff_system->update_creature_buffs(*this); // Unified buff system
+	// Apply the modifiers from stats and items
+	if (destructible)
+	{
+		destructible->update_armor_class(*this, ctx);
+		destructible->update_constitution_bonus(*this, ctx);
+	}
+
+	// if the actor has an ai then update the ai
+	if (ai)
+	{
+		ai->update(*this, ctx);
+	}
+}
+
+void Creature::apply_confusion(int nbTurns)
+{
+	ai = std::make_unique<AiMonsterConfused>(nbTurns, std::move(ai));
+}
+
+void Creature::equip(Item& item, GameContext& ctx)
+{
+	bool isArmor = item.is_armor();
+	bool isWeapon = item.is_weapon();
+	bool isShield = item.is_shield();
+
+	// First check if any equipment of the same type is already equipped
+	std::vector<Item*> equippedItems;
+
+	// Find all equipped items
+	for (const auto& inv_item : inventory_data.items)
+	{
+		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
+		{
+			bool itemIsArmor = inv_item->is_armor();
+			bool itemIsWeapon = inv_item->is_weapon();
+			bool itemIsShield = inv_item->is_shield();
+
+			// Only consider same-type equipment for unequipping
+			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon) || (isShield && itemIsShield))
+			{
+				equippedItems.push_back(inv_item.get());
+			}
+		}
+	}
+
+	// If there's already equipment of the same type, unequip it
+	if (!equippedItems.empty() && &item != equippedItems[0])
+	{
+		for (auto* equipped : equippedItems)
+		{
+			unequip(*equipped, ctx);
+		}
+	}
+
+	// Now equip the new item
+	item.add_state(ActorState::IS_EQUIPPED);
+
+	// Update weapon equipped name and damage if it's a weapon
+	if (isWeapon)
+	{
+		weaponEquipped = item.get_name();
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemId);
+		ctx.message_system->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
+	}
+
+	// Log shield equipped
+	if (isShield)
+	{
+		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
+	}
+
+	// Log armor equipped
+	if (isArmor)
+	{
+		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
+	}
+}
+
+void Creature::unequip(Item& item, GameContext& ctx)
+{
+	// Check if the item is actually equipped
+	if (item.has_state(ActorState::IS_EQUIPPED))
+	{
+		// Remove the equipped state
+		item.remove_state(ActorState::IS_EQUIPPED);
+
+		// If it's a weapon, update the weaponEquipped status
+		if (item.is_weapon())
+		{
+			weaponEquipped = "None";
+			ctx.message_system->log("Unequipped weapon - now unarmed");
+
+			// Check for ranged weapon - use ItemClass system
+			if (item.is_ranged_weapon())
+			{
+				// Remove the ranged state
+				if (has_state(ActorState::IS_RANGED))
+				{
+					remove_state(ActorState::IS_RANGED);
+					ctx.message_system->log("Removed IS_RANGED state after unequipping " + item.actorData.name);
+				}
+			}
+		}
+
+		// Double-check all inventory to see if we still should have IS_RANGED
+		bool hasRangedWeapon = false;
+		for (const auto& invItem : inventory_data.items)
+		{
+			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
+			{
+				if (invItem->is_ranged_weapon())
+				{
+					hasRangedWeapon = true;
+					break;
+				}
+			}
+		}
+
+		// Force sync the IS_RANGED state
+		if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
+		{
+			remove_state(ActorState::IS_RANGED);
+			ctx.message_system->log("Force removed IS_RANGED state - no ranged weapons equipped");
+		}
+	}
+}
+
+void Creature::sync_ranged_state(GameContext& ctx)
+{
+	// Check if the MISSILE_WEAPON slot holds a ranged weapon
+	Item* missileSlot = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	bool hasRangedWeapon = missileSlot && missileSlot->is_ranged_weapon();
+
+	// Make sure IS_RANGED state matches equipped weapons
+	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
+	{
+		add_state(ActorState::IS_RANGED);
+		ctx.message_system->log("Added missing IS_RANGED state - ranged weapon equipped");
+	}
+	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
+	{
+		remove_state(ActorState::IS_RANGED);
+		ctx.message_system->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
+	}
+}
+
+void Creature::pick(GameContext& ctx)
+{
+	// Check if inventory is already full before attempting to pick
+	if (is_inventory_full(inventory_data))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		return;
+	}
+
+	// Find item at player's position using proper inventory interface
+	Item* itemAtPosition = nullptr;
+	size_t itemIndex = 0;
+
+	if (ctx.inventory_data->items.empty())
+	{
+		return; // No floor items
+	}
+
+	// Search for item at current position
+	for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
+	{
+		if (auto& item = ctx.inventory_data->items[i])
+		{
+			if (position == item->position)
+			{
+				itemAtPosition = item.get();
+				itemIndex = i;
+				break;
+			}
+		}
+	}
+
+	if (!itemAtPosition)
+	{
+		return; // No item at this position
+	}
+
+	// Handle item pickup using proper inventory operations
+	if (itemAtPosition->itemClass == ItemClass::GOLD_COIN)
+	{
+		// Use the pickable's use() method which handles gold pickup properly
+		if (itemAtPosition->behavior && use_item(*itemAtPosition->behavior, *itemAtPosition, *this, ctx))
+		{
+			// Gold was picked up successfully via polymorphic call
+			// Remove gold from floor inventory
+			auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
+			if (!removeResult.has_value())
+			{
+				ctx.message_system->log("WARNING: Failed to remove gold item from floor inventory");
+			}
+		}
+	}
+	else
+	{
+		// Normal item handling - store name before moving
+		const std::string itemName = itemAtPosition->actorData.name;
+
+		// Remove from floor first
+		auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
+		if (removeResult.has_value())
+		{
+			// Add to player inventory
+			auto addResult = add_item(inventory_data, std::move(*removeResult));
+			if (addResult.has_value())
+			{
+				ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+			}
+			else
+			{
+				ctx.message_system->log("WARNING: Failed to add item to player inventory");
+				// Item is lost - this should not happen since we checked is_full() earlier
+			}
+		}
+		else
+		{
+			ctx.message_system->log("WARNING: Failed to remove item from floor inventory");
+		}
+	}
+}
+
+void Creature::drop(Item& item, GameContext& ctx)
+{
+	// Check if the item is actually in the inventory first
+	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(), [&item](const auto& invItem)
+		{ return invItem.get() == &item; });
+
+	if (it != inventory_data.items.end())
+	{
+		// Set the item's position to the player's position
+		(*it)->position = position;
+
+		// If the item is equipped, unequip it first
+		if ((*it)->has_state(ActorState::IS_EQUIPPED))
+		{
+			unequip(*(*it), ctx);
+		}
+
+		// Add to game floor inventory
+		auto addResult = add_item(*ctx.inventory_data, std::move(*it));
+		if (addResult.has_value())
+		{
+			// Clean up null pointer that remains after moving
+			optimize_inventory_storage(inventory_data);
+			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
+		}
+	}
+}
+
+TileRef Creature::get_display_tile() const noexcept
+{
+	if (is_invisible())
+	{
+		return invisibleTile; // Instant access, no string lookup
+	}
+	return Actor::get_display_tile();
+}
+
+int Creature::get_display_color() const noexcept
+{
+	if (is_invisible())
+	{
+		return CYAN_BLACK_PAIR;
+	}
+	return Actor::get_display_color();
+}
+
+//==Unified Buff System - Modifier Stack Pattern==
+// Note: Buff lifecycle managed by BuffSystem, not Creature
+
+// Helper to sum all buff values of a specific type using ranges
+// AD&D 2e: Calculate effective stat value combining base, SET, and ADD effects
+// LOGIC: effective = MAX(base, highest_SET) + SUM(all_ADDs)
+
+int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
+{
+	auto matches_type = [type](const Buff& b)
+	{
+		return b.type == type;
+	};
+	auto matching_buffs = active_buffs | std::views::filter(matches_type);
+
+	int highest_set = 0; // Highest SET effect (Potion of Giant Strength → 18)
+	int sum_of_adds = 0; // Sum of ADD effects (Strength spell +1, Gauntlets +2)
+
+	for (const auto& buff : matching_buffs)
+	{
+		if (buff.is_set_effect)
+		{
+			highest_set = std::max(highest_set, buff.value);
+		}
+		else
+		{
+			sum_of_adds += buff.value;
+		}
+	}
+
+	// AD&D 2e: SET effects replace base (if higher), ADD effects always stack
+	// Example: base=14, SET=18, ADD=+2 → MAX(14,18) + 2 = 20
+	int effective_base = (highest_set > 0) ? std::max(base_value, highest_set) : base_value;
+	return effective_base + sum_of_adds;
+}

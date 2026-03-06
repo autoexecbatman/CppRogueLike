@@ -113,7 +113,6 @@ struct EnhancedItemSpawnRule
 class ItemCreator
 {
 public:
-public:
 	// Registry access
 	static const ItemParams& get_params(ItemId itemId);
 	static const std::unordered_map<ItemId, ItemParams>& get_all_params();
@@ -124,7 +123,6 @@ public:
 	static std::unique_ptr<Item> create_enhanced_weapon(ItemId weaponId, Vector2D pos, int enhancementLevel);
 	static std::unique_ptr<Item> create_with_enhancement(ItemId itemId, Vector2D pos, PrefixType prefix, SuffixType suffix);
 
-public:
 	// Special item creation functions
 	static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
 
@@ -135,4 +133,5 @@ public:
 	static int calculate_enhancement_chance(int dungeonLevel);
 	static int determine_enhancement_level(GameContext& ctx, int dungeonLevel);
 	static int calculate_enhanced_value(int baseValue, int enhancementLevel);
+
 };

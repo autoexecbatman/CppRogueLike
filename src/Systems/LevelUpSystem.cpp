@@ -1,18 +1,23 @@
 // LevelUpSystem.cpp - Handles combat improvements on level up according to AD&D 2e rules
+#include <algorithm>
 #include <format>
+#include <string>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
+#include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
 #include "LevelUpSystem.h"
 
 void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	int oldTHAC0 = owner.destructible ? owner.destructible->get_thaco() : 20;
 
@@ -51,7 +56,9 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameC
 void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx || !owner.destructible)
+	{
 		return;
+	}
 
 	CalculatedTHAC0s thac0Tables;
 	int newTHAC0 = 20;
@@ -60,17 +67,28 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
 	{
 	case CreatureClass::FIGHTER:
 	case CreatureClass::MONSTER:
+	{
 		newTHAC0 = thac0Tables.get_fighter(newLevel);
 		break;
+	}
+
 	case CreatureClass::ROGUE:
+	{
 		newTHAC0 = thac0Tables.get_rogue(newLevel);
 		break;
+	}
+
 	case CreatureClass::CLERIC:
+	{
 		newTHAC0 = thac0Tables.get_cleric(newLevel);
 		break;
+	}
+
 	case CreatureClass::WIZARD:
+	{
 		newTHAC0 = thac0Tables.get_wizard(newLevel);
 		break;
+	}
 	}
 
 	if (newTHAC0 < owner.destructible->get_thaco())
@@ -93,16 +111,34 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
 int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx || !owner.destructible)
+	{
 		return 0;
+	}
 
 	auto roll_hit_die = [&]() -> int
 	{
 		switch (owner.get_hit_die())
 		{
-		case 4: return ctx->dice->d4();
-		case 6: return ctx->dice->d6();
-		case 10: return ctx->dice->d10();
-		default: return ctx->dice->d8();
+
+		case 4:
+		{
+			return ctx->dice->d4();
+		}
+
+		case 6:
+		{
+			return ctx->dice->d6();
+		}
+
+		case 10:
+		{
+			return ctx->dice->d10();
+		}
+
+		default:
+		{
+			return ctx->dice->d8();
+		}
 		}
 	};
 
@@ -154,31 +190,50 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel, GameConte
 void LevelUpSystem::apply_class_specific_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	switch (owner.get_creature_class())
 	{
+
 	case CreatureClass::FIGHTER:
+	{
 		apply_fighter_improvements(owner, newLevel, ctx);
 		break;
+	}
+
 	case CreatureClass::ROGUE:
+	{
 		apply_rogue_improvements(owner, newLevel, ctx);
 		break;
+	}
+
 	case CreatureClass::CLERIC:
+	{
 		apply_cleric_improvements(owner, newLevel, ctx);
 		break;
+	}
+
 	case CreatureClass::WIZARD:
+	{
 		apply_wizard_improvements(owner, newLevel, ctx);
 		break;
+	}
+
 	case CreatureClass::MONSTER:
+	{
 		break; // No class-specific improvements for monsters currently
+	}
 	}
 }
 
 void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	if (newLevel >= 13)
 	{
@@ -215,7 +270,9 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
 void LevelUpSystem::apply_rogue_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	int backstabMultiplier = calculate_backstab_multiplier(newLevel);
 	if (backstabMultiplier > calculate_backstab_multiplier(newLevel - 1))
@@ -238,7 +295,9 @@ void LevelUpSystem::apply_rogue_improvements(Creature& owner, int newLevel, Game
 void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	if (newLevel == 3 || newLevel == 5 || newLevel == 7 || newLevel == 9)
 	{
@@ -259,7 +318,9 @@ void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel, Gam
 void LevelUpSystem::apply_wizard_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	if (newLevel % 2 == 1 && newLevel > 1)
 	{
@@ -283,20 +344,30 @@ void LevelUpSystem::apply_wizard_improvements(Creature& owner, int newLevel, Gam
 int LevelUpSystem::calculate_backstab_multiplier(int level)
 {
 	if (level >= 13)
+	{
 		return 5;
+	}
 	if (level >= 9)
+	{
 		return 4;
+	}
 	if (level >= 5)
+	{
 		return 3;
+	}
 	if (level >= 1)
+	{
 		return 2;
+	}
 	return 1;
 }
 
 void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
 	ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Ability Score Improvement!");
@@ -305,32 +376,47 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
 
 	switch (owner.get_creature_class())
 	{
+
 	case CreatureClass::FIGHTER:
+	{
 		owner.set_strength(std::min(18, owner.get_strength() + 1));
 		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Strength increased to {}!", owner.get_strength()));
 		ctx->message_system->finalize_message();
 		break;
+	}
+
 	case CreatureClass::ROGUE:
+	{
 		owner.set_dexterity(std::min(18, owner.get_dexterity() + 1));
 		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Dexterity increased to {}!", owner.get_dexterity()));
 		ctx->message_system->finalize_message();
 		break;
+	}
+
 	case CreatureClass::CLERIC:
+	{
 		owner.set_wisdom(std::min(18, owner.get_wisdom() + 1));
 		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Wisdom increased to {}!", owner.get_wisdom()));
 		ctx->message_system->finalize_message();
 		break;
+	}
+
 	case CreatureClass::WIZARD:
+	{
 		owner.set_intelligence(std::min(18, owner.get_intelligence() + 1));
 		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Intelligence increased to {}!", owner.get_intelligence()));
 		ctx->message_system->finalize_message();
 		break;
+	}
+
 	case CreatureClass::MONSTER:
+	{
 		break;
+	}
 	}
 
 	ctx->message_system->log(std::format("Ability score improved at level {}", newLevel));
@@ -339,27 +425,44 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
 void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
 	if (!ctx)
+	{
 		return;
+	}
 
 	bool improved = false;
 
 	switch (owner.get_creature_class())
 	{
+
 	case CreatureClass::FIGHTER:
+	{
 		improved = (newLevel == 3 || newLevel == 6 || newLevel == 9 || newLevel == 12 || newLevel == 15);
 		break;
+	}
+
 	case CreatureClass::ROGUE:
+	{
 		improved = (newLevel % 4 == 0);
 		break;
+	}
+
 	case CreatureClass::CLERIC:
+	{
 		improved = (newLevel % 3 == 0);
 		break;
+	}
+
 	case CreatureClass::WIZARD:
+	{
 		improved = (newLevel % 5 == 0);
 		break;
+	}
+
 	case CreatureClass::MONSTER:
+	{
 		improved = (newLevel % 2 == 0); // AD&D 2e: monster saves improve every 2 HD
 		break;
+	}
 	}
 
 	if (improved)

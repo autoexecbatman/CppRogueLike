@@ -1,6 +1,9 @@
 // file: EnhancedArmorRules.cpp
-#include "EnhancedArmorRules.h"
+#include <span>
+
 #include "../../Items/ItemClassification.h"
+#include "../ItemCreator.h"
+#include "EnhancedArmorRules.h"
 
 namespace
 {

@@ -1,8 +1,13 @@
 // file: JewelryItems.cpp
 // Amulets, gauntlets, boots, cloaks
-#include "JewelryItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../../Items/MagicalItemEffects.h"
+#include "../ItemCreator.h"
+#include "JewelryItems.h"
 
 namespace
 {

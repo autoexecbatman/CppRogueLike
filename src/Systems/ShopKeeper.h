@@ -2,7 +2,6 @@
 
 #include <memory>
 #include <string>
-#include <vector>
 
 #include "../Actor/InventoryData.h"
 #include "../Persistent/Persistent.h"

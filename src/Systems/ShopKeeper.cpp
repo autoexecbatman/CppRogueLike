@@ -5,9 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Actor/InventoryData.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Actor/Item.h"
+#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h" // SINGLE SOURCE OF TRUTH

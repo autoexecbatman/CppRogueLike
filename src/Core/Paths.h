@@ -17,6 +17,8 @@ inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/SDS_8x8.ttf";
 
 inline constexpr std::string_view PREFABS = "data/prefabs.json";
 inline constexpr std::string_view CONTENT_TILES = "data/content/tiles.json";
+inline constexpr std::string_view MONSTERS = "data/content/monsters.json";
+inline constexpr std::string_view SPELLS   = "data/content/spells.json";
 inline constexpr std::string_view TILE_CONFIG = "data/tiles/tile_config.json";
 
 // Walks upward from cwd until a directory containing "data/" is found,

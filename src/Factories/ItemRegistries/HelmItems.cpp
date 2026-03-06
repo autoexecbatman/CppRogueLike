@@ -1,7 +1,12 @@
 // file: HelmItems.cpp
-#include "HelmItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../../Items/MagicalItemEffects.h"
+#include "../ItemCreator.h"
+#include "HelmItems.h"
 
 namespace
 {

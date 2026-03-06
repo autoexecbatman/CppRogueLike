@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../Actor/Creature.h"
+#include "../Core/GameContext.h"
+#include "../Persistent/Persistent.h"
 #include "Ai.h"
 
 class Item;
@@ -12,6 +15,7 @@ class AiShopkeeper : public Ai
 private:
 	int moveCount{ 0 };
 	bool hasApproachedPlayer{ false }; // Shopkeeper only approaches player once
+
 	void update(Creature& owner, GameContext& ctx) override;
 	// Shopkeepers are non-hostile - replaces dynamic_cast detection
 	bool is_hostile() const override { return false; }
@@ -25,5 +29,6 @@ protected:
 
 public:
 	bool tradeMenuOpen{ false }; // Prevents multiple trade menu opens - now public
+
 	void trade(Creature& shopkeeper, Creature& player, GameContext& ctx);
 };

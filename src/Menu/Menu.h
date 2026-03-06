@@ -1,6 +1,8 @@
 #pragma once
 
+#include <format>
 #include <memory>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 
@@ -29,6 +31,16 @@ class RoomEditorEntry : public IMenuState
 	void on_selection(GameContext& ctx) override;
 };
 
+class MonsterEditorEntry : public IMenuState
+{
+	void on_selection(GameContext& ctx) override;
+};
+
+class SpellEditorEntry : public IMenuState
+{
+	void on_selection(GameContext& ctx) override;
+};
+
 class Quit : public IMenuState
 {
 	void on_selection(GameContext& ctx) override;
@@ -37,8 +49,8 @@ class Quit : public IMenuState
 class Menu : public BaseMenu
 {
 	bool isStartupMenu{ true }; // Track if this is the startup menu (default true)
-	int menu_height{ 7 };
-	int menu_width{ 11 };
+	int menu_height{ 9 };
+	int menu_width{ 16 };
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
 	enum class MenuState
@@ -47,6 +59,8 @@ class Menu : public BaseMenu
 		LOAD_GAME,
 		OPTIONS,
 		ROOM_EDITOR,
+		MONSTER_EDITOR,
+		SPELL_EDITOR,
 		QUIT
 	} currentState{ MenuState::NEW_GAME };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
@@ -55,10 +69,21 @@ class Menu : public BaseMenu
 		{ MenuState::LOAD_GAME, "Load Game" },
 		{ MenuState::OPTIONS, "Options" },
 		{ MenuState::ROOM_EDITOR, "Room Editor" },
+		{ MenuState::MONSTER_EDITOR, "Monster Editor" },
+		{ MenuState::SPELL_EDITOR, "Spell Editor" },
 		{ MenuState::QUIT, "Quit" }
 	};
 
-	std::string menu_get_string(MenuState state) { return menuStateStrings.at(state); }
+	std::string menu_get_string(MenuState state)
+	{
+		if (!menuStateStrings.contains(state))
+		{
+			throw std::out_of_range(std::format(
+				"Menu::menu_get_string: no label registered for MenuState({})",
+				static_cast<int>(state)));
+		}
+		return menuStateStrings.at(state);
+	}
 	void menu_print_state(MenuState state);
 	void draw_content() override;
 

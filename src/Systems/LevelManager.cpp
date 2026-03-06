@@ -1,8 +1,10 @@
 // LevelManager.cpp - Handles dungeon level progression and level-specific state
 #include <format>
+
 #include <nlohmann/json.hpp>
 
 #include "../ActorTypes/Player.h"
+#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Systems/MessageSystem.h"

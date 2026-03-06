@@ -1,7 +1,8 @@
 #pragma once
 
-#include <raylib.h>
 #include <string>
+
+#include <raylib.h>
 
 class Renderer;
 

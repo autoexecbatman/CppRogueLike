@@ -1,12 +1,18 @@
 #include <algorithm>
+#include <filesystem>
 #include <format>
+#include <fstream>
 #include <map>
+#include <stdexcept>
 #include <string>
 #include <unordered_map>
 #include <variant>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 #include "../Actor/Actor.h"
+#include "../Core/Paths.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
@@ -23,6 +29,7 @@
 #include "MessageSystem.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
+#include "TileConfig.h"
 #include "TargetingSystem.h"
 #include "TileConfig.h"
 
@@ -40,55 +47,319 @@ static CasterClass to_caster_class(Player::PlayerClassState state)
 	}
 }
 
-const std::map<SpellId, SpellDefinition>& SpellSystem::get_spell_table()
+// ---------------------------------------------------------------------------
+// Module-level mutable spell table. Loaded from JSON; falls back to defaults
+// if load() has not been called (e.g. in unit tests).
+// ---------------------------------------------------------------------------
+
+namespace
 {
-	static const std::map<SpellId, SpellDefinition> spells = {
-		// Cleric Level 1
-		{ SpellId::CURE_LIGHT_WOUNDS, { SpellId::CURE_LIGHT_WOUNDS, "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP" } },
-		{ SpellId::BLESS, { SpellId::BLESS, "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns" } },
-		{ SpellId::SANCTUARY, { SpellId::SANCTUARY, "Sanctuary", 1, SpellClass::CLERIC, "Enemies ignore you for 3 turns" } },
 
-		// Cleric Level 2
-		{ SpellId::HOLD_PERSON, { SpellId::HOLD_PERSON, "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns" } },
-		{ SpellId::SILENCE, { SpellId::SILENCE, "Silence", 2, SpellClass::CLERIC, "Prevent target from casting" } },
+// Implementation-only identifier used to key s_spells and SPELL_KEYS.
+// Not part of the public API -- the game addresses spells by string key.
+enum class SpellId
+{
+	CURE_LIGHT_WOUNDS, BLESS, SANCTUARY,
+	HOLD_PERSON, SILENCE,
+	MAGIC_MISSILE, SHIELD, SLEEP,
+	INVISIBILITY, WEB,
+	FIREBALL, TELEPORT,
+	NONE
+};
 
-		// Wizard Level 1
-		{ SpellId::MAGIC_MISSILE, { SpellId::MAGIC_MISSILE, "Magic Missile", 1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit" } },
-		{ SpellId::SHIELD, { SpellId::SHIELD, "Shield", 1, SpellClass::WIZARD, "+4 AC for 5 turns" } },
-		{ SpellId::SLEEP, { SpellId::SLEEP, "Sleep", 1, SpellClass::WIZARD, "Put weak enemies to sleep" } },
+std::map<std::string, SpellDefinition> s_custom_spells;
 
-		// Wizard Level 2
-		{ SpellId::INVISIBILITY, { SpellId::INVISIBILITY, "Invisibility", 2, SpellClass::WIZARD, "Become invisible for 20 turns" } },
-		{ SpellId::WEB, { SpellId::WEB, "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies" } },
+std::map<SpellId, SpellDefinition> s_spells = {
+	{ SpellId::CURE_LIGHT_WOUNDS, { "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP",                                                      SpellEffectType::CURE_LIGHT_WOUNDS } },
+	{ SpellId::BLESS,             { "Bless",             1, SpellClass::CLERIC, "+1 to hit for 6 turns",                                             SpellEffectType::BLESS             } },
+	{ SpellId::SANCTUARY,         { "Sanctuary",         1, SpellClass::CLERIC, "Enemies ignore you for 3 turns",                                    SpellEffectType::SANCTUARY         } },
+	{ SpellId::HOLD_PERSON,       { "Hold Person",       2, SpellClass::CLERIC, "Paralyze target for 4 turns",                                       SpellEffectType::HOLD_PERSON       } },
+	{ SpellId::SILENCE,           { "Silence",           2, SpellClass::CLERIC, "Prevent target from casting",                                       SpellEffectType::SILENCE           } },
+	{ SpellId::MAGIC_MISSILE,     { "Magic Missile",     1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit",                                      SpellEffectType::MAGIC_MISSILE     } },
+	{ SpellId::SHIELD,            { "Shield",            1, SpellClass::WIZARD, "+4 AC for 5 turns",                                                 SpellEffectType::SHIELD            } },
+	{ SpellId::SLEEP,             { "Sleep",             1, SpellClass::WIZARD, "Put weak enemies to sleep",                                         SpellEffectType::SLEEP             } },
+	{ SpellId::INVISIBILITY,      { "Invisibility",      2, SpellClass::WIZARD, "Become invisible for 20 turns",                                     SpellEffectType::INVISIBILITY      } },
+	{ SpellId::WEB,               { "Web",               2, SpellClass::WIZARD, "Create webs to trap enemies",                                       SpellEffectType::WEB               } },
+	{ SpellId::FIREBALL,          { "Fireball",          3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half",  SpellEffectType::FIREBALL          } },
+	{ SpellId::TELEPORT,          { "Teleport",          3, SpellClass::WIZARD, "Teleport to random location",                                       SpellEffectType::TELEPORT          } },
+	{ SpellId::NONE,              { "None",              0, SpellClass::BOTH,   "",                                                                  SpellEffectType::NONE              } },
+};
 
-		// Wizard Level 3
-		{ SpellId::FIREBALL, { SpellId::FIREBALL, "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half" } },
-		{ SpellId::TELEPORT, { SpellId::TELEPORT, "Teleport", 3, SpellClass::WIZARD, "Teleport to random location" } },
+// JSON key <-> SpellId mapping
+struct SpellEntry { SpellId id; const char* key; };
 
-		{ SpellId::NONE, { SpellId::NONE, "None", 0, SpellClass::BOTH, "" } }
-	};
-	return spells;
+constexpr SpellEntry SPELL_KEYS[] = {
+	{ SpellId::CURE_LIGHT_WOUNDS, "cure_light_wounds" },
+	{ SpellId::BLESS,             "bless"             },
+	{ SpellId::SANCTUARY,         "sanctuary"         },
+	{ SpellId::HOLD_PERSON,       "hold_person"       },
+	{ SpellId::SILENCE,           "silence"           },
+	{ SpellId::MAGIC_MISSILE,     "magic_missile"     },
+	{ SpellId::SHIELD,            "shield"            },
+	{ SpellId::SLEEP,             "sleep"             },
+	{ SpellId::INVISIBILITY,      "invisibility"      },
+	{ SpellId::WEB,               "web"               },
+	{ SpellId::FIREBALL,          "fireball"          },
+	{ SpellId::TELEPORT,          "teleport"          },
+};
+
+SpellClass parse_class(const std::string& s)
+{
+	if (s == "cleric") return SpellClass::CLERIC;
+	if (s == "wizard") return SpellClass::WIZARD;
+	return SpellClass::BOTH;
 }
 
-const SpellDefinition& SpellSystem::get_spell_definition(SpellId id)
+std::string encode_class(SpellClass c)
 {
-	const auto& table = get_spell_table();
-	auto it = table.find(id);
-	if (it != table.end())
+	if (c == SpellClass::CLERIC) return "cleric";
+	if (c == SpellClass::WIZARD) return "wizard";
+	return "both";
+}
+
+SpellEffectType parse_effect_type(const std::string& s)
+{
+	if (s == "cure_light_wounds") return SpellEffectType::CURE_LIGHT_WOUNDS;
+	if (s == "bless")             return SpellEffectType::BLESS;
+	if (s == "sanctuary")         return SpellEffectType::SANCTUARY;
+	if (s == "hold_person")       return SpellEffectType::HOLD_PERSON;
+	if (s == "silence")           return SpellEffectType::SILENCE;
+	if (s == "magic_missile")     return SpellEffectType::MAGIC_MISSILE;
+	if (s == "shield")            return SpellEffectType::SHIELD;
+	if (s == "sleep")             return SpellEffectType::SLEEP;
+	if (s == "invisibility")      return SpellEffectType::INVISIBILITY;
+	if (s == "web")               return SpellEffectType::WEB;
+	if (s == "fireball")          return SpellEffectType::FIREBALL;
+	if (s == "teleport")          return SpellEffectType::TELEPORT;
+	return SpellEffectType::NONE;
+}
+
+std::string encode_effect_type(SpellEffectType e)
+{
+	switch (e)
 	{
-		return it->second;
+	case SpellEffectType::CURE_LIGHT_WOUNDS: return "cure_light_wounds";
+	case SpellEffectType::BLESS:             return "bless";
+	case SpellEffectType::SANCTUARY:         return "sanctuary";
+	case SpellEffectType::HOLD_PERSON:       return "hold_person";
+	case SpellEffectType::SILENCE:           return "silence";
+	case SpellEffectType::MAGIC_MISSILE:     return "magic_missile";
+	case SpellEffectType::SHIELD:            return "shield";
+	case SpellEffectType::SLEEP:             return "sleep";
+	case SpellEffectType::INVISIBILITY:      return "invisibility";
+	case SpellEffectType::WEB:               return "web";
+	case SpellEffectType::FIREBALL:          return "fireball";
+	case SpellEffectType::TELEPORT:          return "teleport";
+	default:                                 return "none";
 	}
-	return table.at(SpellId::NONE);
 }
 
-int SpellSystem::get_spell_level(SpellId id)
+} // namespace
+
+// ---------------------------------------------------------------------------
+
+void SpellSystem::load(std::string_view path)
 {
-	return get_spell_definition(id).level;
+	auto resolved = Paths::resolve(path);
+	std::ifstream f(resolved);
+	if (!f.is_open())
+	{
+		throw std::runtime_error(
+			std::format("SpellSystem::load -- cannot open '{}'", resolved.string()));
+	}
+
+	nlohmann::json root = nlohmann::json::parse(f);
+
+	s_custom_spells.clear();
+
+	// Load known builtin keys
+	for (const auto& entry : SPELL_KEYS)
+	{
+		const std::string key{ entry.key };
+		if (!root.contains(key))
+			continue;
+		const auto& j = root.at(key);
+		SpellDefinition& def = s_spells.at(entry.id);
+		def.name        = j.at("name").get<std::string>();
+		def.level       = j.at("level").get<int>();
+		def.spellClass  = parse_class(j.at("class").get<std::string>());
+		def.description = j.at("description").get<std::string>();
+	}
+
+	// Load custom spells: any key not in SPELL_KEYS
+	for (const auto& [key, j] : root.items())
+	{
+		bool is_builtin = false;
+		for (const auto& entry : SPELL_KEYS)
+		{
+			if (entry.key == key)
+			{
+				is_builtin = true;
+				break;
+			}
+		}
+		if (is_builtin)
+			continue;
+
+		SpellDefinition def;
+		def.name        = j.at("name").get<std::string>();
+		def.level       = j.at("level").get<int>();
+		def.spellClass  = parse_class(j.at("class").get<std::string>());
+		def.description = j.at("description").get<std::string>();
+		if (j.contains("effect"))
+			def.effect_type = parse_effect_type(j.at("effect").get<std::string>());
+		s_custom_spells[key] = std::move(def);
+	}
 }
 
-const std::string& SpellSystem::get_spell_name(SpellId id)
+void SpellSystem::save(std::string_view path)
 {
-	return get_spell_definition(id).name;
+	auto resolved = Paths::resolve(path);
+	std::filesystem::create_directories(resolved.parent_path());
+
+	nlohmann::json root = nlohmann::json::object();
+
+	for (const auto& entry : SPELL_KEYS)
+	{
+		const SpellDefinition& def = s_spells.at(entry.id);
+		root[std::string{ entry.key }] = nlohmann::json{
+			{ "name",        def.name        },
+			{ "level",       def.level       },
+			{ "class",       encode_class(def.spellClass) },
+			{ "description", def.description }
+		};
+	}
+
+	for (const auto& [key, def] : s_custom_spells)
+	{
+		root[key] = nlohmann::json{
+			{ "name",        def.name        },
+			{ "level",       def.level       },
+			{ "class",       encode_class(def.spellClass) },
+			{ "description", def.description },
+			{ "effect",      encode_effect_type(def.effect_type) }
+		};
+	}
+
+	std::ofstream f(resolved);
+	if (!f.is_open())
+	{
+		throw std::runtime_error(
+			std::format("SpellSystem::save -- cannot open '{}' for writing", resolved.string()));
+	}
+	f << root.dump(4);
+	if (f.fail())
+	{
+		throw std::runtime_error(
+			std::format("SpellSystem::save -- write failed for '{}'", resolved.string()));
+	}
+}
+
+// ---------------------------------------------------------------------------
+// String-keyed API (editor)
+// ---------------------------------------------------------------------------
+
+std::vector<std::string> SpellSystem::get_all_keys()
+{
+	std::vector<std::string> keys;
+	keys.reserve(std::size(SPELL_KEYS) + s_custom_spells.size());
+	for (const auto& entry : SPELL_KEYS)
+		keys.push_back(std::string{ entry.key });
+	for (const auto& [key, _] : s_custom_spells)
+		keys.push_back(key);
+	return keys;
+}
+
+const SpellDefinition& SpellSystem::get_by_key(std::string_view key)
+{
+	for (const auto& entry : SPELL_KEYS)
+	{
+		if (entry.key == key)
+			return s_spells.at(entry.id);
+	}
+	auto it = s_custom_spells.find(std::string{ key });
+	if (it != s_custom_spells.end())
+		return it->second;
+	throw std::out_of_range(std::format("SpellSystem::get_by_key -- unknown key '{}'", key));
+}
+
+void SpellSystem::set_by_key(std::string_view key, const SpellDefinition& def)
+{
+	for (const auto& entry : SPELL_KEYS)
+	{
+		if (entry.key == key)
+		{
+			s_spells[entry.id] = def;
+			return;
+		}
+	}
+	auto it = s_custom_spells.find(std::string{ key });
+	if (it != s_custom_spells.end())
+	{
+		it->second = def;
+		return;
+	}
+	throw std::out_of_range(std::format("SpellSystem::set_by_key -- unknown key '{}'", key));
+}
+
+std::string SpellSystem::add_custom(SpellDefinition def)
+{
+	auto normalize = [](std::string_view name) -> std::string
+	{
+		std::string key;
+		for (char c : name)
+		{
+			if (std::isspace(static_cast<unsigned char>(c)))
+				key += '_';
+			else
+				key += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+		}
+		return key;
+	};
+
+	auto has_key = [](const std::string& k) -> bool
+	{
+		for (const auto& entry : SPELL_KEYS)
+			if (entry.key == k) return true;
+		return s_custom_spells.contains(k);
+	};
+
+	std::string base = normalize(def.name.empty() ? "new_spell" : def.name);
+	std::string key = base;
+	if (has_key(key))
+	{
+		for (int n = 2; ; ++n)
+		{
+			key = std::format("{}_{}", base, n);
+			if (!has_key(key)) break;
+		}
+	}
+	s_custom_spells[key] = std::move(def);
+	return key;
+}
+
+void SpellSystem::remove_custom(std::string_view key)
+{
+	for (const auto& entry : SPELL_KEYS)
+	{
+		if (entry.key == key)
+		{
+			throw std::invalid_argument(
+				std::format("SpellSystem::remove_custom -- '{}' is a built-in spell and cannot be removed", key));
+		}
+	}
+	if (!s_custom_spells.erase(std::string{ key }))
+	{
+		throw std::out_of_range(
+			std::format("SpellSystem::remove_custom -- unknown key '{}'", key));
+	}
+}
+
+bool SpellSystem::is_builtin_key(std::string_view key)
+{
+	for (const auto& entry : SPELL_KEYS)
+		if (entry.key == key) return true;
+	return false;
 }
 
 std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
@@ -136,51 +407,54 @@ std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 	return {};
 }
 
-std::vector<SpellId> SpellSystem::get_available_spells(CasterClass classState, int maxSpellLevel)
+std::vector<std::string> SpellSystem::get_available_spells(CasterClass classState, int maxSpellLevel)
 {
-	std::vector<SpellId> available;
+	std::vector<std::string> available;
 	SpellClass targetClass = (classState == CasterClass::CLERIC)
 		? SpellClass::CLERIC
 		: SpellClass::WIZARD;
 
-	for (const auto& [id, def] : get_spell_table())
+	for (const auto& entry : SPELL_KEYS)
 	{
-		if (id == SpellId::NONE)
+		const SpellDefinition& def = s_spells.at(entry.id);
+		if (entry.id == SpellId::NONE)
 			continue;
 		if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH) && def.level <= maxSpellLevel)
-		{
-			available.push_back(id);
-		}
+			available.push_back(std::string{ entry.key });
 	}
-	return available; // std::map iteration is already ordered by SpellId
+
+	for (const auto& [key, def] : s_custom_spells)
+	{
+		if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH) && def.level <= maxSpellLevel)
+			available.push_back(key);
+	}
+
+	return available;
 }
 
-bool SpellSystem::cast_spell(SpellId spell, Creature& caster, GameContext& ctx)
+bool SpellSystem::dispatch_effect(SpellEffectType effect, Creature& caster, GameContext& ctx)
 {
-	switch (spell)
+	switch (effect)
 	{
-	case SpellId::CURE_LIGHT_WOUNDS:
-		return cast_cure_light_wounds(caster, ctx);
-	case SpellId::BLESS:
-		return cast_bless(caster, ctx);
-	case SpellId::FIREBALL:
-		return cast_fireball(caster, ctx);
-	case SpellId::MAGIC_MISSILE:
-		return cast_magic_missile(caster, ctx);
-	case SpellId::SHIELD:
-		return cast_shield(caster, ctx);
-	case SpellId::SLEEP:
-		return cast_sleep(caster, ctx);
-	case SpellId::INVISIBILITY:
-		return cast_invisibility(caster, ctx);
-	case SpellId::TELEPORT:
-		return cast_teleport(caster, ctx);
-	case SpellId::HOLD_PERSON:
-		return cast_hold_person(caster, ctx);
+	case SpellEffectType::CURE_LIGHT_WOUNDS: return cast_cure_light_wounds(caster, ctx);
+	case SpellEffectType::BLESS:             return cast_bless(caster, ctx);
+	case SpellEffectType::FIREBALL:          return cast_fireball(caster, ctx);
+	case SpellEffectType::MAGIC_MISSILE:     return cast_magic_missile(caster, ctx);
+	case SpellEffectType::SHIELD:            return cast_shield(caster, ctx);
+	case SpellEffectType::SLEEP:             return cast_sleep(caster, ctx);
+	case SpellEffectType::INVISIBILITY:      return cast_invisibility(caster, ctx);
+	case SpellEffectType::TELEPORT:          return cast_teleport(caster, ctx);
+	case SpellEffectType::HOLD_PERSON:       return cast_hold_person(caster, ctx);
 	default:
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
 		return false;
 	}
+}
+
+bool SpellSystem::cast_spell_by_key(std::string_view key, Creature& caster, GameContext& ctx)
+{
+	const SpellDefinition& def = get_by_key(key);
+	return dispatch_effect(def.effect_type, caster, ctx);
 }
 
 static void animate_heal(const Vector2D& pos, GameContext& ctx)
@@ -190,7 +464,7 @@ static void animate_heal(const Vector2D& pos, GameContext& ctx)
 	ctx.anim_system->spawn_effect(
 		pos.x,
 		pos.y,
-		TileConfig::instance().get("TILE_EFFECT_HEAL"),
+		ctx.tile_config->get("TILE_EFFECT_HEAL"),
 		60,
 		220,
 		60,
@@ -523,11 +797,12 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 	for (int level = 1; level <= maxSpellLevel; ++level)
 	{
 		int slotsAtLevel = slots[level - 1];
-		for (SpellId id : available)
+		for (const std::string& key : available)
 		{
-			if (get_spell_level(id) == level && slotsAtLevel > 0)
+			const SpellDefinition& def = get_by_key(key);
+			if (def.level == level && slotsAtLevel > 0)
 			{
-				player.memorizedSpells.push_back(id);
+				player.memorizedSpells.push_back(key);
 				--slotsAtLevel;
 			}
 		}
@@ -538,7 +813,7 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 	{
 		if (i > 0)
 			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", ");
-		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, get_spell_name(player.memorizedSpells[i]));
+		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, get_by_key(player.memorizedSpells[i]).name);
 	}
 	ctx.message_system->finalize_message();
 }
@@ -562,7 +837,7 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 			{
 				if (magicRing->effect == MagicalEffect::INVISIBILITY)
 				{
-					itemSpells.push_back({ SpellId::INVISIBILITY, "Ring" });
+					itemSpells.push_back({ "invisibility", "Ring" });
 					break; // Only add once even if wearing two
 				}
 			}
@@ -576,7 +851,7 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 		{
 			if (magicHelm->effect == MagicalEffect::TELEPORTATION)
 			{
-				itemSpells.push_back({ SpellId::TELEPORT, "Helm" });
+				itemSpells.push_back({ "teleport", "Helm" });
 			}
 		}
 	}

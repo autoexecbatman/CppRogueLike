@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
 

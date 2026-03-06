@@ -1,5 +1,6 @@
 // file: MenuName.cpp
-#include "MenuName.h"
+#include <raylib.h>
+
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -7,6 +8,7 @@
 #include "../Renderer/Renderer.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/RenderingManager.h"
+#include "MenuName.h"
 
 MenuName::MenuName(GameContext& ctx)
 {

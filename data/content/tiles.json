@@ -42,13 +42,13 @@
         },
         "boots_of_elvenkind": {
             "col": 1,
-            "row": 4,
-            "sheet": 29
+            "row": 0,
+            "sheet": 48
         },
         "boots_of_speed": {
             "col": 0,
-            "row": 4,
-            "sheet": 29
+            "row": 0,
+            "sheet": 48
         },
         "bread": {
             "col": 1,
@@ -76,7 +76,7 @@
             "sheet": 29
         },
         "cloak_of_protection": {
-            "col": 2,
+            "col": 0,
             "row": 4,
             "sheet": 29
         },
@@ -121,29 +121,29 @@
             "sheet": 34
         },
         "full_plate": {
-            "col": 4,
-            "row": 1,
+            "col": 7,
+            "row": 0,
             "sheet": 29
         },
         "gauntlets_of_dexterity": {
             "col": 1,
-            "row": 3,
-            "sheet": 29
+            "row": 0,
+            "sheet": 49
         },
         "gauntlets_of_fumbling": {
             "col": 3,
-            "row": 3,
-            "sheet": 29
+            "row": 0,
+            "sheet": 49
         },
         "gauntlets_of_ogre_power": {
             "col": 0,
-            "row": 3,
-            "sheet": 29
+            "row": 0,
+            "sheet": 49
         },
         "gauntlets_of_swimming_and_climbing": {
             "col": 2,
-            "row": 3,
-            "sheet": 29
+            "row": 0,
+            "sheet": 49
         },
         "gem": {
             "col": 1,
@@ -331,8 +331,8 @@
             "sheet": 24
         },
         "quarterstaff": {
-            "col": 3,
-            "row": 0,
+            "col": 2,
+            "row": 4,
             "sheet": 28
         },
         "rapier": {
@@ -456,12 +456,12 @@
             "sheet": 29
         },
         "staff": {
-            "col": 4,
-            "row": 0,
+            "col": 2,
+            "row": 4,
             "sheet": 28
         },
         "studded_leather": {
-            "col": 2,
+            "col": 1,
             "row": 0,
             "sheet": 29
         },

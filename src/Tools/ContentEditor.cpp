@@ -1,8 +1,9 @@
 // file: ContentEditor.cpp
 #include <algorithm>
 #include <format>
-#include <raylib.h>
 #include <string>
+
+#include <raylib.h>
 
 #include "../Core/Paths.h"
 #include "../Factories/MonsterCreator.h"
@@ -157,6 +158,7 @@ void ContentEditor::toggle()
 	{
 		// Closing: persist all assignments immediately.
 		ContentRegistryIO::save(ContentRegistry::instance(), Paths::CONTENT_TILES);
+		MonsterCreator::save(Paths::MONSTERS);
 	}
 
 	m_active = !m_active;
@@ -180,23 +182,36 @@ TileRef ContentEditor::current_tile() const
 {
 	const auto& entries = active_entries();
 	if (entries.empty())
+	{
 		return TileRef{};
+	}
+
 	int key = entries[m_list_cursor].entity_key;
 	if (m_tab == 0)
+	{
 		return ContentRegistry::instance().get_tile(static_cast<ItemId>(key));
-	return ContentRegistry::instance().get_tile(static_cast<MonsterId>(key));
+	}
+
+	return MonsterCreator::get_tile(static_cast<MonsterId>(key));
 }
 
 void ContentEditor::assign_tile(TileRef tile)
 {
 	auto& entries = active_entries();
 	if (entries.empty())
+	{
 		return;
+	}
+
 	int key = entries[m_list_cursor].entity_key;
 	if (m_tab == 0)
+	{
 		ContentRegistry::instance().set_tile(static_cast<ItemId>(key), tile);
+	}
 	else
-		ContentRegistry::instance().set_tile(static_cast<MonsterId>(key), tile);
+	{
+		MonsterCreator::set_tile(static_cast<MonsterId>(key), tile);
+	}
 }
 
 // ---------------------------------------------------------------------------
@@ -206,7 +221,9 @@ void ContentEditor::assign_tile(TileRef tile)
 void ContentEditor::update_and_render(const Renderer& renderer)
 {
 	if (!m_active)
+	{
 		return;
+	}
 
 	handle_keyboard();
 
@@ -295,7 +312,9 @@ void ContentEditor::draw_list(
 	{
 		float wheel = GetMouseWheelMove();
 		if (wheel != 0.0f)
+		{
 			m_list_scroll = std::clamp(m_list_scroll - static_cast<int>(wheel), 0, max_scroll);
+		}
 	}
 
 	BeginScissorMode(list_x, list_y, list_w, list_h);
@@ -304,19 +323,25 @@ void ContentEditor::draw_list(
 	{
 		int iy = list_y + (i - m_list_scroll) * ITEM_H;
 		if (iy + ITEM_H > list_y + list_h)
+		{
 			break;
+		}
 
 		bool is_sel = (i == m_list_cursor);
 		bool hovered = in_list && mouse.y >= iy && mouse.y < iy + ITEM_H;
 
 		if (is_sel)
+		{
 			DrawRectangle(list_x, iy, list_w, ITEM_H, Color{ 60, 60, 0, 220 });
+		}
 		else if (hovered)
+		{
 			DrawRectangle(list_x, iy, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
+		}
 
 		TileRef tile = (m_tab == 0)
 			? ContentRegistry::instance().get_tile(static_cast<ItemId>(entries[i].entity_key))
-			: ContentRegistry::instance().get_tile(static_cast<MonsterId>(entries[i].entity_key));
+			: MonsterCreator::get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
 		renderer.draw_tile_screen_sized(list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
 
@@ -324,7 +349,9 @@ void ContentEditor::draw_list(
 		renderer.draw_text_color(list_x + PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2, entries[i].name, tc);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
+		{
 			m_list_cursor = i;
+		}
 	}
 
 	EndScissorMode();
@@ -348,18 +375,26 @@ void ContentEditor::draw_browser(
 		{
 			m_browser_sheet = (m_browser_sheet + dir + total_sheets) % total_sheets;
 			if (renderer.sheet_is_loaded(static_cast<TileSheet>(m_browser_sheet)))
+			{
 				break;
+			}
 		}
 		m_browser_scroll = 0;
 	};
 
 	if (!renderer.sheet_is_loaded(static_cast<TileSheet>(m_browser_sheet)))
+	{
 		advance_sheet(1);
+	}
 
 	if (IsKeyPressed(KEY_LEFT))
+	{
 		advance_sheet(-1);
+	}
 	if (IsKeyPressed(KEY_RIGHT))
+	{
 		advance_sheet(1);
+	}
 
 	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(m_browser_sheet));
 	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(m_browser_sheet));
@@ -401,7 +436,9 @@ void ContentEditor::draw_browser(
 	{
 		int py = grid_y + (row - m_browser_scroll) * (BROWSER_TILE + 2);
 		if (py >= grid_y + grid_h)
+		{
 			break;
+		}
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
@@ -413,17 +450,25 @@ void ContentEditor::draw_browser(
 				mouse.y >= py && mouse.y < py + BROWSER_TILE;
 
 			if (is_sel)
+			{
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 0, 220 });
+			}
 			else if (hovered_tile)
+			{
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 40, 40, 20, 160 });
+			}
 
 			renderer.draw_tile_screen_sized(px, py, tid, BROWSER_TILE);
 
 			if (is_sel)
+			{
 				DrawRectangleLines(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 255, 255, 0, 255 });
+			}
 
 			if (hovered_tile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_browser)
+			{
 				assign_tile(tid);
+			}
 		}
 	}
 

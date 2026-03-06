@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Item.h"
 #include "../Actor/Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -96,43 +96,69 @@ ItemBehavior create_behavior_from_blueprint(ItemId itemId, const ItemParams& par
 		};
 
 	case PickableType::TELEPORTER:
+	{
 		return Teleporter{};
+	}
 
 	case PickableType::WEAPON:
+	{
 		return Weapon{ params.ranged, params.hand_requirement, params.weapon_size };
+	}
 
 	case PickableType::SHIELD:
+	{
 		return Shield{};
+	}
 
 	case PickableType::ARMOR:
+	{
 		return Armor{ params.ac_bonus };
+	}
 
 	case PickableType::QUEST_ITEM:
+	{
 		return Amulet{};
+	}
 
 	case PickableType::MAGICAL_HELM:
+	{
 		return MagicalHelm{ params.effect, params.effect_bonus };
+	}
 
 	case PickableType::MAGICAL_RING:
+	{
 		return MagicalRing{ params.effect, params.effect_bonus };
+	}
 
 	case PickableType::JEWELRY_AMULET:
+	{
 		return create_stat_behavior<JewelryAmulet>(params);
+	}
 
 	case PickableType::GAUNTLETS:
+	{
 		return create_stat_behavior<Gauntlets>(params);
+	}
 
 	case PickableType::GIRDLE:
+	{
 		return create_stat_behavior<Girdle>(params);
+	}
 
 	case PickableType::FOOD:
+	{
 		return Food{ params.nutrition_value };
+	}
 
 	case PickableType::GOLD_COIN:
+	{
 		return Gold{ 0 }; // amount set by caller
+	}
 
 	default:
+	{
 		throw std::runtime_error("Unknown pickable type: " + std::to_string(static_cast<int>(params.pickable_type)));
+	}
 	}
 }
 
@@ -221,11 +247,19 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	for (const auto& [id, params] : get_all_params())
 	{
 		if (params.category != category || params.base_weight <= 0)
+		{
 			continue;
+		}
+
 		if (dungeonLevel < params.level_minimum)
+		{
 			continue;
+		}
+
 		if (params.level_maximum > 0 && dungeonLevel > params.level_maximum)
+		{
 			continue;
+		}
 
 		const float levelFactor = 1.0f + (params.level_scaling * (dungeonLevel - 1));
 		const int weight = std::max(1, static_cast<int>(params.base_weight * levelFactor));
@@ -234,14 +268,18 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 	}
 
 	if (candidates.empty())
+	{
 		return nullptr;
+	}
 
 	int roll = ctx.dice->roll(1, totalWeight);
 	for (const auto& [id, weight] : candidates)
 	{
 		roll -= weight;
 		if (roll <= 0)
+		{
 			return create(id, pos);
+		}
 	}
 
 	return create(candidates.back().id, pos);
@@ -256,9 +294,13 @@ int ItemCreator::determine_enhancement_level(GameContext& ctx, int dungeonLevel)
 {
 	const int roll = ctx.dice->roll(1, 100);
 	if (dungeonLevel >= 10 && roll <= 5)
+	{
 		return 3;
+	}
 	if (dungeonLevel >= 5 && roll <= 20)
+	{
 		return 2;
+	}
 	return 1;
 }
 

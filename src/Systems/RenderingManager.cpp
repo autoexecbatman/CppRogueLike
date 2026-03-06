@@ -1,14 +1,14 @@
 // RenderingManager.cpp - Handles all rendering and screen management
-#include "RenderingManager.h"
+#include <memory>
+#include <span>
+
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryData.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
-#include "../Items/Items.h"
 #include "../Map/Map.h"
-#include "../Objects/Web.h"
-#include "../Renderer/Renderer.h"
+#include "RenderingManager.h"
 
 void RenderingManager::render(GameContext& ctx) const
 {

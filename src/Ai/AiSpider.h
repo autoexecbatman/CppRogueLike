@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../Persistent/Persistent.h"
 #include "AiMonster.h"
 
 // Forward declarations

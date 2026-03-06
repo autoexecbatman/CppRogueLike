@@ -1,11 +1,13 @@
 // file: MenuGender.cpp
-#include "MenuGender.h"
+#include <memory>
+
+#include <raylib.h>
+
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
-#include "Menu.h"
-#include "MenuClass.h"
+#include "MenuGender.h"
 #include "MenuRace.h"
 
 void Male::on_selection(GameContext& ctx)

@@ -1,5 +1,7 @@
 #pragma once
+#include "../Actor/Creature.h"
 #include "../Ai/AiMonster.h"
+#include "../Persistent/Persistent.h"
 
 class Mimic;
 struct GameContext;

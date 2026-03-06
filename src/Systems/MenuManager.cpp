@@ -1,8 +1,12 @@
 // file: Systems/MenuManager.cpp
-#include "MenuManager.h"
+#include <deque>
+#include <memory>
+
+#include "../Actor/Item.h"
 #include "../Core/GameContext.h"
 #include "../Menu/BaseMenu.h"
 #include "../Systems/RenderingManager.h"
+#include "MenuManager.h"
 
 void MenuManager::handle_menus(std::deque<std::unique_ptr<BaseMenu>>& menus, GameContext& ctx)
 {

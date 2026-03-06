@@ -1,6 +1,7 @@
+#include <algorithm>
 #include <format>
 #include <memory>
-#include <string_view>
+#include <string>
 #include <unordered_map>
 
 #include "../Actor/Actor.h"
@@ -9,15 +10,20 @@
 #include "../Ai/AiShopkeeper.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../Menu/MenuTrade.h"
+#include "../Persistent/Persistent.h"
 #include "../Systems/AnimationSystem.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/DataManager.h"
+#include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/LevelUpSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "Attacker.h"
+#include "EquipmentSlot.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> buff_break_messages = {

@@ -14,6 +14,7 @@
 
 // Forward declaration
 struct GameContext;
+class Creature;
 
 inline constexpr int DEFAULT_MAP_WIDTH = 120;
 inline constexpr int DEFAULT_MAP_HEIGHT = 80;

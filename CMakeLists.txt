@@ -114,6 +114,14 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/InventoryOperations.cpp
     ${PROJECT_SOURCE_DIR}/Actor/InventoryOperations.h
     ${PROJECT_SOURCE_DIR}/Actor/InventoryData.h
+    ${PROJECT_SOURCE_DIR}/Actor/Creature.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/Creature.h
+    ${PROJECT_SOURCE_DIR}/Actor/Item.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/Item.h
+    ${PROJECT_SOURCE_DIR}/Actor/NPC.h
+    ${PROJECT_SOURCE_DIR}/Actor/Object.h
+    ${PROJECT_SOURCE_DIR}/Actor/Stairs.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/Stairs.h
 
     # Persistent
     ${PROJECT_SOURCE_DIR}/Persistent/Persistent.cpp
@@ -274,10 +282,14 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.h
+    ${PROJECT_SOURCE_DIR}/Tools/MonsterEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/MonsterEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
     ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.h
     ${PROJECT_SOURCE_DIR}/Tools/RoomEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/RoomEditor.h
+    ${PROJECT_SOURCE_DIR}/Tools/SpellEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/SpellEditor.h
 
     # Factories - Updated paths
     ${PROJECT_SOURCE_DIR}/Factories/MonsterFactory.cpp

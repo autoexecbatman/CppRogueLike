@@ -5,6 +5,8 @@
 
 #include "../Renderer/Renderer.h"
 
+class TileConfig;
+
 struct AnimEntry
 {
 	int world_x;
@@ -18,6 +20,7 @@ struct AnimEntry
 class AnimationSystem
 {
 public:
+	void init(const TileConfig& tc);
 	void spawn_melee_hit(int world_x, int world_y);
 	void spawn_death(int world_x, int world_y);
 
@@ -34,4 +37,5 @@ public:
 
 private:
 	std::vector<AnimEntry> entries;
+	TileRef m_blood_tile{};
 };

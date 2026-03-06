@@ -19,8 +19,6 @@
 class ContentEditor
 {
 public:
-	ContentEditor() = default;
-
 	void toggle();
 	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
 	void update_and_render(const Renderer& renderer);

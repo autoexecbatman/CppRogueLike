@@ -10,7 +10,10 @@ FovMap::FovMap(int width, int height)
 void FovMap::set_properties(int x, int y, bool walkable, bool transparent) noexcept
 {
 	if (!in_bounds(x, y))
+	{
 		return;
+	}
+
 	FovCell& c = cells_[cell_index(x, y)];
 	c.walkable = walkable;
 	c.transparent = transparent;
@@ -19,14 +22,20 @@ void FovMap::set_properties(int x, int y, bool walkable, bool transparent) noexc
 bool FovMap::is_walkable(int x, int y) const noexcept
 {
 	if (!in_bounds(x, y))
+	{
 		return false;
+	}
+
 	return cells_[cell_index(x, y)].walkable;
 }
 
 bool FovMap::is_in_fov(int x, int y) const noexcept
 {
 	if (!in_bounds(x, y))
+	{
 		return false;
+	}
+
 	return cells_[cell_index(x, y)].visible;
 }
 
@@ -51,10 +60,14 @@ int FovMap::cell_index(int x, int y) const noexcept
 void FovMap::compute_fov(int ox, int oy, int radius)
 {
 	for (auto& c : cells_)
+	{
 		c.visible = false;
+	}
 
 	if (!in_bounds(ox, oy))
+	{
 		return;
+	}
 
 	cells_[cell_index(ox, oy)].visible = true;
 
@@ -94,7 +107,9 @@ void FovMap::scan_octant(
 	int yy)
 {
 	if (start < end)
+	{
 		return;
+	}
 
 	float new_start = start;
 
@@ -109,15 +124,22 @@ void FovMap::scan_octant(
 			float r_slope = (static_cast<float>(dx) + 0.5f) / (static_cast<float>(dy) - 0.5f);
 
 			if (start < r_slope)
+			{
 				continue;
+			}
+
 			if (end > l_slope)
+			{
 				break;
+			}
 
 			const int sx = cx + dx * xx + dy * xy;
 			const int sy = cy + dx * yx + dy * yy;
 
 			if (in_bounds(sx, sy) && dx * dx + dy * dy <= radius * radius)
+			{
 				cells_[cell_index(sx, sy)].visible = true;
+			}
 
 			if (blocked)
 			{
@@ -135,12 +157,16 @@ void FovMap::scan_octant(
 			{
 				blocked = true;
 				if (i < radius)
+				{
 					scan_octant(cx, cy, radius, i + 1, start, l_slope, xx, xy, yx, yy);
+				}
 				new_start = r_slope;
 			}
 		}
 
 		if (blocked)
+		{
 			break;
+		}
 	}
 }

@@ -1,6 +1,8 @@
 #pragma once
 
-#include "../Actor/Actor.h"
+#include <vector>
+
+#include "BuffType.h"
 
 struct GameContext;
 class Creature;

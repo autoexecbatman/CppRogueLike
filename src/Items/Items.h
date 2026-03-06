@@ -1,9 +1,10 @@
 #pragma once
 
-#include "../Actor/Actor.h"
+#include "../Actor/Item.h"
 
 struct Vector2D;
 struct GameContext;
+class TileConfig;
 
 class HealthPotion : public Item
 {
@@ -44,5 +45,5 @@ public:
 class AmuletOfYendor : public Item
 {
 public:
-	AmuletOfYendor(Vector2D position);
+	AmuletOfYendor(Vector2D position, const TileConfig& tc);
 };

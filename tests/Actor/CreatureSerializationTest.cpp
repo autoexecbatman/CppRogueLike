@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Actor/Actor.h"
+#include "src/Actor/Creature.h"
 #include "src/Actor/Destructible.h"
 #include "src/Actor/Attacker.h"
 #include "src/Ai/AiMonster.h"

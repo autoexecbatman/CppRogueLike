@@ -1,6 +1,11 @@
 // WeaponDamageRegistry.cpp - Implementation using ItemId system
-#include "WeaponDamageRegistry.h"
+#include <string>
+#include <unordered_map>
+
+#include "../Items/ItemClassification.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
+#include "DamageInfo.h"
+#include "WeaponDamageRegistry.h"
 
 // Static member definition
 const std::unordered_map<ItemId, DamageInfo> WeaponDamageRegistry::weapon_damage_map =

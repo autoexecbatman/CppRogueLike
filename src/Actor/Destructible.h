@@ -1,7 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <memory>
 #include <string>
-#include <string_view>
 
 #include "../Combat/DamageInfo.h"
 #include "../Persistent/Persistent.h"

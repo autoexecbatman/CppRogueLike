@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Actor/Actor.h"
+#include "src/Actor/Item.h"
 #include "src/Actor/Pickable.h"
 #include "src/Systems/ItemEnhancements/ItemEnhancements.h"
 #include "src/Factories/ItemCreator.h"

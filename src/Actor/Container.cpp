@@ -1,10 +1,18 @@
 // Container.cpp - Modern C++20 implementation with proper encapsulation
-#include "Container.h"
-#include "../Items/Items.h"
-#include "Actor.h"
 #include <algorithm>
+#include <exception>
 #include <iostream>
-#include <ranges>
+#include <memory>
+#include <span>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "../Persistent/Persistent.h"
+#include "../Utils/Vector2D.h"
+#include "Actor.h"
+#include "Container.h"
+#include "Item.h"
 
 // Construction with proper initialization
 Container::Container(size_t initial_capacity) noexcept

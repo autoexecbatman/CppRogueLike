@@ -1,11 +1,14 @@
 // file: DungeonGenerator.cpp
 #include <algorithm>
 #include <limits>
-#include <ranges>
+#include <vector>
 
+#include "../Actor/Item.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
+#include "../Utils/Vector2D.h"
 #include "DungeonGenerator.h"
+#include "DungeonRoom.h"
 #include "Map.h"
 
 // ------------------------------------------------------------------ helpers
@@ -39,7 +42,9 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 		for (int gc = 0; gc < grid_cols; ++gc)
 		{
 			if (rng.roll(0, 99) < SKIP_PCTG)
+			{
 				continue;
+			}
 
 			const int cell_x = gc * CELL_W;
 			const int cell_y = gr * CELL_H;
@@ -52,18 +57,26 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			const int max_row = cell_y + CELL_H - room_h - 1;
 
 			if (max_col < cell_x + 1 || max_row < cell_y + 1)
+			{
 				continue;
+			}
 
 			const int room_col = rng.roll(cell_x + 1, max_col);
 			const int room_row = rng.roll(cell_y + 1, max_row);
 
 			// Keep rooms inside map interior (wall ring must always exist).
 			if (room_col < 1 || room_row < 1)
+			{
 				continue;
+			}
 			if (room_col + room_w > map_width - 2)
+			{
 				continue;
+			}
 			if (room_row + room_h > map_height - 2)
+			{
 				continue;
+			}
 
 			rooms.push_back({ room_col, room_row, room_w, room_h });
 		}
@@ -131,7 +144,9 @@ void DungeonGenerator::connect_all(
 	Map& map) const
 {
 	if (rooms.size() < 2)
+	{
 		return;
+	}
 
 	const int n = static_cast<int>(rooms.size());
 
@@ -149,11 +164,17 @@ void DungeonGenerator::connect_all(
 		for (int i = 0; i < n; ++i)
 		{
 			if (!in_tree[i])
+			{
 				continue;
+			}
+
 			for (int j = 0; j < n; ++j)
 			{
 				if (in_tree[j])
+				{
 					continue;
+				}
+
 				const int dx = rooms[i].center_col() - rooms[j].center_col();
 				const int dy = rooms[i].center_row() - rooms[j].center_row();
 				const int dist = dx * dx + dy * dy;
@@ -167,7 +188,9 @@ void DungeonGenerator::connect_all(
 		}
 
 		if (best_b < 0)
+		{
 			break;
+		}
 
 		connect_pair(rooms[best_a], rooms[best_b], map);
 		in_tree[best_b] = true;
@@ -185,13 +208,17 @@ void DungeonGenerator::connect_all(
 		const int a = rng.roll(0, n - 1);
 		const int b = rng.roll(0, n - 1);
 		if (a == b)
+		{
 			continue;
+		}
 
 		const int dx = rooms[a].center_col() - rooms[b].center_col();
 		const int dy = rooms[a].center_row() - rooms[b].center_row();
 		const int dist = dx * dx + dy * dy;
 		if (dist > LOOP_RADIUS)
+		{
 			continue;
+		}
 
 		connect_pair(rooms[a], rooms[b], map);
 		++added;
@@ -211,17 +238,24 @@ void DungeonGenerator::generate(
 	std::vector<DungeonRoom> rooms = place_rooms(map_width, map_height, rng);
 
 	if (rooms.empty())
+	{
 		return;
+	}
 
 	// Sort top-left first so room[0] is always the player spawn.
-	std::ranges::sort(rooms, [](const DungeonRoom& a, const DungeonRoom& b)
+	std::ranges::sort(rooms,
+		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
 	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
+	{
 		map.create_room(rooms[i], i == 0, withActors, ctx);
+	}
 
 	connect_all(rooms, rng, map);
 
 	if (ctx.rooms)
+	{
 		*ctx.rooms = rooms;
+	}
 }

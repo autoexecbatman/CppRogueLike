@@ -11,7 +11,6 @@
 #include "../../Core/GameContext.h"
 #include "../../Factories/MonsterCreator.h"
 #include "../../Random/RandomDice.h"
-#include "../../Systems/ContentRegistry.h"
 #include "../../Systems/MessageSystem.h"
 #include "../../Utils/Vector2D.h"
 #include "../ShopKeeper.h"
@@ -20,7 +19,7 @@
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
 	// Create base creature
-	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ ContentRegistry::instance().get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
+	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ MonsterCreator::get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
 
 	// Configure all shopkeeper components in one place
 	configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);

@@ -11,7 +11,9 @@
 
 #include <raylib.h>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
+#include "../Actor/Stairs.h"
+#include "../ActorTypes/Player.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Colors/Colors.h"
@@ -30,6 +32,7 @@
 #include "../Utils/Vector2D.h"
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
+#include "FovMap.h"
 #include "Map.h"
 
 //====
@@ -481,7 +484,7 @@ void Map::render(const GameContext& ctx) const
 			return TileRef{};
 
 		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
-		auto& tc = TileConfig::instance();
+		const auto& tc = *ctx.tile_config;
 		return (zone == ZONE_CHAPEL) ? tc.get("TILE_CANDELABRA") : tc.get("TILE_TORCH_1");
 	};
 
@@ -513,38 +516,38 @@ void Map::render(const GameContext& ctx) const
 					continue; // Interior wall -- no walkable neighbor, render as void
 				}
 				tile_ref = wall_autotile_resolve_mask(
-					TileConfig::instance().get_wall_autotile("WALL_AUTOTILE_STONE"),
+					ctx.tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"),
 					build_mask(pos, is_border_wall));
 				break;
 			}
 			case TileType::FLOOR:
 			{
 				tile_ref = autotile_resolve_mask(
-					TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
+					ctx.tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::CORRIDOR:
 			{
 				tile_ref = autotile_resolve_mask(
-					TileConfig::instance().get_autotile("AUTOTILE_CORRIDOR"),
+					ctx.tile_config->get_autotile("AUTOTILE_CORRIDOR"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::WATER:
-				tile_ref = TileConfig::instance().get("TILE_WATER");
+				tile_ref = ctx.tile_config->get("TILE_WATER");
 				break;
 			case TileType::CLOSED_DOOR:
 			case TileType::OPEN_DOOR:
 			{
 				// Draw floor underneath -- door sprites have transparency
 				TileRef floor_ref = autotile_resolve_mask(
-					TileConfig::instance().get_autotile("AUTOTILE_FLOOR_STONE"),
+					ctx.tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(col, row, floor_ref, WHITE_BLACK_PAIR, tint);
 				tile_ref = (type == TileType::CLOSED_DOOR)
-					? TileConfig::instance().get("TILE_DOOR_CLOSED")
-					: TileConfig::instance().get("TILE_DOOR_OPEN");
+					? ctx.tile_config->get("TILE_DOOR_CLOSED")
+					: ctx.tile_config->get("TILE_DOOR_OPEN");
 				break;
 			}
 			default:

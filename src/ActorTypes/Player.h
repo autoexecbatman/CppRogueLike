@@ -5,11 +5,10 @@
 #include <utility>
 #include <vector>
 
-#include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
-#include "../Systems/SpellSystem.h"
 #include "../Utils/Vector2D.h"
 
 class Item;
@@ -50,7 +49,7 @@ public:
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
 	int roundCounter{ 0 }; // Tracks rounds for alternating attack patterns
-	std::vector<SpellId> memorizedSpells;
+	std::vector<std::string> memorizedSpells;
 
 	// Equipment system
 	std::vector<EquippedItem> equippedItems;

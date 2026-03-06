@@ -1,12 +1,11 @@
 #include <cmath>
-#include <memory>
 #include <vector>
 
-#include "../Colors/Colors.h"
+#include <raylib.h>
+
+#include "../Actor/Item.h"
 #include "../Core/GameContext.h"
-#include "../Gui/Gui.h"
 #include "../Map/Map.h"
-#include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/RenderingManager.h"
 #include "../Utils/Vector2D.h"

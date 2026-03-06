@@ -21,10 +21,10 @@ void MenuSpellCast::populate_spells()
 	availableSpells.clear();
 	spellSources.clear();
 
-	// Add memorized spells
-	for (const auto& spell : player.memorizedSpells)
+	// Add memorized spells (string keys)
+	for (const auto& key : player.memorizedSpells)
 	{
-		availableSpells.push_back(spell);
+		availableSpells.push_back(key);
 		spellSources.push_back("");
 	}
 
@@ -32,7 +32,7 @@ void MenuSpellCast::populate_spells()
 	const auto itemSpells = SpellSystem::get_item_granted_spells(player);
 	for (const auto& itemSpell : itemSpells)
 	{
-		availableSpells.push_back(itemSpell.spell);
+		availableSpells.push_back(itemSpell.key);
 		spellSources.push_back(itemSpell.source);
 	}
 }
@@ -45,7 +45,7 @@ void MenuSpellCast::draw_content()
 
 	for (size_t i = 0; i < availableSpells.size(); ++i)
 	{
-		const auto& def = SpellSystem::get_spell_definition(availableSpells[i]);
+		const auto& def = SpellSystem::get_by_key(availableSpells[i]);
 
 		if (static_cast<int>(i) == selectedIndex)
 		{
@@ -74,14 +74,14 @@ void MenuSpellCast::handle_selection()
 {
 	if (selectedIndex >= 0 && selectedIndex < static_cast<int>(availableSpells.size()))
 	{
-		SpellId spell = availableSpells[selectedIndex];
-		if (SpellSystem::cast_spell(spell, player, ctx))
+		const std::string& key = availableSpells[selectedIndex];
+		if (SpellSystem::cast_spell_by_key(key, player, ctx))
 		{
 			// Only consume memorized spells (not item-granted)
 			if (spellSources[selectedIndex].empty())
 			{
 				// Find and remove from memorized list
-				auto it = std::find(player.memorizedSpells.begin(), player.memorizedSpells.end(), spell);
+				auto it = std::find(player.memorizedSpells.begin(), player.memorizedSpells.end(), key);
 				if (it != player.memorizedSpells.end())
 				{
 					player.memorizedSpells.erase(it);

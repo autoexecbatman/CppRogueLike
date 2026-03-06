@@ -2,8 +2,8 @@
 #include <string>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
+#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
@@ -11,19 +11,6 @@
 #include "HungerSystem.h"
 
 using json = nlohmann::json;
-
-HungerSystem::HungerSystem()
-	: hunger_value(0),
-	  hunger_max(1000),
-	  WELL_FED_THRESHOLD(200),
-	  SATIATED_THRESHOLD(400),
-	  HUNGRY_THRESHOLD(700),
-	  STARVING_THRESHOLD(900),
-	  DYING_THRESHOLD(950),
-	  current_state(HungerState::SATIATED),
-	  well_fed_message_shown(false)
-{
-}
 
 void HungerSystem::increase_hunger(GameContext& ctx, int amount)
 {

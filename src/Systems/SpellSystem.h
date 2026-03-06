@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <string>
+#include <string_view>
 #include <vector>
 
 // Forward declarations
@@ -17,35 +17,6 @@ enum class CasterClass
 	NONE
 };
 
-// Spell identifiers
-enum class SpellId
-{
-	// Cleric Level 1
-	CURE_LIGHT_WOUNDS,
-	BLESS,
-	SANCTUARY,
-
-	// Cleric Level 2
-	HOLD_PERSON,
-	SILENCE,
-
-	// Wizard Level 1
-	MAGIC_MISSILE,
-	SHIELD,
-	SLEEP,
-
-	// Wizard Level 2
-	INVISIBILITY,
-	WEB,
-
-	// Wizard Level 3
-	FIREBALL,
-	TELEPORT,
-
-	// Shared/Special
-	NONE
-};
-
 enum class SpellClass
 {
 	CLERIC,
@@ -53,13 +24,32 @@ enum class SpellClass
 	BOTH
 };
 
+// Which builtin effect implementation a spell uses.
+// Builtins have this set at initialisation. Custom spells pick one in SpellEditor.
+enum class SpellEffectType
+{
+	CURE_LIGHT_WOUNDS,
+	BLESS,
+	SANCTUARY,
+	HOLD_PERSON,
+	SILENCE,
+	MAGIC_MISSILE,
+	SHIELD,
+	SLEEP,
+	INVISIBILITY,
+	WEB,
+	FIREBALL,
+	TELEPORT,
+	NONE
+};
+
 struct SpellDefinition
 {
-	SpellId id{};
 	std::string name{};
 	int level{};
 	SpellClass spellClass{};
 	std::string description{};
+	SpellEffectType effect_type{ SpellEffectType::NONE };
 };
 
 class SpellSystem
@@ -68,21 +58,40 @@ public:
 	// Get spell slots for class/level (AD&D 2e tables)
 	static std::vector<int> get_spell_slots(CasterClass classState, int level);
 
-	// Get all spells available to a class at given level
-	static std::vector<SpellId> get_available_spells(CasterClass classState, int maxSpellLevel);
+	// Get all spell keys available to a class at given level.
+	// Includes builtin and custom spells. Returns string keys.
+	static std::vector<std::string> get_available_spells(CasterClass classState, int maxSpellLevel);
 
-	// Cast a spell
-	static bool cast_spell(SpellId spell, Creature& caster, GameContext& ctx);
+	// Cast a spell by string key (works for builtin and custom spells).
+	static bool cast_spell_by_key(std::string_view key, Creature& caster, GameContext& ctx);
 
-	// Get spell info
-	static const SpellDefinition& get_spell_definition(SpellId id);
-	static int get_spell_level(SpellId id);
-	static const std::string& get_spell_name(SpellId id);
+	// Load / save spell metadata from JSON (call before Game construction).
+	static void load(std::string_view path);
+	static void save(std::string_view path);
+
+	// --- Dynamic (string-keyed) API for editor use ---
+
+	// Ordered: builtin keys (SPELL_KEYS order), then custom keys (alpha).
+	static std::vector<std::string> get_all_keys();
+
+	// Throws std::out_of_range if key is unknown.
+	static const SpellDefinition& get_by_key(std::string_view key);
+
+	// Updates builtin or custom spell by string key.
+	static void set_by_key(std::string_view key, const SpellDefinition& def);
+
+	// Add a new user-created spell. Returns the actual key used (derived from def.name).
+	static std::string add_custom(SpellDefinition def);
+
+	// Remove a user-created spell. Throws if key is builtin.
+	static void remove_custom(std::string_view key);
+
+	static bool is_builtin_key(std::string_view key);
 
 	// Item-granted spells
 	struct ItemGrantedSpell
 	{
-		SpellId spell{};
+		std::string key{};
 		std::string source{}; // "Ring", "Helm", etc.
 	};
 	static std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
@@ -92,9 +101,10 @@ public:
 	static void show_casting_menu(Player& player, GameContext& ctx);
 
 private:
-	static const std::map<SpellId, SpellDefinition>& get_spell_table();
+	// Dispatch helpers
+	static bool dispatch_effect(SpellEffectType effect, Creature& caster, GameContext& ctx);
 
-	// Spell effects
+	// Spell effect implementations
 	static bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 	static bool cast_bless(Creature& caster, GameContext& ctx);
 	static bool cast_magic_missile(Creature& caster, GameContext& ctx);

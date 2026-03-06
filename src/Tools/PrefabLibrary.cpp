@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <nlohmann/json.hpp>
+#include <nlohmann/json_fwd.hpp>
 
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"

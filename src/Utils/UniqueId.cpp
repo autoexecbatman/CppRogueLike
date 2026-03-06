@@ -1,4 +1,6 @@
 // UniqueId.cpp - Implementation of unique ID system
+#include <atomic>
+
 #include "UniqueId.h"
 
 namespace UniqueId

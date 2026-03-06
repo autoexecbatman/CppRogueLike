@@ -1,7 +1,11 @@
 // file: GirdleItems.cpp
-#include "GirdleItems.h"
+#include <span>
+
+#include "../../Actor/Pickable.h"
 #include "../../Colors/Colors.h"
 #include "../../Items/ItemClassification.h"
+#include "../ItemCreator.h"
+#include "GirdleItems.h"
 
 namespace
 {

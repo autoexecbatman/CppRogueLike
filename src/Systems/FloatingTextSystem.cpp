@@ -1,11 +1,13 @@
 // file: FloatingTextSystem.cpp
-#include "FloatingTextSystem.h"
-
-#include <algorithm>
-#include <cmath>
 #include <format>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include <raylib.h>
 
 #include "../Renderer/Renderer.h"
+#include "FloatingTextSystem.h"
 
 void FloatingTextSystem::spawn_damage(
 	int world_x,
@@ -61,7 +63,9 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 	for (const auto& e : entries)
 	{
 		if (is_expired(e))
+		{
 			continue;
+		}
 
 		float t = (now - e.spawn_time) / e.lifetime;
 

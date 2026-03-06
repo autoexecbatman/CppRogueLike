@@ -1,10 +1,16 @@
-#include "AiMonsterRanged.h"
+#include <algorithm>
+#include <cmath>
+
+#include "../Actor/Actor.h"
+#include "../ActorTypes/Player.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Destructible.h"
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
+#include "../Persistent/Persistent.h"
 #include "../Utils/Vector2D.h"
+#include "AiMonster.h"
+#include "AiMonsterRanged.h"
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
@@ -91,6 +97,7 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 
 void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char projectileChar, GameContext& ctx)
 {
+	// TODO: Use our utility function instead.
 	// Use Bresenham's line algorithm for the projectile path
 	int x0 = from.x;
 	int y0 = from.y;
@@ -119,11 +126,15 @@ void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char project
 
 		// Skip start point
 		if (x0 == from.x && y0 == from.y)
+		{
 			continue;
+		}
 
 		// Stop at end point or walls
 		if ((x0 == to.x && y0 == to.y) || !ctx.map->can_walk(Vector2D{ x0, y0 }, ctx))
+		{
 			break;
+		}
 
 		// TODO: Reimplement projectile drawing without curses
 		// Previously used mvaddch/refresh/napms for projectile animation

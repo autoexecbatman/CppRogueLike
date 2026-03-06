@@ -8,9 +8,11 @@
 #include <vector>
 
 #include "../Actor/Actor.h"
-#include "../Actor/InventoryData.h"
+#include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Actor/Item.h"
 #include "../Actor/Pickable.h"
+#include "../Actor/Stairs.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Controls/Controls.h"
@@ -36,8 +38,6 @@
 #include "Ai.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
-
-using namespace InventoryOperations; // For clean function calls without namespace prefix
 
 //==INVENTORY==
 constexpr int INVENTORY_HEIGHT = 29;
@@ -220,7 +220,7 @@ void AiPlayer::move(Creature& owner, Vector2D target)
 void AiPlayer::pick_item(Player& player, GameContext& ctx)
 {
 	// Check if the inventory is already full (including equipped items)
-	size_t totalItems = get_item_count(player.inventory_data);
+	size_t totalItems = InventoryOperations::get_item_count(player.inventory_data);
 	totalItems += player.equippedItems.size(); // Count equipped items too
 
 	if (player.inventory_data.capacity > 0 && totalItems >= player.inventory_data.capacity)
@@ -263,18 +263,18 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
 
 		// Remove gold from floor
-		remove_item(*ctx.inventory_data, *item);
+		InventoryOperations::remove_item(*ctx.inventory_data, *item);
 		return;
 	}
 
 	// Handle regular items
 	std::string itemName = item->actorData.name;
-	auto result = add_item(player.inventory_data, std::move(itemPtr));
+	auto result = InventoryOperations::add_item(player.inventory_data, std::move(itemPtr));
 
 	if (result.has_value())
 	{
 		// Item successfully added to player inventory
-		optimize_inventory_storage(*ctx.inventory_data);
+		InventoryOperations::optimize_inventory_storage(*ctx.inventory_data);
 		player.sync_ranged_state(ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
@@ -498,7 +498,7 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 				if (web)
 				{
 					// Apply the web effect - returns true if player gets caught
-					webEffect = web->applyEffect(owner, ctx);
+					webEffect = web->apply_effect(owner, ctx);
 					break;
 				}
 			}
@@ -671,11 +671,11 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		// Give wizard spells for animation/targeting testing
-		player.memorizedSpells.push_back(SpellId::MAGIC_MISSILE);
-		player.memorizedSpells.push_back(SpellId::MAGIC_MISSILE);
-		player.memorizedSpells.push_back(SpellId::SLEEP);
-		player.memorizedSpells.push_back(SpellId::WEB);
-		player.memorizedSpells.push_back(SpellId::TELEPORT);
+		player.memorizedSpells.push_back("magic_missile");
+		player.memorizedSpells.push_back("magic_missile");
+		player.memorizedSpells.push_back("sleep");
+		player.memorizedSpells.push_back("web");
+		player.memorizedSpells.push_back("teleport");
 		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
 		break;
 	}

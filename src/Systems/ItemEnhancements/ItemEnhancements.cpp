@@ -1,4 +1,5 @@
-#include <random>
+#include <cstdlib>
+#include <string>
 
 #include "ItemEnhancements.h"
 
@@ -121,164 +122,270 @@ void ItemEnhancement::apply_enhancement_effects()
 	// Apply prefix effects
 	switch (prefix)
 	{
+
 	case PrefixType::SHARP:
+	{
 		damage_bonus += 1;
 		value_modifier += 50;
 		break;
+	}
+
 	case PrefixType::KEEN:
+	{
 		damage_bonus += 2;
 		value_modifier += 100;
 		break;
+	}
+
 	case PrefixType::MASTERWORK:
+	{
 		to_hit_bonus += 1;
 		value_modifier += 75;
 		break;
+	}
+
 	case PrefixType::BLESSED:
+	{
 		to_hit_bonus += 1;
 		damage_bonus += 1;
 		is_blessed = true;
 		value_modifier += 150;
 		break;
+	}
+
 	case PrefixType::FLAMING:
+	{
 		damage_bonus += 2;
 		fire_resistance = 25;
 		is_magical = true;
 		value_modifier += 200;
 		break;
+	}
+
 	case PrefixType::FROST:
+	{
 		damage_bonus += 2;
 		cold_resistance = 25;
 		is_magical = true;
 		value_modifier += 200;
 		break;
+	}
+
 	case PrefixType::SHOCK:
+	{
 		damage_bonus += 2;
 		lightning_resistance = 25;
 		is_magical = true;
 		value_modifier += 200;
 		break;
+	}
+
 	case PrefixType::REINFORCED:
+	{
 		ac_bonus += 1;
 		value_modifier += 60;
 		break;
+	}
+
 	case PrefixType::STUDDED:
+	{
 		ac_bonus += 1;
 		value_modifier += 40;
 		break;
+	}
+
 	case PrefixType::ELVEN:
+	{
 		ac_bonus += 2;
 		dexterity_bonus += 1;
 		value_modifier += 300;
 		break;
+	}
+
 	case PrefixType::DWARVEN:
+	{
 		ac_bonus += 3;
 		strength_bonus += 1;
 		value_modifier += 400;
 		break;
+	}
+
 	case PrefixType::MAGICAL:
+	{
 		ac_bonus += 1;
 		is_magical = true;
 		value_modifier += 250;
 		break;
+	}
+
 	case PrefixType::CURSED:
+	{
 		is_cursed = true;
 		value_modifier = 10; // Drastically reduced value
 		break;
+	}
+
 	case PrefixType::ANCIENT:
+	{
 		value_modifier += 500;
 		break;
+	}
+
 	case PrefixType::RUSTED:
+	{
 		damage_bonus -= 1;
 		ac_bonus -= 1;
 		value_modifier = 30;
 		break;
+	}
+
 	case PrefixType::CRACKED:
+	{
 		value_modifier = 50;
 		break;
+	}
+
 	default:
+	{
 		break;
+	}
 	}
 
 	// Apply suffix effects
 	switch (suffix)
 	{
+
 	case SuffixType::OF_SLAYING:
+	{
 		damage_bonus += 3;
 		value_modifier += 300;
 		break;
+	}
+
 	case SuffixType::OF_ACCURACY:
+	{
 		to_hit_bonus += 2;
 		value_modifier += 200;
 		break;
+	}
+
 	case SuffixType::OF_PROTECTION:
+	{
 		ac_bonus += 2;
 		value_modifier += 250;
 		break;
+	}
+
 	case SuffixType::OF_POWER:
+	{
 		strength_bonus += 1;
 		dexterity_bonus += 1;
 		intelligence_bonus += 1;
 		value_modifier += 400;
 		break;
+	}
+
 	case SuffixType::OF_FIRE_RESISTANCE:
+	{
 		fire_resistance = 50;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_COLD_RESISTANCE:
+	{
 		cold_resistance = 50;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_LIGHTNING_RESISTANCE:
+	{
 		lightning_resistance = 50;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_POISON_RESISTANCE:
+	{
 		poison_resistance = 50;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_SPEED:
+	{
 		speed_bonus += 2;
 		value_modifier += 200;
 		break;
+	}
+
 	case SuffixType::OF_STEALTH:
+	{
 		stealth_bonus += 3;
 		value_modifier += 175;
 		break;
+	}
+
 	case SuffixType::OF_MAGIC:
+	{
 		mana_bonus += 20;
 		intelligence_bonus += 1;
 		value_modifier += 225;
 		break;
+	}
+
 	case SuffixType::OF_HEALTH:
+	{
 		hp_bonus += 15;
 		value_modifier += 200;
 		break;
+	}
+
 	case SuffixType::OF_THE_EAGLE:
+	{
 		dexterity_bonus += 2;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_THE_BEAR:
+	{
 		strength_bonus += 2;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_THE_OWL:
+	{
 		intelligence_bonus += 2;
 		value_modifier += 150;
 		break;
+	}
+
 	case SuffixType::OF_WEAKNESS:
+	{
 		strength_bonus -= 1;
 		is_cursed = true;
 		value_modifier = 20;
 		break;
+	}
+
 	case SuffixType::OF_SLOWNESS:
+	{
 		speed_bonus -= 2;
 		is_cursed = true;
 		value_modifier = 15;
 		break;
+	}
+
 	case SuffixType::OF_BRITTLENESS:
+	{
 		is_cursed = true;
 		value_modifier = 25;
 		break;
+	}
+
 	default:
 		break;
 	}

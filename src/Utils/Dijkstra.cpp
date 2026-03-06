@@ -1,7 +1,13 @@
-#include <iostream>
+#include <algorithm>
+#include <functional>
+#include <limits>
+#include <queue>
+#include <vector>
 
+#include "../Actor/Attacker.h"
 #include "../Map/Map.h"
 #include "Dijkstra.h"
+#include "Vector2D.h"
 
 Dijkstra::Dijkstra(int width, int height)
 	: width(width), height(height), infinity(std::numeric_limits<double>::infinity()) {}

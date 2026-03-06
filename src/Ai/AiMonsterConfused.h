@@ -2,6 +2,7 @@
 
 #include <memory>
 
+#include "../Persistent/Persistent.h"
 #include "Ai.h"
 
 class Creature;

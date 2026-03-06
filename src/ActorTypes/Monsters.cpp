@@ -19,7 +19,7 @@
 #include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
-	: Creature(position, ActorData{ ContentRegistry::instance().get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
+	: Creature(position, ActorData{ MonsterCreator::get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
 {
 	const int hp = ctx.dice->d6() + ctx.dice->d4();
 	const int thaco = 17;
@@ -41,7 +41,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	ai = std::make_unique<AiMimic>();
 
-	initDisguises();
+	init_disguises();
 
 	if (!possibleDisguises.empty())
 	{
@@ -59,7 +59,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	remove_state(ActorState::BLOCKS);
 }
 
-void Mimic::initDisguises()
+void Mimic::init_disguises()
 {
 	// Pull tile/name/color from registries — single source of truth.
 	auto from_item = [](ItemId id) -> Disguise

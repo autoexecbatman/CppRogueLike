@@ -6,8 +6,10 @@
 #include <vector>
 
 #include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
 #include "../ActorTypes/Monsters.h"
+#include "../ActorTypes/Player.h"
 #include "../Ai/AiPlayer.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
@@ -15,7 +17,7 @@
 #include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
-#include "../Systems/ContentRegistry.h"
+#include "../Factories/MonsterCreator.h"
 #include "../Systems/MessageSystem.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
@@ -131,7 +133,9 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	{
 		const auto& item = ctx.inventory_data->items[i];
 		if (!item)
+		{
 			continue;
+		}
 
 		const int itemDistance = mimic.get_tile_distance(item->position);
 		ctx.message_system->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
@@ -197,37 +201,50 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 
 	switch (bonusType)
 	{
+
 	case MimicBonusType::HEALTH:
+	{
 		boost_health(mimic, HEALTH_BONUS, ctx);
 		ctx.message_system->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
 		break;
+	}
 
 	case MimicBonusType::CONFUSION:
+	{
 		boost_confusion_power(ctx);
 		break;
+	}
 
 	case MimicBonusType::DEFENSE_GOLD:
+	{
 		boost_defense(mimic, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
 		if (mimic.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
 		{
 			ctx.message_system->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
 		}
 		break;
+	}
 
 	case MimicBonusType::DEFENSE_ARMOR:
+	{
 		boost_defense(mimic, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
 		if (mimic.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
 		{
 			ctx.message_system->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
 		}
 		break;
+	}
 
 	case MimicBonusType::ATTACK:
+	{
 		boost_attack(mimic, ctx);
 		break;
+	}
 
 	case MimicBonusType::NONE:
+	{
 		break;
+	}
 	}
 }
 
@@ -273,7 +290,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
 {
-	mimic.actorData.tile = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
+	mimic.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
 	mimic.actorData.color = RED_YELLOW_PAIR;
 	mimic.actorData.name = "greater mimic";
 	ctx.message_system->log("Mimic transformed into greater mimic");
@@ -290,7 +307,7 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 	{
 		// Reveal true form!
 		isDisguised = false;
-		mimic.actorData.tile = ContentRegistry::instance().get_tile(MonsterId::MIMIC);
+		mimic.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
 		mimic.actorData.name = "mimic";
 		mimic.actorData.color = RED_YELLOW_PAIR;
 		mimic.add_state(ActorState::BLOCKS); // Now it's solid
@@ -331,7 +348,9 @@ void AiMimic::change_disguise(Mimic& mimic, GameContext& ctx)
 {
 	// Don't change if already revealed - using our isDisguised property
 	if (!isDisguised)
+	{
 		return;
+	}
 
 	// Get the possible disguises from the mimic
 	const auto& possibleDisguises = mimic.get_possible_disguises();

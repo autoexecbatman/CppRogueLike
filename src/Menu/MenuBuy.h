@@ -10,6 +10,7 @@ class Item;
 class Creature;
 class Player;
 class ShopKeeper;
+class Player;
 
 class MenuBuy : public BaseMenu
 {

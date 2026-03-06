@@ -1,7 +1,6 @@
 // file: ContentRegistry.cpp
 #include <string>
 
-#include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Renderer/Renderer.h"
 #include "ContentRegistry.h"
@@ -26,20 +25,9 @@ TileRef ContentRegistry::get_tile(ItemId id) const
 	return m_item_tiles.contains(key) ? m_item_tiles.at(key) : TileRef{};
 }
 
-TileRef ContentRegistry::get_tile(MonsterId id) const
-{
-	auto key = static_cast<int>(id);
-	return m_monster_tiles.contains(key) ? m_monster_tiles.at(key) : TileRef{};
-}
-
 void ContentRegistry::set_tile(ItemId id, TileRef tile)
 {
 	m_item_tiles[static_cast<int>(id)] = tile;
-}
-
-void ContentRegistry::set_tile(MonsterId id, TileRef tile)
-{
-	m_monster_tiles[static_cast<int>(id)] = tile;
 }
 
 // ---------------------------------------------------------------------------
@@ -260,46 +248,6 @@ std::string_view ContentRegistry::item_key(ItemId id)
 		return "rope";
 	case ItemId::LOCKPICK:
 		return "lockpick";
-	}
-	return "unknown";
-}
-
-std::string_view ContentRegistry::monster_key(MonsterId id)
-{
-	switch (id)
-	{
-	case MonsterId::GOBLIN:
-		return "goblin";
-	case MonsterId::ORC:
-		return "orc";
-	case MonsterId::TROLL:
-		return "troll";
-	case MonsterId::DRAGON:
-		return "dragon";
-	case MonsterId::ARCHER:
-		return "archer";
-	case MonsterId::MAGE:
-		return "mage";
-	case MonsterId::WOLF:
-		return "wolf";
-	case MonsterId::FIRE_WOLF:
-		return "fire_wolf";
-	case MonsterId::ICE_WOLF:
-		return "ice_wolf";
-	case MonsterId::BAT:
-		return "bat";
-	case MonsterId::KOBOLD:
-		return "kobold";
-	case MonsterId::MIMIC:
-		return "mimic";
-	case MonsterId::SHOPKEEPER:
-		return "shopkeeper";
-	case MonsterId::SPIDER_SMALL:
-		return "spider_small";
-	case MonsterId::SPIDER_GIANT:
-		return "spider_giant";
-	case MonsterId::SPIDER_WEAVER:
-		return "spider_weaver";
 	}
 	return "unknown";
 }

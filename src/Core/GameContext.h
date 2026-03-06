@@ -4,13 +4,13 @@
 #include <memory>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Actor/InventoryData.h"
-#include "../ActorTypes/Player.h"
+#include "../Actor/Stairs.h"
 
 // Forward declarations
 class Game;
 class Map;
+class TileConfig;
 class Gui;
 class MessageSystem;
 class RandomDice;
@@ -31,6 +31,8 @@ class AnimationSystem;
 class ContentEditor;
 class DecorEditor;
 class RoomEditor;
+class MonsterEditor;
+class SpellEditor;
 class PrefabLibrary;
 class Stairs;
 class Object;
@@ -39,6 +41,7 @@ struct Vector2D;
 struct DungeonRoom;
 class Renderer;
 class InputSystem;
+class Player;
 
 // Game status enumeration - moved here to avoid circular dependency
 enum class GameStatus
@@ -54,7 +57,9 @@ enum class WindowState
 {
 	MENU,
 	GAME,
-	ROOM_EDITOR
+	ROOM_EDITOR,
+	MONSTER_EDITOR,
+	SPELL_EDITOR
 };
 
 /**
@@ -100,7 +105,10 @@ struct GameContext
 	ContentEditor* content_editor{ nullptr };
 	DecorEditor* decor_editor{ nullptr };
 	RoomEditor* room_editor{ nullptr };
+	MonsterEditor* monster_editor{ nullptr };
+	SpellEditor* spell_editor{ nullptr };
 	PrefabLibrary* prefab_library{ nullptr };
+	const TileConfig* tile_config{ nullptr };
 
 	// Game world data
 	Stairs* stairs{ nullptr };

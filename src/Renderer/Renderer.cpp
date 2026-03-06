@@ -486,7 +486,7 @@ void Renderer::zoom_out()
 	}
 }
 
-void Renderer::draw_frame(int px, int py, int w_tiles, int h_tiles) const
+void Renderer::draw_frame(int px, int py, int w_tiles, int h_tiles, const TileConfig& tc) const
 {
 	if (!sheets_loaded)
 		return;
@@ -496,7 +496,6 @@ void Renderer::draw_frame(int px, int py, int w_tiles, int h_tiles) const
 	int ts = tile_size;
 
 	// Top border
-	auto& tc = TileConfig::instance();
 	draw_tile_screen(px, py, tc.get("GUI_FRAME_TL"));
 	for (int col = 1; col < w_tiles - 1; ++col)
 	{

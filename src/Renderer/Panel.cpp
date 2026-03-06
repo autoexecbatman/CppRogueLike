@@ -1,4 +1,8 @@
 // file: Panel.cpp
+#include <string>
+
+#include <raylib.h>
+
 #include "Panel.h"
 #include "Renderer.h"
 
