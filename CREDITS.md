@@ -26,6 +26,3 @@ Licensed under MIT License
   Copyright (c) DragonDePlatino, DawnBringer
   https://opengameart.org/content/dawnlike-16x16-universal-rogue-like-tileset-v181
 
-## References
-
-- AD&D 2nd Edition rules - Wizards of the Coast / TSR
