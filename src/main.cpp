@@ -69,9 +69,11 @@ int main()
 	game.renderer.load_font(Paths::DAWNLIKE_FONT, 16);
 
 	auto ctx = game.context();
+#ifndef EMSCRIPTEN
 	game.decor_editor.load_palette(Paths::TILE_CONFIG);
 	game.prefab_library.load_tile_labels(Paths::TILE_CONFIG);
 	game.prefab_library.load(Paths::PREFABS);
+#endif
 
 	game.menus.push_back(std::make_unique<Menu>(true, ctx));
 

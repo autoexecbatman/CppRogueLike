@@ -26,6 +26,7 @@ class Options : public IMenuState
 	void on_selection(GameContext& ctx) override;
 };
 
+#ifndef EMSCRIPTEN
 class RoomEditorEntry : public IMenuState
 {
 	void on_selection(GameContext& ctx) override;
@@ -45,6 +46,7 @@ class SpellEditorEntry : public IMenuState
 {
 	void on_selection(GameContext& ctx) override;
 };
+#endif
 
 class Quit : public IMenuState
 {
@@ -63,10 +65,12 @@ class Menu : public BaseMenu
 		NEW_GAME,
 		LOAD_GAME,
 		OPTIONS,
+#ifndef EMSCRIPTEN
 		ROOM_EDITOR,
 		MONSTER_EDITOR,
 		SPELL_EDITOR,
 		ITEM_EDITOR,
+#endif
 		QUIT
 	} currentState{ MenuState::NEW_GAME };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
@@ -74,10 +78,12 @@ class Menu : public BaseMenu
 		{ MenuState::NEW_GAME, "New Game" },
 		{ MenuState::LOAD_GAME, "Load Game" },
 		{ MenuState::OPTIONS, "Options" },
+#ifndef EMSCRIPTEN
 		{ MenuState::ROOM_EDITOR, "Room Editor" },
 		{ MenuState::MONSTER_EDITOR, "Monster Editor" },
 		{ MenuState::SPELL_EDITOR, "Spell Editor" },
 		{ MenuState::ITEM_EDITOR, "Item Editor" },
+#endif
 		{ MenuState::QUIT, "Quit" }
 	};
 

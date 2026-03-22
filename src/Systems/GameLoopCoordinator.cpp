@@ -63,8 +63,12 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	}
 
 	// Update game state only when player provides input and editor is not open
+#ifndef EMSCRIPTEN
 	const bool editor_active = (ctx.decor_editor && ctx.decor_editor->is_active()) ||
 		(ctx.content_editor && ctx.content_editor->is_active());
+#else
+	const bool editor_active = false;
+#endif
 	if (!editor_active && !ctx.input_handler->is_animation_tick())
 	{
 		handle_update_phase(ctx, gui);
@@ -106,6 +110,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.map->compute_fov(ctx);
 				return true;
 			}
+	#ifndef EMSCRIPTEN
 			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decor_editor)
 			{
 				ctx.decor_editor->toggle();
@@ -153,9 +158,11 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 					return true;
 				}
 			}
+#endif
 			return false;
 		};
 
+#ifndef EMSCRIPTEN
 		// Editor active: consume all input -- game gets nothing.
 		if (ctx.content_editor && ctx.content_editor->is_active())
 		{
@@ -171,6 +178,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			ctx.menu_manager->set_should_take_input(true);
 			return;
 		}
+#endif
 
 		if (!handle_zoom())
 		{
@@ -214,6 +222,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 		ctx.floating_text->update_and_render(*ctx.renderer);
 	}
 
+#ifndef EMSCRIPTEN
 	if (ctx.decor_editor)
 	{
 		ctx.decor_editor->update_and_render(*ctx.renderer);
@@ -223,6 +232,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 	{
 		ctx.content_editor->update_and_render(*ctx.renderer, *ctx.content_registry);
 	}
+#endif
 
 	if (gui.guiInit)
 	{
@@ -448,6 +458,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (*ctx.game_status == GameStatus::STARTUP)
 	{
+#ifndef EMSCRIPTEN
 		if (ctx.decor_editor && ctx.map && ctx.level_manager)
 		{
 			ctx.decor_editor->set_active_map(
@@ -464,6 +475,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 					*ctx.map);
 			}
 		}
+#endif
 
 		ctx.map->compute_fov(ctx);
 		if (ctx.level_manager->get_dungeon_level() == 1 && !*ctx.isLoadedGame)

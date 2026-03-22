@@ -28,14 +28,16 @@ class HungerSystem;
 class BuffSystem;
 class FloatingTextSystem;
 class AnimationSystem;
-class ContentEditor;
 class ContentRegistry;
+#ifndef EMSCRIPTEN
+class ContentEditor;
 class DecorEditor;
 class RoomEditor;
 class ItemEditor;
 class MonsterEditor;
 class SpellEditor;
 class PrefabLibrary;
+#endif
 class Stairs;
 class Object;
 class BaseMenu;
@@ -59,10 +61,12 @@ enum class WindowState
 {
 	MENU,
 	GAME,
+#ifndef EMSCRIPTEN
 	ROOM_EDITOR,
 	MONSTER_EDITOR,
 	SPELL_EDITOR,
-	ITEM_EDITOR
+	ITEM_EDITOR,
+#endif
 };
 
 /**
@@ -106,6 +110,7 @@ struct GameContext
 	FloatingTextSystem* floating_text{ nullptr };
 	AnimationSystem* anim_system{ nullptr };
 	ContentRegistry* content_registry{ nullptr };
+#ifndef EMSCRIPTEN
 	ContentEditor* content_editor{ nullptr };
 	DecorEditor* decor_editor{ nullptr };
 	RoomEditor* room_editor{ nullptr };
@@ -113,6 +118,7 @@ struct GameContext
 	MonsterEditor* monster_editor{ nullptr };
 	SpellEditor* spell_editor{ nullptr };
 	PrefabLibrary* prefab_library{ nullptr };
+#endif
 	const TileConfig* tile_config{ nullptr };
 
 	// Game world data

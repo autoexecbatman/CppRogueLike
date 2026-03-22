@@ -34,6 +34,7 @@ void LoadGame::on_selection(GameContext& ctx)
 	// TODO: clear loading message after load completes (was curses clear/refresh)
 }
 
+#ifndef EMSCRIPTEN
 void RoomEditorEntry::on_selection(GameContext& ctx)
 {
 	ctx.room_editor->enter(*ctx.prefab_library);
@@ -53,6 +54,7 @@ void SpellEditorEntry::on_selection(GameContext& ctx)
 {
 	ctx.spell_editor->enter();
 }
+#endif
 
 void Options::on_selection(GameContext& ctx)
 {
@@ -78,10 +80,12 @@ Menu::Menu(bool startup, GameContext& ctx)
 	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
 	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
 	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
+#ifndef EMSCRIPTEN
 	iMenuStates.emplace(MenuState::ROOM_EDITOR, std::make_unique<RoomEditorEntry>());
 	iMenuStates.emplace(MenuState::MONSTER_EDITOR, std::make_unique<MonsterEditorEntry>());
 	iMenuStates.emplace(MenuState::SPELL_EDITOR, std::make_unique<SpellEditorEntry>());
 	iMenuStates.emplace(MenuState::ITEM_EDITOR, std::make_unique<ItemEditorEntry>());
+#endif
 	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
@@ -189,6 +193,7 @@ void Menu::on_key(int key, GameContext& ctx)
 		break;
 	}
 
+#ifndef EMSCRIPTEN
 	case 'e':
 	{
 		menu_set_run_false();
@@ -216,6 +221,7 @@ void Menu::on_key(int key, GameContext& ctx)
 		iMenuStates.at(MenuState::ITEM_EDITOR)->on_selection(ctx);
 		break;
 	}
+#endif
 
 	case 'q':
 	{

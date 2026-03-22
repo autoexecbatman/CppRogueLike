@@ -540,9 +540,13 @@ void Map::render(const GameContext& ctx) const
 
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
+#ifndef EMSCRIPTEN
 				TileRef decor_ref = ctx.decor_editor
 					? ctx.decor_editor->get_override(col, row)
 					: TileRef{};
+#else
+				TileRef decor_ref = resolve_decor(pos, type);
+#endif
 				if (!decor_ref.is_valid())
 					decor_ref = resolve_decor(pos, type);
 				if (decor_ref.is_valid())

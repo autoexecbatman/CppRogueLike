@@ -253,12 +253,14 @@ void InputSystem::poll()
 		return;
 
 	// Editor keys
+#ifndef EMSCRIPTEN
 	case KEY_F2:
 		register_key(KEY_F2, GameKey::DECOR_EDIT_TOGGLE, 0, false);
 		return;
 	case KEY_F3:
 		register_key(KEY_F3, GameKey::CONTENT_EDIT_TOGGLE, 0, false);
 		return;
+#endif
 	case KEY_COMMA:
 		if (!shift)
 		{

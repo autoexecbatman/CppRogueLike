@@ -37,6 +37,7 @@
 #include "Systems/RenderingManager.h"
 #include "Systems/TargetingSystem.h"
 #include "Systems/ContentRegistry.h"
+#ifndef EMSCRIPTEN
 #include "Tools/ContentEditor.h"
 #include "Tools/DecorEditor.h"
 #include "Tools/ItemEditor.h"
@@ -44,6 +45,7 @@
 #include "Tools/SpellEditor.h"
 #include "Tools/PrefabLibrary.h"
 #include "Tools/RoomEditor.h"
+#endif
 #include "Utils/Vector2D.h"
 
 class Game
@@ -87,6 +89,7 @@ public:
 			.floating_text = &floating_text,
 			.anim_system = &anim_system,
 			.content_registry = &content_registry,
+	#ifndef EMSCRIPTEN
 			.content_editor = &content_editor,
 			.decor_editor = &decor_editor,
 			.room_editor = &room_editor,
@@ -94,6 +97,7 @@ public:
 			.monster_editor = &monster_editor,
 			.spell_editor = &spell_editor,
 			.prefab_library = &prefab_library,
+#endif
 			.tile_config = &tile_config,
 
 			// Game world data
@@ -124,6 +128,7 @@ public:
 			return false;
 		}
 
+	#ifndef EMSCRIPTEN
 		if (room_editor.is_active())
 		{
 			windowState = WindowState::ROOM_EDITOR;
@@ -141,6 +146,7 @@ public:
 			windowState = WindowState::SPELL_EDITOR;
 		}
 		else
+#endif
 		{
 			windowState = menus.empty() ? WindowState::GAME : WindowState::MENU;
 		}
@@ -158,6 +164,7 @@ public:
 			game_loop_coordinator.handle_gameloop(ctx, gui, loopNum);
 			break;
 		}
+#ifndef EMSCRIPTEN
 		case WindowState::ROOM_EDITOR:
 		{
 			room_editor.tick(ctx);
@@ -178,6 +185,7 @@ public:
 			spell_editor.tick(ctx);
 			break;
 		}
+#endif
 		}
 
 		++loopNum;
@@ -243,6 +251,7 @@ public:
 	FloatingTextSystem floating_text{};
 	AnimationSystem anim_system{};
 	ContentRegistry content_registry{};
+#ifndef EMSCRIPTEN
 	ContentEditor content_editor{};
 	DecorEditor decor_editor{};
 	RoomEditor room_editor{};
@@ -250,6 +259,7 @@ public:
 	MonsterEditor monster_editor{};
 	SpellEditor spell_editor{};
 	PrefabLibrary prefab_library{};
+#endif
 
 	// Game world
 	Map map{ get_map_width(), get_map_height() };
