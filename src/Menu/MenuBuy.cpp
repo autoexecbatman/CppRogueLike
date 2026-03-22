@@ -117,24 +117,39 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
+
 	case 0x103: // UP
 	case 'w':
+	{
 		if (menuItems.empty())
+		{
 			return;
+		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 		menu_mark_dirty();
 		break;
+	}
+
 	case 0x102: // DOWN
 	case 's':
+	{
 		if (menuItems.empty())
+		{
 			return;
+		}
 		currentState = (currentState + 1) % menuItems.size();
 		menu_mark_dirty();
 		break;
+	}
+
 	case 27: // ESC
+	{
 		menu_set_run_false();
 		break;
+	}
+
 	case 10: // ENTER
+	{
 		if (!is_inventory_empty(shopkeeper.shop_inventory))
 		{
 			handle_buy(nullptr, buyer, *ctx.player);
@@ -146,18 +161,15 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 		}
 		break;
 	}
+
+	}
 }
 
 void MenuBuy::menu(GameContext& ctx)
 {
 	draw();
-
-	while (run && !WindowShouldClose())
-	{
-		draw();
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }
 
 void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Player& buyer)

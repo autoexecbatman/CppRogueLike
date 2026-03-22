@@ -102,6 +102,7 @@ void MenuTrade::on_key(int key, GameContext& ctx)
 {
 	switch (key)
 	{
+
 	case 0x103: // UP
 	case 'w':
 	{
@@ -136,13 +137,7 @@ void MenuTrade::on_key(int key, GameContext& ctx)
 
 void MenuTrade::menu(GameContext& ctx)
 {
-	ctx.rendering_manager->render(ctx);
-
-	while (run && !WindowShouldClose())
-	{
-		draw();
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
-	ctx.rendering_manager->render(ctx);
+	draw();
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }

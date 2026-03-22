@@ -239,12 +239,9 @@ void Menu::menu(GameContext& ctx)
 		ctx.gui->gui_render(ctx);
 	}
 
-	while (run && !WindowShouldClose()) // menu has its own loop
-	{
-		draw(); // draw the menu
-		menu_key_listen(); // listen for key presses
-		on_key(keyPress, ctx); // run the key press
-	}
+	draw(); // draw the menu
+	menu_key_listen(); // listen for key presses
+	on_key(keyPress, ctx); // run the key press
 
 	// Restore full game view if returning to game
 	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)

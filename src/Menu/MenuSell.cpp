@@ -61,12 +61,18 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 void MenuSell::menu_print_state(size_t state)
 {
 	if (state >= menuItems.size())
+	{
 		return;
+	}
 	if (currentState == state)
+	{
 		menu_highlight_on();
+	}
 	menu_print(1, static_cast<int>(state) + 2, menu_get_string(state));
 	if (currentState == state)
+	{
 		menu_highlight_off();
+	}
 }
 
 void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
@@ -266,22 +272,13 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		menu_set_run_false();
 		break;
 	}
+
 	}
 }
 
 void MenuSell::menu(GameContext& ctx)
 {
-	// Initial draw
 	draw();
-
-	while (run && !WindowShouldClose())
-	{
-		// Only redraw if needed (navigation/state change)
-		draw();
-
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
-
-	// TODO: screen clearing handled by Renderer
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }

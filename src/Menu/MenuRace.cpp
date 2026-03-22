@@ -1,4 +1,3 @@
-// file: MenuRace.cpp
 #include <memory>
 
 #include <raylib.h>
@@ -172,13 +171,7 @@ void MenuRace::on_key(int key, GameContext& ctx)
 
 void MenuRace::menu(GameContext& ctx)
 {
-	while (run && !WindowShouldClose())
-	{
-		draw();
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
-	// TODO: screen clearing handled by Renderer
+	draw();
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }
-
-// end of file: MenuRace.cpp

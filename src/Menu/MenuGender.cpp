@@ -1,4 +1,3 @@
-// file: MenuGender.cpp
 #include <memory>
 
 #include <raylib.h>
@@ -75,8 +74,10 @@ void MenuGender::draw()
 	menu_clear();
 	menu_draw_box();
 	menu_draw_title("SELECT GENDER", YELLOW_BLACK_PAIR);
-	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
+	for (size_t i = 0; i < menuStateStrings.size(); ++i)
+	{
 		menu_print_state(static_cast<MenuState>(i));
+	}
 	menu_refresh();
 }
 
@@ -131,13 +132,7 @@ void MenuGender::on_key(int key, GameContext& ctx)
 
 void MenuGender::menu(GameContext& ctx)
 {
-	while (run && !WindowShouldClose()) // menu has its own loop
-	{
-		draw();
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
-	// TODO: clear screen when exiting (was curses clear/refresh)
+	draw();
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }
-
-// end of file: MenuGender.cpp

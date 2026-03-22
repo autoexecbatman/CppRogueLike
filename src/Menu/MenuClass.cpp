@@ -1,4 +1,3 @@
-// file: MenuClass.cpp
 #include <memory>
 
 #include <raylib.h>
@@ -122,8 +121,10 @@ void MenuClass::draw()
 	menu_clear();
 	menu_draw_box();
 	menu_draw_title("SELECT CLASS", YELLOW_BLACK_PAIR);
-	for (size_t i{ 0 }; i < menuClassStrings.size(); ++i)
+	for (size_t i = 0; i < menuClassStrings.size(); ++i)
+	{
 		menu_class_print_option(static_cast<MenuState>(i));
+	}
 	menu_refresh();
 }
 
@@ -170,13 +171,7 @@ void MenuClass::on_key(int key, GameContext& ctx)
 
 void MenuClass::menu(GameContext& ctx)
 {
-	while (run && !WindowShouldClose())
-	{
-		draw();
-		menu_key_listen();
-		on_key(keyPress, ctx);
-	}
-	// TODO: clear screen when exiting (was curses clear/refresh)
+	draw();
+	menu_key_listen();
+	on_key(keyPress, ctx);
 }
-
-// end of file: MenuClass.cpp

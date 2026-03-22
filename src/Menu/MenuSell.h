@@ -18,9 +18,9 @@ class MenuSell : public BaseMenu
 	size_t menu_starty{ 0 }; // Full screen - start at top
 	size_t menu_startx{ 0 }; // Full screen - start at left
 	size_t currentState{ 0 };
-	std::vector<std::string> menuItems;
 	Creature& player;
 	Creature& shopkeeper;
+	std::vector<std::string> menuItems;
 
 	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
