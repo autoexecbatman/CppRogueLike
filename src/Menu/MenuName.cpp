@@ -53,51 +53,60 @@ void MenuName::menu(GameContext& ctx)
 
 void MenuName::menu_name(GameContext& ctx)
 {
-	inputText.clear();
-	run = true;
-
-	while (run && !WindowShouldClose())
+	if (!initialized)
 	{
-		draw_name_screen(ctx);
+		inputText.clear();
+		initialized = true;
+	}
 
-		if (!input_system)
+	draw_name_screen(ctx);
+
+	if (!input_system)
+	{
+		run = false;
+		return;
+	}
+
+	input_system->poll();
+
+	int ch = input_system->get_char_input();
+	GameKey gk = input_system->get_key();
+
+	if (ch >= 32 && ch < 127)
+	{
+		if (inputText.size() < 38)
+		{
+			inputText += static_cast<char>(ch);
+		}
+	}
+	else if (ch == 8 || gk == GameKey::BACKSPACE)
+	{
+		if (!inputText.empty())
+		{
+			inputText.pop_back();
+		}
+	}
+	else
+	{
+		switch (gk)
+		{
+		case GameKey::ENTER:
+			ctx.player->actorData.name = inputText.empty() ? "Player" : inputText;
+			menu_set_run_false();
 			break;
-
-		input_system->poll();
-
-		int ch = input_system->get_char_input();
-		GameKey gk = input_system->get_key();
-
-		if (ch >= 32 && ch < 127)
-		{
-			if (inputText.size() < 38)
-				inputText += static_cast<char>(ch);
-		}
-		else if (ch == 8 || gk == GameKey::BACKSPACE)
-		{
-			if (!inputText.empty())
-				inputText.pop_back();
-		}
-		else
-		{
-			switch (gk)
-			{
-			case GameKey::ENTER:
-				ctx.player->actorData.name = inputText.empty() ? "Player" : inputText;
-				menu_set_run_false();
-				break;
-			case GameKey::ESCAPE:
-				ctx.player->actorData.name = "Player";
-				menu_set_run_false();
-				break;
-			default:
-				break;
-			}
+		case GameKey::ESCAPE:
+			ctx.player->actorData.name = "Player";
+			menu_set_run_false();
+			break;
+		default:
+			break;
 		}
 	}
 
-	if (ctx.menu_manager->is_game_initialized())
+	if (!run && ctx.menu_manager->is_game_initialized())
+	{
 		ctx.rendering_manager->restore_game_display();
+	}
 }
 
 // end of file: MenuName.cpp

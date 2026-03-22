@@ -9,6 +9,7 @@ struct GameContext;
 class MenuName : public BaseMenu
 {
 	std::string inputText;
+	bool initialized{ false };
 
 	void draw_name_screen(GameContext& ctx);
 

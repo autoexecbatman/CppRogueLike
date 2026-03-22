@@ -16,6 +16,7 @@ class MenuSpellCast : public BaseMenu
 	Player& player;
 	GameContext& ctx;
 	int selectedIndex{ 0 };
+	bool initialized{ false };
 
 	void populate_spells();
 	void draw_content() override;

@@ -95,67 +95,70 @@ void MenuSpellCast::handle_selection()
 
 void MenuSpellCast::menu(GameContext& ctx)
 {
-	populate_spells();
-
-	if (availableSpells.empty())
+	if (!initialized)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "No spells available.", true);
-		return;
-	}
+		populate_spells();
 
-	const int height = static_cast<int>(availableSpells.size()) + 4;
-	const int width = 45;
-	const size_t startY = (30 - height) / 2;
-	const size_t startX = (119 - width) / 2;
-
-	menu_new(height, width, startY, startX, ctx);
-
-	while (run && !WindowShouldClose())
-	{
-		draw_content();
-		menu_key_listen();
-
-		switch (keyPress)
+		if (availableSpells.empty())
 		{
-		case 27: // ESC
-			menu_set_run_false();
-			break;
-
-		case 0x103:
-			if (selectedIndex > 0)
-			{
-				selectedIndex--;
-			}
-			break;
-
-		case 0x102:
-			if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
-			{
-				selectedIndex++;
-			}
-			break;
-
-		case '\n': // Enter
-		case ' ': // Space
-			handle_selection();
-			break;
-
-		default:
-			// Letter selection (a-z)
-			if (keyPress >= 'a' && keyPress <= 'z')
-			{
-				int selection = keyPress - 'a';
-				if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
-				{
-					selectedIndex = selection;
-					handle_selection();
-				}
-			}
-			break;
+			ctx.message_system->message(WHITE_BLACK_PAIR, "No spells available.", true);
+			run = false;
+			return;
 		}
+
+		const int height = static_cast<int>(availableSpells.size()) + 4;
+		const int width = 45;
+		const size_t startY = (30 - height) / 2;
+		const size_t startX = (119 - width) / 2;
+
+		menu_new(height, width, startY, startX, ctx);
+		initialized = true;
 	}
 
-	ctx.rendering_manager->render(ctx);
+	draw_content();
+	menu_key_listen();
 
-	menu_delete();
+	switch (keyPress)
+	{
+	case 27: // ESC
+		menu_set_run_false();
+		break;
+
+	case 0x103:
+		if (selectedIndex > 0)
+		{
+			selectedIndex--;
+		}
+		break;
+
+	case 0x102:
+		if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
+		{
+			selectedIndex++;
+		}
+		break;
+
+	case '\n': // Enter
+	case ' ': // Space
+		handle_selection();
+		break;
+
+	default:
+		// Letter selection (a-z)
+		if (keyPress >= 'a' && keyPress <= 'z')
+		{
+			int selection = keyPress - 'a';
+			if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
+			{
+				selectedIndex = selection;
+				handle_selection();
+			}
+		}
+		break;
+	}
+
+	if (!run)
+	{
+		ctx.rendering_manager->render(ctx);
+	}
 }
