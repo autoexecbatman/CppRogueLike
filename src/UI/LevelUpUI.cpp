@@ -12,31 +12,33 @@
 #include "../Systems/LevelUpSystem.h"
 #include "LevelUpUI.h"
 
-void LevelUpUI::display_level_up_screen(Player& player, int newLevel, GameContext& ctx)
+LevelUpUI::LevelUpUI(Player& player, int newLevel, GameContext& /*ctx*/)
+	: player_ref(player), level(newLevel)
 {
-	bool run = true;
-	while (run && !WindowShouldClose())
+}
+
+void LevelUpUI::menu(GameContext& ctx)
+{
+	ctx.input_system->poll();
+	GameKey key = ctx.input_system->get_key();
+	if (key == GameKey::SPACE || key == GameKey::ESCAPE || key == GameKey::ENTER)
 	{
-		ctx.renderer->begin_frame();
-
-		int row = 0;
-		draw_title(player, newLevel, ctx, row);
-		draw_current_stats(player, ctx, row);
-		draw_level_benefits(player, newLevel, ctx, row);
-		draw_next_level_info(player, ctx, row);
-
-		int ts = ctx.renderer->get_tile_size();
-		ctx.renderer->draw_text(ts, row * ts, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
-
-		ctx.renderer->end_frame();
-
-		ctx.input_system->poll();
-		GameKey key = ctx.input_system->get_key();
-		if (key == GameKey::SPACE || key == GameKey::ESCAPE || key == GameKey::ENTER)
-		{
-			run = false;
-		}
+		menu_set_run_false();
+		return;
 	}
+
+	ctx.renderer->begin_frame();
+
+	int row = 0;
+	draw_title(player_ref, level, ctx, row);
+	draw_current_stats(player_ref, ctx, row);
+	draw_level_benefits(player_ref, level, ctx, row);
+	draw_next_level_info(player_ref, ctx, row);
+
+	int ts = ctx.renderer->get_tile_size();
+	ctx.renderer->draw_text(ts, row * ts, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
+
+	ctx.renderer->end_frame();
 }
 
 void LevelUpUI::draw_title(const Player& player, int level, GameContext& ctx, int& row)

@@ -1,15 +1,25 @@
 #pragma once
 
+#include "../Menu/BaseMenu.h"
+
 class Player;
 struct GameContext;
 
-// Handles character sheet display via raylib renderer
-class CharacterSheetUI
+class CharacterSheetUI : public BaseMenu
 {
 public:
-	static void display_character_sheet(const Player& player, GameContext& ctx);
+	CharacterSheetUI(const Player& player, GameContext& ctx);
+	~CharacterSheetUI() = default;
+	CharacterSheetUI(const CharacterSheetUI&) = delete;
+	CharacterSheetUI& operator=(const CharacterSheetUI&) = delete;
+	CharacterSheetUI(CharacterSheetUI&&) = delete;
+	CharacterSheetUI& operator=(CharacterSheetUI&&) = delete;
+
+	void menu(GameContext& ctx) override;
 
 private:
+	const Player& player_ref;
+
 	static void display_basic_info(const Player& player, GameContext& ctx, int& row);
 	static void display_experience_info(const Player& player, GameContext& ctx, int& row);
 	static void display_attributes(const Player& player, GameContext& ctx, int& row);

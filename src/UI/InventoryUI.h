@@ -6,6 +6,7 @@
 
 #include "../Actor/EquipmentSlot.h"
 #include "../Items/ItemClassification.h"
+#include "../Menu/BaseMenu.h"
 
 class Creature;
 class Item;
@@ -83,19 +84,20 @@ inline constexpr std::array<ItemCategory, 3> USABLE_CATEGORIES{ {
 	ItemCategory::UNKNOWN,
 } };
 
-class InventoryUI
+class InventoryUI : public BaseMenu
 {
 public:
-	InventoryUI();
+	InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx);
 	~InventoryUI() = default;
 	InventoryUI(const InventoryUI&) = delete;
 	InventoryUI& operator=(const InventoryUI&) = delete;
 	InventoryUI(InventoryUI&&) = delete;
 	InventoryUI& operator=(InventoryUI&&) = delete;
 
-	void display(Player& player, GameContext& ctx, InventoryScreen startScreen);
+	void menu(GameContext& ctx) override;
 
 private:
+	Player& player_ref;
 	// Data building
 	void rebuild_item_list(const Player& player, GameContext& ctx);
 	bool item_fits_slot(const Item& item, EquipmentSlot slot) const;

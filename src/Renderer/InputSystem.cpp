@@ -95,7 +95,10 @@ void InputSystem::poll()
 		KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C,
 		KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K,
 		KEY_R, KEY_U, KEY_X, KEY_M, KEY_N,
-		KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD })
+		KEY_ONE, KEY_TWO, KEY_THREE, KEY_FOUR, KEY_FIVE,
+		KEY_SIX, KEY_SEVEN, KEY_EIGHT, KEY_NINE, KEY_ZERO,
+		KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD,
+		KEY_SLASH, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE })
 	{
 		if (is_pressed(k)) { new_key = k; break; }
 	}
@@ -284,6 +287,16 @@ void InputSystem::poll()
 	{
 		ch = shift ? (new_key - KEY_A + 'A') : (new_key - KEY_A + 'a');
 	}
+	else if (new_key == KEY_ONE)   { ch = shift ? '!' : '1'; }
+	else if (new_key == KEY_TWO)   { ch = shift ? '@' : '2'; }
+	else if (new_key == KEY_THREE) { ch = shift ? '#' : '3'; }
+	else if (new_key == KEY_FOUR)  { ch = shift ? '$' : '4'; }
+	else if (new_key == KEY_FIVE)  { ch = shift ? '%' : '5'; }
+	else if (new_key == KEY_SIX)   { ch = shift ? '^' : '6'; }
+	else if (new_key == KEY_SEVEN) { ch = shift ? '&' : '7'; }
+	else if (new_key == KEY_EIGHT) { ch = shift ? '*' : '8'; }
+	else if (new_key == KEY_NINE)  { ch = shift ? '(' : '9'; }
+	else if (new_key == KEY_ZERO)  { ch = shift ? ')' : '0'; }
 	else if (new_key == KEY_EQUAL) { ch = shift ? '+' : '='; }
 	else if (new_key == KEY_MINUS) { ch = shift ? '_' : '-'; }
 	else if (new_key == KEY_COMMA) { ch = shift ? '<' : ','; }

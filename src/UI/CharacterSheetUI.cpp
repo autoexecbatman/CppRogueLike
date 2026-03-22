@@ -16,46 +16,49 @@
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "CharacterSheetUI.h"
 
-void CharacterSheetUI::display_character_sheet(const Player& player, GameContext& ctx)
+CharacterSheetUI::CharacterSheetUI(const Player& player, GameContext& /*ctx*/)
+	: player_ref(player)
 {
-	bool run = true;
-	while (run && !WindowShouldClose())
+}
+
+void CharacterSheetUI::menu(GameContext& ctx)
+{
+	ctx.input_system->poll();
+	GameKey key = ctx.input_system->get_key();
+	if (key == GameKey::ESCAPE || key == GameKey::SPACE)
 	{
-		ctx.renderer->begin_frame();
-
-		int ts = ctx.renderer->get_tile_size();
-		int font_off = (ts - ctx.renderer->get_font_size()) / 2;
-		int vcols = ctx.renderer->get_viewport_cols();
-		int vrows = ctx.renderer->get_viewport_rows();
-
-		ctx.renderer->draw_frame(0, 0, vcols, vrows, *ctx.tile_config);
-
-		std::string_view title = "CHARACTER SHEET";
-		int title_w = ctx.renderer->measure_text(title);
-		int title_x = (vcols * ts - title_w) / 2;
-		ctx.renderer->draw_text(title_x, font_off, title, YELLOW_BLACK_PAIR);
-
-		// Hint in bottom border row
-		std::string_view hint = "[ESC] or [SPACE] to close";
-		int hint_w = ctx.renderer->measure_text(hint);
-		int hint_x = (vcols * ts - hint_w) / 2;
-		ctx.renderer->draw_text(hint_x, (vrows - 1) * ts + font_off, hint, CYAN_BLACK_PAIR);
-
-		int row = 1;
-		display_basic_info(player, ctx, row);
-		display_experience_info(player, ctx, row);
-		display_attributes(player, ctx, row);
-		display_combat_stats(player, ctx, row);
-		display_equipment_info(player, ctx, row);
-		display_right_panel_info(player, ctx, row);
-
-		ctx.renderer->end_frame();
-
-		ctx.input_system->poll();
-		GameKey key = ctx.input_system->get_key();
-		if (key == GameKey::ESCAPE || key == GameKey::SPACE)
-			run = false;
+		menu_set_run_false();
+		return;
 	}
+
+	ctx.renderer->begin_frame();
+
+	int ts = ctx.renderer->get_tile_size();
+	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int vcols = ctx.renderer->get_viewport_cols();
+	int vrows = ctx.renderer->get_viewport_rows();
+
+	ctx.renderer->draw_frame(0, 0, vcols, vrows, *ctx.tile_config);
+
+	std::string_view title = "CHARACTER SHEET";
+	int title_w = ctx.renderer->measure_text(title);
+	int title_x = (vcols * ts - title_w) / 2;
+	ctx.renderer->draw_text(title_x, font_off, title, YELLOW_BLACK_PAIR);
+
+	std::string_view hint = "[ESC] or [SPACE] to close";
+	int hint_w = ctx.renderer->measure_text(hint);
+	int hint_x = (vcols * ts - hint_w) / 2;
+	ctx.renderer->draw_text(hint_x, (vrows - 1) * ts + font_off, hint, CYAN_BLACK_PAIR);
+
+	int row = 1;
+	display_basic_info(player_ref, ctx, row);
+	display_experience_info(player_ref, ctx, row);
+	display_attributes(player_ref, ctx, row);
+	display_combat_stats(player_ref, ctx, row);
+	display_equipment_info(player_ref, ctx, row);
+	display_right_panel_info(player_ref, ctx, row);
+
+	ctx.renderer->end_frame();
 }
 
 void CharacterSheetUI::display_basic_info(const Player& player, GameContext& ctx, int& row)

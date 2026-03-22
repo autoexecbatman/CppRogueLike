@@ -1,15 +1,26 @@
 #pragma once
 
+#include "../Menu/BaseMenu.h"
+
 class Player;
 struct GameContext;
 
-// Handles level up screen display via raylib renderer
-class LevelUpUI
+class LevelUpUI : public BaseMenu
 {
 public:
-	static void display_level_up_screen(Player& player, int newLevel, GameContext& ctx);
+	LevelUpUI(Player& player, int newLevel, GameContext& ctx);
+	~LevelUpUI() = default;
+	LevelUpUI(const LevelUpUI&) = delete;
+	LevelUpUI& operator=(const LevelUpUI&) = delete;
+	LevelUpUI(LevelUpUI&&) = delete;
+	LevelUpUI& operator=(LevelUpUI&&) = delete;
+
+	void menu(GameContext& ctx) override;
 
 private:
+	Player& player_ref;
+	int level;
+
 	static void draw_title(const Player& player, int level, GameContext& ctx, int& row);
 	static void draw_current_stats(const Player& player, GameContext& ctx, int& row);
 	static void draw_level_benefits(const Player& player, int level, GameContext& ctx, int& row);

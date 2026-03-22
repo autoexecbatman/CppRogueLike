@@ -65,50 +65,46 @@ void InventoryUI::draw_highlight_row(int px, int y_tile, GameContext& ctx)
 	DrawRectangle(bar_x, y_tile * ts, bar_w, ts, pair.bg);
 }
 
-InventoryUI::InventoryUI()
-	: activeScreen(InventoryScreen::EQUIPMENT), equipmentCursor(0), listCursor(0), scrollOffset(0), filterMode(false), filterSlot(EquipmentSlot::NONE)
+InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx)
+	: player_ref(player),
+	  activeScreen(startScreen),
+	  equipmentCursor(0),
+	  listCursor(0),
+	  scrollOffset(0),
+	  filterMode(false),
+	  filterSlot(EquipmentSlot::NONE)
 {
+	rebuild_item_list(player, ctx);
 }
 
-void InventoryUI::display(Player& player, GameContext& ctx, InventoryScreen startScreen)
+void InventoryUI::menu(GameContext& ctx)
 {
-	activeScreen = startScreen;
-	equipmentCursor = 0;
-	listCursor = 0;
-	scrollOffset = 0;
-	filterMode = false;
-	filterSlot = EquipmentSlot::NONE;
-
-	rebuild_item_list(player, ctx);
-
-	while (true)
+	ctx.input_system->poll();
+	if (!handle_input(player_ref, ctx))
 	{
-		ctx.renderer->begin_frame();
-
-		draw_frame(ctx);
-		render_tab_bar(ctx);
-
-		if (activeScreen == InventoryScreen::EQUIPMENT)
-		{
-			render_equipment_screen(player, ctx);
-		}
-		else
-		{
-			render_item_list_screen(ctx);
-		}
-
-		render_detail_bar(player, ctx);
-
-		ctx.renderer->end_frame();
-
-		ctx.input_system->poll();
-		if (!handle_input(player, ctx))
-		{
-			break;
-		}
-
-		rebuild_item_list(player, ctx);
+		menu_set_run_false();
+		return;
 	}
+
+	rebuild_item_list(player_ref, ctx);
+
+	ctx.renderer->begin_frame();
+
+	draw_frame(ctx);
+	render_tab_bar(ctx);
+
+	if (activeScreen == InventoryScreen::EQUIPMENT)
+	{
+		render_equipment_screen(player_ref, ctx);
+	}
+	else
+	{
+		render_item_list_screen(ctx);
+	}
+
+	render_detail_bar(player_ref, ctx);
+
+	ctx.renderer->end_frame();
 }
 
 // ============================================================

@@ -330,8 +330,7 @@ void AiPlayer::display_inventory_items(void* /*inv*/, const Player& /*player*/) 
 
 void AiPlayer::display_inventory(Player& player, GameContext& ctx)
 {
-	InventoryUI inventoryUI;
-	inventoryUI.display(player, ctx, InventoryScreen::EQUIPMENT);
+	ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::EQUIPMENT, ctx));
 }
 
 Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
@@ -598,8 +597,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::USE:
 	{
-		InventoryUI usablesUI;
-		usablesUI.display(player, ctx, InventoryScreen::USABLES);
+		ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::USABLES, ctx));
 		break;
 	}
 
