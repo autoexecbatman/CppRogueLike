@@ -1,3 +1,4 @@
+#include <cstdio>
 #include <string>
 
 #include <raylib.h>
@@ -76,6 +77,7 @@ void BaseMenu::menu_key_listen()
 {
 	if (!input_system)
 	{
+		std::printf("menu_key_listen: input_system is null\n");
 		return;
 	}
 

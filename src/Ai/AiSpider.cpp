@@ -23,7 +23,6 @@
 // Spider AI constants
 constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
 constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
-constexpr int POISON_DURATION = 3; // Duration of poison effect in turns
 constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
 constexpr int WEB_COOLDOWN = 8; // Turns between web creation
 
@@ -31,7 +30,6 @@ constexpr int WEB_COOLDOWN = 8; // Turns between web creation
 constexpr int WEB_MIN_SIZE = 3; // Minimum web size (diameter)
 constexpr int WEB_MAX_SIZE = 5; // Maximum web size (diameter)
 constexpr int WEB_STRENGTH = 3; // Web strength (turns to escape)
-constexpr int WEB_TRAP_CHANCE = 40; // Chance (%) for instant immobilization
 
 // Web tile definition - you would need to add this to your TileType enum in Map.h
 // enum class TileType { ..., WEB, ... };

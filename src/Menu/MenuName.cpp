@@ -59,8 +59,6 @@ void MenuName::menu_name(GameContext& ctx)
 		initialized = true;
 	}
 
-	draw_name_screen(ctx);
-
 	if (!input_system)
 	{
 		run = false;
@@ -102,6 +100,8 @@ void MenuName::menu_name(GameContext& ctx)
 			break;
 		}
 	}
+
+	draw_name_screen(ctx);
 
 	if (!run && ctx.menu_manager->is_game_initialized())
 	{

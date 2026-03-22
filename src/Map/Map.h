@@ -63,7 +63,7 @@ struct Tile
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }
 	Tile(Vector2D pos, TileType type, double cost)
-		: position(pos), type(type), cost(cost), explored(false) {}
+		: position(pos), type(type), explored(false), cost(cost) {}
 };
 
 //==Map==

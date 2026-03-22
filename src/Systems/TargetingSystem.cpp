@@ -475,6 +475,11 @@ TargetResult TargetingSystem::acquire_targets(GameContext& ctx, TargetMode mode,
 	{
 		return target_pick_aoe(ctx, aoe_radius);
 	}
+
+	case TargetMode::FOV_BUFF:
+	{
+		return {}; // Applied at cast site, no targeting needed
+	}
 	}
 	return {};
 }

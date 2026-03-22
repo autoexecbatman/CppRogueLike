@@ -27,7 +27,7 @@ public:
 	}
 
 private:
-	int width, height;
+	int width;
 	double infinity;
 };
 

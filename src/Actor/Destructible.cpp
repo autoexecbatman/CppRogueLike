@@ -51,14 +51,14 @@ static const std::unordered_map<DamageType, std::string_view> damage_type_names 
 
 //====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
-	: hpMax(hpMax),
+	: hpBase(hpMax),
+	  hpMax(hpMax),
+	  hp(hpMax),
 	  dr(dr),
 	  corpseName(corpseName),
 	  xp(xp),
 	  thaco(thaco),
 	  armorClass(armorClass),
-	  hp(hpMax),
-	  hpBase(hpMax),
 	  baseArmorClass(armorClass),
 	  lastConstitution(0),
 	  tempHp(0)

@@ -40,10 +40,6 @@
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
 
-//==INVENTORY==
-constexpr int INVENTORY_HEIGHT = 29;
-constexpr int INVENTORY_WIDTH = 60;
-
 //==PLAYER_AI==
 struct PossibleMoves
 {
@@ -304,10 +300,6 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 
 	// TODO: Reimplement drop_item UI without curses (was a curses WINDOW-based menu)
 	// For now, drop the first inventory item as a fallback
-	int shortcut = 'a';
-
-	// Skip equipped items in shortcut count
-	shortcut += static_cast<int>(player.equippedItems.size());
 
 	// Drop the first regular inventory item
 	if (!player.inventory_data.items.empty())

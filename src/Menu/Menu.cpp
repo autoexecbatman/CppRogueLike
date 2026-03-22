@@ -239,8 +239,8 @@ void Menu::menu(GameContext& ctx)
 		ctx.gui->gui_render(ctx);
 	}
 
-	draw(); // draw the menu
 	menu_key_listen(); // listen for key presses
+	draw(); // draw the menu
 	on_key(keyPress, ctx); // run the key press
 
 	// Restore full game view if returning to game

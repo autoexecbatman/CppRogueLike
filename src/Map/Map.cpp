@@ -40,10 +40,10 @@
 Map::Map(int map_width, int map_height)
 	: map_height(map_height),
 	  map_width(map_width),
-	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
-	  seed(0), // Will be set in init() with GameContext access
 	  monsterFactory(std::make_unique<MonsterFactory>()),
-	  itemFactory(std::make_unique<ItemFactory>())
+	  itemFactory(std::make_unique<ItemFactory>()),
+	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
+	  seed(0) // Will be set in init() with GameContext access
 {
 }
 
@@ -398,21 +398,6 @@ void Map::render(const GameContext& ctx) const
 		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
 	};
 
-	auto is_wall_only = [&](Vector2D p) -> bool
-	{
-		if (!in_bounds(p))
-			return false;
-		return get_tile_type(p) == TileType::WALL;
-	};
-
-	auto is_door = [&](Vector2D p) -> bool
-	{
-		if (!in_bounds(p))
-			return false;
-		TileType t = get_tile_type(p);
-		return t == TileType::CLOSED_DOOR || t == TileType::OPEN_DOOR;
-	};
-
 	auto is_walkable = [&](Vector2D p) -> bool
 	{
 		if (!in_bounds(p))
@@ -462,10 +447,6 @@ void Map::render(const GameContext& ctx) const
 	// 20-tile grid cells match room scale -- most rooms fall within one zone.
 	// Zones: 0=dungeon, 1=library, 2=armory, 3=storage, 4=chapel
 	// ---------------------------------------------------------------------------
-	constexpr int ZONE_DUNGEON = 0;
-	constexpr int ZONE_LIBRARY = 1;
-	constexpr int ZONE_ARMORY = 2;
-	constexpr int ZONE_STORAGE = 3;
 	constexpr int ZONE_CHAPEL = 4;
 
 	auto resolve_decor = [&](Vector2D p, TileType t) -> TileRef
@@ -723,9 +704,8 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 		{ waterPos.x + 1, waterPos.y + 1 } // Bottom row (SW, S, SE)
 	};
 
-	// Count walls and floors around this position
+	// Count walls around this position
 	int wallCount = 0;
-	int floorCount = 0;
 
 	for (const auto& pos : adjacent)
 	{
@@ -735,14 +715,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 			continue;
 		}
 
-		TileType tileType = get_tile_type(pos);
-		if (tileType == TileType::WALL)
+		if (get_tile_type(pos) == TileType::WALL)
 		{
 			wallCount++;
-		}
-		else if (tileType == TileType::FLOOR)
-		{
-			floorCount++;
 		}
 	}
 

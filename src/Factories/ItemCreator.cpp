@@ -369,6 +369,9 @@ std::string_view encode_buff_type(BuffType b)
 	case BuffType::POISON_RESISTANCE:    return "poison_resistance";
 	case BuffType::SLEEP:                return "sleep";
 	case BuffType::HOLD_PERSON:          return "hold_person";
+	case BuffType::SANCTUARY:            return "sanctuary";
+	case BuffType::SILENCE:              return "silence";
+	case BuffType::WEBBED:               return "webbed";
 	}
 	return "none";
 }

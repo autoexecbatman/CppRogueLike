@@ -75,12 +75,30 @@ void InputSystem::poll()
 		}
 	};
 
-	// GetKeyPressed() reads from the GLFW key-press queue, which is populated
-	// by the GLFW key callback on GLFW_PRESS. This avoids the IsKeyPressed
-	// prev/curr timing dependency that causes input failure on Emscripten with
-	// ASYNCIFY -- no matter when PollInputEvents runs, the queue retains events
-	// until they are consumed here.
-	int new_key = GetKeyPressed();
+#ifdef EMSCRIPTEN
+	// On Emscripten, the GLFW key-press queue (GetKeyPressed) is never
+	// populated because the GLFW key callback does not fire on the web
+	// platform. IsKeyPressed (prev/curr state transition) works correctly
+	// because PollInputEvents() is called explicitly in end_frame() before
+	// SwapScreenBuffer(), keeping prev/curr in sync.
+	auto is_pressed = [](int k) { return IsKeyPressed(k); };
+#else
+	// On native, prefer the GLFW queue -- it is not subject to prev/curr
+	// timing issues and handles rapid key-press/release within one frame.
+	int queued = GetKeyPressed();
+	auto is_pressed = [queued](int k) { return queued == k; };
+#endif
+	int new_key = 0;
+	for (int k : {
+		KEY_ENTER, KEY_ESCAPE, KEY_TAB, KEY_SPACE, KEY_BACKSPACE,
+		KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT,
+		KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C,
+		KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K,
+		KEY_R, KEY_U, KEY_X, KEY_M, KEY_N,
+		KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD })
+	{
+		if (is_pressed(k)) { new_key = k; break; }
+	}
 
 	switch (new_key)
 	{
@@ -249,8 +267,27 @@ void InputSystem::poll()
 		break;
 	}
 
-	// Shift+symbol keys and char_input for text fields
+	// Shift+symbol keys and char_input for text fields.
+	// GetCharPressed() is also broken on Emscripten (queue never filled),
+	// so derive char from the pressed key + shift state on web.
+#ifdef EMSCRIPTEN
+	int ch = 0;
+	if (new_key >= KEY_A && new_key <= KEY_Z)
+	{
+		ch = shift ? (new_key - KEY_A + 'A') : (new_key - KEY_A + 'a');
+	}
+	else if (new_key == KEY_EQUAL) { ch = shift ? '+' : '='; }
+	else if (new_key == KEY_MINUS) { ch = shift ? '_' : '-'; }
+	else if (new_key == KEY_COMMA) { ch = shift ? '<' : ','; }
+	else if (new_key == KEY_PERIOD) { ch = shift ? '>' : '.'; }
+	else if (new_key == KEY_SLASH) { ch = shift ? '?' : '/'; }
+	else if (new_key == KEY_SEMICOLON) { ch = shift ? ':' : ';'; }
+	else if (new_key == KEY_APOSTROPHE) { ch = shift ? '"' : '\''; }
+	else if (new_key == KEY_GRAVE) { ch = shift ? '~' : '`'; }
+	else if (new_key == KEY_SPACE) { ch = ' '; }
+#else
 	int ch = GetCharPressed();
+#endif
 	if (ch > 0)
 	{
 		char_input = ch;

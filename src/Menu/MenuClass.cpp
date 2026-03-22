@@ -153,8 +153,7 @@ void MenuClass::on_key(int key, GameContext& ctx)
 		iMenuStates.at(currentState)->on_selection(ctx);
 		if (currentState != MenuState::BACK)
 		{
-			MenuName menuName(ctx);
-			menuName.menu_name(ctx);
+			ctx.menus->push_back(std::make_unique<MenuName>(ctx));
 		}
 		break;
 	}
@@ -171,7 +170,7 @@ void MenuClass::on_key(int key, GameContext& ctx)
 
 void MenuClass::menu(GameContext& ctx)
 {
-	draw();
 	menu_key_listen();
+	draw();
 	on_key(keyPress, ctx);
 }

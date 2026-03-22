@@ -10,7 +10,7 @@
 #include "Vector2D.h"
 
 Dijkstra::Dijkstra(int width, int height)
-	: width(width), height(height), infinity(std::numeric_limits<double>::infinity()) {}
+	: width(width), infinity(std::numeric_limits<double>::infinity()) {}
 
 // set AStar true for A* search, false for Dijkstra's search
 // returns a vector of the path
@@ -98,7 +98,6 @@ std::vector<Vector2D> Dijkstra::reconstruct_path(
 	};
 
 	int goalIndex = get_index(goal);
-	int startIndex = get_index(start);
 
 	// Check if the goal is reachable by looking at its cameFrom value
 	if (cameFrom.at(goalIndex) == Vector2D{ -1, -1 })

@@ -44,7 +44,7 @@
         <progress value="0" max="100" id="progress" hidden></progress>
     </div>
 
-    <canvas id="canvas" oncontextmenu="event.preventDefault()"></canvas>
+    <canvas id="canvas" tabindex="0" oncontextmenu="event.preventDefault()"></canvas>
 
     <script>
         var statusEl  = document.getElementById('status');
@@ -111,6 +111,10 @@
         };
 
         Module.setStatus('Downloading...');
+
+        window.addEventListener('load', function() {
+            document.getElementById('canvas').focus();
+        });
 
         window.onerror = function() {
             Module.setStatus('Exception thrown, see JavaScript console.');

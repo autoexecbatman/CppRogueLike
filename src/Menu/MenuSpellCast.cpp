@@ -115,8 +115,8 @@ void MenuSpellCast::menu(GameContext& ctx)
 		initialized = true;
 	}
 
-	draw_content();
 	menu_key_listen();
+	draw_content();
 
 	switch (keyPress)
 	{

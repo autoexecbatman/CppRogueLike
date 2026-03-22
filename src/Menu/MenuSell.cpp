@@ -278,7 +278,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 
 void MenuSell::menu(GameContext& ctx)
 {
-	draw();
 	menu_key_listen();
+	draw();
 	on_key(keyPress, ctx);
 }

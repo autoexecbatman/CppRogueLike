@@ -522,7 +522,7 @@ void MonsterEditor::render_list(const Renderer& r) const
 			bool cur_custom = !MonsterCreator::is_builtin(m_keys[i]) && !cur_class;
 			bool prev_custom = !prev_builtin && !prev_class;
 
-			if (prev_builtin && cur_custom || prev_custom && cur_class)
+			if ((prev_builtin && cur_custom) || (prev_custom && cur_class))
 				DrawLine(PAD, iy, LIST_W - PAD, iy, Color{ 70, 70, 70, 200 });
 		}
 

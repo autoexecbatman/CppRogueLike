@@ -71,7 +71,6 @@ private:
 	const int SATIATED_THRESHOLD{ 400 };
 	const int HUNGRY_THRESHOLD{ 700 };
 	const int STARVING_THRESHOLD{ 900 };
-	const int DYING_THRESHOLD{ 950 };
 
 	// Updates internal hunger state based on hunger value
 	void update_hunger_state(GameContext& ctx);
