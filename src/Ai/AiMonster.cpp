@@ -27,6 +27,11 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 		return;
 	}
 
+	if (blocked_by_sanctuary(ctx))
+	{
+		return;
+	}
+
 	// Check if monster is in FOV - if so, set tracking
 	if (ctx.map->is_in_fov(owner.position) && !ctx.player->is_invisible())
 	{
@@ -91,6 +96,15 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 			}
 		}
 	}
+}
+
+bool AiMonster::blocked_by_sanctuary(GameContext& ctx)
+{
+	if (!ctx.player->has_state(ActorState::IS_PROTECTED))
+	{
+		return false;
+	}
+	return ctx.dice->roll(1, 20) < 15;
 }
 
 void AiMonster::load(const json& j)

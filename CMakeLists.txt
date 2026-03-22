@@ -213,16 +213,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Map/FovMap.h
 
     # Items - Updated paths
-    ${PROJECT_SOURCE_DIR}/Items/Items.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Items.h
     ${PROJECT_SOURCE_DIR}/Items/ItemClassification.cpp
     ${PROJECT_SOURCE_DIR}/Items/ItemClassification.h
     ${PROJECT_SOURCE_DIR}/Items/Weapons.cpp
     ${PROJECT_SOURCE_DIR}/Items/Weapons.h
     ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.cpp
     ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.h
-    ${PROJECT_SOURCE_DIR}/Items/Food.cpp
-    ${PROJECT_SOURCE_DIR}/Items/Food.h
 
     # Systems - Updated paths
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.cpp
@@ -282,6 +278,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.h
+    ${PROJECT_SOURCE_DIR}/Tools/ItemEditor.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/ItemEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/MonsterEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/MonsterEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
@@ -300,18 +298,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Factories/ItemFactory.h
     ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.cpp
     ${PROJECT_SOURCE_DIR}/Factories/ItemCreator.h
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/PotionItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/ScrollItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/MeleeWeaponItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/RangedWeaponItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/ArmorItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/HelmItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/RingItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/JewelryItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/GirdleItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/FoodItems.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedWeaponRules.cpp
-    ${PROJECT_SOURCE_DIR}/Factories/ItemRegistries/EnhancedArmorRules.cpp
 
     # Objects - Updated paths
     ${PROJECT_SOURCE_DIR}/Objects/Web.cpp

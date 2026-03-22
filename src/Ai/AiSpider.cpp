@@ -141,6 +141,11 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		}
 	}
 
+	if (blocked_by_sanctuary(ctx))
+	{
+		return;
+	}
+
 	// Special check for being adjacent to player - DIRECT ATTACK CODE
 	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))

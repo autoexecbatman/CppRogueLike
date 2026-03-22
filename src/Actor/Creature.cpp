@@ -216,7 +216,7 @@ void Creature::equip(Item& item, GameContext& ctx)
 	if (isWeapon)
 	{
 		weaponEquipped = item.get_name();
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemId);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.item_key);
 		ctx.message_system->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
 	}
 

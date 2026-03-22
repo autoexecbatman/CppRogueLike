@@ -13,6 +13,7 @@ class AiMonsterConfused : public Ai
 {
 public:
 	AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept;
+	~AiMonsterConfused() override = default;
 
 	AiMonsterConfused(const AiMonsterConfused&) = delete;
 	AiMonsterConfused& operator=(const AiMonsterConfused&) = delete;

@@ -441,7 +441,7 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 	switch (weapon->itemClass)
 	{
 	case ItemClass::BOW:
-		if (weapon->itemId == ItemId::LONG_BOW)
+		if (weapon->item_key == "long_bow")
 		{
 			return 7; // AD&D 2e: 70 yards (~7 dungeon tiles)
 		}

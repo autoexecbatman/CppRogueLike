@@ -22,8 +22,8 @@
 #include "../Core/GameContext.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Factories/ItemCreator.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
-#include "../Items/Items.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
@@ -100,11 +100,11 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create(ItemId::PLATE_MAIL, position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create(ItemId::LONG_SWORD, position), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
-		equip_item(ItemCreator::create(ItemId::LONG_BOW, position), EquipmentSlot::MISSILE_WEAPON, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_FIREBALL, position));
+		equip_item(ItemCreator::create("plate_mail", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("long_sword", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, *ctx.content_registry), EquipmentSlot::LEFT_HAND, ctx);
+		equip_item(ItemCreator::create("long_bow", position, *ctx.content_registry), EquipmentSlot::MISSILE_WEAPON, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_fireball", position, *ctx.content_registry));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
@@ -112,8 +112,8 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create(ItemId::LEATHER_ARMOR, position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create(ItemId::DAGGER, position), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("leather_armor", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("dagger", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
@@ -121,11 +121,11 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create(ItemId::CHAIN_MAIL, position), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create(ItemId::MACE, position), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create(ItemId::MEDIUM_SHIELD, position), EquipmentSlot::LEFT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::HEALTH_POTION, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_HOLD_PERSON, position));
+		equip_item(ItemCreator::create("chain_mail", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("mace", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, *ctx.content_registry), EquipmentSlot::LEFT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("health_potion", position, *ctx.content_registry));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_hold_person", position, *ctx.content_registry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -134,10 +134,10 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create(ItemId::STAFF, position), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_FIREBALL, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_LIGHTNING, position));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::SCROLL_SLEEP, position));
+		equip_item(ItemCreator::create("staff", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_fireball", position, *ctx.content_registry));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_lightning", position, *ctx.content_registry));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_sleep", position, *ctx.content_registry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
@@ -561,7 +561,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemId);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->item_key);
 		ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
 
@@ -788,7 +788,7 @@ std::string Player::get_equipped_weapon_damage_roll() const noexcept
 	// Use pure ItemClass system
 	if (rightHandWeapon->is_weapon())
 	{
-		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemId);
+		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->item_key);
 	}
 
 	return WeaponDamageRegistry::get_unarmed_damage();
@@ -824,7 +824,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	{
 		if (leftHandWeapon->is_weapon())
 		{
-			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemId);
+			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->item_key);
 		}
 	}
 

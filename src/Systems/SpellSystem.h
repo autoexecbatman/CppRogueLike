@@ -107,11 +107,14 @@ private:
 	// Spell effect implementations
 	static bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 	static bool cast_bless(Creature& caster, GameContext& ctx);
+	static bool cast_sanctuary(Creature& caster, GameContext& ctx);
+	static bool cast_silence(Creature& caster, GameContext& ctx);
 	static bool cast_magic_missile(Creature& caster, GameContext& ctx);
 	static bool cast_shield(Creature& caster, GameContext& ctx);
 	static bool cast_sleep(Creature& caster, GameContext& ctx);
 	static bool cast_fireball(Creature& caster, GameContext& ctx);
 	static bool cast_invisibility(Creature& caster, GameContext& ctx);
+	static bool cast_web(Creature& caster, GameContext& ctx);
 	static bool cast_teleport(Creature& caster, GameContext& ctx);
 	static bool cast_hold_person(Creature& caster, GameContext& ctx);
 };

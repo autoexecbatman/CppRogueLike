@@ -9,9 +9,9 @@ void Item::load(const json& j)
 {
 	Object::load(j); // Call base class load
 	baseValue = j.at("baseValue").get<int>();
-	if (j.contains("itemId"))
+	if (j.contains("item_key"))
 	{
-		itemId = static_cast<ItemId>(j.at("itemId").get<int>());
+		item_key = j.at("item_key").get<std::string>();
 	}
 	itemClass = static_cast<ItemClass>(j.at("itemClass").get<int>());
 
@@ -50,7 +50,7 @@ void Item::save(json& j)
 {
 	Object::save(j); // Call base class save
 	j["baseValue"] = baseValue;
-	j["itemId"] = static_cast<int>(itemId);
+	j["item_key"] = item_key;
 	j["itemClass"] = static_cast<int>(itemClass);
 
 	// Save enhancement data

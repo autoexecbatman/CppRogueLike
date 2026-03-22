@@ -1,49 +1,61 @@
-// WeaponDamageRegistry.cpp - Implementation using ItemId system
+// WeaponDamageRegistry.cpp
 #include <string>
+#include <string_view>
 #include <unordered_map>
 
-#include "../Items/ItemClassification.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "DamageInfo.h"
 #include "WeaponDamageRegistry.h"
 
-// Static member definition
-const std::unordered_map<ItemId, DamageInfo> WeaponDamageRegistry::weapon_damage_map =
+const std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::weapon_damage_map =
 	WeaponDamageRegistry::create_weapon_damage_map();
 
-std::unordered_map<ItemId, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
+std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
 {
 	return {
 		// Melee Weapons - AD&D 2e damage values
-		{ ItemId::DAGGER, DamageValues::Dagger() }, // 1-4 damage
-		{ ItemId::SHORT_SWORD, DamageValues::ShortSword() }, // 1-6 damage
-		{ ItemId::LONG_SWORD, DamageValues::LongSword() }, // 1-8 damage
-		{ ItemId::STAFF, DamageValues::Staff() }, // 1-6 damage
-		{ ItemId::BATTLE_AXE, DamageValues::BattleAxe() }, // 1-8 damage
-		{ ItemId::GREAT_AXE, { 1, 12, "1d12" } }, // 1-12 damage
-		{ ItemId::WAR_HAMMER, DamageValues::WarHammer() }, // 2-5 damage (1d4+1)
-		{ ItemId::MACE, { 2, 7, "1d6+1" } }, // 2-7 damage (1d6+1)
-		{ ItemId::GREAT_SWORD, DamageValues::GreatSword() }, // 1-10 damage
+		{ "dagger", DamageValues::Dagger() },
+		{ "short_sword", DamageValues::ShortSword() },
+		{ "long_sword", DamageValues::LongSword() },
+		{ "bastard_sword", DamageValues::LongSword() },
+		{ "two_handed_sword", DamageValues::GreatSword() },
+		{ "great_sword", DamageValues::GreatSword() },
+		{ "scimitar", DamageValues::LongSword() },
+		{ "rapier", DamageValues::ShortSword() },
+		{ "hand_axe", DamageValues::Dagger() },
+		{ "battle_axe", DamageValues::BattleAxe() },
+		{ "great_axe", { 1, 12, "1d12" } },
+		{ "war_hammer", DamageValues::WarHammer() },
+		{ "mace", { 2, 7, "1d6+1" } },
+		{ "morning_star", { 2, 8, "2d4" } },
+		{ "flail", { 2, 7, "1d6+1" } },
+		{ "club", { 1, 6, "1d6" } },
+		{ "quarterstaff", DamageValues::Staff() },
+		{ "staff", DamageValues::Staff() },
 
 		// Ranged Weapons
-		{ ItemId::LONG_BOW, DamageValues::LongBow() }, // 1-6 damage
+		{ "short_bow", { 1, 6, "1d6" } },
+		{ "long_bow", DamageValues::LongBow() },
+		{ "composite_bow", { 1, 6, "1d6" } },
+		{ "light_crossbow", { 1, 8, "1d8" } },
+		{ "heavy_crossbow", { 1, 10, "1d10" } },
+		{ "sling", { 1, 4, "1d4" } },
 	};
 }
 
-DamageInfo WeaponDamageRegistry::get_damage_info(ItemId weaponId) noexcept
+DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noexcept
 {
-	if (weapon_damage_map.contains(weaponId))
+	auto it = weapon_damage_map.find(std::string{ weaponKey });
+	if (it != weapon_damage_map.end())
 	{
-		return weapon_damage_map.at(weaponId);
+		return it->second;
 	}
-
-	// Fallback to unarmed damage for unregistered weapons
 	return get_unarmed_damage_info();
 }
 
-DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(ItemId weaponId, const ItemEnhancement* enhancement) noexcept
+DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weaponKey, const ItemEnhancement* enhancement) noexcept
 {
-	DamageInfo baseDamage = get_damage_info(weaponId);
+	DamageInfo baseDamage = get_damage_info(weaponKey);
 
 	if (enhancement && enhancement->damage_bonus != 0)
 	{
@@ -53,13 +65,12 @@ DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(ItemId weaponId, const
 	return baseDamage;
 }
 
-std::string WeaponDamageRegistry::get_damage_roll(ItemId weaponId) noexcept
+std::string WeaponDamageRegistry::get_damage_roll(std::string_view weaponKey) noexcept
 {
-	auto damageInfo = get_damage_info(weaponId);
-	return damageInfo.displayRoll;
+	return get_damage_info(weaponKey).displayRoll;
 }
 
-bool WeaponDamageRegistry::is_registered(ItemId weaponId) noexcept
+bool WeaponDamageRegistry::is_registered(std::string_view weaponKey) noexcept
 {
-	return weapon_damage_map.contains(weaponId);
+	return weapon_damage_map.contains(std::string{ weaponKey });
 }

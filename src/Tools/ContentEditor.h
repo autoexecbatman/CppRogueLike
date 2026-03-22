@@ -6,6 +6,8 @@
 
 #include "../Renderer/Renderer.h"
 
+class ContentRegistry;
+
 // ContentEditor -- developer tool for assigning sprite tiles to items and monsters.
 //
 // F3           toggle editor
@@ -19,9 +21,9 @@
 class ContentEditor
 {
 public:
-	void toggle();
+	void toggle(ContentRegistry& registry);
 	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
-	void update_and_render(const Renderer& renderer);
+	void update_and_render(const Renderer& renderer, ContentRegistry& registry);
 
 	[[nodiscard]] bool is_active() const { return m_active; }
 
@@ -29,7 +31,8 @@ private:
 	struct Entry
 	{
 		std::string name;
-		int entity_key;
+		std::string item_key; // for item tab (string key into ItemCreator)
+		int entity_key{ 0 }; // for monster tab (MonsterId int cast)
 	};
 
 	[[nodiscard]] TileRef current_tile() const;
@@ -41,6 +44,7 @@ private:
 	void draw_hint_bar(const Renderer& renderer) const;
 	void handle_keyboard();
 
+	ContentRegistry* m_registry{ nullptr };
 	bool m_active{ false };
 	int m_tab{ 0 };
 	int m_list_scroll{ 0 };

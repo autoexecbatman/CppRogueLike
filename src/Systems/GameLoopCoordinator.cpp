@@ -21,6 +21,7 @@
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Tools/ContentEditor.h"
 #include "../Tools/DecorEditor.h"
 #include "../Tools/PrefabLibrary.h"
@@ -112,7 +113,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			}
 			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.content_editor)
 			{
-				ctx.content_editor->toggle();
+				ctx.content_editor->toggle(*ctx.content_registry);
 				return true;
 			}
 			if (ctx.decor_editor && ctx.decor_editor->is_active())
@@ -220,7 +221,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	if (ctx.content_editor)
 	{
-		ctx.content_editor->update_and_render(*ctx.renderer);
+		ctx.content_editor->update_and_render(*ctx.renderer, *ctx.content_registry);
 	}
 
 	if (gui.guiInit)

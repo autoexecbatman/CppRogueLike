@@ -69,6 +69,10 @@ class MenuClass : public BaseMenu
 public:
 	MenuClass(GameContext& ctx);
 	~MenuClass();
+	MenuClass(const MenuClass&) = delete;
+	MenuClass& operator=(const MenuClass&) = delete;
+	MenuClass(MenuClass&&) = delete;
+	MenuClass& operator=(MenuClass&&) = delete;
 
 	void draw();
 	void on_key(int key, GameContext& ctx);

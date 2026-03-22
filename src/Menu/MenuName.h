@@ -15,6 +15,10 @@ class MenuName : public BaseMenu
 public:
 	MenuName(GameContext& ctx);
 	~MenuName();
+	MenuName(const MenuName&) = delete;
+	MenuName& operator=(const MenuName&) = delete;
+	MenuName(MenuName&&) = delete;
+	MenuName& operator=(MenuName&&) = delete;
 
 	void menu_name(GameContext& ctx);
 	void menu(GameContext& ctx) override;

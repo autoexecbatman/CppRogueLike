@@ -73,6 +73,10 @@ class MenuTrade : public BaseMenu
 public:
 	MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
 	~MenuTrade();
+	MenuTrade(const MenuTrade&) = delete;
+	MenuTrade& operator=(const MenuTrade&) = delete;
+	MenuTrade(MenuTrade&&) = delete;
+	MenuTrade& operator=(MenuTrade&&) = delete;
 
 	void draw();
 	void on_key(int key, GameContext& ctx);

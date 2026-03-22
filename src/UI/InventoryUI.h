@@ -88,6 +88,10 @@ class InventoryUI
 public:
 	InventoryUI();
 	~InventoryUI() = default;
+	InventoryUI(const InventoryUI&) = delete;
+	InventoryUI& operator=(const InventoryUI&) = delete;
+	InventoryUI(InventoryUI&&) = delete;
+	InventoryUI& operator=(InventoryUI&&) = delete;
 
 	void display(Player& player, GameContext& ctx, InventoryScreen startScreen);
 

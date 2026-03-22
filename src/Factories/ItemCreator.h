@@ -1,9 +1,11 @@
 #pragma once
 
+#include <map>
 #include <memory>
 #include <span>
 #include <string>
-#include <unordered_map>
+#include <string_view>
+#include <vector>
 
 #include "../Actor/Actor.h"
 #include "../Actor/Pickable.h"
@@ -16,10 +18,9 @@
 
 struct Vector2D;
 struct GameContext;
-enum class ItemId;
-enum class ItemClass;
+class ContentRegistry;
 
-// Unified compositional item parameters - supports any combination of properties
+// Unified compositional item parameters
 struct ItemParams
 {
 	// Display & Classification
@@ -29,68 +30,42 @@ struct ItemParams
 	int value{ 0 };
 	PickableType pickable_type{ PickableType::WEAPON };
 
-	// Gameplay properties (use what you need, rest default to 0/NONE/false)
-
-	// Consumable value: heal amount (HEAL) or buff value (ADD_BUFF)
 	int consumable_amount{ 0 };
-
-	// Ranged effects (scrolls: lightning, fireball)
 	int range{ 0 };
 	int damage{ 0 };
-
-	// Confusion
 	int confuse_turns{ 0 };
-
-	// Duration effects (potions, buffs)
 	int duration{ 0 };
 
-	// Magical effects (rings, helms, protection items)
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int effect_bonus{ 0 };
 
-	// Stat modifications (amulets, gauntlets, girdles)
 	int str_bonus{ 0 };
 	int dex_bonus{ 0 };
 	int con_bonus{ 0 };
 	int int_bonus{ 0 };
 	int wis_bonus{ 0 };
 	int cha_bonus{ 0 };
-	bool is_set_mode{ false }; // If true, non-zero bonuses SET stats instead of adding
+	bool is_set_mode{ false };
 
-	// Food
 	int nutrition_value{ 0 };
-
-	// Treasure
 	int gold_amount{ 0 };
+	int ac_bonus{ 0 };
 
-	// Armor
-	int ac_bonus{ 0 }; // AD&D 2e AC bonus (negative = better AC)
-
-	// Weapon mechanical properties (all weapons in registry should set these)
 	bool ranged{ false };
 	HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
 	WeaponSize weapon_size{ WeaponSize::MEDIUM };
 
-	// Consumable effect (potions and simple scrolls)
 	ConsumableEffect consumable_effect{ ConsumableEffect::NONE };
-	BuffType consumable_buff_type{ BuffType::INVISIBILITY }; // for ADD_BUFF effect
+	BuffType consumable_buff_type{ BuffType::INVISIBILITY };
 
-	// Targeted scroll properties
 	TargetMode target_mode{ TargetMode::AUTO_NEAREST };
 	ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
 
-	// Spawn / ItemFactory integration
-	int base_weight{ 0 }; // Spawn weight (0 = not spawnable)
-	int level_minimum{ 1 }; // Min dungeon level
-	int level_maximum{ 0 }; // Max dungeon level (0 = no cap)
-	float level_scaling{ 0.0f }; // Weight scaling per level (can be negative)
-	std::string_view category{ "" }; // "potion", "weapon", "armor", etc.
-};
-
-struct ItemRegistryEntry
-{
-	ItemId id;
-	ItemParams params;
+	int base_weight{ 0 };
+	int level_minimum{ 1 };
+	int level_maximum{ 0 };
+	float level_scaling{ 0.0f };
+	std::string_view category{ "" };
 };
 
 enum class EnhancedItemCategory
@@ -101,37 +76,44 @@ enum class EnhancedItemCategory
 
 struct EnhancedItemSpawnRule
 {
-	std::span<const ItemId> item_pool;
+	std::vector<std::string> item_pool;
 	EnhancedItemCategory enhancement_category;
 	int base_weight;
 	int level_minimum;
-	int level_maximum; // 0 = no cap
+	int level_maximum;
 	float level_scaling;
-	std::string_view category;
+	std::string category;
 };
 
 class ItemCreator
 {
 public:
-	// Registry access
-	static const ItemParams& get_params(ItemId itemId);
-	static const std::unordered_map<ItemId, ItemParams>& get_all_params();
+	// Load all items from JSON. Must be called before Game construction.
+	static void load(std::string_view path);
+	static void save(std::string_view path);
 
-	// Single source of truth - data-driven item creation
-	static std::unique_ptr<Item> create(ItemId itemId, Vector2D pos);
-	static std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount);
-	static std::unique_ptr<Item> create_enhanced_weapon(ItemId weaponId, Vector2D pos, int enhancementLevel);
-	static std::unique_ptr<Item> create_with_enhancement(ItemId itemId, Vector2D pos, PrefixType prefix, SuffixType suffix);
+	// All keys in insertion order.
+	[[nodiscard]] static std::vector<std::string> get_all_keys();
 
-	// Special item creation functions
-	static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
+	// Throws std::out_of_range if key unknown.
+	[[nodiscard]] static const ItemParams& get_params(std::string_view key);
+	static void set_params(std::string_view key, const ItemParams& params);
+	// Update the owned name and category strings for an existing item (editor use).
+	static void set_name_category(std::string_view key, std::string name, std::string category);
 
-	// Random generation with single source
-	static std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);
+	// Create item from string key.
+	[[nodiscard]] static std::unique_ptr<Item> create(std::string_view key, Vector2D pos, ContentRegistry& registry);
+	[[nodiscard]] static std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount, ContentRegistry& registry);
+	[[nodiscard]] static std::unique_ptr<Item> create_with_enhancement(std::string_view key, Vector2D pos, PrefixType prefix, SuffixType suffix, ContentRegistry& registry);
+	[[nodiscard]] static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
+	[[nodiscard]] static std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);
 
-	// Enhancement utility functions
-	static int calculate_enhancement_chance(int dungeonLevel);
-	static int determine_enhancement_level(GameContext& ctx, int dungeonLevel);
-	static int calculate_enhanced_value(int baseValue, int enhancementLevel);
+	// Add new item. Returns actual key used (derived from name).
+	[[nodiscard]] static std::string add_custom(std::string name, std::string category, ItemParams params);
+	static void remove_custom(std::string_view key);
+	[[nodiscard]] static bool is_builtin_key(std::string_view key);
 
+	// Enhanced item spawn rules -- loaded from separate JSON file.
+	static void load_enhanced_rules(std::string_view path);
+	[[nodiscard]] static std::span<const EnhancedItemSpawnRule> get_enhanced_rules();
 };

@@ -29,6 +29,11 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 		moveCount--;
 	}
 
+	if (blocked_by_sanctuary(ctx))
+	{
+		return;
+	}
+
 	if (moveCount > 0)
 	{
 		move_or_attack(owner, ctx.player->position, ctx);

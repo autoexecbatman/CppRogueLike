@@ -35,7 +35,7 @@ public:
 	int get_value() const noexcept { return (baseValue * enhancement.value_modifier) / 100; }
 	void set_value(int v) noexcept { baseValue = v; }
 
-	ItemId itemId{ ItemId::UNKNOWN }; // Specific item identity
+	std::string item_key; // JSON registry key
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
 

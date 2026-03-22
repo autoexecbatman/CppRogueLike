@@ -1,0 +1,453 @@
+{
+    "health_potion": {
+        "name": "health potion", "category": "potion", "color": 2, "item_class": "potion",
+        "value": 50, "pickable_type": "consumable", "consumable_amount": 10,
+        "consumable_effect": "heal", "base_weight": 50, "level_minimum": 1, "level_scaling": 0.2
+    },
+    "potion_of_extra_healing": {
+        "name": "potion of extra healing", "category": "potion", "color": 9, "item_class": "potion",
+        "value": 100, "pickable_type": "consumable", "consumable_amount": 30,
+        "consumable_effect": "heal"
+    },
+    "mana_potion": {
+        "name": "mana potion", "category": "potion", "color": 12, "item_class": "potion",
+        "value": 50, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+    "invisibility_potion": {
+        "name": "invisibility potion", "category": "potion", "color": 13, "item_class": "potion",
+        "value": 150, "pickable_type": "consumable", "duration": 30,
+        "consumable_effect": "add_buff", "consumable_buff": "invisibility"
+    },
+    "potion_of_giant_strength": {
+        "name": "potion of giant strength", "category": "potion", "color": 11, "item_class": "potion",
+        "value": 200, "pickable_type": "consumable", "consumable_amount": 19, "duration": 50,
+        "is_set_mode": true, "consumable_effect": "add_buff", "consumable_buff": "strength"
+    },
+    "potion_of_fire_resistance": {
+        "name": "potion of fire resistance", "category": "potion", "color": 19, "item_class": "potion",
+        "value": 150, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+    "potion_of_cold_resistance": {
+        "name": "potion of cold resistance", "category": "potion", "color": 13, "item_class": "potion",
+        "value": 150, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+    "potion_of_speed": {
+        "name": "potion of speed", "category": "potion", "color": 10, "item_class": "potion",
+        "value": 200, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+
+    "scroll_lightning": {
+        "name": "scroll of lightning bolt", "category": "scroll", "color": 3, "item_class": "scroll",
+        "value": 150, "pickable_type": "targeted_scroll", "range": 5, "damage": 20,
+        "target_mode": "auto_nearest", "scroll_animation": "lightning",
+        "base_weight": 20, "level_minimum": 2, "level_scaling": 0.2
+    },
+    "scroll_fireball": {
+        "name": "scroll of fireball", "category": "scroll", "color": 19, "item_class": "scroll",
+        "value": 100, "pickable_type": "targeted_scroll", "range": 3, "damage": 12,
+        "target_mode": "pick_tile_aoe", "scroll_animation": "explosion",
+        "base_weight": 15, "level_minimum": 3, "level_scaling": 0.3
+    },
+    "scroll_confusion": {
+        "name": "scroll of confusion", "category": "scroll", "color": 4, "item_class": "scroll",
+        "value": 120, "pickable_type": "targeted_scroll", "range": 10, "confuse_turns": 8,
+        "target_mode": "pick_tile_single", "scroll_animation": "none",
+        "base_weight": 15, "level_minimum": 2, "level_scaling": 0.2
+    },
+    "scroll_teleport": {
+        "name": "scroll of teleportation", "category": "scroll", "color": 14, "item_class": "scroll",
+        "value": 200, "pickable_type": "teleporter"
+    },
+    "scroll_sleep": {
+        "name": "scroll of sleep", "category": "scroll", "color": 13, "item_class": "scroll",
+        "value": 100, "pickable_type": "targeted_scroll", "duration": 5,
+        "consumable_buff": "sleep", "target_mode": "fov_buff", "scroll_animation": "none",
+        "base_weight": 20, "level_minimum": 1, "level_scaling": 0.1
+    },
+    "scroll_hold_person": {
+        "name": "scroll of hold person", "category": "scroll", "color": 1, "item_class": "scroll",
+        "value": 150, "pickable_type": "targeted_scroll", "duration": 8,
+        "consumable_buff": "hold_person", "target_mode": "fov_buff", "scroll_animation": "none",
+        "base_weight": 15, "level_minimum": 2, "level_scaling": 0.15
+    },
+
+    "dagger": {
+        "name": "dagger", "category": "weapon", "color": 1, "item_class": "dagger",
+        "value": 2, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "tiny",
+        "base_weight": 3, "level_minimum": 1, "level_maximum": 3, "level_scaling": -0.5
+    },
+    "short_sword": {
+        "name": "short sword", "category": "weapon", "color": 1, "item_class": "sword",
+        "value": 10, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "small",
+        "base_weight": 5, "level_minimum": 1, "level_maximum": 4, "level_scaling": -0.4
+    },
+    "long_sword": {
+        "name": "long sword", "category": "weapon", "color": 1, "item_class": "sword",
+        "value": 15, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium",
+        "base_weight": 6, "level_minimum": 1, "level_scaling": -0.2
+    },
+    "bastard_sword": {
+        "name": "bastard sword", "color": 1, "item_class": "sword",
+        "value": 25, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "two_handed_sword": {
+        "name": "two-handed sword", "color": 1, "item_class": "great_sword",
+        "value": 45, "pickable_type": "weapon", "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "great_sword": {
+        "name": "greatsword", "color": 1, "item_class": "great_sword",
+        "value": 50, "pickable_type": "weapon", "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "scimitar": {
+        "name": "scimitar", "color": 1, "item_class": "sword",
+        "value": 15, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "rapier": {
+        "name": "rapier", "color": 1, "item_class": "sword",
+        "value": 15, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "hand_axe": {
+        "name": "hand axe", "color": 1, "item_class": "axe",
+        "value": 8, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "small"
+    },
+    "battle_axe": {
+        "name": "battle axe", "category": "weapon", "color": 1, "item_class": "axe",
+        "value": 25, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "great_axe": {
+        "name": "great axe", "color": 1, "item_class": "axe",
+        "value": 40, "pickable_type": "weapon", "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "war_hammer": {
+        "name": "war hammer", "color": 1, "item_class": "hammer",
+        "value": 20, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "mace": {
+        "name": "mace", "category": "weapon", "color": 1, "item_class": "mace",
+        "value": 8, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "morning_star": {
+        "name": "morning star", "color": 1, "item_class": "mace",
+        "value": 10, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "flail": {
+        "name": "flail", "color": 1, "item_class": "mace",
+        "value": 8, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "medium"
+    },
+    "club": {
+        "name": "club", "color": 21, "item_class": "mace",
+        "value": 1, "pickable_type": "weapon", "hand_requirement": "one_handed", "weapon_size": "small"
+    },
+    "quarterstaff": {
+        "name": "quarterstaff", "color": 21, "item_class": "staff",
+        "value": 1, "pickable_type": "weapon", "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "staff": {
+        "name": "staff", "category": "weapon", "color": 1, "item_class": "staff",
+        "value": 6, "pickable_type": "weapon", "hand_requirement": "two_handed", "weapon_size": "large",
+        "base_weight": 8, "level_minimum": 2, "level_scaling": 0.1
+    },
+
+    "short_bow": {
+        "name": "short bow", "color": 21, "item_class": "bow",
+        "value": 30, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "medium"
+    },
+    "long_bow": {
+        "name": "longbow", "category": "weapon", "color": 3, "item_class": "bow",
+        "value": 75, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "large",
+        "base_weight": 12, "level_minimum": 3, "level_scaling": 0.3
+    },
+    "composite_bow": {
+        "name": "composite bow", "color": 11, "item_class": "bow",
+        "value": 100, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "light_crossbow": {
+        "name": "light crossbow", "color": 1, "item_class": "crossbow",
+        "value": 35, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "medium"
+    },
+    "heavy_crossbow": {
+        "name": "heavy crossbow", "color": 1, "item_class": "crossbow",
+        "value": 50, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "large"
+    },
+    "crossbow": {
+        "name": "crossbow", "color": 1, "item_class": "crossbow",
+        "value": 35, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "two_handed", "weapon_size": "medium"
+    },
+    "sling": {
+        "name": "sling", "color": 21, "item_class": "bow",
+        "value": 1, "pickable_type": "weapon", "ranged": true,
+        "hand_requirement": "one_handed", "weapon_size": "small"
+    },
+
+    "small_shield": {
+        "name": "small shield", "color": 1, "item_class": "shield",
+        "value": 5, "pickable_type": "shield"
+    },
+    "medium_shield": {
+        "name": "shield", "category": "armor", "color": 1, "item_class": "shield",
+        "value": 10, "pickable_type": "shield"
+    },
+    "large_shield": {
+        "name": "large shield", "color": 1, "item_class": "shield",
+        "value": 15, "pickable_type": "shield"
+    },
+
+    "padded_armor": {
+        "name": "padded armor", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 4, "pickable_type": "armor", "ac_bonus": -2,
+        "base_weight": 3, "level_minimum": 1, "level_maximum": 3, "level_scaling": -0.5
+    },
+    "leather_armor": {
+        "name": "leather armor", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 5, "pickable_type": "armor", "ac_bonus": -2,
+        "base_weight": 2, "level_minimum": 1, "level_scaling": -0.4
+    },
+    "studded_leather": {
+        "name": "studded leather", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 20, "pickable_type": "armor", "ac_bonus": -3,
+        "base_weight": 3, "level_minimum": 1, "level_maximum": 5, "level_scaling": -0.2
+    },
+    "hide_armor": {
+        "name": "hide armor", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 15, "pickable_type": "armor", "ac_bonus": -3,
+        "base_weight": 2, "level_minimum": 1, "level_maximum": 5, "level_scaling": -0.2
+    },
+    "ring_mail": {
+        "name": "ring mail", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 30, "pickable_type": "armor", "ac_bonus": -3,
+        "base_weight": 3, "level_minimum": 2, "level_maximum": 6, "level_scaling": -0.2
+    },
+    "scale_mail": {
+        "name": "scale mail", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 45, "pickable_type": "armor", "ac_bonus": -4,
+        "base_weight": 3, "level_minimum": 3, "level_maximum": 7, "level_scaling": -0.1
+    },
+    "chain_mail": {
+        "name": "chain mail", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 75, "pickable_type": "armor", "ac_bonus": -5,
+        "base_weight": 3, "level_minimum": 3, "level_scaling": -0.3
+    },
+    "brigandine": {
+        "name": "brigandine", "category": "armor", "color": 21, "item_class": "armor",
+        "value": 120, "pickable_type": "armor", "ac_bonus": -4,
+        "base_weight": 2, "level_minimum": 3, "level_maximum": 7, "level_scaling": -0.1
+    },
+    "splint_mail": {
+        "name": "splint mail", "category": "armor", "color": 1, "item_class": "armor",
+        "value": 80, "pickable_type": "armor", "ac_bonus": -6,
+        "base_weight": 2, "level_minimum": 5, "level_scaling": 0.1
+    },
+    "banded_mail": {
+        "name": "banded mail", "category": "armor", "color": 1, "item_class": "armor",
+        "value": 90, "pickable_type": "armor", "ac_bonus": -6,
+        "base_weight": 2, "level_minimum": 5, "level_scaling": 0.1
+    },
+    "plate_mail": {
+        "name": "plate mail", "category": "armor", "color": 1, "item_class": "armor",
+        "value": 400, "pickable_type": "armor", "ac_bonus": -7,
+        "base_weight": 1, "level_minimum": 5, "level_scaling": -0.5
+    },
+    "field_plate": {
+        "name": "field plate", "category": "armor", "color": 1, "item_class": "armor",
+        "value": 2000, "pickable_type": "armor", "ac_bonus": -8,
+        "base_weight": 1, "level_minimum": 7, "level_scaling": 0.2
+    },
+    "full_plate": {
+        "name": "full plate", "category": "armor", "color": 1, "item_class": "armor",
+        "value": 4000, "pickable_type": "armor", "ac_bonus": -9,
+        "base_weight": 1, "level_minimum": 9, "level_scaling": 0.3
+    },
+
+    "helm_of_brilliance": {
+        "name": "helm of brilliance", "category": "magical_helm", "color": 11, "item_class": "helmet",
+        "value": 12000, "pickable_type": "magical_helm", "effect": "brilliance",
+        "base_weight": 1, "level_minimum": 6, "level_scaling": 0.15
+    },
+    "helm_of_teleportation": {
+        "name": "helm of teleportation", "color": 14, "item_class": "helmet",
+        "value": 7500, "pickable_type": "magical_helm", "effect": "teleportation"
+    },
+    "helm_of_telepathy": {
+        "name": "helm of telepathy", "color": 12, "item_class": "helmet",
+        "value": 8000, "pickable_type": "magical_helm", "effect": "telepathy"
+    },
+    "helm_of_underwater_action": {
+        "name": "helm of underwater action", "color": 13, "item_class": "helmet",
+        "value": 6000, "pickable_type": "magical_helm", "effect": "underwater_action"
+    },
+
+    "ring_of_protection_plus_1": {
+        "name": "ring of protection +1", "category": "magical_ring", "color": 13, "item_class": "ring",
+        "value": 2000, "pickable_type": "magical_ring", "effect": "protection", "effect_bonus": 1,
+        "base_weight": 2, "level_minimum": 3, "level_scaling": 0.3
+    },
+    "ring_of_protection_plus_2": {
+        "name": "ring of protection +2", "category": "magical_ring", "color": 13, "item_class": "ring",
+        "value": 5000, "pickable_type": "magical_ring", "effect": "protection", "effect_bonus": 2,
+        "base_weight": 1, "level_minimum": 6, "level_scaling": 0.4
+    },
+    "ring_of_free_action": {
+        "name": "ring of free action", "category": "magical_ring", "color": 10, "item_class": "ring",
+        "value": 4000, "pickable_type": "magical_ring", "effect": "free_action",
+        "base_weight": 1, "level_minimum": 4, "level_scaling": 0.3
+    },
+    "ring_of_regeneration": {
+        "name": "ring of regeneration", "category": "magical_ring", "color": 9, "item_class": "ring",
+        "value": 8000, "pickable_type": "magical_ring", "effect": "regeneration",
+        "base_weight": 1, "level_minimum": 7, "level_scaling": 0.5
+    },
+    "ring_of_invisibility": {
+        "name": "ring of invisibility", "category": "magical_ring", "color": 1, "item_class": "ring",
+        "value": 6000, "pickable_type": "magical_ring", "effect": "invisibility",
+        "base_weight": 1, "level_minimum": 6, "level_scaling": 0.4
+    },
+    "ring_of_fire_resistance": {
+        "name": "ring of fire resistance", "color": 9, "item_class": "ring",
+        "value": 5000, "pickable_type": "magical_ring", "effect": "fire_resistance"
+    },
+    "ring_of_cold_resistance": {
+        "name": "ring of cold resistance", "color": 13, "item_class": "ring",
+        "value": 5000, "pickable_type": "magical_ring", "effect": "cold_resistance"
+    },
+    "ring_of_spell_storing": {
+        "name": "ring of spell storing", "color": 14, "item_class": "ring",
+        "value": 10000, "pickable_type": "magical_ring", "effect": "spell_storing"
+    },
+
+    "amulet_of_health": {
+        "name": "amulet of health", "color": 9, "item_class": "amulet",
+        "value": 200, "pickable_type": "jewelry_amulet", "con_bonus": 1
+    },
+    "amulet_of_wisdom": {
+        "name": "amulet of wisdom", "color": 12, "item_class": "amulet",
+        "value": 200, "pickable_type": "jewelry_amulet", "wis_bonus": 1
+    },
+    "amulet_of_protection": {
+        "name": "amulet of protection", "color": 13, "item_class": "amulet",
+        "value": 150, "pickable_type": "jewelry_amulet"
+    },
+    "amulet_of_ogre_power": {
+        "name": "amulet of ogre power", "color": 9, "item_class": "amulet",
+        "value": 3000, "pickable_type": "jewelry_amulet",
+        "effect": "protection", "effect_bonus": 1, "str_bonus": 18, "is_set_mode": true
+    },
+    "amulet_of_yendor": {
+        "name": "Amulet of Yendor", "color": 11, "item_class": "quest_item",
+        "value": 50000, "pickable_type": "quest_item"
+    },
+
+    "gauntlets_of_ogre_power": {
+        "name": "gauntlets of ogre power", "category": "gauntlets", "color": 9, "item_class": "gauntlets",
+        "value": 3000, "pickable_type": "gauntlets", "str_bonus": 18, "is_set_mode": true,
+        "base_weight": 1, "level_minimum": 5, "level_scaling": 0.4
+    },
+    "gauntlets_of_dexterity": {
+        "name": "gauntlets of dexterity", "category": "gauntlets", "color": 10, "item_class": "gauntlets",
+        "value": 2000, "pickable_type": "gauntlets", "dex_bonus": 2,
+        "base_weight": 1, "level_minimum": 4, "level_scaling": 0.3
+    },
+    "gauntlets_of_swimming_and_climbing": {
+        "name": "gauntlets of swimming and climbing", "color": 12, "item_class": "gauntlets",
+        "value": 3000, "pickable_type": "gauntlets", "str_bonus": 2
+    },
+    "gauntlets_of_fumbling": {
+        "name": "gauntlets of fumbling", "color": 9, "item_class": "gauntlets",
+        "value": 1, "pickable_type": "gauntlets", "dex_bonus": -2
+    },
+    "boots_of_speed": {
+        "name": "boots of speed", "color": 10, "item_class": "gauntlets",
+        "value": 5000, "pickable_type": "gauntlets", "dex_bonus": 2
+    },
+    "boots_of_elvenkind": {
+        "name": "boots of elvenkind", "color": 10, "item_class": "gauntlets",
+        "value": 3000, "pickable_type": "gauntlets", "dex_bonus": 1
+    },
+    "cloak_of_protection": {
+        "name": "cloak of protection", "color": 13, "item_class": "gauntlets",
+        "value": 3000, "pickable_type": "gauntlets", "effect": "protection", "effect_bonus": 1
+    },
+    "cloak_of_displacement": {
+        "name": "cloak of displacement", "color": 14, "item_class": "gauntlets",
+        "value": 5000, "pickable_type": "gauntlets"
+    },
+    "cloak_of_elvenkind": {
+        "name": "cloak of elvenkind", "color": 10, "item_class": "gauntlets",
+        "value": 4000, "pickable_type": "gauntlets", "dex_bonus": 1
+    },
+
+    "girdle_of_hill_giant_strength": {
+        "name": "girdle of hill giant strength", "category": "girdle", "color": 21, "item_class": "girdle",
+        "value": 5000, "pickable_type": "girdle", "str_bonus": 19, "is_set_mode": true,
+        "base_weight": 1, "level_minimum": 6, "level_scaling": 0.5
+    },
+    "girdle_of_stone_giant_strength": {
+        "name": "girdle of stone giant strength", "color": 21, "item_class": "girdle",
+        "value": 6000, "pickable_type": "girdle", "str_bonus": 20, "is_set_mode": true
+    },
+    "girdle_of_frost_giant_strength": {
+        "name": "girdle of frost giant strength", "category": "girdle", "color": 13, "item_class": "girdle",
+        "value": 8000, "pickable_type": "girdle", "str_bonus": 21, "is_set_mode": true,
+        "base_weight": 1, "level_minimum": 8, "level_scaling": 0.6
+    },
+    "girdle_of_fire_giant_strength": {
+        "name": "girdle of fire giant strength", "color": 9, "item_class": "girdle",
+        "value": 10000, "pickable_type": "girdle", "str_bonus": 22, "is_set_mode": true
+    },
+    "girdle_of_cloud_giant_strength": {
+        "name": "girdle of cloud giant strength", "color": 1, "item_class": "girdle",
+        "value": 12000, "pickable_type": "girdle", "str_bonus": 23, "is_set_mode": true
+    },
+    "girdle_of_storm_giant_strength": {
+        "name": "girdle of storm giant strength", "color": 11, "item_class": "girdle",
+        "value": 15000, "pickable_type": "girdle", "str_bonus": 24, "is_set_mode": true
+    },
+
+    "food_ration": {
+        "name": "ration", "category": "food", "color": 4, "item_class": "food",
+        "value": 10, "pickable_type": "food", "nutrition_value": 300,
+        "base_weight": 25, "level_minimum": 1, "level_scaling": 0.1
+    },
+    "fruit": {
+        "name": "fruit", "category": "food", "color": 10, "item_class": "food",
+        "value": 3, "pickable_type": "food", "nutrition_value": 100,
+        "base_weight": 15, "level_minimum": 1
+    },
+    "bread": {
+        "name": "bread", "category": "food", "color": 19, "item_class": "food",
+        "value": 5, "pickable_type": "food", "nutrition_value": 200,
+        "base_weight": 12, "level_minimum": 1
+    },
+    "meat": {
+        "name": "meat", "category": "food", "color": 9, "item_class": "food",
+        "value": 8, "pickable_type": "food", "nutrition_value": 250,
+        "base_weight": 8, "level_minimum": 2, "level_scaling": 0.1
+    },
+
+    "gold_coin": {
+        "name": "gold pile", "category": "gold", "color": 11, "item_class": "gold_coin",
+        "value": 0, "pickable_type": "gold_coin",
+        "base_weight": 25, "level_minimum": 1, "level_scaling": 0.1
+    },
+    "gem": {
+        "name": "gem", "color": 11, "item_class": "gem",
+        "value": 100, "pickable_type": "gold_coin"
+    },
+    "torch": {
+        "name": "torch", "color": 11, "item_class": "tool",
+        "value": 1, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+    "rope": {
+        "name": "rope", "color": 21, "item_class": "tool",
+        "value": 1, "pickable_type": "consumable", "consumable_effect": "none"
+    },
+    "lockpick": {
+        "name": "lockpick", "color": 1, "item_class": "tool",
+        "value": 5, "pickable_type": "consumable", "consumable_effect": "none"
+    }
+}

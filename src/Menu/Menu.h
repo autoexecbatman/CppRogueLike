@@ -31,6 +31,11 @@ class RoomEditorEntry : public IMenuState
 	void on_selection(GameContext& ctx) override;
 };
 
+class ItemEditorEntry : public IMenuState
+{
+	void on_selection(GameContext& ctx) override;
+};
+
 class MonsterEditorEntry : public IMenuState
 {
 	void on_selection(GameContext& ctx) override;
@@ -49,7 +54,7 @@ class Quit : public IMenuState
 class Menu : public BaseMenu
 {
 	bool isStartupMenu{ true }; // Track if this is the startup menu (default true)
-	int menu_height{ 9 };
+	int menu_height{ 10 };
 	int menu_width{ 16 };
 	int menu_starty{ 0 };
 	int menu_startx{ 0 };
@@ -61,6 +66,7 @@ class Menu : public BaseMenu
 		ROOM_EDITOR,
 		MONSTER_EDITOR,
 		SPELL_EDITOR,
+		ITEM_EDITOR,
 		QUIT
 	} currentState{ MenuState::NEW_GAME };
 	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
@@ -71,6 +77,7 @@ class Menu : public BaseMenu
 		{ MenuState::ROOM_EDITOR, "Room Editor" },
 		{ MenuState::MONSTER_EDITOR, "Monster Editor" },
 		{ MenuState::SPELL_EDITOR, "Spell Editor" },
+		{ MenuState::ITEM_EDITOR, "Item Editor" },
 		{ MenuState::QUIT, "Quit" }
 	};
 
@@ -90,6 +97,10 @@ class Menu : public BaseMenu
 public:
 	Menu(bool startup, GameContext& ctx);
 	~Menu();
+	Menu(const Menu&) = delete;
+	Menu& operator=(const Menu&) = delete;
+	Menu(Menu&&) = delete;
+	Menu& operator=(Menu&&) = delete;
 
 	void draw();
 	void on_key(int key, GameContext& ctx);

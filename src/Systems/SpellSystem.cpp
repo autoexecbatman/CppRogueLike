@@ -438,13 +438,16 @@ bool SpellSystem::dispatch_effect(SpellEffectType effect, Creature& caster, Game
 	{
 	case SpellEffectType::CURE_LIGHT_WOUNDS: return cast_cure_light_wounds(caster, ctx);
 	case SpellEffectType::BLESS:             return cast_bless(caster, ctx);
-	case SpellEffectType::FIREBALL:          return cast_fireball(caster, ctx);
+	case SpellEffectType::SANCTUARY:         return cast_sanctuary(caster, ctx);
+	case SpellEffectType::HOLD_PERSON:       return cast_hold_person(caster, ctx);
+	case SpellEffectType::SILENCE:           return cast_silence(caster, ctx);
 	case SpellEffectType::MAGIC_MISSILE:     return cast_magic_missile(caster, ctx);
 	case SpellEffectType::SHIELD:            return cast_shield(caster, ctx);
 	case SpellEffectType::SLEEP:             return cast_sleep(caster, ctx);
 	case SpellEffectType::INVISIBILITY:      return cast_invisibility(caster, ctx);
+	case SpellEffectType::WEB:               return cast_web(caster, ctx);
+	case SpellEffectType::FIREBALL:          return cast_fireball(caster, ctx);
 	case SpellEffectType::TELEPORT:          return cast_teleport(caster, ctx);
-	case SpellEffectType::HOLD_PERSON:       return cast_hold_person(caster, ctx);
 	default:
 		ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
 		return false;
@@ -453,6 +456,11 @@ bool SpellSystem::dispatch_effect(SpellEffectType effect, Creature& caster, Game
 
 bool SpellSystem::cast_spell_by_key(std::string_view key, Creature& caster, GameContext& ctx)
 {
+	if (caster.has_state(ActorState::IS_SILENCED))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);
+		return false;
+	}
 	const SpellDefinition& def = get_by_key(key);
 	return dispatch_effect(def.effect_type, caster, ctx);
 }
@@ -499,6 +507,124 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
 	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
 	ctx.message_system->finalize_message();
+	return true;
+}
+
+bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
+{
+	// AD&D 2e: Duration 3 rounds + 1 round/level. Cancelled by attacking.
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
+	int duration = 3 + casterLevel;
+
+	ctx.buff_system->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
+
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sanctuary! ");
+	ctx.message_system->append_message_part(
+		WHITE_BLACK_PAIR,
+		std::format("Divine protection shields you for {} turns.", duration));
+	ctx.message_system->finalize_message();
+	return true;
+}
+
+bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
+{
+	// AD&D 2e: Duration 2 rounds/level. Targeted single creature. Prevents spellcasting.
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
+	int duration = 2 * casterLevel;
+	int range = 5 + casterLevel;
+
+	TargetingSystem targeting;
+	Vector2D target_pos{ 0, 0 };
+	if (!targeting.pick_tile(ctx, &target_pos, range))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Silence cancelled.", true);
+		return false;
+	}
+
+	Creature* target = nullptr;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (creature && creature->position == target_pos && !creature->destructible->is_dead())
+		{
+			target = creature.get();
+			break;
+		}
+	}
+
+	if (!target)
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "No creature at that location.", true);
+		return false;
+	}
+
+	ctx.buff_system->add_buff(*target, BuffType::SILENCE, 0, duration, false);
+	SpellAnimations::animate_creature_hit(target->position, ctx);
+
+	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
+	ctx.message_system->append_message_part(
+		WHITE_BLACK_PAIR,
+		std::format("{} is struck mute for {} turns.", target->get_name(), duration));
+	ctx.message_system->finalize_message();
+	return true;
+}
+
+bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
+{
+	// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled. Duration 2 rounds/level.
+	auto* player = dynamic_cast<Player*>(&caster);
+	int casterLevel = player ? player->get_creature_level() : 1;
+	int range = 5 * casterLevel;
+	int radius = 2;
+	int duration = 2 * casterLevel;
+
+	TargetingSystem targeting;
+	Vector2D center{ 0, 0 };
+	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "Web cancelled.", true);
+		return false;
+	}
+
+	int affected = 0;
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (!creature || creature->destructible->is_dead())
+		{
+			continue;
+		}
+		if (creature->get_tile_distance(center) > radius)
+		{
+			continue;
+		}
+
+		// AD&D 2e: Save vs. Paralyzation (d20 >= 10) avoids entanglement
+		int save = ctx.dice->roll(1, 20);
+		if (save < 10)
+		{
+			ctx.buff_system->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
+			SpellAnimations::animate_creature_hit(creature->position, ctx);
+			++affected;
+		}
+	}
+
+	if (affected > 0)
+	{
+		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Web! ");
+		ctx.message_system->append_message_part(
+			WHITE_BLACK_PAIR,
+			std::format(
+				"{} creature{} entangled for {} turns.",
+				affected,
+				affected == 1 ? " is" : "s are",
+				duration));
+		ctx.message_system->finalize_message();
+	}
+	else
+	{
+		ctx.message_system->message(WHITE_BLACK_PAIR, "The webs spread but catch nothing.", true);
+	}
 	return true;
 }
 

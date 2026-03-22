@@ -10,6 +10,7 @@
 #include <raylib.h>
 
 #include "Core/Paths.h"
+#include "Factories/ItemCreator.h"
 #include "Factories/MonsterCreator.h"
 #include "Game.h"
 #include "Menu/Menu.h"
@@ -53,6 +54,8 @@ int main()
 	// Load data before Game construction (MonsterFactory is built inside Map ctor).
 	MonsterCreator::load(Paths::MONSTERS);
 	SpellSystem::load(Paths::SPELLS);
+	ItemCreator::load(Paths::ITEMS);
+	ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
 
 	// Game owns everything including Renderer and InputSystem
 	Game game;

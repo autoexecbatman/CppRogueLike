@@ -84,6 +84,10 @@ class MenuRace : public BaseMenu
 public:
 	MenuRace(GameContext& ctx);
 	~MenuRace();
+	MenuRace(const MenuRace&) = delete;
+	MenuRace& operator=(const MenuRace&) = delete;
+	MenuRace(MenuRace&&) = delete;
+	MenuRace& operator=(MenuRace&&) = delete;
 
 	void draw();
 	void menu(GameContext& ctx) override;

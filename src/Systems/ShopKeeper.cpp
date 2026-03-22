@@ -12,6 +12,7 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h" // SINGLE SOURCE OF TRUTH
+#include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
@@ -163,7 +164,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(GameContext& ctx)
 		item = ItemCreator::create_random_of_category("potion", shop_pos, ctx, level);
 		break;
 	case 3:
-		item = ItemCreator::create(ItemId::FOOD_RATION, shop_pos);
+		item = ItemCreator::create("food_ration", shop_pos, *ctx.content_registry);
 		break;
 	}
 

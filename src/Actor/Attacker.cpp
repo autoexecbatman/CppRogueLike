@@ -28,7 +28,7 @@
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> buff_break_messages = {
 	{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
-	// Future extensions: {BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!"},
+	{ BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!" },
 };
 
 Attacker::Attacker(const DamageInfo& damage)
@@ -342,7 +342,7 @@ DamageInfo Attacker::get_attack_damage(Creature& attacker) const
 		if (weapon && weapon->is_weapon())
 		{
 			const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-			return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemId, enhancement);
+			return WeaponDamageRegistry::get_enhanced_damage_info(weapon->item_key, enhancement);
 		}
 		return WeaponDamageRegistry::get_unarmed_damage_info();
 	}

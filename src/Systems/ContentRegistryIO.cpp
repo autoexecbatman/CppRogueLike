@@ -9,7 +9,6 @@
 #include <nlohmann/json.hpp>
 
 #include "../Core/Paths.h"
-#include "../Items/ItemClassification.h"
 #include "../Renderer/Renderer.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
@@ -34,20 +33,12 @@ void load(ContentRegistry& reg, std::string_view path)
 	{
 		for (auto& [key, val] : root["items"].items())
 		{
-			for (int i = 1; i <= static_cast<int>(ItemId::LOCKPICK); ++i)
-			{
-				ItemId id = static_cast<ItemId>(i);
-				if (ContentRegistry::item_key(id) == key)
-				{
-					TileRef t{
-						static_cast<TileSheet>(val.at("sheet").get<int>()),
-						val.at("col").get<int>(),
-						val.at("row").get<int>()
-					};
-					reg.set_tile(id, t);
-					break;
-				}
-			}
+			TileRef t{
+				static_cast<TileSheet>(val.at("sheet").get<int>()),
+				val.at("col").get<int>(),
+				val.at("row").get<int>()
+			};
+			reg.set_tile(key, t);
 		}
 	}
 }
@@ -67,11 +58,8 @@ void save(const ContentRegistry& reg, std::string_view path)
 	};
 
 	nlohmann::json items_obj = nlohmann::json::object();
-	for (int i = 1; i <= static_cast<int>(ItemId::LOCKPICK); ++i)
-	{
-		ItemId id = static_cast<ItemId>(i);
-		items_obj[std::string{ ContentRegistry::item_key(id) }] = encode_tile(reg.get_tile(id));
-	}
+	for (const auto& [key, tile] : reg.all_tiles())
+		items_obj[key] = encode_tile(tile);
 
 	nlohmann::json root;
 	root["items"] = items_obj;

@@ -1,0 +1,46 @@
+[
+    {
+        "enhancement_category": "weapon",
+        "item_pool": ["dagger", "short_sword", "hand_axe", "club", "sling", "short_bow"],
+        "base_weight": 8,
+        "level_minimum": 1,
+        "level_maximum": 4,
+        "level_scaling": 0.2,
+        "category": "enhanced_weapon"
+    },
+    {
+        "enhancement_category": "weapon",
+        "item_pool": [
+            "long_sword", "bastard_sword", "scimitar", "rapier", "great_sword",
+            "two_handed_sword", "battle_axe", "great_axe", "war_hammer", "mace",
+            "morning_star", "flail", "staff", "quarterstaff",
+            "long_bow", "composite_bow", "light_crossbow", "heavy_crossbow"
+        ],
+        "base_weight": 5,
+        "level_minimum": 3,
+        "level_maximum": 0,
+        "level_scaling": 0.4,
+        "category": "enhanced_weapon"
+    },
+    {
+        "enhancement_category": "armor",
+        "item_pool": ["padded_armor", "leather_armor", "studded_leather", "hide_armor", "ring_mail"],
+        "base_weight": 6,
+        "level_minimum": 1,
+        "level_maximum": 5,
+        "level_scaling": 0.2,
+        "category": "enhanced_armor"
+    },
+    {
+        "enhancement_category": "armor",
+        "item_pool": [
+            "scale_mail", "chain_mail", "brigandine", "splint_mail",
+            "banded_mail", "plate_mail", "field_plate", "full_plate"
+        ],
+        "base_weight": 4,
+        "level_minimum": 4,
+        "level_maximum": 0,
+        "level_scaling": 0.4,
+        "category": "enhanced_armor"
+    }
+]

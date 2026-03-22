@@ -5,6 +5,7 @@
 #include "src/Actor/Attacker.h"
 #include "src/Ai/AiPlayer.h"
 #include "src/Factories/ItemCreator.h"
+#include "src/Systems/ContentRegistry.h"
 
 using json = nlohmann::json;
 
@@ -15,6 +16,8 @@ using json = nlohmann::json;
 
 class PlayerSerializationTest : public ::testing::Test {
 protected:
+    ContentRegistry content_registry;
+
     std::unique_ptr<Player> create_test_player() {
         auto player = std::make_unique<Player>(Vector2D{20, 10});
 
@@ -109,12 +112,12 @@ TEST_F(PlayerSerializationTest, EquippedItems_Preserved) {
     auto original = create_test_player();
 
     // Create and equip a sword
-    auto sword = ItemCreator::create(ItemId::LONG_SWORD, Vector2D{0, 0});
+    auto sword = ItemCreator::create("long_sword", Vector2D{0, 0}, content_registry);
     sword->set_value(100);
     original->equippedItems.emplace_back(std::move(sword), EquipmentSlot::RIGHT_HAND);
 
     // Create and equip armor
-    auto armor = ItemCreator::create(ItemId::CHAIN_MAIL, Vector2D{0, 0});
+    auto armor = ItemCreator::create("chain_mail", Vector2D{0, 0}, content_registry);
     armor->set_value(200);
     original->equippedItems.emplace_back(std::move(armor), EquipmentSlot::BODY);
 

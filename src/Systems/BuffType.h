@@ -20,6 +20,9 @@ enum class BuffType
 	POISON_RESISTANCE,
 	SLEEP,
 	HOLD_PERSON,
+	SANCTUARY,
+	SILENCE,
+	WEBBED,
 };
 
 struct Buff

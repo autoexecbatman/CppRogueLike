@@ -12,7 +12,6 @@
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
 #include "../Factories/MonsterCreator.h"
-#include "../Items/ItemClassification.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Utils/Vector2D.h"
@@ -41,7 +40,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	ai = std::make_unique<AiMimic>();
 
-	init_disguises();
+	init_disguises(*ctx.content_registry);
 
 	if (!possibleDisguises.empty())
 	{
@@ -59,21 +58,21 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	remove_state(ActorState::BLOCKS);
 }
 
-void Mimic::init_disguises()
+void Mimic::init_disguises(ContentRegistry& registry)
 {
 	// Pull tile/name/color from registries — single source of truth.
-	auto from_item = [](ItemId id) -> Disguise
+	auto from_item = [&registry](std::string_view key) -> Disguise
 	{
-		const auto& p = ItemCreator::get_params(id);
-		return { ContentRegistry::instance().get_tile(id), std::string(p.name), p.color };
+		const auto& p = ItemCreator::get_params(key);
+		return { registry.get_tile(key), std::string(p.name), p.color };
 	};
 
 	possibleDisguises = {
-		from_item(ItemId::GOLD_COIN),
-		from_item(ItemId::HEALTH_POTION),
-		from_item(ItemId::SCROLL_LIGHTNING),
-		from_item(ItemId::SHORT_SWORD),
-		from_item(ItemId::FOOD_RATION),
+		from_item("gold_coin"),
+		from_item("health_potion"),
+		from_item("scroll_lightning"),
+		from_item("short_sword"),
+		from_item("food_ration"),
 	};
 }
 

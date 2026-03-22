@@ -18,6 +18,7 @@
 #include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Menu/Menu.h"
@@ -48,22 +49,22 @@ struct PossibleMoves
 {
 	std::unordered_map<Controls, Vector2D> moves = {
 		// Arrow keys
-		{ Controls::UP_ARROW, { 0, -1 } },
-		{ Controls::DOWN_ARROW, { 0, 1 } },
-		{ Controls::LEFT_ARROW, { -1, 0 } },
-		{ Controls::RIGHT_ARROW, { 1, 0 } },
+		{ Controls::UP_ARROW, DIR_N },
+		{ Controls::DOWN_ARROW, DIR_S },
+		{ Controls::LEFT_ARROW, DIR_W },
+		{ Controls::RIGHT_ARROW, DIR_E },
 
 		// WASD movement
-		{ Controls::W_KEY, { 0, -1 } },
-		{ Controls::S_KEY, { 0, 1 } },
-		{ Controls::A_KEY, { -1, 0 } },
-		{ Controls::D_KEY, { 1, 0 } },
+		{ Controls::W_KEY, DIR_N },
+		{ Controls::S_KEY, DIR_S },
+		{ Controls::A_KEY, DIR_W },
+		{ Controls::D_KEY, DIR_E },
 
 		// WASD diagonals
-		{ Controls::Q_KEY, { -1, -1 } }, // up-left
-		{ Controls::E_KEY, { 1, -1 } }, // up-right
-		{ Controls::Z_KEY, { -1, 1 } }, // down-left
-		{ Controls::C_KEY, { 1, 1 } }, // down-right
+		{ Controls::Q_KEY, DIR_NW },
+		{ Controls::E_KEY, DIR_NE },
+		{ Controls::Z_KEY, DIR_SW },
+		{ Controls::C_KEY, DIR_SE },
 	};
 } m;
 
@@ -667,7 +668,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
-		InventoryOperations::add_item(player.inventory_data, ItemCreator::create(ItemId::LONG_BOW, player.position));
+		InventoryOperations::add_item(player.inventory_data, ItemCreator::create("long_bow", player.position, *ctx.content_registry));
 		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		// Give wizard spells for animation/targeting testing

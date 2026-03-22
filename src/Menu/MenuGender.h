@@ -56,6 +56,10 @@ class MenuGender : public BaseMenu
 public:
 	MenuGender(GameContext& ctx);
 	~MenuGender();
+	MenuGender(const MenuGender&) = delete;
+	MenuGender& operator=(const MenuGender&) = delete;
+	MenuGender(MenuGender&&) = delete;
+	MenuGender& operator=(MenuGender&&) = delete;
 
 	void draw();
 	void on_key(int key, GameContext& ctx);

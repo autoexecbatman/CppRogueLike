@@ -33,6 +33,10 @@ class MenuBuy : public BaseMenu
 public:
 	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);
 	~MenuBuy();
+	MenuBuy(const MenuBuy&) = delete;
+	MenuBuy& operator=(const MenuBuy&) = delete;
+	MenuBuy(MenuBuy&&) = delete;
+	MenuBuy& operator=(MenuBuy&&) = delete;
 
 	void draw();
 	void on_key(int key, GameContext& ctx);

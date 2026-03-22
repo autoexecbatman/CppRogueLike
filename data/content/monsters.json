@@ -1,286 +1,708 @@
 {
-    "goblin": {
-        "tile":        { "sheet": 6, "col": 0, "row": 4 },
-        "color":       11,
-        "corpse":      "dead goblin",
-        "hp":          { "num": 1, "sides": 8,  "bonus": -1 },
-        "thaco":       20,
-        "ac":          6,
-        "xp":          105,
-        "dr":          0,
-        "str":         { "num": 2, "sides": 6, "bonus": 1 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 0 },
-        "con":         { "num": 2, "sides": 6, "bonus": 1 },
-        "int":         { "num": 1, "sides": 6, "bonus": 3 },
-        "wis":         { "num": 1, "sides": 6, "bonus": 3 },
-        "cha":         { "num": 1, "sides": 4, "bonus": 1 },
-        "weapon":      "Short Sword",
-        "damage":      { "min": 1, "max": 6,  "display": "1d6",     "type": 0 },
-        "ai":          "melee",
-        "can_swim":    true,
-        "weight":      30,
-        "depth_min":   1,
-        "depth_max":   5,
-        "depth_scale": -0.2
-    },
-    "orc": {
-        "tile":        { "sheet": 6, "col": 3, "row": 4 },
-        "color":       9,
-        "corpse":      "dead orc",
-        "hp":          { "num": 1, "sides": 10, "bonus": 0 },
-        "thaco":       19,
-        "ac":          6,
-        "xp":          105,
-        "dr":          0,
-        "str":         { "num": 3, "sides": 6, "bonus": 1 },
-        "dex":         { "num": 2, "sides": 6, "bonus": 2 },
-        "con":         { "num": 3, "sides": 6, "bonus": 0 },
-        "int":         { "num": 2, "sides": 6, "bonus": 1 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 1 },
-        "cha":         { "num": 1, "sides": 6, "bonus": 2 },
-        "weapon":      "Long Sword",
-        "damage":      { "min": 1, "max": 8,  "display": "1d8",     "type": 0 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      15,
-        "depth_min":   2,
-        "depth_max":   0,
-        "depth_scale": 0.0
-    },
-    "troll": {
-        "tile":        { "sheet": 6, "col": 0, "row": 14 },
-        "color":       10,
-        "corpse":      "dead troll",
-        "hp":          { "num": 1, "sides": 12, "bonus": 0 },
-        "thaco":       13,
-        "ac":          4,
-        "xp":          300,
-        "dr":          1,
-        "str":         { "num": 4, "sides": 6, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 0 },
-        "con":         { "num": 4, "sides": 6, "bonus": 0 },
-        "int":         { "num": 1, "sides": 4, "bonus": 1 },
-        "wis":         { "num": 1, "sides": 4, "bonus": 2 },
-        "cha":         { "num": 1, "sides": 4, "bonus": 0 },
-        "weapon":      "Claws",
-        "damage":      { "min": 1, "max": 10, "display": "1d10",    "type": 0 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      7,
-        "depth_min":   4,
-        "depth_max":   0,
-        "depth_scale": 0.5
-    },
-    "dragon": {
-        "tile":        { "sheet": 8, "col": 3, "row": 3 },
-        "color":       19,
-        "corpse":      "dead dragon",
-        "hp":          { "num": 1, "sides": 12, "bonus": 5 },
-        "thaco":       9,
-        "ac":          1,
-        "xp":          600,
-        "dr":          2,
-        "str":         { "num": 5, "sides": 6, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 0 },
-        "con":         { "num": 5, "sides": 6, "bonus": 0 },
-        "int":         { "num": 3, "sides": 6, "bonus": 3 },
-        "wis":         { "num": 3, "sides": 6, "bonus": 0 },
-        "cha":         { "num": 4, "sides": 6, "bonus": 0 },
-        "weapon":      "Fiery Breath",
-        "damage":      { "min": 1, "max": 17, "display": "1d12+5",  "type": 1 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      3,
-        "depth_min":   5,
-        "depth_max":   0,
-        "depth_scale": 1.0
-    },
     "archer": {
-        "tile":        { "sheet": 6, "col": 2, "row": 12 },
-        "color":       9,
-        "corpse":      "dead archer",
-        "hp":          { "num": 1, "sides": 8,  "bonus": 0 },
-        "thaco":       18,
-        "ac":          7,
-        "xp":          120,
-        "dr":          0,
-        "str":         { "num": 3, "sides": 6, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 2 },
-        "con":         { "num": 3, "sides": 6, "bonus": 0 },
-        "int":         { "num": 3, "sides": 6, "bonus": 0 },
-        "wis":         { "num": 3, "sides": 6, "bonus": 0 },
-        "cha":         { "num": 3, "sides": 6, "bonus": 0 },
-        "weapon":      "Longbow",
-        "damage":      { "min": 1, "max": 6,  "display": "1d6",     "type": 0 },
-        "ai":          "ranged",
-        "can_swim":    false,
-        "weight":      10,
-        "depth_min":   2,
-        "depth_max":   0,
-        "depth_scale": 0.2
-    },
-    "mage": {
-        "tile":        { "sheet": 6, "col": 5, "row": 2 },
-        "color":       3,
-        "corpse":      "dead mage",
-        "hp":          { "num": 1, "sides": 6,  "bonus": 0 },
-        "thaco":       19,
-        "ac":          9,
-        "xp":          180,
-        "dr":          0,
-        "str":         { "num": 2, "sides": 6, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 0 },
-        "con":         { "num": 2, "sides": 6, "bonus": 0 },
-        "int":         { "num": 3, "sides": 6, "bonus": 3 },
-        "wis":         { "num": 3, "sides": 6, "bonus": 2 },
-        "cha":         { "num": 3, "sides": 6, "bonus": 0 },
-        "weapon":      "Staff",
-        "damage":      { "min": 1, "max": 6,  "display": "1d6",     "type": 0 },
-        "ai":          "ranged",
-        "can_swim":    false,
-        "weight":      10,
-        "depth_min":   3,
-        "depth_max":   0,
-        "depth_scale": 0.3
-    },
-    "wolf": {
-        "tile":        { "sheet": 12, "col": 0, "row": 1 },
-        "color":       21,
-        "corpse":      "dead wolf",
-        "hp":          { "num": 2, "sides": 4,  "bonus": 0 },
-        "thaco":       19,
-        "ac":          7,
-        "xp":          45,
-        "dr":          0,
-        "str":         { "num": 3, "sides": 6, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 2 },
-        "con":         { "num": 3, "sides": 6, "bonus": 0 },
-        "int":         { "num": 1, "sides": 4, "bonus": 1 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 2 },
-        "cha":         { "num": 1, "sides": 4, "bonus": 0 },
-        "weapon":      "Bite",
-        "damage":      { "min": 1, "max": 4,  "display": "1d4",     "type": 0 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      20,
-        "depth_min":   1,
-        "depth_max":   5,
-        "depth_scale": -0.1
-    },
-    "fire_wolf": {
-        "tile":        { "sheet": 12, "col": 0, "row": 5 },
-        "color":       19,
-        "corpse":      "charred wolf corpse",
-        "hp":          { "num": 2, "sides": 6,  "bonus": 0 },
-        "thaco":       18,
-        "ac":          6,
-        "xp":          120,
-        "dr":          0,
-        "str":         { "num": 3, "sides": 6, "bonus": 2 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 2 },
-        "con":         { "num": 3, "sides": 6, "bonus": 2 },
-        "int":         { "num": 1, "sides": 6, "bonus": 2 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 2 },
-        "cha":         { "num": 1, "sides": 4, "bonus": 1 },
-        "weapon":      "Flaming Bite",
-        "damage":      { "min": 1, "max": 6,  "display": "1d6",     "type": 1 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      8,
-        "depth_min":   3,
-        "depth_max":   0,
-        "depth_scale": 0.3
-    },
-    "ice_wolf": {
-        "tile":        { "sheet": 12, "col": 2, "row": 1 },
-        "color":       15,
-        "corpse":      "frozen wolf corpse",
-        "hp":          { "num": 2, "sides": 6,  "bonus": 0 },
-        "thaco":       18,
-        "ac":          6,
-        "xp":          120,
-        "dr":          0,
-        "str":         { "num": 3, "sides": 6, "bonus": 2 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 2 },
-        "con":         { "num": 3, "sides": 6, "bonus": 2 },
-        "int":         { "num": 1, "sides": 6, "bonus": 2 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 2 },
-        "cha":         { "num": 1, "sides": 4, "bonus": 1 },
-        "weapon":      "Freezing Bite",
-        "damage":      { "min": 1, "max": 6,  "display": "1d6",     "type": 2 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      8,
-        "depth_min":   3,
-        "depth_max":   0,
-        "depth_scale": 0.3
+        "ac": 7,
+        "ai": "ranged",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "color": 9,
+        "con": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "corpse": "dead archer",
+        "damage": {
+            "display": "1d6",
+            "max": 6,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 0,
+        "depth_min": 2,
+        "depth_scale": 0.20000000298023224,
+        "dex": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 8
+        },
+        "int": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "thaco": 18,
+        "tile": {
+            "col": 2,
+            "row": 12,
+            "sheet": 6
+        },
+        "weapon": "Longbow",
+        "weight": 10,
+        "wis": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "xp": 120
     },
     "bat": {
-        "tile":        { "sheet": 14, "col": 0, "row": 11 },
-        "color":       14,
-        "corpse":      "dead bat",
-        "hp":          { "num": 1, "sides": 2,  "bonus": 0 },
-        "thaco":       20,
-        "ac":          8,
-        "xp":          30,
-        "dr":          0,
-        "str":         { "num": 1, "sides": 4, "bonus": 0 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 6 },
-        "con":         { "num": 1, "sides": 4, "bonus": 1 },
-        "int":         { "num": 1, "sides": 2, "bonus": 0 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 0 },
-        "cha":         { "num": 1, "sides": 2, "bonus": 0 },
-        "weapon":      "Bite",
-        "damage":      { "min": 1, "max": 2,  "display": "1d2",     "type": 0 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      15,
-        "depth_min":   1,
-        "depth_max":   3,
-        "depth_scale": -0.3
+        "ac": 8,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 2
+        },
+        "color": 14,
+        "con": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "corpse": "dead bat",
+        "damage": {
+            "display": "1d2",
+            "max": 2,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 3,
+        "depth_min": 1,
+        "depth_scale": -0.30000001192092896,
+        "dex": {
+            "bonus": 6,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 2
+        },
+        "int": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 2
+        },
+        "str": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 4
+        },
+        "thaco": 20,
+        "tile": {
+            "col": 0,
+            "row": 11,
+            "sheet": 14
+        },
+        "weapon": "Bite",
+        "weight": 15,
+        "wis": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 30
+    },
+    "dragon": {
+        "ac": 1,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 4,
+            "sides": 6
+        },
+        "color": 19,
+        "con": {
+            "bonus": 0,
+            "num": 5,
+            "sides": 6
+        },
+        "corpse": "dead dragon",
+        "damage": {
+            "display": "1d12+5",
+            "max": 17,
+            "min": 1,
+            "type": 1
+        },
+        "depth_max": 0,
+        "depth_min": 5,
+        "depth_scale": 1.0,
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 2,
+        "hp": {
+            "bonus": 5,
+            "num": 1,
+            "sides": 12
+        },
+        "int": {
+            "bonus": 3,
+            "num": 3,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 0,
+            "num": 5,
+            "sides": 6
+        },
+        "thaco": 9,
+        "tile": {
+            "col": 3,
+            "row": 3,
+            "sheet": 8
+        },
+        "weapon": "Fiery Breath",
+        "weight": 3,
+        "wis": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "xp": 600
+    },
+    "fire_wolf": {
+        "ac": 6,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "color": 19,
+        "con": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "corpse": "charred wolf corpse",
+        "damage": {
+            "display": "1d6",
+            "max": 6,
+            "min": 1,
+            "type": 1
+        },
+        "depth_max": 0,
+        "depth_min": 3,
+        "depth_scale": 0.30000001192092896,
+        "dex": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "int": {
+            "bonus": 2,
+            "num": 1,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "thaco": 18,
+        "tile": {
+            "col": 0,
+            "row": 5,
+            "sheet": 12
+        },
+        "weapon": "Flaming Bite",
+        "weight": 8,
+        "wis": {
+            "bonus": 2,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 120
+    },
+    "goblin": {
+        "ac": 6,
+        "ai": "melee",
+        "can_swim": true,
+        "cha": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "color": 11,
+        "con": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "corpse": "dead goblin",
+        "damage": {
+            "display": "1d6",
+            "max": 6,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 5,
+        "depth_min": 1,
+        "depth_scale": -0.20000000298023224,
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": -1,
+            "num": 1,
+            "sides": 8
+        },
+        "int": {
+            "bonus": 3,
+            "num": 1,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "thaco": 20,
+        "tile": {
+            "col": 0,
+            "row": 4,
+            "sheet": 6
+        },
+        "weapon": "Short Sword",
+        "weight": 30,
+        "wis": {
+            "bonus": 3,
+            "num": 1,
+            "sides": 6
+        },
+        "xp": 105
+    },
+    "ice_wolf": {
+        "ac": 6,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "color": 15,
+        "con": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "corpse": "frozen wolf corpse",
+        "damage": {
+            "display": "1d6",
+            "max": 6,
+            "min": 1,
+            "type": 2
+        },
+        "depth_max": 0,
+        "depth_min": 3,
+        "depth_scale": 0.30000001192092896,
+        "dex": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "int": {
+            "bonus": 2,
+            "num": 1,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "thaco": 18,
+        "tile": {
+            "col": 2,
+            "row": 1,
+            "sheet": 12
+        },
+        "weapon": "Freezing Bite",
+        "weight": 8,
+        "wis": {
+            "bonus": 2,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 120
     },
     "kobold": {
-        "tile":        { "sheet": 4, "col": 0, "row": 14 },
-        "color":       9,
-        "corpse":      "dead kobold",
-        "hp":          { "num": 1, "sides": 4,  "bonus": 0 },
-        "thaco":       20,
-        "ac":          7,
-        "xp":          45,
-        "dr":          0,
-        "str":         { "num": 2, "sides": 6, "bonus": 1 },
-        "dex":         { "num": 3, "sides": 6, "bonus": 1 },
-        "con":         { "num": 2, "sides": 6, "bonus": 0 },
-        "int":         { "num": 2, "sides": 6, "bonus": 1 },
-        "wis":         { "num": 2, "sides": 6, "bonus": 0 },
-        "cha":         { "num": 1, "sides": 6, "bonus": 1 },
-        "weapon":      "Dagger",
-        "damage":      { "min": 1, "max": 4,  "display": "1d4",     "type": 0 },
-        "ai":          "melee",
-        "can_swim":    false,
-        "weight":      25,
-        "depth_min":   1,
-        "depth_max":   4,
-        "depth_scale": -0.2
+        "ac": 7,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 6
+        },
+        "color": 9,
+        "con": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "corpse": "dead kobold",
+        "damage": {
+            "display": "1d4",
+            "max": 4,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 4,
+        "depth_min": 1,
+        "depth_scale": -0.20000000298023224,
+        "dex": {
+            "bonus": 1,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 4
+        },
+        "int": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "thaco": 20,
+        "tile": {
+            "col": 0,
+            "row": 14,
+            "sheet": 4
+        },
+        "weapon": "Dagger",
+        "weight": 25,
+        "wis": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 45
+    },
+    "mage": {
+        "ac": 9,
+        "ai": "ranged",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "color": 3,
+        "con": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "corpse": "dead mage",
+        "damage": {
+            "display": "1d6",
+            "max": 6,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 0,
+        "depth_min": 3,
+        "depth_scale": 0.30000001192092896,
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 6
+        },
+        "int": {
+            "bonus": 3,
+            "num": 3,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 6
+        },
+        "thaco": 19,
+        "tile": {
+            "col": 5,
+            "row": 2,
+            "sheet": 6
+        },
+        "weapon": "Staff",
+        "weight": 10,
+        "wis": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "xp": 180
     },
     "mimic": {
-        "tile":        { "sheet": 20, "col": 1, "row": 2 },
-        "color":       19
+        "tile": {
+            "col": 1,
+            "row": 2,
+            "sheet": 20
+        }
+    },
+    "orc": {
+        "ac": 6,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 2,
+            "num": 1,
+            "sides": 6
+        },
+        "color": 9,
+        "con": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "corpse": "dead orc",
+        "damage": {
+            "display": "1d8",
+            "max": 8,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 0,
+        "depth_min": 2,
+        "depth_scale": 0.0,
+        "dex": {
+            "bonus": 2,
+            "num": 2,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 10
+        },
+        "int": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "str": {
+            "bonus": 1,
+            "num": 3,
+            "sides": 6
+        },
+        "thaco": 19,
+        "tile": {
+            "col": 3,
+            "row": 4,
+            "sheet": 6
+        },
+        "weapon": "Long Sword",
+        "weight": 15,
+        "wis": {
+            "bonus": 1,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 105
     },
     "shopkeeper": {
-        "tile":        { "sheet": 6, "col": 2, "row": 9 },
-        "color":       11
-    },
-    "spider_small": {
-        "tile":        { "sheet": 10, "col": 0, "row": 4 },
-        "color":       10
+        "tile": {
+            "col": 2,
+            "row": 9,
+            "sheet": 6
+        }
     },
     "spider_giant": {
-        "tile":        { "sheet": 10, "col": 2, "row": 4 },
-        "color":       9
+        "tile": {
+            "col": 2,
+            "row": 4,
+            "sheet": 10
+        }
+    },
+    "spider_small": {
+        "tile": {
+            "col": 0,
+            "row": 4,
+            "sheet": 10
+        }
     },
     "spider_weaver": {
-        "tile":        { "sheet": 10, "col": 1, "row": 4 },
-        "color":       6
+        "tile": {
+            "col": 1,
+            "row": 4,
+            "sheet": 10
+        }
+    },
+    "troll": {
+        "ac": 4,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 4
+        },
+        "color": 10,
+        "con": {
+            "bonus": 0,
+            "num": 4,
+            "sides": 6
+        },
+        "corpse": "dead troll",
+        "damage": {
+            "display": "1d10",
+            "max": 10,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 0,
+        "depth_min": 4,
+        "depth_scale": 0.5,
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 1,
+        "hp": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 12
+        },
+        "int": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "str": {
+            "bonus": 0,
+            "num": 4,
+            "sides": 6
+        },
+        "thaco": 13,
+        "tile": {
+            "col": 0,
+            "row": 14,
+            "sheet": 6
+        },
+        "weapon": "Claws",
+        "weight": 7,
+        "wis": {
+            "bonus": 2,
+            "num": 1,
+            "sides": 4
+        },
+        "xp": 300
+    },
+    "wolf": {
+        "ac": 7,
+        "ai": "melee",
+        "can_swim": false,
+        "cha": {
+            "bonus": 0,
+            "num": 1,
+            "sides": 4
+        },
+        "color": 21,
+        "con": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "corpse": "dead wolf",
+        "damage": {
+            "display": "1d4",
+            "max": 4,
+            "min": 1,
+            "type": 0
+        },
+        "depth_max": 5,
+        "depth_min": 1,
+        "depth_scale": -0.10000000149011612,
+        "dex": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
+        "dr": 0,
+        "hp": {
+            "bonus": 0,
+            "num": 2,
+            "sides": 4
+        },
+        "int": {
+            "bonus": 1,
+            "num": 1,
+            "sides": 4
+        },
+        "str": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "thaco": 19,
+        "tile": {
+            "col": 0,
+            "row": 1,
+            "sheet": 12
+        },
+        "weapon": "Bite",
+        "weight": 20,
+        "wis": {
+            "bonus": 2,
+            "num": 2,
+            "sides": 6
+        },
+        "xp": 45
     }
 }

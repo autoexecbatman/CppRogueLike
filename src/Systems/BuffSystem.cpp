@@ -14,6 +14,9 @@ static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 	{ BuffType::INVISIBILITY, ActorState::IS_INVISIBLE },
 	{ BuffType::SLEEP, ActorState::IS_SLEEPING },
 	{ BuffType::HOLD_PERSON, ActorState::IS_HELD },
+	{ BuffType::SANCTUARY, ActorState::IS_PROTECTED },
+	{ BuffType::SILENCE, ActorState::IS_SILENCED },
+	{ BuffType::WEBBED, ActorState::IS_HELD },
 };
 
 // OCP: Data-driven AC calculation - BuffTypes that affect armor class
@@ -27,7 +30,7 @@ static const std::unordered_set<BuffType> ac_affecting_buffs = {
 // AD&D 2e: Invisibility ends when you attack
 static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 	BuffType::INVISIBILITY,
-	// Future extensions: BuffType::SANCTUARY, etc.
+	BuffType::SANCTUARY,
 };
 
 // OCP: Data-driven hit calculation - BuffTypes that modify to-hit rolls

@@ -20,7 +20,7 @@ protected:
             ActorData{TileRef{}, "Test Sword", 1}
         );
         item->set_value(80);
-        item->itemId = ItemId::LONG_SWORD;
+        item->item_key = "long_sword";
         item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{ false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM };
         return item;
@@ -37,7 +37,7 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_value(), 80);
-    EXPECT_EQ(loaded->itemId, ItemId::LONG_SWORD);
+    EXPECT_EQ(loaded->item_key, "long_sword");
     EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
     EXPECT_EQ(loaded->actorData.name, "Test Sword");
 }

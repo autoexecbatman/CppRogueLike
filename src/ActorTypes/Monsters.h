@@ -7,6 +7,7 @@
 #include "../Utils/Vector2D.h"
 
 struct GameContext;
+class ContentRegistry;
 
 // Disguise data for Mimic class
 struct Disguise
@@ -25,7 +26,7 @@ public:
 	std::vector<Disguise> get_possible_disguises() const;
 
 private:
-	void init_disguises();
+	void init_disguises(ContentRegistry& registry);
 
 	std::vector<Disguise> possibleDisguises;
 };

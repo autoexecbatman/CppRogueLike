@@ -552,7 +552,7 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 std::string InventoryUI::format_weapon_info(const Item& item) const
 {
 	DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(
-		item.itemId,
+		item.item_key,
 		&item.get_enhancement());
 	const Weapon* weapon = item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
 	bool ranged = weapon && weapon->is_ranged();

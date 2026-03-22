@@ -11,4 +11,11 @@ public:
 
 	virtual void load(const json& json) = 0;
 	virtual void save(json& json) = 0;
+
+protected:
+	Persistent() = default;
+	Persistent(const Persistent&) = default;
+	Persistent& operator=(const Persistent&) = default;
+	Persistent(Persistent&&) = default;
+	Persistent& operator=(Persistent&&) = default;
 };

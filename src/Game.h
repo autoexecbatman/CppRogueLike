@@ -36,8 +36,10 @@
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
 #include "Systems/TargetingSystem.h"
+#include "Systems/ContentRegistry.h"
 #include "Tools/ContentEditor.h"
 #include "Tools/DecorEditor.h"
+#include "Tools/ItemEditor.h"
 #include "Tools/MonsterEditor.h"
 #include "Tools/SpellEditor.h"
 #include "Tools/PrefabLibrary.h"
@@ -84,9 +86,11 @@ public:
 			.buff_system = &buff_system,
 			.floating_text = &floating_text,
 			.anim_system = &anim_system,
+			.content_registry = &content_registry,
 			.content_editor = &content_editor,
 			.decor_editor = &decor_editor,
 			.room_editor = &room_editor,
+			.item_editor = &item_editor,
 			.monster_editor = &monster_editor,
 			.spell_editor = &spell_editor,
 			.prefab_library = &prefab_library,
@@ -124,6 +128,10 @@ public:
 		{
 			windowState = WindowState::ROOM_EDITOR;
 		}
+		else if (item_editor.is_active())
+		{
+			windowState = WindowState::ITEM_EDITOR;
+		}
 		else if (monster_editor.is_active())
 		{
 			windowState = WindowState::MONSTER_EDITOR;
@@ -153,6 +161,11 @@ public:
 		case WindowState::ROOM_EDITOR:
 		{
 			room_editor.tick(ctx);
+			break;
+		}
+		case WindowState::ITEM_EDITOR:
+		{
+			item_editor.tick(ctx);
 			break;
 		}
 		case WindowState::MONSTER_EDITOR:
@@ -229,9 +242,11 @@ public:
 	BuffSystem buff_system{};
 	FloatingTextSystem floating_text{};
 	AnimationSystem anim_system{};
+	ContentRegistry content_registry{};
 	ContentEditor content_editor{};
 	DecorEditor decor_editor{};
 	RoomEditor room_editor{};
+	ItemEditor item_editor{};
 	MonsterEditor monster_editor{};
 	SpellEditor spell_editor{};
 	PrefabLibrary prefab_library{};

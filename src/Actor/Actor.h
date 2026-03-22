@@ -29,6 +29,8 @@ enum class ActorState
 	IS_INVISIBLE,
 	IS_SLEEPING,
 	IS_HELD,
+	IS_PROTECTED,
+	IS_SILENCED,
 };
 
 //==Actor==

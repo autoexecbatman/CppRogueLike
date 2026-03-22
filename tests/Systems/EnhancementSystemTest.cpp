@@ -468,18 +468,18 @@ TEST_F(EnhancementSystemTest, WeaponDamageRegistry_AppliesEnhancement) {
     ItemEnhancement enhancement;
     enhancement.damage_bonus = 3;
 
-    DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info(ItemId::LONG_SWORD);
+    DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info("long_sword");
     DamageInfo enhancedDamage = WeaponDamageRegistry::get_enhanced_damage_info(
-        ItemId::LONG_SWORD, &enhancement);
+        "long_sword", &enhancement);
 
     EXPECT_EQ(enhancedDamage.minDamage, baseDamage.minDamage + 3);
     EXPECT_EQ(enhancedDamage.maxDamage, baseDamage.maxDamage + 3);
 }
 
 TEST_F(EnhancementSystemTest, WeaponDamageRegistry_NullEnhancement_ReturnsBase) {
-    DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info(ItemId::DAGGER);
+    DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info("dagger");
     DamageInfo withNull = WeaponDamageRegistry::get_enhanced_damage_info(
-        ItemId::DAGGER, nullptr);
+        "dagger", nullptr);
 
     EXPECT_EQ(withNull.minDamage, baseDamage.minDamage);
     EXPECT_EQ(withNull.maxDamage, baseDamage.maxDamage);

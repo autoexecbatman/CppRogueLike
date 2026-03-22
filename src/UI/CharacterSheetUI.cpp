@@ -174,7 +174,7 @@ void CharacterSheetUI::display_equipment_info(const Player& player, GameContext&
 			? &equippedWeapon->get_enhancement()
 			: nullptr;
 		damageDisplay = WeaponDamageRegistry::get_enhanced_damage_info(
-			equippedWeapon->itemId, enh)
+			equippedWeapon->item_key, enh)
 							.displayRoll;
 	}
 	else

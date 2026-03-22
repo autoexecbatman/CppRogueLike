@@ -6,127 +6,24 @@
 #include <raylib.h>
 
 #include "../Core/Paths.h"
+#include "../Factories/ItemCreator.h"
 #include "../Factories/MonsterCreator.h"
-#include "../Items/ItemClassification.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/ContentRegistryIO.h"
 #include "ContentEditor.h"
 
 // ---------------------------------------------------------------------------
-// Static entity tables
+// Static monster table
 // ---------------------------------------------------------------------------
 
 namespace
 {
 
-struct ItemEntry
-{
-	ItemId id;
-	const char* name;
-};
-
 struct MonsterEntry
 {
 	MonsterId id;
 	const char* name;
-};
-
-constexpr ItemEntry ITEM_TABLE[] = {
-	{ ItemId::HEALTH_POTION, "Health Potion" },
-	{ ItemId::POTION_OF_EXTRA_HEALING, "Potion of Extra Healing" },
-	{ ItemId::MANA_POTION, "Mana Potion" },
-	{ ItemId::INVISIBILITY_POTION, "Invisibility Potion" },
-	{ ItemId::POTION_OF_GIANT_STRENGTH, "Potion of Giant Strength" },
-	{ ItemId::POTION_OF_FIRE_RESISTANCE, "Potion of Fire Resistance" },
-	{ ItemId::POTION_OF_COLD_RESISTANCE, "Potion of Cold Resistance" },
-	{ ItemId::POTION_OF_SPEED, "Potion of Speed" },
-	{ ItemId::SCROLL_LIGHTNING, "Scroll of Lightning" },
-	{ ItemId::SCROLL_FIREBALL, "Scroll of Fireball" },
-	{ ItemId::SCROLL_CONFUSION, "Scroll of Confusion" },
-	{ ItemId::SCROLL_TELEPORT, "Scroll of Teleport" },
-	{ ItemId::DAGGER, "Dagger" },
-	{ ItemId::SHORT_SWORD, "Short Sword" },
-	{ ItemId::LONG_SWORD, "Long Sword" },
-	{ ItemId::BASTARD_SWORD, "Bastard Sword" },
-	{ ItemId::TWO_HANDED_SWORD, "Two-Handed Sword" },
-	{ ItemId::GREAT_SWORD, "Great Sword" },
-	{ ItemId::SCIMITAR, "Scimitar" },
-	{ ItemId::RAPIER, "Rapier" },
-	{ ItemId::HAND_AXE, "Hand Axe" },
-	{ ItemId::BATTLE_AXE, "Battle Axe" },
-	{ ItemId::GREAT_AXE, "Great Axe" },
-	{ ItemId::WAR_HAMMER, "War Hammer" },
-	{ ItemId::MACE, "Mace" },
-	{ ItemId::MORNING_STAR, "Morning Star" },
-	{ ItemId::FLAIL, "Flail" },
-	{ ItemId::CLUB, "Club" },
-	{ ItemId::QUARTERSTAFF, "Quarterstaff" },
-	{ ItemId::STAFF, "Staff" },
-	{ ItemId::SHORT_BOW, "Short Bow" },
-	{ ItemId::LONG_BOW, "Long Bow" },
-	{ ItemId::COMPOSITE_BOW, "Composite Bow" },
-	{ ItemId::LIGHT_CROSSBOW, "Light Crossbow" },
-	{ ItemId::HEAVY_CROSSBOW, "Heavy Crossbow" },
-	{ ItemId::CROSSBOW, "Crossbow" },
-	{ ItemId::SLING, "Sling" },
-	{ ItemId::PADDED_ARMOR, "Padded Armor" },
-	{ ItemId::LEATHER_ARMOR, "Leather Armor" },
-	{ ItemId::STUDDED_LEATHER, "Studded Leather" },
-	{ ItemId::HIDE_ARMOR, "Hide Armor" },
-	{ ItemId::RING_MAIL, "Ring Mail" },
-	{ ItemId::SCALE_MAIL, "Scale Mail" },
-	{ ItemId::CHAIN_MAIL, "Chain Mail" },
-	{ ItemId::BRIGANDINE, "Brigandine" },
-	{ ItemId::SPLINT_MAIL, "Splint Mail" },
-	{ ItemId::BANDED_MAIL, "Banded Mail" },
-	{ ItemId::PLATE_MAIL, "Plate Mail" },
-	{ ItemId::FIELD_PLATE, "Field Plate" },
-	{ ItemId::FULL_PLATE, "Full Plate" },
-	{ ItemId::SMALL_SHIELD, "Small Shield" },
-	{ ItemId::MEDIUM_SHIELD, "Medium Shield" },
-	{ ItemId::LARGE_SHIELD, "Large Shield" },
-	{ ItemId::HELM_OF_BRILLIANCE, "Helm of Brilliance" },
-	{ ItemId::HELM_OF_TELEPORTATION, "Helm of Teleportation" },
-	{ ItemId::HELM_OF_TELEPATHY, "Helm of Telepathy" },
-	{ ItemId::HELM_OF_UNDERWATER_ACTION, "Helm of Underwater Action" },
-	{ ItemId::RING_OF_PROTECTION_PLUS_1, "Ring of Protection +1" },
-	{ ItemId::RING_OF_PROTECTION_PLUS_2, "Ring of Protection +2" },
-	{ ItemId::RING_OF_FREE_ACTION, "Ring of Free Action" },
-	{ ItemId::RING_OF_REGENERATION, "Ring of Regeneration" },
-	{ ItemId::RING_OF_INVISIBILITY, "Ring of Invisibility" },
-	{ ItemId::RING_OF_FIRE_RESISTANCE, "Ring of Fire Resistance" },
-	{ ItemId::RING_OF_COLD_RESISTANCE, "Ring of Cold Resistance" },
-	{ ItemId::RING_OF_SPELL_STORING, "Ring of Spell Storing" },
-	{ ItemId::AMULET_OF_HEALTH, "Amulet of Health" },
-	{ ItemId::AMULET_OF_WISDOM, "Amulet of Wisdom" },
-	{ ItemId::AMULET_OF_PROTECTION, "Amulet of Protection" },
-	{ ItemId::AMULET_OF_OGRE_POWER, "Amulet of Ogre Power" },
-	{ ItemId::AMULET_OF_YENDOR, "Amulet of Yendor" },
-	{ ItemId::GAUNTLETS_OF_OGRE_POWER, "Gauntlets of Ogre Power" },
-	{ ItemId::GAUNTLETS_OF_DEXTERITY, "Gauntlets of Dexterity" },
-	{ ItemId::GAUNTLETS_OF_SWIMMING_AND_CLIMBING, "Gauntlets of Swimming & Climbing" },
-	{ ItemId::GAUNTLETS_OF_FUMBLING, "Gauntlets of Fumbling" },
-	{ ItemId::GIRDLE_OF_HILL_GIANT_STRENGTH, "Girdle of Hill Giant Strength" },
-	{ ItemId::GIRDLE_OF_STONE_GIANT_STRENGTH, "Girdle of Stone Giant Strength" },
-	{ ItemId::GIRDLE_OF_FROST_GIANT_STRENGTH, "Girdle of Frost Giant Strength" },
-	{ ItemId::GIRDLE_OF_FIRE_GIANT_STRENGTH, "Girdle of Fire Giant Strength" },
-	{ ItemId::GIRDLE_OF_CLOUD_GIANT_STRENGTH, "Girdle of Cloud Giant Strength" },
-	{ ItemId::GIRDLE_OF_STORM_GIANT_STRENGTH, "Girdle of Storm Giant Strength" },
-	{ ItemId::BOOTS_OF_SPEED, "Boots of Speed" },
-	{ ItemId::BOOTS_OF_ELVENKIND, "Boots of Elvenkind" },
-	{ ItemId::CLOAK_OF_PROTECTION, "Cloak of Protection" },
-	{ ItemId::CLOAK_OF_DISPLACEMENT, "Cloak of Displacement" },
-	{ ItemId::CLOAK_OF_ELVENKIND, "Cloak of Elvenkind" },
-	{ ItemId::FOOD_RATION, "Food Ration" },
-	{ ItemId::BREAD, "Bread" },
-	{ ItemId::MEAT, "Meat" },
-	{ ItemId::FRUIT, "Fruit" },
-	{ ItemId::GOLD_COIN, "Gold" },
-	{ ItemId::GEM, "Gem" },
-	{ ItemId::TORCH, "Torch" },
-	{ ItemId::ROPE, "Rope" },
-	{ ItemId::LOCKPICK, "Lockpick" },
 };
 
 constexpr MonsterEntry MONSTER_TABLE[] = {
@@ -152,12 +49,14 @@ constexpr MonsterEntry MONSTER_TABLE[] = {
 
 // ---------------------------------------------------------------------------
 
-void ContentEditor::toggle()
+void ContentEditor::toggle(ContentRegistry& registry)
 {
+	m_registry = &registry;
+
 	if (m_active)
 	{
 		// Closing: persist all assignments immediately.
-		ContentRegistryIO::save(ContentRegistry::instance(), Paths::CONTENT_TILES);
+		ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
 		MonsterCreator::save(Paths::MONSTERS);
 	}
 
@@ -165,13 +64,14 @@ void ContentEditor::toggle()
 
 	if (m_active && m_item_entries.empty())
 	{
-		for (const auto& row : ITEM_TABLE)
+		for (const auto& key : ItemCreator::get_all_keys())
 		{
-			m_item_entries.push_back({ row.name, static_cast<int>(row.id) });
+			const auto& p = ItemCreator::get_params(key);
+			m_item_entries.push_back({ std::string(p.name), std::string(key), 0 });
 		}
 		for (const auto& row : MONSTER_TABLE)
 		{
-			m_monster_entries.push_back({ row.name, static_cast<int>(row.id) });
+			m_monster_entries.push_back({ row.name, {}, static_cast<int>(row.id) });
 		}
 		m_list_cursor = 0;
 		m_list_scroll = 0;
@@ -186,13 +86,13 @@ TileRef ContentEditor::current_tile() const
 		return TileRef{};
 	}
 
-	int key = entries[m_list_cursor].entity_key;
+	const auto& sel = entries[m_list_cursor];
 	if (m_tab == 0)
 	{
-		return ContentRegistry::instance().get_tile(static_cast<ItemId>(key));
+		return m_registry ? m_registry->get_tile(sel.item_key) : TileRef{};
 	}
 
-	return MonsterCreator::get_tile(static_cast<MonsterId>(key));
+	return MonsterCreator::get_tile(static_cast<MonsterId>(sel.entity_key));
 }
 
 void ContentEditor::assign_tile(TileRef tile)
@@ -203,14 +103,17 @@ void ContentEditor::assign_tile(TileRef tile)
 		return;
 	}
 
-	int key = entries[m_list_cursor].entity_key;
+	const auto& sel = entries[m_list_cursor];
 	if (m_tab == 0)
 	{
-		ContentRegistry::instance().set_tile(static_cast<ItemId>(key), tile);
+		if (m_registry)
+		{
+			m_registry->set_tile(sel.item_key, tile);
+		}
 	}
 	else
 	{
-		MonsterCreator::set_tile(static_cast<MonsterId>(key), tile);
+		MonsterCreator::set_tile(static_cast<MonsterId>(sel.entity_key), tile);
 	}
 }
 
@@ -218,12 +121,13 @@ void ContentEditor::assign_tile(TileRef tile)
 // update_and_render
 // ---------------------------------------------------------------------------
 
-void ContentEditor::update_and_render(const Renderer& renderer)
+void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry& registry)
 {
 	if (!m_active)
 	{
 		return;
 	}
+	m_registry = &registry;
 
 	handle_keyboard();
 
@@ -340,7 +244,7 @@ void ContentEditor::draw_list(
 		}
 
 		TileRef tile = (m_tab == 0)
-			? ContentRegistry::instance().get_tile(static_cast<ItemId>(entries[i].entity_key))
+			? (m_registry ? m_registry->get_tile(entries[i].item_key) : TileRef{})
 			: MonsterCreator::get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
 		renderer.draw_tile_screen_sized(list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
@@ -517,7 +421,10 @@ void ContentEditor::handle_keyboard()
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	if (ctrl && IsKeyPressed(KEY_S))
 	{
-		ContentRegistryIO::save(ContentRegistry::instance(), Paths::CONTENT_TILES);
+		if (m_registry)
+		{
+			ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
+		}
 		m_last_save_time = GetTime();
 	}
 }

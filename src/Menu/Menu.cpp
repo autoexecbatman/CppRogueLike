@@ -12,6 +12,7 @@
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Tools/ItemEditor.h"
 #include "../Tools/MonsterEditor.h"
 #include "../Tools/RoomEditor.h"
 #include "../Tools/SpellEditor.h"
@@ -36,6 +37,11 @@ void LoadGame::on_selection(GameContext& ctx)
 void RoomEditorEntry::on_selection(GameContext& ctx)
 {
 	ctx.room_editor->enter(*ctx.prefab_library);
+}
+
+void ItemEditorEntry::on_selection(GameContext& ctx)
+{
+	ctx.item_editor->enter(ctx);
 }
 
 void MonsterEditorEntry::on_selection(GameContext& ctx)
@@ -75,6 +81,7 @@ Menu::Menu(bool startup, GameContext& ctx)
 	iMenuStates.emplace(MenuState::ROOM_EDITOR, std::make_unique<RoomEditorEntry>());
 	iMenuStates.emplace(MenuState::MONSTER_EDITOR, std::make_unique<MonsterEditorEntry>());
 	iMenuStates.emplace(MenuState::SPELL_EDITOR, std::make_unique<SpellEditorEntry>());
+	iMenuStates.emplace(MenuState::ITEM_EDITOR, std::make_unique<ItemEditorEntry>());
 	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
 }
 
@@ -200,6 +207,13 @@ void Menu::on_key(int key, GameContext& ctx)
 	{
 		menu_set_run_false();
 		iMenuStates.at(MenuState::SPELL_EDITOR)->on_selection(ctx);
+		break;
+	}
+
+	case 'i':
+	{
+		menu_set_run_false();
+		iMenuStates.at(MenuState::ITEM_EDITOR)->on_selection(ctx);
 		break;
 	}
 

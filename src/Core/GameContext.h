@@ -29,8 +29,10 @@ class BuffSystem;
 class FloatingTextSystem;
 class AnimationSystem;
 class ContentEditor;
+class ContentRegistry;
 class DecorEditor;
 class RoomEditor;
+class ItemEditor;
 class MonsterEditor;
 class SpellEditor;
 class PrefabLibrary;
@@ -59,7 +61,8 @@ enum class WindowState
 	GAME,
 	ROOM_EDITOR,
 	MONSTER_EDITOR,
-	SPELL_EDITOR
+	SPELL_EDITOR,
+	ITEM_EDITOR
 };
 
 /**
@@ -102,9 +105,11 @@ struct GameContext
 	BuffSystem* buff_system{ nullptr };
 	FloatingTextSystem* floating_text{ nullptr };
 	AnimationSystem* anim_system{ nullptr };
+	ContentRegistry* content_registry{ nullptr };
 	ContentEditor* content_editor{ nullptr };
 	DecorEditor* decor_editor{ nullptr };
 	RoomEditor* room_editor{ nullptr };
+	ItemEditor* item_editor{ nullptr };
 	MonsterEditor* monster_editor{ nullptr };
 	SpellEditor* spell_editor{ nullptr };
 	PrefabLibrary* prefab_library{ nullptr };

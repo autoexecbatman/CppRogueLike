@@ -105,7 +105,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.player != nullptr);
 	assert(ctx.game_status != nullptr);
 
-	ContentRegistryIO::load(ContentRegistry::instance(), Paths::CONTENT_TILES);
+	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
 	ctx.level_manager->reset_to_first_level();
@@ -127,7 +127,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.isLoadedGame != nullptr);
 	assert(ctx.game_status != nullptr);
 
-	ContentRegistryIO::load(ContentRegistry::instance(), Paths::CONTENT_TILES);
+	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
 	ctx.menu_manager->set_game_initialized(true);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 

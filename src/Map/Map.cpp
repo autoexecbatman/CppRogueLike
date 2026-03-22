@@ -19,6 +19,7 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Items/ItemClassification.h"
@@ -1217,7 +1218,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create(ItemId::AMULET_OF_YENDOR, amuletPos));
+		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.content_registry));
 
 		// Log the placement (debug info)
 		if (ctx.message_system)

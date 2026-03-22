@@ -19,5 +19,8 @@ public:
 protected:
 	int moveCount{ 0 };
 
+	// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's turn.
+	static bool blocked_by_sanctuary(GameContext& ctx);
+
 	virtual void move_or_attack(Creature& owner, Vector2D position, GameContext& ctx);
 };
