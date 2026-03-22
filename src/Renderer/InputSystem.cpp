@@ -257,11 +257,19 @@ void InputSystem::poll()
 		register_key(KEY_F3, GameKey::CONTENT_EDIT_TOGGLE, 0, false);
 		return;
 	case KEY_COMMA:
-		register_key(KEY_COMMA, GameKey::DECOR_PREV, 0, false);
-		return;
+		if (!shift)
+		{
+			register_key(KEY_COMMA, GameKey::DECOR_PREV, 0, false);
+			return;
+		}
+		break;
 	case KEY_PERIOD:
-		register_key(KEY_PERIOD, GameKey::DECOR_NEXT, 0, false);
-		return;
+		if (!shift)
+		{
+			register_key(KEY_PERIOD, GameKey::DECOR_NEXT, 0, false);
+			return;
+		}
+		break;
 
 	default:
 		break;
