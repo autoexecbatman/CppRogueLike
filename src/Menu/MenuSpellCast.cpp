@@ -11,8 +11,8 @@
 #include "../Systems/SpellSystem.h"
 #include "MenuSpellCast.h"
 
-MenuSpellCast::MenuSpellCast(GameContext& ctx, Player& player)
-	: player(player), ctx(ctx)
+MenuSpellCast::MenuSpellCast(Player& player)
+	: player(player)
 {
 }
 
@@ -70,7 +70,7 @@ void MenuSpellCast::draw_content()
 	menu_refresh();
 }
 
-void MenuSpellCast::handle_selection()
+void MenuSpellCast::handle_selection(GameContext& ctx)
 {
 	if (selectedIndex >= 0 && selectedIndex < static_cast<int>(availableSpells.size()))
 	{
@@ -87,7 +87,7 @@ void MenuSpellCast::handle_selection()
 					player.memorizedSpells.erase(it);
 				}
 			}
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 			menu_set_run_false();
 		}
 	}
@@ -140,7 +140,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 
 	case '\n': // Enter
 	case ' ': // Space
-		handle_selection();
+		handle_selection(ctx);
 		break;
 
 	default:
@@ -151,7 +151,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 			if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
 			{
 				selectedIndex = selection;
-				handle_selection();
+				handle_selection(ctx);
 			}
 		}
 		break;

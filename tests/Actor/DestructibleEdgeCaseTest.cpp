@@ -346,7 +346,7 @@ TEST_F(DestructibleEdgeCaseTest, PlayerDeath_SetsDefeatStatus)
 	player->destructible->take_damage(*player, 10, ctx);
 
 	EXPECT_TRUE(player->destructible->is_dead());
-	EXPECT_EQ(*ctx.game_status, GameStatus::DEFEAT);
+	EXPECT_EQ(ctx.game_state->get_game_status(), GameStatus::DEFEAT);
 }
 
 // ----------------------------------------------------------------------------
@@ -718,7 +718,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionDrain_CanCauseDeath)
 	player->destructible->update_constitution_bonus(*player, ctx);
 
 	EXPECT_TRUE(player->destructible->is_dead());
-	EXPECT_EQ(*ctx.game_status, GameStatus::DEFEAT);
+	EXPECT_EQ(ctx.game_state->get_game_status(), GameStatus::DEFEAT);
 }
 
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_InvalidConstitutionReturnsZero)

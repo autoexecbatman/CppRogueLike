@@ -14,16 +14,15 @@ class MenuSpellCast : public BaseMenu
 	std::vector<std::string> availableSpells;
 	std::vector<std::string> spellSources; // "" = memorized, "Ring", "Helm", etc.
 	Player& player;
-	GameContext& ctx;
 	int selectedIndex{ 0 };
 	bool initialized{ false };
 
 	void populate_spells();
 	void draw_content() override;
-	void handle_selection();
+	void handle_selection(GameContext& ctx);
 
 public:
-	MenuSpellCast(GameContext& ctx, Player& player);
+	MenuSpellCast(Player& player);
 	~MenuSpellCast() override = default;
 	MenuSpellCast(const MenuSpellCast&) = delete;
 	MenuSpellCast& operator=(const MenuSpellCast&) = delete;

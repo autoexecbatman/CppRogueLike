@@ -42,6 +42,9 @@ message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOU
 # Explicitly list parent project sources (excludes main.cpp)
 set(PARENT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 set(PARENT_SOURCES
+    # Game
+    ${PARENT_SOURCE_DIR}/Game.cpp
+
     # Renderer (raylib)
     ${PARENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${PARENT_SOURCE_DIR}/Renderer/InputSystem.cpp

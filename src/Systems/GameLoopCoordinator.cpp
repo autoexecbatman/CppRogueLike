@@ -59,7 +59,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 		ctx.gui->guiInit = true;
 		ctx.gui->gui_update(ctx);
 
-		*ctx.game_status = GameStatus::IDLE;
+		ctx.game_state->set_game_status(GameStatus::IDLE);
 	}
 
 	// Update game state only when player provides input and editor is not open
@@ -249,7 +249,7 @@ void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 {
 	if (ctx.menu_manager->has_active_menus(*ctx.menus))
 	{
-		*ctx.window_state = WindowState::MENU;
+		ctx.game_state->set_window_state(WindowState::MENU);
 		return;
 	}
 }
@@ -442,7 +442,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 void GameLoopCoordinator::update(GameContext& ctx)
 {
-	if (*ctx.game_status == GameStatus::VICTORY)
+	if (ctx.game_state->get_game_status() == GameStatus::VICTORY)
 	{
 		ctx.message_system->log("Player has won the game!");
 		ctx.message_system->append_message_part(RED_YELLOW_PAIR, "Congratulations!");
@@ -450,13 +450,13 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.message_system->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
 		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
 		ctx.message_system->finalize_message();
-		*ctx.run = false;
+		ctx.game_state->set_run(false);
 	}
 
 	ctx.map->update();
 	ctx.player->update(ctx);
 
-	if (*ctx.game_status == GameStatus::STARTUP)
+	if (ctx.game_state->get_game_status() == GameStatus::STARTUP)
 	{
 #ifndef EMSCRIPTEN
 		if (ctx.decor_editor && ctx.map && ctx.level_manager)
@@ -465,7 +465,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 				ctx.map->get_seed(),
 				ctx.level_manager->get_dungeon_level());
 
-			if (ctx.prefab_library && ctx.rooms && ctx.decor_editor->is_active_map_empty() && !*ctx.isLoadedGame)
+			if (ctx.prefab_library && ctx.rooms && ctx.decor_editor->is_active_map_empty() && !ctx.game_state->get_is_loaded_game())
 			{
 				ctx.prefab_library->apply_to_rooms(
 					*ctx.rooms,
@@ -478,22 +478,22 @@ void GameLoopCoordinator::update(GameContext& ctx)
 #endif
 
 		ctx.map->compute_fov(ctx);
-		if (ctx.level_manager->get_dungeon_level() == 1 && !*ctx.isLoadedGame)
+		if (ctx.level_manager->get_dungeon_level() == 1 && !ctx.game_state->get_is_loaded_game())
 		{
 			ctx.player->racial_ability_adjustments();
 			ctx.player->equip_class_starting_gear(ctx);
 		}
-		bool wasLoadedGame = *ctx.isLoadedGame;
-		*ctx.isLoadedGame = false;
+		bool wasLoadedGame = ctx.game_state->get_is_loaded_game();
+		ctx.game_state->set_is_loaded_game(false);
 		ctx.player->calculate_thaco();
 
 		if (wasLoadedGame)
 		{
-			*ctx.game_status = GameStatus::IDLE;
+			ctx.game_state->set_game_status(GameStatus::IDLE);
 		}
 		else
 		{
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 
 		if (!ctx.gui->guiInit)
@@ -504,7 +504,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		}
 	}
 
-	if (*ctx.game_status == GameStatus::NEW_TURN)
+	if (ctx.game_state->get_game_status() == GameStatus::NEW_TURN)
 	{
 		std::erase_if(*ctx.objects, 
 			[](const auto& obj)
@@ -531,18 +531,18 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 
-		(*ctx.time)++;
-		if (*ctx.game_status != GameStatus::DEFEAT)
+		ctx.game_state->increment_time();
+		if (ctx.game_state->get_game_status() != GameStatus::DEFEAT)
 		{
-			*ctx.game_status = GameStatus::IDLE;
+			ctx.game_state->set_game_status(GameStatus::IDLE);
 		}
 	}
 
-	if (*ctx.game_status == GameStatus::DEFEAT)
+	if (ctx.game_state->get_game_status() == GameStatus::DEFEAT)
 	{
 		ctx.message_system->log("Player is dead!");
 		ctx.message_system->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
 		ctx.message_system->finalize_message();
-		*ctx.run = false;
+		ctx.game_state->set_run(false);
 	}
 }

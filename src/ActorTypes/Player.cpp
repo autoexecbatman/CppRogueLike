@@ -317,7 +317,7 @@ bool Player::rest(GameContext& ctx)
 	}
 
 	// Resting takes time
-	*ctx.game_status = GameStatus::NEW_TURN;
+	ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 	return true;
 }
 

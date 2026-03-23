@@ -14,8 +14,8 @@ struct MockGameContext
 	MessageSystem messages{};
 	CreatureManager creature_mgr{};
 	ContentRegistry content_registry{};
-	InventoryData inventory{ 100 }; // Initialize with capacity of 100
-	GameStatus status{ GameStatus::IDLE };
+	InventoryData inventory{ 100 };
+	GameState game_state{};
 	TileConfig tile_config{};
 
 	MockGameContext()
@@ -41,7 +41,7 @@ struct MockGameContext
 			.content_registry = &content_registry,
 			.tile_config = &tile_config,
 			.inventory_data = &inventory,
-			.game_status = &status
+			.game_state = &game_state
 		};
 	}
 };

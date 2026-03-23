@@ -99,23 +99,21 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.data_manager != nullptr);
 	assert(ctx.message_system != nullptr);
 	assert(ctx.level_manager != nullptr);
-	assert(ctx.time != nullptr);
-	assert(ctx.isLoadedGame != nullptr);
+	assert(ctx.game_state != nullptr);
 	assert(ctx.map != nullptr);
 	assert(ctx.player != nullptr);
-	assert(ctx.game_status != nullptr);
 
 	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
 	ctx.data_manager->load_all_data(*ctx.message_system);
 
 	ctx.level_manager->reset_to_first_level();
-	*ctx.time = 0;
-	*ctx.isLoadedGame = false;
+	ctx.game_state->set_time(0);
+	ctx.game_state->set_is_loaded_game(false);
 
 	ctx.map->regenerate(ctx);
 
 	ctx.player->roll_new_character(ctx);
-	*ctx.game_status = GameStatus::STARTUP;
+	ctx.game_state->set_game_status(GameStatus::STARTUP);
 	ctx.message_system->log("New game initialized");
 }
 
@@ -124,8 +122,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.menu_manager != nullptr);
 	assert(ctx.data_manager != nullptr);
 	assert(ctx.message_system != nullptr);
-	assert(ctx.isLoadedGame != nullptr);
-	assert(ctx.game_status != nullptr);
+	assert(ctx.game_state != nullptr);
 
 	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
 	ctx.menu_manager->set_game_initialized(true);
@@ -137,8 +134,8 @@ bool GameStateManager::load_all(GameContext& ctx)
 		return false;
 	}
 
-	*ctx.isLoadedGame = true;
-	*ctx.game_status = GameStatus::STARTUP;
+	ctx.game_state->set_is_loaded_game(true);
+	ctx.game_state->set_game_status(GameStatus::STARTUP);
 	ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
 	return true;
 }
@@ -154,7 +151,7 @@ void GameStateManager::save_game(GameContext& ctx)
 	assert(ctx.gui != nullptr);
 	assert(ctx.hunger_system != nullptr);
 	assert(ctx.level_manager != nullptr);
-	assert(ctx.time != nullptr);
+	assert(ctx.game_state != nullptr);
 
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 	std::filesystem::create_directories(save_path.parent_path());
@@ -186,7 +183,7 @@ void GameStateManager::save_game(GameContext& ctx)
 		j["hunger_system"] = hungerJson;
 
 		ctx.level_manager->save_to_json(j);
-		j["time"] = *ctx.time;
+		j["time"] = ctx.game_state->get_time();
 
 		// Write the JSON data to the file
 		file << j.dump(4); // Pretty print with an indentation of 4 spaces
@@ -209,7 +206,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 	assert(ctx.gui != nullptr);
 	assert(ctx.hunger_system != nullptr);
 	assert(ctx.level_manager != nullptr);
-	assert(ctx.time != nullptr);
+	assert(ctx.game_state != nullptr);
 
 	std::ifstream file(Paths::resolve(Paths::SAVE_FILE));
 	if (!file.is_open())
@@ -250,7 +247,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 
 	if (j.contains("time"))
 	{
-		*ctx.time = j["time"];
+		ctx.game_state->set_time(j["time"]);
 	}
 
 	return true; // Successfully loaded

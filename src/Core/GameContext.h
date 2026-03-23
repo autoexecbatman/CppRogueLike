@@ -8,7 +8,7 @@
 #include "../Actor/Stairs.h"
 
 // Forward declarations
-class Game;
+struct Game;
 class Map;
 class TileConfig;
 class Gui;
@@ -47,7 +47,6 @@ class Renderer;
 class InputSystem;
 class Player;
 
-// Game status enumeration - moved here to avoid circular dependency
 enum class GameStatus
 {
 	STARTUP,
@@ -67,6 +66,38 @@ enum class WindowState
 	SPELL_EDITOR,
 	ITEM_EDITOR,
 #endif
+};
+
+class GameState
+{
+private:
+	bool run{ true };
+	bool shouldSave{ true };
+	bool isLoadedGame{ false };
+	int time{ 0 };
+	GameStatus gameStatus{ GameStatus::STARTUP };
+	WindowState windowState{ WindowState::GAME };
+
+public:
+	bool get_run() const noexcept { return run; }
+	void set_run(bool v) noexcept { run = v; }
+
+	bool get_should_save() const noexcept { return shouldSave; }
+	void set_should_save(bool v) noexcept { shouldSave = v; }
+
+	bool get_is_loaded_game() const noexcept { return isLoadedGame; }
+	void set_is_loaded_game(bool v) noexcept { isLoadedGame = v; }
+
+	int get_time() const noexcept { return time; }
+	void set_time(int v) noexcept { time = v; }
+	void increment_time() noexcept { ++time; }
+
+	GameStatus get_game_status() const noexcept { return gameStatus; }
+	void set_game_status(GameStatus s) noexcept { gameStatus = s; }
+
+	WindowState get_window_state() const noexcept { return windowState; }
+	void set_window_state(WindowState s) noexcept { windowState = s; }
+
 };
 
 /**
@@ -131,11 +162,6 @@ struct GameContext
 	// UI Collections
 	std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
 
-	// Game state (pointers to allow mutation)
-	int* time{ nullptr };
-	bool* run{ nullptr };
-	bool* shouldSave{ nullptr };
-	bool* isLoadedGame{ nullptr }; // Track new game vs loaded game
-	GameStatus* game_status{ nullptr };
-	WindowState* window_state{ nullptr };
+	// Game state
+	GameState* game_state{ nullptr };
 };

@@ -522,7 +522,7 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
-	*ctx.game_status = GameStatus::DEFEAT;
+	ctx.game_state->set_game_status(GameStatus::DEFEAT);
 
 	// Delete save file on death (ignore return value - non-critical operation)
 	[[maybe_unused]] const bool deleted = ctx.state_manager->delete_save_file();

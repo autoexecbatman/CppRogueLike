@@ -84,7 +84,7 @@ int main()
 	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
 #else
 	// Frame-based game loop
-	while (!WindowShouldClose() && game.run)
+	while (!WindowShouldClose() && game.game_state.get_run())
 	{
 		game.tick(loopNum);
 	}

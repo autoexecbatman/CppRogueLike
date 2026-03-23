@@ -903,7 +903,7 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 
 	if (itemUsed)
 	{
-		*ctx.game_status = GameStatus::NEW_TURN;
+		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 
 		if (filterMode)
 		{

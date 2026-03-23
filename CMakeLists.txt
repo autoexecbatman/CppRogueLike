@@ -89,6 +89,7 @@ set(PROJECT_SOURCE_DIR "${PROJECT_SOURCE_DIR}/src")
 # Set source files
 set(SOURCE_FILES # Add Source Files Here !
     # Game
+    ${PROJECT_SOURCE_DIR}/Game.cpp
     ${PROJECT_SOURCE_DIR}/Game.h
     ${PROJECT_SOURCE_DIR}/Core/Paths.h
 

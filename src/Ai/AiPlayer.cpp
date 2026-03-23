@@ -72,7 +72,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		if (!ctx.player->try_break_web(ctx))
 		{
 			// Still stuck, skip the player's turn
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 			return;
 		}
 	}
@@ -133,7 +133,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				}
 
 				ctx.message_system->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
-				*ctx.game_status = GameStatus::NEW_TURN;
+				ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 			}
 			else
 			{
@@ -144,7 +144,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				if (m.moves.find(key) != m.moves.end())
 				{
 					moveVector = m.moves.at(key);
-					*ctx.game_status = GameStatus::NEW_TURN;
+					ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 				}
 				else
 				{
@@ -164,7 +164,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		if (m.moves.find(key) != m.moves.end())
 		{
 			moveVector = m.moves.at(key);
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		else
 		{
@@ -310,7 +310,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 			std::string itemName = itemToDrop->actorData.name;
 			player.drop(*itemToDrop, ctx);
 			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 	}
 
@@ -536,7 +536,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::WAIT:
 	{
-		*ctx.game_status = GameStatus::NEW_TURN;
+		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		isWaiting = true;
 		break;
 	}
@@ -572,14 +572,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 			shouldComputeFOV = false;
 			ctx.map->compute_fov(ctx);
 		}
-		*ctx.game_status = GameStatus::NEW_TURN;
+		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		break;
 	}
 
 	case Controls::PICK:
 	{
 		pick_item(player, ctx);
-		*ctx.game_status = GameStatus::NEW_TURN;
+		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		break;
 	}
 
@@ -603,7 +603,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::QUIT:
 	{
-		*ctx.run = false;
+		ctx.game_state->set_run(false);
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
 		break;
 	}
@@ -619,7 +619,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		if (ctx.stairs->position == player.position)
 		{
 			ctx.level_manager->advance_to_next_level(ctx);
-			*ctx.game_status = GameStatus::STARTUP;
+			ctx.game_state->set_game_status(GameStatus::STARTUP);
 		}
 		break;
 	}
@@ -702,7 +702,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		if (player.attempt_hide(ctx))
 		{
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		break;
 	}
@@ -763,7 +763,7 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 		if (ctx.map->open_door(doorPos, ctx))
 		{
 			ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		else
 		{
@@ -775,7 +775,7 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 		if (ctx.map->close_door(doorPos, ctx))
 		{
 			ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
-			*ctx.game_status = GameStatus::NEW_TURN;
+			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 		{

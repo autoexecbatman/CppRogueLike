@@ -63,8 +63,8 @@ void Options::on_selection(GameContext& ctx)
 
 void Quit::on_selection(GameContext& ctx)
 {
-	*ctx.run = false;
-	*ctx.shouldSave = false;
+	ctx.game_state->set_run(false);
+	ctx.game_state->set_should_save(false);
 	ctx.message_system->log("You quit without saving!");
 }
 
