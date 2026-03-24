@@ -159,7 +159,7 @@ void ContentEditor::draw_header(const Renderer& renderer)
 	constexpr int TAB_Y = 20;
 
 	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
-	renderer.draw_text_color(8, 4, "CONTENT EDITOR", Color{ 255, 255, 180, 255 });
+	renderer.draw_text_color(Vector2D{ 8, 4 }, "CONTENT EDITOR", Color{ 255, 255, 180, 255 });
 
 	const char* TAB_NAMES[2] = { "Items", "Monsters" };
 	::Vector2 mouse = GetMousePosition();
@@ -173,7 +173,7 @@ void ContentEditor::draw_header(const Renderer& renderer)
 
 		DrawRectangle(tx, TAB_Y, TAB_W, TAB_H, bg);
 		DrawRectangleLines(tx, TAB_Y, TAB_W, TAB_H, Color{ 100, 100, 60, 255 });
-		renderer.draw_text_color(tx + 8, TAB_Y + 4, TAB_NAMES[t], tc);
+		renderer.draw_text_color(Vector2D{ tx + 8, TAB_Y + 4 }, TAB_NAMES[t], tc);
 
 		bool click_tab = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
 			mouse.x >= tx && mouse.x < tx + TAB_W &&
@@ -247,10 +247,10 @@ void ContentEditor::draw_list(
 			? (m_registry ? m_registry->get_tile(entries[i].item_key) : TileRef{})
 			: MonsterCreator::get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
-		renderer.draw_tile_screen_sized(list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
+		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
 		Color tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
-		renderer.draw_text_color(list_x + PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2, entries[i].name, tc);
+		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, entries[i].name, tc);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
@@ -313,7 +313,7 @@ void ContentEditor::draw_browser(
 		sheet_cols,
 		sheet_rows);
 
-	renderer.draw_text_color(ox + PAD, oy + 4, hdr, Color{ 200, 200, 120, 255 });
+	renderer.draw_text_color(Vector2D{ ox + PAD, oy + 4 }, hdr, Color{ 200, 200, 120, 255 });
 
 	const int grid_y = oy + SUB_HEADER_H;
 	const int grid_h = bh - SUB_HEADER_H;
@@ -362,7 +362,7 @@ void ContentEditor::draw_browser(
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 40, 40, 20, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(px, py, tid, BROWSER_TILE);
+			renderer.draw_tile_screen_sized(Vector2D{ px, py }, tid, BROWSER_TILE);
 
 			if (is_sel)
 			{
@@ -394,7 +394,7 @@ void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 		saved_flash ? "   -- SAVED!" : "");
 
 	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	renderer.draw_text_color(8, hint_y + 4, hint, hc);
+	renderer.draw_text_color(Vector2D{ 8, hint_y + 4 }, hint, hc);
 }
 
 void ContentEditor::handle_keyboard()

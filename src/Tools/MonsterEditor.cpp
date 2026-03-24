@@ -482,8 +482,8 @@ void MonsterEditor::render_header(const Renderer& r) const
 {
 	int sw = r.get_screen_width();
 	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
-	r.draw_text_color(8, 6, "MONSTER EDITOR", Color{ 255, 255, 180, 255 });
-	r.draw_text_color(8, 26,
+	r.draw_text_color(Vector2D{ 8, 6 }, "MONSTER EDITOR", Color{ 255, 255, 180, 255 });
+	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
 		Color{ 130, 130, 100, 255 });
 }
@@ -542,7 +542,7 @@ void MonsterEditor::render_list(const Renderer& r) const
 			DrawRectangle(0, iy, LIST_W, ITEM_H, bg);
 
 		TileRef tile = is_sel ? m_working.symbol : MonsterCreator::get_tile(m_keys[i]);
-		r.draw_tile_screen_sized(PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
+		r.draw_tile_screen_sized(Vector2D{ PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
 		bool is_class = MonsterCreator::is_class_key(m_keys[i]);
 		bool is_custom = !MonsterCreator::is_builtin(m_keys[i]) && !is_class;
@@ -561,7 +561,7 @@ void MonsterEditor::render_list(const Renderer& r) const
 		else
 			tc = is_class ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2, display_name, tc);
+		r.draw_text_color(Vector2D{ PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, display_name, tc);
 	}
 }
 
@@ -578,17 +578,17 @@ void MonsterEditor::render_fields(const Renderer& r) const
 
 	if (m_is_class_based)
 	{
-		r.draw_text_color(ox + 12, oy + 10,
+		r.draw_text_color(Vector2D{ ox + 12, oy + 10 },
 			"Class-based monster -- only tile is editable.",
 			Color{ 160, 160, 100, 255 });
 
 		constexpr int TILE_SZ = 40;
 		int ty = oy + 44;
 		DrawRectangle(ox, ty, fw, FIELD_H, Color{ 60, 60, 0, 200 });
-		r.draw_text_color(ox + 12, ty + (FIELD_H - 16) / 2, "Tile", Color{ 255, 220, 80, 255 });
-		r.draw_tile_screen_sized(sw - TILE_SZ - 12, ty + (FIELD_H - TILE_SZ) / 2, m_working.symbol, TILE_SZ);
+		r.draw_text_color(Vector2D{ ox + 12, ty + (FIELD_H - 16) / 2 }, "Tile", Color{ 255, 220, 80, 255 });
+		r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, ty + (FIELD_H - TILE_SZ) / 2 }, m_working.symbol, TILE_SZ);
 		DrawRectangleLines(sw - TILE_SZ - 12, ty + (FIELD_H - TILE_SZ) / 2, TILE_SZ, TILE_SZ, Color{ 255, 255, 0, 255 });
-		r.draw_text_color(ox + 12, ty + FIELD_H + 8,
+		r.draw_text_color(Vector2D{ ox + 12, ty + FIELD_H + 8 },
 			"Press Enter or F2 to open tile picker.",
 			Color{ 130, 130, 100, 255 });
 		return;
@@ -635,12 +635,12 @@ void MonsterEditor::render_fields(const Renderer& r) const
 		Color lc = is_sel ? Color{ 255, 220, 80, 255 } : Color{ 150, 150, 150, 255 };
 		Color vc = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(ox + 12, iy + (FIELD_H - 16) / 2, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
 
 		if (fid == FieldId::TILE)
 		{
 			constexpr int TILE_SZ = 22;
-			r.draw_tile_screen_sized(sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2, m_working.symbol, TILE_SZ);
+			r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2 }, m_working.symbol, TILE_SZ);
 			if (is_sel)
 			{
 				DrawRectangleLines(sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2, TILE_SZ, TILE_SZ, Color{ 255, 255, 0, 255 });
@@ -658,7 +658,7 @@ void MonsterEditor::render_fields(const Renderer& r) const
 				val = field_value(fid);
 			}
 			int vx = sw - r.measure_text(val) - 16;
-			r.draw_text_color(vx, iy + (FIELD_H - 16) / 2, val, vc);
+			r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
 		}
 	}
 }
@@ -684,7 +684,7 @@ void MonsterEditor::render_picker(const Renderer& r) const
 		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
 		m_picker_sheet + 1,
 		total_sheets);
-	r.draw_text_color(ox + PAD, body_y + 6, hdr, Color{ 200, 200, 120, 255 });
+	r.draw_text_color(Vector2D{ ox + PAD, body_y + 6 }, hdr, Color{ 200, 200, 120, 255 });
 
 	int grid_y = body_y + SUB_HDR_H;
 	int grid_h = body_h - SUB_HDR_H;
@@ -721,7 +721,7 @@ void MonsterEditor::render_picker(const Renderer& r) const
 				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 40, 40, 20, 160 });
 			}
 
-			r.draw_tile_screen_sized(px, py, tid, PICKER_TILE);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE);
 
 			if (is_cur)
 			{
@@ -766,7 +766,7 @@ void MonsterEditor::render_hint(const Renderer& r) const
 	}
 
 	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	r.draw_text_color(8, hint_y + 6, msg, hc);
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
 }
 
 // ---------------------------------------------------------------------------

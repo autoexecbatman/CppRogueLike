@@ -316,7 +316,7 @@ void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y
 	DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 60 });
 	DrawRectangleLines(px, py, tile_size, tile_size, Color{ 255, 255, 0, 220 });
 
-	renderer.draw_tile(world_x, world_y, palette[palette_index].tile, 0, Color{ 255, 255, 255, 180 });
+	renderer.draw_tile(Vector2D{ world_x, world_y }, palette[palette_index].tile, Color{ 255, 255, 255, 180 });
 }
 
 void DecorEditor::draw_palette_strip(const Renderer& renderer) const
@@ -353,7 +353,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 			DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 80 });
 		}
 
-		renderer.draw_tile_screen(px, py, palette[idx].tile);
+		renderer.draw_tile_screen(Vector2D{ px, py }, palette[idx].tile);	
 
 		if (is_current)
 		{
@@ -389,7 +389,7 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, int world_x, int world
 		? Color{ 100, 255, 100, 255 }
 		: Color{ 255, 255, 180, 255 };
 
-	renderer.draw_text_color(4, bar_y + 2, info, text_color);
+	renderer.draw_text_color(Vector2D{ 4, bar_y + 2 }, info, text_color);
 }
 
 // ---------------------------------------------------------------------------
@@ -459,8 +459,8 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 
 	std::string h2 = "Left/Right: sheet    Tab: close    Click list entry: rename    [X]: delete    Click tile: add/edit";
 
-	renderer.draw_text_color(PAD, 6, h1, Color{ 255, 255, 180, 255 });
-	renderer.draw_text_color(PAD, 28, h2, Color{ 160, 160, 120, 255 });
+	renderer.draw_text_color(Vector2D{ PAD, 6 }, h1, Color{ 255, 255, 180, 255 });
+	renderer.draw_text_color(Vector2D{ PAD, 28 }, h2, Color{ 160, 160, 120, 255 });
 
 	const int grid_y = HEADER_H + 2;
 	const int grid_h = sh - grid_y - (editing ? EDIT_H : 0) - 2;
@@ -474,7 +474,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	// --- Palette list panel ---
 	DrawRectangle(0, grid_y, LIST_W, grid_h, Color{ 10, 10, 20, 255 });
 	DrawLine(LIST_W, grid_y, LIST_W, grid_y + grid_h, Color{ 80, 80, 120, 255 });
-	renderer.draw_text_color(PAD, grid_y + 4, "PALETTE", Color{ 200, 200, 100, 255 });
+	renderer.draw_text_color(Vector2D{ PAD, grid_y + 4 }, "PALETTE", Color{ 200, 200, 100, 255 });
 
 	const int list_top = grid_y + 20;
 	const int list_vis_h = grid_h - 20;
@@ -557,8 +557,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		}
 
 		renderer.draw_tile_screen_sized(
-			PAD,
-			iy + (LIST_ITEM_H - LIST_TILE) / 2,
+			Vector2D{ PAD, iy + (LIST_ITEM_H - LIST_TILE) / 2 },
 			palette[i].tile,
 			LIST_TILE);
 
@@ -588,7 +587,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 			entry_text = truncate(entry_text);
 			tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
 		}
-		renderer.draw_text_color(text_x_l, iy + (LIST_ITEM_H - 16) / 2, entry_text, tc);
+		renderer.draw_text_color(Vector2D{ text_x_l, iy + (LIST_ITEM_H - 16) / 2 }, entry_text, tc);
 
 		// [X] delete button -- visible on selected or hovered row.
 		if (is_sel || hovered)
@@ -599,7 +598,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 
 			Color del_bg = del_hot ? Color{ 220, 50, 50, 255 } : Color{ 140, 40, 40, 200 };
 			DrawRectangle(del_x, btn_y, DEL_W, btn_h, del_bg);
-			renderer.draw_text_color(del_x + 5, iy + (LIST_ITEM_H - 16) / 2, "X", Color{ 255, 255, 255, 255 });
+			renderer.draw_text_color(Vector2D{ del_x + 5, iy + (LIST_ITEM_H - 16) / 2 }, "X", Color{ 255, 255, 255, 255 });
 
 			if (del_hot && clicked)
 			{
@@ -669,7 +668,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				DrawRectangle(px, py, BROWSER_TILE, BROWSER_TILE, Color{ 60, 60, 30, 160 });
 			}
 
-			renderer.draw_tile_screen_sized(px, py, tid, BROWSER_TILE);
+			renderer.draw_tile_screen_sized(Vector2D{ px, py }, tid, BROWSER_TILE);
 
 			if (is_sel)
 			{
@@ -694,7 +693,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 					int tip_x = static_cast<int>(mouse.x) + 14;
 					int tip_y = static_cast<int>(mouse.y) - 18;
 					DrawRectangle(tip_x - 2, tip_y - 2, static_cast<int>(tip.size()) * 8 + 6, 18, Color{ 0, 0, 0, 200 });
-					renderer.draw_text_color(tip_x, tip_y, tip, Color{ 255, 255, 200, 255 });
+					renderer.draw_text_color(Vector2D{ tip_x, tip_y }, tip, Color{ 255, 255, 200, 255 });
 				}
 			}
 
@@ -725,8 +724,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		DrawLine(0, panel_y, sw, panel_y, Color{ 100, 100, 200, 255 });
 
 		renderer.draw_tile_screen_sized(
-			PAD,
-			panel_y + (EDIT_H - BROWSER_TILE) / 2,
+			Vector2D{ PAD, panel_y + (EDIT_H - BROWSER_TILE) / 2 },
 			browser_selected,
 			BROWSER_TILE);
 
@@ -742,7 +740,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		Color sprite_col = list_cursor >= 0
 			? Color{ 255, 180, 80, 255 }
 			: Color{ 140, 200, 255, 255 };
-		renderer.draw_text_color(text_x, panel_y + 6, sprite_info, sprite_col);
+		renderer.draw_text_color(Vector2D{ text_x, panel_y + 6 }, sprite_info, sprite_col);
 
 		// Label field -- highlighted when all-selected (next keystroke replaces)
 		Color lbl_col = !editing_sym
@@ -751,16 +749,16 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		std::string label_display = label_all_selected
 			? std::format("Label: [{}]", label_buf) // brackets = all selected
 			: std::format("Label: {}{}", label_buf, !editing_sym ? "|" : "");
-		renderer.draw_text_color(text_x, panel_y + 26, label_display, lbl_col);
+		renderer.draw_text_color(Vector2D{ text_x, panel_y + 26 }, label_display, lbl_col);
 
 		// Symbol field
 		Color sym_col = editing_sym
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 160, 160, 80, 255 };
 		renderer.draw_text_color(
-			text_x, panel_y + 46, std::format("Symbol: {}{}", sym_buf ? std::string(1, sym_buf) : "_", editing_sym ? "|" : ""), sym_col);
+			Vector2D{ text_x, panel_y + 46 }, std::format("Symbol: {}{}", sym_buf ? std::string(1, sym_buf) : "_", editing_sym ? "|" : ""), sym_col);
 
-		renderer.draw_text_color(text_x, panel_y + 72, "Tab=switch field  |  Enter=save  |  Esc=cancel  |  Del=remove", Color{ 140, 140, 140, 255 });
+		renderer.draw_text_color(Vector2D{ text_x, panel_y + 72 }, "Tab=switch field  |  Enter=save  |  Esc=cancel  |  Del=remove", Color{ 140, 140, 140, 255 });
 
 		if (IsKeyPressed(KEY_TAB))
 		{

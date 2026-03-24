@@ -33,6 +33,7 @@ public:
 private:
 	// Helper methods
 	void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
+	void apply_lighting(const Player& player, const GameContext& ctx) const;
 	void render_world(
 		const Map& map,
 		const Stairs& stairs,

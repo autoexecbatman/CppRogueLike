@@ -55,11 +55,11 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 		int bar_w = (static_cast<int>(menu_width) - 2) * ts;
 		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
 		DrawRectangle(bar_x, py, bar_w, ts, pair.bg);
-		renderer->draw_text(px, py + font_off, text, BLACK_WHITE_PAIR);
+		renderer->draw_text(Vector2D{ px, py + font_off }, text, BLACK_WHITE_PAIR);
 	}
 	else
 	{
-		renderer->draw_text(px, py + font_off, text, WHITE_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ px, py + font_off }, text, WHITE_BLACK_PAIR);
 	}
 }
 
@@ -167,7 +167,7 @@ void BaseMenu::menu_draw_box()
 	int px = static_cast<int>(menu_startx) * ts;
 	int py = static_cast<int>(menu_starty) * ts;
 
-	renderer->draw_frame(px, py, static_cast<int>(menu_width), static_cast<int>(menu_height), *tile_config);
+	renderer->draw_frame(Vector2D{ px, py }, static_cast<int>(menu_width), static_cast<int>(menu_height), *tile_config);
 }
 
 void BaseMenu::menu_draw_title(std::string_view title, int color_pair)
@@ -183,5 +183,5 @@ void BaseMenu::menu_draw_title(std::string_view title, int color_pair)
 	int text_w = renderer->measure_text(title);
 	int px = (static_cast<int>(menu_startx) + 1) * ts + (interior_w - text_w) / 2;
 	int py = static_cast<int>(menu_starty) * ts + font_off;
-	renderer->draw_text(px, py, title, color_pair);
+	renderer->draw_text(Vector2D{ px, py }, title, color_pair);
 }

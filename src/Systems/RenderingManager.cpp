@@ -8,6 +8,7 @@
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
+#include "../Renderer/Renderer.h"
 #include "RenderingManager.h"
 
 void RenderingManager::render(GameContext& ctx) const
@@ -34,6 +35,8 @@ void RenderingManager::render_world(
 
 	render_creatures(creatures, ctx);
 	player.render(ctx);
+
+	apply_lighting(player, ctx);
 }
 
 void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const
@@ -78,6 +81,33 @@ void RenderingManager::restore_screen(GameContext& ctx) const
 {
 	render(ctx);
 	ctx.gui->gui_render(ctx);
+}
+
+void RenderingManager::apply_lighting(const Player& player, const GameContext& ctx) const
+{
+	if (!ctx.renderer)
+		return;
+
+	Renderer& r = *ctx.renderer;
+	int ts = r.get_tile_size();
+	int cam_x = r.get_camera_x();
+	int cam_y = r.get_camera_y();
+
+	Vector2D screenPos{
+		player.position.x * ts - cam_x + ts / 2,
+		player.position.y * ts - cam_y + ts / 2
+	};
+
+	static constexpr float torchRadiusTiles = 6.5f;
+	float radius = torchRadiusTiles * static_cast<float>(ts);
+
+	// Warm torch inner, fade to darkness
+	static constexpr Color torchInner = { 255, 210, 140, 255 };
+	static constexpr Color torchOuter = { 0, 0, 0, 255 };
+
+	r.begin_light_mask();
+	r.add_light_source(screenPos, radius, torchInner, torchOuter);
+	r.apply_light_mask();
 }
 
 void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const

@@ -150,7 +150,7 @@ void Game::init_world()
 {
 	player->actorData.tile = tile_config.get("TILE_PLAYER");
 	stairs->actorData.tile = tile_config.get("TILE_STAIRS");
-	anim_system.init(tile_config);
+	anim_system.init(tile_config, renderer.get_tile_size());
 }
 
 // Save on exit if needed

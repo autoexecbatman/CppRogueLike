@@ -82,7 +82,7 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 		int screen_y = e.world_y * ts - cam_y - static_cast<int>(offset_px);
 
 		Color col{ e.r, e.g, e.b, alpha };
-		renderer.draw_text_color(screen_x, screen_y, e.text, col);
+		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, e.text, col);
 	}
 
 	std::erase_if(entries, is_expired);

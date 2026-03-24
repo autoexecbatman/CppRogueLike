@@ -16,7 +16,7 @@ void Panel::draw_text(Renderer& renderer, int row, int col, std::string_view tex
 	int tile_size = renderer.get_tile_size();
 	int px = panel_rect.x + col * tile_size;
 	int py = panel_rect.y + row * tile_size;
-	renderer.draw_text(px, py, text, color_pair);
+	renderer.draw_text(Vector2D{ px, py }, text, color_pair);
 }
 
 void Panel::draw_text_reversed(Renderer& renderer, int row, int col, std::string_view text, int color_pair) const
@@ -30,7 +30,7 @@ void Panel::draw_text_reversed(Renderer& renderer, int row, int col, std::string
 	int text_h = tile_size;
 
 	DrawRectangle(px, py, text_w, text_h, pair.fg);
-	renderer.draw_text(px, py, text, 0);
+	renderer.draw_text(Vector2D{ px, py }, text, 0);
 }
 
 void Panel::draw_box(Renderer& renderer, Color border) const

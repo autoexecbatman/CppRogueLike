@@ -710,7 +710,7 @@ void RoomEditor::render_top_bar(const Renderer& r) const
 		? Color{ 100, 255, 140, 255 }
 		: Color{ 200, 200, 255, 255 };
 
-	r.draw_text_color(8, (ts - r.get_font_size()) / 2, title, title_col);
+	r.draw_text_color(Vector2D{ 8, (ts - r.get_font_size()) / 2 }, title, title_col);
 }
 
 void RoomEditor::render_left_panel(const Renderer& r) const
@@ -753,7 +753,7 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 		if (is_structural)
 		{
 			if (tile.is_valid())
-				r.draw_tile_screen(2, py, tile);
+				r.draw_tile_screen(Vector2D{ 2, py }, tile);
 			else
 			{
 				Color block{};
@@ -776,7 +776,7 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 		{
 			DrawRectangle(2, py, ts, ts, Color{ 70, 58, 42, 255 });
 			if (tile.is_valid())
-				r.draw_tile_screen(2, py, tile);
+				r.draw_tile_screen(Vector2D{ 2, py }, tile);
 		}
 
 		// Label
@@ -784,7 +784,7 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 180, 180, 200, 200 };
 
-		r.draw_text_color(ts + 4, py + (ts - r.get_font_size()) / 2, pal[idx].second, label_col);
+		r.draw_text_color(Vector2D{ ts + 4, py + (ts - r.get_font_size()) / 2 }, pal[idx].second, label_col);
 
 		if (selected)
 			DrawRectangleLines(1, py + 1, panel_w - 2, ts - 2, Color{ 200, 200, 100, 180 });
@@ -822,7 +822,7 @@ void RoomEditor::render_canvas(const Renderer& r) const
 			// Base layer (structural)
 			TileRef base_tile = canvas_tile_id(col, row);
 			if (base_tile.is_valid())
-				r.draw_tile_screen(px, py, base_tile);
+				r.draw_tile_screen(Vector2D{ px, py }, base_tile);
 			else
 				DrawRectangle(px, py, ts, ts, FLOOR_BG);
 
@@ -837,7 +837,7 @@ void RoomEditor::render_canvas(const Renderer& r) const
 			{
 				TileRef decor_tile = symbol_tile_id(decor_sym);
 				if (decor_tile.is_valid())
-					r.draw_tile_screen(px, py, decor_tile);
+					r.draw_tile_screen(Vector2D{ px, py }, decor_tile);
 			}
 
 			DrawRectangleLines(px, py, ts, ts, GRID_COLOR);
@@ -852,7 +852,7 @@ void RoomEditor::render_canvas(const Renderer& r) const
 
 	// Canvas size label in top-left corner of canvas area
 	std::string dim_label = std::format("{}x{}", canvas_w, canvas_h);
-	r.draw_text_color(area_x + 4, area_y + 4, dim_label, Color{ 100, 100, 140, 160 });
+	r.draw_text_color(Vector2D{ area_x + 4, area_y + 4 }, dim_label, Color{ 100, 100, 140, 160 });
 }
 
 void RoomEditor::render_right_panel(const Renderer& r) const
@@ -870,7 +870,7 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 	DrawLine(panel_x, panel_y, panel_x, panel_y + panel_h, Color{ 70, 70, 110, 255 });
 
 	// Header
-	r.draw_text_color(panel_x + 6, panel_y + 4, "SAVED PREFABS", Color{ 160, 160, 220, 255 });
+	r.draw_text_color(Vector2D{ panel_x + 6, panel_y + 4 }, "SAVED PREFABS", Color{ 160, 160, 220, 255 });
 
 	int font_h = r.get_font_size() + 4;
 	int list_y_off = font_h + 4;
@@ -896,14 +896,14 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 160, 160, 200, 200 };
 
-		r.draw_text_color(panel_x + 6, py + 2, label, entry_col);
+		r.draw_text_color(Vector2D{ panel_x + 6, py + 2 }, label, entry_col);
 	}
 
 	// Empty state
 	if (count == 0)
 	{
 		r.draw_text_color(
-			panel_x + 6, panel_y + list_y_off + 4, "No prefabs yet.", Color{ 100, 100, 120, 150 });
+			Vector2D{ panel_x + 6, panel_y + list_y_off + 4 }, "No prefabs yet.", Color{ 100, 100, 120, 150 });
 	}
 
 	// Workflow guidance -- drawn in the bottom portion of the right panel
@@ -914,7 +914,7 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 	DrawLine(panel_x, guide_y, panel_x + panel_w, guide_y, Color{ 60, 60, 100, 200 });
 	DrawRectangle(panel_x, guide_y + 1, panel_w, guide_h - 1, Color{ 10, 10, 18, 200 });
 
-	r.draw_text_color(panel_x + 6, guide_y + 4, "HOW IT WORKS", Color{ 140, 140, 220, 255 });
+	r.draw_text_color(Vector2D{ panel_x + 6, guide_y + 4 }, "HOW IT WORKS", Color{ 140, 140, 220, 255 });
 
 	static constexpr const char* GUIDE[] = {
 		"[N]      new canvas",
@@ -931,7 +931,7 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 
 	for (const char* line : GUIDE)
 	{
-		r.draw_text_color(panel_x + 6, guide_text_y, line, guide_col);
+		r.draw_text_color(Vector2D{ panel_x + 6, guide_text_y }, line, guide_col);
 		guide_text_y += font_h;
 	}
 }
@@ -948,7 +948,7 @@ void RoomEditor::render_bottom_bar(const Renderer& r) const
 	std::string_view controls =
 		"L=paint  R=erase  Mid=pan  Up/Dn=pal  +/-=zoom  F2=tile  F3=label  Ctrl+S=save  Esc=exit";
 
-	r.draw_text_color(8, bar_y + (ts - r.get_font_size()) / 2, controls, Color{ 140, 140, 180, 220 });
+	r.draw_text_color(Vector2D{ 8, bar_y + (ts - r.get_font_size()) / 2 }, controls, Color{ 140, 140, 180, 220 });
 }
 
 void RoomEditor::render_input_overlay(const Renderer& r) const
@@ -978,7 +978,7 @@ void RoomEditor::render_input_overlay(const Renderer& r) const
 
 	DrawRectangle(box_x, box_y, box_w, box_h, Color{ 20, 20, 35, 240 });
 	DrawRectangleLines(box_x, box_y, box_w, box_h, Color{ 120, 120, 200, 255 });
-	r.draw_text_color(box_x + 16, box_y + 10, prompt, Color{ 220, 220, 255, 255 });
+	r.draw_text_color(Vector2D{ box_x + 16, box_y + 10 }, prompt, Color{ 220, 220, 255, 255 });
 }
 
 // ---------------------------------------------------------------------------
@@ -1076,7 +1076,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 			// Dark bg so decor tiles are visible
 			DrawRectangle(px, py, PICK_TS, PICK_TS, Color{ 20, 16, 12, 255 });
 
-			r.draw_tile_screen_sized(px, py, tile_ref, PICK_TS);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tile_ref, PICK_TS);
 
 			// Selected cell highlight
 			if (col == picker_col && row == picker_row)
@@ -1106,7 +1106,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 		picker_row);
 
 	DrawRectangle(0, 0, sw, 40, Color{ 20, 20, 35, 240 });
-	r.draw_text_color(8, 10, header, Color{ 220, 220, 255, 255 });
+	r.draw_text_color(Vector2D{ 8, 10 }, header, Color{ 220, 220, 255, 255 });
 
 	// Sheet name label centered below grid
 	int name_y = off_y + grid_h + 8;
@@ -1114,5 +1114,5 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 		PICKER_SHEET_NAMES[picker_sheet_list_idx],
 		cols,
 		rows);
-	r.draw_text_color(off_x, name_y, sheet_label, Color{ 160, 160, 220, 200 });
+	r.draw_text_color(Vector2D{ off_x, name_y }, sheet_label, Color{ 160, 160, 220, 200 });
 }

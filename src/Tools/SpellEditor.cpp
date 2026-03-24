@@ -301,8 +301,8 @@ void SpellEditor::render_header(const Renderer& r) const
 {
 	int sw = r.get_screen_width();
 	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
-	r.draw_text_color(8, 6, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
-	r.draw_text_color(8, 26,
+	r.draw_text_color(Vector2D{ 8, 6 }, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
+	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Ctrl+S:save  Esc:exit",
 		Color{ 130, 130, 100, 255 });
 }
@@ -369,11 +369,11 @@ void SpellEditor::render_list(const Renderer& r) const
 		std::string label = std::format("[{}] {}{}", def.level, def.name, is_custom ? " *" : "");
 		Color tc = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(PAD, iy + (ITEM_H - 16) / 2, label, tc);
+		r.draw_text_color(Vector2D{ PAD, iy + (ITEM_H - 16) / 2 }, label, tc);
 
 		// Class dot on right edge
 		const char* class_tag = (def.spellClass == SpellClass::CLERIC) ? "C" : "W";
-		r.draw_text_color(LIST_W - 20, iy + (ITEM_H - 16) / 2, class_tag, class_col);
+		r.draw_text_color(Vector2D{ LIST_W - 20, iy + (ITEM_H - 16) / 2 }, class_tag, class_col);
 	}
 }
 
@@ -425,7 +425,7 @@ void SpellEditor::render_fields(const Renderer& r) const
 		Color lc = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
 		Color vc = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(ox + 12, iy + (FIELD_H - 16) / 2, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
 
 		std::string val;
 		if (is_sel && m_mode == Mode::EDIT_STRING)
@@ -438,7 +438,7 @@ void SpellEditor::render_fields(const Renderer& r) const
 		}
 
 		int vx = sw - r.measure_text(val) - 16;
-		r.draw_text_color(vx, iy + (FIELD_H - 16) / 2, val, vc);
+		r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
 	}
 }
 
@@ -471,7 +471,7 @@ void SpellEditor::render_hint(const Renderer& r) const
 	}
 
 	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	r.draw_text_color(8, hint_y + 6, msg, hc);
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
 }
 
 // ---------------------------------------------------------------------------

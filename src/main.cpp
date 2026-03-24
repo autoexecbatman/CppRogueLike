@@ -26,7 +26,7 @@ struct LoopData
 void emscripten_loop(void* arg)
 {
 	auto* data = static_cast<LoopData*>(arg);
-	if (!data->game->run)
+	if (WindowShouldClose() || !data->game->game_state.get_run())
 	{
 		emscripten_cancel_main_loop();
 		return;

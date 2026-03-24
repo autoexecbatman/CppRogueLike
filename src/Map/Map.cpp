@@ -526,7 +526,7 @@ void Map::render(const GameContext& ctx) const
 				TileRef floor_ref = autotile_resolve_mask(
 					ctx.tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
-				ctx.renderer->draw_tile(col, row, floor_ref, WHITE_BLACK_PAIR, tint);
+				ctx.renderer->draw_tile(Vector2D{ col, row }, floor_ref, tint);
 				tile_ref = (type == TileType::CLOSED_DOOR)
 					? ctx.tile_config->get("TILE_DOOR_CLOSED")
 					: ctx.tile_config->get("TILE_DOOR_OPEN");
@@ -536,7 +536,7 @@ void Map::render(const GameContext& ctx) const
 				continue;
 			}
 
-			ctx.renderer->draw_tile(col, row, tile_ref, WHITE_BLACK_PAIR, tint);
+			ctx.renderer->draw_tile(Vector2D{ col, row }, tile_ref, tint);
 
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
@@ -550,7 +550,7 @@ void Map::render(const GameContext& ctx) const
 				if (!decor_ref.is_valid())
 					decor_ref = resolve_decor(pos, type);
 				if (decor_ref.is_valid())
-					ctx.renderer->draw_tile(col, row, decor_ref, WHITE_BLACK_PAIR, tint);
+					ctx.renderer->draw_tile(Vector2D{ col, row }, decor_ref, tint);
 			}
 		}
 	}

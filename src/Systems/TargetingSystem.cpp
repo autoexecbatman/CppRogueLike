@@ -310,7 +310,7 @@ bool TargetingSystem::run_targeting_loop(
 				Color{ 255, 255, 50, ring_a });
 		}
 
-		ctx.renderer->draw_text(4, 4, "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 4, 4 }, "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel", WHITE_BLACK_PAIR);
 		ctx.renderer->end_frame();
 
 		ctx.input_system->poll();

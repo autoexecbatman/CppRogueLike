@@ -39,8 +39,8 @@ void MenuName::draw_name_screen(GameContext& ctx)
 		int px = (static_cast<int>(menu_startx) + 1) * ts;
 		int row1_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
 		int row2_y = (static_cast<int>(menu_starty) + 2) * ts + font_off;
-		renderer->draw_text(px, row1_y, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
-		renderer->draw_text(px, row2_y, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ px, row1_y }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ px, row2_y }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
 	}
 
 	menu_refresh();

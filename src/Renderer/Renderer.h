@@ -1,13 +1,18 @@
 #pragma once
 
 #include <array>
-#include <functional>
-#include <string>
-#include <unordered_map>
+#include <string_view>
 
 #include <raylib.h>
 
+#include "../Utils/Vector2D.h"
+
 class TileConfig;
+
+inline constexpr int SPRITE_SIZE = 16;       // DawnLike native sprite pixel size
+inline constexpr int DISPLAY_TILE_SIZE = 32;  // Default rendered tile size in pixels
+inline constexpr int GUI_RESERVE_ROWS = 7;    // Rows reserved at the bottom for the HUD
+inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
 
 // DawnLike sprite sheet indices.
 // Sheets with 0/1 suffixes are animation frame pairs.
@@ -85,15 +90,7 @@ enum class TileSheet
 	SHEET_TRAP0,
 	SHEET_FENCE,
 	SHEET_MAP0,
-};
-
-template <>
-struct std::hash<TileSheet>
-{
-	std::size_t operator()(TileSheet s) const noexcept
-	{
-		return std::hash<int>{}(static_cast<int>(s));
-	}
+	COUNT, // sentinel -- keep last
 };
 
 // Unencoded tile reference: sheet + grid position.
@@ -113,46 +110,67 @@ struct TileRef
 
 struct ScreenMetrics
 {
-	int tile_w;
-	int tile_h;
-	int map_cols;
-	int map_rows;
-	int gui_rows;
-	int window_w;
-	int window_h;
+	int tile_w{};
+	int tile_h{};
+	int map_cols{};
+	int map_rows{};
+	int gui_rows{};
+	int window_w{};
+	int window_h{};
 };
 
 struct ColorPair
 {
-	Color fg;
-	Color bg;
+	Color fg{};
+	Color bg{};
 };
-
-inline constexpr int MAX_COLOR_PAIRS = 23;
-inline constexpr int SPRITE_SIZE = 16; // DawnLike native sprite pixel size
-inline constexpr int DISPLAY_TILE_SIZE = 32; // On-screen tile pixel size (2x)
-inline constexpr int GUI_RESERVE_ROWS = 7;
 
 // Holds one DawnLike sprite sheet (optionally two frames for animation).
 struct SpriteSheet
 {
 	Texture2D frame0{};
 	Texture2D frame1{};
-	int tiles_per_row{ 0 };
-	int tiles_per_col{ 0 };
+	int tilesPerRow{ 0 };
+	int tilesPerCol{ 0 };
 	bool animated{ false };
 	bool loaded{ false };
-	std::string_view name;
-};
-
-struct GameCamera
-{
-	int x{ 0 };
-	int y{ 0 };
+	std::string_view name{};
 };
 
 class Renderer
 {
+	bool initialized{ false };
+
+	int tileSize{ DISPLAY_TILE_SIZE };
+	int viewportCols{ 0 };
+	int viewportRows{ 0 };
+	int screenWidth{ 0 };
+	int screenHeight{ 0 };
+
+	Vector2D camera{};
+
+	float shakeTrauma{ 0.0f };
+	Vector2D shakeOffset{};
+
+	RenderTexture2D lightMask{};
+	bool lightMaskLoaded{ false };
+
+	std::array<SpriteSheet, static_cast<std::size_t>(TileSheet::COUNT)> sheets{};
+	bool sheetsLoaded{ false };
+
+	Font gameFont{};
+	bool fontLoaded{ false };
+	int fontSize{ 0 };
+
+	int currentAnimFrame{ 0 };
+	double lastAnimToggle{ 0.0 };
+
+	std::array<ColorPair, MAX_COLOR_PAIRS> colorPairs{};
+
+	void init_color_pairs();
+	void load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1);
+	void load_sheet_static(TileSheet id, std::string_view name, std::string_view path);
+
 public:
 	Renderer() = default;
 	~Renderer() = default;
@@ -165,76 +183,60 @@ public:
 	void init();
 	void shutdown();
 
-	void load_dawnlike(std::string_view base_path);
-	void load_font(std::string_view font_path, int size);
+	void load_dawnlike(std::string_view basePath);
+	void load_font(std::string_view fontPath, int size);
 
 	void begin_frame();
 	void end_frame();
 
 	// World-space tile drawing (camera offset applied)
-	void draw_tile(int grid_x, int grid_y, TileRef tile, int color_pair_id, Color tint) const;
+	void draw_tile(Vector2D gridPos, TileRef tile, Color tint) const;
 
 	// Screen-space drawing (no camera offset)
-	void draw_tile_screen(int px, int py, TileRef tile) const;
+	void draw_tile_screen(Vector2D screenPos, TileRef tile) const;
+	void draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color tint) const;
+	void draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRef tile, Color tint) const;
 
 	// Screen-space drawing at an explicit pixel size (used by tile picker).
-	void draw_tile_screen_sized(int px, int py, TileRef tile, int display_size) const;
-	void draw_text(int px, int py, std::string_view text, int color_pair_id) const;
-	void draw_text_color(int px, int py, std::string_view text, Color color) const;
-	void draw_bar(int px, int py, int w, int h, float ratio, Color filled, Color empty) const;
+	void draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const;
+	void draw_text(Vector2D screenPos, std::string_view text, int colorPairId) const;
+	void draw_text_color(Vector2D screenPos, std::string_view text, Color color) const;
+	void draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const;
 
 	// Draw a DawnLike-tiled frame with dark background fill.
-	// px/py = top-left in pixels; w_tiles/h_tiles = dimensions in tiles.
-	void draw_frame(int px, int py, int w_tiles, int h_tiles, const TileConfig& tc) const;
+	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
+	void draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tc) const;
 
 	void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
 	void update_viewport();
 	void zoom_in();
 	void zoom_out();
 
+	// Screen shake: add trauma [0..1]. Decays automatically each frame.
+	void add_trauma(float amount);
+
+	// Dynamic lighting: fill darkness then punch light cones, multiply onto screen.
+	void begin_light_mask();
+	void add_light_source(Vector2D screen_pos, float radius, Color inner, Color outer);
+	void apply_light_mask();
+
 	[[nodiscard]] ColorPair get_color_pair(int id) const;
 	[[nodiscard]] ScreenMetrics metrics() const;
 	[[nodiscard]] int measure_text(std::string_view text) const;
 
 	[[nodiscard]] bool is_initialized() const { return initialized; }
-	[[nodiscard]] int get_tile_size() const { return tile_size; }
-	[[nodiscard]] int get_font_size() const { return font_size; }
-	[[nodiscard]] int get_viewport_cols() const { return viewport_cols; }
-	[[nodiscard]] int get_viewport_rows() const { return viewport_rows; }
-	[[nodiscard]] int get_screen_width() const { return screen_w; }
-	[[nodiscard]] int get_screen_height() const { return screen_h; }
-	[[nodiscard]] int get_camera_x() const { return camera.x; }
-	[[nodiscard]] int get_camera_y() const { return camera.y; }
+	[[nodiscard]] int get_tile_size() const { return tileSize; }
+	[[nodiscard]] int get_font_size() const { return fontSize; }
+	[[nodiscard]] int get_viewport_cols() const { return viewportCols; }
+	[[nodiscard]] int get_viewport_rows() const { return viewportRows; }
+	[[nodiscard]] int get_screen_width() const { return screenWidth; }
+	[[nodiscard]] int get_screen_height() const { return screenHeight; }
+	[[nodiscard]] int get_camera_x() const { return camera.x + shakeOffset.x; }
+	[[nodiscard]] int get_camera_y() const { return camera.y + shakeOffset.y; }
 	[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
 	[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
 	[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
 	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
 	[[nodiscard]] int get_loaded_sheet_count() const;
 
-private:
-	void init_color_pairs();
-	void load_sheet(TileSheet id, std::string_view name, const std::string& path0, const std::string& path1);
-	void load_sheet_static(TileSheet id, std::string_view name, const std::string& path);
-
-	bool initialized{ false };
-	int tile_size{ DISPLAY_TILE_SIZE };
-	int viewport_cols{ 0 };
-	int viewport_rows{ 0 };
-	int screen_w{ 0 };
-	int screen_h{ 0 };
-
-	GameCamera camera{};
-
-	std::unordered_map<TileSheet, SpriteSheet> sheets;
-	bool sheets_loaded{ false };
-
-	Font game_font{};
-	bool font_loaded{ false };
-	int font_size{ 24 };
-
-	int current_anim_frame{ 0 };
-	double last_anim_toggle{ 0.0 };
-	static constexpr double ANIM_INTERVAL = 0.5;
-
-	std::array<ColorPair, MAX_COLOR_PAIRS> color_pairs{};
 };

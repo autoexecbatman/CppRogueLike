@@ -619,8 +619,8 @@ void ItemEditor::render_header(const Renderer& r) const
 {
 	int sw = r.get_screen_width();
 	DrawRectangle(0, 0, sw, HEADER_H, Color{ 0, 20, 40, 255 });
-	r.draw_text_color(8, 6, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
-	r.draw_text_color(8, 26,
+	r.draw_text_color(Vector2D{ 8, 6 }, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
+	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
 		Color{ 100, 130, 100, 255 });
 }
@@ -668,7 +668,7 @@ void ItemEditor::render_list(const Renderer& r) const
 		TileRef tile = is_sel
 			? m_working_tile
 			: (m_registry ? m_registry->get_tile(m_keys[i]) : TileRef{});
-		r.draw_tile_screen_sized(PAD, iy + (ITEM_H - TILE_SZ) / 2, tile, TILE_SZ);
+		r.draw_tile_screen_sized(Vector2D{ PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
 		bool is_custom = !ItemCreator::is_builtin_key(m_keys[i]);
 
@@ -684,7 +684,7 @@ void ItemEditor::render_list(const Renderer& r) const
 			? Color{ 150, 255, 150, 255 }
 			: Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2, display_name, tc);
+		r.draw_text_color(Vector2D{ PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, display_name, tc);
 	}
 }
 
@@ -730,12 +730,12 @@ void ItemEditor::render_fields(const Renderer& r) const
 		Color lc = is_sel ? Color{ 150, 255, 150, 255 } : Color{ 150, 150, 150, 255 };
 		Color vc = is_sel ? Color{ 220, 255, 220, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(ox + 12, iy + (FIELD_H - 16) / 2, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
 
 		if (fid == FieldId::TILE)
 		{
 			constexpr int TILE_SZ = 22;
-			r.draw_tile_screen_sized(sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2, m_working_tile, TILE_SZ);
+			r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2 }, m_working_tile, TILE_SZ);
 			if (is_sel)
 			{
 				DrawRectangleLines(
@@ -754,7 +754,7 @@ void ItemEditor::render_fields(const Renderer& r) const
 			else
 				val = field_value(fid);
 			int vx = sw - r.measure_text(val) - 16;
-			r.draw_text_color(vx, iy + (FIELD_H - 16) / 2, val, vc);
+			r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
 		}
 	}
 }
@@ -780,7 +780,7 @@ void ItemEditor::render_picker(const Renderer& r) const
 		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
 		m_picker_sheet + 1,
 		total_sheets);
-	r.draw_text_color(ox + PAD, body_y + 6, hdr, Color{ 120, 200, 200, 255 });
+	r.draw_text_color(Vector2D{ ox + PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
 
 	int grid_y = body_y + SUB_HDR_H;
 	int grid_h = body_h - SUB_HDR_H;
@@ -811,7 +811,7 @@ void ItemEditor::render_picker(const Renderer& r) const
 			else if (hovered)
 				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 20, 40, 20, 160 });
 
-			r.draw_tile_screen_sized(px, py, tid, PICKER_TILE);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE);
 
 			if (is_cur)
 				DrawRectangleLines(px, py, PICKER_TILE, PICKER_TILE, Color{ 0, 255, 100, 255 });
@@ -854,7 +854,7 @@ void ItemEditor::render_hint(const Renderer& r) const
 	}
 
 	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 120, 160, 120, 255 };
-	r.draw_text_color(8, hint_y + 6, msg, hc);
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
 }
 
 // ---------------------------------------------------------------------------

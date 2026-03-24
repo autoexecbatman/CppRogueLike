@@ -204,7 +204,7 @@ void MenuSell::draw()
 		int font_off = (ts - renderer->get_font_size()) / 2;
 		int hdr_x = (static_cast<int>(menu_startx) + 1) * ts;
 		int hdr_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
-		renderer->draw_text(hdr_x, hdr_y, "Item                       Price", CYAN_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ hdr_x, hdr_y }, "Item                       Price", CYAN_BLACK_PAIR);
 	}
 
 	draw_content();

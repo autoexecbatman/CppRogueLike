@@ -105,7 +105,7 @@ void Actor::render(const GameContext& ctx) const noexcept
 		int displayColor = get_display_color();
 
 		// Note: You might want to extract Color{255, 255, 255, 255} to a constant too
-		ctx.renderer->draw_tile(position.x, position.y, displayTile, displayColor, Color{ 255, 255, 255, 255 });
+		ctx.renderer->draw_tile(position, displayTile, Color{ 255, 255, 255, 255 });
 	}
 }
 

@@ -36,7 +36,7 @@ void LevelUpUI::menu(GameContext& ctx)
 	draw_next_level_info(player_ref, ctx, row);
 
 	int ts = ctx.renderer->get_tile_size();
-	ctx.renderer->draw_text(ts, row * ts, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
 
 	ctx.renderer->end_frame();
 }
@@ -45,15 +45,15 @@ void LevelUpUI::draw_title(const Player& player, int level, GameContext& ctx, in
 {
 	int ts = ctx.renderer->get_tile_size();
 
-	ctx.renderer->draw_text(ts, row * ts, "*** LEVEL UP! ***", YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "*** LEVEL UP! ***", YELLOW_BLACK_PAIR);
 	row++;
 
 	ctx.renderer->draw_text(
-		ts, row * ts, std::format("{} has attained level {}!", player.get_name(), level), WHITE_BLACK_PAIR);
+		Vector2D{ ts, row * ts }, std::format("{} has attained level {}!", player.get_name(), level), WHITE_BLACK_PAIR);
 	row++;
 
 	ctx.renderer->draw_text(
-		ts, row * ts, std::format("Class: {}", player.playerClass), WHITE_BLACK_PAIR);
+		Vector2D{ ts, row * ts }, std::format("Class: {}", player.playerClass), WHITE_BLACK_PAIR);
 	row += 2;
 }
 
@@ -61,11 +61,11 @@ void LevelUpUI::draw_current_stats(const Player& player, GameContext& ctx, int& 
 {
 	int ts = ctx.renderer->get_tile_size();
 
-	ctx.renderer->draw_text(ts, row * ts, "--- CURRENT STATS ---", YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "--- CURRENT STATS ---", YELLOW_BLACK_PAIR);
 	row++;
 
 	ctx.renderer->draw_text(
-		ts, row * ts, std::format("HP: {} / {}   THAC0: {}   AC: {}", player.destructible->get_hp(), player.destructible->get_max_hp(), player.destructible->get_thaco(), player.destructible->get_armor_class()), GREEN_BLACK_PAIR);
+		Vector2D{ ts, row * ts }, std::format("HP: {} / {}   THAC0: {}   AC: {}", player.destructible->get_hp(), player.destructible->get_max_hp(), player.destructible->get_thaco(), player.destructible->get_armor_class()), GREEN_BLACK_PAIR);
 	row += 2;
 }
 
@@ -73,13 +73,13 @@ void LevelUpUI::draw_level_benefits(const Player& player, int level, GameContext
 {
 	int ts = ctx.renderer->get_tile_size();
 
-	ctx.renderer->draw_text(ts, row * ts, "--- LEVEL BENEFITS ---", YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "--- LEVEL BENEFITS ---", YELLOW_BLACK_PAIR);
 	row++;
 
 	if (has_thac0_improvement(player, level))
 	{
 		ctx.renderer->draw_text(
-			ts, row * ts, std::format("THAC0 improved to {}", player.destructible->get_thaco()), GREEN_BLACK_PAIR);
+			Vector2D{ ts, row * ts }, std::format("THAC0 improved to {}", player.destructible->get_thaco()), GREEN_BLACK_PAIR);
 		row++;
 	}
 
@@ -87,51 +87,51 @@ void LevelUpUI::draw_level_benefits(const Player& player, int level, GameContext
 	{
 	case Player::PlayerClassState::FIGHTER:
 	{
-		ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d10", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "Hit Dice: d10", WHITE_BLACK_PAIR);
 		row++;
 		if (level == 7)
 		{
 			ctx.renderer->draw_text(
-				ts, row * ts, "Special: Extra Attack (3 attacks per 2 rounds)", YELLOW_BLACK_PAIR);
+				Vector2D{ ts, row * ts }, "Special: Extra Attack (3 attacks per 2 rounds)", YELLOW_BLACK_PAIR);
 			row++;
 		}
 		else if (level == 13)
 		{
 			ctx.renderer->draw_text(
-				ts, row * ts, "Special: Extra Attack (2 attacks per round)", YELLOW_BLACK_PAIR);
+				Vector2D{ ts, row * ts }, "Special: Extra Attack (2 attacks per round)", YELLOW_BLACK_PAIR);
 			row++;
 		}
 		break;
 	}
 	case Player::PlayerClassState::ROGUE:
 	{
-		ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d6", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "Hit Dice: d6", WHITE_BLACK_PAIR);
 		row++;
 		int newMult = LevelUpSystem::calculate_backstab_multiplier(level);
 		int oldMult = LevelUpSystem::calculate_backstab_multiplier(level - 1);
 		if (newMult > oldMult)
 		{
 			ctx.renderer->draw_text(
-				ts, row * ts, std::format("Special: Backstab multiplier increased to x{}", newMult), YELLOW_BLACK_PAIR);
+				Vector2D{ ts, row * ts }, std::format("Special: Backstab multiplier increased to x{}", newMult), YELLOW_BLACK_PAIR);
 			row++;
 		}
 		break;
 	}
 	case Player::PlayerClassState::CLERIC:
 	{
-		ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d8", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "Hit Dice: d8", WHITE_BLACK_PAIR);
 		row++;
 		if (level == 3 || level == 5 || level == 7 || level == 9)
 		{
 			ctx.renderer->draw_text(
-				ts, row * ts, "Special: Turn Undead ability improved", YELLOW_BLACK_PAIR);
+				Vector2D{ ts, row * ts }, "Special: Turn Undead ability improved", YELLOW_BLACK_PAIR);
 			row++;
 		}
 		break;
 	}
 	case Player::PlayerClassState::WIZARD:
 	{
-		ctx.renderer->draw_text(ts, row * ts, "Hit Dice: d4", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "Hit Dice: d4", WHITE_BLACK_PAIR);
 		row++;
 		if ((level % 2 == 1) && level > 1)
 		{
@@ -139,7 +139,7 @@ void LevelUpUI::draw_level_benefits(const Player& player, int level, GameContext
 			if (spellLevel <= 9)
 			{
 				ctx.renderer->draw_text(
-					ts, row * ts, std::format("Special: Level {} spells now available", spellLevel), YELLOW_BLACK_PAIR);
+					Vector2D{ ts, row * ts }, std::format("Special: Level {} spells now available", spellLevel), YELLOW_BLACK_PAIR);
 				row++;
 			}
 		}
@@ -158,11 +158,11 @@ void LevelUpUI::draw_next_level_info(const Player& player, GameContext& ctx, int
 
 	int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
 
-	ctx.renderer->draw_text(ts, row * ts, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ ts, row * ts }, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
 	row++;
 
 	ctx.renderer->draw_text(
-		ts, row * ts, std::format("XP needed for next level: {}", nextLevelXP), WHITE_BLACK_PAIR);
+		Vector2D{ ts, row * ts }, std::format("XP needed for next level: {}", nextLevelXP), WHITE_BLACK_PAIR);
 	row += 2;
 }
 

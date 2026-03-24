@@ -437,7 +437,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			static_cast<float>(tip_px), static_cast<float>(tip_py), static_cast<float>(box_w), static_cast<float>(box_h) },
 		1.0f,
 		Color{ hr, hg, hb, 180 });
-	ctx.renderer->draw_text(tip_px + pad, tip_py + font_off, desc, WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ tip_px + pad, tip_py + font_off }, desc, WHITE_BLACK_PAIR);
 }
 
 void GameLoopCoordinator::update(GameContext& ctx)
