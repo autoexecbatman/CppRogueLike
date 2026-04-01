@@ -120,10 +120,14 @@ void RoomEditor::do_save(const std::string& name)
 void RoomEditor::do_load(int prefab_index)
 {
 	if (!library)
+	{
 		return;
+	}
 	const auto& all = library->all();
 	if (prefab_index < 0 || prefab_index >= static_cast<int>(all.size()))
+	{
 		return;
+	}
 
 	const Prefab& p = all[prefab_index];
 	prefab_name = p.name;
@@ -168,10 +172,14 @@ void RoomEditor::do_load(int prefab_index)
 void RoomEditor::do_delete(int prefab_index)
 {
 	if (!library)
+	{
 		return;
+	}
 	const auto& all = library->all();
 	if (prefab_index < 0 || prefab_index >= static_cast<int>(all.size()))
+	{
 		return;
+	}
 
 	std::string name = all[prefab_index].name;
 	library->remove(name);
@@ -193,17 +201,23 @@ void RoomEditor::set_status(const std::string& msg)
 void RoomEditor::handle_input(GameContext& ctx)
 {
 	if (mode == EditorMode::TILE_PICKER)
+	{
 		handle_input_picker(ctx);
+	}
 	else if (mode == EditorMode::NORMAL)
+	{
 		handle_input_normal(ctx);
+	}
 	else
+	{
 		handle_input_text(ctx);
+	}
 }
 
 void RoomEditor::handle_input_normal(GameContext& ctx)
 {
 	Renderer& r = *ctx.renderer;
-	int ts = r.get_tile_size();
+	int tileSize = r.get_tile_size();
 
 	// Escape -- exit
 	if (IsKeyPressed(KEY_ESCAPE))
@@ -341,7 +355,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		int delta = (wheel > 0.0f) ? -1 : 1;
 
 		if (screen_to_palette_index(r, static_cast<int>(mw.x), static_cast<int>(mw.y)) >= 0 ||
-			static_cast<int>(mw.x) < LEFT_W_TILES * ts)
+			static_cast<int>(mw.x) < LEFT_W_TILES * tileSize)
 		{
 			int pal_size = static_cast<int>(library->ordered_palette().size());
 			palette_index = std::clamp(palette_index + delta, 0, std::max(0, pal_size - 1));
@@ -501,11 +515,11 @@ bool RoomEditor::screen_to_canvas(
 	int& out_cx,
 	int& out_cy) const
 {
-	int ts = r.get_tile_size();
-	int area_x = LEFT_W_TILES * ts;
-	int area_y = TOP_H_TILES * ts;
-	int area_w = r.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * ts;
-	int area_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
+	int tileSize = r.get_tile_size();
+	int area_x = LEFT_W_TILES * tileSize;
+	int area_y = TOP_H_TILES * tileSize;
+	int area_w = r.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
+	int area_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mouse_px < area_x || mouse_px >= area_x + area_w)
 		return false;
@@ -515,8 +529,8 @@ bool RoomEditor::screen_to_canvas(
 	int rel_x = mouse_px - area_x + pan_x;
 	int rel_y = mouse_py - area_y + pan_y;
 
-	out_cx = rel_x / ts;
-	out_cy = rel_y / ts;
+	out_cx = rel_x / tileSize;
+	out_cy = rel_y / tileSize;
 
 	if (out_cx < 0 || out_cx >= canvas_w)
 		return false;
@@ -531,10 +545,10 @@ int RoomEditor::screen_to_list_index(const Renderer& r, int mouse_px, int mouse_
 	if (!library)
 		return -1;
 
-	int ts = r.get_tile_size();
-	int panel_x = r.get_screen_width() - RIGHT_W_TILES * ts;
-	int panel_y = TOP_H_TILES * ts;
-	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
+	int tileSize = r.get_tile_size();
+	int panel_x = r.get_screen_width() - RIGHT_W_TILES * tileSize;
+	int panel_y = TOP_H_TILES * tileSize;
+	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mouse_px < panel_x || mouse_px >= r.get_screen_width())
 		return -1;
@@ -558,18 +572,18 @@ int RoomEditor::screen_to_palette_index(const Renderer& r, int mouse_px, int mou
 	if (!library)
 		return -1;
 
-	int ts = r.get_tile_size();
-	int panel_w = LEFT_W_TILES * ts;
-	int panel_y = TOP_H_TILES * ts;
-	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
+	int tileSize = r.get_tile_size();
+	int panel_w = LEFT_W_TILES * tileSize;
+	int panel_y = TOP_H_TILES * tileSize;
+	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	if (mouse_px < 0 || mouse_px >= panel_w)
 		return -1;
 	if (mouse_py < panel_y || mouse_py >= panel_y + panel_h)
 		return -1;
 
-	int max_visible = panel_h / ts;
-	int slot = (mouse_py - panel_y) / ts;
+	int max_visible = panel_h / tileSize;
+	int slot = (mouse_py - panel_y) / tileSize;
 	int pal_size = static_cast<int>(library->ordered_palette().size());
 
 	int scroll_start = 0;
@@ -601,19 +615,19 @@ TileRef RoomEditor::symbol_tile_id(char sym) const
 	{
 		return TileRef{};
 	}
-	const auto& tc = *m_tile_config;
+	const auto& tileConfig = *m_tile_config;
 	switch (sym)
 	{
 	case '#':
-		return tc.get("TILE_WALL_STONE");
+		return tileConfig.get("TILE_WALL_STONE");
 	case '.':
-		return tc.get("TILE_FLOOR_STONE");
+		return tileConfig.get("TILE_FLOOR_STONE");
 	case ',':
-		return tc.get("TILE_CORRIDOR");
+		return tileConfig.get("TILE_CORRIDOR");
 	case '+':
-		return tc.get("TILE_DOOR_CLOSED");
+		return tileConfig.get("TILE_DOOR_CLOSED");
 	case '~':
-		return tc.get("TILE_WATER");
+		return tileConfig.get("TILE_WATER");
 	default:
 		if (library)
 			return library->resolve_decor(sym);
@@ -688,11 +702,11 @@ void RoomEditor::render(const GameContext& ctx) const
 
 void RoomEditor::render_top_bar(const Renderer& r) const
 {
-	int ts = r.get_tile_size();
-	int sw = r.get_screen_width();
+	int tileSize = r.get_tile_size();
+	int screenWidth = r.get_screen_width();
 
-	DrawRectangle(0, 0, sw, ts, Color{ 20, 20, 30, 240 });
-	DrawLine(0, ts - 1, sw, ts - 1, Color{ 80, 80, 120, 255 });
+	DrawRectangle(0, 0, screenWidth, tileSize, Color{ 20, 20, 30, 240 });
+	DrawLine(0, tileSize - 1, screenWidth, tileSize - 1, Color{ 80, 80, 120, 255 });
 
 	bool saved_flash = (GetTime() - status_time) < 3.0;
 
@@ -710,7 +724,7 @@ void RoomEditor::render_top_bar(const Renderer& r) const
 		? Color{ 100, 255, 140, 255 }
 		: Color{ 200, 200, 255, 255 };
 
-	r.draw_text_color(Vector2D{ 8, (ts - r.get_font_size()) / 2 }, title, title_col);
+	r.draw_text_color(Vector2D{ 8, (tileSize - r.get_font_size()) / 2 }, title, title_col);
 }
 
 void RoomEditor::render_left_panel(const Renderer& r) const
@@ -718,16 +732,16 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 	if (!library)
 		return;
 
-	int ts = r.get_tile_size();
-	int panel_w = LEFT_W_TILES * ts;
-	int panel_y = TOP_H_TILES * ts;
-	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
+	int tileSize = r.get_tile_size();
+	int panel_w = LEFT_W_TILES * tileSize;
+	int panel_y = TOP_H_TILES * tileSize;
+	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	DrawRectangle(0, panel_y, panel_w, panel_h, Color{ 15, 15, 22, 230 });
 	DrawLine(panel_w - 1, panel_y, panel_w - 1, panel_y + panel_h, Color{ 70, 70, 110, 255 });
 
 	const auto& pal = library->ordered_palette();
-	int max_visible = panel_h / ts;
+	int max_visible = panel_h / tileSize;
 	int pal_size = static_cast<int>(pal.size());
 
 	// Scroll to keep selected entry visible
@@ -738,13 +752,13 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 	for (int slot = 0; slot < max_visible && (scroll_start + slot) < pal_size; ++slot)
 	{
 		int idx = scroll_start + slot;
-		int py = panel_y + slot * ts;
+		int py = panel_y + slot * tileSize;
 		char sym = pal[idx].first;
 
 		bool selected = (idx == palette_index);
 
 		if (selected)
-			DrawRectangle(0, py, panel_w, ts, Color{ 60, 60, 100, 200 });
+			DrawRectangle(0, py, panel_w, tileSize, Color{ 60, 60, 100, 200 });
 
 		TileRef tile = symbol_tile_id(sym);
 		bool is_structural = (sym == '#' || sym == '.' || sym == ',' ||
@@ -769,12 +783,12 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 					block = Color{ 30, 60, 120, 255 };
 				else
 					block = Color{ 50, 50, 50, 255 };
-				DrawRectangle(4, py + 4, ts - 8, ts - 8, block);
+				DrawRectangle(4, py + 4, tileSize - 8, tileSize - 8, block);
 			}
 		}
 		else
 		{
-			DrawRectangle(2, py, ts, ts, Color{ 70, 58, 42, 255 });
+			DrawRectangle(2, py, tileSize, tileSize, Color{ 70, 58, 42, 255 });
 			if (tile.is_valid())
 				r.draw_tile_screen(Vector2D{ 2, py }, tile);
 		}
@@ -784,30 +798,30 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 180, 180, 200, 200 };
 
-		r.draw_text_color(Vector2D{ ts + 4, py + (ts - r.get_font_size()) / 2 }, pal[idx].second, label_col);
+		r.draw_text_color(Vector2D{ tileSize + 4, py + (tileSize - r.get_font_size()) / 2 }, pal[idx].second, label_col);
 
 		if (selected)
-			DrawRectangleLines(1, py + 1, panel_w - 2, ts - 2, Color{ 200, 200, 100, 180 });
+			DrawRectangleLines(1, py + 1, panel_w - 2, tileSize - 2, Color{ 200, 200, 100, 180 });
 	}
 }
 
 void RoomEditor::render_canvas(const Renderer& r) const
 {
-	int ts = r.get_tile_size();
-	int area_x = LEFT_W_TILES * ts;
-	int area_y = TOP_H_TILES * ts;
-	int area_w = r.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * ts;
-	int area_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
+	int tileSize = r.get_tile_size();
+	int area_x = LEFT_W_TILES * tileSize;
+	int area_y = TOP_H_TILES * tileSize;
+	int area_w = r.get_screen_width() - (LEFT_W_TILES + RIGHT_W_TILES) * tileSize;
+	int area_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
 
 	// Dark canvas background
 	DrawRectangle(area_x, area_y, area_w, area_h, Color{ 8, 8, 12, 255 });
 
 	BeginScissorMode(area_x, area_y, area_w, area_h);
 
-	int start_col = std::max(0, pan_x / ts);
-	int start_row = std::max(0, pan_y / ts);
-	int end_col = std::min(canvas_w, start_col + area_w / ts + 2);
-	int end_row = std::min(canvas_h, start_row + area_h / ts + 2);
+	int start_col = std::max(0, pan_x / tileSize);
+	int start_row = std::max(0, pan_y / tileSize);
+	int end_col = std::min(canvas_w, start_col + area_w / tileSize + 2);
+	int end_row = std::min(canvas_h, start_row + area_h / tileSize + 2);
 
 	static constexpr Color FLOOR_BG = { 70, 58, 42, 255 };
 	static constexpr Color GRID_COLOR = { 80, 80, 110, 200 };
@@ -816,15 +830,15 @@ void RoomEditor::render_canvas(const Renderer& r) const
 	{
 		for (int col = start_col; col < end_col; ++col)
 		{
-			int px = area_x + col * ts - pan_x;
-			int py = area_y + row * ts - pan_y;
+			int px = area_x + col * tileSize - pan_x;
+			int py = area_y + row * tileSize - pan_y;
 
 			// Base layer (structural)
 			TileRef base_tile = canvas_tile_id(col, row);
 			if (base_tile.is_valid())
 				r.draw_tile_screen(Vector2D{ px, py }, base_tile);
 			else
-				DrawRectangle(px, py, ts, ts, FLOOR_BG);
+				DrawRectangle(px, py, tileSize, tileSize, FLOOR_BG);
 
 			// Decor layer -- additively blended so black sprite pixels
 			// are transparent and the base tile shows through underneath.
@@ -840,7 +854,7 @@ void RoomEditor::render_canvas(const Renderer& r) const
 					r.draw_tile_screen(Vector2D{ px, py }, decor_tile);
 			}
 
-			DrawRectangleLines(px, py, ts, ts, GRID_COLOR);
+			DrawRectangleLines(px, py, tileSize, tileSize, GRID_COLOR);
 		}
 	}
 
@@ -860,11 +874,11 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 	if (!library)
 		return;
 
-	int ts = r.get_tile_size();
-	int panel_x = r.get_screen_width() - RIGHT_W_TILES * ts;
-	int panel_y = TOP_H_TILES * ts;
-	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * ts;
-	int panel_w = RIGHT_W_TILES * ts;
+	int tileSize = r.get_tile_size();
+	int panel_x = r.get_screen_width() - RIGHT_W_TILES * tileSize;
+	int panel_y = TOP_H_TILES * tileSize;
+	int panel_h = r.get_screen_height() - (TOP_H_TILES + BOT_H_TILES) * tileSize;
+	int panel_w = RIGHT_W_TILES * tileSize;
 
 	DrawRectangle(panel_x, panel_y, panel_w, panel_h, Color{ 15, 15, 22, 230 });
 	DrawLine(panel_x, panel_y, panel_x, panel_y + panel_h, Color{ 70, 70, 110, 255 });
@@ -938,26 +952,26 @@ void RoomEditor::render_right_panel(const Renderer& r) const
 
 void RoomEditor::render_bottom_bar(const Renderer& r) const
 {
-	int ts = r.get_tile_size();
-	int sw = r.get_screen_width();
-	int bar_y = r.get_screen_height() - ts;
+	int tileSize = r.get_tile_size();
+	int screenWidth = r.get_screen_width();
+	int bar_y = r.get_screen_height() - tileSize;
 
-	DrawRectangle(0, bar_y, sw, ts, Color{ 20, 20, 30, 240 });
-	DrawLine(0, bar_y, sw, bar_y, Color{ 80, 80, 120, 255 });
+	DrawRectangle(0, bar_y, screenWidth, tileSize, Color{ 20, 20, 30, 240 });
+	DrawLine(0, bar_y, screenWidth, bar_y, Color{ 80, 80, 120, 255 });
 
 	std::string_view controls =
 		"L=paint  R=erase  Mid=pan  Up/Dn=pal  +/-=zoom  F2=tile  F3=label  Ctrl+S=save  Esc=exit";
 
-	r.draw_text_color(Vector2D{ 8, bar_y + (ts - r.get_font_size()) / 2 }, controls, Color{ 140, 140, 180, 220 });
+	r.draw_text_color(Vector2D{ 8, bar_y + (tileSize - r.get_font_size()) / 2 }, controls, Color{ 140, 140, 180, 220 });
 }
 
 void RoomEditor::render_input_overlay(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
 
 	// Semi-transparent backdrop
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 160 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 160 });
 
 	std::string prompt;
 	if (mode == EditorMode::INPUT_WIDTH)
@@ -973,8 +987,8 @@ void RoomEditor::render_input_overlay(const Renderer& r) const
 	int text_w = r.measure_text(prompt);
 	int box_w = text_w + 32;
 	int box_h = font_h + 20;
-	int box_x = (sw - box_w) / 2;
-	int box_y = (sh - box_h) / 2;
+	int box_x = (screenWidth - box_w) / 2;
+	int box_y = (screenHeight - box_h) / 2;
 
 	DrawRectangle(box_x, box_y, box_w, box_h, Color{ 20, 20, 35, 240 });
 	DrawRectangleLines(box_x, box_y, box_w, box_h, Color{ 120, 120, 200, 255 });
@@ -1042,11 +1056,11 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 
 void RoomEditor::render_tile_picker(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
 
 	// Dark overlay over editor
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 200 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 200 });
 
 	// Picker tile display size -- 2x native for visibility
 	static constexpr int PICK_TS = SPRITE_SIZE * 2;
@@ -1058,7 +1072,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 	// Center the grid
 	int grid_w = cols * PICK_TS;
 	int grid_h = rows * PICK_TS;
-	int off_x = (sw - grid_w) / 2;
+	int off_x = (screenWidth - grid_w) / 2;
 	int off_y = 48; // leave room for top info bar
 
 	// Background for grid area
@@ -1105,7 +1119,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 		picker_col,
 		picker_row);
 
-	DrawRectangle(0, 0, sw, 40, Color{ 20, 20, 35, 240 });
+	DrawRectangle(0, 0, screenWidth, 40, Color{ 20, 20, 35, 240 });
 	r.draw_text_color(Vector2D{ 8, 10 }, header, Color{ 220, 220, 255, 255 });
 
 	// Sheet name label centered below grid

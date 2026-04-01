@@ -89,17 +89,17 @@ void RenderingManager::apply_lighting(const Player& player, const GameContext& c
 		return;
 
 	Renderer& r = *ctx.renderer;
-	int ts = r.get_tile_size();
+	int tileSize = r.get_tile_size();
 	int cam_x = r.get_camera_x();
 	int cam_y = r.get_camera_y();
 
 	Vector2D screenPos{
-		player.position.x * ts - cam_x + ts / 2,
-		player.position.y * ts - cam_y + ts / 2
+		player.position.x * tileSize - cam_x + tileSize / 2,
+		player.position.y * tileSize - cam_y + tileSize / 2
 	};
 
 	static constexpr float torchRadiusTiles = 6.5f;
-	float radius = torchRadiusTiles * static_cast<float>(ts);
+	float radius = torchRadiusTiles * static_cast<float>(tileSize);
 
 	// Warm torch inner, fade to darkness
 	static constexpr Color torchInner = { 255, 210, 140, 255 };

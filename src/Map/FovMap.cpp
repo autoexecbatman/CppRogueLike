@@ -57,19 +57,19 @@ int FovMap::cell_index(int x, int y) const noexcept
 //   mult[4][8]: each column is {xx, xy, yx, yy} for one octant.
 // ---------------------------------------------------------------------------
 
-void FovMap::compute_fov(int ox, int oy, int radius)
+void FovMap::compute_fov(int panelX, int panelY, int radius)
 {
 	for (auto& c : cells_)
 	{
 		c.visible = false;
 	}
 
-	if (!in_bounds(ox, oy))
+	if (!in_bounds(panelX, panelY))
 	{
 		return;
 	}
 
-	cells_[cell_index(ox, oy)].visible = true;
+	cells_[cell_index(panelX, panelY)].visible = true;
 
 	static const int mult[4][8] = {
 		{ 1, 0, 0, -1, -1, 0, 0, 1 },
@@ -81,8 +81,8 @@ void FovMap::compute_fov(int ox, int oy, int radius)
 	for (int oct = 0; oct < 8; ++oct)
 	{
 		scan_octant(
-			ox,
-			oy,
+			panelX,
+			panelY,
 			radius,
 			1,
 			1.0f,

@@ -16,24 +16,24 @@
 #include "Renderer.h"
 
 // Local color constants (raylib macros are #undef'd in Renderer.h)
-static constexpr Color RL_WHITE = { 255, 255, 255, 255 };
-static constexpr Color RL_BLACK = { 0, 0, 0, 255 };
-static constexpr Color RL_RED = { 230, 41, 55, 255 };
-static constexpr Color RL_GREEN = { 0, 228, 48, 255 };
-static constexpr Color RL_BLUE = { 0, 121, 241, 255 };
-static constexpr Color RL_YELLOW = { 253, 249, 0, 255 };
-static constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
+constexpr Color RL_WHITE = { 255, 255, 255, 255 };
+constexpr Color RL_BLACK = { 0, 0, 0, 255 };
+constexpr Color RL_RED = { 230, 41, 55, 255 };
+constexpr Color RL_GREEN = { 0, 228, 48, 255 };
+constexpr Color RL_BLUE = { 0, 121, 241, 255 };
+constexpr Color RL_YELLOW = { 253, 249, 0, 255 };
+constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
 
-static constexpr double animInterval = 0.5;
+constexpr double animInterval = 0.5;
 
-static constexpr std::size_t sheet_idx(TileSheet s) noexcept
+constexpr std::size_t sheet_idx(TileSheet s) noexcept
 {
 	return static_cast<std::size_t>(s);
 }
 
 // DawnLike uses magenta (255,0,255) as the transparency key.
 // Load a PNG, replace magenta pixels with alpha=0, return as Texture2D.
-static Texture2D load_dawnlike_texture(std::string_view path)
+Texture2D load_dawnlike_texture(std::string_view path)
 {
 	std::string path_str(path);
 	Image image = LoadImage(path_str.c_str());
@@ -632,37 +632,37 @@ void Renderer::zoom_out()
 	}
 }
 
-void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tc) const
+void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const
 {
 	if (!sheetsLoaded)
+	{
 		return;
+	}
 
 	DrawRectangle(screenPos.x, screenPos.y, wTiles * tileSize, hTiles * tileSize, Color{ 8, 8, 16, 255 });
 
-	int ts = tileSize;
-
 	// Top border
-	draw_tile_screen(screenPos, tc.get("GUI_FRAME_TL"));
+	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
 	for (int col = 1; col < wTiles - 1; ++col)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x + col * ts, screenPos.y }, tc.get("GUI_FRAME_T"));
+		draw_tile_screen(Vector2D{ screenPos.x + col * tileSize, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
 	}
-	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * ts, screenPos.y }, tc.get("GUI_FRAME_TR"));
+	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
 
 	// Left and right borders
 	for (int row = 1; row < hTiles - 1; ++row)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + row * ts }, tc.get("GUI_FRAME_L"));
-		draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * ts, screenPos.y + row * ts }, tc.get("GUI_FRAME_R"));
+		draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
 	}
 
 	// Bottom border
-	draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + (hTiles - 1) * ts }, tc.get("GUI_FRAME_BL"));
+	draw_tile_screen(Vector2D{ screenPos.x, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BL"));
 	for (int col = 1; col < wTiles - 1; ++col)
 	{
-		draw_tile_screen(Vector2D{ screenPos.x + col * ts, screenPos.y + (hTiles - 1) * ts }, tc.get("GUI_FRAME_B"));
+		draw_tile_screen(Vector2D{ screenPos.x + col * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_B"));
 	}
-	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * ts, screenPos.y + (hTiles - 1) * ts }, tc.get("GUI_FRAME_BR"));
+	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BR"));
 }
 
 void Renderer::draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const

@@ -13,8 +13,8 @@
 #include "../Utils/Vector2D.h"
 #include "Web.h"
 
-Web::Web(Vector2D position, int strength, const TileConfig& tc)
-	: Object(position, ActorData{ tc.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
+Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
+	: Object(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through

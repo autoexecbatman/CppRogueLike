@@ -261,13 +261,13 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		return;
 	}
 
-	int ts = ctx.renderer->get_tile_size();
-	if (ts <= 0)
+	int tileSize = ctx.renderer->get_tile_size();
+	if (tileSize <= 0)
 	{
 		return;
 	}
 
-	Vector2D screen_tile = ctx.input_system->get_mouse_tile(ts);
+	Vector2D screen_tile = ctx.input_system->get_mouse_tile(tileSize);
 
 	// Ignore cursor over the GUI panel rows at the bottom
 	int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
@@ -283,8 +283,8 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	}
 
 	Vector2D world_tile{
-		screen_tile.x + ctx.renderer->get_camera_x() / ts,
-		screen_tile.y + ctx.renderer->get_camera_y() / ts
+		screen_tile.x + ctx.renderer->get_camera_x() / tileSize,
+		screen_tile.y + ctx.renderer->get_camera_y() / tileSize
 	};
 
 	if (!ctx.map->is_in_bounds(world_tile))
@@ -378,22 +378,22 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	// Pulse: 3 Hz sine, range [0, 1]
 	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 3.0f) + 1.0f) * 0.5f;
 
-	int tx = screen_tile.x * ts;
-	int ty = screen_tile.y * ts;
+	int tx = screen_tile.x * tileSize;
+	int ty = screen_tile.y * tileSize;
 	float tx_f = static_cast<float>(tx);
 	float ty_f = static_cast<float>(ty);
-	float ts_f = static_cast<float>(ts);
+	float ts_f = static_cast<float>(tileSize);
 
 	// Inner fill: very subtle tint
 	unsigned char fill_a = static_cast<unsigned char>(10 + static_cast<int>(15.0f * pulse));
-	DrawRectangle(tx, ty, ts, ts, Color{ hr, hg, hb, fill_a });
+	DrawRectangle(tx, ty, tileSize, tileSize, Color{ hr, hg, hb, fill_a });
 
 	// Full perimeter: thin line, pulsing alpha
 	unsigned char border_a = static_cast<unsigned char>(70 + static_cast<int>(80.0f * pulse));
 	DrawRectangleLinesEx(Rectangle{ tx_f, ty_f, ts_f, ts_f }, 1.0f, Color{ hr, hg, hb, border_a });
 
 	// Corner L-accents: bright, 2 px thick, clen px long
-	int clen = ts / 4;
+	int clen = tileSize / 4;
 	int clw = 2;
 	unsigned char corner_a = static_cast<unsigned char>(160 + static_cast<int>(95.0f * pulse));
 	Color cc = Color{ hr, hg, hb, corner_a };
@@ -402,23 +402,23 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	DrawRectangle(tx, ty, clen, clw, cc);
 	DrawRectangle(tx, ty, clw, clen, cc);
 	// Top-right
-	DrawRectangle(tx + ts - clen, ty, clen, clw, cc);
-	DrawRectangle(tx + ts - clw, ty, clw, clen, cc);
+	DrawRectangle(tx + tileSize - clen, ty, clen, clw, cc);
+	DrawRectangle(tx + tileSize - clw, ty, clw, clen, cc);
 	// Bottom-left
-	DrawRectangle(tx, ty + ts - clw, clen, clw, cc);
-	DrawRectangle(tx, ty + ts - clen, clw, clen, cc);
+	DrawRectangle(tx, ty + tileSize - clw, clen, clw, cc);
+	DrawRectangle(tx, ty + tileSize - clen, clw, clen, cc);
 	// Bottom-right
-	DrawRectangle(tx + ts - clen, ty + ts - clw, clen, clw, cc);
-	DrawRectangle(tx + ts - clw, ty + ts - clen, clw, clen, cc);
+	DrawRectangle(tx + tileSize - clen, ty + tileSize - clw, clen, clw, cc);
+	DrawRectangle(tx + tileSize - clw, ty + tileSize - clen, clw, clen, cc);
 
 	// Tooltip box below (or above if near bottom)
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int text_w = ctx.renderer->measure_text(desc);
-	int pad = ts / 4;
+	int pad = tileSize / 4;
 	int box_w = text_w + pad * 2;
-	int box_h = ts;
+	int box_h = tileSize;
 	int tip_px = tx;
-	int tip_py = ty + ts;
+	int tip_py = ty + tileSize;
 
 	if (tip_px + box_w > ctx.renderer->get_screen_width())
 	{

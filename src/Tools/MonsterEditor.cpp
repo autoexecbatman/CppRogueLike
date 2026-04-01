@@ -15,24 +15,36 @@
 #include "../Renderer/Renderer.h"
 #include "MonsterEditor.h"
 
+constexpr int LIST_WIDTH = 220;
+constexpr int HEADER_HEIGHT = 48;
+constexpr int HINT_HEIGHT = 28;
+constexpr int FIELD_HEIGHT = 26;
+constexpr int ITEM_HEIGHT = 30;
+constexpr int LIST_TILE_SIZE = 22;
+constexpr int CLASS_TILE_PREVIEW_SIZE = 40;
+constexpr int LIST_PAD = 6;
+constexpr int PICKER_PAD = 10;
+constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
+constexpr int PICKER_TILE_SIZE = 36;
+
 namespace
 {
 
 std::string prettify_key(std::string_view key)
 {
 	std::string result;
-	bool cap_next = true;
+	bool capNext = true;
 	for (char c : key)
 	{
 		if (c == '_')
 		{
 			result += ' ';
-			cap_next = true;
+			capNext = true;
 		}
-		else if (cap_next)
+		else if (capNext)
 		{
 			result += static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
-			cap_next = false;
+			capNext = false;
 		}
 		else
 		{
@@ -151,9 +163,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 {
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
-	int sh = r.get_screen_height();
-	int body_h = sh - HEADER_H - HINT_H;
-	int visible_fields = body_h / FIELD_H;
+	int screenHeight = r.get_screen_height();
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int visible_fields = body_h / FIELD_HEIGHT;
 	int total = static_cast<int>(m_keys.size());
 
 	::Vector2 mouse = GetMousePosition();
@@ -162,11 +174,10 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	// Mouse: click selects panel and item
 	if (clicked)
 	{
-		if (mouse.x < LIST_W)
+		if (mouse.x < LIST_WIDTH)
 		{
 			m_focus = 0;
-			constexpr int ITEM_H = 30;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_H) / ITEM_H;
+			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != m_list_cursor)
 			{
@@ -179,7 +190,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		{
 			m_focus = 1;
 			int max_field = m_is_class_based ? static_cast<int>(FieldId::TILE) : FIELD_COUNT - 1;
-			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_H) / FIELD_H;
+			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
 			idx = std::clamp(idx, 0, max_field);
 			m_field_cursor = m_is_class_based ? static_cast<int>(FieldId::TILE) : idx;
 		}
@@ -189,7 +200,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	float wheel = GetMouseWheelMove();
 	if (wheel != 0.0f)
 	{
-		if (mouse.x < LIST_W)
+		if (mouse.x < LIST_WIDTH)
 		{
 			m_list_scroll = std::clamp(
 				m_list_scroll - static_cast<int>(wheel),
@@ -418,7 +429,7 @@ void MonsterEditor::handle_picker(const Renderer& r)
 
 	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
 	::Vector2 mouse = GetMousePosition();
-	bool in_picker = mouse.x >= LIST_W;
+	bool in_picker = mouse.x >= LIST_WIDTH;
 
 	if (in_picker)
 	{
@@ -432,15 +443,12 @@ void MonsterEditor::handle_picker(const Renderer& r)
 		}
 	}
 
-	constexpr int PICKER_TILE = 36;
-	constexpr int PAD = 10;
-	constexpr int SUB_HDR_H = 28;
-	int grid_y = HEADER_H + SUB_HDR_H;
+	int grid_y = HEADER_HEIGHT + PICKER_SUB_HEADER_HEIGHT;
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		int col = static_cast<int>(mouse.x - LIST_W - PAD) / (PICKER_TILE + 2);
-		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (PICKER_TILE + 2);
+		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (PICKER_TILE_SIZE + 2);
+		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (PICKER_TILE_SIZE + 2);
 		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
@@ -458,10 +466,10 @@ void MonsterEditor::handle_picker(const Renderer& r)
 void MonsterEditor::render(const GameContext& ctx) const
 {
 	const Renderer& r = *ctx.renderer;
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
 
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 255 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
 	render_list(r);
@@ -480,8 +488,8 @@ void MonsterEditor::render(const GameContext& ctx) const
 
 void MonsterEditor::render_header(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
+	int screenWidth = r.get_screen_width();
+	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
 	r.draw_text_color(Vector2D{ 8, 6 }, "MONSTER EDITOR", Color{ 255, 255, 180, 255 });
 	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
@@ -490,27 +498,24 @@ void MonsterEditor::render_header(const Renderer& r) const
 
 void MonsterEditor::render_list(const Renderer& r) const
 {
-	int sh = r.get_screen_height();
-	int body_y = HEADER_H;
-	int body_h = sh - HEADER_H - HINT_H;
-	constexpr int ITEM_H = 30;
-	constexpr int TILE_SZ = 22;
-	constexpr int PAD = 6;
+	int screenHeight = r.get_screen_height();
+	int body_y = HEADER_HEIGHT;
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(0, body_y, LIST_W, body_h, Color{ 10, 10, 20, 255 });
-	DrawLine(LIST_W, body_y, LIST_W, body_y + body_h, Color{ 80, 80, 120, 255 });
+	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 10, 10, 20, 255 });
+	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 80, 120, 255 });
 
 	int total = static_cast<int>(m_keys.size());
-	int vis = body_h / ITEM_H;
-	int max_scroll = std::max(0, total - vis);
+	int visibleCount = body_h / ITEM_HEIGHT;
+	int max_scroll = std::max(0, total - visibleCount);
 	int scroll = std::clamp(m_list_scroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
 	for (int i = scroll; i < total; ++i)
 	{
-		int iy = body_y + (i - scroll) * ITEM_H;
-		if (iy + ITEM_H > body_y + body_h)
+		int itemY = body_y + (i - scroll) * ITEM_HEIGHT;
+		if (itemY + ITEM_HEIGHT > body_y + body_h)
 			break;
 
 		// Section separators
@@ -523,26 +528,26 @@ void MonsterEditor::render_list(const Renderer& r) const
 			bool prev_custom = !prev_builtin && !prev_class;
 
 			if ((prev_builtin && cur_custom) || (prev_custom && cur_class))
-				DrawLine(PAD, iy, LIST_W - PAD, iy, Color{ 70, 70, 70, 200 });
+				DrawLine(LIST_PAD, itemY, LIST_WIDTH - LIST_PAD, itemY, Color{ 70, 70, 70, 200 });
 		}
 
 		bool is_sel = (i == m_list_cursor);
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_W
-			&& mouse.y >= iy && mouse.y < iy + ITEM_H;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
+			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 0)
-			bg = Color{ 60, 60, 0, 200 };
+			bgColor = Color{ 60, 60, 0, 200 };
 		else if (is_sel)
-			bg = Color{ 40, 40, 0, 150 };
+			bgColor = Color{ 40, 40, 0, 150 };
 		else if (hovered)
-			bg = Color{ 30, 30, 30, 160 };
+			bgColor = Color{ 30, 30, 30, 160 };
 
-		if (bg.a > 0)
-			DrawRectangle(0, iy, LIST_W, ITEM_H, bg);
+		if (bgColor.a > 0)
+			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 
 		TileRef tile = is_sel ? m_working.symbol : MonsterCreator::get_tile(m_keys[i]);
-		r.draw_tile_screen_sized(Vector2D{ PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
+		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
 		bool is_class = MonsterCreator::is_class_key(m_keys[i]);
 		bool is_custom = !MonsterCreator::is_builtin(m_keys[i]) && !is_class;
@@ -555,46 +560,45 @@ void MonsterEditor::render_list(const Renderer& r) const
 		if (is_custom)
 			display_name += " *";
 
-		Color tc;
+		Color textColor;
 		if (is_sel)
-			tc = is_class ? Color{ 255, 200, 80, 255 } : Color{ 255, 255, 100, 255 };
+			textColor = is_class ? Color{ 255, 200, 80, 255 } : Color{ 255, 255, 100, 255 };
 		else
-			tc = is_class ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
+			textColor = is_class ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, display_name, tc);
+		r.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, display_name, textColor);
 	}
 }
 
 void MonsterEditor::render_fields(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int ox = LIST_W;
-	int oy = HEADER_H;
-	int fw = sw - LIST_W;
-	int fh = sh - HEADER_H - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int panelX = LIST_WIDTH;
+	int panelY = HEADER_HEIGHT;
+	int fieldsWidth = screenWidth - LIST_WIDTH;
+	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(ox, oy, fw, fh, Color{ 8, 8, 16, 255 });
+	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
 
 	if (m_is_class_based)
 	{
-		r.draw_text_color(Vector2D{ ox + 12, oy + 10 },
+		r.draw_text_color(Vector2D{ panelX + 12, panelY + 10 },
 			"Class-based monster -- only tile is editable.",
 			Color{ 160, 160, 100, 255 });
 
-		constexpr int TILE_SZ = 40;
-		int ty = oy + 44;
-		DrawRectangle(ox, ty, fw, FIELD_H, Color{ 60, 60, 0, 200 });
-		r.draw_text_color(Vector2D{ ox + 12, ty + (FIELD_H - 16) / 2 }, "Tile", Color{ 255, 220, 80, 255 });
-		r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, ty + (FIELD_H - TILE_SZ) / 2 }, m_working.symbol, TILE_SZ);
-		DrawRectangleLines(sw - TILE_SZ - 12, ty + (FIELD_H - TILE_SZ) / 2, TILE_SZ, TILE_SZ, Color{ 255, 255, 0, 255 });
-		r.draw_text_color(Vector2D{ ox + 12, ty + FIELD_H + 8 },
+		int fieldY = panelY + 44;
+		DrawRectangle(panelX, fieldY, fieldsWidth, FIELD_HEIGHT, Color{ 60, 60, 0, 200 });
+		r.draw_text_color(Vector2D{ panelX + 12, fieldY + (FIELD_HEIGHT - 16) / 2 }, "Tile", Color{ 255, 220, 80, 255 });
+		r.draw_tile_screen_sized(Vector2D{ screenWidth - CLASS_TILE_PREVIEW_SIZE - 12, fieldY + (FIELD_HEIGHT - CLASS_TILE_PREVIEW_SIZE) / 2 }, m_working.symbol, CLASS_TILE_PREVIEW_SIZE);
+		DrawRectangleLines(screenWidth - CLASS_TILE_PREVIEW_SIZE - 12, fieldY + (FIELD_HEIGHT - CLASS_TILE_PREVIEW_SIZE) / 2, CLASS_TILE_PREVIEW_SIZE, CLASS_TILE_PREVIEW_SIZE, Color{ 255, 255, 0, 255 });
+		r.draw_text_color(Vector2D{ panelX + 12, fieldY + FIELD_HEIGHT + 8 },
 			"Press Enter or F2 to open tile picker.",
 			Color{ 130, 130, 100, 255 });
 		return;
 	}
 
-	int visible = fh / FIELD_H;
+	int visible = fieldsHeight / FIELD_HEIGHT;
 	int max_scroll = std::max(0, FIELD_COUNT - visible);
 	int scroll = std::clamp(m_field_scroll, 0, max_scroll);
 
@@ -602,48 +606,47 @@ void MonsterEditor::render_fields(const Renderer& r) const
 
 	for (int i = scroll; i < FIELD_COUNT; ++i)
 	{
-		int iy = oy + (i - scroll) * FIELD_H;
-		if (iy + FIELD_H > oy + fh)
+		int itemY = panelY + (i - scroll) * FIELD_HEIGHT;
+		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
 		FieldId fid = static_cast<FieldId>(i);
 		bool is_sel = (i == m_field_cursor);
-		bool hovered = mouse.x >= ox && mouse.x < sw
-			&& mouse.y >= iy && mouse.y < iy + FIELD_H;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
+			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 1)
 		{
-			bg = Color{ 60, 60, 0, 200 };
+			bgColor = Color{ 60, 60, 0, 200 };
 		}
 		else if (is_sel)
 		{
-			bg = Color{ 40, 40, 0, 140 };
+			bgColor = Color{ 40, 40, 0, 140 };
 		}
 		else if (hovered)
 		{
-			bg = Color{ 20, 20, 10, 120 };
+			bgColor = Color{ 20, 20, 10, 120 };
 		}
 
-		if (bg.a > 0)
+		if (bgColor.a > 0)
 		{
-			DrawRectangle(ox, iy, fw, FIELD_H, bg);
+			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color lc = is_sel ? Color{ 255, 220, 80, 255 } : Color{ 150, 150, 150, 255 };
-		Color vc = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = is_sel ? Color{ 255, 220, 80, 255 } : Color{ 150, 150, 150, 255 };
+		Color valueColor = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		if (fid == FieldId::TILE)
 		{
-			constexpr int TILE_SZ = 22;
-			r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2 }, m_working.symbol, TILE_SZ);
+			r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working.symbol, LIST_TILE_SIZE);
 			if (is_sel)
 			{
-				DrawRectangleLines(sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2, TILE_SZ, TILE_SZ, Color{ 255, 255, 0, 255 });
+				DrawRectangleLines(screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2, LIST_TILE_SIZE, LIST_TILE_SIZE, Color{ 255, 255, 0, 255 });
 			}
 		}
 		else
@@ -657,47 +660,44 @@ void MonsterEditor::render_fields(const Renderer& r) const
 			{
 				val = field_value(fid);
 			}
-			int vx = sw - r.measure_text(val) - 16;
-			r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
+			int vx = screenWidth - r.measure_text(val) - 16;
+			r.draw_text_color(Vector2D{ vx, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
 		}
 	}
 }
 
 void MonsterEditor::render_picker(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int ox = LIST_W;
-	int ow = sw - LIST_W;
-	int body_y = HEADER_H;
-	int body_h = sh - HEADER_H - HINT_H;
-	constexpr int SUB_HDR_H = 28;
-	constexpr int PICKER_TILE = 36;
-	constexpr int PAD = 10;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int panelX = LIST_WIDTH;
+	int panelWidth = screenWidth - LIST_WIDTH;
+	int body_y = HEADER_HEIGHT;
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(ox, body_y, ow, body_h, Color{ 8, 8, 24, 255 });
+	DrawRectangle(panelX, body_y, panelWidth, body_h, Color{ 8, 8, 24, 255 });
 
-	DrawRectangle(ox, body_y, ow, SUB_HDR_H, Color{ 15, 15, 40, 255 });
+	DrawRectangle(panelX, body_y, panelWidth, PICKER_SUB_HEADER_HEIGHT, Color{ 15, 15, 40, 255 });
 	int total_sheets = r.get_loaded_sheet_count();
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
 		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
 		m_picker_sheet + 1,
 		total_sheets);
-	r.draw_text_color(Vector2D{ ox + PAD, body_y + 6 }, hdr, Color{ 200, 200, 120, 255 });
+	r.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 200, 200, 120, 255 });
 
-	int grid_y = body_y + SUB_HDR_H;
-	int grid_h = body_h - SUB_HDR_H;
+	int grid_y = body_y + PICKER_SUB_HEADER_HEIGHT;
+	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
 	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
 
 	::Vector2 mouse = GetMousePosition();
 
-	BeginScissorMode(ox, grid_y, ow, grid_h);
+	BeginScissorMode(panelX, grid_y, panelWidth, grid_h);
 
 	for (int row = m_picker_scroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_picker_scroll) * (PICKER_TILE + 2);
+		int py = grid_y + (row - m_picker_scroll) * (PICKER_TILE_SIZE + 2);
 		if (py >= grid_y + grid_h)
 		{
 			break;
@@ -705,27 +705,27 @@ void MonsterEditor::render_picker(const Renderer& r) const
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = ox + PAD + col * (PICKER_TILE + 2);
+			int px = panelX + PICKER_PAD + col * (PICKER_TILE_SIZE + 2);
 			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
 
 			bool is_cur = (tid == m_working.symbol);
-			bool hovered = mouse.x >= px && mouse.x < px + PICKER_TILE
-				&& mouse.y >= py && mouse.y < py + PICKER_TILE;
+			bool hovered = mouse.x >= px && mouse.x < px + PICKER_TILE_SIZE
+				&& mouse.y >= py && mouse.y < py + PICKER_TILE_SIZE;
 
 			if (is_cur)
 			{
-				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 60, 60, 0, 220 });
+				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 60, 60, 0, 220 });
 			}
 			else if (hovered)
 			{
-				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 40, 40, 20, 160 });
+				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 40, 40, 20, 160 });
 			}
 
-			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE_SIZE);
 
 			if (is_cur)
 			{
-				DrawRectangleLines(px, py, PICKER_TILE, PICKER_TILE, Color{ 255, 255, 0, 255 });
+				DrawRectangleLines(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 255, 255, 0, 255 });
 			}
 		}
 	}
@@ -735,11 +735,11 @@ void MonsterEditor::render_picker(const Renderer& r) const
 
 void MonsterEditor::render_hint(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int hint_y = sh - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int hint_y = screenHeight - HINT_HEIGHT;
 
-	DrawRectangle(0, hint_y, sw, HINT_H, Color{ 20, 20, 40, 255 });
+	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
 
 	std::string msg;
 	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
@@ -765,8 +765,8 @@ void MonsterEditor::render_hint(const Renderer& r) const
 		msg = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
+	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
 }
 
 // ---------------------------------------------------------------------------

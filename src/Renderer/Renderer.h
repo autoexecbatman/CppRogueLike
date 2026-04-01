@@ -205,7 +205,7 @@ public:
 
 	// Draw a DawnLike-tiled frame with dark background fill.
 	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
-	void draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tc) const;
+	void draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const;
 
 	void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
 	void update_viewport();

@@ -544,26 +544,53 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::MOUSE:
 	{
 		if (!ctx.renderer || !ctx.input_system)
+		{
 			break;
-		int ts = ctx.renderer->get_tile_size();
-		if (ts <= 0)
+		}
+
+		int tileSize = ctx.renderer->get_tile_size();
+		if (tileSize <= 0)
+		{
 			break;
-		Vector2D screen_tile = ctx.input_system->get_mouse_tile(ts);
+		}
+
+		Vector2D screen_tile = ctx.input_system->get_mouse_tile(tileSize);
 		Vector2D world_tile{
-			screen_tile.x + ctx.renderer->get_camera_x() / ts,
-			screen_tile.y + ctx.renderer->get_camera_y() / ts
-		};
+			screen_tile.x + ctx.renderer->get_camera_x() / tileSize,
+			screen_tile.y + ctx.renderer->get_camera_y() / tileSize
+		}
+		;
 		if (!ctx.map->is_in_bounds(world_tile))
+		{
 			break;
+		}
+
 		if (world_tile == player.position)
+		{
 			break;
-		int step_x = (world_tile.x > player.position.x) ? 1
-			: (world_tile.x < player.position.x)		? -1
-														: 0;
-		int step_y = (world_tile.y > player.position.y) ? 1
-			: (world_tile.y < player.position.y)		? -1
-														: 0;
-		Vector2D target_pos{ player.position.x + step_x, player.position.y + step_y };
+		}
+
+		int stepX = 0;
+		if (world_tile.x > player.position.x)
+		{
+			stepX = 1;
+		}
+		else if (world_tile.x < player.position.x)
+		{
+			stepX = -1;
+		}
+
+		int stepY = 0;
+		if (world_tile.y > player.position.y)
+		{
+			stepY = 1;
+		}
+		else if (world_tile.y < player.position.y)
+		{
+			stepY = -1;
+		}
+
+		Vector2D target_pos{ player.position.x + stepX, player.position.y + stepY };
 		look_to_move(player, target_pos, ctx);
 		look_to_attack(target_pos, player, ctx);
 		look_on_floor(target_pos, ctx);

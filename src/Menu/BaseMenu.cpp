@@ -44,17 +44,17 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 		return;
 	}
 
-	int ts = renderer->get_tile_size();
-	int px = (static_cast<int>(menu_startx) + x) * ts;
-	int py = (static_cast<int>(menu_starty) + y) * ts;
-	int font_off = (ts - renderer->get_font_size()) / 2;
+	int tileSize = renderer->get_tile_size();
+	int px = (static_cast<int>(menu_startx) + x) * tileSize;
+	int py = (static_cast<int>(menu_starty) + y) * tileSize;
+	int font_off = (tileSize - renderer->get_font_size()) / 2;
 
 	if (isHighlighted)
 	{
-		int bar_x = (static_cast<int>(menu_startx) + 1) * ts;
-		int bar_w = (static_cast<int>(menu_width) - 2) * ts;
+		int bar_x = (static_cast<int>(menu_startx) + 1) * tileSize;
+		int bar_w = (static_cast<int>(menu_width) - 2) * tileSize;
 		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
-		DrawRectangle(bar_x, py, bar_w, ts, pair.bg);
+		DrawRectangle(bar_x, py, bar_w, tileSize, pair.bg);
 		renderer->draw_text(Vector2D{ px, py + font_off }, text, BLACK_WHITE_PAIR);
 	}
 	else
@@ -163,9 +163,9 @@ void BaseMenu::menu_draw_box()
 		return;
 	}
 
-	int ts = renderer->get_tile_size();
-	int px = static_cast<int>(menu_startx) * ts;
-	int py = static_cast<int>(menu_starty) * ts;
+	int tileSize = renderer->get_tile_size();
+	int px = static_cast<int>(menu_startx) * tileSize;
+	int py = static_cast<int>(menu_starty) * tileSize;
 
 	renderer->draw_frame(Vector2D{ px, py }, static_cast<int>(menu_width), static_cast<int>(menu_height), *tile_config);
 }
@@ -177,11 +177,11 @@ void BaseMenu::menu_draw_title(std::string_view title, int color_pair)
 		return;
 	}
 
-	int ts = renderer->get_tile_size();
-	int font_off = (ts - renderer->get_font_size()) / 2;
-	int interior_w = (static_cast<int>(menu_width) - 2) * ts;
+	int tileSize = renderer->get_tile_size();
+	int font_off = (tileSize - renderer->get_font_size()) / 2;
+	int interior_w = (static_cast<int>(menu_width) - 2) * tileSize;
 	int text_w = renderer->measure_text(title);
-	int px = (static_cast<int>(menu_startx) + 1) * ts + (interior_w - text_w) / 2;
-	int py = static_cast<int>(menu_starty) * ts + font_off;
+	int px = (static_cast<int>(menu_startx) + 1) * tileSize + (interior_w - text_w) / 2;
+	int py = static_cast<int>(menu_starty) * tileSize + font_off;
 	renderer->draw_text(Vector2D{ px, py }, title, color_pair);
 }

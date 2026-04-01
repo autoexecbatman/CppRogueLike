@@ -25,13 +25,6 @@ struct GameContext;
 
 class MonsterEditor
 {
-public:
-	void enter();
-	void exit(GameContext& ctx);
-	void tick(GameContext& ctx);
-
-	[[nodiscard]] bool is_active() const { return m_active; }
-
 private:
 	enum class Mode
 	{
@@ -40,9 +33,9 @@ private:
 		TILE_PICKER
 	};
 
-	enum class FieldId : int
+	enum class FieldId
 	{
-		NAME = 0,
+		NAME,
 		CORPSE,
 		HP_NUM,
 		HP_SIDES,
@@ -109,13 +102,7 @@ private:
 	// Status feedback
 	double m_last_save_time{ -100.0 };
 
-	// Layout constants (pixels)
-	static constexpr int LIST_W = 220;
-	static constexpr int HEADER_H = 48;
-	static constexpr int HINT_H = 28;
-	static constexpr int FIELD_H = 26;
-
-	void load_working();
+void load_working();
 	void commit_working();
 
 	void handle_input(GameContext& ctx);
@@ -141,4 +128,12 @@ private:
 	void field_adjust(FieldId f, int delta);
 	void field_toggle(FieldId f);
 	void field_set_string(FieldId f, std::string val);
+
+public:
+	void enter();
+	void exit(GameContext& ctx);
+	void tick(GameContext& ctx);
+
+	[[nodiscard]] bool is_active() const { return m_active; }
+
 };

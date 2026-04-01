@@ -200,10 +200,10 @@ void MenuSell::draw()
 
 	if (renderer)
 	{
-		int ts = renderer->get_tile_size();
-		int font_off = (ts - renderer->get_font_size()) / 2;
-		int hdr_x = (static_cast<int>(menu_startx) + 1) * ts;
-		int hdr_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
+		int tileSize = renderer->get_tile_size();
+		int font_off = (tileSize - renderer->get_font_size()) / 2;
+		int hdr_x = (static_cast<int>(menu_startx) + 1) * tileSize;
+		int hdr_y = (static_cast<int>(menu_starty) + 1) * tileSize + font_off;
 		renderer->draw_text(Vector2D{ hdr_x, hdr_y }, "Item                       Price", CYAN_BLACK_PAIR);
 	}
 

@@ -481,9 +481,9 @@ bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx)
 	return true;
 }
 
-bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	if (ts.target_mode == TargetMode::FOV_BUFF)
+	if (targetScroll.target_mode == TargetMode::FOV_BUFF)
 	{
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
@@ -495,7 +495,7 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 			const int save = ctx.dice->roll(1, 20);
 			if (save < 15)
 			{
-				ctx.buff_system->add_buff(*creature, ts.buff_type, 0, ts.buff_duration, false);
+				ctx.buff_system->add_buff(*creature, targetScroll.buff_type, 0, targetScroll.buff_duration, false);
 				++affected;
 			}
 		}
@@ -512,7 +512,7 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 		return consume_item(owner, wearer);
 	}
 
-	TargetResult result = ctx.targeting->acquire_targets(ctx, ts.target_mode, wearer.position, ts.range, ts.range);
+	TargetResult result = ctx.targeting->acquire_targets(ctx, targetScroll.target_mode, wearer.position, targetScroll.range, targetScroll.range);
 
 	if (!result.success)
 	{
@@ -520,7 +520,7 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 		return false;
 	}
 
-	switch (ts.target_mode)
+	switch (targetScroll.target_mode)
 	{
 	case TargetMode::AUTO_NEAREST:
 	{
@@ -532,8 +532,8 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
 			ctx.message_system->finalize_message();
 			SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
-			ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", ts.damage), true);
-			target->destructible->take_damage(*target, ts.damage, ctx);
+			ctx.message_system->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
+			target->destructible->take_damage(*target, targetScroll.damage, ctx);
 			ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 		}
 		break;
@@ -542,13 +542,13 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 	{
 		ctx.message_system->append_message_part(
 			WHITE_BLACK_PAIR,
-			std::format("The fireball explodes, burning everything within {} tiles!", ts.range));
+			std::format("The fireball explodes, burning everything within {} tiles!", targetScroll.range));
 		ctx.message_system->finalize_message();
-		SpellAnimations::animate_explosion(result.impact_pos, ts.range, ctx);
-		if (ctx.player->get_tile_distance(result.impact_pos) <= ts.range)
+		SpellAnimations::animate_explosion(result.impact_pos, targetScroll.range, ctx);
+		if (ctx.player->get_tile_distance(result.impact_pos) <= targetScroll.range)
 		{
 			SpellAnimations::animate_creature_hit(ctx.player->position, ctx);
-			ctx.player->destructible->take_damage(*ctx.player, ts.damage, ctx);
+			ctx.player->destructible->take_damage(*ctx.player, targetScroll.damage, ctx);
 		}
 		for (auto* t : result.creatures)
 		{
@@ -557,14 +557,14 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 				SpellAnimations::animate_creature_hit(t->position, ctx);
 				ctx.message_system->append_message_part(
 					WHITE_BLACK_PAIR,
-					std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, ts.damage));
+					std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, targetScroll.damage));
 				ctx.message_system->finalize_message();
 			}
 		}
 		for (auto* t : result.creatures)
 		{
 			if (!t->destructible->is_dead())
-				t->destructible->take_damage(*t, ts.damage, ctx);
+				t->destructible->take_damage(*t, targetScroll.damage, ctx);
 		}
 		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 		break;
@@ -574,7 +574,7 @@ bool use(TargetedScroll& ts, Item& owner, Creature& wearer, GameContext& ctx)
 		if (!result.creatures.empty())
 		{
 			auto* target = result.creatures[0];
-			target->apply_confusion(ts.confuse_turns);
+			target->apply_confusion(targetScroll.confuse_turns);
 			ctx.message_system->message(
 				WHITE_BLACK_PAIR,
 				std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
@@ -905,11 +905,15 @@ ItemBehavior load_behavior(const json& j)
 
 	switch (type)
 	{
+
 	case PickableType::CONSUMABLE:
 	{
 		Consumable c;
 		if (j.contains("effect"))
+		{
 			c.effect = static_cast<ConsumableEffect>(j["effect"].get<int>());
+		}
+
 		// Legacy Healer save format
 		if (j.contains("amountToHeal"))
 		{
@@ -920,14 +924,23 @@ ItemBehavior load_behavior(const json& j)
 		{
 			c.amount = j["amount"].get<int>();
 		}
+
 		if (j.contains("duration"))
+		{
 			c.duration = j["duration"].get<int>();
+		}
 		if (j.contains("buff_type"))
+		{
 			c.buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
+		}
 		if (j.contains("is_set_effect"))
+		{
 			c.is_set_effect = j["is_set_effect"].get<bool>();
+		}
+
 		return c;
 	}
+
 	case PickableType::WEAPON:
 	{
 		Weapon w;
@@ -939,29 +952,51 @@ ItemBehavior load_behavior(const json& j)
 			w.weapon_size = static_cast<WeaponSize>(j["weapon_size"].get<int>());
 		return w;
 	}
+
 	case PickableType::SHIELD:
+	{
 		return Shield{};
+	}
+
 	case PickableType::TARGETED_SCROLL:
 	{
-		TargetedScroll ts;
+		TargetedScroll targetedScroll;
 		if (j.contains("target_mode"))
-			ts.target_mode = static_cast<TargetMode>(j["target_mode"].get<int>());
+		{
+			targetedScroll.target_mode = static_cast<TargetMode>(j["target_mode"].get<int>());
+		}
 		if (j.contains("animation"))
-			ts.scroll_animation = static_cast<ScrollAnimation>(j["animation"].get<int>());
+		{
+			targetedScroll.scroll_animation = static_cast<ScrollAnimation>(j["animation"].get<int>());
+		}
 		if (j.contains("range"))
-			ts.range = j["range"].get<int>();
+		{
+			targetedScroll.range = j["range"].get<int>();
+		}
 		if (j.contains("damage"))
-			ts.damage = j["damage"].get<int>();
+		{
+			targetedScroll.damage = j["damage"].get<int>();
+		}
 		if (j.contains("confuse_turns"))
-			ts.confuse_turns = j["confuse_turns"].get<int>();
+		{
+			targetedScroll.confuse_turns = j["confuse_turns"].get<int>();
+		}
 		if (j.contains("buff_type"))
-			ts.buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
+		{
+			targetedScroll.buff_type = static_cast<BuffType>(j["buff_type"].get<int>());
+		}
 		if (j.contains("buff_duration"))
-			ts.buff_duration = j["buff_duration"].get<int>();
-		return ts;
+		{
+			targetedScroll.buff_duration = j["buff_duration"].get<int>();
+		}
+		return targetedScroll;
 	}
+
 	case PickableType::TELEPORTER:
+	{
 		return Teleporter{};
+	}
+
 	case PickableType::GOLD_COIN:
 	{
 		Gold g;
@@ -969,6 +1004,7 @@ ItemBehavior load_behavior(const json& j)
 			g.amount = j["amount"].get<int>();
 		return g;
 	}
+
 	case PickableType::FOOD:
 	{
 		Food f;
@@ -976,6 +1012,7 @@ ItemBehavior load_behavior(const json& j)
 			f.nutrition_value = j["nutrition_value"].get<int>();
 		return f;
 	}
+
 	case PickableType::CORPSE_FOOD:
 	{
 		CorpseFood cf;
@@ -983,12 +1020,14 @@ ItemBehavior load_behavior(const json& j)
 			cf.nutrition_value = j["nutrition_value"].get<int>();
 		return cf;
 	}
+
 	case PickableType::ARMOR:
 	{
 		Armor a;
 		a.armor_class = j.at("armorClass").get<int>();
 		return a;
 	}
+
 	case PickableType::MAGICAL_HELM:
 	{
 		MagicalHelm mh;
@@ -998,36 +1037,51 @@ ItemBehavior load_behavior(const json& j)
 			mh.bonus = j["bonus"].get<int>();
 		return mh;
 	}
+
 	case PickableType::MAGICAL_RING:
 	{
 		MagicalRing mr;
 		if (j.contains("effect"))
+		{
 			mr.effect = static_cast<MagicalEffect>(j["effect"].get<int>());
+		}
 		if (j.contains("bonus"))
+		{
 			mr.bonus = j["bonus"].get<int>();
+		}
 		return mr;
 	}
+
 	case PickableType::JEWELRY_AMULET:
 	{
 		JewelryAmulet ja;
 		load_stat_boost(ja, j);
 		return ja;
 	}
+
 	case PickableType::GAUNTLETS:
 	{
 		Gauntlets g;
 		load_stat_boost(g, j);
 		return g;
 	}
+
 	case PickableType::GIRDLE:
 	{
 		Girdle g;
 		load_stat_boost(g, j);
 		return g;
 	}
+
 	case PickableType::QUEST_ITEM:
+	{
 		return Amulet{};
+	}
+
 	default:
+	{
 		throw std::runtime_error(std::format("Unknown PickableType: {}", static_cast<int>(type)));
+	}
+
 	}
 }

@@ -56,7 +56,7 @@ void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 	}
 
 	auto path = Map::bresenham_line(ctx.player->position, targetCursor);
-	int ts = ctx.renderer->get_tile_size();
+	int tileSize = ctx.renderer->get_tile_size();
 	int cam_x = ctx.renderer->get_camera_x();
 	int cam_y = ctx.renderer->get_camera_y();
 
@@ -69,11 +69,11 @@ void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 			continue;
 		}
 
-		int sx = pos.x * ts - cam_x;
-		int sy = pos.y * ts - cam_y;
+		int sx = pos.x * tileSize - cam_x;
+		int sy = pos.y * tileSize - cam_y;
 		// Green tint = clear LOS, red = blocked
 		Color c = clear ? Color{ 50, 220, 100, 50 } : Color{ 220, 50, 50, 50 };
-		DrawRectangle(sx, sy, ts, ts, c);
+		DrawRectangle(sx, sy, tileSize, tileSize, c);
 	}
 }
 
@@ -84,7 +84,7 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 		return;
 	}
 
-	int ts = ctx.renderer->get_tile_size();
+	int tileSize = ctx.renderer->get_tile_size();
 	int cam_x = ctx.renderer->get_camera_x();
 	int cam_y = ctx.renderer->get_camera_y();
 
@@ -109,9 +109,9 @@ void TargetingSystem::draw_range_indicator(GameContext& ctx, Vector2D center, in
 				continue;
 			}
 
-			int sx = pos.x * ts - cam_x;
-			int sy = pos.y * ts - cam_y;
-			DrawRectangle(sx, sy, ts, ts, Color{ 100, 200, 255, 35 });
+			int sx = pos.x * tileSize - cam_x;
+			int sy = pos.y * tileSize - cam_y;
+			DrawRectangle(sx, sy, tileSize, tileSize, Color{ 100, 200, 255, 35 });
 		}
 	}
 }
@@ -194,9 +194,9 @@ void TargetingSystem::animate_projectile(
 		return;
 	}
 
-	int ts = ctx.renderer->get_tile_size();
-	int half = ts / 2;
-	float r = static_cast<float>(ts) / 4.0f;
+	int tileSize = ctx.renderer->get_tile_size();
+	int half = tileSize / 2;
+	float r = static_cast<float>(tileSize) / 4.0f;
 
 	static constexpr double STEP_DURATION = 0.05; // 50 ms per tile
 
@@ -207,8 +207,8 @@ void TargetingSystem::animate_projectile(
 		double start = GetTime();
 		while (GetTime() - start < STEP_DURATION && !WindowShouldClose())
 		{
-			int sx = pos.x * ts - ctx.renderer->get_camera_x() + half;
-			int sy = pos.y * ts - ctx.renderer->get_camera_y() + half;
+			int sx = pos.x * tileSize - ctx.renderer->get_camera_x() + half;
+			int sy = pos.y * tileSize - ctx.renderer->get_camera_y() + half;
 
 			ctx.renderer->begin_frame();
 			ctx.rendering_manager->render(ctx);
@@ -226,7 +226,7 @@ void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int ra
 		return;
 	}
 
-	int ts = ctx.renderer->get_tile_size();
+	int tileSize = ctx.renderer->get_tile_size();
 	int cam_x = ctx.renderer->get_camera_x();
 	int cam_y = ctx.renderer->get_camera_y();
 
@@ -244,9 +244,9 @@ void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int ra
 				continue;
 			}
 
-			int sx = pos.x * ts - cam_x;
-			int sy = pos.y * ts - cam_y;
-			DrawRectangle(sx, sy, ts, ts, Color{ 255, 140, 0, 50 }); // orange AoE tint
+			int sx = pos.x * tileSize - cam_x;
+			int sy = pos.y * tileSize - cam_y;
+			DrawRectangle(sx, sy, tileSize, tileSize, Color{ 255, 140, 0, 50 }); // orange AoE tint
 		}
 	}
 }
@@ -295,17 +295,17 @@ bool TargetingSystem::run_targeting_loop(
 		// TODO: Extract into a function.
 		// Pulsing cursor highlight
 		{
-			int ts = ctx.renderer->get_tile_size();
-			int sx = cursor.x * ts - ctx.renderer->get_camera_x();
-			int sy = cursor.y * ts - ctx.renderer->get_camera_y();
+			int tileSize = ctx.renderer->get_tile_size();
+			int sx = cursor.x * tileSize - ctx.renderer->get_camera_x();
+			int sy = cursor.y * tileSize - ctx.renderer->get_camera_y();
 			float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) * 0.5f;
 			auto fill_a = static_cast<unsigned char>(40.0f + 30.0f * pulse);
 			auto ring_a = static_cast<unsigned char>(120.0f + 100.0f * pulse);
 
-			DrawRectangle(sx, sy, ts, ts, Color{ 255, 255, 50, fill_a });
+			DrawRectangle(sx, sy, tileSize, tileSize, Color{ 255, 255, 50, fill_a });
 			DrawRectangleLinesEx(
 				Rectangle{
-					static_cast<float>(sx), static_cast<float>(sy), static_cast<float>(ts), static_cast<float>(ts) },
+					static_cast<float>(sx), static_cast<float>(sy), static_cast<float>(tileSize), static_cast<float>(tileSize) },
 				2.0f,
 				Color{ 255, 255, 50, ring_a });
 		}

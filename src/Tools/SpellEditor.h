@@ -68,12 +68,6 @@ private:
 	// Status feedback
 	double m_last_save_time{ -100.0 };
 
-	// Layout constants (pixels)
-	static constexpr int LIST_W = 220;
-	static constexpr int HEADER_H = 48;
-	static constexpr int HINT_H = 28;
-	static constexpr int FIELD_H = 30;
-
 	void load_working();
 	void commit_working();
 

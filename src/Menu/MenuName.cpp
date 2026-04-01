@@ -34,11 +34,11 @@ void MenuName::draw_name_screen(GameContext& ctx)
 
 	if (renderer)
 	{
-		int ts = renderer->get_tile_size();
-		int font_off = (ts - renderer->get_font_size()) / 2;
-		int px = (static_cast<int>(menu_startx) + 1) * ts;
-		int row1_y = (static_cast<int>(menu_starty) + 1) * ts + font_off;
-		int row2_y = (static_cast<int>(menu_starty) + 2) * ts + font_off;
+		int tileSize = renderer->get_tile_size();
+		int font_off = (tileSize - renderer->get_font_size()) / 2;
+		int px = (static_cast<int>(menu_startx) + 1) * tileSize;
+		int row1_y = (static_cast<int>(menu_starty) + 1) * tileSize + font_off;
+		int row2_y = (static_cast<int>(menu_starty) + 2) * tileSize + font_off;
 		renderer->draw_text(Vector2D{ px, row1_y }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
 		renderer->draw_text(Vector2D{ px, row2_y }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
 	}

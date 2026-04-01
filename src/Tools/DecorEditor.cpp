@@ -327,13 +327,13 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 	}
 
 	const int tile_size = renderer.get_tile_size();
-	const int sw = renderer.get_screen_width();
+	const int screenWidth = renderer.get_screen_width();
 	const int sz = static_cast<int>(palette.size());
 
 	constexpr int VISIBLE = 9;
 	int half = VISIBLE / 2;
 
-	DrawRectangle(0, 0, sw, tile_size + 4, Color{ 0, 0, 0, 200 });
+	DrawRectangle(0, 0, screenWidth, tile_size + 4, Color{ 0, 0, 0, 200 });
 
 	for (int slot = 0; slot < VISIBLE; ++slot)
 	{
@@ -343,7 +343,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 			continue;
 		}
 
-		int px = slot * tile_size + (sw - VISIBLE * tile_size) / 2;
+		int px = slot * tile_size + (screenWidth - VISIBLE * tile_size) / 2;
 		int py = 2;
 
 		bool is_current = (idx == palette_index);
@@ -365,10 +365,10 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 void DecorEditor::draw_info_bar(const Renderer& renderer, int world_x, int world_y) const
 {
 	const int tile_size = renderer.get_tile_size();
-	const int sw = renderer.get_screen_width();
+	const int screenWidth = renderer.get_screen_width();
 
 	int bar_y = tile_size + 6;
-	DrawRectangle(0, bar_y, sw, 20, Color{ 0, 0, 0, 180 });
+	DrawRectangle(0, bar_y, screenWidth, 20, Color{ 0, 0, 0, 180 });
 
 	bool saved_flash = (GetTime() - last_save_time) < 2.0;
 
@@ -398,8 +398,8 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, int world_x, int world
 
 void DecorEditor::update_browser(const Renderer& renderer, std::string_view palette_path)
 {
-	const int sw = renderer.get_screen_width();
-	const int sh = renderer.get_screen_height();
+	const int screenWidth = renderer.get_screen_width();
+	const int screenHeight = renderer.get_screen_height();
 
 	constexpr int BROWSER_TILE = 32;
 	constexpr int LIST_TILE = 20;
@@ -410,7 +410,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	constexpr int EDIT_H = 104;
 
 	// Full-screen dark backdrop
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 220 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 220 });
 
 	// --- Sheet navigation (Left/Right arrow) ---
 	const int total_sheets = renderer.get_loaded_sheet_count();
@@ -447,7 +447,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(browser_sheet));
 
 	// --- Header (two lines) ---
-	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
+	DrawRectangle(0, 0, screenWidth, HEADER_H, Color{ 20, 20, 40, 255 });
 
 	std::string h1 = std::format(
 		"TILE BROWSER  |  {} ({}/{})  |  {}x{} tiles",
@@ -463,7 +463,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	renderer.draw_text_color(Vector2D{ PAD, 28 }, h2, Color{ 160, 160, 120, 255 });
 
 	const int grid_y = HEADER_H + 2;
-	const int grid_h = sh - grid_y - (editing ? EDIT_H : 0) - 2;
+	const int grid_h = screenHeight - grid_y - (editing ? EDIT_H : 0) - 2;
 
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -538,32 +538,32 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 
 	for (int i = list_scroll; i < static_cast<int>(palette.size()); ++i)
 	{
-		int iy = list_top + (i - list_scroll) * LIST_ITEM_H;
-		if (iy >= list_top + list_vis_h)
+		int itemY = list_top + (i - list_scroll) * LIST_ITEM_H;
+		if (itemY >= list_top + list_vis_h)
 		{
 			break;
 		}
 
 		bool is_sel = (i == list_cursor);
-		bool hovered = mouse_in_list && mouse.y >= iy && mouse.y < iy + LIST_ITEM_H;
+		bool hovered = mouse_in_list && mouse.y >= itemY && mouse.y < itemY + LIST_ITEM_H;
 
 		if (is_sel)
 		{
-			DrawRectangle(0, iy, LIST_W, LIST_ITEM_H, Color{ 60, 60, 0, 220 });
+			DrawRectangle(0, itemY, LIST_W, LIST_ITEM_H, Color{ 60, 60, 0, 220 });
 		}
 		else if (hovered)
 		{
-			DrawRectangle(0, iy, LIST_W, LIST_ITEM_H, Color{ 30, 30, 30, 180 });
+			DrawRectangle(0, itemY, LIST_W, LIST_ITEM_H, Color{ 30, 30, 30, 180 });
 		}
 
 		renderer.draw_tile_screen_sized(
-			Vector2D{ PAD, iy + (LIST_ITEM_H - LIST_TILE) / 2 },
+			Vector2D{ PAD, itemY + (LIST_ITEM_H - LIST_TILE) / 2 },
 			palette[i].tile,
 			LIST_TILE);
 
 		// Label -- show live edit buffer inline when this row is being renamed.
 		std::string entry_text;
-		Color tc;
+		Color textColor;
 		if (is_sel && editing)
 		{
 			// Show what the user is currently typing, with cursor.
@@ -575,7 +575,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				live += std::format(" ({})", sym_buf);
 			}
 			entry_text = truncate(live);
-			tc = Color{ 255, 220, 60, 255 };
+			textColor = Color{ 255, 220, 60, 255 };
 		}
 		else
 		{
@@ -585,20 +585,20 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 				entry_text += std::format(" [{}]", palette[i].symbol);
 			}
 			entry_text = truncate(entry_text);
-			tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
+			textColor = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
 		}
-		renderer.draw_text_color(Vector2D{ text_x_l, iy + (LIST_ITEM_H - 16) / 2 }, entry_text, tc);
+		renderer.draw_text_color(Vector2D{ text_x_l, itemY + (LIST_ITEM_H - 16) / 2 }, entry_text, textColor);
 
 		// [X] delete button -- visible on selected or hovered row.
 		if (is_sel || hovered)
 		{
-			int btn_y = iy + 4;
+			int btn_y = itemY + 4;
 			int btn_h = LIST_ITEM_H - 8;
-			bool del_hot = mouse_in_list && mouse.x >= del_x && mouse.x < del_x + DEL_W && mouse.y >= iy && mouse.y < iy + LIST_ITEM_H;
+			bool del_hot = mouse_in_list && mouse.x >= del_x && mouse.x < del_x + DEL_W && mouse.y >= itemY && mouse.y < itemY + LIST_ITEM_H;
 
 			Color del_bg = del_hot ? Color{ 220, 50, 50, 255 } : Color{ 140, 40, 40, 200 };
 			DrawRectangle(del_x, btn_y, DEL_W, btn_h, del_bg);
-			renderer.draw_text_color(Vector2D{ del_x + 5, iy + (LIST_ITEM_H - 16) / 2 }, "X", Color{ 255, 255, 255, 255 });
+			renderer.draw_text_color(Vector2D{ del_x + 5, itemY + (LIST_ITEM_H - 16) / 2 }, "X", Color{ 255, 255, 255, 255 });
 
 			if (del_hot && clicked)
 			{
@@ -635,7 +635,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		}
 	}
 
-	BeginScissorMode(LIST_W, grid_y, sw - LIST_W, grid_h);
+	BeginScissorMode(LIST_W, grid_y, screenWidth - LIST_W, grid_h);
 
 	for (int row = browser_scroll; row < sheet_rows; ++row)
 	{
@@ -719,9 +719,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	// --- Edit panel ---
 	if (editing)
 	{
-		int panel_y = sh - EDIT_H;
-		DrawRectangle(0, panel_y, sw, EDIT_H, Color{ 10, 10, 30, 248 });
-		DrawLine(0, panel_y, sw, panel_y, Color{ 100, 100, 200, 255 });
+		int panel_y = screenHeight - EDIT_H;
+		DrawRectangle(0, panel_y, screenWidth, EDIT_H, Color{ 10, 10, 30, 248 });
+		DrawLine(0, panel_y, screenWidth, panel_y, Color{ 100, 100, 200, 255 });
 
 		renderer.draw_tile_screen_sized(
 			Vector2D{ PAD, panel_y + (EDIT_H - BROWSER_TILE) / 2 },

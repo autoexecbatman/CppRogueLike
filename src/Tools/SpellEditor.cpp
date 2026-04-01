@@ -15,6 +15,12 @@
 #include "../Systems/SpellSystem.h"
 #include "SpellEditor.h"
 
+constexpr int LIST_WIDTH = 220;
+constexpr int HEADER_HEIGHT = 48;
+constexpr int HINT_HEIGHT = 28;
+constexpr int FIELD_HEIGHT = 30;
+constexpr int ITEM_HEIGHT = 32;
+constexpr int LIST_PAD = 8;
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -117,11 +123,10 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 
 	if (clicked)
 	{
-		if (mouse.x < LIST_W)
+		if (mouse.x < LIST_WIDTH)
 		{
 			m_focus = 0;
-			constexpr int ITEM_H = 32;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_H) / ITEM_H;
+			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != m_list_cursor)
 			{
@@ -133,7 +138,7 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		else
 		{
 			m_focus = 1;
-			int idx = static_cast<int>(mouse.y - HEADER_H) / FIELD_H;
+			int idx = static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
 			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
 			m_field_cursor = idx;
 		}
@@ -141,7 +146,7 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 
 	// Mouse wheel
 	float wheel = GetMouseWheelMove();
-	if (wheel != 0.0f && mouse.x < LIST_W)
+	if (wheel != 0.0f && mouse.x < LIST_WIDTH)
 	{
 		m_list_scroll = std::clamp(
 			m_list_scroll - static_cast<int>(wheel),
@@ -165,11 +170,11 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		{
 			commit_working();
 			++m_list_cursor;
-			int sh = ctx.renderer->get_screen_height();
-			int vis = (sh - HEADER_H - HINT_H) / 32;
-			if (m_list_cursor >= m_list_scroll + vis)
+			int screenHeight = ctx.renderer->get_screen_height();
+			int visibleCount = (screenHeight - HEADER_HEIGHT - HINT_HEIGHT) / 32;
+			if (m_list_cursor >= m_list_scroll + visibleCount)
 			{
-				m_list_scroll = m_list_cursor - vis + 1;
+				m_list_scroll = m_list_cursor - visibleCount + 1;
 			}
 			load_working();
 		}
@@ -286,10 +291,10 @@ void SpellEditor::handle_edit_string()
 void SpellEditor::render(const GameContext& ctx) const
 {
 	const Renderer& r = *ctx.renderer;
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
 
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 255 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
 	render_list(r);
@@ -299,8 +304,8 @@ void SpellEditor::render(const GameContext& ctx) const
 
 void SpellEditor::render_header(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
+	int screenWidth = r.get_screen_width();
+	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 20, 20, 40, 255 });
 	r.draw_text_color(Vector2D{ 8, 6 }, "SPELL EDITOR", Color{ 180, 255, 180, 255 });
 	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Ctrl+S:save  Esc:exit",
@@ -309,50 +314,48 @@ void SpellEditor::render_header(const Renderer& r) const
 
 void SpellEditor::render_list(const Renderer& r) const
 {
-	int sh = r.get_screen_height();
-	int body_y = HEADER_H;
-	int body_h = sh - HEADER_H - HINT_H;
-	constexpr int ITEM_H = 32;
-	constexpr int PAD = 8;
+	int screenHeight = r.get_screen_height();
+	int body_y = HEADER_HEIGHT;
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(0, body_y, LIST_W, body_h, Color{ 10, 10, 20, 255 });
-	DrawLine(LIST_W, body_y, LIST_W, body_y + body_h, Color{ 80, 80, 120, 255 });
+	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 10, 10, 20, 255 });
+	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 80, 120, 255 });
 
 	int total = static_cast<int>(m_keys.size());
-	int vis = body_h / ITEM_H;
-	int scroll = std::clamp(m_list_scroll, 0, std::max(0, total - vis));
+	int visibleCount = body_h / ITEM_HEIGHT;
+	int scroll = std::clamp(m_list_scroll, 0, std::max(0, total - visibleCount));
 
 	::Vector2 mouse = GetMousePosition();
 
 	for (int i = scroll; i < total; ++i)
 	{
-		int iy = body_y + (i - scroll) * ITEM_H;
-		if (iy + ITEM_H > body_y + body_h)
+		int itemY = body_y + (i - scroll) * ITEM_HEIGHT;
+		if (itemY + ITEM_HEIGHT > body_y + body_h)
 		{
 			break;
 		}
 
 		bool is_sel = (i == m_list_cursor);
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_W
-			&& mouse.y >= iy && mouse.y < iy + ITEM_H;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
+			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 0)
 		{
-			bg = Color{ 0, 60, 0, 200 };
+			bgColor = Color{ 0, 60, 0, 200 };
 		}
 		else if (is_sel)
 		{
-			bg = Color{ 0, 40, 0, 150 };
+			bgColor = Color{ 0, 40, 0, 150 };
 		}
 		else if (hovered)
 		{
-			bg = Color{ 30, 30, 30, 160 };
+			bgColor = Color{ 30, 30, 30, 160 };
 		}
 
-		if (bg.a > 0)
+		if (bgColor.a > 0)
 		{
-			DrawRectangle(0, iy, LIST_W, ITEM_H, bg);
+			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 		}
 
 		// Show spell class indicator
@@ -367,65 +370,65 @@ void SpellEditor::render_list(const Renderer& r) const
 			: Color{ 255, 160, 80, 255 };
 
 		std::string label = std::format("[{}] {}{}", def.level, def.name, is_custom ? " *" : "");
-		Color tc = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
+		Color textColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ PAD, iy + (ITEM_H - 16) / 2 }, label, tc);
+		r.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
 
 		// Class dot on right edge
 		const char* class_tag = (def.spellClass == SpellClass::CLERIC) ? "C" : "W";
-		r.draw_text_color(Vector2D{ LIST_W - 20, iy + (ITEM_H - 16) / 2 }, class_tag, class_col);
+		r.draw_text_color(Vector2D{ LIST_WIDTH - 20, itemY + (ITEM_HEIGHT - 16) / 2 }, class_tag, class_col);
 	}
 }
 
 void SpellEditor::render_fields(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int ox = LIST_W;
-	int oy = HEADER_H;
-	int fw = sw - LIST_W;
-	int fh = sh - HEADER_H - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int panelX = LIST_WIDTH;
+	int panelY = HEADER_HEIGHT;
+	int fieldsWidth = screenWidth - LIST_WIDTH;
+	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(ox, oy, fw, fh, Color{ 8, 8, 16, 255 });
+	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 8, 8, 16, 255 });
 
 	::Vector2 mouse = GetMousePosition();
 
 	for (int i = 0; i < FIELD_COUNT; ++i)
 	{
-		int iy = oy + i * FIELD_H;
-		if (iy + FIELD_H > oy + fh)
+		int itemY = panelY + i * FIELD_HEIGHT;
+		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 		{
 			break;
 		}
 
 		FieldId fid = static_cast<FieldId>(i);
 		bool is_sel = (i == m_field_cursor);
-		bool hovered = mouse.x >= ox && mouse.x < sw
-			&& mouse.y >= iy && mouse.y < iy + FIELD_H;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
+			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 1)
 		{
-			bg = Color{ 0, 60, 0, 200 };
+			bgColor = Color{ 0, 60, 0, 200 };
 		}
 		else if (is_sel)
 		{
-			bg = Color{ 0, 40, 0, 140 };
+			bgColor = Color{ 0, 40, 0, 140 };
 		}
 		else if (hovered)
 		{
-			bg = Color{ 20, 30, 20, 120 };
+			bgColor = Color{ 20, 30, 20, 120 };
 		}
 
-		if (bg.a > 0)
+		if (bgColor.a > 0)
 		{
-			DrawRectangle(ox, iy, fw, FIELD_H, bg);
+			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
 		}
 
-		Color lc = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
-		Color vc = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 150, 150, 150, 255 };
+		Color valueColor = is_sel ? Color{ 255, 255, 200, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		std::string val;
 		if (is_sel && m_mode == Mode::EDIT_STRING)
@@ -437,18 +440,18 @@ void SpellEditor::render_fields(const Renderer& r) const
 			val = field_value(fid);
 		}
 
-		int vx = sw - r.measure_text(val) - 16;
-		r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
+		int vx = screenWidth - r.measure_text(val) - 16;
+		r.draw_text_color(Vector2D{ vx, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
 	}
 }
 
 void SpellEditor::render_hint(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int hint_y = sh - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int hint_y = screenHeight - HINT_HEIGHT;
 
-	DrawRectangle(0, hint_y, sw, HINT_H, Color{ 20, 20, 40, 255 });
+	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
 
 	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
 	std::string msg;
@@ -470,8 +473,8 @@ void SpellEditor::render_hint(const Renderer& r) const
 		msg = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/cycle  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
+	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
 }
 
 // ---------------------------------------------------------------------------

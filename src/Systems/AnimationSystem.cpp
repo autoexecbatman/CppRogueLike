@@ -17,10 +17,10 @@ float AnimationSystem::random_range(float lo, float hi)
 	return dist(m_rng);
 }
 
-void AnimationSystem::init(const TileConfig& tc, int tile_size)
+void AnimationSystem::init(const TileConfig& tileConfig, int tile_size)
 {
 	m_tile_size = tile_size;
-	m_blood_tile = tc.get("TILE_EFFECT_BLOOD");
+	m_blood_tile = tileConfig.get("TILE_EFFECT_BLOOD");
 	// Spark: fall back to blood tile until TILE_EFFECT_SPARK is added to tile_config.json.
 	m_spark_tile = m_blood_tile;
 

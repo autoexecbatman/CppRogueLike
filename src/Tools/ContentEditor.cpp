@@ -131,34 +131,34 @@ void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry&
 
 	handle_keyboard();
 
-	const int sw = renderer.get_screen_width();
-	const int sh = renderer.get_screen_height();
+	const int screenWidth = renderer.get_screen_width();
+	const int screenHeight = renderer.get_screen_height();
 
 	constexpr int HEADER_H = 56;
 	constexpr int HINT_H = 28;
 	constexpr int LIST_W = 420;
 
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 220 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 220 });
 
 	draw_header(renderer);
 
 	const int body_y = HEADER_H;
-	const int body_h = sh - HEADER_H - HINT_H;
+	const int body_h = screenHeight - HEADER_H - HINT_H;
 
 	draw_list(renderer, 0, body_y, LIST_W, body_h);
-	draw_browser(renderer, LIST_W, body_y, sw - LIST_W, body_h);
+	draw_browser(renderer, LIST_W, body_y, screenWidth - LIST_W, body_h);
 	draw_hint_bar(renderer);
 }
 
 void ContentEditor::draw_header(const Renderer& renderer)
 {
-	const int sw = renderer.get_screen_width();
+	const int screenWidth = renderer.get_screen_width();
 	constexpr int HEADER_H = 56;
 	constexpr int TAB_W = 110;
 	constexpr int TAB_H = 28;
 	constexpr int TAB_Y = 20;
 
-	DrawRectangle(0, 0, sw, HEADER_H, Color{ 20, 20, 40, 255 });
+	DrawRectangle(0, 0, screenWidth, HEADER_H, Color{ 20, 20, 40, 255 });
 	renderer.draw_text_color(Vector2D{ 8, 4 }, "CONTENT EDITOR", Color{ 255, 255, 180, 255 });
 
 	const char* TAB_NAMES[2] = { "Items", "Monsters" };
@@ -168,12 +168,12 @@ void ContentEditor::draw_header(const Renderer& renderer)
 	{
 		int tx = 8 + t * (TAB_W + 4);
 		bool sel = (m_tab == t);
-		Color bg = sel ? Color{ 80, 80, 0, 255 } : Color{ 30, 30, 60, 255 };
-		Color tc = sel ? Color{ 255, 255, 100, 255 } : Color{ 160, 160, 160, 255 };
+		Color bgColor = sel ? Color{ 80, 80, 0, 255 } : Color{ 30, 30, 60, 255 };
+		Color textColor = sel ? Color{ 255, 255, 100, 255 } : Color{ 160, 160, 160, 255 };
 
-		DrawRectangle(tx, TAB_Y, TAB_W, TAB_H, bg);
+		DrawRectangle(tx, TAB_Y, TAB_W, TAB_H, bgColor);
 		DrawRectangleLines(tx, TAB_Y, TAB_W, TAB_H, Color{ 100, 100, 60, 255 });
-		renderer.draw_text_color(Vector2D{ tx + 8, TAB_Y + 4 }, TAB_NAMES[t], tc);
+		renderer.draw_text_color(Vector2D{ tx + 8, TAB_Y + 4 }, TAB_NAMES[t], textColor);
 
 		bool click_tab = IsMouseButtonPressed(MOUSE_LEFT_BUTTON) &&
 			mouse.x >= tx && mouse.x < tx + TAB_W &&
@@ -225,32 +225,32 @@ void ContentEditor::draw_list(
 
 	for (int i = m_list_scroll; i < total; ++i)
 	{
-		int iy = list_y + (i - m_list_scroll) * ITEM_H;
-		if (iy + ITEM_H > list_y + list_h)
+		int itemY = list_y + (i - m_list_scroll) * ITEM_H;
+		if (itemY + ITEM_H > list_y + list_h)
 		{
 			break;
 		}
 
 		bool is_sel = (i == m_list_cursor);
-		bool hovered = in_list && mouse.y >= iy && mouse.y < iy + ITEM_H;
+		bool hovered = in_list && mouse.y >= itemY && mouse.y < itemY + ITEM_H;
 
 		if (is_sel)
 		{
-			DrawRectangle(list_x, iy, list_w, ITEM_H, Color{ 60, 60, 0, 220 });
+			DrawRectangle(list_x, itemY, list_w, ITEM_H, Color{ 60, 60, 0, 220 });
 		}
 		else if (hovered)
 		{
-			DrawRectangle(list_x, iy, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
+			DrawRectangle(list_x, itemY, list_w, ITEM_H, Color{ 30, 30, 30, 180 });
 		}
 
 		TileRef tile = (m_tab == 0)
 			? (m_registry ? m_registry->get_tile(entries[i].item_key) : TileRef{})
 			: MonsterCreator::get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
-		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
+		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
-		Color tc = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
-		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, entries[i].name, tc);
+		Color textColor = is_sel ? Color{ 255, 255, 100, 255 } : Color{ 200, 200, 200, 255 };
+		renderer.draw_text_color(Vector2D{ list_x + PAD + TILE_SZ + 4, itemY + (ITEM_H - 16) / 2 }, entries[i].name, textColor);
 
 		if (hovered && IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
 		{
@@ -263,8 +263,8 @@ void ContentEditor::draw_list(
 
 void ContentEditor::draw_browser(
 	const Renderer& renderer,
-	int ox,
-	int oy,
+	int panelX,
+	int panelY,
 	int bw,
 	int bh)
 {
@@ -303,7 +303,7 @@ void ContentEditor::draw_browser(
 	const int sheet_cols = renderer.get_sheet_cols(static_cast<TileSheet>(m_browser_sheet));
 	const int sheet_rows = renderer.get_sheet_rows(static_cast<TileSheet>(m_browser_sheet));
 
-	DrawRectangle(ox, oy, bw, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
+	DrawRectangle(panelX, panelY, bw, SUB_HEADER_H, Color{ 15, 15, 30, 255 });
 
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  {}x{} tiles",
@@ -313,13 +313,13 @@ void ContentEditor::draw_browser(
 		sheet_cols,
 		sheet_rows);
 
-	renderer.draw_text_color(Vector2D{ ox + PAD, oy + 4 }, hdr, Color{ 200, 200, 120, 255 });
+	renderer.draw_text_color(Vector2D{ panelX + PAD, panelY + 4 }, hdr, Color{ 200, 200, 120, 255 });
 
-	const int grid_y = oy + SUB_HEADER_H;
+	const int grid_y = panelY + SUB_HEADER_H;
 	const int grid_h = bh - SUB_HEADER_H;
 
 	::Vector2 mouse = GetMousePosition();
-	bool in_browser = mouse.x >= ox && mouse.x < ox + bw &&
+	bool in_browser = mouse.x >= panelX && mouse.x < panelX + bw &&
 		mouse.y >= grid_y && mouse.y < grid_y + grid_h;
 
 	if (in_browser)
@@ -334,7 +334,7 @@ void ContentEditor::draw_browser(
 
 	TileRef selected_tile = current_tile();
 
-	BeginScissorMode(ox, grid_y, bw, grid_h);
+	BeginScissorMode(panelX, grid_y, bw, grid_h);
 
 	for (int row = m_browser_scroll; row < sheet_rows; ++row)
 	{
@@ -346,7 +346,7 @@ void ContentEditor::draw_browser(
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = ox + PAD + col * (BROWSER_TILE + 2);
+			int px = panelX + PAD + col * (BROWSER_TILE + 2);
 			TileRef tid{ static_cast<TileSheet>(m_browser_sheet), col, row };
 
 			bool is_sel = (tid == selected_tile);
@@ -381,20 +381,20 @@ void ContentEditor::draw_browser(
 
 void ContentEditor::draw_hint_bar(const Renderer& renderer) const
 {
-	const int sw = renderer.get_screen_width();
-	const int sh = renderer.get_screen_height();
+	const int screenWidth = renderer.get_screen_width();
+	const int screenHeight = renderer.get_screen_height();
 	constexpr int HINT_H = 28;
 
-	int hint_y = sh - HINT_H;
-	DrawRectangle(0, hint_y, sw, HINT_H, Color{ 20, 20, 40, 255 });
+	int hint_y = screenHeight - HINT_H;
+	DrawRectangle(0, hint_y, screenWidth, HINT_H, Color{ 20, 20, 40, 255 });
 
 	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
 	std::string hint = std::format(
 		"Tab:switch tab   Up/Down:select   Left/Right:sheet   Click tile:assign   Ctrl+S:save{}",
 		saved_flash ? "   -- SAVED!" : "");
 
-	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
-	renderer.draw_text_color(Vector2D{ 8, hint_y + 4 }, hint, hc);
+	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 160, 160, 120, 255 };
+	renderer.draw_text_color(Vector2D{ 8, hint_y + 4 }, hint, hintColor);
 }
 
 void ContentEditor::handle_keyboard()

@@ -349,14 +349,14 @@ void Map::render(const GameContext& ctx) const
 		return;
 	}
 
-	int ts = ctx.renderer->get_tile_size();
+	int tileSize = ctx.renderer->get_tile_size();
 	int cam_x = ctx.renderer->get_camera_x();
 	int cam_y = ctx.renderer->get_camera_y();
 	int vis_cols = ctx.renderer->get_viewport_cols();
 	int vis_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
 
-	int start_col = std::max(0, cam_x / ts);
-	int start_row = std::max(0, cam_y / ts);
+	int start_col = std::max(0, cam_x / tileSize);
+	int start_row = std::max(0, cam_y / tileSize);
 	int end_col = std::min(map_width, start_col + vis_cols + 2);
 	int end_row = std::min(map_height, start_row + vis_rows + 2);
 
@@ -466,8 +466,8 @@ void Map::render(const GameContext& ctx) const
 			return TileRef{};
 
 		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
-		const auto& tc = *ctx.tile_config;
-		return (zone == ZONE_CHAPEL) ? tc.get("TILE_CANDELABRA") : tc.get("TILE_TORCH_1");
+		const auto& tileConfig = *ctx.tile_config;
+		return (zone == ZONE_CHAPEL) ? tileConfig.get("TILE_CANDELABRA") : tileConfig.get("TILE_TORCH_1");
 	};
 
 	for (int row = start_row; row < end_row; row++)

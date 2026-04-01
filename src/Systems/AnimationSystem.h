@@ -33,7 +33,7 @@ struct AnimEntry
 class AnimationSystem
 {
 public:
-	void init(const TileConfig& tc, int tile_size);
+	void init(const TileConfig& tileConfig, int tile_size);
 
 	// Particle bursts
 	void spawn_melee_hit(int world_x, int world_y);

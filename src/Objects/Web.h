@@ -11,7 +11,7 @@ class TileConfig;
 class Web : public Object
 {
 public:
-	Web(Vector2D position, int strength, const TileConfig& tc);
+	Web(Vector2D position, int strength, const TileConfig& tileConfig);
 
 	// Web properties
 	int get_strength() const { return webStrength; }

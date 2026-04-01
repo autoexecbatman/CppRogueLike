@@ -22,6 +22,17 @@
 #include "../Systems/TargetMode.h"
 #include "ItemEditor.h"
 
+constexpr int LIST_WIDTH = 220;
+constexpr int HEADER_HEIGHT = 48;
+constexpr int HINT_HEIGHT = 28;
+constexpr int FIELD_HEIGHT = 26;
+constexpr int ITEM_HEIGHT = 30;
+constexpr int LIST_TILE_SIZE = 22;
+constexpr int LIST_PAD = 6;
+constexpr int PICKER_PAD = 10;
+constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
+constexpr int PICKER_TILE_SIZE = 36;
+
 namespace
 {
 
@@ -341,9 +352,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 {
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
-	int sh = r.get_screen_height();
-	int body_h = sh - HEADER_H - HINT_H;
-	int visible_fields = body_h / FIELD_H;
+	int screenHeight = r.get_screen_height();
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
+	int visible_fields = body_h / FIELD_HEIGHT;
 	int total = static_cast<int>(m_keys.size());
 
 	::Vector2 mouse = GetMousePosition();
@@ -351,11 +362,10 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 
 	if (clicked)
 	{
-		if (mouse.x < LIST_W)
+		if (mouse.x < LIST_WIDTH)
 		{
 			m_focus = 0;
-			constexpr int ITEM_H = 30;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_H) / ITEM_H;
+			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != m_list_cursor)
 			{
@@ -367,7 +377,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 		else if (m_mode == Mode::NORMAL)
 		{
 			m_focus = 1;
-			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_H) / FIELD_H;
+			int idx = m_field_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
 			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
 			m_field_cursor = idx;
 		}
@@ -376,7 +386,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	float wheel = GetMouseWheelMove();
 	if (wheel != 0.0f)
 	{
-		if (mouse.x < LIST_W)
+		if (mouse.x < LIST_WIDTH)
 		{
 			m_list_scroll = std::clamp(
 				m_list_scroll - static_cast<int>(wheel),
@@ -559,7 +569,7 @@ void ItemEditor::handle_picker(const Renderer& r)
 
 	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
 	::Vector2 mouse = GetMousePosition();
-	bool in_picker = mouse.x >= LIST_W;
+	bool in_picker = mouse.x >= LIST_WIDTH;
 
 	if (in_picker)
 	{
@@ -573,15 +583,12 @@ void ItemEditor::handle_picker(const Renderer& r)
 		}
 	}
 
-	constexpr int PICKER_TILE = 36;
-	constexpr int PAD = 10;
-	constexpr int SUB_HDR_H = 28;
-	int grid_y = HEADER_H + SUB_HDR_H;
+	int grid_y = HEADER_HEIGHT + PICKER_SUB_HEADER_HEIGHT;
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		int col = static_cast<int>(mouse.x - LIST_W - PAD) / (PICKER_TILE + 2);
-		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (PICKER_TILE + 2);
+		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (PICKER_TILE_SIZE + 2);
+		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (PICKER_TILE_SIZE + 2);
 		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
@@ -599,10 +606,10 @@ void ItemEditor::handle_picker(const Renderer& r)
 void ItemEditor::render(const GameContext& ctx) const
 {
 	const Renderer& r = *ctx.renderer;
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
 
-	DrawRectangle(0, 0, sw, sh, Color{ 0, 0, 0, 255 });
+	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
 	render_list(r);
@@ -617,8 +624,8 @@ void ItemEditor::render(const GameContext& ctx) const
 
 void ItemEditor::render_header(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	DrawRectangle(0, 0, sw, HEADER_H, Color{ 0, 20, 40, 255 });
+	int screenWidth = r.get_screen_width();
+	DrawRectangle(0, 0, screenWidth, HEADER_HEIGHT, Color{ 0, 20, 40, 255 });
 	r.draw_text_color(Vector2D{ 8, 6 }, "ITEM EDITOR", Color{ 180, 255, 180, 255 });
 	r.draw_text_color(Vector2D{ 8, 26 },
 		"Tab:switch focus  Left/Right:adjust  Enter:edit  F2:tile  Ctrl+S:save  Esc:exit",
@@ -627,79 +634,92 @@ void ItemEditor::render_header(const Renderer& r) const
 
 void ItemEditor::render_list(const Renderer& r) const
 {
-	int sh = r.get_screen_height();
-	int body_y = HEADER_H;
-	int body_h = sh - HEADER_H - HINT_H;
-	constexpr int ITEM_H = 30;
-	constexpr int TILE_SZ = 22;
-	constexpr int PAD = 6;
+	int screenHeight = r.get_screen_height();
+	int body_y = HEADER_HEIGHT;
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(0, body_y, LIST_W, body_h, Color{ 5, 10, 5, 255 });
-	DrawLine(LIST_W, body_y, LIST_W, body_y + body_h, Color{ 80, 120, 80, 255 });
+	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 5, 10, 5, 255 });
+	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 120, 80, 255 });
 
 	int total = static_cast<int>(m_keys.size());
-	int vis = body_h / ITEM_H;
-	int max_scroll = std::max(0, total - vis);
+	int visibleCount = body_h / ITEM_HEIGHT;
+	int max_scroll = std::max(0, total - visibleCount);
 	int scroll = std::clamp(m_list_scroll, 0, max_scroll);
 
 	::Vector2 mouse = GetMousePosition();
 
 	for (int i = scroll; i < total; ++i)
 	{
-		int iy = body_y + (i - scroll) * ITEM_H;
-		if (iy + ITEM_H > body_y + body_h)
+		int itemY = body_y + (i - scroll) * ITEM_HEIGHT;
+		if (itemY + ITEM_HEIGHT > body_y + body_h)
+		{
 			break;
+		}
 
 		bool is_sel = (i == m_list_cursor);
-		bool hovered = mouse.x >= 0 && mouse.x < LIST_W
-			&& mouse.y >= iy && mouse.y < iy + ITEM_H;
+		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
+			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 0)
-			bg = Color{ 0, 60, 0, 200 };
+		{
+			bgColor = Color{ 0, 60, 0, 200 };
+		}
 		else if (is_sel)
-			bg = Color{ 0, 40, 0, 150 };
+		{
+			bgColor = Color{ 0, 40, 0, 150 };
+		}
 		else if (hovered)
-			bg = Color{ 20, 30, 20, 160 };
+		{
+			bgColor = Color{ 20, 30, 20, 160 };
+		}
 
-		if (bg.a > 0)
-			DrawRectangle(0, iy, LIST_W, ITEM_H, bg);
+		if (bgColor.a > 0)
+		{
+			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
+		}
 
 		TileRef tile = is_sel
 			? m_working_tile
 			: (m_registry ? m_registry->get_tile(m_keys[i]) : TileRef{});
-		r.draw_tile_screen_sized(Vector2D{ PAD, iy + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
+		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
 		bool is_custom = !ItemCreator::is_builtin_key(m_keys[i]);
 
 		std::string display_name = is_sel
 			? m_working_name
 			: std::string{ ItemCreator::get_params(m_keys[i]).name };
-		if (display_name.empty())
-			display_name = prettify_key(m_keys[i]);
-		if (is_custom)
-			display_name += " *";
 
-		Color tc = is_sel
+		if (display_name.empty())
+		{
+			display_name = prettify_key(m_keys[i]);
+		}
+
+		if (is_custom)
+		{
+			display_name += " *";
+		}
+
+		Color textColor = is_sel
 			? Color{ 150, 255, 150, 255 }
 			: Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ PAD + TILE_SZ + 4, iy + (ITEM_H - 16) / 2 }, display_name, tc);
+		r.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, display_name, textColor);
 	}
 }
 
 void ItemEditor::render_fields(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int ox = LIST_W;
-	int oy = HEADER_H;
-	int fw = sw - LIST_W;
-	int fh = sh - HEADER_H - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int panelX = LIST_WIDTH;
+	int panelY = HEADER_HEIGHT;
+	int fieldsWidth = screenWidth - LIST_WIDTH;
+	int fieldsHeight = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(ox, oy, fw, fh, Color{ 5, 8, 5, 255 });
+	DrawRectangle(panelX, panelY, fieldsWidth, fieldsHeight, Color{ 5, 8, 5, 255 });
 
-	int visible = fh / FIELD_H;
+	int visible = fieldsHeight / FIELD_HEIGHT;
 	int max_scroll = std::max(0, FIELD_COUNT - visible);
 	int scroll = std::clamp(m_field_scroll, 0, max_scroll);
 
@@ -707,42 +727,49 @@ void ItemEditor::render_fields(const Renderer& r) const
 
 	for (int i = scroll; i < FIELD_COUNT; ++i)
 	{
-		int iy = oy + (i - scroll) * FIELD_H;
-		if (iy + FIELD_H > oy + fh)
+		int itemY = panelY + (i - scroll) * FIELD_HEIGHT;
+		if (itemY + FIELD_HEIGHT > panelY + fieldsHeight)
 			break;
 
 		FieldId fid = static_cast<FieldId>(i);
 		bool is_sel = (i == m_field_cursor);
-		bool hovered = mouse.x >= ox && mouse.x < sw
-			&& mouse.y >= iy && mouse.y < iy + FIELD_H;
+		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
+			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
-		Color bg{ 0, 0, 0, 0 };
+		Color bgColor{ 0, 0, 0, 0 };
 		if (is_sel && m_focus == 1)
-			bg = Color{ 0, 60, 0, 200 };
+		{
+			bgColor = Color{ 0, 60, 0, 200 };
+		}
 		else if (is_sel)
-			bg = Color{ 0, 40, 0, 140 };
+		{
+			bgColor = Color{ 0, 40, 0, 140 };
+		}
 		else if (hovered)
-			bg = Color{ 10, 20, 10, 120 };
+		{
+			bgColor = Color{ 10, 20, 10, 120 };
+		}
 
-		if (bg.a > 0)
-			DrawRectangle(ox, iy, fw, FIELD_H, bg);
+		if (bgColor.a > 0)
+		{
+			DrawRectangle(panelX, itemY, fieldsWidth, FIELD_HEIGHT, bgColor);
+		}
 
-		Color lc = is_sel ? Color{ 150, 255, 150, 255 } : Color{ 150, 150, 150, 255 };
-		Color vc = is_sel ? Color{ 220, 255, 220, 255 } : Color{ 200, 200, 200, 255 };
+		Color labelColor = is_sel ? Color{ 150, 255, 150, 255 } : Color{ 150, 150, 150, 255 };
+		Color valueColor = is_sel ? Color{ 220, 255, 220, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ ox + 12, iy + (FIELD_H - 16) / 2 }, field_label(fid), lc);
+		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		if (fid == FieldId::TILE)
 		{
-			constexpr int TILE_SZ = 22;
-			r.draw_tile_screen_sized(Vector2D{ sw - TILE_SZ - 12, iy + (FIELD_H - TILE_SZ) / 2 }, m_working_tile, TILE_SZ);
+					r.draw_tile_screen_sized(Vector2D{ screenWidth - LIST_TILE_SIZE - 12, itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2 }, m_working_tile, LIST_TILE_SIZE);
 			if (is_sel)
 			{
 				DrawRectangleLines(
-					sw - TILE_SZ - 12,
-					iy + (FIELD_H - TILE_SZ) / 2,
-					TILE_SZ,
-					TILE_SZ,
+					screenWidth - LIST_TILE_SIZE - 12,
+					itemY + (FIELD_HEIGHT - LIST_TILE_SIZE) / 2,
+					LIST_TILE_SIZE,
+					LIST_TILE_SIZE,
 					Color{ 0, 255, 100, 255 });
 			}
 		}
@@ -750,71 +777,72 @@ void ItemEditor::render_fields(const Renderer& r) const
 		{
 			std::string val;
 			if (is_sel && m_mode == Mode::EDIT_STRING)
+			{
 				val = m_edit_buf + "_";
+			}
 			else
+			{
 				val = field_value(fid);
-			int vx = sw - r.measure_text(val) - 16;
-			r.draw_text_color(Vector2D{ vx, iy + (FIELD_H - 16) / 2 }, val, vc);
+			}
+			int vx = screenWidth - r.measure_text(val) - 16;
+			r.draw_text_color(Vector2D{ vx, itemY + (FIELD_HEIGHT - 16) / 2 }, val, valueColor);
 		}
 	}
 }
 
 void ItemEditor::render_picker(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int ox = LIST_W;
-	int ow = sw - LIST_W;
-	int body_y = HEADER_H;
-	int body_h = sh - HEADER_H - HINT_H;
-	constexpr int SUB_HDR_H = 28;
-	constexpr int PICKER_TILE = 36;
-	constexpr int PAD = 10;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int panelX = LIST_WIDTH;
+	int panelWidth = screenWidth - LIST_WIDTH;
+	int body_y = HEADER_HEIGHT;
+	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
-	DrawRectangle(ox, body_y, ow, body_h, Color{ 5, 8, 24, 255 });
+	DrawRectangle(panelX, body_y, panelWidth, body_h, Color{ 5, 8, 24, 255 });
 
-	DrawRectangle(ox, body_y, ow, SUB_HDR_H, Color{ 8, 15, 40, 255 });
+	DrawRectangle(panelX, body_y, panelWidth, PICKER_SUB_HEADER_HEIGHT, Color{ 8, 15, 40, 255 });
 	int total_sheets = r.get_loaded_sheet_count();
 	std::string hdr = std::format(
 		"Sheet: {} ({}/{})  --  Left/Right:change  Esc/F2:back",
 		r.get_sheet_name(static_cast<TileSheet>(m_picker_sheet)),
 		m_picker_sheet + 1,
 		total_sheets);
-	r.draw_text_color(Vector2D{ ox + PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
+	r.draw_text_color(Vector2D{ panelX + PICKER_PAD, body_y + 6 }, hdr, Color{ 120, 200, 200, 255 });
 
-	int grid_y = body_y + SUB_HDR_H;
-	int grid_h = body_h - SUB_HDR_H;
+	int grid_y = body_y + PICKER_SUB_HEADER_HEIGHT;
+	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
 	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
 
 	::Vector2 mouse = GetMousePosition();
 
-	BeginScissorMode(ox, grid_y, ow, grid_h);
+	BeginScissorMode(panelX, grid_y, panelWidth, grid_h);
 
 	for (int row = m_picker_scroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_picker_scroll) * (PICKER_TILE + 2);
+		int py = grid_y + (row - m_picker_scroll) * (PICKER_TILE_SIZE + 2);
 		if (py >= grid_y + grid_h)
 			break;
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = ox + PAD + col * (PICKER_TILE + 2);
+			int px = panelX + PICKER_PAD + col * (PICKER_TILE_SIZE + 2);
 			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
 
 			bool is_cur = (tid == m_working_tile);
-			bool hovered = mouse.x >= px && mouse.x < px + PICKER_TILE
-				&& mouse.y >= py && mouse.y < py + PICKER_TILE;
+			bool hovered = mouse.x >= px && mouse.x < px + PICKER_TILE_SIZE
+				&& mouse.y >= py && mouse.y < py + PICKER_TILE_SIZE;
 
 			if (is_cur)
-				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 0, 60, 0, 220 });
+				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 0, 60, 0, 220 });
 			else if (hovered)
-				DrawRectangle(px, py, PICKER_TILE, PICKER_TILE, Color{ 20, 40, 20, 160 });
+				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 20, 40, 20, 160 });
 
-			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE_SIZE);
 
 			if (is_cur)
-				DrawRectangleLines(px, py, PICKER_TILE, PICKER_TILE, Color{ 0, 255, 100, 255 });
+				DrawRectangleLines(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 0, 255, 100, 255 });
 		}
 	}
 
@@ -823,11 +851,11 @@ void ItemEditor::render_picker(const Renderer& r) const
 
 void ItemEditor::render_hint(const Renderer& r) const
 {
-	int sw = r.get_screen_width();
-	int sh = r.get_screen_height();
-	int hint_y = sh - HINT_H;
+	int screenWidth = r.get_screen_width();
+	int screenHeight = r.get_screen_height();
+	int hint_y = screenHeight - HINT_HEIGHT;
 
-	DrawRectangle(0, hint_y, sw, HINT_H, Color{ 0, 20, 40, 255 });
+	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 0, 20, 40, 255 });
 
 	std::string msg;
 	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
@@ -853,8 +881,8 @@ void ItemEditor::render_hint(const Renderer& r) const
 		msg = "[FIELDS] Up/Down:navigate  Left/Right:adjust  Enter:edit/toggle  F2:tile  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
 
-	Color hc = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 120, 160, 120, 255 };
-	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hc);
+	Color hintColor = saved_flash ? Color{ 100, 255, 100, 255 } : Color{ 120, 160, 120, 255 };
+	r.draw_text_color(Vector2D{ 8, hint_y + 6 }, msg, hintColor);
 }
 
 // ---------------------------------------------------------------------------

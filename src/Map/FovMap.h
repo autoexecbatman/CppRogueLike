@@ -27,7 +27,7 @@ public:
 	void set_properties(int x, int y, bool walkable, bool transparent) noexcept;
 	bool is_walkable(int x, int y) const noexcept;
 	bool is_in_fov(int x, int y) const noexcept;
-	void compute_fov(int ox, int oy, int radius);
+	void compute_fov(int panelX, int panelY, int radius);
 
 private:
 	int width_;

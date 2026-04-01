@@ -51,7 +51,7 @@ void FloatingTextSystem::spawn_text(
 void FloatingTextSystem::update_and_render(const Renderer& renderer)
 {
 	float now = static_cast<float>(GetTime());
-	int ts = renderer.get_tile_size();
+	int tileSize = renderer.get_tile_size();
 	int cam_x = renderer.get_camera_x();
 	int cam_y = renderer.get_camera_y();
 
@@ -70,7 +70,7 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 		float t = (now - e.spawn_time) / e.lifetime;
 
 		// Float upward by 0.75 tiles over the lifetime
-		float offset_px = t * static_cast<float>(ts) * 0.75f;
+		float offset_px = t * static_cast<float>(tileSize) * 0.75f;
 
 		// Full opacity for first 60%, then fade to zero
 		float alpha_f = (t < 0.6f)
@@ -78,8 +78,8 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 			: 1.0f - ((t - 0.6f) / 0.4f);
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
-		int screen_x = e.world_x * ts - cam_x;
-		int screen_y = e.world_y * ts - cam_y - static_cast<int>(offset_px);
+		int screen_x = e.world_x * tileSize - cam_x;
+		int screen_y = e.world_y * tileSize - cam_y - static_cast<int>(offset_px);
 
 		Color col{ e.r, e.g, e.b, alpha };
 		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, e.text, col);

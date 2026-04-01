@@ -89,33 +89,33 @@ void Gui::gui_render(const GameContext& ctx)
 	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
-	const auto& tc = *ctx.tile_config;
-	ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY }, tc.get("GUI_FRAME_TL"));
+	const auto& tileConfig = *ctx.tile_config;
+	ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY }, tileConfig.get("GUI_FRAME_TL"));
 	for (int col = 1; col < vcols - 1; ++col)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ col * tileSize, baseY }, tc.get("GUI_FRAME_T"));
+		ctx.renderer->draw_tile_screen(Vector2D{ col * tileSize, baseY }, tileConfig.get("GUI_FRAME_T"));
 	}
-	ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY }, tc.get("GUI_FRAME_TR"));
+	ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY }, tileConfig.get("GUI_FRAME_TR"));
 
 	// ---- Left and right outer edges ---------------------------------------
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY + row * tileSize }, tc.get("GUI_FRAME_L"));
-		ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY + row * tileSize }, tc.get("GUI_FRAME_R"));
+		ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
 	}
 
 	// ---- Divider 1: bar panel | stat panel --------------------------------
-	ctx.renderer->draw_tile_screen(Vector2D{ div1 * tileSize, baseY }, tc.get("GUI_FRAME_T"));
+	ctx.renderer->draw_tile_screen(Vector2D{ div1 * tileSize, baseY }, tileConfig.get("GUI_FRAME_T"));
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ div1 * tileSize, baseY + row * tileSize }, tc.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(Vector2D{ div1 * tileSize, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
 	}
 
 	// ---- Divider 2: stat panel | log panel --------------------------------
-	ctx.renderer->draw_tile_screen(Vector2D{ div2 * tileSize, baseY }, tc.get("GUI_FRAME_T"));
+	ctx.renderer->draw_tile_screen(Vector2D{ div2 * tileSize, baseY }, tileConfig.get("GUI_FRAME_T"));
 	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
 	{
-		ctx.renderer->draw_tile_screen(Vector2D{ div2 * tileSize, baseY + row * tileSize }, tc.get("GUI_FRAME_L"));
+		ctx.renderer->draw_tile_screen(Vector2D{ div2 * tileSize, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
 	}
 
 	// ---- Panel content ----------------------------------------------------
@@ -317,11 +317,11 @@ void Gui::gui_print_log(const GameContext& ctx)
 		return;
 	}
 
-	const int ts = ctx.renderer->get_tile_size();
+	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
-	const int logX = (hud_div2(vcols) + 1) * ts;
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int logX = (hud_div2(vcols) + 1) * tileSize;
 
 	const int messagesToShow = std::min(
 		LOG_MAX_MESSAGES,
@@ -334,7 +334,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 				ctx.message_system->get_stored_message_count() - 1 - i);
 
 		int x = logX;
-		const int y = baseY + (1 + i) * ts;
+		const int y = baseY + (1 + i) * tileSize;
 		int curX = 0;
 
 		for (const auto& part : parts)
@@ -355,15 +355,15 @@ void Gui::render_player_status(const GameContext& ctx)
 		return;
 	}
 
-	const int ts = ctx.renderer->get_tile_size();
+	const int tileSize = ctx.renderer->get_tile_size();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * ts;
+	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	if (ctx.player->has_state(ActorState::IS_CONFUSED))
 	{
 		ctx.renderer->draw_text(
-			Vector2D{ 2 * ts, baseY + 3 * ts + fontOff },
+			Vector2D{ 2 * tileSize, baseY + 3 * tileSize + fontOff },
 			"CONFUSED",
 			RED_BLACK_PAIR);
 	}

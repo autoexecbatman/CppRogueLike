@@ -40,7 +40,7 @@ private:
 
 	void draw_header(const Renderer& renderer);
 	void draw_list(const Renderer& renderer, int list_x, int list_y, int list_w, int list_h);
-	void draw_browser(const Renderer& renderer, int ox, int oy, int bw, int bh);
+	void draw_browser(const Renderer& renderer, int panelX, int panelY, int bw, int bh);
 	void draw_hint_bar(const Renderer& renderer) const;
 	void handle_keyboard();
 

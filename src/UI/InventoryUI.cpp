@@ -36,18 +36,20 @@ int InventoryUI::screen_rows(GameContext& ctx) const
 void InventoryUI::draw_frame(GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
-	int ts = ctx.renderer->get_tile_size();
+	int tileSize = ctx.renderer->get_tile_size();
 	int vcols = screen_cols(ctx);
 	int vrows = screen_rows(ctx);
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 
 	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tile_config);
 
 	std::string_view title = "INVENTORY";
 	int title_w = ctx.renderer->measure_text(title);
-	int title_x = (vcols * ts - title_w) / 2;
+	int title_x = (vcols * tileSize - title_w) / 2;
 	ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, YELLOW_BLACK_PAIR);
 }
 
@@ -55,14 +57,16 @@ void InventoryUI::draw_frame(GameContext& ctx)
 void InventoryUI::draw_highlight_row(int px, int y_tile, GameContext& ctx)
 {
 	if (!ctx.renderer)
+	{
 		return;
+	}
 
-	int ts = ctx.renderer->get_tile_size();
-	int bar_x = 1 * ts;
-	int bar_w = (screen_cols(ctx) - 2) * ts;
+	int tileSize = ctx.renderer->get_tile_size();
+	int bar_x = 1 * tileSize;
+	int bar_w = (screen_cols(ctx) - 2) * tileSize;
 
 	ColorPair pair = ctx.renderer->get_color_pair(BLACK_WHITE_PAIR);
-	DrawRectangle(bar_x, y_tile * ts, bar_w, ts, pair.bg);
+	DrawRectangle(bar_x, y_tile * tileSize, bar_w, tileSize, pair.bg);
 }
 
 InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx)
@@ -287,10 +291,10 @@ ItemCategory InventoryUI::get_effective_category(const Item& item) const
 
 void InventoryUI::render_tab_bar(GameContext& ctx)
 {
-	int ts = ctx.renderer->get_tile_size();
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
-	int tab_y = 1 * ts; // row 1 (inside frame border)
-	int px = 2 * ts; // start 2 tiles from left
+	int tileSize = ctx.renderer->get_tile_size();
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
+	int tab_y = 1 * tileSize; // row 1 (inside frame border)
+	int px = 2 * tileSize; // start 2 tiles from left
 
 	struct TabLabel
 	{
@@ -312,23 +316,23 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		if (tab.screen == activeScreen)
 		{
 			ColorPair pair = ctx.renderer->get_color_pair(BLACK_WHITE_PAIR);
-			DrawRectangle(px - 4, tab_y, textW + 8, ts, pair.bg);
+			DrawRectangle(px - 4, tab_y, textW + 8, tileSize, pair.bg);
 		}
 
 		ctx.renderer->draw_text(Vector2D{ px, tab_y + font_off }, tab.text, colorPair);
-		px += textW + ts; // one-tile gap between tabs
+		px += textW + tileSize; // one-tile gap between tabs
 	}
 
 	std::string_view hint = "[Tab] Switch";
 	int hint_w = ctx.renderer->measure_text(hint);
-	int hint_x = screen_cols(ctx) * ts - hint_w - ts;
+	int hint_x = screen_cols(ctx) * tileSize - hint_w - tileSize;
 	ctx.renderer->draw_text(Vector2D{ hint_x, tab_y + font_off }, hint, CYAN_BLACK_PAIR);
 }
 
 void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
 {
-	int ts = ctx.renderer->get_tile_size();
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int tileSize = ctx.renderer->get_tile_size();
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int startY = 2 + TAB_BAR_HEIGHT; // +1 shift for top frame border
 
 	for (int i = 0; i < SLOT_COUNT; ++i)
@@ -375,21 +379,21 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			line = slotLabel + "(empty)";
 		}
 
-		ctx.renderer->draw_text(Vector2D{ 3 * ts, y * ts + font_off }, line, rowColor);
+		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, y * tileSize + font_off }, line, rowColor);
 	}
 
 	if (filterMode)
 	{
 		int filterY = startY + SLOT_COUNT + 1;
 		std::string filterText = std::format("FILTER: {}", SLOT_TABLE[equipmentCursor].label);
-		ctx.renderer->draw_text(Vector2D{ 3 * ts, filterY * ts + font_off }, filterText, YELLOW_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, filterY * tileSize + font_off }, filterText, YELLOW_BLACK_PAIR);
 	}
 }
 
 void InventoryUI::render_item_list_screen(GameContext& ctx)
 {
-	int ts = ctx.renderer->get_tile_size();
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int tileSize = ctx.renderer->get_tile_size();
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int startY = 2 + TAB_BAR_HEIGHT; // +1 shift for top frame border
 	int contentHeight = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 3 - TAB_BAR_HEIGHT;
 
@@ -404,7 +408,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 		{
 			msg = "No items fit this slot.";
 		}
-		ctx.renderer->draw_text(Vector2D{ 3 * ts, (startY + 1) * ts + font_off }, msg, WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, (startY + 1) * tileSize + font_off }, msg, WHITE_BLACK_PAIR);
 		return;
 	}
 
@@ -424,7 +428,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 		if (entry.kind == BackpackEntry::Kind::CATEGORY_HEADER)
 		{
 			int headerColor = isCursorRow ? BLACK_WHITE_PAIR : YELLOW_BLACK_PAIR;
-			ctx.renderer->draw_text(Vector2D{ 3 * ts, y * ts + font_off }, entry.header_text, headerColor);
+			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, y * tileSize + font_off }, entry.header_text, headerColor);
 		}
 		else if (entry.item)
 		{
@@ -451,28 +455,28 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 			}
 
 			int itemColor = isCursorRow ? BLACK_WHITE_PAIR : entry.item->actorData.color;
-			ctx.renderer->draw_text(Vector2D{ 3 * ts, y * ts + font_off }, line, itemColor);
+			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, y * tileSize + font_off }, line, itemColor);
 		}
 
 		y++;
 	}
 
 	int totalEntries = static_cast<int>(listEntries.size());
-	int arrowX = screen_cols(ctx) * ts - 4 * ts;
+	int arrowX = screen_cols(ctx) * tileSize - 4 * tileSize;
 	if (scrollOffset > 0)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, startY * ts + font_off }, "^^^", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ arrowX, startY * tileSize + font_off }, "^^^", CYAN_BLACK_PAIR);
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, (startY + contentHeight - 1) * ts + font_off }, "vvv", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ arrowX, (startY + contentHeight - 1) * tileSize + font_off }, "vvv", CYAN_BLACK_PAIR);
 	}
 }
 
 void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 {
-	int ts = ctx.renderer->get_tile_size();
-	int font_off = (ts - ctx.renderer->get_font_size()) / 2;
+	int tileSize = ctx.renderer->get_tile_size();
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int detailY = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 1; // -1 for bottom frame border
 
 	Item* selectedItem = get_selected_item();
@@ -507,7 +511,7 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 			nameLine += "  " + valueStr;
 		}
 
-		ctx.renderer->draw_text(Vector2D{ 2 * ts, (detailY + 1) * ts + font_off }, nameLine, selectedItem->actorData.color);
+		ctx.renderer->draw_text(Vector2D{ 2 * tileSize, (detailY + 1) * tileSize + font_off }, nameLine, selectedItem->actorData.color);
 
 		std::string enhStr = format_enhancement_info(*selectedItem);
 		std::string statStr = format_stat_bonus_info(*selectedItem);
@@ -526,19 +530,19 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		}
 		if (!line2.empty())
 		{
-			ctx.renderer->draw_text(Vector2D{ 2 * ts, (detailY + 2) * ts + font_off }, line2, WHITE_BLACK_PAIR);
+			ctx.renderer->draw_text(Vector2D{ 2 * tileSize, (detailY + 2) * tileSize + font_off }, line2, WHITE_BLACK_PAIR);
 		}
 	}
 	else if (activeScreen == InventoryScreen::EQUIPMENT)
 	{
-		ctx.renderer->draw_text(Vector2D{ 2 * ts, (detailY + 1) * ts + font_off }, "Press [Enter] to browse items for this slot.", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 2 * tileSize, (detailY + 1) * tileSize + font_off }, "Press [Enter] to browse items for this slot.", WHITE_BLACK_PAIR);
 	}
 
 	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
 		? "[Enter] Unequip/Browse  [d] Drop  [Tab] Switch  [ESC] Close"
 		: "[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Tab] Switch  [ESC] Close";
 
-	ctx.renderer->draw_text(Vector2D{ 2 * ts, (detailY + DETAIL_BAR_HEIGHT - 1) * ts + font_off }, keybinds, CYAN_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ 2 * tileSize, (detailY + DETAIL_BAR_HEIGHT - 1) * tileSize + font_off }, keybinds, CYAN_BLACK_PAIR);
 }
 
 // ============================================================
