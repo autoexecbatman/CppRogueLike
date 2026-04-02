@@ -283,6 +283,22 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 	}
 }
 
+Decoration* Map::find_decoration_at(Vector2D pos, GameContext& ctx) const noexcept
+{
+	if (!ctx.decorations)
+	{
+		return nullptr;
+	}
+	for (auto& d : *ctx.decorations)
+	{
+		if (d && !d->is_broken && d->position == pos)
+		{
+			return d.get();
+		}
+	}
+	return nullptr;
+}
+
 bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx)
 {
 	// if there is an actor at the position
@@ -290,6 +306,14 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 	if (actor)
 	{
 		return true;
+	}
+
+	if (auto* decor = find_decoration_at(pos, ctx))
+	{
+		if (decor->blocks_movement)
+		{
+			return true;
+		}
 	}
 
 	switch (tileType)
@@ -665,8 +689,11 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 		return;
 
 	if (first)
+	{
 		spawn_player(room, ctx);
+	}
 
+	spawn_barrels(room, ctx);
 	spawn_items(room, ctx);
 }
 
@@ -843,6 +870,40 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 	}
 }
 
+void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
+{
+	if (!ctx.decorations || !ctx.tile_config)
+		return;
+
+	constexpr int MAX_ROOM_BARRELS = 2;
+	const int count = mapRng_.roll(0, MAX_ROOM_BARRELS);
+	const TileRef barrel_tile = ctx.tile_config->get("TILE_BARREL");
+
+	for (int i = 0; i < count; ++i)
+	{
+		Vector2D pos{ mapRng_.roll(room.col, room.col_end()), mapRng_.roll(room.row, room.row_end()) };
+		constexpr int MAX_TRIES = 20;
+		int tries = 0;
+		while (tries < MAX_TRIES && (!can_walk(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
+		{
+			pos.x = mapRng_.roll(room.col, room.col_end());
+			pos.y = mapRng_.roll(room.row, room.row_end());
+			++tries;
+		}
+		if (tries >= MAX_TRIES)
+			continue;
+
+		auto barrel = std::make_unique<Decoration>();
+		barrel->position = pos;
+		barrel->tile = barrel_tile;
+		barrel->name = "barrel";
+		barrel->hp = 2;
+		barrel->blocks_movement = true;
+		barrel->loot_table_key = "gold";
+		ctx.decorations->push_back(std::move(barrel));
+	}
+}
+
 void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
 	if (!ctx.player || !ctx.dice)
@@ -980,6 +1041,10 @@ void Map::regenerate(GameContext& ctx)
 	if (ctx.objects)
 	{
 		ctx.objects->clear();
+	}
+	if (ctx.decorations)
+	{
+		ctx.decorations->clear();
 	}
 
 	// generate a new map at current window dimensions (keep old size if curses not active)

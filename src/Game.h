@@ -14,6 +14,7 @@
 #include "ActorTypes/Player.h"
 #include "Core/GameContext.h"
 #include "Gui/Gui.h"
+#include "Map/Decoration.h"
 #include "Map/DungeonRoom.h"
 #include "Map/Map.h"
 #include "Map/Minimap.h"
@@ -103,6 +104,7 @@ struct Game
 	std::vector<DungeonRoom> rooms{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::vector<std::unique_ptr<Object>> objects{};
+	std::vector<std::unique_ptr<Decoration>> decorations{};
 	InventoryData inventory_data{ 1000 };
 
 	// Menu system

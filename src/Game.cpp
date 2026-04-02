@@ -50,6 +50,7 @@
 		// Game world data
 		.stairs = stairs.get(),
 		.objects = &objects,
+		.decorations = &decorations,
 		.inventory_data = &inventory_data,
 		.creatures = &creatures,
 		.rooms = &rooms,

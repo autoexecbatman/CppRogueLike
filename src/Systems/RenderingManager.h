@@ -10,6 +10,7 @@ class Map;
 class Player;
 class Stairs;
 class Object;
+struct Decoration;
 struct InventoryData;
 struct GameContext;
 class Gui;
@@ -33,6 +34,7 @@ public:
 private:
 	// Helper methods
 	void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
+	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
 	void apply_lighting(const Player& player, const GameContext& ctx) const;
 	void render_world(
 		const Map& map,

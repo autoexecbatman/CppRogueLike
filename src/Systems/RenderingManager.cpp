@@ -7,6 +7,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
+#include "../Map/Decoration.h"
 #include "../Map/Map.h"
 #include "../Map/Minimap.h"
 #include "../Renderer/Renderer.h"
@@ -36,6 +37,11 @@ void RenderingManager::render_world(
 
 	render_creatures(creatures, ctx);
 	player.render(ctx);
+
+	if (ctx.decorations)
+	{
+		render_decorations(*ctx.decorations, ctx);
+	}
 
 	apply_lighting(player, ctx);
 
@@ -125,5 +131,27 @@ void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> o
 		{
 			obj->render(ctx);
 		}
+	}
+}
+
+void RenderingManager::render_decorations(
+	std::span<const std::unique_ptr<Decoration>> decorations,
+	const GameContext& ctx) const
+{
+	if (!ctx.renderer || !ctx.map)
+	{
+		return;
+	}
+	for (const auto& decor : decorations)
+	{
+		if (!decor || decor->is_broken)
+		{
+			continue;
+		}
+		if (!ctx.map->is_in_fov(decor->position))
+		{
+			continue;
+		}
+		ctx.renderer->draw_tile_static(decor->position, decor->tile, Color{ 255, 255, 255, 255 });
 	}
 }

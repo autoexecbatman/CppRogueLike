@@ -212,6 +212,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.h
     ${PROJECT_SOURCE_DIR}/Map/FovMap.cpp
     ${PROJECT_SOURCE_DIR}/Map/FovMap.h
+    ${PROJECT_SOURCE_DIR}/Map/Minimap.cpp
+    ${PROJECT_SOURCE_DIR}/Map/Minimap.h
+    ${PROJECT_SOURCE_DIR}/Map/Decoration.h
 
     # Items - Updated paths
     ${PROJECT_SOURCE_DIR}/Items/ItemClassification.cpp

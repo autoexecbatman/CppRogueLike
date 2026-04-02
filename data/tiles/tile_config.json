@@ -11,6 +11,8 @@
         "TILE_CORPSE":       { "sheet": 35, "col": 0,  "row": 0  },
         "TILE_GOLD":         { "sheet": 36, "col": 0,  "row": 0  },
         "TILE_WEB":          { "sheet": 40, "col": 0,  "row": 0  },
+        "TILE_BARREL":       { "sheet": 55, "col": 1,  "row": 1  },
+        "TILE_BARREL_OPEN":  { "sheet": 55, "col": 1,  "row": 2  },
         "TILE_AMULET_YENDOR":{ "sheet": 33, "col": 2,  "row": 0  },
         "TILE_INVISIBLE":    { "sheet": 40, "col": 1,  "row": 0  },
         "TILE_TORCH_1":      { "sheet": 38, "col": 0,  "row": 8  },

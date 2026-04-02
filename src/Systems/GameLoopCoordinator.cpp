@@ -512,9 +512,16 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (ctx.game_state->get_game_status() == GameStatus::NEW_TURN)
 	{
-		std::erase_if(*ctx.objects, 
+		std::erase_if(*ctx.objects,
 			[](const auto& obj)
 			{ return !obj; });
+
+		if (ctx.decorations)
+		{
+			std::erase_if(*ctx.decorations,
+				[](const auto& d)
+				{ return !d || d->is_broken; });
+		}
 
 		ctx.creature_manager->update_creatures(*ctx.creatures, ctx);
 		ctx.creature_manager->spawn_creatures(ctx);

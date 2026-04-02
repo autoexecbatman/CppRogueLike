@@ -102,6 +102,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Map/Map.cpp
     ${PARENT_SOURCE_DIR}/Map/DungeonGenerator.cpp
     ${PARENT_SOURCE_DIR}/Map/FovMap.cpp
+    ${PARENT_SOURCE_DIR}/Map/Minimap.cpp
 
     # Items
     ${PARENT_SOURCE_DIR}/Items/ItemClassification.cpp

@@ -11,6 +11,7 @@
 struct Game;
 class Map;
 class Minimap;
+struct Decoration;
 class TileConfig;
 class Gui;
 class MessageSystem;
@@ -157,6 +158,7 @@ struct GameContext
 	// Game world data
 	Stairs* stairs{ nullptr };
 	std::vector<std::unique_ptr<Object>>* objects{ nullptr };
+	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
 	struct InventoryData* inventory_data{ nullptr };
 	std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
 	std::vector<DungeonRoom>* rooms{ nullptr };

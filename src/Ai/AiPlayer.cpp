@@ -20,6 +20,7 @@
 #include "../Factories/ItemCreator.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
+#include "../Map/Decoration.h"
 #include "../Map/Map.h"
 #include "../Menu/Menu.h"
 #include "../Objects/Web.h"
@@ -467,6 +468,35 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 			}
 		}
 	}
+	if (ctx.map && ctx.decorations)
+	{
+		auto* decor = ctx.map->find_decoration_at(target, ctx);
+		if (decor && !decor->is_broken)
+		{
+			--decor->hp;
+			if (decor->hp <= 0)
+			{
+				decor->is_broken = true;
+				ctx.message_system->message(
+					WHITE_BLACK_PAIR,
+					std::format("The {} shatters!", decor->name),
+					true);
+				if (!decor->loot_table_key.empty())
+				{
+					ctx.map->add_item(decor->position, ctx);
+				}
+			}
+			else
+			{
+				ctx.message_system->message(
+					WHITE_BLACK_PAIR,
+					std::format("You hit the {}.", decor->name),
+					true);
+			}
+			return false;
+		}
+	}
+
 	return true;
 }
 

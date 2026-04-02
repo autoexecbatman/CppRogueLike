@@ -9,6 +9,7 @@
 #include "../Factories/MonsterFactory.h"
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
+#include "Decoration.h"
 #include "DungeonRoom.h"
 #include "FovMap.h"
 
@@ -92,6 +93,7 @@ private:
 	void spawn_water(const DungeonRoom& room, GameContext& ctx);
 	bool would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const;
 	void spawn_items(const DungeonRoom& room, GameContext& ctx);
+	void spawn_barrels(const DungeonRoom& room, GameContext& ctx);
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
 	void generate_rooms(bool withActors, GameContext& ctx);
 	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
@@ -149,6 +151,7 @@ public:
 	void create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx);
 	bool maybe_create_treasure_room(int dungeonLevel, GameContext& ctx);
 	void display_item_distribution(GameContext& ctx) const;
+	Decoration* find_decoration_at(Vector2D pos, GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
