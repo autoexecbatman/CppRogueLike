@@ -522,9 +522,29 @@ void Map::render(const GameContext& ctx) const
 				{
 					continue; // Interior wall -- no walkable neighbor, render as void
 				}
+				// Two border walls connect only if they share a common walkable 8-neighbor.
+				// A void wall sitting between a room wall and a corridor shares no walkable
+				// neighbor with the room wall, so it cannot bleed into the room wall mask.
+				// Corner walls (only diagonally adjacent to floor) still connect because
+				// their shared floor tile IS a common 8-neighbor of both wall tiles.
+				auto connected_wall = [&](Vector2D neighbor) -> bool
+				{
+					if (!is_border_wall(neighbor))
+						return false;
+					for (const auto& d : ALL_DIRS)
+					{
+						Vector2D shared = pos + d;
+						if (!is_walkable(shared))
+							continue;
+						Vector2D diff = shared - neighbor;
+						if (std::abs(diff.x) <= 1 && std::abs(diff.y) <= 1)
+							return true;
+					}
+					return false;
+				};
 				tile_ref = wall_autotile_resolve_mask(
 					ctx.tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"),
-					build_mask(pos, is_border_wall));
+					build_mask(pos, connected_wall));
 				break;
 			}
 			case TileType::FLOOR:
