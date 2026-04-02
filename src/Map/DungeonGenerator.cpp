@@ -18,6 +18,12 @@ static Vector2D v(int col, int row) noexcept
 	return Vector2D{ col, row };
 }
 
+// Cell dimensions: each grid cell is large enough to hold the largest room
+// plus a guaranteed corridor gap on every side so rooms never share a wall.
+// Defined here so both place_rooms and connect_all can reference them.
+static constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 3;
+static constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 4;
+
 // ------------------------------------------------------------------- rooms
 
 std::vector<DungeonRoom> DungeonGenerator::place_rooms(
@@ -25,10 +31,6 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	int map_height,
 	RandomDice& rng) const
 {
-	// Each cell is wide/tall enough to hold the largest room plus a corridor
-	// gap on every side so rooms never share a wall tile.
-	constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 3;
-	constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 4;
 	constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
 
 	const int grid_cols = map_width / CELL_W;
@@ -88,60 +90,19 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 // --------------------------------------------------------------- corridors
 
 void DungeonGenerator::connect_pair(
-	const DungeonRoom& a,
-	const DungeonRoom& b,
-	Map& map) const
+	std::vector<DungeonRoom>& rooms,
+	int a_index,
+	int b_index) const
 {
-	const bool a_below = a.top_wall() > b.bottom_wall();
-	const bool a_right = a.left_wall() > b.right_wall();
-	const bool a_above = a.bottom_wall() < b.top_wall();
-	const bool a_left = a.right_wall() < b.left_wall();
-
-	if (a_below)
-	{
-		// a is below b -- corridor rises from a, crosses horizontally, drops to b
-		const int mid = (b.bottom_wall() + a.top_wall()) / 2;
-		map.dig_corridor(v(a.center_col(), a.top_wall()), v(a.center_col(), mid));
-		map.dig_corridor(v(a.center_col(), mid), v(b.center_col(), mid));
-		map.dig_corridor(v(b.center_col(), mid), v(b.center_col(), b.bottom_wall()));
-	}
-	else if (a_right)
-	{
-		// a is to the right of b
-		const int mid = (b.right_wall() + a.left_wall()) / 2;
-		map.dig_corridor(v(a.left_wall(), a.center_row()), v(mid, a.center_row()));
-		map.dig_corridor(v(mid, a.center_row()), v(mid, b.center_row()));
-		map.dig_corridor(v(mid, b.center_row()), v(b.right_wall(), b.center_row()));
-	}
-	else if (a_above)
-	{
-		// a is above b
-		const int mid = (a.bottom_wall() + b.top_wall()) / 2;
-		map.dig_corridor(v(a.center_col(), a.bottom_wall()), v(a.center_col(), mid));
-		map.dig_corridor(v(a.center_col(), mid), v(b.center_col(), mid));
-		map.dig_corridor(v(b.center_col(), mid), v(b.center_col(), b.top_wall()));
-	}
-	else if (a_left)
-	{
-		// a is to the left of b
-		const int mid = (a.right_wall() + b.left_wall()) / 2;
-		map.dig_corridor(v(a.right_wall(), a.center_row()), v(mid, a.center_row()));
-		map.dig_corridor(v(mid, a.center_row()), v(mid, b.center_row()));
-		map.dig_corridor(v(mid, b.center_row()), v(b.left_wall(), b.center_row()));
-	}
-	else
-	{
-		// Rooms are adjacent or overlapping -- direct L-shape between centres.
-		map.dig_corridor(
-			v(a.center_col(), a.center_row()),
-			v(b.center_col(), b.center_row()));
-	}
+	// Record bidirectional adjacency in the graph
+	// (Actual corridor tile placement happens later in Map::place_from_graph)
+	rooms[a_index].adjacent_room_indices.push_back(b_index);
+	rooms[b_index].adjacent_room_indices.push_back(a_index);
 }
 
 void DungeonGenerator::connect_all(
-	const std::vector<DungeonRoom>& rooms,
-	RandomDice& rng,
-	Map& map) const
+	std::vector<DungeonRoom>& rooms,
+	RandomDice& rng) const
 {
 	if (rooms.size() < 2)
 	{
@@ -192,13 +153,17 @@ void DungeonGenerator::connect_all(
 			break;
 		}
 
-		connect_pair(rooms[best_a], rooms[best_b], map);
+		connect_pair(rooms, best_a, best_b);
 		in_tree[best_b] = true;
 		++in_count;
 	}
 
 	// ---- Extra short-range corridors (~20 %) to create loop paths ----
-	constexpr int LOOP_RADIUS = 35 * 35; // max squared distance for a loop edge
+	// Limit to adjacent cells only (diagonal included). Rooms 2+ cells apart
+	// produce corridors whose mid-turn segment can pass through an intermediate
+	// room.  CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
+	// centres -- the tightest upper bound that still covers all adjacent pairs.
+	constexpr int LOOP_RADIUS = CELL_W * CELL_W + CELL_H * CELL_H;
 	const int extra_target = std::max(1, n / 5);
 	int added = 0;
 	const int max_attempts = extra_target * 6;
@@ -220,7 +185,7 @@ void DungeonGenerator::connect_all(
 			continue;
 		}
 
-		connect_pair(rooms[a], rooms[b], map);
+		connect_pair(rooms, a, b);
 		++added;
 	}
 }
@@ -247,12 +212,11 @@ void DungeonGenerator::generate(
 		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
-	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
-	{
-		map.create_room(rooms[i], i == 0, withActors, ctx);
-	}
+	// ---- Build pure graph (rooms + edges) ----
+	connect_all(rooms, rng);
 
-	connect_all(rooms, rng, map);
+	// ---- Render graph to tiles and spawn content ----
+	map.place_from_graph(rooms, withActors, ctx);
 
 	if (ctx.rooms)
 	{

@@ -153,6 +153,10 @@ public:
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
 	void set_tile(Vector2D pos, TileType newType, double cost);
+	void place_from_graph(
+		const std::vector<DungeonRoom>& rooms,
+		bool withActors,
+		GameContext& ctx);
 
 	std::vector<Tile> tiles;
 

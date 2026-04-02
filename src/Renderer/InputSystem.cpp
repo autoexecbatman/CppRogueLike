@@ -117,7 +117,7 @@ void InputSystem::poll()
 		register_key(KEY_ESCAPE, GameKey::ESCAPE, 0, false);
 		return;
 	case KEY_TAB:
-		register_key(KEY_TAB, GameKey::TAB, 0, false);
+		register_key(KEY_TAB, GameKey::MINIMAP_TOGGLE, 0, false);
 		return;
 	case KEY_SPACE:
 		register_key(KEY_SPACE, GameKey::SPACE, ' ', false);

@@ -36,12 +36,11 @@ private:
 		RandomDice& rng) const;
 
 	void connect_all(
-		const std::vector<DungeonRoom>& rooms,
-		RandomDice& rng,
-		Map& map) const;
+		std::vector<DungeonRoom>& rooms,
+		RandomDice& rng) const;
 
 	void connect_pair(
-		const DungeonRoom& a,
-		const DungeonRoom& b,
-		Map& map) const;
+		std::vector<DungeonRoom>& rooms,
+		int a_index,
+		int b_index) const;
 };

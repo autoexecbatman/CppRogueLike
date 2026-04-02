@@ -16,6 +16,7 @@
 #include "Gui/Gui.h"
 #include "Map/DungeonRoom.h"
 #include "Map/Map.h"
+#include "Map/Minimap.h"
 #include "Menu/BaseMenu.h"
 #include "Random/RandomDice.h"
 #include "Renderer/InputSystem.h"
@@ -57,6 +58,9 @@ struct Game
 
 	// Tile configuration (must be loaded before init_world)
 	TileConfig tile_config{};
+
+	// Minimap overlay
+	Minimap minimap{};
 
 	// Rendering (raylib)
 	Renderer renderer{};

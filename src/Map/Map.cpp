@@ -5,6 +5,7 @@
 #include <format>
 #include <limits>
 #include <memory>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1477,6 +1478,104 @@ void Map::post_process_doors()
 void Map::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 {
 	itemFactory->spawn_all_enhanced_items_debug(position, ctx);
+}
+
+// ---- place_from_graph: render dungeon graph (rooms + edges) to tiles ----
+// Idempotent: can regenerate from the same room graph without data loss.
+// Separates graph construction from tile rendering.
+
+void Map::place_from_graph(
+	const std::vector<DungeonRoom>& rooms,
+	bool withActors,
+	GameContext& ctx)
+{
+	if (ctx.message_system)
+	{
+		ctx.message_system->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
+	}
+
+	// Step 1: Create all rooms (dig them, spawn water/items/player)
+	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
+	{
+		create_room(rooms[i], i == 0, withActors, ctx);
+	}
+
+	if (ctx.message_system)
+	{
+		ctx.message_system->log("place_from_graph: Rooms created, now connecting with corridors");
+	}
+
+	// Step 2: Connect adjacent rooms with corridors (from graph edges)
+	std::set<std::pair<int, int>> dug_edges;
+
+	for (int a_idx = 0; a_idx < static_cast<int>(rooms.size()); ++a_idx)
+	{
+		const DungeonRoom& a = rooms[a_idx];
+
+		for (int b_idx : a.adjacent_room_indices)
+		{
+			// Avoid digging the same corridor twice
+			std::pair<int, int> edge_forward(std::min(a_idx, b_idx), std::max(a_idx, b_idx));
+			if (dug_edges.count(edge_forward))
+			{
+				continue;
+			}
+			dug_edges.insert(edge_forward);
+
+			const DungeonRoom& b = rooms[b_idx];
+
+			// Determine relative positions and dig L-shape corridor
+			const bool a_below = a.top_wall() > b.bottom_wall();
+			const bool a_right = a.left_wall() > b.right_wall();
+			const bool a_above = a.bottom_wall() < b.top_wall();
+			const bool a_left = a.right_wall() < b.left_wall();
+
+			if (a_below)
+			{
+				// a is below b -- corridor rises from a, crosses horizontally, drops to b
+				const int mid = (b.bottom_wall() + a.top_wall()) / 2;
+				dig_corridor(Vector2D{ a.center_col(), a.top_wall() }, Vector2D{ a.center_col(), mid });
+				dig_corridor(Vector2D{ a.center_col(), mid }, Vector2D{ b.center_col(), mid });
+				dig_corridor(Vector2D{ b.center_col(), mid }, Vector2D{ b.center_col(), b.bottom_wall() });
+			}
+			else if (a_right)
+			{
+				// a is to the right of b
+				const int mid = (b.right_wall() + a.left_wall()) / 2;
+				dig_corridor(Vector2D{ a.left_wall(), a.center_row() }, Vector2D{ mid, a.center_row() });
+				dig_corridor(Vector2D{ mid, a.center_row() }, Vector2D{ mid, b.center_row() });
+				dig_corridor(Vector2D{ mid, b.center_row() }, Vector2D{ b.right_wall(), b.center_row() });
+			}
+			else if (a_above)
+			{
+				// a is above b
+				const int mid = (a.bottom_wall() + b.top_wall()) / 2;
+				dig_corridor(Vector2D{ a.center_col(), a.bottom_wall() }, Vector2D{ a.center_col(), mid });
+				dig_corridor(Vector2D{ a.center_col(), mid }, Vector2D{ b.center_col(), mid });
+				dig_corridor(Vector2D{ b.center_col(), mid }, Vector2D{ b.center_col(), b.top_wall() });
+			}
+			else if (a_left)
+			{
+				// a is to the left of b
+				const int mid = (a.right_wall() + b.left_wall()) / 2;
+				dig_corridor(Vector2D{ a.right_wall(), a.center_row() }, Vector2D{ mid, a.center_row() });
+				dig_corridor(Vector2D{ mid, a.center_row() }, Vector2D{ mid, b.center_row() });
+				dig_corridor(Vector2D{ mid, b.center_row() }, Vector2D{ b.left_wall(), b.center_row() });
+			}
+			else
+			{
+				// Rooms are adjacent or overlapping -- direct L-shape between centres.
+				dig_corridor(
+					Vector2D{ a.center_col(), a.center_row() },
+					Vector2D{ b.center_col(), b.center_row() });
+			}
+		}
+	}
+
+	if (ctx.message_system)
+	{
+		ctx.message_system->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
+	}
 }
 
 // end of file: Map.cpp

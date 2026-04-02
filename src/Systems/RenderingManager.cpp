@@ -8,6 +8,7 @@
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
+#include "../Map/Minimap.h"
 #include "../Renderer/Renderer.h"
 #include "RenderingManager.h"
 
@@ -37,6 +38,11 @@ void RenderingManager::render_world(
 	player.render(ctx);
 
 	apply_lighting(player, ctx);
+
+	if (ctx.minimap)
+	{
+		ctx.minimap->render(ctx);
+	}
 }
 
 void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature>> creatures, const GameContext& ctx) const

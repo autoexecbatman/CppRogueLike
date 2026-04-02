@@ -10,6 +10,7 @@
 // Forward declarations
 struct Game;
 class Map;
+class Minimap;
 class TileConfig;
 class Gui;
 class MessageSystem;
@@ -141,6 +142,7 @@ struct GameContext
 	FloatingTextSystem* floating_text{ nullptr };
 	AnimationSystem* anim_system{ nullptr };
 	ContentRegistry* content_registry{ nullptr };
+	Minimap* minimap{ nullptr };
 #ifndef EMSCRIPTEN
 	ContentEditor* content_editor{ nullptr };
 	DecorEditor* decor_editor{ nullptr };

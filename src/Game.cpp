@@ -35,6 +35,7 @@
 		.floating_text = &floating_text,
 		.anim_system = &anim_system,
 		.content_registry = &content_registry,
+		.minimap = &minimap,
 #ifndef EMSCRIPTEN
 		.content_editor = &content_editor,
 		.decor_editor = &decor_editor,

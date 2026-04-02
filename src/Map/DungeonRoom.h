@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 // file: DungeonRoom.h
 //
 // Single source of truth for a BSP-generated room's geometry.
@@ -13,6 +15,7 @@ struct DungeonRoom
 	int row; // topmost  floor row
 	int width; // floor column count
 	int height; // floor row    count
+	std::vector<int> adjacent_room_indices; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)
 	[[nodiscard]] int col_end() const { return col + width - 1; }

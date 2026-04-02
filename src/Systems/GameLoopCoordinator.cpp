@@ -14,6 +14,7 @@
 #include "../Core/Paths.h"
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
+#include "../Map/Minimap.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/GameStateManager.h"
@@ -98,6 +99,11 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 		auto handle_zoom = [&]() -> bool
 		{
 			GameKey key = ctx.input_system->get_key();
+			if (key == GameKey::MINIMAP_TOGGLE && ctx.minimap)
+			{
+				ctx.minimap->toggle();
+				return true;
+			}
 			if (key == GameKey::ZOOM_IN)
 			{
 				ctx.renderer->zoom_in();

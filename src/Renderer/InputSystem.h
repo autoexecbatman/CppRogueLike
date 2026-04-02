@@ -75,7 +75,10 @@ enum class GameKey
 	DECOR_BROWSER,
 
 	// Content editor (developer tool -- F3)
-	CONTENT_EDIT_TOGGLE
+	CONTENT_EDIT_TOGGLE,
+
+	// Minimap overlay
+	MINIMAP_TOGGLE
 };
 
 class InputSystem
