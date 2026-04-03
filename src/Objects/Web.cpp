@@ -2,9 +2,9 @@
 #include <variant>
 
 #include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Actor/Pickable.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Items/MagicalItemEffects.h"
@@ -25,7 +25,7 @@ Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
 bool Web::apply_effect(Creature& creature, GameContext& ctx)
 {
 	// Only players can get stuck (for simplicity)
-	if (&creature != ctx.player)
+	if (!creature.is_player())
 		return false;
 
 	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
@@ -46,7 +46,7 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 	}
 
 	// Calculate chance to get caught based on dexterity and web strength
-	int catchChance = 40 + (webStrength * 10) - ((ctx.player->get_dexterity() - 10) * 3);
+	int catchChance = 40 + (webStrength * 10) - ((creature.get_dexterity() - 10) * 3);
 	catchChance = std::min(90, std::max(10, catchChance)); // Cap between 10-90%
 
 	if (ctx.dice->d100() <= catchChance)
@@ -54,8 +54,8 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 		// Calculate number of turns stuck based on web strength
 		int stuckTurns = webStrength + ctx.dice->roll(1, 2);
 
-		// Apply the effect
-		ctx.player->get_stuck_in_web(stuckTurns, webStrength, this, ctx);
+		// Apply the effect through polymorphic interface
+		creature.apply_web_effect(stuckTurns, webStrength, this, ctx);
 
 		ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 

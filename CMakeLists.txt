@@ -92,6 +92,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Game.cpp
     ${PROJECT_SOURCE_DIR}/Game.h
     ${PROJECT_SOURCE_DIR}/Core/Paths.h
+    ${PROJECT_SOURCE_DIR}/Core/GameContext.h
 
     # Renderer (raylib)
     ${PROJECT_SOURCE_DIR}/Renderer/Renderer.cpp

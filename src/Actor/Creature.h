@@ -142,6 +142,12 @@ public:
 	virtual bool is_slot_occupied(EquipmentSlot slot) const noexcept { return false; }
 	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept { return nullptr; }
 
+	// Type query - allows polymorphic identification without RTTI or cross-module deps
+	virtual bool is_player() const noexcept { return false; }
+
+	// Web effect handler - Player overrides this, monsters ignore webs by default
+	virtual void apply_web_effect(int duration, int strength, class Web* web, GameContext& ctx) { /* do nothing */ }
+
 	TileRef get_display_tile() const noexcept override;
 	int get_display_color() const noexcept override;
 

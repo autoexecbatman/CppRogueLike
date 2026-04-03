@@ -84,7 +84,7 @@ public:
 
 	bool is_webbed() const noexcept { return webStuckTurns > 0; } // Check if player is stuck in a web
 	bool try_break_web(GameContext& ctx); // Attempt to break free from a web
-	void get_stuck_in_web(int duration, int strength, Web* web, GameContext& ctx); // Get stuck in a web
+	void apply_web_effect(int duration, int strength, Web* web, GameContext& ctx) override; // Get stuck in a web
 
 	// Equipment system methods
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
@@ -101,6 +101,8 @@ public:
 	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx) override;
 	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx) override;
 	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx) override;
+
+	bool is_player() const noexcept override { return true; }
 
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo

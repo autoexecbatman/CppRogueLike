@@ -372,7 +372,7 @@ bool Player::attempt_hide(GameContext& ctx)
 	return true;
 }
 
-void Player::get_stuck_in_web(int duration, int strength, Web* web, GameContext& ctx)
+void Player::apply_web_effect(int duration, int strength, Web* web, GameContext& ctx)
 {
 	webStuckTurns = duration;
 	webStrength = strength;

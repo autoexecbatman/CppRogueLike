@@ -12,11 +12,11 @@
 
 struct Decoration
 {
-    Vector2D position;
-    TileRef tile;
-    std::string name;
+	Vector2D position{};
+	TileRef tile{};
+	std::string name{};
     int hp{ 1 };
     bool blocks_movement{ true };
-    std::string loot_table_key; // "" = drops nothing on break
+	std::string loot_table_key{}; // "" = drops nothing on break
     bool is_broken{ false };
 };
