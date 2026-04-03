@@ -19,7 +19,7 @@ public:
 		bool AStar,
 		GameContext& ctx);
 	std::vector<Vector2D> reconstruct_path(
-		Vector2D start, Vector2D goal, std::vector<Vector2D> cameFrom);
+		Vector2D start, Vector2D goal, const std::vector<Vector2D>& cameFrom);
 	// Heuristic function for A* search
 	double heuristic(Vector2D a, Vector2D b)
 	{
@@ -29,6 +29,8 @@ public:
 private:
 	int width;
 	double infinity;
+	std::vector<Vector2D> cameFrom_;      // Persistent work vector (reused across calls)
+	std::vector<double> costSoFar_;       // Persistent work vector (reused across calls)
 };
 
 // Structure to represent a node in the priority queue

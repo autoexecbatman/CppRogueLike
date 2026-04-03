@@ -36,6 +36,8 @@
 		.anim_system = &anim_system,
 		.content_registry = &content_registry,
 		.minimap = &minimap,
+		.pathfinder = &pathfinder,
+
 #ifndef EMSCRIPTEN
 		.content_editor = &content_editor,
 		.decor_editor = &decor_editor,

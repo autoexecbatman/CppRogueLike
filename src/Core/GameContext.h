@@ -48,6 +48,7 @@ struct DungeonRoom;
 class Renderer;
 class InputSystem;
 class Player;
+class Dijkstra;
 
 enum class GameStatus
 {
@@ -144,6 +145,7 @@ struct GameContext
 	AnimationSystem* anim_system{ nullptr };
 	ContentRegistry* content_registry{ nullptr };
 	Minimap* minimap{ nullptr };
+	Dijkstra* pathfinder{ nullptr };  // Persistent pathfinding object (reused across turns)
 #ifndef EMSCRIPTEN
 	ContentEditor* content_editor{ nullptr };
 	DecorEditor* decor_editor{ nullptr };

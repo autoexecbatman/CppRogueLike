@@ -39,6 +39,7 @@
 #include "Systems/RenderingManager.h"
 #include "Systems/TargetingSystem.h"
 #include "Systems/TileConfig.h"
+#include "Utils/Dijkstra.h"
 #include "Utils/Vector2D.h"
 
 #ifndef EMSCRIPTEN
@@ -85,6 +86,7 @@ struct Game
 	FloatingTextSystem floating_text{};
 	AnimationSystem anim_system{};
 	ContentRegistry content_registry{};
+	Dijkstra pathfinder{ get_map_width(), get_map_height() };
 #ifndef EMSCRIPTEN
 	ContentEditor content_editor{};
 	DecorEditor decor_editor{};

@@ -10,7 +10,13 @@
 #include "Vector2D.h"
 
 Dijkstra::Dijkstra(int width, int height)
-	: width(width), infinity(std::numeric_limits<double>::infinity()) {}
+	: width(width), infinity(std::numeric_limits<double>::infinity())
+{
+	// Pre-allocate work vectors once; they'll be reused and cleared each search
+	const size_t gridSize = static_cast<size_t>(width) * height;
+	cameFrom_.resize(gridSize);
+	costSoFar_.resize(gridSize);
+}
 
 // set AStar true for A* search, false for Dijkstra's search
 // returns a vector of the path
@@ -21,15 +27,14 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 	bool AStar,
 	GameContext& ctx)
 {
-	std::vector<Vector2D> cameFrom;
-	std::vector<double> costSoFar;
-	// Determine the total number of tiles in the map
-	size_t gridSize = graph.get_map().size();
-	// Resize vectors to match grid size
+	// Reuse persistent work vectors; just reset them for this search
+	const size_t gridSize = graph.get_map().size();
+	
+	// Clear and re-initialize the work vectors (fast: just fills existing capacity)
 	// cameFrom[i] -> Stores which node led to this node
 	// costSoFar[i] -> Stores the lowest cost found to reach this node
-	cameFrom.resize(gridSize, Vector2D{ -1, -1 }); // Initialize with invalid positions
-	costSoFar.resize(gridSize, infinity); // Initialize all costs as infinite
+	std::fill(cameFrom_.begin(), cameFrom_.end(), Vector2D{ -1, -1 });
+	std::fill(costSoFar_.begin(), costSoFar_.end(), infinity);
 
 	// Priority queue for processing nodes, ordered by lowest cost (min-heap)
 	std::priority_queue<FrontierNode, std::vector<FrontierNode>, std::greater<FrontierNode>> frontier;
@@ -38,8 +43,8 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 
 	// Get the index of the starting position in the 1D vector representation of the grid
 	const size_t startIndex = graph.get_index(start);
-	cameFrom.at(startIndex) = start; // The start node leads to itself
-	costSoFar.at(startIndex) = 0; // Cost to reach the start is 0
+	cameFrom_[startIndex] = start; // The start node leads to itself
+	costSoFar_[startIndex] = 0; // Cost to reach the start is 0
 
 	// Process nodes until there are none left in the priority queue
 	while (!frontier.empty())
@@ -61,11 +66,11 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 			const size_t nextIndex = graph.get_index(next); // Get index of the next node
 
 			// If this new path is better (lower cost) than the previously known cost
-			double new_cost = costSoFar.at(currentIndex) + graph.cost(current, next, ctx);
+			double new_cost = costSoFar_[currentIndex] + graph.cost(current, next, ctx);
 
-			if (costSoFar.at(nextIndex) == infinity || new_cost < costSoFar.at(nextIndex))
+			if (costSoFar_[nextIndex] == infinity || new_cost < costSoFar_[nextIndex])
 			{
-				costSoFar.at(nextIndex) = new_cost; // Update cost to reach this node
+				costSoFar_[nextIndex] = new_cost; // Update cost to reach this node
 				if (AStar) // for A* search
 				{
 					double priority = new_cost + heuristic(next, goal);
@@ -75,17 +80,17 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 				{
 					frontier.emplace(next, new_cost);
 				}
-				cameFrom.at(nextIndex) = current;
+				cameFrom_[nextIndex] = current;
 			}
 		}
 	}
-	return reconstruct_path(start, goal, cameFrom);
+	return reconstruct_path(start, goal, cameFrom_);
 }
 
 std::vector<Vector2D> Dijkstra::reconstruct_path(
 	Vector2D start, // The starting position
 	Vector2D goal, // The goal position
-	std::vector<Vector2D> cameFrom // Stores the previous node in the path
+	const std::vector<Vector2D>& cameFrom // Stores the previous node in the path
 )
 {
 	std::vector<Vector2D> path; // Stores the reconstructed path

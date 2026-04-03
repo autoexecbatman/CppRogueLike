@@ -120,8 +120,8 @@ void AiMonster::save(json& j)
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
-	Dijkstra dijkstra{ ctx.map->get_width(), ctx.map->get_height() };
-	std::vector<Vector2D> path = dijkstra.a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);
+	// Use persistent pathfinder from context instead of creating a new one each time
+	std::vector<Vector2D> path = ctx.pathfinder->a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	auto is_actor = [&ctx](const Vector2D& pos)
 	{
