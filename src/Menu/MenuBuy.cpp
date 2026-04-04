@@ -157,7 +157,7 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "No items for sale.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);
 		}
 		break;
 	}
@@ -177,14 +177,14 @@ void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Player& 
 	if (is_inventory_empty(shopkeeper.shop_inventory) ||
 		currentState >= get_item_count(shopkeeper.shop_inventory))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
 	Item* item = get_item_at(shopkeeper.shop_inventory, currentState);
 	if (!item)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 

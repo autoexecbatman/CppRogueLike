@@ -78,9 +78,9 @@ void AiShopkeeper::move_or_trade(Creature& shopkeeper, Vector2D target, GameCont
 	const int distance = shopkeeper.get_tile_distance(target);
 
 	// DEBUG: Log distance calculation
-	if (ctx.message_system->is_debug_mode())
+	if (ctx.messageSystem->is_debug_mode())
 	{
-		ctx.message_system->log("Shopkeeper distance to player: " + std::to_string(distance) +
+		ctx.messageSystem->log("Shopkeeper distance to player: " + std::to_string(distance) +
 			" (Shopkeeper: " + std::to_string(shopkeeper.position.x) + "," + std::to_string(shopkeeper.position.y) +
 			" Player: " + std::to_string(target.x) + "," + std::to_string(target.y) + ")");
 	}
@@ -88,20 +88,20 @@ void AiShopkeeper::move_or_trade(Creature& shopkeeper, Vector2D target, GameCont
 	// Only trade if adjacent (distance exactly 1.0) and menu not already open
 	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.destructible->is_dead() && !tradeMenuOpen)
 	{
-		ctx.message_system->log("TRADE CONDITION MET: Opening trade menu!");
+		ctx.messageSystem->log("TRADE CONDITION MET: Opening trade menu!");
 		trade(shopkeeper, *ctx.player, ctx);
 		tradeMenuOpen = true; // Mark that trade menu is open
 		moveCount = 0; // Stop tracking immediately
 	}
 	else if (distance > MAX_TRADE_DISTANCE)
 	{
-		ctx.message_system->log("Distance > MAX_TRADE_DISTANCE, moving toward player");
+		ctx.messageSystem->log("Distance > MAX_TRADE_DISTANCE, moving toward player");
 		// Only move if not in cooldown and distance is greater than trade distance
 		move_to_target(shopkeeper, target, ctx);
 	}
 	else
 	{
-		ctx.message_system->log("Not trading: distance=" + std::to_string(distance) +
+		ctx.messageSystem->log("Not trading: distance=" + std::to_string(distance) +
 			" dead=" + std::to_string(shopkeeper.destructible->is_dead()) +
 			" menuOpen=" + std::to_string(tradeMenuOpen));
 	}

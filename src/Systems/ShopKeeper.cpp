@@ -189,13 +189,13 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 
 	if (player.get_gold() < price)
 	{
-		ctx.message_system->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
+		ctx.messageSystem->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
 		return false;
 	}
 
 	if (is_inventory_full(player.inventory_data))
 	{
-		ctx.message_system->message(WHITE_RED_PAIR, "Your inventory is full!", true);
+		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
 	}
 
@@ -211,12 +211,12 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 
 	add_item(player.inventory_data, std::move(player_item));
 
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You bought ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " for ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " gold.");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->finalize_message();
 
 	return true;
 }
@@ -236,12 +236,12 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& pla
 		}
 	}
 
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You sold ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " for ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " gold.");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You sold ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->finalize_message();
 
 	return true;
 }

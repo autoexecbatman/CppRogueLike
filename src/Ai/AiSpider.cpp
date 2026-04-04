@@ -73,8 +73,8 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 			if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
 			{
 				// Message about being ambushed
-				ctx.message_system->message(owner.actorData.color, owner.actorData.name);
-				ctx.message_system->message(WHITE_BLACK_PAIR, " ambushes you from hiding!", true);
+				ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, " ambushes you from hiding!", true);
 
 				// If right next to player, get an immediate attack
 				if (distanceToPlayer <= 1)
@@ -84,10 +84,10 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 					int bonusDamage = ctx.dice->roll(1, 2); // Ambush damage bonus
 					int totalDamage = normalDamage + bonusDamage;
 
-					ctx.message_system->message(owner.actorData.color, owner.actorData.name);
-					ctx.message_system->message(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
-					ctx.message_system->message(WHITE_RED_PAIR, std::to_string(totalDamage));
-					ctx.message_system->message(WHITE_BLACK_PAIR, " damage!", true);
+					ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
+					ctx.messageSystem->message(WHITE_RED_PAIR, std::to_string(totalDamage));
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, " damage!", true);
 
 					// Apply damage directly
 					ctx.player->destructible->take_damage(*ctx.player, totalDamage, ctx);
@@ -132,7 +132,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 				ambushCounter = AMBUSH_DURATION;
 
 				// Debug log
-				ctx.message_system->log("Spider setting ambush at " + std::to_string(ambushPos.x) + "," + std::to_string(ambushPos.y));
+				ctx.messageSystem->log("Spider setting ambush at " + std::to_string(ambushPos.x) + "," + std::to_string(ambushPos.y));
 
 				return;
 			}
@@ -149,7 +149,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
 		// Directly trigger attack
-		ctx.message_system->log("Spider attempting attack with poison");
+		ctx.messageSystem->log("Spider attempting attack with poison");
 
 		// First do the regular attack
 		owner.attacker->attack(owner, *ctx.player, ctx);
@@ -376,10 +376,10 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 		int poisonDamage = ctx.dice->roll(1, 3);
 
 		// Display poison message with damage amount
-		ctx.message_system->message(RED_BLACK_PAIR, owner.actorData.name);
-		ctx.message_system->message(WHITE_BLACK_PAIR, " injects venom for ");
-		ctx.message_system->message(WHITE_RED_PAIR, std::to_string(poisonDamage));
-		ctx.message_system->message(WHITE_BLACK_PAIR, " extra poison damage!", true);
+		ctx.messageSystem->message(RED_BLACK_PAIR, owner.actorData.name);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, " injects venom for ");
+		ctx.messageSystem->message(WHITE_RED_PAIR, std::to_string(poisonDamage));
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, " extra poison damage!", true);
 
 		// Deal the poison damage
 		target.destructible->take_damage(target, poisonDamage, ctx);
@@ -553,7 +553,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
 		// Directly trigger attack - avoid any inheritance issues
-		ctx.message_system->log("Web spinner attempting attack with poison");
+		ctx.messageSystem->log("Web spinner attempting attack with poison");
 
 		// First do the regular attack
 		owner.attacker->attack(owner, *ctx.player, ctx);
@@ -576,8 +576,8 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 			webCooldown = WEB_COOLDOWN;
 
 			// Show message about web spinning
-			ctx.message_system->message(owner.actorData.color, owner.actorData.name);
-			ctx.message_system->message(WHITE_BLACK_PAIR, " spins a sticky web!", true);
+			ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, " spins a sticky web!", true);
 
 			return;
 		}
@@ -660,7 +660,7 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 	Spider* spider = dynamic_cast<Spider*>(&owner);
 	if (!spider)
 	{
-		ctx.message_system->log("Error: tryCreateWeb called on non-Spider creature");
+		ctx.messageSystem->log("Error: tryCreateWeb called on non-Spider creature");
 		return false;
 	}
 
@@ -719,14 +719,14 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 	generate_web_entities(webCenter, webSize, ctx);
 
 	// Dramatic message about web creation
-	ctx.message_system->message(RED_YELLOW_PAIR, owner.actorData.name);
+	ctx.messageSystem->message(RED_YELLOW_PAIR, owner.actorData.name);
 	if (webSize >= WEB_MAX_SIZE - 1)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, " creates a massive web network!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, " creates a massive web network!", true);
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, " spins a complex web structure!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, " spins a complex web structure!", true);
 	}
 
 	// Mark this spider as having laid a web - now using our own method

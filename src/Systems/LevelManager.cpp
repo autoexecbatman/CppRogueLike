@@ -16,7 +16,7 @@ void LevelManager::advance_to_next_level(GameContext& ctx)
 	shopkeepers_on_current_level = 0; // Reset shopkeeper counter for new level
 
 	// Display progression messages
-	display_level_messages(*ctx.message_system);
+	display_level_messages(*ctx.messageSystem);
 
 	// Heal player between levels
 	heal_player_between_levels(ctx);
@@ -95,7 +95,7 @@ void LevelManager::heal_player_between_levels(GameContext& ctx) const
 
 	if (actualHealed > 0)
 	{
-		ctx.message_system->message(GREEN_BLACK_PAIR,
+		ctx.messageSystem->message(GREEN_BLACK_PAIR,
 			std::format("You rest between levels and recover {} HP.", actualHealed),
 			true);
 	}

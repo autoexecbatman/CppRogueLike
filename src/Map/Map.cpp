@@ -62,9 +62,9 @@ void Map::init_tiles(GameContext& ctx)
 		tiles.clear();
 	}
 
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("init_tiles: Creating " + std::to_string(map_width * map_height) + " tiles (" + std::to_string(map_width) + " x " + std::to_string(map_height) + ")");
+		ctx.messageSystem->log("init_tiles: Creating " + std::to_string(map_width * map_height) + " tiles (" + std::to_string(map_width) + " x " + std::to_string(map_height) + ")");
 	}
 
 	for (int y = 0; y < map_height; y++)
@@ -75,9 +75,9 @@ void Map::init_tiles(GameContext& ctx)
 		}
 	}
 
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("init_tiles: Created " + std::to_string(tiles.size()) + " tiles");
+		ctx.messageSystem->log("init_tiles: Created " + std::to_string(tiles.size()) + " tiles");
 	}
 }
 
@@ -247,17 +247,17 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 	{
 	case TileType::WATER:
 		// Only called on successful water entry (with swim ability)
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("You are in water");
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You are in water", true);
+			ctx.messageSystem->log("You are in water");
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are in water", true);
 		}
 		break;
 	case TileType::WALL:
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("You are against a wall");
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You are against a wall", true);
+			ctx.messageSystem->log("You are against a wall");
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are against a wall", true);
 		}
 		break;
 	case TileType::FLOOR:
@@ -265,10 +265,10 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
 		break;
 	case TileType::CLOSED_DOOR:
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("You are at a door");
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You are at a door", true);
+			ctx.messageSystem->log("You are at a door");
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are at a door", true);
 		}
 		break;
 	case TileType::CORRIDOR:
@@ -276,9 +276,9 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
 		break;
 	default:
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("You are in an unknown area");
+			ctx.messageSystem->log("You are in an unknown area");
 		}
 	}
 }
@@ -338,18 +338,18 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 
 void Map::compute_fov(GameContext& ctx)
 {
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("...Computing FOV...");
+		ctx.messageSystem->log("...Computing FOV...");
 	}
 	// Safety check for valid player position
 	if (!ctx.player ||
 		ctx.player->position.x < 0 || ctx.player->position.x >= map_width ||
 		ctx.player->position.y < 0 || ctx.player->position.y >= map_height)
 	{
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("Warning: Can't compute FOV - invalid player position");
+			ctx.messageSystem->log("Warning: Can't compute FOV - invalid player position");
 		}
 		return;
 	}
@@ -990,9 +990,9 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 
 		// Log the spawn for debugging
 		Creature* monster = get_actor(pos, ctx);
-		if (monster && ctx.message_system)
+		if (monster && ctx.messageSystem)
 		{
-			ctx.message_system->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.level_manager->get_dungeon_level()));
+			ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.level_manager->get_dungeon_level()));
 		}
 	}
 }
@@ -1286,12 +1286,12 @@ void Map::place_amulet(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.content_registry));
 
 		// Log the placement (debug info)
-		if (ctx.message_system)
+		if (ctx.messageSystem)
 		{
-			ctx.message_system->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
+			ctx.messageSystem->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
 
 			// Add a hint message
-			ctx.message_system->message(RED_YELLOW_PAIR, "You sense a powerful artifact somewhere on this level...", true);
+			ctx.messageSystem->message(RED_YELLOW_PAIR, "You sense a powerful artifact somewhere on this level...", true);
 		}
 	}
 }
@@ -1357,9 +1357,9 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 		add_monster(guardPos, ctx);
 	}
 
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log(std::format(
+		ctx.messageSystem->log(std::format(
 			"Created treasure room at ({},{}) size {}x{} quality {}",
 			room.col,
 			room.row,
@@ -1574,9 +1574,9 @@ void Map::place_from_graph(
 	bool withActors,
 	GameContext& ctx)
 {
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
+		ctx.messageSystem->log("place_from_graph: Starting with " + std::to_string(rooms.size()) + " rooms");
 	}
 
 	// Step 1: Create all rooms (dig them, spawn water/items/player)
@@ -1585,9 +1585,9 @@ void Map::place_from_graph(
 		create_room(rooms[i], i == 0, withActors, ctx);
 	}
 
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("place_from_graph: Rooms created, now connecting with corridors");
+		ctx.messageSystem->log("place_from_graph: Rooms created, now connecting with corridors");
 	}
 
 	// Step 2: Connect adjacent rooms with corridors (from graph edges)
@@ -1657,9 +1657,9 @@ void Map::place_from_graph(
 		}
 	}
 
-	if (ctx.message_system)
+	if (ctx.messageSystem)
 	{
-		ctx.message_system->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
+		ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
 	}
 }
 

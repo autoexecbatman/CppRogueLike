@@ -10,7 +10,7 @@
 		.player = player.get(),
 
 		// Core systems
-		.message_system = &message_system,
+		.messageSystem = &message_system,
 		.dice = &dice,
 
 		// Managers

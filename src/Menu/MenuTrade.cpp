@@ -23,7 +23,7 @@ void Buy::on_selection(GameContext& ctx)
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "This shopkeeper has nothing to sell.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "This shopkeeper has nothing to sell.", true);
 	}
 }
 

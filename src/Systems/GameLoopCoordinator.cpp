@@ -38,10 +38,10 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 {
 	handle_initialization(ctx);
 
-	if (ctx.message_system->is_debug_mode())
+	if (ctx.messageSystem->is_debug_mode())
 	{
-		ctx.message_system->log("//====================LOOP====================//");
-		ctx.message_system->log(std::format("Loop number: {}\n", loopNum));
+		ctx.messageSystem->log("//====================LOOP====================//");
+		ctx.messageSystem->log(std::format("Loop number: {}\n", loopNum));
 	}
 
 	handle_input_phase(ctx);
@@ -197,15 +197,15 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 
 void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
-	ctx.message_system->log("Running update...");
+	ctx.messageSystem->log("Running update...");
 	ctx.game_loop_coordinator->update(ctx);
 	gui.gui_update(ctx);
-	ctx.message_system->log("Update OK.");
+	ctx.messageSystem->log("Update OK.");
 }
 
 void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 {
-	ctx.message_system->log("Running render...");
+	ctx.messageSystem->log("Running render...");
 
 	// Center camera on player before rendering
 	ctx.renderer->set_camera_center(
@@ -248,7 +248,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 	draw_hover_tooltip(ctx);
 
 	ctx.renderer->end_frame();
-	ctx.message_system->log("Render OK.");
+	ctx.messageSystem->log("Render OK.");
 }
 
 void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
@@ -450,12 +450,12 @@ void GameLoopCoordinator::update(GameContext& ctx)
 {
 	if (ctx.game_state->get_game_status() == GameStatus::VICTORY)
 	{
-		ctx.message_system->log("Player has won the game!");
-		ctx.message_system->append_message_part(RED_YELLOW_PAIR, "Congratulations!");
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
-		ctx.message_system->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->log("Player has won the game!");
+		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Congratulations!");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
+		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
+		ctx.messageSystem->finalize_message();
 		ctx.game_state->set_run(false);
 	}
 
@@ -553,9 +553,9 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (ctx.game_state->get_game_status() == GameStatus::DEFEAT)
 	{
-		ctx.message_system->log("Player is dead!");
-		ctx.message_system->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->log("Player is dead!");
+		ctx.messageSystem->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
+		ctx.messageSystem->finalize_message();
 		ctx.game_state->set_run(false);
 	}
 }

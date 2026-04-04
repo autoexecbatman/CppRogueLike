@@ -105,7 +105,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.content_registry), EquipmentSlot::LEFT_HAND, ctx);
 		equip_item(ItemCreator::create("long_bow", position, *ctx.content_registry), EquipmentSlot::MISSILE_WEAPON, ctx);
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_fireball", position, *ctx.content_registry));
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
 	case PlayerClassState::ROGUE:
@@ -114,7 +114,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("leather_armor", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("dagger", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
 	case PlayerClassState::CLERIC:
@@ -127,7 +127,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("health_potion", position, *ctx.content_registry));
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_hold_person", position, *ctx.content_registry));
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
 	}
 	case PlayerClassState::WIZARD:
@@ -139,7 +139,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_lightning", position, *ctx.content_registry));
 		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_sleep", position, *ctx.content_registry));
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
 	}
 	default:
@@ -233,7 +233,7 @@ bool Player::rest(GameContext& ctx)
 	// Check if player is already at full health
 	if (destructible->get_hp() >= destructible->get_max_hp())
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You're already at full health.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're already at full health.", true);
 		return false;
 	}
 
@@ -261,7 +261,7 @@ bool Player::rest(GameContext& ctx)
 			// If hostile enemy is within 5 tiles, can't rest
 			if (distance <= 5)
 			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
 				return false;
 			}
 		}
@@ -271,7 +271,7 @@ bool Player::rest(GameContext& ctx)
 	if (ctx.hunger_system->get_hunger_state() == HungerState::STARVING ||
 		ctx.hunger_system->get_hunger_state() == HungerState::DYING)
 	{
-		ctx.message_system->message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
+		ctx.messageSystem->message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
 		return false;
 	}
 
@@ -292,23 +292,23 @@ bool Player::rest(GameContext& ctx)
 	HungerState afterState = ctx.hunger_system->get_hunger_state();
 
 	// Display message with more detail
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
-	ctx.message_system->append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
-	ctx.message_system->append_message_part(WHITE_GREEN_PAIR, " health");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
+	ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
+	ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
-		ctx.message_system->append_message_part(ctx.hunger_system->get_hunger_color(), ctx.hunger_system->get_hunger_state_string().c_str());
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
+		ctx.messageSystem->append_message_part(ctx.hunger_system->get_hunger_color(), ctx.hunger_system->get_hunger_state_string().c_str());
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
 	}
 	else
 	{
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
 	}
 
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->finalize_message();
 
 	// Memorize spells for casters
 	if (playerClassState == PlayerClassState::CLERIC || playerClassState == PlayerClassState::WIZARD)
@@ -334,14 +334,14 @@ bool Player::attempt_hide(GameContext& ctx)
 	// Only rogues can hide
 	if (playerClassState != PlayerClassState::ROGUE)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
 		return false;
 	}
 
 	// Already invisible
 	if (is_invisible())
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
 		return false;
 	}
 
@@ -361,14 +361,14 @@ bool Player::attempt_hide(GameContext& ctx)
 
 	if (observed)
 	{
-		ctx.message_system->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true);
+		ctx.messageSystem->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true);
 		return false;
 	}
 
 	// Success - hide duration based on level
 	int hideDuration = 10 + get_creature_level() * 2;
 	ctx.buff_system->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
-	ctx.message_system->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
+	ctx.messageSystem->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
 	return true;
 }
 
@@ -378,7 +378,7 @@ void Player::apply_web_effect(int duration, int strength, Web* web, GameContext&
 	webStrength = strength;
 	trappingWeb = web;
 
-	ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " + std::to_string(duration) + " turns!", true);
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " + std::to_string(duration) + " turns!", true);
 }
 
 bool Player::try_break_web(GameContext& ctx)
@@ -393,7 +393,7 @@ bool Player::try_break_web(GameContext& ctx)
 	if (ctx.dice->d100() <= breakChance)
 	{
 		// Success!
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb)
@@ -412,7 +412,7 @@ bool Player::try_break_web(GameContext& ctx)
 	if (webStuckTurns <= 0)
 	{
 		// Time expired, free anyway
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
 
 		// Destroy the web that trapped the player
 		if (trappingWeb)
@@ -426,7 +426,7 @@ bool Player::try_break_web(GameContext& ctx)
 		return true;
 	}
 
-	ctx.message_system->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " + std::to_string(webStuckTurns), true);
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " + std::to_string(webStuckTurns), true);
 	return false;
 }
 
@@ -518,20 +518,20 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 {
 	if (!item)
 	{
-		if (ctx.message_system->is_debug_mode())
-			ctx.message_system->log("DEBUG: equip_item failed - null item");
+		if (ctx.messageSystem->is_debug_mode())
+			ctx.messageSystem->log("DEBUG: equip_item failed - null item");
 		return false;
 	}
 
 	if (!can_equip(*item, slot))
 	{
-		if (ctx.message_system->is_debug_mode())
+		if (ctx.messageSystem->is_debug_mode())
 		{
-			ctx.message_system->log("DEBUG: can_equip failed for " + item->actorData.name);
-			ctx.message_system->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
-			ctx.message_system->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
-			ctx.message_system->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-			ctx.message_system->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->actorData.name);
+			ctx.messageSystem->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
+			ctx.messageSystem->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
+			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
 		InventoryOperations::add_item(inventory_data, std::move(item));
@@ -548,7 +548,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
 		}
 	}
 
@@ -562,14 +562,14 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
 		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->item_key);
-		ctx.message_system->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
+		ctx.messageSystem->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
 
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		destructible->update_armor_class(*this, ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 	}
 
 	// Set ranged state when a ranged weapon is equipped
@@ -729,7 +729,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			destructible->update_armor_class(*this, ctx);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
 		}
 
 		return true;

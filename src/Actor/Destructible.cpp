@@ -130,11 +130,11 @@ void Destructible::handle_stat_drain_death(Creature& owner, GameContext& ctx)
 {
 	if (&owner == ctx.player)
 	{
-		ctx.message_system->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
+		ctx.messageSystem->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
 	}
 	else
 	{
-		ctx.message_system->log(std::format("{} dies from stat drain.", owner.get_name()));
+		ctx.messageSystem->log(std::format("{} dies from stat drain.", owner.get_name()));
 	}
 
 	// Trigger death system
@@ -151,13 +151,13 @@ void Destructible::log_constitution_change(const Creature& owner, GameContext& c
 
 	if (hpChange > 0)
 	{
-		ctx.message_system->message(GREEN_BLACK_PAIR,
+		ctx.messageSystem->message(GREEN_BLACK_PAIR,
 			std::format("Constitution increased from {} to {}! You gain {} hit points.", oldCon, newCon, hpChange),
 			true);
 	}
 	else
 	{
-		ctx.message_system->message(RED_BLACK_PAIR,
+		ctx.messageSystem->message(RED_BLACK_PAIR,
 			std::format("Constitution decreased from {} to {}! You lose {} hit points.", oldCon, newCon, -hpChange),
 			true);
 	}
@@ -193,7 +193,7 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, Dam
 					? damage_type_names.at(damageType)
 					: "unknown";
 
-				ctx.message_system->log(std::format(
+				ctx.messageSystem->log(std::format(
 					"You resisted {} {} damage! ({}% resistance, {} -> {})",
 					damageReduced,
 					typeName,
@@ -295,7 +295,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 		// Log for player
 		if (&owner == ctx.player)
 		{
-			ctx.message_system->log(std::format(
+			ctx.messageSystem->log(std::format(
 				"Armor Class updated: {} → {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
 				oldAC,
 				calculatedAC,
@@ -323,7 +323,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Log for player if non-zero
 	if (&owner == ctx.player && defensiveAdj != 0)
 	{
-		ctx.message_system->log(std::format(
+		ctx.messageSystem->log(std::format(
 			"Dexterity Defensive Adjustment: {:+} (Dex: {})",
 			defensiveAdj,
 			dexterity));
@@ -350,7 +350,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 			if (&owner == ctx.player)
 			{
-				ctx.message_system->log(std::format(
+				ctx.messageSystem->log(std::format(
 					"Armor bonus: {:+} from {}",
 					armorBonus,
 					equippedArmor->actorData.name));
@@ -368,7 +368,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 			if (&owner == ctx.player)
 			{
-				ctx.message_system->log(std::format(
+				ctx.messageSystem->log(std::format(
 					"Shield bonus: {:+} from {}",
 					shieldBonus,
 					equippedShield->actorData.name));
@@ -399,7 +399,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 		if (&owner == ctx.player)
 		{
-			ctx.message_system->log(std::format(
+			ctx.messageSystem->log(std::format(
 				"Ring bonus: {:+} from {}",
 				bestRingBonus,
 				bestRing->actorData.name));
@@ -416,7 +416,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 			if (&owner == ctx.player)
 			{
-				ctx.message_system->log(std::format(
+				ctx.messageSystem->log(std::format(
 					"Helm bonus: {:+} from {}",
 					helmBonus,
 					equippedHelm->actorData.name));
@@ -543,17 +543,17 @@ MonsterDestructible::MonsterDestructible(
 void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 {
 	// message which monster is dead
-	ctx.message_system->append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+	ctx.messageSystem->finalize_message();
 
 	// get the xp from the monster
 
 	// message how much xp you get
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You get ");
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You get ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+	ctx.messageSystem->finalize_message();
 
 	// increase the player's experience
 	/*game.player->destructible->xp += xp;*/

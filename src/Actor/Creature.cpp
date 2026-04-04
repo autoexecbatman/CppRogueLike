@@ -217,19 +217,19 @@ void Creature::equip(Item& item, GameContext& ctx)
 	{
 		weaponEquipped = item.get_name();
 		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.item_key);
-		ctx.message_system->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
+		ctx.messageSystem->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
 	}
 
 	// Log shield equipped
 	if (isShield)
 	{
-		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
+		ctx.messageSystem->log(std::format("Equipped {}", item.get_name()));
 	}
 
 	// Log armor equipped
 	if (isArmor)
 	{
-		ctx.message_system->log(std::format("Equipped {}", item.get_name()));
+		ctx.messageSystem->log(std::format("Equipped {}", item.get_name()));
 	}
 }
 
@@ -245,7 +245,7 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		if (item.is_weapon())
 		{
 			weaponEquipped = "None";
-			ctx.message_system->log("Unequipped weapon - now unarmed");
+			ctx.messageSystem->log("Unequipped weapon - now unarmed");
 
 			// Check for ranged weapon - use ItemClass system
 			if (item.is_ranged_weapon())
@@ -254,7 +254,7 @@ void Creature::unequip(Item& item, GameContext& ctx)
 				if (has_state(ActorState::IS_RANGED))
 				{
 					remove_state(ActorState::IS_RANGED);
-					ctx.message_system->log("Removed IS_RANGED state after unequipping " + item.actorData.name);
+					ctx.messageSystem->log("Removed IS_RANGED state after unequipping " + item.actorData.name);
 				}
 			}
 		}
@@ -277,7 +277,7 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
 		{
 			remove_state(ActorState::IS_RANGED);
-			ctx.message_system->log("Force removed IS_RANGED state - no ranged weapons equipped");
+			ctx.messageSystem->log("Force removed IS_RANGED state - no ranged weapons equipped");
 		}
 	}
 }
@@ -292,12 +292,12 @@ void Creature::sync_ranged_state(GameContext& ctx)
 	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
 	{
 		add_state(ActorState::IS_RANGED);
-		ctx.message_system->log("Added missing IS_RANGED state - ranged weapon equipped");
+		ctx.messageSystem->log("Added missing IS_RANGED state - ranged weapon equipped");
 	}
 	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
 	{
 		remove_state(ActorState::IS_RANGED);
-		ctx.message_system->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
+		ctx.messageSystem->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
 	}
 }
 
@@ -306,7 +306,7 @@ void Creature::pick(GameContext& ctx)
 	// Check if inventory is already full before attempting to pick
 	if (is_inventory_full(inventory_data))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
@@ -349,7 +349,7 @@ void Creature::pick(GameContext& ctx)
 			auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
 			if (!removeResult.has_value())
 			{
-				ctx.message_system->log("WARNING: Failed to remove gold item from floor inventory");
+				ctx.messageSystem->log("WARNING: Failed to remove gold item from floor inventory");
 			}
 		}
 	}
@@ -366,17 +366,17 @@ void Creature::pick(GameContext& ctx)
 			auto addResult = add_item(inventory_data, std::move(*removeResult));
 			if (addResult.has_value())
 			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 			}
 			else
 			{
-				ctx.message_system->log("WARNING: Failed to add item to player inventory");
+				ctx.messageSystem->log("WARNING: Failed to add item to player inventory");
 				// Item is lost - this should not happen since we checked is_full() earlier
 			}
 		}
 		else
 		{
-			ctx.message_system->log("WARNING: Failed to remove item from floor inventory");
+			ctx.messageSystem->log("WARNING: Failed to remove item from floor inventory");
 		}
 	}
 }
@@ -404,7 +404,7 @@ void Creature::drop(Item& item, GameContext& ctx)
 		{
 			// Clean up null pointer that remains after moving
 			optimize_inventory_storage(inventory_data);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}
 	}
 }

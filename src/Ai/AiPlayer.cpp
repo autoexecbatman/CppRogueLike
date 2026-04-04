@@ -96,7 +96,7 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		if (confusionTurns == 0)
 		{
 			owner.remove_state(ActorState::IS_CONFUSED);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Your mind clears.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your mind clears.", true);
 		}
 		else
 		{
@@ -133,13 +133,13 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 					break; // Southeast
 				}
 
-				ctx.message_system->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
+				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
 				ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 			}
 			else
 			{
 				// Process normal input but show a message
-				ctx.message_system->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
+				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				// Check for movement keys as normal
 				if (m.moves.find(key) != m.moves.end())
@@ -223,7 +223,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 
 	if (player.inventory_data.capacity > 0 && totalItems >= player.inventory_data.capacity)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
@@ -245,7 +245,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 
 	if (itemsAtPosition.empty())
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
 		return;
 	}
 
@@ -258,7 +258,7 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	{
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
 		player.adjust_gold(goldBehavior.amount);
-		ctx.message_system->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
+		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
 
 		// Remove gold from floor
 		InventoryOperations::remove_item(*ctx.inventory_data, *item);
@@ -274,18 +274,18 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 		// Item successfully added to player inventory
 		InventoryOperations::optimize_inventory_storage(*ctx.inventory_data);
 		player.sync_ranged_state(ctx);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
 	{
 		// Handle inventory full error
 		if (result.get_error() == InventoryError::FULL)
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
 		}
 	}
 }
@@ -295,7 +295,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 	// If the inventory is empty, show a message and return
 	if (player.inventory_data.items.empty())
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
 
@@ -310,7 +310,7 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 		{
 			std::string itemName = itemToDrop->actorData.name;
 			player.drop(*itemToDrop, ctx);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
 			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 	}
@@ -336,7 +336,7 @@ void AiPlayer::display_inventory(Player& player, GameContext& ctx)
 
 Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
 {
-	ctx.message_system->log("You chose from inventory");
+	ctx.messageSystem->log("You chose from inventory");
 	if (player.inventory_data.items.size() > 0)
 	{
 		const size_t index = ascii - 'a';
@@ -357,7 +357,7 @@ Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx
 	}
 	else
 	{
-		ctx.message_system->log("Error: choseFromInventory() called on player with no inventory.");
+		ctx.messageSystem->log("Error: choseFromInventory() called on player with no inventory.");
 		exit(EXIT_FAILURE);
 	}
 }
@@ -377,7 +377,7 @@ void AiPlayer::look_on_floor(Vector2D target, GameContext& ctx)
 		{
 			if (i->position == target)
 			{
-				ctx.message_system->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here\n", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here\n", true);
 			}
 		}
 	}
@@ -400,7 +400,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					if (shopkeeperAI && !shopkeeperAI->tradeMenuOpen)
 					{
 						// Player bumped into shopkeeper - initiate trade
-						ctx.message_system->log("Player bumped shopkeeper - initiating trade!");
+						ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
 						shopkeeperAI->trade(*c, owner, ctx);
 						shopkeeperAI->tradeMenuOpen = true;
 						return false; // Block movement but don't attack
@@ -408,7 +408,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					else
 					{
 						// Other non-hostile creature - just block movement
-						ctx.message_system->log("Encountered non-hostile creature: " + c->actorData.name);
+						ctx.messageSystem->log("Encountered non-hostile creature: " + c->actorData.name);
 						return false; // Block movement
 					}
 				}
@@ -442,7 +442,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 							if (i > 0)
 							{
 								// Display follow-up attack message
-								ctx.message_system->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
+								ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
 							}
 							owner.attacker->attack(owner, *c, ctx);
 						}
@@ -477,7 +477,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 			if (decor->hp <= 0)
 			{
 				decor->is_broken = true;
-				ctx.message_system->message(
+				ctx.messageSystem->message(
 					WHITE_BLACK_PAIR,
 					std::format("The {} shatters!", decor->name),
 					true);
@@ -488,7 +488,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 			}
 			else
 			{
-				ctx.message_system->message(
+				ctx.messageSystem->message(
 					WHITE_BLACK_PAIR,
 					std::format("You hit the {}.", decor->name),
 					true);
@@ -543,8 +543,8 @@ void AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 		case TileType::WATER:
 			if (!owner.has_state(ActorState::CAN_SWIM))
 			{
-				ctx.message_system->log("You can't swim.");
-				ctx.message_system->message(WHITE_BLACK_PAIR, "You can't swim.", true);
+				ctx.messageSystem->log("You can't swim.");
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't swim.", true);
 			}
 			break;
 		case TileType::WALL:
@@ -661,7 +661,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	case Controls::QUIT:
 	{
 		ctx.game_state->set_run(false);
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
 		break;
 	}
 
@@ -696,7 +696,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 #ifndef NDEBUG
 	case Controls::DEBUG:
 	{
-		ctx.message_system->display_debug_messages();
+		ctx.messageSystem->display_debug_messages();
 		break;
 	}
 
@@ -716,7 +716,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 	{
 		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
 		InventoryOperations::add_item(player.inventory_data, ItemCreator::create("long_bow", player.position, *ctx.content_registry));
-		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		// Give wizard spells for animation/targeting testing
 		player.memorizedSpells.push_back("magic_missile");
@@ -724,7 +724,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		player.memorizedSpells.push_back("sleep");
 		player.memorizedSpells.push_back("web");
 		player.memorizedSpells.push_back("teleport");
-		ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
 		break;
 	}
 
@@ -737,14 +737,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::OPEN_DOOR:
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
 		pendingDoorAction = PendingDoorAction::OPEN;
 		break;
 	}
 
 	case Controls::CLOSE_DOOR:
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
 		pendingDoorAction = PendingDoorAction::CLOSE;
 		break;
 	}
@@ -791,7 +791,7 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 	int dirKey = ctx.input_handler->get_current_key();
 	if (dirKey == 27)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Cancelled.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cancelled.", true);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -803,14 +803,14 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 	Vector2D doorPos = handle_direction_input(owner, dirKey, ctx);
 	if (doorPos.x == 0 && doorPos.y == 0)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
 
 	if (!ctx.map->is_door(doorPos))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "There is no door there.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "There is no door there.", true);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -819,28 +819,28 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 	{
 		if (ctx.map->open_door(doorPos, ctx))
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You open the door.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
 			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already open.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already open.", true);
 		}
 	}
 	else
 	{
 		if (ctx.map->close_door(doorPos, ctx))
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You close the door.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You close the door.", true);
 			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
 		}
 		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
 		}
 	}
 

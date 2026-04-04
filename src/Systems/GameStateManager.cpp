@@ -97,14 +97,14 @@ void load_creatures(const json& j, std::vector<std::unique_ptr<Creature>>& creat
 void GameStateManager::init_new_game(GameContext& ctx)
 {
 	assert(ctx.data_manager != nullptr);
-	assert(ctx.message_system != nullptr);
+	assert(ctx.messageSystem != nullptr);
 	assert(ctx.level_manager != nullptr);
 	assert(ctx.game_state != nullptr);
 	assert(ctx.map != nullptr);
 	assert(ctx.player != nullptr);
 
 	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
-	ctx.data_manager->load_all_data(*ctx.message_system);
+	ctx.data_manager->load_all_data(*ctx.messageSystem);
 
 	ctx.level_manager->reset_to_first_level();
 	ctx.game_state->set_time(0);
@@ -114,29 +114,29 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 	ctx.player->roll_new_character(ctx);
 	ctx.game_state->set_game_status(GameStatus::STARTUP);
-	ctx.message_system->log("New game initialized");
+	ctx.messageSystem->log("New game initialized");
 }
 
 bool GameStateManager::load_all(GameContext& ctx)
 {
 	assert(ctx.menu_manager != nullptr);
 	assert(ctx.data_manager != nullptr);
-	assert(ctx.message_system != nullptr);
+	assert(ctx.messageSystem != nullptr);
 	assert(ctx.game_state != nullptr);
 
 	ContentRegistryIO::load(*ctx.content_registry, Paths::CONTENT_TILES);
 	ctx.menu_manager->set_game_initialized(true);
-	ctx.data_manager->load_all_data(*ctx.message_system);
+	ctx.data_manager->load_all_data(*ctx.messageSystem);
 
 	if (!load_game(ctx))
 	{
-		ctx.message_system->log("Error: Could not open save file.");
+		ctx.messageSystem->log("Error: Could not open save file.");
 		return false;
 	}
 
 	ctx.game_state->set_is_loaded_game(true);
 	ctx.game_state->set_game_status(GameStatus::STARTUP);
-	ctx.message_system->log("GameStatus set to STARTUP after loading for FOV computation");
+	ctx.messageSystem->log("GameStatus set to STARTUP after loading for FOV computation");
 	return true;
 }
 

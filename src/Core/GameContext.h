@@ -119,7 +119,7 @@ struct GameContext
 	Player* player{ nullptr };
 
 	// Core systems
-	MessageSystem* message_system{ nullptr };
+	MessageSystem* messageSystem{ nullptr };
 	RandomDice* dice{ nullptr };
 
 	// Managers

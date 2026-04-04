@@ -37,7 +37,7 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 			{
 				if (magicRing->effect == MagicalEffect::FREE_ACTION)
 				{
-					ctx.message_system->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
+					ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
 					destroy(ctx);
 					return false;
 				}
@@ -57,7 +57,7 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 		// Apply the effect through polymorphic interface
 		creature.apply_web_effect(stuckTurns, webStrength, this, ctx);
 
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 
 		// Player loses their turn
 		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
@@ -65,13 +65,13 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
 
 		// 50% chance to destroy the web
 		if (ctx.dice->d2() == 1)
 		{
 			destroy(ctx);
-			ctx.message_system->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
 		}
 
 		return false;

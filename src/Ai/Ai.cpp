@@ -109,14 +109,14 @@ int Ai::get_next_level_xp(GameContext& ctx, Creature& owner)
 
 void Ai::levelup_update(GameContext& ctx, Creature& owner)
 {
-	ctx.message_system->log("AiPlayer::levelUpUpdate(Actor& owner)");
+	ctx.messageSystem->log("AiPlayer::levelUpUpdate(Actor& owner)");
 	// level up if needed
 	int levelUpXp = get_next_level_xp(ctx, owner);
 	if (owner.destructible->get_xp() >= levelUpXp)
 	{
 		ctx.player->adjust_level(1);
 		owner.destructible->set_xp(owner.destructible->get_xp() - levelUpXp);
-		ctx.message_system->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->get_creature_level()), true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->get_creature_level()), true);
 
 		// Only display level-up UI if display_manager is available (not in headless tests)
 		if (ctx.display_manager != nullptr)

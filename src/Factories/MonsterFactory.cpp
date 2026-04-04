@@ -125,12 +125,12 @@ MonsterFactory::MonsterFactory()
 				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
 				{
 					ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx));
-					ctx.message_system->log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
+					ctx.messageSystem->log("Shopkeeper spawned at level " + std::to_string(dungeonLevel));
 				}
 				else
 				{
 					ctx.creatures->push_back(MonsterCreator::create(pos, MonsterId::GOBLIN, ctx));
-					ctx.message_system->log("Shopkeeper spawn failed, spawned Goblin instead");
+					ctx.messageSystem->log("Shopkeeper spawn failed, spawned Goblin instead");
 				}
 			},
 		});
@@ -174,7 +174,7 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
 
 	if (totalWeight <= 0)
 	{
-		ctx.message_system->log("No valid monsters for this dungeon level!");
+		ctx.messageSystem->log("No valid monsters for this dungeon level!");
 		return;
 	}
 

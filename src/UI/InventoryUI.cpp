@@ -720,7 +720,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 			activeScreen = InventoryScreen::EQUIPMENT;
 			return true;
 		}
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
 		return false;
 	}
 
@@ -871,7 +871,7 @@ void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
 	{
 		std::string itemName = std::string(equipped->get_name());
 		player.unequip_item(slot, ctx);
-		ctx.message_system->message(
+		ctx.messageSystem->message(
 			WHITE_BLACK_PAIR,
 			std::format("You unequipped the {}.", itemName),
 			true);
@@ -926,7 +926,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		Item* equipped = player.get_equipped_item(slot);
 		if (!equipped)
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Nothing to drop.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Nothing to drop.", true);
 			return;
 		}
 
@@ -942,7 +942,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		if (it != player.inventory_data.items.end())
 		{
 			player.drop(**it, ctx);
-			ctx.message_system->message(
+			ctx.messageSystem->message(
 				WHITE_BLACK_PAIR,
 				std::format("You drop the {}.", itemName),
 				true);
@@ -963,7 +963,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 
 		std::string itemName = std::string(entry.item->get_name());
 		player.drop(*entry.item, ctx);
-		ctx.message_system->message(
+		ctx.messageSystem->message(
 			WHITE_BLACK_PAIR,
 			std::format("You drop the {}.", itemName),
 			true);

@@ -52,7 +52,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.shop = std::make_unique<ShopKeeper>(shopType, shopQuality);
 	shopkeeper.shop->generate_initial_inventory(ctx);
 
-	ctx.message_system->log("Created shopkeeper: " + shopkeeper.shop->shop_name + " (Level " + std::to_string(dungeonLevel) + ")");
+	ctx.messageSystem->log("Created shopkeeper: " + shopkeeper.shop->shop_name + " (Level " + std::to_string(dungeonLevel) + ")");
 }
 
 ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameContext& ctx)

@@ -219,7 +219,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 		}
 	}
 
-	ctx.message_system->log("Generated treasure of quality " + std::to_string(quality) +
+	ctx.messageSystem->log("Generated treasure of quality " + std::to_string(quality) +
 		" with " + std::to_string(itemCount + 1) + " items including gold");
 }
 
@@ -259,7 +259,7 @@ void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, in
 	auto it = itemCategories.find(category);
 	if (it == itemCategories.end() || it->second.empty())
 	{
-		ctx.message_system->log("No items found in category: " + category);
+		ctx.messageSystem->log("No items found in category: " + category);
 		return;
 	}
 
@@ -279,7 +279,7 @@ void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, in
 	// If no valid items for this level in this category, do nothing
 	if (totalWeight <= 0)
 	{
-		ctx.message_system->log("No valid items in category " + category + " for this dungeon level!");
+		ctx.messageSystem->log("No valid items in category " + category + " for this dungeon level!");
 		return;
 	}
 
@@ -316,7 +316,7 @@ void ItemFactory::spawn_random_item(Vector2D position, GameContext& ctx, int dun
 	// If no valid items for this level, do nothing
 	if (totalWeight <= 0)
 	{
-		ctx.message_system->log("No valid items for this dungeon level!");
+		ctx.messageSystem->log("No valid items for this dungeon level!");
 		return;
 	}
 
@@ -355,7 +355,7 @@ int ItemFactory::calculate_weight(const ItemType& item, int dungeonLevel) const
 
 void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 {
-	ctx.message_system->log("DEBUG: Spawning enhanced items from all rules");
+	ctx.messageSystem->log("DEBUG: Spawning enhanced items from all rules");
 
 	auto spawn_rule_sample = [&](std::span<const EnhancedItemSpawnRule> rules)
 	{
@@ -382,5 +382,5 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 	};
 
 	spawn_rule_sample(ItemCreator::get_enhanced_rules());
-	ctx.message_system->message(WHITE_BLACK_PAIR, "DEBUG: Spawned enhanced items", true);
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spawned enhanced items", true);
 }

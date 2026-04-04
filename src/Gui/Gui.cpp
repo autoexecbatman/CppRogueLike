@@ -62,8 +62,8 @@ void Gui::gui_shutdown() noexcept {}
 
 void Gui::gui_update(GameContext& ctx)
 {
-	set_message(ctx.message_system->get_current_message());
-	set_message_color(ctx.message_system->get_current_message_color());
+	set_message(ctx.messageSystem->get_current_message());
+	set_message_color(ctx.messageSystem->get_current_message_color());
 }
 
 // ---------------------------------------------------------------------------
@@ -325,13 +325,13 @@ void Gui::gui_print_log(const GameContext& ctx)
 
 	const int messagesToShow = std::min(
 		LOG_MAX_MESSAGES,
-		static_cast<int>(ctx.message_system->get_stored_message_count()));
+		static_cast<int>(ctx.messageSystem->get_stored_message_count()));
 
 	for (int i = 0; i < messagesToShow; ++i)
 	{
 		const std::vector<LogMessage>& parts =
-			ctx.message_system->get_attack_message_at(
-				ctx.message_system->get_stored_message_count() - 1 - i);
+			ctx.messageSystem->get_attack_message_at(
+				ctx.messageSystem->get_stored_message_count() - 1 - i);
 
 		int x = logX;
 		const int y = baseY + (1 + i) * tileSize;

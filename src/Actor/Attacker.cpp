@@ -43,9 +43,9 @@ void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 		auto dualWieldInfo = player->get_dual_wield_info();
 		if (dualWieldInfo.isDualWielding)
 		{
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
-			ctx.message_system->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
-			ctx.message_system->finalize_message();
+			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
+			ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
+			ctx.messageSystem->finalize_message();
 
 			perform_single_attack(attacker, target, dualWieldInfo.mainHandPenalty, "main hand", ctx);
 
@@ -79,7 +79,7 @@ void Attacker::perform_single_attack(
 {
 	if (!target.destructible)
 	{
-		ctx.message_system->log("WARNING: Target has no destructible component");
+		ctx.messageSystem->log("WARNING: Target has no destructible component");
 		return;
 	}
 
@@ -93,11 +93,11 @@ void Attacker::perform_single_attack(
 	// Cannot attack dead targets or without strength
 	if (target.destructible->is_dead() || attacker.get_strength() <= 0)
 	{
-		ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " attacks ");
-		ctx.message_system->append_message_part(target.actorData.color, target.actorData.name);
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " in vain.");
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " attacks ");
+		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " in vain.");
+		ctx.messageSystem->finalize_message();
 		return;
 	}
 
@@ -105,7 +105,7 @@ void Attacker::perform_single_attack(
 	const int strIndex = attacker.get_strength() - 1;
 	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.data_manager->get_strength_attributes().size())
 	{
-		ctx.message_system->log(std::format("ERROR: Invalid strength {} for {}", attacker.get_strength(), attacker.actorData.name));
+		ctx.messageSystem->log(std::format("ERROR: Invalid strength {} for {}", attacker.get_strength(), attacker.actorData.name));
 		return;
 	}
 	const auto& strengthAttr = ctx.data_manager->get_strength_attributes().at(strIndex);
@@ -170,7 +170,7 @@ void Attacker::perform_single_attack(
 		{
 			if (buff_break_messages.contains(buff_type))
 			{
-				ctx.message_system->message(
+				ctx.messageSystem->message(
 					CYAN_BLACK_PAIR,
 					std::string(buff_break_messages.at(buff_type)),
 					true);
@@ -223,7 +223,7 @@ int Attacker::calculate_to_hit_roll(
 
 			if (dexAttr.MissileAttackAdj != 0)
 			{
-				ctx.message_system->log(std::format(
+				ctx.messageSystem->log(std::format(
 					"Ranged modifier: {} from DEX {}",
 					dexAttr.MissileAttackAdj,
 					attacker.get_dexterity()));
@@ -251,7 +251,7 @@ int Attacker::calculate_damage_with_backstab(
 	if (backstab.isBackstab && backstab.damageMultiplier > 1)
 	{
 		baseDamage *= backstab.damageMultiplier;
-		ctx.message_system->append_message_part(
+		ctx.messageSystem->append_message_part(
 			MAGENTA_BLACK_PAIR,
 			std::format(" BACKSTAB x{}! ", backstab.damageMultiplier));
 	}
@@ -273,20 +273,20 @@ void Attacker::log_attack_hit(
 	const std::string& handName,
 	GameContext& ctx) const noexcept
 {
-	ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
-	ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
 	}
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
-	ctx.message_system->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
-	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}", finalDamage));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" dmg ({}).", attackDamage.displayRoll));
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", finalDamage));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" dmg ({}).", attackDamage.displayRoll));
+	ctx.messageSystem->finalize_message();
 
-	ctx.message_system->log(std::format(
+	ctx.messageSystem->log(std::format(
 		"HIT ({}): {} rolled {} vs {} | {} ({}) + {} str - {} DR = {} dmg",
 		handName,
 		attacker.actorData.name,
@@ -308,18 +308,18 @@ void Attacker::log_attack_miss(
 	const std::string& handName,
 	GameContext& ctx) const noexcept
 {
-	ctx.message_system->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
-	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
 	}
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
-	ctx.message_system->append_message_part(RED_BLACK_PAIR, ". Miss!");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, ". Miss!");
+	ctx.messageSystem->finalize_message();
 
-	ctx.message_system->log(std::format(
+	ctx.messageSystem->log(std::format(
 		"MISS ({}): {} rolled {} vs {} (THAC0:{}, AC:{}, Penalty:{})",
 		handName,
 		attacker.actorData.name,

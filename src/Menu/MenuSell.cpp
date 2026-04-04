@@ -80,15 +80,15 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 	if (InventoryOperations::is_inventory_empty(seller.inventory_data) ||
 		currentState >= InventoryOperations::get_item_count(seller.inventory_data))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
 	const Item* item = InventoryOperations::get_item_at(seller.inventory_data, currentState);
 	if (!item)
 	{
-		ctx.message_system->log("Error: Attempted to sell a null item.");
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
+		ctx.messageSystem->log("Error: Attempted to sell a null item.");
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
 		return;
 	}
 
@@ -114,7 +114,7 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 				InventoryOperations::add_item(seller.inventory_data, std::move(*removed_item));
 				shopkeeper.adjust_gold(price);
 				seller.adjust_gold(-price);
-				ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
 				return;
 			}
 
@@ -124,17 +124,17 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 				currentState = InventoryOperations::get_item_count(seller.inventory_data) - 1;
 			}
 
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
 		}
 	}
 	else
 	{
-		ctx.message_system->log("Shopkeeper does not have enough gold to buy the item.");
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+		ctx.messageSystem->log("Shopkeeper does not have enough gold to buy the item.");
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
 	}
 }
 
@@ -262,7 +262,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		}
 		else
 		{
-			ctx.message_system->message(WHITE_BLACK_PAIR, "No items to sell.", true);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items to sell.", true);
 		}
 		break;
 	}

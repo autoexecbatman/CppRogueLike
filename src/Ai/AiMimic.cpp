@@ -59,7 +59,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	if (!mimic)
 	{
 		// This shouldn't happen - but if it does, use standard monster AI
-		ctx.message_system->log("Error: AiMimic::update called on non-Mimic creature");
+		ctx.messageSystem->log("Error: AiMimic::update called on non-Mimic creature");
 		AiMonster::update(owner, ctx);
 		return;
 	}
@@ -81,7 +81,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		{
 			change_disguise(*mimic, ctx);
 			disguiseChangeCounter = 0;
-			ctx.message_system->log("Mimic changed disguise");
+			ctx.messageSystem->log("Mimic changed disguise");
 		}
 
 		// Check if player is close enough to reveal
@@ -123,7 +123,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		return false;
 	}
 
-	ctx.message_system->log(std::format("Checking for items. Inventory size: {}", ctx.inventory_data->items.size()));
+	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.inventory_data->items.size()));
 
 	// Find and consume one item within range
 	std::vector<size_t> itemsToRemove;
@@ -138,25 +138,25 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		}
 
 		const int itemDistance = mimic.get_tile_distance(item->position);
-		ctx.message_system->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
+		ctx.messageSystem->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
 
 		if (itemDistance <= CONSUMPTION_RADIUS)
 		{
 			// Verify item is pickable
 			if (!item->behavior)
 			{
-				ctx.message_system->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
+				ctx.messageSystem->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
 				continue;
 			}
 
 			// Display consumption message
-			ctx.message_system->append_message_part(RED_YELLOW_PAIR, "The mimic ");
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "consumes the ");
-			ctx.message_system->append_message_part(item->actorData.color, item->actorData.name);
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "!");
-			ctx.message_system->finalize_message();
+			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "The mimic ");
+			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "consumes the ");
+			ctx.messageSystem->append_message_part(item->actorData.color, item->actorData.name);
+			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "!");
+			ctx.messageSystem->finalize_message();
 
-			ctx.message_system->log(std::format("Mimic consuming item: {}", item->actorData.name));
+			ctx.messageSystem->log(std::format("Mimic consuming item: {}", item->actorData.name));
 
 			// Apply item-specific bonuses
 			++itemsConsumed;
@@ -178,7 +178,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	// Remove consumed items in reverse order to maintain indices
 	for (size_t index : std::views::reverse(itemsToRemove))
 	{
-		ctx.message_system->log(std::format("Removing consumed item at index {}", index));
+		ctx.messageSystem->log(std::format("Removing consumed item at index {}", index));
 
 		if (index < ctx.inventory_data->items.size() && ctx.inventory_data->items[index])
 		{
@@ -205,7 +205,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 	case MimicBonusType::HEALTH:
 	{
 		boost_health(mimic, HEALTH_BONUS, ctx);
-		ctx.message_system->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
+		ctx.messageSystem->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
 		break;
 	}
 
@@ -220,7 +220,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 		boost_defense(mimic, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
 		if (mimic.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
 		{
-			ctx.message_system->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
+			ctx.messageSystem->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
 		}
 		break;
 	}
@@ -230,7 +230,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 		boost_defense(mimic, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
 		if (mimic.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
 		{
-			ctx.message_system->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
+			ctx.messageSystem->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
 		}
 		break;
 	}
@@ -255,7 +255,7 @@ void AiMimic::boost_health(Mimic& mimic, int amount, GameContext& ctx)
 		mimic.destructible->get_hp() + amount,
 		mimic.destructible->get_max_hp());
 	mimic.destructible->set_hp(newCurrentHp);
-	ctx.message_system->log(std::format("Mimic gained {} health from food", amount));
+	ctx.messageSystem->log(std::format("Mimic gained {} health from food", amount));
 }
 
 void AiMimic::boost_defense(Mimic& mimic, int amount, int maxDR, GameContext& ctx)
@@ -278,14 +278,14 @@ void AiMimic::boost_attack(Mimic& mimic, GameContext& ctx)
 			newMaxDamage,
 			std::format("1d{}", newMaxDamage));
 		mimic.attacker->set_damage_info(improvedDamage);
-		ctx.message_system->log(std::format("Mimic improved attack to {}", improvedDamage.displayRoll));
+		ctx.messageSystem->log(std::format("Mimic improved attack to {}", improvedDamage.displayRoll));
 	}
 }
 
 void AiMimic::boost_confusion_power(GameContext& ctx)
 {
 	confusionDuration = std::min(confusionDuration + CONFUSION_BONUS, MAX_CONFUSION_DURATION);
-	ctx.message_system->log(std::format("Mimic increased confusion duration to {}", confusionDuration));
+	ctx.messageSystem->log(std::format("Mimic increased confusion duration to {}", confusionDuration));
 }
 
 void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
@@ -293,14 +293,14 @@ void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
 	mimic.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
 	mimic.actorData.color = RED_YELLOW_PAIR;
 	mimic.actorData.name = "greater mimic";
-	ctx.message_system->log("Mimic transformed into greater mimic");
+	ctx.messageSystem->log("Mimic transformed into greater mimic");
 }
 
 void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 {
 	// Calculate distance to player
 	int distanceToPlayer = mimic.get_tile_distance(ctx.player->position);
-	ctx.message_system->log("Mimic distance to player: " + std::to_string(distanceToPlayer));
+	ctx.messageSystem->log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
 	// Check if player is close enough to reveal - using our internal revealDistance
 	if (distanceToPlayer <= revealDistance)
@@ -312,15 +312,15 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 		mimic.actorData.color = RED_YELLOW_PAIR;
 		mimic.add_state(ActorState::BLOCKS); // Now it's solid
 
-		ctx.message_system->log("Mimic revealed itself!");
+		ctx.messageSystem->log("Mimic revealed itself!");
 
 		// Try to confuse the player
 		if (ctx.dice->d20() > ctx.player->get_wisdom())
 		{
-			ctx.message_system->append_message_part(WHITE_GREEN_PAIR, "The ");
-			ctx.message_system->append_message_part(RED_YELLOW_PAIR, "mimic");
-			ctx.message_system->append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
-			ctx.message_system->finalize_message();
+			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, "The ");
+			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "mimic");
+			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
+			ctx.messageSystem->finalize_message();
 
 			// Apply confusion to player
 			ctx.player->add_state(ActorState::IS_CONFUSED);
@@ -331,15 +331,15 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 			{
 				// Using our confusionDuration for consistency
 				playerAi->apply_confusion(confusionDuration);
-				ctx.message_system->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
+				ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 			}
 		}
 		else
 		{
-			ctx.message_system->append_message_part(RED_YELLOW_PAIR, "A mimic");
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
-			ctx.message_system->finalize_message();
-			ctx.message_system->log("Player resisted mimic confusion");
+			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "A mimic");
+			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
+			ctx.messageSystem->finalize_message();
+			ctx.messageSystem->log("Player resisted mimic confusion");
 		}
 	}
 }

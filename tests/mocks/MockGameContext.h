@@ -35,7 +35,7 @@ struct MockGameContext
 	GameContext to_game_context()
 	{
 		return GameContext{
-			.message_system = &messages,
+			.messageSystem = &messages,
 			.dice = &dice,
 			.creature_manager = &creature_mgr,
 			.content_registry = &content_registry,

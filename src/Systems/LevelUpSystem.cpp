@@ -36,20 +36,20 @@ void LevelUpSystem::apply_level_up_benefits(Creature& owner, int newLevel, GameC
 
 	if (owner.get_creature_class() != CreatureClass::MONSTER)
 	{
-		ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "LEVEL UP! ");
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
+		ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "LEVEL UP! ");
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format("You are now level {}. ", newLevel));
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP, ", hpGained));
 		if (thac0_improved)
 		{
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
 				std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->get_thaco()));
 		}
-		ctx->message_system->finalize_message();
-		ctx->message_system->log(std::format("Level {} reached! Combat abilities improved.", newLevel));
+		ctx->messageSystem->finalize_message();
+		ctx->messageSystem->log(std::format("Level {} reached! Combat abilities improved.", newLevel));
 	}
 	else
 	{
-		ctx->message_system->log(std::format("{} reaches level {}.", owner.actorData.name, newLevel));
+		ctx->messageSystem->log(std::format("{} reaches level {}.", owner.actorData.name, newLevel));
 	}
 }
 
@@ -98,13 +98,13 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
 
 		if (owner.get_creature_class() != CreatureClass::MONSTER)
 		{
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "THAC0 improved");
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR,
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "THAC0 improved");
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR,
 				std::format(" from {} to {}!", oldTHAC0, newTHAC0));
-			ctx->message_system->finalize_message();
+			ctx->messageSystem->finalize_message();
 		}
 
-		ctx->message_system->log(std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
+		ctx->messageSystem->log(std::format("THAC0 improved: {} -> {}", oldTHAC0, newTHAC0));
 	}
 }
 
@@ -161,24 +161,24 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel, GameConte
 
 	if (owner.get_creature_class() != CreatureClass::MONSTER)
 	{
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Hit Points increased");
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " by ");
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(totalHPGain));
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " (");
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, diceType);
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, ": ");
-		ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(hitDiceRoll));
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Hit Points increased");
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " by ");
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, std::to_string(totalHPGain));
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " (");
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, diceType);
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, ": ");
+		ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(hitDiceRoll));
 		if (conBonus != 0)
 		{
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " + ");
-			ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, std::to_string(conBonus));
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " CON");
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " + ");
+			ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(conBonus));
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " CON");
 		}
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, ")");
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, ")");
+		ctx->messageSystem->finalize_message();
 	}
 
-	ctx->message_system->log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
+	ctx->messageSystem->log(std::format("HP increased by {} ({} rolled + {} CON bonus). Max HP now: {}",
 		totalHPGain,
 		hitDiceRoll,
 		conBonus,
@@ -240,11 +240,11 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
 		if (owner.get_attacks_per_round() < 2.0f)
 		{
 			owner.set_attacks_per_round(2.0f);
-			ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
-			ctx->message_system->finalize_message();
-			ctx->message_system->log("Fighter gained extra attack (2 attacks per round)");
+			ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can now attack 2 times per round.");
+			ctx->messageSystem->finalize_message();
+			ctx->messageSystem->log("Fighter gained extra attack (2 attacks per round)");
 		}
 	}
 	else if (newLevel >= 7)
@@ -252,18 +252,18 @@ void LevelUpSystem::apply_fighter_improvements(Creature& owner, int newLevel, Ga
 		if (owner.get_attacks_per_round() < 1.5f)
 		{
 			owner.set_attacks_per_round(1.5f);
-			ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
-			ctx->message_system->finalize_message();
-			ctx->message_system->log("Fighter gained extra attack (3/2 attacks per round)");
+			ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Extra Attack!");
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can now attack 3/2 times per round.");
+			ctx->messageSystem->finalize_message();
+			ctx->messageSystem->log("Fighter gained extra attack (3/2 attacks per round)");
 		}
 	}
 
 	if (newLevel % 3 == 0)
 	{
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Your martial prowess improves!");
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Your martial prowess improves!");
+		ctx->messageSystem->finalize_message();
 	}
 }
 
@@ -277,18 +277,18 @@ void LevelUpSystem::apply_rogue_improvements(Creature& owner, int newLevel, Game
 	int backstabMultiplier = calculate_backstab_multiplier(newLevel);
 	if (backstabMultiplier > calculate_backstab_multiplier(newLevel - 1))
 	{
-		ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Backstab improved!");
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " Damage multiplier: x");
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(backstabMultiplier));
-		ctx->message_system->finalize_message();
-		ctx->message_system->log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
+		ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Backstab improved!");
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " Damage multiplier: x");
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, std::to_string(backstabMultiplier));
+		ctx->messageSystem->finalize_message();
+		ctx->messageSystem->log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
 	}
 
 	if (newLevel % 2 == 0)
 	{
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Your thieving skills improve!");
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Your thieving skills improve!");
+		ctx->messageSystem->finalize_message();
 	}
 }
 
@@ -301,17 +301,17 @@ void LevelUpSystem::apply_cleric_improvements(Creature& owner, int newLevel, Gam
 
 	if (newLevel == 3 || newLevel == 5 || newLevel == 7 || newLevel == 9)
 	{
-		ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Turn Undead improved!");
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
-		ctx->message_system->finalize_message();
-		ctx->message_system->log(std::format("Cleric turn undead ability improved at level {}", newLevel));
+		ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Turn Undead improved!");
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
+		ctx->messageSystem->finalize_message();
+		ctx->messageSystem->log(std::format("Cleric turn undead ability improved at level {}", newLevel));
 	}
 
 	if (newLevel >= 2)
 	{
-		ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Your divine power grows stronger!");
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Your divine power grows stronger!");
+		ctx->messageSystem->finalize_message();
 	}
 }
 
@@ -327,18 +327,18 @@ void LevelUpSystem::apply_wizard_improvements(Creature& owner, int newLevel, Gam
 		int spellLevel = (newLevel + 1) / 2;
 		if (spellLevel <= 9)
 		{
-			ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "New spell level!");
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You can now cast level ");
-			ctx->message_system->append_message_part(GREEN_BLACK_PAIR, std::to_string(spellLevel));
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " spells.");
-			ctx->message_system->finalize_message();
-			ctx->message_system->log(std::format("Wizard can now cast level {} spells", spellLevel));
+			ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "New spell level!");
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can now cast level ");
+			ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, std::to_string(spellLevel));
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " spells.");
+			ctx->messageSystem->finalize_message();
+			ctx->messageSystem->log(std::format("Wizard can now cast level {} spells", spellLevel));
 		}
 	}
 
-	ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Your arcane knowledge deepens!");
-	ctx->message_system->finalize_message();
+	ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Your arcane knowledge deepens!");
+	ctx->messageSystem->finalize_message();
 }
 
 int LevelUpSystem::calculate_backstab_multiplier(int level)
@@ -369,10 +369,10 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
 		return;
 	}
 
-	ctx->message_system->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-	ctx->message_system->append_message_part(GREEN_BLACK_PAIR, "Ability Score Improvement!");
-	ctx->message_system->append_message_part(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
-	ctx->message_system->finalize_message();
+	ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
+	ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Ability Score Improvement!");
+	ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
+	ctx->messageSystem->finalize_message();
 
 	switch (owner.get_creature_class())
 	{
@@ -380,36 +380,36 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
 	case CreatureClass::FIGHTER:
 	{
 		owner.set_strength(std::min(18, owner.get_strength() + 1));
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Strength increased to {}!", owner.get_strength()));
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->finalize_message();
 		break;
 	}
 
 	case CreatureClass::ROGUE:
 	{
 		owner.set_dexterity(std::min(18, owner.get_dexterity() + 1));
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Dexterity increased to {}!", owner.get_dexterity()));
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->finalize_message();
 		break;
 	}
 
 	case CreatureClass::CLERIC:
 	{
 		owner.set_wisdom(std::min(18, owner.get_wisdom() + 1));
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Wisdom increased to {}!", owner.get_wisdom()));
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->finalize_message();
 		break;
 	}
 
 	case CreatureClass::WIZARD:
 	{
 		owner.set_intelligence(std::min(18, owner.get_intelligence() + 1));
-		ctx->message_system->append_message_part(GREEN_BLACK_PAIR,
+		ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
 			std::format("Intelligence increased to {}!", owner.get_intelligence()));
-		ctx->message_system->finalize_message();
+		ctx->messageSystem->finalize_message();
 		break;
 	}
 
@@ -419,7 +419,7 @@ void LevelUpSystem::apply_ability_score_improvement(Creature& owner, int newLeve
 	}
 	}
 
-	ctx->message_system->log(std::format("Ability score improved at level {}", newLevel));
+	ctx->messageSystem->log(std::format("Ability score improved at level {}", newLevel));
 }
 
 void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext* ctx)
@@ -469,9 +469,9 @@ void LevelUpSystem::apply_saving_throw_improvements(Creature& owner, int newLeve
 	{
 		if (owner.get_creature_class() != CreatureClass::MONSTER)
 		{
-			ctx->message_system->append_message_part(WHITE_BLACK_PAIR, "Saving throws improved!");
-			ctx->message_system->finalize_message();
+			ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Saving throws improved!");
+			ctx->messageSystem->finalize_message();
 		}
-		ctx->message_system->log(std::format("Saving throws improved at level {}", newLevel));
+		ctx->messageSystem->log(std::format("Saving throws improved at level {}", newLevel));
 	}
 }

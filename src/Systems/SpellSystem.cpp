@@ -673,7 +673,7 @@ bool SpellSystem::dispatch_effect(SpellEffectType effect, Creature& caster, Game
 
 	default:
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
 		return false;
 	}
 
@@ -684,7 +684,7 @@ bool SpellSystem::cast_spell_by_key(std::string_view key, Creature& caster, Game
 {
 	if (caster.has_state(ActorState::IS_SILENCED))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);
 		return false;
 	}
 	const SpellDefinition& def = get_by_key(key);
@@ -725,9 +725,9 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 
 	caster.destructible->set_hp(newHp);
 
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
-	ctx.message_system->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
+	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));
+	ctx.messageSystem->finalize_message();
 
 	return true;
 }
@@ -735,9 +735,9 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
 	ctx.buff_system->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
+	ctx.messageSystem->finalize_message();
 	return true;
 }
 
@@ -750,11 +750,11 @@ bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 
 	ctx.buff_system->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
 
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sanctuary! ");
-	ctx.message_system->append_message_part(
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Sanctuary! ");
+	ctx.messageSystem->append_message_part(
 		WHITE_BLACK_PAIR,
 		std::format("Divine protection shields you for {} turns.", duration));
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->finalize_message();
 	return true;
 }
 
@@ -770,7 +770,7 @@ bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
 	Vector2D target_pos{ 0, 0 };
 	if (!targeting.pick_tile(ctx, &target_pos, range))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Silence cancelled.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Silence cancelled.", true);
 		return false;
 	}
 
@@ -786,18 +786,18 @@ bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
 
 	if (!target)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "No creature at that location.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "No creature at that location.", true);
 		return false;
 	}
 
 	ctx.buff_system->add_buff(*target, BuffType::SILENCE, 0, duration, false);
 	SpellAnimations::animate_creature_hit(target->position, ctx);
 
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
-	ctx.message_system->append_message_part(
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
+	ctx.messageSystem->append_message_part(
 		WHITE_BLACK_PAIR,
 		std::format("{} is struck mute for {} turns.", target->get_name(), duration));
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->finalize_message();
 	return true;
 }
 
@@ -814,7 +814,7 @@ bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
 	Vector2D center{ 0, 0 };
 	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Web cancelled.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Web cancelled.", true);
 		return false;
 	}
 
@@ -842,19 +842,19 @@ bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
 
 	if (affected > 0)
 	{
-		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Web! ");
-		ctx.message_system->append_message_part(
+		ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Web! ");
+		ctx.messageSystem->append_message_part(
 			WHITE_BLACK_PAIR,
 			std::format(
 				"{} creature{} entangled for {} turns.",
 				affected,
 				affected == 1 ? " is" : "s are",
 				duration));
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->finalize_message();
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "The webs spread but catch nothing.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "The webs spread but catch nothing.", true);
 	}
 	return true;
 }
@@ -872,7 +872,7 @@ bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 	Vector2D center{ 0, 0 };
 	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
 		return false;
 	}
 
@@ -905,13 +905,13 @@ bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 		++affected;
 	}
 
-	ctx.message_system->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
-	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
 	if (affected > 0)
 	{
-		ctx.message_system->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
 	}
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->finalize_message();
 
 	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 	return true;
@@ -950,7 +950,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 
 	if (targets.empty())
 	{
-		ctx.message_system->message(RED_BLACK_PAIR, "No valid target in sight!", true);
+		ctx.messageSystem->message(RED_BLACK_PAIR, "No valid target in sight!", true);
 		return false;
 	}
 
@@ -990,10 +990,10 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	}
 
 	// Message
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, std::format("Magic Missile ({})! ", numMissiles));
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "Total ");
-	ctx.message_system->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, std::format("Magic Missile ({})! ", numMissiles));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Total ");
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
+	ctx.messageSystem->finalize_message();
 
 	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
 
@@ -1003,9 +1003,9 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
 	ctx.buff_system->add_buff(caster, BuffType::SHIELD, 4, 5, false); // Spell: ADD +4 AC
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
+	ctx.messageSystem->finalize_message();
 	return true;
 }
 
@@ -1042,14 +1042,14 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 
 	if (affected > 0)
 	{
-		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Sleep! ");
-		ctx.message_system->append_message_part(
+		ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Sleep! ");
+		ctx.messageSystem->append_message_part(
 			WHITE_BLACK_PAIR, std::format("{} creatures fall asleep.", affected));
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->finalize_message();
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Sleep spell has no effect.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Sleep spell has no effect.", true);
 	}
 
 	return true;
@@ -1090,14 +1090,14 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 
 	if (affected > 0)
 	{
-		ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Hold Person! ");
-		ctx.message_system->append_message_part(
+		ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Hold Person! ");
+		ctx.messageSystem->append_message_part(
 			WHITE_BLACK_PAIR, std::format("{} creatures paralyzed for {} turns.", affected, duration));
-		ctx.message_system->finalize_message();
+		ctx.messageSystem->finalize_message();
 	}
 	else
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "Hold Person has no effect.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Hold Person has no effect.", true);
 	}
 
 	return true;
@@ -1106,9 +1106,9 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 {
 	ctx.buff_system->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false); // Spell: ADD effect
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
-	ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
+	ctx.messageSystem->finalize_message();
 	return true;
 }
 
@@ -1141,16 +1141,16 @@ bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
 				caster.position = teleportPos;
 				ctx.map->compute_fov(ctx);
 
-				ctx.message_system->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
-				ctx.message_system->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
-				ctx.message_system->finalize_message();
+				ctx.messageSystem->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
+				ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
+				ctx.messageSystem->finalize_message();
 				return true;
 			}
 		}
 	}
 
 	// Failed to find a valid location
-	ctx.message_system->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
+	ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
 	return false;
 }
 
@@ -1160,7 +1160,7 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 	auto slots = get_spell_slots(casterClass, player.get_creature_level());
 	if (slots.empty())
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You cannot cast spells.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You cannot cast spells.", true);
 		return;
 	}
 
@@ -1185,16 +1185,16 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 		}
 	}
 
-	ctx.message_system->append_message_part(CYAN_BLACK_PAIR, "Spells memorized: ");
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Spells memorized: ");
 	for (size_t i = 0; i < player.memorizedSpells.size(); ++i)
 	{
 		if (i > 0)
 		{
-			ctx.message_system->append_message_part(WHITE_BLACK_PAIR, ", ");
+			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", ");
 		}
-		ctx.message_system->append_message_part(GREEN_BLACK_PAIR, get_by_key(player.memorizedSpells[i]).name);
+		ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, get_by_key(player.memorizedSpells[i]).name);
 	}
-	ctx.message_system->finalize_message();
+	ctx.messageSystem->finalize_message();
 }
 
 void SpellSystem::show_casting_menu(Player& player, GameContext& ctx)

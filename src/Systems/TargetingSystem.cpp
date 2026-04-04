@@ -23,7 +23,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 {
 	if (!ctx.player->has_state(ActorState::IS_RANGED))
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 		return Vector2D{ -1, -1 };
 	}
 
@@ -41,7 +41,7 @@ const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPo
 	Creature* actor = ctx.map->get_actor(targetPos, ctx);
 	if (!actor || actor == ctx.player)
 	{
-		ctx.message_system->message(WHITE_BLACK_PAIR, "No valid target there.", true);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "No valid target there.", true);
 		return Vector2D{ -1, -1 };
 	}
 
