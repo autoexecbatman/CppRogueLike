@@ -23,7 +23,7 @@ public:
 	[[nodiscard]] const std::unordered_map<std::string, TileRef>& all_tiles() const;
 
 private:
-	std::unordered_map<std::string, TileRef> m_item_tiles;
+	std::unordered_map<std::string, TileRef> itemTiles;
 };
 
 // end of file: ContentRegistry.h

@@ -84,6 +84,12 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 		break;
 	}
 
+	case GameKey::MOUSE_RIGHT:
+	{
+		keyPress = 0x19A;
+		break;
+	}
+
 	default:
 	{
 		keyPress = -1;

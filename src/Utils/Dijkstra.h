@@ -23,7 +23,11 @@ public:
 	// Heuristic function for A* search
 	double heuristic(Vector2D a, Vector2D b)
 	{
-		return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+		// Chebyshev distance (max of absolute differences)
+		// Admissible for 8-directional movement where diagonals cost same as cardinal
+		int dx = std::abs(a.x - b.x);
+		int dy = std::abs(a.y - b.y);
+		return static_cast<double>(std::max(dx, dy));
 	}
 
 private:

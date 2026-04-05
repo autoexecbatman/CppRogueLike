@@ -29,7 +29,7 @@ void LoadGame::on_selection(GameContext& ctx)
 {
 	// TODO: clear screen and show loading message (was curses clear/mvprintw/refresh)
 
-	ctx.state_manager->load_all(ctx);
+	ctx.stateManager->load_all(ctx);
 
 	// TODO: clear loading message after load completes (was curses clear/refresh)
 }
@@ -37,22 +37,22 @@ void LoadGame::on_selection(GameContext& ctx)
 #ifndef EMSCRIPTEN
 void RoomEditorEntry::on_selection(GameContext& ctx)
 {
-	ctx.room_editor->enter(*ctx.prefab_library);
+	ctx.roomEditor->enter(*ctx.prefabLibrary);
 }
 
 void ItemEditorEntry::on_selection(GameContext& ctx)
 {
-	ctx.item_editor->enter(ctx);
+	ctx.itemEditor->enter(ctx);
 }
 
 void MonsterEditorEntry::on_selection(GameContext& ctx)
 {
-	ctx.monster_editor->enter();
+	ctx.monsterEditor->enter();
 }
 
 void SpellEditorEntry::on_selection(GameContext& ctx)
 {
-	ctx.spell_editor->enter();
+	ctx.spellEditor->enter();
 }
 #endif
 
@@ -63,8 +63,8 @@ void Options::on_selection(GameContext& ctx)
 
 void Quit::on_selection(GameContext& ctx)
 {
-	ctx.game_state->set_run(false);
-	ctx.game_state->set_should_save(false);
+	ctx.gameState->set_run(false);
+	ctx.gameState->set_should_save(false);
 	ctx.messageSystem->log("You quit without saving!");
 }
 
@@ -238,10 +238,10 @@ void Menu::on_key(int key, GameContext& ctx)
 void Menu::menu(GameContext& ctx)
 {
 	// TODO: clear screen (was curses clear/refresh)
-	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
+	if (ctx.menuManager->is_game_initialized() && !isStartupMenu)
 	{
 		// For in-game menu, show the game world behind it
-		ctx.rendering_manager->render(ctx);
+		ctx.renderingManager->render(ctx);
 		ctx.gui->gui_render(ctx);
 	}
 
@@ -250,10 +250,10 @@ void Menu::menu(GameContext& ctx)
 	on_key(keyPress, ctx); // run the key press
 
 	// Restore full game view if returning to game
-	if (ctx.menu_manager->is_game_initialized() && !isStartupMenu)
+	if (ctx.menuManager->is_game_initialized() && !isStartupMenu)
 	{
 		// TODO: clear screen (was curses clear/refresh)
-		ctx.rendering_manager->render(ctx);
+		ctx.renderingManager->render(ctx);
 		ctx.gui->gui_render(ctx);
 	}
 }

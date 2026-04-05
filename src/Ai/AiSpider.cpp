@@ -834,7 +834,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 				int x = center.x + (int)(radius * cos(angle));
 				int y = center.y + (int)(radius * sin(angle));
 
-				Vector2D pos{ y, x };
+				Vector2D pos{ x, y };
 				if (is_valid_web_position(pos, ctx))
 				{
 					webPositions.push_back(pos);
@@ -850,7 +850,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 						int offX = x + ctx.dice->roll(-1, 1);
 						int offY = y + ctx.dice->roll(-1, 1);
 
-						Vector2D offPos{ offY, offX };
+						Vector2D offPos{ offX, offY };
 						if (is_valid_web_position(offPos, ctx))
 						{
 							webPositions.push_back(offPos);
@@ -869,14 +869,14 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 
 			for (int i = 0; i < numSpokes; i++)
 			{
-				float angle = (float)i * (2.0f * 3.14159f / numSpokes);
+				float angle = static_cast<float>(i) * (2.0f * 3.14159f / numSpokes);
 
 				for (int dist = 1; dist <= size; dist++)
 				{
 					int x = center.x + (int)(dist * cos(angle));
 					int y = center.y + (int)(dist * sin(angle));
 
-					Vector2D pos{ y, x };
+					Vector2D pos{ x, y };
 					if (is_valid_web_position(pos, ctx))
 					{
 						webPositions.push_back(pos);
@@ -892,7 +892,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 					int x = center.x + (int)(radius * cos(angle));
 					int y = center.y + (int)(radius * sin(angle));
 
-					Vector2D pos{ y, x };
+					Vector2D pos{ x, y };
 					if (is_valid_web_position(pos, ctx))
 					{
 						webPositions.push_back(pos);
@@ -984,7 +984,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 		}
 
 		// Create a new Web entity
-		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tile_config);
+		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tileConfig);
 		ctx.objects->emplace_back(std::move(web));
 	}
 }

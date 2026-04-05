@@ -47,16 +47,16 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 	{
 		return b.type == type;
 	};
-	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
+	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
 
-	if (it != creature.active_buffs.end())
+	if (it != creature.activeBuffs.end())
 	{
 		// AD&D 2e: Same buff type - take highest value, extend duration
 		if (value > it->value)
 		{
 			it->value = value; // Better buff, update value
 			it->turnsRemaining = duration; // Reset duration
-			it->is_set_effect = is_set_effect; // Update effect type
+			it->isSetEffect = is_set_effect; // Update effect type
 		}
 		else
 		{
@@ -71,7 +71,7 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 		newBuff.type = type;
 		newBuff.value = value;
 		newBuff.turnsRemaining = duration;
-		newBuff.is_set_effect = is_set_effect;
+		newBuff.isSetEffect = is_set_effect;
 
 		// Apply state effects (data-driven, OCP compliant)
 		if (buff_state_effects.contains(type))
@@ -79,7 +79,7 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 			creature.add_state(buff_state_effects.at(type));
 		}
 
-		creature.active_buffs.push_back(newBuff);
+		creature.activeBuffs.push_back(newBuff);
 	}
 }
 
@@ -96,7 +96,7 @@ void BuffSystem::remove_buff(Creature& creature, BuffType type) noexcept
 	{
 		return b.type == type;
 	};
-	std::erase_if(creature.active_buffs, matches_type);
+	std::erase_if(creature.activeBuffs, matches_type);
 }
 
 void BuffSystem::update_creature_buffs(Creature& creature) noexcept
@@ -109,7 +109,7 @@ void BuffSystem::update_creature_buffs(Creature& creature) noexcept
 			--b.turnsRemaining;
 		}
 	};
-	std::ranges::for_each(creature.active_buffs, decrement_timer);
+	std::ranges::for_each(creature.activeBuffs, decrement_timer);
 
 	// Clear states for all expiring buffs (data-driven, OCP compliant)
 	for (const auto& [buffType, state] : buff_state_effects)
@@ -118,7 +118,7 @@ void BuffSystem::update_creature_buffs(Creature& creature) noexcept
 		{
 			return b.type == buffType && b.turnsRemaining == 0;
 		};
-		auto expiring = creature.active_buffs | std::views::filter(is_expiring_buff);
+		auto expiring = creature.activeBuffs | std::views::filter(is_expiring_buff);
 
 		if (!std::ranges::empty(expiring))
 		{
@@ -131,13 +131,13 @@ void BuffSystem::update_creature_buffs(Creature& creature) noexcept
 	{
 		return b.turnsRemaining == 0;
 	};
-	std::erase_if(creature.active_buffs, is_expired);
+	std::erase_if(creature.activeBuffs, is_expired);
 }
 
 void BuffSystem::restore_loaded_buff_states(Creature& creature) noexcept
 {
 	// Restore state effects for all active buffs (idempotent - called after deserialization)
-	for (const auto& buff : creature.active_buffs)
+	for (const auto& buff : creature.activeBuffs)
 	{
 		if (buff.turnsRemaining > 0)
 		{
@@ -155,8 +155,8 @@ int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const no
 	{
 		return b.type == type;
 	};
-	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
-	return it != creature.active_buffs.end() ? it->value : 0;
+	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
+	return it != creature.activeBuffs.end() ? it->value : 0;
 }
 
 int BuffSystem::get_buff_turns(const Creature& creature, BuffType type) const noexcept
@@ -165,8 +165,8 @@ int BuffSystem::get_buff_turns(const Creature& creature, BuffType type) const no
 	{
 		return b.type == type;
 	};
-	auto it = std::ranges::find_if(creature.active_buffs, matches_type);
-	return it != creature.active_buffs.end() ? it->turnsRemaining : 0;
+	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
+	return it != creature.activeBuffs.end() ? it->turnsRemaining : 0;
 }
 
 bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcept
@@ -175,7 +175,7 @@ bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcep
 	{
 		return b.type == type;
 	};
-	return std::ranges::find_if(creature.active_buffs, matches_type) != creature.active_buffs.end();
+	return std::ranges::find_if(creature.activeBuffs, matches_type) != creature.activeBuffs.end();
 }
 
 int BuffSystem::calculate_ac_bonus(const Creature& creature) const noexcept
@@ -188,7 +188,7 @@ int BuffSystem::calculate_ac_bonus(const Creature& creature) const noexcept
 		return ac_affecting_buffs.contains(buff.type);
 	};
 
-	for (const auto& buff : creature.active_buffs | std::views::filter(is_ac_affecting))
+	for (const auto& buff : creature.activeBuffs | std::views::filter(is_ac_affecting))
 	{
 		total -= buff.value;
 	}
@@ -202,7 +202,7 @@ int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept
 	// Example: Bless gives +1, Prayer gives +1, total = +2
 	int total = 0;
 
-	for (const auto& buff : creature.active_buffs)
+	for (const auto& buff : creature.activeBuffs)
 	{
 		if (buff_hit_modifiers.contains(buff.type))
 		{
@@ -223,7 +223,7 @@ std::vector<BuffType> BuffSystem::remove_buffs_broken_by_attacking(Creature& cre
 
 	// Collect buffs to remove first to avoid iterator invalidation
 	std::vector<BuffType> buffs_to_remove;
-	for (const auto& buff : creature.active_buffs | std::views::filter(is_broken_by_attack))
+	for (const auto& buff : creature.activeBuffs | std::views::filter(is_broken_by_attack))
 	{
 		buffs_to_remove.push_back(buff.type);
 	}

@@ -51,21 +51,21 @@ struct Consumable
 	ConsumableEffect effect{ ConsumableEffect::NONE };
 	int amount{ 0 };
 	int duration{ 0 };
-	BuffType buff_type{ BuffType::NONE };
-	bool is_set_effect{ false };
+	BuffType buffType{ BuffType::NONE };
+	bool isSetEffect{ false };
 };
 
 struct Weapon
 {
 	bool ranged{ false };
-	HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
-	WeaponSize weapon_size{ WeaponSize::MEDIUM };
+	HandRequirement handRequirement{ HandRequirement::ONE_HANDED };
+	WeaponSize weaponSize{ WeaponSize::MEDIUM };
 
 	bool is_ranged() const noexcept { return ranged; }
-	bool is_two_handed() const noexcept { return hand_requirement == HandRequirement::TWO_HANDED; }
-	WeaponSize get_weapon_size() const noexcept { return weapon_size; }
-	HandRequirement get_hand_requirement() const noexcept { return hand_requirement; }
-	bool can_be_off_hand() const noexcept { return weapon_size <= WeaponSize::SMALL; }
+	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
+	WeaponSize get_weapon_size() const noexcept { return weaponSize; }
+	HandRequirement get_hand_requirement() const noexcept { return handRequirement; }
+	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL; }
 	bool validate_dual_wield(const Item* main_hand, const Item* off_hand) const;
 	EquipmentSlot get_preferred_slot(const Creature* creature) const;
 };
@@ -76,13 +76,13 @@ struct Shield
 
 struct TargetedScroll
 {
-	TargetMode target_mode{ TargetMode::AUTO_NEAREST };
-	ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
+	TargetMode targetMode{ TargetMode::AUTO_NEAREST };
+	ScrollAnimation scrollAnimation{ ScrollAnimation::NONE };
 	int range{ 0 };
 	int damage{ 0 };
-	int confuse_turns{ 0 };
-	BuffType buff_type{ BuffType::NONE };
-	int buff_duration{ 0 };
+	int confuseTurns{ 0 };
+	BuffType buffType{ BuffType::NONE };
+	int buffDuration{ 0 };
 };
 
 struct Teleporter
@@ -96,17 +96,17 @@ struct Gold
 
 struct Food
 {
-	int nutrition_value{ 0 };
+	int nutritionValue{ 0 };
 };
 
 struct CorpseFood
 {
-	int nutrition_value{ 0 };
+	int nutritionValue{ 0 };
 };
 
 struct Armor
 {
-	int armor_class{ 0 };
+	int armorClass{ 0 };
 };
 
 struct MagicalHelm
@@ -134,44 +134,44 @@ struct OriginalStats
 
 struct JewelryAmulet
 {
-	int str_bonus{ 0 };
-	int dex_bonus{ 0 };
-	int con_bonus{ 0 };
-	int int_bonus{ 0 };
-	int wis_bonus{ 0 };
-	int cha_bonus{ 0 };
+	int strBonus{ 0 };
+	int dexBonus{ 0 };
+	int conBonus{ 0 };
+	int intBonus{ 0 };
+	int wisBonus{ 0 };
+	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool is_set_mode{ false };
-	OriginalStats original_stats{};
+	bool isSetMode{ false };
+	OriginalStats originalStats{};
 };
 
 struct Gauntlets
 {
-	int str_bonus{ 0 };
-	int dex_bonus{ 0 };
-	int con_bonus{ 0 };
-	int int_bonus{ 0 };
-	int wis_bonus{ 0 };
-	int cha_bonus{ 0 };
+	int strBonus{ 0 };
+	int dexBonus{ 0 };
+	int conBonus{ 0 };
+	int intBonus{ 0 };
+	int wisBonus{ 0 };
+	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool is_set_mode{ false };
-	OriginalStats original_stats{};
+	bool isSetMode{ false };
+	OriginalStats originalStats{};
 };
 
 struct Girdle
 {
-	int str_bonus{ 0 };
-	int dex_bonus{ 0 };
-	int con_bonus{ 0 };
-	int int_bonus{ 0 };
-	int wis_bonus{ 0 };
-	int cha_bonus{ 0 };
+	int strBonus{ 0 };
+	int dexBonus{ 0 };
+	int conBonus{ 0 };
+	int intBonus{ 0 };
+	int wisBonus{ 0 };
+	int chaBonus{ 0 };
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
-	bool is_set_mode{ false };
-	OriginalStats original_stats{};
+	bool isSetMode{ false };
+	OriginalStats originalStats{};
 };
 
 struct Amulet

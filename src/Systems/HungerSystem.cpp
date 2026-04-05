@@ -66,6 +66,11 @@ std::string HungerSystem::get_hunger_state_string() const
 		return "Dying";
 	}
 
+	default:
+	{
+		return "Unknown";
+	}
+
 	}
 }
 
@@ -264,29 +269,29 @@ void HungerSystem::update_hunger_state(GameContext& ctx)
 
 void HungerSystem::save(json& j) const
 {
-	j["hunger_value"] = hungerValue;
-	j["hunger_max"] = hungerMax;
-	j["current_state"] = static_cast<int>(currentState);
-	j["well_fed_message_shown"] = wellFedMessageShown;
+	j["hungerValue"] = hungerValue;
+	j["hungerMax"] = hungerMax;
+	j["currentState"] = static_cast<int>(currentState);
+	j["wellFedMessageShown"] = wellFedMessageShown;
 }
 
 void HungerSystem::load(GameContext& ctx, const json& j)
 {
-	if (j.contains("hunger_value"))
+	if (j.contains("hungerValue"))
 	{
-		hungerValue = j["hunger_value"];
+		hungerValue = j["hungerValue"];
 	}
-	if (j.contains("hunger_max"))
+	if (j.contains("hungerMax"))
 	{
-		hungerMax = j["hunger_max"];
+		hungerMax = j["hungerMax"];
 	}
-	if (j.contains("current_state"))
+	if (j.contains("currentState"))
 	{
-		currentState = static_cast<HungerState>(j["current_state"]);
+		currentState = static_cast<HungerState>(j["currentState"]);
 	}
-	if (j.contains("well_fed_message_shown"))
+	if (j.contains("wellFedMessageShown"))
 	{
-		wellFedMessageShown = j["well_fed_message_shown"];
+		wellFedMessageShown = j["wellFedMessageShown"];
 	}
 
 	// Update hunger state based on loaded values to ensure consistency

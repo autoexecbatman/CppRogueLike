@@ -30,6 +30,6 @@ struct Buff
 	BuffType type{ BuffType::INVISIBILITY };
 	int value{ 0 }; // Bonus amount (0 for binary buffs like invisibility)
 	int turnsRemaining{ 0 };
-	bool is_set_effect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
+	bool isSetEffect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
 };

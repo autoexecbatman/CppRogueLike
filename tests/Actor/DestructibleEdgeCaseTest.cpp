@@ -44,7 +44,7 @@ protected:
 		ctx = mock.to_game_context();
 		ctx.player = player.get();
 		ctx.creatures = &creatures;
-		ctx.data_manager = &data_manager;
+		ctx.dataManager = &data_manager;
 	}
 
 	void TearDown() override
@@ -346,7 +346,7 @@ TEST_F(DestructibleEdgeCaseTest, PlayerDeath_SetsDefeatStatus)
 	player->destructible->take_damage(*player, 10, ctx);
 
 	EXPECT_TRUE(player->destructible->is_dead());
-	EXPECT_EQ(ctx.game_state->get_game_status(), GameStatus::DEFEAT);
+	EXPECT_EQ(ctx.gameState->get_game_status(), GameStatus::DEFEAT);
 }
 
 // ----------------------------------------------------------------------------
@@ -535,7 +535,7 @@ TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_RemovesDeadFromVector)
 	creatures[0]->destructible->take_damage(*creatures[0], 1000, ctx);
 	EXPECT_TRUE(creatures[0]->destructible->is_dead());
 
-	ctx.creature_manager->cleanup_dead_creatures(creatures);
+	ctx.creatureManager->cleanup_dead_creatures(creatures);
 
 	EXPECT_EQ(creatures.size(), 0) << "Dead creatures should be removed after cleanup";
 }
@@ -548,7 +548,7 @@ TEST_F(DestructibleEdgeCaseTest, CleanupDeadCreatures_KeepsAliveCreatures)
 	creatures[0]->destructible->take_damage(*creatures[0], 10, ctx);
 	EXPECT_FALSE(creatures[0]->destructible->is_dead());
 
-	ctx.creature_manager->cleanup_dead_creatures(creatures);
+	ctx.creatureManager->cleanup_dead_creatures(creatures);
 
 	EXPECT_EQ(creatures.size(), 1) << "Alive creatures should not be removed";
 }
@@ -562,7 +562,7 @@ TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup)
 	EXPECT_TRUE(creatures[0]->destructible->is_dead());
 	EXPECT_EQ(creatures.size(), 1) << "Dead creature still in list before cleanup";
 
-	ctx.creature_manager->cleanup_dead_creatures(creatures);
+	ctx.creatureManager->cleanup_dead_creatures(creatures);
 	EXPECT_EQ(creatures.size(), 0) << "Dead creature removed after cleanup";
 }
 
@@ -718,7 +718,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionDrain_CanCauseDeath)
 	player->destructible->update_constitution_bonus(*player, ctx);
 
 	EXPECT_TRUE(player->destructible->is_dead());
-	EXPECT_EQ(ctx.game_state->get_game_status(), GameStatus::DEFEAT);
+	EXPECT_EQ(ctx.gameState->get_game_status(), GameStatus::DEFEAT);
 }
 
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_InvalidConstitutionReturnsZero)

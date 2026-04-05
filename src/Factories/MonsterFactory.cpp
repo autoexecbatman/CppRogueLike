@@ -121,7 +121,7 @@ MonsterFactory::MonsterFactory()
 			.levelScaling = 0.0f,
 			.createFunc = [](Vector2D pos, GameContext& ctx)
 			{
-				const int dungeonLevel = ctx.level_manager->get_dungeon_level();
+				const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 				if (ShopkeeperFactory::should_spawn_shopkeeper(dungeonLevel, ctx))
 				{
 					ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(pos, dungeonLevel, ctx));

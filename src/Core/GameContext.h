@@ -43,7 +43,7 @@ class PrefabLibrary;
 class Stairs;
 class Object;
 class BaseMenu;
-struct Vector2D;
+#include "../Utils/Vector2D.h"
 struct DungeonRoom;
 class Renderer;
 class InputSystem;
@@ -123,51 +123,54 @@ struct GameContext
 	RandomDice* dice{ nullptr };
 
 	// Managers
-	CreatureManager* creature_manager{ nullptr };
-	LevelManager* level_manager{ nullptr };
-	RenderingManager* rendering_manager{ nullptr };
-	InputHandler* input_handler{ nullptr };
-	GameStateManager* state_manager{ nullptr };
-	MenuManager* menu_manager{ nullptr };
-	DisplayManager* display_manager{ nullptr };
-	GameLoopCoordinator* game_loop_coordinator{ nullptr };
-	DataManager* data_manager{ nullptr };
+	CreatureManager* creatureManager{ nullptr };
+	LevelManager* levelManager{ nullptr };
+	RenderingManager* renderingManager{ nullptr };
+	InputHandler* inputHandler{ nullptr };
+	GameStateManager* stateManager{ nullptr };
+	MenuManager* menuManager{ nullptr };
+	DisplayManager* displayManager{ nullptr };
+	GameLoopCoordinator* gameLoopCoordinator{ nullptr };
+	DataManager* dataManager{ nullptr };
 
 	// Rendering
 	Renderer* renderer{ nullptr };
-	InputSystem* input_system{ nullptr };
+	InputSystem* inputSystem{ nullptr };
 
 	// Specialized systems
 	TargetingSystem* targeting{ nullptr };
-	HungerSystem* hunger_system{ nullptr };
-	BuffSystem* buff_system{ nullptr };
-	FloatingTextSystem* floating_text{ nullptr };
-	AnimationSystem* anim_system{ nullptr };
-	ContentRegistry* content_registry{ nullptr };
+	HungerSystem* hungerSystem{ nullptr };
+	BuffSystem* buffSystem{ nullptr };
+	FloatingTextSystem* floatingText{ nullptr };
+	AnimationSystem* animSystem{ nullptr };
+	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
 	Dijkstra* pathfinder{ nullptr };  // Persistent pathfinding object (reused across turns)
 #ifndef EMSCRIPTEN
-	ContentEditor* content_editor{ nullptr };
-	DecorEditor* decor_editor{ nullptr };
-	RoomEditor* room_editor{ nullptr };
-	ItemEditor* item_editor{ nullptr };
-	MonsterEditor* monster_editor{ nullptr };
-	SpellEditor* spell_editor{ nullptr };
-	PrefabLibrary* prefab_library{ nullptr };
+	ContentEditor* contentEditor{ nullptr };
+	DecorEditor* decorEditor{ nullptr };
+	RoomEditor* roomEditor{ nullptr };
+	ItemEditor* itemEditor{ nullptr };
+	MonsterEditor* monsterEditor{ nullptr };
+	SpellEditor* spellEditor{ nullptr };
+	PrefabLibrary* prefabLibrary{ nullptr };
 #endif
-	const TileConfig* tile_config{ nullptr };
+	const TileConfig* tileConfig{ nullptr };
 
 	// Game world data
 	Stairs* stairs{ nullptr };
 	std::vector<std::unique_ptr<Object>>* objects{ nullptr };
 	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
-	struct InventoryData* inventory_data{ nullptr };
+	struct InventoryData* inventoryData{ nullptr };
 	std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
 	std::vector<DungeonRoom>* rooms{ nullptr };
 
 	// UI Collections
 	std::deque<std::unique_ptr<BaseMenu>>* menus{ nullptr };
 
+	// Mouse path overlay — written by AiPlayer, read by RenderingManager
+	std::vector<Vector2D>* mousePathOverlay{ nullptr };
+
 	// Game state
-	GameState* game_state{ nullptr };
+	GameState* gameState{ nullptr };
 };

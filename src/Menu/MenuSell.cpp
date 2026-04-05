@@ -77,14 +77,14 @@ void MenuSell::menu_print_state(size_t state)
 
 void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx)
 {
-	if (InventoryOperations::is_inventory_empty(seller.inventory_data) ||
-		currentState >= InventoryOperations::get_item_count(seller.inventory_data))
+	if (InventoryOperations::is_inventory_empty(seller.inventoryData) ||
+		currentState >= InventoryOperations::get_item_count(seller.inventoryData))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
-	const Item* item = InventoryOperations::get_item_at(seller.inventory_data, currentState);
+	const Item* item = InventoryOperations::get_item_at(seller.inventoryData, currentState);
 	if (!item)
 	{
 		ctx.messageSystem->log("Error: Attempted to sell a null item.");
@@ -102,16 +102,16 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 	if (shopkeeper.get_gold() >= price)
 	{
 		// Remove item from seller
-		auto removed_item = InventoryOperations::remove_item_at(seller.inventory_data, currentState);
+		auto removed_item = InventoryOperations::remove_item_at(seller.inventoryData, currentState);
 		if (removed_item.has_value())
 		{
 			shopkeeper.adjust_gold(-price);
 			seller.adjust_gold(price);
 
-			auto add_result = InventoryOperations::add_item(shopkeeper.inventory_data, std::move(*removed_item));
+			auto add_result = InventoryOperations::add_item(shopkeeper.inventoryData, std::move(*removed_item));
 			if (!add_result.has_value())
 			{
-				InventoryOperations::add_item(seller.inventory_data, std::move(*removed_item));
+				InventoryOperations::add_item(seller.inventoryData, std::move(*removed_item));
 				shopkeeper.adjust_gold(price);
 				seller.adjust_gold(-price);
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
@@ -119,9 +119,9 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 			}
 
 			// Adjust currentState bounds
-			if (currentState >= InventoryOperations::get_item_count(seller.inventory_data) && !InventoryOperations::is_inventory_empty(seller.inventory_data))
+			if (currentState >= InventoryOperations::get_item_count(seller.inventoryData) && !InventoryOperations::is_inventory_empty(seller.inventoryData))
 			{
-				currentState = InventoryOperations::get_item_count(seller.inventory_data) - 1;
+				currentState = InventoryOperations::get_item_count(seller.inventoryData) - 1;
 			}
 
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
@@ -152,16 +152,16 @@ MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
 		menu_width = 60;
 	}
 
-	populate_items(player.inventory_data.items);
+	populate_items(player.inventoryData.items);
 	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
 
-	if (InventoryOperations::is_inventory_empty(player.inventory_data))
+	if (InventoryOperations::is_inventory_empty(player.inventoryData))
 	{
 		currentState = 0;
 	}
-	else if (currentState >= player.inventory_data.items.size())
+	else if (currentState >= player.inventoryData.items.size())
 	{
-		currentState = player.inventory_data.items.size() - 1;
+		currentState = player.inventoryData.items.size() - 1;
 	}
 }
 
@@ -173,16 +173,16 @@ MenuSell::~MenuSell()
 void MenuSell::draw_content()
 {
 	// Player inventory is always initialized - no need to check
-	populate_items(player.inventory_data.items);
+	populate_items(player.inventoryData.items);
 
 	// Validate currentState after repopulating
-	if (InventoryOperations::is_inventory_empty(player.inventory_data))
+	if (InventoryOperations::is_inventory_empty(player.inventoryData))
 	{
 		currentState = 0;
 	}
-	else if (currentState >= player.inventory_data.items.size())
+	else if (currentState >= player.inventoryData.items.size())
 	{
-		currentState = player.inventory_data.items.size() - 1;
+		currentState = player.inventoryData.items.size() - 1;
 	}
 
 	// Draw all menu items efficiently
@@ -220,7 +220,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 	case 'w':
 	{
 		// Don't allow navigation if no sellable items
-		if (InventoryOperations::is_inventory_empty(player.inventory_data))
+		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
 			return;
 		}
@@ -239,7 +239,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 	case 's':
 	{
 		// Don't allow navigation if no sellable items
-		if (InventoryOperations::is_inventory_empty(player.inventory_data))
+		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
 			return;
 		}
@@ -255,7 +255,7 @@ void MenuSell::on_key(int key, GameContext& ctx)
 	case 10: // Enter key
 	{
 		// Only allow selling if player actually has items
-		if (!InventoryOperations::is_inventory_empty(player.inventory_data) && !menuItems.empty())
+		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
 		{
 			handle_sell(nullptr, shopkeeper, player, ctx);
 			menu_mark_dirty(); // Redraw after sale

@@ -48,7 +48,7 @@ void ItemFactory::load_from_registry()
 	for (const auto& key : ItemCreator::get_all_keys())
 	{
 		const ItemParams& params = ItemCreator::get_params(key);
-		if (params.base_weight <= 0)
+		if (params.baseWeight <= 0)
 			continue;
 
 		std::string capturedKey = key;
@@ -56,27 +56,27 @@ void ItemFactory::load_from_registry()
 			? std::function<void(Vector2D, GameContext&)>{
 				  [](Vector2D pos, GameContext& ctx)
 				  {
-					  const int level = ctx.level_manager->get_dungeon_level();
+					  const int level = ctx.levelManager->get_dungeon_level();
 					  const int amount = ctx.dice->roll(level * 3, level * 10);
 					  InventoryOperations::add_item(
-						  *ctx.inventory_data,
-						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.content_registry));
+						  *ctx.inventoryData,
+						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry));
 				  }
 			  }
 			: std::function<void(Vector2D, GameContext&)>{ [capturedKey](Vector2D pos, GameContext& ctx)
 				  {
 					  InventoryOperations::add_item(
-						  *ctx.inventory_data,
-						  ItemCreator::create(capturedKey, pos, *ctx.content_registry));
+						  *ctx.inventoryData,
+						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry));
 				  } };
 
 		add_item_type(
 			{
 				std::string{ params.name },
-				params.base_weight,
-				params.level_minimum,
-				params.level_maximum,
-				params.level_scaling,
+				params.baseWeight,
+				params.levelMin,
+				params.levelMax,
+				params.levelScaling,
 				std::string{ params.category },
 				std::move(createFunc)
 			});
@@ -90,30 +90,30 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 		add_item_type(
 			{
 				rule.category,
-				rule.base_weight,
-				rule.level_minimum,
-				rule.level_maximum,
-				rule.level_scaling,
+				rule.baseWeight,
+				rule.levelMin,
+				rule.levelMax,
+				rule.levelScaling,
 				rule.category,
 				[rule](Vector2D pos, GameContext& ctx)
 				{
-					const int idx = ctx.dice->roll(0, static_cast<int>(rule.item_pool.size()) - 1);
-					const std::string_view baseKey = rule.item_pool[idx];
-					if (rule.enhancement_category == EnhancedItemCategory::WEAPON)
+					const int idx = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
+					const std::string_view baseKey = rule.itemPool[idx];
+					if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 					{
 						auto enh = ItemEnhancement::generate_weapon_enhancement();
 						InventoryOperations::add_item(
-							*ctx.inventory_data,
+							*ctx.inventoryData,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.content_registry));
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
 					}
 					else
 					{
 						auto enh = ItemEnhancement::generate_armor_enhancement();
 						InventoryOperations::add_item(
-							*ctx.inventory_data,
+							*ctx.inventoryData,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.content_registry));
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
 					}
 				}
 			});
@@ -162,9 +162,9 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
 	// Create gold pile
-	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tile_config->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
+	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tileConfig->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
 	goldPile->behavior = Gold{ goldAmount };
-	add_item(*ctx.inventory_data, std::move(goldPile));
+	add_item(*ctx.inventoryData, std::move(goldPile));
 
 	// Generate other random items
 	for (int i = 0; i < itemCount; i++)
@@ -362,21 +362,21 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 		for (const auto& rule : rules)
 		{
 			const int idx = ctx.dice->roll(
-				0, static_cast<int>(rule.item_pool.size()) - 1);
-			const std::string_view baseKey = rule.item_pool[idx];
-			if (rule.enhancement_category == EnhancedItemCategory::WEAPON)
+				0, static_cast<int>(rule.itemPool.size()) - 1);
+			const std::string_view baseKey = rule.itemPool[idx];
+			if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 			{
 				auto enh = ItemEnhancement::generate_weapon_enhancement();
 				InventoryOperations::add_item(
-					*ctx.inventory_data,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.content_registry));
+					*ctx.inventoryData,
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
 			}
 			else
 			{
 				auto enh = ItemEnhancement::generate_armor_enhancement();
 				InventoryOperations::add_item(
-					*ctx.inventory_data,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.content_registry));
+					*ctx.inventoryData,
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
 			}
 		}
 	};

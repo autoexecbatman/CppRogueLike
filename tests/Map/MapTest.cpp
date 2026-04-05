@@ -45,7 +45,7 @@ protected:
         );
 
         ctx.player = player.get();
-        ctx.data_manager = &data_manager;
+        ctx.dataManager = &data_manager;
         ctx.messageSystem = &message_system;
         ctx.dice = &dice;
         ctx.creatures = &creatures;

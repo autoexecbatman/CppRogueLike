@@ -183,7 +183,7 @@ void TargetingSystem::animate_projectile(
 	char projectileSymbol,
 	int colorPair) const
 {
-	if (!ctx.renderer || !ctx.rendering_manager)
+	if (!ctx.renderer || !ctx.renderingManager)
 	{
 		return;
 	}
@@ -211,7 +211,7 @@ void TargetingSystem::animate_projectile(
 			int sy = pos.y * tileSize - ctx.renderer->get_camera_y() + half;
 
 			ctx.renderer->begin_frame();
-			ctx.rendering_manager->render(ctx);
+			ctx.renderingManager->render(ctx);
 			DrawCircle(sx, sy, r, Color{ 255, 220, 50, 230 }); // yellow shell
 			DrawCircle(sx, sy, r * 0.5f, Color{ 255, 255, 255, 220 }); // white core
 			ctx.renderer->end_frame();
@@ -271,7 +271,7 @@ bool TargetingSystem::run_targeting_loop(
 	int maxRange,
 	int aoe_radius) const
 {
-	if (!ctx.renderer || !ctx.rendering_manager || !ctx.input_system || !ctx.map || !ctx.player)
+	if (!ctx.renderer || !ctx.renderingManager || !ctx.inputSystem || !ctx.map || !ctx.player)
 	{
 		return false;
 	}
@@ -283,7 +283,7 @@ bool TargetingSystem::run_targeting_loop(
 	while (picking && !WindowShouldClose())
 	{
 		ctx.renderer->begin_frame();
-		ctx.rendering_manager->render(ctx);
+		ctx.renderingManager->render(ctx);
 
 		draw_range_indicator(ctx, ctx.player->position, maxRange);
 		draw_los(ctx, cursor);
@@ -313,8 +313,8 @@ bool TargetingSystem::run_targeting_loop(
 		ctx.renderer->draw_text(Vector2D{ 4, 4 }, "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel", WHITE_BLACK_PAIR);
 		ctx.renderer->end_frame();
 
-		ctx.input_system->poll();
-		GameKey key = ctx.input_system->get_key();
+		ctx.inputSystem->poll();
+		GameKey key = ctx.inputSystem->get_key();
 
 		Vector2D move{ 0, 0 };
 		switch (key)
@@ -426,7 +426,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 		process_ranged_attack(ctx, *ctx.player, targetPos);
 
 		// Clean up dead creatures after ranged combat
-		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 	}
 }
 
@@ -486,7 +486,7 @@ TargetResult TargetingSystem::acquire_targets(GameContext& ctx, TargetMode mode,
 
 TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const
 {
-	const auto& monster = ctx.creature_manager->get_closest_monster(*ctx.creatures, origin, range);
+	const auto& monster = ctx.creatureManager->get_closest_monster(*ctx.creatures, origin, range);
 	if (!monster)
 	{
 		return {};

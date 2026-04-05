@@ -87,7 +87,7 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 					player.memorizedSpells.erase(it);
 				}
 			}
-			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			menu_set_run_false();
 		}
 	}
@@ -159,6 +159,6 @@ void MenuSpellCast::menu(GameContext& ctx)
 
 	if (!run)
 	{
-		ctx.rendering_manager->render(ctx);
+		ctx.renderingManager->render(ctx);
 	}
 }

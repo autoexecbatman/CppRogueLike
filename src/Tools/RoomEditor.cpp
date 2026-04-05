@@ -41,7 +41,7 @@ void RoomEditor::exit(GameContext& ctx)
 
 void RoomEditor::tick(GameContext& ctx)
 {
-	m_tile_config = ctx.tile_config;
+	m_tile_config = ctx.tileConfig;
 	handle_input(ctx);
 
 	ctx.renderer->begin_frame();

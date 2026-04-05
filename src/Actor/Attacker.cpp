@@ -36,6 +36,7 @@ Attacker::Attacker(const DamageInfo& damage)
 
 void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
 {
+	// TODO: dynamic_cast smell probably should be refactored to use polymorphism.
 	auto* player = dynamic_cast<Player*>(&attacker);
 	if (player)
 	{
@@ -103,12 +104,12 @@ void Attacker::perform_single_attack(
 
 	// Validate strength attribute
 	const int strIndex = attacker.get_strength() - 1;
-	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.data_manager->get_strength_attributes().size())
+	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.dataManager->get_strength_attributes().size())
 	{
 		ctx.messageSystem->log(std::format("ERROR: Invalid strength {} for {}", attacker.get_strength(), attacker.actorData.name));
 		return;
 	}
-	const auto& strengthAttr = ctx.data_manager->get_strength_attributes().at(strIndex);
+	const auto& strengthAttr = ctx.dataManager->get_strength_attributes().at(strIndex);
 
 	// Get damage and roll dice
 	const DamageInfo attackDamage = get_attack_damage(attacker);
@@ -141,9 +142,9 @@ void Attacker::perform_single_attack(
 
 		if (finalDamage > 0)
 		{
-			if (ctx.anim_system)
+			if (ctx.animSystem)
 			{
-				ctx.anim_system->spawn_melee_hit(target.position.x, target.position.y);
+				ctx.animSystem->spawn_melee_hit(target.position.x, target.position.y);
 			}
 			target.destructible->take_damage(target, finalDamage, ctx, attackDamage.damageType);
 		}
@@ -161,7 +162,7 @@ void Attacker::perform_single_attack(
 	}
 
 	// AD&D 2e: Remove buffs that break when attacking (Invisibility, Sanctuary, etc.) - OCP compliant
-	const auto broken_buffs = ctx.buff_system->remove_buffs_broken_by_attacking(attacker);
+	const auto broken_buffs = ctx.buffSystem->remove_buffs_broken_by_attacking(attacker);
 
 	// Show player notification for broken buffs
 	if (attacker.uniqueId == ctx.player->uniqueId)
@@ -216,9 +217,9 @@ int Attacker::calculate_to_hit_roll(
 	if (attacker.has_state(ActorState::IS_RANGED))
 	{
 		const int dexIndex = attacker.get_dexterity() - 1;
-		if (dexIndex >= 0 && static_cast<size_t>(dexIndex) < ctx.data_manager->get_dexterity_attributes().size())
+		if (dexIndex >= 0 && static_cast<size_t>(dexIndex) < ctx.dataManager->get_dexterity_attributes().size())
 		{
-			const auto& dexAttr = ctx.data_manager->get_dexterity_attributes().at(dexIndex);
+			const auto& dexAttr = ctx.dataManager->get_dexterity_attributes().at(dexIndex);
 			hitModifier += dexAttr.MissileAttackAdj;
 
 			if (dexAttr.MissileAttackAdj != 0)
@@ -232,7 +233,7 @@ int Attacker::calculate_to_hit_roll(
 	}
 
 	// AD&D 2e: Add all buff-based hit modifiers (Bless, Prayer, etc.) - OCP compliant
-	hitModifier += ctx.buff_system->calculate_hit_modifier(attacker);
+	hitModifier += ctx.buffSystem->calculate_hit_modifier(attacker);
 
 	// AD&D 2e: Add backstab bonus
 	hitModifier += backstab.hitBonus;
@@ -332,6 +333,7 @@ void Attacker::log_attack_miss(
 
 DamageInfo Attacker::get_attack_damage(Creature& attacker) const
 {
+	// TODO: dynamic_cast smell probably should be refactored to use polymorphism.
 	auto* player = dynamic_cast<Player*>(&attacker);
 	if (player)
 	{

@@ -103,9 +103,9 @@ void MenuName::menu_name(GameContext& ctx)
 
 	draw_name_screen(ctx);
 
-	if (!run && ctx.menu_manager->is_game_initialized())
+	if (!run && ctx.menuManager->is_game_initialized())
 	{
-		ctx.rendering_manager->restore_game_display();
+		ctx.renderingManager->restore_game_display();
 	}
 }
 

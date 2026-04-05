@@ -113,7 +113,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(GameContext& ctx)
 
 std::unique_ptr<Item> ShopKeeper::generate_random_weapon(GameContext& ctx)
 {
-	const int level = ctx.level_manager->get_dungeon_level();
+	const int level = ctx.levelManager->get_dungeon_level();
 	auto item = ItemCreator::create_random_of_category("weapon", { 0, 0 }, ctx, level);
 
 	if (item && ctx.dice->roll(1, 100) <= 40)
@@ -124,7 +124,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_weapon(GameContext& ctx)
 
 std::unique_ptr<Item> ShopKeeper::generate_random_armor(GameContext& ctx)
 {
-	const int level = ctx.level_manager->get_dungeon_level();
+	const int level = ctx.levelManager->get_dungeon_level();
 	auto item = ItemCreator::create_random_of_category("armor", { 0, 0 }, ctx, level);
 
 	if (item && ctx.dice->roll(1, 100) <= 35)
@@ -135,20 +135,20 @@ std::unique_ptr<Item> ShopKeeper::generate_random_armor(GameContext& ctx)
 
 std::unique_ptr<Item> ShopKeeper::generate_random_potion(GameContext& ctx)
 {
-	const int level = ctx.level_manager->get_dungeon_level();
+	const int level = ctx.levelManager->get_dungeon_level();
 	return ItemCreator::create_random_of_category("potion", { 0, 0 }, ctx, level);
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_scroll(GameContext& ctx)
 {
-	const int level = ctx.level_manager->get_dungeon_level();
+	const int level = ctx.levelManager->get_dungeon_level();
 	return ItemCreator::create_random_of_category("scroll", { 0, 0 }, ctx, level);
 }
 
 std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(GameContext& ctx)
 {
 	Vector2D shop_pos{ 0, 0 };
-	const int level = ctx.level_manager->get_dungeon_level();
+	const int level = ctx.levelManager->get_dungeon_level();
 
 	std::unique_ptr<Item> item;
 	const int category = ctx.dice->roll(0, 3);
@@ -164,7 +164,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(GameContext& ctx)
 		item = ItemCreator::create_random_of_category("potion", shop_pos, ctx, level);
 		break;
 	case 3:
-		item = ItemCreator::create("food_ration", shop_pos, *ctx.content_registry);
+		item = ItemCreator::create("food_ration", shop_pos, *ctx.contentRegistry);
 		break;
 	}
 
@@ -193,7 +193,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 		return false;
 	}
 
-	if (is_inventory_full(player.inventory_data))
+	if (is_inventory_full(player.inventoryData))
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
@@ -209,7 +209,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// Copy behavior (variant is value-copyable)
 	player_item->behavior = item.behavior;
 
-	add_item(player.inventory_data, std::move(player_item));
+	add_item(player.inventoryData, std::move(player_item));
 
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
@@ -227,7 +227,7 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& pla
 
 	player.adjust_gold(price);
 
-	auto removed_item = remove_item(player.inventory_data, item);
+	auto removed_item = remove_item(player.inventoryData, item);
 	if (removed_item.has_value())
 	{
 		if (!is_inventory_full(shop_inventory))

@@ -27,10 +27,8 @@
 #include "EquipmentSlot.h"
 #include "Pickable.h"
 
-using namespace InventoryOperations; // For clean function calls
-
 // OCP: Data-driven damage resistance mapping
-static const std::unordered_map<DamageType, BuffType> damage_resistance_buffs = {
+static const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
 	{ DamageType::FIRE, BuffType::FIRE_RESISTANCE },
 	{ DamageType::COLD, BuffType::COLD_RESISTANCE },
 	{ DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
@@ -39,7 +37,7 @@ static const std::unordered_map<DamageType, BuffType> damage_resistance_buffs = 
 };
 
 // OCP: Data-driven damage type names for logging
-static const std::unordered_map<DamageType, std::string_view> damage_type_names = {
+static const std::unordered_map<DamageType, std::string_view> damageTypeNames = {
 	{ DamageType::PHYSICAL, "physical" },
 	{ DamageType::FIRE, "fire" },
 	{ DamageType::COLD, "cold" },
@@ -49,7 +47,6 @@ static const std::unordered_map<DamageType, std::string_view> damage_type_names 
 	{ DamageType::MAGIC, "magic" },
 };
 
-//====
 Destructible::Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass)
 	: hpBase(hpMax),
 	  hpMax(hpMax),
@@ -107,7 +104,7 @@ void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 
 [[nodiscard]] int Destructible::calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const
 {
-	const auto& constitutionAttributes = ctx.data_manager->get_constitution_attributes();
+	const auto& constitutionAttributes = ctx.dataManager->get_constitution_attributes();
 
 	// Validate constitution is in valid range (1-based indexing)
 	if (constitution < 1 || constitution > static_cast<int>(constitutionAttributes.size()))
@@ -174,12 +171,12 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, Dam
 	const int originalDamage = damage;
 
 	// AD&D 2e: Apply resistance based on damage type (data-driven, OCP compliant)
-	if (damage_resistance_buffs.contains(damageType))
+	if (damageResistanceBuffs.contains(damageType))
 	{
-		const BuffType resistanceBuff = damage_resistance_buffs.at(damageType);
-		if (ctx.buff_system->has_buff(owner, resistanceBuff))
+		const BuffType resistanceBuff = damageResistanceBuffs.at(damageType);
+		if (ctx.buffSystem->has_buff(owner, resistanceBuff))
 		{
-			const int resistancePercent = ctx.buff_system->get_buff_value(owner, resistanceBuff);
+			const int resistancePercent = ctx.buffSystem->get_buff_value(owner, resistanceBuff);
 
 			if (resistancePercent > 0)
 			{
@@ -189,8 +186,8 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, Dam
 				damage = std::max(0, damage); // Defensive: ensure non-negative
 
 				// Log resistance message
-				const std::string_view typeName = damage_type_names.contains(damageType)
-					? damage_type_names.at(damageType)
+				const std::string_view typeName = damageTypeNames.contains(damageType)
+					? damageTypeNames.at(damageType)
 					: "unknown";
 
 				ctx.messageSystem->log(std::format(
@@ -229,13 +226,13 @@ int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, Dam
 	}
 
 	// Floating damage number: red for player damage, yellow for monster damage
-	if (ctx.floating_text)
+	if (ctx.floatingText)
 	{
-		bool hit_player = (&owner == ctx.player);
-		unsigned char r = hit_player ? 255 : 255;
-		unsigned char g = hit_player ? 80 : 220;
-		unsigned char b = hit_player ? 80 : 50;
-		ctx.floating_text->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
+		bool hitPlayer = (&owner == ctx.player);
+		unsigned char r = hitPlayer ? 255 : 255;
+		unsigned char g = hitPlayer ? 80 : 220;
+		unsigned char b = hitPlayer ? 80 : 50;
+		ctx.floatingText->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
 	}
 
 	return damage;
@@ -247,11 +244,11 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	// copy data to new entity of type Item
 	auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
 	corpse->actorData.name = get_corpse_name();
-	corpse->actorData.tile = ctx.tile_config->get("TILE_CORPSE");
+	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->behavior = CorpseFood{ 0 }; // 0 means calculate from type
 
 	// Add the corpse to the floor items
-	add_item(*ctx.inventory_data, std::move(corpse));
+	InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
 
 	// Note: The creature will be removed from game.creatures later
 	// when it's safe to do so (e.g., at the end of the turn)
@@ -283,7 +280,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	const int baseAC = get_base_armor_class();
 	const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
 	const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-	const int tempBonus = ctx.buff_system->calculate_ac_bonus(owner);
+	const int tempBonus = ctx.buffSystem->calculate_ac_bonus(owner);
 	const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
 
 	// Only update if changed
@@ -309,7 +306,7 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 [[nodiscard]] int Destructible::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
 {
-	const auto& dexAttributes = ctx.data_manager->get_dexterity_attributes();
+	const auto& dexAttributes = ctx.dataManager->get_dexterity_attributes();
 	const int dexterity = owner.get_dexterity();
 
 	// Validate dexterity is in valid range (1-based indexing)
@@ -494,7 +491,6 @@ void MonsterDestructible::save(json& j)
 		{
 			break;
 		}
-
 		}
 
 		if (destructible)
@@ -522,10 +518,10 @@ PlayerDestructible::PlayerDestructible(
 
 void PlayerDestructible::die(Creature& owner, GameContext& ctx)
 {
-	ctx.game_state->set_game_status(GameStatus::DEFEAT);
+	ctx.gameState->set_game_status(GameStatus::DEFEAT);
 
 	// Delete save file on death (ignore return value - non-critical operation)
-	[[maybe_unused]] const bool deleted = ctx.state_manager->delete_save_file();
+	[[maybe_unused]] const bool deleted = ctx.stateManager->delete_save_file();
 }
 
 //==MonsterDestructible==
@@ -561,9 +557,9 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 
 	ctx.player->ai->levelup_update(ctx, *ctx.player);
 
-	if (ctx.anim_system)
+	if (ctx.animSystem)
 	{
-		ctx.anim_system->spawn_death(owner.position.x, owner.position.y);
+		ctx.animSystem->spawn_death(owner.position.x, owner.position.y);
 	}
 
 	Destructible::die(owner, ctx);

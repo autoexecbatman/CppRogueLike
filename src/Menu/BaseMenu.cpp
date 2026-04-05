@@ -23,8 +23,8 @@ void BaseMenu::menu_new(
 	menu_starty = starty;
 	menu_startx = startx;
 	renderer = ctx.renderer;
-	input_system = ctx.input_system;
-	tile_config = ctx.tile_config;
+	input_system = ctx.inputSystem;
+	tile_config = ctx.tileConfig;
 }
 
 void BaseMenu::menu_clear()

@@ -23,6 +23,7 @@ enum class Controls
 	C_KEY = 'c',
 
 	MOUSE = 0x199,
+	MOUSE_RIGHT = 0x19A,
 
 	TEST_COMMAND = 'x',
 

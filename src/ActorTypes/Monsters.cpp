@@ -40,7 +40,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	ai = std::make_unique<AiMimic>();
 
-	init_disguises(*ctx.content_registry);
+	init_disguises(*ctx.contentRegistry);
 
 	if (!possibleDisguises.empty())
 	{

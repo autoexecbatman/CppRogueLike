@@ -17,12 +17,9 @@
 #include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
-#include "../Factories/MonsterCreator.h"
 #include "../Systems/MessageSystem.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
-
-using namespace InventoryOperations; // For clean function calls
 
 // OCP-compliant: data-driven item bonus mapping
 enum class MimicBonusType
@@ -118,20 +115,20 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	consumptionCooldown = 0;
 
 	// Early exit if no items exist
-	if (ctx.inventory_data->items.empty())
+	if (ctx.inventoryData->items.empty())
 	{
 		return false;
 	}
 
-	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.inventory_data->items.size()));
+	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.inventoryData->items.size()));
 
 	// Find and consume one item within range
 	std::vector<size_t> itemsToRemove;
 	bool itemConsumed = false;
 
-	for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
+	for (size_t i = 0; i < ctx.inventoryData->items.size(); ++i)
 	{
-		const auto& item = ctx.inventory_data->items[i];
+		const auto& item = ctx.inventoryData->items[i];
 		if (!item)
 		{
 			continue;
@@ -180,9 +177,9 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	{
 		ctx.messageSystem->log(std::format("Removing consumed item at index {}", index));
 
-		if (index < ctx.inventory_data->items.size() && ctx.inventory_data->items[index])
+		if (index < ctx.inventoryData->items.size() && ctx.inventoryData->items[index])
 		{
-			remove_item_at(*ctx.inventory_data, index);
+			InventoryOperations::remove_item_at(*ctx.inventoryData, index);
 		}
 	}
 

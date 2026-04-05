@@ -14,54 +14,57 @@
 		.dice = &dice,
 
 		// Managers
-		.creature_manager = &creature_manager,
-		.level_manager = &level_manager,
-		.rendering_manager = &rendering_manager,
-		.input_handler = &input_handler,
-		.state_manager = &state_manager,
-		.menu_manager = &menu_manager,
-		.display_manager = &display_manager,
-		.game_loop_coordinator = &game_loop_coordinator,
-		.data_manager = &data_manager,
+		.creatureManager = &creature_manager,
+		.levelManager = &level_manager,
+		.renderingManager = &rendering_manager,
+		.inputHandler = &input_handler,
+		.stateManager = &state_manager,
+		.menuManager = &menu_manager,
+		.displayManager = &display_manager,
+		.gameLoopCoordinator = &game_loop_coordinator,
+		.dataManager = &data_manager,
 
 		// Rendering
 		.renderer = &renderer,
-		.input_system = &input_system,
+		.inputSystem = &input_system,
 
 		// Specialized systems
 		.targeting = &targeting,
-		.hunger_system = &hunger_system,
-		.buff_system = &buff_system,
-		.floating_text = &floating_text,
-		.anim_system = &anim_system,
-		.content_registry = &content_registry,
+		.hungerSystem = &hunger_system,
+		.buffSystem = &buff_system,
+		.floatingText = &floating_text,
+		.animSystem = &anim_system,
+		.contentRegistry = &content_registry,
 		.minimap = &minimap,
 		.pathfinder = &pathfinder,
 
 #ifndef EMSCRIPTEN
-		.content_editor = &content_editor,
-		.decor_editor = &decor_editor,
-		.room_editor = &room_editor,
-		.item_editor = &item_editor,
-		.monster_editor = &monster_editor,
-		.spell_editor = &spell_editor,
-		.prefab_library = &prefab_library,
+		.contentEditor = &content_editor,
+		.decorEditor = &decor_editor,
+		.roomEditor = &room_editor,
+		.itemEditor = &item_editor,
+		.monsterEditor = &monster_editor,
+		.spellEditor = &spell_editor,
+		.prefabLibrary = &prefab_library,
 #endif
-		.tile_config = &tile_config,
+		.tileConfig = &tile_config,
 
 		// Game world data
 		.stairs = stairs.get(),
 		.objects = &objects,
 		.decorations = &decorations,
-		.inventory_data = &inventory_data,
+		.inventoryData = &inventory_data,
 		.creatures = &creatures,
 		.rooms = &rooms,
 
 		// UI
 		.menus = &menus,
 
+		// Mouse path overlay
+		.mousePathOverlay = &mouse_path_overlay,
+
 		// Game state
-		.game_state = &game_state
+		.gameState = &game_state
 	};
 }
 

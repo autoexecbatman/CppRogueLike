@@ -37,11 +37,11 @@ struct MockGameContext
 		return GameContext{
 			.messageSystem = &messages,
 			.dice = &dice,
-			.creature_manager = &creature_mgr,
-			.content_registry = &content_registry,
-			.tile_config = &tile_config,
-			.inventory_data = &inventory,
-			.game_state = &game_state
+			.creatureManager = &creature_mgr,
+			.contentRegistry = &content_registry,
+			.tileConfig = &tile_config,
+			.inventoryData = &inventory,
+			.gameState = &game_state
 		};
 	}
 };

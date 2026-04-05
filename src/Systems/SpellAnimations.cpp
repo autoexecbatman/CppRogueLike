@@ -13,18 +13,18 @@ namespace SpellAnimations
 
 void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 {
-	if (!ctx.anim_system || !ctx.renderer)
+	if (!ctx.animSystem || !ctx.renderer)
 		return;
 
 	auto path = Map::bresenham_line(from, to);
-	ctx.anim_system->spawn_lightning_path(path, 180, 220, 255);
-	ctx.anim_system->spawn_spark_burst(to.x, to.y, 8, 140, 180, 255);
+	ctx.animSystem->spawn_lightning_path(path, 180, 220, 255);
+	ctx.animSystem->spawn_spark_burst(to.x, to.y, 8, 140, 180, 255);
 	ctx.renderer->add_trauma(0.25f);
 }
 
 void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 {
-	if (!ctx.anim_system || !ctx.renderer)
+	if (!ctx.animSystem || !ctx.renderer)
 		return;
 
 	// Spawn sparks radiating outward from every cell in the blast radius
@@ -34,7 +34,7 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 		{
 			if (dx * dx + dy * dy <= radius * radius)
 			{
-				ctx.anim_system->spawn_spark_burst(
+				ctx.animSystem->spawn_spark_burst(
 					center.x + dx,
 					center.y + dy,
 					3,
@@ -45,16 +45,16 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 		}
 	}
 
-	ctx.anim_system->spawn_spark_burst(center.x, center.y, 16, 255, 80, 0);
+	ctx.animSystem->spawn_spark_burst(center.x, center.y, 16, 255, 80, 0);
 	ctx.renderer->add_trauma(0.5f);
 }
 
 void animate_creature_hit(Vector2D position, GameContext& ctx)
 {
-	if (!ctx.anim_system)
+	if (!ctx.animSystem)
 		return;
 
-	ctx.anim_system->spawn_blood_burst(position.x, position.y, 4);
+	ctx.animSystem->spawn_blood_burst(position.x, position.y, 4);
 }
 
 } // namespace SpellAnimations

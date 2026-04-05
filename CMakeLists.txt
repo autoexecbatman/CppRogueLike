@@ -190,6 +190,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuTrade.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.cpp
     ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.h
+    ${PROJECT_SOURCE_DIR}/Menu/ContextMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/ContextMenu.h
 
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.cpp

@@ -119,9 +119,9 @@ void Ai::levelup_update(GameContext& ctx, Creature& owner)
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("Your battle skills grow stronger! You reached level {}", ctx.player->get_creature_level()), true);
 
 		// Only display level-up UI if display_manager is available (not in headless tests)
-		if (ctx.display_manager != nullptr)
+		if (ctx.displayManager != nullptr)
 		{
-			ctx.display_manager->display_levelup(*ctx.player, ctx.player->get_creature_level(), ctx);
+			ctx.displayManager->display_levelup(*ctx.player, ctx.player->get_creature_level(), ctx);
 		}
 	}
 }

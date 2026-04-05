@@ -88,6 +88,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Menu/MenuSell.cpp
     ${PARENT_SOURCE_DIR}/Menu/MenuTrade.cpp
     ${PARENT_SOURCE_DIR}/Menu/MenuSpellCast.cpp
+    ${PARENT_SOURCE_DIR}/Menu/ContextMenu.cpp
 
     # ActorTypes
     ${PARENT_SOURCE_DIR}/ActorTypes/Monsters.cpp

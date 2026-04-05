@@ -23,8 +23,8 @@ CharacterSheetUI::CharacterSheetUI(const Player& player, GameContext& /*ctx*/)
 
 void CharacterSheetUI::menu(GameContext& ctx)
 {
-	ctx.input_system->poll();
-	GameKey key = ctx.input_system->get_key();
+	ctx.inputSystem->poll();
+	GameKey key = ctx.inputSystem->get_key();
 	if (key == GameKey::ESCAPE || key == GameKey::SPACE)
 	{
 		menu_set_run_false();
@@ -38,7 +38,7 @@ void CharacterSheetUI::menu(GameContext& ctx)
 	int vcols = ctx.renderer->get_viewport_cols();
 	int vrows = ctx.renderer->get_viewport_rows();
 
-	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tile_config);
+	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
 
 	std::string_view title = "CHARACTER SHEET";
 	int title_w = ctx.renderer->measure_text(title);
@@ -106,7 +106,7 @@ void CharacterSheetUI::display_attributes(const Player& player, GameContext& ctx
 
 	int missileAdj = 0;
 	int defensiveAdj = 0;
-	const auto& dexAttr = ctx.data_manager->get_dexterity_attributes();
+	const auto& dexAttr = ctx.dataManager->get_dexterity_attributes();
 	if (player.get_dexterity() > 0 &&
 		player.get_dexterity() <= static_cast<int>(dexAttr.size()))
 	{
@@ -204,8 +204,8 @@ void CharacterSheetUI::display_right_panel_info(const Player& player, GameContex
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 	int x = tileSize;
 
-	std::string hungerStr = ctx.hunger_system
-		? ctx.hunger_system->get_hunger_state_string()
+	std::string hungerStr = ctx.hungerSystem
+		? ctx.hungerSystem->get_hunger_state_string()
 		: "Unknown";
 
 	ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- OTHER ---", YELLOW_BLACK_PAIR);
@@ -218,7 +218,7 @@ void CharacterSheetUI::display_right_panel_info(const Player& player, GameContex
 
 int CharacterSheetUI::get_strength_hit_modifier(const Player& player, GameContext& ctx)
 {
-	const auto& attrs = ctx.data_manager->get_strength_attributes();
+	const auto& attrs = ctx.dataManager->get_strength_attributes();
 	if (player.get_strength() > 0 &&
 		player.get_strength() <= static_cast<int>(attrs.size()))
 	{
@@ -229,7 +229,7 @@ int CharacterSheetUI::get_strength_hit_modifier(const Player& player, GameContex
 
 int CharacterSheetUI::get_strength_damage_modifier(const Player& player, GameContext& ctx)
 {
-	const auto& attrs = ctx.data_manager->get_strength_attributes();
+	const auto& attrs = ctx.dataManager->get_strength_attributes();
 	if (player.get_strength() > 0 &&
 		player.get_strength() <= static_cast<int>(attrs.size()))
 	{
@@ -240,7 +240,7 @@ int CharacterSheetUI::get_strength_damage_modifier(const Player& player, GameCon
 
 int CharacterSheetUI::get_constitution_bonus(const Player& player, GameContext& ctx)
 {
-	const auto& attrs = ctx.data_manager->get_constitution_attributes();
+	const auto& attrs = ctx.dataManager->get_constitution_attributes();
 	if (player.get_constitution() >= 1 &&
 		player.get_constitution() <= static_cast<int>(attrs.size()))
 	{

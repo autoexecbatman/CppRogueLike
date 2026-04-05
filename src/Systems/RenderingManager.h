@@ -36,6 +36,7 @@ private:
 	void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
 	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
 	void apply_lighting(const Player& player, const GameContext& ctx) const;
+	void render_mouse_path_overlay(const GameContext& ctx) const;
 	void render_world(
 		const Map& map,
 		const Stairs& stairs,

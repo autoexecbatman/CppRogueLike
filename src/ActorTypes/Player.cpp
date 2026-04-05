@@ -22,7 +22,6 @@
 #include "../Core/GameContext.h"
 #include "../dnd_tables/CalculatedTHAC0s.h"
 #include "../Factories/ItemCreator.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
@@ -31,14 +30,13 @@
 #include "../Renderer/Renderer.h"
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
 #include "../Utils/Vector2D.h"
 #include "Player.h"
-
-using namespace InventoryOperations; // For clean function calls
 
 // Equipment comparison predicates for DRY compliance
 namespace
@@ -96,54 +94,62 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 {
 	switch (playerClassState)
 	{
+
 	case PlayerClassState::FIGHTER:
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("plate_mail", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("long_sword", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, *ctx.content_registry), EquipmentSlot::LEFT_HAND, ctx);
-		equip_item(ItemCreator::create("long_bow", position, *ctx.content_registry), EquipmentSlot::MISSILE_WEAPON, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_fireball", position, *ctx.content_registry));
+		equip_item(ItemCreator::create("plate_mail", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("long_sword", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
+		equip_item(ItemCreator::create("long_bow", position, *ctx.contentRegistry), EquipmentSlot::MISSILE_WEAPON, ctx);
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
+
 	case PlayerClassState::ROGUE:
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("leather_armor", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("dagger", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("leather_armor", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("dagger", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
+
 	case PlayerClassState::CLERIC:
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("chain_mail", position, *ctx.content_registry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("mace", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, *ctx.content_registry), EquipmentSlot::LEFT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("health_potion", position, *ctx.content_registry));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_hold_person", position, *ctx.content_registry));
+		equip_item(ItemCreator::create("chain_mail", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("mace", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
 	}
+
 	case PlayerClassState::WIZARD:
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("staff", position, *ctx.content_registry), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_fireball", position, *ctx.content_registry));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_lightning", position, *ctx.content_registry));
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("scroll_sleep", position, *ctx.content_registry));
+		equip_item(ItemCreator::create("staff", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
 	}
+
 	default:
+	{
 		break;
+	}
+
 	}
 }
 void Player::racial_ability_adjustments()
@@ -151,40 +157,62 @@ void Player::racial_ability_adjustments()
 	// switch player state
 	switch (playerRaceState)
 	{
+
 	case Player::PlayerRaceState::HUMAN:
+	{
 		break;
+	}
+
 	case Player::PlayerRaceState::DWARF:
+	{
 		// TODO: Display racial bonus message via Renderer
 		// "You got +1 to constitution and -1 to charisma for being a dwarf."
 
 		adjust_constitution(1);
 		adjust_charisma(-1);
 		break;
+	}
+
 	case Player::PlayerRaceState::ELF:
+	{
 		// TODO: Display racial bonus message via Renderer
 		// "You got +1 to dexterity and -1 to constitution for being an elf."
 
 		adjust_dexterity(1);
 		adjust_constitution(-1);
 		break;
+	}
+
 	case Player::PlayerRaceState::GNOME:
+	{
 		// TODO: Display racial bonus message via Renderer
 		// "You got +1 to intelligence and -1 to wisdom for being a gnome."
 
 		adjust_intelligence(1);
 		adjust_wisdom(-1);
 		break;
+	}
+
 	case Player::PlayerRaceState::HALFELF:
+	{
 		break;
+	}
+
 	case Player::PlayerRaceState::HALFLING:
+	{
 		// TODO: Display racial bonus message via Renderer
 		// "You got +1 to dexterity and -1 to strength for being a halfling."
 
 		adjust_dexterity(1);
 		adjust_strength(-1);
 		break;
+	}
+
 	default:
+	{
 		break;
+	}
+
 	}
 
 	// TODO: Clear screen after all racial bonuses via Renderer
@@ -197,29 +225,48 @@ void Player::calculate_thaco()
 
 	switch (playerClassState)
 	{
+
 	case PlayerClassState::FIGHTER:
+	{
 		destructible->set_thaco(thaco_tables.get_fighter(get_creature_level()));
 		break;
+	}
+
 	case PlayerClassState::ROGUE:
+	{
 		destructible->set_thaco(thaco_tables.get_rogue(get_creature_level()));
 		break;
+	}
+
 	case PlayerClassState::CLERIC:
+	{
 		destructible->set_thaco(thaco_tables.get_cleric(get_creature_level()));
 		break;
+	}
+
 	case PlayerClassState::WIZARD:
+	{
 		destructible->set_thaco(thaco_tables.get_wizard(get_creature_level()));
 		break;
+	}
+
 	case PlayerClassState::NONE:
+	{
 		break;
+	}
+
 	default:
+	{
 		break;
+	}
+
 	}
 }
 
 void Player::consume_food(int nutrition, GameContext& ctx)
 {
 	// Decrease hunger by nutrition value
-	ctx.hunger_system->decrease_hunger(ctx, nutrition);
+	ctx.hungerSystem->decrease_hunger(ctx, nutrition);
 }
 
 void Player::render(const GameContext& ctx) const noexcept
@@ -268,8 +315,8 @@ bool Player::rest(GameContext& ctx)
 	}
 
 	// Check if player has enough food (hunger isn't too high)
-	if (ctx.hunger_system->get_hunger_state() == HungerState::STARVING ||
-		ctx.hunger_system->get_hunger_state() == HungerState::DYING)
+	if (ctx.hungerSystem->get_hunger_state() == HungerState::STARVING ||
+		ctx.hungerSystem->get_hunger_state() == HungerState::DYING)
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
 		return false;
@@ -283,13 +330,13 @@ bool Player::rest(GameContext& ctx)
 	int amountHealed = destructible->heal(healAmount);
 
 	// Capture the hunger state before and after
-	HungerState beforeState = ctx.hunger_system->get_hunger_state();
+	HungerState beforeState = ctx.hungerSystem->get_hunger_state();
 
 	// Consume food (increase hunger)
 	const int hungerCost = 50;
-	ctx.hunger_system->increase_hunger(ctx, hungerCost);
+	ctx.hungerSystem->increase_hunger(ctx, hungerCost);
 
-	HungerState afterState = ctx.hunger_system->get_hunger_state();
+	HungerState afterState = ctx.hungerSystem->get_hunger_state();
 
 	// Display message with more detail
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
@@ -300,7 +347,7 @@ bool Player::rest(GameContext& ctx)
 	{
 		// If hunger state changed, mention it
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
-		ctx.messageSystem->append_message_part(ctx.hunger_system->get_hunger_color(), ctx.hunger_system->get_hunger_state_string().c_str());
+		ctx.messageSystem->append_message_part(ctx.hungerSystem->get_hunger_color(), ctx.hungerSystem->get_hunger_state_string().c_str());
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
 	}
 	else
@@ -317,7 +364,7 @@ bool Player::rest(GameContext& ctx)
 	}
 
 	// Resting takes time
-	ctx.game_state->set_game_status(GameStatus::NEW_TURN);
+	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 	return true;
 }
 
@@ -326,7 +373,7 @@ void Player::animate_resting(GameContext& ctx)
 	// TODO: Implement resting animation via Renderer
 	// Should display 'z', 'z', 'Z', 'Z', 'Z' symbols above player
 	// with WHITE_GREEN_PAIR color and 80ms delay between frames
-	ctx.rendering_manager->render(ctx);
+	ctx.renderingManager->render(ctx);
 }
 
 bool Player::attempt_hide(GameContext& ctx)
@@ -367,7 +414,7 @@ bool Player::attempt_hide(GameContext& ctx)
 
 	// Success - hide duration based on level
 	int hideDuration = 10 + get_creature_level() * 2;
-	ctx.buff_system->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
+	ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
 	ctx.messageSystem->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
 	return true;
 }
@@ -449,11 +496,11 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 	else
 	{
 		// Find item in inventory and equip it
-		Item* itemToEquip = find_item_by_id(inventory_data, item_unique_id);
+		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, item_unique_id);
 		if (itemToEquip)
 		{
 			// Remove item from inventory
-			auto result = remove_item_by_id(inventory_data, item_unique_id);
+			auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
 			if (result.has_value())
 			{
 				auto itemToEquip = std::move(*result);
@@ -486,7 +533,7 @@ bool Player::toggle_shield(uint64_t item_unique_id, GameContext& ctx)
 	}
 	else
 	{
-		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
@@ -505,7 +552,7 @@ bool Player::toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameC
 	}
 	else
 	{
-		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), slot, ctx);
@@ -534,7 +581,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
-		InventoryOperations::add_item(inventory_data, std::move(item));
+		InventoryOperations::add_item(inventoryData, std::move(item));
 		return false;
 	}
 
@@ -590,11 +637,14 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 	// Check if item has behavior component (weapons/armor)
 	if (!item.behavior)
+	{
 		return false;
+	}
 
 	// Slot-specific validation
 	switch (slot)
 	{
+
 	case EquipmentSlot::RIGHT_HAND:
 	case EquipmentSlot::LEFT_HAND:
 	{
@@ -628,6 +678,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 		break;
 	}
+
 	case EquipmentSlot::BODY:
 	{
 		// Body slot can only hold armor - use proper item type system
@@ -637,6 +688,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::MISSILE_WEAPON:
 	{
 		// Missile weapon slot can only hold ranged weapons - use ItemClass system
@@ -646,6 +698,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::HEAD:
 	{
 		if (!item.is_helmet())
@@ -654,6 +707,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::NECK:
 	{
 		if (!item.is_amulet())
@@ -662,6 +716,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::RIGHT_RING:
 	case EquipmentSlot::LEFT_RING:
 	{
@@ -671,6 +726,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::GAUNTLETS:
 	{
 		if (!item.is_gauntlets())
@@ -679,6 +735,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::GIRDLE:
 	{
 		if (!item.is_girdle())
@@ -687,6 +744,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	case EquipmentSlot::TOOL:
 	{
 		if (!item.is_tool())
@@ -695,9 +753,13 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 		}
 		break;
 	}
+
 	default:
+	{
 		// Other slots (CLOAK, BRACERS, BOOTS, MISSILES) - no items defined yet
 		break;
+	}
+
 	}
 
 	return true;
@@ -720,7 +782,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			remove_state(ActorState::IS_RANGED);
 
 		// Return item to inventory
-		add_item(inventory_data, std::move(it->item));
+		InventoryOperations::add_item(inventoryData, std::move(it->item));
 
 		// Remove from equipped items
 		equippedItems.erase(it);
@@ -842,7 +904,7 @@ bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
 	}
 	else
 	{
-		auto result = remove_item_by_id(inventory_data, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
@@ -867,18 +929,28 @@ int Player::get_constitution_hp_multiplier() const noexcept
 	// - Rogues/Wizards: 10 Hit Dice (levels 1-10), then fixed HP/level without Constitution bonus
 	switch (playerClassState)
 	{
+
 	case PlayerClassState::FIGHTER:
+	{
 		return std::min(level, 9); // AD&D 2e: Fighters get Con bonus for 9 levels
+	}
 
 	case PlayerClassState::CLERIC:
+	{
 		return std::min(level, 9); // AD&D 2e: Priests get Con bonus for 9 levels
+	}
 
 	case PlayerClassState::ROGUE:
 	case PlayerClassState::WIZARD:
+	{
 		return std::min(level, 10); // AD&D 2e: Rogues/Wizards get Con bonus for 10 levels
+	}
 
 	default:
+	{
 		return std::min(level, 10);
+	}
+
 	}
 }
 
@@ -940,36 +1012,50 @@ void Player::load(const json& j)
 void Player::remove_stat_bonuses_from_equipment(Item& item)
 {
 	if (!item.behavior)
+	{
 		return;
+	}
 
 	auto remove_stats = [this](auto& sb)
 	{
 		using T = std::decay_t<decltype(sb)>;
 		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
 		{
-			if (sb.is_set_mode)
+			if (sb.isSetMode)
 			{
-				if (sb.str_bonus != 0)
-					set_strength(sb.original_stats.str);
-				if (sb.dex_bonus != 0)
-					set_dexterity(sb.original_stats.dex);
-				if (sb.con_bonus != 0)
-					set_constitution(sb.original_stats.con);
-				if (sb.int_bonus != 0)
-					set_intelligence(sb.original_stats.intel);
-				if (sb.wis_bonus != 0)
-					set_wisdom(sb.original_stats.wis);
-				if (sb.cha_bonus != 0)
-					set_charisma(sb.original_stats.cha);
+				if (sb.strBonus != 0)
+				{
+					set_strength(sb.originalStats.str);
+				}
+				if (sb.dexBonus != 0)
+				{
+					set_dexterity(sb.originalStats.dex);
+				}
+				if (sb.conBonus != 0)
+				{
+					set_constitution(sb.originalStats.con);
+				}
+				if (sb.intBonus != 0)
+				{
+					set_intelligence(sb.originalStats.intel);
+				}
+				if (sb.wisBonus != 0)
+				{
+					set_wisdom(sb.originalStats.wis);
+				}
+				if (sb.chaBonus != 0)
+				{
+					set_charisma(sb.originalStats.cha);
+				}
 			}
 			else
 			{
-				set_strength(get_strength() - sb.str_bonus);
-				set_dexterity(get_dexterity() - sb.dex_bonus);
-				set_constitution(get_constitution() - sb.con_bonus);
-				set_intelligence(get_intelligence() - sb.int_bonus);
-				set_wisdom(get_wisdom() - sb.wis_bonus);
-				set_charisma(get_charisma() - sb.cha_bonus);
+				set_strength(get_strength() - sb.strBonus);
+				set_dexterity(get_dexterity() - sb.dexBonus);
+				set_constitution(get_constitution() - sb.conBonus);
+				set_intelligence(get_intelligence() - sb.intBonus);
+				set_wisdom(get_wisdom() - sb.wisBonus);
+				set_charisma(get_charisma() - sb.chaBonus);
 			}
 		}
 	};

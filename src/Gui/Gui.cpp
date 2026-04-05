@@ -89,7 +89,7 @@ void Gui::gui_render(const GameContext& ctx)
 	DrawRectangle(0, baseY, pw, ph, Color{ 8, 8, 16, 255 });
 
 	// ---- Top border row (TL + T... + TR) ----------------------------------
-	const auto& tileConfig = *ctx.tile_config;
+	const auto& tileConfig = *ctx.tileConfig;
 	ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY }, tileConfig.get("GUI_FRAME_TL"));
 	for (int col = 1; col < vcols - 1; ++col)
 	{
@@ -156,7 +156,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int fontOff = font_row_off(*ctx.renderer);
 
 	// Heart icon at col 1
-	ctx.renderer->draw_tile_screen(Vector2D{ 1 * tileSize, rowY }, ctx.tile_config->get("GUI_HEART_FULL"));
+	ctx.renderer->draw_tile_screen(Vector2D{ 1 * tileSize, rowY }, ctx.tileConfig->get("GUI_HEART_FULL"));
 
 	// Bar: col 2 to div1-1
 	const int barX = 2 * tileSize;
@@ -203,15 +203,15 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
 	const int div1 = hud_div1(vcols);
 
-	if (ctx.hunger_system->get_hunger_max() <= 0)
+	if (ctx.hungerSystem->get_hunger_max() <= 0)
 	{
 		return;
 	}
 
-	const int hungerVal = ctx.hunger_system->get_hunger_value();
-	const int hungerMax = ctx.hunger_system->get_hunger_max();
-	const std::string hungerText = ctx.hunger_system->get_hunger_state_string();
-	const int hungerColor = ctx.hunger_system->get_hunger_color();
+	const int hungerVal = ctx.hungerSystem->get_hunger_value();
+	const int hungerMax = ctx.hungerSystem->get_hunger_max();
+	const std::string hungerText = ctx.hungerSystem->get_hunger_state_string();
+	const int hungerColor = ctx.hungerSystem->get_hunger_color();
 
 	const float ratio = std::clamp(
 		static_cast<float>(hungerVal) / static_cast<float>(hungerMax), 0.0f, 1.0f);

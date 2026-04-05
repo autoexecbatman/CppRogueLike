@@ -60,7 +60,7 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 
 		// Player loses their turn
-		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
 	else

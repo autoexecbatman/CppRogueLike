@@ -237,7 +237,7 @@ std::string_view magical_effect_str(MagicalEffect e)
 
 void ItemEditor::enter(GameContext& ctx)
 {
-	m_registry = ctx.content_registry;
+	m_registry = ctx.contentRegistry;
 	m_active = true;
 	m_mode = Mode::NORMAL;
 	m_focus = 0;
@@ -431,13 +431,13 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			commit_working();
 			ItemParams defaults;
 			defaults.itemClass = ItemClass::SWORD;
-			defaults.pickable_type = PickableType::WEAPON;
+			defaults.pickableType = PickableType::WEAPON;
 			defaults.value = 10;
-			defaults.base_weight = 10;
-			defaults.level_minimum = 1;
-			defaults.level_maximum = 5;
-			defaults.hand_requirement = HandRequirement::ONE_HANDED;
-			defaults.weapon_size = WeaponSize::MEDIUM;
+			defaults.baseWeight = 10;
+			defaults.levelMin = 1;
+			defaults.levelMax = 5;
+			defaults.handRequirement = HandRequirement::ONE_HANDED;
+			defaults.weaponSize = WeaponSize::MEDIUM;
 			std::string new_key = ItemCreator::add_custom("New Item", "weapon", defaults);
 			m_keys = ItemCreator::get_all_keys();
 			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
@@ -952,37 +952,37 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::NAME:             return m_working_name;
 	case FieldId::CATEGORY:         return m_working_category;
 	case FieldId::ITEM_CLASS:       return std::string{ item_class_str(p.itemClass) };
-	case FieldId::PICKABLE_TYPE:    return std::string{ pickable_type_str(p.pickable_type) };
+	case FieldId::PICKABLE_TYPE:    return std::string{ pickable_type_str(p.pickableType) };
 	case FieldId::COLOR:            return std::format("{}", p.color);
 	case FieldId::VALUE:            return std::format("{}", p.value);
-	case FieldId::BASE_WEIGHT:      return std::format("{}", p.base_weight);
-	case FieldId::LEVEL_MIN:        return std::format("{}", p.level_minimum);
-	case FieldId::LEVEL_MAX:        return std::format("{}", p.level_maximum);
-	case FieldId::LEVEL_SCALING:    return std::format("{:.2f}", p.level_scaling);
-	case FieldId::CONSUMABLE_EFFECT: return std::string{ consumable_effect_str(p.consumable_effect) };
-	case FieldId::CONSUMABLE_BUFF:  return std::string{ buff_type_str(p.consumable_buff_type) };
-	case FieldId::CONSUMABLE_AMT:   return std::format("{}", p.consumable_amount);
+	case FieldId::BASE_WEIGHT:      return std::format("{}", p.baseWeight);
+	case FieldId::LEVEL_MIN:        return std::format("{}", p.levelMin);
+	case FieldId::LEVEL_MAX:        return std::format("{}", p.levelMax);
+	case FieldId::LEVEL_SCALING:    return std::format("{:.2f}", p.levelScaling);
+	case FieldId::CONSUMABLE_EFFECT: return std::string{ consumable_effect_str(p.consumableEffect) };
+	case FieldId::CONSUMABLE_BUFF:  return std::string{ buff_type_str(p.consumableBuffType) };
+	case FieldId::CONSUMABLE_AMT:   return std::format("{}", p.consumableAmount);
 	case FieldId::DURATION:         return std::format("{}", p.duration);
-	case FieldId::TARGET_MODE:      return std::string{ target_mode_str(p.target_mode) };
-	case FieldId::SCROLL_ANIM:      return std::string{ scroll_anim_str(p.scroll_animation) };
+	case FieldId::TARGET_MODE:      return std::string{ target_mode_str(p.targetMode) };
+	case FieldId::SCROLL_ANIM:      return std::string{ scroll_anim_str(p.scrollAnimation) };
 	case FieldId::RANGE:            return std::format("{}", p.range);
 	case FieldId::DAMAGE:           return std::format("{}", p.damage);
-	case FieldId::CONFUSE_TURNS:    return std::format("{}", p.confuse_turns);
+	case FieldId::CONFUSE_TURNS:    return std::format("{}", p.confuseTurns);
 	case FieldId::RANGED:           return p.ranged ? "yes" : "no";
-	case FieldId::HAND_REQUIREMENT: return std::string{ hand_req_str(p.hand_requirement) };
-	case FieldId::WEAPON_SIZE:      return std::string{ weapon_size_str(p.weapon_size) };
-	case FieldId::AC_BONUS:         return std::format("{}", p.ac_bonus);
+	case FieldId::HAND_REQUIREMENT: return std::string{ hand_req_str(p.handRequirement) };
+	case FieldId::WEAPON_SIZE:      return std::string{ weapon_size_str(p.weaponSize) };
+	case FieldId::AC_BONUS:         return std::format("{}", p.acBonus);
 	case FieldId::EFFECT:           return std::string{ magical_effect_str(p.effect) };
-	case FieldId::EFFECT_BONUS:     return std::format("{}", p.effect_bonus);
-	case FieldId::STR_BONUS:        return std::format("{}", p.str_bonus);
-	case FieldId::DEX_BONUS:        return std::format("{}", p.dex_bonus);
-	case FieldId::CON_BONUS:        return std::format("{}", p.con_bonus);
-	case FieldId::INT_BONUS:        return std::format("{}", p.int_bonus);
-	case FieldId::WIS_BONUS:        return std::format("{}", p.wis_bonus);
-	case FieldId::CHA_BONUS:        return std::format("{}", p.cha_bonus);
-	case FieldId::IS_SET_MODE:      return p.is_set_mode ? "yes" : "no";
-	case FieldId::NUTRITION:        return std::format("{}", p.nutrition_value);
-	case FieldId::GOLD_AMOUNT:      return std::format("{}", p.gold_amount);
+	case FieldId::EFFECT_BONUS:     return std::format("{}", p.effectBonus);
+	case FieldId::STR_BONUS:        return std::format("{}", p.strBonus);
+	case FieldId::DEX_BONUS:        return std::format("{}", p.dexBonus);
+	case FieldId::CON_BONUS:        return std::format("{}", p.conBonus);
+	case FieldId::INT_BONUS:        return std::format("{}", p.intBonus);
+	case FieldId::WIS_BONUS:        return std::format("{}", p.wisBonus);
+	case FieldId::CHA_BONUS:        return std::format("{}", p.chaBonus);
+	case FieldId::IS_SET_MODE:      return p.isSetMode ? "yes" : "no";
+	case FieldId::NUTRITION:        return std::format("{}", p.nutritionValue);
+	case FieldId::GOLD_AMOUNT:      return std::format("{}", p.goldAmount);
 	case FieldId::TILE:             return "(tile)";
 	default:                        return "";
 	}
@@ -1025,22 +1025,22 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		p.value = clamp_val(p.value, delta, 0, 99999);
 		break;
 	case FieldId::BASE_WEIGHT:
-		p.base_weight = clamp_val(p.base_weight, delta, 0, 100);
+		p.baseWeight = clamp_val(p.baseWeight, delta, 0, 100);
 		break;
 	case FieldId::LEVEL_MIN:
-		p.level_minimum = clamp_val(p.level_minimum, delta, 1, 20);
+		p.levelMin = clamp_val(p.levelMin, delta, 1, 20);
 		break;
 	case FieldId::LEVEL_MAX:
-		p.level_maximum = clamp_val(p.level_maximum, delta, 0, 20);
+		p.levelMax = clamp_val(p.levelMax, delta, 0, 20);
 		break;
 	case FieldId::LEVEL_SCALING:
 	{
-		float raw = p.level_scaling + static_cast<float>(delta) * 0.01f;
-		p.level_scaling = std::clamp(raw, 0.0f, 5.0f);
+		float raw = p.levelScaling + static_cast<float>(delta) * 0.01f;
+		p.levelScaling = std::clamp(raw, 0.0f, 5.0f);
 		break;
 	}
 	case FieldId::CONSUMABLE_AMT:
-		p.consumable_amount = clamp_val(p.consumable_amount, delta, 0, 9999);
+		p.consumableAmount = clamp_val(p.consumableAmount, delta, 0, 9999);
 		break;
 	case FieldId::DURATION:
 		p.duration = clamp_val(p.duration, delta, 0, 9999);
@@ -1052,37 +1052,37 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		p.damage = clamp_val(p.damage, delta, 0, 999);
 		break;
 	case FieldId::CONFUSE_TURNS:
-		p.confuse_turns = clamp_val(p.confuse_turns, delta, 0, 999);
+		p.confuseTurns = clamp_val(p.confuseTurns, delta, 0, 999);
 		break;
 	case FieldId::AC_BONUS:
-		p.ac_bonus = clamp_val(p.ac_bonus, delta, -10, 10);
+		p.acBonus = clamp_val(p.acBonus, delta, -10, 10);
 		break;
 	case FieldId::EFFECT_BONUS:
-		p.effect_bonus = clamp_val(p.effect_bonus, delta, 0, 20);
+		p.effectBonus = clamp_val(p.effectBonus, delta, 0, 20);
 		break;
 	case FieldId::STR_BONUS:
-		p.str_bonus = clamp_val(p.str_bonus, delta, -18, 18);
+		p.strBonus = clamp_val(p.strBonus, delta, -18, 18);
 		break;
 	case FieldId::DEX_BONUS:
-		p.dex_bonus = clamp_val(p.dex_bonus, delta, -18, 18);
+		p.dexBonus = clamp_val(p.dexBonus, delta, -18, 18);
 		break;
 	case FieldId::CON_BONUS:
-		p.con_bonus = clamp_val(p.con_bonus, delta, -18, 18);
+		p.conBonus = clamp_val(p.conBonus, delta, -18, 18);
 		break;
 	case FieldId::INT_BONUS:
-		p.int_bonus = clamp_val(p.int_bonus, delta, -18, 18);
+		p.intBonus = clamp_val(p.intBonus, delta, -18, 18);
 		break;
 	case FieldId::WIS_BONUS:
-		p.wis_bonus = clamp_val(p.wis_bonus, delta, -18, 18);
+		p.wisBonus = clamp_val(p.wisBonus, delta, -18, 18);
 		break;
 	case FieldId::CHA_BONUS:
-		p.cha_bonus = clamp_val(p.cha_bonus, delta, -18, 18);
+		p.chaBonus = clamp_val(p.chaBonus, delta, -18, 18);
 		break;
 	case FieldId::NUTRITION:
-		p.nutrition_value = clamp_val(p.nutrition_value, delta, 0, 9999);
+		p.nutritionValue = clamp_val(p.nutritionValue, delta, 0, 9999);
 		break;
 	case FieldId::GOLD_AMOUNT:
-		p.gold_amount = clamp_val(p.gold_amount, delta, 0, 99999);
+		p.goldAmount = clamp_val(p.goldAmount, delta, 0, 99999);
 		break;
 	default:
 		break;
@@ -1108,34 +1108,34 @@ void ItemEditor::field_toggle(FieldId f)
 		p.itemClass = cycle_enum(p.itemClass, ITEM_CLASS_COUNT);
 		break;
 	case FieldId::PICKABLE_TYPE:
-		p.pickable_type = cycle_enum(p.pickable_type, PICKABLE_COUNT);
+		p.pickableType = cycle_enum(p.pickableType, PICKABLE_COUNT);
 		break;
 	case FieldId::CONSUMABLE_EFFECT:
-		p.consumable_effect = cycle_enum(p.consumable_effect, CONSUMABLE_EFFECT_COUNT);
+		p.consumableEffect = cycle_enum(p.consumableEffect, CONSUMABLE_EFFECT_COUNT);
 		break;
 	case FieldId::CONSUMABLE_BUFF:
-		p.consumable_buff_type = cycle_enum(p.consumable_buff_type, BUFF_COUNT);
+		p.consumableBuffType = cycle_enum(p.consumableBuffType, BUFF_COUNT);
 		break;
 	case FieldId::TARGET_MODE:
-		p.target_mode = cycle_enum(p.target_mode, TARGET_MODE_COUNT);
+		p.targetMode = cycle_enum(p.targetMode, TARGET_MODE_COUNT);
 		break;
 	case FieldId::SCROLL_ANIM:
-		p.scroll_animation = cycle_enum(p.scroll_animation, SCROLL_ANIM_COUNT);
+		p.scrollAnimation = cycle_enum(p.scrollAnimation, SCROLL_ANIM_COUNT);
 		break;
 	case FieldId::RANGED:
 		p.ranged = !p.ranged;
 		break;
 	case FieldId::HAND_REQUIREMENT:
-		p.hand_requirement = cycle_enum(p.hand_requirement, HAND_REQ_COUNT);
+		p.handRequirement = cycle_enum(p.handRequirement, HAND_REQ_COUNT);
 		break;
 	case FieldId::WEAPON_SIZE:
-		p.weapon_size = cycle_enum(p.weapon_size, WEAPON_SIZE_COUNT);
+		p.weaponSize = cycle_enum(p.weaponSize, WEAPON_SIZE_COUNT);
 		break;
 	case FieldId::EFFECT:
 		p.effect = cycle_enum(p.effect, EFFECT_COUNT);
 		break;
 	case FieldId::IS_SET_MODE:
-		p.is_set_mode = !p.is_set_mode;
+		p.isSetMode = !p.isSetMode;
 		break;
 	default:
 		break;

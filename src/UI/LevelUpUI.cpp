@@ -19,8 +19,8 @@ LevelUpUI::LevelUpUI(Player& player, int newLevel, GameContext& /*ctx*/)
 
 void LevelUpUI::menu(GameContext& ctx)
 {
-	ctx.input_system->poll();
-	GameKey key = ctx.input_system->get_key();
+	ctx.inputSystem->poll();
+	GameKey key = ctx.inputSystem->get_key();
 	if (key == GameKey::SPACE || key == GameKey::ESCAPE || key == GameKey::ENTER)
 	{
 		menu_set_run_false();

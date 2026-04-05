@@ -60,9 +60,9 @@ private:
 public:
 	// Unified buff system - modifier stack pattern (managed by BuffSystem)
 	// Note: active_buffs vector is public for BuffSystem access
-	std::vector<Buff> active_buffs;
+	std::vector<Buff> activeBuffs;
 	Creature(Vector2D position, ActorData data)
-		: Actor(position, data), inventory_data(InventoryData(50))
+		: Actor(position, data), inventoryData(InventoryData(50))
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
@@ -155,5 +155,5 @@ public:
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
-	InventoryData inventory_data;
+	InventoryData inventoryData;
 };

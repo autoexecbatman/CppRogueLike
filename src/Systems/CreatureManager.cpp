@@ -34,7 +34,7 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 void CreatureManager::spawn_creatures(GameContext& ctx)
 {
 	// INCREASED SPAWN RATE - add a new monster every spawn_rate turns (default 2)
-	if (ctx.game_state->get_time() % spawnRate == 0)
+	if (ctx.gameState->get_time() % spawnRate == 0)
 	{
 		if (can_spawn_creature(*ctx.creatures, maxCreatures))
 		{

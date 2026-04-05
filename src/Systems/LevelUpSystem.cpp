@@ -147,10 +147,10 @@ int LevelUpSystem::apply_hit_point_gain(Creature& owner, int newLevel, GameConte
 
 	int conBonus = 0;
 	int con = owner.get_constitution();
-	int conTableSize = static_cast<int>(ctx->data_manager->get_constitution_attributes().size());
+	int conTableSize = static_cast<int>(ctx->dataManager->get_constitution_attributes().size());
 	if (con >= 1 && con <= conTableSize)
 	{
-		conBonus = ctx->data_manager->get_constitution_attributes()[con - 1].HPAdj;
+		conBonus = ctx->dataManager->get_constitution_attributes()[con - 1].HPAdj;
 	}
 
 	int totalHPGain = std::max(1, hitDiceRoll + conBonus);

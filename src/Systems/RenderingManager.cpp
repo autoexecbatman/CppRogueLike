@@ -1,4 +1,5 @@
 // RenderingManager.cpp - Handles all rendering and screen management
+#include <algorithm>
 #include <memory>
 #include <span>
 
@@ -15,7 +16,7 @@
 
 void RenderingManager::render(GameContext& ctx) const
 {
-	render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventory_data, *ctx.creatures, *ctx.player, ctx);
+	render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventoryData, *ctx.creatures, *ctx.player, ctx);
 }
 
 void RenderingManager::render_world(
@@ -44,6 +45,7 @@ void RenderingManager::render_world(
 	}
 
 	apply_lighting(player, ctx);
+	render_mouse_path_overlay(ctx);
 
 	if (ctx.minimap)
 	{
@@ -144,7 +146,7 @@ void RenderingManager::render_decorations(
 	}
 	for (const auto& decor : decorations)
 	{
-		if (!decor || decor->is_broken)
+		if (!decor || decor->isBroken)
 		{
 			continue;
 		}
@@ -153,5 +155,70 @@ void RenderingManager::render_decorations(
 			continue;
 		}
 		ctx.renderer->draw_tile_static(decor->position, decor->tile, Color{ 255, 255, 255, 255 });
+	}
+}
+
+void RenderingManager::render_mouse_path_overlay(const GameContext& ctx) const
+{
+	if (!ctx.renderer || !ctx.mousePathOverlay || ctx.mousePathOverlay->empty())
+	{
+		return;
+	}
+
+	const int tileSize = ctx.renderer->get_tile_size();
+	const int cam_x = ctx.renderer->get_camera_x();
+	const int cam_y = ctx.renderer->get_camera_y();
+
+	const int dotRadius = std::max(2, tileSize / 8);
+	const int destRadius = std::max(3, tileSize / 5);
+	const size_t count = ctx.mousePathOverlay->size();
+	const size_t lastIdx = count - 1;
+
+	// Pre-compute screen centres
+	auto screen_centre = [&](size_t i) -> Vector2D
+	{
+		const Vector2D& p = (*ctx.mousePathOverlay)[i];
+		return { p.x * tileSize - cam_x + tileSize / 2,
+			p.y * tileSize - cam_y + tileSize / 2 };
+	};
+
+	// Pass 1 — lines between consecutive nodes, alpha fades toward destination
+	for (size_t i = 0; i + 1 < count; ++i)
+	{
+		Vector2D a = screen_centre(i);
+		Vector2D b = screen_centre(i + 1);
+
+		float t = static_cast<float>(i) / static_cast<float>(lastIdx);
+		unsigned char alpha = static_cast<unsigned char>(55 + static_cast<int>(80.0f * t));
+		Color lineColor = { 220, 220, 220, alpha };
+
+		DrawLineEx(
+			{ static_cast<float>(a.x), static_cast<float>(a.y) },
+			{ static_cast<float>(b.x), static_cast<float>(b.y) },
+			2.0f,
+			lineColor);
+	}
+
+	// Pass 2 — dots on top of lines, alpha fades toward destination
+	for (size_t i = 0; i < count; ++i)
+	{
+		Vector2D sc = screen_centre(i);
+
+		float t = static_cast<float>(i) / static_cast<float>(lastIdx);
+		unsigned char alpha = static_cast<unsigned char>(80 + static_cast<int>(120.0f * t));
+
+		if (i == lastIdx)
+		{
+			// Destination: bright ring
+			Color destFill = { 255, 255, 255, static_cast<unsigned char>(alpha) };
+			Color destRing = { 255, 255, 255, 200 };
+			DrawCircle(sc.x, sc.y, static_cast<float>(destRadius), destFill);
+			DrawCircleLines(sc.x, sc.y, static_cast<float>(destRadius + 2), destRing);
+		}
+		else
+		{
+			Color nodeColor = { 210, 210, 210, alpha };
+			DrawCircle(sc.x, sc.y, static_cast<float>(dotRadius), nodeColor);
+		}
 	}
 }

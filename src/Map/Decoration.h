@@ -17,6 +17,6 @@ struct Decoration
 	std::string name{};
     int hp{ 1 };
     bool blocks_movement{ true };
-	std::string loot_table_key{}; // "" = drops nothing on break
-    bool is_broken{ false };
+	std::string lootTableKey{}; // "" = drops nothing on break
+    bool isBroken{ false };
 };

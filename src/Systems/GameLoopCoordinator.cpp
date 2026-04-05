@@ -46,9 +46,9 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 	handle_input_phase(ctx);
 
-	if (ctx.input_handler->was_resized())
+	if (ctx.inputHandler->was_resized())
 	{
-		ctx.input_handler->clear_resize();
+		ctx.inputHandler->clear_resize();
 		ctx.renderer->update_viewport();
 		ctx.map->compute_fov(ctx);
 
@@ -60,17 +60,30 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 		ctx.gui->guiInit = true;
 		ctx.gui->gui_update(ctx);
 
-		ctx.game_state->set_game_status(GameStatus::IDLE);
+		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 
 	// Update game state only when player provides input and editor is not open
 #ifndef EMSCRIPTEN
-	const bool editor_active = (ctx.decor_editor && ctx.decor_editor->is_active()) ||
-		(ctx.content_editor && ctx.content_editor->is_active());
+	const bool editor_active = (ctx.decorEditor && ctx.decorEditor->is_active()) ||
+		(ctx.contentEditor && ctx.contentEditor->is_active());
 #else
 	const bool editor_active = false;
 #endif
-	if (!editor_active && !ctx.input_handler->is_animation_tick())
+	// Path pacing: allow one update step every 0.12 s while auto-walking.
+	// Keyboard input always bypasses the rate-limit (is_animation_tick() is false).
+	bool has_mouse_path = ctx.mousePathOverlay && !ctx.mousePathOverlay->empty();
+	bool pathStepReady = false;
+	if (has_mouse_path)
+	{
+		double now = GetTime();
+		if (now - mousePathStepTime >= 0.12)
+		{
+			pathStepReady = true;
+			mousePathStepTime = now;
+		}
+	}
+	if (!editor_active && (!ctx.inputHandler->is_animation_tick() || pathStepReady))
 	{
 		handle_update_phase(ctx, gui);
 	}
@@ -82,23 +95,23 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 void GameLoopCoordinator::handle_initialization(GameContext& ctx)
 {
-	if (!ctx.menu_manager->is_game_initialized())
+	if (!ctx.menuManager->is_game_initialized())
 	{
-		ctx.state_manager->init_new_game(ctx);
-		ctx.menu_manager->set_game_initialized(true);
+		ctx.stateManager->init_new_game(ctx);
+		ctx.menuManager->set_game_initialized(true);
 	}
 }
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 {
-	ctx.input_handler->reset_key();
-	if (ctx.menu_manager->should_take_input())
+	ctx.inputHandler->reset_key();
+	if (ctx.menuManager->should_take_input())
 	{
-		ctx.input_system->poll();
+		ctx.inputSystem->poll();
 
 		auto handle_zoom = [&]() -> bool
 		{
-			GameKey key = ctx.input_system->get_key();
+			GameKey key = ctx.inputSystem->get_key();
 			if (key == GameKey::MINIMAP_TOGGLE && ctx.minimap)
 			{
 				ctx.minimap->toggle();
@@ -117,37 +130,37 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				return true;
 			}
 	#ifndef EMSCRIPTEN
-			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decor_editor)
+			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decorEditor)
 			{
-				ctx.decor_editor->toggle();
+				ctx.decorEditor->toggle();
 				return true;
 			}
-			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.content_editor)
+			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.contentEditor)
 			{
-				ctx.content_editor->toggle(*ctx.content_registry);
+				ctx.contentEditor->toggle(*ctx.contentRegistry);
 				return true;
 			}
-			if (ctx.decor_editor && ctx.decor_editor->is_active())
+			if (ctx.decorEditor && ctx.decorEditor->is_active())
 			{
 				if (key == GameKey::DECOR_PREV)
 				{
-					ctx.decor_editor->cycle_prev();
+					ctx.decorEditor->cycle_prev();
 					return true;
 				}
 				if (key == GameKey::DECOR_NEXT)
 				{
-					ctx.decor_editor->cycle_next();
+					ctx.decorEditor->cycle_next();
 					return true;
 				}
 				if (key == GameKey::DECOR_SAVE)
 				{
-					ctx.decor_editor->save_palette(Paths::TILE_CONFIG);
+					ctx.decorEditor->save_palette(Paths::TILE_CONFIG);
 					return true;
 				}
 				// Handle placement -- blocked while sheet browser is open
-				if (!ctx.decor_editor->is_browser_open() && (key == GameKey::MOUSE_LEFT || key == GameKey::MOUSE_RIGHT))
+				if (!ctx.decorEditor->is_browser_open() && (key == GameKey::MOUSE_LEFT || key == GameKey::MOUSE_RIGHT))
 				{
-					Vector2D world = ctx.input_system->get_mouse_world_tile(
+					Vector2D world = ctx.inputSystem->get_mouse_world_tile(
 						ctx.renderer->get_camera_x(),
 						ctx.renderer->get_camera_y(),
 						ctx.renderer->get_tile_size());
@@ -155,11 +168,11 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 					int world_y = world.y;
 					if (key == GameKey::MOUSE_LEFT)
 					{
-						ctx.decor_editor->place(world_x, world_y);
+						ctx.decorEditor->place(world_x, world_y);
 					}
 					else
 					{
-						ctx.decor_editor->erase(world_x, world_y);
+						ctx.decorEditor->erase(world_x, world_y);
 					}
 					return true;
 				}
@@ -170,35 +183,35 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 
 #ifndef EMSCRIPTEN
 		// Editor active: consume all input -- game gets nothing.
-		if (ctx.content_editor && ctx.content_editor->is_active())
+		if (ctx.contentEditor && ctx.contentEditor->is_active())
 		{
 			handle_zoom();
-			ctx.menu_manager->set_should_take_input(true);
+			ctx.menuManager->set_should_take_input(true);
 			return;
 		}
 
-		if (ctx.decor_editor && ctx.decor_editor->is_active())
+		if (ctx.decorEditor && ctx.decorEditor->is_active())
 		{
 			handle_zoom();
-			ctx.decor_editor->set_char_input(ctx.input_system->get_char_input());
-			ctx.menu_manager->set_should_take_input(true);
+			ctx.decorEditor->set_char_input(ctx.inputSystem->get_char_input());
+			ctx.menuManager->set_should_take_input(true);
 			return;
 		}
 #endif
 
 		if (!handle_zoom())
 		{
-			ctx.input_handler->key_store();
-			ctx.input_handler->key_listen(*ctx.input_system);
+			ctx.inputHandler->key_store();
+			ctx.inputHandler->key_listen(*ctx.inputSystem);
 		}
 	}
-	ctx.menu_manager->set_should_take_input(true);
+	ctx.menuManager->set_should_take_input(true);
 }
 
 void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
 {
 	ctx.messageSystem->log("Running update...");
-	ctx.game_loop_coordinator->update(ctx);
+	ctx.gameLoopCoordinator->update(ctx);
 	gui.gui_update(ctx);
 	ctx.messageSystem->log("Update OK.");
 }
@@ -216,27 +229,27 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	ctx.renderer->begin_frame();
 
-	ctx.rendering_manager->render(ctx);
+	ctx.renderingManager->render(ctx);
 
-	if (ctx.anim_system)
+	if (ctx.animSystem)
 	{
-		ctx.anim_system->update_and_render(*ctx.renderer);
+		ctx.animSystem->update_and_render(*ctx.renderer);
 	}
 
-	if (ctx.floating_text)
+	if (ctx.floatingText)
 	{
-		ctx.floating_text->update_and_render(*ctx.renderer);
+		ctx.floatingText->update_and_render(*ctx.renderer);
 	}
 
 #ifndef EMSCRIPTEN
-	if (ctx.decor_editor)
+	if (ctx.decorEditor)
 	{
-		ctx.decor_editor->update_and_render(*ctx.renderer);
+		ctx.decorEditor->update_and_render(*ctx.renderer);
 	}
 
-	if (ctx.content_editor)
+	if (ctx.contentEditor)
 	{
-		ctx.content_editor->update_and_render(*ctx.renderer, *ctx.content_registry);
+		ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry);
 	}
 #endif
 
@@ -253,16 +266,16 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
 {
-	if (ctx.menu_manager->has_active_menus(*ctx.menus))
+	if (ctx.menuManager->has_active_menus(*ctx.menus))
 	{
-		ctx.game_state->set_window_state(WindowState::MENU);
+		ctx.gameState->set_window_state(WindowState::MENU);
 		return;
 	}
 }
 
 void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 {
-	if (!ctx.renderer || !ctx.input_system || !ctx.map)
+	if (!ctx.renderer || !ctx.inputSystem || !ctx.map)
 	{
 		return;
 	}
@@ -273,7 +286,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		return;
 	}
 
-	Vector2D screen_tile = ctx.input_system->get_mouse_tile(tileSize);
+	Vector2D screen_tile = ctx.inputSystem->get_mouse_tile(tileSize);
 
 	// Ignore cursor over the GUI panel rows at the bottom
 	int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
@@ -365,7 +378,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			hg = 180;
 			hb = 0; // amber
 		}
-		for (const auto& item : ctx.inventory_data->items)
+		for (const auto& item : ctx.inventoryData->items)
 		{
 			if (item && item->position == world_tile)
 			{
@@ -448,7 +461,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 void GameLoopCoordinator::update(GameContext& ctx)
 {
-	if (ctx.game_state->get_game_status() == GameStatus::VICTORY)
+	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
 	{
 		ctx.messageSystem->log("Player has won the game!");
 		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Congratulations!");
@@ -456,50 +469,50 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
 		ctx.messageSystem->finalize_message();
-		ctx.game_state->set_run(false);
+		ctx.gameState->set_run(false);
 	}
 
 	ctx.map->update();
 	ctx.player->update(ctx);
 
-	if (ctx.game_state->get_game_status() == GameStatus::STARTUP)
+	if (ctx.gameState->get_game_status() == GameStatus::STARTUP)
 	{
 #ifndef EMSCRIPTEN
-		if (ctx.decor_editor && ctx.map && ctx.level_manager)
+		if (ctx.decorEditor && ctx.map && ctx.levelManager)
 		{
-			ctx.decor_editor->set_active_map(
+			ctx.decorEditor->set_active_map(
 				ctx.map->get_seed(),
-				ctx.level_manager->get_dungeon_level());
+				ctx.levelManager->get_dungeon_level());
 
-			if (ctx.prefab_library && ctx.rooms && ctx.decor_editor->is_active_map_empty() && !ctx.game_state->get_is_loaded_game())
+			if (ctx.prefabLibrary && ctx.rooms && ctx.decorEditor->is_active_map_empty() && !ctx.gameState->get_is_loaded_game())
 			{
-				ctx.prefab_library->apply_to_rooms(
+				ctx.prefabLibrary->apply_to_rooms(
 					*ctx.rooms,
 					ctx.map->get_seed(),
-					ctx.level_manager->get_dungeon_level(),
-					*ctx.decor_editor,
+					ctx.levelManager->get_dungeon_level(),
+					*ctx.decorEditor,
 					*ctx.map);
 			}
 		}
 #endif
 
 		ctx.map->compute_fov(ctx);
-		if (ctx.level_manager->get_dungeon_level() == 1 && !ctx.game_state->get_is_loaded_game())
+		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
 		{
 			ctx.player->racial_ability_adjustments();
 			ctx.player->equip_class_starting_gear(ctx);
 		}
-		bool wasLoadedGame = ctx.game_state->get_is_loaded_game();
-		ctx.game_state->set_is_loaded_game(false);
+		bool wasLoadedGame = ctx.gameState->get_is_loaded_game();
+		ctx.gameState->set_is_loaded_game(false);
 		ctx.player->calculate_thaco();
 
 		if (wasLoadedGame)
 		{
-			ctx.game_state->set_game_status(GameStatus::IDLE);
+			ctx.gameState->set_game_status(GameStatus::IDLE);
 		}
 		else
 		{
-			ctx.game_state->set_game_status(GameStatus::NEW_TURN);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 
 		if (!ctx.gui->guiInit)
@@ -510,7 +523,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		}
 	}
 
-	if (ctx.game_state->get_game_status() == GameStatus::NEW_TURN)
+	if (ctx.gameState->get_game_status() == GameStatus::NEW_TURN)
 	{
 		std::erase_if(*ctx.objects,
 			[](const auto& obj)
@@ -520,11 +533,11 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		{
 			std::erase_if(*ctx.decorations,
 				[](const auto& d)
-				{ return !d || d->is_broken; });
+				{ return !d || d->isBroken; });
 		}
 
-		ctx.creature_manager->update_creatures(*ctx.creatures, ctx);
-		ctx.creature_manager->spawn_creatures(ctx);
+		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
+		ctx.creatureManager->spawn_creatures(ctx);
 
 		for (const auto& creature : *ctx.creatures)
 		{
@@ -539,23 +552,23 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			ctx.player->destructible->update_constitution_bonus(*ctx.player, ctx);
 		}
 
-		ctx.hunger_system->increase_hunger(ctx, 1);
-		ctx.hunger_system->apply_hunger_effects(ctx);
+		ctx.hungerSystem->increase_hunger(ctx, 1);
+		ctx.hungerSystem->apply_hunger_effects(ctx);
 
-		ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 
-		ctx.game_state->increment_time();
-		if (ctx.game_state->get_game_status() != GameStatus::DEFEAT)
+		ctx.gameState->increment_time();
+		if (ctx.gameState->get_game_status() != GameStatus::DEFEAT)
 		{
-			ctx.game_state->set_game_status(GameStatus::IDLE);
+			ctx.gameState->set_game_status(GameStatus::IDLE);
 		}
 	}
 
-	if (ctx.game_state->get_game_status() == GameStatus::DEFEAT)
+	if (ctx.gameState->get_game_status() == GameStatus::DEFEAT)
 	{
 		ctx.messageSystem->log("Player is dead!");
 		ctx.messageSystem->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
 		ctx.messageSystem->finalize_message();
-		ctx.game_state->set_run(false);
+		ctx.gameState->set_run(false);
 	}
 }

@@ -693,15 +693,15 @@ bool SpellSystem::cast_spell_by_key(std::string_view key, Creature& caster, Game
 
 static void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
-	if (!ctx.anim_system)
+	if (!ctx.animSystem)
 	{
 		return;
 	}
 
-	ctx.anim_system->spawn_effect(
+	ctx.animSystem->spawn_effect(
 		pos.x,
 		pos.y,
-		ctx.tile_config->get("TILE_EFFECT_HEAL"),
+		ctx.tileConfig->get("TILE_EFFECT_HEAL"),
 		60,
 		220,
 		60,
@@ -734,7 +734,7 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 {
-	ctx.buff_system->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
+	ctx.buffSystem->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
 	ctx.messageSystem->finalize_message();
@@ -748,7 +748,7 @@ bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 	int casterLevel = player ? player->get_creature_level() : 1;
 	int duration = 3 + casterLevel;
 
-	ctx.buff_system->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
+	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
 
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Sanctuary! ");
 	ctx.messageSystem->append_message_part(
@@ -790,7 +790,7 @@ bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
 		return false;
 	}
 
-	ctx.buff_system->add_buff(*target, BuffType::SILENCE, 0, duration, false);
+	ctx.buffSystem->add_buff(*target, BuffType::SILENCE, 0, duration, false);
 	SpellAnimations::animate_creature_hit(target->position, ctx);
 
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
@@ -834,7 +834,7 @@ bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
 		int save = ctx.dice->roll(1, 20);
 		if (save < 10)
 		{
-			ctx.buff_system->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
+			ctx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
 			SpellAnimations::animate_creature_hit(creature->position, ctx);
 			++affected;
 		}
@@ -913,7 +913,7 @@ bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 	}
 	ctx.messageSystem->finalize_message();
 
-	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 	return true;
 }
 
@@ -995,14 +995,14 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{} damage!", totalDamage));
 	ctx.messageSystem->finalize_message();
 
-	ctx.creature_manager->cleanup_dead_creatures(*ctx.creatures);
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 
 	return true;
 }
 
 bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 {
-	ctx.buff_system->add_buff(caster, BuffType::SHIELD, 4, 5, false); // Spell: ADD +4 AC
+	ctx.buffSystem->add_buff(caster, BuffType::SHIELD, 4, 5, false); // Spell: ADD +4 AC
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Shield! ");
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "+4 AC for 5 turns.");
 	ctx.messageSystem->finalize_message();
@@ -1034,7 +1034,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 		int hd = std::max(1, creature->destructible->get_max_hp() / 4);
 		if (hd <= hdBudget)
 		{
-			ctx.buff_system->add_buff(*creature, BuffType::SLEEP, 0, 5, false);
+			ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, 5, false);
 			hdBudget -= hd;
 			++affected;
 		}
@@ -1083,7 +1083,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 		int save = ctx.dice->roll(1, 20);
 		if (save < 15)
 		{
-			ctx.buff_system->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false);
+			ctx.buffSystem->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false);
 			++affected;
 		}
 	}
@@ -1105,7 +1105,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 {
-	ctx.buff_system->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false); // Spell: ADD effect
+	ctx.buffSystem->add_buff(caster, BuffType::INVISIBILITY, 0, 20, false); // Spell: ADD effect
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Invisibility! ");
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You fade from view for 20 turns.");
 	ctx.messageSystem->finalize_message();

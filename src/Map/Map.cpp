@@ -94,9 +94,9 @@ void Map::init(bool withActors, GameContext& ctx)
 
 	post_process_doors();
 
-	if (ctx.level_manager && ctx.level_manager->get_dungeon_level() > 1)
+	if (ctx.levelManager && ctx.levelManager->get_dungeon_level() > 1)
 	{
-		maybe_create_treasure_room(ctx.level_manager->get_dungeon_level(), ctx);
+		maybe_create_treasure_room(ctx.levelManager->get_dungeon_level(), ctx);
 	}
 	place_amulet(ctx);
 }
@@ -291,7 +291,7 @@ Decoration* Map::find_decoration_at(Vector2D pos, GameContext& ctx) const noexce
 	}
 	for (auto& d : *ctx.decorations)
 	{
-		if (d && !d->is_broken && d->position == pos)
+		if (d && !d->isBroken && d->position == pos)
 		{
 			return d.get();
 		}
@@ -491,7 +491,7 @@ void Map::render(const GameContext& ctx) const
 			return TileRef{};
 
 		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
-		const auto& tileConfig = *ctx.tile_config;
+		const auto& tileConfig = *ctx.tileConfig;
 		return (zone == ZONE_CHAPEL) ? tileConfig.get("TILE_CANDELABRA") : tileConfig.get("TILE_TORCH_1");
 	};
 
@@ -543,38 +543,38 @@ void Map::render(const GameContext& ctx) const
 					return false;
 				};
 				tile_ref = wall_autotile_resolve_mask(
-					ctx.tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"),
+					ctx.tileConfig->get_wall_autotile("WALL_AUTOTILE_STONE"),
 					build_mask(pos, connected_wall));
 				break;
 			}
 			case TileType::FLOOR:
 			{
 				tile_ref = autotile_resolve_mask(
-					ctx.tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
+					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::CORRIDOR:
 			{
 				tile_ref = autotile_resolve_mask(
-					ctx.tile_config->get_autotile("AUTOTILE_CORRIDOR"),
+					ctx.tileConfig->get_autotile("AUTOTILE_CORRIDOR"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::WATER:
-				tile_ref = ctx.tile_config->get("TILE_WATER");
+				tile_ref = ctx.tileConfig->get("TILE_WATER");
 				break;
 			case TileType::CLOSED_DOOR:
 			case TileType::OPEN_DOOR:
 			{
 				// Draw floor underneath -- door sprites have transparency
 				TileRef floor_ref = autotile_resolve_mask(
-					ctx.tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
+					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floor_ref, tint);
 				tile_ref = (type == TileType::CLOSED_DOOR)
-					? ctx.tile_config->get("TILE_DOOR_CLOSED")
-					: ctx.tile_config->get("TILE_DOOR_OPEN");
+					? ctx.tileConfig->get("TILE_DOOR_CLOSED")
+					: ctx.tileConfig->get("TILE_DOOR_OPEN");
 				break;
 			}
 			default:
@@ -586,8 +586,8 @@ void Map::render(const GameContext& ctx) const
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
 #ifndef EMSCRIPTEN
-				TileRef decor_ref = ctx.decor_editor
-					? ctx.decor_editor->get_override(col, row)
+				TileRef decor_ref = ctx.decorEditor
+					? ctx.decorEditor->get_override(col, row)
 					: TileRef{};
 #else
 				TileRef decor_ref = resolve_decor(pos, type);
@@ -608,9 +608,9 @@ void Map::add_item(Vector2D pos, GameContext& ctx)
 		return;
 
 	// Use our ItemFactory to create a random item
-	if (ctx.level_manager)
+	if (ctx.levelManager)
 	{
-		itemFactory->spawn_random_item(pos, ctx, ctx.level_manager->get_dungeon_level());
+		itemFactory->spawn_random_item(pos, ctx, ctx.levelManager->get_dungeon_level());
 	}
 }
 
@@ -892,12 +892,12 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 
 void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.decorations || !ctx.tile_config)
+	if (!ctx.decorations || !ctx.tileConfig)
 		return;
 
 	constexpr int MAX_ROOM_BARRELS = 2;
 	const int count = mapRng_.roll(0, MAX_ROOM_BARRELS);
-	const TileRef barrel_tile = ctx.tile_config->get("TILE_BARREL");
+	const TileRef barrel_tile = ctx.tileConfig->get("TILE_BARREL");
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -919,7 +919,7 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 		barrel->name = "barrel";
 		barrel->hp = 2;
 		barrel->blocks_movement = true;
-		barrel->loot_table_key = "gold";
+		barrel->lootTableKey = "gold";
 		ctx.decorations->push_back(std::move(barrel));
 	}
 }
@@ -984,15 +984,15 @@ bool Map::can_walk(Vector2D pos, GameContext& ctx) const noexcept
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
-	if (ctx.level_manager)
+	if (ctx.levelManager)
 	{
-		monsterFactory->spawn_random_monster(pos, ctx.level_manager->get_dungeon_level(), ctx);
+		monsterFactory->spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
 
 		// Log the spawn for debugging
 		Creature* monster = get_actor(pos, ctx);
 		if (monster && ctx.messageSystem)
 		{
-			ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.level_manager->get_dungeon_level()));
+			ctx.messageSystem->log("Spawned " + monster->actorData.name + " at level " + std::to_string(ctx.levelManager->get_dungeon_level()));
 		}
 	}
 }
@@ -1050,9 +1050,9 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.creatures->clear();
 	}
-	if (ctx.inventory_data)
+	if (ctx.inventoryData)
 	{
-		ctx.inventory_data->items.clear();
+		ctx.inventoryData->items.clear();
 	}
 	if (ctx.rooms)
 	{
@@ -1265,10 +1265,10 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 void Map::place_amulet(GameContext& ctx)
 {
 	// Only place the amulet on the final level
-	if (!ctx.level_manager || !ctx.player || !ctx.rooms || !ctx.dice)
+	if (!ctx.levelManager || !ctx.player || !ctx.rooms || !ctx.dice)
 		return;
 
-	if (ctx.level_manager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
+	if (ctx.levelManager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
 		// Choose a random room for the amulet
 		const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
@@ -1283,7 +1283,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(*ctx.inventory_data, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.content_registry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry));
 
 		// Log the placement (debug info)
 		if (ctx.messageSystem)
@@ -1303,7 +1303,7 @@ void Map::display_spawn_rates(GameContext& ctx) const
 
 void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx)
 {
-	if (!ctx.level_manager || !ctx.dice)
+	if (!ctx.levelManager || !ctx.dice)
 		return;
 
 	// Mark the area for the treasure room
@@ -1320,7 +1320,7 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	const Vector2D center{ room.center_col(), room.center_row() };
 
 	// Generate treasure at the center of the room
-	itemFactory->generate_treasure(center, ctx, ctx.level_manager->get_dungeon_level(), quality);
+	itemFactory->generate_treasure(center, ctx, ctx.levelManager->get_dungeon_level(), quality);
 
 	// Add guardians or traps based on quality
 	int guardianCount = 0;

@@ -45,7 +45,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	int vrows = screen_rows(ctx);
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 
-	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tile_config);
+	ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
 
 	std::string_view title = "INVENTORY";
 	int title_w = ctx.renderer->measure_text(title);
@@ -83,7 +83,7 @@ InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContex
 
 void InventoryUI::menu(GameContext& ctx)
 {
-	ctx.input_system->poll();
+	ctx.inputSystem->poll();
 	if (!handle_input(player_ref, ctx))
 	{
 		menu_set_run_false();
@@ -120,7 +120,7 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 	listEntries.clear();
 
 	std::vector<Item*> items;
-	for (const auto& item : player.inventory_data.items)
+	for (const auto& item : player.inventoryData.items)
 	{
 		if (!item)
 		{
@@ -585,12 +585,12 @@ std::string InventoryUI::format_stat_bonus_info(const Item& item) const
 		using T = std::decay_t<decltype(sb)>;
 		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
 		{
-			str_b = sb.str_bonus;
-			dex_b = sb.dex_bonus;
-			con_b = sb.con_bonus;
-			int_b = sb.int_bonus;
-			wis_b = sb.wis_bonus;
-			cha_b = sb.cha_bonus;
+			str_b = sb.strBonus;
+			dex_b = sb.dexBonus;
+			con_b = sb.conBonus;
+			int_b = sb.intBonus;
+			wis_b = sb.wisBonus;
+			cha_b = sb.chaBonus;
 			return true;
 		}
 		return false;
@@ -707,7 +707,7 @@ std::string InventoryUI::get_category_name(ItemCategory cat) const
 
 bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 {
-	GameKey key = ctx.input_system->get_key();
+	GameKey key = ctx.inputSystem->get_key();
 
 	switch (key)
 	{
@@ -766,7 +766,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	default:
 	{
 		// Letter shortcuts for Backpack/Usables screens
-		int charInput = ctx.input_system->get_char_input();
+		int charInput = ctx.inputSystem->get_char_input();
 		if (activeScreen != InventoryScreen::EQUIPMENT && charInput >= 'a' && charInput <= 'z' && charInput != 'd')
 		{
 			int letterIndex = charInput - 'a';
@@ -907,7 +907,7 @@ void InventoryUI::handle_enter_item(Player& player, GameContext& ctx)
 
 	if (itemUsed)
 	{
-		ctx.game_state->set_game_status(GameStatus::NEW_TURN);
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 
 		if (filterMode)
 		{
@@ -938,8 +938,8 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		{
 			return it && it->uniqueId == itemId;
 		};
-		auto it = std::ranges::find_if(player.inventory_data.items, find_by_id);
-		if (it != player.inventory_data.items.end())
+		auto it = std::ranges::find_if(player.inventoryData.items, find_by_id);
+		if (it != player.inventoryData.items.end())
 		{
 			player.drop(**it, ctx);
 			ctx.messageSystem->message(

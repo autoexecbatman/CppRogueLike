@@ -35,7 +35,7 @@ namespace
 // Class-based monsters (mimic, shopkeeper, spiders): tile only.
 // Custom monsters: user-created, persisted to JSON alongside builtins.
 // ---------------------------------------------------------------------------
-std::unordered_map<MonsterId, MonsterParams> s_registry;
+std::unordered_map<MonsterId, MonsterParams> registry;
 std::unordered_map<MonsterId, TileRef> s_class_tiles;
 std::unordered_map<MonsterId, MonsterParams> s_class_params; // minimal params for class-based
 std::map<std::string, MonsterParams> s_custom;               // user-created monsters
@@ -283,7 +283,7 @@ void MonsterCreator::load(std::string_view path)
 
 	nlohmann::json root = nlohmann::json::parse(f);
 
-	s_registry.clear();
+	registry.clear();
 	s_class_tiles.clear();
 	s_custom.clear();
 	s_class_params.clear();
@@ -304,13 +304,13 @@ void MonsterCreator::load(std::string_view path)
 			throw std::runtime_error(
 				std::format("MonsterCreator::load -- missing entry '{}'", key));
 		}
-		s_registry[id] = parse_full_params(root.at(key));
-		const auto& corpse = s_registry[id].corpse_name;
+		registry[id] = parse_full_params(root.at(key));
+		const auto& corpse = registry[id].corpse_name;
 		const std::string dead_prefix = "dead ";
 		if (corpse.starts_with(dead_prefix))
-			s_registry[id].name = corpse.substr(dead_prefix.size());
+			registry[id].name = corpse.substr(dead_prefix.size());
 		else
-			s_registry[id].name = key;
+			registry[id].name = key;
 	}
 
 	// Class-based monsters: entry only has tile (and optional color).
@@ -350,9 +350,9 @@ void MonsterCreator::save(std::string_view path)
 
 	for (MonsterId id : STANDARD_IDS)
 	{
-		if (s_registry.contains(id))
+		if (registry.contains(id))
 		{
-			root[std::string{ monster_key(id) }] = encode_full_params(s_registry.at(id));
+			root[std::string{ monster_key(id) }] = encode_full_params(registry.at(id));
 		}
 	}
 
@@ -363,9 +363,9 @@ void MonsterCreator::save(std::string_view path)
 		{
 			entry["tile"] = encode_tile(s_class_tiles.at(id));
 		}
-		if (s_registry.contains(id))
+		if (registry.contains(id))
 		{
-			entry["color"] = s_registry.at(id).color;
+			entry["color"] = registry.at(id).color;
 		}
 		root[std::string{ monster_key(id) }] = entry;
 	}
@@ -391,13 +391,13 @@ void MonsterCreator::save(std::string_view path)
 
 const std::unordered_map<MonsterId, MonsterParams>& MonsterCreator::get_registry()
 {
-	return s_registry;
+	return registry;
 }
 
 TileRef MonsterCreator::get_tile(MonsterId id)
 {
-	if (s_registry.contains(id))
-		return s_registry.at(id).symbol;
+	if (registry.contains(id))
+		return registry.at(id).symbol;
 	if (s_class_tiles.contains(id))
 		return s_class_tiles.at(id);
 	return TileRef{};
@@ -405,17 +405,17 @@ TileRef MonsterCreator::get_tile(MonsterId id)
 
 void MonsterCreator::set_params(MonsterId id, const MonsterParams& p)
 {
-	if (s_registry.contains(id))
+	if (registry.contains(id))
 	{
-		s_registry[id] = p;
+		registry[id] = p;
 	}
 }
 
 void MonsterCreator::set_tile(MonsterId id, TileRef tile)
 {
-	if (s_registry.contains(id))
+	if (registry.contains(id))
 	{
-		s_registry.at(id).symbol = tile;
+		registry.at(id).symbol = tile;
 	}
 	else
 	{
@@ -464,7 +464,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 std::unique_ptr<Creature> MonsterCreator::create(Vector2D pos, MonsterId id, GameContext& ctx)
 {
-	return create_from_params(pos, s_registry.at(id), ctx);
+	return create_from_params(pos, registry.at(id), ctx);
 }
 
 // ---------------------------------------------------------------------------
@@ -488,9 +488,9 @@ const MonsterParams& MonsterCreator::get_params(std::string_view key)
 {
 	if (auto id = key_to_standard_id(key))
 	{
-		if (!s_registry.contains(*id))
+		if (!registry.contains(*id))
 			throw std::out_of_range(std::format("MonsterCreator::get_params -- '{}' not in registry", key));
-		return s_registry.at(*id);
+		return registry.at(*id);
 	}
 	if (s_custom.contains(std::string{ key }))
 		return s_custom.at(std::string{ key });
@@ -507,7 +507,7 @@ void MonsterCreator::set_params(std::string_view key, const MonsterParams& p)
 {
 	if (auto id = key_to_standard_id(key))
 	{
-		s_registry[*id] = p;
+		registry[*id] = p;
 		return;
 	}
 	if (auto id = key_to_class_id(key))

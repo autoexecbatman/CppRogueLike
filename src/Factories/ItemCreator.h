@@ -28,43 +28,43 @@ struct ItemParams
 	int color{ 0 };
 	ItemClass itemClass{ ItemClass::UNKNOWN };
 	int value{ 0 };
-	PickableType pickable_type{ PickableType::WEAPON };
+	PickableType pickableType{ PickableType::WEAPON };
 
-	int consumable_amount{ 0 };
+	int consumableAmount{ 0 };
 	int range{ 0 };
 	int damage{ 0 };
-	int confuse_turns{ 0 };
+	int confuseTurns{ 0 };
 	int duration{ 0 };
 
 	MagicalEffect effect{ MagicalEffect::NONE };
-	int effect_bonus{ 0 };
+	int effectBonus{ 0 };
 
-	int str_bonus{ 0 };
-	int dex_bonus{ 0 };
-	int con_bonus{ 0 };
-	int int_bonus{ 0 };
-	int wis_bonus{ 0 };
-	int cha_bonus{ 0 };
-	bool is_set_mode{ false };
+	int strBonus{ 0 };
+	int dexBonus{ 0 };
+	int conBonus{ 0 };
+	int intBonus{ 0 };
+	int wisBonus{ 0 };
+	int chaBonus{ 0 };
+	bool isSetMode{ false };
 
-	int nutrition_value{ 0 };
-	int gold_amount{ 0 };
-	int ac_bonus{ 0 };
+	int nutritionValue{ 0 };
+	int goldAmount{ 0 };
+	int acBonus{ 0 };
 
 	bool ranged{ false };
-	HandRequirement hand_requirement{ HandRequirement::ONE_HANDED };
-	WeaponSize weapon_size{ WeaponSize::MEDIUM };
+	HandRequirement handRequirement{ HandRequirement::ONE_HANDED };
+	WeaponSize weaponSize{ WeaponSize::MEDIUM };
 
-	ConsumableEffect consumable_effect{ ConsumableEffect::NONE };
-	BuffType consumable_buff_type{ BuffType::INVISIBILITY };
+	ConsumableEffect consumableEffect{ ConsumableEffect::NONE };
+	BuffType consumableBuffType{ BuffType::INVISIBILITY };
 
-	TargetMode target_mode{ TargetMode::AUTO_NEAREST };
-	ScrollAnimation scroll_animation{ ScrollAnimation::NONE };
+	TargetMode targetMode{ TargetMode::AUTO_NEAREST };
+	ScrollAnimation scrollAnimation{ ScrollAnimation::NONE };
 
-	int base_weight{ 0 };
-	int level_minimum{ 1 };
-	int level_maximum{ 0 };
-	float level_scaling{ 0.0f };
+	int baseWeight{ 0 };
+	int levelMin{ 1 };
+	int levelMax{ 0 };
+	float levelScaling{ 0.0f };
 	std::string_view category{ "" };
 };
 
@@ -76,12 +76,12 @@ enum class EnhancedItemCategory
 
 struct EnhancedItemSpawnRule
 {
-	std::vector<std::string> item_pool;
-	EnhancedItemCategory enhancement_category;
-	int base_weight;
-	int level_minimum;
-	int level_maximum;
-	float level_scaling;
+	std::vector<std::string> itemPool;
+	EnhancedItemCategory enhancementCategory{};
+	int baseWeight{ 0 };
+	int levelMin{ 0 };
+	int levelMax{ 0 };
+	float levelScaling{ 0.0f };
 	std::string category;
 };
 
@@ -102,9 +102,9 @@ public:
 	static void set_name_category(std::string_view key, std::string name, std::string category);
 
 	// Create item from string key.
-	[[nodiscard]] static std::unique_ptr<Item> create(std::string_view key, Vector2D pos, ContentRegistry& registry);
-	[[nodiscard]] static std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount, ContentRegistry& registry);
-	[[nodiscard]] static std::unique_ptr<Item> create_with_enhancement(std::string_view key, Vector2D pos, PrefixType prefix, SuffixType suffix, ContentRegistry& registry);
+	[[nodiscard]] static std::unique_ptr<Item> create(std::string_view key, Vector2D pos, ContentRegistry& tiles);
+	[[nodiscard]] static std::unique_ptr<Item> create_with_gold_amount(Vector2D pos, int goldAmount, ContentRegistry& tiles);
+	[[nodiscard]] static std::unique_ptr<Item> create_with_enhancement(std::string_view key, Vector2D pos, PrefixType prefix, SuffixType suffix, ContentRegistry& tiles);
 	[[nodiscard]] static std::unique_ptr<Item> create_gold_pile(Vector2D pos, GameContext& ctx);
 	[[nodiscard]] static std::unique_ptr<Item> create_random_of_category(std::string_view category, Vector2D pos, GameContext& ctx, int dungeonLevel);
 

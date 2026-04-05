@@ -11,6 +11,9 @@ public:
 	void update(GameContext& ctx);
 
 private:
+	// Pacing for mouse path auto-walk: one step every 0.12 s
+	double mousePathStepTime{ 0.0 };
+
 	// Helper methods for game loop phases
 	void handle_initialization(GameContext& ctx);
 	void handle_input_phase(GameContext& ctx);

@@ -112,6 +112,9 @@ struct Game
 	// Menu system
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 
+	// Mouse path overlay — persistent across frames, owned here
+	std::vector<Vector2D> mouse_path_overlay{};
+
 	[[nodiscard]] GameContext context() noexcept;
 	bool tick(int& loopNum);
 	void init_world();

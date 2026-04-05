@@ -49,7 +49,7 @@ bool MenuManager::has_active_menus(const std::deque<std::unique_ptr<BaseMenu>>& 
 
 void MenuManager::restore_game_display(GameContext& ctx)
 {
-	ctx.rendering_manager->restore_game_display();
+	ctx.renderingManager->restore_game_display();
 }
 
 // end of file: Systems/MenuManager.cpp

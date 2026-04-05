@@ -9,7 +9,6 @@
 #include "../Actor/InventoryOperations.h"
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
-#include "../Systems/TileConfig.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
@@ -20,6 +19,7 @@
 #include "../Systems/BuffType.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/ShopKeeper.h"
+#include "../Systems/TileConfig.h"
 #include "Actor.h"
 #include "Attacker.h"
 #include "Creature.h"
@@ -28,8 +28,6 @@
 #include "InventoryData.h"
 #include "Item.h"
 #include "Pickable.h"
-
-using namespace InventoryOperations;
 
 //==Creature==
 void Creature::load(const json& j)
@@ -61,10 +59,10 @@ void Creature::load(const json& j)
 	{
 		ai = Ai::create(j["ai"]);
 	}
-	if (j.contains("inventory_data"))
+	if (j.contains("inventoryData"))
 	{
-		inventory_data = InventoryData(50); // Default capacity
-		load_inventory(inventory_data, j["inventory_data"]);
+		inventoryData = InventoryData(50); // Default capacity
+		InventoryOperations::load_inventory(inventoryData, j["inventoryData"]);
 	}
 	if (j.contains("shop"))
 	{
@@ -72,17 +70,17 @@ void Creature::load(const json& j)
 	}
 
 	// Load unified buff system
-	if (j.contains("active_buffs"))
+	if (j.contains("activeBuffs"))
 	{
-		active_buffs.clear();
-		for (const auto& buffJson : j["active_buffs"])
+		activeBuffs.clear();
+		for (const auto& buffJson : j["activeBuffs"])
 		{
 			Buff buff{};
 			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());
 			buff.value = buffJson.at("value").get<int>();
 			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
-			buff.is_set_effect = buffJson.at("is_set_effect").get<bool>();
-			active_buffs.push_back(buff);
+			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
+			activeBuffs.push_back(buff);
 		}
 	}
 }
@@ -123,8 +121,8 @@ void Creature::save(json& j)
 	}
 	// Always save inventory data since it always exists
 	json inventoryJson;
-	save_inventory(inventory_data, inventoryJson);
-	j["inventory_data"] = inventoryJson;
+	InventoryOperations::save_inventory(inventoryData, inventoryJson);
+	j["inventoryData"] = inventoryJson;
 	if (shop)
 	{
 		json shopJson;
@@ -134,27 +132,27 @@ void Creature::save(json& j)
 
 	// Save unified buff system
 	json buffsJson = json::array();
-	for (const auto& buff : active_buffs)
+	for (const auto& buff : activeBuffs)
 	{
 		json buffJson;
 		buffJson["type"] = static_cast<int>(buff.type);
 		buffJson["value"] = buff.value;
 		buffJson["turnsRemaining"] = buff.turnsRemaining;
-		buffJson["is_set_effect"] = buff.is_set_effect;
+		buffJson["isSetEffect"] = buff.isSetEffect;
 		buffsJson.push_back(buffJson);
 	}
-	j["active_buffs"] = buffsJson;
+	j["activeBuffs"] = buffsJson;
 }
 
 // the actor update
 void Creature::update(GameContext& ctx)
 {
-	if (!invisibleTile.is_valid() && ctx.tile_config)
+	if (!invisibleTile.is_valid() && ctx.tileConfig)
 	{
-		invisibleTile = ctx.tile_config->get("TILE_INVISIBLE");
+		invisibleTile = ctx.tileConfig->get("TILE_INVISIBLE");
 	}
-	ctx.buff_system->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
-	ctx.buff_system->update_creature_buffs(*this); // Unified buff system
+	ctx.buffSystem->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
+	ctx.buffSystem->update_creature_buffs(*this); // Unified buff system
 	// Apply the modifiers from stats and items
 	if (destructible)
 	{
@@ -184,18 +182,18 @@ void Creature::equip(Item& item, GameContext& ctx)
 	std::vector<Item*> equippedItems;
 
 	// Find all equipped items
-	for (const auto& inv_item : inventory_data.items)
+	for (const auto& invItem : inventoryData.items)
 	{
-		if (inv_item && inv_item->has_state(ActorState::IS_EQUIPPED))
+		if (invItem && invItem->has_state(ActorState::IS_EQUIPPED))
 		{
-			bool itemIsArmor = inv_item->is_armor();
-			bool itemIsWeapon = inv_item->is_weapon();
-			bool itemIsShield = inv_item->is_shield();
+			bool itemIsArmor = invItem->is_armor();
+			bool itemIsWeapon = invItem->is_weapon();
+			bool itemIsShield = invItem->is_shield();
 
 			// Only consider same-type equipment for unequipping
 			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon) || (isShield && itemIsShield))
 			{
-				equippedItems.push_back(inv_item.get());
+				equippedItems.push_back(invItem.get());
 			}
 		}
 	}
@@ -261,7 +259,7 @@ void Creature::unequip(Item& item, GameContext& ctx)
 
 		// Double-check all inventory to see if we still should have IS_RANGED
 		bool hasRangedWeapon = false;
-		for (const auto& invItem : inventory_data.items)
+		for (const auto& invItem : inventoryData.items)
 		{
 			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
 			{
@@ -304,7 +302,7 @@ void Creature::sync_ranged_state(GameContext& ctx)
 void Creature::pick(GameContext& ctx)
 {
 	// Check if inventory is already full before attempting to pick
-	if (is_inventory_full(inventory_data))
+	if (InventoryOperations::is_inventory_full(inventoryData))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
@@ -314,15 +312,15 @@ void Creature::pick(GameContext& ctx)
 	Item* itemAtPosition = nullptr;
 	size_t itemIndex = 0;
 
-	if (ctx.inventory_data->items.empty())
+	if (ctx.inventoryData->items.empty())
 	{
 		return; // No floor items
 	}
 
 	// Search for item at current position
-	for (size_t i = 0; i < ctx.inventory_data->items.size(); ++i)
+	for (size_t i = 0; i < ctx.inventoryData->items.size(); ++i)
 	{
-		if (auto& item = ctx.inventory_data->items[i])
+		if (auto& item = ctx.inventoryData->items[i])
 		{
 			if (position == item->position)
 			{
@@ -346,7 +344,7 @@ void Creature::pick(GameContext& ctx)
 		{
 			// Gold was picked up successfully via polymorphic call
 			// Remove gold from floor inventory
-			auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
+			auto removeResult = InventoryOperations::remove_item_at(*ctx.inventoryData, itemIndex);
 			if (!removeResult.has_value())
 			{
 				ctx.messageSystem->log("WARNING: Failed to remove gold item from floor inventory");
@@ -359,11 +357,11 @@ void Creature::pick(GameContext& ctx)
 		const std::string itemName = itemAtPosition->actorData.name;
 
 		// Remove from floor first
-		auto removeResult = remove_item_at(*ctx.inventory_data, itemIndex);
+		auto removeResult = InventoryOperations::remove_item_at(*ctx.inventoryData, itemIndex);
 		if (removeResult.has_value())
 		{
 			// Add to player inventory
-			auto addResult = add_item(inventory_data, std::move(*removeResult));
+			auto addResult = InventoryOperations::add_item(inventoryData, std::move(*removeResult));
 			if (addResult.has_value())
 			{
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
@@ -384,10 +382,10 @@ void Creature::pick(GameContext& ctx)
 void Creature::drop(Item& item, GameContext& ctx)
 {
 	// Check if the item is actually in the inventory first
-	auto it = std::find_if(inventory_data.items.begin(), inventory_data.items.end(), [&item](const auto& invItem)
+	auto it = std::find_if(inventoryData.items.begin(), inventoryData.items.end(), [&item](const auto& invItem)
 		{ return invItem.get() == &item; });
 
-	if (it != inventory_data.items.end())
+	if (it != inventoryData.items.end())
 	{
 		// Set the item's position to the player's position
 		(*it)->position = position;
@@ -399,11 +397,11 @@ void Creature::drop(Item& item, GameContext& ctx)
 		}
 
 		// Add to game floor inventory
-		auto addResult = add_item(*ctx.inventory_data, std::move(*it));
+		auto addResult = InventoryOperations::add_item(*ctx.inventoryData, std::move(*it));
 		if (addResult.has_value())
 		{
 			// Clean up null pointer that remains after moving
-			optimize_inventory_storage(inventory_data);
+			InventoryOperations::optimize_inventory_storage(inventoryData);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 		}
 	}
@@ -436,29 +434,29 @@ int Creature::get_display_color() const noexcept
 
 int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
 {
-	auto matches_type = [type](const Buff& b)
+	auto matchesType = [type](const Buff& b)
 	{
 		return b.type == type;
 	};
-	auto matching_buffs = active_buffs | std::views::filter(matches_type);
+	auto matchingBuffs = activeBuffs | std::views::filter(matchesType);
 
-	int highest_set = 0; // Highest SET effect (Potion of Giant Strength → 18)
-	int sum_of_adds = 0; // Sum of ADD effects (Strength spell +1, Gauntlets +2)
+	int highestSet = 0; // Highest SET effect (Potion of Giant Strength → 18)
+	int sumOfAdds = 0; // Sum of ADD effects (Strength spell +1, Gauntlets +2)
 
-	for (const auto& buff : matching_buffs)
+	for (const auto& buff : matchingBuffs)
 	{
-		if (buff.is_set_effect)
+		if (buff.isSetEffect)
 		{
-			highest_set = std::max(highest_set, buff.value);
+			highestSet = std::max(highestSet, buff.value);
 		}
 		else
 		{
-			sum_of_adds += buff.value;
+			sumOfAdds += buff.value;
 		}
 	}
 
 	// AD&D 2e: SET effects replace base (if higher), ADD effects always stack
 	// Example: base=14, SET=18, ADD=+2 → MAX(14,18) + 2 = 20
-	int effective_base = (highest_set > 0) ? std::max(base_value, highest_set) : base_value;
-	return effective_base + sum_of_adds;
+	int effectiveBase = (highestSet > 0) ? std::max(base_value, highestSet) : base_value;
+	return effectiveBase + sumOfAdds;
 }
