@@ -1,4 +1,5 @@
 // file: AiPlayer.cpp
+#include <functional>
 #include <memory>
 #include <stdexcept>
 #include <string>
@@ -789,28 +790,34 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 			int anchor_col = world_tile.x - ctx.renderer->get_camera_x() / tileSize;
 			int anchor_row = world_tile.y - ctx.renderer->get_camera_y() / tileSize;
-			ContextMenu contextMenu{ std::move(options), anchor_col, anchor_row, ctx };
-			contextMenu.menu(ctx);
-			int sel = contextMenu.get_selected();
 
-			int idx = 0;
-			if (foundItem)
+			// Capture by value -- foundItem ptr could dangle, use presence flag instead
+			bool hasItem = (foundItem != nullptr);
+			PendingDoorAction doorAction = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
+
+			auto callback = [this, world_tile, hasItem, hasDoor, doorAction](int sel, GameContext& callbackCtx)
 			{
-				if (sel == idx)
+				int idx = 0;
+				if (hasItem)
 				{
-					begin_path_walk(world_tile, MouseMode::WALK_TO_PICKUP, PendingDoorAction::NONE, ctx);
+					if (sel == idx)
+					{
+						begin_path_walk(world_tile, MouseMode::WALK_TO_PICKUP, PendingDoorAction::NONE, callbackCtx);
+					}
+					idx++;
 				}
-				idx++;
-			}
-			if (hasDoor)
-			{
-				if (sel == idx)
+				if (hasDoor)
 				{
-					PendingDoorAction action = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
-					begin_path_walk(world_tile, MouseMode::WALK_TO_DOOR, action, ctx);
+					if (sel == idx)
+					{
+						begin_path_walk(world_tile, MouseMode::WALK_TO_DOOR, doorAction, callbackCtx);
+					}
+					// last index = Cancel -- do nothing
 				}
-				// last index = Cancel -- do nothing
-			}
+			};
+
+			ctx.menus->push_back(std::make_unique<ContextMenu>(
+				std::move(options), anchor_col, anchor_row, std::move(callback), ctx));
 		}
 		break;
 	}

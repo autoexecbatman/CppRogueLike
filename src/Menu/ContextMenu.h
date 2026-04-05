@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -10,13 +11,19 @@ struct GameContext;
 class ContextMenu : public BaseMenu
 {
 public:
-    ContextMenu(std::vector<std::string> options, int anchor_col, int anchor_row, GameContext& ctx);
-    void menu(GameContext& ctx) override;
-    int get_selected() const { return selected; }
+	ContextMenu(
+		std::vector<std::string> options,
+		int anchor_col,
+		int anchor_row,
+		std::function<void(int, GameContext&)> callback,
+		GameContext& ctx);
+
+	// Called once per frame by MenuManager -- no blocking loop
+	void menu(GameContext& ctx) override;
 
 private:
-    std::vector<std::string> menuOptions;
-    int selectedIndex{ 0 };
-    int selected{ -1 }; // -1 = cancelled, 0..N = chosen option
-    void draw_content() override;
+	std::vector<std::string> menuOptions;
+	int selectedIndex{ 0 };
+	std::function<void(int, GameContext&)> onSelect;
+	void draw_content() override;
 };
