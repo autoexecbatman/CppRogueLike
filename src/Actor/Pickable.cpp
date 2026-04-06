@@ -21,6 +21,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellAnimations.h"
+#include "../Systems/TargetingMenu.h"
 #include "../Systems/TargetingSystem.h"
 #include "../Systems/TargetMode.h"
 #include "../Utils/Vector2D.h"
@@ -524,6 +525,7 @@ bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx)
 
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx)
 {
+	// FOV_BUFF and AUTO_NEAREST are synchronous — no targeting cursor needed
 	if (targetScroll.targetMode == TargetMode::FOV_BUFF)
 	{
 		int affected = 0;
@@ -559,88 +561,95 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		return consume_item(owner, wearer);
 	}
 
-	TargetResult result = ctx.targeting->acquire_targets(ctx, targetScroll.targetMode, wearer.position, targetScroll.range, targetScroll.range);
-	if (!result.success)
+	if (targetScroll.targetMode == TargetMode::AUTO_NEAREST)
 	{
-		ctx.renderingManager->restore_screen(ctx);
-		return false;
-	}
-
-	switch (targetScroll.targetMode)
-	{
-
-	case TargetMode::AUTO_NEAREST:
-	{
-		if (!result.creatures.empty())
+		TargetResult result = ctx.targeting->acquire_targets(
+			ctx,
+			TargetMode::AUTO_NEAREST,
+			wearer.position,
+			targetScroll.range,
+			0);
+		if (!result.success || result.creatures.empty())
 		{
-			auto* target = result.creatures[0];
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
-			ctx.messageSystem->append_message_part(WHITE_BLUE_PAIR, target->actorData.name);
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
-			ctx.messageSystem->finalize_message();
-			SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
-			ctx.messageSystem->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
-			target->destructible->take_damage(*target, targetScroll.damage, ctx);
-			ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+			return false;
 		}
-		break;
-	}
-
-	case TargetMode::PICK_TILE_AOE:
-	{
-		ctx.messageSystem->append_message_part(
-			WHITE_BLACK_PAIR,
-			std::format("The fireball explodes, burning everything within {} tiles!", targetScroll.range));
+		auto* target = result.creatures[0];
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
+		ctx.messageSystem->append_message_part(WHITE_BLUE_PAIR, target->actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
 		ctx.messageSystem->finalize_message();
-		SpellAnimations::animate_explosion(result.impact_pos, targetScroll.range, ctx);
-		if (ctx.player->get_tile_distance(result.impact_pos) <= targetScroll.range)
+		SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
+		ctx.messageSystem->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
+		target->destructible->take_damage(*target, targetScroll.damage, ctx);
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+		return consume_item(owner, wearer);
+	}
+
+	// PICK_TILE_SINGLE and PICK_TILE_AOE — async via TargetingMenu
+	int aoeRadius = (targetScroll.targetMode == TargetMode::PICK_TILE_AOE) ? targetScroll.range : 0;
+	int scrollRange = targetScroll.range;
+	int scrollDamage = targetScroll.damage;
+	int confuseTurns = targetScroll.confuseTurns;
+	TargetMode mode = targetScroll.targetMode;
+
+	auto onTarget = [mode, aoeRadius, scrollRange, scrollDamage, confuseTurns, &owner, &wearer](
+		bool confirmed,
+		Vector2D targetPos,
+		GameContext& innerCtx) mutable
+	{
+		if (!confirmed)
 		{
-			SpellAnimations::animate_creature_hit(ctx.player->position, ctx);
-			ctx.player->destructible->take_damage(*ctx.player, targetScroll.damage, ctx);
+			return;
 		}
-		for (auto* t : result.creatures)
+
+		if (mode == TargetMode::PICK_TILE_AOE)
 		{
-			if (!t->destructible->is_dead())
+			innerCtx.messageSystem->append_message_part(
+				WHITE_BLACK_PAIR,
+				std::format("The fireball explodes, burning everything within {} tiles!", scrollRange));
+			innerCtx.messageSystem->finalize_message();
+			SpellAnimations::animate_explosion(targetPos, aoeRadius, innerCtx);
+
+			if (innerCtx.player->get_tile_distance(targetPos) <= aoeRadius)
 			{
-				SpellAnimations::animate_creature_hit(t->position, ctx);
-				ctx.messageSystem->append_message_part(
+				SpellAnimations::animate_creature_hit(innerCtx.player->position, innerCtx);
+				innerCtx.player->destructible->take_damage(*innerCtx.player, scrollDamage, innerCtx);
+			}
+
+			for (const auto& creature : *innerCtx.creatures)
+			{
+				if (!creature || creature->destructible->is_dead())
+					continue;
+				if (creature->get_tile_distance(targetPos) > aoeRadius)
+					continue;
+				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
+				innerCtx.messageSystem->append_message_part(
 					WHITE_BLACK_PAIR,
-					std::format("The {} gets engulfed in flames! ({} damage)", t->actorData.name, targetScroll.damage));
-				ctx.messageSystem->finalize_message();
+					std::format("The {} gets engulfed in flames! ({} damage)", creature->actorData.name, scrollDamage));
+				innerCtx.messageSystem->finalize_message();
+				creature->destructible->take_damage(*creature, scrollDamage, innerCtx);
+			}
+			innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
+		}
+		else // PICK_TILE_SINGLE
+		{
+			Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
+			if (target)
+			{
+				target->apply_confusion(confuseTurns);
+				innerCtx.messageSystem->message(
+					WHITE_BLACK_PAIR,
+					std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
+					true);
 			}
 		}
-		for (auto* t : result.creatures)
-		{
-			if (!t->destructible->is_dead())
-				t->destructible->take_damage(*t, targetScroll.damage, ctx);
-		}
-		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-		break;
-	}
 
-	case TargetMode::PICK_TILE_SINGLE:
-	{
-		if (!result.creatures.empty())
-		{
-			auto* target = result.creatures[0];
-			target->apply_confusion(targetScroll.confuseTurns);
-			ctx.messageSystem->message(
-				WHITE_BLACK_PAIR,
-				std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
-				true);
-		}
-		break;
-	}
+		consume_item(owner, wearer);
+		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+	};
 
-	case TargetMode::FOV_BUFF:
-	{
-		break;
-	}
-
-	}
-
-	ctx.renderingManager->restore_screen(ctx);
-	return consume_item(owner, wearer);
+	ctx.menus->push_back(std::make_unique<TargetingMenu>(scrollRange, aoeRadius, std::move(onTarget), ctx));
+	return false; // turn and item consumption handled in callback
 }
 
 bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx)

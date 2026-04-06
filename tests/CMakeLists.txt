@@ -112,6 +112,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Items/MagicalItemEffects.cpp
 
     # Systems
+    ${PARENT_SOURCE_DIR}/Systems/TargetingMenu.cpp
     ${PARENT_SOURCE_DIR}/Systems/TargetingSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/SpellAnimations.cpp
     ${PARENT_SOURCE_DIR}/Systems/HungerSystem.cpp

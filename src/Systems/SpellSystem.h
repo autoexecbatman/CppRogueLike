@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -63,7 +64,13 @@ public:
 	static std::vector<std::string> get_available_spells(CasterClass classState, int maxSpellLevel);
 
 	// Cast a spell by string key (works for builtin and custom spells).
-	static bool cast_spell_by_key(std::string_view key, Creature& caster, GameContext& ctx);
+	// onSuccess is called when the spell takes effect (immediately for instant spells,
+	// deferred via TargetingMenu callback for targeted spells).
+	static void cast_spell_by_key(
+		std::string_view key,
+		Creature& caster,
+		std::function<void(GameContext&)> onSuccess,
+		GameContext& ctx);
 
 	// Load / save spell metadata from JSON (call before Game construction).
 	static void load(std::string_view path);
@@ -102,19 +109,25 @@ public:
 
 private:
 	// Dispatch helpers
-	static bool dispatch_effect(SpellEffectType effect, Creature& caster, GameContext& ctx);
+	static void dispatch_effect(
+		SpellEffectType effect,
+		Creature& caster,
+		std::function<void(GameContext&)> onSuccess,
+		GameContext& ctx);
 
-	// Spell effect implementations
+	// Spell effect implementations (instant — return true on success)
 	static bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 	static bool cast_bless(Creature& caster, GameContext& ctx);
 	static bool cast_sanctuary(Creature& caster, GameContext& ctx);
-	static bool cast_silence(Creature& caster, GameContext& ctx);
 	static bool cast_magic_missile(Creature& caster, GameContext& ctx);
 	static bool cast_shield(Creature& caster, GameContext& ctx);
 	static bool cast_sleep(Creature& caster, GameContext& ctx);
-	static bool cast_fireball(Creature& caster, GameContext& ctx);
 	static bool cast_invisibility(Creature& caster, GameContext& ctx);
-	static bool cast_web(Creature& caster, GameContext& ctx);
 	static bool cast_teleport(Creature& caster, GameContext& ctx);
 	static bool cast_hold_person(Creature& caster, GameContext& ctx);
+
+	// Targeted spell implementations — async via TargetingMenu; onSuccess fires on confirm
+	static void cast_silence(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
+	static void cast_web(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
+	static void cast_fireball(Creature& caster, std::function<void(GameContext&)> onSuccess, GameContext& ctx);
 };

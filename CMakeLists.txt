@@ -233,6 +233,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Items/MagicalItemEffects.h
 
     # Systems - Updated paths
+    ${PROJECT_SOURCE_DIR}/Systems/TargetingMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/TargetingMenu.h
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/TargetingSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/SpellAnimations.cpp

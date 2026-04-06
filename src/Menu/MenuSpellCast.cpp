@@ -72,25 +72,32 @@ void MenuSpellCast::draw_content()
 
 void MenuSpellCast::handle_selection(GameContext& ctx)
 {
-	if (selectedIndex >= 0 && selectedIndex < static_cast<int>(availableSpells.size()))
+	if (selectedIndex < 0 || selectedIndex >= static_cast<int>(availableSpells.size()))
 	{
-		const std::string& key = availableSpells[selectedIndex];
-		if (SpellSystem::cast_spell_by_key(key, player, ctx))
-		{
-			// Only consume memorized spells (not item-granted)
-			if (spellSources[selectedIndex].empty())
-			{
-				// Find and remove from memorized list
-				auto it = std::find(player.memorizedSpells.begin(), player.memorizedSpells.end(), key);
-				if (it != player.memorizedSpells.end())
-				{
-					player.memorizedSpells.erase(it);
-				}
-			}
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-			menu_set_run_false();
-		}
+		return;
 	}
+
+	const std::string key = availableSpells[selectedIndex];
+	const bool isMemorized = spellSources[selectedIndex].empty();
+	Player& playerRef = player;
+
+	// onSuccess fires when the spell takes effect — immediately for instant spells,
+	// deferred via TargetingMenu callback for targeted spells.
+	auto onSuccess = [key, isMemorized, &playerRef](GameContext& innerCtx)
+	{
+		if (isMemorized)
+		{
+			auto it = std::ranges::find(playerRef.memorizedSpells, key);
+			if (it != playerRef.memorizedSpells.end())
+			{
+				playerRef.memorizedSpells.erase(it);
+			}
+		}
+		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+	};
+
+	SpellSystem::cast_spell_by_key(key, player, std::move(onSuccess), ctx);
+	menu_set_run_false();
 }
 
 void MenuSpellCast::menu(GameContext& ctx)

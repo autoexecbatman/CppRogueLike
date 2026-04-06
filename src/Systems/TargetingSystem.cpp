@@ -17,7 +17,6 @@
 #include "../Systems/RenderingManager.h"
 #include "../Utils/Vector2D.h"
 #include "TargetingSystem.h"
-#include "TargetMode.h"
 
 const Vector2D TargetingSystem::select_target(GameContext& ctx, Vector2D startPos, int maxRange) const
 {
@@ -292,24 +291,6 @@ bool TargetingSystem::run_targeting_loop(
 			draw_aoe_preview(ctx, cursor, aoe_radius);
 		}
 
-		// TODO: Extract into a function.
-		// Pulsing cursor highlight
-		{
-			int tileSize = ctx.renderer->get_tile_size();
-			int sx = cursor.x * tileSize - ctx.renderer->get_camera_x();
-			int sy = cursor.y * tileSize - ctx.renderer->get_camera_y();
-			float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 4.0f) + 1.0f) * 0.5f;
-			auto fill_a = static_cast<unsigned char>(40.0f + 30.0f * pulse);
-			auto ring_a = static_cast<unsigned char>(120.0f + 100.0f * pulse);
-
-			DrawRectangle(sx, sy, tileSize, tileSize, Color{ 255, 255, 50, fill_a });
-			DrawRectangleLinesEx(
-				Rectangle{
-					static_cast<float>(sx), static_cast<float>(sy), static_cast<float>(tileSize), static_cast<float>(tileSize) },
-				2.0f,
-				Color{ 255, 255, 50, ring_a });
-		}
-
 		ctx.renderer->draw_text(Vector2D{ 4, 4 }, "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel", WHITE_BLACK_PAIR);
 		ctx.renderer->end_frame();
 
@@ -392,9 +373,9 @@ bool TargetingSystem::run_targeting_loop(
 		if (move.x != 0 || move.y != 0)
 		{
 			Vector2D next = cursor + move;
-			bool in_bounds = ctx.map->is_in_bounds(next);
-			bool in_range = maxRange <= 0 || next.distance_to(ctx.player->position) <= static_cast<double>(maxRange);
-			if (in_bounds && in_range)
+			bool inBounds = ctx.map->is_in_bounds(next);
+			bool inRange = maxRange <= 0 || next.distance_to(ctx.player->position) <= static_cast<double>(maxRange);
+			if (inBounds && inRange)
 			{
 				cursor = next;
 			}
@@ -407,6 +388,77 @@ bool TargetingSystem::run_targeting_loop(
 		return true;
 	}
 	return false;
+}
+
+TargetResult TargetingSystem::acquire_targets(GameContext& ctx, TargetMode mode, Vector2D origin, int range, int aoe_radius) const
+{
+	switch (mode)
+	{
+
+	case TargetMode::AUTO_NEAREST:
+	{
+		return target_auto_nearest(ctx, origin, range);
+	}
+
+	case TargetMode::PICK_TILE_SINGLE:
+	{
+		return target_pick_single(ctx);
+	}
+
+	case TargetMode::PICK_TILE_AOE:
+	{
+		return target_pick_aoe(ctx, aoe_radius);
+	}
+
+	case TargetMode::FOV_BUFF:
+	{
+		return {};
+	}
+	}
+	return {};
+}
+
+TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const
+{
+	const auto& monster = ctx.creatureManager->get_closest_monster(*ctx.creatures, origin, range);
+	if (!monster)
+	{
+		return {};
+	}
+	return { true, monster->position, { monster } };
+}
+
+TargetResult TargetingSystem::target_pick_single(GameContext& ctx) const
+{
+	Vector2D pos{ 0, 0 };
+	if (!pick_tile(ctx, &pos, 0))
+	{
+		return {};
+	}
+	Creature* actor = ctx.map->get_actor(pos, ctx);
+	if (!actor)
+	{
+		return {};
+	}
+	return { true, pos, { actor } };
+}
+
+TargetResult TargetingSystem::target_pick_aoe(GameContext& ctx, int aoe_radius) const
+{
+	Vector2D center{ 0, 0 };
+	if (!pick_tile_aoe(ctx, &center, aoe_radius, aoe_radius))
+	{
+		return {};
+	}
+	std::vector<Creature*> targets;
+	for (const auto& c : *ctx.creatures)
+	{
+		if (c && !c->destructible->is_dead() && c->get_tile_distance(center) <= aoe_radius)
+		{
+			targets.push_back(c.get());
+		}
+	}
+	return { true, center, targets };
 }
 
 // Handle ranged attack coordination
@@ -456,73 +508,3 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 	}
 }
 
-TargetResult TargetingSystem::acquire_targets(GameContext& ctx, TargetMode mode, Vector2D origin, int range, int aoe_radius) const
-{
-	switch (mode)
-	{
-
-	case TargetMode::AUTO_NEAREST:
-	{
-		return target_auto_nearest(ctx, origin, range);
-	}
-
-	case TargetMode::PICK_TILE_SINGLE:
-	{
-		return target_pick_single(ctx);
-	}
-
-	case TargetMode::PICK_TILE_AOE:
-	{
-		return target_pick_aoe(ctx, aoe_radius);
-	}
-
-	case TargetMode::FOV_BUFF:
-	{
-		return {}; // Applied at cast site, no targeting needed
-	}
-	}
-	return {};
-}
-
-TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const
-{
-	const auto& monster = ctx.creatureManager->get_closest_monster(*ctx.creatures, origin, range);
-	if (!monster)
-	{
-		return {};
-	}
-	return { true, monster->position, { monster } };
-}
-
-TargetResult TargetingSystem::target_pick_single(GameContext& ctx) const
-{
-	Vector2D pos{ 0, 0 };
-	if (!pick_tile(ctx, &pos, 0))
-	{
-		return {};
-	}
-	Creature* actor = ctx.map->get_actor(pos, ctx);
-	if (!actor)
-	{
-		return {};
-	}
-	return { true, pos, { actor } };
-}
-
-TargetResult TargetingSystem::target_pick_aoe(GameContext& ctx, int aoe_radius) const
-{
-	Vector2D center{ 0, 0 };
-	if (!pick_tile_aoe(ctx, &center, aoe_radius, aoe_radius))
-	{
-		return {};
-	}
-	std::vector<Creature*> targets;
-	for (const auto& c : *ctx.creatures)
-	{
-		if (c && !c->destructible->is_dead() && c->get_tile_distance(center) <= aoe_radius)
-		{
-			targets.push_back(c.get());
-		}
-	}
-	return { true, center, targets };
-}

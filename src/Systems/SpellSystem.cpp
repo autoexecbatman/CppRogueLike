@@ -31,6 +31,7 @@
 #include "MessageSystem.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
+#include "TargetingMenu.h"
 #include "TargetingSystem.h"
 #include "TileConfig.h"
 
@@ -606,89 +607,125 @@ std::vector<std::string> SpellSystem::get_available_spells(CasterClass classStat
 	return available;
 }
 
-bool SpellSystem::dispatch_effect(SpellEffectType effect, Creature& caster, GameContext& ctx)
+void SpellSystem::dispatch_effect(
+	SpellEffectType effect,
+	Creature& caster,
+	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx)
 {
+	// Targeted spells: async via TargetingMenu — onSuccess is forwarded into the callback
+	switch (effect)
+	{
+
+	case SpellEffectType::SILENCE:
+	{
+		cast_silence(caster, std::move(onSuccess), ctx);
+		return;
+	}
+
+	case SpellEffectType::WEB:
+	{
+		cast_web(caster, std::move(onSuccess), ctx);
+		return;
+	}
+
+	case SpellEffectType::FIREBALL:
+	{
+		cast_fireball(caster, std::move(onSuccess), ctx);
+		return;
+	}
+
+	default:
+		break;
+
+	}
+
+	// Instant spells: cast synchronously, call onSuccess if successful
+	bool result = false;
 	switch (effect)
 	{
 
 	case SpellEffectType::CURE_LIGHT_WOUNDS:
 	{
-		return cast_cure_light_wounds(caster, ctx);
+		result = cast_cure_light_wounds(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::BLESS:
 	{
-		return cast_bless(caster, ctx);
+		result = cast_bless(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::SANCTUARY:
 	{
-		return cast_sanctuary(caster, ctx);
+		result = cast_sanctuary(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::HOLD_PERSON:
 	{
-		return cast_hold_person(caster, ctx);
-	}
-
-	case SpellEffectType::SILENCE:
-	{
-		return cast_silence(caster, ctx);
+		result = cast_hold_person(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::MAGIC_MISSILE:
 	{
-		return cast_magic_missile(caster, ctx);
+		result = cast_magic_missile(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::SHIELD:
 	{
-		return cast_shield(caster, ctx);
+		result = cast_shield(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::SLEEP:
 	{
-		return cast_sleep(caster, ctx);
+		result = cast_sleep(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::INVISIBILITY:
 	{
-		return cast_invisibility(caster, ctx);
-	}
-
-	case SpellEffectType::WEB:
-	{
-		return cast_web(caster, ctx);
-	}
-
-	case SpellEffectType::FIREBALL:
-	{
-		return cast_fireball(caster, ctx);
+		result = cast_invisibility(caster, ctx);
+		break;
 	}
 
 	case SpellEffectType::TELEPORT:
 	{
-		return cast_teleport(caster, ctx);
+		result = cast_teleport(caster, ctx);
+		break;
 	}
 
 	default:
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Spell not implemented yet.", true);
-		return false;
+		break;
 	}
 
+	}
+
+	if (result)
+	{
+		onSuccess(ctx);
 	}
 }
 
-bool SpellSystem::cast_spell_by_key(std::string_view key, Creature& caster, GameContext& ctx)
+void SpellSystem::cast_spell_by_key(
+	std::string_view key,
+	Creature& caster,
+	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx)
 {
 	if (caster.has_state(ActorState::IS_SILENCED))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);
-		return false;
+		return;
 	}
 	const SpellDefinition& def = get_by_key(key);
-	return dispatch_effect(def.effect_type, caster, ctx);
+	dispatch_effect(def.effect_type, caster, std::move(onSuccess), ctx);
 }
 
 static void animate_heal(const Vector2D& pos, GameContext& ctx)
@@ -758,7 +795,10 @@ bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 	return true;
 }
 
-bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
+void SpellSystem::cast_silence(
+	Creature& caster,
+	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx)
 {
 	// AD&D 2e: Duration 2 rounds/level. Targeted single creature. Prevents spellcasting.
 	auto* player = dynamic_cast<Player*>(&caster);
@@ -766,42 +806,52 @@ bool SpellSystem::cast_silence(Creature& caster, GameContext& ctx)
 	int duration = 2 * casterLevel;
 	int range = 5 + casterLevel;
 
-	TargetingSystem targeting;
-	Vector2D target_pos{ 0, 0 };
-	if (!targeting.pick_tile(ctx, &target_pos, range))
+	auto onTarget = [&caster, duration, onSuccess = std::move(onSuccess)](
+		bool confirmed,
+		Vector2D targetPos,
+		GameContext& innerCtx) mutable
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Silence cancelled.", true);
-		return false;
-	}
-
-	Creature* target = nullptr;
-	for (const auto& creature : *ctx.creatures)
-	{
-		if (creature && creature->position == target_pos && !creature->destructible->is_dead())
+		if (!confirmed)
 		{
-			target = creature.get();
-			break;
+			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "Silence cancelled.", true);
+			return;
 		}
-	}
 
-	if (!target)
-	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "No creature at that location.", true);
-		return false;
-	}
+		Creature* target = nullptr;
+		for (const auto& creature : *innerCtx.creatures)
+		{
+			if (creature && creature->position == targetPos && !creature->destructible->is_dead())
+			{
+				target = creature.get();
+				break;
+			}
+		}
 
-	ctx.buffSystem->add_buff(*target, BuffType::SILENCE, 0, duration, false);
-	SpellAnimations::animate_creature_hit(target->position, ctx);
+		if (!target)
+		{
+			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "No creature at that location.", true);
+			return;
+		}
 
-	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
-	ctx.messageSystem->append_message_part(
-		WHITE_BLACK_PAIR,
-		std::format("{} is struck mute for {} turns.", target->get_name(), duration));
-	ctx.messageSystem->finalize_message();
-	return true;
+		innerCtx.buffSystem->add_buff(*target, BuffType::SILENCE, 0, duration, false);
+		SpellAnimations::animate_creature_hit(target->position, innerCtx);
+
+		innerCtx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Silence! ");
+		innerCtx.messageSystem->append_message_part(
+			WHITE_BLACK_PAIR,
+			std::format("{} is struck mute for {} turns.", target->get_name(), duration));
+		innerCtx.messageSystem->finalize_message();
+
+		onSuccess(innerCtx);
+	};
+
+	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, 0, std::move(onTarget), ctx));
 }
 
-bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
+void SpellSystem::cast_web(
+	Creature& caster,
+	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx)
 {
 	// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled. Duration 2 rounds/level.
 	auto* player = dynamic_cast<Player*>(&caster);
@@ -810,56 +860,66 @@ bool SpellSystem::cast_web(Creature& caster, GameContext& ctx)
 	int radius = 2;
 	int duration = 2 * casterLevel;
 
-	TargetingSystem targeting;
-	Vector2D center{ 0, 0 };
-	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
+	auto onTarget = [radius, duration, onSuccess = std::move(onSuccess)](
+		bool confirmed,
+		Vector2D center,
+		GameContext& innerCtx) mutable
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Web cancelled.", true);
-		return false;
-	}
-
-	int affected = 0;
-	for (const auto& creature : *ctx.creatures)
-	{
-		if (!creature || creature->destructible->is_dead())
+		if (!confirmed)
 		{
-			continue;
-		}
-		if (creature->get_tile_distance(center) > radius)
-		{
-			continue;
+			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "Web cancelled.", true);
+			return;
 		}
 
-		// AD&D 2e: Save vs. Paralyzation (d20 >= 10) avoids entanglement
-		int save = ctx.dice->roll(1, 20);
-		if (save < 10)
+		int affected = 0;
+		for (const auto& creature : *innerCtx.creatures)
 		{
-			ctx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
-			SpellAnimations::animate_creature_hit(creature->position, ctx);
-			++affected;
-		}
-	}
+			if (!creature || creature->destructible->is_dead())
+			{
+				continue;
+			}
+			if (creature->get_tile_distance(center) > radius)
+			{
+				continue;
+			}
 
-	if (affected > 0)
-	{
-		ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Web! ");
-		ctx.messageSystem->append_message_part(
-			WHITE_BLACK_PAIR,
-			std::format(
-				"{} creature{} entangled for {} turns.",
-				affected,
-				affected == 1 ? " is" : "s are",
-				duration));
-		ctx.messageSystem->finalize_message();
-	}
-	else
-	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "The webs spread but catch nothing.", true);
-	}
-	return true;
+			// AD&D 2e: Save vs. Paralyzation (d20 >= 10) avoids entanglement
+			int save = innerCtx.dice->roll(1, 20);
+			if (save < 10)
+			{
+				innerCtx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
+				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
+				++affected;
+			}
+		}
+
+		if (affected > 0)
+		{
+			innerCtx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Web! ");
+			innerCtx.messageSystem->append_message_part(
+				WHITE_BLACK_PAIR,
+				std::format(
+					"{} creature{} entangled for {} turns.",
+					affected,
+					affected == 1 ? " is" : "s are",
+					duration));
+			innerCtx.messageSystem->finalize_message();
+		}
+		else
+		{
+			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "The webs spread but catch nothing.", true);
+		}
+
+		onSuccess(innerCtx);
+	};
+
+	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
-bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
+void SpellSystem::cast_fireball(
+	Creature& caster,
+	std::function<void(GameContext&)> onSuccess,
+	GameContext& ctx)
 {
 	auto* player = dynamic_cast<Player*>(&caster);
 	int casterLevel = player ? player->get_creature_level() : 1;
@@ -868,53 +928,60 @@ bool SpellSystem::cast_fireball(Creature& caster, GameContext& ctx)
 	int range = 10 + casterLevel;
 	int radius = 2;
 
-	TargetingSystem targeting;
-	Vector2D center{ 0, 0 };
-	if (!targeting.pick_tile_aoe(ctx, &center, range, radius))
+	auto onTarget = [casterLevel, radius, onSuccess = std::move(onSuccess)](
+		bool confirmed,
+		Vector2D center,
+		GameContext& innerCtx) mutable
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
-		return false;
-	}
-
-	SpellAnimations::animate_explosion(center, radius, ctx);
-
-	// AD&D 2e: 1d6 per caster level, max 10d6
-	int diceCnt = std::min(casterLevel, 10);
-	int totalDamage = 0;
-	for (int i = 0; i < diceCnt; ++i)
-	{
-		totalDamage += ctx.dice->roll(1, 6);
-	}
-
-	int affected = 0;
-	for (const auto& creature : *ctx.creatures)
-	{
-		if (!creature || creature->destructible->is_dead())
+		if (!confirmed)
 		{
-			continue;
-		}
-		if (creature->get_tile_distance(center) > static_cast<double>(radius))
-		{
-			continue;
+			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "Fireball cancelled.", true);
+			return;
 		}
 
-		// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
-		int save = ctx.dice->roll(1, 20);
-		int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
-		creature->destructible->take_damage(*creature, dealt, ctx);
-		++affected;
-	}
+		SpellAnimations::animate_explosion(center, radius, innerCtx);
 
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
-	if (affected > 0)
-	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
-	}
-	ctx.messageSystem->finalize_message();
+		// AD&D 2e: 1d6 per caster level, max 10d6
+		int diceCnt = std::min(casterLevel, 10);
+		int totalDamage = 0;
+		for (int i = 0; i < diceCnt; ++i)
+		{
+			totalDamage += innerCtx.dice->roll(1, 6);
+		}
 
-	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-	return true;
+		int affected = 0;
+		for (const auto& creature : *innerCtx.creatures)
+		{
+			if (!creature || creature->destructible->is_dead())
+			{
+				continue;
+			}
+			if (creature->get_tile_distance(center) > static_cast<double>(radius))
+			{
+				continue;
+			}
+
+			// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
+			int save = innerCtx.dice->roll(1, 20);
+			int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
+			creature->destructible->take_damage(*creature, dealt, innerCtx);
+			++affected;
+		}
+
+		innerCtx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
+		innerCtx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
+		if (affected > 0)
+		{
+			innerCtx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
+		}
+		innerCtx.messageSystem->finalize_message();
+
+		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
+
+		onSuccess(innerCtx);
+	};
+
+	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
 static void animate_magic_missile(const Vector2D& to, GameContext& ctx)
