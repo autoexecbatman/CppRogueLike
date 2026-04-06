@@ -856,7 +856,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::ESCAPE:
 	{
-		ctx.menus->push_back(std::make_unique<Menu>(false, ctx));
+		ctx.menus->push_back(make_main_menu(false, ctx));
 		break;
 	}
 

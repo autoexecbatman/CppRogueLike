@@ -122,7 +122,7 @@ private:
 	bool handle_input(Player& player, GameContext& ctx);
 	void handle_cursor_up();
 	void handle_cursor_down(GameContext& ctx);
-	void handle_tab_switch();
+	void handle_tab_switch(int direction);
 	void handle_enter_equipment(Player& player, GameContext& ctx);
 	void handle_enter_item(Player& player, GameContext& ctx);
 	void handle_drop(Player& player, GameContext& ctx);

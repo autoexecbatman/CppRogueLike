@@ -1,67 +1,11 @@
 #pragma once
 
+// MenuGender.h — factory for the character creation gender selection menu.
+
 #include <memory>
-#include <string>
-#include <unordered_map>
 
 #include "BaseMenu.h"
-#include "IMenuState.h"
 
 struct GameContext;
 
-class Male : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class Female : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class Random : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class Back : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class MenuGender : public BaseMenu
-{
-	int height_{ 6 };
-	int width_{ 15 };
-	int starty_{ 0 };
-	int startx_{ 0 };
-	enum class MenuState
-	{
-		MALE,
-		FEMALE,
-		RANDOM,
-		BACK
-	} currentState{ MenuState::MALE };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuStateStrings{
-		{ MenuState::MALE, "Male" },
-		{ MenuState::FEMALE, "Female" },
-		{ MenuState::RANDOM, "Random" },
-		{ MenuState::BACK, "Back" }
-	};
-
-	std::string menu_gender_get_string(MenuState option) { return menuStateStrings.at(option); }
-	void menu_print_state(MenuState option);
-
-public:
-	MenuGender(GameContext& ctx);
-	~MenuGender();
-	MenuGender(const MenuGender&) = delete;
-	MenuGender& operator=(const MenuGender&) = delete;
-	MenuGender(MenuGender&&) = delete;
-	MenuGender& operator=(MenuGender&&) = delete;
-
-	void draw();
-	void on_key(int key, GameContext& ctx);
-	void menu(GameContext& ctx) override;
-};
+std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx);

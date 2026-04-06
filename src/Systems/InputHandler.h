@@ -6,6 +6,14 @@ class InputSystem;
 
 class InputHandler
 {
+private:
+	int keyPress{ -1 };
+	int lastKey{ 0 };
+	bool screenResized{ false };
+	bool animationTick{ false };
+	Vector2D lastMousePos{ 0, 0 };
+	Vector2D currentMousePos{ 0, 0 };
+
 public:
 	void key_store() noexcept;
 	void key_listen(InputSystem& input) noexcept;
@@ -28,12 +36,4 @@ public:
 	bool was_resized() const noexcept { return screenResized; }
 	void clear_resize() noexcept { screenResized = false; }
 
-private:
-	int keyPress{ -1 };
-	int lastKey{ 0 };
-	bool screenResized{ false };
-	bool animationTick{ false };
-
-	Vector2D lastMousePos{ 0, 0 };
-	Vector2D currentMousePos{ 0, 0 };
 };

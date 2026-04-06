@@ -75,7 +75,7 @@ int main()
 	game.prefab_library.load(Paths::PREFABS);
 #endif
 
-	game.menus.push_back(std::make_unique<Menu>(true, ctx));
+	game.menus.push_back(make_main_menu(true, ctx));
 
 	int loopNum{ 0 };
 

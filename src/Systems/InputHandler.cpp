@@ -96,6 +96,7 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 		animationTick = true;
 		return;
 	}
+
 	}
 
 	animationTick = false;
@@ -110,6 +111,7 @@ Vector2D InputHandler::get_mouse_position(InputSystem& input, int tile_size) noe
 {
 	lastMousePos = currentMousePos;
 	currentMousePos = input.get_mouse_tile(tile_size);
+
 	return currentMousePos;
 }
 

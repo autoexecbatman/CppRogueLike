@@ -1,84 +1,37 @@
 #pragma once
 
-#include <functional>
-#include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "../Actor/Actor.h"
 #include "BaseMenu.h"
-#include "IMenuState.h"
+#include "MenuEntry.h"
 
 struct GameContext;
-class Player;
-
-class Buy : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-	Creature& shopkeeper;
-
-public:
-	Buy(Creature& shopkeeper)
-		: shopkeeper{ shopkeeper } {}
-};
-
-class Sell : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-	Creature& player;
-	Creature& shopkeeper;
-
-public:
-	Sell(Creature& shopkeeper, Creature& seller)
-		: player{ seller }, shopkeeper{ shopkeeper } {}
-};
-
-class Exit : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
 
 class MenuTrade : public BaseMenu
 {
-	int height_{ 5 }; // Title row + 3 menu items + 2 border rows + spacing
-	int width_{ 10 }; // Wide enough for "Trade" title
-	int starty_{ 0 };
-	int startx_{ 0 };
-	Creature& shopkeeper; // Store reference to shopkeeper
+    int height_{ 5 };
+    int width_{ 10 };
+    int starty_{ 0 };
+    int startx_{ 0 };
+    Creature& shopkeeper;
 
-	size_t currentState{ 0 };
-	std::vector<std::unique_ptr<IMenuState>> iMenuStates;
-	std::vector<std::string> menuStateStrings{ "Buy", "Sell", "Exit" };
+    size_t currentState{ 0 };
+    std::vector<MenuEntry> entries{};
 
-	std::unordered_map<size_t, std::function<void(GameContext& ctx)>> menuCallbacks{
-		{ 0, [&](GameContext& ctx)
-			{
-				iMenuStates.at(currentState)->on_selection(ctx);
-			} },
-		{ 1, [&](GameContext& ctx)
-			{
-				iMenuStates.at(currentState)->on_selection(ctx);
-			} },
-		{ 2, [&](GameContext& ctx)
-			{
-				iMenuStates.at(currentState)->on_selection(ctx);
-			} }
-	};
-
-	std::string menu_get_string(size_t state) { return menuStateStrings.at(state); }
-	void menu_print_state(size_t state);
-	void draw_content() override;
+    void menu_print_state(size_t state);
+    void draw_content() override;
 
 public:
-	MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
-	~MenuTrade();
-	MenuTrade(const MenuTrade&) = delete;
-	MenuTrade& operator=(const MenuTrade&) = delete;
-	MenuTrade(MenuTrade&&) = delete;
-	MenuTrade& operator=(MenuTrade&&) = delete;
+    MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
+    ~MenuTrade();
+    MenuTrade(const MenuTrade&) = delete;
+    MenuTrade& operator=(const MenuTrade&) = delete;
+    MenuTrade(MenuTrade&&) = delete;
+    MenuTrade& operator=(MenuTrade&&) = delete;
 
-	void draw();
-	void on_key(int key, GameContext& ctx);
-	void menu(GameContext& ctx) override;
+    void draw();
+    void on_key(int key, GameContext& ctx);
+    void menu(GameContext& ctx) override;
 };

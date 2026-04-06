@@ -36,7 +36,7 @@ void RoomEditor::exit(GameContext& ctx)
 {
 	active = false;
 	// Return to main menu
-	ctx.menus->push_back(std::make_unique<Menu>(true, ctx));
+	ctx.menus->push_back(make_main_menu(true, ctx));
 }
 
 void RoomEditor::tick(GameContext& ctx)

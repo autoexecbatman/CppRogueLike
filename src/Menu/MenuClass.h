@@ -1,80 +1,11 @@
 #pragma once
 
+// MenuClass.h — factory for the character creation class selection menu.
+
 #include <memory>
-#include <string>
-#include <unordered_map>
 
-#include "../Core/GameContext.h"
 #include "BaseMenu.h"
-#include "IMenuState.h"
 
-class Fighter : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
+struct GameContext;
 
-class Rogue : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class Cleric : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class Wizard : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class ClassRandom : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class ClassBack : public IMenuState
-{
-	void on_selection(GameContext& ctx) override;
-};
-
-class MenuClass : public BaseMenu
-{
-	int menu_height{ 10 };
-	int menu_width{ 14 };
-	int menu_starty{ 0 };
-	int menu_startx{ 0 };
-	enum class MenuState
-	{
-		FIGHTER,
-		ROGUE,
-		CLERIC,
-		WIZARD,
-		RANDOM,
-		BACK
-	} currentState{ MenuState::FIGHTER };
-	std::unordered_map<MenuState, std::unique_ptr<IMenuState>> iMenuStates;
-	std::unordered_map<MenuState, std::string> menuClassStrings{
-		{ MenuState::FIGHTER, "Fighter" },
-		{ MenuState::ROGUE, "Rogue" },
-		{ MenuState::CLERIC, "Cleric" },
-		{ MenuState::WIZARD, "Wizard" },
-		{ MenuState::RANDOM, "Random" },
-		{ MenuState::BACK, "Back" }
-	};
-
-	std::string menu_class_get_string(MenuState option) { return menuClassStrings.at(option); };
-	void menu_class_print_option(MenuState option) noexcept;
-
-public:
-	MenuClass(GameContext& ctx);
-	~MenuClass();
-	MenuClass(const MenuClass&) = delete;
-	MenuClass& operator=(const MenuClass&) = delete;
-	MenuClass(MenuClass&&) = delete;
-	MenuClass& operator=(MenuClass&&) = delete;
-
-	void draw();
-	void on_key(int key, GameContext& ctx);
-	void menu(GameContext& ctx) override;
-};
+std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx);

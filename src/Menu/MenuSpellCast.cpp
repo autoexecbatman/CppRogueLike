@@ -106,12 +106,14 @@ void MenuSpellCast::menu(GameContext& ctx)
 			return;
 		}
 
-		const int height = static_cast<int>(availableSpells.size()) + 4;
 		const int width = 45;
-		const size_t startY = (30 - height) / 2;
-		const size_t startX = (119 - width) / 2;
+		const int height = static_cast<int>(availableSpells.size()) + 4;
+		const int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 30;
+		const int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 119;
+		const size_t startX = static_cast<size_t>((vcols - width) / 2);
+		const size_t startY = static_cast<size_t>((vrows - height) / 2);
 
-		menu_new(height, width, startY, startX, ctx);
+		menu_new(static_cast<size_t>(width), static_cast<size_t>(height), startX, startY, ctx);
 		initialized = true;
 	}
 

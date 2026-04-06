@@ -46,17 +46,22 @@ MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 {
 	if (ctx.renderer)
 	{
-		menu_height = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
-		menu_width = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+		menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+		menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 	}
 	else
 	{
-		menu_height = 26;
-		menu_width = 60;
+		menuHeight = 26;
+		menuWidth = 60;
 	}
 
 	populate_items();
-	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
+	menu_new(
+		menuWidth,
+		menuHeight,
+		menuStartX,
+		menuStartY,
+		ctx);
 }
 
 MenuBuy::~MenuBuy()
@@ -100,8 +105,8 @@ void MenuBuy::draw()
 	{
 		int tileSize = renderer->get_tile_size();
 		int font_off = (tileSize - renderer->get_font_size()) / 2;
-		int hdr_x = (static_cast<int>(menu_startx) + 1) * tileSize;
-		int hdr_y = (static_cast<int>(menu_starty) + 1) * tileSize + font_off;
+		int hdr_x = (static_cast<int>(menuStartX) + 1) * tileSize;
+		int hdr_y = (static_cast<int>(menuStartY) + 1) * tileSize + font_off;
 		renderer->draw_text(Vector2D{ hdr_x, hdr_y }, "Item                       Price", CYAN_BLACK_PAIR);
 	}
 

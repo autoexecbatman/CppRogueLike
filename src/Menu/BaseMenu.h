@@ -11,12 +11,12 @@ class BaseMenu
 {
 protected:
 	Renderer* renderer{ nullptr };
-	InputSystem* input_system{ nullptr };
-	const TileConfig* tile_config{ nullptr };
-	size_t menu_height{ 0 };
-	size_t menu_width{ 0 };
-	size_t menu_starty{ 0 };
-	size_t menu_startx{ 0 };
+	InputSystem* inputSystem{ nullptr };
+	const TileConfig* tileConfig{ nullptr };
+	size_t menuWidth{ 0 };
+	size_t menuHeight{ 0 };
+	size_t menuStartX{ 0 };
+	size_t menuStartY{ 0 };
 	int keyPress{ 0 };
 	bool isHighlighted{ false };
 
@@ -31,7 +31,7 @@ public:
 	BaseMenu(BaseMenu&&) = delete;
 	BaseMenu& operator=(BaseMenu&&) = delete;
 
-	void menu_new(size_t height, size_t width, size_t starty, size_t startx, GameContext& ctx);
+	void menu_new(size_t width, size_t height, size_t startX, size_t startY, GameContext& ctx);
 	void menu_clear();
 	void menu_print(int x, int y, const std::string& text);
 	void menu_refresh();
@@ -43,7 +43,7 @@ public:
 	void menu_set_run_false() { run = false; }
 	void menu_mark_dirty() {}
 	void menu_draw_box();
-	void menu_draw_title(std::string_view title, int color_pair);
+	void menu_draw_title(std::string_view title, int colorPair);
 
 	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}

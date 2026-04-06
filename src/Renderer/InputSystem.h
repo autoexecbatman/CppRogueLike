@@ -83,6 +83,20 @@ enum class GameKey
 
 class InputSystem
 {
+private:
+	GameKey currentKey{ GameKey::NONE };
+	int charInput{ 0 };
+	bool resized{ false };
+
+	// Controlled key-repeat state
+	// Repeatable keys (movement + wait) fire once on press, then again after
+	// REPEAT_DELAY, and every REPEAT_INTERVAL thereafter while held.
+	int heldRaylibKey{ 0 };
+	GameKey heldGameKey{ GameKey::NONE };
+	int heldCharInput{ 0 };
+	double holdStart{ 0.0 };
+	double lastRepeat{ 0.0 };
+
 public:
 	InputSystem() = default;
 	~InputSystem() = default;
@@ -94,27 +108,11 @@ public:
 
 	void poll();
 
-	[[nodiscard]] GameKey get_key() const { return current_key; }
-	[[nodiscard]] int get_char_input() const { return char_input; }
-	[[nodiscard]] Vector2D get_mouse_tile(int tile_size) const;
-	[[nodiscard]] Vector2D get_mouse_world_tile(int cam_x, int cam_y, int tile_size) const;
-	[[nodiscard]] bool has_player_action() const { return current_key != GameKey::NONE; }
+	[[nodiscard]] GameKey get_key() const { return currentKey; }
+	[[nodiscard]] int get_char_input() const { return charInput; }
+	[[nodiscard]] Vector2D get_mouse_tile(int tileSize) const;
+	[[nodiscard]] Vector2D get_mouse_world_tile(int camX, int camY, int tileSize) const;
+	[[nodiscard]] bool has_player_action() const { return currentKey != GameKey::NONE; }
 	[[nodiscard]] bool window_resized() const { return resized; }
 
-private:
-	GameKey current_key{ GameKey::NONE };
-	int char_input{ 0 };
-	bool resized{ false };
-
-	// Controlled key-repeat state
-	// Repeatable keys (movement + wait) fire once on press, then again after
-	// REPEAT_DELAY, and every REPEAT_INTERVAL thereafter while held.
-	int held_raylib_key{ 0 };
-	GameKey held_game_key{ GameKey::NONE };
-	int held_char_input{ 0 };
-	double hold_start{ 0.0 };
-	double last_repeat{ 0.0 };
-
-	static constexpr double REPEAT_DELAY = 0.30; // seconds before repeat begins
-	static constexpr double REPEAT_INTERVAL = 0.10; // seconds between repeat fires
 };

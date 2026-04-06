@@ -14,10 +14,6 @@ class Player;
 
 class MenuBuy : public BaseMenu
 {
-	size_t menu_height{ 0 };
-	size_t menu_width{ 0 };
-	size_t menu_starty{ 0 }; // Full screen - start at top
-	size_t menu_startx{ 0 }; // Full screen - start at left
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
 	Creature& buyer;

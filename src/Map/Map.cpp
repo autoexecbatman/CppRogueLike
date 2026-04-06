@@ -1113,14 +1113,26 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D tar
 	return results;
 }
 
-double Map::cost(Vector2D from_node, Vector2D to_node, GameContext& ctx)
+double Map::cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx)
 {
 	// if there is an actor on the tile, return a high cost
-	if (get_actor(to_node, ctx) != nullptr)
+	if (get_actor(toNode, ctx) != nullptr)
 	{
 		return 1000.0;
 	}
-	return get_cost(to_node, ctx);
+	
+	double baseCost = get_cost(toNode, ctx);
+	
+	// Check if this is a diagonal move (8-directional grid)
+	int dx = std::abs(toNode.x - fromNode.x);
+	int dy = std::abs(toNode.y - fromNode.y);
+	
+	if (dx == 1 && dy == 1)  // Diagonal move
+	{
+		return baseCost * 1.414213562373095;  // sqrt(2)
+	}
+	
+	return baseCost;
 }
 
 double Map::get_cost(Vector2D pos, GameContext& ctx) const noexcept

@@ -5,6 +5,7 @@
 
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Gui/Gui.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/RenderingManager.h"
@@ -29,17 +30,17 @@ ContextMenu::ContextMenu(
 	int height = static_cast<int>(menuOptions.size()) + 3;
 	int width = std::max(static_cast<int>(longest) + 4, 14);
 
-	int viewport_cols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 80;
-	int viewport_rows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 24;
+	int viewportCols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 80;
+	int viewportRows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 24;
 
-	int starty = std::clamp(anchor_row, 0, std::max(0, viewport_rows - height));
-	int startx = std::clamp(anchor_col, 0, std::max(0, viewport_cols - width));
+	int startX = std::clamp(anchor_col, 0, std::max(0, viewportCols - width));
+	int startY = std::clamp(anchor_row, 0, std::max(0, viewportRows - height));
 
 	menu_new(
-		static_cast<size_t>(height),
 		static_cast<size_t>(width),
-		static_cast<size_t>(starty),
-		static_cast<size_t>(startx),
+		static_cast<size_t>(height),
+		static_cast<size_t>(startX),
+		static_cast<size_t>(startY),
 		ctx);
 }
 
@@ -63,15 +64,11 @@ void ContextMenu::draw_content()
 }
 
 // Called once per frame by MenuManager -- no blocking loop.
-// Sets run = false when a selection is committed, then fires onSelect.
+// Input is polled first (reads previous frame's PollInputEvents state),
+// then we render. This matches InventoryUI's pattern.
 void ContextMenu::menu(GameContext& ctx)
 {
-	if (ctx.renderingManager)
-	{
-		ctx.renderingManager->render(ctx);
-	}
-	draw_content();
-	menu_refresh();
+	// --- Input phase (before render, like InventoryUI) ---
 	menu_key_listen();
 
 	const int maxIndex = static_cast<int>(menuOptions.size()) - 1;
@@ -80,8 +77,8 @@ void ContextMenu::menu(GameContext& ctx)
 	{
 		int sel = -1;
 		int tileSize = renderer ? renderer->get_tile_size() : 16;
-		Vector2D mousePos = input_system->get_mouse_tile(tileSize);
-		int relRow = static_cast<int>(mousePos.y) - static_cast<int>(menu_starty);
+		Vector2D mousePos = inputSystem->get_mouse_tile(tileSize);
+		int relRow = static_cast<int>(mousePos.y) - static_cast<int>(menuStartY);
 		if (relRow >= 2 && relRow < 2 + static_cast<int>(menuOptions.size()))
 		{
 			sel = relRow - 2;
@@ -96,6 +93,7 @@ void ContextMenu::menu(GameContext& ctx)
 
 	switch (keyPress)
 	{
+
 	case 0x103: // UP
 	{
 		if (selectedIndex > 0)
@@ -104,6 +102,7 @@ void ContextMenu::menu(GameContext& ctx)
 		}
 		break;
 	}
+
 	case 0x102: // DOWN
 	{
 		if (selectedIndex < maxIndex)
@@ -112,6 +111,7 @@ void ContextMenu::menu(GameContext& ctx)
 		}
 		break;
 	}
+
 	case '\n':
 	case ' ':
 	{
@@ -122,6 +122,7 @@ void ContextMenu::menu(GameContext& ctx)
 		}
 		break;
 	}
+
 	case 27: // ESC
 	{
 		run = false;
@@ -131,7 +132,32 @@ void ContextMenu::menu(GameContext& ctx)
 		}
 		break;
 	}
+
 	default:
+	{
 		break;
 	}
+
+	}
+
+	if (!run)
+	{
+		return;
+	}
+
+	// --- Render phase ---
+	if (renderer)
+	{
+		renderer->begin_frame();
+	}
+	if (ctx.renderingManager)
+	{
+		ctx.renderingManager->render(ctx);
+	}
+	if (ctx.gui && ctx.gui->guiInit)
+	{
+		ctx.gui->gui_render(ctx);
+	}
+	draw_content();
+	menu_refresh();
 }

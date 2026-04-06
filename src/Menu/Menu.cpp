@@ -1,261 +1,106 @@
 // file: Menu.cpp
 #include <memory>
-#include <type_traits>
+#include <vector>
 
 #include <raylib.h>
 
-#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Gui/Gui.h"
-#include "../Renderer/Renderer.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "ListMenu.h"
+#include "Menu.h"
+#include "MenuGender.h"
+
+#ifndef EMSCRIPTEN
 #include "../Tools/ItemEditor.h"
 #include "../Tools/MonsterEditor.h"
 #include "../Tools/RoomEditor.h"
 #include "../Tools/SpellEditor.h"
-#include "Menu.h"
-#include "MenuGender.h"
-#include "../Actor/Item.h"
-
-void NewGame::on_selection(GameContext& ctx)
-{
-	ctx.menus->push_back(std::make_unique<MenuGender>(ctx));
-}
-
-void LoadGame::on_selection(GameContext& ctx)
-{
-	// TODO: clear screen and show loading message (was curses clear/mvprintw/refresh)
-
-	ctx.stateManager->load_all(ctx);
-
-	// TODO: clear loading message after load completes (was curses clear/refresh)
-}
-
-#ifndef EMSCRIPTEN
-void RoomEditorEntry::on_selection(GameContext& ctx)
-{
-	ctx.roomEditor->enter(*ctx.prefabLibrary);
-}
-
-void ItemEditorEntry::on_selection(GameContext& ctx)
-{
-	ctx.itemEditor->enter(ctx);
-}
-
-void MonsterEditorEntry::on_selection(GameContext& ctx)
-{
-	ctx.monsterEditor->enter();
-}
-
-void SpellEditorEntry::on_selection(GameContext& ctx)
-{
-	ctx.spellEditor->enter();
-}
 #endif
 
-void Options::on_selection(GameContext& ctx)
+std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 {
-	// do nothing
-}
+    std::vector<MenuEntry> entries;
 
-void Quit::on_selection(GameContext& ctx)
-{
-	ctx.gameState->set_run(false);
-	ctx.gameState->set_should_save(false);
-	ctx.messageSystem->log("You quit without saving!");
-}
+    auto newGameCommand = [](GameContext& ctx)
+    {
+        ctx.menus->push_back(make_gender_menu(ctx));
+    };
+    entries.push_back({ "New Game", 'n', newGameCommand });
 
-Menu::Menu(bool startup, GameContext& ctx)
-	: isStartupMenu(startup)
-{
-	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
-	menu_starty = (vrows - menu_height) / 2;
+    auto loadGameCommand = [](GameContext& ctx)
+    {
+        ctx.stateManager->load_all(ctx);
+    };
+    entries.push_back({ "Load Game", 'l', loadGameCommand });
 
-	menu_startx = (vcols - menu_width) / 2;
-	menu_new(menu_height, menu_width, menu_starty, menu_startx, ctx);
-	iMenuStates.emplace(MenuState::NEW_GAME, std::make_unique<NewGame>());
-	iMenuStates.emplace(MenuState::LOAD_GAME, std::make_unique<LoadGame>());
-	iMenuStates.emplace(MenuState::OPTIONS, std::make_unique<Options>());
-#ifndef EMSCRIPTEN
-	iMenuStates.emplace(MenuState::ROOM_EDITOR, std::make_unique<RoomEditorEntry>());
-	iMenuStates.emplace(MenuState::MONSTER_EDITOR, std::make_unique<MonsterEditorEntry>());
-	iMenuStates.emplace(MenuState::SPELL_EDITOR, std::make_unique<SpellEditorEntry>());
-	iMenuStates.emplace(MenuState::ITEM_EDITOR, std::make_unique<ItemEditorEntry>());
-#endif
-	iMenuStates.emplace(MenuState::QUIT, std::make_unique<Quit>());
-}
-
-Menu::~Menu()
-{
-	menu_delete();
-}
-
-void Menu::menu_print_state(MenuState state)
-{
-	auto row = static_cast<std::underlying_type_t<MenuState>>(state) + 1; // Start at row 1 after title
-	if (currentState == state)
-	{
-		menu_highlight_on();
-	}
-	menu_print(1, row, menu_get_string(state));
-	if (currentState == state)
-	{
-		menu_highlight_off();
-	}
-}
-
-void Menu::draw_content()
-{
-	// TODO: debug current state display (was curses mvwprintw)
-
-	// Draw menu options
-	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
-	{
-		menu_print_state(static_cast<MenuState>(i));
-	}
-}
-
-void Menu::draw()
-{
-	menu_clear();
-	menu_draw_box();
-	menu_draw_title("MAIN MENU", YELLOW_BLACK_PAIR);
-
-	for (size_t i{ 0 }; i < menuStateStrings.size(); ++i)
-	{
-		menu_print_state(static_cast<MenuState>(i));
-	}
-	menu_refresh();
-}
-
-void Menu::on_key(int key, GameContext& ctx)
-{
-	switch (key)
-	{
-
-	case 0x103: // KEY_UP
-	case 'w':
-	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
-		menu_mark_dirty(); // Mark for redraw
-		break;
-	}
-
-	case 0x102: // KEY_DOWN
-	case 's':
-	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
-		menu_mark_dirty(); // Mark for redraw
-		break;
-	}
-
-	case 10:
-	{ // if a selection is made
-		menu_set_run_false(); // stop running this menu loop
-		iMenuStates.at(currentState)->on_selection(ctx); // run the selected option
-		break;
-	}
-
-	case 27: // Escape key
-	{
-		menu_set_run_false();
-		// Only quit the game if this is the startup menu
-		if (isStartupMenu)
-		{
-			// Use the same quit logic as the Quit menu option
-			iMenuStates.at(MenuState::QUIT)->on_selection(ctx);
-		}
-		break;
-	}
-
-	case 'n':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::NEW_GAME)->on_selection(ctx);
-		break;
-	}
-
-	case 'l':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::LOAD_GAME)->on_selection(ctx);
-		break;
-	}
-
-	case 'o':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::OPTIONS)->on_selection(ctx);
-		break;
-	}
+    auto optionsCommand = [](GameContext& /*ctx*/) {};
+    entries.push_back({ "Options", 'o', optionsCommand });
 
 #ifndef EMSCRIPTEN
-	case 'e':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::ROOM_EDITOR)->on_selection(ctx);
-		break;
-	}
+    auto roomEditorCommand = [](GameContext& ctx)
+    {
+        ctx.roomEditor->enter(*ctx.prefabLibrary);
+    };
+    entries.push_back({ "Room Editor", 'e', roomEditorCommand });
 
-	case 'm':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::MONSTER_EDITOR)->on_selection(ctx);
-		break;
-	}
+    auto monsterEditorCommand = [](GameContext& ctx)
+    {
+        ctx.monsterEditor->enter();
+    };
+    entries.push_back({ "Monster Editor", 'm', monsterEditorCommand });
 
-	case 'p':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::SPELL_EDITOR)->on_selection(ctx);
-		break;
-	}
+    auto spellEditorCommand = [](GameContext& ctx)
+    {
+        ctx.spellEditor->enter();
+    };
+    entries.push_back({ "Spell Editor", 'p', spellEditorCommand });
 
-	case 'i':
-	{
-		menu_set_run_false();
-		iMenuStates.at(MenuState::ITEM_EDITOR)->on_selection(ctx);
-		break;
-	}
+    auto itemEditorCommand = [](GameContext& ctx)
+    {
+        ctx.itemEditor->enter(ctx);
+    };
+    entries.push_back({ "Item Editor", 'i', itemEditorCommand });
 #endif
 
-	case 'q':
-	{
-		menu_set_run_false(); // stop running menu loop
-		iMenuStates.at(MenuState::QUIT)->on_selection(ctx);
-		break; // break out of switch and start closing the game
-	}
+    auto quitCommand = [](GameContext& ctx)
+    {
+        ctx.gameState->set_run(false);
+        ctx.gameState->set_should_save(false);
+        ctx.messageSystem->log("You quit without saving!");
+    };
+    entries.push_back({ "Quit", 'q', quitCommand });
 
-	default:
-		break;
-	}
-}
+    // ESC on the startup menu quits the game; in-game it just closes.
+    std::function<void(GameContext&)> onEscape{};
+    if (startup)
+    {
+        onEscape = quitCommand;
+    }
 
-void Menu::menu(GameContext& ctx)
-{
-	// TODO: clear screen (was curses clear/refresh)
-	if (ctx.menuManager->is_game_initialized() && !isStartupMenu)
-	{
-		// For in-game menu, show the game world behind it
-		ctx.renderingManager->render(ctx);
-		ctx.gui->gui_render(ctx);
-	}
+    // In-game menu renders the world behind it each frame.
+    std::function<void(GameContext&)> onFrame{};
+    if (!startup)
+    {
+        onFrame = [](GameContext& ctx)
+        {
+            if (ctx.menuManager->is_game_initialized())
+            {
+                ctx.renderingManager->render(ctx);
+                ctx.gui->gui_render(ctx);
+            }
+        };
+    }
 
-	menu_key_listen(); // listen for key presses
-	draw(); // draw the menu
-	on_key(keyPress, ctx); // run the key press
-
-	// Restore full game view if returning to game
-	if (ctx.menuManager->is_game_initialized() && !isStartupMenu)
-	{
-		// TODO: clear screen (was curses clear/refresh)
-		ctx.renderingManager->render(ctx);
-		ctx.gui->gui_render(ctx);
-	}
+    return std::make_unique<ListMenu>(
+        "MAIN MENU",
+        std::move(entries),
+        std::move(onEscape),
+        std::move(onFrame),
+        ctx);
 }
 
 // end of file: Menu.cpp

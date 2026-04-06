@@ -12,13 +12,18 @@
 
 MenuName::MenuName(GameContext& ctx)
 {
-	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
-	int w = 32;
-	int h = 5;
-	int sy = (vrows - h) / 2;
-	int sx = (vcols - w) / 2;
-	menu_new(h, w, sy, sx, ctx);
+	int viewportRows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+	int viewportCols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
+	int width = 32;
+	int height = 5;
+	int startX = (viewportCols - width) / 2;
+	int startY = (viewportRows - height) / 2;
+	menu_new(
+		width,
+		height,
+		startX,
+		startY,
+		ctx);
 }
 
 MenuName::~MenuName()
@@ -35,12 +40,12 @@ void MenuName::draw_name_screen(GameContext& ctx)
 	if (renderer)
 	{
 		int tileSize = renderer->get_tile_size();
-		int font_off = (tileSize - renderer->get_font_size()) / 2;
-		int px = (static_cast<int>(menu_startx) + 1) * tileSize;
-		int row1_y = (static_cast<int>(menu_starty) + 1) * tileSize + font_off;
-		int row2_y = (static_cast<int>(menu_starty) + 2) * tileSize + font_off;
-		renderer->draw_text(Vector2D{ px, row1_y }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
-		renderer->draw_text(Vector2D{ px, row2_y }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
+		int fontOff = (tileSize - renderer->get_font_size()) / 2;
+		int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize;
+		int rowY1 = (static_cast<int>(menuStartY) + 1) * tileSize + fontOff;
+		int rowY2 = (static_cast<int>(menuStartY) + 2) * tileSize + fontOff;
+		renderer->draw_text(Vector2D{ pixelX, rowY1 }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ pixelX, rowY2 }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
 	}
 
 	menu_refresh();
@@ -59,25 +64,25 @@ void MenuName::menu_name(GameContext& ctx)
 		initialized = true;
 	}
 
-	if (!input_system)
+	if (!inputSystem)
 	{
 		run = false;
 		return;
 	}
 
-	input_system->poll();
+	inputSystem->poll();
 
-	int ch = input_system->get_char_input();
-	GameKey gk = input_system->get_key();
+	int charInput = inputSystem->get_char_input();
+	GameKey gameKey = inputSystem->get_key();
 
-	if (ch >= 32 && ch < 127)
+	if (charInput >= 32 && charInput < 127)
 	{
 		if (inputText.size() < 38)
 		{
-			inputText += static_cast<char>(ch);
+			inputText += static_cast<char>(charInput);
 		}
 	}
-	else if (ch == 8 || gk == GameKey::BACKSPACE)
+	else if (charInput == 8 || gameKey == GameKey::BACKSPACE)
 	{
 		if (!inputText.empty())
 		{
@@ -86,18 +91,28 @@ void MenuName::menu_name(GameContext& ctx)
 	}
 	else
 	{
-		switch (gk)
+		switch (gameKey)
 		{
+
 		case GameKey::ENTER:
+		{
 			ctx.player->actorData.name = inputText.empty() ? "Player" : inputText;
 			menu_set_run_false();
 			break;
+		}
+
 		case GameKey::ESCAPE:
+		{
 			ctx.player->actorData.name = "Player";
 			menu_set_run_false();
 			break;
+		}
+
 		default:
+		{
 			break;
+		}
+
 		}
 	}
 

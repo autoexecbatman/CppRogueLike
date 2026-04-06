@@ -80,7 +80,7 @@ void MonsterEditor::exit(GameContext& ctx)
 {
 	commit_working();
 	m_active = false;
-	ctx.menus->push_back(std::make_unique<Menu>(true, ctx));
+	ctx.menus->push_back(make_main_menu(true, ctx));
 }
 
 void MonsterEditor::tick(GameContext& ctx)

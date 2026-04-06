@@ -125,7 +125,7 @@ public:
 	void regenerate(GameContext& ctx); // regenerate the map
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
 	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{ -1, -1 });
-	double cost(Vector2D from_node, Vector2D to_node, GameContext& ctx);
+	double cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	long get_seed() const noexcept { return seed; }

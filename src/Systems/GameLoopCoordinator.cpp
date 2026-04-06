@@ -286,25 +286,33 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 		return;
 	}
 
-	Vector2D screen_tile = ctx.inputSystem->get_mouse_tile(tileSize);
+	int cam_x = ctx.renderer->get_camera_x();
+	int cam_y = ctx.renderer->get_camera_y();
+
+	// Correct world tile: combined division avoids split-integer rounding error
+	// when cam_x is not tile-aligned (odd viewportCols on web).
+	Vector2D world_tile = ctx.inputSystem->get_mouse_world_tile(cam_x, cam_y, tileSize);
+
+	// Screen pixel position — same formula as tile rendering so the square
+	// tracks the actual rendered tile regardless of camera alignment.
+	int tx = world_tile.x * tileSize - cam_x;
+	int ty = world_tile.y * tileSize - cam_y;
 
 	// Ignore cursor over the GUI panel rows at the bottom
 	int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
 
-	if (screen_tile.y < 0 || screen_tile.y >= map_rows)
+	if (tx < 0 || ty < 0)
 	{
 		return;
 	}
-
-	if (screen_tile.x < 0 || screen_tile.x >= ctx.renderer->get_viewport_cols())
+	if (ty / tileSize >= map_rows)
 	{
 		return;
 	}
-
-	Vector2D world_tile{
-		screen_tile.x + ctx.renderer->get_camera_x() / tileSize,
-		screen_tile.y + ctx.renderer->get_camera_y() / tileSize
-	};
+	if (tx / tileSize >= ctx.renderer->get_viewport_cols())
+	{
+		return;
+	}
 
 	if (!ctx.map->is_in_bounds(world_tile))
 	{
@@ -397,8 +405,6 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	// Pulse: 3 Hz sine, range [0, 1]
 	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 3.0f) + 1.0f) * 0.5f;
 
-	int tx = screen_tile.x * tileSize;
-	int ty = screen_tile.y * tileSize;
 	float tx_f = static_cast<float>(tx);
 	float ty_f = static_cast<float>(ty);
 	float ts_f = static_cast<float>(tileSize);

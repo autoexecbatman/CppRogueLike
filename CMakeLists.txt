@@ -6,6 +6,9 @@ project(
     LANGUAGES C CXX
 )
 
+# Export compile commands for clangd
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Ensure the C++20 standard is available
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -171,7 +174,9 @@ set(SOURCE_FILES # Add Source Files Here !
     # Menu
     ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.h
-    ${PROJECT_SOURCE_DIR}/Menu/IMenuState.h
+    ${PROJECT_SOURCE_DIR}/Menu/MenuEntry.h
+    ${PROJECT_SOURCE_DIR}/Menu/ListMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/ListMenu.h
     ${PROJECT_SOURCE_DIR}/Menu/Menu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/Menu.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuClass.cpp

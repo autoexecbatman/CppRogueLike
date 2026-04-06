@@ -1,138 +1,51 @@
+// file: MenuGender.cpp
 #include <memory>
-
-#include <raylib.h>
+#include <vector>
 
 #include "../ActorTypes/Player.h"
-#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Renderer/Renderer.h"
+#include "../Random/RandomDice.h"
+#include "ListMenu.h"
 #include "MenuGender.h"
 #include "MenuRace.h"
 
-void Male::on_selection(GameContext& ctx)
+std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 {
-	ctx.player->set_gender("Male");
+    std::vector<MenuEntry> entries;
+
+    auto maleCommand = [](GameContext& ctx)
+    {
+        ctx.player->set_gender("Male");
+        ctx.menus->push_back(make_race_menu(ctx));
+    };
+    entries.push_back({ "Male", 'm', maleCommand });
+
+    auto femaleCommand = [](GameContext& ctx)
+    {
+        ctx.player->set_gender("Female");
+        ctx.menus->push_back(make_race_menu(ctx));
+    };
+    entries.push_back({ "Female", 'f', femaleCommand });
+
+    auto randomCommand = [](GameContext& ctx)
+    {
+        ctx.player->set_gender(ctx.dice->d2() == 1 ? "Male" : "Female");
+        ctx.menus->push_back(make_race_menu(ctx));
+    };
+    entries.push_back({ "Random", 'r', randomCommand });
+
+    auto backCommand = [](GameContext& ctx)
+    {
+        ctx.menus->back()->back = true;
+    };
+    entries.push_back({ "Back", 'b', backCommand });
+
+    return std::make_unique<ListMenu>(
+        "SELECT GENDER",
+        std::move(entries),
+        std::function<void(GameContext&)>{},
+        std::function<void(GameContext&)>{},
+        ctx);
 }
 
-void Female::on_selection(GameContext& ctx)
-{
-	ctx.player->set_gender("Female");
-}
-
-void Random::on_selection(GameContext& ctx)
-{
-	auto roll = ctx.dice->d2();
-	if (roll == 1)
-	{
-		ctx.player->set_gender("Male");
-	}
-	else
-	{
-		ctx.player->set_gender("Female");
-	}
-}
-
-void Back::on_selection(GameContext& ctx)
-{
-	ctx.menus->back()->back = true;
-}
-
-MenuGender::MenuGender(GameContext& ctx)
-{
-	int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-	int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
-	starty_ = (vrows - height_) / 2;
-	startx_ = (vcols - width_) / 2;
-	menu_new(height_, width_, starty_, startx_, ctx);
-	iMenuStates.emplace(MenuState::MALE, std::make_unique<Male>());
-	iMenuStates.emplace(MenuState::FEMALE, std::make_unique<Female>());
-	iMenuStates.emplace(MenuState::RANDOM, std::make_unique<Random>());
-	iMenuStates.emplace(MenuState::BACK, std::make_unique<Back>());
-}
-
-MenuGender::~MenuGender()
-{
-	menu_delete();
-}
-
-void MenuGender::menu_print_state(MenuState option)
-{
-	auto row = static_cast<int>(option) + 1; // Start at row 1 after title
-	if (currentState == option)
-	{
-		menu_highlight_on();
-	}
-	menu_print(1, row, menu_gender_get_string(option));
-	if (currentState == option)
-	{
-		menu_highlight_off();
-	}
-}
-
-void MenuGender::draw()
-{
-	menu_clear();
-	menu_draw_box();
-	menu_draw_title("SELECT GENDER", YELLOW_BLACK_PAIR);
-	for (size_t i = 0; i < menuStateStrings.size(); ++i)
-	{
-		menu_print_state(static_cast<MenuState>(i));
-	}
-	menu_refresh();
-}
-
-void MenuGender::on_key(int key, GameContext& ctx)
-{
-	switch (keyPress)
-	{
-
-	case 0x103: // KEY_UP
-	case 'w':
-	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + iMenuStates.size() - 1) % iMenuStates.size());
-		break;
-	}
-
-	case 0x102: // KEY_DOWN
-	case 's':
-	{
-		currentState = static_cast<MenuState>((static_cast<size_t>(currentState) + 1) % iMenuStates.size());
-		break;
-	}
-
-	case 'M':
-	case 'm':
-	{
-		iMenuStates.at(MenuState::MALE)->on_selection(ctx);
-		break;
-	}
-
-	case 'F':
-	case 'f':
-	{
-		iMenuStates.at(MenuState::FEMALE)->on_selection(ctx);
-		break;
-	}
-
-	case 10:
-	{
-		menu_set_run_false();
-		iMenuStates.at(currentState)->on_selection(ctx); // run the selected option
-		if (currentState != MenuState::BACK)
-		{
-			ctx.menus->push_back(std::make_unique<MenuRace>(ctx));
-		}
-		break;
-	}
-
-	default:
-		break;
-	} // !end switch keyPress
-}
-
-void MenuGender::menu(GameContext& ctx)
-{
-	menu_key_listen();
-	draw();
-	on_key(keyPress, ctx);
-}
+// end of file: MenuGender.cpp

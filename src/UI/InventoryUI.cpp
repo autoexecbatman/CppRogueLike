@@ -725,8 +725,15 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	}
 
 	case GameKey::TAB:
+	case GameKey::RIGHT:
 	{
-		handle_tab_switch();
+		handle_tab_switch(1);
+		return true;
+	}
+
+	case GameKey::LEFT:
+	{
+		handle_tab_switch(-1);
 		return true;
 	}
 
@@ -837,20 +844,12 @@ void InventoryUI::handle_cursor_down(GameContext& ctx)
 	}
 }
 
-void InventoryUI::handle_tab_switch()
+void InventoryUI::handle_tab_switch(int direction)
 {
-	switch (activeScreen)
-	{
-	case InventoryScreen::EQUIPMENT:
-		activeScreen = InventoryScreen::BACKPACK;
-		break;
-	case InventoryScreen::BACKPACK:
-		activeScreen = InventoryScreen::USABLES;
-		break;
-	case InventoryScreen::USABLES:
-		activeScreen = InventoryScreen::EQUIPMENT;
-		break;
-	}
+	constexpr int numTabs = 3;
+	int current = static_cast<int>(activeScreen);
+	current = (current + direction + numTabs) % numTabs;
+	activeScreen = static_cast<InventoryScreen>(current);
 
 	if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
 	{
