@@ -192,9 +192,9 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
 	}
 }
 
-std::vector<std::pair<std::string, float>> MonsterFactory::getCurrentDistribution(int dungeonLevel)
+std::vector<MonsterPercentage> MonsterFactory::getCurrentDistribution(int dungeonLevel)
 {
-	std::vector<std::pair<std::string, float>> distribution;
+	std::vector<MonsterPercentage> distribution;
 
 	int totalWeight = 0;
 	std::vector<int> weights;

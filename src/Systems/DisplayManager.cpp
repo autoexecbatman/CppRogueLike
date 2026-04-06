@@ -5,7 +5,9 @@
 #include "../Actor/Attacker.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
+#include "../Systems/LevelManager.h"
 #include "../Systems/LevelUpSystem.h"
+#include "../Tools/BalanceViewer.h"
 #include "../UI/CharacterSheetUI.h"
 #include "../UI/LevelUpUI.h"
 #include "DisplayManager.h"
@@ -29,6 +31,12 @@ void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& c
 void DisplayManager::display_character_sheet(const Player& player, GameContext& ctx) const noexcept
 {
 	ctx.menus->push_back(std::make_unique<CharacterSheetUI>(player, ctx));
+}
+
+void DisplayManager::display_balance_viewer(GameContext& ctx) const
+{
+	const int level = ctx.levelManager->get_dungeon_level();
+	ctx.menus->push_back(std::make_unique<BalanceViewer>(level, ctx));
 }
 
 // end of file: Systems/DisplayManager.cpp

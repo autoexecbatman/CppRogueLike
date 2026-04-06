@@ -263,7 +263,7 @@ void InputSystem::poll()
 	{
 		if (shift)
 		{
-			register_key(KEY_B, GameKey::ITEM_DISTRIBUTION, 'B', false);
+			register_key(KEY_B, GameKey::BALANCE_VIEWER, 'B', false);
 		}
 		else
 		{

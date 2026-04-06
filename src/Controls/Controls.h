@@ -38,7 +38,7 @@ enum class Controls
 	TOGGLE_GRIP = 'T',
 	QUIT = '~',
 	DEBUG = 'b',
-	ITEM_DISTRIBUTION = 'B',
+	BALANCE_VIEWER = 'B',
 	REVEAL = 'm',
 	REGEN = 'n',
 	OPEN_DOOR = 'o',

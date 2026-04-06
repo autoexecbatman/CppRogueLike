@@ -1308,9 +1308,14 @@ void Map::place_amulet(GameContext& ctx)
 	}
 }
 
-void Map::display_spawn_rates(GameContext& ctx) const
+std::vector<MonsterPercentage> Map::get_monster_distribution(int dungeonLevel)
 {
-	// TODO: Reimplement with Panel+Renderer
+	return monsterFactory->getCurrentDistribution(dungeonLevel);
+}
+
+std::vector<ItemPercentage> Map::get_item_distribution(int dungeonLevel)
+{
+	return itemFactory->get_current_distribution(dungeonLevel);
 }
 
 void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx)
@@ -1420,11 +1425,6 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 	create_treasure_room(room, quality, ctx);
 
 	return true;
-}
-
-void Map::display_item_distribution(GameContext& ctx) const
-{
-	// TODO: Reimplement with Panel+Renderer
 }
 
 void Map::post_process_doors()

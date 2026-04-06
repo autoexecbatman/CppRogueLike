@@ -52,7 +52,7 @@ enum class GameKey
 	// Debug
 	DEBUG,
 	TEST_COMMAND,
-	ITEM_DISTRIBUTION,
+	BALANCE_VIEWER,
 	REVEAL,
 	REGEN,
 

@@ -286,6 +286,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/TileConfig.h
 
     # Tools
+    ${PROJECT_SOURCE_DIR}/Tools/BalanceViewer.cpp
+    ${PROJECT_SOURCE_DIR}/Tools/BalanceViewer.h
     ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.cpp
     ${PROJECT_SOURCE_DIR}/Tools/ContentEditor.h
     ${PROJECT_SOURCE_DIR}/Tools/DecorEditor.cpp

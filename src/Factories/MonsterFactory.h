@@ -2,7 +2,6 @@
 
 #include <functional>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "../Utils/Vector2D.h"
@@ -23,6 +22,12 @@ struct MonsterType
 	std::function<void(Vector2D, GameContext&)> createFunc;
 };
 
+struct MonsterPercentage
+{
+	std::string name{};
+	float percentage{};
+};
+
 class MonsterFactory
 {
 public:
@@ -37,7 +42,7 @@ public:
 	void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);
 
 	// Get the probability distribution for the current dungeon level
-	std::vector<std::pair<std::string, float>> getCurrentDistribution(int dungeonLevel);
+	std::vector<MonsterPercentage> getCurrentDistribution(int dungeonLevel);
 
 	// Add a monster type to the factory
 	void addMonsterType(const MonsterType& monsterType);

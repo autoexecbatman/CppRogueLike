@@ -918,9 +918,9 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 		break;
 	}
 
-	case Controls::ITEM_DISTRIBUTION:
+	case Controls::BALANCE_VIEWER:
 	{
-		ctx.map->display_item_distribution(ctx);
+		ctx.displayManager->display_balance_viewer(ctx);
 		break;
 	}
 #endif

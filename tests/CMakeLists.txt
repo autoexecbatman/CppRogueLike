@@ -131,6 +131,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
     ${PARENT_SOURCE_DIR}/Systems/TileConfig.cpp
     ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
+    ${PARENT_SOURCE_DIR}/Tools/BalanceViewer.cpp
     ${PARENT_SOURCE_DIR}/Tools/ContentEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/DecorEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/ItemEditor.cpp

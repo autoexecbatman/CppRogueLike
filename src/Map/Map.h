@@ -147,10 +147,10 @@ public:
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
-	void display_spawn_rates(GameContext& ctx) const;
+	std::vector<MonsterPercentage> get_monster_distribution(int dungeonLevel);
+	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
 	void create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx);
 	bool maybe_create_treasure_room(int dungeonLevel, GameContext& ctx);
-	void display_item_distribution(GameContext& ctx) const;
 	Decoration* find_decoration_at(Vector2D pos, GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
