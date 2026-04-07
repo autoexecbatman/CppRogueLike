@@ -1053,7 +1053,7 @@ nlohmann::json encode_item_entry(const ItemEntry& e)
 	j["intBonus"] = p.intBonus;
 	j["wisBonus"] = p.wisBonus;
 	j["chaBonus"] = p.chaBonus;
-	j["isSetSode"] = p.isSetMode;
+	j["isSetMode"] = p.isSetMode;
 	j["nutritionValue"] = p.nutritionValue;
 	j["goldAmount"] = p.goldAmount;
 	j["acBonus"] = p.acBonus;

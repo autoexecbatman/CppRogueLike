@@ -19,7 +19,9 @@ protected:
     Game game;
     GameContext ctx;
 
-    void SetUp() override {
+    void SetUp() override
+    {
+        ItemCreator::load("data/content/items.json");
         ctx = game.context();
     }
 
