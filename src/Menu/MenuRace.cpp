@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
 #include "ListMenu.h"
@@ -15,48 +14,42 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
 
     auto humanCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Human";
-        ctx.player->playerRaceState = Player::PlayerRaceState::HUMAN;
+        ctx.playerBlueprint.playerRace = "Human";
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Human", 'h', humanCommand });
 
     auto dwarfCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Dwarf";
-        ctx.player->playerRaceState = Player::PlayerRaceState::DWARF;
+        ctx.playerBlueprint.playerRace = "Dwarf";
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Dwarf", 'd', dwarfCommand });
 
     auto elfCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Elf";
-        ctx.player->playerRaceState = Player::PlayerRaceState::ELF;
+        ctx.playerBlueprint.playerRace = "Elf";
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Elf", 'e', elfCommand });
 
     auto gnomeCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Gnome";
-        ctx.player->playerRaceState = Player::PlayerRaceState::GNOME;
+        ctx.playerBlueprint.playerRace = "Gnome";
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Gnome", 'g', gnomeCommand });
 
     auto halfElfCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Half-Elf";
-        ctx.player->playerRaceState = Player::PlayerRaceState::HALFELF;
+        ctx.playerBlueprint.playerRace = "Half-Elf";
         ctx.menus->push_back(make_class_menu(ctx));
     };
-    entries.push_back({ "Half-Elf", 0, halfElfCommand });  // no unambiguous hotkey
+    entries.push_back({ "Half-Elf", 0, halfElfCommand });
 
     auto halflingCommand = [](GameContext& ctx)
     {
-        ctx.player->playerRace = "Halfling";
-        ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
+        ctx.playerBlueprint.playerRace = "Halfling";
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Halfling", 'l', halflingCommand });
@@ -66,28 +59,22 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
         switch (ctx.dice->d6())
         {
         case 1:
-            ctx.player->playerRace = "Human";
-            ctx.player->playerRaceState = Player::PlayerRaceState::HUMAN;
+            ctx.playerBlueprint.playerRace = "Human";
             break;
         case 2:
-            ctx.player->playerRace = "Dwarf";
-            ctx.player->playerRaceState = Player::PlayerRaceState::DWARF;
+            ctx.playerBlueprint.playerRace = "Dwarf";
             break;
         case 3:
-            ctx.player->playerRace = "Elf";
-            ctx.player->playerRaceState = Player::PlayerRaceState::ELF;
+            ctx.playerBlueprint.playerRace = "Elf";
             break;
         case 4:
-            ctx.player->playerRace = "Gnome";
-            ctx.player->playerRaceState = Player::PlayerRaceState::GNOME;
+            ctx.playerBlueprint.playerRace = "Gnome";
             break;
         case 5:
-            ctx.player->playerRace = "Half-Elf";
-            ctx.player->playerRaceState = Player::PlayerRaceState::HALFELF;
+            ctx.playerBlueprint.playerRace = "Half-Elf";
             break;
         case 6:
-            ctx.player->playerRace = "Halfling";
-            ctx.player->playerRaceState = Player::PlayerRaceState::HALFLING;
+            ctx.playerBlueprint.playerRace = "Halfling";
             break;
         default:
             break;

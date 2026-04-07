@@ -29,6 +29,7 @@
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
 #include "GameStateManager.h"
+#include "TileConfig.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -101,7 +102,8 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.levelManager != nullptr);
 	assert(ctx.gameState != nullptr);
 	assert(ctx.map != nullptr);
-	assert(ctx.player != nullptr);
+	assert(ctx.playerOwner != nullptr);
+	assert(ctx.tileConfig != nullptr);
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
@@ -110,9 +112,12 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	ctx.gameState->set_time(0);
 	ctx.gameState->set_is_loaded_game(false);
 
+	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, ctx.playerBlueprint, ctx);
+	ctx.player = ctx.playerOwner->get();
+	ctx.player->actorData.tile = ctx.tileConfig->get("TILE_PLAYER");
+
 	ctx.map->regenerate(ctx);
 
-	ctx.player->roll_new_character(ctx);
 	ctx.gameState->set_game_status(GameStatus::STARTUP);
 	ctx.messageSystem->log("New game initialized");
 }
@@ -123,10 +128,16 @@ bool GameStateManager::load_all(GameContext& ctx)
 	assert(ctx.dataManager != nullptr);
 	assert(ctx.messageSystem != nullptr);
 	assert(ctx.gameState != nullptr);
+	assert(ctx.playerOwner != nullptr);
+	assert(ctx.tileConfig != nullptr);
 
 	ContentRegistryIO::load(*ctx.contentRegistry, Paths::CONTENT_TILES);
 	ctx.menuManager->set_game_initialized(true);
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
+
+	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
+	ctx.player = ctx.playerOwner->get();
+	ctx.player->actorData.tile = ctx.tileConfig->get("TILE_PLAYER");
 
 	if (!load_game(ctx))
 	{

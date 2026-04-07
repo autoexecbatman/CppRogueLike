@@ -1,4 +1,5 @@
 // file: Monsters.cpp
+#include <cassert>
 #include <memory>
 #include <string>
 #include <vector>
@@ -56,6 +57,10 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	}
 
 	remove_state(ActorState::BLOCKS);
+
+	assert(ai && "Mimic requires Ai");
+	assert(attacker && "Mimic requires Attacker");
+	assert(destructible && "Mimic requires Destructible");
 }
 
 void Mimic::init_disguises(ContentRegistry& registry)

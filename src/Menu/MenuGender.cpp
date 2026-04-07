@@ -2,7 +2,6 @@
 #include <memory>
 #include <vector>
 
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
 #include "ListMenu.h"
@@ -15,21 +14,21 @@ std::unique_ptr<BaseMenu> make_gender_menu(GameContext& ctx)
 
     auto maleCommand = [](GameContext& ctx)
     {
-        ctx.player->set_gender("Male");
+        ctx.playerBlueprint.gender = "Male";
         ctx.menus->push_back(make_race_menu(ctx));
     };
     entries.push_back({ "Male", 'm', maleCommand });
 
     auto femaleCommand = [](GameContext& ctx)
     {
-        ctx.player->set_gender("Female");
+        ctx.playerBlueprint.gender = "Female";
         ctx.menus->push_back(make_race_menu(ctx));
     };
     entries.push_back({ "Female", 'f', femaleCommand });
 
     auto randomCommand = [](GameContext& ctx)
     {
-        ctx.player->set_gender(ctx.dice->d2() == 1 ? "Male" : "Female");
+        ctx.playerBlueprint.gender = ctx.dice->d2() == 1 ? "Male" : "Female";
         ctx.menus->push_back(make_race_menu(ctx));
     };
     entries.push_back({ "Random", 'r', randomCommand });

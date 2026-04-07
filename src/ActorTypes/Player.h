@@ -13,6 +13,7 @@
 
 class Item;
 struct GameContext;
+struct PlayerBlueprint;
 
 struct EquippedItem
 {
@@ -55,6 +56,7 @@ public:
 	std::vector<EquippedItem> equippedItems;
 
 	Player(Vector2D position);
+	Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx);
 	void roll_new_character(GameContext& ctx);
 
 	// Serialization - overrides Creature

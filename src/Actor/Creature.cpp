@@ -1,4 +1,5 @@
 ﻿#include <algorithm>
+#include <cassert>
 #include <format>
 #include <memory>
 #include <ranges>
@@ -153,18 +154,13 @@ void Creature::update(GameContext& ctx)
 	}
 	ctx.buffSystem->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
 	ctx.buffSystem->update_creature_buffs(*this); // Unified buff system
-	// Apply the modifiers from stats and items
-	if (destructible)
-	{
-		destructible->update_armor_class(*this, ctx);
-		destructible->update_constitution_bonus(*this, ctx);
-	}
 
-	// if the actor has an ai then update the ai
-	if (ai)
-	{
-		ai->update(*this, ctx);
-	}
+	assert(destructible && "Creature::update called with null destructible");
+	assert(ai && "Creature::update called with null ai");
+
+	destructible->update_armor_class(*this, ctx);
+	destructible->update_constitution_bonus(*this, ctx);
+	ai->update(*this, ctx);
 }
 
 void Creature::apply_confusion(int nbTurns)

@@ -13,6 +13,7 @@
  * This ensures spiders provide equivalent progression rewards as other
  * creatures in the solo AD&D 2e experience system.
  */
+#include <cassert>
 #include <memory>
 
 #include "../../Actor/Actor.h"
@@ -103,6 +104,10 @@ void Spider::init_spider_type(GameContext& ctx)
 		ai = std::make_unique<AiWebSpinner>();
 		break;
 	}
+
+	assert(ai && "Spider requires Ai");
+	assert(attacker && "Spider requires Attacker");
+	assert(destructible && "Spider requires Destructible");
 }
 
 void Spider::update(GameContext& ctx)

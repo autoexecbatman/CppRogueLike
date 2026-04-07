@@ -101,7 +101,7 @@ struct Game
 	Map map{ get_map_width(), get_map_height() };
 	Gui gui{};
 	std::unique_ptr<Stairs> stairs{ std::make_unique<Stairs>(Vector2D{ 0, 0 }) };
-	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
+	std::unique_ptr<Player> player{ nullptr };
 
 	std::vector<DungeonRoom> rooms{};
 	std::vector<std::unique_ptr<Creature>> creatures{};

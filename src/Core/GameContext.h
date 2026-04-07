@@ -2,6 +2,7 @@
 
 #include <deque>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "../Actor/InventoryData.h"
@@ -103,6 +104,16 @@ public:
 
 };
 
+// Data collected by character creation menus before Player is constructed.
+// Menus write here; GameStateManager::init_new_game consumes it.
+struct PlayerBlueprint
+{
+	std::string gender{ "None" };
+	std::string name{ "Player" };
+	std::string playerClass{ "None" };
+	std::string playerRace{ "None" };
+};
+
 /**
  * GameContext - Dependency injection container
  *
@@ -117,6 +128,13 @@ struct GameContext
 	Map* map{ nullptr };
 	Gui* gui{ nullptr };
 	Player* player{ nullptr };
+
+	// Ownership handle — set by Game::context(), used by init_new_game/load_all
+	// to construct and assign the player without going through Game directly.
+	std::unique_ptr<Player>* playerOwner{ nullptr };
+
+	// Character creation data — populated by menus, consumed by init_new_game.
+	PlayerBlueprint playerBlueprint{};
 
 	// Core systems
 	MessageSystem* messageSystem{ nullptr };

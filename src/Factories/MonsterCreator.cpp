@@ -1,5 +1,6 @@
 // file: MonsterCreator.cpp
 #include <algorithm>
+#include <cassert>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -458,6 +459,10 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	if (params.can_swim)
 		c->add_state(ActorState::CAN_SWIM);
+
+	assert(c->ai && "Monster requires Ai");
+	assert(c->attacker && "Monster requires Attacker");
+	assert(c->destructible && "Monster requires Destructible");
 
 	return c;
 }

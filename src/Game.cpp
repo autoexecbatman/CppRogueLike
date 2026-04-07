@@ -8,6 +8,7 @@
 		.map = &map,
 		.gui = &gui,
 		.player = player.get(),
+		.playerOwner = &player,
 
 		// Core systems
 		.messageSystem = &message_system,
@@ -155,7 +156,6 @@ bool Game::tick(int& loopNum)
 // Call after tile_config.load().
 void Game::init_world()
 {
-	player->actorData.tile = tile_config.get("TILE_PLAYER");
 	stairs->actorData.tile = tile_config.get("TILE_STAIRS");
 	anim_system.init(tile_config, renderer.get_tile_size());
 }

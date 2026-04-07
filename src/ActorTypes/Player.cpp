@@ -61,8 +61,83 @@ constexpr auto matches_unique_id = [](uint64_t unique_id)
 Player::Player(Vector2D position)
 	: Creature(position, ActorData{ TileRef{}, "Player", WHITE_BLACK_PAIR })
 {
-	set_gold(100); // Default starting gold (increased to 200 for fighters in MenuClass)
-	ai = std::make_unique<AiPlayer>(); // Player AI, handles player input
+	set_gold(100);
+	ai = std::make_unique<AiPlayer>();
+}
+
+Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
+	: Creature(position, ActorData{ TileRef{}, blueprint.name, WHITE_BLACK_PAIR })
+{
+	set_gender(blueprint.gender);
+	playerClass = blueprint.playerClass;
+	playerRace = blueprint.playerRace;
+
+	auto applyClassData = [this](std::string_view name)
+	{
+		if (name == "Fighter")
+		{
+			playerClassState = PlayerClassState::FIGHTER;
+			set_creature_class(CreatureClass::FIGHTER);
+			set_hit_die(10);
+		}
+		else if (name == "Rogue")
+		{
+			playerClassState = PlayerClassState::ROGUE;
+			set_creature_class(CreatureClass::ROGUE);
+			set_hit_die(6);
+		}
+		else if (name == "Cleric")
+		{
+			playerClassState = PlayerClassState::CLERIC;
+			set_creature_class(CreatureClass::CLERIC);
+			set_hit_die(8);
+		}
+		else if (name == "Wizard")
+		{
+			playerClassState = PlayerClassState::WIZARD;
+			set_creature_class(CreatureClass::WIZARD);
+			set_hit_die(4);
+		}
+	};
+
+	auto applyRaceData = [this](std::string_view name)
+	{
+		if (name == "Human")
+		{
+			playerRaceState = PlayerRaceState::HUMAN;
+		}
+		else if (name == "Dwarf")
+		{
+			playerRaceState = PlayerRaceState::DWARF;
+		}
+		else if (name == "Elf")
+		{
+			playerRaceState = PlayerRaceState::ELF;
+		}
+		else if (name == "Gnome")
+		{
+			playerRaceState = PlayerRaceState::GNOME;
+		}
+		else if (name == "Half-Elf")
+		{
+			playerRaceState = PlayerRaceState::HALFELF;
+		}
+		else if (name == "Halfling")
+		{
+			playerRaceState = PlayerRaceState::HALFLING;
+		}
+	};
+
+	applyClassData(blueprint.playerClass);
+	applyRaceData(blueprint.playerRace);
+
+	set_gold(100);
+	ai = std::make_unique<AiPlayer>();
+	roll_new_character(ctx);
+
+	assert(ai && "Player requires Ai");
+	assert(attacker && "Player requires Attacker");
+	assert(destructible && "Player requires Destructible");
 }
 
 void Player::roll_new_character(GameContext& ctx)

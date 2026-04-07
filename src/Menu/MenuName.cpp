@@ -1,7 +1,6 @@
 // file: MenuName.cpp
 #include <raylib.h>
 
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/InputSystem.h"
@@ -96,14 +95,14 @@ void MenuName::menu_name(GameContext& ctx)
 
 		case GameKey::ENTER:
 		{
-			ctx.player->actorData.name = inputText.empty() ? "Player" : inputText;
+			ctx.playerBlueprint.name = inputText.empty() ? "Player" : inputText;
 			menu_set_run_false();
 			break;
 		}
 
 		case GameKey::ESCAPE:
 		{
-			ctx.player->actorData.name = "Player";
+			ctx.playerBlueprint.name = "Player";
 			menu_set_run_false();
 			break;
 		}
