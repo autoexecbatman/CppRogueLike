@@ -191,6 +191,8 @@ public:
 
 	// World-space tile drawing (camera offset applied)
 	void draw_tile(Vector2D gridPos, TileRef tile, Color tint) const;
+	// World-space tile drawing with a sub-tile pixel offset (e.g. open doors pushed to side)
+	void draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOffsetY, TileRef tile, Color tint) const;
 	// World-space, always frame0 (no animation)
 	void draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const;
 

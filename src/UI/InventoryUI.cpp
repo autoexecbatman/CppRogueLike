@@ -323,7 +323,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		px += textW + tileSize; // one-tile gap between tabs
 	}
 
-	std::string_view hint = "[Tab] Switch";
+	std::string_view hint = "[Left/Right] Switch";
 	int hint_w = ctx.renderer->measure_text(hint);
 	int hint_x = screen_cols(ctx) * tileSize - hint_w - tileSize;
 	ctx.renderer->draw_text(Vector2D{ hint_x, tab_y + font_off }, hint, CYAN_BLACK_PAIR);
@@ -539,8 +539,8 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 	}
 
 	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
-		? "[Enter] Unequip/Browse  [d] Drop  [Tab] Switch  [ESC] Close"
-		: "[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Tab] Switch  [ESC] Close";
+		? "[Enter] Unequip/Browse  [d] Drop  [Left/Right] Switch  [ESC] Close"
+		: "[Enter] Use/Equip  [d] Drop  [a-z] Quick Use  [Left/Right] Switch  [ESC] Close";
 
 	ctx.renderer->draw_text(Vector2D{ 2 * tileSize, (detailY + DETAIL_BAR_HEIGHT - 1) * tileSize + font_off }, keybinds, CYAN_BLACK_PAIR);
 }

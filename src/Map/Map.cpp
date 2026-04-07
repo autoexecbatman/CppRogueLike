@@ -494,6 +494,7 @@ void Map::render(const GameContext& ctx) const
 		return tileType == TileType::FLOOR || tileType == TileType::CORRIDOR || tileType == TileType::OPEN_DOOR || tileType == TileType::WATER;
 	};
 
+
 	const std::array<Vector2D, 8> allDirs = {{
 		DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE
 	}};
@@ -633,9 +634,7 @@ void Map::render(const GameContext& ctx) const
 			}
 			case TileType::CORRIDOR:
 			{
-				tileRef = autotile_resolve_mask(
-					ctx.tileConfig->get_autotile("AUTOTILE_CORRIDOR"),
-					build_mask(pos, is_walkable));
+				tileRef = ctx.tileConfig->get("TILE_CORRIDOR");
 				break;
 			}
 			case TileType::WATER:
@@ -644,17 +643,28 @@ void Map::render(const GameContext& ctx) const
 				break;
 			}
 			case TileType::CLOSED_DOOR:
-			case TileType::OPEN_DOOR:
 			{
-				// Draw floor underneath -- door sprites have transparency
 				TileRef floorRef = autotile_resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
-				tileRef = (type == TileType::CLOSED_DOOR)
-					? ctx.tileConfig->get("TILE_DOOR_CLOSED")
-					: ctx.tileConfig->get("TILE_DOOR_OPEN");
+				tileRef = ctx.tileConfig->get("TILE_DOOR_CLOSED");
 				break;
+			}
+			case TileType::OPEN_DOOR:
+			{
+				TileRef floorRef = autotile_resolve_mask(
+					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
+					build_mask(pos, is_walkable));
+				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
+				int offset = ctx.renderer->get_tile_size() / 2;
+				ctx.renderer->draw_tile_offset(
+					Vector2D{ col, row },
+					-offset,
+					0,
+					ctx.tileConfig->get("TILE_DOOR_OPEN"),
+					tint);
+				continue;
 			}
 			default:
 			{

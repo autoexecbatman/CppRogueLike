@@ -434,6 +434,44 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
 }
 
+void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOffsetY, TileRef tile, Color tint) const
+{
+	assert(sheetsLoaded);
+	if (!tile.is_valid())
+	{
+		return;
+	}
+
+	assert(sheet_idx(tile.sheet) < sheets.size());
+	const SpriteSheet& sheet = sheets[sheet_idx(tile.sheet)];
+	assert(sheet.loaded && sheet.tilesPerRow > 0);
+
+	float destX = static_cast<float>(gridPos.x * tileSize - camera.x + pixelOffsetX);
+	float destY = static_cast<float>(gridPos.y * tileSize - camera.y + pixelOffsetY);
+
+	float tileSizeFloat = static_cast<float>(tileSize);
+	if (destX + tileSizeFloat < 0.0f || destX >= static_cast<float>(screenWidth) ||
+		destY + tileSizeFloat < 0.0f || destY >= static_cast<float>(screenHeight))
+	{
+		return;
+	}
+
+	const Texture2D& texture = (sheet.animated && currentAnimFrame == 1)
+		? sheet.frame1
+		: sheet.frame0;
+
+	Rectangle srcRect = {
+		static_cast<float>(tile.col * SPRITE_SIZE),
+		static_cast<float>(tile.row * SPRITE_SIZE),
+		static_cast<float>(SPRITE_SIZE),
+		static_cast<float>(SPRITE_SIZE)
+	};
+
+	Rectangle destRect = { destX, destY, tileSizeFloat, tileSizeFloat };
+
+	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, tint);
+}
+
 void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) const
 {
 	assert(sheetsLoaded);
