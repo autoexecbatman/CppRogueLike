@@ -99,29 +99,62 @@ void RenderingManager::restore_screen(GameContext& ctx) const
 
 void RenderingManager::apply_lighting(const Player& player, const GameContext& ctx) const
 {
-	if (!ctx.renderer)
+	if (!ctx.renderer || !ctx.map)
+	{
 		return;
+	}
 
-	Renderer& r = *ctx.renderer;
-	int tileSize = r.get_tile_size();
-	int cam_x = r.get_camera_x();
-	int cam_y = r.get_camera_y();
-
-	Vector2D screenPos{
-		player.position.x * tileSize - cam_x + tileSize / 2,
-		player.position.y * tileSize - cam_y + tileSize / 2
-	};
+	Renderer& renderer = *ctx.renderer;
+	const int tileSize = renderer.get_tile_size();
+	const int cameraX = renderer.get_camera_x();
+	const int cameraY = renderer.get_camera_y();
 
 	static constexpr float torchRadiusTiles = 6.5f;
-	float radius = torchRadiusTiles * static_cast<float>(tileSize);
-
-	// Warm torch inner, fade to darkness
 	static constexpr Color torchInner = { 255, 210, 140, 255 };
 	static constexpr Color torchOuter = { 0, 0, 0, 255 };
+	static constexpr Color exploredMemoryLight = { 160, 155, 148, 255 };
 
-	r.begin_light_mask();
-	r.add_light_source(screenPos, radius, torchInner, torchOuter);
-	r.apply_light_mask();
+	auto lerp_channel = [](unsigned char fromChannel, unsigned char toChannel, float fraction) -> unsigned char
+	{
+		return static_cast<unsigned char>(
+			static_cast<float>(fromChannel) + fraction * (static_cast<float>(toChannel) - static_cast<float>(fromChannel)));
+	};
+
+	renderer.begin_light_mask();
+
+	for (int tileY = 0; tileY < ctx.map->get_height(); ++tileY)
+	{
+		for (int tileX = 0; tileX < ctx.map->get_width(); ++tileX)
+		{
+			Vector2D tilePos{ tileX, tileY };
+			if (!ctx.map->is_in_fov(tilePos))
+			{
+				if (ctx.map->is_explored(tilePos))
+				{
+					int screenX = tileX * tileSize - cameraX;
+					int screenY = tileY * tileSize - cameraY;
+					renderer.add_light_quad(screenX, screenY, tileSize, exploredMemoryLight);
+				}
+				continue;
+			}
+
+			float distanceTiles = static_cast<float>(tilePos.distance_to(player.position));
+			float falloff = std::min(distanceTiles / torchRadiusTiles, 1.0f);
+
+			Color litColor{
+				lerp_channel(torchInner.r, torchOuter.r, falloff),
+				lerp_channel(torchInner.g, torchOuter.g, falloff),
+				lerp_channel(torchInner.b, torchOuter.b, falloff),
+				255
+			};
+
+			int screenX = tileX * tileSize - cameraX;
+			int screenY = tileY * tileSize - cameraY;
+			renderer.add_light_quad(screenX, screenY, tileSize, litColor);
+		}
+	}
+
+	renderer.apply_light_mask();
 }
 
 void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const

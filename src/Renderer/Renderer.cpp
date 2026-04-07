@@ -381,6 +381,16 @@ void Renderer::add_light_source(Vector2D screenPos, float radius, Color inner, C
 	DrawCircleGradient(screenPos.x, flippedY, radius, inner, outer);
 }
 
+void Renderer::add_light_quad(int screenX, int screenY, int tileSize, Color tileColor)
+{
+	if (!lightMaskLoaded)
+	{
+		return;
+	}
+	int flippedY = lightMask.texture.height - screenY - tileSize;
+	DrawRectangle(screenX, flippedY, tileSize, tileSize, tileColor);
+}
+
 void Renderer::apply_light_mask()
 {
 	if (!lightMaskLoaded)

@@ -140,25 +140,39 @@ void Map::load(const json& j)
 
 		switch (tile.type)
 		{
+
 		case TileType::FLOOR:
 		case TileType::CORRIDOR:
 		case TileType::OPEN_DOOR:
+		{
 			walkable = true;
 			transparent = true;
 			break;
+		}
+
 		case TileType::WATER:
+		{
 			walkable = true;
 			transparent = true;
 			break;
+		}
+
 		case TileType::WALL:
 		case TileType::CLOSED_DOOR:
+		{
 			walkable = false;
 			transparent = false;
 			break;
+		}
+
 		default:
+		{
 			walkable = false;
 			transparent = false;
+
 			break;
+		}
+
 		}
 
 		fovMap->set_properties(tile.position.x, tile.position.y, walkable, transparent);
@@ -245,7 +259,9 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 {
 	switch (tileType)
 	{
+
 	case TileType::WATER:
+	{
 		// Only called on successful water entry (with swim ability)
 		if (ctx.messageSystem)
 		{
@@ -253,33 +269,50 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are in water", true);
 		}
 		break;
+	}
+
 	case TileType::WALL:
+	{
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->log("You are against a wall");
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are against a wall", true);
 		}
 		break;
+	}
+
 	case TileType::FLOOR:
+	{
 		// ctx.message_system->log("You are on the floor");
 		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
 		break;
+	}
+
 	case TileType::CLOSED_DOOR:
+	{
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->log("You are at a door");
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are at a door", true);
 		}
 		break;
+	}
+
 	case TileType::CORRIDOR:
+	{
 		// ctx.message_system->log("You are in a corridor");
 		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
 		break;
+	}
+
 	default:
+	{
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->log("You are in an unknown area");
 		}
+	}
+
 	}
 }
 
@@ -289,6 +322,7 @@ Decoration* Map::find_decoration_at(Vector2D pos, GameContext& ctx) const noexce
 	{
 		return nullptr;
 	}
+
 	for (auto& d : *ctx.decorations)
 	{
 		if (d && !d->isBroken && d->position == pos)
@@ -296,6 +330,7 @@ Decoration* Map::find_decoration_at(Vector2D pos, GameContext& ctx) const noexce
 			return d.get();
 		}
 	}
+
 	return nullptr;
 }
 
@@ -318,21 +353,43 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 
 	switch (tileType)
 	{
+
 	case TileType::WATER:
+	{
 		/*return owner.has_state(ActorState::CAN_SWIM) ? false : true;*/
 		return false;
+	}
+
 	case TileType::WALL:
+	{
 		return true;
+	}
+
 	case TileType::FLOOR:
+	{
 		return false;
+	}
+
 	case TileType::CLOSED_DOOR:
+	{
 		return true; // Closed doors block movement
+	}
+
 	case TileType::OPEN_DOOR:
+	{
 		return false; // Open doors don't block movement
+	}
+
 	case TileType::CORRIDOR:
+	{
 		return false;
+	}
+
 	default:
+	{
 		return true;
+	}
+
 	}
 }
 
@@ -342,6 +399,7 @@ void Map::compute_fov(GameContext& ctx)
 	{
 		ctx.messageSystem->log("...Computing FOV...");
 	}
+
 	// Safety check for valid player position
 	if (!ctx.player ||
 		ctx.player->position.x < 0 || ctx.player->position.x >= map_width ||
@@ -353,6 +411,7 @@ void Map::compute_fov(GameContext& ctx)
 		}
 		return;
 	}
+
 	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
 }
 
@@ -375,15 +434,15 @@ void Map::render(const GameContext& ctx) const
 	}
 
 	int tileSize = ctx.renderer->get_tile_size();
-	int cam_x = ctx.renderer->get_camera_x();
-	int cam_y = ctx.renderer->get_camera_y();
-	int vis_cols = ctx.renderer->get_viewport_cols();
-	int vis_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+	int cameraX = ctx.renderer->get_camera_x();
+	int cameraY = ctx.renderer->get_camera_y();
+	int visibleCols = ctx.renderer->get_viewport_cols();
+	int visibleRows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
 
-	int start_col = std::max(0, cam_x / tileSize);
-	int start_row = std::max(0, cam_y / tileSize);
-	int end_col = std::min(map_width, start_col + vis_cols + 2);
-	int end_row = std::min(map_height, start_row + vis_rows + 2);
+	int startCol = std::max(0, cameraX / tileSize);
+	int startRow = std::max(0, cameraY / tileSize);
+	int endCol = std::min(map_width, startCol + visibleCols + 2);
+	int endRow = std::min(map_height, startRow + visibleRows + 2);
 
 	// Cardinal neighbor definitions: offset + bitmask bit
 	struct NeighborDef
@@ -391,21 +450,21 @@ void Map::render(const GameContext& ctx) const
 		Vector2D offset;
 		uint8_t bit;
 	};
-	constexpr uint8_t N_BIT = 8;
-	constexpr uint8_t E_BIT = 4;
-	constexpr uint8_t S_BIT = 2;
-	constexpr uint8_t W_BIT = 1;
-	const NeighborDef CARDINALS[4] = {
-		{ DIR_N, N_BIT },
-		{ DIR_E, E_BIT },
-		{ DIR_S, S_BIT },
-		{ DIR_W, W_BIT }
-	};
+	constexpr uint8_t northBit = 8;
+	constexpr uint8_t eastBit = 4;
+	constexpr uint8_t southBit = 2;
+	constexpr uint8_t westBit = 1;
+	const std::array<NeighborDef, 4> cardinals = {{
+		{ DIR_N, northBit },
+		{ DIR_E, eastBit },
+		{ DIR_S, southBit },
+		{ DIR_W, westBit }
+	}};
 
 	auto build_mask = [&](Vector2D center, auto predicate) -> uint8_t
 	{
 		uint8_t mask = 0;
-		for (const auto& dir : CARDINALS)
+		for (const auto& dir : cardinals)
 		{
 			if (predicate(center + dir.offset))
 			{
@@ -415,35 +474,41 @@ void Map::render(const GameContext& ctx) const
 		return mask;
 	};
 
-	auto is_wall_or_door = [&](Vector2D p) -> bool
+	auto is_wall_or_door = [&](Vector2D pos) -> bool
 	{
-		if (!in_bounds(p))
+		if (!in_bounds(pos))
+		{
 			return false;
-		TileType t = get_tile_type(p);
-		return t == TileType::WALL || t == TileType::CLOSED_DOOR;
+		}
+		TileType tileType = get_tile_type(pos);
+		return tileType == TileType::WALL || tileType == TileType::CLOSED_DOOR;
 	};
 
-	auto is_walkable = [&](Vector2D p) -> bool
+	auto is_walkable = [&](Vector2D pos) -> bool
 	{
-		if (!in_bounds(p))
+		if (!in_bounds(pos))
+		{
 			return false;
-		TileType t = get_tile_type(p);
-		return t == TileType::FLOOR || t == TileType::CORRIDOR || t == TileType::OPEN_DOOR || t == TileType::WATER;
+		}
+		TileType tileType = get_tile_type(pos);
+		return tileType == TileType::FLOOR || tileType == TileType::CORRIDOR || tileType == TileType::OPEN_DOOR || tileType == TileType::WATER;
 	};
 
-	constexpr Vector2D ALL_DIRS[8] = {
+	const std::array<Vector2D, 8> allDirs = {{
 		DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE
-	};
+	}};
 
 	// A border wall is a wall/door with at least one walkable tile
 	// in its 8 neighbors. Only border walls form the visible room outline.
-	auto is_border_wall = [&](Vector2D p) -> bool
+	auto is_border_wall = [&](Vector2D pos) -> bool
 	{
-		if (!is_wall_or_door(p))
-			return false;
-		for (const auto& d : ALL_DIRS)
+		if (!is_wall_or_door(pos))
 		{
-			if (is_walkable(p + d))
+			return false;
+		}
+		for (const auto& direction : allDirs)
+		{
+			if (is_walkable(pos + direction))
 			{
 				return true;
 			}
@@ -451,20 +516,20 @@ void Map::render(const GameContext& ctx) const
 		return false;
 	};
 
-	auto is_visible = [&](Vector2D p) -> bool
+	auto is_visible = [&](Vector2D pos) -> bool
 	{
-		return is_in_fov(p) || is_explored(p);
+		return is_in_fov(pos) || is_explored(pos);
 	};
 
 	// Deterministic hash for decoration placement (stable per map seed).
-	auto decor_hash = [&](int y, int x, int salt) -> unsigned int
+	auto decor_hash = [&](int tileY, int tileX, int salt) -> unsigned int
 	{
-		unsigned int h = static_cast<unsigned int>(
-			y * 7919 + x * 6271 + static_cast<int>(seed) * 1013 + salt * 3571);
-		h ^= h >> 16;
-		h *= 0x45d9f3bU;
-		h ^= h >> 16;
-		return h;
+		unsigned int hashValue = static_cast<unsigned int>(
+			tileY * 7919 + tileX * 6271 + static_cast<int>(seed) * 1013 + salt * 3571);
+		hashValue ^= hashValue >> 16;
+		hashValue *= 0x45d9f3bU;
+		hashValue ^= hashValue >> 16;
+		return hashValue;
 	};
 
 	// ---------------------------------------------------------------------------
@@ -472,32 +537,38 @@ void Map::render(const GameContext& ctx) const
 	// 20-tile grid cells match room scale -- most rooms fall within one zone.
 	// Zones: 0=dungeon, 1=library, 2=armory, 3=storage, 4=chapel
 	// ---------------------------------------------------------------------------
-	constexpr int ZONE_CHAPEL = 4;
+	constexpr int zoneChapel = 4;
 
-	auto resolve_decor = [&](Vector2D p, TileType t) -> TileRef
+	auto resolve_decor = [&](Vector2D pos, TileType tileType) -> TileRef
 	{
 		// Torches only -- the floor itself carries the visual weight.
-		if (t != TileType::WALL)
+		if (tileType != TileType::WALL)
+		{
 			return TileRef{};
+		}
 
-		bool floor_south = is_walkable(p + DIR_S);
-		bool floor_east = is_walkable(p + DIR_E);
-		bool floor_west = is_walkable(p + DIR_W);
-		if (!floor_south || floor_east || floor_west)
+		bool floorSouth = is_walkable(pos + DIR_S);
+		bool floorEast = is_walkable(pos + DIR_E);
+		bool floorWest = is_walkable(pos + DIR_W);
+		if (!floorSouth || floorEast || floorWest)
+		{
 			return TileRef{};
+		}
 
-		int row_phase = static_cast<int>(decor_hash(p.y, 0, 88) % 4);
-		if ((p.x % 4 + 4) % 4 != row_phase)
+		int rowPhase = static_cast<int>(decor_hash(pos.y, 0, 88) % 4);
+		if ((pos.x % 4 + 4) % 4 != rowPhase)
+		{
 			return TileRef{};
+		}
 
-		int zone = static_cast<int>(decor_hash(p.y / 20, p.x / 20, 199) % 5);
+		int zone = static_cast<int>(decor_hash(pos.y / 20, pos.x / 20, 199) % 5);
 		const auto& tileConfig = *ctx.tileConfig;
-		return (zone == ZONE_CHAPEL) ? tileConfig.get("TILE_CANDELABRA") : tileConfig.get("TILE_TORCH_1");
+		return (zone == zoneChapel) ? tileConfig.get("TILE_CANDELABRA") : tileConfig.get("TILE_TORCH_1");
 	};
 
-	for (int row = start_row; row < end_row; row++)
+	for (int row = startRow; row < endRow; row++)
 	{
-		for (int col = start_col; col < end_col; col++)
+		for (int col = startCol; col < endCol; col++)
 		{
 			Vector2D pos{ col, row };
 			if (!is_visible(pos))
@@ -506,13 +577,13 @@ void Map::render(const GameContext& ctx) const
 			}
 
 			// In FOV: full colour. Explored but not visible: dimmed memory tint.
-			bool in_fov = is_in_fov(pos);
-			Color tint = in_fov
+			bool inFov = is_in_fov(pos);
+			Color tint = inFov
 				? Color{ 255, 255, 255, 255 }
-				: Color{ 90, 90, 110, 255 };
+				: Color{ 95, 90, 82, 255 };
 
 			TileType type = get_tile_type(pos);
-			TileRef tile_ref{};
+			TileRef tileRef{};
 
 			switch (type)
 			{
@@ -530,72 +601,86 @@ void Map::render(const GameContext& ctx) const
 				auto connected_wall = [&](Vector2D neighbor) -> bool
 				{
 					if (!is_border_wall(neighbor))
-						return false;
-					for (const auto& d : ALL_DIRS)
 					{
-						Vector2D shared = pos + d;
+						return false;
+					}
+					for (const auto& direction : allDirs)
+					{
+						Vector2D shared = pos + direction;
 						if (!is_walkable(shared))
+						{
 							continue;
+						}
 						Vector2D diff = shared - neighbor;
 						if (std::abs(diff.x) <= 1 && std::abs(diff.y) <= 1)
+						{
 							return true;
+						}
 					}
 					return false;
 				};
-				tile_ref = wall_autotile_resolve_mask(
+				tileRef = wall_autotile_resolve_mask(
 					ctx.tileConfig->get_wall_autotile("WALL_AUTOTILE_STONE"),
 					build_mask(pos, connected_wall));
 				break;
 			}
 			case TileType::FLOOR:
 			{
-				tile_ref = autotile_resolve_mask(
+				tileRef = autotile_resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::CORRIDOR:
 			{
-				tile_ref = autotile_resolve_mask(
+				tileRef = autotile_resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_CORRIDOR"),
 					build_mask(pos, is_walkable));
 				break;
 			}
 			case TileType::WATER:
-				tile_ref = ctx.tileConfig->get("TILE_WATER");
+			{
+				tileRef = ctx.tileConfig->get("TILE_WATER");
 				break;
+			}
 			case TileType::CLOSED_DOOR:
 			case TileType::OPEN_DOOR:
 			{
 				// Draw floor underneath -- door sprites have transparency
-				TileRef floor_ref = autotile_resolve_mask(
+				TileRef floorRef = autotile_resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
-				ctx.renderer->draw_tile(Vector2D{ col, row }, floor_ref, tint);
-				tile_ref = (type == TileType::CLOSED_DOOR)
+				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
+				tileRef = (type == TileType::CLOSED_DOOR)
 					? ctx.tileConfig->get("TILE_DOOR_CLOSED")
 					: ctx.tileConfig->get("TILE_DOOR_OPEN");
 				break;
 			}
 			default:
+			{
 				continue;
 			}
+			}
 
-			ctx.renderer->draw_tile(Vector2D{ col, row }, tile_ref, tint);
+			ctx.renderer->draw_tile(Vector2D{ col, row }, tileRef, tint);
 
 			// Decorations: hand-placed overrides take priority over procedural.
 			{
 #ifndef EMSCRIPTEN
-				TileRef decor_ref = ctx.decorEditor
+				TileRef decorRef = ctx.decorEditor
 					? ctx.decorEditor->get_override(col, row)
 					: TileRef{};
 #else
-				TileRef decor_ref = resolve_decor(pos, type);
+				TileRef decorRef = resolve_decor(pos, type);
 #endif
-				if (!decor_ref.is_valid())
-					decor_ref = resolve_decor(pos, type);
-				if (decor_ref.is_valid())
-					ctx.renderer->draw_tile(Vector2D{ col, row }, decor_ref, tint);
+				if (!decorRef.is_valid())
+				{
+					decorRef = resolve_decor(pos, type);
+				}
+				if (decorRef.is_valid())
+				{
+					ctx.renderer->draw_tile(Vector2D{ col, row }, decorRef, tint);
+				}
 			}
 		}
 	}
