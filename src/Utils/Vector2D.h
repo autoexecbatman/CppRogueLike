@@ -100,10 +100,11 @@ struct Vector2D
 	}
 
 	// Get distance to another position
-	// Note: Returns double for precision, but cannot be noexcept due to sqrt
-	double distance_to(Vector2D other) const
+	float distance_to(Vector2D other) const
 	{
-		return std::sqrt(std::pow(x - other.x, 2) + std::pow(y - other.y, 2));
+		float dx = static_cast<float>(x - other.x);
+		float dy = static_cast<float>(y - other.y);
+		return std::sqrt(dx * dx + dy * dy);
 	}
 
 	// Manhattan distance (noexcept alternative)

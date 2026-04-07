@@ -250,7 +250,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 	// Add the corpse to the floor items
 	InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
 
-	// Note: The creature will be removed from game.creatures later
+	// Note: The creature will be removed from game->creatures later
 	// when it's safe to do so (e.g., at the end of the turn)
 }
 
@@ -552,7 +552,7 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 	ctx.messageSystem->finalize_message();
 
 	// increase the player's experience
-	/*game.player->destructible->xp += xp;*/
+	/*game->player->destructible->xp += xp;*/
 	ctx.player->destructible->set_xp(ctx.player->destructible->get_xp() + get_xp());
 
 	ctx.player->ai->levelup_update(ctx, *ctx.player);

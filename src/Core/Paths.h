@@ -10,7 +10,7 @@
 namespace Paths
 {
 inline constexpr std::string_view LOG      = "clog.txt";
-inline constexpr std::string_view SAVE_FILE = "saves/game.sav";
+inline constexpr std::string_view SAVE_FILE = "saves/game->sav";
 
 inline constexpr std::string_view DAWNLIKE_DIR = "DawnLike";
 inline constexpr std::string_view DAWNLIKE_FONT = "DawnLike/GUI/SDS_8x8.ttf";

@@ -109,7 +109,7 @@ public:
  * Replaces global `extern Game game;` with explicit dependency passing.
  * Phase 1: Expand structure with all Game systems
  * Phase 2: Add get_context() to Game class
- * Phase 3: Replace game.X with ctx->X incrementally (1,196 references)
+ * Phase 3: Replace game->X with ctx->X incrementally (1,196 references)
  */
 struct GameContext
 {

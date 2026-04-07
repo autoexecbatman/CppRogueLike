@@ -58,24 +58,24 @@ int main()
 	ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
 
 	// Game owns everything including Renderer and InputSystem
-	Game game;
-	game.tile_config.load(Paths::TILE_CONFIG);
-	game.init_world();
+	auto game = std::make_unique<Game>();
+	game->tile_config.load(Paths::TILE_CONFIG);
+	game->init_world();
 
 	// Initialize raylib window (fullscreen, auto-detect resolution)
-	game.renderer.init();
-	game.renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
+	game->renderer.init();
+	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
-	game.renderer.load_font(Paths::DAWNLIKE_FONT, 16);
+	game->renderer.load_font(Paths::DAWNLIKE_FONT, 16);
 
-	auto ctx = game.context();
+	auto ctx = game->context();
 #ifndef EMSCRIPTEN
-	game.decor_editor.load_palette(Paths::TILE_CONFIG);
-	game.prefab_library.load_tile_labels(Paths::TILE_CONFIG);
-	game.prefab_library.load(Paths::PREFABS);
+	game->decor_editor.load_palette(Paths::TILE_CONFIG);
+	game->prefab_library.load_tile_labels(Paths::TILE_CONFIG);
+	game->prefab_library.load(Paths::PREFABS);
 #endif
 
-	game.menus.push_back(make_main_menu(true, ctx));
+	game->menus.push_back(make_main_menu(true, ctx));
 
 	int loopNum{ 0 };
 
@@ -84,15 +84,15 @@ int main()
 	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
 #else
 	// Frame-based game loop
-	while (!WindowShouldClose() && game.game_state.get_run())
+	while (!WindowShouldClose() && game->game_state.get_run())
 	{
-		game.tick(loopNum);
+		game->tick(loopNum);
 	}
 #endif
 
 	// Shutdown
-	game.shutdown();
-	game.renderer.shutdown();
+	game->shutdown();
+	game->renderer.shutdown();
 
 	if (debugFile.is_open())
 	{

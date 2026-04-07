@@ -690,7 +690,9 @@ void Map::add_item(Vector2D pos, GameContext& ctx)
 {
 	// 75% chance to spawn an item at all
 	if (mapRng_.roll(1, 100) > 75)
+	{
 		return;
+	}
 
 	// Use our ItemFactory to create a random item
 	if (ctx.levelManager)
@@ -735,31 +737,44 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	auto dig_one = [&](Vector2D pos)
 	{
 		if (!in_bounds(pos))
+		{
 			return;
+		}
+
 		if (get_tile_type(pos) == TileType::WALL)
+		{
 			set_tile(pos, TileType::CORRIDOR, 1);
+		}
 		fovMap->set_properties(pos.x, pos.y, true, true);
 	};
 
 	if (horizontal_first)
 	{
 		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
+		{
 			dig_one(Vector2D{ x, y1 });
+		}
 		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
 		{
 			if (y == y1)
+			{
 				continue;
+			}
 			dig_one(Vector2D{ x2, y });
 		}
 	}
 	else
 	{
 		for (int y = std::min(y1, y2); y <= std::max(y1, y2); ++y)
+		{
 			dig_one(Vector2D{ x1, y });
+		}
 		for (int x = std::min(x1, x2); x <= std::max(x1, x2); ++x)
 		{
 			if (x == x1)
+			{
 				continue;
+			}
 			dig_one(Vector2D{ x, y2 });
 		}
 	}
@@ -784,14 +799,18 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 void Map::create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx)
 {
 	if (ctx.rooms)
+	{
 		ctx.rooms->push_back(room);
+	}
 
 	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 
 	spawn_water(room, ctx);
 
 	if (!withActors)
+	{
 		return;
+	}
 
 	if (first)
 	{
@@ -811,7 +830,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 	{
 		for (waterPos.x = room.col; waterPos.x <= room.col_end(); ++waterPos.x)
 		{
-			/*const int rolld100 = game.d.d100();*/
+			/*const int rolld100 = game->d.d100();*/
 			const int rolld100 = mapRng_.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
@@ -943,7 +962,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 		for (const DungeonRoom& room : *ctx.rooms)
 		{
 			if (!room.contains(waterPos.x, waterPos.y))
+			{
 				continue;
+			}
 
 			// On the floor perimeter -- corridor likely connects here.
 			const bool on_edge =
@@ -951,7 +972,9 @@ bool Map::would_water_block_entrance(Vector2D waterPos, GameContext& ctx) const
 				waterPos.y == room.row || waterPos.y == room.row_end();
 
 			if (on_edge && adjacentWalls >= 1 && adjacentFloors >= 1)
+			{
 				return true;
+			}
 			break;
 		}
 	}
@@ -978,7 +1001,9 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 {
 	if (!ctx.decorations || !ctx.tileConfig)
+	{
 		return;
+	}
 
 	constexpr int MAX_ROOM_BARRELS = 2;
 	const int count = mapRng_.roll(0, MAX_ROOM_BARRELS);
@@ -996,7 +1021,9 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 			++tries;
 		}
 		if (tries >= MAX_TRIES)
+		{
 			continue;
+		}
 
 		auto barrel = std::make_unique<Decoration>();
 		barrel->position = pos;
@@ -1012,7 +1039,9 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
 	if (!ctx.player || !ctx.dice)
+	{
 		return;
+	}
 
 	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 	while (!can_walk(pos, ctx))
@@ -1026,7 +1055,9 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 void Map::place_stairs(GameContext& ctx)
 {
 	if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice)
+	{
 		return;
+	}
 
 	const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
 	const DungeonRoom& room = ctx.rooms->at(index);
@@ -1428,21 +1459,25 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	int guardianCount = 0;
 	switch (quality)
 	{
+
 	case 1:
 	{
 		guardianCount = ctx.dice->roll(0, 1);
 		break;
 	}
+
 	case 2:
 	{
 		guardianCount = ctx.dice->roll(1, 2);
 		break;
 	}
+
 	case 3:
 	{
 		guardianCount = ctx.dice->roll(2, 3);
 		break;
 	}
+
 	}
 
 	for (int i = 0; i < guardianCount; i++)
@@ -1474,7 +1509,9 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 {
 	if (!ctx.dice || !ctx.rooms)
+	{
 		return false;
+	}
 
 	// Probability increases with dungeon level
 	int treasureRoomChance = 5 + (dungeonLevel * 2); // 5% + 2% per level
@@ -1489,7 +1526,9 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 
 	// Need at least 2 rooms to skip the player's starting room
 	if (ctx.rooms->size() < 2)
+	{
 		return false;
+	}
 
 	// Select a random room, skipping index 0 (player's starting room)
 	const int index = ctx.dice->roll(1, static_cast<int>(ctx.rooms->size()) - 1);
@@ -1497,15 +1536,21 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 
 	// Only use rooms that are large enough
 	if (room.width < 6 || room.height < 6)
+	{
 		return false;
+	}
 
 	// Determine the quality of the treasure room based on dungeon level and luck
 	int quality = 1;
 	const int qualityRoll = ctx.dice->d100();
 	if (qualityRoll <= 5 + dungeonLevel)
+	{
 		quality = 3;
+	}
 	else if (qualityRoll <= 15 + (dungeonLevel * 2))
+	{
 		quality = 2;
+	}
 
 	create_treasure_room(room, quality, ctx);
 
@@ -1537,7 +1582,9 @@ void Map::post_process_doors()
 				{
 					Vector2D neighborPos = pos + dir;
 					if (!in_bounds(neighborPos))
+					{
 						continue;
+					}
 
 					if (isRoom(neighborPos))
 					{

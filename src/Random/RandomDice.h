@@ -3,7 +3,7 @@
 #include <random>
 #include <vector>
 
-// This class is used to generate random numbers for our game.
+// This class is used to generate random numbers for our game->
 // We want this class to be the only random number generator for the game right now.
 class RandomDice
 {

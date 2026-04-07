@@ -28,10 +28,10 @@ struct BackpackEntry
 		ITEM
 	};
 
-	Kind kind;
-	ItemCategory category;
-	std::string header_text;
-	Item* item;
+	Kind kind{};
+	ItemCategory category{};
+	std::string header_text{};
+	Item* item{};
 };
 
 struct SlotDisplayInfo
