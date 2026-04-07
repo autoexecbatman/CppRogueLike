@@ -33,6 +33,7 @@
 #include "GameLoopCoordinator.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
+#include "../Menu/DeathMenu.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
@@ -573,8 +574,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	if (ctx.gameState->get_game_status() == GameStatus::DEFEAT)
 	{
 		ctx.messageSystem->log("Player is dead!");
-		ctx.messageSystem->append_message_part(RED_BLACK_PAIR, "You died! Press any key...");
-		ctx.messageSystem->finalize_message();
-		ctx.gameState->set_run(false);
+		ctx.menus->push_back(std::make_unique<DeathMenu>(ctx));
+		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 }

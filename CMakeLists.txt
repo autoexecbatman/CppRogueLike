@@ -197,6 +197,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuSpellCast.h
     ${PROJECT_SOURCE_DIR}/Menu/ContextMenu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/ContextMenu.h
+    ${PROJECT_SOURCE_DIR}/Menu/DeathMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/DeathMenu.h
 
     # ActorTypes
     ${PROJECT_SOURCE_DIR}/ActorTypes/Monsters.cpp

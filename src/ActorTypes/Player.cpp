@@ -966,6 +966,8 @@ void Player::save(json& j)
 	j["roundCounter"] = roundCounter;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
+	j["killCount"] = killCount;
+	j["memorizedSpells"] = memorizedSpells;
 
 	// Save equipped items
 	json equippedJson = json::array();
@@ -993,6 +995,11 @@ void Player::load(const json& j)
 	roundCounter = j.at("roundCounter").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
+	killCount = j.value("killCount", 0);
+	if (j.contains("memorizedSpells"))
+	{
+		memorizedSpells = j["memorizedSpells"].get<std::vector<std::string>>();
+	}
 	// trappingWeb is not serialized - it's a map reference that needs to be re-established
 
 	// Load equipped items

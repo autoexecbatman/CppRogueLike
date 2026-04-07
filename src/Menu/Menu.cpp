@@ -31,11 +31,14 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
     };
     entries.push_back({ "New Game", 'n', newGameCommand });
 
-    auto loadGameCommand = [](GameContext& ctx)
+    if (GameStateManager::save_file_exists())
     {
-        ctx.stateManager->load_all(ctx);
-    };
-    entries.push_back({ "Load Game", 'l', loadGameCommand });
+        auto loadGameCommand = [](GameContext& ctx)
+        {
+            ctx.stateManager->load_all(ctx);
+        };
+        entries.push_back({ "Load Game", 'l', loadGameCommand });
+    }
 
     auto optionsCommand = [](GameContext& /*ctx*/) {};
     entries.push_back({ "Options", 'o', optionsCommand });

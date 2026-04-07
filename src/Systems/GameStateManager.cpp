@@ -191,7 +191,7 @@ void GameStateManager::save_game(GameContext& ctx)
 	}
 	else
 	{
-		throw std::runtime_error("Error occurred while saving the game->");
+		throw std::runtime_error("Error occurred while saving the game.");
 	}
 }
 
