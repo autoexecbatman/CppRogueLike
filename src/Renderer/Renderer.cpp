@@ -370,17 +370,6 @@ void Renderer::begin_light_mask()
 	ClearBackground(RL_BLACK);
 }
 
-void Renderer::add_light_source(Vector2D screenPos, float radius, Color inner, Color outer)
-{
-	if (!lightMaskLoaded)
-	{
-		return;
-	}
-	// RenderTexture Y is flipped in Raylib
-	int flippedY = lightMask.texture.height - screenPos.y;
-	DrawCircleGradient(screenPos.x, flippedY, radius, inner, outer);
-}
-
 void Renderer::add_light_quad(int screenX, int screenY, int tileSize, Color tileColor)
 {
 	if (!lightMaskLoaded)
