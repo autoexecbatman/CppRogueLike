@@ -84,7 +84,7 @@ void InputSystem::poll()
 	// platform. IsKeyPressed (prev/curr state transition) works correctly
 	// because PollInputEvents() is called explicitly in end_frame() before
 	// SwapScreenBuffer(), keeping prev/curr in sync.
-	auto is_pressed = [](int k) { return IsKeyPressed(k); };
+	auto isPressed = [](int k) { return IsKeyPressed(k); };
 #else
 	// On native, prefer the GLFW queue -- it is not subject to prev/curr
 	// timing issues and handles rapid key-press/release within one frame.
@@ -103,7 +103,11 @@ void InputSystem::poll()
 		KEY_F2, KEY_F3, KEY_EQUAL, KEY_MINUS, KEY_COMMA, KEY_PERIOD,
 		KEY_SLASH, KEY_SEMICOLON, KEY_APOSTROPHE, KEY_GRAVE })
 	{
-		if (isPressed(k)) { newKey = k; break; }
+		if (isPressed(k))
+		{
+			newKey = k;
+			break;
+		}
 	}
 
 	switch (newKey)
