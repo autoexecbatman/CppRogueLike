@@ -109,6 +109,9 @@ struct Game
 	std::vector<std::unique_ptr<Decoration>> decorations{};
 	InventoryData inventory_data{ 1000 };
 
+	// Character creation blueprint — persists across ticks
+	PlayerBlueprint player_blueprint{};
+
 	// Menu system
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 

@@ -96,11 +96,8 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 
 void GameLoopCoordinator::handle_initialization(GameContext& ctx)
 {
-	if (!ctx.menuManager->is_game_initialized())
-	{
-		ctx.stateManager->init_new_game(ctx);
-		ctx.menuManager->set_game_initialized(true);
-	}
+	// init_new_game is called by MenuName once the blueprint is complete.
+	// load_all sets game_initialized directly. Nothing to do here.
 }
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)

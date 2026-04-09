@@ -1,6 +1,7 @@
 // file: AnimationSystem.h
 #pragma once
 
+#include <functional>
 #include <random>
 #include <vector>
 
@@ -30,6 +31,25 @@ struct AnimEntry
 	bool additive{ false };
 };
 
+struct ProjectileEntry
+{
+	float pxX;
+	float pxY;
+	float targetPxX;
+	float targetPxY;
+	float speed;
+	float wobbleStrength;
+	float initialDistance;
+	float lastTrailTime{ 0.0f };
+	TileRef tile;
+	unsigned char r{ 255 };
+	unsigned char g{ 255 };
+	unsigned char b{ 255 };
+	float spawnTime;
+	float maxDuration;
+	std::function<void()> onArrive;
+};
+
 class AnimationSystem
 {
 public:
@@ -54,6 +74,20 @@ public:
 		unsigned char g,
 		unsigned char b);
 
+	[[nodiscard]] TileRef get_missile_tile() const noexcept { return m_missile_tile; }
+
+	// Seeking projectile with chaotic wobble motion
+	void spawn_projectile(
+		Vector2D from,
+		Vector2D to,
+		TileRef tile,
+		unsigned char r,
+		unsigned char g,
+		unsigned char b,
+		float speed,
+		float wobbleStrength,
+		std::function<void()> onArrive);
+
 	// Generic single effect
 	void spawn_effect(
 		int world_x,
@@ -68,8 +102,10 @@ public:
 
 private:
 	std::vector<AnimEntry> entries;
+	std::vector<ProjectileEntry> projectiles;
 	TileRef m_blood_tile{};
 	TileRef m_spark_tile{};
+	TileRef m_missile_tile{};
 	int m_tile_size{ 32 };
 	std::mt19937 m_rng;
 

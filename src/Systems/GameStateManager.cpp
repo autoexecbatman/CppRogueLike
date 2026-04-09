@@ -112,7 +112,9 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	ctx.gameState->set_time(0);
 	ctx.gameState->set_is_loaded_game(false);
 
-	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, ctx.playerBlueprint, ctx);
+	assert(ctx.playerBlueprint != nullptr);
+	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
+	*ctx.playerBlueprint = PlayerBlueprint{};
 	ctx.player = ctx.playerOwner->get();
 	ctx.player->actorData.tile = ctx.tileConfig->get("TILE_PLAYER");
 

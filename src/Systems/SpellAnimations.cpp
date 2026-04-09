@@ -1,4 +1,5 @@
 // file: SpellAnimations.cpp
+#include <functional>
 #include <vector>
 
 #include "../Core/GameContext.h"
@@ -55,6 +56,33 @@ void animate_creature_hit(Vector2D position, GameContext& ctx)
 		return;
 
 	ctx.animSystem->spawn_blood_burst(position.x, position.y, 4);
+}
+
+void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx)
+{
+	if (!ctx.animSystem)
+	{
+		return;
+	}
+
+	TileRef missileTile = ctx.animSystem->get_missile_tile();
+
+	auto onArrive = [to, &ctx]()
+	{
+		if (ctx.animSystem)
+		{
+			ctx.animSystem->spawn_blood_burst(to.x, to.y, 4);
+		}
+	};
+
+	ctx.animSystem->spawn_projectile(
+		from,
+		to,
+		missileTile,
+		200, 220, 255,
+		400.0f,
+		2.5f,
+		std::move(onArrive));
 }
 
 } // namespace SpellAnimations

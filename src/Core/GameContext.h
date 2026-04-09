@@ -134,7 +134,7 @@ struct GameContext
 	std::unique_ptr<Player>* playerOwner{ nullptr };
 
 	// Character creation data — populated by menus, consumed by init_new_game.
-	PlayerBlueprint playerBlueprint{};
+	PlayerBlueprint* playerBlueprint{ nullptr };
 
 	// Core systems
 	MessageSystem* messageSystem{ nullptr };

@@ -5,6 +5,7 @@
 #include "../Core/GameContext.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/GameStateManager.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/RenderingManager.h"
 #include "MenuName.h"
@@ -95,14 +96,14 @@ void MenuName::menu_name(GameContext& ctx)
 
 		case GameKey::ENTER:
 		{
-			ctx.playerBlueprint.name = inputText.empty() ? "Player" : inputText;
+			ctx.playerBlueprint->name = inputText.empty() ? "Player" : inputText;
 			menu_set_run_false();
 			break;
 		}
 
 		case GameKey::ESCAPE:
 		{
-			ctx.playerBlueprint.name = "Player";
+			ctx.playerBlueprint->name = "Player";
 			menu_set_run_false();
 			break;
 		}
@@ -116,6 +117,12 @@ void MenuName::menu_name(GameContext& ctx)
 	}
 
 	draw_name_screen(ctx);
+
+	if (!run && !ctx.menuManager->is_game_initialized())
+	{
+		ctx.stateManager->init_new_game(ctx);
+		ctx.menuManager->set_game_initialized(true);
+	}
 
 	if (!run && ctx.menuManager->is_game_initialized())
 	{

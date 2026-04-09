@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <functional>
 #include <vector>
 
 #include <raylib.h>
@@ -23,6 +24,7 @@ void AnimationSystem::init(const TileConfig& tileConfig, int tile_size)
 	m_blood_tile = tileConfig.get("TILE_EFFECT_BLOOD");
 	// Spark: fall back to blood tile until TILE_EFFECT_SPARK is added to tile_config.json.
 	m_spark_tile = m_blood_tile;
+	m_missile_tile = tileConfig.get("TILE_EFFECT_MISSILE");
 
 	auto seed = static_cast<unsigned>(
 		std::chrono::steady_clock::now().time_since_epoch().count());
@@ -165,6 +167,45 @@ void AnimationSystem::spawn_effect(
 		.additive = false });
 }
 
+void AnimationSystem::spawn_projectile(
+	Vector2D from,
+	Vector2D to,
+	TileRef tile,
+	unsigned char r,
+	unsigned char g,
+	unsigned char b,
+	float speed,
+	float wobbleStrength,
+	std::function<void()> onArrive)
+{
+	float fromPxX = static_cast<float>(from.x * m_tile_size + m_tile_size / 2);
+	float fromPxY = static_cast<float>(from.y * m_tile_size + m_tile_size / 2);
+	float toPxX = static_cast<float>(to.x * m_tile_size + m_tile_size / 2);
+	float toPxY = static_cast<float>(to.y * m_tile_size + m_tile_size / 2);
+
+	float dx = toPxX - fromPxX;
+	float dy = toPxY - fromPxY;
+	float dist = std::sqrt(dx * dx + dy * dy);
+	float now = static_cast<float>(GetTime());
+
+	projectiles.push_back(ProjectileEntry{
+		.pxX = fromPxX,
+		.pxY = fromPxY,
+		.targetPxX = toPxX,
+		.targetPxY = toPxY,
+		.speed = speed,
+		.wobbleStrength = wobbleStrength,
+		.initialDistance = std::max(dist, 1.0f),
+		.lastTrailTime = now,
+		.tile = tile,
+		.r = r,
+		.g = g,
+		.b = b,
+		.spawnTime = now,
+		.maxDuration = (dist / speed) * 3.0f + 1.0f,
+		.onArrive = std::move(onArrive) });
+}
+
 void AnimationSystem::update_and_render(const Renderer& renderer)
 {
 	float now = static_cast<float>(GetTime());
@@ -228,4 +269,88 @@ void AnimationSystem::update_and_render(const Renderer& renderer)
 	}
 
 	std::erase_if(entries, is_expired);
+
+	// Update and render seeking projectiles
+	const float arrivalThreshold = static_cast<float>(m_tile_size) * 0.5f;
+
+	for (auto& p : projectiles)
+	{
+		float dx = p.targetPxX - p.pxX;
+		float dy = p.targetPxY - p.pxY;
+		float dist = std::sqrt(dx * dx + dy * dy);
+
+		if (dist < arrivalThreshold)
+		{
+			if (p.onArrive)
+			{
+				p.onArrive();
+				p.onArrive = nullptr;
+			}
+			continue;
+		}
+
+		// Normalized direction toward target
+		float nx = dx / dist;
+		float ny = dy / dist;
+
+		// Perpendicular axis for wobble
+		float perpX = -ny;
+		float perpY = nx;
+
+		// Wobble shrinks as missile closes in
+		float wobbleAmount = p.wobbleStrength * (dist / p.initialDistance);
+		float noise = random_range(-1.0f, 1.0f);
+
+		float dirX = nx + perpX * noise * wobbleAmount;
+		float dirY = ny + perpY * noise * wobbleAmount;
+
+		float dirLen = std::sqrt(dirX * dirX + dirY * dirY);
+		if (dirLen > 0.001f)
+		{
+			dirX /= dirLen;
+			dirY /= dirLen;
+		}
+
+		p.pxX += dirX * p.speed * dt;
+		p.pxY += dirY * p.speed * dt;
+
+		// Emit trail particle
+		if (now - p.lastTrailTime > 0.03f)
+		{
+			p.lastTrailTime = now;
+			entries.push_back(AnimEntry{
+				.px_x = p.pxX,
+				.px_y = p.pxY,
+				.vel_x = 0.0f,
+				.vel_y = 0.0f,
+				.radius = static_cast<float>(m_tile_size) * 0.3f,
+				.tile = p.tile,
+				.r = p.r,
+				.g = p.g,
+				.b = p.b,
+				.spawn_time = now,
+				.duration = 0.12f,
+				.shape = ParticleShape::TILE,
+				.additive = true });
+		}
+
+		// Render projectile head
+		int screenX = static_cast<int>(p.pxX) - cam_x;
+		int screenY = static_cast<int>(p.pxY) - cam_y;
+		int sz = m_tile_size;
+
+		BeginBlendMode(BLEND_ADDITIVE);
+		renderer.draw_tile_screen_color_sized(
+			Vector2D{ screenX - sz / 2, screenY - sz / 2 },
+			sz,
+			p.tile,
+			Color{ p.r, p.g, p.b, 255 });
+		EndBlendMode();
+	}
+
+	auto is_projectile_done = [&](const ProjectileEntry& p)
+	{
+		return !p.onArrive || (now - p.spawnTime) >= p.maxDuration;
+	};
+	std::erase_if(projectiles, is_projectile_done);
 }

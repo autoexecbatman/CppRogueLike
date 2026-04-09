@@ -984,10 +984,6 @@ void SpellSystem::cast_fireball(
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
-static void animate_magic_missile(const Vector2D& to, GameContext& ctx)
-{
-	SpellAnimations::animate_creature_hit(to, ctx);
-}
 
 static int calculate_num_missiles(int casterLevel)
 {
@@ -1047,7 +1043,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 			break;
 		}
 
-		animate_magic_missile(target->position, ctx);
+		SpellAnimations::animate_magic_missile(caster.position, target->position, ctx);
 
 		int damage = ctx.dice->roll(1, 4) + 1;
 		totalDamage += damage;

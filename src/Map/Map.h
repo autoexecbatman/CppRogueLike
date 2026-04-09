@@ -77,6 +77,7 @@ private:
 	std::vector<Vector2D> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
+	std::vector<int> dijkstraCosts;
 
 	Vector2D get_map_size() const noexcept
 	{
@@ -155,6 +156,8 @@ public:
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
+	int get_dijkstra_cost(Vector2D pos) const noexcept;
+	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals);
 	void set_tile(Vector2D pos, TileType newType, double cost);
 	void place_from_graph(
 		const std::vector<DungeonRoom>& rooms,

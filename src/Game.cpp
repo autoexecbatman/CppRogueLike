@@ -9,6 +9,7 @@
 		.gui = &gui,
 		.player = player.get(),
 		.playerOwner = &player,
+		.playerBlueprint = &player_blueprint,
 
 		// Core systems
 		.messageSystem = &message_system,

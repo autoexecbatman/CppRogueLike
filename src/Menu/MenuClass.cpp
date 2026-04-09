@@ -14,28 +14,28 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 
     auto fighterCommand = [](GameContext& ctx)
     {
-        ctx.playerBlueprint.playerClass = "Fighter";
+        ctx.playerBlueprint->playerClass = "Fighter";
         ctx.menus->push_back(std::make_unique<MenuName>(ctx));
     };
     entries.push_back({ "Fighter", 'f', fighterCommand });
 
     auto rogueCommand = [](GameContext& ctx)
     {
-        ctx.playerBlueprint.playerClass = "Rogue";
+        ctx.playerBlueprint->playerClass = "Rogue";
         ctx.menus->push_back(std::make_unique<MenuName>(ctx));
     };
     entries.push_back({ "Rogue", 'r', rogueCommand });
 
     auto clericCommand = [](GameContext& ctx)
     {
-        ctx.playerBlueprint.playerClass = "Cleric";
+        ctx.playerBlueprint->playerClass = "Cleric";
         ctx.menus->push_back(std::make_unique<MenuName>(ctx));
     };
     entries.push_back({ "Cleric", 'c', clericCommand });
 
     auto wizardCommand = [](GameContext& ctx)
     {
-        ctx.playerBlueprint.playerClass = "Wizard";
+        ctx.playerBlueprint->playerClass = "Wizard";
         ctx.menus->push_back(std::make_unique<MenuName>(ctx));
     };
     entries.push_back({ "Wizard", 'z', wizardCommand });
@@ -45,16 +45,16 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
         switch (ctx.dice->d4())
         {
         case 1:
-            ctx.playerBlueprint.playerClass = "Fighter";
+            ctx.playerBlueprint->playerClass = "Fighter";
             break;
         case 2:
-            ctx.playerBlueprint.playerClass = "Rogue";
+            ctx.playerBlueprint->playerClass = "Rogue";
             break;
         case 3:
-            ctx.playerBlueprint.playerClass = "Wizard";
+            ctx.playerBlueprint->playerClass = "Wizard";
             break;
         case 4:
-            ctx.playerBlueprint.playerClass = "Cleric";
+            ctx.playerBlueprint->playerClass = "Cleric";
             break;
         default:
             break;

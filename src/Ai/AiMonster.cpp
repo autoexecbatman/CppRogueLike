@@ -1,3 +1,4 @@
+#include <limits>
 #include <vector>
 
 #include "../Actor/Actor.h"
@@ -7,7 +8,6 @@
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
-#include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
 #include "Ai.h"
 #include "AiMonster.h"
@@ -120,26 +120,45 @@ void AiMonster::save(json& j)
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
-	// Use persistent pathfinder from context instead of creating a new one each time
-	std::vector<Vector2D> path = ctx.pathfinder->a_star_search(*ctx.map, owner.position, targetPosition, false, ctx);
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
-	auto is_actor = [&ctx](const Vector2D& pos)
+	if (distanceToTarget <= 1)
+	{
+		owner.attacker->attack(owner, *ctx.player, ctx);
+		return;
+	}
+
+	const std::vector<Vector2D> neighbors =
+	{
+		{ 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 },
+		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+	};
+
+	auto is_occupied = [&ctx](const Vector2D& pos)
 	{
 		return ctx.map->get_actor(pos, ctx) != nullptr;
 	};
-	if (distanceToTarget > 1)
+
+	Vector2D bestStep{ -1, -1 };
+	int bestCost = std::numeric_limits<int>::max();
+
+	for (const Vector2D& delta : neighbors)
 	{
-		if (!path.empty())
+		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
+		if (!ctx.map->is_in_bounds(candidate))
 		{
-			if (!is_actor(path.at(1)))
-			{
-				owner.position = path.at(1);
-			}
+			continue;
+		}
+		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
+		if (candidateCost < bestCost && !is_occupied(candidate))
+		{
+			bestCost = candidateCost;
+			bestStep = candidate;
 		}
 	}
-	else
+
+	if (bestStep.x != -1)
 	{
-		owner.attacker->attack(owner, *ctx.player, ctx);
+		owner.position = bestStep;
 	}
 }
 

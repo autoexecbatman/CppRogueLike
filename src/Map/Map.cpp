@@ -5,6 +5,7 @@
 #include <format>
 #include <limits>
 #include <memory>
+#include <queue>
 #include <set>
 #include <string>
 #include <utility>
@@ -44,6 +45,7 @@ Map::Map(int map_width, int map_height)
 	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>()),
 	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
+	  dijkstraCosts(static_cast<size_t>(map_width) * map_height, std::numeric_limits<int>::max()),
 	  seed(0) // Will be set in init() with GameContext access
 {
 }
@@ -413,6 +415,7 @@ void Map::compute_fov(GameContext& ctx)
 	}
 
 	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
+	rebuild_dijkstra_map({ ctx.player->position });
 }
 
 void Map::update()
@@ -1814,6 +1817,77 @@ void Map::place_from_graph(
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->log("place_from_graph: Finished. Dug " + std::to_string(dug_edges.size()) + " edges");
+	}
+}
+
+int Map::get_dijkstra_cost(Vector2D pos) const noexcept
+{
+	if (!in_bounds(pos))
+	{
+		return std::numeric_limits<int>::max();
+	}
+	return dijkstraCosts[static_cast<size_t>(pos.y) * map_width + pos.x];
+}
+
+void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
+{
+	std::fill(dijkstraCosts.begin(), dijkstraCosts.end(), std::numeric_limits<int>::max());
+
+	using Entry = std::pair<int, Vector2D>;
+	std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry>> frontier;
+
+	for (const Vector2D& goal : goals)
+	{
+		if (!in_bounds(goal))
+		{
+			continue;
+		}
+		const size_t goalIndex = static_cast<size_t>(goal.y) * map_width + goal.x;
+		dijkstraCosts[goalIndex] = 0;
+		frontier.emplace(0, goal);
+	}
+
+	if (frontier.empty())
+	{
+		return;
+	}
+
+	const std::vector<Vector2D> cardinalAndDiagonal =
+	{
+		{ 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 },
+		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+	};
+
+	while (!frontier.empty())
+	{
+		auto [currentCost, current] = frontier.top();
+		frontier.pop();
+
+		const size_t currentIndex = static_cast<size_t>(current.y) * map_width + current.x;
+		if (currentCost > dijkstraCosts[currentIndex])
+		{
+			continue;
+		}
+
+		for (const Vector2D& delta : cardinalAndDiagonal)
+		{
+			Vector2D next{ current.x + delta.x, current.y + delta.y };
+			if (!in_bounds(next))
+			{
+				continue;
+			}
+			if (!fovMap->is_walkable(next.x, next.y))
+			{
+				continue;
+			}
+			const size_t nextIndex = static_cast<size_t>(next.y) * map_width + next.x;
+			const int newCost = currentCost + 1;
+			if (newCost < dijkstraCosts[nextIndex])
+			{
+				dijkstraCosts[nextIndex] = newCost;
+				frontier.emplace(newCost, next);
+			}
+		}
 	}
 }
 
