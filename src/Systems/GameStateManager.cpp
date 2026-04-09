@@ -166,40 +166,48 @@ void GameStateManager::save_game(GameContext& ctx)
 
 	auto save_path = Paths::resolve(Paths::SAVE_FILE);
 	std::filesystem::create_directories(save_path.parent_path());
-	std::ofstream file(save_path);
-	if (!file.is_open())
+
+	std::filesystem::path temp_path = save_path;
+	temp_path.replace_extension(".tmp");
+
 	{
-		throw std::runtime_error("Error occurred while saving the game.");
+		std::ofstream file(temp_path);
+		if (!file.is_open())
+		{
+			throw std::runtime_error("Error occurred while saving the game.");
+		}
+
+		json j;
+
+		ctx.map->save(j);
+		save_rooms(*ctx.rooms, j);
+
+		json playerJson;
+		ctx.player->save(playerJson);
+		j["player"] = playerJson;
+
+		json stairsJson;
+		ctx.stairs->save(stairsJson);
+		j["stairs"] = stairsJson;
+
+		save_creatures(*ctx.creatures, j);
+		save_inventory(*ctx.inventoryData, j);
+
+		json guiJson;
+		ctx.gui->save(guiJson);
+		j["gui"] = guiJson;
+
+		json hungerJson;
+		ctx.hungerSystem->save(hungerJson);
+		j["hunger_system"] = hungerJson;
+
+		ctx.levelManager->save_to_json(j);
+		j["time"] = ctx.gameState->get_time();
+
+		file << j.dump(4);
 	}
 
-	json j;
-
-	ctx.map->save(j);
-	save_rooms(*ctx.rooms, j);
-
-	json playerJson;
-	ctx.player->save(playerJson);
-	j["player"] = playerJson;
-
-	json stairsJson;
-	ctx.stairs->save(stairsJson);
-	j["stairs"] = stairsJson;
-
-	save_creatures(*ctx.creatures, j);
-	save_inventory(*ctx.inventoryData, j);
-
-	json guiJson;
-	ctx.gui->save(guiJson);
-	j["gui"] = guiJson;
-
-	json hungerJson;
-	ctx.hungerSystem->save(hungerJson);
-	j["hunger_system"] = hungerJson;
-
-	ctx.levelManager->save_to_json(j);
-	j["time"] = ctx.gameState->get_time();
-
-	file << j.dump(4);
+	std::filesystem::rename(temp_path, save_path);
 }
 
 bool GameStateManager::load_game(GameContext& ctx)
