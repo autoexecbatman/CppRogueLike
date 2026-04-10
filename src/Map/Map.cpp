@@ -1833,8 +1833,13 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 {
 	std::fill(dijkstraCosts.begin(), dijkstraCosts.end(), std::numeric_limits<int>::max());
 
-	using Entry = std::pair<int, Vector2D>;
-	std::priority_queue<Entry, std::vector<Entry>, std::greater<Entry>> frontier;
+	struct FrontierEntry
+	{
+		int cost{ 0 };
+		Vector2D position;
+		bool operator>(const FrontierEntry& rhs) const noexcept { return cost > rhs.cost; }
+	};
+	std::priority_queue<FrontierEntry, std::vector<FrontierEntry>, std::greater<FrontierEntry>> frontier;
 
 	for (const Vector2D& goal : goals)
 	{
@@ -1844,7 +1849,7 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 		}
 		const size_t goalIndex = static_cast<size_t>(goal.y) * map_width + goal.x;
 		dijkstraCosts[goalIndex] = 0;
-		frontier.emplace(0, goal);
+		frontier.push(FrontierEntry{ 0, goal });
 	}
 
 	if (frontier.empty())
@@ -1852,26 +1857,26 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 		return;
 	}
 
-	const std::vector<Vector2D> cardinalAndDiagonal =
+	static const std::vector<Vector2D> cardinalAndDiagonal =
 	{
-		{ 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 },
-		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+		DIR_N, DIR_S, DIR_W, DIR_E,
+		DIR_NW, DIR_NE, DIR_SW, DIR_SE
 	};
 
 	while (!frontier.empty())
 	{
-		auto [currentCost, current] = frontier.top();
+		const FrontierEntry top = frontier.top();
 		frontier.pop();
 
-		const size_t currentIndex = static_cast<size_t>(current.y) * map_width + current.x;
-		if (currentCost > dijkstraCosts[currentIndex])
+		const size_t currentIndex = static_cast<size_t>(top.position.y) * map_width + top.position.x;
+		if (top.cost > dijkstraCosts[currentIndex])
 		{
 			continue;
 		}
 
 		for (const Vector2D& delta : cardinalAndDiagonal)
 		{
-			Vector2D next{ current.x + delta.x, current.y + delta.y };
+			Vector2D next{ top.position.x + delta.x, top.position.y + delta.y };
 			if (!in_bounds(next))
 			{
 				continue;
@@ -1881,11 +1886,11 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 				continue;
 			}
 			const size_t nextIndex = static_cast<size_t>(next.y) * map_width + next.x;
-			const int newCost = currentCost + 1;
+			const int newCost = top.cost + 1;
 			if (newCost < dijkstraCosts[nextIndex])
 			{
 				dijkstraCosts[nextIndex] = newCost;
-				frontier.emplace(newCost, next);
+				frontier.push(FrontierEntry{ newCost, next });
 			}
 		}
 	}

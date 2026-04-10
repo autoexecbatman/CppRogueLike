@@ -1,4 +1,5 @@
 // file: AiPlayer.cpp
+#include <array>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -111,34 +112,12 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 			if (ctx.dice->d2() == 1)
 			{
 				// Random direction
-				int randomDir = ctx.dice->roll(0, 7);
-				switch (randomDir)
+				static const std::array<Vector2D, 8> allDirections =
 				{
-				case 0:
-					moveVector = { 0, -1 };
-					break; // North
-				case 1:
-					moveVector = { 0, 1 };
-					break; // South
-				case 2:
-					moveVector = { -1, 0 };
-					break; // West
-				case 3:
-					moveVector = { 1, 0 };
-					break; // East
-				case 4:
-					moveVector = { -1, -1 };
-					break; // Northwest
-				case 5:
-					moveVector = { 1, -1 };
-					break; // Northeast
-				case 6:
-					moveVector = { -1, 1 };
-					break; // Southwest
-				case 7:
-					moveVector = { 1, 1 };
-					break; // Southeast
-				}
+					DIR_N, DIR_S, DIR_W, DIR_E,
+					DIR_NW, DIR_NE, DIR_SW, DIR_SE
+				};
+				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
 				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
 				ctx.gameState->set_game_status(GameStatus::NEW_TURN);

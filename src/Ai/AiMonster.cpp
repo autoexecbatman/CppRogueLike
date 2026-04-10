@@ -127,10 +127,10 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return;
 	}
 
-	const std::vector<Vector2D> neighbors =
+	static const std::vector<Vector2D> neighbors =
 	{
-		{ 0, -1 }, { 0, 1 }, { -1, 0 }, { 1, 0 },
-		{ -1, -1 }, { 1, -1 }, { -1, 1 }, { 1, 1 }
+		DIR_N, DIR_S, DIR_W, DIR_E,
+		DIR_NW, DIR_NE, DIR_SW, DIR_SE
 	};
 
 	auto is_occupied = [&ctx](const Vector2D& pos)
