@@ -6,7 +6,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../dnd_tables/CombatProgressionTables.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/LevelUpSystem.h"
@@ -174,18 +174,18 @@ bool LevelUpUI::has_thac0_improvement(const Player& player, int level)
 
 int LevelUpUI::get_expected_thac0(const Player& player, int level)
 {
-	CalculatedTHAC0s thac0Tables;
+	CombatProgressionTables combatTables;
 
 	switch (player.playerClassState)
 	{
 	case Player::PlayerClassState::FIGHTER:
-		return thac0Tables.get_fighter(level);
+		return combatTables.get_fighter(level);
 	case Player::PlayerClassState::ROGUE:
-		return thac0Tables.get_rogue(level);
+		return combatTables.get_rogue(level);
 	case Player::PlayerClassState::CLERIC:
-		return thac0Tables.get_cleric(level);
+		return combatTables.get_cleric(level);
 	case Player::PlayerClassState::WIZARD:
-		return thac0Tables.get_wizard(level);
+		return combatTables.get_wizard(level);
 	default:
 		return 20;
 	}

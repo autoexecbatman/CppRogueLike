@@ -2,11 +2,11 @@
 
 #include <array>
 
-class CalculatedTHAC0s
+class CombatProgressionTables
 {
 private:
-	// AD&D 2e THAC0 progression tables (index 0 unused, levels 1-20)
-	static constexpr std::array<int, 21> cleric_thac0 = {
+	// Attack roll progression by class (index 0 unused, levels 1-20)
+	static constexpr std::array<int, 21> cleric_attack_roll = {
 		0, // Level 0 (unused)
 		20, // Level 1
 		20, // Level 2
@@ -30,7 +30,7 @@ private:
 		8 // Level 20
 	};
 
-	static constexpr std::array<int, 21> rogue_thac0 = {
+	static constexpr std::array<int, 21> rogue_attack_roll = {
 		0, // Level 0 (unused)
 		20, // Level 1
 		20, // Level 2
@@ -54,7 +54,7 @@ private:
 		11 // Level 20
 	};
 
-	static constexpr std::array<int, 21> fighter_thac0 = {
+	static constexpr std::array<int, 21> fighter_attack_roll = {
 		0, // Level 0 (unused)
 		20, // Level 1
 		19, // Level 2
@@ -78,7 +78,7 @@ private:
 		1 // Level 20
 	};
 
-	static constexpr std::array<int, 21> wizard_thac0 = {
+	static constexpr std::array<int, 21> wizard_attack_roll = {
 		0, // Level 0 (unused)
 		20, // Level 1
 		20, // Level 2
@@ -105,21 +105,21 @@ private:
 public:
 	constexpr int get_fighter(int level) const noexcept
 	{
-		return (level >= 1 && level <= 20) ? fighter_thac0[level] : 20;
+		return (level >= 1 && level <= 20) ? fighter_attack_roll[level] : 20;
 	}
 
 	constexpr int get_rogue(int level) const noexcept
 	{
-		return (level >= 1 && level <= 20) ? rogue_thac0[level] : 20;
+		return (level >= 1 && level <= 20) ? rogue_attack_roll[level] : 20;
 	}
 
 	constexpr int get_cleric(int level) const noexcept
 	{
-		return (level >= 1 && level <= 20) ? cleric_thac0[level] : 20;
+		return (level >= 1 && level <= 20) ? cleric_attack_roll[level] : 20;
 	}
 
 	constexpr int get_wizard(int level) const noexcept
 	{
-		return (level >= 1 && level <= 20) ? wizard_thac0[level] : 20;
+		return (level >= 1 && level <= 20) ? wizard_attack_roll[level] : 20;
 	}
 };

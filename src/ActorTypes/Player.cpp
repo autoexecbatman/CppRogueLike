@@ -20,7 +20,7 @@
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../dnd_tables/CombatProgressionTables.h"
 #include "../Factories/ItemCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
@@ -296,32 +296,32 @@ void Player::racial_ability_adjustments()
 void Player::calculate_thaco()
 {
 	// Static instance for efficiency - no need to recreate each time
-	static constexpr CalculatedTHAC0s thaco_tables;
+	static constexpr CombatProgressionTables combatTables;
 
 	switch (playerClassState)
 	{
 
 	case PlayerClassState::FIGHTER:
 	{
-		destructible->set_thaco(thaco_tables.get_fighter(get_creature_level()));
+		destructible->set_thaco(combatTables.get_fighter(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::ROGUE:
 	{
-		destructible->set_thaco(thaco_tables.get_rogue(get_creature_level()));
+		destructible->set_thaco(combatTables.get_rogue(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::CLERIC:
 	{
-		destructible->set_thaco(thaco_tables.get_cleric(get_creature_level()));
+		destructible->set_thaco(combatTables.get_cleric(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::WIZARD:
 	{
-		destructible->set_thaco(thaco_tables.get_wizard(get_creature_level()));
+		destructible->set_thaco(combatTables.get_wizard(get_creature_level()));
 		break;
 	}
 

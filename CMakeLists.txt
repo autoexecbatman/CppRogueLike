@@ -151,7 +151,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Ai/AiSpider.h
 
     # dnd_tables
-    ${PROJECT_SOURCE_DIR}/dnd_tables/CalculatedTHAC0s.h
+    ${PROJECT_SOURCE_DIR}/dnd_tables/CombatProgressionTables.h
 
     # Random
     ${PROJECT_SOURCE_DIR}/Random/RandomDice.h

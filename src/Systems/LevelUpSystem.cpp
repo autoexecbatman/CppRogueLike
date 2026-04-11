@@ -7,7 +7,7 @@
 #include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../dnd_tables/CalculatedTHAC0s.h"
+#include "../dnd_tables/CombatProgressionTables.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
 #include "LevelUpSystem.h"
@@ -60,7 +60,7 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
 		return;
 	}
 
-	CalculatedTHAC0s thac0Tables;
+	CombatProgressionTables combatTables;
 	int newTHAC0 = 20;
 
 	switch (owner.get_creature_class())
@@ -68,25 +68,25 @@ void LevelUpSystem::apply_thac0_improvement(Creature& owner, int newLevel, GameC
 	case CreatureClass::FIGHTER:
 	case CreatureClass::MONSTER:
 	{
-		newTHAC0 = thac0Tables.get_fighter(newLevel);
+		newTHAC0 = combatTables.get_fighter(newLevel);
 		break;
 	}
 
 	case CreatureClass::ROGUE:
 	{
-		newTHAC0 = thac0Tables.get_rogue(newLevel);
+		newTHAC0 = combatTables.get_rogue(newLevel);
 		break;
 	}
 
 	case CreatureClass::CLERIC:
 	{
-		newTHAC0 = thac0Tables.get_cleric(newLevel);
+		newTHAC0 = combatTables.get_cleric(newLevel);
 		break;
 	}
 
 	case CreatureClass::WIZARD:
 	{
-		newTHAC0 = thac0Tables.get_wizard(newLevel);
+		newTHAC0 = combatTables.get_wizard(newLevel);
 		break;
 	}
 	}

@@ -1,6 +1,6 @@
 # C++ RogueLike
 
-A fantasy roguelike dungeon crawler built on AD&D 2nd Edition rules.
+A fantasy roguelike dungeon crawler with classic old-school RPG mechanics.
 
 Inspired by classics: Rogue, ADOM, Baldur's Gate 2.
 
@@ -10,7 +10,7 @@ Play in browser: https://autoexecbatman.github.io/CppRogueLike/C++RogueLike.html
 
 ## Features
 
-- AD&D 2e combat, spells, and character progression
+- Classic d20 combat, spells, and character progression
 - Raylib renderer with Dawnlike tileset
 - JSON-driven content pipeline — monsters, items, spells, and tiles are all data
 - In-game editors for monsters, items, spells, and map decoration
@@ -62,7 +62,6 @@ cmake --build .
 
 ## Resources
 
-- [AD&D 2e rulebooks](https://archive.org/details/advanced-dungeons-dragons-2nd-edition)
 - [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
 
 ## Contributing
