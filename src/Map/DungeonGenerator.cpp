@@ -212,6 +212,14 @@ void DungeonGenerator::generate(
 		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
+	// Assign room types — entrance is always room[0], last room is danger
+	rooms[0].type = RoomType::ENTRANCE;
+	rooms.back().type = RoomType::DANGER;
+	for (size_t i = 1; i + 1 < rooms.size(); ++i)
+	{
+		rooms[i].type = (rng.roll(1, 100) <= 20) ? RoomType::DANGER : RoomType::CORRIDOR;
+	}
+
 	// ---- Build pure graph (rooms + edges) ----
 	connect_all(rooms, rng);
 

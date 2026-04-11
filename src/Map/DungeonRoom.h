@@ -9,12 +9,21 @@
 // "floor" region  -- the walkable interior, col..col_end() x row..row_end()
 // "wall"  ring    -- one cell outside on all four sides
 
+enum class RoomType
+{
+    ENTRANCE,
+    CORRIDOR,
+    DANGER,
+    TREASURE
+};
+
 struct DungeonRoom
 {
-	int col; // leftmost floor column
-	int row; // topmost  floor row
-	int width; // floor column count
-	int height; // floor row    count
+	int col{ 0 }; // leftmost floor column
+	int row{ 0 }; // topmost  floor row
+	int width{ 0 }; // floor column count
+	int height{ 0 }; // floor row    count
+	RoomType type{ RoomType::CORRIDOR };
 	std::vector<int> adjacent_room_indices; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)

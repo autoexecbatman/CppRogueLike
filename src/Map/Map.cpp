@@ -1072,8 +1072,33 @@ void Map::place_stairs(GameContext& ctx)
 		return;
 	}
 
-	const int index = ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1);
-	const DungeonRoom& room = ctx.rooms->at(index);
+	// BFS from room[0] to find the deepest room — forces player to explore
+	const std::vector<DungeonRoom>& rooms = *ctx.rooms;
+	const int roomCount = static_cast<int>(rooms.size());
+
+	std::vector<int> depth(roomCount, -1);
+	std::queue<int> frontier;
+	depth[0] = 0;
+	frontier.push(0);
+
+	while (!frontier.empty())
+	{
+		const int current = frontier.front();
+		frontier.pop();
+		for (int neighbor : rooms[current].adjacent_room_indices)
+		{
+			if (depth[neighbor] == -1)
+			{
+				depth[neighbor] = depth[current] + 1;
+				frontier.push(neighbor);
+			}
+		}
+	}
+
+	const int deepestIndex = static_cast<int>(
+		std::ranges::max_element(depth) - depth.begin());
+
+	const DungeonRoom& room = rooms[deepestIndex];
 	Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 	while (!can_walk(stairsPos, ctx))
 	{

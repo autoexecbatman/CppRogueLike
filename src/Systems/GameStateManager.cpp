@@ -45,7 +45,8 @@ void save_rooms(const std::vector<DungeonRoom>& rooms, json& j)
 		j["rooms"].push_back({ { "col", room.col },
 			{ "row", room.row },
 			{ "width", room.width },
-			{ "height", room.height } });
+			{ "height", room.height },
+			{ "type", static_cast<int>(room.type) } });
 	}
 }
 
@@ -58,11 +59,13 @@ void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 
 	for (const auto& d : j["rooms"])
 	{
-		rooms.push_back(DungeonRoom{
-			d.value("col", 0),
-			d.value("row", 0),
-			d.value("width", 1),
-			d.value("height", 1) });
+		DungeonRoom room;
+		room.col = d.value("col", 0);
+		room.row = d.value("row", 0);
+		room.width = d.value("width", 1);
+		room.height = d.value("height", 1);
+		room.type = static_cast<RoomType>(d.value("type", static_cast<int>(RoomType::CORRIDOR)));
+		rooms.push_back(std::move(room));
 	}
 }
 
