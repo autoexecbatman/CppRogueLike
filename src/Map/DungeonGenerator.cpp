@@ -22,8 +22,8 @@ static Vector2D v(int col, int row) noexcept
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.
 // Defined here so both place_rooms and connect_all can reference them.
-constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 7;
-constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 7;
+constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 8;
+constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 8;
 constexpr int LOOP_RADIUS = CELL_W * CELL_W + CELL_H * CELL_H;
 constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
 
@@ -165,7 +165,7 @@ void DungeonGenerator::connect_all(
 	// room.  CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
 	// centres -- the tightest upper bound that still covers all adjacent pairs.
 	
-	const int extraTarget = std::max(1, n / 5);
+	const int extraTarget = std::max(1, n / 3);
 	int added = 0;
 	const int maxAttempts = extraTarget * 6;
 
