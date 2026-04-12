@@ -23,4 +23,11 @@ protected:
 	static bool blocked_by_sanctuary(GameContext& ctx);
 
 	virtual void move_or_attack(Creature& owner, Vector2D position, GameContext& ctx);
+
+private:
+	// AD&D 2e: Move away from player using inverted Dijkstra gradient.
+	static void flee(Creature& owner, GameContext& ctx);
+
+	// AD&D 2e: Roll 2d10 against morale score; set IS_FLEEING on failure.
+	static void check_morale(Creature& owner, GameContext& ctx);
 };

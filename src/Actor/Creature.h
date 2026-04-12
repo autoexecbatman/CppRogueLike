@@ -51,6 +51,7 @@ private:
 	CreatureClass creatureClass{ CreatureClass::MONSTER };
 	int hitDie{ 8 };
 	float attacksPerRound{ 1.0f };
+	int morale{ 10 };
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
 
@@ -121,6 +122,8 @@ public:
 	void set_creature_class(CreatureClass cc) noexcept { creatureClass = cc; }
 	void set_hit_die(int hd) noexcept { hitDie = hd; }
 	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
+	int get_morale() const noexcept { return morale; }
+	void set_morale(int value) noexcept { morale = value; }
 
 	void apply_confusion(int nbTurns);
 

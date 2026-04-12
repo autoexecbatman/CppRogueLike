@@ -154,6 +154,7 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.ac         = entry.at("ac").get<int>();
 	p.xp         = entry.at("xp").get<int>();
 	p.dr         = entry.at("dr").get<int>();
+	p.morale     = entry.at("morale").get<int>();
 	p.str_dice   = parse_dice(entry.at("str"));
 	p.dex_dice   = parse_dice(entry.at("dex"));
 	p.con_dice   = parse_dice(entry.at("con"));
@@ -183,6 +184,7 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "ac",          p.ac },
 		{ "xp",          p.xp },
 		{ "dr",          p.dr },
+		{ "morale",      p.morale },
 		{ "str",         encode_dice(p.str_dice) },
 		{ "dex",         encode_dice(p.dex_dice) },
 		{ "con",         encode_dice(p.con_dice) },
@@ -439,6 +441,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.cha_dice)));
 
 	c->set_weapon_equipped(params.weapon_name);
+	c->set_morale(params.morale);
 
 	const int hp = std::max(1, roll_dice(ctx.dice, params.hp_dice));
 

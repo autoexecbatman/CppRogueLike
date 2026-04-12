@@ -31,6 +31,7 @@ enum class ActorState
 	IS_HELD,
 	IS_PROTECTED,
 	IS_SILENCED,
+	IS_FLEEING
 };
 
 //==Actor==

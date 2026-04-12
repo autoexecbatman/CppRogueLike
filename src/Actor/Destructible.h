@@ -11,6 +11,31 @@ class Creature;
 class Player;
 struct GameContext;
 
+// TODO(refactor): Destructible violates SRP -- it owns four distinct responsibilities.
+// Split into three components owned by Creature directly:
+//
+//   1. HealthComponent  { hp, hpMax, hpBase, tempHp, dr }
+//        take_damage(), heal(), is_dead(), die() (virtual)
+//        Motivation: pure survivability, no knowledge of rewards or armor formulas.
+//
+//   2. CombatProfile    { thaco, armorClass, baseArmorClass, lastConstitution }
+//        update_armor_class(), calculate_dexterity_ac_bonus(),
+//        calculate_equipment_ac_bonus(), update_constitution_bonus()
+//        Motivation: AC/THACO are offensive+defensive stats, not "destructibility".
+//        constitution tracking belongs here because it only exists to recalculate AC/HP.
+//
+//   3. RewardData       { xp, corpseName }
+//        Motivation: dropped purely on death, no coupling to damage or defense logic.
+//        Lives as a plain struct; MonsterDestructible::die() reads it.
+//
+// Migration steps:
+//   a. Create the three structs/classes in src/Combat/.
+//   b. Replace Destructible members with composition inside Creature.
+//   c. Update MonsterCreator::create_from_params and PlayerDestructible ctor call sites.
+//   d. Redirect all get_hp()/get_thaco()/get_xp() call sites to the new owners.
+//   e. Delete Destructible. Update CMakeLists.txt.
+//   f. Run all 262 tests green before closing.
+//
 //====
 class Destructible : public Persistent
 {

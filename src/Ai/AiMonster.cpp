@@ -118,8 +118,79 @@ void AiMonster::save(json& j)
 	j["moveCount"] = moveCount;
 }
 
+void AiMonster::check_morale(Creature& owner, GameContext& ctx)
+{
+	if (owner.has_state(ActorState::IS_FLEEING))
+	{
+		return;
+	}
+
+	const int hp = owner.destructible->get_hp();
+	const int hpMax = owner.destructible->get_max_hp();
+
+	if (hp * 2 > hpMax)
+	{
+		return;
+	}
+
+	const int moraleRoll = ctx.dice->roll(1, 10) + ctx.dice->roll(1, 10);
+	if (moraleRoll > owner.get_morale())
+	{
+		owner.add_state(ActorState::IS_FLEEING);
+	}
+}
+
+void AiMonster::flee(Creature& owner, GameContext& ctx)
+{
+	static const std::vector<Vector2D> neighbors =
+	{
+		DIR_N, DIR_S, DIR_W, DIR_E,
+		DIR_NW, DIR_NE, DIR_SW, DIR_SE
+	};
+
+	auto is_occupied = [&ctx](const Vector2D& pos)
+	{
+		return ctx.map->get_actor(pos, ctx) != nullptr;
+	};
+
+	Vector2D bestStep{ -1, -1 };
+	int bestCost = std::numeric_limits<int>::min();
+
+	for (const Vector2D& delta : neighbors)
+	{
+		Vector2D candidate{ owner.position.x + delta.x, owner.position.y + delta.y };
+		if (!ctx.map->is_in_bounds(candidate))
+		{
+			continue;
+		}
+		if (!ctx.map->can_walk(candidate, ctx))
+		{
+			continue;
+		}
+		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
+		if (candidateCost > bestCost && !is_occupied(candidate))
+		{
+			bestCost = candidateCost;
+			bestStep = candidate;
+		}
+	}
+
+	if (bestStep.x != -1)
+	{
+		owner.position = bestStep;
+	}
+}
+
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
+	check_morale(owner, ctx);
+
+	if (owner.has_state(ActorState::IS_FLEEING))
+	{
+		flee(owner, ctx);
+		return;
+	}
+
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	if (distanceToTarget <= 1)
 	{

@@ -687,6 +687,21 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 			break;
 		}
 
+		// Actor check before door check: a monster standing on a door tile must be
+		// attacked, not have the door operated beneath it.
+		if (ctx.map->get_actor(world_tile, ctx) != nullptr)
+		{
+			int dx = std::abs(player.position.x - world_tile.x);
+			int dy = std::abs(player.position.y - world_tile.y);
+			if (dx <= 1 && dy <= 1)
+			{
+				look_to_attack(world_tile, player, ctx);
+				flush_fov(ctx);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
+			break;
+		}
+
 		bool hasDoor = ctx.map->is_door(world_tile);
 		if (hasDoor)
 		{
@@ -710,20 +725,6 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 				? PendingDoorAction::CLOSE
 				: PendingDoorAction::OPEN;
 			begin_path_walk(world_tile, MouseMode::WALK_TO_DOOR, action, ctx);
-			break;
-		}
-
-		// If a creature occupies the tile, attack if adjacent -- never auto-walk to a moving target
-		if (ctx.map->get_actor(world_tile, ctx) != nullptr)
-		{
-			int dx = std::abs(player.position.x - world_tile.x);
-			int dy = std::abs(player.position.y - world_tile.y);
-			if (dx <= 1 && dy <= 1)
-			{
-				look_to_attack(world_tile, player, ctx);
-				flush_fov(ctx);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-			}
 			break;
 		}
 
