@@ -212,12 +212,23 @@ void DungeonGenerator::generate(
 		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
-	// Assign room types — entrance is always room[0], last room is danger
+	// Assign room types based on connectivity:
+	// - room[0] = ENTRANCE (player spawn, always one connection after sort)
+	// - leaf nodes (one connection) = DANGER or TREASURE (50/50)
+	// - everything else = STANDARD
+	// The deepest leaf (by BFS) gets the stairs — handled in place_stairs.
 	rooms[0].type = RoomType::ENTRANCE;
-	rooms.back().type = RoomType::DANGER;
-	for (size_t i = 1; i + 1 < rooms.size(); ++i)
+	for (size_t i = 1; i < rooms.size(); ++i)
 	{
-		rooms[i].type = (rng.roll(1, 100) <= 20) ? RoomType::DANGER : RoomType::CORRIDOR;
+		const bool isLeaf = rooms[i].adjacent_room_indices.size() == 1;
+		if (isLeaf)
+		{
+			rooms[i].type = (rng.roll(1, 2) == 1) ? RoomType::DANGER : RoomType::TREASURE;
+		}
+		else
+		{
+			rooms[i].type = RoomType::STANDARD;
+		}
 	}
 
 	// ---- Build pure graph (rooms + edges) ----

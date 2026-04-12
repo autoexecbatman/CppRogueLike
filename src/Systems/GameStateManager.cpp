@@ -64,7 +64,7 @@ void load_rooms(const json& j, std::vector<DungeonRoom>& rooms)
 		room.row = d.value("row", 0);
 		room.width = d.value("width", 1);
 		room.height = d.value("height", 1);
-		room.type = static_cast<RoomType>(d.value("type", static_cast<int>(RoomType::CORRIDOR)));
+		room.type = static_cast<RoomType>(d.value("type", static_cast<int>(RoomType::STANDARD)));
 		rooms.push_back(std::move(room));
 	}
 }

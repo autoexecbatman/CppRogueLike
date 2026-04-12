@@ -12,7 +12,7 @@
 enum class RoomType
 {
     ENTRANCE,
-    CORRIDOR,
+    STANDARD,
     DANGER,
     TREASURE
 };
@@ -23,7 +23,7 @@ struct DungeonRoom
 	int row{ 0 }; // topmost  floor row
 	int width{ 0 }; // floor column count
 	int height{ 0 }; // floor row    count
-	RoomType type{ RoomType::CORRIDOR };
+	RoomType type{ RoomType::STANDARD };
 	std::vector<int> adjacent_room_indices; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)
