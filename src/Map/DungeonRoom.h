@@ -24,7 +24,7 @@ struct DungeonRoom
 	int width{ 0 }; // floor column count
 	int height{ 0 }; // floor row    count
 	RoomType type{ RoomType::STANDARD };
-	std::vector<int> adjacent_room_indices; // indices of rooms connected via corridors
+	std::vector<int> adjacentRoomIndices; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)
 	[[nodiscard]] int col_end() const { return col + width - 1; }

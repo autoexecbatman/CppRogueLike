@@ -22,8 +22,8 @@ class DungeonGenerator
 {
 public:
 	void generate(
-		int map_width,
-		int map_height,
+		int mapWidth,
+		int mapHeight,
 		RandomDice& rng,
 		bool withActors,
 		GameContext& ctx,
@@ -31,8 +31,8 @@ public:
 
 private:
 	std::vector<DungeonRoom> place_rooms(
-		int map_width,
-		int map_height,
+		int mapWidth,
+		int mapHeight,
 		RandomDice& rng) const;
 
 	void connect_all(
@@ -41,6 +41,6 @@ private:
 
 	void connect_pair(
 		std::vector<DungeonRoom>& rooms,
-		int a_index,
-		int b_index) const;
+		int indexA,
+		int indexB) const;
 };

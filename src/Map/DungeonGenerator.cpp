@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <limits>
 #include <vector>
+#include <ranges>
 
 #include "../Actor/Item.h"
 #include "../Core/GameContext.h"
@@ -21,66 +22,66 @@ static Vector2D v(int col, int row) noexcept
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.
 // Defined here so both place_rooms and connect_all can reference them.
-static constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 3;
-static constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 4;
+constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 7;
+constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 7;
+constexpr int LOOP_RADIUS = CELL_W * CELL_W + CELL_H * CELL_H;
+constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
 
 // ------------------------------------------------------------------- rooms
 
 std::vector<DungeonRoom> DungeonGenerator::place_rooms(
-	int map_width,
-	int map_height,
+	int mapWidth,
+	int mapHeight,
 	RandomDice& rng) const
 {
-	constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
-
-	const int grid_cols = map_width / CELL_W;
-	const int grid_rows = map_height / CELL_H;
+	const int gridCols = mapWidth / CELL_W;
+	const int gridRows = mapHeight / CELL_H;
 
 	std::vector<DungeonRoom> rooms;
-	rooms.reserve(grid_cols * grid_rows);
+	rooms.reserve(gridCols * gridRows);
 
-	for (int gr = 0; gr < grid_rows; ++gr)
+	for (int gr = 0; gr < gridRows; ++gr)
 	{
-		for (int gc = 0; gc < grid_cols; ++gc)
+		for (int gc = 0; gc < gridCols; ++gc)
 		{
 			if (rng.roll(0, 99) < SKIP_PCTG)
 			{
 				continue;
 			}
 
-			const int cell_x = gc * CELL_W;
-			const int cell_y = gr * CELL_H;
+			const int cellX = gc * CELL_W;
+			const int cellY = gr * CELL_H;
 
-			const int room_w = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
-			const int room_h = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
+			const int roomWidth = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
+			const int roomHeight = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
 
 			// Random position inside the cell -- at least 1 tile from each edge.
-			const int max_col = cell_x + CELL_W - room_w - 1;
-			const int max_row = cell_y + CELL_H - room_h - 1;
+			const int maxCol = cellX + CELL_W - roomWidth - 1;
+			const int maxRow = cellY + CELL_H - roomHeight - 1;
 
-			if (max_col < cell_x + 1 || max_row < cell_y + 1)
+			if (maxCol < cellX + 1 || maxRow < cellY + 1)
 			{
 				continue;
 			}
 
-			const int room_col = rng.roll(cell_x + 1, max_col);
-			const int room_row = rng.roll(cell_y + 1, max_row);
+			const int roomCol = rng.roll(cellX + 1, maxCol);
+			const int roomRow = rng.roll(cellY + 1, maxRow);
 
 			// Keep rooms inside map interior (wall ring must always exist).
-			if (room_col < 1 || room_row < 1)
+			if (roomCol < 1 || roomRow < 1)
 			{
 				continue;
 			}
-			if (room_col + room_w > map_width - 2)
+			if (roomCol + roomWidth > mapWidth - 2)
 			{
 				continue;
 			}
-			if (room_row + room_h > map_height - 2)
+			if (roomRow + roomHeight > mapHeight - 2)
 			{
 				continue;
 			}
 
-			rooms.push_back({ room_col, room_row, room_w, room_h });
+			rooms.push_back({ roomCol, roomRow, roomWidth, roomHeight });
 		}
 	}
 
@@ -91,13 +92,13 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 
 void DungeonGenerator::connect_pair(
 	std::vector<DungeonRoom>& rooms,
-	int a_index,
-	int b_index) const
+	int indexA,
+	int indexB) const
 {
 	// Record bidirectional adjacency in the graph
 	// (Actual corridor tile placement happens later in Map::place_from_graph)
-	rooms[a_index].adjacent_room_indices.push_back(b_index);
-	rooms[b_index].adjacent_room_indices.push_back(a_index);
+	rooms[indexA].adjacentRoomIndices.push_back(indexB);
+	rooms[indexB].adjacentRoomIndices.push_back(indexA);
 }
 
 void DungeonGenerator::connect_all(
@@ -112,26 +113,26 @@ void DungeonGenerator::connect_all(
 	const int n = static_cast<int>(rooms.size());
 
 	// ---- Prim's MST: guarantees full connectivity ----
-	std::vector<bool> in_tree(n, false);
-	in_tree[0] = true;
-	int in_count = 1;
+	std::vector<bool> inTree(n, false);
+	inTree[0] = true;
+	int inCount = 1;
 
-	while (in_count < n)
+	while (inCount < n)
 	{
-		int best_a = -1;
-		int best_b = -1;
-		int best_dist = std::numeric_limits<int>::max();
+		int bestA = -1;
+		int bestB = -1;
+		int bestDist = std::numeric_limits<int>::max();
 
 		for (int i = 0; i < n; ++i)
 		{
-			if (!in_tree[i])
+			if (!inTree[i])
 			{
 				continue;
 			}
 
 			for (int j = 0; j < n; ++j)
 			{
-				if (in_tree[j])
+				if (inTree[j])
 				{
 					continue;
 				}
@@ -139,23 +140,23 @@ void DungeonGenerator::connect_all(
 				const int dx = rooms[i].center_col() - rooms[j].center_col();
 				const int dy = rooms[i].center_row() - rooms[j].center_row();
 				const int dist = dx * dx + dy * dy;
-				if (dist < best_dist)
+				if (dist < bestDist)
 				{
-					best_dist = dist;
-					best_a = i;
-					best_b = j;
+					bestDist = dist;
+					bestA = i;
+					bestB = j;
 				}
 			}
 		}
 
-		if (best_b < 0)
+		if (bestB < 0)
 		{
 			break;
 		}
 
-		connect_pair(rooms, best_a, best_b);
-		in_tree[best_b] = true;
-		++in_count;
+		connect_pair(rooms, bestA, bestB);
+		inTree[bestB] = true;
+		++inCount;
 	}
 
 	// ---- Extra short-range corridors (~20 %) to create loop paths ----
@@ -163,12 +164,12 @@ void DungeonGenerator::connect_all(
 	// produce corridors whose mid-turn segment can pass through an intermediate
 	// room.  CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
 	// centres -- the tightest upper bound that still covers all adjacent pairs.
-	constexpr int LOOP_RADIUS = CELL_W * CELL_W + CELL_H * CELL_H;
-	const int extra_target = std::max(1, n / 5);
+	
+	const int extraTarget = std::max(1, n / 5);
 	int added = 0;
-	const int max_attempts = extra_target * 6;
+	const int maxAttempts = extraTarget * 6;
 
-	for (int attempt = 0; attempt < max_attempts && added < extra_target; ++attempt)
+	for (int attempt = 0; attempt < maxAttempts && added < extraTarget; ++attempt)
 	{
 		const int a = rng.roll(0, n - 1);
 		const int b = rng.roll(0, n - 1);
@@ -185,6 +186,11 @@ void DungeonGenerator::connect_all(
 			continue;
 		}
 
+		if (std::ranges::find(rooms[a].adjacentRoomIndices, b) != rooms[a].adjacentRoomIndices.end())
+		{
+			continue;
+		}
+
 		connect_pair(rooms, a, b);
 		++added;
 	}
@@ -193,14 +199,14 @@ void DungeonGenerator::connect_all(
 // ----------------------------------------------------------------- generate
 
 void DungeonGenerator::generate(
-	int map_width,
-	int map_height,
+	int mapWidth,
+	int mapHeight,
 	RandomDice& rng,
 	bool withActors,
 	GameContext& ctx,
 	Map& map) const
 {
-	std::vector<DungeonRoom> rooms = place_rooms(map_width, map_height, rng);
+	std::vector<DungeonRoom> rooms = place_rooms(mapWidth, mapHeight, rng);
 
 	if (rooms.empty())
 	{
@@ -220,7 +226,7 @@ void DungeonGenerator::generate(
 	rooms[0].type = RoomType::ENTRANCE;
 	for (size_t i = 1; i < rooms.size(); ++i)
 	{
-		const bool isLeaf = rooms[i].adjacent_room_indices.size() == 1;
+		const bool isLeaf = rooms[i].adjacentRoomIndices.size() == 1;
 		if (isLeaf)
 		{
 			rooms[i].type = (rng.roll(1, 2) == 1) ? RoomType::DANGER : RoomType::TREASURE;

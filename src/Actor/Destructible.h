@@ -11,30 +11,31 @@ class Creature;
 class Player;
 struct GameContext;
 
-// TODO(refactor): Destructible violates SRP -- it owns four distinct responsibilities.
-// Split into three components owned by Creature directly:
+// TODO(refactor): Destructible violates SRP -- it owns eight distinct responsibilities.
+// Defer this refactor until a feature actively requires the split.
 //
-//   1. HealthComponent  { hp, hpMax, hpBase, tempHp, dr }
-//        take_damage(), heal(), is_dead(), die() (virtual)
-//        Motivation: pure survivability, no knowledge of rewards or armor formulas.
+// Agreed component design (seven components, one per responsibility):
 //
-//   2. CombatProfile    { thaco, armorClass, baseArmorClass, lastConstitution }
-//        update_armor_class(), calculate_dexterity_ac_bonus(),
-//        calculate_equipment_ac_bonus(), update_constitution_bonus()
-//        Motivation: AC/THACO are offensive+defensive stats, not "destructibility".
-//        constitution tracking belongs here because it only exists to recalculate AC/HP.
+//   1. HealthPool          { hp, hpMax, hpBase, tempHp } -- pure data, get/set/is_dead/heal
+//   2. DamageResolution    -- take_damage() as free function or Combat namespace;
+//                            reads HealthPool, ArmorClass, buffs; triggers DeathHandler.
+//                            Note: Attacker already orchestrates attack; take_damage is
+//                            its final step. Consider moving it there or to CombatSystem.
+//   3. DeathHandler        -- virtual die(); monster: award xp, log, create corpse;
+//                            player: set DEFEAT, delete save. Stays virtual.
+//   4. CombatStats         { thaco } -- one field, but SRP demands it be separate.
+//   5. ArmorClass          { armorClass, baseArmorClass, dr }
+//                            update_armor_class(), dex bonus, equip bonus.
+//   6. ExperienceReward    { xp } -- awarded by DeathHandler on monster death.
+//   7. CorpseData          { corpseName } -- consumed by DeathHandler::die() base impl.
+//   8. ConstitutionTracker { lastConstitution } -- update_constitution_bonus().
 //
-//   3. RewardData       { xp, corpseName }
-//        Motivation: dropped purely on death, no coupling to damage or defense logic.
-//        Lives as a plain struct; MonsterDestructible::die() reads it.
-//
-// Migration steps:
-//   a. Create the three structs/classes in src/Combat/.
-//   b. Replace Destructible members with composition inside Creature.
-//   c. Update MonsterCreator::create_from_params and PlayerDestructible ctor call sites.
-//   d. Redirect all get_hp()/get_thaco()/get_xp() call sites to the new owners.
-//   e. Delete Destructible. Update CMakeLists.txt.
-//   f. Run all 262 tests green before closing.
+// Migration steps (one component at a time, tests green after each):
+//   a. Start with CorpseData or ExperienceReward -- one field, zero dependencies.
+//   b. Create struct in src/Combat/, add to Creature, redirect call sites.
+//   c. Remove field from Destructible. Confirm 262 tests green.
+//   d. Repeat for each component in dependency order.
+//   e. Delete Destructible last. Update CMakeLists.txt.
 //
 //====
 class Destructible : public Persistent

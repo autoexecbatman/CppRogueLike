@@ -1085,7 +1085,7 @@ void Map::place_stairs(GameContext& ctx)
 	{
 		const int current = frontier.front();
 		frontier.pop();
-		for (int neighbor : rooms[current].adjacent_room_indices)
+		for (int neighbor : rooms[current].adjacentRoomIndices)
 		{
 			if (depth[neighbor] == -1)
 			{
@@ -1779,7 +1779,7 @@ void Map::place_from_graph(
 	{
 		const DungeonRoom& a = rooms[a_idx];
 
-		for (int b_idx : a.adjacent_room_indices)
+		for (int b_idx : a.adjacentRoomIndices)
 		{
 			// Avoid digging the same corridor twice
 			std::pair<int, int> edge_forward(std::min(a_idx, b_idx), std::max(a_idx, b_idx));
