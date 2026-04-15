@@ -42,7 +42,7 @@ public:
 	void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);
 
 	// Get the probability distribution for the current dungeon level
-	std::vector<MonsterPercentage> getCurrentDistribution(int dungeonLevel);
+	std::vector<MonsterPercentage> get_current_distribution(int dungeonLevel);
 
 	// Add a monster type to the factory
 	void addMonsterType(const MonsterType& monsterType);

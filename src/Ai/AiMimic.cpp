@@ -21,6 +21,19 @@
 #include "AiMimic.h"
 #include "AiMonster.h"
 
+// Configuration constants (NOT serialized - same for all mimics)
+constexpr int DISGUISE_CHANGE_RATE = 200;
+constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
+constexpr int CONSUMPTION_RADIUS = 1;
+constexpr int MAX_CONFUSION_DURATION = 5;
+constexpr int MAX_GOLD_DR_BONUS = 2;
+constexpr int MAX_WEAPON_DAMAGE = 6;
+constexpr int MAX_ARMOR_DR_BONUS = 3;
+constexpr int ITEMS_FOR_TRANSFORMATION = 5;
+constexpr int HEALTH_BONUS = 1;
+constexpr int DR_BONUS = 1;
+constexpr int CONFUSION_BONUS = 1;
+
 // OCP-compliant: data-driven item bonus mapping
 enum class MimicBonusType
 {

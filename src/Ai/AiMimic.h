@@ -9,12 +9,15 @@ enum class ItemClass;
 
 class AiMimic : public AiMonster
 {
-public:
-	void update(Creature& owner, GameContext& ctx) override;
-	void load(const json& j) override;
-	void save(json& j) override;
-
 private:
+	// Runtime state (IS serialized - unique per mimic instance)
+	bool isDisguised{ true };
+	int confusionDuration{ 3 };
+	int itemsConsumed{ 0 };
+	int disguiseChangeCounter{ 0 };
+	int consumptionCooldown{ 0 };
+	int revealDistance{ 1 }; // Public if needs external access
+
 	[[nodiscard]] bool consume_nearby_items(Mimic& mimic, GameContext& ctx);
 	void check_revealing(Mimic& mimic, GameContext& ctx);
 	void change_disguise(Mimic& mimic, GameContext& ctx);
@@ -27,24 +30,8 @@ private:
 	void boost_confusion_power(GameContext& ctx);
 	void transform_to_greater_mimic(Mimic& mimic, GameContext& ctx);
 
-	// Configuration constants (NOT serialized - same for all mimics)
-	static constexpr int DISGUISE_CHANGE_RATE = 200;
-	static constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
-	static constexpr int CONSUMPTION_RADIUS = 1;
-	static constexpr int MAX_CONFUSION_DURATION = 5;
-	static constexpr int MAX_GOLD_DR_BONUS = 2;
-	static constexpr int MAX_WEAPON_DAMAGE = 6;
-	static constexpr int MAX_ARMOR_DR_BONUS = 3;
-	static constexpr int ITEMS_FOR_TRANSFORMATION = 5;
-	static constexpr int HEALTH_BONUS = 1;
-	static constexpr int DR_BONUS = 1;
-	static constexpr int CONFUSION_BONUS = 1;
-
-	// Runtime state (IS serialized - unique per mimic instance)
-	bool isDisguised{ true };
-	int confusionDuration{ 3 };
-	int itemsConsumed{ 0 };
-	int disguiseChangeCounter{ 0 };
-	int consumptionCooldown{ 0 };
-	int revealDistance{ 1 }; // Public if needs external access
+public:
+	void update(Creature& owner, GameContext& ctx) override;
+	void load(const json& j) override;
+	void save(json& j) override;
 };

@@ -192,7 +192,7 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
 	}
 }
 
-std::vector<MonsterPercentage> MonsterFactory::getCurrentDistribution(int dungeonLevel)
+std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(int dungeonLevel)
 {
 	std::vector<MonsterPercentage> distribution;
 

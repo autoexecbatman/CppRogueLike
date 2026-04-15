@@ -101,9 +101,8 @@ void DungeonGenerator::connect_pair(
 	rooms[indexB].adjacentRoomIndices.push_back(indexA);
 }
 
-void DungeonGenerator::connect_all(
-	std::vector<DungeonRoom>& rooms,
-	RandomDice& rng) const
+void DungeonGenerator::connect_spanning_tree(
+	std::vector<DungeonRoom>& rooms) const
 {
 	if (rooms.size() < 2)
 	{
@@ -158,13 +157,25 @@ void DungeonGenerator::connect_all(
 		inTree[bestB] = true;
 		++inCount;
 	}
+}
 
-	// ---- Extra short-range corridors (~20 %) to create loop paths ----
+void DungeonGenerator::add_extra_corridors(
+	std::vector<DungeonRoom>& rooms,
+	RandomDice& rng) const
+{
+	if (rooms.size() < 2)
+	{
+		return;
+	}
+
+	const int n = static_cast<int>(rooms.size());
+
+	// ---- Extra short-range corridors (~33 %) to create loop paths ----
 	// Limit to adjacent cells only (diagonal included). Rooms 2+ cells apart
 	// produce corridors whose mid-turn segment can pass through an intermediate
-	// room.  CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
+	// room. CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
 	// centres -- the tightest upper bound that still covers all adjacent pairs.
-	
+
 	const int extraTarget = std::max(1, n / 3);
 	int added = 0;
 	const int maxAttempts = extraTarget * 6;
@@ -218,11 +229,12 @@ void DungeonGenerator::generate(
 		[](const DungeonRoom& a, const DungeonRoom& b)
 		{ return (a.row * 10000 + a.col) < (b.row * 10000 + b.col); });
 
-	// Assign room types based on connectivity:
-	// - room[0] = ENTRANCE (player spawn, always one connection after sort)
-	// - leaf nodes (one connection) = DANGER or TREASURE (50/50)
-	// - everything else = STANDARD
-	// The deepest leaf (by BFS) gets the stairs — handled in place_stairs.
+	// ---- Phase 1: Prim's MST — full connectivity, no cycles ----
+	connect_spanning_tree(rooms);
+
+	// Assign room types based on MST connectivity only.
+	// Must run AFTER connect_spanning_tree but BEFORE add_extra_corridors
+	// so extra loop edges do not demote leaf rooms to STANDARD.
 	rooms[0].type = RoomType::ENTRANCE;
 	for (size_t i = 1; i < rooms.size(); ++i)
 	{
@@ -237,8 +249,9 @@ void DungeonGenerator::generate(
 		}
 	}
 
-	// ---- Build pure graph (rooms + edges) ----
-	connect_all(rooms, rng);
+	// ---- Phase 2: extra corridors for loop paths ----
+	// Does not affect room type assignment.
+	add_extra_corridors(rooms, rng);
 
 	// ---- Render graph to tiles and spawn content ----
 	map.place_from_graph(rooms, withActors, ctx);

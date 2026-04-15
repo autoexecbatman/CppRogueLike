@@ -23,7 +23,7 @@ enum class PendingDoorAction
 	CLOSE
 };
 
-class AiPlayer : public Ai
+class AiPlayer final : public Ai
 {
 public:
 	void update(Creature& owner, GameContext& ctx) override;

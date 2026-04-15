@@ -58,6 +58,8 @@ public:
 	void clear_fixed_rolls() { m_fixed_rolls.clear(); }
 #endif
 
+	[[nodiscard]] std::mt19937& get_rng() noexcept { return m_gen; }
+
 private:
 	// we use the mersenne twister engine for our random number generator
 	// we seed it with a random device

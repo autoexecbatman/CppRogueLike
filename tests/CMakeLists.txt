@@ -116,6 +116,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/TargetingMenu.cpp
     ${PARENT_SOURCE_DIR}/Systems/TargetingSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/SpellAnimations.cpp
+    ${PARENT_SOURCE_DIR}/Systems/EncounterPlanner.cpp
     ${PARENT_SOURCE_DIR}/Systems/HungerSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/BuffSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/LevelUpSystem.cpp

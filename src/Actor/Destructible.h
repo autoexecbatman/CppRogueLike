@@ -21,11 +21,13 @@ struct GameContext;
 //                            reads HealthPool, ArmorClass, buffs; triggers DeathHandler.
 //                            Note: Attacker already orchestrates attack; take_damage is
 //                            its final step. Consider moving it there or to CombatSystem.
-//   3. DeathHandler        -- NOT virtual. Injected as std::function<void(Creature&, GameContext&)>
-//                            at construction. Monster lambda: award xp, log, create corpse.
-//                            Player lambda: set DEFEAT, delete save.
-//                            Guard: assert(m_onDeath && "death handler not injected") before call.
-//                            Eliminates MonsterDestructible/PlayerDestructible subclasses entirely.
+//   3. DeathHandler        -- Named abstract struct with virtual execute(Creature&, GameContext&).
+//                            MonsterDeathHandler: award xp, log, create corpse, check kill count.
+//                            PlayerDeathHandler: set DEFEAT, delete save.
+//                            Injected as unique_ptr<DeathHandler> at construction.
+//                            Guard: assert(m_deathHandler && "death handler not injected").
+//                            Satisfies DIP: Destructible depends on DeathHandler abstraction,
+//                            not on Player or Monster concretions. Named type = debuggable.
 //   4. CombatStats         { thaco } -- one field, but SRP demands it be separate.
 //   5. ArmorClass          { armorClass, baseArmorClass, dr }
 //                            update_armor_class(), dex bonus, equip bonus.

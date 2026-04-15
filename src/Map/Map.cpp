@@ -28,6 +28,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/EncounterPlanner.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/TileConfig.h"
@@ -832,6 +833,7 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 
 	spawn_barrels(room, ctx);
 	spawn_items(room, ctx);
+	plan_encounter(room, ctx);
 }
 
 void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
@@ -1464,7 +1466,7 @@ void Map::place_amulet(GameContext& ctx)
 
 std::vector<MonsterPercentage> Map::get_monster_distribution(int dungeonLevel)
 {
-	return monsterFactory->getCurrentDistribution(dungeonLevel);
+	return monsterFactory->get_current_distribution(dungeonLevel);
 }
 
 std::vector<ItemPercentage> Map::get_item_distribution(int dungeonLevel)

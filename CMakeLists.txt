@@ -242,6 +242,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/SpellAnimations.cpp
     ${PROJECT_SOURCE_DIR}/Systems/SpellAnimations.h
     ${PROJECT_SOURCE_DIR}/Systems/TargetMode.h
+    ${PROJECT_SOURCE_DIR}/Systems/EncounterPlanner.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/EncounterPlanner.h
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/BuffSystem.cpp
