@@ -71,7 +71,7 @@ private:
 	bool execute_arrival(Creature& owner, GameContext& ctx);
 	void handle_left_click(Player& player, GameContext& ctx);
 	void handle_right_click(Player& player, GameContext& ctx);
-	Vector2D find_door_approach(Vector2D doorTile, GameContext& ctx) const;
+	Vector2D find_door_approach(Vector2D doorTile, const GameContext& ctx) const;
 	void begin_path_walk(
 		Vector2D walkDest,
 		Vector2D actionTarget,

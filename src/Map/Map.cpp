@@ -328,7 +328,7 @@ void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
 	}
 }
 
-Decoration* Map::find_decoration_at(Vector2D pos, GameContext& ctx) const noexcept
+Decoration* Map::find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept
 {
 	if (!ctx.decorations)
 	{
@@ -1180,7 +1180,7 @@ bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 	return ctx.stairs && ctx.stairs->position == pos;
 }
 
-bool Map::can_walk(Vector2D pos, GameContext& ctx) const noexcept
+bool Map::can_walk(Vector2D pos, const GameContext& ctx) const noexcept
 {
 	if (is_wall(pos))
 	{
@@ -1222,7 +1222,7 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 }
 
 // getActor returns the actor at the given coordinates or `nullptr` if there's none
-Creature* Map::get_actor(Vector2D pos, GameContext& ctx) const noexcept
+Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 {
 	// Check player position first
 	if (ctx.player && ctx.player->position == pos)
@@ -1316,10 +1316,10 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D tar
 			if (isTarget)
 			{
 				// Allow closed doors as target; exclude only solid walls
-			if (!is_wall(next) || get_tile_type(next) == TileType::CLOSED_DOOR)
-			{
-				results.push_back(next);
-			}
+				if (!is_wall(next) || get_tile_type(next) == TileType::CLOSED_DOOR)
+				{
+					results.push_back(next);
+				}
 			}
 			else if (can_walk(next, ctx))
 			{

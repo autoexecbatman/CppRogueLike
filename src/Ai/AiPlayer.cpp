@@ -561,7 +561,7 @@ bool AiPlayer::is_mouse_pending_cancelled(GameContext& ctx) const
 // ---------------------------------------------------------------------------
 // find_door_approach -- nearest walkable cardinal neighbour of doorTile.
 // Returns {-1,-1} when all four cardinal neighbours are blocked.
-Vector2D AiPlayer::find_door_approach(Vector2D doorTile, GameContext& ctx) const
+Vector2D AiPlayer::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
 {
 	if (!ctx.map)
 	{

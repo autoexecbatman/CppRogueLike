@@ -114,13 +114,13 @@ public:
 	void tile_action(Creature& owner, TileType tileType, GameContext& ctx);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
-	bool can_walk(Vector2D pos, GameContext& ctx) const noexcept;
+	bool can_walk(Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
 	void compute_fov(GameContext& ctx);
 	void update();
 	void render(const GameContext& ctx) const;
 	void add_item(Vector2D pos, GameContext& ctx);
-	Creature* get_actor(Vector2D pos, GameContext& ctx) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
+	Creature* get_actor(Vector2D pos, const GameContext& ctx) const noexcept; // getActor returns the actor at the given coordinates or NULL if there's none
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
@@ -152,7 +152,7 @@ public:
 	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
 	void create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx);
 	bool maybe_create_treasure_room(int dungeonLevel, GameContext& ctx);
-	Decoration* find_decoration_at(Vector2D pos, GameContext& ctx) const noexcept;
+	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
