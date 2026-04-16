@@ -102,9 +102,6 @@ void Actor::render(const GameContext& ctx) const noexcept
 	{
 		// Now it naturally resolves whether it's an Actor, Creature, or Item
 		TileRef displayTile = get_display_tile();
-		int displayColor = get_display_color();
-
-		// Note: You might want to extract Color{255, 255, 255, 255} to a constant too
 		ctx.renderer->draw_tile(position, displayTile, Color{ 255, 255, 255, 255 });
 	}
 }

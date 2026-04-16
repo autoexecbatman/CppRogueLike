@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <functional>
 
 #include "../Actor/Actor.h"
 #include "../ActorTypes/Player.h"
@@ -8,6 +9,8 @@
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
+#include "../Systems/AnimationSystem.h"
+#include "../Systems/TileConfig.h"
 #include "../Utils/Vector2D.h"
 #include "AiMonster.h"
 #include "AiMonsterRanged.h"
@@ -91,59 +94,38 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 		return false;
 	}
 
-	// Animate the projectile
-	char projChar = (owner.has_state(ActorState::IS_RANGED)) ? '/' : '*';
-	animateProjectile(owner.position, targetPos, projChar, ctx);
+	animate_arrow(owner.position, targetPos, ctx);
 
 	// Perform the attack
 	owner.attacker->attack(owner, *ctx.player, ctx);
 	return true;
 }
 
-void AiMonsterRanged::animateProjectile(Vector2D from, Vector2D to, char projectileChar, GameContext& ctx)
+void AiMonsterRanged::animate_arrow(Vector2D from, Vector2D to, GameContext& ctx)
 {
-	// TODO: Use our utility function instead.
-	// Use Bresenham's line algorithm for the projectile path
-	int x0 = from.x;
-	int y0 = from.y;
-	int x1 = to.x;
-	int y1 = to.y;
-
-	int dx = std::abs(x1 - x0);
-	int dy = std::abs(y1 - y0);
-	int sx = (x0 < x1) ? 1 : -1;
-	int sy = (y0 < y1) ? 1 : -1;
-	int err = dx - dy;
-
-	while (x0 != x1 || y0 != y1)
+	if (!ctx.animSystem || !ctx.tileConfig)
 	{
-		int e2 = 2 * err;
-		if (e2 > -dy)
-		{
-			err -= dy;
-			x0 += sx;
-		}
-		if (e2 < dx)
-		{
-			err += dx;
-			y0 += sy;
-		}
-
-		// Skip start point
-		if (x0 == from.x && y0 == from.y)
-		{
-			continue;
-		}
-
-		// Stop at end point or walls
-		if ((x0 == to.x && y0 == to.y) || !ctx.map->can_walk(Vector2D{ x0, y0 }, ctx))
-		{
-			break;
-		}
-
-		// TODO: Reimplement projectile drawing without curses
-		// Previously used mvaddch/refresh/napms for projectile animation
+		return;
 	}
+
+	const TileRef boltTile = ctx.tileConfig->get("TILE_EFFECT_BOLT");
+
+	auto onArrive = [to, &ctx]()
+	{
+		if (ctx.animSystem)
+		{
+			ctx.animSystem->spawn_blood_burst(to.x, to.y, 3);
+		}
+	};
+
+	ctx.animSystem->spawn_projectile(
+		from,
+		to,
+		boltTile,
+		210, 180, 100,
+		550.0f,
+		0.0f,
+		std::move(onArrive));
 }
 
 void AiMonsterRanged::load(const json& j)

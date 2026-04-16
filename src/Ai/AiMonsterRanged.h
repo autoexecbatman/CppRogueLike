@@ -21,5 +21,5 @@ protected:
 
 	void move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
 	bool tryRangedAttack(Creature& owner, Vector2D targetPos, GameContext& ctx);
-	void animateProjectile(Vector2D from, Vector2D to, char projectileChar, GameContext& ctx);
+	void animate_arrow(Vector2D from, Vector2D to, GameContext& ctx);
 };

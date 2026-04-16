@@ -28,8 +28,6 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 	GameContext& ctx)
 {
 	// Reuse persistent work vectors; just reset them for this search
-	const size_t gridSize = graph.get_map().size();
-	
 	// Clear and re-initialize the work vectors (fast: just fills existing capacity)
 	// cameFrom[i] -> Stores which node led to this node
 	// costSoFar[i] -> Stores the lowest cost found to reach this node

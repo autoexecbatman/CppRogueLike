@@ -15,10 +15,10 @@
 #include "TargetingMenu.h"
 
 TargetingMenu::TargetingMenu(int maxRange, int aoeRadius, Callback onComplete, GameContext& ctx)
-    : maxRange(maxRange)
+    : cursor(ctx.player->position)
+    , maxRange(maxRange)
     , aoeRadius(aoeRadius)
     , onComplete(std::move(onComplete))
-    , cursor(ctx.player->position)
 {
 }
 

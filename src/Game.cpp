@@ -40,14 +40,14 @@
 		.minimap = &minimap,
 		.pathfinder = &pathfinder,
 
+		.decorEditor = &decor_editor,
+		.prefabLibrary = &prefab_library,
 #ifndef EMSCRIPTEN
 		.contentEditor = &content_editor,
-		.decorEditor = &decor_editor,
 		.roomEditor = &room_editor,
 		.itemEditor = &item_editor,
 		.monsterEditor = &monster_editor,
 		.spellEditor = &spell_editor,
-		.prefabLibrary = &prefab_library,
 #endif
 		.tileConfig = &tile_config,
 

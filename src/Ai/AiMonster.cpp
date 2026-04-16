@@ -102,9 +102,10 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		return;
 	}
 
-	auto is_occupied = [&ctx](const Vector2D& pos)
+	auto is_blocked = [&ctx](const Vector2D& pos)
 	{
-		return ctx.map->get_actor(pos, ctx) != nullptr;
+		return ctx.map->get_actor(pos, ctx) != nullptr
+			|| ctx.map->find_decoration_at(pos, ctx) != nullptr;
 	};
 
 	Vector2D bestStep{ -1, -1 };
@@ -117,8 +118,12 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		{
 			continue;
 		}
+		if (!ctx.map->can_walk(candidate, ctx))
+		{
+			continue;
+		}
 		int candidateCost = ctx.map->get_dijkstra_cost(candidate);
-		if (candidateCost < bestCost && !is_occupied(candidate))
+		if (candidateCost < bestCost && !is_blocked(candidate))
 		{
 			bestCost = candidateCost;
 			bestStep = candidate;

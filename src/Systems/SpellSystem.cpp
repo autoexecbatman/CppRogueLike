@@ -806,7 +806,7 @@ void SpellSystem::cast_silence(
 	int duration = 2 * casterLevel;
 	int range = 5 + casterLevel;
 
-	auto onTarget = [&caster, duration, onSuccess = std::move(onSuccess)](
+	auto onTarget = [duration, onSuccess = std::move(onSuccess)](
 		bool confirmed,
 		Vector2D targetPos,
 		GameContext& innerCtx) mutable

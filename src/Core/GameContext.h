@@ -32,14 +32,14 @@ class BuffSystem;
 class FloatingTextSystem;
 class AnimationSystem;
 class ContentRegistry;
+class DecorEditor;
+class PrefabLibrary;
 #ifndef EMSCRIPTEN
 class ContentEditor;
-class DecorEditor;
 class RoomEditor;
 class ItemEditor;
 class MonsterEditor;
 class SpellEditor;
-class PrefabLibrary;
 #endif
 class Stairs;
 class Object;
@@ -164,14 +164,14 @@ struct GameContext
 	ContentRegistry* contentRegistry{ nullptr };
 	Minimap* minimap{ nullptr };
 	Dijkstra* pathfinder{ nullptr };  // Persistent pathfinding object (reused across turns)
+	DecorEditor* decorEditor{ nullptr };
+	PrefabLibrary* prefabLibrary{ nullptr };
 #ifndef EMSCRIPTEN
 	ContentEditor* contentEditor{ nullptr };
-	DecorEditor* decorEditor{ nullptr };
 	RoomEditor* roomEditor{ nullptr };
 	ItemEditor* itemEditor{ nullptr };
 	MonsterEditor* monsterEditor{ nullptr };
 	SpellEditor* spellEditor{ nullptr };
-	PrefabLibrary* prefabLibrary{ nullptr };
 #endif
 	const TileConfig* tileConfig{ nullptr };
 

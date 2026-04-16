@@ -172,6 +172,11 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	switch (currentState)
 	{
 
+	case HungerState::SATIATED:
+	{
+		break;
+	}
+
 	case HungerState::WELL_FED:
 	{
 		// Bonuses for being well fed

@@ -13,13 +13,6 @@
 #include "DungeonRoom.h"
 #include "Map.h"
 
-// ------------------------------------------------------------------ helpers
-
-static Vector2D v(int col, int row) noexcept
-{
-	return Vector2D{ col, row };
-}
-
 // Cell dimensions: each grid cell is large enough to hold the largest room
 // plus a guaranteed corridor gap on every side so rooms never share a wall.
 // Defined here so both place_rooms and connect_all can reference them.

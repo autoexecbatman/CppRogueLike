@@ -47,9 +47,9 @@ Map::Map(int map_width, int map_height)
 	  map_width(map_width),
 	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>()),
-	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
 	  dijkstraCosts(static_cast<size_t>(map_width) * map_height, std::numeric_limits<int>::max()),
-	  seed(0) // Will be set in init() with GameContext access
+	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
+	  seed(0)
 {
 }
 
@@ -1162,8 +1162,13 @@ void Map::place_stairs(GameContext& ctx)
 
 	const DungeonRoom& room = rooms[deepestIndex];
 	Vector2D stairsPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-	while (!can_walk(stairsPos, ctx))
+	constexpr int MAX_STAIR_TRIES = 200;
+	for (int attempt = 0; attempt < MAX_STAIR_TRIES; ++attempt)
 	{
+		if (can_walk(stairsPos, ctx) && find_decoration_at(stairsPos, ctx) == nullptr)
+		{
+			break;
+		}
 		stairsPos.x = ctx.dice->roll(room.col, room.col_end());
 		stairsPos.y = ctx.dice->roll(room.row, room.row_end());
 	}
@@ -1177,21 +1182,24 @@ bool Map::is_stairs(Vector2D pos, GameContext& ctx) const
 
 bool Map::can_walk(Vector2D pos, GameContext& ctx) const noexcept
 {
-	if (is_wall(pos)) // check if the tile is a wall
+	if (is_wall(pos))
 	{
 		return false;
 	}
 
-	// Check for doors - can only walk through open doors
 	if (get_tile_type(pos) == TileType::CLOSED_DOOR)
 	{
-		return false; // Closed doors block movement
+		return false;
 	}
 
-	// CRITICAL FIX: Check if there's already an actor at this position
 	if (get_actor(pos, ctx) != nullptr)
 	{
-		return false; // Position occupied by another actor
+		return false;
+	}
+
+	if (find_decoration_at(pos, ctx) != nullptr)
+	{
+		return false;
 	}
 
 	return true;
@@ -1474,6 +1482,19 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	if (get_actor(pos, ctx) != nullptr)
 	{
 		return false;
+	}
+
+	// Check if there's a floor item on the door tile
+	if (ctx.inventoryData)
+	{
+		auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
+		{
+			return item && item->position == pos;
+		};
+		if (std::ranges::any_of(ctx.inventoryData->items, has_item_at_pos))
+		{
+			return false;
+		}
 	}
 
 	// Change the tile type to DOOR (closed)
