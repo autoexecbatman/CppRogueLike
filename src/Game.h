@@ -42,12 +42,12 @@
 #include "Utils/Dijkstra.h"
 #include "Utils/Vector2D.h"
 
+#include "Tools/DecorEditor.h"
+#include "Tools/PrefabLibrary.h"
 #ifndef EMSCRIPTEN
 #include "Tools/ContentEditor.h"
-#include "Tools/DecorEditor.h"
 #include "Tools/ItemEditor.h"
 #include "Tools/MonsterEditor.h"
-#include "Tools/PrefabLibrary.h"
 #include "Tools/RoomEditor.h"
 #include "Tools/SpellEditor.h"
 #endif
@@ -87,14 +87,14 @@ struct Game
 	AnimationSystem anim_system{};
 	ContentRegistry content_registry{};
 	Dijkstra pathfinder{ get_map_width(), get_map_height() };
+	DecorEditor decor_editor{};
+	PrefabLibrary prefab_library{};
 #ifndef EMSCRIPTEN
 	ContentEditor content_editor{};
-	DecorEditor decor_editor{};
 	RoomEditor room_editor{};
 	ItemEditor item_editor{};
 	MonsterEditor monster_editor{};
 	SpellEditor spell_editor{};
-	PrefabLibrary prefab_library{};
 #endif
 
 	// Game world
