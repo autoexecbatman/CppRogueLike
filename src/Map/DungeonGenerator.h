@@ -15,6 +15,7 @@
 #include "DungeonRoom.h"
 
 class Map;
+class PrefabLibrary;
 class RandomDice;
 struct GameContext;
 
@@ -33,7 +34,8 @@ private:
 	std::vector<DungeonRoom> place_rooms(
 		int mapWidth,
 		int mapHeight,
-		RandomDice& rng) const;
+		RandomDice& rng,
+		const PrefabLibrary* prefabs) const;
 
 	// Phase 1: Prim's MST — guarantees full connectivity, no cycles.
 	// Room types must be assigned after this and before add_extra_corridors.

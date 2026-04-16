@@ -14,26 +14,28 @@
 #include <raylib.h>
 
 #include "../Actor/Creature.h"
-#include "../Actor/Stairs.h"
-#include "../ActorTypes/Player.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/InventoryOperations.h"
+#include "../Actor/Stairs.h"
+#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/EncounterPlanner.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/TileConfig.h"
 #include "../Tools/DecorEditor.h"
+#include "../Tools/PrefabLibrary.h"
 #include "../Utils/Vector2D.h"
+#include "Decoration.h"
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
 #include "FovMap.h"
@@ -93,6 +95,14 @@ void Map::init(bool withActors, GameContext& ctx)
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
 	mapRng_ = RandomDice{ static_cast<unsigned int>(seed) };
 	fovMap = std::make_unique<FovMap>(map_width, map_height);
+
+	// Register the active map key before rooms are generated so decoration
+	// stamps inside create_room land in the correct DecorEditor bucket.
+	if (ctx.decorEditor && ctx.levelManager)
+	{
+		ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
+	}
+
 	generate_rooms(withActors, ctx);
 
 	post_process_doors();
@@ -175,7 +185,6 @@ void Map::load(const json& j)
 
 			break;
 		}
-
 		}
 
 		fovMap->set_properties(tile.position.x, tile.position.y, walkable, transparent);
@@ -458,12 +467,10 @@ void Map::render(const GameContext& ctx) const
 	constexpr uint8_t eastBit = 4;
 	constexpr uint8_t southBit = 2;
 	constexpr uint8_t westBit = 1;
-	const std::array<NeighborDef, 4> cardinals = {{
-		{ DIR_N, northBit },
+	const std::array<NeighborDef, 4> cardinals = { { { DIR_N, northBit },
 		{ DIR_E, eastBit },
 		{ DIR_S, southBit },
-		{ DIR_W, westBit }
-	}};
+		{ DIR_W, westBit } } };
 
 	auto build_mask = [&](Vector2D center, auto predicate) -> uint8_t
 	{
@@ -498,10 +505,7 @@ void Map::render(const GameContext& ctx) const
 		return tileType == TileType::FLOOR || tileType == TileType::CORRIDOR || tileType == TileType::OPEN_DOOR || tileType == TileType::WATER;
 	};
 
-
-	const std::array<Vector2D, 8> allDirs = {{
-		DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE
-	}};
+	const std::array<Vector2D, 8> allDirs = { { DIR_NW, DIR_N, DIR_NE, DIR_W, DIR_E, DIR_SW, DIR_S, DIR_SE } };
 
 	// A border wall is a wall/door with at least one walkable tile
 	// in its 8 neighbors. Only border walls form the visible room outline.
@@ -592,6 +596,7 @@ void Map::render(const GameContext& ctx) const
 
 			switch (type)
 			{
+
 			case TileType::WALL:
 			{
 				if (!is_border_wall(pos))
@@ -629,6 +634,7 @@ void Map::render(const GameContext& ctx) const
 					build_mask(pos, connected_wall));
 				break;
 			}
+
 			case TileType::FLOOR:
 			{
 				tileRef = autotile_resolve_mask(
@@ -636,16 +642,19 @@ void Map::render(const GameContext& ctx) const
 					build_mask(pos, is_walkable));
 				break;
 			}
+
 			case TileType::CORRIDOR:
 			{
 				tileRef = ctx.tileConfig->get("TILE_CORRIDOR");
 				break;
 			}
+
 			case TileType::WATER:
 			{
 				tileRef = ctx.tileConfig->get("TILE_WATER");
 				break;
 			}
+
 			case TileType::CLOSED_DOOR:
 			{
 				TileRef floorRef = autotile_resolve_mask(
@@ -655,6 +664,7 @@ void Map::render(const GameContext& ctx) const
 				tileRef = ctx.tileConfig->get("TILE_DOOR_CLOSED");
 				break;
 			}
+
 			case TileType::OPEN_DOOR:
 			{
 				TileRef floorRef = autotile_resolve_mask(
@@ -670,10 +680,12 @@ void Map::render(const GameContext& ctx) const
 					tint);
 				continue;
 			}
+
 			default:
 			{
 				continue;
 			}
+
 			}
 
 			ctx.renderer->draw_tile(Vector2D{ col, row }, tileRef, tint);
@@ -819,6 +831,37 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 
 	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
 
+	// Stamp prefab decorations before water so water can see occupied tiles.
+	if (ctx.prefabLibrary && ctx.decorEditor)
+	{
+		ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
+
+		// Register a blocking Decoration for every stamped tile.
+		if (ctx.decorations)
+		{
+			for (int dy = room.row; dy <= room.row_end(); ++dy)
+			{
+				for (int dx = room.col; dx <= room.col_end(); ++dx)
+				{
+					TileRef t = ctx.decorEditor->get_override(dx, dy);
+					if (!t.is_valid())
+					{
+						continue;
+					}
+					auto d = std::make_unique<Decoration>();
+					d->position = Vector2D{ dx, dy };
+					d->tile = t;
+					d->name = "decoration";
+					d->hp = 3;
+					d->blocks_movement = true;
+					d->lootTableKey = "";
+					d->isBroken = false;
+					ctx.decorations->push_back(std::move(d));
+				}
+			}
+		}
+	}
+
 	spawn_water(room, ctx);
 
 	if (!withActors)
@@ -849,6 +892,11 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 			const int rolld100 = mapRng_.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
+				// Never place water on a decorated tile.
+				if (ctx.decorEditor && ctx.decorEditor->get_override(waterPos.x, waterPos.y).is_valid())
+				{
+					continue;
+				}
 				// CRITICAL FIX: Check if water would block entrances using pattern matching
 				if (!would_water_block_entrance(waterPos, ctx))
 				{
@@ -1004,10 +1052,18 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 	for (int i = 0; i < numItems; i++)
 	{
 		Vector2D itemPos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-		while (!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx))
+		constexpr int MAX_ITEM_TRIES = 20;
+		int itemTries = 0;
+		while (itemTries < MAX_ITEM_TRIES &&
+			(!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
+			++itemTries;
+		}
+		if (itemTries >= MAX_ITEM_TRIES)
+		{
+			continue;
 		}
 		add_item(itemPos, ctx);
 	}
@@ -1059,10 +1115,14 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
-	while (!can_walk(pos, ctx))
+	constexpr int MAX_PLAYER_TRIES = 50;
+	int playerTries = 0;
+	while (playerTries < MAX_PLAYER_TRIES &&
+		(!can_walk(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
 	{
 		pos.x = ctx.dice->roll(room.col, room.col_end());
 		pos.y = ctx.dice->roll(room.row, room.row_end());
+		++playerTries;
 	}
 	ctx.player->position = pos;
 }
@@ -1276,18 +1336,18 @@ double Map::cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx)
 	{
 		return 1000.0;
 	}
-	
+
 	double baseCost = get_cost(toNode, ctx);
-	
+
 	// Check if this is a diagonal move (8-directional grid)
 	int dx = std::abs(toNode.x - fromNode.x);
 	int dy = std::abs(toNode.y - fromNode.y);
-	
-	if (dx == 1 && dy == 1)  // Diagonal move
+
+	if (dx == 1 && dy == 1) // Diagonal move
 	{
-		return baseCost * 1.414213562373095;  // sqrt(2)
+		return baseCost * 1.414213562373095; // sqrt(2)
 	}
-	
+
 	return baseCost;
 }
 
@@ -1522,14 +1582,27 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 
 	for (int i = 0; i < guardianCount; i++)
 	{
-		Vector2D guardPos;
-		do
+		Vector2D guardPos{ -1, -1 };
+		constexpr int MAX_GUARD_TRIES = 50;
+		for (int t = 0; t < MAX_GUARD_TRIES; ++t)
 		{
-			guardPos.x = ctx.dice->roll(room.col, room.col_end());
-			guardPos.y = ctx.dice->roll(room.row, room.row_end());
-		} while ((guardPos == center) ||
-			!can_walk(guardPos, ctx) ||
-			get_actor(guardPos, ctx) != nullptr);
+			Vector2D candidate{
+				ctx.dice->roll(room.col, room.col_end()),
+				ctx.dice->roll(room.row, room.row_end())
+			};
+			if (candidate != center &&
+				can_walk(candidate, ctx) &&
+				get_actor(candidate, ctx) == nullptr &&
+				find_decoration_at(candidate, ctx) == nullptr)
+			{
+				guardPos = candidate;
+				break;
+			}
+		}
+		if (guardPos.x < 0)
+		{
+			continue;
+		}
 
 		add_monster(guardPos, ctx);
 	}
@@ -1853,6 +1926,7 @@ int Map::get_dijkstra_cost(Vector2D pos) const noexcept
 	{
 		return std::numeric_limits<int>::max();
 	}
+
 	return dijkstraCosts[static_cast<size_t>(pos.y) * map_width + pos.x];
 }
 
@@ -1884,10 +1958,8 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 		return;
 	}
 
-	static const std::vector<Vector2D> cardinalAndDiagonal =
-	{
-		DIR_N, DIR_S, DIR_W, DIR_E,
-		DIR_NW, DIR_NE, DIR_SW, DIR_SE
+	static const std::vector<Vector2D> cardinalAndDiagonal = {
+		DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
 	};
 
 	while (!frontier.empty())

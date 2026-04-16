@@ -15,14 +15,15 @@
 #include "../Gui/Gui.h"
 #include "../Map/Map.h"
 #include "../Map/Minimap.h"
+#include "../Menu/DeathMenu.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/GameStateManager.h"
 #include "../Systems/InputHandler.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Tools/ContentEditor.h"
 #include "../Tools/DecorEditor.h"
 #include "../Tools/PrefabLibrary.h"
@@ -33,7 +34,6 @@
 #include "GameLoopCoordinator.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
-#include "../Menu/DeathMenu.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
@@ -110,6 +110,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 		auto handle_zoom = [&]() -> bool
 		{
 			GameKey key = ctx.inputSystem->get_key();
+
 			if (key == GameKey::MINIMAP_TOGGLE && ctx.minimap)
 			{
 				ctx.minimap->toggle();
@@ -127,7 +128,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.map->compute_fov(ctx);
 				return true;
 			}
-	#ifndef EMSCRIPTEN
+#ifndef EMSCRIPTEN
 			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decorEditor)
 			{
 				ctx.decorEditor->toggle();
@@ -482,21 +483,12 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	if (ctx.gameState->get_game_status() == GameStatus::STARTUP)
 	{
 #ifndef EMSCRIPTEN
+		// Ensure active map key is set for loaded games (new games set it in Map::init).
 		if (ctx.decorEditor && ctx.map && ctx.levelManager)
 		{
 			ctx.decorEditor->set_active_map(
 				ctx.map->get_seed(),
 				ctx.levelManager->get_dungeon_level());
-
-			if (ctx.prefabLibrary && ctx.rooms && ctx.decorEditor->is_active_map_empty() && !ctx.gameState->get_is_loaded_game())
-			{
-				ctx.prefabLibrary->apply_to_rooms(
-					*ctx.rooms,
-					ctx.map->get_seed(),
-					ctx.levelManager->get_dungeon_level(),
-					*ctx.decorEditor,
-					*ctx.map);
-			}
 		}
 #endif
 

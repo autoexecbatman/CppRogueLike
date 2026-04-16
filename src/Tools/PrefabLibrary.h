@@ -73,12 +73,16 @@ public:
 	// Overwrite the display label for a symbol.
 	void set_symbol_label(char sym, const std::string& label);
 
-	// Stamps decoration tiles from fitting prefabs into editor overrides.
-	// Called once at STARTUP for each dungeon level, before prefabs have been applied.
+	// Stamps decoration tiles from one room's assigned prefab into editor overrides.
+	// Called from Map::create_room before spawn_water so water can see decoration positions.
+	void apply_to_room(
+		const DungeonRoom& room,
+		DecorEditor& editor,
+		const Map& map) const;
+
+	// Batch version used as a fallback; prefer apply_to_room called per room.
 	void apply_to_rooms(
 		const std::vector<DungeonRoom>& rooms,
-		long seed,
-		int dungeon_level,
 		DecorEditor& editor,
 		const Map& map) const;
 
@@ -90,8 +94,4 @@ private:
 
 	void build_structural_symbols();
 	void register_symbol(char sym, TileRef tile, std::string_view label);
-
-	// Deterministic prefab selection for a room of (total_w x total_h) including walls.
-	// Returns prefab index, or -1 if none fits.
-	int pick_prefab(int total_w, int total_h, int dungeon_level, long hash_val) const;
 };

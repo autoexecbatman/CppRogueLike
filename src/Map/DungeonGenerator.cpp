@@ -1,12 +1,13 @@
 // file: DungeonGenerator.cpp
 #include <algorithm>
 #include <limits>
-#include <vector>
 #include <ranges>
+#include <vector>
 
 #include "../Actor/Item.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
+#include "../Tools/PrefabLibrary.h"
 #include "../Utils/Vector2D.h"
 #include "DungeonGenerator.h"
 #include "DungeonRoom.h"
@@ -32,7 +33,8 @@ constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
 std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 	int mapWidth,
 	int mapHeight,
-	RandomDice& rng) const
+	RandomDice& rng,
+	const PrefabLibrary* prefabs) const
 {
 	const int gridCols = mapWidth / CELL_W;
 	const int gridRows = mapHeight / CELL_H;
@@ -52,8 +54,57 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			const int cellX = gc * CELL_W;
 			const int cellY = gr * CELL_H;
 
-			const int roomWidth = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
-			const int roomHeight = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
+			// Prefab defines the room.  Pick a prefab that fits inside the cell
+			// (total dims including wall border must not exceed CELL_W x CELL_H).
+			// If no library is available (e.g. unit tests), fall back to random size.
+			int roomWidth = rng.roll(ROOM_MIN_SIZE, ROOM_HORIZONTAL_MAX_SIZE);
+			int roomHeight = rng.roll(ROOM_MIN_SIZE, ROOM_VERTICAL_MAX_SIZE);
+			std::string chosenPrefab;
+
+			if (prefabs && prefabs->count() > 0)
+			{
+				// Collect all prefabs that fit inside this cell.
+				struct Candidate
+				{
+					int index;
+					float weight;
+				};
+				std::vector<Candidate> candidates;
+				const auto& all = prefabs->all();
+				for (int i = 0; i < static_cast<int>(all.size()); ++i)
+				{
+					const Prefab& p = all[i];
+					if (p.width() <= CELL_W && p.height() <= CELL_H)
+					{
+						candidates.push_back({ i, p.weight });
+					}
+				}
+
+				if (!candidates.empty())
+				{
+					float total = 0.0f;
+					for (const auto& c : candidates)
+					{
+						total += c.weight;
+					}
+					float roll = static_cast<float>(rng.roll(0, 999999)) / 1000000.0f * total;
+					float accumulated = 0.0f;
+					int chosen = candidates.back().index;
+					for (const auto& c : candidates)
+					{
+						accumulated += c.weight;
+						if (roll < accumulated)
+						{
+							chosen = c.index;
+							break;
+						}
+					}
+					const Prefab& p = all[chosen];
+					roomWidth = p.width() - 2;
+					roomHeight = p.height() - 2;
+					chosenPrefab = p.name;
+				}
+			}
 
 			// Random position inside the cell -- at least 1 tile from each edge.
 			const int maxCol = cellX + CELL_W - roomWidth - 1;
@@ -81,7 +132,9 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 				continue;
 			}
 
-			rooms.push_back({ roomCol, roomRow, roomWidth, roomHeight });
+			DungeonRoom room{ roomCol, roomRow, roomWidth, roomHeight };
+			room.prefab_name = std::move(chosenPrefab);
+			rooms.push_back(std::move(room));
 		}
 	}
 
@@ -217,7 +270,7 @@ void DungeonGenerator::generate(
 	GameContext& ctx,
 	Map& map) const
 {
-	std::vector<DungeonRoom> rooms = place_rooms(mapWidth, mapHeight, rng);
+	std::vector<DungeonRoom> rooms = place_rooms(mapWidth, mapHeight, rng, ctx.prefabLibrary);
 
 	if (rooms.empty())
 	{

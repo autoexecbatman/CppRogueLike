@@ -1,15 +1,14 @@
 // file: PrefabLibrary.cpp
 #include <algorithm>
-#include <cstdlib>
 #include <format>
 #include <fstream>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
-#include <nlohmann/json_fwd.hpp>
 
 #include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
@@ -56,13 +55,20 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 	try
 	{
 		in >> j;
+
 		if (!j.contains("palette"))
+		{
 			return;
+		}
+
 		for (const auto& e : j["palette"])
 		{
 			std::string sym_str = e.value("symbol", "");
+
 			if (sym_str.empty())
+			{
 				continue;
+			}
 
 			char sym = sym_str[0];
 			TileRef tile{
@@ -109,8 +115,11 @@ std::string PrefabLibrary::symbol_label(char c) const
 void PrefabLibrary::load(std::string_view path)
 {
 	std::ifstream in(path.data());
+	
 	if (!in.is_open())
+	{
 		return;
+	}
 
 	json j;
 	try
@@ -118,7 +127,9 @@ void PrefabLibrary::load(std::string_view path)
 		in >> j;
 
 		if (!j.contains("prefabs"))
+		{
 			return;
+		}
 
 		prefabs.clear();
 		for (const auto& entry : j["prefabs"])
@@ -213,157 +224,99 @@ void PrefabLibrary::remove(const std::string& name)
 }
 
 // ---------------------------------------------------------------------------
-// Prefab selection
-// ---------------------------------------------------------------------------
-
-int PrefabLibrary::pick_prefab(
-	int total_w,
-	int total_h,
-	int dungeon_level,
-	long hash_val) const
-{
-	struct Candidate
-	{
-		size_t index;
-		float weight;
-	};
-
-	std::vector<Candidate> candidates;
-	candidates.reserve(prefabs.size());
-
-	for (size_t i = 0; i < prefabs.size(); ++i)
-	{
-		const Prefab& p = prefabs[i];
-		if (p.depth_min > dungeon_level || p.depth_max < dungeon_level)
-		{
-			continue;
-		}
-		if (p.width() > total_w)
-		{
-			continue;
-		}
-		if (p.height() > total_h)
-		{
-			continue;
-		}
-		candidates.push_back({ i, p.weight });
-	}
-
-	if (candidates.empty())
-	{
-		return -1;
-	}
-
-	float total_weight = 0.0f;
-	for (const auto& c : candidates)
-	{
-		total_weight += c.weight;
-	}
-
-	// Map hash to [0, total_weight) deterministically
-	float selection = static_cast<float>(std::abs(hash_val) % 1000000) / 1000000.0f * total_weight;
-
-	float accumulated = 0.0f;
-	for (const auto& c : candidates)
-	{
-		accumulated += c.weight;
-		if (selection < accumulated)
-		{
-			return static_cast<int>(c.index);
-		}
-	}
-	return static_cast<int>(candidates.back().index);
-}
-
-// ---------------------------------------------------------------------------
 // Apply to rooms
 // ---------------------------------------------------------------------------
 
-void PrefabLibrary::apply_to_rooms(
-	const std::vector<DungeonRoom>& rooms,
-	long seed,
-	int dungeon_level,
+// Resolves prefab name to index.  Returns -1 if not found.
+static int find_prefab_index(
+	const std::vector<Prefab>& prefabs,
+	const std::string& name)
+{
+	for (int i = 0; i < static_cast<int>(prefabs.size()); ++i)
+	{
+		if (prefabs[i].name == name)
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+static void stamp_room(
+	const Prefab& p,
+	const DungeonRoom& room,
+	const std::unordered_map<char, TileRef>& symbol_to_tile,
+	DecorEditor& editor,
+	const Map& map)
+{
+	// Prefab origin [0,0] = top-left wall corner of the room.
+	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
+	// aligns exactly with the room wall ring -- no centering offset needed.
+	const int base_x = room.left_wall();
+	const int base_y = room.top_wall();
+
+	for (size_t r = 0; r < p.rows.size(); ++r)
+	{
+		const std::string& row_str = p.rows[r];
+		for (size_t c = 0; c < row_str.size(); ++c)
+		{
+			char sym = row_str[c];
+			auto it = symbol_to_tile.find(sym);
+			if (it == symbol_to_tile.end() || !it->second.is_valid())
+			{
+				continue;
+			}
+			const TileRef tile = it->second;
+
+			const int world_x = base_x + static_cast<int>(c);
+			const int world_y = base_y + static_cast<int>(r);
+
+			if (world_x < room.col || world_x > room.col_end())
+			{
+				continue;
+			}
+			if (world_y < room.row || world_y > room.row_end())
+			{
+				continue;
+			}
+			if (!map.is_in_bounds({ world_x, world_y }))
+			{
+				continue;
+			}
+			if (map.get_tile_type({ world_x, world_y }) != TileType::FLOOR)
+			{
+				continue;
+			}
+
+			editor.place_tile(world_x, world_y, tile);
+		}
+	}
+}
+
+void PrefabLibrary::apply_to_room(
+	const DungeonRoom& room,
 	DecorEditor& editor,
 	const Map& map) const
 {
-	if (prefabs.empty() || rooms.empty())
+	if (room.prefab_name.empty())
 	{
 		return;
 	}
-
-	auto room_hash = [&](size_t room_idx) -> long
+	int idx = find_prefab_index(prefabs, room.prefab_name);
+	if (idx < 0)
 	{
-		long h = seed ^ (static_cast<long>(room_idx) * 2654435761L);
-		h ^= h >> 16;
-		h *= 0x45d9f3bL;
-		h ^= h >> 16;
-		return h;
-	};
+		return;
+	}
+	stamp_room(prefabs[idx], room, symbol_to_tile, editor, map);
+}
 
-	for (size_t room_idx = 0; room_idx < rooms.size(); ++room_idx)
+void PrefabLibrary::apply_to_rooms(
+	const std::vector<DungeonRoom>& rooms,
+	DecorEditor& editor,
+	const Map& map) const
+{
+	for (const DungeonRoom& room : rooms)
 	{
-		const DungeonRoom& room = rooms[room_idx];
-
-		// Total room dimensions including surrounding walls
-		const int total_w = room.total_width();
-		const int total_h = room.total_height();
-
-		int idx = pick_prefab(total_w, total_h, dungeon_level, room_hash(room_idx));
-		if (idx < 0)
-		{
-			continue;
-		}
-
-		const Prefab& p = prefabs[static_cast<size_t>(idx)];
-
-		// Center the prefab inside the room.
-		// Prefab origin [0,0] aligns to the left/top wall so the '#' border
-		// of an exactly-fitting prefab lines up with the room walls.
-		const int base_x = room.left_wall();
-		const int base_y = room.top_wall();
-		const int offset_x = (total_w - p.width()) / 2;
-		const int offset_y = (total_h - p.height()) / 2;
-
-		// Stamp the decoration layer -- floor tiles only.
-		for (size_t r = 0; r < p.rows.size(); ++r)
-		{
-			const std::string& row_str = p.rows[r];
-			for (size_t c = 0; c < row_str.size(); ++c)
-			{
-				char sym = row_str[c];
-				TileRef tile = resolve_decor(sym);
-				if (!tile.is_valid())
-				{
-					continue;
-				}
-
-				const int world_x = base_x + offset_x + static_cast<int>(c);
-				const int world_y = base_y + offset_y + static_cast<int>(r);
-
-				// Reject anything outside room floor interior (fast early-out).
-				if (world_x < room.col || world_x > room.col_end())
-				{
-					continue;
-				}
-				if (world_y < room.row || world_y > room.row_end())
-				{
-					continue;
-				}
-
-				// Reject if the map tile is not a plain floor tile.
-				// This prevents stamping on water, corridor, wall, or any
-				// other special tile type that may exist within room bounds.
-				if (!map.is_in_bounds({ world_x, world_y }))
-				{
-					continue;
-				}
-				if (map.get_tile_type({ world_x, world_y }) != TileType::FLOOR)
-				{
-					continue;
-				}
-
-				editor.place_tile(world_x, world_y, tile);
-			}
-		}
+		apply_to_room(room, editor, map);
 	}
 }

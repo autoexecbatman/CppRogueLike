@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <vector>
 
 // file: DungeonRoom.h
@@ -11,10 +12,10 @@
 
 enum class RoomType
 {
-    ENTRANCE,
-    STANDARD,
-    DANGER,
-    TREASURE
+	ENTRANCE,
+	STANDARD,
+	DANGER,
+	TREASURE
 };
 
 struct DungeonRoom
@@ -24,6 +25,7 @@ struct DungeonRoom
 	int width{ 0 }; // floor column count
 	int height{ 0 }; // floor row    count
 	RoomType type{ RoomType::STANDARD };
+	std::string prefab_name; // name of the prefab that defines this room's layout
 	std::vector<int> adjacentRoomIndices; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)

@@ -39,7 +39,7 @@ namespace
 std::unordered_map<MonsterId, MonsterParams> registry;
 std::unordered_map<MonsterId, TileRef> s_class_tiles;
 std::unordered_map<MonsterId, MonsterParams> s_class_params; // minimal params for class-based
-std::map<std::string, MonsterParams> s_custom;               // user-created monsters
+std::map<std::string, MonsterParams> s_custom; // user-created monsters
 
 // ---------------------------------------------------------------------------
 // Key <-> MonsterId mappings
@@ -48,32 +48,55 @@ std::string_view monster_key(MonsterId id)
 {
 	switch (id)
 	{
-	case MonsterId::GOBLIN:       return "goblin";
-	case MonsterId::ORC:          return "orc";
-	case MonsterId::TROLL:        return "troll";
-	case MonsterId::DRAGON:       return "dragon";
-	case MonsterId::ARCHER:       return "archer";
-	case MonsterId::MAGE:         return "mage";
-	case MonsterId::WOLF:         return "wolf";
-	case MonsterId::FIRE_WOLF:    return "fire_wolf";
-	case MonsterId::ICE_WOLF:     return "ice_wolf";
-	case MonsterId::BAT:          return "bat";
-	case MonsterId::KOBOLD:       return "kobold";
-	case MonsterId::MIMIC:        return "mimic";
-	case MonsterId::SHOPKEEPER:   return "shopkeeper";
-	case MonsterId::SPIDER_SMALL: return "spider_small";
-	case MonsterId::SPIDER_GIANT: return "spider_giant";
-	case MonsterId::SPIDER_WEAVER:return "spider_weaver";
+	case MonsterId::GOBLIN:
+		return "goblin";
+	case MonsterId::ORC:
+		return "orc";
+	case MonsterId::TROLL:
+		return "troll";
+	case MonsterId::DRAGON:
+		return "dragon";
+	case MonsterId::ARCHER:
+		return "archer";
+	case MonsterId::MAGE:
+		return "mage";
+	case MonsterId::WOLF:
+		return "wolf";
+	case MonsterId::FIRE_WOLF:
+		return "fire_wolf";
+	case MonsterId::ICE_WOLF:
+		return "ice_wolf";
+	case MonsterId::BAT:
+		return "bat";
+	case MonsterId::KOBOLD:
+		return "kobold";
+	case MonsterId::MIMIC:
+		return "mimic";
+	case MonsterId::SHOPKEEPER:
+		return "shopkeeper";
+	case MonsterId::SPIDER_SMALL:
+		return "spider_small";
+	case MonsterId::SPIDER_GIANT:
+		return "spider_giant";
+	case MonsterId::SPIDER_WEAVER:
+		return "spider_weaver";
 	}
 	return "unknown";
 }
 
 // Standard monsters in declaration order (used for load/save iteration).
 constexpr MonsterId STANDARD_IDS[] = {
-	MonsterId::GOBLIN, MonsterId::ORC,   MonsterId::TROLL,
-	MonsterId::DRAGON, MonsterId::ARCHER, MonsterId::MAGE,
-	MonsterId::WOLF,   MonsterId::FIRE_WOLF, MonsterId::ICE_WOLF,
-	MonsterId::BAT,    MonsterId::KOBOLD,
+	MonsterId::GOBLIN,
+	MonsterId::ORC,
+	MonsterId::TROLL,
+	MonsterId::DRAGON,
+	MonsterId::ARCHER,
+	MonsterId::MAGE,
+	MonsterId::WOLF,
+	MonsterId::FIRE_WOLF,
+	MonsterId::ICE_WOLF,
+	MonsterId::BAT,
+	MonsterId::KOBOLD,
 };
 
 constexpr MonsterId CLASS_IDS[] = {
@@ -100,8 +123,8 @@ nlohmann::json encode_tile(TileRef t)
 {
 	return nlohmann::json{
 		{ "sheet", static_cast<int>(t.sheet) },
-		{ "col",   t.col },
-		{ "row",   t.row }
+		{ "col", t.col },
+		{ "row", t.row }
 	};
 }
 
@@ -117,7 +140,7 @@ DiceExpr parse_dice(const nlohmann::json& j)
 nlohmann::json encode_dice(const DiceExpr& d)
 {
 	return nlohmann::json{
-		{ "num",   d.num },
+		{ "num", d.num },
 		{ "sides", d.sides },
 		{ "bonus", d.bonus }
 	};
@@ -136,37 +159,38 @@ DamageInfo parse_damage(const nlohmann::json& j)
 nlohmann::json encode_damage(const DamageInfo& d)
 {
 	return nlohmann::json{
-		{ "min",     d.minDamage },
-		{ "max",     d.maxDamage },
+		{ "min", d.minDamage },
+		{ "max", d.maxDamage },
 		{ "display", d.displayRoll },
-		{ "type",    static_cast<int>(d.damageType) }
+		{ "type", static_cast<int>(d.damageType) }
 	};
 }
 
 MonsterParams parse_full_params(const nlohmann::json& entry)
 {
 	MonsterParams p;
-	p.symbol     = parse_tile(entry.at("tile"));
-	p.color      = entry.at("color").get<int>();
+	p.symbol = parse_tile(entry.at("tile"));
+	p.color = entry.at("color").get<int>();
 	p.corpse_name = entry.at("corpse").get<std::string>();
-	p.hp_dice    = parse_dice(entry.at("hp"));
-	p.thaco      = entry.at("thaco").get<int>();
-	p.ac         = entry.at("ac").get<int>();
-	p.xp         = entry.at("xp").get<int>();
-	p.dr         = entry.at("dr").get<int>();
-	p.morale     = entry.at("morale").get<int>();
-	p.str_dice   = parse_dice(entry.at("str"));
-	p.dex_dice   = parse_dice(entry.at("dex"));
-	p.con_dice   = parse_dice(entry.at("con"));
-	p.int_dice   = parse_dice(entry.at("int"));
-	p.wis_dice   = parse_dice(entry.at("wis"));
-	p.cha_dice   = parse_dice(entry.at("cha"));
+	p.hp_dice = parse_dice(entry.at("hp"));
+	p.thaco = entry.at("thaco").get<int>();
+	p.ac = entry.at("ac").get<int>();
+	p.xp = entry.at("xp").get<int>();
+	p.dr = entry.at("dr").get<int>();
+	p.morale = entry.at("morale").get<int>();
+	p.str_dice = parse_dice(entry.at("str"));
+	p.dex_dice = parse_dice(entry.at("dex"));
+	p.con_dice = parse_dice(entry.at("con"));
+	p.int_dice = parse_dice(entry.at("int"));
+	p.wis_dice = parse_dice(entry.at("wis"));
+	p.cha_dice = parse_dice(entry.at("cha"));
 	p.weapon_name = entry.at("weapon").get<std::string>();
-	p.damage     = parse_damage(entry.at("damage"));
-	p.ai_type    = (entry.at("ai").get<std::string>() == "ranged")
-		? MonsterAiType::RANGED : MonsterAiType::MELEE;
-	p.can_swim   = entry.at("can_swim").get<bool>();
-	p.base_weight   = entry.at("weight").get<int>();
+	p.damage = parse_damage(entry.at("damage"));
+	p.ai_type = (entry.at("ai").get<std::string>() == "ranged")
+		? MonsterAiType::RANGED
+		: MonsterAiType::MELEE;
+	p.can_swim = entry.at("can_swim").get<bool>();
+	p.base_weight = entry.at("weight").get<int>();
 	p.level_minimum = entry.at("depth_min").get<int>();
 	p.level_maximum = entry.at("depth_max").get<int>();
 	p.level_scaling = entry.at("depth_scale").get<float>();
@@ -176,28 +200,28 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 nlohmann::json encode_full_params(const MonsterParams& p)
 {
 	return nlohmann::json{
-		{ "tile",        encode_tile(p.symbol) },
-		{ "color",       p.color },
-		{ "corpse",      p.corpse_name },
-		{ "hp",          encode_dice(p.hp_dice) },
-		{ "thaco",       p.thaco },
-		{ "ac",          p.ac },
-		{ "xp",          p.xp },
-		{ "dr",          p.dr },
-		{ "morale",      p.morale },
-		{ "str",         encode_dice(p.str_dice) },
-		{ "dex",         encode_dice(p.dex_dice) },
-		{ "con",         encode_dice(p.con_dice) },
-		{ "int",         encode_dice(p.int_dice) },
-		{ "wis",         encode_dice(p.wis_dice) },
-		{ "cha",         encode_dice(p.cha_dice) },
-		{ "weapon",      p.weapon_name },
-		{ "damage",      encode_damage(p.damage) },
-		{ "ai",          p.ai_type == MonsterAiType::RANGED ? "ranged" : "melee" },
-		{ "can_swim",    p.can_swim },
-		{ "weight",      p.base_weight },
-		{ "depth_min",   p.level_minimum },
-		{ "depth_max",   p.level_maximum },
+		{ "tile", encode_tile(p.symbol) },
+		{ "color", p.color },
+		{ "corpse", p.corpse_name },
+		{ "hp", encode_dice(p.hp_dice) },
+		{ "thaco", p.thaco },
+		{ "ac", p.ac },
+		{ "xp", p.xp },
+		{ "dr", p.dr },
+		{ "morale", p.morale },
+		{ "str", encode_dice(p.str_dice) },
+		{ "dex", encode_dice(p.dex_dice) },
+		{ "con", encode_dice(p.con_dice) },
+		{ "int", encode_dice(p.int_dice) },
+		{ "wis", encode_dice(p.wis_dice) },
+		{ "cha", encode_dice(p.cha_dice) },
+		{ "weapon", p.weapon_name },
+		{ "damage", encode_damage(p.damage) },
+		{ "ai", p.ai_type == MonsterAiType::RANGED ? "ranged" : "melee" },
+		{ "can_swim", p.can_swim },
+		{ "weight", p.base_weight },
+		{ "depth_min", p.level_minimum },
+		{ "depth_max", p.level_maximum },
 		{ "depth_scale", p.level_scaling }
 	};
 }
@@ -205,10 +229,16 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 int roll_dice(RandomDice* dice, const DiceExpr& expr)
 {
 	if (expr.num == 0)
+	{
 		return 0;
+	}
+
 	int total = 0;
 	for (int i = 0; i < expr.num; ++i)
+	{
 		total += dice->roll(1, expr.sides);
+	}
+
 	return total + expr.bonus;
 }
 
@@ -220,8 +250,11 @@ std::optional<MonsterId> key_to_standard_id(std::string_view key)
 	for (MonsterId id : STANDARD_IDS)
 	{
 		if (monster_key(id) == key)
+		{
 			return id;
+		}
 	}
+
 	return std::nullopt;
 }
 
@@ -230,8 +263,11 @@ std::optional<MonsterId> key_to_class_id(std::string_view key)
 	for (MonsterId id : CLASS_IDS)
 	{
 		if (monster_key(id) == key)
+		{
 			return id;
+		}
 	}
+
 	return std::nullopt;
 }
 
@@ -242,31 +278,53 @@ std::string normalize_key(std::string_view name)
 	for (char c : name)
 	{
 		if (std::isspace(static_cast<unsigned char>(c)))
+		{
 			key += '_';
+		}
 		else
+		{
 			key += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+		}
 	}
+
 	return key;
 }
 
 bool has_any_key(std::string_view key)
 {
 	for (MonsterId id : STANDARD_IDS)
-		if (monster_key(id) == key) return true;
+	{
+		if (monster_key(id) == key)
+		{
+			return true;
+		}
+	}
+
 	for (MonsterId id : CLASS_IDS)
-		if (monster_key(id) == key) return true;
+	{
+		if (monster_key(id) == key)
+		{
+			return true;
+		}
+	}
+
 	return s_custom.contains(std::string{ key });
 }
 
 std::string unique_key(std::string base)
 {
 	if (!has_any_key(base))
+	{
 		return base;
-	for (int n = 2; ; ++n)
+	}
+
+	for (int n = 2;; ++n)
 	{
 		std::string candidate = std::format("{}_{}", base, n);
 		if (!has_any_key(candidate))
+		{
 			return candidate;
+		}
 	}
 }
 
@@ -294,9 +352,14 @@ void MonsterCreator::load(std::string_view path)
 	// Collect known builtin keys for custom detection
 	std::set<std::string> known_keys;
 	for (MonsterId id : STANDARD_IDS)
+	{
 		known_keys.insert(std::string{ monster_key(id) });
+	}
+
 	for (MonsterId id : CLASS_IDS)
+	{
 		known_keys.insert(std::string{ monster_key(id) });
+	}
 
 	// Standard monsters: entry has "hp" field.
 	for (MonsterId id : STANDARD_IDS)
@@ -311,9 +374,13 @@ void MonsterCreator::load(std::string_view path)
 		const auto& corpse = registry[id].corpse_name;
 		const std::string dead_prefix = "dead ";
 		if (corpse.starts_with(dead_prefix))
+		{
 			registry[id].name = corpse.substr(dead_prefix.size());
+		}
 		else
+		{
 			registry[id].name = key;
+		}
 	}
 
 	// Class-based monsters: entry only has tile (and optional color).
@@ -327,19 +394,29 @@ void MonsterCreator::load(std::string_view path)
 		MonsterParams& p = s_class_params[id];
 		p.name = std::string{ monster_key(id) };
 		if (s_class_tiles.contains(id))
+		{
 			p.symbol = s_class_tiles.at(id);
+		}
 	}
 
 	// Custom monsters: any remaining JSON entry with an "hp" field
 	for (const auto& [key, entry] : root.items())
 	{
 		if (known_keys.contains(key))
+		{
 			continue;
+		}
+
 		if (!entry.contains("hp"))
+		{
 			continue;
+		}
+
 		MonsterParams p = parse_full_params(entry);
 		if (p.name.empty())
+		{
 			p.name = key;
+		}
 		s_custom[key] = std::move(p);
 	}
 }
@@ -366,6 +443,7 @@ void MonsterCreator::save(std::string_view path)
 		{
 			entry["tile"] = encode_tile(s_class_tiles.at(id));
 		}
+
 		if (registry.contains(id))
 		{
 			entry["color"] = registry.at(id).color;
@@ -400,9 +478,15 @@ const std::unordered_map<MonsterId, MonsterParams>& MonsterCreator::get_registry
 TileRef MonsterCreator::get_tile(MonsterId id)
 {
 	if (registry.contains(id))
+	{
 		return registry.at(id).symbol;
+	}
+
 	if (s_class_tiles.contains(id))
+	{
 		return s_class_tiles.at(id);
+	}
+
 	return TileRef{};
 }
 
@@ -447,7 +531,12 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	c->attacker = std::make_unique<Attacker>(params.damage);
 	c->destructible = std::make_unique<MonsterDestructible>(
-		hp, params.dr, params.corpse_name, params.xp, params.thaco, params.ac);
+		hp,
+		params.dr,
+		params.corpse_name,
+		params.xp,
+		params.thaco,
+		params.ac);
 	c->destructible->set_last_constitution(c->get_constitution());
 
 	if (params.ai_type == MonsterAiType::RANGED)
@@ -461,7 +550,9 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	}
 
 	if (params.can_swim)
+	{
 		c->add_state(ActorState::CAN_SWIM);
+	}
 
 	assert(c->ai && "Monster requires Ai");
 	assert(c->attacker && "Monster requires Attacker");
@@ -484,11 +575,18 @@ std::vector<std::string> MonsterCreator::get_all_keys()
 	std::vector<std::string> keys;
 	keys.reserve(std::size(STANDARD_IDS) + s_custom.size() + std::size(CLASS_IDS));
 	for (MonsterId id : STANDARD_IDS)
+	{
 		keys.push_back(std::string{ monster_key(id) });
+	}
 	for (const auto& [key, _] : s_custom)
+	{
 		keys.push_back(key);
+	}
 	for (MonsterId id : CLASS_IDS)
+	{
 		keys.push_back(std::string{ monster_key(id) });
+	}
+
 	return keys;
 }
 
@@ -497,17 +595,28 @@ const MonsterParams& MonsterCreator::get_params(std::string_view key)
 	if (auto id = key_to_standard_id(key))
 	{
 		if (!registry.contains(*id))
+		{
 			throw std::out_of_range(std::format("MonsterCreator::get_params -- '{}' not in registry", key));
+		}
+
 		return registry.at(*id);
 	}
+
 	if (s_custom.contains(std::string{ key }))
+	{
 		return s_custom.at(std::string{ key });
+	}
+
 	if (auto id = key_to_class_id(key))
 	{
 		if (!s_class_params.contains(*id))
+		{
 			throw std::out_of_range(std::format("MonsterCreator::get_params -- class entry '{}' not initialised", key));
+		}
+
 		return s_class_params.at(*id);
 	}
+
 	throw std::out_of_range(std::format("MonsterCreator::get_params -- unknown key '{}'", key));
 }
 
@@ -518,28 +627,40 @@ void MonsterCreator::set_params(std::string_view key, const MonsterParams& p)
 		registry[*id] = p;
 		return;
 	}
+
 	if (auto id = key_to_class_id(key))
 	{
 		s_class_tiles[*id] = p.symbol;
 		s_class_params[*id] = p;
 		return;
 	}
+
 	if (s_custom.contains(std::string{ key }))
 	{
 		s_custom[std::string{ key }] = p;
 		return;
 	}
+
 	throw std::out_of_range(std::format("MonsterCreator::set_params -- unknown key '{}'", key));
 }
 
 TileRef MonsterCreator::get_tile(std::string_view key)
 {
 	if (auto id = key_to_standard_id(key))
+	{
 		return get_tile(*id);
+	}
+
 	if (auto id = key_to_class_id(key))
+	{
 		return get_tile(*id);
+	}
+
 	if (s_custom.contains(std::string{ key }))
+	{
 		return s_custom.at(std::string{ key }).symbol;
+	}
+
 	return TileRef{};
 }
 
@@ -550,16 +671,19 @@ void MonsterCreator::set_tile(std::string_view key, TileRef tile)
 		set_tile(*id, tile);
 		return;
 	}
+
 	if (auto id = key_to_class_id(key))
 	{
 		set_tile(*id, tile);
 		return;
 	}
+
 	if (s_custom.contains(std::string{ key }))
 	{
 		s_custom[std::string{ key }].symbol = tile;
 		return;
 	}
+
 	throw std::out_of_range(std::format("MonsterCreator::set_tile -- unknown key '{}'", key));
 }
 
@@ -568,6 +692,7 @@ std::string MonsterCreator::add_custom(MonsterParams p)
 	std::string base = normalize_key(p.name.empty() ? "new_monster" : p.name);
 	std::string key = unique_key(base);
 	s_custom[key] = std::move(p);
+
 	return key;
 }
 
@@ -578,6 +703,7 @@ void MonsterCreator::remove_custom(std::string_view key)
 		throw std::invalid_argument(
 			std::format("MonsterCreator::remove_custom -- '{}' is a built-in monster and cannot be removed", key));
 	}
+
 	if (!s_custom.erase(std::string{ key }))
 	{
 		throw std::out_of_range(

@@ -20,17 +20,16 @@
 #include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Decoration.h"
 #include "../Map/Map.h"
 #include "../Menu/ContextMenu.h"
 #include "../Menu/Menu.h"
-#include "../Utils/Dijkstra.h"
 #include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/CreatureManager.h"
 #include "../Systems/DisplayManager.h"
 #include "../Systems/InputHandler.h"
@@ -39,7 +38,9 @@
 #include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
 #include "../Systems/TargetingSystem.h"
+#include "../Tools/DecorEditor.h"
 #include "../UI/InventoryUI.h"
+#include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
 #include "Ai.h"
 #include "AiPlayer.h"
@@ -86,10 +87,14 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 	}
 
 	if (resolve_pending_door(owner, ctx))
+	{
 		return;
+	}
 
 	if (handle_mouse_path(owner, ctx))
+	{
 		return;
+	}
 
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
@@ -112,10 +117,8 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 			if (ctx.dice->d2() == 1)
 			{
 				// Random direction
-				static const std::array<Vector2D, 8> allDirections =
-				{
-					DIR_N, DIR_S, DIR_W, DIR_E,
-					DIR_NW, DIR_NE, DIR_SW, DIR_SE
+				static const std::array<Vector2D, 8> allDirections = {
+					DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
 				};
 				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
@@ -137,7 +140,9 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				{
 					Player* player = dynamic_cast<Player*>(&owner);
 					if (player)
+					{
 						call_action(*player, key, ctx);
+					}
 				}
 			}
 		}
@@ -415,6 +420,10 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 			if (decor->hp <= 0)
 			{
 				decor->isBroken = true;
+				if (ctx.decorEditor)
+				{
+					ctx.decorEditor->erase(decor->position.x, decor->position.y);
+				}
 				ctx.messageSystem->message(
 					WHITE_BLACK_PAIR,
 					std::format("The {} shatters!", decor->name),
@@ -473,19 +482,32 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 	{
 		switch (targetTileType)
 		{
+
 		case TileType::WATER:
+		{
 			if (!owner.has_state(ActorState::CAN_SWIM))
 			{
 				ctx.messageSystem->log("You can't swim.");
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't swim.", true);
 			}
 			break;
+		}
+
 		case TileType::WALL:
+		{
 			break;
+		}
+
 		case TileType::CLOSED_DOOR:
+		{
 			break;
+		}
+
 		default:
+		{
 			break;
+		}
+
 		}
 		return false;
 	}
@@ -497,6 +519,7 @@ bool AiPlayer::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_ti
 	{
 		return false;
 	}
+
 	int tileSize = ctx.renderer->get_tile_size();
 	if (tileSize <= 0)
 	{
@@ -506,6 +529,7 @@ bool AiPlayer::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_ti
 		ctx.renderer->get_camera_x(),
 		ctx.renderer->get_camera_y(),
 		tileSize);
+
 	return ctx.map->is_in_bounds(out_world_tile);
 }
 
@@ -524,6 +548,7 @@ bool AiPlayer::is_mouse_pending_cancelled(GameContext& ctx) const
 	const auto& moves = direction_map();
 	bool isMovement = (moves.find(key) != moves.end());
 	bool isAction = (key == Controls::ESCAPE || key == Controls::WAIT || key == Controls::PICK);
+
 	return isMovement || isAction;
 }
 
@@ -542,12 +567,15 @@ void AiPlayer::begin_path_walk(
 	{
 		return;
 	}
+
 	auto path = ctx.pathfinder->a_star_search(
 		*ctx.map, ctx.player->position, destination, true, ctx);
+
 	if (path.empty())
 	{
 		return;
 	}
+
 	*ctx.mousePathOverlay = std::move(path);
 	mouseMode = mode;
 	mouseDoorAction = doorAction;
@@ -562,6 +590,7 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 {
 	switch (mouseMode)
 	{
+
 	case MouseMode::WALK_TO_PICKUP:
 	{
 		Player* player = dynamic_cast<Player*>(&owner);
@@ -573,6 +602,7 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
+
 	case MouseMode::WALK_TO_DOOR:
 	{
 		// The remaining path front is the door tile
@@ -591,8 +621,12 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
+
 	default:
+	{
 		return false;
+	}
+
 	}
 }
 
@@ -657,6 +691,7 @@ bool AiPlayer::handle_mouse_path(Creature& owner, GameContext& ctx)
 	}
 
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+
 	return true;
 }
 
