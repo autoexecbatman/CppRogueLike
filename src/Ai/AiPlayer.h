@@ -40,7 +40,8 @@ private:
 		IDLE,
 		WALK,           // plain A* walk, no arrival action
 		WALK_TO_PICKUP, // walk then pick up item
-		WALK_TO_DOOR    // walk then open/close door
+		WALK_TO_DOOR,   // walk then open/close door
+		WALK_TO_STAIRS  // walk then descend
 	};
 
 	bool shouldComputeFOV{ false };
@@ -49,6 +50,7 @@ private:
 	PendingDoorAction pendingDoorAction{ PendingDoorAction::NONE }; // keyboard door prompt
 	MouseMode mouseMode{ MouseMode::IDLE };
 	PendingDoorAction mouseDoorAction{ PendingDoorAction::NONE }; // WALK_TO_DOOR intent
+	Vector2D mouseDoorTarget{ -1, -1 }; // destination tile for WALK_TO_DOOR
 
 	void move(Creature& owner, Vector2D target);
 	void pick_item(Player& player, GameContext& ctx);

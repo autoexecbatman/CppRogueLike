@@ -1315,11 +1315,11 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D tar
 			bool isTarget = (target.x != -1 && next == target);
 			if (isTarget)
 			{
-				// For target, only check terrain (walls, doors) not actors
-				if (!is_wall(next) && get_tile_type(next) != TileType::CLOSED_DOOR)
-				{
-					results.push_back(next);
-				}
+				// Allow closed doors as target; exclude only solid walls
+			if (!is_wall(next) || get_tile_type(next) == TileType::CLOSED_DOOR)
+			{
+				results.push_back(next);
+			}
 			}
 			else if (can_walk(next, ctx))
 			{

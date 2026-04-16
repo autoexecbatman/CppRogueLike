@@ -500,6 +500,8 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 
 		case TileType::CLOSED_DOOR:
 		{
+			ctx.map->open_door(targetPosition, ctx);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			break;
 		}
 
@@ -579,6 +581,7 @@ void AiPlayer::begin_path_walk(
 	*ctx.mousePathOverlay = std::move(path);
 	mouseMode = mode;
 	mouseDoorAction = doorAction;
+	mouseDoorTarget = destination;
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 }
 
@@ -605,20 +608,25 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 
 	case MouseMode::WALK_TO_DOOR:
 	{
-		// The remaining path front is the door tile
-		if (!ctx.mousePathOverlay->empty())
+		if (mouseDoorAction == PendingDoorAction::OPEN)
 		{
-			Vector2D doorPos = ctx.mousePathOverlay->front();
-			if (mouseDoorAction == PendingDoorAction::OPEN)
-			{
-				ctx.map->open_door(doorPos, ctx);
-			}
-			else
-			{
-				ctx.map->close_door(doorPos, ctx);
-			}
+			ctx.map->open_door(mouseDoorTarget, ctx);
+		}
+		else
+		{
+			ctx.map->close_door(mouseDoorTarget, ctx);
 		}
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		return true;
+	}
+
+	case MouseMode::WALK_TO_STAIRS:
+	{
+		if (ctx.stairs && ctx.stairs->position == owner.position)
+		{
+			ctx.levelManager->advance_to_next_level(ctx);
+			ctx.gameState->set_game_status(GameStatus::STARTUP);
+		}
 		return true;
 	}
 
@@ -687,10 +695,14 @@ bool AiPlayer::handle_mouse_path(Creature& owner, GameContext& ctx)
 
 	if (ctx.mousePathOverlay->empty())
 	{
+		execute_arrival(owner, ctx);
 		mouseMode = MouseMode::IDLE;
 	}
 
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	if (ctx.gameState->get_game_status() != GameStatus::STARTUP)
+	{
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	}
 
 	return true;
 }
@@ -717,8 +729,16 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 		if (world_tile == player.position)
 		{
-			pick_item(player, ctx);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			if (ctx.stairs && ctx.stairs->position == player.position)
+			{
+				ctx.levelManager->advance_to_next_level(ctx);
+				ctx.gameState->set_game_status(GameStatus::STARTUP);
+			}
+			else
+			{
+				pick_item(player, ctx);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
 			break;
 		}
 
@@ -737,34 +757,26 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 			break;
 		}
 
-		bool hasDoor = ctx.map->is_door(world_tile);
-		if (hasDoor)
 		{
-			int dx = std::abs(player.position.x - world_tile.x);
-			int dy = std::abs(player.position.y - world_tile.y);
-			if (dx <= 1 && dy <= 1)
+			MouseMode mode = MouseMode::WALK;
+			if (ctx.stairs && ctx.stairs->position == world_tile)
 			{
-				// Already adjacent -- act immediately
-				if (ctx.map->is_open_door(world_tile))
-				{
-					ctx.map->close_door(world_tile, ctx);
-				}
-				else
-				{
-					ctx.map->open_door(world_tile, ctx);
-				}
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-				break;
+				mode = MouseMode::WALK_TO_STAIRS;
 			}
-			PendingDoorAction action = ctx.map->is_open_door(world_tile)
-				? PendingDoorAction::CLOSE
-				: PendingDoorAction::OPEN;
-			begin_path_walk(world_tile, MouseMode::WALK_TO_DOOR, action, ctx);
+			else
+			{
+				for (const auto& item : ctx.inventoryData->items)
+				{
+					if (item && item->position == world_tile)
+					{
+						mode = MouseMode::WALK_TO_PICKUP;
+						break;
+					}
+				}
+			}
+			begin_path_walk(world_tile, mode, PendingDoorAction::NONE, ctx);
 			break;
 		}
-
-		begin_path_walk(world_tile, MouseMode::WALK, PendingDoorAction::NONE, ctx);
-		break;
 	}
 
 	case Controls::MOUSE_RIGHT:
@@ -789,8 +801,9 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 		bool hasDoor = ctx.map->is_door(world_tile);
 		bool doorIsOpen = hasDoor && ctx.map->is_open_door(world_tile);
+		bool hasStairs = ctx.stairs && ctx.stairs->position == world_tile;
 
-		if (foundItem || hasDoor)
+		if (foundItem || hasDoor || hasStairs)
 		{
 			std::vector<std::string> options;
 			if (foundItem)
@@ -801,16 +814,19 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 			{
 				options.push_back(doorIsOpen ? "Close door" : "Open door");
 			}
+			if (hasStairs)
+			{
+				options.push_back("Descend stairs");
+			}
 			options.push_back("Cancel");
 
 			int anchor_col = world_tile.x - ctx.renderer->get_camera_x() / tileSize;
 			int anchor_row = world_tile.y - ctx.renderer->get_camera_y() / tileSize;
 
-			// Capture by value -- foundItem ptr could dangle, use presence flag instead
 			bool hasItem = (foundItem != nullptr);
 			PendingDoorAction doorAction = doorIsOpen ? PendingDoorAction::CLOSE : PendingDoorAction::OPEN;
 
-			auto callback = [this, world_tile, hasItem, hasDoor, doorAction](int sel, GameContext& callbackCtx)
+			auto callback = [this, world_tile, hasItem, hasDoor, hasStairs, doorAction](int sel, GameContext& callbackCtx)
 			{
 				int idx = 0;
 				if (hasItem)
@@ -827,8 +843,16 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 					{
 						begin_path_walk(world_tile, MouseMode::WALK_TO_DOOR, doorAction, callbackCtx);
 					}
-					// last index = Cancel -- do nothing
+					idx++;
 				}
+				if (hasStairs)
+				{
+					if (sel == idx)
+					{
+						begin_path_walk(world_tile, MouseMode::WALK_TO_STAIRS, PendingDoorAction::NONE, callbackCtx);
+					}
+				}
+				// last index = Cancel -- do nothing
 			};
 
 			ctx.menus->push_back(std::make_unique<ContextMenu>(

@@ -493,6 +493,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 #endif
 
 		ctx.map->compute_fov(ctx);
+		ctx.map->update(); // stamp explored for the freshly-computed FOV so minimap is correct this frame
 		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
 		{
 			ctx.player->racial_ability_adjustments();
