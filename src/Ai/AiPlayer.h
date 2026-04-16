@@ -69,8 +69,12 @@ private:
 	bool is_mouse_pending_cancelled(GameContext& ctx) const;
 	bool handle_mouse_path(Creature& owner, GameContext& ctx);
 	bool execute_arrival(Creature& owner, GameContext& ctx);
+	void handle_left_click(Player& player, GameContext& ctx);
+	void handle_right_click(Player& player, GameContext& ctx);
+	Vector2D find_door_approach(Vector2D doorTile, GameContext& ctx) const;
 	void begin_path_walk(
-		Vector2D destination,
+		Vector2D walkDest,
+		Vector2D actionTarget,
 		MouseMode mode,
 		PendingDoorAction doorAction,
 		GameContext& ctx);
