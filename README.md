@@ -4,8 +4,7 @@ A fantasy roguelike dungeon crawler with classic old-school RPG mechanics.
 
 Inspired by classics: Rogue, ADOM, Baldur's Gate 2.
 
-Play in browser: https://autoexecbatman.github.io/CppRogueLike/C++RogueLike.html
-
+Play in browser: https://autoexecbatman.github.io/CppRogueLike/
 ---
 
 ## Features
