@@ -10,6 +10,12 @@ struct GameContext;
 
 class Dijkstra
 {
+private:
+	int width;
+	double infinity;
+	std::vector<Vector2D> cameFrom; // Persistent work vector (reused across calls)
+	std::vector<double> costSoFar; // Persistent work vector (reused across calls)
+
 public:
 	Dijkstra(int width, int height);
 	std::vector<Vector2D> a_star_search(
@@ -17,7 +23,7 @@ public:
 		Vector2D start,
 		Vector2D goal,
 		bool AStar,
-		GameContext& ctx);
+		const GameContext& ctx);
 	std::vector<Vector2D> reconstruct_path(
 		Vector2D start, Vector2D goal, const std::vector<Vector2D>& cameFrom);
 	// Heuristic function for A* search
@@ -29,12 +35,6 @@ public:
 		int dy = std::abs(a.y - b.y);
 		return static_cast<double>(std::max(dx, dy));
 	}
-
-private:
-	int width;
-	double infinity;
-	std::vector<Vector2D> cameFrom_;      // Persistent work vector (reused across calls)
-	std::vector<double> costSoFar_;       // Persistent work vector (reused across calls)
 };
 
 // Structure to represent a node in the priority queue

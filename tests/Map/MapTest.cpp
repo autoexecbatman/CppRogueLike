@@ -304,7 +304,7 @@ TEST_F(MapTest, IsExplored_OutOfBounds_ReturnsFalse)
 
 TEST_F(MapTest, GetCost_OutOfBounds_ReturnsHighCost)
 {
-    double cost = map->get_cost(Vector2D{-1, -1}, ctx);
+    double cost = map->get_cost(Vector2D{-1, -1});
     EXPECT_GE(cost, 1000.0);
 }
 
@@ -394,7 +394,7 @@ TEST_F(MapTest, Neighbors_ReturnsAdjacentWalkable)
     create_simple_room(5, 5, 7, 7);
 
     Vector2D center{6, 6};
-    auto neighbors = map->neighbors(center, ctx);
+    auto neighbors = map->neighbors(center, ctx, Vector2D{-1, -1});
 
     // Should return adjacent walkable tiles
     // Number depends on which tiles are walkable after init
@@ -405,7 +405,7 @@ TEST_F(MapTest, Neighbors_CornerPosition_LessNeighbors)
 {
     // Corner should have fewer potential neighbors
     Vector2D corner{0, 0};
-    auto neighbors = map->neighbors(corner, ctx);
+    auto neighbors = map->neighbors(corner, ctx, Vector2D{-1, -1});
 
     // Maximum 3 for corner (if all walkable), usually 0 (walls)
     EXPECT_LE(neighbors.size(), 3u);
@@ -468,8 +468,8 @@ TEST_F(MapTest, Cost_WaterTile_IsHigher)
     map->set_tile(floorPos, TileType::FLOOR, 1.0);
     map->set_tile(waterPos, TileType::WATER, 10.0);
 
-    double waterCost = map->get_cost(waterPos, ctx);
-    double floorCost = map->get_cost(floorPos, ctx);
+    double waterCost = map->get_cost(waterPos);
+    double floorCost = map->get_cost(floorPos);
 
     EXPECT_GT(waterCost, floorCost);
 }

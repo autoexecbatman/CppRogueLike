@@ -125,8 +125,8 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
-	std::vector<Vector2D> neighbors(Vector2D id, GameContext& ctx, Vector2D target = Vector2D{ -1, -1 });
-	double cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx);
+	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, Vector2D target);
+	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
 	int get_width() const noexcept { return map_width; }
 	int get_height() const noexcept { return map_height; }
 	long get_seed() const noexcept { return seed; }
@@ -143,7 +143,7 @@ public:
 			throw std::out_of_range{ "Map::get_index() out of bounds" };
 		}
 	} // Note: Cannot be noexcept due to exception
-	double get_cost(Vector2D pos, GameContext& ctx) const noexcept;
+	double get_cost(Vector2D pos) const noexcept;
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);

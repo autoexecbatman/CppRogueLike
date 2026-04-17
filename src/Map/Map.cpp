@@ -1302,7 +1302,7 @@ void Map::regenerate(GameContext& ctx)
 	init(true, ctx);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D target)
+std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, Vector2D target)
 {
 	std::vector<Vector2D> results;
 
@@ -1337,7 +1337,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, GameContext& ctx, Vector2D tar
 	return results;
 }
 
-double Map::cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx)
+double Map::cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx)
 {
 	// if there is an actor on the tile, return a high cost
 	if (get_actor(toNode, ctx) != nullptr)
@@ -1345,7 +1345,7 @@ double Map::cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx)
 		return 1000.0;
 	}
 
-	double baseCost = get_cost(toNode, ctx);
+	double baseCost = get_cost(toNode);
 
 	// Check if this is a diagonal move (8-directional grid)
 	int dx = std::abs(toNode.x - fromNode.x);
@@ -1359,7 +1359,7 @@ double Map::cost(Vector2D fromNode, Vector2D toNode, GameContext& ctx)
 	return baseCost;
 }
 
-double Map::get_cost(Vector2D pos, GameContext& ctx) const noexcept
+double Map::get_cost(Vector2D pos) const noexcept
 {
 	if (!in_bounds(pos))
 	{

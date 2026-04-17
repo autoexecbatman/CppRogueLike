@@ -14,8 +14,8 @@ Dijkstra::Dijkstra(int width, int height)
 {
 	// Pre-allocate work vectors once; they'll be reused and cleared each search
 	const size_t gridSize = static_cast<size_t>(width) * height;
-	cameFrom_.resize(gridSize);
-	costSoFar_.resize(gridSize);
+	cameFrom.resize(gridSize);
+	costSoFar.resize(gridSize);
 }
 
 // set AStar true for A* search, false for Dijkstra's search
@@ -25,14 +25,14 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 	Vector2D start,
 	Vector2D goal,
 	bool AStar,
-	GameContext& ctx)
+	const GameContext& ctx)
 {
 	// Reuse persistent work vectors; just reset them for this search
 	// Clear and re-initialize the work vectors (fast: just fills existing capacity)
 	// cameFrom[i] -> Stores which node led to this node
 	// costSoFar[i] -> Stores the lowest cost found to reach this node
-	std::fill(cameFrom_.begin(), cameFrom_.end(), Vector2D{ -1, -1 });
-	std::fill(costSoFar_.begin(), costSoFar_.end(), infinity);
+	std::fill(cameFrom.begin(), cameFrom.end(), Vector2D{ -1, -1 });
+	std::fill(costSoFar.begin(), costSoFar.end(), infinity);
 
 	// Priority queue for processing nodes, ordered by lowest cost (min-heap)
 	std::priority_queue<FrontierNode, std::vector<FrontierNode>, std::greater<FrontierNode>> frontier;
@@ -41,8 +41,8 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 
 	// Get the index of the starting position in the 1D vector representation of the grid
 	const size_t startIndex = graph.get_index(start);
-	cameFrom_[startIndex] = start; // The start node leads to itself
-	costSoFar_[startIndex] = 0; // Cost to reach the start is 0
+	cameFrom[startIndex] = start; // The start node leads to itself
+	costSoFar[startIndex] = 0; // Cost to reach the start is 0
 
 	// Process nodes until there are none left in the priority queue
 	while (!frontier.empty())
@@ -64,11 +64,11 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 			const size_t nextIndex = graph.get_index(next); // Get index of the next node
 
 			// If this new path is better (lower cost) than the previously known cost
-			double new_cost = costSoFar_[currentIndex] + graph.cost(current, next, ctx);
+			double new_cost = costSoFar[currentIndex] + graph.cost(current, next, ctx);
 
-			if (costSoFar_[nextIndex] == infinity || new_cost < costSoFar_[nextIndex])
+			if (costSoFar[nextIndex] == infinity || new_cost < costSoFar[nextIndex])
 			{
-				costSoFar_[nextIndex] = new_cost; // Update cost to reach this node
+				costSoFar[nextIndex] = new_cost; // Update cost to reach this node
 				if (AStar) // for A* search
 				{
 					double priority = new_cost + heuristic(next, goal);
@@ -78,11 +78,11 @@ std::vector<Vector2D> Dijkstra::a_star_search(
 				{
 					frontier.emplace(next, new_cost);
 				}
-				cameFrom_[nextIndex] = current;
+				cameFrom[nextIndex] = current;
 			}
 		}
 	}
-	return reconstruct_path(start, goal, cameFrom_);
+	return reconstruct_path(start, goal, cameFrom);
 }
 
 std::vector<Vector2D> Dijkstra::reconstruct_path(
