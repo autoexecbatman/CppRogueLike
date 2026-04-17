@@ -433,7 +433,10 @@ bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
 	case ConsumableEffect::HEAL:
 	{
 		if (!wearer.destructible)
+		{
 			return false;
+		}
+
 		if (wearer.destructible->get_hp() >= wearer.destructible->get_max_hp())
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
@@ -491,31 +494,6 @@ bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx)
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You unequip the {}.", owner.get_name()), true);
 		}
-		return true;
-	}
-
-	wearer.equip(owner, ctx);
-	return true;
-}
-
-bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	// TODO: Check this void cast.
-	(void)s;
-	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
-
-	if (success)
-	{
-		Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
-		if (equipped && equipped->uniqueId == owner.uniqueId)
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
-		}
-		else
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
-		}
-
 		return true;
 	}
 
@@ -593,9 +571,9 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	TargetMode mode = targetScroll.targetMode;
 
 	auto onTarget = [mode, aoeRadius, scrollRange, scrollDamage, confuseTurns, &owner, &wearer](
-		bool confirmed,
-		Vector2D targetPos,
-		GameContext& innerCtx) mutable
+						bool confirmed,
+						Vector2D targetPos,
+						GameContext& innerCtx) mutable
 	{
 		if (!confirmed)
 		{
@@ -652,25 +630,6 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	return false; // turn and item consumption handled in callback
 }
 
-bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	// TODO: check this void cast smell.
-	(void)t;
-	const Vector2D validLocation = find_valid_teleport_location(ctx);
-
-	if (validLocation.x != -1 && validLocation.y != -1)
-	{
-		wearer.position = validLocation;
-		ctx.map->compute_fov(ctx);
-		ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
-		return consume_item(owner, wearer);
-	}
-
-	ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
-	return false;
-}
-
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	wearer.adjust_gold(g.amount);
@@ -712,16 +671,13 @@ bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx)
 	return consume_item(owner, wearer);
 }
 
-bool use(Armor& a, Item& item, Creature& wearer, GameContext& ctx)
+bool use([[maybe_unused]] Armor& a, Item& item, Creature& wearer, GameContext& ctx)
 {
-	// TODO: check this void cast smell.
-	(void)a;
-	// Player path
-	if (wearer.uniqueId == ctx.player->uniqueId)
+	if (wearer.is_player())
 	{
 		const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
 
-		// Player* cast is safe: we just verified uniqueId matches player
+		// static_cast safe: is_player() guarantees type
 		auto* player = static_cast<Player*>(&wearer);
 		const bool success = player->toggle_armor(item.uniqueId, ctx);
 
@@ -778,95 +734,77 @@ bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx)
 	return use_stat_boost(g, EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
-bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	// TODO: check this void cast smell.
-	(void)a;
-	(void)wearer;
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
-	ctx.gameState->set_game_status(GameStatus::VICTORY);
-	return false;
-}
-
-// ========== get_ac_bonus() implementations ==========
-// TODO: This is problematic and has no reason.
-int get_ac_bonus(const Consumable&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Weapon&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Shield&) noexcept
-{
-	return -1;
-} // +1 AC in AD&D terms
-int get_ac_bonus(const TargetedScroll&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Teleporter&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Gold&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Food&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const CorpseFood&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Armor& a) noexcept
-{
-	return a.armorClass;
-}
-int get_ac_bonus(const MagicalHelm& mh) noexcept
-{
-	return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus);
-}
-int get_ac_bonus(const MagicalRing& mr) noexcept
-{
-	return MagicalEffectUtils::get_protection_bonus(mr.effect);
-}
-int get_ac_bonus(const JewelryAmulet&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Gauntlets&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Girdle&) noexcept
-{
-	return 0;
-}
-int get_ac_bonus(const Amulet&) noexcept
-{
-	return 0;
-}
-
 // ========== Variant-level dispatchers ==========
 
 bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return std::visit(
-		[&owner, &wearer, &ctx](auto& b)
-		{ return use(b, owner, wearer, ctx); },
+		[&owner, &wearer, &ctx](auto& b) -> bool
+		{
+			using T = std::decay_t<decltype(b)>;
+
+			// Empty-struct types carry no use-site data -- behavior lives here.
+			if constexpr (std::is_same_v<T, Shield>)
+			{
+				const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
+				if (success)
+				{
+					Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
+					if (equipped && equipped->uniqueId == owner.uniqueId)
+						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
+					else
+						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
+					return true;
+				}
+				wearer.equip(owner, ctx);
+				return true;
+			}
+			else if constexpr (std::is_same_v<T, Teleporter>)
+			{
+				const Vector2D validLocation = find_valid_teleport_location(ctx);
+				if (validLocation.x != -1 && validLocation.y != -1)
+				{
+					wearer.position = validLocation;
+					ctx.map->compute_fov(ctx);
+					ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
+					return consume_item(owner, wearer);
+				}
+				ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
+				return false;
+			}
+			else if constexpr (std::is_same_v<T, Amulet>)
+			{
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
+				ctx.gameState->set_game_status(GameStatus::VICTORY);
+				return false;
+			}
+			else
+			{
+				return use(b, owner, wearer, ctx);
+			}
+		},
 		behavior);
 }
 
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 {
 	return std::visit(
-		[](const auto& b)
-		{ return get_ac_bonus(b); },
+		[](const auto& b) -> int
+		{
+			using T = std::decay_t<decltype(b)>;
+			if constexpr (std::is_same_v<T, Armor>)
+				return b.armorClass;
+			else if constexpr (std::is_same_v<T, Shield>)
+				return -1; // +1 AC in AD&D terms
+			else if constexpr (std::is_same_v<T, MagicalHelm>)
+				return MagicalEffectUtils::get_ac_bonus(b.effect, b.bonus);
+			else if constexpr (std::is_same_v<T, MagicalRing>)
+				return MagicalEffectUtils::get_protection_bonus(b.effect);
+			else
+				return 0;
+		},
 		behavior);
 }
 

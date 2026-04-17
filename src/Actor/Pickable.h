@@ -201,37 +201,16 @@ using ItemBehavior = std::variant<
 
 bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Armor& a, Item& owner, Creature& wearer, GameContext& ctx);
+bool use([[maybe_unused]] Armor& a, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(MagicalHelm& mh, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx);
-
-// ========== get_ac_bonus() overloads ==========
-
-int get_ac_bonus(const Consumable&) noexcept;
-int get_ac_bonus(const Weapon&) noexcept;
-int get_ac_bonus(const Shield&) noexcept;
-int get_ac_bonus(const TargetedScroll&) noexcept;
-int get_ac_bonus(const Teleporter&) noexcept;
-int get_ac_bonus(const Gold&) noexcept;
-int get_ac_bonus(const Food&) noexcept;
-int get_ac_bonus(const CorpseFood&) noexcept;
-int get_ac_bonus(const Armor& a) noexcept;
-int get_ac_bonus(const MagicalHelm& mh) noexcept;
-int get_ac_bonus(const MagicalRing& mr) noexcept;
-int get_ac_bonus(const JewelryAmulet&) noexcept;
-int get_ac_bonus(const Gauntlets&) noexcept;
-int get_ac_bonus(const Girdle&) noexcept;
-int get_ac_bonus(const Amulet&) noexcept;
 
 // ========== Variant-level dispatchers ==========
 

@@ -34,6 +34,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PickableAcBonusTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
 )
 

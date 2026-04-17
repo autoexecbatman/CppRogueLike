@@ -1,6 +1,7 @@
+// file: AiMimic.cpp
 #include <algorithm>
 #include <format>
-#include <ranges> // For std::views::reverse
+#include <ranges>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -8,20 +9,20 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Monsters.h"
 #include "../ActorTypes/Player.h"
-#include "../Ai/AiPlayer.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
+#include "../Factories/ItemCreator.h"
 #include "../Factories/MonsterCreator.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
+#include "../Systems/ContentRegistry.h"
 #include "../Systems/MessageSystem.h"
 #include "AiMimic.h"
 #include "AiMonster.h"
 
-// Configuration constants (NOT serialized - same for all mimics)
+// Configuration constants (NOT serialized — same for all mimics)
 constexpr int DISGUISE_CHANGE_RATE = 200;
 constexpr int CONSUMPTION_COOLDOWN_TURNS = 3;
 constexpr int CONSUMPTION_RADIUS = 1;
@@ -62,64 +63,74 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
 };
 
+// Single source of truth: which item appearances a mimic can adopt.
+// Called at fresh construction (Mimic ctor) and as lazy init after load.
+std::vector<Disguise> build_mimic_disguises(ContentRegistry& registry)
+{
+	auto fromItem = [&registry](std::string_view key) -> Disguise
+	{
+		const auto& p = ItemCreator::get_params(key);
+		return { registry.get_tile(key), std::string(p.name), p.color };
+	};
+
+	return {
+		fromItem("gold_coin"),
+		fromItem("health_potion"),
+		fromItem("scroll_lightning"),
+		fromItem("short_sword"),
+		fromItem("food_ration"),
+	};
+}
+
+AiMimic::AiMimic(std::vector<Disguise> initialDisguises)
+	: possibleDisguises(std::move(initialDisguises))
+{
+}
+
 void AiMimic::update(Creature& owner, GameContext& ctx)
 {
-	// Cast the owner to a Mimic - we still need this for type-specific operations
-	Mimic* mimic = dynamic_cast<Mimic*>(&owner);
-	if (!mimic)
+	// Lazy init after load: possibleDisguises is empty when created via Ai::create().
+	if (possibleDisguises.empty())
 	{
-		// This shouldn't happen - but if it does, use standard monster AI
-		ctx.messageSystem->log("Error: AiMimic::update called on non-Mimic creature");
-		AiMonster::update(owner, ctx);
-		return;
+		possibleDisguises = build_mimic_disguises(*ctx.contentRegistry);
 	}
 
-	// Skip if mimic is dead
-	if (mimic->destructible->is_dead())
+	if (owner.destructible->is_dead())
 	{
 		return;
 	}
 
-	// Check if disguised - now using our internal state
 	if (isDisguised)
 	{
-		// Increment disguise change counter
 		disguiseChangeCounter++;
 
-		// Occasionally change disguise if still hidden
 		if (disguiseChangeCounter >= DISGUISE_CHANGE_RATE)
 		{
-			change_disguise(*mimic, ctx);
+			change_disguise(owner, ctx);
 			disguiseChangeCounter = 0;
 			ctx.messageSystem->log("Mimic changed disguise");
 		}
 
-		// Check if player is close enough to reveal
-		check_revealing(*mimic, ctx);
+		check_revealing(owner, ctx);
 	}
 	else
 	{
-		// Not disguised - can consume items and move
-		const bool itemConsumed = consume_nearby_items(*mimic, ctx);
+		const bool itemConsumed = consume_nearby_items(owner, ctx);
 
-		// Only move/attack if we didn't just consume an item
 		if (!itemConsumed)
 		{
-			// Use standard monster AI for movement and attacks
 			AiMonster::update(owner, ctx);
 		}
 	}
 }
 
-[[nodiscard]] bool AiMimic::consume_nearby_items(Mimic& mimic, GameContext& ctx)
+[[nodiscard]] bool AiMimic::consume_nearby_items(Creature& owner, GameContext& ctx)
 {
-	// Only consume items when revealed and active
-	if (isDisguised || mimic.destructible->is_dead())
+	if (isDisguised || owner.destructible->is_dead())
 	{
 		return false;
 	}
 
-	// Apply cooldown mechanic
 	++consumptionCooldown;
 	if (consumptionCooldown < CONSUMPTION_COOLDOWN_TURNS)
 	{
@@ -127,7 +138,6 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	}
 	consumptionCooldown = 0;
 
-	// Early exit if no items exist
 	if (ctx.inventoryData->items.empty())
 	{
 		return false;
@@ -135,7 +145,6 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.inventoryData->items.size()));
 
-	// Find and consume one item within range
 	std::vector<size_t> itemsToRemove;
 	bool itemConsumed = false;
 
@@ -147,19 +156,17 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 			continue;
 		}
 
-		const int itemDistance = mimic.get_tile_distance(item->position);
+		const int itemDistance = owner.get_tile_distance(item->position);
 		ctx.messageSystem->log(std::format("Item at distance {}: {}", itemDistance, item->actorData.name));
 
 		if (itemDistance <= CONSUMPTION_RADIUS)
 		{
-			// Verify item is pickable
 			if (!item->behavior)
 			{
 				ctx.messageSystem->log(std::format("Mimic found non-pickable item, skipping: {}", item->actorData.name));
 				continue;
 			}
 
-			// Display consumption message
 			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "The mimic ");
 			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "consumes the ");
 			ctx.messageSystem->append_message_part(item->actorData.color, item->actorData.name);
@@ -168,24 +175,20 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 			ctx.messageSystem->log(std::format("Mimic consuming item: {}", item->actorData.name));
 
-			// Apply item-specific bonuses
 			++itemsConsumed;
-			apply_item_bonus(mimic, item->itemClass, ctx);
+			apply_item_bonus(owner, item->itemClass, ctx);
 
-			// Check for transformation
 			if (itemsConsumed >= ITEMS_FOR_TRANSFORMATION)
 			{
-				transform_to_greater_mimic(mimic, ctx);
+				transform_to_greater_mimic(owner, ctx);
 			}
 
-			// Mark for removal and stop (one item per turn)
 			itemsToRemove.push_back(i);
 			itemConsumed = true;
 			break;
 		}
 	}
 
-	// Remove consumed items in reverse order to maintain indices
 	for (size_t index : std::views::reverse(itemsToRemove))
 	{
 		ctx.messageSystem->log(std::format("Removing consumed item at index {}", index));
@@ -199,12 +202,11 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	return itemConsumed;
 }
 
-// OCP-compliant: data-driven item bonus application
-void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& ctx)
+void AiMimic::apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext& ctx)
 {
 	if (!item_bonus_map.contains(itemClass))
 	{
-		return; // Unknown item class - no bonus
+		return;
 	}
 
 	const MimicBonusType bonusType = item_bonus_map.at(itemClass);
@@ -214,7 +216,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 
 	case MimicBonusType::HEALTH:
 	{
-		boost_health(mimic, HEALTH_BONUS, ctx);
+		boost_health(owner, HEALTH_BONUS, ctx);
 		ctx.messageSystem->log(std::format("Mimic gained {} HP", HEALTH_BONUS));
 		break;
 	}
@@ -227,8 +229,8 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 
 	case MimicBonusType::DEFENSE_GOLD:
 	{
-		boost_defense(mimic, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
-		if (mimic.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
+		boost_defense(owner, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
+		if (owner.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
 		{
 			ctx.messageSystem->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
 		}
@@ -237,8 +239,8 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 
 	case MimicBonusType::DEFENSE_ARMOR:
 	{
-		boost_defense(mimic, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
-		if (mimic.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
+		boost_defense(owner, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
+		if (owner.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
 		{
 			ctx.messageSystem->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
 		}
@@ -247,7 +249,7 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 
 	case MimicBonusType::ATTACK:
 	{
-		boost_attack(mimic, ctx);
+		boost_attack(owner, ctx);
 		break;
 	}
 
@@ -258,28 +260,28 @@ void AiMimic::apply_item_bonus(Mimic& mimic, ItemClass itemClass, GameContext& c
 	}
 }
 
-void AiMimic::boost_health(Mimic& mimic, int amount, GameContext& ctx)
+void AiMimic::boost_health(Creature& owner, int amount, GameContext& ctx)
 {
-	mimic.destructible->set_max_hp(mimic.destructible->get_max_hp() + amount);
+	owner.destructible->set_max_hp(owner.destructible->get_max_hp() + amount);
 	const int newCurrentHp = std::min(
-		mimic.destructible->get_hp() + amount,
-		mimic.destructible->get_max_hp());
-	mimic.destructible->set_hp(newCurrentHp);
+		owner.destructible->get_hp() + amount,
+		owner.destructible->get_max_hp());
+	owner.destructible->set_hp(newCurrentHp);
 	ctx.messageSystem->log(std::format("Mimic gained {} health from food", amount));
 }
 
-void AiMimic::boost_defense(Mimic& mimic, int amount, int maxDR, GameContext& ctx)
+void AiMimic::boost_defense(Creature& owner, int amount, int maxDR, GameContext& ctx)
 {
-	const int currentDR = mimic.destructible->get_dr();
+	const int currentDR = owner.destructible->get_dr();
 	if (currentDR < maxDR)
 	{
-		mimic.destructible->set_dr(currentDR + amount);
+		owner.destructible->set_dr(currentDR + amount);
 	}
 }
 
-void AiMimic::boost_attack(Mimic& mimic, GameContext& ctx)
+void AiMimic::boost_attack(Creature& owner, GameContext& ctx)
 {
-	const auto& currentDamage = mimic.attacker->get_damage_info();
+	const auto& currentDamage = owner.attacker->get_damage_info();
 	if (currentDamage.maxDamage < MAX_WEAPON_DAMAGE)
 	{
 		const int newMaxDamage = std::min(currentDamage.maxDamage + 1, MAX_WEAPON_DAMAGE);
@@ -287,7 +289,7 @@ void AiMimic::boost_attack(Mimic& mimic, GameContext& ctx)
 			currentDamage.minDamage,
 			newMaxDamage,
 			std::format("1d{}", newMaxDamage));
-		mimic.attacker->set_damage_info(improvedDamage);
+		owner.attacker->set_damage_info(improvedDamage);
 		ctx.messageSystem->log(std::format("Mimic improved attack to {}", improvedDamage.displayRoll));
 	}
 }
@@ -298,33 +300,29 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 	ctx.messageSystem->log(std::format("Mimic increased confusion duration to {}", confusionDuration));
 }
 
-void AiMimic::transform_to_greater_mimic(Mimic& mimic, GameContext& ctx)
+void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 {
-	mimic.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
-	mimic.actorData.color = RED_YELLOW_PAIR;
-	mimic.actorData.name = "greater mimic";
+	owner.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
+	owner.actorData.color = RED_YELLOW_PAIR;
+	owner.actorData.name = "greater mimic";
 	ctx.messageSystem->log("Mimic transformed into greater mimic");
 }
 
-void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
+void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 {
-	// Calculate distance to player
-	int distanceToPlayer = mimic.get_tile_distance(ctx.player->position);
+	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
 	ctx.messageSystem->log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
-	// Check if player is close enough to reveal - using our internal revealDistance
 	if (distanceToPlayer <= revealDistance)
 	{
-		// Reveal true form!
 		isDisguised = false;
-		mimic.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
-		mimic.actorData.name = "mimic";
-		mimic.actorData.color = RED_YELLOW_PAIR;
-		mimic.add_state(ActorState::BLOCKS); // Now it's solid
+		owner.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
+		owner.actorData.name = "mimic";
+		owner.actorData.color = RED_YELLOW_PAIR;
+		owner.add_state(ActorState::BLOCKS);
 
 		ctx.messageSystem->log("Mimic revealed itself!");
 
-		// Try to confuse the player
 		if (ctx.dice->d20() > ctx.player->get_wisdom())
 		{
 			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, "The ");
@@ -332,17 +330,9 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
 			ctx.messageSystem->finalize_message();
 
-			// Apply confusion to player
 			ctx.player->add_state(ActorState::IS_CONFUSED);
-
-			// Apply confusion through player's AI
-			auto playerAi = dynamic_cast<AiPlayer*>(ctx.player->ai.get());
-			if (playerAi)
-			{
-				// Using our confusionDuration for consistency
-				playerAi->apply_confusion(confusionDuration);
-				ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
-			}
+			ctx.player->ai->apply_confusion(confusionDuration);
+			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 		}
 		else
 		{
@@ -354,41 +344,33 @@ void AiMimic::check_revealing(Mimic& mimic, GameContext& ctx)
 	}
 }
 
-void AiMimic::change_disguise(Mimic& mimic, GameContext& ctx)
+void AiMimic::change_disguise(Creature& owner, GameContext& ctx)
 {
-	// Don't change if already revealed - using our isDisguised property
 	if (!isDisguised)
 	{
 		return;
 	}
 
-	// Get the possible disguises from the mimic
-	const auto& possibleDisguises = mimic.get_possible_disguises();
-
-	// Select a random disguise
 	if (!possibleDisguises.empty())
 	{
 		const size_t index = ctx.dice->roll(0, static_cast<int>(possibleDisguises.size()) - 1);
 		const auto& chosen = possibleDisguises.at(index);
-		// Apply the disguise
-		mimic.actorData.tile = chosen.tile;
-		mimic.actorData.name = chosen.name;
-		mimic.actorData.color = chosen.color;
+		owner.actorData.tile = chosen.tile;
+		owner.actorData.name = chosen.name;
+		owner.actorData.color = chosen.color;
 	}
 	else
 	{
 		throw "possibleDisguises is empty in change_disguise()";
 	}
 
-	// Remove the BLOCKS state while disguised
-	mimic.remove_state(ActorState::BLOCKS);
+	owner.remove_state(ActorState::BLOCKS);
 }
 
 void AiMimic::load(const json& j)
 {
 	AiMonster::load(j);
 
-	// Load AiMimic specific data
 	if (j.contains("disguiseChangeCounter"))
 	{
 		disguiseChangeCounter = j.at("disguiseChangeCounter").get<int>();
@@ -424,7 +406,9 @@ void AiMimic::save(json& j)
 {
 	AiMonster::save(j);
 
-	// Save AiMimic specific data
+	// Override the MONSTER type written by AiMonster::save — we are MIMIC.
+	j["type"] = static_cast<int>(AiType::MIMIC);
+
 	j["disguiseChangeCounter"] = disguiseChangeCounter;
 	j["consumptionCooldown"] = consumptionCooldown;
 	j["isDisguised"] = isDisguised;

@@ -25,23 +25,15 @@ enum class PendingDoorAction
 
 class AiPlayer final : public Ai
 {
-public:
-	void update(Creature& owner, GameContext& ctx) override;
-	void load(const json& j) override;
-	void save(json& j) override;
-	void display_inventory(Player& player, GameContext& ctx);
-	void apply_confusion(int duration) { confusionTurns = duration; }
-	bool is_confused() const { return confusionTurns > 0; }
-
 private:
 	// Mouse navigation mode — one authoritative state, no scattered optionals
 	enum class MouseMode
 	{
 		IDLE,
-		WALK,           // plain A* walk, no arrival action
+		WALK, // plain A* walk, no arrival action
 		WALK_TO_PICKUP, // walk then pick up item
-		WALK_TO_DOOR,   // walk then open/close door
-		WALK_TO_STAIRS  // walk then descend
+		WALK_TO_DOOR, // walk then open/close door
+		WALK_TO_STAIRS // walk then descend
 	};
 
 	bool shouldComputeFOV{ false };
@@ -78,4 +70,13 @@ private:
 		MouseMode mode,
 		PendingDoorAction doorAction,
 		GameContext& ctx);
+
+public:
+	void update(Creature& owner, GameContext& ctx) override;
+	void load(const json& j) override;
+	void save(json& j) override;
+	void display_inventory(Player& player, GameContext& ctx);
+	void apply_confusion(int duration) override { confusionTurns = duration; }
+	bool is_confused() const { return confusionTurns > 0; }
+
 };

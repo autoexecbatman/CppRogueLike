@@ -12,6 +12,7 @@
 #include "../Systems/MessageSystem.h"
 #include "Ai.h"
 #include "AiMonster.h"
+#include "AiMimic.h"
 #include "AiMonsterConfused.h"
 #include "AiPlayer.h"
 #include "AiShopkeeper.h"
@@ -51,6 +52,13 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	case AiType::SHOPKEEPER:
 	{
 		ai = std::make_unique<AiShopkeeper>();
+		break;
+	}
+
+	case AiType::MIMIC:
+	{
+		// Default ctor -- possibleDisguises rebuilt lazily on first update via ContentRegistry.
+		ai = std::make_unique<AiMimic>();
 		break;
 	}
 
