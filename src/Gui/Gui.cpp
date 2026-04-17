@@ -280,7 +280,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 
 	// Row 3: Attack roll
 	auto atkLine = std::format(
-		"Atk: {}", ctx.player->attacker->get_attack_damage(*ctx.player).displayRoll);
+		"Atk: {}", ctx.player->get_equipped_weapon_damage_roll());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 3 * tileSize + fontOff }, atkLine, GREEN_BLACK_PAIR);
 
 	// Row 4: Physical attributes

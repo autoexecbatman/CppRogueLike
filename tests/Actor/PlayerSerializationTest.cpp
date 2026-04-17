@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Destructible.h"
-#include "src/Actor/Attacker.h"
+#include "src/Actor/PlayerAttacker.h"
 #include "src/Ai/AiPlayer.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Systems/ContentRegistry.h"
@@ -40,7 +40,7 @@ protected:
 
         // Set up components
         player->destructible = std::make_unique<PlayerDestructible>(30, 2, "player corpse", 0, 18, 10);
-        player->attacker = std::make_unique<Attacker>(DamageInfo{1, 8, "1d8"});
+        player->attacker = std::make_unique<PlayerAttacker>(*player);
         player->ai = std::make_unique<AiPlayer>();
 
         return player;

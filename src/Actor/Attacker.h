@@ -16,19 +16,27 @@ struct BackstabInfo
 	int damageMultiplier{ 1 };
 };
 
+// Abstract base — combat resolution engine shared by MonsterAttacker and PlayerAttacker.
+// Subclasses supply the attacker identity (stored owner reference) and implement attack().
 class Attacker : public Persistent
 {
 private:
-	DamageInfo damageInfo; // Base damage for monsters
+	DamageInfo damageInfo; // Used by MonsterAttacker. PlayerAttacker ignores it.
 
+protected:
+	explicit Attacker(const DamageInfo& damage);
+
+	// Shared combat resolution engine — called by both strategies.
+	// DamageInfo is supplied by the caller (subclass), not computed here.
 	void perform_single_attack(
-		Creature& attacker,
+		Creature& owner,
 		Creature& target,
+		const DamageInfo& attackDamage,
 		int attackPenalty,
 		const std::string& handName,
 		GameContext& ctx);
 
-	BackstabInfo calculate_backstab_bonus(Creature& attacker) const noexcept;
+	BackstabInfo calculate_backstab_bonus(const Creature& owner) const noexcept;
 
 	int calculate_to_hit_roll(
 		const Creature& attacker,
@@ -67,19 +75,15 @@ private:
 		GameContext& ctx) const noexcept;
 
 public:
-	explicit Attacker(const DamageInfo& damage);
+	// Subclasses implement attack() with their owner reference and damage source.
+	virtual void attack(Creature& target, GameContext& ctx) = 0;
 
-	// Get effective damage - uses equipped weapon for players, base damage for monsters
-	DamageInfo get_attack_damage(Creature& attacker) const;
-
-	// Direct damage access for monsters
+	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }
 	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
 	int roll_damage(RandomDice* dice) const { return damageInfo.roll_damage(dice); }
 
-	// Main attack entry point - handles single and dual wield
-	void attack(Creature& attacker, Creature& target, GameContext& ctx);
-
+	// Serializes damageInfo — used by MonsterAttacker. PlayerAttacker overrides with no-ops.
 	void load(const json& j) override;
 	void save(json& j) override;
 };

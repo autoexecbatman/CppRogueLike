@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Attacker.h"
+#include "../Actor/MonsterAttacker.h"
 #include "../Actor/Destructible.h"
 #include "../Ai/AiMimic.h"
 #include "../Colors/Colors.h"
@@ -36,7 +36,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	set_weapon_equipped("Pseudopod");
 
-	attacker = std::make_unique<Attacker>(DamageValues::Dagger());
+	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac);
 
 	ai = std::make_unique<AiMimic>();

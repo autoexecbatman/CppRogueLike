@@ -152,7 +152,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		ctx.messageSystem->log("Spider attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(owner, *ctx.player, ctx);
+		owner.attacker->attack(*ctx.player, ctx);
 
 		// Then try poison - now independent of the regular attack
 		if (can_poison_attack(owner, ctx))
@@ -253,7 +253,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 		if (target)
 		{
 			// Normal attack
-			owner.attacker->attack(owner, *target, ctx);
+			owner.attacker->attack(*target, ctx);
 
 			// Try poison attack
 			if (can_poison_attack(owner, ctx))
@@ -556,7 +556,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(owner, *ctx.player, ctx);
+		owner.attacker->attack(*ctx.player, ctx);
 
 		// Then check for poison - independent of the regular attack success
 		if (can_poison_attack(owner, ctx))

@@ -5,13 +5,11 @@
 #include <unordered_map>
 
 #include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
-#include "../ActorTypes/Player.h"
-#include "../Ai/AiShopkeeper.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
-#include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../Menu/MenuTrade.h"
 #include "../Persistent/Persistent.h"
@@ -19,14 +17,12 @@
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/DataManager.h"
-#include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/LevelUpSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "Attacker.h"
-#include "EquipmentSlot.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
-static const std::unordered_map<BuffType, std::string_view> buff_break_messages = {
+static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
 	{ BuffType::INVISIBILITY, "Your invisibility fades as you attack!" },
 	{ BuffType::SANCTUARY, "Your sanctuary is broken by your aggression!" },
 };
@@ -34,46 +30,10 @@ static const std::unordered_map<BuffType, std::string_view> buff_break_messages 
 Attacker::Attacker(const DamageInfo& damage)
 	: damageInfo(damage) {}
 
-void Attacker::attack(Creature& attacker, Creature& target, GameContext& ctx)
-{
-	// TODO: dynamic_cast smell probably should be refactored to use polymorphism.
-	auto* player = dynamic_cast<Player*>(&attacker);
-	if (player)
-	{
-		// Check for dual wielding
-		auto dualWieldInfo = player->get_dual_wield_info();
-		if (dualWieldInfo.isDualWielding)
-		{
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
-			ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
-			ctx.messageSystem->finalize_message();
-
-			perform_single_attack(attacker, target, dualWieldInfo.mainHandPenalty, "main hand", ctx);
-
-			if (target.destructible && !target.destructible->is_dead())
-			{
-				perform_single_attack(attacker, target, dualWieldInfo.offHandPenalty, "off hand", ctx);
-			}
-			return;
-		}
-
-		// Single source of truth: derive weapon name from equipped item
-		const EquipmentSlot weaponSlot = attacker.has_state(ActorState::IS_RANGED)
-			? EquipmentSlot::MISSILE_WEAPON
-			: EquipmentSlot::RIGHT_HAND;
-		Item* weapon = player->get_equipped_item(weaponSlot);
-		std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
-		perform_single_attack(attacker, target, 0, weaponName, ctx);
-		return;
-	}
-
-	// Monster attack - use stored weapon name
-	perform_single_attack(attacker, target, 0, attacker.get_weapon_equipped(), ctx);
-}
-
 void Attacker::perform_single_attack(
-	Creature& attacker,
+	Creature& owner,
 	Creature& target,
+	const DamageInfo& attackDamage,
 	int attackPenalty,
 	const std::string& handName,
 	GameContext& ctx)
@@ -84,17 +44,17 @@ void Attacker::perform_single_attack(
 		return;
 	}
 
-	// Shopkeeper interaction (melee only)
-	if (dynamic_cast<AiShopkeeper*>(target.ai.get()) && !attacker.has_state(ActorState::IS_RANGED))
+	// Shopkeeper interaction (melee only) — component check replaces dynamic_cast
+	if (target.shop && !owner.has_state(ActorState::IS_RANGED))
 	{
-		ctx.menus->push_back(std::make_unique<MenuTrade>(target, attacker, ctx));
+		ctx.menus->push_back(std::make_unique<MenuTrade>(target, owner, ctx));
 		return;
 	}
 
 	// Cannot attack dead targets or without strength
-	if (target.destructible->is_dead() || attacker.get_strength() <= 0)
+	if (target.destructible->is_dead() || owner.get_strength() <= 0)
 	{
-		ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
+		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " attacks ");
 		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " in vain.");
@@ -103,22 +63,21 @@ void Attacker::perform_single_attack(
 	}
 
 	// Validate strength attribute
-	const int strIndex = attacker.get_strength() - 1;
+	const int strIndex = owner.get_strength() - 1;
 	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.dataManager->get_strength_attributes().size())
 	{
-		ctx.messageSystem->log(std::format("ERROR: Invalid strength {} for {}", attacker.get_strength(), attacker.actorData.name));
+		ctx.messageSystem->log(std::format("ERROR: Invalid strength {} for {}", owner.get_strength(), owner.actorData.name));
 		return;
 	}
 	const auto& strengthAttr = ctx.dataManager->get_strength_attributes().at(strIndex);
 
-	// Get damage and roll dice
-	const DamageInfo attackDamage = get_attack_damage(attacker);
+	// Roll dice
 	const int attackRoll = ctx.dice->d20();
 	const int damageRoll = ctx.dice->roll(attackDamage.minDamage, attackDamage.maxDamage);
 
 	// Calculate backstab and to-hit roll
-	const BackstabInfo backstab = calculate_backstab_bonus(attacker);
-	const int rollNeeded = calculate_to_hit_roll(attacker, target, attackPenalty, backstab, ctx);
+	const BackstabInfo backstab = calculate_backstab_bonus(owner);
+	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, backstab, ctx);
 	const bool isHit = (attackRoll >= rollNeeded);
 
 	if (isHit)
@@ -127,7 +86,7 @@ void Attacker::perform_single_attack(
 		const int finalDamage = std::max(0, baseDamage - target.destructible->get_dr());
 
 		log_attack_hit(
-			attacker,
+			owner,
 			target,
 			attackRoll,
 			rollNeeded,
@@ -152,7 +111,7 @@ void Attacker::perform_single_attack(
 	else
 	{
 		log_attack_miss(
-			attacker,
+			owner,
 			target,
 			attackRoll,
 			rollNeeded,
@@ -162,28 +121,28 @@ void Attacker::perform_single_attack(
 	}
 
 	// AD&D 2e: Remove buffs that break when attacking (Invisibility, Sanctuary, etc.) - OCP compliant
-	const auto broken_buffs = ctx.buffSystem->remove_buffs_broken_by_attacking(attacker);
+	const auto broken_buffs = ctx.buffSystem->remove_buffs_broken_by_attacking(owner);
 
 	// Show player notification for broken buffs
-	if (attacker.uniqueId == ctx.player->uniqueId)
+	if (owner.is_player())
 	{
 		for (BuffType buff_type : broken_buffs)
 		{
-			if (buff_break_messages.contains(buff_type))
+			if (BUFF_BREAK_MESSAGES.contains(buff_type))
 			{
 				ctx.messageSystem->message(
 					CYAN_BLACK_PAIR,
-					std::string(buff_break_messages.at(buff_type)),
+					std::string(BUFF_BREAK_MESSAGES.at(buff_type)),
 					true);
 			}
 		}
 	}
 }
 
-BackstabInfo Attacker::calculate_backstab_bonus(Creature& attacker) const noexcept
+BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noexcept
 {
-	// AD&D 2e: Invisibility grants backstab - +4 to hit, rogues get damage multiplier
-	if (!attacker.is_invisible())
+	// AD&D 2e: Invisibility grants backstab — +4 to hit, rogues get damage multiplier
+	if (!owner.is_invisible())
 	{
 		return BackstabInfo{ false, 0, 1 };
 	}
@@ -193,10 +152,10 @@ BackstabInfo Attacker::calculate_backstab_bonus(Creature& attacker) const noexce
 	info.hitBonus = 4; // +4 to hit from behind/invisible
 	info.damageMultiplier = 1;
 
-	auto* player = dynamic_cast<Player*>(&attacker);
-	if (player && player->playerClassState == Player::PlayerClassState::ROGUE)
+	// CreatureClass::ROGUE replaces dynamic_cast<Player*> + playerClassState check
+	if (owner.get_creature_class() == CreatureClass::ROGUE)
 	{
-		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(player->get_creature_level());
+		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(owner.get_creature_level());
 	}
 
 	return info;
@@ -329,27 +288,6 @@ void Attacker::log_attack_miss(
 		attacker.destructible->get_thaco(),
 		target.destructible->get_armor_class(),
 		attackPenalty));
-}
-
-DamageInfo Attacker::get_attack_damage(Creature& attacker) const
-{
-	// TODO: dynamic_cast smell probably should be refactored to use polymorphism.
-	auto* player = dynamic_cast<Player*>(&attacker);
-	if (player)
-	{
-		const EquipmentSlot weaponSlot = attacker.has_state(ActorState::IS_RANGED)
-			? EquipmentSlot::MISSILE_WEAPON
-			: EquipmentSlot::RIGHT_HAND;
-		Item* weapon = player->get_equipped_item(weaponSlot);
-		if (weapon && weapon->is_weapon())
-		{
-			const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-			return WeaponDamageRegistry::get_enhanced_damage_info(weapon->item_key, enhancement);
-		}
-		return WeaponDamageRegistry::get_unarmed_damage_info();
-	}
-
-	return damageInfo;
 }
 
 void Attacker::load(const json& j)

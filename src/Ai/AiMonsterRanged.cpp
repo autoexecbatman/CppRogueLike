@@ -97,7 +97,7 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 	animate_arrow(owner.position, targetPos, ctx);
 
 	// Perform the attack
-	owner.attacker->attack(owner, *ctx.player, ctx);
+	owner.attacker->attack(*ctx.player, ctx);
 	return true;
 }
 

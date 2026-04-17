@@ -10,6 +10,7 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
+#include "../Actor/PlayerAttacker.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Actor/InventoryOperations.h"
@@ -160,7 +161,7 @@ void Player::roll_new_character(GameContext& ctx)
 	const int playerXp = 0;
 	const int playerAC = 10;
 
-	attacker = std::make_unique<Attacker>(DamageValues::Unarmed());
+	attacker = std::make_unique<PlayerAttacker>(*this);
 	destructible = std::make_unique<PlayerDestructible>(
 		playerHp, playerDr, "your corpse", playerXp, 0, playerAC);
 }
@@ -1061,6 +1062,9 @@ void Player::save(json& j)
 void Player::load(const json& j)
 {
 	Creature::load(j); // Call base class load
+	// Creature::load constructs MonsterAttacker when attacker data is present.
+	// Replace with the correct PlayerAttacker strategy.
+	attacker = std::make_unique<PlayerAttacker>(*this);
 
 	// Player-specific fields
 	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());

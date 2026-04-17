@@ -53,7 +53,7 @@ void AiMonsterConfused::attempt_move(Creature& owner, const Vector2D& destinatio
 		const auto& actor = ctx.map->get_actor(destination, ctx);
 		if (actor && owner.attacker)
 		{
-			owner.attacker->attack(owner, *actor, ctx);
+			owner.attacker->attack(*actor, ctx);
 		}
 	}
 }

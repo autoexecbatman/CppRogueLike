@@ -98,7 +98,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(owner, *ctx.player, ctx);
+		owner.attacker->attack(*ctx.player, ctx);
 		return;
 	}
 

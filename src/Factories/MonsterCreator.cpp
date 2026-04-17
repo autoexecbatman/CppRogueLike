@@ -14,7 +14,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "../Actor/Attacker.h"
+#include "../Actor/MonsterAttacker.h"
 #include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
 #include "../Ai/AiMonster.h"
@@ -529,7 +529,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	const int hp = std::max(1, roll_dice(ctx.dice, params.hp_dice));
 
-	c->attacker = std::make_unique<Attacker>(params.damage);
+	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
 	c->destructible = std::make_unique<MonsterDestructible>(
 		hp,
 		params.dr,

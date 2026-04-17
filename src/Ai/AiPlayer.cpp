@@ -390,7 +390,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 							{
 								ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
 							}
-							owner.attacker->attack(owner, *c, ctx);
+							owner.attacker->attack(*c, ctx);
 						}
 						else
 						{
@@ -402,7 +402,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 				}
 				else
 				{
-					owner.attacker->attack(owner, *c, ctx);
+					owner.attacker->attack(*c, ctx);
 				}
 
 				ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);

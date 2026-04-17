@@ -23,6 +23,7 @@
 #include "../Systems/TileConfig.h"
 #include "Actor.h"
 #include "Attacker.h"
+#include "MonsterAttacker.h"
 #include "Creature.h"
 #include "Destructible.h"
 #include "EquipmentSlot.h"
@@ -49,7 +50,7 @@ void Creature::load(const json& j)
 	attacksPerRound = j.value("attacksPerRound", 1.0f);
 	if (j.contains("attacker"))
 	{
-		attacker = std::make_unique<Attacker>(DamageInfo{});
+		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{});
 		attacker->load(j["attacker"]);
 	}
 	if (j.contains("destructible"))
@@ -106,7 +107,12 @@ void Creature::save(json& j)
 	{
 		json attackerJson;
 		attacker->save(attackerJson);
-		j["attacker"] = attackerJson;
+		// Only write the key if the strategy produced content.
+		// PlayerAttacker::save() is a no-op — no damageInfo to persist.
+		if (!attackerJson.empty())
+		{
+			j["attacker"] = attackerJson;
+		}
 	}
 	if (destructible)
 	{

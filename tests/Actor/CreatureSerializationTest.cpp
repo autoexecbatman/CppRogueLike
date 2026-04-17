@@ -2,7 +2,7 @@
 #include <nlohmann/json.hpp>
 #include "src/Actor/Creature.h"
 #include "src/Actor/Destructible.h"
-#include "src/Actor/Attacker.h"
+#include "src/Actor/MonsterAttacker.h"
 #include "src/Ai/AiMonster.h"
 
 using json = nlohmann::json;
@@ -30,7 +30,7 @@ protected:
 
         // Add components - use MonsterDestructible for proper serialization
         creature->destructible = std::make_unique<MonsterDestructible>(20, 1, "dead goblin", 35, 19, 6);
-        creature->attacker = std::make_unique<Attacker>(DamageInfo{1, 6, "1d6"});
+        creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
         creature->ai = std::make_unique<AiMonster>();
 
         return creature;
@@ -130,7 +130,7 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     ASSERT_NE(loaded->attacker, nullptr);
 
     // Get damage info and verify
-    auto damageInfo = loaded->attacker->get_attack_damage(*loaded);
+    const auto& damageInfo = loaded->attacker->get_damage_info();
     EXPECT_EQ(damageInfo.minDamage, 1);
     EXPECT_EQ(damageInfo.maxDamage, 6);
 }

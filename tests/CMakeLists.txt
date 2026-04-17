@@ -53,6 +53,8 @@ set(PARENT_SOURCES
     # Actor
     ${PARENT_SOURCE_DIR}/Actor/Actor.cpp
     ${PARENT_SOURCE_DIR}/Actor/Attacker.cpp
+    ${PARENT_SOURCE_DIR}/Actor/MonsterAttacker.cpp
+    ${PARENT_SOURCE_DIR}/Actor/PlayerAttacker.cpp
     ${PARENT_SOURCE_DIR}/Actor/Container.cpp
     ${PARENT_SOURCE_DIR}/Actor/Destructible.cpp
     ${PARENT_SOURCE_DIR}/Actor/Pickable.cpp

@@ -4,7 +4,7 @@
 #include <string>
 
 #include "../../Actor/Actor.h"
-#include "../../Actor/Attacker.h"
+#include "../../Actor/MonsterAttacker.h"
 #include "../../Actor/Destructible.h"
 #include "../../Ai/AiShopkeeper.h"
 #include "../../Colors/Colors.h"
@@ -44,7 +44,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 
 	// Set combat stats - non-hostile defensive stats (use MonsterDestructible for proper save/load)
 	shopkeeper.destructible = std::make_unique<MonsterDestructible>(100, 20, "the shopkeeper's corpse", 0, 20, 10);
-	shopkeeper.attacker = std::make_unique<Attacker>(DamageValues::Dagger());
+	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 
 	assert(shopkeeper.ai && "Shopkeeper requires Ai");

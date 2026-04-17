@@ -110,6 +110,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/Actor.h
     ${PROJECT_SOURCE_DIR}/Actor/Attacker.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Attacker.h
+    ${PROJECT_SOURCE_DIR}/Actor/MonsterAttacker.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/MonsterAttacker.h
+    ${PROJECT_SOURCE_DIR}/Actor/PlayerAttacker.cpp
+    ${PROJECT_SOURCE_DIR}/Actor/PlayerAttacker.h
     ${PROJECT_SOURCE_DIR}/Actor/Container.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Container.h
     ${PROJECT_SOURCE_DIR}/Actor/Destructible.cpp

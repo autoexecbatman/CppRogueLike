@@ -201,7 +201,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 
 		assert(innerCtx.player->attacker && "ranged attack fired with no attacker component");
 		assert(innerCtx.creatureManager && "ranged attack fired with no creature manager");
-		innerCtx.player->attacker->attack(*innerCtx.player, *target, innerCtx);
+		innerCtx.player->attacker->attack(*target, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
 	};
