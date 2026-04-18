@@ -573,7 +573,7 @@ TEST_F(DestructibleEdgeCaseTest, SpellDamage_KillsAndRequiresCleanup)
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_IncreaseAddsHp)
 {
 	player->set_constitution(10); // +0 HP/level
-	player->set_player_level(5);
+	player->set_creature_level(5);
 	player->destructible->set_last_constitution(10);
 	player->destructible->update_constitution_bonus(*player, ctx);
 
@@ -592,7 +592,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_IncreaseAddsHp)
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_DecreaseRemovesHp)
 {
 	// Start fresh: establish baseline with con 16
-	player->set_player_level(5); // Set level first
+	player->set_creature_level(5); // Set level first
 	player->set_constitution(16); // +2 HP/level
 	player->destructible->set_last_constitution(10); // Starting from con 10
 	player->destructible->update_constitution_bonus(*player, ctx); // Apply con 16 bonus (+10 HP)
@@ -618,7 +618,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_CapsAtLevel9ForFighter)
 {
 	player->playerClassState = Player::PlayerClassState::FIGHTER;
 	player->set_constitution(16); // +2 HP/level
-	player->set_player_level(12);
+	player->set_creature_level(12);
 	player->destructible->set_hp_base(50);
 	player->destructible->set_max_hp(50);
 	player->destructible->set_hp(50);
@@ -634,7 +634,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_CapsAtLevel9ForCleric)
 {
 	player->playerClassState = Player::PlayerClassState::CLERIC;
 	player->set_constitution(16);
-	player->set_player_level(15);
+	player->set_creature_level(15);
 	player->destructible->set_hp_base(50);
 	player->destructible->set_max_hp(50);
 	player->destructible->set_hp(50);
@@ -650,7 +650,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_CapsAtLevel10ForRogue)
 {
 	player->playerClassState = Player::PlayerClassState::ROGUE;
 	player->set_constitution(16);
-	player->set_player_level(15);
+	player->set_creature_level(15);
 	player->destructible->set_hp_base(50);
 	player->destructible->set_max_hp(50);
 	player->destructible->set_hp(50);
@@ -666,7 +666,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_CapsAtLevel10ForWizard)
 {
 	player->playerClassState = Player::PlayerClassState::WIZARD;
 	player->set_constitution(16);
-	player->set_player_level(20);
+	player->set_creature_level(20);
 	player->destructible->set_hp_base(30);
 	player->destructible->set_max_hp(30);
 	player->destructible->set_hp(30);
@@ -681,7 +681,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_CapsAtLevel10ForWizard)
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_NoChangeDoesNothing)
 {
 	player->set_constitution(14);
-	player->set_player_level(5);
+	player->set_creature_level(5);
 	player->destructible->set_hp_base(50);
 	player->destructible->set_max_hp(50);
 	player->destructible->set_hp(50);
@@ -700,7 +700,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_NoChangeDoesNothing)
 TEST_F(DestructibleEdgeCaseTest, ConstitutionDrain_CanCauseDeath)
 {
 	player->set_constitution(16); // +2 HP/level
-	player->set_player_level(5);
+	player->set_creature_level(5);
 	player->destructible->set_max_hp(10);
 	player->destructible->set_hp(10);
 	player->destructible->set_last_constitution(16);
@@ -724,7 +724,7 @@ TEST_F(DestructibleEdgeCaseTest, ConstitutionDrain_CanCauseDeath)
 TEST_F(DestructibleEdgeCaseTest, ConstitutionBonus_InvalidConstitutionReturnsZero)
 {
 	player->set_constitution(10); // Start with valid con
-	player->set_player_level(5);
+	player->set_creature_level(5);
 	player->destructible->set_last_constitution(10);
 	player->destructible->update_constitution_bonus(*player, ctx);
 
@@ -796,7 +796,7 @@ TEST_F(DestructibleEdgeCaseTest, TempHp_NotAffectedByHealing)
 TEST_F(DestructibleEdgeCaseTest, TempHp_NotAffectedByConstitutionChange)
 {
 	player->set_constitution(10);
-	player->set_player_level(5);
+	player->set_creature_level(5);
 	player->destructible->set_hp_base(50);
 	player->destructible->set_hp(50);
 	player->destructible->set_temp_hp(15);

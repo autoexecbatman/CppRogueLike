@@ -171,29 +171,29 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	MonsterParams p;
 	p.symbol = parse_tile(entry.at("tile"));
 	p.color = entry.at("color").get<int>();
-	p.corpse_name = entry.at("corpse").get<std::string>();
-	p.hp_dice = parse_dice(entry.at("hp"));
+	p.corpseName = entry.at("corpse").get<std::string>();
+	p.hpDice = parse_dice(entry.at("hp"));
 	p.thaco = entry.at("thaco").get<int>();
 	p.ac = entry.at("ac").get<int>();
 	p.xp = entry.at("xp").get<int>();
 	p.dr = entry.at("dr").get<int>();
 	p.morale = entry.at("morale").get<int>();
-	p.str_dice = parse_dice(entry.at("str"));
-	p.dex_dice = parse_dice(entry.at("dex"));
-	p.con_dice = parse_dice(entry.at("con"));
-	p.int_dice = parse_dice(entry.at("int"));
-	p.wis_dice = parse_dice(entry.at("wis"));
-	p.cha_dice = parse_dice(entry.at("cha"));
-	p.weapon_name = entry.at("weapon").get<std::string>();
+	p.strDice = parse_dice(entry.at("str"));
+	p.dexDice = parse_dice(entry.at("dex"));
+	p.conDice = parse_dice(entry.at("con"));
+	p.intDice = parse_dice(entry.at("int"));
+	p.wisDice = parse_dice(entry.at("wis"));
+	p.chaDice = parse_dice(entry.at("cha"));
+	p.weaponName = entry.at("weapon").get<std::string>();
 	p.damage = parse_damage(entry.at("damage"));
-	p.ai_type = (entry.at("ai").get<std::string>() == "ranged")
+	p.aiType = (entry.at("ai").get<std::string>() == "ranged")
 		? MonsterAiType::RANGED
 		: MonsterAiType::MELEE;
-	p.can_swim = entry.at("can_swim").get<bool>();
-	p.base_weight = entry.at("weight").get<int>();
-	p.level_minimum = entry.at("depth_min").get<int>();
-	p.level_maximum = entry.at("depth_max").get<int>();
-	p.level_scaling = entry.at("depth_scale").get<float>();
+	p.canSwim = entry.at("can_swim").get<bool>();
+	p.baseWeight = entry.at("weight").get<int>();
+	p.levelMinimum = entry.at("depth_min").get<int>();
+	p.levelMaximum = entry.at("depth_max").get<int>();
+	p.levelScaling = entry.at("depth_scale").get<float>();
 	return p;
 }
 
@@ -202,27 +202,27 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 	return nlohmann::json{
 		{ "tile", encode_tile(p.symbol) },
 		{ "color", p.color },
-		{ "corpse", p.corpse_name },
-		{ "hp", encode_dice(p.hp_dice) },
+		{ "corpse", p.corpseName },
+		{ "hp", encode_dice(p.hpDice) },
 		{ "thaco", p.thaco },
 		{ "ac", p.ac },
 		{ "xp", p.xp },
 		{ "dr", p.dr },
 		{ "morale", p.morale },
-		{ "str", encode_dice(p.str_dice) },
-		{ "dex", encode_dice(p.dex_dice) },
-		{ "con", encode_dice(p.con_dice) },
-		{ "int", encode_dice(p.int_dice) },
-		{ "wis", encode_dice(p.wis_dice) },
-		{ "cha", encode_dice(p.cha_dice) },
-		{ "weapon", p.weapon_name },
+		{ "str", encode_dice(p.strDice) },
+		{ "dex", encode_dice(p.dexDice) },
+		{ "con", encode_dice(p.conDice) },
+		{ "int", encode_dice(p.intDice) },
+		{ "wis", encode_dice(p.wisDice) },
+		{ "cha", encode_dice(p.chaDice) },
+		{ "weapon", p.weaponName },
 		{ "damage", encode_damage(p.damage) },
-		{ "ai", p.ai_type == MonsterAiType::RANGED ? "ranged" : "melee" },
-		{ "can_swim", p.can_swim },
-		{ "weight", p.base_weight },
-		{ "depth_min", p.level_minimum },
-		{ "depth_max", p.level_maximum },
-		{ "depth_scale", p.level_scaling }
+		{ "ai", p.aiType == MonsterAiType::RANGED ? "ranged" : "melee" },
+		{ "can_swim", p.canSwim },
+		{ "weight", p.baseWeight },
+		{ "depth_min", p.levelMinimum },
+		{ "depth_max", p.levelMaximum },
+		{ "depth_scale", p.levelScaling }
 	};
 }
 
@@ -371,7 +371,7 @@ void MonsterCreator::load(std::string_view path)
 				std::format("MonsterCreator::load -- missing entry '{}'", key));
 		}
 		registry[id] = parse_full_params(root.at(key));
-		const auto& corpse = registry[id].corpse_name;
+		const auto& corpse = registry[id].corpseName;
 		const std::string dead_prefix = "dead ";
 		if (corpse.starts_with(dead_prefix))
 		{
@@ -517,29 +517,30 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 {
 	auto c = std::make_unique<Creature>(pos, ActorData{ params.symbol, params.name, params.color });
 
-	c->set_strength(std::max(1, roll_dice(ctx.dice, params.str_dice)));
-	c->set_dexterity(std::max(1, roll_dice(ctx.dice, params.dex_dice)));
-	c->set_constitution(std::max(1, roll_dice(ctx.dice, params.con_dice)));
-	c->set_intelligence(std::max(1, roll_dice(ctx.dice, params.int_dice)));
-	c->set_wisdom(std::max(1, roll_dice(ctx.dice, params.wis_dice)));
-	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.cha_dice)));
+	c->set_strength(std::max(1, roll_dice(ctx.dice, params.strDice)));
+	c->set_dexterity(std::max(1, roll_dice(ctx.dice, params.dexDice)));
+	c->set_constitution(std::max(1, roll_dice(ctx.dice, params.conDice)));
+	c->set_intelligence(std::max(1, roll_dice(ctx.dice, params.intDice)));
+	c->set_wisdom(std::max(1, roll_dice(ctx.dice, params.wisDice)));
+	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.chaDice)));
 
-	c->set_weapon_equipped(params.weapon_name);
+	c->set_weapon_equipped(params.weaponName);
 	c->set_morale(params.morale);
+	c->set_creature_level(params.hpDice.num);
 
-	const int hp = std::max(1, roll_dice(ctx.dice, params.hp_dice));
+	const int hp = std::max(1, roll_dice(ctx.dice, params.hpDice));
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
 	c->destructible = std::make_unique<MonsterDestructible>(
 		hp,
 		params.dr,
-		params.corpse_name,
+		params.corpseName,
 		params.xp,
 		params.thaco,
 		params.ac);
 	c->destructible->set_last_constitution(c->get_constitution());
 
-	if (params.ai_type == MonsterAiType::RANGED)
+	if (params.aiType == MonsterAiType::RANGED)
 	{
 		c->ai = std::make_unique<AiMonsterRanged>();
 		c->add_state(ActorState::IS_RANGED);
@@ -549,7 +550,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 		c->ai = std::make_unique<AiMonster>();
 	}
 
-	if (params.can_swim)
+	if (params.canSwim)
 	{
 		c->add_state(ActorState::CAN_SWIM);
 	}

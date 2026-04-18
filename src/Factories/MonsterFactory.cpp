@@ -25,10 +25,10 @@ MonsterFactory::MonsterFactory()
 		addMonsterType(
 			{
 				.name = params.name,
-				.baseWeight = params.base_weight,
-				.levelMinimum = params.level_minimum,
-				.levelMaximum = params.level_maximum,
-				.levelScaling = params.level_scaling,
+				.baseWeight = params.baseWeight,
+				.levelMinimum = params.levelMinimum,
+				.levelMaximum = params.levelMaximum,
+				.levelScaling = params.levelScaling,
 				.createFunc = [id](Vector2D pos, GameContext& ctx)
 				{
 					ctx.creatures->push_back(MonsterCreator::create(pos, id, ctx));
@@ -45,10 +45,10 @@ MonsterFactory::MonsterFactory()
 		addMonsterType(
 			{
 				.name = p.name,
-				.baseWeight = p.base_weight,
-				.levelMinimum = p.level_minimum,
-				.levelMaximum = p.level_maximum,
-				.levelScaling = p.level_scaling,
+				.baseWeight = p.baseWeight,
+				.levelMinimum = p.levelMinimum,
+				.levelMaximum = p.levelMaximum,
+				.levelScaling = p.levelScaling,
 				.createFunc = [key](Vector2D pos, GameContext& ctx)
 				{
 					ctx.creatures->push_back(

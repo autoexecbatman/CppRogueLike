@@ -57,10 +57,10 @@ struct MonsterParams
 	TileRef symbol{};
 	std::string name;
 	int color{ 0 };
-	std::string corpse_name;
+	std::string corpseName;
 
 	// Combat
-	DiceExpr hp_dice{};
+	DiceExpr hpDice{};
 	int thaco{ 20 };
 	int ac{ 10 };
 	int xp{ 0 };
@@ -68,26 +68,26 @@ struct MonsterParams
 	int morale{ 10 };
 
 	// Ability scores
-	DiceExpr str_dice{ 3, 6, 0 };
-	DiceExpr dex_dice{ 3, 6, 0 };
-	DiceExpr con_dice{ 3, 6, 0 };
-	DiceExpr int_dice{ 3, 6, 0 };
-	DiceExpr wis_dice{ 3, 6, 0 };
-	DiceExpr cha_dice{ 3, 6, 0 };
+	DiceExpr strDice{ 3, 6, 0 };
+	DiceExpr dexDice{ 3, 6, 0 };
+	DiceExpr conDice{ 3, 6, 0 };
+	DiceExpr intDice{ 3, 6, 0 };
+	DiceExpr wisDice{ 3, 6, 0 };
+	DiceExpr chaDice{ 3, 6, 0 };
 
 	// Weapon display + damage
-	std::string weapon_name;
+	std::string weaponName;
 	DamageInfo damage{};
 
 	// Behaviour
-	MonsterAiType ai_type{ MonsterAiType::MELEE };
-	bool can_swim{ false };
+	MonsterAiType aiType{ MonsterAiType::MELEE };
+	bool canSwim{ false };
 
 	// Spawn table
-	int base_weight{ 10 };
-	int level_minimum{ 1 };
-	int level_maximum{ 0 };
-	float level_scaling{ 0.0f };
+	int baseWeight{ 10 };
+	int levelMinimum{ 1 };
+	int levelMaximum{ 0 };
+	float levelScaling{ 0.0f };
 };
 
 namespace MonsterCreator

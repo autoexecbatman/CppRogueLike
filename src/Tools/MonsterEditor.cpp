@@ -249,22 +249,22 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			commit_working();
 			MonsterParams defaults;
 			defaults.name = "New Monster";
-			defaults.corpse_name = "dead monster";
-			defaults.hp_dice = DiceExpr{ 1, 8, 0 };
+			defaults.corpseName = "dead monster";
+			defaults.hpDice = DiceExpr{ 1, 8, 0 };
 			defaults.thaco = 20;
 			defaults.ac = 10;
 			defaults.xp = 1;
-			defaults.str_dice = DiceExpr{ 3, 6, 0 };
-			defaults.dex_dice = DiceExpr{ 3, 6, 0 };
-			defaults.con_dice = DiceExpr{ 3, 6, 0 };
-			defaults.int_dice = DiceExpr{ 3, 6, 0 };
-			defaults.wis_dice = DiceExpr{ 3, 6, 0 };
-			defaults.cha_dice = DiceExpr{ 3, 6, 0 };
-			defaults.weapon_name = "claws";
+			defaults.strDice = DiceExpr{ 3, 6, 0 };
+			defaults.dexDice = DiceExpr{ 3, 6, 0 };
+			defaults.conDice = DiceExpr{ 3, 6, 0 };
+			defaults.intDice = DiceExpr{ 3, 6, 0 };
+			defaults.wisDice = DiceExpr{ 3, 6, 0 };
+			defaults.chaDice = DiceExpr{ 3, 6, 0 };
+			defaults.weaponName = "claws";
 			defaults.damage = DamageInfo{ 1, 4, "1d4", DamageType::PHYSICAL };
-			defaults.base_weight = 10;
-			defaults.level_minimum = 1;
-			defaults.level_maximum = 5;
+			defaults.baseWeight = 10;
+			defaults.levelMinimum = 1;
+			defaults.levelMaximum = 5;
 			std::string new_key = MonsterCreator::add_custom(std::move(defaults));
 			m_keys = MonsterCreator::get_all_keys();
 			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
@@ -839,41 +839,41 @@ std::string MonsterEditor::field_value(FieldId f) const
 	switch (f)
 	{
 	case FieldId::NAME:        return m_working.name;
-	case FieldId::CORPSE:      return m_working.corpse_name;
-	case FieldId::HP_NUM:      return std::format("{}", m_working.hp_dice.num);
-	case FieldId::HP_SIDES:    return std::format("{}", m_working.hp_dice.sides);
-	case FieldId::HP_BONUS:    return std::format("{}", m_working.hp_dice.bonus);
+	case FieldId::CORPSE:      return m_working.corpseName;
+	case FieldId::HP_NUM:      return std::format("{}", m_working.hpDice.num);
+	case FieldId::HP_SIDES:    return std::format("{}", m_working.hpDice.sides);
+	case FieldId::HP_BONUS:    return std::format("{}", m_working.hpDice.bonus);
 	case FieldId::THACO:       return std::format("{}", m_working.thaco);
 	case FieldId::AC:          return std::format("{}", m_working.ac);
 	case FieldId::XP:          return std::format("{}", m_working.xp);
 	case FieldId::DR:          return std::format("{}", m_working.dr);
-	case FieldId::STR_NUM:     return std::format("{}", m_working.str_dice.num);
-	case FieldId::STR_SIDES:   return std::format("{}", m_working.str_dice.sides);
-	case FieldId::STR_BONUS:   return std::format("{}", m_working.str_dice.bonus);
-	case FieldId::DEX_NUM:     return std::format("{}", m_working.dex_dice.num);
-	case FieldId::DEX_SIDES:   return std::format("{}", m_working.dex_dice.sides);
-	case FieldId::DEX_BONUS:   return std::format("{}", m_working.dex_dice.bonus);
-	case FieldId::CON_NUM:     return std::format("{}", m_working.con_dice.num);
-	case FieldId::CON_SIDES:   return std::format("{}", m_working.con_dice.sides);
-	case FieldId::CON_BONUS:   return std::format("{}", m_working.con_dice.bonus);
-	case FieldId::INT_NUM:     return std::format("{}", m_working.int_dice.num);
-	case FieldId::INT_SIDES:   return std::format("{}", m_working.int_dice.sides);
-	case FieldId::INT_BONUS:   return std::format("{}", m_working.int_dice.bonus);
-	case FieldId::WIS_NUM:     return std::format("{}", m_working.wis_dice.num);
-	case FieldId::WIS_SIDES:   return std::format("{}", m_working.wis_dice.sides);
-	case FieldId::WIS_BONUS:   return std::format("{}", m_working.wis_dice.bonus);
-	case FieldId::CHA_NUM:     return std::format("{}", m_working.cha_dice.num);
-	case FieldId::CHA_SIDES:   return std::format("{}", m_working.cha_dice.sides);
-	case FieldId::CHA_BONUS:   return std::format("{}", m_working.cha_dice.bonus);
-	case FieldId::WEAPON:      return m_working.weapon_name;
+	case FieldId::STR_NUM:     return std::format("{}", m_working.strDice.num);
+	case FieldId::STR_SIDES:   return std::format("{}", m_working.strDice.sides);
+	case FieldId::STR_BONUS:   return std::format("{}", m_working.strDice.bonus);
+	case FieldId::DEX_NUM:     return std::format("{}", m_working.dexDice.num);
+	case FieldId::DEX_SIDES:   return std::format("{}", m_working.dexDice.sides);
+	case FieldId::DEX_BONUS:   return std::format("{}", m_working.dexDice.bonus);
+	case FieldId::CON_NUM:     return std::format("{}", m_working.conDice.num);
+	case FieldId::CON_SIDES:   return std::format("{}", m_working.conDice.sides);
+	case FieldId::CON_BONUS:   return std::format("{}", m_working.conDice.bonus);
+	case FieldId::INT_NUM:     return std::format("{}", m_working.intDice.num);
+	case FieldId::INT_SIDES:   return std::format("{}", m_working.intDice.sides);
+	case FieldId::INT_BONUS:   return std::format("{}", m_working.intDice.bonus);
+	case FieldId::WIS_NUM:     return std::format("{}", m_working.wisDice.num);
+	case FieldId::WIS_SIDES:   return std::format("{}", m_working.wisDice.sides);
+	case FieldId::WIS_BONUS:   return std::format("{}", m_working.wisDice.bonus);
+	case FieldId::CHA_NUM:     return std::format("{}", m_working.chaDice.num);
+	case FieldId::CHA_SIDES:   return std::format("{}", m_working.chaDice.sides);
+	case FieldId::CHA_BONUS:   return std::format("{}", m_working.chaDice.bonus);
+	case FieldId::WEAPON:      return m_working.weaponName;
 	case FieldId::DMG_MIN:     return std::format("{}", m_working.damage.minDamage);
 	case FieldId::DMG_MAX:     return std::format("{}", m_working.damage.maxDamage);
 	case FieldId::DMG_DISPLAY: return m_working.damage.displayRoll;
-	case FieldId::AI_TYPE:     return m_working.ai_type == MonsterAiType::MELEE ? "melee" : "ranged";
-	case FieldId::CAN_SWIM:    return m_working.can_swim ? "yes" : "no";
-	case FieldId::WEIGHT:      return std::format("{}", m_working.base_weight);
-	case FieldId::DEPTH_MIN:   return std::format("{}", m_working.level_minimum);
-	case FieldId::DEPTH_MAX:   return std::format("{}", m_working.level_maximum);
+	case FieldId::AI_TYPE:     return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
+	case FieldId::CAN_SWIM:    return m_working.canSwim ? "yes" : "no";
+	case FieldId::WEIGHT:      return std::format("{}", m_working.baseWeight);
+	case FieldId::DEPTH_MIN:   return std::format("{}", m_working.levelMinimum);
+	case FieldId::DEPTH_MAX:   return std::format("{}", m_working.levelMaximum);
 	case FieldId::TILE:        return "(tile)";
 	default:                   return "";
 	}
@@ -901,36 +901,36 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 
 	switch (f)
 	{
-	case FieldId::HP_NUM:     m_working.hp_dice.num    = clamp_val(m_working.hp_dice.num,    delta, 1,   99); break;
-	case FieldId::HP_SIDES:   m_working.hp_dice.sides  = clamp_val(m_working.hp_dice.sides,  delta, 2,   20); break;
-	case FieldId::HP_BONUS:   m_working.hp_dice.bonus  = clamp_val(m_working.hp_dice.bonus,  delta, -99, 99); break;
+	case FieldId::HP_NUM:     m_working.hpDice.num    = clamp_val(m_working.hpDice.num,    delta, 1,   99); break;
+	case FieldId::HP_SIDES:   m_working.hpDice.sides  = clamp_val(m_working.hpDice.sides,  delta, 2,   20); break;
+	case FieldId::HP_BONUS:   m_working.hpDice.bonus  = clamp_val(m_working.hpDice.bonus,  delta, -99, 99); break;
 	case FieldId::THACO:      m_working.thaco           = clamp_val(m_working.thaco,           delta, 1,   25); break;
 	case FieldId::AC:         m_working.ac              = clamp_val(m_working.ac,              delta, -10, 10); break;
 	case FieldId::XP:         m_working.xp              = clamp_val(m_working.xp,              delta, 0,   9999); break;
 	case FieldId::DR:         m_working.dr              = clamp_val(m_working.dr,              delta, 0,   20); break;
-	case FieldId::STR_NUM:    m_working.str_dice.num    = clamp_val(m_working.str_dice.num,    delta, 1,   10); break;
-	case FieldId::STR_SIDES:  m_working.str_dice.sides  = clamp_val(m_working.str_dice.sides,  delta, 2,   20); break;
-	case FieldId::STR_BONUS:  m_working.str_dice.bonus  = clamp_val(m_working.str_dice.bonus,  delta, -18, 18); break;
-	case FieldId::DEX_NUM:    m_working.dex_dice.num    = clamp_val(m_working.dex_dice.num,    delta, 1,   10); break;
-	case FieldId::DEX_SIDES:  m_working.dex_dice.sides  = clamp_val(m_working.dex_dice.sides,  delta, 2,   20); break;
-	case FieldId::DEX_BONUS:  m_working.dex_dice.bonus  = clamp_val(m_working.dex_dice.bonus,  delta, -18, 18); break;
-	case FieldId::CON_NUM:    m_working.con_dice.num    = clamp_val(m_working.con_dice.num,    delta, 1,   10); break;
-	case FieldId::CON_SIDES:  m_working.con_dice.sides  = clamp_val(m_working.con_dice.sides,  delta, 2,   20); break;
-	case FieldId::CON_BONUS:  m_working.con_dice.bonus  = clamp_val(m_working.con_dice.bonus,  delta, -18, 18); break;
-	case FieldId::INT_NUM:    m_working.int_dice.num    = clamp_val(m_working.int_dice.num,    delta, 1,   10); break;
-	case FieldId::INT_SIDES:  m_working.int_dice.sides  = clamp_val(m_working.int_dice.sides,  delta, 2,   20); break;
-	case FieldId::INT_BONUS:  m_working.int_dice.bonus  = clamp_val(m_working.int_dice.bonus,  delta, -18, 18); break;
-	case FieldId::WIS_NUM:    m_working.wis_dice.num    = clamp_val(m_working.wis_dice.num,    delta, 1,   10); break;
-	case FieldId::WIS_SIDES:  m_working.wis_dice.sides  = clamp_val(m_working.wis_dice.sides,  delta, 2,   20); break;
-	case FieldId::WIS_BONUS:  m_working.wis_dice.bonus  = clamp_val(m_working.wis_dice.bonus,  delta, -18, 18); break;
-	case FieldId::CHA_NUM:    m_working.cha_dice.num    = clamp_val(m_working.cha_dice.num,    delta, 1,   10); break;
-	case FieldId::CHA_SIDES:  m_working.cha_dice.sides  = clamp_val(m_working.cha_dice.sides,  delta, 2,   20); break;
-	case FieldId::CHA_BONUS:  m_working.cha_dice.bonus  = clamp_val(m_working.cha_dice.bonus,  delta, -18, 18); break;
+	case FieldId::STR_NUM:    m_working.strDice.num    = clamp_val(m_working.strDice.num,    delta, 1,   10); break;
+	case FieldId::STR_SIDES:  m_working.strDice.sides  = clamp_val(m_working.strDice.sides,  delta, 2,   20); break;
+	case FieldId::STR_BONUS:  m_working.strDice.bonus  = clamp_val(m_working.strDice.bonus,  delta, -18, 18); break;
+	case FieldId::DEX_NUM:    m_working.dexDice.num    = clamp_val(m_working.dexDice.num,    delta, 1,   10); break;
+	case FieldId::DEX_SIDES:  m_working.dexDice.sides  = clamp_val(m_working.dexDice.sides,  delta, 2,   20); break;
+	case FieldId::DEX_BONUS:  m_working.dexDice.bonus  = clamp_val(m_working.dexDice.bonus,  delta, -18, 18); break;
+	case FieldId::CON_NUM:    m_working.conDice.num    = clamp_val(m_working.conDice.num,    delta, 1,   10); break;
+	case FieldId::CON_SIDES:  m_working.conDice.sides  = clamp_val(m_working.conDice.sides,  delta, 2,   20); break;
+	case FieldId::CON_BONUS:  m_working.conDice.bonus  = clamp_val(m_working.conDice.bonus,  delta, -18, 18); break;
+	case FieldId::INT_NUM:    m_working.intDice.num    = clamp_val(m_working.intDice.num,    delta, 1,   10); break;
+	case FieldId::INT_SIDES:  m_working.intDice.sides  = clamp_val(m_working.intDice.sides,  delta, 2,   20); break;
+	case FieldId::INT_BONUS:  m_working.intDice.bonus  = clamp_val(m_working.intDice.bonus,  delta, -18, 18); break;
+	case FieldId::WIS_NUM:    m_working.wisDice.num    = clamp_val(m_working.wisDice.num,    delta, 1,   10); break;
+	case FieldId::WIS_SIDES:  m_working.wisDice.sides  = clamp_val(m_working.wisDice.sides,  delta, 2,   20); break;
+	case FieldId::WIS_BONUS:  m_working.wisDice.bonus  = clamp_val(m_working.wisDice.bonus,  delta, -18, 18); break;
+	case FieldId::CHA_NUM:    m_working.chaDice.num    = clamp_val(m_working.chaDice.num,    delta, 1,   10); break;
+	case FieldId::CHA_SIDES:  m_working.chaDice.sides  = clamp_val(m_working.chaDice.sides,  delta, 2,   20); break;
+	case FieldId::CHA_BONUS:  m_working.chaDice.bonus  = clamp_val(m_working.chaDice.bonus,  delta, -18, 18); break;
 	case FieldId::DMG_MIN:    m_working.damage.minDamage = clamp_val(m_working.damage.minDamage, delta, 1, 99); break;
 	case FieldId::DMG_MAX:    m_working.damage.maxDamage = clamp_val(m_working.damage.maxDamage, delta, 1, 99); break;
-	case FieldId::WEIGHT:     m_working.base_weight      = clamp_val(m_working.base_weight,      delta, 0, 100); break;
-	case FieldId::DEPTH_MIN:  m_working.level_minimum    = clamp_val(m_working.level_minimum,    delta, 1, 20); break;
-	case FieldId::DEPTH_MAX:  m_working.level_maximum    = clamp_val(m_working.level_maximum,    delta, 0, 20); break;
+	case FieldId::WEIGHT:     m_working.baseWeight      = clamp_val(m_working.baseWeight,      delta, 0, 100); break;
+	case FieldId::DEPTH_MIN:  m_working.levelMinimum    = clamp_val(m_working.levelMinimum,    delta, 1, 20); break;
+	case FieldId::DEPTH_MAX:  m_working.levelMaximum    = clamp_val(m_working.levelMaximum,    delta, 0, 20); break;
 	default: break;
 	}
 }
@@ -939,13 +939,13 @@ void MonsterEditor::field_toggle(FieldId f)
 {
 	if (f == FieldId::AI_TYPE)
 	{
-		m_working.ai_type = (m_working.ai_type == MonsterAiType::MELEE)
+		m_working.aiType = (m_working.aiType == MonsterAiType::MELEE)
 			? MonsterAiType::RANGED
 			: MonsterAiType::MELEE;
 	}
 	else if (f == FieldId::CAN_SWIM)
 	{
-		m_working.can_swim = !m_working.can_swim;
+		m_working.canSwim = !m_working.canSwim;
 	}
 }
 
@@ -954,8 +954,8 @@ void MonsterEditor::field_set_string(FieldId f, std::string val)
 	switch (f)
 	{
 	case FieldId::NAME:        m_working.name = std::move(val); break;
-	case FieldId::CORPSE:      m_working.corpse_name = std::move(val); break;
-	case FieldId::WEAPON:      m_working.weapon_name = std::move(val); break;
+	case FieldId::CORPSE:      m_working.corpseName = std::move(val); break;
+	case FieldId::WEAPON:      m_working.weaponName = std::move(val); break;
 	case FieldId::DMG_DISPLAY: m_working.damage.displayRoll = std::move(val); break;
 	default: break;
 	}

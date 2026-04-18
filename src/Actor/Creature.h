@@ -101,7 +101,7 @@ public:
 	void set_intelligence(int value) noexcept { baseIntelligence = value; }
 	void set_wisdom(int value) noexcept { baseWisdom = value; }
 	void set_charisma(int value) noexcept { baseCharisma = value; }
-	void set_player_level(int value) noexcept { creatureLevel = value; }
+	void set_creature_level(int value) noexcept { creatureLevel = value; }
 	void set_gold(int value) noexcept { gold = value; }
 	void set_gender(const std::string& new_gender) noexcept { gender = new_gender; }
 	void set_weapon_equipped(const std::string& weapon) noexcept { weaponEquipped = weapon; }

@@ -781,8 +781,7 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 {
 	// AD&D 2e: Duration 3 rounds + 1 round/level. Cancelled by attacking.
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 	int duration = 3 + casterLevel;
 
 	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
@@ -801,8 +800,7 @@ void SpellSystem::cast_silence(
 	GameContext& ctx)
 {
 	// AD&D 2e: Duration 2 rounds/level. Targeted single creature. Prevents spellcasting.
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 	int duration = 2 * casterLevel;
 	int range = 5 + casterLevel;
 
@@ -854,8 +852,7 @@ void SpellSystem::cast_web(
 	GameContext& ctx)
 {
 	// AD&D 2e: Save vs. Paralyzation (d20 >= 10) or be entangled. Duration 2 rounds/level.
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 	int range = 5 * casterLevel;
 	int radius = 2;
 	int duration = 2 * casterLevel;
@@ -921,8 +918,7 @@ void SpellSystem::cast_fireball(
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 
 	// AD&D 2e: range 10" + 1"/level (tiles), AoE 20-ft radius (2 tiles)
 	int range = 10 + casterLevel;
@@ -994,8 +990,7 @@ static int calculate_num_missiles(int casterLevel)
 bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 {
 	// Get caster level
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 	int numMissiles = calculate_num_missiles(casterLevel);
 
 	// Find all valid targets in FOV
@@ -1122,8 +1117,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 {
 	// AD&D 2e: paralyzes up to 1d4 humanoids in FOV; save vs. spells (d20 >= 15) negates
 	// Duration: 2 rounds per caster level
-	auto* player = dynamic_cast<Player*>(&caster);
-	int casterLevel = player ? player->get_creature_level() : 1;
+	int casterLevel = caster.get_creature_level();
 	int duration = 2 * casterLevel;
 	int maxTargets = ctx.dice->roll(1, 4);
 	int affected = 0;

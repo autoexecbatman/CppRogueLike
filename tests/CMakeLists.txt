@@ -26,6 +26,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WeaponDamageRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemCreatorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterCreatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnhancementSystemTest.cpp

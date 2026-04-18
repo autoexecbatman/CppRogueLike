@@ -180,11 +180,11 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 		{
 			continue;
 		}
-		if (params.level_minimum > dungeonLevel)
+		if (params.levelMinimum > dungeonLevel)
 		{
 			continue;
 		}
-		if (params.level_maximum > 0 && params.level_maximum < dungeonLevel)
+		if (params.levelMaximum > 0 && params.levelMaximum < dungeonLevel)
 		{
 			continue;
 		}
