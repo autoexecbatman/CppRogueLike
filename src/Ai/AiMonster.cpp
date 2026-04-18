@@ -24,8 +24,16 @@ void AiMonster::flee(Creature& owner, GameContext& ctx)
 		return ctx.map->get_actor(pos, ctx) != nullptr;
 	};
 
+	const int currentCost = ctx.map->get_dijkstra_cost(owner.position);
+
+	// Disconnected tile (unreachable from player) — costs are meaningless, hold position.
+	if (currentCost == std::numeric_limits<int>::max())
+	{
+		return;
+	}
+
 	Vector2D bestStep{ -1, -1 };
-	int bestCost = std::numeric_limits<int>::min();
+	int bestCost = currentCost; // only accept tiles strictly further than current position
 
 	for (const Vector2D& delta : NEIGHBORS)
 	{
@@ -49,6 +57,17 @@ void AiMonster::flee(Creature& owner, GameContext& ctx)
 	if (bestStep.x != -1)
 	{
 		owner.position = bestStep;
+	}
+	else
+	{
+		// At escape apex — no tile further from player is available.
+		// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
+		if (owner.get_tile_distance(ctx.player->position) <= 1)
+		{
+			owner.remove_state(ActorState::IS_FLEEING);
+			owner.attacker->attack(*ctx.player, ctx);
+		}
+		// else: hold position, keep IS_FLEEING — player has not cornered us yet
 	}
 }
 
@@ -191,32 +210,44 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 		}
 		else if (ctx.dice->d10() == 1) // Occasional random movement
 		{
-			// Random movement in one of eight directions
-			int dx = ctx.dice->roll(-1, 1);
-			int dy = ctx.dice->roll(-1, 1);
-
-			if (dx != 0 || dy != 0) // Ensure we're not standing still
+			if (owner.has_state(ActorState::IS_FLEEING))
 			{
-				Vector2D newPos = owner.position + Vector2D{ dx, dy };
-				if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+				flee(owner, ctx);
+			}
+			else
+			{
+				int dx = ctx.dice->roll(-1, 1);
+				int dy = ctx.dice->roll(-1, 1);
+
+				if (dx != 0 || dy != 0)
 				{
-					owner.position = newPos;
+					Vector2D newPos = owner.position + Vector2D{ dx, dy };
+					if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+					{
+						owner.position = newPos;
+					}
 				}
 			}
 		}
 	}
 	else if (ctx.dice->d20() == 1) // Very occasional random movement for distant monsters
 	{
-		// Random movement in one of eight directions
-		int dx = ctx.dice->roll(-1, 1);
-		int dy = ctx.dice->roll(-1, 1);
-
-		if (dx != 0 || dy != 0) // Ensure we're not standing still
+		if (owner.has_state(ActorState::IS_FLEEING))
 		{
-			Vector2D newPos = owner.position + Vector2D{ dx, dy };
-			if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+			flee(owner, ctx);
+		}
+		else
+		{
+			int dx = ctx.dice->roll(-1, 1);
+			int dy = ctx.dice->roll(-1, 1);
+
+			if (dx != 0 || dy != 0)
 			{
-				owner.position = newPos;
+				Vector2D newPos = owner.position + Vector2D{ dx, dy };
+				if (ctx.map->can_walk(newPos, ctx) && !ctx.map->get_actor(newPos, ctx))
+				{
+					owner.position = newPos;
+				}
 			}
 		}
 	}

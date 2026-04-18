@@ -101,7 +101,7 @@ Vector2D CreatureManager::find_spawn_position(GameContext& ctx)
 	const DungeonRoom& room = ctx.rooms->at(index);
 
 	Vector2D pos{ dice->roll(room.col, room.col_end()), dice->roll(room.row, room.row_end()) };
-	while (!ctx.map->can_walk(pos, ctx))
+	while (!ctx.map->can_walk(pos, ctx) || ctx.map->get_actor(pos, ctx) != nullptr)
 	{
 		pos.x = dice->roll(room.col, room.col_end());
 		pos.y = dice->roll(room.row, room.row_end());

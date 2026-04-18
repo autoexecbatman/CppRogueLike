@@ -449,6 +449,12 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 
 bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx)
 {
+	// Bump-to-attack: never step onto an occupied tile — look_to_attack handles combat.
+	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
+	{
+		return false;
+	}
+
 	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
 	if (!ctx.map->is_collision(owner, targetTileType, targetPosition, ctx))
@@ -618,7 +624,9 @@ void AiPlayer::begin_path_walk(
 	mouseMode = mode;
 	mouseDoorAction = doorAction;
 	mouseDoorTarget = actionTarget;
-	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	// Do NOT set NEW_TURN here. Monsters advance only after the player actually moves,
+	// which handle_mouse_path sets NEW_TURN on each step. Setting it here gives monsters
+	// a free advance before the player takes their first step.
 }
 
 // ---------------------------------------------------------------------------

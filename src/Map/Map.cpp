@@ -425,7 +425,7 @@ void Map::compute_fov(GameContext& ctx)
 	}
 
 	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
-	rebuild_dijkstra_map({ ctx.player->position });
+	rebuild_dijkstra_map({ ctx.player->position }, ctx);
 }
 
 void Map::update()
@@ -1951,7 +1951,7 @@ int Map::get_dijkstra_cost(Vector2D pos) const noexcept
 	return dijkstraCosts[static_cast<size_t>(pos.y) * map_width + pos.x];
 }
 
-void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
+void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx)
 {
 	std::fill(dijkstraCosts.begin(), dijkstraCosts.end(), std::numeric_limits<int>::max());
 
@@ -2002,6 +2002,10 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals)
 				continue;
 			}
 			if (!fovMap->is_walkable(next.x, next.y))
+			{
+				continue;
+			}
+			if (find_decoration_at(next, ctx) != nullptr)
 			{
 				continue;
 			}

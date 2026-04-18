@@ -157,7 +157,7 @@ public:
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
 	int get_dijkstra_cost(Vector2D pos) const noexcept;
-	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals);
+	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx);
 	void set_tile(Vector2D pos, TileType newType, double cost);
 	void place_from_graph(
 		const std::vector<DungeonRoom>& rooms,
