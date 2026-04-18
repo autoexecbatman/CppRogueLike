@@ -31,4 +31,9 @@ public:
 	bool tradeMenuOpen{ false }; // Prevents multiple trade menu opens - now public
 
 	void trade(Creature& shopkeeper, Creature& player, GameContext& ctx);
+
+	// Ai virtual trade interface
+	void initiate_trade(Creature& owner, Creature& player, GameContext& ctx) override;
+	[[nodiscard]] bool is_trade_open() const override { return tradeMenuOpen; }
+	void set_trade_open(bool open) override { tradeMenuOpen = open; }
 };

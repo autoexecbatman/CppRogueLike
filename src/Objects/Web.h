@@ -20,6 +20,9 @@ public:
 	// Apply web effect to a creature trying to pass through
 	bool apply_effect(Creature& creature, GameContext& ctx);
 
+	// Object virtual — triggers web trap on movement through this tile
+	bool apply_movement_effect(Creature& creature, GameContext& ctx) override;
+
 	// Destroy this web
 	void destroy(GameContext& ctx);
 

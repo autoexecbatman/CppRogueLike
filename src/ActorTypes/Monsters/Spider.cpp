@@ -20,6 +20,7 @@
 #include "../../Actor/MonsterAttacker.h"
 #include "../../Actor/Destructible.h"
 #include "../../Ai/AiSpider.h"
+#include "../../Ai/AiWebSpinner.h"
 #include "../../Colors/Colors.h"
 #include "../../Combat/DamageInfo.h"
 #include "../../Core/GameContext.h"
@@ -27,6 +28,10 @@
 #include "../../Random/RandomDice.h"
 #include "../../Utils/Vector2D.h"
 #include "Spider.h"
+
+constexpr int POISON_CHANCE_SMALL_SPIDER = 25;
+constexpr int POISON_CHANCE_GIANT_SPIDER = 15;
+constexpr int POISON_CHANCE_WEB_SPINNER = 15;
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
@@ -58,8 +63,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_weapon_equipped("Venomous fangs");
 
-		// AI - use spider AI for intelligent movement
-		ai = std::make_unique<AiSpider>();
+		ai = std::make_unique<AiSpider>(POISON_CHANCE_SMALL_SPIDER);
 		break;
 
 	case SpiderType::GIANT:
@@ -82,8 +86,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
 		set_weapon_equipped("Giant fangs");
 
-		// AI - use spider AI for intelligent movement
-		ai = std::make_unique<AiSpider>();
+		ai = std::make_unique<AiSpider>(POISON_CHANCE_GIANT_SPIDER);
 		break;
 
 	case SpiderType::WEB_SPINNER:
@@ -100,8 +103,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_weapon_equipped("Toxic fangs");
 
-		// AI - use web spinner AI for web creation and movement
-		ai = std::make_unique<AiWebSpinner>();
+		ai = std::make_unique<AiWebSpinner>(POISON_CHANCE_WEB_SPINNER);
 		break;
 	}
 
@@ -114,22 +116,6 @@ void Spider::update(GameContext& ctx)
 {
 	// Call the base class update method
 	Creature::update(ctx);
-}
-
-int Spider::get_poison_chance() const
-{
-	// Return poison chance based on spider type
-	switch (spiderType)
-	{
-	case SpiderType::SMALL:
-		return 25;
-	case SpiderType::GIANT:
-		return 15;
-	case SpiderType::WEB_SPINNER:
-		return 15;
-	default:
-		return 0;
-	}
 }
 
 // Small Spider implementation

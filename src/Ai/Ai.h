@@ -22,6 +22,11 @@ public:
 	// Type-safe hostility check - replaces dynamic_cast usage
 	[[nodiscard]] virtual bool is_hostile() const { return true; } // Most AI types are hostile by default
 
+	// Trade interface - default no-ops; AiShopkeeper overrides all three
+	virtual void initiate_trade(Creature& owner, Creature& player, GameContext& ctx);
+	[[nodiscard]] virtual bool is_trade_open() const { return false; }
+	virtual void set_trade_open(bool) {}
+
 	[[nodiscard]] static std::unique_ptr<Ai> create(const json& j);
 
 protected:
@@ -34,6 +39,8 @@ protected:
 		CONFUSED_MONSTER = 1,
 		// 2 was PLAYER -- removed, PlayerController handles input directly
 		SHOPKEEPER = 3,
-		MIMIC = 4 // append last — integer values are serialized
+		MIMIC = 4,
+		SPIDER = 5,
+		WEB_SPINNER = 6 // append last — integer values are serialized
 	};
 };

@@ -4,10 +4,12 @@
 
 #include "../Persistent/Persistent.h"
 #include "Ai.h"
-#include "AiMonster.h"
 #include "AiMimic.h"
+#include "AiMonster.h"
 #include "AiMonsterConfused.h"
 #include "AiShopkeeper.h"
+#include "AiSpider.h"
+#include "AiWebSpinner.h"
 
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)
@@ -48,6 +50,20 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 		break;
 	}
 
+	case AiType::SPIDER:
+	{
+		// poisonChance restored from JSON by AiSpider::load()
+		ai = std::make_unique<AiSpider>(0);
+		break;
+	}
+
+	case AiType::WEB_SPINNER:
+	{
+		// poisonChance restored from JSON by AiSpider::load()
+		ai = std::make_unique<AiWebSpinner>(0);
+		break;
+	}
+
 	default:
 	{
 		throw std::runtime_error("Unknown AiType");
@@ -57,6 +73,11 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 
 	ai->load(j);
 	return ai;
+}
+
+void Ai::initiate_trade(Creature& owner, Creature& player, GameContext& ctx)
+{
+	// No-op default — AiShopkeeper overrides
 }
 
 // end of file: Ai.cpp

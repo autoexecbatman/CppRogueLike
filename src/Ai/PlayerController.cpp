@@ -42,7 +42,6 @@
 #include "../UI/InventoryUI.h"
 #include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
-#include "AiShopkeeper.h"
 #include "PlayerController.h"
 
 // ---------------------------------------------------------------------------
@@ -319,19 +318,16 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 			{
 				if (c->ai && !c->ai->is_hostile())
 				{
-					AiShopkeeper* shopkeeperAI = dynamic_cast<AiShopkeeper*>(c->ai.get());
-					if (shopkeeperAI && !shopkeeperAI->tradeMenuOpen)
+					if (!c->ai->is_trade_open())
 					{
 						ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
-						shopkeeperAI->trade(*c, playerOwner, ctx);
-						shopkeeperAI->tradeMenuOpen = true;
-						return false;
+						c->ai->initiate_trade(*c, playerOwner, ctx);
 					}
 					else
 					{
 						ctx.messageSystem->log("Encountered non-hostile creature: " + c->actorData.name);
-						return false;
 					}
+					return false;
 				}
 
 				playerOwner.roundCounter++;
@@ -414,13 +410,11 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 		for (const auto& obj : *ctx.objects)
 		{
-			if (obj && obj->position == targetPosition &&
-				obj->actorData.name == "spider web")
+			if (obj && obj->position == targetPosition)
 			{
-				Web* web = dynamic_cast<Web*>(obj.get());
-				if (web)
+				if (obj->apply_movement_effect(playerOwner, ctx))
 				{
-					webEffect = web->apply_effect(playerOwner, ctx);
+					webEffect = true;
 					break;
 				}
 			}

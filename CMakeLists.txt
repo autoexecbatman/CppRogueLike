@@ -153,6 +153,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Ai/AiMonsterRanged.h
     ${PROJECT_SOURCE_DIR}/Ai/AiSpider.cpp
     ${PROJECT_SOURCE_DIR}/Ai/AiSpider.h
+    ${PROJECT_SOURCE_DIR}/Ai/AiWebSpinner.cpp
+    ${PROJECT_SOURCE_DIR}/Ai/AiWebSpinner.h
 
     # dnd_tables
     ${PROJECT_SOURCE_DIR}/dnd_tables/CombatProgressionTables.h

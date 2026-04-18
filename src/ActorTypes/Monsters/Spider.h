@@ -23,9 +23,6 @@ public:
 	// Override update if needed for spider-specific behavior
 	void update(GameContext& ctx);
 
-	// Poison attack chance based on spider type
-	int get_poison_chance() const;
-
 	// Get spider type
 	SpiderType get_spider_type() const { return spiderType; }
 

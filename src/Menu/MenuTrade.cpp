@@ -6,7 +6,6 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Stairs.h"
 #include "../ActorTypes/Player.h"
-#include "../Ai/AiShopkeeper.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
@@ -54,11 +53,7 @@ MenuTrade::~MenuTrade()
 
     if (shopkeeper.ai)
     {
-        auto* shopAi = dynamic_cast<AiShopkeeper*>(shopkeeper.ai.get());
-        if (shopAi)
-        {
-            shopAi->tradeMenuOpen = false;
-        }
+        shopkeeper.ai->set_trade_open(false);
     }
 }
 

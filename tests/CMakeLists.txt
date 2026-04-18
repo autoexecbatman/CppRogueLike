@@ -78,6 +78,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Ai/AiMimic.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiMonsterRanged.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiSpider.cpp
+    ${PARENT_SOURCE_DIR}/Ai/AiWebSpinner.cpp
 
     # Colors
     ${PARENT_SOURCE_DIR}/Colors/Colors.cpp

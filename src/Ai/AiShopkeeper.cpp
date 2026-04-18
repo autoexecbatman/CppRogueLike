@@ -19,6 +19,72 @@
 constexpr auto TRACKING_TURNS = 3; // Used in AiShopkeeper::update()
 constexpr auto MAX_TRADE_DISTANCE = 1; // Maximum distance to initiate a trade (adjacent only - no diagonals)
 
+void AiShopkeeper::update(Creature& owner, GameContext& ctx)
+{
+	// Skip if dead or missing destructible
+	if (owner.ai == nullptr || !owner.destructible || owner.destructible->is_dead())
+	{
+		return;
+	}
+
+	// Reset trade menu flag when player moves away
+	int distance = owner.get_tile_distance(ctx.player->position);
+	if (distance > MAX_TRADE_DISTANCE)
+	{
+		tradeMenuOpen = false;
+	}
+
+	// If shopkeeper has already approached player once, don't approach again
+	if (hasApproachedPlayer)
+	{
+		return; // Stay passive after first approach
+	}
+
+	// Check if player is visible and not already tracking
+	if (ctx.map->is_in_fov(owner.position))
+	{
+		// Only start tracking if we're not already tracking (prevents constant following)
+		if (moveCount == 0)
+		{
+			moveCount = TRACKING_TURNS;
+			hasApproachedPlayer = true; // Mark that shopkeeper has now approached
+		}
+	}
+	else if (moveCount > 0)
+	{
+		// Player not visible but still tracking - countdown
+		moveCount--;
+	}
+
+	// Move towards player only if actively tracking
+	if (moveCount > 0)
+	{
+		// Only move, don't trade during approach (trade check handled above)
+		move_to_target(owner, ctx.player->position, ctx);
+	}
+}
+
+void AiShopkeeper::load(const json& j)
+{
+	moveCount = j.at("moveCount").get<int>();
+	if (j.contains("tradeMenuOpen"))
+	{
+		tradeMenuOpen = j.at("tradeMenuOpen").get<bool>();
+	}
+	if (j.contains("hasApproachedPlayer"))
+	{
+		hasApproachedPlayer = j.at("hasApproachedPlayer").get<bool>();
+	}
+}
+
+void AiShopkeeper::save(json& j)
+{
+	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
+	j["moveCount"] = moveCount;
+	j["tradeMenuOpen"] = tradeMenuOpen;
+	j["hasApproachedPlayer"] = hasApproachedPlayer;
+}
+
 // If positionDifference > 0, return 1; otherwise, return -1
 int AiShopkeeper::calculate_step(int positionDifference)
 {
@@ -113,69 +179,8 @@ void AiShopkeeper::trade(Creature& shopkeeper, Creature& player, GameContext& ct
 	ctx.menuManager->set_should_take_input(false);
 }
 
-void AiShopkeeper::update(Creature& owner, GameContext& ctx)
+void AiShopkeeper::initiate_trade(Creature& owner, Creature& player, GameContext& ctx)
 {
-	// Skip if dead or missing destructible
-	if (owner.ai == nullptr || !owner.destructible || owner.destructible->is_dead())
-	{
-		return;
-	}
-
-	// Reset trade menu flag when player moves away
-	int distance = owner.get_tile_distance(ctx.player->position);
-	if (distance > MAX_TRADE_DISTANCE)
-	{
-		tradeMenuOpen = false;
-	}
-
-	// If shopkeeper has already approached player once, don't approach again
-	if (hasApproachedPlayer)
-	{
-		return; // Stay passive after first approach
-	}
-
-	// Check if player is visible and not already tracking
-	if (ctx.map->is_in_fov(owner.position))
-	{
-		// Only start tracking if we're not already tracking (prevents constant following)
-		if (moveCount == 0)
-		{
-			moveCount = TRACKING_TURNS;
-			hasApproachedPlayer = true; // Mark that shopkeeper has now approached
-		}
-	}
-	else if (moveCount > 0)
-	{
-		// Player not visible but still tracking - countdown
-		moveCount--;
-	}
-
-	// Move towards player only if actively tracking
-	if (moveCount > 0)
-	{
-		// Only move, don't trade during approach (trade check handled above)
-		move_to_target(owner, ctx.player->position, ctx);
-	}
+	trade(owner, player, ctx);
+	tradeMenuOpen = true;
 }
-
-void AiShopkeeper::load(const json& j)
-{
-	moveCount = j.at("moveCount").get<int>();
-	if (j.contains("tradeMenuOpen"))
-	{
-		tradeMenuOpen = j.at("tradeMenuOpen").get<bool>();
-	}
-	if (j.contains("hasApproachedPlayer"))
-	{
-		hasApproachedPlayer = j.at("hasApproachedPlayer").get<bool>();
-	}
-}
-
-void AiShopkeeper::save(json& j)
-{
-	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
-	j["moveCount"] = moveCount;
-	j["tradeMenuOpen"] = tradeMenuOpen;
-	j["hasApproachedPlayer"] = hasApproachedPlayer;
-}
-// file: AiShopkeeper.cpp

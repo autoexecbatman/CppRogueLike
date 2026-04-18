@@ -78,6 +78,12 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 	}
 }
 
+// Object virtual — triggers web trap on movement through this tile
+bool Web::apply_movement_effect(Creature& creature, GameContext& ctx)
+{
+	return apply_effect(creature, ctx);
+}
+
 // Destroy this web
 void Web::destroy(GameContext& ctx)
 {
