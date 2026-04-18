@@ -156,7 +156,7 @@ void LevelUpUI::draw_next_level_info(const Player& player, GameContext& ctx, int
 {
 	int tileSize = ctx.renderer->get_tile_size();
 
-	int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
+	int nextLevelXP = player.get_next_level_xp(ctx);
 
 	ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
 	row++;

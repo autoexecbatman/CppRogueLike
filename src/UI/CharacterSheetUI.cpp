@@ -84,7 +84,7 @@ void CharacterSheetUI::display_experience_info(const Player& player, GameContext
 	int x = tileSize;
 
 	int currentXP = player.destructible->get_xp();
-	int nextLevelXP = player.ai->get_next_level_xp(ctx, const_cast<Player&>(player));
+	int nextLevelXP = player.get_next_level_xp(ctx);
 	int xpNeeded = nextLevelXP - currentXP;
 
 	ctx.renderer->draw_text(

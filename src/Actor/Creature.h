@@ -30,6 +30,11 @@ enum class CreatureClass
 
 class Creature : public Actor
 {
+protected:
+	// Shared per-turn logic (buffs, armor, constitution) used by both
+	// Creature::update() and Player::update().
+	void update_creature_state(GameContext& ctx);
+
 private:
 	//==Actor Attributes - Base values (buffs calculated dynamically)==
 	int baseStrength{ 0 };
@@ -72,7 +77,7 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	void update(GameContext& ctx);
+	virtual void update(GameContext& ctx);
 
 	// Const-correct getter methods - return effective values (AD&D 2e: MAX(base, SET) + ADD)
 	int get_strength() const noexcept { return calculate_effective_stat(baseStrength, BuffType::STRENGTH); }
@@ -125,7 +130,7 @@ public:
 	int get_morale() const noexcept { return morale; }
 	void set_morale(int value) noexcept { morale = value; }
 
-	void apply_confusion(int nbTurns);
+	virtual void apply_confusion(int nbTurns);
 
 	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);

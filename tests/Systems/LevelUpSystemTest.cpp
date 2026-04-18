@@ -171,3 +171,74 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)
 
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 1.5f);
 }
+
+// AD&D 2e XP table compliance — get_next_level_xp now lives on Player
+TEST_F(LevelUpSystemTest, XpTableFighterLevel1)
+{
+    player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_level(1);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 2000);
+}
+
+TEST_F(LevelUpSystemTest, XpTableFighterLevel5)
+{
+    player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_level(5);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 32000);
+}
+
+TEST_F(LevelUpSystemTest, XpTableFighterLinearExtrapolation)
+{
+    // Level 11 = last table entry (750000) + 1 * 250000 = 1,000,000
+    player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_level(11);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 1000000);
+}
+
+TEST_F(LevelUpSystemTest, XpTableRogueLevel1)
+{
+    player->playerClassState = Player::PlayerClassState::ROGUE;
+    player->set_creature_level(1);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 1250);
+}
+
+TEST_F(LevelUpSystemTest, XpTableClericLevel1)
+{
+    player->playerClassState = Player::PlayerClassState::CLERIC;
+    player->set_creature_level(1);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 1500);
+}
+
+TEST_F(LevelUpSystemTest, XpTableWizardLevel1)
+{
+    player->playerClassState = Player::PlayerClassState::WIZARD;
+    player->set_creature_level(1);
+    EXPECT_EQ(player->get_next_level_xp(ctx), 2500);
+}
+
+// levelup_update behavior
+TEST_F(LevelUpSystemTest, LevelupUpdateBelowThreshold)
+{
+    player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_level(1);
+    player->destructible->set_xp(1999); // one short
+
+    int levelBefore = player->get_creature_level();
+    player->levelup_update(ctx);
+
+    EXPECT_EQ(player->get_creature_level(), levelBefore);
+    EXPECT_EQ(player->destructible->get_xp(), 1999);
+}
+
+TEST_F(LevelUpSystemTest, LevelupUpdateAtThreshold)
+{
+    player->playerClassState = Player::PlayerClassState::FIGHTER;
+    player->set_creature_level(1);
+    player->destructible->set_xp(2000); // exactly at threshold
+
+    int levelBefore = player->get_creature_level();
+    player->levelup_update(ctx);
+
+    EXPECT_EQ(player->get_creature_level(), levelBefore + 1);
+    EXPECT_EQ(player->destructible->get_xp(), 0); // 2000 - 2000
+}

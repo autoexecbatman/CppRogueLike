@@ -331,7 +331,7 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 			ctx.messageSystem->finalize_message();
 
 			ctx.player->add_state(ActorState::IS_CONFUSED);
-			ctx.player->ai->apply_confusion(confusionDuration);
+			ctx.player->apply_confusion(confusionDuration);
 			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 		}
 		else

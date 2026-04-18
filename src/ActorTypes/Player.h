@@ -7,6 +7,7 @@
 
 #include "../Actor/Creature.h"
 #include "../Actor/EquipmentSlot.h"
+#include "../Ai/PlayerController.h"
 #include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
 #include "../Utils/Vector2D.h"
@@ -54,6 +55,8 @@ public:
 
 	std::vector<std::string> memorizedSpells;
 	std::vector<EquippedItem> equippedItems;
+
+	std::unique_ptr<PlayerController> controller;
 
 	Player(Vector2D position);
 	Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx);
@@ -105,6 +108,12 @@ public:
 	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx) override;
 
 	bool is_player() const noexcept override { return true; }
+
+	void update(GameContext& ctx) override;
+	void apply_confusion(int duration) override;
+
+	[[nodiscard]] int get_next_level_xp(GameContext& ctx) const;
+	void levelup_update(GameContext& ctx);
 
 	// Two-weapon fighting mechanics
 	struct DualWieldInfo

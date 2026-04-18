@@ -73,7 +73,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Ai/Ai.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiMonster.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiMonsterConfused.cpp
-    ${PARENT_SOURCE_DIR}/Ai/AiPlayer.cpp
+    ${PARENT_SOURCE_DIR}/Ai/PlayerController.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiShopkeeper.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiMimic.cpp
     ${PARENT_SOURCE_DIR}/Ai/AiMonsterRanged.cpp

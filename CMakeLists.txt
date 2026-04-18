@@ -143,8 +143,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Ai/AiMonster.h
     ${PROJECT_SOURCE_DIR}/Ai/AiMonsterConfused.cpp
     ${PROJECT_SOURCE_DIR}/Ai/AiMonsterConfused.h
-    ${PROJECT_SOURCE_DIR}/Ai/AiPlayer.cpp
-    ${PROJECT_SOURCE_DIR}/Ai/AiPlayer.h
+    ${PROJECT_SOURCE_DIR}/Ai/PlayerController.cpp
+    ${PROJECT_SOURCE_DIR}/Ai/PlayerController.h
     ${PROJECT_SOURCE_DIR}/Ai/AiShopkeeper.cpp
     ${PROJECT_SOURCE_DIR}/Ai/AiShopkeeper.h
     ${PROJECT_SOURCE_DIR}/Ai/AiMimic.cpp

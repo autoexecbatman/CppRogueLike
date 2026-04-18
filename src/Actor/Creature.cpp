@@ -151,21 +151,27 @@ void Creature::save(json& j)
 	j["activeBuffs"] = buffsJson;
 }
 
-// the actor update
-void Creature::update(GameContext& ctx)
+void Creature::update_creature_state(GameContext& ctx)
 {
 	if (!invisibleTile.is_valid() && ctx.tileConfig)
 	{
 		invisibleTile = ctx.tileConfig->get("TILE_INVISIBLE");
 	}
-	ctx.buffSystem->restore_loaded_buff_states(*this); // Restore states after deserialization (idempotent)
-	ctx.buffSystem->update_creature_buffs(*this); // Unified buff system
 
-	assert(destructible && "Creature::update called with null destructible");
-	assert(ai && "Creature::update called with null ai");
+	ctx.buffSystem->restore_loaded_buff_states(*this);
+	ctx.buffSystem->update_creature_buffs(*this);
+
+	assert(destructible && "Creature::update_creature_state called with null destructible");
 
 	destructible->update_armor_class(*this, ctx);
 	destructible->update_constitution_bonus(*this, ctx);
+}
+
+// the actor update -- monsters only; Player overrides this
+void Creature::update(GameContext& ctx)
+{
+	update_creature_state(ctx);
+	assert(ai && "Creature::update called with null ai");
 	ai->update(*this, ctx);
 }
 

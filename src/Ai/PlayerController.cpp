@@ -1,4 +1,4 @@
-// file: AiPlayer.cpp
+// file: PlayerController.cpp
 #include <array>
 #include <functional>
 #include <memory>
@@ -42,9 +42,8 @@
 #include "../UI/InventoryUI.h"
 #include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
-#include "Ai.h"
-#include "AiPlayer.h"
 #include "AiShopkeeper.h"
+#include "PlayerController.h"
 
 // ---------------------------------------------------------------------------
 // Direction table -- static const, not a mutable global
@@ -52,19 +51,16 @@
 static const std::unordered_map<Controls, Vector2D>& direction_map()
 {
 	static const std::unordered_map<Controls, Vector2D> moves = {
-		// Arrow keys
 		{ Controls::UP_ARROW, DIR_N },
 		{ Controls::DOWN_ARROW, DIR_S },
 		{ Controls::LEFT_ARROW, DIR_W },
 		{ Controls::RIGHT_ARROW, DIR_E },
 
-		// WASD movement
 		{ Controls::W_KEY, DIR_N },
 		{ Controls::S_KEY, DIR_S },
 		{ Controls::A_KEY, DIR_W },
 		{ Controls::D_KEY, DIR_E },
 
-		// WASD diagonals
 		{ Controls::Q_KEY, DIR_NW },
 		{ Controls::E_KEY, DIR_NE },
 		{ Controls::Z_KEY, DIR_SW },
@@ -73,50 +69,46 @@ static const std::unordered_map<Controls, Vector2D>& direction_map()
 	return moves;
 }
 
-void AiPlayer::update(Creature& owner, GameContext& ctx)
+PlayerController::PlayerController(Player& owner)
+	: playerOwner(owner)
+{
+}
+
+void PlayerController::update(GameContext& ctx)
 {
 	// If stuck in a web, try to break free and skip turn if still stuck
 	if (ctx.player->is_webbed())
 	{
 		if (!ctx.player->try_break_web(ctx))
 		{
-			// Still stuck, skip the player's turn
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			return;
 		}
 	}
 
-	if (resolve_pending_door(owner, ctx))
-	{
+	if (resolve_pending_door(ctx))
 		return;
-	}
 
-	if (handle_mouse_path(owner, ctx))
-	{
+	if (handle_mouse_path(ctx))
 		return;
-	}
 
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
 
-	// Handle confused state - randomly move or act
-	if (owner.has_state(ActorState::IS_CONFUSED) && confusionTurns > 0)
+	// Handle confused state -- randomly move or act
+	if (playerOwner.has_state(ActorState::IS_CONFUSED) && confusionTurns > 0)
 	{
-		// Decrease confusion duration
 		confusionTurns--;
 
-		// If confusion ended, inform the player
 		if (confusionTurns == 0)
 		{
-			owner.remove_state(ActorState::IS_CONFUSED);
+			playerOwner.remove_state(ActorState::IS_CONFUSED);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your mind clears.", true);
 		}
 		else
 		{
-			// 50% chance of random movement
 			if (ctx.dice->d2() == 1)
 			{
-				// Random direction
 				static const std::array<Vector2D, 8> allDirections = {
 					DIR_N, DIR_S, DIR_W, DIR_E, DIR_NW, DIR_NE, DIR_SW, DIR_SE
 				};
@@ -127,7 +119,6 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 			}
 			else
 			{
-				// Process normal input but show a message
 				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				const auto& moves = direction_map();
@@ -138,18 +129,13 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 				}
 				else
 				{
-					Player* player = dynamic_cast<Player*>(&owner);
-					if (player)
-					{
-						call_action(*player, key, ctx);
-					}
+					call_action(key, ctx);
 				}
 			}
 		}
 	}
 	else
 	{
-		// Normal movement handling
 		const auto& moves = direction_map();
 		if (moves.find(key) != moves.end())
 		{
@@ -158,69 +144,59 @@ void AiPlayer::update(Creature& owner, GameContext& ctx)
 		}
 		else
 		{
-			Player* player = dynamic_cast<Player*>(&owner);
-			if (player)
-				call_action(*player, key, ctx);
+			call_action(key, ctx);
 		}
 	}
 
-	if (isWaiting) // when waiting tiles are triggered
+	if (isWaiting)
 	{
 		isWaiting = false;
-		ctx.map->tile_action(owner, ctx.map->get_tile_type(owner.position), ctx);
-		look_on_floor(owner.position, ctx);
+		ctx.map->tile_action(playerOwner, ctx.map->get_tile_type(playerOwner.position), ctx);
+		look_on_floor(playerOwner.position, ctx);
 	}
 
-	// if moving
 	if (moveVector.x != 0 || moveVector.y != 0)
 	{
-		Vector2D targetPosition = owner.position + moveVector;
-		look_to_move(owner, targetPosition, ctx);
-		look_to_attack(targetPosition, owner, ctx);
+		Vector2D targetPosition = playerOwner.position + moveVector;
+		look_to_move(targetPosition, ctx);
+		look_to_attack(targetPosition, ctx);
 		look_on_floor(targetPosition, ctx);
 		flush_fov(ctx);
 	}
 }
 
-void AiPlayer::load(const json& j)
+void PlayerController::load(const json& /*j*/)
 {
-	/*type is assigned in Ai::create()*/
 }
 
-void AiPlayer::save(json& j)
+void PlayerController::save(json& /*j*/)
 {
-	j["type"] = static_cast<int>(AiType::PLAYER);
 }
 
-void AiPlayer::move(Creature& owner, Vector2D target)
+void PlayerController::move(Vector2D target)
 {
-	owner.position = target;
+	playerOwner.position = target;
 }
 
-void AiPlayer::pick_item(Player& player, GameContext& ctx)
+void PlayerController::pick_item(GameContext& ctx)
 {
-	// Check if the inventory is already full (including equipped items)
-	size_t totalItems = InventoryOperations::get_item_count(player.inventoryData);
-	totalItems += player.equippedItems.size();
+	size_t totalItems = InventoryOperations::get_item_count(playerOwner.inventoryData);
+	totalItems += playerOwner.equippedItems.size();
 
-	if (player.inventoryData.capacity > 0 && totalItems >= player.inventoryData.capacity)
+	if (playerOwner.inventoryData.capacity > 0 && totalItems >= playerOwner.inventoryData.capacity)
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
 		return;
 	}
 
 	if (ctx.inventoryData->items.empty())
-	{
 		return;
-	}
 
 	std::vector<std::unique_ptr<Item>*> itemsAtPosition;
 	for (auto& item : ctx.inventoryData->items)
 	{
-		if (item && item->position == player.position)
-		{
+		if (item && item->position == playerOwner.position)
 			itemsAtPosition.push_back(&item);
-		}
 	}
 
 	if (itemsAtPosition.empty())
@@ -235,50 +211,46 @@ void AiPlayer::pick_item(Player& player, GameContext& ctx)
 	if (item->itemClass == ItemClass::GOLD_COIN)
 	{
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
-		player.adjust_gold(goldBehavior.amount);
+		playerOwner.adjust_gold(goldBehavior.amount);
 		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
 		InventoryOperations::remove_item(*ctx.inventoryData, *item);
 		return;
 	}
 
 	std::string itemName = item->actorData.name;
-	auto result = InventoryOperations::add_item(player.inventoryData, std::move(itemPtr));
+	auto result = InventoryOperations::add_item(playerOwner.inventoryData, std::move(itemPtr));
 
 	if (result.has_value())
 	{
 		InventoryOperations::optimize_inventory_storage(*ctx.inventoryData);
-		player.sync_ranged_state(ctx);
+		playerOwner.sync_ranged_state(ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
 	{
 		if (result.get_error() == InventoryError::FULL)
-		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
-		}
 		else
-		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
-		}
 	}
 }
 
-void AiPlayer::drop_item(Player& player, GameContext& ctx)
+void PlayerController::drop_item(GameContext& ctx)
 {
-	if (player.inventoryData.items.empty())
+	if (playerOwner.inventoryData.items.empty())
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
 		return;
 	}
 
 	// TODO: Reimplement drop_item UI without curses (was a curses WINDOW-based menu)
-	if (!player.inventoryData.items.empty())
+	if (!playerOwner.inventoryData.items.empty())
 	{
-		Item* itemToDrop = player.inventoryData.items.front().get();
+		Item* itemToDrop = playerOwner.inventoryData.items.front().get();
 		if (itemToDrop)
 		{
 			std::string itemName = itemToDrop->actorData.name;
-			player.drop(*itemToDrop, ctx);
+			playerOwner.drop(*itemToDrop, ctx);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
@@ -287,31 +259,31 @@ void AiPlayer::drop_item(Player& player, GameContext& ctx)
 	ctx.renderingManager->restore_game_display();
 }
 
-bool AiPlayer::is_pickable_at_position(const Actor& actor, const Actor& owner) const
+bool PlayerController::is_pickable_at_position(const Actor& actor) const
 {
-	return actor.position == owner.position;
+	return actor.position == playerOwner.position;
 }
 
-void AiPlayer::display_inventory_items(void* /*inv*/, const Player& /*player*/) noexcept
+void PlayerController::display_inventory_items() noexcept
 {
 	// TODO: Reimplement display_inventory_items without curses
 }
 
-void AiPlayer::display_inventory(Player& player, GameContext& ctx)
+void PlayerController::display_inventory(GameContext& ctx)
 {
-	ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::EQUIPMENT, ctx));
+	ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::EQUIPMENT, ctx));
 }
 
-Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx)
+Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 {
 	ctx.messageSystem->log("You chose from inventory");
-	if (player.inventoryData.items.size() > 0)
+	if (playerOwner.inventoryData.items.size() > 0)
 	{
 		const size_t index = ascii - 'a';
-		if (index >= 0 && index < player.inventoryData.items.size())
+		if (index >= 0 && index < playerOwner.inventoryData.items.size())
 		{
-			Item* item = player.inventoryData.items.at(index).get();
-			player.sync_ranged_state(ctx);
+			Item* item = playerOwner.inventoryData.items.at(index).get();
+			playerOwner.sync_ranged_state(ctx);
 			return item;
 		}
 		else
@@ -321,27 +293,23 @@ Item* AiPlayer::chose_from_inventory(Player& player, int ascii, GameContext& ctx
 	}
 	else
 	{
-		throw std::logic_error("AiPlayer::chose_from_inventory -- called on player with empty inventory");
+		throw std::logic_error("PlayerController::chose_from_inventory -- called on player with empty inventory");
 	}
 }
 
-void AiPlayer::look_on_floor(Vector2D target, GameContext& ctx)
+void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 {
 	if (ctx.inventoryData->items.empty())
-	{
 		return;
-	}
 
 	for (const auto& i : ctx.inventoryData->items)
 	{
 		if (i && i->position == target)
-		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here", true);
-		}
 	}
 }
 
-bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ctx)
+bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 {
 	for (const auto& c : *ctx.creatures)
 	{
@@ -355,7 +323,7 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					if (shopkeeperAI && !shopkeeperAI->tradeMenuOpen)
 					{
 						ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
-						shopkeeperAI->trade(*c, owner, ctx);
+						shopkeeperAI->trade(*c, playerOwner, ctx);
 						shopkeeperAI->tradeMenuOpen = true;
 						return false;
 					}
@@ -366,43 +334,32 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 					}
 				}
 
-				auto playerPtr = dynamic_cast<Player*>(&owner);
-				if (playerPtr)
+				playerOwner.roundCounter++;
+
+				int attacksThisRound = 1;
+
+				if (playerOwner.get_attacks_per_round() >= 2.0f)
 				{
-					playerPtr->roundCounter++;
-
-					int attacksThisRound = 1;
-
-					if (playerPtr->get_attacks_per_round() >= 2.0f)
-					{
-						attacksThisRound = 2;
-					}
-					else if (playerPtr->get_attacks_per_round() >= 1.5f)
-					{
-						attacksThisRound = (playerPtr->roundCounter % 2 == 1) ? 2 : 1;
-					}
-
-					for (int i = 0; i < attacksThisRound; i++)
-					{
-						if (c->destructible && !c->destructible->is_dead())
-						{
-							if (i > 0)
-							{
-								ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
-							}
-							owner.attacker->attack(*c, ctx);
-						}
-						else
-						{
-							break;
-						}
-					}
-
-					ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+					attacksThisRound = 2;
 				}
-				else
+				else if (playerOwner.get_attacks_per_round() >= 1.5f)
 				{
-					owner.attacker->attack(*c, ctx);
+					attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
+				}
+
+				for (int i = 0; i < attacksThisRound; i++)
+				{
+					if (c->destructible && !c->destructible->is_dead())
+					{
+						if (i > 0)
+							ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
+
+						playerOwner.attacker->attack(*c, ctx);
+					}
+					else
+					{
+						break;
+					}
 				}
 
 				ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
@@ -421,17 +378,14 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 			{
 				decor->isBroken = true;
 				if (ctx.decorEditor)
-				{
 					ctx.decorEditor->erase(decor->position.x, decor->position.y);
-				}
+
 				ctx.messageSystem->message(
 					WHITE_BLACK_PAIR,
 					std::format("The {} shatters!", decor->name),
 					true);
 				if (!decor->lootTableKey.empty())
-				{
 					ctx.map->add_item(decor->position, ctx);
-				}
 			}
 			else
 			{
@@ -447,17 +401,14 @@ bool AiPlayer::look_to_attack(Vector2D& target, Creature& owner, GameContext& ct
 	return true;
 }
 
-bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, GameContext& ctx)
+bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)
 {
-	// Bump-to-attack: never step onto an occupied tile — look_to_attack handles combat.
 	if (ctx.map->get_actor(targetPosition, ctx) != nullptr)
-	{
 		return false;
-	}
 
 	TileType targetTileType = ctx.map->get_tile_type(targetPosition);
 
-	if (!ctx.map->is_collision(owner, targetTileType, targetPosition, ctx))
+	if (!ctx.map->is_collision(playerOwner, targetTileType, targetPosition, ctx))
 	{
 		bool webEffect = false;
 
@@ -469,7 +420,7 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 				Web* web = dynamic_cast<Web*>(obj.get());
 				if (web)
 				{
-					webEffect = web->apply_effect(owner, ctx);
+					webEffect = web->apply_effect(playerOwner, ctx);
 					break;
 				}
 			}
@@ -477,8 +428,8 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 
 		if (!webEffect)
 		{
-			move(owner, targetPosition);
-			ctx.map->tile_action(owner, targetTileType, ctx);
+			move(targetPosition);
+			ctx.map->tile_action(playerOwner, targetTileType, ctx);
 			shouldComputeFOV = true;
 			return true;
 		}
@@ -491,7 +442,7 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 
 		case TileType::WATER:
 		{
-			if (!owner.has_state(ActorState::CAN_SWIM))
+			if (!playerOwner.has_state(ActorState::CAN_SWIM))
 			{
 				ctx.messageSystem->log("You can't swim.");
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't swim.", true);
@@ -521,18 +472,15 @@ bool AiPlayer::look_to_move(Creature& owner, const Vector2D& targetPosition, Gam
 	}
 }
 
-bool AiPlayer::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
+bool PlayerController::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const
 {
 	if (!ctx.renderer || !ctx.inputSystem)
-	{
 		return false;
-	}
 
 	int tileSize = ctx.renderer->get_tile_size();
 	if (tileSize <= 0)
-	{
 		return false;
-	}
+
 	out_world_tile = ctx.inputSystem->get_mouse_world_tile(
 		ctx.renderer->get_camera_x(),
 		ctx.renderer->get_camera_y(),
@@ -541,7 +489,7 @@ bool AiPlayer::resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_ti
 	return ctx.map->is_in_bounds(out_world_tile);
 }
 
-void AiPlayer::flush_fov(GameContext& ctx)
+void PlayerController::flush_fov(GameContext& ctx)
 {
 	if (shouldComputeFOV)
 	{
@@ -550,29 +498,20 @@ void AiPlayer::flush_fov(GameContext& ctx)
 	}
 }
 
-bool AiPlayer::is_mouse_pending_cancelled(GameContext& ctx) const
+bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 {
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	const auto& moves = direction_map();
 	bool isMovement = (moves.find(key) != moves.end());
 	bool isAction = (key == Controls::ESCAPE || key == Controls::WAIT || key == Controls::PICK);
-
 	return isMovement || isAction;
 }
 
-// ---------------------------------------------------------------------------
-// begin_path_walk -- compute A* path and enter a mouse navigation mode.
-// walkDest is where the player walks to; actionTarget is the tile acted on
-// at arrival (for WALK_TO_DOOR these differ: adj tile vs. door tile).
-// ---------------------------------------------------------------------------
-// find_door_approach -- nearest walkable cardinal neighbour of doorTile.
-// Returns {-1,-1} when all four cardinal neighbours are blocked.
-Vector2D AiPlayer::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
+Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameContext& ctx) const
 {
 	if (!ctx.map)
-	{
-		throw std::logic_error("AiPlayer::find_door_approach -- ctx.map is null");
-	}
+		throw std::logic_error("PlayerController::find_door_approach -- ctx.map is null");
+
 	const std::array<Vector2D, 4> dirs{
 		Vector2D{0, -1}, Vector2D{0, 1}, Vector2D{-1, 0}, Vector2D{1, 0}
 	};
@@ -582,9 +521,8 @@ Vector2D AiPlayer::find_door_approach(Vector2D doorTile, const GameContext& ctx)
 	{
 		Vector2D adj{ doorTile.x + d.x, doorTile.y + d.y };
 		if (!ctx.map->can_walk(adj, ctx))
-		{
 			continue;
-		}
+
 		int dist = std::abs(adj.x - ctx.player->position.x)
 			+ std::abs(adj.y - ctx.player->position.y);
 		if (dist < bestDist)
@@ -596,7 +534,7 @@ Vector2D AiPlayer::find_door_approach(Vector2D doorTile, const GameContext& ctx)
 	return best;
 }
 
-void AiPlayer::begin_path_walk(
+void PlayerController::begin_path_walk(
 	Vector2D walkDest,
 	Vector2D actionTarget,
 	MouseMode mode,
@@ -604,48 +542,31 @@ void AiPlayer::begin_path_walk(
 	GameContext& ctx)
 {
 	if (mode == MouseMode::IDLE)
-	{
-		throw std::logic_error("AiPlayer::begin_path_walk -- mode must not be IDLE");
-	}
+		throw std::logic_error("PlayerController::begin_path_walk -- mode must not be IDLE");
+
 	if (!ctx.pathfinder || !ctx.map)
-	{
 		return;
-	}
 
 	auto path = ctx.pathfinder->a_star_search(
 		*ctx.map, ctx.player->position, walkDest, true, ctx);
 
 	if (path.empty())
-	{
 		return;
-	}
 
 	*ctx.mousePathOverlay = std::move(path);
 	mouseMode = mode;
 	mouseDoorAction = doorAction;
 	mouseDoorTarget = actionTarget;
-	// Do NOT set NEW_TURN here. Monsters advance only after the player actually moves,
-	// which handle_mouse_path sets NEW_TURN on each step. Setting it here gives monsters
-	// a free advance before the player takes their first step.
 }
 
-// ---------------------------------------------------------------------------
-// execute_arrival -- called when the player reaches the path destination.
-// Returns true if a game turn was consumed.
-// ---------------------------------------------------------------------------
-bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
+bool PlayerController::execute_arrival(GameContext& ctx)
 {
 	switch (mouseMode)
 	{
 
 	case MouseMode::WALK_TO_PICKUP:
 	{
-		Player* player = dynamic_cast<Player*>(&owner);
-		if (!player)
-		{
-			throw std::logic_error("AiPlayer::execute_arrival -- owner is not a Player");
-		}
-		pick_item(*player, ctx);
+		pick_item(ctx);
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
@@ -653,24 +574,20 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 	case MouseMode::WALK_TO_DOOR:
 	{
 		if (mouseDoorTarget.x == -1)
-		{
-			throw std::logic_error("AiPlayer::execute_arrival -- WALK_TO_DOOR reached without a valid mouseDoorTarget");
-		}
+			throw std::logic_error("PlayerController::execute_arrival -- WALK_TO_DOOR reached without a valid mouseDoorTarget");
+
 		if (mouseDoorAction == PendingDoorAction::OPEN)
-		{
 			ctx.map->open_door(mouseDoorTarget, ctx);
-		}
 		else
-		{
 			ctx.map->close_door(mouseDoorTarget, ctx);
-		}
+
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
 
 	case MouseMode::WALK_TO_STAIRS:
 	{
-		if (ctx.stairs && ctx.stairs->position == owner.position)
+		if (ctx.stairs && ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
 			ctx.gameState->set_game_status(GameStatus::STARTUP);
@@ -679,24 +596,15 @@ bool AiPlayer::execute_arrival(Creature& owner, GameContext& ctx)
 	}
 
 	default:
-	{
 		return false;
-	}
 
 	}
 }
 
-// ---------------------------------------------------------------------------
-// handle_mouse_path -- unified walk handler for all mouse navigation modes.
-// Rate-limiting (pacing between steps) lives in GameLoopCoordinator;
-// this function executes exactly one step per call.
-// ---------------------------------------------------------------------------
-bool AiPlayer::handle_mouse_path(Creature& owner, GameContext& ctx)
+bool PlayerController::handle_mouse_path(GameContext& ctx)
 {
 	if (mouseMode == MouseMode::IDLE)
-	{
 		return false;
-	}
 
 	if (is_mouse_pending_cancelled(ctx))
 	{
@@ -705,84 +613,72 @@ bool AiPlayer::handle_mouse_path(Creature& owner, GameContext& ctx)
 		return false;
 	}
 
-	// Drain nodes where the owner is already standing
-	while (!ctx.mousePathOverlay->empty() && ctx.mousePathOverlay->front() == owner.position)
-	{
+	while (!ctx.mousePathOverlay->empty() && ctx.mousePathOverlay->front() == playerOwner.position)
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
-	}
 
 	if (ctx.mousePathOverlay->empty())
 	{
-		bool turnConsumed = execute_arrival(owner, ctx);
+		bool turnConsumed = execute_arrival(ctx);
 		mouseMode = MouseMode::IDLE;
 		return turnConsumed;
 	}
 
 	Vector2D next = ctx.mousePathOverlay->front();
-	Vector2D prevPos = owner.position;
-	look_to_move(owner, next, ctx);
-	look_to_attack(next, owner, ctx);
+	Vector2D prevPos = playerOwner.position;
+	look_to_move(next, ctx);
+	look_to_attack(next, ctx);
 	look_on_floor(next, ctx);
 	flush_fov(ctx);
 
-	if (owner.position == next)
-	{
+	if (playerOwner.position == next)
 		ctx.mousePathOverlay->erase(ctx.mousePathOverlay->begin());
-	}
 
-	if (owner.position == prevPos)
+	if (playerOwner.position == prevPos)
 	{
-		// Movement was blocked (monster, decoration, etc.) -- abort path.
 		ctx.mousePathOverlay->clear();
 		mouseMode = MouseMode::IDLE;
 	}
 
 	if (ctx.mousePathOverlay->empty())
 	{
-		execute_arrival(owner, ctx);
+		execute_arrival(ctx);
 		mouseMode = MouseMode::IDLE;
 	}
 
 	if (ctx.gameState->get_game_status() != GameStatus::STARTUP)
-	{
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-	}
 
 	return true;
 }
 
-void AiPlayer::handle_left_click(Player& player, GameContext& ctx)
+void PlayerController::handle_left_click(GameContext& ctx)
 {
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
-	{
 		return;
-	}
 
-	if (world_tile == player.position)
+	if (world_tile == playerOwner.position)
 	{
-		if (ctx.stairs && ctx.stairs->position == player.position)
+		if (ctx.stairs && ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
 			ctx.gameState->set_game_status(GameStatus::STARTUP);
 		}
 		else
 		{
-			pick_item(player, ctx);
+			pick_item(ctx);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 		return;
 	}
 
-	// Actor check before door check: a monster standing on a door tile must be
-	// attacked, not have the door operated beneath it.
 	if (ctx.map->get_actor(world_tile, ctx) != nullptr)
 	{
-		int dx = std::abs(player.position.x - world_tile.x);
-		int dy = std::abs(player.position.y - world_tile.y);
+		int dx = std::abs(playerOwner.position.x - world_tile.x);
+		int dy = std::abs(playerOwner.position.y - world_tile.y);
 		if (dx <= 1 && dy <= 1)
 		{
-			look_to_attack(world_tile, player, ctx);
+			look_to_attack(world_tile, ctx);
 			flush_fov(ctx);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
@@ -808,13 +704,11 @@ void AiPlayer::handle_left_click(Player& player, GameContext& ctx)
 	begin_path_walk(world_tile, world_tile, mode, PendingDoorAction::NONE, ctx);
 }
 
-void AiPlayer::handle_right_click(Player& player, GameContext& ctx)
+void PlayerController::handle_right_click(GameContext& ctx)
 {
 	Vector2D world_tile;
 	if (!resolve_mouse_world_tile(ctx, world_tile))
-	{
 		return;
-	}
 
 	int tileSize = ctx.renderer->get_tile_size();
 
@@ -833,23 +727,15 @@ void AiPlayer::handle_right_click(Player& player, GameContext& ctx)
 	bool hasStairs = ctx.stairs && ctx.stairs->position == world_tile;
 
 	if (!(foundItem || hasDoor || hasStairs))
-	{
 		return;
-	}
 
 	std::vector<std::string> options;
 	if (foundItem)
-	{
 		options.push_back("Pick up " + foundItem->actorData.name.substr(0, 14));
-	}
 	if (hasDoor)
-	{
 		options.push_back(doorIsOpen ? "Close door" : "Open door");
-	}
 	if (hasStairs)
-	{
 		options.push_back("Descend stairs");
-	}
 	options.push_back("Cancel");
 
 	int anchor_col = world_tile.x - ctx.renderer->get_camera_x() / tileSize;
@@ -864,55 +750,43 @@ void AiPlayer::handle_right_click(Player& player, GameContext& ctx)
 		if (hasItem)
 		{
 			if (sel == idx)
-			{
 				begin_path_walk(world_tile, world_tile, MouseMode::WALK_TO_PICKUP, PendingDoorAction::NONE, callbackCtx);
-			}
 			idx++;
 		}
 		if (hasDoor)
 		{
 			if (sel == idx)
 			{
-				// WALK_TO_DOOR invariant: player must arrive adjacent, never on the door
-				// tile. open_door/close_door both reject tiles occupied by an actor.
 				auto& pl = *callbackCtx.player;
 				int dx = std::abs(pl.position.x - world_tile.x);
 				int dy = std::abs(pl.position.y - world_tile.y);
 				if (dx <= 1 && dy <= 1)
 				{
 					if (doorAction == PendingDoorAction::OPEN)
-					{
 						callbackCtx.map->open_door(world_tile, callbackCtx);
-					}
 					else
-					{
 						callbackCtx.map->close_door(world_tile, callbackCtx);
-					}
+
 					callbackCtx.gameState->set_game_status(GameStatus::NEW_TURN);
 				}
 				else
 				{
 					Vector2D adj = find_door_approach(world_tile, callbackCtx);
 					if (adj.x != -1)
-					{
 						begin_path_walk(adj, world_tile, MouseMode::WALK_TO_DOOR, doorAction, callbackCtx);
-					}
 				}
 			}
 			idx++;
 		}
 		if (hasStairs && sel == idx)
-		{
 			begin_path_walk(world_tile, world_tile, MouseMode::WALK_TO_STAIRS, PendingDoorAction::NONE, callbackCtx);
-		}
-		// last index = Cancel -- do nothing
 	};
 
 	ctx.menus->push_back(std::make_unique<ContextMenu>(
 		std::move(options), anchor_col, anchor_row, std::move(on_select), ctx));
 }
 
-void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
+void PlayerController::call_action(Controls key, GameContext& ctx)
 {
 	switch (key)
 	{
@@ -926,38 +800,38 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::MOUSE:
 	{
-		handle_left_click(player, ctx);
+		handle_left_click(ctx);
 		break;
 	}
 
 	case Controls::MOUSE_RIGHT:
 	{
-		handle_right_click(player, ctx);
+		handle_right_click(ctx);
 		break;
 	}
 
 	case Controls::PICK:
 	{
-		pick_item(player, ctx);
+		pick_item(ctx);
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		break;
 	}
 
 	case Controls::DROP:
 	{
-		drop_item(player, ctx);
+		drop_item(ctx);
 		break;
 	}
 
 	case Controls::INVENTORY:
 	{
-		display_inventory(player, ctx);
+		display_inventory(ctx);
 		break;
 	}
 
 	case Controls::USE:
 	{
-		ctx.menus->push_back(std::make_unique<InventoryUI>(player, InventoryScreen::USABLES, ctx));
+		ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::USABLES, ctx));
 		break;
 	}
 
@@ -976,7 +850,7 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::DESCEND:
 	{
-		if (ctx.stairs->position == player.position)
+		if (ctx.stairs->position == playerOwner.position)
 		{
 			ctx.levelManager->advance_to_next_level(ctx);
 			ctx.gameState->set_game_status(GameStatus::STARTUP);
@@ -1017,17 +891,17 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::TEST_COMMAND:
 	{
-		ctx.map->spawn_all_enhanced_items_debug(player.position, ctx);
+		ctx.map->spawn_all_enhanced_items_debug(playerOwner.position, ctx);
 		InventoryOperations::add_item(
-			player.inventoryData,
-			ItemCreator::create("long_bow", player.position, *ctx.contentRegistry));
+			playerOwner.inventoryData,
+			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry));
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
-		player.memorizedSpells.push_back("magic_missile");
-		player.memorizedSpells.push_back("magic_missile");
-		player.memorizedSpells.push_back("sleep");
-		player.memorizedSpells.push_back("web");
-		player.memorizedSpells.push_back("teleport");
+		playerOwner.memorizedSpells.push_back("magic_missile");
+		playerOwner.memorizedSpells.push_back("magic_missile");
+		playerOwner.memorizedSpells.push_back("sleep");
+		playerOwner.memorizedSpells.push_back("web");
+		playerOwner.memorizedSpells.push_back("teleport");
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
 		break;
 	}
@@ -1061,16 +935,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	case Controls::HIDE:
 	{
-		if (player.attempt_hide(ctx))
-		{
+		if (playerOwner.attempt_hide(ctx))
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-		}
 		break;
 	}
 
 	case Controls::CAST:
 	{
-		SpellSystem::show_casting_menu(player, ctx);
+		SpellSystem::show_casting_menu(playerOwner, ctx);
 		break;
 	}
 
@@ -1082,15 +954,14 @@ void AiPlayer::call_action(Player& player, Controls key, GameContext& ctx)
 
 	default:
 		break;
+
 	}
 }
 
-bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
+bool PlayerController::resolve_pending_door(GameContext& ctx)
 {
 	if (pendingDoorAction == PendingDoorAction::NONE)
-	{
 		return false;
-	}
 
 	int dirKey = ctx.inputHandler->get_current_key();
 	if (dirKey == 27)
@@ -1100,11 +971,9 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 		return true;
 	}
 	if (dirKey == -1)
-	{
 		return true;
-	}
 
-	Vector2D doorPos = handle_direction_input(owner, dirKey, ctx);
+	Vector2D doorPos = handle_direction_input(dirKey, ctx);
 	if (doorPos.x == 0 && doorPos.y == 0)
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
@@ -1152,20 +1021,18 @@ bool AiPlayer::resolve_pending_door(Creature& owner, GameContext& ctx)
 	return true;
 }
 
-Vector2D AiPlayer::handle_direction_input(const Creature& owner, int dirKey, GameContext& ctx)
+Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 {
 	const auto& moves = direction_map();
 	const auto it = moves.find(static_cast<Controls>(dirKey));
 	if (it == moves.end())
-	{
 		return { 0, 0 };
-	}
 
-	const Vector2D targetPos = owner.position + it->second;
+	const Vector2D targetPos = playerOwner.position + it->second;
 	if (!ctx.map->is_in_bounds(targetPos))
-	{
 		return { 0, 0 };
-	}
 
 	return targetPos;
 }
+
+// end of file: PlayerController.cpp

@@ -16,7 +16,6 @@
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Pickable.h"
 #include "../Ai/Ai.h"
-#include "../Ai/AiPlayer.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
@@ -31,6 +30,7 @@
 #include "../Renderer/Renderer.h"
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
+#include "../Systems/DisplayManager.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
@@ -38,6 +38,55 @@
 #include "../Systems/SpellSystem.h"
 #include "../Utils/Vector2D.h"
 #include "Player.h"
+
+// XP table helpers — pure functions, no state
+namespace
+{
+template <std::size_t N>
+constexpr int calculate_xp_for_level(int level, const std::array<int, N>& xpTable, int linearProgression) noexcept
+{
+	if (level <= 0)
+		return xpTable[0];
+
+	if (level < static_cast<int>(xpTable.size()))
+		return xpTable[level];
+
+	const int maxLevel = static_cast<int>(xpTable.size()) - 1;
+	return xpTable[maxLevel] + (level - maxLevel) * linearProgression;
+}
+
+constexpr int calculate_fighter_xp(int level) noexcept
+{
+	constexpr std::array fighter_xp = {
+		0, 2000, 4000, 8000, 16000, 32000, 64000, 125000, 250000, 500000, 750000
+	};
+	return calculate_xp_for_level(level, fighter_xp, 250000);
+}
+
+constexpr int calculate_rogue_xp(int level) noexcept
+{
+	constexpr std::array rogue_xp = {
+		0, 1250, 2500, 5000, 10000, 20000, 40000, 70000, 110000, 160000, 220000
+	};
+	return calculate_xp_for_level(level, rogue_xp, 60000);
+}
+
+constexpr int calculate_cleric_xp(int level) noexcept
+{
+	constexpr std::array cleric_xp = {
+		0, 1500, 3000, 6000, 13000, 27500, 55000, 110000, 225000, 450000, 675000
+	};
+	return calculate_xp_for_level(level, cleric_xp, 225000);
+}
+
+constexpr int calculate_wizard_xp(int level) noexcept
+{
+	constexpr std::array wizard_xp = {
+		0, 2500, 5000, 10000, 20000, 40000, 60000, 90000, 135000, 250000, 375000
+	};
+	return calculate_xp_for_level(level, wizard_xp, 125000);
+}
+} // namespace (xp helpers)
 
 // Equipment comparison predicates for DRY compliance
 namespace
@@ -63,7 +112,7 @@ Player::Player(Vector2D position)
 	: Creature(position, ActorData{ TileRef{}, "Player", WHITE_BLACK_PAIR })
 {
 	set_gold(100);
-	ai = std::make_unique<AiPlayer>();
+	controller = std::make_unique<PlayerController>(*this);
 }
 
 Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
@@ -133,7 +182,7 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	applyRaceData(blueprint.playerRace);
 
 	set_gold(100);
-	ai = std::make_unique<AiPlayer>();
+	controller = std::make_unique<PlayerController>(*this);
 	roll_new_character(ctx);
 
 	assert(ai && "Player requires Ai");
@@ -1065,6 +1114,8 @@ void Player::load(const json& j)
 	// Creature::load constructs MonsterAttacker when attacker data is present.
 	// Replace with the correct PlayerAttacker strategy.
 	attacker = std::make_unique<PlayerAttacker>(*this);
+	// PlayerController is not in the Ai hierarchy -- construct directly.
+	controller = std::make_unique<PlayerController>(*this);
 
 	// Player-specific fields
 	playerRaceState = static_cast<PlayerRaceState>(j.at("playerRaceState").get<int>());
@@ -1147,6 +1198,62 @@ void Player::remove_stat_bonuses_from_equipment(Item& item)
 	};
 
 	std::visit(remove_stats, *item.behavior);
+}
+
+void Player::update(GameContext& ctx)
+{
+	update_creature_state(ctx);
+	assert(controller && "Player::update called with null controller");
+	controller->update(ctx);
+}
+
+void Player::apply_confusion(int duration)
+{
+	assert(controller && "Player::apply_confusion called with null controller");
+	controller->apply_confusion(duration);
+}
+
+int Player::get_next_level_xp(GameContext& ctx) const
+{
+	int currentLevel = get_creature_level();
+
+	switch (playerClassState)
+	{
+
+	case PlayerClassState::FIGHTER:
+		return calculate_fighter_xp(currentLevel);
+
+	case PlayerClassState::ROGUE:
+		return calculate_rogue_xp(currentLevel);
+
+	case PlayerClassState::CLERIC:
+		return calculate_cleric_xp(currentLevel);
+
+	case PlayerClassState::WIZARD:
+		return calculate_wizard_xp(currentLevel);
+
+	default:
+		return 2000 * currentLevel;
+
+	}
+}
+
+void Player::levelup_update(GameContext& ctx)
+{
+	ctx.messageSystem->log("Player::levelup_update");
+	int levelUpXp = get_next_level_xp(ctx);
+	if (destructible->get_xp() >= levelUpXp)
+	{
+		adjust_level(1);
+		destructible->set_xp(destructible->get_xp() - levelUpXp);
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("Your battle skills grow stronger! You reached level {}", get_creature_level()),
+			true);
+
+		if (ctx.displayManager != nullptr)
+			ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);
+	}
 }
 
 // end of file: Player.cpp

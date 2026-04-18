@@ -1,7 +1,7 @@
 ﻿#include "src/Actor/Actor.h"
 #include "src/Actor/Destructible.h"
 #include "src/ActorTypes/Player.h"
-#include "src/Ai/AiPlayer.h"
+#include "src/Ai/PlayerController.h"
 #include "src/Systems/DataManager.h"
 #include "tests/mocks/MockGameContext.h"
 #include <Core/GameContext.h>
@@ -34,7 +34,7 @@ protected:
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
 		player->destructible = std::make_unique<PlayerDestructible>(100, 5, "your corpse", 0, 20, 10);
-		player->ai = std::make_unique<AiPlayer>();
+		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "orc", 1 });

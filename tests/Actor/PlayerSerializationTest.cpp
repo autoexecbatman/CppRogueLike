@@ -3,7 +3,7 @@
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Destructible.h"
 #include "src/Actor/PlayerAttacker.h"
-#include "src/Ai/AiPlayer.h"
+#include "src/Ai/PlayerController.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Systems/ContentRegistry.h"
 
@@ -41,7 +41,7 @@ protected:
         // Set up components
         player->destructible = std::make_unique<PlayerDestructible>(30, 2, "player corpse", 0, 18, 10);
         player->attacker = std::make_unique<PlayerAttacker>(*player);
-        player->ai = std::make_unique<AiPlayer>();
+        // PlayerController constructed automatically in Player constructor
 
         return player;
     }
@@ -208,7 +208,7 @@ TEST_F(PlayerSerializationTest, Components_Preserved) {
 
     ASSERT_NE(loaded->destructible, nullptr) << "Destructible not loaded";
     ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
-    ASSERT_NE(loaded->ai, nullptr) << "AI not loaded";
+    ASSERT_NE(loaded->controller, nullptr) << "PlayerController not loaded";
 
     EXPECT_EQ(loaded->destructible->get_max_hp(), 30);
 }

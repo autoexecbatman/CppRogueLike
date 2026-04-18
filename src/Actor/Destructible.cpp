@@ -556,7 +556,7 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 	ctx.player->destructible->set_xp(ctx.player->destructible->get_xp() + get_xp());
 	ctx.player->killCount++;
 
-	ctx.player->ai->levelup_update(ctx, *ctx.player);
+	ctx.player->levelup_update(ctx);
 
 	if (ctx.animSystem)
 	{
