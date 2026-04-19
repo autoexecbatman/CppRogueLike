@@ -133,7 +133,49 @@ void ListMenu::menu(GameContext& ctx)
         onFrame(ctx);
     }
     menu_key_listen();
+
+    // Hover -- update cursor to follow mouse every frame
+    if (inputSystem && renderer)
+    {
+        int tileSize = renderer->get_tile_size();
+        ::Vector2 rawMouse = GetMousePosition();
+        int relRow = static_cast<int>(rawMouse.y) / tileSize
+            - static_cast<int>(menuStartY) - 1;
+        if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
+        {
+            cursorIndex = static_cast<size_t>(relRow);
+        }
+    }
+
     draw();
+
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    {
+        if (inputSystem && renderer)
+        {
+            int tileSize = renderer->get_tile_size();
+            ::Vector2 rawMouse = GetMousePosition();
+            int relRow = static_cast<int>(rawMouse.y) / tileSize
+                - static_cast<int>(menuStartY) - 1;
+            if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
+            {
+                menu_set_run_false();
+                if (entries[static_cast<size_t>(relRow)].command)
+                {
+                    entries[static_cast<size_t>(relRow)].command(ctx);
+                }
+                return;
+            }
+        }
+        // Click outside menu = cancel
+        menu_set_run_false();
+        if (onEscape)
+        {
+            onEscape(ctx);
+        }
+        return;
+    }
+
     on_key(keyPress, ctx);
 }
 

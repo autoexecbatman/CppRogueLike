@@ -709,6 +709,33 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 {
 	GameKey key = ctx.inputSystem->get_key();
 
+	// Hover -- track mouse position every frame so cursor follows the pointer
+	if (ctx.renderer)
+	{
+		int tileSize = ctx.renderer->get_tile_size();
+		::Vector2 rawMouse = GetMousePosition();
+		int mouseRow = static_cast<int>(rawMouse.y) / tileSize;
+		constexpr int startY_tiles = 2 + TAB_BAR_HEIGHT;
+
+		if (activeScreen == InventoryScreen::EQUIPMENT)
+		{
+			int slotIdx = mouseRow - startY_tiles;
+			if (slotIdx >= 0 && slotIdx < SLOT_COUNT)
+			{
+				equipmentCursor = slotIdx;
+			}
+		}
+		else
+		{
+			int entryIdx = (mouseRow - startY_tiles) + scrollOffset;
+			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size())
+				&& listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
+			{
+				listCursor = entryIdx;
+			}
+		}
+	}
+
 	switch (key)
 	{
 	case GameKey::ESCAPE:
@@ -767,6 +794,89 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	case GameKey::DROP:
 	{
 		handle_drop(player, ctx);
+		return true;
+	}
+
+	case GameKey::MOUSE_LEFT:
+	{
+		if (!ctx.renderer)
+		{
+			return true;
+		}
+
+		int tileSize = ctx.renderer->get_tile_size();
+		::Vector2 rawMouse = GetMousePosition();
+		int mousePixelX = static_cast<int>(rawMouse.x);
+		int mousePixelY = static_cast<int>(rawMouse.y);
+		int mouseRow = mousePixelY / tileSize;
+		int vcols = screen_cols(ctx);
+		int vrows = screen_rows(ctx);
+
+		// Click outside viewport = close
+		if (mousePixelX / tileSize < 0 || mousePixelX / tileSize >= vcols
+			|| mouseRow < 0 || mouseRow >= vrows)
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+			return false;
+		}
+
+		// Tab bar (tile row 1)
+		if (mouseRow == 1)
+		{
+			const std::array<const char*, 3> tabLabels{
+				"Equipment", "Backpack", "Usables"
+			};
+			int px = 2 * tileSize;
+			for (int i = 0; i < 3; ++i)
+			{
+				int textW = ctx.renderer->measure_text(tabLabels[static_cast<size_t>(i)]);
+				if (mousePixelX >= px - 4 && mousePixelX < px + textW + 4)
+				{
+					activeScreen = static_cast<InventoryScreen>(i);
+					if (filterMode && activeScreen == InventoryScreen::EQUIPMENT)
+					{
+						filterMode = false;
+						filterSlot = EquipmentSlot::NONE;
+					}
+					listCursor = 0;
+					scrollOffset = 0;
+					return true;
+				}
+				px += textW + tileSize;
+			}
+			return true;
+		}
+
+		constexpr int startY_tiles = 2 + TAB_BAR_HEIGHT;
+		int detailY = vrows - DETAIL_BAR_HEIGHT - 1;
+
+		if (mouseRow < startY_tiles || mouseRow >= detailY)
+		{
+			return true;
+		}
+
+		if (activeScreen == InventoryScreen::EQUIPMENT)
+		{
+			int slotIdx = mouseRow - startY_tiles;
+			if (slotIdx >= 0 && slotIdx < SLOT_COUNT)
+			{
+				equipmentCursor = slotIdx;
+				handle_enter_equipment(player, ctx);
+			}
+		}
+		else
+		{
+			int entryIdx = (mouseRow - startY_tiles) + scrollOffset;
+			if (entryIdx >= 0 && entryIdx < static_cast<int>(listEntries.size()))
+			{
+				listCursor = entryIdx;
+				if (listEntries[entryIdx].kind == BackpackEntry::Kind::ITEM)
+				{
+					handle_enter_item(player, ctx);
+				}
+			}
+		}
+
 		return true;
 	}
 
