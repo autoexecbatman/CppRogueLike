@@ -4,32 +4,26 @@
 // the enumeration for the controls of the player
 enum class Controls
 {
-	// the controls for the player movement (arrow key values from InputSystem)
+	// Cardinal movement (arrow keys + numpad 8/4/6/2)
 	UP_ARROW = 0x103,
 	DOWN_ARROW = 0x102,
 	LEFT_ARROW = 0x104,
 	RIGHT_ARROW = 0x105,
 
-	// Web-compatible WASD movement
-	W_KEY = 'w',
-	S_KEY = 's',
-	A_KEY = 'a',
-	D_KEY = 'd',
-
-	// WASD diagonals
-	Q_KEY = 'q',
-	E_KEY = 'e',
-	Z_KEY = 'z',
-	C_KEY = 'c',
+	// Diagonal movement (numpad 7/9/1/3)
+	KP_NW = 0x110,
+	KP_NE = 0x111,
+	KP_SW = 0x112,
+	KP_SE = 0x113,
 
 	MOUSE = 0x199,
 	MOUSE_RIGHT = 0x19A,
 
 	TEST_COMMAND = 'x',
 
-	WAIT = 'h',
+	WAIT = 0x106,
 	PICK = 'p',
-	DROP = 'l',
+	DROP = 'd',
 	INVENTORY = 'i',
 	ESCAPE = 27,
 	CHAR_SHEET = '@',

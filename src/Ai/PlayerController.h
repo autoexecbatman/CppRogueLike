@@ -3,9 +3,6 @@
 // Not an AI -- does not inherit from Ai. Player owns this; monsters never touch it.
 #pragma once
 
-#include <optional>
-#include <vector>
-
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 
@@ -49,7 +46,6 @@ private:
 	void pick_item(GameContext& ctx);
 	void drop_item(GameContext& ctx);
 	bool is_pickable_at_position(const Actor& actor) const;
-	void display_inventory_items() noexcept;
 	Item* chose_from_inventory(int ascii, GameContext& ctx);
 	void look_on_floor(Vector2D target, GameContext& ctx);
 	bool look_to_attack(Vector2D& target, GameContext& ctx);

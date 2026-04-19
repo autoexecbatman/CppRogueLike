@@ -32,7 +32,6 @@
 #include "../Systems/InputHandler.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
 #include "../Systems/TargetingSystem.h"
 #include "../Tools/DecorEditor.h"
@@ -51,16 +50,10 @@ static const std::unordered_map<Controls, Vector2D>& direction_map()
 		{ Controls::DOWN_ARROW, DIR_S },
 		{ Controls::LEFT_ARROW, DIR_W },
 		{ Controls::RIGHT_ARROW, DIR_E },
-
-		{ Controls::W_KEY, DIR_N },
-		{ Controls::S_KEY, DIR_S },
-		{ Controls::A_KEY, DIR_W },
-		{ Controls::D_KEY, DIR_E },
-
-		{ Controls::Q_KEY, DIR_NW },
-		{ Controls::E_KEY, DIR_NE },
-		{ Controls::Z_KEY, DIR_SW },
-		{ Controls::C_KEY, DIR_SE },
+		{ Controls::KP_NW, DIR_NW },
+		{ Controls::KP_NE, DIR_NE },
+		{ Controls::KP_SW, DIR_SW },
+		{ Controls::KP_SE, DIR_SE },
 	};
 	return moves;
 }
@@ -237,36 +230,12 @@ void PlayerController::pick_item(GameContext& ctx)
 
 void PlayerController::drop_item(GameContext& ctx)
 {
-	if (playerOwner.inventoryData.items.empty())
-	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is empty!", true);
-		return;
-	}
-
-	// TODO: Reimplement drop_item UI without curses (was a curses WINDOW-based menu)
-	if (!playerOwner.inventoryData.items.empty())
-	{
-		Item* itemToDrop = playerOwner.inventoryData.items.front().get();
-		if (itemToDrop)
-		{
-			std::string itemName = itemToDrop->actorData.name;
-			playerOwner.drop(*itemToDrop, ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the " + itemName + ".", true);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-		}
-	}
-
-	ctx.renderingManager->restore_game_display();
+	ctx.menus->push_back(std::make_unique<InventoryUI>(playerOwner, InventoryScreen::BACKPACK, ctx));
 }
 
 bool PlayerController::is_pickable_at_position(const Actor& actor) const
 {
 	return actor.position == playerOwner.position;
-}
-
-void PlayerController::display_inventory_items() noexcept
-{
-	// TODO: Reimplement display_inventory_items without curses
 }
 
 void PlayerController::display_inventory(GameContext& ctx)

@@ -9,7 +9,6 @@
 #include <variant>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Attacker.h"
 #include "../Actor/PlayerAttacker.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/EquipmentSlot.h"
@@ -17,7 +16,6 @@
 #include "../Actor/Pickable.h"
 #include "../Ai/Ai.h"
 #include "../Colors/Colors.h"
-#include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../dnd_tables/CombatProgressionTables.h"
@@ -31,7 +29,6 @@
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/DisplayManager.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"

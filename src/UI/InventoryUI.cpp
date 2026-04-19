@@ -774,7 +774,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 	{
 		// Letter shortcuts for Backpack/Usables screens
 		int charInput = ctx.inputSystem->get_char_input();
-		if (activeScreen != InventoryScreen::EQUIPMENT && charInput >= 'a' && charInput <= 'z' && charInput != 'd')
+		if (activeScreen != InventoryScreen::EQUIPMENT && charInput >= 'a' && charInput <= 'z')
 		{
 			int letterIndex = charInput - 'a';
 			int itemCount = 0;

@@ -90,6 +90,36 @@ void InputHandler::key_listen(InputSystem& input) noexcept
 		break;
 	}
 
+	case GameKey::KP_NW:
+	{
+		keyPress = 0x110;
+		break;
+	}
+
+	case GameKey::KP_NE:
+	{
+		keyPress = 0x111;
+		break;
+	}
+
+	case GameKey::KP_SW:
+	{
+		keyPress = 0x112;
+		break;
+	}
+
+	case GameKey::KP_SE:
+	{
+		keyPress = 0x113;
+		break;
+	}
+
+	case GameKey::WAIT:
+	{
+		keyPress = 0x106;
+		break;
+	}
+
 	default:
 	{
 		keyPress = -1;

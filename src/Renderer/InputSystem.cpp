@@ -95,6 +95,8 @@ void InputSystem::poll()
 	for (int k : {
 		KEY_ENTER, KEY_ESCAPE, KEY_TAB, KEY_SPACE, KEY_BACKSPACE,
 		KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT,
+		KEY_KP_1, KEY_KP_2, KEY_KP_3, KEY_KP_4, KEY_KP_5,
+		KEY_KP_6, KEY_KP_7, KEY_KP_8, KEY_KP_9, KEY_KP_MULTIPLY,
 		KEY_W, KEY_A, KEY_S, KEY_D, KEY_Q, KEY_E, KEY_Z, KEY_C,
 		KEY_H, KEY_T, KEY_B, KEY_P, KEY_L, KEY_I, KEY_O, KEY_K,
 		KEY_R, KEY_U, KEY_X, KEY_M, KEY_N,
@@ -173,6 +175,67 @@ void InputSystem::poll()
 		return;
 	}
 
+	// Numpad movement (8-dir + wait)
+	case KEY_KP_8:
+	{
+		register_key(KEY_KP_8, GameKey::UP, 0, true);
+		return;
+	}
+
+	case KEY_KP_2:
+	{
+		register_key(KEY_KP_2, GameKey::DOWN, 0, true);
+		return;
+	}
+
+	case KEY_KP_4:
+	{
+		register_key(KEY_KP_4, GameKey::LEFT, 0, true);
+		return;
+	}
+
+	case KEY_KP_6:
+	{
+		register_key(KEY_KP_6, GameKey::RIGHT, 0, true);
+		return;
+	}
+
+	case KEY_KP_7:
+	{
+		register_key(KEY_KP_7, GameKey::KP_NW, 0, true);
+		return;
+	}
+
+	case KEY_KP_9:
+	{
+		register_key(KEY_KP_9, GameKey::KP_NE, 0, true);
+		return;
+	}
+
+	case KEY_KP_1:
+	{
+		register_key(KEY_KP_1, GameKey::KP_SW, 0, true);
+		return;
+	}
+
+	case KEY_KP_3:
+	{
+		register_key(KEY_KP_3, GameKey::KP_SE, 0, true);
+		return;
+	}
+
+	case KEY_KP_5:
+	{
+		register_key(KEY_KP_5, GameKey::WAIT, 0, true);
+		return;
+	}
+
+	case KEY_KP_MULTIPLY:
+	{
+		register_key(KEY_KP_MULTIPLY, GameKey::PICK, 'p', false);
+		return;
+	}
+
 	// WASD + diagonals
 	case KEY_W:
 	{
@@ -201,7 +264,7 @@ void InputSystem::poll()
 
 	case KEY_D:
 	{
-		register_key(KEY_D, GameKey::D, shift ? 'D' : 'd', true);
+		register_key(KEY_D, GameKey::DROP, 'd', false);
 		return;
 	}
 
@@ -245,7 +308,7 @@ void InputSystem::poll()
 		}
 		else
 		{
-			register_key(KEY_H, GameKey::WAIT, 'h', true);
+			register_key(KEY_H, GameKey::WAIT, 0, true);
 		}
 		return;
 	}
@@ -285,7 +348,8 @@ void InputSystem::poll()
 
 	case KEY_L:
 	{
-		register_key(KEY_L, GameKey::DROP, shift ? 'L' : 'l', false);
+		// freed -- no action assigned yet
+		charInput = shift ? 'L' : 'l';
 		return;
 	}
 

@@ -24,6 +24,12 @@ enum class GameKey
 	Z,
 	C,
 
+	// Numpad diagonals
+	KP_NW,
+	KP_NE,
+	KP_SW,
+	KP_SE,
+
 	// Actions
 	ENTER,
 	ESCAPE,
