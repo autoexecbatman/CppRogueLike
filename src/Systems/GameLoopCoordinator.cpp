@@ -16,6 +16,7 @@
 #include "../Map/Map.h"
 #include "../Map/Minimap.h"
 #include "../Menu/DeathMenu.h"
+#include "../Menu/NotificationMenu.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/InputHandler.h"
@@ -465,13 +466,22 @@ void GameLoopCoordinator::update(GameContext& ctx)
 {
 	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
 	{
-		ctx.messageSystem->log("Player has won the game!");
-		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Congratulations!");
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " You have obtained the ");
-		ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "Amulet of Yendor");
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " and escaped the dungeon!");
-		ctx.messageSystem->finalize_message();
-		ctx.gameState->set_run(false);
+		auto victoryMenu = std::make_unique<NotificationMenu>(
+			"Victory!",
+			std::vector<std::string>{
+				"Congratulations, brave adventurer!",
+				"You have retrieved the Amulet of Yendor",
+				"and escaped the dungeon alive.",
+				"",
+				"Your legend will be remembered."
+			},
+			ctx);
+		victoryMenu->set_on_close([](GameContext& c)
+		{
+			c.gameState->set_run(false);
+		});
+		ctx.menus->push_back(std::move(victoryMenu));
+		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
 
 	ctx.map->update();

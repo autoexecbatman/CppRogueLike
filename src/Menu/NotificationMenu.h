@@ -5,7 +5,9 @@
 // victory screen, help text, etc.
 //
 // Shows a title and a list of text lines. Any key dismisses.
+// Optional onClose callback fires exactly once when the player dismisses.
 
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -17,6 +19,7 @@ class NotificationMenu : public BaseMenu
 {
     std::string title{};
     std::vector<std::string> lines{};
+    std::function<void(GameContext&)> onClose{};
 
     void draw();
 
@@ -31,5 +34,6 @@ public:
     NotificationMenu(NotificationMenu&&) = delete;
     NotificationMenu& operator=(NotificationMenu&&) = delete;
 
+    void set_on_close(std::function<void(GameContext&)> callback);
     void menu(GameContext& ctx) override;
 };

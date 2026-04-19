@@ -63,6 +63,11 @@ void NotificationMenu::draw()
     menu_refresh();
 }
 
+void NotificationMenu::set_on_close(std::function<void(GameContext&)> callback)
+{
+    onClose = std::move(callback);
+}
+
 void NotificationMenu::menu(GameContext& ctx)
 {
     menu_key_listen();
@@ -70,5 +75,9 @@ void NotificationMenu::menu(GameContext& ctx)
     if (keyPress != 0)
     {
         menu_set_run_false();
+        if (onClose)
+        {
+            onClose(ctx);
+        }
     }
 }
