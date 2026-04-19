@@ -27,6 +27,7 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
     auto newGameCommand = [](GameContext& ctx)
     {
+        ctx.menuManager->set_game_initialized(false);
         ctx.menus->push_back(make_gender_menu(ctx));
     };
     entries.push_back({ "New Game", 'n', newGameCommand });

@@ -35,6 +35,7 @@
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
+#include "../Menu/NotificationMenu.h"
 #include "../Systems/SpellSystem.h"
 #include "../Utils/Vector2D.h"
 #include "Player.h"
@@ -216,7 +217,7 @@ void Player::roll_new_character(GameContext& ctx)
 
 void Player::on_new_game_start(GameContext& ctx)
 {
-	racial_ability_adjustments();
+	racial_ability_adjustments(ctx);
 	equip_class_starting_gear(ctx);
 }
 
@@ -294,59 +295,55 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 
 	}
 }
-void Player::racial_ability_adjustments()
+void Player::racial_ability_adjustments(GameContext& ctx)
 {
-	// switch player state
+	// Apply stat changes and collect the display lines in a single pass.
+	// Human and Half-elf have no stat modifications (AD&D 2e PHB), so they
+	// produce no entries and no popup is shown.
+	std::vector<std::string> bonusLines;
+
 	switch (playerRaceState)
 	{
 
 	case Player::PlayerRaceState::HUMAN:
+	case Player::PlayerRaceState::HALFELF:
 	{
 		break;
 	}
 
 	case Player::PlayerRaceState::DWARF:
 	{
-		// TODO: Display racial bonus message via Renderer
-		// "You got +1 to constitution and -1 to charisma for being a dwarf."
-
 		adjust_constitution(1);
 		adjust_charisma(-1);
+		bonusLines.push_back("+1 Constitution");
+		bonusLines.push_back("-1 Charisma");
 		break;
 	}
 
 	case Player::PlayerRaceState::ELF:
 	{
-		// TODO: Display racial bonus message via Renderer
-		// "You got +1 to dexterity and -1 to constitution for being an elf."
-
 		adjust_dexterity(1);
 		adjust_constitution(-1);
+		bonusLines.push_back("+1 Dexterity");
+		bonusLines.push_back("-1 Constitution");
 		break;
 	}
 
 	case Player::PlayerRaceState::GNOME:
 	{
-		// TODO: Display racial bonus message via Renderer
-		// "You got +1 to intelligence and -1 to wisdom for being a gnome."
-
 		adjust_intelligence(1);
 		adjust_wisdom(-1);
-		break;
-	}
-
-	case Player::PlayerRaceState::HALFELF:
-	{
+		bonusLines.push_back("+1 Intelligence");
+		bonusLines.push_back("-1 Wisdom");
 		break;
 	}
 
 	case Player::PlayerRaceState::HALFLING:
 	{
-		// TODO: Display racial bonus message via Renderer
-		// "You got +1 to dexterity and -1 to strength for being a halfling."
-
 		adjust_dexterity(1);
 		adjust_strength(-1);
+		bonusLines.push_back("+1 Dexterity");
+		bonusLines.push_back("-1 Strength");
 		break;
 	}
 
@@ -357,7 +354,15 @@ void Player::racial_ability_adjustments()
 
 	}
 
-	// TODO: Clear screen after all racial bonuses via Renderer
+	if (bonusLines.empty())
+	{
+		return;
+	}
+
+	ctx.menus->push_back(std::make_unique<NotificationMenu>(
+		std::format("Racial Traits: {}", playerRace),
+		std::move(bonusLines),
+		ctx));
 }
 
 void Player::calculate_thaco()

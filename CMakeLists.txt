@@ -183,6 +183,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu/MenuEntry.h
     ${PROJECT_SOURCE_DIR}/Menu/ListMenu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/ListMenu.h
+    ${PROJECT_SOURCE_DIR}/Menu/NotificationMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/NotificationMenu.h
     ${PROJECT_SOURCE_DIR}/Menu/Menu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/Menu.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuClass.cpp

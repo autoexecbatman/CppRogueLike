@@ -87,6 +87,7 @@ set(PARENT_SOURCES
     # Menu
     ${PARENT_SOURCE_DIR}/Menu/BaseMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu/ListMenu.cpp
+    ${PARENT_SOURCE_DIR}/Menu/NotificationMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu/Menu.cpp
     ${PARENT_SOURCE_DIR}/Menu/MenuClass.cpp
     ${PARENT_SOURCE_DIR}/Menu/MenuGender.cpp
