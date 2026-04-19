@@ -185,7 +185,6 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	controller = std::make_unique<PlayerController>(*this);
 	roll_new_character(ctx);
 
-	assert(ai && "Player requires Ai");
 	assert(attacker && "Player requires Attacker");
 	assert(destructible && "Player requires Destructible");
 }
