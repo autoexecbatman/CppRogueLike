@@ -657,7 +657,7 @@ TileRef RoomEditor::canvas_tile_id(int col, int row) const
 	char sym = canvas[row][col];
 
 	if (sym == '#' && m_tile_config)
-		return wall_autotile_resolve_mask(m_tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
+		return Autotile::wall_resolve_mask(m_tile_config->get_wall_autotile("WALL_AUTOTILE_STONE"), canvas_wall_mask(col, row));
 
 	if (sym == '.' && m_tile_config)
 	{
@@ -667,7 +667,7 @@ TileRef RoomEditor::canvas_tile_id(int col, int row) const
 				return false;
 			return canvas[r][c] == '.';
 		};
-		return autotile_resolve(
+		return Autotile::resolve(
 			m_tile_config->get_autotile("AUTOTILE_FLOOR_STONE"),
 			is_floor(col, row - 1),
 			is_floor(col + 1, row),

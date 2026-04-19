@@ -13,6 +13,7 @@
 
 constexpr int WEB_COOLDOWN = 8;
 constexpr int WEB_MIN_SIZE = 3;
+constexpr int MAX_WEBS = 5; // Maximum number of webs that can exist at once per spider
 constexpr int WEB_MAX_SIZE = 5;
 constexpr int WEB_STRENGTH = 3;
 

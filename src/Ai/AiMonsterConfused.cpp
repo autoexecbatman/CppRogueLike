@@ -10,6 +10,9 @@
 #include "Ai.h"
 #include "AiMonsterConfused.h"
 
+constexpr int MIN_DIRECTION = -1;
+constexpr int MAX_DIRECTION = 1;
+
 //==ConfusedMonsterAi==
 AiMonsterConfused::AiMonsterConfused(int nbTurns, std::unique_ptr<Ai> oldAi) noexcept
 	: nbTurns{ nbTurns }, oldAi{ std::move(oldAi) } {}

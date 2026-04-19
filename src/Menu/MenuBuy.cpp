@@ -156,7 +156,7 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 	{
 		if (!is_inventory_empty(shopkeeper.shop_inventory))
 		{
-			handle_buy(nullptr, buyer, *ctx.player);
+			handle_buy();
 			menu_mark_dirty();
 		}
 		else
@@ -176,8 +176,7 @@ void MenuBuy::menu(GameContext& ctx)
 	on_key(keyPress, ctx);
 }
 
-// TODO: void* tradeWin is a smell.
-void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Creature& buyer)
+void MenuBuy::handle_buy()
 {
 	if (is_inventory_empty(shopkeeper.shop_inventory) ||
 		currentState >= get_item_count(shopkeeper.shop_inventory))
@@ -195,7 +194,7 @@ void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Creature
 
 	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
 	{
-		auto removed_item = remove_item_at(shopkeeper.shop_inventory, currentState);
+		remove_item_at(shopkeeper.shop_inventory, currentState);
 
 		if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
 		{

@@ -629,7 +629,7 @@ void Map::render(const GameContext& ctx) const
 					}
 					return false;
 				};
-				tileRef = wall_autotile_resolve_mask(
+				tileRef = Autotile::wall_resolve_mask(
 					ctx.tileConfig->get_wall_autotile("WALL_AUTOTILE_STONE"),
 					build_mask(pos, connected_wall));
 				break;
@@ -637,7 +637,7 @@ void Map::render(const GameContext& ctx) const
 
 			case TileType::FLOOR:
 			{
-				tileRef = autotile_resolve_mask(
+				tileRef = Autotile::resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				break;
@@ -657,7 +657,7 @@ void Map::render(const GameContext& ctx) const
 
 			case TileType::CLOSED_DOOR:
 			{
-				TileRef floorRef = autotile_resolve_mask(
+				TileRef floorRef = Autotile::resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
@@ -667,7 +667,7 @@ void Map::render(const GameContext& ctx) const
 
 			case TileType::OPEN_DOOR:
 			{
-				TileRef floorRef = autotile_resolve_mask(
+				TileRef floorRef = Autotile::resolve_mask(
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);

@@ -227,9 +227,10 @@ void PrefabLibrary::remove(const std::string& name)
 // Apply to rooms
 // ---------------------------------------------------------------------------
 
-// TODO: global function smell.
+namespace
+{
 // Resolves prefab name to index.  Returns -1 if not found.
-static int find_prefab_index(
+int find_prefab_index(
 	const std::vector<Prefab>& prefabs,
 	const std::string& name)
 {
@@ -243,7 +244,7 @@ static int find_prefab_index(
 	return -1;
 }
 
-static void stamp_room(
+void stamp_room(
 	const Prefab& p,
 	const DungeonRoom& room,
 	const std::unordered_map<char, TileRef>& symbol_to_tile,
@@ -293,6 +294,7 @@ static void stamp_room(
 		}
 	}
 }
+} // namespace
 
 void PrefabLibrary::apply_to_room(
 	const DungeonRoom& room,

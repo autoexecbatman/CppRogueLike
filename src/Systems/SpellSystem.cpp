@@ -35,8 +35,10 @@
 #include "TargetingSystem.h"
 #include "TileConfig.h"
 
+namespace
+{
 // Helper to convert PlayerClassState to CasterClass
-static CasterClass to_caster_class(Player::PlayerClassState state)
+CasterClass to_caster_class(Player::PlayerClassState state)
 {
 	switch (state)
 	{
@@ -58,6 +60,7 @@ static CasterClass to_caster_class(Player::PlayerClassState state)
 
 	}
 }
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Module-level mutable spell table. Loaded from JSON; falls back to defaults
@@ -728,8 +731,9 @@ void SpellSystem::cast_spell_by_key(
 	dispatch_effect(def.effect_type, caster, std::move(onSuccess), ctx);
 }
 
-// TODO: Why is it a global function?
-static void animate_heal(const Vector2D& pos, GameContext& ctx)
+namespace
+{
+void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
 	if (!ctx.animSystem)
 	{
@@ -745,6 +749,7 @@ static void animate_heal(const Vector2D& pos, GameContext& ctx)
 		60,
 		0.5f);
 }
+} // namespace
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
@@ -981,12 +986,14 @@ void SpellSystem::cast_fireball(
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
-// TODO: global function smell.
-static int calculate_num_missiles(int casterLevel)
+namespace
 {
-	// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+int calculate_num_missiles(int casterLevel)
+{
 	return std::min(5, 1 + (casterLevel - 1) / 2);
 }
+} // namespace
 
 bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 {

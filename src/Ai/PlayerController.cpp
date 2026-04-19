@@ -44,7 +44,6 @@
 // ---------------------------------------------------------------------------
 // Direction table -- static const, not a mutable global
 // ---------------------------------------------------------------------------
-// TODO: global function smell.
 static const std::unordered_map<Controls, Vector2D>& direction_map()
 {
 	static const std::unordered_map<Controls, Vector2D> moves = {

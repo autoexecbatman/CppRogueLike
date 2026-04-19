@@ -20,7 +20,10 @@ struct Disguise
 
 // Build the list of item appearances a mimic can adopt.
 // Single source of truth: called at fresh construction AND as lazy init after load.
-[[nodiscard]] std::vector<Disguise> build_mimic_disguises(ContentRegistry& registry);
+namespace Appearance
+{
+[[nodiscard]] std::vector<Disguise> build_mimic_list(ContentRegistry& registry);
+} // namespace Appearance
 
 class AiMimic : public AiMonster
 {

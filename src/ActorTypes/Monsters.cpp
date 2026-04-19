@@ -36,12 +36,12 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
 	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac);
 
-	// Build disguise list -- single source of truth is in AiMimic (build_mimic_disguises).
-	auto disguises = build_mimic_disguises(*ctx.contentRegistry);
+	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
+	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);
 
 	if (disguises.empty())
 	{
-		throw("possibleDisguises is empty from build_mimic_disguises()!");
+		throw("possibleDisguises is empty from Appearance::build_mimic_list()!");
 	}
 
 	// Apply initial random disguise to this creature's visible appearance.

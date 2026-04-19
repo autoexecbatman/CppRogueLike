@@ -29,8 +29,9 @@ constexpr float TREASURE_MULTIPLIER = 1.5f;
 // Budget calculation
 // ---------------------------------------------------------------------------
 
-// TODO: global function smell.
-static int calculate_budget(RoomType type, int dungeonLevel)
+namespace
+{
+int calculate_budget(RoomType type, int dungeonLevel)
 {
 	switch (type)
 	{
@@ -70,7 +71,7 @@ static int calculate_budget(RoomType type, int dungeonLevel)
 // Two-phase approximation produces good variety without DP complexity.
 // ---------------------------------------------------------------------------
 
-static std::vector<std::string> select_encounter(
+std::vector<std::string> select_encounter(
 	const std::vector<MonsterCandidate>& candidates,
 	int budget,
 	int cap,
@@ -133,7 +134,7 @@ static std::vector<std::string> select_encounter(
 // Random walkable position inside room
 // ---------------------------------------------------------------------------
 
-static Vector2D random_room_position(const DungeonRoom& room, GameContext& ctx)
+Vector2D random_room_position(const DungeonRoom& room, GameContext& ctx)
 {
 	Vector2D pos{};
 	constexpr int MAX_TRIES = 50;
@@ -150,6 +151,7 @@ static Vector2D random_room_position(const DungeonRoom& room, GameContext& ctx)
 	}
 	return { -1, -1 }; // invalid sentinel
 }
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Public interface

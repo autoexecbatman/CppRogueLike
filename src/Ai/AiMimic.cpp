@@ -62,10 +62,9 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
 };
 
-// TODO: global function smell.
 // Single source of truth: which item appearances a mimic can adopt.
 // Called at fresh construction (Mimic ctor) and as lazy init after load.
-std::vector<Disguise> build_mimic_disguises(ContentRegistry& registry)
+std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& registry)
 {
 	auto fromItem = [&registry](std::string_view key) -> Disguise
 	{
@@ -92,7 +91,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	// Lazy init after load: possibleDisguises is empty when created via Ai::create().
 	if (possibleDisguises.empty())
 	{
-		possibleDisguises = build_mimic_disguises(*ctx.contentRegistry);
+		possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry);
 	}
 
 	if (owner.destructible->is_dead())

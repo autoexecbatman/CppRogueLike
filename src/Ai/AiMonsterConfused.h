@@ -25,9 +25,6 @@ public:
 	void save(json& j) override;
 
 private:
-	static constexpr int MIN_DIRECTION = -1;
-	static constexpr int MAX_DIRECTION = 1;
-
 	int nbTurns;
 	std::unique_ptr<Ai> oldAi;
 

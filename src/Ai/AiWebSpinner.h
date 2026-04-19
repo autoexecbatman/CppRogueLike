@@ -18,7 +18,6 @@ public:
 
 private:
 	int webCooldown{ 0 }; // Cooldown timer for creating webs
-	static constexpr int MAX_WEBS{ 5 }; // Maximum number of webs that can exist at once per spider
 
 	// Try to create a web at the current position
 	bool try_create_web(Creature& owner, GameContext& ctx);

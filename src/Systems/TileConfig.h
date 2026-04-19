@@ -16,53 +16,10 @@ struct AutotileGroup
 	int origin_row{};
 };
 
-// TODO: global function smell.
-constexpr TileRef autotile_resolve(AutotileGroup g, bool n, bool e, bool s, bool w)
-{
-	int col_offset = (!w && e) ? 0 : (w && !e) ? 2
-											   : 1;
-	int row_offset = (!n && s) ? 0 : (n && !s) ? 2
-											   : 1;
-	return TileRef{ g.sheet, g.origin_col + col_offset, g.origin_row + row_offset };
-}
-
-// TODO: global function smell.
-constexpr TileRef autotile_resolve_mask(AutotileGroup g, int mask)
-{
-	return autotile_resolve(
-		g,
-		(mask & 8) != 0,
-		(mask & 4) != 0,
-		(mask & 2) != 0,
-		(mask & 1) != 0);
-}
-
-// ---------------------------------------------------------------------------
-// Wall autotile (6-column DawnLike format)
-// ---------------------------------------------------------------------------
 struct TileOffset
 {
 	int col{};
 	int row{};
-};
-
-inline constexpr TileOffset WALL_AUTOTILE_TABLE[16] = {
-	{ 3, 0 }, //  0: ....  Isolated pillar
-	{ 1, 0 }, //  1: ...W  Horizontal (endcap fallback)
-	{ 0, 1 }, //  2: ..S.  Vertical (endcap fallback)
-	{ 2, 0 }, //  3: ..SW  Corner TR
-	{ 1, 0 }, //  4: .E..  Horizontal (endcap fallback)
-	{ 1, 0 }, //  5: .E.W  Horizontal
-	{ 0, 0 }, //  6: .ES.  Corner TL
-	{ 4, 0 }, //  7: .ESW  T-junction top
-	{ 0, 1 }, //  8: N...  Vertical (endcap fallback)
-	{ 2, 2 }, //  9: N..W  Corner BR
-	{ 0, 1 }, // 10: N.S.  Vertical
-	{ 5, 1 }, // 11: N.SW  T-junction right
-	{ 0, 2 }, // 12: NE..  Corner BL
-	{ 4, 2 }, // 13: NE.W  T-junction bottom
-	{ 3, 1 }, // 14: NES.  T-junction left
-	{ 4, 1 }, // 15: NESW  Center (fully surrounded)
 };
 
 struct WallAutotileGroup
@@ -72,18 +29,61 @@ struct WallAutotileGroup
 	int origin_row{};
 };
 
-constexpr TileRef wall_autotile_resolve(WallAutotileGroup g, bool n, bool e, bool s, bool w)
+// ---------------------------------------------------------------------------
+// Autotile -- resolve functions live in a namespace, not the global scope.
+// ---------------------------------------------------------------------------
+namespace Autotile
 {
-	int mask = (n ? 8 : 0) | (e ? 4 : 0) | (s ? 2 : 0) | (w ? 1 : 0);
-	auto off = WALL_AUTOTILE_TABLE[mask];
-	return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
-}
+	constexpr TileRef resolve(AutotileGroup g, bool n, bool e, bool s, bool w)
+	{
+		int col_offset = (!w && e) ? 0 : (w && !e) ? 2 : 1;
+		int row_offset = (!n && s) ? 0 : (n && !s) ? 2 : 1;
+		return TileRef{ g.sheet, g.origin_col + col_offset, g.origin_row + row_offset };
+	}
 
-constexpr TileRef wall_autotile_resolve_mask(WallAutotileGroup g, int mask)
-{
-	auto off = WALL_AUTOTILE_TABLE[mask & 0xF];
-	return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
-}
+	constexpr TileRef resolve_mask(AutotileGroup g, int mask)
+	{
+		return resolve(
+			g,
+			(mask & 8) != 0,
+			(mask & 4) != 0,
+			(mask & 2) != 0,
+			(mask & 1) != 0);
+	}
+
+	// Wall autotile (6-column DawnLike format)
+	inline constexpr TileOffset WALL_TABLE[16] = {
+		{ 3, 0 }, //  0: ....  Isolated pillar
+		{ 1, 0 }, //  1: ...W  Horizontal (endcap fallback)
+		{ 0, 1 }, //  2: ..S.  Vertical (endcap fallback)
+		{ 2, 0 }, //  3: ..SW  Corner TR
+		{ 1, 0 }, //  4: .E..  Horizontal (endcap fallback)
+		{ 1, 0 }, //  5: .E.W  Horizontal
+		{ 0, 0 }, //  6: .ES.  Corner TL
+		{ 4, 0 }, //  7: .ESW  T-junction top
+		{ 0, 1 }, //  8: N...  Vertical (endcap fallback)
+		{ 2, 2 }, //  9: N..W  Corner BR
+		{ 0, 1 }, // 10: N.S.  Vertical
+		{ 5, 1 }, // 11: N.SW  T-junction right
+		{ 0, 2 }, // 12: NE..  Corner BL
+		{ 4, 2 }, // 13: NE.W  T-junction bottom
+		{ 3, 1 }, // 14: NES.  T-junction left
+		{ 4, 1 }, // 15: NESW  Center (fully surrounded)
+	};
+
+	constexpr TileRef wall_resolve(WallAutotileGroup g, bool n, bool e, bool s, bool w)
+	{
+		int mask = (n ? 8 : 0) | (e ? 4 : 0) | (s ? 2 : 0) | (w ? 1 : 0);
+		auto off = WALL_TABLE[mask];
+		return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
+	}
+
+	constexpr TileRef wall_resolve_mask(WallAutotileGroup g, int mask)
+	{
+		auto off = WALL_TABLE[mask & 0xF];
+		return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
+	}
+} // namespace Autotile
 
 // ---------------------------------------------------------------------------
 // TileConfig -- runtime registry for system tile IDs loaded from JSON.
