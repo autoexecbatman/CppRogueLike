@@ -215,6 +215,24 @@ void Player::roll_new_character(GameContext& ctx)
 		playerHp, playerDr, "your corpse", playerXp, 0, playerAC);
 }
 
+void Player::on_new_game_start(GameContext& ctx)
+{
+	racial_ability_adjustments();
+	equip_class_starting_gear(ctx);
+}
+
+void Player::recalculate_combat_stats()
+{
+	calculate_thaco();
+}
+
+void Player::on_kill_reward(int xp, GameContext& ctx)
+{
+	destructible->set_xp(destructible->get_xp() + xp);
+	++killCount;
+	levelup_update(ctx);
+}
+
 void Player::equip_class_starting_gear(GameContext& ctx)
 {
 	switch (playerClassState)
@@ -1221,19 +1239,29 @@ int Player::get_next_level_xp(GameContext& ctx) const
 	{
 
 	case PlayerClassState::FIGHTER:
+	{
 		return calculate_fighter_xp(currentLevel);
+	}
 
 	case PlayerClassState::ROGUE:
+	{
 		return calculate_rogue_xp(currentLevel);
+	}
 
 	case PlayerClassState::CLERIC:
+	{
 		return calculate_cleric_xp(currentLevel);
+	}
 
 	case PlayerClassState::WIZARD:
+	{
 		return calculate_wizard_xp(currentLevel);
+	}
 
 	default:
+	{
 		return 2000 * currentLevel;
+	}
 
 	}
 }
@@ -1252,7 +1280,9 @@ void Player::levelup_update(GameContext& ctx)
 			true);
 
 		if (ctx.displayManager != nullptr)
+		{
 			ctx.displayManager->display_levelup(*this, get_creature_level(), ctx);
+		}
 	}
 }
 

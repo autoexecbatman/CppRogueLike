@@ -1,13 +1,13 @@
 // RenderingManager.cpp - Handles all rendering and screen management
 #include <algorithm>
+#include <cassert>
 #include <memory>
 #include <span>
 
 #include "../Actor/Actor.h"
-#include "../Actor/InventoryData.h"
-#include "../ActorTypes/Player.h"
-#include "../Core/GameContext.h"
+#include "../Actor/Creature.h"
 #include "../Gui/Gui.h"
+#include "../Core/GameContext.h"
 #include "../Map/Decoration.h"
 #include "../Map/Map.h"
 #include "../Map/Minimap.h"
@@ -16,35 +16,28 @@
 
 void RenderingManager::render(GameContext& ctx) const
 {
-	render_world(*ctx.map, *ctx.stairs, *ctx.objects, *ctx.inventoryData, *ctx.creatures, *ctx.player, ctx);
+	render_world(ctx);
 }
 
-void RenderingManager::render_world(
-	const Map& map,
-	const Stairs& stairs,
-	std::span<const std::unique_ptr<Object>> objects,
-	const InventoryData& inventory_data,
-	std::span<const std::unique_ptr<Creature>> creatures,
-	const Player& player,
-	const GameContext& ctx) const
+void RenderingManager::render_world(const GameContext& ctx) const
 {
-	map.render(ctx);
-	stairs.render(ctx);
+	ctx.map->render(ctx);
+	ctx.stairs->render(ctx);
 
-	render_objects(objects, ctx);
+	render_objects(*ctx.objects, ctx);
 
 	// Render floor items
-	render_items(inventory_data.items, ctx);
+	render_items(ctx.inventoryData->items, ctx);
 
-	render_creatures(creatures, ctx);
-	player.render(ctx);
+	render_creatures(*ctx.creatures, ctx);
+	ctx.player->render(ctx);
 
 	if (ctx.decorations)
 	{
 		render_decorations(*ctx.decorations, ctx);
 	}
 
-	apply_lighting(player, ctx);
+	apply_lighting(ctx);
 	render_mouse_path_overlay(ctx);
 
 	if (ctx.minimap)
@@ -93,13 +86,15 @@ void RenderingManager::restore_game_display() const
 
 void RenderingManager::restore_screen(GameContext& ctx) const
 {
+	assert(ctx.gui != nullptr);
+
 	render(ctx);
 	ctx.gui->gui_render(ctx);
 }
 
-void RenderingManager::apply_lighting(const Player& player, const GameContext& ctx) const
+void RenderingManager::apply_lighting(const GameContext& ctx) const
 {
-	if (!ctx.renderer || !ctx.map)
+	if (!ctx.renderer || !ctx.map || !ctx.player)
 	{
 		return;
 	}
@@ -138,7 +133,7 @@ void RenderingManager::apply_lighting(const Player& player, const GameContext& c
 				continue;
 			}
 
-			float distanceTiles = static_cast<float>(tilePos.distance_to(player.position));
+			float distanceTiles = static_cast<float>(tilePos.distance_to(ctx.player->position));
 			float falloff = std::min(distanceTiles / torchRadiusTiles, 1.0f);
 
 			Color litColor{

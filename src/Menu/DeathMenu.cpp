@@ -5,12 +5,10 @@
 
 #include <raylib.h>
 
-#include "../ActorTypes/Player.h"
-#include "../Colors/Colors.h"
+#include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/LevelManager.h"
-#include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "DeathMenu.h"
 #include "Menu.h"
@@ -24,9 +22,9 @@ DeathMenu::DeathMenu(GameContext& ctx)
     dungeonLevel = ctx.levelManager ? ctx.levelManager->get_dungeon_level() : 0;
     playerLevel = ctx.player ? ctx.player->get_level() : 0;
     playerXp = (ctx.player && ctx.player->destructible) ? ctx.player->destructible->get_xp() : 0;
-    killCount = ctx.player ? ctx.player->killCount : 0;
-    playerClass = ctx.player ? ctx.player->playerClass : "Unknown";
-    playerRace = ctx.player ? ctx.player->playerRace : "Unknown";
+    killCount = ctx.player ? ctx.player->get_kill_count() : 0;
+    playerClass = ctx.player ? ctx.player->get_class_display_name() : "Unknown";
+    playerRace = ctx.player ? ctx.player->get_race_display_name() : "Unknown";
 
     if (ctx.messageSystem)
     {

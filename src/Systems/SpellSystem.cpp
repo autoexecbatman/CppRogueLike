@@ -728,6 +728,7 @@ void SpellSystem::cast_spell_by_key(
 	dispatch_effect(def.effect_type, caster, std::move(onSuccess), ctx);
 }
 
+// TODO: Why is it a global function?
 static void animate_heal(const Vector2D& pos, GameContext& ctx)
 {
 	if (!ctx.animSystem)
@@ -980,7 +981,7 @@ void SpellSystem::cast_fireball(
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
-
+// TODO: global function smell.
 static int calculate_num_missiles(int casterLevel)
 {
 	// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5

@@ -8,7 +8,6 @@
 #include "../Persistent/Persistent.h"
 
 class Creature;
-class Player;
 struct GameContext;
 
 // TODO(refactor): Destructible violates SRP -- it owns eight distinct responsibilities.

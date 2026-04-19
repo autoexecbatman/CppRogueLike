@@ -4,7 +4,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
@@ -177,7 +176,8 @@ void MenuBuy::menu(GameContext& ctx)
 	on_key(keyPress, ctx);
 }
 
-void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Player& buyer)
+// TODO: void* tradeWin is a smell.
+void MenuBuy::handle_buy(void* tradeWin, Creature& shopkeeper_creature, Creature& buyer)
 {
 	if (is_inventory_empty(shopkeeper.shop_inventory) ||
 		currentState >= get_item_count(shopkeeper.shop_inventory))

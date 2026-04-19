@@ -1,5 +1,6 @@
 ﻿// file: Destructible.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <memory>
 #include <string>
@@ -8,7 +9,6 @@
 
 #include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Player.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Colors/Colors.h"
@@ -552,11 +552,8 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 	ctx.messageSystem->finalize_message();
 
 	// increase the player's experience
-	/*game->player->destructible->xp += xp;*/
-	ctx.player->destructible->set_xp(ctx.player->destructible->get_xp() + get_xp());
-	ctx.player->killCount++;
-
-	ctx.player->levelup_update(ctx);
+	assert(ctx.player != nullptr && "MonsterDestructible::die requires a live player in context");
+	ctx.player->on_kill_reward(get_xp(), ctx);
 
 	if (ctx.animSystem)
 	{

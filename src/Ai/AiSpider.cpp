@@ -1,14 +1,11 @@
-#include <algorithm>
 #include <cmath>
 #include <limits>
 #include <memory>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Stairs.h"
-#include "../ActorTypes/Player.h"
+#include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"

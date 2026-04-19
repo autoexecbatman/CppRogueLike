@@ -18,17 +18,18 @@
 // Constants
 // ---------------------------------------------------------------------------
 
-static constexpr int BASE_XP_PER_LEVEL = 120;
-static constexpr int MAX_ENCOUNTER_MONSTERS = 10;
+constexpr int BASE_XP_PER_LEVEL = 120;
+constexpr int MAX_ENCOUNTER_MONSTERS = 10;
 
-static constexpr float STANDARD_MULTIPLIER = 1.0f;
-static constexpr float DANGER_MULTIPLIER = 2.5f;
-static constexpr float TREASURE_MULTIPLIER = 1.5f;
+constexpr float STANDARD_MULTIPLIER = 1.0f;
+constexpr float DANGER_MULTIPLIER = 2.5f;
+constexpr float TREASURE_MULTIPLIER = 1.5f;
 
 // ---------------------------------------------------------------------------
 // Budget calculation
 // ---------------------------------------------------------------------------
 
+// TODO: global function smell.
 static int calculate_budget(RoomType type, int dungeonLevel)
 {
 	switch (type)

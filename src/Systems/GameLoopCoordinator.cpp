@@ -7,8 +7,8 @@
 #include <raylib.h>
 
 #include "../Actor/Actor.h"
+#include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
@@ -18,15 +18,12 @@
 #include "../Menu/DeathMenu.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/ContentRegistry.h"
-#include "../Systems/GameStateManager.h"
 #include "../Systems/InputHandler.h"
 #include "../Systems/MenuManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
 #include "../Tools/ContentEditor.h"
 #include "../Tools/DecorEditor.h"
-#include "../Tools/PrefabLibrary.h"
 #include "../Utils/Vector2D.h"
 #include "AnimationSystem.h"
 #include "CreatureManager.h"
@@ -496,12 +493,11 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.map->update(); // stamp explored for the freshly-computed FOV so minimap is correct this frame
 		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
 		{
-			ctx.player->racial_ability_adjustments();
-			ctx.player->equip_class_starting_gear(ctx);
+			ctx.player->on_new_game_start(ctx);
 		}
 		bool wasLoadedGame = ctx.gameState->get_is_loaded_game();
 		ctx.gameState->set_is_loaded_game(false);
-		ctx.player->calculate_thaco();
+		ctx.player->recalculate_combat_stats();
 
 		if (wasLoadedGame)
 		{

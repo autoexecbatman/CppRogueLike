@@ -16,6 +16,7 @@ struct AutotileGroup
 	int origin_row{};
 };
 
+// TODO: global function smell.
 constexpr TileRef autotile_resolve(AutotileGroup g, bool n, bool e, bool s, bool w)
 {
 	int col_offset = (!w && e) ? 0 : (w && !e) ? 2
@@ -25,6 +26,7 @@ constexpr TileRef autotile_resolve(AutotileGroup g, bool n, bool e, bool s, bool
 	return TileRef{ g.sheet, g.origin_col + col_offset, g.origin_row + row_offset };
 }
 
+// TODO: global function smell.
 constexpr TileRef autotile_resolve_mask(AutotileGroup g, int mask)
 {
 	return autotile_resolve(

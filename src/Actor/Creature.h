@@ -156,6 +156,20 @@ public:
 	// Web effect handler - Player overrides this, monsters ignore webs by default
 	virtual void apply_web_effect(int duration, int strength, class Web* web, GameContext& ctx) { /* do nothing */ }
 
+	// Display interface — Player overrides with actual values; monsters return sentinels
+	virtual std::string get_class_display_name() const { return {}; }
+	virtual std::string get_race_display_name() const { return {}; }
+	virtual int get_kill_count() const noexcept { return 0; }
+	virtual std::string get_equipped_weapon_damage_roll() const noexcept { return "?"; }
+
+	// Lifecycle hooks — Player overrides; monsters no-op
+	// Called once at game start (level 1, new game) to apply race/class setup
+	virtual void on_new_game_start(GameContext& ctx) {}
+	// Called every STARTUP to sync combat stats (THAC0 etc.)
+	virtual void recalculate_combat_stats() {}
+	// Called by Destructible when a monster dies — rewards the player who killed it
+	virtual void on_kill_reward(int xp, GameContext& ctx) {}
+
 	TileRef get_display_tile() const noexcept override;
 	int get_display_color() const noexcept override;
 

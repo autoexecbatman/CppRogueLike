@@ -9,7 +9,6 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
@@ -63,6 +62,7 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
 };
 
+// TODO: global function smell.
 // Single source of truth: which item appearances a mimic can adopt.
 // Called at fresh construction (Mimic ctor) and as lazy init after load.
 std::vector<Disguise> build_mimic_disguises(ContentRegistry& registry)

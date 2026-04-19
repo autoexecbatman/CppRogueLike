@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "../Actor/Creature.h"
-#include "../ActorTypes/Player.h" // TODO: remove when ctx.player typed as Creature*
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"

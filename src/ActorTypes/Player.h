@@ -98,7 +98,6 @@ public:
 	Item* get_equipped_item(EquipmentSlot slot) const noexcept override;
 	bool is_slot_occupied(EquipmentSlot slot) const noexcept override;
 	bool is_dual_wielding() const noexcept;
-	std::string get_equipped_weapon_damage_roll() const noexcept;
 
 	// Equipment system - unique ID based methods
 	bool toggle_armor(uint64_t item_unique_id, GameContext& ctx);
@@ -108,6 +107,17 @@ public:
 	bool toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx) override;
 
 	bool is_player() const noexcept override { return true; }
+
+	// Display interface overrides
+	std::string get_class_display_name() const override { return playerClass; }
+	std::string get_race_display_name() const override { return playerRace; }
+	int get_kill_count() const noexcept override { return killCount; }
+	std::string get_equipped_weapon_damage_roll() const noexcept override;
+
+	// Lifecycle hook overrides
+	void on_new_game_start(GameContext& ctx) override;
+	void recalculate_combat_stats() override;
+	void on_kill_reward(int xp, GameContext& ctx) override;
 
 	void update(GameContext& ctx) override;
 	void apply_confusion(int duration) override;

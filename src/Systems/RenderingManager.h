@@ -6,14 +6,9 @@
 // Forward declarations
 class Creature;
 class Item;
-class Map;
-class Player;
-class Stairs;
 class Object;
 struct Decoration;
-struct InventoryData;
 struct GameContext;
-class Gui;
 
 // - Handles all rendering and screen management
 class RenderingManager
@@ -35,14 +30,7 @@ private:
 	// Helper methods
 	void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
 	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
-	void apply_lighting(const Player& player, const GameContext& ctx) const;
+	void apply_lighting(const GameContext& ctx) const;
 	void render_mouse_path_overlay(const GameContext& ctx) const;
-	void render_world(
-		const Map& map,
-		const Stairs& stairs,
-		std::span<const std::unique_ptr<Object>> objects,
-		const InventoryData& inventory_data,
-		std::span<const std::unique_ptr<Creature>> creatures,
-		const Player& player,
-		const GameContext& ctx) const;
+	void render_world(const GameContext& ctx) const;
 };

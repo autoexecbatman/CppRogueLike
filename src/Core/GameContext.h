@@ -48,6 +48,7 @@ class BaseMenu;
 struct DungeonRoom;
 class Renderer;
 class InputSystem;
+class Creature;
 class Player;
 class Dijkstra;
 
@@ -127,7 +128,7 @@ struct GameContext
 	// Core game world
 	Map* map{ nullptr };
 	Gui* gui{ nullptr };
-	Player* player{ nullptr };
+	Creature* player{ nullptr };
 
 	// Ownership handle — set by Game::context(), used by init_new_game/load_all
 	// to construct and assign the player without going through Game directly.

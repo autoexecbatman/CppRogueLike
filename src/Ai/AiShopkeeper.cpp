@@ -5,7 +5,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
-#include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Menu/MenuTrade.h"

@@ -14,7 +14,6 @@
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Item.h"
 #include "../Actor/Pickable.h"
-#include "../Actor/Stairs.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Controls/Controls.h"
@@ -25,11 +24,9 @@
 #include "../Map/Map.h"
 #include "../Menu/ContextMenu.h"
 #include "../Menu/Menu.h"
-#include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Systems/CreatureManager.h"
 #include "../Systems/DisplayManager.h"
 #include "../Systems/InputHandler.h"
@@ -47,6 +44,7 @@
 // ---------------------------------------------------------------------------
 // Direction table -- static const, not a mutable global
 // ---------------------------------------------------------------------------
+// TODO: global function smell.
 static const std::unordered_map<Controls, Vector2D>& direction_map()
 {
 	static const std::unordered_map<Controls, Vector2D> moves = {
@@ -76,9 +74,9 @@ PlayerController::PlayerController(Player& owner)
 void PlayerController::update(GameContext& ctx)
 {
 	// If stuck in a web, try to break free and skip turn if still stuck
-	if (ctx.player->is_webbed())
+	if (playerOwner.is_webbed())
 	{
-		if (!ctx.player->try_break_web(ctx))
+		if (!playerOwner.try_break_web(ctx))
 		{
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			return;
@@ -86,10 +84,14 @@ void PlayerController::update(GameContext& ctx)
 	}
 
 	if (resolve_pending_door(ctx))
+	{
 		return;
+	}
 
 	if (handle_mouse_path(ctx))
+	{
 		return;
+	}
 
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	Vector2D moveVector{ 0, 0 };
@@ -860,7 +862,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::CHAR_SHEET:
 	{
-		ctx.displayManager->display_character_sheet(*ctx.player, ctx);
+		ctx.displayManager->display_character_sheet(playerOwner, ctx);
 		break;
 	}
 
@@ -923,7 +925,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::REST:
 	{
-		ctx.player->rest(ctx);
+		playerOwner.rest(ctx);
 		break;
 	}
 

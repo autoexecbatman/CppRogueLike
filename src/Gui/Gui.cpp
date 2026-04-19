@@ -7,9 +7,8 @@
 #include <raylib.h>
 
 #include "../Actor/Actor.h"
-#include "../Actor/Attacker.h"
+#include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
@@ -266,7 +265,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	auto nameLine = std::format(
 		"{} ({} Lv.{})",
 		ctx.player->actorData.name,
-		ctx.player->playerClass,
+		ctx.player->get_class_display_name(),
 		ctx.player->get_level());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 1 * tileSize + fontOff }, nameLine, YELLOW_BLACK_PAIR);
 

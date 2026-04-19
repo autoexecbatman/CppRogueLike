@@ -227,6 +227,7 @@ void PrefabLibrary::remove(const std::string& name)
 // Apply to rooms
 // ---------------------------------------------------------------------------
 
+// TODO: global function smell.
 // Resolves prefab name to index.  Returns -1 if not found.
 static int find_prefab_index(
 	const std::vector<Prefab>& prefabs,

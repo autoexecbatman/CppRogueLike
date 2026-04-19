@@ -3,8 +3,8 @@
 #include <functional>
 
 #include "../Actor/Actor.h"
-#include "../ActorTypes/Player.h"
 #include "../Actor/Attacker.h"
+#include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
