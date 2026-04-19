@@ -173,7 +173,7 @@
         "thaco": 16,
         "tile": {
             "col": 0,
-            "row": 6,
+            "row": 1,
             "sheet": 6
         },
         "weapon": "Morning Star",
@@ -234,8 +234,8 @@
         },
         "thaco": 10,
         "tile": {
-            "col": 2,
-            "row": 4,
+            "col": 0,
+            "row": 0,
             "sheet": 22
         },
         "weapon": "Fire Breath",
@@ -420,8 +420,8 @@
         },
         "thaco": 15,
         "tile": {
-            "col": 2,
-            "row": 4,
+            "col": 6,
+            "row": 0,
             "sheet": 20
         },
         "weapon": "Claw",
@@ -482,8 +482,8 @@
         },
         "thaco": 17,
         "tile": {
-            "col": 0,
-            "row": 4,
+            "col": 4,
+            "row": 0,
             "sheet": 16
         },
         "weapon": "Paralytic Claw",
@@ -668,8 +668,8 @@
         },
         "thaco": 15,
         "tile": {
-            "col": 0,
-            "row": 8,
+            "col": 5,
+            "row": 4,
             "sheet": 8
         },
         "weapon": "Poison Bite",
@@ -730,9 +730,9 @@
         },
         "thaco": 17,
         "tile": {
-            "col": 2,
-            "row": 4,
-            "sheet": 6
+            "col": 0,
+            "row": 13,
+            "sheet": 4
         },
         "weapon": "Battle Axe",
         "weight": 13,
@@ -854,9 +854,9 @@
         },
         "thaco": 9,
         "tile": {
-            "col": 0,
-            "row": 6,
-            "sheet": 22
+            "col": 6,
+            "row": 0,
+            "sheet": 6
         },
         "weapon": "Stone Fist",
         "weight": 4,
@@ -916,9 +916,9 @@
         },
         "thaco": 16,
         "tile": {
-            "col": 0,
-            "row": 4,
-            "sheet": 14
+            "col": 2,
+            "row": 17,
+            "sheet": 6
         },
         "weapon": "Talons",
         "weight": 8,
@@ -980,7 +980,7 @@
         "tile": {
             "col": 0,
             "row": 0,
-            "sheet": 22
+            "sheet": 6
         },
         "weapon": "Hurled Boulder",
         "weight": 6,
@@ -1226,8 +1226,8 @@
         },
         "thaco": 9,
         "tile": {
-            "col": 0,
-            "row": 14,
+            "col": 6,
+            "row": 2,
             "sheet": 16
         },
         "weapon": "Paralyzing Touch",
@@ -1351,7 +1351,7 @@
         "thaco": 13,
         "tile": {
             "col": 0,
-            "row": 10,
+            "row": 26,
             "sheet": 6
         },
         "weapon": "Petrifying Gaze",
@@ -1419,8 +1419,8 @@
         },
         "thaco": 15,
         "tile": {
-            "col": 0,
-            "row": 8,
+            "col": 2,
+            "row": 0,
             "sheet": 6
         },
         "weapon": "Club",
@@ -1543,8 +1543,8 @@
         },
         "thaco": 7,
         "tile": {
-            "col": 0,
-            "row": 8,
+            "col": 3,
+            "row": 1,
             "sheet": 20
         },
         "weapon": "Hellfire Strike",
@@ -1667,8 +1667,8 @@
         },
         "thaco": 16,
         "tile": {
-            "col": 2,
-            "row": 8,
+            "col": 3,
+            "row": 4,
             "sheet": 16
         },
         "weapon": "Strength Drain",
@@ -1737,7 +1737,7 @@
         "thaco": 19,
         "tile": {
             "col": 0,
-            "row": 0,
+            "row": 2,
             "sheet": 16
         },
         "weapon": "Claw",
@@ -1882,7 +1882,7 @@
         "thaco": 11,
         "tile": {
             "col": 0,
-            "row": 12,
+            "row": 3,
             "sheet": 16
         },
         "weapon": "Blood Drain",
@@ -1943,8 +1943,8 @@
         },
         "thaco": 15,
         "tile": {
-            "col": 0,
-            "row": 8,
+            "col": 5,
+            "row": 0,
             "sheet": 12
         },
         "weapon": "Bite",
@@ -2129,8 +2129,8 @@
         },
         "thaco": 14,
         "tile": {
-            "col": 0,
-            "row": 10,
+            "col": 2,
+            "row": 4,
             "sheet": 16
         },
         "weapon": "Energy Drain",
@@ -2253,8 +2253,8 @@
         },
         "thaco": 17,
         "tile": {
-            "col": 0,
-            "row": 2,
+            "col": 7,
+            "row": 0,
             "sheet": 16
         },
         "weapon": "Slam",
