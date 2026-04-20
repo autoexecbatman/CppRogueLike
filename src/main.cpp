@@ -51,19 +51,30 @@ int main()
 		std::cerr << "Warning: Could not open debug file: " << e.what() << std::endl;
 	}
 
+	std::clog << "STARTUP: Opened debug log\n" << std::flush;
+
 	// Load data before Game construction (MonsterFactory is built inside Map ctor).
+	std::clog << "STARTUP: Loading MonsterCreator\n" << std::flush;
 	MonsterCreator::load(Paths::MONSTERS);
+	std::clog << "STARTUP: Loading SpellSystem\n" << std::flush;
 	SpellSystem::load(Paths::SPELLS);
+	std::clog << "STARTUP: Loading ItemCreator\n" << std::flush;
 	ItemCreator::load(Paths::ITEMS);
+	std::clog << "STARTUP: Loading enhanced rules\n" << std::flush;
 	ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
 
+	std::clog << "STARTUP: Creating Game\n" << std::flush;
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>();
+	std::clog << "STARTUP: Loading tile config\n" << std::flush;
 	game->tile_config.load(Paths::TILE_CONFIG);
+	std::clog << "STARTUP: Initializing world\n" << std::flush;
 	game->init_world();
 
+	std::clog << "STARTUP: Initializing renderer\n" << std::flush;
 	// Initialize raylib window (fullscreen, auto-detect resolution)
 	game->renderer.init();
+	std::clog << "STARTUP: Loading Dawnlike tileset\n" << std::flush;
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 16);

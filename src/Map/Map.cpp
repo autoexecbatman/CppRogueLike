@@ -40,6 +40,7 @@
 #include "DungeonRoom.h"
 #include "FovMap.h"
 #include "Map.h"
+#include "../Objects/Trap.h"
 
 //====
 Map::Map(int map_width, int map_height)
@@ -892,7 +893,78 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 
 	spawn_barrels(room, ctx);
 	spawn_items(room, ctx);
+	spawn_traps(room, ctx);
 	plan_encounter(room, ctx);
+}
+
+void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
+{
+	if (!ctx.dice || !ctx.tileConfig || !ctx.objects)
+	{
+		return;
+	}
+
+	// ~30% of rooms get 0-2 random traps (was 10%)
+	if (ctx.dice->d10() > 3)
+	{
+		return;  // Room has no traps
+	}
+
+	// Room gets 1-2 random traps
+	int trapCount = ctx.dice->roll(1, 2);
+
+	for (int i = 0; i < trapCount; ++i)
+	{
+		// Pick random valid floor tile in room
+		Vector2D trapPos;
+		bool foundSpot = false;
+
+		for (int attempt = 0; attempt < 20; ++attempt)
+		{
+			trapPos.x = room.col + ctx.dice->roll(0, room.width - 1);
+			trapPos.y = room.row + ctx.dice->roll(0, room.height - 1);
+
+			if (!in_bounds(trapPos))
+			{
+				continue;
+			}
+
+			TileType tileType = get_tile_type(trapPos);
+
+			// Must be a floor tile (walkable, no objects/items)
+			if (tileType == TileType::FLOOR)
+			{
+				foundSpot = true;
+				break;
+			}
+		}
+
+		if (!foundSpot)
+		{
+			continue;  // Couldn't find a valid spot for this trap
+		}
+
+		// Create trap (randomly choose type)
+		TrapType trapType;
+		int trapChoice = ctx.dice->roll(1, 3);
+		switch (trapChoice)
+		{
+		case 1:
+			trapType = TrapType::PIT;
+			break;
+		case 2:
+			trapType = TrapType::DART;
+			break;
+		case 3:
+			trapType = TrapType::ARROW;
+			break;
+		default:
+			trapType = TrapType::PIT;
+		}
+
+		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
+		ctx.objects->push_back(std::move(trap));
+	}
 }
 
 void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
@@ -1936,6 +2008,7 @@ void Map::place_from_graph(
 	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
 	{
 		create_room(rooms[i], i == 0, withActors, ctx);
+		spawn_traps(rooms[i], ctx);
 	}
 
 	if (ctx.messageSystem)

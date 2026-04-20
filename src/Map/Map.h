@@ -185,4 +185,5 @@ protected:
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY);
 	void create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx);
+	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
 };

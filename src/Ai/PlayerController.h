@@ -16,7 +16,8 @@ enum class PendingDoorAction
 {
 	NONE,
 	OPEN,
-	CLOSE
+	CLOSE,
+	DISARM
 };
 
 class PlayerController final : public Persistent

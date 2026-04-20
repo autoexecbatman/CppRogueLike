@@ -18,6 +18,8 @@ TileRef TileConfig::get(std::string_view key) const
 
 	if (it == m_tiles.end())
 	{
+		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
+		fflush(stderr);
 		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
 	}
 

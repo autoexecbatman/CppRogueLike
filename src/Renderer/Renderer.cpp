@@ -75,7 +75,7 @@ void Renderer::init()
 	// Go fullscreen at monitor resolution
 	SetWindowSize(screenWidth, screenHeight);
 	SetWindowPosition(0, 0);
-	ToggleFullscreen();
+	// ToggleFullscreen();  // DISABLED FOR DEBUGGING
 #endif
 
 	// Viewport in tile units

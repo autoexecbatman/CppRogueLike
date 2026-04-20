@@ -37,6 +37,7 @@ enum class Controls
 	REGEN = 'n',
 	OPEN_DOOR = 'o',
 	CLOSE_DOOR = 'k',
+	DISARM = 's',
 	REST = 'r',
 	HELP = '?',
 	HIDE = 'H',

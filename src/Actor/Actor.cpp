@@ -109,5 +109,11 @@ void Actor::render(const GameContext& ctx) const noexcept
 // check if the actor is visible
 bool Actor::is_visible(const GameContext& ctx) const noexcept
 {
+	// Invisible actors are hidden unless there's special detection
+	if (has_state(ActorState::IS_INVISIBLE))
+	{
+		return false;
+	}
+
 	return (!has_state(ActorState::FOV_ONLY) && ctx.map->is_explored(position)) || ctx.map->is_in_fov(position);
 }

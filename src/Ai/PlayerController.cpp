@@ -24,6 +24,7 @@
 #include "../Map/Map.h"
 #include "../Menu/ContextMenu.h"
 #include "../Menu/Menu.h"
+#include "../Objects/Trap.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
@@ -1031,6 +1032,13 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		break;
 	}
 
+	case Controls::DISARM:
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		pendingDoorAction = PendingDoorAction::DISARM;
+		break;
+	}
+
 	case Controls::REST:
 	{
 		playerOwner.rest(ctx);
@@ -1132,7 +1140,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already open.", true);
 		}
 	}
-	else
+	else if (pendingDoorAction == PendingDoorAction::CLOSE)
 	{
 		if (ctx.map->close_door(doorPos, ctx))
 		{
@@ -1146,6 +1154,45 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		else
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
+		}
+	}
+	else if (pendingDoorAction == PendingDoorAction::DISARM)
+	{
+		// Find trap at target position
+		Trap* trapAtPos = nullptr;
+		if (ctx.objects != nullptr)
+		{
+			for (auto& obj : *ctx.objects)
+			{
+				if (obj && obj->position == doorPos)
+				{
+					// Check if this is a Trap by attempting cast
+					if (auto* trapPtr = dynamic_cast<Trap*>(obj.get()))
+					{
+						trapAtPos = trapPtr;
+						break;
+					}
+				}
+			}
+		}
+
+		if (trapAtPos == nullptr)
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There is no trap there.", true);
+		}
+		else
+		{
+			// Attempt disarm with Dexterity check (DC from trap)
+			if (trapAtPos->attempt_disarm(playerOwner, ctx))
+			{
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully disarm the trap.", true);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
+			else
+			{
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to disarm the trap.", true);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
 		}
 	}
 

@@ -165,6 +165,7 @@ set(PARENT_SOURCES
 
     # Objects
     ${PARENT_SOURCE_DIR}/Objects/Web.cpp
+    ${PARENT_SOURCE_DIR}/Objects/Trap.cpp
 
     # Utils
     ${PARENT_SOURCE_DIR}/Utils/Dijkstra.cpp
