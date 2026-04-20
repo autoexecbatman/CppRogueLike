@@ -256,6 +256,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/HungerSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/BuffSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/BuffSystem.h
+    ${PROJECT_SOURCE_DIR}/Systems/CurseSystem.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/CurseSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.cpp
     ${PROJECT_SOURCE_DIR}/Systems/LevelUpSystem.h
     ${PROJECT_SOURCE_DIR}/Systems/MessageSystem.cpp

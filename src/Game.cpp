@@ -36,6 +36,7 @@
 		.buffSystem = &buff_system,
 		.floatingText = &floating_text,
 		.animSystem = &anim_system,
+		.curseSystem = &curse_system,
 		.contentRegistry = &content_registry,
 		.minimap = &minimap,
 		.pathfinder = &pathfinder,

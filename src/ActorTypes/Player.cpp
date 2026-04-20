@@ -21,6 +21,7 @@
 #include "../dnd_tables/CombatProgressionTables.h"
 #include "../Factories/ItemCreator.h"
 #include "../Items/ItemClassification.h"
+#include "../Items/ItemIdentification.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
@@ -752,6 +753,9 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
+	
+	// Apply stat bonuses from equipment
+	add_stat_bonuses_from_equipment(*equippedItems.back().item);
 
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
@@ -920,6 +924,17 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 	if (it != equippedItems.end())
 	{
+		// AD&D 2e PHB p.230: cursed items are magically bound to the wearer.
+		// Only a Remove Curse spell breaks the bond.
+		if (it->item->get_enhancement().blessing == BlessingStatus::CURSED)
+		{
+			ctx.messageSystem->message(
+				RED_BLACK_PAIR,
+				std::format("The {} is cursed and cannot be removed!", it->item->actorData.name),
+				true);
+			return false;
+		}
+
 		remove_stat_bonuses_from_equipment(*it->item);
 
 		// Remove equipped state
@@ -1169,8 +1184,90 @@ void Player::load(const json& j)
 	}
 }
 
+void Player::add_stat_bonuses_from_equipment(Item& item)
+{
+	// Apply ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
+	if (item.enhancement.strength_bonus != 0)
+	{
+		set_strength(get_strength() + item.enhancement.strength_bonus);
+	}
+	if (item.enhancement.dexterity_bonus != 0)
+	{
+		set_dexterity(get_dexterity() + item.enhancement.dexterity_bonus);
+	}
+	
+	// Apply behavior-based stat bonuses for special jewelry items
+	if (!item.behavior)
+	{
+		return;
+	}
+
+	auto add_stats = [this](auto& sb)
+	{
+		using T = std::decay_t<decltype(sb)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			if (sb.isSetMode)
+			{
+				if (sb.strBonus != 0)
+				{
+					sb.originalStats.str = get_strength();
+					set_strength(sb.strBonus);
+				}
+				if (sb.dexBonus != 0)
+				{
+					sb.originalStats.dex = get_dexterity();
+					set_dexterity(sb.dexBonus);
+				}
+				if (sb.conBonus != 0)
+				{
+					sb.originalStats.con = get_constitution();
+					set_constitution(sb.conBonus);
+				}
+				if (sb.intBonus != 0)
+				{
+					sb.originalStats.intel = get_intelligence();
+					set_intelligence(sb.intBonus);
+				}
+				if (sb.wisBonus != 0)
+				{
+					sb.originalStats.wis = get_wisdom();
+					set_wisdom(sb.wisBonus);
+				}
+				if (sb.chaBonus != 0)
+				{
+					sb.originalStats.cha = get_charisma();
+					set_charisma(sb.chaBonus);
+				}
+			}
+			else
+			{
+				set_strength(get_strength() + sb.strBonus);
+				set_dexterity(get_dexterity() + sb.dexBonus);
+				set_constitution(get_constitution() + sb.conBonus);
+				set_intelligence(get_intelligence() + sb.intBonus);
+				set_wisdom(get_wisdom() + sb.wisBonus);
+				set_charisma(get_charisma() + sb.chaBonus);
+			}
+		}
+	};
+
+	std::visit(add_stats, *item.behavior);
+}
+
 void Player::remove_stat_bonuses_from_equipment(Item& item)
 {
+	// Remove ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
+	if (item.enhancement.strength_bonus != 0)
+	{
+		set_strength(get_strength() - item.enhancement.strength_bonus);
+	}
+	if (item.enhancement.dexterity_bonus != 0)
+	{
+		set_dexterity(get_dexterity() - item.enhancement.dexterity_bonus);
+	}
+	
+	// Remove behavior-based stat bonuses for special jewelry items
 	if (!item.behavior)
 	{
 		return;

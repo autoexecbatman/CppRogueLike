@@ -39,6 +39,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerVirtualInterfaceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/EquipmentStatBonusTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")
@@ -127,6 +129,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/EncounterPlanner.cpp
     ${PARENT_SOURCE_DIR}/Systems/HungerSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/BuffSystem.cpp
+    ${PARENT_SOURCE_DIR}/Systems/CurseSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/LevelUpSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/MessageSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/RenderingManager.cpp

@@ -138,4 +138,7 @@ public:
 private:
 	// Helper for removing stat bonuses when unequipping stat-boost equipment
 	void remove_stat_bonuses_from_equipment(Item& item);
+	
+	// Helper for applying stat bonuses when equipping stat-boost equipment
+	void add_stat_bonuses_from_equipment(Item& item);
 };

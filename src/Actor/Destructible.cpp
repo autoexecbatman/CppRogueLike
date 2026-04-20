@@ -11,6 +11,7 @@
 #include "../Actor/InventoryOperations.h"
 #include "../Attributes/ConstitutionAttributes.h"
 #include "../Attributes/DexterityAttributes.h"
+#include "../Items/ItemIdentification.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
@@ -340,7 +341,14 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Check body armor - polymorphic via virtual get_ac_bonus()
 	if (Item* equippedArmor = owner.get_equipped_item(EquipmentSlot::BODY))
 	{
-		const int armorBonus = equippedArmor->behavior ? get_item_ac_bonus(*equippedArmor->behavior) : 0;
+		int armorBonus = equippedArmor->behavior ? get_item_ac_bonus(*equippedArmor->behavior) : 0;
+
+		// AD&D 2e: cursed armor provides 1 point worse protection (higher AC = worse)
+		if (equippedArmor->get_enhancement().blessing == BlessingStatus::CURSED)
+		{
+			armorBonus += 1;
+		}
+
 		if (armorBonus != 0)
 		{
 			totalBonus += armorBonus;
@@ -358,7 +366,14 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 	// Check shield in left hand - polymorphic via virtual get_ac_bonus()
 	if (Item* equippedShield = owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
 	{
-		const int shieldBonus = equippedShield->behavior ? get_item_ac_bonus(*equippedShield->behavior) : 0;
+		int shieldBonus = equippedShield->behavior ? get_item_ac_bonus(*equippedShield->behavior) : 0;
+
+		// AD&D 2e: cursed shield provides 1 point worse protection
+		if (equippedShield->get_enhancement().blessing == BlessingStatus::CURSED)
+		{
+			shieldBonus += 1;
+		}
+
 		if (shieldBonus != 0)
 		{
 			totalBonus += shieldBonus;

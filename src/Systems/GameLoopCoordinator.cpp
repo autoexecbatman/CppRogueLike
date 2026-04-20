@@ -28,6 +28,7 @@
 #include "../Utils/Vector2D.h"
 #include "AnimationSystem.h"
 #include "CreatureManager.h"
+#include "CurseSystem.h"
 #include "FloatingTextSystem.h"
 #include "GameLoopCoordinator.h"
 #include "HungerSystem.h"
@@ -557,6 +558,11 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);
 		ctx.hungerSystem->apply_hunger_effects(ctx);
+
+		if (ctx.playerOwner && ctx.curseSystem)
+		{
+			ctx.curseSystem->apply_curses(**ctx.playerOwner, ctx);
+		}
 
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 

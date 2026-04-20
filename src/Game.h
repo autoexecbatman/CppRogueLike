@@ -37,6 +37,7 @@
 #include "Systems/MenuManager.h"
 #include "Systems/MessageSystem.h"
 #include "Systems/RenderingManager.h"
+#include "Systems/CurseSystem.h"
 #include "Systems/TargetingSystem.h"
 #include "Systems/TileConfig.h"
 #include "Utils/Dijkstra.h"
@@ -89,6 +90,7 @@ struct Game
 	Dijkstra pathfinder{ get_map_width(), get_map_height() };
 	DecorEditor decor_editor{};
 	PrefabLibrary prefab_library{};
+	CurseSystem curse_system{};
 #ifndef EMSCRIPTEN
 	ContentEditor content_editor{};
 	RoomEditor room_editor{};
