@@ -3,6 +3,7 @@
 #include <string>
 
 #include "../Items/ItemClassification.h"
+#include "../Items/ItemIdentification.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Utils/Vector2D.h"
@@ -21,8 +22,11 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	// Name accessor - returns enhanced name if item has enhancements
+	// Name accessors
+	// get_name() returns identified parts; unknown parts shown as "?"
+	// get_true_name() returns full name (internal use only)
 	const std::string& get_name() const noexcept;
+	const std::string& get_true_name() const noexcept;
 	const std::string& get_base_name() const noexcept { return actorData.name; }
 
 	// Enhancement system
@@ -31,6 +35,17 @@ public:
 	const ItemEnhancement& get_enhancement() const noexcept { return enhancement; }
 	bool is_enhanced() const noexcept;
 
+	// Identification system
+	void identify_type() noexcept { identification.identified_type = true; }
+	void identify_enhancement() noexcept { identification.identified_enhancement = true; }
+	void identify_buc() noexcept { identification.identified_buc = true; }
+	void identify_all() noexcept { identification.identify_all(); }
+	void reset_identification() noexcept { identification.reset(); }
+	[[nodiscard]] bool is_fully_identified() const noexcept { return identification.is_fully_identified(); }
+	[[nodiscard]] bool is_type_identified() const noexcept { return identification.identified_type; }
+	[[nodiscard]] bool is_enhancement_identified() const noexcept { return identification.identified_enhancement; }
+	[[nodiscard]] bool is_buc_identified() const noexcept { return identification.identified_buc; }
+
 	// Value: baseValue * enhancement.value_modifier / 100  (modifier defaults to 100)
 	int get_value() const noexcept { return (baseValue * enhancement.value_modifier) / 100; }
 	void set_value(int v) noexcept { baseValue = v; }
@@ -38,6 +53,7 @@ public:
 	std::string item_key; // JSON registry key
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
+	ItemIdentificationStatus identification; // Identification tracking
 
 	std::optional<ItemBehavior> behavior; // item behavior (replaces pickable hierarchy)
 

@@ -244,6 +244,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
 		equip_item(ItemCreator::create("long_bow", position, *ctx.contentRegistry), EquipmentSlot::MISSILE_WEAPON, ctx);
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
@@ -254,6 +255,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("leather_armor", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("dagger", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
@@ -267,6 +269,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -280,6 +283,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry));
+		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;

@@ -17,6 +17,7 @@
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/CreatureManager.h"
+#include "../Systems/FloatingTextSystem.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
@@ -630,6 +631,56 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	return false; // turn and item consumption handled in callback
 }
 
+bool use(IdentifyScroll& idScroll, Item& owner, Creature& wearer, GameContext& ctx)
+{
+	(void)idScroll; // unused parameter
+
+	auto* player = dynamic_cast<Player*>(&wearer);
+	if (!player)
+	{
+		return false;
+	}
+
+	int identifiedCount = 0;
+	for (auto& item : player->inventoryData.items)
+	{
+		if (!item->is_fully_identified())
+		{
+			item->identify_all();
+			identifiedCount++;
+			if (ctx.floatingText)
+			{
+				std::string identified_msg = std::string(item->get_name()) + " identified!";
+				ctx.floatingText->spawn_text(
+					player->position.x,
+					player->position.y,
+					identified_msg,
+					0,
+					255,
+					255,
+					2.0f);
+			}
+		}
+	}
+
+	if (identifiedCount > 0)
+	{
+		ctx.messageSystem->message(
+			CYAN_BLACK_PAIR,
+			std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount),
+			true);
+	}
+	else
+	{
+		ctx.messageSystem->message(
+			CYAN_BLACK_PAIR,
+			std::format("You use the {}. All items were already identified.", owner.get_name()),
+			true);
+	}
+
+	return consume_item(owner, wearer);
+}
+
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	wearer.adjust_gold(g.amount);
@@ -852,6 +903,10 @@ void save_behavior(const ItemBehavior& behavior, json& j)
 			{
 				j["type"] = static_cast<int>(PickableType::TELEPORTER);
 			}
+			else if constexpr (std::is_same_v<T, IdentifyScroll>)
+			{
+				j["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL);
+			}
 			else if constexpr (std::is_same_v<T, Gold>)
 			{
 				j["type"] = static_cast<int>(PickableType::GOLD_COIN);
@@ -1011,6 +1066,11 @@ ItemBehavior load_behavior(const json& j)
 	case PickableType::TELEPORTER:
 	{
 		return Teleporter{};
+	}
+
+	case PickableType::IDENTIFY_SCROLL:
+	{
+		return IdentifyScroll{};
 	}
 
 	case PickableType::GOLD_COIN:

@@ -70,6 +70,11 @@
         "consumableBuff": "hold_person", "targetMode": "fov_buff", "scrollAnimation": "none",
         "baseWeight": 15, "levelMin": 2, "levelScaling": 0.15
     },
+    "identify_scroll": {
+        "name": "identify scroll", "category": "scroll", "color": 15, "itemClass": "scroll",
+        "value": 100, "pickableType": "identify_scroll",
+        "baseWeight": 10, "levelMin": 1, "levelScaling": 0.1
+    },
 
     "dagger": {
         "name": "dagger", "category": "weapon", "color": 1, "itemClass": "dagger",

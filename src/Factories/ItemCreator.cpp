@@ -89,6 +89,10 @@ PickableType parse_pickable_type(std::string_view s)
 	{
 		return PickableType::TELEPORTER;
 	}
+	if (s == "identify_scroll")
+	{
+		return PickableType::IDENTIFY_SCROLL;
+	}
 	if (s == "weapon")
 	{
 		return PickableType::WEAPON;
@@ -497,6 +501,11 @@ std::string_view encode_pickable_type(PickableType t)
 	case PickableType::TELEPORTER:
 	{
 		return "teleporter";
+	}
+
+	case PickableType::IDENTIFY_SCROLL:
+	{
+		return "identify_scroll";
 	}
 
 	case PickableType::WEAPON:
@@ -1164,6 +1173,11 @@ ItemBehavior create_behavior(const ItemParams& params)
 	case PickableType::TELEPORTER:
 	{
 		return Teleporter{};
+	}
+
+	case PickableType::IDENTIFY_SCROLL:
+	{
+		return IdentifyScroll{};
 	}
 
 	case PickableType::WEAPON:

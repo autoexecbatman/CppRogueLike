@@ -51,8 +51,7 @@ TEST_F(EnhancementSystemTest, DefaultEnhancement_ZeroResistances) {
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_NotCursedOrBlessed) {
-    EXPECT_FALSE(defaultEnhancement.is_cursed);
-    EXPECT_FALSE(defaultEnhancement.is_blessed);
+    EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::UNCURSED);
     EXPECT_FALSE(defaultEnhancement.is_magical);
 }
 
@@ -208,7 +207,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_BlessedPrefix_AddsBothBonuses) {
 
     EXPECT_GT(defaultEnhancement.damage_bonus, 0);
     EXPECT_GT(defaultEnhancement.to_hit_bonus, 0);
-    EXPECT_TRUE(defaultEnhancement.is_blessed);
+    EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::BLESSED);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_ReinforcedPrefix_AddsACBonus) {
@@ -224,7 +223,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_CursedPrefix_SetsCursedFlag) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_TRUE(defaultEnhancement.is_cursed);
+    EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::CURSED);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_OfSlayingSuffix_AddsDamage) {
@@ -407,19 +406,17 @@ TEST_F(EnhancementSystemTest, CursedItem_CanHaveOtherEnhancements) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_TRUE(defaultEnhancement.is_cursed);
+    EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::CURSED);
     // Still may have damage bonus from suffix
 }
 
 TEST_F(EnhancementSystemTest, BlessedItem_CannotBeCursed) {
     defaultEnhancement.prefix = PrefixType::BLESSED;
-    defaultEnhancement.is_cursed = false;
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_TRUE(defaultEnhancement.is_blessed);
-    // Blessed should not be cursed (unless specifically set)
-    EXPECT_FALSE(defaultEnhancement.is_cursed);
+    EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::BLESSED);
+    // Blessed should not be cursed
 }
 
 // ----------------------------------------------------------------------------

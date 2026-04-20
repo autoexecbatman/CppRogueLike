@@ -63,3 +63,14 @@ TEST_F(ItemCreatorTest, CreateLeatherArmor)
 	EXPECT_EQ(item->get_value(), 5);
 	EXPECT_EQ(item->itemClass, ItemClass::ARMOR);
 }
+
+TEST_F(ItemCreatorTest, CreateIdentifyScroll)
+{
+	Vector2D pos(0, 0);
+	auto item = ItemCreator::create("identify_scroll", pos, mock.content_registry);
+
+	EXPECT_EQ(item->actorData.name, "identify scroll");
+	EXPECT_TRUE(item->behavior.has_value());
+	EXPECT_EQ(item->itemClass, ItemClass::SCROLL);
+	ASSERT_TRUE(std::holds_alternative<IdentifyScroll>(*item->behavior));
+}

@@ -33,6 +33,7 @@ enum class PickableType
 	GAUNTLETS,
 	GIRDLE,
 	QUEST_ITEM,
+	IDENTIFY_SCROLL,
 };
 
 // Effect type for Consumable
@@ -86,6 +87,10 @@ struct TargetedScroll
 };
 
 struct Teleporter
+{
+};
+
+struct IdentifyScroll
 {
 };
 
@@ -186,6 +191,7 @@ using ItemBehavior = std::variant<
 	Shield,
 	TargetedScroll,
 	Teleporter,
+	IdentifyScroll,
 	Gold,
 	Food,
 	CorpseFood,
@@ -202,6 +208,7 @@ using ItemBehavior = std::variant<
 bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(IdentifyScroll& idScroll, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);

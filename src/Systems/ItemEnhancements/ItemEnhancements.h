@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "../../Items/ItemIdentification.h"
+
 enum class PrefixType
 {
 	NONE,
@@ -77,8 +79,7 @@ struct ItemEnhancement
 	int poison_resistance{ 0 };
 
 	// Special properties
-	bool is_cursed{ false };
-	bool is_blessed{ false };
+	BlessingStatus blessing{ BlessingStatus::UNCURSED }; // Three-state: uncursed/blessed/cursed
 	bool is_magical{ false };
 
 	// Numeric enhancement level for traditional "+X" display

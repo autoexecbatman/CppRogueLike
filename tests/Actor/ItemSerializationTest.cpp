@@ -94,8 +94,7 @@ TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
 TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
     auto original = create_test_item();
 
-    original->enhancement.is_cursed = true;
-    original->enhancement.is_blessed = false;
+    original->enhancement.blessing = BlessingStatus::CURSED;
 
     json j;
     original->save(j);
@@ -103,8 +102,7 @@ TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
-    EXPECT_TRUE(loaded->enhancement.is_cursed);
-    EXPECT_FALSE(loaded->enhancement.is_blessed);
+    EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::CURSED);
 }
 
 TEST_F(ItemSerializationTest, Pickable_Preserved) {
@@ -132,8 +130,7 @@ TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
     EXPECT_EQ(loaded->enhancement.suffix, SuffixType::NONE);
     EXPECT_EQ(loaded->enhancement.damage_bonus, 0);
-    EXPECT_FALSE(loaded->enhancement.is_cursed);
-    EXPECT_FALSE(loaded->enhancement.is_blessed);
+    EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::UNCURSED);
     EXPECT_FALSE(loaded->enhancement.is_magical);
 }
 

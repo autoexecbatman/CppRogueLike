@@ -35,11 +35,19 @@ void Item::load(const json& j)
 		enhancement.cold_resistance = enh.at("cold_resistance").get<int>();
 		enhancement.lightning_resistance = enh.at("lightning_resistance").get<int>();
 		enhancement.poison_resistance = enh.at("poison_resistance").get<int>();
-		enhancement.is_cursed = enh.at("is_cursed").get<bool>();
-		enhancement.is_blessed = enh.at("is_blessed").get<bool>();
+		enhancement.blessing = static_cast<BlessingStatus>(enh.at("blessing").get<int>());
 		enhancement.is_magical = enh.at("is_magical").get<bool>();
 		enhancement.enhancement_level = enh.at("enhancement_level").get<int>();
 		enhancement.value_modifier = enh.at("value_modifier").get<int>();
+	}
+
+	// Load identification status
+	if (j.contains("identification"))
+	{
+		const auto& id = j["identification"];
+		identification.identified_type = id.at("identified_type").get<bool>();
+		identification.identified_enhancement = id.at("identified_enhancement").get<bool>();
+		identification.identified_buc = id.at("identified_buc").get<bool>();
 	}
 
 	if (j.contains("pickable"))
@@ -71,12 +79,18 @@ void Item::save(json& j)
 	enh["cold_resistance"] = enhancement.cold_resistance;
 	enh["lightning_resistance"] = enhancement.lightning_resistance;
 	enh["poison_resistance"] = enhancement.poison_resistance;
-	enh["is_cursed"] = enhancement.is_cursed;
-	enh["is_blessed"] = enhancement.is_blessed;
+	enh["blessing"] = static_cast<int>(enhancement.blessing);
 	enh["is_magical"] = enhancement.is_magical;
 	enh["enhancement_level"] = enhancement.enhancement_level;
 	enh["value_modifier"] = enhancement.value_modifier;
 	j["enhancement"] = enh;
+
+	// Save identification status
+	json id;
+	id["identified_type"] = identification.identified_type;
+	id["identified_enhancement"] = identification.identified_enhancement;
+	id["identified_buc"] = identification.identified_buc;
+	j["identification"] = id;
 
 	if (behavior)
 	{
@@ -86,8 +100,9 @@ void Item::save(json& j)
 	}
 }
 
-const std::string& Item::get_name() const noexcept
+const std::string& Item::get_true_name() const noexcept
 {
+	// Returns the complete, true name (for internal use)
 	if (is_enhanced())
 	{
 		static std::string enhanced_name;
@@ -95,6 +110,77 @@ const std::string& Item::get_name() const noexcept
 		return enhanced_name;
 	}
 	return actorData.name;
+}
+
+const std::string& Item::get_name() const noexcept
+{
+	// Returns identified parts only; unknown parts marked with "?"
+	static std::string display_name;
+
+	if (!is_enhanced())
+	{
+		// No enhancement: just use base name, maybe with unknown marker
+		return actorData.name;
+	}
+
+	display_name = "";
+
+	// Build prefix
+	if (!identification.identified_enhancement)
+	{
+		// Don't know enhancement level yet
+		display_name = "? ";
+	}
+	else
+	{
+		// We know the enhancement
+		if (enhancement.prefix != PrefixType::NONE)
+		{
+			display_name += enhancement.get_prefix_name() + " ";
+		}
+	}
+
+	// Base name
+	display_name += actorData.name;
+
+	// Build suffix
+	if (identification.identified_enhancement && enhancement.suffix != SuffixType::NONE)
+	{
+		display_name += " " + enhancement.get_suffix_name();
+	}
+	else if (!identification.identified_enhancement && enhancement.suffix != SuffixType::NONE)
+	{
+		display_name += " ?";
+	}
+
+	// Append BUC if identified
+	if (identification.identified_buc)
+	{
+		switch (enhancement.blessing)
+		{
+
+		case BlessingStatus::BLESSED:
+		{
+			display_name += " (blessed)";
+			break;
+		}
+
+		case BlessingStatus::CURSED:
+		{
+			display_name += " (cursed)";
+			break;
+		}
+
+		case BlessingStatus::UNCURSED:
+		{
+			// Don't append uncursed to keep name clean
+			break;
+		}
+
+		}
+	}
+
+	return display_name;
 }
 
 void Item::apply_enhancement(const ItemEnhancement& new_enhancement)

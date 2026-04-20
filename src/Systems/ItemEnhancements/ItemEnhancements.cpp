@@ -148,7 +148,7 @@ void ItemEnhancement::apply_enhancement_effects()
 	{
 		to_hit_bonus += 1;
 		damage_bonus += 1;
-		is_blessed = true;
+		blessing = BlessingStatus::BLESSED;
 		value_modifier += 150;
 		break;
 	}
@@ -220,7 +220,7 @@ void ItemEnhancement::apply_enhancement_effects()
 
 	case PrefixType::CURSED:
 	{
-		is_cursed = true;
+		blessing = BlessingStatus::CURSED;
 		value_modifier = 10; // Drastically reduced value
 		break;
 	}
@@ -366,7 +366,7 @@ void ItemEnhancement::apply_enhancement_effects()
 	case SuffixType::OF_WEAKNESS:
 	{
 		strength_bonus -= 1;
-		is_cursed = true;
+		blessing = BlessingStatus::CURSED;
 		value_modifier = 20;
 		break;
 	}
@@ -374,14 +374,14 @@ void ItemEnhancement::apply_enhancement_effects()
 	case SuffixType::OF_SLOWNESS:
 	{
 		speed_bonus -= 2;
-		is_cursed = true;
+		blessing = BlessingStatus::CURSED;
 		value_modifier = 15;
 		break;
 	}
 
 	case SuffixType::OF_BRITTLENESS:
 	{
-		is_cursed = true;
+		blessing = BlessingStatus::CURSED;
 		value_modifier = 25;
 		break;
 	}
