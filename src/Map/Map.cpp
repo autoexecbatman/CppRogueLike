@@ -661,7 +661,16 @@ void Map::render(const GameContext& ctx) const
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
-				tileRef = ctx.tileConfig->get("TILE_DOOR_CLOSED");
+
+				// Check if door is locked and render differently
+				if (is_door_locked(pos))
+				{
+					tileRef = ctx.tileConfig->get("TILE_DOOR_LOCKED");
+				}
+				else
+				{
+					tileRef = ctx.tileConfig->get("TILE_DOOR_CLOSED");
+				}
 				break;
 			}
 
@@ -810,6 +819,13 @@ void Map::set_door(Vector2D thisTile, int tileX, int tileY)
 {
 	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
 	fovMap->set_properties(tileX, tileY, false, false);
+
+	// Mark the door as locked by default
+	size_t tileIndex = get_index(thisTile);
+	if (tileIndex < tiles.size())
+	{
+		tiles[tileIndex].doorState = DoorState::CLOSED_LOCKED;
+	}
 }
 
 void Map::set_tile(Vector2D pos, TileType newType, double cost)
@@ -1454,7 +1470,21 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 		return false;
 	}
 
+	// Check if the door is locked (can't open locked doors)
+	if (is_door_locked(pos))
+	{
+		return false;
+	}
+
 	set_tile(pos, TileType::OPEN_DOOR, 1);
+
+	// Clear door state when opening
+	size_t tileIndex = get_index(pos);
+	if (tileIndex < tiles.size())
+	{
+		tiles[tileIndex].doorState = DoorState::OPEN;
+	}
+
 	fovMap->set_properties(pos.x, pos.y, true, true);
 
 	if (ctx.player && ctx.player->get_tile_distance(pos) <= FOV_RADIUS)
@@ -1500,6 +1530,13 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	// Change the tile type to DOOR (closed)
 	set_tile(pos, TileType::CLOSED_DOOR, 2);
 
+	// New doors are unlocked by default
+	size_t tileIndex = get_index(pos);
+	if (tileIndex < tiles.size())
+	{
+		tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
+	}
+
 	// Make the tile non-walkable and non-transparent
 	fovMap->set_properties(pos.x, pos.y, false, false);
 
@@ -1509,6 +1546,44 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	return true;
+}
+
+bool Map::unlock_door(Vector2D pos, GameContext& ctx)
+{
+	if (!is_door(pos) || get_tile_type(pos) != TileType::CLOSED_DOOR)
+	{
+		return false;
+	}
+
+	size_t tileIndex = get_index(pos);
+	if (tileIndex >= tiles.size())
+	{
+		return false;
+	}
+
+	if (tiles[tileIndex].doorState != DoorState::CLOSED_LOCKED)
+	{
+		return false; // Door is not locked
+	}
+
+	tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
+	return true;
+}
+
+bool Map::is_door_locked(Vector2D pos) const noexcept
+{
+	if (!in_bounds(pos))
+	{
+		return false;
+	}
+
+	size_t tileIndex = get_index(pos);
+	if (tileIndex >= tiles.size())
+	{
+		return false;
+	}
+
+	return tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED;
 }
 
 void Map::place_amulet(GameContext& ctx)

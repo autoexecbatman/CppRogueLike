@@ -5,6 +5,7 @@
         "TILE_WATER":        { "sheet": 42, "col": 1,  "row": 13 },
         "TILE_WALL_STONE":   { "sheet": 1,  "col": 4,  "row": 4  },
         "TILE_DOOR_CLOSED":  { "sheet": 2,  "col": 0,  "row": 0  },
+        "TILE_DOOR_LOCKED":  { "sheet": 2,  "col": 2,  "row": 0  },
         "TILE_DOOR_OPEN":    { "sheet": 2,  "col": 1,  "row": 0  },
         "TILE_STAIRS":       { "sheet": 37, "col": 5,  "row": 3  },
         "TILE_PLAYER":       { "sheet": 4,  "col": 1,  "row": 3  },

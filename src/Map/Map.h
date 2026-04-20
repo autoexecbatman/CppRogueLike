@@ -54,17 +54,25 @@ enum class TileType
 	// Add more as needed...
 };
 
+enum class DoorState
+{
+	OPEN,
+	CLOSED_UNLOCKED,
+	CLOSED_LOCKED
+};
+
 struct Tile
 {
 	Vector2D position;
 	TileType type;
 	bool explored;
 	double cost;
+	DoorState doorState { DoorState::OPEN };
 
 	// overload the greater than operator
 	bool operator>(const Tile& other) const { return cost > other.cost; }
 	Tile(Vector2D pos, TileType type, double cost)
-		: position(pos), type(type), explored(false), cost(cost) {}
+		: position(pos), type(type), explored(false), cost(cost), doorState(DoorState::OPEN) {}
 };
 
 //==Map==
@@ -147,6 +155,8 @@ public:
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);
+	bool unlock_door(Vector2D pos, GameContext& ctx);
+	bool is_door_locked(Vector2D pos) const noexcept;
 	void place_amulet(GameContext& ctx);
 	std::vector<MonsterPercentage> get_monster_distribution(int dungeonLevel);
 	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);

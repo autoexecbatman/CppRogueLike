@@ -433,8 +433,35 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 		case TileType::CLOSED_DOOR:
 		{
-			ctx.map->open_door(targetPosition, ctx);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			// Check if the door is locked
+			if (ctx.map->is_door_locked(targetPosition))
+			{
+				// Attempt to unlock the door
+				// DC 15 lock: 1d20 + dexterity modifier
+				int dexModifier = (playerOwner.get_dexterity() - 10) / 2;
+				int roll = ctx.dice->d20();
+				int unlockRoll = roll + dexModifier;
+
+				if (unlockRoll >= 15)
+				{
+					ctx.map->unlock_door(targetPosition, ctx);
+					ctx.messageSystem->log("You successfully pick the lock!");
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully pick the lock!", true);
+					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				}
+				else
+				{
+					ctx.messageSystem->log("You fail to pick the lock.");
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
+					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				}
+			}
+			else
+			{
+				// Door is unlocked, open it normally
+				ctx.map->open_door(targetPosition, ctx);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
 			break;
 		}
 
@@ -1067,7 +1094,35 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 
 	if (pendingDoorAction == PendingDoorAction::OPEN)
 	{
-		if (ctx.map->open_door(doorPos, ctx))
+		// Check if door is locked and attempt unlock if needed
+		if (ctx.map->is_door_locked(doorPos))
+		{
+			// Attempt unlock with Dexterity check (DC 15)
+			const int LOCK_DIFFICULTY = 15;
+			int dexterity = playerOwner.get_dexterity();
+			int dexMod = (dexterity - 10) / 2;
+			int roll = ctx.dice->roll(1, 20) + dexMod;
+			
+			if (roll >= LOCK_DIFFICULTY)
+			{
+				if (ctx.map->unlock_door(doorPos, ctx))
+				{
+					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully pick the lock!", true);
+					// Now try to open it
+					if (ctx.map->open_door(doorPos, ctx))
+					{
+						ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
+						ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+					}
+				}
+			}
+			else
+			{
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			}
+		}
+		else if (ctx.map->open_door(doorPos, ctx))
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
