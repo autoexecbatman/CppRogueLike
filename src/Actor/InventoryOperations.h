@@ -34,6 +34,11 @@ bool is_inventory_empty(const InventoryData& inventory) noexcept;
 size_t get_item_count(const InventoryData& inventory) noexcept;
 size_t get_remaining_space(const InventoryData& inventory) noexcept;
 
+// Weight management
+int get_total_weight(const InventoryData& inventory) noexcept;
+int get_max_weight(const InventoryData& inventory) noexcept;
+bool is_overloaded(const InventoryData& inventory) noexcept;
+
 // Capacity modification
 void set_inventory_capacity(InventoryData& inventory, size_t new_capacity);
 

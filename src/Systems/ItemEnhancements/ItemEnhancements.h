@@ -88,6 +88,9 @@ struct ItemEnhancement
 	// Value modifier (percentage)
 	int value_modifier{ 100 }; // 100% = no change
 
+	// Weight in standardized units (roughly 1 lb per unit)
+	int weight{ 0 };
+
 	// Generate enhancement name
 	std::string get_prefix_name() const;
 	std::string get_suffix_name() const;

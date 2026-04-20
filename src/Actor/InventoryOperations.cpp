@@ -118,6 +118,31 @@ void set_inventory_capacity(InventoryData& inventory, size_t new_capacity)
 	fire_inventory_event(inventory, InventoryEvent::Type::CAPACITY_CHANGED);
 }
 
+int get_total_weight(const InventoryData& inventory) noexcept
+{
+	int total = 0;
+	for (const auto& item : inventory.items)
+	{
+		if (item)
+		{
+			total += item->enhancement.weight;
+		}
+	}
+	return total;
+}
+
+int get_max_weight(const InventoryData& inventory) noexcept
+{
+	// Standard carrying capacity: 50 pounds per inventory
+	// Can be extended to use STR modifier in future
+	return 50;
+}
+
+bool is_overloaded(const InventoryData& inventory) noexcept
+{
+	return get_total_weight(inventory) > get_max_weight(inventory);
+}
+
 // ===== ITEM ACCESS =====
 
 Item* get_item_at(InventoryData& inventory, size_t index) noexcept

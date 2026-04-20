@@ -96,6 +96,13 @@ public:
 	[[nodiscard]] bool is_empty() const noexcept { return inventory_.empty(); }
 	[[nodiscard]] size_t get_remaining_space() const noexcept { return capacity_ - inventory_.size(); }
 
+	// Weight management
+	[[nodiscard]] int get_total_weight() const noexcept;
+	[[nodiscard]] int get_max_weight() const noexcept { return max_weight_; }
+	[[nodiscard]] bool is_overloaded() const noexcept { return get_total_weight() > max_weight_; }
+	[[nodiscard]] bool can_run() const noexcept { return !is_overloaded(); }
+	void set_max_weight(int max_w) noexcept { max_weight_ = max_w; }
+
 	// Item access
 	[[nodiscard]] Item* get_item_at(size_t index) noexcept;
 	[[nodiscard]] const Item* get_item_at(size_t index) const noexcept;
@@ -122,6 +129,7 @@ private:
 	// Private data members - proper encapsulation
 	std::vector<std::unique_ptr<Item>> inventory_;
 	size_t capacity_;
+	int max_weight_{ 500 }; // Roughly 250 lbs in D&D scaling (2 units per lb)
 	ContainerEventHandler event_handler_;
 
 	// Internal helper methods

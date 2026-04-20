@@ -1256,6 +1256,7 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemEntry& entry, Ve
 	item->item_key = std::string{ key };
 	item->itemClass = p.itemClass;
 	item->set_value(p.value);
+	item->enhancement.weight = p.baseWeight; // Assign base weight to enhancement
 	return item;
 }
 

@@ -11,6 +11,7 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/EquipmentSlot.h"
+#include "../Actor/InventoryOperations.h"
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
@@ -51,6 +52,15 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	int title_w = ctx.renderer->measure_text(title);
 	int title_x = (vcols * tileSize - title_w) / 2;
 	ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, YELLOW_BLACK_PAIR);
+
+	// Draw weight info on the right side
+	int current_weight = InventoryOperations::get_total_weight(player_ref.inventoryData);
+	int max_weight = InventoryOperations::get_max_weight(player_ref.inventoryData);
+	std::string weight_info = std::format("Weight: {}/{}", current_weight, max_weight);
+	int weight_w = ctx.renderer->measure_text(weight_info);
+	int weight_x = vcols * tileSize - weight_w - tileSize;
+	int weight_color = current_weight > max_weight ? RED_BLACK_PAIR : WHITE_BLACK_PAIR;
+	ctx.renderer->draw_text(Vector2D{ weight_x, font_off }, weight_info, weight_color);
 }
 
 // Draw a full-width white highlight bar at the given tile row.
@@ -293,6 +303,16 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 {
 	int tileSize = ctx.renderer->get_tile_size();
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
+
+	// Draw overloaded warning if inventory exceeds max weight
+	if (InventoryOperations::is_overloaded(player_ref.inventoryData))
+	{
+		std::string_view warning = "OVERLOADED! Movement speed reduced.";
+		int warning_w = ctx.renderer->measure_text(warning);
+		int warning_x = (screen_cols(ctx) * tileSize - warning_w) / 2;
+		ctx.renderer->draw_text(Vector2D{ warning_x, font_off }, warning, RED_BLACK_PAIR);
+	}
+
 	int tab_y = 1 * tileSize; // row 1 (inside frame border)
 	int px = 2 * tileSize; // start 2 tiles from left
 

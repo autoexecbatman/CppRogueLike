@@ -223,7 +223,21 @@ std::string Container::get_debug_info() const
 {
 	return "Container{items:" + std::to_string(get_item_count()) +
 		", capacity:" + std::to_string(get_capacity()) +
+		", weight:" + std::to_string(get_total_weight()) + "/" + std::to_string(get_max_weight()) +
 		", full:" + (is_full() ? "yes" : "no") + "}";
+}
+
+int Container::get_total_weight() const noexcept
+{
+	int total = 0;
+	for (const auto& item : inventory_)
+	{
+		if (!item) continue;
+		// Clamp individual item weight to non-negative
+		const int item_weight = std::max(0, item->enhancement.weight);
+		total += item_weight;
+	}
+	return total;
 }
 
 // Private helper methods
