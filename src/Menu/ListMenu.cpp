@@ -134,8 +134,12 @@ void ListMenu::menu(GameContext& ctx)
     }
     menu_key_listen();
 
-    // Hover -- update cursor to follow mouse every frame
-    if (inputSystem && renderer)
+    // Hover -- update cursor only when the mouse actually moves.
+    // Without the delta guard, a stationary mouse inside the menu area
+    // resets cursorIndex every frame, making keyboard UP/DOWN invisible.
+    ::Vector2 mouseDelta = GetMouseDelta();
+    bool mouseMoved = (mouseDelta.x != 0.0f || mouseDelta.y != 0.0f);
+    if (mouseMoved && inputSystem && renderer)
     {
         int tileSize = renderer->get_tile_size();
         ::Vector2 rawMouse = GetMousePosition();
