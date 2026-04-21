@@ -14,27 +14,57 @@
 
 void CurseSystem::apply_curses(Player& player, GameContext& ctx)
 {
-	for (const auto& equipped : player.equippedItems)
-	{
-		if (!equipped.item)
-		{
-			continue;
-		}
+    for (const auto& equipped : player.equippedItems)
+    {
+        if (!equipped.item)
+        {
+            continue;
+        }
 
-		const Item& item = *equipped.item;
+        const Item& item = *equipped.item;
 
-		if (item.get_enhancement().blessing != BlessingStatus::CURSED)
-		{
-			continue;
-		}
+        if (item.get_enhancement().blessing != BlessingStatus::CURSED)
+        {
+            continue;
+        }
 
-		// AD&D 2e: cursed amulets drain 1 HP per turn.
-		// All other curse effects are enforced at their computation sites — see header.
-		if (item.is_amulet())
-		{
-			apply_hp_drain(1, player, ctx);
-		}
-	}
+        if (item.is_weapon())
+        {
+            apply_weapon_curse(item, ctx);
+        }
+        else if (item.is_armor())
+        {
+            apply_armor_curse(item, ctx);
+        }
+        else if (item.is_amulet())
+        {
+            apply_hp_drain(1, player, ctx);
+        }
+    }
+}
+
+void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
+{
+    if (!ctx.messageSystem)
+    {
+        return;
+    }
+    ctx.messageSystem->message(
+        14,
+        std::format("Your {} weakens your aim!", item.actorData.name),
+        true);
+}
+
+void CurseSystem::apply_armor_curse(const Item& item, GameContext& ctx)
+{
+    if (!ctx.messageSystem)
+    {
+        return;
+    }
+    ctx.messageSystem->message(
+        14,
+        std::format("Your {} deteriorates under the curse!", item.actorData.name),
+        true);
 }
 
 void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
