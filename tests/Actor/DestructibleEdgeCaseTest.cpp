@@ -479,7 +479,7 @@ TEST_F(DestructibleEdgeCaseTest, Create_MissingType_ReturnsNullptr)
 TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible)
 {
 	json j;
-	j["type"] = static_cast<int>(Destructible::DestructibleType::MONSTER);
+	j["type"] = static_cast<int>(DestructibleType::MONSTER);
 	j["hpMax"] = 50;
 	j["hp"] = 50;
 	j["hpBase"] = 50;
@@ -502,7 +502,7 @@ TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible)
 TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible)
 {
 	json j;
-	j["type"] = static_cast<int>(Destructible::DestructibleType::PLAYER);
+	j["type"] = static_cast<int>(DestructibleType::PLAYER);
 	j["hpMax"] = 100;
 	j["hp"] = 80;
 	j["hpBase"] = 100;

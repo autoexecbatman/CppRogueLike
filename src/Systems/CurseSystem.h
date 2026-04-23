@@ -17,20 +17,12 @@ struct GameContext;
 // each turn a cursed item is worn.
 class CurseSystem
 {
-public:
-    CurseSystem() = default;
-    ~CurseSystem() = default;
+private:
+	void apply_weapon_curse(const Item& item, GameContext& ctx);
+	void apply_armor_curse(const Item& item, GameContext& ctx);
+	void apply_hp_drain(int damage, Player& player, GameContext& ctx);
 
-    // Called once per NEW_TURN from GameLoopCoordinator::update().
+public:
     void apply_curses(Player& player, GameContext& ctx);
 
-private:
-    // Emits "weakens your aim" notification for cursed weapons.
-    void apply_weapon_curse(const Item& item, GameContext& ctx);
-
-    // Emits "deteriorates" notification for cursed armor.
-    void apply_armor_curse(const Item& item, GameContext& ctx);
-
-    // Drains 1 HP per turn and emits "drains" notification for cursed amulets.
-    void apply_hp_drain(int damage, Player& player, GameContext& ctx);
 };

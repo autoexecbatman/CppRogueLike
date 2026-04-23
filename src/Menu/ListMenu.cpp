@@ -6,6 +6,7 @@
 
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
+#include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "ListMenu.h"
 
@@ -49,7 +50,7 @@ ListMenu::~ListMenu()
 
 void ListMenu::draw_entries()
 {
-    for (size_t i{ 0 }; i < entries.size(); ++i)
+    for (size_t i = 0; i < entries.size(); ++i)
     {
         if (cursorIndex == i)
         {
@@ -76,18 +77,21 @@ void ListMenu::on_key(int key, GameContext& ctx)
 {
     switch (key)
     {
+
     case 0x103: // KEY_UP
     case 'w':
     {
         cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
         break;
     }
+
     case 0x102: // KEY_DOWN
     case 's':
     {
         cursorIndex = (cursorIndex + 1) % entries.size();
         break;
     }
+
     case 10: // ENTER
     {
         menu_set_run_false();
@@ -97,6 +101,7 @@ void ListMenu::on_key(int key, GameContext& ctx)
         }
         break;
     }
+
     case 27: // ESCAPE
     {
         menu_set_run_false();
@@ -106,6 +111,7 @@ void ListMenu::on_key(int key, GameContext& ctx)
         }
         break;
     }
+
     default:
     {
         // Hotkey match — case-insensitive so 'M' and 'm' both work.
@@ -123,6 +129,7 @@ void ListMenu::on_key(int key, GameContext& ctx)
         }
         break;
     }
+
     }
 }
 
@@ -143,8 +150,7 @@ void ListMenu::menu(GameContext& ctx)
     {
         int tileSize = renderer->get_tile_size();
         ::Vector2 rawMouse = GetMousePosition();
-        int relRow = static_cast<int>(rawMouse.y) / tileSize
-            - static_cast<int>(menuStartY) - 1;
+        int relRow = static_cast<int>(rawMouse.y) / tileSize - static_cast<int>(menuStartY) - 1;
         if (relRow >= 0 && relRow < static_cast<int>(entries.size()))
         {
             cursorIndex = static_cast<size_t>(relRow);
@@ -153,9 +159,13 @@ void ListMenu::menu(GameContext& ctx)
 
     draw();
 
-    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+    // Use inputSystem->get_key() instead of IsMouseButtonPressed() directly.
+    // On Emscripten, poll() (called inside menu_key_listen()) consumes the
+    // prev->curr transition. A second raw IsMouseButtonPressed() call in the
+    // same frame sees prev=curr=1 and returns false.
+    if (inputSystem && inputSystem->get_key() == GameKey::MOUSE_LEFT)
     {
-        if (inputSystem && renderer)
+        if (renderer)
         {
             int tileSize = renderer->get_tile_size();
             ::Vector2 rawMouse = GetMousePosition();

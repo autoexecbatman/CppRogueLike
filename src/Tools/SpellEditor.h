@@ -21,52 +21,43 @@
 struct GameContext;
 class Renderer;
 
+enum class Mode
+{
+	NORMAL,
+	EDIT_STRING
+};
+
+enum class FieldId
+{
+	NAME,
+	LEVEL,
+	CLASS,
+	EFFECT_TYPE,
+	DESCRIPTION,
+	COUNT
+};
+
 class SpellEditor
 {
-public:
-	void enter();
-	void exit(GameContext& ctx);
-	void tick(GameContext& ctx);
-
-	[[nodiscard]] bool is_active() const { return m_active; }
-
 private:
-	enum class Mode
-	{
-		NORMAL,
-		EDIT_STRING
-	};
-
-	enum class FieldId : int
-	{
-		NAME = 0,
-		LEVEL,
-		CLASS,
-		EFFECT_TYPE,
-		DESCRIPTION,
-		COUNT
-	};
-
-	static constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
-
-	bool m_active{ false };
-	Mode m_mode{ Mode::NORMAL };
-	int m_focus{ 0 }; // 0 = list, 1 = fields
+	bool active{ false };
+	Mode mode{ Mode::NORMAL };
+	int focus{ 0 }; // 0 = list, 1 = fields
 
 	// Spell list (string keys: builtins then custom)
-	std::vector<std::string> m_keys;
-	int m_list_cursor{ 0 };
-	int m_list_scroll{ 0 };
+	std::vector<std::string> keys;
+	int listCursor{ 0 };
+	int listScroll{ 0 };
 
 	// Working copy
-	SpellDefinition m_working{};
+	SpellDefinition working{};
 
 	// Field navigation
-	int m_field_cursor{ 0 };
-	std::string m_edit_buf;
+	int fieldCursor{ 0 };
+	std::string editBuffer;
 
 	// Status feedback
-	double m_last_save_time{ -100.0 };
+	double lastSaveTime{ -100.0 };
 
 	void load_working();
 	void commit_working();
@@ -91,4 +82,12 @@ private:
 	void field_adjust(FieldId f, int delta);
 	void field_cycle(FieldId f);
 	void field_set_string(FieldId f, std::string val);
+
+public:
+	void enter();
+	void exit(GameContext& ctx);
+	void tick(GameContext& ctx);
+
+	[[nodiscard]] bool is_active() const { return active; }
+
 };

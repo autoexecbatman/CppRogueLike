@@ -1,7 +1,6 @@
 // file: SpellEditor.cpp
 #include <algorithm>
 #include <format>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -21,6 +20,7 @@ constexpr int HINT_HEIGHT = 28;
 constexpr int FIELD_HEIGHT = 30;
 constexpr int ITEM_HEIGHT = 32;
 constexpr int LIST_PAD = 8;
+constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
 
 // ---------------------------------------------------------------------------
 // Lifecycle
@@ -28,14 +28,14 @@ constexpr int LIST_PAD = 8;
 
 void SpellEditor::enter()
 {
-	m_active = true;
-	m_mode = Mode::NORMAL;
-	m_focus = 0;
+	active = true;
+	mode = Mode::NORMAL;
+	focus = 0;
 
-	m_keys = SpellSystem::get_all_keys();
+	keys = SpellSystem::get_all_keys();
 
-	m_list_cursor = 0;
-	m_list_scroll = 0;
+	listCursor = 0;
+	listScroll = 0;
 
 	load_working();
 }
@@ -43,7 +43,7 @@ void SpellEditor::enter()
 void SpellEditor::exit(GameContext& ctx)
 {
 	commit_working();
-	m_active = false;
+	active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
 
@@ -62,19 +62,25 @@ void SpellEditor::tick(GameContext& ctx)
 
 void SpellEditor::load_working()
 {
-	if (m_keys.empty())
+	if (keys.empty())
+	{
 		return;
-	m_working = SpellSystem::get_by_key(current_key());
-	m_field_cursor = 0;
-	m_mode = Mode::NORMAL;
-	m_edit_buf.clear();
+	}
+
+	working = SpellSystem::get_by_key(current_key());
+	fieldCursor = 0;
+	mode = Mode::NORMAL;
+	editBuffer.clear();
 }
 
 void SpellEditor::commit_working()
 {
-	if (m_keys.empty())
+	if (keys.empty())
+	{
 		return;
-	SpellSystem::set_by_key(current_key(), m_working);
+	}
+
+	SpellSystem::set_by_key(current_key(), working);
 }
 
 // ---------------------------------------------------------------------------
@@ -95,21 +101,21 @@ void SpellEditor::handle_input(GameContext& ctx)
 	{
 		commit_working();
 		SpellSystem::save(Paths::SPELLS);
-		m_last_save_time = GetTime();
+		lastSaveTime = GetTime();
 		return;
 	}
 
 	if (IsKeyPressed(KEY_TAB))
 	{
-		m_focus = 1 - m_focus;
+		focus = 1 - focus;
 		return;
 	}
 
-	if (m_mode == Mode::NORMAL)
+	if (mode == Mode::NORMAL)
 	{
 		handle_normal(ctx);
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		handle_edit_string();
 	}
@@ -117,7 +123,7 @@ void SpellEditor::handle_input(GameContext& ctx)
 
 void SpellEditor::handle_normal(const GameContext& ctx)
 {
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
 
@@ -125,22 +131,22 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	{
 		if (mouse.x < LIST_WIDTH)
 		{
-			m_focus = 0;
-			int idx = m_list_scroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
+			focus = 0;
+			int idx = listScroll + static_cast<int>(mouse.y - HEADER_HEIGHT) / ITEM_HEIGHT;
 			idx = std::clamp(idx, 0, total - 1);
-			if (idx != m_list_cursor)
+			if (idx != listCursor)
 			{
 				commit_working();
-				m_list_cursor = idx;
+				listCursor = idx;
 				load_working();
 			}
 		}
 		else
 		{
-			m_focus = 1;
+			focus = 1;
 			int idx = static_cast<int>(mouse.y - HEADER_HEIGHT) / FIELD_HEIGHT;
 			idx = std::clamp(idx, 0, FIELD_COUNT - 1);
-			m_field_cursor = idx;
+			fieldCursor = idx;
 		}
 	}
 
@@ -148,39 +154,39 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	float wheel = GetMouseWheelMove();
 	if (wheel != 0.0f && mouse.x < LIST_WIDTH)
 	{
-		m_list_scroll = std::clamp(
-			m_list_scroll - static_cast<int>(wheel),
+		listScroll = std::clamp(
+			listScroll - static_cast<int>(wheel),
 			0,
 			std::max(0, total - 1));
 	}
 
-	if (m_focus == 0)
+	if (focus == 0)
 	{
-		if (IsKeyPressed(KEY_UP) && m_list_cursor > 0)
+		if (IsKeyPressed(KEY_UP) && listCursor > 0)
 		{
 			commit_working();
-			--m_list_cursor;
-			if (m_list_cursor < m_list_scroll)
+			--listCursor;
+			if (listCursor < listScroll)
 			{
-				m_list_scroll = m_list_cursor;
+				listScroll = listCursor;
 			}
 			load_working();
 		}
-		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
+		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
 		{
 			commit_working();
-			++m_list_cursor;
+			++listCursor;
 			int screenHeight = ctx.renderer->get_screen_height();
 			int visibleCount = (screenHeight - HEADER_HEIGHT - HINT_HEIGHT) / 32;
-			if (m_list_cursor >= m_list_scroll + visibleCount)
+			if (listCursor >= listScroll + visibleCount)
 			{
-				m_list_scroll = m_list_cursor - visibleCount + 1;
+				listScroll = listCursor - visibleCount + 1;
 			}
 			load_working();
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
@@ -191,25 +197,25 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			def.spellClass = SpellClass::WIZARD;
 			def.description = "No effect yet.";
 			std::string new_key = SpellSystem::add_custom(std::move(def));
-			m_keys = SpellSystem::get_all_keys();
-			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
+			keys = SpellSystem::get_all_keys();
+			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
 			{
-				if (m_keys[i] == new_key)
+				if (keys[i] == new_key)
 				{
-					m_list_cursor = i;
+					listCursor = i;
 					break;
 				}
 			}
 			load_working();
-			m_focus = 1;
+			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
 			if (!SpellSystem::is_builtin_key(current_key()))
 			{
 				SpellSystem::remove_custom(current_key());
-				m_keys = SpellSystem::get_all_keys();
-				m_list_cursor = std::clamp(m_list_cursor, 0, static_cast<int>(m_keys.size()) - 1);
+				keys = SpellSystem::get_all_keys();
+				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
 				load_working();
 			}
 		}
@@ -217,13 +223,13 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	}
 
 	// Field panel navigation
-	if (IsKeyPressed(KEY_UP) && m_field_cursor > 0)
+	if (IsKeyPressed(KEY_UP) && fieldCursor > 0)
 	{
-		--m_field_cursor;
+		--fieldCursor;
 	}
-	else if (IsKeyPressed(KEY_DOWN) && m_field_cursor < FIELD_COUNT - 1)
+	else if (IsKeyPressed(KEY_DOWN) && fieldCursor < FIELD_COUNT - 1)
 	{
-		++m_field_cursor;
+		++fieldCursor;
 	}
 
 	FieldId fid = current_field();
@@ -232,8 +238,8 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	{
 		if (field_is_string(fid))
 		{
-			m_edit_buf = field_value(fid);
-			m_mode = Mode::EDIT_STRING;
+			editBuffer = field_value(fid);
+			mode = Mode::EDIT_STRING;
 		}
 		else
 		{
@@ -262,25 +268,25 @@ void SpellEditor::handle_edit_string()
 	{
 		if (ch >= 32 && ch < 127)
 		{
-			m_edit_buf += static_cast<char>(ch);
+			editBuffer += static_cast<char>(ch);
 		}
 		ch = GetCharPressed();
 	}
 
-	if (IsKeyPressed(KEY_BACKSPACE) && !m_edit_buf.empty())
+	if (IsKeyPressed(KEY_BACKSPACE) && !editBuffer.empty())
 	{
-		m_edit_buf.pop_back();
+		editBuffer.pop_back();
 	}
 
 	if (IsKeyPressed(KEY_ENTER))
 	{
-		field_set_string(current_field(), m_edit_buf);
-		m_mode = Mode::NORMAL;
+		field_set_string(current_field(), editBuffer);
+		mode = Mode::NORMAL;
 	}
 
 	if (IsKeyPressed(KEY_ESCAPE))
 	{
-		m_mode = Mode::NORMAL;
+		mode = Mode::NORMAL;
 	}
 }
 
@@ -321,9 +327,9 @@ void SpellEditor::render_list(const Renderer& r) const
 	DrawRectangle(0, body_y, LIST_WIDTH, body_h, Color{ 10, 10, 20, 255 });
 	DrawLine(LIST_WIDTH, body_y, LIST_WIDTH, body_y + body_h, Color{ 80, 80, 120, 255 });
 
-	int total = static_cast<int>(m_keys.size());
+	int total = static_cast<int>(keys.size());
 	int visibleCount = body_h / ITEM_HEIGHT;
-	int scroll = std::clamp(m_list_scroll, 0, std::max(0, total - visibleCount));
+	int scroll = std::clamp(listScroll, 0, std::max(0, total - visibleCount));
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -335,12 +341,12 @@ void SpellEditor::render_list(const Renderer& r) const
 			break;
 		}
 
-		bool is_sel = (i == m_list_cursor);
+		bool is_sel = (i == listCursor);
 		bool hovered = mouse.x >= 0 && mouse.x < LIST_WIDTH
 			&& mouse.y >= itemY && mouse.y < itemY + ITEM_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 0)
+		if (is_sel && focus == 0)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
@@ -360,10 +366,10 @@ void SpellEditor::render_list(const Renderer& r) const
 
 		// Show spell class indicator
 		const SpellDefinition& def = is_sel
-			? m_working
-			: SpellSystem::get_by_key(m_keys[i]);
+			? working
+			: SpellSystem::get_by_key(keys[i]);
 
-		bool is_custom = !SpellSystem::is_builtin_key(m_keys[i]);
+		bool is_custom = !SpellSystem::is_builtin_key(keys[i]);
 
 		Color class_col = (def.spellClass == SpellClass::CLERIC)
 			? Color{ 100, 220, 255, 255 }
@@ -402,12 +408,12 @@ void SpellEditor::render_fields(const Renderer& r) const
 		}
 
 		FieldId fid = static_cast<FieldId>(i);
-		bool is_sel = (i == m_field_cursor);
+		bool is_sel = (i == fieldCursor);
 		bool hovered = mouse.x >= panelX && mouse.x < screenWidth
 			&& mouse.y >= itemY && mouse.y < itemY + FIELD_HEIGHT;
 
 		Color bgColor{ 0, 0, 0, 0 };
-		if (is_sel && m_focus == 1)
+		if (is_sel && focus == 1)
 		{
 			bgColor = Color{ 0, 60, 0, 200 };
 		}
@@ -431,9 +437,9 @@ void SpellEditor::render_fields(const Renderer& r) const
 		r.draw_text_color(Vector2D{ panelX + 12, itemY + (FIELD_HEIGHT - 16) / 2 }, field_label(fid), labelColor);
 
 		std::string val;
-		if (is_sel && m_mode == Mode::EDIT_STRING)
+		if (is_sel && mode == Mode::EDIT_STRING)
 		{
-			val = m_edit_buf + "_";
+			val = editBuffer + "_";
 		}
 		else
 		{
@@ -453,18 +459,18 @@ void SpellEditor::render_hint(const Renderer& r) const
 
 	DrawRectangle(0, hint_y, screenWidth, HINT_HEIGHT, Color{ 20, 20, 40, 255 });
 
-	bool saved_flash = (GetTime() - m_last_save_time) < 2.0;
+	bool saved_flash = (GetTime() - lastSaveTime) < 2.0;
 	std::string msg;
 
 	if (saved_flash)
 	{
 		msg = "Saved!";
 	}
-	else if (m_mode == Mode::EDIT_STRING)
+	else if (mode == Mode::EDIT_STRING)
 	{
 		msg = "Typing  --  Enter:confirm  Esc:cancel";
 	}
-	else if (m_focus == 0)
+	else if (focus == 0)
 	{
 		msg = "[LIST] Up/Down:navigate  A:add new  Del:remove custom  Enter:edit fields  Tab:switch  Ctrl+S:save  Esc:exit";
 	}
@@ -483,14 +489,14 @@ void SpellEditor::render_hint(const Renderer& r) const
 
 const std::string& SpellEditor::current_key() const
 {
-	if (m_keys.empty())
+	if (keys.empty())
 		throw std::out_of_range("SpellEditor::current_key -- key list is empty");
-	return m_keys[m_list_cursor];
+	return keys[listCursor];
 }
 
-SpellEditor::FieldId SpellEditor::current_field() const
+FieldId SpellEditor::current_field() const
 {
-	return static_cast<FieldId>(m_field_cursor);
+	return static_cast<FieldId>(fieldCursor);
 }
 
 namespace
@@ -551,14 +557,14 @@ std::string SpellEditor::field_value(FieldId f) const
 {
 	switch (f)
 	{
-	case FieldId::NAME:        return m_working.name;
-	case FieldId::LEVEL:       return std::format("{}", m_working.level);
+	case FieldId::NAME:        return working.name;
+	case FieldId::LEVEL:       return std::format("{}", working.level);
 	case FieldId::CLASS:
-		if (m_working.spellClass == SpellClass::CLERIC) return "cleric";
-		if (m_working.spellClass == SpellClass::WIZARD) return "wizard";
+		if (working.spellClass == SpellClass::CLERIC) return "cleric";
+		if (working.spellClass == SpellClass::WIZARD) return "wizard";
 		return "both";
-	case FieldId::EFFECT_TYPE: return effect_type_name(m_working.effect_type);
-	case FieldId::DESCRIPTION: return m_working.description;
+	case FieldId::EFFECT_TYPE: return effect_type_name(working.effect_type);
+	case FieldId::DESCRIPTION: return working.description;
 	default:                   return "";
 	}
 }
@@ -572,14 +578,18 @@ void SpellEditor::field_adjust(FieldId f, int delta)
 {
 	if (f == FieldId::LEVEL)
 	{
-		m_working.level = std::clamp(m_working.level + delta, 1, 9);
+		working.level = std::clamp(working.level + delta, 1, 9);
 	}
 	else if (f == FieldId::EFFECT_TYPE)
 	{
 		if (delta > 0)
-			m_working.effect_type = effect_type_next(m_working.effect_type);
+		{
+			working.effect_type = effect_type_next(working.effect_type);
+		}
 		else
-			m_working.effect_type = effect_type_prev(m_working.effect_type);
+		{
+			working.effect_type = effect_type_prev(working.effect_type);
+		}
 	}
 }
 
@@ -587,22 +597,22 @@ void SpellEditor::field_cycle(FieldId f)
 {
 	if (f == FieldId::CLASS)
 	{
-		if (m_working.spellClass == SpellClass::CLERIC)
+		if (working.spellClass == SpellClass::CLERIC)
 		{
-			m_working.spellClass = SpellClass::WIZARD;
+			working.spellClass = SpellClass::WIZARD;
 		}
-		else if (m_working.spellClass == SpellClass::WIZARD)
+		else if (working.spellClass == SpellClass::WIZARD)
 		{
-			m_working.spellClass = SpellClass::BOTH;
+			working.spellClass = SpellClass::BOTH;
 		}
 		else
 		{
-			m_working.spellClass = SpellClass::CLERIC;
+			working.spellClass = SpellClass::CLERIC;
 		}
 	}
 	else if (f == FieldId::EFFECT_TYPE)
 	{
-		m_working.effect_type = effect_type_next(m_working.effect_type);
+		working.effect_type = effect_type_next(working.effect_type);
 	}
 }
 
@@ -610,11 +620,11 @@ void SpellEditor::field_set_string(FieldId f, std::string val)
 {
 	if (f == FieldId::NAME)
 	{
-		m_working.name = std::move(val);
+		working.name = std::move(val);
 	}
 	else if (f == FieldId::DESCRIPTION)
 	{
-		m_working.description = std::move(val);
+		working.description = std::move(val);
 	}
 }
 

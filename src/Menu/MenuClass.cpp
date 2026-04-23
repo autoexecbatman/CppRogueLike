@@ -44,20 +44,36 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
     {
         switch (ctx.dice->d4())
         {
+
         case 1:
-            ctx.playerBlueprint->playerClass = "Fighter";
-            break;
+		{
+			ctx.playerBlueprint->playerClass = "Fighter";
+			break;
+		}
+
         case 2:
-            ctx.playerBlueprint->playerClass = "Rogue";
-            break;
+		{
+			ctx.playerBlueprint->playerClass = "Rogue";
+			break;
+		}
+
         case 3:
-            ctx.playerBlueprint->playerClass = "Wizard";
-            break;
+		{
+			ctx.playerBlueprint->playerClass = "Wizard";
+			break;
+		}
+
         case 4:
-            ctx.playerBlueprint->playerClass = "Cleric";
-            break;
+		{
+			ctx.playerBlueprint->playerClass = "Cleric";
+			break;
+		}
+
         default:
-            break;
+		{
+			break;
+		}
+
         }
         ctx.menus->push_back(std::make_unique<MenuName>(ctx));
     };

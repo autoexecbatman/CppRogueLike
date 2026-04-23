@@ -8,7 +8,8 @@ struct GameContext;
 
 class MenuName : public BaseMenu
 {
-	std::string inputText;
+private:
+	std::string inputText{};
 	bool initialized{ false };
 
 	void draw_name_screen(GameContext& ctx);
@@ -21,6 +22,5 @@ public:
 	MenuName(MenuName&&) = delete;
 	MenuName& operator=(MenuName&&) = delete;
 
-	void menu_name(GameContext& ctx);
 	void menu(GameContext& ctx) override;
 };

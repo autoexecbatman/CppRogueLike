@@ -29,6 +29,7 @@ void BaseMenu::menu_new(
 
 void BaseMenu::menu_clear()
 {
+	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
 	if (!renderer)
 	{
 		return;
@@ -65,6 +66,7 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 
 void BaseMenu::menu_refresh()
 {
+	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
 	if (!renderer)
 	{
 		return;
@@ -158,6 +160,7 @@ void BaseMenu::menu_key_listen()
 
 void BaseMenu::menu_draw_box()
 {
+	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
 	if (!renderer)
 	{
 		return;
@@ -172,6 +175,7 @@ void BaseMenu::menu_draw_box()
 
 void BaseMenu::menu_draw_title(std::string_view title, int colorPair)
 {
+	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
 	if (!renderer)
 	{
 		return;

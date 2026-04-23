@@ -2,7 +2,6 @@
 #include "CurseSystem.h"
 
 #include <format>
-#include <string>
 
 #include "../Actor/Destructible.h"
 #include "../Actor/Item.h"
@@ -12,6 +11,61 @@
 #include "../Items/ItemIdentification.h"
 #include "../Systems/MessageSystem.h"
 
+// Emits "weakens your aim" notification for cursed weapons.
+void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
+{
+	if (!ctx.messageSystem)
+	{
+		return;
+	}
+	ctx.messageSystem->message(
+		14,
+		std::format("Your {} weakens your aim!", item.actorData.name),
+		true);
+}
+
+// Emits "deteriorates" notification for cursed armor.
+void CurseSystem::apply_armor_curse(const Item& item, GameContext& ctx)
+{
+	if (!ctx.messageSystem)
+	{
+		return;
+	}
+	ctx.messageSystem->message(
+		14,
+		std::format("Your {} deteriorates under the curse!", item.actorData.name),
+		true);
+}
+
+// Drains 1 HP per turn and emits "drains" notification for cursed amulets.
+void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
+{
+	if (damage <= 0)
+	{
+		return;
+	}
+
+	const int damageTaken = player.destructible->take_damage(player, damage, ctx, DamageType::MAGIC);
+
+	if (ctx.messageSystem)
+	{
+		ctx.messageSystem->message(
+			15,
+			std::format("The curse drains {} HP from you!", damageTaken),
+			true);
+	}
+
+	if (player.destructible->get_hp() <= 0)
+	{
+		if (ctx.messageSystem)
+		{
+			ctx.messageSystem->message(12, "The curse has killed you!", true);
+		}
+		ctx.gameState->set_game_status(GameStatus::DEFEAT);
+	}
+}
+
+// Called once per NEW_TURN from GameLoopCoordinator::update().
 void CurseSystem::apply_curses(Player& player, GameContext& ctx)
 {
     for (const auto& equipped : player.equippedItems)
@@ -41,55 +95,4 @@ void CurseSystem::apply_curses(Player& player, GameContext& ctx)
             apply_hp_drain(1, player, ctx);
         }
     }
-}
-
-void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
-{
-    if (!ctx.messageSystem)
-    {
-        return;
-    }
-    ctx.messageSystem->message(
-        14,
-        std::format("Your {} weakens your aim!", item.actorData.name),
-        true);
-}
-
-void CurseSystem::apply_armor_curse(const Item& item, GameContext& ctx)
-{
-    if (!ctx.messageSystem)
-    {
-        return;
-    }
-    ctx.messageSystem->message(
-        14,
-        std::format("Your {} deteriorates under the curse!", item.actorData.name),
-        true);
-}
-
-void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
-{
-	if (damage <= 0)
-	{
-		return;
-	}
-
-	const int damageTaken = player.destructible->take_damage(player, damage, ctx, DamageType::MAGIC);
-
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->message(
-			15,
-			std::format("The curse drains {} HP from you!", damageTaken),
-			true);
-	}
-
-	if (player.destructible->get_hp() <= 0)
-	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(12, "The curse has killed you!", true);
-		}
-		ctx.gameState->set_game_status(GameStatus::DEFEAT);
-	}
 }

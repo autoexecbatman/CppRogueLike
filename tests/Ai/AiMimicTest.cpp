@@ -19,7 +19,7 @@ TEST(AiMimicTest, Save_WritesMimicType_NotMonsterType)
 
     ASSERT_TRUE(j.contains("type")) << "save() must write a type field";
     // AiType::MIMIC = 4. Must NOT be AiType::MONSTER = 0.
-    EXPECT_EQ(j["type"], 4) << "AiMimic must save as MIMIC (4), not MONSTER (0)";
+	EXPECT_EQ(j["type"], static_cast<int>(AiType::MIMIC));
 }
 
 TEST(AiMimicTest, Save_PreservesIsDisguisedState)
@@ -45,5 +45,5 @@ TEST(AiMimicTest, SaveLoad_RoundTrip_PreservesType)
     // Verify the round-trip preserves type by saving again and checking.
     json j2;
     loaded->save(j2);
-    EXPECT_EQ(j2["type"], 4) << "loaded AI must still be MIMIC type";
+	EXPECT_EQ(j2["type"], static_cast<int>(AiType::MIMIC)) << "loaded AI must still be MIMIC type";
 }

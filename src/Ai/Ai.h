@@ -7,6 +7,17 @@
 class Creature; // for no circular dependency with Creature.h
 struct GameContext; // for dependency injection
 
+enum class AiType
+{
+	MONSTER = 0,
+	CONFUSED_MONSTER = 1,
+	// 2 was PLAYER -- removed, PlayerController handles input directly
+	SHOPKEEPER = 3,
+	MIMIC = 4,
+	SPIDER = 5,
+	WEB_SPINNER = 6 // append last — integer values are serialized
+};
+
 //==AI==
 class Ai : public Persistent
 {
@@ -32,15 +43,4 @@ public:
 protected:
 	// Protected default constructor - only derived classes can use
 	Ai() = default;
-
-	enum class AiType
-	{
-		MONSTER = 0,
-		CONFUSED_MONSTER = 1,
-		// 2 was PLAYER -- removed, PlayerController handles input directly
-		SHOPKEEPER = 3,
-		MIMIC = 4,
-		SPIDER = 5,
-		WEB_SPINNER = 6 // append last — integer values are serialized
-	};
 };

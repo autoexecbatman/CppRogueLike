@@ -1,6 +1,3 @@
-// file: MenuName.cpp
-#include <raylib.h>
-
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/InputSystem.h"
@@ -26,6 +23,7 @@ MenuName::MenuName(GameContext& ctx)
 		ctx);
 }
 
+// TODO: menu_delete() is a stub. A code smell. Makes us declare a destructor that is empty while it should be compiler generated.
 MenuName::~MenuName()
 {
 	menu_delete();
@@ -37,6 +35,7 @@ void MenuName::draw_name_screen(GameContext& ctx)
 	menu_draw_box();
 	menu_draw_title("ENTER NAME", YELLOW_BLACK_PAIR);
 
+	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
 	if (renderer)
 	{
 		int tileSize = renderer->get_tile_size();
@@ -53,17 +52,12 @@ void MenuName::draw_name_screen(GameContext& ctx)
 
 void MenuName::menu(GameContext& ctx)
 {
-	menu_name(ctx);
-}
-
-void MenuName::menu_name(GameContext& ctx)
-{
 	if (!initialized)
 	{
 		inputText.clear();
 		initialized = true;
 	}
-
+	// TODO: What does it mean for inputSystem to be null? Should it be an assertion instead?
 	if (!inputSystem)
 	{
 		run = false;
@@ -112,7 +106,6 @@ void MenuName::menu_name(GameContext& ctx)
 		{
 			break;
 		}
-
 		}
 	}
 
@@ -129,5 +122,3 @@ void MenuName::menu_name(GameContext& ctx)
 		ctx.renderingManager->restore_game_display();
 	}
 }
-
-// end of file: MenuName.cpp

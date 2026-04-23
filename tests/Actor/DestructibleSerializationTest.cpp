@@ -33,7 +33,7 @@ TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
 
     // Verify type is saved
     ASSERT_TRUE(j.contains("type")) << "MonsterDestructible must save 'type' field";
-    EXPECT_EQ(j["type"].get<int>(), static_cast<int>(Destructible::DestructibleType::MONSTER));
+    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::MONSTER));
 
     // Load via factory
     auto loaded = Destructible::create(j);
@@ -61,7 +61,7 @@ TEST_F(DestructibleSerializationTest, PlayerDestructible_SaveLoad_RoundTrip) {
 
     // Verify type
     ASSERT_TRUE(j.contains("type"));
-    EXPECT_EQ(j["type"].get<int>(), static_cast<int>(Destructible::DestructibleType::PLAYER));
+    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::PLAYER));
 
     auto loaded = Destructible::create(j);
 
@@ -73,7 +73,7 @@ TEST_F(DestructibleSerializationTest, PlayerDestructible_SaveLoad_RoundTrip) {
 TEST_F(DestructibleSerializationTest, BaseDestructible_NoType_ReturnsNullptr) {
     // Simulate what happens if someone uses base Destructible
     json j;
-    j["hpMax"] = HP_MAX;
+	j["hpMax"] = HP_MAX;
     j["hp"] = HP_MAX;
     j["dr"] = DR;
     // NO "type" field
@@ -106,7 +106,7 @@ TEST_F(DestructibleSerializationTest, Regression_ShopkeeperMustUseMonsterDestruc
 
     // Must have type for proper loading
     ASSERT_TRUE(j.contains("type"));
-    EXPECT_EQ(j["type"].get<int>(), static_cast<int>(Destructible::DestructibleType::MONSTER));
+    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::MONSTER));
 
     // Must load back correctly
     auto loaded = Destructible::create(j);

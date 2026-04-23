@@ -10,6 +10,13 @@
 class Creature;
 struct GameContext;
 
+// Type enum for serialization - must be public for tests
+enum class DestructibleType
+{
+	MONSTER,
+	PLAYER
+};
+
 // TODO(refactor): Destructible violates SRP -- it owns eight distinct responsibilities.
 // Defer this refactor until a feature actively requires the split.
 //
@@ -45,24 +52,20 @@ struct GameContext;
 class Destructible : public Persistent
 {
 private:
-	int hpBase; // Base HP without Constitution bonus
-	int hpMax; // maximum health points
-	int hp; // current health points
-	int dr; // hit points deflected
-	std::string corpseName; // the actor's name once it is dead/destroyed
-	int xp; // for awarding experience points
-	int thaco; // to hit armor class 0
-	int armorClass; // armor class
-	int baseArmorClass; // Store the base AC without equipment
-	int lastConstitution; // Last known Constitution value to check for changes
-	int tempHp; // Temporary hit points such as from aid spell
+	int hpBase{}; // Base HP without Constitution bonus
+	int hpMax{}; // maximum health points
+	int hp{}; // current health points
+	int dr{}; // hit points deflected
+	std::string corpseName{}; // the actor's name once it is dead/destroyed
+	int xp{}; // for awarding experience points
+	int thaco{}; // to hit armor class 0
+	int armorClass{}; // armor class
+	int baseArmorClass{}; // Store the base AC without equipment
+	int lastConstitution{}; // Last known Constitution value to check for changes
+	int tempHp{}; // Temporary hit points such as from aid spell
 
 	[[nodiscard]] int calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const;
-
-	// Single source of truth: slot-based equipment AC via virtual get_equipped_item()
-	// Players: returns items from slots, NPCs: returns nullptr (0 AC bonus)
 	[[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const;
-
 	[[nodiscard]] int calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const;
 	[[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
 	[[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
@@ -71,13 +74,6 @@ private:
 	void log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const;
 
 public:
-	// Type enum for serialization - must be public for tests
-	enum class DestructibleType
-	{
-		MONSTER,
-		PLAYER
-	};
-
 	Destructible(int hpMax, int dr, std::string_view corpseName, int xp, int thaco, int armorClass);
 	virtual ~Destructible() override = default;
 	Destructible(const Destructible&) = delete;
@@ -99,6 +95,7 @@ public:
 	[[nodiscard]] int get_xp() const noexcept { return xp; }
 	[[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
 	[[nodiscard]] int get_hp_base() const noexcept { return hpBase; }
+
 	// Temporary HP accessors
 	[[nodiscard]] int get_temp_hp() const noexcept { return tempHp; }
 	void set_temp_hp(int value) noexcept { tempHp = std::max(0, value); }

@@ -73,7 +73,12 @@ void ContextMenu::menu(GameContext& ctx)
 
 	const int maxIndex = static_cast<int>(menuOptions.size()) - 1;
 
-	if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+	// Use inputSystem->get_key() instead of IsMouseButtonPressed() directly.
+	// On Emscripten, poll() (called inside menu_key_listen()) consumes the
+	// prev->curr transition for mouse buttons. A second raw IsMouseButtonPressed()
+	// call in the same frame sees prev=curr=1 and returns false. Reading through
+	// the InputSystem avoids the double-consumption.
+	if (inputSystem && inputSystem->get_key() == GameKey::MOUSE_LEFT)
 	{
 		int sel = -1;
 		int tileSize = renderer ? renderer->get_tile_size() : 16;
