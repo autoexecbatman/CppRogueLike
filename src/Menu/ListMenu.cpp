@@ -181,12 +181,9 @@ void ListMenu::menu(GameContext& ctx)
                 return;
             }
         }
-        // Click outside menu = cancel
-        menu_set_run_false();
-        if (onEscape)
-        {
-            onEscape(ctx);
-        }
+        // Click outside menu bounds = ignore. Do not cancel or fire onEscape.
+        // onEscape is reserved for the ESC key — a misclick outside the menu
+        // should never trigger quit or close behaviour.
         return;
     }
 
