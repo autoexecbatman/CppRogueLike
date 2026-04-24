@@ -785,6 +785,12 @@ bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx)
 	return use_stat_boost(g, EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
+bool use(DungeonKey& /*dk*/, Item& /*owner*/, Creature& /*wearer*/, GameContext& ctx)
+{
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "Bump into a locked door to use this key.", true);
+	return false;
+}
+
 // ========== Variant-level dispatchers ==========
 
 bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx)
@@ -954,6 +960,10 @@ void save_behavior(const ItemBehavior& behavior, json& j)
 			else if constexpr (std::is_same_v<T, Amulet>)
 			{
 				j["type"] = static_cast<int>(PickableType::QUEST_ITEM);
+			}
+			else if constexpr (std::is_same_v<T, DungeonKey>)
+			{
+				j["type"] = static_cast<int>(PickableType::DUNGEON_KEY);
 			}
 		},
 		behavior);
@@ -1152,6 +1162,11 @@ ItemBehavior load_behavior(const json& j)
 	case PickableType::QUEST_ITEM:
 	{
 		return Amulet{};
+	}
+
+	case PickableType::DUNGEON_KEY:
+	{
+		return DungeonKey{};
 	}
 
 	default:

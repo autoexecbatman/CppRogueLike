@@ -412,6 +412,49 @@ void Player::calculate_thaco()
 	}
 }
 
+int Player::get_open_locks_skill() const noexcept
+{
+	if (playerClassState != PlayerClassState::ROGUE)
+	{
+		return 0;
+	}
+
+	// AD&D 2e PHB Open Locks table: base 10 at level 1, +5 per level, cap 95.
+	constexpr int BASE_OPEN_LOCKS = 10;
+	constexpr int PER_LEVEL_BONUS = 5;
+	constexpr int MAX_OPEN_LOCKS = 95;
+
+	int level = get_creature_level();
+	int baseChance = BASE_OPEN_LOCKS + (level - 1) * PER_LEVEL_BONUS;
+
+	// Dexterity adjustment for Open Locks (PHB 2e thief skill table):
+	// Dex 9-10: -10, Dex 11-12: -5, Dex 13-14: 0, Dex 15-16: +5, Dex 17-18: +10
+	int dex = get_dexterity();
+	int dexBonus = 0;
+	if (dex <= 10)
+	{
+		dexBonus = -10;
+	}
+	else if (dex <= 12)
+	{
+		dexBonus = -5;
+	}
+	else if (dex <= 14)
+	{
+		dexBonus = 0;
+	}
+	else if (dex <= 16)
+	{
+		dexBonus = 5;
+	}
+	else
+	{
+		dexBonus = 10;
+	}
+
+	return std::clamp(baseChance + dexBonus, 0, MAX_OPEN_LOCKS);
+}
+
 void Player::consume_food(int nutrition, GameContext& ctx)
 {
 	// Decrease hunger by nutrition value

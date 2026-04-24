@@ -260,6 +260,11 @@
             "row": 0,
             "sheet": 22
         },
+        "dungeon_key": {
+            "col": 3,
+            "row": 0,
+            "sheet": 22
+        },
         "long_bow": {
             "col": 0,
             "row": 1,

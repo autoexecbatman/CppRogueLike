@@ -34,6 +34,7 @@ enum class PickableType
 	GIRDLE,
 	QUEST_ITEM,
 	IDENTIFY_SCROLL,
+	DUNGEON_KEY,
 };
 
 // Effect type for Consumable
@@ -183,6 +184,12 @@ struct Amulet
 {
 };
 
+// Used on a locked door via bump — consumed automatically by PlayerController.
+// When selected from inventory, shows a hint message.
+struct DungeonKey
+{
+};
+
 // ========== The variant ==========
 
 using ItemBehavior = std::variant<
@@ -201,7 +208,8 @@ using ItemBehavior = std::variant<
 	JewelryAmulet,
 	Gauntlets,
 	Girdle,
-	Amulet>;
+	Amulet,
+	DungeonKey>;
 
 // ========== use() overloads - one per behavior type ==========
 
@@ -218,6 +226,7 @@ bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(DungeonKey& dk, Item& owner, Creature& wearer, GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
 

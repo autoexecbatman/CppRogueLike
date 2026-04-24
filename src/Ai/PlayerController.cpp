@@ -434,35 +434,13 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 		case TileType::CLOSED_DOOR:
 		{
-			// Check if the door is locked
-			if (ctx.map->is_door_locked(targetPosition))
+			if (!ctx.map->is_door_locked(targetPosition))
 			{
-				// Attempt to unlock the door
-				// DC 15 lock: 1d20 + dexterity modifier
-				int dexModifier = (playerOwner.get_dexterity() - 10) / 2;
-				int roll = ctx.dice->d20();
-				int unlockRoll = roll + dexModifier;
-
-				if (unlockRoll >= 15)
-				{
-					ctx.map->unlock_door(targetPosition, ctx);
-					ctx.messageSystem->log("You successfully pick the lock!");
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully pick the lock!", true);
-					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-				}
-				else
-				{
-					ctx.messageSystem->log("You fail to pick the lock.");
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
-					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-				}
-			}
-			else
-			{
-				// Door is unlocked, open it normally
 				ctx.map->open_door(targetPosition, ctx);
 				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				break;
 			}
+			resolve_locked_door(targetPosition, ctx);
 			break;
 		}
 
@@ -536,6 +514,70 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 		}
 	}
 	return best;
+}
+
+bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
+{
+	// Branch 1: player carries a dungeon key -- consume it, unlock, open.
+	Item* keyItem = nullptr;
+	for (const auto& item : playerOwner.inventoryData.items)
+	{
+		if (item && item->item_key == "dungeon_key")
+		{
+			keyItem = item.get();
+			break;
+		}
+	}
+
+	if (keyItem != nullptr)
+	{
+		InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
+		ctx.map->open_all_room_doors(doorPos, ctx);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You use the key. The lock turns.", true);
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		return true;
+	}
+
+	// Branch 2: Rogue -- Open Locks percentage roll (AD&D 2e thief skill).
+	const int openLocksChance = playerOwner.get_open_locks_skill();
+	if (openLocksChance > 0)
+	{
+		if (ctx.dice->d100() <= openLocksChance)
+		{
+			ctx.map->unlock_door(doorPos, ctx);
+			ctx.map->open_door(doorPos, ctx);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You pick the lock.", true);
+		}
+		else
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
+		}
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		return true;
+	}
+
+	// Branch 3: Fighter class or STR >= 18 -- bash the door (DC 18).
+	if (playerOwner.get_creature_class() == CreatureClass::FIGHTER ||
+		playerOwner.get_strength() >= 18)
+	{
+		constexpr int BASH_DC = 18;
+		const int strRoll = ctx.dice->d20() + (playerOwner.get_strength() - 10) / 2;
+		if (strRoll >= BASH_DC)
+		{
+			ctx.map->set_tile(doorPos, TileType::FLOOR, 1);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You smash the door open! The crash echoes down the corridor.", true);
+		}
+		else
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You slam into the door but it holds.", true);
+		}
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		return true;
+	}
+
+	// Branch 4: no tool available.
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is locked. You have no way through it.", true);
+	return false;
 }
 
 void PlayerController::begin_path_walk(
@@ -1102,42 +1144,21 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 
 	if (pendingDoorAction == PendingDoorAction::OPEN)
 	{
-		// Check if door is locked and attempt unlock if needed
-		if (ctx.map->is_door_locked(doorPos))
+		if (!ctx.map->is_door_locked(doorPos))
 		{
-			// Attempt unlock with Dexterity check (DC 15)
-			const int LOCK_DIFFICULTY = 15;
-			int dexterity = playerOwner.get_dexterity();
-			int dexMod = (dexterity - 10) / 2;
-			int roll = ctx.dice->roll(1, 20) + dexMod;
-			
-			if (roll >= LOCK_DIFFICULTY)
+			if (ctx.map->open_door(doorPos, ctx))
 			{
-				if (ctx.map->unlock_door(doorPos, ctx))
-				{
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully pick the lock!", true);
-					// Now try to open it
-					if (ctx.map->open_door(doorPos, ctx))
-					{
-						ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
-						ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-					}
-				}
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
+				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			}
 			else
 			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already open.", true);
 			}
-		}
-		else if (ctx.map->open_door(doorPos, ctx))
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already open.", true);
+			resolve_locked_door(doorPos, ctx);
 		}
 	}
 	else if (pendingDoorAction == PendingDoorAction::CLOSE)

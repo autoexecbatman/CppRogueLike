@@ -152,8 +152,16 @@ int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLeve
 		return true;
 	};
 
-	if (!check_level_requirements(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
+	// baseWeight == 0 means "never spawn randomly" (e.g. dungeon_jailer)
+	if (monster.baseWeight == 0)
+	{
 		return 0;
+	}
+
+	if (!check_level_requirements(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
+	{
+		return 0;
+	}
 
 	const float levelFactor = 1.0f + (monster.levelScaling * (dungeonLevel - 1));
 	const int weight = static_cast<int>(monster.baseWeight * levelFactor);

@@ -41,6 +41,7 @@ enum class SpellEffectType
 	WEB,
 	FIREBALL,
 	TELEPORT,
+	KNOCK,
 	NONE
 };
 
@@ -124,6 +125,7 @@ private:
 	static bool cast_sleep(Creature& caster, GameContext& ctx);
 	static bool cast_invisibility(Creature& caster, GameContext& ctx);
 	static bool cast_teleport(Creature& caster, GameContext& ctx);
+	static bool cast_knock(Creature& caster, GameContext& ctx);
 	static bool cast_hold_person(Creature& caster, GameContext& ctx);
 
 	// Targeted spell implementations — async via TargetingMenu; onSuccess fires on confirm

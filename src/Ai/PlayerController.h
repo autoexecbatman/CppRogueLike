@@ -62,6 +62,9 @@ private:
 	void handle_left_click(GameContext& ctx);
 	void handle_right_click(GameContext& ctx);
 	Vector2D find_door_approach(Vector2D doorTile, const GameContext& ctx) const;
+	// Four-branch locked-door resolution: key, Open Locks, bash, blocked.
+	// Returns true when a turn is consumed.
+	bool resolve_locked_door(Vector2D doorPos, GameContext& ctx);
 	void begin_path_walk(
 		Vector2D walkDest,
 		Vector2D actionTarget,

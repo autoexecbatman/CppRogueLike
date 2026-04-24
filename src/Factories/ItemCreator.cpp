@@ -145,6 +145,10 @@ PickableType parse_pickable_type(std::string_view s)
 	{
 		return PickableType::QUEST_ITEM;
 	}
+	if (s == "dungeon_key")
+	{
+		return PickableType::DUNGEON_KEY;
+	}
 
 	throw std::runtime_error(std::format("ItemCreator: unknown pickable_type '{}'", s));
 }
@@ -1233,6 +1237,11 @@ ItemBehavior create_behavior(const ItemParams& params)
 	case PickableType::GOLD_COIN:
 	{
 		return Gold{ 0 };
+	}
+
+	case PickableType::DUNGEON_KEY:
+	{
+		return DungeonKey{};
 	}
 
 	default:

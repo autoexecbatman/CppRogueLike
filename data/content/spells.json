@@ -10,5 +10,6 @@
     "invisibility":      { "name": "Invisibility",      "level": 2, "class": "wizard", "description": "Become invisible for 20 turns" },
     "web":               { "name": "Web",               "level": 2, "class": "wizard", "description": "Create webs to trap enemies" },
     "fireball":          { "name": "Fireball",          "level": 3, "class": "wizard", "description": "1d6/level fire damage in 20-ft radius, save vs. spells for half" },
-    "teleport":          { "name": "Teleport",          "level": 3, "class": "wizard", "description": "Teleport to random location" }
+    "teleport":          { "name": "Teleport",          "level": 3, "class": "wizard", "description": "Teleport to random location" },
+    "knock":             { "name": "Knock",             "level": 2, "class": "wizard", "description": "Open any nearby locked door" }
 }

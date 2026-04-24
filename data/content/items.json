@@ -454,5 +454,9 @@
     "lockpick": {
         "name": "lockpick", "color": 1, "itemClass": "tool",
         "value": 5, "pickableType": "consumable", "consumableEffect": "none"
+    },
+    "dungeon_key": {
+        "name": "dungeon key", "category": "misc", "color": 11, "itemClass": "tool",
+        "value": 25, "pickableType": "dungeon_key", "baseWeight": 1, "levelMin": 2
     }
 }

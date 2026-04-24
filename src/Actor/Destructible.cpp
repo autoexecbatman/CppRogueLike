@@ -575,6 +575,18 @@ void MonsterDestructible::die(Creature& owner, GameContext& ctx)
 		ctx.animSystem->spawn_death(owner.position.x, owner.position.y);
 	}
 
+	// Drop any carried items to the floor before the corpse replaces the creature.
+	for (auto& item : owner.inventoryData.items)
+	{
+		if (!item)
+		{
+			continue;
+		}
+		item->position = owner.position;
+		InventoryOperations::add_item(*ctx.inventoryData, std::move(item));
+	}
+	owner.inventoryData.items.clear();
+
 	Destructible::die(owner, ctx);
 }
 

@@ -108,6 +108,9 @@ public:
 
 	bool is_player() const noexcept override { return true; }
 
+	// AD&D 2e Open Locks: Rogue-only, level-based percentage chance
+	int get_open_locks_skill() const noexcept override;
+
 	// Display interface overrides
 	std::string get_class_display_name() const override { return playerClass; }
 	std::string get_race_display_name() const override { return playerRace; }

@@ -157,6 +157,7 @@ public:
 	bool close_door(Vector2D pos, GameContext& ctx);
 	bool unlock_door(Vector2D pos, GameContext& ctx);
 	bool is_door_locked(Vector2D pos) const noexcept;
+	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
 	std::vector<MonsterPercentage> get_monster_distribution(int dungeonLevel);
 	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
@@ -183,7 +184,9 @@ protected:
 	friend class DungeonGenerator;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
-	void set_door(Vector2D thisTile, int tileX, int tileY);
+	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
+	void setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx);
+	int count_room_entrances(const DungeonRoom& room) const;
 	void create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx);
 	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
 };

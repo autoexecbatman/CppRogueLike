@@ -194,6 +194,11 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.levelMinimum = entry.at("depth_min").get<int>();
 	p.levelMaximum = entry.at("depth_max").get<int>();
 	p.levelScaling = entry.at("depth_scale").get<float>();
+	// Optional display name — overrides the key-derived fallback.
+	if (entry.contains("name"))
+	{
+		p.name = entry.at("name").get<std::string>();
+	}
 	return p;
 }
 

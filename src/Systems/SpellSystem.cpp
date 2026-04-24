@@ -86,6 +86,7 @@ enum class SpellId
 	WEB,
 	FIREBALL,
 	TELEPORT,
+	KNOCK,
 	NONE
 };
 
@@ -104,6 +105,7 @@ std::map<SpellId, SpellDefinition> s_spells = {
 	{ SpellId::WEB, { "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies", SpellEffectType::WEB } },
 	{ SpellId::FIREBALL, { "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half", SpellEffectType::FIREBALL } },
 	{ SpellId::TELEPORT, { "Teleport", 3, SpellClass::WIZARD, "Teleport to random location", SpellEffectType::TELEPORT } },
+	{ SpellId::KNOCK, { "Knock", 2, SpellClass::WIZARD, "Open any nearby locked door", SpellEffectType::KNOCK } },
 	{ SpellId::NONE, { "None", 0, SpellClass::BOTH, "", SpellEffectType::NONE } },
 };
 
@@ -127,6 +129,7 @@ constexpr SpellEntry SPELL_KEYS[] = {
 	{ SpellId::WEB, "web" },
 	{ SpellId::FIREBALL, "fireball" },
 	{ SpellId::TELEPORT, "teleport" },
+	{ SpellId::KNOCK, "knock" },
 };
 
 SpellClass parse_class(std::string_view s)
@@ -211,6 +214,10 @@ SpellEffectType parse_effect_type(std::string_view s)
 	{
 		return SpellEffectType::TELEPORT;
 	}
+	else if (s == "knock")
+	{
+		return SpellEffectType::KNOCK;
+	}
 	else
 	{
 		return SpellEffectType::NONE;
@@ -280,6 +287,11 @@ std::string encode_effect_type(SpellEffectType e)
 	case SpellEffectType::TELEPORT:
 	{
 		return "teleport";
+	}
+
+	case SpellEffectType::KNOCK:
+	{
+		return "knock";
 	}
 
 	default:
@@ -699,6 +711,12 @@ void SpellSystem::dispatch_effect(
 	case SpellEffectType::TELEPORT:
 	{
 		result = cast_teleport(caster, ctx);
+		break;
+	}
+
+	case SpellEffectType::KNOCK:
+	{
+		result = cast_knock(caster, ctx);
 		break;
 	}
 
@@ -1217,6 +1235,52 @@ bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
 	// Failed to find a valid location
 	ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
 	return false;
+}
+
+bool SpellSystem::cast_knock(Creature& caster, GameContext& ctx)
+{
+	// AD&D 2e: Knock opens any locked door within range.
+	// Scan a 7-tile radius for the nearest locked door and open it.
+	constexpr int KNOCK_RADIUS = 7;
+
+	Vector2D nearest{ -1, -1 };
+	int bestDist = KNOCK_RADIUS + 1;
+
+	for (int dy = -KNOCK_RADIUS; dy <= KNOCK_RADIUS; ++dy)
+	{
+		for (int dx = -KNOCK_RADIUS; dx <= KNOCK_RADIUS; ++dx)
+		{
+			Vector2D candidate{ caster.position.x + dx, caster.position.y + dy };
+			if (!ctx.map->is_in_bounds(candidate))
+			{
+				continue;
+			}
+			if (ctx.map->is_door_locked(candidate))
+			{
+				int dist = std::abs(dx) + std::abs(dy);
+				if (dist < bestDist)
+				{
+					bestDist = dist;
+					nearest = candidate;
+				}
+			}
+		}
+	}
+
+	if (nearest.x < 0)
+	{
+		ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Knock! ");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "No locked doors are nearby.");
+		ctx.messageSystem->finalize_message();
+		return true; // Spell slot consumed even on miss — AD&D 2e rule
+	}
+
+	ctx.map->unlock_door(nearest, ctx);
+	ctx.map->open_door(nearest, ctx);
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Knock! ");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "The lock clicks open.");
+	ctx.messageSystem->finalize_message();
+	return true;
 }
 
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)

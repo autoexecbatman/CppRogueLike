@@ -1,5 +1,6 @@
 // file: Map.cpp
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <cstdint>
 #include <format>
@@ -22,6 +23,7 @@
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
 #include "../Factories/ItemFactory.h"
+#include "../Factories/MonsterCreator.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
@@ -41,6 +43,101 @@
 #include "FovMap.h"
 #include "Map.h"
 #include "../Objects/Trap.h"
+
+namespace
+{
+	// Returns true if `target` is reachable from `start` without crossing a
+	// locked door or a wall. Used to assert that the jailer spawn is on the
+	// correct (corridor) side of the locked treasure room door.
+	// Returns true if `target` is reachable from `start` without crossing a
+	// locked door or a wall. Used to assert that the jailer spawn is on the
+	// correct (corridor) side of the locked treasure room door.
+	bool is_reachable_without_locked_doors(
+		Vector2D start,
+		Vector2D target,
+		const Map& map)
+	{
+		if (start == target)
+		{
+			return true;
+		}
+
+		// Use a flat visited array sized to the known map extents.
+		const int width = map.get_width();
+		const int height = map.get_height();
+		std::vector<bool> visited(static_cast<size_t>(width) * height, false);
+
+		auto mark = [&](Vector2D pos)
+		{
+			visited[static_cast<size_t>(pos.y) * width + pos.x] = true;
+		};
+		auto was_visited = [&](Vector2D pos) -> bool
+		{
+			return visited[static_cast<size_t>(pos.y) * width + pos.x];
+		};
+		auto can_traverse = [&](Vector2D pos) -> bool
+		{
+			if (!map.is_in_bounds(pos)) return false;
+			if (map.is_door_locked(pos)) return false;
+			return map.get_tile_type(pos) != TileType::WALL;
+		};
+
+		std::queue<Vector2D> frontier;
+		frontier.push(start);
+		mark(start);
+
+		while (!frontier.empty())
+		{
+			const Vector2D current = frontier.front();
+			frontier.pop();
+
+			if (current == target)
+			{
+				return true;
+			}
+
+			for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+			{
+				const Vector2D next = current + dir;
+				if (!was_visited(next) && can_traverse(next))
+				{
+					mark(next);
+					frontier.push(next);
+				}
+			}
+		}
+
+		return false;
+	}
+
+	struct FovProperties
+	{
+		bool walkable;
+		bool transparent;
+	};
+
+	// Single source of truth for how each tile type maps onto the FOV grid.
+	// Used by both set_tile (runtime mutations) and Map::load (FOV rebuild).
+	FovProperties fov_properties_for(TileType type) noexcept
+	{
+		switch (type)
+		{
+		case TileType::FLOOR:
+		case TileType::CORRIDOR:
+		case TileType::OPEN_DOOR:
+		case TileType::WATER:
+		{
+			return { true, true };
+		}
+		case TileType::WALL:
+		case TileType::CLOSED_DOOR:
+		default:
+		{
+			return { false, false };
+		}
+		}
+	}
+}
 
 //====
 Map::Map(int map_width, int map_height)
@@ -108,7 +205,7 @@ void Map::init(bool withActors, GameContext& ctx)
 
 	post_process_doors();
 
-	if (ctx.levelManager && ctx.levelManager->get_dungeon_level() > 1)
+	if (ctx.levelManager && ctx.levelManager->get_dungeon_level() >= 1)
 	{
 		maybe_create_treasure_room(ctx.levelManager->get_dungeon_level(), ctx);
 	}
@@ -149,45 +246,7 @@ void Map::load(const json& j)
 	// Rebuild FOV grid from loaded tile data.
 	for (const auto& tile : tiles)
 	{
-		bool walkable = false;
-		bool transparent = false;
-
-		switch (tile.type)
-		{
-
-		case TileType::FLOOR:
-		case TileType::CORRIDOR:
-		case TileType::OPEN_DOOR:
-		{
-			walkable = true;
-			transparent = true;
-			break;
-		}
-
-		case TileType::WATER:
-		{
-			walkable = true;
-			transparent = true;
-			break;
-		}
-
-		case TileType::WALL:
-		case TileType::CLOSED_DOOR:
-		{
-			walkable = false;
-			transparent = false;
-			break;
-		}
-
-		default:
-		{
-			walkable = false;
-			transparent = false;
-
-			break;
-		}
-		}
-
+		const auto [walkable, transparent] = fov_properties_for(tile.type);
 		fovMap->set_properties(tile.position.x, tile.position.y, walkable, transparent);
 	}
 
@@ -816,16 +875,17 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	}
 }
 
-void Map::set_door(Vector2D thisTile, int tileX, int tileY)
+void Map::set_door(Vector2D thisTile, int tileX, int tileY, bool locked)
 {
 	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
 	fovMap->set_properties(tileX, tileY, false, false);
 
-	// Mark the door as locked by default
 	size_t tileIndex = get_index(thisTile);
 	if (tileIndex < tiles.size())
 	{
-		tiles[tileIndex].doorState = DoorState::CLOSED_LOCKED;
+		tiles[tileIndex].doorState = locked
+			? DoorState::CLOSED_LOCKED
+			: DoorState::CLOSED_UNLOCKED;
 	}
 }
 
@@ -833,10 +893,15 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 {
 	if (!in_bounds(pos))
 	{
-		return; // Can't set tile for out of bounds positions
+		return;
 	}
-	tiles.at(get_index(pos)).type = newType;
-	tiles.at(get_index(pos)).cost = cost;
+	const size_t idx = get_index(pos);
+	tiles.at(idx).type = newType;
+	tiles.at(idx).cost = cost;
+
+	// Keep fovMap in sync so is_wall / can_walk / A* see the change immediately.
+	const auto [walkable, transparent] = fov_properties_for(newType);
+	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
 }
 
 void Map::create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx)
@@ -1642,6 +1707,76 @@ bool Map::unlock_door(Vector2D pos, GameContext& ctx)
 	return true;
 }
 
+void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
+{
+	// Find the room this door belongs to, then open every locked door of that room.
+	// A door belongs to a room iff one of its cardinal neighbors is inside room.contains().
+	if (!ctx.rooms)
+	{
+		unlock_door(doorPos, ctx);
+		open_door(doorPos, ctx);
+		return;
+	}
+
+	for (const auto& room : *ctx.rooms)
+	{
+		bool belongsToRoom = false;
+		for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+		{
+			Vector2D nb = doorPos + dir;
+			if (room.contains(nb.x, nb.y))
+			{
+				belongsToRoom = true;
+				break;
+			}
+		}
+		if (!belongsToRoom)
+		{
+			continue;
+		}
+
+		// Open every locked door on this room's wall border.
+		for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+		{
+			for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+			{
+				Vector2D pos{ x, y };
+				if (!in_bounds(pos) || room.contains(x, y))
+				{
+					continue;
+				}
+				if (!is_door_locked(pos))
+				{
+					continue;
+				}
+
+				auto opens_this_room = [&]()
+				{
+					for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+					{
+						if (room.contains((pos + dir).x, (pos + dir).y))
+						{
+							return true;
+						}
+					}
+					return false;
+				};
+
+				if (opens_this_room())
+				{
+					unlock_door(pos, ctx);
+					open_door(pos, ctx);
+				}
+			}
+		}
+		return;
+	}
+
+	// Fallback: no room found, open only this door.
+	unlock_door(doorPos, ctx);
+	open_door(doorPos, ctx);
+}
+
 bool Map::is_door_locked(Vector2D pos) const noexcept
 {
 	if (!in_bounds(pos))
@@ -1723,6 +1858,32 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	// Generate treasure at the center of the room
 	itemFactory->generate_treasure(center, ctx, ctx.levelManager->get_dungeon_level(), quality);
 
+	// Spawn the Dungeon Warden — the named boss guarding the vault.
+	// Try the room center first, then spiral outward to find a free tile.
+	{
+		Vector2D wardenPos{ -1, -1 };
+		constexpr int MAX_WARDEN_TRIES = 50;
+		for (int t = 0; t < MAX_WARDEN_TRIES && wardenPos.x < 0; ++t)
+		{
+			Vector2D candidate{
+				ctx.dice->roll(room.col, room.col_end()),
+				ctx.dice->roll(room.row, room.row_end())
+			};
+			if (can_walk(candidate, ctx) && get_actor(candidate, ctx) == nullptr)
+			{
+				wardenPos = candidate;
+			}
+		}
+		if (wardenPos.x >= 0)
+		{
+			ctx.creatures->push_back(
+				MonsterCreator::create_from_params(
+					wardenPos,
+					MonsterCreator::get_params("dungeon_warden"),
+					ctx));
+		}
+	}
+
 	// Add guardians or traps based on quality
 	int guardianCount = 0;
 	switch (quality)
@@ -1775,6 +1936,8 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 		add_monster(guardPos, ctx);
 	}
 
+	setup_treasure_room_guard(room, ctx);
+
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->log(std::format(
@@ -1787,6 +1950,241 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	}
 }
 
+int Map::count_room_entrances(const DungeonRoom& room) const
+{
+	int count = 0;
+	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	{
+		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		{
+			const Vector2D pos{ x, y };
+			if (!in_bounds(pos) || room.contains(x, y))
+			{
+				continue;
+			}
+			if (get_tile_type(pos) != TileType::CLOSED_DOOR)
+			{
+				continue;
+			}
+			for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+			{
+				if (room.contains((pos + dir).x, (pos + dir).y))
+				{
+					++count;
+					break;
+				}
+			}
+		}
+	}
+	return count;
+}
+
+void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
+{
+	if (!ctx.contentRegistry || !ctx.creatures || !ctx.dice || !ctx.player)
+	{
+		return;
+	}
+
+	// Two separate passes over the wall border:
+	//
+	// Pass 1 — lock EVERY genuine room entrance.
+	//   A door belongs to this room iff one of its cardinal neighbors is inside
+	//   room.contains(). Lock it regardless of what tile type is outside.
+	//
+	// Pass 2 — collect jailer spawn candidates.
+	//   Walk outward from each locked entrance up to MAX_WALK steps.
+	//   Break only on walls; skip actors/decorations/other doors.
+	//   Reachability filter (below) guarantees the spawn is on the corridor side.
+
+	auto find_inward_dir = [&](Vector2D doorPos) -> Vector2D
+	{
+		for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+		{
+			if (room.contains((doorPos + dir).x, (doorPos + dir).y))
+			{
+				return dir;
+			}
+		}
+		return { 0, 0 }; // no room-interior neighbor found
+	};
+
+	// Pass 1: lock all genuine entrances.
+	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	{
+		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		{
+			Vector2D doorPos{ x, y };
+			if (!in_bounds(doorPos) || room.contains(x, y))
+			{
+				continue;
+			}
+			if (get_tile_type(doorPos) != TileType::CLOSED_DOOR)
+			{
+				continue;
+			}
+			const Vector2D inward = find_inward_dir(doorPos);
+			if (inward.x == 0 && inward.y == 0)
+			{
+				continue;
+			}
+			tiles[get_index(doorPos)].doorState = DoorState::CLOSED_LOCKED;
+		}
+	}
+
+	// Pass 2: collect jailer spawn candidates.
+	// For each locked entrance, walk outward (away from the room) up to MAX_WALK
+	// steps. Break only on map boundary or solid wall — skip past actors, decorations,
+	// and other doors (temporary occupants that do not block the corridor permanently).
+	struct DoorCandidate
+	{
+		Vector2D doorPos;
+		Vector2D spawnPos;
+	};
+
+	std::vector<DoorCandidate> candidates;
+
+	for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+	{
+		for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+		{
+			Vector2D doorPos{ x, y };
+			if (!in_bounds(doorPos) || room.contains(x, y))
+			{
+				continue;
+			}
+			if (!is_door_locked(doorPos))
+			{
+				continue;
+			}
+
+			const Vector2D inward = find_inward_dir(doorPos);
+			if (inward.x == 0 && inward.y == 0)
+			{
+				continue;
+			}
+
+			Vector2D spawnPos{ -1, -1 };
+			constexpr int MAX_WALK = 5;
+			for (int step = 1; step <= MAX_WALK; ++step)
+			{
+				const Vector2D candidate = doorPos - (inward * step);
+				if (!in_bounds(candidate))
+				{
+					break; // left the map
+				}
+				const TileType tileType = get_tile_type(candidate);
+				if (tileType == TileType::WALL)
+				{
+					break; // solid obstruction — corridor ends here
+				}
+				// Skip temporarily-occupied or non-floor tiles; keep stepping.
+				if (tileType == TileType::CLOSED_DOOR)
+				{
+					continue;
+				}
+				if (get_actor(candidate, ctx) != nullptr)
+				{
+					continue;
+				}
+				if (find_decoration_at(candidate, ctx) != nullptr)
+				{
+					continue;
+				}
+				spawnPos = candidate;
+				break;
+			}
+
+			if (spawnPos.x < 0)
+			{
+				continue;
+			}
+
+			candidates.push_back({ doorPos, spawnPos });
+		}
+	}
+
+	// Helper: undo all locks Pass 1 applied so the map is left consistent
+	// when we bail out without placing a jailer.
+	auto unlock_all_room_entrances = [&]()
+	{
+		for (int y = room.top_wall(); y <= room.bottom_wall(); ++y)
+		{
+			for (int x = room.left_wall(); x <= room.right_wall(); ++x)
+			{
+				const Vector2D pos{ x, y };
+				if (!in_bounds(pos) || room.contains(x, y))
+				{
+					continue;
+				}
+				if (is_door_locked(pos))
+				{
+					tiles[get_index(pos)].doorState = DoorState::CLOSED_UNLOCKED;
+				}
+			}
+		}
+	};
+
+	if (candidates.empty())
+	{
+		unlock_all_room_entrances();
+		return;
+	}
+
+	// With all doors now locked, filter to candidates whose spawn tile is
+	// still reachable from the stairs. A dead-end corridor that only connects
+	// back through a locked door will fail this check.
+	auto manhattan = [](Vector2D a, Vector2D b)
+	{
+		return std::abs(a.x - b.x) + std::abs(a.y - b.y);
+	};
+
+	const Vector2D playerPos = ctx.player->position;
+	const bool stairsAvailable = ctx.stairs != nullptr;
+
+	const DoorCandidate* best = nullptr;
+	int bestDist = std::numeric_limits<int>::max();
+
+	for (const DoorCandidate& c : candidates)
+	{
+		if (stairsAvailable &&
+			!is_reachable_without_locked_doors(c.spawnPos, ctx.stairs->position, *this))
+		{
+			continue; // dead-end pocket — skip
+		}
+
+		const int dist = manhattan(c.spawnPos, playerPos);
+		if (dist < bestDist)
+		{
+			bestDist = dist;
+			best = &c;
+		}
+	}
+
+	if (best == nullptr)
+	{
+		// No corridor-side spawn is reachable from the stairs.
+		// Unlock all entrances so the room is not permanently inaccessible.
+		unlock_all_room_entrances();
+		return;
+	}
+
+	assert(
+		(ctx.stairs == nullptr ||
+		is_reachable_without_locked_doors(best->spawnPos, ctx.stairs->position, *this)) &&
+		"setup_treasure_room_guard: reachability filter passed but assert disagrees");
+
+	auto jailer = MonsterCreator::create_from_params(
+		best->spawnPos,
+		MonsterCreator::get_params("dungeon_jailer"),
+		ctx);
+
+	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
+	InventoryOperations::add_item(jailer->inventoryData, std::move(key));
+
+	ctx.creatures->push_back(std::move(jailer));
+}
+
 bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 {
 	if (!ctx.dice || !ctx.rooms)
@@ -1794,15 +2192,11 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 		return false;
 	}
 
-	// Probability increases with dungeon level
-	int treasureRoomChance = 5 + (dungeonLevel * 2); // 5% + 2% per level
-
-	// Cap at 25%
-	treasureRoomChance = std::min(treasureRoomChance, 25);
-
+	// TODO: restore after testing — production formula: std::min(30 + (dungeonLevel * 5), 60)
+	constexpr int treasureRoomChance = 100;
 	if (ctx.dice->d100() > treasureRoomChance)
 	{
-		return false; // No treasure room this time
+		return false;
 	}
 
 	// Need at least 2 rooms to skip the player's starting room
@@ -1811,15 +2205,32 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 		return false;
 	}
 
-	// Select a random room, skipping index 0 (player's starting room)
-	const int index = ctx.dice->roll(1, static_cast<int>(ctx.rooms->size()) - 1);
-	const DungeonRoom& room = ctx.rooms->at(index);
+	// Collect candidate rooms: single-entrance, not the player's starting room,
+	// and not the room that already contains the stairs. Locking a staircase
+	// inside the treasure room traps the player on this level permanently.
+	std::vector<int> singleEntranceIndices;
 
-	// Only use rooms that are large enough
-	if (room.width < 6 || room.height < 6)
+	for (int i = 1; i < static_cast<int>(ctx.rooms->size()); ++i)
+	{
+		const DungeonRoom& candidate = ctx.rooms->at(i);
+		if (ctx.stairs != nullptr &&
+			candidate.contains(ctx.stairs->position.x, ctx.stairs->position.y))
+		{
+			continue; // never lock the staircase room
+		}
+		if (count_room_entrances(candidate) == 1)
+		{
+			singleEntranceIndices.push_back(i);
+		}
+	}
+
+	if (singleEntranceIndices.empty())
 	{
 		return false;
 	}
+
+	const int pick = ctx.dice->roll(0, static_cast<int>(singleEntranceIndices.size()) - 1);
+	const DungeonRoom& room = ctx.rooms->at(singleEntranceIndices[pick]);
 
 	// Determine the quality of the treasure room based on dungeon level and luck
 	int quality = 1;
@@ -1952,7 +2363,7 @@ void Map::post_process_doors()
 					{
 						// Move door UP
 						Vector2D upPos = { pos.y - 1, pos.x };
-						set_door(upPos, upPos.x, upPos.y);
+						set_door(upPos, upPos.x, upPos.y, false);
 					}
 					// Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
 					else if (isWall(upLeft) &&
@@ -1963,7 +2374,7 @@ void Map::post_process_doors()
 					{
 						// Move door UP
 						Vector2D upPos = { pos.y - 1, pos.x };
-						set_door(upPos, upPos.x, upPos.y);
+						set_door(upPos, upPos.x, upPos.y, false);
 					}
 					// Check for Z-pattern: WRR/CCW/WWW (move door left)
 					else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
@@ -1972,12 +2383,12 @@ void Map::post_process_doors()
 					{
 						// Move door LEFT
 						Vector2D leftPos = { pos.y, pos.x - 1 };
-						set_door(leftPos, leftPos.x, leftPos.y);
+						set_door(leftPos, leftPos.x, leftPos.y, false);
 					}
 					else
 					{
 						// All other doors (including WRR/CCR/WRR pattern)
-						set_door(pos, pos.x, pos.y);
+						set_door(pos, pos.x, pos.y, false);
 					}
 				}
 			}

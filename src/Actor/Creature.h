@@ -162,6 +162,10 @@ public:
 	virtual int get_kill_count() const noexcept { return 0; }
 	virtual std::string get_equipped_weapon_damage_roll() const noexcept { return "?"; }
 
+	// AD&D 2e Open Locks skill — Rogue only. Returns percentage chance (0-95).
+	// Non-Rogue classes return 0 (cannot pick locks).
+	virtual int get_open_locks_skill() const noexcept { return 0; }
+
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called once at game start (level 1, new game) to apply race/class setup
 	virtual void on_new_game_start(GameContext& ctx) {}

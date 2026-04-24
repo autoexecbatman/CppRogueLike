@@ -221,6 +221,10 @@ void DungeonGenerator::add_extra_corridors(
 	// produce corridors whose mid-turn segment can pass through an intermediate
 	// room. CELL_W^2 + CELL_H^2 is the squared diagonal between adjacent cell
 	// centres -- the tightest upper bound that still covers all adjacent pairs.
+	//
+	// Leaf rooms (degree-1 after the MST) are excluded from extra corridors.
+	// Preserving them guarantees single-entrance rooms exist for treasure room
+	// placement — connecting a leaf removes its only locked-door candidate.
 
 	const int extraTarget = std::max(1, n / 3);
 	int added = 0;
@@ -231,6 +235,13 @@ void DungeonGenerator::add_extra_corridors(
 		const int a = rng.roll(0, n - 1);
 		const int b = rng.roll(0, n - 1);
 		if (a == b)
+		{
+			continue;
+		}
+
+		// Preserve leaf rooms — skip if either endpoint is currently degree-1.
+		if (rooms[a].adjacentRoomIndices.size() == 1 ||
+			rooms[b].adjacentRoomIndices.size() == 1)
 		{
 			continue;
 		}
