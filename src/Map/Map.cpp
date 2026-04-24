@@ -39,6 +39,7 @@
 #include "../Utils/Vector2D.h"
 #include "Decoration.h"
 #include "DungeonGenerator.h"
+#include "DungeonNames.h"
 #include "DungeonRoom.h"
 #include "FovMap.h"
 #include "Map.h"
@@ -1876,11 +1877,10 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 		}
 		if (wardenPos.x >= 0)
 		{
+			MonsterParams wardenParams = MonsterCreator::get_params("dungeon_warden");
+			wardenParams.name = DungeonNames::generate_warden_name(mapRng_);
 			ctx.creatures->push_back(
-				MonsterCreator::create_from_params(
-					wardenPos,
-					MonsterCreator::get_params("dungeon_warden"),
-					ctx));
+				MonsterCreator::create_from_params(wardenPos, wardenParams, ctx));
 		}
 	}
 

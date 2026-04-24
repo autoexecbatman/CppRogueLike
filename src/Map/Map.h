@@ -175,6 +175,10 @@ public:
 		bool withActors,
 		GameContext& ctx);
 
+	// Counts doors on this room's wall border that have a room-interior
+	// cardinal neighbour. Used to select single-entrance treasure rooms.
+	int count_room_entrances(const DungeonRoom& room) const;
+
 	std::vector<Tile> tiles;
 
 protected:
@@ -186,7 +190,6 @@ protected:
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
 	void setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx);
-	int count_room_entrances(const DungeonRoom& room) const;
 	void create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx);
 	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
 };

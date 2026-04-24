@@ -227,24 +227,23 @@ TEST_F(MapTest, CloseDoor_ActorOnDoor_ReturnsFalse)
 // Wall Tests
 // ----------------------------------------------------------------------------
 
-TEST_F(MapTest, IsWall_ChecksTcodMapWalkability)
+TEST_F(MapTest, IsWall_SyncedBySetTile)
 {
-    // is_wall() checks tcodMap->isWalkable(), NOT tile type
-    // set_tile() only updates tile array, not tcodMap
-    // This documents the actual behavior
+    // set_tile syncs fovMap via fov_properties_for — both tile type and
+    // FOV walkability are updated atomically. is_wall must reflect the change.
     Vector2D pos{5, 5};
 
-    // Initially after init(), tcodMap has its own walkability state
-    // is_wall returns true if tcodMap says tile is NOT walkable
-    bool initialWallState = map->is_wall(pos);
+    // All tiles start as WALL after init(false).
+    EXPECT_TRUE(map->is_wall(pos));
 
-    // set_tile changes tile type but NOT tcodMap walkability
+    // Setting FLOOR must make the tile walkable in fovMap too.
     map->set_tile(pos, TileType::FLOOR, 1.0);
     EXPECT_EQ(map->get_tile_type(pos), TileType::FLOOR);
+    EXPECT_FALSE(map->is_wall(pos)) << "set_tile must sync fovMap walkability";
 
-    // is_wall still returns same value because tcodMap unchanged
-    EXPECT_EQ(map->is_wall(pos), initialWallState)
-        << "set_tile does not affect tcodMap walkability";
+    // Reverting to WALL must make it non-walkable again.
+    map->set_tile(pos, TileType::WALL, 0.0);
+    EXPECT_TRUE(map->is_wall(pos)) << "set_tile to WALL must mark tile non-walkable";
 }
 
 // ----------------------------------------------------------------------------

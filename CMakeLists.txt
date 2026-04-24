@@ -228,6 +228,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Map/DungeonRoom.h
     ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.cpp
     ${PROJECT_SOURCE_DIR}/Map/DungeonGenerator.h
+    ${PROJECT_SOURCE_DIR}/Map/DungeonNames.cpp
+    ${PROJECT_SOURCE_DIR}/Map/DungeonNames.h
     ${PROJECT_SOURCE_DIR}/Map/FovMap.cpp
     ${PROJECT_SOURCE_DIR}/Map/FovMap.h
     ${PROJECT_SOURCE_DIR}/Map/Minimap.cpp

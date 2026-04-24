@@ -39,6 +39,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerVirtualInterfaceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/TreasureRoomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/EquipmentStatBonusTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
 )
@@ -114,6 +115,7 @@ set(PARENT_SOURCES
     # Map
     ${PARENT_SOURCE_DIR}/Map/Map.cpp
     ${PARENT_SOURCE_DIR}/Map/DungeonGenerator.cpp
+    ${PARENT_SOURCE_DIR}/Map/DungeonNames.cpp
     ${PARENT_SOURCE_DIR}/Map/FovMap.cpp
     ${PARENT_SOURCE_DIR}/Map/Minimap.cpp
 
