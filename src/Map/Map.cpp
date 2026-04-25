@@ -17,19 +17,15 @@
 #include "../Actor/Creature.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/InventoryOperations.h"
-#include "../Actor/Stairs.h"
-#include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterCreator.h"
 #include "../Factories/MonsterFactory.h"
-#include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Systems/EncounterPlanner.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/MessageSystem.h"
@@ -97,7 +93,7 @@ namespace
 				return true;
 			}
 
-			for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })
+			for (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W, DIR_NE, DIR_NW, DIR_SE, DIR_SW })
 			{
 				const Vector2D next = current + dir;
 				if (!was_visited(next) && can_traverse(next))
@@ -113,8 +109,8 @@ namespace
 
 	struct FovProperties
 	{
-		bool walkable;
-		bool transparent;
+		bool walkable{};
+		bool transparent{};
 	};
 
 	// Single source of truth for how each tile type maps onto the FOV grid.
@@ -141,20 +137,20 @@ namespace
 }
 
 //====
-Map::Map(int map_width, int map_height)
-	: map_height(map_height),
-	  map_width(map_width),
+Map::Map(int mapWidth, int mapHeight)
+	: mapHeight(mapHeight),
+	  mapWidth(mapWidth),
 	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>()),
-	  dijkstraCosts(static_cast<size_t>(map_width) * map_height, std::numeric_limits<int>::max()),
-	  fovMap(std::make_unique<FovMap>(map_width, map_height)),
+	  dijkstraCosts(static_cast<size_t>(mapWidth) * mapHeight, std::numeric_limits<int>::max()),
+	  fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
 	  seed(0)
 {
 }
 
 bool Map::in_bounds(Vector2D pos) const noexcept
 {
-	bool result = pos.y >= 0 && pos.y < map_height && pos.x >= 0 && pos.x < map_width;
+	bool result = pos.y >= 0 && pos.y < mapHeight && pos.x >= 0 && pos.x < mapWidth;
 	// Logging moved to callers that have GameContext access
 	return result;
 }
@@ -168,12 +164,12 @@ void Map::init_tiles(GameContext& ctx)
 
 	if (ctx.messageSystem)
 	{
-		ctx.messageSystem->log("init_tiles: Creating " + std::to_string(map_width * map_height) + " tiles (" + std::to_string(map_width) + " x " + std::to_string(map_height) + ")");
+		ctx.messageSystem->log("init_tiles: Creating " + std::to_string(mapWidth * mapHeight) + " tiles (" + std::to_string(mapWidth) + " x " + std::to_string(mapHeight) + ")");
 	}
 
-	for (int y = 0; y < map_height; y++)
+	for (int y = 0; y < mapHeight; y++)
 	{
-		for (int x = 0; x < map_width; x++)
+		for (int x = 0; x < mapWidth; x++)
 		{
 			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL, 0));
 		}
@@ -192,8 +188,8 @@ void Map::init(bool withActors, GameContext& ctx)
 {
 	init_tiles(ctx);
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
-	mapRng_ = RandomDice{ static_cast<unsigned int>(seed) };
-	fovMap = std::make_unique<FovMap>(map_width, map_height);
+	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
+	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
 	// Register the active map key before rooms are generated so decoration
 	// stamps inside create_room land in the correct DecorEditor bucket.
@@ -216,14 +212,14 @@ void Map::init(bool withActors, GameContext& ctx)
 void Map::generate_rooms(bool withActors, GameContext& ctx)
 {
 	DungeonGenerator gen;
-	gen.generate(map_width, map_height, mapRng_, withActors, ctx, *this);
+	gen.generate(mapWidth, mapHeight, mapRng, withActors, ctx, *this);
 	place_stairs(ctx);
 }
 
 void Map::load(const json& j)
 {
-	map_width = j.at("map_width").get<int>();
-	map_height = j.at("map_height").get<int>();
+	mapWidth = j.at("map_width").get<int>();
+	mapHeight = j.at("map_height").get<int>();
 	seed = j.at("seed").get<int>();
 
 	tiles.clear();
@@ -241,8 +237,8 @@ void Map::load(const json& j)
 		tiles.back().explored = explored;
 	}
 
-	fovMap = std::make_unique<FovMap>(map_width, map_height);
-	mapRng_ = RandomDice{ static_cast<unsigned int>(seed) };
+	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
+	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
 
 	// Rebuild FOV grid from loaded tile data.
 	for (const auto& tile : tiles)
@@ -259,8 +255,8 @@ void Map::load(const json& j)
 
 void Map::save(json& j)
 {
-	j["map_width"] = map_width;
-	j["map_height"] = map_height;
+	j["map_width"] = mapWidth;
+	j["map_height"] = mapHeight;
 	j["seed"] = seed;
 
 	j["tiles"] = json::array();
@@ -473,17 +469,11 @@ void Map::compute_fov(GameContext& ctx)
 		ctx.messageSystem->log("...Computing FOV...");
 	}
 
-	// Safety check for valid player position
-	if (!ctx.player ||
-		ctx.player->position.x < 0 || ctx.player->position.x >= map_width ||
-		ctx.player->position.y < 0 || ctx.player->position.y >= map_height)
-	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("Warning: Can't compute FOV - invalid player position");
-		}
-		return;
-	}
+	assert(ctx.player && "Map::compute_fov called without player");
+	assert(
+		ctx.player->position.x >= 0 && ctx.player->position.x < mapWidth &&
+		ctx.player->position.y >= 0 && ctx.player->position.y < mapHeight &&
+		"Map::compute_fov: player position out of map bounds");
 
 	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
 	rebuild_dijkstra_map({ ctx.player->position }, ctx);
@@ -515,8 +505,8 @@ void Map::render(const GameContext& ctx) const
 
 	int startCol = std::max(0, cameraX / tileSize);
 	int startRow = std::max(0, cameraY / tileSize);
-	int endCol = std::min(map_width, startCol + visibleCols + 2);
-	int endRow = std::min(map_height, startRow + visibleRows + 2);
+	int endCol = std::min(mapWidth, startCol + visibleCols + 2);
+	int endRow = std::min(mapHeight, startRow + visibleRows + 2);
 
 	// Cardinal neighbor definitions: offset + bitmask bit
 	struct NeighborDef
@@ -785,7 +775,7 @@ void Map::render(const GameContext& ctx) const
 void Map::add_item(Vector2D pos, GameContext& ctx)
 {
 	// 75% chance to spawn an item at all
-	if (mapRng_.roll(1, 100) > 75)
+	if (mapRng.roll(1, 100) > 75)
 	{
 		return;
 	}
@@ -825,7 +815,7 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	const int x2 = end.x;
 	const int y2 = end.y;
 
-	const bool horizontal_first = mapRng_.roll(0, 1) == 1;
+	const bool horizontal_first = mapRng.roll(0, 1) == 1;
 
 	// Only carve WALL tiles -- floor/corridor tiles keep their existing type.
 	// This prevents corridors from visually scarring room interiors when the
@@ -965,10 +955,9 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 
 void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.dice || !ctx.tileConfig || !ctx.objects)
-	{
-		return;
-	}
+	assert(ctx.dice && "Map::spawn_traps called without dice");
+	assert(ctx.tileConfig && "Map::spawn_traps called without tileConfig");
+	assert(ctx.objects && "Map::spawn_traps called without objects");
 
 	// ~30% of rooms get 0-2 random traps (was 10%)
 	if (ctx.dice->d10() > 3)
@@ -1043,7 +1032,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 		for (waterPos.x = room.col; waterPos.x <= room.col_end(); ++waterPos.x)
 		{
 			/*const int rolld100 = game->d.d100();*/
-			const int rolld100 = mapRng_.roll(1, 100);
+			const int rolld100 = mapRng.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
 				// Never place water on a decorated tile.
@@ -1231,18 +1220,18 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 	}
 
 	constexpr int MAX_ROOM_BARRELS = 2;
-	const int count = mapRng_.roll(0, MAX_ROOM_BARRELS);
+	const int count = mapRng.roll(0, MAX_ROOM_BARRELS);
 	const TileRef barrel_tile = ctx.tileConfig->get("TILE_BARREL");
 
 	for (int i = 0; i < count; ++i)
 	{
-		Vector2D pos{ mapRng_.roll(room.col, room.col_end()), mapRng_.roll(room.row, room.row_end()) };
+		Vector2D pos{ mapRng.roll(room.col, room.col_end()), mapRng.roll(room.row, room.row_end()) };
 		constexpr int MAX_TRIES = 20;
 		int tries = 0;
 		while (tries < MAX_TRIES && (!can_walk(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
 		{
-			pos.x = mapRng_.roll(room.col, room.col_end());
-			pos.y = mapRng_.roll(room.row, room.row_end());
+			pos.x = mapRng.roll(room.col, room.col_end());
+			pos.y = mapRng.roll(room.row, room.row_end());
 			++tries;
 		}
 		if (tries >= MAX_TRIES)
@@ -1263,10 +1252,8 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 
 void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.player || !ctx.dice)
-	{
-		return;
-	}
+	assert(ctx.player && "Map::spawn_player called without player");
+	assert(ctx.dice && "Map::spawn_player called without dice");
 
 	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
 	constexpr int MAX_PLAYER_TRIES = 50;
@@ -1283,10 +1270,9 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 
 void Map::place_stairs(GameContext& ctx)
 {
-	if (!ctx.stairs || !ctx.rooms || ctx.rooms->empty() || !ctx.dice)
-	{
-		return;
-	}
+	assert(ctx.stairs && "Map::place_stairs called without stairs");
+	assert(ctx.rooms && !ctx.rooms->empty() && "Map::place_stairs called without rooms");
+	assert(ctx.dice && "Map::place_stairs called without dice");
 
 	// BFS from room[0] to find the deepest room — forces player to explore
 	const std::vector<DungeonRoom>& rooms = *ctx.rooms;
@@ -1450,8 +1436,8 @@ void Map::regenerate(GameContext& ctx)
 	const int newW = get_map_width();
 	if (newH > 0 && newW > 0)
 	{
-		map_height = newH;
-		map_width = newW;
+		mapHeight = newH;
+		mapWidth = newW;
 	}
 	init(true, ctx);
 }
@@ -1590,7 +1576,7 @@ bool Map::is_door(Vector2D pos) const noexcept
 
 bool Map::is_open_door(Vector2D pos) const noexcept
 {
-	if (pos.y < 0 || pos.y >= map_height || pos.x < 0 || pos.x >= map_width)
+	if (pos.y < 0 || pos.y >= mapHeight || pos.x < 0 || pos.x >= mapWidth)
 		return false;
 	return get_tile_type(pos) == TileType::OPEN_DOOR;
 }
@@ -1797,8 +1783,10 @@ bool Map::is_door_locked(Vector2D pos) const noexcept
 void Map::place_amulet(GameContext& ctx)
 {
 	// Only place the amulet on the final level
-	if (!ctx.levelManager || !ctx.player || !ctx.rooms || !ctx.dice)
-		return;
+	assert(ctx.levelManager && "Map::place_amulet called without levelManager");
+	assert(ctx.player && "Map::place_amulet called without player");
+	assert(ctx.rooms && "Map::place_amulet called without rooms");
+	assert(ctx.dice && "Map::place_amulet called without dice");
 
 	if (ctx.levelManager->get_dungeon_level() == FINAL_DUNGEON_LEVEL)
 	{
@@ -1840,8 +1828,8 @@ std::vector<ItemPercentage> Map::get_item_distribution(int dungeonLevel)
 
 void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx)
 {
-	if (!ctx.levelManager || !ctx.dice)
-		return;
+	assert(ctx.levelManager && "Map::create_treasure_room called without levelManager");
+	assert(ctx.dice && "Map::create_treasure_room called without dice");
 
 	// Mark the area for the treasure room
 	for (int y = room.row; y <= room.row_end(); y++)
@@ -1878,7 +1866,7 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 		if (wardenPos.x >= 0)
 		{
 			MonsterParams wardenParams = MonsterCreator::get_params("dungeon_warden");
-			wardenParams.name = DungeonNames::generate_warden_name(mapRng_);
+			wardenParams.name = DungeonNames::generate_warden_name(mapRng);
 			ctx.creatures->push_back(
 				MonsterCreator::create_from_params(wardenPos, wardenParams, ctx));
 		}
@@ -1981,10 +1969,10 @@ int Map::count_room_entrances(const DungeonRoom& room) const
 
 void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.contentRegistry || !ctx.creatures || !ctx.dice || !ctx.player)
-	{
-		return;
-	}
+	assert(ctx.contentRegistry && "Map::setup_treasure_room_guard called without contentRegistry");
+	assert(ctx.creatures && "Map::setup_treasure_room_guard called without creatures");
+	assert(ctx.dice && "Map::setup_treasure_room_guard called without dice");
+	assert(ctx.player && "Map::setup_treasure_room_guard called without player");
 
 	// Two separate passes over the wall border:
 	//
@@ -2187,12 +2175,10 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 
 bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 {
-	if (!ctx.dice || !ctx.rooms)
-	{
-		return false;
-	}
+	assert(ctx.dice && "Map::maybe_create_treasure_room called without dice");
+	assert(ctx.rooms && "Map::maybe_create_treasure_room called without rooms");
 
-	// TODO: restore after testing — production formula: std::min(30 + (dungeonLevel * 5), 60)
+	// TODO: restore to production formula: std::min(30 + (dungeonLevel * 5), 60)
 	constexpr int treasureRoomChance = 100;
 	if (ctx.dice->d100() > treasureRoomChance)
 	{
@@ -2260,9 +2246,9 @@ void Map::post_process_doors()
 		return in_bounds(pos) && (get_tile_type(pos) == TileType::WALL || get_tile_type(pos) == TileType::WATER);
 	};
 
-	for (int y = 0; y < map_height; ++y)
+	for (int y = 0; y < mapHeight; ++y)
 	{
-		for (int x = 0; x < map_width; ++x)
+		for (int x = 0; x < mapWidth; ++x)
 		{
 			Vector2D pos{ x, y };
 			if (get_tile_type(pos) == TileType::CORRIDOR)
@@ -2507,7 +2493,7 @@ int Map::get_dijkstra_cost(Vector2D pos) const noexcept
 		return std::numeric_limits<int>::max();
 	}
 
-	return dijkstraCosts[static_cast<size_t>(pos.y) * map_width + pos.x];
+	return dijkstraCosts[static_cast<size_t>(pos.y) * mapWidth + pos.x];
 }
 
 void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx)
@@ -2528,7 +2514,7 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameCon
 		{
 			continue;
 		}
-		const size_t goalIndex = static_cast<size_t>(goal.y) * map_width + goal.x;
+		const size_t goalIndex = static_cast<size_t>(goal.y) * mapWidth + goal.x;
 		dijkstraCosts[goalIndex] = 0;
 		frontier.push(FrontierEntry{ 0, goal });
 	}
@@ -2547,7 +2533,7 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameCon
 		const FrontierEntry top = frontier.top();
 		frontier.pop();
 
-		const size_t currentIndex = static_cast<size_t>(top.position.y) * map_width + top.position.x;
+		const size_t currentIndex = static_cast<size_t>(top.position.y) * mapWidth + top.position.x;
 		if (top.cost > dijkstraCosts[currentIndex])
 		{
 			continue;
@@ -2568,7 +2554,7 @@ void Map::rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameCon
 			{
 				continue;
 			}
-			const size_t nextIndex = static_cast<size_t>(next.y) * map_width + next.x;
+			const size_t nextIndex = static_cast<size_t>(next.y) * mapWidth + next.x;
 			const int newCost = top.cost + 1;
 			if (newCost < dijkstraCosts[nextIndex])
 			{

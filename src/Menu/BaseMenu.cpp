@@ -1,4 +1,4 @@
-#include <cstdio>
+#include <cassert>
 #include <string>
 
 #include <raylib.h>
@@ -22,6 +22,9 @@ void BaseMenu::menu_new(
 	menuHeight = height;
 	menuStartX = startX;
 	menuStartY = startY;
+	assert(ctx.renderer && "BaseMenu::menu_new called without a renderer");
+	assert(ctx.inputSystem && "BaseMenu::menu_new called without an inputSystem");
+	assert(ctx.tileConfig && "BaseMenu::menu_new called without a tileConfig");
 	renderer = ctx.renderer;
 	inputSystem = ctx.inputSystem;
 	tileConfig = ctx.tileConfig;
@@ -29,21 +32,13 @@ void BaseMenu::menu_new(
 
 void BaseMenu::menu_clear()
 {
-	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
-	if (!renderer)
-	{
-		return;
-	}
-
+	assert(renderer && "BaseMenu::menu_clear called without a renderer");
 	renderer->begin_frame();
 }
 
 void BaseMenu::menu_print(int x, int y, const std::string& text)
 {
-	if (!renderer)
-	{
-		return;
-	}
+	assert(renderer && "BaseMenu::menu_print called without a renderer");
 
 	int tileSize = renderer->get_tile_size();
 	int px = (static_cast<int>(menuStartX) + x) * tileSize;
@@ -66,22 +61,13 @@ void BaseMenu::menu_print(int x, int y, const std::string& text)
 
 void BaseMenu::menu_refresh()
 {
-	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
-	if (!renderer)
-	{
-		return;
-	}
-
+	assert(renderer && "BaseMenu::menu_refresh called without a renderer");
 	renderer->end_frame();
 }
 
 void BaseMenu::menu_key_listen()
 {
-	if (!inputSystem)
-	{
-		std::printf("menu_key_listen: input_system is null\n");
-		return;
-	}
+	assert(inputSystem && "BaseMenu::menu_key_listen called without an inputSystem");
 
 	inputSystem->poll();
 
@@ -160,11 +146,7 @@ void BaseMenu::menu_key_listen()
 
 void BaseMenu::menu_draw_box()
 {
-	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
-	if (!renderer)
-	{
-		return;
-	}
+	assert(renderer && "BaseMenu::menu_draw_box called without a renderer");
 
 	int tileSize = renderer->get_tile_size();
 	int pixelX = static_cast<int>(menuStartX) * tileSize;
@@ -175,11 +157,7 @@ void BaseMenu::menu_draw_box()
 
 void BaseMenu::menu_draw_title(std::string_view title, int colorPair)
 {
-	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
-	if (!renderer)
-	{
-		return;
-	}
+	assert(renderer && "BaseMenu::menu_draw_title called without a renderer");
 
 	int tileSize = renderer->get_tile_size();
 	int fontOff = (tileSize - renderer->get_font_size()) / 2;

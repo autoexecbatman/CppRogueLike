@@ -63,10 +63,10 @@ enum class DoorState
 
 struct Tile
 {
-	Vector2D position;
-	TileType type;
-	bool explored;
-	double cost;
+	Vector2D position{};
+	TileType type{};
+	bool explored{};
+	double cost{};
 	DoorState doorState { DoorState::OPEN };
 
 	// overload the greater than operator
@@ -81,7 +81,8 @@ struct Tile
 class Map : public Persistent
 {
 private:
-	int map_height, map_width;
+	int mapWidth{};
+	int mapHeight{};
 	std::vector<Vector2D> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
@@ -90,8 +91,8 @@ private:
 	Vector2D get_map_size() const noexcept
 	{
 		Vector2D size{ 0, 0 };
-		size.x = map_width;
-		size.y = map_height;
+		size.x = mapWidth;
+		size.y = mapHeight;
 		return size;
 	}
 	bool in_bounds(Vector2D pos) const noexcept;
@@ -111,7 +112,7 @@ private:
 	void post_process_doors();
 
 public:
-	Map(int map_width, int map_height);
+	Map(int mapWidth, int mapHeight);
 
 	void load(const json& j) override;
 	void save(json& j) override;
@@ -135,16 +136,16 @@ public:
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
 	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, Vector2D target);
 	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
-	int get_width() const noexcept { return map_width; }
-	int get_height() const noexcept { return map_height; }
+	int get_width() const noexcept { return mapWidth; }
+	int get_height() const noexcept { return mapHeight; }
 	long get_seed() const noexcept { return seed; }
-	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < map_width && pos.y >= 0 && pos.y < map_height; }
+	bool is_in_bounds(Vector2D pos) const noexcept { return pos.x >= 0 && pos.x < mapWidth && pos.y >= 0 && pos.y < mapHeight; }
 	static std::vector<Vector2D> bresenham_line(Vector2D from, Vector2D to);
 	size_t get_index(Vector2D pos) const
 	{
 		if (in_bounds(pos))
 		{
-			return pos.y * map_width + pos.x;
+			return pos.y * mapWidth + pos.x;
 		}
 		else
 		{
@@ -183,7 +184,7 @@ public:
 
 protected:
 	std::unique_ptr<FovMap> fovMap;
-	RandomDice mapRng_;
+	RandomDice mapRng;
 	long seed;
 	friend class DungeonGenerator;
 	void dig(Vector2D begin, Vector2D end);

@@ -1,4 +1,5 @@
 // file: DeathMenu.cpp
+#include <cassert>
 #include <format>
 #include <string>
 #include <vector>
@@ -58,10 +59,7 @@ void DeathMenu::menu(GameContext& ctx)
 
 void DeathMenu::render(GameContext& ctx) const
 {
-    if (!ctx.renderer)
-    {
-        return;
-    }
+    assert(ctx.renderer && "DeathMenu::render called without a renderer");
 
     Renderer& r = *ctx.renderer;
     const int ts = r.get_tile_size();

@@ -1,5 +1,6 @@
 // file: Gui.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <string>
 #include <vector>
@@ -70,10 +71,7 @@ void Gui::gui_update(GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::gui_render(const GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::gui_render called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -130,10 +128,7 @@ void Gui::gui_render(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_hp_bar(const GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::render_hp_bar called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -191,10 +186,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 
 void Gui::render_hunger_status(const GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::render_hunger_status called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -244,10 +236,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::gui_print_stats(const GameContext& ctx) noexcept
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::gui_print_stats called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -311,10 +300,7 @@ void Gui::gui_print_attrs(const GameContext& /*ctx*/) noexcept {}
 // ---------------------------------------------------------------------------
 void Gui::gui_print_log(const GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::gui_print_log called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
@@ -349,10 +335,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 // ---------------------------------------------------------------------------
 void Gui::render_player_status(const GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "Gui::render_player_status called without a renderer");
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vrows = ctx.renderer->get_viewport_rows();

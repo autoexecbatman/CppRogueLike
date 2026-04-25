@@ -2312,7 +2312,7 @@
         "name": "Dungeon Warden",
         "str": { "bonus": 6, "num": 3, "sides": 6 },
         "thaco": 16,
-        "tile": { "col": 5, "row": 12, "sheet": 6 },
+        "tile": { "col": 4, "row": 0, "sheet": 6 },
         "weapon": "Longsword",
         "weight": 0,
         "wis": { "bonus": 0, "num": 3, "sides": 6 },

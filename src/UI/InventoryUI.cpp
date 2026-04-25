@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <format>
 #include <memory>
@@ -36,10 +37,7 @@ int InventoryUI::screen_rows(GameContext& ctx) const
 
 void InventoryUI::draw_frame(GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "InventoryUI::draw_frame called without a renderer");
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int vcols = screen_cols(ctx);
@@ -66,10 +64,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 // Draw a full-width white highlight bar at the given tile row.
 void InventoryUI::draw_highlight_row(int px, int y_tile, GameContext& ctx)
 {
-	if (!ctx.renderer)
-	{
-		return;
-	}
+	assert(ctx.renderer && "InventoryUI::draw_highlight_row called without a renderer");
 
 	int tileSize = ctx.renderer->get_tile_size();
 	int bar_x = 1 * tileSize;
@@ -819,10 +814,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 
 	case GameKey::MOUSE_LEFT:
 	{
-		if (!ctx.renderer)
-		{
-			return true;
-		}
+		assert(ctx.renderer && "InventoryUI::handle_input MOUSE_LEFT called without a renderer");
 
 		int tileSize = ctx.renderer->get_tile_size();
 		::Vector2 rawMouse = GetMousePosition();

@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <functional>
 
@@ -103,19 +104,14 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 
 void AiMonsterRanged::animate_arrow(Vector2D from, Vector2D to, GameContext& ctx)
 {
-	if (!ctx.animSystem || !ctx.tileConfig)
-	{
-		return;
-	}
+	assert(ctx.animSystem && "AiMonsterRanged::animate_arrow called without an animSystem");
+	assert(ctx.tileConfig && "AiMonsterRanged::animate_arrow called without a tileConfig");
 
 	const TileRef boltTile = ctx.tileConfig->get("TILE_EFFECT_BOLT");
 
 	auto onArrive = [to, &ctx]()
 	{
-		if (ctx.animSystem)
-		{
-			ctx.animSystem->spawn_blood_burst(to.x, to.y, 3);
-		}
+		ctx.animSystem->spawn_blood_burst(to.x, to.y, 3);
 	};
 
 	ctx.animSystem->spawn_projectile(
