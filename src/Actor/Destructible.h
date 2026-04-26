@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include "../Combat/ArmorClass.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/DeathHandler.h"
 #include "../Persistent/Persistent.h"
@@ -21,14 +22,11 @@ private:
     std::string corpseName{};
     int xp{};
     int thaco{};
-    int armorClass{};
-    int baseArmorClass{};
     int lastConstitution{};
     int tempHp{};
     std::unique_ptr<DeathHandler> deathHandler{};
+    std::unique_ptr<ArmorClass> armorClass{};
 
-    [[nodiscard]] int calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const;
-    [[nodiscard]] int calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const;
     [[nodiscard]] int calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const;
     [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
     [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
@@ -57,8 +55,8 @@ public:
     [[nodiscard]] bool is_dead() const noexcept { return hp <= 0; }
     [[nodiscard]] int get_hp() const noexcept { return hp; }
     [[nodiscard]] int get_max_hp() const noexcept { return hpMax; }
-    [[nodiscard]] int get_armor_class() const noexcept { return armorClass; }
-    [[nodiscard]] int get_base_armor_class() const noexcept { return baseArmorClass; }
+    [[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
+    [[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
     [[nodiscard]] int get_thaco() const noexcept { return thaco; }
     [[nodiscard]] int get_dr() const noexcept { return dr; }
     [[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
@@ -76,8 +74,8 @@ public:
     void set_hp(int value) noexcept { hp = value; }
     void set_max_hp(int value) noexcept { hpMax = value; }
     void set_hp_base(int value) noexcept { hpBase = value; }
-    void set_armor_class(int value) noexcept { armorClass = value; }
-    void set_base_armor_class(int value) noexcept { baseArmorClass = value; }
+    void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
+    void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
     void set_thaco(int value) noexcept { thaco = value; }
     void set_dr(int value) noexcept { dr = value; }
     void set_corpse_name(std::string_view name) { corpseName = name; }
@@ -90,6 +88,7 @@ public:
     void die(Creature& owner, GameContext& ctx);
     [[nodiscard]] int heal(int hpToHeal);
     void update_armor_class(Creature& owner, GameContext& ctx);
+    [[nodiscard]] const ArmorClass* get_armor_class_system() const noexcept { return armorClass.get(); }
 
     void load(const json& j) override;
     void save(json& j) override;

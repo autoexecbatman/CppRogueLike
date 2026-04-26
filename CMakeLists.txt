@@ -350,6 +350,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
     ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.h
     ${PROJECT_SOURCE_DIR}/Combat/DamageInfo.h
+    ${PROJECT_SOURCE_DIR}/Combat/ArmorClass.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/ArmorClass.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp

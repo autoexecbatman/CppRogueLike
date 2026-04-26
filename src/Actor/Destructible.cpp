@@ -50,7 +50,7 @@ Destructible::Destructible(
     std::string_view corpseName,
     int xp,
     int thaco,
-    int armorClass,
+    int armorClassValue,
     std::unique_ptr<DeathHandler> handler)
     : hpBase(hpMax),
       hpMax(hpMax),
@@ -59,11 +59,10 @@ Destructible::Destructible(
       corpseName(corpseName),
       xp(xp),
       thaco(thaco),
-      armorClass(armorClass),
-      baseArmorClass(armorClass),
       lastConstitution(0),
       tempHp(0),
-      deathHandler(std::move(handler))
+      deathHandler(std::move(handler)),
+      armorClass(std::make_unique<ArmorClass>(armorClassValue))
 {
 }
 
@@ -256,156 +255,7 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 
 void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 {
-    const int baseAC = get_base_armor_class();
-    const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
-    const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-    const int tempBonus = ctx.buffSystem->calculate_ac_bonus(owner);
-    const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
-
-    if (get_armor_class() != calculatedAC)
-    {
-        const int oldAC = get_armor_class();
-        set_armor_class(calculatedAC);
-
-        if (&owner == ctx.player)
-        {
-            ctx.messageSystem->log(std::format(
-                "Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
-                oldAC,
-                calculatedAC,
-                baseAC,
-                dexBonus,
-                equipBonus,
-                tempBonus));
-        }
-    }
-}
-
-[[nodiscard]] int Destructible::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
-{
-    const auto& dexAttributes = ctx.dataManager->get_dexterity_attributes();
-    const int dexterity = owner.get_dexterity();
-
-    if (dexterity <= 0 || dexterity > static_cast<int>(dexAttributes.size()))
-    {
-        return 0;
-    }
-
-    const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
-
-    if (&owner == ctx.player && defensiveAdj != 0)
-    {
-        ctx.messageSystem->log(std::format(
-            "Dexterity Defensive Adjustment: {:+} (Dex: {})",
-            defensiveAdj,
-            dexterity));
-    }
-
-    return defensiveAdj;
-}
-
-// Single source of truth: slot-based equipment AC calculation
-// Works polymorphically via virtual get_equipped_item():
-//   - Players: returns items from equipment slots
-//   - NPCs: returns nullptr (no slot-based equipment, 0 AC bonus)
-[[nodiscard]] int Destructible::calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const
-{
-    int totalBonus = 0;
-
-    if (Item* equippedArmor = owner.get_equipped_item(EquipmentSlot::BODY))
-    {
-        int armorBonus = equippedArmor->behavior ? get_item_ac_bonus(*equippedArmor->behavior) : 0;
-
-        if (equippedArmor->get_enhancement().blessing == BlessingStatus::CURSED)
-        {
-            armorBonus += 1;
-        }
-
-        if (armorBonus != 0)
-        {
-            totalBonus += armorBonus;
-
-            if (&owner == ctx.player)
-            {
-                ctx.messageSystem->log(std::format(
-                    "Armor bonus: {:+} from {}",
-                    armorBonus,
-                    equippedArmor->actorData.name));
-            }
-        }
-    }
-
-    if (Item* equippedShield = owner.get_equipped_item(EquipmentSlot::LEFT_HAND))
-    {
-        int shieldBonus = equippedShield->behavior ? get_item_ac_bonus(*equippedShield->behavior) : 0;
-
-        if (equippedShield->get_enhancement().blessing == BlessingStatus::CURSED)
-        {
-            shieldBonus += 1;
-        }
-
-        if (shieldBonus != 0)
-        {
-            totalBonus += shieldBonus;
-
-            if (&owner == ctx.player)
-            {
-                ctx.messageSystem->log(std::format(
-                    "Shield bonus: {:+} from {}",
-                    shieldBonus,
-                    equippedShield->actorData.name));
-            }
-        }
-    }
-
-    // AD&D 2e: best ring applies, no stacking
-    int bestRingBonus = 0;
-    const Item* bestRing = nullptr;
-
-    for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
-    {
-        if (Item* equippedRing = owner.get_equipped_item(slot))
-        {
-            const int ringBonus = equippedRing->behavior ? get_item_ac_bonus(*equippedRing->behavior) : 0;
-            if (ringBonus < bestRingBonus)
-            {
-                bestRingBonus = ringBonus;
-                bestRing = equippedRing;
-            }
-        }
-    }
-
-    if (bestRingBonus < 0 && bestRing)
-    {
-        totalBonus += bestRingBonus;
-
-        if (&owner == ctx.player)
-        {
-            ctx.messageSystem->log(std::format(
-                "Ring bonus: {:+} from {}",
-                bestRingBonus,
-                bestRing->actorData.name));
-        }
-    }
-
-    if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
-    {
-        const int helmBonus = equippedHelm->behavior ? get_item_ac_bonus(*equippedHelm->behavior) : 0;
-        if (helmBonus < 0)
-        {
-            totalBonus += helmBonus;
-
-            if (&owner == ctx.player)
-            {
-                ctx.messageSystem->log(std::format(
-                    "Helm bonus: {:+} from {}",
-                    helmBonus,
-                    equippedHelm->actorData.name));
-            }
-        }
-    }
-
-    return totalBonus;
+	armorClass->update(owner, ctx);
 }
 
 void Destructible::load(const json& j)
@@ -418,9 +268,10 @@ void Destructible::load(const json& j)
     set_corpse_name(j.at("corpseName").get<std::string>());
     set_xp(j.at("xp").get<int>());
     set_thaco(j.at("thaco").get<int>());
-    set_armor_class(j.at("armorClass").get<int>());
-    set_base_armor_class(j.at("baseArmorClass").get<int>());
     set_temp_hp(j.at("tempHp").get<int>());
+
+    armorClass->set_armor_class(j.at("armorClass").get<int>());
+    armorClass->set_base_armor_class(j.at("baseArmorClass").get<int>());
 }
 
 void Destructible::save(json& j)
@@ -435,9 +286,9 @@ void Destructible::save(json& j)
     j["corpseName"] = get_corpse_name();
     j["xp"] = get_xp();
     j["thaco"] = get_thaco();
+    j["tempHp"] = get_temp_hp();
     j["armorClass"] = get_armor_class();
     j["baseArmorClass"] = get_base_armor_class();
-    j["tempHp"] = get_temp_hp();
 }
 
 [[nodiscard]] std::unique_ptr<Destructible> Destructible::create(const json& j)
