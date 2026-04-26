@@ -705,11 +705,7 @@ void Renderer::zoom_out()
 
 void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const
 {
-	// TODO: What does it mean for sheetsLoaded to be null? Should it be an assertion instead?
-	if (!sheetsLoaded)
-	{
-		return;
-	}
+	assert(sheetsLoaded && "Renderer::draw_frame called before sheets are loaded");
 
 	DrawRectangle(screenPos.x, screenPos.y, wTiles * tileSize, hTiles * tileSize, Color{ 8, 8, 16, 255 });
 

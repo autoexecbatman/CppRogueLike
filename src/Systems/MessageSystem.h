@@ -55,7 +55,4 @@ private:
 	// Debug state
 	bool debugMode{ true };
 
-	// Helper methods for debug display
-	void render_debug_background() const;
-	void create_debug_pad(int total_lines) const;
 };

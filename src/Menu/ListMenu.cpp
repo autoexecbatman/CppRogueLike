@@ -43,11 +43,6 @@ ListMenu::ListMenu(
     menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
 }
 
-ListMenu::~ListMenu()
-{
-    menu_delete();
-}
-
 void ListMenu::draw_entries()
 {
     for (size_t i = 0; i < entries.size(); ++i)

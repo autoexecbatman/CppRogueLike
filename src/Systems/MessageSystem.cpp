@@ -1,8 +1,6 @@
-#include <fstream>
 #include <iostream>
 #include <string>
 
-#include "../Core/Paths.h"
 #include "../Gui/Gui.h"
 #include "../Gui/LogMessage.h"
 #include "MessageSystem.h"
@@ -11,87 +9,63 @@ MessageSystem::MessageSystem() = default;
 
 void MessageSystem::message(int color, std::string_view text, bool isComplete)
 {
-	// Store message in system
-	messageToDisplay = text;
-	messageColor = color;
+    // Store message in system
+    messageToDisplay = text;
+    messageColor = color;
 
-	// Always append the message part to attackMessageParts
-	attackMessageParts.push_back(LogMessage{ color, std::string(text) });
+    // Always append the message part to attackMessageParts
+    attackMessageParts.push_back(LogMessage{ color, std::string(text) });
 
-	// If isComplete flag is set, consider the message to be finished
-	if (isComplete)
-	{
-		// Add the entire composed message parts to attackMessagesWhole
-		attackMessagesWhole.push_back(attackMessageParts);
+    // If isComplete flag is set, consider the message to be finished
+    if (isComplete)
+    {
+        // Add the entire composed message parts to attackMessagesWhole
+        attackMessagesWhole.push_back(attackMessageParts);
 
-		// Clear attackMessageParts for the next message
-		attackMessageParts.clear();
-	}
+        // Clear attackMessageParts for the next message
+        attackMessageParts.clear();
+    }
 
-	log("Stored message: '" + messageToDisplay + "'");
-	log("Stored message color: " + std::to_string(messageColor));
+    log("Stored message: '" + messageToDisplay + "'");
+    log("Stored message color: " + std::to_string(messageColor));
 }
 
 void MessageSystem::append_message_part(int color, std::string_view text)
 {
-	attackMessageParts.push_back({ color, std::string(text) });
+    attackMessageParts.push_back({ color, std::string(text) });
 }
 
 void MessageSystem::finalize_message()
 {
-	if (!attackMessageParts.empty())
-	{
-		attackMessagesWhole.push_back(attackMessageParts);
-		attackMessageParts.clear();
-	}
+    if (!attackMessageParts.empty())
+    {
+        attackMessagesWhole.push_back(attackMessageParts);
+        attackMessageParts.clear();
+    }
 }
 
 void MessageSystem::transfer_messages_to_gui(Gui& gui)
 {
-	for (const auto& message : attackMessagesWhole)
-	{
-		gui.add_display_message(message);
-	}
-	attackMessagesWhole.clear();
+    for (const auto& message : attackMessagesWhole)
+    {
+        gui.add_display_message(message);
+    }
+    attackMessagesWhole.clear();
 }
 
 void MessageSystem::log(std::string_view message) const
 {
-	if (debugMode)
-	{
-		std::clog << message << "\n";
-		std::cout << message << "\n";
-	}
+    if (debugMode)
+    {
+        std::clog << message << "\n";
+        std::cout << message << "\n";
+    }
 }
 
 void MessageSystem::display_debug_messages() const noexcept
 {
-	render_debug_background();
-
-	int total_lines = 0;
-	std::ifstream logFile(Paths::LOG.data());
-	std::string line;
-
-	// First, count the number of lines in the file
-	while (getline(logFile, line))
-	{
-		total_lines++;
-	}
-	logFile.close();
-
-	create_debug_pad(total_lines);
-}
-
-void MessageSystem::render_debug_background() const
-{
-	// TODO: stub - clear screen and render game background without curses
-}
-
-void MessageSystem::create_debug_pad(int total_lines) const
-{
-	// TODO: stub - debug log pad display requires curses replacement
-	// Previously used newpad/prefresh/getch/delwin for scrollable log viewer
-	// Key constants for reference:
-	//   KEY_DOWN = 0x102, KEY_UP = 0x103
-	//   KEY_HOME = 0x106, KEY_END = 0x166
+    // Scrollable debug log viewer — not yet ported from curses to Raylib.
+    // The log() function already streams to std::clog / std::cout in debug mode.
+    // When implemented: read log file and render via ctx.renderer with scroll support.
+    log("display_debug_messages: debug viewer not yet implemented for Raylib");
 }

@@ -16,7 +16,6 @@ private:
 
 public:
 	MenuName(GameContext& ctx);
-	~MenuName();
 	MenuName(const MenuName&) = delete;
 	MenuName& operator=(const MenuName&) = delete;
 	MenuName(MenuName&&) = delete;

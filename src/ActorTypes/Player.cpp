@@ -28,6 +28,7 @@
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/BuffSystem.h"
+#include "../Systems/FloatingTextSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/DisplayManager.h"
 #include "../Systems/HungerSystem.h"
@@ -562,9 +563,17 @@ bool Player::rest(GameContext& ctx)
 
 void Player::animate_resting(GameContext& ctx)
 {
-	// TODO: Implement resting animation via Renderer
-	// Should display 'z', 'z', 'Z', 'Z', 'Z' symbols above player
-	// with WHITE_GREEN_PAIR color and 80ms delay between frames
+	// Spawn one floating 'z'/'Z' above the player each rest turn.
+	// The floating text system handles the animated drift and fade.
+	// Alternate lowercase/uppercase by hp recovered so far (varies nicely).
+	const bool big = (destructible->get_max_hp() - destructible->get_hp()) < 5;
+	const std::string symbol = big ? "Z" : "z";
+	ctx.floatingText->spawn_text(
+		position.x,
+		position.y - 1,
+		symbol,
+		200, 230, 200,
+		1.2f);
 	ctx.renderingManager->render(ctx);
 }
 

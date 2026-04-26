@@ -5,7 +5,6 @@
 #include <iostream>
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -26,7 +25,7 @@ void PrefabLibrary::register_symbol(char sym, TileRef tile, std::string_view lab
 {
 	symbolToTile[sym] = tile;
 	symbolToLabel[sym] = std::string(label);
-	paletteOrder.emplace_back(sym, std::string(label));
+	paletteOrder.push_back(PaletteEntry{ sym, std::string(label) });
 }
 
 void PrefabLibrary::build_structural_symbols()
@@ -196,14 +195,14 @@ void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
 void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
 {
 	symbolToLabel[sym] = label;
-	auto find_sym = [sym](const auto& e)
+	auto find_sym = [sym](const PaletteEntry& e)
 	{
-		return e.first == sym;
+		return e.symbol == sym;
 	};
 	auto it = std::ranges::find_if(paletteOrder, find_sym);
 	if (it != paletteOrder.end())
 	{
-		it->second = label;
+		it->label = label;
 	}
 }
 

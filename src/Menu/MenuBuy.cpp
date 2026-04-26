@@ -63,11 +63,6 @@ MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 		ctx);
 }
 
-MenuBuy::~MenuBuy()
-{
-	menu_delete();
-}
-
 void MenuBuy::menu_print_state(size_t state)
 {
 	if (state >= menuItems.size())
@@ -130,7 +125,6 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 			return;
 		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
-		menu_mark_dirty();
 		break;
 	}
 
@@ -142,7 +136,6 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 			return;
 		}
 		currentState = (currentState + 1) % menuItems.size();
-		menu_mark_dirty();
 		break;
 	}
 
@@ -157,8 +150,7 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 		if (!is_inventory_empty(shopkeeper.shop_inventory))
 		{
 			handle_buy();
-			menu_mark_dirty();
-		}
+			}
 		else
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);

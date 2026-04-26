@@ -36,7 +36,6 @@ public:
         std::function<void(GameContext&)> onEscape,
         std::function<void(GameContext&)> onFrame,
         GameContext& ctx);
-    ~ListMenu() override;
     ListMenu(const ListMenu&) = delete;
     ListMenu& operator=(const ListMenu&) = delete;
     ListMenu(ListMenu&&) = delete;

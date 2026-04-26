@@ -260,7 +260,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		const auto& pal = library->ordered_palette();
 		if (paletteIndex >= 0 && paletteIndex < static_cast<int>(pal.size()))
 		{
-			inputBuffer = pal[paletteIndex].second;
+			inputBuffer = pal[paletteIndex].label;
 			mode = EditorMode::INPUT_LABEL;
 		}
 		return;
@@ -480,7 +480,7 @@ void RoomEditor::handle_input_text(GameContext& ctx)
 				const auto& pal = library->ordered_palette();
 				if (paletteIndex >= 0 && paletteIndex < static_cast<int>(pal.size()))
 				{
-					char sym = pal[paletteIndex].first;
+					char sym = pal[paletteIndex].symbol;
 					library->set_symbol_label(sym, inputBuffer);
 					library->save(Paths::PREFABS);
 					set_status(std::format("Label: '{}'={}", sym, inputBuffer));
@@ -616,7 +616,7 @@ char RoomEditor::selected_sym() const
 	const auto& pal = library->ordered_palette();
 	if (paletteIndex < 0 || paletteIndex >= static_cast<int>(pal.size()))
 		return '.';
-	return pal[paletteIndex].first;
+	return pal[paletteIndex].symbol;
 }
 
 // Tile to draw for a symbol in the canvas and palette.
@@ -766,7 +766,7 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 	{
 		int idx = scroll_start + slot;
 		int py = panel_y + slot * tileSize;
-		char sym = pal[idx].first;
+		char sym = pal[idx].symbol;
 
 		bool selected = (idx == paletteIndex);
 
@@ -811,7 +811,7 @@ void RoomEditor::render_left_panel(const Renderer& r) const
 			? Color{ 255, 255, 100, 255 }
 			: Color{ 180, 180, 200, 200 };
 
-		r.draw_text_color(Vector2D{ tileSize + 4, py + (tileSize - r.get_font_size()) / 2 }, pal[idx].second, label_col);
+		r.draw_text_color(Vector2D{ tileSize + 4, py + (tileSize - r.get_font_size()) / 2 }, pal[idx].label, label_col);
 
 		if (selected)
 			DrawRectangleLines(1, py + 1, panel_w - 2, tileSize - 2, Color{ 200, 200, 100, 180 });
@@ -1057,7 +1057,7 @@ void RoomEditor::handle_input_picker(GameContext& ctx)
 		const auto& pal = library->ordered_palette();
 		if (paletteIndex >= 0 && paletteIndex < static_cast<int>(pal.size()))
 		{
-			char sym = pal[paletteIndex].first;
+			char sym = pal[paletteIndex].symbol;
 			TileRef tile{ sheet_id, pickerCol, pickerRow };
 			library->set_symbol_tile(sym, tile);
 			library->save(Paths::PREFABS);
@@ -1117,7 +1117,7 @@ void RoomEditor::render_tile_picker(const Renderer& r) const
 	if (pal_ptr && paletteIndex >= 0 &&
 		paletteIndex < static_cast<int>(pal_ptr->size()))
 	{
-		char sym = (*pal_ptr)[paletteIndex].first;
+		char sym = (*pal_ptr)[paletteIndex].symbol;
 		sym_info = std::format("Assigning tile for '{}' ({})",
 			sym,
 			library->symbol_label(sym));

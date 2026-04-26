@@ -7,7 +7,7 @@ class DisplayManager
 {
 public:
 	// Display management methods
-	void display_help() const noexcept;
+	void display_help(GameContext& ctx) const;
 	void display_levelup(Player& player, int xpLevel, GameContext& ctx) const;
 	void display_character_sheet(const Player& player, GameContext& ctx) const noexcept;
 	void display_balance_viewer(GameContext& ctx) const;

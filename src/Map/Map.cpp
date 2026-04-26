@@ -157,10 +157,12 @@ bool Map::in_bounds(Vector2D pos) const noexcept
 
 void Map::init_tiles(GameContext& ctx)
 {
-	if (!tiles.empty())
-	{
-		tiles.clear();
-	}
+	tiles.clear();
+
+	// FovMap must be reset alongside tiles so can_walk / is_wall see correct
+	// state even when init_tiles is called standalone (e.g. in tests).
+	// All FovCells default to walkable=false, transparent=false — matches WALL.
+	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
 	if (ctx.messageSystem)
 	{
@@ -184,12 +186,11 @@ void Map::init_tiles(GameContext& ctx)
 //====
 // We have to move the map initialization code out of the constructor
 // for enabling loading the map from the file.
-void Map::init(bool withActors, GameContext& ctx)
+void Map::init(GameContext& ctx)
 {
-	init_tiles(ctx);
+	init_tiles(ctx);  // resets tiles + fovMap to all-walls
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
 	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
-	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
 	// Register the active map key before rooms are generated so decoration
 	// stamps inside create_room land in the correct DecorEditor bucket.
@@ -198,7 +199,7 @@ void Map::init(bool withActors, GameContext& ctx)
 		ctx.decorEditor->set_active_map(seed, ctx.levelManager->get_dungeon_level());
 	}
 
-	generate_rooms(withActors, ctx);
+	generate_rooms(ctx);
 
 	post_process_doors();
 
@@ -209,10 +210,10 @@ void Map::init(bool withActors, GameContext& ctx)
 	place_amulet(ctx);
 }
 
-void Map::generate_rooms(bool withActors, GameContext& ctx)
+void Map::generate_rooms(GameContext& ctx)
 {
 	DungeonGenerator gen;
-	gen.generate(mapWidth, mapHeight, mapRng, withActors, ctx, *this);
+	gen.generate(mapWidth, mapHeight, mapRng, ctx, *this);
 	place_stairs(ctx);
 }
 
@@ -895,7 +896,7 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
 }
 
-void Map::create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx)
+void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 {
 	if (ctx.rooms)
 	{
@@ -936,11 +937,6 @@ void Map::create_room(const DungeonRoom& room, bool first, bool withActors, Game
 	}
 
 	spawn_water(room, ctx);
-
-	if (!withActors)
-	{
-		return;
-	}
 
 	if (first)
 	{
@@ -1439,7 +1435,7 @@ void Map::regenerate(GameContext& ctx)
 		mapHeight = newH;
 		mapWidth = newW;
 	}
-	init(true, ctx);
+	init(ctx);
 }
 
 std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, Vector2D target)
@@ -2178,8 +2174,7 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 	assert(ctx.dice && "Map::maybe_create_treasure_room called without dice");
 	assert(ctx.rooms && "Map::maybe_create_treasure_room called without rooms");
 
-	// TODO: restore to production formula: std::min(30 + (dungeonLevel * 5), 60)
-	constexpr int treasureRoomChance = 100;
+	const int treasureRoomChance = std::min(30 + (dungeonLevel * 5), 60);
 	if (ctx.dice->d100() > treasureRoomChance)
 	{
 		return false;
@@ -2393,7 +2388,6 @@ void Map::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 
 void Map::place_from_graph(
 	const std::vector<DungeonRoom>& rooms,
-	bool withActors,
 	GameContext& ctx)
 {
 	if (ctx.messageSystem)
@@ -2404,8 +2398,7 @@ void Map::place_from_graph(
 	// Step 1: Create all rooms (dig them, spawn water/items/player)
 	for (int i = 0; i < static_cast<int>(rooms.size()); ++i)
 	{
-		create_room(rooms[i], i == 0, withActors, ctx);
-		spawn_traps(rooms[i], ctx);
+		create_room(rooms[i], i == 0, ctx);
 	}
 
 	if (ctx.messageSystem)

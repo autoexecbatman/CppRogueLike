@@ -1328,7 +1328,7 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 
 void SpellSystem::show_casting_menu(Player& player, GameContext& ctx)
 {
-	ctx.menus->push_back(std::make_unique<MenuSpellCast>(player));
+	ctx.menus->push_back(std::make_unique<MenuSpellCast>(player, ctx));
 }
 
 std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(const Player& player)

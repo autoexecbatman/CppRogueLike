@@ -35,13 +35,11 @@ public:
 	void menu_clear();
 	void menu_print(int x, int y, const std::string& text);
 	void menu_refresh();
-	void menu_delete() {}
 	void menu_highlight_on() { isHighlighted = true; }
 	void menu_highlight_off() { isHighlighted = false; }
 	void menu_key_listen();
 	void menu_set_run_true() { run = true; }
 	void menu_set_run_false() { run = false; }
-	void menu_mark_dirty() {}
 	void menu_draw_box();
 	void menu_draw_title(std::string_view title, int colorPair);
 

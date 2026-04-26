@@ -14,7 +14,6 @@
 
 #include <string>
 #include <unordered_map>
-#include <utility>
 #include <vector>
 
 #include "../Renderer/Renderer.h"
@@ -22,6 +21,14 @@
 class DecorEditor;
 class Map;
 struct DungeonRoom;
+
+// ---------------------------------------------------------------------------
+
+struct PaletteEntry
+{
+	char symbol{};
+	std::string label{};
+};
 
 // ---------------------------------------------------------------------------
 
@@ -57,9 +64,8 @@ public:
 	bool is_decoration(char c) const;
 	std::string symbol_label(char c) const;
 	
-	// TODO: Usage of pair. Prefer returning a struct with named fields for clarity.
 	// Ordered palette of all known symbols (for Room Editor UI).
-	const std::vector<std::pair<char, std::string>>& ordered_palette() const { return paletteOrder; }
+	const std::vector<PaletteEntry>& ordered_palette() const { return paletteOrder; }
 
 	void set_symbol_tile(char sym, TileRef tile);
 	void set_symbol_label(char sym, const std::string& label);
@@ -76,7 +82,7 @@ private:
 	std::vector<Prefab> prefabs;
 	std::unordered_map<char, TileRef> symbolToTile; // char -> tile (invalid = structural)
 	std::unordered_map<char, std::string> symbolToLabel;
-	std::vector<std::pair<char, std::string>> paletteOrder; // stable display order
+	std::vector<PaletteEntry> paletteOrder; // stable display order
 
 	void build_structural_symbols();
 	void register_symbol(char sym, TileRef tile, std::string_view label);

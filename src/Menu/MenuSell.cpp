@@ -165,11 +165,6 @@ MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	}
 }
 
-MenuSell::~MenuSell()
-{
-	menu_delete();
-}
-
 void MenuSell::draw_content()
 {
 	// Player inventory is always initialized - no need to check
@@ -231,7 +226,6 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		}
 
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
-		menu_mark_dirty(); // Mark for redraw
 		break;
 	}
 
@@ -248,7 +242,6 @@ void MenuSell::on_key(int key, GameContext& ctx)
 			return; // Check for empty menu
 		}
 		currentState = (currentState + 1) % menuItems.size();
-		menu_mark_dirty(); // Mark for redraw
 		break;
 	}
 
@@ -258,7 +251,6 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
 		{
 			handle_sell(nullptr, shopkeeper, player, ctx);
-			menu_mark_dirty(); // Redraw after sale
 		}
 		else
 		{

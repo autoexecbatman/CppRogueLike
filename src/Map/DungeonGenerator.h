@@ -26,7 +26,6 @@ public:
 		int mapWidth,
 		int mapHeight,
 		RandomDice& rng,
-		bool withActors,
 		GameContext& ctx,
 		Map& map) const;
 

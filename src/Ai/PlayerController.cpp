@@ -1102,7 +1102,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::HELP:
 	{
-		ctx.displayManager->display_help();
+		ctx.displayManager->display_help(ctx);
 		break;
 	}
 

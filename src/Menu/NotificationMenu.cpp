@@ -38,11 +38,6 @@ NotificationMenu::NotificationMenu(
     menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
 }
 
-NotificationMenu::~NotificationMenu()
-{
-    menu_delete();
-}
-
 void NotificationMenu::draw()
 {
     menu_clear();

@@ -270,7 +270,6 @@ void DungeonGenerator::generate(
 	int mapWidth,
 	int mapHeight,
 	RandomDice& rng,
-	bool withActors,
 	GameContext& ctx,
 	Map& map) const
 {
@@ -311,7 +310,7 @@ void DungeonGenerator::generate(
 	add_extra_corridors(rooms, rng);
 
 	// ---- Render graph to tiles and spawn content ----
-	map.place_from_graph(rooms, withActors, ctx);
+	map.place_from_graph(rooms, ctx);
 
 	if (ctx.rooms)
 	{

@@ -7,167 +7,170 @@
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
 #include "../Systems/SpellSystem.h"
 #include "MenuSpellCast.h"
 
-MenuSpellCast::MenuSpellCast(Player& player)
-	: player(player)
+MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
+    : player(player)
 {
+    populate_spells();
+
+    if (availableSpells.empty())
+    {
+        // No spells available — menu() will close immediately on first frame.
+        return;
+    }
+
+    const int width = 45;
+    const int height = static_cast<int>(availableSpells.size()) + 4;
+    const int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 30;
+    const int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 119;
+    const size_t startX = static_cast<size_t>((vcols - width) / 2);
+    const size_t startY = static_cast<size_t>((vrows - height) / 2);
+    menu_new(static_cast<size_t>(width), static_cast<size_t>(height), startX, startY, ctx);
 }
 
 void MenuSpellCast::populate_spells()
 {
-	availableSpells.clear();
-	spellSources.clear();
+    availableSpells.clear();
+    spellSources.clear();
 
-	// Add memorized spells (string keys)
-	for (const auto& key : player.memorizedSpells)
-	{
-		availableSpells.push_back(key);
-		spellSources.push_back("");
-	}
+    // Add memorized spells (string keys)
+    for (const auto& key : player.memorizedSpells)
+    {
+        availableSpells.push_back(key);
+        spellSources.push_back("");
+    }
 
-	// Add item-granted spells
-	const auto itemSpells = SpellSystem::get_item_granted_spells(player);
-	for (const auto& itemSpell : itemSpells)
-	{
-		availableSpells.push_back(itemSpell.key);
-		spellSources.push_back(itemSpell.source);
-	}
+    // Add item-granted spells
+    const auto itemSpells = SpellSystem::get_item_granted_spells(player);
+    for (const auto& itemSpell : itemSpells)
+    {
+        availableSpells.push_back(itemSpell.key);
+        spellSources.push_back(itemSpell.source);
+    }
 }
 
-void MenuSpellCast::draw_content()
+void MenuSpellCast::draw()
 {
-	// TODO: Reimplement with Panel+Renderer
-	menu_clear();
-	menu_print(2, 1, "Cast Spell (ESC to cancel):");
+    menu_clear();
+    menu_print(2, 1, "Cast Spell (ESC to cancel):");
 
-	for (size_t i = 0; i < availableSpells.size(); ++i)
-	{
-		const auto& def = SpellSystem::get_by_key(availableSpells[i]);
+    for (size_t i = 0; i < availableSpells.size(); ++i)
+    {
+        const auto& def = SpellSystem::get_by_key(availableSpells[i]);
 
-		if (static_cast<int>(i) == selectedIndex)
-		{
-			menu_highlight_on();
-		}
+        if (static_cast<int>(i) == selectedIndex)
+        {
+            menu_highlight_on();
+        }
 
-		if (!spellSources[i].empty())
-		{
-			menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " [" + spellSources[i] + "]");
-		}
-		else
-		{
-			menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " (L" + std::to_string(def.level) + ")");
-		}
+        if (!spellSources[i].empty())
+        {
+            menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " [" + spellSources[i] + "]");
+        }
+        else
+        {
+            menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " (L" + std::to_string(def.level) + ")");
+        }
 
-		if (static_cast<int>(i) == selectedIndex)
-		{
-			menu_highlight_off();
-		}
-	}
+        if (static_cast<int>(i) == selectedIndex)
+        {
+            menu_highlight_off();
+        }
+    }
 
-	menu_refresh();
+    menu_refresh();
 }
 
 void MenuSpellCast::handle_selection(GameContext& ctx)
 {
-	if (selectedIndex < 0 || selectedIndex >= static_cast<int>(availableSpells.size()))
-	{
-		return;
-	}
+    if (selectedIndex < 0 || selectedIndex >= static_cast<int>(availableSpells.size()))
+    {
+        return;
+    }
 
-	const std::string key = availableSpells[selectedIndex];
-	const bool isMemorized = spellSources[selectedIndex].empty();
-	Player& playerRef = player;
+    const std::string key = availableSpells[selectedIndex];
+    const bool isMemorized = spellSources[selectedIndex].empty();
+    Player& playerRef = player;
 
-	// onSuccess fires when the spell takes effect — immediately for instant spells,
-	// deferred via TargetingMenu callback for targeted spells.
-	auto onSuccess = [key, isMemorized, &playerRef](GameContext& innerCtx)
-	{
-		if (isMemorized)
-		{
-			auto it = std::ranges::find(playerRef.memorizedSpells, key);
-			if (it != playerRef.memorizedSpells.end())
-			{
-				playerRef.memorizedSpells.erase(it);
-			}
-		}
-		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
-	};
+    // onSuccess fires when the spell takes effect — immediately for instant spells,
+    // deferred via TargetingMenu callback for targeted spells.
+    auto onSuccess = [key, isMemorized, &playerRef](GameContext& innerCtx)
+    {
+        if (isMemorized)
+        {
+            auto it = std::ranges::find(playerRef.memorizedSpells, key);
+            if (it != playerRef.memorizedSpells.end())
+            {
+                playerRef.memorizedSpells.erase(it);
+            }
+        }
+        innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+    };
 
-	SpellSystem::cast_spell_by_key(key, player, std::move(onSuccess), ctx);
-	menu_set_run_false();
+    SpellSystem::cast_spell_by_key(key, player, std::move(onSuccess), ctx);
+    menu_set_run_false();
 }
 
 void MenuSpellCast::menu(GameContext& ctx)
 {
-	if (!initialized)
-	{
-		populate_spells();
+    if (availableSpells.empty())
+    {
+        ctx.messageSystem->message(WHITE_BLACK_PAIR, "No spells available.", true);
+        menu_set_run_false();
+        return;
+    }
 
-		if (availableSpells.empty())
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No spells available.", true);
-			run = false;
-			return;
-		}
+    menu_key_listen();
+    draw();
 
-		const int width = 45;
-		const int height = static_cast<int>(availableSpells.size()) + 4;
-		const int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 30;
-		const int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 119;
-		const size_t startX = static_cast<size_t>((vcols - width) / 2);
-		const size_t startY = static_cast<size_t>((vrows - height) / 2);
+    switch (keyPress)
+    {
+    case 27: // ESC
+    {
+        menu_set_run_false();
+        break;
+    }
 
-		menu_new(static_cast<size_t>(width), static_cast<size_t>(height), startX, startY, ctx);
-		initialized = true;
-	}
+    case 0x103: // UP
+    {
+        if (selectedIndex > 0)
+        {
+            selectedIndex--;
+        }
+        break;
+    }
 
-	menu_key_listen();
-	draw_content();
+    case 0x102: // DOWN
+    {
+        if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
+        {
+            selectedIndex++;
+        }
+        break;
+    }
 
-	switch (keyPress)
-	{
-	case 27: // ESC
-		menu_set_run_false();
-		break;
+    case '\n': // Enter
+    case ' ':  // Space
+    {
+        handle_selection(ctx);
+        break;
+    }
 
-	case 0x103:
-		if (selectedIndex > 0)
-		{
-			selectedIndex--;
-		}
-		break;
-
-	case 0x102:
-		if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
-		{
-			selectedIndex++;
-		}
-		break;
-
-	case '\n': // Enter
-	case ' ': // Space
-		handle_selection(ctx);
-		break;
-
-	default:
-		// Letter selection (a-z)
-		if (keyPress >= 'a' && keyPress <= 'z')
-		{
-			int selection = keyPress - 'a';
-			if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
-			{
-				selectedIndex = selection;
-				handle_selection(ctx);
-			}
-		}
-		break;
-	}
-
-	if (!run)
-	{
-		ctx.renderingManager->render(ctx);
-	}
+    default:
+    {
+        // Letter selection (a-z)
+        if (keyPress >= 'a' && keyPress <= 'z')
+        {
+            int selection = keyPress - 'a';
+            if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
+            {
+                selectedIndex = selection;
+                handle_selection(ctx);
+            }
+        }
+        break;
+    }
+    }
 }

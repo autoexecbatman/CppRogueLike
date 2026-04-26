@@ -1,22 +1,38 @@
 // file: Systems/DisplayManager.cpp
 
 #include <memory>
+#include <string>
+#include <vector>
 
 #include "../Actor/Attacker.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/LevelUpSystem.h"
+#include "../Menu/NotificationMenu.h"
 #include "../Tools/BalanceViewer.h"
 #include "../UI/CharacterSheetUI.h"
 #include "../UI/LevelUpUI.h"
 #include "DisplayManager.h"
 
-void DisplayManager::display_help() const noexcept
+void DisplayManager::display_help(GameContext& ctx) const
 {
-	// TODO: stub - help window popup requires curses replacement
-	// Previously created a newwin(30, 70, 0, 0) with box, displayed controls text
-	// via mvwprintw, waited for getch, then delwin/clear/refresh
+	ctx.menus->push_back(std::make_unique<NotificationMenu>(
+		"CONTROLS",
+		std::vector<std::string>{
+			"Movement  : numpad / arrow keys",
+			"Wait      : numpad 5 / period (.)",
+			"Pick up   : comma (,)",
+			"Inventory : i",
+			"Drop      : d",
+			"Character : @",
+			"Spells    : s",
+			"Target    : t  (ranged attack)",
+			"Rest      : r",
+			"Help      : ?",
+			"Quit      : q",
+		},
+		ctx));
 }
 
 void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& ctx) const

@@ -28,7 +28,6 @@ public:
         std::string title,
         std::vector<std::string> lines,
         GameContext& ctx);
-    ~NotificationMenu() override;
     NotificationMenu(const NotificationMenu&) = delete;
     NotificationMenu& operator=(const NotificationMenu&) = delete;
     NotificationMenu(NotificationMenu&&) = delete;

@@ -1,3 +1,5 @@
+#include <cassert>
+
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/InputSystem.h"
@@ -23,29 +25,20 @@ MenuName::MenuName(GameContext& ctx)
 		ctx);
 }
 
-// TODO: menu_delete() is a stub. A code smell. Makes us declare a destructor that is empty while it should be compiler generated.
-MenuName::~MenuName()
-{
-	menu_delete();
-}
-
 void MenuName::draw_name_screen(GameContext& ctx)
 {
 	menu_clear();
 	menu_draw_box();
 	menu_draw_title("ENTER NAME", YELLOW_BLACK_PAIR);
 
-	// TODO: What does it mean for renderer to be null? Should it be an assertion instead?
-	if (renderer)
-	{
-		int tileSize = renderer->get_tile_size();
-		int fontOff = (tileSize - renderer->get_font_size()) / 2;
-		int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize;
-		int rowY1 = (static_cast<int>(menuStartY) + 1) * tileSize + fontOff;
-		int rowY2 = (static_cast<int>(menuStartY) + 2) * tileSize + fontOff;
-		renderer->draw_text(Vector2D{ pixelX, rowY1 }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
-		renderer->draw_text(Vector2D{ pixelX, rowY2 }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
-	}
+	assert(renderer && "MenuName::draw_name_screen called before menu_new");
+	int tileSize = renderer->get_tile_size();
+	int fontOff = (tileSize - renderer->get_font_size()) / 2;
+	int pixelX = (static_cast<int>(menuStartX) + 1) * tileSize;
+	int rowY1 = (static_cast<int>(menuStartY) + 1) * tileSize + fontOff;
+	int rowY2 = (static_cast<int>(menuStartY) + 2) * tileSize + fontOff;
+	renderer->draw_text(Vector2D{ pixelX, rowY1 }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
+	renderer->draw_text(Vector2D{ pixelX, rowY2 }, "[Enter] Confirm  [Esc] Skip", CYAN_BLACK_PAIR);
 
 	menu_refresh();
 }
@@ -57,13 +50,7 @@ void MenuName::menu(GameContext& ctx)
 		inputText.clear();
 		initialized = true;
 	}
-	// TODO: What does it mean for inputSystem to be null? Should it be an assertion instead?
-	if (!inputSystem)
-	{
-		run = false;
-		return;
-	}
-
+	assert(inputSystem && "MenuName::menu called before menu_new");
 	inputSystem->poll();
 
 	int charInput = inputSystem->get_char_input();

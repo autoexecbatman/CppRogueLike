@@ -2,6 +2,7 @@
 #include <set>
 #include <string>
 
+#include "src/Actor/Object.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Factories/MonsterCreator.h"
 #include "src/Map/DungeonNames.h"
@@ -80,7 +81,7 @@ protected:
         ctx.creatures = &creatures;
         ctx.map = map.get();
 
-        map->init(false, ctx);
+        map->init_tiles(ctx);  // blank wall grid; tests manually stamp rooms and doors
     }
 
     // Stamp a room floor and return its descriptor.
@@ -253,9 +254,8 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 // Staircase room never locked (integration)
 // After map init, no locked door should be adjacent to the stairs tile.
 //
-// Uses MockGameContext to supply tileConfig, contentRegistry, and inventoryData
-// which generate_treasure needs. withActors=false avoids the much heavier
-// actor-spawning path that requires the full wired game context.
+// Uses MockGameContext to supply tileConfig, contentRegistry, and inventoryData.
+// Full init (stairs, rooms, levelManager, creatures all wired in the test body).
 // ============================================================================
 
 TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
@@ -281,6 +281,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;
+    std::vector<std::unique_ptr<Object>> objects;
     std::vector<DungeonRoom> rooms;
     DataManager dataManager;
     MessageSystem messageSystem;
@@ -295,14 +296,16 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     ctx.stairs = stairs.get();
     ctx.rooms = &rooms;
     ctx.creatures = &creatures;
+    ctx.objects = &objects;
     ctx.dataManager = &dataManager;
     ctx.messageSystem = &messageSystem;
     ctx.map = map.get();
     ctx.levelManager = &levelManager;
 
-    // withActors=false: room floors and treasure rooms are created but
-    // monster/item spawning (which needs further context) is skipped.
-    map->init(false, ctx);
+    // Full init: ctx wires stairs, rooms, levelManager, dice, and the mock provides
+    // tileConfig, contentRegistry, inventoryData. Verifies the stair-adjacency
+    // invariant after a complete dungeon generation pass.
+    map->init(ctx);
 
     const Vector2D stairsPos = stairs->position;
     ASSERT_TRUE(map->is_in_bounds(stairsPos))

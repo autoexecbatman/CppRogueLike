@@ -97,7 +97,6 @@ private:
 	}
 	bool in_bounds(Vector2D pos) const noexcept;
 
-	void init_tiles(GameContext& ctx);
 	void place_stairs(GameContext& ctx);
 	bool is_stairs(Vector2D pos, GameContext& ctx) const;
 	void spawn_water(const DungeonRoom& room, GameContext& ctx);
@@ -105,7 +104,7 @@ private:
 	void spawn_items(const DungeonRoom& room, GameContext& ctx);
 	void spawn_barrels(const DungeonRoom& room, GameContext& ctx);
 	void spawn_player(const DungeonRoom& room, GameContext& ctx);
-	void generate_rooms(bool withActors, GameContext& ctx);
+	void generate_rooms(GameContext& ctx);
 	bool is_floor(Vector2D pos) const noexcept { return get_tile_type(pos) == TileType::FLOOR; }
 	bool is_water(Vector2D pos) const noexcept;
 	void set_explored(Vector2D pos); // set the tile as explored
@@ -117,7 +116,12 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	void init(bool withActors, GameContext& ctx);
+	// Initialize the tile grid to all-walls. No dungeon generation.
+	// Useful as a test seam when unit tests need a blank map.
+	void init_tiles(GameContext& ctx);
+
+	// Full dungeon initialization: tile grid + room generation + actor placement.
+	void init(GameContext& ctx);
 	bool is_in_fov(Vector2D pos) const noexcept;
 	TileType get_tile_type(Vector2D pos) const noexcept;
 	void tile_action(Creature& owner, TileType tileType, GameContext& ctx);
@@ -173,7 +177,6 @@ public:
 	void set_tile(Vector2D pos, TileType newType, double cost);
 	void place_from_graph(
 		const std::vector<DungeonRoom>& rooms,
-		bool withActors,
 		GameContext& ctx);
 
 	// Counts doors on this room's wall border that have a room-interior
@@ -191,6 +194,6 @@ protected:
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
 	void setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx);
-	void create_room(const DungeonRoom& room, bool first, bool withActors, GameContext& ctx);
+	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
 	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
 };

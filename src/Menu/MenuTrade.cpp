@@ -49,8 +49,6 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 
 MenuTrade::~MenuTrade()
 {
-    menu_delete();
-
     if (shopkeeper.ai)
     {
         shopkeeper.ai->set_trade_open(false);

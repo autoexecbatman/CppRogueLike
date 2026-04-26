@@ -26,7 +26,6 @@ class MenuBuy : public BaseMenu
 
 public:
 	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);
-	~MenuBuy();
 	MenuBuy(const MenuBuy&) = delete;
 	MenuBuy& operator=(const MenuBuy&) = delete;
 	MenuBuy(MenuBuy&&) = delete;

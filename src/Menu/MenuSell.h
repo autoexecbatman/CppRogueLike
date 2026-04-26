@@ -26,7 +26,6 @@ class MenuSell : public BaseMenu
 
 public:
 	MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx);
-	~MenuSell();
 	MenuSell(const MenuSell&) = delete;
 	MenuSell& operator=(const MenuSell&) = delete;
 	MenuSell(MenuSell&&) = delete;

@@ -3,29 +3,15 @@
 class Creature;
 struct GameContext;
 
-// - Handles combat improvements on level up according to AD&D 2e rules
-class LevelUpSystem
+// Handles combat improvements on level up according to AD&D 2e rules.
+// Each function encapsulates one domain rule: THAC0 progression, HP gain,
+// class-specific milestones, and saving throw improvements.
+namespace LevelUpSystem
 {
-public:
-	// Main function to apply all level up benefits
-	static void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx);
+    // Apply all level-up benefits to owner based on their class and newLevel.
+    void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx);
 
-	// Helper functions (public for display purposes)
-	static int calculate_backstab_multiplier(int level);
-
-private:
-	// Core combat improvements
-	static void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx);
-	static int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx);
-	static void apply_class_specific_improvements(Creature& owner, int newLevel, GameContext* ctx);
-
-	// AD&D 2e specific improvements
-	static void apply_ability_score_improvement(Creature& owner, int newLevel, GameContext* ctx);
-	static void apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext* ctx);
-
-	// Class-specific improvements
-	static void apply_fighter_improvements(Creature& owner, int newLevel, GameContext* ctx);
-	static void apply_rogue_improvements(Creature& owner, int newLevel, GameContext* ctx);
-	static void apply_cleric_improvements(Creature& owner, int newLevel, GameContext* ctx);
-	static void apply_wizard_improvements(Creature& owner, int newLevel, GameContext* ctx);
-};
+    // AD&D 2e backstab table: x2 at level 1, +1 multiplier every 4 levels.
+    // Public for display use in LevelUpUI.
+    int calculate_backstab_multiplier(int level);
+}
