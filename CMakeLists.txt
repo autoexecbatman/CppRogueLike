@@ -352,6 +352,10 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Combat/DamageInfo.h
     ${PROJECT_SOURCE_DIR}/Combat/ArmorClass.cpp
     ${PROJECT_SOURCE_DIR}/Combat/ArmorClass.h
+    ${PROJECT_SOURCE_DIR}/Combat/DamageResolver.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/DamageResolver.h
+    ${PROJECT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/ConstitutionTracker.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp

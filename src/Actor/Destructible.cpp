@@ -4,7 +4,6 @@
 #include <format>
 #include <memory>
 #include <string>
-#include <unordered_map>
 
 #include "../Actor/Creature.h"
 #include "../Attributes/ConstitutionAttributes.h"
@@ -12,37 +11,17 @@
 #include "../Items/ItemIdentification.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
+#include "../Combat/DamageResolver.h"
 #include "../Combat/DeathHandler.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
-#include "../Systems/BuffType.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/FloatingTextSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "Destructible.h"
 #include "EquipmentSlot.h"
 #include "Pickable.h"
-
-// OCP: Data-driven damage resistance mapping
-static const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
-    { DamageType::FIRE, BuffType::FIRE_RESISTANCE },
-    { DamageType::COLD, BuffType::COLD_RESISTANCE },
-    { DamageType::LIGHTNING, BuffType::LIGHTNING_RESISTANCE },
-    { DamageType::POISON, BuffType::POISON_RESISTANCE },
-    // DamageType::PHYSICAL, ACID, MAGIC have no resistance buffs
-};
-
-// OCP: Data-driven damage type names for logging
-static const std::unordered_map<DamageType, std::string_view> damageTypeNames = {
-    { DamageType::PHYSICAL, "physical" },
-    { DamageType::FIRE, "fire" },
-    { DamageType::COLD, "cold" },
-    { DamageType::LIGHTNING, "lightning" },
-    { DamageType::POISON, "poison" },
-    { DamageType::ACID, "acid" },
-    { DamageType::MAGIC, "magic" },
-};
 
 Destructible::Destructible(
     int hpMax,
@@ -59,68 +38,33 @@ Destructible::Destructible(
       corpseName(corpseName),
       xp(xp),
       thaco(thaco),
-      lastConstitution(0),
       tempHp(0),
       deathHandler(std::move(handler)),
-      armorClass(std::make_unique<ArmorClass>(armorClassValue))
+      armorClass(std::make_unique<ArmorClass>(armorClassValue)),
+      constitutionTracker(std::make_unique<ConstitutionTracker>())
 {
 }
 
 void Destructible::update_constitution_bonus(Creature& owner, GameContext& ctx)
 {
-    const int currentConstitution = owner.get_constitution();
-    const int lastCon = get_last_constitution();
+    const int oldCon = get_last_constitution();
+    const auto result = constitutionTracker->apply_constitution_changes(owner, ctx);
 
-    if (currentConstitution == lastCon)
+    if (result.hpDifference == 0)
     {
         return;
     }
 
-    const int oldBonus = calculate_constitution_hp_bonus_for_value(lastCon, ctx);
-    const int newBonus = calculate_constitution_hp_bonus(owner, ctx);
-    const int level = calculate_level_multiplier(owner);
-    const int hpDifference = (newBonus - oldBonus) * level;
+    set_max_hp(get_max_hp() + result.hpDifference);
+    set_hp(get_hp() + result.hpDifference);
 
-    if (hpDifference != 0)
+    log_constitution_change(owner, ctx, oldCon, owner.get_constitution(), result.hpDifference);
+
+    if (get_hp() <= 0)
     {
-        set_max_hp(get_max_hp() + hpDifference);
-        set_hp(get_hp() + hpDifference);
-
-        log_constitution_change(owner, ctx, lastCon, currentConstitution, hpDifference);
-
-        if (get_hp() <= 0)
-        {
-            set_hp(0);
-            handle_stat_drain_death(owner, ctx);
-        }
+        set_hp(0);
+        handle_stat_drain_death(owner, ctx);
     }
-
-    set_last_constitution(currentConstitution);
-}
-
-[[nodiscard]] int Destructible::calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const
-{
-    return calculate_constitution_hp_bonus_for_value(owner.get_constitution(), ctx);
-}
-
-[[nodiscard]] int Destructible::calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const
-{
-    const auto& constitutionAttributes = ctx.dataManager->get_constitution_attributes();
-
-    if (constitution < 1 || constitution > static_cast<int>(constitutionAttributes.size()))
-    {
-        return 0;
-    }
-
-    return constitutionAttributes[constitution - 1].HPAdj;
-}
-
-[[nodiscard]] int Destructible::calculate_level_multiplier(const Creature& owner) const
-{
-    // AD&D 2e: Polymorphic Constitution HP multiplier
-    // - Monsters: Use Hit Dice (no cap)
-    // - Players: Class-specific caps (Fighter=9, Priest=9, Rogue/Wizard=10)
-    return owner.get_constitution_hp_multiplier();
 }
 
 void Destructible::handle_stat_drain_death(Creature& owner, GameContext& ctx)
@@ -160,74 +104,37 @@ void Destructible::log_constitution_change(const Creature& owner, GameContext& c
 
 int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType)
 {
-    if (damage <= 0)
-    {
-        return 0;
-    }
+	if (damage <= 0)
+	{
+		return 0;
+	}
 
-    const int originalDamage = damage;
+	int actualDamage = DamageResolver::apply_resistances(damage, damageType, owner, ctx);
+	actualDamage = DamageResolver::apply_temp_hp_shield(actualDamage, tempHp);
 
-    // AD&D 2e: Apply resistance based on damage type (data-driven, OCP compliant)
-    if (damageResistanceBuffs.contains(damageType))
-    {
-        const BuffType resistanceBuff = damageResistanceBuffs.at(damageType);
-        if (ctx.buffSystem->has_buff(owner, resistanceBuff))
-        {
-            const int resistancePercent = ctx.buffSystem->get_buff_value(owner, resistanceBuff);
+	if (actualDamage == 0)
+	{
+		return 0;
+	}
 
-            if (resistancePercent > 0)
-            {
-                const int damageReduced = (damage * resistancePercent) / 100;
-                damage -= damageReduced;
-                damage = std::max(0, damage);
+	set_hp(get_hp() - actualDamage);
 
-                const std::string_view typeName = damageTypeNames.contains(damageType)
-                    ? damageTypeNames.at(damageType)
-                    : "unknown";
+	if (get_hp() <= 0)
+	{
+		set_hp(0);
+		die(owner, ctx);
+	}
 
-                ctx.messageSystem->log(std::format(
-                    "You resisted {} {} damage! ({}% resistance, {} -> {})",
-                    damageReduced,
-                    typeName,
-                    resistancePercent,
-                    originalDamage,
-                    damage));
-            }
-        }
-    }
+	if (ctx.floatingText)
+	{
+		const bool hitPlayer = (&owner == ctx.player);
+		const unsigned char r = hitPlayer ? 255 : 255;
+		const unsigned char g = hitPlayer ? 80 : 220;
+		const unsigned char b = hitPlayer ? 80 : 50;
+		ctx.floatingText->spawn_damage(owner.position.x, owner.position.y, actualDamage, r, g, b);
+	}
 
-    // AD&D 2e: Temp HP absorbs damage first
-    if (get_temp_hp() > 0)
-    {
-        const int tempAbsorbed = std::min(damage, get_temp_hp());
-        set_temp_hp(get_temp_hp() - tempAbsorbed);
-        damage -= tempAbsorbed;
-
-        if (damage == 0)
-        {
-            return 0;
-        }
-    }
-
-    const int newHp = get_hp() - damage;
-    set_hp(newHp);
-
-    if (get_hp() <= 0)
-    {
-        set_hp(0);
-        die(owner, ctx);
-    }
-
-    if (ctx.floatingText)
-    {
-        const bool hitPlayer = (&owner == ctx.player);
-        const unsigned char r = hitPlayer ? 255 : 255;
-        const unsigned char g = hitPlayer ? 80 : 220;
-        const unsigned char b = hitPlayer ? 80 : 50;
-        ctx.floatingText->spawn_damage(owner.position.x, owner.position.y, damage, r, g, b);
-    }
-
-    return damage;
+	return actualDamage;
 }
 
 void Destructible::die(Creature& owner, GameContext& ctx)
@@ -263,7 +170,7 @@ void Destructible::load(const json& j)
     set_max_hp(j.at("hpMax").get<int>());
     set_hp(j.at("hp").get<int>());
     set_hp_base(j.at("hpBase").get<int>());
-    set_last_constitution(j.at("lastConstitution").get<int>());
+    constitutionTracker->set_last_constitution(j.at("lastConstitution").get<int>());
     set_dr(j.at("dr").get<int>());
     set_corpse_name(j.at("corpseName").get<std::string>());
     set_xp(j.at("xp").get<int>());

@@ -5,6 +5,7 @@
 #include <string>
 
 #include "../Combat/ArmorClass.h"
+#include "../Combat/ConstitutionTracker.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/DeathHandler.h"
 #include "../Persistent/Persistent.h"
@@ -22,14 +23,10 @@ private:
     std::string corpseName{};
     int xp{};
     int thaco{};
-    int lastConstitution{};
     int tempHp{};
     std::unique_ptr<DeathHandler> deathHandler{};
     std::unique_ptr<ArmorClass> armorClass{};
-
-    [[nodiscard]] int calculate_constitution_hp_bonus(const Creature& owner, GameContext& ctx) const;
-    [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
-    [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
+    std::unique_ptr<ConstitutionTracker> constitutionTracker{};
 
     void handle_stat_drain_death(Creature& owner, GameContext& ctx);
     void log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const;
@@ -61,7 +58,7 @@ public:
     [[nodiscard]] int get_dr() const noexcept { return dr; }
     [[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
     [[nodiscard]] int get_xp() const noexcept { return xp; }
-    [[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
+    [[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
     [[nodiscard]] int get_hp_base() const noexcept { return hpBase; }
 
     [[nodiscard]] int get_temp_hp() const noexcept { return tempHp; }
@@ -80,7 +77,7 @@ public:
     void set_dr(int value) noexcept { dr = value; }
     void set_corpse_name(std::string_view name) { corpseName = name; }
     void set_xp(int value) noexcept { xp = value; }
-    void set_last_constitution(int value) noexcept { lastConstitution = value; }
+    void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
     void add_xp(int amount) noexcept { xp += amount; }
 
     // Action methods

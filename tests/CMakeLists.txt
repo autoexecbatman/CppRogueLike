@@ -180,6 +180,8 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Combat/DeathHandler.cpp
     ${PARENT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
     ${PARENT_SOURCE_DIR}/Combat/ArmorClass.cpp
+    ${PARENT_SOURCE_DIR}/Combat/DamageResolver.cpp
+    ${PARENT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
 
     # UI
     ${PARENT_SOURCE_DIR}/UI/InventoryUI.cpp
