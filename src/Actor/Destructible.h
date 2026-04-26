@@ -5,9 +5,12 @@
 #include <string>
 
 #include "../Combat/ArmorClass.h"
+#include "../Combat/CombatStats.h"
 #include "../Combat/ConstitutionTracker.h"
+#include "../Combat/CorpseData.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/DeathHandler.h"
+#include "../Combat/ExperienceReward.h"
 #include "../Combat/HealthPool.h"
 #include "../Persistent/Persistent.h"
 
@@ -17,14 +20,13 @@ struct GameContext;
 class Destructible : public Persistent
 {
 private:
-    int dr{};
-    std::string corpseName{};
-    int xp{};
-    int thaco{};
     std::unique_ptr<DeathHandler> deathHandler{};
     std::unique_ptr<ArmorClass> armorClass{};
     std::unique_ptr<ConstitutionTracker> constitutionTracker{};
     std::unique_ptr<HealthPool> healthPool{};
+    std::unique_ptr<CombatStats> combatStats{};
+    std::unique_ptr<ExperienceReward> experienceReward{};
+    std::unique_ptr<CorpseData> corpseData{};
 
     void handle_stat_drain_death(Creature& owner, GameContext& ctx);
     void log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const;
@@ -52,10 +54,10 @@ public:
     [[nodiscard]] int get_max_hp() const noexcept { return healthPool->get_max_hp(); }
     [[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
     [[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
-    [[nodiscard]] int get_thaco() const noexcept { return thaco; }
-    [[nodiscard]] int get_dr() const noexcept { return dr; }
-    [[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseName; }
-    [[nodiscard]] int get_xp() const noexcept { return xp; }
+    [[nodiscard]] int get_thaco() const noexcept { return combatStats->get_thaco(); }
+    [[nodiscard]] int get_dr() const noexcept { return combatStats->get_dr(); }
+    [[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseData->get_corpse_name(); }
+    [[nodiscard]] int get_xp() const noexcept { return experienceReward->get_xp(); }
     [[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
     [[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
 
@@ -71,12 +73,12 @@ public:
     void set_hp_base(int value) noexcept { healthPool->set_hp_base(value); }
     void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
     void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
-    void set_thaco(int value) noexcept { thaco = value; }
-    void set_dr(int value) noexcept { dr = value; }
-    void set_corpse_name(std::string_view name) { corpseName = name; }
-    void set_xp(int value) noexcept { xp = value; }
+    void set_thaco(int value) noexcept { combatStats->set_thaco(value); }
+    void set_dr(int value) noexcept { combatStats->set_dr(value); }
+    void set_corpse_name(std::string_view name) { corpseData->set_corpse_name(name); }
+    void set_xp(int value) noexcept { experienceReward->set_xp(value); }
     void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
-    void add_xp(int amount) noexcept { xp += amount; }
+    void add_xp(int amount) noexcept { experienceReward->add_xp(amount); }
 
     // Action methods
     int take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL)

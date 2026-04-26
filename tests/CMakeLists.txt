@@ -183,6 +183,9 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Combat/DamageResolver.cpp
     ${PARENT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
     ${PARENT_SOURCE_DIR}/Combat/HealthPool.cpp
+    ${PARENT_SOURCE_DIR}/Combat/CombatStats.cpp
+    ${PARENT_SOURCE_DIR}/Combat/ExperienceReward.cpp
+    ${PARENT_SOURCE_DIR}/Combat/CorpseData.cpp
 
     # UI
     ${PARENT_SOURCE_DIR}/UI/InventoryUI.cpp

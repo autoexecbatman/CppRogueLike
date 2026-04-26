@@ -358,6 +358,12 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Combat/ConstitutionTracker.h
     ${PROJECT_SOURCE_DIR}/Combat/HealthPool.cpp
     ${PROJECT_SOURCE_DIR}/Combat/HealthPool.h
+    ${PROJECT_SOURCE_DIR}/Combat/CombatStats.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/CombatStats.h
+    ${PROJECT_SOURCE_DIR}/Combat/ExperienceReward.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/ExperienceReward.h
+    ${PROJECT_SOURCE_DIR}/Combat/CorpseData.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/CorpseData.h
 
     # UI - New UI classes
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp
