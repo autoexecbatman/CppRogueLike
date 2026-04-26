@@ -31,17 +31,14 @@ Destructible::Destructible(
     int thaco,
     int armorClassValue,
     std::unique_ptr<DeathHandler> handler)
-    : hpBase(hpMax),
-      hpMax(hpMax),
-      hp(hpMax),
-      dr(dr),
+    : dr(dr),
       corpseName(corpseName),
       xp(xp),
       thaco(thaco),
-      tempHp(0),
       deathHandler(std::move(handler)),
       armorClass(std::make_unique<ArmorClass>(armorClassValue)),
-      constitutionTracker(std::make_unique<ConstitutionTracker>())
+      constitutionTracker(std::make_unique<ConstitutionTracker>()),
+      healthPool(std::make_unique<HealthPool>(hpMax))
 {
 }
 
@@ -102,40 +99,6 @@ void Destructible::log_constitution_change(const Creature& owner, GameContext& c
     }
 }
 
-int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType)
-{
-	if (damage <= 0)
-	{
-		return 0;
-	}
-
-	int actualDamage = DamageResolver::apply_resistances(damage, damageType, owner, ctx);
-	actualDamage = DamageResolver::apply_temp_hp_shield(actualDamage, tempHp);
-
-	if (actualDamage == 0)
-	{
-		return 0;
-	}
-
-	set_hp(get_hp() - actualDamage);
-
-	if (get_hp() <= 0)
-	{
-		set_hp(0);
-		die(owner, ctx);
-	}
-
-	if (ctx.floatingText)
-	{
-		const bool hitPlayer = (&owner == ctx.player);
-		const unsigned char r = hitPlayer ? 255 : 255;
-		const unsigned char g = hitPlayer ? 80 : 220;
-		const unsigned char b = hitPlayer ? 80 : 50;
-		ctx.floatingText->spawn_damage(owner.position.x, owner.position.y, actualDamage, r, g, b);
-	}
-
-	return actualDamage;
-}
 
 void Destructible::die(Creature& owner, GameContext& ctx)
 {
@@ -143,22 +106,6 @@ void Destructible::die(Creature& owner, GameContext& ctx)
     deathHandler->execute(owner, ctx);
 }
 
-[[nodiscard]] int Destructible::heal(int hpToHeal)
-{
-    const int currentHp = get_hp();
-    const int maxHp = get_max_hp();
-    const int newHp = std::min(currentHp + hpToHeal, maxHp);
-    const int actualHealed = newHp - currentHp;
-
-    set_hp(newHp);
-
-    if (get_hp() > get_max_hp())
-    {
-        set_hp(get_max_hp());
-    }
-
-    return actualHealed;
-}
 
 void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 {
@@ -167,15 +114,15 @@ void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
 
 void Destructible::load(const json& j)
 {
-    set_max_hp(j.at("hpMax").get<int>());
-    set_hp(j.at("hp").get<int>());
-    set_hp_base(j.at("hpBase").get<int>());
+    healthPool->set_max_hp(j.at("hpMax").get<int>());
+    healthPool->set_hp(j.at("hp").get<int>());
+    healthPool->set_hp_base(j.at("hpBase").get<int>());
+    healthPool->set_temp_hp(j.at("tempHp").get<int>());
     constitutionTracker->set_last_constitution(j.at("lastConstitution").get<int>());
     set_dr(j.at("dr").get<int>());
     set_corpse_name(j.at("corpseName").get<std::string>());
     set_xp(j.at("xp").get<int>());
     set_thaco(j.at("thaco").get<int>());
-    set_temp_hp(j.at("tempHp").get<int>());
 
     armorClass->set_armor_class(j.at("armorClass").get<int>());
     armorClass->set_base_armor_class(j.at("baseArmorClass").get<int>());
@@ -185,15 +132,15 @@ void Destructible::save(json& j)
 {
     assert(deathHandler && "Cannot save Destructible without a death handler");
     j["type"] = static_cast<int>(deathHandler->type());
-    j["hpMax"] = get_max_hp();
-    j["hp"] = get_hp();
-    j["hpBase"] = get_hp_base();
+    j["hpMax"] = healthPool->get_max_hp();
+    j["hp"] = healthPool->get_hp();
+    j["hpBase"] = healthPool->get_hp_base();
+    j["tempHp"] = healthPool->get_temp_hp();
     j["lastConstitution"] = get_last_constitution();
     j["dr"] = get_dr();
     j["corpseName"] = get_corpse_name();
     j["xp"] = get_xp();
     j["thaco"] = get_thaco();
-    j["tempHp"] = get_temp_hp();
     j["armorClass"] = get_armor_class();
     j["baseArmorClass"] = get_base_armor_class();
 }

@@ -182,6 +182,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Combat/ArmorClass.cpp
     ${PARENT_SOURCE_DIR}/Combat/DamageResolver.cpp
     ${PARENT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
+    ${PARENT_SOURCE_DIR}/Combat/HealthPool.cpp
 
     # UI
     ${PARENT_SOURCE_DIR}/UI/InventoryUI.cpp

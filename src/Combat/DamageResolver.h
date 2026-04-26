@@ -16,7 +16,7 @@ namespace DamageResolver
 		const Creature& owner,
 		GameContext& ctx);
 
-	// Apply temporary HP shield. Temp HP absorbs damage first.
-	// Modifies tempHp in-place, returns remainder damage (post-shield).
-	int apply_temp_hp_shield(int damage, int& tempHp);
+	// Apply temporary HP shield. Pure calculation: temp HP absorbs damage first.
+	// Returns damage post-shield and updated tempHp value.
+	ShieldResult apply_temp_hp_shield(int damage, int tempHp);
 }

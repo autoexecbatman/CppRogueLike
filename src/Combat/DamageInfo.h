@@ -17,6 +17,13 @@ enum class DamageType
 	MAGIC, // Pure magical damage
 };
 
+// Result of applying temporary HP shield to damage
+struct ShieldResult
+{
+	int damageAfterShield;
+	int tempHpAfterShield;
+};
+
 // - Robust damage value system replacing fragile roll strings
 struct DamageInfo
 {

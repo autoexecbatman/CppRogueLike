@@ -3,6 +3,7 @@
 #include <unordered_map>
 
 #include "DamageResolver.h"
+#include "DamageInfo.h"
 #include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
 #include "../Systems/BuffSystem.h"
@@ -73,17 +74,17 @@ int DamageResolver::apply_resistances(
 	return damage;
 }
 
-int DamageResolver::apply_temp_hp_shield(int damage, int& tempHp)
+ShieldResult DamageResolver::apply_temp_hp_shield(int damage, int tempHp)
 {
-	// AD&D 2e: Temp HP absorbs damage first
+	// AD&D 2e: Temp HP absorbs damage first (pure calculation)
 	if (tempHp <= 0)
 	{
-		return damage;
+		return { damage, 0 };
 	}
 
 	const int tempAbsorbed = std::min(damage, tempHp);
-	tempHp -= tempAbsorbed;
-	damage -= tempAbsorbed;
+	const int damageAfterShield = std::max(0, damage - tempAbsorbed);
+	const int newTempHp = tempHp - tempAbsorbed;
 
-	return std::max(0, damage);
+	return { damageAfterShield, newTempHp };
 }
