@@ -120,6 +120,7 @@ public:
 	// Lifecycle hook overrides
 	void on_new_game_start(GameContext& ctx) override;
 	void recalculate_combat_stats() override;
+	void die(GameContext& ctx) override;
 	void on_kill_reward(int xp, GameContext& ctx) override;
 
 	void update(GameContext& ctx) override;

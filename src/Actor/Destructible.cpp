@@ -12,7 +12,6 @@
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/DamageResolver.h"
-#include "../Combat/DeathHandler.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
@@ -23,12 +22,8 @@
 #include "EquipmentSlot.h"
 #include "Pickable.h"
 
-Destructible::Destructible(
-    int hpMax,
-    int armorClassValue,
-    std::unique_ptr<DeathHandler> handler)
-    : deathHandler(std::move(handler)),
-      constitutionTracker(std::make_unique<ConstitutionTracker>()),
+Destructible::Destructible(int hpMax)
+    : constitutionTracker(std::make_unique<ConstitutionTracker>()),
       healthPool(std::make_unique<HealthPool>(hpMax))
 {
 }
@@ -66,7 +61,7 @@ void Destructible::handle_stat_drain_death(Creature& owner, GameContext& ctx)
         ctx.messageSystem->log(std::format("{} dies from stat drain.", owner.get_name()));
     }
 
-    die(owner, ctx);
+    owner.die(ctx);
 }
 
 void Destructible::log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const
@@ -91,13 +86,15 @@ void Destructible::log_constitution_change(const Creature& owner, GameContext& c
 }
 
 
-void Destructible::die(Creature& owner, GameContext& ctx)
+int Destructible::take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType)
 {
-    assert(deathHandler && "Destructible::die requires a death handler");
-    deathHandler->execute(owner, ctx);
+    const int actual = healthPool->take_damage(owner, damage, ctx, damageType);
+    if (is_dead())
+    {
+        owner.die(ctx);
+    }
+    return actual;
 }
-
-
 
 void Destructible::load(const json& j)
 {
@@ -110,8 +107,6 @@ void Destructible::load(const json& j)
 
 void Destructible::save(json& j)
 {
-    assert(deathHandler && "Cannot save Destructible without a death handler");
-    j["type"] = static_cast<int>(deathHandler->type());
     j["hpMax"] = healthPool->get_max_hp();
     j["hp"] = healthPool->get_hp();
     j["hpBase"] = healthPool->get_hp_base();
@@ -121,38 +116,7 @@ void Destructible::save(json& j)
 
 [[nodiscard]] std::unique_ptr<Destructible> Destructible::create(const json& j)
 {
-    if (!j.contains("type") || !j["type"].is_number())
-    {
-        return nullptr;
-    }
-
-    const auto destructibleType = static_cast<DestructibleType>(j["type"].get<int>());
-    std::unique_ptr<DeathHandler> handler{};
-
-    switch (destructibleType)
-    {
-    case DestructibleType::MONSTER:
-    {
-        handler = std::make_unique<MonsterDeathHandler>();
-        break;
-    }
-    case DestructibleType::PLAYER:
-    {
-        handler = std::make_unique<PlayerDeathHandler>();
-        break;
-    }
-    default:
-    {
-        break;
-    }
-    }
-
-    if (!handler)
-    {
-        return nullptr;
-    }
-
-    auto destructible = std::make_unique<Destructible>(0, 0, std::move(handler));
+    auto destructible = std::make_unique<Destructible>(0);
     destructible->load(j);
     return destructible;
 }

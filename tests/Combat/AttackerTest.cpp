@@ -42,8 +42,7 @@ protected:
 		player->set_dr(0);
 		player->set_thaco(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->destructible = std::make_unique<Destructible>(
-			20, 10, std::make_unique<PlayerDeathHandler>());
+		player->destructible = std::make_unique<Destructible>(20);
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		player->set_strength(10);
 		player->set_dexterity(10);
@@ -53,8 +52,7 @@ protected:
 		monster->set_dr(0);
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
-		monster->destructible = std::make_unique<Destructible>(
-			10, 6, std::make_unique<MonsterDeathHandler>());
+		monster->destructible = std::make_unique<Destructible>(10);
 		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);

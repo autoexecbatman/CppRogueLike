@@ -32,6 +32,7 @@
 #include "../Systems/FloatingTextSystem.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/DisplayManager.h"
+#include "../Systems/GameStateManager.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/RenderingManager.h"
@@ -215,8 +216,13 @@ void Player::roll_new_character(GameContext& ctx)
 	set_dr(playerDr);
 	set_thaco(0);
 	armorClass = std::make_unique<ArmorClass>(playerAC);
-	destructible = std::make_unique<Destructible>(
-		playerHp, playerAC, std::make_unique<PlayerDeathHandler>());
+	destructible = std::make_unique<Destructible>(playerHp);
+}
+
+void Player::die(GameContext& ctx)
+{
+	ctx.gameState->set_game_status(GameStatus::DEFEAT);
+	[[maybe_unused]] const bool deleted = ctx.stateManager->delete_save_file();
 }
 
 void Player::on_new_game_start(GameContext& ctx)

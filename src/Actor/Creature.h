@@ -192,6 +192,8 @@ public:
 	virtual void on_new_game_start(GameContext& ctx) {}
 	// Called every STARTUP to sync combat stats (THAC0 etc.)
 	virtual void recalculate_combat_stats() {}
+	// Called when a creature dies — Player saves/defeats, monsters drop corpses
+	virtual void die(GameContext& ctx);
 	// Called by Destructible when a monster dies — rewards the player who killed it
 	virtual void on_kill_reward(int xp, GameContext& ctx) {}
 

@@ -32,7 +32,7 @@ protected:
 		player.set_dr(0);
 		player.set_thaco(0);
 		player.armorClass = std::make_unique<ArmorClass>(10);
-		player.destructible = std::make_unique<Destructible>(20, 10, std::make_unique<PlayerDeathHandler>());
+		player.destructible = std::make_unique<Destructible>(20);
 		ctx.player = &player;
 		ctx.messageSystem = &message_system;
 		ctx.curseSystem = &curse_system;

@@ -8,7 +8,8 @@ using json = nlohmann::json;
 // ============================================================================
 // DESTRUCTIBLE SERIALIZATION TESTS
 // Ensures save/load round-trip works correctly - prevents shopkeeper-style bugs
-// Note: DR, THACO, AC, and XP are now on Creature, not Destructible.
+// Note: Death handler type (PLAYER/MONSTER) is now determined by Creature class,
+// not by Destructible. Destructible only manages HealthPool and ConstitutionTracker.
 // ============================================================================
 
 class DestructibleSerializationTest : public ::testing::Test {
@@ -17,10 +18,10 @@ protected:
     static constexpr int HP_MAX = 50;
 };
 
-// Monster death handler round-trip
-TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
-    // Create and configure with correct constructor signature
-    Destructible original(HP_MAX, 5, std::make_unique<MonsterDeathHandler>());
+// HP and constitution state round-trip
+TEST_F(DestructibleSerializationTest, Destructible_SaveLoad_RoundTrip) {
+    // Create with new constructor signature
+    Destructible original(HP_MAX);
     // Directly set HP to simulate damage (take_damage requires GameContext)
     original.set_hp(40);
 
@@ -28,88 +29,41 @@ TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
     json j;
     original.save(j);
 
-    // Verify type is saved
-    ASSERT_TRUE(j.contains("type")) << "MonsterDestructible must save 'type' field";
-    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::MONSTER));
+    // Verify required fields are saved
+    ASSERT_TRUE(j.contains("hpMax")) << "Destructible must save 'hpMax' field";
+    ASSERT_TRUE(j.contains("hp")) << "Destructible must save 'hp' field";
+    ASSERT_TRUE(j.contains("lastConstitution")) << "Destructible must save 'lastConstitution' field";
 
     // Load via factory
     auto loaded = Destructible::create(j);
 
     // Verify not null
-    ASSERT_NE(loaded, nullptr) << "Destructible::create returned nullptr - type field missing or invalid";
+    ASSERT_NE(loaded, nullptr) << "Destructible::create returned nullptr";
 
     // Verify HP values
     EXPECT_EQ(loaded->get_max_hp(), HP_MAX);
     EXPECT_EQ(loaded->get_hp(), 40); // Damaged
-    // DR, THACO, AC are now on Creature, not Destructible
 }
 
-// Player death handler round-trip
-TEST_F(DestructibleSerializationTest, PlayerDestructible_SaveLoad_RoundTrip) {
-    Destructible original(HP_MAX, 10, std::make_unique<PlayerDeathHandler>());
-    original.set_hp(30); // Simulate damage
+// Full HP state preservation
+TEST_F(DestructibleSerializationTest, FullHP_PreservedAfterLoad) {
+    Destructible original(HP_MAX);
+    // No damage - full HP
 
     json j;
     original.save(j);
 
-    // Verify type
-    ASSERT_TRUE(j.contains("type"));
-    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::PLAYER));
-
     auto loaded = Destructible::create(j);
 
     ASSERT_NE(loaded, nullptr);
-    EXPECT_EQ(loaded->get_hp(), 30);
-}
-
-// Base Destructible should NOT be used directly (no type saved)
-TEST_F(DestructibleSerializationTest, BaseDestructible_NoType_ReturnsNullptr) {
-    // Simulate what happens if someone uses base Destructible
-    json j;
-    j["hpMax"] = HP_MAX;
-    j["hp"] = HP_MAX;
-    // NO "type" field
-
-    auto loaded = Destructible::create(j);
-
-    EXPECT_EQ(loaded, nullptr) << "Base Destructible without type should return nullptr on load";
-}
-
-// Invalid type returns nullptr
-TEST_F(DestructibleSerializationTest, InvalidType_ReturnsNullptr) {
-    json j;
-    j["type"] = 999; // Invalid type
-    j["hpMax"] = HP_MAX;
-
-    auto loaded = Destructible::create(j);
-
-    EXPECT_EQ(loaded, nullptr);
-}
-
-// Regression: Shopkeeper bug - ensure MonsterDestructible is distinguishable
-TEST_F(DestructibleSerializationTest, Regression_ShopkeeperMustUseMonsterDestructible) {
-    // The bug: ShopkeeperFactory used base Destructible which doesn't save type
-    // This test ensures MonsterDestructible saves correctly
-
-    Destructible shopkeeperDestructible(100, 10, std::make_unique<MonsterDeathHandler>());
-
-    json j;
-    shopkeeperDestructible.save(j);
-
-    // Must have type for proper loading
-    ASSERT_TRUE(j.contains("type"));
-    EXPECT_EQ(j["type"], static_cast<int>(DestructibleType::MONSTER));
-
-    // Must load back correctly
-    auto loaded = Destructible::create(j);
-    ASSERT_NE(loaded, nullptr) << "Shopkeeper destructible failed to load";
-    EXPECT_EQ(loaded->get_max_hp(), 100);
+    EXPECT_EQ(loaded->get_hp(), HP_MAX);
+    EXPECT_EQ(loaded->get_max_hp(), HP_MAX);
 }
 
 // Death state persists
 TEST_F(DestructibleSerializationTest, DeathState_Persists) {
-    Destructible original(10, 0, std::make_unique<MonsterDeathHandler>());
-    original.set_hp(-5); // Kill it by setting HP below 0
+    Destructible original(10);
+    original.set_hp(0); // Mark as dead
 
     ASSERT_TRUE(original.is_dead());
 
@@ -119,5 +73,34 @@ TEST_F(DestructibleSerializationTest, DeathState_Persists) {
     auto loaded = Destructible::create(j);
     ASSERT_NE(loaded, nullptr);
     EXPECT_TRUE(loaded->is_dead()) << "Death state not preserved after load";
-    EXPECT_LE(loaded->get_hp(), 0);
+    EXPECT_EQ(loaded->get_hp(), 0);
+}
+
+// Temp HP preservation
+TEST_F(DestructibleSerializationTest, TempHP_PreservedAfterLoad) {
+    Destructible original(50);
+    original.set_hp(40);
+    original.set_temp_hp(20);
+
+    json j;
+    original.save(j);
+
+    auto loaded = Destructible::create(j);
+    ASSERT_NE(loaded, nullptr);
+    EXPECT_EQ(loaded->get_temp_hp(), 20);
+    EXPECT_EQ(loaded->get_effective_hp(), 60); // 40 + 20
+}
+
+// HP Base preservation (for level-up scenarios)
+TEST_F(DestructibleSerializationTest, HPBase_PreservedAfterLoad) {
+    Destructible original(50);
+    original.set_hp_base(55); // Simulates level-up HP increase
+    original.set_hp(55);
+
+    json j;
+    original.save(j);
+
+    auto loaded = Destructible::create(j);
+    ASSERT_NE(loaded, nullptr);
+    EXPECT_EQ(loaded->get_hp_base(), 55);
 }

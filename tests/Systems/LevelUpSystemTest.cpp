@@ -23,9 +23,7 @@ protected:
         player->set_dr(0);
         player->set_thaco(0);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(
-            10, 10, std::make_unique<PlayerDeathHandler>()
-        );
+        player->destructible = std::make_unique<Destructible>(10);
         player->destructible->set_hp_base(10);
 
         ctx = game.context();

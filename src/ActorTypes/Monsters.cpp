@@ -39,7 +39,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_dr(1);
 	set_thaco(thaco);
 	armorClass = std::make_unique<ArmorClass>(ac);
-	destructible = std::make_unique<Destructible>(hp, ac, std::make_unique<MonsterDeathHandler>());
+	destructible = std::make_unique<Destructible>(hp);
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);

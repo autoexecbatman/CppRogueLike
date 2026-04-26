@@ -48,7 +48,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.set_dr(20);
 	shopkeeper.set_thaco(20);
 	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
-	shopkeeper.destructible = std::make_unique<Destructible>(100, 10, std::make_unique<MonsterDeathHandler>());
+	shopkeeper.destructible = std::make_unique<Destructible>(100);
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 

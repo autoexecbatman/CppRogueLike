@@ -14,6 +14,7 @@
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
+#include "../Systems/AnimationSystem.h"
 #include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
@@ -459,6 +460,45 @@ int Creature::get_display_color() const noexcept
 		return CYAN_BLACK_PAIR;
 	}
 	return Actor::get_display_color();
+}
+
+void Creature::die(GameContext& ctx)
+{
+	// Monster death: message, reward, animation, drop items, create corpse
+	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+	ctx.messageSystem->finalize_message();
+
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You get ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+	ctx.messageSystem->finalize_message();
+
+	assert(ctx.player != nullptr && "Creature::die requires a live player in context");
+	ctx.player->on_kill_reward(get_xp(), ctx);
+
+	if (ctx.animSystem)
+	{
+		ctx.animSystem->spawn_death(position.x, position.y);
+	}
+
+	for (auto& item : inventoryData.items)
+	{
+		if (!item)
+		{
+			continue;
+		}
+		item->position = position;
+		InventoryOperations::add_item(*ctx.inventoryData, std::move(item));
+	}
+	inventoryData.items.clear();
+
+	// Create a corpse on the floor in place of the creature.
+	auto corpse = std::make_unique<Item>(position, actorData);
+	corpse->actorData.name = std::format("dead {}", get_name());
+	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
+	corpse->behavior = CorpseFood{ 0 };
+	InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
 }
 
 //==Unified Buff System - Modifier Stack Pattern==

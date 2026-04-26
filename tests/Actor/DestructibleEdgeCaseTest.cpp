@@ -38,7 +38,7 @@ protected:
 		player->set_dr(5);
 		player->set_thaco(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
+		player->destructible = std::make_unique<Destructible>(100);
 		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
 
@@ -47,7 +47,7 @@ protected:
 		monster->set_dr(2);
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(7);
-		monster->destructible = std::make_unique<Destructible>(50, 7, std::make_unique<MonsterDeathHandler>());
+		monster->destructible = std::make_unique<Destructible>(50);
 		monster->set_constitution(10);
 
 		ctx = mock.to_game_context();
@@ -453,82 +453,69 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_NegativeAC_Preserved)
 // Factory Create Edge Cases
 // ----------------------------------------------------------------------------
 
-TEST_F(DestructibleEdgeCaseTest, Create_InvalidType_ReturnsNullptr)
+TEST_F(DestructibleEdgeCaseTest, Create_IgnoresType_StillCreates)
 {
+	// Type field is no longer used - Destructible::create ignores it
 	json j;
-	j["type"] = 999; // Invalid type
+	j["type"] = 999; // Ignored
 	j["hpMax"] = 10;
 	j["hp"] = 10;
 	j["hpBase"] = 10;
 	j["lastConstitution"] = 10;
-	j["dr"] = 0;
-	j["corpseName"] = "test";
-	j["xp"] = 0;
-	j["thaco"] = 20;
-	j["armorClass"] = 10;
-	j["baseArmorClass"] = 10;
+	j["tempHp"] = 0;
 
 	auto result = Destructible::create(j);
 
-	EXPECT_EQ(result, nullptr);
+	ASSERT_NE(result, nullptr);
+	EXPECT_EQ(result->get_max_hp(), 10);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_MissingType_ReturnsNullptr)
+TEST_F(DestructibleEdgeCaseTest, Create_NoType_StillCreates)
 {
+	// Type field is optional - factory doesn't require it
 	json j;
-	// No "type" field
 	j["hpMax"] = 10;
 	j["hp"] = 10;
+	j["hpBase"] = 10;
+	j["lastConstitution"] = 10;
+	j["tempHp"] = 0;
 
 	auto result = Destructible::create(j);
 
-	EXPECT_EQ(result, nullptr);
+	ASSERT_NE(result, nullptr);
+	EXPECT_EQ(result->get_hp(), 10);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_MonsterType_ReturnsMonsterDestructible)
+TEST_F(DestructibleEdgeCaseTest, Create_Factory_CreatesValidDestructible)
 {
 	json j;
-	j["type"] = static_cast<int>(DestructibleType::MONSTER);
 	j["hpMax"] = 50;
 	j["hp"] = 50;
 	j["hpBase"] = 50;
 	j["lastConstitution"] = 0;
-	j["dr"] = 2;
-	j["corpseName"] = "corpse";
-	j["xp"] = 100;
-	j["thaco"] = 19;
-	j["armorClass"] = 7;
-	j["baseArmorClass"] = 7;
 	j["tempHp"] = 0;
 
 	auto result = Destructible::create(j);
 
 	ASSERT_NE(result, nullptr);
 	EXPECT_EQ(result->get_max_hp(), 50);
-	// Verify it's actually a MonsterDestructible by checking behavior would be harder
+	EXPECT_EQ(result->get_hp(), 50);
 }
 
-TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible)
+TEST_F(DestructibleEdgeCaseTest, Create_Factory_PlayerHP_CreatesValidDestructible)
 {
 	json j;
-	j["type"] = static_cast<int>(DestructibleType::PLAYER);
 	j["hpMax"] = 100;
 	j["hp"] = 80;
 	j["hpBase"] = 100;
 	j["lastConstitution"] = 12;
-	j["dr"] = 0;
-	j["corpseName"] = "your corpse";
-	j["xp"] = 5000;
-	j["thaco"] = 18;
-	j["armorClass"] = 5;
-	j["baseArmorClass"] = 10;
 	j["tempHp"] = 0;
 
 	auto result = Destructible::create(j);
 
 	ASSERT_NE(result, nullptr);
 	EXPECT_EQ(result->get_hp(), 80);
-	// XP is no longer part of Destructible - it's on Creature
+	EXPECT_EQ(result->get_max_hp(), 100);
 }
 
 // ----------------------------------------------------------------------------

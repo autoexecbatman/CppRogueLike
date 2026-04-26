@@ -34,7 +34,7 @@ protected:
         player->set_dr(5);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
+        player->destructible = std::make_unique<Destructible>(100);
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
@@ -43,7 +43,7 @@ protected:
         creature_base->set_dr(2);
         creature_base->set_thaco(19);
         creature_base->armorClass = std::make_unique<ArmorClass>(7);
-        creature_base->destructible = std::make_unique<Destructible>(30, 7, std::make_unique<MonsterDeathHandler>());
+        creature_base->destructible = std::make_unique<Destructible>(30);
 
         ctx = mock.to_game_context();
         ctx.player = player.get();
@@ -106,7 +106,7 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetKillCount_ReturnsKillCount)
 
 // ----------------------------------------------------------------------------
 // on_kill_reward — critical path (replaced 3 lines of direct Player mutation)
-// Regression here means MonsterDeathHandler::execute is broken.
+// Regression here means Creature::die() is broken.
 // ----------------------------------------------------------------------------
 
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_XpAddedToDestructible)

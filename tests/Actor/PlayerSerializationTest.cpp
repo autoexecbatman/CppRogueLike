@@ -44,7 +44,7 @@ protected:
         player->set_dr(2);
         player->set_thaco(18);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(30, 10, std::make_unique<PlayerDeathHandler>());
+        player->destructible = std::make_unique<Destructible>(30);
         player->attacker = std::make_unique<PlayerAttacker>(*player);
         // PlayerController constructed automatically in Player constructor
 

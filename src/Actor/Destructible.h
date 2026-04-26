@@ -6,7 +6,6 @@
 
 #include "../Combat/ConstitutionTracker.h"
 #include "../Combat/DamageInfo.h"
-#include "../Combat/DeathHandler.h"
 #include "../Combat/HealthPool.h"
 #include "../Persistent/Persistent.h"
 
@@ -16,7 +15,6 @@ struct GameContext;
 class Destructible : public Persistent
 {
 private:
-    std::unique_ptr<DeathHandler> deathHandler{};
     std::unique_ptr<ConstitutionTracker> constitutionTracker{};
     std::unique_ptr<HealthPool> healthPool{};
 
@@ -24,10 +22,7 @@ private:
     void log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const;
 
 public:
-    Destructible(
-        int hpMax,
-        int armorClass,
-        std::unique_ptr<DeathHandler> handler);
+    Destructible(int hpMax);
     virtual ~Destructible() override = default;
     Destructible(const Destructible&) = delete;
     Destructible(Destructible&&) = delete;
@@ -56,16 +51,7 @@ public:
     void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
 
     // Action methods
-    int take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL)
-    {
-        const int actual = healthPool->take_damage(owner, damage, ctx, damageType);
-        if (is_dead())
-        {
-            die(owner, ctx);
-        }
-        return actual;
-    }
-    void die(Creature& owner, GameContext& ctx);
+    int take_damage(Creature& owner, int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL);
     [[nodiscard]] int heal(int hpToHeal) { return healthPool->heal(hpToHeal); }
 
     void load(const json& j) override;

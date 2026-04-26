@@ -40,7 +40,7 @@ protected:
         player->set_dr(5);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
+        player->destructible = std::make_unique<Destructible>(100);
 
         ctx = mock.to_game_context();
         ctx.player = player.get();

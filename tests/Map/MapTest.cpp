@@ -48,9 +48,7 @@ protected:
         player->set_dr(0);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(
-            20, 10, std::make_unique<PlayerDeathHandler>()
-        );
+        player->destructible = std::make_unique<Destructible>(20);
 
         ctx.player = player.get();
         ctx.dataManager = &dataManager;
