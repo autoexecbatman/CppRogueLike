@@ -28,8 +28,7 @@ protected:
         creature->set_gold(50);
         creature->set_weapon_equipped("Short Sword");
 
-        // Add components - use MonsterDestructible for proper serialization
-        creature->destructible = std::make_unique<MonsterDestructible>(20, 1, "dead goblin", 35, 19, 6);
+        creature->destructible = std::make_unique<Destructible>(20, 1, "dead goblin", 35, 19, 6, std::make_unique<MonsterDeathHandler>());
         creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
         creature->ai = std::make_unique<AiMonster>();
 

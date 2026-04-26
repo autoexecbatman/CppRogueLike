@@ -18,8 +18,8 @@ protected:
         } catch (...) {}
 
         player = std::make_unique<Player>(Vector2D{0, 0});
-        player->destructible = std::make_unique<PlayerDestructible>(
-            10, 0, "your corpse", 0, 0, 10
+        player->destructible = std::make_unique<Destructible>(
+            10, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>()
         );
         player->destructible->set_hp_base(10);
 

@@ -59,7 +59,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_constitution(ctx.dice->d6());
 
 		// Combat properties - TRIPLED XP for solo play
-		destructible = std::make_unique<MonsterDestructible>(ctx.dice->d2() + 2, 0, "dead small spider", 45, 20, 7); // TRIPLED from 15 for solo play bonus
+		destructible = std::make_unique<Destructible>(ctx.dice->d2() + 2, 0, "dead small spider", 45, 20, 7, std::make_unique<MonsterDeathHandler>()); // TRIPLED from 15 for solo play bonus
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_weapon_equipped("Venomous fangs");
 
@@ -76,13 +76,14 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_constitution(ctx.dice->d6() + 1);
 
 		// Combat properties - giant spiders have more HP and do more damage - TRIPLED XP for solo play
-		destructible = std::make_unique<MonsterDestructible>(
+		destructible = std::make_unique<Destructible>(
 			ctx.dice->d4() + 3,
 			1,
 			"dead giant spider",
 			120, // TRIPLED from 40 for solo play bonus
 			19,
-			5);
+			5,
+			std::make_unique<MonsterDeathHandler>());
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
 		set_weapon_equipped("Giant fangs");
 
@@ -99,7 +100,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_constitution(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
 
 		// Combat properties - significantly stronger - TRIPLED XP for solo play
-		destructible = std::make_unique<MonsterDestructible>(ctx.dice->d8() + 5, 1, "dead web weaver", 180, 17, 5); // TRIPLED from 60 for solo play bonus
+		destructible = std::make_unique<Destructible>(ctx.dice->d8() + 5, 1, "dead web weaver", 180, 17, 5, std::make_unique<MonsterDeathHandler>()); // TRIPLED from 60 for solo play bonus
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_weapon_equipped("Toxic fangs");
 

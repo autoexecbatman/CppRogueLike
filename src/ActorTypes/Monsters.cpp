@@ -34,7 +34,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_weapon_equipped("Pseudopod");
 
 	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
-	destructible = std::make_unique<MonsterDestructible>(hp, 1, "dead mimic", 150, thaco, ac);
+	destructible = std::make_unique<Destructible>(hp, 1, "dead mimic", 150, thaco, ac, std::make_unique<MonsterDeathHandler>());
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);

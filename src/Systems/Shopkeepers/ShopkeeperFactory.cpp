@@ -42,8 +42,8 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	// Set AI - single source for shopkeeper behavior
 	shopkeeper.ai = std::make_unique<AiShopkeeper>();
 
-	// Set combat stats - non-hostile defensive stats (use MonsterDestructible for proper save/load)
-	shopkeeper.destructible = std::make_unique<MonsterDestructible>(100, 20, "the shopkeeper's corpse", 0, 20, 10);
+	// Set combat stats - non-hostile defensive stats
+	shopkeeper.destructible = std::make_unique<Destructible>(100, 20, "the shopkeeper's corpse", 0, 20, 10, std::make_unique<MonsterDeathHandler>());
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 

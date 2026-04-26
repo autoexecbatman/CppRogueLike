@@ -27,7 +27,7 @@ protected:
 
 	void SetUp() override
 	{
-		player.destructible = std::make_unique<PlayerDestructible>(20, 0, "your corpse", 0, 0, 10);
+		player.destructible = std::make_unique<Destructible>(20, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>());
 		ctx.player = &player;
 		ctx.messageSystem = &message_system;
 		ctx.curseSystem = &curse_system;

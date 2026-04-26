@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <memory>
 #include <nlohmann/json.hpp>
 #include "src/Actor/Destructible.h"
 
@@ -20,10 +21,10 @@ protected:
     const std::string CORPSE_NAME = "test corpse";
 };
 
-// MonsterDestructible round-trip
+// Monster death handler round-trip
 TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
     // Create and configure
-    MonsterDestructible original(HP_MAX, DR, CORPSE_NAME, XP, THACO, AC);
+    Destructible original(HP_MAX, DR, CORPSE_NAME, XP, THACO, AC, std::make_unique<MonsterDeathHandler>());
     // Directly set HP to simulate damage (take_damage requires GameContext)
     original.set_hp(40);
 
@@ -51,9 +52,9 @@ TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
     EXPECT_EQ(loaded->get_armor_class(), AC);
 }
 
-// PlayerDestructible round-trip
+// Player death handler round-trip
 TEST_F(DestructibleSerializationTest, PlayerDestructible_SaveLoad_RoundTrip) {
-    PlayerDestructible original(HP_MAX, DR, CORPSE_NAME, XP, THACO, AC);
+    Destructible original(HP_MAX, DR, CORPSE_NAME, XP, THACO, AC, std::make_unique<PlayerDeathHandler>());
     original.set_hp(30); // Simulate damage
 
     json j;
@@ -99,7 +100,7 @@ TEST_F(DestructibleSerializationTest, Regression_ShopkeeperMustUseMonsterDestruc
     // The bug: ShopkeeperFactory used base Destructible which doesn't save type
     // This test ensures MonsterDestructible saves correctly
 
-    MonsterDestructible shopkeeperDestructible(100, 20, "shopkeeper corpse", 0, 20, 10);
+    Destructible shopkeeperDestructible(100, 20, "shopkeeper corpse", 0, 20, 10, std::make_unique<MonsterDeathHandler>());
 
     json j;
     shopkeeperDestructible.save(j);
@@ -116,7 +117,7 @@ TEST_F(DestructibleSerializationTest, Regression_ShopkeeperMustUseMonsterDestruc
 
 // Death state persists
 TEST_F(DestructibleSerializationTest, DeathState_Persists) {
-    MonsterDestructible original(10, 0, CORPSE_NAME, XP, THACO, AC);
+    Destructible original(10, 0, CORPSE_NAME, XP, THACO, AC, std::make_unique<MonsterDeathHandler>());
     original.set_hp(-5); // Kill it by setting HP below 0
 
     ASSERT_TRUE(original.is_dead());

@@ -37,15 +37,15 @@ protected:
 		game.tile_config.load(Paths::TILE_CONFIG);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->destructible = std::make_unique<PlayerDestructible>(
-			20, 0, "your corpse", 0, 20, 10);
+		player->destructible = std::make_unique<Destructible>(
+			20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		player->set_strength(10);
 		player->set_dexterity(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", 1 });
-		monster->destructible = std::make_unique<MonsterDestructible>(
-			10, 0, "goblin corpse", 50, 19, 6);
+		monster->destructible = std::make_unique<Destructible>(
+			10, 0, "goblin corpse", 50, 19, 6, std::make_unique<MonsterDeathHandler>());
 		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);

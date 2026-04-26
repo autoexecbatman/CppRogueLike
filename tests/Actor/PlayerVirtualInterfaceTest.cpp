@@ -29,12 +29,12 @@ protected:
         data_manager.load_all_data(mock.messages);
 
         player = std::make_unique<Player>(Vector2D{ 0, 0 });
-        player->destructible = std::make_unique<PlayerDestructible>(100, 5, "your corpse", 0, 20, 10);
+        player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
             ActorData{ TileRef{}, "test_creature", 1 });
-        creature_base->destructible = std::make_unique<MonsterDestructible>(30, 2, "corpse", 50, 19, 7);
+        creature_base->destructible = std::make_unique<Destructible>(30, 2, "corpse", 50, 19, 7, std::make_unique<MonsterDeathHandler>());
 
         ctx = mock.to_game_context();
         ctx.player = player.get();
@@ -97,7 +97,7 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetKillCount_ReturnsKillCount)
 
 // ----------------------------------------------------------------------------
 // on_kill_reward — critical path (replaced 3 lines of direct Player mutation)
-// Regression here means MonsterDestructible::die is broken.
+// Regression here means MonsterDeathHandler::execute is broken.
 // ----------------------------------------------------------------------------
 
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_XpAddedToDestructible)

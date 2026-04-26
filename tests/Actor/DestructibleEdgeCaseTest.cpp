@@ -33,12 +33,12 @@ protected:
 		data_manager.load_all_data(mock.messages);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
-		player->destructible = std::make_unique<PlayerDestructible>(100, 5, "your corpse", 0, 20, 10);
+		player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "orc", 1 });
-		monster->destructible = std::make_unique<MonsterDestructible>(50, 2, "orc corpse", 75, 19, 7);
+		monster->destructible = std::make_unique<Destructible>(50, 2, "orc corpse", 75, 19, 7, std::make_unique<MonsterDeathHandler>());
 		monster->set_constitution(10);
 
 		ctx = mock.to_game_context();

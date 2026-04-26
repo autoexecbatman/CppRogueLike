@@ -39,7 +39,7 @@ protected:
         player->roundCounter = 3;
 
         // Set up components
-        player->destructible = std::make_unique<PlayerDestructible>(30, 2, "player corpse", 0, 18, 10);
+        player->destructible = std::make_unique<Destructible>(30, 2, "player corpse", 0, 18, 10, std::make_unique<PlayerDeathHandler>());
         player->attacker = std::make_unique<PlayerAttacker>(*player);
         // PlayerController constructed automatically in Player constructor
 

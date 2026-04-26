@@ -536,13 +536,14 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	const int hp = std::max(1, roll_dice(ctx.dice, params.hpDice));
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
-	c->destructible = std::make_unique<MonsterDestructible>(
+	c->destructible = std::make_unique<Destructible>(
 		hp,
 		params.dr,
 		params.corpseName,
 		params.xp,
 		params.thaco,
-		params.ac);
+		params.ac,
+		std::make_unique<MonsterDeathHandler>());
 	c->destructible->set_last_constitution(c->get_constitution());
 
 	if (params.aiType == MonsterAiType::RANGED)

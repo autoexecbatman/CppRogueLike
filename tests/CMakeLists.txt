@@ -177,6 +177,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Utils/UniqueId.cpp
 
     # Combat
+    ${PARENT_SOURCE_DIR}/Combat/DeathHandler.cpp
     ${PARENT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
 
     # UI

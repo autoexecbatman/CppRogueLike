@@ -210,8 +210,8 @@ void Player::roll_new_character(GameContext& ctx)
 	const int playerAC = 10;
 
 	attacker = std::make_unique<PlayerAttacker>(*this);
-	destructible = std::make_unique<PlayerDestructible>(
-		playerHp, playerDr, "your corpse", playerXp, 0, playerAC);
+	destructible = std::make_unique<Destructible>(
+		playerHp, playerDr, "your corpse", playerXp, 0, playerAC, std::make_unique<PlayerDeathHandler>());
 }
 
 void Player::on_new_game_start(GameContext& ctx)
