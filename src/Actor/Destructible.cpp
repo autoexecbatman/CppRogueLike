@@ -28,7 +28,6 @@ Destructible::Destructible(
     int armorClassValue,
     std::unique_ptr<DeathHandler> handler)
     : deathHandler(std::move(handler)),
-      armorClass(std::make_unique<ArmorClass>(armorClassValue)),
       constitutionTracker(std::make_unique<ConstitutionTracker>()),
       healthPool(std::make_unique<HealthPool>(hpMax))
 {
@@ -99,10 +98,6 @@ void Destructible::die(Creature& owner, GameContext& ctx)
 }
 
 
-void Destructible::update_armor_class(Creature& owner, GameContext& ctx)
-{
-	armorClass->update(owner, ctx);
-}
 
 void Destructible::load(const json& j)
 {
@@ -111,9 +106,6 @@ void Destructible::load(const json& j)
     healthPool->set_hp_base(j.at("hpBase").get<int>());
     healthPool->set_temp_hp(j.at("tempHp").get<int>());
     constitutionTracker->set_last_constitution(j.at("lastConstitution").get<int>());
-
-    armorClass->set_armor_class(j.at("armorClass").get<int>());
-    armorClass->set_base_armor_class(j.at("baseArmorClass").get<int>());
 }
 
 void Destructible::save(json& j)
@@ -125,8 +117,6 @@ void Destructible::save(json& j)
     j["hpBase"] = healthPool->get_hp_base();
     j["tempHp"] = healthPool->get_temp_hp();
     j["lastConstitution"] = get_last_constitution();
-    j["armorClass"] = get_armor_class();
-    j["baseArmorClass"] = get_base_armor_class();
 }
 
 [[nodiscard]] std::unique_ptr<Destructible> Destructible::create(const json& j)

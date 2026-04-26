@@ -64,6 +64,13 @@ void Creature::load(const json& j)
 			experienceReward = std::make_unique<ExperienceReward>(0);
 			experienceReward->load(j["destructible"]);
 		}
+		// Move armorClass from destructible's JSON to creature's member
+		if (destructible && j["destructible"].contains("armorClass"))
+		{
+			armorClass = std::make_unique<ArmorClass>(10);
+			armorClass->set_armor_class(j["destructible"].at("armorClass").get<int>());
+			armorClass->set_base_armor_class(j["destructible"].at("baseArmorClass").get<int>());
+		}
 	}
 	if (j.contains("ai"))
 	{
@@ -133,6 +140,12 @@ void Creature::save(json& j)
 		{
 			experienceReward->save(destructibleJson);
 		}
+		// Also save armorClass within the destructible object for now
+		if (armorClass)
+		{
+			destructibleJson["armorClass"] = armorClass->get_armor_class();
+			destructibleJson["baseArmorClass"] = armorClass->get_base_armor_class();
+		}
 		j["destructible"] = destructibleJson;
 	}
 	if (ai)
@@ -178,7 +191,7 @@ void Creature::update_creature_state(GameContext& ctx)
 
 	assert(destructible && "Creature::update_creature_state called with null destructible");
 
-	destructible->update_armor_class(*this, ctx);
+	update_armor_class(ctx);
 	destructible->update_constitution_bonus(*this, ctx);
 }
 

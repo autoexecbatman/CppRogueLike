@@ -214,6 +214,7 @@ void Player::roll_new_character(GameContext& ctx)
 	experienceReward = std::make_unique<ExperienceReward>(playerXp);
 	set_dr(playerDr);
 	set_thaco(0);
+	armorClass = std::make_unique<ArmorClass>(playerAC);
 	destructible = std::make_unique<Destructible>(
 		playerHp, playerAC, std::make_unique<PlayerDeathHandler>());
 }
@@ -823,8 +824,8 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	// Update armor class if armor or shield was equipped
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
-		destructible->update_armor_class(*this, ctx);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+		update_armor_class(ctx);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(get_armor_class()) + ".", true);
 	}
 
 	// Set ranged state when a ranged weapon is equipped
@@ -1009,8 +1010,8 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// Update armor class if armor or shield was unequipped
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
-			destructible->update_armor_class(*this, ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(destructible->get_armor_class()) + ".", true);
+			update_armor_class(ctx);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(get_armor_class()) + ".", true);
 		}
 
 		return true;

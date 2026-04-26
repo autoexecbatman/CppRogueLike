@@ -47,6 +47,7 @@ protected:
         player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->set_dr(0);
         player->set_thaco(20);
+        player->armorClass = std::make_unique<ArmorClass>(10);
         player->destructible = std::make_unique<Destructible>(
             20, 10, std::make_unique<PlayerDeathHandler>()
         );

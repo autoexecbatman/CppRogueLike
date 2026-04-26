@@ -63,6 +63,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		experienceReward = std::make_unique<ExperienceReward>(45); // TRIPLED from 15 for solo play bonus
 		set_dr(0);
 		set_thaco(20);
+		armorClass = std::make_unique<ArmorClass>(7);
 		destructible = std::make_unique<Destructible>(ctx.dice->d2() + 2, 7, std::make_unique<MonsterDeathHandler>());
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_weapon_equipped("Venomous fangs");
@@ -83,6 +84,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		experienceReward = std::make_unique<ExperienceReward>(120); // TRIPLED from 40 for solo play bonus
 		set_dr(1);
 		set_thaco(19);
+		armorClass = std::make_unique<ArmorClass>(5);
 		destructible = std::make_unique<Destructible>(
 			ctx.dice->d4() + 3,
 			5,
@@ -106,6 +108,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		experienceReward = std::make_unique<ExperienceReward>(180); // TRIPLED from 60 for solo play bonus
 		set_dr(1);
 		set_thaco(17);
+		armorClass = std::make_unique<ArmorClass>(5);
 		destructible = std::make_unique<Destructible>(ctx.dice->d8() + 5, 5, std::make_unique<MonsterDeathHandler>());
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_weapon_equipped("Toxic fangs");

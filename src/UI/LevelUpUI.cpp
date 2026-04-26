@@ -70,7 +70,7 @@ void draw_current_stats(const Player& player, GameContext& ctx, int& row)
     ctx.renderer->draw_text(
         Vector2D{ tileSize, row * tileSize }, std::format("HP: {} / {}   THAC0: {}   AC: {}",
             player.destructible->get_hp(), player.destructible->get_max_hp(),
-            player.get_thaco(), player.destructible->get_armor_class()),
+            player.get_thaco(), player.get_armor_class()),
         GREEN_BLACK_PAIR);
     row += 2;
 }

@@ -169,7 +169,7 @@ int Attacker::calculate_to_hit_roll(
 	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
-	int rollNeeded = attacker.get_thaco() - target.destructible->get_armor_class();
+	int rollNeeded = attacker.get_thaco() - target.get_armor_class();
 	int hitModifier = attackPenalty;
 
 	// Ranged: apply dexterity modifier
@@ -286,7 +286,7 @@ void Attacker::log_attack_miss(
 		attackRoll,
 		rollNeeded,
 		attacker.get_thaco(),
-		target.destructible->get_armor_class(),
+		target.get_armor_class(),
 		attackPenalty));
 }
 

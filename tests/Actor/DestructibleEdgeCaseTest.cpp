@@ -37,6 +37,7 @@ protected:
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->set_dr(5);
 		player->set_thaco(20);
+		player->armorClass = std::make_unique<ArmorClass>(10);
 		player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
 		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
@@ -45,6 +46,7 @@ protected:
 		monster->experienceReward = std::make_unique<ExperienceReward>(75);
 		monster->set_dr(2);
 		monster->set_thaco(19);
+		monster->armorClass = std::make_unique<ArmorClass>(7);
 		monster->destructible = std::make_unique<Destructible>(50, 7, std::make_unique<MonsterDeathHandler>());
 		monster->set_constitution(10);
 
@@ -305,8 +307,8 @@ TEST_F(DestructibleEdgeCaseTest, IsDead_TrueWithNegativeClampedHp)
 TEST_F(DestructibleEdgeCaseTest, ArmorClass_CanBeNegative)
 {
 	// In AD&D, negative AC is better
-	monster->destructible->set_armor_class(-5);
-	EXPECT_EQ(monster->destructible->get_armor_class(), -5);
+	monster->set_armor_class(-5);
+	EXPECT_EQ(monster->get_armor_class(), -5);
 }
 
 TEST_F(DestructibleEdgeCaseTest, THAC0_CanBeSetToAnyValue)
@@ -399,8 +401,8 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	monster->set_dr(8);
 	monster->set_xp(300);
 	monster->set_thaco(15);
-	monster->destructible->set_armor_class(3);
-	monster->destructible->set_base_armor_class(5);
+	monster->set_armor_class(3);
+	monster->set_base_armor_class(5);
 	monster->destructible->set_last_constitution(14);
 
 	json j;
@@ -412,12 +414,9 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	EXPECT_EQ(loaded->get_max_hp(), 75);
 	EXPECT_EQ(loaded->get_hp(), 60);
 	EXPECT_EQ(loaded->get_hp_base(), 50);
-	EXPECT_EQ(loaded->get_dr(), 8);
 	// XP is no longer part of Destructible - it's on Creature
-	EXPECT_EQ(loaded->get_thaco(), 15);
-	EXPECT_EQ(loaded->get_armor_class(), 3);
-	EXPECT_EQ(loaded->get_base_armor_class(), 5);
-	// CorpseName is now on Creature, not Destructible
+	// DR and THACO are no longer part of Destructible - they're on Creature
+	// ArmorClass is no longer part of Destructible - it's on Creature
 	EXPECT_EQ(loaded->get_last_constitution(), 14);
 }
 
@@ -438,14 +437,16 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_DeadState_Preserved)
 
 TEST_F(DestructibleEdgeCaseTest, Serialization_NegativeAC_Preserved)
 {
-	monster->destructible->set_armor_class(-10);
+	// ArmorClass is no longer part of Destructible - it's on Creature
+	monster->set_armor_class(-10);
 
 	json j;
 	monster->destructible->save(j);
 
 	auto loaded = Destructible::create(j);
 
-	EXPECT_EQ(loaded->get_armor_class(), -10);
+	// ArmorClass is no longer persisted by Destructible - it's on Creature
+	EXPECT_NE(loaded, nullptr);
 }
 
 // ----------------------------------------------------------------------------

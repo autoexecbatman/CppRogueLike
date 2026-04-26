@@ -33,6 +33,7 @@ protected:
         player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->set_dr(5);
         player->set_thaco(20);
+        player->armorClass = std::make_unique<ArmorClass>(10);
         player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
 
         creature_base = std::make_unique<Creature>(
@@ -41,6 +42,7 @@ protected:
         creature_base->experienceReward = std::make_unique<ExperienceReward>(50);
         creature_base->set_dr(2);
         creature_base->set_thaco(19);
+        creature_base->armorClass = std::make_unique<ArmorClass>(7);
         creature_base->destructible = std::make_unique<Destructible>(30, 7, std::make_unique<MonsterDeathHandler>());
 
         ctx = mock.to_game_context();

@@ -6,6 +6,7 @@
 
 #include "../Ai/Ai.h"
 #include "../Colors/Colors.h"
+#include "../Combat/ArmorClass.h"
 #include "../Combat/ExperienceReward.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
@@ -179,6 +180,13 @@ public:
 	// Non-Rogue classes return 0 (cannot pick locks).
 	virtual int get_open_locks_skill() const noexcept { return 0; }
 
+	// Armor Class accessors
+	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
+	[[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
+	void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
+	void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
+	void update_armor_class(GameContext& ctx) { armorClass->update(*this, ctx); }
+
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called once at game start (level 1, new game) to apply race/class setup
 	virtual void on_new_game_start(GameContext& ctx) {}
@@ -192,6 +200,7 @@ public:
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<ExperienceReward> experienceReward; // the actor can earn experience
+	std::unique_ptr<ArmorClass> armorClass; // the actor has armor class
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading

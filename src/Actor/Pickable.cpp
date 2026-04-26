@@ -191,7 +191,7 @@ bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, Gam
 				wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
 			}
 
-			wearer.destructible->update_armor_class(wearer, ctx);
+			wearer.update_armor_class(ctx);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You remove the " + item.actorData.name + ".", true);
 		}
 		else
@@ -239,7 +239,7 @@ bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, Gam
 				wearer.set_charisma(wearer.get_charisma() + sb.chaBonus);
 			}
 
-			wearer.destructible->update_armor_class(wearer, ctx);
+			wearer.update_armor_class(ctx);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You put on the " + item.actorData.name + ".", true);
 		}
 		return true;
@@ -273,7 +273,7 @@ bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, Gam
 			wearer.set_wisdom(wearer.get_wisdom() - sb.wisBonus);
 			wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
 		}
-		wearer.destructible->update_armor_class(wearer, ctx);
+		wearer.update_armor_class(ctx);
 	}
 	else
 	{
@@ -320,7 +320,7 @@ bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, Gam
 			wearer.set_wisdom(wearer.get_wisdom() + sb.wisBonus);
 			wearer.set_charisma(wearer.get_charisma() + sb.chaBonus);
 		}
-		wearer.destructible->update_armor_class(wearer, ctx);
+		wearer.update_armor_class(ctx);
 	}
 
 	return true;
@@ -359,7 +359,7 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 		}
 
 		if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
-			wearer.destructible->update_armor_class(wearer, ctx);
+			wearer.update_armor_class(ctx);
 
 		return true;
 	}
@@ -750,12 +750,12 @@ bool use([[maybe_unused]] Armor& a, Item& item, Creature& wearer, GameContext& c
 	if (item.has_state(ActorState::IS_EQUIPPED))
 	{
 		item.remove_state(ActorState::IS_EQUIPPED);
-		wearer.destructible->update_armor_class(wearer, ctx);
+		wearer.update_armor_class(ctx);
 	}
 	else
 	{
 		item.add_state(ActorState::IS_EQUIPPED);
-		wearer.destructible->update_armor_class(wearer, ctx);
+		wearer.update_armor_class(ctx);
 	}
 	return true;
 }

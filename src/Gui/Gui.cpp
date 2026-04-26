@@ -262,7 +262,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	auto combatLine = std::format(
 		"T0:{}  AC:{}  DR:{}",
 		ctx.player->get_thaco(),
-		ctx.player->destructible->get_armor_class(),
+		ctx.player->get_armor_class(),
 		ctx.player->get_dr());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 2 * tileSize + fontOff }, combatLine, WHITE_BLACK_PAIR);
 

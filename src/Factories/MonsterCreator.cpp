@@ -540,6 +540,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->experienceReward = std::make_unique<ExperienceReward>(params.xp);
 	c->set_dr(params.dr);
 	c->set_thaco(params.thaco);
+	c->armorClass = std::make_unique<ArmorClass>(params.ac);
 	c->destructible = std::make_unique<Destructible>(
 		hp,
 		params.ac,
