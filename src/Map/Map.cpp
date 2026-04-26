@@ -155,7 +155,7 @@ bool Map::in_bounds(Vector2D pos) const noexcept
 	return result;
 }
 
-void Map::init_tiles(GameContext& ctx)
+void Map::init_tiles()
 {
 	tiles.clear();
 
@@ -164,22 +164,12 @@ void Map::init_tiles(GameContext& ctx)
 	// All FovCells default to walkable=false, transparent=false — matches WALL.
 	fovMap = std::make_unique<FovMap>(mapWidth, mapHeight);
 
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("init_tiles: Creating " + std::to_string(mapWidth * mapHeight) + " tiles (" + std::to_string(mapWidth) + " x " + std::to_string(mapHeight) + ")");
-	}
-
 	for (int y = 0; y < mapHeight; y++)
 	{
 		for (int x = 0; x < mapWidth; x++)
 		{
 			tiles.emplace_back(Tile(Vector2D{ x, y }, TileType::WALL, 0));
 		}
-	}
-
-	if (ctx.messageSystem)
-	{
-		ctx.messageSystem->log("init_tiles: Created " + std::to_string(tiles.size()) + " tiles");
 	}
 }
 
@@ -188,7 +178,11 @@ void Map::init_tiles(GameContext& ctx)
 // for enabling loading the map from the file.
 void Map::init(GameContext& ctx)
 {
-	init_tiles(ctx);  // resets tiles + fovMap to all-walls
+	init_tiles();  // resets tiles + fovMap to all-walls
+	if (ctx.messageSystem)
+	{
+		ctx.messageSystem->log("Map::init: " + std::to_string(mapWidth) + "x" + std::to_string(mapHeight) + " tile grid reset");
+	}
 	seed = ctx.dice ? ctx.dice->roll(0, std::numeric_limits<int>::max()) : 0;
 	mapRng = RandomDice{ static_cast<unsigned int>(seed) };
 

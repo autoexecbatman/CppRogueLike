@@ -118,7 +118,7 @@ public:
 
 	// Initialize the tile grid to all-walls. No dungeon generation.
 	// Useful as a test seam when unit tests need a blank map.
-	void init_tiles(GameContext& ctx);
+	void init_tiles();
 
 	// Full dungeon initialization: tile grid + room generation + actor placement.
 	void init(GameContext& ctx);

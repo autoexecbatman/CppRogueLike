@@ -29,6 +29,17 @@
 //     in Pass 1 are rolled back to CLOSED_UNLOCKED
 // ============================================================================
 
+namespace
+{
+    // Fixture map dimensions — single TU, no reason to be class members.
+    constexpr int FIXTURE_W = 40;
+    constexpr int FIXTURE_H = 25;
+
+    // Integration test map dimensions.
+    constexpr int STAIR_TEST_W = 120;
+    constexpr int STAIR_TEST_H = 80;
+}
+
 // Exposes the protected setup_treasure_room_guard so tests can call it directly.
 class TestableTreasureMap : public Map
 {
@@ -44,9 +55,6 @@ public:
 class TreasureRoomFixture : public ::testing::Test
 {
 protected:
-    static constexpr int W = 40;
-    static constexpr int H = 25;
-
     std::unique_ptr<TestableTreasureMap> map;
     std::unique_ptr<Player> player;
     std::vector<std::unique_ptr<Creature>> creatures;
@@ -66,7 +74,7 @@ protected:
         }
         catch (...) {}
 
-        map = std::make_unique<TestableTreasureMap>(W, H);
+        map = std::make_unique<TestableTreasureMap>(FIXTURE_W, FIXTURE_H);
         player = std::make_unique<Player>(Vector2D{ 1, 1 });
         player->destructible = std::make_unique<PlayerDestructible>(
             20, 0, "your corpse", 0, 20, 10);
@@ -81,7 +89,7 @@ protected:
         ctx.creatures = &creatures;
         ctx.map = map.get();
 
-        map->init_tiles(ctx);  // blank wall grid; tests manually stamp rooms and doors
+        map->init_tiles();  // blank wall grid; tests manually stamp rooms and doors
     }
 
     // Stamp a room floor and return its descriptor.
@@ -271,10 +279,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 
     MockGameContext mock;
 
-    static constexpr int W = 120;
-    static constexpr int H = 80;
-
-    auto map = std::make_unique<Map>(W, H);
+    auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);
     auto player = std::make_unique<Player>(Vector2D{ 5, 5 });
     player->destructible = std::make_unique<PlayerDestructible>(
         20, 0, "your corpse", 0, 20, 10);

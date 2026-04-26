@@ -15,6 +15,12 @@
 // Tests tile operations, walkability, door mechanics, serialization
 // ============================================================================
 
+namespace
+{
+    constexpr int TEST_MAP_WIDTH = 20;
+    constexpr int TEST_MAP_HEIGHT = 15;
+}
+
 class MapTest : public ::testing::Test
 {
 protected:
@@ -22,18 +28,15 @@ protected:
     std::unique_ptr<Player> player;
     std::vector<std::unique_ptr<Creature>> creatures;
     GameContext ctx;
-    DataManager data_manager;
-    MessageSystem message_system;
+    DataManager dataManager;
+    MessageSystem messageSystem;
     RandomDice dice;
-
-    static constexpr int TEST_MAP_WIDTH = 20;
-    static constexpr int TEST_MAP_HEIGHT = 15;
 
     void SetUp() override
     {
         try
         {
-            data_manager.load_all_data(message_system);
+            dataManager.load_all_data(messageSystem);
         }
         catch (...) {}
 
@@ -45,8 +48,8 @@ protected:
         );
 
         ctx.player = player.get();
-        ctx.dataManager = &data_manager;
-        ctx.messageSystem = &message_system;
+        ctx.dataManager = &dataManager;
+        ctx.messageSystem = &messageSystem;
         ctx.dice = &dice;
         ctx.creatures = &creatures;
         ctx.map = map.get();
@@ -54,7 +57,7 @@ protected:
         dice.set_test_mode(true);
 
         // Initialize tiles (required before any tile operations)
-        map->init_tiles(ctx);  // blank wall grid — no dungeon generation; tile-level tests need no more
+        map->init_tiles();  // blank wall grid — no dungeon generation; tile-level tests need no more
     }
 
     void TearDown() override
@@ -63,12 +66,13 @@ protected:
         dice.clear_fixed_rolls();
     }
 
-    // Helper to manually set up a simple map with floor tiles
-    void create_simple_room(int y1, int x1, int y2, int x2)
+    // Helper to manually set up a simple map with floor tiles.
+    // Parameters follow the codebase convention: x (column) before y (row).
+    void create_simple_room(int x1, int y1, int x2, int y2)
     {
         for (int y = y1; y <= y2; ++y)
         {
-            for (int x = x1; x <= x2; ++x) 
+            for (int x = x1; x <= x2; ++x)
             {
                 map->set_tile(Vector2D{x, y}, TileType::FLOOR, 1.0);
             }
