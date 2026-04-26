@@ -78,8 +78,10 @@ protected:
         map = std::make_unique<TestableTreasureMap>(FIXTURE_W, FIXTURE_H);
         player = std::make_unique<Player>(Vector2D{ 1, 1 });
         player->experienceReward = std::make_unique<ExperienceReward>(0);
+        player->set_dr(0);
+        player->set_thaco(20);
         player->destructible = std::make_unique<Destructible>(
-            20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
+            20, 10, std::make_unique<PlayerDeathHandler>());
 
         // Use MockGameContext as base so contentRegistry, tileConfig, and
         // inventoryData are all wired — setup_treasure_room_guard needs
@@ -284,8 +286,10 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);
     auto player = std::make_unique<Player>(Vector2D{ 5, 5 });
     player->experienceReward = std::make_unique<ExperienceReward>(0);
+    player->set_dr(0);
+    player->set_thaco(20);
     player->destructible = std::make_unique<Destructible>(
-        20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
+        20, 10, std::make_unique<PlayerDeathHandler>());
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;

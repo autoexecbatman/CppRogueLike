@@ -25,18 +25,12 @@
 
 Destructible::Destructible(
     int hpMax,
-    int dr,
-    std::string_view corpseName,
-    int xp,
-    int thaco,
     int armorClassValue,
     std::unique_ptr<DeathHandler> handler)
     : deathHandler(std::move(handler)),
       armorClass(std::make_unique<ArmorClass>(armorClassValue)),
       constitutionTracker(std::make_unique<ConstitutionTracker>()),
-      healthPool(std::make_unique<HealthPool>(hpMax)),
-      combatStats(std::make_unique<CombatStats>(dr, thaco)),
-      corpseData(std::make_unique<CorpseData>(corpseName))
+      healthPool(std::make_unique<HealthPool>(hpMax))
 {
 }
 
@@ -117,8 +111,6 @@ void Destructible::load(const json& j)
     healthPool->set_hp_base(j.at("hpBase").get<int>());
     healthPool->set_temp_hp(j.at("tempHp").get<int>());
     constitutionTracker->set_last_constitution(j.at("lastConstitution").get<int>());
-    combatStats->load(j);
-    corpseData->load(j);
 
     armorClass->set_armor_class(j.at("armorClass").get<int>());
     armorClass->set_base_armor_class(j.at("baseArmorClass").get<int>());
@@ -133,8 +125,6 @@ void Destructible::save(json& j)
     j["hpBase"] = healthPool->get_hp_base();
     j["tempHp"] = healthPool->get_temp_hp();
     j["lastConstitution"] = get_last_constitution();
-    combatStats->save(j);
-    corpseData->save(j);
     j["armorClass"] = get_armor_class();
     j["baseArmorClass"] = get_base_armor_class();
 }
@@ -172,7 +162,7 @@ void Destructible::save(json& j)
         return nullptr;
     }
 
-    auto destructible = std::make_unique<Destructible>(0, 0, "", 0, 0, 0, std::move(handler));
+    auto destructible = std::make_unique<Destructible>(0, 0, std::move(handler));
     destructible->load(j);
     return destructible;
 }

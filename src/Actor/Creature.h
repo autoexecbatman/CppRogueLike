@@ -58,6 +58,8 @@ private:
 	int hitDie{ 8 };
 	float attacksPerRound{ 1.0f };
 	int morale{ 10 };
+	int damageResistance{ 0 };
+	int thaco{ 20 };
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
 
@@ -135,6 +137,11 @@ public:
 	void set_attacks_per_round(float apr) noexcept { attacksPerRound = apr; }
 	int get_morale() const noexcept { return morale; }
 	void set_morale(int value) noexcept { morale = value; }
+
+	int get_dr() const noexcept { return damageResistance; }
+	int get_thaco() const noexcept { return thaco; }
+	void set_dr(int value) noexcept { damageResistance = value; }
+	void set_thaco(int value) noexcept { thaco = value; }
 
 	virtual void apply_confusion(int nbTurns);
 

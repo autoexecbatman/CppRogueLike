@@ -41,7 +41,7 @@ int get_expected_thac0(const Player& player, int level)
 bool has_thac0_improvement(const Player& player, int level)
 {
     int expectedTHAC0 = get_expected_thac0(player, level);
-    return player.destructible->get_thaco() <= expectedTHAC0;
+    return player.get_thaco() <= expectedTHAC0;
 }
 
 void draw_title(const Player& player, int level, GameContext& ctx, int& row)
@@ -70,7 +70,7 @@ void draw_current_stats(const Player& player, GameContext& ctx, int& row)
     ctx.renderer->draw_text(
         Vector2D{ tileSize, row * tileSize }, std::format("HP: {} / {}   THAC0: {}   AC: {}",
             player.destructible->get_hp(), player.destructible->get_max_hp(),
-            player.destructible->get_thaco(), player.destructible->get_armor_class()),
+            player.get_thaco(), player.destructible->get_armor_class()),
         GREEN_BLACK_PAIR);
     row += 2;
 }
@@ -85,7 +85,7 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
     if (has_thac0_improvement(player, level))
     {
         ctx.renderer->draw_text(
-            Vector2D{ tileSize, row * tileSize }, std::format("THAC0 improved to {}", player.destructible->get_thaco()), GREEN_BLACK_PAIR);
+            Vector2D{ tileSize, row * tileSize }, std::format("THAC0 improved to {}", player.get_thaco()), GREEN_BLACK_PAIR);
         row++;
     }
 

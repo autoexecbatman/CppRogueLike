@@ -45,7 +45,9 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 
 	// Set combat stats - non-hostile defensive stats
 	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);
-	shopkeeper.destructible = std::make_unique<Destructible>(100, 20, "the shopkeeper's corpse", 0, 20, 10, std::make_unique<MonsterDeathHandler>());
+	shopkeeper.set_dr(20);
+	shopkeeper.set_thaco(20);
+	shopkeeper.destructible = std::make_unique<Destructible>(100, 10, std::make_unique<MonsterDeathHandler>());
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 

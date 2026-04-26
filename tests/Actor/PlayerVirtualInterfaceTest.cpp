@@ -31,13 +31,17 @@ protected:
 
         player = std::make_unique<Player>(Vector2D{ 0, 0 });
         player->experienceReward = std::make_unique<ExperienceReward>(0);
-        player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
+        player->set_dr(5);
+        player->set_thaco(20);
+        player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
             ActorData{ TileRef{}, "test_creature", 1 });
         creature_base->experienceReward = std::make_unique<ExperienceReward>(50);
-        creature_base->destructible = std::make_unique<Destructible>(30, 2, "corpse", 0, 19, 7, std::make_unique<MonsterDeathHandler>());
+        creature_base->set_dr(2);
+        creature_base->set_thaco(19);
+        creature_base->destructible = std::make_unique<Destructible>(30, 7, std::make_unique<MonsterDeathHandler>());
 
         ctx = mock.to_game_context();
         ctx.player = player.get();

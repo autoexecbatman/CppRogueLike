@@ -20,8 +20,10 @@ protected:
 
         player = std::make_unique<Player>(Vector2D{0, 0});
         player->experienceReward = std::make_unique<ExperienceReward>(0);
+        player->set_dr(0);
+        player->set_thaco(0);
         player->destructible = std::make_unique<Destructible>(
-            10, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>()
+            10, 10, std::make_unique<PlayerDeathHandler>()
         );
         player->destructible->set_hp_base(10);
 
@@ -151,13 +153,13 @@ TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_creature_class(CreatureClass::FIGHTER);
     player->set_hit_die(10);
-    player->destructible->set_thaco(20);
+    player->set_thaco(20);
 
     game.dice.set_next_d20(5);
 
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
 
-    EXPECT_EQ(player->destructible->get_thaco(), 19);
+    EXPECT_EQ(player->get_thaco(), 19);
 }
 
 TEST_F(LevelUpSystemTest, FighterExtraAttackSkippedLevel)

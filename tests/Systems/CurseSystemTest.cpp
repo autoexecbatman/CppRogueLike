@@ -29,7 +29,9 @@ protected:
 	void SetUp() override
 	{
 		player.experienceReward = std::make_unique<ExperienceReward>(0);
-		player.destructible = std::make_unique<Destructible>(20, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>());
+		player.set_dr(0);
+		player.set_thaco(0);
+		player.destructible = std::make_unique<Destructible>(20, 10, std::make_unique<PlayerDeathHandler>());
 		ctx.player = &player;
 		ctx.messageSystem = &message_system;
 		ctx.curseSystem = &curse_system;

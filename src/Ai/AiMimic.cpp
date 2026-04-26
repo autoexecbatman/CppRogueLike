@@ -229,7 +229,7 @@ void AiMimic::apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext
 	case MimicBonusType::DEFENSE_GOLD:
 	{
 		boost_defense(owner, DR_BONUS, MAX_GOLD_DR_BONUS, ctx);
-		if (owner.destructible->get_dr() <= MAX_GOLD_DR_BONUS)
+		if (owner.get_dr() <= MAX_GOLD_DR_BONUS)
 		{
 			ctx.messageSystem->log(std::format("Mimic gained {} DR from gold", DR_BONUS));
 		}
@@ -239,7 +239,7 @@ void AiMimic::apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext
 	case MimicBonusType::DEFENSE_ARMOR:
 	{
 		boost_defense(owner, DR_BONUS, MAX_ARMOR_DR_BONUS, ctx);
-		if (owner.destructible->get_dr() <= MAX_ARMOR_DR_BONUS)
+		if (owner.get_dr() <= MAX_ARMOR_DR_BONUS)
 		{
 			ctx.messageSystem->log(std::format("Mimic gained {} DR from armor", DR_BONUS));
 		}
@@ -271,10 +271,10 @@ void AiMimic::boost_health(Creature& owner, int amount, GameContext& ctx)
 
 void AiMimic::boost_defense(Creature& owner, int amount, int maxDR, GameContext& ctx)
 {
-	const int currentDR = owner.destructible->get_dr();
+	const int currentDR = owner.get_dr();
 	if (currentDR < maxDR)
 	{
-		owner.destructible->set_dr(currentDR + amount);
+		owner.set_dr(currentDR + amount);
 	}
 }
 

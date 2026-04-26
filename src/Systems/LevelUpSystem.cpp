@@ -57,10 +57,10 @@ void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
     }
     }
 
-    if (newTHAC0 < owner.destructible->get_thaco())
+    if (newTHAC0 < owner.get_thaco())
     {
-        int oldTHAC0 = owner.destructible->get_thaco();
-        owner.destructible->set_thaco(newTHAC0);
+        int oldTHAC0 = owner.get_thaco();
+        owner.set_thaco(newTHAC0);
 
         if (owner.get_creature_class() != CreatureClass::MONSTER)
         {
@@ -433,7 +433,7 @@ void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
         return;
     }
 
-    int oldTHAC0 = owner.destructible ? owner.destructible->get_thaco() : 20;
+    int oldTHAC0 = owner.get_thaco();
 
     apply_thac0_improvement(owner, newLevel, ctx);
     int hpGained = apply_hit_point_gain(owner, newLevel, ctx);
@@ -446,7 +446,7 @@ void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
 
     apply_saving_throw_improvements(owner, newLevel, ctx);
 
-    bool thac0_improved = owner.destructible && (oldTHAC0 != owner.destructible->get_thaco());
+    bool thac0_improved = (oldTHAC0 != owner.get_thaco());
 
     if (owner.get_creature_class() != CreatureClass::MONSTER)
     {
@@ -456,7 +456,7 @@ void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
         if (thac0_improved)
         {
             ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
-                std::format("THAC0 {}->{}", oldTHAC0, owner.destructible->get_thaco()));
+                std::format("THAC0 {}->{}", oldTHAC0, owner.get_thaco()));
         }
         ctx->messageSystem->finalize_message();
         ctx->messageSystem->log(std::format("Level {} reached! Combat abilities improved.", newLevel));

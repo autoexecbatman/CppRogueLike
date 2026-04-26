@@ -261,9 +261,9 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	// Row 2: Combat -- T0 = THAC0 abbreviation
 	auto combatLine = std::format(
 		"T0:{}  AC:{}  DR:{}",
-		ctx.player->destructible->get_thaco(),
+		ctx.player->get_thaco(),
 		ctx.player->destructible->get_armor_class(),
-		ctx.player->destructible->get_dr());
+		ctx.player->get_dr());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 2 * tileSize + fontOff }, combatLine, WHITE_BLACK_PAIR);
 
 	// Row 3: Attack roll

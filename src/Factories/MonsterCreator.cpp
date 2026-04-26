@@ -538,12 +538,10 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
 	c->experienceReward = std::make_unique<ExperienceReward>(params.xp);
+	c->set_dr(params.dr);
+	c->set_thaco(params.thaco);
 	c->destructible = std::make_unique<Destructible>(
 		hp,
-		params.dr,
-		params.corpseName,
-		0,
-		params.thaco,
 		params.ac,
 		std::make_unique<MonsterDeathHandler>());
 	c->destructible->set_last_constitution(c->get_constitution());

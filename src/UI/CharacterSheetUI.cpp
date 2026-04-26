@@ -152,7 +152,7 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("THAC0: {}   AC: {}   DR: {}", player.destructible->get_thaco(), player.destructible->get_armor_class(), player.destructible->get_dr()), WHITE_BLACK_PAIR);
+        Vector2D{ x, row * tileSize + font_off }, std::format("THAC0: {}   AC: {}   DR: {}", player.get_thaco(), player.destructible->get_armor_class(), player.get_dr()), WHITE_BLACK_PAIR);
     row += 2;
 }
 

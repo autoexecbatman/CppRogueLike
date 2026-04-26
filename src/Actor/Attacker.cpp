@@ -83,7 +83,7 @@ void Attacker::perform_single_attack(
 	if (isHit)
 	{
 		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthAttr.dmgAdj, backstab, ctx);
-		const int finalDamage = std::max(0, baseDamage - target.destructible->get_dr());
+		const int finalDamage = std::max(0, baseDamage - target.get_dr());
 
 		log_attack_hit(
 			owner,
@@ -95,7 +95,7 @@ void Attacker::perform_single_attack(
 			damageRoll,
 			attackDamage,
 			strengthAttr.dmgAdj,
-			target.destructible->get_dr(),
+			target.get_dr(),
 			handName,
 			ctx);
 
@@ -169,7 +169,7 @@ int Attacker::calculate_to_hit_roll(
 	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
-	int rollNeeded = attacker.destructible->get_thaco() - target.destructible->get_armor_class();
+	int rollNeeded = attacker.get_thaco() - target.destructible->get_armor_class();
 	int hitModifier = attackPenalty;
 
 	// Ranged: apply dexterity modifier
@@ -285,7 +285,7 @@ void Attacker::log_attack_miss(
 		attacker.actorData.name,
 		attackRoll,
 		rollNeeded,
-		attacker.destructible->get_thaco(),
+		attacker.get_thaco(),
 		target.destructible->get_armor_class(),
 		attackPenalty));
 }

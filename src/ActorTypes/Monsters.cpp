@@ -36,7 +36,9 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
 	experienceReward = std::make_unique<ExperienceReward>(150);
-	destructible = std::make_unique<Destructible>(hp, 1, "dead mimic", 0, thaco, ac, std::make_unique<MonsterDeathHandler>());
+	set_dr(1);
+	set_thaco(thaco);
+	destructible = std::make_unique<Destructible>(hp, ac, std::make_unique<MonsterDeathHandler>());
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);

@@ -5,12 +5,9 @@
 #include <string>
 
 #include "../Combat/ArmorClass.h"
-#include "../Combat/CombatStats.h"
 #include "../Combat/ConstitutionTracker.h"
-#include "../Combat/CorpseData.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/DeathHandler.h"
-#include "../Combat/ExperienceReward.h"
 #include "../Combat/HealthPool.h"
 #include "../Persistent/Persistent.h"
 
@@ -24,8 +21,6 @@ private:
     std::unique_ptr<ArmorClass> armorClass{};
     std::unique_ptr<ConstitutionTracker> constitutionTracker{};
     std::unique_ptr<HealthPool> healthPool{};
-    std::unique_ptr<CombatStats> combatStats{};
-    std::unique_ptr<CorpseData> corpseData{};
 
     void handle_stat_drain_death(Creature& owner, GameContext& ctx);
     void log_constitution_change(const Creature& owner, GameContext& ctx, int oldCon, int newCon, int hpChange) const;
@@ -33,10 +28,6 @@ private:
 public:
     Destructible(
         int hpMax,
-        int dr,
-        std::string_view corpseName,
-        int xp,
-        int thaco,
         int armorClass,
         std::unique_ptr<DeathHandler> handler);
     virtual ~Destructible() override = default;
@@ -53,9 +44,6 @@ public:
     [[nodiscard]] int get_max_hp() const noexcept { return healthPool->get_max_hp(); }
     [[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
     [[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
-    [[nodiscard]] int get_thaco() const noexcept { return combatStats->get_thaco(); }
-    [[nodiscard]] int get_dr() const noexcept { return combatStats->get_dr(); }
-    [[nodiscard]] const std::string& get_corpse_name() const noexcept { return corpseData->get_corpse_name(); }
     [[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
     [[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
 
@@ -71,9 +59,6 @@ public:
     void set_hp_base(int value) noexcept { healthPool->set_hp_base(value); }
     void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
     void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
-    void set_thaco(int value) noexcept { combatStats->set_thaco(value); }
-    void set_dr(int value) noexcept { combatStats->set_dr(value); }
-    void set_corpse_name(std::string_view name) { corpseData->set_corpse_name(name); }
     void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
 
     // Action methods

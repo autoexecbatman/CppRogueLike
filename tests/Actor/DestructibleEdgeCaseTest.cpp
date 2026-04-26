@@ -35,13 +35,17 @@ protected:
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
-		player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
+		player->set_dr(5);
+		player->set_thaco(20);
+		player->destructible = std::make_unique<Destructible>(100, 10, std::make_unique<PlayerDeathHandler>());
 		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "orc", 1 });
 		monster->experienceReward = std::make_unique<ExperienceReward>(75);
-		monster->destructible = std::make_unique<Destructible>(50, 2, "orc corpse", 0, 19, 7, std::make_unique<MonsterDeathHandler>());
+		monster->set_dr(2);
+		monster->set_thaco(19);
+		monster->destructible = std::make_unique<Destructible>(50, 7, std::make_unique<MonsterDeathHandler>());
 		monster->set_constitution(10);
 
 		ctx = mock.to_game_context();
@@ -307,20 +311,20 @@ TEST_F(DestructibleEdgeCaseTest, ArmorClass_CanBeNegative)
 
 TEST_F(DestructibleEdgeCaseTest, THAC0_CanBeSetToAnyValue)
 {
-	monster->destructible->set_thaco(5);
-	EXPECT_EQ(monster->destructible->get_thaco(), 5);
+	monster->set_thaco(5);
+	EXPECT_EQ(monster->get_thaco(), 5);
 
-	monster->destructible->set_thaco(25);
-	EXPECT_EQ(monster->destructible->get_thaco(), 25);
+	monster->set_thaco(25);
+	EXPECT_EQ(monster->get_thaco(), 25);
 }
 
 TEST_F(DestructibleEdgeCaseTest, DamageReduction_AcceptsAnyValue)
 {
-	monster->destructible->set_dr(0);
-	EXPECT_EQ(monster->destructible->get_dr(), 0);
+	monster->set_dr(0);
+	EXPECT_EQ(monster->get_dr(), 0);
 
-	monster->destructible->set_dr(100);
-	EXPECT_EQ(monster->destructible->get_dr(), 100);
+	monster->set_dr(100);
+	EXPECT_EQ(monster->get_dr(), 100);
 }
 
 TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified)
@@ -332,10 +336,12 @@ TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified)
 	EXPECT_EQ(monster->get_xp(), 150);
 }
 
-TEST_F(DestructibleEdgeCaseTest, CorpseName_Preserved)
+TEST_F(DestructibleEdgeCaseTest, CorpseName_Derived)
 {
-	monster->destructible->set_corpse_name("dead orc");
-	EXPECT_EQ(monster->destructible->get_corpse_name(), "dead orc");
+	// Corpse name is derived from creature name, not stored
+	EXPECT_EQ(monster->get_name(), "orc");
+	// MonsterDeathHandler will create a corpse named "dead orc"
+	// (tested via integration tests in DeathHandler tests)
 }
 
 // ----------------------------------------------------------------------------
@@ -390,12 +396,11 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	monster->destructible->set_max_hp(75);
 	monster->destructible->set_hp(60);
 	monster->destructible->set_hp_base(50);
-	monster->destructible->set_dr(8);
+	monster->set_dr(8);
 	monster->set_xp(300);
-	monster->destructible->set_thaco(15);
+	monster->set_thaco(15);
 	monster->destructible->set_armor_class(3);
 	monster->destructible->set_base_armor_class(5);
-	monster->destructible->set_corpse_name("dead monster");
 	monster->destructible->set_last_constitution(14);
 
 	json j;
@@ -412,7 +417,7 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	EXPECT_EQ(loaded->get_thaco(), 15);
 	EXPECT_EQ(loaded->get_armor_class(), 3);
 	EXPECT_EQ(loaded->get_base_armor_class(), 5);
-	EXPECT_EQ(loaded->get_corpse_name(), "dead monster");
+	// CorpseName is now on Creature, not Destructible
 	EXPECT_EQ(loaded->get_last_constitution(), 14);
 }
 

@@ -45,8 +45,10 @@ protected:
 
         player = std::make_unique<Player>(Vector2D{5, 5});
         player->experienceReward = std::make_unique<ExperienceReward>(0);
+        player->set_dr(0);
+        player->set_thaco(20);
         player->destructible = std::make_unique<Destructible>(
-            20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>()
+            20, 10, std::make_unique<PlayerDeathHandler>()
         );
 
         ctx.player = player.get();

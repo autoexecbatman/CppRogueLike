@@ -41,7 +41,9 @@ protected:
 
         // Set up components
         player->experienceReward = std::make_unique<ExperienceReward>(0);
-        player->destructible = std::make_unique<Destructible>(30, 2, "player corpse", 0, 18, 10, std::make_unique<PlayerDeathHandler>());
+        player->set_dr(2);
+        player->set_thaco(18);
+        player->destructible = std::make_unique<Destructible>(30, 10, std::make_unique<PlayerDeathHandler>());
         player->attacker = std::make_unique<PlayerAttacker>(*player);
         // PlayerController constructed automatically in Player constructor
 

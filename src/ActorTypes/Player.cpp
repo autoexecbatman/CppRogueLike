@@ -212,8 +212,10 @@ void Player::roll_new_character(GameContext& ctx)
 
 	attacker = std::make_unique<PlayerAttacker>(*this);
 	experienceReward = std::make_unique<ExperienceReward>(playerXp);
+	set_dr(playerDr);
+	set_thaco(0);
 	destructible = std::make_unique<Destructible>(
-		playerHp, playerDr, "your corpse", 0, 0, playerAC, std::make_unique<PlayerDeathHandler>());
+		playerHp, playerAC, std::make_unique<PlayerDeathHandler>());
 }
 
 void Player::on_new_game_start(GameContext& ctx)
@@ -380,25 +382,25 @@ void Player::calculate_thaco()
 
 	case PlayerClassState::FIGHTER:
 	{
-		destructible->set_thaco(combatTables.get_fighter(get_creature_level()));
+		set_thaco(combatTables.get_fighter(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::ROGUE:
 	{
-		destructible->set_thaco(combatTables.get_rogue(get_creature_level()));
+		set_thaco(combatTables.get_rogue(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::CLERIC:
 	{
-		destructible->set_thaco(combatTables.get_cleric(get_creature_level()));
+		set_thaco(combatTables.get_cleric(get_creature_level()));
 		break;
 	}
 
 	case PlayerClassState::WIZARD:
 	{
-		destructible->set_thaco(combatTables.get_wizard(get_creature_level()));
+		set_thaco(combatTables.get_wizard(get_creature_level()));
 		break;
 	}
 

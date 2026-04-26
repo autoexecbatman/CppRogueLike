@@ -39,16 +39,20 @@ protected:
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		player->set_dr(0);
+		player->set_thaco(20);
 		player->destructible = std::make_unique<Destructible>(
-			20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
+			20, 10, std::make_unique<PlayerDeathHandler>());
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		player->set_strength(10);
 		player->set_dexterity(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", 1 });
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
+		monster->set_dr(0);
+		monster->set_thaco(19);
 		monster->destructible = std::make_unique<Destructible>(
-			10, 0, "goblin corpse", 0, 19, 6, std::make_unique<MonsterDeathHandler>());
+			10, 6, std::make_unique<MonsterDeathHandler>());
 		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
@@ -157,7 +161,7 @@ TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
 TEST_F(AttackerTest, DamageReduction_ReducesDamage)
 {
 	monster->destructible->set_armor_class(20);
-	monster->destructible->set_dr(3);
+	monster->set_dr(3);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
@@ -172,7 +176,7 @@ TEST_F(AttackerTest, DamageReduction_ReducesDamage)
 TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
 {
 	monster->destructible->set_armor_class(20);
-	monster->destructible->set_dr(10);
+	monster->set_dr(10);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
@@ -205,7 +209,7 @@ TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
 TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
 {
 	player->destructible->set_armor_class(20);
-	player->destructible->set_dr(0);
+	player->set_dr(0);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(6);
@@ -224,7 +228,7 @@ TEST_F(AttackerTest, Attack_CanKillTarget)
 {
 	monster->destructible->set_hp(1);
 	monster->destructible->set_armor_class(20);
-	monster->destructible->set_dr(0);
+	monster->set_dr(0);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
@@ -239,7 +243,7 @@ TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
 {
 	monster->destructible->set_hp(1);
 	monster->destructible->set_armor_class(20);
-	monster->destructible->set_dr(0);
+	monster->set_dr(0);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
@@ -264,7 +268,7 @@ TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
 	player->set_creature_class(CreatureClass::ROGUE);
 	player->add_state(ActorState::IS_INVISIBLE);
 	monster->destructible->set_armor_class(10);
-	monster->destructible->set_dr(0);
+	monster->set_dr(0);
 
 	// THAC0=20, AC=10, backstab hitBonus=+4: rollNeeded = 20 - 10 - 4 = 6
 	// damageRoll=3, strength 10 (dmgAdj=0), multiplier=2: finalDamage = (3+0)*2 = 6
@@ -283,7 +287,7 @@ TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
 	// Default creatureClass is MONSTER, not ROGUE — no multiplier.
 	player->add_state(ActorState::IS_INVISIBLE);
 	monster->destructible->set_armor_class(10);
-	monster->destructible->set_dr(0);
+	monster->set_dr(0);
 
 	// THAC0=20, AC=10: rollNeeded without backstab = 10
 	// With +4 backstab hitBonus: rollNeeded = 6
@@ -316,7 +320,7 @@ TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 
 	// AC=20 → rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
 	monster->destructible->set_armor_class(20);
-	monster->destructible->set_dr(0);
+	monster->set_dr(0);
 	game.dice.set_next_d20(1);
 	game.dice.set_next_roll(4);
 
