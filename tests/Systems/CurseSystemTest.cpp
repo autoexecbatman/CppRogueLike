@@ -7,6 +7,7 @@
 #include "../../src/Actor/Destructible.h"
 #include "../../src/Actor/Item.h"
 #include "../../src/ActorTypes/Player.h"
+#include "../../src/Combat/ExperienceReward.h"
 #include "../../src/Colors/Colors.h"
 #include "../../src/Core/GameContext.h"
 #include "../../src/Items/ItemClassification.h"
@@ -27,6 +28,7 @@ protected:
 
 	void SetUp() override
 	{
+		player.experienceReward = std::make_unique<ExperienceReward>(0);
 		player.destructible = std::make_unique<Destructible>(20, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>());
 		ctx.player = &player;
 		ctx.messageSystem = &message_system;

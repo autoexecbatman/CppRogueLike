@@ -12,6 +12,7 @@
 #include <utility>
 #include <Utils/Vector2D.h>
 #include <vector>
+#include "src/Combat/ExperienceReward.h"
 
 // ============================================================================
 // DESTRUCTIBLE EDGE CASE TESTS
@@ -33,12 +34,14 @@ protected:
 		data_manager.load_all_data(mock.messages);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 		// PlayerController constructed automatically in Player constructor
 		player->set_constitution(10);
 
 		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "orc", 1 });
-		monster->destructible = std::make_unique<Destructible>(50, 2, "orc corpse", 75, 19, 7, std::make_unique<MonsterDeathHandler>());
+		monster->experienceReward = std::make_unique<ExperienceReward>(75);
+		monster->destructible = std::make_unique<Destructible>(50, 2, "orc corpse", 0, 19, 7, std::make_unique<MonsterDeathHandler>());
 		monster->set_constitution(10);
 
 		ctx = mock.to_game_context();
@@ -322,11 +325,11 @@ TEST_F(DestructibleEdgeCaseTest, DamageReduction_AcceptsAnyValue)
 
 TEST_F(DestructibleEdgeCaseTest, XP_CanBeModified)
 {
-	monster->destructible->set_xp(100);
-	EXPECT_EQ(monster->destructible->get_xp(), 100);
+	monster->set_xp(100);
+	EXPECT_EQ(monster->get_xp(), 100);
 
-	monster->destructible->add_xp(50);
-	EXPECT_EQ(monster->destructible->get_xp(), 150);
+	monster->add_xp(50);
+	EXPECT_EQ(monster->get_xp(), 150);
 }
 
 TEST_F(DestructibleEdgeCaseTest, CorpseName_Preserved)
@@ -356,26 +359,26 @@ TEST_F(DestructibleEdgeCaseTest, PlayerDeath_SetsDefeatStatus)
 TEST_F(DestructibleEdgeCaseTest, MonsterDeath_AwardsXPToPlayer)
 {
 	monster->destructible->set_hp(1);
-	monster->destructible->set_xp(200);
+	monster->set_xp(200);
 
-	int playerXpBefore = player->destructible->get_xp();
+	int playerXpBefore = player->get_xp();
 
 	monster->destructible->take_damage(*monster, 10, ctx);
 
 	EXPECT_TRUE(monster->destructible->is_dead());
-	EXPECT_EQ(player->destructible->get_xp(), playerXpBefore + 200);
+	EXPECT_EQ(player->get_xp(), playerXpBefore + 200);
 }
 
 TEST_F(DestructibleEdgeCaseTest, MonsterDeath_ZeroXPMonster)
 {
 	monster->destructible->set_hp(1);
-	monster->destructible->set_xp(0);
+	monster->set_xp(0);
 
-	int playerXpBefore = player->destructible->get_xp();
+	int playerXpBefore = player->get_xp();
 
 	monster->destructible->take_damage(*monster, 10, ctx);
 
-	EXPECT_EQ(player->destructible->get_xp(), playerXpBefore);
+	EXPECT_EQ(player->get_xp(), playerXpBefore);
 }
 
 // ----------------------------------------------------------------------------
@@ -388,7 +391,7 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	monster->destructible->set_hp(60);
 	monster->destructible->set_hp_base(50);
 	monster->destructible->set_dr(8);
-	monster->destructible->set_xp(300);
+	monster->set_xp(300);
 	monster->destructible->set_thaco(15);
 	monster->destructible->set_armor_class(3);
 	monster->destructible->set_base_armor_class(5);
@@ -405,7 +408,7 @@ TEST_F(DestructibleEdgeCaseTest, Serialization_AllFieldsPreserved)
 	EXPECT_EQ(loaded->get_hp(), 60);
 	EXPECT_EQ(loaded->get_hp_base(), 50);
 	EXPECT_EQ(loaded->get_dr(), 8);
-	EXPECT_EQ(loaded->get_xp(), 300);
+	// XP is no longer part of Destructible - it's on Creature
 	EXPECT_EQ(loaded->get_thaco(), 15);
 	EXPECT_EQ(loaded->get_armor_class(), 3);
 	EXPECT_EQ(loaded->get_base_armor_class(), 5);
@@ -519,7 +522,7 @@ TEST_F(DestructibleEdgeCaseTest, Create_PlayerType_ReturnsPlayerDestructible)
 
 	ASSERT_NE(result, nullptr);
 	EXPECT_EQ(result->get_hp(), 80);
-	EXPECT_EQ(result->get_xp(), 5000);
+	// XP is no longer part of Destructible - it's on Creature
 }
 
 // ----------------------------------------------------------------------------

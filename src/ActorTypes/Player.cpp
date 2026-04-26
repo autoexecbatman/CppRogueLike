@@ -12,6 +12,7 @@
 #include "../Actor/PlayerAttacker.h"
 #include "../Actor/Destructible.h"
 #include "../Actor/EquipmentSlot.h"
+#include "../Combat/ExperienceReward.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Pickable.h"
 #include "../Ai/Ai.h"
@@ -210,8 +211,9 @@ void Player::roll_new_character(GameContext& ctx)
 	const int playerAC = 10;
 
 	attacker = std::make_unique<PlayerAttacker>(*this);
+	experienceReward = std::make_unique<ExperienceReward>(playerXp);
 	destructible = std::make_unique<Destructible>(
-		playerHp, playerDr, "your corpse", playerXp, 0, playerAC, std::make_unique<PlayerDeathHandler>());
+		playerHp, playerDr, "your corpse", 0, 0, playerAC, std::make_unique<PlayerDeathHandler>());
 }
 
 void Player::on_new_game_start(GameContext& ctx)
@@ -227,7 +229,7 @@ void Player::recalculate_combat_stats()
 
 void Player::on_kill_reward(int xp, GameContext& ctx)
 {
-	destructible->set_xp(destructible->get_xp() + xp);
+	set_xp(get_xp() + xp);
 	++killCount;
 	levelup_update(ctx);
 }
@@ -1424,10 +1426,10 @@ void Player::levelup_update(GameContext& ctx)
 {
 	ctx.messageSystem->log("Player::levelup_update");
 	int levelUpXp = get_next_level_xp(ctx);
-	if (destructible->get_xp() >= levelUpXp)
+	if (get_xp() >= levelUpXp)
 	{
 		adjust_level(1);
-		destructible->set_xp(destructible->get_xp() - levelUpXp);
+		set_xp(get_xp() - levelUpXp);
 		ctx.messageSystem->message(
 			WHITE_BLACK_PAIR,
 			std::format("Your battle skills grow stronger! You reached level {}", get_creature_level()),

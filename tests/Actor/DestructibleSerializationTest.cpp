@@ -47,7 +47,7 @@ TEST_F(DestructibleSerializationTest, MonsterDestructible_SaveLoad_RoundTrip) {
     EXPECT_EQ(loaded->get_hp(), 40); // Damaged
     EXPECT_EQ(loaded->get_dr(), DR);
     EXPECT_EQ(loaded->get_corpse_name(), CORPSE_NAME);
-    EXPECT_EQ(loaded->get_xp(), XP);
+    // XP is no longer part of Destructible - it's on Creature
     EXPECT_EQ(loaded->get_thaco(), THACO);
     EXPECT_EQ(loaded->get_armor_class(), AC);
 }

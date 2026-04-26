@@ -11,6 +11,7 @@
 #include "src/Actor/Destructible.h"
 #include "src/Actor/Stairs.h"
 #include "src/ActorTypes/Player.h"
+#include "src/Combat/ExperienceReward.h"
 #include "src/Core/GameContext.h"
 #include "src/Core/Paths.h"
 #include "src/Random/RandomDice.h"
@@ -76,6 +77,7 @@ protected:
 
         map = std::make_unique<TestableTreasureMap>(FIXTURE_W, FIXTURE_H);
         player = std::make_unique<Player>(Vector2D{ 1, 1 });
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(
             20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 
@@ -281,6 +283,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 
     auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);
     auto player = std::make_unique<Player>(Vector2D{ 5, 5 });
+    player->experienceReward = std::make_unique<ExperienceReward>(0);
     player->destructible = std::make_unique<Destructible>(
         20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });

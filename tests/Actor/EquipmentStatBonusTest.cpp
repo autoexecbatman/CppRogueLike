@@ -9,6 +9,7 @@
 #include "src/Actor/Destructible.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Item.h"
+#include "src/Combat/ExperienceReward.h"
 #include "src/Systems/DataManager.h"
 #include "src/Items/ItemIdentification.h"
 #include "src/Items/MagicalItemEffects.h"
@@ -35,8 +36,9 @@ protected:
         data_manager.load_all_data(mock.messages);
 
         player = std::make_unique<Player>(Vector2D{ 0, 0 });
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
-        
+
         ctx = mock.to_game_context();
         ctx.player = player.get();
     }

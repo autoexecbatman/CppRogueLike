@@ -4,6 +4,7 @@
 #include "src/Actor/Destructible.h"
 #include "src/Actor/PlayerAttacker.h"
 #include "src/Ai/PlayerController.h"
+#include "src/Combat/ExperienceReward.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Systems/ContentRegistry.h"
 
@@ -39,6 +40,7 @@ protected:
         player->roundCounter = 3;
 
         // Set up components
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(30, 2, "player corpse", 0, 18, 10, std::make_unique<PlayerDeathHandler>());
         player->attacker = std::make_unique<PlayerAttacker>(*player);
         // PlayerController constructed automatically in Player constructor

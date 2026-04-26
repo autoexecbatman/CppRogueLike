@@ -29,12 +29,12 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     ctx.messageSystem->finalize_message();
 
     ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You get ");
-    ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", owner.destructible->get_xp()));
+    ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", owner.get_xp()));
     ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
     ctx.messageSystem->finalize_message();
 
     assert(ctx.player != nullptr && "MonsterDeathHandler::execute requires a live player in context");
-    ctx.player->on_kill_reward(owner.destructible->get_xp(), ctx);
+    ctx.player->on_kill_reward(owner.get_xp(), ctx);
 
     if (ctx.animSystem)
     {

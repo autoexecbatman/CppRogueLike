@@ -78,7 +78,7 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
     int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
-    int currentXP = player.destructible->get_xp();
+    int currentXP = player.get_xp();
     int nextLevelXP = player.get_next_level_xp(ctx);
     int xpNeeded = nextLevelXP - currentXP;
 

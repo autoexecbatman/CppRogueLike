@@ -21,6 +21,7 @@
 #include "../Ai/AiMonsterRanged.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
+#include "../Combat/ExperienceReward.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Random/RandomDice.h"
@@ -536,11 +537,12 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	const int hp = std::max(1, roll_dice(ctx.dice, params.hpDice));
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
+	c->experienceReward = std::make_unique<ExperienceReward>(params.xp);
 	c->destructible = std::make_unique<Destructible>(
 		hp,
 		params.dr,
 		params.corpseName,
-		params.xp,
+		0,
 		params.thaco,
 		params.ac,
 		std::make_unique<MonsterDeathHandler>());

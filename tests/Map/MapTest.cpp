@@ -6,6 +6,7 @@
 #include "src/Core/GameContext.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Destructible.h"
+#include "src/Combat/ExperienceReward.h"
 #include "src/Systems/DataManager.h"
 #include "src/Systems/MessageSystem.h"
 #include "src/Random/RandomDice.h"
@@ -43,6 +44,7 @@ protected:
         map = std::make_unique<Map>(TEST_MAP_WIDTH, TEST_MAP_HEIGHT);
 
         player = std::make_unique<Player>(Vector2D{5, 5});
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(
             20, 0, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>()
         );

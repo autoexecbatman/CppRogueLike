@@ -4,6 +4,7 @@
 #include "src/Actor/Destructible.h"
 #include "src/Actor/MonsterAttacker.h"
 #include "src/Ai/AiMonster.h"
+#include "src/Combat/ExperienceReward.h"
 
 using json = nlohmann::json;
 
@@ -28,7 +29,8 @@ protected:
         creature->set_gold(50);
         creature->set_weapon_equipped("Short Sword");
 
-        creature->destructible = std::make_unique<Destructible>(20, 1, "dead goblin", 35, 19, 6, std::make_unique<MonsterDeathHandler>());
+        creature->experienceReward = std::make_unique<ExperienceReward>(35);
+        creature->destructible = std::make_unique<Destructible>(20, 1, "dead goblin", 0, 19, 6, std::make_unique<MonsterDeathHandler>());
         creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
         creature->ai = std::make_unique<AiMonster>();
 
@@ -66,7 +68,7 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     // Verify destructible values
     EXPECT_EQ(loaded->destructible->get_max_hp(), 20);
     EXPECT_EQ(loaded->destructible->get_dr(), 1);
-    EXPECT_EQ(loaded->destructible->get_xp(), 35);
+    EXPECT_EQ(loaded->get_xp(), 35);
 }
 
 TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {

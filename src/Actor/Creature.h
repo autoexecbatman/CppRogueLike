@@ -6,6 +6,7 @@
 
 #include "../Ai/Ai.h"
 #include "../Colors/Colors.h"
+#include "../Combat/ExperienceReward.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
@@ -121,6 +122,11 @@ public:
 	void adjust_gold(int delta) noexcept { gold += delta; }
 	void adjust_level(int delta) noexcept { creatureLevel += delta; }
 
+	// Experience reward
+	[[nodiscard]] int get_xp() const noexcept { return experienceReward->get_xp(); }
+	void set_xp(int value) noexcept { experienceReward->set_xp(value); }
+	void add_xp(int amount) noexcept { experienceReward->add_xp(amount); }
+
 	CreatureClass get_creature_class() const noexcept { return creatureClass; }
 	int get_hit_die() const noexcept { return hitDie; }
 	float get_attacks_per_round() const noexcept { return attacksPerRound; }
@@ -178,6 +184,7 @@ public:
 	int get_display_color() const noexcept override;
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
+	std::unique_ptr<ExperienceReward> experienceReward; // the actor can earn experience
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading

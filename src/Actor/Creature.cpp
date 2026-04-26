@@ -56,6 +56,12 @@ void Creature::load(const json& j)
 	if (j.contains("destructible"))
 	{
 		destructible = Destructible::create(j["destructible"]);
+		// Move experienceReward from destructible's JSON to creature's member
+		if (destructible && j["destructible"].contains("xp"))
+		{
+			experienceReward = std::make_unique<ExperienceReward>(0);
+			experienceReward->load(j["destructible"]);
+		}
 	}
 	if (j.contains("ai"))
 	{
@@ -118,6 +124,11 @@ void Creature::save(json& j)
 	{
 		json destructibleJson;
 		destructible->save(destructibleJson);
+		// Also save experienceReward within the destructible object for now
+		if (experienceReward)
+		{
+			experienceReward->save(destructibleJson);
+		}
 		j["destructible"] = destructibleJson;
 	}
 	if (ai)

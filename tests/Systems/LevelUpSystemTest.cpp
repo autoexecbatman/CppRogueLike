@@ -3,6 +3,7 @@
 #include "src/Systems/LevelUpSystem.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Destructible.h"
+#include "src/Combat/ExperienceReward.h"
 
 class LevelUpSystemTest : public ::testing::Test
 {
@@ -18,6 +19,7 @@ protected:
         } catch (...) {}
 
         player = std::make_unique<Player>(Vector2D{0, 0});
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(
             10, 0, "your corpse", 0, 0, 10, std::make_unique<PlayerDeathHandler>()
         );
@@ -221,24 +223,24 @@ TEST_F(LevelUpSystemTest, LevelupUpdateBelowThreshold)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_creature_level(1);
-    player->destructible->set_xp(1999); // one short
+    player->set_xp(1999); // one short
 
     int levelBefore = player->get_creature_level();
     player->levelup_update(ctx);
 
     EXPECT_EQ(player->get_creature_level(), levelBefore);
-    EXPECT_EQ(player->destructible->get_xp(), 1999);
+    EXPECT_EQ(player->get_xp(), 1999);
 }
 
 TEST_F(LevelUpSystemTest, LevelupUpdateAtThreshold)
 {
     player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_creature_level(1);
-    player->destructible->set_xp(2000); // exactly at threshold
+    player->set_xp(2000); // exactly at threshold
 
     int levelBefore = player->get_creature_level();
     player->levelup_update(ctx);
 
     EXPECT_EQ(player->get_creature_level(), levelBefore + 1);
-    EXPECT_EQ(player->destructible->get_xp(), 0); // 2000 - 2000
+    EXPECT_EQ(player->get_xp(), 0); // 2000 - 2000
 }

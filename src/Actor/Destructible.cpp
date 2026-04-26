@@ -36,7 +36,6 @@ Destructible::Destructible(
       constitutionTracker(std::make_unique<ConstitutionTracker>()),
       healthPool(std::make_unique<HealthPool>(hpMax)),
       combatStats(std::make_unique<CombatStats>(dr, thaco)),
-      experienceReward(std::make_unique<ExperienceReward>(xp)),
       corpseData(std::make_unique<CorpseData>(corpseName))
 {
 }
@@ -120,7 +119,6 @@ void Destructible::load(const json& j)
     constitutionTracker->set_last_constitution(j.at("lastConstitution").get<int>());
     combatStats->load(j);
     corpseData->load(j);
-    experienceReward->load(j);
 
     armorClass->set_armor_class(j.at("armorClass").get<int>());
     armorClass->set_base_armor_class(j.at("baseArmorClass").get<int>());
@@ -137,7 +135,6 @@ void Destructible::save(json& j)
     j["lastConstitution"] = get_last_constitution();
     combatStats->save(j);
     corpseData->save(j);
-    experienceReward->save(j);
     j["armorClass"] = get_armor_class();
     j["baseArmorClass"] = get_base_armor_class();
 }

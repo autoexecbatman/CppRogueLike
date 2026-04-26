@@ -8,6 +8,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <Utils/Vector2D.h>
+#include "src/Combat/ExperienceReward.h"
 
 // ============================================================================
 // PLAYER VIRTUAL INTERFACE TESTS
@@ -29,12 +30,14 @@ protected:
         data_manager.load_all_data(mock.messages);
 
         player = std::make_unique<Player>(Vector2D{ 0, 0 });
+        player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->destructible = std::make_unique<Destructible>(100, 5, "your corpse", 0, 20, 10, std::make_unique<PlayerDeathHandler>());
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
             ActorData{ TileRef{}, "test_creature", 1 });
-        creature_base->destructible = std::make_unique<Destructible>(30, 2, "corpse", 50, 19, 7, std::make_unique<MonsterDeathHandler>());
+        creature_base->experienceReward = std::make_unique<ExperienceReward>(50);
+        creature_base->destructible = std::make_unique<Destructible>(30, 2, "corpse", 0, 19, 7, std::make_unique<MonsterDeathHandler>());
 
         ctx = mock.to_game_context();
         ctx.player = player.get();
@@ -102,11 +105,11 @@ TEST_F(PlayerVirtualInterfaceTest, Player_GetKillCount_ReturnsKillCount)
 
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_XpAddedToDestructible)
 {
-    int xpBefore = player->destructible->get_xp();
+    int xpBefore = player->get_xp();
 
     ctx.player->on_kill_reward(150, ctx);
 
-    EXPECT_EQ(player->destructible->get_xp(), xpBefore + 150);
+    EXPECT_EQ(player->get_xp(), xpBefore + 150);
 }
 
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_KillCountIncrements)
@@ -121,23 +124,23 @@ TEST_F(PlayerVirtualInterfaceTest, OnKillReward_KillCountIncrements)
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_ZeroXp_KillCountStillIncrements)
 {
     int killsBefore = player->get_kill_count();
-    int xpBefore = player->destructible->get_xp();
+    int xpBefore = player->get_xp();
 
     ctx.player->on_kill_reward(0, ctx);
 
     EXPECT_EQ(player->get_kill_count(), killsBefore + 1);
-    EXPECT_EQ(player->destructible->get_xp(), xpBefore);
+    EXPECT_EQ(player->get_xp(), xpBefore);
 }
 
 TEST_F(PlayerVirtualInterfaceTest, OnKillReward_MultipleRewards_Accumulate)
 {
-    int xpBefore = player->destructible->get_xp();
+    int xpBefore = player->get_xp();
 
     ctx.player->on_kill_reward(100, ctx);
     ctx.player->on_kill_reward(200, ctx);
     ctx.player->on_kill_reward(50, ctx);
 
-    EXPECT_EQ(player->destructible->get_xp(), xpBefore + 350);
+    EXPECT_EQ(player->get_xp(), xpBefore + 350);
     EXPECT_EQ(player->get_kill_count(), 3);
 }
 
@@ -146,10 +149,10 @@ TEST_F(PlayerVirtualInterfaceTest, OnKillReward_DispatchedThroughCreaturePtr)
     // The entire point of the refactor: ctx.player is Creature*, no cast needed.
     // This test calls on_kill_reward through Creature* and verifies Player state.
     Creature* asCreature = player.get();
-    int xpBefore = player->destructible->get_xp();
+    int xpBefore = player->get_xp();
 
     asCreature->on_kill_reward(300, ctx);
 
-    EXPECT_EQ(player->destructible->get_xp(), xpBefore + 300);
+    EXPECT_EQ(player->get_xp(), xpBefore + 300);
     EXPECT_EQ(player->killCount, 1);
 }
