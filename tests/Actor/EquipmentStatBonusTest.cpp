@@ -6,7 +6,6 @@
 
 #include "src/Actor/Actor.h"
 #include "src/Actor/Creature.h"
-#include "src/Actor/Destructible.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Actor/Item.h"
 #include "src/Combat/ExperienceReward.h"
@@ -41,7 +40,6 @@ protected:
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(100);
-        player->destructible = std::make_unique<Destructible>();
 
         ctx = mock.to_game_context();
         ctx.player = player.get();

@@ -8,7 +8,6 @@
 #include "src/Map/DungeonNames.h"
 #include "src/Map/DungeonRoom.h"
 #include "src/Map/Map.h"
-#include "src/Actor/Destructible.h"
 #include "src/Actor/Stairs.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Combat/ExperienceReward.h"
@@ -82,7 +81,6 @@ protected:
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(20);
-        player->destructible = std::make_unique<Destructible>();
 
         // Use MockGameContext as base so contentRegistry, tileConfig, and
         // inventoryData are all wired — setup_treasure_room_guard needs
@@ -290,7 +288,6 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     player->set_dr(0);
     player->set_thaco(20);
     player->healthPool = std::make_unique<HealthPool>(20);
-    player->destructible = std::make_unique<Destructible>();
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;

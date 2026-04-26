@@ -61,7 +61,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Actor/MonsterAttacker.cpp
     ${PARENT_SOURCE_DIR}/Actor/PlayerAttacker.cpp
     ${PARENT_SOURCE_DIR}/Actor/Container.cpp
-    ${PARENT_SOURCE_DIR}/Actor/Destructible.cpp
     ${PARENT_SOURCE_DIR}/Actor/Pickable.cpp
     ${PARENT_SOURCE_DIR}/Actor/InventoryOperations.cpp
     ${PARENT_SOURCE_DIR}/Actor/Stairs.cpp

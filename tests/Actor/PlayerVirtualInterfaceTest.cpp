@@ -1,6 +1,5 @@
 #include "src/Actor/Actor.h"
 #include "src/Actor/Creature.h"
-#include "src/Actor/Destructible.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Systems/DataManager.h"
 #include "tests/mocks/MockGameContext.h"
@@ -35,7 +34,6 @@ protected:
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(100);
-        player->destructible = std::make_unique<Destructible>();
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
@@ -45,7 +43,6 @@ protected:
         creature_base->set_thaco(19);
         creature_base->armorClass = std::make_unique<ArmorClass>(7);
         creature_base->healthPool = std::make_unique<HealthPool>(30);
-        creature_base->destructible = std::make_unique<Destructible>();
 
         ctx = mock.to_game_context();
         ctx.player = player.get();

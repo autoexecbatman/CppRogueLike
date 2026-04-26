@@ -4,7 +4,6 @@
 #include <string>
 
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../dnd_tables/CombatProgressionTables.h"
@@ -21,7 +20,7 @@ namespace
 
 void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
 {
-    if (!ctx || !owner.destructible)
+    if (!ctx)
     {
         return;
     }
@@ -76,7 +75,7 @@ void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
 
 int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
 {
-    if (!ctx || !owner.destructible)
+    if (!ctx)
     {
         return 0;
     }

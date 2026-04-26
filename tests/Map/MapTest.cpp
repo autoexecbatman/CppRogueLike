@@ -5,7 +5,6 @@
 #include "src/Map/DungeonRoom.h"
 #include "src/Core/GameContext.h"
 #include "src/ActorTypes/Player.h"
-#include "src/Actor/Destructible.h"
 #include "src/Combat/ExperienceReward.h"
 #include "src/Systems/DataManager.h"
 #include "src/Systems/MessageSystem.h"
@@ -49,7 +48,6 @@ protected:
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(20);
-        player->destructible = std::make_unique<Destructible>();
 
         ctx.player = player.get();
         ctx.dataManager = &dataManager;

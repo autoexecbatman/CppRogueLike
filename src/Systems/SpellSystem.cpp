@@ -771,11 +771,6 @@ void animate_heal(const Vector2D& pos, GameContext& ctx)
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
-	if (!caster.destructible)
-	{
-		return false;
-	}
-
 	animate_heal(caster.position, ctx);
 
 	int healing = ctx.dice->roll(1, 8);
@@ -1023,7 +1018,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	std::vector<Creature*> targets;
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && creature->destructible && !creature->is_dead())
+		if (creature && !creature->is_dead())
 		{
 			if (ctx.map->is_in_fov(creature->position))
 			{
@@ -1052,7 +1047,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 		Creature* target = nullptr;
 		for (Creature* t : targets)
 		{
-			if (t->destructible && !t->is_dead())
+			if (!t->is_dead())
 			{
 				target = t;
 				break;
@@ -1105,7 +1100,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 		{
 			break;
 		}
-		if (!creature || !creature->destructible || creature->is_dead())
+		if (!creature || creature->is_dead())
 		{
 			continue;
 		}
@@ -1154,7 +1149,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 		{
 			break;
 		}
-		if (!creature || !creature->destructible || creature->is_dead())
+		if (!creature || creature->is_dead())
 		{
 			continue;
 		}

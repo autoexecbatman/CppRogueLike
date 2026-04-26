@@ -19,7 +19,6 @@
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
 #include "Attacker.h"
-#include "Destructible.h"
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
@@ -229,7 +228,6 @@ public:
 	std::unique_ptr<ArmorClass> armorClass; // the actor has armor class
 	std::unique_ptr<HealthPool> healthPool; // the actor has health
 	std::unique_ptr<ConstitutionTracker> constitutionTracker; // tracks constitution changes for HP adjustments
-	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
 	InventoryData inventoryData;

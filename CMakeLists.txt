@@ -116,8 +116,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/PlayerAttacker.h
     ${PROJECT_SOURCE_DIR}/Actor/Container.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Container.h
-    ${PROJECT_SOURCE_DIR}/Actor/Destructible.cpp
-    ${PROJECT_SOURCE_DIR}/Actor/Destructible.h
     ${PROJECT_SOURCE_DIR}/Actor/Pickable.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Pickable.h
     ${PROJECT_SOURCE_DIR}/Actor/InventoryOperations.cpp

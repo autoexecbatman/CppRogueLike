@@ -16,7 +16,6 @@
 
 #include "../Actor/MonsterAttacker.h"
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Ai/AiMonster.h"
 #include "../Ai/AiMonsterRanged.h"
 #include "../Colors/Colors.h"
@@ -543,7 +542,6 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_thaco(params.thaco);
 	c->armorClass = std::make_unique<ArmorClass>(params.ac);
 	c->healthPool = std::make_unique<HealthPool>(hp);
-	c->destructible = std::make_unique<Destructible>();
 	c->set_last_constitution(c->get_constitution());
 
 	if (params.aiType == MonsterAiType::RANGED)
@@ -563,7 +561,6 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	assert(c->ai && "Monster requires Ai");
 	assert(c->attacker && "Monster requires Attacker");
-	assert(c->destructible && "Monster requires Destructible");
 
 	return c;
 }

@@ -9,7 +9,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"

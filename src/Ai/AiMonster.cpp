@@ -4,7 +4,6 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"

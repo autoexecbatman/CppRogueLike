@@ -26,7 +26,6 @@
 #include "Attacker.h"
 #include "MonsterAttacker.h"
 #include "Creature.h"
-#include "Destructible.h"
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
@@ -56,35 +55,40 @@ void Creature::load(const json& j)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{});
 		attacker->load(j["attacker"]);
 	}
-	if (j.contains("destructible"))
+	// Load health pool data
+	if (j.contains("healthPool"))
 	{
-		destructible = Destructible::create(j["destructible"]);
-		// Load health data into healthPool
-		if (healthPool && j["destructible"].contains("hpMax"))
+		const auto& healthJson = j["healthPool"];
+		if (healthPool && healthJson.contains("hpMax"))
 		{
-			healthPool->set_max_hp(j["destructible"].at("hpMax").get<int>());
-			healthPool->set_hp(j["destructible"].at("hp").get<int>());
-			healthPool->set_hp_base(j["destructible"].at("hpBase").get<int>());
-			healthPool->set_temp_hp(j["destructible"].at("tempHp").get<int>());
+			healthPool->set_max_hp(healthJson.at("hpMax").get<int>());
+			healthPool->set_hp(healthJson.at("hp").get<int>());
+			healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
+			healthPool->set_temp_hp(healthJson.at("tempHp").get<int>());
 		}
-		// Load constitution tracker state
-		if (j["destructible"].contains("lastConstitution"))
+	}
+	// Load constitution tracker state
+	if (j.contains("constitutionTracker"))
+	{
+		const auto& constJson = j["constitutionTracker"];
+		if (constJson.contains("lastConstitution"))
 		{
-			constitutionTracker->set_last_constitution(j["destructible"].at("lastConstitution").get<int>());
+			constitutionTracker->set_last_constitution(constJson.at("lastConstitution").get<int>());
 		}
-		// Move experienceReward from destructible's JSON to creature's member
-		if (destructible && j["destructible"].contains("xp"))
-		{
-			experienceReward = std::make_unique<ExperienceReward>(0);
-			experienceReward->load(j["destructible"]);
-		}
-		// Move armorClass from destructible's JSON to creature's member
-		if (destructible && j["destructible"].contains("armorClass"))
-		{
-			armorClass = std::make_unique<ArmorClass>(10);
-			armorClass->set_armor_class(j["destructible"].at("armorClass").get<int>());
-			armorClass->set_base_armor_class(j["destructible"].at("baseArmorClass").get<int>());
-		}
+	}
+	// Load experience reward
+	if (j.contains("experienceReward"))
+	{
+		experienceReward = std::make_unique<ExperienceReward>(0);
+		experienceReward->load(j["experienceReward"]);
+	}
+	// Load armor class
+	if (j.contains("armorClass"))
+	{
+		const auto& acJson = j["armorClass"];
+		armorClass = std::make_unique<ArmorClass>(10);
+		armorClass->set_armor_class(acJson.at("armorClass").get<int>());
+		armorClass->set_base_armor_class(acJson.at("baseArmorClass").get<int>());
 	}
 	if (j.contains("ai"))
 	{
@@ -145,32 +149,34 @@ void Creature::save(json& j)
 			j["attacker"] = attackerJson;
 		}
 	}
-	if (destructible)
+	// Save health pool data
+	if (healthPool)
 	{
-		json destructibleJson;
-		destructible->save(destructibleJson);
-		// Save health data from healthPool
-		if (healthPool)
-		{
-			destructibleJson["hpMax"] = healthPool->get_max_hp();
-			destructibleJson["hp"] = healthPool->get_hp();
-			destructibleJson["hpBase"] = healthPool->get_hp_base();
-			destructibleJson["tempHp"] = healthPool->get_temp_hp();
-		}
-		// Save constitution tracker state
-		destructibleJson["lastConstitution"] = get_last_constitution();
-		// Also save experienceReward within the destructible object for now
-		if (experienceReward)
-		{
-			experienceReward->save(destructibleJson);
-		}
-		// Also save armorClass within the destructible object for now
-		if (armorClass)
-		{
-			destructibleJson["armorClass"] = armorClass->get_armor_class();
-			destructibleJson["baseArmorClass"] = armorClass->get_base_armor_class();
-		}
-		j["destructible"] = destructibleJson;
+		json healthJson;
+		healthJson["hpMax"] = healthPool->get_max_hp();
+		healthJson["hp"] = healthPool->get_hp();
+		healthJson["hpBase"] = healthPool->get_hp_base();
+		healthJson["tempHp"] = healthPool->get_temp_hp();
+		j["healthPool"] = healthJson;
+	}
+	// Save constitution tracker state
+	json constJson;
+	constJson["lastConstitution"] = get_last_constitution();
+	j["constitutionTracker"] = constJson;
+	// Save experience reward
+	if (experienceReward)
+	{
+		json expJson;
+		experienceReward->save(expJson);
+		j["experienceReward"] = expJson;
+	}
+	// Save armor class
+	if (armorClass)
+	{
+		json acJson;
+		acJson["armorClass"] = armorClass->get_armor_class();
+		acJson["baseArmorClass"] = armorClass->get_base_armor_class();
+		j["armorClass"] = acJson;
 	}
 	if (ai)
 	{
@@ -212,8 +218,6 @@ void Creature::update_creature_state(GameContext& ctx)
 
 	ctx.buffSystem->restore_loaded_buff_states(*this);
 	ctx.buffSystem->update_creature_buffs(*this);
-
-	assert(destructible && "Creature::update_creature_state called with null destructible");
 
 	update_armor_class(ctx);
 	update_constitution_bonus(ctx);

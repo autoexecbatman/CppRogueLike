@@ -28,7 +28,7 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 	// Remove dead creatures from the game
 	// This is called at safe points to avoid dangling references during combat
 	std::erase_if(creatures, [](const auto& creature)
-		{ return creature && creature->destructible && creature->is_dead(); });
+		{ return creature && creature->is_dead(); });
 }
 
 void CreatureManager::spawn_creatures(GameContext& ctx)

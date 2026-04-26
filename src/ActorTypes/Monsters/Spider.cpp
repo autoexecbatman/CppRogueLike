@@ -18,7 +18,6 @@
 
 #include "../../Actor/Actor.h"
 #include "../../Actor/MonsterAttacker.h"
-#include "../../Actor/Destructible.h"
 #include "../../Ai/AiSpider.h"
 #include "../../Ai/AiWebSpinner.h"
 #include "../../Colors/Colors.h"
@@ -66,7 +65,6 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(20);
 		armorClass = std::make_unique<ArmorClass>(7);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d2() + 2);
-		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_weapon_equipped("Venomous fangs");
 
@@ -88,7 +86,6 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(19);
 		armorClass = std::make_unique<ArmorClass>(5);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d4() + 3);
-		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
 		set_weapon_equipped("Giant fangs");
 
@@ -110,7 +107,6 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(17);
 		armorClass = std::make_unique<ArmorClass>(5);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d8() + 5);
-		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_weapon_equipped("Toxic fangs");
 
@@ -120,7 +116,6 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	assert(ai && "Spider requires Ai");
 	assert(attacker && "Spider requires Attacker");
-	assert(destructible && "Spider requires Destructible");
 }
 
 void Spider::update(GameContext& ctx)

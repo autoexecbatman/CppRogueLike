@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 #include "src/Actor/Creature.h"
-#include "src/Actor/Destructible.h"
 #include "src/Actor/MonsterAttacker.h"
 #include "src/Ai/AiMonster.h"
 #include "src/Combat/ExperienceReward.h"
@@ -34,7 +33,6 @@ protected:
         creature->set_thaco(19);
         creature->armorClass = std::make_unique<ArmorClass>(6);
         creature->healthPool = std::make_unique<HealthPool>(20);
-        creature->destructible = std::make_unique<Destructible>();
         creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
         creature->ai = std::make_unique<AiMonster>();
 
@@ -52,7 +50,6 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     // Load into new creature
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     // Verify position (Vector2D is {y, x})
@@ -67,7 +64,6 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     EXPECT_EQ(loaded->get_weapon_equipped(), "Short Sword");
 
     // Verify components exist
-    ASSERT_NE(loaded->destructible, nullptr) << "Destructible not loaded";
     ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
     ASSERT_NE(loaded->ai, nullptr) << "AI not loaded";
 
@@ -86,10 +82,8 @@ TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
-    ASSERT_NE(loaded->destructible, nullptr);
     EXPECT_EQ(loaded->get_hp(), 15);
 }
 
@@ -104,29 +98,29 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
-    ASSERT_NE(loaded->destructible, nullptr);
     EXPECT_TRUE(loaded->is_dead());
 }
 
-TEST_F(CreatureSerializationTest, Creature_NoDestructible_HandledGracefully) {
-    // Create creature without destructible
+TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully) {
+    // Create creature without healthPool
     auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", 1});
-    // Don't add destructible or healthPool
+    // Don't add healthPool
 
     json j;
     original->save(j);
 
-    // Verify destructible section not in JSON
-    EXPECT_FALSE(j.contains("destructible"));
+    // Verify no healthPool key when not initialized
+    EXPECT_FALSE(j.contains("healthPool"));
+    // But constitutionTracker should still exist
+    EXPECT_TRUE(j.contains("constitutionTracker"));
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
-    // Should be null, not crash
-    EXPECT_EQ(loaded->destructible, nullptr);
+    // Load should succeed
+    EXPECT_TRUE(true);
 }
 
 TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
@@ -137,7 +131,6 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     ASSERT_NE(loaded->attacker, nullptr);

@@ -8,7 +8,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
@@ -545,13 +544,13 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 		for (const auto& creature : *ctx.creatures)
 		{
-			if (creature && creature->destructible)
+			if (creature)
 			{
 				creature->update_constitution_bonus(ctx);
 			}
 		}
 
-		if (ctx.player && ctx.player->destructible)
+		if (ctx.player)
 		{
 			ctx.player->update_constitution_bonus(ctx);
 		}

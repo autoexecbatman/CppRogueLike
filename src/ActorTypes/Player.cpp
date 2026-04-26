@@ -10,7 +10,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/PlayerAttacker.h"
-#include "../Actor/Destructible.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Combat/ExperienceReward.h"
 #include "../Combat/HealthPool.h"
@@ -189,7 +188,6 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	roll_new_character(ctx);
 
 	assert(attacker && "Player requires Attacker");
-	assert(destructible && "Player requires Destructible");
 }
 
 void Player::roll_new_character(GameContext& ctx)
@@ -218,7 +216,6 @@ void Player::roll_new_character(GameContext& ctx)
 	set_thaco(0);
 	armorClass = std::make_unique<ArmorClass>(playerAC);
 	healthPool = std::make_unique<HealthPool>(playerHp);
-	destructible = std::make_unique<Destructible>();
 }
 
 void Player::die(GameContext& ctx)
@@ -610,7 +607,7 @@ bool Player::attempt_hide(GameContext& ctx)
 	bool observed = false;
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && creature->destructible && !creature->is_dead())
+		if (creature && !creature->is_dead())
 		{
 			if (ctx.map->is_in_fov(creature->position))
 			{

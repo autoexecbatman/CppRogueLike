@@ -85,7 +85,7 @@ void LevelManager::display_level_messages(MessageSystem& message_system) const
 
 void LevelManager::heal_player_between_levels(GameContext& ctx) const
 {
-	if (!ctx.player || !ctx.player->destructible)
+	if (!ctx.player)
 	{
 		return;
 	}

@@ -3,7 +3,6 @@
 
 #include <format>
 
-#include "../Actor/Destructible.h"
 #include "../Actor/Item.h"
 #include "../ActorTypes/Player.h"
 #include "../Combat/DamageInfo.h"

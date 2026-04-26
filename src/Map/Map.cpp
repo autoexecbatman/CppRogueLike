@@ -15,7 +15,6 @@
 #include <raylib.h>
 
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
@@ -1366,7 +1365,7 @@ Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 		if (actor && actor->position == pos)
 		{
 			// Only return living creatures as blockers
-			if (actor->destructible && !actor->is_dead())
+			if (!actor->is_dead())
 			{
 				return actor.get();
 			}

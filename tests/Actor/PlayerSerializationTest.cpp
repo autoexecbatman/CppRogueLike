@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 #include "src/ActorTypes/Player.h"
-#include "src/Actor/Destructible.h"
 #include "src/Actor/PlayerAttacker.h"
 #include "src/Ai/PlayerController.h"
 #include "src/Combat/ExperienceReward.h"
@@ -45,7 +44,6 @@ protected:
         player->set_thaco(18);
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(30);
-        player->destructible = std::make_unique<Destructible>();
         player->attacker = std::make_unique<PlayerAttacker>(*player);
         // PlayerController constructed automatically in Player constructor
 
@@ -61,7 +59,6 @@ TEST_F(PlayerSerializationTest, BasicStats_SaveLoad_RoundTrip) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_strength(), 16);
@@ -81,7 +78,6 @@ TEST_F(PlayerSerializationTest, ClassAndRace_Preserved) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     EXPECT_EQ(loaded->playerClassState, Player::PlayerClassState::FIGHTER);
@@ -98,7 +94,6 @@ TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     EXPECT_FLOAT_EQ(loaded->get_attacks_per_round(), 1.5f);
@@ -115,7 +110,6 @@ TEST_F(PlayerSerializationTest, WebStatus_Preserved) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     EXPECT_EQ(loaded->webStuckTurns, 5);
@@ -140,7 +134,6 @@ TEST_F(PlayerSerializationTest, EquippedItems_Preserved) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     ASSERT_EQ(loaded->equippedItems.size(), 2) << "Should have 2 equipped items";
@@ -163,7 +156,6 @@ TEST_F(PlayerSerializationTest, NoEquippedItems_HandledGracefully) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     EXPECT_TRUE(loaded->equippedItems.empty());
@@ -188,8 +180,7 @@ TEST_F(PlayerSerializationTest, AllRaces_SaveLoad) {
 
         auto loaded = std::make_unique<Player>(Vector2D{0, 0});
         loaded->healthPool = std::make_unique<HealthPool>(0);
-        loaded->destructible = std::make_unique<Destructible>();
-        loaded->load(j);
+            loaded->load(j);
 
         EXPECT_EQ(loaded->playerRaceState, race) << "Race mismatch for " << static_cast<int>(race);
     }
@@ -212,8 +203,7 @@ TEST_F(PlayerSerializationTest, AllClasses_SaveLoad) {
 
         auto loaded = std::make_unique<Player>(Vector2D{0, 0});
         loaded->healthPool = std::make_unique<HealthPool>(0);
-        loaded->destructible = std::make_unique<Destructible>();
-        loaded->load(j);
+            loaded->load(j);
 
         EXPECT_EQ(loaded->playerClassState, playerClass) << "Class mismatch for " << static_cast<int>(playerClass);
     }
@@ -227,10 +217,8 @@ TEST_F(PlayerSerializationTest, Components_Preserved) {
 
     auto loaded = std::make_unique<Player>(Vector2D{0, 0});
     loaded->healthPool = std::make_unique<HealthPool>(0);
-    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
-    ASSERT_NE(loaded->destructible, nullptr) << "Destructible not loaded";
     ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";
     ASSERT_NE(loaded->controller, nullptr) << "PlayerController not loaded";
 

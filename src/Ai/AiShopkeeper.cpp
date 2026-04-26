@@ -20,8 +20,8 @@ constexpr auto MAX_TRADE_DISTANCE = 1; // Maximum distance to initiate a trade (
 
 void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 {
-	// Skip if dead or missing destructible
-	if (owner.ai == nullptr || !owner.destructible || owner.is_dead())
+	// Skip if dead
+	if (owner.ai == nullptr || owner.is_dead())
 	{
 		return;
 	}

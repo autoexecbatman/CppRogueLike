@@ -433,11 +433,6 @@ bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
 
 	case ConsumableEffect::HEAL:
 	{
-		if (!wearer.destructible)
-		{
-			return false;
-		}
-
 		if (wearer.get_hp() >= wearer.get_max_hp())
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
@@ -510,7 +505,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
 		{
-			if (!creature || !creature->destructible || creature->is_dead())
+			if (!creature || creature->is_dead())
 			{
 				continue;
 			}

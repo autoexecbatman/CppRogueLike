@@ -3,7 +3,6 @@
 
 #include "src/Actor/Actor.h"
 #include "src/Actor/Attacker.h"
-#include "src/Actor/Destructible.h"
 #include "src/Actor/MonsterAttacker.h"
 #include "src/Actor/PlayerAttacker.h"
 #include "src/ActorTypes/Player.h"
@@ -43,7 +42,6 @@ protected:
 		player->set_thaco(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
 		player->healthPool = std::make_unique<HealthPool>(20);
-		player->destructible = std::make_unique<Destructible>();
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		player->set_strength(10);
 		player->set_dexterity(10);
@@ -54,8 +52,7 @@ protected:
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
 		monster->healthPool = std::make_unique<HealthPool>(10);
-		monster->destructible = std::make_unique<Destructible>();
-		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
+			monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_weapon_equipped("claws");

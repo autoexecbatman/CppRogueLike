@@ -6,7 +6,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
-#include "../Actor/Destructible.h"
 #include "../Attributes/DexterityAttributes.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
@@ -38,12 +37,6 @@ void Attacker::perform_single_attack(
 	const std::string& handName,
 	GameContext& ctx)
 {
-	if (!target.destructible)
-	{
-		ctx.messageSystem->log("WARNING: Target has no destructible component");
-		return;
-	}
-
 	// Shopkeeper interaction (melee only) — component check replaces dynamic_cast
 	if (target.shop && !owner.has_state(ActorState::IS_RANGED))
 	{

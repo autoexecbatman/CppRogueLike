@@ -5,7 +5,6 @@
 
 #include "../../Actor/Actor.h"
 #include "../../Actor/MonsterAttacker.h"
-#include "../../Actor/Destructible.h"
 #include "../../Ai/AiShopkeeper.h"
 #include "../../Colors/Colors.h"
 #include "../../Combat/DamageInfo.h"
@@ -50,13 +49,11 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.set_thaco(20);
 	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
 	shopkeeper.healthPool = std::make_unique<HealthPool>(100);
-	shopkeeper.destructible = std::make_unique<Destructible>();
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 
 	assert(shopkeeper.ai && "Shopkeeper requires Ai");
 	assert(shopkeeper.attacker && "Shopkeeper requires Attacker");
-	assert(shopkeeper.destructible && "Shopkeeper requires Destructible");
 
 	// Create shop component with level-appropriate configuration
 	ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);

@@ -4,7 +4,6 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/MonsterAttacker.h"
-#include "../Actor/Destructible.h"
 #include "../Ai/AiMimic.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
@@ -41,7 +40,6 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_thaco(thaco);
 	armorClass = std::make_unique<ArmorClass>(ac);
 	healthPool = std::make_unique<HealthPool>(hp);
-	destructible = std::make_unique<Destructible>();
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);
@@ -65,5 +63,4 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	assert(ai && "Mimic requires Ai");
 	assert(attacker && "Mimic requires Attacker");
-	assert(destructible && "Mimic requires Destructible");
 }

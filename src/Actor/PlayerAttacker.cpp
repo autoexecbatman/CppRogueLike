@@ -57,7 +57,7 @@ void PlayerAttacker::attack(Creature& target, GameContext& ctx)
 			dualWieldInfo.mainHandPenalty + curse_hit_penalty(EquipmentSlot::RIGHT_HAND),
 			mainName, ctx);
 
-		if (target.destructible && !target.is_dead())
+		if (!target.is_dead())
 		{
 			const DamageInfo offDamage = compute_weapon_damage(EquipmentSlot::LEFT_HAND);
 			perform_single_attack(
