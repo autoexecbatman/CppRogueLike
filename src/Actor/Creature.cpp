@@ -59,6 +59,19 @@ void Creature::load(const json& j)
 	if (j.contains("destructible"))
 	{
 		destructible = Destructible::create(j["destructible"]);
+		// Load health data into healthPool
+		if (healthPool && j["destructible"].contains("hpMax"))
+		{
+			healthPool->set_max_hp(j["destructible"].at("hpMax").get<int>());
+			healthPool->set_hp(j["destructible"].at("hp").get<int>());
+			healthPool->set_hp_base(j["destructible"].at("hpBase").get<int>());
+			healthPool->set_temp_hp(j["destructible"].at("tempHp").get<int>());
+		}
+		// Load constitution tracker state
+		if (j["destructible"].contains("lastConstitution"))
+		{
+			constitutionTracker->set_last_constitution(j["destructible"].at("lastConstitution").get<int>());
+		}
 		// Move experienceReward from destructible's JSON to creature's member
 		if (destructible && j["destructible"].contains("xp"))
 		{
@@ -136,6 +149,16 @@ void Creature::save(json& j)
 	{
 		json destructibleJson;
 		destructible->save(destructibleJson);
+		// Save health data from healthPool
+		if (healthPool)
+		{
+			destructibleJson["hpMax"] = healthPool->get_max_hp();
+			destructibleJson["hp"] = healthPool->get_hp();
+			destructibleJson["hpBase"] = healthPool->get_hp_base();
+			destructibleJson["tempHp"] = healthPool->get_temp_hp();
+		}
+		// Save constitution tracker state
+		destructibleJson["lastConstitution"] = get_last_constitution();
 		// Also save experienceReward within the destructible object for now
 		if (experienceReward)
 		{
@@ -193,7 +216,66 @@ void Creature::update_creature_state(GameContext& ctx)
 	assert(destructible && "Creature::update_creature_state called with null destructible");
 
 	update_armor_class(ctx);
-	destructible->update_constitution_bonus(*this, ctx);
+	update_constitution_bonus(ctx);
+}
+
+void Creature::update_constitution_bonus(GameContext& ctx)
+{
+	const int oldCon = get_last_constitution();
+	const auto result = constitutionTracker->apply_constitution_changes(*this, ctx);
+
+	if (result.hpDifference == 0)
+	{
+		return;
+	}
+
+	set_max_hp(get_max_hp() + result.hpDifference);
+	set_hp(get_hp() + result.hpDifference);
+
+	// Log only for player
+	if (this == ctx.player)
+	{
+		if (result.hpDifference > 0)
+		{
+			ctx.messageSystem->message(GREEN_BLACK_PAIR,
+				std::format("Constitution increased from {} to {}! You gain {} hit points.", oldCon, get_constitution(), result.hpDifference),
+				true);
+		}
+		else
+		{
+			ctx.messageSystem->message(RED_BLACK_PAIR,
+				std::format("Constitution decreased from {} to {}! You lose {} hit points.", oldCon, get_constitution(), -result.hpDifference),
+				true);
+		}
+	}
+
+	if (get_hp() <= 0)
+	{
+		set_hp(0);
+		if (this == ctx.player)
+		{
+			ctx.messageSystem->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
+		}
+		else
+		{
+			ctx.messageSystem->log(std::format("{} dies from stat drain.", get_name()));
+		}
+		die(ctx);
+	}
+}
+
+int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)
+{
+	return healthPool->take_damage(*this, damage, ctx, damageType);
+}
+
+void Creature::take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType)
+{
+	take_damage(damage, ctx, damageType);
+	if (is_dead())
+	{
+		die(ctx);
+	}
 }
 
 // the actor update -- monsters only; Player overrides this

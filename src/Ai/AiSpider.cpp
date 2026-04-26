@@ -32,7 +32,7 @@ AiSpider::AiSpider(int poisonChance)
 void AiSpider::update(Creature& owner, GameContext& ctx)
 {
 	// Skip if spider is dead
-	if (owner.destructible->is_dead())
+	if (owner.is_dead())
 	{
 		return;
 	}
@@ -81,7 +81,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 					ctx.messageSystem->message(WHITE_BLACK_PAIR, " damage!", true);
 
 					// Apply damage directly
-					ctx.player->destructible->take_damage(*ctx.player, totalDamage, ctx);
+					ctx.player->take_damage_and_check_death(totalDamage, ctx);
 
 					// Also try for poison
 					if (can_poison_attack(owner, ctx))
@@ -365,7 +365,7 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, " extra poison damage!", true);
 
 		// Deal the poison damage
-		target.destructible->take_damage(target, poisonDamage, ctx);
+		target.take_damage_and_check_death(poisonDamage, ctx);
 
 		// Reset cooldown
 		poisonCooldown = POISON_COOLDOWN;

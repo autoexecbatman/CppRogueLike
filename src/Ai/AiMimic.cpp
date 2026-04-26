@@ -94,7 +94,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 		possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry);
 	}
 
-	if (owner.destructible->is_dead())
+	if (owner.is_dead())
 	{
 		return;
 	}
@@ -125,7 +125,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 [[nodiscard]] bool AiMimic::consume_nearby_items(Creature& owner, GameContext& ctx)
 {
-	if (isDisguised || owner.destructible->is_dead())
+	if (isDisguised || owner.is_dead())
 	{
 		return false;
 	}
@@ -261,11 +261,11 @@ void AiMimic::apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext
 
 void AiMimic::boost_health(Creature& owner, int amount, GameContext& ctx)
 {
-	owner.destructible->set_max_hp(owner.destructible->get_max_hp() + amount);
+	owner.set_max_hp(owner.get_max_hp() + amount);
 	const int newCurrentHp = std::min(
-		owner.destructible->get_hp() + amount,
-		owner.destructible->get_max_hp());
-	owner.destructible->set_hp(newCurrentHp);
+		owner.get_hp() + amount,
+		owner.get_max_hp());
+	owner.set_hp(newCurrentHp);
 	ctx.messageSystem->log(std::format("Mimic gained {} health from food", amount));
 }
 

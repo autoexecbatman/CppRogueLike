@@ -136,8 +136,8 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
 	const int div1 = hud_div1(vcols);
 
-	const int hp = ctx.player->destructible->get_hp();
-	const int maxHp = ctx.player->destructible->get_max_hp();
+	const int hp = ctx.player->get_hp();
+	const int maxHp = ctx.player->get_max_hp();
 	if (maxHp <= 0)
 	{
 		return;

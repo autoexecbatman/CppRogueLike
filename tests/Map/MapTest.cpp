@@ -48,7 +48,8 @@ protected:
         player->set_dr(0);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(20);
+        player->healthPool = std::make_unique<HealthPool>(20);
+        player->destructible = std::make_unique<Destructible>();
 
         ctx.player = player.get();
         ctx.dataManager = &dataManager;

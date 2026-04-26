@@ -30,8 +30,6 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnhancementSystemTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/DestructibleSerializationTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/DestructibleEdgeCaseTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CreatureSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ItemSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp

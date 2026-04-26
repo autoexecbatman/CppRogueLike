@@ -42,7 +42,8 @@ protected:
 		player->set_dr(0);
 		player->set_thaco(20);
 		player->armorClass = std::make_unique<ArmorClass>(10);
-		player->destructible = std::make_unique<Destructible>(20);
+		player->healthPool = std::make_unique<HealthPool>(20);
+		player->destructible = std::make_unique<Destructible>();
 		player->attacker = std::make_unique<PlayerAttacker>(*player);
 		player->set_strength(10);
 		player->set_dexterity(10);
@@ -52,7 +53,8 @@ protected:
 		monster->set_dr(0);
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
-		monster->destructible = std::make_unique<Destructible>(10);
+		monster->healthPool = std::make_unique<HealthPool>(10);
+		monster->destructible = std::make_unique<Destructible>();
 		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
@@ -105,11 +107,11 @@ TEST_F(AttackerTest, THAC0_RollNeeded_Calculation)
 	game.dice.set_next_d20(14);
 	game.dice.set_next_roll(3);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
 	// Should hit with roll of exactly 14
-	EXPECT_LT(monster->destructible->get_hp(), hpBefore);
+	EXPECT_LT(monster->get_hp(), hpBefore);
 }
 
 TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
@@ -119,11 +121,11 @@ TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
 	game.dice.set_next_d20(13);
 	game.dice.set_next_roll(3);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
 	// Should miss with roll of 13
-	EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
+	EXPECT_EQ(monster->get_hp(), hpBefore);
 }
 
 TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
@@ -134,10 +136,10 @@ TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
-	EXPECT_LT(monster->destructible->get_hp(), hpBefore);
+	EXPECT_LT(monster->get_hp(), hpBefore);
 }
 
 TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
@@ -148,10 +150,10 @@ TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
 	game.dice.set_next_d20(10);
 	game.dice.set_next_roll(4);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
-	EXPECT_LT(monster->destructible->get_hp(), hpBefore);
+	EXPECT_LT(monster->get_hp(), hpBefore);
 }
 
 // ----------------------------------------------------------------------------
@@ -166,11 +168,11 @@ TEST_F(AttackerTest, DamageReduction_ReducesDamage)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
 	// 5 damage - 3 DR = 2 actual damage
-	EXPECT_EQ(monster->destructible->get_hp(), hpBefore - 2);
+	EXPECT_EQ(monster->get_hp(), hpBefore - 2);
 }
 
 TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
@@ -181,11 +183,11 @@ TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
 
-	int hpBefore = monster->destructible->get_hp();
+	int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
 	// 5 damage - 10 DR = 0 actual damage
-	EXPECT_EQ(monster->destructible->get_hp(), hpBefore);
+	EXPECT_EQ(monster->get_hp(), hpBefore);
 }
 
 // ----------------------------------------------------------------------------
@@ -214,10 +216,10 @@ TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(6);
 
-	int hpBefore = player->destructible->get_hp();
+	int hpBefore = player->get_hp();
 	monster->attacker->attack(*player, ctx);
 
-	EXPECT_EQ(player->destructible->get_hp(), hpBefore - 6);
+	EXPECT_EQ(player->get_hp(), hpBefore - 6);
 }
 
 // ----------------------------------------------------------------------------
@@ -226,22 +228,22 @@ TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
 
 TEST_F(AttackerTest, Attack_CanKillTarget)
 {
-	monster->destructible->set_hp(1);
+	monster->set_hp(1);
 	monster->set_armor_class(20);
 	monster->set_dr(0);
 
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
 
-	ASSERT_FALSE(monster->destructible->is_dead());
+	ASSERT_FALSE(monster->is_dead());
 	player->attacker->attack(*monster, ctx);
 
-	EXPECT_TRUE(monster->destructible->is_dead());
+	EXPECT_TRUE(monster->is_dead());
 }
 
 TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
 {
-	monster->destructible->set_hp(1);
+	monster->set_hp(1);
 	monster->set_armor_class(20);
 	monster->set_dr(0);
 
@@ -275,10 +277,10 @@ TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
 	game.dice.set_next_d20(6);
 	game.dice.set_next_roll(3);
 
-	const int hpBefore = monster->destructible->get_hp();
+	const int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
-	EXPECT_EQ(monster->destructible->get_hp(), hpBefore - 6);
+	EXPECT_EQ(monster->get_hp(), hpBefore - 6);
 }
 
 TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
@@ -296,11 +298,11 @@ TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
 	game.dice.set_next_d20(6);
 	game.dice.set_next_roll(3);
 
-	const int hpBefore = monster->destructible->get_hp();
+	const int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, ctx);
 
 	// Asserts both that the +4 hit bonus landed AND that no multiplier was applied
-	EXPECT_EQ(monster->destructible->get_hp(), hpBefore - 3);
+	EXPECT_EQ(monster->get_hp(), hpBefore - 3);
 }
 
 // ----------------------------------------------------------------------------
@@ -324,9 +326,9 @@ TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 	game.dice.set_next_d20(1);
 	game.dice.set_next_roll(4);
 
-	const int hpBefore = monster->destructible->get_hp();
+	const int hpBefore = monster->get_hp();
 	loadedPlayer->attacker->attack(*monster, ctx);
 
 	// PlayerAttacker is wired correctly post-load and deals damage
-	EXPECT_LT(monster->destructible->get_hp(), hpBefore);
+	EXPECT_LT(monster->get_hp(), hpBefore);
 }

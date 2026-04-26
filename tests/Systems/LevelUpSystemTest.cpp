@@ -23,8 +23,9 @@ protected:
         player->set_dr(0);
         player->set_thaco(0);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(10);
-        player->destructible->set_hp_base(10);
+        player->healthPool = std::make_unique<HealthPool>(10);
+        player->destructible = std::make_unique<Destructible>();
+        player->set_hp_base(10);
 
         ctx = game.context();
         ctx.player = player.get();
@@ -58,17 +59,17 @@ TEST_F(LevelUpSystemTest, FighterLevelUpHPGain)
     player->set_hit_die(10);
     player->set_constitution(10);
 
-    player->destructible->set_hp_base(10);
-    player->destructible->set_max_hp(10);
-    player->destructible->set_hp(10);
+    player->set_hp_base(10);
+    player->set_max_hp(10);
+    player->set_hp(10);
 
     game.dice.set_next_d20(8);
 
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
 
-    EXPECT_EQ(player->destructible->get_hp_base(), 18);
-    EXPECT_EQ(player->destructible->get_max_hp(), 18);
-    EXPECT_EQ(player->destructible->get_hp(), 18);
+    EXPECT_EQ(player->get_hp_base(), 18);
+    EXPECT_EQ(player->get_max_hp(), 18);
+    EXPECT_EQ(player->get_hp(), 18);
 }
 
 TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
@@ -85,18 +86,18 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
         }
     }
 
-    player->destructible->set_hp_base(4);
-    player->destructible->set_max_hp(4 + expectedBonus);
-    player->destructible->set_hp(4 + expectedBonus);
+    player->set_hp_base(4);
+    player->set_max_hp(4 + expectedBonus);
+    player->set_hp(4 + expectedBonus);
 
-    int oldMaxHP = player->destructible->get_max_hp();
+    int oldMaxHP = player->get_max_hp();
 
     game.dice.set_next_d20(3);
 
     LevelUpSystem::apply_level_up_benefits(*player, 2, &ctx);
 
     int gained = 3 + expectedBonus;
-    EXPECT_EQ(player->destructible->get_max_hp(), oldMaxHP + gained);
+    EXPECT_EQ(player->get_max_hp(), oldMaxHP + gained);
 }
 
 TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel7)

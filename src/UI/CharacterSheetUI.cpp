@@ -135,9 +135,9 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
     int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
-    int hp = player.destructible->get_hp();
-    int maxHp = player.destructible->get_max_hp();
-    int baseHP = player.destructible->get_hp_base();
+    int hp = player.get_hp();
+    int maxHp = player.get_max_hp();
+    int baseHP = player.get_hp_base();
     int conBonusTotal = maxHp - baseHP;
 
     ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- COMBAT ---", YELLOW_BLACK_PAIR);

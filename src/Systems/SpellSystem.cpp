@@ -779,12 +779,12 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 	animate_heal(caster.position, ctx);
 
 	int healing = ctx.dice->roll(1, 8);
-	int oldHp = caster.destructible->get_hp();
-	int maxHp = caster.destructible->get_max_hp();
+	int oldHp = caster.get_hp();
+	int maxHp = caster.get_max_hp();
 	int newHp = std::min(oldHp + healing, maxHp);
 	int actualHealing = newHp - oldHp;
 
-	caster.destructible->set_hp(newHp);
+	caster.set_hp(newHp);
 
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
 	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));
@@ -842,7 +842,7 @@ void SpellSystem::cast_silence(
 		Creature* target = nullptr;
 		for (const auto& creature : *innerCtx.creatures)
 		{
-			if (creature && creature->position == targetPos && !creature->destructible->is_dead())
+			if (creature && creature->position == targetPos && !creature->is_dead())
 			{
 				target = creature.get();
 				break;
@@ -895,7 +895,7 @@ void SpellSystem::cast_web(
 		int affected = 0;
 		for (const auto& creature : *innerCtx.creatures)
 		{
-			if (!creature || creature->destructible->is_dead())
+			if (!creature || creature->is_dead())
 			{
 				continue;
 			}
@@ -972,7 +972,7 @@ void SpellSystem::cast_fireball(
 		int affected = 0;
 		for (const auto& creature : *innerCtx.creatures)
 		{
-			if (!creature || creature->destructible->is_dead())
+			if (!creature || creature->is_dead())
 			{
 				continue;
 			}
@@ -984,7 +984,7 @@ void SpellSystem::cast_fireball(
 			// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
 			int save = innerCtx.dice->roll(1, 20);
 			int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
-			creature->destructible->take_damage(*creature, dealt, innerCtx);
+			creature->take_damage_and_check_death(dealt, innerCtx);
 			++affected;
 		}
 
@@ -1023,7 +1023,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	std::vector<Creature*> targets;
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && creature->destructible && !creature->destructible->is_dead())
+		if (creature && creature->destructible && !creature->is_dead())
 		{
 			if (ctx.map->is_in_fov(creature->position))
 			{
@@ -1052,7 +1052,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 		Creature* target = nullptr;
 		for (Creature* t : targets)
 		{
-			if (t->destructible && !t->destructible->is_dead())
+			if (t->destructible && !t->is_dead())
 			{
 				target = t;
 				break;
@@ -1070,7 +1070,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 		totalDamage += damage;
 		damagePerTarget[target] += damage;
 
-		target->destructible->take_damage(*target, damage, ctx);
+		target->take_damage_and_check_death(damage, ctx);
 	}
 
 	// Message
@@ -1105,7 +1105,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 		{
 			break;
 		}
-		if (!creature || !creature->destructible || creature->destructible->is_dead())
+		if (!creature || !creature->destructible || creature->is_dead())
 		{
 			continue;
 		}
@@ -1115,7 +1115,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 		}
 
 		// Proxy HD from max HP (4 HP per HD)
-		int hd = std::max(1, creature->destructible->get_max_hp() / 4);
+		int hd = std::max(1, creature->get_max_hp() / 4);
 		if (hd <= hdBudget)
 		{
 			ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, 5, false);
@@ -1154,7 +1154,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 		{
 			break;
 		}
-		if (!creature || !creature->destructible || creature->destructible->is_dead())
+		if (!creature || !creature->destructible || creature->is_dead())
 		{
 			continue;
 		}

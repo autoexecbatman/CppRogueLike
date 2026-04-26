@@ -34,7 +34,8 @@ protected:
         player->set_dr(5);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(100);
+        player->healthPool = std::make_unique<HealthPool>(100);
+        player->destructible = std::make_unique<Destructible>();
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
@@ -43,7 +44,8 @@ protected:
         creature_base->set_dr(2);
         creature_base->set_thaco(19);
         creature_base->armorClass = std::make_unique<ArmorClass>(7);
-        creature_base->destructible = std::make_unique<Destructible>(30);
+        creature_base->healthPool = std::make_unique<HealthPool>(30);
+        creature_base->destructible = std::make_unique<Destructible>();
 
         ctx = mock.to_game_context();
         ctx.player = player.get();

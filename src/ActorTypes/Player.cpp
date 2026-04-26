@@ -13,6 +13,7 @@
 #include "../Actor/Destructible.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Combat/ExperienceReward.h"
+#include "../Combat/HealthPool.h"
 #include "../Actor/InventoryOperations.h"
 #include "../Actor/Pickable.h"
 #include "../Ai/Ai.h"
@@ -216,7 +217,8 @@ void Player::roll_new_character(GameContext& ctx)
 	set_dr(playerDr);
 	set_thaco(0);
 	armorClass = std::make_unique<ArmorClass>(playerAC);
-	destructible = std::make_unique<Destructible>(playerHp);
+	healthPool = std::make_unique<HealthPool>(playerHp);
+	destructible = std::make_unique<Destructible>();
 }
 
 void Player::die(GameContext& ctx)
@@ -482,7 +484,7 @@ void Player::render(const GameContext& ctx) const noexcept
 bool Player::rest(GameContext& ctx)
 {
 	// Check if player is already at full health
-	if (destructible->get_hp() >= destructible->get_max_hp())
+	if (get_hp() >= get_max_hp())
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're already at full health.", true);
 		return false;
@@ -492,7 +494,7 @@ bool Player::rest(GameContext& ctx)
 	// Exclude shopkeepers and other neutral NPCs
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && !creature->destructible->is_dead())
+		if (creature && !creature->is_dead())
 		{
 			// Skip the player themselves
 			if (creature.get() == this)
@@ -530,8 +532,8 @@ bool Player::rest(GameContext& ctx)
 	animate_resting(ctx);
 
 	// Rest - heal 20% of max HP
-	int healAmount = std::max(1, destructible->get_max_hp() / 5);
-	int amountHealed = destructible->heal(healAmount);
+	int healAmount = std::max(1, get_max_hp() / 5);
+	int amountHealed = heal(healAmount);
 
 	// Capture the hunger state before and after
 	HungerState beforeState = ctx.hungerSystem->get_hunger_state();
@@ -577,7 +579,7 @@ void Player::animate_resting(GameContext& ctx)
 	// Spawn one floating 'z'/'Z' above the player each rest turn.
 	// The floating text system handles the animated drift and fade.
 	// Alternate lowercase/uppercase by hp recovered so far (varies nicely).
-	const bool big = (destructible->get_max_hp() - destructible->get_hp()) < 5;
+	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
 	ctx.floatingText->spawn_text(
 		position.x,
@@ -608,7 +610,7 @@ bool Player::attempt_hide(GameContext& ctx)
 	bool observed = false;
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (creature && creature->destructible && !creature->destructible->is_dead())
+		if (creature && creature->destructible && !creature->is_dead())
 		{
 			if (ctx.map->is_in_fov(creature->position))
 			{

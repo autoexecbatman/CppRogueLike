@@ -10,6 +10,7 @@
 #include "../../Colors/Colors.h"
 #include "../../Combat/DamageInfo.h"
 #include "../../Combat/ExperienceReward.h"
+#include "../../Combat/HealthPool.h"
 #include "../../Core/GameContext.h"
 #include "../../Factories/MonsterCreator.h"
 #include "../../Random/RandomDice.h"
@@ -48,7 +49,8 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.set_dr(20);
 	shopkeeper.set_thaco(20);
 	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
-	shopkeeper.destructible = std::make_unique<Destructible>(100);
+	shopkeeper.healthPool = std::make_unique<HealthPool>(100);
+	shopkeeper.destructible = std::make_unique<Destructible>();
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	shopkeeper.set_weapon_equipped("Dagger");
 

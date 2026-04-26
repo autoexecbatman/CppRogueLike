@@ -7,7 +7,10 @@
 #include "../Ai/Ai.h"
 #include "../Colors/Colors.h"
 #include "../Combat/ArmorClass.h"
+#include "../Combat/ConstitutionTracker.h"
+#include "../Combat/DamageInfo.h"
 #include "../Combat/ExperienceReward.h"
+#include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
@@ -72,7 +75,7 @@ public:
 	// Note: active_buffs vector is public for BuffSystem access
 	std::vector<Buff> activeBuffs;
 	Creature(Vector2D position, ActorData data)
-		: Actor(position, data), inventoryData(InventoryData(50))
+		: Actor(position, data), inventoryData(InventoryData(50)), constitutionTracker(std::make_unique<ConstitutionTracker>())
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
@@ -187,6 +190,27 @@ public:
 	void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
 	void update_armor_class(GameContext& ctx) { armorClass->update(*this, ctx); }
 
+	// Health Pool accessors
+	[[nodiscard]] bool is_dead() const noexcept { return healthPool->is_dead(); }
+	[[nodiscard]] int get_hp() const noexcept { return healthPool->get_hp(); }
+	[[nodiscard]] int get_max_hp() const noexcept { return healthPool->get_max_hp(); }
+	[[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
+	[[nodiscard]] int get_temp_hp() const noexcept { return healthPool->get_temp_hp(); }
+	[[nodiscard]] int get_effective_hp() const noexcept { return healthPool->get_effective_hp(); }
+	void set_hp(int value) noexcept { healthPool->set_hp(value); }
+	void set_max_hp(int value) noexcept { healthPool->set_max_hp(value); }
+	void set_hp_base(int value) noexcept { healthPool->set_hp_base(value); }
+	void set_temp_hp(int value) noexcept { healthPool->set_temp_hp(value); }
+	void add_temp_hp(int amount) noexcept { healthPool->add_temp_hp(amount); }
+	int heal(int hpToHeal) { return healthPool->heal(hpToHeal); }
+	int take_damage(int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL);
+	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL);
+
+	// Constitution tracking accessors
+	[[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
+	void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
+	void update_constitution_bonus(GameContext& ctx);
+
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called once at game start (level 1, new game) to apply race/class setup
 	virtual void on_new_game_start(GameContext& ctx) {}
@@ -203,6 +227,8 @@ public:
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<ExperienceReward> experienceReward; // the actor can earn experience
 	std::unique_ptr<ArmorClass> armorClass; // the actor has armor class
+	std::unique_ptr<HealthPool> healthPool; // the actor has health
+	std::unique_ptr<ConstitutionTracker> constitutionTracker; // tracks constitution changes for HP adjustments
 	std::unique_ptr<Destructible> destructible; // the actor can be destroyed
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading

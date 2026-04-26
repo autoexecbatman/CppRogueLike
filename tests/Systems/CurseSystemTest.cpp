@@ -32,7 +32,8 @@ protected:
 		player.set_dr(0);
 		player.set_thaco(0);
 		player.armorClass = std::make_unique<ArmorClass>(10);
-		player.destructible = std::make_unique<Destructible>(20);
+		player.healthPool = std::make_unique<HealthPool>(20);
+		player.destructible = std::make_unique<Destructible>();
 		ctx.player = &player;
 		ctx.messageSystem = &message_system;
 		ctx.curseSystem = &curse_system;
@@ -84,11 +85,11 @@ TEST_F(CurseSystemTest, CursedAmuletDrainsHP)
 {
 	equip_cursed(ItemClass::AMULET, BlessingStatus::CURSED, "amulet of life drain", EquipmentSlot::NECK);
 
-	const int hpBefore = player.destructible->get_hp();
+	const int hpBefore = player.get_hp();
 
 	curse_system.apply_curses(player, ctx);
 
-	EXPECT_EQ(player.destructible->get_hp(), hpBefore - 1);
+	EXPECT_EQ(player.get_hp(), hpBefore - 1);
 	EXPECT_NE(message_system.get_current_message().find("drains"), std::string::npos);
 }
 

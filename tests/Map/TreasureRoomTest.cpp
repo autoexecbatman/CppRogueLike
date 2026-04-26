@@ -81,7 +81,8 @@ protected:
         player->set_dr(0);
         player->set_thaco(20);
         player->armorClass = std::make_unique<ArmorClass>(10);
-        player->destructible = std::make_unique<Destructible>(20);
+        player->healthPool = std::make_unique<HealthPool>(20);
+        player->destructible = std::make_unique<Destructible>();
 
         // Use MockGameContext as base so contentRegistry, tileConfig, and
         // inventoryData are all wired — setup_treasure_room_guard needs
@@ -288,7 +289,8 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     player->experienceReward = std::make_unique<ExperienceReward>(0);
     player->set_dr(0);
     player->set_thaco(20);
-    player->destructible = std::make_unique<Destructible>(20);
+    player->healthPool = std::make_unique<HealthPool>(20);
+    player->destructible = std::make_unique<Destructible>();
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;

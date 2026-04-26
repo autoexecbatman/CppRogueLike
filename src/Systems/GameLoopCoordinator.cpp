@@ -547,13 +547,13 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		{
 			if (creature && creature->destructible)
 			{
-				creature->destructible->update_constitution_bonus(*creature, ctx);
+				creature->update_constitution_bonus(ctx);
 			}
 		}
 
 		if (ctx.player && ctx.player->destructible)
 		{
-			ctx.player->destructible->update_constitution_bonus(*ctx.player, ctx);
+			ctx.player->update_constitution_bonus(ctx);
 		}
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);

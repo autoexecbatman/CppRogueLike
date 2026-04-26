@@ -9,6 +9,7 @@
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/ExperienceReward.h"
+#include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
 #include "../Factories/MonsterCreator.h"
 #include "../Random/RandomDice.h"
@@ -39,7 +40,8 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_dr(1);
 	set_thaco(thaco);
 	armorClass = std::make_unique<ArmorClass>(ac);
-	destructible = std::make_unique<Destructible>(hp);
+	healthPool = std::make_unique<HealthPool>(hp);
+	destructible = std::make_unique<Destructible>();
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);

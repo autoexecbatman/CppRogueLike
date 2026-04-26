@@ -33,7 +33,8 @@ protected:
         creature->set_dr(1);
         creature->set_thaco(19);
         creature->armorClass = std::make_unique<ArmorClass>(6);
-        creature->destructible = std::make_unique<Destructible>(20);
+        creature->healthPool = std::make_unique<HealthPool>(20);
+        creature->destructible = std::make_unique<Destructible>();
         creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
         creature->ai = std::make_unique<AiMonster>();
 
@@ -50,6 +51,8 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
 
     // Load into new creature
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    loaded->healthPool = std::make_unique<HealthPool>(0);
+    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     // Verify position (Vector2D is {y, x})
@@ -69,45 +72,49 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     ASSERT_NE(loaded->ai, nullptr) << "AI not loaded";
 
     // Verify destructible values
-    EXPECT_EQ(loaded->destructible->get_max_hp(), 20);
+    EXPECT_EQ(loaded->get_max_hp(), 20);
     EXPECT_EQ(loaded->get_dr(), 1);
     EXPECT_EQ(loaded->get_xp(), 35);
 }
 
 TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
     auto original = create_test_creature();
-    original->destructible->set_hp(15); // HP: 20 -> 15
+    original->set_hp(15); // HP: 20 -> 15
 
     json j;
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    loaded->healthPool = std::make_unique<HealthPool>(0);
+    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     ASSERT_NE(loaded->destructible, nullptr);
-    EXPECT_EQ(loaded->destructible->get_hp(), 15);
+    EXPECT_EQ(loaded->get_hp(), 15);
 }
 
 TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
     auto original = create_test_creature();
-    original->destructible->set_hp(-5); // Kill it
+    original->set_hp(-5); // Kill it
 
-    ASSERT_TRUE(original->destructible->is_dead());
+    ASSERT_TRUE(original->is_dead());
 
     json j;
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    loaded->healthPool = std::make_unique<HealthPool>(0);
+    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     ASSERT_NE(loaded->destructible, nullptr);
-    EXPECT_TRUE(loaded->destructible->is_dead());
+    EXPECT_TRUE(loaded->is_dead());
 }
 
 TEST_F(CreatureSerializationTest, Creature_NoDestructible_HandledGracefully) {
     // Create creature without destructible
     auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", 1});
-    // Don't add destructible
+    // Don't add destructible or healthPool
 
     json j;
     original->save(j);
@@ -129,6 +136,8 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    loaded->healthPool = std::make_unique<HealthPool>(0);
+    loaded->destructible = std::make_unique<Destructible>();
     loaded->load(j);
 
     ASSERT_NE(loaded->attacker, nullptr);

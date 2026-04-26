@@ -18,7 +18,7 @@
 
 void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 {
-	if (owner.destructible->is_dead())
+	if (owner.is_dead())
 	{
 		return;
 	}

@@ -438,12 +438,12 @@ bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
 			return false;
 		}
 
-		if (wearer.destructible->get_hp() >= wearer.destructible->get_max_hp())
+		if (wearer.get_hp() >= wearer.get_max_hp())
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
 			return false;
 		}
-		const int healed = wearer.destructible->heal(c.amount);
+		const int healed = wearer.heal(c.amount);
 		ctx.messageSystem->message(GREEN_BLACK_PAIR, std::format("You feel better! (+{} HP)", healed), true);
 		break;
 	}
@@ -510,7 +510,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
 		{
-			if (!creature || !creature->destructible || creature->destructible->is_dead())
+			if (!creature || !creature->destructible || creature->is_dead())
 			{
 				continue;
 			}
@@ -559,7 +559,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		ctx.messageSystem->finalize_message();
 		SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
 		ctx.messageSystem->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
-		target->destructible->take_damage(*target, targetScroll.damage, ctx);
+		target->take_damage_and_check_death(targetScroll.damage, ctx);
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 		return consume_item(owner, wearer);
 	}
@@ -592,12 +592,12 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			if (innerCtx.player->get_tile_distance(targetPos) <= aoeRadius)
 			{
 				SpellAnimations::animate_creature_hit(innerCtx.player->position, innerCtx);
-				innerCtx.player->destructible->take_damage(*innerCtx.player, scrollDamage, innerCtx);
+				innerCtx.player->take_damage_and_check_death(scrollDamage, innerCtx);
 			}
 
 			for (const auto& creature : *innerCtx.creatures)
 			{
-				if (!creature || creature->destructible->is_dead())
+				if (!creature || creature->is_dead())
 					continue;
 				if (creature->get_tile_distance(targetPos) > aoeRadius)
 					continue;
@@ -606,7 +606,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 					WHITE_BLACK_PAIR,
 					std::format("The {} gets engulfed in flames! ({} damage)", creature->actorData.name, scrollDamage));
 				innerCtx.messageSystem->finalize_message();
-				creature->destructible->take_damage(*creature, scrollDamage, innerCtx);
+				creature->take_damage_and_check_death(scrollDamage, innerCtx);
 			}
 			innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		}

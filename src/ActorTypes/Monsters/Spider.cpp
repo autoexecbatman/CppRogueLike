@@ -24,6 +24,7 @@
 #include "../../Colors/Colors.h"
 #include "../../Combat/DamageInfo.h"
 #include "../../Combat/ExperienceReward.h"
+#include "../../Combat/HealthPool.h"
 #include "../../Core/GameContext.h"
 #include "../../Factories/MonsterCreator.h"
 #include "../../Random/RandomDice.h"
@@ -64,7 +65,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(0);
 		set_thaco(20);
 		armorClass = std::make_unique<ArmorClass>(7);
-		destructible = std::make_unique<Destructible>(ctx.dice->d2() + 2);
+		healthPool = std::make_unique<HealthPool>(ctx.dice->d2() + 2);
+		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_weapon_equipped("Venomous fangs");
 
@@ -85,7 +87,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(19);
 		armorClass = std::make_unique<ArmorClass>(5);
-		destructible = std::make_unique<Destructible>(ctx.dice->d4() + 3);
+		healthPool = std::make_unique<HealthPool>(ctx.dice->d4() + 3);
+		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
 		set_weapon_equipped("Giant fangs");
 
@@ -106,7 +109,8 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(17);
 		armorClass = std::make_unique<ArmorClass>(5);
-		destructible = std::make_unique<Destructible>(ctx.dice->d8() + 5);
+		healthPool = std::make_unique<HealthPool>(ctx.dice->d8() + 5);
+		destructible = std::make_unique<Destructible>();
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_weapon_equipped("Toxic fangs");
 

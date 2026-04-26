@@ -45,7 +45,11 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 		return;
 	}
 
-	const int damageTaken = player.destructible->take_damage(player, damage, ctx, DamageType::MAGIC);
+	const int damageTaken = player.take_damage(damage, ctx, DamageType::MAGIC);
+	if (player.is_dead())
+	{
+		player.die(ctx);
+	}
 
 	if (ctx.messageSystem)
 	{
@@ -55,7 +59,7 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 			true);
 	}
 
-	if (player.destructible->get_hp() <= 0)
+	if (player.get_hp() <= 0)
 	{
 		if (ctx.messageSystem)
 		{

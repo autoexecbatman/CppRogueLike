@@ -52,7 +52,7 @@ void Attacker::perform_single_attack(
 	}
 
 	// Cannot attack dead targets or without strength
-	if (target.destructible->is_dead() || owner.get_strength() <= 0)
+	if (target.is_dead() || owner.get_strength() <= 0)
 	{
 		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " attacks ");
@@ -105,7 +105,7 @@ void Attacker::perform_single_attack(
 			{
 				ctx.animSystem->spawn_melee_hit(target.position.x, target.position.y);
 			}
-			target.destructible->take_damage(target, finalDamage, ctx, attackDamage.damageType);
+			target.take_damage_and_check_death(finalDamage, ctx, attackDamage.damageType);
 		}
 	}
 	else

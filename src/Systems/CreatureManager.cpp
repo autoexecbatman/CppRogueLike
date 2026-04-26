@@ -28,7 +28,7 @@ void CreatureManager::cleanup_dead_creatures(std::vector<std::unique_ptr<Creatur
 	// Remove dead creatures from the game
 	// This is called at safe points to avoid dangling references during combat
 	std::erase_if(creatures, [](const auto& creature)
-		{ return creature && creature->destructible && creature->destructible->is_dead(); });
+		{ return creature && creature->destructible && creature->is_dead(); });
 }
 
 void CreatureManager::spawn_creatures(GameContext& ctx)
@@ -54,7 +54,7 @@ Creature* CreatureManager::get_closest_monster(
 
 	for (const auto& actor : creatures)
 	{
-		if (!actor->destructible->is_dead())
+		if (!actor->is_dead())
 		{
 			const int distance = actor->get_tile_distance(fromPosition);
 			if (distance < bestDistance && (distance <= inRange || inRange == 0))

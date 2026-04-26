@@ -297,7 +297,7 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 	{
 		if (c && c->destructible)
 		{
-			if (!c->destructible->is_dead() && c->position == target)
+			if (!c->is_dead() && c->position == target)
 			{
 				if (c->ai && !c->ai->is_hostile())
 				{
@@ -328,7 +328,7 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 
 				for (int i = 0; i < attacksThisRound; i++)
 				{
-					if (c->destructible && !c->destructible->is_dead())
+					if (c->destructible && !c->is_dead())
 					{
 						if (i > 0)
 							ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);

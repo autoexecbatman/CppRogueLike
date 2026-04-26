@@ -1366,7 +1366,7 @@ Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 		if (actor && actor->position == pos)
 		{
 			// Only return living creatures as blockers
-			if (actor->destructible && !actor->destructible->is_dead())
+			if (actor->destructible && !actor->is_dead())
 			{
 				return actor.get();
 			}

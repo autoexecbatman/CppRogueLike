@@ -90,8 +90,8 @@ void LevelManager::heal_player_between_levels(GameContext& ctx) const
 		return;
 	}
 
-	const int healAmount = ctx.player->destructible->get_max_hp() / 2;
-	const int actualHealed = ctx.player->destructible->heal(healAmount);
+	const int healAmount = ctx.player->get_max_hp() / 2;
+	const int actualHealed = ctx.player->heal(healAmount);
 
 	if (actualHealed > 0)
 	{

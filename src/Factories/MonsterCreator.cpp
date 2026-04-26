@@ -22,6 +22,7 @@
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/ExperienceReward.h"
+#include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Random/RandomDice.h"
@@ -541,8 +542,9 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_dr(params.dr);
 	c->set_thaco(params.thaco);
 	c->armorClass = std::make_unique<ArmorClass>(params.ac);
-	c->destructible = std::make_unique<Destructible>(hp);
-	c->destructible->set_last_constitution(c->get_constitution());
+	c->healthPool = std::make_unique<HealthPool>(hp);
+	c->destructible = std::make_unique<Destructible>();
+	c->set_last_constitution(c->get_constitution());
 
 	if (params.aiType == MonsterAiType::RANGED)
 	{

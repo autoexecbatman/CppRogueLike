@@ -81,8 +81,8 @@ namespace
 			return;
 		}
 
-		const int hp = owner.destructible->get_hp();
-		const int hpMax = owner.destructible->get_max_hp();
+		const int hp = owner.get_hp();
+		const int hpMax = owner.get_max_hp();
 
 		if (hp * 2 > hpMax)
 		{
@@ -114,7 +114,7 @@ namespace
 	// Returns true when this creature must skip its turn entirely.
 	bool cannot_act(Creature& owner, GameContext& ctx)
 	{
-		if (owner.ai == nullptr || owner.destructible->is_dead())
+		if (owner.ai == nullptr || owner.is_dead())
 		{
 			return true;
 		}

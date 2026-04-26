@@ -21,7 +21,7 @@ constexpr auto MAX_TRADE_DISTANCE = 1; // Maximum distance to initiate a trade (
 void AiShopkeeper::update(Creature& owner, GameContext& ctx)
 {
 	// Skip if dead or missing destructible
-	if (owner.ai == nullptr || !owner.destructible || owner.destructible->is_dead())
+	if (owner.ai == nullptr || !owner.destructible || owner.is_dead())
 	{
 		return;
 	}
@@ -151,7 +151,7 @@ void AiShopkeeper::move_or_trade(Creature& shopkeeper, Vector2D target, GameCont
 	}
 
 	// Only trade if adjacent (distance exactly 1.0) and menu not already open
-	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.destructible->is_dead() && !tradeMenuOpen)
+	if (distance <= MAX_TRADE_DISTANCE && !shopkeeper.is_dead() && !tradeMenuOpen)
 	{
 		ctx.messageSystem->log("TRADE CONDITION MET: Opening trade menu!");
 		trade(shopkeeper, *ctx.player, ctx);
@@ -167,7 +167,7 @@ void AiShopkeeper::move_or_trade(Creature& shopkeeper, Vector2D target, GameCont
 	else
 	{
 		ctx.messageSystem->log("Not trading: distance=" + std::to_string(distance) +
-			" dead=" + std::to_string(shopkeeper.destructible->is_dead()) +
+			" dead=" + std::to_string(shopkeeper.is_dead()) +
 			" menuOpen=" + std::to_string(tradeMenuOpen));
 	}
 }

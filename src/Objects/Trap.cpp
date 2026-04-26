@@ -158,7 +158,7 @@ bool Trap::apply_movement_effect(Creature& creature, GameContext& ctx)
 				"You trigger the " + trapName + " and take " + std::to_string(damage) + " damage!", true);
 		}
 
-		creature.destructible->take_damage(creature, damage, ctx);
+		creature.take_damage_and_check_death(damage, ctx);
 
 		// 50% chance trap is destroyed after triggering
 		if (ctx.dice->d2() == 1)
@@ -171,7 +171,7 @@ bool Trap::apply_movement_effect(Creature& creature, GameContext& ctx)
 		}
 
 		// Trap blocks movement on first trigger (only if creature still alive)
-		if (creature.destructible->get_hp() > 0)
+		if (creature.get_hp() > 0)
 		{
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}

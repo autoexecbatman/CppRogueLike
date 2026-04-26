@@ -120,9 +120,9 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
 
     int totalHPGain = std::max(1, hitDiceRoll + conBonus);
 
-    owner.destructible->set_hp_base(owner.destructible->get_hp_base() + hitDiceRoll);
-    owner.destructible->set_max_hp(owner.destructible->get_max_hp() + totalHPGain);
-    owner.destructible->set_hp(owner.destructible->get_hp() + totalHPGain);
+    owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);
+    owner.set_max_hp(owner.get_max_hp() + totalHPGain);
+    owner.set_hp(owner.get_hp() + totalHPGain);
 
     if (owner.get_creature_class() != CreatureClass::MONSTER)
     {
@@ -147,7 +147,7 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
         totalHPGain,
         hitDiceRoll,
         conBonus,
-        owner.destructible->get_max_hp()));
+        owner.get_max_hp()));
 
     return totalHPGain;
 }
