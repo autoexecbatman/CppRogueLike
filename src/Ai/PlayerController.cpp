@@ -186,33 +186,25 @@ void PlayerController::move(Vector2D target)
 
 void PlayerController::pick_item(GameContext& ctx)
 {
-	size_t totalItems = InventoryOperations::get_item_count(playerOwner.inventoryData);
-	totalItems += playerOwner.equippedItems.size();
-
-	if (playerOwner.inventoryData.capacity > 0 && totalItems >= playerOwner.inventoryData.capacity)
-	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
-		return;
-	}
-
 	if (ctx.inventoryData->items.empty())
 		return;
 
-	std::vector<std::unique_ptr<Item>*> itemsAtPosition;
-	for (auto& item : ctx.inventoryData->items)
+	// Find the first item at the player's position
+	Item* item = nullptr;
+	for (auto& floorItem : ctx.inventoryData->items)
 	{
-		if (item && item->position == playerOwner.position)
-			itemsAtPosition.push_back(&item);
+		if (floorItem && floorItem->position == playerOwner.position)
+		{
+			item = floorItem.get();
+			break;
+		}
 	}
 
-	if (itemsAtPosition.empty())
+	if (!item)
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
 		return;
 	}
-
-	auto& itemPtr = *itemsAtPosition[0];
-	Item* item = itemPtr.get();
 
 	if (item->itemClass == ItemClass::GOLD_COIN)
 	{
@@ -223,21 +215,47 @@ void PlayerController::pick_item(GameContext& ctx)
 		return;
 	}
 
-	std::string itemName = item->actorData.name;
-	auto result = InventoryOperations::add_item(playerOwner.inventoryData, std::move(itemPtr));
-
-	if (result.has_value())
+	// Pre-check slot capacity before touching ownership
+	if (InventoryOperations::is_inventory_full(playerOwner.inventoryData))
 	{
-		InventoryOperations::optimize_inventory_storage(*ctx.inventoryData);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+		return;
+	}
+
+	// Pre-check weight before touching ownership — prevents item destruction on rejection
+	const int currentWeight = InventoryOperations::get_total_weight(playerOwner.inventoryData);
+	const int maxWeight = InventoryOperations::get_max_weight(playerOwner);
+	if (currentWeight + item->enhancement.weight > maxWeight)
+	{
+		ctx.messageSystem->message(RED_BLACK_PAIR, "Too heavy to carry.", true);
+		return;
+	}
+
+	const std::string itemName = item->actorData.name;
+
+	// Remove from floor: ownership transfers to removeResult
+	auto removeResult = InventoryOperations::remove_item(*ctx.inventoryData, *item);
+	if (!removeResult.has_value())
+	{
+		ctx.messageSystem->log("ERROR: pick_item -- remove_item failed unexpectedly");
+		return;
+	}
+
+	// Pre-checks passed; add cannot fail on capacity or weight
+	auto addResult = InventoryOperations::add_item_to_inventory(
+		playerOwner.inventoryData,
+		std::move(*removeResult),
+		playerOwner
+	);
+
+	if (addResult.has_value())
+	{
 		playerOwner.sync_ranged_state(ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
 	{
-		if (result.get_error() == InventoryError::FULL)
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
-		else
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't pick up that item.", true);
+		ctx.messageSystem->log("ERROR: pick_item -- add failed after pre-checks; item lost");
 	}
 }
 
@@ -1039,9 +1057,10 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ctx.map->spawn_all_enhanced_items_debug(playerOwner.position, ctx);
-		InventoryOperations::add_item(
+		InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
-			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry));
+			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry),
+			playerOwner);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		playerOwner.memorizedSpells.push_back("magic_missile");

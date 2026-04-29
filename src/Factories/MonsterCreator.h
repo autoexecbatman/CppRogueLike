@@ -66,6 +66,7 @@ struct MonsterParams
 	int xp{ 0 };
 	int dr{ 0 };
 	int morale{ 10 };
+	int corpseWeight{ 50 };
 
 	// Ability scores
 	DiceExpr strDice{ 3, 6, 0 };

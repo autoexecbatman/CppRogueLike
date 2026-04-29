@@ -255,8 +255,8 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("long_sword", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
 		equip_item(ItemCreator::create("long_bow", position, *ctx.contentRegistry), EquipmentSlot::MISSILE_WEAPON, ctx);
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry), *this);
+		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
@@ -267,7 +267,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("leather_armor", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("dagger", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
@@ -281,7 +281,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -295,7 +295,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry));
 		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
@@ -792,7 +792,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
-		InventoryOperations::add_item(inventoryData, std::move(item));
+		InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this);
 		return false;
 	}
 
@@ -1007,7 +1007,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			remove_state(ActorState::IS_RANGED);
 
 		// Return item to inventory
-		InventoryOperations::add_item(inventoryData, std::move(it->item));
+		InventoryOperations::add_item_to_inventory(inventoryData, std::move(it->item), *this);
 
 		// Remove from equipped items
 		equippedItems.erase(it);

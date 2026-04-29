@@ -2157,7 +2157,7 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
-	InventoryOperations::add_item(jailer->inventoryData, std::move(key));
+	InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer);
 
 	ctx.creatures->push_back(std::move(jailer));
 }

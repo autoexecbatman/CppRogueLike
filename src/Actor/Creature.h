@@ -63,6 +63,7 @@ private:
 	int morale{ 10 };
 	int damageResistance{ 0 };
 	int thaco{ 20 };
+	int corpseWeight{ 50 };
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
 
@@ -145,13 +146,14 @@ public:
 	int get_thaco() const noexcept { return thaco; }
 	void set_dr(int value) noexcept { damageResistance = value; }
 	void set_thaco(int value) noexcept { thaco = value; }
+	int get_corpse_weight() const noexcept { return corpseWeight; }
+	void set_corpse_weight(int value) noexcept { corpseWeight = value; }
 
 	virtual void apply_confusion(int nbTurns);
 
 	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);
 	void sync_ranged_state(GameContext& ctx);
-	void pick(GameContext& ctx);
 	void drop(Item& item, GameContext& ctx);
 
 	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }

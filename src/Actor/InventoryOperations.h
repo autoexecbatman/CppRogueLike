@@ -12,6 +12,7 @@
 // Forward declarations
 class Item;
 class Actor;
+class Creature;
 
 // - Free functions for inventory management
 namespace InventoryOperations
@@ -19,8 +20,15 @@ namespace InventoryOperations
 
 // ===== CORE OPERATIONS =====
 
-// Add item with proper error handling and capacity constraints
+// Add item to floor or container inventory (no weight check)
 InventoryResult<bool> add_item(InventoryData& inventory, std::unique_ptr<Item> item);
+
+// Add item to creature's personal inventory with STR-based weight enforcement
+InventoryResult<bool> add_item_to_inventory(
+	InventoryData& inventory,
+	std::unique_ptr<Item> item,
+	const Creature& owner
+);
 
 // Remove operations
 InventoryResult<std::unique_ptr<Item>> remove_item(InventoryData& inventory, const Item& item);
@@ -36,8 +44,8 @@ size_t get_remaining_space(const InventoryData& inventory) noexcept;
 
 // Weight management
 int get_total_weight(const InventoryData& inventory) noexcept;
-int get_max_weight(const InventoryData& inventory) noexcept;
-bool is_overloaded(const InventoryData& inventory) noexcept;
+int get_max_weight(const Creature& owner) noexcept;
+bool is_overloaded(const InventoryData& inventory, const Creature& owner) noexcept;
 
 // Capacity modification
 void set_inventory_capacity(InventoryData& inventory, size_t new_capacity);

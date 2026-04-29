@@ -56,6 +56,7 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     auto corpse = std::make_unique<Item>(owner.position, owner.actorData);
     corpse->actorData.name = std::format("dead {}", owner.get_name());
     corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
+    corpse->enhancement.weight = owner.get_corpse_weight();
     corpse->behavior = CorpseFood{ 0 };
     InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
 }

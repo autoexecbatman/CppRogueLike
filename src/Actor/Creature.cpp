@@ -29,7 +29,6 @@
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
-#include "Pickable.h"
 
 //==Creature==
 void Creature::load(const json& j)
@@ -422,85 +421,6 @@ void Creature::sync_ranged_state(GameContext& ctx)
 	}
 }
 
-void Creature::pick(GameContext& ctx)
-{
-	// Check if inventory is already full before attempting to pick
-	if (InventoryOperations::is_inventory_full(inventoryData))
-	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full! You can't carry any more items.", true);
-		return;
-	}
-
-	// Find item at player's position using proper inventory interface
-	Item* itemAtPosition = nullptr;
-	size_t itemIndex = 0;
-
-	if (ctx.inventoryData->items.empty())
-	{
-		return; // No floor items
-	}
-
-	// Search for item at current position
-	for (size_t i = 0; i < ctx.inventoryData->items.size(); ++i)
-	{
-		if (auto& item = ctx.inventoryData->items[i])
-		{
-			if (position == item->position)
-			{
-				itemAtPosition = item.get();
-				itemIndex = i;
-				break;
-			}
-		}
-	}
-
-	if (!itemAtPosition)
-	{
-		return; // No item at this position
-	}
-
-	// Handle item pickup using proper inventory operations
-	if (itemAtPosition->itemClass == ItemClass::GOLD_COIN)
-	{
-		// Use the pickable's use() method which handles gold pickup properly
-		if (itemAtPosition->behavior && use_item(*itemAtPosition->behavior, *itemAtPosition, *this, ctx))
-		{
-			// Gold was picked up successfully via polymorphic call
-			// Remove gold from floor inventory
-			auto removeResult = InventoryOperations::remove_item_at(*ctx.inventoryData, itemIndex);
-			if (!removeResult.has_value())
-			{
-				ctx.messageSystem->log("WARNING: Failed to remove gold item from floor inventory");
-			}
-		}
-	}
-	else
-	{
-		// Normal item handling - store name before moving
-		const std::string itemName = itemAtPosition->actorData.name;
-
-		// Remove from floor first
-		auto removeResult = InventoryOperations::remove_item_at(*ctx.inventoryData, itemIndex);
-		if (removeResult.has_value())
-		{
-			// Add to player inventory
-			auto addResult = InventoryOperations::add_item(inventoryData, std::move(*removeResult));
-			if (addResult.has_value())
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
-			}
-			else
-			{
-				ctx.messageSystem->log("WARNING: Failed to add item to player inventory");
-				// Item is lost - this should not happen since we checked is_full() earlier
-			}
-		}
-		else
-		{
-			ctx.messageSystem->log("WARNING: Failed to remove item from floor inventory");
-		}
-	}
-}
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
@@ -583,6 +503,7 @@ void Creature::die(GameContext& ctx)
 	auto corpse = std::make_unique<Item>(position, actorData);
 	corpse->actorData.name = std::format("dead {}", get_name());
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
+	corpse->enhancement.weight = get_corpse_weight();
 	corpse->behavior = CorpseFood{ 0 };
 	InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
 }

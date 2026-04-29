@@ -18,6 +18,7 @@
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
+#include "../Combat/WeightTier.h"
 #include "../Core/GameContext.h"
 #include "../Items/ItemClassification.h"
 #include "../Renderer/InputSystem.h"
@@ -51,14 +52,37 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	int title_x = (vcols * tileSize - title_w) / 2;
 	ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, YELLOW_BLACK_PAIR);
 
-	// Draw weight info on the right side
+	// Draw weight info with tier on the right side
 	int current_weight = InventoryOperations::get_total_weight(player_ref.inventoryData);
-	int max_weight = InventoryOperations::get_max_weight(player_ref.inventoryData);
-	std::string weight_info = std::format("Weight: {}/{}", current_weight, max_weight);
+	int max_weight = InventoryOperations::get_max_weight(player_ref);
+	WeightTier tier = get_weight_tier(current_weight, max_weight);
+
+	std::string tier_name;
+	int tier_color = WHITE_BLACK_PAIR;
+	switch (tier)
+	{
+	case WeightTier::LIGHT:
+		tier_name = "LIGHT";
+		tier_color = WHITE_BLACK_PAIR;
+		break;
+	case WeightTier::MODERATE:
+		tier_name = "MODERATE";
+		tier_color = YELLOW_BLACK_PAIR;
+		break;
+	case WeightTier::HEAVY:
+		tier_name = "HEAVY";
+		tier_color = MAGENTA_BLACK_PAIR;
+		break;
+	case WeightTier::OVERENCUMBERED:
+		tier_name = "OVERENCUMBERED";
+		tier_color = RED_BLACK_PAIR;
+		break;
+	}
+
+	std::string weight_info = std::format("Weight: {}/{} [{}]", current_weight, max_weight, tier_name);
 	int weight_w = ctx.renderer->measure_text(weight_info);
 	int weight_x = vcols * tileSize - weight_w - tileSize;
-	int weight_color = current_weight > max_weight ? RED_BLACK_PAIR : WHITE_BLACK_PAIR;
-	ctx.renderer->draw_text(Vector2D{ weight_x, font_off }, weight_info, weight_color);
+	ctx.renderer->draw_text(Vector2D{ weight_x, font_off }, weight_info, tier_color);
 }
 
 // Draw a full-width white highlight bar at the given tile row.
@@ -300,7 +324,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
 
 	// Draw overloaded warning if inventory exceeds max weight
-	if (InventoryOperations::is_overloaded(player_ref.inventoryData))
+	if (InventoryOperations::is_overloaded(player_ref.inventoryData, player_ref))
 	{
 		std::string_view warning = "OVERLOADED! Movement speed reduced.";
 		int warning_w = ctx.renderer->measure_text(warning);

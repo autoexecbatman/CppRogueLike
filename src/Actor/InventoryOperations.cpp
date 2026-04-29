@@ -12,8 +12,10 @@
 #include <nlohmann/json.hpp>
 #include <nlohmann/json_fwd.hpp>
 
+#include "../Combat/WeightTier.h"
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
+#include "Creature.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
@@ -36,6 +38,41 @@ InventoryResult<bool> add_item(InventoryData& inventory, std::unique_ptr<Item> i
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return InventoryError::FULL;
+	}
+
+	const auto* item_ptr = item.get();
+	inventory.items.push_back(std::move(item));
+
+	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, item_ptr);
+	return true;
+}
+
+InventoryResult<bool> add_item_to_inventory(
+	InventoryData& inventory,
+	std::unique_ptr<Item> item,
+	const Creature& owner
+)
+{
+	if (!item)
+	{
+		return InventoryError::INVALID_ITEM;
+	}
+
+	if (is_inventory_full(inventory))
+	{
+		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
+		return InventoryError::FULL;
+	}
+
+	// Check weight capacity: hard stop if total weight would exceed max
+	const int item_weight = item->enhancement.weight;
+	const int current_weight = get_total_weight(inventory);
+	const int max_weight = get_max_weight(owner);
+
+	if (current_weight + item_weight > max_weight)
+	{
+		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
+		return InventoryError::CAPACITY_EXCEEDED;
 	}
 
 	const auto* item_ptr = item.get();
@@ -131,16 +168,14 @@ int get_total_weight(const InventoryData& inventory) noexcept
 	return total;
 }
 
-int get_max_weight(const InventoryData& inventory) noexcept
+int get_max_weight(const Creature& owner) noexcept
 {
-	// Standard carrying capacity: 50 pounds per inventory
-	// Can be extended to use STR modifier in future
-	return 50;
+	return calculate_max_weight(owner.get_strength());
 }
 
-bool is_overloaded(const InventoryData& inventory) noexcept
+bool is_overloaded(const InventoryData& inventory, const Creature& owner) noexcept
 {
-	return get_total_weight(inventory) > get_max_weight(inventory);
+	return get_total_weight(inventory) > get_max_weight(owner);
 }
 
 // ===== ITEM ACCESS =====

@@ -59,7 +59,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 120
+        "xp": 120,
+        "corpse_weight": 160
     },
     "bat": {
         "ac": 8,
@@ -121,7 +122,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 30
+        "xp": 30,
+        "corpse_weight": 8
     },
     "bugbear": {
         "ac": 5,
@@ -183,7 +185,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 175
+        "xp": 175,
+        "corpse_weight": 100
     },
     "chimera": {
         "ac": 6,
@@ -245,7 +248,8 @@
             "num": 1,
             "sides": 6
         },
-        "xp": 2000
+        "xp": 2000,
+        "corpse_weight": 100
     },
     "dragon": {
         "ac": 1,
@@ -307,7 +311,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 600
+        "xp": 600,
+        "corpse_weight": 600
     },
     "fire_wolf": {
         "ac": 6,
@@ -369,7 +374,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 120
+        "xp": 120,
+        "corpse_weight": 130
     },
     "gargoyle": {
         "ac": 5,
@@ -431,7 +437,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 270
+        "xp": 270,
+        "corpse_weight": 100
     },
     "ghoul": {
         "ac": 6,
@@ -493,7 +500,8 @@
             "num": 1,
             "sides": 4
         },
-        "xp": 175
+        "xp": 175,
+        "corpse_weight": 100
     },
     "giant_centipede": {
         "ac": 5,
@@ -555,7 +563,8 @@
             "num": 1,
             "sides": 2
         },
-        "xp": 35
+        "xp": 35,
+        "corpse_weight": 100
     },
     "giant_rat": {
         "ac": 7,
@@ -617,7 +626,8 @@
             "num": 1,
             "sides": 4
         },
-        "xp": 35
+        "xp": 35,
+        "corpse_weight": 100
     },
     "giant_snake": {
         "ac": 5,
@@ -679,7 +689,8 @@
             "num": 1,
             "sides": 4
         },
-        "xp": 270
+        "xp": 270,
+        "corpse_weight": 100
     },
     "gnoll": {
         "ac": 5,
@@ -741,7 +752,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 120
+        "xp": 120,
+        "corpse_weight": 100
     },
     "goblin": {
         "ac": 6,
@@ -803,7 +815,8 @@
             "num": 1,
             "sides": 6
         },
-        "xp": 105
+        "xp": 105,
+        "corpse_weight": 90
     },
     "golem_stone": {
         "ac": 5,
@@ -865,7 +878,8 @@
             "num": 1,
             "sides": 2
         },
-        "xp": 3000
+        "xp": 3000,
+        "corpse_weight": 100
     },
     "harpy": {
         "ac": 7,
@@ -927,7 +941,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 175
+        "xp": 175,
+        "corpse_weight": 100
     },
     "hill_giant": {
         "ac": 3,
@@ -989,7 +1004,8 @@
             "num": 1,
             "sides": 6
         },
-        "xp": 2000
+        "xp": 2000,
+        "corpse_weight": 100
     },
     "hobgoblin": {
         "ac": 5,
@@ -1051,7 +1067,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 65
+        "xp": 65,
+        "corpse_weight": 100
     },
     "ice_wolf": {
         "ac": 6,
@@ -1113,7 +1130,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 120
+        "xp": 120,
+        "corpse_weight": 130
     },
     "kobold": {
         "ac": 7,
@@ -1175,7 +1193,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 45
+        "xp": 45,
+        "corpse_weight": 85
     },
     "lich": {
         "ac": 0,
@@ -1237,7 +1256,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 4000
+        "xp": 4000,
+        "corpse_weight": 100
     },
     "mage": {
         "ac": 9,
@@ -1299,7 +1319,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 180
+        "xp": 180,
+        "corpse_weight": 150
     },
     "medusa": {
         "ac": 5,
@@ -1361,14 +1382,16 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 1400
+        "xp": 1400,
+        "corpse_weight": 100
     },
     "mimic": {
         "tile": {
             "col": 1,
             "row": 2,
             "sheet": 20
-        }
+        },
+        "corpse_weight": 100
     },
     "ogre": {
         "ac": 5,
@@ -1430,7 +1453,8 @@
             "num": 1,
             "sides": 6
         },
-        "xp": 270
+        "xp": 270,
+        "corpse_weight": 100
     },
     "orc": {
         "ac": 6,
@@ -1492,7 +1516,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 105
+        "xp": 105,
+        "corpse_weight": 180
     },
     "pit_fiend": {
         "ac": -3,
@@ -1554,7 +1579,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 4000
+        "xp": 4000,
+        "corpse_weight": 100
     },
     "rat": {
         "ac": 9,
@@ -1616,7 +1642,8 @@
             "num": 1,
             "sides": 2
         },
-        "xp": 15
+        "xp": 15,
+        "corpse_weight": 100
     },
     "shadow": {
         "ac": 7,
@@ -1678,14 +1705,16 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 420
+        "xp": 420,
+        "corpse_weight": 100
     },
     "shopkeeper": {
         "tile": {
             "col": 2,
             "row": 9,
             "sheet": 6
-        }
+        },
+        "corpse_weight": 170
     },
     "skeleton": {
         "ac": 7,
@@ -1747,28 +1776,32 @@
             "num": 1,
             "sides": 2
         },
-        "xp": 65
+        "xp": 65,
+        "corpse_weight": 100
     },
     "spider_giant": {
         "tile": {
             "col": 2,
             "row": 4,
             "sheet": 10
-        }
+        },
+        "corpse_weight": 150
     },
     "spider_small": {
         "tile": {
             "col": 0,
             "row": 4,
             "sheet": 10
-        }
+        },
+        "corpse_weight": 20
     },
     "spider_weaver": {
         "tile": {
             "col": 1,
             "row": 4,
             "sheet": 10
-        }
+        },
+        "corpse_weight": 160
     },
     "troll": {
         "ac": 4,
@@ -1830,7 +1863,8 @@
             "num": 1,
             "sides": 4
         },
-        "xp": 300
+        "xp": 300,
+        "corpse_weight": 280
     },
     "vampire": {
         "ac": 1,
@@ -1892,7 +1926,8 @@
             "num": 3,
             "sides": 6
         },
-        "xp": 2000
+        "xp": 2000,
+        "corpse_weight": 100
     },
     "werewolf": {
         "ac": 5,
@@ -1954,7 +1989,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 420
+        "xp": 420,
+        "corpse_weight": 100
     },
     "wight": {
         "ac": 5,
@@ -2016,7 +2052,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 650
+        "xp": 650,
+        "corpse_weight": 100
     },
     "wolf": {
         "ac": 7,
@@ -2078,7 +2115,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 45
+        "xp": 45,
+        "corpse_weight": 120
     },
     "wraith": {
         "ac": 4,
@@ -2140,7 +2178,8 @@
             "num": 2,
             "sides": 6
         },
-        "xp": 975
+        "xp": 975,
+        "corpse_weight": 100
     },
     "wyvern": {
         "ac": 3,
@@ -2202,7 +2241,8 @@
             "num": 1,
             "sides": 6
         },
-        "xp": 1400
+        "xp": 1400,
+        "corpse_weight": 100
     },
     "zombie": {
         "ac": 8,
@@ -2264,58 +2304,135 @@
             "num": 1,
             "sides": 2
         },
-        "xp": 65
+        "xp": 65,
+        "corpse_weight": 100
     },
     "dungeon_jailer": {
         "ac": 4,
         "ai": "melee",
         "can_swim": false,
-        "cha": { "bonus": 0, "num": 3, "sides": 6 },
+        "cha": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "color": 9,
-        "con": { "bonus": 0, "num": 3, "sides": 6 },
+        "con": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "corpse": "dead jailer",
-        "damage": { "display": "1d6+1", "max": 7, "min": 2, "type": 0 },
+        "damage": {
+            "display": "1d6+1",
+            "max": 7,
+            "min": 2,
+            "type": 0
+        },
         "depth_max": 0,
         "depth_min": 2,
         "depth_scale": 0.0,
-        "dex": { "bonus": 0, "num": 3, "sides": 6 },
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "dr": 0,
-        "hp": { "bonus": 0, "num": 3, "sides": 8 },
-        "int": { "bonus": 0, "num": 3, "sides": 6 },
+        "hp": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 8
+        },
+        "int": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "morale": 12,
         "name": "Dungeon Jailer",
-        "str": { "bonus": 1, "num": 3, "sides": 6 },
+        "str": {
+            "bonus": 1,
+            "num": 3,
+            "sides": 6
+        },
         "thaco": 15,
-        "tile": { "col": 3, "row": 12, "sheet": 6 },
+        "tile": {
+            "col": 3,
+            "row": 12,
+            "sheet": 6
+        },
         "weapon": "Mace",
         "weight": 0,
-        "wis": { "bonus": 0, "num": 3, "sides": 6 },
-        "xp": 65
+        "wis": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "xp": 65,
+        "corpse_weight": 100
     },
     "dungeon_warden": {
         "ac": 1,
         "ai": "melee",
         "can_swim": false,
-        "cha": { "bonus": 0, "num": 3, "sides": 6 },
+        "cha": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "color": 14,
-        "con": { "bonus": 2, "num": 3, "sides": 6 },
+        "con": {
+            "bonus": 2,
+            "num": 3,
+            "sides": 6
+        },
         "corpse": "dead warden",
-        "damage": { "display": "1d8+3", "max": 11, "min": 4, "type": 0 },
+        "damage": {
+            "display": "1d8+3",
+            "max": 11,
+            "min": 4,
+            "type": 0
+        },
         "depth_max": 0,
         "depth_min": 2,
         "depth_scale": 0.0,
-        "dex": { "bonus": 0, "num": 3, "sides": 6 },
+        "dex": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "dr": 2,
-        "hp": { "bonus": 0, "num": 5, "sides": 10 },
-        "int": { "bonus": 0, "num": 3, "sides": 6 },
+        "hp": {
+            "bonus": 0,
+            "num": 5,
+            "sides": 10
+        },
+        "int": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
         "morale": 12,
         "name": "Dungeon Warden",
-        "str": { "bonus": 6, "num": 3, "sides": 6 },
+        "str": {
+            "bonus": 6,
+            "num": 3,
+            "sides": 6
+        },
         "thaco": 16,
-        "tile": { "col": 4, "row": 0, "sheet": 6 },
+        "tile": {
+            "col": 4,
+            "row": 0,
+            "sheet": 6
+        },
         "weapon": "Longsword",
         "weight": 0,
-        "wis": { "bonus": 0, "num": 3, "sides": 6 },
-        "xp": 650
+        "wis": {
+            "bonus": 0,
+            "num": 3,
+            "sides": 6
+        },
+        "xp": 650,
+        "corpse_weight": 100
     }
 }
