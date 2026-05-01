@@ -1,0 +1,337 @@
+@startuml
+title AI System
+class "std::unique_ptr<Ai>" as C_0014248386106627927896
+class C_0014248386106627927896 {
+__
+}
+class "std::char_traits<char>" as C_0007500688229146332176
+class C_0007500688229146332176 {
+__
+}
+class "std::allocator<char>" as C_0000465838628272370621
+class C_0000465838628272370621 {
+__
+}
+class "std::string" as C_0005016775666417918015
+class C_0005016775666417918015 {
+__
+}
+class "std::vector<Disguise>" as C_0016118280229456530782
+class C_0016118280229456530782 {
+__
+}
+class "std::function<void(GameContext &)>" as C_0007834028488579349924
+class C_0007834028488579349924 {
+__
+}
+class "nlohmann::basic_json" as C_0011887994287659977427
+class C_0011887994287659977427 {
+__
+}
+enum "AiType" as C_0008798026718197390503
+enum C_0008798026718197390503 {
+MONSTER
+CONFUSED_MONSTER
+SHOPKEEPER
+MIMIC
+SPIDER
+WEB_SPINNER
+}
+abstract "Ai" as C_0000650835050453051391
+abstract C_0000650835050453051391 {
++Ai() = deleted : void
++Ai() noexcept = deleted : void
+#Ai() = default : void
++~Ai() constexpr noexcept = default : void
+..
++operator=() = deleted : Ai &
++operator=() noexcept = deleted : Ai &
+..
+{static} +create() : std::unique_ptr<Ai>
++initiate_trade() : void
++is_hostile() const : bool
++is_trade_open() const : bool
++set_trade_open() : void
+{abstract} +update() = 0 : void
+__
+}
+enum "PendingDoorAction" as C_0004819904729666870950
+enum C_0004819904729666870950 {
+NONE
+OPEN
+CLOSE
+DISARM
+}
+class "PlayerController" as C_0005287587107561980904
+class C_0005287587107561980904 {
++PlayerController() : void
+..
++apply_confusion() : void
+-begin_path_walk() : void
+-call_action() : void
+-chose_from_inventory() : Item *
++display_inventory() : void
+-drop_item() : void
+-execute_arrival() : bool
+-find_door_approach() const : Vector2D
+-flush_fov() : void
+-handle_direction_input() : Vector2D
+-handle_left_click() : void
+-handle_mouse_path() : bool
+-handle_right_click() : void
++is_confused() const : bool
+-is_mouse_pending_cancelled() const : bool
+-is_pickable_at_position() const : bool
++load() : void
+-look_on_floor() : void
+-look_to_attack() : bool
+-look_to_move() : bool
+-move() : void
+-pick_item() : void
+-resolve_locked_door() : bool
+-resolve_mouse_world_tile() const : bool
+-resolve_pending_door() : bool
++save() : void
++update() : void
+__
+-confusionTurns : int
+-isWaiting : bool
+-mouseDoorAction : PendingDoorAction
+-mouseDoorTarget : Vector2D
+-mouseMode : MouseMode
+-pendingDoorAction : PendingDoorAction
+-playerOwner : Player &
+-shouldComputeFOV : bool
+}
+enum "PlayerController::MouseMode" as C_0013012857986182955546
+enum C_0013012857986182955546 {
+IDLE
+WALK
+WALK_TO_PICKUP
+WALK_TO_DOOR
+WALK_TO_STAIRS
+}
+class "Vector2D" as C_0002027590062895808220
+class C_0002027590062895808220 {
+__
+}
+class "Player" as C_0003692324345213718176
+class C_0003692324345213718176 {
+__
+}
+class "Item" as C_0005967165952864249862
+class C_0005967165952864249862 {
+__
+}
+class "GameContext" as C_0010095634811082523150
+class C_0010095634811082523150 {
+__
+}
+class "Creature" as C_0016796484603318207096
+class C_0016796484603318207096 {
+__
+}
+enum "Controls" as C_0009497302948704471479
+enum C_0009497302948704471479 {
+}
+class "AiShopkeeper" as C_0010501628484777054405
+class C_0010501628484777054405 {
+-calculate_step() : int
++initiate_trade() : void
+-is_hostile() const : bool
++is_trade_open() const : bool
+-load() : void
+#move_or_trade() : void
+-move_to_target() : void
+-save() : void
++set_trade_open() : void
++trade() : void
+-update() : void
+__
+-hasApproachedPlayer : bool
+-moveCount : int
++tradeMenuOpen : bool
+}
+class "Actor" as C_0017898892907908295482
+class C_0017898892907908295482 {
+__
+}
+class "AiMonster" as C_0009770254876193258647
+class C_0009770254876193258647 {
+-decide_action() : void
++load() : void
+#move_or_attack() : void
++save() : void
++update() : void
+-update_tracking() : void
+__
+#moveCount : int
+}
+class "AiSpider" as C_0005905294805692676266
+class C_0005905294805692676266 {
++AiSpider() : void
+..
+#can_poison_attack() : bool
+#find_ambush_position() : Vector2D
++has_laid_web() const : bool
+#is_good_ambush_spot() : bool
++load() : void
+#move_or_attack() : void
++move_toward_player() : void
+#poison_attack() : void
++random_move() : void
++save() : void
++set_web_laid() : void
++update() : void
+__
+#ambushCounter : int
+#isAmbushing : bool
+#poisonChance : int
+#poisonCooldown : int
+#webLaid : bool
+}
+class "AiMonsterRanged" as C_0002064596336851038264
+class C_0002064596336851038264 {
+#animate_arrow() : void
++load() : void
+#move_or_attack() : void
++save() : void
+#tryRangedAttack() : bool
++update() : void
+__
+#maxRangeDistance : int
+#optimalDistance : int
+}
+class "AiMonsterConfused" as C_0000434051106480994844
+class C_0000434051106480994844 {
++AiMonsterConfused() noexcept : void
++AiMonsterConfused() = deleted : void
++AiMonsterConfused() noexcept = deleted : void
++~AiMonsterConfused() = default : void
+..
++operator=() = deleted : AiMonsterConfused &
++operator=() noexcept = deleted : AiMonsterConfused &
+..
+-attempt_move() : void
+-get_random_direction() const : Vector2D
++load() : void
+-restore_original_ai() : void
++save() : void
++update() : void
+__
+-nbTurns : int
+-oldAi : std::unique_ptr<Ai>
+}
+class "Disguise" as C_0017064389239102010434
+class C_0017064389239102010434 {
+__
++color : int
++name : std::string
++tile : TileRef
+}
+class "AiMimic" as C_0013533451039947171800
+class C_0013533451039947171800 {
++AiMimic() = default : void
++AiMimic() : void
+..
+-apply_item_bonus() : void
+-boost_attack() : void
+-boost_confusion_power() : void
+-boost_defense() : void
+-boost_health() : void
+-change_disguise() : void
+-check_revealing() : void
+-consume_nearby_items() : bool
++load() : void
++save() : void
+-transform_to_greater_mimic() : void
++update() : void
+__
+-confusionDuration : int
+-consumptionCooldown : int
+-disguiseChangeCounter : int
+-isDisguised : bool
+-itemsConsumed : int
+-possibleDisguises : std::vector<Disguise>
+-revealDistance : int
+}
+class "AiWebSpinner" as C_0009533519576658375260
+class C_0009533519576658375260 {
++AiWebSpinner() : void
+..
+-generate_web_entities() : void
+-is_valid_web_position() : bool
++load() : void
++save() : void
+-should_create_web() : bool
+-try_create_web() : bool
++update() : void
+__
+-webCooldown : int
+}
+class "ContentRegistry" as C_0010839060922292652857
+class C_0010839060922292652857 {
+__
+}
+enum "ItemClass" as C_0007287312418392588518
+enum C_0007287312418392588518 {
+}
+class "ContextAction" as C_0017457456956011318510
+class C_0017457456956011318510 {
+__
++execute : std::function<void (GameContext &)>
++label : std::string
+}
+enum "MimicBonusType" as C_0002509812607654581833
+enum C_0002509812607654581833 {
+HEALTH
+CONFUSION
+ATTACK
+DEFENSE_GOLD
+DEFENSE_ARMOR
+NONE
+}
+enum "WebPattern" as C_0000154122469611552349
+enum C_0000154122469611552349 {
+CIRCULAR
+SPIRAL
+RADIAL
+CHAOTIC
+}
+C_0014248386106627927896 ..> C_0000650835050453051391
+C_0005016775666417918015 ..> C_0007500688229146332176
+C_0005016775666417918015 ..> C_0000465838628272370621
+C_0016118280229456530782 ..> C_0017064389239102010434
+C_0007834028488579349924 ..> C_0010095634811082523150
+C_0000650835050453051391 ..> C_0011887994287659977427
+C_0000650835050453051391 ..> C_0014248386106627927896
+C_0005287587107561980904 ..> C_0009497302948704471479
+C_0005287587107561980904 ..> C_0011887994287659977427
+C_0005287587107561980904 o-- C_0004819904729666870950 : -pendingDoorAction
+C_0005287587107561980904 o-- C_0013012857986182955546 : -mouseMode
+C_0005287587107561980904 o-- C_0004819904729666870950 : -mouseDoorAction
+C_0013012857986182955546 --+ C_0005287587107561980904
+C_0010501628484777054405 ..> C_0011887994287659977427
+C_0000650835050453051391 <|-- C_0010501628484777054405
+C_0009770254876193258647 ..> C_0011887994287659977427
+C_0000650835050453051391 <|-- C_0009770254876193258647
+C_0005905294805692676266 ..> C_0011887994287659977427
+C_0009770254876193258647 <|-- C_0005905294805692676266
+C_0002064596336851038264 ..> C_0011887994287659977427
+C_0009770254876193258647 <|-- C_0002064596336851038264
+C_0000434051106480994844 ..> C_0011887994287659977427
+C_0000434051106480994844 o-- C_0014248386106627927896 : -oldAi
+C_0000650835050453051391 <|-- C_0000434051106480994844
+C_0017064389239102010434 o-- C_0005016775666417918015 : +name
+C_0013533451039947171800 ..> C_0017064389239102010434
+C_0013533451039947171800 ..> C_0011887994287659977427
+C_0013533451039947171800 o-- C_0016118280229456530782 : -possibleDisguises
+C_0009770254876193258647 <|-- C_0013533451039947171800
+C_0009533519576658375260 ..> C_0011887994287659977427
+C_0005905294805692676266 <|-- C_0009533519576658375260
+C_0017457456956011318510 o-- C_0005016775666417918015 : +label
+C_0017457456956011318510 o-- C_0007834028488579349924 : +execute
+
+'Generated with clang-uml, version 0.6.2
+'LLVM version clang version 20.1.7 (https://github.com/llvm/llvm-project.git 6146a88f60492b520a36f8f8f3231e15f3cc6082)
+@enduml

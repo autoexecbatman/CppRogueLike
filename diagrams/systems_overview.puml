@@ -1,0 +1,1170 @@
+@startuml
+title Core Systems and GameContext
+package [std] as C_0009398582622211100658 {
+class "char_traits<char>" as C_0007500688229146332176
+class C_0007500688229146332176 {
+__
+}
+class "allocator<char>" as C_0000465838628272370621
+class C_0000465838628272370621 {
+__
+}
+class "basic_string<char,std::char_traits<char>,std::allocator<char>>" as C_0005016775666417918015
+class C_0005016775666417918015 {
+__
+}
+class "unique_ptr<Player>" as C_0004534020899441168361
+class C_0004534020899441168361 {
+__
+}
+class "unique_ptr<Object>" as C_0003599932711864402915
+class C_0003599932711864402915 {
+__
+}
+class "vector<std::unique_ptr<Object>>" as C_0017305124704771861061
+class C_0017305124704771861061 {
+__
+}
+class "unique_ptr<Decoration>" as C_0003895283783863330472
+class C_0003895283783863330472 {
+__
+}
+class "vector<std::unique_ptr<Decoration>>" as C_0016183880242117446092
+class C_0016183880242117446092 {
+__
+}
+class "unique_ptr<Creature>" as C_0011620708722662223273
+class C_0011620708722662223273 {
+__
+}
+class "vector<std::unique_ptr<Creature>>" as C_0012405118893925481423
+class C_0012405118893925481423 {
+__
+}
+class "vector<DungeonRoom>" as C_0014395090568650248626
+class C_0014395090568650248626 {
+__
+}
+class "unique_ptr<BaseMenu>" as C_0015540580711300931588
+class C_0015540580711300931588 {
+__
+}
+class "deque<std::unique_ptr<BaseMenu>>" as C_0014147764600823528737
+class C_0014147764600823528737 {
+__
+}
+class "vector<Vector2D>" as C_0010755708640928265688
+class C_0010755708640928265688 {
+__
+}
+class "unique_ptr<ShopKeeper>" as C_0016226757124167424344
+class C_0016226757124167424344 {
+__
+}
+class "unique_ptr<Item>" as C_0004796116875221873371
+class C_0004796116875221873371 {
+__
+}
+class "vector<Weapons>" as C_0017187362050362232666
+class C_0017187362050362232666 {
+__
+}
+class "vector<StrengthAttributes>" as C_0009139167252489745271
+class C_0009139167252489745271 {
+__
+}
+class "vector<DexterityAttributes>" as C_0002628908634292627742
+class C_0002628908634292627742 {
+__
+}
+class "vector<ConstitutionAttributes>" as C_0014343738894352411609
+class C_0014343738894352411609 {
+__
+}
+class "vector<CharismaAttributes>" as C_0002170614438089614942
+class C_0002170614438089614942 {
+__
+}
+class "vector<IntelligenceAttributes>" as C_0012875810337402998101
+class C_0012875810337402998101 {
+__
+}
+class "vector<WisdomAttributes>" as C_0006798022911403317525
+class C_0006798022911403317525 {
+__
+}
+class "basic_string_view<char>" as C_0012008603185729621422
+class C_0012008603185729621422 {
+__
+}
+class "unordered_map<std::string,TileRef>" as C_0004515361358353227692
+class C_0004515361358353227692 {
+__
+}
+class "span<std::unique_ptr<Creature>>" as C_0017565885199287248654
+class C_0017565885199287248654 {
+__
+}
+class "vector<LogMessage>" as C_0012260412196667827836
+class C_0012260412196667827836 {
+__
+}
+class "vector<std::vector<LogMessage>>" as C_0011060773678787800092
+class C_0011060773678787800092 {
+__
+}
+class "unordered_map<std::string,AutotileGroup>" as C_0005207428333653371085
+class C_0005207428333653371085 {
+__
+}
+class "unordered_map<std::string,WallAutotileGroup>" as C_0012688378547694052021
+class C_0012688378547694052021 {
+__
+}
+class "function<void()>" as C_0011970315036169891779
+class C_0011970315036169891779 {
+__
+}
+class "vector<AnimEntry>" as C_0004725048460884544756
+class C_0004725048460884544756 {
+__
+}
+class "vector<ProjectileEntry>" as C_0009824935406090569086
+class C_0009824935406090569086 {
+__
+}
+class "mersenne_twister_engine<unsigned int,32,624,397,31,0x9908b0df,11,0xffffffff,7,0x9d2c5680,15,0xefc60000,18,1812433253>" as C_0003048801440335063312
+class C_0003048801440335063312 {
+__
+}
+class "span<std::unique_ptr<Item>>" as C_0009849680224112406864
+class C_0009849680224112406864 {
+__
+}
+class "span<std::unique_ptr<Object>>" as C_0005959513126156511716
+class C_0005959513126156511716 {
+__
+}
+class "span<std::unique_ptr<Decoration>>" as C_0003719395400905936805
+class C_0003719395400905936805 {
+__
+}
+class "function<void(bool,Vector2D,GameContext &)>" as C_0015196010255607809857
+class C_0015196010255607809857 {
+__
+}
+class "vector<Creature *>" as C_0002977765105874482750
+class C_0002977765105874482750 {
+__
+}
+class "vector<BuffType>" as C_0015749009658368705520
+class C_0015749009658368705520 {
+__
+}
+class "vector<FloatingEntry>" as C_0016951849925110626515
+class C_0016951849925110626515 {
+__
+}
+class "vector<int>" as C_0017563173931554010774
+class C_0017563173931554010774 {
+__
+}
+class "vector<std::string>" as C_0008261390615332338001
+class C_0008261390615332338001 {
+__
+}
+class "function<void(GameContext &)>" as C_0007834028488579349924
+class C_0007834028488579349924 {
+__
+}
+class "vector<SpellSystem::ItemGrantedSpell>" as C_0012525661917834764612
+class C_0012525661917834764612 {
+__
+}
+}
+package [nlohmann] as C_0018111317376470178350 {
+class "basic_json" as C_0011887994287659977427
+class C_0011887994287659977427 {
+__
+}
+}
+enum "BuffType" as C_0014332256836473659204
+enum C_0014332256836473659204 {
+NONE
+INVISIBILITY
+BLESS
+SHIELD
+STRENGTH
+DEXTERITY
+CONSTITUTION
+INTELLIGENCE
+WISDOM
+CHARISMA
+SPEED
+FIRE_RESISTANCE
+COLD_RESISTANCE
+LIGHTNING_RESISTANCE
+POISON_RESISTANCE
+SLEEP
+HOLD_PERSON
+SANCTUARY
+SILENCE
+WEBBED
+}
+class "Buff" as C_0003045488500843797932
+class C_0003045488500843797932 {
+__
++isSetEffect : bool
++turnsRemaining : int
++type : BuffType
++value : int
+}
+enum "TargetMode" as C_0009067206581592040507
+enum C_0009067206581592040507 {
+AUTO_NEAREST
+PICK_TILE_SINGLE
+PICK_TILE_AOE
+FOV_BUFF
+}
+enum "ScrollAnimation" as C_0002194380935617524074
+enum C_0002194380935617524074 {
+NONE
+LIGHTNING
+EXPLOSION
+}
+enum "GameStatus" as C_0013302321448474623153
+enum C_0013302321448474623153 {
+STARTUP
+IDLE
+NEW_TURN
+VICTORY
+DEFEAT
+}
+enum "WindowState" as C_0007276205921972622302
+enum C_0007276205921972622302 {
+MENU
+GAME
+ROOM_EDITOR
+MONSTER_EDITOR
+SPELL_EDITOR
+ITEM_EDITOR
+}
+class "GameState" as C_0003981560271957445032
+class C_0003981560271957445032 {
++get_game_status() const noexcept : GameStatus
++get_is_loaded_game() const noexcept : bool
++get_run() const noexcept : bool
++get_should_save() const noexcept : bool
++get_time() const noexcept : int
++get_window_state() const noexcept : WindowState
++increment_time() noexcept : void
++set_game_status() noexcept : void
++set_is_loaded_game() noexcept : void
++set_run() noexcept : void
++set_should_save() noexcept : void
++set_time() noexcept : void
++set_window_state() noexcept : void
+__
+-gameStatus : GameStatus
+-isLoadedGame : bool
+-run : bool
+-shouldSave : bool
+-time : int
+-windowState : WindowState
+}
+class "PlayerBlueprint" as C_0009402887733387462875
+class C_0009402887733387462875 {
+__
++gender : std::string
++name : std::string
++playerClass : std::string
++playerRace : std::string
+}
+class "GameContext" as C_0010095634811082523150
+class C_0010095634811082523150 {
+__
++animSystem : AnimationSystem *
++buffSystem : BuffSystem *
++contentEditor : ContentEditor *
++contentRegistry : ContentRegistry *
++creatureManager : CreatureManager *
++creatures : std::vector<std::unique_ptr<class Creature>> *
++curseSystem : CurseSystem *
++dataManager : DataManager *
++decorEditor : DecorEditor *
++decorations : std::vector<std::unique_ptr<Decoration>> *
++dice : RandomDice *
++displayManager : DisplayManager *
++floatingText : FloatingTextSystem *
++gameLoopCoordinator : GameLoopCoordinator *
++gameState : GameState *
++gui : Gui *
++hungerSystem : HungerSystem *
++inputHandler : InputHandler *
++inputSystem : InputSystem *
++inventoryData : struct InventoryData *
++itemEditor : ItemEditor *
++levelManager : LevelManager *
++map : Map *
++menuManager : MenuManager *
++menus : std::deque<std::unique_ptr<BaseMenu>> *
++messageSystem : MessageSystem *
++minimap : Minimap *
++monsterEditor : MonsterEditor *
++mousePathOverlay : std::vector<Vector2D> *
++objects : std::vector<std::unique_ptr<Object>> *
++pathfinder : Dijkstra *
++player : Creature *
++playerBlueprint : PlayerBlueprint *
++playerOwner : std::unique_ptr<Player> *
++prefabLibrary : PrefabLibrary *
++renderer : Renderer *
++renderingManager : RenderingManager *
++roomEditor : RoomEditor *
++rooms : std::vector<DungeonRoom> *
++spellEditor : SpellEditor *
++stairs : Stairs *
++stateManager : GameStateManager *
++targeting : TargetingSystem *
++tileConfig : const TileConfig *
+}
+class "CurseSystem" as C_0000059669435870719692
+class C_0000059669435870719692 {
+-apply_armor_curse() : void
++apply_curses() : void
+-apply_hp_drain() : void
+-apply_weapon_curse() : void
+__
+}
+class "HungerSystem" as C_0000337216555136859519
+class C_0000337216555136859519 {
++HungerSystem() = default : void
++HungerSystem() = deleted : void
++HungerSystem() = deleted : void
++~HungerSystem() constexpr = default : void
+..
++operator=() = deleted : HungerSystem &
++operator=() = deleted : HungerSystem &
+..
++apply_hunger_effects() : void
++decrease_hunger() : void
++get_hunger_bar_string() const : std::string
++get_hunger_color() const : int
++get_hunger_max() const : int
++get_hunger_numerical_string() const : std::string
++get_hunger_state() const : HungerState
++get_hunger_state_string() const : std::string
++get_hunger_value() const : int
++increase_hunger() : void
++is_suffering_hunger_penalties() const : bool
++load() : void
++save() const : void
+-update_hunger_state() : void
+__
+-currentState : HungerState
+-hungerMax : int
+-hungerValue : int
+-wellFedMessageShown : bool
+}
+class "Decoration" as C_0001076391110850100099
+class C_0001076391110850100099 {
+__
+}
+class "DisplayManager" as C_0001671402285248785404
+class C_0001671402285248785404 {
++display_balance_viewer() const : void
++display_character_sheet() const noexcept : void
++display_help() const : void
++display_levelup() const : void
+__
+}
+class "RoomEditor" as C_0001828139660553515947
+class C_0001828139660553515947 {
+__
+}
+class "Map" as C_0002168616371899218417
+class C_0002168616371899218417 {
+__
+}
+class "PrefabLibrary" as C_0003137358372177129174
+class C_0003137358372177129174 {
+__
+}
+class "Player" as C_0003692324345213718176
+class C_0003692324345213718176 {
+__
+}
+class "TargetingSystem" as C_0004276821252104207009
+class C_0004276821252104207009 {
++acquire_targets() const : TargetResult
++draw_aoe_preview() const : void
++draw_los() const : void
++draw_range_indicator() const : void
+{static} -get_weapon_range() : int
++handle_ranged_attack() const : void
++is_valid_target() const : bool
+-target_auto_nearest() const : TargetResult
+__
+}
+class "CreatureManager" as C_0004945832908523177543
+class C_0004945832908523177543 {
+-can_spawn_creature() const noexcept : bool
++cleanup_dead_creatures() : void
+-find_spawn_position() : Vector2D
++get_actor_at_position() const noexcept : Creature *
++get_closest_monster() const noexcept : Creature *
++spawn_creatures() : void
++update_creatures() : void
+__
+-maxCreatures : int
+-spawnRate : int
+}
+class "GameStateManager" as C_0005322331793564804791
+class C_0005322331793564804791 {
+{static} +delete_save_file() : bool
++init_new_game() : void
++load_all() : bool
++load_game() : bool
+{static} +save_file_exists() : bool
++save_game() : void
+__
+}
+class "LevelManager" as C_0005478316966680258324
+class C_0005478316966680258324 {
++advance_to_next_level() : void
++can_spawn_shopkeeper() const noexcept : bool
+-display_level_messages() const : void
++get_dungeon_level() const noexcept : int
++get_shopkeepers_count() const noexcept : int
+-heal_player_between_levels() const : void
++increment_shopkeeper_count() : void
++load_from_json() : void
++reset_to_first_level() : void
++save_to_json() const : void
+__
+-dungeon_level : int
+-shopkeepers_on_current_level : int
+}
+class "InputSystem" as C_0005669240452412135682
+class C_0005669240452412135682 {
+__
+}
+class "MenuManager" as C_0006118712368242846753
+class C_0006118712368242846753 {
++handle_menus() : void
++has_active_menus() const noexcept : bool
++is_game_initialized() const noexcept : bool
+-restore_game_display() : void
++set_game_initialized() noexcept : void
++set_should_take_input() noexcept : void
++should_take_input() const noexcept : bool
+__
+-gameWasInit : bool
+-shouldTakeInput : bool
+}
+class "AnimationSystem" as C_0007351786633553270132
+class C_0007351786633553270132 {
++get_missile_tile() const noexcept : TileRef
++init() : void
+-random_range() : float
++spawn_blood_burst() : void
++spawn_death() : void
++spawn_effect() : void
++spawn_lightning_path() : void
++spawn_melee_hit() : void
++spawn_projectile() : void
++spawn_spark_burst() : void
++update_and_render() : void
+__
+-entries : std::vector<AnimEntry>
+-m_blood_tile : TileRef
+-m_missile_tile : TileRef
+-m_rng : std::mt19937
+-m_spark_tile : TileRef
+-m_tile_size : int
+-projectiles : std::vector<ProjectileEntry>
+}
+class "SpellEditor" as C_0008230672684030138012
+class C_0008230672684030138012 {
+__
+}
+class "DungeonRoom" as C_0008262984800870883090
+class C_0008262984800870883090 {
+__
+}
+class "Object" as C_0008287048469554089178
+class C_0008287048469554089178 {
+__
+}
+class "TileConfig" as C_0008651314364294251227
+class C_0008651314364294251227 {
++get() const : TileRef
++get_autotile() const : AutotileGroup
++get_wall_autotile() const : WallAutotileGroup
++load() : void
+__
+-m_autotile_groups : std::unordered_map<std::string,AutotileGroup>
+-m_tiles : std::unordered_map<std::string,TileRef>
+-m_wall_autotile_groups : std::unordered_map<std::string,WallAutotileGroup>
+}
+class "BuffSystem" as C_0009465698443163472005
+class C_0009465698443163472005 {
++add_buff() noexcept : void
++calculate_ac_bonus() const noexcept : int
++calculate_hit_modifier() const noexcept : int
++get_buff_turns() const noexcept : int
++get_buff_value() const noexcept : int
++has_buff() const noexcept : bool
++remove_buff() noexcept : void
++remove_buffs_broken_by_attacking() noexcept : std::vector<BuffType>
++restore_loaded_buff_states() noexcept : void
++update_creature_buffs() noexcept : void
+__
+}
+class "DataManager" as C_0009695347333374990892
+class C_0009695347333374990892 {
++get_charisma_attributes() const : const std::vector<CharismaAttributes> &
++get_constitution_attributes() const : const std::vector<ConstitutionAttributes> &
++get_dexterity_attributes() const : const std::vector<DexterityAttributes> &
++get_intelligence_attributes() const : const std::vector<IntelligenceAttributes> &
++get_strength_attributes() const : const std::vector<StrengthAttributes> &
++get_weapons() const : const std::vector<Weapons> &
++get_wisdom_attributes() const : const std::vector<WisdomAttributes> &
++load_all_data() : void
+-load_charisma() : std::vector<CharismaAttributes>
+-load_constitution() : std::vector<ConstitutionAttributes>
+-load_dexterity() : std::vector<DexterityAttributes>
+-load_intelligence() : std::vector<IntelligenceAttributes>
+-load_strength() : std::vector<StrengthAttributes>
+-load_weapons() : std::vector<Weapons>
+-load_wisdom() : std::vector<WisdomAttributes>
+__
+-charismaAttributes : std::vector<CharismaAttributes>
+-constitutionAttributes : std::vector<ConstitutionAttributes>
+-dexterityAttributes : std::vector<DexterityAttributes>
+-intelligenceAttributes : std::vector<IntelligenceAttributes>
+-strengthAttributes : std::vector<StrengthAttributes>
+-weapons : std::vector<Weapons>
+-wisdomAttributes : std::vector<WisdomAttributes>
+}
+class "MessageSystem" as C_0010116639673508100285
+class C_0010116639673508100285 {
++MessageSystem() : void
++MessageSystem() = deleted : void
++MessageSystem() = deleted : void
++~MessageSystem() constexpr = default : void
+..
++operator=() = deleted : MessageSystem &
++operator=() = deleted : MessageSystem &
+..
++append_message_part() : void
++disable_debug_mode() noexcept : void
++display_debug_messages() const noexcept : void
++enable_debug_mode() noexcept : void
++finalize_message() : void
++get_attack_message_at() const : const std::vector<LogMessage> &
++get_current_message() const noexcept : const std::string &
++get_current_message_color() const noexcept : int
++get_stored_message_count() const noexcept : size_t
++is_debug_mode() const noexcept : bool
++log() const : void
++message() : void
++transfer_messages_to_gui() : void
+__
+-attackMessageParts : std::vector<LogMessage>
+-attackMessagesWhole : std::vector<std::vector<LogMessage>>
+-debugMode : bool
+-messageColor : int
+-messageToDisplay : std::string
+}
+class "RenderingManager" as C_0010328313207694549666
+class C_0010328313207694549666 {
+-apply_lighting() const : void
++force_screen_refresh() const : void
++render() const : void
++render_creatures() const : void
+-render_decorations() const : void
++render_items() const : void
+-render_mouse_path_overlay() const : void
+-render_objects() const : void
+-render_world() const : void
++restore_game_display() const : void
++restore_screen() const : void
++safe_screen_clear() : void
+__
+}
+class "ContentRegistry" as C_0010839060922292652857
+class C_0010839060922292652857 {
++ContentRegistry() = default : void
+..
++all_tiles() const : const std::unordered_map<std::string,TileRef> &
++get_tile() const : TileRef
++set_tile() : void
+__
+-itemTiles : std::unordered_map<std::string,TileRef>
+}
+class "ItemEditor" as C_0011505689796366509735
+class C_0011505689796366509735 {
+__
+}
+class "GameLoopCoordinator" as C_0011717784627019575129
+class C_0011717784627019575129 {
+-draw_hover_tooltip() : void
++handle_gameloop() : void
+-handle_initialization() : void
+-handle_input_phase() : void
+-handle_menu_check() : void
+-handle_render_phase() : void
+-handle_update_phase() : void
++update() : void
+__
+-mousePathStepTime : double
+}
+class "DecorEditor" as C_0011950644379711287779
+class C_0011950644379711287779 {
+__
+}
+class "InputHandler" as C_0012115948801518301005
+class C_0012115948801518301005 {
++clear_resize() noexcept : void
++get_current_key() const noexcept : int
++get_last_key() const noexcept : int
++get_mouse_position() noexcept : Vector2D
++get_mouse_position_old() const noexcept : Vector2D
++is_animation_tick() const noexcept : bool
++key_listen() noexcept : void
++key_store() noexcept : void
++mouse_moved() const noexcept : bool
++reset_key() noexcept : void
++was_resized() const noexcept : bool
+__
+-animationTick : bool
+-currentMousePos : Vector2D
+-keyPress : int
+-lastKey : int
+-lastMousePos : Vector2D
+-screenResized : bool
+}
+class "Game" as C_0013071880978633431303
+class C_0013071880978633431303 {
+__
+}
+class "Stairs" as C_0014301382382820756783
+class C_0014301382382820756783 {
+__
+}
+class "Dijkstra" as C_0014863129547091626403
+class C_0014863129547091626403 {
+__
+}
+class "MonsterEditor" as C_0015729900374463990916
+class C_0015729900374463990916 {
+__
+}
+class "ContentEditor" as C_0016240395494315274643
+class C_0016240395494315274643 {
+__
+}
+class "BaseMenu" as C_0016700093810350814207
+class C_0016700093810350814207 {
+__
+}
+class "Creature" as C_0016796484603318207096
+class C_0016796484603318207096 {
+__
+}
+class "Gui" as C_0016942935533264364672
+class C_0016942935533264364672 {
+__
+}
+class "Minimap" as C_0016974569922615795044
+class C_0016974569922615795044 {
+__
+}
+class "FloatingTextSystem" as C_0017150808902367152453
+class C_0017150808902367152453 {
++spawn_damage() : void
++spawn_text() : void
++update_and_render() : void
+__
+-entries : std::vector<FloatingEntry>
+}
+class "RandomDice" as C_0018372094237340231225
+class C_0018372094237340231225 {
+__
+}
+class "Renderer" as C_0018406484507766955422
+class C_0018406484507766955422 {
+__
+}
+enum "ShopType" as C_0001041274809281534113
+enum C_0001041274809281534113 {
+WEAPON_SHOP
+ARMOR_SHOP
+GENERAL_STORE
+POTION_SHOP
+SCROLL_SHOP
+ADVENTURING_GEAR
+}
+enum "ShopQuality" as C_0006484442695111255578
+enum C_0006484442695111255578 {
+POOR
+AVERAGE
+GOOD
+EXCELLENT
+}
+class "ShopKeeper" as C_0002639197799890657499
+class C_0002639197799890657499 {
++ShopKeeper() : void
++ShopKeeper() : void
+..
++can_buy_item() const : bool
+{static} +create() : std::unique_ptr<ShopKeeper>
+{static} +create_random_shopkeeper() : std::unique_ptr<ShopKeeper>
++generate_initial_inventory() : void
+-generate_random_armor() : std::unique_ptr<Item>
+-generate_random_item_by_type() : std::unique_ptr<Item>
+-generate_random_misc_item() : std::unique_ptr<Item>
+-generate_random_potion() : std::unique_ptr<Item>
+-generate_random_scroll() : std::unique_ptr<Item>
+-generate_random_weapon() : std::unique_ptr<Item>
+-generate_shop_name() : void
++get_buy_price() const : int
++get_sell_price() const : int
++load() : void
++process_player_purchase() : bool
++process_player_sale() : bool
++save() : void
+__
++markup_percent : int
++sellback_percent : int
++shop_inventory : InventoryData
++shop_name : std::string
++shop_quality : ShopQuality
++shop_type : ShopType
+}
+class "AutotileGroup" as C_0001180332917190940613
+class C_0001180332917190940613 {
+__
++origin_col : int
++origin_row : int
++sheet : TileSheet
+}
+class "TileOffset" as C_0015077586980204021942
+class C_0015077586980204021942 {
+__
++col : int
++row : int
+}
+class "WallAutotileGroup" as C_0004176706875966548277
+class C_0004176706875966548277 {
+__
++origin_col : int
++origin_row : int
++sheet : TileSheet
+}
+class "Vector2D" as C_0002027590062895808220
+class C_0002027590062895808220 {
+__
+}
+class "Item" as C_0005967165952864249862
+class C_0005967165952864249862 {
+__
+}
+enum "ParticleShape" as C_0014129058815686898696
+enum C_0014129058815686898696 {
+CIRCLE
+TILE
+}
+class "AnimEntry" as C_0016393283822375445028
+class C_0016393283822375445028 {
+__
++additive : bool
++b : unsigned char
++duration : float
++g : unsigned char
++px_x : float
++px_y : float
++r : unsigned char
++radius : float
++shape : ParticleShape
++spawn_time : float
++tile : TileRef
++vel_x : float
++vel_y : float
+}
+class "ProjectileEntry" as C_0014349993868575182738
+class C_0014349993868575182738 {
+__
++b : unsigned char
++g : unsigned char
++initialDistance : float
++lastTrailTime : float
++maxDuration : float
++onArrive : std::function<void ()>
++pxX : float
++pxY : float
++r : unsigned char
++spawnTime : float
++speed : float
++targetPxX : float
++targetPxY : float
++tile : TileRef
++wobbleStrength : float
+}
+class "TargetingMenu" as C_0003606986384213450919
+class C_0003606986384213450919 {
++TargetingMenu() : void
++TargetingMenu() = deleted : void
++TargetingMenu() = deleted : void
++~TargetingMenu() = default : void
+..
++operator=() = deleted : TargetingMenu &
++operator=() = deleted : TargetingMenu &
+..
+-draw_cursor() const : void
++menu() : void
+__
+-aoeRadius : int
+-cursor : Vector2D
+-maxRange : int
+-onComplete : Callback
+}
+class "TargetResult" as C_0006935017777108423441
+class C_0006935017777108423441 {
+__
++creatures : std::vector<Creature *>
++success : bool
+}
+enum "HungerState" as C_0008573764383245001155
+enum C_0008573764383245001155 {
+WELL_FED
+SATIATED
+HUNGRY
+STARVING
+DYING
+}
+class "ShopkeeperFactory" as C_0004652160827245784983
+class C_0004652160827245784983 {
+{static} +configure_shopkeeper() : void
+{static} +create_shopkeeper() : std::unique_ptr<Creature>
+{static} -select_shop_quality_for_level() : ShopQuality
+{static} -select_shop_type_for_level() : ShopType
+{static} +should_spawn_shopkeeper() : bool
+__
+}
+class "FloatingEntry" as C_0007672400597394834437
+class C_0007672400597394834437 {
+__
++b : unsigned char
++g : unsigned char
++lifetime : float
++r : unsigned char
++spawn_time : float
++text : std::string
++world_x : int
++world_y : int
+}
+enum "CasterClass" as C_0005555278573912357091
+enum C_0005555278573912357091 {
+CLERIC
+WIZARD
+NONE
+}
+enum "SpellClass" as C_0012541571023964216339
+enum C_0012541571023964216339 {
+CLERIC
+WIZARD
+BOTH
+}
+enum "SpellEffectType" as C_0003869395719703979240
+enum C_0003869395719703979240 {
+CURE_LIGHT_WOUNDS
+BLESS
+SANCTUARY
+HOLD_PERSON
+SILENCE
+MAGIC_MISSILE
+SHIELD
+SLEEP
+INVISIBILITY
+WEB
+FIREBALL
+TELEPORT
+KNOCK
+NONE
+}
+class "SpellDefinition" as C_0015304574571731222860
+class C_0015304574571731222860 {
+__
++description : std::string
++effect_type : SpellEffectType
++level : int
++name : std::string
++spellClass : SpellClass
+}
+class "SpellSystem" as C_0004353268642102680872
+class C_0004353268642102680872 {
+{static} +add_custom() : std::string
+{static} -cast_bless() : bool
+{static} -cast_cure_light_wounds() : bool
+{static} -cast_fireball() : void
+{static} -cast_hold_person() : bool
+{static} -cast_invisibility() : bool
+{static} -cast_knock() : bool
+{static} -cast_magic_missile() : bool
+{static} -cast_sanctuary() : bool
+{static} -cast_shield() : bool
+{static} -cast_silence() : void
+{static} -cast_sleep() : bool
+{static} +cast_spell_by_key() : void
+{static} -cast_teleport() : bool
+{static} -cast_web() : void
+{static} -dispatch_effect() : void
+{static} +get_all_keys() : std::vector<std::string>
+{static} +get_available_spells() : std::vector<std::string>
+{static} +get_by_key() : const SpellDefinition &
+{static} +get_item_granted_spells() : std::vector<ItemGrantedSpell>
+{static} +get_spell_slots() : std::vector<int>
+{static} +is_builtin_key() : bool
+{static} +load() : void
+{static} +remove_custom() : void
+{static} +save() : void
+{static} +set_by_key() : void
+{static} +show_casting_menu() : void
+{static} +show_memorization_menu() : void
+__
+}
+class "SpellSystem::ItemGrantedSpell" as C_0005102105501337569406
+class C_0005102105501337569406 {
+__
++key : std::string
++source : std::string
+}
+class "InventoryData" as C_0018331972385105376903
+class C_0018331972385105376903 {
+__
+}
+enum "SpellId" as C_0003240762082029656396
+enum C_0003240762082029656396 {
+CURE_LIGHT_WOUNDS
+BLESS
+SANCTUARY
+HOLD_PERSON
+SILENCE
+MAGIC_MISSILE
+SHIELD
+SLEEP
+INVISIBILITY
+WEB
+FIREBALL
+TELEPORT
+KNOCK
+NONE
+}
+class "SpellEntry" as C_0008774450586651984679
+class C_0008774450586651984679 {
+__
++id : SpellId
++key : std::string_view
+}
+class "MonsterCandidate" as C_0015454847442012905766
+class C_0015454847442012905766 {
+__
++key : std::string
++xpCost : int
+}
+class "ObjectManager" as C_0011982859883563531329
+class C_0011982859883563531329 {
++ObjectManager() = default : void
++~ObjectManager() constexpr = default : void
+..
++cleanup_destroyed_objects() : void
++create_creature<T>() : void
++create_item<T>() : void
++find_web_at() const : Web *
+__
+}
+class "Web" as C_0008406532865187851089
+class C_0008406532865187851089 {
+__
+}
+C_0005016775666417918015 ..> C_0007500688229146332176
+C_0005016775666417918015 ..> C_0000465838628272370621
+C_0004534020899441168361 ..> C_0003692324345213718176
+C_0003599932711864402915 ..> C_0008287048469554089178
+C_0017305124704771861061 ..> C_0003599932711864402915
+C_0003895283783863330472 ..> C_0001076391110850100099
+C_0016183880242117446092 ..> C_0003895283783863330472
+C_0011620708722662223273 ..> C_0016796484603318207096
+C_0012405118893925481423 ..> C_0011620708722662223273
+C_0014395090568650248626 ..> C_0008262984800870883090
+C_0015540580711300931588 ..> C_0016700093810350814207
+C_0014147764600823528737 ..> C_0015540580711300931588
+C_0010755708640928265688 ..> C_0002027590062895808220
+C_0016226757124167424344 ..> C_0002639197799890657499
+C_0004796116875221873371 ..> C_0005967165952864249862
+C_0004515361358353227692 ..> C_0005016775666417918015
+C_0017565885199287248654 ..> C_0011620708722662223273
+C_0011060773678787800092 ..> C_0012260412196667827836
+C_0005207428333653371085 ..> C_0005016775666417918015
+C_0005207428333653371085 ..> C_0001180332917190940613
+C_0012688378547694052021 ..> C_0005016775666417918015
+C_0012688378547694052021 ..> C_0004176706875966548277
+C_0004725048460884544756 ..> C_0016393283822375445028
+C_0009824935406090569086 ..> C_0014349993868575182738
+C_0009849680224112406864 ..> C_0004796116875221873371
+C_0005959513126156511716 ..> C_0003599932711864402915
+C_0003719395400905936805 ..> C_0003895283783863330472
+C_0015196010255607809857 ..> C_0002027590062895808220
+C_0015196010255607809857 ..> C_0010095634811082523150
+C_0002977765105874482750 ..> C_0016796484603318207096
+C_0015749009658368705520 ..> C_0014332256836473659204
+C_0016951849925110626515 ..> C_0007672400597394834437
+C_0008261390615332338001 ..> C_0005016775666417918015
+C_0007834028488579349924 ..> C_0010095634811082523150
+C_0003045488500843797932 o-- C_0014332256836473659204 : +type
+C_0003981560271957445032 o-- C_0013302321448474623153 : -gameStatus
+C_0003981560271957445032 o-- C_0007276205921972622302 : -windowState
+C_0009402887733387462875 o-- C_0005016775666417918015 : +gender
+C_0009402887733387462875 o-- C_0005016775666417918015 : +name
+C_0009402887733387462875 o-- C_0005016775666417918015 : +playerClass
+C_0009402887733387462875 o-- C_0005016775666417918015 : +playerRace
+C_0010095634811082523150 --> C_0016942935533264364672 : +gui
+C_0010095634811082523150 o-- C_0004534020899441168361 : +playerOwner
+C_0010095634811082523150 --> C_0009402887733387462875 : +playerBlueprint
+C_0010095634811082523150 --> C_0010116639673508100285 : +messageSystem
+C_0010095634811082523150 --> C_0004945832908523177543 : +creatureManager
+C_0010095634811082523150 --> C_0005478316966680258324 : +levelManager
+C_0010095634811082523150 --> C_0010328313207694549666 : +renderingManager
+C_0010095634811082523150 --> C_0012115948801518301005 : +inputHandler
+C_0010095634811082523150 --> C_0005322331793564804791 : +stateManager
+C_0010095634811082523150 --> C_0006118712368242846753 : +menuManager
+C_0010095634811082523150 --> C_0001671402285248785404 : +displayManager
+C_0010095634811082523150 --> C_0011717784627019575129 : +gameLoopCoordinator
+C_0010095634811082523150 --> C_0009695347333374990892 : +dataManager
+C_0010095634811082523150 --> C_0004276821252104207009 : +targeting
+C_0010095634811082523150 --> C_0000337216555136859519 : +hungerSystem
+C_0010095634811082523150 --> C_0009465698443163472005 : +buffSystem
+C_0010095634811082523150 --> C_0017150808902367152453 : +floatingText
+C_0010095634811082523150 --> C_0007351786633553270132 : +animSystem
+C_0010095634811082523150 --> C_0000059669435870719692 : +curseSystem
+C_0010095634811082523150 --> C_0010839060922292652857 : +contentRegistry
+C_0010095634811082523150 --> C_0016974569922615795044 : +minimap
+C_0010095634811082523150 --> C_0014863129547091626403 : +pathfinder
+C_0010095634811082523150 --> C_0011950644379711287779 : +decorEditor
+C_0010095634811082523150 --> C_0003137358372177129174 : +prefabLibrary
+C_0010095634811082523150 --> C_0016240395494315274643 : +contentEditor
+C_0010095634811082523150 --> C_0001828139660553515947 : +roomEditor
+C_0010095634811082523150 --> C_0011505689796366509735 : +itemEditor
+C_0010095634811082523150 --> C_0015729900374463990916 : +monsterEditor
+C_0010095634811082523150 --> C_0008230672684030138012 : +spellEditor
+C_0010095634811082523150 o-- C_0017305124704771861061 : +objects
+C_0010095634811082523150 o-- C_0016183880242117446092 : +decorations
+C_0010095634811082523150 o-- C_0012405118893925481423 : +creatures
+C_0010095634811082523150 o-- C_0014395090568650248626 : +rooms
+C_0010095634811082523150 --> C_0015540580711300931588 : +menus
+C_0010095634811082523150 --> C_0014147764600823528737 : +menus
+C_0010095634811082523150 o-- C_0010755708640928265688 : +mousePathOverlay
+C_0010095634811082523150 --> C_0003981560271957445032 : +gameState
+C_0000059669435870719692 ..> C_0010095634811082523150
+C_0000337216555136859519 ..> C_0010095634811082523150
+C_0000337216555136859519 ..> C_0005016775666417918015
+C_0000337216555136859519 ..> C_0011887994287659977427
+C_0000337216555136859519 o-- C_0008573764383245001155 : -currentState
+C_0001671402285248785404 ..> C_0010095634811082523150
+C_0004276821252104207009 ..> C_0010095634811082523150
+C_0004276821252104207009 ..> C_0009067206581592040507
+C_0004276821252104207009 ..> C_0006935017777108423441
+C_0004945832908523177543 ..> C_0017565885199287248654
+C_0004945832908523177543 ..> C_0010095634811082523150
+C_0004945832908523177543 ..> C_0012405118893925481423
+C_0005322331793564804791 ..> C_0010095634811082523150
+C_0005478316966680258324 ..> C_0010095634811082523150
+C_0005478316966680258324 ..> C_0011887994287659977427
+C_0005478316966680258324 ..> C_0010116639673508100285
+C_0006118712368242846753 ..> C_0014147764600823528737
+C_0006118712368242846753 ..> C_0010095634811082523150
+C_0007351786633553270132 ..> C_0008651314364294251227
+C_0007351786633553270132 ..> C_0010755708640928265688
+C_0007351786633553270132 ..> C_0011970315036169891779
+C_0007351786633553270132 o-- C_0004725048460884544756 : -entries
+C_0007351786633553270132 o-- C_0009824935406090569086 : -projectiles
+C_0007351786633553270132 o-- C_0003048801440335063312 : -m_rng
+C_0008651314364294251227 ..> C_0012008603185729621422
+C_0008651314364294251227 ..> C_0001180332917190940613
+C_0008651314364294251227 ..> C_0004176706875966548277
+C_0008651314364294251227 o-- C_0004515361358353227692 : -m_tiles
+C_0008651314364294251227 o-- C_0005207428333653371085 : -m_autotile_groups
+C_0008651314364294251227 o-- C_0012688378547694052021 : -m_wall_autotile_groups
+C_0009465698443163472005 ..> C_0014332256836473659204
+C_0009465698443163472005 ..> C_0015749009658368705520
+C_0009695347333374990892 ..> C_0010116639673508100285
+C_0009695347333374990892 ..> C_0005016775666417918015
+C_0009695347333374990892 o-- C_0017187362050362232666 : -weapons
+C_0009695347333374990892 o-- C_0009139167252489745271 : -strengthAttributes
+C_0009695347333374990892 o-- C_0002628908634292627742 : -dexterityAttributes
+C_0009695347333374990892 o-- C_0014343738894352411609 : -constitutionAttributes
+C_0009695347333374990892 o-- C_0002170614438089614942 : -charismaAttributes
+C_0009695347333374990892 o-- C_0012875810337402998101 : -intelligenceAttributes
+C_0009695347333374990892 o-- C_0006798022911403317525 : -wisdomAttributes
+C_0010116639673508100285 ..> C_0012008603185729621422
+C_0010116639673508100285 ..> C_0016942935533264364672
+C_0010116639673508100285 o-- C_0012260412196667827836 : -attackMessageParts
+C_0010116639673508100285 o-- C_0011060773678787800092 : -attackMessagesWhole
+C_0010116639673508100285 o-- C_0005016775666417918015 : -messageToDisplay
+C_0010328313207694549666 ..> C_0010095634811082523150
+C_0010328313207694549666 ..> C_0017565885199287248654
+C_0010328313207694549666 ..> C_0009849680224112406864
+C_0010328313207694549666 ..> C_0005959513126156511716
+C_0010328313207694549666 ..> C_0003719395400905936805
+C_0010839060922292652857 ..> C_0012008603185729621422
+C_0010839060922292652857 o-- C_0004515361358353227692 : -itemTiles
+C_0011717784627019575129 ..> C_0010095634811082523150
+C_0017150808902367152453 ..> C_0005016775666417918015
+C_0017150808902367152453 o-- C_0016951849925110626515 : -entries
+C_0002639197799890657499 ..> C_0011887994287659977427
+C_0002639197799890657499 ..> C_0016226757124167424344
+C_0002639197799890657499 ..> C_0010095634811082523150
+C_0002639197799890657499 ..> C_0004796116875221873371
+C_0002639197799890657499 o-- C_0001041274809281534113 : +shop_type
+C_0002639197799890657499 o-- C_0006484442695111255578 : +shop_quality
+C_0002639197799890657499 o-- C_0005016775666417918015 : +shop_name
+C_0016393283822375445028 o-- C_0014129058815686898696 : +shape
+C_0014349993868575182738 o-- C_0011970315036169891779 : +onArrive
+C_0003606986384213450919 ..> C_0010095634811082523150
+C_0003606986384213450919 o-- C_0015196010255607809857 : -onComplete
+C_0016700093810350814207 <|-- C_0003606986384213450919
+C_0006935017777108423441 o-- C_0002977765105874482750 : +creatures
+C_0004652160827245784983 ..> C_0010095634811082523150
+C_0004652160827245784983 ..> C_0011620708722662223273
+C_0004652160827245784983 ..> C_0001041274809281534113
+C_0004652160827245784983 ..> C_0006484442695111255578
+C_0007672400597394834437 o-- C_0005016775666417918015 : +text
+C_0015304574571731222860 o-- C_0005016775666417918015 : +name
+C_0015304574571731222860 o-- C_0012541571023964216339 : +spellClass
+C_0015304574571731222860 o-- C_0005016775666417918015 : +description
+C_0015304574571731222860 o-- C_0003869395719703979240 : +effect_type
+C_0004353268642102680872 ..> C_0005555278573912357091
+C_0004353268642102680872 ..> C_0017563173931554010774
+C_0004353268642102680872 ..> C_0008261390615332338001
+C_0004353268642102680872 ..> C_0012008603185729621422
+C_0004353268642102680872 ..> C_0007834028488579349924
+C_0004353268642102680872 ..> C_0010095634811082523150
+C_0004353268642102680872 ..> C_0015304574571731222860
+C_0004353268642102680872 ..> C_0005016775666417918015
+C_0004353268642102680872 ..> C_0012525661917834764612
+C_0004353268642102680872 ..> C_0005102105501337569406
+C_0004353268642102680872 ..> C_0003869395719703979240
+C_0005102105501337569406 --+ C_0004353268642102680872
+C_0005102105501337569406 o-- C_0005016775666417918015 : +key
+C_0005102105501337569406 o-- C_0005016775666417918015 : +source
+C_0008774450586651984679 o-- C_0003240762082029656396 : +id
+C_0008774450586651984679 o-- C_0012008603185729621422 : +key
+C_0015454847442012905766 o-- C_0005016775666417918015 : +key
+C_0011982859883563531329 ..> C_0017305124704771861061
+C_0011982859883563531329 ..> C_0012405118893925481423
+
+'Generated with clang-uml, version 0.6.2
+'LLVM version clang version 20.1.7 (https://github.com/llvm/llvm-project.git 6146a88f60492b520a36f8f8f3231e15f3cc6082)
+@enduml

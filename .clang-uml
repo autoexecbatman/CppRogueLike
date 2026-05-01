@@ -1,0 +1,73 @@
+# clang-uml configuration
+# Run from project root:
+#   clang-uml --config .clang-uml
+# Outputs PlantUML .puml files to diagrams/
+# Render with PlantUML: java -jar plantuml.jar diagrams/*.puml
+# Or use the VS Code PlantUML extension to preview.
+
+compilation_database_dir: build-clang
+output_directory: diagrams
+
+# Suppress MSVC-specific warnings that clang doesn't understand
+add_compile_flags:
+  - -Wno-unknown-pragmas
+  - -Wno-ignored-attributes
+  - -Wno-microsoft-include
+
+diagrams:
+
+  creature_hierarchy:
+    type: class
+    title: "Creature and Actor Hierarchy"
+    generate_method_arguments: none
+    generate_packages: false
+    include:
+      paths:
+        - src/Actor
+        - src/ActorTypes
+    exclude:
+      paths:
+        - src/Actor/EquipmentSlot.h
+
+  ai_system:
+    type: class
+    title: "AI System"
+    generate_method_arguments: none
+    generate_packages: false
+    include:
+      paths:
+        - src/Ai
+
+  menu_system:
+    type: class
+    title: "Menu System"
+    generate_method_arguments: none
+    generate_packages: false
+    include:
+      paths:
+        - src/Menu
+
+  combat_system:
+    type: class
+    title: "Combat System"
+    generate_method_arguments: none
+    generate_packages: false
+    include:
+      paths:
+        - src/Combat
+        - src/Actor/Attacker.h
+        - src/Actor/MonsterAttacker.h
+        - src/Actor/PlayerAttacker.h
+
+  systems_overview:
+    type: class
+    title: "Core Systems and GameContext"
+    generate_method_arguments: none
+    generate_packages: true
+    include:
+      paths:
+        - src/Core
+        - src/Systems
+    exclude:
+      paths:
+        - src/Systems/ItemEnhancements

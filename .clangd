@@ -1,2 +1,4 @@
 CompileFlags:
-  CompilationDatabase: build
+  # build-clang uses Ninja + clang-cl (VS 2026 bundled LLVM) and produces a real compile_commands.json.
+  # Fall back to build/ if build-clang has not been configured yet.
+  CompilationDatabase: build-clang

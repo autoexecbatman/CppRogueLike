@@ -1,0 +1,1007 @@
+@startuml
+title Creature and Actor Hierarchy
+class "std::char_traits<char>" as C_0007500688229146332176
+class C_0007500688229146332176 {
+__
+}
+class "std::allocator<char>" as C_0000465838628272370621
+class C_0000465838628272370621 {
+__
+}
+class "std::string" as C_0005016775666417918015
+class C_0005016775666417918015 {
+__
+}
+class "std::basic_string_view<char>" as C_0012008603185729621422
+class C_0012008603185729621422 {
+__
+}
+class "std::vector<ActorState>" as C_0004024929348999353017
+class C_0004024929348999353017 {
+__
+}
+class "std::variant<Consumable,Weapon,Shield,TargetedScroll,Teleporter,IdentifyScroll,Gold,Food,CorpseFood,Armor,MagicalHelm,MagicalRing,JewelryAmulet,Gauntlets,Girdle,Amulet,DungeonKey>" as C_0008892743540308554955
+class C_0008892743540308554955 {
+__
+}
+class "std::optional<std::variant<Consumable,Weapon,Shield,TargetedScroll,Teleporter,IdentifyScroll,Gold,Food,CorpseFood,Armor,MagicalHelm,MagicalRing,JewelryAmulet,Gauntlets,Girdle,Amulet,DungeonKey>>" as C_0017874184112052246832
+class C_0017874184112052246832 {
+__
+}
+class "std::optional<T>" as C_0003887371098995552768
+class C_0003887371098995552768 {
+__
+}
+class "std::optional<InventoryError>" as C_0002570385992250167446
+class C_0002570385992250167446 {
+__
+}
+class "std::unique_ptr<Item>" as C_0004796116875221873371
+class C_0004796116875221873371 {
+__
+}
+class "std::vector<std::unique_ptr<Item>>" as C_0013493670309079268837
+class C_0013493670309079268837 {
+__
+}
+class "std::function<void(InventoryEvent const&)>" as C_0004773651139648169396
+class C_0004773651139648169396 {
+__
+}
+class "std::vector<Buff>" as C_0001717932057243540720
+class C_0001717932057243540720 {
+__
+}
+class "std::unique_ptr<Attacker>" as C_0015851677629932266871
+class C_0015851677629932266871 {
+__
+}
+class "std::unique_ptr<ExperienceReward>" as C_0000432149987656353911
+class C_0000432149987656353911 {
+__
+}
+class "std::unique_ptr<ArmorClass>" as C_0007875232007154941565
+class C_0007875232007154941565 {
+__
+}
+class "std::unique_ptr<HealthPool>" as C_0008702523768990479918
+class C_0008702523768990479918 {
+__
+}
+class "std::unique_ptr<ConstitutionTracker>" as C_0005265525043410500049
+class C_0005265525043410500049 {
+__
+}
+class "std::unique_ptr<Ai>" as C_0014248386106627927896
+class C_0014248386106627927896 {
+__
+}
+class "std::unique_ptr<ShopKeeper>" as C_0016226757124167424344
+class C_0016226757124167424344 {
+__
+}
+class "std::vector<std::string>" as C_0008261390615332338001
+class C_0008261390615332338001 {
+__
+}
+class "std::vector<EquippedItem>" as C_0004617534497489968553
+class C_0004617534497489968553 {
+__
+}
+class "std::unique_ptr<PlayerController>" as C_0017259706817410849509
+class C_0017259706817410849509 {
+__
+}
+class "std::optional<ContainerError>" as C_0013438578351037437669
+class C_0013438578351037437669 {
+__
+}
+class "std::function<void(ContainerEvent const&)>" as C_0004212912564551825943
+class C_0004212912564551825943 {
+__
+}
+class "std::unique_ptr<Actor>" as C_0017523577221469975573
+class C_0017523577221469975573 {
+__
+}
+class "std::span<std::unique_ptr<Actor>>" as C_0001650237536220868964
+class C_0001650237536220868964 {
+__
+}
+class "nlohmann::basic_json" as C_0011887994287659977427
+class C_0011887994287659977427 {
+__
+}
+class "ActorData" as C_0003047734144939532202
+class C_0003047734144939532202 {
+__
++color : int
++name : std::string
++tile : TileRef
+}
+enum "ActorState" as C_0014685509157476421551
+enum C_0014685509157476421551 {
+BLOCKS
+FOV_ONLY
+CAN_SWIM
+IS_EQUIPPED
+IS_RANGED
+IS_CONFUSED
+IS_INVISIBLE
+IS_SLEEPING
+IS_HELD
+IS_PROTECTED
+IS_SILENCED
+IS_FLEEING
+}
+class "Actor" as C_0017898892907908295482
+class C_0017898892907908295482 {
++Actor() : void
++Actor() = deleted : void
++Actor() = deleted : void
++~Actor() constexpr = default : void
+..
++operator=() = deleted : Actor &
++operator=() = deleted : Actor &
+..
++add_state() noexcept : void
++get_display_color() const noexcept : int
++get_display_tile() const noexcept : TileRef
++get_name() const : std::string_view
++get_tile_distance() const noexcept : int
++has_state() const noexcept : bool
++is_visible() const noexcept : bool
++load() : void
++remove_state() noexcept : void
++render() const noexcept : void
++save() : void
+__
++actorData : ActorData
++direction : Vector2D
++position : Vector2D
++states : std::vector<ActorState>
++uniqueId : UniqueId::IdType
+}
+class "Object" as C_0008287048469554089178
+class C_0008287048469554089178 {
++Object() : void
+..
++apply_movement_effect() : bool
+__
+}
+enum "PickableType" as C_0017252642508452926008
+enum C_0017252642508452926008 {
+TARGETED_SCROLL
+TELEPORTER
+WEAPON
+SHIELD
+CONSUMABLE
+GOLD_COIN
+FOOD
+CORPSE_FOOD
+ARMOR
+MAGICAL_HELM
+MAGICAL_RING
+JEWELRY_AMULET
+GAUNTLETS
+GIRDLE
+QUEST_ITEM
+IDENTIFY_SCROLL
+DUNGEON_KEY
+}
+enum "ConsumableEffect" as C_0018300293730861559711
+enum C_0018300293730861559711 {
+NONE
+HEAL
+ADD_BUFF
+FAIL
+}
+class "Consumable" as C_0010968929617812835794
+class C_0010968929617812835794 {
+__
++amount : int
++buffType : BuffType
++duration : int
++effect : ConsumableEffect
++isSetEffect : bool
+}
+class "Weapon" as C_0009880302970961535201
+class C_0009880302970961535201 {
++can_be_off_hand() const noexcept : bool
++get_hand_requirement() const noexcept : HandRequirement
++get_preferred_slot() const : EquipmentSlot
++get_weapon_size() const noexcept : WeaponSize
++is_ranged() const noexcept : bool
++is_two_handed() const noexcept : bool
++validate_dual_wield() const : bool
+__
++handRequirement : HandRequirement
++ranged : bool
++weaponSize : WeaponSize
+}
+class "Shield" as C_0005868091636912021200
+class C_0005868091636912021200 {
+__
+}
+class "TargetedScroll" as C_0016374430443579771656
+class C_0016374430443579771656 {
+__
++buffDuration : int
++buffType : BuffType
++confuseTurns : int
++damage : int
++range : int
++scrollAnimation : ScrollAnimation
++targetMode : TargetMode
+}
+class "Teleporter" as C_0002335938758896436713
+class C_0002335938758896436713 {
+__
+}
+class "IdentifyScroll" as C_0001913925486231449940
+class C_0001913925486231449940 {
+__
+}
+class "Gold" as C_0014129702424145959091
+class C_0014129702424145959091 {
+__
++amount : int
+}
+class "Food" as C_0000549454019648914217
+class C_0000549454019648914217 {
+__
++nutritionValue : int
+}
+class "CorpseFood" as C_0018167159334421366545
+class C_0018167159334421366545 {
+__
++nutritionValue : int
+}
+class "Armor" as C_0017091837617986840564
+class C_0017091837617986840564 {
+__
++armorClass : int
+}
+class "MagicalHelm" as C_0009142731415852093645
+class C_0009142731415852093645 {
+__
++bonus : int
++effect : MagicalEffect
+}
+class "MagicalRing" as C_0006388875158815814807
+class C_0006388875158815814807 {
+__
++bonus : int
++effect : MagicalEffect
+}
+class "OriginalStats" as C_0012361771204827893217
+class C_0012361771204827893217 {
+__
++cha : int
++con : int
++dex : int
++intel : int
++str : int
++wis : int
+}
+class "JewelryAmulet" as C_0003990356576010744599
+class C_0003990356576010744599 {
+__
++bonus : int
++chaBonus : int
++conBonus : int
++dexBonus : int
++effect : MagicalEffect
++intBonus : int
++isSetMode : bool
++originalStats : OriginalStats
++strBonus : int
++wisBonus : int
+}
+class "Gauntlets" as C_0017898990235636661728
+class C_0017898990235636661728 {
+__
++bonus : int
++chaBonus : int
++conBonus : int
++dexBonus : int
++effect : MagicalEffect
++intBonus : int
++isSetMode : bool
++originalStats : OriginalStats
++strBonus : int
++wisBonus : int
+}
+class "Girdle" as C_0017861868997883726832
+class C_0017861868997883726832 {
+__
++bonus : int
++chaBonus : int
++conBonus : int
++dexBonus : int
++effect : MagicalEffect
++intBonus : int
++isSetMode : bool
++originalStats : OriginalStats
++strBonus : int
++wisBonus : int
+}
+class "Amulet" as C_0015751345594268040123
+class C_0015751345594268040123 {
+__
+}
+class "DungeonKey" as C_0001519586503431990660
+class C_0001519586503431990660 {
+__
+}
+class "Item" as C_0005967165952864249862
+class C_0005967165952864249862 {
++Item() : void
+..
++apply_enhancement() : void
++can_equip_to_body() const noexcept : bool
++can_equip_to_left_hand() const noexcept : bool
++can_equip_to_right_hand() const noexcept : bool
++generate_random_enhancement() : void
++get_base_name() const noexcept : const std::string &
++get_category() const noexcept : ItemCategory
++get_enhancement() const noexcept : const ItemEnhancement &
++get_name() const noexcept : const std::string &
++get_true_name() const noexcept : const std::string &
++get_value() const noexcept : int
++identify_all() noexcept : void
++identify_buc() noexcept : void
++identify_enhancement() noexcept : void
++identify_type() noexcept : void
++is_amulet() const noexcept : bool
++is_armor() const noexcept : bool
++is_buc_identified() const noexcept : bool
++is_consumable() const noexcept : bool
++is_enhanced() const noexcept : bool
++is_enhancement_identified() const noexcept : bool
++is_fully_identified() const noexcept : bool
++is_gauntlets() const noexcept : bool
++is_girdle() const noexcept : bool
++is_helmet() const noexcept : bool
++is_jewelry() const noexcept : bool
++is_ranged_weapon() const noexcept : bool
++is_ring() const noexcept : bool
++is_shield() const noexcept : bool
++is_tool() const noexcept : bool
++is_two_handed_weapon() const noexcept : bool
++is_type_identified() const noexcept : bool
++is_weapon() const noexcept : bool
++load() : void
++reset_identification() noexcept : void
++save() : void
++set_value() noexcept : void
+__
+-baseValue : int
++behavior : std::optional<ItemBehavior>
++enhancement : ItemEnhancement
++identification : ItemIdentificationStatus
++itemClass : ItemClass
++item_key : std::string
+}
+enum "InventoryError" as C_0011504619595395019599
+enum C_0011504619595395019599 {
+FULL
+ITEM_NOT_FOUND
+INVALID_ITEM
+CAPACITY_EXCEEDED
+}
+class "InventoryResult<T>" as C_0001856891488435026320
+class C_0001856891488435026320 {
++InventoryResult() : void
++InventoryResult() : void
+..
++operator*() : T &
++operator*() const : const T &
+..
++get_error() const : InventoryError
++has_error() const : bool
++has_value() const : bool
++operator bool() const : bool
+__
++error : std::optional<InventoryError>
++value : std::optional<T>
+}
+class "InventoryEvent" as C_0001735820390792507613
+class C_0001735820390792507613 {
+__
++capacity : size_t
++current_size : size_t
++item : const Item *
++type : Type
+}
+enum "InventoryEvent::Type" as C_0003286799596456118755
+enum C_0003286799596456118755 {
+ITEM_ADDED
+ITEM_REMOVED
+INVENTORY_FULL
+CAPACITY_CHANGED
+}
+class "InventoryData" as C_0018331972385105376903
+class C_0018331972385105376903 {
++InventoryData() : void
++InventoryData() noexcept = default : void
++InventoryData() = deleted : void
++~InventoryData() = default : void
+..
++operator=() noexcept = default : InventoryData &
++operator=() = deleted : InventoryData &
+__
++capacity : size_t
++event_handler : InventoryEventHandler
++items : std::vector<std::unique_ptr<Item>>
+}
+class "Stairs" as C_0014301382382820756783
+class C_0014301382382820756783 {
++Stairs() : void
+__
+}
+class "Vector2D" as C_0002027590062895808220
+class C_0002027590062895808220 {
+__
+}
+class "GameContext" as C_0010095634811082523150
+class C_0010095634811082523150 {
+__
+}
+class "Creature" as C_0016796484603318207096
+class C_0016796484603318207096 {
++Creature() : void
+..
++add_temp_hp() noexcept : void
++add_xp() noexcept : void
++adjust_charisma() noexcept : void
++adjust_constitution() noexcept : void
++adjust_dexterity() noexcept : void
++adjust_gold() noexcept : void
++adjust_intelligence() noexcept : void
++adjust_level() noexcept : void
++adjust_strength() noexcept : void
++adjust_wisdom() noexcept : void
++apply_confusion() : void
++apply_web_effect() : void
+-calculate_effective_stat() const noexcept : int
++die() : void
++drop() : void
++equip() : void
++get_armor_class() const noexcept : int
++get_attacks_per_round() const noexcept : float
++get_base_armor_class() const noexcept : int
++get_charisma() const noexcept : int
++get_class_display_name() const : std::string
++get_constitution() const noexcept : int
++get_constitution_hp_multiplier() const noexcept : int
++get_corpse_weight() const noexcept : int
++get_creature_class() const noexcept : CreatureClass
++get_creature_level() const noexcept : int
++get_dexterity() const noexcept : int
++get_display_color() const noexcept : int
++get_display_tile() const noexcept : TileRef
++get_dr() const noexcept : int
++get_effective_hp() const noexcept : int
++get_equipped_item() const noexcept : Item *
++get_equipped_weapon_damage_roll() const noexcept : std::string
++get_gender() const noexcept : const std::string &
++get_gold() const noexcept : int
++get_hit_die() const noexcept : int
++get_hp() const noexcept : int
++get_hp_base() const noexcept : int
++get_intelligence() const noexcept : int
++get_kill_count() const noexcept : int
++get_last_constitution() const noexcept : int
++get_level() const noexcept : int
++get_max_hp() const noexcept : int
++get_morale() const noexcept : int
++get_open_locks_skill() const noexcept : int
++get_race_display_name() const : std::string
++get_strength() const noexcept : int
++get_temp_hp() const noexcept : int
++get_thaco() const noexcept : int
++get_weapon_equipped() const noexcept : const std::string &
++get_wisdom() const noexcept : int
++get_xp() const noexcept : int
++heal() : int
++is_dead() const noexcept : bool
++is_invisible() const noexcept : bool
++is_item_equipped() const noexcept : bool
++is_player() const noexcept : bool
++is_slot_occupied() const noexcept : bool
++load() : void
++on_kill_reward() : void
++on_new_game_start() : void
++recalculate_combat_stats() : void
++save() : void
++set_armor_class() noexcept : void
++set_attacks_per_round() noexcept : void
++set_base_armor_class() noexcept : void
++set_charisma() noexcept : void
++set_constitution() noexcept : void
++set_corpse_weight() noexcept : void
++set_creature_class() noexcept : void
++set_creature_level() noexcept : void
++set_dexterity() noexcept : void
++set_dr() noexcept : void
++set_gender() noexcept : void
++set_gold() noexcept : void
++set_hit_die() noexcept : void
++set_hp() noexcept : void
++set_hp_base() noexcept : void
++set_intelligence() noexcept : void
++set_last_constitution() noexcept : void
++set_max_hp() noexcept : void
++set_morale() noexcept : void
++set_strength() noexcept : void
++set_temp_hp() noexcept : void
++set_thaco() noexcept : void
++set_weapon_equipped() noexcept : void
++set_wisdom() noexcept : void
++set_xp() noexcept : void
++sync_ranged_state() : void
++take_damage() : int
++take_damage_and_check_death() : void
++toggle_equipment() : bool
++toggle_shield() : bool
++toggle_weapon() : bool
++unequip() : void
++update() : void
++update_armor_class() : void
++update_constitution_bonus() : void
+#update_creature_state() : void
+__
++activeBuffs : std::vector<Buff>
++ai : std::unique_ptr<Ai>
++armorClass : std::unique_ptr<ArmorClass>
++attacker : std::unique_ptr<Attacker>
+-attacksPerRound : float
+-baseCharisma : int
+-baseConstitution : int
+-baseDexterity : int
+-baseIntelligence : int
+-baseStrength : int
+-baseWisdom : int
++constitutionTracker : std::unique_ptr<ConstitutionTracker>
+-corpseWeight : int
+-creatureClass : CreatureClass
+-creatureLevel : int
+-damageResistance : int
++experienceReward : std::unique_ptr<ExperienceReward>
+-gender : std::string
+-gold : int
++healthPool : std::unique_ptr<HealthPool>
+-hitDie : int
++inventoryData : InventoryData
+-invisibleTile : TileRef
+-morale : int
++shop : std::unique_ptr<ShopKeeper>
+-thaco : int
+-weaponEquipped : std::string
+}
+class "BackstabInfo" as C_0009515309360007373602
+class C_0009515309360007373602 {
+__
++damageMultiplier : int
++hitBonus : int
++isBackstab : bool
+}
+abstract "Attacker" as C_0001275861008980335822
+abstract C_0001275861008980335822 {
+#Attacker() : void
+..
+{abstract} +attack() = 0 : void
+#calculate_backstab_bonus() const noexcept : BackstabInfo
+#calculate_damage_with_backstab() const noexcept : int
+#calculate_to_hit_roll() const noexcept : int
++get_damage_info() const noexcept : const DamageInfo &
++load() : void
+#log_attack_hit() const noexcept : void
+#log_attack_miss() const noexcept : void
+#perform_single_attack() : void
++roll_damage() const : int
++save() : void
++set_damage_info() noexcept : void
+__
+-damageInfo : DamageInfo
+}
+enum "CreatureClass" as C_0002451707966697120688
+enum C_0002451707966697120688 {
+FIGHTER
+ROGUE
+CLERIC
+WIZARD
+MONSTER
+}
+class "EquippedItem" as C_0000054851001451184127
+class C_0000054851001451184127 {
++EquippedItem() : void
+__
++item : std::unique_ptr<Item>
++slot : EquipmentSlot
+}
+class "Player" as C_0003692324345213718176
+class C_0003692324345213718176 {
++Player() : void
++Player() : void
+..
+-add_stat_bonuses_from_equipment() : void
++animate_resting() : void
++apply_confusion() : void
++apply_web_effect() : void
++attempt_hide() : bool
++calculate_thaco() : void
++can_equip() const noexcept : bool
++consume_food() : void
++die() : void
++equip_class_starting_gear() : void
++equip_item() : bool
++get_class_display_name() const : std::string
++get_constitution_hp_multiplier() const noexcept : int
++get_dual_wield_info() const noexcept : DualWieldInfo
++get_equipped_item() const noexcept : Item *
++get_equipped_weapon_damage_roll() const noexcept : std::string
++get_kill_count() const noexcept : int
++get_next_level_xp() const : int
++get_open_locks_skill() const noexcept : int
++get_race_display_name() const : std::string
++is_dual_wielding() const noexcept : bool
++is_item_equipped() const noexcept : bool
++is_player() const noexcept : bool
++is_slot_occupied() const noexcept : bool
++is_webbed() const noexcept : bool
++levelup_update() : void
++load() : void
++on_kill_reward() : void
++on_new_game_start() : void
++racial_ability_adjustments() : void
++recalculate_combat_stats() : void
+-remove_stat_bonuses_from_equipment() : void
++render() const noexcept : void
++rest() : bool
++roll_new_character() : void
++save() : void
++toggle_armor() : bool
++toggle_equipment() : bool
++toggle_shield() : bool
++toggle_weapon() : bool
++try_break_web() : bool
++unequip_item() : bool
++update() : void
+__
++controller : std::unique_ptr<PlayerController>
++equippedItems : std::vector<EquippedItem>
++killCount : int
++memorizedSpells : std::vector<std::string>
++playerClass : std::string
++playerClassState : enum PlayerClassState
++playerRace : std::string
++playerRaceState : enum PlayerRaceState
++roundCounter : int
++trappingWeb : Web *
++webStrength : int
++webStuckTurns : int
+}
+enum "Player::PlayerRaceState" as C_0012885046433095982767
+enum C_0012885046433095982767 {
+NONE
+HUMAN
+ELF
+DWARF
+HALFLING
+GNOME
+HALFELF
+}
+enum "Player::PlayerClassState" as C_0000399381673562337338
+enum C_0000399381673562337338 {
+NONE
+FIGHTER
+ROGUE
+CLERIC
+WIZARD
+}
+class "Player::DualWieldInfo" as C_0004578246943477471715
+class C_0004578246943477471715 {
+__
++isDualWielding : bool
++mainHandPenalty : int
++offHandDamageRoll : std::string
++offHandPenalty : int
+}
+class "Web" as C_0008406532865187851089
+class C_0008406532865187851089 {
+__
+}
+class "PlayerBlueprint" as C_0009402887733387462875
+class C_0009402887733387462875 {
+__
+}
+class "MonsterAttacker" as C_0008499460547459340482
+class C_0008499460547459340482 {
++MonsterAttacker() : void
+..
++attack() : void
++load() : void
++save() : void
+__
+-owner : Creature &
+}
+class "PlayerAttacker" as C_0001538495839641045803
+class C_0001538495839641045803 {
++PlayerAttacker() : void
+..
++attack() : void
+-compute_weapon_damage() const : DamageInfo
++load() : void
++save() : void
+__
+-owner : Player &
+}
+class "Mimic" as C_0005450148061586989934
+class C_0005450148061586989934 {
++Mimic() : void
+__
+}
+enum "SpiderType" as C_0000855290156190114304
+enum C_0000855290156190114304 {
+SMALL
+GIANT
+WEB_SPINNER
+}
+class "Spider" as C_0007821966411215142792
+class C_0007821966411215142792 {
++Spider() : void
+..
++get_spider_type() const : SpiderType
+-init_spider_type() : void
++update() : void
+__
+-spiderType : SpiderType
+}
+class "SmallSpider" as C_0016194168344117071165
+class C_0016194168344117071165 {
++SmallSpider() : void
+__
+}
+class "GiantSpider" as C_0008790152254294404999
+class C_0008790152254294404999 {
++GiantSpider() : void
+__
+}
+class "WebSpinner" as C_0007626194361914932210
+class C_0007626194361914932210 {
++WebSpinner() : void
+__
+}
+enum "ContainerError" as C_0011201421193444638686
+enum C_0011201421193444638686 {
+FULL
+ITEM_NOT_FOUND
+INVALID_ITEM
+CAPACITY_EXCEEDED
+}
+class "ContainerResult<T>" as C_0006272257352104167605
+class C_0006272257352104167605 {
++ContainerResult() : void
++ContainerResult() : void
+..
++operator*() : T &
++operator*() const : const T &
+..
++get_error() const : ContainerError
++has_error() const : bool
++has_value() const : bool
++operator bool() const : bool
+__
++error : std::optional<ContainerError>
++value : std::optional<T>
+}
+class "ContainerEvent" as C_0001171718872221216000
+class C_0001171718872221216000 {
+__
++capacity : size_t
++current_size : size_t
++item : const Item *
++type : Type
+}
+enum "ContainerEvent::Type" as C_0001939466768499311598
+enum C_0001939466768499311598 {
+ITEM_ADDED
+ITEM_REMOVED
+INVENTORY_FULL
+CAPACITY_CHANGED
+}
+class "ContainerResult<bool>" as C_0012793097468079222391
+class C_0012793097468079222391 {
+__
+}
+class "ContainerResult<std::unique_ptr<Item>>" as C_0009382574672312817641
+class C_0009382574672312817641 {
+__
+}
+class "Container" as C_0013908034248162013336
+class C_0013908034248162013336 {
++Container() noexcept : void
++Container() = deleted : void
++Container() noexcept = default : void
++~Container() = default : void
+..
++operator=() = deleted : Container &
++operator=() noexcept = default : Container &
+..
++add() : ContainerResult<bool>
++can_run() const noexcept : bool
++contains_item() const noexcept : bool
++find_item_by_name() const noexcept : const Item *
+-fire_event() : void
++get_capacity() const noexcept : size_t
++get_debug_info() const : std::string
++get_inventory() const noexcept : const std::vector<std::unique_ptr<Item>> &
++get_inventory_mutable() noexcept : std::vector<std::unique_ptr<Item>> &
++get_item_at() noexcept : Item *
++get_item_at() const noexcept : const Item *
++get_item_count() const noexcept : size_t
++get_max_weight() const noexcept : int
++get_remaining_space() const noexcept : size_t
++get_total_weight() const noexcept : int
++is_empty() const noexcept : bool
++is_full() const noexcept : bool
++is_overloaded() const noexcept : bool
++load() : void
+-optimize_storage() : void
++print_container() const : void
++remove() : ContainerResult<std::unique_ptr<Item>>
++remove_at() : ContainerResult<std::unique_ptr<Item>>
++remove_legacy() : void
++save() : void
++set_capacity() : void
++set_event_handler() : void
++set_max_weight() noexcept : void
+__
+-capacity_ : size_t
+-event_handler_ : ContainerEventHandler
+-inventory_ : std::vector<std::unique_ptr<Item>>
+-max_weight_ : int
+}
+C_0005016775666417918015 ..> C_0007500688229146332176
+C_0005016775666417918015 ..> C_0000465838628272370621
+C_0004024929348999353017 ..> C_0014685509157476421551
+C_0008892743540308554955 ..> C_0010968929617812835794
+C_0008892743540308554955 ..> C_0009880302970961535201
+C_0008892743540308554955 ..> C_0005868091636912021200
+C_0008892743540308554955 ..> C_0016374430443579771656
+C_0008892743540308554955 ..> C_0002335938758896436713
+C_0008892743540308554955 ..> C_0001913925486231449940
+C_0008892743540308554955 ..> C_0014129702424145959091
+C_0008892743540308554955 ..> C_0000549454019648914217
+C_0008892743540308554955 ..> C_0018167159334421366545
+C_0008892743540308554955 ..> C_0017091837617986840564
+C_0008892743540308554955 ..> C_0009142731415852093645
+C_0008892743540308554955 ..> C_0006388875158815814807
+C_0008892743540308554955 ..> C_0003990356576010744599
+C_0008892743540308554955 ..> C_0017898990235636661728
+C_0008892743540308554955 ..> C_0017861868997883726832
+C_0008892743540308554955 ..> C_0015751345594268040123
+C_0008892743540308554955 ..> C_0001519586503431990660
+C_0017874184112052246832 ..> C_0008892743540308554955
+C_0002570385992250167446 ..> C_0011504619595395019599
+C_0002570385992250167446 ..|> C_0003887371098995552768
+C_0004796116875221873371 ..> C_0005967165952864249862
+C_0013493670309079268837 ..> C_0004796116875221873371
+C_0004773651139648169396 ..> C_0001735820390792507613
+C_0015851677629932266871 ..> C_0001275861008980335822
+C_0008261390615332338001 ..> C_0005016775666417918015
+C_0004617534497489968553 ..> C_0000054851001451184127
+C_0013438578351037437669 ..> C_0011201421193444638686
+C_0013438578351037437669 ..|> C_0003887371098995552768
+C_0004212912564551825943 ..> C_0001171718872221216000
+C_0017523577221469975573 ..> C_0017898892907908295482
+C_0001650237536220868964 ..> C_0017523577221469975573
+C_0003047734144939532202 o-- C_0005016775666417918015 : +name
+C_0017898892907908295482 ..> C_0014685509157476421551
+C_0017898892907908295482 ..> C_0011887994287659977427
+C_0017898892907908295482 ..> C_0012008603185729621422
+C_0017898892907908295482 o-- C_0003047734144939532202 : +actorData
+C_0017898892907908295482 o-- C_0004024929348999353017 : +states
+C_0008287048469554089178 ..> C_0003047734144939532202
+C_0008287048469554089178 ..> C_0016796484603318207096
+C_0017898892907908295482 <|-- C_0008287048469554089178
+C_0010968929617812835794 o-- C_0018300293730861559711 : +effect
+C_0009880302970961535201 ..> C_0005967165952864249862
+C_0009880302970961535201 ..> C_0016796484603318207096
+C_0003990356576010744599 o-- C_0012361771204827893217 : +originalStats
+C_0017898990235636661728 o-- C_0012361771204827893217 : +originalStats
+C_0017861868997883726832 o-- C_0012361771204827893217 : +originalStats
+C_0005967165952864249862 ..> C_0003047734144939532202
+C_0005967165952864249862 ..> C_0011887994287659977427
+C_0005967165952864249862 o-- C_0005016775666417918015 : +item_key
+C_0005967165952864249862 o-- C_0017874184112052246832 : +behavior
+C_0008287048469554089178 <|-- C_0005967165952864249862
+C_0001856891488435026320 ..> C_0011504619595395019599
+C_0001856891488435026320 o-- C_0003887371098995552768 : +value
+C_0001856891488435026320 o-- C_0002570385992250167446 : +error
+C_0001735820390792507613 o-- C_0003286799596456118755 : +type
+C_0001735820390792507613 --> C_0005967165952864249862 : +item
+C_0003286799596456118755 --+ C_0001735820390792507613
+C_0018331972385105376903 o-- C_0013493670309079268837 : +items
+C_0018331972385105376903 o-- C_0004773651139648169396 : +event_handler
+C_0008287048469554089178 <|-- C_0014301382382820756783
+C_0016796484603318207096 ..> C_0003047734144939532202
+C_0016796484603318207096 ..> C_0011887994287659977427
+C_0016796484603318207096 ..> C_0005967165952864249862
+C_0016796484603318207096 o-- C_0005016775666417918015 : -gender
+C_0016796484603318207096 o-- C_0005016775666417918015 : -weaponEquipped
+C_0016796484603318207096 o-- C_0002451707966697120688 : -creatureClass
+C_0016796484603318207096 o-- C_0001717932057243540720 : +activeBuffs
+C_0016796484603318207096 o-- C_0015851677629932266871 : +attacker
+C_0016796484603318207096 o-- C_0000432149987656353911 : +experienceReward
+C_0016796484603318207096 o-- C_0007875232007154941565 : +armorClass
+C_0016796484603318207096 o-- C_0008702523768990479918 : +healthPool
+C_0016796484603318207096 o-- C_0005265525043410500049 : +constitutionTracker
+C_0016796484603318207096 o-- C_0014248386106627927896 : +ai
+C_0016796484603318207096 o-- C_0016226757124167424344 : +shop
+C_0016796484603318207096 o-- C_0018331972385105376903 : +inventoryData
+C_0017898892907908295482 <|-- C_0016796484603318207096
+C_0001275861008980335822 ..> C_0016796484603318207096
+C_0001275861008980335822 ..> C_0005016775666417918015
+C_0001275861008980335822 ..> C_0009515309360007373602
+C_0001275861008980335822 ..> C_0011887994287659977427
+C_0000054851001451184127 ..> C_0005967165952864249862
+C_0000054851001451184127 o-- C_0004796116875221873371 : +item
+C_0003692324345213718176 ..> C_0011887994287659977427
+C_0003692324345213718176 ..> C_0005967165952864249862
+C_0003692324345213718176 ..> C_0004796116875221873371
+C_0003692324345213718176 ..> C_0004578246943477471715
+C_0003692324345213718176 o-- C_0012885046433095982767 : +playerRaceState
+C_0003692324345213718176 o-- C_0000399381673562337338 : +playerClassState
+C_0003692324345213718176 o-- C_0005016775666417918015 : +playerClass
+C_0003692324345213718176 o-- C_0005016775666417918015 : +playerRace
+C_0003692324345213718176 o-- C_0008261390615332338001 : +memorizedSpells
+C_0003692324345213718176 o-- C_0004617534497489968553 : +equippedItems
+C_0003692324345213718176 o-- C_0017259706817410849509 : +controller
+C_0016796484603318207096 <|-- C_0003692324345213718176
+C_0012885046433095982767 --+ C_0003692324345213718176
+C_0000399381673562337338 --+ C_0003692324345213718176
+C_0004578246943477471715 --+ C_0003692324345213718176
+C_0004578246943477471715 o-- C_0005016775666417918015 : +offHandDamageRoll
+C_0008499460547459340482 ..> C_0011887994287659977427
+C_0008499460547459340482 --> C_0016796484603318207096 : -owner
+C_0001275861008980335822 <|-- C_0008499460547459340482
+C_0001538495839641045803 ..> C_0016796484603318207096
+C_0001538495839641045803 ..> C_0011887994287659977427
+C_0001538495839641045803 --> C_0003692324345213718176 : -owner
+C_0001275861008980335822 <|-- C_0001538495839641045803
+C_0016796484603318207096 <|-- C_0005450148061586989934
+C_0007821966411215142792 o-- C_0000855290156190114304 : -spiderType
+C_0016796484603318207096 <|-- C_0007821966411215142792
+C_0007821966411215142792 <|-- C_0016194168344117071165
+C_0007821966411215142792 <|-- C_0008790152254294404999
+C_0007821966411215142792 <|-- C_0007626194361914932210
+C_0006272257352104167605 ..> C_0011201421193444638686
+C_0006272257352104167605 o-- C_0003887371098995552768 : +value
+C_0006272257352104167605 o-- C_0013438578351037437669 : +error
+C_0001171718872221216000 o-- C_0001939466768499311598 : +type
+C_0001171718872221216000 --> C_0005967165952864249862 : +item
+C_0001939466768499311598 --+ C_0001171718872221216000
+C_0012793097468079222391 ..|> C_0006272257352104167605
+C_0009382574672312817641 ..> C_0004796116875221873371
+C_0009382574672312817641 ..|> C_0006272257352104167605
+C_0013908034248162013336 ..> C_0004796116875221873371
+C_0013908034248162013336 ..> C_0005967165952864249862
+C_0013908034248162013336 ..> C_0012793097468079222391
+C_0013908034248162013336 ..> C_0006272257352104167605
+C_0013908034248162013336 ..> C_0009382574672312817641
+C_0013908034248162013336 ..> C_0012008603185729621422
+C_0013908034248162013336 ..> C_0001171718872221216000
+C_0013908034248162013336 ..> C_0011887994287659977427
+C_0013908034248162013336 ..> C_0001650237536220868964
+C_0013908034248162013336 ..> C_0017898892907908295482
+C_0013908034248162013336 ..> C_0005016775666417918015
+C_0013908034248162013336 ..> C_0001939466768499311598
+C_0013908034248162013336 o-- C_0013493670309079268837 : -inventory_
+C_0013908034248162013336 o-- C_0004212912564551825943 : -event_handler_
+
+'Generated with clang-uml, version 0.6.2
+'LLVM version clang version 20.1.7 (https://github.com/llvm/llvm-project.git 6146a88f60492b520a36f8f8f3231e15f3cc6082)
+@enduml

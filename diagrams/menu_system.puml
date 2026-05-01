@@ -1,0 +1,339 @@
+@startuml
+title Menu System
+class "std::char_traits<char>" as C_0007500688229146332176
+class C_0007500688229146332176 {
+__
+}
+class "std::allocator<char>" as C_0000465838628272370621
+class C_0000465838628272370621 {
+__
+}
+class "std::string" as C_0005016775666417918015
+class C_0005016775666417918015 {
+__
+}
+class "std::basic_string_view<char>" as C_0012008603185729621422
+class C_0012008603185729621422 {
+__
+}
+class "std::function<void(GameContext &)>" as C_0007834028488579349924
+class C_0007834028488579349924 {
+__
+}
+class "std::vector<MenuEntry>" as C_0014074451682333755218
+class C_0014074451682333755218 {
+__
+}
+class "std::vector<std::string>" as C_0008261390615332338001
+class C_0008261390615332338001 {
+__
+}
+class "std::function<void(int,GameContext &)>" as C_0014186947182730379997
+class C_0014186947182730379997 {
+__
+}
+class "std::unique_ptr<Item>" as C_0004796116875221873371
+class C_0004796116875221873371 {
+__
+}
+class "std::span<std::unique_ptr<Item>>" as C_0009849680224112406864
+class C_0009849680224112406864 {
+__
+}
+abstract "BaseMenu" as C_0016700093810350814207
+abstract C_0016700093810350814207 {
++BaseMenu() = default : void
++BaseMenu() = deleted : void
++BaseMenu() = deleted : void
++~BaseMenu() constexpr = default : void
+..
++operator=() = deleted : BaseMenu &
++operator=() = deleted : BaseMenu &
+..
++draw_content() : void
+{abstract} +menu() = 0 : void
++menu_clear() : void
++menu_draw_box() : void
++menu_draw_title() : void
++menu_highlight_off() : void
++menu_highlight_on() : void
++menu_key_listen() : void
++menu_new() : void
++menu_print() : void
++menu_refresh() : void
++menu_set_run_false() : void
++menu_set_run_true() : void
+__
++back : bool
+#inputSystem : InputSystem *
+#isHighlighted : bool
+#keyPress : int
+#menuHeight : size_t
+#menuStartX : size_t
+#menuStartY : size_t
+#menuWidth : size_t
+#renderer : Renderer *
++run : bool
+#tileConfig : const TileConfig *
+}
+class "InputSystem" as C_0005669240452412135682
+class C_0005669240452412135682 {
+__
+}
+class "TileConfig" as C_0008651314364294251227
+class C_0008651314364294251227 {
+__
+}
+class "GameContext" as C_0010095634811082523150
+class C_0010095634811082523150 {
+__
+}
+class "Renderer" as C_0018406484507766955422
+class C_0018406484507766955422 {
+__
+}
+class "MenuEntry" as C_0011811161347480181394
+class C_0011811161347480181394 {
+__
++command : std::function<void (GameContext &)>
++hotkey : char
++label : std::string
+}
+class "MenuTrade" as C_0007461563586528402760
+class C_0007461563586528402760 {
++MenuTrade() : void
++MenuTrade() = deleted : void
++MenuTrade() = deleted : void
++~MenuTrade() : void
+..
++operator=() = deleted : MenuTrade &
++operator=() = deleted : MenuTrade &
+..
++draw() : void
+-draw_content() : void
++menu() : void
+-menu_print_state() : void
++on_key() : void
+__
+-currentState : size_t
+-entries : std::vector<MenuEntry>
+-height_ : int
+-shopkeeper : Creature &
+-startx_ : int
+-starty_ : int
+-width_ : int
+}
+class "NotificationMenu" as C_0018155397284466581465
+class C_0018155397284466581465 {
++NotificationMenu() : void
++NotificationMenu() = deleted : void
++NotificationMenu() = deleted : void
+..
++operator=() = deleted : NotificationMenu &
++operator=() = deleted : NotificationMenu &
+..
+-draw() : void
++menu() : void
++set_on_close() : void
+__
+-lines : std::vector<std::string>
+-onClose : std::function<void (GameContext &)>
+-title : std::string
+}
+class "MenuSpellCast" as C_0011626225987437545147
+class C_0011626225987437545147 {
++MenuSpellCast() : void
++MenuSpellCast() = deleted : void
++MenuSpellCast() = deleted : void
+..
++operator=() = deleted : MenuSpellCast &
++operator=() = deleted : MenuSpellCast &
+..
+-draw() : void
+-handle_selection() : void
++menu() : void
+-populate_spells() : void
+__
+-availableSpells : std::vector<std::string>
+-player : Player &
+-selectedIndex : int
+-spellSources : std::vector<std::string>
+}
+class "Player" as C_0003692324345213718176
+class C_0003692324345213718176 {
+__
+}
+class "MenuName" as C_0002284470689637258657
+class C_0002284470689637258657 {
++MenuName() : void
++MenuName() = deleted : void
++MenuName() = deleted : void
+..
++operator=() = deleted : MenuName &
++operator=() = deleted : MenuName &
+..
+-draw_name_screen() : void
++menu() : void
+__
+-initialized : bool
+-inputText : std::string
+}
+class "ListMenu" as C_0006539506488035345878
+class C_0006539506488035345878 {
++ListMenu() : void
++ListMenu() = deleted : void
++ListMenu() = deleted : void
+..
++operator=() = deleted : ListMenu &
++operator=() = deleted : ListMenu &
+..
++draw() : void
+-draw_entries() : void
++menu() : void
++on_key() : void
+__
+-cursorIndex : size_t
+-entries : std::vector<MenuEntry>
+-onEscape : std::function<void (GameContext &)>
+-onFrame : std::function<void (GameContext &)>
+-title : std::string
+}
+class "ContextMenu" as C_0016181172014834066899
+class C_0016181172014834066899 {
++ContextMenu() : void
+..
+-draw_content() : void
++menu() : void
+__
+-menuOptions : std::vector<std::string>
+-onSelect : std::function<void (int,GameContext &)>
+-selectedIndex : int
+}
+class "MenuBuy" as C_0009182278224832392218
+class C_0009182278224832392218 {
++MenuBuy() : void
++MenuBuy() = deleted : void
++MenuBuy() = deleted : void
+..
++operator=() = deleted : MenuBuy &
++operator=() = deleted : MenuBuy &
+..
++draw() : void
+-draw_content() : void
+-handle_buy() : void
++menu() : void
+-menu_get_string() : std::string
+-menu_print_state() : void
++on_key() : void
+-populate_items() : void
+__
+-buyer : Creature &
+-ctx : GameContext &
+-currentState : size_t
+-menuItems : std::vector<std::string>
+-shopkeeper : ShopKeeper &
+}
+class "MenuSell" as C_0008962700518673851482
+class C_0008962700518673851482 {
++MenuSell() : void
++MenuSell() = deleted : void
++MenuSell() = deleted : void
+..
++operator=() = deleted : MenuSell &
++operator=() = deleted : MenuSell &
+..
++draw() : void
+-draw_content() : void
+-handle_sell() : void
++menu() : void
+-menu_get_string() : std::string
+-menu_print_state() : void
++on_key() : void
+-populate_items() : void
+__
+-currentState : size_t
+-menuItems : std::vector<std::string>
+-player : Creature &
+-shopkeeper : Creature &
+}
+class "ShopKeeper" as C_0002639197799890657499
+class C_0002639197799890657499 {
+__
+}
+class "Item" as C_0005967165952864249862
+class C_0005967165952864249862 {
+__
+}
+class "Creature" as C_0016796484603318207096
+class C_0016796484603318207096 {
+__
+}
+class "DeathMenu" as C_0008121095864722573442
+class C_0008121095864722573442 {
++DeathMenu() : void
++DeathMenu() = deleted : void
++DeathMenu() = deleted : void
++~DeathMenu() constexpr = default : void
+..
++operator=() = deleted : DeathMenu &
++operator=() = deleted : DeathMenu &
+..
+-handle_input() : void
++menu() : void
+-render() const : void
+__
+-dungeonLevel : int
+-killCount : int
+-playerClass : std::string
+-playerLevel : int
+-playerRace : std::string
+-playerXp : int
+-recentMessages : std::vector<std::string>
+}
+C_0005016775666417918015 ..> C_0007500688229146332176
+C_0005016775666417918015 ..> C_0000465838628272370621
+C_0007834028488579349924 ..> C_0010095634811082523150
+C_0014074451682333755218 ..> C_0011811161347480181394
+C_0008261390615332338001 ..> C_0005016775666417918015
+C_0014186947182730379997 ..> C_0010095634811082523150
+C_0004796116875221873371 ..> C_0005967165952864249862
+C_0009849680224112406864 ..> C_0004796116875221873371
+C_0016700093810350814207 ..> C_0005016775666417918015
+C_0016700093810350814207 ..> C_0012008603185729621422
+C_0011811161347480181394 o-- C_0005016775666417918015 : +label
+C_0011811161347480181394 o-- C_0007834028488579349924 : +command
+C_0007461563586528402760 o-- C_0014074451682333755218 : -entries
+C_0016700093810350814207 <|-- C_0007461563586528402760
+C_0018155397284466581465 o-- C_0005016775666417918015 : -title
+C_0018155397284466581465 o-- C_0008261390615332338001 : -lines
+C_0018155397284466581465 o-- C_0007834028488579349924 : -onClose
+C_0016700093810350814207 <|-- C_0018155397284466581465
+C_0011626225987437545147 o-- C_0008261390615332338001 : -availableSpells
+C_0011626225987437545147 o-- C_0008261390615332338001 : -spellSources
+C_0016700093810350814207 <|-- C_0011626225987437545147
+C_0002284470689637258657 o-- C_0005016775666417918015 : -inputText
+C_0016700093810350814207 <|-- C_0002284470689637258657
+C_0006539506488035345878 ..> C_0011811161347480181394
+C_0006539506488035345878 o-- C_0005016775666417918015 : -title
+C_0006539506488035345878 o-- C_0014074451682333755218 : -entries
+C_0006539506488035345878 o-- C_0007834028488579349924 : -onEscape
+C_0006539506488035345878 o-- C_0007834028488579349924 : -onFrame
+C_0016700093810350814207 <|-- C_0006539506488035345878
+C_0016181172014834066899 o-- C_0008261390615332338001 : -menuOptions
+C_0016181172014834066899 o-- C_0014186947182730379997 : -onSelect
+C_0016700093810350814207 <|-- C_0016181172014834066899
+C_0009182278224832392218 ..> C_0005016775666417918015
+C_0009182278224832392218 o-- C_0008261390615332338001 : -menuItems
+C_0016700093810350814207 <|-- C_0009182278224832392218
+C_0008962700518673851482 ..> C_0009849680224112406864
+C_0008962700518673851482 ..> C_0005016775666417918015
+C_0008962700518673851482 o-- C_0008261390615332338001 : -menuItems
+C_0016700093810350814207 <|-- C_0008962700518673851482
+C_0008121095864722573442 o-- C_0005016775666417918015 : -playerClass
+C_0008121095864722573442 o-- C_0005016775666417918015 : -playerRace
+C_0008121095864722573442 o-- C_0008261390615332338001 : -recentMessages
+C_0016700093810350814207 <|-- C_0008121095864722573442
+
+'Generated with clang-uml, version 0.6.2
+'LLVM version clang version 20.1.7 (https://github.com/llvm/llvm-project.git 6146a88f60492b520a36f8f8f3231e15f3cc6082)
+@enduml

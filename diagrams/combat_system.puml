@@ -1,0 +1,321 @@
+@startuml
+title Combat System
+class "std::char_traits<char>" as C_0007500688229146332176
+class C_0007500688229146332176 {
+__
+}
+class "std::allocator<char>" as C_0000465838628272370621
+class C_0000465838628272370621 {
+__
+}
+class "std::string" as C_0005016775666417918015
+class C_0005016775666417918015 {
+__
+}
+class "std::basic_string_view<char>" as C_0012008603185729621422
+class C_0012008603185729621422 {
+__
+}
+class "std::unordered_map<std::string,DamageInfo>" as C_0012293139037497649994
+class C_0012293139037497649994 {
+__
+}
+class "nlohmann::basic_json" as C_0011887994287659977427
+class C_0011887994287659977427 {
+__
+}
+class "ExperienceReward" as C_0005795596494599998262
+class C_0005795596494599998262 {
++ExperienceReward() noexcept : void
+..
++add_xp() noexcept : void
++get_xp() const noexcept : int
++load() : void
++save() const : void
++set_xp() noexcept : void
+__
+-xp : int
+}
+class "ArmorClass" as C_0002356357338461752476
+class C_0002356357338461752476 {
++ArmorClass() : void
++ArmorClass() = deleted : void
++ArmorClass() = deleted : void
++~ArmorClass() constexpr = default : void
+..
++operator=() = deleted : ArmorClass &
++operator=() = deleted : ArmorClass &
+..
+-calculate_dexterity_ac_bonus() const : int
+-calculate_equipment_ac_bonus() const : int
++get_armor_class() const noexcept : int
++get_base_armor_class() const noexcept : int
++set_armor_class() noexcept : void
++set_base_armor_class() noexcept : void
++update() : void
+__
+-armorClass : int
+-baseArmorClass : int
+}
+class "ConstitutionTracker" as C_0002050323186493403110
+class C_0002050323186493403110 {
++ConstitutionTracker() = default : void
++ConstitutionTracker() = deleted : void
++ConstitutionTracker() = deleted : void
++~ConstitutionTracker() constexpr = default : void
+..
++operator=() = deleted : ConstitutionTracker &
++operator=() = deleted : ConstitutionTracker &
+..
++apply_constitution_changes() : ConstitutionChangeResult
+-calculate_constitution_hp_bonus_for_value() const : int
+-calculate_level_multiplier() const : int
++get_last_constitution() const noexcept : int
++set_last_constitution() noexcept : void
+__
+-lastConstitution : int
+}
+class "ConstitutionTracker::ConstitutionChangeResult" as C_0007852005649500254322
+class C_0007852005649500254322 {
+__
++died : bool
++hpDifference : int
++newBonus : int
++oldBonus : int
+}
+enum "DamageType" as C_0011726816272886114664
+enum C_0011726816272886114664 {
+PHYSICAL
+FIRE
+COLD
+LIGHTNING
+POISON
+ACID
+MAGIC
+}
+class "ShieldResult" as C_0012871558125789430153
+class C_0012871558125789430153 {
+__
++damageAfterShield : int
++tempHpAfterShield : int
+}
+class "DamageInfo" as C_0015326389335011405692
+class C_0015326389335011405692 {
++DamageInfo() : void
++DamageInfo() : void
+..
++operator!=() const : bool
++operator==() const : bool
+..
++add_bonus() : DamageInfo &
++get_average_damage() const : int
++get_damage_range() const : std::string
++is_valid() const : bool
++multiply_damage() : DamageInfo &
++roll_damage() const : int
++with_enhancement() const : DamageInfo
+__
++damageType : DamageType
++displayRoll : std::string
++maxDamage : int
++minDamage : int
+}
+class "HealthPool" as C_0010193311393994475941
+class C_0010193311393994475941 {
++HealthPool() : void
++HealthPool() = deleted : void
++HealthPool() = deleted : void
++~HealthPool() constexpr = default : void
+..
++operator=() = deleted : HealthPool &
++operator=() = deleted : HealthPool &
+..
++add_temp_hp() noexcept : void
++get_effective_hp() const noexcept : int
++get_hp() const noexcept : int
++get_hp_base() const noexcept : int
++get_max_hp() const noexcept : int
++get_temp_hp() const noexcept : int
++heal() : int
++is_dead() const noexcept : bool
++set_hp() noexcept : void
++set_hp_base() noexcept : void
++set_max_hp() noexcept : void
++set_temp_hp() noexcept : void
++take_damage() : int
+__
+-hp : int
+-hpBase : int
+-hpMax : int
+-tempHp : int
+}
+class "BackstabInfo" as C_0009515309360007373602
+class C_0009515309360007373602 {
+__
++damageMultiplier : int
++hitBonus : int
++isBackstab : bool
+}
+abstract "Attacker" as C_0001275861008980335822
+abstract C_0001275861008980335822 {
+#Attacker() : void
+..
+{abstract} +attack() = 0 : void
+#calculate_backstab_bonus() const noexcept : BackstabInfo
+#calculate_damage_with_backstab() const noexcept : int
+#calculate_to_hit_roll() const noexcept : int
++get_damage_info() const noexcept : const DamageInfo &
++load() : void
+#log_attack_hit() const noexcept : void
+#log_attack_miss() const noexcept : void
+#perform_single_attack() : void
++roll_damage() const : int
++save() : void
++set_damage_info() noexcept : void
+__
+-damageInfo : DamageInfo
+}
+class "GameContext" as C_0010095634811082523150
+class C_0010095634811082523150 {
+__
+}
+class "Creature" as C_0016796484603318207096
+class C_0016796484603318207096 {
+__
+}
+class "WeaponDamageRegistry" as C_0001018834599171879803
+class C_0001018834599171879803 {
+{static} -create_weapon_damage_map() : std::unordered_map<std::string,DamageInfo>
+{static} +get_damage_info() noexcept : DamageInfo
+{static} +get_damage_roll() noexcept : std::string
+{static} +get_enhanced_damage_info() noexcept : DamageInfo
+{static} +get_unarmed_damage() noexcept : std::string
+{static} +get_unarmed_damage_info() noexcept : DamageInfo
+{static} +is_registered() noexcept : bool
+__
+{static} -weapon_damage_map : const std::unordered_map<std::string,DamageInfo>
+}
+class "ItemEnhancement" as C_0017005816672986270852
+class C_0017005816672986270852 {
+__
+}
+class "MonsterAttacker" as C_0008499460547459340482
+class C_0008499460547459340482 {
++MonsterAttacker() : void
+..
++attack() : void
++load() : void
++save() : void
+__
+-owner : Creature &
+}
+class "PlayerAttacker" as C_0001538495839641045803
+class C_0001538495839641045803 {
++PlayerAttacker() : void
+..
++attack() : void
+-compute_weapon_damage() const : DamageInfo
++load() : void
++save() : void
+__
+-owner : Player &
+}
+class "Player" as C_0003692324345213718176
+class C_0003692324345213718176 {
+__
+}
+enum "WeightTier" as C_0009133781020787203565
+enum C_0009133781020787203565 {
+LIGHT
+MODERATE
+HEAVY
+OVERENCUMBERED
+}
+enum "DestructibleType" as C_0009152690193750738371
+enum C_0009152690193750738371 {
+MONSTER
+PLAYER
+}
+abstract "DeathHandler" as C_0015926291465888696987
+abstract C_0015926291465888696987 {
++~DeathHandler() constexpr = default : void
+..
+{abstract} +execute() = 0 : void
+{abstract} +type() const = 0 : DestructibleType
+__
+}
+class "MonsterDeathHandler" as C_0012443987753507951471
+class C_0012443987753507951471 {
++execute() : void
++type() const : DestructibleType
+__
+}
+class "PlayerDeathHandler" as C_0014045497423929182666
+class C_0014045497423929182666 {
++execute() : void
++type() const : DestructibleType
+__
+}
+class "CorpseData" as C_0001691576747987620205
+class C_0001691576747987620205 {
++CorpseData() : void
+..
++get_corpse_name() const noexcept : const std::string &
++load() : void
++save() const : void
++set_corpse_name() : void
+__
+-corpseName : std::string
+}
+class "CombatStats" as C_0010164418652711490320
+class C_0010164418652711490320 {
++CombatStats() noexcept : void
+..
++get_dr() const noexcept : int
++get_thaco() const noexcept : int
++load() : void
++save() const : void
++set_dr() noexcept : void
++set_thaco() noexcept : void
+__
+-dr : int
+-thaco : int
+}
+C_0005016775666417918015 ..> C_0007500688229146332176
+C_0005016775666417918015 ..> C_0000465838628272370621
+C_0012293139037497649994 ..> C_0005016775666417918015
+C_0012293139037497649994 ..> C_0015326389335011405692
+C_0005795596494599998262 ..> C_0011887994287659977427
+C_0002050323186493403110 ..> C_0007852005649500254322
+C_0007852005649500254322 --+ C_0002050323186493403110
+C_0015326389335011405692 o-- C_0005016775666417918015 : +displayRoll
+C_0015326389335011405692 o-- C_0011726816272886114664 : +damageType
+C_0010193311393994475941 ..> C_0011726816272886114664
+C_0001275861008980335822 ..> C_0005016775666417918015
+C_0001275861008980335822 ..> C_0009515309360007373602
+C_0001275861008980335822 ..> C_0011887994287659977427
+C_0001275861008980335822 o-- C_0015326389335011405692 : -damageInfo
+C_0001018834599171879803 ..> C_0012008603185729621422
+C_0001018834599171879803 ..> C_0005016775666417918015
+C_0001018834599171879803 ..> C_0012293139037497649994
+C_0001018834599171879803 --> C_0015326389335011405692 : -weapon_damage_map
+C_0008499460547459340482 ..> C_0015326389335011405692
+C_0008499460547459340482 ..> C_0011887994287659977427
+C_0008499460547459340482 --> C_0016796484603318207096 : -owner
+C_0001275861008980335822 <|-- C_0008499460547459340482
+C_0001538495839641045803 ..> C_0015326389335011405692
+C_0001538495839641045803 ..> C_0011887994287659977427
+C_0001275861008980335822 <|-- C_0001538495839641045803
+C_0015926291465888696987 ..> C_0009152690193750738371
+C_0012443987753507951471 ..> C_0009152690193750738371
+C_0015926291465888696987 <|-- C_0012443987753507951471
+C_0014045497423929182666 ..> C_0009152690193750738371
+C_0015926291465888696987 <|-- C_0014045497423929182666
+C_0001691576747987620205 ..> C_0012008603185729621422
+C_0001691576747987620205 ..> C_0011887994287659977427
+C_0001691576747987620205 o-- C_0005016775666417918015 : -corpseName
+C_0010164418652711490320 ..> C_0011887994287659977427
+
+'Generated with clang-uml, version 0.6.2
+'LLVM version clang version 20.1.7 (https://github.com/llvm/llvm-project.git 6146a88f60492b520a36f8f8f3231e15f3cc6082)
+@enduml
