@@ -15,7 +15,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable parallel builds for MSVC
 if(MSVC)
-    add_compile_options(/MP)
+    add_compile_options(/MP10)
 endif()
 
 # Check if we're compiling with Emscripten
@@ -410,7 +410,7 @@ else()
 
     # Enforce UTF-8 encoding on MSVC
     if(MSVC)
-        target_compile_options(${PROJECT_NAME} PRIVATE /MP /utf-8)
+        target_compile_options(${PROJECT_NAME} PRIVATE /MP10 /utf-8)
 
         # Set the working directory for Visual Studio debugging
         set_target_properties(${PROJECT_NAME} PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
