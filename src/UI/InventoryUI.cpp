@@ -1130,6 +1130,7 @@ int InventoryUI::get_next_item_index(int from, int direction) const
 		}
 		idx += direction;
 	}
+	// TODO: return type should be std::optional<int> -- -1 is a sentinel; caller must know the convention
 	return -1;
 }
 

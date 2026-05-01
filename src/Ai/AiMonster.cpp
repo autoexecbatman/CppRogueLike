@@ -55,6 +55,7 @@ namespace
 			}
 		}
 
+		// TODO: bestStep uses x==-1 as sentinel for "no step found"; replace with std::optional<Vector2D>
 		if (bestStep.x != -1)
 		{
 			owner.position = bestStep;
@@ -180,6 +181,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		}
 	}
 
+	// TODO: bestStep uses x==-1 as sentinel for "no step found"; replace with std::optional<Vector2D>
 	if (bestStep.x != -1)
 	{
 		owner.position = bestStep;

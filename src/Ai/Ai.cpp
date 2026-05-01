@@ -1,4 +1,3 @@
-// file: Ai.cpp
 #include <memory>
 #include <stdexcept>
 
@@ -74,10 +73,3 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	ai->load(j);
 	return ai;
 }
-
-void Ai::initiate_trade(Creature& owner, Creature& player, GameContext& ctx)
-{
-	// No-op default — AiShopkeeper overrides
-}
-
-// end of file: Ai.cpp

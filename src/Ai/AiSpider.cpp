@@ -115,6 +115,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 			// Find a good ambush position
 			Vector2D ambushPos = find_ambush_position(owner, ctx.player->position, ctx);
 
+			// TODO: ambushPos uses x==-1 as sentinel for "no position found"; replace with std::optional<Vector2D>
 			if (ambushPos.x != -1 && !ctx.map->get_actor(ambushPos, ctx)) // Valid position found and not occupied
 			{
 				// Move to ambush position

@@ -5,6 +5,7 @@
 // command executed when selected. Shared by ListMenu and MenuTrade.
 
 #include <functional>
+#include <optional>
 #include <string>
 
 struct GameContext;
@@ -13,5 +14,5 @@ struct MenuEntry
 {
     std::string label{};
     char hotkey{ 0 };
-    std::function<void(GameContext&)> command{};
+    std::optional<std::function<void(GameContext&)>> command{};
 };

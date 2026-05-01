@@ -814,6 +814,7 @@ bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext
 			else if constexpr (std::is_same_v<T, Teleporter>)
 			{
 				const Vector2D validLocation = find_valid_teleport_location(ctx);
+				// TODO: validLocation uses x==-1/y==-1 as sentinel for "no location"; replace with std::optional<Vector2D>
 				if (validLocation.x != -1 && validLocation.y != -1)
 				{
 					wearer.position = validLocation;

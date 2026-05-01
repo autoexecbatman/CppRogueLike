@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../../Actor/Actor.h"
+#include "../../Actor/Creature.h"
 #include "../../Actor/MonsterAttacker.h"
 #include "../../Ai/AiShopkeeper.h"
 #include "../../Colors/Colors.h"

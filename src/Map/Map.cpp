@@ -1441,6 +1441,7 @@ std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, Vector
 		if (in_bounds(next))
 		{
 			// Allow target position even if occupied (for pathfinding to reach goal)
+			// TODO: target uses x==-1 as sentinel for "no target"; replace with std::optional<Vector2D> at call sites
 			bool isTarget = (target.x != -1 && next == target);
 			if (isTarget)
 			{

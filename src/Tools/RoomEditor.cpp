@@ -547,6 +547,7 @@ bool RoomEditor::screen_to_canvas(
 	return true;
 }
 
+// TODO: screen_to_list_index and screen_to_palette_index should return std::optional<int> -- -1 is a sentinel
 // Returns prefab list index from screen pixel in right panel, -1 if none.
 int RoomEditor::screen_to_list_index(const Renderer& r, int mouse_px, int mouse_py) const
 {

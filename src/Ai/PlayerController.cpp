@@ -32,6 +32,7 @@
 #include "../Systems/DisplayManager.h"
 #include "../Systems/InputHandler.h"
 #include "../Systems/LevelManager.h"
+#include "../Systems/Shopkeepers/ShopkeeperFactory.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/SpellSystem.h"
 #include "../Systems/TargetingSystem.h"
@@ -313,55 +314,49 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 {
 	for (const auto& c : *ctx.creatures)
 	{
-		if (c)
+		assert(c != nullptr && "null creature in creatures list");
+		if (!c->is_dead() && c->position == target)
 		{
-			if (!c->is_dead() && c->position == target)
+			assert(c->ai != nullptr && "living creature at target has no AI");
+			if (!c->ai->is_hostile())
 			{
-				if (c->ai && !c->ai->is_hostile())
-				{
-					if (!c->ai->is_trade_open())
-					{
-						ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
-						c->ai->initiate_trade(*c, playerOwner, ctx);
-					}
-					else
-					{
-						ctx.messageSystem->log("Encountered non-hostile creature: " + c->actorData.name);
-					}
-					return false;
-				}
-
-				playerOwner.roundCounter++;
-
-				int attacksThisRound = 1;
-
-				if (playerOwner.get_attacks_per_round() >= 2.0f)
-				{
-					attacksThisRound = 2;
-				}
-				else if (playerOwner.get_attacks_per_round() >= 1.5f)
-				{
-					attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
-				}
-
-				for (int i = 0; i < attacksThisRound; i++)
-				{
-					if (!c->is_dead())
-					{
-						if (i > 0)
-							ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
-
-						playerOwner.attacker->attack(*c, ctx);
-					}
-					else
-					{
-						break;
-					}
-				}
-
-				ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+				ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
+				c->ai->open_trade(*c, playerOwner, ctx);
 				return false;
 			}
+
+			playerOwner.roundCounter++;
+
+			int attacksThisRound = 1;
+
+			if (playerOwner.get_attacks_per_round() >= 2.0f)
+			{
+				attacksThisRound = 2;
+			}
+			else if (playerOwner.get_attacks_per_round() >= 1.5f)
+			{
+				attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
+			}
+
+			for (int i = 0; i < attacksThisRound; i++)
+			{
+				if (!c->is_dead())
+				{
+					if (i > 0)
+					{
+						ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
+					}
+
+					playerOwner.attacker->attack(*c, ctx);
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+			return false;
 		}
 	}
 
@@ -1069,6 +1064,19 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		playerOwner.memorizedSpells.push_back("web");
 		playerOwner.memorizedSpells.push_back("teleport");
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
+
+		// Spawn a shopkeeper on the first walkable adjacent tile
+		const std::array<Vector2D, 4> cardinals{ Vector2D{0, -1}, Vector2D{0, 1}, Vector2D{-1, 0}, Vector2D{1, 0} };
+		for (const auto& offset : cardinals)
+		{
+			Vector2D spawnPos = playerOwner.position + offset;
+			if (ctx.map->can_walk(spawnPos, ctx))
+			{
+				ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx));
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Shopkeeper spawned.", true);
+				break;
+			}
+		}
 		break;
 	}
 

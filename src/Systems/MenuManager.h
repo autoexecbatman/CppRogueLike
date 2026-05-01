@@ -20,6 +20,12 @@ public:
 	void set_game_initialized(bool initialized) noexcept { gameWasInit = initialized; }
 
 	bool should_take_input() const noexcept { return shouldTakeInput; }
+
+	// Controls whether handle_input_phase polls for new keys this frame.
+	// Set to false when pushing a menu that must consume the triggering keypress
+	// before the game loop sees it (prevents the key that opened the menu from
+	// also being processed as a game action). Reset to true by handle_input_phase
+	// at the start of each frame.
 	void set_should_take_input(bool takeInput) noexcept { shouldTakeInput = takeInput; }
 
 private:

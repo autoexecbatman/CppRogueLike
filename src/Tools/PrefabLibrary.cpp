@@ -247,6 +247,7 @@ int find_prefab_index(
 			return i;
 		}
 	}
+	// TODO: return type should be std::optional<int> -- -1 is a sentinel; caller must know the convention
 	return -1;
 }
 

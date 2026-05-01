@@ -1,20 +1,20 @@
 #pragma once
 
-#include <string>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "BaseMenu.h"
 #include "MenuEntry.h"
 
+class Creature;
 struct GameContext;
 
 class MenuTrade : public BaseMenu
 {
-    int height_{ 5 };
-    int width_{ 10 };
-    int starty_{ 0 };
-    int startx_{ 0 };
+private:
+    int height{ 5 };
+    int width{ 10 };
+    int startY{ 0 };
+    int startX{ 0 };
     Creature& shopkeeper;
 
     size_t currentState{ 0 };
@@ -25,7 +25,6 @@ class MenuTrade : public BaseMenu
 
 public:
     MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx);
-    ~MenuTrade();
     MenuTrade(const MenuTrade&) = delete;
     MenuTrade& operator=(const MenuTrade&) = delete;
     MenuTrade(MenuTrade&&) = delete;

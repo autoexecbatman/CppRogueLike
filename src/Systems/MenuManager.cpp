@@ -1,8 +1,6 @@
-// file: Systems/MenuManager.cpp
 #include <deque>
 #include <memory>
 
-#include "../Actor/Item.h"
 #include "../Core/GameContext.h"
 #include "../Menu/BaseMenu.h"
 #include "../Systems/RenderingManager.h"
@@ -51,5 +49,3 @@ void MenuManager::restore_game_display(GameContext& ctx)
 {
 	ctx.renderingManager->restore_game_display();
 }
-
-// end of file: Systems/MenuManager.cpp

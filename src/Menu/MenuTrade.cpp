@@ -1,16 +1,11 @@
 // file: MenuTrade.cpp
 #include <memory>
 
-#include <raylib.h>
-
-#include "../Actor/Actor.h"
-#include "../Actor/Stairs.h"
-#include "../ActorTypes/Player.h"
+#include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
 #include "MenuTrade.h"
@@ -20,9 +15,9 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 {
     int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
     int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
-    starty_ = (vrows - height_) / 2;
-    startx_ = (vcols - width_) / 2;
-    menu_new(width_, height_, startx_, starty_, ctx);
+    startY = (vrows - height) / 2;
+    startX = (vcols - width) / 2;
+    menu_new(width, height, startX, startY, ctx);
 
     auto buyCommand = [&shopkeeper](GameContext& ctx)
     {
@@ -43,16 +38,7 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
     };
     entries.push_back({ "Sell", 0, sellCommand });
 
-    auto exitCommand = [](GameContext& /*ctx*/) {};
-    entries.push_back({ "Exit", 0, exitCommand });
-}
-
-MenuTrade::~MenuTrade()
-{
-    if (shopkeeper.ai)
-    {
-        shopkeeper.ai->set_trade_open(false);
-    }
+    entries.push_back({ "Exit", 0, std::nullopt });
 }
 
 void MenuTrade::menu_print_state(size_t state)
@@ -110,7 +96,7 @@ void MenuTrade::on_key(int key, GameContext& ctx)
         menu_set_run_false();
         if (entries[currentState].command)
         {
-            entries[currentState].command(ctx);
+            (*entries[currentState].command)(ctx);
         }
         break;
     }

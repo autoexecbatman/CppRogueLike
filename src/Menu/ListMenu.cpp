@@ -92,7 +92,7 @@ void ListMenu::on_key(int key, GameContext& ctx)
         menu_set_run_false();
         if (entries[cursorIndex].command)
         {
-            entries[cursorIndex].command(ctx);
+            (*entries[cursorIndex].command)(ctx);
         }
         break;
     }
@@ -117,7 +117,7 @@ void ListMenu::on_key(int key, GameContext& ctx)
                 menu_set_run_false();
                 if (entry.command)
                 {
-                    entry.command(ctx);
+                    (*entry.command)(ctx);
                 }
                 return;
             }
@@ -171,7 +171,7 @@ void ListMenu::menu(GameContext& ctx)
                 menu_set_run_false();
                 if (entries[static_cast<size_t>(relRow)].command)
                 {
-                    entries[static_cast<size_t>(relRow)].command(ctx);
+                    (*entries[static_cast<size_t>(relRow)].command)(ctx);
                 }
                 return;
             }
