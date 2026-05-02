@@ -1,5 +1,7 @@
 #pragma once
 
+#include <optional>
+
 #include "../Persistent/Persistent.h"
 #include "AiMonster.h"
 
@@ -39,8 +41,8 @@ protected:
 	// Perform a poison attack on the target
 	void poison_attack(Creature& owner, Creature& target, GameContext& ctx);
 
-	// Find the best ambush position near walls
-	Vector2D find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx);
+	// Find the best ambush position near walls. Returns nullopt when no valid position exists.
+	std::optional<Vector2D> find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx);
 
 	// Check if a position is a good ambush spot (near walls)
 	bool is_good_ambush_spot(Vector2D position, GameContext& ctx);

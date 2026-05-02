@@ -425,6 +425,7 @@ void Creature::sync_ranged_state(GameContext& ctx)
 void Creature::drop(Item& item, GameContext& ctx)
 {
 	// Check if the item is actually in the inventory first
+	// TODO: replace std::find_if + erase with std::ranges::find_if + ranges (erase requires iterator for now)
 	auto it = std::find_if(inventoryData.items.begin(), inventoryData.items.end(), [&item](const auto& invItem)
 		{ return invItem.get() == &item; });
 

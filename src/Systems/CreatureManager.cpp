@@ -1,3 +1,4 @@
+#include <cassert>
 #include <limits>
 #include <memory>
 #include <span>
@@ -6,20 +7,18 @@
 
 #include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
-#include "../Map/DungeonRoom.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
 #include "CreatureManager.h"
+#include "SpawnUtils.h"
 
 void CreatureManager::update_creatures(std::span<std::unique_ptr<Creature>> creatures, GameContext& ctx)
 {
 	for (const auto& creature : creatures)
 	{
-		if (creature)
-		{
-			creature->update(ctx);
-		}
+		assert(creature);
+		creature->update(ctx);
 	}
 }
 
@@ -54,6 +53,7 @@ Creature* CreatureManager::get_closest_monster(
 
 	for (const auto& actor : creatures)
 	{
+		assert(actor);
 		if (!actor->is_dead())
 		{
 			const int distance = actor->get_tile_distance(fromPosition);
@@ -74,6 +74,7 @@ Creature* CreatureManager::get_actor_at_position(
 {
 	for (const auto& actor : creatures)
 	{
+		assert(actor);
 		if (actor->position == pos)
 		{
 			return actor.get();
@@ -91,21 +92,20 @@ bool CreatureManager::can_spawn_creature(
 
 Vector2D CreatureManager::find_spawn_position(GameContext& ctx)
 {
-	const auto& dice = ctx.dice;
 	if (ctx.rooms->empty())
 	{
 		throw std::runtime_error("rooms vector is empty!");
 	}
 
-	const size_t index = static_cast<size_t>(dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1));
-	const DungeonRoom& room = ctx.rooms->at(index);
-
-	Vector2D pos{ dice->roll(room.col, room.col_end()), dice->roll(room.row, room.row_end()) };
-	while (!ctx.map->can_walk(pos, ctx) || ctx.map->get_actor(pos, ctx) != nullptr)
+	// Pick a random room; retry with a different room if it is full.
+	while (true)
 	{
-		pos.x = dice->roll(room.col, room.col_end());
-		pos.y = dice->roll(room.row, room.row_end());
+		const size_t index = static_cast<size_t>(
+			ctx.dice->roll(0, static_cast<int>(ctx.rooms->size()) - 1));
+		auto pos = SpawnUtils::find_random_room_position(ctx.rooms->at(index), ctx);
+		if (pos)
+		{
+			return *pos;
+		}
 	}
-
-	return pos;
 }

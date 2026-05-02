@@ -60,9 +60,9 @@ public:
 	int count() const { return static_cast<int>(prefabs.size()); }
 	const std::vector<Prefab>& all() const { return prefabs; }
 
-	TileRef resolve_decor(char c) const;
-	bool is_decoration(char c) const;
-	std::string symbol_label(char c) const;
+	TileRef resolve_decor(char symbol) const;
+	bool is_decoration(char symbol) const;
+	std::string symbol_label(char symbol) const;
 	
 	// Ordered palette of all known symbols (for Room Editor UI).
 	const std::vector<PaletteEntry>& ordered_palette() const { return paletteOrder; }

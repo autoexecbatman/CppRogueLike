@@ -127,6 +127,7 @@ ItemClass item_class_from_string(const std::string& typeName)
 		{ "quest_item", ItemClass::QUEST_ITEM }
 	};
 
+	// TODO: replace iterator pattern with contains + at
 	auto it = classMap.find(typeName);
 	return (it != classMap.end()) ? it->second : ItemClass::UNKNOWN;
 }

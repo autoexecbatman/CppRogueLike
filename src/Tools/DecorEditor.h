@@ -2,6 +2,7 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -119,7 +120,7 @@ private:
 	void update_browser(const Renderer& renderer, std::string_view palette_path);
 
 	// Palette helpers
-	[[nodiscard]] int palette_find(TileRef tile) const;
+	[[nodiscard]] std::optional<int> palette_find(TileRef tile) const;
 	void palette_add_or_update(TileRef tile, std::string_view label, char symbol);
 	void palette_remove(TileRef tile);
 };

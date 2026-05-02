@@ -3,6 +3,7 @@
 #include <format>
 #include <fstream>
 #include <iostream>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -93,23 +94,21 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 // ---------------------------------------------------------------------------
 
 // Returns decoration TileRef for symbol; invalid TileRef for structural symbols (wall/floor/corridor/door/water).
-TileRef PrefabLibrary::resolve_decor(char c) const
+TileRef PrefabLibrary::resolve_decor(char symbol) const
 {
-	auto it = symbolToTile.find(c);
-	return (it != symbolToTile.end()) ? it->second : TileRef{};
+	return symbolToTile.contains(symbol) ? symbolToTile.at(symbol) : TileRef{};
 }
 
 // Returns true if symbol maps to a decoration (has a sprite to overlay).
-bool PrefabLibrary::is_decoration(char c) const
+bool PrefabLibrary::is_decoration(char symbol) const
 {
-	return resolve_decor(c).is_valid();
+	return resolve_decor(symbol).is_valid();
 }
 
 // Human-readable label for a symbol.
-std::string PrefabLibrary::symbol_label(char c) const
+std::string PrefabLibrary::symbol_label(char symbol) const
 {
-	auto it = symbolToLabel.find(c);
-	return (it != symbolToLabel.end()) ? it->second : std::string(1, c);
+	return symbolToLabel.contains(symbol) ? symbolToLabel.at(symbol) : std::string(1, symbol);
 }
 
 // ---------------------------------------------------------------------------
@@ -195,31 +194,31 @@ void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
 void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
 {
 	symbolToLabel[sym] = label;
-	auto find_sym = [sym](const PaletteEntry& e)
+	auto matches_symbol = [sym](const PaletteEntry& e)
 	{
 		return e.symbol == sym;
 	};
-	auto it = std::ranges::find_if(paletteOrder, find_sym);
-	if (it != paletteOrder.end())
+	auto matches = paletteOrder | std::views::filter(matches_symbol);
+	if (!matches.empty())
 	{
-		it->label = label;
+		matches.front().label = label;
 	}
 }
 
 void PrefabLibrary::add_or_replace(Prefab p)
 {
-	auto find_name = [&p](const Prefab& existing)
+	auto has_same_name = [&p](const Prefab& existing)
 	{
 		return existing.name == p.name;
 	};
-	auto it = std::ranges::find_if(prefabs, find_name);
-	if (it != prefabs.end())
+	auto matches = prefabs | std::views::filter(has_same_name);
+	if (matches.empty())
 	{
-		*it = std::move(p);
+		prefabs.push_back(std::move(p));
 	}
 	else
 	{
-		prefabs.push_back(std::move(p));
+		matches.front() = std::move(p);
 	}
 }
 
@@ -235,20 +234,19 @@ void PrefabLibrary::remove(const std::string& name)
 
 namespace
 {
-// Resolves prefab name to index.  Returns -1 if not found.
-int find_prefab_index(
+// Resolves prefab name to index. Returns nullopt if not found.
+std::optional<size_t> find_prefab_index(
 	const std::vector<Prefab>& prefabs,
 	const std::string& name)
 {
-	for (int i = 0; i < static_cast<int>(prefabs.size()); ++i)
+	for (size_t i = 0; i < prefabs.size(); ++i)
 	{
 		if (prefabs[i].name == name)
 		{
 			return i;
 		}
 	}
-	// TODO: return type should be std::optional<int> -- -1 is a sentinel; caller must know the convention
-	return -1;
+	return std::nullopt;
 }
 
 void stamp_room(
@@ -261,46 +259,49 @@ void stamp_room(
 	// Prefab origin [0,0] = top-left wall corner of the room.
 	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
 	// aligns exactly with the room wall ring -- no centering offset needed.
-	const int base_x = room.left_wall();
-	const int base_y = room.top_wall();
+	const int baseX = room.left_wall();
+	const int baseY = room.top_wall();
 
-	for (size_t r = 0; r < p.rows.size(); ++r)
+	for (size_t row = 0; row < p.rows.size(); ++row)
 	{
-		const std::string& row_str = p.rows[r];
-		for (size_t c = 0; c < row_str.size(); ++c)
+		const std::string& rowStr = p.rows[row];
+		for (size_t col = 0; col < rowStr.size(); ++col)
 		{
-			char sym = row_str[c];
-			auto it = symbolToTile.find(sym);
-			if (it == symbolToTile.end() || !it->second.is_valid())
+			char sym = rowStr[col];
+			if (!symbolToTile.contains(sym))
 			{
 				continue;
 			}
-			const TileRef tile = it->second;
-
-			const int world_x = base_x + static_cast<int>(c);
-			const int world_y = base_y + static_cast<int>(r);
-
-			if (world_x < room.col || world_x > room.col_end())
+			const TileRef tile = symbolToTile.at(sym);
+			if (!tile.is_valid())
 			{
 				continue;
 			}
 
-			if (world_y < room.row || world_y > room.row_end())
+			const int worldX = baseX + static_cast<int>(col);
+			const int worldY = baseY + static_cast<int>(row);
+
+			if (worldX < room.col || worldX > room.col_end())
 			{
 				continue;
 			}
 
-			if (!map.is_in_bounds({ world_x, world_y }))
+			if (worldY < room.row || worldY > room.row_end())
 			{
 				continue;
 			}
 
-			if (map.get_tile_type({ world_x, world_y }) != TileType::FLOOR)
+			if (!map.is_in_bounds({ worldX, worldY }))
 			{
 				continue;
 			}
 
-			editor.place_tile(world_x, world_y, tile);
+			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
+			{
+				continue;
+			}
+
+			editor.place_tile(worldX, worldY, tile);
 		}
 	}
 }
@@ -317,12 +318,12 @@ void PrefabLibrary::apply_to_room(
 	{
 		return;
 	}
-	int idx = find_prefab_index(prefabs, room.prefab_name);
-	if (idx < 0)
+	auto idx = find_prefab_index(prefabs, room.prefab_name);
+	if (!idx)
 	{
 		return;
 	}
-	stamp_room(prefabs[idx], room, symbolToTile, editor, map);
+	stamp_room(prefabs[*idx], room, symbolToTile, editor, map);
 }
 
 // Batch version used as a fallback; prefer apply_to_room called per room.

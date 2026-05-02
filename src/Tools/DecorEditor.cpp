@@ -27,7 +27,7 @@ DecorEditor::DecorEditor() = default;
 // Palette helpers
 // ---------------------------------------------------------------------------
 
-int DecorEditor::palette_find(TileRef tile) const
+std::optional<int> DecorEditor::palette_find(TileRef tile) const
 {
 	for (int i = 0; i < static_cast<int>(palette.size()); ++i)
 	{
@@ -36,8 +36,7 @@ int DecorEditor::palette_find(TileRef tile) const
 			return i;
 		}
 	}
-	// TODO: return type should be std::optional<int> -- -1 is a sentinel; caller must know the convention
-	return -1;
+	return std::nullopt;
 }
 
 void DecorEditor::palette_add_or_update(
@@ -45,11 +44,11 @@ void DecorEditor::palette_add_or_update(
 	std::string_view label,
 	char symbol)
 {
-	int idx = palette_find(tile);
-	if (idx >= 0)
+	auto idx = palette_find(tile);
+	if (idx)
 	{
-		palette[idx].label = label;
-		palette[idx].symbol = symbol;
+		palette[*idx].label = label;
+		palette[*idx].symbol = symbol;
 	}
 	else
 	{
@@ -234,6 +233,7 @@ bool DecorEditor::is_active_map_empty() const
 TileRef DecorEditor::get_override(int world_x, int world_y) const
 {
 	const auto& m = current_map();
+	// TODO: replace iterator pattern with contains + at
 	auto it = m.find(make_key(world_x, world_y));
 	return (it != m.end()) ? it->second : TileRef{};
 }
@@ -245,6 +245,7 @@ std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map()
 
 const std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map() const
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = all_overrides.find(active_key);
 	if (it != all_overrides.end())
 	{
@@ -514,12 +515,12 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 	auto begin_edit = [this, &renderer](TileRef tid)
 	{
 		browser_selected = tid;
-		int pi = palette_find(tid);
-		if (pi >= 0)
+		auto pi = palette_find(tid);
+		if (pi)
 		{
-			list_cursor = pi;
-			label_buf = palette[pi].label;
-			sym_buf = palette[pi].symbol;
+			list_cursor = *pi;
+			label_buf = palette[*pi].label;
+			sym_buf = palette[*pi].symbol;
 		}
 		else
 		{
@@ -652,7 +653,7 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 			TileRef tid{ static_cast<TileSheet>(browser_sheet), col, row };
 
 			bool is_sel = (tid == browser_selected);
-			bool in_pal = (palette_find(tid) >= 0);
+			bool in_pal = palette_find(tid).has_value();
 			bool hovered_tile = (mouse.x >= px && mouse.x < px + BROWSER_TILE &&
 				mouse.y >= py && mouse.y < py + BROWSER_TILE);
 
@@ -682,10 +683,10 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 
 			if (hovered_tile)
 			{
-				int pi = palette_find(tid);
-				if (pi >= 0)
+				auto pi = palette_find(tid);
+				if (pi)
 				{
-					const auto& pe = palette[pi];
+					const auto& pe = palette[*pi];
 					std::string tip = pe.label;
 					if (pe.symbol)
 					{
@@ -778,9 +779,9 @@ void DecorEditor::update_browser(const Renderer& renderer, std::string_view pale
 		if (IsKeyPressed(KEY_ENTER) && !label_buf.empty())
 		{
 			palette_add_or_update(browser_selected, label_buf, sym_buf);
-			list_cursor = palette_find(browser_selected);
-			if (list_cursor >= 0)
+			if (auto found = palette_find(browser_selected))
 			{
+				list_cursor = *found;
 				list_scroll = std::max(0, list_cursor - visible_rows + 1);
 			}
 			save_palette(palette_path);

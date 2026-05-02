@@ -84,6 +84,7 @@ InventoryResult<bool> add_item_to_inventory(
 
 InventoryResult<std::unique_ptr<Item>> remove_item(InventoryData& inventory, const Item& item)
 {
+	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
 	auto it = std::ranges::find_if(inventory.items,
 		[&item](const auto& stored_item)
 		{
@@ -194,6 +195,7 @@ const Item* get_item_at(const InventoryData& inventory, size_t index) noexcept
 
 const Item* find_item_by_name(const InventoryData& inventory, std::string_view name) noexcept
 {
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(inventory.items,
 		[name](const auto& item)
 		{
@@ -205,6 +207,7 @@ const Item* find_item_by_name(const InventoryData& inventory, std::string_view n
 
 Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept
 {
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(inventory.items,
 		[unique_id](const auto& item)
 		{
@@ -216,6 +219,7 @@ Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept
 
 const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) noexcept
 {
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(inventory.items,
 		[unique_id](const auto& item)
 		{
@@ -227,6 +231,7 @@ const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) 
 
 InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t unique_id)
 {
+	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
 	auto it = std::ranges::find_if(inventory.items,
 		[unique_id](const auto& item)
 		{

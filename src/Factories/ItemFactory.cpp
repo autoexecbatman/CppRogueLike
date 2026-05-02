@@ -255,7 +255,7 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 // Spawn a specific item category (weapon, potion, scroll, etc.)
 void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category)
 {
-	// Get indices of items in this category
+	// TODO: replace iterator pattern with contains + at
 	auto it = itemCategories.find(category);
 	if (it == itemCategories.end() || it->second.empty())
 	{

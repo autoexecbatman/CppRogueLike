@@ -47,6 +47,7 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 	{
 		return b.type == type;
 	};
+	// TODO: replace find_if iterator pattern with ranges view (mutation via front() on filter view)
 	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
 
 	if (it != creature.activeBuffs.end())
@@ -155,6 +156,7 @@ int BuffSystem::get_buff_value(const Creature& creature, BuffType type) const no
 	{
 		return b.type == type;
 	};
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
 	return it != creature.activeBuffs.end() ? it->value : 0;
 }
@@ -165,6 +167,7 @@ int BuffSystem::get_buff_turns(const Creature& creature, BuffType type) const no
 	{
 		return b.type == type;
 	};
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(creature.activeBuffs, matches_type);
 	return it != creature.activeBuffs.end() ? it->turnsRemaining : 0;
 }
@@ -175,6 +178,7 @@ bool BuffSystem::has_buff(const Creature& creature, BuffType type) const noexcep
 	{
 		return b.type == type;
 	};
+	// TODO: replace with std::ranges::any_of
 	return std::ranges::find_if(creature.activeBuffs, matches_type) != creature.activeBuffs.end();
 }
 

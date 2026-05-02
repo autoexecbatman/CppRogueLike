@@ -1,4 +1,3 @@
-// file: Player.cpp
 #include <algorithm>
 #include <cstdint>
 #include <format>
@@ -981,7 +980,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
-	// C++20 ranges - modern approach for finding elements
+	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	if (it != equippedItems.end())
@@ -1027,7 +1026,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
 {
-	// C++20 ranges - modern approach for finding elements
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
@@ -1449,5 +1448,3 @@ void Player::levelup_update(GameContext& ctx)
 		}
 	}
 }
-
-// end of file: Player.cpp

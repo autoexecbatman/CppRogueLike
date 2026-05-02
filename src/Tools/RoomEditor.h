@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+#include <optional>
 
 #include "../Renderer/Renderer.h"
 
@@ -94,28 +95,28 @@ private:
 	void handle_input_picker(GameContext& ctx);
 
 	void render(const GameContext& ctx) const;
-	void render_top_bar(const Renderer& r) const;
-	void render_left_panel(const Renderer& r) const;
-	void render_canvas(const Renderer& r) const;
-	void render_right_panel(const Renderer& r) const;
-	void render_bottom_bar(const Renderer& r) const;
-	void render_input_overlay(const Renderer& r) const;
-	void render_tile_picker(const Renderer& r) const;
+	void render_top_bar(const Renderer& renderer) const;
+	void render_left_panel(const Renderer& renderer) const;
+	void render_canvas(const Renderer& renderer) const;
+	void render_right_panel(const Renderer& renderer) const;
+	void render_bottom_bar(const Renderer& renderer) const;
+	void render_input_overlay(const Renderer& renderer) const;
+	void render_tile_picker(const Renderer& renderer) const;
 
-	void new_canvas(int w, int h);
+	void new_canvas(int width, int height);
 	void do_save(const std::string& name);
-	void do_load(int prefab_index);
-	void do_delete(int prefab_index);
+	void do_load(int prefabIndex);
+	void do_delete(int prefabIndex);
 	void set_status(const std::string& msg);
 
 	[[nodiscard]] bool screen_to_canvas(
-		const Renderer& r,
-		int mouse_px,
-		int mouse_py,
-		int& out_cx,
-		int& out_cy) const;
-	[[nodiscard]] int screen_to_list_index(const Renderer& r, int mouse_px, int mouse_py) const;
-	[[nodiscard]] int screen_to_palette_index(const Renderer& r, int mouse_px, int mouse_py) const;
+		const Renderer& renderer,
+		int mousePx,
+		int mousePy,
+		int& outCx,
+		int& outCy) const;
+	[[nodiscard]] std::optional<int> screen_to_list_index(const Renderer& renderer, int mousePx, int mousePy) const;
+	[[nodiscard]] std::optional<int> screen_to_palette_index(const Renderer& renderer, int mousePx, int mousePy) const;
 	[[nodiscard]] TileRef symbol_tile_id(char sym) const;
 	[[nodiscard]] TileRef canvas_tile_id(int col, int row) const;
 	[[nodiscard]] int canvas_wall_mask(int col, int row) const;

@@ -29,10 +29,10 @@
 #include "BuffType.h"
 #include "CreatureManager.h"
 #include "MessageSystem.h"
+#include "SpawnUtils.h"
 #include "SpellAnimations.h"
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
-#include "TargetingSystem.h"
 #include "TileConfig.h"
 
 namespace
@@ -438,6 +438,7 @@ const SpellDefinition& SpellSystem::get_by_key(std::string_view key)
 		}
 	}
 
+	// TODO: replace iterator pattern with contains + at
 	auto it = s_custom_spells.find(std::string{ key });
 	if (it != s_custom_spells.end())
 	{
@@ -458,6 +459,7 @@ void SpellSystem::set_by_key(std::string_view key, const SpellDefinition& def)
 		}
 	}
 
+	// TODO: replace iterator pattern with contains + at
 	auto it = s_custom_spells.find(std::string{ key });
 	if (it != s_custom_spells.end())
 	{
@@ -1192,44 +1194,13 @@ bool SpellSystem::cast_invisibility(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_teleport(Creature& caster, GameContext& ctx)
 {
-	// Try to find a valid teleport location (up to 50 attempts)
-	for (int attempts = 0; attempts < 50; attempts++)
-	{
-		int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
-		int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
-		Vector2D teleportPos{ y, x };
+	caster.position = SpawnUtils::find_random_floor_tile(ctx);
+	ctx.map->compute_fov(ctx);
 
-		// Check if the tile is a floor and walkable
-		if (ctx.map->get_tile_type(teleportPos) == TileType::FLOOR && ctx.map->can_walk(teleportPos, ctx))
-		{
-			// Check if any creature is at this position
-			bool occupied = false;
-			for (const auto& creature : *ctx.creatures)
-			{
-				if (creature && creature->position == teleportPos)
-				{
-					occupied = true;
-					break;
-				}
-			}
-
-			if (!occupied)
-			{
-				// Teleport successful
-				caster.position = teleportPos;
-				ctx.map->compute_fov(ctx);
-
-				ctx.messageSystem->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
-				ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
-				ctx.messageSystem->finalize_message();
-				return true;
-			}
-		}
-	}
-
-	// Failed to find a valid location
-	ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
-	return false;
+	ctx.messageSystem->append_message_part(MAGENTA_BLACK_PAIR, "Teleport! ");
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You feel disoriented as the world shifts around you!");
+	ctx.messageSystem->finalize_message();
+	return true;
 }
 
 bool SpellSystem::cast_knock(Creature& caster, GameContext& ctx)

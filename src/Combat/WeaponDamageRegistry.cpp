@@ -45,6 +45,7 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 
 DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noexcept
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = weapon_damage_map.find(std::string{ weaponKey });
 	if (it != weapon_damage_map.end())
 	{

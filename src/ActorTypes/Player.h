@@ -100,7 +100,7 @@ public:
 	bool is_dual_wielding() const noexcept;
 
 	// Equipment system - unique ID based methods
-	bool toggle_armor(uint64_t item_unique_id, GameContext& ctx);
+	bool toggle_armor(uint64_t item_unique_id, GameContext& ctx) override;
 	bool is_item_equipped(uint64_t item_unique_id) const noexcept override;
 	bool toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx) override;
 	bool toggle_shield(uint64_t item_unique_id, GameContext& ctx) override;

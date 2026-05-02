@@ -1,6 +1,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,9 +17,12 @@
 #include "AiSpider.h"
 
 // Spider AI constants
-constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
-constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
-constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+namespace
+{
+	constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
+	constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
+	constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+}
 
 //=============================================================================
 // AiSpider Implementation
@@ -113,18 +117,17 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		if (ctx.dice->d100() <= ambushChance)
 		{
 			// Find a good ambush position
-			Vector2D ambushPos = find_ambush_position(owner, ctx.player->position, ctx);
+			std::optional<Vector2D> ambushPos = find_ambush_position(owner, ctx.player->position, ctx);
 
-			// TODO: ambushPos uses x==-1 as sentinel for "no position found"; replace with std::optional<Vector2D>
-			if (ambushPos.x != -1 && !ctx.map->get_actor(ambushPos, ctx)) // Valid position found and not occupied
+			if (ambushPos && !ctx.map->get_actor(*ambushPos, ctx))
 			{
 				// Move to ambush position
-				owner.position = ambushPos;
+				owner.position = *ambushPos;
 				isAmbushing = true;
 				ambushCounter = AMBUSH_DURATION;
 
 				// Debug log
-				ctx.messageSystem->log("Spider setting ambush at " + std::to_string(ambushPos.x) + "," + std::to_string(ambushPos.y));
+				ctx.messageSystem->log("Spider setting ambush at " + std::to_string(ambushPos->x) + "," + std::to_string(ambushPos->y));
 
 				return;
 			}
@@ -373,7 +376,7 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 	}
 }
 
-Vector2D AiSpider::find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+std::optional<Vector2D> AiSpider::find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
 	// Look for positions near walls that are good for ambushing
 	std::vector<Vector2D> candidates;
@@ -418,11 +421,8 @@ Vector2D AiSpider::find_ambush_position(Creature& owner, Vector2D targetPosition
 		int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
 		return candidates.at(index);
 	}
-	else
-	{
-		// No good ambush position found
-		return Vector2D{ -1, -1 };
-	}
+
+	return std::nullopt;
 }
 
 bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)

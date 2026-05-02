@@ -26,6 +26,7 @@ Actor::Actor(Vector2D position, ActorData data)
 
 bool Actor::has_state(ActorState state) const noexcept
 {
+	// TODO: replace with std::ranges::contains
 	return std::ranges::find(states, state) != states.end();
 }
 

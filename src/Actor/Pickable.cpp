@@ -1,5 +1,5 @@
-// file: Pickable.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <variant>
 
-#include "../ActorTypes/Player.h"
+#include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Items/MagicalItemEffects.h"
@@ -20,7 +20,7 @@
 #include "../Systems/FloatingTextSystem.h"
 #include "../Systems/HungerSystem.h"
 #include "../Systems/MessageSystem.h"
-#include "../Systems/RenderingManager.h"
+#include "../Systems/SpawnUtils.h"
 #include "../Systems/SpellAnimations.h"
 #include "../Systems/TargetingMenu.h"
 #include "../Systems/TargetingSystem.h"
@@ -41,32 +41,6 @@ bool consume_item(Item& owner, Creature& wearer)
 {
 	auto result = InventoryOperations::remove_item(wearer.inventoryData, owner);
 	return result.has_value();
-}
-
-Vector2D find_valid_teleport_location(GameContext& ctx)
-{
-	auto is_position_free = [&](int x, int y) -> bool
-	{
-		for (const auto& creature : *ctx.creatures)
-		{
-			if (creature && creature->position.x == x && creature->position.y == y)
-				return false;
-		}
-		if (ctx.player && ctx.player->position.x == x && ctx.player->position.y == y)
-			return false;
-		return true;
-	};
-
-	for (int attempts = 0; attempts < 50; ++attempts)
-	{
-		const int x = ctx.dice->roll(2, ctx.map->get_width() - 2);
-		const int y = ctx.dice->roll(2, ctx.map->get_height() - 2);
-
-		if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::FLOOR && is_position_free(x, y))
-			return Vector2D{ x, y };
-	}
-
-	return Vector2D(-1, -1);
 }
 
 const std::unordered_map<std::string, int> corpseNutritionValues = {
@@ -92,9 +66,12 @@ const std::unordered_map<std::string, std::string> corpseFlavorText = {
 template <typename K, typename V>
 const V& get_or_default(const std::unordered_map<K, V>& map, const K& key, const V& default_value) noexcept
 {
+	// TODO: replace iterator pattern with contains + at
 	const auto it = map.find(key);
 	if (it != map.end())
+	{
 		return it->second;
+	}
 	return default_value;
 }
 
@@ -147,169 +124,16 @@ void load_stat_boost(T& sb, const json& j)
 template <typename T>
 bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, GameContext& ctx)
 {
-	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-	const bool success = wearer.toggle_equipment(item.uniqueId, slot, ctx);
-
-	if (success)
+	auto apply_stat_boost = [&]()
 	{
-		if (wasEquipped)
-		{
-			if (sb.isSetMode)
-			{
-				if (sb.strBonus != 0)
-				{
-					wearer.set_strength(sb.originalStats.str);
-				}
-				if (sb.dexBonus != 0)
-				{
-					wearer.set_dexterity(sb.originalStats.dex);
-				}
-				if (sb.conBonus != 0)
-				{
-					wearer.set_constitution(sb.originalStats.con);
-				}
-				if (sb.intBonus != 0)
-				{
-					wearer.set_intelligence(sb.originalStats.intel);
-				}
-				if (sb.wisBonus != 0)
-				{
-					wearer.set_wisdom(sb.originalStats.wis);
-				}
-				if (sb.chaBonus != 0)
-				{
-					wearer.set_charisma(sb.originalStats.cha);
-				}
-			}
-			else
-			{
-				wearer.set_strength(wearer.get_strength() - sb.strBonus);
-				wearer.set_dexterity(wearer.get_dexterity() - sb.dexBonus);
-				wearer.set_constitution(wearer.get_constitution() - sb.conBonus);
-				wearer.set_intelligence(wearer.get_intelligence() - sb.intBonus);
-				wearer.set_wisdom(wearer.get_wisdom() - sb.wisBonus);
-				wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
-			}
-
-			wearer.update_armor_class(ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You remove the " + item.actorData.name + ".", true);
-		}
-		else
-		{
-			if (sb.isSetMode)
-			{
-				if (sb.strBonus != 0)
-				{
-					sb.originalStats.str = wearer.get_strength();
-					wearer.set_strength(sb.strBonus);
-				}
-				if (sb.dexBonus != 0)
-				{
-					sb.originalStats.dex = wearer.get_dexterity();
-					wearer.set_dexterity(sb.dexBonus);
-				}
-				if (sb.conBonus != 0)
-				{
-					sb.originalStats.con = wearer.get_constitution();
-					wearer.set_constitution(sb.conBonus);
-				}
-				if (sb.intBonus != 0)
-				{
-					sb.originalStats.intel = wearer.get_intelligence();
-					wearer.set_intelligence(sb.intBonus);
-				}
-				if (sb.wisBonus != 0)
-				{
-					sb.originalStats.wis = wearer.get_wisdom();
-					wearer.set_wisdom(sb.wisBonus);
-				}
-				if (sb.chaBonus != 0)
-				{
-					sb.originalStats.cha = wearer.get_charisma();
-					wearer.set_charisma(sb.chaBonus);
-				}
-			}
-			else
-			{
-				wearer.set_strength(wearer.get_strength() + sb.strBonus);
-				wearer.set_dexterity(wearer.get_dexterity() + sb.dexBonus);
-				wearer.set_constitution(wearer.get_constitution() + sb.conBonus);
-				wearer.set_intelligence(wearer.get_intelligence() + sb.intBonus);
-				wearer.set_wisdom(wearer.get_wisdom() + sb.wisBonus);
-				wearer.set_charisma(wearer.get_charisma() + sb.chaBonus);
-			}
-
-			wearer.update_armor_class(ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You put on the " + item.actorData.name + ".", true);
-		}
-		return true;
-	}
-
-	// NPC fallback: toggle equipped state + apply bonuses directly
-	if (item.has_state(ActorState::IS_EQUIPPED))
-	{
-		item.remove_state(ActorState::IS_EQUIPPED);
 		if (sb.isSetMode)
 		{
-			if (sb.strBonus != 0)
-				wearer.set_strength(sb.originalStats.str);
-			if (sb.dexBonus != 0)
-				wearer.set_dexterity(sb.originalStats.dex);
-			if (sb.conBonus != 0)
-				wearer.set_constitution(sb.originalStats.con);
-			if (sb.intBonus != 0)
-				wearer.set_intelligence(sb.originalStats.intel);
-			if (sb.wisBonus != 0)
-				wearer.set_wisdom(sb.originalStats.wis);
-			if (sb.chaBonus != 0)
-				wearer.set_charisma(sb.originalStats.cha);
-		}
-		else
-		{
-			wearer.set_strength(wearer.get_strength() - sb.strBonus);
-			wearer.set_dexterity(wearer.get_dexterity() - sb.dexBonus);
-			wearer.set_constitution(wearer.get_constitution() - sb.conBonus);
-			wearer.set_intelligence(wearer.get_intelligence() - sb.intBonus);
-			wearer.set_wisdom(wearer.get_wisdom() - sb.wisBonus);
-			wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
-		}
-		wearer.update_armor_class(ctx);
-	}
-	else
-	{
-		item.add_state(ActorState::IS_EQUIPPED);
-		if (sb.isSetMode)
-		{
-			if (sb.strBonus != 0)
-			{
-				sb.originalStats.str = wearer.get_strength();
-				wearer.set_strength(sb.strBonus);
-			}
-			if (sb.dexBonus != 0)
-			{
-				sb.originalStats.dex = wearer.get_dexterity();
-				wearer.set_dexterity(sb.dexBonus);
-			}
-			if (sb.conBonus != 0)
-			{
-				sb.originalStats.con = wearer.get_constitution();
-				wearer.set_constitution(sb.conBonus);
-			}
-			if (sb.intBonus != 0)
-			{
-				sb.originalStats.intel = wearer.get_intelligence();
-				wearer.set_intelligence(sb.intBonus);
-			}
-			if (sb.wisBonus != 0)
-			{
-				sb.originalStats.wis = wearer.get_wisdom();
-				wearer.set_wisdom(sb.wisBonus);
-			}
-			if (sb.chaBonus != 0)
-			{
-				sb.originalStats.cha = wearer.get_charisma();
-				wearer.set_charisma(sb.chaBonus);
-			}
+			if (sb.strBonus != 0) { sb.originalStats.str = wearer.get_strength(); wearer.set_strength(sb.strBonus); }
+			if (sb.dexBonus != 0) { sb.originalStats.dex = wearer.get_dexterity(); wearer.set_dexterity(sb.dexBonus); }
+			if (sb.conBonus != 0) { sb.originalStats.con = wearer.get_constitution(); wearer.set_constitution(sb.conBonus); }
+			if (sb.intBonus != 0) { sb.originalStats.intel = wearer.get_intelligence(); wearer.set_intelligence(sb.intBonus); }
+			if (sb.wisBonus != 0) { sb.originalStats.wis = wearer.get_wisdom(); wearer.set_wisdom(sb.wisBonus); }
+			if (sb.chaBonus != 0) { sb.originalStats.cha = wearer.get_charisma(); wearer.set_charisma(sb.chaBonus); }
 		}
 		else
 		{
@@ -320,9 +144,57 @@ bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Creature& wearer, Gam
 			wearer.set_wisdom(wearer.get_wisdom() + sb.wisBonus);
 			wearer.set_charisma(wearer.get_charisma() + sb.chaBonus);
 		}
+	};
+
+	auto remove_stat_boost = [&]()
+	{
+		if (sb.isSetMode)
+		{
+			if (sb.strBonus != 0) { wearer.set_strength(sb.originalStats.str); }
+			if (sb.dexBonus != 0) { wearer.set_dexterity(sb.originalStats.dex); }
+			if (sb.conBonus != 0) { wearer.set_constitution(sb.originalStats.con); }
+			if (sb.intBonus != 0) { wearer.set_intelligence(sb.originalStats.intel); }
+			if (sb.wisBonus != 0) { wearer.set_wisdom(sb.originalStats.wis); }
+			if (sb.chaBonus != 0) { wearer.set_charisma(sb.originalStats.cha); }
+		}
+		else
+		{
+			wearer.set_strength(wearer.get_strength() - sb.strBonus);
+			wearer.set_dexterity(wearer.get_dexterity() - sb.dexBonus);
+			wearer.set_constitution(wearer.get_constitution() - sb.conBonus);
+			wearer.set_intelligence(wearer.get_intelligence() - sb.intBonus);
+			wearer.set_wisdom(wearer.get_wisdom() - sb.wisBonus);
+			wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
+		}
+	};
+
+	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
+	const bool success = wearer.toggle_equipment(item.uniqueId, slot, ctx);
+
+	if (success)
+	{
+		wasEquipped ? remove_stat_boost() : apply_stat_boost();
 		wearer.update_armor_class(ctx);
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			wasEquipped ? "You remove the " + item.actorData.name + "."
+			            : "You put on the " + item.actorData.name + ".",
+			true);
+		return true;
 	}
 
+	// NPC fallback: toggle equipped state + apply bonuses directly
+	if (item.has_state(ActorState::IS_EQUIPPED))
+	{
+		item.remove_state(ActorState::IS_EQUIPPED);
+		remove_stat_boost();
+	}
+	else
+	{
+		item.add_state(ActorState::IS_EQUIPPED);
+		apply_stat_boost();
+	}
+	wearer.update_armor_class(ctx);
 	return true;
 }
 
@@ -336,7 +208,9 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 	if (slot == EquipmentSlot::RIGHT_RING && !wasEquipped)
 	{
 		if (wearer.is_slot_occupied(EquipmentSlot::RIGHT_RING))
+		{
 			targetSlot = EquipmentSlot::LEFT_RING;
+		}
 	}
 
 	const bool success = wearer.toggle_equipment(item.uniqueId, targetSlot, ctx);
@@ -354,12 +228,16 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 		else
 		{
 			if (effect == MagicalEffect::INVISIBILITY)
+			{
 				ctx.messageSystem->message(CYAN_BLACK_PAIR, "The ring pulses with arcane power. Press Ctrl+C to cast.", true);
+			}
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You put on the " + item.actorData.name + ".", true);
 		}
 
 		if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
+		{
 			wearer.update_armor_class(ctx);
+		}
 
 		return true;
 	}
@@ -505,7 +383,8 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		int affected = 0;
 		for (const auto& creature : *ctx.creatures)
 		{
-			if (!creature || creature->is_dead())
+			assert(creature);
+			if (creature->is_dead())
 			{
 				continue;
 			}
@@ -522,6 +401,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 				++affected;
 			}
 		}
+
 		if (affected > 0)
 		{
 			ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, std::format("{}! ", owner.get_name()));
@@ -532,6 +412,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("The {} has no effect.", owner.get_name()), true);
 		}
+
 		return consume_item(owner, wearer);
 	}
 
@@ -592,10 +473,15 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 			for (const auto& creature : *innerCtx.creatures)
 			{
-				if (!creature || creature->is_dead())
+				assert(creature);
+				if (creature->is_dead())
+				{
 					continue;
+				}
 				if (creature->get_tile_distance(targetPos) > aoeRadius)
+				{
 					continue;
+				}
 				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
 				innerCtx.messageSystem->append_message_part(
 					WHITE_BLACK_PAIR,
@@ -624,56 +510,6 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(scrollRange, aoeRadius, std::move(onTarget), ctx));
 	return false; // turn and item consumption handled in callback
-}
-
-bool use(IdentifyScroll& idScroll, Item& owner, Creature& wearer, GameContext& ctx)
-{
-	(void)idScroll; // unused parameter
-
-	auto* player = dynamic_cast<Player*>(&wearer);
-	if (!player)
-	{
-		return false;
-	}
-
-	int identifiedCount = 0;
-	for (auto& item : player->inventoryData.items)
-	{
-		if (!item->is_fully_identified())
-		{
-			item->identify_all();
-			identifiedCount++;
-			if (ctx.floatingText)
-			{
-				std::string identified_msg = std::string(item->get_name()) + " identified!";
-				ctx.floatingText->spawn_text(
-					player->position.x,
-					player->position.y,
-					identified_msg,
-					0,
-					255,
-					255,
-					2.0f);
-			}
-		}
-	}
-
-	if (identifiedCount > 0)
-	{
-		ctx.messageSystem->message(
-			CYAN_BLACK_PAIR,
-			std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount),
-			true);
-	}
-	else
-	{
-		ctx.messageSystem->message(
-			CYAN_BLACK_PAIR,
-			std::format("You use the {}. All items were already identified.", owner.get_name()),
-			true);
-	}
-
-	return consume_item(owner, wearer);
 }
 
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx)
@@ -717,42 +553,21 @@ bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx)
 	return consume_item(owner, wearer);
 }
 
-bool use([[maybe_unused]] Armor& a, Item& item, Creature& wearer, GameContext& ctx)
+bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx)
 {
-	if (wearer.is_player())
+	const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
+	const bool success = wearer.toggle_armor(item.uniqueId, ctx);
+
+	if (success)
 	{
-		const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
-
-		// static_cast safe: is_player() guarantees type
-		auto* player = static_cast<Player*>(&wearer);
-		const bool success = player->toggle_armor(item.uniqueId, ctx);
-
-		if (success)
-		{
-			if (was_equipped)
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You remove the " + item.actorData.name + ".", true);
-			}
-			else
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You put on the " + item.actorData.name + ".", true);
-			}
-		}
-		return success;
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			was_equipped ? "You remove the " + item.actorData.name + "."
+			             : "You put on the " + item.actorData.name + ".",
+			true);
 	}
 
-	// NPC fallback: toggle equipped state
-	if (item.has_state(ActorState::IS_EQUIPPED))
-	{
-		item.remove_state(ActorState::IS_EQUIPPED);
-		wearer.update_armor_class(ctx);
-	}
-	else
-	{
-		item.add_state(ActorState::IS_EQUIPPED);
-		wearer.update_armor_class(ctx);
-	}
-	return true;
+	return success;
 }
 
 bool use(MagicalHelm& mh, Item& owner, Creature& wearer, GameContext& ctx)
@@ -780,7 +595,7 @@ bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx)
 	return use_stat_boost(g, EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
-bool use(DungeonKey& /*dk*/, Item& /*owner*/, Creature& /*wearer*/, GameContext& ctx)
+bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	ctx.messageSystem->message(WHITE_BLACK_PAIR, "Bump into a locked door to use this key.", true);
 	return false;
@@ -803,9 +618,13 @@ bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext
 				{
 					Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
 					if (equipped && equipped->uniqueId == owner.uniqueId)
+					{
 						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
+					}
 					else
+					{
 						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
+					}
 					return true;
 				}
 				wearer.equip(owner, ctx);
@@ -813,18 +632,38 @@ bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext
 			}
 			else if constexpr (std::is_same_v<T, Teleporter>)
 			{
-				const Vector2D validLocation = find_valid_teleport_location(ctx);
-				// TODO: validLocation uses x==-1/y==-1 as sentinel for "no location"; replace with std::optional<Vector2D>
-				if (validLocation.x != -1 && validLocation.y != -1)
+				wearer.position = SpawnUtils::find_random_floor_tile(ctx);
+				ctx.map->compute_fov(ctx);
+				ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
+				return consume_item(owner, wearer);
+			}
+			else if constexpr (std::is_same_v<T, IdentifyScroll>)
+			{
+				int identifiedCount = 0;
+				for (auto& item : wearer.inventoryData.items)
 				{
-					wearer.position = validLocation;
-					ctx.map->compute_fov(ctx);
-					ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
-					return consume_item(owner, wearer);
+					if (!item->is_fully_identified())
+					{
+						item->identify_all();
+						++identifiedCount;
+						if (ctx.floatingText)
+						{
+							ctx.floatingText->spawn_text(
+								wearer.position.x,
+								wearer.position.y,
+								std::string(item->get_name()) + " identified!",
+								0, 255, 255, 2.0f);
+						}
+					}
 				}
-				ctx.messageSystem->message(RED_BLACK_PAIR, "The teleportation magic fizzles out - no safe location found!", true);
-				return false;
+				ctx.messageSystem->message(
+					CYAN_BLACK_PAIR,
+					identifiedCount > 0
+						? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
+						: std::format("You use the {}. All items were already identified.", owner.get_name()),
+					true);
+				return consume_item(owner, wearer);
 			}
 			else if constexpr (std::is_same_v<T, Amulet>)
 			{
@@ -848,15 +687,25 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 		{
 			using T = std::decay_t<decltype(b)>;
 			if constexpr (std::is_same_v<T, Armor>)
+			{
 				return b.armorClass;
+			}
 			else if constexpr (std::is_same_v<T, Shield>)
+			{
 				return -1; // +1 AC in AD&D terms
+			}
 			else if constexpr (std::is_same_v<T, MagicalHelm>)
+			{
 				return MagicalEffectUtils::get_ac_bonus(b.effect, b.bonus);
+			}
 			else if constexpr (std::is_same_v<T, MagicalRing>)
+			{
 				return MagicalEffectUtils::get_protection_bonus(b.effect);
+			}
 			else
+			{
 				return 0;
+			}
 		},
 		behavior);
 }
@@ -1083,7 +932,9 @@ ItemBehavior load_behavior(const json& j)
 	{
 		Gold g;
 		if (j.contains("amount"))
+		{
 			g.amount = j["amount"].get<int>();
+		}
 		return g;
 	}
 
@@ -1091,7 +942,9 @@ ItemBehavior load_behavior(const json& j)
 	{
 		Food f;
 		if (j.contains("nutritionValue"))
+		{
 			f.nutritionValue = j["nutritionValue"].get<int>();
+		}
 		return f;
 	}
 
@@ -1099,7 +952,9 @@ ItemBehavior load_behavior(const json& j)
 	{
 		CorpseFood cf;
 		if (j.contains("nutritionValue"))
+		{
 			cf.nutritionValue = j["nutritionValue"].get<int>();
+		}
 		return cf;
 	}
 
@@ -1114,9 +969,13 @@ ItemBehavior load_behavior(const json& j)
 	{
 		MagicalHelm mh;
 		if (j.contains("effect"))
+		{
 			mh.effect = static_cast<MagicalEffect>(j["effect"].get<int>());
+		}
 		if (j.contains("bonus"))
+		{
 			mh.bonus = j["bonus"].get<int>();
+		}
 		return mh;
 	}
 

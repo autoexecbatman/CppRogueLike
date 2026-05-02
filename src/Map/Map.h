@@ -1,10 +1,9 @@
 #pragma once
 
 #include <memory>
-#include <unordered_set>
+#include <optional>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Persistent/Persistent.h"
@@ -138,7 +137,7 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
-	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, Vector2D target);
+	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target);
 	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
 	int get_width() const noexcept { return mapWidth; }
 	int get_height() const noexcept { return mapHeight; }

@@ -14,6 +14,7 @@ using json = nlohmann::json;
 
 TileRef TileConfig::get(std::string_view key) const
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = m_tiles.find(std::string(key));
 
 	if (it == m_tiles.end())
@@ -28,6 +29,7 @@ TileRef TileConfig::get(std::string_view key) const
 
 AutotileGroup TileConfig::get_autotile(std::string_view key) const
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = m_autotile_groups.find(std::string(key));
 
 	if (it == m_autotile_groups.end())
@@ -40,6 +42,7 @@ AutotileGroup TileConfig::get_autotile(std::string_view key) const
 
 WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = m_wall_autotile_groups.find(std::string(key));
 
 	if (it == m_wall_autotile_groups.end())

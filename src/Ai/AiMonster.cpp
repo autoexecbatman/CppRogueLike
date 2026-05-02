@@ -1,4 +1,5 @@
 #include <limits>
+#include <optional>
 #include <vector>
 
 #include "../Actor/Actor.h"
@@ -33,7 +34,7 @@ namespace
 			return;
 		}
 
-		Vector2D bestStep{ -1, -1 };
+		std::optional<Vector2D> bestStep;
 		int bestCost = currentCost; // only accept tiles strictly further than current position
 
 		for (const Vector2D& delta : NEIGHBORS)
@@ -55,10 +56,9 @@ namespace
 			}
 		}
 
-		// TODO: bestStep uses x==-1 as sentinel for "no step found"; replace with std::optional<Vector2D>
-		if (bestStep.x != -1)
+		if (bestStep)
 		{
-			owner.position = bestStep;
+			owner.position = *bestStep;
 		}
 		else
 		{
@@ -159,7 +159,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 			|| ctx.map->find_decoration_at(pos, ctx) != nullptr;
 	};
 
-	Vector2D bestStep{ -1, -1 };
+	std::optional<Vector2D> bestStep;
 	int bestCost = std::numeric_limits<int>::max();
 
 	for (const Vector2D& delta : NEIGHBORS)
@@ -181,10 +181,9 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 		}
 	}
 
-	// TODO: bestStep uses x==-1 as sentinel for "no step found"; replace with std::optional<Vector2D>
-	if (bestStep.x != -1)
+	if (bestStep)
 	{
-		owner.position = bestStep;
+		owner.position = *bestStep;
 	}
 }
 

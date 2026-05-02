@@ -6,6 +6,7 @@
 
 TileRef ContentRegistry::get_tile(std::string_view key) const
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = itemTiles.find(std::string{ key });
 	return it != itemTiles.end() ? it->second : TileRef{};
 }

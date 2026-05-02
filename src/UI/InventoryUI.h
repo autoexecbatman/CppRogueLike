@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -36,7 +37,8 @@ struct BackpackEntry
 
 struct SlotDisplayInfo
 {
-	EquipmentSlot slot;
+	EquipmentSlot slot{};
+	// TODO: we don't use const char*.
 	const char* label;
 };
 
@@ -97,7 +99,18 @@ public:
 	void menu(GameContext& ctx) override;
 
 private:
+	// State
+	InventoryScreen activeScreen{};
+	int equipmentCursor{};
+	int listCursor{};
+	int scrollOffset{};
+	bool filterMode{};
+	EquipmentSlot filterSlot{};
 	Player& player_ref;
+
+	// Flat item list (shared by Backpack and Usables, rebuilt on tab switch)
+	std::vector<BackpackEntry> listEntries;
+
 	// Data building
 	void rebuild_item_list(const Player& player, GameContext& ctx);
 	bool item_fits_slot(const Item& item, EquipmentSlot slot) const;
@@ -128,7 +141,7 @@ private:
 	void handle_drop(Player& player, GameContext& ctx);
 
 	// Cursor helpers
-	int get_next_item_index(int from, int direction) const;
+	std::optional<int> get_next_item_index(int from, int direction) const;
 	Item* get_selected_item() const;
 
 	// Layout: derived from renderer viewport at runtime
@@ -138,14 +151,4 @@ private:
 	void draw_frame(GameContext& ctx);
 	void draw_highlight_row(int px, int y_tile, GameContext& ctx);
 
-	// State
-	InventoryScreen activeScreen;
-	int equipmentCursor;
-	int listCursor;
-	int scrollOffset;
-	bool filterMode;
-	EquipmentSlot filterSlot;
-
-	// Flat item list (shared by Backpack and Usables, rebuilt on tab switch)
-	std::vector<BackpackEntry> listEntries;
 };

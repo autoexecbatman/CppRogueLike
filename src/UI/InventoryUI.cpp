@@ -62,21 +62,29 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	switch (tier)
 	{
 	case WeightTier::LIGHT:
+	{
 		tier_name = "LIGHT";
 		tier_color = WHITE_BLACK_PAIR;
 		break;
+	}
 	case WeightTier::MODERATE:
+	{
 		tier_name = "MODERATE";
 		tier_color = YELLOW_BLACK_PAIR;
 		break;
+	}
 	case WeightTier::HEAVY:
+	{
 		tier_name = "HEAVY";
 		tier_color = MAGENTA_BLACK_PAIR;
 		break;
+	}
 	case WeightTier::OVERENCUMBERED:
+	{
 		tier_name = "OVERENCUMBERED";
 		tier_color = RED_BLACK_PAIR;
 		break;
+	}
 	}
 
 	std::string weight_info = std::format("Weight: {}/{} [{}]", current_weight, max_weight, tier_name);
@@ -239,10 +247,10 @@ void InventoryUI::rebuild_item_list(const Player& player, GameContext& ctx)
 		}
 		if (listEntries[listCursor].kind == BackpackEntry::Kind::CATEGORY_HEADER)
 		{
-			int next = get_next_item_index(listCursor, 1);
-			if (next >= 0)
+			auto next = get_next_item_index(listCursor, 1);
+			if (next)
 			{
-				listCursor = next;
+				listCursor = *next;
 			}
 		}
 	}
@@ -302,6 +310,7 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
 
 bool InventoryUI::is_usable_category(ItemCategory cat) const
 {
+	// TODO: replace with std::ranges::contains
 	return std::ranges::find(USABLE_CATEGORIES, cat) != USABLE_CATEGORIES.end();
 }
 
@@ -954,10 +963,10 @@ void InventoryUI::handle_cursor_up()
 	}
 	else
 	{
-		int next = get_next_item_index(listCursor, -1);
-		if (next >= 0)
+		auto next = get_next_item_index(listCursor, -1);
+		if (next)
 		{
-			listCursor = next;
+			listCursor = *next;
 			if (listCursor < scrollOffset)
 			{
 				scrollOffset = listCursor;
@@ -977,10 +986,10 @@ void InventoryUI::handle_cursor_down(GameContext& ctx)
 	}
 	else
 	{
-		int next = get_next_item_index(listCursor, 1);
-		if (next >= 0)
+		auto next = get_next_item_index(listCursor, 1);
+		if (next)
 		{
-			listCursor = next;
+			listCursor = *next;
 			int contentHeight = screen_rows(ctx) - DETAIL_BAR_HEIGHT - 3 - TAB_BAR_HEIGHT;
 			if (listCursor >= scrollOffset + contentHeight)
 			{
@@ -1083,6 +1092,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		{
 			return it && it->uniqueId == itemId;
 		};
+		// TODO: replace find_if iterator pattern with ranges view
 		auto it = std::ranges::find_if(player.inventoryData.items, find_by_id);
 		if (it != player.inventoryData.items.end())
 		{
@@ -1119,7 +1129,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 // Helpers
 // ============================================================
 
-int InventoryUI::get_next_item_index(int from, int direction) const
+std::optional<int> InventoryUI::get_next_item_index(int from, int direction) const
 {
 	int idx = from + direction;
 	while (idx >= 0 && idx < static_cast<int>(listEntries.size()))
@@ -1130,8 +1140,7 @@ int InventoryUI::get_next_item_index(int from, int direction) const
 		}
 		idx += direction;
 	}
-	// TODO: return type should be std::optional<int> -- -1 is a sentinel; caller must know the convention
-	return -1;
+	return std::nullopt;
 }
 
 Item* InventoryUI::get_selected_item() const

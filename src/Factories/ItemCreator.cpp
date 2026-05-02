@@ -1335,6 +1335,7 @@ std::vector<std::string> ItemCreator::get_all_keys()
 
 const ItemParams& ItemCreator::get_params(std::string_view key)
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = registry.find(std::string{ key });
 	if (it == registry.end())
 	{
@@ -1347,6 +1348,7 @@ const ItemParams& ItemCreator::get_params(std::string_view key)
 
 void ItemCreator::set_params(std::string_view key, const ItemParams& params)
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = registry.find(std::string{ key });
 	if (it == registry.end())
 	{
@@ -1359,6 +1361,7 @@ void ItemCreator::set_params(std::string_view key, const ItemParams& params)
 
 std::unique_ptr<Item> ItemCreator::create(std::string_view key, Vector2D pos, ContentRegistry& tiles)
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = registry.find(std::string{ key });
 	if (it == registry.end())
 	{
@@ -1370,6 +1373,7 @@ std::unique_ptr<Item> ItemCreator::create(std::string_view key, Vector2D pos, Co
 
 std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount, ContentRegistry& tiles)
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = registry.find("gold_coin");
 	if (it == registry.end())
 	{
@@ -1491,6 +1495,7 @@ void ItemCreator::remove_custom(std::string_view key)
 
 void ItemCreator::set_name_category(std::string_view key, std::string name, std::string category)
 {
+	// TODO: replace iterator pattern with contains + at
 	auto it = registry.find(std::string{ key });
 	if (it == registry.end())
 	{

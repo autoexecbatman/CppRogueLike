@@ -129,6 +129,7 @@ void PlayerController::update(GameContext& ctx)
 				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				const auto& moves = direction_map();
+				// TODO: replace iterator pattern with contains
 				if (moves.find(key) != moves.end())
 				{
 					moveVector = moves.at(key);
@@ -144,6 +145,7 @@ void PlayerController::update(GameContext& ctx)
 	else
 	{
 		const auto& moves = direction_map();
+		// TODO: replace iterator pattern with contains
 		if (moves.find(key) != moves.end())
 		{
 			moveVector = moves.at(key);
@@ -497,6 +499,7 @@ bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 {
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	const auto& moves = direction_map();
+	// TODO: replace iterator pattern with contains
 	bool isMovement = (moves.find(key) != moves.end());
 	bool isAction = (key == Controls::ESCAPE || key == Controls::WAIT || key == Controls::PICK);
 	return isMovement || isAction;
@@ -1251,9 +1254,12 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 {
 	const auto& moves = direction_map();
+	// TODO: replace iterator pattern with contains + at
 	const auto it = moves.find(static_cast<Controls>(dirKey));
 	if (it == moves.end())
+	{
 		return { 0, 0 };
+	}
 
 	const Vector2D targetPos = playerOwner.position + it->second;
 	if (!ctx.map->is_in_bounds(targetPos))

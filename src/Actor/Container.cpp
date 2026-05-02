@@ -45,6 +45,7 @@ ContainerResult<bool> Container::add(std::unique_ptr<Item> item)
 
 ContainerResult<std::unique_ptr<Item>> Container::remove(const Item& item)
 {
+	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
 	auto it = std::ranges::find_if(inventory_,
 		[&item](const auto& stored_item)
 		{
@@ -120,6 +121,7 @@ void Container::set_capacity(size_t new_capacity)
 // Search operations
 const Item* Container::find_item_by_name(std::string_view name) const noexcept
 {
+	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(inventory_,
 		[name](const auto& item)
 		{

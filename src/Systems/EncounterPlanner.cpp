@@ -1,6 +1,6 @@
 // file: EncounterPlanner.cpp
+#include <cassert>
 #include <algorithm>
-#include <random>
 #include <string>
 #include <vector>
 
@@ -8,29 +8,27 @@
 #include "../Core/GameContext.h"
 #include "../Factories/MonsterCreator.h"
 #include "../Map/DungeonRoom.h"
-#include "../Map/Map.h"
 #include "../Random/RandomDice.h"
-#include "../Utils/Vector2D.h"
 #include "EncounterPlanner.h"
+#include "SpawnUtils.h"
 #include "LevelManager.h"
 
 // ---------------------------------------------------------------------------
 // Constants
 // ---------------------------------------------------------------------------
+namespace
+{
+	constexpr int BASE_XP_PER_LEVEL = 120;
+	constexpr int MAX_ENCOUNTER_MONSTERS = 10;
 
-constexpr int BASE_XP_PER_LEVEL = 120;
-constexpr int MAX_ENCOUNTER_MONSTERS = 10;
-
-constexpr float STANDARD_MULTIPLIER = 1.0f;
-constexpr float DANGER_MULTIPLIER = 2.5f;
-constexpr float TREASURE_MULTIPLIER = 1.5f;
+	constexpr float STANDARD_MULTIPLIER = 1.0f;
+	constexpr float DANGER_MULTIPLIER = 2.5f;
+	constexpr float TREASURE_MULTIPLIER = 1.5f;
 
 // ---------------------------------------------------------------------------
 // Budget calculation
 // ---------------------------------------------------------------------------
 
-namespace
-{
 int calculate_budget(RoomType type, int dungeonLevel)
 {
 	switch (type)
@@ -134,23 +132,6 @@ std::vector<std::string> select_encounter(
 // Random walkable position inside room
 // ---------------------------------------------------------------------------
 
-Vector2D random_room_position(const DungeonRoom& room, GameContext& ctx)
-{
-	Vector2D pos{};
-	constexpr int MAX_TRIES = 50;
-	for (int attempt = 0; attempt < MAX_TRIES; ++attempt)
-	{
-		pos.x = ctx.dice->roll(room.col, room.col_end());
-		pos.y = ctx.dice->roll(room.row, room.row_end());
-		if (ctx.map->can_walk(pos, ctx) &&
-			ctx.map->get_actor(pos, ctx) == nullptr &&
-			ctx.map->find_decoration_at(pos, ctx) == nullptr)
-		{
-			return pos;
-		}
-	}
-	return { -1, -1 }; // invalid sentinel
-}
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -159,10 +140,10 @@ Vector2D random_room_position(const DungeonRoom& room, GameContext& ctx)
 
 void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 {
-	if (!ctx.levelManager || !ctx.dice || !ctx.map || !ctx.creatures)
-	{
-		return;
-	}
+	assert(ctx.levelManager);
+	assert(ctx.dice);
+	assert(ctx.map);
+	assert(ctx.creatures);
 
 	const int dungeonLevel = ctx.levelManager->get_dungeon_level();
 	const int baseBudget = calculate_budget(room.type, dungeonLevel);
@@ -209,12 +190,12 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 	// Spawn each selected monster at a random walkable position
 	for (const auto& key : selected)
 	{
-		const Vector2D pos = random_room_position(room, ctx);
-		if (pos.x < 0)
+		auto pos = SpawnUtils::find_random_room_position(room, ctx);
+		if (!pos)
 		{
 			break; // no more walkable positions
 		}
 		ctx.creatures->push_back(
-			MonsterCreator::create_from_params(pos, MonsterCreator::get_params(key), ctx));
+			MonsterCreator::create_from_params(*pos, MonsterCreator::get_params(key), ctx));
 	}
 }

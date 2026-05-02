@@ -216,17 +216,16 @@ using ItemBehavior = std::variant<
 bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(IdentifyScroll& idScroll, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);
-bool use([[maybe_unused]] Armor& a, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx);
 bool use(MagicalHelm& mh, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(DungeonKey& dk, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
 

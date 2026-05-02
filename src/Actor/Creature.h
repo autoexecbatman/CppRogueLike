@@ -164,6 +164,7 @@ public:
 	virtual bool toggle_equipment(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
 	virtual bool toggle_weapon(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
 	virtual bool toggle_shield(uint64_t item_id, GameContext& ctx) { return false; }
+	virtual bool toggle_armor(uint64_t item_id, GameContext& ctx) { return false; }
 	virtual bool is_item_equipped(uint64_t item_id) const noexcept { return false; }
 	virtual bool is_slot_occupied(EquipmentSlot slot) const noexcept { return false; }
 	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept { return nullptr; }
