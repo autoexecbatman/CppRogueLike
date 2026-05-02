@@ -1,6 +1,8 @@
-#include <memory>
-#include <vector>
 #include <algorithm>
+#include <cassert>
+#include <memory>
+#include <ranges>
+#include <vector>
 
 #include "ItemTypeUtils.h"
 #include "../Actor/Container.h"
@@ -10,11 +12,13 @@ namespace ItemTypeUtils
 {
     Item* find_item_by_id(std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        // TODO: replace std::find_if with std::ranges::find_if + ranges view
-        auto it = std::find_if(inventory.begin(), inventory.end(),
+        auto is_null = [](const auto& item) { return !item; };
+        assert(std::ranges::none_of(inventory, is_null));
+
+        auto it = std::ranges::find_if(inventory,
             [uniqueId](const std::unique_ptr<Item>& item)
             {
-                return item && item->uniqueId == uniqueId;
+                return item->uniqueId == uniqueId;
             });
 
         return (it != inventory.end()) ? it->get() : nullptr;
@@ -22,11 +26,13 @@ namespace ItemTypeUtils
 
     const Item* find_item_by_id(const std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        // TODO: replace std::find_if with std::ranges::find_if + ranges view
-        auto it = std::find_if(inventory.begin(), inventory.end(),
+        auto is_null = [](const auto& item) { return !item; };
+        assert(std::ranges::none_of(inventory, is_null));
+
+        auto it = std::ranges::find_if(inventory,
             [uniqueId](const std::unique_ptr<Item>& item)
             {
-                return item && item->uniqueId == uniqueId;
+                return item->uniqueId == uniqueId;
             });
 
         return (it != inventory.end()) ? it->get() : nullptr;
@@ -36,20 +42,19 @@ namespace ItemTypeUtils
     {
         auto& inventory = container.get_inventory_mutable();
 
-        // TODO: replace std::find_if + erase with ranges (erase requires iterator for now)
-        auto it = std::find_if(inventory.begin(), inventory.end(),
-            [uniqueId](const std::unique_ptr<Item>& item)
-            {
-                return item && item->uniqueId == uniqueId;
-            });
+        auto is_null = [](const auto& item) { return !item; };
+        assert(std::ranges::none_of(inventory, is_null));
 
-        if (it != inventory.end())
+        auto matches_id = [uniqueId](const auto& item) { return item->uniqueId == uniqueId; };
+        auto matches = inventory | std::views::filter(matches_id);
+
+        if (std::ranges::empty(matches))
         {
-            auto extracted_item = std::move(*it);
-            inventory.erase(it);
-            return extracted_item;
+            return nullptr;
         }
-        
-        return nullptr;
+
+        auto extracted = std::move(matches.front());
+        std::erase_if(inventory, is_null);
+        return extracted;
     }
 }

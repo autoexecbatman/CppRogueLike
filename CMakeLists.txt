@@ -9,8 +9,8 @@ project(
 # Export compile commands for clangd
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Ensure the C++20 standard is available
-set(CMAKE_CXX_STANDARD 20)
+# Ensure the C++23 standard is available
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Enable parallel builds for MSVC

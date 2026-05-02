@@ -20,7 +20,7 @@ protected:
             ActorData{TileRef{}, "Test Sword", 1}
         );
         item->set_value(80);
-        item->item_key = "long_sword";
+        item->itemKey = "long_sword";
         item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{ false, HandRequirement::ONE_HANDED, WeaponSize::MEDIUM };
         return item;
@@ -37,7 +37,7 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_value(), 80);
-    EXPECT_EQ(loaded->item_key, "long_sword");
+    EXPECT_EQ(loaded->itemKey, "long_sword");
     EXPECT_EQ(loaded->itemClass, ItemClass::SWORD);
     EXPECT_EQ(loaded->actorData.name, "Test Sword");
 }
@@ -48,12 +48,12 @@ TEST_F(ItemSerializationTest, Enhancement_Preserved) {
     // Set enhancement
     original->enhancement.prefix = PrefixType::SHARP;
     original->enhancement.suffix = SuffixType::OF_THE_BEAR;
-    original->enhancement.damage_bonus = 2;
-    original->enhancement.to_hit_bonus = 1;
-    original->enhancement.strength_bonus = 2;
-    original->enhancement.is_magical = true;
-    original->enhancement.enhancement_level = 3;
-    original->enhancement.value_modifier = 150;
+    original->enhancement.damageBonus = 2;
+    original->enhancement.toHitBonus = 1;
+    original->enhancement.strengthBonus = 2;
+    original->enhancement.isMagical = true;
+    original->enhancement.enhancementLevel = 3;
+    original->enhancement.valueModifier = 150;
 
     json j;
     original->save(j);
@@ -63,21 +63,21 @@ TEST_F(ItemSerializationTest, Enhancement_Preserved) {
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::SHARP);
     EXPECT_EQ(loaded->enhancement.suffix, SuffixType::OF_THE_BEAR);
-    EXPECT_EQ(loaded->enhancement.damage_bonus, 2);
-    EXPECT_EQ(loaded->enhancement.to_hit_bonus, 1);
-    EXPECT_EQ(loaded->enhancement.strength_bonus, 2);
-    EXPECT_TRUE(loaded->enhancement.is_magical);
-    EXPECT_EQ(loaded->enhancement.enhancement_level, 3);
-    EXPECT_EQ(loaded->enhancement.value_modifier, 150);
+    EXPECT_EQ(loaded->enhancement.damageBonus, 2);
+    EXPECT_EQ(loaded->enhancement.toHitBonus, 1);
+    EXPECT_EQ(loaded->enhancement.strengthBonus, 2);
+    EXPECT_TRUE(loaded->enhancement.isMagical);
+    EXPECT_EQ(loaded->enhancement.enhancementLevel, 3);
+    EXPECT_EQ(loaded->enhancement.valueModifier, 150);
 }
 
 TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
     auto original = create_test_item();
 
-    original->enhancement.fire_resistance = 25;
-    original->enhancement.cold_resistance = 30;
-    original->enhancement.lightning_resistance = 15;
-    original->enhancement.poison_resistance = 50;
+    original->enhancement.fireResistance = 25;
+    original->enhancement.coldResistance = 30;
+    original->enhancement.lightningResistance = 15;
+    original->enhancement.poisonResistance = 50;
 
     json j;
     original->save(j);
@@ -85,10 +85,10 @@ TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
     auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
     loaded->load(j);
 
-    EXPECT_EQ(loaded->enhancement.fire_resistance, 25);
-    EXPECT_EQ(loaded->enhancement.cold_resistance, 30);
-    EXPECT_EQ(loaded->enhancement.lightning_resistance, 15);
-    EXPECT_EQ(loaded->enhancement.poison_resistance, 50);
+    EXPECT_EQ(loaded->enhancement.fireResistance, 25);
+    EXPECT_EQ(loaded->enhancement.coldResistance, 30);
+    EXPECT_EQ(loaded->enhancement.lightningResistance, 15);
+    EXPECT_EQ(loaded->enhancement.poisonResistance, 50);
 }
 
 TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
@@ -129,9 +129,9 @@ TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
     EXPECT_EQ(loaded->enhancement.suffix, SuffixType::NONE);
-    EXPECT_EQ(loaded->enhancement.damage_bonus, 0);
+    EXPECT_EQ(loaded->enhancement.damageBonus, 0);
     EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::UNCURSED);
-    EXPECT_FALSE(loaded->enhancement.is_magical);
+    EXPECT_FALSE(loaded->enhancement.isMagical);
 }
 
 TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {

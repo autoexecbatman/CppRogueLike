@@ -304,9 +304,10 @@ void Creature::equip(Item& item, GameContext& ctx)
 	std::vector<Item*> equippedItems;
 
 	// Find all equipped items
+	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
 	for (const auto& invItem : inventoryData.items)
 	{
-		if (invItem && invItem->has_state(ActorState::IS_EQUIPPED))
+		if (invItem->has_state(ActorState::IS_EQUIPPED))
 		{
 			bool itemIsArmor = invItem->is_armor();
 			bool itemIsWeapon = invItem->is_weapon();
@@ -336,7 +337,7 @@ void Creature::equip(Item& item, GameContext& ctx)
 	if (isWeapon)
 	{
 		weaponEquipped = item.get_name();
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.item_key);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemKey);
 		ctx.messageSystem->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
 	}
 
@@ -381,9 +382,10 @@ void Creature::unequip(Item& item, GameContext& ctx)
 
 		// Double-check all inventory to see if we still should have IS_RANGED
 		bool hasRangedWeapon = false;
+		assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
 		for (const auto& invItem : inventoryData.items)
 		{
-			if (invItem && invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
+			if (invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
 			{
 				if (invItem->is_ranged_weapon())
 				{
@@ -424,30 +426,30 @@ void Creature::sync_ranged_state(GameContext& ctx)
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
-	// Check if the item is actually in the inventory first
-	// TODO: replace std::find_if + erase with std::ranges::find_if + ranges (erase requires iterator for now)
-	auto it = std::find_if(inventoryData.items.begin(), inventoryData.items.end(), [&item](const auto& invItem)
-		{ return invItem.get() == &item; });
+	auto is_null = [](const auto& invItem) { return !invItem; };
+	assert(std::ranges::none_of(inventoryData.items, is_null));
 
-	if (it != inventoryData.items.end())
+	auto matches_item = [&item](const auto& invItem) { return invItem.get() == &item; };
+	auto matches = inventoryData.items | std::views::filter(matches_item);
+
+	if (std::ranges::empty(matches))
 	{
-		// Set the item's position to the player's position
-		(*it)->position = position;
+		return;
+	}
 
-		// If the item is equipped, unequip it first
-		if ((*it)->has_state(ActorState::IS_EQUIPPED))
-		{
-			unequip(*(*it), ctx);
-		}
+	auto& foundPtr = matches.front();
+	foundPtr->position = position;
 
-		// Add to game floor inventory
-		auto addResult = InventoryOperations::add_item(*ctx.inventoryData, std::move(*it));
-		if (addResult.has_value())
-		{
-			// Clean up null pointer that remains after moving
-			InventoryOperations::optimize_inventory_storage(inventoryData);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
-		}
+	if (foundPtr->has_state(ActorState::IS_EQUIPPED))
+	{
+		unequip(*foundPtr, ctx);
+	}
+
+	auto addResult = InventoryOperations::add_item(*ctx.inventoryData, std::move(foundPtr));
+	if (addResult.has_value())
+	{
+		InventoryOperations::optimize_inventory_storage(inventoryData);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
 	}
 }
 
@@ -489,14 +491,11 @@ void Creature::die(GameContext& ctx)
 		ctx.animSystem->spawn_death(position.x, position.y);
 	}
 
+	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
 	for (auto& item : inventoryData.items)
 	{
-		if (!item)
-		{
-			continue;
-		}
 		item->position = position;
-		InventoryOperations::add_item(*ctx.inventoryData, std::move(item));
+		assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(item)).has_value());
 	}
 	inventoryData.items.clear();
 
@@ -506,7 +505,7 @@ void Creature::die(GameContext& ctx)
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
 	corpse->behavior = CorpseFood{ 0 };
-	InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
+	assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse)).has_value());
 }
 
 //==Unified Buff System - Modifier Stack Pattern==

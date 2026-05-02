@@ -1,6 +1,8 @@
 // file: Systems/GameLoopCoordinator.cpp
+#include <cassert>
 #include <cmath>
 #include <format>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -383,9 +385,10 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			hg = 180;
 			hb = 0; // amber
 		}
+		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
 		for (const auto& item : ctx.inventoryData->items)
 		{
-			if (item && item->position == world_tile)
+			if (item->position == world_tile)
 			{
 				desc += " [" + item->actorData.name + "]";
 				if (!actor)

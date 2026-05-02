@@ -48,7 +48,7 @@ int get_max_weight(const Creature& owner) noexcept;
 bool is_overloaded(const InventoryData& inventory, const Creature& owner) noexcept;
 
 // Capacity modification
-void set_inventory_capacity(InventoryData& inventory, size_t new_capacity);
+void set_inventory_capacity(InventoryData& inventory, size_t newCapacity);
 
 // ===== ITEM ACCESS =====
 
@@ -60,9 +60,9 @@ const Item* get_item_at(const InventoryData& inventory, size_t index) noexcept;
 
 // Const-correct search functions
 const Item* find_item_by_name(const InventoryData& inventory, std::string_view name) noexcept;
-Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept;
-const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) noexcept;
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t unique_id);
+Item* find_item_by_id(InventoryData& inventory, uint64_t uniqueId) noexcept;
+const Item* find_item_by_id(const InventoryData& inventory, uint64_t uniqueId) noexcept;
+InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t uniqueId);
 bool contains_item(const InventoryData& inventory, const Item& item) noexcept;
 
 // ===== EVENT SYSTEM =====

@@ -2,6 +2,7 @@
 #include <cassert>
 #include <format>
 #include <memory>
+#include <ranges>
 
 #include "../Actor/Creature.h"
 #include "../Actor/InventoryOperations.h"
@@ -41,14 +42,11 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
         ctx.animSystem->spawn_death(owner.position.x, owner.position.y);
     }
 
+    assert(std::ranges::none_of(owner.inventoryData.items, [](const auto& i) { return !i; }));
     for (auto& item : owner.inventoryData.items)
     {
-        if (!item)
-        {
-            continue;
-        }
         item->position = owner.position;
-        InventoryOperations::add_item(*ctx.inventoryData, std::move(item));
+        assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(item)).has_value());
     }
     owner.inventoryData.items.clear();
 
@@ -58,7 +56,7 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
     corpse->enhancement.weight = owner.get_corpse_weight();
     corpse->behavior = CorpseFood{ 0 };
-    InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse));
+    assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse)).has_value());
 }
 
 //==PlayerDeathHandler==

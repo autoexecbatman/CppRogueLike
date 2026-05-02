@@ -248,7 +248,7 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 
 	case ItemClass::BOW:
 	{
-		if (weapon->item_key == "long_bow")
+		if (weapon->itemKey == "long_bow")
 		{
 			return 7;
 		}

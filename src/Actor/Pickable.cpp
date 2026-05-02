@@ -67,13 +67,7 @@ const std::unordered_map<std::string, std::string> corpseFlavorText = {
 template <typename K, typename V>
 const V& get_or_default(const std::unordered_map<K, V>& map, const K& key, const V& default_value) noexcept
 {
-	// TODO: replace iterator pattern with contains + at
-	const auto it = map.find(key);
-	if (it != map.end())
-	{
-		return it->second;
-	}
-	return default_value;
+	return map.contains(key) ? map.at(key) : default_value;
 }
 
 // Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
@@ -260,13 +254,13 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Cre
 
 // ========== Weapon struct methods ==========
 
-bool Weapon::validate_dual_wield(const Item* main_hand, const Item* off_hand) const
+bool Weapon::validate_dual_wield(const Item* mainHand, const Item* offHand) const
 {
-	if (!main_hand || !off_hand)
+	if (!mainHand || !offHand)
 	{
 		return false;
 	}
-	return main_hand->is_weapon() && off_hand->is_weapon();
+	return mainHand->is_weapon() && offHand->is_weapon();
 }
 
 EquipmentSlot Weapon::get_preferred_slot(const Creature* creature) const
@@ -281,19 +275,19 @@ EquipmentSlot Weapon::get_preferred_slot(const Creature* creature) const
 		return EquipmentSlot::RIGHT_HAND;
 	}
 
-	Item* main_hand = creature->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	Item* off_hand = creature->get_equipped_item(EquipmentSlot::LEFT_HAND);
+	Item* mainHand = creature->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	Item* offHand = creature->get_equipped_item(EquipmentSlot::LEFT_HAND);
 
-	if (!main_hand || off_hand)
+	if (!mainHand || offHand)
 	{
 		return EquipmentSlot::RIGHT_HAND;
 	}
 
-	if (main_hand->is_weapon())
+	if (mainHand->is_weapon())
 	{
-		if (const Weapon* main_weapon = std::get_if<Weapon>(&*main_hand->behavior))
+		if (const Weapon* mainWeapon = std::get_if<Weapon>(&*mainHand->behavior))
 		{
-			if (main_weapon->get_weapon_size() > weaponSize)
+			if (mainWeapon->get_weapon_size() > weaponSize)
 			{
 				return EquipmentSlot::LEFT_HAND;
 			}

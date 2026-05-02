@@ -1262,7 +1262,7 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemEntry& entry, Ve
 		pos,
 		ActorData{ tile, std::string{ p.name }, p.color });
 	item->behavior = create_behavior(p);
-	item->item_key = std::string{ key };
+	item->itemKey = std::string{ key };
 	item->itemClass = p.itemClass;
 	item->set_value(p.value);
 	item->enhancement.weight = p.baseWeight; // Assign base weight to enhancement
@@ -1335,58 +1335,50 @@ std::vector<std::string> ItemCreator::get_all_keys()
 
 const ItemParams& ItemCreator::get_params(std::string_view key)
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = registry.find(std::string{ key });
-	if (it == registry.end())
+	if (!registry.contains(std::string{ key }))
 	{
 		throw std::out_of_range(
 			std::format("ItemCreator::get_params -- unknown key '{}'", key));
 	}
-
-	return it->second.params;
+	return registry.at(std::string{ key }).params;
 }
 
 void ItemCreator::set_params(std::string_view key, const ItemParams& params)
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = registry.find(std::string{ key });
-	if (it == registry.end())
+	if (!registry.contains(std::string{ key }))
 	{
 		throw std::out_of_range(
 			std::format("ItemCreator::set_params -- unknown key '{}'", key));
 	}
-	it->second.params = params;
-	patch_views(it->second);
+	auto& entry = registry.at(std::string{ key });
+	entry.params = params;
+	patch_views(entry);
 }
 
 std::unique_ptr<Item> ItemCreator::create(std::string_view key, Vector2D pos, ContentRegistry& tiles)
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = registry.find(std::string{ key });
-	if (it == registry.end())
+	if (!registry.contains(std::string{ key }))
 	{
 		throw std::out_of_range(
 			std::format("ItemCreator::create -- unknown key '{}'", key));
 	}
-	return make_item(key, it->second, pos, tiles);
+	return make_item(key, registry.at(std::string{ key }), pos, tiles);
 }
 
 std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int goldAmount, ContentRegistry& tiles)
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = registry.find("gold_coin");
-	if (it == registry.end())
+	if (!registry.contains("gold_coin"))
 	{
 		throw std::runtime_error(
 			"ItemCreator::create_with_gold_amount -- 'gold_coin' not in registry");
 	}
-	const ItemParams& p = it->second.params;
+	const ItemParams& p = registry.at("gold_coin").params;
 	TileRef tile = tiles.get_tile("gold_coin");
 	auto item = std::make_unique<Item>(
 		pos,
 		ActorData{ tile, std::string{ p.name }, p.color });
 	item->behavior = Gold{ goldAmount };
-	item->item_key = "gold_coin";
+	item->itemKey = "gold_coin";
 	item->itemClass = p.itemClass;
 	item->set_value(goldAmount);
 	return item;
@@ -1495,16 +1487,15 @@ void ItemCreator::remove_custom(std::string_view key)
 
 void ItemCreator::set_name_category(std::string_view key, std::string name, std::string category)
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = registry.find(std::string{ key });
-	if (it == registry.end())
+	if (!registry.contains(std::string{ key }))
 	{
 		throw std::out_of_range(
 			std::format("ItemCreator::set_name_category -- unknown key '{}'", key));
 	}
-	it->second.name = std::move(name);
-	it->second.category = std::move(category);
-	patch_views(it->second);
+	auto& entry = registry.at(std::string{ key });
+	entry.name = std::move(name);
+	entry.category = std::move(category);
+	patch_views(entry);
 }
 
 bool ItemCreator::is_builtin_key(std::string_view key)

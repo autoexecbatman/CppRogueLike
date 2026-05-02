@@ -254,8 +254,7 @@ void DungeonGenerator::add_extra_corridors(
 			continue;
 		}
 
-		// TODO: replace with std::ranges::contains
-		if (std::ranges::find(rooms[a].adjacentRoomIndices, b) != rooms[a].adjacentRoomIndices.end())
+		if (std::ranges::contains(rooms[a].adjacentRoomIndices, b))
 		{
 			continue;
 		}

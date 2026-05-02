@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <cstdlib>
 #include <memory>
 #include <string>
@@ -75,7 +76,7 @@ void ShopKeeper::generate_initial_inventory(GameContext& ctx)
 		std::unique_ptr<Item> item = generate_random_item_by_type(ctx);
 		if (item)
 		{
-			add_item(shop_inventory, std::move(item));
+			assert(add_item(shop_inventory, std::move(item)).has_value());
 		}
 	}
 }
@@ -209,7 +210,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// Copy behavior (variant is value-copyable)
 	player_item->behavior = item.behavior;
 
-	add_item(player.inventoryData, std::move(player_item));
+	assert(add_item(player.inventoryData, std::move(player_item)).has_value());
 
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
@@ -232,7 +233,7 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& pla
 	{
 		if (!is_inventory_full(shop_inventory))
 		{
-			add_item(shop_inventory, std::move(*removed_item));
+			assert(add_item(shop_inventory, std::move(*removed_item)).has_value());
 		}
 	}
 

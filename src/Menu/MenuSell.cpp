@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -111,7 +112,7 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 			auto add_result = InventoryOperations::add_item(shopkeeper.inventoryData, std::move(*removed_item));
 			if (!add_result.has_value())
 			{
-				InventoryOperations::add_item(seller.inventoryData, std::move(*removed_item));
+				assert(InventoryOperations::add_item(seller.inventoryData, std::move(*removed_item)).has_value());
 				shopkeeper.adjust_gold(price);
 				seller.adjust_gold(-price);
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);

@@ -1,3 +1,4 @@
+#include <cassert>
 #include <string>
 
 #include <raylib.h>
@@ -186,7 +187,7 @@ void MenuBuy::handle_buy()
 
 	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
 	{
-		remove_item_at(shopkeeper.shop_inventory, currentState);
+		assert(remove_item_at(shopkeeper.shop_inventory, currentState).has_value());
 
 		if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
 		{

@@ -30,27 +30,27 @@ public:
 	const std::string& get_base_name() const noexcept { return actorData.name; }
 
 	// Enhancement system
-	void apply_enhancement(const ItemEnhancement& enhancement);
-	void generate_random_enhancement(bool allow_magical);
+	void apply_enhancement(const ItemEnhancement& newEnhancement);
+	void generate_random_enhancement(bool allowMagical);
 	const ItemEnhancement& get_enhancement() const noexcept { return enhancement; }
 	bool is_enhanced() const noexcept;
 
 	// Identification system
-	void identify_type() noexcept { identification.identified_type = true; }
-	void identify_enhancement() noexcept { identification.identified_enhancement = true; }
-	void identify_buc() noexcept { identification.identified_buc = true; }
+	void identify_type() noexcept { identification.identifiedType = true; }
+	void identify_enhancement() noexcept { identification.identifiedEnhancement = true; }
+	void identify_buc() noexcept { identification.identifiedBuc = true; }
 	void identify_all() noexcept { identification.identify_all(); }
 	void reset_identification() noexcept { identification.reset(); }
 	[[nodiscard]] bool is_fully_identified() const noexcept { return identification.is_fully_identified(); }
-	[[nodiscard]] bool is_type_identified() const noexcept { return identification.identified_type; }
-	[[nodiscard]] bool is_enhancement_identified() const noexcept { return identification.identified_enhancement; }
-	[[nodiscard]] bool is_buc_identified() const noexcept { return identification.identified_buc; }
+	[[nodiscard]] bool is_type_identified() const noexcept { return identification.identifiedType; }
+	[[nodiscard]] bool is_enhancement_identified() const noexcept { return identification.identifiedEnhancement; }
+	[[nodiscard]] bool is_buc_identified() const noexcept { return identification.identifiedBuc; }
 
-	// Value: baseValue * enhancement.value_modifier / 100  (modifier defaults to 100)
-	int get_value() const noexcept { return (baseValue * enhancement.value_modifier) / 100; }
+	// Value: baseValue * enhancement.valueModifier / 100  (modifier defaults to 100)
+	int get_value() const noexcept { return (baseValue * enhancement.valueModifier) / 100; }
 	void set_value(int v) noexcept { baseValue = v; }
 
-	std::string item_key; // JSON registry key
+	std::string itemKey; // JSON registry key
 	ItemClass itemClass{ ItemClass::UNKNOWN }; // Item category classification
 	ItemEnhancement enhancement; // Enhancement data
 	ItemIdentificationStatus identification; // Identification tracking

@@ -1,8 +1,8 @@
 #pragma once
 
+#include <expected>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <vector>
 
 #include "Item.h"
@@ -18,31 +18,8 @@ enum class InventoryError
 	CAPACITY_EXCEEDED
 };
 
-// Result type for inventory operations
 template <typename T>
-struct InventoryResult
-{
-	std::optional<T> value;
-	std::optional<InventoryError> error;
-
-	// Success constructor
-	InventoryResult(T&& val)
-		: value(std::move(val)) {}
-
-	// Error constructor
-	InventoryResult(InventoryError err)
-		: error(err) {}
-
-	// Convenience methods
-	bool has_value() const { return value.has_value(); }
-	bool has_error() const { return error.has_value(); }
-	explicit operator bool() const { return has_value(); }
-
-	T& operator*() { return *value; }
-	const T& operator*() const { return *value; }
-
-	InventoryError get_error() const { return error.value_or(InventoryError::INVALID_ITEM); }
-};
+using InventoryResult = std::expected<T, InventoryError>;
 
 // Event system for decoupled communication
 struct InventoryEvent
@@ -54,10 +31,10 @@ struct InventoryEvent
 		INVENTORY_FULL,
 		CAPACITY_CHANGED
 	};
-	Type type;
-	const Item* item;
-	size_t current_size;
-	size_t capacity;
+	Type type{ Type::ITEM_ADDED };
+	const Item* item{ nullptr };
+	size_t currentSize{ 0 };
+	size_t capacity{ 0 };
 };
 
 using InventoryEventHandler = std::function<void(const InventoryEvent&)>;
@@ -66,14 +43,14 @@ using InventoryEventHandler = std::function<void(const InventoryEvent&)>;
 struct InventoryData
 {
 	std::vector<std::unique_ptr<Item>> items;
-	size_t capacity;
-	InventoryEventHandler event_handler;
+	size_t capacity{ 0 };
+	InventoryEventHandler eventHandler{ nullptr };
 
 	// Simple constructor
-	explicit InventoryData(size_t initial_capacity)
-		: capacity(initial_capacity), event_handler(nullptr)
+	explicit InventoryData(size_t initialCapacity)
+		: capacity(initialCapacity), eventHandler(nullptr)
 	{
-		items.reserve(initial_capacity);
+		items.reserve(initialCapacity);
 	}
 
 	// Move semantics

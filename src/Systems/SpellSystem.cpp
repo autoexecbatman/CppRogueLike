@@ -438,11 +438,9 @@ const SpellDefinition& SpellSystem::get_by_key(std::string_view key)
 		}
 	}
 
-	// TODO: replace iterator pattern with contains + at
-	auto it = s_custom_spells.find(std::string{ key });
-	if (it != s_custom_spells.end())
+	if (s_custom_spells.contains(std::string{ key }))
 	{
-		return it->second;
+		return s_custom_spells.at(std::string{ key });
 	}
 
 	throw std::out_of_range(std::format("SpellSystem::get_by_key -- unknown key '{}'", key));
@@ -459,11 +457,9 @@ void SpellSystem::set_by_key(std::string_view key, const SpellDefinition& def)
 		}
 	}
 
-	// TODO: replace iterator pattern with contains + at
-	auto it = s_custom_spells.find(std::string{ key });
-	if (it != s_custom_spells.end())
+	if (s_custom_spells.contains(std::string{ key }))
 	{
-		it->second = def;
+		s_custom_spells.at(std::string{ key }) = def;
 		return;
 	}
 

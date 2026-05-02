@@ -7,7 +7,7 @@
 #include "DamageInfo.h"
 #include "WeaponDamageRegistry.h"
 
-const std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::weapon_damage_map =
+const std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::weaponDamageMap =
 	WeaponDamageRegistry::create_weapon_damage_map();
 
 std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_damage_map()
@@ -45,11 +45,9 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 
 DamageInfo WeaponDamageRegistry::get_damage_info(std::string_view weaponKey) noexcept
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = weapon_damage_map.find(std::string{ weaponKey });
-	if (it != weapon_damage_map.end())
+	if (weaponDamageMap.contains(std::string{ weaponKey }))
 	{
-		return it->second;
+		return weaponDamageMap.at(std::string{ weaponKey });
 	}
 	return get_unarmed_damage_info();
 }
@@ -58,9 +56,9 @@ DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weapo
 {
 	DamageInfo baseDamage = get_damage_info(weaponKey);
 
-	if (enhancement && enhancement->damage_bonus != 0)
+	if (enhancement && enhancement->damageBonus != 0)
 	{
-		return baseDamage.with_enhancement(enhancement->damage_bonus, 0);
+		return baseDamage.with_enhancement(enhancement->damageBonus, 0);
 	}
 
 	return baseDamage;
@@ -73,5 +71,5 @@ std::string WeaponDamageRegistry::get_damage_roll(std::string_view weaponKey) no
 
 bool WeaponDamageRegistry::is_registered(std::string_view weaponKey) noexcept
 {
-	return weapon_damage_map.contains(std::string{ weaponKey });
+	return weaponDamageMap.contains(std::string{ weaponKey });
 }

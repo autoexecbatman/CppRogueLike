@@ -31,36 +31,36 @@ TEST_F(EnhancementSystemTest, DefaultEnhancement_HasNoSuffix) {
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_ZeroBonuses) {
-    EXPECT_EQ(defaultEnhancement.damage_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.to_hit_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.ac_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.strength_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.dexterity_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.intelligence_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.hp_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.mana_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.speed_bonus, 0);
-    EXPECT_EQ(defaultEnhancement.stealth_bonus, 0);
+    EXPECT_EQ(defaultEnhancement.damageBonus, 0);
+    EXPECT_EQ(defaultEnhancement.toHitBonus, 0);
+    EXPECT_EQ(defaultEnhancement.acBonus, 0);
+    EXPECT_EQ(defaultEnhancement.strengthBonus, 0);
+    EXPECT_EQ(defaultEnhancement.dexterityBonus, 0);
+    EXPECT_EQ(defaultEnhancement.intelligenceBonus, 0);
+    EXPECT_EQ(defaultEnhancement.hpBonus, 0);
+    EXPECT_EQ(defaultEnhancement.manaBonus, 0);
+    EXPECT_EQ(defaultEnhancement.speedBonus, 0);
+    EXPECT_EQ(defaultEnhancement.stealthBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_ZeroResistances) {
-    EXPECT_EQ(defaultEnhancement.fire_resistance, 0);
-    EXPECT_EQ(defaultEnhancement.cold_resistance, 0);
-    EXPECT_EQ(defaultEnhancement.lightning_resistance, 0);
-    EXPECT_EQ(defaultEnhancement.poison_resistance, 0);
+    EXPECT_EQ(defaultEnhancement.fireResistance, 0);
+    EXPECT_EQ(defaultEnhancement.coldResistance, 0);
+    EXPECT_EQ(defaultEnhancement.lightningResistance, 0);
+    EXPECT_EQ(defaultEnhancement.poisonResistance, 0);
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_NotCursedOrBlessed) {
     EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::UNCURSED);
-    EXPECT_FALSE(defaultEnhancement.is_magical);
+    EXPECT_FALSE(defaultEnhancement.isMagical);
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_BaseValueModifier) {
-    EXPECT_EQ(defaultEnhancement.value_modifier, 100);
+    EXPECT_EQ(defaultEnhancement.valueModifier, 100);
 }
 
 TEST_F(EnhancementSystemTest, DefaultEnhancement_ZeroEnhancementLevel) {
-    EXPECT_EQ(defaultEnhancement.enhancement_level, 0);
+    EXPECT_EQ(defaultEnhancement.enhancementLevel, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -157,7 +157,7 @@ TEST_F(EnhancementSystemTest, GetFullName_PrefixAndSuffix_IncludesBoth) {
 }
 
 TEST_F(EnhancementSystemTest, GetFullName_WithEnhancementLevel_IncludesPlus) {
-    defaultEnhancement.enhancement_level = 2;
+    defaultEnhancement.enhancementLevel = 2;
     defaultEnhancement.prefix = PrefixType::NONE;
     defaultEnhancement.suffix = SuffixType::NONE;
 
@@ -176,7 +176,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_SharpPrefix_AddsDamageBonus) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.damage_bonus, 0);
+    EXPECT_GT(defaultEnhancement.damageBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_KeenPrefix_AddsDamageBonus) {
@@ -189,7 +189,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_KeenPrefix_AddsDamageBonus) {
     sharpEnhancement.prefix = PrefixType::SHARP;
     sharpEnhancement.apply_enhancement_effects();
 
-    EXPECT_GE(defaultEnhancement.damage_bonus, sharpEnhancement.damage_bonus);
+    EXPECT_GE(defaultEnhancement.damageBonus, sharpEnhancement.damageBonus);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_MasterworkPrefix_AddsToHit) {
@@ -197,7 +197,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_MasterworkPrefix_AddsToHit) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.to_hit_bonus, 0);
+    EXPECT_GT(defaultEnhancement.toHitBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_BlessedPrefix_AddsBothBonuses) {
@@ -205,8 +205,8 @@ TEST_F(EnhancementSystemTest, ApplyEffects_BlessedPrefix_AddsBothBonuses) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.damage_bonus, 0);
-    EXPECT_GT(defaultEnhancement.to_hit_bonus, 0);
+    EXPECT_GT(defaultEnhancement.damageBonus, 0);
+    EXPECT_GT(defaultEnhancement.toHitBonus, 0);
     EXPECT_EQ(defaultEnhancement.blessing, BlessingStatus::BLESSED);
 }
 
@@ -215,7 +215,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_ReinforcedPrefix_AddsACBonus) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.ac_bonus, 0);
+    EXPECT_GT(defaultEnhancement.acBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_CursedPrefix_SetsCursedFlag) {
@@ -231,7 +231,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_OfSlayingSuffix_AddsDamage) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.damage_bonus, 0);
+    EXPECT_GT(defaultEnhancement.damageBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_OfTheBearSuffix_AddsStrength) {
@@ -239,7 +239,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_OfTheBearSuffix_AddsStrength) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.strength_bonus, 0);
+    EXPECT_GT(defaultEnhancement.strengthBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_OfTheEagleSuffix_AddsDexterity) {
@@ -247,7 +247,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_OfTheEagleSuffix_AddsDexterity) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.dexterity_bonus, 0);
+    EXPECT_GT(defaultEnhancement.dexterityBonus, 0);
 }
 
 TEST_F(EnhancementSystemTest, ApplyEffects_OfFireResistance_AddsResistance) {
@@ -255,7 +255,7 @@ TEST_F(EnhancementSystemTest, ApplyEffects_OfFireResistance_AddsResistance) {
 
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GT(defaultEnhancement.fire_resistance, 0);
+    EXPECT_GT(defaultEnhancement.fireResistance, 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -266,16 +266,16 @@ TEST_F(EnhancementSystemTest, FireResistance_InValidRange) {
     defaultEnhancement.suffix = SuffixType::OF_FIRE_RESISTANCE;
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GE(defaultEnhancement.fire_resistance, 0);
-    EXPECT_LE(defaultEnhancement.fire_resistance, 100);
+    EXPECT_GE(defaultEnhancement.fireResistance, 0);
+    EXPECT_LE(defaultEnhancement.fireResistance, 100);
 }
 
 TEST_F(EnhancementSystemTest, ColdResistance_InValidRange) {
     defaultEnhancement.suffix = SuffixType::OF_COLD_RESISTANCE;
     defaultEnhancement.apply_enhancement_effects();
 
-    EXPECT_GE(defaultEnhancement.cold_resistance, 0);
-    EXPECT_LE(defaultEnhancement.cold_resistance, 100);
+    EXPECT_GE(defaultEnhancement.coldResistance, 0);
+    EXPECT_LE(defaultEnhancement.coldResistance, 100);
 }
 
 // ----------------------------------------------------------------------------
@@ -288,7 +288,7 @@ TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
     // Should have at least one enhancement (prefix or suffix or level)
     bool hasEnhancement = (enhancement.prefix != PrefixType::NONE) ||
                           (enhancement.suffix != SuffixType::NONE) ||
-                          (enhancement.enhancement_level > 0);
+                          (enhancement.enhancementLevel > 0);
 
     // May or may not have enhancement depending on random chance
     // Just verify no crash
@@ -339,28 +339,28 @@ TEST_F(EnhancementSystemTest, GenerateByRarity_Level5_PowerfulEnhancement) {
 // ----------------------------------------------------------------------------
 
 TEST_F(EnhancementSystemTest, ValueModifier_100_NoChange) {
-    defaultEnhancement.value_modifier = 100;
+    defaultEnhancement.valueModifier = 100;
 
     int baseValue = 100;
-    int enhancedValue = (baseValue * defaultEnhancement.value_modifier) / 100;
+    int enhancedValue = (baseValue * defaultEnhancement.valueModifier) / 100;
 
     EXPECT_EQ(enhancedValue, 100);
 }
 
 TEST_F(EnhancementSystemTest, ValueModifier_150_IncreasesValue) {
-    defaultEnhancement.value_modifier = 150;
+    defaultEnhancement.valueModifier = 150;
 
     int baseValue = 100;
-    int enhancedValue = (baseValue * defaultEnhancement.value_modifier) / 100;
+    int enhancedValue = (baseValue * defaultEnhancement.valueModifier) / 100;
 
     EXPECT_EQ(enhancedValue, 150);
 }
 
 TEST_F(EnhancementSystemTest, ValueModifier_50_DecreasesValue) {
-    defaultEnhancement.value_modifier = 50;
+    defaultEnhancement.valueModifier = 50;
 
     int baseValue = 100;
-    int enhancedValue = (baseValue * defaultEnhancement.value_modifier) / 100;
+    int enhancedValue = (baseValue * defaultEnhancement.valueModifier) / 100;
 
     EXPECT_EQ(enhancedValue, 50);
 }
@@ -370,7 +370,7 @@ TEST_F(EnhancementSystemTest, ValueModifier_50_DecreasesValue) {
 // ----------------------------------------------------------------------------
 
 TEST_F(EnhancementSystemTest, EnhancementLevel_AffectsName) {
-    defaultEnhancement.enhancement_level = 3;
+    defaultEnhancement.enhancementLevel = 3;
 
     std::string name = defaultEnhancement.get_full_name("sword");
 
@@ -378,7 +378,7 @@ TEST_F(EnhancementSystemTest, EnhancementLevel_AffectsName) {
 }
 
 TEST_F(EnhancementSystemTest, EnhancementLevel_Zero_NoPlus) {
-    defaultEnhancement.enhancement_level = 0;
+    defaultEnhancement.enhancementLevel = 0;
 
     std::string name = defaultEnhancement.get_full_name("sword");
 
@@ -397,7 +397,7 @@ TEST_F(EnhancementSystemTest, PrefixAndSuffixBonuses_Stack) {
     defaultEnhancement.apply_enhancement_effects();
 
     // Both should contribute to damage
-    EXPECT_GE(defaultEnhancement.damage_bonus, 2);
+    EXPECT_GE(defaultEnhancement.damageBonus, 2);
 }
 
 TEST_F(EnhancementSystemTest, CursedItem_CanHaveOtherEnhancements) {
@@ -447,10 +447,10 @@ TEST_F(EnhancementSystemTest, MultipleApplyEffects_Idempotent) {
     defaultEnhancement.prefix = PrefixType::SHARP;
 
     defaultEnhancement.apply_enhancement_effects();
-    int firstDamageBonus = defaultEnhancement.damage_bonus;
+    int firstDamageBonus = defaultEnhancement.damageBonus;
 
     defaultEnhancement.apply_enhancement_effects();
-    int secondDamageBonus = defaultEnhancement.damage_bonus;
+    int secondDamageBonus = defaultEnhancement.damageBonus;
 
     // Applying effects multiple times should be idempotent or additive
     // (depends on implementation - this documents behavior)
@@ -463,7 +463,7 @@ TEST_F(EnhancementSystemTest, MultipleApplyEffects_Idempotent) {
 
 TEST_F(EnhancementSystemTest, WeaponDamageRegistry_AppliesEnhancement) {
     ItemEnhancement enhancement;
-    enhancement.damage_bonus = 3;
+    enhancement.damageBonus = 3;
 
     DamageInfo baseDamage = WeaponDamageRegistry::get_damage_info("long_sword");
     DamageInfo enhancedDamage = WeaponDamageRegistry::get_enhanced_damage_info(

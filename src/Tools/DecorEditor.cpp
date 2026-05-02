@@ -233,9 +233,8 @@ bool DecorEditor::is_active_map_empty() const
 TileRef DecorEditor::get_override(int world_x, int world_y) const
 {
 	const auto& m = current_map();
-	// TODO: replace iterator pattern with contains + at
-	auto it = m.find(make_key(world_x, world_y));
-	return (it != m.end()) ? it->second : TileRef{};
+	const auto key = make_key(world_x, world_y);
+	return m.contains(key) ? m.at(key) : TileRef{};
 }
 
 std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map()
@@ -245,13 +244,10 @@ std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map()
 
 const std::unordered_map<uint32_t, TileRef>& DecorEditor::current_map() const
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = all_overrides.find(active_key);
-	if (it != all_overrides.end())
+	if (all_overrides.contains(active_key))
 	{
-		return it->second;
+		return all_overrides.at(active_key);
 	}
-
 	static const std::unordered_map<uint32_t, TileRef> empty;
 	return empty;
 }

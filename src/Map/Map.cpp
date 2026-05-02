@@ -9,6 +9,7 @@
 #include <optional>
 #include <queue>
 #include <set>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <vector>
@@ -1632,9 +1633,10 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	// Check if there's a floor item on the door tile
 	if (ctx.inventoryData)
 	{
+		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
 		auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 		{
-			return item && item->position == pos;
+			return item->position == pos;
 		};
 		if (std::ranges::any_of(ctx.inventoryData->items, has_item_at_pos))
 		{
@@ -1794,7 +1796,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry));
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry)).has_value());
 
 		// Log the placement (debug info)
 		if (ctx.messageSystem)
@@ -2159,7 +2161,7 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
-	InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer);
+	assert(InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer).has_value());
 
 	ctx.creatures->push_back(std::move(jailer));
 }

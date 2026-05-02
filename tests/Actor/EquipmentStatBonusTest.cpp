@@ -50,7 +50,7 @@ protected:
         auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
         item->actorData.name = "Test Item +" + std::to_string(bonus) + " STR";
         item->actorData.tile = TileRef{};
-        item->enhancement.strength_bonus = bonus;
+        item->enhancement.strengthBonus = bonus;
         item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;
@@ -61,7 +61,7 @@ protected:
         auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
         item->actorData.name = "Test Item +" + std::to_string(bonus) + " DEX";
         item->actorData.tile = TileRef{};
-        item->enhancement.dexterity_bonus = bonus;
+        item->enhancement.dexterityBonus = bonus;
         item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;
@@ -72,8 +72,8 @@ protected:
         auto item = std::make_unique<Item>(Vector2D{}, ActorData{});
         item->actorData.name = "Test Item +" + std::to_string(str_bonus) + " STR +" + std::to_string(dex_bonus) + " DEX";
         item->actorData.tile = TileRef{};
-        item->enhancement.strength_bonus = str_bonus;
-        item->enhancement.dexterity_bonus = dex_bonus;
+        item->enhancement.strengthBonus = str_bonus;
+        item->enhancement.dexterityBonus = dex_bonus;
         item->itemClass = ItemClass::SWORD;
         item->behavior = Weapon{};
         return item;

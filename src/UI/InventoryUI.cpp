@@ -310,8 +310,7 @@ bool InventoryUI::item_fits_slot(const Item& item, EquipmentSlot slot) const
 
 bool InventoryUI::is_usable_category(ItemCategory cat) const
 {
-	// TODO: replace with std::ranges::contains
-	return std::ranges::find(USABLE_CATEGORIES, cat) != USABLE_CATEGORIES.end();
+	return std::ranges::contains(USABLE_CATEGORIES, cat);
 }
 
 ItemCategory InventoryUI::get_effective_category(const Item& item) const
@@ -600,7 +599,7 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 std::string InventoryUI::format_weapon_info(const Item& item) const
 {
 	DamageInfo damage = WeaponDamageRegistry::get_enhanced_damage_info(
-		item.item_key,
+		item.itemKey,
 		&item.get_enhancement());
 	const Weapon* weapon = item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
 	bool ranged = weapon && weapon->is_ranged();
@@ -680,25 +679,25 @@ std::string InventoryUI::format_enhancement_info(const Item& item) const
 	const auto& enh = item.get_enhancement();
 	std::string result;
 
-	if (enh.to_hit_bonus != 0)
+	if (enh.toHitBonus != 0)
 	{
-		result += std::format("Hit {:+d}", enh.to_hit_bonus);
+		result += std::format("Hit {:+d}", enh.toHitBonus);
 	}
-	if (enh.damage_bonus != 0)
+	if (enh.damageBonus != 0)
 	{
 		if (!result.empty())
 		{
 			result += " ";
 		}
-		result += std::format("Dmg {:+d}", enh.damage_bonus);
+		result += std::format("Dmg {:+d}", enh.damageBonus);
 	}
-	if (enh.ac_bonus != 0)
+	if (enh.acBonus != 0)
 	{
 		if (!result.empty())
 		{
 			result += " ";
 		}
-		result += std::format("AC {:+d}", enh.ac_bonus);
+		result += std::format("AC {:+d}", enh.acBonus);
 	}
 
 	return result;
@@ -1092,7 +1091,6 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		{
 			return it && it->uniqueId == itemId;
 		};
-		// TODO: replace find_if iterator pattern with ranges view
 		auto it = std::ranges::find_if(player.inventoryData.items, find_by_id);
 		if (it != player.inventoryData.items.end())
 		{

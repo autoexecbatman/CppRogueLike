@@ -1,5 +1,6 @@
 // file: AiMimic.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <ranges>
 #include <string>
@@ -194,7 +195,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 		if (index < ctx.inventoryData->items.size() && ctx.inventoryData->items[index])
 		{
-			InventoryOperations::remove_item_at(*ctx.inventoryData, index);
+			assert(InventoryOperations::remove_item_at(*ctx.inventoryData, index).has_value());
 		}
 	}
 

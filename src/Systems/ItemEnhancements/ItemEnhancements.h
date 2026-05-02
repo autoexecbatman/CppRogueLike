@@ -61,32 +61,32 @@ struct ItemEnhancement
 	SuffixType suffix{ SuffixType::NONE };
 
 	// Modifier values
-	int damage_bonus{ 0 };
-	int to_hit_bonus{ 0 };
-	int ac_bonus{ 0 };
-	int strength_bonus{ 0 };
-	int dexterity_bonus{ 0 };
-	int intelligence_bonus{ 0 };
-	int hp_bonus{ 0 };
-	int mana_bonus{ 0 };
-	int speed_bonus{ 0 };
-	int stealth_bonus{ 0 };
+	int damageBonus{ 0 };
+	int toHitBonus{ 0 };
+	int acBonus{ 0 };
+	int strengthBonus{ 0 };
+	int dexterityBonus{ 0 };
+	int intelligenceBonus{ 0 };
+	int hpBonus{ 0 };
+	int manaBonus{ 0 };
+	int speedBonus{ 0 };
+	int stealthBonus{ 0 };
 
 	// Resistances (0-100%)
-	int fire_resistance{ 0 };
-	int cold_resistance{ 0 };
-	int lightning_resistance{ 0 };
-	int poison_resistance{ 0 };
+	int fireResistance{ 0 };
+	int coldResistance{ 0 };
+	int lightningResistance{ 0 };
+	int poisonResistance{ 0 };
 
 	// Special properties
 	BlessingStatus blessing{ BlessingStatus::UNCURSED }; // Three-state: uncursed/blessed/cursed
-	bool is_magical{ false };
+	bool isMagical{ false };
 
 	// Numeric enhancement level for traditional "+X" display
-	int enhancement_level{ 0 };
+	int enhancementLevel{ 0 };
 
 	// Value modifier (percentage)
-	int value_modifier{ 100 }; // 100% = no change
+	int valueModifier{ 100 }; // 100% = no change
 
 	// Weight in standardized units (roughly 1 lb per unit)
 	int weight{ 0 };
@@ -100,7 +100,7 @@ struct ItemEnhancement
 	void apply_enhancement_effects();
 
 	// Enhancement generation
-	static ItemEnhancement generate_random_enhancement(bool allow_magical);
+	static ItemEnhancement generate_random_enhancement(bool allowMagical);
 	static ItemEnhancement generate_weapon_enhancement();
 	static ItemEnhancement generate_armor_enhancement();
 

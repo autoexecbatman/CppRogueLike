@@ -95,9 +95,9 @@ std::string ItemEnhancement::get_full_name(const std::string& base_name) const
 	std::string name = "";
 
 	// Handle traditional "+X" enhancement level first
-	if (enhancement_level > 0)
+	if (enhancementLevel > 0)
 	{
-		name = base_name + " +" + std::to_string(enhancement_level);
+		name = base_name + " +" + std::to_string(enhancementLevel);
 		return name;
 	}
 
@@ -125,123 +125,123 @@ void ItemEnhancement::apply_enhancement_effects()
 
 	case PrefixType::SHARP:
 	{
-		damage_bonus += 1;
-		value_modifier += 50;
+		damageBonus += 1;
+		valueModifier += 50;
 		break;
 	}
 
 	case PrefixType::KEEN:
 	{
-		damage_bonus += 2;
-		value_modifier += 100;
+		damageBonus += 2;
+		valueModifier += 100;
 		break;
 	}
 
 	case PrefixType::MASTERWORK:
 	{
-		to_hit_bonus += 1;
-		value_modifier += 75;
+		toHitBonus += 1;
+		valueModifier += 75;
 		break;
 	}
 
 	case PrefixType::BLESSED:
 	{
-		to_hit_bonus += 1;
-		damage_bonus += 1;
+		toHitBonus += 1;
+		damageBonus += 1;
 		blessing = BlessingStatus::BLESSED;
-		value_modifier += 150;
+		valueModifier += 150;
 		break;
 	}
 
 	case PrefixType::FLAMING:
 	{
-		damage_bonus += 2;
-		fire_resistance = 25;
-		is_magical = true;
-		value_modifier += 200;
+		damageBonus += 2;
+		fireResistance = 25;
+		isMagical = true;
+		valueModifier += 200;
 		break;
 	}
 
 	case PrefixType::FROST:
 	{
-		damage_bonus += 2;
-		cold_resistance = 25;
-		is_magical = true;
-		value_modifier += 200;
+		damageBonus += 2;
+		coldResistance = 25;
+		isMagical = true;
+		valueModifier += 200;
 		break;
 	}
 
 	case PrefixType::SHOCK:
 	{
-		damage_bonus += 2;
-		lightning_resistance = 25;
-		is_magical = true;
-		value_modifier += 200;
+		damageBonus += 2;
+		lightningResistance = 25;
+		isMagical = true;
+		valueModifier += 200;
 		break;
 	}
 
 	case PrefixType::REINFORCED:
 	{
-		ac_bonus += 1;
-		value_modifier += 60;
+		acBonus += 1;
+		valueModifier += 60;
 		break;
 	}
 
 	case PrefixType::STUDDED:
 	{
-		ac_bonus += 1;
-		value_modifier += 40;
+		acBonus += 1;
+		valueModifier += 40;
 		break;
 	}
 
 	case PrefixType::ELVEN:
 	{
-		ac_bonus += 2;
-		dexterity_bonus += 1;
-		value_modifier += 300;
+		acBonus += 2;
+		dexterityBonus += 1;
+		valueModifier += 300;
 		break;
 	}
 
 	case PrefixType::DWARVEN:
 	{
-		ac_bonus += 3;
-		strength_bonus += 1;
-		value_modifier += 400;
+		acBonus += 3;
+		strengthBonus += 1;
+		valueModifier += 400;
 		break;
 	}
 
 	case PrefixType::MAGICAL:
 	{
-		ac_bonus += 1;
-		is_magical = true;
-		value_modifier += 250;
+		acBonus += 1;
+		isMagical = true;
+		valueModifier += 250;
 		break;
 	}
 
 	case PrefixType::CURSED:
 	{
 		blessing = BlessingStatus::CURSED;
-		value_modifier = 10; // Drastically reduced value
+		valueModifier = 10; // Drastically reduced value
 		break;
 	}
 
 	case PrefixType::ANCIENT:
 	{
-		value_modifier += 500;
+		valueModifier += 500;
 		break;
 	}
 
 	case PrefixType::RUSTED:
 	{
-		damage_bonus -= 1;
-		ac_bonus -= 1;
-		value_modifier = 30;
+		damageBonus -= 1;
+		acBonus -= 1;
+		valueModifier = 30;
 		break;
 	}
 
 	case PrefixType::CRACKED:
 	{
-		value_modifier = 50;
+		valueModifier = 50;
 		break;
 	}
 
@@ -257,132 +257,132 @@ void ItemEnhancement::apply_enhancement_effects()
 
 	case SuffixType::OF_SLAYING:
 	{
-		damage_bonus += 3;
-		value_modifier += 300;
+		damageBonus += 3;
+		valueModifier += 300;
 		break;
 	}
 
 	case SuffixType::OF_ACCURACY:
 	{
-		to_hit_bonus += 2;
-		value_modifier += 200;
+		toHitBonus += 2;
+		valueModifier += 200;
 		break;
 	}
 
 	case SuffixType::OF_PROTECTION:
 	{
-		ac_bonus += 2;
-		value_modifier += 250;
+		acBonus += 2;
+		valueModifier += 250;
 		break;
 	}
 
 	case SuffixType::OF_POWER:
 	{
-		strength_bonus += 1;
-		dexterity_bonus += 1;
-		intelligence_bonus += 1;
-		value_modifier += 400;
+		strengthBonus += 1;
+		dexterityBonus += 1;
+		intelligenceBonus += 1;
+		valueModifier += 400;
 		break;
 	}
 
 	case SuffixType::OF_FIRE_RESISTANCE:
 	{
-		fire_resistance = 50;
-		value_modifier += 150;
+		fireResistance = 50;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_COLD_RESISTANCE:
 	{
-		cold_resistance = 50;
-		value_modifier += 150;
+		coldResistance = 50;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_LIGHTNING_RESISTANCE:
 	{
-		lightning_resistance = 50;
-		value_modifier += 150;
+		lightningResistance = 50;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_POISON_RESISTANCE:
 	{
-		poison_resistance = 50;
-		value_modifier += 150;
+		poisonResistance = 50;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_SPEED:
 	{
-		speed_bonus += 2;
-		value_modifier += 200;
+		speedBonus += 2;
+		valueModifier += 200;
 		break;
 	}
 
 	case SuffixType::OF_STEALTH:
 	{
-		stealth_bonus += 3;
-		value_modifier += 175;
+		stealthBonus += 3;
+		valueModifier += 175;
 		break;
 	}
 
 	case SuffixType::OF_MAGIC:
 	{
-		mana_bonus += 20;
-		intelligence_bonus += 1;
-		value_modifier += 225;
+		manaBonus += 20;
+		intelligenceBonus += 1;
+		valueModifier += 225;
 		break;
 	}
 
 	case SuffixType::OF_HEALTH:
 	{
-		hp_bonus += 15;
-		value_modifier += 200;
+		hpBonus += 15;
+		valueModifier += 200;
 		break;
 	}
 
 	case SuffixType::OF_THE_EAGLE:
 	{
-		dexterity_bonus += 2;
-		value_modifier += 150;
+		dexterityBonus += 2;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_THE_BEAR:
 	{
-		strength_bonus += 2;
-		value_modifier += 150;
+		strengthBonus += 2;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_THE_OWL:
 	{
-		intelligence_bonus += 2;
-		value_modifier += 150;
+		intelligenceBonus += 2;
+		valueModifier += 150;
 		break;
 	}
 
 	case SuffixType::OF_WEAKNESS:
 	{
-		strength_bonus -= 1;
+		strengthBonus -= 1;
 		blessing = BlessingStatus::CURSED;
-		value_modifier = 20;
+		valueModifier = 20;
 		break;
 	}
 
 	case SuffixType::OF_SLOWNESS:
 	{
-		speed_bonus -= 2;
+		speedBonus -= 2;
 		blessing = BlessingStatus::CURSED;
-		value_modifier = 15;
+		valueModifier = 15;
 		break;
 	}
 
 	case SuffixType::OF_BRITTLENESS:
 	{
 		blessing = BlessingStatus::CURSED;
-		value_modifier = 25;
+		valueModifier = 25;
 		break;
 	}
 
@@ -392,7 +392,7 @@ void ItemEnhancement::apply_enhancement_effects()
 }
 
 // Random generation methods
-ItemEnhancement ItemEnhancement::generate_random_enhancement(bool allow_magical)
+ItemEnhancement ItemEnhancement::generate_random_enhancement(bool allowMagical)
 {
 	ItemEnhancement enhancement;
 
@@ -414,7 +414,7 @@ ItemEnhancement ItemEnhancement::generate_random_enhancement(bool allow_magical)
 	}
 	// 40% chance for no enhancement
 
-	if (!allow_magical)
+	if (!allowMagical)
 	{
 		// Remove magical prefixes if not allowed
 		if (enhancement.prefix == PrefixType::FLAMING ||

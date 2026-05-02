@@ -1,5 +1,6 @@
 // file: PlayerController.cpp
 #include <array>
+#include <cassert>
 #include <functional>
 #include <memory>
 #include <stdexcept>
@@ -129,8 +130,7 @@ void PlayerController::update(GameContext& ctx)
 				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
 
 				const auto& moves = direction_map();
-				// TODO: replace iterator pattern with contains
-				if (moves.find(key) != moves.end())
+				if (moves.contains(key))
 				{
 					moveVector = moves.at(key);
 					ctx.gameState->set_game_status(GameStatus::NEW_TURN);
@@ -145,8 +145,7 @@ void PlayerController::update(GameContext& ctx)
 	else
 	{
 		const auto& moves = direction_map();
-		// TODO: replace iterator pattern with contains
-		if (moves.find(key) != moves.end())
+		if (moves.contains(key))
 		{
 			moveVector = moves.at(key);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
@@ -214,7 +213,7 @@ void PlayerController::pick_item(GameContext& ctx)
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
 		playerOwner.adjust_gold(goldBehavior.amount);
 		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
-		InventoryOperations::remove_item(*ctx.inventoryData, *item);
+		assert(InventoryOperations::remove_item(*ctx.inventoryData, *item).has_value());
 		return;
 	}
 
@@ -499,8 +498,7 @@ bool PlayerController::is_mouse_pending_cancelled(GameContext& ctx) const
 {
 	const Controls key = static_cast<Controls>(ctx.inputHandler->get_current_key());
 	const auto& moves = direction_map();
-	// TODO: replace iterator pattern with contains
-	bool isMovement = (moves.find(key) != moves.end());
+	bool isMovement = moves.contains(key);
 	bool isAction = (key == Controls::ESCAPE || key == Controls::WAIT || key == Controls::PICK);
 	return isMovement || isAction;
 }
@@ -538,7 +536,8 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 	Item* keyItem = nullptr;
 	for (const auto& item : playerOwner.inventoryData.items)
 	{
-		if (item && item->item_key == "dungeon_key")
+		assert(item);
+		if (item->itemKey == "dungeon_key")
 		{
 			keyItem = item.get();
 			break;
@@ -547,7 +546,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 
 	if (keyItem != nullptr)
 	{
-		InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
+		assert(InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem).has_value());
 		ctx.map->open_all_room_doors(doorPos, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You use the key. The lock turns.", true);
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
@@ -754,9 +753,10 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 	else
 	{
+		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
 		for (const auto& item : ctx.inventoryData->items)
 		{
-			if (item && item->position == world_tile)
+			if (item->position == world_tile)
 			{
 				mode = MouseMode::WALK_TO_PICKUP;
 				break;
@@ -807,9 +807,10 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Floor item at tile
+	assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
 	for (auto& item : ctx.inventoryData->items)
 	{
-		if (item && item->position == world_tile)
+		if (item->position == world_tile)
 		{
 			std::string itemName = item->actorData.name.substr(0, 16);
 			actions.push_back({
@@ -1055,10 +1056,10 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ctx.map->spawn_all_enhanced_items_debug(playerOwner.position, ctx);
-		InventoryOperations::add_item_to_inventory(
+		assert(InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
 			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry),
-			playerOwner);
+			playerOwner).has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		playerOwner.memorizedSpells.push_back("magic_missile");
@@ -1254,14 +1255,12 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 Vector2D PlayerController::handle_direction_input(int dirKey, GameContext& ctx)
 {
 	const auto& moves = direction_map();
-	// TODO: replace iterator pattern with contains + at
-	const auto it = moves.find(static_cast<Controls>(dirKey));
-	if (it == moves.end())
+	const auto controlKey = static_cast<Controls>(dirKey);
+	if (!moves.contains(controlKey))
 	{
 		return { 0, 0 };
 	}
-
-	const Vector2D targetPos = playerOwner.position + it->second;
+	const Vector2D targetPos = playerOwner.position + moves.at(controlKey);
 	if (!ctx.map->is_in_bounds(targetPos))
 		return { 0, 0 };
 

@@ -29,7 +29,7 @@ public:
 	static std::string get_unarmed_damage() noexcept { return "1d2"; }
 
 private:
-	static const std::unordered_map<std::string, DamageInfo> weapon_damage_map;
+	static const std::unordered_map<std::string, DamageInfo> weaponDamageMap;
 
 	static std::unordered_map<std::string, DamageInfo> create_weapon_damage_map();
 };

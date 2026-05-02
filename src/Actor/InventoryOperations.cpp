@@ -1,9 +1,12 @@
-// InventoryOperations.cpp - Free function implementations
 #include <algorithm>
+#include <cassert>
 #include <cstdint>
 #include <exception>
+#include <expected>
+#include <format>
 #include <iostream>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <string>
 #include <utility>
@@ -31,19 +34,19 @@ InventoryResult<bool> add_item(InventoryData& inventory, std::unique_ptr<Item> i
 {
 	if (!item)
 	{
-		return InventoryError::INVALID_ITEM;
+		return std::unexpected(InventoryError::INVALID_ITEM);
 	}
 
 	if (is_inventory_full(inventory))
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
-		return InventoryError::FULL;
+		return std::unexpected(InventoryError::FULL);
 	}
 
-	const auto* item_ptr = item.get();
+	const auto* itemPtr = item.get();
 	inventory.items.push_back(std::move(item));
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, item_ptr);
+	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_ADDED, itemPtr);
 	return true;
 }
 
@@ -55,24 +58,24 @@ InventoryResult<bool> add_item_to_inventory(
 {
 	if (!item)
 	{
-		return InventoryError::INVALID_ITEM;
+		return std::unexpected(InventoryError::INVALID_ITEM);
 	}
 
 	if (is_inventory_full(inventory))
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
-		return InventoryError::FULL;
+		return std::unexpected(InventoryError::FULL);
 	}
 
 	// Check weight capacity: hard stop if total weight would exceed max
-	const int item_weight = item->enhancement.weight;
-	const int current_weight = get_total_weight(inventory);
-	const int max_weight = get_max_weight(owner);
+	const int itemWeight = item->enhancement.weight;
+	const int currentWeight = get_total_weight(inventory);
+	const int maxWeight = get_max_weight(owner);
 
-	if (current_weight + item_weight > max_weight)
+	if (currentWeight + itemWeight > maxWeight)
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
-		return InventoryError::CAPACITY_EXCEEDED;
+		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
 	}
 
 	const auto* item_ptr = item.get();
@@ -84,41 +87,39 @@ InventoryResult<bool> add_item_to_inventory(
 
 InventoryResult<std::unique_ptr<Item>> remove_item(InventoryData& inventory, const Item& item)
 {
-	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
-	auto it = std::ranges::find_if(inventory.items,
-		[&item](const auto& stored_item)
-		{
-			return stored_item.get() == &item;
-		});
+	auto is_null = [](const auto& stored) { return !stored; };
+	assert(std::ranges::none_of(inventory.items, is_null));
 
-	if (it == inventory.items.end())
+	auto matches_item = [&item](const auto& stored) { return stored.get() == &item; };
+	auto matches = inventory.items | std::views::filter(matches_item);
+
+	if (std::ranges::empty(matches))
 	{
-		return InventoryError::ITEM_NOT_FOUND;
+		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
 	}
 
-	auto removed_item = std::move(*it);
-	inventory.items.erase(it);
-
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removed_item.get());
+	auto removedItem = std::move(matches.front());
 	optimize_inventory_storage(inventory);
 
-	return std::move(removed_item);
+	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
+
+	return std::move(removedItem);
 }
 
 InventoryResult<std::unique_ptr<Item>> remove_item_at(InventoryData& inventory, size_t index)
 {
 	if (index >= inventory.items.size())
 	{
-		return InventoryError::ITEM_NOT_FOUND;
+		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
 	}
 
-	auto removed_item = std::move(inventory.items[index]);
+	auto removedItem = std::move(inventory.items[index]);
 	inventory.items.erase(inventory.items.begin() + index);
 
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removed_item.get());
+	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
 	optimize_inventory_storage(inventory);
 
-	return std::move(removed_item);
+	return std::move(removedItem);
 }
 
 // ===== CAPACITY MANAGEMENT =====
@@ -143,14 +144,14 @@ size_t get_remaining_space(const InventoryData& inventory) noexcept
 	return inventory.capacity - inventory.items.size();
 }
 
-void set_inventory_capacity(InventoryData& inventory, size_t new_capacity)
+void set_inventory_capacity(InventoryData& inventory, size_t newCapacity)
 {
-	if (new_capacity < inventory.items.size())
+	if (newCapacity < inventory.items.size())
 	{
-		inventory.items.resize(new_capacity);
+		inventory.items.resize(newCapacity);
 	}
 
-	inventory.capacity = new_capacity;
+	inventory.capacity = newCapacity;
 	inventory.items.reserve(inventory.capacity);
 
 	fire_inventory_event(inventory, InventoryEvent::Type::CAPACITY_CHANGED);
@@ -195,61 +196,65 @@ const Item* get_item_at(const InventoryData& inventory, size_t index) noexcept
 
 const Item* find_item_by_name(const InventoryData& inventory, std::string_view name) noexcept
 {
-	// TODO: replace find_if iterator pattern with ranges view
+	auto is_null = [](const auto& item) { return !item; };
+	assert(std::ranges::none_of(inventory.items, is_null));
+
 	auto it = std::ranges::find_if(inventory.items,
 		[name](const auto& item)
 		{
-			return item && item->actorData.name == name;
+			return item->actorData.name == name;
 		});
 
 	return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-Item* find_item_by_id(InventoryData& inventory, uint64_t unique_id) noexcept
+Item* find_item_by_id(InventoryData& inventory, uint64_t uniqueId) noexcept
 {
-	// TODO: replace find_if iterator pattern with ranges view
+	auto is_null = [](const auto& item) { return !item; };
+	assert(std::ranges::none_of(inventory.items, is_null));
+
 	auto it = std::ranges::find_if(inventory.items,
-		[unique_id](const auto& item)
+		[uniqueId](const auto& item)
 		{
-			return item && item->uniqueId == unique_id;
+			return item->uniqueId == uniqueId;
 		});
 
 	return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-const Item* find_item_by_id(const InventoryData& inventory, uint64_t unique_id) noexcept
+const Item* find_item_by_id(const InventoryData& inventory, uint64_t uniqueId) noexcept
 {
-	// TODO: replace find_if iterator pattern with ranges view
+	auto is_null = [](const auto& item) { return !item; };
+	assert(std::ranges::none_of(inventory.items, is_null));
+
 	auto it = std::ranges::find_if(inventory.items,
-		[unique_id](const auto& item)
+		[uniqueId](const auto& item)
 		{
-			return item && item->uniqueId == unique_id;
+			return item->uniqueId == uniqueId;
 		});
 
 	return it != inventory.items.end() ? it->get() : nullptr;
 }
 
-InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t unique_id)
+InventoryResult<std::unique_ptr<Item>> remove_item_by_id(InventoryData& inventory, uint64_t uniqueId)
 {
-	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
-	auto it = std::ranges::find_if(inventory.items,
-		[unique_id](const auto& item)
-		{
-			return item && item->uniqueId == unique_id;
-		});
+	auto is_null = [](const auto& item) { return !item; };
+	assert(std::ranges::none_of(inventory.items, is_null));
 
-	if (it == inventory.items.end())
+	auto matches_id = [uniqueId](const auto& item) { return item->uniqueId == uniqueId; };
+	auto matches = inventory.items | std::views::filter(matches_id);
+
+	if (std::ranges::empty(matches))
 	{
-		return InventoryError::ITEM_NOT_FOUND;
+		return std::unexpected(InventoryError::ITEM_NOT_FOUND);
 	}
 
-	auto removed_item = std::move(*it);
-	inventory.items.erase(it);
-
-	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removed_item.get());
+	auto removedItem = std::move(matches.front());
 	optimize_inventory_storage(inventory);
 
-	return std::move(removed_item);
+	fire_inventory_event(inventory, InventoryEvent::Type::ITEM_REMOVED, removedItem.get());
+
+	return std::move(removedItem);
 }
 
 bool contains_item(const InventoryData& inventory, const Item& item) noexcept
@@ -265,20 +270,20 @@ bool contains_item(const InventoryData& inventory, const Item& item) noexcept
 
 void set_inventory_event_handler(InventoryData& inventory, InventoryEventHandler handler)
 {
-	inventory.event_handler = std::move(handler);
+	inventory.eventHandler = std::move(handler);
 }
 
 void fire_inventory_event(InventoryData& inventory, InventoryEvent::Type type, const Item* item)
 {
-	if (inventory.event_handler)
+	if (inventory.eventHandler)
 	{
 		InventoryEvent event{
 			.type = type,
 			.item = item,
-			.current_size = inventory.items.size(),
+			.currentSize = inventory.items.size(),
 			.capacity = inventory.capacity
 		};
-		inventory.event_handler(event);
+		inventory.eventHandler(event);
 	}
 }
 
@@ -295,12 +300,12 @@ void load_inventory(InventoryData& inventory, const json& j)
 
 		if (j.contains("inventory") && j["inventory"].is_array())
 		{
-			for (const auto& item_json : j["inventory"])
+			for (const auto& itemJson : j["inventory"])
 			{
 				auto item = std::make_unique<Item>(
 					Vector2D{ 0, 0 },
 					ActorData{});
-				item->load(item_json);
+				item->load(itemJson);
 				inventory.items.push_back(std::move(item));
 			}
 		}
@@ -322,9 +327,9 @@ void save_inventory(const InventoryData& inventory, json& j)
 		{
 			if (item)
 			{
-				json item_json;
-				item->save(item_json);
-				j["inventory"].push_back(item_json);
+				json itemJson;
+				item->save(itemJson);
+				j["inventory"].push_back(itemJson);
 			}
 		}
 	}
@@ -352,9 +357,11 @@ void print_inventory(const InventoryData& inventory, std::span<std::unique_ptr<A
 
 std::string get_inventory_debug_info(const InventoryData& inventory)
 {
-	return "Inventory{items:" + std::to_string(get_item_count(inventory)) +
-		", capacity:" + std::to_string(inventory.capacity) +
-		", full:" + (is_inventory_full(inventory) ? "yes" : "no") + "}";
+	return std::format(
+		"Inventory{{items:{}, capacity:{}, full:{}}}",
+		get_item_count(inventory),
+		inventory.capacity,
+		is_inventory_full(inventory) ? "yes" : "no");
 }
 
 // ===== OPTIMIZATION =====

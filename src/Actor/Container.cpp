@@ -1,8 +1,11 @@
-// Container.cpp - Modern C++20 implementation with proper encapsulation
 #include <algorithm>
+#include <cassert>
 #include <exception>
+#include <expected>
+#include <format>
 #include <iostream>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <string>
 #include <utility>
@@ -11,15 +14,15 @@
 #include "../Persistent/Persistent.h"
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
-#include "Container.h"
 #include "Item.h"
+#include "Container.h"
 
 // Construction with proper initialization
-Container::Container(size_t initial_capacity) noexcept
-	: capacity_(initial_capacity),
-	  event_handler_(nullptr)
+Container::Container(size_t initialCapacity) noexcept
+	: capacity(initialCapacity),
+	  eventHandler(nullptr)
 {
-	inventory_.reserve(initial_capacity);
+	inventory.reserve(initialCapacity);
 }
 
 // Modern add method with proper error handling
@@ -27,93 +30,80 @@ ContainerResult<bool> Container::add(std::unique_ptr<Item> item)
 {
 	if (!item)
 	{
-		return ContainerError::INVALID_ITEM;
+		return std::unexpected(ContainerError::INVALID_ITEM);
 	}
 
 	if (is_full())
 	{
 		fire_event(ContainerEvent::Type::INVENTORY_FULL, item.get());
-		return ContainerError::FULL;
+		return std::unexpected(ContainerError::FULL);
 	}
 
-	const auto* item_ptr = item.get();
-	inventory_.push_back(std::move(item));
+	const auto* itemPtr = item.get();
+	inventory.push_back(std::move(item));
 
-	fire_event(ContainerEvent::Type::ITEM_ADDED, item_ptr);
+	fire_event(ContainerEvent::Type::ITEM_ADDED, itemPtr);
 	return true;
 }
 
 ContainerResult<std::unique_ptr<Item>> Container::remove(const Item& item)
 {
-	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
-	auto it = std::ranges::find_if(inventory_,
-		[&item](const auto& stored_item)
-		{
-			return stored_item.get() == &item;
-		});
+	auto is_null = [](const auto& stored) { return !stored; };
+	assert(std::ranges::none_of(inventory, is_null));
 
-	if (it == inventory_.end())
+	auto matches_item = [&item](const auto& stored) { return stored.get() == &item; };
+	auto matches = inventory | std::views::filter(matches_item);
+
+	if (std::ranges::empty(matches))
 	{
-		return ContainerError::ITEM_NOT_FOUND;
+		return std::unexpected(ContainerError::ITEM_NOT_FOUND);
 	}
 
-	auto removed_item = std::move(*it);
-	inventory_.erase(it);
-
-	fire_event(ContainerEvent::Type::ITEM_REMOVED, removed_item.get());
+	auto removedItem = std::move(matches.front());
 	optimize_storage();
 
-	return std::move(removed_item);
+	fire_event(ContainerEvent::Type::ITEM_REMOVED, removedItem.get());
+
+	return std::move(removedItem);
 }
 
 ContainerResult<std::unique_ptr<Item>> Container::remove_at(size_t index)
 {
-	if (index >= inventory_.size())
+	if (index >= inventory.size())
 	{
-		return ContainerError::ITEM_NOT_FOUND;
+		return std::unexpected(ContainerError::ITEM_NOT_FOUND);
 	}
 
-	auto removed_item = std::move(inventory_[index]);
-	inventory_.erase(inventory_.begin() + index);
+	auto removedItem = std::move(inventory[index]);
+	inventory.erase(inventory.begin() + index);
 
-	fire_event(ContainerEvent::Type::ITEM_REMOVED, removed_item.get());
+	fire_event(ContainerEvent::Type::ITEM_REMOVED, removedItem.get());
 	optimize_storage();
 
-	return std::move(removed_item);
-}
-
-// Legacy remove pattern (unusual but preserved for compatibility)
-void Container::remove_legacy(std::unique_ptr<Item> actor)
-{
-	inventory_.push_back(std::move(actor));
-	auto is_null = [](const auto& a) noexcept
-	{
-		return !a;
-	};
-	std::erase_if(inventory_, is_null);
+	return std::move(removedItem);
 }
 
 // Item access methods
 Item* Container::get_item_at(size_t index) noexcept
 {
-	return index < inventory_.size() ? inventory_[index].get() : nullptr;
+	return index < inventory.size() ? inventory[index].get() : nullptr;
 }
 
 const Item* Container::get_item_at(size_t index) const noexcept
 {
-	return index < inventory_.size() ? inventory_[index].get() : nullptr;
+	return index < inventory.size() ? inventory[index].get() : nullptr;
 }
 
 // Capacity management
-void Container::set_capacity(size_t new_capacity)
+void Container::set_capacity(size_t newCapacity)
 {
-	if (new_capacity < inventory_.size())
+	if (newCapacity < inventory.size())
 	{
-		inventory_.resize(new_capacity);
+		inventory.resize(newCapacity);
 	}
 
-	capacity_ = new_capacity;
-	inventory_.reserve(capacity_);
+	capacity = newCapacity;
+	inventory.reserve(capacity);
 
 	fire_event(ContainerEvent::Type::CAPACITY_CHANGED);
 }
@@ -121,19 +111,21 @@ void Container::set_capacity(size_t new_capacity)
 // Search operations
 const Item* Container::find_item_by_name(std::string_view name) const noexcept
 {
-	// TODO: replace find_if iterator pattern with ranges view
-	auto it = std::ranges::find_if(inventory_,
+	auto is_null = [](const auto& item) { return !item; };
+	assert(std::ranges::none_of(inventory, is_null));
+
+	auto it = std::ranges::find_if(inventory,
 		[name](const auto& item)
 		{
-			return item && item->actorData.name == name;
+			return item->actorData.name == name;
 		});
 
-	return it != inventory_.end() ? it->get() : nullptr;
+	return it != inventory.end() ? it->get() : nullptr;
 }
 
 bool Container::contains_item(const Item& item) const noexcept
 {
-	return std::ranges::any_of(inventory_,
+	return std::ranges::any_of(inventory,
 		[&item](const auto& stored_item)
 		{
 			return stored_item.get() == &item;
@@ -143,15 +135,15 @@ bool Container::contains_item(const Item& item) const noexcept
 // Event system implementation
 void Container::fire_event(ContainerEvent::Type type, const Item* item)
 {
-	if (event_handler_)
+	if (eventHandler)
 	{
 		ContainerEvent event{
 			.type = type,
 			.item = item,
-			.current_size = inventory_.size(),
-			.capacity = capacity_
+			.currentSize = inventory.size(),
+			.capacity = capacity
 		};
-		event_handler_(event);
+		eventHandler(event);
 	}
 }
 
@@ -160,10 +152,10 @@ void Container::load(const json& j)
 {
 	try
 	{
-		capacity_ = j.value("capacity", 0);
+		capacity = j.value("capacity", 0);
 
-		inventory_.clear();
-		inventory_.reserve(capacity_);
+		inventory.clear();
+		inventory.reserve(capacity);
 
 		if (j.contains("inventory") && j["inventory"].is_array())
 		{
@@ -173,7 +165,7 @@ void Container::load(const json& j)
 					Vector2D{ 0, 0 },
 					ActorData{});
 				item->load(item_json);
-				inventory_.push_back(std::move(item));
+				inventory.push_back(std::move(item));
 			}
 		}
 	}
@@ -187,10 +179,10 @@ void Container::save(json& j)
 {
 	try
 	{
-		j["capacity"] = capacity_;
+		j["capacity"] = capacity;
 		j["inventory"] = json::array();
 
-		for (const auto& item : inventory_)
+		for (const auto& item : inventory)
 		{
 			if (item)
 			{
@@ -210,7 +202,7 @@ void Container::save(json& j)
 void Container::print_container(std::span<std::unique_ptr<Actor>> container) const
 {
 	int i = 0;
-	for (const auto& item : inventory_)
+	for (const auto& item : inventory)
 	{
 		if (item)
 		{
@@ -223,16 +215,19 @@ void Container::print_container(std::span<std::unique_ptr<Actor>> container) con
 
 std::string Container::get_debug_info() const
 {
-	return "Container{items:" + std::to_string(get_item_count()) +
-		", capacity:" + std::to_string(get_capacity()) +
-		", weight:" + std::to_string(get_total_weight()) + "/" + std::to_string(get_max_weight()) +
-		", full:" + (is_full() ? "yes" : "no") + "}";
+	return std::format(
+		"Container{{items:{}, capacity:{}, weight:{}/{}, full:{}}}",
+		get_item_count(),
+		get_capacity(),
+		get_total_weight(),
+		get_max_weight(),
+		is_full() ? "yes" : "no");
 }
 
 int Container::get_total_weight() const noexcept
 {
 	int total = 0;
-	for (const auto& item : inventory_)
+	for (const auto& item : inventory)
 	{
 		if (!item) continue;
 		// Clamp individual item weight to non-negative
@@ -245,11 +240,11 @@ int Container::get_total_weight() const noexcept
 // Private helper methods
 void Container::optimize_storage()
 {
-	std::erase_if(inventory_, [](const auto& item)
+	std::erase_if(inventory, [](const auto& item)
 		{ return !item; });
 
-	if (inventory_.size() * 4 < inventory_.capacity())
+	if (inventory.size() * 4 < inventory.capacity())
 	{
-		inventory_.shrink_to_fit();
+		inventory.shrink_to_fit();
 	}
 }

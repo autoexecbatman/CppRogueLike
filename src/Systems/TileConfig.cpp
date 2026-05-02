@@ -14,43 +14,31 @@ using json = nlohmann::json;
 
 TileRef TileConfig::get(std::string_view key) const
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = m_tiles.find(std::string(key));
-
-	if (it == m_tiles.end())
+	if (!m_tiles.contains(std::string(key)))
 	{
 		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
 		fflush(stderr);
 		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
 	}
-
-	return it->second;
+	return m_tiles.at(std::string(key));
 }
 
 AutotileGroup TileConfig::get_autotile(std::string_view key) const
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = m_autotile_groups.find(std::string(key));
-
-	if (it == m_autotile_groups.end())
+	if (!m_autotile_groups.contains(std::string(key)))
 	{
 		throw std::runtime_error(std::format("TileConfig::get_autotile -- unknown key '{}'", key));
 	}
-
-	return it->second;
+	return m_autotile_groups.at(std::string(key));
 }
 
 WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
 {
-	// TODO: replace iterator pattern with contains + at
-	auto it = m_wall_autotile_groups.find(std::string(key));
-
-	if (it == m_wall_autotile_groups.end())
+	if (!m_wall_autotile_groups.contains(std::string(key)))
 	{
 		throw std::runtime_error(std::format("TileConfig::get_wall_autotile -- unknown key '{}'", key));
 	}
-
-	return it->second;
+	return m_wall_autotile_groups.at(std::string(key));
 }
 
 void TileConfig::load(std::string_view path)

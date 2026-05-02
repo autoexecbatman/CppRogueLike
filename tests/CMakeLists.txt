@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.13...3.21)
 project(C++RogueLike_Tests)
 
 # Set C++ standard to match main project
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Find required packages

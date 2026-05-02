@@ -100,11 +100,11 @@ constexpr auto matches_slot = [](EquipmentSlot slot)
 	};
 };
 
-constexpr auto matches_unique_id = [](uint64_t unique_id)
+constexpr auto matches_unique_id = [](uint64_t uniqueId)
 {
-	return [unique_id](const EquippedItem& equipped)
+	return [uniqueId](const EquippedItem& equipped)
 	{
-		return equipped.item->uniqueId == unique_id;
+		return equipped.item->uniqueId == uniqueId;
 	};
 };
 } // namespace
@@ -254,8 +254,8 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("long_sword", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
 		equip_item(ItemCreator::create("long_bow", position, *ctx.contentRegistry), EquipmentSlot::MISSILE_WEAPON, ctx);
-		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry), *this);
-		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
+		assert(InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry), *this).has_value());
+		assert(InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this).has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
 	}
@@ -266,7 +266,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("leather_armor", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("dagger", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
+		assert(InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this).has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
 	}
@@ -278,9 +278,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("chain_mail", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
 		equip_item(ItemCreator::create("mace", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
 		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry));
-		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this).has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
 		break;
@@ -291,10 +291,10 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
 		equip_item(ItemCreator::create("staff", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry));
-		InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry));
-		InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this);
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item_to_inventory(*ctx.inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry), *this).has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
 		break;
@@ -688,16 +688,16 @@ bool Player::try_break_web(GameContext& ctx)
 }
 
 // Clean Weapon Equipment System using Unique IDs
-bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot, GameContext& ctx)
+bool Player::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
 {
 	// Check if weapon is already equipped
-	if (is_item_equipped(item_unique_id))
+	if (is_item_equipped(itemUniqueId))
 	{
 		// Find which slot and unequip
 		for (auto slot : { EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON })
 		{
 			Item* equipped = get_equipped_item(slot);
-			if (equipped && equipped->uniqueId == item_unique_id)
+			if (equipped && equipped->uniqueId == itemUniqueId)
 			{
 				return unequip_item(slot, ctx);
 			}
@@ -706,11 +706,11 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 	else
 	{
 		// Find item in inventory and equip it
-		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, item_unique_id);
+		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, itemUniqueId);
 		if (itemToEquip)
 		{
 			// Remove item from inventory
-			auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
+			auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 			if (result.has_value())
 			{
 				auto itemToEquip = std::move(*result);
@@ -724,7 +724,7 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 				}
 				else
 				{
-					target_slot = preferred_slot;
+					target_slot = preferredSlot;
 				}
 
 				return equip_item(std::move(itemToEquip), target_slot, ctx);
@@ -734,16 +734,16 @@ bool Player::toggle_weapon(uint64_t item_unique_id, EquipmentSlot preferred_slot
 	return false;
 }
 
-bool Player::toggle_shield(uint64_t item_unique_id, GameContext& ctx)
+bool Player::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
 {
 	// Shields always go in LEFT_HAND slot
-	if (is_item_equipped(item_unique_id))
+	if (is_item_equipped(itemUniqueId))
 	{
 		return unequip_item(EquipmentSlot::LEFT_HAND, ctx);
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
@@ -752,17 +752,17 @@ bool Player::toggle_shield(uint64_t item_unique_id, GameContext& ctx)
 	}
 }
 
-bool Player::toggle_equipment(uint64_t item_unique_id, EquipmentSlot slot, GameContext& ctx)
+bool Player::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
 {
 	// Check if item is already equipped
-	if (is_item_equipped(item_unique_id))
+	if (is_item_equipped(itemUniqueId))
 	{
 		// Unequip the item
 		return unequip_item(slot, ctx);
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), slot, ctx);
@@ -791,7 +791,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
-		InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this);
+		assert(InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this).has_value());
 		return false;
 	}
 
@@ -821,7 +821,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
 	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->item_key);
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemKey);
 		ctx.messageSystem->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
 	}
 
@@ -980,7 +980,7 @@ bool Player::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 
 bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 {
-	// TODO: replace find_if + erase iterator pattern with ranges (erase requires iterator for now)
+	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	if (it != equippedItems.end())
@@ -1006,7 +1006,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			remove_state(ActorState::IS_RANGED);
 
 		// Return item to inventory
-		InventoryOperations::add_item_to_inventory(inventoryData, std::move(it->item), *this);
+		assert(InventoryOperations::add_item_to_inventory(inventoryData, std::move(it->item), *this).has_value());
 
 		// Remove from equipped items
 		equippedItems.erase(it);
@@ -1026,7 +1026,6 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
 {
-	// TODO: replace find_if iterator pattern with ranges view
 	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	return (it != equippedItems.end()) ? it->item.get() : nullptr;
@@ -1074,7 +1073,7 @@ std::string Player::get_equipped_weapon_damage_roll() const noexcept
 	// Use pure ItemClass system
 	if (rightHandWeapon->is_weapon())
 	{
-		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->item_key);
+		return WeaponDamageRegistry::get_damage_roll(rightHandWeapon->itemKey);
 	}
 
 	return WeaponDamageRegistry::get_unarmed_damage();
@@ -1110,7 +1109,7 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	{
 		if (leftHandWeapon->is_weapon())
 		{
-			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->item_key);
+			info.offHandDamageRoll = WeaponDamageRegistry::get_damage_roll(leftHandWeapon->itemKey);
 		}
 	}
 
@@ -1118,17 +1117,17 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 }
 
 // Clean Equipment System using Unique IDs
-bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
+bool Player::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
 {
 	// Check if item is already equipped
-	if (is_item_equipped(item_unique_id))
+	if (is_item_equipped(itemUniqueId))
 	{
 		// Unequip the armor
 		return unequip_item(EquipmentSlot::BODY, ctx);
 	}
 	else
 	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, item_unique_id);
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
 		if (result.has_value())
 		{
 			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
@@ -1137,9 +1136,9 @@ bool Player::toggle_armor(uint64_t item_unique_id, GameContext& ctx)
 	}
 }
 
-bool Player::is_item_equipped(uint64_t item_unique_id) const noexcept
+bool Player::is_item_equipped(uint64_t itemUniqueId) const noexcept
 {
-	return std::ranges::any_of(equippedItems, matches_unique_id(item_unique_id));
+	return std::ranges::any_of(equippedItems, matches_unique_id(itemUniqueId));
 }
 
 int Player::get_constitution_hp_multiplier() const noexcept
@@ -1247,14 +1246,14 @@ void Player::load(const json& j)
 
 void Player::add_stat_bonuses_from_equipment(Item& item)
 {
-	// Apply ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
-	if (item.enhancement.strength_bonus != 0)
+	// Apply ItemEnhancement stat bonuses (strengthBonus, dexterityBonus)
+	if (item.enhancement.strengthBonus != 0)
 	{
-		set_strength(get_strength() + item.enhancement.strength_bonus);
+		set_strength(get_strength() + item.enhancement.strengthBonus);
 	}
-	if (item.enhancement.dexterity_bonus != 0)
+	if (item.enhancement.dexterityBonus != 0)
 	{
-		set_dexterity(get_dexterity() + item.enhancement.dexterity_bonus);
+		set_dexterity(get_dexterity() + item.enhancement.dexterityBonus);
 	}
 	
 	// Apply behavior-based stat bonuses for special jewelry items
@@ -1318,14 +1317,14 @@ void Player::add_stat_bonuses_from_equipment(Item& item)
 
 void Player::remove_stat_bonuses_from_equipment(Item& item)
 {
-	// Remove ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
-	if (item.enhancement.strength_bonus != 0)
+	// Remove ItemEnhancement stat bonuses (strengthBonus, dexterityBonus)
+	if (item.enhancement.strengthBonus != 0)
 	{
-		set_strength(get_strength() - item.enhancement.strength_bonus);
+		set_strength(get_strength() - item.enhancement.strengthBonus);
 	}
-	if (item.enhancement.dexterity_bonus != 0)
+	if (item.enhancement.dexterityBonus != 0)
 	{
-		set_dexterity(get_dexterity() - item.enhancement.dexterity_bonus);
+		set_dexterity(get_dexterity() - item.enhancement.dexterityBonus);
 	}
 	
 	// Remove behavior-based stat bonuses for special jewelry items

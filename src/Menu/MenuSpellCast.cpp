@@ -100,12 +100,7 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
     {
         if (isMemorized)
         {
-            // TODO: replace find + erase with std::erase (C++20 free function)
-            auto it = std::ranges::find(playerRef.memorizedSpells, key);
-            if (it != playerRef.memorizedSpells.end())
-            {
-                playerRef.memorizedSpells.erase(it);
-            }
+            std::erase(playerRef.memorizedSpells, key);
         }
         innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
     };

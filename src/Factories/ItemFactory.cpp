@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <functional>
 #include <memory>
 #include <span>
@@ -58,16 +59,16 @@ void ItemFactory::load_from_registry()
 				  {
 					  const int level = ctx.levelManager->get_dungeon_level();
 					  const int amount = ctx.dice->roll(level * 3, level * 10);
-					  InventoryOperations::add_item(
+					  assert(InventoryOperations::add_item(
 						  *ctx.inventoryData,
-						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry));
+						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry)).has_value());
 				  }
 			  }
 			: std::function<void(Vector2D, GameContext&)>{ [capturedKey](Vector2D pos, GameContext& ctx)
 				  {
-					  InventoryOperations::add_item(
+					  assert(InventoryOperations::add_item(
 						  *ctx.inventoryData,
-						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry));
+						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry)).has_value());
 				  } };
 
 		add_item_type(
@@ -102,18 +103,18 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 					if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 					{
 						auto enh = ItemEnhancement::generate_weapon_enhancement();
-						InventoryOperations::add_item(
+						assert(InventoryOperations::add_item(
 							*ctx.inventoryData,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 					}
 					else
 					{
 						auto enh = ItemEnhancement::generate_armor_enhancement();
-						InventoryOperations::add_item(
+						assert(InventoryOperations::add_item(
 							*ctx.inventoryData,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 					}
 				}
 			});
@@ -164,7 +165,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	// Create gold pile
 	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tileConfig->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
 	goldPile->behavior = Gold{ goldAmount };
-	add_item(*ctx.inventoryData, std::move(goldPile));
+	assert(add_item(*ctx.inventoryData, std::move(goldPile)).has_value());
 
 	// Generate other random items
 	for (int i = 0; i < itemCount; i++)
@@ -255,7 +256,7 @@ std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLev
 // Spawn a specific item category (weapon, potion, scroll, etc.)
 void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category)
 {
-	// TODO: replace iterator pattern with contains + at
+	// find() retained: compound empty() check + value reuse avoids triple lookup
 	auto it = itemCategories.find(category);
 	if (it == itemCategories.end() || it->second.empty())
 	{
@@ -367,16 +368,16 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 			if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 			{
 				auto enh = ItemEnhancement::generate_weapon_enhancement();
-				InventoryOperations::add_item(
+				assert(InventoryOperations::add_item(
 					*ctx.inventoryData,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 			}
 			else
 			{
 				auto enh = ItemEnhancement::generate_armor_enhancement();
-				InventoryOperations::add_item(
+				assert(InventoryOperations::add_item(
 					*ctx.inventoryData,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 			}
 		}
 	};

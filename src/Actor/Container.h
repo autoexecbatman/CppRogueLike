@@ -1,8 +1,8 @@
 #pragma once
 
+#include <expected>
 #include <functional>
 #include <memory>
-#include <optional>
 #include <span>
 #include <string>
 #include <utility>
@@ -14,7 +14,6 @@
 class Actor;
 class Item;
 
-// C++20 compatible error handling
 enum class ContainerError
 {
 	FULL,
@@ -23,31 +22,8 @@ enum class ContainerError
 	CAPACITY_EXCEEDED
 };
 
-// Result type for C++20 compatibility
 template <typename T>
-struct ContainerResult
-{
-	std::optional<T> value;
-	std::optional<ContainerError> error;
-
-	// Success constructor
-	ContainerResult(T&& val)
-		: value(std::move(val)) {}
-
-	// Error constructor
-	ContainerResult(ContainerError err)
-		: error(err) {}
-
-	// Convenience methods
-	bool has_value() const { return value.has_value(); }
-	bool has_error() const { return error.has_value(); }
-	explicit operator bool() const { return has_value(); }
-
-	T& operator*() { return *value; }
-	const T& operator*() const { return *value; }
-
-	ContainerError get_error() const { return error.value_or(ContainerError::INVALID_ITEM); }
-};
+using ContainerResult = std::expected<T, ContainerError>;
 
 // Event system for decoupled communication
 struct ContainerEvent
@@ -59,10 +35,10 @@ struct ContainerEvent
 		INVENTORY_FULL,
 		CAPACITY_CHANGED
 	};
-	Type type;
-	const Item* item;
-	size_t current_size;
-	size_t capacity;
+	Type type{ Type::ITEM_ADDED };
+	const Item* item{ nullptr };
+	size_t currentSize{ 0 };
+	size_t capacity{ 0 };
 };
 
 using ContainerEventHandler = std::function<void(const ContainerEvent&)>;
@@ -70,8 +46,19 @@ using ContainerEventHandler = std::function<void(const ContainerEvent&)>;
 // - Modern C++20 inventory management with proper encapsulation
 class Container : public Persistent
 {
+private:
+	// Private data members - proper encapsulation
+	std::vector<std::unique_ptr<Item>> inventory;
+	size_t capacity{};
+	int maxWeight{ 500 }; // Roughly 250 lbs in D&D scaling (2 units per lb)
+	ContainerEventHandler eventHandler;
+
+	// Internal helper methods
+	void fire_event(ContainerEvent::Type type, const Item* item = nullptr);
+	void optimize_storage();
+
 public:
-	explicit Container(size_t initial_capacity) noexcept;
+	explicit Container(size_t initialCapacity) noexcept;
 	~Container() = default;
 
 	// Rule of 5 for proper resource management
@@ -87,35 +74,35 @@ public:
 	void remove_legacy(std::unique_ptr<Item> actor); // For unusual legacy pattern
 
 	// Const-correct access methods
-	[[nodiscard]] const std::vector<std::unique_ptr<Item>>& get_inventory() const noexcept { return inventory_; }
-	[[nodiscard]] std::vector<std::unique_ptr<Item>>& get_inventory_mutable() noexcept { return inventory_; }
+	[[nodiscard]] const std::vector<std::unique_ptr<Item>>& get_inventory() const noexcept { return inventory; }
+	[[nodiscard]] std::vector<std::unique_ptr<Item>>& get_inventory_mutable() noexcept { return inventory; }
 
-	[[nodiscard]] size_t get_capacity() const noexcept { return capacity_; }
-	[[nodiscard]] size_t get_item_count() const noexcept { return inventory_.size(); }
-	[[nodiscard]] bool is_full() const noexcept { return inventory_.size() >= capacity_; }
-	[[nodiscard]] bool is_empty() const noexcept { return inventory_.empty(); }
-	[[nodiscard]] size_t get_remaining_space() const noexcept { return capacity_ - inventory_.size(); }
+	[[nodiscard]] size_t get_capacity() const noexcept { return capacity; }
+	[[nodiscard]] size_t get_item_count() const noexcept { return inventory.size(); }
+	[[nodiscard]] bool is_full() const noexcept { return inventory.size() >= capacity; }
+	[[nodiscard]] bool is_empty() const noexcept { return inventory.empty(); }
+	[[nodiscard]] size_t get_remaining_space() const noexcept { return capacity - inventory.size(); }
 
 	// Weight management
 	[[nodiscard]] int get_total_weight() const noexcept;
-	[[nodiscard]] int get_max_weight() const noexcept { return max_weight_; }
-	[[nodiscard]] bool is_overloaded() const noexcept { return get_total_weight() > max_weight_; }
+	[[nodiscard]] int get_max_weight() const noexcept { return maxWeight; }
+	[[nodiscard]] bool is_overloaded() const noexcept { return get_total_weight() > maxWeight; }
 	[[nodiscard]] bool can_run() const noexcept { return !is_overloaded(); }
-	void set_max_weight(int max_w) noexcept { max_weight_ = max_w; }
+	void set_max_weight(int max_w) noexcept { maxWeight = max_w; }
 
 	// Item access
 	[[nodiscard]] Item* get_item_at(size_t index) noexcept;
 	[[nodiscard]] const Item* get_item_at(size_t index) const noexcept;
 
 	// Capacity management
-	void set_capacity(size_t new_capacity);
+	void set_capacity(size_t newCapacity);
 
 	// Search operations
 	[[nodiscard]] const Item* find_item_by_name(std::string_view name) const noexcept;
 	[[nodiscard]] bool contains_item(const Item& item) const noexcept;
 
 	// Event system for decoupled communication
-	void set_event_handler(ContainerEventHandler handler) { event_handler_ = std::move(handler); }
+	void set_event_handler(ContainerEventHandler handler) { eventHandler = std::move(handler); }
 
 	// Persistence interface
 	void load(const json& j) override;
@@ -125,14 +112,4 @@ public:
 	void print_container(std::span<std::unique_ptr<Actor>> container) const;
 	[[nodiscard]] std::string get_debug_info() const;
 
-private:
-	// Private data members - proper encapsulation
-	std::vector<std::unique_ptr<Item>> inventory_;
-	size_t capacity_;
-	int max_weight_{ 500 }; // Roughly 250 lbs in D&D scaling (2 units per lb)
-	ContainerEventHandler event_handler_;
-
-	// Internal helper methods
-	void fire_event(ContainerEvent::Type type, const Item* item = nullptr);
-	void optimize_storage();
 };

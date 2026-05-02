@@ -1,5 +1,3 @@
-#include "PlayerAttacker.h"
-
 #include <string>
 
 #include "../Actor/Creature.h"
@@ -12,6 +10,7 @@
 #include "../Items/ItemIdentification.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Systems/MessageSystem.h"
+#include "PlayerAttacker.h"
 
 PlayerAttacker::PlayerAttacker(Player& owner)
 	: Attacker(DamageInfo{}), owner(owner) {}
@@ -22,7 +21,7 @@ DamageInfo PlayerAttacker::compute_weapon_damage(EquipmentSlot slot) const
 	if (weapon && weapon->is_weapon())
 	{
 		const ItemEnhancement* enhancement = weapon->is_enhanced() ? &weapon->get_enhancement() : nullptr;
-		return WeaponDamageRegistry::get_enhanced_damage_info(weapon->item_key, enhancement);
+		return WeaponDamageRegistry::get_enhanced_damage_info(weapon->itemKey, enhancement);
 	}
 	return WeaponDamageRegistry::get_unarmed_damage_info();
 }
