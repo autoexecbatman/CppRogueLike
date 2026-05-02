@@ -3,9 +3,10 @@
 #include <format>
 #include <stdexcept>
 #include <string>
-#include <type_traits>
 #include <unordered_map>
 #include <variant>
+
+#include "../Utils/VariantVisitor.h"
 
 #include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
@@ -595,6 +596,71 @@ bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx)
 	return use_stat_boost(g, EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
+bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx)
+{
+	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
+	if (success)
+	{
+		Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
+		if (equipped && equipped->uniqueId == owner.uniqueId)
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
+		}
+		else
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
+		}
+		return true;
+	}
+	wearer.equip(owner, ctx);
+	return true;
+}
+
+bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx)
+{
+	wearer.position = SpawnUtils::find_random_floor_tile(ctx);
+	ctx.map->compute_fov(ctx);
+	ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
+	return consume_item(owner, wearer);
+}
+
+bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameContext& ctx)
+{
+	int identifiedCount = 0;
+	for (auto& item : wearer.inventoryData.items)
+	{
+		if (!item->is_fully_identified())
+		{
+			item->identify_all();
+			++identifiedCount;
+			if (ctx.floatingText)
+			{
+				ctx.floatingText->spawn_text(
+					wearer.position.x,
+					wearer.position.y,
+					std::string(item->get_name()) + " identified!",
+					0, 255, 255, 2.0f);
+			}
+		}
+	}
+	ctx.messageSystem->message(
+		CYAN_BLACK_PAIR,
+		identifiedCount > 0
+			? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
+			: std::format("You use the {}. All items were already identified.", owner.get_name()),
+		true);
+	return consume_item(owner, wearer);
+}
+
+bool use(Amulet& amulet, Item& owner, Creature& wearer, GameContext& ctx)
+{
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
+	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
+	ctx.gameState->set_game_status(GameStatus::VICTORY);
+	return false;
+}
+
 bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	ctx.messageSystem->message(WHITE_BLACK_PAIR, "Bump into a locked door to use this key.", true);
@@ -608,74 +674,7 @@ bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext
 	return std::visit(
 		[&owner, &wearer, &ctx](auto& b) -> bool
 		{
-			using T = std::decay_t<decltype(b)>;
-
-			// Empty-struct types carry no use-site data -- behavior lives here.
-			if constexpr (std::is_same_v<T, Shield>)
-			{
-				const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
-				if (success)
-				{
-					Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
-					if (equipped && equipped->uniqueId == owner.uniqueId)
-					{
-						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
-					}
-					else
-					{
-						ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
-					}
-					return true;
-				}
-				wearer.equip(owner, ctx);
-				return true;
-			}
-			else if constexpr (std::is_same_v<T, Teleporter>)
-			{
-				wearer.position = SpawnUtils::find_random_floor_tile(ctx);
-				ctx.map->compute_fov(ctx);
-				ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
-				return consume_item(owner, wearer);
-			}
-			else if constexpr (std::is_same_v<T, IdentifyScroll>)
-			{
-				int identifiedCount = 0;
-				for (auto& item : wearer.inventoryData.items)
-				{
-					if (!item->is_fully_identified())
-					{
-						item->identify_all();
-						++identifiedCount;
-						if (ctx.floatingText)
-						{
-							ctx.floatingText->spawn_text(
-								wearer.position.x,
-								wearer.position.y,
-								std::string(item->get_name()) + " identified!",
-								0, 255, 255, 2.0f);
-						}
-					}
-				}
-				ctx.messageSystem->message(
-					CYAN_BLACK_PAIR,
-					identifiedCount > 0
-						? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
-						: std::format("You use the {}. All items were already identified.", owner.get_name()),
-					true);
-				return consume_item(owner, wearer);
-			}
-			else if constexpr (std::is_same_v<T, Amulet>)
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
-				ctx.gameState->set_game_status(GameStatus::VICTORY);
-				return false;
-			}
-			else
-			{
-				return use(b, owner, wearer, ctx);
-			}
+			return use(b, owner, wearer, ctx);
 		},
 		behavior);
 }
@@ -683,29 +682,12 @@ bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 {
 	return std::visit(
-		[](const auto& b) -> int
-		{
-			using T = std::decay_t<decltype(b)>;
-			if constexpr (std::is_same_v<T, Armor>)
-			{
-				return b.armorClass;
-			}
-			else if constexpr (std::is_same_v<T, Shield>)
-			{
-				return -1; // +1 AC in AD&D terms
-			}
-			else if constexpr (std::is_same_v<T, MagicalHelm>)
-			{
-				return MagicalEffectUtils::get_ac_bonus(b.effect, b.bonus);
-			}
-			else if constexpr (std::is_same_v<T, MagicalRing>)
-			{
-				return MagicalEffectUtils::get_protection_bonus(b.effect);
-			}
-			else
-			{
-				return 0;
-			}
+		VariantVisitor{
+			[](const Armor& a) -> int { return a.armorClass; },
+			[](const Shield&) -> int { return -1; }, // +1 AC in AD&D terms
+			[](const MagicalHelm& mh) -> int { return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
+			[](const MagicalRing& mr) -> int { return MagicalEffectUtils::get_protection_bonus(mr.effect); },
+			[](const auto&) -> int { return 0; },
 		},
 		behavior);
 }
@@ -715,11 +697,8 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 void save_behavior(const ItemBehavior& behavior, json& j)
 {
 	std::visit(
-		[&j](const auto& b)
-		{
-			using T = std::decay_t<decltype(b)>;
-
-			if constexpr (std::is_same_v<T, Consumable>)
+		VariantVisitor{
+			[&j](const Consumable& b)
 			{
 				j["type"] = static_cast<int>(PickableType::CONSUMABLE);
 				j["effect"] = static_cast<int>(b.effect);
@@ -727,19 +706,16 @@ void save_behavior(const ItemBehavior& behavior, json& j)
 				j["duration"] = b.duration;
 				j["buffType"] = static_cast<int>(b.buffType);
 				j["isSetEffect"] = b.isSetEffect;
-			}
-			else if constexpr (std::is_same_v<T, Weapon>)
+			},
+			[&j](const Weapon& b)
 			{
 				j["type"] = static_cast<int>(PickableType::WEAPON);
 				j["ranged"] = b.ranged;
 				j["handReq"] = static_cast<int>(b.handRequirement);
 				j["weaponSize"] = static_cast<int>(b.weaponSize);
-			}
-			else if constexpr (std::is_same_v<T, Shield>)
-			{
-				j["type"] = static_cast<int>(PickableType::SHIELD);
-			}
-			else if constexpr (std::is_same_v<T, TargetedScroll>)
+			},
+			[&j](const Shield&) { j["type"] = static_cast<int>(PickableType::SHIELD); },
+			[&j](const TargetedScroll& b)
 			{
 				j["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
 				j["targetMode"] = static_cast<int>(b.targetMode);
@@ -749,67 +725,46 @@ void save_behavior(const ItemBehavior& behavior, json& j)
 				j["confuseTurns"] = b.confuseTurns;
 				j["buffType"] = static_cast<int>(b.buffType);
 				j["buffDuration"] = b.buffDuration;
-			}
-			else if constexpr (std::is_same_v<T, Teleporter>)
-			{
-				j["type"] = static_cast<int>(PickableType::TELEPORTER);
-			}
-			else if constexpr (std::is_same_v<T, IdentifyScroll>)
-			{
-				j["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL);
-			}
-			else if constexpr (std::is_same_v<T, Gold>)
+			},
+			[&j](const Teleporter&) { j["type"] = static_cast<int>(PickableType::TELEPORTER); },
+			[&j](const IdentifyScroll&) { j["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL); },
+			[&j](const Gold& b)
 			{
 				j["type"] = static_cast<int>(PickableType::GOLD_COIN);
 				j["amount"] = b.amount;
-			}
-			else if constexpr (std::is_same_v<T, Food>)
+			},
+			[&j](const Food& b)
 			{
 				j["type"] = static_cast<int>(PickableType::FOOD);
 				j["nutritionValue"] = b.nutritionValue;
-			}
-			else if constexpr (std::is_same_v<T, CorpseFood>)
+			},
+			[&j](const CorpseFood& b)
 			{
 				j["type"] = static_cast<int>(PickableType::CORPSE_FOOD);
 				j["nutritionValue"] = b.nutritionValue;
-			}
-			else if constexpr (std::is_same_v<T, Armor>)
+			},
+			[&j](const Armor& b)
 			{
 				j["type"] = static_cast<int>(PickableType::ARMOR);
 				j["armorClass"] = b.armorClass;
-			}
-			else if constexpr (std::is_same_v<T, MagicalHelm>)
+			},
+			[&j](const MagicalHelm& b)
 			{
 				j["type"] = static_cast<int>(PickableType::MAGICAL_HELM);
 				j["effect"] = static_cast<int>(b.effect);
 				j["bonus"] = b.bonus;
-			}
-			else if constexpr (std::is_same_v<T, MagicalRing>)
+			},
+			[&j](const MagicalRing& b)
 			{
 				j["type"] = static_cast<int>(PickableType::MAGICAL_RING);
 				j["effect"] = static_cast<int>(b.effect);
 				j["bonus"] = b.bonus;
-			}
-			else if constexpr (std::is_same_v<T, JewelryAmulet>)
-			{
-				save_stat_boost(b, PickableType::JEWELRY_AMULET, j);
-			}
-			else if constexpr (std::is_same_v<T, Gauntlets>)
-			{
-				save_stat_boost(b, PickableType::GAUNTLETS, j);
-			}
-			else if constexpr (std::is_same_v<T, Girdle>)
-			{
-				save_stat_boost(b, PickableType::GIRDLE, j);
-			}
-			else if constexpr (std::is_same_v<T, Amulet>)
-			{
-				j["type"] = static_cast<int>(PickableType::QUEST_ITEM);
-			}
-			else if constexpr (std::is_same_v<T, DungeonKey>)
-			{
-				j["type"] = static_cast<int>(PickableType::DUNGEON_KEY);
-			}
+			},
+			[&j](const JewelryAmulet& b) { save_stat_boost(b, PickableType::JEWELRY_AMULET, j); },
+			[&j](const Gauntlets& b) { save_stat_boost(b, PickableType::GAUNTLETS, j); },
+			[&j](const Girdle& b) { save_stat_boost(b, PickableType::GIRDLE, j); },
+			[&j](const Amulet&) { j["type"] = static_cast<int>(PickableType::QUEST_ITEM); },
+			[&j](const DungeonKey&) { j["type"] = static_cast<int>(PickableType::DUNGEON_KEY); },
 		},
 		behavior);
 }

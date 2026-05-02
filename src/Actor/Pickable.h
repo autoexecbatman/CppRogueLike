@@ -1,4 +1,3 @@
-// file: Pickable.h
 #pragma once
 
 #include <variant>
@@ -215,7 +214,10 @@ using ItemBehavior = std::variant<
 
 bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(IdentifyScroll& is, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);
@@ -225,6 +227,7 @@ bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
