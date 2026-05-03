@@ -41,12 +41,12 @@ void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& c
 	LevelUpSystem::apply_level_up_benefits(player, xpLevel, &ctx);
 
 	// Display the level up screen using the dedicated UI class
-	ctx.menus->push_back(std::make_unique<LevelUpUI>(player, xpLevel, ctx));
+	ctx.menus->push_back(std::make_unique<LevelUpUI>(player, xpLevel));
 }
 
 void DisplayManager::display_character_sheet(const Player& player, GameContext& ctx) const noexcept
 {
-	ctx.menus->push_back(std::make_unique<CharacterSheetUI>(player, ctx));
+	ctx.menus->push_back(std::make_unique<CharacterSheetUI>(player));
 }
 
 void DisplayManager::display_balance_viewer(GameContext& ctx) const

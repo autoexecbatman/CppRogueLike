@@ -8,7 +8,7 @@ struct GameContext;
 class CharacterSheetUI : public BaseMenu
 {
 public:
-    CharacterSheetUI(const Player& player, GameContext& ctx);
+    CharacterSheetUI(const Player& player);
     ~CharacterSheetUI() = default;
     CharacterSheetUI(const CharacterSheetUI&) = delete;
     CharacterSheetUI& operator=(const CharacterSheetUI&) = delete;

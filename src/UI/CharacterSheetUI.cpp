@@ -217,7 +217,7 @@ void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 // CharacterSheetUI
 // ============================================================================
 
-CharacterSheetUI::CharacterSheetUI(const Player& player, GameContext& /*ctx*/)
+CharacterSheetUI::CharacterSheetUI(const Player& player)
     : player_ref(player)
 {
 }

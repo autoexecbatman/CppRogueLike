@@ -291,9 +291,6 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 6 * tileSize + fontOff }, goldLine, YELLOW_BLACK_PAIR);
 }
 
-// No-op: content merged into gui_print_stats
-void Gui::gui_print_attrs(const GameContext& /*ctx*/) noexcept {}
-
 // ---------------------------------------------------------------------------
 // Log panel -- right section
 // ---------------------------------------------------------------------------
@@ -349,10 +346,6 @@ void Gui::render_player_status(const GameContext& ctx)
 			RED_BLACK_PAIR);
 	}
 }
-
-void Gui::gui(GameContext& /*ctx*/) noexcept {}
-
-void Gui::renderMouseLook(const GameContext& /*ctx*/) {}
 
 void Gui::save(json& /*j*/) {}
 

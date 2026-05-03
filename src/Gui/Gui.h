@@ -33,9 +33,6 @@ public:
 
 	void gui_print_stats(const GameContext& ctx) noexcept;
 	void gui_print_log(const GameContext& ctx);
-	void gui_print_attrs(const GameContext& ctx) noexcept;
-
-	void gui(GameContext& ctx) noexcept;
 
 	void load(const json& j) override;
 	void save(json& j) override;
@@ -51,5 +48,4 @@ public:
 protected:
 	void render_hp_bar(const GameContext& ctx);
 	void render_hunger_status(const GameContext& ctx);
-	void renderMouseLook(const GameContext& ctx);
 };

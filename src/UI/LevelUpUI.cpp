@@ -178,7 +178,7 @@ void draw_next_level_info(const Player& player, GameContext& ctx, int& row)
 // LevelUpUI
 // ============================================================================
 
-LevelUpUI::LevelUpUI(Player& player, int newLevel, GameContext& /*ctx*/)
+LevelUpUI::LevelUpUI(Player& player, int newLevel)
     : player_ref(player), level(newLevel)
 {
 }

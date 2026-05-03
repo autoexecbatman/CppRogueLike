@@ -41,7 +41,10 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
         entries.push_back({ "Load Game", 'l', loadGameCommand });
     }
 
-    auto optionsCommand = [](GameContext& /*ctx*/) {};
+    auto optionsCommand = [startup](GameContext& ctx)
+    {
+        ctx.menus->push_back(make_main_menu(startup, ctx));
+    };
     entries.push_back({ "Options", 'o', optionsCommand });
 
 #ifndef EMSCRIPTEN

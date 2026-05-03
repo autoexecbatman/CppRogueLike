@@ -29,21 +29,29 @@ ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality)
 	switch (quality)
 	{
 	case ShopQuality::POOR:
+	{
 		markupPercent = 110;
 		sellbackPercent = 50;
 		break;
+	}
 	case ShopQuality::AVERAGE:
+	{
 		markupPercent = 120;
 		sellbackPercent = 60;
 		break;
+	}
 	case ShopQuality::GOOD:
+	{
 		markupPercent = 130;
 		sellbackPercent = 70;
 		break;
+	}
 	case ShopQuality::EXCELLENT:
+	{
 		markupPercent = 150;
 		sellbackPercent = 80;
 		break;
+	}
 	}
 
 	generate_shop_name();

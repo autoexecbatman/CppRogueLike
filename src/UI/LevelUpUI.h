@@ -8,7 +8,7 @@ struct GameContext;
 class LevelUpUI : public BaseMenu
 {
 public:
-    LevelUpUI(Player& player, int newLevel, GameContext& ctx);
+    LevelUpUI(Player& player, int newLevel);
     ~LevelUpUI() = default;
     LevelUpUI(const LevelUpUI&) = delete;
     LevelUpUI& operator=(const LevelUpUI&) = delete;
