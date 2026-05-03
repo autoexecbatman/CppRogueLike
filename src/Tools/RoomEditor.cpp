@@ -366,9 +366,13 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 		::Vector2 mw = GetMousePosition();
 		int delta = (wheel > 0.0f) ? -1 : 1;
 
-		// TODO: This if statement should be a named lambda for self-documenting code clarity.
-		if (screen_to_palette_index(renderer, static_cast<int>(mw.x), static_cast<int>(mw.y)).has_value() ||
-			static_cast<int>(mw.x) < LEFT_W_TILES * tileSize)
+		auto is_mouse_over_left_panel = [this, &renderer, tileSize, &mw]()
+		{
+			return screen_to_palette_index(renderer, static_cast<int>(mw.x), static_cast<int>(mw.y)).has_value() ||
+				static_cast<int>(mw.x) < LEFT_W_TILES * tileSize;
+		};
+
+		if (is_mouse_over_left_panel())
 		{
 			int palSize = static_cast<int>(library->ordered_palette().size());
 			paletteIndex = std::clamp(paletteIndex + delta, 0, std::max(0, palSize - 1));
