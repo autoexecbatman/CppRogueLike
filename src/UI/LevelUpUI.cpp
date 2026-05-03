@@ -179,7 +179,7 @@ void draw_next_level_info(const Player& player, GameContext& ctx, int& row)
 // ============================================================================
 
 LevelUpUI::LevelUpUI(Player& player, int newLevel)
-    : player_ref(player), level(newLevel)
+    : playerRef(player), level(newLevel)
 {
 }
 
@@ -196,10 +196,10 @@ void LevelUpUI::menu(GameContext& ctx)
     ctx.renderer->begin_frame();
 
     int row = 0;
-    draw_title(player_ref, level, ctx, row);
-    draw_current_stats(player_ref, ctx, row);
-    draw_level_benefits(player_ref, level, ctx, row);
-    draw_next_level_info(player_ref, ctx, row);
+    draw_title(playerRef, level, ctx, row);
+    draw_current_stats(playerRef, ctx, row);
+    draw_level_benefits(playerRef, level, ctx, row);
+    draw_next_level_info(playerRef, ctx, row);
 
     int tileSize = ctx.renderer->get_tile_size();
     ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Press [SPACE] to continue", CYAN_BLACK_PAIR);

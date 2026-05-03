@@ -18,6 +18,6 @@ public:
     void menu(GameContext& ctx) override;
 
 private:
-    Player& player_ref;
-    int level;
+    Player& playerRef;
+    int level{};
 };
