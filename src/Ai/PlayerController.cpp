@@ -188,12 +188,12 @@ void PlayerController::move(Vector2D target)
 
 void PlayerController::pick_item(GameContext& ctx)
 {
-	if (ctx.inventoryData->items.empty())
+	if (ctx.floorInventory->items.empty())
 		return;
 
 	// Find the first item at the player's position
 	Item* item = nullptr;
-	for (auto& floorItem : ctx.inventoryData->items)
+	for (auto& floorItem : ctx.floorInventory->items)
 	{
 		if (floorItem && floorItem->position == playerOwner.position)
 		{
@@ -213,7 +213,7 @@ void PlayerController::pick_item(GameContext& ctx)
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
 		playerOwner.adjust_gold(goldBehavior.amount);
 		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
-		assert(InventoryOperations::remove_item(*ctx.inventoryData, *item).has_value());
+		assert(InventoryOperations::remove_item(*ctx.floorInventory, *item).has_value());
 		return;
 	}
 
@@ -236,7 +236,7 @@ void PlayerController::pick_item(GameContext& ctx)
 	const std::string itemName = item->actorData.name;
 
 	// Remove from floor: ownership transfers to removeResult
-	auto removeResult = InventoryOperations::remove_item(*ctx.inventoryData, *item);
+	auto removeResult = InventoryOperations::remove_item(*ctx.floorInventory, *item);
 	if (!removeResult.has_value())
 	{
 		ctx.messageSystem->log("ERROR: pick_item -- remove_item failed unexpectedly");
@@ -301,10 +301,10 @@ Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 
 void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 {
-	if (ctx.inventoryData->items.empty())
+	if (ctx.floorInventory->items.empty())
 		return;
 
-	for (const auto& i : ctx.inventoryData->items)
+	for (const auto& i : ctx.floorInventory->items)
 	{
 		if (i && i->position == target)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here", true);
@@ -603,16 +603,21 @@ void PlayerController::begin_path_walk(
 	GameContext& ctx)
 {
 	if (mode == MouseMode::IDLE)
+	{
 		throw std::logic_error("PlayerController::begin_path_walk -- mode must not be IDLE");
+	}
 
 	if (!ctx.pathfinder || !ctx.map)
+	{
 		return;
+	}
 
-	auto path = ctx.pathfinder->a_star_search(
-		*ctx.map, ctx.player->position, walkDest, true, ctx);
+	auto path = ctx.pathfinder->a_star_search(*ctx.map, ctx.player->position, walkDest, true, ctx);
 
 	if (path.empty())
+	{
 		return;
+	}
 
 	*ctx.mousePathOverlay = std::move(path);
 	mouseMode = mode;
@@ -753,8 +758,8 @@ void PlayerController::handle_left_click(GameContext& ctx)
 	}
 	else
 	{
-		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
-		for (const auto& item : ctx.inventoryData->items)
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		for (const auto& item : ctx.floorInventory->items)
 		{
 			if (item->position == world_tile)
 			{
@@ -807,8 +812,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 	}
 
 	// Floor item at tile
-	assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
-	for (auto& item : ctx.inventoryData->items)
+	assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+	for (auto& item : ctx.floorInventory->items)
 	{
 		if (item->position == world_tile)
 		{

@@ -163,7 +163,7 @@ void GameStateManager::save_game(GameContext& ctx)
 	assert(ctx.player != nullptr);
 	assert(ctx.stairs != nullptr);
 	assert(ctx.creatures != nullptr);
-	assert(ctx.inventoryData != nullptr);
+	assert(ctx.floorInventory != nullptr);
 	assert(ctx.gui != nullptr);
 	assert(ctx.hungerSystem != nullptr);
 	assert(ctx.levelManager != nullptr);
@@ -196,7 +196,7 @@ void GameStateManager::save_game(GameContext& ctx)
 		j["stairs"] = stairsJson;
 
 		save_creatures(*ctx.creatures, j);
-		save_inventory(*ctx.inventoryData, j);
+		save_inventory(*ctx.floorInventory, j);
 
 		json guiJson;
 		ctx.gui->save(guiJson);
@@ -222,7 +222,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 	assert(ctx.player != nullptr);
 	assert(ctx.stairs != nullptr);
 	assert(ctx.creatures != nullptr);
-	assert(ctx.inventoryData != nullptr);
+	assert(ctx.floorInventory != nullptr);
 	assert(ctx.gui != nullptr);
 	assert(ctx.hungerSystem != nullptr);
 	assert(ctx.levelManager != nullptr);
@@ -251,7 +251,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 	}
 
 	load_creatures(j, *ctx.creatures);
-	load_inventory(*ctx.inventoryData, j);
+	load_inventory(*ctx.floorInventory, j);
 
 	if (j.contains("gui"))
 	{

@@ -138,19 +138,19 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	}
 	consumptionCooldown = 0;
 
-	if (ctx.inventoryData->items.empty())
+	if (ctx.floorInventory->items.empty())
 	{
 		return false;
 	}
 
-	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.inventoryData->items.size()));
+	ctx.messageSystem->log(std::format("Checking for items. Inventory size: {}", ctx.floorInventory->items.size()));
 
 	std::vector<size_t> itemsToRemove;
 	bool itemConsumed = false;
 
-	for (size_t i = 0; i < ctx.inventoryData->items.size(); ++i)
+	for (size_t i = 0; i < ctx.floorInventory->items.size(); ++i)
 	{
-		const auto& item = ctx.inventoryData->items[i];
+		const auto& item = ctx.floorInventory->items[i];
 		if (!item)
 		{
 			continue;
@@ -193,9 +193,9 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	{
 		ctx.messageSystem->log(std::format("Removing consumed item at index {}", index));
 
-		if (index < ctx.inventoryData->items.size() && ctx.inventoryData->items[index])
+		if (index < ctx.floorInventory->items.size() && ctx.floorInventory->items[index])
 		{
-			assert(InventoryOperations::remove_item_at(*ctx.inventoryData, index).has_value());
+			assert(InventoryOperations::remove_item_at(*ctx.floorInventory, index).has_value());
 		}
 	}
 

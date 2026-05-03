@@ -182,8 +182,8 @@ struct GameContext
 	Stairs* stairs{ nullptr };
 	std::vector<std::unique_ptr<Object>>* objects{ nullptr };
 	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
-	struct InventoryData* inventoryData{ nullptr };
-	std::vector<std::unique_ptr<class Creature>>* creatures{ nullptr };
+	FloorInventory* floorInventory{ nullptr };
+	std::vector<std::unique_ptr<Creature>>* creatures{ nullptr };
 	std::vector<DungeonRoom>* rooms{ nullptr };
 
 	// UI Collections

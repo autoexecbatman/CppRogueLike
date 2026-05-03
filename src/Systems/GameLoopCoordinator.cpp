@@ -385,8 +385,8 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 			hg = 180;
 			hb = 0; // amber
 		}
-		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
-		for (const auto& item : ctx.inventoryData->items)
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		for (const auto& item : ctx.floorInventory->items)
 		{
 			if (item->position == world_tile)
 			{

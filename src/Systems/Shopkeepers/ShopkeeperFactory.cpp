@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cassert>
+#include <format>
 #include <memory>
 #include <string>
 
@@ -62,7 +63,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.shop = std::make_unique<ShopKeeper>(shopType, shopQuality);
 	shopkeeper.shop->generate_initial_inventory(ctx);
 
-	ctx.messageSystem->log("Created shopkeeper: " + shopkeeper.shop->shop_name + " (Level " + std::to_string(dungeonLevel) + ")");
+	ctx.messageSystem->log(std::format("Created shopkeeper: {} (Level {})", shopkeeper.shop->get_shop_name(), dungeonLevel));
 }
 
 ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameContext& ctx)

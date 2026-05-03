@@ -19,14 +19,14 @@
 #ifdef EMSCRIPTEN
 struct LoopData
 {
-	Game* game;
-	int loopNum;
+	Game* game{};
+	int loopNum{};
 };
 
 void emscripten_loop(void* arg)
 {
 	auto* data = static_cast<LoopData*>(arg);
-	if (WindowShouldClose() || !data->game->game_state.get_run())
+	if (WindowShouldClose() || !data->game->gameState.get_run())
 	{
 		emscripten_cancel_main_loop();
 		return;
@@ -67,7 +67,7 @@ int main()
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>();
 	std::clog << "STARTUP: Loading tile config\n" << std::flush;
-	game->tile_config.load(Paths::TILE_CONFIG);
+	game->tileConfig.load(Paths::TILE_CONFIG);
 	std::clog << "STARTUP: Initializing world\n" << std::flush;
 	game->init_world();
 
@@ -80,9 +80,9 @@ int main()
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 16);
 
 	auto ctx = game->context();
-	game->decor_editor.load_palette(Paths::TILE_CONFIG);
-	game->prefab_library.load_tile_labels(Paths::TILE_CONFIG);
-	game->prefab_library.load(Paths::PREFABS);
+	game->decorEditor.load_palette(Paths::TILE_CONFIG);
+	game->prefabLibrary.load_tile_labels(Paths::TILE_CONFIG);
+	game->prefabLibrary.load(Paths::PREFABS);
 
 	game->menus.push_back(make_main_menu(true, ctx));
 
@@ -93,7 +93,7 @@ int main()
 	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
 #else
 	// Frame-based game loop
-	while (!WindowShouldClose() && game->game_state.get_run())
+	while (!WindowShouldClose() && game->gameState.get_run())
 	{
 		game->tick(loopNum);
 	}

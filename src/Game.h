@@ -4,12 +4,9 @@
 // C++ Core Guidelines: C.9 minimize exposure, Rule of Zero
 
 #include <deque>
-#include <exception>
 #include <memory>
-#include <string>
 #include <vector>
 
-#include "Actor/Actor.h"
 #include "Actor/InventoryData.h"
 #include "ActorTypes/Player.h"
 #include "Core/GameContext.h"
@@ -57,46 +54,46 @@ struct Game
 {
 
 	// Game state
-	GameState game_state{};
+	GameState gameState{};
 
 	// Tile configuration (must be loaded before init_world)
-	TileConfig tile_config{};
+	TileConfig tileConfig{};
 
 	// Minimap overlay
 	Minimap minimap{};
 
 	// Rendering (raylib)
 	Renderer renderer{};
-	InputSystem input_system{};
+	InputSystem inputSystem{};
 
 	// Core systems
 	RandomDice dice{};
-	MessageSystem message_system{};
-	RenderingManager rendering_manager{};
-	InputHandler input_handler{};
-	GameStateManager state_manager{};
-	LevelManager level_manager{};
-	CreatureManager creature_manager{};
-	MenuManager menu_manager{};
-	DisplayManager display_manager{};
-	GameLoopCoordinator game_loop_coordinator{};
-	DataManager data_manager{};
+	MessageSystem messageSystem{};
+	RenderingManager renderingManager{};
+	InputHandler inputHandler{};
+	GameStateManager stateManager{};
+	LevelManager levelManager{};
+	CreatureManager creatureManager{};
+	MenuManager menuManager{};
+	DisplayManager displayManager{};
+	GameLoopCoordinator gameLoopCoordinator{};
+	DataManager dataManager{};
 	TargetingSystem targeting{};
-	HungerSystem hunger_system{};
-	BuffSystem buff_system{};
-	FloatingTextSystem floating_text{};
-	AnimationSystem anim_system{};
-	ContentRegistry content_registry{};
+	HungerSystem hungerSystem{};
+	BuffSystem buffSystem{};
+	FloatingTextSystem floatingText{};
+	AnimationSystem animSystem{};
+	ContentRegistry contentRegistry{};
 	Dijkstra pathfinder{ get_map_width(), get_map_height() };
-	DecorEditor decor_editor{};
-	PrefabLibrary prefab_library{};
-	CurseSystem curse_system{};
+	DecorEditor decorEditor{};
+	PrefabLibrary prefabLibrary{};
+	CurseSystem curseSystem{};
 #ifndef EMSCRIPTEN
-	ContentEditor content_editor{};
-	RoomEditor room_editor{};
-	ItemEditor item_editor{};
-	MonsterEditor monster_editor{};
-	SpellEditor spell_editor{};
+	ContentEditor contentEditor{};
+	RoomEditor roomEditor{};
+	ItemEditor itemEditor{};
+	MonsterEditor monsterEditor{};
+	SpellEditor spellEditor{};
 #endif
 
 	// Game world
@@ -109,16 +106,16 @@ struct Game
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::vector<std::unique_ptr<Object>> objects{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
-	InventoryData inventory_data{ 1000 };
+	FloorInventory floorInventory{ 1000 };
 
 	// Character creation blueprint — persists across ticks
-	PlayerBlueprint player_blueprint{};
+	PlayerBlueprint playerBlueprint{};
 
 	// Menu system
 	std::deque<std::unique_ptr<BaseMenu>> menus{};
 
 	// Mouse path overlay — persistent across frames, owned here
-	std::vector<Vector2D> mouse_path_overlay{};
+	std::vector<Vector2D> mousePathOverlay{};
 
 	[[nodiscard]] GameContext context() noexcept;
 	bool tick(int& loopNum);

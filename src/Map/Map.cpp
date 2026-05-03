@@ -1406,9 +1406,9 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.creatures->clear();
 	}
-	if (ctx.inventoryData)
+	if (ctx.floorInventory)
 	{
-		ctx.inventoryData->items.clear();
+		ctx.floorInventory->items.clear();
 	}
 	if (ctx.rooms)
 	{
@@ -1631,14 +1631,14 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if there's a floor item on the door tile
-	if (ctx.inventoryData)
+	if (ctx.floorInventory)
 	{
-		assert(std::ranges::none_of(ctx.inventoryData->items, [](const auto& i) { return !i; }));
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
 		auto has_item_at_pos = [&pos](const std::unique_ptr<Item>& item)
 		{
 			return item->position == pos;
 		};
-		if (std::ranges::any_of(ctx.inventoryData->items, has_item_at_pos))
+		if (std::ranges::any_of(ctx.floorInventory->items, has_item_at_pos))
 		{
 			return false;
 		}
@@ -1796,7 +1796,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		assert(InventoryOperations::add_item(*ctx.inventoryData, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry)).has_value());
+		assert(InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry)).has_value());
 
 		// Log the placement (debug info)
 		if (ctx.messageSystem)

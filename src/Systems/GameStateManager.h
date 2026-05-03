@@ -9,7 +9,7 @@ class Item;
 class Gui;
 class HungerSystem;
 class LevelManager;
-struct InventoryData;
+struct FloorInventory;
 struct Vector2D;
 struct DungeonRoom;
 struct GameContext;

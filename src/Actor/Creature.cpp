@@ -15,7 +15,6 @@
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
 #include "../Systems/AnimationSystem.h"
-#include "../Items/ItemClassification.h"
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
@@ -25,10 +24,10 @@
 #include "Actor.h"
 #include "Attacker.h"
 #include "MonsterAttacker.h"
-#include "Creature.h"
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
+#include "Creature.h"
 
 //==Creature==
 void Creature::load(const json& j)
@@ -95,7 +94,7 @@ void Creature::load(const json& j)
 	}
 	if (j.contains("inventoryData"))
 	{
-		inventoryData = InventoryData(50); // Default capacity
+		inventoryData = CreatureInventory(50); // Default capacity
 		InventoryOperations::load_inventory(inventoryData, j["inventoryData"]);
 	}
 	if (j.contains("shop"))
@@ -445,7 +444,7 @@ void Creature::drop(Item& item, GameContext& ctx)
 		unequip(*foundPtr, ctx);
 	}
 
-	auto addResult = InventoryOperations::add_item(*ctx.inventoryData, std::move(foundPtr));
+	auto addResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
 	if (addResult.has_value())
 	{
 		InventoryOperations::optimize_inventory_storage(inventoryData);
@@ -495,7 +494,7 @@ void Creature::die(GameContext& ctx)
 	for (auto& item : inventoryData.items)
 	{
 		item->position = position;
-		assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(item)).has_value());
+		assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(item)).has_value());
 	}
 	inventoryData.items.clear();
 
@@ -505,7 +504,7 @@ void Creature::die(GameContext& ctx)
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
 	corpse->behavior = CorpseFood{ 0 };
-	assert(InventoryOperations::add_item(*ctx.inventoryData, std::move(corpse)).has_value());
+	assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse)).has_value());
 }
 
 //==Unified Buff System - Modifier Stack Pattern==

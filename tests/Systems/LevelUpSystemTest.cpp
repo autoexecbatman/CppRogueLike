@@ -14,7 +14,7 @@ protected:
     void SetUp() override
     {
         try {
-            game.data_manager.load_all_data(game.message_system);
+            game.dataManager.load_all_data(game.messageSystem);
         } catch (...) {}
 
         player = std::make_unique<Player>(Vector2D{0, 0});
@@ -78,9 +78,9 @@ TEST_F(LevelUpSystemTest, WizardLevelUpHPGainWithConBonus)
     player->set_constitution(16);
 
     int expectedBonus = 0;
-    if (!game.data_manager.get_constitution_attributes().empty()) {
-        if (player->get_constitution() <= static_cast<int>(game.data_manager.get_constitution_attributes().size())) {
-            expectedBonus = game.data_manager.get_constitution_attributes()[player->get_constitution() - 1].HPAdj;
+    if (!game.dataManager.get_constitution_attributes().empty()) {
+        if (player->get_constitution() <= static_cast<int>(game.dataManager.get_constitution_attributes().size())) {
+            expectedBonus = game.dataManager.get_constitution_attributes()[player->get_constitution() - 1].HPAdj;
         }
     }
 

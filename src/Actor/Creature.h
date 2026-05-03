@@ -74,7 +74,7 @@ public:
 	// Note: active_buffs vector is public for BuffSystem access
 	std::vector<Buff> activeBuffs;
 	Creature(Vector2D position, ActorData data)
-		: Actor(position, data), inventoryData(InventoryData(50)), constitutionTracker(std::make_unique<ConstitutionTracker>())
+		: Actor(position, data), inventoryData(CreatureInventory(50)), constitutionTracker(std::make_unique<ConstitutionTracker>())
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
@@ -232,5 +232,5 @@ public:
 	std::unique_ptr<ConstitutionTracker> constitutionTracker; // tracks constitution changes for HP adjustments
 	std::unique_ptr<Ai> ai; // the actor can have AI
 	std::unique_ptr<ShopKeeper> shop; // shopkeeper component for trading
-	InventoryData inventoryData;
+	CreatureInventory inventoryData;
 };

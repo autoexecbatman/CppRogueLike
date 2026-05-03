@@ -14,7 +14,7 @@ struct MockGameContext
 	MessageSystem messages{};
 	CreatureManager creature_mgr{};
 	ContentRegistry content_registry{};
-	InventoryData inventory{ 100 };
+	FloorInventory inventory{ 100 };
 	GameState game_state{};
 	TileConfig tile_config{};
 
@@ -40,7 +40,7 @@ struct MockGameContext
 			.creatureManager = &creature_mgr,
 			.contentRegistry = &content_registry,
 			.tileConfig = &tile_config,
-			.inventoryData = &inventory,
+			.floorInventory = &inventory,
 			.gameState = &game_state
 		};
 	}

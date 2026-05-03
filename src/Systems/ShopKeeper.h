@@ -33,18 +33,33 @@ class Creature;
 
 class ShopKeeper : public Persistent
 {
+private:
+	ShopType shopType{ ShopType::GENERAL_STORE };
+	ShopQuality shopQuality{ ShopQuality::AVERAGE };
+	std::string shopName{};
+	FloorInventory shopInventory{ 50 }; // Shop's items for sale
+	int markupPercent{ 120 }; // Buy price percentage
+	int sellbackPercent{ 60 }; // Sell price percentage
+
+	void generate_shop_name();
+
+	// Random item generation methods
+	std::unique_ptr<Item> generate_random_item_by_type(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_weapon(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_armor(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_potion(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_scroll(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_misc_item(GameContext& ctx);
+
 public:
-	ShopType shop_type;
-	ShopQuality shop_quality;
-	std::string shop_name;
-	InventoryData shop_inventory{ 50 }; // Shop's items for sale
-	int markup_percent{ 120 }; // Buy price percentage
-	int sellback_percent{ 60 }; // Sell price percentage
-
 	ShopKeeper(ShopType type, ShopQuality quality);
+	ShopKeeper() = default;
 
-	// Default constructor for deserialization
-	ShopKeeper();
+	~ShopKeeper() override = default;
+	ShopKeeper(const ShopKeeper&) = delete;
+	ShopKeeper& operator=(const ShopKeeper&) = delete;
+	ShopKeeper(ShopKeeper&&) = default;
+	ShopKeeper& operator=(ShopKeeper&&) = default;
 
 	// Serialization - required by Persistent interface
 	void load(const json& j) override;
@@ -52,6 +67,17 @@ public:
 
 	// Factory method for deserialization
 	static std::unique_ptr<ShopKeeper> create(const json& j);
+
+	// Accessors
+	ShopType get_shop_type() const noexcept { return shopType; }
+	ShopQuality get_shop_quality() const noexcept { return shopQuality; }
+	const std::string& get_shop_name() const noexcept { return shopName; }
+	FloorInventory& get_shop_inventory() noexcept { return shopInventory; }
+	const FloorInventory& get_shop_inventory() const noexcept { return shopInventory; }
+	int get_markup_percent() const noexcept { return markupPercent; }
+	void set_markup_percent(int value) noexcept { markupPercent = value; }
+	int get_sellback_percent() const noexcept { return sellbackPercent; }
+	void set_sellback_percent(int value) noexcept { sellbackPercent = value; }
 
 	// Trading operations - simplified for now
 	bool can_buy_item(const Item& item) const { return true; } // Accept all items for now
@@ -67,15 +93,4 @@ public:
 
 	// Static utility function for creating random shopkeepers
 	static std::unique_ptr<ShopKeeper> create_random_shopkeeper();
-
-private:
-	void generate_shop_name();
-
-	// Random item generation methods
-	std::unique_ptr<Item> generate_random_item_by_type(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_weapon(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_armor(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_potion(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_scroll(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_misc_item(GameContext& ctx);
 };

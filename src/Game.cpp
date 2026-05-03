@@ -9,54 +9,54 @@
 		.gui = &gui,
 		.player = player.get(),
 		.playerOwner = &player,
-		.playerBlueprint = &player_blueprint,
+		.playerBlueprint = &playerBlueprint,
 
 		// Core systems
-		.messageSystem = &message_system,
+		.messageSystem = &messageSystem,
 		.dice = &dice,
 
 		// Managers
-		.creatureManager = &creature_manager,
-		.levelManager = &level_manager,
-		.renderingManager = &rendering_manager,
-		.inputHandler = &input_handler,
-		.stateManager = &state_manager,
-		.menuManager = &menu_manager,
-		.displayManager = &display_manager,
-		.gameLoopCoordinator = &game_loop_coordinator,
-		.dataManager = &data_manager,
+		.creatureManager = &creatureManager,
+		.levelManager = &levelManager,
+		.renderingManager = &renderingManager,
+		.inputHandler = &inputHandler,
+		.stateManager = &stateManager,
+		.menuManager = &menuManager,
+		.displayManager = &displayManager,
+		.gameLoopCoordinator = &gameLoopCoordinator,
+		.dataManager = &dataManager,
 
 		// Rendering
 		.renderer = &renderer,
-		.inputSystem = &input_system,
+		.inputSystem = &inputSystem,
 
 		// Specialized systems
 		.targeting = &targeting,
-		.hungerSystem = &hunger_system,
-		.buffSystem = &buff_system,
-		.floatingText = &floating_text,
-		.animSystem = &anim_system,
-		.curseSystem = &curse_system,
-		.contentRegistry = &content_registry,
+		.hungerSystem = &hungerSystem,
+		.buffSystem = &buffSystem,
+		.floatingText = &floatingText,
+		.animSystem = &animSystem,
+		.curseSystem = &curseSystem,
+		.contentRegistry = &contentRegistry,
 		.minimap = &minimap,
 		.pathfinder = &pathfinder,
 
-		.decorEditor = &decor_editor,
-		.prefabLibrary = &prefab_library,
+		.decorEditor = &decorEditor,
+		.prefabLibrary = &prefabLibrary,
 #ifndef EMSCRIPTEN
-		.contentEditor = &content_editor,
-		.roomEditor = &room_editor,
-		.itemEditor = &item_editor,
-		.monsterEditor = &monster_editor,
-		.spellEditor = &spell_editor,
+		.contentEditor = &contentEditor,
+		.roomEditor = &roomEditor,
+		.itemEditor = &itemEditor,
+		.monsterEditor = &monsterEditor,
+		.spellEditor = &spellEditor,
 #endif
-		.tileConfig = &tile_config,
+		.tileConfig = &tileConfig,
 
 		// Game world data
 		.stairs = stairs.get(),
 		.objects = &objects,
 		.decorations = &decorations,
-		.inventoryData = &inventory_data,
+		.floorInventory = &floorInventory,
 		.creatures = &creatures,
 		.rooms = &rooms,
 
@@ -64,57 +64,57 @@
 		.menus = &menus,
 
 		// Mouse path overlay
-		.mousePathOverlay = &mouse_path_overlay,
+		.mousePathOverlay = &mousePathOverlay,
 
 		// Game state
-		.gameState = &game_state
+		.gameState = &gameState
 	};
 }
 
 // Game loop - returns false when game should exit
 bool Game::tick(int& loopNum)
 {
-	if (!game_state.get_run())
+	if (!gameState.get_run())
 	{
 		return false;
 	}
 
 #ifndef EMSCRIPTEN
-	if (room_editor.is_active())
+	if (roomEditor.is_active())
 	{
-		game_state.set_window_state(WindowState::ROOM_EDITOR);
+		gameState.set_window_state(WindowState::ROOM_EDITOR);
 	}
-	else if (item_editor.is_active())
+	else if (itemEditor.is_active())
 	{
-		game_state.set_window_state(WindowState::ITEM_EDITOR);
+		gameState.set_window_state(WindowState::ITEM_EDITOR);
 	}
-	else if (monster_editor.is_active())
+	else if (monsterEditor.is_active())
 	{
-		game_state.set_window_state(WindowState::MONSTER_EDITOR);
+		gameState.set_window_state(WindowState::MONSTER_EDITOR);
 	}
-	else if (spell_editor.is_active())
+	else if (spellEditor.is_active())
 	{
-		game_state.set_window_state(WindowState::SPELL_EDITOR);
+		gameState.set_window_state(WindowState::SPELL_EDITOR);
 	}
 	else
 #endif
 	{
-		game_state.set_window_state(menus.empty() ? WindowState::GAME : WindowState::MENU);
+		gameState.set_window_state(menus.empty() ? WindowState::GAME : WindowState::MENU);
 	}
 
 	auto ctx = context();
-	switch (game_state.get_window_state())
+	switch (gameState.get_window_state())
 	{
 
 	case WindowState::MENU:
 	{
-		menu_manager.handle_menus(menus, ctx);
+		menuManager.handle_menus(menus, ctx);
 		break;
 	}
 
 	case WindowState::GAME:
 	{
-		game_loop_coordinator.handle_gameloop(ctx, gui, loopNum);
+		gameLoopCoordinator.handle_gameloop(ctx, gui, loopNum);
 		break;
 	}
 
@@ -122,25 +122,25 @@ bool Game::tick(int& loopNum)
 
 	case WindowState::ROOM_EDITOR:
 	{
-		room_editor.tick(ctx);
+		roomEditor.tick(ctx);
 		break;
 	}
 
 	case WindowState::ITEM_EDITOR:
 	{
-		item_editor.tick(ctx);
+		itemEditor.tick(ctx);
 		break;
 	}
 
 	case WindowState::MONSTER_EDITOR:
 	{
-		monster_editor.tick(ctx);
+		monsterEditor.tick(ctx);
 		break;
 	}
 
 	case WindowState::SPELL_EDITOR:
 	{
-		spell_editor.tick(ctx);
+		spellEditor.tick(ctx);
 		break;
 	}
 #endif
@@ -151,30 +151,30 @@ bool Game::tick(int& loopNum)
 	}
 
 	++loopNum;
-	return game_state.get_run();
+	return gameState.get_run();
 }
 
 // Set tile refs for objects constructed before tile_config was loaded.
 // Call after tile_config.load().
 void Game::init_world()
 {
-	stairs->actorData.tile = tile_config.get("TILE_STAIRS");
-	anim_system.init(tile_config, renderer.get_tile_size());
+	stairs->actorData.tile = tileConfig.get("TILE_STAIRS");
+	animSystem.init(tileConfig, renderer.get_tile_size());
 }
 
 // Save on exit if needed
 void Game::shutdown()
 {
-	if (game_state.get_should_save())
+	if (gameState.get_should_save())
 	{
 		try
 		{
 			auto ctx = context();
-			state_manager.save_game(ctx);
+			stateManager.save_game(ctx);
 		}
 		catch (const std::exception& e)
 		{
-			message_system.log("Error saving: " + std::string(e.what()));
+			messageSystem.log("Error saving: " + std::string(e.what()));
 		}
 	}
 }

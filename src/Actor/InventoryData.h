@@ -7,21 +7,19 @@
 
 #include "Item.h"
 
-// - Data structures for inventory management
-
 // Error handling for inventory operations
 enum class InventoryError
 {
 	FULL,
 	ITEM_NOT_FOUND,
 	INVALID_ITEM,
-	CAPACITY_EXCEEDED
+	CAPACITY_EXCEEDED // only possible from add_item_to_inventory (CreatureInventory)
 };
 
 template <typename T>
 using InventoryResult = std::expected<T, InventoryError>;
 
-// Event system for decoupled communication
+// Event system for decoupled notification
 struct InventoryEvent
 {
 	enum class Type
@@ -39,27 +37,45 @@ struct InventoryEvent
 
 using InventoryEventHandler = std::function<void(const InventoryEvent&)>;
 
-// Pure data structure - no behavior
-struct InventoryData
+// Items on the dungeon floor.
+// No weight owner. No carry cap. Cleared on level transition.
+struct FloorInventory
 {
 	std::vector<std::unique_ptr<Item>> items;
 	size_t capacity{ 0 };
 	InventoryEventHandler eventHandler{ nullptr };
 
-	// Simple constructor
-	explicit InventoryData(size_t initialCapacity)
-		: capacity(initialCapacity), eventHandler(nullptr)
+	explicit FloorInventory(size_t initialCapacity)
+		: capacity(initialCapacity)
 	{
 		items.reserve(initialCapacity);
 	}
 
-	// Move semantics
-	InventoryData(InventoryData&&) noexcept = default;
-	InventoryData& operator=(InventoryData&&) noexcept = default;
+	FloorInventory(FloorInventory&&) noexcept = default;
+	FloorInventory& operator=(FloorInventory&&) noexcept = default;
+	~FloorInventory() = default;
+	FloorInventory(const FloorInventory&) = delete;
+	FloorInventory& operator=(const FloorInventory&) = delete;
+};
 
-	~InventoryData() = default;
+// A creature's personal backpack.
+// Weight-gated by owner STR via add_item_to_inventory.
+// Persisted with the owning Creature.
+struct CreatureInventory
+{
+	std::vector<std::unique_ptr<Item>> items;
+	size_t capacity{ 0 };
+	InventoryEventHandler eventHandler{ nullptr };
 
-	// No copying - unique ownership
-	InventoryData(const InventoryData&) = delete;
-	InventoryData& operator=(const InventoryData&) = delete;
+	explicit CreatureInventory(size_t initialCapacity)
+		: capacity(initialCapacity)
+	{
+		items.reserve(initialCapacity);
+	}
+
+	CreatureInventory(CreatureInventory&&) noexcept = default;
+	CreatureInventory& operator=(CreatureInventory&&) noexcept = default;
+	~CreatureInventory() = default;
+	CreatureInventory(const CreatureInventory&) = delete;
+	CreatureInventory& operator=(const CreatureInventory&) = delete;
 };

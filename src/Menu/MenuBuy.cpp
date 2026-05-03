@@ -1,7 +1,6 @@
+#include <algorithm>
 #include <cassert>
 #include <string>
-
-#include <raylib.h>
 
 #include "../Actor/Actor.h"
 #include "../Actor/InventoryOperations.h"
@@ -12,32 +11,28 @@
 #include "../Systems/ShopKeeper.h"
 #include "MenuBuy.h"
 
-using namespace InventoryOperations;
-
 void MenuBuy::populate_items()
 {
 	menuItems.clear();
 
-	if (is_inventory_empty(shopkeeper.shop_inventory))
+	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 	{
 		menuItems.push_back("No items for sale");
 		return;
 	}
 
-	for (const auto& item : shopkeeper.shop_inventory.items)
+	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, [](const auto& item) { return !item; }));
+	for (const auto& item : shopkeeper.get_shop_inventory().items)
 	{
-		if (item)
-		{
-			std::string itemName = item->actorData.name;
-			int price = shopkeeper.get_buy_price(*item);
-			std::string goldText = "(" + std::to_string(price) + "g)";
+		std::string itemName = item->actorData.name;
+		int price = shopkeeper.get_buy_price(*item);
+		std::string goldText = "(" + std::to_string(price) + "g)";
 
-			size_t totalWidth = 28;
-			size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+		size_t totalWidth = 28;
+		size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
 
-			std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
-			menuItems.push_back(itemDisplay);
-		}
+		std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
+		menuItems.push_back(itemDisplay);
 	}
 }
 
@@ -148,10 +143,10 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 
 	case 10: // ENTER
 	{
-		if (!is_inventory_empty(shopkeeper.shop_inventory))
+		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
 			handle_buy();
-			}
+		}
 		else
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);
@@ -171,14 +166,14 @@ void MenuBuy::menu(GameContext& ctx)
 
 void MenuBuy::handle_buy()
 {
-	if (is_inventory_empty(shopkeeper.shop_inventory) ||
-		currentState >= get_item_count(shopkeeper.shop_inventory))
+	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()) ||
+		currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
 		return;
 	}
 
-	Item* item = get_item_at(shopkeeper.shop_inventory, currentState);
+	Item* item = InventoryOperations::get_item_at(shopkeeper.get_shop_inventory(), currentState);
 	if (!item)
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
@@ -187,11 +182,11 @@ void MenuBuy::handle_buy()
 
 	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
 	{
-		assert(remove_item_at(shopkeeper.shop_inventory, currentState).has_value());
+		assert(InventoryOperations::remove_item_at(shopkeeper.get_shop_inventory(), currentState).has_value());
 
-		if (currentState >= get_item_count(shopkeeper.shop_inventory) && !is_inventory_empty(shopkeeper.shop_inventory))
+		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
-			currentState = get_item_count(shopkeeper.shop_inventory) - 1;
+			currentState = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) - 1;
 		}
 
 		populate_items();

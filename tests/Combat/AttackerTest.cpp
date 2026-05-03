@@ -28,13 +28,13 @@ protected:
 	{
 		try
 		{
-			game.data_manager.load_all_data(game.message_system);
+			game.dataManager.load_all_data(game.messageSystem);
 		}
 		catch (...)
 		{
 		}
 
-		game.tile_config.load(Paths::TILE_CONFIG);
+		game.tileConfig.load(Paths::TILE_CONFIG);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
 		player->experienceReward = std::make_unique<ExperienceReward>(0);

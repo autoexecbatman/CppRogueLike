@@ -27,7 +27,7 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	render_objects(*ctx.objects, ctx);
 
 	// Render floor items
-	render_items(ctx.inventoryData->items, ctx);
+	render_items(ctx.floorInventory->items, ctx);
 
 	render_creatures(*ctx.creatures, ctx);
 	ctx.player->render(ctx);

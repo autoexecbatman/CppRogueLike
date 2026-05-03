@@ -60,14 +60,14 @@ void ItemFactory::load_from_registry()
 					  const int level = ctx.levelManager->get_dungeon_level();
 					  const int amount = ctx.dice->roll(level * 3, level * 10);
 					  assert(InventoryOperations::add_item(
-						  *ctx.inventoryData,
+						  *ctx.floorInventory,
 						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry)).has_value());
 				  }
 			  }
 			: std::function<void(Vector2D, GameContext&)>{ [capturedKey](Vector2D pos, GameContext& ctx)
 				  {
 					  assert(InventoryOperations::add_item(
-						  *ctx.inventoryData,
+						  *ctx.floorInventory,
 						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry)).has_value());
 				  } };
 
@@ -104,7 +104,7 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 					{
 						auto enh = ItemEnhancement::generate_weapon_enhancement();
 						assert(InventoryOperations::add_item(
-							*ctx.inventoryData,
+							*ctx.floorInventory,
 							ItemCreator::create_with_enhancement(
 								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 					}
@@ -112,7 +112,7 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 					{
 						auto enh = ItemEnhancement::generate_armor_enhancement();
 						assert(InventoryOperations::add_item(
-							*ctx.inventoryData,
+							*ctx.floorInventory,
 							ItemCreator::create_with_enhancement(
 								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 					}
@@ -165,7 +165,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	// Create gold pile
 	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tileConfig->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
 	goldPile->behavior = Gold{ goldAmount };
-	assert(add_item(*ctx.inventoryData, std::move(goldPile)).has_value());
+	assert(add_item(*ctx.floorInventory, std::move(goldPile)).has_value());
 
 	// Generate other random items
 	for (int i = 0; i < itemCount; i++)
@@ -369,14 +369,14 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 			{
 				auto enh = ItemEnhancement::generate_weapon_enhancement();
 				assert(InventoryOperations::add_item(
-					*ctx.inventoryData,
+					*ctx.floorInventory,
 					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 			}
 			else
 			{
 				auto enh = ItemEnhancement::generate_armor_enhancement();
 				assert(InventoryOperations::add_item(
-					*ctx.inventoryData,
+					*ctx.floorInventory,
 					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
 			}
 		}
