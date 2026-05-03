@@ -3,6 +3,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "../Actor/EquipmentSlot.h"
@@ -38,8 +39,7 @@ struct BackpackEntry
 struct SlotDisplayInfo
 {
 	EquipmentSlot slot{};
-	// TODO: we don't use const char*.
-	const char* label;
+	std::string_view label{};
 };
 
 inline constexpr int DETAIL_BAR_HEIGHT = 4;
