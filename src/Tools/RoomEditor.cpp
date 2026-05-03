@@ -1,7 +1,6 @@
 // file: RoomEditor.cpp
 #include <algorithm>
 #include <format>
-#include <memory>
 #include <string>
 #include <utility>
 
@@ -16,11 +15,14 @@
 #include "PrefabLibrary.h"
 #include "RoomEditor.h"
 
-// Layout (all in tiles; pixels = value * tile_size)
-constexpr int LEFT_W_TILES = 11;
-constexpr int RIGHT_W_TILES = 13;
-constexpr int TOP_H_TILES = 1;
-constexpr int BOT_H_TILES = 1;
+namespace
+{
+	// Layout (all in tiles; pixels = value * tile_size)
+	constexpr int LEFT_W_TILES = 11;
+	constexpr int RIGHT_W_TILES = 13;
+	constexpr int TOP_H_TILES = 1;
+	constexpr int BOT_H_TILES = 1;
+}
 
 // ---------------------------------------------------------------------------
 // Lifecycle

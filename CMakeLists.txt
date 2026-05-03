@@ -366,6 +366,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Combat/CorpseData.h
 
     # UI - New UI classes
+    ${PROJECT_SOURCE_DIR}/UI/CloseButtonArea.cpp
+    ${PROJECT_SOURCE_DIR}/UI/CloseButtonArea.h
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.cpp
     ${PROJECT_SOURCE_DIR}/UI/InventoryUI.h
     ${PROJECT_SOURCE_DIR}/UI/LevelUpUI.cpp

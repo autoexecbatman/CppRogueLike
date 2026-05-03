@@ -186,6 +186,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Combat/CorpseData.cpp
 
     # UI
+    ${PARENT_SOURCE_DIR}/UI/CloseButtonArea.cpp
     ${PARENT_SOURCE_DIR}/UI/InventoryUI.cpp
     ${PARENT_SOURCE_DIR}/UI/LevelUpUI.cpp
     ${PARENT_SOURCE_DIR}/UI/CharacterSheetUI.cpp

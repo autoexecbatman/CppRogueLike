@@ -32,7 +32,7 @@ struct BackpackEntry
 
 	Kind kind{};
 	ItemCategory category{};
-	std::string header_text{};
+	std::string headerText{};
 	Item* item{};
 };
 
@@ -106,7 +106,7 @@ private:
 	int scrollOffset{};
 	bool filterMode{};
 	EquipmentSlot filterSlot{};
-	Player& player_ref;
+	Player& playerRef;
 
 	// Flat item list (shared by Backpack and Usables, rebuilt on tab switch)
 	std::vector<BackpackEntry> listEntries;
@@ -149,6 +149,6 @@ private:
 	int screen_rows(GameContext& ctx) const;
 
 	void draw_frame(GameContext& ctx);
-	void draw_highlight_row(int px, int y_tile, GameContext& ctx);
+	void draw_highlight_row(int px, int yTile, GameContext& ctx);
 
 };
