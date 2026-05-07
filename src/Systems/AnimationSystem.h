@@ -14,6 +14,7 @@ enum class ParticleShape
 {
 	CIRCLE,  // Raylib filled circle — blood, sparks
 	TILE,    // DawnLike sprite — named effects
+	PIXEL,   // Single DrawPixel — fire, embers
 };
 
 struct AnimEntry
@@ -22,9 +23,14 @@ struct AnimEntry
 	float px_y;
 	float vel_x{ 0.0f };     // world-space pixels per second
 	float vel_y{ 0.0f };
-	float radius{ 4.0f };     // pixels, for CIRCLE shape
-	TileRef tile;             // used only for TILE shape
+	float accel_y{ 0.0f };      // upward buoyancy — negative = rises; zero = drag only
+	float turbulence{ 0.0f };   // perpendicular swirl per frame; 0 = straight arcs
+	float radius{ 4.0f };       // pixels, for CIRCLE shape
+	TileRef tile;               // used only for TILE shape
 	unsigned char r, g, b;
+	unsigned char r_end{ 0 };   // color at end of lifetime — interpolated over duration
+	unsigned char g_end{ 0 };   // default 0,0,0 = cool to black
+	unsigned char b_end{ 0 };
 	float spawn_time;
 	float duration;
 	ParticleShape shape{ ParticleShape::CIRCLE };
@@ -67,6 +73,9 @@ public:
 		unsigned char g,
 		unsigned char b);
 
+	// Multi-phase fire explosion: radial wavefront, color gradient, rising embers
+	void spawn_fireball_explosion(Vector2D center, int radius);
+
 	// Lightning: flash tiles along a bresenham path
 	void spawn_lightning_path(
 		const std::vector<Vector2D>& path,
@@ -99,6 +108,11 @@ public:
 		float duration);
 
 	void update_and_render(const Renderer& renderer);
+
+	[[nodiscard]] bool has_active_entries() const noexcept
+	{
+		return !entries.empty() || !projectiles.empty();
+	}
 
 private:
 	std::vector<AnimEntry> entries;

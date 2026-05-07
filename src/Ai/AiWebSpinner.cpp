@@ -51,7 +51,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 		owner.attacker->attack(*ctx.player, ctx);
 
 		// Then check for poison - independent of the regular attack success
-		if (can_poison_attack(owner, ctx))
+		if (can_poison_attack(ctx))
 		{
 			poison_attack(owner, *ctx.player, ctx);
 		}

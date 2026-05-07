@@ -1,4 +1,6 @@
 #include <algorithm>
+#include <cassert>
+#include <format>
 #include <string>
 
 #include <raylib.h>
@@ -21,10 +23,11 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
         return;
     }
 
+    assert(ctx.renderer && "MenuSpellCast: renderer required before construction");
     const int width = 45;
     const int height = static_cast<int>(availableSpells.size()) + 4;
-    const int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 30;
-    const int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 119;
+    const int vrows = ctx.renderer->get_viewport_rows();
+    const int vcols = ctx.renderer->get_viewport_cols();
     const size_t startX = static_cast<size_t>((vcols - width) / 2);
     const size_t startY = static_cast<size_t>((vrows - height) / 2);
     menu_new(static_cast<size_t>(width), static_cast<size_t>(height), startX, startY, ctx);
@@ -54,11 +57,14 @@ void MenuSpellCast::populate_spells()
 void MenuSpellCast::draw()
 {
     menu_clear();
+    menu_draw_box();
     menu_print(2, 1, "Cast Spell (ESC to cancel):");
 
     for (size_t i = 0; i < availableSpells.size(); ++i)
     {
         const auto& def = SpellSystem::get_by_key(availableSpells[i]);
+        const char letter = static_cast<char>('a' + static_cast<int>(i));
+        const int row = static_cast<int>(i) + 2;
 
         if (static_cast<int>(i) == selectedIndex)
         {
@@ -67,11 +73,11 @@ void MenuSpellCast::draw()
 
         if (!spellSources[i].empty())
         {
-            menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " [" + spellSources[i] + "]");
+            menu_print(2, row, std::format("{}) {} [{}]", letter, def.name, spellSources[i]));
         }
         else
         {
-            menu_print(2, static_cast<int>(i) + 2, std::string(1, 'a' + static_cast<char>(i)) + ") " + def.name + " (L" + std::to_string(def.level) + ")");
+            menu_print(2, row, std::format("{}) {} (L{})", letter, def.name, def.level));
         }
 
         if (static_cast<int>(i) == selectedIndex)
@@ -92,11 +98,12 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 
     const std::string key = availableSpells[selectedIndex];
     const bool isMemorized = spellSources[selectedIndex].empty();
-    Player& playerRef = player;
 
     // onSuccess fires when the spell takes effect — immediately for instant spells,
     // deferred via TargetingMenu callback for targeted spells.
-    auto onSuccess = [key, isMemorized, &playerRef](GameContext& innerCtx)
+    // Init-capture &playerRef = player binds to the Player member (session lifetime),
+    // not to a local alias that would dangle after handle_selection() returns.
+    auto onSuccess = [key, isMemorized, &playerRef = player](GameContext& innerCtx)
     {
         if (isMemorized)
         {
@@ -107,6 +114,41 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
 
     SpellSystem::cast_spell_by_key(key, player, std::move(onSuccess), ctx);
     menu_set_run_false();
+}
+
+void MenuSpellCast::on_key(GameKey key, int ch, GameContext& ctx)
+{
+    if (key == GameKey::ESCAPE)
+    {
+        menu_set_run_false();
+    }
+    else if (key == GameKey::UP)
+    {
+        if (selectedIndex > 0)
+        {
+            selectedIndex--;
+        }
+    }
+    else if (key == GameKey::DOWN)
+    {
+        if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
+        {
+            selectedIndex++;
+        }
+    }
+    else if (key == GameKey::ENTER || key == GameKey::SPACE)
+    {
+        handle_selection(ctx);
+    }
+    else if (ch >= 'a' && ch <= 'z')
+    {
+        int selection = ch - 'a';
+        if (selection < static_cast<int>(availableSpells.size()))
+        {
+            selectedIndex = selection;
+            handle_selection(ctx);
+        }
+    }
 }
 
 void MenuSpellCast::menu(GameContext& ctx)
@@ -120,53 +162,5 @@ void MenuSpellCast::menu(GameContext& ctx)
 
     menu_key_listen();
     draw();
-
-    switch (keyPress)
-    {
-    case 27: // ESC
-    {
-        menu_set_run_false();
-        break;
-    }
-
-    case 0x103: // UP
-    {
-        if (selectedIndex > 0)
-        {
-            selectedIndex--;
-        }
-        break;
-    }
-
-    case 0x102: // DOWN
-    {
-        if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
-        {
-            selectedIndex++;
-        }
-        break;
-    }
-
-    case '\n': // Enter
-    case ' ':  // Space
-    {
-        handle_selection(ctx);
-        break;
-    }
-
-    default:
-    {
-        // Letter selection (a-z)
-        if (keyPress >= 'a' && keyPress <= 'z')
-        {
-            int selection = keyPress - 'a';
-            if (selection >= 0 && selection < static_cast<int>(availableSpells.size()))
-            {
-                selectedIndex = selection;
-                handle_selection(ctx);
-            }
-        }
-        break;
-    }
-    }
+    on_key(lastKey, lastChar, ctx);
 }

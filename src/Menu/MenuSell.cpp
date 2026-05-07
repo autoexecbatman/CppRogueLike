@@ -142,16 +142,9 @@ void MenuSell::handle_sell(void* tradeWin, Creature& shopkeeper, Creature& selle
 MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	: player(player), shopkeeper(shopkeeper)
 {
-	if (ctx.renderer)
-	{
-		menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
-		menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
-	}
-	else
-	{
-		menuHeight = 26;
-		menuWidth = 60;
-	}
+	assert(ctx.renderer && "MenuSell: renderer required before construction");
+	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 
 	populate_items(player.inventoryData.items);
 	menu_new(menuWidth, menuHeight, menuStartX, menuStartY, ctx);
@@ -207,48 +200,34 @@ void MenuSell::draw()
 	menu_refresh();
 }
 
-void MenuSell::on_key(int key, GameContext& ctx)
+void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 {
-	switch (key)
+	if (key == GameKey::UP || ch == 'w')
 	{
-
-	case 0x103:
-	case 'w':
-	{
-		// Don't allow navigation if no sellable items
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
 			return;
 		}
-
 		if (menuItems.empty())
 		{
-			return; // Check for empty menu
+			return;
 		}
-
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
-		break;
 	}
-
-	case 0x102:
-	case 's':
+	else if (key == GameKey::DOWN || ch == 's')
 	{
-		// Don't allow navigation if no sellable items
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
 			return;
 		}
 		if (menuItems.empty())
 		{
-			return; // Check for empty menu
+			return;
 		}
 		currentState = (currentState + 1) % menuItems.size();
-		break;
 	}
-
-	case 10: // Enter key
+	else if (key == GameKey::ENTER)
 	{
-		// Only allow selling if player actually has items
 		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
 		{
 			handle_sell(nullptr, shopkeeper, player, ctx);
@@ -257,15 +236,10 @@ void MenuSell::on_key(int key, GameContext& ctx)
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items to sell.", true);
 		}
-		break;
 	}
-
-	case 27: // Escape key
+	else if (key == GameKey::ESCAPE)
 	{
 		menu_set_run_false();
-		break;
-	}
-
 	}
 }
 
@@ -273,5 +247,5 @@ void MenuSell::menu(GameContext& ctx)
 {
 	menu_key_listen();
 	draw();
-	on_key(keyPress, ctx);
+	on_key(lastKey, lastChar, ctx);
 }

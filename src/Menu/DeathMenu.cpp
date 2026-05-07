@@ -127,11 +127,10 @@ void DeathMenu::render(GameContext& ctx) const
 
 void DeathMenu::handle_input(GameContext& ctx)
 {
-    if (keyPress == 10) // ENTER
+    if (lastKey == GameKey::ENTER)
     {
         run = false;
         ctx.menus->clear();
         ctx.menus->push_back(make_main_menu(true, ctx));
-        keyPress = 0;
     }
 }

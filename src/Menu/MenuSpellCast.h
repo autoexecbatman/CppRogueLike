@@ -19,6 +19,7 @@ class MenuSpellCast : public BaseMenu
     void populate_spells();
     void draw();
     void handle_selection(GameContext& ctx);
+    void on_key(GameKey key, int ch, GameContext& ctx) override;
 
 public:
     MenuSpellCast(Player& player, GameContext& ctx);

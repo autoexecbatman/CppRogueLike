@@ -26,4 +26,5 @@ private:
 	int selectedIndex{ 0 };
 	std::function<void(int, GameContext&)> onSelect;
 	void draw_content() override;
+	void on_key(GameKey key, int ch, GameContext& ctx) override;
 };

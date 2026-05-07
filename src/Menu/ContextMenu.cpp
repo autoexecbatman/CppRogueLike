@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <string>
 
 #include <raylib.h>
@@ -30,8 +31,9 @@ ContextMenu::ContextMenu(
 	int height = static_cast<int>(menuOptions.size()) + 3;
 	int width = std::max(static_cast<int>(longest) + 4, 14);
 
-	int viewportCols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 80;
-	int viewportRows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 24;
+	assert(ctx.renderer && "ContextMenu: renderer required before construction");
+	int viewportCols = ctx.renderer->get_viewport_cols();
+	int viewportRows = ctx.renderer->get_viewport_rows();
 
 	int startX = std::clamp(anchor_col, 0, std::max(0, viewportCols - width));
 	int startY = std::clamp(anchor_row, 0, std::max(0, viewportRows - height));
@@ -63,6 +65,41 @@ void ContextMenu::draw_content()
 	}
 }
 
+void ContextMenu::on_key(GameKey key, int ch, GameContext& ctx)
+{
+	const int maxIndex = static_cast<int>(menuOptions.size()) - 1;
+	if (key == GameKey::UP)
+	{
+		if (selectedIndex > 0)
+		{
+			selectedIndex--;
+		}
+	}
+	else if (key == GameKey::DOWN)
+	{
+		if (selectedIndex < maxIndex)
+		{
+			selectedIndex++;
+		}
+	}
+	else if (key == GameKey::ENTER || key == GameKey::SPACE)
+	{
+		run = false;
+		if (onSelect)
+		{
+			onSelect(selectedIndex, ctx);
+		}
+	}
+	else if (key == GameKey::ESCAPE)
+	{
+		run = false;
+		if (onSelect)
+		{
+			onSelect(-1, ctx);
+		}
+	}
+}
+
 // Called once per frame by MenuManager -- no blocking loop.
 // Input is polled first (reads previous frame's PollInputEvents state),
 // then we render. This matches InventoryUI's pattern.
@@ -70,8 +107,6 @@ void ContextMenu::menu(GameContext& ctx)
 {
 	// --- Input phase (before render, like InventoryUI) ---
 	menu_key_listen();
-
-	const int maxIndex = static_cast<int>(menuOptions.size()) - 1;
 
 	// Use inputSystem->get_key() instead of IsMouseButtonPressed() directly.
 	// On Emscripten, poll() (called inside menu_key_listen()) consumes the
@@ -96,54 +131,7 @@ void ContextMenu::menu(GameContext& ctx)
 		return;
 	}
 
-	switch (keyPress)
-	{
-
-	case 0x103: // UP
-	{
-		if (selectedIndex > 0)
-		{
-			selectedIndex--;
-		}
-		break;
-	}
-
-	case 0x102: // DOWN
-	{
-		if (selectedIndex < maxIndex)
-		{
-			selectedIndex++;
-		}
-		break;
-	}
-
-	case '\n':
-	case ' ':
-	{
-		run = false;
-		if (onSelect)
-		{
-			onSelect(selectedIndex, ctx);
-		}
-		break;
-	}
-
-	case 27: // ESC
-	{
-		run = false;
-		if (onSelect)
-		{
-			onSelect(-1, ctx);
-		}
-		break;
-	}
-
-	default:
-	{
-		break;
-	}
-
-	}
+	on_key(lastKey, lastChar, ctx);
 
 	if (!run)
 	{

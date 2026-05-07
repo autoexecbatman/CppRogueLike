@@ -39,16 +39,9 @@ void MenuBuy::populate_items()
 MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
 	: buyer{ buyer }, shopkeeper{ shopkeeper }, ctx{ ctx }
 {
-	if (ctx.renderer)
-	{
-		menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
-		menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
-	}
-	else
-	{
-		menuHeight = 26;
-		menuWidth = 60;
-	}
+	assert(ctx.renderer && "MenuBuy: renderer required before construction");
+	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 
 	populate_items();
 	menu_new(
@@ -108,40 +101,29 @@ void MenuBuy::draw()
 	menu_refresh();
 }
 
-void MenuBuy::on_key(int key, GameContext& ctx)
+void MenuBuy::on_key(GameKey key, int ch, GameContext& ctx)
 {
-	switch (key)
-	{
-
-	case 0x103: // UP
-	case 'w':
+	if (key == GameKey::UP || ch == 'w')
 	{
 		if (menuItems.empty())
 		{
 			return;
 		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
-		break;
 	}
-
-	case 0x102: // DOWN
-	case 's':
+	else if (key == GameKey::DOWN || ch == 's')
 	{
 		if (menuItems.empty())
 		{
 			return;
 		}
 		currentState = (currentState + 1) % menuItems.size();
-		break;
 	}
-
-	case 27: // ESC
+	else if (key == GameKey::ESCAPE)
 	{
 		menu_set_run_false();
-		break;
 	}
-
-	case 10: // ENTER
+	else if (key == GameKey::ENTER)
 	{
 		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
@@ -151,9 +133,6 @@ void MenuBuy::on_key(int key, GameContext& ctx)
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);
 		}
-		break;
-	}
-
 	}
 }
 
@@ -161,7 +140,7 @@ void MenuBuy::menu(GameContext& ctx)
 {
 	menu_key_listen();
 	draw();
-	on_key(keyPress, ctx);
+	on_key(lastKey, lastChar, ctx);
 }
 
 void MenuBuy::handle_buy()

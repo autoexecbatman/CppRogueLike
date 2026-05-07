@@ -1,5 +1,6 @@
 // file: NotificationMenu.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 
 #include "../Colors/Colors.h"
@@ -29,8 +30,9 @@ NotificationMenu::NotificationMenu(
     menuWidth = std::max({ this->title.size() + 2, maxLineLen + 4, minWidth });
     menuHeight = this->lines.size() + 3;
 
-    int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-    int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+    assert(ctx.renderer && "NotificationMenu: renderer required before construction");
+    int vcols = ctx.renderer->get_viewport_cols();
+    int vrows = ctx.renderer->get_viewport_rows();
     int startX = (vcols - static_cast<int>(menuWidth)) / 2;
     int startY = (vrows - static_cast<int>(menuHeight)) / 2;
     menuStartX = static_cast<size_t>(startX < 0 ? 0 : startX);
@@ -67,7 +69,7 @@ void NotificationMenu::menu(GameContext& ctx)
 {
     menu_key_listen();
     draw();
-    if (keyPress != 0)
+    if (lastKey != GameKey::NONE || lastChar != 0)
     {
         menu_set_run_false();
         if (onClose)

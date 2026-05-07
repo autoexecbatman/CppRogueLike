@@ -1434,7 +1434,7 @@ void Map::regenerate(GameContext& ctx)
 	init(ctx);
 }
 
-std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target)
+std::vector<Vector2D> Map::neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target) const
 {
 	std::vector<Vector2D> results;
 
@@ -1843,9 +1843,9 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 	// Spawn the Dungeon Warden — the named boss guarding the vault.
 	// Try the room center first, then spiral outward to find a free tile.
 	{
-		Vector2D wardenPos{ -1, -1 };
+		std::optional<Vector2D> wardenPos;
 		constexpr int MAX_WARDEN_TRIES = 50;
-		for (int t = 0; t < MAX_WARDEN_TRIES && wardenPos.x < 0; ++t)
+		for (int t = 0; t < MAX_WARDEN_TRIES && !wardenPos; ++t)
 		{
 			Vector2D candidate{
 				ctx.dice->roll(room.col, room.col_end()),
@@ -1856,12 +1856,12 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 				wardenPos = candidate;
 			}
 		}
-		if (wardenPos.x >= 0)
+		if (wardenPos)
 		{
 			MonsterParams wardenParams = MonsterCreator::get_params("dungeon_warden");
 			wardenParams.name = DungeonNames::generate_warden_name(mapRng);
 			ctx.creatures->push_back(
-				MonsterCreator::create_from_params(wardenPos, wardenParams, ctx));
+				MonsterCreator::create_from_params(*wardenPos, wardenParams, ctx));
 		}
 	}
 
@@ -1892,7 +1892,7 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 
 	for (int i = 0; i < guardianCount; i++)
 	{
-		Vector2D guardPos{ -1, -1 };
+		std::optional<Vector2D> guardPos;
 		constexpr int MAX_GUARD_TRIES = 50;
 		for (int t = 0; t < MAX_GUARD_TRIES; ++t)
 		{
@@ -1909,12 +1909,12 @@ void Map::create_treasure_room(const DungeonRoom& room, int quality, GameContext
 				break;
 			}
 		}
-		if (guardPos.x < 0)
+		if (!guardPos)
 		{
 			continue;
 		}
 
-		add_monster(guardPos, ctx);
+		add_monster(*guardPos, ctx);
 	}
 
 	setup_treasure_room_guard(room, ctx);
@@ -2045,7 +2045,7 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 				continue;
 			}
 
-			Vector2D spawnPos{ -1, -1 };
+			std::optional<Vector2D> spawnPos;
 			constexpr int MAX_WALK = 5;
 			for (int step = 1; step <= MAX_WALK; ++step)
 			{
@@ -2076,12 +2076,12 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 				break;
 			}
 
-			if (spawnPos.x < 0)
+			if (!spawnPos)
 			{
 				continue;
 			}
 
-			candidates.push_back({ doorPos, spawnPos });
+			candidates.push_back({ doorPos, *spawnPos });
 		}
 	}
 
@@ -2186,21 +2186,21 @@ bool Map::maybe_create_treasure_room(int dungeonLevel, GameContext& ctx)
 	// Collect candidate rooms: single-entrance, not the player's starting room,
 	// and not the room that already contains the stairs. Locking a staircase
 	// inside the treasure room traps the player on this level permanently.
-	std::vector<int> singleEntranceIndices;
 
-	for (int i = 1; i < static_cast<int>(ctx.rooms->size()); ++i)
+	auto is_valid_treasure_room = [&](int roomIndex) -> bool
 	{
-		const DungeonRoom& candidate = ctx.rooms->at(i);
-		if (ctx.stairs != nullptr &&
-			candidate.contains(ctx.stairs->position.x, ctx.stairs->position.y))
+		assert(ctx.stairs != nullptr);
+		const DungeonRoom& room = ctx.rooms->at(roomIndex);
+		if (room.contains(ctx.stairs->position.x, ctx.stairs->position.y))
 		{
-			continue; // never lock the staircase room
+			return false;
 		}
-		if (count_room_entrances(candidate) == 1)
-		{
-			singleEntranceIndices.push_back(i);
-		}
-	}
+		return count_room_entrances(room) == 1;
+	};
+
+	auto singleEntranceIndices = std::views::iota(1, static_cast<int>(ctx.rooms->size())) 
+		| std::views::filter(is_valid_treasure_room) 
+		| std::ranges::to<std::vector>();
 
 	if (singleEntranceIndices.empty())
 	{
@@ -2235,7 +2235,7 @@ void Map::post_process_doors()
 	};
 	auto isWall = [this](Vector2D pos)
 	{
-		return in_bounds(pos) && (get_tile_type(pos) == TileType::WALL || get_tile_type(pos) == TileType::WATER);
+		return in_bounds(pos) && get_tile_type(pos) == TileType::WALL;
 	};
 
 	for (int y = 0; y < mapHeight; ++y)
@@ -2269,14 +2269,14 @@ void Map::post_process_doors()
 				if (roomNeighbors >= 1 && wallNeighbors >= 2)
 				{
 					// Get 3x3 grid around current position
-					Vector2D upLeft = { pos.y - 1, pos.x - 1 };
-					Vector2D up = { pos.y - 1, pos.x };
-					Vector2D upRight = { pos.y - 1, pos.x + 1 };
-					Vector2D left = { pos.y, pos.x - 1 };
-					Vector2D right = { pos.y, pos.x + 1 };
-					Vector2D downLeft = { pos.y + 1, pos.x - 1 };
-					Vector2D down = { pos.y + 1, pos.x };
-					Vector2D downRight = { pos.y + 1, pos.x + 1 };
+					Vector2D upLeft = { pos.x - 1, pos.y - 1 };
+					Vector2D up = { pos.x, pos.y - 1 };
+					Vector2D upRight = { pos.x + 1, pos.y - 1 };
+					Vector2D left = { pos.x - 1, pos.y };
+					Vector2D right = { pos.x + 1, pos.y };
+					Vector2D downLeft = { pos.x - 1, pos.y + 1 };
+					Vector2D down = { pos.x, pos.y + 1 };
+					Vector2D downRight = { pos.x + 1, pos.y + 1 };
 
 					// Exclude pattern RRR/WCC/WWW (and rotations)
 					bool shouldExclude = false;
@@ -2340,7 +2340,7 @@ void Map::post_process_doors()
 						isRoom(downLeft) && isWall(down) && isWall(downRight))
 					{
 						// Move door UP
-						Vector2D upPos = { pos.y - 1, pos.x };
+						Vector2D upPos = { pos.x, pos.y - 1 };
 						set_door(upPos, upPos.x, upPos.y, false);
 					}
 					// Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
@@ -2351,7 +2351,7 @@ void Map::post_process_doors()
 						isWall(downLeft) && isWall(down) && isWall(downRight))
 					{
 						// Move door UP
-						Vector2D upPos = { pos.y - 1, pos.x };
+						Vector2D upPos = { pos.x, pos.y - 1 };
 						set_door(upPos, upPos.x, upPos.y, false);
 					}
 					// Check for Z-pattern: WRR/CCW/WWW (move door left)
@@ -2360,7 +2360,7 @@ void Map::post_process_doors()
 						isWall(downLeft) && isWall(down) && isWall(downRight))
 					{
 						// Move door LEFT
-						Vector2D leftPos = { pos.y, pos.x - 1 };
+						Vector2D leftPos = { pos.x - 1, pos.y };
 						set_door(leftPos, leftPos.x, leftPos.y, false);
 					}
 					else

@@ -1,4 +1,5 @@
 // file: MenuTrade.cpp
+#include <cassert>
 #include <memory>
 
 #include "../Actor/Creature.h"
@@ -13,8 +14,9 @@
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
     : shopkeeper(shopkeeper)
 {
-    int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-    int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+    assert(ctx.renderer && "MenuTrade: renderer required before construction");
+    int vcols = ctx.renderer->get_viewport_cols();
+    int vrows = ctx.renderer->get_viewport_rows();
     startY = (vrows - height) / 2;
     startX = (vcols - width) / 2;
     menu_new(width, height, startX, startY, ctx);
@@ -75,38 +77,27 @@ void MenuTrade::draw()
     menu_refresh();
 }
 
-void MenuTrade::on_key(int key, GameContext& ctx)
+void MenuTrade::on_key(GameKey key, int ch, GameContext& ctx)
 {
-    switch (key)
-    {
-    case 0x103: // UP
-    case 'w':
+    if (key == GameKey::UP || ch == 'w')
     {
         currentState = (currentState + entries.size() - 1) % entries.size();
-        break;
     }
-    case 0x102: // DOWN
-    case 's':
+    else if (key == GameKey::DOWN || ch == 's')
     {
         currentState = (currentState + 1) % entries.size();
-        break;
     }
-    case 10:
+    else if (key == GameKey::ENTER)
     {
         menu_set_run_false();
         if (entries[currentState].command)
         {
             (*entries[currentState].command)(ctx);
         }
-        break;
     }
-    case 27:
+    else if (key == GameKey::ESCAPE)
     {
         menu_set_run_false();
-        break;
-    }
-    default:
-        break;
     }
 }
 
@@ -114,7 +105,7 @@ void MenuTrade::menu(GameContext& ctx)
 {
     menu_key_listen();
     draw();
-    on_key(keyPress, ctx);
+    on_key(lastKey, lastChar, ctx);
 }
 
 // end of file: MenuTrade.cpp

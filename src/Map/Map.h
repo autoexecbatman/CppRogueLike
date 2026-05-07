@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <memory>
 #include <optional>
 #include <vector>
@@ -82,7 +83,7 @@ class Map : public Persistent
 private:
 	int mapWidth{};
 	int mapHeight{};
-	std::vector<Vector2D> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
+	static constexpr std::array<Vector2D, 8> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
 	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
 	std::vector<int> dijkstraCosts;
@@ -137,7 +138,7 @@ public:
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
 	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
-	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target);
+	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target) const;
 	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
 	int get_width() const noexcept { return mapWidth; }
 	int get_height() const noexcept { return mapHeight; }

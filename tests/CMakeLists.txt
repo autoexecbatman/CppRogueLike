@@ -85,6 +85,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Colors/Colors.cpp
 
     # Menu
+    ${PARENT_SOURCE_DIR}/Menu/AnimationBarrierMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu/BaseMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu/ListMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu/NotificationMenu.cpp

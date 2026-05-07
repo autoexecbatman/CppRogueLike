@@ -176,6 +176,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Controls/Controls.h
 
     # Menu
+    ${PROJECT_SOURCE_DIR}/Menu/AnimationBarrierMenu.cpp
+    ${PROJECT_SOURCE_DIR}/Menu/AnimationBarrierMenu.h
     ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.cpp
     ${PROJECT_SOURCE_DIR}/Menu/BaseMenu.h
     ${PROJECT_SOURCE_DIR}/Menu/MenuEntry.h
@@ -381,6 +383,17 @@ set(SOURCE_FILES # Add Source Files Here !
 
 # Create an executable with the listed source files
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
+
+target_precompile_headers(${PROJECT_NAME} PRIVATE
+    <algorithm>
+    <cassert>
+    <format>
+    <memory>
+    <optional>
+    <ranges>
+    <string>
+    <vector>
+)
 
 # Set output suffix based on platform
 set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX "${OUTPUT_SUFFIX}")

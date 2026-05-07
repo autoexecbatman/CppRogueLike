@@ -4,6 +4,7 @@
 
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
+#include "../Menu/AnimationBarrierMenu.h"
 #include "../Renderer/Renderer.h"
 #include "../Utils/Vector2D.h"
 #include "AnimationSystem.h"
@@ -28,26 +29,17 @@ void animate_explosion(Vector2D center, int radius, GameContext& ctx)
 	if (!ctx.animSystem || !ctx.renderer)
 		return;
 
-	// Spawn sparks radiating outward from every cell in the blast radius
-	for (int dy = -radius; dy <= radius; ++dy)
-	{
-		for (int dx = -radius; dx <= radius; ++dx)
-		{
-			if (dx * dx + dy * dy <= radius * radius)
-			{
-				ctx.animSystem->spawn_spark_burst(
-					center.x + dx,
-					center.y + dy,
-					3,
-					255,
-					140,
-					20);
-			}
-		}
-	}
-
-	ctx.animSystem->spawn_spark_burst(center.x, center.y, 16, 255, 80, 0);
+	ctx.animSystem->spawn_fireball_explosion(center, radius);
 	ctx.renderer->add_trauma(0.5f);
+
+	// When fired from inside menu context (e.g. scroll used from inventory),
+	// the AnimationSystem is never ticked — only handle_gameloop calls it.
+	// Push a barrier menu that renders the game world + animations until all
+	// particles expire, then pops itself back to whatever was on the stack.
+	if (ctx.menus && !ctx.menus->empty())
+	{
+		ctx.menus->push_back(std::make_unique<AnimationBarrierMenu>(ctx));
+	}
 }
 
 void animate_creature_hit(Vector2D position, GameContext& ctx)

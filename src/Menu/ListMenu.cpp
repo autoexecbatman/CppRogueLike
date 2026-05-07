@@ -1,5 +1,6 @@
 // file: ListMenu.cpp
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 
 #include <raylib.h>
@@ -34,8 +35,9 @@ ListMenu::ListMenu(
     menuWidth = std::max({ this->title.size() + 2, maxLabelLen + 4, size_t{ 10 } });
     menuHeight = this->entries.size() + 2;
 
-    int vcols = ctx.renderer ? ctx.renderer->get_viewport_cols() : 60;
-    int vrows = ctx.renderer ? ctx.renderer->get_viewport_rows() : 34;
+    assert(ctx.renderer && "ListMenu: renderer required before construction");
+    int vcols = ctx.renderer->get_viewport_cols();
+    int vrows = ctx.renderer->get_viewport_rows();
     int startX = (vcols - static_cast<int>(menuWidth)) / 2;
     int startY = (vrows - static_cast<int>(menuHeight)) / 2;
     menuStartX = static_cast<size_t>(startX < 0 ? 0 : startX);
@@ -68,51 +70,38 @@ void ListMenu::draw()
     menu_refresh();
 }
 
-void ListMenu::on_key(int key, GameContext& ctx)
+void ListMenu::on_key(GameKey key, int ch, GameContext& ctx)
 {
-    switch (key)
-    {
-
-    case 0x103: // KEY_UP
-    case 'w':
+    if (key == GameKey::UP || ch == 'w')
     {
         cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
-        break;
     }
-
-    case 0x102: // KEY_DOWN
-    case 's':
+    else if (key == GameKey::DOWN || ch == 's')
     {
         cursorIndex = (cursorIndex + 1) % entries.size();
-        break;
     }
-
-    case 10: // ENTER
+    else if (key == GameKey::ENTER)
     {
         menu_set_run_false();
         if (entries[cursorIndex].command)
         {
             (*entries[cursorIndex].command)(ctx);
         }
-        break;
     }
-
-    case 27: // ESCAPE
+    else if (key == GameKey::ESCAPE)
     {
         menu_set_run_false();
         if (onEscape)
         {
             onEscape(ctx);
         }
-        break;
     }
-
-    default:
+    else
     {
         // Hotkey match — case-insensitive so 'M' and 'm' both work.
         for (auto& entry : entries)
         {
-            if (entry.hotkey != 0 && std::tolower(key) == std::tolower(entry.hotkey))
+            if (entry.hotkey != 0 && std::tolower(ch) == std::tolower(entry.hotkey))
             {
                 menu_set_run_false();
                 if (entry.command)
@@ -122,9 +111,6 @@ void ListMenu::on_key(int key, GameContext& ctx)
                 return;
             }
         }
-        break;
-    }
-
     }
 }
 
@@ -182,7 +168,7 @@ void ListMenu::menu(GameContext& ctx)
         return;
     }
 
-    on_key(keyPress, ctx);
+    on_key(lastKey, lastChar, ctx);
 }
 
 // end of file: ListMenu.cpp

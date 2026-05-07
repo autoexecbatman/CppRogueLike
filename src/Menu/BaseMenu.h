@@ -2,8 +2,9 @@
 
 #include <string>
 
+#include "../Renderer/InputSystem.h"
+
 class Renderer;
-class InputSystem;
 class TileConfig;
 struct GameContext;
 
@@ -17,7 +18,8 @@ protected:
 	size_t menuHeight{ 0 };
 	size_t menuStartX{ 0 };
 	size_t menuStartY{ 0 };
-	int keyPress{ 0 };
+	GameKey lastKey{ GameKey::NONE };
+	int lastChar{ 0 };
 	bool isHighlighted{ false };
 
 public:
@@ -45,4 +47,5 @@ public:
 
 	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}
+	virtual void on_key(GameKey key, int ch, GameContext& ctx) {}
 };

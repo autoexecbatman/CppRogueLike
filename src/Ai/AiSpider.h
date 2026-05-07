@@ -29,14 +29,14 @@ protected:
 	int ambushCounter{ 0 }; // Counter for ambush behavior
 	bool isAmbushing{ false }; // Is this spider currently in ambush mode?
 	int poisonCooldown{ 0 }; // Cooldown for poison attacks
-	int poisonChance; // Per-type poison hit probability (0-100), set at construction
+	int poisonChance{0}; // Per-type poison hit probability (0-100), set at construction
 	bool webLaid{ false }; // Tracks if this spider has created a web
 
 	// Specialized spider movement pattern that prefers walls and corners
 	void move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
 
 	// Check if the spider can attempt a poison attack
-	bool can_poison_attack(Creature& owner, GameContext& ctx);
+	bool can_poison_attack(GameContext& ctx);
 
 	// Perform a poison attack on the target
 	void poison_attack(Creature& owner, Creature& target, GameContext& ctx);

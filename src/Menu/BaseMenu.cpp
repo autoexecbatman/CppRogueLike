@@ -74,74 +74,13 @@ void BaseMenu::menu_key_listen()
 	int ch = inputSystem->get_char_input();
 	if (ch != 0)
 	{
-		keyPress = ch;
+		lastChar = ch;
+		lastKey = GameKey::NONE;
 		return;
 	}
 
-	GameKey gk = inputSystem->get_key();
-	switch (gk)
-	{
-
-	case GameKey::UP:
-	{
-		keyPress = 0x103;
-		break;
-	}
-
-	case GameKey::DOWN:
-	{
-		keyPress = 0x102;
-		break;
-	}
-
-	case GameKey::LEFT:
-	{
-		keyPress = 0x104;
-		break;
-	}
-
-	case GameKey::RIGHT:
-	{
-		keyPress = 0x105;
-		break;
-	}
-
-	case GameKey::ENTER:
-	{
-		keyPress = 10;
-		break;
-	}
-
-	case GameKey::ESCAPE:
-	{
-		keyPress = 27;
-		break;
-	}
-
-	case GameKey::TAB:
-	{
-		keyPress = 9;
-		break;
-	}
-
-	case GameKey::SPACE:
-	{
-		keyPress = ' ';
-		break;
-	}
-
-	case GameKey::BACKSPACE:
-	{
-		keyPress = 8;
-		break;
-	}
-
-	default:
-	{
-		keyPress = 0;
-		break;
-	}
-	}
+	lastChar = 0;
+	lastKey = inputSystem->get_key();
 }
 
 void BaseMenu::menu_draw_box()

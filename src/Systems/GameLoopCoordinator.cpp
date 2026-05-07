@@ -2,7 +2,6 @@
 #include <cassert>
 #include <cmath>
 #include <format>
-#include <ranges>
 #include <string>
 #include <vector>
 
@@ -31,9 +30,9 @@
 #include "CreatureManager.h"
 #include "CurseSystem.h"
 #include "FloatingTextSystem.h"
-#include "GameLoopCoordinator.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
+#include "GameLoopCoordinator.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {

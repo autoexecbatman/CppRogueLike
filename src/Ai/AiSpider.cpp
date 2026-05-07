@@ -1,7 +1,12 @@
+#include <algorithm>
+#include <cassert>
 #include <cmath>
+#include <format>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <optional>
+#include <ranges>
 #include <string>
 #include <vector>
 
@@ -13,6 +18,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Systems/MessageSystem.h"
 #include "../Utils/Vector2D.h"
+#include "Ai.h"
 #include "AiMonster.h"
 #include "AiSpider.h"
 
@@ -22,6 +28,14 @@ namespace
 	constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
 	constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
 	constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+
+	// Translates a cartesian_product offset pair into a world position.
+	// origin: the reference tile (spider position, wall tile, etc.)
+	Vector2D offset_to_world(const std::tuple<int, int>& pair, Vector2D origin)
+	{
+		const auto& [y, x] = pair;
+		return origin + Vector2D{ x, y };
+	}
 }
 
 //=============================================================================
@@ -88,7 +102,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 					ctx.player->take_damage_and_check_death(totalDamage, ctx);
 
 					// Also try for poison
-					if (can_poison_attack(owner, ctx))
+					if (can_poison_attack(ctx))
 					{
 						poison_attack(owner, *ctx.player, ctx);
 					}
@@ -119,15 +133,14 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 			// Find a good ambush position
 			std::optional<Vector2D> ambushPos = find_ambush_position(owner, ctx.player->position, ctx);
 
-			if (ambushPos && !ctx.map->get_actor(*ambushPos, ctx))
+			if (ambushPos)
 			{
 				// Move to ambush position
 				owner.position = *ambushPos;
 				isAmbushing = true;
 				ambushCounter = AMBUSH_DURATION;
 
-				// Debug log
-				ctx.messageSystem->log("Spider setting ambush at " + std::to_string(ambushPos->x) + "," + std::to_string(ambushPos->y));
+				ctx.messageSystem->log(std::format("Spider setting ambush at {},{}", ambushPos->x, ambushPos->y));
 
 				return;
 			}
@@ -150,7 +163,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		owner.attacker->attack(*ctx.player, ctx);
 
 		// Then try poison - now independent of the regular attack
-		if (can_poison_attack(owner, ctx))
+		if (can_poison_attack(ctx))
 		{
 			poison_attack(owner, *ctx.player, ctx);
 		}
@@ -251,7 +264,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 			owner.attacker->attack(*target, ctx);
 
 			// Try poison attack
-			if (can_poison_attack(owner, ctx))
+			if (can_poison_attack(ctx))
 			{
 				poison_attack(owner, *target, ctx);
 			}
@@ -342,7 +355,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 	}
 }
 
-bool AiSpider::can_poison_attack(Creature& owner, GameContext& ctx)
+bool AiSpider::can_poison_attack(GameContext& ctx)
 {
 	// Check cooldown
 	if (poisonCooldown > 0)
@@ -376,107 +389,108 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 	}
 }
 
-std::optional<Vector2D> AiSpider::find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx)
+std::optional<Vector2D> AiSpider::find_ambush_position(
+	Creature& owner,
+	Vector2D targetPosition,
+	GameContext& ctx)
 {
-	// Look for positions near walls that are good for ambushing
-	std::vector<Vector2D> candidates;
-
-	// Search in a larger area around the current position (increased from 5x5 to 8x8)
-	for (int y = -8; y <= 8; y++)
+	auto is_in_bounds = [&](Vector2D pos) -> bool
 	{
-		for (int x = -8; x <= 8; x++)
-		{
-			Vector2D pos = owner.position + Vector2D{ x, y };
+		return pos.x >= 0 &&
+			pos.x < ctx.map->get_width() &&
+			pos.y >= 0 &&
+			pos.y < ctx.map->get_height();
+	};
 
-			// Check boundaries
-			if (pos.y < 0 ||
-				pos.y >= ctx.map->get_height() ||
-				pos.x < 0 ||
-				pos.x >= ctx.map->get_width())
-			{
-				continue;
-			}
+	auto is_valid_ambush = [&](Vector2D pos) -> bool
+	{
+		return ctx.map->can_walk(pos, ctx) &&
+			!ctx.map->get_actor(pos, ctx) &&
+			is_good_ambush_spot(pos, ctx);
+	};
 
-			// Check if position is walkable, not occupied, and a good ambush spot
-			if (ctx.map->can_walk(pos, ctx) &&
-				!ctx.map->get_actor(pos, ctx) &&
-				is_good_ambush_spot(pos, ctx))
-			{
-				// Evaluate position - closer to player's path is better for ambush
-				int distToPlayer = std::abs(pos.x - targetPosition.x) + std::abs(pos.y - targetPosition.y);
+	auto is_in_ambush_range = [&](Vector2D pos) -> bool
+	{
+		int dist = std::abs(pos.x - targetPosition.x) +
+			std::abs(pos.y - targetPosition.y);
+		return dist >= 3 && dist <= 12;
+	};
 
-				// Only consider positions that are not too far and not too close
-				if (distToPlayer >= 3 && distToPlayer <= 12)
-				{
-					// Prioritize positions closer to doors, corners, or chokepoints
-					candidates.push_back(pos);
-				}
-			}
-		}
+	auto candidates = std::views::cartesian_product(
+		std::views::iota(-8, 9),
+		std::views::iota(-8, 9))
+		| std::views::transform(std::bind_back(offset_to_world, owner.position))
+		| std::views::filter(is_in_bounds)
+		| std::views::filter(is_valid_ambush)
+		| std::views::filter(is_in_ambush_range)
+		| std::ranges::to<std::vector<Vector2D>>();
+
+	if (candidates.empty())
+	{
+		return std::nullopt;
 	}
 
-	// Pick a random good position if available
-	if (!candidates.empty())
-	{
-		int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
-		return candidates.at(index);
-	}
-
-	return std::nullopt;
+	int index = ctx.dice->roll(0, static_cast<int>(candidates.size()) - 1);
+	return candidates.at(index);
 }
 
 bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 {
-	// Good ambush spots are adjacent to walls (especially corners) and ideally in shadows
-	int wallCount = 0;
-	bool hasCorner = false;
+	assert(!ctx.map->is_wall(position));
 
-	// Check the 8 surrounding tiles
-	for (int y = -1; y <= 1; y++)
+	struct AmbushMetrics
 	{
-		for (int x = -1; x <= 1; x++)
+		int wallCount{0};
+		bool hasCorner{false};
+	};
+
+	auto is_not_center = [](const auto& pair) -> bool
+	{
+		const auto& [y, x] = pair;
+		return x != 0 || y != 0;
+	};
+
+	auto is_wall_tile = [&](Vector2D adj) -> bool
+	{
+		return ctx.map->is_wall(adj);
+	};
+
+	auto count_corner_walls = [&](Vector2D adj) -> int
+	{
+		return static_cast<int>(std::ranges::count_if(
+			std::views::cartesian_product(
+				std::views::iota(-1, 2),
+				std::views::iota(-1, 2))
+			| std::views::filter(is_not_center)
+			| std::views::transform(std::bind_back(offset_to_world, adj)),
+			is_wall_tile));
+	};
+
+	auto neighbors = std::views::cartesian_product(
+		std::views::iota(-1, 2),
+		std::views::iota(-1, 2))
+		| std::views::filter(is_not_center)
+		| std::views::transform(std::bind_back(offset_to_world, position));
+
+	auto accumulate_metrics = [&](AmbushMetrics acc, Vector2D adj) -> AmbushMetrics
+	{
+		if (ctx.map->is_wall(adj))
 		{
-			if (x == 0 && y == 0)
+			acc.wallCount++;
+			if (count_corner_walls(adj) >= 3)
 			{
-				continue; // Skip center
-			}
-
-			Vector2D adj = position + Vector2D{ x, y };
-
-			// Check if this position is a wall
-			if (ctx.map->is_wall(adj))
-			{
-				wallCount++;
-
-				// Check if adjacent position forms a corner (has two walls next to it)
-				int cornerWalls = 0;
-				for (int cy = -1; cy <= 1; cy++)
-				{
-					for (int cx = -1; cx <= 1; cx++)
-					{
-						if (cx == 0 && cy == 0)
-						{
-							continue;
-						}
-
-						Vector2D cornerAdj = adj + Vector2D{ cx, cy };
-						if (ctx.map->is_wall(cornerAdj))
-						{
-							cornerWalls++;
-						}
-					}
-				}
-
-				if (cornerWalls >= 3)
-				{
-					hasCorner = true;
-				}
+				acc.hasCorner = true;
 			}
 		}
-	}
+		return acc;
+	};
 
-	// Good ambush spots have at least 2 adjacent walls, better if it's a corner
-	return wallCount >= 2 || hasCorner;
+	auto metrics = std::ranges::fold_left(
+		neighbors,
+		AmbushMetrics{},
+		accumulate_metrics);
+
+	return metrics.wallCount >= 2 || metrics.hasCorner;
 }
 
 void AiSpider::load(const json& j)
