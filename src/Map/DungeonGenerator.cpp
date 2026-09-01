@@ -1,5 +1,6 @@
 // file: DungeonGenerator.cpp
 #include <algorithm>
+#include <array>
 #include <limits>
 #include <ranges>
 #include <vector>
@@ -20,6 +21,71 @@ constexpr int CELL_W = ROOM_HORIZONTAL_MAX_SIZE + 8;
 constexpr int CELL_H = ROOM_VERTICAL_MAX_SIZE + 8;
 constexpr int LOOP_RADIUS = CELL_W * CELL_W + CELL_H * CELL_H;
 constexpr int SKIP_PCTG = 20; // percent of cells left empty for variety
+
+// ---------------------------------------------------------------------------
+// Shape selection
+//
+// Weights must sum to 100. Shapes with dimension requirements fall back to
+// RECT when the generated room is too small to look meaningful.
+// ---------------------------------------------------------------------------
+
+namespace
+{
+
+RoomShape pick_room_shape(int width, int height, RandomDice& rng)
+{
+	// Weighted table: { shape, weight, minWidth, minHeight }
+	struct ShapeEntry
+	{
+		RoomShape shape;
+		int weight;
+		int minWidth;
+		int minHeight;
+	};
+
+	constexpr std::array<ShapeEntry, 5> table
+	{
+		ShapeEntry{ RoomShape::RECT,      40, 0,  0 },
+		ShapeEntry{ RoomShape::CHAMFERED, 25, 6,  6 },
+		ShapeEntry{ RoomShape::L_SHAPE,   20, 9,  7 },
+		ShapeEntry{ RoomShape::PILLARED,  10, 8,  6 },
+		ShapeEntry{ RoomShape::CROSS,      5, 10, 7 },
+	};
+
+	// Build eligible entries for this room size.
+	int totalWeight = 0;
+	for (const auto& entry : table)
+	{
+		if (width >= entry.minWidth && height >= entry.minHeight)
+		{
+			totalWeight += entry.weight;
+		}
+	}
+
+	if (totalWeight <= 0)
+	{
+		return RoomShape::RECT;
+	}
+
+	int roll = rng.roll(1, totalWeight);
+	int accumulated = 0;
+	for (const auto& entry : table)
+	{
+		if (width < entry.minWidth || height < entry.minHeight)
+		{
+			continue;
+		}
+		accumulated += entry.weight;
+		if (roll <= accumulated)
+		{
+			return entry.shape;
+		}
+	}
+
+	return RoomShape::RECT;
+}
+
+} // namespace
 
 // ------------------------------------------------------------------- rooms
 
@@ -127,6 +193,9 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 
 			DungeonRoom room{ roomCol, roomRow, roomWidth, roomHeight };
 			room.prefab_name = std::move(chosenPrefab);
+			room.shape = pick_room_shape(roomWidth, roomHeight, rng);
+			room.shapeVariant = rng.roll(0, 3);
+
 			rooms.push_back(std::move(room));
 		}
 	}

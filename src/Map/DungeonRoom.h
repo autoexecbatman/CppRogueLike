@@ -9,6 +9,19 @@
 //
 // "floor" region  -- the walkable interior, col..col_end() x row..row_end()
 // "wall"  ring    -- one cell outside on all four sides
+//
+// RoomShape controls which cells inside the bounding box are carved as floor.
+// Map::apply_room_shape() reads this after dig() to wall back non-floor cells.
+// RECT = full bounding box (default, backwards compatible).
+
+enum class RoomShape
+{
+	RECT,      // full bounding box — default
+	L_SHAPE,   // one W/3 x H/3 corner quadrant removed; variant 0-3 = TR, TL, BR, BL
+	CHAMFERED, // single corner cells cut at all four corners
+	CROSS,     // center row + center column only; arms extend full width/height
+	PILLARED,  // full rect with four 1x1 interior wall pillars
+};
 
 enum class RoomType
 {
@@ -25,6 +38,8 @@ struct DungeonRoom
 	int width{ 0 }; // floor column count
 	int height{ 0 }; // floor row    count
 	RoomType type{ RoomType::STANDARD };
+	RoomShape shape{ RoomShape::RECT };
+	int shapeVariant{ 0 }; // shape-specific sub-variant (e.g. which corner for L_SHAPE)
 	std::string prefab_name; // name of the prefab that defines this room's layout
 	std::vector<int> adjacentRoomIndices; // indices of rooms connected via corridors
 

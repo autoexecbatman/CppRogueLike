@@ -72,11 +72,11 @@ public:
 	void apply_to_room(
 		const DungeonRoom& room,
 		DecorEditor& editor,
-		const Map& map) const;
+		Map& map) const;
 	void apply_to_rooms(
 		const std::vector<DungeonRoom>& rooms,
 		DecorEditor& editor,
-		const Map& map) const;
+		Map& map) const;
 
 private:
 	std::vector<Prefab> prefabs;

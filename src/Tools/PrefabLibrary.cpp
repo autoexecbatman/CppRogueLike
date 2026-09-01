@@ -254,7 +254,7 @@ void stamp_room(
 	const DungeonRoom& room,
 	const std::unordered_map<char, TileRef>& symbolToTile,
 	DecorEditor& editor,
-	const Map& map)
+	Map& map)
 {
 	// Prefab origin [0,0] = top-left wall corner of the room.
 	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
@@ -268,6 +268,32 @@ void stamp_room(
 		for (size_t col = 0; col < rowStr.size(); ++col)
 		{
 			char sym = rowStr[col];
+
+			const int worldX = baseX + static_cast<int>(col);
+			const int worldY = baseY + static_cast<int>(row);
+
+			// Clamp to floor area — border '#' characters sit in the wall ring
+			// and must never be processed as interior shape commands.
+			if (worldX < room.col || worldX > room.col_end())
+			{
+				continue;
+			}
+			if (worldY < room.row || worldY > room.row_end())
+			{
+				continue;
+			}
+			if (!map.is_in_bounds({ worldX, worldY }))
+			{
+				continue;
+			}
+
+			// Interior '#': wall this floor cell back to create room shape.
+			if (sym == '#')
+			{
+				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL, 0);
+				continue;
+			}
+
 			if (!symbolToTile.contains(sym))
 			{
 				continue;
@@ -277,25 +303,6 @@ void stamp_room(
 			{
 				continue;
 			}
-
-			const int worldX = baseX + static_cast<int>(col);
-			const int worldY = baseY + static_cast<int>(row);
-
-			if (worldX < room.col || worldX > room.col_end())
-			{
-				continue;
-			}
-
-			if (worldY < room.row || worldY > room.row_end())
-			{
-				continue;
-			}
-
-			if (!map.is_in_bounds({ worldX, worldY }))
-			{
-				continue;
-			}
-
 			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
 			{
 				continue;
@@ -312,7 +319,7 @@ void stamp_room(
 void PrefabLibrary::apply_to_room(
 	const DungeonRoom& room,
 	DecorEditor& editor,
-	const Map& map) const
+	Map& map) const
 {
 	if (room.prefab_name.empty())
 	{
@@ -330,7 +337,7 @@ void PrefabLibrary::apply_to_room(
 void PrefabLibrary::apply_to_rooms(
 	const std::vector<DungeonRoom>& rooms,
 	DecorEditor& editor,
-	const Map& map) const
+	Map& map) const
 {
 	for (const DungeonRoom& room : rooms)
 	{

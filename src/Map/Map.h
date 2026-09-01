@@ -195,5 +195,8 @@ protected:
 	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
 	void setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx);
 	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
+	// Walls back cells inside the bounding box that the chosen RoomShape excludes.
+	// Must be called after dig() and before any spawning. No-op for RECT.
+	void apply_room_shape(const DungeonRoom& room);
 	void spawn_traps(const DungeonRoom& room, GameContext& ctx);
 };

@@ -891,6 +891,133 @@ void Map::set_tile(Vector2D pos, TileType newType, double cost)
 	fovMap->set_properties(pos.x, pos.y, walkable, transparent);
 }
 
+void Map::apply_room_shape(const DungeonRoom& room)
+{
+	auto wall_back = [&](int x, int y)
+	{
+		set_tile(Vector2D{ x, y }, TileType::WALL, 0);
+	};
+
+	switch (room.shape)
+	{
+	case RoomShape::RECT:
+	{
+		// Full bounding box already dug — nothing to remove.
+		break;
+	}
+
+	case RoomShape::L_SHAPE:
+	{
+		// Remove one W/3 x H/3 corner quadrant.
+		// variant 0=top-right, 1=top-left, 2=bottom-right, 3=bottom-left.
+		const int cutW = room.width / 3;
+		const int cutH = room.height / 3;
+
+		int xStart{};
+		int xEnd{};
+		int yStart{};
+		int yEnd{};
+
+		switch (room.shapeVariant % 4)
+		{
+		case 0: // top-right
+		{
+			xStart = room.col_end() - cutW + 1;
+			xEnd = room.col_end();
+			yStart = room.row;
+			yEnd = room.row + cutH - 1;
+			break;
+		}
+		case 1: // top-left
+		{
+			xStart = room.col;
+			xEnd = room.col + cutW - 1;
+			yStart = room.row;
+			yEnd = room.row + cutH - 1;
+			break;
+		}
+		case 2: // bottom-right
+		{
+			xStart = room.col_end() - cutW + 1;
+			xEnd = room.col_end();
+			yStart = room.row_end() - cutH + 1;
+			yEnd = room.row_end();
+			break;
+		}
+		case 3: // bottom-left
+		{
+			xStart = room.col;
+			xEnd = room.col + cutW - 1;
+			yStart = room.row_end() - cutH + 1;
+			yEnd = room.row_end();
+			break;
+		}
+		}
+
+		for (int y = yStart; y <= yEnd; ++y)
+		{
+			for (int x = xStart; x <= xEnd; ++x)
+			{
+				wall_back(x, y);
+			}
+		}
+		break;
+	}
+
+	case RoomShape::CHAMFERED:
+	{
+		// Cut the single corner cell at each of the four corners.
+		wall_back(room.col, room.row);
+		wall_back(room.col_end(), room.row);
+		wall_back(room.col, room.row_end());
+		wall_back(room.col_end(), room.row_end());
+		break;
+	}
+
+	case RoomShape::CROSS:
+	{
+		// Keep center row band (H/3 thick) and center column band (W/3 wide).
+		// Wall back every cell that falls outside both bands.
+		const int armThicknessH = std::max(2, room.height / 3);
+		const int armThicknessW = std::max(2, room.width / 3);
+		const int rowBandStart = room.row + (room.height - armThicknessH) / 2;
+		const int rowBandEnd = rowBandStart + armThicknessH - 1;
+		const int colBandStart = room.col + (room.width - armThicknessW) / 2;
+		const int colBandEnd = colBandStart + armThicknessW - 1;
+
+		for (int y = room.row; y <= room.row_end(); ++y)
+		{
+			for (int x = room.col; x <= room.col_end(); ++x)
+			{
+				const bool inRowBand = (y >= rowBandStart && y <= rowBandEnd);
+				const bool inColBand = (x >= colBandStart && x <= colBandEnd);
+				if (!inRowBand && !inColBand)
+				{
+					wall_back(x, y);
+				}
+			}
+		}
+		break;
+	}
+
+	case RoomShape::PILLARED:
+	{
+		// Full rect kept; place four 1x1 wall pillars at interior corners.
+		// Pillar offset: 2 cells in from each corner edge.
+		// Only place a pillar if the room is large enough to keep floor around it.
+		constexpr int pillarOffset = 2;
+		if (room.width >= 8 && room.height >= 6)
+		{
+			wall_back(room.col + pillarOffset, room.row + pillarOffset);
+			wall_back(room.col_end() - pillarOffset, room.row + pillarOffset);
+			wall_back(room.col + pillarOffset, room.row_end() - pillarOffset);
+			wall_back(room.col_end() - pillarOffset, room.row_end() - pillarOffset);
+		}
+		break;
+	}
+	}
+}
+
 void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 {
 	if (ctx.rooms)
@@ -899,6 +1026,10 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	}
 
 	dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+
+	// Carve shape: wall back cells excluded by the chosen RoomShape.
+	// Must run after dig() and before any spawning so all tile checks see correct state.
+	apply_room_shape(room);
 
 	// Stamp prefab decorations before water so water can see occupied tiles.
 	if (ctx.prefabLibrary && ctx.decorEditor)
