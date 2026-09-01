@@ -2,11 +2,9 @@
 #include <cassert>
 #include <cmath>
 #include <format>
-#include <functional>
 #include <limits>
 #include <memory>
 #include <optional>
-#include <ranges>
 #include <string>
 #include <vector>
 
@@ -29,13 +27,6 @@ namespace
 	constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
 	constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
 
-	// Translates a cartesian_product offset pair into a world position.
-	// origin: the reference tile (spider position, wall tile, etc.)
-	Vector2D offset_to_world(const std::tuple<int, int>& pair, Vector2D origin)
-	{
-		const auto& [y, x] = pair;
-		return origin + Vector2D{ x, y };
-	}
 }
 
 //=============================================================================
@@ -416,14 +407,28 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 		return dist >= 3 && dist <= 12;
 	};
 
-	auto candidates = std::views::cartesian_product(
-		std::views::iota(-8, 9),
-		std::views::iota(-8, 9))
-		| std::views::transform(std::bind_back(offset_to_world, owner.position))
-		| std::views::filter(is_in_bounds)
-		| std::views::filter(is_valid_ambush)
-		| std::views::filter(is_in_ambush_range)
-		| std::ranges::to<std::vector<Vector2D>>();
+	// Scan the 17x17 box centred on the spider for tiles passing every predicate.
+	std::vector<Vector2D> candidates;
+	for (int offsetRow = -8; offsetRow <= 8; ++offsetRow)
+	{
+		for (int offsetCol = -8; offsetCol <= 8; ++offsetCol)
+		{
+			const Vector2D candidate = owner.position + Vector2D{ offsetCol, offsetRow };
+			if (!is_in_bounds(candidate))
+			{
+				continue;
+			}
+			if (!is_valid_ambush(candidate))
+			{
+				continue;
+			}
+			if (!is_in_ambush_range(candidate))
+			{
+				continue;
+			}
+			candidates.push_back(candidate);
+		}
+	}
 
 	if (candidates.empty())
 	{
@@ -444,51 +449,54 @@ bool AiSpider::is_good_ambush_spot(Vector2D position, GameContext& ctx)
 		bool hasCorner{false};
 	};
 
-	auto is_not_center = [](const auto& pair) -> bool
-	{
-		const auto& [y, x] = pair;
-		return x != 0 || y != 0;
-	};
-
 	auto is_wall_tile = [&](Vector2D adj) -> bool
 	{
 		return ctx.map->is_wall(adj);
 	};
 
-	auto count_corner_walls = [&](Vector2D adj) -> int
+	auto count_corner_walls = [&](Vector2D adjacent) -> int
 	{
-		return static_cast<int>(std::ranges::count_if(
-			std::views::cartesian_product(
-				std::views::iota(-1, 2),
-				std::views::iota(-1, 2))
-			| std::views::filter(is_not_center)
-			| std::views::transform(std::bind_back(offset_to_world, adj)),
-			is_wall_tile));
-	};
-
-	auto neighbors = std::views::cartesian_product(
-		std::views::iota(-1, 2),
-		std::views::iota(-1, 2))
-		| std::views::filter(is_not_center)
-		| std::views::transform(std::bind_back(offset_to_world, position));
-
-	auto accumulate_metrics = [&](AmbushMetrics acc, Vector2D adj) -> AmbushMetrics
-	{
-		if (ctx.map->is_wall(adj))
+		int cornerWalls = 0;
+		for (int offsetRow = -1; offsetRow <= 1; ++offsetRow)
 		{
-			acc.wallCount++;
-			if (count_corner_walls(adj) >= 3)
+			for (int offsetCol = -1; offsetCol <= 1; ++offsetCol)
 			{
-				acc.hasCorner = true;
+				// The centre tile is the neighbour itself, not one of its neighbours.
+				if (offsetRow == 0 && offsetCol == 0)
+				{
+					continue;
+				}
+				if (is_wall_tile(adjacent + Vector2D{ offsetCol, offsetRow }))
+				{
+					++cornerWalls;
+				}
 			}
 		}
-		return acc;
+		return cornerWalls;
 	};
 
-	auto metrics = std::ranges::fold_left(
-		neighbors,
-		AmbushMetrics{},
-		accumulate_metrics);
+	// Walk the eight neighbours, counting walls and flagging corner pockets.
+	AmbushMetrics metrics{};
+	for (int offsetRow = -1; offsetRow <= 1; ++offsetRow)
+	{
+		for (int offsetCol = -1; offsetCol <= 1; ++offsetCol)
+		{
+			if (offsetRow == 0 && offsetCol == 0)
+			{
+				continue;
+			}
+			const Vector2D adjacent = position + Vector2D{ offsetCol, offsetRow };
+			if (!ctx.map->is_wall(adjacent))
+			{
+				continue;
+			}
+			metrics.wallCount++;
+			if (count_corner_walls(adjacent) >= 3)
+			{
+				metrics.hasCorner = true;
+			}
+		}
+	}
 
 	return metrics.wallCount >= 2 || metrics.hasCorner;
 }
