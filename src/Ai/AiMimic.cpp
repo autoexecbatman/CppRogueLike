@@ -195,7 +195,8 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 
 		if (index < ctx.floorInventory->items.size() && ctx.floorInventory->items[index])
 		{
-			assert(InventoryOperations::remove_item_at(*ctx.floorInventory, index).has_value());
+			[[maybe_unused]] const auto removeLureResult = InventoryOperations::remove_item_at(*ctx.floorInventory, index);
+			assert(removeLureResult.has_value());
 		}
 	}
 

@@ -139,8 +139,8 @@ namespace
 
 //====
 Map::Map(int mapWidth, int mapHeight)
-	: mapHeight(mapHeight),
-	  mapWidth(mapWidth),
+	: mapWidth(mapWidth),
+	  mapHeight(mapHeight),
 	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>()),
 	  dijkstraCosts(static_cast<size_t>(mapWidth) * mapHeight, std::numeric_limits<int>::max()),
@@ -1927,7 +1927,8 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		assert(InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry)).has_value());
+		[[maybe_unused]] const auto placeAmuletResult = InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry));
+		assert(placeAmuletResult.has_value());
 
 		// Log the placement (debug info)
 		if (ctx.messageSystem)
@@ -2292,7 +2293,8 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
-	assert(InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer).has_value());
+	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer);
+	assert(giveKeyToJailerResult.has_value());
 
 	ctx.creatures->push_back(std::move(jailer));
 }

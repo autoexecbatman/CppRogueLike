@@ -4,10 +4,8 @@
 #include <cassert>
 #include <concepts>
 #include <cstdint>
-#include <format>
 #include <iostream>
 #include <memory>
-#include <ranges>
 #include <span>
 #include <string>
 
@@ -134,7 +132,7 @@ const Item* get_item_at(const T& inventory, size_t index) noexcept
 template <AnyInventory T>
 const Item* find_item_by_name(const T& inventory, std::string_view name) noexcept
 {
-	auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
 	assert(std::ranges::none_of(inventory.items, is_null));
 
 	auto it = std::ranges::find_if(inventory.items,

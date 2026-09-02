@@ -12,7 +12,7 @@ namespace ItemTypeUtils
 {
     Item* find_item_by_id(std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        auto is_null = [](const auto& item) { return !item; };
+        [[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
         assert(std::ranges::none_of(inventory, is_null));
 
         auto it = std::ranges::find_if(inventory,
@@ -26,7 +26,7 @@ namespace ItemTypeUtils
 
     const Item* find_item_by_id(const std::vector<std::unique_ptr<Item>>& inventory, int uniqueId)
     {
-        auto is_null = [](const auto& item) { return !item; };
+        [[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
         assert(std::ranges::none_of(inventory, is_null));
 
         auto it = std::ranges::find_if(inventory,
@@ -42,7 +42,7 @@ namespace ItemTypeUtils
     {
         auto& inventory = container.get_inventory_mutable();
 
-        auto is_null = [](const auto& item) { return !item; };
+        [[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
         assert(std::ranges::none_of(inventory, is_null));
 
         auto matches_id = [uniqueId](const auto& item) { return item->uniqueId == uniqueId; };

@@ -48,7 +48,7 @@ ContainerResult<bool> Container::add(std::unique_ptr<Item> item)
 
 ContainerResult<std::unique_ptr<Item>> Container::remove(const Item& item)
 {
-	auto is_null = [](const auto& stored) { return !stored; };
+	[[maybe_unused]] auto is_null = [](const auto& stored) { return !stored; };
 	assert(std::ranges::none_of(inventory, is_null));
 
 	auto matches_item = [&item](const auto& stored) { return stored.get() == &item; };
@@ -111,7 +111,7 @@ void Container::set_capacity(size_t newCapacity)
 // Search operations
 const Item* Container::find_item_by_name(std::string_view name) const noexcept
 {
-	auto is_null = [](const auto& item) { return !item; };
+	[[maybe_unused]] auto is_null = [](const auto& item) { return !item; };
 	assert(std::ranges::none_of(inventory, is_null));
 
 	auto it = std::ranges::find_if(inventory,

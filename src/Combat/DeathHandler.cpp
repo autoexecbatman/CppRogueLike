@@ -46,7 +46,8 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     for (auto& item : owner.inventoryData.items)
     {
         item->position = owner.position;
-        assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(item)).has_value());
+        [[maybe_unused]] const auto dropOnDeathResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
+        assert(dropOnDeathResult.has_value());
     }
     owner.inventoryData.items.clear();
 
@@ -56,7 +57,8 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
     corpse->enhancement.weight = owner.get_corpse_weight();
     corpse->behavior = CorpseFood{ 0 };
-    assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse)).has_value());
+    [[maybe_unused]] const auto placeCorpseResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
+    assert(placeCorpseResult.has_value());
 }
 
 //==PlayerDeathHandler==

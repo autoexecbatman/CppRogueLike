@@ -425,7 +425,7 @@ void Creature::sync_ranged_state(GameContext& ctx)
 
 void Creature::drop(Item& item, GameContext& ctx)
 {
-	auto is_null = [](const auto& invItem) { return !invItem; };
+	[[maybe_unused]] auto is_null = [](const auto& invItem) { return !invItem; };
 	assert(std::ranges::none_of(inventoryData.items, is_null));
 
 	auto matches_item = [&item](const auto& invItem) { return invItem.get() == &item; };
@@ -494,7 +494,8 @@ void Creature::die(GameContext& ctx)
 	for (auto& item : inventoryData.items)
 	{
 		item->position = position;
-		assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(item)).has_value());
+		[[maybe_unused]] const auto dropOnDeathResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(item));
+		assert(dropOnDeathResult.has_value());
 	}
 	inventoryData.items.clear();
 
@@ -504,7 +505,8 @@ void Creature::die(GameContext& ctx)
 	corpse->actorData.tile = ctx.tileConfig->get("TILE_CORPSE");
 	corpse->enhancement.weight = get_corpse_weight();
 	corpse->behavior = CorpseFood{ 0 };
-	assert(InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse)).has_value());
+	[[maybe_unused]] const auto placeCorpseResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
+	assert(placeCorpseResult.has_value());
 }
 
 //==Unified Buff System - Modifier Stack Pattern==

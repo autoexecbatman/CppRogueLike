@@ -161,7 +161,8 @@ void MenuBuy::handle_buy()
 
 	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
 	{
-		assert(InventoryOperations::remove_item_at(shopkeeper.get_shop_inventory(), currentState).has_value());
+		[[maybe_unused]] const auto removeFromStockResult = InventoryOperations::remove_item_at(shopkeeper.get_shop_inventory(), currentState);
+		assert(removeFromStockResult.has_value());
 
 		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{

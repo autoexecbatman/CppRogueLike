@@ -12,9 +12,7 @@
 #include "../Actor/Pickable.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../Systems/ContentRegistry.h"
 #include "../Systems/TileConfig.h"
-#include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
@@ -59,16 +57,18 @@ void ItemFactory::load_from_registry()
 				  {
 					  const int level = ctx.levelManager->get_dungeon_level();
 					  const int amount = ctx.dice->roll(level * 3, level * 10);
-					  assert(InventoryOperations::add_item(
+					  [[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 						  *ctx.floorInventory,
-						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry)).has_value());
+						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry));
+					  assert(spawnItemResult.has_value());
 				  }
 			  }
 			: std::function<void(Vector2D, GameContext&)>{ [capturedKey](Vector2D pos, GameContext& ctx)
 				  {
-					  assert(InventoryOperations::add_item(
+					  [[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 						  *ctx.floorInventory,
-						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry)).has_value());
+						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry));
+					  assert(spawnItemResult.has_value());
 				  } };
 
 		add_item_type(
@@ -103,18 +103,20 @@ void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rul
 					if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 					{
 						auto enh = ItemEnhancement::generate_weapon_enhancement();
-						assert(InventoryOperations::add_item(
+						[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 							*ctx.floorInventory,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
+						assert(spawnItemResult.has_value());
 					}
 					else
 					{
 						auto enh = ItemEnhancement::generate_armor_enhancement();
-						assert(InventoryOperations::add_item(
+						[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 							*ctx.floorInventory,
 							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
+								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
+						assert(spawnItemResult.has_value());
 					}
 				}
 			});
@@ -368,16 +370,18 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 			if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
 			{
 				auto enh = ItemEnhancement::generate_weapon_enhancement();
-				assert(InventoryOperations::add_item(
+				[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 					*ctx.floorInventory,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
+				assert(spawnItemResult.has_value());
 			}
 			else
 			{
 				auto enh = ItemEnhancement::generate_armor_enhancement();
-				assert(InventoryOperations::add_item(
+				[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 					*ctx.floorInventory,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry)).has_value());
+					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
+				assert(spawnItemResult.has_value());
 			}
 		}
 	};

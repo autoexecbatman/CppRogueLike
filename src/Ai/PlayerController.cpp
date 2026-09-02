@@ -213,7 +213,8 @@ void PlayerController::pick_item(GameContext& ctx)
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
 		playerOwner.adjust_gold(goldBehavior.amount);
 		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
-		assert(InventoryOperations::remove_item(*ctx.floorInventory, *item).has_value());
+		[[maybe_unused]] const auto takeGoldResult = InventoryOperations::remove_item(*ctx.floorInventory, *item);
+		assert(takeGoldResult.has_value());
 		return;
 	}
 
@@ -546,7 +547,8 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 
 	if (keyItem != nullptr)
 	{
-		assert(InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem).has_value());
+		[[maybe_unused]] const auto consumeUnlockResult = InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
+		assert(consumeUnlockResult.has_value());
 		ctx.map->open_all_room_doors(doorPos, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You use the key. The lock turns.", true);
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
@@ -1061,10 +1063,11 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::TEST_COMMAND:
 	{
 		ctx.map->spawn_all_enhanced_items_debug(playerOwner.position, ctx);
-		assert(InventoryOperations::add_item_to_inventory(
+		[[maybe_unused]] const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
 			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry),
-			playerOwner).has_value());
+			playerOwner);
+		assert(debugSpawnBowResult.has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 
 		playerOwner.memorizedSpells.push_back("magic_missile");
