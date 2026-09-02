@@ -74,7 +74,7 @@ public:
 	// Note: active_buffs vector is public for BuffSystem access
 	std::vector<Buff> activeBuffs;
 	Creature(Vector2D position, ActorData data)
-		: Actor(position, data), inventoryData(CreatureInventory(50)), constitutionTracker(std::make_unique<ConstitutionTracker>())
+		: Actor(position, data), constitutionTracker(std::make_unique<ConstitutionTracker>()), inventoryData(CreatureInventory(50))
 	{
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/

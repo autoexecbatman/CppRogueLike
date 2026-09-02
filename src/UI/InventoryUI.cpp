@@ -110,13 +110,13 @@ void InventoryUI::draw_highlight_row(int px, int yTile, GameContext& ctx)
 }
 
 InventoryUI::InventoryUI(Player& player, InventoryScreen startScreen, GameContext& ctx)
-	: playerRef(player),
-	  activeScreen(startScreen),
+	: activeScreen(startScreen),
 	  equipmentCursor(0),
 	  listCursor(0),
 	  scrollOffset(0),
 	  filterMode(false),
-	  filterSlot(EquipmentSlot::NONE)
+	  filterSlot(EquipmentSlot::NONE),
+	  playerRef(player)
 {
 	rebuild_item_list(player, ctx);
 }

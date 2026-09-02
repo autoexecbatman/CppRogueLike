@@ -577,6 +577,11 @@ std::string_view encode_pickable_type(PickableType t)
 		return "quest_item";
 	}
 
+	case PickableType::DUNGEON_KEY:
+	{
+		return "dungeon_key";
+	}
+
 	}
 
 	return "weapon";

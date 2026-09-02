@@ -1,7 +1,6 @@
 // file: ItemEditor.cpp
 #include <algorithm>
 #include <format>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -118,6 +117,8 @@ std::string_view pickable_type_str(PickableType t)
 	case PickableType::GAUNTLETS:       return "gauntlets";
 	case PickableType::GIRDLE:          return "girdle";
 	case PickableType::QUEST_ITEM:      return "quest_item";
+	case PickableType::IDENTIFY_SCROLL: return "identify_scroll";
+	case PickableType::DUNGEON_KEY:     return "dungeon_key";
 	}
 	return "weapon";
 }
