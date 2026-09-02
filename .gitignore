@@ -414,3 +414,4 @@ add-2e-the-complete-advanced-dungeons-dragons-2nd-edition-archive_compress.pdf
 CppProperties.json
 CMakeSettings.json
 /build-clang
+/build-web-warn
