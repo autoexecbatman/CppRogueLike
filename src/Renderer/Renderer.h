@@ -130,6 +130,7 @@ struct SpriteSheet
 {
 	Texture2D frame0{};
 	Texture2D frame1{};
+	int cellSize{ SPRITE_SIZE }; // source pixel size of one cell in this sheet
 	int tilesPerRow{ 0 };
 	int tilesPerCol{ 0 };
 	bool animated{ false };
@@ -168,8 +169,8 @@ class Renderer
 	std::array<ColorPair, MAX_COLOR_PAIRS> colorPairs{};
 
 	void init_color_pairs();
-	void load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1);
-	void load_sheet_static(TileSheet id, std::string_view name, std::string_view path);
+	void load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize);
+	void load_sheet_static(TileSheet id, std::string_view name, std::string_view path, int cellSize);
 
 public:
 	Renderer() = default;

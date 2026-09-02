@@ -136,26 +136,28 @@ void Renderer::shutdown()
 	}
 }
 
-void Renderer::load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1)
+void Renderer::load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize)
 {
 	auto& s = sheets[sheet_idx(id)];
 	s.name = name;
+	s.cellSize = cellSize;
 	s.frame0 = load_dawnlike_texture(path0);
 	s.frame1 = load_dawnlike_texture(path1);
-	s.tilesPerRow = s.frame0.width / SPRITE_SIZE;
-	s.tilesPerCol = s.frame0.height / SPRITE_SIZE;
+	s.tilesPerRow = s.frame0.width / cellSize;
+	s.tilesPerCol = s.frame0.height / cellSize;
 	s.animated = (s.frame1.id > 0);
 	s.loaded = (s.frame0.id > 0);
 }
 
-void Renderer::load_sheet_static(TileSheet id, std::string_view name, std::string_view path)
+void Renderer::load_sheet_static(TileSheet id, std::string_view name, std::string_view path, int cellSize)
 {
 	auto& s = sheets[sheet_idx(id)];
 	s.name = name;
+	s.cellSize = cellSize;
 	s.frame0 = load_dawnlike_texture(path);
 	s.frame1 = s.frame0;
-	s.tilesPerRow = s.frame0.width / SPRITE_SIZE;
-	s.tilesPerCol = s.frame0.height / SPRITE_SIZE;
+	s.tilesPerRow = s.frame0.width / cellSize;
+	s.tilesPerCol = s.frame0.height / cellSize;
 	s.animated = false;
 	s.loaded = (s.frame0.id > 0);
 }
@@ -217,85 +219,85 @@ void Renderer::load_dawnlike(std::string_view basePath)
 		base += '/';
 	}
 
-	auto load_animated = [&](TileSheet id, std::string_view name, const char* dir, const char* file)
+	auto load_animated = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
 	{
 		std::string p0 = std::format("{}{}{}0.png", base, dir, file);
 		std::string p1 = std::format("{}{}{}1.png", base, dir, file);
-		load_sheet(id, name, p0, p1);
+		load_sheet(id, name, p0, p1, cellSize);
 	};
 
-	auto load_static = [&](TileSheet id, std::string_view name, const char* dir, const char* file)
+	auto load_static = [&](TileSheet id, std::string_view name, const char* dir, const char* file, int cellSize)
 	{
 		std::string p = std::format("{}{}{}.png", base, dir, file);
-		load_sheet_static(id, name, p);
+		load_sheet_static(id, name, p, cellSize);
 	};
 
 	// Objects
-	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor");
-	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall");
-	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0");
-	load_animated(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor");
-	load_animated(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect");
-	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile");
-	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit");
-	load_animated(TileSheet::SHEET_GUI0, "GUI0", "GUI/", "GUI");
+	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor", 16);
+	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall", 16);
+	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0", 16);
+	load_animated(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor", 16);
+	load_animated(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect", 16);
+	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile", 16);
+	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit", 16);
+	load_animated(TileSheet::SHEET_GUI0, "GUI0", "GUI/", "GUI", 16);
 
 	// Characters (all animated with 0/1 pairs)
-	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player");
-	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid");
-	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile");
-	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest");
-	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog");
-	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian");
-	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead");
-	load_animated(TileSheet::SHEET_QUADRAPED0, "Quadraped0", "Characters/", "Quadraped");
-	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon");
-	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc");
+	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player", 16);
+	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid", 16);
+	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile", 16);
+	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest", 16);
+	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog", 16);
+	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian", 16);
+	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead", 16);
+	load_animated(TileSheet::SHEET_QUADRAPED0, "Quadraped0", "Characters/", "Quadraped", 16);
+	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon", 16);
+	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc", 16);
 
 	// Items (static -- no animation frames)
-	load_static(TileSheet::SHEET_POTION, "Potion", "Items/", "Potion");
-	load_static(TileSheet::SHEET_SCROLL, "Scroll", "Items/", "Scroll");
-	load_static(TileSheet::SHEET_SHORT_WEP, "ShortWep", "Items/", "ShortWep");
-	load_static(TileSheet::SHEET_MED_WEP, "MedWep", "Items/", "MedWep");
-	load_static(TileSheet::SHEET_LONG_WEP, "LongWep", "Items/", "LongWep");
-	load_static(TileSheet::SHEET_ARMOR, "Armor", "Items/", "Armor");
-	load_static(TileSheet::SHEET_SHIELD, "Shield", "Items/", "Shield");
-	load_static(TileSheet::SHEET_HAT, "Hat", "Items/", "Hat");
-	load_static(TileSheet::SHEET_RING, "Ring", "Items/", "Ring");
-	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet");
-	load_static(TileSheet::SHEET_FOOD, "Food", "Items/", "Food");
-	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh");
-	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money");
+	load_static(TileSheet::SHEET_POTION, "Potion", "Items/", "Potion", 16);
+	load_static(TileSheet::SHEET_SCROLL, "Scroll", "Items/", "Scroll", 16);
+	load_static(TileSheet::SHEET_SHORT_WEP, "ShortWep", "Items/", "ShortWep", 16);
+	load_static(TileSheet::SHEET_MED_WEP, "MedWep", "Items/", "MedWep", 16);
+	load_static(TileSheet::SHEET_LONG_WEP, "LongWep", "Items/", "LongWep", 16);
+	load_static(TileSheet::SHEET_ARMOR, "Armor", "Items/", "Armor", 16);
+	load_static(TileSheet::SHEET_SHIELD, "Shield", "Items/", "Shield", 16);
+	load_static(TileSheet::SHEET_HAT, "Hat", "Items/", "Hat", 16);
+	load_static(TileSheet::SHEET_RING, "Ring", "Items/", "Ring", 16);
+	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet", 16);
+	load_static(TileSheet::SHEET_FOOD, "Food", "Items/", "Food", 16);
+	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh", 16);
+	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money", 16);
 
 	// Previously unloaded item sheets
-	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo");
-	load_static(TileSheet::SHEET_WAND, "Wand", "Items/", "Wand");
-	load_static(TileSheet::SHEET_BOOK, "Book", "Items/", "Book");
-	load_static(TileSheet::SHEET_BOOT, "Boot", "Items/", "Boot");
-	load_static(TileSheet::SHEET_GLOVE, "Glove", "Items/", "Glove");
-	load_static(TileSheet::SHEET_KEY, "Key", "Items/", "Key");
-	load_static(TileSheet::SHEET_LIGHT, "Light", "Items/", "Light");
-	load_static(TileSheet::SHEET_TOOL, "Tool", "Items/", "Tool");
-	load_static(TileSheet::SHEET_ROCK, "Rock", "Items/", "Rock");
-	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music");
-	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest");
+	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo", 16);
+	load_static(TileSheet::SHEET_WAND, "Wand", "Items/", "Wand", 16);
+	load_static(TileSheet::SHEET_BOOK, "Book", "Items/", "Book", 16);
+	load_static(TileSheet::SHEET_BOOT, "Boot", "Items/", "Boot", 16);
+	load_static(TileSheet::SHEET_GLOVE, "Glove", "Items/", "Glove", 16);
+	load_static(TileSheet::SHEET_KEY, "Key", "Items/", "Key", 16);
+	load_static(TileSheet::SHEET_LIGHT, "Light", "Items/", "Light", 16);
+	load_static(TileSheet::SHEET_TOOL, "Tool", "Items/", "Tool", 16);
+	load_static(TileSheet::SHEET_ROCK, "Rock", "Items/", "Rock", 16);
+	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music", 16);
+	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 16);
 
 	// Previously unloaded character sheets
-	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime");
-	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat");
-	load_animated(TileSheet::SHEET_RODENT0, "Rodent0", "Characters/", "Rodent");
-	load_animated(TileSheet::SHEET_PLANT0, "Plant0", "Characters/", "Plant");
-	load_animated(TileSheet::SHEET_ELEMENTAL0, "Elemental0", "Characters/", "Elemental");
-	load_animated(TileSheet::SHEET_AQUATIC0, "Aquatic0", "Characters/", "Aquatic");
+	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
+	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat", 16);
+	load_animated(TileSheet::SHEET_RODENT0, "Rodent0", "Characters/", "Rodent", 16);
+	load_animated(TileSheet::SHEET_PLANT0, "Plant0", "Characters/", "Plant", 16);
+	load_animated(TileSheet::SHEET_ELEMENTAL0, "Elemental0", "Characters/", "Elemental", 16);
+	load_animated(TileSheet::SHEET_AQUATIC0, "Aquatic0", "Characters/", "Aquatic", 16);
 
 	// Previously unloaded object sheets
-	load_animated(TileSheet::SHEET_ORE0, "Ore0", "Objects/", "Ore");
-	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill");
-	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree");
-	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground");
-	load_animated(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap");
-	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence");
-	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map");
+	load_animated(TileSheet::SHEET_ORE0, "Ore0", "Objects/", "Ore", 16);
+	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill", 16);
+	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree", 16);
+	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground", 16);
+	load_animated(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap", 16);
+	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence", 16);
+	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map", 16);
 
 	sheetsLoaded = true;
 }
@@ -420,12 +422,11 @@ void Renderer::draw_tile(Vector2D gridPos, TileRef tile, Color tint) const
 		? sheet.frame1
 		: sheet.frame0;
 
-	// Source rect in the 16x16 sprite sheet
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	// Destination rect scaled to display tile size
@@ -461,10 +462,10 @@ void Renderer::draw_tile_offset(Vector2D gridPos, int pixelOffsetX, int pixelOff
 		: sheet.frame0;
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	Rectangle destRect = { destX, destY, tileSizeFloat, tileSizeFloat };
@@ -495,10 +496,10 @@ void Renderer::draw_tile_static(Vector2D gridPos, TileRef tile, Color tint) cons
 	}
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	Rectangle destRect = { destX, destY, tileSizeFloat, tileSizeFloat };
@@ -523,10 +524,10 @@ void Renderer::draw_tile_screen(Vector2D screenPos, TileRef tile) const
 		: sheet.frame0;
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	float tileSizeFloat = static_cast<float>(tileSize);
@@ -557,10 +558,10 @@ void Renderer::draw_tile_screen_color(Vector2D screenPos, TileRef tile, Color ti
 		: sheet.frame0;
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	float tileSizeFloat = static_cast<float>(tileSize);
@@ -591,10 +592,10 @@ void Renderer::draw_tile_screen_color_sized(Vector2D screenPos, int size, TileRe
 		: sheet.frame0;
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	float sizeFloat = static_cast<float>(size);
@@ -625,10 +626,10 @@ void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int disp
 		: sheet.frame0;
 
 	Rectangle srcRect = {
-		static_cast<float>(tile.col * SPRITE_SIZE),
-		static_cast<float>(tile.row * SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE),
-		static_cast<float>(SPRITE_SIZE)
+		static_cast<float>(tile.col * sheet.cellSize),
+		static_cast<float>(tile.row * sheet.cellSize),
+		static_cast<float>(sheet.cellSize),
+		static_cast<float>(sheet.cellSize)
 	};
 
 	float displaySizeFloat = static_cast<float>(displaySize);
