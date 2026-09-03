@@ -235,6 +235,8 @@ void Attacker::log_attack_hit(
 	}
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
 	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " takes ");
 	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", finalDamage));
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" dmg ({}).", attackDamage.displayRoll));
 	ctx.messageSystem->finalize_message();
@@ -269,7 +271,9 @@ void Attacker::log_attack_miss(
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
 	}
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, ". Miss!");
+	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, ". Miss! ");
+	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is unharmed.");
 	ctx.messageSystem->finalize_message();
 
 	ctx.messageSystem->log(std::format(

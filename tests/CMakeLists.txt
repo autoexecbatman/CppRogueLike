@@ -53,7 +53,6 @@ set(PARENT_SOURCES
     # Renderer (raylib)
     ${PARENT_SOURCE_DIR}/Renderer/Renderer.cpp
     ${PARENT_SOURCE_DIR}/Renderer/InputSystem.cpp
-    ${PARENT_SOURCE_DIR}/Renderer/Panel.cpp
 
     # Actor
     ${PARENT_SOURCE_DIR}/Actor/Actor.cpp

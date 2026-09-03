@@ -109,7 +109,6 @@ public:
 	void save(json& j) override;
 
 	// Debug utilities
-	void print_container(std::span<std::unique_ptr<Actor>> container) const;
 	[[nodiscard]] std::string get_debug_info() const;
 
 };

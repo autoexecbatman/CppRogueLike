@@ -102,8 +102,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Renderer/Renderer.h
     ${PROJECT_SOURCE_DIR}/Renderer/InputSystem.cpp
     ${PROJECT_SOURCE_DIR}/Renderer/InputSystem.h
-    ${PROJECT_SOURCE_DIR}/Renderer/Panel.cpp
-    ${PROJECT_SOURCE_DIR}/Renderer/Panel.h
 
     # Actor
     ${PROJECT_SOURCE_DIR}/Actor/Actor.cpp

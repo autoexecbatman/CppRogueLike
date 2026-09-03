@@ -97,7 +97,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 }
 
 // Draw a full-width white highlight bar at the given tile row.
-void InventoryUI::draw_highlight_row(int px, int yTile, GameContext& ctx)
+void InventoryUI::draw_highlight_row(int yTile, GameContext& ctx)
 {
 	assert(ctx.renderer && "InventoryUI::draw_highlight_row called without a renderer");
 
@@ -423,7 +423,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 
 		if (isCursorRow)
 		{
-			draw_highlight_row(3, y, ctx);
+			draw_highlight_row(y, ctx);
 		}
 
 		int rowColor = isCursorRow ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
@@ -502,7 +502,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 
 		if (isCursorRow)
 		{
-			draw_highlight_row(3, y, ctx);
+			draw_highlight_row(y, ctx);
 		}
 
 		if (entry.kind == BackpackEntry::Kind::CATEGORY_HEADER)

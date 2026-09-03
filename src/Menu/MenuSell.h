@@ -5,7 +5,6 @@
 #include <string>
 #include <vector>
 
-#include "../Actor/Actor.h"
 #include "../Core/GameContext.h"
 #include "BaseMenu.h"
 
@@ -21,7 +20,7 @@ class MenuSell : public BaseMenu
 	void populate_items(std::span<std::unique_ptr<Item>> item);
 	void menu_print_state(size_t state);
 	std::string menu_get_string(size_t state) { return menuItems.at(state); }
-	void handle_sell(void* tradeWin, Creature& shopkeeper, Creature& seller, GameContext& ctx);
+	void handle_sell(Creature& shopkeeper, Creature& seller, GameContext& ctx);
 	void draw_content() override;
 
 public:

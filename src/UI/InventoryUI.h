@@ -149,6 +149,6 @@ private:
 	int screen_rows(GameContext& ctx) const;
 
 	void draw_frame(GameContext& ctx);
-	void draw_highlight_row(int px, int yTile, GameContext& ctx);
+	void draw_highlight_row(int yTile, GameContext& ctx);
 
 };

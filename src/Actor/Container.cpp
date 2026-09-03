@@ -199,20 +199,6 @@ void Container::save(json& j)
 }
 
 // Debug utilities
-void Container::print_container(std::span<std::unique_ptr<Actor>> container) const
-{
-	int i = 0;
-	for (const auto& item : inventory)
-	{
-		if (item)
-		{
-			std::cout << item->actorData.name << i << " ";
-			i++;
-		}
-	}
-	std::cout << '\n';
-}
-
 std::string Container::get_debug_info() const
 {
 	return std::format(
