@@ -66,7 +66,7 @@ struct DamageInfo
 	}
 
 	// Create enhanced version with bonus (non-mutating)
-	DamageInfo with_enhancement(int damage_bonus, int hit_bonus) const
+	DamageInfo with_enhancement(int damage_bonus) const
 	{
 		DamageInfo enhanced = *this;
 		enhanced.add_bonus(damage_bonus);

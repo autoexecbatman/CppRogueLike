@@ -58,7 +58,7 @@ DamageInfo WeaponDamageRegistry::get_enhanced_damage_info(std::string_view weapo
 
 	if (enhancement && enhancement->damageBonus != 0)
 	{
-		return baseDamage.with_enhancement(enhancement->damageBonus, 0);
+		return baseDamage.with_enhancement(enhancement->damageBonus);
 	}
 
 	return baseDamage;

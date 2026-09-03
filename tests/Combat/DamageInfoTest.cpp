@@ -91,7 +91,7 @@ TEST_F(DamageInfoTest, AddBonus_Chaining) {
 
 TEST_F(DamageInfoTest, WithEnhancement_NonMutating) {
     DamageInfo original = longsword;
-    DamageInfo enhanced = original.with_enhancement(3, 0);
+    DamageInfo enhanced = original.with_enhancement(3);
 
     // Original unchanged
     EXPECT_EQ(original.minDamage, 1);
@@ -182,7 +182,7 @@ TEST_F(DamageInfoTest, Regression_StrengthBonus_AddedCorrectly) {
     DamageInfo base_dagger = DamageValues::Dagger();
     int strength_bonus = 2;  // 18 Strength = +2 damage
 
-    DamageInfo enhanced = base_dagger.with_enhancement(strength_bonus, 0);
+    DamageInfo enhanced = base_dagger.with_enhancement(strength_bonus);
 
     EXPECT_EQ(enhanced.minDamage, 3);  // 1 + 2
     EXPECT_EQ(enhanced.maxDamage, 6);  // 4 + 2

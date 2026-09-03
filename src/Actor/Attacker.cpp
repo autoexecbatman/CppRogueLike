@@ -231,7 +231,7 @@ void Attacker::log_attack_hit(
 	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({:+})", attackPenalty));
 	}
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
 	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
@@ -268,7 +268,7 @@ void Attacker::log_attack_miss(
 	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({})", attackPenalty));
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({:+})", attackPenalty));
 	}
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
 	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, ". Miss! ");
