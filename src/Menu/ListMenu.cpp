@@ -72,11 +72,11 @@ void ListMenu::draw()
 
 void ListMenu::on_key(GameKey key, int ch, GameContext& ctx)
 {
-    if (key == GameKey::UP || ch == 'w')
+    if (key == GameKey::UP || key == GameKey::W)
     {
         cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
     }
-    else if (key == GameKey::DOWN || ch == 's')
+    else if (key == GameKey::DOWN || key == GameKey::S)
     {
         cursorIndex = (cursorIndex + 1) % entries.size();
     }

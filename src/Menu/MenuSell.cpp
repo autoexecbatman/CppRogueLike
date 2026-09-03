@@ -203,7 +203,7 @@ void MenuSell::draw()
 
 void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 {
-	if (key == GameKey::UP || ch == 'w')
+	if (key == GameKey::UP || key == GameKey::W)
 	{
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
@@ -215,7 +215,7 @@ void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 	}
-	else if (key == GameKey::DOWN || ch == 's')
+	else if (key == GameKey::DOWN || key == GameKey::S)
 	{
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{

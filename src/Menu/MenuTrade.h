@@ -15,7 +15,6 @@ private:
     int width{ 10 };
     int startY{ 0 };
     int startX{ 0 };
-    Creature& shopkeeper;
 
     size_t currentState{ 0 };
     std::vector<MenuEntry> entries{};

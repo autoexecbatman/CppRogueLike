@@ -71,15 +71,9 @@ void BaseMenu::menu_key_listen()
 
 	inputSystem->poll();
 
-	int ch = inputSystem->get_char_input();
-	if (ch != 0)
-	{
-		lastChar = ch;
-		lastKey = GameKey::NONE;
-		return;
-	}
-
-	lastChar = 0;
+	// Both channels come from the same poll. A letter arrives as a character and
+	// as its GameKey, so a menu may test whichever it needs.
+	lastChar = inputSystem->get_char_input();
 	lastKey = inputSystem->get_key();
 }
 

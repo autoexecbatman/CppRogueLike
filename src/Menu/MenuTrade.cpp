@@ -12,7 +12,6 @@
 #include "MenuTrade.h"
 
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
-    : shopkeeper(shopkeeper)
 {
     assert(ctx.renderer && "MenuTrade: renderer required before construction");
     int vcols = ctx.renderer->get_viewport_cols();
@@ -79,11 +78,11 @@ void MenuTrade::draw()
 
 void MenuTrade::on_key(GameKey key, int ch, GameContext& ctx)
 {
-    if (key == GameKey::UP || ch == 'w')
+    if (key == GameKey::UP || key == GameKey::W)
     {
         currentState = (currentState + entries.size() - 1) % entries.size();
     }
-    else if (key == GameKey::DOWN || ch == 's')
+    else if (key == GameKey::DOWN || key == GameKey::S)
     {
         currentState = (currentState + 1) % entries.size();
     }
