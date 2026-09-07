@@ -116,6 +116,44 @@ Player::Player(Vector2D position)
 	controller = std::make_unique<PlayerController>(*this);
 }
 
+std::string_view Player::sprite_tile_key() const noexcept
+{
+	// Only human and dwarf art exists; the other races borrow the human row.
+	const bool isDwarf = (playerRaceState == PlayerRaceState::DWARF);
+
+	switch (playerClassState)
+	{
+
+	case PlayerClassState::FIGHTER:
+	{
+		return isDwarf ? "TILE_PLAYER_DWARF_FIGHTER" : "TILE_PLAYER_HUMAN_FIGHTER";
+	}
+
+	case PlayerClassState::ROGUE:
+	{
+		return isDwarf ? "TILE_PLAYER_DWARF_ROGUE" : "TILE_PLAYER_HUMAN_ROGUE";
+	}
+
+	case PlayerClassState::CLERIC:
+	{
+		return isDwarf ? "TILE_PLAYER_DWARF_CLERIC" : "TILE_PLAYER_HUMAN_CLERIC";
+	}
+
+	case PlayerClassState::WIZARD:
+	{
+		return isDwarf ? "TILE_PLAYER_DWARF_WIZARD" : "TILE_PLAYER_HUMAN_WIZARD";
+	}
+
+	case PlayerClassState::NONE:
+	{
+		return "TILE_PLAYER";
+	}
+
+	}
+
+	return "TILE_PLAYER";
+}
+
 Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
 	: Creature(position, ActorData{ TileRef{}, blueprint.name, WHITE_BLACK_PAIR })
 {

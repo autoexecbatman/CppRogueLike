@@ -119,7 +119,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
 	*ctx.playerBlueprint = PlayerBlueprint{};
 	ctx.player = ctx.playerOwner->get();
-	ctx.player->actorData.tile = ctx.tileConfig->get("TILE_PLAYER");
+	ctx.player->actorData.tile = ctx.tileConfig->get((*ctx.playerOwner)->sprite_tile_key());
 
 	ctx.map->regenerate(ctx);
 
@@ -142,13 +142,15 @@ bool GameStateManager::load_all(GameContext& ctx)
 
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
 	ctx.player = ctx.playerOwner->get();
-	ctx.player->actorData.tile = ctx.tileConfig->get("TILE_PLAYER");
 
 	if (!load_game(ctx))
 	{
 		ctx.messageSystem->log("Error: Could not open save file.");
 		return false;
 	}
+
+	// load_game restores playerClassState, so the class sprite is only known now.
+	ctx.player->actorData.tile = ctx.tileConfig->get((*ctx.playerOwner)->sprite_tile_key());
 
 	ctx.gameState->set_is_loaded_game(true);
 	ctx.gameState->set_game_status(GameStatus::STARTUP);

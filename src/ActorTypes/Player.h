@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -61,6 +62,11 @@ public:
 	Player(Vector2D position);
 	Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx);
 	void roll_new_character(GameContext& ctx);
+
+	// Tile config key for this character's sprite, e.g.
+	// "TILE_PLAYER_DWARF_CLERIC". Races without art fall back to the human
+	// row, and an unset race or class falls back to "TILE_PLAYER".
+	[[nodiscard]] std::string_view sprite_tile_key() const noexcept;
 
 	// Serialization - overrides Creature
 	void load(const json& j) override;
