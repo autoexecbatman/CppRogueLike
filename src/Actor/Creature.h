@@ -152,20 +152,13 @@ public:
 
 	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);
-	void sync_ranged_state(GameContext& ctx);
 	void drop(Item& item, GameContext& ctx);
 
 	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
 
-	// Virtual equipment interface - LSP compliant polymorphic equipment operations
-	// Default implementations for NPCs (do nothing/return false)
-	// Player overrides these with actual slot-based equipment system
-	virtual bool toggle_equipment(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
-	virtual bool toggle_weapon(uint64_t item_id, EquipmentSlot slot, GameContext& ctx) { return false; }
-	virtual bool toggle_shield(uint64_t item_id, GameContext& ctx) { return false; }
-	virtual bool toggle_armor(uint64_t item_id, GameContext& ctx) { return false; }
-	virtual bool is_item_equipped(uint64_t item_id) const noexcept { return false; }
-	virtual bool is_slot_occupied(EquipmentSlot slot) const noexcept { return false; }
+	// Equipment query. Creatures other than the player have no slots, so the
+	// honest answer for them is nothing. Read by ArmorClass, Web and targeting,
+	// each of which runs for any creature.
 	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept { return nullptr; }
 
 	// Type query - allows polymorphic identification without RTTI or cross-module deps

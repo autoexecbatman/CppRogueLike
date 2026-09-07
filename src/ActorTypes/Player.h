@@ -102,15 +102,19 @@ public:
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
 	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
 	Item* get_equipped_item(EquipmentSlot slot) const noexcept override;
-	bool is_slot_occupied(EquipmentSlot slot) const noexcept override;
+	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
 	bool is_dual_wielding() const noexcept;
 
 	// Equipment system - unique ID based methods
-	bool toggle_armor(uint64_t itemUniqueId, GameContext& ctx) override;
-	bool is_item_equipped(uint64_t itemUniqueId) const noexcept override;
-	bool toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx) override;
-	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx) override;
-	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx) override;
+	bool toggle_armor(uint64_t itemUniqueId, GameContext& ctx);
+	bool is_item_equipped(uint64_t itemUniqueId) const noexcept;
+	bool toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx);
+	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx);
+	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx);
+
+	// Keeps IS_RANGED in step with the missile slot. Player-only: no other
+	// creature has equipment slots to read.
+	void sync_ranged_state(GameContext& ctx);
 
 	bool is_player() const noexcept override { return true; }
 

@@ -11,6 +11,7 @@
 
 class Item;
 class Creature;
+class Player;
 struct GameContext;
 
 // ========== Serialization discriminator ==========
@@ -68,7 +69,7 @@ struct Weapon
 	HandRequirement get_hand_requirement() const noexcept { return handRequirement; }
 	bool can_be_off_hand() const noexcept { return weaponSize <= WeaponSize::SMALL; }
 	bool validate_dual_wield(const Item* mainHand, const Item* offHand) const;
-	EquipmentSlot get_preferred_slot(const Creature* creature) const;
+	EquipmentSlot get_preferred_slot(const Player* player) const;
 };
 
 struct Shield
@@ -213,26 +214,26 @@ using ItemBehavior = std::variant<
 // ========== use() overloads - one per behavior type ==========
 
 bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Weapon& w, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Shield& s, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Weapon& w, Item& owner, Player& wearer, GameContext& ctx);
+bool use(Shield& s, Item& owner, Player& wearer, GameContext& ctx);
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(IdentifyScroll& is, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx);
-bool use(MagicalHelm& mh, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(MagicalRing& mr, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(JewelryAmulet& ja, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Gauntlets& g, Item& owner, Creature& wearer, GameContext& ctx);
-bool use(Girdle& g, Item& owner, Creature& wearer, GameContext& ctx);
+bool use(Armor& armor, Item& item, Player& wearer, GameContext& ctx);
+bool use(MagicalHelm& mh, Item& owner, Player& wearer, GameContext& ctx);
+bool use(MagicalRing& mr, Item& owner, Player& wearer, GameContext& ctx);
+bool use(JewelryAmulet& ja, Item& owner, Player& wearer, GameContext& ctx);
+bool use(Gauntlets& g, Item& owner, Player& wearer, GameContext& ctx);
+bool use(Girdle& g, Item& owner, Player& wearer, GameContext& ctx);
 bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
 
-bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx);
+bool use_item(ItemBehavior& behavior, Item& owner, Player& wearer, GameContext& ctx);
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
 
 // Serialization

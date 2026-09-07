@@ -403,26 +403,6 @@ void Creature::unequip(Item& item, GameContext& ctx)
 	}
 }
 
-void Creature::sync_ranged_state(GameContext& ctx)
-{
-	// Check if the MISSILE_WEAPON slot holds a ranged weapon
-	Item* missileSlot = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
-	bool hasRangedWeapon = missileSlot && missileSlot->is_ranged_weapon();
-
-	// Make sure IS_RANGED state matches equipped weapons
-	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
-	{
-		add_state(ActorState::IS_RANGED);
-		ctx.messageSystem->log("Added missing IS_RANGED state - ranged weapon equipped");
-	}
-	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
-	{
-		remove_state(ActorState::IS_RANGED);
-		ctx.messageSystem->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
-	}
-}
-
-
 void Creature::drop(Item& item, GameContext& ctx)
 {
 	[[maybe_unused]] auto is_null = [](const auto& invItem) { return !invItem; };
