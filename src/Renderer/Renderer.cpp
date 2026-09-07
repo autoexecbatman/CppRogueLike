@@ -1,5 +1,6 @@
 // file: Renderer.cpp
 #include <algorithm>
+#include <array>
 #include <cassert>
 #include <cmath>
 #include <format>
@@ -14,6 +15,10 @@
 
 #include "../Systems/TileConfig.h"
 #include "Renderer.h"
+
+// Rendered tile sizes the player can step through. 64 matches the native cell
+// size of the regenerated sheets, so their art draws unscaled.
+constexpr std::array<int, 6> ZOOM_LEVELS{ 16, 24, 32, 48, 64, 96 };
 
 // Local color constants (raylib macros are #undef'd in Renderer.h)
 constexpr Color RL_WHITE = { 255, 255, 255, 255 };
@@ -171,6 +176,15 @@ int Renderer::get_sheet_cols(TileSheet sheet) const
 	return sheets[sheet_idx(sheet)].tilesPerRow;
 }
 
+int Renderer::get_sheet_cell_size(TileSheet sheet) const
+{
+	if (sheet_idx(sheet) >= sheets.size())
+	{
+		return SPRITE_SIZE;
+	}
+	return sheets[sheet_idx(sheet)].cellSize;
+}
+
 int Renderer::get_sheet_rows(TileSheet sheet) const
 {
 	if (sheet_idx(sheet) >= sheets.size())
@@ -233,26 +247,26 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	};
 
 	// Objects
-	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor", 16);
-	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall", 16);
-	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0", 16);
-	load_animated(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor", 16);
-	load_animated(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect", 16);
-	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile", 16);
-	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit", 16);
+	load_static(TileSheet::SHEET_FLOOR, "Floor", "Objects/", "Floor", 64);
+	load_static(TileSheet::SHEET_WALL, "Wall", "Objects/", "Wall", 64);
+	load_static(TileSheet::SHEET_DOOR0, "Door0", "Objects/", "Door0", 64);
+	load_static(TileSheet::SHEET_DECOR0, "Decor0", "Objects/", "Decor0", 64);
+	load_static(TileSheet::SHEET_EFFECT0, "Effect0", "Objects/", "Effect0", 64);
+	load_static(TileSheet::SHEET_TILE, "Tile", "Objects/", "Tile", 64);
+	load_animated(TileSheet::SHEET_PIT0, "Pit0", "Objects/", "Pit", 64);
 	load_animated(TileSheet::SHEET_GUI0, "GUI0", "GUI/", "GUI", 16);
 
 	// Characters (all animated with 0/1 pairs)
-	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player", 16);
-	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid", 16);
-	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile", 16);
-	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest", 16);
-	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog", 16);
-	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian", 16);
-	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead", 16);
+	load_animated(TileSheet::SHEET_PLAYER0, "Player0", "Characters/", "Player", 64);
+	load_animated(TileSheet::SHEET_HUMANOID0, "Humanoid0", "Characters/", "Humanoid", 64);
+	load_animated(TileSheet::SHEET_REPTILE0, "Reptile0", "Characters/", "Reptile", 64);
+	load_animated(TileSheet::SHEET_PEST0, "Pest0", "Characters/", "Pest", 64);
+	load_animated(TileSheet::SHEET_DOG0, "Dog0", "Characters/", "Dog", 64);
+	load_animated(TileSheet::SHEET_AVIAN0, "Avian0", "Characters/", "Avian", 64);
+	load_animated(TileSheet::SHEET_UNDEAD0, "Undead0", "Characters/", "Undead", 64);
 	load_animated(TileSheet::SHEET_QUADRAPED0, "Quadraped0", "Characters/", "Quadraped", 16);
-	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon", 16);
-	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc", 16);
+	load_animated(TileSheet::SHEET_DEMON0, "Demon0", "Characters/", "Demon", 64);
+	load_animated(TileSheet::SHEET_MISC0, "Misc0", "Characters/", "Misc", 64);
 
 	// Items (static -- no animation frames)
 	load_static(TileSheet::SHEET_POTION, "Potion", "Items/", "Potion", 16);
@@ -264,10 +278,10 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_SHIELD, "Shield", "Items/", "Shield", 16);
 	load_static(TileSheet::SHEET_HAT, "Hat", "Items/", "Hat", 16);
 	load_static(TileSheet::SHEET_RING, "Ring", "Items/", "Ring", 16);
-	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet", 16);
+	load_static(TileSheet::SHEET_AMULET_ITEM, "Amulet", "Items/", "Amulet", 64);
 	load_static(TileSheet::SHEET_FOOD, "Food", "Items/", "Food", 16);
-	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh", 16);
-	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money", 16);
+	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh", 64);
+	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money", 64);
 
 	// Previously unloaded item sheets
 	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo", 16);
@@ -280,7 +294,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_TOOL, "Tool", "Items/", "Tool", 16);
 	load_static(TileSheet::SHEET_ROCK, "Rock", "Items/", "Rock", 16);
 	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music", 16);
-	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 16);
+	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 64);
 
 	// Previously unloaded character sheets
 	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
@@ -676,12 +690,12 @@ void Renderer::draw_text_color(Vector2D screenPos, std::string_view text, Color 
 
 void Renderer::zoom_in()
 {
-	static constexpr int zoom_levels[] = { 16, 24, 32, 48 };
-	for (int i = 0; i < 3; ++i)
+	// Step to the next larger level; the largest stays put.
+	for (size_t level = 0; level + 1 < ZOOM_LEVELS.size(); ++level)
 	{
-		if (tileSize == zoom_levels[i])
+		if (tileSize == ZOOM_LEVELS[level])
 		{
-			tileSize = zoom_levels[i + 1];
+			tileSize = ZOOM_LEVELS[level + 1];
 			fontSize = tileSize * 3 / 4;
 			update_viewport();
 			return;
@@ -691,12 +705,12 @@ void Renderer::zoom_in()
 
 void Renderer::zoom_out()
 {
-	static constexpr int zoom_levels[] = { 16, 24, 32, 48 };
-	for (int i = 1; i < 4; ++i)
+	// Step to the next smaller level; the smallest stays put.
+	for (size_t level = 1; level < ZOOM_LEVELS.size(); ++level)
 	{
-		if (tileSize == zoom_levels[i])
+		if (tileSize == ZOOM_LEVELS[level])
 		{
-			tileSize = zoom_levels[i - 1];
+			tileSize = ZOOM_LEVELS[level - 1];
 			fontSize = tileSize * 3 / 4;
 			update_viewport();
 			return;

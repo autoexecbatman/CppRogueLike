@@ -727,11 +727,8 @@ void Map::render(const GameContext& ctx) const
 					ctx.tileConfig->get_autotile("AUTOTILE_FLOOR_STONE"),
 					build_mask(pos, is_walkable));
 				ctx.renderer->draw_tile(Vector2D{ col, row }, floorRef, tint);
-				int offset = ctx.renderer->get_tile_size() / 2;
-				ctx.renderer->draw_tile_offset(
+				ctx.renderer->draw_tile(
 					Vector2D{ col, row },
-					-offset,
-					0,
 					ctx.tileConfig->get("TILE_DOOR_OPEN"),
 					tint);
 				continue;

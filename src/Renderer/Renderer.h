@@ -10,7 +10,7 @@
 class TileConfig;
 
 inline constexpr int SPRITE_SIZE = 16;       // DawnLike native sprite pixel size
-inline constexpr int DISPLAY_TILE_SIZE = 32;  // Default rendered tile size in pixels
+inline constexpr int DISPLAY_TILE_SIZE = 64;  // Default rendered tile size in pixels
 inline constexpr int GUI_RESERVE_ROWS = 7;    // Rows reserved at the bottom for the HUD
 inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
 
@@ -240,6 +240,9 @@ public:
 	[[nodiscard]] int get_camera_y() const { return camera.y + shakeOffset.y; }
 	[[nodiscard]] int get_sheet_cols(TileSheet sheet) const;
 	[[nodiscard]] int get_sheet_rows(TileSheet sheet) const;
+	// Source pixel size of one cell in this sheet: 16 for DawnLike, 64 for the
+	// regenerated sheets. Editors use it to draw tiles at an integer scale.
+	[[nodiscard]] int get_sheet_cell_size(TileSheet sheet) const;
 	[[nodiscard]] bool sheet_is_loaded(TileSheet sheet) const;
 	[[nodiscard]] std::string_view get_sheet_name(TileSheet sheet) const;
 	[[nodiscard]] int get_loaded_sheet_count() const;
