@@ -6,16 +6,13 @@
 #include <raylib.h>
 
 #include "../Ai/Ai.h"
-#include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
-#include "../Systems/TileConfig.h"
 #include "../Utils/UniqueId.h"
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
-#include "Item.h"
 
 Actor::Actor(Vector2D position, ActorData data)
 	: position(position),
