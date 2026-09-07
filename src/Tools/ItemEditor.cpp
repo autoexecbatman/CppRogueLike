@@ -30,7 +30,18 @@ constexpr int LIST_TILE_SIZE = 22;
 constexpr int LIST_PAD = 6;
 constexpr int PICKER_PAD = 10;
 constexpr int PICKER_SUB_HEADER_HEIGHT = 28;
-constexpr int PICKER_TILE_SIZE = 36;
+constexpr int PICKER_TILE_TARGET = 64; // drawn cell size the grid aims for
+
+// Largest integer multiple of the sheet's own cell size that fits the target,
+// so a 16-pixel tile draws at 4x and a 64-pixel tile at 1x - never blurred.
+namespace
+{
+int picker_tile_size(const Renderer& renderer, int sheetIndex)
+{
+	const int cellSize = renderer.get_sheet_cell_size(static_cast<TileSheet>(sheetIndex));
+	return cellSize * std::max(1, PICKER_TILE_TARGET / cellSize);
+}
+} // namespace
 
 namespace
 {
@@ -588,8 +599,9 @@ void ItemEditor::handle_picker(const Renderer& r)
 
 	if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_picker)
 	{
-		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (PICKER_TILE_SIZE + 2);
-		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (PICKER_TILE_SIZE + 2);
+		const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
+		int col = static_cast<int>(mouse.x - LIST_WIDTH - PICKER_PAD) / (pickerTileSize + 2);
+		int row = m_picker_scroll + static_cast<int>(mouse.y - grid_y) / (pickerTileSize + 2);
 		int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 
 		if (col >= 0 && col < sheet_cols && row >= 0 && row < sheet_rows)
@@ -815,6 +827,7 @@ void ItemEditor::render_picker(const Renderer& r) const
 	int grid_h = body_h - PICKER_SUB_HEADER_HEIGHT;
 	int sheet_cols = r.get_sheet_cols(static_cast<TileSheet>(m_picker_sheet));
 	int sheet_rows = r.get_sheet_rows(static_cast<TileSheet>(m_picker_sheet));
+	const int pickerTileSize = picker_tile_size(r, m_picker_sheet);
 
 	::Vector2 mouse = GetMousePosition();
 
@@ -822,28 +835,28 @@ void ItemEditor::render_picker(const Renderer& r) const
 
 	for (int row = m_picker_scroll; row < sheet_rows; ++row)
 	{
-		int py = grid_y + (row - m_picker_scroll) * (PICKER_TILE_SIZE + 2);
+		int py = grid_y + (row - m_picker_scroll) * (pickerTileSize + 2);
 		if (py >= grid_y + grid_h)
 			break;
 
 		for (int col = 0; col < sheet_cols; ++col)
 		{
-			int px = panelX + PICKER_PAD + col * (PICKER_TILE_SIZE + 2);
+			int px = panelX + PICKER_PAD + col * (pickerTileSize + 2);
 			TileRef tid{ static_cast<TileSheet>(m_picker_sheet), col, row };
 
 			bool is_cur = (tid == m_working_tile);
-			bool hovered = mouse.x >= px && mouse.x < px + PICKER_TILE_SIZE
-				&& mouse.y >= py && mouse.y < py + PICKER_TILE_SIZE;
+			bool hovered = mouse.x >= px && mouse.x < px + pickerTileSize
+				&& mouse.y >= py && mouse.y < py + pickerTileSize;
 
 			if (is_cur)
-				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 0, 60, 0, 220 });
+				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 0, 60, 0, 220 });
 			else if (hovered)
-				DrawRectangle(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 20, 40, 20, 160 });
+				DrawRectangle(px, py, pickerTileSize, pickerTileSize, Color{ 20, 40, 20, 160 });
 
-			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, PICKER_TILE_SIZE);
+			r.draw_tile_screen_sized(Vector2D{ px, py }, tid, pickerTileSize);
 
 			if (is_cur)
-				DrawRectangleLines(px, py, PICKER_TILE_SIZE, PICKER_TILE_SIZE, Color{ 0, 255, 100, 255 });
+				DrawRectangleLines(px, py, pickerTileSize, pickerTileSize, Color{ 0, 255, 100, 255 });
 		}
 	}
 
