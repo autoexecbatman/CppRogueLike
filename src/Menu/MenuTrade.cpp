@@ -24,7 +24,7 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
     {
         if (shopkeeper.shop != nullptr)
         {
-            ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player, *shopkeeper.shop));
+            ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player(), *shopkeeper.shop));
         }
         else
         {

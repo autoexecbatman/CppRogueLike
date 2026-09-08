@@ -26,7 +26,7 @@ protected:
         player->set_hp_base(10);
 
         ctx = game.context();
-        ctx.player = player.get();
+        ctx.playerOwner = &player;
 
         game.dice.set_test_mode(true);
     }

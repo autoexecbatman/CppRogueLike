@@ -461,10 +461,10 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			innerCtx.messageSystem->finalize_message();
 			SpellAnimations::animate_explosion(targetPos, aoeRadius, innerCtx);
 
-			if (innerCtx.player->get_tile_distance(targetPos) <= aoeRadius)
+			if (innerCtx.player()->get_tile_distance(targetPos) <= aoeRadius)
 			{
-				SpellAnimations::animate_creature_hit(innerCtx.player->position, innerCtx);
-				innerCtx.player->take_damage_and_check_death(scrollDamage, innerCtx);
+				SpellAnimations::animate_creature_hit(innerCtx.player()->position, innerCtx);
+				innerCtx.player()->take_damage_and_check_death(scrollDamage, innerCtx);
 			}
 
 			for (const auto& creature : *innerCtx.creatures)

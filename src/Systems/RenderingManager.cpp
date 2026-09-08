@@ -30,7 +30,7 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	render_items(ctx.floorInventory->items, ctx);
 
 	render_creatures(*ctx.creatures, ctx);
-	ctx.player->render(ctx);
+	ctx.player()->render(ctx);
 
 	if (ctx.decorations)
 	{
@@ -94,7 +94,7 @@ void RenderingManager::restore_screen(GameContext& ctx) const
 
 void RenderingManager::apply_lighting(const GameContext& ctx) const
 {
-	if (!ctx.renderer || !ctx.map || !ctx.player)
+	if (!ctx.renderer || !ctx.map || !ctx.player())
 	{
 		return;
 	}
@@ -133,7 +133,7 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 				continue;
 			}
 
-			float distanceTiles = static_cast<float>(tilePos.distance_to(ctx.player->position));
+			float distanceTiles = static_cast<float>(tilePos.distance_to(ctx.player()->position));
 			float falloff = std::min(distanceTiles / torchRadiusTiles, 1.0f);
 
 			Color litColor{

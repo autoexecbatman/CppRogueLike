@@ -44,7 +44,7 @@ int HealthPool::take_damage(Creature& owner, int damage, GameContext& ctx, Damag
 
 	if (ctx.floatingText)
 	{
-		const bool hitPlayer = (&owner == ctx.player);
+		const bool hitPlayer = owner.is_player();
 		const unsigned char r = hitPlayer ? 255 : 255;
 		const unsigned char g = hitPlayer ? 80 : 220;
 		const unsigned char b = hitPlayer ? 80 : 50;

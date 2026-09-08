@@ -69,7 +69,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 			isAmbushing = false;
 
 			// If player is close when we're discovered, get a surprise attack
-			int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+			int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 			if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
 			{
 				// Message about being ambushed
@@ -90,12 +90,12 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 					ctx.messageSystem->message(WHITE_BLACK_PAIR, " damage!", true);
 
 					// Apply damage directly
-					ctx.player->take_damage_and_check_death(totalDamage, ctx);
+					ctx.player()->take_damage_and_check_death(totalDamage, ctx);
 
 					// Also try for poison
 					if (can_poison_attack(ctx))
 					{
-						poison_attack(owner, *ctx.player, ctx);
+						poison_attack(owner, *ctx.player(), ctx);
 					}
 				}
 			}
@@ -110,7 +110,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	{
 		// Not in player's FOV, consider setting an ambush
 		// Higher chance when player is near but doesn't see the spider
-		int playerDistance = owner.get_tile_distance(ctx.player->position);
+		int playerDistance = owner.get_tile_distance(ctx.player()->position);
 		int ambushChance = AMBUSH_CHANCE;
 
 		// Increase chance when player is nearby but doesn't see us
@@ -122,7 +122,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		if (ctx.dice->d100() <= ambushChance)
 		{
 			// Find a good ambush position
-			std::optional<Vector2D> ambushPos = find_ambush_position(owner, ctx.player->position, ctx);
+			std::optional<Vector2D> ambushPos = find_ambush_position(owner, ctx.player()->position, ctx);
 
 			if (ambushPos)
 			{
@@ -144,19 +144,19 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	}
 
 	// Special check for being adjacent to player - DIRECT ATTACK CODE
-	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
 		// Directly trigger attack
 		ctx.messageSystem->log("Spider attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(*ctx.player, ctx);
+		owner.attacker->attack(*ctx.player(), ctx);
 
 		// Then try poison - now independent of the regular attack
 		if (can_poison_attack(ctx))
 		{
-			poison_attack(owner, *ctx.player, ctx);
+			poison_attack(owner, *ctx.player(), ctx);
 		}
 
 		return;
@@ -193,7 +193,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 void AiSpider::move_toward_player(Creature& owner, GameContext& ctx)
 {
 	// Get direction to player
-	Vector2D dirToPlayer = ctx.player->position - owner.position;
+	Vector2D dirToPlayer = ctx.player()->position - owner.position;
 	int dx = (dirToPlayer.x != 0) ? (dirToPlayer.x > 0 ? 1 : -1) : 0;
 	int dy = (dirToPlayer.y != 0) ? (dirToPlayer.y > 0 ? 1 : -1) : 0;
 
@@ -361,7 +361,7 @@ bool AiSpider::can_poison_attack(GameContext& ctx)
 void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
 	// Apply poison effect to target if it's the player
-	if (&target == ctx.player)
+	if (target.is_player())
 	{
 		// Calculate poison damage (1-3 points)
 		int poisonDamage = ctx.dice->roll(1, 3);

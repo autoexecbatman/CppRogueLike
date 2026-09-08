@@ -39,7 +39,7 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
 	if (moveCount > 0)
 	{
-		move_or_attack(owner, ctx.player->position, ctx);
+		move_or_attack(owner, ctx.player()->position, ctx);
 	}
 }
 
@@ -97,7 +97,7 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 	animate_arrow(owner.position, targetPos, ctx);
 
 	// Perform the attack
-	owner.attacker->attack(*ctx.player, ctx);
+	owner.attacker->attack(*ctx.player(), ctx);
 	return true;
 }
 

@@ -15,6 +15,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/TileConfig.h"
 #include "DeathHandler.h"
+#include "../ActorTypes/Player.h"
 
 //==MonsterDeathHandler==
 
@@ -34,8 +35,8 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
     ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
     ctx.messageSystem->finalize_message();
 
-    assert(ctx.player != nullptr && "MonsterDeathHandler::execute requires a live player in context");
-    ctx.player->on_kill_reward(owner.get_xp(), ctx);
+    assert(ctx.player() != nullptr && "MonsterDeathHandler::execute requires a live player in context");
+    ctx.player_concrete().on_kill_reward(owner.get_xp(), ctx);
 
     if (ctx.animSystem)
     {

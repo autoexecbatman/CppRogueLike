@@ -64,10 +64,10 @@ namespace
 		{
 			// At escape apex — no tile further from player is available.
 			// AD&D 2e: fight back only if the threat is adjacent; otherwise hold ground.
-			if (owner.get_tile_distance(ctx.player->position) <= 1)
+			if (owner.get_tile_distance(ctx.player()->position) <= 1)
 			{
 				owner.remove_state(ActorState::IS_FLEEING);
-				owner.attacker->attack(*ctx.player, ctx);
+				owner.attacker->attack(*ctx.player(), ctx);
 			}
 			// else: hold position, keep IS_FLEEING — player has not cornered us yet
 		}
@@ -129,7 +129,7 @@ namespace
 // AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's turn.
 bool blocked_by_sanctuary(GameContext& ctx)
 {
-	if (!ctx.player->has_state(ActorState::IS_PROTECTED))
+	if (!ctx.player()->has_state(ActorState::IS_PROTECTED))
 	{
 		return false;
 	}
@@ -149,7 +149,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(*ctx.player, ctx);
+		owner.attacker->attack(*ctx.player(), ctx);
 		return;
 	}
 
@@ -190,7 +190,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 // Keeps moveCount current: full reset when player is visible, decay when not.
 void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 {
-	if (ctx.map->is_in_fov(owner.position) && !ctx.player->is_invisible())
+	if (ctx.map->is_in_fov(owner.position) && !ctx.player()->is_invisible())
 	{
 		moveCount = TRACKING_TURNS;
 	}
@@ -210,17 +210,17 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 		return;
 	}
 
-	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 
-	if (moveCount > 0 && !ctx.player->is_invisible())
+	if (moveCount > 0 && !ctx.player()->is_invisible())
 	{
-		move_or_attack(owner, ctx.player->position, ctx);
+		move_or_attack(owner, ctx.player()->position, ctx);
 	}
-	else if (distanceToPlayer <= 15 && !ctx.player->is_invisible())
+	else if (distanceToPlayer <= 15 && !ctx.player()->is_invisible())
 	{
 		if (ctx.dice->d6() == 1)
 		{
-			move_or_attack(owner, ctx.player->position, ctx);
+			move_or_attack(owner, ctx.player()->position, ctx);
 		}
 		else if (ctx.dice->d10() == 1)
 		{

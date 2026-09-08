@@ -20,7 +20,7 @@ bool Minimap::is_visible() const noexcept
 
 void Minimap::render(const GameContext& ctx) const
 {
-    if (!visible || !ctx.map || !ctx.renderer || !ctx.player)
+    if (!visible || !ctx.map || !ctx.renderer || !ctx.player())
     {
         return;
     }
@@ -93,7 +93,7 @@ void Minimap::render(const GameContext& ctx) const
         }
     }
 
-    Vector2D pp = ctx.player->position;
+    Vector2D pp = ctx.player()->position;
     DrawRectangle(
         originX + pp.x * TILE_PX - 1,
         originY + pp.y * TILE_PX - 1,

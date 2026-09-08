@@ -311,7 +311,7 @@ void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 
 void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 {
-	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	ctx.messageSystem->log("Mimic distance to player: " + std::to_string(distanceToPlayer));
 
 	if (distanceToPlayer <= revealDistance)
@@ -324,15 +324,15 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 
 		ctx.messageSystem->log("Mimic revealed itself!");
 
-		if (ctx.dice->d20() > ctx.player->get_wisdom())
+		if (ctx.dice->d20() > ctx.player()->get_wisdom())
 		{
 			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, "The ");
 			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "mimic");
 			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
 			ctx.messageSystem->finalize_message();
 
-			ctx.player->add_state(ActorState::IS_CONFUSED);
-			ctx.player->apply_confusion(confusionDuration);
+			ctx.player()->add_state(ActorState::IS_CONFUSED);
+			ctx.player()->apply_confusion(confusionDuration);
 			ctx.messageSystem->log("Applied confusion to player for " + std::to_string(confusionDuration) + " turns");
 		}
 		else

@@ -129,11 +129,18 @@ struct GameContext
 	// Core game world
 	Map* map{ nullptr };
 	Gui* gui{ nullptr };
-	Creature* player{ nullptr };
-
-	// Ownership handle — set by Game::context(), used by init_new_game/load_all
-	// to construct and assign the player without going through Game directly.
+	// The player, stored once as the handle that owns it. Set by Game::context();
+	// init_new_game and load_all assign through it to replace the player.
 	std::unique_ptr<Player>* playerOwner{ nullptr };
+
+	// The player as a creature, which is what almost every caller wants. Computed
+	// from playerOwner rather than stored, so there is no second copy to fall out
+	// of step with it. Null before the player exists.
+	[[nodiscard]] Creature* player() const;
+
+	// The player as itself, for the few callers that need a class name, a kill
+	// count or an equipment slot. Asserts a player exists.
+	[[nodiscard]] Player& player_concrete() const;
 
 	// Character creation data — populated by menus, consumed by init_new_game.
 	PlayerBlueprint* playerBlueprint{ nullptr };

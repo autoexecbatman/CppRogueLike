@@ -13,6 +13,7 @@
 #include "../Systems/MessageSystem.h"
 #include "DeathMenu.h"
 #include "Menu.h"
+#include "../ActorTypes/Player.h"
 
 static constexpr int MAX_LOG_LINES = 10;
 static constexpr int PANEL_W_TILES = 52;
@@ -21,11 +22,11 @@ static constexpr int PANEL_H_TILES = 28;
 DeathMenu::DeathMenu(GameContext& ctx)
 {
     dungeonLevel = ctx.levelManager ? ctx.levelManager->get_dungeon_level() : 0;
-    playerLevel = ctx.player ? ctx.player->get_level() : 0;
-    playerXp = ctx.player ? ctx.player->get_xp() : 0;
-    killCount = ctx.player ? ctx.player->get_kill_count() : 0;
-    playerClass = ctx.player ? ctx.player->get_class_display_name() : "Unknown";
-    playerRace = ctx.player ? ctx.player->get_race_display_name() : "Unknown";
+    playerLevel = ctx.player() ? ctx.player()->get_level() : 0;
+    playerXp = ctx.player() ? ctx.player()->get_xp() : 0;
+    killCount = ctx.player() ? ctx.player_concrete().get_kill_count() : 0;
+    playerClass = ctx.player() ? ctx.player_concrete().get_class_display_name() : "Unknown";
+    playerRace = ctx.player() ? ctx.player_concrete().get_race_display_name() : "Unknown";
 
     if (ctx.messageSystem)
     {

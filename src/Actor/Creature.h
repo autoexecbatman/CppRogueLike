@@ -167,16 +167,6 @@ public:
 	// Web effect handler - Player overrides this, monsters ignore webs by default
 	virtual void apply_web_effect(int duration, int strength, class Web* web, GameContext& ctx) { /* do nothing */ }
 
-	// Display interface — Player overrides with actual values; monsters return sentinels
-	virtual std::string get_class_display_name() const { return {}; }
-	virtual std::string get_race_display_name() const { return {}; }
-	virtual int get_kill_count() const noexcept { return 0; }
-	virtual std::string get_equipped_weapon_damage_roll() const noexcept { return "?"; }
-
-	// AD&D 2e Open Locks skill — Rogue only. Returns percentage chance (0-95).
-	// Non-Rogue classes return 0 (cannot pick locks).
-	virtual int get_open_locks_skill() const noexcept { return 0; }
-
 	// Armor Class accessors
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }
 	[[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
@@ -206,14 +196,8 @@ public:
 	void update_constitution_bonus(GameContext& ctx);
 
 	// Lifecycle hooks — Player overrides; monsters no-op
-	// Called once at game start (level 1, new game) to apply race/class setup
-	virtual void on_new_game_start(GameContext& ctx) {}
-	// Called every STARTUP to sync combat stats (THAC0 etc.)
-	virtual void recalculate_combat_stats() {}
 	// Called when a creature dies — Player saves/defeats, monsters drop corpses
 	virtual void die(GameContext& ctx);
-	// Called by Destructible when a monster dies — rewards the player who killed it
-	virtual void on_kill_reward(int xp, GameContext& ctx) {}
 
 	TileRef get_display_tile() const noexcept override;
 	int get_display_color() const noexcept override;

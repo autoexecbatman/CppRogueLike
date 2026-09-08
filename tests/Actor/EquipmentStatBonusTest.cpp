@@ -42,7 +42,7 @@ protected:
         player->healthPool = std::make_unique<HealthPool>(100);
 
         ctx = mock.to_game_context();
-        ctx.player = player.get();
+        ctx.playerOwner = &player;
     }
 
     std::unique_ptr<Item> create_item_with_strength_bonus(int bonus)

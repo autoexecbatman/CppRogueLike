@@ -346,6 +346,7 @@ set(SOURCE_FILES # Add Source Files Here !
 
     # Combat - Weapon damage system
     ${PROJECT_SOURCE_DIR}/Combat/DeathHandler.cpp
+    ${PROJECT_SOURCE_DIR}/Core/GameContext.cpp
     ${PROJECT_SOURCE_DIR}/Combat/DeathHandler.h
     ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
     ${PROJECT_SOURCE_DIR}/Combat/WeaponDamageRegistry.h

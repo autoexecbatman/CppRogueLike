@@ -25,7 +25,7 @@ Vector2D find_random_floor_tile(GameContext& ctx)
     assert(ctx.map);
     assert(ctx.dice);
     assert(ctx.creatures);
-    assert(ctx.player);
+    assert(ctx.player());
 
     auto is_position_free = [&](Vector2D pos) -> bool
     {
@@ -37,7 +37,7 @@ Vector2D find_random_floor_tile(GameContext& ctx)
                 return false;
             }
         }
-        if (ctx.player->position == pos)
+        if (ctx.player()->position == pos)
         {
             return false;
         }

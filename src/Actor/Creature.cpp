@@ -28,6 +28,7 @@
 #include "InventoryData.h"
 #include "Item.h"
 #include "Creature.h"
+#include "../ActorTypes/Player.h"
 
 //==Creature==
 void Creature::load(const json& j)
@@ -235,7 +236,7 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	set_hp(get_hp() + result.hpDifference);
 
 	// Log only for player
-	if (this == ctx.player)
+	if (is_player())
 	{
 		if (result.hpDifference > 0)
 		{
@@ -254,7 +255,7 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	if (get_hp() <= 0)
 	{
 		set_hp(0);
-		if (this == ctx.player)
+		if (is_player())
 		{
 			ctx.messageSystem->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
 		}
@@ -462,8 +463,8 @@ void Creature::die(GameContext& ctx)
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
 	ctx.messageSystem->finalize_message();
 
-	assert(ctx.player != nullptr && "Creature::die requires a live player in context");
-	ctx.player->on_kill_reward(get_xp(), ctx);
+	assert(ctx.player() != nullptr && "Creature::die requires a live player in context");
+	ctx.player_concrete().on_kill_reward(get_xp(), ctx);
 
 	if (ctx.animSystem)
 	{

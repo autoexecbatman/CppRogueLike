@@ -24,21 +24,21 @@
 
 void TargetingSystem::draw_los(GameContext& ctx, Vector2D targetCursor) const
 {
-	if (!ctx.renderer || !ctx.map || !ctx.player)
+	if (!ctx.renderer || !ctx.map || !ctx.player())
 	{
 		return;
 	}
 
-	auto path = Map::bresenham_line(ctx.player->position, targetCursor);
+	auto path = Map::bresenham_line(ctx.player()->position, targetCursor);
 	int tileSize = ctx.renderer->get_tile_size();
 	int cameraOffsetX = ctx.renderer->get_camera_x();
 	int cameraOffsetY = ctx.renderer->get_camera_y();
 
-	bool hasLineOfSight = ctx.map->has_los(ctx.player->position, targetCursor);
+	bool hasLineOfSight = ctx.map->has_los(ctx.player()->position, targetCursor);
 
 	for (const auto& pos : path)
 	{
-		if (pos == ctx.player->position)
+		if (pos == ctx.player()->position)
 		{
 			continue;
 		}
@@ -106,7 +106,7 @@ bool TargetingSystem::is_valid_target(GameContext& ctx, Vector2D from, Vector2D 
 		return false;
 	}
 
-	if (entity == ctx.player)
+	if (entity->is_player())
 	{
 		return false;
 	}
@@ -148,13 +148,13 @@ void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int ra
 
 void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 {
-	if (!ctx.player->has_state(ActorState::IS_RANGED))
+	if (!ctx.player()->has_state(ActorState::IS_RANGED))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 		return;
 	}
 
-	Item* missileWeapon = ctx.player->get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	Item* missileWeapon = ctx.player()->get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
 	const int weaponRange = get_weapon_range(missileWeapon);
 
 	auto onTarget = [](bool confirmed, Vector2D targetPos, GameContext& innerCtx)
@@ -165,13 +165,13 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 		}
 
 		Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
-		if (!target || target == innerCtx.player)
+		if (!target || target == innerCtx.player())
 		{
 			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "No valid target there.", true);
 			return;
 		}
 
-		if (!innerCtx.map->has_los(innerCtx.player->position, targetPos))
+		if (!innerCtx.map->has_los(innerCtx.player()->position, targetPos))
 		{
 			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "No clear line of sight.", true);
 			return;
@@ -190,7 +190,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 			};
 
 			innerCtx.animSystem->spawn_projectile(
-				innerCtx.player->position,
+				innerCtx.player()->position,
 				targetPos,
 				boltTile,
 				210, 180, 100,
@@ -199,9 +199,9 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 				std::move(onArrive));
 		}
 
-		assert(innerCtx.player->attacker && "ranged attack fired with no attacker component");
+		assert(innerCtx.player()->attacker && "ranged attack fired with no attacker component");
 		assert(innerCtx.creatureManager && "ranged attack fired with no creature manager");
-		innerCtx.player->attacker->attack(*target, innerCtx);
+		innerCtx.player()->attacker->attack(*target, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
 	};

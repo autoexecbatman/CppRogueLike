@@ -31,7 +31,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		const int oldAC = get_armor_class();
 		set_armor_class(calculatedAC);
 
-		if (&owner == ctx.player)
+		if (owner.is_player())
 		{
 			ctx.messageSystem->log(std::format(
 				"Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
@@ -57,7 +57,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 
 	const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
 
-	if (&owner == ctx.player && defensiveAdj != 0)
+	if (owner.is_player() && defensiveAdj != 0)
 	{
 		ctx.messageSystem->log(std::format(
 			"Dexterity Defensive Adjustment: {:+} (Dex: {})",
@@ -85,7 +85,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += armorBonus;
 
-			if (&owner == ctx.player)
+			if (owner.is_player())
 			{
 				ctx.messageSystem->log(std::format(
 					"Armor bonus: {:+} from {}",
@@ -108,7 +108,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += shieldBonus;
 
-			if (&owner == ctx.player)
+			if (owner.is_player())
 			{
 				ctx.messageSystem->log(std::format(
 					"Shield bonus: {:+} from {}",
@@ -139,7 +139,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 	{
 		totalBonus += bestRingBonus;
 
-		if (&owner == ctx.player)
+		if (owner.is_player())
 		{
 			ctx.messageSystem->log(std::format(
 				"Ring bonus: {:+} from {}",
@@ -155,7 +155,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += helmBonus;
 
-			if (&owner == ctx.player)
+			if (owner.is_player())
 			{
 				ctx.messageSystem->log(std::format(
 					"Helm bonus: {:+} from {}",

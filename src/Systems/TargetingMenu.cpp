@@ -15,7 +15,7 @@
 #include "TargetingMenu.h"
 
 TargetingMenu::TargetingMenu(int maxRange, int aoeRadius, Callback onComplete, GameContext& ctx)
-    : cursor(ctx.player->position)
+    : cursor(ctx.player()->position)
     , maxRange(maxRange)
     , aoeRadius(aoeRadius)
     , onComplete(std::move(onComplete))
@@ -105,7 +105,7 @@ void TargetingMenu::menu(GameContext& ctx)
     {
         Vector2D next = cursor + move;
         bool inBounds = ctx.map->is_in_bounds(next);
-        bool inRange = maxRange <= 0 || next.distance_to(ctx.player->position) <= static_cast<double>(maxRange);
+        bool inRange = maxRange <= 0 || next.distance_to(ctx.player()->position) <= static_cast<double>(maxRange);
         if (inBounds && inRange)
         {
             cursor = next;
@@ -115,7 +115,7 @@ void TargetingMenu::menu(GameContext& ctx)
     ctx.renderer->begin_frame();
     ctx.renderingManager->render(ctx);
 
-    ctx.targeting->draw_range_indicator(ctx, ctx.player->position, maxRange);
+    ctx.targeting->draw_range_indicator(ctx, ctx.player()->position, maxRange);
     ctx.targeting->draw_los(ctx, cursor);
     if (aoeRadius > 0)
     {

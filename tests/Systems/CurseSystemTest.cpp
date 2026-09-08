@@ -19,20 +19,19 @@ class CurseSystemTest : public ::testing::Test
 {
 protected:
 	CurseSystemTest()
-		: player(Vector2D{ 10, 10 })
-		, message_system()
+		: message_system()
 		, curse_system()
 	{
 	}
 
 	void SetUp() override
 	{
-		player.experienceReward = std::make_unique<ExperienceReward>(0);
-		player.set_dr(0);
-		player.set_thaco(0);
-		player.armorClass = std::make_unique<ArmorClass>(10);
-		player.healthPool = std::make_unique<HealthPool>(20);
-		ctx.player = &player;
+		player->experienceReward = std::make_unique<ExperienceReward>(0);
+		player->set_dr(0);
+		player->set_thaco(0);
+		player->armorClass = std::make_unique<ArmorClass>(10);
+		player->healthPool = std::make_unique<HealthPool>(20);
+		ctx.playerOwner = &player;
 		ctx.messageSystem = &message_system;
 		ctx.curseSystem = &curse_system;
 		ctx.gameState = &game_state;
@@ -48,10 +47,9 @@ protected:
 		auto item = std::make_unique<Item>(Vector2D{}, ActorData{ TileRef{}, std::string(name), WHITE_BLACK_PAIR });
 		item->itemClass = itemClass;
 		item->enhancement.blessing = blessing;
-		player.equippedItems.push_back(EquippedItem(std::move(item), slot));
+		player->equippedItems.push_back(EquippedItem(std::move(item), slot));
 	}
-
-	Player player;
+	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 10, 10 }) };
 	MessageSystem message_system;
 	CurseSystem curse_system;
 	GameState game_state;
@@ -63,7 +61,7 @@ TEST_F(CurseSystemTest, CursedWeaponAppliesPenalty)
 {
 	equip_cursed(ItemClass::SWORD, BlessingStatus::CURSED, "sword", EquipmentSlot::RIGHT_HAND);
 
-	curse_system.apply_curses(player, ctx);
+	curse_system.apply_curses(*player, ctx);
 
 	EXPECT_NE(message_system.get_current_message().find("weakens your aim"), std::string::npos);
 }
@@ -73,7 +71,7 @@ TEST_F(CurseSystemTest, CursedArmorAppliesPenalty)
 {
 	equip_cursed(ItemClass::ARMOR, BlessingStatus::CURSED, "plate armor", EquipmentSlot::BODY);
 
-	curse_system.apply_curses(player, ctx);
+	curse_system.apply_curses(*player, ctx);
 
 	EXPECT_NE(message_system.get_current_message().find("deteriorates"), std::string::npos);
 }
@@ -83,11 +81,11 @@ TEST_F(CurseSystemTest, CursedAmuletDrainsHP)
 {
 	equip_cursed(ItemClass::AMULET, BlessingStatus::CURSED, "amulet of life drain", EquipmentSlot::NECK);
 
-	const int hpBefore = player.get_hp();
+	const int hpBefore = player->get_hp();
 
-	curse_system.apply_curses(player, ctx);
+	curse_system.apply_curses(*player, ctx);
 
-	EXPECT_EQ(player.get_hp(), hpBefore - 1);
+	EXPECT_EQ(player->get_hp(), hpBefore - 1);
 	EXPECT_NE(message_system.get_current_message().find("drains"), std::string::npos);
 }
 
@@ -97,7 +95,7 @@ TEST_F(CurseSystemTest, BlessedItemsIgnored)
 	equip_cursed(ItemClass::SWORD, BlessingStatus::BLESSED, "blessed sword", EquipmentSlot::RIGHT_HAND);
 
 	std::string msgBefore = message_system.get_current_message();
-	curse_system.apply_curses(player, ctx);
+	curse_system.apply_curses(*player, ctx);
 
 	EXPECT_EQ(message_system.get_current_message(), msgBefore);
 }
@@ -108,7 +106,7 @@ TEST_F(CurseSystemTest, UncursedItemsIgnored)
 	equip_cursed(ItemClass::SWORD, BlessingStatus::UNCURSED, "sword", EquipmentSlot::RIGHT_HAND);
 
 	std::string msgBefore = message_system.get_current_message();
-	curse_system.apply_curses(player, ctx);
+	curse_system.apply_curses(*player, ctx);
 
 	EXPECT_EQ(message_system.get_current_message(), msgBefore);
 }

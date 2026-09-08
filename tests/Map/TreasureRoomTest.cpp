@@ -86,7 +86,7 @@ protected:
         // inventoryData are all wired — setup_treasure_room_guard needs
         // contentRegistry to create the dungeon_key item for the jailer.
         ctx = mock.to_game_context();
-        ctx.player = player.get();
+        ctx.playerOwner = &player;
         ctx.dataManager = &dataManager;
         ctx.messageSystem = &messageSystem;
         ctx.creatures = &creatures;
@@ -302,7 +302,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     // Start from the mock's wired context (tileConfig, contentRegistry,
     // inventoryData, dice all set), then override the test-specific members.
     GameContext ctx = mock.to_game_context();
-    ctx.player = player.get();
+    ctx.playerOwner = &player;
     ctx.stairs = stairs.get();
     ctx.rooms = &rooms;
     ctx.creatures = &creatures;

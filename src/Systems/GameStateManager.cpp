@@ -118,8 +118,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 	assert(ctx.playerBlueprint != nullptr);
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
 	*ctx.playerBlueprint = PlayerBlueprint{};
-	ctx.player = ctx.playerOwner->get();
-	ctx.player->actorData.tile = ctx.tileConfig->get((*ctx.playerOwner)->sprite_tile_key());
+	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.map->regenerate(ctx);
 
@@ -141,7 +140,6 @@ bool GameStateManager::load_all(GameContext& ctx)
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
-	ctx.player = ctx.playerOwner->get();
 
 	if (!load_game(ctx))
 	{
@@ -150,7 +148,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	}
 
 	// load_game restores playerClassState, so the class sprite is only known now.
-	ctx.player->actorData.tile = ctx.tileConfig->get((*ctx.playerOwner)->sprite_tile_key());
+	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
 	ctx.gameState->set_is_loaded_game(true);
 	ctx.gameState->set_game_status(GameStatus::STARTUP);
@@ -162,7 +160,7 @@ void GameStateManager::save_game(GameContext& ctx)
 {
 	assert(ctx.map != nullptr);
 	assert(ctx.rooms != nullptr);
-	assert(ctx.player != nullptr);
+	assert(ctx.player() != nullptr);
 	assert(ctx.stairs != nullptr);
 	assert(ctx.creatures != nullptr);
 	assert(ctx.floorInventory != nullptr);
@@ -190,7 +188,7 @@ void GameStateManager::save_game(GameContext& ctx)
 		save_rooms(*ctx.rooms, j);
 
 		json playerJson;
-		ctx.player->save(playerJson);
+		ctx.player()->save(playerJson);
 		j["player"] = playerJson;
 
 		json stairsJson;
@@ -221,7 +219,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 {
 	assert(ctx.map != nullptr);
 	assert(ctx.rooms != nullptr);
-	assert(ctx.player != nullptr);
+	assert(ctx.player() != nullptr);
 	assert(ctx.stairs != nullptr);
 	assert(ctx.creatures != nullptr);
 	assert(ctx.floorInventory != nullptr);
@@ -244,7 +242,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 
 	if (j.contains("player"))
 	{
-		ctx.player->load(j["player"]);
+		ctx.player()->load(j["player"]);
 	}
 
 	if (j.contains("stairs"))

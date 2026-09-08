@@ -58,7 +58,9 @@ protected:
 		monster->set_weapon_equipped("claws");
 
 		ctx = game.context();
-		ctx.player = player.get();
+		// The context borrows the handle that owns the player, so the fixture
+		// must point it at one it owns for the lifetime of the test.
+		ctx.playerOwner = &player;
 
 		game.dice.set_test_mode(true);
 	}
@@ -315,7 +317,7 @@ TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 
 	auto loadedPlayer = std::make_unique<Player>(Vector2D{ 0, 0 });
 	loadedPlayer->load(j);
-	ctx.player = loadedPlayer.get();
+	ctx.playerOwner = &loadedPlayer;
 
 	// AC=20 → rollNeeded = THAC0(20) - AC(20) = 0; any d20 roll hits
 	monster->set_armor_class(20);

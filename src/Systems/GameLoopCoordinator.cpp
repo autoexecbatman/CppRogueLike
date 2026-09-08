@@ -33,6 +33,7 @@
 #include "HungerSystem.h"
 #include "LevelManager.h"
 #include "GameLoopCoordinator.h"
+#include "../ActorTypes/Player.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
@@ -220,8 +221,8 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	// Center camera on player before rendering
 	ctx.renderer->set_camera_center(
-		ctx.player->position.x,
-		ctx.player->position.y,
+		ctx.player()->position.x,
+		ctx.player()->position.y,
 		ctx.map->get_width(),
 		ctx.map->get_height());
 
@@ -487,7 +488,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	}
 
 	ctx.map->update();
-	ctx.player->update(ctx);
+	ctx.player()->update(ctx);
 
 	if (ctx.gameState->get_game_status() == GameStatus::STARTUP)
 	{
@@ -505,11 +506,11 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.map->update(); // stamp explored for the freshly-computed FOV so minimap is correct this frame
 		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
 		{
-			ctx.player->on_new_game_start(ctx);
+			ctx.player_concrete().on_new_game_start(ctx);
 		}
 		bool wasLoadedGame = ctx.gameState->get_is_loaded_game();
 		ctx.gameState->set_is_loaded_game(false);
-		ctx.player->recalculate_combat_stats();
+		ctx.player_concrete().recalculate_combat_stats();
 
 		if (wasLoadedGame)
 		{
@@ -552,17 +553,17 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			}
 		}
 
-		if (ctx.player)
+		if (ctx.player())
 		{
-			ctx.player->update_constitution_bonus(ctx);
+			ctx.player()->update_constitution_bonus(ctx);
 		}
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);
 		ctx.hungerSystem->apply_hunger_effects(ctx);
 
-		if (ctx.playerOwner && ctx.curseSystem)
+		if (ctx.player() && ctx.curseSystem)
 		{
-			ctx.curseSystem->apply_curses(**ctx.playerOwner, ctx);
+			ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
 		}
 
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);

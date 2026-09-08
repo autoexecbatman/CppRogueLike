@@ -41,19 +41,19 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	}
 
 	// DIRECT ATTACK CODE - Check if player is adjacent
-	int distanceToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
 		// Directly trigger attack - avoid any inheritance issues
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(*ctx.player, ctx);
+		owner.attacker->attack(*ctx.player(), ctx);
 
 		// Then check for poison - independent of the regular attack success
 		if (can_poison_attack(ctx))
 		{
-			poison_attack(owner, *ctx.player, ctx);
+			poison_attack(owner, *ctx.player(), ctx);
 		}
 
 		// Skip web spinning and other behaviors if we're attacking
@@ -101,7 +101,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 {
 	// If player is directly adjacent, don't create web (attack instead)
-	int distToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distToPlayer <= 1)
 	{
 		return false;
@@ -149,7 +149,7 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 {
 	// Determine the web size - bigger webs when player is closer
-	int distToPlayer = owner.get_tile_distance(ctx.player->position);
+	int distToPlayer = owner.get_tile_distance(ctx.player()->position);
 	int webSize = WEB_MAX_SIZE;
 
 	if (distToPlayer < 5)
@@ -174,8 +174,8 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 	if (ctx.map->is_in_fov(owner.position) && distToPlayer < 10)
 	{
 		// If player can see spider, create web between spider and player
-		int dx = ctx.player->position.x - owner.position.x;
-		int dy = ctx.player->position.y - owner.position.y;
+		int dx = ctx.player()->position.x - owner.position.x;
+		int dy = ctx.player()->position.y - owner.position.y;
 
 		if (dx != 0)
 		{

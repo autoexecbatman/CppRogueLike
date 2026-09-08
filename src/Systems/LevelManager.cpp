@@ -85,13 +85,13 @@ void LevelManager::display_level_messages(MessageSystem& message_system) const
 
 void LevelManager::heal_player_between_levels(GameContext& ctx) const
 {
-	if (!ctx.player)
+	if (!ctx.player())
 	{
 		return;
 	}
 
-	const int healAmount = ctx.player->get_max_hp() / 2;
-	const int actualHealed = ctx.player->heal(healAmount);
+	const int healAmount = ctx.player()->get_max_hp() / 2;
+	const int actualHealed = ctx.player()->heal(healAmount);
 
 	if (actualHealed > 0)
 	{

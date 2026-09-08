@@ -119,19 +119,19 @@ public:
 	bool is_player() const noexcept override { return true; }
 
 	// AD&D 2e Open Locks: Rogue-only, level-based percentage chance
-	int get_open_locks_skill() const noexcept override;
+	int get_open_locks_skill() const noexcept;
 
 	// Display interface overrides
-	std::string get_class_display_name() const override { return playerClass; }
-	std::string get_race_display_name() const override { return playerRace; }
-	int get_kill_count() const noexcept override { return killCount; }
-	std::string get_equipped_weapon_damage_roll() const noexcept override;
+	std::string get_class_display_name() const { return playerClass; }
+	std::string get_race_display_name() const { return playerRace; }
+	int get_kill_count() const noexcept { return killCount; }
+	std::string get_equipped_weapon_damage_roll() const noexcept;
 
 	// Lifecycle hook overrides
-	void on_new_game_start(GameContext& ctx) override;
-	void recalculate_combat_stats() override;
+	void on_new_game_start(GameContext& ctx);
+	void recalculate_combat_stats();
 	void die(GameContext& ctx) override;
-	void on_kill_reward(int xp, GameContext& ctx) override;
+	void on_kill_reward(int xp, GameContext& ctx);
 
 	void update(GameContext& ctx) override;
 	void apply_confusion(int duration) override;

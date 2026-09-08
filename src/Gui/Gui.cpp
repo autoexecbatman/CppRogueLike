@@ -18,6 +18,7 @@
 #include "../Systems/TileConfig.h"
 #include "Gui.h"
 #include "LogMessage.h"
+#include "../ActorTypes/Player.h"
 
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
@@ -135,8 +136,8 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
 	const int div1 = hud_div1(vcols);
 
-	const int hp = ctx.player->get_hp();
-	const int maxHp = ctx.player->get_max_hp();
+	const int hp = ctx.player()->get_hp();
+	const int maxHp = ctx.player()->get_max_hp();
 	if (maxHp <= 0)
 	{
 		return;
@@ -244,50 +245,50 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	const int statsX = (hud_div1(vcols) + 1) * tileSize;
 	const int fontOff = font_row_off(*ctx.renderer);
 
-	if (ctx.player->actorData.name.empty())
+	if (ctx.player()->actorData.name.empty())
 	{
-		ctx.player->actorData.name = "Player";
+		ctx.player()->actorData.name = "Player";
 	}
 
 	// Row 1: Name / class / level on one line
 	auto nameLine = std::format(
 		"{} ({} Lv.{})",
-		ctx.player->actorData.name,
-		ctx.player->get_class_display_name(),
-		ctx.player->get_level());
+		ctx.player()->actorData.name,
+		ctx.player_concrete().get_class_display_name(),
+		ctx.player()->get_level());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 1 * tileSize + fontOff }, nameLine, YELLOW_BLACK_PAIR);
 
 	// Row 2: Combat -- T0 = THAC0 abbreviation
 	auto combatLine = std::format(
 		"T0:{}  AC:{}  DR:{}",
-		ctx.player->get_thaco(),
-		ctx.player->get_armor_class(),
-		ctx.player->get_dr());
+		ctx.player()->get_thaco(),
+		ctx.player()->get_armor_class(),
+		ctx.player()->get_dr());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 2 * tileSize + fontOff }, combatLine, WHITE_BLACK_PAIR);
 
 	// Row 3: Attack roll
 	auto atkLine = std::format(
-		"Atk: {}", ctx.player->get_equipped_weapon_damage_roll());
+		"Atk: {}", ctx.player_concrete().get_equipped_weapon_damage_roll());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 3 * tileSize + fontOff }, atkLine, GREEN_BLACK_PAIR);
 
 	// Row 4: Physical attributes
 	auto physLine = std::format(
 		"S:{} D:{} C:{}",
-		ctx.player->get_strength(),
-		ctx.player->get_dexterity(),
-		ctx.player->get_constitution());
+		ctx.player()->get_strength(),
+		ctx.player()->get_dexterity(),
+		ctx.player()->get_constitution());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 4 * tileSize + fontOff }, physLine, WHITE_BLACK_PAIR);
 
 	// Row 5: Mental attributes
 	auto mentLine = std::format(
 		"I:{} W:{} Ch:{}",
-		ctx.player->get_intelligence(),
-		ctx.player->get_wisdom(),
-		ctx.player->get_charisma());
+		ctx.player()->get_intelligence(),
+		ctx.player()->get_wisdom(),
+		ctx.player()->get_charisma());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 5 * tileSize + fontOff }, mentLine, WHITE_BLACK_PAIR);
 
 	// Row 6: Gold
-	auto goldLine = std::format("Gold: {} gp", ctx.player->get_gold());
+	auto goldLine = std::format("Gold: {} gp", ctx.player()->get_gold());
 	ctx.renderer->draw_text(Vector2D{ statsX, baseY + 6 * tileSize + fontOff }, goldLine, YELLOW_BLACK_PAIR);
 }
 
@@ -338,7 +339,7 @@ void Gui::render_player_status(const GameContext& ctx)
 	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
 	const int fontOff = font_row_off(*ctx.renderer);
 
-	if (ctx.player->has_state(ActorState::IS_CONFUSED))
+	if (ctx.player()->has_state(ActorState::IS_CONFUSED))
 	{
 		ctx.renderer->draw_text(
 			Vector2D{ 2 * tileSize, baseY + 3 * tileSize + fontOff },

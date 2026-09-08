@@ -520,8 +520,8 @@ Vector2D PlayerController::find_door_approach(Vector2D doorTile, const GameConte
 		if (!ctx.map->can_walk(adj, ctx))
 			continue;
 
-		int dist = std::abs(adj.x - ctx.player->position.x)
-			+ std::abs(adj.y - ctx.player->position.y);
+		int dist = std::abs(adj.x - ctx.player()->position.x)
+			+ std::abs(adj.y - ctx.player()->position.y);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
@@ -614,7 +614,7 @@ void PlayerController::begin_path_walk(
 		return;
 	}
 
-	auto path = ctx.pathfinder->a_star_search(*ctx.map, ctx.player->position, walkDest, true, ctx);
+	auto path = ctx.pathfinder->a_star_search(*ctx.map, ctx.player()->position, walkDest, true, ctx);
 
 	if (path.empty())
 	{
@@ -848,8 +848,8 @@ void PlayerController::handle_right_click(GameContext& ctx)
 			doorLabel,
 			[this, world_tile, doorAction](GameContext& c)
 			{
-				int dx = std::abs(c.player->position.x - world_tile.x);
-				int dy = std::abs(c.player->position.y - world_tile.y);
+				int dx = std::abs(c.player()->position.x - world_tile.x);
+				int dy = std::abs(c.player()->position.y - world_tile.y);
 				if (dx <= 1 && dy <= 1)
 				{
 					if (doorAction == PendingDoorAction::OPEN)

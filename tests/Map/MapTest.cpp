@@ -49,7 +49,7 @@ protected:
         player->armorClass = std::make_unique<ArmorClass>(10);
         player->healthPool = std::make_unique<HealthPool>(20);
 
-        ctx.player = player.get();
+        ctx.playerOwner = &player;
         ctx.dataManager = &dataManager;
         ctx.messageSystem = &messageSystem;
         ctx.dice = &dice;

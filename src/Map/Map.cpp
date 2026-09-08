@@ -465,14 +465,14 @@ void Map::compute_fov(GameContext& ctx)
 		ctx.messageSystem->log("...Computing FOV...");
 	}
 
-	assert(ctx.player && "Map::compute_fov called without player");
+	assert(ctx.player() && "Map::compute_fov called without player");
 	assert(
-		ctx.player->position.x >= 0 && ctx.player->position.x < mapWidth &&
-		ctx.player->position.y >= 0 && ctx.player->position.y < mapHeight &&
+		ctx.player()->position.x >= 0 && ctx.player()->position.x < mapWidth &&
+		ctx.player()->position.y >= 0 && ctx.player()->position.y < mapHeight &&
 		"Map::compute_fov: player position out of map bounds");
 
-	fovMap->compute_fov(ctx.player->position.x, ctx.player->position.y, FOV_RADIUS);
-	rebuild_dijkstra_map({ ctx.player->position }, ctx);
+	fovMap->compute_fov(ctx.player()->position.x, ctx.player()->position.y, FOV_RADIUS);
+	rebuild_dijkstra_map({ ctx.player()->position }, ctx);
 }
 
 void Map::update()
@@ -1371,7 +1371,7 @@ void Map::spawn_barrels(const DungeonRoom& room, GameContext& ctx)
 
 void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 {
-	assert(ctx.player && "Map::spawn_player called without player");
+	assert(ctx.player() && "Map::spawn_player called without player");
 	assert(ctx.dice && "Map::spawn_player called without dice");
 
 	Vector2D pos{ ctx.dice->roll(room.col, room.col_end()), ctx.dice->roll(room.row, room.row_end()) };
@@ -1384,7 +1384,7 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 		pos.y = ctx.dice->roll(room.row, room.row_end());
 		++playerTries;
 	}
-	ctx.player->position = pos;
+	ctx.player()->position = pos;
 }
 
 void Map::place_stairs(GameContext& ctx)
@@ -1484,9 +1484,9 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 Creature* Map::get_actor(Vector2D pos, const GameContext& ctx) const noexcept
 {
 	// Check player position first
-	if (ctx.player && ctx.player->position == pos)
+	if (ctx.player() && ctx.player()->position == pos)
 	{
-		return ctx.player;
+		return ctx.player();
 	}
 
 	// Check all creatures (excluding dead ones - they shouldn't block)
@@ -1731,7 +1731,7 @@ bool Map::open_door(Vector2D pos, GameContext& ctx)
 
 	fovMap->set_properties(pos.x, pos.y, true, true);
 
-	if (ctx.player && ctx.player->get_tile_distance(pos) <= FOV_RADIUS)
+	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= FOV_RADIUS)
 	{
 		compute_fov(ctx);
 	}
@@ -1785,7 +1785,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	// Make the tile non-walkable and non-transparent
 	fovMap->set_properties(pos.x, pos.y, false, false);
 
-	if (ctx.player && ctx.player->get_tile_distance(pos) <= FOV_RADIUS)
+	if (ctx.player() && ctx.player()->get_tile_distance(pos) <= FOV_RADIUS)
 	{
 		compute_fov(ctx);
 	}
@@ -1905,7 +1905,7 @@ void Map::place_amulet(GameContext& ctx)
 {
 	// Only place the amulet on the final level
 	assert(ctx.levelManager && "Map::place_amulet called without levelManager");
-	assert(ctx.player && "Map::place_amulet called without player");
+	assert(ctx.player() && "Map::place_amulet called without player");
 	assert(ctx.rooms && "Map::place_amulet called without rooms");
 	assert(ctx.dice && "Map::place_amulet called without dice");
 
@@ -2094,7 +2094,7 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 	assert(ctx.contentRegistry && "Map::setup_treasure_room_guard called without contentRegistry");
 	assert(ctx.creatures && "Map::setup_treasure_room_guard called without creatures");
 	assert(ctx.dice && "Map::setup_treasure_room_guard called without dice");
-	assert(ctx.player && "Map::setup_treasure_room_guard called without player");
+	assert(ctx.player() && "Map::setup_treasure_room_guard called without player");
 
 	// Two separate passes over the wall border:
 	//
@@ -2249,7 +2249,7 @@ void Map::setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx)
 		return std::abs(a.x - b.x) + std::abs(a.y - b.y);
 	};
 
-	const Vector2D playerPos = ctx.player->position;
+	const Vector2D playerPos = ctx.player()->position;
 	const bool stairsAvailable = ctx.stairs != nullptr;
 
 	const DoorCandidate* best = nullptr;

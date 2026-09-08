@@ -7,7 +7,6 @@
 		// Core game world
 		.map = &map,
 		.gui = &gui,
-		.player = player.get(),
 		.playerOwner = &player,
 		.playerBlueprint = &playerBlueprint,
 
