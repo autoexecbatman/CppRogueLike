@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "../Renderer/Renderer.h"
+#include "../Utils/Vector2D.h"
 
 // ---------------------------------------------------------------------------
 // DecorEditor -- in-game decoration placement and tile labeling tool.
@@ -60,13 +61,13 @@ public:
 	[[nodiscard]] bool is_active() const { return active; }
 	[[nodiscard]] bool is_browser_open() const { return browser_open; }
 
-	[[nodiscard]] TileRef get_override(int world_x, int world_y) const;
+	[[nodiscard]] TileRef get_override(Vector2D worldPosition) const;
 
-	void place(int world_x, int world_y);
-	void erase(int world_x, int world_y);
+	void place(Vector2D worldPosition);
+	void erase(Vector2D worldPosition);
 
 	// Direct tile placement bypassing the palette -- used by PrefabLibrary.
-	void place_tile(int world_x, int world_y, TileRef tile);
+	void place_tile(Vector2D worldPosition, TileRef tile);
 
 	[[nodiscard]] bool is_active_map_empty() const;
 
@@ -103,18 +104,21 @@ private:
 	bool label_all_selected{ false }; // first keystroke replaces entire label
 	int buffered_char{ 0 }; // char polled by InputSystem::poll(), fed in before render
 
-	[[nodiscard]] static uint32_t make_key(int x, int y) noexcept
+	// Packs a tile position into one key: row in the high half, column in the
+	// low half. Columns wrap at 65536, which no map approaches.
+	[[nodiscard]] static uint32_t make_key(Vector2D worldPosition) noexcept
 	{
-		return (static_cast<uint32_t>(y) << 16) | static_cast<uint32_t>(x & 0xFFFF);
+		return (static_cast<uint32_t>(worldPosition.y) << 16)
+			| static_cast<uint32_t>(worldPosition.x & 0xFFFF);
 	}
 
 	[[nodiscard]] std::unordered_map<uint32_t, TileRef>& current_map();
 	[[nodiscard]] const std::unordered_map<uint32_t, TileRef>& current_map() const;
 
 	// Normal editor overlay
-	void draw_cursor(const Renderer& renderer, int world_x, int world_y) const;
+	void draw_cursor(const Renderer& renderer, Vector2D worldPosition) const;
 	void draw_palette_strip(const Renderer& renderer) const;
-	void draw_info_bar(const Renderer& renderer, int world_x, int world_y) const;
+	void draw_info_bar(const Renderer& renderer, Vector2D worldPosition) const;
 
 	// Sheet browser
 	void update_browser(const Renderer& renderer, std::string_view palette_path);

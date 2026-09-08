@@ -163,15 +163,13 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 						ctx.renderer->get_camera_x(),
 						ctx.renderer->get_camera_y(),
 						ctx.renderer->get_tile_size());
-					int world_x = world.x;
-					int world_y = world.y;
 					if (key == GameKey::MOUSE_LEFT)
 					{
-						ctx.decorEditor->place(world_x, world_y);
+						ctx.decorEditor->place(world);
 					}
 					else
 					{
-						ctx.decorEditor->erase(world_x, world_y);
+						ctx.decorEditor->erase(world);
 					}
 					return true;
 				}

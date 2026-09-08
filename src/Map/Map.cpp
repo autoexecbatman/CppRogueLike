@@ -747,7 +747,7 @@ void Map::render(const GameContext& ctx) const
 			{
 #ifndef EMSCRIPTEN
 				TileRef decorRef = ctx.decorEditor
-					? ctx.decorEditor->get_override(col, row)
+					? ctx.decorEditor->get_override(Vector2D{ col, row })
 					: TileRef{};
 #else
 				TileRef decorRef = resolve_decor(pos, type);
@@ -1040,7 +1040,7 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 			{
 				for (int dx = room.col; dx <= room.col_end(); ++dx)
 				{
-					TileRef t = ctx.decorEditor->get_override(dx, dy);
+					TileRef t = ctx.decorEditor->get_override(Vector2D{ dx, dy });
 					if (!t.is_valid())
 					{
 						continue;
@@ -1155,7 +1155,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 			if (rolld100 < waterPercentage)
 			{
 				// Never place water on a decorated tile.
-				if (ctx.decorEditor && ctx.decorEditor->get_override(waterPos.x, waterPos.y).is_valid())
+				if (ctx.decorEditor && ctx.decorEditor->get_override(waterPos).is_valid())
 				{
 					continue;
 				}

@@ -372,7 +372,7 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 			{
 				decor->isBroken = true;
 				if (ctx.decorEditor)
-					ctx.decorEditor->erase(decor->position.x, decor->position.y);
+					ctx.decorEditor->erase(decor->position);
 
 				ctx.messageSystem->message(
 					WHITE_BLACK_PAIR,

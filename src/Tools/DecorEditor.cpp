@@ -205,24 +205,24 @@ void DecorEditor::cycle_prev()
 	palette_index = (palette_index - 1 + sz) % sz;
 }
 
-void DecorEditor::place(int world_x, int world_y)
+void DecorEditor::place(Vector2D worldPosition)
 {
 	if (palette.empty())
 	{
 		return;
 	}
 
-	current_map()[make_key(world_x, world_y)] = palette[palette_index].tile;
+	current_map()[make_key(worldPosition)] = palette[palette_index].tile;
 }
 
-void DecorEditor::erase(int world_x, int world_y)
+void DecorEditor::erase(Vector2D worldPosition)
 {
-	current_map().erase(make_key(world_x, world_y));
+	current_map().erase(make_key(worldPosition));
 }
 
-void DecorEditor::place_tile(int world_x, int world_y, TileRef tile)
+void DecorEditor::place_tile(Vector2D worldPosition, TileRef tile)
 {
-	current_map()[make_key(world_x, world_y)] = tile;
+	current_map()[make_key(worldPosition)] = tile;
 }
 
 bool DecorEditor::is_active_map_empty() const
@@ -230,10 +230,10 @@ bool DecorEditor::is_active_map_empty() const
 	return current_map().empty();
 }
 
-TileRef DecorEditor::get_override(int world_x, int world_y) const
+TileRef DecorEditor::get_override(Vector2D worldPosition) const
 {
 	const auto& m = current_map();
-	const auto key = make_key(world_x, world_y);
+	const auto key = make_key(worldPosition);
 	return m.contains(key) ? m.at(key) : TileRef{};
 }
 
@@ -285,19 +285,20 @@ void DecorEditor::update_and_render(const Renderer& renderer)
 	const int cam_y = renderer.get_camera_y();
 
 	::Vector2 mouse_pos = GetMousePosition();
-	int world_x = (static_cast<int>(mouse_pos.x) + cam_x) / tile_size;
-	int world_y = (static_cast<int>(mouse_pos.y) + cam_y) / tile_size;
+	const Vector2D worldPosition{
+		(static_cast<int>(mouse_pos.x) + cam_x) / tile_size,
+		(static_cast<int>(mouse_pos.y) + cam_y) / tile_size };
 
-	draw_cursor(renderer, world_x, world_y);
+	draw_cursor(renderer, worldPosition);
 	draw_palette_strip(renderer);
-	draw_info_bar(renderer, world_x, world_y);
+	draw_info_bar(renderer, worldPosition);
 }
 
 // ---------------------------------------------------------------------------
 // Normal editor drawing
 // ---------------------------------------------------------------------------
 
-void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y) const
+void DecorEditor::draw_cursor(const Renderer& renderer, Vector2D worldPosition) const
 {
 	if (palette.empty())
 	{
@@ -308,13 +309,13 @@ void DecorEditor::draw_cursor(const Renderer& renderer, int world_x, int world_y
 	const int cam_x = renderer.get_camera_x();
 	const int cam_y = renderer.get_camera_y();
 
-	int px = world_x * tile_size - cam_x;
-	int py = world_y * tile_size - cam_y;
+	int px = worldPosition.x * tile_size - cam_x;
+	int py = worldPosition.y * tile_size - cam_y;
 
 	DrawRectangle(px, py, tile_size, tile_size, Color{ 255, 255, 0, 60 });
 	DrawRectangleLines(px, py, tile_size, tile_size, Color{ 255, 255, 0, 220 });
 
-	renderer.draw_tile(Vector2D{ world_x, world_y }, palette[palette_index].tile, Color{ 255, 255, 255, 180 });
+	renderer.draw_tile(Vector2D{ worldPosition.x, worldPosition.y }, palette[palette_index].tile, Color{ 255, 255, 255, 180 });
 }
 
 void DecorEditor::draw_palette_strip(const Renderer& renderer) const
@@ -360,7 +361,7 @@ void DecorEditor::draw_palette_strip(const Renderer& renderer) const
 	}
 }
 
-void DecorEditor::draw_info_bar(const Renderer& renderer, int world_x, int world_y) const
+void DecorEditor::draw_info_bar(const Renderer& renderer, Vector2D worldPosition) const
 {
 	const int tile_size = renderer.get_tile_size();
 	const int screenWidth = renderer.get_screen_width();
@@ -379,8 +380,8 @@ void DecorEditor::draw_info_bar(const Renderer& renderer, int world_x, int world
 		"  |  Tab browser  , / . cycle  LClick place  RClick erase  Ctrl+S save{}",
 		tile_name,
 		active_key.empty() ? "none" : active_key,
-		world_x,
-		world_y,
+		worldPosition.x,
+		worldPosition.y,
 		saved_flash ? "  -- SAVED!" : "");
 
 	Color text_color = saved_flash

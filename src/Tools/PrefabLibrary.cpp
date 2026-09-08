@@ -308,7 +308,7 @@ void stamp_room(
 				continue;
 			}
 
-			editor.place_tile(worldX, worldY, tile);
+			editor.place_tile(Vector2D{ worldX, worldY }, tile);
 		}
 	}
 }
