@@ -110,7 +110,7 @@ void AiMonsterRanged::animate_arrow(Vector2D from, Vector2D to, GameContext& ctx
 
 	auto onArrive = [to, &ctx]()
 	{
-		ctx.animSystem->spawn_blood_burst(to.x, to.y, 3);
+		ctx.animSystem->spawn_blood_burst(to, 3);
 	};
 
 	ctx.animSystem->spawn_projectile(

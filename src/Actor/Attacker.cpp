@@ -96,7 +96,7 @@ void Attacker::perform_single_attack(
 		{
 			if (ctx.animSystem)
 			{
-				ctx.animSystem->spawn_melee_hit(target.position.x, target.position.y);
+				ctx.animSystem->spawn_melee_hit(target.position);
 			}
 			target.take_damage_and_check_death(finalDamage, ctx, attackDamage.damageType);
 		}

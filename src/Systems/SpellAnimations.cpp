@@ -20,7 +20,7 @@ void animate_lightning(Vector2D from, Vector2D to, GameContext& ctx)
 
 	auto path = Map::bresenham_line(from, to);
 	ctx.animSystem->spawn_lightning_path(path, 180, 220, 255);
-	ctx.animSystem->spawn_spark_burst(to.x, to.y, 8, 140, 180, 255);
+	ctx.animSystem->spawn_spark_burst(to, 8, 140, 180, 255);
 	ctx.renderer->add_trauma(0.25f);
 }
 
@@ -47,7 +47,7 @@ void animate_creature_hit(Vector2D position, GameContext& ctx)
 	if (!ctx.animSystem)
 		return;
 
-	ctx.animSystem->spawn_blood_burst(position.x, position.y, 4);
+	ctx.animSystem->spawn_blood_burst(position, 4);
 }
 
 void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx)
@@ -63,7 +63,7 @@ void animate_magic_missile(Vector2D from, Vector2D to, GameContext& ctx)
 	{
 		if (ctx.animSystem)
 		{
-			ctx.animSystem->spawn_blood_burst(to.x, to.y, 4);
+			ctx.animSystem->spawn_blood_burst(to, 4);
 		}
 	};
 

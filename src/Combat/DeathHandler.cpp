@@ -40,7 +40,7 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
 
     if (ctx.animSystem)
     {
-        ctx.animSystem->spawn_death(owner.position.x, owner.position.y);
+        ctx.animSystem->spawn_death(owner.position);
     }
 
     assert(std::ranges::none_of(owner.inventoryData.items, [](const auto& i) { return !i; }));

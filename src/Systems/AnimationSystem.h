@@ -6,9 +6,9 @@
 #include <vector>
 
 #include "../Renderer/Renderer.h"
+#include "../Utils/Vector2D.h"
 
 class TileConfig;
-struct Vector2D;
 
 enum class ParticleShape
 {
@@ -62,12 +62,11 @@ public:
 	void init(const TileConfig& tileConfig, int tile_size);
 
 	// Particle bursts
-	void spawn_melee_hit(int world_x, int world_y);
-	void spawn_death(int world_x, int world_y);
-	void spawn_blood_burst(int world_x, int world_y, int count);
+	void spawn_melee_hit(Vector2D worldPosition);
+	void spawn_death(Vector2D worldPosition);
+	void spawn_blood_burst(Vector2D worldPosition, int count);
 	void spawn_spark_burst(
-		int world_x,
-		int world_y,
+		Vector2D worldPosition,
 		int count,
 		unsigned char r,
 		unsigned char g,
@@ -99,8 +98,7 @@ public:
 
 	// Generic single effect
 	void spawn_effect(
-		int world_x,
-		int world_y,
+		Vector2D worldPosition,
 		TileRef tile,
 		unsigned char r,
 		unsigned char g,

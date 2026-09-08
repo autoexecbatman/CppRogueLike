@@ -185,7 +185,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 			{
 				if (innerCtx.animSystem)
 				{
-					innerCtx.animSystem->spawn_blood_burst(targetPos.x, targetPos.y, 3);
+					innerCtx.animSystem->spawn_blood_burst(targetPos, 3);
 				}
 			};
 

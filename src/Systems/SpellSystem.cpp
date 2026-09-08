@@ -757,8 +757,7 @@ void animate_heal(const Vector2D& pos, GameContext& ctx)
 	}
 
 	ctx.animSystem->spawn_effect(
-		pos.x,
-		pos.y,
+		pos,
 		ctx.tileConfig->get("TILE_EFFECT_HEAL"),
 		60,
 		220,

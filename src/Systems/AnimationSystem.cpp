@@ -31,10 +31,10 @@ void AnimationSystem::init(const TileConfig& tileConfig, int tile_size)
 	m_rng.seed(seed);
 }
 
-void AnimationSystem::spawn_blood_burst(int world_x, int world_y, int count)
+void AnimationSystem::spawn_blood_burst(Vector2D worldPosition, int count)
 {
-	float cx = static_cast<float>(world_x * m_tile_size + m_tile_size / 2);
-	float cy = static_cast<float>(world_y * m_tile_size + m_tile_size / 2);
+	float cx = static_cast<float>(worldPosition.x * m_tile_size + m_tile_size / 2);
+	float cy = static_cast<float>(worldPosition.y * m_tile_size + m_tile_size / 2);
 	float now = static_cast<float>(GetTime());
 
 	for (int i = 0; i < count; ++i)
@@ -61,26 +61,25 @@ void AnimationSystem::spawn_blood_burst(int world_x, int world_y, int count)
 	}
 }
 
-void AnimationSystem::spawn_melee_hit(int world_x, int world_y)
+void AnimationSystem::spawn_melee_hit(Vector2D worldPosition)
 {
-	spawn_blood_burst(world_x, world_y, 5);
+	spawn_blood_burst(worldPosition, 5);
 }
 
-void AnimationSystem::spawn_death(int world_x, int world_y)
+void AnimationSystem::spawn_death(Vector2D worldPosition)
 {
-	spawn_blood_burst(world_x, world_y, 12);
+	spawn_blood_burst(worldPosition, 12);
 }
 
 void AnimationSystem::spawn_spark_burst(
-	int world_x,
-	int world_y,
+	Vector2D worldPosition,
 	int count,
 	unsigned char r,
 	unsigned char g,
 	unsigned char b)
 {
-	float cx = static_cast<float>(world_x * m_tile_size + m_tile_size / 2);
-	float cy = static_cast<float>(world_y * m_tile_size + m_tile_size / 2);
+	float cx = static_cast<float>(worldPosition.x * m_tile_size + m_tile_size / 2);
+	float cy = static_cast<float>(worldPosition.y * m_tile_size + m_tile_size / 2);
 	float now = static_cast<float>(GetTime());
 
 	for (int i = 0; i < count; ++i)
@@ -140,16 +139,15 @@ void AnimationSystem::spawn_lightning_path(
 }
 
 void AnimationSystem::spawn_effect(
-	int world_x,
-	int world_y,
+	Vector2D worldPosition,
 	TileRef tile,
 	unsigned char r,
 	unsigned char g,
 	unsigned char b,
 	float duration)
 {
-	float cx = static_cast<float>(world_x * m_tile_size);
-	float cy = static_cast<float>(world_y * m_tile_size);
+	float cx = static_cast<float>(worldPosition.x * m_tile_size);
+	float cy = static_cast<float>(worldPosition.y * m_tile_size);
 
 	entries.push_back(AnimEntry{
 		.px_x = cx,

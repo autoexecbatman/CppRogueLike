@@ -517,7 +517,7 @@ void Creature::die(GameContext& ctx)
 
 	if (ctx.animSystem)
 	{
-		ctx.animSystem->spawn_death(position.x, position.y);
+		ctx.animSystem->spawn_death(position);
 	}
 
 	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
