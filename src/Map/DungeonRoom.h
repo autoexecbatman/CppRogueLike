@@ -40,8 +40,8 @@ struct DungeonRoom
 	RoomType type{ RoomType::STANDARD };
 	RoomShape shape{ RoomShape::RECT };
 	int shapeVariant{ 0 }; // shape-specific sub-variant (e.g. which corner for L_SHAPE)
-	std::string prefab_name; // name of the prefab that defines this room's layout
-	std::vector<int> adjacentRoomIndices; // indices of rooms connected via corridors
+	std::string prefabName{}; // name of the prefab that defines this room's layout
+	std::vector<int> adjacentRoomIndices{}; // indices of rooms connected via corridors
 
 	// Floor bounds (inclusive)
 	[[nodiscard]] int col_end() const { return col + width - 1; }

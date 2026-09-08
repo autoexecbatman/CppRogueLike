@@ -8,10 +8,9 @@
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Utils/Vector2D.h"
 #include "Actor.h"
-#include "Object.h"
 #include "Pickable.h"
 
-class Item : public Object
+class Item : public Actor
 {
 private:
 	int baseValue{ 1 }; // base price set at creation; get_value() applies enhancement modifier

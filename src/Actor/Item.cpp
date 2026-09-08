@@ -1,13 +1,13 @@
 #include "Item.h"
 
 Item::Item(Vector2D position, ActorData data)
-	: Object(position, data) {
+	: Actor(position, data) {
 		  // ItemClass should be set by ItemCreator, not by fragile string matching
 	  };
 
 void Item::load(const json& j)
 {
-	Object::load(j); // Call base class load
+	Actor::load(j); // Call base class load
 	baseValue = j.at("baseValue").get<int>();
 	if (j.contains("itemKey"))
 	{
@@ -56,7 +56,7 @@ void Item::load(const json& j)
 
 void Item::save(json& j)
 {
-	Object::save(j); // Call base class save
+	Actor::save(j); // Call base class save
 	j["baseValue"] = baseValue;
 	j["itemKey"] = itemKey;
 	j["itemClass"] = static_cast<int>(itemClass);

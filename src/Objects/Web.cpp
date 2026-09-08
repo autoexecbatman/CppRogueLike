@@ -14,7 +14,7 @@
 #include "Web.h"
 
 Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
-	: Object(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
+	: TileFeature(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }, FeatureKind::WEB),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through
@@ -22,11 +22,11 @@ Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
 }
 
 // Apply web effect when a creature tries to pass through
-bool Web::apply_effect(Creature& creature, GameContext& ctx)
+EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 {
 	// Only players can get stuck (for simplicity)
 	if (!creature.is_player())
-		return false;
+		return EntryResult::UNAFFECTED;
 
 	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
 	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
@@ -38,8 +38,8 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 				if (magicRing->effect == MagicalEffect::FREE_ACTION)
 				{
 					ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
-					destroy(ctx);
-					return false;
+					destroy();
+					return EntryResult::AFFECTED;
 				}
 			}
 		}
@@ -61,7 +61,7 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 
 		// Player loses their turn
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-		return true;
+		return EntryResult::BLOCKED;
 	}
 	else
 	{
@@ -70,34 +70,16 @@ bool Web::apply_effect(Creature& creature, GameContext& ctx)
 		// 50% chance to destroy the web
 		if (ctx.dice->d2() == 1)
 		{
-			destroy(ctx);
+			destroy();
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
 		}
 
-		return false;
+		return EntryResult::AFFECTED;
 	}
-}
-
-// Object virtual — triggers web trap on movement through this tile
-bool Web::apply_movement_effect(Creature& creature, GameContext& ctx)
-{
-	return apply_effect(creature, ctx);
 }
 
 // Destroy this web
-void Web::destroy(GameContext& ctx)
+void Web::destroy()
 {
-	// Mark for deletion
-	// We don't delete it here directly because it could be mid-update
-	// Instead we set a flag or use a system that safely removes objects
-
-	// C++20 ranges: find and reset the web object
-	auto found = std::ranges::find_if(*ctx.objects,
-		[this](const auto& obj)
-		{ return obj.get() == this; });
-
-	if (found != ctx.objects->end())
-	{
-		found->reset();
-	}
+	mark_destroyed();
 }

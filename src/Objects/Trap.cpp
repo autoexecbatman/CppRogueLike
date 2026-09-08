@@ -12,7 +12,7 @@
 #include <ranges>
 
 Trap::Trap(Vector2D position, TrapType type, const TileConfig& tileConfig)
-	: Object(position, ActorData{}),
+	: TileFeature(position, ActorData{}, FeatureKind::TRAP),
 	type_(type),
 	state_(TrapState::HIDDEN),
 	detectionDC_(15),
@@ -77,24 +77,18 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 	return false;
 }
 
-bool Trap::attempt_disarm(Creature& creature, GameContext& ctx)
+DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 {
+	// Nothing left to disarm.
 	if (state_ == TrapState::DISARMED)
 	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "That trap is already disarmed.", true);
-		}
-		return false;
+		return DisarmResult::ALREADY_DISARMED;
 	}
 
+	// A trap the creature has not spotted cannot be worked on.
 	if (state_ == TrapState::HIDDEN)
 	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You don't see a trap there.", true);
-		}
-		return false;
+		return DisarmResult::NOT_VISIBLE;
 	}
 
 	// Roll 1d20 + DEX modifier vs disarm DC
@@ -105,26 +99,17 @@ bool Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 	if (checkResult >= disarmDC_)
 	{
 		state_ = TrapState::DISARMED;
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(GREEN_BLACK_PAIR, "You successfully disarm the trap.", true);
-		}
-		return true;
+		return DisarmResult::DISARMED;
 	}
-	else
-	{
-		// Failed disarm triggers trap
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->message(RED_BLACK_PAIR, "You trigger the trap while attempting to disarm it!", true);
-		}
-		state_ = TrapState::TRIGGERED;
-		apply_movement_effect(creature, ctx);
-		return false;
-	}
+
+	// A failed attempt sets the trap off on the creature working on it.
+	state_ = TrapState::TRIGGERED;
+	on_creature_enter(creature, ctx);
+
+	return DisarmResult::TRIGGERED;
 }
 
-bool Trap::apply_movement_effect(Creature& creature, GameContext& ctx)
+EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 {
 	// Passive detection check when walking into trap
 	attempt_passive_detection(creature, ctx);
@@ -163,7 +148,7 @@ bool Trap::apply_movement_effect(Creature& creature, GameContext& ctx)
 		// 50% chance trap is destroyed after triggering
 		if (ctx.dice->d2() == 1)
 		{
-			destroy(ctx);
+			destroy();
 			if (ctx.messageSystem)
 			{
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The trap is destroyed.", true);
@@ -175,11 +160,11 @@ bool Trap::apply_movement_effect(Creature& creature, GameContext& ctx)
 		{
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
-		return true;
+		return EntryResult::BLOCKED;
 	}
 
 	// Hidden trap didn't trigger (missed detection)
-	return false;
+	return EntryResult::UNAFFECTED;
 }
 
 void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
@@ -209,15 +194,7 @@ int Trap::roll_damage(RandomDice& dice) const
 
 
 
-void Trap::destroy(GameContext& ctx)
+void Trap::destroy()
 {
-	// Mark for deletion using safe removal pattern from Web.cpp
-	auto found = std::ranges::find_if(*ctx.objects,
-		[this](const auto& obj)
-		{ return obj.get() == this; });
-
-	if (found != ctx.objects->end())
-	{
-		found->reset();
-	}
+	mark_destroyed();
 }

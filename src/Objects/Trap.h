@@ -1,10 +1,10 @@
 // file: Trap.h
 // Trap mechanics: pit, dart, arrow hazards placed in dungeons
-// Inherits from Object; blocks movement on trigger; applies damage to creatures
+// Inherits from TileFeature; blocks movement on trigger; applies damage to creatures
 
 #pragma once
 
-#include "../Actor/Object.h"
+#include "../Actor/TileFeature.h"
 #include "../Utils/Vector2D.h"
 
 class RandomDice;
@@ -25,7 +25,7 @@ enum class TrapState
 };
 
 // Trap class - represents environmental hazards (pit, dart, arrow)
-class Trap : public Object
+class Trap : public TileFeature
 {
 public:
 	Trap(Vector2D position, TrapType type, const TileConfig& tileConfig);
@@ -40,16 +40,15 @@ public:
 	// Returns true if trap is now detected (was hidden, now revealed)
 	bool attempt_detect(Creature& creature, GameContext& ctx);
 
-	// Apply trap effect on movement through this tile
-	// Returns true if movement is blocked (was triggered and blocks movement)
-	bool apply_movement_effect(Creature& creature, GameContext& ctx) override;
+	// Applies the trap's effect to a creature entering its tile.
+	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
-	// Disarm attempt: player makes DEX check vs DC 12
-	// Returns true if successfully disarmed
-	bool attempt_disarm(Creature& creature, GameContext& ctx);
+	// Disarm attempt: the creature rolls 1d20 plus its dexterity modifier
+	// against the trap's disarm DC. Failure sets the trap off.
+	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) override;
 
 	// Destroy this trap (called after trigger or successful disarm)
-	void destroy(GameContext& ctx);
+	void destroy();
 
 private:
 	TrapType type_;

@@ -321,11 +321,11 @@ void PrefabLibrary::apply_to_room(
 	DecorEditor& editor,
 	Map& map) const
 {
-	if (room.prefab_name.empty())
+	if (room.prefabName.empty())
 	{
 		return;
 	}
-	auto idx = find_prefab_index(prefabs, room.prefab_name);
+	auto idx = find_prefab_index(prefabs, room.prefabName);
 	if (!idx)
 	{
 		return;

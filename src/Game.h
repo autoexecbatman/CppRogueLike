@@ -104,7 +104,7 @@ struct Game
 
 	std::vector<DungeonRoom> rooms{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::vector<std::unique_ptr<Object>> objects{};
+	std::vector<std::unique_ptr<TileFeature>> tileFeatures{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
 	FloorInventory floorInventory{ 1000 };
 

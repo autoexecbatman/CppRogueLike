@@ -6,7 +6,7 @@
 #include "../Actor/Container.h"
 #include "../Utils/Vector2D.h"
 
-class Object;
+class TileFeature;
 class Web;
 class Creature;
 
@@ -17,7 +17,7 @@ public:
 	~ObjectManager() = default;
 
 	// Object queries
-	Web* find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const;
+	Web* find_web_at(Vector2D position, const std::vector<std::unique_ptr<TileFeature>>& objects) const;
 
 	// Object creation templates - implemented inline to avoid template instantiation issues
 	template <typename T>
@@ -35,5 +35,5 @@ public:
 	}
 
 	// Object lifecycle management
-	void cleanup_destroyed_objects(std::vector<std::unique_ptr<Object>>& objects);
+	void cleanup_destroyed_objects(std::vector<std::unique_ptr<TileFeature>>& objects);
 };

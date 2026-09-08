@@ -1,3 +1,4 @@
+#include <cassert>
 #include <cmath>
 #include <memory>
 #include <vector>
@@ -132,11 +133,12 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 		return true;
 	}
 
-	// Count actual webs in the game objects
+	// Count actual webs among the level's tile features
 	int webCount = 0;
-	for (const auto& obj : *ctx.objects)
+	for (const auto& feature : *ctx.tileFeatures)
 	{
-		if (obj && obj->actorData.name == "spider web")
+		assert(feature && "tileFeatures holds a null entry");
+		if (!feature->is_destroyed() && feature->get_kind() == FeatureKind::WEB)
 		{
 			webCount++;
 		}
@@ -244,9 +246,10 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 	}
 
 	// Check if there's already a web at this position
-	for (const auto& obj : *ctx.objects)
+	for (const auto& feature : *ctx.tileFeatures)
 	{
-		if (obj && obj->position == pos && obj->actorData.name == "spider web")
+		assert(feature && "tileFeatures holds a null entry");
+		if (!feature->is_destroyed() && feature->position == pos && feature->get_kind() == FeatureKind::WEB)
 		{
 			return false;
 		}
@@ -469,7 +472,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 
 		// Create a new Web entity
 		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tileConfig);
-		ctx.objects->emplace_back(std::move(web));
+		ctx.tileFeatures->emplace_back(std::move(web));
 	}
 }
 

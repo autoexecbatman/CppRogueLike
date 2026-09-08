@@ -192,7 +192,7 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 			}
 
 			DungeonRoom room{ roomCol, roomRow, roomWidth, roomHeight };
-			room.prefab_name = std::move(chosenPrefab);
+			room.prefabName = std::move(chosenPrefab);
 			room.shape = pick_room_shape(roomWidth, roomHeight, rng);
 			room.shapeVariant = rng.roll(0, 3);
 

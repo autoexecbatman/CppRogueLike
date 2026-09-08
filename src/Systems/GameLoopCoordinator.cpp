@@ -529,9 +529,9 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (ctx.gameState->get_game_status() == GameStatus::NEW_TURN)
 	{
-		std::erase_if(*ctx.objects,
-			[](const auto& obj)
-			{ return !obj; });
+		std::erase_if(*ctx.tileFeatures,
+			[](const auto& feature)
+			{ return feature->is_destroyed(); });
 
 		if (ctx.decorations)
 		{

@@ -6,7 +6,7 @@
 // Forward declarations
 class Creature;
 class Item;
-class Object;
+class TileFeature;
 struct Decoration;
 struct GameContext;
 
@@ -28,7 +28,7 @@ public:
 
 private:
 	// Helper methods
-	void render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const;
+	void render_tile_features(std::span<const std::unique_ptr<TileFeature>> tileFeatures, const GameContext& ctx) const;
 	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
 	void apply_lighting(const GameContext& ctx) const;
 	void render_mouse_path_overlay(const GameContext& ctx) const;

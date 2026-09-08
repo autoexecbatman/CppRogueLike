@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Actor/Object.h"
+#include "../Actor/TileFeature.h"
 
 struct GameContext;
 struct Vector2D;
@@ -8,7 +8,7 @@ class Creature;
 class TileConfig;
 
 // Web class - represents a spider web that can trap players
-class Web : public Object
+class Web : public TileFeature
 {
 public:
 	Web(Vector2D position, int strength, const TileConfig& tileConfig);
@@ -18,13 +18,11 @@ public:
 	void set_strength(int strength) { webStrength = strength; }
 
 	// Apply web effect to a creature trying to pass through
-	bool apply_effect(Creature& creature, GameContext& ctx);
 
-	// Object virtual — triggers web trap on movement through this tile
-	bool apply_movement_effect(Creature& creature, GameContext& ctx) override;
+	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
 	// Destroy this web
-	void destroy(GameContext& ctx);
+	void destroy();
 
 private:
 	int webStrength{ 2 }; // How strong the web is (affects escape difficulty)

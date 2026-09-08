@@ -2,7 +2,7 @@
 #include <set>
 #include <string>
 
-#include "src/Actor/Object.h"
+#include "src/Actor/TileFeature.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Factories/MonsterCreator.h"
 #include "src/Map/DungeonNames.h"
@@ -291,7 +291,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;
-    std::vector<std::unique_ptr<Object>> objects;
+    std::vector<std::unique_ptr<TileFeature>> tileFeatures;
     std::vector<DungeonRoom> rooms;
     DataManager dataManager;
     MessageSystem messageSystem;
@@ -306,7 +306,7 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     ctx.stairs = stairs.get();
     ctx.rooms = &rooms;
     ctx.creatures = &creatures;
-    ctx.objects = &objects;
+    ctx.tileFeatures = &tileFeatures;
     ctx.dataManager = &dataManager;
     ctx.messageSystem = &messageSystem;
     ctx.map = map.get();

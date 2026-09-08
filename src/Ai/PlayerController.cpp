@@ -404,21 +404,26 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 
 	if (!ctx.map->is_collision(playerOwner, targetTileType, targetPosition, ctx))
 	{
-		bool webEffect = false;
+		bool blocked = false;
 
-		for (const auto& obj : *ctx.objects)
+		for (const auto& feature : *ctx.tileFeatures)
 		{
-			if (obj && obj->position == targetPosition)
+			assert(feature && "tileFeatures holds a null entry");
+
+			// A feature that destroyed itself this turn is inert until the sweep.
+			if (feature->is_destroyed() || feature->position != targetPosition)
 			{
-				if (obj->apply_movement_effect(playerOwner, ctx))
-				{
-					webEffect = true;
-					break;
-				}
+				continue;
+			}
+
+			if (feature->on_creature_enter(playerOwner, ctx) == EntryResult::BLOCKED)
+			{
+				blocked = true;
+				break;
 			}
 		}
 
-		if (!webEffect)
+		if (!blocked)
 		{
 			move(targetPosition);
 			ctx.map->tile_action(playerOwner, targetTileType, ctx);
@@ -1218,41 +1223,55 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	}
 	else if (pendingDoorAction == PendingDoorAction::DISARM)
 	{
-		// Find trap at target position
-		Trap* trapAtPos = nullptr;
-		if (ctx.objects != nullptr)
+		// Ask every feature on the tile; the first with something to disarm answers.
+		DisarmResult disarmResult = DisarmResult::NOT_DISARMABLE;
+		if (ctx.tileFeatures != nullptr)
 		{
-			for (auto& obj : *ctx.objects)
+			for (auto& feature : *ctx.tileFeatures)
 			{
-				if (obj && obj->position == doorPos)
+				assert(feature && "tileFeatures holds a null entry");
+				if (feature->is_destroyed() || feature->position != doorPos)
 				{
-					// Check if this is a Trap by attempting cast
-					if (auto* trapPtr = dynamic_cast<Trap*>(obj.get()))
-					{
-						trapAtPos = trapPtr;
-						break;
-					}
+					continue;
+				}
+
+				disarmResult = feature->attempt_disarm(playerOwner, ctx);
+				if (disarmResult != DisarmResult::NOT_DISARMABLE)
+				{
+					break;
 				}
 			}
 		}
 
-		if (trapAtPos == nullptr)
+		switch (disarmResult)
+		{
+		case DisarmResult::NOT_DISARMABLE:
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There is no trap there.", true);
+			break;
 		}
-		else
+		case DisarmResult::NOT_VISIBLE:
 		{
-			// Attempt disarm with Dexterity check (DC from trap)
-			if (trapAtPos->attempt_disarm(playerOwner, ctx))
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You successfully disarm the trap.", true);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-			}
-			else
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to disarm the trap.", true);
-				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-			}
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You don't see a trap there.", true);
+			break;
+		}
+		case DisarmResult::ALREADY_DISARMED:
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "That trap is already disarmed.", true);
+			break;
+		}
+		case DisarmResult::DISARMED:
+		{
+			ctx.messageSystem->message(GREEN_BLACK_PAIR, "You successfully disarm the trap.", true);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			break;
+		}
+		case DisarmResult::TRIGGERED:
+		{
+			ctx.messageSystem->message(RED_BLACK_PAIR, "You trigger the trap while attempting to disarm it!", true);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			break;
+		}
 		}
 	}
 

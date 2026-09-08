@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Object.h"
+#include "Actor.h"
 
 struct Vector2D;
 
-class Stairs : public Object
+class Stairs : public Actor
 {
 public:
 	Stairs(Vector2D position);

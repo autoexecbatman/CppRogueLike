@@ -1,3 +1,4 @@
+#include <cassert>
 #include <memory>
 #include <vector>
 
@@ -6,13 +7,14 @@
 #include "../Utils/Vector2D.h"
 #include "ObjectManager.h"
 
-Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<Object>>& objects) const
+Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique_ptr<TileFeature>>& objects) const
 {
 	for (const auto& obj : objects)
 	{
-		if (obj &&
+		assert(obj && "tileFeatures holds a null entry");
+		if (!obj->is_destroyed() &&
 			obj->position == position &&
-			obj->actorData.name == "spider web")
+			obj->get_kind() == FeatureKind::WEB)
 		{
 			return dynamic_cast<Web*>(obj.get());
 		}
@@ -20,7 +22,7 @@ Web* ObjectManager::find_web_at(Vector2D position, const std::vector<std::unique
 	return nullptr;
 }
 
-void ObjectManager::cleanup_destroyed_objects(std::vector<std::unique_ptr<Object>>& objects)
+void ObjectManager::cleanup_destroyed_objects(std::vector<std::unique_ptr<TileFeature>>& objects)
 {
 	// Remove destroyed objects
 	auto isNull = [](const auto& obj)

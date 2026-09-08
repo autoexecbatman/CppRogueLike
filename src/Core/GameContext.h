@@ -43,7 +43,7 @@ class MonsterEditor;
 class SpellEditor;
 #endif
 class Stairs;
-class Object;
+class TileFeature;
 class BaseMenu;
 #include "../Utils/Vector2D.h"
 struct DungeonRoom;
@@ -187,7 +187,7 @@ struct GameContext
 
 	// Game world data
 	Stairs* stairs{ nullptr };
-	std::vector<std::unique_ptr<Object>>* objects{ nullptr };
+	std::vector<std::unique_ptr<TileFeature>>* tileFeatures{ nullptr };
 	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
 	FloorInventory* floorInventory{ nullptr };
 	std::vector<std::unique_ptr<Creature>>* creatures{ nullptr };

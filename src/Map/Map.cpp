@@ -1076,7 +1076,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.dice && "Map::spawn_traps called without dice");
 	assert(ctx.tileConfig && "Map::spawn_traps called without tileConfig");
-	assert(ctx.objects && "Map::spawn_traps called without objects");
+	assert(ctx.tileFeatures && "Map::spawn_traps called without tile features");
 
 	// ~30% of rooms get 0-2 random traps (was 10%)
 	if (ctx.dice->d10() > 3)
@@ -1105,7 +1105,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 
 			TileType tileType = get_tile_type(trapPos);
 
-			// Must be a floor tile (walkable, no objects/items)
+			// Must be a floor tile (walkable, no features/items)
 			if (tileType == TileType::FLOOR)
 			{
 				foundSpot = true;
@@ -1137,7 +1137,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 		}
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
-		ctx.objects->push_back(std::move(trap));
+		ctx.tileFeatures->push_back(std::move(trap));
 	}
 }
 
@@ -1542,9 +1542,9 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.rooms->clear(); // we clear the room coordinates
 	}
-	if (ctx.objects)
+	if (ctx.tileFeatures)
 	{
-		ctx.objects->clear();
+		ctx.tileFeatures->clear();
 	}
 	if (ctx.decorations)
 	{

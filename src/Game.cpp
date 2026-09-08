@@ -53,7 +53,7 @@
 
 		// Game world data
 		.stairs = stairs.get(),
-		.objects = &objects,
+		.tileFeatures = &tileFeatures,
 		.decorations = &decorations,
 		.floorInventory = &floorInventory,
 		.creatures = &creatures,
@@ -153,7 +153,7 @@ bool Game::tick(int& loopNum)
 	return gameState.get_run();
 }
 
-// Set tile refs for objects constructed before tile_config was loaded.
+// Set tile refs for tile features constructed before tile_config was loaded.
 // Call after tile_config.load().
 void Game::init_world()
 {

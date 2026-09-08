@@ -6,6 +6,7 @@
 
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
+#include "../Actor/TileFeature.h"
 #include "../Gui/Gui.h"
 #include "../Core/GameContext.h"
 #include "../Map/Decoration.h"
@@ -24,7 +25,7 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	ctx.map->render(ctx);
 	ctx.stairs->render(ctx);
 
-	render_objects(*ctx.objects, ctx);
+	render_tile_features(*ctx.tileFeatures, ctx);
 
 	// Render floor items
 	render_items(ctx.floorInventory->items, ctx);
@@ -152,14 +153,15 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 	renderer.apply_light_mask();
 }
 
-void RenderingManager::render_objects(std::span<const std::unique_ptr<Object>> objects, const GameContext& ctx) const
+void RenderingManager::render_tile_features(std::span<const std::unique_ptr<TileFeature>> tileFeatures, const GameContext& ctx) const
 {
-	// Render any objects (like webs)
-	for (const auto& obj : objects)
+	// Render the level's tile features (traps, webs)
+	for (const auto& feature : tileFeatures)
 	{
-		if (obj)
+		assert(feature && "tileFeatures holds a null entry");
+		if (!feature->is_destroyed())
 		{
-			obj->render(ctx);
+			feature->render(ctx);
 		}
 	}
 }
