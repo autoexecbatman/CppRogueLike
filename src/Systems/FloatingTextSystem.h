@@ -4,32 +4,35 @@
 #include <string>
 #include <vector>
 
+#include "../Utils/Vector2D.h"
+
 class Renderer;
 
 struct FloatingEntry
 {
-	int world_x;
-	int world_y;
+	Vector2D worldPosition{};
 	std::string text;
 	unsigned char r, g, b;
 	float spawn_time;
 	float lifetime;
 };
 
+// Who took the damage, which is all the palette needs to know. Callers state
+// the fact; this system owns what colour it is drawn in.
+enum class DamageSubject
+{
+	PLAYER,
+	MONSTER
+};
+
 class FloatingTextSystem
 {
 public:
-	void spawn_damage(
-		int world_x,
-		int world_y,
-		int value,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b);
+	// Shows a damage number rising off a tile, coloured by who was hit.
+	void spawn_damage(Vector2D worldPosition, int value, DamageSubject subject);
 
 	void spawn_text(
-		int world_x,
-		int world_y,
+		Vector2D worldPosition,
 		std::string text,
 		unsigned char r,
 		unsigned char g,

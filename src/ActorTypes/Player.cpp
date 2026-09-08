@@ -626,8 +626,7 @@ void Player::animate_resting(GameContext& ctx)
 	const bool big = (get_max_hp() - get_hp()) < 5;
 	const std::string symbol = big ? "Z" : "z";
 	ctx.floatingText->spawn_text(
-		position.x,
-		position.y - 1,
+		Vector2D{ position.x, position.y - 1 },   // a row above the sleeper
 		symbol,
 		200, 230, 200,
 		1.2f);

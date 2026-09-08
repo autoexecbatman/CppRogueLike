@@ -18,6 +18,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffSystem.h"
 #include "../Systems/BuffType.h"
+#include "../Systems/FloatingTextSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "../Systems/ShopKeeper.h"
 #include "../Systems/TileConfig.h"
@@ -222,6 +223,40 @@ void Creature::update_creature_state(GameContext& ctx)
 	update_constitution_bonus(ctx);
 }
 
+// Recomputes armour class, and writes the arithmetic to the log for the player.
+//
+// Only the player's breakdown is logged: it is there so a human can check the
+// numbers against the rules, and nobody reads a goblin's. ArmorClass itself
+// does not know that - it reports, and this decides who hears.
+void Creature::update_armor_class(GameContext& ctx)
+{
+	const ArmorClassBreakdown breakdown = armorClass->update(*this, ctx);
+
+	if (!is_player() || !breakdown.changed)
+	{
+		return;
+	}
+
+	ctx.messageSystem->log(std::format(
+		"Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
+		breakdown.previous,
+		breakdown.total,
+		breakdown.base,
+		breakdown.dexterity,
+		breakdown.equipment,
+		breakdown.temporary));
+
+	// Name each contributing item, skipping the slots that gave nothing.
+	const ArmorClassSource sources[] = { breakdown.armor, breakdown.shield, breakdown.ring, breakdown.helm };
+	for (const ArmorClassSource& source : sources)
+	{
+		if (!source.name.empty())
+		{
+			ctx.messageSystem->log(std::format("  {:+} from {}", source.bonus, source.name));
+		}
+	}
+}
+
 void Creature::update_constitution_bonus(GameContext& ctx)
 {
 	const int oldCon = get_last_constitution();
@@ -267,9 +302,23 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	}
 }
 
+// Applies damage and shows the number floating off the creature.
+//
+// HealthPool does the arithmetic and FloatingTextSystem decides how the number
+// looks; this states who was hurt and joins the two.
 int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)
 {
-	return healthPool->take_damage(*this, damage, ctx, damageType);
+	const int actualDamage = healthPool->take_damage(*this, damage, ctx, damageType);
+
+	if (ctx.floatingText)
+	{
+		ctx.floatingText->spawn_damage(
+			position,
+			actualDamage,
+			is_player() ? DamageSubject::PLAYER : DamageSubject::MONSTER);
+	}
+
+	return actualDamage;
 }
 
 void Creature::take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType)

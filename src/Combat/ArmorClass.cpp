@@ -18,31 +18,35 @@ ArmorClass::ArmorClass(int baseAC)
 {
 }
 
-void ArmorClass::update(Creature& owner, GameContext& ctx)
+// Recomputes the armour class and reports how it was reached.
+//
+// AD&D 2e counts downward: every bonus below is negative, and a lower total is
+// better armour. The returned breakdown carries each contribution so a caller
+// that wants to show the arithmetic can, without this function knowing who is
+// watching.
+//
+// Example:
+//   const ArmorClassBreakdown ac = armorClass->update(owner, ctx);
+//   ac.changed;            // -> true when the total moved
+//   ac.previous, ac.total; // -> 10, 5
+//   ac.armor.name;         // -> "plate mail", or empty if the slot is bare
+ArmorClassBreakdown ArmorClass::update(Creature& owner, GameContext& ctx)
 {
-	const int baseAC = get_base_armor_class();
-	const int dexBonus = calculate_dexterity_ac_bonus(owner, ctx);
-	const int equipBonus = calculate_equipment_ac_bonus(owner, ctx);
-	const int tempBonus = ctx.buffSystem->calculate_ac_bonus(owner);
-	const int calculatedAC = baseAC + dexBonus + equipBonus + tempBonus;
+	ArmorClassBreakdown breakdown{};
+	breakdown.previous = get_armor_class();
+	breakdown.base = get_base_armor_class();
+	breakdown.dexterity = calculate_dexterity_ac_bonus(owner, ctx);
+	breakdown.equipment = calculate_equipment_ac_bonus(owner, breakdown);
+	breakdown.temporary = ctx.buffSystem->calculate_ac_bonus(owner);
+	breakdown.total = breakdown.base + breakdown.dexterity + breakdown.equipment + breakdown.temporary;
+	breakdown.changed = (breakdown.previous != breakdown.total);
 
-	if (get_armor_class() != calculatedAC)
+	if (breakdown.changed)
 	{
-		const int oldAC = get_armor_class();
-		set_armor_class(calculatedAC);
-
-		if (owner.is_player())
-		{
-			ctx.messageSystem->log(std::format(
-				"Armor Class updated: {} -> {} (Base: {}, Dex: {:+}, Equipment: {:+}, Temp: {:+})",
-				oldAC,
-				calculatedAC,
-				baseAC,
-				dexBonus,
-				equipBonus,
-				tempBonus));
-		}
+		set_armor_class(breakdown.total);
 	}
+
+	return breakdown;
 }
 
 [[nodiscard]] int ArmorClass::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
@@ -57,18 +61,10 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 
 	const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
 
-	if (owner.is_player() && defensiveAdj != 0)
-	{
-		ctx.messageSystem->log(std::format(
-			"Dexterity Defensive Adjustment: {:+} (Dex: {})",
-			defensiveAdj,
-			dexterity));
-	}
-
 	return defensiveAdj;
 }
 
-[[nodiscard]] int ArmorClass::calculate_equipment_ac_bonus(const Creature& owner, GameContext& ctx) const
+[[nodiscard]] int ArmorClass::calculate_equipment_ac_bonus(const Creature& owner, ArmorClassBreakdown& breakdown) const
 {
 	int totalBonus = 0;
 
@@ -85,13 +81,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += armorBonus;
 
-			if (owner.is_player())
-			{
-				ctx.messageSystem->log(std::format(
-					"Armor bonus: {:+} from {}",
-					armorBonus,
-					equippedArmor->actorData.name));
-			}
+			breakdown.armor = { equippedArmor->actorData.name, armorBonus };
 		}
 	}
 
@@ -108,13 +98,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += shieldBonus;
 
-			if (owner.is_player())
-			{
-				ctx.messageSystem->log(std::format(
-					"Shield bonus: {:+} from {}",
-					shieldBonus,
-					equippedShield->actorData.name));
-			}
+			breakdown.shield = { equippedShield->actorData.name, shieldBonus };
 		}
 	}
 
@@ -139,13 +123,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 	{
 		totalBonus += bestRingBonus;
 
-		if (owner.is_player())
-		{
-			ctx.messageSystem->log(std::format(
-				"Ring bonus: {:+} from {}",
-				bestRingBonus,
-				bestRing->actorData.name));
-		}
+		breakdown.ring = { bestRing->actorData.name, bestRingBonus };
 	}
 
 	if (Item* equippedHelm = owner.get_equipped_item(EquipmentSlot::HEAD))
@@ -155,13 +133,7 @@ void ArmorClass::update(Creature& owner, GameContext& ctx)
 		{
 			totalBonus += helmBonus;
 
-			if (owner.is_player())
-			{
-				ctx.messageSystem->log(std::format(
-					"Helm bonus: {:+} from {}",
-					helmBonus,
-					equippedHelm->actorData.name));
-			}
+			breakdown.helm = { equippedHelm->actorData.name, helmBonus };
 		}
 	}
 

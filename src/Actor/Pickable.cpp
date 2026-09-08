@@ -632,8 +632,7 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 			if (ctx.floatingText)
 			{
 				ctx.floatingText->spawn_text(
-					wearer.position.x,
-					wearer.position.y,
+					wearer.position,
 					std::string(item->get_name()) + " identified!",
 					0, 255, 255, 2.0f);
 			}

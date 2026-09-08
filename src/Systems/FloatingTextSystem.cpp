@@ -9,28 +9,32 @@
 #include "../Renderer/Renderer.h"
 #include "FloatingTextSystem.h"
 
-void FloatingTextSystem::spawn_damage(
-	int world_x,
-	int world_y,
-	int value,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b)
+// Shows a damage number rising off a tile.
+//
+// The colour is decided here rather than by the caller: red when the player is
+// hurt, yellow otherwise, so a glance at the screen says whether the damage was
+// yours. A caller states who was hit and nothing about how it looks.
+//
+// Example:
+//   floatingText->spawn_damage(pos, 7, DamageSubject::PLAYER);   // red 7
+//   floatingText->spawn_damage(pos, 7, DamageSubject::MONSTER);  // yellow 7
+void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageSubject subject)
 {
+	// Damage to the player is the one a human needs to notice.
+	const bool hurtPlayer = (subject == DamageSubject::PLAYER);
+
 	entries.push_back(FloatingEntry{
-		.world_x = world_x,
-		.world_y = world_y,
+		.worldPosition = worldPosition,
 		.text = std::format("{}", value),
-		.r = r,
-		.g = g,
-		.b = b,
+		.r = 255,
+		.g = static_cast<unsigned char>(hurtPlayer ? 80 : 220),
+		.b = static_cast<unsigned char>(hurtPlayer ? 80 : 50),
 		.spawn_time = static_cast<float>(GetTime()),
 		.lifetime = 1.2f });
 }
 
 void FloatingTextSystem::spawn_text(
-	int world_x,
-	int world_y,
+	Vector2D worldPosition,
 	std::string text,
 	unsigned char r,
 	unsigned char g,
@@ -38,8 +42,7 @@ void FloatingTextSystem::spawn_text(
 	float lifetime)
 {
 	entries.push_back(FloatingEntry{
-		.world_x = world_x,
-		.world_y = world_y,
+		.worldPosition = worldPosition,
 		.text = std::move(text),
 		.r = r,
 		.g = g,
@@ -78,8 +81,8 @@ void FloatingTextSystem::update_and_render(const Renderer& renderer)
 			: 1.0f - ((t - 0.6f) / 0.4f);
 		unsigned char alpha = static_cast<unsigned char>(alpha_f * 255.0f);
 
-		int screen_x = e.world_x * tileSize - cam_x;
-		int screen_y = e.world_y * tileSize - cam_y - static_cast<int>(offset_px);
+		int screen_x = e.worldPosition.x * tileSize - cam_x;
+		int screen_y = e.worldPosition.y * tileSize - cam_y - static_cast<int>(offset_px);
 
 		Color col{ e.r, e.g, e.b, alpha };
 		renderer.draw_text_color(Vector2D{ screen_x, screen_y }, e.text, col);

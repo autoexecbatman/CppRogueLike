@@ -7,7 +7,6 @@
 #include "DamageInfo.h"
 #include "../Actor/Creature.h"
 #include "../Core/GameContext.h"
-#include "../Systems/FloatingTextSystem.h"
 
 HealthPool::HealthPool(int hpMax)
 	: hpBase(hpMax),
@@ -40,15 +39,6 @@ int HealthPool::take_damage(Creature& owner, int damage, GameContext& ctx, Damag
 	if (hp <= 0)
 	{
 		hp = 0;
-	}
-
-	if (ctx.floatingText)
-	{
-		const bool hitPlayer = owner.is_player();
-		const unsigned char r = hitPlayer ? 255 : 255;
-		const unsigned char g = hitPlayer ? 80 : 220;
-		const unsigned char b = hitPlayer ? 80 : 50;
-		ctx.floatingText->spawn_damage(owner.position.x, owner.position.y, actualDamage, r, g, b);
 	}
 
 	return actualDamage;

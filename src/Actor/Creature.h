@@ -172,7 +172,7 @@ public:
 	[[nodiscard]] int get_base_armor_class() const noexcept { return armorClass->get_base_armor_class(); }
 	void set_armor_class(int value) noexcept { armorClass->set_armor_class(value); }
 	void set_base_armor_class(int value) noexcept { armorClass->set_base_armor_class(value); }
-	void update_armor_class(GameContext& ctx) { armorClass->update(*this, ctx); }
+	void update_armor_class(GameContext& ctx);
 
 	// Health Pool accessors
 	[[nodiscard]] bool is_dead() const noexcept { return healthPool->is_dead(); }
