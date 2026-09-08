@@ -415,3 +415,9 @@ CppProperties.json
 CMakeSettings.json
 /build-clang
 /build-web-warn
+
+# Generated documentation. Regenerate it rather than reading a copy that stopped
+# being true three commits ago.
+/docs/src_index.html
+/docs/src_api.html
+/docs/__pycache__
