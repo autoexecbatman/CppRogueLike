@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "Actor/InventoryData.h"
+#include "Actor/TileFeature.h"
 #include "ActorTypes/Player.h"
 #include "Core/GameContext.h"
 #include "Gui/Gui.h"

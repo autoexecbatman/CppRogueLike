@@ -547,7 +547,7 @@ bool Player::rest(GameContext& ctx)
 			}
 
 			// Skip non-hostile creatures (shopkeepers, etc.)
-			if (creature->ai && !creature->ai->is_hostile())
+			if (creature->get_attitude() != Attitude::HOSTILE)
 			{
 				continue;
 			}

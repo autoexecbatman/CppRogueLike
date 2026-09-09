@@ -33,6 +33,30 @@ enum class CreatureClass
 
 class Web;
 
+// How a creature feels about the player. Ordered from most hostile to most
+// friendly, so threshold comparisons are meaningful.
+//
+// This is deliberately separate from whether the creature has noticed the
+// player: a hostile creature that has not seen you is still hostile.
+enum class Attitude
+{
+	HOSTILE, // attacks the player on sight
+	PEACEFUL, // will not attack unless provoked
+	FRIENDLY, // will not attack, and sides with the player
+	TAME, // a companion under the player's direction
+};
+
+// True when attacking this creature is a deliberate act the player should be
+// asked to confirm.
+//
+// Example:
+//   needs_attack_confirmation(Attitude::HOSTILE);  // -> false
+//   needs_attack_confirmation(Attitude::PEACEFUL); // -> true
+[[nodiscard]] constexpr bool needs_attack_confirmation(Attitude attitude)
+{
+	return attitude >= Attitude::PEACEFUL;
+}
+
 // What a struggle against a web achieved this turn.
 enum class WebEscape
 {
@@ -44,6 +68,8 @@ enum class WebEscape
 class Creature : public Actor
 {
 private:
+	Attitude attitude{ Attitude::HOSTILE }; // how this creature feels about the player
+	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
 	int webStrength{ 0 }; // strength of the web holding this creature
 	Web* trappingWeb{ nullptr }; // the web holding it, destroyed on escape
@@ -182,6 +208,14 @@ public:
 	// Binds this creature into a web for duration turns. Pure state: the web
 	// decides what, if anything, the player is told.
 	void apply_web_effect(int duration, int strength, class Web* web);
+
+	[[nodiscard]] Attitude get_attitude() const noexcept { return attitude; }
+	void set_attitude(Attitude value) noexcept { attitude = value; }
+
+	// Whether the player swaps places with this creature instead of being
+	// blocked. Unique NPCs that must not be pushed around set this false.
+	[[nodiscard]] bool is_displaceable() const noexcept { return displaceable; }
+	void set_displaceable(bool value) noexcept { displaceable = value; }
 
 	[[nodiscard]] bool is_webbed() const noexcept { return webStuckTurns > 0; }
 

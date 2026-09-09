@@ -30,13 +30,6 @@ public:
 
 	virtual void update(Creature& owner, GameContext& ctx) = 0;
 
-	// Type-safe hostility check - replaces dynamic_cast usage
-	[[nodiscard]] virtual bool is_hostile() const { return true; } // Most AI types are hostile by default
-
-	// No-op default: non-trader AI types do nothing when bumped by the player.
-	// AiShopkeeper overrides to push MenuTrade.
-	virtual void open_trade(Creature& owner, Creature& player, GameContext& ctx) {}
-
 	[[nodiscard]] static std::unique_ptr<Ai> create(const json& j);
 
 protected:

@@ -53,6 +53,7 @@ private:
 	bool look_to_move(const Vector2D& targetPosition, GameContext& ctx);
 	void call_action(Controls key, GameContext& ctx);
 	bool resolve_pending_door(GameContext& ctx);
+	void resolve_peaceful_bump(Creature& target, GameContext& ctx);
 	Vector2D handle_direction_input(int dirKey, GameContext& ctx);
 	bool resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const;
 	void flush_fov(GameContext& ctx);

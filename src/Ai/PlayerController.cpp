@@ -42,6 +42,7 @@
 #include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
 #include "PlayerController.h"
+#include "AiShopkeeper.h"
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -336,10 +337,12 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 		if (!c->is_dead() && c->position == target)
 		{
 			assert(c->ai != nullptr && "living creature at target has no AI");
-			if (!c->ai->is_hostile())
+
+			// Bumping anything the player would not attack outright resolves as
+			// an interaction rather than a swing.
+			if (needs_attack_confirmation(c->get_attitude()))
 			{
-				ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
-				c->ai->open_trade(*c, playerOwner, ctx);
+				resolve_peaceful_bump(*c, ctx);
 				return false;
 			}
 
@@ -409,6 +412,42 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 	}
 
 	return true;
+}
+
+// Handles bumping a creature the player would not attack outright.
+//
+// Shopkeepers trade. Anything else displaceable swaps places, which is how a
+// peaceful creature is passed rather than fought. A creature that is neither
+// simply blocks; attacking it is a separate deliberate command.
+//
+// Example:
+//   resolve_peaceful_bump(shopkeeper, ctx); // opens the trade menu
+//   resolve_peaceful_bump(villager, ctx);   // player and villager swap tiles
+void PlayerController::resolve_peaceful_bump(Creature& target, GameContext& ctx)
+{
+	// A shopkeeper's answer to being bumped is its shop.
+	if (target.shop != nullptr)
+	{
+		ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
+		AiShopkeeper::open_trade(target, playerOwner, ctx);
+		return;
+	}
+
+	if (!target.is_displaceable())
+	{
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("{} will not move aside.", target.actorData.name),
+			true);
+		return;
+	}
+
+	// Swap tiles, so a peaceful creature is passed rather than fought.
+	const Vector2D playerPosition = playerOwner.position;
+	playerOwner.position = target.position;
+	target.position = playerPosition;
+
+	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 }
 
 bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)

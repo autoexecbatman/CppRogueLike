@@ -45,6 +45,10 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	// Set AI - single source for shopkeeper behavior
 	shopkeeper.ai = std::make_unique<AiShopkeeper>();
 
+	// Shopkeepers trade rather than fight, and cannot be shoved out of their shop.
+	shopkeeper.set_attitude(Attitude::PEACEFUL);
+	shopkeeper.set_displaceable(false);
+
 	// Set combat stats - non-hostile defensive stats
 	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);
 	shopkeeper.set_dr(20);

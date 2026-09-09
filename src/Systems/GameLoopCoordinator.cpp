@@ -33,6 +33,7 @@
 #include "HungerSystem.h"
 #include "LevelManager.h"
 #include "GameLoopCoordinator.h"
+#include "../Actor/TileFeature.h"
 #include "../ActorTypes/Player.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
