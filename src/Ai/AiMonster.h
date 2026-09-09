@@ -7,7 +7,6 @@ class Creature;
 struct GameContext;
 struct Vector2D;
 
-inline constexpr int TRACKING_TURNS = 3; // Used in AiSpider::update()
 
 class AiMonster : public Ai
 {
@@ -16,7 +15,6 @@ private:
 	void decide_action(Creature& owner, GameContext& ctx);
 
 protected:
-	int moveCount{ 0 };
 
 	virtual void move_or_attack(Creature& owner, Vector2D position, GameContext& ctx);
 

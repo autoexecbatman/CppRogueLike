@@ -162,20 +162,10 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		return;
 	}
 
-	// Handle movement and other behaviors normally
-	if (ctx.map->is_in_fov(owner.position))
-	{
-		// Player can see spider - set maximum tracking
-		moveCount = TRACKING_TURNS;
-	}
-	else if (moveCount > 0)
-	{
-		// Player can't see spider but we're still tracking
-		moveCount--;
-	}
+	owner.update_awareness(ctx);
 
 	// Movement logic
-	if (moveCount > 0)
+	if (owner.is_aware())
 	{
 		// Move toward player
 		move_toward_player(owner, ctx);

@@ -11,6 +11,7 @@
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "../Colors/Colors.h"
+#include "../Map/Map.h"
 #include "../Objects/Web.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
@@ -46,6 +47,7 @@ void Creature::load(const json& j)
 	gold = j["gold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
+	awarenessTurns = j.at("awarenessTurns").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
 	creatureClass = static_cast<CreatureClass>(j.value("creatureClass", static_cast<int>(CreatureClass::MONSTER)));
@@ -136,6 +138,7 @@ void Creature::save(json& j)
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
+	j["awarenessTurns"] = awarenessTurns;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
 	j["creatureClass"] = static_cast<int>(creatureClass);
@@ -348,6 +351,21 @@ void Creature::update(GameContext& ctx)
 
 	assert(ai && "Creature::update called with null ai");
 	ai->update(*this, ctx);
+}
+
+void Creature::update_awareness(const GameContext& ctx)
+{
+	// An invisible player is not seen even in plain line of sight.
+	if (ctx.map->is_in_fov(position) && !ctx.player()->is_invisible())
+	{
+		awarenessTurns = AWARENESS_TURNS;
+		return;
+	}
+
+	if (awarenessTurns > 0)
+	{
+		--awarenessTurns;
+	}
 }
 
 // Binds this creature into a web. The caller decides what is announced.

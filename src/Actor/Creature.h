@@ -57,6 +57,9 @@ enum class Attitude
 	return attitude >= Attitude::PEACEFUL;
 }
 
+// Turns a creature keeps tracking the player after losing sight of them.
+inline constexpr int AWARENESS_TURNS = 3;
+
 // What a struggle against a web achieved this turn.
 enum class WebEscape
 {
@@ -69,6 +72,7 @@ class Creature : public Actor
 {
 private:
 	Attitude attitude{ Attitude::HOSTILE }; // how this creature feels about the player
+	int awarenessTurns{ 0 }; // turns of memory left after last seeing the player
 	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
 	int webStrength{ 0 }; // strength of the web holding this creature
@@ -208,6 +212,20 @@ public:
 	// Binds this creature into a web for duration turns. Pure state: the web
 	// decides what, if anything, the player is told.
 	void apply_web_effect(int duration, int strength, class Web* web);
+
+	// Whether this creature currently knows where the player is. Separate from
+	// attitude: a hostile creature that has not seen you is still hostile.
+	[[nodiscard]] bool is_aware() const noexcept { return awarenessTurns > 0; }
+
+	// Refreshes awareness for this turn. Seeing the player resets the memory to
+	// full; losing sight lets it decay one turn at a time, so a creature keeps
+	// hunting briefly rather than forgetting the moment it loses line of sight.
+	// An invisible player is never seen.
+	//
+	// Example:
+	//   creature.update_awareness(ctx); // player in view -> is_aware() == true
+	//   creature.update_awareness(ctx); // out of view    -> still true, decaying
+	void update_awareness(const GameContext& ctx);
 
 	[[nodiscard]] Attitude get_attitude() const noexcept { return attitude; }
 	void set_attitude(Attitude value) noexcept { attitude = value; }

@@ -187,17 +187,10 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	}
 }
 
-// Keeps moveCount current: full reset when player is visible, decay when not.
+// Keeps the creature's awareness current for this turn.
 void AiMonster::update_tracking(Creature& owner, const GameContext& ctx)
 {
-	if (ctx.map->is_in_fov(owner.position) && !ctx.player()->is_invisible())
-	{
-		moveCount = TRACKING_TURNS;
-	}
-	else if (moveCount > 0)
-	{
-		--moveCount;
-	}
+	owner.update_awareness(ctx);
 }
 
 // AD&D 2e behavior dispatch: flee always wins, then pursue, then wander.
@@ -212,7 +205,7 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 
-	if (moveCount > 0 && !ctx.player()->is_invisible())
+	if (owner.is_aware() && !ctx.player()->is_invisible())
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}
@@ -245,13 +238,13 @@ void AiMonster::update(Creature& owner, GameContext& ctx)
 
 void AiMonster::load(const json& j)
 {
-	moveCount = j.at("moveCount").get<int>();
+
 }
 
 void AiMonster::save(json& j)
 {
 	j["type"] = static_cast<int>(AiType::MONSTER);
-	j["moveCount"] = moveCount;
+
 }
 
 // file: AiMonster.cpp

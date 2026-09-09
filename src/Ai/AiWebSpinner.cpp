@@ -77,16 +77,10 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	}
 
 	// Fall back to standard movement behavior
-	if (ctx.map->is_in_fov(owner.position))
+	owner.update_awareness(ctx);
+
+	if (owner.is_aware())
 	{
-		// If player can see us, move toward player
-		moveCount = TRACKING_TURNS;
-		move_toward_player(owner, ctx);
-	}
-	else if (moveCount > 0)
-	{
-		// Still tracking player
-		moveCount--;
 		move_toward_player(owner, ctx);
 	}
 	else

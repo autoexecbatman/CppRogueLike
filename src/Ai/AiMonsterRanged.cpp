@@ -22,22 +22,14 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 		return;
 	}
 
-	if (ctx.map->is_in_fov(owner.position))
-	{
-		// Move towards the player if we can see them
-		moveCount = TRACKING_TURNS;
-	}
-	else
-	{
-		moveCount--;
-	}
+	owner.update_awareness(ctx);
 
 	if (blocked_by_sanctuary(ctx))
 	{
 		return;
 	}
 
-	if (moveCount > 0)
+	if (owner.is_aware())
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}
