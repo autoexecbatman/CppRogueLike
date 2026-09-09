@@ -1130,33 +1130,62 @@ bool SpellSystem::cast_shield(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 {
-	// AD&D 2e: 2d8 HD of creatures affected, lowest HD first
-	int hdBudget = ctx.dice->roll(2, 8);
-	int affected = 0;
+	// AD&D 2e, Player's Handbook page 279: the spell affects 2d4 Hit Dice of
+	// monsters, least Hit Dice first, and lasts 5 rounds per caster level.
+	// Undead and creatures of 4+3 Hit Dice or more are unaffected.
+	//
+	// The book's threshold is four Hit Dice plus three hit points. Creatures
+	// here carry whole Hit Dice, so anything above four is out of reach.
+	constexpr int SLEEP_MAX_HIT_DICE = 4;
+	constexpr int SLEEP_ROUNDS_PER_LEVEL = 5;
 
+	int hdBudget = ctx.dice->roll(2, 4);
+	const int duration = SLEEP_ROUNDS_PER_LEVEL * caster.get_creature_level();
+
+	// Gather the eligible first: the budget is spent weakest-first, which the
+	// container's own order does not give.
+	std::vector<Creature*> sleepable{};
 	for (const auto& creature : *ctx.creatures)
 	{
-		if (hdBudget <= 0)
-		{
-			break;
-		}
-		if (!creature || creature->is_dead())
+		assert(creature && "creatures list holds a null entry");
+
+		if (creature->is_dead() || creature->is_undead())
 		{
 			continue;
 		}
+
+		if (creature->get_hit_dice() > SLEEP_MAX_HIT_DICE)
+		{
+			continue;
+		}
+
 		if (!ctx.map->is_in_fov(creature->position))
 		{
 			continue;
 		}
 
-		// Proxy HD from max HP (4 HP per HD)
-		int hd = std::max(1, creature->get_max_hp() / 4);
-		if (hd <= hdBudget)
+		sleepable.push_back(creature.get());
+	}
+
+	std::ranges::sort(sleepable,
+		[](const Creature* left, const Creature* right)
+		{ return left->get_hit_dice() < right->get_hit_dice(); });
+
+	int affected = 0;
+	for (Creature* creature : sleepable)
+	{
+		const int hitDice = creature->get_hit_dice();
+
+		// Partial effects are ignored: a creature the budget cannot cover whole
+		// is left awake, and the budget stops there.
+		if (hitDice > hdBudget)
 		{
-			ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, 5, false);
-			hdBudget -= hd;
-			++affected;
+			break;
 		}
+
+		ctx.buffSystem->add_buff(*creature, BuffType::SLEEP, 0, duration, false);
+		hdBudget -= hitDice;
+		++affected;
 	}
 
 	if (affected > 0)
