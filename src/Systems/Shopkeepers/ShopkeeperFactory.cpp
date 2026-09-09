@@ -19,6 +19,8 @@
 #include "../../Utils/Vector2D.h"
 #include "../ShopKeeper.h"
 #include "ShopkeeperFactory.h"
+#include "../BodyPlanRegistry.h"
+#include "../../Factories/ItemCreator.h"
 
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
@@ -56,7 +58,14 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
 	shopkeeper.healthPool = std::make_unique<HealthPool>(100);
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
-	shopkeeper.set_weapon_equipped("Dagger");
+	// A merchant is a person with a knife, so the dagger is a real item in a
+	// real hand rather than a name on the creature.
+	assert(ctx.bodyPlanRegistry && "configure_shopkeeper called without a bodyPlanRegistry");
+	assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");
+	shopkeeper.set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
+	shopkeeper.wear(
+		ItemCreator::create("dagger", shopkeeper.position, *ctx.contentRegistry),
+		EquipmentSlot::RIGHT_HAND);
 
 	assert(shopkeeper.ai && "Shopkeeper requires Ai");
 	assert(shopkeeper.attacker && "Shopkeeper requires Attacker");

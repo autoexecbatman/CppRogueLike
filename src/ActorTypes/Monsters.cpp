@@ -32,7 +32,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_wisdom(ctx.dice->d6() + ctx.dice->d6() + 1);                    // 2d6+1  avg  8
 	set_charisma(ctx.dice->d4());                                        // 1d4    avg  2
 
-	set_weapon_equipped("Pseudopod");
+	set_natural_attack("Pseudopod");
 
 	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
 	experienceReward = std::make_unique<ExperienceReward>(150);

@@ -10,6 +10,8 @@
 #include "src/Factories/MonsterCreator.h"
 #include "src/Factories/ItemCreator.h"
 #include "src/Systems/BodyPlanRegistry.h"
+#include "src/Actor/Creature.h"
+#include "tests/mocks/MockGameContext.h"
 #include "src/Actor/EquipmentSlot.h"
 
 // A monster either wields an item or fights with its body. The two are
@@ -190,4 +192,33 @@ TEST_F(MonsterEquipmentTest, HarpyHasHandsAndNothingElse)
 	EXPECT_EQ(plan.size(), 2u);
 	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end());
 	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
+}
+
+// A carried item key becomes a real item in a real slot at creation, and the
+// creature's attack takes its name from it.
+TEST_F(MonsterEquipmentTest, WieldingMonsterHoldsARealItem)
+{
+	MockGameContext mock;
+	GameContext ctx = mock.to_game_context();
+
+	auto orc = MonsterCreator::create(Vector2D(0, 0), MonsterId::ORC, ctx);
+	ASSERT_NE(orc, nullptr);
+
+	Item* mainHand = orc->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	ASSERT_NE(mainHand, nullptr) << "the orc's long sword never became an item";
+	EXPECT_EQ(orc->get_attack_name(), mainHand->get_name());
+}
+
+// A creature that fights with its body holds nothing, and its attack comes
+// from the body instead.
+TEST_F(MonsterEquipmentTest, ClawedMonsterHoldsNothingAndStrikesWithItsBody)
+{
+	MockGameContext mock;
+	GameContext ctx = mock.to_game_context();
+
+	auto troll = MonsterCreator::create(Vector2D(0, 0), MonsterId::TROLL, ctx);
+	ASSERT_NE(troll, nullptr);
+
+	EXPECT_EQ(troll->get_equipped_item(EquipmentSlot::RIGHT_HAND), nullptr);
+	EXPECT_EQ(troll->get_attack_name(), "Claws");
 }

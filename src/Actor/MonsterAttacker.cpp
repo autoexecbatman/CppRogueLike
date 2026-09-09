@@ -8,5 +8,5 @@ MonsterAttacker::MonsterAttacker(Creature& owner, const DamageInfo& damage)
 
 void MonsterAttacker::attack(Creature& target, GameContext& ctx)
 {
-	perform_single_attack(owner, target, get_damage_info(), 0, owner.get_weapon_equipped(), ctx);
+	perform_single_attack(owner, target, get_damage_info(), 0, owner.get_attack_name(), ctx);
 }

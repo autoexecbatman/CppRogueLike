@@ -73,3 +73,37 @@ TEST_F(EquipmentStorageTest, UnfilledSlotStaysEmpty)
 	EXPECT_EQ(creature->get_equipped_item(EquipmentSlot::BODY), nullptr);
 	EXPECT_EQ(creature->get_equipped_item(EquipmentSlot::HEAD), nullptr);
 }
+
+// What a creature strikes with has one answer, and it comes from the slot when
+// something is in it and from the body when nothing is. Before this, a monster
+// carried a display string that nothing could resolve to a real item.
+TEST_F(EquipmentStorageTest, BodyProvidesTheAttackWhenNoWeaponIsHeld)
+{
+	creature->set_natural_attack("Claws");
+
+	EXPECT_EQ(creature->get_attack_name(), "Claws");
+}
+
+TEST_F(EquipmentStorageTest, HeldWeaponNamesTheAttack)
+{
+	creature->set_natural_attack("Claws");
+	wear("long sword", EquipmentSlot::RIGHT_HAND);
+
+	EXPECT_EQ(creature->get_attack_name(), "long sword");
+}
+
+// A creature with hands, nothing in them and no natural attack is unarmed
+// rather than nameless.
+TEST_F(EquipmentStorageTest, EmptyHandedAndBodilessIsUnarmed)
+{
+	EXPECT_EQ(creature->get_attack_name(), "unarmed");
+}
+
+// Armor is not what you hit with. Only the main hand names the attack.
+TEST_F(EquipmentStorageTest, WornArmorDoesNotNameTheAttack)
+{
+	creature->set_natural_attack("Claws");
+	wear("chain mail", EquipmentSlot::BODY);
+
+	EXPECT_EQ(creature->get_attack_name(), "Claws");
+}

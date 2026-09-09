@@ -81,8 +81,7 @@ struct MonsterParams
 	DiceExpr wisDice{ 3, 6, 0 };
 	DiceExpr chaDice{ 3, 6, 0 };
 
-	// Weapon display + damage
-	std::string weaponName;
+	// Damage this creature deals
 	DamageInfo damage{};
 
 	// One item this creature starts wearing or wielding. The key names an entry

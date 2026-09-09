@@ -55,7 +55,7 @@ protected:
 			monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
-		monster->set_weapon_equipped("claws");
+		monster->set_natural_attack("claws");
 
 		ctx = game.context();
 		// The context borrows the handle that owns the player, so the fixture
@@ -195,7 +195,7 @@ TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
 
 TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
 {
-	monster->set_weapon_equipped("sharp claws");
+	monster->set_natural_attack("sharp claws");
 	player->set_armor_class(10);
 
 	game.dice.set_next_d20(20);

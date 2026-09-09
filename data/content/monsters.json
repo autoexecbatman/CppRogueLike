@@ -52,7 +52,6 @@
       "row": 12,
       "sheet": 6
     },
-    "weapon": "Longbow",
     "weight": 10,
     "wis": {
       "bonus": 0,
@@ -123,7 +122,6 @@
       "row": 11,
       "sheet": 14
     },
-    "weapon": "Bite",
     "weight": 15,
     "wis": {
       "bonus": 0,
@@ -189,7 +187,6 @@
       "row": 1,
       "sheet": 6
     },
-    "weapon": "Morning Star",
     "weight": 11,
     "wis": {
       "bonus": 1,
@@ -260,7 +257,6 @@
       "row": 0,
       "sheet": 22
     },
-    "weapon": "Fire Breath",
     "weight": 5,
     "wis": {
       "bonus": 0,
@@ -326,7 +322,6 @@
       "row": 3,
       "sheet": 8
     },
-    "weapon": "Fiery Breath",
     "weight": 3,
     "wis": {
       "bonus": 0,
@@ -392,7 +387,6 @@
       "row": 5,
       "sheet": 12
     },
-    "weapon": "Flaming Bite",
     "weight": 8,
     "wis": {
       "bonus": 2,
@@ -458,7 +452,6 @@
       "row": 0,
       "sheet": 20
     },
-    "weapon": "Claw",
     "weight": 9,
     "wis": {
       "bonus": 0,
@@ -524,7 +517,6 @@
       "row": 0,
       "sheet": 16
     },
-    "weapon": "Paralytic Claw",
     "weight": 10,
     "wis": {
       "bonus": 0,
@@ -591,7 +583,6 @@
       "row": 5,
       "sheet": 10
     },
-    "weapon": "Poison Bite",
     "weight": 12,
     "wis": {
       "bonus": 0,
@@ -657,7 +648,6 @@
       "row": 0,
       "sheet": 22
     },
-    "weapon": "Bite",
     "weight": 18,
     "wis": {
       "bonus": 0,
@@ -723,7 +713,6 @@
       "row": 4,
       "sheet": 8
     },
-    "weapon": "Poison Bite",
     "weight": 10,
     "wis": {
       "bonus": 0,
@@ -789,7 +778,6 @@
       "row": 13,
       "sheet": 4
     },
-    "weapon": "Battle Axe",
     "weight": 13,
     "wis": {
       "bonus": 1,
@@ -860,7 +848,6 @@
       "row": 4,
       "sheet": 6
     },
-    "weapon": "Short Sword",
     "weight": 30,
     "wis": {
       "bonus": 3,
@@ -931,7 +918,6 @@
       "row": 0,
       "sheet": 6
     },
-    "weapon": "Stone Fist",
     "weight": 4,
     "wis": {
       "bonus": 0,
@@ -997,7 +983,6 @@
       "row": 17,
       "sheet": 6
     },
-    "weapon": "Talons",
     "weight": 8,
     "wis": {
       "bonus": 0,
@@ -1063,7 +1048,6 @@
       "row": 0,
       "sheet": 6
     },
-    "weapon": "Hurled Boulder",
     "weight": 6,
     "wis": {
       "bonus": 0,
@@ -1129,7 +1113,6 @@
       "row": 4,
       "sheet": 6
     },
-    "weapon": "Long Sword",
     "weight": 15,
     "wis": {
       "bonus": 1,
@@ -1200,7 +1183,6 @@
       "row": 1,
       "sheet": 12
     },
-    "weapon": "Freezing Bite",
     "weight": 8,
     "wis": {
       "bonus": 2,
@@ -1266,7 +1248,6 @@
       "row": 14,
       "sheet": 4
     },
-    "weapon": "Dagger",
     "weight": 25,
     "wis": {
       "bonus": 0,
@@ -1337,7 +1318,6 @@
       "row": 2,
       "sheet": 16
     },
-    "weapon": "Paralyzing Touch",
     "weight": 3,
     "wis": {
       "bonus": 3,
@@ -1404,7 +1384,6 @@
       "row": 2,
       "sheet": 6
     },
-    "weapon": "Staff",
     "weight": 10,
     "wis": {
       "bonus": 2,
@@ -1475,7 +1454,6 @@
       "row": 26,
       "sheet": 6
     },
-    "weapon": "Petrifying Gaze",
     "weight": 7,
     "wis": {
       "bonus": 1,
@@ -1549,7 +1527,6 @@
       "row": 0,
       "sheet": 6
     },
-    "weapon": "Club",
     "weight": 10,
     "wis": {
       "bonus": 0,
@@ -1620,7 +1597,6 @@
       "row": 4,
       "sheet": 6
     },
-    "weapon": "Long Sword",
     "weight": 15,
     "wis": {
       "bonus": 1,
@@ -1691,7 +1667,6 @@
       "row": 1,
       "sheet": 20
     },
-    "weapon": "Hellfire Strike",
     "weight": 3,
     "wis": {
       "bonus": 2,
@@ -1757,7 +1732,6 @@
       "row": 0,
       "sheet": 22
     },
-    "weapon": "Bite",
     "weight": 20,
     "wis": {
       "bonus": 0,
@@ -1823,7 +1797,6 @@
       "row": 4,
       "sheet": 16
     },
-    "weapon": "Strength Drain",
     "weight": 9,
     "wis": {
       "bonus": 1,
@@ -1898,7 +1871,6 @@
       "row": 2,
       "sheet": 16
     },
-    "weapon": "Claw",
     "weight": 15,
     "wis": {
       "bonus": 0,
@@ -1989,7 +1961,6 @@
       "row": 14,
       "sheet": 6
     },
-    "weapon": "Claws",
     "weight": 7,
     "wis": {
       "bonus": 2,
@@ -2055,7 +2026,6 @@
       "row": 3,
       "sheet": 16
     },
-    "weapon": "Blood Drain",
     "weight": 5,
     "wis": {
       "bonus": 2,
@@ -2122,7 +2092,6 @@
       "row": 0,
       "sheet": 12
     },
-    "weapon": "Bite",
     "weight": 8,
     "wis": {
       "bonus": 1,
@@ -2188,7 +2157,6 @@
       "row": 6,
       "sheet": 16
     },
-    "weapon": "Energy Drain",
     "weight": 8,
     "wis": {
       "bonus": 1,
@@ -2255,7 +2223,6 @@
       "row": 1,
       "sheet": 12
     },
-    "weapon": "Bite",
     "weight": 20,
     "wis": {
       "bonus": 2,
@@ -2321,7 +2288,6 @@
       "row": 4,
       "sheet": 16
     },
-    "weapon": "Energy Drain",
     "weight": 7,
     "wis": {
       "bonus": 1,
@@ -2388,7 +2354,6 @@
       "row": 6,
       "sheet": 8
     },
-    "weapon": "Poison Sting",
     "weight": 6,
     "wis": {
       "bonus": 0,
@@ -2454,7 +2419,6 @@
       "row": 0,
       "sheet": 16
     },
-    "weapon": "Slam",
     "weight": 14,
     "wis": {
       "bonus": 0,
@@ -2522,7 +2486,6 @@
       "row": 12,
       "sheet": 6
     },
-    "weapon": "Mace",
     "weight": 0,
     "wis": {
       "bonus": 0,
@@ -2594,7 +2557,6 @@
       "row": 0,
       "sheet": 6
     },
-    "weapon": "Longsword",
     "weight": 0,
     "wis": {
       "bonus": 0,

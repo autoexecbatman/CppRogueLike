@@ -26,7 +26,7 @@ protected:
         creature->set_wisdom(7);
         creature->set_charisma(6);
         creature->set_gold(50);
-        creature->set_weapon_equipped("Short Sword");
+        creature->set_natural_attack("Short Sword");
 
         creature->experienceReward = std::make_unique<ExperienceReward>(35);
         creature->set_dr(1);
@@ -61,7 +61,7 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     EXPECT_EQ(loaded->get_dexterity(), 12);
     EXPECT_EQ(loaded->get_constitution(), 10);
     EXPECT_EQ(loaded->get_gold(), 50);
-    EXPECT_EQ(loaded->get_weapon_equipped(), "Short Sword");
+    EXPECT_EQ(loaded->get_natural_attack(), "Short Sword");
 
     // Verify components exist
     ASSERT_NE(loaded->attacker, nullptr) << "Attacker not loaded";

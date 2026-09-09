@@ -67,7 +67,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		armorClass = std::make_unique<ArmorClass>(7);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d2() + 2);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
-		set_weapon_equipped("Venomous fangs");
+		set_natural_attack("Venomous fangs");
 
 		ai = std::make_unique<AiSpider>(POISON_CHANCE_SMALL_SPIDER);
 		break;
@@ -88,7 +88,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		armorClass = std::make_unique<ArmorClass>(5);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d4() + 3);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
-		set_weapon_equipped("Giant fangs");
+		set_natural_attack("Giant fangs");
 
 		ai = std::make_unique<AiSpider>(POISON_CHANCE_GIANT_SPIDER);
 		break;
@@ -109,7 +109,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		armorClass = std::make_unique<ArmorClass>(5);
 		healthPool = std::make_unique<HealthPool>(ctx.dice->d8() + 5);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
-		set_weapon_equipped("Toxic fangs");
+		set_natural_attack("Toxic fangs");
 
 		ai = std::make_unique<AiWebSpinner>(POISON_CHANCE_WEB_SPINNER);
 		break;

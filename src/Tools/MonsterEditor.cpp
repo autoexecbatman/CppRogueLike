@@ -353,7 +353,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.intDice = DiceExpr{ 3, 6, 0 };
 			defaults.wisDice = DiceExpr{ 3, 6, 0 };
 			defaults.chaDice = DiceExpr{ 3, 6, 0 };
-			defaults.weaponName = "claws";
+			defaults.naturalAttack = "claws";
 			defaults.damage = DamageInfo{ 1, 4, "1d4", DamageType::PHYSICAL };
 			defaults.baseWeight = 10;
 			defaults.levelMinimum = 1;
@@ -915,7 +915,7 @@ std::string MonsterEditor::field_label(FieldId f) const
 	case FieldId::CHA_NUM:    return "CHA Num";
 	case FieldId::CHA_SIDES:  return "CHA Sides";
 	case FieldId::CHA_BONUS:  return "CHA Bonus";
-	case FieldId::WEAPON:     return "Weapon";
+	case FieldId::WEAPON:     return "Natural Attack";
 	case FieldId::DMG_MIN:    return "Dmg Min";
 	case FieldId::DMG_MAX:    return "Dmg Max";
 	case FieldId::DMG_DISPLAY: return "Dmg Display";
@@ -962,7 +962,7 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::CHA_NUM:     return std::format("{}", m_working.chaDice.num);
 	case FieldId::CHA_SIDES:   return std::format("{}", m_working.chaDice.sides);
 	case FieldId::CHA_BONUS:   return std::format("{}", m_working.chaDice.bonus);
-	case FieldId::WEAPON:      return m_working.weaponName;
+	case FieldId::WEAPON:      return m_working.naturalAttack;
 	case FieldId::DMG_MIN:     return std::format("{}", m_working.damage.minDamage);
 	case FieldId::DMG_MAX:     return std::format("{}", m_working.damage.maxDamage);
 	case FieldId::DMG_DISPLAY: return m_working.damage.displayRoll;
@@ -1063,7 +1063,7 @@ void MonsterEditor::field_set_string(FieldId f, std::string val)
 	{
 	case FieldId::NAME:        m_working.name = std::move(val); break;
 	case FieldId::CORPSE:      m_working.corpseName = std::move(val); break;
-	case FieldId::WEAPON:      m_working.weaponName = std::move(val); break;
+	case FieldId::WEAPON:      m_working.naturalAttack = std::move(val); break;
 	case FieldId::DMG_DISPLAY: m_working.damage.displayRoll = std::move(val); break;
 	default: break;
 	}

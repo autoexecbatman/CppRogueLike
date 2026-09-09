@@ -46,7 +46,7 @@ void Creature::load(const json& j)
 	creatureLevel = j["playerLevel"];
 	gold = j["gold"];
 	gender = j["gender"];
-	weaponEquipped = j["weaponEquipped"];
+	naturalAttack = j.value("naturalAttack", std::string{});
 	ethics = static_cast<Ethics>(j.at("ethics").get<int>());
 	morality = static_cast<Morality>(j.at("morality").get<int>());
 	undead = j.at("undead").get<bool>();
@@ -140,7 +140,7 @@ void Creature::save(json& j)
 	j["playerLevel"] = creatureLevel;
 	j["gold"] = gold;
 	j["gender"] = gender;
-	j["weaponEquipped"] = weaponEquipped;
+	j["naturalAttack"] = naturalAttack;
 	j["ethics"] = static_cast<int>(ethics);
 	j["morality"] = static_cast<int>(morality);
 	j["undead"] = undead;
@@ -384,6 +384,41 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 	return std::ranges::find(bodyPlan, slot) != bodyPlan.end();
 }
 
+// Puts an item into a slot this creature's body provides.
+//
+// Example:
+//   orc.wear(ItemCreator::create("long_sword", pos, tiles), EquipmentSlot::RIGHT_HAND);
+//   orc.get_attack_name(); // -> "long sword"
+void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
+{
+	assert(item && "Creature::wear called with no item");
+	assert(has_slot(slot) && "Creature::wear called with a slot this body does not have");
+
+	item->add_state(ActorState::IS_EQUIPPED);
+	equippedItems.push_back(EquippedItem(std::move(item), slot));
+}
+
+// What this creature strikes with. The held weapon wins, because a monster
+// that picks up a sword is fighting with the sword.
+//
+// Example:
+//   troll.get_attack_name();  // -> "Claws", from its body
+//   orc.get_attack_name();    // -> "long sword", from its main hand
+std::string Creature::get_attack_name() const
+{
+	if (const Item* mainHand = get_equipped_item(EquipmentSlot::RIGHT_HAND))
+	{
+		return mainHand->get_name();
+	}
+
+	if (!naturalAttack.empty())
+	{
+		return naturalAttack;
+	}
+
+	return "unarmed";
+}
+
 // What sits in one slot, or nothing when the slot is empty or the creature's
 // body plan does not grant it.
 //
@@ -462,8 +497,10 @@ void Creature::equip(Item& item, GameContext& ctx)
 	bool isWeapon = item.is_weapon();
 	bool isShield = item.is_shield();
 
-	// First check if any equipment of the same type is already equipped
-	std::vector<Item*> equippedItems;
+	// Equipment of the same type already worn, which this item displaces.
+	// Named apart from the equippedItems member, which it would otherwise
+	// shadow.
+	std::vector<Item*> sameTypeWorn;
 
 	// Find all equipped items
 	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
@@ -478,15 +515,15 @@ void Creature::equip(Item& item, GameContext& ctx)
 			// Only consider same-type equipment for unequipping
 			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon) || (isShield && itemIsShield))
 			{
-				equippedItems.push_back(invItem.get());
+				sameTypeWorn.push_back(invItem.get());
 			}
 		}
 	}
 
 	// If there's already equipment of the same type, unequip it
-	if (!equippedItems.empty() && &item != equippedItems[0])
+	if (!sameTypeWorn.empty() && &item != sameTypeWorn[0])
 	{
-		for (auto* equipped : equippedItems)
+		for (auto* equipped : sameTypeWorn)
 		{
 			unequip(*equipped, ctx);
 		}
@@ -495,10 +532,10 @@ void Creature::equip(Item& item, GameContext& ctx)
 	// Now equip the new item
 	item.add_state(ActorState::IS_EQUIPPED);
 
-	// Update weapon equipped name and damage if it's a weapon
+	// Log the weapon and its damage. The item itself is the record of what is
+	// held, so nothing copies its name.
 	if (isWeapon)
 	{
-		weaponEquipped = item.get_name();
 		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemKey);
 		ctx.messageSystem->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
 	}
@@ -524,10 +561,9 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		// Remove the equipped state
 		item.remove_state(ActorState::IS_EQUIPPED);
 
-		// If it's a weapon, update the weaponEquipped status
+		// Unequipping a weapon leaves the creature striking with its body
 		if (item.is_weapon())
 		{
-			weaponEquipped = "None";
 			ctx.messageSystem->log("Unequipped weapon - now unarmed");
 
 			// Check for ranged weapon - use ItemClass system

@@ -112,9 +112,9 @@ private:
 	int creatureLevel{ 1 };
 	int gold{ 0 };
 
-	// Creature gender and weapon
+	// Creature gender, and what its body attacks with when it holds no weapon
 	std::string gender{ "None" };
-	std::string weaponEquipped{ "None" };
+	std::string naturalAttack{};
 
 	// The slots this creature has at all. Empty means it wears nothing -- a
 	// wolf, a gelatinous cube -- which is the default until a body plan is
@@ -182,7 +182,7 @@ public:
 
 	int get_gold() const noexcept { return gold; }
 	const std::string& get_gender() const noexcept { return gender; }
-	const std::string& get_weapon_equipped() const noexcept { return weaponEquipped; }
+	const std::string& get_natural_attack() const noexcept { return naturalAttack; }
 
 	// Setter methods - modify base stats
 	void set_strength(int value) noexcept { baseStrength = value; }
@@ -194,7 +194,7 @@ public:
 	void set_creature_level(int value) noexcept { creatureLevel = value; }
 	void set_gold(int value) noexcept { gold = value; }
 	void set_gender(const std::string& new_gender) noexcept { gender = new_gender; }
-	void set_weapon_equipped(const std::string& weapon) noexcept { weaponEquipped = weapon; }
+	void set_natural_attack(const std::string& attack) noexcept { naturalAttack = attack; }
 
 	// Modifier methods for increment/decrement operations - modify base stats
 	void adjust_strength(int delta) noexcept { baseStrength += delta; }
@@ -238,6 +238,16 @@ public:
 	// Equipment query. Read by ArmorClass, Web and targeting, each of which
 	// runs for any creature.
 	[[nodiscard]] Item* get_equipped_item(EquipmentSlot slot) const noexcept;
+
+	// Puts an item into one of this creature's slots and takes ownership of
+	// it. The slot must be one the body plan grants: wearing boots on a wolf
+	// is a data error, not a runtime outcome.
+	void wear(std::unique_ptr<Item> item, EquipmentSlot slot);
+
+	// What this creature strikes with: the weapon in its main hand, or the
+	// attack its body provides when no slot holds one. "unarmed" when it has
+	// neither, which is a creature with hands and nothing in them.
+	[[nodiscard]] std::string get_attack_name() const;
 
 	// Type query - allows polymorphic identification without RTTI or cross-module deps
 	virtual bool is_player() const noexcept { return false; }

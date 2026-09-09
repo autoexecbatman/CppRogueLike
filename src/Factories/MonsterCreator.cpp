@@ -28,6 +28,7 @@
 #include "../Utils/Vector2D.h"
 #include "MonsterCreator.h"
 #include "../Systems/BodyPlanRegistry.h"
+#include "ItemCreator.h"
 
 namespace
 {
@@ -226,7 +227,6 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.intDice = parse_dice(entry.at("int"));
 	p.wisDice = parse_dice(entry.at("wis"));
 	p.chaDice = parse_dice(entry.at("cha"));
-	p.weaponName = entry.at("weapon").get<std::string>();
 	p.naturalAttack = entry.at("natural_attack").get<std::string>();
 	p.equipment = parse_equipment(entry.at("equipment"));
 	p.bodyPlanName = entry.at("body").get<std::string>();
@@ -269,7 +269,6 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "int", encode_dice(p.intDice) },
 		{ "wis", encode_dice(p.wisDice) },
 		{ "cha", encode_dice(p.chaDice) },
-		{ "weapon", p.weaponName },
 		{ "natural_attack", p.naturalAttack },
 		{ "equipment", encode_equipment(p.equipment) },
 		{ "body", p.bodyPlanName },
@@ -582,9 +581,17 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_wisdom(std::max(1, roll_dice(ctx.dice, params.wisDice)));
 	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.chaDice)));
 
-	c->set_weapon_equipped(params.weaponName);
+	c->set_natural_attack(params.naturalAttack);
 	assert(ctx.bodyPlanRegistry && "MonsterCreator::create_from_params called without a bodyPlanRegistry");
 	c->set_body_plan(ctx.bodyPlanRegistry->get(params.bodyPlanName));
+
+	// Whatever the creature carries is a real item, created through the same
+	// path the player's gear comes from.
+	assert(ctx.contentRegistry && "MonsterCreator::create_from_params called without a contentRegistry");
+	for (const MonsterParams::StartingItem& carried : params.equipment)
+	{
+		c->wear(ItemCreator::create(carried.itemKey, pos, *ctx.contentRegistry), carried.slot);
+	}
 	c->set_morale(params.morale);
 	c->set_undead(params.undead);
 	c->set_ethics(params.ethics);
