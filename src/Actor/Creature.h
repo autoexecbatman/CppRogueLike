@@ -76,6 +76,7 @@ private:
 	Ethics ethics{ Ethics::NEUTRAL }; // law/chaos axis; true neutral until data says otherwise
 	Morality morality{ Morality::NEUTRAL }; // good/evil axis
 	int awarenessTurns{ 0 }; // turns of memory left after last seeing the player
+	bool undead{ false }; // whether a priest may attempt to turn this creature
 	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
 	int webStrength{ 0 }; // strength of the web holding this creature
@@ -218,6 +219,17 @@ public:
 
 	// Whether this creature currently knows where the player is. Separate from
 	// attitude: a hostile creature that has not seen you is still hostile.
+	// Whether this creature is undead, which is what turning acts on.
+	[[nodiscard]] bool is_undead() const noexcept { return undead; }
+	void set_undead(bool value) noexcept { undead = value; }
+
+	// Hit dice, the row a turning attempt reads from Table 61. Derived from
+	// the creature's level, which is what the hit dice roll was based on.
+	//
+	// Example:
+	//   skeleton.get_hit_dice(); // -> 1
+	[[nodiscard]] int get_hit_dice() const noexcept { return creatureLevel; }
+
 	[[nodiscard]] bool is_aware() const noexcept { return awarenessTurns > 0; }
 
 	// Refreshes awareness for this turn. Seeing the player resets the memory to

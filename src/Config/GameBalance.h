@@ -66,8 +66,6 @@ namespace GameBalance
         // Cleric Progression
         namespace Cleric
         {
-            // Turn undead improvement levels
-            inline constexpr int TURN_UNDEAD_IMPROVEMENT_LEVELS[] = {3, 5, 7, 9};
             inline constexpr int SPELL_ACCESS_MINIMUM_LEVEL = 2;
             inline constexpr int SAVING_THROW_IMPROVEMENT_INTERVAL = 3;  // Every 3 levels
         }

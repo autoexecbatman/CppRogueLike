@@ -49,6 +49,7 @@ void Creature::load(const json& j)
 	weaponEquipped = j["weaponEquipped"];
 	ethics = static_cast<Ethics>(j.at("ethics").get<int>());
 	morality = static_cast<Morality>(j.at("morality").get<int>());
+	undead = j.at("undead").get<bool>();
 	awarenessTurns = j.at("awarenessTurns").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
@@ -142,6 +143,7 @@ void Creature::save(json& j)
 	j["weaponEquipped"] = weaponEquipped;
 	j["ethics"] = static_cast<int>(ethics);
 	j["morality"] = static_cast<int>(morality);
+	j["undead"] = undead;
 	j["awarenessTurns"] = awarenessTurns;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;

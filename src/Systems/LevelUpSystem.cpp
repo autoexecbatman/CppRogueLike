@@ -9,6 +9,7 @@
 #include "../dnd_tables/CombatProgressionTables.h"
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
+#include "../Combat/TurningTable.h"
 #include "LevelUpSystem.h"
 
 // ============================================================================
@@ -190,7 +191,7 @@ void apply_fighter_improvements(Creature& owner, int newLevel, GameContext* ctx)
     }
 }
 
-void apply_rogue_improvements(Creature& owner, int newLevel, GameContext* ctx)
+void apply_rogue_improvements(int newLevel, GameContext* ctx)
 {
     if (!ctx)
     {
@@ -215,20 +216,26 @@ void apply_rogue_improvements(Creature& owner, int newLevel, GameContext* ctx)
     }
 }
 
-void apply_cleric_improvements(Creature& owner, int newLevel, GameContext* ctx)
+void apply_cleric_improvements(int newLevel, GameContext* ctx)
 {
     if (!ctx)
     {
         return;
     }
 
-    if (newLevel == 3 || newLevel == 5 || newLevel == 7 || newLevel == 9)
+    // Announce only when a tougher class of undead comes into reach. The target
+    // numbers improve at almost every level, so announcing those would announce
+    // almost every level.
+    const int reachNow = highest_turnable_hit_dice(newLevel);
+    if (reachNow > highest_turnable_hit_dice(newLevel - 1))
     {
         ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
         ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Turn Undead improved!");
-        ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can affect more powerful undead.");
+        ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You can now turn undead of up to ");
+        ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, std::to_string(reachNow));
+        ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " hit dice.");
         ctx->messageSystem->finalize_message();
-        ctx->messageSystem->log(std::format("Cleric turn undead ability improved at level {}", newLevel));
+        ctx->messageSystem->log(std::format("Cleric turning reach rose to {} HD at level {}", reachNow, newLevel));
     }
 
     if (newLevel >= 2)
@@ -238,7 +245,7 @@ void apply_cleric_improvements(Creature& owner, int newLevel, GameContext* ctx)
     }
 }
 
-void apply_wizard_improvements(Creature& owner, int newLevel, GameContext* ctx)
+void apply_wizard_improvements(int newLevel, GameContext* ctx)
 {
     if (!ctx)
     {
@@ -281,19 +288,19 @@ void apply_class_specific_improvements(Creature& owner, int newLevel, GameContex
 
     case CreatureClass::ROGUE:
     {
-        apply_rogue_improvements(owner, newLevel, ctx);
+        apply_rogue_improvements(newLevel, ctx);
         break;
     }
 
     case CreatureClass::CLERIC:
     {
-        apply_cleric_improvements(owner, newLevel, ctx);
+        apply_cleric_improvements(newLevel, ctx);
         break;
     }
 
     case CreatureClass::WIZARD:
     {
-        apply_wizard_improvements(owner, newLevel, ctx);
+        apply_wizard_improvements(newLevel, ctx);
         break;
     }
 

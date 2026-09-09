@@ -43,4 +43,5 @@ enum class Controls
 	HIDE = 'H',
 	CAST = 'C',
 	USE = 'u',
+	TURN_UNDEAD = 'U',
 };

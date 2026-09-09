@@ -44,6 +44,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AwarenessTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AlignmentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/ProtectionFromEvilTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TurningTableTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TurnUndeadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WebTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
@@ -170,6 +172,7 @@ set(PARENT_SOURCES
 
     # Factories
     ${PARENT_SOURCE_DIR}/Factories/MonsterFactory.cpp
+    ${PARENT_SOURCE_DIR}/Combat/TurnUndead.cpp
     ${PARENT_SOURCE_DIR}/Factories/MonsterCreator.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemFactory.cpp
     ${PARENT_SOURCE_DIR}/Factories/ItemCreator.cpp

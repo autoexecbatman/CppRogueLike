@@ -179,6 +179,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.xp = entry.at("xp").get<int>();
 	p.dr = entry.at("dr").get<int>();
 	p.morale = entry.at("morale").get<int>();
+	// Optional by design: entries authored before turning existed are living.
+	p.undead = entry.value("undead", false);
 	// Optional by design: entries authored before alignment existed default to
 	// true neutral rather than failing to load.
 	p.ethics = static_cast<Ethics>(entry.value("ethics", static_cast<int>(Ethics::NEUTRAL)));
@@ -220,6 +222,7 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "xp", p.xp },
 		{ "dr", p.dr },
 		{ "morale", p.morale },
+		{ "undead", p.undead },
 		{ "ethics", static_cast<int>(p.ethics) },
 		{ "morality", static_cast<int>(p.morality) },
 		{ "corpse_weight", p.corpseWeight },
@@ -540,6 +543,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	c->set_weapon_equipped(params.weaponName);
 	c->set_morale(params.morale);
+	c->set_undead(params.undead);
 	c->set_ethics(params.ethics);
 	c->set_morality(params.morality);
 	c->set_corpse_weight(params.corpseWeight);

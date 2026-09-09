@@ -125,6 +125,9 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Actor/Item.h
     ${PROJECT_SOURCE_DIR}/Actor/NPC.h
     ${PROJECT_SOURCE_DIR}/Actor/Alignment.h
+    ${PROJECT_SOURCE_DIR}/Combat/TurnUndead.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/TurnUndead.h
+    ${PROJECT_SOURCE_DIR}/Combat/TurningTable.h
     ${PROJECT_SOURCE_DIR}/Actor/TileFeature.h
     ${PROJECT_SOURCE_DIR}/Actor/Stairs.cpp
     ${PROJECT_SOURCE_DIR}/Actor/Stairs.h

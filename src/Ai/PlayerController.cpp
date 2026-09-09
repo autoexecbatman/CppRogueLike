@@ -42,6 +42,7 @@
 #include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
 #include "PlayerController.h"
+#include "../Combat/TurnUndead.h"
 #include "../Menu/MenuTrade.h"
 #include "../Menu/ListMenu.h"
 #include "../Menu/MenuEntry.h"
@@ -428,6 +429,56 @@ void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
 	target.position = playerOwner.position;
 	move(targetPosition);
 
+	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+}
+
+// Channels the player's deity against nearby undead and narrates the result.
+//
+// The system decides what happened; this decides what the player is told, and
+// spends the turn only when an attempt was actually made.
+void PlayerController::attempt_turn_undead(GameContext& ctx)
+{
+	const TurnUndeadReport report = turn_undead(playerOwner, ctx);
+
+	if (!report.attempted)
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have no deity to channel.", true);
+		return;
+	}
+
+	if (report.turned.empty() && report.destroyed.empty() && report.resisted.empty())
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You hold up your holy symbol, but nothing stirs.", true);
+		return;
+	}
+
+	ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You raise your holy symbol!", true);
+
+	for (const Creature* destroyed : report.destroyed)
+	{
+		ctx.messageSystem->message(
+			GREEN_BLACK_PAIR,
+			std::format("The {} crumbles to dust!", destroyed->actorData.name),
+			true);
+	}
+
+	for (const Creature* turned : report.turned)
+	{
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("The {} recoils and flees!", turned->actorData.name),
+			true);
+	}
+
+	for (const Creature* resisted : report.resisted)
+	{
+		ctx.messageSystem->message(
+			RED_BLACK_PAIR,
+			std::format("The {} is unmoved.", resisted->actorData.name),
+			true);
+	}
+
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 }
 
@@ -1249,6 +1300,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::REST:
 	{
 		playerOwner.rest(ctx);
+		break;
+	}
+
+	case Controls::TURN_UNDEAD:
+	{
+		attempt_turn_undead(ctx);
 		break;
 	}
 

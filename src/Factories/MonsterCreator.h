@@ -67,6 +67,7 @@ struct MonsterParams
 	int xp{ 0 };
 	int dr{ 0 };
 	int morale{ 10 };
+	bool undead{ false };
 	Ethics ethics{ Ethics::NEUTRAL };
 	Morality morality{ Morality::NEUTRAL };
 	int corpseWeight{ 50 };
