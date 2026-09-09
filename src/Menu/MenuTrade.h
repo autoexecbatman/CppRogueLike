@@ -8,6 +8,13 @@
 class Creature;
 struct GameContext;
 
+// Opens the trade menu between a shopkeeper and the player, and suppresses input
+// for the frame so the bump that opened it is not also read by the menu.
+//
+// Example:
+//   open_trade(shopkeeper, player, ctx); // trade menu is now on top of ctx.menus
+void open_trade(Creature& shopkeeper, Creature& player, GameContext& ctx);
+
 class MenuTrade : public BaseMenu
 {
 private:

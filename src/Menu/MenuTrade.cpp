@@ -9,6 +9,7 @@
 #include "../Systems/MessageSystem.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
+#include "../Systems/MenuManager.h"
 #include "MenuTrade.h"
 
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
@@ -108,3 +109,9 @@ void MenuTrade::menu(GameContext& ctx)
 }
 
 // end of file: MenuTrade.cpp
+
+void open_trade(Creature& shopkeeper, Creature& player, GameContext& ctx)
+{
+	ctx.menus->push_back(std::make_unique<MenuTrade>(shopkeeper, player, ctx));
+	ctx.menuManager->set_should_take_input(false);
+}

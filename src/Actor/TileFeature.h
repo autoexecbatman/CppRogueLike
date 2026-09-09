@@ -15,15 +15,17 @@
 //
 // Usage -- deciding whether a move may proceed:
 //
-//   for (const auto& feature : *ctx.tileFeatures)                 // features on this level
+//   bool blocked = false;
+//   for (const auto& feature : *ctx.tileFeatures)            // features on this level
 //   {
 //       if (feature->position != destination) { continue; }  // only the entered tile
 //       if (feature->on_creature_enter(creature, ctx) == EntryResult::BLOCKED)
 //       {
-//           return;                                          // move is stopped
+//           blocked = true;                                  // move is stopped
+//           break;
 //       }
 //   }
-//   creature.move(destination);                              // nothing blocked it
+//   if (!blocked) { move(destination); }                     // nothing blocked it
 
 class Creature;
 struct GameContext;
@@ -38,17 +40,6 @@ enum class EntryResult
 	AFFECTED, // the feature acted and the creature may still enter
 	BLOCKED, // the feature acted and the creature's move is stopped
 };
-
-// True when the feature acted on the creature at all.
-//
-// Example:
-//   is_affected(EntryResult::UNAFFECTED); // -> false
-//   is_affected(EntryResult::AFFECTED);   // -> true
-//   is_affected(EntryResult::BLOCKED);    // -> true
-[[nodiscard]] constexpr bool is_affected(EntryResult result)
-{
-	return result != EntryResult::UNAFFECTED;
-}
 
 // Which kind of feature this is, for callers that need to find one kind among
 // the rest. Identity lives here rather than in ActorData::name, which is a

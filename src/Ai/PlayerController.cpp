@@ -42,7 +42,7 @@
 #include "../Utils/Dijkstra.h"
 #include "../Utils/Vector2D.h"
 #include "PlayerController.h"
-#include "AiShopkeeper.h"
+#include "../Menu/MenuTrade.h"
 #include "../Menu/ListMenu.h"
 #include "../Menu/MenuEntry.h"
 
@@ -398,10 +398,10 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 void PlayerController::resolve_peaceful_bump(Creature& target, GameContext& ctx)
 {
 	// A shopkeeper's answer to being bumped is its shop.
-	if (target.shop != nullptr)
+	if (target.shop)
 	{
 		ctx.messageSystem->log("Player bumped shopkeeper - initiating trade!");
-		AiShopkeeper::open_trade(target, playerOwner, ctx);
+		open_trade(target, playerOwner, ctx);
 		return;
 	}
 
@@ -413,10 +413,20 @@ void PlayerController::resolve_peaceful_bump(Creature& target, GameContext& ctx)
 		return;
 	}
 
-	// Swap tiles, so a peaceful creature is passed rather than fought.
-	const Vector2D playerPosition = playerOwner.position;
-	playerOwner.position = target.position;
-	target.position = playerPosition;
+	swap_places_with(target, ctx);
+}
+
+// Player and target trade tiles, so a peaceful creature is passed rather than
+// fought. Only reached for a creature that consents to being displaced.
+//
+// Example:
+//   swap_places_with(villager, ctx); // player stands where the villager did
+void PlayerController::swap_places_with(Creature& target, GameContext& ctx)
+{
+	const Vector2D targetPosition = target.position;
+
+	target.position = playerOwner.position;
+	move(targetPosition);
 
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 }
@@ -1336,7 +1346,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	{
 		// Ask every feature on the tile; the first with something to disarm answers.
 		DisarmResult disarmResult = DisarmResult::NOT_DISARMABLE;
-		if (ctx.tileFeatures != nullptr)
+		if (ctx.tileFeatures)
 		{
 			for (auto& feature : *ctx.tileFeatures)
 			{

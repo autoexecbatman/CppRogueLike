@@ -159,7 +159,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Tools/PrefabLibrary.cpp
     ${PARENT_SOURCE_DIR}/Tools/RoomEditor.cpp
     ${PARENT_SOURCE_DIR}/Tools/SpellEditor.cpp
-    ${PARENT_SOURCE_DIR}/Systems/ObjectManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/DataManager.cpp
     ${PARENT_SOURCE_DIR}/Systems/ShopKeeper.cpp
     ${PARENT_SOURCE_DIR}/Systems/Shopkeepers/ShopkeeperFactory.cpp

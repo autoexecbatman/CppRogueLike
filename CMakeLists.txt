@@ -281,8 +281,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/DisplayManager.h
     ${PROJECT_SOURCE_DIR}/Systems/GameLoopCoordinator.cpp
     ${PROJECT_SOURCE_DIR}/Systems/GameLoopCoordinator.h
-    ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.cpp
-    ${PROJECT_SOURCE_DIR}/Systems/ObjectManager.h
     ${PROJECT_SOURCE_DIR}/Systems/DataManager.cpp
     ${PROJECT_SOURCE_DIR}/Systems/DataManager.h
     ${PROJECT_SOURCE_DIR}/Systems/ShopKeeper.cpp

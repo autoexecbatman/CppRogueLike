@@ -79,8 +79,7 @@ public:
 	int get_sellback_percent() const noexcept { return sellbackPercent; }
 	void set_sellback_percent(int value) noexcept { sellbackPercent = value; }
 
-	// Trading operations - simplified for now
-	bool can_buy_item(const Item& item) const { return true; } // Accept all items for now
+	// Trading operations
 	int get_buy_price(const Item& item) const;
 	int get_sell_price(const Item& item) const;
 

@@ -30,10 +30,3 @@ void AiShopkeeper::save(json& j)
 {
 	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
 }
-
-
-void AiShopkeeper::open_trade(Creature& owner, Creature& player, GameContext& ctx)
-{
-	ctx.menus->push_back(std::make_unique<MenuTrade>(owner, player, ctx));
-	ctx.menuManager->set_should_take_input(false);
-}

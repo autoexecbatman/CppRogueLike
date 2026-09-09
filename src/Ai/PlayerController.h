@@ -54,6 +54,7 @@ private:
 	void call_action(Controls key, GameContext& ctx);
 	bool resolve_pending_door(GameContext& ctx);
 	void resolve_peaceful_bump(Creature& target, GameContext& ctx);
+	void swap_places_with(Creature& target, GameContext& ctx);
 	void confirm_attack_on_peaceful(Creature& target, GameContext& ctx);
 	void strike(Creature& target, GameContext& ctx);
 	Vector2D handle_direction_input(int dirKey, GameContext& ctx);
