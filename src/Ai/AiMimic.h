@@ -42,7 +42,7 @@ private:
 
 	void apply_item_bonus(Creature& owner, ItemClass itemClass, GameContext& ctx);
 	void boost_health(Creature& owner, int amount, GameContext& ctx);
-	void boost_defense(Creature& owner, int amount, int maxDR, GameContext& ctx);
+	void boost_defense(Creature& owner, int amount, int maxDR);
 	void boost_attack(Creature& owner, GameContext& ctx);
 	void boost_confusion_power(GameContext& ctx);
 	void transform_to_greater_mimic(Creature& owner, GameContext& ctx);

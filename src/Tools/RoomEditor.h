@@ -91,7 +91,7 @@ private:
 
 	void handle_input(GameContext& ctx);
 	void handle_input_normal(GameContext& ctx);
-	void handle_input_text(GameContext& ctx);
+	void handle_input_text();
 	void handle_input_picker(GameContext& ctx);
 
 	void render(const GameContext& ctx) const;

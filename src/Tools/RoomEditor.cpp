@@ -220,7 +220,7 @@ void RoomEditor::handle_input(GameContext& ctx)
 	}
 	else
 	{
-		handle_input_text(ctx);
+		handle_input_text();
 	}
 }
 
@@ -448,7 +448,7 @@ void RoomEditor::handle_input_normal(GameContext& ctx)
 	}
 }
 
-void RoomEditor::handle_input_text(GameContext& ctx)
+void RoomEditor::handle_input_text()
 {
 	// Backspace
 	if (IsKeyPressed(KEY_BACKSPACE) && !inputBuffer.empty())

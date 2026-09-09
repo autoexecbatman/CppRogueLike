@@ -25,7 +25,7 @@ MenuName::MenuName(GameContext& ctx)
 		ctx);
 }
 
-void MenuName::draw_name_screen(GameContext& ctx)
+void MenuName::draw_name_screen()
 {
 	menu_clear();
 	menu_draw_box();
@@ -96,7 +96,7 @@ void MenuName::menu(GameContext& ctx)
 		}
 	}
 
-	draw_name_screen(ctx);
+	draw_name_screen();
 
 	if (!run && !ctx.menuManager->is_game_initialized())
 	{

@@ -12,7 +12,7 @@ private:
 	std::string inputText{};
 	bool initialized{ false };
 
-	void draw_name_screen(GameContext& ctx);
+	void draw_name_screen();
 
 public:
 	MenuName(GameContext& ctx);
