@@ -8,7 +8,7 @@
 
 #include <raylib.h>
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #include <emscripten.h>
 #include <rlgl.h>
 #endif
@@ -55,7 +55,7 @@ Texture2D load_dawnlike_texture(std::string_view path)
 
 void Renderer::init()
 {
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	// Query the actual browser window size and snap to tile grid so no partial
 	// tiles appear at the edges.
 	{
@@ -361,7 +361,7 @@ void Renderer::begin_frame()
 
 void Renderer::end_frame()
 {
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	// EndDrawing's order is: flush -> swap -> WaitTime -> PollInputEvents.
 	// glfwSwapBuffers may yield (emscripten_sleep), so events can fire between
 	// swap and PollInputEvents, causing PollInputEvents to see prev=curr=1 and

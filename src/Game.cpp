@@ -42,7 +42,7 @@
 
 		.decorEditor = &decorEditor,
 		.prefabLibrary = &prefabLibrary,
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		.contentEditor = &contentEditor,
 		.roomEditor = &roomEditor,
 		.itemEditor = &itemEditor,
@@ -78,7 +78,7 @@ bool Game::tick(int& loopNum)
 		return false;
 	}
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (roomEditor.is_active())
 	{
 		gameState.set_window_state(WindowState::ROOM_EDITOR);
@@ -117,7 +117,7 @@ bool Game::tick(int& loopNum)
 		break;
 	}
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 
 	case WindowState::ROOM_EDITOR:
 	{

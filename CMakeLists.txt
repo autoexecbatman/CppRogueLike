@@ -22,8 +22,6 @@ endif()
 if(EMSCRIPTEN)
     message(STATUS "Building with Emscripten")
 
-    add_definitions(-DEMSCRIPTEN)
-
     # Common compilation options
     add_compile_options(-O2 -Wall)
 

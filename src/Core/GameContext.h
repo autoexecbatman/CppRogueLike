@@ -35,7 +35,7 @@ class CurseSystem;
 class ContentRegistry;
 class DecorEditor;
 class PrefabLibrary;
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 class ContentEditor;
 class RoomEditor;
 class ItemEditor;
@@ -66,7 +66,7 @@ enum class WindowState
 {
 	MENU,
 	GAME,
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	ROOM_EDITOR,
 	MONSTER_EDITOR,
 	SPELL_EDITOR,
@@ -176,7 +176,7 @@ struct GameContext
 	Dijkstra* pathfinder{ nullptr };  // Persistent pathfinding object (reused across turns)
 	DecorEditor* decorEditor{ nullptr };
 	PrefabLibrary* prefabLibrary{ nullptr };
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	ContentEditor* contentEditor{ nullptr };
 	RoomEditor* roomEditor{ nullptr };
 	ItemEditor* itemEditor{ nullptr };

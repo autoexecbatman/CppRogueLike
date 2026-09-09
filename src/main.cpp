@@ -4,7 +4,7 @@
 #include <iostream>
 #include <memory>
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
 #endif
 #include <raylib.h>
@@ -16,7 +16,7 @@
 #include "Menu/Menu.h"
 #include "Systems/SpellSystem.h"
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 struct LoopData
 {
 	Game* game{};
@@ -88,7 +88,7 @@ int main()
 
 	int loopNum{ 0 };
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	LoopData loopData{ game.get(), loopNum };
 	emscripten_set_main_loop_arg(emscripten_loop, &loopData, 0, 1);
 #else

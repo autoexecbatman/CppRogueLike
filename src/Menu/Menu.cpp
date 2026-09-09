@@ -14,7 +14,7 @@
 #include "Menu.h"
 #include "MenuGender.h"
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #include "../Tools/ItemEditor.h"
 #include "../Tools/MonsterEditor.h"
 #include "../Tools/RoomEditor.h"
@@ -47,7 +47,7 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
     };
     entries.push_back({ "Options", 'o', optionsCommand });
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
     auto roomEditorCommand = [](GameContext& ctx)
     {
         ctx.roomEditor->enter(*ctx.prefabLibrary);

@@ -43,7 +43,7 @@
 
 #include "Tools/DecorEditor.h"
 #include "Tools/PrefabLibrary.h"
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 #include "Tools/ContentEditor.h"
 #include "Tools/ItemEditor.h"
 #include "Tools/MonsterEditor.h"
@@ -89,7 +89,7 @@ struct Game
 	DecorEditor decorEditor{};
 	PrefabLibrary prefabLibrary{};
 	CurseSystem curseSystem{};
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	ContentEditor contentEditor{};
 	RoomEditor roomEditor{};
 	ItemEditor itemEditor{};

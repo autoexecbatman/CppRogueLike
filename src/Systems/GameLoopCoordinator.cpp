@@ -68,7 +68,7 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	}
 
 	// Update game state only when player provides input and editor is not open
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	const bool editor_active = (ctx.decorEditor && ctx.decorEditor->is_active()) ||
 		(ctx.contentEditor && ctx.contentEditor->is_active());
 #else
@@ -125,7 +125,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 				ctx.map->compute_fov(ctx);
 				return true;
 			}
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decorEditor)
 			{
 				ctx.decorEditor->toggle();
@@ -175,7 +175,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			return false;
 		};
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		// Editor active: consume all input -- game gets nothing.
 		if (ctx.contentEditor && ctx.contentEditor->is_active())
 		{
@@ -235,7 +235,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 		ctx.floatingText->update_and_render(*ctx.renderer);
 	}
 
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	if (ctx.decorEditor)
 	{
 		ctx.decorEditor->update_and_render(*ctx.renderer);
@@ -443,7 +443,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (ctx.gameState->get_game_status() == GameStatus::STARTUP)
 	{
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 		// Ensure active map key is set for loaded games (new games set it in Map::init).
 		if (ctx.decorEditor && ctx.map && ctx.levelManager)
 		{

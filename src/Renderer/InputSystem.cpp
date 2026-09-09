@@ -78,7 +78,7 @@ void InputSystem::poll()
 		}
 	};
 
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	// On Emscripten, the GLFW key-press queue (GetKeyPressed) is never
 	// populated because the GLFW key callback does not fire on the web
 	// platform. IsKeyPressed (prev/curr state transition) works correctly
@@ -415,7 +415,7 @@ void InputSystem::poll()
 	}
 
 	// Editor keys
-#ifndef EMSCRIPTEN
+#ifndef __EMSCRIPTEN__
 	case KEY_F2:
 	{
 		register_key(KEY_F2, GameKey::DECOR_EDIT_TOGGLE, 0, false);
@@ -459,7 +459,7 @@ void InputSystem::poll()
 	// Shift+symbol keys and char_input for text fields.
 	// GetCharPressed() is also broken on Emscripten (queue never filled),
 	// so derive char from the pressed key + shift state on web.
-#ifdef EMSCRIPTEN
+#ifdef __EMSCRIPTEN__
 	int ch = 0;
 	if (newKey >= KEY_A && newKey <= KEY_Z)
 	{
