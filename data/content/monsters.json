@@ -60,7 +60,14 @@
       "sides": 6
     },
     "xp": 120,
-    "corpse_weight": 160
+    "corpse_weight": 160,
+    "equipment": [
+      {
+        "item": "long_bow",
+        "slot": "missile_weapon"
+      }
+    ],
+    "natural_attack": ""
   },
   "bat": {
     "ac": 8,
@@ -123,7 +130,9 @@
       "sides": 6
     },
     "xp": 30,
-    "corpse_weight": 8
+    "corpse_weight": 8,
+    "equipment": [],
+    "natural_attack": "Bite"
   },
   "bugbear": {
     "ac": 5,
@@ -186,7 +195,14 @@
       "sides": 6
     },
     "xp": 175,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "morning_star",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "chimera": {
     "ac": 6,
@@ -249,7 +265,9 @@
       "sides": 6
     },
     "xp": 2000,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Fire Breath"
   },
   "dragon": {
     "ac": 1,
@@ -312,7 +330,9 @@
       "sides": 6
     },
     "xp": 600,
-    "corpse_weight": 600
+    "corpse_weight": 600,
+    "equipment": [],
+    "natural_attack": "Fiery Breath"
   },
   "fire_wolf": {
     "ac": 6,
@@ -375,7 +395,9 @@
       "sides": 6
     },
     "xp": 120,
-    "corpse_weight": 130
+    "corpse_weight": 130,
+    "equipment": [],
+    "natural_attack": "Flaming Bite"
   },
   "gargoyle": {
     "ac": 5,
@@ -438,7 +460,9 @@
       "sides": 6
     },
     "xp": 270,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Claw"
   },
   "ghoul": {
     "ac": 6,
@@ -502,7 +526,9 @@
     },
     "xp": 175,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Paralytic Claw"
   },
   "giant_centipede": {
     "ac": 5,
@@ -565,7 +591,9 @@
       "sides": 2
     },
     "xp": 35,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Poison Bite"
   },
   "giant_rat": {
     "ac": 7,
@@ -628,7 +656,9 @@
       "sides": 4
     },
     "xp": 35,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Bite"
   },
   "giant_snake": {
     "ac": 5,
@@ -691,7 +721,9 @@
       "sides": 4
     },
     "xp": 270,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Poison Bite"
   },
   "gnoll": {
     "ac": 5,
@@ -754,7 +786,14 @@
       "sides": 6
     },
     "xp": 120,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "battle_axe",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "goblin": {
     "ac": 6,
@@ -817,7 +856,14 @@
       "sides": 6
     },
     "xp": 105,
-    "corpse_weight": 90
+    "corpse_weight": 90,
+    "equipment": [
+      {
+        "item": "short_sword",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "golem_stone": {
     "ac": 5,
@@ -880,7 +926,9 @@
       "sides": 2
     },
     "xp": 3000,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Stone Fist"
   },
   "harpy": {
     "ac": 7,
@@ -943,7 +991,9 @@
       "sides": 6
     },
     "xp": 175,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Talons"
   },
   "hill_giant": {
     "ac": 3,
@@ -1006,7 +1056,9 @@
       "sides": 6
     },
     "xp": 2000,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Hurled Boulder"
   },
   "hobgoblin": {
     "ac": 5,
@@ -1069,7 +1121,14 @@
       "sides": 6
     },
     "xp": 65,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "long_sword",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "ice_wolf": {
     "ac": 6,
@@ -1132,7 +1191,9 @@
       "sides": 6
     },
     "xp": 120,
-    "corpse_weight": 130
+    "corpse_weight": 130,
+    "equipment": [],
+    "natural_attack": "Freezing Bite"
   },
   "kobold": {
     "ac": 7,
@@ -1195,7 +1256,14 @@
       "sides": 6
     },
     "xp": 45,
-    "corpse_weight": 85
+    "corpse_weight": 85,
+    "equipment": [
+      {
+        "item": "dagger",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "lich": {
     "ac": 0,
@@ -1259,7 +1327,9 @@
     },
     "xp": 4000,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Paralyzing Touch"
   },
   "mage": {
     "ac": 9,
@@ -1322,7 +1392,14 @@
       "sides": 6
     },
     "xp": 180,
-    "corpse_weight": 150
+    "corpse_weight": 150,
+    "equipment": [
+      {
+        "item": "staff",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "medusa": {
     "ac": 5,
@@ -1385,7 +1462,9 @@
       "sides": 6
     },
     "xp": 1400,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Petrifying Gaze"
   },
   "mimic": {
     "tile": {
@@ -1456,7 +1535,14 @@
       "sides": 6
     },
     "xp": 270,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "club",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "orc": {
     "ac": 6,
@@ -1519,7 +1605,14 @@
       "sides": 6
     },
     "xp": 105,
-    "corpse_weight": 180
+    "corpse_weight": 180,
+    "equipment": [
+      {
+        "item": "long_sword",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "pit_fiend": {
     "ac": -3,
@@ -1582,7 +1675,9 @@
       "sides": 6
     },
     "xp": 4000,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Hellfire Strike"
   },
   "rat": {
     "ac": 9,
@@ -1645,7 +1740,9 @@
       "sides": 2
     },
     "xp": 15,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Bite"
   },
   "shadow": {
     "ac": 7,
@@ -1709,7 +1806,9 @@
     },
     "xp": 420,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Strength Drain"
   },
   "shopkeeper": {
     "tile": {
@@ -1781,7 +1880,9 @@
     },
     "xp": 65,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Claw"
   },
   "spider_giant": {
     "tile": {
@@ -1868,7 +1969,9 @@
       "sides": 4
     },
     "xp": 300,
-    "corpse_weight": 280
+    "corpse_weight": 280,
+    "equipment": [],
+    "natural_attack": "Claws"
   },
   "vampire": {
     "ac": 1,
@@ -1932,7 +2035,9 @@
     },
     "xp": 2000,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Blood Drain"
   },
   "werewolf": {
     "ac": 5,
@@ -1995,7 +2100,9 @@
       "sides": 6
     },
     "xp": 420,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Bite"
   },
   "wight": {
     "ac": 5,
@@ -2059,7 +2166,9 @@
     },
     "xp": 650,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Energy Drain"
   },
   "wolf": {
     "ac": 7,
@@ -2122,7 +2231,9 @@
       "sides": 6
     },
     "xp": 45,
-    "corpse_weight": 120
+    "corpse_weight": 120,
+    "equipment": [],
+    "natural_attack": "Bite"
   },
   "wraith": {
     "ac": 4,
@@ -2186,7 +2297,9 @@
     },
     "xp": 975,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Energy Drain"
   },
   "wyvern": {
     "ac": 3,
@@ -2249,7 +2362,9 @@
       "sides": 6
     },
     "xp": 1400,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [],
+    "natural_attack": "Poison Sting"
   },
   "zombie": {
     "ac": 8,
@@ -2313,7 +2428,9 @@
     },
     "xp": 65,
     "corpse_weight": 100,
-    "undead": true
+    "undead": true,
+    "equipment": [],
+    "natural_attack": "Slam"
   },
   "dungeon_jailer": {
     "ac": 4,
@@ -2377,7 +2494,14 @@
       "sides": 6
     },
     "xp": 65,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "mace",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   },
   "dungeon_warden": {
     "ac": 1,
@@ -2441,6 +2565,13 @@
       "sides": 6
     },
     "xp": 650,
-    "corpse_weight": 100
+    "corpse_weight": 100,
+    "equipment": [
+      {
+        "item": "long_sword",
+        "slot": "right_hand"
+      }
+    ],
+    "natural_attack": ""
   }
 }

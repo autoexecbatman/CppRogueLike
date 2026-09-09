@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "../Actor/Alignment.h"
+#include "../Actor/EquipmentSlot.h"
 #include "../Combat/DamageInfo.h"
 #include "../Renderer/Renderer.h"
 
@@ -83,6 +84,22 @@ struct MonsterParams
 	// Weapon display + damage
 	std::string weaponName;
 	DamageInfo damage{};
+
+	// One item this creature starts wearing or wielding. The key names an entry
+	// in items.json and is snake_case like every other data identifier.
+	struct StartingItem
+	{
+		EquipmentSlot slot{ EquipmentSlot::NONE };
+		std::string itemKey{};
+	};
+
+	// What the creature carries into the dungeon. Empty for anything that
+	// fights with its body.
+	std::vector<StartingItem> equipment{};
+
+	// What the creature strikes with when no slot holds a weapon - claws, a
+	// bite, a gaze. Empty for anything that wields an item.
+	std::string naturalAttack{};
 
 	// Behaviour
 	MonsterAiType aiType{ MonsterAiType::MELEE };

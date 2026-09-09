@@ -167,6 +167,39 @@ nlohmann::json encode_damage(const DamageInfo& d)
 	};
 }
 
+// Reads the slots a creature starts filled. An unknown slot name or a missing
+// field throws, so a typo fails at load rather than leaving a monster unarmed.
+std::vector<MonsterParams::StartingItem> parse_equipment(const nlohmann::json& entries)
+{
+	std::vector<MonsterParams::StartingItem> equipment;
+	equipment.reserve(entries.size());
+
+	for (const nlohmann::json& entry : entries)
+	{
+		MonsterParams::StartingItem carried;
+		carried.itemKey = entry.at("item").get<std::string>();
+		carried.slot = parse_equipment_slot(entry.at("slot").get<std::string>());
+		equipment.push_back(std::move(carried));
+	}
+
+	return equipment;
+}
+
+nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& equipment)
+{
+	nlohmann::json entries = nlohmann::json::array();
+
+	for (const MonsterParams::StartingItem& carried : equipment)
+	{
+		entries.push_back(nlohmann::json{
+			{ "item", carried.itemKey },
+			{ "slot", encode_equipment_slot(carried.slot) }
+		});
+	}
+
+	return entries;
+}
+
 MonsterParams parse_full_params(const nlohmann::json& entry)
 {
 	MonsterParams p;
@@ -193,6 +226,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.wisDice = parse_dice(entry.at("wis"));
 	p.chaDice = parse_dice(entry.at("cha"));
 	p.weaponName = entry.at("weapon").get<std::string>();
+	p.naturalAttack = entry.at("natural_attack").get<std::string>();
+	p.equipment = parse_equipment(entry.at("equipment"));
 	p.damage = parse_damage(entry.at("damage"));
 	p.aiType = (entry.at("ai").get<std::string>() == "ranged")
 		? MonsterAiType::RANGED
@@ -233,6 +268,8 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "wis", encode_dice(p.wisDice) },
 		{ "cha", encode_dice(p.chaDice) },
 		{ "weapon", p.weaponName },
+		{ "natural_attack", p.naturalAttack },
+		{ "equipment", encode_equipment(p.equipment) },
 		{ "damage", encode_damage(p.damage) },
 		{ "ai", p.aiType == MonsterAiType::RANGED ? "ranged" : "melee" },
 		{ "can_swim", p.canSwim },
