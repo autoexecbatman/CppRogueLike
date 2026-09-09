@@ -209,31 +209,9 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(weaponRange, 0, std::move(onTarget), ctx));
 }
 
-TargetResult TargetingSystem::acquire_targets(
-	GameContext& ctx,
-	TargetMode mode,
-	Vector2D origin,
-	int range,
-	int aoe_radius) const
+TargetResult TargetingSystem::acquire_nearest(GameContext& ctx, Vector2D origin, int range) const
 {
-	switch (mode)
-	{
-
-	case TargetMode::AUTO_NEAREST:
-	{
-		return target_auto_nearest(ctx, origin, range);
-	}
-
-	case TargetMode::PICK_TILE_SINGLE:
-	case TargetMode::PICK_TILE_AOE:
-	case TargetMode::FOV_BUFF:
-	{
-		return {};
-	}
-
-	}
-
-	return {};
+	return target_auto_nearest(ctx, origin, range);
 }
 
 int TargetingSystem::get_weapon_range(const Item* weapon)

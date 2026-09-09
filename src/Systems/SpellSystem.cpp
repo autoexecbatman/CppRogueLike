@@ -135,31 +135,31 @@ constexpr SpellEntry SPELL_KEYS[] = {
 	{ SpellId::KNOCK, "knock" },
 };
 
-SpellClass parse_class(std::string_view s)
+SpellClass parse_class(std::string_view text)
 {
-	if (s == "cleric")
+	if (text == "cleric")
 	{
 		return SpellClass::CLERIC;
 	}
-	else if (s == "wizard")
+	else if (text == "wizard")
 	{
 		return SpellClass::WIZARD;
 	}
-	else if (s == "both")
+	else if (text == "both")
 	{
 		return SpellClass::BOTH;
 	}
 
-	throw std::runtime_error(std::format("SpellSystem: unknown spell class '{}'", s));
+	throw std::runtime_error(std::format("SpellSystem: unknown spell class '{}'", text));
 }
 
-std::string encode_class(SpellClass c)
+std::string encode_class(SpellClass spellClass)
 {
-	if (c == SpellClass::CLERIC)
+	if (spellClass == SpellClass::CLERIC)
 	{
 		return "cleric";
 	}
-	else if (c == SpellClass::WIZARD)
+	else if (spellClass == SpellClass::WIZARD)
 	{
 		return "wizard";
 	}
@@ -169,75 +169,75 @@ std::string encode_class(SpellClass c)
 	}
 }
 
-SpellEffectType parse_effect_type(std::string_view s)
+SpellEffectType parse_effect_type(std::string_view text)
 {
-	if (s == "cure_light_wounds")
+	if (text == "cure_light_wounds")
 	{
 		return SpellEffectType::CURE_LIGHT_WOUNDS;
 	}
-	else if (s == "bless")
+	else if (text == "bless")
 	{
 		return SpellEffectType::BLESS;
 	}
-	else if (s == "protection_from_evil")
+	else if (text == "protection_from_evil")
 	{
 		return SpellEffectType::PROTECTION_FROM_EVIL;
 	}
-	else if (s == "sanctuary")
+	else if (text == "sanctuary")
 	{
 		return SpellEffectType::SANCTUARY;
 	}
-	else if (s == "hold_person")
+	else if (text == "hold_person")
 	{
 		return SpellEffectType::HOLD_PERSON;
 	}
-	else if (s == "silence")
+	else if (text == "silence")
 	{
 		return SpellEffectType::SILENCE;
 	}
-	else if (s == "magic_missile")
+	else if (text == "magic_missile")
 	{
 		return SpellEffectType::MAGIC_MISSILE;
 	}
-	else if (s == "shield")
+	else if (text == "shield")
 	{
 		return SpellEffectType::SHIELD;
 	}
-	else if (s == "sleep")
+	else if (text == "sleep")
 	{
 		return SpellEffectType::SLEEP;
 	}
-	else if (s == "invisibility")
+	else if (text == "invisibility")
 	{
 		return SpellEffectType::INVISIBILITY;
 	}
-	else if (s == "web")
+	else if (text == "web")
 	{
 		return SpellEffectType::WEB;
 	}
-	else if (s == "fireball")
+	else if (text == "fireball")
 	{
 		return SpellEffectType::FIREBALL;
 	}
-	else if (s == "teleport")
+	else if (text == "teleport")
 	{
 		return SpellEffectType::TELEPORT;
 	}
-	else if (s == "knock")
+	else if (text == "knock")
 	{
 		return SpellEffectType::KNOCK;
 	}
-	else if (s == "none")
+	else if (text == "none")
 	{
 		return SpellEffectType::NONE;
 	}
 
-	throw std::runtime_error(std::format("SpellSystem: unknown spell effect '{}'", s));
+	throw std::runtime_error(std::format("SpellSystem: unknown spell effect '{}'", text));
 }
 
-std::string encode_effect_type(SpellEffectType e)
+std::string encode_effect_type(SpellEffectType effect)
 {
-	switch (e)
+	switch (effect)
 	{
 
 	case SpellEffectType::CURE_LIGHT_WOUNDS:
@@ -502,26 +502,26 @@ std::string SpellSystem::add_custom(SpellDefinition def)
 		return key;
 	};
 
-	auto has_key = [](const std::string& k) -> bool
+	auto has_key = [](const std::string& key) -> bool
 	{
 		for (const auto& entry : SPELL_KEYS)
 		{
-			if (entry.key == k)
+			if (entry.key == key)
 			{
 				return true;
 			}
 		}
 
-		return s_custom_spells.contains(k);
+		return s_custom_spells.contains(key);
 	};
 
 	std::string base = normalize(def.name.empty() ? "new_spell" : def.name);
 	std::string key = base;
 	if (has_key(key))
 	{
-		for (int n = 2;; ++n)
+		for (int suffix = 2;; ++suffix)
 		{
-			key = std::format("{}_{}", base, n);
+			key = std::format("{}_{}", base, suffix);
 			if (!has_key(key))
 			{
 				break;
@@ -999,7 +999,7 @@ void SpellSystem::cast_fireball(
 		// AD&D 2e: 1d6 per caster level, max 10d6
 		int diceCnt = std::min(casterLevel, 10);
 		int totalDamage = 0;
-		for (int i = 0; i < diceCnt; ++i)
+		for (int die = 0; die < diceCnt; ++die)
 		{
 			totalDamage += innerCtx.dice->roll(1, 6);
 		}
@@ -1074,8 +1074,8 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	}
 
 	// Sort by distance (nearest first)
-	std::sort(targets.begin(), targets.end(), [&caster](Creature* a, Creature* b)
-		{ return caster.get_tile_distance(a->position) < caster.get_tile_distance(b->position); });
+	std::sort(targets.begin(), targets.end(), [&caster](Creature* left, Creature* right)
+		{ return caster.get_tile_distance(left->position) < caster.get_tile_distance(right->position); });
 
 	int totalDamage = 0;
 	std::unordered_map<Creature*, int> damagePerTarget;

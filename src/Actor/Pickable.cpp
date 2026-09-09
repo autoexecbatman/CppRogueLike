@@ -73,94 +73,94 @@ const V& get_or_default(const std::unordered_map<K, V>& map, const K& key, const
 
 // Shared save for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
 template <typename T>
-void save_stat_boost(const T& sb, PickableType type, json& j)
+void save_stat_boost(const T& statBoost, PickableType type, json& output)
 {
-	j["type"] = static_cast<int>(type);
-	j["strBonus"] = sb.strBonus;
-	j["dexBonus"] = sb.dexBonus;
-	j["conBonus"] = sb.conBonus;
-	j["intBonus"] = sb.intBonus;
-	j["wisBonus"] = sb.wisBonus;
-	j["chaBonus"] = sb.chaBonus;
-	j["isSetMode"] = sb.isSetMode;
-	j["originalStats"] = {
-		{ "str", sb.originalStats.str },
-		{ "dex", sb.originalStats.dex },
-		{ "con", sb.originalStats.con },
-		{ "intel", sb.originalStats.intel },
-		{ "wis", sb.originalStats.wis },
-		{ "cha", sb.originalStats.cha },
+	output["type"] = static_cast<int>(type);
+	output["strBonus"] = statBoost.strBonus;
+	output["dexBonus"] = statBoost.dexBonus;
+	output["conBonus"] = statBoost.conBonus;
+	output["intBonus"] = statBoost.intBonus;
+	output["wisBonus"] = statBoost.wisBonus;
+	output["chaBonus"] = statBoost.chaBonus;
+	output["isSetMode"] = statBoost.isSetMode;
+	output["originalStats"] = {
+		{ "str", statBoost.originalStats.str },
+		{ "dex", statBoost.originalStats.dex },
+		{ "con", statBoost.originalStats.con },
+		{ "intel", statBoost.originalStats.intel },
+		{ "wis", statBoost.originalStats.wis },
+		{ "cha", statBoost.originalStats.cha },
 	};
 }
 
 template <typename T>
-void load_stat_boost(T& sb, const json& j)
+void load_stat_boost(T& statBoost, const json& source)
 {
-	sb.strBonus = j.contains("strBonus") ? j.at("strBonus").get<int>() : 0;
-	sb.dexBonus = j.contains("dexBonus") ? j.at("dexBonus").get<int>() : 0;
-	sb.conBonus = j.contains("conBonus") ? j.at("conBonus").get<int>() : 0;
-	sb.intBonus = j.contains("intBonus") ? j.at("intBonus").get<int>() : 0;
-	sb.wisBonus = j.contains("wisBonus") ? j.at("wisBonus").get<int>() : 0;
-	sb.chaBonus = j.contains("chaBonus") ? j.at("chaBonus").get<int>() : 0;
-	sb.isSetMode = j.contains("isSetMode") ? j.at("isSetMode").get<bool>() : false;
+	statBoost.strBonus = source.contains("strBonus") ? source.at("strBonus").get<int>() : 0;
+	statBoost.dexBonus = source.contains("dexBonus") ? source.at("dexBonus").get<int>() : 0;
+	statBoost.conBonus = source.contains("conBonus") ? source.at("conBonus").get<int>() : 0;
+	statBoost.intBonus = source.contains("intBonus") ? source.at("intBonus").get<int>() : 0;
+	statBoost.wisBonus = source.contains("wisBonus") ? source.at("wisBonus").get<int>() : 0;
+	statBoost.chaBonus = source.contains("chaBonus") ? source.at("chaBonus").get<int>() : 0;
+	statBoost.isSetMode = source.contains("isSetMode") ? source.at("isSetMode").get<bool>() : false;
 
-	if (j.contains("originalStats"))
+	if (source.contains("originalStats"))
 	{
-		const auto& orig = j.at("originalStats");
-		sb.originalStats.str = orig.contains("str") ? orig.at("str").get<int>() : 0;
-		sb.originalStats.dex = orig.contains("dex") ? orig.at("dex").get<int>() : 0;
-		sb.originalStats.con = orig.contains("con") ? orig.at("con").get<int>() : 0;
-		sb.originalStats.intel = orig.contains("intel") ? orig.at("intel").get<int>() : 0;
-		sb.originalStats.wis = orig.contains("wis") ? orig.at("wis").get<int>() : 0;
-		sb.originalStats.cha = orig.contains("cha") ? orig.at("cha").get<int>() : 0;
+		const auto& orig = source.at("originalStats");
+		statBoost.originalStats.str = orig.contains("str") ? orig.at("str").get<int>() : 0;
+		statBoost.originalStats.dex = orig.contains("dex") ? orig.at("dex").get<int>() : 0;
+		statBoost.originalStats.con = orig.contains("con") ? orig.at("con").get<int>() : 0;
+		statBoost.originalStats.intel = orig.contains("intel") ? orig.at("intel").get<int>() : 0;
+		statBoost.originalStats.wis = orig.contains("wis") ? orig.at("wis").get<int>() : 0;
+		statBoost.originalStats.cha = orig.contains("cha") ? orig.at("cha").get<int>() : 0;
 	}
 }
 
 // Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
 template <typename T>
-bool use_stat_boost(T& sb, EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
+bool use_stat_boost(T& statBoost, EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
 {
 	auto apply_stat_boost = [&]()
 	{
-		if (sb.isSetMode)
+		if (statBoost.isSetMode)
 		{
-			if (sb.strBonus != 0) { sb.originalStats.str = wearer.get_strength(); wearer.set_strength(sb.strBonus); }
-			if (sb.dexBonus != 0) { sb.originalStats.dex = wearer.get_dexterity(); wearer.set_dexterity(sb.dexBonus); }
-			if (sb.conBonus != 0) { sb.originalStats.con = wearer.get_constitution(); wearer.set_constitution(sb.conBonus); }
-			if (sb.intBonus != 0) { sb.originalStats.intel = wearer.get_intelligence(); wearer.set_intelligence(sb.intBonus); }
-			if (sb.wisBonus != 0) { sb.originalStats.wis = wearer.get_wisdom(); wearer.set_wisdom(sb.wisBonus); }
-			if (sb.chaBonus != 0) { sb.originalStats.cha = wearer.get_charisma(); wearer.set_charisma(sb.chaBonus); }
+			if (statBoost.strBonus != 0) { statBoost.originalStats.str = wearer.get_strength(); wearer.set_strength(statBoost.strBonus); }
+			if (statBoost.dexBonus != 0) { statBoost.originalStats.dex = wearer.get_dexterity(); wearer.set_dexterity(statBoost.dexBonus); }
+			if (statBoost.conBonus != 0) { statBoost.originalStats.con = wearer.get_constitution(); wearer.set_constitution(statBoost.conBonus); }
+			if (statBoost.intBonus != 0) { statBoost.originalStats.intel = wearer.get_intelligence(); wearer.set_intelligence(statBoost.intBonus); }
+			if (statBoost.wisBonus != 0) { statBoost.originalStats.wis = wearer.get_wisdom(); wearer.set_wisdom(statBoost.wisBonus); }
+			if (statBoost.chaBonus != 0) { statBoost.originalStats.cha = wearer.get_charisma(); wearer.set_charisma(statBoost.chaBonus); }
 		}
 		else
 		{
-			wearer.set_strength(wearer.get_strength() + sb.strBonus);
-			wearer.set_dexterity(wearer.get_dexterity() + sb.dexBonus);
-			wearer.set_constitution(wearer.get_constitution() + sb.conBonus);
-			wearer.set_intelligence(wearer.get_intelligence() + sb.intBonus);
-			wearer.set_wisdom(wearer.get_wisdom() + sb.wisBonus);
-			wearer.set_charisma(wearer.get_charisma() + sb.chaBonus);
+			wearer.set_strength(wearer.get_strength() + statBoost.strBonus);
+			wearer.set_dexterity(wearer.get_dexterity() + statBoost.dexBonus);
+			wearer.set_constitution(wearer.get_constitution() + statBoost.conBonus);
+			wearer.set_intelligence(wearer.get_intelligence() + statBoost.intBonus);
+			wearer.set_wisdom(wearer.get_wisdom() + statBoost.wisBonus);
+			wearer.set_charisma(wearer.get_charisma() + statBoost.chaBonus);
 		}
 	};
 
 	auto remove_stat_boost = [&]()
 	{
-		if (sb.isSetMode)
+		if (statBoost.isSetMode)
 		{
-			if (sb.strBonus != 0) { wearer.set_strength(sb.originalStats.str); }
-			if (sb.dexBonus != 0) { wearer.set_dexterity(sb.originalStats.dex); }
-			if (sb.conBonus != 0) { wearer.set_constitution(sb.originalStats.con); }
-			if (sb.intBonus != 0) { wearer.set_intelligence(sb.originalStats.intel); }
-			if (sb.wisBonus != 0) { wearer.set_wisdom(sb.originalStats.wis); }
-			if (sb.chaBonus != 0) { wearer.set_charisma(sb.originalStats.cha); }
+			if (statBoost.strBonus != 0) { wearer.set_strength(statBoost.originalStats.str); }
+			if (statBoost.dexBonus != 0) { wearer.set_dexterity(statBoost.originalStats.dex); }
+			if (statBoost.conBonus != 0) { wearer.set_constitution(statBoost.originalStats.con); }
+			if (statBoost.intBonus != 0) { wearer.set_intelligence(statBoost.originalStats.intel); }
+			if (statBoost.wisBonus != 0) { wearer.set_wisdom(statBoost.originalStats.wis); }
+			if (statBoost.chaBonus != 0) { wearer.set_charisma(statBoost.originalStats.cha); }
 		}
 		else
 		{
-			wearer.set_strength(wearer.get_strength() - sb.strBonus);
-			wearer.set_dexterity(wearer.get_dexterity() - sb.dexBonus);
-			wearer.set_constitution(wearer.get_constitution() - sb.conBonus);
-			wearer.set_intelligence(wearer.get_intelligence() - sb.intBonus);
-			wearer.set_wisdom(wearer.get_wisdom() - sb.wisBonus);
-			wearer.set_charisma(wearer.get_charisma() - sb.chaBonus);
+			wearer.set_strength(wearer.get_strength() - statBoost.strBonus);
+			wearer.set_dexterity(wearer.get_dexterity() - statBoost.dexBonus);
+			wearer.set_constitution(wearer.get_constitution() - statBoost.conBonus);
+			wearer.set_intelligence(wearer.get_intelligence() - statBoost.intBonus);
+			wearer.set_wisdom(wearer.get_wisdom() - statBoost.wisBonus);
+			wearer.set_charisma(wearer.get_charisma() - statBoost.chaBonus);
 		}
 	};
 
@@ -300,9 +300,9 @@ EquipmentSlot Weapon::get_preferred_slot(const Player* player) const
 
 // ========== use() implementations ==========
 
-bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	switch (c.effect)
+	switch (consumable.effect)
 	{
 
 	case ConsumableEffect::HEAL:
@@ -312,17 +312,17 @@ bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
 			return false;
 		}
-		const int healed = wearer.heal(c.amount);
+		const int healed = wearer.heal(consumable.amount);
 		ctx.messageSystem->message(GREEN_BLACK_PAIR, std::format("You feel better! (+{} HP)", healed), true);
 		break;
 	}
 
 	case ConsumableEffect::ADD_BUFF:
 	{
-		ctx.buffSystem->add_buff(wearer, c.buffType, c.amount, c.duration, c.isSetEffect);
+		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect);
 		ctx.messageSystem->message(
 			CYAN_BLACK_PAIR,
-			std::format("You feel the effect of the {} for {} turns.", owner.get_name(), c.duration),
+			std::format("You feel the effect of the {} for {} turns.", owner.get_name(), consumable.duration),
 			true);
 		break;
 	}
@@ -344,9 +344,9 @@ bool use(Consumable& c, Item& owner, Creature& wearer, GameContext& ctx)
 	return consume_item(owner, wearer);
 }
 
-bool use(Weapon& w, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
 {
-	const EquipmentSlot preferred = w.get_preferred_slot(&wearer);
+	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
 	const bool success = wearer.toggle_weapon(owner.uniqueId, preferred, ctx);
 
 	if (success)
@@ -414,12 +414,10 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 	if (targetScroll.targetMode == TargetMode::AUTO_NEAREST)
 	{
-		TargetResult result = ctx.targeting->acquire_targets(
+		TargetResult result = ctx.targeting->acquire_nearest(
 			ctx,
-			TargetMode::AUTO_NEAREST,
 			wearer.position,
-			targetScroll.range,
-			0);
+			targetScroll.range);
 		if (!result.success || result.creatures.empty())
 		{
 			return false;
@@ -508,19 +506,19 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	return false; // turn and item consumption handled in callback
 }
 
-bool use(Gold& g, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	wearer.adjust_gold(g.amount);
+	wearer.adjust_gold(gold.amount);
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "You gained ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(g.amount));
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(gold.amount));
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, " gold.");
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
 }
 
-bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	ctx.hungerSystem->decrease_hunger(ctx, f.nutritionValue);
+	ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
@@ -528,14 +526,14 @@ bool use(Food& f, Item& owner, Creature& wearer, GameContext& ctx)
 	return consume_item(owner, wearer);
 }
 
-bool use(CorpseFood& cf, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	if (cf.nutritionValue <= 0)
+	if (corpseFood.nutritionValue <= 0)
 	{
-		cf.nutritionValue = get_or_default(corpseNutritionValues, owner.actorData.name, 50);
+		corpseFood.nutritionValue = get_or_default(corpseNutritionValues, owner.actorData.name, 50);
 	}
 
-	int actual = cf.nutritionValue + ctx.dice->roll(-10, 10);
+	int actual = corpseFood.nutritionValue + ctx.dice->roll(-10, 10);
 	actual = std::max(10, actual);
 
 	ctx.hungerSystem->decrease_hunger(ctx, actual);
@@ -566,32 +564,32 @@ bool use(Armor& armor, Item& item, Player& wearer, GameContext& ctx)
 	return success;
 }
 
-bool use(MagicalHelm& mh, Item& owner, Player& wearer, GameContext& ctx)
+bool use(MagicalHelm& magicalHelm, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_magical_equip(mh.effect, EquipmentSlot::HEAD, owner, wearer, ctx);
+	return use_magical_equip(magicalHelm.effect, EquipmentSlot::HEAD, owner, wearer, ctx);
 }
 
-bool use(MagicalRing& mr, Item& owner, Player& wearer, GameContext& ctx)
+bool use(MagicalRing& magicalRing, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_magical_equip(mr.effect, EquipmentSlot::RIGHT_RING, owner, wearer, ctx);
+	return use_magical_equip(magicalRing.effect, EquipmentSlot::RIGHT_RING, owner, wearer, ctx);
 }
 
-bool use(JewelryAmulet& ja, Item& owner, Player& wearer, GameContext& ctx)
+bool use(JewelryAmulet& jewelryAmulet, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(ja, EquipmentSlot::NECK, owner, wearer, ctx);
+	return use_stat_boost(jewelryAmulet, EquipmentSlot::NECK, owner, wearer, ctx);
 }
 
-bool use(Gauntlets& g, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Gauntlets& gauntlets, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(g, EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
+	return use_stat_boost(gauntlets, EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
 }
 
-bool use(Girdle& g, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Girdle& girdle, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(g, EquipmentSlot::GIRDLE, owner, wearer, ctx);
+	return use_stat_boost(girdle, EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
-bool use(Shield& s, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Shield& shield, Item& owner, Player& wearer, GameContext& ctx)
 {
 	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
 	if (success)
@@ -611,7 +609,7 @@ bool use(Shield& s, Item& owner, Player& wearer, GameContext& ctx)
 	return true;
 }
 
-bool use(Teleporter& t, Item& owner, Creature& wearer, GameContext& ctx)
+bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	wearer.position = SpawnUtils::find_random_floor_tile(ctx);
 	ctx.map->compute_fov(ctx);
@@ -666,9 +664,9 @@ bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
 bool use_item(ItemBehavior& behavior, Item& owner, Player& wearer, GameContext& ctx)
 {
 	return std::visit(
-		[&owner, &wearer, &ctx](auto& b) -> bool
+		[&owner, &wearer, &ctx](auto& behavior) -> bool
 		{
-			return use(b, owner, wearer, ctx);
+			return use(behavior, owner, wearer, ctx);
 		},
 		behavior);
 }
@@ -688,144 +686,144 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 
 // ========== Serialization ==========
 
-void save_behavior(const ItemBehavior& behavior, json& j)
+void save_behavior(const ItemBehavior& behavior, json& output)
 {
 	std::visit(
 		VariantVisitor{
-			[&j](const Consumable& b)
+			[&output](const Consumable& b)
 			{
-				j["type"] = static_cast<int>(PickableType::CONSUMABLE);
-				j["effect"] = static_cast<int>(b.effect);
-				j["amount"] = b.amount;
-				j["duration"] = b.duration;
-				j["buffType"] = static_cast<int>(b.buffType);
-				j["isSetEffect"] = b.isSetEffect;
+				output["type"] = static_cast<int>(PickableType::CONSUMABLE);
+				output["effect"] = static_cast<int>(b.effect);
+				output["amount"] = b.amount;
+				output["duration"] = b.duration;
+				output["buffType"] = static_cast<int>(b.buffType);
+				output["isSetEffect"] = b.isSetEffect;
 			},
-			[&j](const Weapon& b)
+			[&output](const Weapon& b)
 			{
-				j["type"] = static_cast<int>(PickableType::WEAPON);
-				j["ranged"] = b.ranged;
-				j["handReq"] = static_cast<int>(b.handRequirement);
-				j["weaponSize"] = static_cast<int>(b.weaponSize);
+				output["type"] = static_cast<int>(PickableType::WEAPON);
+				output["ranged"] = b.ranged;
+				output["handReq"] = static_cast<int>(b.handRequirement);
+				output["weaponSize"] = static_cast<int>(b.weaponSize);
 			},
-			[&j](const Shield&) { j["type"] = static_cast<int>(PickableType::SHIELD); },
-			[&j](const TargetedScroll& b)
+			[&output](const Shield&) { output["type"] = static_cast<int>(PickableType::SHIELD); },
+			[&output](const TargetedScroll& b)
 			{
-				j["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
-				j["targetMode"] = static_cast<int>(b.targetMode);
-				j["scrollAnimation"] = static_cast<int>(b.scrollAnimation);
-				j["range"] = b.range;
-				j["damage"] = b.damage;
-				j["confuseTurns"] = b.confuseTurns;
-				j["buffType"] = static_cast<int>(b.buffType);
-				j["buffDuration"] = b.buffDuration;
+				output["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
+				output["targetMode"] = static_cast<int>(b.targetMode);
+				output["scrollAnimation"] = static_cast<int>(b.scrollAnimation);
+				output["range"] = b.range;
+				output["damage"] = b.damage;
+				output["confuseTurns"] = b.confuseTurns;
+				output["buffType"] = static_cast<int>(b.buffType);
+				output["buffDuration"] = b.buffDuration;
 			},
-			[&j](const Teleporter&) { j["type"] = static_cast<int>(PickableType::TELEPORTER); },
-			[&j](const IdentifyScroll&) { j["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL); },
-			[&j](const Gold& b)
+			[&output](const Teleporter&) { output["type"] = static_cast<int>(PickableType::TELEPORTER); },
+			[&output](const IdentifyScroll&) { output["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL); },
+			[&output](const Gold& b)
 			{
-				j["type"] = static_cast<int>(PickableType::GOLD_COIN);
-				j["amount"] = b.amount;
+				output["type"] = static_cast<int>(PickableType::GOLD_COIN);
+				output["amount"] = b.amount;
 			},
-			[&j](const Food& b)
+			[&output](const Food& b)
 			{
-				j["type"] = static_cast<int>(PickableType::FOOD);
-				j["nutritionValue"] = b.nutritionValue;
+				output["type"] = static_cast<int>(PickableType::FOOD);
+				output["nutritionValue"] = b.nutritionValue;
 			},
-			[&j](const CorpseFood& b)
+			[&output](const CorpseFood& b)
 			{
-				j["type"] = static_cast<int>(PickableType::CORPSE_FOOD);
-				j["nutritionValue"] = b.nutritionValue;
+				output["type"] = static_cast<int>(PickableType::CORPSE_FOOD);
+				output["nutritionValue"] = b.nutritionValue;
 			},
-			[&j](const Armor& b)
+			[&output](const Armor& b)
 			{
-				j["type"] = static_cast<int>(PickableType::ARMOR);
-				j["armorClass"] = b.armorClass;
+				output["type"] = static_cast<int>(PickableType::ARMOR);
+				output["armorClass"] = b.armorClass;
 			},
-			[&j](const MagicalHelm& b)
+			[&output](const MagicalHelm& b)
 			{
-				j["type"] = static_cast<int>(PickableType::MAGICAL_HELM);
-				j["effect"] = static_cast<int>(b.effect);
-				j["bonus"] = b.bonus;
+				output["type"] = static_cast<int>(PickableType::MAGICAL_HELM);
+				output["effect"] = static_cast<int>(b.effect);
+				output["bonus"] = b.bonus;
 			},
-			[&j](const MagicalRing& b)
+			[&output](const MagicalRing& b)
 			{
-				j["type"] = static_cast<int>(PickableType::MAGICAL_RING);
-				j["effect"] = static_cast<int>(b.effect);
-				j["bonus"] = b.bonus;
+				output["type"] = static_cast<int>(PickableType::MAGICAL_RING);
+				output["effect"] = static_cast<int>(b.effect);
+				output["bonus"] = b.bonus;
 			},
-			[&j](const JewelryAmulet& b) { save_stat_boost(b, PickableType::JEWELRY_AMULET, j); },
-			[&j](const Gauntlets& b) { save_stat_boost(b, PickableType::GAUNTLETS, j); },
-			[&j](const Girdle& b) { save_stat_boost(b, PickableType::GIRDLE, j); },
-			[&j](const Amulet&) { j["type"] = static_cast<int>(PickableType::QUEST_ITEM); },
-			[&j](const DungeonKey&) { j["type"] = static_cast<int>(PickableType::DUNGEON_KEY); },
+			[&output](const JewelryAmulet& b) { save_stat_boost(b, PickableType::JEWELRY_AMULET, output); },
+			[&output](const Gauntlets& b) { save_stat_boost(b, PickableType::GAUNTLETS, output); },
+			[&output](const Girdle& b) { save_stat_boost(b, PickableType::GIRDLE, output); },
+			[&output](const Amulet&) { output["type"] = static_cast<int>(PickableType::QUEST_ITEM); },
+			[&output](const DungeonKey&) { output["type"] = static_cast<int>(PickableType::DUNGEON_KEY); },
 		},
 		behavior);
 }
 
-ItemBehavior load_behavior(const json& j)
+ItemBehavior load_behavior(const json& source)
 {
-	if (!j.contains("type") || !j["type"].is_number())
+	if (!source.contains("type") || !source["type"].is_number())
 	{
 		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
 	}
 
-	const auto type = static_cast<PickableType>(j["type"].get<int>());
+	const auto type = static_cast<PickableType>(source["type"].get<int>());
 
 	switch (type)
 	{
 
 	case PickableType::CONSUMABLE:
 	{
-		Consumable c;
-		if (j.contains("effect"))
+		Consumable consumable;
+		if (source.contains("effect"))
 		{
-			c.effect = static_cast<ConsumableEffect>(j["effect"].get<int>());
+			consumable.effect = static_cast<ConsumableEffect>(source["effect"].get<int>());
 		}
 
 		// Legacy Healer save format
-		if (j.contains("amountToHeal"))
+		if (source.contains("amountToHeal"))
 		{
-			c.effect = ConsumableEffect::HEAL;
-			c.amount = j["amountToHeal"].get<int>();
+			consumable.effect = ConsumableEffect::HEAL;
+			consumable.amount = source["amountToHeal"].get<int>();
 		}
-		else if (j.contains("amount"))
+		else if (source.contains("amount"))
 		{
-			c.amount = j["amount"].get<int>();
-		}
-
-		if (j.contains("duration"))
-		{
-			c.duration = j["duration"].get<int>();
-		}
-		if (j.contains("buffType"))
-		{
-			c.buffType = static_cast<BuffType>(j["buffType"].get<int>());
-		}
-		if (j.contains("isSetEffect"))
-		{
-			c.isSetEffect = j["isSetEffect"].get<bool>();
+			consumable.amount = source["amount"].get<int>();
 		}
 
-		return c;
+		if (source.contains("duration"))
+		{
+			consumable.duration = source["duration"].get<int>();
+		}
+		if (source.contains("buffType"))
+		{
+			consumable.buffType = static_cast<BuffType>(source["buffType"].get<int>());
+		}
+		if (source.contains("isSetEffect"))
+		{
+			consumable.isSetEffect = source["isSetEffect"].get<bool>();
+		}
+
+		return consumable;
 	}
 
 	case PickableType::WEAPON:
 	{
-		Weapon w;
-		if (j.contains("ranged"))
+		Weapon weapon;
+		if (source.contains("ranged"))
 		{
-			w.ranged = j["ranged"].get<bool>();
+			weapon.ranged = source["ranged"].get<bool>();
 		}
-		if (j.contains("handRequirement"))
+		if (source.contains("handRequirement"))
 		{
-			w.handRequirement = static_cast<HandRequirement>(j["handRequirement"].get<int>());
+			weapon.handRequirement = static_cast<HandRequirement>(source["handRequirement"].get<int>());
 		}
-		if (j.contains("weaponSize"))
+		if (source.contains("weaponSize"))
 		{
-			w.weaponSize = static_cast<WeaponSize>(j["weaponSize"].get<int>());
+			weapon.weaponSize = static_cast<WeaponSize>(source["weaponSize"].get<int>());
 		}
-		return w;
+		return weapon;
 	}
 
 	case PickableType::SHIELD:
@@ -836,33 +834,33 @@ ItemBehavior load_behavior(const json& j)
 	case PickableType::TARGETED_SCROLL:
 	{
 		TargetedScroll targetedScroll;
-		if (j.contains("targetMode"))
+		if (source.contains("targetMode"))
 		{
-			targetedScroll.targetMode = static_cast<TargetMode>(j["targetMode"].get<int>());
+			targetedScroll.targetMode = static_cast<TargetMode>(source["targetMode"].get<int>());
 		}
-		if (j.contains("animation"))
+		if (source.contains("animation"))
 		{
-			targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(j["animation"].get<int>());
+			targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source["animation"].get<int>());
 		}
-		if (j.contains("range"))
+		if (source.contains("range"))
 		{
-			targetedScroll.range = j["range"].get<int>();
+			targetedScroll.range = source["range"].get<int>();
 		}
-		if (j.contains("damage"))
+		if (source.contains("damage"))
 		{
-			targetedScroll.damage = j["damage"].get<int>();
+			targetedScroll.damage = source["damage"].get<int>();
 		}
-		if (j.contains("confuseTurns"))
+		if (source.contains("confuseTurns"))
 		{
-			targetedScroll.confuseTurns = j["confuseTurns"].get<int>();
+			targetedScroll.confuseTurns = source["confuseTurns"].get<int>();
 		}
-		if (j.contains("buffType"))
+		if (source.contains("buffType"))
 		{
-			targetedScroll.buffType = static_cast<BuffType>(j["buffType"].get<int>());
+			targetedScroll.buffType = static_cast<BuffType>(source["buffType"].get<int>());
 		}
-		if (j.contains("buffDuration"))
+		if (source.contains("buffDuration"))
 		{
-			targetedScroll.buffDuration = j["buffDuration"].get<int>();
+			targetedScroll.buffDuration = source["buffDuration"].get<int>();
 		}
 		return targetedScroll;
 	}
@@ -879,88 +877,88 @@ ItemBehavior load_behavior(const json& j)
 
 	case PickableType::GOLD_COIN:
 	{
-		Gold g;
-		if (j.contains("amount"))
+		Gold gold;
+		if (source.contains("amount"))
 		{
-			g.amount = j["amount"].get<int>();
+			gold.amount = source["amount"].get<int>();
 		}
-		return g;
+		return gold;
 	}
 
 	case PickableType::FOOD:
 	{
-		Food f;
-		if (j.contains("nutritionValue"))
+		Food food;
+		if (source.contains("nutritionValue"))
 		{
-			f.nutritionValue = j["nutritionValue"].get<int>();
+			food.nutritionValue = source["nutritionValue"].get<int>();
 		}
-		return f;
+		return food;
 	}
 
 	case PickableType::CORPSE_FOOD:
 	{
-		CorpseFood cf;
-		if (j.contains("nutritionValue"))
+		CorpseFood corpseFood;
+		if (source.contains("nutritionValue"))
 		{
-			cf.nutritionValue = j["nutritionValue"].get<int>();
+			corpseFood.nutritionValue = source["nutritionValue"].get<int>();
 		}
-		return cf;
+		return corpseFood;
 	}
 
 	case PickableType::ARMOR:
 	{
-		Armor a;
-		a.armorClass = j.at("armorClass").get<int>();
-		return a;
+		Armor armor;
+		armor.armorClass = source.at("armorClass").get<int>();
+		return armor;
 	}
 
 	case PickableType::MAGICAL_HELM:
 	{
-		MagicalHelm mh;
-		if (j.contains("effect"))
+		MagicalHelm magicalHelm;
+		if (source.contains("effect"))
 		{
-			mh.effect = static_cast<MagicalEffect>(j["effect"].get<int>());
+			magicalHelm.effect = static_cast<MagicalEffect>(source["effect"].get<int>());
 		}
-		if (j.contains("bonus"))
+		if (source.contains("bonus"))
 		{
-			mh.bonus = j["bonus"].get<int>();
+			magicalHelm.bonus = source["bonus"].get<int>();
 		}
-		return mh;
+		return magicalHelm;
 	}
 
 	case PickableType::MAGICAL_RING:
 	{
-		MagicalRing mr;
-		if (j.contains("effect"))
+		MagicalRing magicalRing;
+		if (source.contains("effect"))
 		{
-			mr.effect = static_cast<MagicalEffect>(j["effect"].get<int>());
+			magicalRing.effect = static_cast<MagicalEffect>(source["effect"].get<int>());
 		}
-		if (j.contains("bonus"))
+		if (source.contains("bonus"))
 		{
-			mr.bonus = j["bonus"].get<int>();
+			magicalRing.bonus = source["bonus"].get<int>();
 		}
-		return mr;
+		return magicalRing;
 	}
 
 	case PickableType::JEWELRY_AMULET:
 	{
-		JewelryAmulet ja;
-		load_stat_boost(ja, j);
-		return ja;
+		JewelryAmulet jewelryAmulet;
+		load_stat_boost(jewelryAmulet, source);
+		return jewelryAmulet;
 	}
 
 	case PickableType::GAUNTLETS:
 	{
-		Gauntlets g;
-		load_stat_boost(g, j);
-		return g;
+		Gauntlets gauntlets;
+		load_stat_boost(gauntlets, source);
+		return gauntlets;
 	}
 
 	case PickableType::GIRDLE:
 	{
-		Girdle g;
-		load_stat_boost(g, j);
-		return g;
+		Girdle girdle;
+		load_stat_boost(girdle, source);
+		return girdle;
 	}
 
 	case PickableType::QUEST_ITEM:
