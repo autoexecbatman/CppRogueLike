@@ -4,6 +4,7 @@
 #include "../Actor/Stairs.h"
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
+#include "../Systems/TileConfig.h"
 #include "../Renderer/Renderer.h"
 #include "Map.h"
 #include "Minimap.h"
@@ -52,28 +53,14 @@ void Minimap::render(const GameContext& ctx) const
             bool inFov = map.is_in_fov(pos);
             Color c{};
 
-            switch (map.get_tile_type(pos))
-            {
-            case TileType::FLOOR:
-            case TileType::OPEN_DOOR:
-                c = inFov ? Color{ 180, 180, 160, 230 } : Color{ 100, 100, 90, 200 };
-                break;
-            case TileType::CORRIDOR:
-                c = inFov ? Color{ 150, 150, 130, 230 } : Color{ 80, 80, 70, 200 };
-                break;
-            case TileType::WALL:
-                c = inFov ? Color{ 90, 90, 80, 210 } : Color{ 50, 50, 45, 180 };
-                break;
-            case TileType::WATER:
-                c = inFov ? Color{ 80, 160, 230, 230 } : Color{ 30, 100, 180, 200 };
-                break;
-            case TileType::CLOSED_DOOR:
-                c = inFov ? Color{ 210, 140, 70, 230 } : Color{ 150, 95, 45, 200 };
-                break;
-            default:
-                c = inFov ? Color{ 100, 100, 90, 200 } : Color{ 55, 55, 50, 180 };
-                break;
-            }
+            const TileDefinition& definition = ctx.tileConfig->get_tile_definition(map.get_tile_type(pos));
+            const TileColor& authored = inFov ? definition.minimapVisible : definition.minimapRemembered;
+            c = Color{
+                static_cast<unsigned char>(authored.red),
+                static_cast<unsigned char>(authored.green),
+                static_cast<unsigned char>(authored.blue),
+                static_cast<unsigned char>(authored.alpha)
+            };
 
             DrawRectangle(originX + x * TILE_PX, originY + y * TILE_PX, TILE_PX, TILE_PX, c);
         }

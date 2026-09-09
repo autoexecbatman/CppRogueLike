@@ -43,6 +43,7 @@
 #include "../Utils/Vector2D.h"
 #include "PlayerController.h"
 #include "../Combat/TurnUndead.h"
+#include "../Systems/TileConfig.h"
 #include "../Menu/MenuTrade.h"
 #include "../Menu/ListMenu.h"
 #include "../Menu/MenuEntry.h"
@@ -179,7 +180,7 @@ void PlayerController::update(GameContext& ctx)
 	if (isWaiting)
 	{
 		isWaiting = false;
-		ctx.map->tile_action(playerOwner, ctx.map->get_tile_type(playerOwner.position), ctx);
+		ctx.map->describe_tile(ctx.map->get_tile_type(playerOwner.position), ctx);
 		look_on_floor(playerOwner.position, ctx);
 	}
 
@@ -598,7 +599,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		if (!blocked)
 		{
 			move(targetPosition);
-			ctx.map->tile_action(playerOwner, targetTileType, ctx);
+			ctx.map->describe_tile(targetTileType, ctx);
 			shouldComputeFOV = true;
 			return true;
 		}
@@ -610,17 +611,16 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 		{
 
 		case TileType::WATER:
-		{
-			if (!playerOwner.has_state(ActorState::CAN_SWIM))
-			{
-				ctx.messageSystem->log("You can't swim.");
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't swim.", true);
-			}
-			break;
-		}
-
 		case TileType::WALL:
 		{
+			// What a blocked tile says is authored in tile_config.json.
+			const std::string& blockedMessage =
+				ctx.tileConfig->get_tile_definition(targetTileType).blockedMessage;
+			if (!blockedMessage.empty())
+			{
+				ctx.messageSystem->log(blockedMessage);
+				ctx.messageSystem->message(WHITE_BLACK_PAIR, blockedMessage, true);
+			}
 			break;
 		}
 
@@ -738,7 +738,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 	{
 		if (ctx.dice->d100() <= openLocksChance)
 		{
-			ctx.map->unlock_door(doorPos, ctx);
+			ctx.map->unlock_door(doorPos);
 			ctx.map->open_door(doorPos, ctx);
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You pick the lock.", true);
 		}

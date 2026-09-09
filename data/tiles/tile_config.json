@@ -525,5 +525,106 @@
       "label": "Floor 15,19",
       "symbol": ""
     }
-  ]
+  ],
+  "tile_types": {
+    "floor": {
+      "display_name": "Floor",
+      "blocks_movement": false,
+      "minimap_visible": {
+        "r": 180,
+        "g": 180,
+        "b": 160,
+        "a": 230
+      },
+      "minimap_remembered": {
+        "r": 100,
+        "g": 100,
+        "b": 90,
+        "a": 200
+      }
+    },
+    "corridor": {
+      "display_name": "Corridor",
+      "blocks_movement": false,
+      "minimap_visible": {
+        "r": 150,
+        "g": 150,
+        "b": 130,
+        "a": 230
+      },
+      "minimap_remembered": {
+        "r": 80,
+        "g": 80,
+        "b": 70,
+        "a": 200
+      }
+    },
+    "wall": {
+      "display_name": "Wall",
+      "blocks_movement": true,
+      "minimap_visible": {
+        "r": 90,
+        "g": 90,
+        "b": 80,
+        "a": 210
+      },
+      "minimap_remembered": {
+        "r": 50,
+        "g": 50,
+        "b": 45,
+        "a": 180
+      }
+    },
+    "water": {
+      "display_name": "Water",
+      "blocks_movement": true,
+      "bypass_state": "can_swim",
+      "entry_message": "You are in water",
+      "blocked_message": "You can't swim.",
+      "minimap_visible": {
+        "r": 80,
+        "g": 160,
+        "b": 230,
+        "a": 230
+      },
+      "minimap_remembered": {
+        "r": 30,
+        "g": 100,
+        "b": 180,
+        "a": 200
+      }
+    },
+    "closed_door": {
+      "display_name": "Closed door",
+      "blocks_movement": true,
+      "minimap_visible": {
+        "r": 210,
+        "g": 140,
+        "b": 70,
+        "a": 230
+      },
+      "minimap_remembered": {
+        "r": 150,
+        "g": 95,
+        "b": 45,
+        "a": 200
+      }
+    },
+    "open_door": {
+      "display_name": "Open door",
+      "blocks_movement": false,
+      "minimap_visible": {
+        "r": 180,
+        "g": 180,
+        "b": 160,
+        "a": 230
+      },
+      "minimap_remembered": {
+        "r": 100,
+        "g": 100,
+        "b": 90,
+        "a": 200
+      }
+    }
+  }
 }

@@ -34,6 +34,7 @@
 #include "LevelManager.h"
 #include "GameLoopCoordinator.h"
 #include "../Actor/TileFeature.h"
+#include "TileConfig.h"
 #include "../ActorTypes/Player.h"
 
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
@@ -325,51 +326,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 
 	// Build description; pick highlight tint based on content
 	std::string desc;
-	switch (ctx.map->get_tile_type(world_tile))
-	{
-
-	case TileType::FLOOR:
-	{
-		desc = "Floor";
-		break;
-	}
-
-	case TileType::WALL:
-	{
-		desc = "Wall";
-		break;
-	}
-
-	case TileType::WATER:
-	{
-		desc = "Water";
-		break;
-	}
-
-	case TileType::CLOSED_DOOR:
-	{
-		desc = "Closed door";
-		break;
-	}
-
-	case TileType::OPEN_DOOR:
-	{
-		desc = "Open door";
-		break;
-	}
-
-	case TileType::CORRIDOR:
-	{
-		desc = "Corridor";
-		break;
-	}
-
-	default:
-	{
-		desc = "Unknown";
-		break;
-	}
-	}
+	desc = ctx.tileConfig->get_tile_definition(ctx.map->get_tile_type(world_tile)).displayName;
 
 	// Tint: cyan (terrain), amber (creature), pale green (item)
 	unsigned char hr = 0, hg = 220, hb = 255;

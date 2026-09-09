@@ -1279,7 +1279,7 @@ bool SpellSystem::cast_knock(Creature& caster, GameContext& ctx)
 		return true; // Spell slot consumed even on miss — AD&D 2e rule
 	}
 
-	ctx.map->unlock_door(nearest, ctx);
+	ctx.map->unlock_door(nearest);
 	ctx.map->open_door(nearest, ctx);
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Knock! ");
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "The lock clicks open.");

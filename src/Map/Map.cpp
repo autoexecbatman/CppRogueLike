@@ -320,64 +320,26 @@ TileType Map::get_tile_type(Vector2D pos) const noexcept
 }
 
 // returns true if the player after a successful move
-void Map::tile_action(Creature& owner, TileType tileType, GameContext& ctx)
+// Tells the player about the tile they are standing on, where it is worth
+// remarking on. Called after a successful move and when waiting in place.
+//
+// Only water has anything to say. A wall or a closed door cannot reach here:
+// both are collisions, so a move onto one never completes, and the player's own
+// tile is never either. Floor and corridor are unremarkable by design.
+void Map::describe_tile(TileType tileType, GameContext& ctx)
 {
-	switch (tileType)
-	{
+	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(tileType);
 
-	case TileType::WATER:
+	// Most ground is unremarkable and says nothing.
+	if (definition.entryMessage.empty())
 	{
-		// Only called on successful water entry (with swim ability)
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("You are in water");
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are in water", true);
-		}
-		break;
+		return;
 	}
 
-	case TileType::WALL:
+	if (ctx.messageSystem)
 	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("You are against a wall");
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are against a wall", true);
-		}
-		break;
-	}
-
-	case TileType::FLOOR:
-	{
-		// ctx.message_system->log("You are on the floor");
-		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are on the floor", true);
-		break;
-	}
-
-	case TileType::CLOSED_DOOR:
-	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("You are at a door");
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are at a door", true);
-		}
-		break;
-	}
-
-	case TileType::CORRIDOR:
-	{
-		// ctx.message_system->log("You are in a corridor");
-		// ctx.message_system->message(WHITE_BLACK_PAIR, "You are in a corridor", true);
-		break;
-	}
-
-	default:
-	{
-		if (ctx.messageSystem)
-		{
-			ctx.messageSystem->log("You are in an unknown area");
-		}
-	}
-
+		ctx.messageSystem->log(definition.entryMessage);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, definition.entryMessage, true);
 	}
 }
 
@@ -416,47 +378,17 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 		}
 	}
 
-	switch (tileType)
-	{
+	// What a tile does is data: TileConfig holds whether it blocks and what
+	// crosses it anyway. See data/tiles/tile_config.json.
+	const TileDefinition& definition = ctx.tileConfig->get_tile_definition(tileType);
 
-	case TileType::WATER:
-	{
-		// Water bars anything that cannot swim. Spiders and creatures whose data
-		// sets can_swim cross it freely.
-		return !owner.has_state(ActorState::CAN_SWIM);
-	}
-
-	case TileType::WALL:
-	{
-		return true;
-	}
-
-	case TileType::FLOOR:
+	if (!definition.blocksMovement)
 	{
 		return false;
 	}
 
-	case TileType::CLOSED_DOOR:
-	{
-		return true; // Closed doors block movement
-	}
-
-	case TileType::OPEN_DOOR:
-	{
-		return false; // Open doors don't block movement
-	}
-
-	case TileType::CORRIDOR:
-	{
-		return false;
-	}
-
-	default:
-	{
-		return true;
-	}
-
-	}
+	// An ability can carry a creature through - a spider across water.
+	return !(definition.hasBypassState && owner.has_state(definition.bypassState));
 }
 
 void Map::compute_fov(GameContext& ctx)
@@ -1795,7 +1727,7 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	return true;
 }
 
-bool Map::unlock_door(Vector2D pos, GameContext& ctx)
+bool Map::unlock_door(Vector2D pos)
 {
 	if (!is_door(pos) || get_tile_type(pos) != TileType::CLOSED_DOOR)
 	{
@@ -1823,7 +1755,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 	// A door belongs to a room iff one of its cardinal neighbors is inside room.contains().
 	if (!ctx.rooms)
 	{
-		unlock_door(doorPos, ctx);
+		unlock_door(doorPos);
 		open_door(doorPos, ctx);
 		return;
 	}
@@ -1874,7 +1806,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 
 				if (opens_this_room())
 				{
-					unlock_door(pos, ctx);
+					unlock_door(pos);
 					open_door(pos, ctx);
 				}
 			}
@@ -1883,7 +1815,7 @@ void Map::open_all_room_doors(Vector2D doorPos, GameContext& ctx)
 	}
 
 	// Fallback: no room found, open only this door.
-	unlock_door(doorPos, ctx);
+	unlock_door(doorPos);
 	open_door(doorPos, ctx);
 }
 

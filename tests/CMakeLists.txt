@@ -40,6 +40,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TreasureRoomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/WaterMovementTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/DescribeTileTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/EquipmentStatBonusTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AttitudeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AwarenessTest.cpp
@@ -51,6 +52,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HitPointProgressionTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileDefinitionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
 )

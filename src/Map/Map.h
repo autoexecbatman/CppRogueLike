@@ -5,6 +5,7 @@
 #include <optional>
 #include <vector>
 
+#include "TileType.h"
 #include "../Factories/ItemFactory.h"
 #include "../Factories/MonsterFactory.h"
 #include "../Persistent/Persistent.h"
@@ -42,17 +43,6 @@ inline constexpr int FINAL_DUNGEON_LEVEL = 10;
 // A tile of the map
 // checks if the player has seen this tile
 // it is used for field of view algorithm (a 2D array) (see Map.h) (see Map.cpp) (see Map::computeFov())
-
-enum class TileType
-{
-	FLOOR,
-	WALL,
-	WATER,
-	CLOSED_DOOR,
-	OPEN_DOOR,
-	CORRIDOR,
-	// Add more as needed...
-};
 
 enum class DoorState
 {
@@ -124,7 +114,8 @@ public:
 	void init(GameContext& ctx);
 	bool is_in_fov(Vector2D pos) const noexcept;
 	TileType get_tile_type(Vector2D pos) const noexcept;
-	void tile_action(Creature& owner, TileType tileType, GameContext& ctx);
+	// Tells the player about the tile they are on, where it is worth remarking on.
+	void describe_tile(TileType tileType, GameContext& ctx);
 	bool is_collision(Creature& owner, TileType tileType, Vector2D pos, GameContext& ctx);
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos, const GameContext& ctx) const noexcept;
@@ -160,7 +151,7 @@ public:
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);
-	bool unlock_door(Vector2D pos, GameContext& ctx);
+	bool unlock_door(Vector2D pos);
 	bool is_door_locked(Vector2D pos) const noexcept;
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);

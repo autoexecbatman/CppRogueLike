@@ -4,6 +4,8 @@
 #include <string>
 #include <unordered_map>
 
+#include "../Map/TileDefinition.h"
+#include "../Map/TileType.h"
 #include "../Renderer/Renderer.h"
 
 // ---------------------------------------------------------------------------
@@ -99,12 +101,23 @@ public:
 	[[nodiscard]] TileRef get(std::string_view key) const;
 	[[nodiscard]] AutotileGroup get_autotile(std::string_view key) const;
 	[[nodiscard]] WallAutotileGroup get_wall_autotile(std::string_view key) const;
+
+	// What a tile type does: whether it blocks, what bypasses it, what it says,
+	// and how it draws on the minimap. Throws when the type has no entry, since
+	// a tile the game can place and cannot describe is a data error.
+	//
+	// Example:
+	//   const TileDefinition& water = config.get_tile_definition(TileType::WATER);
+	//   water.blocksMovement;  // -> true
+	//   water.bypassState;     // -> ActorState::CAN_SWIM
+	[[nodiscard]] const TileDefinition& get_tile_definition(TileType tileType) const;
 	void load(std::string_view path);
 
 private:
 	std::unordered_map<std::string, TileRef> m_tiles;
 	std::unordered_map<std::string, AutotileGroup> m_autotile_groups;
 	std::unordered_map<std::string, WallAutotileGroup> m_wall_autotile_groups;
+	std::unordered_map<TileType, TileDefinition> m_tile_definitions;
 };
 
 // end of file: TileConfig.h
