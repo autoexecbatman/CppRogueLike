@@ -421,8 +421,9 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 
 	case TileType::WATER:
 	{
-		/*return owner.has_state(ActorState::CAN_SWIM) ? false : true;*/
-		return false;
+		// Water bars anything that cannot swim. Spiders and creatures whose data
+		// sets can_swim cross it freely.
+		return !owner.has_state(ActorState::CAN_SWIM);
 	}
 
 	case TileType::WALL:
@@ -1317,7 +1318,8 @@ void Map::spawn_items(const DungeonRoom& room, GameContext& ctx)
 		constexpr int MAX_ITEM_TRIES = 20;
 		int itemTries = 0;
 		while (itemTries < MAX_ITEM_TRIES &&
-			(!can_walk(itemPos, ctx) || is_stairs(itemPos, ctx) || find_decoration_at(itemPos, ctx) != nullptr))
+			(!can_walk(itemPos, ctx) || is_water(itemPos) || is_stairs(itemPos, ctx)
+				|| find_decoration_at(itemPos, ctx) != nullptr))
 		{
 			itemPos.x = ctx.dice->roll(room.col, room.col_end());
 			itemPos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1378,7 +1380,7 @@ void Map::spawn_player(const DungeonRoom& room, GameContext& ctx)
 	constexpr int MAX_PLAYER_TRIES = 50;
 	int playerTries = 0;
 	while (playerTries < MAX_PLAYER_TRIES &&
-		(!can_walk(pos, ctx) || find_decoration_at(pos, ctx) != nullptr))
+		(!can_walk(pos, ctx) || is_water(pos) || find_decoration_at(pos, ctx) != nullptr))
 	{
 		pos.x = ctx.dice->roll(room.col, room.col_end());
 		pos.y = ctx.dice->roll(room.row, room.row_end());
@@ -1424,7 +1426,7 @@ void Map::place_stairs(GameContext& ctx)
 	constexpr int MAX_STAIR_TRIES = 200;
 	for (int attempt = 0; attempt < MAX_STAIR_TRIES; ++attempt)
 	{
-		if (can_walk(stairsPos, ctx) && find_decoration_at(stairsPos, ctx) == nullptr)
+		if (can_walk(stairsPos, ctx) && !is_water(stairsPos) && find_decoration_at(stairsPos, ctx) == nullptr)
 		{
 			break;
 		}
