@@ -77,63 +77,6 @@ E cycle_enum(E val, int count)
 	return static_cast<E>(v);
 }
 
-std::string_view item_class_str(ItemClass c)
-{
-	switch (c)
-	{
-	case ItemClass::UNKNOWN:    return "unknown";
-	case ItemClass::DAGGER:     return "dagger";
-	case ItemClass::SWORD:      return "sword";
-	case ItemClass::GREAT_SWORD: return "great_sword";
-	case ItemClass::AXE:        return "axe";
-	case ItemClass::HAMMER:     return "hammer";
-	case ItemClass::MACE:       return "mace";
-	case ItemClass::STAFF:      return "staff";
-	case ItemClass::BOW:        return "bow";
-	case ItemClass::CROSSBOW:   return "crossbow";
-	case ItemClass::ARMOR:      return "armor";
-	case ItemClass::SHIELD:     return "shield";
-	case ItemClass::HELMET:     return "helmet";
-	case ItemClass::RING:       return "ring";
-	case ItemClass::AMULET:     return "amulet";
-	case ItemClass::GAUNTLETS:  return "gauntlets";
-	case ItemClass::GIRDLE:     return "girdle";
-	case ItemClass::POTION:     return "potion";
-	case ItemClass::SCROLL:     return "scroll";
-	case ItemClass::FOOD:       return "food";
-	case ItemClass::GOLD_COIN:  return "gold_coin";
-	case ItemClass::GEM:        return "gem";
-	case ItemClass::TOOL:       return "tool";
-	case ItemClass::QUEST_ITEM: return "quest_item";
-	}
-	return "unknown";
-}
-
-std::string_view pickable_type_str(PickableType t)
-{
-	switch (t)
-	{
-	case PickableType::TARGETED_SCROLL: return "targeted_scroll";
-	case PickableType::TELEPORTER:      return "teleporter";
-	case PickableType::WEAPON:          return "weapon";
-	case PickableType::SHIELD:          return "shield";
-	case PickableType::CONSUMABLE:      return "consumable";
-	case PickableType::GOLD_COIN:       return "gold_coin";
-	case PickableType::FOOD:            return "food";
-	case PickableType::CORPSE_FOOD:     return "corpse_food";
-	case PickableType::ARMOR:           return "armor";
-	case PickableType::MAGICAL_HELM:    return "magical_helm";
-	case PickableType::MAGICAL_RING:    return "magical_ring";
-	case PickableType::JEWELRY_AMULET:  return "jewelry_amulet";
-	case PickableType::GAUNTLETS:       return "gauntlets";
-	case PickableType::GIRDLE:          return "girdle";
-	case PickableType::QUEST_ITEM:      return "quest_item";
-	case PickableType::IDENTIFY_SCROLL: return "identify_scroll";
-	case PickableType::DUNGEON_KEY:     return "dungeon_key";
-	}
-	return "weapon";
-}
-
 std::string_view consumable_effect_str(ConsumableEffect e)
 {
 	switch (e)
@@ -146,73 +89,6 @@ std::string_view consumable_effect_str(ConsumableEffect e)
 	return "none";
 }
 
-
-std::string_view target_mode_str(TargetMode m)
-{
-	switch (m)
-	{
-	case TargetMode::AUTO_NEAREST:     return "auto_nearest";
-	case TargetMode::PICK_TILE_SINGLE: return "pick_tile_single";
-	case TargetMode::PICK_TILE_AOE:    return "pick_tile_aoe";
-	case TargetMode::FOV_BUFF:         return "fov_buff";
-	}
-	return "auto_nearest";
-}
-
-std::string_view scroll_anim_str(ScrollAnimation a)
-{
-	switch (a)
-	{
-	case ScrollAnimation::NONE:      return "none";
-	case ScrollAnimation::LIGHTNING: return "lightning";
-	case ScrollAnimation::EXPLOSION: return "explosion";
-	}
-	return "none";
-}
-
-std::string_view hand_req_str(HandRequirement h)
-{
-	switch (h)
-	{
-	case HandRequirement::ONE_HANDED:    return "one_handed";
-	case HandRequirement::TWO_HANDED:    return "two_handed";
-	case HandRequirement::OFF_HAND_ONLY: return "off_hand_only";
-	}
-	return "one_handed";
-}
-
-std::string_view weapon_size_str(WeaponSize s)
-{
-	switch (s)
-	{
-	case WeaponSize::TINY:   return "tiny";
-	case WeaponSize::SMALL:  return "small";
-	case WeaponSize::MEDIUM: return "medium";
-	case WeaponSize::LARGE:  return "large";
-	case WeaponSize::GIANT:  return "giant";
-	}
-	return "medium";
-}
-
-std::string_view magical_effect_str(MagicalEffect e)
-{
-	switch (e)
-	{
-	case MagicalEffect::NONE:              return "none";
-	case MagicalEffect::BRILLIANCE:        return "brilliance";
-	case MagicalEffect::TELEPORTATION:     return "teleportation";
-	case MagicalEffect::TELEPATHY:         return "telepathy";
-	case MagicalEffect::UNDERWATER_ACTION: return "underwater_action";
-	case MagicalEffect::FREE_ACTION:       return "free_action";
-	case MagicalEffect::REGENERATION:      return "regeneration";
-	case MagicalEffect::INVISIBILITY:      return "invisibility";
-	case MagicalEffect::FIRE_RESISTANCE:   return "fire_resistance";
-	case MagicalEffect::COLD_RESISTANCE:   return "cold_resistance";
-	case MagicalEffect::SPELL_STORING:     return "spell_storing";
-	case MagicalEffect::PROTECTION:        return "protection";
-	}
-	return "none";
-}
 
 } // namespace
 
@@ -938,8 +814,8 @@ std::string ItemEditor::field_value(FieldId f) const
 	{
 	case FieldId::NAME:             return m_working_name;
 	case FieldId::CATEGORY:         return m_working_category;
-	case FieldId::ITEM_CLASS:       return std::string{ item_class_str(p.itemClass) };
-	case FieldId::PICKABLE_TYPE:    return std::string{ pickable_type_str(p.pickableType) };
+	case FieldId::ITEM_CLASS:       return std::string{ encode_item_class(p.itemClass) };
+	case FieldId::PICKABLE_TYPE:    return std::string{ encode_pickable_type(p.pickableType) };
 	case FieldId::COLOR:            return std::format("{}", p.color);
 	case FieldId::VALUE:            return std::format("{}", p.value);
 	case FieldId::BASE_WEIGHT:      return std::format("{}", p.baseWeight);
@@ -950,16 +826,16 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::CONSUMABLE_BUFF:  return std::string{ encode_buff_type(p.consumableBuffType) };
 	case FieldId::CONSUMABLE_AMT:   return std::format("{}", p.consumableAmount);
 	case FieldId::DURATION:         return std::format("{}", p.duration);
-	case FieldId::TARGET_MODE:      return std::string{ target_mode_str(p.targetMode) };
-	case FieldId::SCROLL_ANIM:      return std::string{ scroll_anim_str(p.scrollAnimation) };
+	case FieldId::TARGET_MODE:      return std::string{ encode_target_mode(p.targetMode) };
+	case FieldId::SCROLL_ANIM:      return std::string{ encode_scroll_animation(p.scrollAnimation) };
 	case FieldId::RANGE:            return std::format("{}", p.range);
 	case FieldId::DAMAGE:           return std::format("{}", p.damage);
 	case FieldId::CONFUSE_TURNS:    return std::format("{}", p.confuseTurns);
 	case FieldId::RANGED:           return p.ranged ? "yes" : "no";
-	case FieldId::HAND_REQUIREMENT: return std::string{ hand_req_str(p.handRequirement) };
-	case FieldId::WEAPON_SIZE:      return std::string{ weapon_size_str(p.weaponSize) };
+	case FieldId::HAND_REQUIREMENT: return std::string{ encode_hand_requirement(p.handRequirement) };
+	case FieldId::WEAPON_SIZE:      return std::string{ encode_weapon_size(p.weaponSize) };
 	case FieldId::AC_BONUS:         return std::format("{}", p.acBonus);
-	case FieldId::EFFECT:           return std::string{ magical_effect_str(p.effect) };
+	case FieldId::EFFECT:           return std::string{ encode_magical_effect(p.effect) };
 	case FieldId::EFFECT_BONUS:     return std::format("{}", p.effectBonus);
 	case FieldId::STR_BONUS:        return std::format("{}", p.strBonus);
 	case FieldId::DEX_BONUS:        return std::format("{}", p.dexBonus);

@@ -1,6 +1,9 @@
 #pragma once
 
+#include <format>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 enum class HandRequirement
@@ -47,3 +50,107 @@ struct Weapons
 
 	// NOTE: Complex dual-wield logic removed - was never integrated with combat
 };
+
+inline std::string_view encode_hand_requirement(HandRequirement h)
+{
+	switch (h)
+	{
+
+	case HandRequirement::ONE_HANDED:
+	{
+		return "one_handed";
+	}
+
+	case HandRequirement::TWO_HANDED:
+	{
+		return "two_handed";
+	}
+
+	case HandRequirement::OFF_HAND_ONLY:
+	{
+		return "off_hand_only";
+	}
+
+	}
+
+	return "one_handed";
+}
+
+inline HandRequirement parse_hand_requirement(std::string_view s)
+{
+	if (s == "one_handed")
+	{
+		return HandRequirement::ONE_HANDED;
+	}
+	if (s == "two_handed")
+	{
+		return HandRequirement::TWO_HANDED;
+	}
+	if (s == "off_hand_only")
+	{
+		return HandRequirement::OFF_HAND_ONLY;
+	}
+
+	throw std::runtime_error(std::format("unknown hand_requirement '{}'", s));
+}
+
+inline std::string_view encode_weapon_size(WeaponSize s)
+{
+	switch (s)
+	{
+
+	case WeaponSize::TINY:
+	{
+		return "tiny";
+	}
+
+	case WeaponSize::SMALL:
+	{
+		return "small";
+	}
+
+	case WeaponSize::MEDIUM:
+	{
+		return "medium";
+	}
+
+	case WeaponSize::LARGE:
+	{
+		return "large";
+	}
+
+	case WeaponSize::GIANT:
+	{
+		return "giant";
+	}
+
+	}
+
+	return "medium";
+}
+
+inline WeaponSize parse_weapon_size(std::string_view s)
+{
+	if (s == "tiny")
+	{
+		return WeaponSize::TINY;
+	}
+	if (s == "small")
+	{
+		return WeaponSize::SMALL;
+	}
+	if (s == "medium")
+	{
+		return WeaponSize::MEDIUM;
+	}
+	if (s == "large")
+	{
+		return WeaponSize::LARGE;
+	}
+	if (s == "giant")
+	{
+		return WeaponSize::GIANT;
+	}
+
+	throw std::runtime_error(std::format("unknown weapon_size '{}'", s));
+}

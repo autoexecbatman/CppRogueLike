@@ -46,6 +46,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/ProtectionFromEvilTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WebTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/BuffTypeEncodingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
 )
 

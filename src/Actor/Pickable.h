@@ -1,5 +1,9 @@
 #pragma once
 
+#include <format>
+#include <stdexcept>
+#include <string_view>
+
 #include <variant>
 
 #include "../Items/MagicalItemEffects.h"
@@ -239,3 +243,172 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
 // Serialization
 void save_behavior(const ItemBehavior& behavior, json& j);
 ItemBehavior load_behavior(const json& j);
+
+inline std::string_view encode_pickable_type(PickableType t)
+{
+	switch (t)
+	{
+
+	case PickableType::TARGETED_SCROLL:
+	{
+		return "targeted_scroll";
+	}
+
+	case PickableType::TELEPORTER:
+	{
+		return "teleporter";
+	}
+
+	case PickableType::IDENTIFY_SCROLL:
+	{
+		return "identify_scroll";
+	}
+
+	case PickableType::WEAPON:
+	{
+		return "weapon";
+	}
+
+	case PickableType::SHIELD:
+	{
+		return "shield";
+	}
+
+	case PickableType::CONSUMABLE:
+	{
+		return "consumable";
+	}
+
+	case PickableType::GOLD_COIN:
+	{
+		return "gold_coin";
+	}
+
+	case PickableType::FOOD:
+	{
+		return "food";
+	}
+
+	case PickableType::CORPSE_FOOD:
+	{
+		return "corpse_food";
+	}
+
+	case PickableType::ARMOR:
+	{
+		return "armor";
+	}
+
+	case PickableType::MAGICAL_HELM:
+	{
+		return "magical_helm";
+	}
+
+	case PickableType::MAGICAL_RING:
+	{
+		return "magical_ring";
+	}
+
+	case PickableType::JEWELRY_AMULET:
+	{
+		return "jewelry_amulet";
+	}
+
+	case PickableType::GAUNTLETS:
+	{
+		return "gauntlets";
+	}
+
+	case PickableType::GIRDLE:
+	{
+		return "girdle";
+	}
+
+	case PickableType::QUEST_ITEM:
+	{
+		return "quest_item";
+	}
+
+	case PickableType::DUNGEON_KEY:
+	{
+		return "dungeon_key";
+	}
+
+	}
+
+	return "weapon";
+}
+
+inline PickableType parse_pickable_type(std::string_view s)
+{
+	if (s == "targeted_scroll")
+	{
+		return PickableType::TARGETED_SCROLL;
+	}
+	if (s == "teleporter")
+	{
+		return PickableType::TELEPORTER;
+	}
+	if (s == "identify_scroll")
+	{
+		return PickableType::IDENTIFY_SCROLL;
+	}
+	if (s == "weapon")
+	{
+		return PickableType::WEAPON;
+	}
+	if (s == "shield")
+	{
+		return PickableType::SHIELD;
+	}
+	if (s == "consumable")
+	{
+		return PickableType::CONSUMABLE;
+	}
+	if (s == "gold_coin")
+	{
+		return PickableType::GOLD_COIN;
+	}
+	if (s == "food")
+	{
+		return PickableType::FOOD;
+	}
+	if (s == "corpse_food")
+	{
+		return PickableType::CORPSE_FOOD;
+	}
+	if (s == "armor")
+	{
+		return PickableType::ARMOR;
+	}
+	if (s == "magical_helm")
+	{
+		return PickableType::MAGICAL_HELM;
+	}
+	if (s == "magical_ring")
+	{
+		return PickableType::MAGICAL_RING;
+	}
+	if (s == "jewelry_amulet")
+	{
+		return PickableType::JEWELRY_AMULET;
+	}
+	if (s == "gauntlets")
+	{
+		return PickableType::GAUNTLETS;
+	}
+	if (s == "girdle")
+	{
+		return PickableType::GIRDLE;
+	}
+	if (s == "quest_item")
+	{
+		return PickableType::QUEST_ITEM;
+	}
+	if (s == "dungeon_key")
+	{
+		return PickableType::DUNGEON_KEY;
+	}
+
+	throw std::runtime_error(std::format("unknown pickable_type '{}'", s));
+}
