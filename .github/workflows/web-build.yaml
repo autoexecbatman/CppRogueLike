@@ -45,7 +45,7 @@ jobs:
       run: |
         emcmake cmake .. -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -w" \
+          -DCMAKE_CXX_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -Wall -Wextra" \
           -DCMAKE_EXE_LINKER_FLAGS="-s USE_SDL=2 -s USE_SDL_IMAGE=2 -s USE_SDL_TTF=2 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1"
     
     - name: Build
