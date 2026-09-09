@@ -10,6 +10,7 @@
 #include "../Systems/DataManager.h"
 #include "../Systems/MessageSystem.h"
 #include "../Combat/TurningTable.h"
+#include "../Config/GameBalance.h"
 #include "LevelUpSystem.h"
 
 // ============================================================================
@@ -107,15 +108,26 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
         }
     };
 
-    int hitDiceRoll = roll_hit_die();
-    std::string diceType = std::format("d{}", owner.get_hit_die());
+    // AD&D 2e: a character rolls hit dice only up to a class-dependent level.
+    // Past it the book grants a flat number of hit points per level, and the
+    // Constitution bonus stops applying entirely.
+    const LevelUpSystem::HitPointProgression progression = LevelUpSystem::hit_point_progression(owner.get_creature_class());
+    const bool stillRollsDice = newLevel <= progression.lastRolledLevel;
+
+    int hitDiceRoll = stillRollsDice ? roll_hit_die() : progression.flatGain;
+    std::string diceType = stillRollsDice
+        ? std::format("d{}", owner.get_hit_die())
+        : std::string{ "fixed" };
 
     int conBonus = 0;
-    int con = owner.get_constitution();
-    int conTableSize = static_cast<int>(ctx->dataManager->get_constitution_attributes().size());
-    if (con >= 1 && con <= conTableSize)
+    if (stillRollsDice)
     {
-        conBonus = ctx->dataManager->get_constitution_attributes()[con - 1].HPAdj;
+        int con = owner.get_constitution();
+        int conTableSize = static_cast<int>(ctx->dataManager->get_constitution_attributes().size());
+        if (con >= 1 && con <= conTableSize)
+        {
+            conBonus = ctx->dataManager->get_constitution_attributes()[con - 1].HPAdj;
+        }
     }
 
     int totalHPGain = std::max(1, hitDiceRoll + conBonus);
@@ -495,3 +507,43 @@ int calculate_backstab_multiplier(int level)
 }
 
 } // namespace LevelUpSystem
+
+// Which level a class stops rolling hit dice at, and what it gains per level
+// after that. AD&D 2e Player's Handbook Tables 14, 20, 23 and 25.
+//
+// Monsters do not advance by these tables; they take the warrior progression so
+// the function has a defined answer for every class.
+//
+// Example:
+//   hit_point_progression(CreatureClass::WIZARD).lastRolledLevel; // -> 10
+//   hit_point_progression(CreatureClass::WIZARD).flatGain;        // -> 1
+LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(CreatureClass creatureClass)
+{
+    using namespace GameBalance::Leveling::HitPoints;
+
+    switch (creatureClass)
+    {
+    case CreatureClass::ROGUE:
+    {
+        return LevelUpSystem::HitPointProgression{ ROGUE_LAST_ROLLED_LEVEL, ROGUE_FLAT_GAIN };
+    }
+
+    case CreatureClass::CLERIC:
+    {
+        return LevelUpSystem::HitPointProgression{ CLERIC_LAST_ROLLED_LEVEL, CLERIC_FLAT_GAIN };
+    }
+
+    case CreatureClass::WIZARD:
+    {
+        return LevelUpSystem::HitPointProgression{ WIZARD_LAST_ROLLED_LEVEL, WIZARD_FLAT_GAIN };
+    }
+
+    case CreatureClass::FIGHTER:
+    case CreatureClass::MONSTER:
+    {
+        return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+    }
+    }
+
+    return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+}

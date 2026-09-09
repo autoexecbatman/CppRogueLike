@@ -39,6 +39,32 @@ namespace GameBalance
         // Ability Score Improvements (AD&D 2e)
         inline constexpr int ABILITY_SCORE_IMPROVEMENT_INTERVAL = 4;  // Every 4 levels
 
+        // AD&D 2e hit point progression, Player's Handbook Tables 14, 20, 23 and 25.
+        //
+        // A character rolls one hit die per level up to a class-dependent level.
+        // After that the book grants a flat number of hit points per level and,
+        // in its own words for each class, they "no longer gain additional hit
+        // point bonuses for high Constitution scores".
+        namespace HitPoints
+        {
+            // Warrior: "gain one 10-sided hit die per level from 1st through 9th.
+            // After 9th level, warriors gain just 3 hit points per level".
+            inline constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
+            inline constexpr int FIGHTER_FLAT_GAIN = 3;
+
+            // Priest: one d8 through 9th, then 2 per level.
+            inline constexpr int CLERIC_LAST_ROLLED_LEVEL = 9;
+            inline constexpr int CLERIC_FLAT_GAIN = 2;
+
+            // Rogue: one d6 through 10th, then 2 per level.
+            inline constexpr int ROGUE_LAST_ROLLED_LEVEL = 10;
+            inline constexpr int ROGUE_FLAT_GAIN = 2;
+
+            // Wizard: one d4 through 10th, then 1 per level.
+            inline constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
+            inline constexpr int WIZARD_FLAT_GAIN = 1;
+        }
+
         // Fighter Progression
         namespace Fighter
         {

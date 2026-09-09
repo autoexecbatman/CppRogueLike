@@ -12,6 +12,7 @@
 #include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
 #include "Alignment.h"
+#include "CreatureClass.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/BuffType.h"
@@ -22,15 +23,6 @@
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
-
-enum class CreatureClass
-{
-	FIGHTER,
-	ROGUE,
-	CLERIC,
-	WIZARD,
-	MONSTER,
-};
 
 class Web;
 
