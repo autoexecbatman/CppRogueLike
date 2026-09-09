@@ -374,6 +374,16 @@ void Creature::update_awareness(const GameContext& ctx)
 	}
 }
 
+// Creatures other than the player have no equipment slots, so every slot is
+// empty for them.
+//
+// Example:
+//   skeleton.get_equipped_item(EquipmentSlot::RIGHT_HAND); // -> nullptr
+Item* Creature::get_equipped_item(EquipmentSlot) const noexcept
+{
+	return nullptr;
+}
+
 // Binds this creature into a web. The caller decides what is announced.
 //
 // Example:

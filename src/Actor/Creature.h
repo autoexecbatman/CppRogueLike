@@ -197,10 +197,9 @@ public:
 
 	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
 
-	// Equipment query. Creatures other than the player have no slots, so the
-	// honest answer for them is nothing. Read by ArmorClass, Web and targeting,
-	// each of which runs for any creature.
-	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept { return nullptr; }
+	// Equipment query. Read by ArmorClass, Web and targeting, each of which
+	// runs for any creature.
+	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 
 	// Type query - allows polymorphic identification without RTTI or cross-module deps
 	virtual bool is_player() const noexcept { return false; }
