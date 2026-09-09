@@ -32,6 +32,6 @@ public:
 	MenuBuy& operator=(MenuBuy&&) = delete;
 
 	void draw();
-	void on_key(GameKey key, int ch, GameContext& ctx) override;
+	void on_key(GameContext& ctx) override;
 	void menu(GameContext& ctx) override;
 };

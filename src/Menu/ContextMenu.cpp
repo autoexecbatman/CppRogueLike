@@ -65,24 +65,24 @@ void ContextMenu::draw_content()
 	}
 }
 
-void ContextMenu::on_key(GameKey key, int ch, GameContext& ctx)
+void ContextMenu::on_key(GameContext& ctx)
 {
 	const int maxIndex = static_cast<int>(menuOptions.size()) - 1;
-	if (key == GameKey::UP)
+	if (lastKey == GameKey::UP)
 	{
 		if (selectedIndex > 0)
 		{
 			selectedIndex--;
 		}
 	}
-	else if (key == GameKey::DOWN)
+	else if (lastKey == GameKey::DOWN)
 	{
 		if (selectedIndex < maxIndex)
 		{
 			selectedIndex++;
 		}
 	}
-	else if (key == GameKey::ENTER || key == GameKey::SPACE)
+	else if (lastKey == GameKey::ENTER || lastKey == GameKey::SPACE)
 	{
 		run = false;
 		if (onSelect)
@@ -90,7 +90,7 @@ void ContextMenu::on_key(GameKey key, int ch, GameContext& ctx)
 			onSelect(selectedIndex, ctx);
 		}
 	}
-	else if (key == GameKey::ESCAPE)
+	else if (lastKey == GameKey::ESCAPE)
 	{
 		run = false;
 		if (onSelect)
@@ -131,7 +131,7 @@ void ContextMenu::menu(GameContext& ctx)
 		return;
 	}
 
-	on_key(lastKey, lastChar, ctx);
+	on_key(ctx);
 
 	if (!run)
 	{

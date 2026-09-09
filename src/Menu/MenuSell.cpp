@@ -201,9 +201,9 @@ void MenuSell::draw()
 	menu_refresh();
 }
 
-void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
+void MenuSell::on_key(GameContext& ctx)
 {
-	if (key == GameKey::UP || key == GameKey::W)
+	if (lastKey == GameKey::UP || lastKey == GameKey::W)
 	{
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
@@ -215,7 +215,7 @@ void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 	}
-	else if (key == GameKey::DOWN || key == GameKey::S)
+	else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
 	{
 		if (InventoryOperations::is_inventory_empty(player.inventoryData))
 		{
@@ -227,7 +227,7 @@ void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 		}
 		currentState = (currentState + 1) % menuItems.size();
 	}
-	else if (key == GameKey::ENTER)
+	else if (lastKey == GameKey::ENTER)
 	{
 		if (!InventoryOperations::is_inventory_empty(player.inventoryData) && !menuItems.empty())
 		{
@@ -238,7 +238,7 @@ void MenuSell::on_key(GameKey key, int ch, GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items to sell.", true);
 		}
 	}
-	else if (key == GameKey::ESCAPE)
+	else if (lastKey == GameKey::ESCAPE)
 	{
 		menu_set_run_false();
 	}
@@ -248,5 +248,5 @@ void MenuSell::menu(GameContext& ctx)
 {
 	menu_key_listen();
 	draw();
-	on_key(lastKey, lastChar, ctx);
+	on_key(ctx);
 }

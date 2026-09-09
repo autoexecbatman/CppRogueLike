@@ -77,17 +77,17 @@ void MenuTrade::draw()
     menu_refresh();
 }
 
-void MenuTrade::on_key(GameKey key, int ch, GameContext& ctx)
+void MenuTrade::on_key(GameContext& ctx)
 {
-    if (key == GameKey::UP || key == GameKey::W)
+    if (lastKey == GameKey::UP || lastKey == GameKey::W)
     {
         currentState = (currentState + entries.size() - 1) % entries.size();
     }
-    else if (key == GameKey::DOWN || key == GameKey::S)
+    else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
     {
         currentState = (currentState + 1) % entries.size();
     }
-    else if (key == GameKey::ENTER)
+    else if (lastKey == GameKey::ENTER)
     {
         menu_set_run_false();
         if (entries[currentState].command)
@@ -95,7 +95,7 @@ void MenuTrade::on_key(GameKey key, int ch, GameContext& ctx)
             (*entries[currentState].command)(ctx);
         }
     }
-    else if (key == GameKey::ESCAPE)
+    else if (lastKey == GameKey::ESCAPE)
     {
         menu_set_run_false();
     }
@@ -105,7 +105,7 @@ void MenuTrade::menu(GameContext& ctx)
 {
     menu_key_listen();
     draw();
-    on_key(lastKey, lastChar, ctx);
+    on_key(ctx);
 }
 
 // end of file: MenuTrade.cpp

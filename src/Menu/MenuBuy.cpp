@@ -101,9 +101,9 @@ void MenuBuy::draw()
 	menu_refresh();
 }
 
-void MenuBuy::on_key(GameKey key, int ch, GameContext& ctx)
+void MenuBuy::on_key(GameContext& ctx)
 {
-	if (key == GameKey::UP || key == GameKey::W)
+	if (lastKey == GameKey::UP || lastKey == GameKey::W)
 	{
 		if (menuItems.empty())
 		{
@@ -111,7 +111,7 @@ void MenuBuy::on_key(GameKey key, int ch, GameContext& ctx)
 		}
 		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
 	}
-	else if (key == GameKey::DOWN || key == GameKey::S)
+	else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
 	{
 		if (menuItems.empty())
 		{
@@ -119,11 +119,11 @@ void MenuBuy::on_key(GameKey key, int ch, GameContext& ctx)
 		}
 		currentState = (currentState + 1) % menuItems.size();
 	}
-	else if (key == GameKey::ESCAPE)
+	else if (lastKey == GameKey::ESCAPE)
 	{
 		menu_set_run_false();
 	}
-	else if (key == GameKey::ENTER)
+	else if (lastKey == GameKey::ENTER)
 	{
 		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
@@ -140,7 +140,7 @@ void MenuBuy::menu(GameContext& ctx)
 {
 	menu_key_listen();
 	draw();
-	on_key(lastKey, lastChar, ctx);
+	on_key(ctx);
 }
 
 void MenuBuy::handle_buy()

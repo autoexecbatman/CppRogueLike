@@ -70,17 +70,17 @@ void ListMenu::draw()
     menu_refresh();
 }
 
-void ListMenu::on_key(GameKey key, int ch, GameContext& ctx)
+void ListMenu::on_key(GameContext& ctx)
 {
-    if (key == GameKey::UP || key == GameKey::W)
+    if (lastKey == GameKey::UP || lastKey == GameKey::W)
     {
         cursorIndex = (cursorIndex + entries.size() - 1) % entries.size();
     }
-    else if (key == GameKey::DOWN || key == GameKey::S)
+    else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
     {
         cursorIndex = (cursorIndex + 1) % entries.size();
     }
-    else if (key == GameKey::ENTER)
+    else if (lastKey == GameKey::ENTER)
     {
         menu_set_run_false();
         if (entries[cursorIndex].command)
@@ -88,7 +88,7 @@ void ListMenu::on_key(GameKey key, int ch, GameContext& ctx)
             (*entries[cursorIndex].command)(ctx);
         }
     }
-    else if (key == GameKey::ESCAPE)
+    else if (lastKey == GameKey::ESCAPE)
     {
         menu_set_run_false();
         if (onEscape)
@@ -101,7 +101,7 @@ void ListMenu::on_key(GameKey key, int ch, GameContext& ctx)
         // Hotkey match — case-insensitive so 'M' and 'm' both work.
         for (auto& entry : entries)
         {
-            if (entry.hotkey != 0 && std::tolower(ch) == std::tolower(entry.hotkey))
+            if (entry.hotkey != 0 && std::tolower(lastChar) == std::tolower(entry.hotkey))
             {
                 menu_set_run_false();
                 if (entry.command)
@@ -168,7 +168,7 @@ void ListMenu::menu(GameContext& ctx)
         return;
     }
 
-    on_key(lastKey, lastChar, ctx);
+    on_key(ctx);
 }
 
 // end of file: ListMenu.cpp

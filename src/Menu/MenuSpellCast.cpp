@@ -116,33 +116,33 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
     menu_set_run_false();
 }
 
-void MenuSpellCast::on_key(GameKey key, int ch, GameContext& ctx)
+void MenuSpellCast::on_key(GameContext& ctx)
 {
-    if (key == GameKey::ESCAPE)
+    if (lastKey == GameKey::ESCAPE)
     {
         menu_set_run_false();
     }
-    else if (key == GameKey::UP)
+    else if (lastKey == GameKey::UP)
     {
         if (selectedIndex > 0)
         {
             selectedIndex--;
         }
     }
-    else if (key == GameKey::DOWN)
+    else if (lastKey == GameKey::DOWN)
     {
         if (selectedIndex < static_cast<int>(availableSpells.size()) - 1)
         {
             selectedIndex++;
         }
     }
-    else if (key == GameKey::ENTER || key == GameKey::SPACE)
+    else if (lastKey == GameKey::ENTER || lastKey == GameKey::SPACE)
     {
         handle_selection(ctx);
     }
-    else if (ch >= 'a' && ch <= 'z')
+    else if (lastChar >= 'a' && lastChar <= 'z')
     {
-        int selection = ch - 'a';
+        int selection = lastChar - 'a';
         if (selection < static_cast<int>(availableSpells.size()))
         {
             selectedIndex = selection;
@@ -162,5 +162,5 @@ void MenuSpellCast::menu(GameContext& ctx)
 
     menu_key_listen();
     draw();
-    on_key(lastKey, lastChar, ctx);
+    on_key(ctx);
 }

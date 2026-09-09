@@ -100,3 +100,9 @@ void BaseMenu::menu_draw_title(std::string_view title, int colorPair)
 	int pixelY = static_cast<int>(menuStartY) * tileSize + fontOff;
 	renderer->draw_text(Vector2D{ pixelX, pixelY }, title, colorPair);
 }
+
+// A menu that consumes no keys of its own. The polled key and character are
+// lastKey and lastChar, so an override takes only the context.
+void BaseMenu::on_key(GameContext&)
+{
+}

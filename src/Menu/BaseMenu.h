@@ -47,5 +47,5 @@ public:
 
 	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}
-	virtual void on_key(GameKey key, int ch, GameContext& ctx) {}
+	virtual void on_key(GameContext& ctx);
 };
