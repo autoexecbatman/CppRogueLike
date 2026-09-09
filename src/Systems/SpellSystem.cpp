@@ -145,10 +145,12 @@ SpellClass parse_class(std::string_view s)
 	{
 		return SpellClass::WIZARD;
 	}
-	else
+	else if (s == "both")
 	{
 		return SpellClass::BOTH;
 	}
+
+	throw std::runtime_error(std::format("SpellSystem: unknown spell class '{}'", s));
 }
 
 std::string encode_class(SpellClass c)
@@ -225,10 +227,12 @@ SpellEffectType parse_effect_type(std::string_view s)
 	{
 		return SpellEffectType::KNOCK;
 	}
-	else
+	else if (s == "none")
 	{
 		return SpellEffectType::NONE;
 	}
+
+	throw std::runtime_error(std::format("SpellSystem: unknown spell effect '{}'", s));
 }
 
 std::string encode_effect_type(SpellEffectType e)
