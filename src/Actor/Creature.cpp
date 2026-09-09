@@ -374,6 +374,16 @@ void Creature::update_awareness(const GameContext& ctx)
 	}
 }
 
+void Creature::set_body_plan(std::vector<EquipmentSlot> slots) noexcept
+{
+	bodyPlan = std::move(slots);
+}
+
+bool Creature::has_slot(EquipmentSlot slot) const noexcept
+{
+	return std::ranges::find(bodyPlan, slot) != bodyPlan.end();
+}
+
 // Creatures other than the player have no equipment slots, so every slot is
 // empty for them.
 //

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <filesystem>
 #include <set>
 #include <string>
 #include <vector>
@@ -83,4 +84,94 @@ TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
 				<< key << " carries " << entry.itemKey << " in no slot";
 		}
 	}
+}
+
+// A creature that carries gear has somewhere to put it; one that fights with
+// its body has no slots at all.
+TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
+{
+	for (const std::string& key : MonsterCreator::get_all_keys())
+	{
+		const MonsterParams& params = MonsterCreator::get_params(key);
+		const std::vector<EquipmentSlot>& plan = MonsterCreator::get_body_plan(params.bodyPlanName);
+		for (const MonsterParams::StartingItem& carried : params.equipment)
+		{
+			const bool planned = std::ranges::find(plan, carried.slot) != plan.end();
+			EXPECT_TRUE(planned)
+				<< key << " carries " << carried.itemKey << " in a slot its body does not have";
+		}
+	}
+}
+
+// The wolf wears nothing, and nothing in the data pretends otherwise.
+TEST_F(MonsterEquipmentTest, BeastHasNoSlots)
+{
+	EXPECT_TRUE(MonsterCreator::get_body_plan(MonsterCreator::get_params("wolf").bodyPlanName).empty());
+	EXPECT_FALSE(MonsterCreator::get_body_plan(MonsterCreator::get_params("orc").bodyPlanName).empty());
+}
+
+// Eleven monsters share one humanoid body rather than eleven copies of the
+// same fifteen slot names.
+TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
+{
+	EXPECT_EQ(MonsterCreator::get_params("orc").bodyPlanName, "humanoid");
+	EXPECT_EQ(MonsterCreator::get_params("kobold").bodyPlanName, "humanoid");
+	EXPECT_TRUE(MonsterCreator::get_params("wolf").bodyPlanName.empty());
+}
+
+// A misspelled template is a data error and must not read as a creature that
+// simply wears nothing.
+TEST_F(MonsterEquipmentTest, UnknownBodyTemplateIsRefused)
+{
+	EXPECT_THROW(MonsterCreator::get_body_plan("humaniod"), std::runtime_error);
+	EXPECT_NO_THROW(MonsterCreator::get_body_plan(""));
+}
+
+// The saver rebuilds the file from scratch, so anything it does not write is
+// destroyed by the first save from the editor. The template table is written.
+TEST_F(MonsterEquipmentTest, SavePreservesBodyTemplates)
+{
+	const std::filesystem::path roundTrip =
+		std::filesystem::temp_directory_path() / "monsters_roundtrip.json";
+
+	MonsterCreator::save(roundTrip.string());
+	MonsterCreator::load(roundTrip.string());
+
+	EXPECT_EQ(MonsterCreator::get_params("orc").bodyPlanName, "humanoid");
+	EXPECT_EQ(MonsterCreator::get_body_plan("humanoid").size(), 15u);
+
+	// Leave the shared registry holding the real file, not the temporary one.
+	MonsterCreator::load("data/content/monsters.json");
+	std::filesystem::remove(roundTrip);
+}
+
+// Body composition follows the Monstrous Manual rather than a single humanoid
+// default. A medusa's snakes leave no room for a helmet.
+TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
+{
+	const std::vector<EquipmentSlot>& plan =
+		MonsterCreator::get_body_plan(MonsterCreator::get_params("medusa").bodyPlanName);
+
+	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::HEAD), plan.end());
+	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
+}
+
+// The stone golem entry says it is weaponless and wears nothing, so it gets no
+// slots at all rather than a body nobody fills.
+TEST_F(MonsterEquipmentTest, StoneGolemWearsNothing)
+{
+	EXPECT_TRUE(MonsterCreator::get_params("golem_stone").bodyPlanName.empty());
+	EXPECT_TRUE(MonsterCreator::get_body_plan(
+		MonsterCreator::get_params("golem_stone").bodyPlanName).empty());
+}
+
+// A harpy uses a club and wears nothing, so it has hands and no wardrobe.
+TEST_F(MonsterEquipmentTest, HarpyHasHandsAndNothingElse)
+{
+	const std::vector<EquipmentSlot>& plan =
+		MonsterCreator::get_body_plan(MonsterCreator::get_params("harpy").bodyPlanName);
+
+	EXPECT_EQ(plan.size(), 2u);
+	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end());
+	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
 }

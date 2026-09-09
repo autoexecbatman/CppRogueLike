@@ -101,6 +101,11 @@ struct MonsterParams
 	// bite, a gaze. Empty for anything that wields an item.
 	std::string naturalAttack{};
 
+	// Which body template this creature is built on, named in the body_plans
+	// table. Empty for anything that wears nothing, which is most of the
+	// bestiary. The slots themselves are read with get_body_plan.
+	std::string bodyPlanName{};
+
 	// Behaviour
 	MonsterAiType aiType{ MonsterAiType::MELEE };
 	bool canSwim{ false };
@@ -141,6 +146,15 @@ void set_params(MonsterId id, const MonsterParams& p);
 
 // Throws std::out_of_range if key is unknown.
 [[nodiscard]] const MonsterParams& get_params(std::string_view key);
+
+// The slots a body template grants. An empty name means a creature that wears
+// nothing and yields an empty plan; any other unknown name throws, so a
+// misspelled template fails at load rather than quietly undressing a monster.
+//
+// Example:
+//   get_body_plan("humanoid").size(); // -> 15
+//   get_body_plan("");                // -> empty
+[[nodiscard]] const std::vector<EquipmentSlot>& get_body_plan(std::string_view name);
 
 // Updates builtin, custom, or class-based entry by string key.
 void set_params(std::string_view key, const MonsterParams& p);

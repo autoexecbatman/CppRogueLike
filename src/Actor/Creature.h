@@ -96,6 +96,11 @@ private:
 	std::string gender{ "None" };
 	std::string weaponEquipped{ "None" };
 
+	// The slots this creature has at all. Empty means it wears nothing -- a
+	// wolf, a gelatinous cube -- which is the default until a body plan is
+	// authored for it.
+	std::vector<EquipmentSlot> bodyPlan{};
+
 	// Combat class and hit die (set by class selection or monster registry)
 	CreatureClass creatureClass{ CreatureClass::MONSTER };
 	int hitDie{ 8 };
@@ -120,6 +125,15 @@ public:
 		add_state(ActorState::BLOCKS);
 		/*add_state(ActorState::FOV_ONLY);*/
 	};
+
+	// Replaces this creature's slots wholesale. Authored per creature in
+	// monsters.json rather than fixed in code, so a spider and a hobgoblin do
+	// not have to agree about what a body is.
+	void set_body_plan(std::vector<EquipmentSlot> slots) noexcept;
+
+	// Whether this creature has the slot at all, which is a separate question
+	// from whether anything is in it.
+	[[nodiscard]] bool has_slot(EquipmentSlot slot) const noexcept;
 
 	void load(const json& j) override;
 	void save(json& j) override;
