@@ -9,15 +9,12 @@
 // Everything a tile type does, in one place, loaded from
 // data/tiles/tile_config.json.
 //
-// Tile behaviour used to be six switch statements in five files - one deciding
-// whether a tile blocks, one its minimap colour, one its tooltip, one what the
-// player hears standing on it, one what they hear when blocked by it, and one
-// whether pathfinding may cross it. Five of the six carried a default case, so
-// adding a tile type compiled clean and the new tile silently behaved like
-// whatever the default said.
+// One table answers every question the game asks about a tile: whether it
+// blocks, what crosses it anyway, what it says on entry and when it turns a
+// move away, its tooltip name, and its two minimap colours.
 //
-// Nothing here is code. Every one of those switches produced data, including
-// the swim rule, which is "blocks, unless the creature has this state".
+// A tile type absent from the table throws on lookup, so adding a TileType
+// without authoring it fails loudly.
 //
 // Usage -- asking whether a creature may enter a tile:
 //

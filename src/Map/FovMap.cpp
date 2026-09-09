@@ -1,5 +1,4 @@
 // FovMap.cpp -- standalone FOV grid using recursive shadowcasting.
-// Replaces libtcod TCODMap/TCODPath entirely.
 #include "FovMap.h"
 
 FovMap::FovMap(int width, int height)

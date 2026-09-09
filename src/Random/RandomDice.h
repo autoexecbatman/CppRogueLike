@@ -25,7 +25,7 @@ public:
 	int d20() { return roll(1, 20); }
 	int d100() { return roll(1, 100); }
 
-	// Deprecated roll_from_string method removed - use DamageInfo::roll_damage() instead
+	// Damage strings such as "1d8+2" are rolled by DamageInfo::roll_damage.
 
 	int roll(int min, int max)
 	{

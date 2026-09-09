@@ -283,7 +283,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_FLESH, "Flesh", "Items/", "Flesh", 64);
 	load_static(TileSheet::SHEET_MONEY, "Money", "Items/", "Money", 64);
 
-	// Previously unloaded item sheets
+	// Item sheets
 	load_static(TileSheet::SHEET_AMMO, "Ammo", "Items/", "Ammo", 16);
 	load_static(TileSheet::SHEET_WAND, "Wand", "Items/", "Wand", 16);
 	load_static(TileSheet::SHEET_BOOK, "Book", "Items/", "Book", 16);
@@ -296,7 +296,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music", 16);
 	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 64);
 
-	// Previously unloaded character sheets
+	// Further character sheets
 	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
 	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat", 16);
 	load_animated(TileSheet::SHEET_RODENT0, "Rodent0", "Characters/", "Rodent", 16);
@@ -304,7 +304,7 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_animated(TileSheet::SHEET_ELEMENTAL0, "Elemental0", "Characters/", "Elemental", 16);
 	load_animated(TileSheet::SHEET_AQUATIC0, "Aquatic0", "Characters/", "Aquatic", 16);
 
-	// Previously unloaded object sheets
+	// Further object sheets
 	load_animated(TileSheet::SHEET_ORE0, "Ore0", "Objects/", "Ore", 16);
 	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill", 16);
 	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree", 16);

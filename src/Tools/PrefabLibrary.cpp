@@ -325,12 +325,12 @@ void PrefabLibrary::apply_to_room(
 	{
 		return;
 	}
-	auto idx = find_prefab_index(prefabs, room.prefabName);
-	if (!idx)
+	const std::optional<size_t> prefabIndex = find_prefab_index(prefabs, room.prefabName);
+	if (!prefabIndex)
 	{
 		return;
 	}
-	stamp_room(prefabs[*idx], room, symbolToTile, editor, map);
+	stamp_room(prefabs[*prefabIndex], room, symbolToTile, editor, map);
 }
 
 // Batch version used as a fallback; prefer apply_to_room called per room.

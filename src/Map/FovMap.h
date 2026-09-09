@@ -14,7 +14,7 @@ struct FovCell
 };
 
 // ---------------------------------------------------------------------------
-// FovMap -- replaces TCODMap.
+// FovMap -- the field-of-view grid.
 //
 // Stores per-cell walkability/transparency and computes FOV using
 // recursive shadowcasting (Bjorn Pettersen's algorithm).

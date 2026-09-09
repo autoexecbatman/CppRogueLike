@@ -37,7 +37,7 @@ void Attacker::perform_single_attack(
 	const std::string& handName,
 	GameContext& ctx)
 {
-	// Shopkeeper interaction (melee only) — component check replaces dynamic_cast
+	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
 	if (target.shop && !owner.has_state(ActorState::IS_RANGED))
 	{
 		ctx.menus->push_back(std::make_unique<MenuTrade>(target, owner, ctx));
@@ -145,7 +145,7 @@ BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noe
 	info.hitBonus = 4; // +4 to hit from behind/invisible
 	info.damageMultiplier = 1;
 
-	// CreatureClass::ROGUE replaces dynamic_cast<Player*> + playerClassState check
+	// Backstab is a rogue ability, so the attacker's class decides it.
 	if (owner.get_creature_class() == CreatureClass::ROGUE)
 	{
 		info.damageMultiplier = LevelUpSystem::calculate_backstab_multiplier(owner.get_creature_level());

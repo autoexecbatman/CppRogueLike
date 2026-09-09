@@ -1,8 +1,7 @@
 #pragma once
 
-// ListMenu — a reusable vertical list menu.
-// Replaces the duplicated MenuState-enum + two-map pattern that appeared
-// identically in Menu, MenuClass, MenuRace, and MenuGender.
+// ListMenu — a reusable vertical list menu, shared by Menu, MenuClass,
+// MenuRace and MenuGender.
 //
 // Construct via the factory functions in Menu.h, MenuGender.h, MenuRace.h,
 // MenuClass.h — do not instantiate directly from outside the Menu subsystem.

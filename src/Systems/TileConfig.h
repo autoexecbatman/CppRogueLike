@@ -90,9 +90,7 @@ namespace Autotile
 // ---------------------------------------------------------------------------
 // TileConfig -- runtime registry for system tile IDs loaded from JSON.
 //
-// Replaces all former inline constexpr TILE_* / AUTOTILE_* / WALL_AUTOTILE_*
-// / GUI_* / TILE_EFFECT_* constants. The god editor authors
-// data/tiles/tile_config.json; this class consumes it.
+// The god editor authors data/tiles/tile_config.json; this class consumes it.
 // load() must be called before any code accesses tiles.
 // ---------------------------------------------------------------------------
 class TileConfig
