@@ -68,6 +68,8 @@ int main()
 	auto game = std::make_unique<Game>();
 	std::clog << "STARTUP: Loading tile config\n" << std::flush;
 	game->tileConfig.load(Paths::TILE_CONFIG);
+	std::clog << "STARTUP: Loading body plans\n" << std::flush;
+	game->bodyPlanRegistry.load(Paths::BODY_PLANS);
 	std::clog << "STARTUP: Initializing world\n" << std::flush;
 	game->init_world();
 

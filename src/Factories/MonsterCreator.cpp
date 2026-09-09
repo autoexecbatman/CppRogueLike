@@ -27,6 +27,7 @@
 #include "../Random/RandomDice.h"
 #include "../Utils/Vector2D.h"
 #include "MonsterCreator.h"
+#include "../Systems/BodyPlanRegistry.h"
 
 namespace
 {
@@ -41,8 +42,6 @@ std::unordered_map<MonsterId, MonsterParams> registry;
 std::unordered_map<MonsterId, TileRef> s_class_tiles;
 std::unordered_map<MonsterId, MonsterParams> s_class_params; // minimal params for class-based
 std::map<std::string, MonsterParams> s_custom; // user-created monsters
-std::unordered_map<std::string, std::vector<EquipmentSlot>> bodyPlans; // body templates by name
-const std::vector<EquipmentSlot> emptyBodyPlan{}; // what a creature with no template gets
 
 // ---------------------------------------------------------------------------
 // Key <-> MonsterId mappings
@@ -185,43 +184,6 @@ std::vector<MonsterParams::StartingItem> parse_equipment(const nlohmann::json& e
 	}
 
 	return equipment;
-}
-
-// Reads the body_plans table: each named template lists the slots it grants.
-// An unknown slot name throws, so a typo fails at load.
-std::unordered_map<std::string, std::vector<EquipmentSlot>> parse_body_plans(const nlohmann::json& table)
-{
-	std::unordered_map<std::string, std::vector<EquipmentSlot>> plans;
-
-	for (const auto& [templateName, slotNames] : table.items())
-	{
-		std::vector<EquipmentSlot> slots;
-		slots.reserve(slotNames.size());
-		for (const nlohmann::json& slotName : slotNames)
-		{
-			slots.push_back(parse_equipment_slot(slotName.get<std::string>()));
-		}
-		plans.emplace(templateName, std::move(slots));
-	}
-
-	return plans;
-}
-
-nlohmann::json encode_body_plans(const std::unordered_map<std::string, std::vector<EquipmentSlot>>& plans)
-{
-	nlohmann::json table = nlohmann::json::object();
-
-	for (const auto& [templateName, slots] : plans)
-	{
-		nlohmann::json slotNames = nlohmann::json::array();
-		for (EquipmentSlot slot : slots)
-		{
-			slotNames.push_back(encode_equipment_slot(slot));
-		}
-		table[templateName] = slotNames;
-	}
-
-	return table;
 }
 
 nlohmann::json encode_equipment(const std::vector<MonsterParams::StartingItem>& equipment)
@@ -427,23 +389,6 @@ std::string unique_key(std::string base)
 
 // ---------------------------------------------------------------------------
 
-const std::vector<EquipmentSlot>& MonsterCreator::get_body_plan(std::string_view name)
-{
-	// A creature that wears nothing names no template.
-	if (name.empty())
-	{
-		return emptyBodyPlan;
-	}
-
-	auto found = bodyPlans.find(std::string{ name });
-	if (found == bodyPlans.end())
-	{
-		throw std::runtime_error(std::format("unknown body plan '{}'", name));
-	}
-
-	return found->second;
-}
-
 void MonsterCreator::load(std::string_view path)
 {
 	auto resolved = Paths::resolve(path);
@@ -460,14 +405,6 @@ void MonsterCreator::load(std::string_view path)
 	s_class_tiles.clear();
 	s_custom.clear();
 	s_class_params.clear();
-	bodyPlans.clear();
-
-	// Body templates are read before any monster, because every monster names
-	// one and resolving that name needs the table already standing.
-	if (root.contains("body_plans"))
-	{
-		bodyPlans = parse_body_plans(root.at("body_plans"));
-	}
 
 	// Collect known builtin keys for custom detection
 	std::set<std::string> known_keys;
@@ -576,7 +513,6 @@ void MonsterCreator::save(std::string_view path)
 		root[key] = encode_full_params(params);
 	}
 
-	root["body_plans"] = encode_body_plans(bodyPlans);
 
 	std::ofstream f(resolved);
 	if (!f.is_open())
@@ -647,7 +583,8 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_charisma(std::max(1, roll_dice(ctx.dice, params.chaDice)));
 
 	c->set_weapon_equipped(params.weaponName);
-	c->set_body_plan(MonsterCreator::get_body_plan(params.bodyPlanName));
+	assert(ctx.bodyPlanRegistry && "MonsterCreator::create_from_params called without a bodyPlanRegistry");
+	c->set_body_plan(ctx.bodyPlanRegistry->get(params.bodyPlanName));
 	c->set_morale(params.morale);
 	c->set_undead(params.undead);
 	c->set_ethics(params.ethics);

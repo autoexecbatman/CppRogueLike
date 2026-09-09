@@ -50,6 +50,7 @@
 		.spellEditor = &spellEditor,
 #endif
 		.tileConfig = &tileConfig,
+		.bodyPlanRegistry = &bodyPlanRegistry,
 
 		// Game world data
 		.stairs = stairs.get(),

@@ -19,6 +19,7 @@ inline constexpr std::string_view PREFABS = "data/prefabs.json";
 inline constexpr std::string_view CONTENT_TILES = "data/content/tiles.json";
 inline constexpr std::string_view MONSTERS = "data/content/monsters.json";
 inline constexpr std::string_view SPELLS   = "data/content/spells.json";
+inline constexpr std::string_view BODY_PLANS = "data/content/body_plans.json";
 inline constexpr std::string_view ITEMS          = "data/content/items.json";
 inline constexpr std::string_view ENHANCED_RULES = "data/content/enhanced_rules.json";
 inline constexpr std::string_view TILE_CONFIG = "data/tiles/tile_config.json";

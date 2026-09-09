@@ -37,6 +37,7 @@
 #include "Systems/RenderingManager.h"
 #include "Systems/CurseSystem.h"
 #include "Systems/TargetingSystem.h"
+#include "Systems/BodyPlanRegistry.h"
 #include "Systems/TileConfig.h"
 #include "Utils/Dijkstra.h"
 #include "Utils/Vector2D.h"
@@ -59,6 +60,7 @@ struct Game
 
 	// Tile configuration (must be loaded before init_world)
 	TileConfig tileConfig{};
+	BodyPlanRegistry bodyPlanRegistry{};
 
 	// Minimap overlay
 	Minimap minimap{};

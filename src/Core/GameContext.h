@@ -14,6 +14,7 @@ class Map;
 class Minimap;
 struct Decoration;
 class TileConfig;
+class BodyPlanRegistry;
 class Gui;
 class MessageSystem;
 class RandomDice;
@@ -184,6 +185,7 @@ struct GameContext
 	SpellEditor* spellEditor{ nullptr };
 #endif
 	const TileConfig* tileConfig{ nullptr };
+	const BodyPlanRegistry* bodyPlanRegistry{ nullptr };
 
 	// Game world data
 	Stairs* stairs{ nullptr };

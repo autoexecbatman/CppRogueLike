@@ -1,48 +1,4 @@
 {
-  "body_plans": {
-    "humanoid": [
-      "head",
-      "neck",
-      "body",
-      "girdle",
-      "cloak",
-      "right_hand",
-      "left_hand",
-      "right_ring",
-      "left_ring",
-      "bracers",
-      "gauntlets",
-      "boots",
-      "missile_weapon",
-      "missiles",
-      "tool"
-    ],
-    "serpent_haired": [
-      "neck",
-      "body",
-      "girdle",
-      "cloak",
-      "right_hand",
-      "left_hand",
-      "right_ring",
-      "left_ring",
-      "bracers",
-      "gauntlets",
-      "boots",
-      "missile_weapon",
-      "missiles",
-      "tool"
-    ],
-    "taloned": [
-      "right_hand",
-      "left_hand"
-    ],
-    "grave_clothed": [
-      "body",
-      "cloak",
-      "boots"
-    ]
-  },
   "archer": {
     "ac": 7,
     "ai": "ranged",

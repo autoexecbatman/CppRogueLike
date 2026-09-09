@@ -30,6 +30,7 @@
 #include "ContentRegistryIO.h"
 #include "GameStateManager.h"
 #include "TileConfig.h"
+#include "BodyPlanRegistry.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;
@@ -117,6 +118,7 @@ void GameStateManager::init_new_game(GameContext& ctx)
 
 	assert(ctx.playerBlueprint != nullptr);
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 }, *ctx.playerBlueprint, ctx);
+	ctx.player()->set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 	*ctx.playerBlueprint = PlayerBlueprint{};
 	ctx.player()->actorData.tile = ctx.tileConfig->get(ctx.player_concrete().sprite_tile_key());
 
@@ -140,6 +142,7 @@ bool GameStateManager::load_all(GameContext& ctx)
 	ctx.dataManager->load_all_data(*ctx.messageSystem);
 
 	*ctx.playerOwner = std::make_unique<Player>(Vector2D{ 0, 0 });
+	ctx.player()->set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 
 	if (!load_game(ctx))
 	{

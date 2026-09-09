@@ -162,6 +162,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Systems/AnimationSystem.cpp
     ${PARENT_SOURCE_DIR}/Systems/ContentRegistry.cpp
     ${PARENT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
+    ${PARENT_SOURCE_DIR}/Systems/BodyPlanRegistry.cpp
     ${PARENT_SOURCE_DIR}/Systems/TileConfig.cpp
     ${PARENT_SOURCE_DIR}/Systems/FloatingTextSystem.cpp
     ${PARENT_SOURCE_DIR}/Tools/BalanceViewer.cpp

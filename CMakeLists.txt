@@ -303,6 +303,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistry.h
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.cpp
     ${PROJECT_SOURCE_DIR}/Systems/ContentRegistryIO.h
+    ${PROJECT_SOURCE_DIR}/Systems/BodyPlanRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/Systems/BodyPlanRegistry.h
     ${PROJECT_SOURCE_DIR}/Systems/TileConfig.cpp
     ${PROJECT_SOURCE_DIR}/Systems/TileConfig.h
 
