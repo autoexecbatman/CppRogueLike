@@ -1399,7 +1399,7 @@ void Player::apply_confusion(int duration)
 	controller->apply_confusion(duration);
 }
 
-int Player::get_next_level_xp(GameContext& ctx) const
+int Player::get_next_level_xp() const
 {
 	int currentLevel = get_creature_level();
 
@@ -1437,7 +1437,7 @@ int Player::get_next_level_xp(GameContext& ctx) const
 void Player::levelup_update(GameContext& ctx)
 {
 	ctx.messageSystem->log("Player::levelup_update");
-	int levelUpXp = get_next_level_xp(ctx);
+	int levelUpXp = get_next_level_xp();
 	if (get_xp() >= levelUpXp)
 	{
 		adjust_level(1);

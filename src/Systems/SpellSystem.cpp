@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cassert>
 #include <filesystem>
 #include <format>
 #include <fstream>
@@ -760,6 +761,11 @@ void SpellSystem::cast_spell_by_key(
 	std::function<void(GameContext&)> onSuccess,
 	GameContext& ctx)
 {
+	// Every effect that succeeds calls this, at four sites and sometimes a turn
+	// later from a targeting callback. An empty one throws there rather than
+	// here, which is a long way from the caller that omitted it.
+	assert(onSuccess && "cast_spell_by_key requires a callback");
+
 	if (caster.has_state(ActorState::IS_SILENCED))
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);

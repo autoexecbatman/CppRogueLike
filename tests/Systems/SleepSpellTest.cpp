@@ -159,3 +159,14 @@ TEST_F(SleepSpellTest, HigherLevelCasterSleepsThemLonger)
 	ASSERT_TRUE(goblin.has_state(ActorState::IS_SLEEPING));
 	EXPECT_EQ(buffs.get_buff_turns(goblin, BuffType::SLEEP), 35);
 }
+// Every spell effect that lands calls onSuccess, at four sites and sometimes a
+// turn later from a targeting callback. An empty one used to throw
+// bad_function_call from deep inside that callback; it now fails at the entry
+// point, naming the caller's mistake.
+TEST_F(SleepSpellTest, CastingWithoutACallbackIsRefused)
+{
+	add_creature(1, 4, false);
+	force_next_roll(4);
+
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, {}, ctx), "requires a callback");
+}

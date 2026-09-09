@@ -66,8 +66,9 @@ public:
 	static std::vector<std::string> get_available_spells(CasterClass classState, int maxSpellLevel);
 
 	// Cast a spell by string key (works for builtin and custom spells).
-	// onSuccess is called when the spell takes effect (immediately for instant spells,
-	// deferred via TargetingMenu callback for targeted spells).
+	// onSuccess is called when the spell takes effect: immediately for instant
+	// spells, and a turn later through the TargetingMenu callback for targeted
+	// ones. It is required - a spell that lands always has a turn to end.
 	static void cast_spell_by_key(
 		std::string_view key,
 		Creature& caster,

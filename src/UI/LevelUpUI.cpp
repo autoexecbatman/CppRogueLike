@@ -162,7 +162,7 @@ void draw_next_level_info(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
 
-    int nextLevelXP = player.get_next_level_xp(ctx);
+    int nextLevelXP = player.get_next_level_xp();
 
     ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
     row++;

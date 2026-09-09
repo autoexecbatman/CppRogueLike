@@ -126,7 +126,7 @@ public:
 	void update(GameContext& ctx) override;
 	void apply_confusion(int duration) override;
 
-	[[nodiscard]] int get_next_level_xp(GameContext& ctx) const;
+	[[nodiscard]] int get_next_level_xp() const;
 	void levelup_update(GameContext& ctx);
 
 	// Two-weapon fighting mechanics

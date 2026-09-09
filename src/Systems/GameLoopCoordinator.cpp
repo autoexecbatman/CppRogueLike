@@ -37,10 +37,11 @@
 #include "TileConfig.h"
 #include "../ActorTypes/Player.h"
 
+// One pass of the game loop. The game is already initialised by the time this
+// runs: MenuName calls init_new_game once the blueprint is complete, and
+// load_all sets the initialised flag itself.
 void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
 {
-	handle_initialization(ctx);
-
 	if (ctx.messageSystem->is_debug_mode())
 	{
 		ctx.messageSystem->log("//====================LOOP====================//");
@@ -94,12 +95,6 @@ void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNu
 	// Always render every frame
 	handle_render_phase(ctx, gui);
 	handle_menu_check(ctx);
-}
-
-void GameLoopCoordinator::handle_initialization(GameContext& ctx)
-{
-	// init_new_game is called by MenuName once the blueprint is complete.
-	// load_all sets game_initialized directly. Nothing to do here.
 }
 
 void GameLoopCoordinator::handle_input_phase(GameContext& ctx)

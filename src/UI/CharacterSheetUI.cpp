@@ -79,7 +79,7 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
     int x = tileSize;
 
     int currentXP = player.get_xp();
-    int nextLevelXP = player.get_next_level_xp(ctx);
+    int nextLevelXP = player.get_next_level_xp();
     int xpNeeded = nextLevelXP - currentXP;
 
     ctx.renderer->draw_text(
