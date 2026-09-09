@@ -92,14 +92,6 @@ constexpr int calculate_wizard_xp(int level) noexcept
 // Equipment comparison predicates for DRY compliance
 namespace
 {
-constexpr auto matches_slot = [](EquipmentSlot slot)
-{
-	return [slot](const EquippedItem& equipped)
-	{
-		return equipped.slot == slot;
-	};
-};
-
 constexpr auto matches_unique_id = [](uint64_t uniqueId)
 {
 	return [uniqueId](const EquippedItem& equipped)
@@ -1032,13 +1024,6 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 	}
 
 	return false;
-}
-
-Item* Player::get_equipped_item(EquipmentSlot slot) const noexcept
-{
-	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
-
-	return (it != equippedItems.end()) ? it->item.get() : nullptr;
 }
 
 bool Player::is_slot_occupied(EquipmentSlot slot) const noexcept

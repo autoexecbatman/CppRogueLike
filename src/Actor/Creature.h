@@ -26,6 +26,26 @@
 
 class Web;
 
+// One item sitting in one slot on a creature. The creature owns it while it is
+// worn; unequipping hands it back to the inventory.
+struct EquippedItem
+{
+	std::unique_ptr<Item> item;
+	EquipmentSlot slot;
+
+	EquippedItem(std::unique_ptr<Item> worn, EquipmentSlot wornIn)
+		: item(std::move(worn)), slot(wornIn) {}
+};
+
+// Finds the entry sitting in one slot. Used by every equipment query.
+constexpr auto matches_slot = [](EquipmentSlot slot)
+{
+	return [slot](const EquippedItem& equipped)
+	{
+		return equipped.slot == slot;
+	};
+};
+
 // How a creature feels about the player. Ordered from most hostile to most
 // friendly, so threshold comparisons are meaningful.
 //
@@ -119,6 +139,10 @@ public:
 	// Unified buff system - modifier stack pattern (managed by BuffSystem)
 	// Note: active_buffs vector is public for BuffSystem access
 	std::vector<Buff> activeBuffs;
+
+	// What this creature is currently wearing or wielding. Every entry sits in
+	// a slot its body plan grants.
+	std::vector<EquippedItem> equippedItems;
 	Creature(Vector2D position, ActorData data)
 		: Actor(position, data), constitutionTracker(std::make_unique<ConstitutionTracker>()), inventoryData(CreatureInventory(50))
 	{
@@ -213,7 +237,7 @@ public:
 
 	// Equipment query. Read by ArmorClass, Web and targeting, each of which
 	// runs for any creature.
-	virtual Item* get_equipped_item(EquipmentSlot slot) const noexcept;
+	[[nodiscard]] Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 
 	// Type query - allows polymorphic identification without RTTI or cross-module deps
 	virtual bool is_player() const noexcept { return false; }

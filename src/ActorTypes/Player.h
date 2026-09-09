@@ -16,15 +16,6 @@ class Item;
 struct GameContext;
 struct PlayerBlueprint;
 
-struct EquippedItem
-{
-	std::unique_ptr<Item> item;
-	EquipmentSlot slot;
-
-	EquippedItem(std::unique_ptr<Item> i, EquipmentSlot s)
-		: item(std::move(i)), slot(s) {}
-};
-
 class Player : public Creature
 {
 public:
@@ -54,7 +45,6 @@ public:
 	int killCount{ 0 }; // Tracks kill count for log.
 
 	std::vector<std::string> memorizedSpells;
-	std::vector<EquippedItem> equippedItems;
 
 	std::unique_ptr<PlayerController> controller;
 
@@ -91,7 +81,6 @@ public:
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
 	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
-	Item* get_equipped_item(EquipmentSlot slot) const noexcept override;
 	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
 	bool is_dual_wielding() const noexcept;
 

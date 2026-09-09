@@ -384,14 +384,17 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 	return std::ranges::find(bodyPlan, slot) != bodyPlan.end();
 }
 
-// Creatures other than the player have no equipment slots, so every slot is
-// empty for them.
+// What sits in one slot, or nothing when the slot is empty or the creature's
+// body plan does not grant it.
 //
 // Example:
-//   skeleton.get_equipped_item(EquipmentSlot::RIGHT_HAND); // -> nullptr
-Item* Creature::get_equipped_item(EquipmentSlot) const noexcept
+//   orc.get_equipped_item(EquipmentSlot::RIGHT_HAND);  // -> the long sword
+//   wolf.get_equipped_item(EquipmentSlot::RIGHT_HAND); // -> nullptr
+Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 {
-	return nullptr;
+	auto worn = std::ranges::find_if(equippedItems, matches_slot(slot));
+
+	return (worn != equippedItems.end()) ? worn->item.get() : nullptr;
 }
 
 // Binds this creature into a web. The caller decides what is announced.
