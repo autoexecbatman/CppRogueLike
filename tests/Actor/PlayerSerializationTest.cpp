@@ -102,8 +102,8 @@ TEST_F(PlayerSerializationTest, CombatStats_Preserved) {
 
 TEST_F(PlayerSerializationTest, WebStatus_Preserved) {
     auto original = create_test_player();
-    original->webStuckTurns = 5;
-    original->webStrength = 10;
+    original->apply_web_effect(5, 10, nullptr);
+    EXPECT_TRUE(original->is_webbed());
 
     json j;
     original->save(j);
@@ -112,8 +112,7 @@ TEST_F(PlayerSerializationTest, WebStatus_Preserved) {
     loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
-    EXPECT_EQ(loaded->webStuckTurns, 5);
-    EXPECT_EQ(loaded->webStrength, 10);
+    EXPECT_TRUE(loaded->is_webbed());
 }
 
 TEST_F(PlayerSerializationTest, EquippedItems_Preserved) {

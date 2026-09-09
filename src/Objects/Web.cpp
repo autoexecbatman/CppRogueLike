@@ -24,9 +24,11 @@ Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
 // Apply web effect when a creature tries to pass through
 EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 {
-	// Only players can get stuck (for simplicity)
-	if (!creature.is_player())
+	// Spiders and their kin move across webs freely.
+	if (creature.has_state(ActorState::CAN_WALK_WEBS))
+	{
 		return EntryResult::UNAFFECTED;
+	}
 
 	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
 	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
@@ -55,7 +57,7 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 		int stuckTurns = webStrength + ctx.dice->roll(1, 2);
 
 		// Apply the effect through polymorphic interface
-		creature.apply_web_effect(stuckTurns, webStrength, this, ctx);
+		creature.apply_web_effect(stuckTurns, webStrength, this);
 
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
 

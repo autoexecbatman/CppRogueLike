@@ -11,6 +11,7 @@
 #include "../Ai/Ai.h"
 #include "../Ai/AiMonsterConfused.h"
 #include "../Colors/Colors.h"
+#include "../Objects/Web.h"
 #include "../Combat/DamageInfo.h"
 #include "../Combat/WeaponDamageRegistry.h"
 #include "../Core/GameContext.h"
@@ -45,6 +46,8 @@ void Creature::load(const json& j)
 	gold = j["gold"];
 	gender = j["gender"];
 	weaponEquipped = j["weaponEquipped"];
+	webStuckTurns = j.at("webStuckTurns").get<int>();
+	webStrength = j.at("webStrength").get<int>();
 	creatureClass = static_cast<CreatureClass>(j.value("creatureClass", static_cast<int>(CreatureClass::MONSTER)));
 	hitDie = j.value("hitDie", 8);
 	attacksPerRound = j.value("attacksPerRound", 1.0f);
@@ -133,6 +136,8 @@ void Creature::save(json& j)
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["weaponEquipped"] = weaponEquipped;
+	j["webStuckTurns"] = webStuckTurns;
+	j["webStrength"] = webStrength;
 	j["creatureClass"] = static_cast<int>(creatureClass);
 	j["hitDie"] = hitDie;
 	j["attacksPerRound"] = attacksPerRound;
@@ -334,8 +339,69 @@ void Creature::take_damage_and_check_death(int damage, GameContext& ctx, DamageT
 void Creature::update(GameContext& ctx)
 {
 	update_creature_state(ctx);
+
+	// A held creature spends its turn struggling rather than acting.
+	if (is_webbed() && try_break_web(ctx) == WebEscape::STILL_STUCK)
+	{
+		return;
+	}
+
 	assert(ai && "Creature::update called with null ai");
 	ai->update(*this, ctx);
+}
+
+// Binds this creature into a web. The caller decides what is announced.
+//
+// Example:
+//   creature.apply_web_effect(4, 2, web); // held for 4 turns by a strength-2 web
+//   creature.is_webbed();                 // -> true
+void Creature::apply_web_effect(int duration, int strength, Web* web)
+{
+	webStuckTurns = duration;
+	webStrength = strength;
+	trappingWeb = web;
+}
+
+// Rolls 1d100 against a chance built from this creature's strength against the
+// web's, then ages the binding by one turn. Both escapes destroy the web.
+//
+// Example:
+//   creature.try_break_web(ctx); // -> WebEscape::STILL_STUCK, one turn spent
+//   creature.try_break_web(ctx); // -> WebEscape::BROKE_FREE on a good roll
+WebEscape Creature::try_break_web(GameContext& ctx)
+{
+	// Stronger creatures tear loose more often; stronger webs hold better.
+	const int breakChance = std::max(10, 20 + (get_strength() * 5) - (webStrength * 10));
+
+	if (ctx.dice->d100() <= breakChance)
+	{
+		release_from_web();
+		return WebEscape::BROKE_FREE;
+	}
+
+	webStuckTurns--;
+
+	// The binding ran out; the creature is free whatever it rolled.
+	if (webStuckTurns <= 0)
+	{
+		release_from_web();
+		return WebEscape::STRUGGLED_FREE;
+	}
+
+	return WebEscape::STILL_STUCK;
+}
+
+// Clears the binding and destroys whatever web held it.
+void Creature::release_from_web()
+{
+	if (trappingWeb)
+	{
+		trappingWeb->destroy();
+		trappingWeb = nullptr;
+	}
+
+	webStuckTurns = 0;
+	webStrength = 0;
 }
 
 void Creature::apply_confusion(int nbTurns)

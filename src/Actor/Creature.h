@@ -31,8 +31,23 @@ enum class CreatureClass
 	MONSTER,
 };
 
+class Web;
+
+// What a struggle against a web achieved this turn.
+enum class WebEscape
+{
+	BROKE_FREE, // the creature tore loose on its own
+	STRUGGLED_FREE, // the binding ran out and released it
+	STILL_STUCK, // still held; the turn is spent
+};
+
 class Creature : public Actor
 {
+private:
+	int webStuckTurns{ 0 }; // turns remaining before the web lets go
+	int webStrength{ 0 }; // strength of the web holding this creature
+	Web* trappingWeb{ nullptr }; // the web holding it, destroyed on escape
+
 protected:
 	// Shared per-turn logic (buffs, armor, constitution) used by both
 	// Creature::update() and Player::update().
@@ -164,8 +179,20 @@ public:
 	// Type query - allows polymorphic identification without RTTI or cross-module deps
 	virtual bool is_player() const noexcept { return false; }
 
-	// Web effect handler - Player overrides this, monsters ignore webs by default
-	virtual void apply_web_effect(int duration, int strength, class Web* web, GameContext& ctx) { /* do nothing */ }
+	// Binds this creature into a web for duration turns. Pure state: the web
+	// decides what, if anything, the player is told.
+	void apply_web_effect(int duration, int strength, class Web* web);
+
+	[[nodiscard]] bool is_webbed() const noexcept { return webStuckTurns > 0; }
+
+	// Rolls once against the web's strength and ages the binding by a turn.
+	// Frees the creature and destroys the web on either escape.
+	WebEscape try_break_web(GameContext& ctx);
+
+private:
+	void release_from_web();
+
+public:
 
 	// Armor Class accessors
 	[[nodiscard]] int get_armor_class() const noexcept { return armorClass->get_armor_class(); }

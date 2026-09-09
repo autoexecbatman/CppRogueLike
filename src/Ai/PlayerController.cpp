@@ -83,10 +83,26 @@ void PlayerController::update(GameContext& ctx)
 	// If stuck in a web, try to break free and skip turn if still stuck
 	if (playerOwner.is_webbed())
 	{
-		if (!playerOwner.try_break_web(ctx))
+		const WebEscape escape = playerOwner.try_break_web(ctx);
+
+		switch (escape)
 		{
+		case WebEscape::BROKE_FREE:
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
+			break;
+		}
+		case WebEscape::STRUGGLED_FREE:
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
+			break;
+		}
+		case WebEscape::STILL_STUCK:
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're still stuck in the web.", true);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			return;
+		}
 		}
 	}
 

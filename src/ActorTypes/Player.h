@@ -9,7 +9,6 @@
 #include "../Actor/Creature.h"
 #include "../Actor/EquipmentSlot.h"
 #include "../Ai/PlayerController.h"
-#include "../Objects/Web.h"
 #include "../Persistent/Persistent.h"
 #include "../Utils/Vector2D.h"
 
@@ -87,15 +86,6 @@ public:
 	bool rest(GameContext& ctx);
 	void animate_resting(GameContext& ctx);
 	bool attempt_hide(GameContext& ctx);
-
-	// Web effect tracking
-	int webStuckTurns{ 0 }; // How many turns the player is stuck in a web
-	int webStrength{ 0 }; // How strong the web is (affects escape difficulty)
-	Web* trappingWeb{ nullptr }; // The web that has trapped the player
-
-	bool is_webbed() const noexcept { return webStuckTurns > 0; } // Check if player is stuck in a web
-	bool try_break_web(GameContext& ctx); // Attempt to break free from a web
-	void apply_web_effect(int duration, int strength, Web* web, GameContext& ctx) override; // Get stuck in a web
 
 	// Equipment system methods
 	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;

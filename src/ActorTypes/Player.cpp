@@ -676,64 +676,6 @@ bool Player::attempt_hide(GameContext& ctx)
 	return true;
 }
 
-void Player::apply_web_effect(int duration, int strength, Web* web, GameContext& ctx)
-{
-	webStuckTurns = duration;
-	webStrength = strength;
-	trappingWeb = web;
-
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web for " + std::to_string(duration) + " turns!", true);
-}
-
-bool Player::try_break_web(GameContext& ctx)
-{
-	// Calculate chance to break free based on strength vs web strength
-	int breakChance = 20 + (get_strength() * 5) - (webStrength * 10);
-
-	// Ensure some minimum chance
-	breakChance = std::max(10, breakChance);
-
-	// Roll to break free
-	if (ctx.dice->d100() <= breakChance)
-	{
-		// Success!
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
-
-		// Destroy the web that trapped the player
-		if (trappingWeb)
-		{
-			trappingWeb->destroy();
-			trappingWeb = nullptr;
-		}
-
-		webStuckTurns = 0;
-		webStrength = 0;
-		return true;
-	}
-
-	// Still stuck
-	webStuckTurns--;
-	if (webStuckTurns <= 0)
-	{
-		// Time expired, free anyway
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
-
-		// Destroy the web that trapped the player
-		if (trappingWeb)
-		{
-			trappingWeb->destroy();
-			trappingWeb = nullptr;
-		}
-
-		webStuckTurns = 0;
-		webStrength = 0;
-		return true;
-	}
-
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're still stuck in the web. Turns remaining: " + std::to_string(webStuckTurns), true);
-	return false;
-}
-
 // Clean Weapon Equipment System using Unique IDs
 bool Player::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
 {
@@ -1255,8 +1197,6 @@ void Player::save(json& j)
 	j["playerClass"] = playerClass;
 	j["playerRace"] = playerRace;
 	j["roundCounter"] = roundCounter;
-	j["webStuckTurns"] = webStuckTurns;
-	j["webStrength"] = webStrength;
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
 
@@ -1289,8 +1229,6 @@ void Player::load(const json& j)
 	playerClass = j.at("playerClass").get<std::string>();
 	playerRace = j.at("playerRace").get<std::string>();
 	roundCounter = j.at("roundCounter").get<int>();
-	webStuckTurns = j.at("webStuckTurns").get<int>();
-	webStrength = j.at("webStrength").get<int>();
 	killCount = j.value("killCount", 0);
 	if (j.contains("memorizedSpells"))
 	{
