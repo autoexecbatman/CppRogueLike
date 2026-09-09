@@ -25,5 +25,10 @@ public:
 	// Combat calculations - data-driven, OCP compliant
 	int calculate_ac_bonus(const Creature& creature) const noexcept;
 	int calculate_hit_modifier(const Creature& creature) const noexcept;
+
+	// Penalty an attacker suffers from the target's own wards. Reads both
+	// creatures because the penalty depends on who is swinging: Protection
+	// from Evil bites only evil attackers.
+	int calculate_ward_penalty(const Creature& attacker, const Creature& target) const noexcept;
 	std::vector<BuffType> remove_buffs_broken_by_attacking(Creature& creature) noexcept;
 };

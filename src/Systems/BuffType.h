@@ -1,6 +1,11 @@
 #pragma once
 
 // Unified buff system - single source of truth for all timed effects
+// AD&D 2e, Player's Handbook page 277: "all attacks made by evil (or evilly
+// enchanted) creatures against the protected creature suffer -2 penalties to
+// attack rolls".
+inline constexpr int PROTECTION_FROM_EVIL_PENALTY = -2;
+
 enum class BuffType
 {
 	NONE,
@@ -21,6 +26,7 @@ enum class BuffType
 	SLEEP,
 	HOLD_PERSON,
 	SANCTUARY,
+	PROTECTION_FROM_EVIL,
 	SILENCE,
 	WEBBED,
 };

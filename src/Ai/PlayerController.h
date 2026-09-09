@@ -54,6 +54,8 @@ private:
 	void call_action(Controls key, GameContext& ctx);
 	bool resolve_pending_door(GameContext& ctx);
 	void resolve_peaceful_bump(Creature& target, GameContext& ctx);
+	void confirm_attack_on_peaceful(Creature& target, GameContext& ctx);
+	void strike(Creature& target, GameContext& ctx);
 	Vector2D handle_direction_input(int dirKey, GameContext& ctx);
 	bool resolve_mouse_world_tile(GameContext& ctx, Vector2D& out_world_tile) const;
 	void flush_fov(GameContext& ctx);

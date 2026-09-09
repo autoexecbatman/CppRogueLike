@@ -77,6 +77,7 @@ enum class SpellId
 	CURE_LIGHT_WOUNDS,
 	BLESS,
 	SANCTUARY,
+	PROTECTION_FROM_EVIL,
 	HOLD_PERSON,
 	SILENCE,
 	MAGIC_MISSILE,
@@ -96,6 +97,7 @@ std::map<SpellId, SpellDefinition> s_spells = {
 	{ SpellId::CURE_LIGHT_WOUNDS, { "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP", SpellEffectType::CURE_LIGHT_WOUNDS } },
 	{ SpellId::BLESS, { "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns", SpellEffectType::BLESS } },
 	{ SpellId::SANCTUARY, { "Sanctuary", 1, SpellClass::CLERIC, "Enemies ignore you for 3 turns", SpellEffectType::SANCTUARY } },
+	{ SpellId::PROTECTION_FROM_EVIL, { "Protection From Evil", 1, SpellClass::CLERIC, "Evil attackers suffer -2 to hit", SpellEffectType::PROTECTION_FROM_EVIL } },
 	{ SpellId::HOLD_PERSON, { "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns", SpellEffectType::HOLD_PERSON } },
 	{ SpellId::SILENCE, { "Silence", 2, SpellClass::CLERIC, "Prevent target from casting", SpellEffectType::SILENCE } },
 	{ SpellId::MAGIC_MISSILE, { "Magic Missile", 1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit", SpellEffectType::MAGIC_MISSILE } },
@@ -120,6 +122,7 @@ constexpr SpellEntry SPELL_KEYS[] = {
 	{ SpellId::CURE_LIGHT_WOUNDS, "cure_light_wounds" },
 	{ SpellId::BLESS, "bless" },
 	{ SpellId::SANCTUARY, "sanctuary" },
+	{ SpellId::PROTECTION_FROM_EVIL, "protection_from_evil" },
 	{ SpellId::HOLD_PERSON, "hold_person" },
 	{ SpellId::SILENCE, "silence" },
 	{ SpellId::MAGIC_MISSILE, "magic_missile" },
@@ -173,6 +176,10 @@ SpellEffectType parse_effect_type(std::string_view s)
 	else if (s == "bless")
 	{
 		return SpellEffectType::BLESS;
+	}
+	else if (s == "protection_from_evil")
+	{
+		return SpellEffectType::PROTECTION_FROM_EVIL;
 	}
 	else if (s == "sanctuary")
 	{
@@ -242,6 +249,11 @@ std::string encode_effect_type(SpellEffectType e)
 	case SpellEffectType::SANCTUARY:
 	{
 		return "sanctuary";
+	}
+
+	case SpellEffectType::PROTECTION_FROM_EVIL:
+	{
+		return "protection_from_evil";
 	}
 
 	case SpellEffectType::HOLD_PERSON:
@@ -676,6 +688,12 @@ void SpellSystem::dispatch_effect(
 		break;
 	}
 
+	case SpellEffectType::PROTECTION_FROM_EVIL:
+	{
+		result = cast_protection_from_evil(caster, ctx);
+		break;
+	}
+
 	case SpellEffectType::HOLD_PERSON:
 	{
 		result = cast_hold_person(caster, ctx);
@@ -790,6 +808,27 @@ bool SpellSystem::cast_bless(Creature& caster, GameContext& ctx)
 	ctx.buffSystem->add_buff(caster, BuffType::BLESS, 0, 6, false); // Spell: ADD effect
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Bless! ");
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "+1 to hit for 6 turns.");
+	ctx.messageSystem->finalize_message();
+	return true;
+}
+
+// AD&D 2e, Player's Handbook page 277: evil creatures attacking the protected
+// suffer -2 on attack rolls. Duration is 2 rounds per caster level.
+//
+// Only the to-hit penalty is implemented. The spell's other two effects -
+// blocking mental control, and hedging out conjured creatures - have nothing
+// in this game to act on yet.
+bool SpellSystem::cast_protection_from_evil(Creature& caster, GameContext& ctx)
+{
+	const int duration = 2 * caster.get_creature_level();
+
+	ctx.buffSystem->add_buff(caster, BuffType::PROTECTION_FROM_EVIL, PROTECTION_FROM_EVIL_PENALTY, duration, false);
+
+	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Protection From Evil! ");
+	ctx.messageSystem->append_message_part(
+		WHITE_BLACK_PAIR,
+		std::format("Evil creatures strike at {} against you for {} turns.",
+			PROTECTION_FROM_EVIL_PENALTY, duration));
 	ctx.messageSystem->finalize_message();
 	return true;
 }

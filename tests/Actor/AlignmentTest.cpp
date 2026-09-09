@@ -80,3 +80,29 @@ TEST(AlignmentDataTest, EnumOrderingIsPartOfTheDataFormat)
 	EXPECT_EQ(static_cast<int>(Morality::NEUTRAL), 1);
 	EXPECT_EQ(static_cast<int>(Morality::EVIL), 2);
 }
+
+// The peaceful-attack shift is a house rule, so the test states the rule rather
+// than citing the Player's Handbook, which gives no drift formula at all.
+TEST(AlignmentShiftTest, ShiftMovesOneStepTowardChaotic)
+{
+	EXPECT_EQ(shift_toward_chaotic(Ethics::LAWFUL), Ethics::NEUTRAL);
+	EXPECT_EQ(shift_toward_chaotic(Ethics::NEUTRAL), Ethics::CHAOTIC);
+}
+
+// Chaotic is the floor: there is nothing further to fall to.
+TEST(AlignmentShiftTest, ShiftStopsAtChaotic)
+{
+	EXPECT_EQ(shift_toward_chaotic(Ethics::CHAOTIC), Ethics::CHAOTIC);
+}
+
+// One betrayal is one step, so a lawful player needs two to reach chaotic.
+TEST(AlignmentShiftTest, RepeatedShiftsAccumulateOneStepEach)
+{
+	Ethics ethics = Ethics::LAWFUL;
+
+	ethics = shift_toward_chaotic(ethics);
+	EXPECT_EQ(ethics, Ethics::NEUTRAL) << "one betrayal must not reach chaotic";
+
+	ethics = shift_toward_chaotic(ethics);
+	EXPECT_EQ(ethics, Ethics::CHAOTIC);
+}

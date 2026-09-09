@@ -187,6 +187,9 @@ int Attacker::calculate_to_hit_roll(
 	// AD&D 2e: Add all buff-based hit modifiers (Bless, Prayer, etc.) - OCP compliant
 	hitModifier += ctx.buffSystem->calculate_hit_modifier(attacker);
 
+	// The target's own wards can penalise this attacker, depending on who it is.
+	hitModifier += ctx.buffSystem->calculate_ward_penalty(attacker, target);
+
 	// AD&D 2e: Add backstab bonus
 	hitModifier += backstab.hitBonus;
 

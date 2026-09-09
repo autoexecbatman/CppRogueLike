@@ -43,6 +43,8 @@
 #include "../Utils/Vector2D.h"
 #include "PlayerController.h"
 #include "AiShopkeeper.h"
+#include "../Menu/ListMenu.h"
+#include "../Menu/MenuEntry.h"
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -346,37 +348,7 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 				return false;
 			}
 
-			playerOwner.roundCounter++;
-
-			int attacksThisRound = 1;
-
-			if (playerOwner.get_attacks_per_round() >= 2.0f)
-			{
-				attacksThisRound = 2;
-			}
-			else if (playerOwner.get_attacks_per_round() >= 1.5f)
-			{
-				attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
-			}
-
-			for (int i = 0; i < attacksThisRound; i++)
-			{
-				if (!c->is_dead())
-				{
-					if (i > 0)
-					{
-						ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
-					}
-
-					playerOwner.attacker->attack(*c, ctx);
-				}
-				else
-				{
-					break;
-				}
-			}
-
-			ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+			strike(*c, ctx);
 			return false;
 		}
 	}
@@ -433,12 +405,11 @@ void PlayerController::resolve_peaceful_bump(Creature& target, GameContext& ctx)
 		return;
 	}
 
+	// A creature that will not step aside can only be passed by force, so the
+	// bump becomes the attack prompt.
 	if (!target.is_displaceable())
 	{
-		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
-			std::format("{} will not move aside.", target.actorData.name),
-			true);
+		confirm_attack_on_peaceful(target, ctx);
 		return;
 	}
 
@@ -448,6 +419,91 @@ void PlayerController::resolve_peaceful_bump(Creature& target, GameContext& ctx)
 	target.position = playerPosition;
 
 	ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+}
+
+// Asks before striking a creature that has not threatened the player, and
+// applies the consequence if the answer is yes.
+//
+// Turning on the peaceable is the player's choice, so it is never silent: the
+// prompt is the guard, and the alignment shift is the cost.
+void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext& ctx)
+{
+	std::vector<MenuEntry> entries{};
+
+	// Init-capture: the menu outlives this call, so the target is captured by
+	// pointer rather than through a reference that would dangle on return.
+	auto attackCommand = [this, victim = &target](GameContext& menuCtx)
+	{
+		Player& player = menuCtx.player_concrete();
+
+		// House rule: betraying the peaceable costs one step toward chaotic.
+		player.set_ethics(shift_toward_chaotic(player.get_ethics()));
+
+		// The victim stops being peaceable the moment it is struck.
+		victim->set_attitude(Attitude::HOSTILE);
+
+		menuCtx.messageSystem->message(
+			RED_BLACK_PAIR,
+			std::format("You attack the {}!", victim->actorData.name),
+			true);
+
+		strike(*victim, menuCtx);
+		menuCtx.menus->back()->back = true;
+	};
+
+	auto cancelCommand = [](GameContext& menuCtx)
+	{
+		menuCtx.menus->back()->back = true;
+	};
+
+	entries.push_back({ "Yes, attack", 'y', attackCommand });
+	entries.push_back({ "No", 'n', cancelCommand });
+
+	ctx.menus->push_back(std::make_unique<ListMenu>(
+		std::format("Really attack the {}?", target.actorData.name),
+		std::move(entries),
+		std::function<void(GameContext&)>{},
+		std::function<void(GameContext&)>{},
+		ctx));
+}
+
+// Resolves one round of the player's melee against a target, including the
+// follow-up attacks a high attacks-per-round buys.
+//
+// Example:
+//   strike(goblin, ctx); // one swing, or two at 2.0 attacks per round
+void PlayerController::strike(Creature& target, GameContext& ctx)
+{
+	playerOwner.roundCounter++;
+
+	int attacksThisRound = 1;
+
+	if (playerOwner.get_attacks_per_round() >= 2.0f)
+	{
+		attacksThisRound = 2;
+	}
+	else if (playerOwner.get_attacks_per_round() >= 1.5f)
+	{
+		// A 1.5 rate alternates: two swings on odd rounds, one on even.
+		attacksThisRound = (playerOwner.roundCounter % 2 == 1) ? 2 : 1;
+	}
+
+	for (int attackIndex = 0; attackIndex < attacksThisRound; ++attackIndex)
+	{
+		if (target.is_dead())
+		{
+			break;
+		}
+
+		if (attackIndex > 0)
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
+		}
+
+		playerOwner.attacker->attack(target, ctx);
+	}
+
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 }
 
 bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext& ctx)

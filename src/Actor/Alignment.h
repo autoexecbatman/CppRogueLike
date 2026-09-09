@@ -34,3 +34,33 @@ enum class Morality
 	NEUTRAL,
 	EVIL,
 };
+
+// Turns a creature's ethics one step toward chaotic, stopping at CHAOTIC.
+//
+// HOUSE RULE, not an AD&D 2e citation. The Player's Handbook states that
+// alignment shifts through repeated deeds and that "several occasions of lax
+// behavior are required", but gives no formula, no step size and no table -
+// drift is left to the DM. One step per betrayal is ours.
+//
+// Example:
+//   shift_toward_chaotic(Ethics::LAWFUL);  // -> Ethics::NEUTRAL
+//   shift_toward_chaotic(Ethics::CHAOTIC); // -> Ethics::CHAOTIC, already there
+[[nodiscard]] constexpr Ethics shift_toward_chaotic(Ethics ethics)
+{
+	switch (ethics)
+	{
+	case Ethics::LAWFUL:
+	{
+		return Ethics::NEUTRAL;
+	}
+	case Ethics::NEUTRAL:
+	{
+		return Ethics::CHAOTIC;
+	}
+	case Ethics::CHAOTIC:
+	{
+		return Ethics::CHAOTIC;
+	}
+	}
+	return ethics;
+}

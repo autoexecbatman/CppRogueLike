@@ -32,6 +32,7 @@ enum class SpellEffectType
 	CURE_LIGHT_WOUNDS,
 	BLESS,
 	SANCTUARY,
+	PROTECTION_FROM_EVIL,
 	HOLD_PERSON,
 	SILENCE,
 	MAGIC_MISSILE,
@@ -120,6 +121,7 @@ private:
 	static bool cast_cure_light_wounds(Creature& caster, GameContext& ctx);
 	static bool cast_bless(Creature& caster, GameContext& ctx);
 	static bool cast_sanctuary(Creature& caster, GameContext& ctx);
+	static bool cast_protection_from_evil(Creature& caster, GameContext& ctx);
 	static bool cast_magic_missile(Creature& caster, GameContext& ctx);
 	static bool cast_shield(Creature& caster, GameContext& ctx);
 	static bool cast_sleep(Creature& caster, GameContext& ctx);

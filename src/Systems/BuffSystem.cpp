@@ -196,6 +196,33 @@ int BuffSystem::calculate_ac_bonus(const Creature& creature) const noexcept
 	return total;
 }
 
+// Returns the to-hit penalty the target's wards impose on this attacker.
+//
+// AD&D 2e page 277: Protection from Evil penalises evil attackers by -2. A
+// non-evil attacker walks through the ward untouched, which is the whole point
+// of the spell being keyed to alignment.
+//
+// Example:
+//   calculate_ward_penalty(goblin, wardedCleric);  // -> -2, goblin is evil
+//   calculate_ward_penalty(knight, wardedCleric);  // -> 0, knight is not
+int BuffSystem::calculate_ward_penalty(const Creature& attacker, const Creature& target) const noexcept
+{
+	if (!attacker.is_evil())
+	{
+		return 0;
+	}
+
+	for (const auto& buff : target.activeBuffs)
+	{
+		if (buff.type == BuffType::PROTECTION_FROM_EVIL)
+		{
+			return buff.value;
+		}
+	}
+
+	return 0;
+}
+
 int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept
 {
 	// AD&D 2e: Sum all to-hit bonuses from active buffs
