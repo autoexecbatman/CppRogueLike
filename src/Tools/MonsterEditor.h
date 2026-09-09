@@ -67,6 +67,8 @@ private:
 		DMG_MAX,
 		DMG_DISPLAY,
 		AI_TYPE,
+		ETHICS,
+		MORALITY,
 		CAN_SWIM,
 		WEIGHT,
 		DEPTH_MIN,

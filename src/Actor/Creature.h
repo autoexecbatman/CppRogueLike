@@ -11,6 +11,7 @@
 #include "../Combat/ExperienceReward.h"
 #include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
+#include "Alignment.h"
 #include "../Persistent/Persistent.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/BuffType.h"
@@ -72,6 +73,8 @@ class Creature : public Actor
 {
 private:
 	Attitude attitude{ Attitude::HOSTILE }; // how this creature feels about the player
+	Ethics ethics{ Ethics::NEUTRAL }; // law/chaos axis; true neutral until data says otherwise
+	Morality morality{ Morality::NEUTRAL }; // good/evil axis
 	int awarenessTurns{ 0 }; // turns of memory left after last seeing the player
 	bool displaceable{ true }; // whether the player may swap places with it
 	int webStuckTurns{ 0 }; // turns remaining before the web lets go
@@ -226,6 +229,20 @@ public:
 	//   creature.update_awareness(ctx); // player in view -> is_aware() == true
 	//   creature.update_awareness(ctx); // out of view    -> still true, decaying
 	void update_awareness(const GameContext& ctx);
+
+	[[nodiscard]] Ethics get_ethics() const noexcept { return ethics; }
+	void set_ethics(Ethics value) noexcept { ethics = value; }
+
+	[[nodiscard]] Morality get_morality() const noexcept { return morality; }
+	void set_morality(Morality value) noexcept { morality = value; }
+
+	// True when this creature is evil, which is what alignment-keyed effects
+	// such as Protection from Evil test.
+	//
+	// Example:
+	//   goblin.set_morality(Morality::EVIL);
+	//   goblin.is_evil(); // -> true
+	[[nodiscard]] bool is_evil() const noexcept { return morality == Morality::EVIL; }
 
 	[[nodiscard]] Attitude get_attitude() const noexcept { return attitude; }
 	void set_attitude(Attitude value) noexcept { attitude = value; }

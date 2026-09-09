@@ -8,6 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
+#include "../Actor/Alignment.h"
 #include "../Combat/DamageInfo.h"
 #include "../Renderer/Renderer.h"
 
@@ -66,6 +67,8 @@ struct MonsterParams
 	int xp{ 0 };
 	int dr{ 0 };
 	int morale{ 10 };
+	Ethics ethics{ Ethics::NEUTRAL };
+	Morality morality{ Morality::NEUTRAL };
 	int corpseWeight{ 50 };
 
 	// Ability scores

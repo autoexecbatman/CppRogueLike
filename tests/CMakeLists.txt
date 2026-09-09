@@ -42,6 +42,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/EquipmentStatBonusTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AttitudeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AwarenessTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AlignmentTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/WebTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
 )

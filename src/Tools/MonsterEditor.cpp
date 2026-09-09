@@ -41,6 +41,88 @@ int picker_tile_size(const Renderer& renderer, int sheetIndex)
 namespace
 {
 
+// Alignment fields cycle through their axis rather than being typed, so each
+// press moves one step and wraps at the end.
+std::string_view ethics_name(Ethics ethics)
+{
+	switch (ethics)
+	{
+	case Ethics::LAWFUL:
+	{
+		return "lawful";
+	}
+	case Ethics::NEUTRAL:
+	{
+		return "neutral";
+	}
+	case Ethics::CHAOTIC:
+	{
+		return "chaotic";
+	}
+	}
+	return "neutral";
+}
+
+std::string_view morality_name(Morality morality)
+{
+	switch (morality)
+	{
+	case Morality::GOOD:
+	{
+		return "good";
+	}
+	case Morality::NEUTRAL:
+	{
+		return "neutral";
+	}
+	case Morality::EVIL:
+	{
+		return "evil";
+	}
+	}
+	return "neutral";
+}
+
+Ethics next_ethics(Ethics ethics)
+{
+	switch (ethics)
+	{
+	case Ethics::LAWFUL:
+	{
+		return Ethics::NEUTRAL;
+	}
+	case Ethics::NEUTRAL:
+	{
+		return Ethics::CHAOTIC;
+	}
+	case Ethics::CHAOTIC:
+	{
+		return Ethics::LAWFUL;
+	}
+	}
+	return Ethics::NEUTRAL;
+}
+
+Morality next_morality(Morality morality)
+{
+	switch (morality)
+	{
+	case Morality::GOOD:
+	{
+		return Morality::NEUTRAL;
+	}
+	case Morality::NEUTRAL:
+	{
+		return Morality::EVIL;
+	}
+	case Morality::EVIL:
+	{
+		return Morality::GOOD;
+	}
+	}
+	return Morality::NEUTRAL;
+}
+
 std::string prettify_key(std::string_view key)
 {
 	std::string result;
@@ -838,6 +920,8 @@ std::string MonsterEditor::field_label(FieldId f) const
 	case FieldId::DMG_MAX:    return "Dmg Max";
 	case FieldId::DMG_DISPLAY: return "Dmg Display";
 	case FieldId::AI_TYPE:    return "AI Type";
+	case FieldId::ETHICS:     return "Ethics";
+	case FieldId::MORALITY:   return "Morality";
 	case FieldId::CAN_SWIM:   return "Can Swim";
 	case FieldId::WEIGHT:     return "Spawn Weight";
 	case FieldId::DEPTH_MIN:  return "Depth Min";
@@ -883,6 +967,8 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::DMG_MAX:     return std::format("{}", m_working.damage.maxDamage);
 	case FieldId::DMG_DISPLAY: return m_working.damage.displayRoll;
 	case FieldId::AI_TYPE:     return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
+	case FieldId::ETHICS:      return std::string(ethics_name(m_working.ethics));
+	case FieldId::MORALITY:    return std::string(morality_name(m_working.morality));
 	case FieldId::CAN_SWIM:    return m_working.canSwim ? "yes" : "no";
 	case FieldId::WEIGHT:      return std::format("{}", m_working.baseWeight);
 	case FieldId::DEPTH_MIN:   return std::format("{}", m_working.levelMinimum);
@@ -902,7 +988,8 @@ bool MonsterEditor::field_is_string(FieldId f) const
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
-	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM;
+	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM
+		|| f == FieldId::ETHICS || f == FieldId::MORALITY;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -959,6 +1046,14 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::CAN_SWIM)
 	{
 		m_working.canSwim = !m_working.canSwim;
+	}
+	else if (f == FieldId::ETHICS)
+	{
+		m_working.ethics = next_ethics(m_working.ethics);
+	}
+	else if (f == FieldId::MORALITY)
+	{
+		m_working.morality = next_morality(m_working.morality);
 	}
 }
 

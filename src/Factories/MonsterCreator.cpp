@@ -179,6 +179,10 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	p.xp = entry.at("xp").get<int>();
 	p.dr = entry.at("dr").get<int>();
 	p.morale = entry.at("morale").get<int>();
+	// Optional by design: entries authored before alignment existed default to
+	// true neutral rather than failing to load.
+	p.ethics = static_cast<Ethics>(entry.value("ethics", static_cast<int>(Ethics::NEUTRAL)));
+	p.morality = static_cast<Morality>(entry.value("morality", static_cast<int>(Morality::NEUTRAL)));
 	p.corpseWeight = entry.value("corpse_weight", 50);
 	p.strDice = parse_dice(entry.at("str"));
 	p.dexDice = parse_dice(entry.at("dex"));
@@ -216,6 +220,8 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "xp", p.xp },
 		{ "dr", p.dr },
 		{ "morale", p.morale },
+		{ "ethics", static_cast<int>(p.ethics) },
+		{ "morality", static_cast<int>(p.morality) },
 		{ "corpse_weight", p.corpseWeight },
 		{ "str", encode_dice(p.strDice) },
 		{ "dex", encode_dice(p.dexDice) },
@@ -534,6 +540,8 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 
 	c->set_weapon_equipped(params.weaponName);
 	c->set_morale(params.morale);
+	c->set_ethics(params.ethics);
+	c->set_morality(params.morality);
 	c->set_corpse_weight(params.corpseWeight);
 	c->set_creature_level(params.hpDice.num);
 
