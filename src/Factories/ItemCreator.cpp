@@ -19,6 +19,7 @@
 #include "../Items/ItemClassification.h"
 #include "../Random/RandomDice.h"
 #include "../Renderer/Renderer.h"
+#include "../Systems/BuffType.h"
 #include "../Systems/ContentRegistry.h"
 #include "../Systems/ItemEnhancements/ItemEnhancements.h"
 #include "../Utils/Vector2D.h"
@@ -485,6 +486,22 @@ BuffType parse_buff_type(std::string_view s)
 	{
 		return BuffType::HOLD_PERSON;
 	}
+	if (s == "sanctuary")
+	{
+		return BuffType::SANCTUARY;
+	}
+	if (s == "protection_from_evil")
+	{
+		return BuffType::PROTECTION_FROM_EVIL;
+	}
+	if (s == "silence")
+	{
+		return BuffType::SILENCE;
+	}
+	if (s == "webbed")
+	{
+		return BuffType::WEBBED;
+	}
 
 	throw std::runtime_error(std::format("ItemCreator: unknown buff_type '{}'", s));
 }
@@ -931,115 +948,6 @@ std::string_view encode_scroll_animation(ScrollAnimation a)
 	return "none";
 }
 
-std::string_view encode_buff_type(BuffType b)
-{
-	switch (b)
-	{
-
-	case BuffType::NONE:
-	{
-		return "none";
-	}
-
-	case BuffType::INVISIBILITY:
-	{
-		return "invisibility";
-	}
-
-	case BuffType::BLESS:
-	{
-		return "bless";
-	}
-
-	case BuffType::SHIELD:
-	{
-		return "shield";
-	}
-
-	case BuffType::STRENGTH:
-	{
-		return "strength";
-	}
-
-	case BuffType::DEXTERITY:
-	{
-		return "dexterity";
-	}
-
-	case BuffType::CONSTITUTION:
-	{
-		return "constitution";
-	}
-
-	case BuffType::INTELLIGENCE:
-	{
-		return "intelligence";
-	}
-
-	case BuffType::WISDOM:
-	{
-		return "wisdom";
-	}
-
-	case BuffType::CHARISMA:
-	{
-		return "charisma";
-	}
-
-	case BuffType::SPEED:
-	{
-		return "speed";
-	}
-	
-	case BuffType::FIRE_RESISTANCE:
-	{
-		return "fire_resistance";
-	}
-
-	case BuffType::COLD_RESISTANCE:
-	{
-		return "cold_resistance";
-	}
-
-	case BuffType::LIGHTNING_RESISTANCE:
-	{
-		return "lightning_resistance";
-	}
-
-	case BuffType::POISON_RESISTANCE:
-	{
-		return "poison_resistance";
-	}
-
-	case BuffType::SLEEP:
-	{
-		return "sleep";
-	}
-
-	case BuffType::HOLD_PERSON:
-	{
-		return "hold_person";
-	}
-
-	case BuffType::SANCTUARY:
-	{
-		return "sanctuary";
-	}
-
-	case BuffType::SILENCE:
-	{
-		return "silence";
-	}
-
-	case BuffType::WEBBED:
-	{
-		return "webbed";
-	}
-
-	}
-
-	return "none";
-}
 
 // ---------------------------------------------------------------------------
 // JSON encode / parse

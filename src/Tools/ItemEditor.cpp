@@ -146,33 +146,6 @@ std::string_view consumable_effect_str(ConsumableEffect e)
 	return "none";
 }
 
-std::string_view buff_type_str(BuffType b)
-{
-	switch (b)
-	{
-	case BuffType::NONE:                 return "none";
-	case BuffType::INVISIBILITY:         return "invisibility";
-	case BuffType::BLESS:                return "bless";
-	case BuffType::SHIELD:               return "shield";
-	case BuffType::STRENGTH:             return "strength";
-	case BuffType::DEXTERITY:            return "dexterity";
-	case BuffType::CONSTITUTION:         return "constitution";
-	case BuffType::INTELLIGENCE:         return "intelligence";
-	case BuffType::WISDOM:               return "wisdom";
-	case BuffType::CHARISMA:             return "charisma";
-	case BuffType::SPEED:                return "speed";
-	case BuffType::FIRE_RESISTANCE:      return "fire_resistance";
-	case BuffType::COLD_RESISTANCE:      return "cold_resistance";
-	case BuffType::LIGHTNING_RESISTANCE: return "lightning_resistance";
-	case BuffType::POISON_RESISTANCE:    return "poison_resistance";
-	case BuffType::SLEEP:                return "sleep";
-	case BuffType::HOLD_PERSON:          return "hold_person";
-	case BuffType::SANCTUARY:            return "sanctuary";
-	case BuffType::SILENCE:              return "silence";
-	case BuffType::WEBBED:               return "webbed";
-	}
-	return "none";
-}
 
 std::string_view target_mode_str(TargetMode m)
 {
@@ -974,7 +947,7 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::LEVEL_MAX:        return std::format("{}", p.levelMax);
 	case FieldId::LEVEL_SCALING:    return std::format("{:.2f}", p.levelScaling);
 	case FieldId::CONSUMABLE_EFFECT: return std::string{ consumable_effect_str(p.consumableEffect) };
-	case FieldId::CONSUMABLE_BUFF:  return std::string{ buff_type_str(p.consumableBuffType) };
+	case FieldId::CONSUMABLE_BUFF:  return std::string{ encode_buff_type(p.consumableBuffType) };
 	case FieldId::CONSUMABLE_AMT:   return std::format("{}", p.consumableAmount);
 	case FieldId::DURATION:         return std::format("{}", p.duration);
 	case FieldId::TARGET_MODE:      return std::string{ target_mode_str(p.targetMode) };

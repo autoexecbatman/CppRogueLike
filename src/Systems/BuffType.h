@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string_view>
+
 // Unified buff system - single source of truth for all timed effects
 // AD&D 2e, Player's Handbook page 277: "all attacks made by evil (or evilly
 // enchanted) creatures against the protected creature suffer -2 penalties to
@@ -30,6 +32,108 @@ enum class BuffType
 	SILENCE,
 	WEBBED,
 };
+
+// Maps a buff type to the string used in items.json and shown in the editor.
+//
+// Deliberately without a default case: adding a BuffType makes both this and
+// every other switch over the enum fail to compile under -Wswitch, which is how
+// PROTECTION_FROM_EVIL was caught silently encoding as "none".
+//
+// Example:
+//   encode_buff_type(BuffType::BLESS);     // -> "bless"
+//   encode_buff_type(BuffType::WEBBED);    // -> "webbed"
+inline constexpr std::string_view encode_buff_type(BuffType buffType)
+{
+	switch (buffType)
+	{
+	case BuffType::NONE:
+	{
+		return "none";
+	}
+	case BuffType::INVISIBILITY:
+	{
+		return "invisibility";
+	}
+	case BuffType::BLESS:
+	{
+		return "bless";
+	}
+	case BuffType::SHIELD:
+	{
+		return "shield";
+	}
+	case BuffType::STRENGTH:
+	{
+		return "strength";
+	}
+	case BuffType::DEXTERITY:
+	{
+		return "dexterity";
+	}
+	case BuffType::CONSTITUTION:
+	{
+		return "constitution";
+	}
+	case BuffType::INTELLIGENCE:
+	{
+		return "intelligence";
+	}
+	case BuffType::WISDOM:
+	{
+		return "wisdom";
+	}
+	case BuffType::CHARISMA:
+	{
+		return "charisma";
+	}
+	case BuffType::SPEED:
+	{
+		return "speed";
+	}
+	case BuffType::FIRE_RESISTANCE:
+	{
+		return "fire_resistance";
+	}
+	case BuffType::COLD_RESISTANCE:
+	{
+		return "cold_resistance";
+	}
+	case BuffType::LIGHTNING_RESISTANCE:
+	{
+		return "lightning_resistance";
+	}
+	case BuffType::POISON_RESISTANCE:
+	{
+		return "poison_resistance";
+	}
+	case BuffType::SLEEP:
+	{
+		return "sleep";
+	}
+	case BuffType::HOLD_PERSON:
+	{
+		return "hold_person";
+	}
+	case BuffType::SANCTUARY:
+	{
+		return "sanctuary";
+	}
+	case BuffType::PROTECTION_FROM_EVIL:
+	{
+		return "protection_from_evil";
+	}
+	case BuffType::SILENCE:
+	{
+		return "silence";
+	}
+	case BuffType::WEBBED:
+	{
+		return "webbed";
+	}
+	}
+
+	return "none";
+}
 
 struct Buff
 {
