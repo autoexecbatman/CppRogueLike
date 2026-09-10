@@ -47,6 +47,12 @@ public:
 	// Add a monster type to the factory
 	void addMonsterType(const MonsterType& monsterType);
 
+	// Rebuilds the spawn table from MonsterCreator's registry, discarding what
+	// was there. The monster editor writes monsters.json and updates the
+	// registry while the game runs; until this runs the table still holds the
+	// entries read at startup.
+	void reload_from_registry();
+
 private:
 	std::vector<MonsterType> monsterTypes;
 

@@ -18,6 +18,15 @@
 
 MonsterFactory::MonsterFactory()
 {
+	reload_from_registry();
+}
+
+void MonsterFactory::reload_from_registry()
+{
+	// addMonsterType appends, so the old table goes first or every monster ends
+	// up listed twice and weighted twice against anything added later.
+	monsterTypes.clear();
+
 	// Registry-driven monsters: adding a new monster only requires a new entry
 	// in MonsterCreator's registry — nothing here changes.
 	for (const auto& [id, params] : MonsterCreator::get_registry())

@@ -1490,10 +1490,11 @@ void Map::regenerate(GameContext& ctx)
 		ctx.decorations->clear();
 	}
 
-	// Read the item registry again before placing anything. The editor writes
-	// items.json and reloads ItemCreator mid-game, and without this the table
-	// still holds whatever was loaded at startup.
+	// Read both registries again before placing anything. The editors write
+	// their JSON and update the registries mid-game, and without this the spawn
+	// tables still hold whatever was loaded at startup.
 	itemFactory->reload_from_registry();
+	monsterFactory->reload_from_registry();
 
 	// generate a new map at current window dimensions (keep old size if curses not active)
 	const int newH = get_map_height();
