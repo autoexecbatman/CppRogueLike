@@ -82,3 +82,13 @@ void PlayerAttacker::attack(Creature& target, GameContext& ctx)
 	const std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
 	perform_single_attack(owner, target, attackDamage, weapon_hit_modifier(weaponSlot), weaponName, ctx);
 }
+
+// A player's damage comes from the weapon in hand, which the item itself
+// serializes, so there is nothing here to write or read back.
+void PlayerAttacker::load(const json& j)
+{
+}
+
+void PlayerAttacker::save(json& j)
+{
+}

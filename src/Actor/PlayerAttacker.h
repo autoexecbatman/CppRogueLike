@@ -23,6 +23,6 @@ public:
 	void attack(Creature& target, GameContext& ctx) override;
 
 	// Player has no base DamageInfo to serialize.
-	void load(const json& j) override {}
-	void save(json& j) override {}
+	void load(const json& j) override;
+	void save(json& j) override;
 };
