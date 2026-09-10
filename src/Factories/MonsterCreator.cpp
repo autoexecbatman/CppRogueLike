@@ -252,6 +252,7 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 	return nlohmann::json{
 		{ "tile", encode_tile(p.symbol) },
 		{ "color", p.color },
+		{ "name", p.name },
 		{ "corpse", p.corpseName },
 		{ "hp", encode_dice(p.hpDice) },
 		{ "thaco", p.thaco },
