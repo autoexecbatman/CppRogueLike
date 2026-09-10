@@ -12,7 +12,7 @@
 #include <ranges>
 
 Trap::Trap(Vector2D position, TrapType type, const TileConfig& tileConfig)
-	: TileFeature(position, ActorData{}, FeatureKind::TRAP),
+	: TileFeature(position, ActorData{}),
 	type_(type),
 	state_(TrapState::HIDDEN),
 	detectionDC_(15),

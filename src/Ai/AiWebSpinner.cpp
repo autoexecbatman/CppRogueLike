@@ -11,6 +11,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Utils/Vector2D.h"
 #include "AiWebSpinner.h"
+#include "../Objects/SpellTile.h"
 
 constexpr int WEB_COOLDOWN = 8;
 constexpr int WEB_MIN_SIZE = 3;
@@ -127,12 +128,13 @@ bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)
 		return true;
 	}
 
-	// Count actual webs among the level's tile features
+	// Count the spell tiles still standing. Nothing else lives in this
+	// container, so no kind has to be asked for.
 	int webCount = 0;
-	for (const auto& feature : *ctx.tileFeatures)
+	for (const auto& spellTile : *ctx.spellTiles)
 	{
-		assert(feature && "tileFeatures holds a null entry");
-		if (!feature->is_destroyed() && feature->get_kind() == FeatureKind::WEB)
+		assert(spellTile && "spellTiles holds a null entry");
+		if (!spellTile->is_destroyed())
 		{
 			webCount++;
 		}
@@ -239,11 +241,11 @@ bool AiWebSpinner::is_valid_web_position(Vector2D pos, GameContext& ctx)
 		return false;
 	}
 
-	// Check if there's already a web at this position
-	for (const auto& feature : *ctx.tileFeatures)
+	// Check if there's already a spell tile at this position
+	for (const auto& spellTile : *ctx.spellTiles)
 	{
-		assert(feature && "tileFeatures holds a null entry");
-		if (!feature->is_destroyed() && feature->position == pos && feature->get_kind() == FeatureKind::WEB)
+		assert(spellTile && "spellTiles holds a null entry");
+		if (!spellTile->is_destroyed() && spellTile->position == pos)
 		{
 			return false;
 		}
@@ -466,7 +468,7 @@ void AiWebSpinner::generate_web_entities(Vector2D center, int size, GameContext&
 
 		// Create a new Web entity
 		auto web = std::make_unique<Web>(pos, webStrength, *ctx.tileConfig);
-		ctx.tileFeatures->emplace_back(std::move(web));
+		ctx.spellTiles->emplace_back(std::move(web));
 	}
 }
 

@@ -44,8 +44,9 @@ public:
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
 	// Disarm attempt: the creature rolls 1d20 plus its dexterity modifier
-	// against the trap's disarm DC. Failure sets the trap off.
-	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) override;
+	// against the trap's disarm DC. Failure sets the trap off. Traps are the
+	// only feature that answers this, which is why it is not on TileFeature.
+	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx);
 
 	// Destroy this trap (called after trigger or successful disarm)
 	void destroy();

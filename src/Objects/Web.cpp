@@ -14,7 +14,7 @@
 #include "Web.h"
 
 Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
-	: TileFeature(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }, FeatureKind::WEB),
+	: SpellTile(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through
@@ -84,9 +84,4 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 void Web::destroy()
 {
 	mark_destroyed();
-}
-// A web has no mechanism to disarm. It is cut or burned, not defused.
-DisarmResult Web::attempt_disarm(Creature& creature, GameContext& ctx)
-{
-	return DisarmResult::NOT_DISARMABLE;
 }

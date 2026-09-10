@@ -14,6 +14,8 @@
 #include "../Map/Minimap.h"
 #include "../Renderer/Renderer.h"
 #include "RenderingManager.h"
+#include "../Objects/SpellTile.h"
+#include "../Objects/Trap.h"
 
 void RenderingManager::render(GameContext& ctx) const
 {
@@ -25,7 +27,8 @@ void RenderingManager::render_world(const GameContext& ctx) const
 	ctx.map->render(ctx);
 	ctx.stairs->render(ctx);
 
-	render_tile_features(*ctx.tileFeatures, ctx);
+	render_tile_features(*ctx.traps, ctx);
+	render_tile_features(*ctx.spellTiles, ctx);
 
 	// Render floor items
 	render_items(ctx.floorInventory->items, ctx);
@@ -151,19 +154,6 @@ void RenderingManager::apply_lighting(const GameContext& ctx) const
 	}
 
 	renderer.apply_light_mask();
-}
-
-void RenderingManager::render_tile_features(std::span<const std::unique_ptr<TileFeature>> tileFeatures, const GameContext& ctx) const
-{
-	// Render the level's tile features (traps, webs)
-	for (const auto& feature : tileFeatures)
-	{
-		assert(feature && "tileFeatures holds a null entry");
-		if (!feature->is_destroyed())
-		{
-			feature->render(ctx);
-		}
-	}
 }
 
 void RenderingManager::render_decorations(

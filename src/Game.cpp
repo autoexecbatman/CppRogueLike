@@ -54,7 +54,8 @@
 
 		// Game world data
 		.stairs = stairs.get(),
-		.tileFeatures = &tileFeatures,
+		.traps = &traps,
+		.spellTiles = &spellTiles,
 		.decorations = &decorations,
 		.floorInventory = &floorInventory,
 		.creatures = &creatures,

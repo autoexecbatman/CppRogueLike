@@ -47,6 +47,7 @@
 #include "../Menu/MenuTrade.h"
 #include "../Menu/ListMenu.h"
 #include "../Menu/MenuEntry.h"
+#include "../Objects/SpellTile.h"
 
 // ---------------------------------------------------------------------------
 // ---------------------------------------------------------------------------
@@ -581,22 +582,28 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 	{
 		bool blocked = false;
 
-		for (const auto& feature : *ctx.tileFeatures)
+		// Everything standing on the tile gets one entry, whichever container it
+		// lives in. A feature that destroyed itself this turn is inert until the
+		// sweep.
+		const auto enter_all = [&](auto& features)
 		{
-			assert(feature && "tileFeatures holds a null entry");
-
-			// A feature that destroyed itself this turn is inert until the sweep.
-			if (feature->is_destroyed() || feature->position != targetPosition)
+			for (const auto& feature : features)
 			{
-				continue;
-			}
+				assert(feature && "a floor container holds a null entry");
 
-			if (feature->on_creature_enter(playerOwner, ctx) == EntryResult::BLOCKED)
-			{
-				blocked = true;
-				break;
+				if (blocked || feature->is_destroyed() || feature->position != targetPosition)
+				{
+					continue;
+				}
+
+				if (feature->on_creature_enter(playerOwner, ctx) == EntryResult::BLOCKED)
+				{
+					blocked = true;
+				}
 			}
-		}
+		};
+		enter_all(*ctx.traps);
+		enter_all(*ctx.spellTiles);
 
 		if (!blocked)
 		{
@@ -1403,19 +1410,20 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	}
 	else if (pendingDoorAction == PendingDoorAction::DISARM)
 	{
-		// Ask every feature on the tile; the first with something to disarm answers.
+		// Only a trap disarms, so only traps are asked. NOT_DISARMABLE survives
+		// as the answer when the tile holds none.
 		DisarmResult disarmResult = DisarmResult::NOT_DISARMABLE;
-		if (ctx.tileFeatures)
+		if (ctx.traps)
 		{
-			for (auto& feature : *ctx.tileFeatures)
+			for (auto& trap : *ctx.traps)
 			{
-				assert(feature && "tileFeatures holds a null entry");
-				if (feature->is_destroyed() || feature->position != doorPos)
+				assert(trap && "traps holds a null entry");
+				if (trap->is_destroyed() || trap->position != doorPos)
 				{
 					continue;
 				}
 
-				disarmResult = feature->attempt_disarm(playerOwner, ctx);
+				disarmResult = trap->attempt_disarm(playerOwner, ctx);
 				if (disarmResult != DisarmResult::NOT_DISARMABLE)
 				{
 					break;

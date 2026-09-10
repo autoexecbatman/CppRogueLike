@@ -341,6 +341,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Objects/Web.h
     ${PROJECT_SOURCE_DIR}/Objects/Trap.cpp
     ${PROJECT_SOURCE_DIR}/Objects/Trap.h
+    ${PROJECT_SOURCE_DIR}/Objects/SpellTile.h
 
     # Utils - Updated paths
     ${PROJECT_SOURCE_DIR}/Utils/Dijkstra.cpp

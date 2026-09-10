@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../Actor/TileFeature.h"
+#include "SpellTile.h"
 
 struct GameContext;
 struct Vector2D;
@@ -8,7 +8,7 @@ class Creature;
 class TileConfig;
 
 // Web class - represents a spider web that can trap players
-class Web : public TileFeature
+class Web : public SpellTile
 {
 public:
 	Web(Vector2D position, int strength, const TileConfig& tileConfig);
@@ -21,8 +21,6 @@ public:
 
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
-	// A web has no mechanism to disarm. It is cut or burned, not defused.
-	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) override;
 
 	// Destroy this web
 	void destroy();

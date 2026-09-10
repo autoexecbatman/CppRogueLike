@@ -45,6 +45,8 @@ class SpellEditor;
 #endif
 class Stairs;
 class TileFeature;
+class Trap;
+class SpellTile;
 class BaseMenu;
 #include "../Utils/Vector2D.h"
 struct DungeonRoom;
@@ -189,7 +191,11 @@ struct GameContext
 
 	// Game world data
 	Stairs* stairs{ nullptr };
-	std::vector<std::unique_ptr<TileFeature>>* tileFeatures{ nullptr };
+	// Traps and spell tiles are separate systems that happen to share a floor:
+	// a trap hides, triggers and is disarmed; a spell tile answers to the spell
+	// that made it. Nothing needs to ask which one it is holding.
+	std::vector<std::unique_ptr<Trap>>* traps{ nullptr };
+	std::vector<std::unique_ptr<SpellTile>>* spellTiles{ nullptr };
 	std::vector<std::unique_ptr<Decoration>>* decorations{ nullptr };
 	FloorInventory* floorInventory{ nullptr };
 	std::vector<std::unique_ptr<Creature>>* creatures{ nullptr };

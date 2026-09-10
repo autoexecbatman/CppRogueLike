@@ -18,6 +18,8 @@
 #include "src/Systems/LevelManager.h"
 #include "src/Systems/MessageSystem.h"
 #include "tests/mocks/MockGameContext.h"
+#include "src/Objects/SpellTile.h"
+#include "src/Objects/Trap.h"
 
 // ============================================================================
 // Treasure Room Tests
@@ -291,7 +293,8 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     auto stairs = std::make_unique<Stairs>(Vector2D{ 0, 0 });
 
     std::vector<std::unique_ptr<Creature>> creatures;
-    std::vector<std::unique_ptr<TileFeature>> tileFeatures;
+    std::vector<std::unique_ptr<Trap>> traps;
+    std::vector<std::unique_ptr<SpellTile>> spellTiles;
     std::vector<DungeonRoom> rooms;
     DataManager dataManager;
     MessageSystem messageSystem;
@@ -306,7 +309,8 @@ TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
     ctx.stairs = stairs.get();
     ctx.rooms = &rooms;
     ctx.creatures = &creatures;
-    ctx.tileFeatures = &tileFeatures;
+    ctx.traps = &traps;
+    ctx.spellTiles = &spellTiles;
     ctx.dataManager = &dataManager;
     ctx.messageSystem = &messageSystem;
     ctx.map = map.get();

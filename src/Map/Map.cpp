@@ -41,6 +41,7 @@
 #include "FovMap.h"
 #include "Map.h"
 #include "../Objects/Trap.h"
+#include "../Objects/SpellTile.h"
 
 namespace
 {
@@ -1009,7 +1010,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 {
 	assert(ctx.dice && "Map::spawn_traps called without dice");
 	assert(ctx.tileConfig && "Map::spawn_traps called without tileConfig");
-	assert(ctx.tileFeatures && "Map::spawn_traps called without tile features");
+	assert(ctx.traps && "Map::spawn_traps called without a trap container");
 
 	// ~30% of rooms get 0-2 random traps (was 10%)
 	if (ctx.dice->d10() > 3)
@@ -1070,7 +1071,7 @@ void Map::spawn_traps(const DungeonRoom& room, GameContext& ctx)
 		}
 
 		auto trap = std::make_unique<Trap>(trapPos, trapType, *ctx.tileConfig);
-		ctx.tileFeatures->push_back(std::move(trap));
+		ctx.traps->push_back(std::move(trap));
 	}
 }
 
@@ -1476,9 +1477,13 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.rooms->clear(); // we clear the room coordinates
 	}
-	if (ctx.tileFeatures)
+	if (ctx.traps)
 	{
-		ctx.tileFeatures->clear();
+		ctx.traps->clear();
+	}
+	if (ctx.spellTiles)
+	{
+		ctx.spellTiles->clear();
 	}
 	if (ctx.decorations)
 	{

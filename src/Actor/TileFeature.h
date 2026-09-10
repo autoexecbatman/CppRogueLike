@@ -4,28 +4,37 @@
 
 // file: TileFeature.h
 //
-// A dungeon feature bound to a tile that acts on creatures entering it --
-// traps and spider webs today, and the persistent magical areas that will join
-// them. Items and stairs are not features: they occupy a tile without acting,
-// and derive from Actor directly.
+// What every thing standing on a floor tile shares: a position, a lifetime,
+// and one act when a creature enters. Items and stairs are not features -- they
+// occupy a tile without acting, and derive from Actor directly.
 //
-// Every feature lives in Game::tileFeatures and is reached polymorphically from
-// there. The one operation is on_creature_enter, called before a move is
-// committed so the feature can stop it.
+// Two systems build on this and they live in separate containers. Traps are
+// dungeon furniture: hidden, triggered once, disarmable, held in Game::traps.
+// Spell tiles are what a spell left behind, held in Game::spellTiles under
+// SpellTile. Nothing has to ask which one it is holding, because nothing holds
+// both.
+//
+// What belongs here is only what is true of both. Disarming is not: it lives on
+// Trap, and the disarm code reaches a Trap directly rather than asking every
+// feature whether it happens to be one.
 //
 // Usage -- deciding whether a move may proceed:
 //
 //   bool blocked = false;
-//   for (const auto& feature : *ctx.tileFeatures)            // features on this level
+//   const auto enter_all = [&](auto& features)
 //   {
-//       if (feature->position != destination) { continue; }  // only the entered tile
-//       if (feature->on_creature_enter(creature, ctx) == EntryResult::BLOCKED)
+//       for (const auto& feature : features)
 //       {
-//           blocked = true;                                  // move is stopped
-//           break;
+//           if (blocked || feature->position != destination) { continue; }
+//           if (feature->on_creature_enter(creature, ctx) == EntryResult::BLOCKED)
+//           {
+//               blocked = true;                              // move is stopped
+//           }
 //       }
-//   }
-//   if (!blocked) { move(destination); }                     // nothing blocked it
+//   };
+//   enter_all(*ctx.traps);                                   // both containers
+//   enter_all(*ctx.spellTiles);
+//   if (!blocked) { move(destination); }
 
 class Creature;
 struct GameContext;
@@ -39,15 +48,6 @@ enum class EntryResult
 	UNAFFECTED, // the feature did nothing -- a hidden trap that went unnoticed
 	AFFECTED, // the feature acted and the creature may still enter
 	BLOCKED, // the feature acted and the creature's move is stopped
-};
-
-// Which kind of feature this is, for callers that need to find one kind among
-// the rest. Identity lives here rather than in ActorData::name, which is a
-// display string and free to change.
-enum class FeatureKind
-{
-	TRAP,
-	WEB,
 };
 
 // What a disarm attempt did. Most features cannot be disarmed at all, which is
@@ -64,19 +64,11 @@ enum class DisarmResult
 class TileFeature : public Actor
 {
 private:
-	FeatureKind kind{ FeatureKind::TRAP };
 	bool destroyed{ false };
 
 public:
-	TileFeature(Vector2D position, ActorData data, FeatureKind featureKind)
-		: Actor(position, data),
-		kind(featureKind) {};
-
-	// Which kind of feature this is.
-	//
-	// Example:
-	//   web->get_kind() == FeatureKind::WEB; // -> true
-	[[nodiscard]] FeatureKind get_kind() const { return kind; }
+	TileFeature(Vector2D position, ActorData data)
+		: Actor(position, data) {};
 
 	// Marks this feature for removal at the next turn boundary. A feature may
 	// destroy itself from inside on_creature_enter, so the entry stays alive and
@@ -94,10 +86,4 @@ public:
 	// the call changes state and must not be made twice for one entry.
 	virtual EntryResult on_creature_enter(Creature& creature, GameContext& ctx) = 0;
 
-	// Attempts to disarm this feature. Every feature answers, including the
-	// ones that refuse.
-	//
-	// Example:
-	//   web->attempt_disarm(player, ctx); // -> DisarmResult::NOT_DISARMABLE
-	virtual DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) = 0;
 };

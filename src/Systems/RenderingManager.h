@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include <cassert>
 
 #include <memory>
 #include <span>
@@ -28,7 +30,22 @@ public:
 
 private:
 	// Helper methods
-	void render_tile_features(std::span<const std::unique_ptr<TileFeature>> tileFeatures, const GameContext& ctx) const;
+	// Draws whatever is standing on the floor. Templated on the element type so
+	// one body serves the trap container and the spell tile container, both of
+	// which hold something derived from TileFeature.
+	template <typename Feature>
+	void render_tile_features(const std::vector<std::unique_ptr<Feature>>& features, const GameContext& ctx) const
+	{
+		for (const auto& feature : features)
+		{
+			assert(feature && "a floor container holds a null entry");
+			if (!feature->is_destroyed())
+			{
+				feature->render(ctx);
+			}
+		}
+	}
+
 	void render_decorations(std::span<const std::unique_ptr<Decoration>> decorations, const GameContext& ctx) const;
 	void apply_lighting(const GameContext& ctx) const;
 	void render_mouse_path_overlay(const GameContext& ctx) const;

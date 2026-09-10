@@ -36,6 +36,8 @@
 #include "../Actor/TileFeature.h"
 #include "TileConfig.h"
 #include "../ActorTypes/Player.h"
+#include "../Objects/SpellTile.h"
+#include "../Objects/Trap.h"
 
 // One pass of the game loop. The game is already initialised by the time this
 // runs: MenuName calls init_new_game once the blueprint is complete, and
@@ -482,9 +484,11 @@ void GameLoopCoordinator::update(GameContext& ctx)
 
 	if (ctx.gameState->get_game_status() == GameStatus::NEW_TURN)
 	{
-		std::erase_if(*ctx.tileFeatures,
-			[](const auto& feature)
-			{ return feature->is_destroyed(); });
+		// Both floor containers are swept the same way: a feature may destroy
+		// itself from inside on_creature_enter, so it stays owned until here.
+		const auto is_spent = [](const auto& feature) { return feature->is_destroyed(); };
+		std::erase_if(*ctx.traps, is_spent);
+		std::erase_if(*ctx.spellTiles, is_spent);
 
 		if (ctx.decorations)
 		{

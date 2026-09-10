@@ -37,6 +37,8 @@
 #include "Systems/RenderingManager.h"
 #include "Systems/CurseSystem.h"
 #include "Systems/TargetingSystem.h"
+#include "Objects/SpellTile.h"
+#include "Objects/Trap.h"
 #include "Systems/BodyPlanRegistry.h"
 #include "Systems/TileConfig.h"
 #include "Utils/Dijkstra.h"
@@ -107,7 +109,8 @@ struct Game
 
 	std::vector<DungeonRoom> rooms{};
 	std::vector<std::unique_ptr<Creature>> creatures{};
-	std::vector<std::unique_ptr<TileFeature>> tileFeatures{};
+	std::vector<std::unique_ptr<Trap>> traps{};
+	std::vector<std::unique_ptr<SpellTile>> spellTiles{};
 	std::vector<std::unique_ptr<Decoration>> decorations{};
 	FloorInventory floorInventory{ 1000 };
 
