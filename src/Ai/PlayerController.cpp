@@ -194,11 +194,13 @@ void PlayerController::update(GameContext& ctx)
 	}
 }
 
-void PlayerController::load(const json& /*j*/)
+// The controller holds only input state, which is rebuilt each frame. Player
+// data belongs to Player and is written there.
+void PlayerController::load(const json& savedState)
 {
 }
 
-void PlayerController::save(json& /*j*/)
+void PlayerController::save(json& savedState)
 {
 }
 

@@ -69,7 +69,7 @@ DestructibleType PlayerDeathHandler::type() const
     return DestructibleType::PLAYER;
 }
 
-void PlayerDeathHandler::execute(Creature& /*owner*/, GameContext& ctx)
+void PlayerDeathHandler::execute(Creature& owner, GameContext& ctx)
 {
     ctx.gameState->set_game_status(GameStatus::DEFEAT);
     [[maybe_unused]] const bool deleted = ctx.stateManager->delete_save_file();

@@ -34,8 +34,8 @@ public:
 	void gui_print_stats(const GameContext& ctx) noexcept;
 	void gui_print_log(const GameContext& ctx);
 
-	void load(const json& j) override;
-	void save(json& j) override;
+	void load(const json& savedState) override;
+	void save(json& savedState) override;
 
 	void add_display_message(const std::vector<LogMessage>& message);
 	void render_messages() noexcept;

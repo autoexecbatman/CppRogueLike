@@ -4,9 +4,7 @@
 #include <cassert>
 #include <concepts>
 #include <cstdint>
-#include <iostream>
 #include <memory>
-#include <span>
 #include <string>
 
 #include <nlohmann/json.hpp>
@@ -238,21 +236,6 @@ std::string get_inventory_debug_info(const T& inventory)
 		get_item_count(inventory),
 		inventory.capacity,
 		is_inventory_full(inventory) ? "yes" : "no");
-}
-
-template <AnyInventory T>
-void print_inventory(const T& inventory, std::span<std::unique_ptr<Actor>> /*actors*/)
-{
-	int i = 0;
-	for (const auto& item : inventory.items)
-	{
-		if (item)
-		{
-			std::cout << item->actorData.name << i << " ";
-			++i;
-		}
-	}
-	std::cout << '\n';
 }
 
 // ===== OPTIMIZATION =====
