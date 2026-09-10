@@ -1,7 +1,7 @@
 {
     "amulet_of_health": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -37,7 +37,7 @@
     },
     "amulet_of_ogre_power": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -73,7 +73,7 @@
     },
     "amulet_of_protection": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -109,7 +109,7 @@
     },
     "amulet_of_wisdom": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -253,7 +253,7 @@
     },
     "battle_axe": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 6,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -289,7 +289,7 @@
     },
     "boots_of_elvenkind": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -325,7 +325,7 @@
     },
     "boots_of_speed": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -469,7 +469,7 @@
     },
     "cloak_of_displacement": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -505,7 +505,7 @@
     },
     "cloak_of_elvenkind": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -541,7 +541,7 @@
     },
     "cloak_of_protection": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -649,7 +649,7 @@
     },
     "crossbow": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 4,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -973,7 +973,7 @@
     },
     "gauntlets_of_fumbling": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -1045,7 +1045,7 @@
     },
     "gauntlets_of_swimming_and_climbing": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -1081,7 +1081,7 @@
     },
     "gem": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -1117,7 +1117,7 @@
     },
     "girdle_of_cloud_giant_strength": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1153,7 +1153,7 @@
     },
     "girdle_of_fire_giant_strength": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -1261,7 +1261,7 @@
     },
     "girdle_of_stone_giant_strength": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -1297,7 +1297,7 @@
     },
     "girdle_of_storm_giant_strength": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -1585,7 +1585,7 @@
     },
     "helm_of_telepathy": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -1621,7 +1621,7 @@
     },
     "helm_of_teleportation": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -1657,7 +1657,7 @@
     },
     "helm_of_underwater_action": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -1765,7 +1765,7 @@
     },
     "invisibility_potion": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 6,
         "category": "potion",
         "chaBonus": 0,
         "color": 13,
@@ -1801,7 +1801,7 @@
     },
     "large_shield": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1909,7 +1909,7 @@
     },
     "lockpick": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -2017,7 +2017,7 @@
     },
     "mace": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 7,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -2053,7 +2053,7 @@
     },
     "mana_potion": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 10,
         "category": "potion",
         "chaBonus": 0,
         "color": 12,
@@ -2125,7 +2125,7 @@
     },
     "medium_shield": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -2269,7 +2269,7 @@
     },
     "potion_of_cold_resistance": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 13,
@@ -2305,7 +2305,7 @@
     },
     "potion_of_extra_healing": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 8,
         "category": "potion",
         "chaBonus": 0,
         "color": 9,
@@ -2341,7 +2341,7 @@
     },
     "potion_of_fire_resistance": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 19,
@@ -2377,7 +2377,7 @@
     },
     "potion_of_giant_strength": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 11,
@@ -2413,7 +2413,7 @@
     },
     "potion_of_speed": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 6,
         "category": "potion",
         "chaBonus": 0,
         "color": 10,
@@ -2557,7 +2557,7 @@
     },
     "ring_of_cold_resistance": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -2593,7 +2593,7 @@
     },
     "ring_of_fire_resistance": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -2809,7 +2809,7 @@
     },
     "ring_of_spell_storing": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -2845,7 +2845,7 @@
     },
     "rope": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 4,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -3133,7 +3133,7 @@
     },
     "scroll_teleport": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 12,
         "category": "scroll",
         "chaBonus": 0,
         "color": 14,
@@ -3277,7 +3277,7 @@
     },
     "small_shield": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 3,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -3421,7 +3421,7 @@
     },
     "torch": {
         "acBonus": 0,
-        "baseWeight": 0,
+        "baseWeight": 8,
         "category": "",
         "chaBonus": 0,
         "color": 11,
