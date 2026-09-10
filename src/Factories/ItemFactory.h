@@ -43,6 +43,15 @@ public:
 
 	void add_item_type(const ItemType& itemType);
 	void load_from_registry();
+
+	// Rebuilds the spawn table from the current item registry, discarding what
+	// was there. Call after the registry changes - the editor writes items.json
+	// and reloads ItemCreator, and until this runs the table still holds the
+	// entries read at startup.
+	//
+	// Clearing first is the whole point: load_from_registry appends, so calling
+	// it twice would list every item twice and double its weight.
+	void reload_from_registry();
 	void load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rules);
 	void generate_treasure(Vector2D position, GameContext& ctx, int dungeonLevel, int quality);
 	std::vector<ItemPercentage> get_current_distribution(int dungeonLevel);

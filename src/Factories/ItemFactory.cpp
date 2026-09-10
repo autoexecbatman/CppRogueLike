@@ -26,6 +26,16 @@ using namespace InventoryOperations; // For clean function calls
 
 ItemFactory::ItemFactory()
 {
+	reload_from_registry();
+}
+
+void ItemFactory::reload_from_registry()
+{
+	// load_from_registry and load_enhanced_rules both append, so the old table
+	// goes first or every item ends up listed twice.
+	itemTypes.clear();
+	itemCategories.clear();
+
 	load_from_registry();
 	load_enhanced_rules(ItemCreator::get_enhanced_rules());
 

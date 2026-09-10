@@ -54,10 +54,8 @@ void RenderingManager::render_creatures(std::span<const std::unique_ptr<Creature
 {
 	for (const auto& creature : creatures)
 	{
-		if (creature)
-		{
-			creature->render(ctx);
-		}
+		assert(creature && "creatures holds a null entry");
+		creature->render(ctx);
 	}
 }
 
@@ -65,10 +63,8 @@ void RenderingManager::render_items(std::span<const std::unique_ptr<Item>> items
 {
 	for (const auto& item : items)
 	{
-		if (item)
-		{
-			item->render(ctx);
-		}
+		assert(item && "items holds a null entry");
+		item->render(ctx);
 	}
 }
 
