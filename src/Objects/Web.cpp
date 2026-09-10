@@ -85,3 +85,8 @@ void Web::destroy()
 {
 	mark_destroyed();
 }
+// A web has no mechanism to disarm. It is cut or burned, not defused.
+DisarmResult Web::attempt_disarm(Creature& creature, GameContext& ctx)
+{
+	return DisarmResult::NOT_DISARMABLE;
+}

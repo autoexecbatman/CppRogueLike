@@ -21,6 +21,9 @@ public:
 
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
+	// A web has no mechanism to disarm. It is cut or burned, not defused.
+	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) override;
+
 	// Destroy this web
 	void destroy();
 

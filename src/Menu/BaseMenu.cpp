@@ -103,6 +103,6 @@ void BaseMenu::menu_draw_title(std::string_view title, int colorPair)
 
 // A menu that consumes no keys of its own. The polled key and character are
 // lastKey and lastChar, so an override takes only the context.
-void BaseMenu::on_key(GameContext&)
+void BaseMenu::on_key(GameContext& ctx)
 {
 }

@@ -94,13 +94,10 @@ public:
 	// the call changes state and must not be made twice for one entry.
 	virtual EntryResult on_creature_enter(Creature& creature, GameContext& ctx) = 0;
 
-	// Attempts to disarm this feature. The default states that the feature has
-	// no mechanism to disarm; only features with one override it.
+	// Attempts to disarm this feature. Every feature answers, including the
+	// ones that refuse.
 	//
 	// Example:
 	//   web->attempt_disarm(player, ctx); // -> DisarmResult::NOT_DISARMABLE
-	virtual DisarmResult attempt_disarm(Creature& creature, GameContext& ctx)
-	{
-		return DisarmResult::NOT_DISARMABLE;
-	}
+	virtual DisarmResult attempt_disarm(Creature& creature, GameContext& ctx) = 0;
 };
