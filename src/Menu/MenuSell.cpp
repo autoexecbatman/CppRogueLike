@@ -144,7 +144,7 @@ MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	: player(player), shopkeeper(shopkeeper)
 {
 	assert(ctx.renderer && "MenuSell: renderer required before construction");
-	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS);
+	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
 	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 
 	populate_items(player.inventoryData.items);

@@ -431,7 +431,7 @@ void Map::render(const GameContext& ctx) const
 	int cameraX = ctx.renderer->get_camera_x();
 	int cameraY = ctx.renderer->get_camera_y();
 	int visibleCols = ctx.renderer->get_viewport_cols();
-	int visibleRows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+	int visibleRows = ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows();
 
 	int startCol = std::max(0, cameraX / tileSize);
 	int startRow = std::max(0, cameraY / tileSize);

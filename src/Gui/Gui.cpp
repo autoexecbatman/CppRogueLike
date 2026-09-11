@@ -23,12 +23,11 @@
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
 
-// The HUD lays its text on a pitch of its own rather than on the map's tile
-// grid. A tile row is 64 pixels and the font is 16, so a row spent three
-// quarters of itself on nothing, and six rows of stats reserved half the screen.
-constexpr int GUI_TEXT_ROW_PITCH = 32;
-// Gap between the frame's top edge and the first row of text.
-constexpr int GUI_TEXT_TOP_INSET = 6;
+// GUI_TEXT_ROW_PITCH, GUI_TEXT_TOP_INSET, GUI_TEXT_ROWS and gui_reserve_rows
+// live in Renderer.h: the renderer has to reserve the HUD's height and the Gui
+// has to fill it, so one of them holding the numbers privately puts the two out
+// of step at any zoom but the one they were written for.
+
 // Icons sit on the same pitch as the text beside them.
 constexpr int GUI_ICON_SIZE = 32;
 // Height of a bar, leaving a little air inside its row.
@@ -97,7 +96,8 @@ static int hud_text_row_y(int baseY, int tileSize, int row)
 // font, not a whole pitch, which is why it is added back on.
 static int hud_text_row_count(int tileSize, int fontSize)
 {
-	const int contentHeight = (GUI_RESERVE_ROWS - 1) * tileSize - GUI_TEXT_TOP_INSET - fontSize;
+	const int contentHeight =
+		(gui_reserve_rows(tileSize, fontSize) - 1) * tileSize - GUI_TEXT_TOP_INSET - fontSize;
 	return contentHeight / GUI_TEXT_ROW_PITCH + 1;
 }
 
@@ -195,7 +195,8 @@ void Gui::gui_render(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int reserveRows = ctx.renderer->get_gui_reserve_rows();
+	const int baseY = (vrows - reserveRows) * tileSize;
 	const int pw = vcols * tileSize;
 	const int ph = ctx.renderer->get_screen_height() - baseY;
 	const int div1 = hud_divider1_x(pw);
@@ -214,7 +215,7 @@ void Gui::gui_render(const GameContext& ctx)
 	ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY }, tileConfig.get("GUI_FRAME_TR"));
 
 	// ---- Left and right outer edges ---------------------------------------
-	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	for (int row = 1; row < reserveRows; ++row)
 	{
 		ctx.renderer->draw_tile_screen(Vector2D{ 0, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
 		ctx.renderer->draw_tile_screen(Vector2D{ (vcols - 1) * tileSize, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_R"));
@@ -222,14 +223,14 @@ void Gui::gui_render(const GameContext& ctx)
 
 	// ---- Divider 1: bar panel | stat panel --------------------------------
 	ctx.renderer->draw_tile_screen(Vector2D{ div1, baseY }, tileConfig.get("GUI_FRAME_T"));
-	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	for (int row = 1; row < reserveRows; ++row)
 	{
 		ctx.renderer->draw_tile_screen(Vector2D{ div1, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
 	}
 
 	// ---- Divider 2: stat panel | log panel --------------------------------
 	ctx.renderer->draw_tile_screen(Vector2D{ div2, baseY }, tileConfig.get("GUI_FRAME_T"));
-	for (int row = 1; row < GUI_RESERVE_ROWS; ++row)
+	for (int row = 1; row < reserveRows; ++row)
 	{
 		ctx.renderer->draw_tile_screen(Vector2D{ div2, baseY + row * tileSize }, tileConfig.get("GUI_FRAME_L"));
 	}
@@ -252,7 +253,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int baseY = (vrows - ctx.renderer->get_gui_reserve_rows()) * tileSize;
 	const int div1 = hud_divider1_x(vcols * tileSize);
 
 	const int hp = ctx.player()->get_hp();
@@ -311,7 +312,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int baseY = (vrows - ctx.renderer->get_gui_reserve_rows()) * tileSize;
 	const int div1 = hud_divider1_x(vcols * tileSize);
 
 	if (ctx.hungerSystem->get_hunger_max() <= 0)
@@ -361,7 +362,7 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int baseY = (vrows - ctx.renderer->get_gui_reserve_rows()) * tileSize;
 	const int statsX = hud_panel_text_left(hud_divider1_x(vcols * tileSize));
 	const int statsWidth = hud_panel_text_right(hud_divider2_x(vcols * tileSize)) - statsX;
 
@@ -422,7 +423,7 @@ void Gui::gui_print_log(const GameContext& ctx)
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vcols = ctx.renderer->get_viewport_cols();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int baseY = (vrows - ctx.renderer->get_gui_reserve_rows()) * tileSize;
 	const int logX = hud_panel_text_left(hud_divider2_x(vcols * tileSize));
 
 	const int messagesToShow = std::min(
@@ -472,7 +473,7 @@ void Gui::render_player_status(const GameContext& ctx)
 
 	const int tileSize = ctx.renderer->get_tile_size();
 	const int vrows = ctx.renderer->get_viewport_rows();
-	const int baseY = (vrows - GUI_RESERVE_ROWS) * tileSize;
+	const int baseY = (vrows - ctx.renderer->get_gui_reserve_rows()) * tileSize;
 
 	if (ctx.player()->has_state(ActorState::IS_CONFUSED))
 	{

@@ -295,7 +295,7 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	int ty = world_tile.y * tileSize - cam_y;
 
 	// Ignore cursor over the GUI panel rows at the bottom
-	int map_rows = ctx.renderer->get_viewport_rows() - GUI_RESERVE_ROWS;
+	int map_rows = ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows();
 
 	if (tx < 0 || ty < 0)
 	{

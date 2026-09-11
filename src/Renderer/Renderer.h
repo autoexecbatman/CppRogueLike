@@ -12,7 +12,38 @@ class TileConfig;
 
 inline constexpr int SPRITE_SIZE = 16;       // DawnLike native sprite pixel size
 inline constexpr int DISPLAY_TILE_SIZE = 64;  // Default rendered tile size in pixels
-inline constexpr int GUI_RESERVE_ROWS = 4;    // Map-tile rows reserved at the bottom for the HUD
+// The HUD's outer geometry, here rather than in Gui.cpp because two modules need
+// it: the renderer reserves room for the HUD, and the Gui fills it.
+//
+// Its rows run on a pitch of their own rather than on the map's tile grid. A tile
+// is as tall as the zoom makes it and a row of text is not, so a pitch measured in
+// tiles puts most of a row on nothing at one zoom and overlaps at the next.
+inline constexpr int GUI_TEXT_ROW_PITCH = 32;  // Pixels between the tops of two HUD text rows
+inline constexpr int GUI_TEXT_TOP_INSET = 6;   // Gap below the frame's top edge before the first row
+inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
+
+// Map-tile rows reserved at the bottom for the HUD.
+//
+// Derived rather than fixed. The HUD holds a constant amount of text, so the
+// pixels it needs do not change with zoom; the number of tile rows covering them
+// therefore must. As a constant it was 4, which is right only at a 64-pixel tile:
+// at 16 the panel was 64 pixels tall for 198 pixels of content and the lower rows
+// drew off the bottom of the screen, and at 96 it took 384 pixels to hold the same
+// six rows.
+//
+// Example:
+//
+//   gui_reserve_rows(64, 16);   // -> 4, the value this replaced
+//   gui_reserve_rows(16, 16);   // -> 13
+//   gui_reserve_rows(96, 16);   // -> 3
+[[nodiscard]] inline constexpr int gui_reserve_rows(int tileSize, int fontSize)
+{
+	// One whole tile for the frame's top edge, then the rows. The last row needs
+	// only the height of the font rather than another full pitch.
+	const int neededPixels =
+		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * GUI_TEXT_ROW_PITCH + fontSize;
+	return (neededPixels + tileSize - 1) / tileSize;
+}
 inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
 
 // DawnLike sprite sheet indices.
@@ -251,6 +282,9 @@ public:
 	[[nodiscard]] bool is_initialized() const { return initialized; }
 	[[nodiscard]] int get_tile_size() const { return tileSize; }
 	[[nodiscard]] int get_font_size() const { return fontSize; }
+	// Tile rows the HUD needs at the current zoom. Everything that splits the
+	// screen between map and HUD asks this rather than assuming a number.
+	[[nodiscard]] int get_gui_reserve_rows() const { return gui_reserve_rows(tileSize, fontSize); }
 	[[nodiscard]] int get_viewport_cols() const { return viewportCols; }
 	[[nodiscard]] int get_viewport_rows() const { return viewportRows; }
 	[[nodiscard]] int get_screen_width() const { return screenWidth; }

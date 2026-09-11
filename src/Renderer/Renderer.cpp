@@ -87,9 +87,6 @@ void Renderer::init()
 	viewportCols = screenWidth / tileSize;
 	viewportRows = screenHeight / tileSize;
 
-	// Font scaled proportionally to tile size
-	fontSize = tileSize * 3 / 4;
-
 	init_color_pairs();
 
 	lightMask = LoadRenderTexture(screenWidth, screenHeight);
@@ -696,7 +693,6 @@ void Renderer::zoom_in()
 		if (tileSize == ZOOM_LEVELS[level])
 		{
 			tileSize = ZOOM_LEVELS[level + 1];
-			fontSize = tileSize * 3 / 4;
 			update_viewport();
 			return;
 		}
@@ -711,7 +707,6 @@ void Renderer::zoom_out()
 		if (tileSize == ZOOM_LEVELS[level])
 		{
 			tileSize = ZOOM_LEVELS[level - 1];
-			fontSize = tileSize * 3 / 4;
 			update_viewport();
 			return;
 		}
@@ -761,7 +756,7 @@ void Renderer::draw_bar(Vector2D screenPos, int w, int h, float ratio, Color fil
 
 void Renderer::set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h)
 {
-	int map_viewport_rows = viewportRows - GUI_RESERVE_ROWS;
+	int map_viewport_rows = viewportRows - get_gui_reserve_rows();
 	int viewport_px_w = viewportCols * tileSize;
 	int viewport_px_h = map_viewport_rows * tileSize;
 
@@ -790,8 +785,8 @@ ScreenMetrics Renderer::metrics() const
 		.tile_w = tileSize,
 		.tile_h = tileSize,
 		.map_cols = viewportCols,
-		.map_rows = viewportRows - GUI_RESERVE_ROWS,
-		.gui_rows = GUI_RESERVE_ROWS,
+		.map_rows = viewportRows - get_gui_reserve_rows(),
+		.gui_rows = get_gui_reserve_rows(),
 		.window_w = screenWidth,
 		.window_h = screenHeight
 	};
