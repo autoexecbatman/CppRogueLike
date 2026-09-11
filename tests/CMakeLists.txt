@@ -20,6 +20,7 @@ include_directories(
 # Test source files - explicitly listed
 set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/test_main.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Core/AssertProbeTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/UniqueIdTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/GameContextWiringTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Utils/Vector2DTest.cpp
