@@ -13,6 +13,7 @@ private:
 	bool initialized{ false };
 
 	void draw_name_screen();
+	[[nodiscard]] int interior_width() const;
 
 public:
 	MenuName(GameContext& ctx);
