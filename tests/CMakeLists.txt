@@ -66,7 +66,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerFullnessTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")

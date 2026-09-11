@@ -1,6 +1,7 @@
 #pragma once
 
 #include <nlohmann/json_fwd.hpp>
+#include <optional>
 #include <string>
 
 struct GameContext;
@@ -31,8 +32,18 @@ public:
 	// Decreases hunger by the specified amount
 	void decrease_hunger(GameContext& ctx, int amount);
 
-	// Returns current hunger state
-	HungerState get_hunger_state() const;
+	// The state the counter is in, derived on every call from hungerValue against
+	// the threshold table. There is no stored copy of this to fall out of step
+	// with the counter, so it is right before anything has ticked.
+	//
+	// Example (values from HungerSystemTest):
+	//
+	//   HungerSystem hunger{};                    // nothing eaten, counter at 0
+	//   hunger.get_hunger_state();                // -> HungerState::WELL_FED
+	//
+	//   hunger.increase_hunger(ctx, 700);         // counter at 700
+	//   hunger.get_hunger_state();                // -> HungerState::HUNGRY
+	[[nodiscard]] HungerState get_hunger_state() const;
 
 	// Returns string representation of the current hunger state
 	std::string get_hunger_state_string() const;
@@ -48,7 +59,7 @@ public:
 	// empties as the creature fills. This is the complement, and it is what the
 	// HUD draws, because it sits beside a health bar that fills when healthy.
 	//
-	// Example (values from HungerFullnessTest, which pins all three):
+	// Example (values from HungerSystemTest, which pins all three):
 	//
 	//   HungerSystem hunger{};                              // nothing eaten yet
 	//   hunger.get_fullness_ratio();                        // -> 1.0
@@ -77,15 +88,19 @@ public:
 
 	// Save/Load methods for game persistence
 	void save(nlohmann::json& j) const;
-	void load(GameContext& ctx, const nlohmann::json& j);
+	void load(const nlohmann::json& j);
 
 private:
 	int hungerValue{ 0 }; // Internal hunger counter
 	int hungerMax{ 1000 }; // Maximum hunger value
 	bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
-	HungerState currentState{ HungerState::SATIATED };
 
-	// Updates internal hunger state based on hunger value
-	void update_hunger_state(GameContext& ctx);
+	// What the player was last told they were, empty until the first message.
+	// Held only so a transition has something to compare against; the current
+	// state comes from get_hunger_state().
+	std::optional<HungerState> lastNotifiedState{};
+
+	// Announces a move to a different state, and records what was announced.
+	void notify_state_change(GameContext& ctx);
 
 };

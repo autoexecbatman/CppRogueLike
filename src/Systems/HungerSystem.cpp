@@ -19,26 +19,53 @@ constexpr int SATIATED_THRESHOLD{ 400 };
 constexpr int HUNGRY_THRESHOLD{ 700 };
 constexpr int STARVING_THRESHOLD{ 900 };
 
+// The only place a counter becomes a state. Bounds ascend, so the first one that
+// holds is the answer.
+static HungerState hunger_state_for(int hungerValue)
+{
+	if (hungerValue <= WELL_FED_THRESHOLD)
+	{
+		return HungerState::WELL_FED;
+	}
+
+	if (hungerValue <= SATIATED_THRESHOLD)
+	{
+		return HungerState::SATIATED;
+	}
+
+	if (hungerValue <= HUNGRY_THRESHOLD)
+	{
+		return HungerState::HUNGRY;
+	}
+
+	if (hungerValue <= STARVING_THRESHOLD)
+	{
+		return HungerState::STARVING;
+	}
+
+	return HungerState::DYING;
+}
+
 void HungerSystem::increase_hunger(GameContext& ctx, int amount)
 {
 	hungerValue = std::min(hungerValue + amount, hungerMax);
-	update_hunger_state(ctx);
+	notify_state_change(ctx);
 }
 
 void HungerSystem::decrease_hunger(GameContext& ctx, int amount)
 {
 	hungerValue = std::max(hungerValue - amount, 0);
-	update_hunger_state(ctx);
+	notify_state_change(ctx);
 }
 
 HungerState HungerSystem::get_hunger_state() const
 {
-	return currentState;
+	return hunger_state_for(hungerValue);
 }
 
 std::string HungerSystem::get_hunger_state_string() const
 {
-	switch (currentState)
+	switch (get_hunger_state())
 	{
 
 	case HungerState::WELL_FED:
@@ -124,7 +151,7 @@ std::string HungerSystem::get_hunger_bar_string(int bar_width) const
 
 int HungerSystem::get_hunger_color() const
 {
-	switch (currentState)
+	switch (get_hunger_state())
 	{
 
 	case HungerState::WELL_FED:
@@ -162,9 +189,10 @@ int HungerSystem::get_hunger_color() const
 
 bool HungerSystem::is_suffering_hunger_penalties() const
 {
-	return currentState == HungerState::HUNGRY ||
-		currentState == HungerState::STARVING ||
-		currentState == HungerState::DYING;
+	const HungerState state = get_hunger_state();
+	return state == HungerState::HUNGRY ||
+		state == HungerState::STARVING ||
+		state == HungerState::DYING;
 }
 
 void HungerSystem::apply_hunger_effects(GameContext& ctx)
@@ -178,7 +206,7 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	// This is assuming the player's base stats are stored somewhere and can be restored
 
 	// Apply effects based on hunger state
-	switch (currentState)
+	switch (get_hunger_state())
 	{
 
 	case HungerState::SATIATED:
@@ -242,42 +270,38 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 	}
 }
 
-void HungerSystem::update_hunger_state(GameContext& ctx)
+void HungerSystem::notify_state_change(GameContext& ctx)
 {
-	HungerState oldState = currentState;
+	const HungerState current = get_hunger_state();
 
-	if (hungerValue <= WELL_FED_THRESHOLD)
+	// The first call establishes what the player is; there is no move to report.
+	if (!lastNotifiedState.has_value())
 	{
-		currentState = HungerState::WELL_FED;
-	}
-	else if (hungerValue <= SATIATED_THRESHOLD)
-	{
-		currentState = HungerState::SATIATED;
-	}
-	else if (hungerValue <= HUNGRY_THRESHOLD)
-	{
-		currentState = HungerState::HUNGRY;
-	}
-	else if (hungerValue <= STARVING_THRESHOLD)
-	{
-		currentState = HungerState::STARVING;
-	}
-	else
-	{
-		currentState = HungerState::DYING;
+		lastNotifiedState = current;
+		return;
 	}
 
-	// Notify the player if hunger state has changed
-	if (oldState != currentState)
+	// Most ticks move the counter without crossing a threshold.
+	if (*lastNotifiedState == current)
 	{
-		ctx.messageSystem->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
-		ctx.messageSystem->finalize_message();
+		return;
+	}
 
-		// Reset well-fed message flag when leaving well-fed state
-		if (oldState == HungerState::WELL_FED && currentState != HungerState::WELL_FED)
-		{
-			wellFedMessageShown = false;
-		}
+	const HungerState previous = *lastNotifiedState;
+
+	// Say it before recording that it was said. Recording first and then throwing
+	// on the way out would mark this threshold announced and silence it forever,
+	// leaving a correct state and a missing message that no test can distinguish.
+	ctx.messageSystem->append_message_part(get_hunger_color(), "You are now " + get_hunger_state_string() + ".");
+	ctx.messageSystem->finalize_message();
+
+	lastNotifiedState = current;
+
+	// Leaving well fed re-arms the message that fires on the way back into it.
+	// The equality guard above already establishes that current is something else.
+	if (previous == HungerState::WELL_FED)
+	{
+		wellFedMessageShown = false;
 	}
 }
 
@@ -285,11 +309,17 @@ void HungerSystem::save(json& j) const
 {
 	j["hungerValue"] = hungerValue;
 	j["hungerMax"] = hungerMax;
-	j["currentState"] = static_cast<int>(currentState);
 	j["wellFedMessageShown"] = wellFedMessageShown;
+
+	// Only what the player was told. The state itself is derived from hungerValue,
+	// so storing it would be a second copy free to disagree with the counter.
+	if (lastNotifiedState.has_value())
+	{
+		j["lastNotifiedState"] = static_cast<int>(*lastNotifiedState);
+	}
 }
 
-void HungerSystem::load(GameContext& ctx, const json& j)
+void HungerSystem::load(const json& j)
 {
 	if (j.contains("hungerValue"))
 	{
@@ -299,15 +329,15 @@ void HungerSystem::load(GameContext& ctx, const json& j)
 	{
 		hungerMax = j["hungerMax"];
 	}
-	if (j.contains("currentState"))
-	{
-		currentState = static_cast<HungerState>(j["currentState"]);
-	}
 	if (j.contains("wellFedMessageShown"))
 	{
 		wellFedMessageShown = j["wellFedMessageShown"];
 	}
 
-	// Update hunger state based on loaded values to ensure consistency
-	update_hunger_state(ctx);
+	// A save written before this field existed leaves it empty, and the first tick
+	// after the load sets the baseline without announcing anything.
+	if (j.contains("lastNotifiedState"))
+	{
+		lastNotifiedState = static_cast<HungerState>(j["lastNotifiedState"].get<int>());
+	}
 }

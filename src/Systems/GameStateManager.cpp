@@ -263,7 +263,7 @@ bool GameStateManager::load_game(GameContext& ctx)
 
 	if (j.contains("hunger_system"))
 	{
-		ctx.hungerSystem->load(ctx, j["hunger_system"]);
+		ctx.hungerSystem->load(j["hunger_system"]);
 	}
 
 	ctx.levelManager->load_from_json(j);

@@ -421,3 +421,7 @@ CMakeSettings.json
 /docs/src_index.html
 /docs/src_api.html
 /docs/__pycache__
+
+# The Telegram assistant's mailbox for this project. Notes it leaves about
+# the game land here; they are working notes, not part of the source.
+/relay/
