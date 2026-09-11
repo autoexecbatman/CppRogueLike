@@ -84,6 +84,15 @@ int HungerSystem::get_hunger_max() const
 	return hungerMax;
 }
 
+float HungerSystem::get_fullness_ratio() const
+{
+	if (hungerMax <= 0)
+	{
+		return 0.0f;
+	}
+	return std::clamp(1.0f - static_cast<float>(hungerValue) / static_cast<float>(hungerMax), 0.0f, 1.0f);
+}
+
 std::string HungerSystem::get_hunger_numerical_string() const
 {
 	return std::format("{}/{}", hungerValue, hungerMax);

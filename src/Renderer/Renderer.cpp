@@ -797,6 +797,28 @@ ScreenMetrics Renderer::metrics() const
 	};
 }
 
+std::string Renderer::fit_text_to_width(std::string_view text, int maxWidth) const
+{
+	if (measure_text(text) <= maxWidth)
+	{
+		return std::string(text);
+	}
+
+	std::string fitted(text);
+	while (!fitted.empty() && measure_text(fitted) > maxWidth)
+	{
+		fitted.pop_back();
+	}
+
+	// Back up to the last space, unless that would leave almost nothing.
+	const std::size_t lastSpace = fitted.find_last_of(' ');
+	if (lastSpace != std::string::npos && lastSpace * 2 > fitted.size())
+	{
+		fitted.erase(lastSpace);
+	}
+	return fitted;
+}
+
 int Renderer::measure_text(std::string_view text) const
 {
 	std::string text_str(text);

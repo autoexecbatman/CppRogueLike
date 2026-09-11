@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <string>
 #include <string_view>
 
 #include <raylib.h>
@@ -11,7 +12,7 @@ class TileConfig;
 
 inline constexpr int SPRITE_SIZE = 16;       // DawnLike native sprite pixel size
 inline constexpr int DISPLAY_TILE_SIZE = 64;  // Default rendered tile size in pixels
-inline constexpr int GUI_RESERVE_ROWS = 7;    // Rows reserved at the bottom for the HUD
+inline constexpr int GUI_RESERVE_ROWS = 4;    // Map-tile rows reserved at the bottom for the HUD
 inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
 
 // DawnLike sprite sheet indices.
@@ -228,6 +229,11 @@ public:
 	[[nodiscard]] ColorPair get_color_pair(int id) const;
 	[[nodiscard]] ScreenMetrics metrics() const;
 	[[nodiscard]] int measure_text(std::string_view text) const;
+	// The longest prefix of text that fits in maxWidth pixels, cut at a space when
+	// there is one so a word is not split across a boundary. Text that already fits
+	// comes back unchanged, trailing space included, because that space separates it
+	// from whatever is drawn beside it.
+	[[nodiscard]] std::string fit_text_to_width(std::string_view text, int maxWidth) const;
 
 	[[nodiscard]] bool is_initialized() const { return initialized; }
 	[[nodiscard]] int get_tile_size() const { return tileSize; }

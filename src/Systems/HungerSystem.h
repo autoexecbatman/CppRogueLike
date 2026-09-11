@@ -43,6 +43,12 @@ public:
 	// Returns maximum hunger value
 	int get_hunger_max() const;
 
+	// How full the creature is: 1.0 just after eating, 0.0 at starvation.
+	// hungerValue counts up toward starving, so a meter drawn straight from it
+	// empties as the creature fills. This is the complement, and it is what the
+	// HUD draws, because it sits beside a health bar that fills when healthy.
+	[[nodiscard]] float get_fullness_ratio() const;
+
 	// Returns numerical hunger display (e.g., "150/1000")
 	std::string get_hunger_numerical_string() const;
 

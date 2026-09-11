@@ -1,0 +1,8 @@
+[
+  {"label": "main_menu", "keys": []},
+  {"label": "select_gender", "keys": ["Enter"]},
+  {"label": "select_race", "keys": ["Enter"]},
+  {"label": "select_class", "keys": ["Enter"]},
+  {"label": "enter_name", "keys": ["Enter"]},
+  {"label": "in_game", "keys": ["Enter"]}
+]
