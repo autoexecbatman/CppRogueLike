@@ -47,6 +47,17 @@ public:
 	// hungerValue counts up toward starving, so a meter drawn straight from it
 	// empties as the creature fills. This is the complement, and it is what the
 	// HUD draws, because it sits beside a health bar that fills when healthy.
+	//
+	// Example (values from HungerFullnessTest, which pins all three):
+	//
+	//   HungerSystem hunger{};                              // nothing eaten yet
+	//   hunger.get_fullness_ratio();                        // -> 1.0
+	//
+	//   hunger.increase_hunger(ctx, hunger.get_hunger_max() / 4);
+	//   hunger.get_fullness_ratio();                        // -> 0.75
+	//
+	//   hunger.increase_hunger(ctx, hunger.get_hunger_max() * 2);
+	//   hunger.get_fullness_ratio();                        // -> 0.0, never below
 	[[nodiscard]] float get_fullness_ratio() const;
 
 	// Returns numerical hunger display (e.g., "150/1000")

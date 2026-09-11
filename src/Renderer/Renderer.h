@@ -233,6 +233,19 @@ public:
 	// there is one so a word is not split across a boundary. Text that already fits
 	// comes back unchanged, trailing space included, because that space separates it
 	// from whatever is drawn beside it.
+	//
+	// Example, read off the HUD's log panel at 1280x896, where the panel measures
+	// 575 pixels between its divider and the frame's right rule:
+	//
+	//   fit_text_to_width("You are now Well Fed.", 575);
+	//   // -> "You are now Well Fed."          // fits, so it is returned whole
+	//
+	//   fit_text_to_width("mail, long sword, shield, long bow, fireball scroll.", 575);
+	//   // -> "mail, long sword, shield, long" // cut at a space, never mid-word
+	//
+	// The cut lands on a space, so a caller that needs the tail of a string rather
+	// than its head - an input field showing what was just typed - wants to limit
+	// what it accepts instead of truncating what it draws.
 	[[nodiscard]] std::string fit_text_to_width(std::string_view text, int maxWidth) const;
 
 	[[nodiscard]] bool is_initialized() const { return initialized; }
