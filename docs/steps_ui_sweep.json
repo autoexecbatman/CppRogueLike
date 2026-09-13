@@ -1,0 +1,21 @@
+[
+  {"label": "main_menu", "keys": []},
+  {"label": "select_gender", "keys": ["Enter"]},
+  {"label": "select_race", "keys": ["Enter"]},
+  {"label": "select_class", "keys": ["Enter"]},
+  {"label": "enter_name", "keys": ["Enter"]},
+  {"label": "in_game", "keys": ["Enter"]},
+  {"label": "inventory", "keys": ["i"]},
+  {"label": "inventory_closed", "keys": ["Escape"]},
+  {"label": "character_sheet", "keys": ["Shift+2"]},
+  {"label": "character_sheet_closed", "keys": ["Escape"]},
+  {"label": "help", "keys": ["Shift+Slash"]},
+  {"label": "help_closed", "keys": ["Escape"]},
+  {"label": "cast_menu", "keys": ["Shift+c"]},
+  {"label": "cast_menu_closed", "keys": ["Escape"]},
+  {"label": "targeting", "keys": ["t"]},
+  {"label": "targeting_closed", "keys": ["Escape"]},
+  {"label": "minimap", "keys": ["Tab"]},
+  {"label": "minimap_closed", "keys": ["Tab"]},
+  {"label": "rest", "keys": ["r"]}
+]

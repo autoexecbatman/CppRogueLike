@@ -36,8 +36,13 @@ Playwright key names, pressed in order:
 
     [
       {"label": "main_menu", "keys": []},
-      {"label": "new_game",  "keys": ["Enter"]}
+      {"label": "new_game",  "keys": ["Enter"]},
+      {"label": "char_sheet", "keys": ["Shift+2"]}
     ]
+
+A key may be written as a chord, modifiers first: "Shift+2" holds Shift across
+the press. That is the only way to send a shifted command, because the game reads
+the shift state itself rather than taking the browser's character.
 
 Needs playwright and Pillow. Refuses a step file that is not a list of objects
 carrying both fields, and a page whose loading overlay never clears.
@@ -67,6 +72,12 @@ KEY_HOLD_SECONDS = 0.12
 # Extra captures taken when measuring a screen's noise floor. One pair is not
 # enough: the animation toggles on a timer, so a single pair can straddle nothing.
 NOISE_FLOOR_SAMPLES = 4
+# How much of the canvas must carry something other than its own background before
+# a frame counts as drawn. Measured here: an undrawn canvas reads 0.0038 and holds
+# four near-black shades, so "more than one colour" accepts it; the main menu reads
+# 0.2178. This sits between them, five times the empty frame and a tenth of the
+# real one.
+MINIMUM_PAINTED_FRACTION = 0.02
 
 
 def canvas_shot(page):
@@ -119,11 +130,36 @@ def changed_fraction(before, after):
     return changed / (first.size[0] * first.size[1])
 
 
+def painted_fraction(data):
+    """Fraction of the canvas that is not its single most common colour, in [0, 1].
+
+    How much of the surface carries content. A canvas the game has not drawn to is
+    its clear colour almost everywhere, whatever stray shades the compositor leaves
+    in it, so this separates a drawn frame from an empty one where a colour count
+    does not.
+
+    Example:
+        painted_fraction(dead_canvas)   # -> 0.003802
+        painted_fraction(main_menu)     # -> 0.217787
+
+    Args:
+        data: PNG bytes of a canvas capture.
+    """
+    image = Image.open(io.BytesIO(data)).convert("RGB")
+    total = image.size[0] * image.size[1]
+
+    # getcolors returns (count, colour) pairs, so the largest pair is the dominant
+    # colour by count.
+    dominant = max(image.getcolors(maxcolors=total))[0]
+    return 1.0 - dominant / total
+
+
 def wait_for_game(page, timeout_seconds):
-    """Block until the loading overlay clears and the canvas has drawn something.
+    """Block until the loading overlay clears and the game has drawn a real frame.
 
     A capture taken before this returns is a picture of an empty canvas, which
-    looks exactly like a game that renders nothing.
+    looks exactly like a game that renders nothing - and every later step then
+    reports UNCHANGED, which reads as a dead build rather than an early start.
 
     Example:
         wait_for_game(page, 90)   # returns None once the menu is on screen
@@ -133,22 +169,27 @@ def wait_for_game(page, timeout_seconds):
         timeout_seconds: how long to wait before giving up.
 
     Raises:
-        TimeoutError: the overlay never cleared, or the canvas stayed blank.
+        TimeoutError: the overlay never cleared, or the canvas never carried more
+            than MINIMUM_PAINTED_FRACTION of content.
     """
     # Emscripten's shell hides this overlay once the bundle has run.
     page.wait_for_selector("#loading-overlay", state="hidden", timeout=timeout_seconds * 1000)
 
-    # A hidden overlay is not a drawn frame: wait until the canvas stops being one
-    # flat colour, which is what an uninitialised WebGL surface looks like.
+    # A hidden overlay is not a drawn frame. Wait for content rather than for the
+    # canvas to stop being flat: an undrawn one here is not flat, it holds four
+    # near-black shades, which is why the flat test passed on it.
     deadline = time.monotonic() + timeout_seconds
+    painted = 0.0
     while time.monotonic() < deadline:
-        image = Image.open(io.BytesIO(canvas_shot(page))).convert("RGB")
-        colours = image.getcolors(maxcolors=256)
-        if colours is None or len(colours) > 1:
+        painted = painted_fraction(canvas_shot(page))
+        if painted >= MINIMUM_PAINTED_FRACTION:
             return
         time.sleep(CAPTURE_INTERVAL_SECONDS)
 
-    raise TimeoutError(f"canvas was still one flat colour after {timeout_seconds}s")
+    raise TimeoutError(
+        f"canvas was still blank after {timeout_seconds}s: "
+        f"{painted:.6f} of it carries content, below the {MINIMUM_PAINTED_FRACTION} a drawn frame needs"
+    )
 
 
 def measure_noise_floor(page):
@@ -211,9 +252,18 @@ def run_step(page, step, destination):
     # Keys go to the focused canvas, in the order written, each held long enough to
     # survive to the next polled frame. page.keyboard.press() does not do this.
     for key in step["keys"]:
-        page.keyboard.down(key)
+        # A chord holds its modifiers down around the key. The game derives a
+        # shifted character from the key plus the shift state it reads itself, so
+        # a bare "@" arrives as an unshifted 2 and reaches nothing.
+        parts = key.split("+") if len(key) > 1 else [key]
+        modifiers, final = parts[:-1], parts[-1]
+        for modifier in modifiers:
+            page.keyboard.down(modifier)
+        page.keyboard.down(final)
         time.sleep(KEY_HOLD_SECONDS)
-        page.keyboard.up(key)
+        page.keyboard.up(final)
+        for modifier in reversed(modifiers):
+            page.keyboard.up(modifier)
 
     # Re-capture until the screen has moved further than animation alone would.
     after = before
