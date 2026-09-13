@@ -42,8 +42,16 @@ struct SlotDisplayInfo
 	std::string_view label{};
 };
 
-inline constexpr int DETAIL_BAR_HEIGHT = 4;
-inline constexpr int TAB_BAR_HEIGHT = 1;
+// Vertical layout, counted in text rows below the frame's top edge rather than in
+// map tiles. A tile is as tall as the zoom makes it and a line of text is not, so
+// rows counted in tiles walked off the bottom of the screen: four equipment slots
+// and both footer lines were drawn below 896 pixels, and the cursor could still
+// reach them.
+// Clear air between the last glyph of a right-aligned line and the frame's rule.
+inline constexpr int PANEL_EDGE_CLEARANCE = 12;
+inline constexpr int DETAIL_BAR_ROWS = 3;
+inline constexpr int TAB_ROW = 0;
+inline constexpr int FIRST_CONTENT_ROW = 2;
 inline constexpr int SLOT_COUNT = 15;
 
 inline constexpr std::array<SlotDisplayInfo, SLOT_COUNT> SLOT_TABLE{ {
@@ -149,6 +157,6 @@ private:
 	int screen_rows(GameContext& ctx) const;
 
 	void draw_frame(GameContext& ctx);
-	void draw_highlight_row(int yTile, GameContext& ctx);
+	void draw_highlight_row(int row, GameContext& ctx);
 
 };

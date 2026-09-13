@@ -59,7 +59,6 @@ int get_constitution_bonus(const Player& player, GameContext& ctx)
 void display_basic_info(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     std::string line = std::format(
@@ -68,14 +67,13 @@ void display_basic_info(const Player& player, GameContext& ctx, int& row)
         player.playerClass,
         player.playerRace,
         player.get_level());
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, line, WHITE_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, line, WHITE_BLACK_PAIR);
     row += 2;
 }
 
 void display_experience_info(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     int currentXP = player.get_xp();
@@ -83,7 +81,7 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
     int xpNeeded = nextLevelXP - currentXP;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off },
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) },
         std::format("XP: {} / {}   (Need: {})", currentXP, nextLevelXP, xpNeeded),
         CYAN_BLACK_PAIR);
     row += 2;
@@ -92,7 +90,6 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
 void display_attributes(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     int strHitMod = get_strength_hit_modifier(player, ctx);
@@ -109,30 +106,29 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
         defensiveAdj = dexAttr.at(player.get_dexterity() - 1).DefensiveAdj;
     }
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- ATTRIBUTES ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- ATTRIBUTES ---", YELLOW_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("STR: {:2d}  ({:+d} hit, {:+d} dmg)", player.get_strength(), strHitMod, strDmgMod), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:2d}  ({:+d} hit, {:+d} dmg)", player.get_strength(), strHitMod, strDmgMod), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("DEX: {:2d}  ({:+d} missile, {:+d} defensive)", player.get_dexterity(), missileAdj, defensiveAdj), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("DEX: {:2d}  ({:+d} missile, {:+d} defensive)", player.get_dexterity(), missileAdj, defensiveAdj), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("CON: {:2d}  ({:+d} HP/level)", player.get_constitution(), conBonus), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("CON: {:2d}  ({:+d} HP/level)", player.get_constitution(), conBonus), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("INT: {:2d}   WIS: {:2d}   CHA: {:2d}", player.get_intelligence(), player.get_wisdom(), player.get_charisma()), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("INT: {:2d}   WIS: {:2d}   CHA: {:2d}", player.get_intelligence(), player.get_wisdom(), player.get_charisma()), WHITE_BLACK_PAIR);
     row += 2;
 }
 
 void display_combat_stats(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     int hp = player.get_hp();
@@ -140,7 +136,7 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
     int baseHP = player.get_hp_base();
     int conBonusTotal = maxHp - baseHP;
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- COMBAT ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- COMBAT ---", YELLOW_BLACK_PAIR);
     row++;
 
     int hpColor = (hp > maxHp / 2)
@@ -148,18 +144,17 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
         : (hp > maxHp / 4 ? YELLOW_BLACK_PAIR : RED_BLACK_PAIR);
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("HP: {} / {}  (Base: {}, Con Bonus: {:+d})", hp, maxHp, baseHP, conBonusTotal), hpColor);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("HP: {} / {}  (Base: {}, Con Bonus: {:+d})", hp, maxHp, baseHP, conBonusTotal), hpColor);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("THAC0: {}   AC: {}   DR: {}", player.get_thaco(), player.get_armor_class(), player.get_dr()), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("THAC0: {}   AC: {}   DR: {}", player.get_thaco(), player.get_armor_class(), player.get_dr()), WHITE_BLACK_PAIR);
     row += 2;
 }
 
 void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     auto* equippedWeapon = player.get_equipped_item(EquipmentSlot::RIGHT_HAND);
@@ -181,7 +176,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
 
     int strDmgMod = get_strength_damage_modifier(player, ctx);
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
     row++;
 
     std::string weaponName = equippedWeapon
@@ -189,25 +184,24 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
         : "(unarmed)";
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("Weapon: {}   Damage: {}  (STR bonus: {:+d})", weaponName, damageDisplay, strDmgMod), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Weapon: {}   Damage: {}  (STR bonus: {:+d})", weaponName, damageDisplay, strDmgMod), WHITE_BLACK_PAIR);
     row += 2;
 }
 
 void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
-    int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
     int x = tileSize;
 
     std::string hungerStr = ctx.hungerSystem
         ? ctx.hungerSystem->get_hunger_state_string()
         : "Unknown";
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + font_off }, "--- OTHER ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- OTHER ---", YELLOW_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, row * tileSize + font_off }, std::format("Gender: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.get_gold(), hungerStr), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Gender: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.get_gold(), hungerStr), WHITE_BLACK_PAIR);
     row += 2;
 }
 
@@ -236,22 +230,25 @@ void CharacterSheetUI::menu(GameContext& ctx)
 
     int tileSize = ctx.renderer->get_tile_size();
     int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
-    int vcols = ctx.renderer->get_viewport_cols();
-    int vrows = ctx.renderer->get_viewport_rows();
+    // The panel spans the screen in pixels. Whole tiles stop short of it at most
+    // zooms, which left a strip unpainted and put the closing hint above the
+    // panel's own floor, on top of the last row of content.
+    int screenW = ctx.renderer->get_screen_width();
+    int screenH = ctx.renderer->get_screen_height();
 
-    ctx.renderer->draw_frame(Vector2D{ 0, 0 }, vcols, vrows, *ctx.tileConfig);
+    ctx.renderer->draw_frame_pixels(Vector2D{ 0, 0 }, screenW, screenH, *ctx.tileConfig);
 
     std::string_view title = "CHARACTER SHEET";
     int title_w = ctx.renderer->measure_text(title);
-    int title_x = (vcols * tileSize - title_w) / 2;
+    int title_x = (screenW - title_w) / 2;
     ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, YELLOW_BLACK_PAIR);
 
     std::string_view hint = "[ESC] or [SPACE] to close";
     int hint_w = ctx.renderer->measure_text(hint);
-    int hint_x = (vcols * tileSize - hint_w) / 2;
-    ctx.renderer->draw_text(Vector2D{ hint_x, (vrows - 1) * tileSize + font_off }, hint, CYAN_BLACK_PAIR);
+    int hint_x = (screenW - hint_w) / 2;
+    ctx.renderer->draw_text(Vector2D{ hint_x, screenH - tileSize + font_off }, hint, CYAN_BLACK_PAIR);
 
-    int row = 1;
+    int row = 0;
     display_basic_info(player_ref, ctx, row);
     display_experience_info(player_ref, ctx, row);
     display_attributes(player_ref, ctx, row);
