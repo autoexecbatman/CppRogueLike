@@ -713,11 +713,17 @@ void Renderer::zoom_out()
 	}
 }
 
+// What a frame paints behind its border tiles. This is the colour the GUI_FRAME_*
+// sprites fill their own 56-pixel bodies with, measured off a render: while the
+// two differed, every border tile read as a band across the panel it enclosed.
+// One name, so a frame cannot disagree with its own art.
+static constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
+
 void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const
 {
 	assert(sheetsLoaded && "Renderer::draw_frame called before sheets are loaded");
 
-	DrawRectangle(screenPos.x, screenPos.y, wTiles * tileSize, hTiles * tileSize, Color{ 8, 8, 16, 255 });
+	DrawRectangle(screenPos.x, screenPos.y, wTiles * tileSize, hTiles * tileSize, FRAME_FILL);
 
 	// Top border
 	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
@@ -741,6 +747,39 @@ void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const Tile
 		draw_tile_screen(Vector2D{ screenPos.x + col * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_B"));
 	}
 	draw_tile_screen(Vector2D{ screenPos.x + (wTiles - 1) * tileSize, screenPos.y + (hTiles - 1) * tileSize }, tileConfig.get("GUI_FRAME_BR"));
+}
+
+void Renderer::draw_frame_pixels(Vector2D screenPos, int widthPixels, int heightPixels, const TileConfig& tileConfig) const
+{
+	assert(sheetsLoaded && "Renderer::draw_frame_pixels called before sheets are loaded");
+
+	DrawRectangle(screenPos.x, screenPos.y, widthPixels, heightPixels, FRAME_FILL);
+
+	// The far edges are placed against the rectangle rather than on the tile grid,
+	// so the frame closes on a rectangle the tile size does not divide.
+	const int rightX = screenPos.x + widthPixels - tileSize;
+	const int bottomY = screenPos.y + heightPixels - tileSize;
+
+	// Corners first, then the runs between them. A run's last tile may overlap its
+	// neighbour, which is what lets the border meet the corner on any width.
+	draw_tile_screen(screenPos, tileConfig.get("GUI_FRAME_TL"));
+	draw_tile_screen(Vector2D{ rightX, screenPos.y }, tileConfig.get("GUI_FRAME_TR"));
+	draw_tile_screen(Vector2D{ screenPos.x, bottomY }, tileConfig.get("GUI_FRAME_BL"));
+	draw_tile_screen(Vector2D{ rightX, bottomY }, tileConfig.get("GUI_FRAME_BR"));
+
+	for (int x = screenPos.x + tileSize; x < rightX; x += tileSize)
+	{
+		const int clampedX = std::min(x, rightX - 1);
+		draw_tile_screen(Vector2D{ clampedX, screenPos.y }, tileConfig.get("GUI_FRAME_T"));
+		draw_tile_screen(Vector2D{ clampedX, bottomY }, tileConfig.get("GUI_FRAME_B"));
+	}
+
+	for (int y = screenPos.y + tileSize; y < bottomY; y += tileSize)
+	{
+		const int clampedY = std::min(y, bottomY - 1);
+		draw_tile_screen(Vector2D{ screenPos.x, clampedY }, tileConfig.get("GUI_FRAME_L"));
+		draw_tile_screen(Vector2D{ rightX, clampedY }, tileConfig.get("GUI_FRAME_R"));
+	}
 }
 
 void Renderer::draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const

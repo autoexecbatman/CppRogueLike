@@ -23,7 +23,7 @@
 // Maximum log messages shown in the HUD
 constexpr int LOG_MAX_MESSAGES = 5;
 
-// GUI_TEXT_ROW_PITCH, GUI_TEXT_TOP_INSET, GUI_TEXT_ROWS and gui_reserve_rows
+// UI_TEXT_ROW_PITCH, GUI_TEXT_TOP_INSET, GUI_TEXT_ROWS and gui_reserve_rows
 // live in Renderer.h: the renderer has to reserve the HUD's height and the Gui
 // has to fill it, so one of them holding the numbers privately puts the two out
 // of step at any zoom but the one they were written for.
@@ -35,7 +35,7 @@ constexpr int GUI_ICON_SIZE = 32;
 // and at a 64-pixel tile it spent 32 pixels the bars needed.
 constexpr int GUI_PANEL_LEFT_MARGIN = 12;
 // Height of a bar, leaving a little air inside its row.
-constexpr int GUI_BAR_HEIGHT = GUI_TEXT_ROW_PITCH - 10;
+constexpr int GUI_BAR_HEIGHT = UI_TEXT_ROW_PITCH - 10;
 // The frame sprites draw a 4-pixel rule inside their 64-pixel tile rather than at
 // its edge: the outer left edge and both dividers put it 4 pixels in, and the
 // right edge puts it 8 pixels short of the far side. Text has to clear the rule,
@@ -112,7 +112,7 @@ static int hud_base_y(const Renderer& renderer)
 // Top edge of one HUD text row, counting from zero below the frame's top edge.
 static int hud_text_row_y(int baseY, int tileSize, int row)
 {
-	return baseY + tileSize + GUI_TEXT_TOP_INSET + row * GUI_TEXT_ROW_PITCH;
+	return baseY + tileSize + GUI_TEXT_TOP_INSET + row * UI_TEXT_ROW_PITCH;
 }
 
 // How many text rows fit in the panel. The last row needs only the height of the
@@ -121,7 +121,7 @@ static int hud_text_row_count(int tileSize, int fontSize)
 {
 	const int contentHeight =
 		(gui_reserve_rows(tileSize, fontSize) - 1) * tileSize - GUI_TEXT_TOP_INSET - fontSize;
-	return contentHeight / GUI_TEXT_ROW_PITCH + 1;
+	return contentHeight / UI_TEXT_ROW_PITCH + 1;
 }
 
 // The rectangle log text is laid out in. Pixels across, rows down.
@@ -302,7 +302,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int barX = GUI_PANEL_LEFT_MARGIN + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 	const int barH = GUI_BAR_HEIGHT;
-	const int barY = rowY + (GUI_TEXT_ROW_PITCH - barH) / 2;
+	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
 
 	Color filled;
 	if (ratio > 0.5f)
@@ -328,7 +328,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	const int textW = ctx.renderer->measure_text(hpText);
 	const int textX = barX + std::max(0, (barW - textW) / 2);
 	ctx.renderer->draw_text(
-		Vector2D{ textX, rowY + (GUI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
+		Vector2D{ textX, rowY + (UI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
 		hpText,
 		WHITE_BLACK_PAIR);
 }
@@ -364,7 +364,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int barX = GUI_PANEL_LEFT_MARGIN + GUI_ICON_SIZE + 8;
 	const int barW = hud_panel_text_right(div1) - barX;
 	const int barH = GUI_BAR_HEIGHT;
-	const int barY = rowY + (GUI_TEXT_ROW_PITCH - barH) / 2;
+	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
 
 	Color filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
 	Color barEmpty = { 20, 20, 30, 255 };
@@ -374,7 +374,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int textW = ctx.renderer->measure_text(hungerText);
 	const int textX = barX + std::max(0, (barW - textW) / 2);
 	ctx.renderer->draw_text(
-		Vector2D{ textX, rowY + (GUI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
+		Vector2D{ textX, rowY + (UI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
 		hungerText,
 		hungerColor);
 }

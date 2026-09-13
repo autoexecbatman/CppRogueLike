@@ -18,9 +18,66 @@ inline constexpr int DISPLAY_TILE_SIZE = 64;  // Default rendered tile size in p
 // Its rows run on a pitch of their own rather than on the map's tile grid. A tile
 // is as tall as the zoom makes it and a row of text is not, so a pitch measured in
 // tiles puts most of a row on nothing at one zoom and overlaps at the next.
-inline constexpr int GUI_TEXT_ROW_PITCH = 32;  // Pixels between the tops of two HUD text rows
+inline constexpr int UI_TEXT_ROW_PITCH = 32;   // Pixels between the tops of two rows of UI text
 inline constexpr int GUI_TEXT_TOP_INSET = 6;   // Gap below the frame's top edge before the first row
 inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
+
+// Top of one text row inside a panel whose frame begins at panelTopY. Row 0 sits
+// directly below the frame's top edge, which is one tile tall.
+//
+// Every full-screen panel uses this rather than multiplying a row index by the
+// tile size. A tile grows with the zoom and a row of text does not, so a row
+// index on the tile grid walks off the bottom of the screen at a large tile and
+// bunches up at a small one.
+//
+// Example, at a 64-pixel tile:
+//
+//   panel_text_row_y(0, 64, 0);    // -> 64,  first row under the top edge
+//   panel_text_row_y(0, 64, 10);   // -> 384, still on a 896-pixel screen
+[[nodiscard]] inline constexpr int panel_text_row_y(int panelTopY, int tileSize, int row)
+{
+	return panelTopY + tileSize + row * UI_TEXT_ROW_PITCH;
+}
+
+// How many text rows fit between a panel's top and bottom frame edges. Callers
+// that can overflow ask this rather than assuming their content fits.
+//
+// Example:
+//
+//   panel_text_rows_that_fit(896, 64, 14);  // -> 23
+[[nodiscard]] inline constexpr int panel_text_rows_that_fit(int panelHeightPixels, int tileSize, int fontSize)
+{
+	const int usablePixels = panelHeightPixels - 2 * tileSize - fontSize;
+	return usablePixels < 0 ? 0 : usablePixels / UI_TEXT_ROW_PITCH + 1;
+}
+
+// Tiles tall enough to frame a given number of text rows: a border tile top and
+// bottom, with the rows between them. A menu asks this instead of counting one
+// tile per line, which made an eleven-line help screen fourteen tiles - the whole
+// height of the window.
+//
+// Example:
+//
+//   panel_tiles_for_text_rows(11, 64, 14);   // -> 8
+[[nodiscard]] inline constexpr int panel_tiles_for_text_rows(int rows, int tileSize, int fontSize)
+{
+	const int neededPixels = 2 * tileSize + (rows - 1) * UI_TEXT_ROW_PITCH + fontSize;
+	return (neededPixels + tileSize - 1) / tileSize;
+}
+
+// Tiles wide enough to hold a measured run of text between two border tiles. The
+// argument is pixels from measure_text, never a character count: a count of
+// characters used as a count of tiles made a 33-character line 37 tiles wide,
+// which is 2368 pixels on a 1280-pixel screen.
+//
+// Example:
+//
+//   panel_tiles_for_text_width(487, 64);     // -> 10
+[[nodiscard]] inline constexpr int panel_tiles_for_text_width(int textWidthPixels, int tileSize)
+{
+	const int neededPixels = 2 * tileSize + textWidthPixels;
+	return (neededPixels + tileSize - 1) / tileSize;
+}
 
 // Map-tile rows reserved at the bottom for the HUD.
 //
@@ -41,7 +98,7 @@ inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
 	// One whole tile for the frame's top edge, then the rows. The last row needs
 	// only the height of the font rather than another full pitch.
 	const int neededPixels =
-		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * GUI_TEXT_ROW_PITCH + fontSize;
+		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
 	return (neededPixels + tileSize - 1) / tileSize;
 }
 inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
@@ -243,6 +300,13 @@ public:
 	// Draw a DawnLike-tiled frame with dark background fill.
 	// screenPos = top-left in pixels; wTiles/hTiles = dimensions in tiles.
 	void draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const;
+
+	// The same frame fitted to a pixel rectangle rather than a whole number of
+	// tiles. The four border tiles are set against the edges and the runs between
+	// them are tiled, so the frame closes on any rectangle. Whole tiles rarely fill
+	// the screen - at a 96-pixel tile they stop 32 pixels short of 1280x896 - and a
+	// frame counted in tiles then leaves an unpainted strip along two edges.
+	void draw_frame_pixels(Vector2D screenPos, int widthPixels, int heightPixels, const TileConfig& tileConfig) const;
 
 	void set_camera_center(int world_tile_x, int world_tile_y, int map_w, int map_h);
 	void update_viewport();
