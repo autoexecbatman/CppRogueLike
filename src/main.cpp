@@ -79,7 +79,10 @@ int main()
 	std::clog << "STARTUP: Loading Dawnlike tileset\n" << std::flush;
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
-	game->renderer.load_font(Paths::DAWNLIKE_FONT, 16);
+	// 14 rather than the font's exact 2x of 12: a 2.33x bake antialiases the glyph
+	// edges slightly, which is the cost of a readable size between 12 and the next
+	// integer multiple at 18. Every layout width in the HUD is measured against it.
+	game->renderer.load_font(Paths::DAWNLIKE_FONT, 14);
 
 	auto ctx = game->context();
 	game->decorEditor.load_palette(Paths::TILE_CONFIG);
