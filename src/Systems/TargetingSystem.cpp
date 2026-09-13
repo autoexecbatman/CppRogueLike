@@ -9,6 +9,7 @@
 #include "../Actor/EquipmentSlot.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Combat/AttackKind.h"
 #include "../Core/GameContext.h"
 #include "../Items/ItemClassification.h"
 #include "../Map/Map.h"
@@ -201,7 +202,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 
 		assert(innerCtx.player()->attacker && "ranged attack fired with no attacker component");
 		assert(innerCtx.creatureManager && "ranged attack fired with no creature manager");
-		innerCtx.player()->attacker->attack(*target, innerCtx);
+		innerCtx.player()->attacker->attack(*target, AttackKind::RANGED, innerCtx);
 		innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
 	};

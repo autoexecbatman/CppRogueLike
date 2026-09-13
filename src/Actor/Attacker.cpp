@@ -35,10 +35,11 @@ void Attacker::perform_single_attack(
 	const DamageInfo& attackDamage,
 	int attackPenalty,
 	const std::string& handName,
+	AttackKind kind,
 	GameContext& ctx)
 {
 	// Shopkeeper interaction, melee only: the shop component is what marks a trader.
-	if (target.shop && !owner.has_state(ActorState::IS_RANGED))
+	if (target.shop && kind == AttackKind::MELEE)
 	{
 		ctx.menus->push_back(std::make_unique<MenuTrade>(target, owner, ctx));
 		return;
@@ -70,7 +71,7 @@ void Attacker::perform_single_attack(
 
 	// Calculate backstab and to-hit roll
 	const BackstabInfo backstab = calculate_backstab_bonus(owner);
-	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, backstab, ctx);
+	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, backstab, kind, ctx);
 	const bool isHit = (attackRoll >= rollNeeded);
 
 	if (isHit)
@@ -159,14 +160,15 @@ int Attacker::calculate_to_hit_roll(
 	const Creature& target,
 	int attackPenalty,
 	const BackstabInfo& backstab,
+	AttackKind kind,
 	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
 	int rollNeeded = attacker.get_thaco() - target.get_armor_class();
 	int hitModifier = attackPenalty;
 
-	// Ranged: apply dexterity modifier
-	if (attacker.has_state(ActorState::IS_RANGED))
+	// A missile attack takes the dexterity missile adjustment; a swing does not.
+	if (kind == AttackKind::RANGED)
 	{
 		const int dexIndex = attacker.get_dexterity() - 1;
 		if (dexIndex >= 0 && static_cast<size_t>(dexIndex) < ctx.dataManager->get_dexterity_attributes().size())

@@ -5,6 +5,7 @@
 
 #include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
+#include "../Combat/AttackKind.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Objects/Web.h"
@@ -50,7 +51,7 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(*ctx.player(), ctx);
+		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 
 		// Then check for poison - independent of the regular attack success
 		if (can_poison_attack(ctx))

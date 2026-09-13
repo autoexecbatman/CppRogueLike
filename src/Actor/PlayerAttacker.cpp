@@ -26,7 +26,7 @@ DamageInfo PlayerAttacker::compute_weapon_damage(EquipmentSlot slot) const
 	return WeaponDamageRegistry::get_unarmed_damage_info();
 }
 
-void PlayerAttacker::attack(Creature& target, GameContext& ctx)
+void PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 {
 	// Every to-hit adjustment the equipped weapon confers, resolved at the point of
 	// attack so there is one source of truth. AD&D 2e PHB p.88: a cursed weapon is
@@ -61,7 +61,7 @@ void PlayerAttacker::attack(Creature& target, GameContext& ctx)
 		perform_single_attack(
 			owner, target, mainDamage,
 			dualWieldInfo.mainHandPenalty + weapon_hit_modifier(EquipmentSlot::RIGHT_HAND),
-			mainName, ctx);
+			mainName, kind, ctx);
 
 		if (!target.is_dead())
 		{
@@ -69,18 +69,20 @@ void PlayerAttacker::attack(Creature& target, GameContext& ctx)
 			perform_single_attack(
 				owner, target, offDamage,
 				dualWieldInfo.offHandPenalty + weapon_hit_modifier(EquipmentSlot::LEFT_HAND),
-				"off hand", ctx);
+				"off hand", kind, ctx);
 		}
 		return;
 	}
 
-	const EquipmentSlot weaponSlot = owner.has_state(ActorState::IS_RANGED)
+	// The attack says which weapon it is made with. Carrying a bow does not change
+	// what is in the attacker's hand when they swing.
+	const EquipmentSlot weaponSlot = kind == AttackKind::RANGED
 		? EquipmentSlot::MISSILE_WEAPON
 		: EquipmentSlot::RIGHT_HAND;
 	Item* weapon = owner.get_equipped_item(weaponSlot);
 	const DamageInfo attackDamage = compute_weapon_damage(weaponSlot);
 	const std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
-	perform_single_attack(owner, target, attackDamage, weapon_hit_modifier(weaponSlot), weaponName, ctx);
+	perform_single_attack(owner, target, attackDamage, weapon_hit_modifier(weaponSlot), weaponName, kind, ctx);
 }
 
 // A player's damage comes from the weapon in hand, which the item itself

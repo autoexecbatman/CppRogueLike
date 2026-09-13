@@ -5,6 +5,7 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Creature.h"
+#include "../Combat/AttackKind.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
@@ -67,7 +68,7 @@ namespace
 			if (owner.get_tile_distance(ctx.player()->position) <= 1)
 			{
 				owner.remove_state(ActorState::IS_FLEEING);
-				owner.attacker->attack(*ctx.player(), ctx);
+				owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 			}
 			// else: hold position, keep IS_FLEEING — player has not cornered us yet
 		}
@@ -149,7 +150,7 @@ void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameCon
 	int distanceToTarget = owner.get_tile_distance(targetPosition);
 	if (distanceToTarget <= 1)
 	{
-		owner.attacker->attack(*ctx.player(), ctx);
+		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 		return;
 	}
 

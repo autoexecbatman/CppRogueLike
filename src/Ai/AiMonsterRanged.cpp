@@ -6,6 +6,7 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Attacker.h"
 #include "../Actor/Creature.h"
+#include "../Combat/AttackKind.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
@@ -89,7 +90,7 @@ bool AiMonsterRanged::tryRangedAttack(Creature& owner, Vector2D targetPos, GameC
 	animate_arrow(owner.position, targetPos, ctx);
 
 	// Perform the attack
-	owner.attacker->attack(*ctx.player(), ctx);
+	owner.attacker->attack(*ctx.player(), AttackKind::RANGED, ctx);
 	return true;
 }
 

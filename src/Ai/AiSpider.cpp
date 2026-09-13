@@ -11,6 +11,7 @@
 #include "../Actor/Actor.h"
 #include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
+#include "../Combat/AttackKind.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
@@ -151,7 +152,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		ctx.messageSystem->log("Spider attempting attack with poison");
 
 		// First do the regular attack
-		owner.attacker->attack(*ctx.player(), ctx);
+		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
 
 		// Then try poison - now independent of the regular attack
 		if (can_poison_attack(ctx))
@@ -242,7 +243,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 		if (target)
 		{
 			// Normal attack
-			owner.attacker->attack(*target, ctx);
+			owner.attacker->attack(*target, AttackKind::MELEE, ctx);
 
 			// Try poison attack
 			if (can_poison_attack(ctx))

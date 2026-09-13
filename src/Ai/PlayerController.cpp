@@ -17,6 +17,7 @@
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Combat/AttackKind.h"
 #include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
 #include "../Factories/ItemCreator.h"
@@ -565,7 +566,7 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
 		}
 
-		playerOwner.attacker->attack(target, ctx);
+		playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
 	}
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);

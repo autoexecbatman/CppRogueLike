@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "../Combat/AttackKind.h"
 #include "../Combat/DamageInfo.h"
 #include "../Persistent/Persistent.h"
 #include "../Random/RandomDice.h"
@@ -34,6 +35,7 @@ protected:
 		const DamageInfo& attackDamage,
 		int attackPenalty,
 		const std::string& handName,
+		AttackKind kind,
 		GameContext& ctx);
 
 	BackstabInfo calculate_backstab_bonus(const Creature& owner) const noexcept;
@@ -43,6 +45,7 @@ protected:
 		const Creature& target,
 		int attackPenalty,
 		const BackstabInfo& backstab,
+		AttackKind kind,
 		GameContext& ctx) const noexcept;
 
 	int calculate_damage_with_backstab(
@@ -76,7 +79,9 @@ protected:
 
 public:
 	// Subclasses implement attack() with their owner reference and damage source.
-	virtual void attack(Creature& target, GameContext& ctx) = 0;
+	// kind says which way the attack is being made; it decides which weapon is
+	// used and whether the missile to-hit adjustment applies.
+	virtual void attack(Creature& target, AttackKind kind, GameContext& ctx) = 0;
 
 	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }

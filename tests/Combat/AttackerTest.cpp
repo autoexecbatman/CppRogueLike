@@ -6,6 +6,7 @@
 #include "src/Actor/MonsterAttacker.h"
 #include "src/Actor/PlayerAttacker.h"
 #include "src/ActorTypes/Player.h"
+#include "src/Combat/AttackKind.h"
 #include "src/Combat/DamageInfo.h"
 #include "src/Combat/ExperienceReward.h"
 #include "src/Core/Paths.h"
@@ -107,7 +108,7 @@ TEST_F(AttackerTest, THAC0_RollNeeded_Calculation)
 	game.dice.set_next_roll(3);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// Should hit with roll of exactly 14
 	EXPECT_LT(monster->get_hp(), hpBefore);
@@ -121,7 +122,7 @@ TEST_F(AttackerTest, THAC0_RollBelowNeeded_Misses)
 	game.dice.set_next_roll(3);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// Should miss with roll of 13
 	EXPECT_EQ(monster->get_hp(), hpBefore);
@@ -136,7 +137,7 @@ TEST_F(AttackerTest, THAC0_LowAC_EasierToHit)
 	game.dice.set_next_roll(5);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_LT(monster->get_hp(), hpBefore);
 }
@@ -150,7 +151,7 @@ TEST_F(AttackerTest, THAC0_HighAC_EasierToHit)
 	game.dice.set_next_roll(4);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_LT(monster->get_hp(), hpBefore);
 }
@@ -168,7 +169,7 @@ TEST_F(AttackerTest, DamageReduction_ReducesDamage)
 	game.dice.set_next_roll(5);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// 5 damage - 3 DR = 2 actual damage
 	EXPECT_EQ(monster->get_hp(), hpBefore - 2);
@@ -183,7 +184,7 @@ TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
 	game.dice.set_next_roll(5);
 
 	int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// 5 damage - 10 DR = 0 actual damage
 	EXPECT_EQ(monster->get_hp(), hpBefore);
@@ -202,7 +203,7 @@ TEST_F(AttackerTest, MonsterAttack_UsesStoredWeaponName)
 	game.dice.set_next_roll(4);
 
 	// Attack should complete without errors using stored weapon name
-	monster->attacker->attack(*player, ctx);
+	monster->attacker->attack(*player, AttackKind::MELEE, ctx);
 
 	EXPECT_TRUE(true);
 }
@@ -216,7 +217,7 @@ TEST_F(AttackerTest, MonsterAttack_DealsCorrectDamage)
 	game.dice.set_next_roll(6);
 
 	int hpBefore = player->get_hp();
-	monster->attacker->attack(*player, ctx);
+	monster->attacker->attack(*player, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(player->get_hp(), hpBefore - 6);
 }
@@ -235,7 +236,7 @@ TEST_F(AttackerTest, Attack_CanKillTarget)
 	game.dice.set_next_roll(5);
 
 	ASSERT_FALSE(monster->is_dead());
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_TRUE(monster->is_dead());
 }
@@ -250,7 +251,7 @@ TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
 	game.dice.set_next_roll(5);
 
 	int xpBefore = player->get_xp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// Monster was worth 50 XP
 	EXPECT_GT(player->get_xp(), xpBefore);
@@ -277,7 +278,7 @@ TEST_F(AttackerTest, Backstab_InvisibleRogue_GetsDamageMultiplier)
 	game.dice.set_next_roll(3);
 
 	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_EQ(monster->get_hp(), hpBefore - 6);
 }
@@ -298,7 +299,7 @@ TEST_F(AttackerTest, Backstab_InvisibleNonRogue_GetsHitBonusOnly)
 	game.dice.set_next_roll(3);
 
 	const int hpBefore = monster->get_hp();
-	player->attacker->attack(*monster, ctx);
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// Asserts both that the +4 hit bonus landed AND that no multiplier was applied
 	EXPECT_EQ(monster->get_hp(), hpBefore - 3);
@@ -326,7 +327,7 @@ TEST_F(AttackerTest, PlayerAttacker_FunctionalAfterSaveLoad)
 	game.dice.set_next_roll(4);
 
 	const int hpBefore = monster->get_hp();
-	loadedPlayer->attacker->attack(*monster, ctx);
+	loadedPlayer->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	// PlayerAttacker is wired correctly post-load and deals damage
 	EXPECT_LT(monster->get_hp(), hpBefore);
