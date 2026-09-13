@@ -1,11 +1,13 @@
 // file: Systems/DisplayManager.cpp
 
+#include <format>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "../Actor/Attacker.h"
 #include "../ActorTypes/Player.h"
+#include "../Controls/Controls.h"
 #include "../Core/GameContext.h"
 #include "../Systems/LevelManager.h"
 #include "../Systems/LevelUpSystem.h"
@@ -17,22 +19,22 @@
 
 void DisplayManager::display_help(GameContext& ctx) const
 {
-	ctx.menus->push_back(std::make_unique<NotificationMenu>(
-		"CONTROLS",
-		std::vector<std::string>{
-			"Movement  : numpad / arrow keys",
-			"Wait      : numpad 5 / period (.)",
-			"Pick up   : comma (,)",
-			"Inventory : i",
-			"Drop      : d",
-			"Character : @",
-			"Spells    : s",
-			"Target    : t  (ranged attack)",
-			"Rest      : r",
-			"Help      : ?",
-			"Quit      : q",
-		},
-		ctx));
+	std::vector<std::string> lines;
+	lines.reserve(NAMED_COMMANDS.size() + CHARACTER_COMMANDS.size());
+
+	// Keys that are not characters have to be named; everything else reads its key
+	// off its own binding, so this screen cannot fall out of step with the game.
+	for (const auto& named : NAMED_COMMANDS)
+	{
+		lines.push_back(std::format("{:<15} {}", named.description, named.keys));
+	}
+
+	for (const auto& command : CHARACTER_COMMANDS)
+	{
+		lines.push_back(std::format("{:<15} {}", command.description, command_key(command.control)));
+	}
+
+	ctx.menus->push_back(std::make_unique<NotificationMenu>("CONTROLS", std::move(lines), ctx));
 }
 
 void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& ctx) const
