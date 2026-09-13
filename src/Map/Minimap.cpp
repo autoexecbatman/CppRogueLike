@@ -1,4 +1,6 @@
 // file: Map/Minimap.cpp
+#include <algorithm>
+
 #include <raylib.h>
 
 #include "../Actor/Stairs.h"
@@ -32,13 +34,25 @@ void Minimap::render(const GameContext& ctx) const
     int mapW = map.get_width();
     int mapH = map.get_height();
     int screenW = renderer.get_screen_width();
+    int screenH = renderer.get_screen_height();
 
-    int panelW = mapW * TILE_PX;
-    int panelH = mapH * TILE_PX;
+    // The largest whole number of pixels a map tile can take and still leave the
+    // overlay inside its share of the window. Whole pixels, so no cell is a
+    // different size from its neighbour.
+    const int tilePx = std::max(1, std::min(
+        screenW * MAX_WIDTH_PERCENT / 100 / mapW,
+        screenH * MAX_HEIGHT_PERCENT / 100 / mapH));
+
+    int panelW = mapW * tilePx;
+    int panelH = mapH * tilePx;
     int originX = screenW - panelW - PADDING;
     int originY = PADDING;
 
-    DrawRectangle(originX - 2, originY - 2, panelW + 4, panelH + 4, Color{ 0, 0, 0, 200 });
+    // Opaque, with an edge. A translucent black backdrop is invisible against the
+    // unexplored parts of the map, which left the overlay reading as loose specks
+    // with no bounds.
+    DrawRectangle(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 20, 12, 28, 255 });
+    DrawRectangleLines(originX - BORDER, originY - BORDER, panelW + 2 * BORDER, panelH + 2 * BORDER, Color{ 120, 120, 150, 255 });
 
     for (int y = 0; y < mapH; ++y)
     {
@@ -62,7 +76,7 @@ void Minimap::render(const GameContext& ctx) const
                 static_cast<unsigned char>(authored.alpha)
             };
 
-            DrawRectangle(originX + x * TILE_PX, originY + y * TILE_PX, TILE_PX, TILE_PX, c);
+            DrawRectangle(originX + x * tilePx, originY + y * tilePx, tilePx, tilePx, c);
         }
     }
 
@@ -72,19 +86,19 @@ void Minimap::render(const GameContext& ctx) const
         if (map.is_explored(sp))
         {
             DrawRectangle(
-                originX + sp.x * TILE_PX - 1,
-                originY + sp.y * TILE_PX - 1,
-                TILE_PX + 2,
-                TILE_PX + 2,
+                originX + sp.x * tilePx - 1,
+                originY + sp.y * tilePx - 1,
+                tilePx + 2,
+                tilePx + 2,
                 Color{ 255, 210, 50, 255 });
         }
     }
 
     Vector2D pp = ctx.player()->position;
     DrawRectangle(
-        originX + pp.x * TILE_PX - 1,
-        originY + pp.y * TILE_PX - 1,
-        TILE_PX + 2,
-        TILE_PX + 2,
+        originX + pp.x * tilePx - 1,
+        originY + pp.y * tilePx - 1,
+        tilePx + 2,
+        tilePx + 2,
         Color{ 255, 255, 0, 255 });
 }
