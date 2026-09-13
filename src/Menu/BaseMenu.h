@@ -22,6 +22,10 @@ protected:
 	int lastChar{ 0 };
 	bool isHighlighted{ false };
 
+	// Paints one row at an already-resolved pixel column, with the highlight bar
+	// when one is on. Both menu_print forms end here so a row is drawn one way.
+	void menu_draw_row(int pixelX, int row, const std::string& text);
+
 public:
 	bool run{ true };
 	bool back{ false };
@@ -35,7 +39,15 @@ public:
 
 	void menu_new(size_t width, size_t height, size_t startX, size_t startY, GameContext& ctx);
 	void menu_clear();
-	void menu_print(int x, int y, const std::string& text);
+	// Draws text at a tile column and a text row inside the menu. Row 0 sits just
+	// below the top border. Rows run on a pixel pitch rather than the tile grid,
+	// so a menu holds the same lines however far the map is zoomed.
+	void menu_print(int x, int row, const std::string& text);
+	// The same, horizontally centred inside the menu's borders by measured width.
+	void menu_print_centered(int row, const std::string& text);
+	// The shop screens' column header, on row 0 so it shares the pitch of the rows
+	// beneath it rather than sitting on the tile grid.
+	void menu_print_header();
 	void menu_refresh();
 	void menu_highlight_on() { isHighlighted = true; }
 	void menu_highlight_off() { isHighlighted = false; }

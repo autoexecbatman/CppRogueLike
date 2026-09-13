@@ -22,20 +22,22 @@ ListMenu::ListMenu(
     , onEscape{ std::move(onEscape) }
     , onFrame{ std::move(onFrame) }
 {
-    size_t maxLabelLen{ 0 };
+    assert(ctx.renderer && "ListMenu: renderer required before construction");
+    const int tileSize = ctx.renderer->get_tile_size();
+    const int fontSize = ctx.renderer->get_font_size();
+
+    // Sized from what the text measures, never from how many characters it has.
+    // A character count handed to menu_new is read as a count of 64-pixel tiles.
+    int widestText = ctx.renderer->measure_text(this->title);
     for (const auto& entry : this->entries)
     {
-        if (entry.label.size() > maxLabelLen)
-        {
-            maxLabelLen = entry.label.size();
-        }
+        widestText = std::max(widestText, ctx.renderer->measure_text(entry.label));
     }
-    // Width: enough for the widest label (2 border + 2 padding) or the title (2 border).
-    // Height: one row per entry plus 2 border rows.
-    menuWidth = std::max({ this->title.size() + 2, maxLabelLen + 4, size_t{ 10 } });
-    menuHeight = this->entries.size() + 2;
 
-    assert(ctx.renderer && "ListMenu: renderer required before construction");
+    menuWidth = static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
+    menuHeight = static_cast<size_t>(
+        panel_tiles_for_text_rows(static_cast<int>(this->entries.size()), tileSize, fontSize));
+
     int vcols = ctx.renderer->get_viewport_cols();
     int vrows = ctx.renderer->get_viewport_rows();
     int startX = (vcols - static_cast<int>(menuWidth)) / 2;
@@ -53,7 +55,7 @@ void ListMenu::draw_entries()
         {
             menu_highlight_on();
         }
-        menu_print(1, static_cast<int>(i) + 1, entries[i].label);
+        menu_print(1, static_cast<int>(i), entries[i].label);
         if (cursorIndex == i)
         {
             menu_highlight_off();

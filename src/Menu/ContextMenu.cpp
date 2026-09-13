@@ -22,16 +22,21 @@ ContextMenu::ContextMenu(
 	: menuOptions(std::move(options))
 	, onSelect(std::move(callback))
 {
-	size_t longest = 0;
+	assert(ctx.renderer && "ContextMenu: renderer required before construction");
+	const int tileSize = ctx.renderer->get_tile_size();
+
+	// Measured, not counted. As a character count this was at least 14, which
+	// menu_new reads as 14 tiles - 896 pixels for a menu of one-word options.
+	int widestText = 0;
 	for (const auto& opt : menuOptions)
 	{
-		longest = std::max(longest, opt.size());
+		widestText = std::max(widestText, ctx.renderer->measure_text(opt));
 	}
 
-	int height = static_cast<int>(menuOptions.size()) + 3;
-	int width = std::max(static_cast<int>(longest) + 4, 14);
+	int width = panel_tiles_for_text_width(widestText, tileSize);
+	int height = panel_tiles_for_text_rows(
+		static_cast<int>(menuOptions.size()), tileSize, ctx.renderer->get_font_size());
 
-	assert(ctx.renderer && "ContextMenu: renderer required before construction");
 	int viewportCols = ctx.renderer->get_viewport_cols();
 	int viewportRows = ctx.renderer->get_viewport_rows();
 
@@ -57,7 +62,7 @@ void ContextMenu::draw_content()
 		{
 			menu_highlight_on();
 		}
-		menu_print(2, i + 2, menuOptions[static_cast<size_t>(i)]);
+		menu_print(1, i, menuOptions[static_cast<size_t>(i)]);
 		if (i == selectedIndex)
 		{
 			menu_highlight_off();

@@ -1,4 +1,5 @@
 // file: MenuTrade.cpp
+#include <algorithm>
 #include <cassert>
 #include <memory>
 
@@ -15,11 +16,6 @@
 MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 {
     assert(ctx.renderer && "MenuTrade: renderer required before construction");
-    int vcols = ctx.renderer->get_viewport_cols();
-    int vrows = ctx.renderer->get_viewport_rows();
-    startY = (vrows - height) / 2;
-    startX = (vcols - width) / 2;
-    menu_new(width, height, startX, startY, ctx);
 
     auto buyCommand = [&shopkeeper](GameContext& ctx)
     {
@@ -41,6 +37,20 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
     entries.push_back({ "Sell", 0, sellCommand });
 
     entries.push_back({ "Exit", 0, std::nullopt });
+
+    const int tileSize = ctx.renderer->get_tile_size();
+    int widestText = ctx.renderer->measure_text("TRADE");
+    for (const auto& entry : entries)
+    {
+        widestText = std::max(widestText, ctx.renderer->measure_text(entry.label));
+    }
+
+    width = panel_tiles_for_text_width(widestText, tileSize);
+    height = panel_tiles_for_text_rows(
+        static_cast<int>(entries.size()), tileSize, ctx.renderer->get_font_size());
+    startY = (ctx.renderer->get_viewport_rows() - height) / 2;
+    startX = (ctx.renderer->get_viewport_cols() - width) / 2;
+    menu_new(width, height, startX, startY, ctx);
 }
 
 void MenuTrade::menu_print_state(size_t state)
@@ -48,12 +58,12 @@ void MenuTrade::menu_print_state(size_t state)
     if (currentState == state)
     {
         menu_highlight_on();
-        menu_print(1, static_cast<int>(state) + 1, entries[state].label);
+        menu_print(1, static_cast<int>(state), entries[state].label);
         menu_highlight_off();
     }
     else
     {
-        menu_print(1, static_cast<int>(state) + 1, entries[state].label);
+        menu_print(1, static_cast<int>(state), entries[state].label);
     }
 }
 

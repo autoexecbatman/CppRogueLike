@@ -8,6 +8,9 @@
 #include "../Renderer/Renderer.h"
 #include "NotificationMenu.h"
 
+// The row every notification ends with, and part of what sets the menu's width.
+static constexpr std::string_view PROMPT{ "[ press any key ]" };
+
 NotificationMenu::NotificationMenu(
     std::string title,
     std::vector<std::string> lines,
@@ -15,22 +18,25 @@ NotificationMenu::NotificationMenu(
     : title{ std::move(title) }
     , lines{ std::move(lines) }
 {
-    size_t maxLineLen{ 0 };
+    assert(ctx.renderer && "NotificationMenu: renderer required before construction");
+    const int tileSize = ctx.renderer->get_tile_size();
+    const int fontSize = ctx.renderer->get_font_size();
+
+    // Sized from measured text. A character count used as a tile count made the
+    // help screen 37 tiles wide - 2368 pixels on a 1280-pixel screen - which threw
+    // its centred title off to the right and filled the window top to bottom.
+    int widestText = ctx.renderer->measure_text(this->title);
     for (const auto& line : this->lines)
     {
-        if (line.size() > maxLineLen)
-        {
-            maxLineLen = line.size();
-        }
+        widestText = std::max(widestText, ctx.renderer->measure_text(line));
     }
+    widestText = std::max(widestText, ctx.renderer->measure_text(PROMPT));
 
-    // Width: fits widest line (2 border + 2 padding) or title (2 border).
-    // Height: 1 top border + N lines + 1 prompt row + 1 bottom border.
-    static constexpr size_t minWidth{ 10 };
-    menuWidth = std::max({ this->title.size() + 2, maxLineLen + 4, minWidth });
-    menuHeight = this->lines.size() + 3;
+    // One row per line, then the prompt row.
+    const int rowCount = static_cast<int>(this->lines.size()) + 1;
+    menuWidth = static_cast<size_t>(panel_tiles_for_text_width(widestText, tileSize));
+    menuHeight = static_cast<size_t>(panel_tiles_for_text_rows(rowCount, tileSize, fontSize));
 
-    assert(ctx.renderer && "NotificationMenu: renderer required before construction");
     int vcols = ctx.renderer->get_viewport_cols();
     int vrows = ctx.renderer->get_viewport_rows();
     int startX = (vcols - static_cast<int>(menuWidth)) / 2;
@@ -46,16 +52,15 @@ void NotificationMenu::draw()
     menu_draw_box();
     menu_draw_title(title, YELLOW_BLACK_PAIR);
 
-    int row{ 1 };
+    int row{ 0 };
     for (const auto& line : lines)
     {
-        menu_print(2, row, line);
+        menu_print(1, row, line);
         ++row;
     }
 
     // Centered prompt — gives the player a visual cue to press any key.
-    int promptCol = (static_cast<int>(menuWidth) - 16) / 2;
-    menu_print(promptCol < 1 ? 1 : promptCol, row, "[ press any key ]");
+    menu_print_centered(row, std::string(PROMPT));
 
     menu_refresh();
 }

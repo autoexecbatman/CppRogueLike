@@ -18,8 +18,10 @@ void open_trade(Creature& shopkeeper, Creature& player, GameContext& ctx);
 class MenuTrade : public BaseMenu
 {
 private:
-    int height{ 5 };
-    int width{ 10 };
+    // Sized in the constructor from what the entries measure, so the box holds its
+    // own labels rather than a number somebody picked.
+    int height{ 0 };
+    int width{ 0 };
     int startY{ 0 };
     int startX{ 0 };
 

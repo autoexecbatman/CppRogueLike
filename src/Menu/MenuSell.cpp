@@ -69,7 +69,7 @@ void MenuSell::menu_print_state(size_t state)
 	{
 		menu_highlight_on();
 	}
-	menu_print(1, static_cast<int>(state) + 2, menu_get_string(state));
+	menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
 	if (currentState == state)
 	{
 		menu_highlight_off();
@@ -188,14 +188,7 @@ void MenuSell::draw()
 	menu_draw_box();
 	menu_draw_title("SELL ITEMS", YELLOW_BLACK_PAIR);
 
-	if (renderer)
-	{
-		int tileSize = renderer->get_tile_size();
-		int font_off = (tileSize - renderer->get_font_size()) / 2;
-		int hdr_x = (static_cast<int>(menuStartX) + 1) * tileSize;
-		int hdr_y = (static_cast<int>(menuStartY) + 1) * tileSize + font_off;
-		renderer->draw_text(Vector2D{ hdr_x, hdr_y }, "Item                       Price", CYAN_BLACK_PAIR);
-	}
+	menu_print_header();
 
 	draw_content();
 	menu_refresh();

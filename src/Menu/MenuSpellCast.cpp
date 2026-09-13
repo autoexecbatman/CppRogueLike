@@ -24,8 +24,20 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
     }
 
     assert(ctx.renderer && "MenuSpellCast: renderer required before construction");
-    const int width = 45;
-    const int height = static_cast<int>(availableSpells.size()) + 4;
+    const int tileSize = ctx.renderer->get_tile_size();
+
+    // 45 was a character count handed to menu_new, which reads tiles: 2880 pixels
+    // on a 1280-pixel screen. Measured off the lines this menu actually draws.
+    int widestText = ctx.renderer->measure_text("Cast Spell (ESC to cancel):");
+    for (size_t i = 0; i < availableSpells.size(); ++i)
+    {
+        widestText = std::max(widestText, ctx.renderer->measure_text(spell_line(i)));
+    }
+
+    // One header row, then a row per spell.
+    const int width = panel_tiles_for_text_width(widestText, tileSize);
+    const int height = panel_tiles_for_text_rows(
+        static_cast<int>(availableSpells.size()) + 1, tileSize, ctx.renderer->get_font_size());
     const int vrows = ctx.renderer->get_viewport_rows();
     const int vcols = ctx.renderer->get_viewport_cols();
     const size_t startX = static_cast<size_t>((vcols - width) / 2);
@@ -54,31 +66,35 @@ void MenuSpellCast::populate_spells()
     }
 }
 
+std::string MenuSpellCast::spell_line(size_t index) const
+{
+    const auto& def = SpellSystem::get_by_key(availableSpells[index]);
+    const char letter = static_cast<char>('a' + static_cast<int>(index));
+
+    // An item-granted spell names what granted it; a memorised one names its level.
+    if (!spellSources[index].empty())
+    {
+        return std::format("{}) {} [{}]", letter, def.name, spellSources[index]);
+    }
+    return std::format("{}) {} (L{})", letter, def.name, def.level);
+}
+
 void MenuSpellCast::draw()
 {
     menu_clear();
     menu_draw_box();
-    menu_print(2, 1, "Cast Spell (ESC to cancel):");
+    menu_print(1, 0, "Cast Spell (ESC to cancel):");
 
     for (size_t i = 0; i < availableSpells.size(); ++i)
     {
-        const auto& def = SpellSystem::get_by_key(availableSpells[i]);
-        const char letter = static_cast<char>('a' + static_cast<int>(i));
-        const int row = static_cast<int>(i) + 2;
+        const int row = static_cast<int>(i) + 1;
 
         if (static_cast<int>(i) == selectedIndex)
         {
             menu_highlight_on();
         }
 
-        if (!spellSources[i].empty())
-        {
-            menu_print(2, row, std::format("{}) {} [{}]", letter, def.name, spellSources[i]));
-        }
-        else
-        {
-            menu_print(2, row, std::format("{}) {} (L{})", letter, def.name, def.level));
-        }
+        menu_print(1, row, spell_line(i));
 
         if (static_cast<int>(i) == selectedIndex)
         {
