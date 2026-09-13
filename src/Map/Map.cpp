@@ -567,10 +567,13 @@ void Map::render(const GameContext& ctx) const
 			}
 
 			// In FOV: full colour. Explored but not visible: dimmed memory tint.
+			// The memory tint multiplies with the memory light quad, so a warm value
+			// here is a second warm multiply on top of the first. Neutral, so what
+			// separates remembered ground from lit ground is how dark it is.
 			bool inFov = is_in_fov(pos);
 			Color tint = inFov
 				? Color{ 255, 255, 255, 255 }
-				: Color{ 95, 90, 82, 255 };
+				: Color{ 92, 92, 96, 255 };
 
 			TileType type = get_tile_type(pos);
 			TileRef tileRef{};
