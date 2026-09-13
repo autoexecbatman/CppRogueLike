@@ -51,34 +51,26 @@ constexpr int GUI_TEXT_CLEARANCE = 12;
 constexpr Color GUI_PANEL_BACKGROUND{ 20, 12, 28, 255 };
 
 // ---------------------------------------------------------------------------
-// HUD column layout, as fractions of viewport width:
+// HUD column layout, as fractions of the screen width:
 //   Bar panel  : frame's left rule .. divider 1
 //   Stat panel : divider 1 .. divider 2
 //   Log panel  : divider 2 .. frame's right rule
 // ---------------------------------------------------------------------------
-// Both dividers are pixel positions proportional to the panel, not tile columns.
-// A column-aligned divider can only move in 64-pixel steps, which is coarser than
-// the difference between a stats panel that fits its longest line and one that
-// does not. Each of the first two panels gets what its widest content needs and
-// the log gets the remainder, because it is the panel that runs out of room first.
+// Both dividers are pixel positions proportional to the screen, not tile columns.
+// A column-aligned divider can only move in whole tiles, which is coarser than the
+// difference between a stats panel that fits its longest line and one that does
+// not. Each of the first two panels gets what its widest content needs and the log
+// gets the remainder, because it is the panel that runs out of room first.
 //
-// Measured off a render at 1280 pixels wide, 16-pixel font:
-// Measured off a render with the font at its current load size, which advances
-// 14.8 pixels a character. Re-measure these if that size changes: the advance is
-// the load size, so every width here moves with it.
+// Sized against the font's advance, which is its load size in main.cpp, currently
+// about 14.8 pixels a character. Re-measure these if that changes, and measure the
+// advance rather than the ink: the ink of the last glyph stops short of its own
+// advance, and fit_text_to_width counts the advance.
 //   bars  - icon at 12, bar from 52, longest label is a hunger state at 8
 //           characters, about 118px, so 182 needed
-//   stats - every line is 12 characters or fewer, about 178px, so 210 needed.
-//           It was 21 characters when the log was first called too narrow.
-// Both panels hold what the character sheet does not: the sheet carries the name,
-// race, gold and all six ability scores in more detail than this ever did.
-// Measure the advance width these are laid out on rather than the ink: 48 percent
-// left 352px of text, which covers 350px of ink and still dropped "Lv.1)", because
-// fit_text_to_width counts the advance of every glyph and the ink of the last one
-// stops short of it.
-//
-// The stats panel's name line is what stops the log taking more. Shortening or
-// wrapping that line is the only way to move this further.
+//   stats - every line is 12 characters or fewer, about 178px, so 210 needed
+// Both panels hold only what the character sheet does not: the sheet carries the
+// name, race, gold and all six ability scores in more detail than this ever did.
 static int hud_divider1_x(int panelWidth)
 {
 	return panelWidth * 15 / 100;

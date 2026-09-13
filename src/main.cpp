@@ -79,9 +79,10 @@ int main()
 	std::clog << "STARTUP: Loading Dawnlike tileset\n" << std::flush;
 	game->renderer.load_dawnlike(Paths::DAWNLIKE_DIR);
 
-	// 14 rather than the font's exact 2x of 12: a 2.33x bake antialiases the glyph
-	// edges slightly, which is the cost of a readable size between 12 and the next
-	// integer multiple at 18. Every layout width in the HUD is measured against it.
+	// This size is the text's width: the advance is whatever is asked for here, so
+	// every layout width in the HUD is measured against it. 14 is a 1.75x bake of an
+	// 8-pixel design, which antialiases the glyph edges slightly; the exact
+	// multiples are 8, 16 and 24, and none of those is both readable and narrow.
 	game->renderer.load_font(Paths::DAWNLIKE_FONT, 14);
 
 	auto ctx = game->context();
