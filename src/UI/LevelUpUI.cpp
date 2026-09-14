@@ -6,7 +6,6 @@
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Core/GameContext.h"
-#include "../dnd_tables/CombatProgressionTables.h"
 #include "../Renderer/InputSystem.h"
 #include "../Renderer/Renderer.h"
 #include "../Systems/LevelUpSystem.h"
@@ -19,44 +18,19 @@
 namespace
 {
 
-int get_expected_thac0(const Player& player, int level)
-{
-    CombatProgressionTables combatTables;
-
-    switch (player.playerClassState)
-    {
-    case Player::PlayerClassState::FIGHTER:
-        return combatTables.get_fighter(level);
-    case Player::PlayerClassState::ROGUE:
-        return combatTables.get_rogue(level);
-    case Player::PlayerClassState::CLERIC:
-        return combatTables.get_cleric(level);
-    case Player::PlayerClassState::WIZARD:
-        return combatTables.get_wizard(level);
-    default:
-        return 20;
-    }
-}
-
-bool has_thac0_improvement(const Player& player, int level)
-{
-    int expectedTHAC0 = get_expected_thac0(player, level);
-    return player.get_thaco() <= expectedTHAC0;
-}
-
 void draw_title(const Player& player, int level, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
 
-    ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "*** LEVEL UP! ***", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "*** LEVEL UP! ***", YELLOW_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ tileSize, row * tileSize }, std::format("{} has attained level {}!", player.get_name(), level), WHITE_BLACK_PAIR);
+        Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("{} has attained level {}!", player.get_name(), level), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ tileSize, row * tileSize }, std::format("Class: {}", player.playerClass), WHITE_BLACK_PAIR);
+        Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("Class: {}", player.playerClass), WHITE_BLACK_PAIR);
     row += 2;
 }
 
@@ -64,11 +38,11 @@ void draw_current_stats(const Player& player, GameContext& ctx, int& row)
 {
     int tileSize = ctx.renderer->get_tile_size();
 
-    ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "--- CURRENT STATS ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "--- CURRENT STATS ---", YELLOW_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ tileSize, row * tileSize }, std::format("HP: {} / {}   THAC0: {}   AC: {}",
+        Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("HP: {} / {}   THAC0: {}   AC: {}",
             player.get_hp(), player.get_max_hp(),
             player.get_thaco(), player.get_armor_class()),
         GREEN_BLACK_PAIR);
@@ -79,13 +53,13 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
 {
     int tileSize = ctx.renderer->get_tile_size();
 
-    ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "--- LEVEL BENEFITS ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "--- LEVEL BENEFITS ---", YELLOW_BLACK_PAIR);
     row++;
 
-    if (has_thac0_improvement(player, level))
+    if (LevelUpSystem::thac0_improves_at(player.get_creature_class(), level))
     {
         ctx.renderer->draw_text(
-            Vector2D{ tileSize, row * tileSize }, std::format("THAC0 improved to {}", player.get_thaco()), GREEN_BLACK_PAIR);
+            Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("THAC0 improved to {}", player.get_thaco()), GREEN_BLACK_PAIR);
         row++;
     }
 
@@ -93,51 +67,51 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
     {
     case Player::PlayerClassState::FIGHTER:
     {
-        ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Hit Dice: d10", WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d10", WHITE_BLACK_PAIR);
         row++;
         if (level == 7)
         {
             ctx.renderer->draw_text(
-                Vector2D{ tileSize, row * tileSize }, "Special: Extra Attack (3 attacks per 2 rounds)", YELLOW_BLACK_PAIR);
+                Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Special: Extra Attack (3 attacks per 2 rounds)", YELLOW_BLACK_PAIR);
             row++;
         }
         else if (level == 13)
         {
             ctx.renderer->draw_text(
-                Vector2D{ tileSize, row * tileSize }, "Special: Extra Attack (2 attacks per round)", YELLOW_BLACK_PAIR);
+                Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Special: Extra Attack (2 attacks per round)", YELLOW_BLACK_PAIR);
             row++;
         }
         break;
     }
     case Player::PlayerClassState::ROGUE:
     {
-        ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Hit Dice: d6", WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d6", WHITE_BLACK_PAIR);
         row++;
         int newMult = LevelUpSystem::calculate_backstab_multiplier(level);
         int oldMult = LevelUpSystem::calculate_backstab_multiplier(level - 1);
         if (newMult > oldMult)
         {
             ctx.renderer->draw_text(
-                Vector2D{ tileSize, row * tileSize }, std::format("Special: Backstab multiplier increased to x{}", newMult), YELLOW_BLACK_PAIR);
+                Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("Special: Backstab multiplier increased to x{}", newMult), YELLOW_BLACK_PAIR);
             row++;
         }
         break;
     }
     case Player::PlayerClassState::CLERIC:
     {
-        ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Hit Dice: d8", WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d8", WHITE_BLACK_PAIR);
         row++;
         if (level == 3 || level == 5 || level == 7 || level == 9)
         {
             ctx.renderer->draw_text(
-                Vector2D{ tileSize, row * tileSize }, "Special: Turn Undead ability improved", YELLOW_BLACK_PAIR);
+                Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Special: Turn Undead ability improved", YELLOW_BLACK_PAIR);
             row++;
         }
         break;
     }
     case Player::PlayerClassState::WIZARD:
     {
-        ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Hit Dice: d4", WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Hit Dice: d4", WHITE_BLACK_PAIR);
         row++;
         if ((level % 2 == 1) && level > 1)
         {
@@ -145,7 +119,7 @@ void draw_level_benefits(const Player& player, int level, GameContext& ctx, int&
             if (spellLevel <= 9)
             {
                 ctx.renderer->draw_text(
-                    Vector2D{ tileSize, row * tileSize }, std::format("Special: Level {} spells now available", spellLevel), YELLOW_BLACK_PAIR);
+                    Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("Special: Level {} spells now available", spellLevel), YELLOW_BLACK_PAIR);
                 row++;
             }
         }
@@ -164,11 +138,11 @@ void draw_next_level_info(const Player& player, GameContext& ctx, int& row)
 
     int nextLevelXP = player.get_next_level_xp();
 
-    ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "--- NEXT LEVEL ---", YELLOW_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ tileSize, row * tileSize }, std::format("XP needed for next level: {}", nextLevelXP), WHITE_BLACK_PAIR);
+        Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, std::format("XP needed for next level: {}", nextLevelXP), WHITE_BLACK_PAIR);
     row += 2;
 }
 
@@ -202,7 +176,7 @@ void LevelUpUI::menu(GameContext& ctx)
     draw_next_level_info(playerRef, ctx, row);
 
     int tileSize = ctx.renderer->get_tile_size();
-    ctx.renderer->draw_text(Vector2D{ tileSize, row * tileSize }, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ tileSize, panel_text_row_y(0, tileSize, row) }, "Press [SPACE] to continue", CYAN_BLACK_PAIR);
 
     ctx.renderer->end_frame();
 }

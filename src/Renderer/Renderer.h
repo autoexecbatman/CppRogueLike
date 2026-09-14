@@ -44,7 +44,7 @@ inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
 //
 // Example:
 //
-//   panel_text_rows_that_fit(896, 64, 14);  // -> 23
+//   panel_text_rows_that_fit(896, 64, 14);  // -> 24
 [[nodiscard]] inline constexpr int panel_text_rows_that_fit(int panelHeightPixels, int tileSize, int fontSize)
 {
 	const int usablePixels = panelHeightPixels - 2 * tileSize - fontSize;

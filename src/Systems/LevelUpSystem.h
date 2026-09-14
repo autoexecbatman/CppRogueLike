@@ -37,4 +37,27 @@ namespace LevelUpSystem
     //   hit_point_progression(CreatureClass::WIZARD).lastRolledLevel; // -> 10
     //   hit_point_progression(CreatureClass::WIZARD).flatGain;        // -> 1
     HitPointProgression hit_point_progression(CreatureClass creatureClass);
+
+    // The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook
+    // attack tables: a warrior improves a point a level, a rogue a point every
+    // two, a priest two points every three, a wizard a point every three.
+    //
+    // Monsters attack on the warrior table, and a level off either end of the
+    // table answers 20, so every class and level has an answer.
+    //
+    // Example:
+    //   thac0_for_level(CreatureClass::WIZARD, 3);   // -> 20
+    //   thac0_for_level(CreatureClass::WIZARD, 4);   // -> 19
+    int thac0_for_level(CreatureClass creatureClass, int level);
+
+    // Whether reaching this level moves the class down its attack table.
+    //
+    // Read from the table rather than from the creature, whose THAC0 has already
+    // been advanced by the time any display asks, so comparing against it says
+    // yes at every level of every class.
+    //
+    // Example:
+    //   thac0_improves_at(CreatureClass::FIGHTER, 3);  // -> true
+    //   thac0_improves_at(CreatureClass::WIZARD, 3);   // -> false, 20 at both
+    bool thac0_improves_at(CreatureClass creatureClass, int level);
 }

@@ -27,36 +27,7 @@ void apply_thac0_improvement(Creature& owner, int newLevel, GameContext* ctx)
         return;
     }
 
-    CombatProgressionTables combatTables;
-    int newTHAC0 = 20;
-
-    switch (owner.get_creature_class())
-    {
-    case CreatureClass::FIGHTER:
-    case CreatureClass::MONSTER:
-    {
-        newTHAC0 = combatTables.get_fighter(newLevel);
-        break;
-    }
-
-    case CreatureClass::ROGUE:
-    {
-        newTHAC0 = combatTables.get_rogue(newLevel);
-        break;
-    }
-
-    case CreatureClass::CLERIC:
-    {
-        newTHAC0 = combatTables.get_cleric(newLevel);
-        break;
-    }
-
-    case CreatureClass::WIZARD:
-    {
-        newTHAC0 = combatTables.get_wizard(newLevel);
-        break;
-    }
-    }
+    const int newTHAC0 = LevelUpSystem::thac0_for_level(owner.get_creature_class(), newLevel);
 
     if (newTHAC0 < owner.get_thaco())
     {
@@ -546,4 +517,53 @@ LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(Creature
     }
 
     return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+}
+
+// The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook
+// attack tables, one per class, with monsters on the warrior's.
+//
+// Example:
+//   thac0_for_level(CreatureClass::WIZARD, 3);   // -> 20
+//   thac0_for_level(CreatureClass::WIZARD, 4);   // -> 19
+int LevelUpSystem::thac0_for_level(CreatureClass creatureClass, int level)
+{
+    static constexpr CombatProgressionTables combatTables;
+
+    switch (creatureClass)
+    {
+    case CreatureClass::ROGUE:
+    {
+        return combatTables.get_rogue(level);
+    }
+
+    case CreatureClass::CLERIC:
+    {
+        return combatTables.get_cleric(level);
+    }
+
+    case CreatureClass::WIZARD:
+    {
+        return combatTables.get_wizard(level);
+    }
+
+    case CreatureClass::FIGHTER:
+    case CreatureClass::MONSTER:
+    {
+        return combatTables.get_fighter(level);
+    }
+    }
+
+    return combatTables.get_fighter(level);
+}
+
+// Whether reaching this level moves the class down its attack table.
+//
+// Example:
+//   thac0_improves_at(CreatureClass::FIGHTER, 3);  // -> true
+//   thac0_improves_at(CreatureClass::WIZARD, 3);   // -> false, 20 at both
+bool LevelUpSystem::thac0_improves_at(CreatureClass creatureClass, int level)
+{
+    // Level 1 has no level below it to improve from; the table answers 20 there,
+    // which is what a class starts at, so the comparison already says no.
+    return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level - 1);
 }
