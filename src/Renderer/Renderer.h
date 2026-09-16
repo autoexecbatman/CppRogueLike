@@ -179,6 +179,9 @@ enum class TileSheet
 	SHEET_TRAP0,
 	SHEET_FENCE,
 	SHEET_MAP0,
+	// Generated item art -- appended to preserve existing enum integer values.
+	// One 64px sheet holding every item in items.json, addressed by tiles.json.
+	SHEET_ITEMS,
 	COUNT, // sentinel -- keep last
 };
 

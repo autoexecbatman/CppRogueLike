@@ -293,6 +293,10 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_static(TileSheet::SHEET_MUSIC, "Music", "Items/", "Music", 16);
 	load_animated(TileSheet::SHEET_CHEST0, "Chest0", "Items/", "Chest", 64);
 
+	// Generated item sheet: every item in items.json on one 64px grid, 8 columns
+	// by 15 rows. Static, because items do not animate.
+	load_static(TileSheet::SHEET_ITEMS, "Items", "Items/", "Items", 64);
+
 	// Further character sheets
 	load_animated(TileSheet::SHEET_SLIME0, "Slime0", "Characters/", "Slime", 16);
 	load_animated(TileSheet::SHEET_CAT0, "Cat0", "Characters/", "Cat", 16);
