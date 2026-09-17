@@ -9,6 +9,7 @@
 #include "../Combat/ArmorClass.h"
 #include "../Combat/ConstitutionTracker.h"
 #include "../Combat/DamageInfo.h"
+#include "../Combat/DamageResolver.h"
 #include "../Combat/ExperienceReward.h"
 #include "../Combat/HealthPool.h"
 #include "../Core/GameContext.h"
@@ -240,6 +241,16 @@ public:
 	// runs for any creature.
 	[[nodiscard]] Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 
+	// How strongly the worn equipment resists the given type, in rings: the
+	// greatest over every worn item of its own effect and its enhancement. Like
+	// protections do not stack, so two rings of fire resistance are one ring.
+	// Read from what is worn when asked; nothing is kept in step with the slots.
+	//
+	// Example, wearing a ring of fire resistance:
+	//   worn_resistance_strength(DamageType::FIRE);   // -> 1
+	//   worn_resistance_strength(DamageType::COLD);   // -> 0
+	[[nodiscard]] int worn_resistance_strength(DamageType damageType) const noexcept;
+
 	// Puts an item into one of this creature's slots and takes ownership of
 	// it. The slot must be one the body plan grants: wearing boots on a wolf
 	// is a data error, not a runtime outcome.
@@ -342,8 +353,17 @@ public:
 	void set_temp_hp(int value) noexcept { healthPool->set_temp_hp(value); }
 	void add_temp_hp(int amount) noexcept { healthPool->add_temp_hp(amount); }
 	int heal(int hpToHeal) { return healthPool->heal(hpToHeal); }
+	// The one body both damage paths share, once the type has been vetted.
+	int take_damage_hit_points(int damage, GameContext& ctx, DamageType damageType);
+
+	// A hit as a plain total, for the types that are not resisted per die.
+	// Refuses fire and cold: those arrive as ResistedDamage from
+	// DamageResolver::reduce_dice, so a producer cannot skip the reduction.
 	int take_damage(int damage, GameContext& ctx, DamageType damageType);
 	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType);
+	// A hit whose dice have been reduced by this creature's resistance.
+	int take_damage(const DamageResolver::ResistedDamage& damage, GameContext& ctx);
+	void take_damage_and_check_death(const DamageResolver::ResistedDamage& damage, GameContext& ctx);
 
 	// Constitution tracking accessors
 	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }

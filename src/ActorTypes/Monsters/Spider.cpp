@@ -66,7 +66,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(20);
 		armorClass = std::make_unique<ArmorClass>(7);
 		set_hit_dice(ctx.dice->d2() + 2);
-		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
+		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d4", DamageType::PHYSICAL });
 		set_natural_attack("Venomous fangs");
 
 		ai = std::make_unique<AiSpider>(POISON_CHANCE_SMALL_SPIDER);
@@ -87,7 +87,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(19);
 		armorClass = std::make_unique<ArmorClass>(5);
 		set_hit_dice(ctx.dice->d4() + 3);
-		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
+		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		set_natural_attack("Giant fangs");
 
 		ai = std::make_unique<AiSpider>(POISON_CHANCE_GIANT_SPIDER);
@@ -108,7 +108,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_thaco(17);
 		armorClass = std::make_unique<ArmorClass>(5);
 		set_hit_dice(ctx.dice->d8() + 5);
-		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
+		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d8", DamageType::PHYSICAL });
 		set_natural_attack("Toxic fangs");
 
 		ai = std::make_unique<AiWebSpinner>(POISON_CHANCE_WEB_SPINNER);

@@ -11,6 +11,7 @@
 #include "../Persistent/Persistent.h"
 #include "../Systems/BuffType.h"
 #include "../Systems/TargetMode.h"
+#include "../Combat/DamageInfo.h"
 #include "EquipmentSlot.h"
 
 class Item;
@@ -239,6 +240,16 @@ bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx);
 
 bool use_item(ItemBehavior& behavior, Item& owner, Player& wearer, GameContext& ctx);
 int get_item_ac_bonus(const ItemBehavior& behavior) noexcept;
+
+// How strongly a worn item's own effect resists the given type, in rings: a
+// ring of fire resistance or of warmth at its bonus of 1, the helm of
+// brilliance against fire at its bonus of 2 - the book's double-strength ring.
+// Zero for everything else, so a sword answers 0.
+//
+// Example:
+//   get_item_resistance_strength(MagicalRing{ MagicalEffect::FIRE_RESISTANCE, 1 }, DamageType::FIRE);  // -> 1
+//   get_item_resistance_strength(MagicalRing{ MagicalEffect::FIRE_RESISTANCE, 1 }, DamageType::COLD);  // -> 0
+int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damageType) noexcept;
 
 // Serialization
 void save_behavior(const ItemBehavior& behavior, json& j);

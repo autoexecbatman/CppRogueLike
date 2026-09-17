@@ -1,3 +1,4 @@
+#include <utility>
 #include <cstdlib>
 #include <string>
 
@@ -115,6 +116,39 @@ std::string ItemEnhancement::get_full_name(const std::string& base_name) const
 	}
 
 	return name;
+}
+
+int ItemEnhancement::resistance_strength(DamageType damageType) const noexcept
+{
+	// Any non-zero field is one ring's worth: the magnitude is not the book's unit.
+	switch (damageType)
+	{
+	case DamageType::FIRE:
+	{
+		return fireResistance > 0 ? 1 : 0;
+	}
+	case DamageType::COLD:
+	{
+		return coldResistance > 0 ? 1 : 0;
+	}
+	case DamageType::LIGHTNING:
+	{
+		return lightningResistance > 0 ? 1 : 0;
+	}
+	case DamageType::POISON:
+	{
+		return poisonResistance > 0 ? 1 : 0;
+	}
+	case DamageType::PHYSICAL:
+	case DamageType::ACID:
+	case DamageType::MAGIC:
+	{
+		return 0;
+	}
+	}
+	// Every damage type returned above; a new one fails to compile under -Wswitch
+	// rather than falling through to a quiet zero.
+	std::unreachable();
 }
 
 void ItemEnhancement::apply_enhancement_effects()

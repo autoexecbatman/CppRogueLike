@@ -3,6 +3,7 @@
 #include <format>
 #include <string>
 
+#include "../Random/DiceExpr.h"
 #include "../Random/RandomDice.h"
 
 // Damage type classification for resistance calculations
@@ -24,20 +25,40 @@ struct ShieldResult
 	int tempHpAfterShield;
 };
 
-// - Robust damage value system replacing fragile roll strings
+// A damage roll: its dice, its type, and the range derived from the dice. The
+// dice are the fact - fire resistance takes two off every die and lets none
+// fall below one, which no range can express - so a DamageInfo is built from
+// a dice expression and its range is never written by hand.
+//
+// Example:
+//   DamageInfo{ "3d12", DamageType::FIRE }.dice;   // -> { 3, 12, 0 }
+//   DamageInfo{ "1d12+5", DamageType::FIRE }.dice; // -> { 1, 12, 5 }
 struct DamageInfo
 {
-	int minDamage;
-	int maxDamage;
-	std::string displayRoll; // For UI display only: "1d8", "1d6+1", etc.
+	DiceExpr dice; // The dice the display names; what a per-die rule acts on
+	int minDamage; // Derived from the dice
+	int maxDamage; // Derived from the dice
+	std::string displayRoll; // The dice as written: "1d8", "1d6+1", etc.
 	DamageType damageType; // Type of damage for resistance calculations
 
 	// Constructors
 	DamageInfo()
-		: minDamage(1), maxDamage(2), displayRoll("1d2"), damageType(DamageType::PHYSICAL) {}
+		: dice{ 1, 2, 0 }, minDamage(1), maxDamage(2), displayRoll("1d2"), damageType(DamageType::PHYSICAL) {}
 
-	DamageInfo(int min, int max, const std::string& display, DamageType type = DamageType::PHYSICAL)
-		: minDamage(min), maxDamage(max), displayRoll(display), damageType(type) {}
+	// From the dice alone: the range is derived, so there is no second copy of
+	// it to disagree.
+	//
+	// Example:
+	//   DamageInfo{ "2d4", DamageType::FIRE }.minDamage;   // -> 2
+	//   DamageInfo{ "2d4", DamageType::FIRE }.maxDamage;   // -> 8
+	DamageInfo(const std::string& display, DamageType type)
+		: dice(parse_dice_expression(display))
+		, minDamage(dice.min_total())
+		, maxDamage(dice.max_total())
+		, displayRoll(display)
+		, damageType(type)
+	{
+	}
 
 	// Core damage operations
 	int roll_damage(RandomDice* dice) const
@@ -54,6 +75,7 @@ struct DamageInfo
 	{
 		minDamage += bonus;
 		maxDamage += bonus;
+		dice.bonus += bonus;
 		if (bonus > 0)
 		{
 			displayRoll += std::format("+{}", bonus);
@@ -106,38 +128,38 @@ namespace DamageValues
 {
 inline DamageInfo Unarmed()
 {
-	return { 1, 2, "1d2" };
+	return { "1d2", DamageType::PHYSICAL };
 }
 inline DamageInfo Dagger()
 {
-	return { 1, 4, "1d4" };
+	return { "1d4", DamageType::PHYSICAL };
 }
 inline DamageInfo ShortSword()
 {
-	return { 1, 6, "1d6" };
+	return { "1d6", DamageType::PHYSICAL };
 }
 inline DamageInfo LongSword()
 {
-	return { 1, 8, "1d8" };
+	return { "1d8", DamageType::PHYSICAL };
 }
 inline DamageInfo GreatSword()
 {
-	return { 1, 10, "1d10" };
+	return { "1d10", DamageType::PHYSICAL };
 }
 inline DamageInfo BattleAxe()
 {
-	return { 1, 8, "1d8" };
+	return { "1d8", DamageType::PHYSICAL };
 }
 inline DamageInfo WarHammer()
 {
-	return { 2, 5, "1d4+1" };
+	return { "1d4+1", DamageType::PHYSICAL };
 }
 inline DamageInfo Staff()
 {
-	return { 1, 6, "1d6" };
+	return { "1d6", DamageType::PHYSICAL };
 }
 inline DamageInfo LongBow()
 {
-	return { 1, 6, "1d6" };
+	return { "1d6", DamageType::PHYSICAL };
 }
 } // namespace DamageValues

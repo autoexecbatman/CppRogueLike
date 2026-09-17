@@ -24,22 +24,22 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 		{ "rapier", DamageValues::ShortSword() },
 		{ "hand_axe", DamageValues::Dagger() },
 		{ "battle_axe", DamageValues::BattleAxe() },
-		{ "great_axe", { 1, 12, "1d12" } },
+		{ "great_axe", { "1d12", DamageType::PHYSICAL } },
 		{ "war_hammer", DamageValues::WarHammer() },
-		{ "mace", { 2, 7, "1d6+1" } },
-		{ "morning_star", { 2, 8, "2d4" } },
-		{ "flail", { 2, 7, "1d6+1" } },
-		{ "club", { 1, 6, "1d6" } },
+		{ "mace", { "1d6+1", DamageType::PHYSICAL } },
+		{ "morning_star", { "2d4", DamageType::PHYSICAL } },
+		{ "flail", { "1d6+1", DamageType::PHYSICAL } },
+		{ "club", { "1d6", DamageType::PHYSICAL } },
 		{ "quarterstaff", DamageValues::Staff() },
 		{ "staff", DamageValues::Staff() },
 
 		// Ranged Weapons
-		{ "short_bow", { 1, 6, "1d6" } },
+		{ "short_bow", { "1d6", DamageType::PHYSICAL } },
 		{ "long_bow", DamageValues::LongBow() },
-		{ "composite_bow", { 1, 6, "1d6" } },
-		{ "light_crossbow", { 1, 8, "1d8" } },
-		{ "heavy_crossbow", { 1, 10, "1d10" } },
-		{ "sling", { 1, 4, "1d4" } },
+		{ "composite_bow", { "1d6", DamageType::PHYSICAL } },
+		{ "light_crossbow", { "1d8", DamageType::PHYSICAL } },
+		{ "heavy_crossbow", { "1d10", DamageType::PHYSICAL } },
+		{ "sling", { "1d4", DamageType::PHYSICAL } },
 	};
 }
 

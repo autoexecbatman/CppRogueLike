@@ -57,6 +57,11 @@ $probes = @(
         anchor = 'assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");'
     },
     @{
+        test   = "AssertProbeDeathTest.TakingFireAsAPlainTotalAborts"
+        file   = "src/Actor/Creature.cpp"
+        anchor = 'assert(damageType != DamageType::FIRE && damageType != DamageType::COLD && "Creature::take_damage: fire and cold arrive as ResistedDamage from DamageResolver::reduce_dice");'
+    },
+    @{
         test   = "AssertProbeDeathTest.BuildingAMonsterWithNoBodyPlanRegistryAborts"
         file   = "src/Factories/MonsterCreator.cpp"
         anchor = 'assert(ctx.bodyPlanRegistry && "MonsterCreator::create_from_params called without a bodyPlanRegistry");'

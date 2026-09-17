@@ -1,3 +1,4 @@
+#include <optional>
 #include <algorithm>
 #include <cassert>
 #include <format>
@@ -25,6 +26,7 @@
 #include "../Systems/MessageSystem.h"
 #include "../Systems/SpawnUtils.h"
 #include "../Systems/SpellAnimations.h"
+#include "../Systems/SpellSystem.h"
 #include "../Systems/TargetingMenu.h"
 #include "../Systems/TargetingSystem.h"
 #include "../Systems/TargetMode.h"
@@ -458,31 +460,18 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 				WHITE_BLACK_PAIR,
 				std::format("The fireball explodes, burning everything within {} tiles!", scrollRange));
 			innerCtx.messageSystem->finalize_message();
-			SpellAnimations::animate_explosion(targetPos, aoeRadius, innerCtx);
+			// The scroll casts the spell itself, at the level the book reads it at.
+			const SpellSystem::FireballBurst burst = SpellSystem::burst_fireball(
+				targetPos, SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL, aoeRadius, innerCtx);
+			innerCtx.messageSystem->message(
+				WHITE_BLACK_PAIR,
+				std::format("{}d6 = {} fire, {} struck.", burst.diceCount, burst.totalDamage, burst.struck),
+				true);
 
 			if (innerCtx.player()->get_tile_distance(targetPos) <= aoeRadius)
 			{
 				SpellAnimations::animate_creature_hit(innerCtx.player()->position, innerCtx);
-				innerCtx.player()->take_damage_and_check_death(scrollDamage, innerCtx, DamageType::FIRE);
-			}
-
-			for (const auto& creature : *innerCtx.creatures)
-			{
-				assert(creature);
-				if (creature->is_dead())
-				{
-					continue;
-				}
-				if (creature->get_tile_distance(targetPos) > aoeRadius)
-				{
-					continue;
-				}
-				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
-				innerCtx.messageSystem->append_message_part(
-					WHITE_BLACK_PAIR,
-					std::format("The {} gets engulfed in flames! ({} damage)", creature->actorData.name, scrollDamage));
-				innerCtx.messageSystem->finalize_message();
-				creature->take_damage_and_check_death(scrollDamage, innerCtx, DamageType::FIRE);
+				SpellSystem::burn_with_fireball(*innerCtx.player(), burst, innerCtx);
 			}
 			innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		}
@@ -680,6 +669,45 @@ int get_item_ac_bonus(const ItemBehavior& behavior) noexcept
 			[](const Shield&) -> int { return -1; }, // +1 AC in AD&D terms
 			[](const MagicalHelm& mh) -> int { return MagicalEffectUtils::get_ac_bonus(mh.effect, mh.bonus); },
 			[](const MagicalRing& mr) -> int { return MagicalEffectUtils::get_protection_bonus(mr.effect); },
+			[](const auto&) -> int { return 0; },
+		},
+		behavior);
+}
+
+// The damage type a resistance effect answers for; empty for an effect that
+// resists nothing.
+static std::optional<DamageType> resisted_type(MagicalEffect effect) noexcept
+{
+	switch (effect)
+	{
+	case MagicalEffect::FIRE_RESISTANCE:
+	case MagicalEffect::BRILLIANCE:
+	{
+		return DamageType::FIRE;
+	}
+	case MagicalEffect::COLD_RESISTANCE:
+	{
+		return DamageType::COLD;
+	}
+	default:
+	{
+		return std::nullopt;
+	}
+	}
+}
+
+int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damageType) noexcept
+{
+	// A ring or helm resists one type at its bonus; nothing else worn resists at all.
+	const auto percent_if = [damageType](MagicalEffect effect, int bonus) -> int
+	{
+		const std::optional<DamageType> resisted = resisted_type(effect);
+		return resisted.has_value() && *resisted == damageType ? bonus : 0;
+	};
+	return std::visit(
+		VariantVisitor{
+			[&percent_if](const MagicalRing& ring) -> int { return percent_if(ring.effect, ring.bonus); },
+			[&percent_if](const MagicalHelm& helm) -> int { return percent_if(helm.effect, helm.bonus); },
 			[](const auto&) -> int { return 0; },
 		},
 		behavior);

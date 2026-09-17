@@ -1,4 +1,6 @@
 #include <gtest/gtest.h>
+
+#include <stdexcept>
 #include "src/Combat/DamageInfo.h"
 #include "src/Random/RandomDice.h"
 
@@ -10,9 +12,9 @@
 class DamageInfoTest : public ::testing::Test {
 protected:
     RandomDice dice;
-    DamageInfo dagger{1, 4, "1d4"};
-    DamageInfo longsword{1, 8, "1d8"};
-    DamageInfo warhammer{2, 5, "1d4+1"};
+    DamageInfo dagger{"1d4", DamageType::PHYSICAL};
+    DamageInfo longsword{"1d8", DamageType::PHYSICAL};
+    DamageInfo warhammer{"1d4+1", DamageType::PHYSICAL};
 };
 
 // Basic Construction
@@ -24,7 +26,7 @@ TEST_F(DamageInfoTest, DefaultConstructor) {
 }
 
 TEST_F(DamageInfoTest, ParameterizedConstructor) {
-    DamageInfo custom(5, 10, "1d6+4");
+    DamageInfo custom("1d6+4", DamageType::PHYSICAL);
     EXPECT_EQ(custom.minDamage, 5);
     EXPECT_EQ(custom.maxDamage, 10);
     EXPECT_EQ(custom.displayRoll, "1d6+4");
@@ -41,7 +43,7 @@ TEST_F(DamageInfoTest, RollDamage_RespectsMinMax) {
 }
 
 TEST_F(DamageInfoTest, RollDamage_FixedValue) {
-    DamageInfo fixed(5, 5, "5");
+    DamageInfo fixed("5", DamageType::PHYSICAL);
     EXPECT_EQ(fixed.roll_damage(&dice), 5);
     EXPECT_EQ(fixed.roll_damage(&dice), 5);
     EXPECT_EQ(fixed.roll_damage(&dice), 5);
@@ -125,11 +127,14 @@ TEST_F(DamageInfoTest, IsValid_NormalCases) {
     EXPECT_TRUE(warhammer.is_valid());
 }
 
+// The range is derived from the dice, so a DamageInfo that is not valid cannot
+// be built: the constructor refuses dice that roll nothing or less than nothing.
 TEST_F(DamageInfoTest, IsValid_EdgeCases) {
-    EXPECT_TRUE(DamageInfo(1, 1, "1").is_valid());     // Equal min/max
-    EXPECT_FALSE(DamageInfo(0, 5, "0d5").is_valid()); // Zero min
-    EXPECT_FALSE(DamageInfo(5, 3, "5d3").is_valid()); // Min > max
-    EXPECT_FALSE(DamageInfo(-1, 5, "-1d5").is_valid()); // Negative min
+    EXPECT_TRUE(DamageInfo("1", DamageType::PHYSICAL).is_valid());     // A fixed value
+    EXPECT_TRUE(DamageInfo("1d4", DamageType::PHYSICAL).is_valid());
+    EXPECT_THROW(DamageInfo("0d5", DamageType::PHYSICAL), std::invalid_argument);  // No dice to roll
+    EXPECT_THROW(DamageInfo("5d0", DamageType::PHYSICAL), std::invalid_argument);  // No sides
+    EXPECT_THROW(DamageInfo("-1d5", DamageType::PHYSICAL), std::invalid_argument); // A negative count
 }
 
 // Display
@@ -140,14 +145,14 @@ TEST_F(DamageInfoTest, GetDamageRange_Variable) {
 }
 
 TEST_F(DamageInfoTest, GetDamageRange_Fixed) {
-    DamageInfo fixed(5, 5, "5");
+    DamageInfo fixed("5", DamageType::PHYSICAL);
     EXPECT_EQ(fixed.get_damage_range(), "5");
 }
 
 // Equality
 TEST_F(DamageInfoTest, Equality_SameValues) {
-    DamageInfo sword1(1, 8, "1d8");
-    DamageInfo sword2(1, 8, "1d8");
+    DamageInfo sword1("1d8", DamageType::PHYSICAL);
+    DamageInfo sword2("1d8", DamageType::PHYSICAL);
 
     EXPECT_EQ(sword1, sword2);
     EXPECT_FALSE(sword1 != sword2);
@@ -171,9 +176,9 @@ TEST_F(DamageInfoTest, DamageValues_CommonWeapons) {
     auto longsword_ref = DamageValues::LongSword();
     auto greatsword_ref = DamageValues::GreatSword();
 
-    EXPECT_EQ(dagger_ref, DamageInfo(1, 4, "1d4"));
-    EXPECT_EQ(longsword_ref, DamageInfo(1, 8, "1d8"));
-    EXPECT_EQ(greatsword_ref, DamageInfo(1, 10, "1d10"));
+    EXPECT_EQ(dagger_ref, DamageInfo("1d4", DamageType::PHYSICAL));
+    EXPECT_EQ(longsword_ref, DamageInfo("1d8", DamageType::PHYSICAL));
+    EXPECT_EQ(greatsword_ref, DamageInfo("1d10", DamageType::PHYSICAL));
 }
 
 // Regression Test: Strength Bonus Application

@@ -20,6 +20,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
 #include "../Combat/DamageInfo.h"
+#include "../Combat/DamageResolver.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Items/MagicalItemEffects.h"
@@ -986,7 +987,8 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int cast
 	burst.diceCount = std::min(casterLevel, 10);
 	for (int die = 0; die < burst.diceCount; ++die)
 	{
-		burst.totalDamage += ctx.dice->roll(1, 6);
+		burst.dice.push_back(ctx.dice->roll(1, 6));
+		burst.totalDamage += burst.dice.back();
 	}
 
 	for (const auto& creature : *ctx.creatures)
@@ -1000,14 +1002,22 @@ SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int cast
 			continue;
 		}
 
-		// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
-		const int save = ctx.dice->roll(1, 20);
-		const int dealt = (save >= 15) ? burst.totalDamage / 2 : burst.totalDamage;
-		creature->take_damage_and_check_death(dealt, ctx, DamageType::FIRE);
+		burn_with_fireball(*creature, burst, ctx);
 		++burst.struck;
 	}
 
 	return burst;
+}
+
+void SpellSystem::burn_with_fireball(Creature& target, const FireballBurst& burst, GameContext& ctx)
+{
+	const int strength = DamageResolver::resistance_strength(DamageType::FIRE, target, ctx);
+
+	// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage, the ring's bonus added.
+	const int save = ctx.dice->roll(1, 20) + DamageResolver::save_bonus_against(DamageType::FIRE, target, ctx);
+	const DamageResolver::ResistedDamage reduced = DamageResolver::reduce_dice(burst.dice, DamageType::FIRE, strength);
+	const DamageResolver::ResistedDamage dealt = (save >= 15) ? reduced.at(reduced.hit_points() / 2) : reduced;
+	target.take_damage_and_check_death(dealt, ctx);
 }
 
 void SpellSystem::cast_fireball(

@@ -112,18 +112,31 @@ public:
 	struct FireballBurst
 	{
 		int diceCount{ 0 };
+		std::vector<int> dice{};
 		int totalDamage{ 0 };
 		int struck{ 0 };
 	};
 
 	// Burns every living creature within radius of center for 1d6 per caster
-	// level, ten dice at most, halved by a save versus spells of 15 or better. The
-	// damage is fire, so fire resistance reduces it. Public so a test can reach the
-	// burst without driving the targeting menu that precedes it in play.
+	// level, ten dice at most, rolled once for the whole burst. Each creature
+	// saves versus spells at 15 or better with its fire resistance's bonus added,
+	// takes the dice reduced per die by that resistance, and half of that on a
+	// save. Public so a test can reach the burst without driving the targeting
+	// menu that precedes it in play, and so the scroll can cast it.
 	//
 	// Example, caster level 3, one goblin adjacent, dice forced to 6, 6, 6 and a save of 1:
 	//   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1 }, goblin takes 18
 	static FireballBurst burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx);
+
+	// Burns one creature with an already-rolled burst: its save with its fire
+	// resistance's bonus, the dice reduced per die, half on a save.
+	static void burn_with_fireball(Creature& target, const FireballBurst& burst, GameContext& ctx);
+
+	// The level a spell read from a scroll is cast at. Dungeon Master's Guide:
+	// "typically one level higher than that required to cast the spell, but
+	// never below 6th level of experience". Fireball needs a 5th-level wizard,
+	// so both readings give 6.
+	static constexpr int SCROLL_FIREBALL_CASTER_LEVEL = 6;
 
 	// Memorization
 	static void show_memorization_menu(Player& player, GameContext& ctx);

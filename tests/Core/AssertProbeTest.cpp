@@ -127,6 +127,17 @@ TEST_F(AssertProbeDeathTest, HitDiceAtZeroAbort)
 	EXPECT_DEATH(creature->set_hit_dice(0), "roll at or below zero");
 }
 
+// Fire and cold are resisted per die before they land, so a plain total of
+// either is a producer that skipped the reduction. It has to fail here, where
+// the producer is, rather than quietly deal its whole damage to a ring wearer.
+TEST_F(AssertProbeDeathTest, TakingFireAsAPlainTotalAborts)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+	creature->set_hit_dice(10);
+
+	EXPECT_DEATH(creature->take_damage_and_check_death(5, ctx, DamageType::FIRE), "arrive as ResistedDamage");
+}
+
 // Every monster's body comes from the registry. Without one it would be built
 // with no slots at all and quietly wear nothing it was authored to carry.
 TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoBodyPlanRegistryAborts)

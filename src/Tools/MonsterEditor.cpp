@@ -12,6 +12,7 @@
 #include "../Core/Paths.h"
 #include "../Factories/MonsterCreator.h"
 #include "../Menu/Menu.h"
+#include "../Random/DiceExpr.h"
 #include "../Renderer/Renderer.h"
 #include "MonsterEditor.h"
 
@@ -354,7 +355,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.wisDice = DiceExpr{ 3, 6, 0 };
 			defaults.chaDice = DiceExpr{ 3, 6, 0 };
 			defaults.naturalAttack = "claws";
-			defaults.damage = DamageInfo{ 1, 4, "1d4", DamageType::PHYSICAL };
+			defaults.damage = DamageInfo{ "1d4", DamageType::PHYSICAL };
 			defaults.baseWeight = 10;
 			defaults.levelMinimum = 1;
 			defaults.levelMaximum = 5;

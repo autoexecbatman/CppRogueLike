@@ -149,11 +149,11 @@ nlohmann::json encode_dice(const DiceExpr& d)
 	};
 }
 
+// The dice are the record; the range is theirs to derive, so a file cannot
+// carry a minimum its dice never roll.
 DamageInfo parse_damage(const nlohmann::json& j)
 {
 	return DamageInfo{
-		j.at("min").get<int>(),
-		j.at("max").get<int>(),
 		j.at("display").get<std::string>(),
 		static_cast<DamageType>(j.at("type").get<int>())
 	};
@@ -162,8 +162,6 @@ DamageInfo parse_damage(const nlohmann::json& j)
 nlohmann::json encode_damage(const DamageInfo& d)
 {
 	return nlohmann::json{
-		{ "min", d.minDamage },
-		{ "max", d.maxDamage },
 		{ "display", d.displayRoll },
 		{ "type", static_cast<int>(d.damageType) }
 	};
@@ -281,22 +279,6 @@ nlohmann::json encode_full_params(const MonsterParams& p)
 		{ "depth_max", p.levelMaximum },
 		{ "depth_scale", p.levelScaling }
 	};
-}
-
-int roll_dice(RandomDice* dice, const DiceExpr& expr)
-{
-	if (expr.num == 0)
-	{
-		return 0;
-	}
-
-	int total = 0;
-	for (int i = 0; i < expr.num; ++i)
-	{
-		total += dice->roll(1, expr.sides);
-	}
-
-	return total + expr.bonus;
 }
 
 // ---------------------------------------------------------------------------

@@ -1,3 +1,4 @@
+#include <vector>
 #include <algorithm>
 #include <format>
 #include <memory>
@@ -19,6 +20,8 @@
 #include "../Systems/LevelUpSystem.h"
 #include "../Systems/MessageSystem.h"
 #include "Attacker.h"
+#include "../Combat/DamageResolver.h"
+#include "../Random/DiceExpr.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -65,9 +68,15 @@ void Attacker::perform_single_attack(
 	}
 	const auto& strengthAttr = ctx.dataManager->get_strength_attributes().at(strIndex);
 
-	// Roll dice
 	const int attackRoll = ctx.dice->d20();
-	const int damageRoll = ctx.dice->roll(attackDamage.minDamage, attackDamage.maxDamage);
+
+	// A die at a time: fire and cold are resisted on each die by the book, and
+	// the bonus on the roll is not a die. A bite offers no saving throw, so the
+	// ring's save bonus has nothing to add here.
+	const std::vector<int> dice = roll_each_die(ctx.dice, attackDamage.dice);
+	const int strength = DamageResolver::resistance_strength(attackDamage.damageType, target, ctx);
+	const DamageResolver::ResistedDamage reduced = DamageResolver::reduce_dice(dice, attackDamage.damageType, strength);
+	const int damageRoll = reduced.hit_points() + attackDamage.dice.bonus;
 
 	// Calculate backstab and to-hit roll
 	const BackstabInfo backstab = calculate_backstab_bonus(owner);
@@ -99,7 +108,9 @@ void Attacker::perform_single_attack(
 			{
 				ctx.animSystem->spawn_melee_hit(target.position);
 			}
-			target.take_damage_and_check_death(finalDamage, ctx, attackDamage.damageType);
+			// The reduced roll, carried on to the number the bonus, strength and damage
+			// reduction made of it.
+			target.take_damage_and_check_death(reduced.at(finalDamage), ctx);
 		}
 	}
 	else
@@ -294,16 +305,15 @@ void Attacker::log_attack_miss(
 
 void Attacker::load(const json& j)
 {
-	damageInfo.minDamage = j["damageInfo"]["min"];
-	damageInfo.maxDamage = j["damageInfo"]["max"];
-	damageInfo.displayRoll = j["damageInfo"]["display"];
-	damageInfo.damageType = static_cast<DamageType>(j["damageInfo"]["type"]);
+	// The dice are the record; the range is derived from them.
+	damageInfo = DamageInfo{
+		j["damageInfo"]["display"].get<std::string>(),
+		static_cast<DamageType>(j["damageInfo"]["type"].get<int>())
+	};
 }
 
 void Attacker::save(json& j)
 {
-	j["damageInfo"]["min"] = damageInfo.minDamage;
-	j["damageInfo"]["max"] = damageInfo.maxDamage;
 	j["damageInfo"]["display"] = damageInfo.displayRoll;
 	j["damageInfo"]["type"] = static_cast<int>(damageInfo.damageType);
 }

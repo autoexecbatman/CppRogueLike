@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=FireballDamageTest.*:WornResistanceTest.*:ReduceDiceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Combat/DamageResolver.cpp",
+      "original": "return std::max(drunk, owner.worn_resistance_strength(damageType));",
+      "mutated": "return drunk + owner.worn_resistance_strength(damageType);",
+      "catches": "a ring and a potion summed, the helm augmented"
+    },
+    {
+      "file": "src/Combat/DamageResolver.cpp",
+      "original": "return std::max(drunk, owner.worn_resistance_strength(damageType));",
+      "mutated": "return drunk;",
+      "catches": "the worn equipment ignored, as before"
+    },
+    {
+      "file": "src/Combat/DamageResolver.cpp",
+      "original": "static constexpr int FIRE_SAVE_BONUS = 4;",
+      "mutated": "static constexpr int FIRE_SAVE_BONUS = 2;",
+      "catches": "the fire save bonus halved"
+    },
+    {
+      "file": "src/Combat/DamageResolver.cpp",
+      "original": "static constexpr int COLD_PER_DIE = 1;",
+      "mutated": "static constexpr int COLD_PER_DIE = 2;",
+      "catches": "cold reduced like fire"
+    },
+    {
+      "file": "src/Actor/Pickable.cpp",
+      "original": "\tcase MagicalEffect::FIRE_RESISTANCE:\n\tcase MagicalEffect::BRILLIANCE:\n",
+      "mutated": "\tcase MagicalEffect::FIRE_RESISTANCE:\n",
+      "catches": "the helm of brilliance no longer resisting fire"
+    },
+    {
+      "file": "src/Actor/Pickable.cpp",
+      "original": "\tcase MagicalEffect::COLD_RESISTANCE:\n\t{\n\t\treturn DamageType::COLD;",
+      "mutated": "\tcase MagicalEffect::COLD_RESISTANCE:\n\t{\n\t\treturn DamageType::FIRE;",
+      "catches": "the ring of warmth answering for fire"
+    },
+    {
+      "file": "src/Actor/Creature.cpp",
+      "original": "\t\tgreatest = std::max(greatest, item.get_enhancement().resistance_strength(damageType));\n",
+      "mutated": "",
+      "catches": "a worn enhancement ignored"
+    }
+  ]
+}

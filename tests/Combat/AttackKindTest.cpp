@@ -49,7 +49,7 @@ protected:
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(10);
 		monster->healthPool = std::make_unique<HealthPool>(100);
-		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
+		monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_natural_attack("claws");

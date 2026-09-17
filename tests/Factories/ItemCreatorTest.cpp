@@ -75,10 +75,11 @@ TEST_F(ItemCreatorTest, CreateIdentifyScroll)
 	ASSERT_TRUE(std::holds_alternative<IdentifyScroll>(*item->behavior));
 }
 
-// The two resistance potions grant the buff DamageResolver reads as a percentage.
-// Pinned here because the data once carried no effect at all, which no code
-// path could notice: a potion that does nothing looks like a potion.
-TEST_F(ItemCreatorTest, FireResistancePotionGrantsHalfFireResistance)
+// The two resistance potions grant the buff DamageResolver reads as a strength
+// in rings: a drunk potion is one ring's worth for its duration. Pinned here
+// because the data once carried no effect at all, which no code path could
+// notice: a potion that does nothing looks like a potion.
+TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 {
 	auto item = ItemCreator::create("potion_of_fire_resistance", Vector2D{ 0, 0 }, mock.content_registry);
 	ASSERT_TRUE(item);
@@ -87,12 +88,12 @@ TEST_F(ItemCreatorTest, FireResistancePotionGrantsHalfFireResistance)
 
 	EXPECT_EQ(potion.effect, ConsumableEffect::ADD_BUFF);
 	EXPECT_EQ(potion.buffType, BuffType::FIRE_RESISTANCE);
-	EXPECT_EQ(potion.amount, 50) << "the buff value is the percentage resisted";
+	EXPECT_EQ(potion.amount, 1) << "the buff value is the strength in rings";
 	EXPECT_EQ(potion.duration, 50);
 	EXPECT_FALSE(potion.isSetEffect);
 }
 
-TEST_F(ItemCreatorTest, ColdResistancePotionGrantsHalfColdResistance)
+TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 {
 	auto item = ItemCreator::create("potion_of_cold_resistance", Vector2D{ 0, 0 }, mock.content_registry);
 	ASSERT_TRUE(item);
@@ -101,6 +102,6 @@ TEST_F(ItemCreatorTest, ColdResistancePotionGrantsHalfColdResistance)
 
 	EXPECT_EQ(potion.effect, ConsumableEffect::ADD_BUFF);
 	EXPECT_EQ(potion.buffType, BuffType::COLD_RESISTANCE);
-	EXPECT_EQ(potion.amount, 50);
+	EXPECT_EQ(potion.amount, 1);
 	EXPECT_EQ(potion.duration, 50);
 }

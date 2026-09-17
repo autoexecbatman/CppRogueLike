@@ -286,10 +286,8 @@ void AiMimic::boost_attack(Creature& owner, GameContext& ctx)
 	if (currentDamage.maxDamage < MAX_WEAPON_DAMAGE)
 	{
 		const int newMaxDamage = std::min(currentDamage.maxDamage + 1, MAX_WEAPON_DAMAGE);
-		const DamageInfo improvedDamage(
-			currentDamage.minDamage,
-			newMaxDamage,
-			std::format("1d{}", newMaxDamage));
+		// One die, a side larger; the type it deals is kept.
+		const DamageInfo improvedDamage(std::format("1d{}", newMaxDamage), currentDamage.damageType);
 		owner.attacker->set_damage_info(improvedDamage);
 		ctx.messageSystem->log(std::format("Mimic improved attack to {}", improvedDamage.displayRoll));
 	}

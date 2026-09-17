@@ -32,6 +32,7 @@
 #include "Item.h"
 #include "Creature.h"
 #include "../ActorTypes/Player.h"
+#include "Pickable.h"
 
 //==Creature==
 void Creature::load(const json& j)
@@ -335,6 +336,26 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 // looks; this states who was hurt and joins the two.
 int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)
 {
+	assert(damageType != DamageType::FIRE && damageType != DamageType::COLD && "Creature::take_damage: fire and cold arrive as ResistedDamage from DamageResolver::reduce_dice");
+	return take_damage_hit_points(damage, ctx, damageType);
+}
+
+int Creature::take_damage(const DamageResolver::ResistedDamage& damage, GameContext& ctx)
+{
+	return take_damage_hit_points(damage.hit_points(), ctx, damage.damage_type());
+}
+
+void Creature::take_damage_and_check_death(const DamageResolver::ResistedDamage& damage, GameContext& ctx)
+{
+	take_damage(damage, ctx);
+	if (is_dead())
+	{
+		die(ctx);
+	}
+}
+
+int Creature::take_damage_hit_points(int damage, GameContext& ctx, DamageType damageType)
+{
 	const int actualDamage = healthPool->take_damage(*this, damage, ctx, damageType);
 
 	if (ctx.floatingText)
@@ -438,6 +459,22 @@ std::string Creature::get_attack_name() const
 // Example:
 //   orc.get_equipped_item(EquipmentSlot::RIGHT_HAND);  // -> the long sword
 //   wolf.get_equipped_item(EquipmentSlot::RIGHT_HAND); // -> nullptr
+int Creature::worn_resistance_strength(DamageType damageType) const noexcept
+{
+	int greatest = 0;
+	for (const EquippedItem& equipped : equippedItems)
+	{
+		const Item& item = *equipped.item;
+		// An item's effect and its enhancement are two claims; the larger stands.
+		greatest = std::max(greatest, item.get_enhancement().resistance_strength(damageType));
+		if (item.behavior)
+		{
+			greatest = std::max(greatest, get_item_resistance_strength(*item.behavior, damageType));
+		}
+	}
+	return greatest;
+}
+
 Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 {
 	auto worn = std::ranges::find_if(equippedItems, matches_slot(slot));

@@ -33,7 +33,7 @@ protected:
         creature->set_thaco(19);
         creature->armorClass = std::make_unique<ArmorClass>(6);
         creature->healthPool = std::make_unique<HealthPool>(20);
-        creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{1, 6, "1d6"});
+        creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{"1d6", DamageType::PHYSICAL});
         creature->ai = std::make_unique<AiMonster>();
 
         return creature;

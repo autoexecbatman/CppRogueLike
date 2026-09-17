@@ -2,6 +2,7 @@
 
 #include <string>
 
+#include "../../Combat/DamageInfo.h"
 #include "../../Items/ItemIdentification.h"
 
 enum class PrefixType
@@ -77,6 +78,17 @@ struct ItemEnhancement
 	int coldResistance{ 0 };
 	int lightningResistance{ 0 };
 	int poisonResistance{ 0 };
+
+	// How strongly this enhancement resists the given type, in rings. The book
+	// has no such suffix, so an enhancement of fire or cold resistance is read
+	// as one ring's worth when its field is set. Zero for a type it says
+	// nothing about.
+	//
+	// Example:
+	//   enhancement.fireResistance = 50;
+	//   enhancement.resistance_strength(DamageType::FIRE);   // -> 1
+	//   enhancement.resistance_strength(DamageType::COLD);   // -> 0
+	[[nodiscard]] int resistance_strength(DamageType damageType) const noexcept;
 
 	// Special properties
 	BlessingStatus blessing{ BlessingStatus::UNCURSED }; // Three-state: uncursed/blessed/cursed

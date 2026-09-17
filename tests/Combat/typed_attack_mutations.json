@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TypedAttackResistanceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Actor/Attacker.cpp",
+      "original": "const int damageRoll = reduced.hit_points() + attackDamage.dice.bonus;",
+      "mutated": "const int damageRoll = DamageResolver::reduce_dice(dice, attackDamage.damageType, 0).hit_points() + attackDamage.dice.bonus;",
+      "catches": "the target's resistance ignored on a bite"
+    },
+    {
+      "file": "src/Actor/Attacker.cpp",
+      "original": "const int damageRoll = reduced.hit_points() + attackDamage.dice.bonus;",
+      "mutated": "const int damageRoll = reduced.hit_points();",
+      "catches": "the bonus on the roll dropped"
+    },
+    {
+      "file": "src/Actor/Attacker.cpp",
+      "original": "const int damageRoll = reduced.hit_points() + attackDamage.dice.bonus;",
+      "mutated": "const int damageRoll = reduced.hit_points() - 2 * strength + attackDamage.dice.bonus;",
+      "catches": "the bonus reduced as though it were a die"
+    },
+    {
+      "file": "src/Combat/DamageResolver.cpp",
+      "original": "static constexpr int COLD_PER_DIE = 1;",
+      "mutated": "static constexpr int COLD_PER_DIE = 2;",
+      "catches": "a cold bite reduced like fire"
+    }
+  ]
+}

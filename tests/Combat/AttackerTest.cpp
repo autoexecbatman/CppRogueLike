@@ -53,7 +53,7 @@ protected:
 		monster->set_thaco(19);
 		monster->armorClass = std::make_unique<ArmorClass>(6);
 		monster->healthPool = std::make_unique<HealthPool>(10);
-			monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ 1, 6, "1d6" });
+			monster->attacker = std::make_unique<MonsterAttacker>(*monster, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		monster->set_strength(8);
 		monster->set_dexterity(10);
 		monster->set_natural_attack("claws");
@@ -80,12 +80,12 @@ protected:
 TEST_F(AttackerTest, Serialization_RoundTrip)
 {
 	Creature dummy(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "dummy", 1 });
-	MonsterAttacker original(dummy, DamageInfo{ 2, 8, "2d4", DamageType::FIRE });
+	MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
 
 	json j;
 	original.save(j);
 
-	MonsterAttacker loaded(dummy, DamageInfo{ 0, 0, "" });
+	MonsterAttacker loaded(dummy, DamageValues::Unarmed());
 	loaded.load(j);
 
 	EXPECT_EQ(loaded.get_damage_info().minDamage, 2);

@@ -12,6 +12,7 @@
 #include "../Actor/EquipmentSlot.h"
 #include "../Combat/DamageInfo.h"
 #include "../Renderer/Renderer.h"
+#include "../Random/DiceExpr.h"
 
 // Forward declarations
 class Creature;
@@ -46,13 +47,6 @@ enum class MonsterAiType
 };
 
 // Dice expression: roll num dice of sides sides, add bonus. num=0 means skip.
-struct DiceExpr
-{
-	int num{ 0 };
-	int sides{ 0 };
-	int bonus{ 0 };
-};
-
 struct MonsterParams
 {
 	// Identity
