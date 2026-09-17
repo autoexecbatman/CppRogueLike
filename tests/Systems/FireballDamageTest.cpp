@@ -6,7 +6,9 @@
 //
 // and the Dungeon Master's Guide's fire resistance: a ring's wearer saves at +4
 // and takes -2 on every die, never below 1; the helm of brilliance is a double
-// ring. Every number below is derived from those rules, never from the code.
+// ring. The save itself is Table 60: these creatures are 1st-level monsters,
+// which save on the warrior row and need 17 against a spell. Every number below
+// is derived from those rules, never from the code.
 
 #include <gtest/gtest.h>
 
@@ -100,12 +102,13 @@ TEST_F(FireballDamageTest, APotionOfFireResistanceTakesTwoOffEveryDie)
 		<< "fire resistance did nothing, so the burst was not typed as fire";
 }
 
-// A save of 15 or better halves the damage before any resistance.
+// A made save halves the damage: a 1st-level monster needs 17 against a spell,
+// so 17 saves and 16 does not.
 TEST_F(FireballDamageTest, SaveVersusSpellsHalves)
 {
 	Creature& saved = add_creature(3);
 	Creature& failed = add_creature(4);
-	force_max_dice_then_saves({ 15, 14 });
+	force_max_dice_then_saves({ 17, 16 });
 
 	burst_at(Vector2D{ 3, 5 });
 
@@ -188,14 +191,14 @@ TEST_F(FireballDamageTest, ADieNeverGoesBelowOne)
 	EXPECT_EQ(wearer.get_hp(), STARTING_HP - CASTER_LEVEL);
 }
 
-// The ring adds +4 to the save: a roll of 11 fails bare and succeeds worn, so
+// The ring adds +4 to the save: a roll of 13 fails bare and makes it worn, so
 // the reduced dice are halved as well.
 TEST_F(FireballDamageTest, ARingAddsFourToTheSave)
 {
 	Creature& wearer = add_creature(3);
 	Creature& bare = add_creature(4);
 	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, mock.content_registry), EquipmentSlot::RIGHT_RING);
-	force_max_dice_then_saves({ 11, 11 });
+	force_max_dice_then_saves({ 13, 13 });
 
 	burst_at(Vector2D{ 3, 5 });
 

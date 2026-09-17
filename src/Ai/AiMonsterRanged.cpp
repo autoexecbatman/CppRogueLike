@@ -25,7 +25,7 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
 	owner.update_awareness(ctx);
 
-	if (blocked_by_sanctuary(ctx))
+	if (blocked_by_sanctuary(owner, ctx))
 	{
 		return;
 	}

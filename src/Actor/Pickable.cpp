@@ -8,6 +8,7 @@
 #include <variant>
 
 #include "../Combat/DamageInfo.h"
+#include "../Combat/SavingThrow.h"
 #include "../Utils/VariantVisitor.h"
 
 #include "../Actor/Creature.h"
@@ -393,8 +394,8 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 				continue;
 			}
 
-			const int save = ctx.dice->roll(1, 20);
-			if (save < 15)
+			// A scroll's effect is a spell: the target saves against it or takes it.
+			if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 			{
 				ctx.buffSystem->add_buff(*creature, targetScroll.buffType, 0, targetScroll.buffDuration, false);
 				++affected;

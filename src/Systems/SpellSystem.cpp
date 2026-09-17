@@ -27,6 +27,7 @@
 #include "../Map/Map.h"
 #include "../Menu/MenuSpellCast.h"
 #include "../Utils/Vector2D.h"
+#include "../Combat/SavingThrow.h"
 #include "AnimationSystem.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
@@ -947,9 +948,8 @@ void SpellSystem::cast_web(
 				continue;
 			}
 
-			// AD&D 2e: Save vs. Paralyzation (d20 >= 10) avoids entanglement
-			int save = innerCtx.dice->roll(1, 20);
-			if (save < 10)
+			// AD&D 2e: a save versus paralyzation avoids the entanglement.
+			if (!SavingThrows::is_made(*creature, SavingThrow::PARALYZATION_POISON_DEATH, 0, innerCtx))
 			{
 				innerCtx.buffSystem->add_buff(*creature, BuffType::WEBBED, 0, duration, false);
 				SpellAnimations::animate_creature_hit(creature->position, innerCtx);
@@ -1013,10 +1013,15 @@ void SpellSystem::burn_with_fireball(Creature& target, const FireballBurst& burs
 {
 	const int strength = DamageResolver::resistance_strength(DamageType::FIRE, target, ctx);
 
-	// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage, the ring's bonus added.
-	const int save = ctx.dice->roll(1, 20) + DamageResolver::save_bonus_against(DamageType::FIRE, target, ctx);
+	// AD&D 2e: a save versus spell halves the damage, with the ring's bonus
+	// added to the roll as the book adds it.
+	const bool saved = SavingThrows::is_made(
+		target,
+		SavingThrow::SPELL,
+		DamageResolver::save_bonus_against(DamageType::FIRE, target, ctx),
+		ctx);
 	const DamageResolver::ResistedDamage reduced = DamageResolver::reduce_dice(burst.dice, DamageType::FIRE, strength);
-	const DamageResolver::ResistedDamage dealt = (save >= 15) ? reduced.at(reduced.hit_points() / 2) : reduced;
+	const DamageResolver::ResistedDamage dealt = saved ? reduced.at(reduced.hit_points() / 2) : reduced;
 	target.take_damage_and_check_death(dealt, ctx);
 }
 
@@ -1250,8 +1255,7 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 			continue;
 		}
 
-		int save = ctx.dice->roll(1, 20);
-		if (save < 15)
+		if (!SavingThrows::is_made(*creature, SavingThrow::SPELL, 0, ctx))
 		{
 			ctx.buffSystem->add_buff(*creature, BuffType::HOLD_PERSON, 0, duration, false);
 			++affected;

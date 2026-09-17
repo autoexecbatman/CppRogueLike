@@ -10,6 +10,7 @@
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
 #include "../Utils/Vector2D.h"
+#include "../Combat/SavingThrow.h"
 #include "Ai.h"
 #include "AiMonster.h"
 
@@ -123,18 +124,19 @@ namespace
 		{
 			return true;
 		}
-		return blocked_by_sanctuary(ctx);
+		return blocked_by_sanctuary(owner, ctx);
 	}
 } // namespace
 
-// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's turn.
-bool blocked_by_sanctuary(GameContext& ctx)
+// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's
+// turn. Sanctuary is a spell, so the monster saves against it on its own row.
+bool blocked_by_sanctuary(Creature& owner, GameContext& ctx)
 {
 	if (!ctx.player()->has_state(ActorState::IS_PROTECTED))
 	{
 		return false;
 	}
-	return ctx.dice->roll(1, 20) < 15;
+	return !SavingThrows::is_made(owner, SavingThrow::SPELL, 0, ctx);
 }
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)

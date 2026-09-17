@@ -24,5 +24,7 @@ public:
 	void save(json& j) override;
 };
 
-// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's turn.
-bool blocked_by_sanctuary(GameContext& ctx);
+// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's
+// turn. Sanctuary is a spell, so the monster saves against it on its own row of
+// Table 60, which is why it needs the monster and not only the context.
+bool blocked_by_sanctuary(Creature& owner, GameContext& ctx);

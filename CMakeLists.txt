@@ -362,6 +362,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Combat/ArmorClass.h
     ${PROJECT_SOURCE_DIR}/Combat/DamageResolver.cpp
     ${PROJECT_SOURCE_DIR}/Combat/DamageResolver.h
+    ${PROJECT_SOURCE_DIR}/Combat/SavingThrow.cpp
+    ${PROJECT_SOURCE_DIR}/Combat/SavingThrow.h
     ${PROJECT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
     ${PROJECT_SOURCE_DIR}/Combat/ConstitutionTracker.h
     ${PROJECT_SOURCE_DIR}/Combat/HealthPool.cpp

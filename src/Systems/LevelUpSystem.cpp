@@ -12,6 +12,7 @@
 #include "../Combat/TurningTable.h"
 #include "../Config/GameBalance.h"
 #include "LevelUpSystem.h"
+#include "../Combat/SavingThrow.h"
 
 // ============================================================================
 // Private implementation — not visible outside this translation unit.
@@ -360,40 +361,9 @@ void apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext*
         return;
     }
 
-    bool improved = false;
-
-    switch (owner.get_creature_class())
-    {
-    case CreatureClass::FIGHTER:
-    {
-        improved = (newLevel == 3 || newLevel == 6 || newLevel == 9 || newLevel == 12 || newLevel == 15);
-        break;
-    }
-
-    case CreatureClass::ROGUE:
-    {
-        improved = (newLevel % 4 == 0);
-        break;
-    }
-
-    case CreatureClass::CLERIC:
-    {
-        improved = (newLevel % 3 == 0);
-        break;
-    }
-
-    case CreatureClass::WIZARD:
-    {
-        improved = (newLevel % 5 == 0);
-        break;
-    }
-
-    case CreatureClass::MONSTER:
-    {
-        improved = (newLevel % 2 == 0); // AD&D 2e: monster saves improve every 2 HD
-        break;
-    }
-    }
+    // Table 60 is banded, and a level improves the save when it lands on a row
+    // the level below did not. Asking the table means this cannot drift from it.
+    const bool improved = SavingThrows::improves_at(owner.get_creature_class(), newLevel);
 
     if (improved)
     {

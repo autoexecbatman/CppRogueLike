@@ -30,6 +30,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackKindTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WornResistanceTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SavingThrowTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TypedAttackResistanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemCreatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterCreatorTest.cpp
@@ -217,6 +218,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/Combat/WeaponDamageRegistry.cpp
     ${PARENT_SOURCE_DIR}/Combat/ArmorClass.cpp
     ${PARENT_SOURCE_DIR}/Combat/DamageResolver.cpp
+    ${PARENT_SOURCE_DIR}/Combat/SavingThrow.cpp
     ${PARENT_SOURCE_DIR}/Combat/ConstitutionTracker.cpp
     ${PARENT_SOURCE_DIR}/Combat/HealthPool.cpp
     ${PARENT_SOURCE_DIR}/Combat/CombatStats.cpp

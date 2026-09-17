@@ -140,7 +140,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		}
 	}
 
-	if (blocked_by_sanctuary(ctx))
+	if (blocked_by_sanctuary(owner, ctx))
 	{
 		return;
 	}
