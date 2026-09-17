@@ -58,7 +58,7 @@ TEST_F(DamageInfoTest, GetAverageDamage) {
 // Damage Modification
 TEST_F(DamageInfoTest, AddBonus_Positive) {
     DamageInfo sword = longsword;  // Copy
-    sword.add_bonus(3);
+    sword = sword.with_enhancement(3);
 
     EXPECT_EQ(sword.minDamage, 4);   // 1 + 3
     EXPECT_EQ(sword.maxDamage, 11);  // 8 + 3
@@ -67,7 +67,7 @@ TEST_F(DamageInfoTest, AddBonus_Positive) {
 
 TEST_F(DamageInfoTest, AddBonus_Negative) {
     DamageInfo sword = longsword;
-    sword.add_bonus(-2);
+    sword = sword.with_enhancement(-2);
 
     EXPECT_EQ(sword.minDamage, -1);  // 1 - 2
     EXPECT_EQ(sword.maxDamage, 6);   // 8 - 2
@@ -76,7 +76,7 @@ TEST_F(DamageInfoTest, AddBonus_Negative) {
 
 TEST_F(DamageInfoTest, AddBonus_Zero) {
     DamageInfo sword = longsword;
-    sword.add_bonus(0);
+    sword = sword.with_enhancement(0);
 
     EXPECT_EQ(sword.minDamage, 1);
     EXPECT_EQ(sword.maxDamage, 8);
@@ -85,7 +85,8 @@ TEST_F(DamageInfoTest, AddBonus_Zero) {
 
 TEST_F(DamageInfoTest, AddBonus_Chaining) {
     DamageInfo sword = longsword;
-    sword.add_bonus(2).add_bonus(3);
+    sword = sword.with_enhancement(2);
+    sword = sword.with_enhancement(3);
 
     EXPECT_EQ(sword.minDamage, 6);   // 1 + 2 + 3
     EXPECT_EQ(sword.maxDamage, 13);  // 8 + 2 + 3
@@ -102,22 +103,6 @@ TEST_F(DamageInfoTest, WithEnhancement_NonMutating) {
     // Enhanced has bonus
     EXPECT_EQ(enhanced.minDamage, 4);
     EXPECT_EQ(enhanced.maxDamage, 11);
-}
-
-TEST_F(DamageInfoTest, MultiplyDamage) {
-    DamageInfo sword = longsword;
-    sword.multiply_damage(2.0f);
-
-    EXPECT_EQ(sword.minDamage, 2);   // 1 * 2
-    EXPECT_EQ(sword.maxDamage, 16);  // 8 * 2
-}
-
-TEST_F(DamageInfoTest, MultiplyDamage_Fractional) {
-    DamageInfo sword = longsword;
-    sword.multiply_damage(0.5f);
-
-    EXPECT_EQ(sword.minDamage, 0);   // 1 * 0.5 = 0 (truncated)
-    EXPECT_EQ(sword.maxDamage, 4);   // 8 * 0.5 = 4
 }
 
 // Validation
@@ -200,27 +185,64 @@ TEST_F(DamageInfoTest, Regression_StrengthBonus_AddedCorrectly) {
     }
 }
 
-// Critical Hit Scenario
-TEST_F(DamageInfoTest, CriticalHit_DoubledDamage) {
-    DamageInfo base = longsword;
-    DamageInfo critical = base;
-    critical.multiply_damage(2.0f);
-
-    EXPECT_EQ(critical.minDamage, 2);   // 1 * 2
-    EXPECT_EQ(critical.maxDamage, 16);  // 8 * 2
-}
-
 // Edge Case: Maximum Enhancement Stacking
 TEST_F(DamageInfoTest, EdgeCase_MassiveEnhancementStack) {
     DamageInfo weapon = DamageValues::Dagger();
 
     // Stack +1, +2, +3, +4, +5 bonuses
-    weapon.add_bonus(1)
-          .add_bonus(2)
-          .add_bonus(3)
-          .add_bonus(4)
-          .add_bonus(5);
+    weapon = weapon.with_enhancement(1);
+    weapon = weapon.with_enhancement(2);
+    weapon = weapon.with_enhancement(3);
+    weapon = weapon.with_enhancement(4);
+    weapon = weapon.with_enhancement(5);
 
     EXPECT_EQ(weapon.minDamage, 16);  // 1 + (1+2+3+4+5)
     EXPECT_EQ(weapon.maxDamage, 19);  // 4 + (1+2+3+4+5)
+    EXPECT_EQ(weapon.displayRoll, "1d4+15") << "five bonuses are one sum, not five of them";
+    EXPECT_NO_THROW(parse_dice_expression(weapon.displayRoll));
+}
+
+// The dice are the record, so a mutation moves them and the range and the text
+// are re-derived. Building the text by appending to it instead produces
+// "1d8+2+3", which parse_dice_expression refuses - a DamageInfo that can no
+// longer be read back from the file it would be written to.
+TEST_F(DamageInfoTest, ABonusAddedTwiceStillReadsAsDice)
+{
+    DamageInfo weapon{ "1d8", DamageType::PHYSICAL };
+
+    weapon = weapon.with_enhancement(2);
+    weapon = weapon.with_enhancement(3);
+
+    EXPECT_EQ(weapon.dice.bonus, 5);
+    EXPECT_EQ(weapon.displayRoll, "1d8+5");
+    EXPECT_NO_THROW(parse_dice_expression(weapon.displayRoll));
+    EXPECT_EQ(weapon.minDamage, 6);
+    EXPECT_EQ(weapon.maxDamage, 13);
+}
+
+// A bonus that cancels leaves the plain dice behind, not a trailing "+0".
+TEST_F(DamageInfoTest, ABonusThatCancelsLeavesThePlainDice)
+{
+    DamageInfo weapon{ "1d8", DamageType::PHYSICAL };
+
+    weapon = weapon.with_enhancement(2);
+    weapon = weapon.with_enhancement(-2);
+
+    EXPECT_EQ(weapon.displayRoll, "1d8");
+    EXPECT_EQ(weapon.minDamage, 1);
+    EXPECT_EQ(weapon.maxDamage, 8);
+}
+
+// A bonus changes how hard the weapon hits, never what kind of damage it deals.
+// The type is what resistance reads, so a flaming sword that lost it on being
+// enhanced would pass straight through fire resistance.
+TEST_F(DamageInfoTest, ABonusKeepsTheDamageType)
+{
+    DamageInfo flaming{ "1d8", DamageType::FIRE };
+
+    flaming = flaming.with_enhancement(2);
+
+    EXPECT_EQ(flaming.damageType, DamageType::FIRE);
+    const DamageInfo frost{ "1d6", DamageType::COLD };
+    EXPECT_EQ(frost.with_enhancement(3).damageType, DamageType::COLD);
 }

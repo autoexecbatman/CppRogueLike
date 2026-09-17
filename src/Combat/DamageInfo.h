@@ -82,36 +82,17 @@ struct DamageInfo
 	int get_average_damage() const { return (minDamage + maxDamage) / 2; }
 
 	// Modification operations
-	DamageInfo& add_bonus(int bonus)
+	// The same damage with its bonus moved, as a new value: the dice carry the
+	// bonus and the range and the text are derived from them, so a second call
+	// reads as one sum rather than as a string of them. The type is unchanged -
+	// a bonus says how hard a weapon hits, never what kind of damage it deals.
+	//
+	// Example:
+	//   const DamageInfo sword{ "1d8", DamageType::PHYSICAL };
+	//   sword.with_enhancement(2).with_enhancement(3).displayRoll;   // -> "1d8+5"
+	[[nodiscard]] DamageInfo with_enhancement(int damage_bonus) const
 	{
-		minDamage += bonus;
-		maxDamage += bonus;
-		dice.bonus += bonus;
-		if (bonus > 0)
-		{
-			displayRoll += std::format("+{}", bonus);
-		}
-		else if (bonus < 0)
-		{
-			displayRoll += std::format("{}", bonus); // Already has minus sign
-		}
-		return *this;
-	}
-
-	// Create enhanced version with bonus (non-mutating)
-	DamageInfo with_enhancement(int damage_bonus) const
-	{
-		DamageInfo enhanced = *this;
-		enhanced.add_bonus(damage_bonus);
-		return enhanced;
-	}
-
-	DamageInfo& multiply_damage(float multiplier)
-	{
-		minDamage = static_cast<int>(minDamage * multiplier);
-		maxDamage = static_cast<int>(maxDamage * multiplier);
-		// Don't modify display roll for multipliers - too complex
-		return *this;
+		return DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, damageType };
 	}
 
 	// Utility functions
