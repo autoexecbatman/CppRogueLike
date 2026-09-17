@@ -248,6 +248,16 @@ public:
 	// Example, holding a long bow:
 	//   creature.has_ranged_weapon();   // -> true
 	//   creature.has_ranged_weapon();   // -> false once the slot is empty
+	// Whether this item belongs in that slot: a shield in the left hand, a ranged
+	// weapon in the missile slot, and so on, including what is already worn - a
+	// two-handed weapon leaves no left hand free. One rule, so the player equipping
+	// and the data arming a monster are held to the same one.
+	//
+	// Example:
+	//   creature.can_equip(bow, EquipmentSlot::MISSILE_WEAPON);     // -> true
+	//   creature.can_equip(dagger, EquipmentSlot::MISSILE_WEAPON);  // -> false
+	[[nodiscard]] bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
+
 	[[nodiscard]] bool has_ranged_weapon() const noexcept;
 
 	// How strongly the worn equipment resists the given type, in rings: the

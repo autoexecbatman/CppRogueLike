@@ -475,6 +475,145 @@ int Creature::worn_resistance_strength(DamageType damageType) const noexcept
 	return greatest;
 }
 
+bool Creature::can_equip(const Item& item, EquipmentSlot slot) const noexcept
+{
+	// Basic slot validation
+	if (slot == EquipmentSlot::NONE)
+	{
+		return false;
+	}
+
+	// Check if item has behavior component (weapons/armor)
+	if (!item.behavior)
+	{
+		return false;
+	}
+
+	// Slot-specific validation
+	switch (slot)
+	{
+
+	case EquipmentSlot::RIGHT_HAND:
+	case EquipmentSlot::LEFT_HAND:
+	{
+		// Hand slots can hold weapons or shields - use proper item type system
+		if (!item.is_weapon() && !item.is_shield())
+		{
+			return false; // Not a weapon or shield
+		}
+
+		// Shields can only go in left hand
+		if (item.is_shield() && slot != EquipmentSlot::LEFT_HAND)
+		{
+			return false;
+		}
+
+		// Two-handed weapons can only go in right hand
+		if (item.is_two_handed_weapon() && slot != EquipmentSlot::RIGHT_HAND)
+		{
+			return false;
+		}
+
+		// Check if trying to equip something in left hand when two-handed weapon is equipped
+		if (slot == EquipmentSlot::LEFT_HAND)
+		{
+			auto* rightHandItem = get_equipped_item(EquipmentSlot::RIGHT_HAND);
+			if (rightHandItem && rightHandItem->is_two_handed_weapon())
+			{
+				return false; // Can't equip anything in left hand when two-handed weapon equipped
+			}
+		}
+
+		break;
+	}
+
+	case EquipmentSlot::BODY:
+	{
+		// Body slot can only hold armor - use proper item type system
+		if (!item.is_armor())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::MISSILE_WEAPON:
+	{
+		// Missile weapon slot can only hold ranged weapons - use ItemClass system
+		if (!item.is_ranged_weapon())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::HEAD:
+	{
+		if (!item.is_helmet())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::NECK:
+	{
+		if (!item.is_amulet())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::RIGHT_RING:
+	case EquipmentSlot::LEFT_RING:
+	{
+		if (!item.is_ring())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::GAUNTLETS:
+	{
+		if (!item.is_gauntlets())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::GIRDLE:
+	{
+		if (!item.is_girdle())
+		{
+			return false;
+		}
+		break;
+	}
+
+	case EquipmentSlot::TOOL:
+	{
+		if (!item.is_tool())
+		{
+			return false;
+		}
+		break;
+	}
+
+	default:
+	{
+		// Other slots (CLOAK, BRACERS, BOOTS, MISSILES) - no items defined yet
+		break;
+	}
+
+	}
+
+	return true;
+}
+
+
 bool Creature::has_ranged_weapon() const noexcept
 {
 	const Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);

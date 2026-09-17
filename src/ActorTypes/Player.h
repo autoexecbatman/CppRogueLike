@@ -78,7 +78,6 @@ public:
 	bool attempt_hide(GameContext& ctx);
 
 	// Equipment system methods
-	bool can_equip(const Item& item, EquipmentSlot slot) const noexcept;
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
 	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
 	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
