@@ -733,25 +733,6 @@ bool Player::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
 	}
 }
 
-void Player::sync_ranged_state(GameContext& ctx)
-{
-	// Check if the MISSILE_WEAPON slot holds a ranged weapon
-	Item* missileSlot = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
-	bool hasRangedWeapon = missileSlot && missileSlot->is_ranged_weapon();
-
-	// Make sure IS_RANGED state matches equipped weapons
-	if (hasRangedWeapon && !has_state(ActorState::IS_RANGED))
-	{
-		add_state(ActorState::IS_RANGED);
-		ctx.messageSystem->log("Added missing IS_RANGED state - ranged weapon equipped");
-	}
-	else if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
-	{
-		remove_state(ActorState::IS_RANGED);
-		ctx.messageSystem->log("Removed incorrect IS_RANGED state - no ranged weapons equipped");
-	}
-}
-
 bool Player::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
 {
 	// Check if item is already equipped
@@ -832,10 +813,6 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 		update_armor_class(ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(get_armor_class()) + ".", true);
 	}
-
-	// Set ranged state when a ranged weapon is equipped
-	if (slot == EquipmentSlot::MISSILE_WEAPON)
-		add_state(ActorState::IS_RANGED);
 
 	return true;
 }
@@ -1001,10 +978,6 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 
 		// Remove equipped state
 		it->item->remove_state(ActorState::IS_EQUIPPED);
-
-		// Reset ranged state when the missile weapon slot is vacated
-		if (slot == EquipmentSlot::MISSILE_WEAPON)
-			remove_state(ActorState::IS_RANGED);
 
 		// Return item to inventory
 		[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(it->item), *this);

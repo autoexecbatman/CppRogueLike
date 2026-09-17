@@ -73,6 +73,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionTrackerTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RangedWeaponTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp

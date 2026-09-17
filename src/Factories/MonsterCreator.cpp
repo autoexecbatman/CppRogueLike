@@ -594,7 +594,6 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	if (params.aiType == MonsterAiType::RANGED)
 	{
 		c->ai = std::make_unique<AiMonsterRanged>();
-		c->add_state(ActorState::IS_RANGED);
 	}
 	else
 	{

@@ -149,7 +149,7 @@ void TargetingSystem::draw_aoe_preview(GameContext& ctx, Vector2D center, int ra
 
 void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 {
-	if (!ctx.player()->has_state(ActorState::IS_RANGED))
+	if (!ctx.player()->has_ranged_weapon())
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
 		return;

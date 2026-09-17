@@ -278,7 +278,6 @@ void PlayerController::pick_item(GameContext& ctx)
 
 	if (addResult.has_value())
 	{
-		playerOwner.sync_ranged_state(ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
 	}
 	else
@@ -311,7 +310,6 @@ Item* PlayerController::chose_from_inventory(int ascii, GameContext& ctx)
 		if (index >= 0 && index < playerOwner.inventoryData.items.size())
 		{
 			Item* item = playerOwner.inventoryData.items.at(index).get();
-			playerOwner.sync_ranged_state(ctx);
 			return item;
 		}
 		else

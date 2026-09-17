@@ -91,10 +91,6 @@ public:
 	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx);
 	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx);
 
-	// Keeps IS_RANGED in step with the missile slot. Player-only: no other
-	// creature has equipment slots to read.
-	void sync_ranged_state(GameContext& ctx);
-
 	bool is_player() const noexcept override { return true; }
 
 	// AD&D 2e Open Locks: Rogue-only, level-based percentage chance

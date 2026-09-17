@@ -475,6 +475,12 @@ int Creature::worn_resistance_strength(DamageType damageType) const noexcept
 	return greatest;
 }
 
+bool Creature::has_ranged_weapon() const noexcept
+{
+	const Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
+	return missile != nullptr && missile->is_ranged_weapon();
+}
+
 Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 {
 	auto worn = std::ranges::find_if(equippedItems, matches_slot(slot));
@@ -615,39 +621,6 @@ void Creature::unequip(Item& item, GameContext& ctx)
 		if (item.is_weapon())
 		{
 			ctx.messageSystem->log("Unequipped weapon - now unarmed");
-
-			// Check for ranged weapon - use ItemClass system
-			if (item.is_ranged_weapon())
-			{
-				// Remove the ranged state
-				if (has_state(ActorState::IS_RANGED))
-				{
-					remove_state(ActorState::IS_RANGED);
-					ctx.messageSystem->log("Removed IS_RANGED state after unequipping " + item.actorData.name);
-				}
-			}
-		}
-
-		// Double-check all inventory to see if we still should have IS_RANGED
-		bool hasRangedWeapon = false;
-		assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
-		for (const auto& invItem : inventoryData.items)
-		{
-			if (invItem->has_state(ActorState::IS_EQUIPPED) && invItem->behavior)
-			{
-				if (invItem->is_ranged_weapon())
-				{
-					hasRangedWeapon = true;
-					break;
-				}
-			}
-		}
-
-		// Force sync the IS_RANGED state
-		if (!hasRangedWeapon && has_state(ActorState::IS_RANGED))
-		{
-			remove_state(ActorState::IS_RANGED);
-			ctx.messageSystem->log("Force removed IS_RANGED state - no ranged weapons equipped");
 		}
 	}
 }

@@ -241,6 +241,15 @@ public:
 	// runs for any creature.
 	[[nodiscard]] Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 
+	// Whether this creature can attack at a distance: a ranged weapon is in its
+	// missile slot. Asked of the slot when it matters rather than mirrored into a
+	// flag, so there is nothing to keep in step and nothing to go stale.
+	//
+	// Example, holding a long bow:
+	//   creature.has_ranged_weapon();   // -> true
+	//   creature.has_ranged_weapon();   // -> false once the slot is empty
+	[[nodiscard]] bool has_ranged_weapon() const noexcept;
+
 	// How strongly the worn equipment resists the given type, in rings: the
 	// greatest over every worn item of its own effect and its enhancement. Like
 	// protections do not stack, so two rings of fire resistance are one ring.
