@@ -52,6 +52,11 @@ $probes = @(
         anchor = 'assert(has_slot(slot) && "Creature::wear called with a slot this body does not have");'
     },
     @{
+        test   = "AssertProbeDeathTest.HitDiceAtZeroAbort"
+        file   = "src/Actor/Creature.cpp"
+        anchor = 'assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");'
+    },
+    @{
         test   = "AssertProbeDeathTest.BuildingAMonsterWithNoBodyPlanRegistryAborts"
         file   = "src/Factories/MonsterCreator.cpp"
         anchor = 'assert(ctx.bodyPlanRegistry && "MonsterCreator::create_from_params called without a bodyPlanRegistry");'

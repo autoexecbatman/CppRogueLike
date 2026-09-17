@@ -72,6 +72,7 @@ int ShopKeeper::get_sell_price(const Item& item) const
 
 void ShopKeeper::generate_initial_inventory(GameContext& ctx)
 {
+	assert(ctx.levelManager && "ShopKeeper::generate_initial_inventory called without a levelManager");
 	shopInventory.items.clear();
 
 	// Generate 3-7 random items based on shop type

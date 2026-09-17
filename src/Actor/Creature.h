@@ -323,6 +323,13 @@ public:
 	void update_armor_class(GameContext& ctx);
 
 	// Health Pool accessors
+	// Gives the creature the hit points rolled from its hit dice. The dice already
+	// stand for the constitution, so the score is recorded as accounted for and no
+	// adjustment is ever applied on top. Call it after the scores are set. A
+	// character takes its adjustment once instead, so it builds its pool directly.
+	// Refuses a roll at or below zero.
+	void set_hit_dice(int hitPoints);
+
 	[[nodiscard]] bool is_dead() const noexcept { return healthPool->is_dead(); }
 	[[nodiscard]] int get_hp() const noexcept { return healthPool->get_hp(); }
 	[[nodiscard]] int get_max_hp() const noexcept { return healthPool->get_max_hp(); }

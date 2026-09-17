@@ -65,7 +65,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(0);
 		set_thaco(20);
 		armorClass = std::make_unique<ArmorClass>(7);
-		healthPool = std::make_unique<HealthPool>(ctx.dice->d2() + 2);
+		set_hit_dice(ctx.dice->d2() + 2);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 4, "1d4" });
 		set_natural_attack("Venomous fangs");
 
@@ -86,7 +86,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(19);
 		armorClass = std::make_unique<ArmorClass>(5);
-		healthPool = std::make_unique<HealthPool>(ctx.dice->d4() + 3);
+		set_hit_dice(ctx.dice->d4() + 3);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 6, "1d6" });
 		set_natural_attack("Giant fangs");
 
@@ -107,7 +107,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(17);
 		armorClass = std::make_unique<ArmorClass>(5);
-		healthPool = std::make_unique<HealthPool>(ctx.dice->d8() + 5);
+		set_hit_dice(ctx.dice->d8() + 5);
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ 1, 8, "1d8" });
 		set_natural_attack("Toxic fangs");
 

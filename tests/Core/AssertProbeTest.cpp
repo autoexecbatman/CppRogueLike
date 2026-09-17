@@ -117,6 +117,16 @@ TEST_F(AssertProbeDeathTest, WearingIntoASlotTheBodyLacksAborts)
 	EXPECT_DEATH(creature->wear(make_item("chain mail"), EquipmentSlot::BODY), "a slot this body does not have");
 }
 
+// Hit dice are rolled from dice with a floor above zero, so a roll at or below
+// it is a caller that has stopped rolling dice. HealthPool itself refuses
+// nothing, and a pool of zero is a creature born dead.
+TEST_F(AssertProbeDeathTest, HitDiceAtZeroAbort)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+
+	EXPECT_DEATH(creature->set_hit_dice(0), "roll at or below zero");
+}
+
 // Every monster's body comes from the registry. Without one it would be built
 // with no slots at all and quietly wear nothing it was authored to carry.
 TEST_F(AssertProbeDeathTest, BuildingAMonsterWithNoBodyPlanRegistryAborts)

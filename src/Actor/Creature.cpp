@@ -274,6 +274,15 @@ void Creature::update_armor_class(GameContext& ctx)
 	}
 }
 
+void Creature::set_hit_dice(int hitPoints)
+{
+	assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");
+	healthPool = std::make_unique<HealthPool>(hitPoints);
+
+	// Recorded now, so the first tick finds nothing to apply.
+	constitutionTracker->set_last_constitution(get_constitution());
+}
+
 void Creature::update_constitution_bonus(GameContext& ctx)
 {
 	const std::optional<int> oldCon = get_last_constitution();

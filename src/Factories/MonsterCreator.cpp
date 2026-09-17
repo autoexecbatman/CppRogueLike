@@ -607,10 +607,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_dr(params.dr);
 	c->set_thaco(params.thaco);
 	c->armorClass = std::make_unique<ArmorClass>(params.ac);
-	c->healthPool = std::make_unique<HealthPool>(hp);
-	// A monster's hit dice already stand for its constitution, so the score is
-	// recorded as accounted for and no bonus is ever applied on top.
-	c->set_last_constitution(c->get_constitution());
+	c->set_hit_dice(hp);
 
 	if (params.aiType == MonsterAiType::RANGED)
 	{

@@ -56,7 +56,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	shopkeeper.set_dr(20);
 	shopkeeper.set_thaco(20);
 	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
-	shopkeeper.healthPool = std::make_unique<HealthPool>(100);
+	shopkeeper.set_hit_dice(100);
 	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
 	// A merchant is a person with a knife, so the dagger is a real item in a
 	// real hand rather than a name on the creature.
