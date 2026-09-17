@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=FireballDamageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Systems/SpellSystem.cpp",
+      "original": "creature->take_damage_and_check_death(dealt, ctx, DamageType::FIRE);",
+      "mutated": "creature->take_damage_and_check_death(dealt, ctx, DamageType::PHYSICAL);",
+      "catches": "the burst typed as physical again, so fire resistance does nothing"
+    },
+    {
+      "file": "src/Systems/SpellSystem.cpp",
+      "original": "const int dealt = (save >= 15) ? burst.totalDamage / 2 : burst.totalDamage;",
+      "mutated": "const int dealt = (save > 15) ? burst.totalDamage / 2 : burst.totalDamage;",
+      "catches": "a save of exactly 15 no longer halving"
+    },
+    {
+      "file": "src/Systems/SpellSystem.cpp",
+      "original": "const int dealt = (save >= 15) ? burst.totalDamage / 2 : burst.totalDamage;",
+      "mutated": "const int dealt = burst.totalDamage;",
+      "catches": "the save ignored entirely"
+    },
+    {
+      "file": "src/Systems/SpellSystem.cpp",
+      "original": "if (creature->get_tile_distance(center) > static_cast<double>(radius))",
+      "mutated": "if (creature->get_tile_distance(center) > static_cast<double>(radius) + 1.0)",
+      "catches": "the burst reaching one tile past its radius"
+    },
+    {
+      "file": "src/Systems/SpellSystem.cpp",
+      "original": "burst.diceCount = std::min(casterLevel, 10);",
+      "mutated": "burst.diceCount = casterLevel;",
+      "catches": "the ten-dice ceiling removed"
+    }
+  ]
+}

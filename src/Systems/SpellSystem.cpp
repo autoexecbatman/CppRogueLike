@@ -19,6 +19,7 @@
 #include "../Actor/Pickable.h"
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
 #include "../Core/Paths.h"
 #include "../Items/MagicalItemEffects.h"
@@ -978,6 +979,37 @@ void SpellSystem::cast_web(
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
 
+SpellSystem::FireballBurst SpellSystem::burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx)
+{
+	// AD&D 2e: 1d6 per caster level, max 10d6
+	FireballBurst burst{};
+	burst.diceCount = std::min(casterLevel, 10);
+	for (int die = 0; die < burst.diceCount; ++die)
+	{
+		burst.totalDamage += ctx.dice->roll(1, 6);
+	}
+
+	for (const auto& creature : *ctx.creatures)
+	{
+		if (!creature || creature->is_dead())
+		{
+			continue;
+		}
+		if (creature->get_tile_distance(center) > static_cast<double>(radius))
+		{
+			continue;
+		}
+
+		// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
+		const int save = ctx.dice->roll(1, 20);
+		const int dealt = (save >= 15) ? burst.totalDamage / 2 : burst.totalDamage;
+		creature->take_damage_and_check_death(dealt, ctx, DamageType::FIRE);
+		++burst.struck;
+	}
+
+	return burst;
+}
+
 void SpellSystem::cast_fireball(
 	Creature& caster,
 	std::function<void(GameContext&)> onSuccess,
@@ -1002,38 +1034,13 @@ void SpellSystem::cast_fireball(
 
 		SpellAnimations::animate_explosion(center, radius, innerCtx);
 
-		// AD&D 2e: 1d6 per caster level, max 10d6
-		int diceCnt = std::min(casterLevel, 10);
-		int totalDamage = 0;
-		for (int die = 0; die < diceCnt; ++die)
-		{
-			totalDamage += innerCtx.dice->roll(1, 6);
-		}
-
-		int affected = 0;
-		for (const auto& creature : *innerCtx.creatures)
-		{
-			if (!creature || creature->is_dead())
-			{
-				continue;
-			}
-			if (creature->get_tile_distance(center) > static_cast<double>(radius))
-			{
-				continue;
-			}
-
-			// AD&D 2e: Save vs. Spells (d20 >= 15) for half damage
-			int save = innerCtx.dice->roll(1, 20);
-			int dealt = (save >= 15) ? totalDamage / 2 : totalDamage;
-			creature->take_damage_and_check_death(dealt, innerCtx);
-			++affected;
-		}
+		const FireballBurst burst = burst_fireball(center, casterLevel, radius, innerCtx);
 
 		innerCtx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Fireball! ");
-		innerCtx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", diceCnt, totalDamage));
-		if (affected > 0)
+		innerCtx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}d6 = {} damage", burst.diceCount, burst.totalDamage));
+		if (burst.struck > 0)
 		{
-			innerCtx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", affected));
+			innerCtx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({} struck)", burst.struck));
 		}
 		innerCtx.messageSystem->finalize_message();
 
@@ -1111,7 +1118,7 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 		totalDamage += damage;
 		damagePerTarget[target] += damage;
 
-		target->take_damage_and_check_death(damage, ctx);
+		target->take_damage_and_check_death(damage, ctx, DamageType::MAGIC);
 	}
 
 	// Message

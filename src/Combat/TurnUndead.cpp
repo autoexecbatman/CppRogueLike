@@ -4,6 +4,7 @@
 #include "../ActorTypes/Player.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
+#include "DamageInfo.h"
 #include "TurnUndead.h"
 #include "TurningTable.h"
 
@@ -85,7 +86,7 @@ TurnUndeadReport turn_undead(Creature& priest, GameContext& ctx)
 
 		if (result.outcome == TurningOutcome::DESTROYED)
 		{
-			undead->take_damage_and_check_death(undead->get_hp(), ctx);
+			undead->take_damage_and_check_death(undead->get_hp(), ctx, DamageType::MAGIC);
 			report.destroyed.push_back(undead);
 			continue;
 		}

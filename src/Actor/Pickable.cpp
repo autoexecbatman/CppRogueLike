@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <variant>
 
+#include "../Combat/DamageInfo.h"
 #include "../Utils/VariantVisitor.h"
 
 #include "../Actor/Creature.h"
@@ -429,7 +430,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		ctx.messageSystem->finalize_message();
 		SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
 		ctx.messageSystem->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
-		target->take_damage_and_check_death(targetScroll.damage, ctx);
+		target->take_damage_and_check_death(targetScroll.damage, ctx, DamageType::LIGHTNING);
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 		return consume_item(owner, wearer);
 	}
@@ -462,7 +463,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			if (innerCtx.player()->get_tile_distance(targetPos) <= aoeRadius)
 			{
 				SpellAnimations::animate_creature_hit(innerCtx.player()->position, innerCtx);
-				innerCtx.player()->take_damage_and_check_death(scrollDamage, innerCtx);
+				innerCtx.player()->take_damage_and_check_death(scrollDamage, innerCtx, DamageType::FIRE);
 			}
 
 			for (const auto& creature : *innerCtx.creatures)
@@ -481,7 +482,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 					WHITE_BLACK_PAIR,
 					std::format("The {} gets engulfed in flames! ({} damage)", creature->actorData.name, scrollDamage));
 				innerCtx.messageSystem->finalize_message();
-				creature->take_damage_and_check_death(scrollDamage, innerCtx);
+				creature->take_damage_and_check_death(scrollDamage, innerCtx, DamageType::FIRE);
 			}
 			innerCtx.creatureManager->cleanup_dead_creatures(*innerCtx.creatures);
 		}

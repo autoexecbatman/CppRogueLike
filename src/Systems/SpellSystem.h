@@ -5,6 +5,8 @@
 #include <string_view>
 #include <vector>
 
+#include "../Utils/Vector2D.h"
+
 // Forward declarations
 class Player;
 class Creature;
@@ -105,6 +107,23 @@ public:
 		std::string source{}; // "Ring", "Helm", etc.
 	};
 	static std::vector<ItemGrantedSpell> get_item_granted_spells(const Player& player);
+
+	// What one fireball did: the dice it rolled and how many it struck.
+	struct FireballBurst
+	{
+		int diceCount{ 0 };
+		int totalDamage{ 0 };
+		int struck{ 0 };
+	};
+
+	// Burns every living creature within radius of center for 1d6 per caster
+	// level, ten dice at most, halved by a save versus spells of 15 or better. The
+	// damage is fire, so fire resistance reduces it. Public so a test can reach the
+	// burst without driving the targeting menu that precedes it in play.
+	//
+	// Example, caster level 3, one goblin adjacent, dice forced to 6, 6, 6 and a save of 1:
+	//   burst_fireball(center, 3, 2, ctx);   // -> { 3, 18, 1 }, goblin takes 18
+	static FireballBurst burst_fireball(Vector2D center, int casterLevel, int radius, GameContext& ctx);
 
 	// Memorization
 	static void show_memorization_menu(Player& player, GameContext& ctx);

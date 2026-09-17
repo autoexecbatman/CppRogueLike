@@ -12,6 +12,7 @@
 #include "../Actor/Creature.h"
 #include "../Colors/Colors.h"
 #include "../Combat/AttackKind.h"
+#include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
 #include "../Map/Map.h"
 #include "../Persistent/Persistent.h"
@@ -91,7 +92,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 					ctx.messageSystem->message(WHITE_BLACK_PAIR, " damage!", true);
 
 					// Apply damage directly
-					ctx.player()->take_damage_and_check_death(totalDamage, ctx);
+					ctx.player()->take_damage_and_check_death(totalDamage, ctx, DamageType::PHYSICAL);
 
 					// Also try for poison
 					if (can_poison_attack(ctx))
@@ -364,7 +365,7 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, " extra poison damage!", true);
 
 		// Deal the poison damage
-		target.take_damage_and_check_death(poisonDamage, ctx);
+		target.take_damage_and_check_death(poisonDamage, ctx, DamageType::POISON);
 
 		// Reset cooldown
 		poisonCooldown = POISON_COOLDOWN;

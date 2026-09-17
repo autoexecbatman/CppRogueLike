@@ -334,8 +334,8 @@ public:
 	void set_temp_hp(int value) noexcept { healthPool->set_temp_hp(value); }
 	void add_temp_hp(int amount) noexcept { healthPool->add_temp_hp(amount); }
 	int heal(int hpToHeal) { return healthPool->heal(hpToHeal); }
-	int take_damage(int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL);
-	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType = DamageType::PHYSICAL);
+	int take_damage(int damage, GameContext& ctx, DamageType damageType);
+	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType);
 
 	// Constitution tracking accessors
 	[[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }

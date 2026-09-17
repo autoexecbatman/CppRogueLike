@@ -6,6 +6,7 @@
 
 #include "../ActorTypes/Player.h"
 #include "../Colors/Colors.h"
+#include "../Combat/DamageInfo.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
 #include "../Systems/MessageSystem.h"
@@ -250,7 +251,7 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		// Take small damage occasionally
 		if (ctx.dice->d20() == 1)
 		{ // 5% chance each turn
-			ctx.player()->take_damage_and_check_death(1, ctx);
+			ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
 			ctx.messageSystem->append_message_part(get_hunger_color(), "You're starving!");
 			ctx.messageSystem->finalize_message();
 		}
@@ -263,7 +264,7 @@ void HungerSystem::apply_hunger_effects(GameContext& ctx)
 		ctx.messageSystem->append_message_part(get_hunger_color(), "You are dying from starvation!");
 		ctx.messageSystem->finalize_message();
 		// Take damage every turn
-		ctx.player()->take_damage_and_check_death(1, ctx);
+		ctx.player()->take_damage_and_check_death(1, ctx, DamageType::PHYSICAL);
 		break;
 	}
 

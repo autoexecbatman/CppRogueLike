@@ -66,6 +66,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/Thac0ProgressionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/TileDefinitionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SleepSpellTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/FireballDamageTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp

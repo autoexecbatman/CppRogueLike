@@ -1,0 +1,17 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "./build/bin/Debug/test_exe.exe --gtest_filter=ItemCreatorTest.*ResistancePotion*"
+  ],
+  "mutations": [
+    {
+      "file": "data/content/items.json",
+      "original": "\"consumableBuff\": \"fire_resistance\",",
+      "mutated": "\"consumableBuff\": \"none\",",
+      "catches": "the fire potion granting no buff, as the data once did"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 // file: Trap.cpp
 // Implementation of trap mechanics: detection, triggering, disarming, damage
 
+#include "../Combat/DamageInfo.h"
 #include "Trap.h"
 #include "../Core/GameContext.h"
 #include "../Random/RandomDice.h"
@@ -143,7 +144,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 				"You trigger the " + trapName + " and take " + std::to_string(damage) + " damage!", true);
 		}
 
-		creature.take_damage_and_check_death(damage, ctx);
+		creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
 
 		// 50% chance trap is destroyed after triggering
 		if (ctx.dice->d2() == 1)
