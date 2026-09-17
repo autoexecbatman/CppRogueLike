@@ -175,7 +175,10 @@ void Creature::save(json& j)
 	}
 	// Save constitution tracker state
 	json constJson;
-	constJson["lastConstitution"] = get_last_constitution();
+	if (const auto lastConstitution = get_last_constitution(); lastConstitution.has_value())
+	{
+		constJson["lastConstitution"] = *lastConstitution;
+	}
 	j["constitutionTracker"] = constJson;
 	// Save experience reward
 	if (experienceReward)
@@ -273,7 +276,7 @@ void Creature::update_armor_class(GameContext& ctx)
 
 void Creature::update_constitution_bonus(GameContext& ctx)
 {
-	const int oldCon = get_last_constitution();
+	const std::optional<int> oldCon = get_last_constitution();
 	const auto result = constitutionTracker->apply_constitution_changes(*this, ctx);
 
 	if (result.hpDifference == 0)
@@ -284,19 +287,20 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	set_max_hp(get_max_hp() + result.hpDifference);
 	set_hp(get_hp() + result.hpDifference);
 
-	// Log only for player
-	if (is_player())
+	// A first application accounts for the score the creature was made with;
+	// only a move between two scores is a change worth telling the player.
+	if (is_player() && !result.firstApplication)
 	{
 		if (result.hpDifference > 0)
 		{
 			ctx.messageSystem->message(GREEN_BLACK_PAIR,
-				std::format("Constitution increased from {} to {}! You gain {} hit points.", oldCon, get_constitution(), result.hpDifference),
+				std::format("Constitution increased from {} to {}! You gain {} hit points.", *oldCon, get_constitution(), result.hpDifference),
 				true);
 		}
 		else
 		{
 			ctx.messageSystem->message(RED_BLACK_PAIR,
-				std::format("Constitution decreased from {} to {}! You lose {} hit points.", oldCon, get_constitution(), -result.hpDifference),
+				std::format("Constitution decreased from {} to {}! You lose {} hit points.", *oldCon, get_constitution(), -result.hpDifference),
 				true);
 		}
 	}

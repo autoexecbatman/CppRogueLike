@@ -25,3 +25,15 @@ enum class CreatureClass
 	WIZARD,
 	MONSTER,
 };
+
+// Whether a class advances on the warrior tables - the constitution column with
+// the bonus above +2, and the warrior hit dice. Fighter is the only warrior the
+// game has; a paladin or ranger joins here, and every warrior rule follows.
+//
+// Example:
+//   is_warrior(CreatureClass::FIGHTER);  // -> true
+//   is_warrior(CreatureClass::WIZARD);   // -> false
+[[nodiscard]] inline constexpr bool is_warrior(CreatureClass creatureClass)
+{
+	return creatureClass == CreatureClass::FIGHTER;
+}

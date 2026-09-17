@@ -3,6 +3,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <optional>
 
 #include "../Ai/Ai.h"
 #include "../Combat/ArmorClass.h"
@@ -338,7 +339,7 @@ public:
 	void take_damage_and_check_death(int damage, GameContext& ctx, DamageType damageType);
 
 	// Constitution tracking accessors
-	[[nodiscard]] int get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
+	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
 	void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
 	void update_constitution_bonus(GameContext& ctx);
 

@@ -1,6 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
+
+#include "../Actor/CreatureClass.h"
 
 class Creature;
 struct GameContext;
@@ -8,9 +11,15 @@ struct GameContext;
 class ConstitutionTracker
 {
 private:
-    int lastConstitution{};
+    // The score whose bonus the owner's hit points already include. Empty until
+    // the first application, so a fresh creature is never compared against a
+    // score it did not have.
+    std::optional<int> lastConstitution{};
 
-    [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, GameContext& ctx) const;
+    // The hit point adjustment for a score, by class. Player's Handbook Table 3:
+    // the table's bonus above +2 belongs to warriors; every other class stops at
+    // +2, and a penalty is never capped. A score off the table adjusts by 0.
+    [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, CreatureClass creatureClass, GameContext& ctx) const;
     [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
 
 public:
@@ -21,7 +30,7 @@ public:
     ConstitutionTracker& operator=(const ConstitutionTracker&) = delete;
     ConstitutionTracker& operator=(ConstitutionTracker&&) = delete;
 
-    [[nodiscard]] int get_last_constitution() const noexcept { return lastConstitution; }
+    [[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return lastConstitution; }
     void set_last_constitution(int value) noexcept { lastConstitution = value; }
 
     struct ConstitutionChangeResult
@@ -30,6 +39,9 @@ public:
         int hpDifference{0};
         int oldBonus{0};
         int newBonus{0};
+        // True when the bonus was applied for the first time rather than moved:
+        // there was no earlier score, so there is no change to report.
+        bool firstApplication{false};
     };
 
     [[nodiscard]] ConstitutionChangeResult apply_constitution_changes(
