@@ -355,7 +355,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.wisDice = DiceExpr{ 3, 6, 0 };
 			defaults.chaDice = DiceExpr{ 3, 6, 0 };
 			defaults.naturalAttack = "claws";
-			defaults.damage = DamageInfo{ "1d4", DamageType::PHYSICAL };
+			defaults.damage = DamageInfo{ DiceExpr{ 1, 4, 0 }, DamageType::PHYSICAL };
 			defaults.baseWeight = 10;
 			defaults.levelMinimum = 1;
 			defaults.levelMaximum = 5;
@@ -917,9 +917,9 @@ std::string MonsterEditor::field_label(FieldId f) const
 	case FieldId::CHA_SIDES:  return "CHA Sides";
 	case FieldId::CHA_BONUS:  return "CHA Bonus";
 	case FieldId::WEAPON:     return "Natural Attack";
-	case FieldId::DMG_MIN:    return "Dmg Min";
-	case FieldId::DMG_MAX:    return "Dmg Max";
-	case FieldId::DMG_DISPLAY: return "Dmg Display";
+	case FieldId::DMG_NUM:    return "Dmg Num";
+	case FieldId::DMG_SIDES:  return "Dmg Sides";
+	case FieldId::DMG_BONUS:  return "Dmg Bonus";
 	case FieldId::AI_TYPE:    return "AI Type";
 	case FieldId::ETHICS:     return "Ethics";
 	case FieldId::MORALITY:   return "Morality";
@@ -930,6 +930,11 @@ std::string MonsterEditor::field_label(FieldId f) const
 	case FieldId::TILE:       return "Tile";
 	default:                  return "???";
 	}
+}
+
+void MonsterEditor::set_damage_dice(int num, int sides, int bonus)
+{
+	m_working.damage = DamageInfo{ DiceExpr{ num, sides, bonus }, m_working.damage.damageType };
 }
 
 std::string MonsterEditor::field_value(FieldId f) const
@@ -964,9 +969,9 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::CHA_SIDES:   return std::format("{}", m_working.chaDice.sides);
 	case FieldId::CHA_BONUS:   return std::format("{}", m_working.chaDice.bonus);
 	case FieldId::WEAPON:      return m_working.naturalAttack;
-	case FieldId::DMG_MIN:     return std::format("{}", m_working.damage.minDamage);
-	case FieldId::DMG_MAX:     return std::format("{}", m_working.damage.maxDamage);
-	case FieldId::DMG_DISPLAY: return m_working.damage.displayRoll;
+	case FieldId::DMG_NUM:     return std::format("{}", m_working.damage.dice.num);
+	case FieldId::DMG_SIDES:   return std::format("{}", m_working.damage.dice.sides);
+	case FieldId::DMG_BONUS:   return std::format("{}", m_working.damage.dice.bonus);
 	case FieldId::AI_TYPE:     return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
 	case FieldId::ETHICS:      return std::string(ethics_name(m_working.ethics));
 	case FieldId::MORALITY:    return std::string(morality_name(m_working.morality));
@@ -983,8 +988,7 @@ bool MonsterEditor::field_is_string(FieldId f) const
 {
 	return f == FieldId::NAME
 		|| f == FieldId::CORPSE
-		|| f == FieldId::WEAPON
-		|| f == FieldId::DMG_DISPLAY;
+		|| f == FieldId::WEAPON;
 }
 
 bool MonsterEditor::field_is_toggle(FieldId f) const
@@ -1027,8 +1031,11 @@ void MonsterEditor::field_adjust(FieldId f, int delta)
 	case FieldId::CHA_NUM:    m_working.chaDice.num    = clamp_val(m_working.chaDice.num,    delta, 1,   10); break;
 	case FieldId::CHA_SIDES:  m_working.chaDice.sides  = clamp_val(m_working.chaDice.sides,  delta, 2,   20); break;
 	case FieldId::CHA_BONUS:  m_working.chaDice.bonus  = clamp_val(m_working.chaDice.bonus,  delta, -18, 18); break;
-	case FieldId::DMG_MIN:    m_working.damage.minDamage = clamp_val(m_working.damage.minDamage, delta, 1, 99); break;
-	case FieldId::DMG_MAX:    m_working.damage.maxDamage = clamp_val(m_working.damage.maxDamage, delta, 1, 99); break;
+	// The dice are the record: every change rebuilds the damage, so its text and
+	// its range follow rather than being edited into disagreement.
+	case FieldId::DMG_NUM:    set_damage_dice(clamp_val(m_working.damage.dice.num, delta, 1, 99), m_working.damage.dice.sides, m_working.damage.dice.bonus); break;
+	case FieldId::DMG_SIDES:  set_damage_dice(m_working.damage.dice.num, clamp_val(m_working.damage.dice.sides, delta, 2, 20), m_working.damage.dice.bonus); break;
+	case FieldId::DMG_BONUS:  set_damage_dice(m_working.damage.dice.num, m_working.damage.dice.sides, clamp_val(m_working.damage.dice.bonus, delta, -99, 99)); break;
 	case FieldId::WEIGHT:     m_working.baseWeight      = clamp_val(m_working.baseWeight,      delta, 0, 100); break;
 	case FieldId::DEPTH_MIN:  m_working.levelMinimum    = clamp_val(m_working.levelMinimum,    delta, 1, 20); break;
 	case FieldId::DEPTH_MAX:  m_working.levelMaximum    = clamp_val(m_working.levelMaximum,    delta, 0, 20); break;
@@ -1065,7 +1072,6 @@ void MonsterEditor::field_set_string(FieldId f, std::string val)
 	case FieldId::NAME:        m_working.name = std::move(val); break;
 	case FieldId::CORPSE:      m_working.corpseName = std::move(val); break;
 	case FieldId::WEAPON:      m_working.naturalAttack = std::move(val); break;
-	case FieldId::DMG_DISPLAY: m_working.damage.displayRoll = std::move(val); break;
 	default: break;
 	}
 }

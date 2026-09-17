@@ -96,3 +96,26 @@ TEST(DiceExprTest, RollDiceSumsAndAddsTheBonus)
 
 	EXPECT_EQ(roll_dice(&dice, DiceExpr{ 2, 6, 1 }), 8);
 }
+
+// Writing an expression out is the inverse of reading one in: the editor stores
+// dice and the data file stores text, and a round trip through both must not
+// change the dice.
+TEST(DiceExprTest, WritesTheExpressionTheDataUses)
+{
+	EXPECT_EQ(to_text(DiceExpr{ 1, 8, 0 }), "1d8");
+	EXPECT_EQ(to_text(DiceExpr{ 1, 12, 5 }), "1d12+5");
+	EXPECT_EQ(to_text(DiceExpr{ 2, 6, -1 }), "2d6-1");
+	EXPECT_EQ(to_text(DiceExpr{ 0, 0, 5 }), "5") << "a fixed value has no dice to write";
+}
+
+TEST(DiceExprTest, TextSurvivesARoundTrip)
+{
+	for (const DiceExpr& expr : { DiceExpr{ 1, 8, 0 }, DiceExpr{ 3, 12, 0 }, DiceExpr{ 1, 12, 5 },
+		DiceExpr{ 2, 6, -1 }, DiceExpr{ 0, 0, 5 }, DiceExpr{ 10, 6, 0 } })
+	{
+		const DiceExpr read = parse_dice_expression(to_text(expr));
+		EXPECT_EQ(read.num, expr.num) << to_text(expr);
+		EXPECT_EQ(read.sides, expr.sides) << to_text(expr);
+		EXPECT_EQ(read.bonus, expr.bonus) << to_text(expr);
+	}
+}

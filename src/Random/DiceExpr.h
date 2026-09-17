@@ -109,6 +109,33 @@ inline DiceExpr parse_dice_expression(std::string_view text)
 	return expr;
 }
 
+// The expression as the data writes it, and the inverse of
+// parse_dice_expression: parsing what this returns gives the same dice back.
+// A fixed value, having no dice, is written as its number alone.
+//
+// Example:
+//   to_text(DiceExpr{ 1, 12, 5 });   // -> "1d12+5"
+//   to_text(DiceExpr{ 2, 6, -1 });   // -> "2d6-1"
+//   to_text(DiceExpr{ 0, 0, 5 });    // -> "5"
+inline std::string to_text(const DiceExpr& expr)
+{
+	if (expr.num == 0)
+	{
+		return std::to_string(expr.bonus);
+	}
+	std::string text = std::to_string(expr.num) + "d" + std::to_string(expr.sides);
+	if (expr.bonus > 0)
+	{
+		text += "+" + std::to_string(expr.bonus);
+	}
+	else if (expr.bonus < 0)
+	{
+		// to_string writes the minus sign itself.
+		text += std::to_string(expr.bonus);
+	}
+	return text;
+}
+
 // Rolls every die of the expression and returns each value; the bonus is the
 // caller's to add, because rules that act per die must see the dice alone.
 //

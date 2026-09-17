@@ -63,9 +63,9 @@ private:
 		CHA_SIDES,
 		CHA_BONUS,
 		WEAPON,
-		DMG_MIN,
-		DMG_MAX,
-		DMG_DISPLAY,
+		DMG_NUM,
+		DMG_SIDES,
+		DMG_BONUS,
 		AI_TYPE,
 		ETHICS,
 		MORALITY,
@@ -123,6 +123,9 @@ void load_working();
 	[[nodiscard]] FieldId current_field() const;
 
 	[[nodiscard]] std::string field_label(FieldId f) const;
+	// Rebuilds the working damage from dice, so its text and its range follow.
+	void set_damage_dice(int num, int sides, int bonus);
+
 	[[nodiscard]] std::string field_value(FieldId f) const;
 	[[nodiscard]] bool field_is_string(FieldId f) const;
 	[[nodiscard]] bool field_is_toggle(FieldId f) const;

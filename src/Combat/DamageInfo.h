@@ -45,18 +45,29 @@ struct DamageInfo
 	DamageInfo()
 		: dice{ 1, 2, 0 }, minDamage(1), maxDamage(2), displayRoll("1d2"), damageType(DamageType::PHYSICAL) {}
 
-	// From the dice alone: the range is derived, so there is no second copy of
-	// it to disagree.
+	// From the dice alone: the display and the range are derived, so there is no
+	// second copy of either to disagree. This is what an editor holds - dice -
+	// and what the data file stores is the text of them.
+	//
+	// Example:
+	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.displayRoll;   // -> "2d4"
+	//   DamageInfo{ DiceExpr{ 2, 4, 0 }, DamageType::FIRE }.maxDamage;     // -> 8
+	DamageInfo(const DiceExpr& rolled, DamageType type)
+		: dice(rolled)
+		, minDamage(dice.min_total())
+		, maxDamage(dice.max_total())
+		, displayRoll(to_text(dice))
+		, damageType(type)
+	{
+	}
+
+	// From the text the data file stores.
 	//
 	// Example:
 	//   DamageInfo{ "2d4", DamageType::FIRE }.minDamage;   // -> 2
 	//   DamageInfo{ "2d4", DamageType::FIRE }.maxDamage;   // -> 8
 	DamageInfo(const std::string& display, DamageType type)
-		: dice(parse_dice_expression(display))
-		, minDamage(dice.min_total())
-		, maxDamage(dice.max_total())
-		, displayRoll(display)
-		, damageType(type)
+		: DamageInfo(parse_dice_expression(display), type)
 	{
 	}
 

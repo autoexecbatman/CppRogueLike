@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DiceExprTest.*:DamageInfoTest.*:MonsterRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Random/DiceExpr.h",
+      "original": "\t\ttext += \"+\" + std::to_string(expr.bonus);",
+      "mutated": "\t\ttext += std::to_string(expr.bonus);",
+      "catches": "a positive bonus written without its plus, which will not parse back"
+    },
+    {
+      "file": "src/Random/DiceExpr.h",
+      "original": "\t\treturn std::to_string(expr.bonus);",
+      "mutated": "\t\treturn \"0d0\";",
+      "catches": "a fixed value written as dice that roll nothing"
+    },
+    {
+      "file": "src/Random/DiceExpr.h",
+      "original": "\tstd::string text = std::to_string(expr.num) + \"d\" + std::to_string(expr.sides);",
+      "mutated": "\tstd::string text = std::to_string(expr.sides) + \"d\" + std::to_string(expr.num);",
+      "catches": "the count and the sides written the wrong way round"
+    },
+    {
+      "file": "src/Combat/DamageInfo.h",
+      "original": "\t\t, displayRoll(to_text(dice))",
+      "mutated": "\t\t, displayRoll(\"1d2\")",
+      "catches": "the display no longer naming the dice it was built from"
+    }
+  ]
+}
