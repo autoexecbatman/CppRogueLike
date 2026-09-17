@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ShopStockLevelTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Systems/ShopKeeper.cpp",
+      "original": "auto item = ItemCreator::create_random_of_category(\"armor\", { 0, 0 }, ctx, dungeonLevel);",
+      "mutated": "auto item = ItemCreator::create_random_of_category(\"armor\", { 0, 0 }, ctx, 1);",
+      "catches": "armour drawn at a fixed level rather than the one the shop was told"
+    },
+    {
+      "file": "src/Systems/ShopKeeper.cpp",
+      "original": "std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel, ctx);",
+      "mutated": "std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel + 1, ctx);",
+      "catches": "the level handed down off by one"
+    },
+    {
+      "file": "src/Systems/ShopKeeper.cpp",
+      "original": "int item_count = ctx.dice->roll(3, 7);",
+      "mutated": "int item_count = ctx.dice->roll(3, 7) - 1;",
+      "catches": "one item fewer than the count rolled"
+    }
+  ]
+}

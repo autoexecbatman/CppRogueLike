@@ -74,7 +74,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);
 	ShopQuality shopQuality = select_shop_quality_for_level(dungeonLevel, ctx);
 	shopkeeper.shop = std::make_unique<ShopKeeper>(shopType, shopQuality);
-	shopkeeper.shop->generate_initial_inventory(ctx);
+	shopkeeper.shop->generate_initial_inventory(dungeonLevel, ctx);
 
 	ctx.messageSystem->log(std::format("Created shopkeeper: {} (Level {})", shopkeeper.shop->get_shop_name(), dungeonLevel));
 }

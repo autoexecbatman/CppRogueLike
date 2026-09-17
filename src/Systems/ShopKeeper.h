@@ -44,12 +44,12 @@ private:
 	void generate_shop_name();
 
 	// Random item generation methods
-	std::unique_ptr<Item> generate_random_item_by_type(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_weapon(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_armor(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_potion(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_scroll(GameContext& ctx);
-	std::unique_ptr<Item> generate_random_misc_item(GameContext& ctx);
+	std::unique_ptr<Item> generate_random_item_by_type(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_weapon(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_armor(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_potion(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_scroll(int dungeonLevel, GameContext& ctx);
+	std::unique_ptr<Item> generate_random_misc_item(int dungeonLevel, GameContext& ctx);
 
 public:
 	ShopKeeper(ShopType type, ShopQuality quality);
@@ -84,7 +84,10 @@ public:
 	int get_sell_price(const Item& item) const;
 
 	// Inventory management
-	void generate_initial_inventory(GameContext& ctx);
+	// Stocks the shop with three to seven items eligible at the given dungeon
+	// level, replacing whatever it held. The level is the one the shop was placed
+	// at; nothing here reads it from the context.
+	void generate_initial_inventory(int dungeonLevel, GameContext& ctx);
 
 	// Transaction handling
 	bool process_player_purchase(GameContext& ctx, Item& item, Creature& player);

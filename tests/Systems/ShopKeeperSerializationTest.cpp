@@ -27,7 +27,7 @@ protected:
 
     std::unique_ptr<ShopKeeper> create_test_shop() {
         auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD);
-        shop->generate_initial_inventory(ctx);
+        shop->generate_initial_inventory(1, ctx);
         return shop;
     }
 };
@@ -50,7 +50,7 @@ TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip) {
 
 TEST_F(ShopKeeperSerializationTest, Inventory_Preserved) {
     ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE);
-    original.generate_initial_inventory(ctx);
+    original.generate_initial_inventory(1, ctx);
 
     // Shop should have generated 3-7 items
     size_t original_count = get_item_count(original.get_shop_inventory());
@@ -78,7 +78,7 @@ TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad) {
 
     for (ShopType type : types) {
         ShopKeeper original(type, ShopQuality::AVERAGE);
-        original.generate_initial_inventory(ctx);
+        original.generate_initial_inventory(1, ctx);
 
         json j;
         original.save(j);
@@ -100,7 +100,7 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad) {
 
     for (ShopQuality quality : qualities) {
         ShopKeeper original(ShopType::GENERAL_STORE, quality);
-        original.generate_initial_inventory(ctx);
+        original.generate_initial_inventory(1, ctx);
 
         json j;
         original.save(j);
