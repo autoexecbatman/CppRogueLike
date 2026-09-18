@@ -15,8 +15,8 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t[[maybe_unused]] const auto handedOver = add_item(buyer.inventoryData, std::move(*taken));\n\tassert(handedOver.has_value());",
-      "mutated": "\tassert(add_item(buyer.inventoryData, std::move(*taken)).has_value());",
+      "original": "\t[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer);\n\tassert(handedOver.has_value());",
+      "mutated": "\tassert(add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer).has_value());",
       "catches": "the purchase back inside the assert, taking the gold and handing over nothing"
     },
     {

@@ -41,6 +41,9 @@ protected:
 	{
 		ItemCreator::load(Paths::ITEMS);
 		ctx = mock.to_game_context();
+		// A player built directly has strength 0, whose carry limit is 0, so every item
+		// would be too heavy. Ten is the average 3d6 roll and gives a limit of 50.
+		player.set_strength(10);
 	}
 
 	MockGameContext mock{};
@@ -149,6 +152,37 @@ TEST_F(ShopTransactionTest, AnUnaffordablePurchaseMovesNothing)
 	EXPECT_TRUE(player.inventoryData.items.empty());
 	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore) << "the item stays on the shelf";
 	EXPECT_EQ(owner.get_gold(), 0);
+}
+
+// Buying is held to the same strength-based weight limit as picking up. The purchase
+// used the capacity-only add, so a shop would sell a player what they could not lift.
+// Weights are set here rather than read from the data, so the case is about the rule
+// and not about whichever item happens to be heaviest.
+TEST_F(ShopTransactionTest, APurchaseTooHeavyToCarryMovesNothing)
+{
+	Item& onShelf = shelve("long_sword");
+	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player) + 1;
+	player.adjust_gold(shop.get_buy_price(onShelf));
+	const int buyerGoldBefore = player.get_gold();
+	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
+
+	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
+
+	EXPECT_FALSE(bought) << "a purchase over the carry limit went through";
+	EXPECT_TRUE(player.inventoryData.items.empty());
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore) << "the item stays on the shelf";
+	EXPECT_EQ(player.get_gold(), buyerGoldBefore) << "nothing is paid for a purchase that did not happen";
+}
+
+// The boundary: exactly at the limit is carryable, one over is not.
+TEST_F(ShopTransactionTest, APurchaseExactlyAtTheCarryLimitGoesThrough)
+{
+	Item& onShelf = shelve("long_sword");
+	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player);
+	player.adjust_gold(shop.get_buy_price(onShelf));
+
+	EXPECT_TRUE(shop.process_player_purchase(ctx, onShelf, player, owner))
+		<< "an item that fits exactly must be sold";
 }
 
 // A sale moves the item onto the shelves the buy menu reads, and the shopkeeper - the

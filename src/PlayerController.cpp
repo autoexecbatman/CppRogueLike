@@ -251,9 +251,7 @@ void PlayerController::pick_item(GameContext& ctx)
 	}
 
 	// Pre-check weight before touching ownership — prevents item destruction on rejection
-	const int currentWeight = InventoryOperations::get_total_weight(playerOwner.inventoryData);
-	const int maxWeight = InventoryOperations::get_max_weight(playerOwner);
-	if (currentWeight + item->enhancement.weight > maxWeight)
+	if (!InventoryOperations::is_within_weight_limit(playerOwner.inventoryData, *item, playerOwner))
 	{
 		ctx.messageSystem->message(RED_BLACK_PAIR, "Too heavy to carry.", true);
 		return;

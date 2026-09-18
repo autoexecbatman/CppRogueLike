@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=CarryWeightTest.*:ShopTransactionTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner);",
+      "mutated": "\treturn get_total_weight(inventory) + item.enhancement.weight < get_max_weight(owner);",
+      "catches": "an item that fits exactly being refused"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner);",
+      "mutated": "\treturn item.enhancement.weight <= get_max_weight(owner);",
+      "catches": "the pack's own weight ignored, so a full pack keeps accepting"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tif (!is_within_weight_limit(inventory, *item, owner))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "the checked add no longer checking weight"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\tif (!is_within_weight_limit(buyer.inventoryData, item, buyer))\n\t{",
+      "mutated": "\tif (false)\n\t{",
+      "catches": "a shop selling what the buyer cannot lift, as before"
+    }
+  ]
+}

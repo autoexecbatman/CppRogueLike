@@ -235,15 +235,20 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
 	}
+	if (!is_within_weight_limit(buyer.inventoryData, item, buyer))
+	{
+		ctx.messageSystem->message(WHITE_RED_PAIR, "Too heavy to carry.", true);
+		return false;
+	}
 
 	// The buy menu offers only what is on these shelves, so the item is always found.
 	auto taken = remove_item(shopInventory, item);
 	assert(taken.has_value() && "process_player_purchase called with an item not on the shelves");
 
-	// The item itself moves, so its key and enhancement come with it. The full-pack check
-	// above is the only way this add can fail, and the item lives on in the pack, which
-	// keeps the reference valid for the message below.
-	[[maybe_unused]] const auto handedOver = add_item(buyer.inventoryData, std::move(*taken));
+	// The item itself moves, so its key and enhancement come with it. Room and weight
+	// were checked above, so this add cannot fail, and the item lives on in the pack,
+	// which keeps the reference valid for the message below.
+	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer);
 	assert(handedOver.has_value());
 
 	buyer.adjust_gold(-price);

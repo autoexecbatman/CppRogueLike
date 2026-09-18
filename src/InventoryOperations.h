@@ -58,6 +58,15 @@ int get_total_weight(const CreatureInventory& inventory) noexcept;
 int get_max_weight(const Creature& owner) noexcept;
 bool is_overloaded(const CreatureInventory& inventory, const Creature& owner) noexcept;
 
+// Whether this item can go into the pack without taking what it carries past the
+// owner's strength-based limit. The one statement of that rule: adding, picking up
+// and buying all ask here, so they cannot disagree about what is too heavy.
+//
+// Example:
+//   is_within_weight_limit(player.inventoryData, dagger, player);      // -> true
+//   is_within_weight_limit(player.inventoryData, plateArmour, weakling); // -> false
+bool is_within_weight_limit(const CreatureInventory& inventory, const Item& item, const Creature& owner) noexcept;
+
 // id-based search — creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;
 const Item* find_item_by_id(const CreatureInventory& inventory, uint64_t uniqueId) noexcept;

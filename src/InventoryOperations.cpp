@@ -75,11 +75,7 @@ InventoryResult<bool> add_item_to_inventory(
 		return std::unexpected(InventoryError::FULL);
 	}
 
-	const int itemWeight = item->enhancement.weight;
-	const int currentWeight = get_total_weight(inventory);
-	const int maxWeight = get_max_weight(owner);
-
-	if (currentWeight + itemWeight > maxWeight)
+	if (!is_within_weight_limit(inventory, *item, owner))
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
@@ -207,6 +203,11 @@ int get_max_weight(const Creature& owner) noexcept
 bool is_overloaded(const CreatureInventory& inventory, const Creature& owner) noexcept
 {
 	return get_total_weight(inventory) > get_max_weight(owner);
+}
+
+bool is_within_weight_limit(const CreatureInventory& inventory, const Item& item, const Creature& owner) noexcept
+{
+	return get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner);
 }
 
 // ===== SEARCH OPERATIONS =====
