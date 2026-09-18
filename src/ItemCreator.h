@@ -48,7 +48,6 @@ struct ItemParams
 	bool isSetMode{ false };
 
 	int nutritionValue{ 0 };
-	int goldAmount{ 0 };
 	int acBonus{ 0 };
 
 	bool ranged{ false };

@@ -77,7 +77,6 @@ private:
 		CHA_BONUS,
 		IS_SET_MODE,
 		NUTRITION,
-		GOLD_AMOUNT,
 		TILE,
 		COUNT
 	};

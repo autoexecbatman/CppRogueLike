@@ -36,6 +36,12 @@
       "original": "\tentry.name = required_field(record, key, \"name\").get<std::string>();",
       "mutated": "\tentry.name = record.value(\"name\", key);",
       "catches": "a missing name silently becoming the registry key"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "    \"health_potion\": {\n        \"acBonus\": 0,\n",
+      "mutated": "    \"health_potion\": {\n        \"stray\": 0,\n        \"acBonus\": 0,\n",
+      "catches": "a key in the data the parser never reads, which is how goldAmount lived on unread"
     }
   ]
 }

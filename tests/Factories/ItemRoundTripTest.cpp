@@ -102,7 +102,6 @@ void expect_same_item(const std::string& key, const ItemSnapshot& before, const 
 	EXPECT_EQ(before.params.isSetMode, after.isSetMode) << key << ".isSetMode";
 
 	EXPECT_EQ(before.params.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
-	EXPECT_EQ(before.params.goldAmount, after.goldAmount) << key << ".goldAmount";
 	EXPECT_EQ(before.params.acBonus, after.acBonus) << key << ".acBonus";
 
 	EXPECT_EQ(before.params.ranged, after.ranged) << key << ".ranged";

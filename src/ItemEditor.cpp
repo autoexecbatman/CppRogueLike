@@ -802,7 +802,6 @@ std::string ItemEditor::field_label(FieldId f) const
 	case FieldId::CHA_BONUS:        return "CHA Bonus";
 	case FieldId::IS_SET_MODE:      return "Is Set Mode";
 	case FieldId::NUTRITION:        return "Nutrition Value";
-	case FieldId::GOLD_AMOUNT:      return "Gold Amount";
 	case FieldId::TILE:             return "Tile";
 	default:                        return "???";
 	}
@@ -847,7 +846,6 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::CHA_BONUS:        return std::format("{}", p.chaBonus);
 	case FieldId::IS_SET_MODE:      return p.isSetMode ? "yes" : "no";
 	case FieldId::NUTRITION:        return std::format("{}", p.nutritionValue);
-	case FieldId::GOLD_AMOUNT:      return std::format("{}", p.goldAmount);
 	case FieldId::TILE:             return "(tile)";
 	default:                        return "";
 	}
@@ -948,9 +946,6 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		break;
 	case FieldId::NUTRITION:
 		p.nutritionValue = clamp_val(p.nutritionValue, delta, 0, 9999);
-		break;
-	case FieldId::GOLD_AMOUNT:
-		p.goldAmount = clamp_val(p.goldAmount, delta, 0, 99999);
 		break;
 	default:
 		break;

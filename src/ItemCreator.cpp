@@ -191,7 +191,6 @@ nlohmann::json encode_item_entry(const ItemEntry& entry)
 	record["chaBonus"] = params.chaBonus;
 	record["isSetMode"] = params.isSetMode;
 	record["nutritionValue"] = params.nutritionValue;
-	record["goldAmount"] = params.goldAmount;
 	record["acBonus"] = params.acBonus;
 	record["ranged"] = params.ranged;
 	record["handRequirement"] = encode_hand_requirement(params.handRequirement);
@@ -260,7 +259,6 @@ ItemEntry parse_item_entry(const std::string& key, const nlohmann::json& record)
 	params.chaBonus = required_field(record, key, "chaBonus");
 	params.isSetMode = required_field(record, key, "isSetMode");
 	params.nutritionValue = required_field(record, key, "nutritionValue");
-	params.goldAmount = required_field(record, key, "goldAmount");
 	params.acBonus = required_field(record, key, "acBonus");
 	params.ranged = required_field(record, key, "ranged");
 	params.handRequirement = parse_hand_requirement(required_field(record, key, "handRequirement").get<std::string>());
