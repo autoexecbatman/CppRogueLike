@@ -94,12 +94,7 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
     int conBonus = 0;
     if (stillRollsDice)
     {
-        int con = owner.get_constitution();
-        int conTableSize = static_cast<int>(ctx->dataManager->get_constitution_attributes().size());
-        if (con >= 1 && con <= conTableSize)
-        {
-            conBonus = ctx->dataManager->get_constitution_attributes()[con - 1].HPAdj;
-        }
+        conBonus = ctx->dataManager->constitution_for(owner.get_constitution()).HPAdj;
     }
 
     int totalHPGain = std::max(1, hitDiceRoll + conBonus);

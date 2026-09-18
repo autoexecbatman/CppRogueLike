@@ -20,6 +20,7 @@
 #include "DataManager.h"
 #include "LevelUpSystem.h"
 #include "MessageSystem.h"
+#include "StrengthAttributes.h"
 #include "Attacker.h"
 #include "DamageResolver.h"
 #include "DiceExpr.h"
@@ -72,14 +73,8 @@ void Attacker::perform_single_attack(
 		return;
 	}
 
-	// Validate strength attribute
-	const int strIndex = owner.get_strength() - 1;
-	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.dataManager->get_strength_attributes().size())
-	{
-		ctx.messageSystem->log(std::format("ERROR: Invalid strength {} for {}", owner.get_strength(), owner.actorData.name));
-		return;
-	}
-	const auto& strengthAttr = ctx.dataManager->get_strength_attributes().at(strIndex);
+	// The attacker's row of Table 1, exceptional Strength included.
+	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength());
 
 	const int attackRoll = ctx.dice->d20();
 
@@ -98,7 +93,7 @@ void Attacker::perform_single_attack(
 
 	if (isHit)
 	{
-		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthAttr.dmgAdj, backstab, ctx);
+		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthRow.dmgAdj, backstab, ctx);
 		const int finalDamage = std::max(0, baseDamage - target.get_dr());
 
 		log_attack_hit(
@@ -110,7 +105,7 @@ void Attacker::perform_single_attack(
 			finalDamage,
 			damageRoll,
 			attackDamage,
-			strengthAttr.dmgAdj,
+			strengthRow.dmgAdj,
 			target.get_dr(),
 			handName,
 			ctx);
@@ -195,6 +190,12 @@ int Attacker::calculate_to_hit_roll(
 	if (target.has_state(ActorState::IS_SURPRISED))
 	{
 		hitModifier += 1;
+	}
+
+	// A swing takes Strength's hit adjustment (PHB page 181, "always applied to melees").
+	if (kind == AttackKind::MELEE)
+	{
+		hitModifier += ctx.dataManager->strength_for(attacker.get_strength(), attacker.get_exceptional_strength()).hitProb;
 	}
 
 	// A missile attack takes the dexterity missile adjustment; a swing does not.

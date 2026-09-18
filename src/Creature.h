@@ -104,6 +104,9 @@ protected:
 private:
 	//==Actor Attributes - Base values (buffs calculated dynamically)==
 	int baseStrength{ 0 };
+	// Exceptional Strength as percentile, 100 being 18/00; 0 for none. Counts only while
+	// Strength is 18.
+	int exceptionalStrength{ 0 };
 	int baseDexterity{ 0 };
 	int baseConstitution{ 0 };
 	int baseIntelligence{ 0 };
@@ -168,6 +171,9 @@ public:
 
 	// Const-correct getter methods - return effective values (AD&D 2e: MAX(base, SET) + ADD)
 	int get_strength() const noexcept { return calculate_effective_stat(baseStrength, BuffType::STRENGTH); }
+	// Percentile of exceptional Strength, 1-100 with 100 as 18/00, or 0 for none; the
+	// Strength table reads it only when get_strength() is 18.
+	int get_exceptional_strength() const noexcept { return exceptionalStrength; }
 	int get_dexterity() const noexcept { return calculate_effective_stat(baseDexterity, BuffType::DEXTERITY); }
 	int get_constitution() const noexcept { return calculate_effective_stat(baseConstitution, BuffType::CONSTITUTION); }
 	int get_intelligence() const noexcept { return calculate_effective_stat(baseIntelligence, BuffType::INTELLIGENCE); }
@@ -188,6 +194,7 @@ public:
 
 	// Setter methods - modify base stats
 	void set_strength(int value) noexcept { baseStrength = value; }
+	void set_exceptional_strength(int percentile) noexcept { exceptionalStrength = percentile; }
 	void set_dexterity(int value) noexcept { baseDexterity = value; }
 	void set_constitution(int value) noexcept { baseConstitution = value; }
 	void set_intelligence(int value) noexcept { baseIntelligence = value; }

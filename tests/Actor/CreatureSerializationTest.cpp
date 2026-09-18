@@ -87,6 +87,22 @@ TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
     EXPECT_EQ(loaded->get_hp(), 15);
 }
 
+// Exceptional Strength is part of the saved creature: an 18/76 loads as 18/76.
+TEST_F(CreatureSerializationTest, ExceptionalStrength_Preserved) {
+    auto original = create_test_creature();
+    original->set_strength(18);
+    original->set_exceptional_strength(76);
+
+    json j;
+    original->save(j);
+
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    loaded->healthPool = std::make_unique<HealthPool>(0);
+    loaded->load(j);
+
+    EXPECT_EQ(loaded->get_exceptional_strength(), 76);
+}
+
 TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
     auto original = create_test_creature();
     original->set_hp(-5); // Kill it

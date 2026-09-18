@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=AbilityTableTest.*:CreatureSerializationTest.*:DexterityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tif (score != 18 || exceptional < 1)",
+      "mutated": "\tif (true)",
+      "catches": "exceptional Strength ignored"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\treturn band.exceptionalFrom <= exceptional && exceptional <= band.exceptionalTo;",
+      "mutated": "\t\treturn band.exceptionalFrom <= exceptional;",
+      "catches": "every percentile read as the 18/01-50 band"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\treturn table.back();",
+      "mutated": "\t\treturn Row{};",
+      "catches": "a score past the table reading as no adjustment"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\thitModifier += ctx.dataManager->strength_for(attacker.get_strength(), attacker.get_exceptional_strength()).hitProb;",
+      "mutated": "",
+      "catches": "Strength's hit adjustment never reaching the attack roll"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tconst StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength());",
+      "mutated": "\tconst StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), 0);",
+      "catches": "exceptional Strength left out of the damage"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": " && playerRaceState != PlayerRaceState::HALFLING",
+      "mutated": "",
+      "catches": "a halfling fighter rolling exceptional Strength"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": " && get_strength() == 18;",
+      "mutated": " && get_strength() >= 17;",
+      "catches": "a fighter short of 18 rolling exceptional Strength"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tj[\"exceptionalStrength\"] = exceptionalStrength;",
+      "mutated": "\tj[\"exceptionalStrength\"] = 0;",
+      "catches": "exceptional Strength lost in a save"
+    },
+    {
+      "file": "src/ConstitutionTracker.cpp",
+      "original": "    const int tableAdjustment = ctx.dataManager->constitution_for(constitution).HPAdj;",
+      "mutated": "    const int tableAdjustment = constitution > 19 ? 0 : ctx.dataManager->constitution_for(constitution).HPAdj;",
+      "catches": "Constitution past 19 losing its hit point bonus again"
+    },
+    {
+      "file": "src/json/strength.json",
+      "original": "\"ExceptionalFrom\": 100,\n\t\t\"ExceptionalTo\": 100,\n\t\t\"Hit\": 3,\n\t\t\"Dmg\": 6,",
+      "mutated": "\"ExceptionalFrom\": 100,\n\t\t\"ExceptionalTo\": 100,\n\t\t\"Hit\": 3,\n\t\t\"Dmg\": 5,",
+      "catches": "18/00's damage misread"
+    },
+    {
+      "file": "src/json/constitution.json",
+      "original": "\"Con\": 20,\n\t\t\"HPAdj\": 5,",
+      "mutated": "\"Con\": 20,\n\t\t\"HPAdj\": 4,",
+      "catches": "Constitution 20's hit point adjustment misread"
+    }
+  ]
+}

@@ -38,10 +38,30 @@ public:
 	//   dataManager.dexterity_for(0).DefensiveAdj;    // -> 0
 	[[nodiscard]] DexterityAttributes dexterity_for(int score) const;
 
+	// The Table 1 row a Strength score reads, with the same edges as dexterity_for. At
+	// Strength 18 an exceptional percentile of 1-100 reads the 18/xx band holding it;
+	// at any other score it is ignored, as the book gives it only to an 18.
+	//
+	// Example:
+	//   dataManager.strength_for(17, 0).dmgAdj;     // -> 1
+	//   dataManager.strength_for(18, 76).dmgAdj;    // -> 4, 18/76-90
+	//   dataManager.strength_for(18, 100).hitProb;  // -> 3, 18/00
+	//   dataManager.strength_for(19, 100).dmgAdj;   // -> 7, the percentile ignored
+	[[nodiscard]] StrengthAttributes strength_for(int score, int exceptional) const;
+
+	// The Table 3 row a Constitution score reads, with the same edges as dexterity_for.
+	// Its hit point column is the warrior's; ConstitutionTracker caps it for other classes.
+	//
+	// Example:
+	//   dataManager.constitution_for(17).HPAdj;   // -> 3
+	//   dataManager.constitution_for(20).HPAdj;   // -> 5
+	[[nodiscard]] ConstitutionAttributes constitution_for(int score) const;
+
 private:
 	// Data storage
 	std::vector<Weapons> weapons;
 	std::vector<StrengthAttributes> strengthAttributes;
+	std::vector<StrengthAttributes> exceptionalStrengthBands;
 	std::vector<DexterityAttributes> dexterityAttributes;
 	std::vector<ConstitutionAttributes> constitutionAttributes;
 	std::vector<CharismaAttributes> charismaAttributes;

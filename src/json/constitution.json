@@ -150,5 +150,53 @@
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 1,
 		"Regeneration": 0
+	},
+	{
+		"Con": 20,
+		"HPAdj": 5,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 1,
+		"Regeneration": 6
+	},
+	{
+		"Con": 21,
+		"HPAdj": 6,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 2,
+		"Regeneration": 5
+	},
+	{
+		"Con": 22,
+		"HPAdj": 6,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 2,
+		"Regeneration": 4
+	},
+	{
+		"Con": 23,
+		"HPAdj": 6,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 3,
+		"Regeneration": 3
+	},
+	{
+		"Con": 24,
+		"HPAdj": 7,
+		"SystemShock": 99,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 3,
+		"Regeneration": 2
+	},
+	{
+		"Con": 25,
+		"HPAdj": 7,
+		"SystemShock": 100,
+		"ResurrectionSurvival": 100,
+		"PoisonSave": 4,
+		"Regeneration": 1
 	}
 ]

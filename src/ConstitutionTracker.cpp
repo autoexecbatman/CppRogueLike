@@ -14,14 +14,7 @@ static constexpr int NON_WARRIOR_BONUS_CAP = 2;
     CreatureClass creatureClass,
     GameContext& ctx) const
 {
-    const auto& constitutionAttributes = ctx.dataManager->get_constitution_attributes();
-
-    if (constitution < 1 || constitution > static_cast<int>(constitutionAttributes.size()))
-    {
-        return 0;
-    }
-
-    const int tableAdjustment = constitutionAttributes[constitution - 1].HPAdj;
+    const int tableAdjustment = ctx.dataManager->constitution_for(constitution).HPAdj;
 
     // The table is the warrior column. Only a bonus is capped, so a penalty
     // passes through untouched for every class.

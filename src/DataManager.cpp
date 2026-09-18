@@ -1,7 +1,10 @@
 // file: Systems/DataManager.cpp
+#include <algorithm>
 #include <cassert>
 #include <filesystem>
+#include <format>
 #include <fstream>
+#include <ranges>
 #include <string>
 #include <utility>
 #include <vector>
@@ -48,7 +51,16 @@ void DataManager::load_all_data(MessageSystem& message_system)
 {
 	message_system.log("DataManager: Starting data load...");
 
-	strengthAttributes = load_strength(find_data_file("strength.json"), message_system);
+	// The 18/xx bands are kept apart, so the plain rows stay indexed by score. Assigned
+	// rather than appended, so a second load replaces the first.
+	std::vector<StrengthAttributes> strengthRows = load_strength(find_data_file("strength.json"), message_system);
+	auto is_exceptional_band = [](const StrengthAttributes& row)
+	{
+		return row.exceptionalFrom > 0;
+	};
+	exceptionalStrengthBands = strengthRows | std::views::filter(is_exceptional_band) | std::ranges::to<std::vector>();
+	std::erase_if(strengthRows, is_exceptional_band);
+	strengthAttributes = std::move(strengthRows);
 	dexterityAttributes = load_dexterity(find_data_file("dexterity.json"), message_system);
 	constitutionAttributes = load_constitution(find_data_file("constitution.json"), message_system);
 	charismaAttributes = load_charisma(find_data_file("charisma.json"), message_system);
@@ -58,22 +70,58 @@ void DataManager::load_all_data(MessageSystem& message_system)
 	message_system.log("DataManager: All game data loaded successfully");
 }
 
-DexterityAttributes DataManager::dexterity_for(int score) const
+namespace
 {
-	assert(!dexterityAttributes.empty() && "dexterity_for called before the Dexterity table was loaded");
+// The row a score reads from an ability table ordered by score from 1. Past the end it
+// is the last row, the books capping every ability at 25; below 1, a score a creature
+// was never given, it is a row of no adjustment.
+//
+// Example, with the Dexterity table's 25 rows:
+//   row_for(dexterity, 17).DefensiveAdj;   // -> -3
+//   row_for(dexterity, 26).DefensiveAdj;   // -> -6, the 25 row
+//   row_for(dexterity, 0).DefensiveAdj;    // -> 0
+template <typename Row>
+Row row_for(const std::vector<Row>& table, int score)
+{
+	assert(!table.empty() && "an ability table read before it was loaded");
 
-	// A score never set - a shopkeeper's - carries no adjustment.
 	if (score < 1)
 	{
-		return DexterityAttributes{ score, 0, 0, 0 };
+		return Row{};
+	}
+	if (std::cmp_greater(score, table.size()))
+	{
+		return table.back();
+	}
+	return table.at(score - 1);
+}
+} // namespace
+
+DexterityAttributes DataManager::dexterity_for(int score) const
+{
+	return row_for(dexterityAttributes, score);
+}
+
+StrengthAttributes DataManager::strength_for(int score, int exceptional) const
+{
+	// Only an 18 has exceptional Strength; everywhere else the percentile means nothing.
+	if (score != 18 || exceptional < 1)
+	{
+		return row_for(strengthAttributes, score);
 	}
 
-	// No ability goes higher than the table's last row, which is the book's 25.
-	if (std::cmp_greater(score, dexterityAttributes.size()))
+	auto holds = [exceptional](const StrengthAttributes& band)
 	{
-		return dexterityAttributes.back();
-	}
-	return dexterityAttributes.at(score - 1);
+		return band.exceptionalFrom <= exceptional && exceptional <= band.exceptionalTo;
+	};
+	const auto band = std::ranges::find_if(exceptionalStrengthBands, holds);
+	assert(band != exceptionalStrengthBands.end() && "exceptional Strength outside 1-100");
+	return *band;
+}
+
+ConstitutionAttributes DataManager::constitution_for(int score) const
+{
+	return row_for(constitutionAttributes, score);
 }
 
 std::vector<Weapons> DataManager::load_weapons(const std::string& filename, MessageSystem& message_system)
@@ -81,7 +129,7 @@ std::vector<Weapons> DataManager::load_weapons(const std::string& filename, Mess
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -163,7 +211,7 @@ std::vector<Weapons> DataManager::load_weapons(const std::string& filename, Mess
 		data.push_back(w);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " weapons");
+	message_system.log(std::format("DataManager: Loaded {} weapons", data.size()));
 	return data;
 }
 
@@ -172,7 +220,7 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -191,10 +239,17 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 		s.openDoors = item.value("OpenDoors", 0);
 		s.BB_LG = item.value("BB_LG", 0.0);
 		s.notes = item.value("Notes", "");
+
+		// An 18/xx band carries its percentile range; a plain score's row carries none.
+		if (item.contains("ExceptionalFrom"))
+		{
+			s.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
+			s.exceptionalTo = item.at("ExceptionalTo").get<int>();
+		}
 		data.push_back(s);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " strength attributes");
+	message_system.log(std::format("DataManager: Loaded {} strength attributes", data.size()));
 	return data;
 }
 
@@ -203,7 +258,7 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -221,7 +276,7 @@ std::vector<DexterityAttributes> DataManager::load_dexterity(const std::string& 
 		data.push_back(d);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " dexterity attributes");
+	message_system.log(std::format("DataManager: Loaded {} dexterity attributes", data.size()));
 	return data;
 }
 
@@ -230,7 +285,7 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -250,7 +305,7 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 		data.push_back(c);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " constitution attributes");
+	message_system.log(std::format("DataManager: Loaded {} constitution attributes", data.size()));
 	return data;
 }
 
@@ -259,7 +314,7 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -277,7 +332,7 @@ std::vector<CharismaAttributes> DataManager::load_charisma(const std::string& fi
 		data.push_back(c);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " charisma attributes");
+	message_system.log(std::format("DataManager: Loaded {} charisma attributes", data.size()));
 	return data;
 }
 
@@ -286,7 +341,7 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -306,7 +361,7 @@ std::vector<IntelligenceAttributes> DataManager::load_intelligence(const std::st
 		data.push_back(i);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " intelligence attributes");
+	message_system.log(std::format("DataManager: Loaded {} intelligence attributes", data.size()));
 	return data;
 }
 
@@ -315,7 +370,7 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filena
 	std::ifstream file(filename);
 	if (!file.is_open())
 	{
-		message_system.log("DataManager: Error opening " + filename);
+		message_system.log(std::format("DataManager: Error opening {}", filename));
 		return {};
 	}
 
@@ -334,7 +389,7 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filena
 		data.push_back(w);
 	}
 
-	message_system.log("DataManager: Loaded " + std::to_string(data.size()) + " wisdom attributes");
+	message_system.log(std::format("DataManager: Loaded {} wisdom attributes", data.size()));
 	return data;
 }
 

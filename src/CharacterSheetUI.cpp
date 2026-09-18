@@ -14,6 +14,7 @@
 #include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "HungerSystem.h"
+#include "StrengthAttributes.h"
 #include "ItemEnhancements.h"
 #include "CharacterSheetUI.h"
 
@@ -24,37 +25,18 @@
 namespace
 {
 
-int get_strength_hit_modifier(const Player& player, GameContext& ctx)
+// Strength as the book writes it: 18/76, 18/00 for a percentile of 100, a plain score otherwise.
+//
+// Example:
+//   strength_text(player);   // -> "18/76", "18/00" or "17"
+std::string strength_text(const Player& player)
 {
-    const auto& attrs = ctx.dataManager->get_strength_attributes();
-    if (player.get_strength() > 0 &&
-        player.get_strength() <= static_cast<int>(attrs.size()))
+    const int exceptional = player.get_exceptional_strength();
+    if (player.get_strength() != 18 || exceptional < 1)
     {
-        return attrs.at(player.get_strength() - 1).hitProb;
+        return std::format("{}", player.get_strength());
     }
-    return 0;
-}
-
-int get_strength_damage_modifier(const Player& player, GameContext& ctx)
-{
-    const auto& attrs = ctx.dataManager->get_strength_attributes();
-    if (player.get_strength() > 0 &&
-        player.get_strength() <= static_cast<int>(attrs.size()))
-    {
-        return attrs.at(player.get_strength() - 1).dmgAdj;
-    }
-    return 0;
-}
-
-int get_constitution_bonus(const Player& player, GameContext& ctx)
-{
-    const auto& attrs = ctx.dataManager->get_constitution_attributes();
-    if (player.get_constitution() >= 1 &&
-        player.get_constitution() <= static_cast<int>(attrs.size()))
-    {
-        return attrs.at(player.get_constitution() - 1).HPAdj;
-    }
-    return 0;
+    return std::format("18/{:02d}", exceptional % 100);
 }
 
 void display_basic_info(const Player& player, GameContext& ctx, int& row)
@@ -93,9 +75,10 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     int tileSize = ctx.renderer->get_tile_size();
     int x = tileSize;
 
-    int strHitMod = get_strength_hit_modifier(player, ctx);
-    int strDmgMod = get_strength_damage_modifier(player, ctx);
-    int conBonus = get_constitution_bonus(player, ctx);
+    const StrengthAttributes strengthRow = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength());
+    const int strHitMod = strengthRow.hitProb;
+    const int strDmgMod = strengthRow.dmgAdj;
+    const int conBonus = ctx.dataManager->constitution_for(player.get_constitution()).HPAdj;
 
     const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
     const int missileAdj = dexterityRow.MissileAttackAdj;
@@ -105,7 +88,7 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:2d}  ({:+d} hit, {:+d} dmg)", player.get_strength(), strHitMod, strDmgMod), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:>2}  ({:+d} hit, {:+d} dmg)", strength_text(player), strHitMod, strDmgMod), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
@@ -169,7 +152,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
         damageDisplay = WeaponDamageRegistry::get_unarmed_damage_info().displayRoll;
     }
 
-    int strDmgMod = get_strength_damage_modifier(player, ctx);
+    const int strDmgMod = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength()).dmgAdj;
 
     ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
     row++;

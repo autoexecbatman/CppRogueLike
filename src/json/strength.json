@@ -248,5 +248,65 @@
 		"OpenDoors": 19,
 		"BB_LG": 99,
 		"Notes": "Maximum"
+	},
+	{
+		"Str": 18,
+		"ExceptionalFrom": 1,
+		"ExceptionalTo": 50,
+		"Hit": 1,
+		"Dmg": 3,
+		"Wgt": 135,
+		"MaxPress": 280,
+		"OpenDoors": 12,
+		"BB_LG": 20,
+		"Notes": "18/01-50"
+	},
+	{
+		"Str": 18,
+		"ExceptionalFrom": 51,
+		"ExceptionalTo": 75,
+		"Hit": 2,
+		"Dmg": 3,
+		"Wgt": 160,
+		"MaxPress": 305,
+		"OpenDoors": 13,
+		"BB_LG": 25,
+		"Notes": "18/51-75"
+	},
+	{
+		"Str": 18,
+		"ExceptionalFrom": 76,
+		"ExceptionalTo": 90,
+		"Hit": 2,
+		"Dmg": 4,
+		"Wgt": 185,
+		"MaxPress": 330,
+		"OpenDoors": 14,
+		"BB_LG": 30,
+		"Notes": "18/76-90"
+	},
+	{
+		"Str": 18,
+		"ExceptionalFrom": 91,
+		"ExceptionalTo": 99,
+		"Hit": 2,
+		"Dmg": 5,
+		"Wgt": 235,
+		"MaxPress": 380,
+		"OpenDoors": 15,
+		"BB_LG": 35,
+		"Notes": "18/91-99"
+	},
+	{
+		"Str": 18,
+		"ExceptionalFrom": 100,
+		"ExceptionalTo": 100,
+		"Hit": 3,
+		"Dmg": 6,
+		"Wgt": 335,
+		"MaxPress": 480,
+		"OpenDoors": 16,
+		"BB_LG": 40,
+		"Notes": "18/00"
 	}
 ]

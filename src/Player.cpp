@@ -256,7 +256,20 @@ void Player::die(GameContext& ctx)
 void Player::on_new_game_start(GameContext& ctx)
 {
 	racial_ability_adjustments(ctx);
+	// After the racial adjustments, which can take a halfling's 18 away or give it.
+	roll_exceptional_strength(ctx);
 	equip_class_starting_gear(ctx);
+}
+
+void Player::roll_exceptional_strength(GameContext& ctx)
+{
+	// PHB character creation: a fighter who is not a halfling, with Strength 18.
+	const bool isEligible = get_creature_class() == CreatureClass::FIGHTER && playerRaceState != PlayerRaceState::HALFLING && get_strength() == 18;
+	if (!isEligible)
+	{
+		return;
+	}
+	set_exceptional_strength(ctx.dice->roll(1, 100));
 }
 
 void Player::recalculate_combat_stats()

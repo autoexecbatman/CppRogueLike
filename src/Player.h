@@ -103,6 +103,14 @@ public:
 
 	// Lifecycle hook overrides
 	void on_new_game_start(GameContext& ctx);
+
+	// PHB character creation: a fighter who is not a halfling and has Strength 18 rolls
+	// d100 for exceptional Strength, a roll of 100 being 18/00. Anyone else keeps none.
+	//
+	// Example, a human fighter with Strength 18, the d100 showing 76:
+	//   player.roll_exceptional_strength(ctx);   // get_exceptional_strength() -> 76
+	// A halfling fighter, or a cleric, with the same 18 rolls nothing and keeps 0.
+	void roll_exceptional_strength(GameContext& ctx);
 	void recalculate_combat_stats();
 	void die(GameContext& ctx) override;
 	void on_kill_reward(int xp, GameContext& ctx);

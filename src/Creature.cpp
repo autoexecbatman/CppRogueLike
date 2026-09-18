@@ -39,6 +39,7 @@ void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
 	baseStrength = j["strength"];
+	exceptionalStrength = j.at("exceptionalStrength").get<int>();
 	baseDexterity = j["dexterity"];
 	baseConstitution = j["constitution"];
 	baseIntelligence = j["intelligence"];
@@ -139,6 +140,7 @@ void Creature::save(json& j)
 {
 	Actor::save(j); // Call base class save
 	j["strength"] = baseStrength;
+	j["exceptionalStrength"] = exceptionalStrength;
 	j["dexterity"] = baseDexterity;
 	j["constitution"] = baseConstitution;
 	j["intelligence"] = baseIntelligence;

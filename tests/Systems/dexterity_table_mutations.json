@@ -27,14 +27,14 @@
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\treturn dexterityAttributes.back();",
-      "mutated": "\t\treturn DexterityAttributes{ score, 0, 0, 0 };",
+      "original": "\t\treturn table.back();",
+      "mutated": "\t\treturn Row{};",
       "catches": "a score past the table reading as no adjustment"
     },
     {
       "file": "src/DataManager.cpp",
-      "original": "\t\treturn DexterityAttributes{ score, 0, 0, 0 };",
-      "mutated": "\t\treturn dexterityAttributes.front();",
+      "original": "\tif (score < 1)\n\t{\n\t\treturn Row{};\n\t}",
+      "mutated": "\tif (score < 1)\n\t{\n\t\treturn table.front();\n\t}",
       "catches": "a score never set read as Dexterity 1"
     },
     {
