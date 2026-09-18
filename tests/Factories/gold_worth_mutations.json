@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemCreatorTest.*:ItemRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\treturn Gold{ params.value };",
+      "mutated": "\t\treturn Gold{ 0 };",
+      "catches": "the defect itself, a gem reaching the player worth nothing"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\treturn Gold{ params.value };",
+      "mutated": "\t\treturn Gold{ params.goldAmount };",
+      "catches": "reading the field that is zero in all 98 records instead of the authored value"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\treturn Gold{ params.value };",
+      "mutated": "\t\treturn Gold{ params.baseWeight };",
+      "catches": "the spawn weight mistaken for the worth"
+    }
+  ]
+}

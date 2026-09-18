@@ -105,3 +105,20 @@ TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 	EXPECT_EQ(potion.amount, 1);
 	EXPECT_EQ(potion.duration, 50);
 }
+
+// A gem is authored as worth 100 and reaches the player as a Gold behaviour, which is
+// the only thing pickup and use read. Two items carry pickableType gold_coin - the
+// rolled pile, which ItemFactory builds through create_with_gold_amount, and the gem,
+// which comes through the ordinary create() path like every other item.
+TEST_F(ItemCreatorTest, AGemIsWorthWhatItIsAuthoredToBeWorth)
+{
+	const int authored = ItemCreator::get_params("gem").value;
+	ASSERT_GT(authored, 0) << "the data must give a gem a value for this to mean anything";
+
+	auto item = ItemCreator::create("gem", Vector2D{ 0, 0 }, mock.content_registry);
+	ASSERT_TRUE(item);
+	ASSERT_TRUE(std::holds_alternative<Gold>(*item->behavior));
+
+	EXPECT_EQ(std::get<Gold>(*item->behavior).amount, authored)
+		<< "a gem picked up gives the player this many gold, and nothing else reads its value";
+}

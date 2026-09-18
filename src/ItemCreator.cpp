@@ -361,7 +361,9 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 	case PickableType::GOLD_COIN:
 	{
-		return Gold{ 0 };
+		// A gold item is worth what it is authored to be worth. A rolled pile is the
+		// exception and sets its own amount afterwards, in create_with_gold_amount.
+		return Gold{ params.value };
 	}
 
 	case PickableType::DUNGEON_KEY:
