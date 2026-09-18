@@ -45,7 +45,7 @@ struct GameContext;
 // comparing against UNAFFECTED at a call site.
 enum class EntryResult
 {
-	UNAFFECTED, // the feature did nothing -- a hidden trap that went unnoticed
+	UNAFFECTED, // the feature did nothing -- a disarmed trap
 	AFFECTED, // the feature acted and the creature may still enter
 	BLOCKED, // the feature acted and the creature's move is stopped
 };

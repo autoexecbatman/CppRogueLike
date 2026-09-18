@@ -1,6 +1,12 @@
 // file: Trap.cpp
 // Implementation of trap mechanics: detection, triggering, disarming, damage
 
+#include <algorithm>
+#include <cassert>
+#include <format>
+#include <ranges>
+#include <string>
+
 #include "DamageInfo.h"
 #include "DiceExpr.h"
 #include "Trap.h"
@@ -10,15 +16,10 @@
 #include "Map.h"
 #include "TileConfig.h"
 #include "MessageSystem.h"
-#include <algorithm>
-#include <ranges>
 
-Trap::Trap(Vector2D position, TrapType type, const TileConfig& tileConfig)
+Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 	: TileFeature(position, ActorData{}),
-	type_(type),
-	state_(TrapState::HIDDEN),
-	detectionDC_(15),
-	disarmDC_(12)
+	  type(trapType)
 {
 	// Set damage dice and display name based on trap type
 	std::string trapName;
@@ -26,23 +27,29 @@ Trap::Trap(Vector2D position, TrapType type, const TileConfig& tileConfig)
 	switch (type)
 	{
 	case TrapType::PIT:
-		damageDiceCount_ = 2;
-		damageDiceSize_ = 6;  // 2d6 damage
+	{
+		damageDiceCount = 2;
+		damageDiceSize = 6; // 2d6 damage
 		trapName = "pit trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE");  // Hidden on floor
+		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
 		break;
+	}
 	case TrapType::DART:
-		damageDiceCount_ = 1;
-		damageDiceSize_ = 4;  // 1d4 damage
+	{
+		damageDiceCount = 1;
+		damageDiceSize = 4; // 1d4 damage
 		trapName = "dart trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE");  // Hidden on floor
+		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
 		break;
+	}
 	case TrapType::ARROW:
-		damageDiceCount_ = 1;
-		damageDiceSize_ = 6;  // 1d6 damage
+	{
+		damageDiceCount = 1;
+		damageDiceSize = 6; // 1d6 damage
 		trapName = "arrow trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE");  // Hidden on floor
+		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
 		break;
+	}
 	}
 
 	actorData.name = trapName;
@@ -55,7 +62,7 @@ Trap::Trap(Vector2D position, TrapType type, const TileConfig& tileConfig)
 
 bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 {
-	if (state_ != TrapState::HIDDEN)
+	if (state != TrapState::HIDDEN)
 	{
 		return false;  // Already detected, disarmed, or triggered
 	}
@@ -65,9 +72,9 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 	int dexMod = (creature.get_dexterity() - 10) / 2;
 	int checkResult = roll + dexMod;
 
-	if (checkResult >= detectionDC_)
+	if (checkResult >= detectionDC)
 	{
-		state_ = TrapState::DETECTED;
+		state = TrapState::DETECTED;
 		remove_state(ActorState::IS_INVISIBLE);  // Trap is now visible
 		if (ctx.messageSystem)
 		{
@@ -82,13 +89,13 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 {
 	// Nothing left to disarm.
-	if (state_ == TrapState::DISARMED)
+	if (state == TrapState::DISARMED)
 	{
 		return DisarmResult::ALREADY_DISARMED;
 	}
 
 	// A trap the creature has not spotted cannot be worked on.
-	if (state_ == TrapState::HIDDEN)
+	if (state == TrapState::HIDDEN)
 	{
 		return DisarmResult::NOT_VISIBLE;
 	}
@@ -98,14 +105,14 @@ DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 	int dexMod = (creature.get_dexterity() - 10) / 2;
 	int checkResult = roll + dexMod;
 
-	if (checkResult >= disarmDC_)
+	if (checkResult >= disarmDC)
 	{
-		state_ = TrapState::DISARMED;
+		state = TrapState::DISARMED;
 		return DisarmResult::DISARMED;
 	}
 
 	// A failed attempt sets the trap off on the creature working on it.
-	state_ = TrapState::TRIGGERED;
+	state = TrapState::TRIGGERED;
 	on_creature_enter(creature, ctx);
 
 	return DisarmResult::TRIGGERED;
@@ -113,78 +120,89 @@ DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 
 EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 {
-	// Passive detection check when walking into trap
-	attempt_passive_detection(creature, ctx);
-
-	// If already detected or triggered, apply damage
-	if (state_ == TrapState::DETECTED || state_ == TrapState::TRIGGERED)
+	// A disarmed trap is walked over.
+	if (state == TrapState::DISARMED)
 	{
-		// Trigger the trap
-		state_ = TrapState::TRIGGERED;
-
-		// Roll damage
-		int damage = roll_damage(*ctx.dice);
-
-		// Apply damage to creature
-		if (ctx.messageSystem)
-		{
-			std::string trapName;
-			switch (type_)
-			{
-			case TrapType::PIT:
-				trapName = "pit";
-				break;
-			case TrapType::DART:
-				trapName = "dart trap";
-				break;
-			case TrapType::ARROW:
-				trapName = "arrow trap";
-				break;
-			}
-			ctx.messageSystem->message(RED_BLACK_PAIR,
-				"You trigger the " + trapName + " and take " + std::to_string(damage) + " damage!", true);
-		}
-
-		creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
-
-		// 50% chance trap is destroyed after triggering
-		if (ctx.dice->d2() == 1)
-		{
-			destroy();
-			if (ctx.messageSystem)
-			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The trap is destroyed.", true);
-			}
-		}
-
-		// Trap blocks movement on first trigger (only if creature still alive)
-		if (creature.get_hp() > 0)
-		{
-			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
-		}
-		return EntryResult::BLOCKED;
+		return EntryResult::UNAFFECTED;
 	}
 
-	// Hidden trap didn't trigger (missed detection)
-	return EntryResult::UNAFFECTED;
+	// The one detection roll a hidden trap gets: noticed now, the creature stops short.
+	if (state == TrapState::HIDDEN)
+	{
+		attempt_passive_detection(creature, ctx);
+		if (state == TrapState::DETECTED)
+		{
+			return EntryResult::BLOCKED;
+		}
+	}
+
+	// Missed, already known, or left armed by a failed disarm: it springs.
+	state = TrapState::TRIGGERED;
+
+	// Roll damage
+	const int damage = roll_damage(*ctx.dice);
+
+	// Apply damage to creature
+	if (ctx.messageSystem)
+	{
+		std::string trapName;
+		switch (type)
+		{
+		case TrapType::PIT:
+		{
+			trapName = "pit";
+			break;
+		}
+		case TrapType::DART:
+		{
+			trapName = "dart trap";
+			break;
+		}
+		case TrapType::ARROW:
+		{
+			trapName = "arrow trap";
+			break;
+		}
+		}
+		ctx.messageSystem->message(RED_BLACK_PAIR, std::format("You trigger the {} and take {} damage!", trapName, damage), true);
+	}
+
+	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
+
+	// 50% chance trap is destroyed after triggering
+	if (ctx.dice->d2() == 1)
+	{
+		destroy();
+		if (ctx.messageSystem)
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The trap is destroyed.", true);
+		}
+	}
+
+	// Trap blocks movement on first trigger (only if creature still alive)
+	if (creature.get_hp() > 0)
+	{
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+	}
+	return EntryResult::BLOCKED;
 }
 
 void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 {
-	if (state_ == TrapState::HIDDEN)
-	{
-		// Passive detection: roll vs detection DC
-		int roll = ctx.dice->roll(1, 20);
-		int dexMod = (creature.get_dexterity() - 10) / 2;
-		int checkResult = roll + dexMod;
+	// Only a hidden trap is looked for; on_creature_enter asks for nothing else.
+	assert(state == TrapState::HIDDEN && "passive detection on a trap that is not hidden");
 
-		if (checkResult >= detectionDC_)
+	// Passive detection: roll vs detection DC
+	const int roll = ctx.dice->roll(1, 20);
+	const int dexMod = (creature.get_dexterity() - 10) / 2;
+	const int checkResult = roll + dexMod;
+
+	if (checkResult >= detectionDC)
+	{
+		state = TrapState::DETECTED;
+		if (ctx.messageSystem)
 		{
-			state_ = TrapState::DETECTED;
-			if (ctx.messageSystem)
-			{
-				ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You notice a hidden trap at the last moment!", true);
-			}
+			ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You notice a hidden trap at the last moment!", true);
 		}
 	}
 }
@@ -192,7 +210,7 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 int Trap::roll_damage(RandomDice& dice) const
 {
 	// Every die rolled on its own: a 2d6 pit ranges from 2 to 12.
-	return roll_dice(&dice, DiceExpr{ damageDiceCount_, damageDiceSize_, 0 });
+	return roll_dice(&dice, DiceExpr{ damageDiceCount, damageDiceSize, 0 });
 }
 
 

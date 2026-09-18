@@ -21,8 +21,8 @@
     },
     {
       "file": "src/Trap.cpp",
-      "original": "\treturn roll_dice(&dice, DiceExpr{ damageDiceCount_, damageDiceSize_, 0 });",
-      "mutated": "\treturn dice.roll(damageDiceCount_, damageDiceSize_);",
+      "original": "\treturn roll_dice(&dice, DiceExpr{ damageDiceCount, damageDiceSize, 0 });",
+      "mutated": "\treturn dice.roll(damageDiceCount, damageDiceSize);",
       "catches": "a pit rolling between its dice count and its die size, as before"
     }
   ]

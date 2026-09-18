@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\tif (state == TrapState::DETECTED)\n\t\t{\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}",
+      "mutated": "\t\treturn state == TrapState::DETECTED ? EntryResult::BLOCKED : EntryResult::UNAFFECTED;",
+      "catches": "the old ordering: a hidden trap you miss lets you walk over it"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\tif (state == TrapState::DETECTED)\n\t\t{\n\t\t\treturn EntryResult::BLOCKED;\n\t\t}",
+      "mutated": "",
+      "catches": "the old ordering: noticing a trap at the last moment is what springs it"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\t\treturn EntryResult::BLOCKED;\n\t\t}\n\t}\n\n\t// Missed, already known",
+      "mutated": "\t\t\treturn EntryResult::UNAFFECTED;\n\t\t}\n\t}\n\n\t// Missed, already known",
+      "catches": "a trap noticed in time is stepped onto instead of stopped short of"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t// The one detection roll a hidden trap gets: noticed now, the creature stops short.\n\tif (state == TrapState::HIDDEN)",
+      "mutated": "\t// The one detection roll a hidden trap gets: noticed now, the creature stops short.\n\tif (state == TrapState::HIDDEN || state == TrapState::DETECTED)",
+      "catches": "a known trap stopping the step again instead of springing"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
+      "mutated": "\t// A disarmed trap is walked over.\n\tif (false)",
+      "catches": "a disarmed trap springing"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
+      "mutated": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
+      "catches": "a failed disarm leaving the disarmer unhurt"
+    }
+  ]
+}
