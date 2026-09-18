@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TreasureGoldTest.*:ItemCreatorTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\tauto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, *ctx.contentRegistry);",
+      "mutated": "\tauto goldPile = std::make_unique<Item>(position, ActorData{ TileRef{}, \"gold pile\", 0 });\n\tgoldPile->behavior = Gold{ goldAmount };",
+      "catches": "the hand-built pile restored, worth 1 while paying out its roll"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->set_value(goldAmount);",
+      "mutated": "",
+      "catches": "the pile paying out an amount it is not valued at, on the shared path this time"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->behavior = Gold{ goldAmount };",
+      "mutated": "\titem->behavior = Gold{ 0 };",
+      "catches": "a pile that is valued correctly and pays nothing"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->itemKey = \"gold_coin\";",
+      "mutated": "\titem->itemKey = \"\";",
+      "catches": "a pile with no key, which cannot be identified when a save is read back"
+    }
+  ]
+}

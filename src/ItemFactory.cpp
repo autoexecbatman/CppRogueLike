@@ -12,7 +12,6 @@
 #include "Pickable.h"
 #include "Colors.h"
 #include "GameContext.h"
-#include "TileConfig.h"
 #include "Map.h"
 #include "RandomDice.h"
 #include "ItemEnhancements.h"
@@ -174,9 +173,9 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	int goldMax = 20 * dungeonLevel * quality;
 	int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
-	// Create gold pile
-	auto goldPile = std::make_unique<Item>(position, ActorData{ ctx.tileConfig->get("TILE_GOLD"), "gold pile", YELLOW_BLACK_PAIR });
-	goldPile->behavior = Gold{ goldAmount };
+	// Through the registry, so a treasure pile is the same item as a floor pile: one
+	// number for what it pays and what it is worth, and a tile the item data owns.
+	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, *ctx.contentRegistry);
 	assert(add_item(*ctx.floorInventory, std::move(goldPile)).has_value());
 
 	// Generate other random items
