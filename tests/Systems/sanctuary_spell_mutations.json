@@ -54,6 +54,18 @@
       "original": "\t\treturn ScrollReading::KEPT;",
       "mutated": "\t\treturn ScrollReading::SPENT;",
       "catches": "a scroll the reader could not read counted as spent"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tconst int duration = 2 + casterLevel;",
+      "mutated": "\tconst int duration = 3 + casterLevel;",
+      "catches": "Sanctuary back at three rounds plus one per level"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tconst int duration = 2 + casterLevel;",
+      "mutated": "\tconst int duration = 1 + 2 * casterLevel;",
+      "catches": "a duration right at 1st level and wrong above it"
     }
   ]
 }

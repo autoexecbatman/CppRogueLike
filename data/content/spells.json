@@ -51,7 +51,7 @@
     "name": "Sanctuary",
     "level": 1,
     "class": "cleric",
-    "description": "Enemies ignore you for 3 turns"
+    "description": "Attackers must save or ignore you; 2 turns + 1 per level"
   },
   "shield": {
     "name": "Shield",

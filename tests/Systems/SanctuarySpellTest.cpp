@@ -203,6 +203,19 @@ TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAWardedCreatureIsKept)
 	EXPECT_EQ(goblin->ai.get(), before) << "a creature the reader ignores was confused";
 }
 
+// Sanctuary itself lasts "2 rds. + 1 rd./level" (PHB page 436), a round being a turn
+// here: three turns at 1st level, seven at 5th. Two levels pin both terms.
+TEST_F(SanctuarySpellTest, SanctuaryLastsTwoRoundsPlusOnePerLevel)
+{
+	cast("sanctuary");
+	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY), 3) << "1st level: 2 + 1";
+
+	buffs.remove_buff(*caster, BuffType::SANCTUARY);
+	caster->set_creature_level(5);
+	cast("sanctuary");
+	EXPECT_EQ(buffs.get_buff_turns(*caster, BuffType::SANCTUARY), 7) << "5th level: 2 + 5";
+}
+
 // Aimed at the unwarded orc, it is read, and the orc is confused.
 TEST_F(SanctuarySpellTest, AConfusionScrollAimedAtAnUnwardedCreatureIsRead)
 {

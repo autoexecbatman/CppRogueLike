@@ -100,7 +100,7 @@ std::map<std::string, SpellDefinition> s_custom_spells;
 std::map<SpellId, SpellDefinition> s_spells = {
 	{ SpellId::CURE_LIGHT_WOUNDS, { "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP", SpellEffectType::CURE_LIGHT_WOUNDS } },
 	{ SpellId::BLESS, { "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns", SpellEffectType::BLESS } },
-	{ SpellId::SANCTUARY, { "Sanctuary", 1, SpellClass::CLERIC, "Enemies ignore you for 3 turns", SpellEffectType::SANCTUARY } },
+	{ SpellId::SANCTUARY, { "Sanctuary", 1, SpellClass::CLERIC, "Attackers must save or ignore you; 2 turns + 1 per level", SpellEffectType::SANCTUARY } },
 	{ SpellId::PROTECTION_FROM_EVIL, { "Protection From Evil", 1, SpellClass::CLERIC, "Evil attackers suffer -2 to hit", SpellEffectType::PROTECTION_FROM_EVIL } },
 	{ SpellId::HOLD_PERSON, { "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns", SpellEffectType::HOLD_PERSON } },
 	{ SpellId::SILENCE, { "Silence", 2, SpellClass::CLERIC, "Prevent target from casting", SpellEffectType::SILENCE } },
@@ -848,9 +848,9 @@ bool SpellSystem::cast_protection_from_evil(Creature& caster, GameContext& ctx)
 
 bool SpellSystem::cast_sanctuary(Creature& caster, GameContext& ctx)
 {
-	// AD&D 2e: Duration 3 rounds + 1 round/level. Cancelled by attacking.
-	int casterLevel = caster.get_creature_level();
-	int duration = 3 + casterLevel;
+	// AD&D 2e, PHB page 436: 2 rounds + 1 round/level. Cancelled by attacking.
+	const int casterLevel = caster.get_creature_level();
+	const int duration = 2 + casterLevel;
 
 	ctx.buffSystem->add_buff(caster, BuffType::SANCTUARY, 0, duration, false);
 
