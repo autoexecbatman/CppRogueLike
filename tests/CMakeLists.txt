@@ -81,6 +81,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/WebSpinnerSanctuaryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp

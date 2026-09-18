@@ -201,14 +201,14 @@ TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "the bite cannot hit this armour class";
 }
 
-// A protected player: the spider saves against the spell on a 12 and fails. The same
-// 12 would hit armour class 10, so a spider that skipped the save would bite for four.
+// A protected player: the spider saves against the spell on a 12 and fails. A hit is
+// queued behind it, so a spider that skipped the save, or rolled it and bit anyway,
+// lands damage.
 TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spider.get_creature_class(), spider.get_creature_level(), SavingThrow::SPELL), 12);
 	player->add_state(ActorState::IS_PROTECTED);
-	game.dice.set_next_roll(12);
-	game.dice.set_next_roll(4);
+	script({ 12, 20, 4, 100, 10 });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "sanctuary held and the spider struck anyway";
 }

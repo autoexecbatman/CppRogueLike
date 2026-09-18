@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
+#include "AiMonster.h"
 #include "Creature.h"
 #include "Colors.h"
-#include "AttackKind.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Web.h"
@@ -47,17 +47,14 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
-		// Directly trigger attack - avoid any inheritance issues
-		ctx.messageSystem->log("Web spinner attempting attack with poison");
-
-		// First do the regular attack
-		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
-
-		// Then check for poison - independent of the regular attack success
-		if (can_poison_attack(ctx))
+		// A warded player is bitten only by a spinner that saves; failing, it does nothing.
+		if (blocked_by_sanctuary(owner, ctx))
 		{
-			poison_attack(owner, *ctx.player(), ctx);
+			return;
 		}
+
+		ctx.messageSystem->log("Web spinner attempting attack with poison");
+		bite(owner, *ctx.player(), ctx);
 
 		// Skip web spinning and other behaviors if we're attacking
 		return;

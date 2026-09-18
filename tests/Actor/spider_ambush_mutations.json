@@ -27,6 +27,12 @@
     },
     {
       "file": "src/AiSpider.cpp",
+      "original": "\tif (blocked_by_sanctuary(owner, ctx))\n\t{\n\t\treturn;\n\t}",
+      "mutated": "\tif (blocked_by_sanctuary(owner, ctx))\n\t{\n\t}",
+      "catches": "a spider that fails its save and bites anyway"
+    },
+    {
+      "file": "src/AiSpider.cpp",
       "original": "\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
       "mutated": "\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
       "catches": "a bite that lands without an attack roll against armour class"
