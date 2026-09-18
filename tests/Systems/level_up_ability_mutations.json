@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=LevelUpSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "mutated": "    if (newLevel % 4 == 0)\n    {\n        owner.set_strength(std::min(18, owner.get_strength() + 1));\n    }\n    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "catches": "a level raising Strength again"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "mutated": "    if (newLevel % 4 == 0 && owner.get_creature_class() == CreatureClass::WIZARD)\n    {\n        owner.set_intelligence(owner.get_intelligence() + 1);\n    }\n    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "catches": "a level raising only a wizard's Intelligence"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "mutated": "    owner.set_strength(owner.get_strength());\n    apply_saving_throw_improvements(owner, newLevel, ctx);\n\n    bool thac0_improved",
+      "catches": "a level writing the buffed score into the base"
+    }
+  ]
+}

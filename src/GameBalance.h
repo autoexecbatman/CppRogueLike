@@ -36,9 +36,6 @@ namespace GameBalance
     // ========================================================================
     namespace Leveling
     {
-        // Ability Score Improvements (AD&D 2e)
-        inline constexpr int ABILITY_SCORE_IMPROVEMENT_INTERVAL = 4;  // Every 4 levels
-
         // AD&D 2e hit point progression, Player's Handbook Tables 14, 20, 23 and 25.
         //
         // A character rolls one hit die per level up to a class-dependent level.

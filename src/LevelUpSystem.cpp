@@ -290,65 +290,6 @@ void apply_class_specific_improvements(Creature& owner, int newLevel, GameContex
     }
 }
 
-void apply_ability_score_improvement(Creature& owner, int newLevel, GameContext* ctx)
-{
-    if (!ctx)
-    {
-        return;
-    }
-
-    ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Special: ");
-    ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR, "Ability Score Improvement!");
-    ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " You may increase one ability score by 1 point.");
-    ctx->messageSystem->finalize_message();
-
-    switch (owner.get_creature_class())
-    {
-    case CreatureClass::FIGHTER:
-    {
-        owner.set_strength(std::min(18, owner.get_strength() + 1));
-        ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
-            std::format("Strength increased to {}!", owner.get_strength()));
-        ctx->messageSystem->finalize_message();
-        break;
-    }
-
-    case CreatureClass::ROGUE:
-    {
-        owner.set_dexterity(std::min(18, owner.get_dexterity() + 1));
-        ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
-            std::format("Dexterity increased to {}!", owner.get_dexterity()));
-        ctx->messageSystem->finalize_message();
-        break;
-    }
-
-    case CreatureClass::CLERIC:
-    {
-        owner.set_wisdom(std::min(18, owner.get_wisdom() + 1));
-        ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
-            std::format("Wisdom increased to {}!", owner.get_wisdom()));
-        ctx->messageSystem->finalize_message();
-        break;
-    }
-
-    case CreatureClass::WIZARD:
-    {
-        owner.set_intelligence(std::min(18, owner.get_intelligence() + 1));
-        ctx->messageSystem->append_message_part(GREEN_BLACK_PAIR,
-            std::format("Intelligence increased to {}!", owner.get_intelligence()));
-        ctx->messageSystem->finalize_message();
-        break;
-    }
-
-    case CreatureClass::MONSTER:
-    {
-        break;
-    }
-    }
-
-    ctx->messageSystem->log(std::format("Ability score improved at level {}", newLevel));
-}
-
 void apply_saving_throw_improvements(Creature& owner, int newLevel, GameContext* ctx)
 {
     if (!ctx)
@@ -392,11 +333,6 @@ void apply_level_up_benefits(Creature& owner, int newLevel, GameContext* ctx)
     apply_thac0_improvement(owner, newLevel, ctx);
     int hpGained = apply_hit_point_gain(owner, newLevel, ctx);
     apply_class_specific_improvements(owner, newLevel, ctx);
-
-    if (newLevel % 4 == 0 && owner.get_creature_class() != CreatureClass::MONSTER)
-    {
-        apply_ability_score_improvement(owner, newLevel, ctx);
-    }
 
     apply_saving_throw_improvements(owner, newLevel, ctx);
 

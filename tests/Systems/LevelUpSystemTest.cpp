@@ -1,4 +1,7 @@
 #include <gtest/gtest.h>
+#include "src/BuffSystem.h"
+#include "src/BuffType.h"
+#include "src/CreatureClass.h"
 #include "src/Game.h"
 #include "src/LevelUpSystem.h"
 #include "src/Player.h"
@@ -122,28 +125,44 @@ TEST_F(LevelUpSystemTest, FighterExtraAttackAtLevel13)
     EXPECT_FLOAT_EQ(player->get_attacks_per_round(), 2.0f);
 }
 
-TEST_F(LevelUpSystemTest, AbilityScoreImprovement)
+// A level raises no ability score: in 2e they rise by wishes, "magical items (manuals,
+// books, etc.) and the intervention of greater powers" (Dungeon Master's Guide, PDF page
+// 605 of the 2e archive). Each class's prime requisite is still 15 at 4th, 8th and 12th.
+TEST_F(LevelUpSystemTest, ALevelRaisesNoAbilityScore)
 {
-    player->playerClassState = Player::PlayerClassState::FIGHTER;
-    player->set_creature_class(CreatureClass::FIGHTER);
-    player->set_hit_die(10);
-    player->set_strength(15);
+    const CreatureClass classes[] = { CreatureClass::FIGHTER, CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD };
+    for (const CreatureClass creatureClass : classes)
+    {
+        player->set_creature_class(creatureClass);
+        player->set_strength(15);
+        player->set_dexterity(15);
+        player->set_wisdom(15);
+        player->set_intelligence(15);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 4, &ctx);
+        for (const int level : { 4, 8, 12 })
+        {
+            LevelUpSystem::apply_level_up_benefits(*player, level, &ctx);
+        }
 
-    EXPECT_EQ(player->get_strength(), 16);
+        EXPECT_EQ(player->get_strength(), 15) << "class " << static_cast<int>(creatureClass);
+        EXPECT_EQ(player->get_dexterity(), 15) << "class " << static_cast<int>(creatureClass);
+        EXPECT_EQ(player->get_wisdom(), 15) << "class " << static_cast<int>(creatureClass);
+        EXPECT_EQ(player->get_intelligence(), 15) << "class " << static_cast<int>(creatureClass);
+    }
 }
 
-TEST_F(LevelUpSystemTest, NoAbilityScoreImprovementAtInterimLevel)
+// A potion of giant strength drunk before 4th level leaves nothing behind once it ends.
+TEST_F(LevelUpSystemTest, AStrengthBuffIsNotKeptByALevel)
 {
-    player->playerClassState = Player::PlayerClassState::FIGHTER;
     player->set_creature_class(CreatureClass::FIGHTER);
     player->set_hit_die(10);
     player->set_strength(15);
+    ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true);
 
-    LevelUpSystem::apply_level_up_benefits(*player, 5, &ctx);
+    LevelUpSystem::apply_level_up_benefits(*player, 4, &ctx);
+    ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
-    EXPECT_EQ(player->get_strength(), 15);
+    EXPECT_EQ(player->get_strength(), 15) << "the level kept the potion's Strength";
 }
 
 TEST_F(LevelUpSystemTest, FighterTHAC0Improvement)
