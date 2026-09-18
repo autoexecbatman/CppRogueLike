@@ -9,15 +9,15 @@
   "mutations": [
     {
       "file": "src/SpellSystem.cpp",
-      "original": "const DamageResolver::ResistedDamage dealt = (save >= 15) ? reduced.at(reduced.hit_points() / 2) : reduced;",
-      "mutated": "const DamageResolver::ResistedDamage dealt = (save > 15) ? reduced.at(reduced.hit_points() / 2) : reduced;",
-      "catches": "a save of exactly 15 no longer halving"
+      "original": "\tconst DamageResolver::ResistedDamage dealt = saved ? reduced.at(reduced.hit_points() / 2) : reduced;",
+      "mutated": "\tconst DamageResolver::ResistedDamage dealt = reduced;",
+      "catches": "a made save no longer halving the burn"
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "const int save = ctx.dice->roll(1, 20) + DamageResolver::save_bonus_against(DamageType::FIRE, target, ctx);",
-      "mutated": "const int save = ctx.dice->roll(1, 20);",
-      "catches": "the ring's +4 on the save dropped"
+      "original": "\t\tDamageResolver::save_bonus_against(DamageType::FIRE, target, ctx),\n\t\tctx);",
+      "mutated": "\t\t0,\n\t\tctx);",
+      "catches": "the fireball's save made without the ring's bonus"
     },
     {
       "file": "src/SpellSystem.cpp",
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/DamageResolver.cpp",
-      "original": "static constexpr int FIRE_PER_DIE = 2;",
-      "mutated": "static constexpr int FIRE_PER_DIE = 1;",
+      "original": "constexpr int FIRE_PER_DIE = 2;",
+      "mutated": "constexpr int FIRE_PER_DIE = 1;",
       "catches": "fire reduced by one a die instead of two"
     }
   ]

@@ -27,8 +27,8 @@
     },
     {
       "file": "src/DamageResolver.cpp",
-      "original": "static constexpr int COLD_PER_DIE = 1;",
-      "mutated": "static constexpr int COLD_PER_DIE = 2;",
+      "original": "constexpr int COLD_PER_DIE = 1;",
+      "mutated": "constexpr int COLD_PER_DIE = 2;",
       "catches": "a cold bite reduced like fire"
     }
   ]
