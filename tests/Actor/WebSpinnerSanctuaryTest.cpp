@@ -2,8 +2,8 @@
 //
 // What it is for. The Player's Handbook, PDF page 436 of the 2e archive: "any opponent
 // attempting to strike or otherwise directly attack the protected creature must roll a
-// saving throw vs. spell". A web spinner beside a warded player saves first, as
-// blocked_by_sanctuary has every monster do; failing, it does nothing that turn.
+// saving throw vs. spell". The save is made where every attack resolves, so a web
+// spinner's bite and its venom are held off by it like any other attack.
 //
 // Every roll is scripted in the order the game asks for it: the sanctuary save if the
 // player is protected, then the attack roll, the damage die and the venom roll. The
@@ -22,6 +22,8 @@
 #include "src/Actor.h"
 #include "src/AiWebSpinner.h"
 #include "src/ArmorClass.h"
+#include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
@@ -107,7 +109,7 @@ protected:
 TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spinner.get_creature_class(), spinner.get_creature_level(), SavingThrow::SPELL), 12);
-	player->add_state(ActorState::IS_PROTECTED);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
 	script({ 12, 20, 4, 100 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "sanctuary held and the spinner bit anyway";
@@ -117,10 +119,22 @@ TEST_F(WebSpinnerSanctuaryTest, SanctuaryHoldsOffASpinnerThatFailsToSave)
 // Without the save, the attack would take the 20 and the die the next 20.
 TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 {
-	player->add_state(ActorState::IS_PROTECTED);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
 	script({ 20, 20, 4, 100 });
 
 	EXPECT_EQ(hp_lost_to_one_turn(), 4) << "1d4 at four after a made save";
+}
+
+// Venom is a direct attack too. A spinner certain to inject it fails its save on a 12:
+// the bite is turned away, the venom roll of 20 comes in under its chance of 100, and
+// a 3 waits for the venom's damage, which must never be read.
+TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
+{
+	spinner.ai = std::make_unique<AiWebSpinner>(100);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	script({ 12, 20, 3 });
+
+	EXPECT_EQ(hp_lost_to_one_turn(), 0) << "venom landed through a failed save";
 }
 
 // No sanctuary, no save: the first roll is the attack.

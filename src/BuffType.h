@@ -3,6 +3,9 @@
 #include <format>
 #include <stdexcept>
 #include <string_view>
+#include <vector>
+
+#include "UniqueId.h"
 
 // Unified buff system - single source of truth for all timed effects
 // AD&D 2e, Player's Handbook page 277: "all attacks made by evil (or evilly
@@ -137,6 +140,13 @@ inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	return "none";
 }
 
+// One opponent's saving throw against a casting, kept so it is rolled once.
+struct OpponentSave
+{
+	UniqueId::IdType opponent{};
+	bool isMade{ false };
+};
+
 struct Buff
 {
 	BuffType type{ BuffType::INVISIBILITY };
@@ -144,6 +154,11 @@ struct Buff
 	int turnsRemaining{ 0 };
 	bool isSetEffect{ false }; // AD&D 2e: true = SET stat to value (potions), false = ADD value (spells/items)
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
+
+	// The saves opponents have rolled against this casting. Sanctuary is the one that
+	// asks: each opponent saves once and the result holds while the casting lasts, so
+	// the record lives and ends with it (PHB page 436).
+	std::vector<OpponentSave> opponentSaves{};
 };
 
 inline BuffType parse_buff_type(std::string_view name)

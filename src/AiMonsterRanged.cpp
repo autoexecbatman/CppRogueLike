@@ -25,11 +25,6 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
 	owner.update_awareness(ctx);
 
-	if (blocked_by_sanctuary(owner, ctx))
-	{
-		return;
-	}
-
 	if (owner.is_aware())
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);

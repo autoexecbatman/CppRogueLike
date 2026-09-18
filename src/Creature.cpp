@@ -124,6 +124,12 @@ void Creature::load(const json& j)
 			buff.value = buffJson.at("value").get<int>();
 			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
 			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
+			for (const auto& saveJson : buffJson.at("opponentSaves"))
+			{
+				buff.opponentSaves.push_back(OpponentSave{
+					saveJson.at("opponent").get<UniqueId::IdType>(),
+					saveJson.at("isMade").get<bool>() });
+			}
 			activeBuffs.push_back(buff);
 		}
 	}
@@ -222,6 +228,12 @@ void Creature::save(json& j)
 		buffJson["value"] = buff.value;
 		buffJson["turnsRemaining"] = buff.turnsRemaining;
 		buffJson["isSetEffect"] = buff.isSetEffect;
+		json savesJson = json::array();
+		for (const OpponentSave& save : buff.opponentSaves)
+		{
+			savesJson.push_back(json{ { "opponent", save.opponent }, { "isMade", save.isMade } });
+		}
+		buffJson["opponentSaves"] = savesJson;
 		buffsJson.push_back(buffJson);
 	}
 	j["activeBuffs"] = buffsJson;

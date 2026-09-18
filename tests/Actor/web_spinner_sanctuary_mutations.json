@@ -8,16 +8,16 @@
   ],
   "mutations": [
     {
-      "file": "src/AiWebSpinner.cpp",
-      "original": "\t\tif (blocked_by_sanctuary(owner, ctx))",
-      "mutated": "\t\tif (false)",
-      "catches": "a spinner that never saves against sanctuary"
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\treturn;\n\t}",
+      "mutated": "\tif (false)\n\t{\n\t\treturn;\n\t}",
+      "catches": "venom that never asks the target's Sanctuary"
     },
     {
-      "file": "src/AiWebSpinner.cpp",
-      "original": "\t\tif (blocked_by_sanctuary(owner, ctx))\n\t\t{\n\t\t\treturn;\n\t\t}",
-      "mutated": "\t\tif (blocked_by_sanctuary(owner, ctx))\n\t\t{\n\t\t}",
-      "catches": "a spinner that fails its save and bites anyway"
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\treturn;\n\t}",
+      "mutated": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t}",
+      "catches": "venom turned away by Sanctuary that lands anyway"
     },
     {
       "file": "src/AiWebSpinner.cpp",
@@ -26,9 +26,9 @@
       "catches": "a spinner that never bites"
     },
     {
-      "file": "src/AiMonster.cpp",
-      "original": "\tif (!ctx.player()->has_state(ActorState::IS_PROTECTED))\n\t{\n\t\treturn false;\n\t}",
-      "mutated": "",
+      "file": "src/BuffSystem.cpp",
+      "original": "\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn false;\n\t}",
+      "mutated": "\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn !SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);\n\t}",
       "catches": "a save rolled against a player without sanctuary"
     }
   ]

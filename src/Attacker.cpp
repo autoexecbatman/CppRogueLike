@@ -60,6 +60,18 @@ void Attacker::perform_single_attack(
 		return;
 	}
 
+	// Sanctuary wards whoever bears it: an attacker that fails its save against the
+	// target's casting makes no attack on it (PHB page 436).
+	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
+	{
+		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " cannot bring itself to attack ");
+		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->finalize_message();
+		return;
+	}
+
 	// Validate strength attribute
 	const int strIndex = owner.get_strength() - 1;
 	if (strIndex < 0 || static_cast<size_t>(strIndex) >= ctx.dataManager->get_strength_attributes().size())

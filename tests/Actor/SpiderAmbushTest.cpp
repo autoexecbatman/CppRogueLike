@@ -23,15 +23,20 @@
 
 #include <initializer_list>
 #include <memory>
+#include <string>
+#include <string_view>
 
 #include "src/Actor.h"
 #include "src/AiSpider.h"
 #include "src/ArmorClass.h"
+#include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "src/LogMessage.h"
 #include "src/Map.h"
 #include "src/MonsterAttacker.h"
 #include "src/Player.h"
@@ -100,6 +105,22 @@ protected:
 	{
 		spider.ai->update(spider, ctx);
 		return STARTING_HP - player->get_hp();
+	}
+
+	// Whether any finished message carries this text.
+	bool was_told(std::string_view text)
+	{
+		for (size_t index = 0; index < game.messageSystem.get_stored_message_count(); ++index)
+		{
+			for (const LogMessage& part : game.messageSystem.get_attack_message_at(index))
+			{
+				if (part.logMessageText.find(text) != std::string::npos)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	static constexpr int STARTING_HP = 100;
@@ -207,8 +228,22 @@ TEST_F(SpiderAmbushTest, AnAmbushRollsAgainstArmourClass)
 TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 {
 	ASSERT_GT(SavingThrows::target(spider.get_creature_class(), spider.get_creature_level(), SavingThrow::SPELL), 12);
-	player->add_state(ActorState::IS_PROTECTED);
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
 	script({ 12, 20, 4, 100, 10 });
 
 	EXPECT_EQ(hp_lost_to_the_ambush(), 0) << "sanctuary held and the spider struck anyway";
+}
+
+// A spider turned away by Sanctuary ignores the player, so it takes no surprise round:
+// no surprise roll, and no word of one. The 1 queued where a surprise roll would be
+// read would surprise the player if it were.
+TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
+{
+	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
+	script({ 12, 100, 1, 20, 4, 100 });
+
+	spider.ai->update(spider, ctx);
+
+	EXPECT_TRUE(was_told("cannot bring itself to attack")) << "the bite was not turned away";
+	EXPECT_FALSE(was_told("caught off guard")) << "a surprise round against a player the spider ignores";
 }

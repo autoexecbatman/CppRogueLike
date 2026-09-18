@@ -8,6 +8,7 @@
 #include "Creature.h"
 #include "BuffSystem.h"
 #include "BuffType.h"
+#include "SavingThrow.h"
 
 // OCP: Data-driven buff state mapping - add new buffs here without modifying methods
 static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
@@ -221,6 +222,35 @@ int BuffSystem::calculate_ward_penalty(const Creature& attacker, const Creature&
 	}
 
 	return 0;
+}
+
+bool BuffSystem::is_turned_away_by_sanctuary(const Creature& attacker, Creature& warded, GameContext& ctx)
+{
+	auto is_sanctuary = [](const Buff& buff)
+	{
+		return buff.type == BuffType::SANCTUARY;
+	};
+	const auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);
+	if (casting == warded.activeBuffs.end())
+	{
+		return false;
+	}
+
+	// Already rolled against this casting: the result stands.
+	auto is_this_attacker = [&attacker](const OpponentSave& save)
+	{
+		return save.opponent == attacker.uniqueId;
+	};
+	const auto recorded = std::ranges::find_if(casting->opponentSaves, is_this_attacker);
+	if (recorded != casting->opponentSaves.end())
+	{
+		return !recorded->isMade;
+	}
+
+	// The first attempt rolls, once, and the casting keeps the result.
+	const bool isMade = SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);
+	casting->opponentSaves.push_back(OpponentSave{ attacker.uniqueId, isMade });
+	return !isMade;
 }
 
 int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept

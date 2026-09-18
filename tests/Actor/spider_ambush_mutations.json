@@ -11,7 +11,7 @@
       "file": "src/AiSpider.cpp",
       "original": "\t\t\t\tambushSprung = true;\n\t\t\t}",
       "mutated": "\t\t\t\tambushSprung = true;\n\t\t\t\tif (distanceToPlayer <= 1)\n\t\t\t\t{\n\t\t\t\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);\n\t\t\t\t}\n\t\t\t}",
-      "catches": "a second strike on discovery, ahead of the sanctuary check"
+      "catches": "a second strike on discovery"
     },
     {
       "file": "src/AiSpider.cpp",
@@ -21,15 +21,9 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\tif (blocked_by_sanctuary(owner, ctx))",
-      "mutated": "\tif (false)",
-      "catches": "a spider that ignores sanctuary"
-    },
-    {
-      "file": "src/AiSpider.cpp",
-      "original": "\tif (blocked_by_sanctuary(owner, ctx))\n\t{\n\t\treturn;\n\t}",
-      "mutated": "\tif (blocked_by_sanctuary(owner, ctx))\n\t{\n\t}",
-      "catches": "a spider that fails its save and bites anyway"
+      "original": " && !ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx)",
+      "mutated": "",
+      "catches": "a surprise round against a player the spider ignores"
     },
     {
       "file": "src/AiSpider.cpp",
@@ -63,8 +57,8 @@
     },
     {
       "file": "src/AiSpider.cpp",
-      "original": "\t\tif (ambushSprung && !ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))",
-      "mutated": "\t\tif (!ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))",
+      "original": "if (ambushSprung && ",
+      "mutated": "if (true && ",
       "catches": "a surprise roll after every bite, ambush or not"
     },
     {

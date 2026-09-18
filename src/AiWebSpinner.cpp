@@ -3,7 +3,6 @@
 #include <memory>
 #include <vector>
 
-#include "AiMonster.h"
 #include "Creature.h"
 #include "Colors.h"
 #include "GameContext.h"
@@ -47,12 +46,6 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
 	{
-		// A warded player is bitten only by a spinner that saves; failing, it does nothing.
-		if (blocked_by_sanctuary(owner, ctx))
-		{
-			return;
-		}
-
 		ctx.messageSystem->log("Web spinner attempting attack with poison");
 		bite(owner, *ctx.player(), ctx);
 

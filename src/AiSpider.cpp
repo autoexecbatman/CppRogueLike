@@ -12,6 +12,7 @@
 #include "Creature.h"
 #include "Colors.h"
 #include "AttackKind.h"
+#include "BuffSystem.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
 #include "DexterityAttributes.h"
@@ -136,11 +137,6 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		}
 	}
 
-	if (blocked_by_sanctuary(owner, ctx))
-	{
-		return;
-	}
-
 	// Special check for being adjacent to player - DIRECT ATTACK CODE
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 	if (distanceToPlayer <= 1 && ctx.map->is_in_fov(owner.position))
@@ -150,8 +146,11 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		bite(owner, *ctx.player(), ctx);
 
 		// PHB: an ambush's victim rolls for surprise after the initial attack, and a
-		// surprised victim takes one more round before it can act.
-		if (ambushSprung && !ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))
+		// surprised victim takes one more round before it can act. A spider the player's
+		// Sanctuary turned away ignores the player, so there is no round to take; the bite
+		// above asked, so this reads its answer rather than rolling one. The surprise roll
+		// comes last because it spends a die, and only a round that can happen should.
+		if (ambushSprung && !ctx.player()->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx) && is_surprised(*ctx.player(), ctx))
 		{
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are caught off guard!", true);
 			ctx.player()->add_state(ActorState::IS_SURPRISED);
@@ -354,6 +353,12 @@ bool AiSpider::can_poison_attack(GameContext& ctx)
 
 void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
+	// The venom is a direct attack, so a target's Sanctuary holds it off as it does the bite.
+	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
+	{
+		return;
+	}
+
 	// Apply poison effect to target if it's the player
 	if (target.is_player())
 	{

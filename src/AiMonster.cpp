@@ -10,7 +10,6 @@
 #include "Map.h"
 #include "Persistent.h"
 #include "Vector2D.h"
-#include "SavingThrow.h"
 #include "Ai.h"
 #include "AiMonster.h"
 
@@ -114,30 +113,15 @@ namespace
 		}
 	}
 	// Returns true when this creature must skip its turn entirely.
-	bool cannot_act(Creature& owner, GameContext& ctx)
+	bool cannot_act(Creature& owner)
 	{
 		if (owner.ai == nullptr || owner.is_dead())
 		{
 			return true;
 		}
-		if (owner.has_state(ActorState::IS_SLEEPING) || owner.has_state(ActorState::IS_HELD))
-		{
-			return true;
-		}
-		return blocked_by_sanctuary(owner, ctx);
+		return owner.has_state(ActorState::IS_SLEEPING) || owner.has_state(ActorState::IS_HELD);
 	}
 } // namespace
-
-// AD&D 2e: Returns true if the player's Sanctuary spell blocks this monster's
-// turn. Sanctuary is a spell, so the monster saves against it on its own row.
-bool blocked_by_sanctuary(Creature& owner, GameContext& ctx)
-{
-	if (!ctx.player()->has_state(ActorState::IS_PROTECTED))
-	{
-		return false;
-	}
-	return !SavingThrows::is_made(owner, SavingThrow::SPELL, 0, ctx);
-}
 
 void AiMonster::move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx)
 {
@@ -231,7 +215,7 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 
 void AiMonster::update(Creature& owner, GameContext& ctx)
 {
-	if (cannot_act(owner, ctx))
+	if (cannot_act(owner))
 	{
 		return;
 	}

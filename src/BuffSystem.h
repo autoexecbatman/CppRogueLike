@@ -30,5 +30,17 @@ public:
 	// creatures because the penalty depends on who is swinging: Protection
 	// from Evil bites only evil attackers.
 	int calculate_ward_penalty(const Creature& attacker, const Creature& target) const noexcept;
+
+	// Whether the warded creature's Sanctuary turns this attacker away. PHB page 436:
+	// an opponent attempting to attack saves against the spell; made, it "is
+	// unaffected by that casting"; failed, it "totally ignores the warded creature
+	// for the duration". The first ask rolls the save and records it on the casting;
+	// every later ask reads the record. No Sanctuary, no save.
+	//
+	// Example, the goblin rolling a 1 against a fresh casting, the orc a 20:
+	//   is_turned_away_by_sanctuary(goblin, player, ctx);   // -> true, and recorded
+	//   is_turned_away_by_sanctuary(goblin, player, ctx);   // -> true, no roll
+	//   is_turned_away_by_sanctuary(orc, player, ctx);      // -> false for this casting
+	bool is_turned_away_by_sanctuary(const Creature& attacker, Creature& warded, GameContext& ctx);
 	std::vector<BuffType> remove_buffs_broken_by_attacking(Creature& creature) noexcept;
 };
