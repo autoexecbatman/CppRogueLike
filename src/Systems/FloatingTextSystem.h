@@ -34,9 +34,9 @@ public:
 	void spawn_text(
 		Vector2D worldPosition,
 		std::string text,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
 		float lifetime);
 
 	void update_and_render(const Renderer& renderer);

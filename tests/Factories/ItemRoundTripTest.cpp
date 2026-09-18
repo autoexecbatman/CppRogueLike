@@ -29,9 +29,13 @@
 #include "src/Factories/ItemCreator.h"
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <set>
+#include <stdexcept>
 #include <string>
 
 namespace
@@ -133,6 +137,83 @@ TEST_F(ItemRoundTripTest, EveryPersistedFieldSurvivesASave)
 	{
 		expect_same_item(key, snapshot, ItemCreator::get_params(key));
 	}
+}
+
+// Writes the real file to the temporary path with one key removed from one record, and
+// returns what loading it threw. Fails the calling test if nothing was thrown.
+std::string load_without_field(
+	const std::filesystem::path& destination,
+	const std::string& itemKey,
+	const std::string& field)
+{
+	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	EXPECT_TRUE(source.is_open()) << "cannot read the real items file";
+	nlohmann::json root = nlohmann::json::parse(source);
+	EXPECT_TRUE(root.contains(itemKey)) << itemKey << " must exist to be damaged";
+	EXPECT_TRUE(root[itemKey].contains(field)) << itemKey << " has no " << field << " to remove";
+	root[itemKey].erase(field);
+
+	std::ofstream damaged(destination);
+	damaged << root.dump(2);
+	damaged.close();
+
+	try
+	{
+		ItemCreator::load(destination.string());
+	}
+	catch (const std::runtime_error& refusal)
+	{
+		return refusal.what();
+	}
+	ADD_FAILURE() << "loading a record with no " << field << " threw nothing";
+	return {};
+}
+
+// The encoder writes all thirty-four keys unconditionally and every record carries all
+// thirty-four, so a record missing one is a corrupted or hand-edited file. Loading it
+// must fail loudly: the alternative is the registry filling with items whose every value
+// is a default, which is the failure this file exists for.
+//
+// Every field is tried rather than a chosen one, because the defect this replaces was a
+// property of one line at a time - thirty-three correct reads and one silent default is
+// exactly the state that produced the original bug.
+TEST_F(ItemRoundTripTest, EveryFieldOfARecordIsRequired)
+{
+	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
+	const nlohmann::json root = nlohmann::json::parse(source);
+	ASSERT_TRUE(root.contains("health_potion")) << "health_potion must exist to be damaged";
+
+	std::set<std::string> fields;
+	for (const auto& [field, unused] : root.at("health_potion").items())
+	{
+		fields.insert(field);
+	}
+	ASSERT_FALSE(fields.empty()) << "no fields to remove; the test would pass vacuously";
+
+	for (const std::string& field : fields)
+	{
+		const std::string refusal = load_without_field(roundTrip, "health_potion", field);
+
+		const std::size_t namesRecord = refusal.find("health_potion");
+		const std::size_t namesField = refusal.find(field);
+		EXPECT_NE(namesRecord, std::string::npos)
+			<< "the refusal must name the record, since 98 of them load: " << refusal;
+		EXPECT_NE(namesField, std::string::npos)
+			<< "the refusal must name " << field << ": " << refusal;
+		// Both names present in either order reads as a sentence about the wrong thing,
+		// so the record has to come first.
+		EXPECT_LT(namesRecord, namesField)
+			<< "the refusal names " << field << " before the record it belongs to: " << refusal;
+	}
+}
+
+// Paired with the refusals above: they must be about the missing key rather than about
+// the file, or they would pass while rejecting everything.
+TEST_F(ItemRoundTripTest, TheRealFileLoadsWithoutThrowing)
+{
+	EXPECT_NO_THROW(ItemCreator::load("data/content/items.json"));
+	EXPECT_FALSE(ItemCreator::get_all_keys().empty());
 }
 
 // A category is only consulted through create_random_of_category, which also requires a

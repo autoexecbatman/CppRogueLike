@@ -146,92 +146,92 @@ struct Buff
 	// Note: Modifier stack pattern - no originalStat needed, effective values calculated on the fly
 };
 
-inline BuffType parse_buff_type(std::string_view s)
+inline BuffType parse_buff_type(std::string_view name)
 {
-	if (s == "none")
+	if (name == "none")
 	{
 		return BuffType::NONE;
 	}
-	if (s == "invisibility")
+	if (name == "invisibility")
 	{
 		return BuffType::INVISIBILITY;
 	}
-	if (s == "bless")
+	if (name == "bless")
 	{
 		return BuffType::BLESS;
 	}
-	if (s == "shield")
+	if (name == "shield")
 	{
 		return BuffType::SHIELD;
 	}
-	if (s == "strength")
+	if (name == "strength")
 	{
 		return BuffType::STRENGTH;
 	}
-	if (s == "dexterity")
+	if (name == "dexterity")
 	{
 		return BuffType::DEXTERITY;
 	}
-	if (s == "constitution")
+	if (name == "constitution")
 	{
 		return BuffType::CONSTITUTION;
 	}
-	if (s == "intelligence")
+	if (name == "intelligence")
 	{
 		return BuffType::INTELLIGENCE;
 	}
-	if (s == "wisdom")
+	if (name == "wisdom")
 	{
 		return BuffType::WISDOM;
 	}
-	if (s == "charisma")
+	if (name == "charisma")
 	{
 		return BuffType::CHARISMA;
 	}
-	if (s == "speed")
+	if (name == "speed")
 	{
 		return BuffType::SPEED;
 	}
-	if (s == "fire_resistance")
+	if (name == "fire_resistance")
 	{
 		return BuffType::FIRE_RESISTANCE;
 	}
-	if (s == "cold_resistance")
+	if (name == "cold_resistance")
 	{
 		return BuffType::COLD_RESISTANCE;
 	}
-	if (s == "lightning_resistance")
+	if (name == "lightning_resistance")
 	{
 		return BuffType::LIGHTNING_RESISTANCE;
 	}
-	if (s == "poison_resistance")
+	if (name == "poison_resistance")
 	{
 		return BuffType::POISON_RESISTANCE;
 	}
-	if (s == "sleep")
+	if (name == "sleep")
 	{
 		return BuffType::SLEEP;
 	}
-	if (s == "hold_person")
+	if (name == "hold_person")
 	{
 		return BuffType::HOLD_PERSON;
 	}
-	if (s == "sanctuary")
+	if (name == "sanctuary")
 	{
 		return BuffType::SANCTUARY;
 	}
-	if (s == "protection_from_evil")
+	if (name == "protection_from_evil")
 	{
 		return BuffType::PROTECTION_FROM_EVIL;
 	}
-	if (s == "silence")
+	if (name == "silence")
 	{
 		return BuffType::SILENCE;
 	}
-	if (s == "webbed")
+	if (name == "webbed")
 	{
 		return BuffType::WEBBED;
 	}
 
-	throw std::runtime_error(std::format("unknown buff_type '{}'", s));
+	throw std::runtime_error(std::format("unknown buff_type '{}'", name));
 }

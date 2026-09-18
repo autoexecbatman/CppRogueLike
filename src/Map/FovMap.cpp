@@ -6,46 +6,46 @@ FovMap::FovMap(int width, int height)
 {
 }
 
-void FovMap::set_properties(int x, int y, bool walkable, bool transparent) noexcept
+void FovMap::set_properties(int col, int row, bool walkable, bool transparent) noexcept
 {
-	if (!in_bounds(x, y))
+	if (!in_bounds(col, row))
 	{
 		return;
 	}
 
-	FovCell& c = cells_[cell_index(x, y)];
-	c.walkable = walkable;
-	c.transparent = transparent;
+	FovCell& cell = cells_[cell_index(col, row)];
+	cell.walkable = walkable;
+	cell.transparent = transparent;
 }
 
-bool FovMap::is_walkable(int x, int y) const noexcept
+bool FovMap::is_walkable(int col, int row) const noexcept
 {
-	if (!in_bounds(x, y))
+	if (!in_bounds(col, row))
 	{
 		return false;
 	}
 
-	return cells_[cell_index(x, y)].walkable;
+	return cells_[cell_index(col, row)].walkable;
 }
 
-bool FovMap::is_in_fov(int x, int y) const noexcept
+bool FovMap::is_in_fov(int col, int row) const noexcept
 {
-	if (!in_bounds(x, y))
+	if (!in_bounds(col, row))
 	{
 		return false;
 	}
 
-	return cells_[cell_index(x, y)].visible;
+	return cells_[cell_index(col, row)].visible;
 }
 
-bool FovMap::in_bounds(int x, int y) const noexcept
+bool FovMap::in_bounds(int col, int row) const noexcept
 {
-	return x >= 0 && x < width_ && y >= 0 && y < height_;
+	return col >= 0 && col < width_ && row >= 0 && row < height_;
 }
 
-int FovMap::cell_index(int x, int y) const noexcept
+int FovMap::cell_index(int col, int row) const noexcept
 {
-	return y * width_ + x;
+	return row * width_ + col;
 }
 
 // ---------------------------------------------------------------------------

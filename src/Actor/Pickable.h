@@ -255,9 +255,9 @@ int get_item_resistance_strength(const ItemBehavior& behavior, DamageType damage
 void save_behavior(const ItemBehavior& behavior, json& j);
 ItemBehavior load_behavior(const json& j);
 
-inline std::string_view encode_pickable_type(PickableType t)
+inline std::string_view encode_pickable_type(PickableType pickableType)
 {
-	switch (t)
+	switch (pickableType)
 	{
 
 	case PickableType::TARGETED_SCROLL:
@@ -350,76 +350,76 @@ inline std::string_view encode_pickable_type(PickableType t)
 	return "weapon";
 }
 
-inline PickableType parse_pickable_type(std::string_view s)
+inline PickableType parse_pickable_type(std::string_view name)
 {
-	if (s == "targeted_scroll")
+	if (name == "targeted_scroll")
 	{
 		return PickableType::TARGETED_SCROLL;
 	}
-	if (s == "teleporter")
+	if (name == "teleporter")
 	{
 		return PickableType::TELEPORTER;
 	}
-	if (s == "identify_scroll")
+	if (name == "identify_scroll")
 	{
 		return PickableType::IDENTIFY_SCROLL;
 	}
-	if (s == "weapon")
+	if (name == "weapon")
 	{
 		return PickableType::WEAPON;
 	}
-	if (s == "shield")
+	if (name == "shield")
 	{
 		return PickableType::SHIELD;
 	}
-	if (s == "consumable")
+	if (name == "consumable")
 	{
 		return PickableType::CONSUMABLE;
 	}
-	if (s == "gold_coin")
+	if (name == "gold_coin")
 	{
 		return PickableType::GOLD_COIN;
 	}
-	if (s == "food")
+	if (name == "food")
 	{
 		return PickableType::FOOD;
 	}
-	if (s == "corpse_food")
+	if (name == "corpse_food")
 	{
 		return PickableType::CORPSE_FOOD;
 	}
-	if (s == "armor")
+	if (name == "armor")
 	{
 		return PickableType::ARMOR;
 	}
-	if (s == "magical_helm")
+	if (name == "magical_helm")
 	{
 		return PickableType::MAGICAL_HELM;
 	}
-	if (s == "magical_ring")
+	if (name == "magical_ring")
 	{
 		return PickableType::MAGICAL_RING;
 	}
-	if (s == "jewelry_amulet")
+	if (name == "jewelry_amulet")
 	{
 		return PickableType::JEWELRY_AMULET;
 	}
-	if (s == "gauntlets")
+	if (name == "gauntlets")
 	{
 		return PickableType::GAUNTLETS;
 	}
-	if (s == "girdle")
+	if (name == "girdle")
 	{
 		return PickableType::GIRDLE;
 	}
-	if (s == "quest_item")
+	if (name == "quest_item")
 	{
 		return PickableType::QUEST_ITEM;
 	}
-	if (s == "dungeon_key")
+	if (name == "dungeon_key")
 	{
 		return PickableType::DUNGEON_KEY;
 	}
 
-	throw std::runtime_error(std::format("unknown pickable_type '{}'", s));
+	throw std::runtime_error(std::format("unknown pickable_type '{}'", name));
 }

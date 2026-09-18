@@ -163,9 +163,9 @@ bool is_two_handed_weapon(ItemClass itemClass);
 ItemClass item_class_from_string(const std::string& typeName);
 } // namespace ItemClassificationUtils
 
-inline std::string_view encode_item_class(ItemClass c)
+inline std::string_view encode_item_class(ItemClass itemClass)
 {
-	switch (c)
+	switch (itemClass)
 	{
 
 	case ItemClass::UNKNOWN:
@@ -292,104 +292,104 @@ inline std::string_view encode_item_class(ItemClass c)
 	return "unknown";
 }
 
-inline ItemClass parse_item_class(std::string_view s)
+inline ItemClass parse_item_class(std::string_view name)
 {
-	if (s == "unknown")
+	if (name == "unknown")
 	{
 		return ItemClass::UNKNOWN;
 	}
-	if (s == "dagger")
+	if (name == "dagger")
 	{
 		return ItemClass::DAGGER;
 	}
-	if (s == "sword")
+	if (name == "sword")
 	{
 		return ItemClass::SWORD;
 	}
-	if (s == "great_sword")
+	if (name == "great_sword")
 	{
 		return ItemClass::GREAT_SWORD;
 	}
-	if (s == "axe")
+	if (name == "axe")
 	{
 		return ItemClass::AXE;
 	}
-	if (s == "hammer")
+	if (name == "hammer")
 	{
 		return ItemClass::HAMMER;
 	}
-	if (s == "mace")
+	if (name == "mace")
 	{
 		return ItemClass::MACE;
 	}
-	if (s == "staff")
+	if (name == "staff")
 	{
 		return ItemClass::STAFF;
 	}
-	if (s == "bow")
+	if (name == "bow")
 	{
 		return ItemClass::BOW;
 	}
-	if (s == "crossbow")
+	if (name == "crossbow")
 	{
 		return ItemClass::CROSSBOW;
 	}
-	if (s == "armor")
+	if (name == "armor")
 	{
 		return ItemClass::ARMOR;
 	}
-	if (s == "shield")
+	if (name == "shield")
 	{
 		return ItemClass::SHIELD;
 	}
-	if (s == "helmet")
+	if (name == "helmet")
 	{
 		return ItemClass::HELMET;
 	}
-	if (s == "ring")
+	if (name == "ring")
 	{
 		return ItemClass::RING;
 	}
-	if (s == "amulet")
+	if (name == "amulet")
 	{
 		return ItemClass::AMULET;
 	}
-	if (s == "gauntlets")
+	if (name == "gauntlets")
 	{
 		return ItemClass::GAUNTLETS;
 	}
-	if (s == "girdle")
+	if (name == "girdle")
 	{
 		return ItemClass::GIRDLE;
 	}
-	if (s == "potion")
+	if (name == "potion")
 	{
 		return ItemClass::POTION;
 	}
-	if (s == "scroll")
+	if (name == "scroll")
 	{
 		return ItemClass::SCROLL;
 	}
-	if (s == "food")
+	if (name == "food")
 	{
 		return ItemClass::FOOD;
 	}
-	if (s == "gold_coin")
+	if (name == "gold_coin")
 	{
 		return ItemClass::GOLD_COIN;
 	}
-	if (s == "gem")
+	if (name == "gem")
 	{
 		return ItemClass::GEM;
 	}
-	if (s == "tool")
+	if (name == "tool")
 	{
 		return ItemClass::TOOL;
 	}
-	if (s == "quest_item")
+	if (name == "quest_item")
 	{
 		return ItemClass::QUEST_ITEM;
 	}
 
-	throw std::runtime_error(std::format("unknown item_class '{}'", s));
+	throw std::runtime_error(std::format("unknown item_class '{}'", name));
 }

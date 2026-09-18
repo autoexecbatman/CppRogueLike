@@ -50,12 +50,12 @@ std::string normalize_key(std::string_view raw)
 {
 	std::string key;
 	key.reserve(raw.size());
-	for (char c : raw)
+	for (char character : raw)
 	{
-		if (std::isspace(static_cast<unsigned char>(c)))
+		if (std::isspace(static_cast<unsigned char>(character)))
 			key += '_';
 		else
-			key += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+			key += static_cast<char>(std::tolower(static_cast<unsigned char>(character)));
 	}
 	return key;
 }
@@ -64,9 +64,9 @@ std::string unique_item_key(const std::string& base)
 {
 	if (!registry.contains(base))
 		return base;
-	for (int n = 2;; ++n)
+	for (int suffix = 2;; ++suffix)
 	{
-		std::string candidate = std::format("{}_{}", base, n);
+		std::string candidate = std::format("{}_{}", base, suffix);
 		if (!registry.contains(candidate))
 			return candidate;
 	}
@@ -81,34 +81,34 @@ void patch_views(ItemEntry& entry)
 // ---------------------------------------------------------------------------
 // Enum parse helpers
 // ---------------------------------------------------------------------------
-ConsumableEffect parse_consumable_effect(std::string_view s)
+ConsumableEffect parse_consumable_effect(std::string_view name)
 {
-	if (s == "none")
+	if (name == "none")
 	{
 		return ConsumableEffect::NONE;
 	}
-	if (s == "heal")
+	if (name == "heal")
 	{
 		return ConsumableEffect::HEAL;
 	}
-	if (s == "add_buff")
+	if (name == "add_buff")
 	{
 		return ConsumableEffect::ADD_BUFF;
 	}
-	if (s == "fail")
+	if (name == "fail")
 	{
 		return ConsumableEffect::FAIL;
 	}
 
-	throw std::runtime_error(std::format("ItemCreator: unknown consumable_effect '{}'", s));
+	throw std::runtime_error(std::format("ItemCreator: unknown consumable_effect '{}'", name));
 }
 
 // ---------------------------------------------------------------------------
 // Enum encode helpers
 // ---------------------------------------------------------------------------
-std::string_view encode_consumable_effect(ConsumableEffect e)
+std::string_view encode_consumable_effect(ConsumableEffect consumableEffect)
 {
-	switch (e)
+	switch (consumableEffect)
 	{
 
 	case ConsumableEffect::NONE:
@@ -139,109 +139,134 @@ std::string_view encode_consumable_effect(ConsumableEffect e)
 // ---------------------------------------------------------------------------
 // JSON encode / parse
 // ---------------------------------------------------------------------------
-nlohmann::json encode_item_entry(const ItemEntry& e)
+nlohmann::json encode_item_entry(const ItemEntry& entry)
 {
-	const ItemParams& p = e.params;
-	nlohmann::json j;
-	j["name"] = e.name;
-	j["category"] = e.category;
-	j["color"] = p.color;
-	j["itemClass"] = encode_item_class(p.itemClass);
-	j["value"] = p.value;
-	j["pickableType"] = encode_pickable_type(p.pickableType);
-	j["baseWeight"] = p.baseWeight;
-	j["levelMin"] = p.levelMin;
-	j["levelMax"] = p.levelMax;
-	j["levelScaling"] = p.levelScaling;
-	j["consumableAmount"] = p.consumableAmount;
-	j["range"] = p.range;
-	j["damage"] = p.damage;
-	j["confuseTurns"] = p.confuseTurns;
-	j["duration"] = p.duration;
-	j["effect"] = encode_magical_effect(p.effect);
-	j["effectBonus"] = p.effectBonus;
-	j["strBonus"] = p.strBonus;
-	j["dexBonus"] = p.dexBonus;
-	j["conBonus"] = p.conBonus;
-	j["intBonus"] = p.intBonus;
-	j["wisBonus"] = p.wisBonus;
-	j["chaBonus"] = p.chaBonus;
-	j["isSetMode"] = p.isSetMode;
-	j["nutritionValue"] = p.nutritionValue;
-	j["goldAmount"] = p.goldAmount;
-	j["acBonus"] = p.acBonus;
-	j["ranged"] = p.ranged;
-	j["handRequirement"] = encode_hand_requirement(p.handRequirement);
-	j["weaponSize"] = encode_weapon_size(p.weaponSize);
-	j["consumableEffect"] = encode_consumable_effect(p.consumableEffect);
-	j["consumableBuff"] = encode_buff_type(p.consumableBuffType);
-	j["targetMode"] = encode_target_mode(p.targetMode);
-	j["scrollAnimation"] = encode_scroll_animation(p.scrollAnimation);
+	const ItemParams& params = entry.params;
+	nlohmann::json record;
+	record["name"] = entry.name;
+	record["category"] = entry.category;
+	record["color"] = params.color;
+	record["itemClass"] = encode_item_class(params.itemClass);
+	record["value"] = params.value;
+	record["pickableType"] = encode_pickable_type(params.pickableType);
+	record["baseWeight"] = params.baseWeight;
+	record["levelMin"] = params.levelMin;
+	record["levelMax"] = params.levelMax;
+	record["levelScaling"] = params.levelScaling;
+	record["consumableAmount"] = params.consumableAmount;
+	record["range"] = params.range;
+	record["damage"] = params.damage;
+	record["confuseTurns"] = params.confuseTurns;
+	record["duration"] = params.duration;
+	record["effect"] = encode_magical_effect(params.effect);
+	record["effectBonus"] = params.effectBonus;
+	record["strBonus"] = params.strBonus;
+	record["dexBonus"] = params.dexBonus;
+	record["conBonus"] = params.conBonus;
+	record["intBonus"] = params.intBonus;
+	record["wisBonus"] = params.wisBonus;
+	record["chaBonus"] = params.chaBonus;
+	record["isSetMode"] = params.isSetMode;
+	record["nutritionValue"] = params.nutritionValue;
+	record["goldAmount"] = params.goldAmount;
+	record["acBonus"] = params.acBonus;
+	record["ranged"] = params.ranged;
+	record["handRequirement"] = encode_hand_requirement(params.handRequirement);
+	record["weaponSize"] = encode_weapon_size(params.weaponSize);
+	record["consumableEffect"] = encode_consumable_effect(params.consumableEffect);
+	record["consumableBuff"] = encode_buff_type(params.consumableBuffType);
+	record["targetMode"] = encode_target_mode(params.targetMode);
+	record["scrollAnimation"] = encode_scroll_animation(params.scrollAnimation);
 
-	return j;
+	return record;
 }
 
-ItemEntry parse_item_entry(const std::string& key, const nlohmann::json& j)
+// Reads a field every item record carries. encode_item_entry writes all thirty-four
+// unconditionally, so a record missing one is a corrupted or hand-edited file rather
+// than a shorter record - this names the item and the field instead of handing back a
+// default nobody authored.
+//
+// Example:
+//   required_field(record, "health_potion", "baseWeight");   // -> 12
+//   required_field(record, "health_potion", "weight");
+//   // throws: ItemCreator::load -- item 'health_potion' is missing required field 'weight'
+const nlohmann::json& required_field(
+	const nlohmann::json& record,
+	const std::string& itemKey,
+	const std::string& field)
 {
-	ItemEntry e;
-	e.name = j.value("name", key);
-	e.category = j.value("category", std::string{});
+	const auto found = record.find(field);
+	if (found == record.end())
+	{
+		throw std::runtime_error(std::format(
+			"ItemCreator::load -- item '{}' is missing required field '{}'",
+			itemKey,
+			field));
+	}
+	return *found;
+}
 
-	ItemParams& p = e.params;
-	p.color = j.value("color", 0);
-	p.itemClass = parse_item_class(j.value("itemClass", std::string{ "unknown" }));
-	p.value = j.value("value", 0);
-	p.pickableType = parse_pickable_type(j.value("pickableType", std::string{ "weapon" }));
-	p.baseWeight = j.value("baseWeight", 0);
-	p.levelMin = j.value("levelMin", 1);
-	p.levelMax = j.value("levelMax", 0);
-	p.levelScaling = j.value("levelScaling", 0.0f);
-	p.consumableAmount = j.value("consumableAmount", 0);
-	p.range = j.value("range", 0);
-	p.damage = j.value("damage", 0);
-	p.confuseTurns = j.value("confuseTurns", 0);
-	p.duration = j.value("duration", 0);
-	p.effect = parse_magical_effect(j.value("effect", std::string{ "none" }));
-	p.effectBonus = j.value("effectBonus", 0);
-	p.strBonus = j.value("strBonus", 0);
-	p.dexBonus = j.value("dexBonus", 0);
-	p.conBonus = j.value("conBonus", 0);
-	p.intBonus = j.value("intBonus", 0);
-	p.wisBonus = j.value("wisBonus", 0);
-	p.chaBonus = j.value("chaBonus", 0);
-	p.isSetMode = j.value("isSetMode", false);
-	p.nutritionValue = j.value("nutritionValue", 0);
-	p.goldAmount = j.value("goldAmount", 0);
-	p.acBonus = j.value("acBonus", 0);
-	p.ranged = j.value("ranged", false);
-	p.handRequirement = parse_hand_requirement(j.value("handRequirement", std::string{ "one_handed" }));
-	p.weaponSize = parse_weapon_size(j.value("weaponSize", std::string{ "medium" }));
-	p.consumableEffect = parse_consumable_effect(j.value("consumableEffect", std::string{ "none" }));
-	p.consumableBuffType = parse_buff_type(j.value("consumableBuff", std::string{ "none" }));
-	p.targetMode = parse_target_mode(j.value("targetMode", std::string{ "auto_nearest" }));
-	p.scrollAnimation = parse_scroll_animation(j.value("scrollAnimation", std::string{ "none" }));
+ItemEntry parse_item_entry(const std::string& key, const nlohmann::json& record)
+{
+	ItemEntry entry;
+	entry.name = required_field(record, key, "name").get<std::string>();
+	entry.category = required_field(record, key, "category").get<std::string>();
+
+	ItemParams& params = entry.params;
+	params.color = required_field(record, key, "color");
+	params.itemClass = parse_item_class(required_field(record, key, "itemClass").get<std::string>());
+	params.value = required_field(record, key, "value");
+	params.pickableType = parse_pickable_type(required_field(record, key, "pickableType").get<std::string>());
+	params.baseWeight = required_field(record, key, "baseWeight");
+	params.levelMin = required_field(record, key, "levelMin");
+	params.levelMax = required_field(record, key, "levelMax");
+	params.levelScaling = required_field(record, key, "levelScaling");
+	params.consumableAmount = required_field(record, key, "consumableAmount");
+	params.range = required_field(record, key, "range");
+	params.damage = required_field(record, key, "damage");
+	params.confuseTurns = required_field(record, key, "confuseTurns");
+	params.duration = required_field(record, key, "duration");
+	params.effect = parse_magical_effect(required_field(record, key, "effect").get<std::string>());
+	params.effectBonus = required_field(record, key, "effectBonus");
+	params.strBonus = required_field(record, key, "strBonus");
+	params.dexBonus = required_field(record, key, "dexBonus");
+	params.conBonus = required_field(record, key, "conBonus");
+	params.intBonus = required_field(record, key, "intBonus");
+	params.wisBonus = required_field(record, key, "wisBonus");
+	params.chaBonus = required_field(record, key, "chaBonus");
+	params.isSetMode = required_field(record, key, "isSetMode");
+	params.nutritionValue = required_field(record, key, "nutritionValue");
+	params.goldAmount = required_field(record, key, "goldAmount");
+	params.acBonus = required_field(record, key, "acBonus");
+	params.ranged = required_field(record, key, "ranged");
+	params.handRequirement = parse_hand_requirement(required_field(record, key, "handRequirement").get<std::string>());
+	params.weaponSize = parse_weapon_size(required_field(record, key, "weaponSize").get<std::string>());
+	params.consumableEffect = parse_consumable_effect(required_field(record, key, "consumableEffect").get<std::string>());
+	params.consumableBuffType = parse_buff_type(required_field(record, key, "consumableBuff").get<std::string>());
+	params.targetMode = parse_target_mode(required_field(record, key, "targetMode").get<std::string>());
+	params.scrollAnimation = parse_scroll_animation(required_field(record, key, "scrollAnimation").get<std::string>());
 	// NOTE: do NOT call patch_views here -- views would dangle after return-by-value.
 	// Caller must call patch_views after placing the entry in its stable storage.
 
-	return e;
+	return entry;
 }
 
 // ---------------------------------------------------------------------------
 // Behavior construction
 // ---------------------------------------------------------------------------
 template <typename T>
-T create_stat_behavior(const ItemParams& p)
+T create_stat_behavior(const ItemParams& params)
 {
 	T item;
-	item.strBonus = p.strBonus;
-	item.dexBonus = p.dexBonus;
-	item.conBonus = p.conBonus;
-	item.intBonus = p.intBonus;
-	item.wisBonus = p.wisBonus;
-	item.chaBonus = p.chaBonus;
-	item.effect = p.effect;
-	item.bonus = p.effectBonus;
-	item.isSetMode = p.isSetMode;
+	item.strBonus = params.strBonus;
+	item.dexBonus = params.dexBonus;
+	item.conBonus = params.conBonus;
+	item.intBonus = params.intBonus;
+	item.wisBonus = params.wisBonus;
+	item.chaBonus = params.chaBonus;
+	item.effect = params.effect;
+	item.bonus = params.effectBonus;
+	item.isSetMode = params.isSetMode;
 	return item;
 }
 
@@ -356,16 +381,16 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 std::unique_ptr<Item> make_item(std::string_view key, const ItemEntry& entry, Vector2D pos, ContentRegistry& registry)
 {
-	const ItemParams& p = entry.params;
+	const ItemParams& params = entry.params;
 	TileRef tile = registry.get_tile(key);
 	auto item = std::make_unique<Item>(
 		pos,
-		ActorData{ tile, std::string{ p.name }, p.color });
-	item->behavior = create_behavior(p);
+		ActorData{ tile, std::string{ params.name }, params.color });
+	item->behavior = create_behavior(params);
 	item->itemKey = std::string{ key };
-	item->itemClass = p.itemClass;
-	item->set_value(p.value);
-	item->enhancement.weight = p.baseWeight; // Assign base weight to enhancement
+	item->itemClass = params.itemClass;
+	item->set_value(params.value);
+	item->enhancement.weight = params.baseWeight; // Assign base weight to enhancement
 	return item;
 }
 
@@ -378,19 +403,19 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemEntry& entry, Ve
 void ItemCreator::load(std::string_view path)
 {
 	auto resolved = Paths::resolve(path);
-	std::ifstream f(resolved);
-	if (!f.is_open())
+	std::ifstream file(resolved);
+	if (!file.is_open())
 	{
 		return;
 	}
 
-	nlohmann::json root = nlohmann::json::parse(f);
+	nlohmann::json root = nlohmann::json::parse(file);
 	registry.clear();
 	builtinKeys.clear();
 
-	for (const auto& [key, val] : root.items())
+	for (const auto& [key, record] : root.items())
 	{
-		registry[key] = parse_item_entry(key, val);
+		registry[key] = parse_item_entry(key, record);
 		patch_views(registry[key]); // patch after stable insertion into map
 		builtinKeys.insert(key);
 	}
@@ -407,14 +432,14 @@ void ItemCreator::save(std::string_view path)
 		root[key] = encode_item_entry(entry);
 	}
 
-	std::ofstream f(resolved);
-	if (!f.is_open())
+	std::ofstream file(resolved);
+	if (!file.is_open())
 	{
 		throw std::runtime_error(
 			std::format("ItemCreator::save -- cannot open '{}' for writing", resolved.string()));
 	}
-	f << root.dump(4);
-	if (f.fail())
+	file << root.dump(4);
+	if (file.fail())
 	{
 		throw std::runtime_error(
 			std::format("ItemCreator::save -- write failed for '{}'", resolved.string()));
@@ -472,14 +497,14 @@ std::unique_ptr<Item> ItemCreator::create_with_gold_amount(Vector2D pos, int gol
 		throw std::runtime_error(
 			"ItemCreator::create_with_gold_amount -- 'gold_coin' not in registry");
 	}
-	const ItemParams& p = registry.at("gold_coin").params;
+	const ItemParams& params = registry.at("gold_coin").params;
 	TileRef tile = tiles.get_tile("gold_coin");
 	auto item = std::make_unique<Item>(
 		pos,
-		ActorData{ tile, std::string{ p.name }, p.color });
+		ActorData{ tile, std::string{ params.name }, params.color });
 	item->behavior = Gold{ goldAmount };
 	item->itemKey = "gold_coin";
-	item->itemClass = p.itemClass;
+	item->itemClass = params.itemClass;
 	item->set_value(goldAmount);
 	return item;
 }
@@ -521,22 +546,22 @@ std::unique_ptr<Item> ItemCreator::create_random_of_category(
 
 	for (const auto& [key, entry] : registry)
 	{
-		const ItemParams& p = entry.params;
-		if (p.category != category || p.baseWeight <= 0)
+		const ItemParams& params = entry.params;
+		if (params.category != category || params.baseWeight <= 0)
 		{
 			continue;
 		}
-		if (dungeonLevel < p.levelMin)
+		if (dungeonLevel < params.levelMin)
 		{
 			continue;
 		}
-		if (p.levelMax > 0 && dungeonLevel > p.levelMax)
+		if (params.levelMax > 0 && dungeonLevel > params.levelMax)
 		{
 			continue;
 		}
 
-		const float levelFactor = 1.0f + (p.levelScaling * static_cast<float>(dungeonLevel - 1));
-		const int weight = std::max(1, static_cast<int>(p.baseWeight * levelFactor));
+		const float levelFactor = 1.0f + (params.levelScaling * static_cast<float>(dungeonLevel - 1));
+		const int weight = std::max(1, static_cast<int>(params.baseWeight * levelFactor));
 		candidates.push_back({ key, weight });
 		totalWeight += weight;
 	}
@@ -606,21 +631,21 @@ bool ItemCreator::is_builtin_key(std::string_view key)
 void ItemCreator::load_enhanced_rules(std::string_view path)
 {
 	auto resolved = Paths::resolve(path);
-	std::ifstream f(resolved);
-	if (!f.is_open())
+	std::ifstream file(resolved);
+	if (!file.is_open())
 	{
 		return;
 	}
 
-	nlohmann::json root = nlohmann::json::parse(f);
+	nlohmann::json root = nlohmann::json::parse(file);
 	enhancedRules.clear();
 
 	for (const auto& entry : root)
 	{
 		EnhancedItemSpawnRule rule;
 
-		std::string cat = entry.at("enhancement_category").get<std::string>();
-		rule.enhancementCategory = (cat == "weapon")
+		std::string category = entry.at("enhancement_category").get<std::string>();
+		rule.enhancementCategory = (category == "weapon")
 			? EnhancedItemCategory::WEAPON
 			: EnhancedItemCategory::ARMOR;
 

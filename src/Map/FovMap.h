@@ -24,9 +24,9 @@ class FovMap
 public:
 	FovMap(int width, int height);
 
-	void set_properties(int x, int y, bool walkable, bool transparent) noexcept;
-	bool is_walkable(int x, int y) const noexcept;
-	bool is_in_fov(int x, int y) const noexcept;
+	void set_properties(int col, int row, bool walkable, bool transparent) noexcept;
+	bool is_walkable(int col, int row) const noexcept;
+	bool is_in_fov(int col, int row) const noexcept;
 	void compute_fov(int panelX, int panelY, int radius);
 
 private:
@@ -34,8 +34,8 @@ private:
 	int height_;
 	std::vector<FovCell> cells_;
 
-	bool in_bounds(int x, int y) const noexcept;
-	int cell_index(int x, int y) const noexcept;
+	bool in_bounds(int col, int row) const noexcept;
+	int cell_index(int col, int row) const noexcept;
 
 	void scan_octant(
 		int cx,

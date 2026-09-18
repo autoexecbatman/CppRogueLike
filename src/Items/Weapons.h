@@ -51,9 +51,9 @@ struct Weapons
 	// NOTE: Complex dual-wield logic removed - was never integrated with combat
 };
 
-inline std::string_view encode_hand_requirement(HandRequirement h)
+inline std::string_view encode_hand_requirement(HandRequirement handRequirement)
 {
-	switch (h)
+	switch (handRequirement)
 	{
 
 	case HandRequirement::ONE_HANDED:
@@ -76,27 +76,27 @@ inline std::string_view encode_hand_requirement(HandRequirement h)
 	return "one_handed";
 }
 
-inline HandRequirement parse_hand_requirement(std::string_view s)
+inline HandRequirement parse_hand_requirement(std::string_view name)
 {
-	if (s == "one_handed")
+	if (name == "one_handed")
 	{
 		return HandRequirement::ONE_HANDED;
 	}
-	if (s == "two_handed")
+	if (name == "two_handed")
 	{
 		return HandRequirement::TWO_HANDED;
 	}
-	if (s == "off_hand_only")
+	if (name == "off_hand_only")
 	{
 		return HandRequirement::OFF_HAND_ONLY;
 	}
 
-	throw std::runtime_error(std::format("unknown hand_requirement '{}'", s));
+	throw std::runtime_error(std::format("unknown hand_requirement '{}'", name));
 }
 
-inline std::string_view encode_weapon_size(WeaponSize s)
+inline std::string_view encode_weapon_size(WeaponSize weaponSize)
 {
-	switch (s)
+	switch (weaponSize)
 	{
 
 	case WeaponSize::TINY:
@@ -129,28 +129,28 @@ inline std::string_view encode_weapon_size(WeaponSize s)
 	return "medium";
 }
 
-inline WeaponSize parse_weapon_size(std::string_view s)
+inline WeaponSize parse_weapon_size(std::string_view name)
 {
-	if (s == "tiny")
+	if (name == "tiny")
 	{
 		return WeaponSize::TINY;
 	}
-	if (s == "small")
+	if (name == "small")
 	{
 		return WeaponSize::SMALL;
 	}
-	if (s == "medium")
+	if (name == "medium")
 	{
 		return WeaponSize::MEDIUM;
 	}
-	if (s == "large")
+	if (name == "large")
 	{
 		return WeaponSize::LARGE;
 	}
-	if (s == "giant")
+	if (name == "giant")
 	{
 		return WeaponSize::GIANT;
 	}
 
-	throw std::runtime_error(std::format("unknown weapon_size '{}'", s));
+	throw std::runtime_error(std::format("unknown weapon_size '{}'", name));
 }

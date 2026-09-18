@@ -18,9 +18,9 @@ enum class ScrollAnimation : int
 	EXPLOSION
 };
 
-inline std::string_view encode_scroll_animation(ScrollAnimation a)
+inline std::string_view encode_scroll_animation(ScrollAnimation scrollAnimation)
 {
-	switch (a)
+	switch (scrollAnimation)
 	{
 
 	case ScrollAnimation::NONE:
@@ -43,27 +43,27 @@ inline std::string_view encode_scroll_animation(ScrollAnimation a)
 	return "none";
 }
 
-inline ScrollAnimation parse_scroll_animation(std::string_view s)
+inline ScrollAnimation parse_scroll_animation(std::string_view name)
 {
-	if (s == "none")
+	if (name == "none")
 	{
 		return ScrollAnimation::NONE;
 	}
-	if (s == "lightning")
+	if (name == "lightning")
 	{
 		return ScrollAnimation::LIGHTNING;
 	}
-	if (s == "explosion")
+	if (name == "explosion")
 	{
 		return ScrollAnimation::EXPLOSION;
 	}
 
-	throw std::runtime_error(std::format("unknown scroll_animation '{}'", s));
+	throw std::runtime_error(std::format("unknown scroll_animation '{}'", name));
 }
 
-inline std::string_view encode_target_mode(TargetMode m)
+inline std::string_view encode_target_mode(TargetMode targetMode)
 {
-	switch (m)
+	switch (targetMode)
 	{
 
 	case TargetMode::AUTO_NEAREST:
@@ -91,24 +91,24 @@ inline std::string_view encode_target_mode(TargetMode m)
 	return "auto_nearest";
 }
 
-inline TargetMode parse_target_mode(std::string_view s)
+inline TargetMode parse_target_mode(std::string_view name)
 {
-	if (s == "auto_nearest")
+	if (name == "auto_nearest")
 	{
 		return TargetMode::AUTO_NEAREST;
 	}
-	if (s == "pick_tile_single")
+	if (name == "pick_tile_single")
 	{
 		return TargetMode::PICK_TILE_SINGLE;
 	}
-	if (s == "pick_tile_aoe")
+	if (name == "pick_tile_aoe")
 	{
 		return TargetMode::PICK_TILE_AOE;
 	}
-	if (s == "fov_buff")
+	if (name == "fov_buff")
 	{
 		return TargetMode::FOV_BUFF;
 	}
 
-	throw std::runtime_error(std::format("unknown target_mode '{}'", s));
+	throw std::runtime_error(std::format("unknown target_mode '{}'", name));
 }

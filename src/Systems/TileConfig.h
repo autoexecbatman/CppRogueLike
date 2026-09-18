@@ -36,17 +36,17 @@ struct WallAutotileGroup
 // ---------------------------------------------------------------------------
 namespace Autotile
 {
-	constexpr TileRef resolve(AutotileGroup g, bool n, bool e, bool s, bool w)
+	constexpr TileRef resolve(AutotileGroup group, bool north, bool east, bool south, bool west)
 	{
-		int col_offset = (!w && e) ? 0 : (w && !e) ? 2 : 1;
-		int row_offset = (!n && s) ? 0 : (n && !s) ? 2 : 1;
-		return TileRef{ g.sheet, g.origin_col + col_offset, g.origin_row + row_offset };
+		int col_offset = (!west && east) ? 0 : (west && !east) ? 2 : 1;
+		int row_offset = (!north && south) ? 0 : (north && !south) ? 2 : 1;
+		return TileRef{ group.sheet, group.origin_col + col_offset, group.origin_row + row_offset };
 	}
 
-	constexpr TileRef resolve_mask(AutotileGroup g, int mask)
+	constexpr TileRef resolve_mask(AutotileGroup group, int mask)
 	{
 		return resolve(
-			g,
+			group,
 			(mask & 8) != 0,
 			(mask & 4) != 0,
 			(mask & 2) != 0,
@@ -73,17 +73,17 @@ namespace Autotile
 		{ 4, 1 }, // 15: NESW  Center (fully surrounded)
 	};
 
-	constexpr TileRef wall_resolve(WallAutotileGroup g, bool n, bool e, bool s, bool w)
+	constexpr TileRef wall_resolve(WallAutotileGroup group, bool north, bool east, bool south, bool west)
 	{
-		int mask = (n ? 8 : 0) | (e ? 4 : 0) | (s ? 2 : 0) | (w ? 1 : 0);
-		auto off = WALL_TABLE[mask];
-		return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
+		int mask = (north ? 8 : 0) | (east ? 4 : 0) | (south ? 2 : 0) | (west ? 1 : 0);
+		auto offset = WALL_TABLE[mask];
+		return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
 	}
 
-	constexpr TileRef wall_resolve_mask(WallAutotileGroup g, int mask)
+	constexpr TileRef wall_resolve_mask(WallAutotileGroup group, int mask)
 	{
-		auto off = WALL_TABLE[mask & 0xF];
-		return TileRef{ g.sheet, g.origin_col + off.col, g.origin_row + off.row };
+		auto offset = WALL_TABLE[mask & 0xF];
+		return TileRef{ group.sheet, group.origin_col + offset.col, group.origin_row + offset.row };
 	}
 } // namespace Autotile
 

@@ -68,9 +68,9 @@ public:
 	void spawn_spark_burst(
 		Vector2D worldPosition,
 		int count,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b);
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue);
 
 	// Multi-phase fire explosion: radial wavefront, color gradient, rising embers
 	void spawn_fireball_explosion(Vector2D center, int radius);
@@ -78,9 +78,9 @@ public:
 	// Lightning: flash tiles along a bresenham path
 	void spawn_lightning_path(
 		const std::vector<Vector2D>& path,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b);
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue);
 
 	[[nodiscard]] TileRef get_missile_tile() const noexcept { return m_missile_tile; }
 
@@ -89,9 +89,9 @@ public:
 		Vector2D from,
 		Vector2D to,
 		TileRef tile,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
 		float speed,
 		float wobbleStrength,
 		std::function<void()> onArrive);
@@ -100,9 +100,9 @@ public:
 	void spawn_effect(
 		Vector2D worldPosition,
 		TileRef tile,
-		unsigned char r,
-		unsigned char g,
-		unsigned char b,
+		unsigned char red,
+		unsigned char green,
+		unsigned char blue,
 		float duration);
 
 	void update_and_render(const Renderer& renderer);

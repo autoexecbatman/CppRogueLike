@@ -36,17 +36,17 @@ void FloatingTextSystem::spawn_damage(Vector2D worldPosition, int value, DamageS
 void FloatingTextSystem::spawn_text(
 	Vector2D worldPosition,
 	std::string text,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue,
 	float lifetime)
 {
 	entries.push_back(FloatingEntry{
 		.worldPosition = worldPosition,
 		.text = std::move(text),
-		.r = r,
-		.g = g,
-		.b = b,
+		.r = red,
+		.g = green,
+		.b = blue,
 		.spawn_time = static_cast<float>(GetTime()),
 		.lifetime = lifetime });
 }

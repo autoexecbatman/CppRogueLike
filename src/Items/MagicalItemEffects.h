@@ -36,9 +36,9 @@ int get_protection_bonus(MagicalEffect effect);
 int get_ac_bonus(MagicalEffect effect, int bonus); // Returns AC bonus for any effect (protection rings, helms, etc.)
 } // namespace MagicalEffectUtils
 
-inline std::string_view encode_magical_effect(MagicalEffect e)
+inline std::string_view encode_magical_effect(MagicalEffect magicalEffect)
 {
-	switch (e)
+	switch (magicalEffect)
 	{
 
 	case MagicalEffect::NONE:
@@ -106,56 +106,56 @@ inline std::string_view encode_magical_effect(MagicalEffect e)
 	return "none";
 }
 
-inline MagicalEffect parse_magical_effect(std::string_view s)
+inline MagicalEffect parse_magical_effect(std::string_view name)
 {
-	if (s == "none")
+	if (name == "none")
 	{
 		return MagicalEffect::NONE;
 	}
-	if (s == "brilliance")
+	if (name == "brilliance")
 	{
 		return MagicalEffect::BRILLIANCE;
 	}
-	if (s == "teleportation")
+	if (name == "teleportation")
 	{
 		return MagicalEffect::TELEPORTATION;
 	}
-	if (s == "telepathy")
+	if (name == "telepathy")
 	{
 		return MagicalEffect::TELEPATHY;
 	}
-	if (s == "underwater_action")
+	if (name == "underwater_action")
 	{
 		return MagicalEffect::UNDERWATER_ACTION;
 	}
-	if (s == "free_action")
+	if (name == "free_action")
 	{
 		return MagicalEffect::FREE_ACTION;
 	}
-	if (s == "regeneration")
+	if (name == "regeneration")
 	{
 		return MagicalEffect::REGENERATION;
 	}
-	if (s == "invisibility")
+	if (name == "invisibility")
 	{
 		return MagicalEffect::INVISIBILITY;
 	}
-	if (s == "fire_resistance")
+	if (name == "fire_resistance")
 	{
 		return MagicalEffect::FIRE_RESISTANCE;
 	}
-	if (s == "cold_resistance")
+	if (name == "cold_resistance")
 	{
 		return MagicalEffect::COLD_RESISTANCE;
 	}
-	if (s == "spell_storing")
+	if (name == "spell_storing")
 	{
 		return MagicalEffect::SPELL_STORING;
 	}
-	if (s == "protection")
+	if (name == "protection")
 	{
 		return MagicalEffect::PROTECTION;
 	}
 
-	throw std::runtime_error(std::format("unknown magical_effect '{}'", s));
+	throw std::runtime_error(std::format("unknown magical_effect '{}'", name));
 }

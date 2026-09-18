@@ -74,9 +74,9 @@ void AnimationSystem::spawn_death(Vector2D worldPosition)
 void AnimationSystem::spawn_spark_burst(
 	Vector2D worldPosition,
 	int count,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b)
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue)
 {
 	float cx = static_cast<float>(worldPosition.x * m_tile_size + m_tile_size / 2);
 	float cy = static_cast<float>(worldPosition.y * m_tile_size + m_tile_size / 2);
@@ -95,9 +95,9 @@ void AnimationSystem::spawn_spark_burst(
 			.vel_y = std::sin(angle) * speed,
 			.radius = random_range(2.0f, 5.0f),
 			.tile = {},
-			.r = r,
-			.g = g,
-			.b = b,
+			.r = red,
+			.g = green,
+			.b = blue,
 			.spawn_time = now,
 			.duration = dur,
 			.shape = ParticleShape::CIRCLE,
@@ -107,9 +107,9 @@ void AnimationSystem::spawn_spark_burst(
 
 void AnimationSystem::spawn_lightning_path(
 	const std::vector<Vector2D>& path,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b)
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue)
 {
 	if (path.empty())
 		return;
@@ -128,9 +128,9 @@ void AnimationSystem::spawn_lightning_path(
 			.vel_y = 0.0f,
 			.radius = static_cast<float>(m_tile_size) * 0.5f,
 			.tile = m_spark_tile,
-			.r = r,
-			.g = g,
-			.b = b,
+			.r = red,
+			.g = green,
+			.b = blue,
 			.spawn_time = now,
 			.duration = 0.18f,
 			.shape = ParticleShape::TILE,
@@ -141,9 +141,9 @@ void AnimationSystem::spawn_lightning_path(
 void AnimationSystem::spawn_effect(
 	Vector2D worldPosition,
 	TileRef tile,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue,
 	float duration)
 {
 	float cx = static_cast<float>(worldPosition.x * m_tile_size);
@@ -156,9 +156,9 @@ void AnimationSystem::spawn_effect(
 		.vel_y = 0.0f,
 		.radius = static_cast<float>(m_tile_size),
 		.tile = tile,
-		.r = r,
-		.g = g,
-		.b = b,
+		.r = red,
+		.g = green,
+		.b = blue,
 		.spawn_time = static_cast<float>(GetTime()),
 		.duration = duration,
 		.shape = ParticleShape::TILE,
@@ -169,9 +169,9 @@ void AnimationSystem::spawn_projectile(
 	Vector2D from,
 	Vector2D to,
 	TileRef tile,
-	unsigned char r,
-	unsigned char g,
-	unsigned char b,
+	unsigned char red,
+	unsigned char green,
+	unsigned char blue,
 	float speed,
 	float wobbleStrength,
 	std::function<void()> onArrive)
@@ -196,9 +196,9 @@ void AnimationSystem::spawn_projectile(
 		.initialDistance = std::max(dist, 1.0f),
 		.lastTrailTime = now,
 		.tile = tile,
-		.r = r,
-		.g = g,
-		.b = b,
+		.r = red,
+		.g = green,
+		.b = blue,
 		.spawnTime = now,
 		.maxDuration = (dist / speed) * 3.0f + 1.0f,
 		.onArrive = std::move(onArrive) });
