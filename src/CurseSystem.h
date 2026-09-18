@@ -9,8 +9,8 @@ struct GameContext;
 // Mechanical penalties live at their computation sites and are NOT duplicated here:
 //   Weapon  -2 to hit  : PlayerAttacker::attack (curse_hit_penalty lambda)
 //   Armor   +1 AC      : ArmorClass::update (called during creature update)
-//   Ring    stat penalty: ItemEnhancement strength/dexterity bonuses
-//                         applied by Player::add_stat_bonuses_from_equipment on equip
+//   Ring    stat penalty: ItemEnhancement strength/dexterity bonuses, counted
+//                         while worn by Creature::calculate_effective_stat
 //   Lock-in (all types): Player::unequip_item guards on BlessingStatus::CURSED
 //
 // Per-turn notification messages ARE emitted here so the player sees feedback

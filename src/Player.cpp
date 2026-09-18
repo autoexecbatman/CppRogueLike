@@ -809,9 +809,6 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 
 	// Mark item as equipped
 	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
-	
-	// Apply stat bonuses from equipment
-	add_stat_bonuses_from_equipment(*equippedItems.back().item);
 
 	// Log weapon equip
 	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
@@ -848,17 +845,15 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 			return false;
 		}
 
-		remove_stat_bonuses_from_equipment(*it->item);
-
-		// Remove equipped state
-		it->item->remove_state(ActorState::IS_EQUIPPED);
+		// Out of the slot list before anything reads it again: the pack's weight check reads
+		// Strength, which counts every worn item.
+		std::unique_ptr<Item> removed = std::move(it->item);
+		equippedItems.erase(it);
+		removed->remove_state(ActorState::IS_EQUIPPED);
 
 		// Return item to inventory
-		[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(it->item), *this);
+		[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);
 		assert(restoreItemResult.has_value());
-
-		// Remove from equipped items
-		equippedItems.erase(it);
 
 		// Update armor class if armor or shield was unequipped
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
@@ -1080,142 +1075,6 @@ void Player::load(const json& j)
 			equippedItems.emplace_back(std::move(item), slot);
 		}
 	}
-}
-
-void Player::add_stat_bonuses_from_equipment(Item& item)
-{
-	// Apply ItemEnhancement stat bonuses (strengthBonus, dexterityBonus)
-	if (item.enhancement.strengthBonus != 0)
-	{
-		set_strength(get_strength() + item.enhancement.strengthBonus);
-	}
-	if (item.enhancement.dexterityBonus != 0)
-	{
-		set_dexterity(get_dexterity() + item.enhancement.dexterityBonus);
-	}
-	
-	// Apply behavior-based stat bonuses for special jewelry items
-	if (!item.behavior)
-	{
-		return;
-	}
-
-	auto add_stats = [this](auto& sb)
-	{
-		using T = std::decay_t<decltype(sb)>;
-		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
-		{
-			if (sb.isSetMode)
-			{
-				if (sb.strBonus != 0)
-				{
-					sb.originalStats.str = get_strength();
-					set_strength(sb.strBonus);
-				}
-				if (sb.dexBonus != 0)
-				{
-					sb.originalStats.dex = get_dexterity();
-					set_dexterity(sb.dexBonus);
-				}
-				if (sb.conBonus != 0)
-				{
-					sb.originalStats.con = get_constitution();
-					set_constitution(sb.conBonus);
-				}
-				if (sb.intBonus != 0)
-				{
-					sb.originalStats.intel = get_intelligence();
-					set_intelligence(sb.intBonus);
-				}
-				if (sb.wisBonus != 0)
-				{
-					sb.originalStats.wis = get_wisdom();
-					set_wisdom(sb.wisBonus);
-				}
-				if (sb.chaBonus != 0)
-				{
-					sb.originalStats.cha = get_charisma();
-					set_charisma(sb.chaBonus);
-				}
-			}
-			else
-			{
-				set_strength(get_strength() + sb.strBonus);
-				set_dexterity(get_dexterity() + sb.dexBonus);
-				set_constitution(get_constitution() + sb.conBonus);
-				set_intelligence(get_intelligence() + sb.intBonus);
-				set_wisdom(get_wisdom() + sb.wisBonus);
-				set_charisma(get_charisma() + sb.chaBonus);
-			}
-		}
-	};
-
-	std::visit(add_stats, *item.behavior);
-}
-
-void Player::remove_stat_bonuses_from_equipment(Item& item)
-{
-	// Remove ItemEnhancement stat bonuses (strengthBonus, dexterityBonus)
-	if (item.enhancement.strengthBonus != 0)
-	{
-		set_strength(get_strength() - item.enhancement.strengthBonus);
-	}
-	if (item.enhancement.dexterityBonus != 0)
-	{
-		set_dexterity(get_dexterity() - item.enhancement.dexterityBonus);
-	}
-	
-	// Remove behavior-based stat bonuses for special jewelry items
-	if (!item.behavior)
-	{
-		return;
-	}
-
-	auto remove_stats = [this](auto& sb)
-	{
-		using T = std::decay_t<decltype(sb)>;
-		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
-		{
-			if (sb.isSetMode)
-			{
-				if (sb.strBonus != 0)
-				{
-					set_strength(sb.originalStats.str);
-				}
-				if (sb.dexBonus != 0)
-				{
-					set_dexterity(sb.originalStats.dex);
-				}
-				if (sb.conBonus != 0)
-				{
-					set_constitution(sb.originalStats.con);
-				}
-				if (sb.intBonus != 0)
-				{
-					set_intelligence(sb.originalStats.intel);
-				}
-				if (sb.wisBonus != 0)
-				{
-					set_wisdom(sb.originalStats.wis);
-				}
-				if (sb.chaBonus != 0)
-				{
-					set_charisma(sb.originalStats.cha);
-				}
-			}
-			else
-			{
-				set_strength(get_strength() - sb.strBonus);
-				set_dexterity(get_dexterity() - sb.dexBonus);
-				set_constitution(get_constitution() - sb.conBonus);
-				set_intelligence(get_intelligence() - sb.intBonus);
-				set_wisdom(get_wisdom() - sb.wisBonus);
-				set_charisma(get_charisma() - sb.chaBonus);
-			}
-		}
-	};
-
-	std::visit(remove_stats, *item.behavior);
 }
 
 void Player::update(GameContext& ctx)

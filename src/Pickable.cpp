@@ -87,14 +87,6 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["wisBonus"] = statBoost.wisBonus;
 	output["chaBonus"] = statBoost.chaBonus;
 	output["isSetMode"] = statBoost.isSetMode;
-	output["originalStats"] = {
-		{ "str", statBoost.originalStats.str },
-		{ "dex", statBoost.originalStats.dex },
-		{ "con", statBoost.originalStats.con },
-		{ "intel", statBoost.originalStats.intel },
-		{ "wis", statBoost.originalStats.wis },
-		{ "cha", statBoost.originalStats.cha },
-	};
 }
 
 template <typename T>
@@ -107,94 +99,29 @@ void load_stat_boost(T& statBoost, const json& source)
 	statBoost.wisBonus = source.contains("wisBonus") ? source.at("wisBonus").get<int>() : 0;
 	statBoost.chaBonus = source.contains("chaBonus") ? source.at("chaBonus").get<int>() : 0;
 	statBoost.isSetMode = source.contains("isSetMode") ? source.at("isSetMode").get<bool>() : false;
-
-	if (source.contains("originalStats"))
-	{
-		const auto& orig = source.at("originalStats");
-		statBoost.originalStats.str = orig.contains("str") ? orig.at("str").get<int>() : 0;
-		statBoost.originalStats.dex = orig.contains("dex") ? orig.at("dex").get<int>() : 0;
-		statBoost.originalStats.con = orig.contains("con") ? orig.at("con").get<int>() : 0;
-		statBoost.originalStats.intel = orig.contains("intel") ? orig.at("intel").get<int>() : 0;
-		statBoost.originalStats.wis = orig.contains("wis") ? orig.at("wis").get<int>() : 0;
-		statBoost.originalStats.cha = orig.contains("cha") ? orig.at("cha").get<int>() : 0;
-	}
 }
 
-// Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet)
-template <typename T>
-bool use_stat_boost(T& statBoost, EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
+// Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet): puts the item
+// on, or takes it off. What it does to an ability is read from what is worn
+// (Creature::calculate_effective_stat), never written here. An item that could not be put
+// on or taken off - a cursed one that will not come off - uses no turn.
+//
+// Example:
+//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, worn: Strength 19
+//   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, removed: Strength as before
+bool use_stat_boost(EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
 {
-	auto apply_stat_boost = [&]()
-	{
-		if (statBoost.isSetMode)
-		{
-			if (statBoost.strBonus != 0) { statBoost.originalStats.str = wearer.get_strength(); wearer.set_strength(statBoost.strBonus); }
-			if (statBoost.dexBonus != 0) { statBoost.originalStats.dex = wearer.get_dexterity(); wearer.set_dexterity(statBoost.dexBonus); }
-			if (statBoost.conBonus != 0) { statBoost.originalStats.con = wearer.get_constitution(); wearer.set_constitution(statBoost.conBonus); }
-			if (statBoost.intBonus != 0) { statBoost.originalStats.intel = wearer.get_intelligence(); wearer.set_intelligence(statBoost.intBonus); }
-			if (statBoost.wisBonus != 0) { statBoost.originalStats.wis = wearer.get_wisdom(); wearer.set_wisdom(statBoost.wisBonus); }
-			if (statBoost.chaBonus != 0) { statBoost.originalStats.cha = wearer.get_charisma(); wearer.set_charisma(statBoost.chaBonus); }
-		}
-		else
-		{
-			wearer.set_strength(wearer.get_strength() + statBoost.strBonus);
-			wearer.set_dexterity(wearer.get_dexterity() + statBoost.dexBonus);
-			wearer.set_constitution(wearer.get_constitution() + statBoost.conBonus);
-			wearer.set_intelligence(wearer.get_intelligence() + statBoost.intBonus);
-			wearer.set_wisdom(wearer.get_wisdom() + statBoost.wisBonus);
-			wearer.set_charisma(wearer.get_charisma() + statBoost.chaBonus);
-		}
-	};
-
-	auto remove_stat_boost = [&]()
-	{
-		if (statBoost.isSetMode)
-		{
-			if (statBoost.strBonus != 0) { wearer.set_strength(statBoost.originalStats.str); }
-			if (statBoost.dexBonus != 0) { wearer.set_dexterity(statBoost.originalStats.dex); }
-			if (statBoost.conBonus != 0) { wearer.set_constitution(statBoost.originalStats.con); }
-			if (statBoost.intBonus != 0) { wearer.set_intelligence(statBoost.originalStats.intel); }
-			if (statBoost.wisBonus != 0) { wearer.set_wisdom(statBoost.originalStats.wis); }
-			if (statBoost.chaBonus != 0) { wearer.set_charisma(statBoost.originalStats.cha); }
-		}
-		else
-		{
-			wearer.set_strength(wearer.get_strength() - statBoost.strBonus);
-			wearer.set_dexterity(wearer.get_dexterity() - statBoost.dexBonus);
-			wearer.set_constitution(wearer.get_constitution() - statBoost.conBonus);
-			wearer.set_intelligence(wearer.get_intelligence() - statBoost.intBonus);
-			wearer.set_wisdom(wearer.get_wisdom() - statBoost.wisBonus);
-			wearer.set_charisma(wearer.get_charisma() - statBoost.chaBonus);
-		}
-	};
-
 	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
-	const bool success = wearer.toggle_equipment(item.uniqueId, slot, ctx);
-
-	if (success)
+	if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
 	{
-		wasEquipped ? remove_stat_boost() : apply_stat_boost();
-		wearer.update_armor_class(ctx);
-		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
-			wasEquipped ? "You remove the " + item.actorData.name + "."
-			            : "You put on the " + item.actorData.name + ".",
-			true);
-		return true;
+		return false;
 	}
 
-	// NPC fallback: toggle equipped state + apply bonuses directly
-	if (item.has_state(ActorState::IS_EQUIPPED))
-	{
-		item.remove_state(ActorState::IS_EQUIPPED);
-		remove_stat_boost();
-	}
-	else
-	{
-		item.add_state(ActorState::IS_EQUIPPED);
-		apply_stat_boost();
-	}
 	wearer.update_armor_class(ctx);
+	ctx.messageSystem->message(
+		WHITE_BLACK_PAIR,
+		std::format("You {} the {}.", wasEquipped ? "remove" : "put on", item.actorData.name),
+		true);
 	return true;
 }
 
@@ -589,17 +516,17 @@ bool use(MagicalRing& magicalRing, Item& owner, Player& wearer, GameContext& ctx
 
 bool use(JewelryAmulet& jewelryAmulet, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(jewelryAmulet, EquipmentSlot::NECK, owner, wearer, ctx);
+	return use_stat_boost(EquipmentSlot::NECK, owner, wearer, ctx);
 }
 
 bool use(Gauntlets& gauntlets, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(gauntlets, EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
+	return use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
 }
 
 bool use(Girdle& girdle, Item& owner, Player& wearer, GameContext& ctx)
 {
-	return use_stat_boost(girdle, EquipmentSlot::GIRDLE, owner, wearer, ctx);
+	return use_stat_boost(EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
 bool use(Shield& shield, Item& owner, Player& wearer, GameContext& ctx)

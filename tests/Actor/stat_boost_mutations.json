@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=StatBoostEquipmentTest.*:EquipmentStatBonusTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tconst WornAbilityEffect effect = worn_ability_effect(*worn.item, type);\n\t\thighestSet = std::max(highestSet, effect.setTo);\n\t\tsumOfAdds += effect.add;",
+      "mutated": "\t\tstatic_cast<void>(worn);",
+      "catches": "worn items counting for nothing, as a monster's always did"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\thighestSet = std::max(highestSet, effect.setTo);",
+      "mutated": "\t\thighestSet = effect.setTo;",
+      "catches": "a worn item overriding a higher set value"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\teffect.setTo = amount;",
+      "mutated": "\t\t\t\teffect.add += amount;",
+      "catches": "a setting item added on top of the score"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\teffect.add += amount;",
+      "mutated": "\t\t\t\teffect.setTo = amount;",
+      "catches": "an adding item treated as setting the score"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\teffect.add += item.get_enhancement().strengthBonus;",
+      "mutated": "",
+      "catches": "a worn item's Strength enhancement ignored"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t{\n\t\treturn false;\n\t}",
+      "mutated": "\tif (!wearer.toggle_equipment(item.uniqueId, slot, ctx))\n\t{\n\t\treturn true;\n\t}",
+      "catches": "a failed removal using a turn"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tequippedItems.erase(it);\n\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n\n\t\t// Return item to inventory\n\t\t[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);\n\t\tassert(restoreItemResult.has_value());",
+      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n\n\t\t// Return item to inventory\n\t\t[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);\n\t\tassert(restoreItemResult.has_value());\n\t\tequippedItems.erase(std::ranges::find_if(equippedItems, matches_slot(slot)));",
+      "catches": "the slot list read while it holds an emptied slot"
+    }
+  ]
+}

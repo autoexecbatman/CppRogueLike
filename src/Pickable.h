@@ -133,17 +133,6 @@ struct MagicalRing
 	int bonus{ 0 };
 };
 
-// Original stats before a SET operation (stored on equip, restored on unequip)
-struct OriginalStats
-{
-	int str{ 0 };
-	int dex{ 0 };
-	int con{ 0 };
-	int intel{ 0 };
-	int wis{ 0 };
-	int cha{ 0 };
-};
-
 struct JewelryAmulet
 {
 	int strBonus{ 0 };
@@ -155,7 +144,6 @@ struct JewelryAmulet
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
-	OriginalStats originalStats{};
 };
 
 struct Gauntlets
@@ -169,7 +157,6 @@ struct Gauntlets
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
-	OriginalStats originalStats{};
 };
 
 struct Girdle
@@ -183,7 +170,6 @@ struct Girdle
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
-	OriginalStats originalStats{};
 };
 
 struct Amulet

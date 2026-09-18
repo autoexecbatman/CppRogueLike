@@ -4,7 +4,9 @@
 #include <memory>
 #include <ranges>
 #include <string>
+#include <type_traits>
 #include <utility>
+#include <variant>
 #include <vector>
 
 #include "InventoryOperations.h"
@@ -864,13 +866,103 @@ void Creature::die(GameContext& ctx)
 	assert(placeCorpseResult.has_value());
 }
 
-//==Unified Buff System - Modifier Stack Pattern==
-// Note: Buff lifecycle managed by BuffSystem, not Creature
+namespace
+{
+// What one worn item does to one ability: a value it sets the score to, an amount it
+// adds, or neither. Ability-raising gauntlets, girdles and amulets set or add as their
+// data says; a worn item's Strength or Dexterity enhancement adds.
+//
+// Example, for Strength:
+//   worn_ability_effect(girdleOfHillGiantStrength, BuffType::STRENGTH);   // -> { 19, 0 }
+//   worn_ability_effect(swimmingGauntlets, BuffType::STRENGTH);           // -> { 0, 2 }
+//   worn_ability_effect(longSword, BuffType::STRENGTH);                   // -> { 0, 0 }
+struct WornAbilityEffect
+{
+	int setTo{ 0 };
+	int add{ 0 };
+};
 
-// Helper to sum all buff values of a specific type using ranges
-// AD&D 2e: Calculate effective stat value combining base, SET, and ADD effects
-// LOGIC: effective = MAX(base, highest_SET) + SUM(all_ADDs)
+WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexcept
+{
+	WornAbilityEffect effect{};
 
+	// An enhancement's bonus adds; only Strength and Dexterity have ever applied.
+	if (ability == BuffType::STRENGTH)
+	{
+		effect.add += item.get_enhancement().strengthBonus;
+	}
+	if (ability == BuffType::DEXTERITY)
+	{
+		effect.add += item.get_enhancement().dexterityBonus;
+	}
+
+	if (!item.behavior)
+	{
+		return effect;
+	}
+
+	auto from_stat_boost = [ability, &effect](const auto& boost)
+	{
+		using T = std::decay_t<decltype(boost)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			int amount = 0;
+			switch (ability)
+			{
+			case BuffType::STRENGTH:
+			{
+				amount = boost.strBonus;
+				break;
+			}
+			case BuffType::DEXTERITY:
+			{
+				amount = boost.dexBonus;
+				break;
+			}
+			case BuffType::CONSTITUTION:
+			{
+				amount = boost.conBonus;
+				break;
+			}
+			case BuffType::INTELLIGENCE:
+			{
+				amount = boost.intBonus;
+				break;
+			}
+			case BuffType::WISDOM:
+			{
+				amount = boost.wisBonus;
+				break;
+			}
+			case BuffType::CHARISMA:
+			{
+				amount = boost.chaBonus;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+			}
+
+			if (boost.isSetMode)
+			{
+				effect.setTo = amount;
+			}
+			else
+			{
+				effect.add += amount;
+			}
+		}
+	};
+	std::visit(from_stat_boost, *item.behavior);
+	return effect;
+}
+} // namespace
+
+// AD&D 2e: an ability score is the creature's own, or the highest value any buff or worn
+// item sets it to if that is higher, plus every buff's and worn item's addition. Nothing
+// is written back, so what is removed takes exactly its own contribution with it.
 int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
 {
 	auto matchesType = [type](const Buff& b)
@@ -892,6 +984,15 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 		{
 			sumOfAdds += buff.value;
 		}
+	}
+
+	// Worn items count exactly as buffs do.
+	for (const EquippedItem& worn : equippedItems)
+	{
+		assert(worn.item && "an equipment slot holds a null item");
+		const WornAbilityEffect effect = worn_ability_effect(*worn.item, type);
+		highestSet = std::max(highestSet, effect.setTo);
+		sumOfAdds += effect.add;
 	}
 
 	// AD&D 2e: SET effects replace base (if higher), ADD effects always stack
