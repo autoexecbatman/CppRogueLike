@@ -50,6 +50,27 @@ TEST_F(DamageInfoTest, RollDamage_FixedValue) {
     EXPECT_EQ(fixed.roll_damage(&dice), 5);
 }
 
+// Two dice are two rolls. With both forced to six, 2d6 is twelve; a single draw between
+// the minimum and the maximum spends one roll and gives six, and makes a 2d6 as likely
+// to be 2 as to be 7, which is not what two dice do.
+TEST_F(DamageInfoTest, RollDamage_RollsEveryDie) {
+    const DamageInfo twoDice{ "2d6", DamageType::PHYSICAL };
+    dice.set_next_roll(6);
+    dice.set_next_roll(6);
+
+    EXPECT_EQ(twoDice.roll_damage(&dice), 12);
+}
+
+// The bonus is added once, after the dice.
+TEST_F(DamageInfoTest, RollDamage_AddsTheBonusToTheDice) {
+    const DamageInfo withBonus{ "3d4+2", DamageType::PHYSICAL };
+    dice.set_next_roll(1);
+    dice.set_next_roll(2);
+    dice.set_next_roll(3);
+
+    EXPECT_EQ(withBonus.roll_damage(&dice), 8);
+}
+
 TEST_F(DamageInfoTest, GetAverageDamage) {
     EXPECT_EQ(dagger.get_average_damage(), 2);        // (1+4)/2 = 2
     EXPECT_EQ(longsword.get_average_damage(), 4);     // (1+8)/2 = 4

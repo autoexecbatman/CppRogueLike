@@ -158,12 +158,15 @@ struct DamageInfo
 	{
 	}
 
-	// Core damage operations
-	int roll_damage(RandomDice* dice) const
+	// Rolls every die and adds the bonus once, so 2d6 lands on 7 more often than on 2.
+	// A fixed value, having no dice, is its bonus.
+	//
+	// Example, dice forced to 6 and 6:
+	//   DamageInfo{ "2d6", DamageType::PHYSICAL }.roll_damage(&rng);   // -> 12
+	//   DamageInfo{ "5", DamageType::PHYSICAL }.roll_damage(&rng);     // -> 5
+	int roll_damage(RandomDice* rng) const
 	{
-		if (minDamage == maxDamage)
-			return minDamage;
-		return dice->roll(minDamage, maxDamage);
+		return roll_dice(rng, dice);
 	}
 
 	int get_average_damage() const { return (minDamage + maxDamage) / 2; }

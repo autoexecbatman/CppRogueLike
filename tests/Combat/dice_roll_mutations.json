@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DamageInfoTest.*:TrapDamageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/DamageInfo.h",
+      "original": "\t\treturn roll_dice(rng, dice);",
+      "mutated": "\t\treturn rng->roll(minDamage, maxDamage);",
+      "catches": "the flat draw restored, which makes 2d6 as likely to be 2 as 7"
+    },
+    {
+      "file": "src/DiceExpr.h",
+      "original": "\tint total = expr.bonus;",
+      "mutated": "\tint total = 0;",
+      "catches": "the bonus dropped from every roll"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\treturn roll_dice(&dice, DiceExpr{ damageDiceCount_, damageDiceSize_, 0 });",
+      "mutated": "\treturn dice.roll(damageDiceCount_, damageDiceSize_);",
+      "catches": "a pit rolling between its dice count and its die size, as before"
+    }
+  ]
+}

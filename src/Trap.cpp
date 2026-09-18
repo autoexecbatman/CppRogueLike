@@ -2,6 +2,7 @@
 // Implementation of trap mechanics: detection, triggering, disarming, damage
 
 #include "DamageInfo.h"
+#include "DiceExpr.h"
 #include "Trap.h"
 #include "GameContext.h"
 #include "RandomDice.h"
@@ -190,7 +191,8 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 
 int Trap::roll_damage(RandomDice& dice) const
 {
-	return dice.roll(damageDiceCount_, damageDiceSize_);
+	// Every die rolled on its own: a 2d6 pit ranges from 2 to 12.
+	return roll_dice(&dice, DiceExpr{ damageDiceCount_, damageDiceSize_, 0 });
 }
 
 
