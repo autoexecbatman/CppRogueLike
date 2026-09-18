@@ -172,6 +172,7 @@ nlohmann::json encode_item_entry(const ItemEntry& entry)
 	record["value"] = params.value;
 	record["pickableType"] = encode_pickable_type(params.pickableType);
 	record["baseWeight"] = params.baseWeight;
+	record["weight"] = params.weight;
 	record["levelMin"] = params.levelMin;
 	record["levelMax"] = params.levelMax;
 	record["levelScaling"] = params.levelScaling;
@@ -240,6 +241,7 @@ ItemEntry parse_item_entry(const std::string& key, const nlohmann::json& record)
 	params.value = required_field(record, key, "value");
 	params.pickableType = parse_pickable_type(required_field(record, key, "pickableType").get<std::string>());
 	params.baseWeight = required_field(record, key, "baseWeight");
+	params.weight = required_field(record, key, "weight");
 	params.levelMin = required_field(record, key, "levelMin");
 	params.levelMax = required_field(record, key, "levelMax");
 	params.levelScaling = required_field(record, key, "levelScaling");
@@ -414,7 +416,8 @@ std::unique_ptr<Item> make_item(std::string_view key, const ItemEntry& entry, Ve
 	item->itemKey = std::string{ key };
 	item->itemClass = params.itemClass;
 	item->set_value(params.value);
-	item->enhancement.weight = params.baseWeight; // Assign base weight to enhancement
+	// What it costs to carry, which is a different question from how often it appears.
+	item->enhancement.weight = params.weight;
 	return item;
 }
 

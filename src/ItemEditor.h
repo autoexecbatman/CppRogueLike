@@ -50,6 +50,7 @@ private:
 		COLOR,
 		VALUE,
 		BASE_WEIGHT,
+		WEIGHT,
 		LEVEL_MIN,
 		LEVEL_MAX,
 		LEVEL_SCALING,

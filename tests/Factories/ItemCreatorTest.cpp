@@ -4,6 +4,11 @@
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
+#include <filesystem>
+#include <fstream>
+
 class ItemCreatorTest : public ::testing::Test
 {
 protected:
@@ -121,4 +126,86 @@ TEST_F(ItemCreatorTest, AGemIsWorthWhatItIsAuthoredToBeWorth)
 
 	EXPECT_EQ(std::get<Gold>(*item->behavior).amount, authored)
 		<< "a gem picked up gives the player this many gold, and nothing else reads its value";
+}
+
+// baseWeight decides how often an item is drawn from its category; weight decides what
+// it costs to carry. They were one field, so a health potion at draw-weight 50 weighed
+// fifty times a suit of full plate at 1.
+//
+// The two are seeded identically in the shipped data, so an assertion against the real
+// file cannot tell which one is read. This writes a file where they differ.
+TEST_F(ItemCreatorTest, AnItemWeighsItsWeightRatherThanItsSpawnRate)
+{
+	const std::filesystem::path apart =
+		std::filesystem::temp_directory_path() / "items_weight_apart.json";
+
+	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	ASSERT_TRUE(source.is_open());
+	nlohmann::json root = nlohmann::json::parse(source);
+	ASSERT_TRUE(root.contains("health_potion"));
+	root["health_potion"]["baseWeight"] = 50;
+	root["health_potion"]["weight"] = 7;
+
+	std::ofstream out(apart);
+	out << root.dump(2);
+	out.close();
+
+	ItemCreator::load(apart.string());
+	auto item = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, mock.content_registry);
+	ASSERT_TRUE(item);
+	const int carried = item->enhancement.weight;
+
+	ItemCreator::load("data/content/items.json");
+	std::filesystem::remove(apart);
+
+	EXPECT_EQ(carried, 7)
+		<< "an item must carry its weight, not its draw weight of 50";
+}
+
+// The other half of the same separation: how often an item is drawn must not move when
+// its carry weight changes. Both fields are seeded identically in the shipped data, so
+// only a file where they disagree can tell which one the draw reads.
+//
+// health_potion sorts first and invisibility_potion second, so with draw weights of 1
+// and 100 a roll of 50 walks past the first and lands on the second. Were the draw to
+// read carry weight - 100 and 1 - the same roll would stop on the first.
+TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
+{
+	const std::filesystem::path apart =
+		std::filesystem::temp_directory_path() / "items_draw_apart.json";
+
+	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	ASSERT_TRUE(source.is_open());
+	nlohmann::json root = nlohmann::json::parse(source);
+	for (auto& [key, record] : root.items())
+	{
+		if (record["category"] == "potion")
+		{
+			// Every other potion drops out of the draw entirely.
+			record["baseWeight"] = 0;
+		}
+	}
+	// Level scaling would multiply the draw weights; hold it flat so the roll is exact.
+	root["health_potion"]["baseWeight"] = 1;
+	root["health_potion"]["weight"] = 100;
+	root["health_potion"]["levelScaling"] = 0.0;
+	root["invisibility_potion"]["baseWeight"] = 100;
+	root["invisibility_potion"]["weight"] = 1;
+	root["invisibility_potion"]["levelScaling"] = 0.0;
+
+	std::ofstream out(apart);
+	out << root.dump(2);
+	out.close();
+
+	ItemCreator::load(apart.string());
+	GameContext ctx = mock.to_game_context();
+	ctx.dice->set_next_roll(50);
+	auto drawn = ItemCreator::create_random_of_category("potion", Vector2D{ 0, 0 }, ctx, 1);
+
+	ItemCreator::load("data/content/items.json");
+	std::filesystem::remove(apart);
+
+	ASSERT_TRUE(drawn);
+	EXPECT_EQ(drawn->itemKey, "invisibility_potion")
+		<< "the draw must weigh by baseWeight; reading carry weight lands on health_potion";
 }

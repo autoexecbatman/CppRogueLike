@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemCreatorTest.*:ItemRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->enhancement.weight = params.weight;",
+      "mutated": "\titem->enhancement.weight = params.baseWeight;",
+      "catches": "the defect itself, an item weighing its draw odds"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\tparams.weight = required_field(record, key, \"weight\");",
+      "mutated": "\tparams.weight = required_field(record, key, \"baseWeight\");",
+      "catches": "the parser reading the spawn field into the carry field, which re-entangles them"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\trecord[\"weight\"] = params.weight;",
+      "mutated": "",
+      "catches": "the encoder dropping the new field, so a save loses every authored weight"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\tconst int weight = std::max(1, static_cast<int>(params.baseWeight * levelFactor));",
+      "mutated": "\t\tconst int weight = std::max(1, static_cast<int>(params.weight * levelFactor));",
+      "catches": "the draw reading the carry weight, the entanglement in the other direction"
+    }
+  ]
+}

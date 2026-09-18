@@ -61,7 +61,10 @@ struct ItemParams
 	TargetMode targetMode{ TargetMode::AUTO_NEAREST };
 	ScrollAnimation scrollAnimation{ ScrollAnimation::NONE };
 
+	// How often this item is drawn from its category. Not its mass.
 	int baseWeight{ 0 };
+	// What it weighs in a pack, against the carrier's strength-derived cap.
+	int weight{ 0 };
 	int levelMin{ 1 };
 	int levelMax{ 0 };
 	float levelScaling{ 0.0f };

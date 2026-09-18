@@ -774,7 +774,8 @@ std::string ItemEditor::field_label(FieldId f) const
 	case FieldId::PICKABLE_TYPE:    return "Pickable Type";
 	case FieldId::COLOR:            return "Color";
 	case FieldId::VALUE:            return "Value";
-	case FieldId::BASE_WEIGHT:      return "Base Weight";
+	case FieldId::BASE_WEIGHT:      return "Spawn Weight";
+	case FieldId::WEIGHT:           return "Carry Weight";
 	case FieldId::LEVEL_MIN:        return "Level Min";
 	case FieldId::LEVEL_MAX:        return "Level Max";
 	case FieldId::LEVEL_SCALING:    return "Level Scaling";
@@ -819,6 +820,7 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::COLOR:            return std::format("{}", p.color);
 	case FieldId::VALUE:            return std::format("{}", p.value);
 	case FieldId::BASE_WEIGHT:      return std::format("{}", p.baseWeight);
+	case FieldId::WEIGHT:           return std::format("{}", p.weight);
 	case FieldId::LEVEL_MIN:        return std::format("{}", p.levelMin);
 	case FieldId::LEVEL_MAX:        return std::format("{}", p.levelMax);
 	case FieldId::LEVEL_SCALING:    return std::format("{:.2f}", p.levelScaling);
@@ -889,6 +891,9 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 		break;
 	case FieldId::BASE_WEIGHT:
 		p.baseWeight = clamp_val(p.baseWeight, delta, 0, 100);
+		break;
+	case FieldId::WEIGHT:
+		p.weight = clamp_val(p.weight, delta, 0, 1000);
 		break;
 	case FieldId::LEVEL_MIN:
 		p.levelMin = clamp_val(p.levelMin, delta, 1, 20);

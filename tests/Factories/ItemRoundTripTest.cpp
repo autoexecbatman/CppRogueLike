@@ -115,6 +115,7 @@ void expect_same_item(const std::string& key, const ItemSnapshot& before, const 
 	EXPECT_EQ(before.params.scrollAnimation, after.scrollAnimation) << key << ".scrollAnimation";
 
 	EXPECT_EQ(before.params.baseWeight, after.baseWeight) << key << ".baseWeight";
+	EXPECT_EQ(before.params.weight, after.weight) << key << ".weight";
 	EXPECT_EQ(before.params.levelMin, after.levelMin) << key << ".levelMin";
 	EXPECT_EQ(before.params.levelMax, after.levelMax) << key << ".levelMax";
 	EXPECT_FLOAT_EQ(before.params.levelScaling, after.levelScaling) << key << ".levelScaling";

@@ -2,6 +2,7 @@
     "amulet_of_health": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -38,6 +39,7 @@
     "amulet_of_ogre_power": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -74,6 +76,7 @@
     "amulet_of_protection": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -110,6 +113,7 @@
     "amulet_of_wisdom": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -146,6 +150,7 @@
     "amulet_of_yendor": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -182,6 +187,7 @@
     "banded_mail": {
         "acBonus": -6,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -218,6 +224,7 @@
     "bastard_sword": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -254,6 +261,7 @@
     "battle_axe": {
         "acBonus": 0,
         "baseWeight": 6,
+        "weight": 6,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -290,6 +298,7 @@
     "boots_of_elvenkind": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -326,6 +335,7 @@
     "boots_of_speed": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -362,6 +372,7 @@
     "bread": {
         "acBonus": 0,
         "baseWeight": 12,
+        "weight": 12,
         "category": "food",
         "chaBonus": 0,
         "color": 19,
@@ -398,6 +409,7 @@
     "brigandine": {
         "acBonus": -4,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -434,6 +446,7 @@
     "chain_mail": {
         "acBonus": -5,
         "baseWeight": 3,
+        "weight": 3,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -470,6 +483,7 @@
     "cloak_of_displacement": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -506,6 +520,7 @@
     "cloak_of_elvenkind": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 10,
@@ -542,6 +557,7 @@
     "cloak_of_protection": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -578,6 +594,7 @@
     "club": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -614,6 +631,7 @@
     "composite_bow": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -650,6 +668,7 @@
     "crossbow": {
         "acBonus": 0,
         "baseWeight": 4,
+        "weight": 4,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -686,6 +705,7 @@
     "dagger": {
         "acBonus": 0,
         "baseWeight": 3,
+        "weight": 3,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -722,6 +742,7 @@
     "dungeon_key": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "misc",
         "chaBonus": 0,
         "color": 11,
@@ -758,6 +779,7 @@
     "field_plate": {
         "acBonus": -8,
         "baseWeight": 1,
+        "weight": 1,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -794,6 +816,7 @@
     "flail": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -830,6 +853,7 @@
     "food_ration": {
         "acBonus": 0,
         "baseWeight": 25,
+        "weight": 25,
         "category": "food",
         "chaBonus": 0,
         "color": 4,
@@ -866,6 +890,7 @@
     "fruit": {
         "acBonus": 0,
         "baseWeight": 15,
+        "weight": 15,
         "category": "food",
         "chaBonus": 0,
         "color": 10,
@@ -902,6 +927,7 @@
     "full_plate": {
         "acBonus": -9,
         "baseWeight": 1,
+        "weight": 1,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -938,6 +964,7 @@
     "gauntlets_of_dexterity": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "gauntlets",
         "chaBonus": 0,
         "color": 10,
@@ -974,6 +1001,7 @@
     "gauntlets_of_fumbling": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -1010,6 +1038,7 @@
     "gauntlets_of_ogre_power": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "gauntlets",
         "chaBonus": 0,
         "color": 9,
@@ -1046,6 +1075,7 @@
     "gauntlets_of_swimming_and_climbing": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -1082,6 +1112,7 @@
     "gem": {
         "acBonus": 0,
         "baseWeight": 2,
+        "weight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -1118,6 +1149,7 @@
     "girdle_of_cloud_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1154,6 +1186,7 @@
     "girdle_of_fire_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -1190,6 +1223,7 @@
     "girdle_of_frost_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "girdle",
         "chaBonus": 0,
         "color": 13,
@@ -1226,6 +1260,7 @@
     "girdle_of_hill_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "girdle",
         "chaBonus": 0,
         "color": 21,
@@ -1262,6 +1297,7 @@
     "girdle_of_stone_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -1298,6 +1334,7 @@
     "girdle_of_storm_giant_strength": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -1334,6 +1371,7 @@
     "gold_coin": {
         "acBonus": 0,
         "baseWeight": 25,
+        "weight": 25,
         "category": "gold",
         "chaBonus": 0,
         "color": 11,
@@ -1370,6 +1408,7 @@
     "great_axe": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1406,6 +1445,7 @@
     "great_sword": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1442,6 +1482,7 @@
     "hand_axe": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1478,6 +1519,7 @@
     "health_potion": {
         "acBonus": 0,
         "baseWeight": 50,
+        "weight": 50,
         "category": "potion",
         "chaBonus": 0,
         "color": 2,
@@ -1514,6 +1556,7 @@
     "heavy_crossbow": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1550,6 +1593,7 @@
     "helm_of_brilliance": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "magical_helm",
         "chaBonus": 0,
         "color": 11,
@@ -1586,6 +1630,7 @@
     "helm_of_telepathy": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 12,
@@ -1622,6 +1667,7 @@
     "helm_of_teleportation": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -1658,6 +1704,7 @@
     "helm_of_underwater_action": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -1694,6 +1741,7 @@
     "hide_armor": {
         "acBonus": -3,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -1730,6 +1778,7 @@
     "identify_scroll": {
         "acBonus": 0,
         "baseWeight": 10,
+        "weight": 10,
         "category": "scroll",
         "chaBonus": 0,
         "color": 15,
@@ -1766,6 +1815,7 @@
     "invisibility_potion": {
         "acBonus": 0,
         "baseWeight": 6,
+        "weight": 6,
         "category": "potion",
         "chaBonus": 0,
         "color": 13,
@@ -1802,6 +1852,7 @@
     "large_shield": {
         "acBonus": 0,
         "baseWeight": 2,
+        "weight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1838,6 +1889,7 @@
     "leather_armor": {
         "acBonus": -2,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -1874,6 +1926,7 @@
     "light_crossbow": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1910,6 +1963,7 @@
     "lockpick": {
         "acBonus": 0,
         "baseWeight": 2,
+        "weight": 2,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -1946,6 +2000,7 @@
     "long_bow": {
         "acBonus": 0,
         "baseWeight": 12,
+        "weight": 12,
         "category": "weapon",
         "chaBonus": 0,
         "color": 3,
@@ -1982,6 +2037,7 @@
     "long_sword": {
         "acBonus": 0,
         "baseWeight": 6,
+        "weight": 6,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -2018,6 +2074,7 @@
     "mace": {
         "acBonus": 0,
         "baseWeight": 7,
+        "weight": 7,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -2054,6 +2111,7 @@
     "mana_potion": {
         "acBonus": 0,
         "baseWeight": 10,
+        "weight": 10,
         "category": "potion",
         "chaBonus": 0,
         "color": 12,
@@ -2090,6 +2148,7 @@
     "meat": {
         "acBonus": 0,
         "baseWeight": 8,
+        "weight": 8,
         "category": "food",
         "chaBonus": 0,
         "color": 9,
@@ -2126,6 +2185,7 @@
     "medium_shield": {
         "acBonus": 0,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -2162,6 +2222,7 @@
     "morning_star": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -2198,6 +2259,7 @@
     "padded_armor": {
         "acBonus": -2,
         "baseWeight": 3,
+        "weight": 3,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -2234,6 +2296,7 @@
     "plate_mail": {
         "acBonus": -7,
         "baseWeight": 1,
+        "weight": 1,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -2270,6 +2333,7 @@
     "potion_of_cold_resistance": {
         "acBonus": 0,
         "baseWeight": 5,
+        "weight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 13,
@@ -2306,6 +2370,7 @@
     "potion_of_extra_healing": {
         "acBonus": 0,
         "baseWeight": 8,
+        "weight": 8,
         "category": "potion",
         "chaBonus": 0,
         "color": 9,
@@ -2342,6 +2407,7 @@
     "potion_of_fire_resistance": {
         "acBonus": 0,
         "baseWeight": 5,
+        "weight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 19,
@@ -2378,6 +2444,7 @@
     "potion_of_giant_strength": {
         "acBonus": 0,
         "baseWeight": 5,
+        "weight": 5,
         "category": "potion",
         "chaBonus": 0,
         "color": 11,
@@ -2414,6 +2481,7 @@
     "potion_of_speed": {
         "acBonus": 0,
         "baseWeight": 6,
+        "weight": 6,
         "category": "potion",
         "chaBonus": 0,
         "color": 10,
@@ -2450,6 +2518,7 @@
     "quarterstaff": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -2486,6 +2555,7 @@
     "rapier": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -2522,6 +2592,7 @@
     "ring_mail": {
         "acBonus": -3,
         "baseWeight": 3,
+        "weight": 3,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -2558,6 +2629,7 @@
     "ring_of_cold_resistance": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 13,
@@ -2594,6 +2666,7 @@
     "ring_of_fire_resistance": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 9,
@@ -2630,6 +2703,7 @@
     "ring_of_free_action": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "magical_ring",
         "chaBonus": 0,
         "color": 10,
@@ -2666,6 +2740,7 @@
     "ring_of_invisibility": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "magical_ring",
         "chaBonus": 0,
         "color": 1,
@@ -2702,6 +2777,7 @@
     "ring_of_protection_plus_1": {
         "acBonus": 0,
         "baseWeight": 2,
+        "weight": 2,
         "category": "magical_ring",
         "chaBonus": 0,
         "color": 13,
@@ -2738,6 +2814,7 @@
     "ring_of_protection_plus_2": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "magical_ring",
         "chaBonus": 0,
         "color": 13,
@@ -2774,6 +2851,7 @@
     "ring_of_regeneration": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "magical_ring",
         "chaBonus": 0,
         "color": 9,
@@ -2810,6 +2888,7 @@
     "ring_of_spell_storing": {
         "acBonus": 0,
         "baseWeight": 1,
+        "weight": 1,
         "category": "",
         "chaBonus": 0,
         "color": 14,
@@ -2846,6 +2925,7 @@
     "rope": {
         "acBonus": 0,
         "baseWeight": 4,
+        "weight": 4,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -2882,6 +2962,7 @@
     "scale_mail": {
         "acBonus": -4,
         "baseWeight": 3,
+        "weight": 3,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -2918,6 +2999,7 @@
     "scimitar": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -2954,6 +3036,7 @@
     "scroll_confusion": {
         "acBonus": 0,
         "baseWeight": 15,
+        "weight": 15,
         "category": "scroll",
         "chaBonus": 0,
         "color": 4,
@@ -2990,6 +3073,7 @@
     "scroll_fireball": {
         "acBonus": 0,
         "baseWeight": 15,
+        "weight": 15,
         "category": "scroll",
         "chaBonus": 0,
         "color": 19,
@@ -3026,6 +3110,7 @@
     "scroll_hold_person": {
         "acBonus": 0,
         "baseWeight": 15,
+        "weight": 15,
         "category": "scroll",
         "chaBonus": 0,
         "color": 1,
@@ -3062,6 +3147,7 @@
     "scroll_lightning": {
         "acBonus": 0,
         "baseWeight": 20,
+        "weight": 20,
         "category": "scroll",
         "chaBonus": 0,
         "color": 3,
@@ -3098,6 +3184,7 @@
     "scroll_sleep": {
         "acBonus": 0,
         "baseWeight": 20,
+        "weight": 20,
         "category": "scroll",
         "chaBonus": 0,
         "color": 13,
@@ -3134,6 +3221,7 @@
     "scroll_teleport": {
         "acBonus": 0,
         "baseWeight": 12,
+        "weight": 12,
         "category": "scroll",
         "chaBonus": 0,
         "color": 14,
@@ -3170,6 +3258,7 @@
     "short_bow": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -3206,6 +3295,7 @@
     "short_sword": {
         "acBonus": 0,
         "baseWeight": 5,
+        "weight": 5,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -3242,6 +3332,7 @@
     "sling": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 21,
@@ -3278,6 +3369,7 @@
     "small_shield": {
         "acBonus": 0,
         "baseWeight": 3,
+        "weight": 3,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -3314,6 +3406,7 @@
     "splint_mail": {
         "acBonus": -6,
         "baseWeight": 2,
+        "weight": 2,
         "category": "armor",
         "chaBonus": 0,
         "color": 1,
@@ -3350,6 +3443,7 @@
     "staff": {
         "acBonus": 0,
         "baseWeight": 8,
+        "weight": 8,
         "category": "weapon",
         "chaBonus": 0,
         "color": 1,
@@ -3386,6 +3480,7 @@
     "studded_leather": {
         "acBonus": -3,
         "baseWeight": 3,
+        "weight": 3,
         "category": "armor",
         "chaBonus": 0,
         "color": 21,
@@ -3422,6 +3517,7 @@
     "torch": {
         "acBonus": 0,
         "baseWeight": 8,
+        "weight": 8,
         "category": "",
         "chaBonus": 0,
         "color": 11,
@@ -3458,6 +3554,7 @@
     "two_handed_sword": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
@@ -3494,6 +3591,7 @@
     "war_hammer": {
         "acBonus": 0,
         "baseWeight": 0,
+        "weight": 0,
         "category": "",
         "chaBonus": 0,
         "color": 1,
