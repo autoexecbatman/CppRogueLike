@@ -14,18 +14,18 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
-#include "src/Actor/Item.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/DamageInfo.h"
-#include "src/Combat/DamageResolver.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Core/GameContext.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Systems/BuffSystem.h"
-#include "src/Systems/BuffType.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/Item.h"
+#include "src/Player.h"
+#include "src/DamageInfo.h"
+#include "src/DamageResolver.h"
+#include "src/ExperienceReward.h"
+#include "src/GameContext.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
+#include "src/BuffSystem.h"
+#include "src/BuffType.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WornResistanceTest : public ::testing::Test

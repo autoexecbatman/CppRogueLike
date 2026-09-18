@@ -20,7 +20,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=MonsterRoundTripTest.*
 
-#include "src/Factories/MonsterCreator.h"
+#include "src/MonsterCreator.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>

@@ -3,10 +3,10 @@
 #include <memory>
 #include <string>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
-#include "src/Actor/Item.h"
-#include "src/Colors/Colors.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/Item.h"
+#include "src/Colors.h"
 
 // Equipment lives on Creature, so any creature with a body plan can wear
 // something. These tests cover get_equipped_item, which had no caller in the

@@ -8,10 +8,10 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Map/Map.h"
-#include "src/Utils/Vector2D.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/Map.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WaterMovementTest : public ::testing::Test

@@ -8,19 +8,19 @@
   ],
   "mutations": [
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "\treturn missile != nullptr && missile->is_ranged_weapon();",
       "mutated": "\treturn missile != nullptr;",
       "catches": "anything in the missile slot counting as a ranged weapon"
     },
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "\tconst Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);",
       "mutated": "\tconst Item* missile = get_equipped_item(EquipmentSlot::RIGHT_HAND);",
       "catches": "the answer read from the wrong slot"
     },
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "bool Creature::has_ranged_weapon() const noexcept\n{\n\tconst Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);\n\treturn missile != nullptr && missile->is_ranged_weapon();\n}",
       "mutated": "bool Creature::has_ranged_weapon() const noexcept\n{\n\treturn false;\n}",
       "catches": "a bow-wielder unable to shoot at all"

@@ -15,16 +15,16 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Monsters.h"
-#include "src/ActorTypes/Monsters/Spider.h"
-#include "src/Core/GameContext.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Factories/MonsterCreator.h"
-#include "src/Systems/DataManager.h"
-#include "src/Systems/LevelManager.h"
-#include "src/Systems/Shopkeepers/ShopkeeperFactory.h"
+#include "src/Creature.h"
+#include "src/Monsters.h"
+#include "src/Spider.h"
+#include "src/GameContext.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
+#include "src/MonsterCreator.h"
+#include "src/DataManager.h"
+#include "src/LevelManager.h"
+#include "src/ShopkeeperFactory.h"
 #include "tests/mocks/MockGameContext.h"
 
 class MonsterHitDiceTest : public ::testing::Test

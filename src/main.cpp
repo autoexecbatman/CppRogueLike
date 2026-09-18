@@ -9,12 +9,12 @@
 #endif
 #include <raylib.h>
 
-#include "Core/Paths.h"
-#include "Factories/ItemCreator.h"
-#include "Factories/MonsterCreator.h"
+#include "Paths.h"
+#include "ItemCreator.h"
+#include "MonsterCreator.h"
 #include "Game.h"
-#include "Menu/Menu.h"
-#include "Systems/SpellSystem.h"
+#include "Menu.h"
+#include "SpellSystem.h"
 
 #ifdef __EMSCRIPTEN__
 struct LoopData

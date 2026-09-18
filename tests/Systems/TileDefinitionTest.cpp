@@ -9,9 +9,9 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Actor.h"
-#include "src/Map/TileType.h"
-#include "src/Systems/TileConfig.h"
+#include "src/Actor.h"
+#include "src/TileType.h"
+#include "src/TileConfig.h"
 
 class TileDefinitionTest : public ::testing::Test
 {

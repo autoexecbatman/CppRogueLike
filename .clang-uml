@@ -23,11 +23,39 @@ diagrams:
     generate_packages: false
     include:
       paths:
-        - src/Actor
-        - src/ActorTypes
+        - src/Actor.cpp
+        - src/Actor.h
+        - src/Alignment.h
+        - src/Attacker.cpp
+        - src/Attacker.h
+        - src/Container.cpp
+        - src/Container.h
+        - src/Creature.cpp
+        - src/Creature.h
+        - src/CreatureClass.h
+        - src/EquipmentSlot.h
+        - src/InventoryData.h
+        - src/InventoryOperations.cpp
+        - src/InventoryOperations.h
+        - src/Item.cpp
+        - src/Item.h
+        - src/MonsterAttacker.cpp
+        - src/MonsterAttacker.h
+        - src/NPC.h
+        - src/Pickable.cpp
+        - src/Pickable.h
+        - src/PlayerAttacker.cpp
+        - src/PlayerAttacker.h
+        - src/Stairs.cpp
+        - src/Stairs.h
+        - src/TileFeature.h
+        - src/Monsters.cpp
+        - src/Monsters.h
+        - src/Player.cpp
+        - src/Player.h
     exclude:
       paths:
-        - src/Actor/EquipmentSlot.h
+        - src/EquipmentSlot.h
 
   ai_system:
     type: class
@@ -36,7 +64,24 @@ diagrams:
     generate_packages: false
     include:
       paths:
-        - src/Ai
+        - src/Ai.cpp
+        - src/Ai.h
+        - src/AiMimic.cpp
+        - src/AiMimic.h
+        - src/AiMonster.cpp
+        - src/AiMonster.h
+        - src/AiMonsterConfused.cpp
+        - src/AiMonsterConfused.h
+        - src/AiMonsterRanged.cpp
+        - src/AiMonsterRanged.h
+        - src/AiShopkeeper.cpp
+        - src/AiShopkeeper.h
+        - src/AiSpider.cpp
+        - src/AiSpider.h
+        - src/AiWebSpinner.cpp
+        - src/AiWebSpinner.h
+        - src/PlayerController.cpp
+        - src/PlayerController.h
 
   menu_system:
     type: class
@@ -45,7 +90,37 @@ diagrams:
     generate_packages: false
     include:
       paths:
-        - src/Menu
+        - src/AnimationBarrierMenu.cpp
+        - src/AnimationBarrierMenu.h
+        - src/BaseMenu.cpp
+        - src/BaseMenu.h
+        - src/ContextMenu.cpp
+        - src/ContextMenu.h
+        - src/DeathMenu.cpp
+        - src/DeathMenu.h
+        - src/ListMenu.cpp
+        - src/ListMenu.h
+        - src/Menu.cpp
+        - src/Menu.h
+        - src/MenuBuy.cpp
+        - src/MenuBuy.h
+        - src/MenuClass.cpp
+        - src/MenuClass.h
+        - src/MenuEntry.h
+        - src/MenuGender.cpp
+        - src/MenuGender.h
+        - src/MenuName.cpp
+        - src/MenuName.h
+        - src/MenuRace.cpp
+        - src/MenuRace.h
+        - src/MenuSell.cpp
+        - src/MenuSell.h
+        - src/MenuSpellCast.cpp
+        - src/MenuSpellCast.h
+        - src/MenuTrade.cpp
+        - src/MenuTrade.h
+        - src/NotificationMenu.cpp
+        - src/NotificationMenu.h
 
   combat_system:
     type: class
@@ -54,10 +129,35 @@ diagrams:
     generate_packages: false
     include:
       paths:
-        - src/Combat
-        - src/Actor/Attacker.h
-        - src/Actor/MonsterAttacker.h
-        - src/Actor/PlayerAttacker.h
+        - src/ArmorClass.cpp
+        - src/ArmorClass.h
+        - src/AttackKind.h
+        - src/CombatStats.cpp
+        - src/CombatStats.h
+        - src/ConstitutionTracker.cpp
+        - src/ConstitutionTracker.h
+        - src/CorpseData.cpp
+        - src/CorpseData.h
+        - src/DamageInfo.h
+        - src/DamageResolver.cpp
+        - src/DamageResolver.h
+        - src/DeathHandler.cpp
+        - src/DeathHandler.h
+        - src/ExperienceReward.cpp
+        - src/ExperienceReward.h
+        - src/HealthPool.cpp
+        - src/HealthPool.h
+        - src/SavingThrow.cpp
+        - src/SavingThrow.h
+        - src/TurnUndead.cpp
+        - src/TurnUndead.h
+        - src/TurningTable.h
+        - src/WeaponDamageRegistry.cpp
+        - src/WeaponDamageRegistry.h
+        - src/WeightTier.h
+        - src/Attacker.h
+        - src/MonsterAttacker.h
+        - src/PlayerAttacker.h
 
   systems_overview:
     type: class
@@ -66,8 +166,66 @@ diagrams:
     generate_packages: true
     include:
       paths:
-        - src/Core
-        - src/Systems
+        - src/GameContext.cpp
+        - src/GameContext.h
+        - src/Paths.h
+        - src/AnimationSystem.cpp
+        - src/AnimationSystem.h
+        - src/BodyPlanRegistry.cpp
+        - src/BodyPlanRegistry.h
+        - src/BuffSystem.cpp
+        - src/BuffSystem.h
+        - src/BuffType.h
+        - src/ContentRegistry.cpp
+        - src/ContentRegistry.h
+        - src/ContentRegistryIO.cpp
+        - src/ContentRegistryIO.h
+        - src/CreatureManager.cpp
+        - src/CreatureManager.h
+        - src/CurseSystem.cpp
+        - src/CurseSystem.h
+        - src/DataManager.cpp
+        - src/DataManager.h
+        - src/DisplayManager.cpp
+        - src/DisplayManager.h
+        - src/EncounterPlanner.cpp
+        - src/EncounterPlanner.h
+        - src/FloatingTextSystem.cpp
+        - src/FloatingTextSystem.h
+        - src/GameLoopCoordinator.cpp
+        - src/GameLoopCoordinator.h
+        - src/GameStateManager.cpp
+        - src/GameStateManager.h
+        - src/HungerSystem.cpp
+        - src/HungerSystem.h
+        - src/InputHandler.cpp
+        - src/InputHandler.h
+        - src/LevelManager.cpp
+        - src/LevelManager.h
+        - src/LevelUpSystem.cpp
+        - src/LevelUpSystem.h
+        - src/MenuManager.cpp
+        - src/MenuManager.h
+        - src/MessageSystem.cpp
+        - src/MessageSystem.h
+        - src/RenderingManager.cpp
+        - src/RenderingManager.h
+        - src/ShopKeeper.cpp
+        - src/ShopKeeper.h
+        - src/SpawnUtils.cpp
+        - src/SpawnUtils.h
+        - src/SpellAnimations.cpp
+        - src/SpellAnimations.h
+        - src/SpellSystem.cpp
+        - src/SpellSystem.h
+        - src/TargetMode.h
+        - src/TargetingMenu.cpp
+        - src/TargetingMenu.h
+        - src/TargetingSystem.cpp
+        - src/TargetingSystem.h
+        - src/TileConfig.cpp
+        - src/TileConfig.h
     exclude:
       paths:
-        - src/Systems/ItemEnhancements
+        - src/ItemEnhancements.cpp
+        - src/ItemEnhancements.h

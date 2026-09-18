@@ -7,12 +7,12 @@
 #include <string>
 #include <vector>
 
-#include "src/Factories/MonsterCreator.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Systems/BodyPlanRegistry.h"
-#include "src/Actor/Creature.h"
+#include "src/MonsterCreator.h"
+#include "src/ItemCreator.h"
+#include "src/BodyPlanRegistry.h"
+#include "src/Creature.h"
 #include "tests/mocks/MockGameContext.h"
-#include "src/Actor/EquipmentSlot.h"
+#include "src/EquipmentSlot.h"
 
 // A monster either wields an item or fights with its body. The two are
 // separate fields because only one of them names something in items.json.

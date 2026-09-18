@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 #include <limits>
 
-#include "src/Map/Map.h"
-#include "src/Map/DungeonRoom.h"
-#include "src/Core/GameContext.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Systems/DataManager.h"
-#include "src/Systems/MessageSystem.h"
-#include "src/Random/RandomDice.h"
+#include "src/Map.h"
+#include "src/DungeonRoom.h"
+#include "src/GameContext.h"
+#include "src/Player.h"
+#include "src/ExperienceReward.h"
+#include "src/DataManager.h"
+#include "src/MessageSystem.h"
+#include "src/RandomDice.h"
 
 // ============================================================================
 // MAP TESTS

@@ -43,42 +43,42 @@ $exe = Join-Path $root "build/bin/Debug/test_exe.exe"
 $probes = @(
     @{
         test   = "AssertProbeDeathTest.WearingNothingAborts"
-        file   = "src/Actor/Creature.cpp"
+        file   = "src/Creature.cpp"
         anchor = 'assert(item && "Creature::wear called with no item");'
     },
     @{
         test   = "AssertProbeDeathTest.WearingIntoASlotTheBodyLacksAborts"
-        file   = "src/Actor/Creature.cpp"
+        file   = "src/Creature.cpp"
         anchor = 'assert(has_slot(slot) && "Creature::wear called with a slot this body does not have");'
     },
     @{
         test   = "AssertProbeDeathTest.HitDiceAtZeroAbort"
-        file   = "src/Actor/Creature.cpp"
+        file   = "src/Creature.cpp"
         anchor = 'assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");'
     },
     @{
         test   = "AssertProbeDeathTest.TakingFireAsAPlainTotalAborts"
-        file   = "src/Actor/Creature.cpp"
+        file   = "src/Creature.cpp"
         anchor = 'assert(damageType != DamageType::FIRE && damageType != DamageType::COLD && "Creature::take_damage: fire and cold arrive as ResistedDamage from DamageResolver::reduce_dice");'
     },
     @{
         test   = "AssertProbeDeathTest.BuildingAMonsterWithNoBodyPlanRegistryAborts"
-        file   = "src/Factories/MonsterCreator.cpp"
+        file   = "src/MonsterCreator.cpp"
         anchor = 'assert(ctx.bodyPlanRegistry && "MonsterCreator::create_from_params called without a bodyPlanRegistry");'
     },
     @{
         test   = "AssertProbeDeathTest.BuildingAMonsterWithNoContentRegistryAborts"
-        file   = "src/Factories/MonsterCreator.cpp"
+        file   = "src/MonsterCreator.cpp"
         anchor = 'assert(ctx.contentRegistry && "MonsterCreator::create_from_params called without a contentRegistry");'
     },
     @{
         test   = "AssertProbeDeathTest.ConfiguringAShopkeeperWithNoContentRegistryAborts"
-        file   = "src/Systems/Shopkeepers/ShopkeeperFactory.cpp"
+        file   = "src/ShopkeeperFactory.cpp"
         anchor = 'assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");'
     },
     @{
         test   = "AssertProbeDeathTest.KillingACreatureWithNoPlayerInContextAborts"
-        file   = "src/Actor/Creature.cpp"
+        file   = "src/Creature.cpp"
         anchor = 'assert(ctx.player() != nullptr && "Creature::die requires a live player in context");'
     }
 )

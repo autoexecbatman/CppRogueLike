@@ -1,0 +1,138 @@
+#include <algorithm>
+#include <cassert>
+#include <format>
+#include <memory>
+#include <string>
+
+#include "Actor.h"
+#include "Creature.h"
+#include "MonsterAttacker.h"
+#include "AiShopkeeper.h"
+#include "Colors.h"
+#include "DamageInfo.h"
+#include "ExperienceReward.h"
+#include "HealthPool.h"
+#include "GameContext.h"
+#include "MonsterCreator.h"
+#include "RandomDice.h"
+#include "MessageSystem.h"
+#include "Vector2D.h"
+#include "ShopKeeper.h"
+#include "ShopkeeperFactory.h"
+#include "BodyPlanRegistry.h"
+#include "ItemCreator.h"
+
+std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
+{
+	// Create base creature
+	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ MonsterCreator::get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
+
+	// Configure all shopkeeper components in one place
+	configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);
+
+	return shopkeeper;
+}
+
+bool ShopkeeperFactory::should_spawn_shopkeeper(int dungeonLevel, GameContext& ctx)
+{
+	// Base 8% chance, increases by 2% per level, cap at 20%
+	int shopkeeperChance = 8 + (dungeonLevel * 2);
+	shopkeeperChance = std::min(shopkeeperChance, 20);
+
+	return ctx.dice->d100() <= shopkeeperChance;
+}
+
+void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLevel, GameContext& ctx)
+{
+	// Set AI - single source for shopkeeper behavior
+	shopkeeper.ai = std::make_unique<AiShopkeeper>();
+
+	// Shopkeepers trade rather than fight, and cannot be shoved out of their shop.
+	shopkeeper.set_attitude(Attitude::PEACEFUL);
+	shopkeeper.set_displaceable(false);
+
+	// Set combat stats - non-hostile defensive stats
+	shopkeeper.experienceReward = std::make_unique<ExperienceReward>(0);
+	shopkeeper.set_dr(20);
+	shopkeeper.set_thaco(20);
+	shopkeeper.armorClass = std::make_unique<ArmorClass>(10);
+	shopkeeper.set_hit_dice(100);
+	shopkeeper.attacker = std::make_unique<MonsterAttacker>(shopkeeper, DamageValues::Dagger());
+	// A merchant is a person with a knife, so the dagger is a real item in a
+	// real hand rather than a name on the creature.
+	assert(ctx.bodyPlanRegistry && "configure_shopkeeper called without a bodyPlanRegistry");
+	assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");
+	shopkeeper.set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
+	shopkeeper.wear(
+		ItemCreator::create("dagger", shopkeeper.position, *ctx.contentRegistry),
+		EquipmentSlot::RIGHT_HAND);
+
+	assert(shopkeeper.ai && "Shopkeeper requires Ai");
+	assert(shopkeeper.attacker && "Shopkeeper requires Attacker");
+
+	// Create shop component with level-appropriate configuration
+	ShopType shopType = select_shop_type_for_level(dungeonLevel, ctx);
+	ShopQuality shopQuality = select_shop_quality_for_level(dungeonLevel, ctx);
+	shopkeeper.shop = std::make_unique<ShopKeeper>(shopType, shopQuality);
+	shopkeeper.shop->generate_initial_inventory(dungeonLevel, ctx);
+
+	ctx.messageSystem->log(std::format("Created shopkeeper: {} (Level {})", shopkeeper.shop->get_shop_name(), dungeonLevel));
+}
+
+ShopType ShopkeeperFactory::select_shop_type_for_level(int dungeonLevel, GameContext& ctx)
+{
+	// Early levels favor general stores, deeper levels get specialized shops
+	if (dungeonLevel <= 2)
+	{
+		return (ctx.dice->d100() <= 60) ? ShopType::GENERAL_STORE : ShopType::WEAPON_SHOP;
+	}
+	else if (dungeonLevel <= 4)
+	{
+		int roll = ctx.dice->d100();
+		if (roll <= 25)
+			return ShopType::WEAPON_SHOP;
+		if (roll <= 50)
+			return ShopType::ARMOR_SHOP;
+		if (roll <= 75)
+			return ShopType::POTION_SHOP;
+		return ShopType::GENERAL_STORE;
+	}
+	else
+	{
+		// Higher levels get full variety including scroll shops
+		int roll = ctx.dice->d100();
+		if (roll <= 20)
+			return ShopType::WEAPON_SHOP;
+		if (roll <= 40)
+			return ShopType::ARMOR_SHOP;
+		if (roll <= 60)
+			return ShopType::POTION_SHOP;
+		if (roll <= 80)
+			return ShopType::SCROLL_SHOP;
+		return ShopType::ADVENTURING_GEAR;
+	}
+}
+
+ShopQuality ShopkeeperFactory::select_shop_quality_for_level(int dungeonLevel, GameContext& ctx)
+{
+	// Quality improves with dungeon depth
+	int qualityRoll = ctx.dice->d100();
+	int levelBonus = dungeonLevel * 5; // 5% quality improvement per level
+
+	if (qualityRoll + levelBonus >= 85)
+	{
+		return ShopQuality::EXCELLENT;
+	}
+	else if (qualityRoll + levelBonus >= 60)
+	{
+		return ShopQuality::GOOD;
+	}
+	else if (qualityRoll + levelBonus >= 30)
+	{
+		return ShopQuality::AVERAGE;
+	}
+	else
+	{
+		return ShopQuality::POOR;
+	}
+}

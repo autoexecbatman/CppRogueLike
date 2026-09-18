@@ -8,19 +8,19 @@
   ],
   "mutations": [
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "\tconstitutionTracker->set_last_constitution(get_constitution());\n}",
       "mutated": "}",
       "catches": "hit dice given without the score recorded, so the first tick applies a bonus"
     },
     {
-      "file": "src/ActorTypes/Monsters.cpp",
+      "file": "src/Monsters.cpp",
       "original": "\tset_hit_dice(hp);",
       "mutated": "\thealthPool = std::make_unique<HealthPool>(hp);",
       "catches": "the mimic building its pool directly again"
     },
     {
-      "file": "src/Systems/Shopkeepers/ShopkeeperFactory.cpp",
+      "file": "src/ShopkeeperFactory.cpp",
       "original": "\tshopkeeper.set_hit_dice(100);",
       "mutated": "\tshopkeeper.healthPool = std::make_unique<HealthPool>(100);",
       "catches": "the shopkeeper building its pool directly again"

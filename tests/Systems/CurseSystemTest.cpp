@@ -4,16 +4,16 @@
 
 #include <gtest/gtest.h>
 
-#include "../../src/Actor/Item.h"
-#include "../../src/ActorTypes/Player.h"
-#include "../../src/Combat/ExperienceReward.h"
-#include "../../src/Colors/Colors.h"
-#include "../../src/Core/GameContext.h"
-#include "../../src/Items/ItemClassification.h"
-#include "../../src/Items/ItemIdentification.h"
-#include "../../src/Systems/CurseSystem.h"
-#include "../../src/Systems/MessageSystem.h"
-#include "../../src/Utils/Vector2D.h"
+#include "../../src/Item.h"
+#include "../../src/Player.h"
+#include "../../src/ExperienceReward.h"
+#include "../../src/Colors.h"
+#include "../../src/GameContext.h"
+#include "../../src/ItemClassification.h"
+#include "../../src/ItemIdentification.h"
+#include "../../src/CurseSystem.h"
+#include "../../src/MessageSystem.h"
+#include "../../src/Vector2D.h"
 
 class CurseSystemTest : public ::testing::Test
 {

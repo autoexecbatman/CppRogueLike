@@ -15,7 +15,7 @@
 #include <fstream>
 #include <string>
 
-#include "src/Systems/SpellSystem.h"
+#include "src/SpellSystem.h"
 
 class SpellDataLoadTest : public ::testing::Test
 {

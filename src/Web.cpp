@@ -1,0 +1,87 @@
+#include <algorithm>
+#include <variant>
+
+#include "Actor.h"
+#include "Creature.h"
+#include "EquipmentSlot.h"
+#include "Pickable.h"
+#include "Colors.h"
+#include "GameContext.h"
+#include "MagicalItemEffects.h"
+#include "MessageSystem.h"
+#include "TileConfig.h" // for TileConfig type used in ctor
+#include "Vector2D.h"
+#include "Web.h"
+
+Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
+	: SpellTile(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
+	  webStrength(strength)
+{
+	// Webs don't block movement but do have their effect when passed through
+	// Note that webs don't have the BLOCKS state
+}
+
+// Apply web effect when a creature tries to pass through
+EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
+{
+	// Spiders and their kin move across webs freely.
+	if (creature.has_state(ActorState::CAN_WALK_WEBS))
+	{
+		return EntryResult::UNAFFECTED;
+	}
+
+	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
+	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
+	{
+		if (Item* equippedRing = creature.get_equipped_item(slot))
+		{
+			if (const auto* magicRing = equippedRing->behavior ? std::get_if<MagicalRing>(&*equippedRing->behavior) : nullptr)
+			{
+				if (magicRing->effect == MagicalEffect::FREE_ACTION)
+				{
+					ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
+					destroy();
+					return EntryResult::AFFECTED;
+				}
+			}
+		}
+	}
+
+	// Calculate chance to get caught based on dexterity and web strength
+	int catchChance = 40 + (webStrength * 10) - ((creature.get_dexterity() - 10) * 3);
+	catchChance = std::min(90, std::max(10, catchChance)); // Cap between 10-90%
+
+	if (ctx.dice->d100() <= catchChance)
+	{
+		// Calculate number of turns stuck based on web strength
+		int stuckTurns = webStrength + ctx.dice->roll(1, 2);
+
+		// Apply the effect through polymorphic interface
+		creature.apply_web_effect(stuckTurns, webStrength, this);
+
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
+
+		// Player loses their turn
+		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		return EntryResult::BLOCKED;
+	}
+	else
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
+
+		// 50% chance to destroy the web
+		if (ctx.dice->d2() == 1)
+		{
+			destroy();
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
+		}
+
+		return EntryResult::AFFECTED;
+	}
+}
+
+// Destroy this web
+void Web::destroy()
+{
+	mark_destroyed();
+}

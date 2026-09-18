@@ -8,37 +8,37 @@
   ],
   "mutations": [
     {
-      "file": "src/Combat/ConstitutionTracker.cpp",
+      "file": "src/ConstitutionTracker.cpp",
       "original": "result.firstApplication = !lastCon.has_value();",
       "mutated": "result.firstApplication = false;",
       "catches": "the first application reported as a change from a score never held"
     },
     {
-      "file": "src/Combat/ConstitutionTracker.cpp",
+      "file": "src/ConstitutionTracker.cpp",
       "original": "    set_last_constitution(currentConstitution);\n",
       "mutated": "",
       "catches": "the score never recorded, so every tick applies the bonus again"
     },
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "if (is_player() && !result.firstApplication)",
       "mutated": "if (is_player())",
       "catches": "the owner ignoring the tracker's verdict and reporting anyway"
     },
     {
-      "file": "src/Combat/ConstitutionTracker.cpp",
+      "file": "src/ConstitutionTracker.cpp",
       "original": "const int oldBonus = lastCon.has_value() ? calculate_constitution_hp_bonus_for_value(*lastCon, owner.get_creature_class(), ctx) : 0;",
       "mutated": "const int oldBonus = calculate_constitution_hp_bonus_for_value(currentConstitution, owner.get_creature_class(), ctx);",
       "catches": "the old bonus read from the new score, so a real change applies nothing"
     },
     {
-      "file": "src/Combat/ConstitutionTracker.cpp",
+      "file": "src/ConstitutionTracker.cpp",
       "original": "    return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
       "mutated": "    return tableAdjustment;",
       "catches": "the warrior cap removed, so a wizard keeps the table's +3"
     },
     {
-      "file": "src/Combat/ConstitutionTracker.cpp",
+      "file": "src/ConstitutionTracker.cpp",
       "original": "    return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
       "mutated": "    return tableAdjustment > 0 ? std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP) : 0;",
       "catches": "the cap swallowing penalties, so a Con 3 wizard loses nothing"

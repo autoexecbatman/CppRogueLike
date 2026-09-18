@@ -6,7 +6,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Combat/TurningTable.h"
+#include "src/TurningTable.h"
 
 // The book's own example: Gorus, a 7th-level priest, rolls 12 against two
 // skeletons led by a wight and a spectre. "The skeletons are destroyed... The

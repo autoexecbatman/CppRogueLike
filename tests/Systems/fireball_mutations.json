@@ -8,37 +8,37 @@
   ],
   "mutations": [
     {
-      "file": "src/Systems/SpellSystem.cpp",
+      "file": "src/SpellSystem.cpp",
       "original": "const DamageResolver::ResistedDamage dealt = (save >= 15) ? reduced.at(reduced.hit_points() / 2) : reduced;",
       "mutated": "const DamageResolver::ResistedDamage dealt = (save > 15) ? reduced.at(reduced.hit_points() / 2) : reduced;",
       "catches": "a save of exactly 15 no longer halving"
     },
     {
-      "file": "src/Systems/SpellSystem.cpp",
+      "file": "src/SpellSystem.cpp",
       "original": "const int save = ctx.dice->roll(1, 20) + DamageResolver::save_bonus_against(DamageType::FIRE, target, ctx);",
       "mutated": "const int save = ctx.dice->roll(1, 20);",
       "catches": "the ring's +4 on the save dropped"
     },
     {
-      "file": "src/Systems/SpellSystem.cpp",
+      "file": "src/SpellSystem.cpp",
       "original": "if (creature->get_tile_distance(center) > static_cast<double>(radius))",
       "mutated": "if (creature->get_tile_distance(center) > static_cast<double>(radius) + 1.0)",
       "catches": "the burst reaching one tile past its radius"
     },
     {
-      "file": "src/Systems/SpellSystem.cpp",
+      "file": "src/SpellSystem.cpp",
       "original": "burst.diceCount = std::min(casterLevel, 10);",
       "mutated": "burst.diceCount = casterLevel;",
       "catches": "the ten-dice ceiling removed"
     },
     {
-      "file": "src/Combat/DamageResolver.cpp",
+      "file": "src/DamageResolver.cpp",
       "original": "\t\ttotal += std::max(1, die - perDie);",
       "mutated": "\t\ttotal += die - perDie;",
       "catches": "a die allowed below one"
     },
     {
-      "file": "src/Combat/DamageResolver.cpp",
+      "file": "src/DamageResolver.cpp",
       "original": "static constexpr int FIRE_PER_DIE = 2;",
       "mutated": "static constexpr int FIRE_PER_DIE = 1;",
       "catches": "fire reduced by one a die instead of two"

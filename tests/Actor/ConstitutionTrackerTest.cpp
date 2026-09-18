@@ -14,11 +14,11 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Core/GameContext.h"
-#include "src/Systems/DataManager.h"
-#include "src/Systems/MessageSystem.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/GameContext.h"
+#include "src/DataManager.h"
+#include "src/MessageSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
 class ConstitutionTrackerTest : public ::testing::Test

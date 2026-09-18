@@ -409,7 +409,7 @@ def cache_key(source):
 
     Example:
 
-        cache_key(Path("src/Actor/Creature.h"))
+        cache_key(Path("src/Creature.h"))
         # '5f2a1c...:18422:1755800000'
 
     Args:
@@ -464,7 +464,7 @@ def parse_with_cache(source, index, cache, read):
 
     Example:
 
-        parse_with_cache(Path("src/Actor/Creature.h"), index, {}, declarations_in)[0]["name"]
+        parse_with_cache(Path("src/Creature.h"), index, {}, declarations_in)[0]["name"]
         # 'MonteCarloSearch'
 
     Args:
@@ -688,7 +688,7 @@ def main():
         # One header at a time when asked, so a parse failure is readable.
         if arguments.only:
             # src/ is nested here, so a bare name is searched for rather than
-            # joined: --only Creature.h finds src/Actor/Creature.h.
+            # joined: --only Creature.h finds src/Creature.h.
             direct = source_directory / arguments.only
             if direct.exists():
                 chosen = direct

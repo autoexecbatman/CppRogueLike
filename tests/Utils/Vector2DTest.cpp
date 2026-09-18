@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "src/Utils/Vector2D.h"
+#include "src/Vector2D.h"
 
 class Vector2DTest : public ::testing::Test {
 };

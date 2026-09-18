@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
 #include "src/Game.h"
-#include "src/Systems/LevelUpSystem.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/ExperienceReward.h"
+#include "src/LevelUpSystem.h"
+#include "src/Player.h"
+#include "src/ExperienceReward.h"
 
 class LevelUpSystemTest : public ::testing::Test
 {

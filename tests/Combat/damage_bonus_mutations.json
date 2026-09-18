@@ -8,19 +8,19 @@
   ],
   "mutations": [
     {
-      "file": "src/Combat/DamageInfo.h",
+      "file": "src/DamageInfo.h",
       "original": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, damageType };",
       "mutated": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, damage_bonus }, damageType };",
       "catches": "a second bonus replacing the first instead of adding to it"
     },
     {
-      "file": "src/Combat/DamageInfo.h",
+      "file": "src/DamageInfo.h",
       "original": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, damageType };",
       "mutated": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus - damage_bonus }, damageType };",
       "catches": "a bonus applied with the wrong sign"
     },
     {
-      "file": "src/Combat/DamageInfo.h",
+      "file": "src/DamageInfo.h",
       "original": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, damageType };",
       "mutated": "\t\treturn DamageInfo{ DiceExpr{ dice.num, dice.sides, dice.bonus + damage_bonus }, DamageType::PHYSICAL };",
       "catches": "an enhanced fire weapon losing its damage type"

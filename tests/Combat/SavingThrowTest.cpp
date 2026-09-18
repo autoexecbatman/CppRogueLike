@@ -17,12 +17,12 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/CreatureClass.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Combat/SavingThrow.h"
-#include "src/Systems/DataManager.h"
-#include "src/Systems/LevelUpSystem.h"
+#include "src/Creature.h"
+#include "src/CreatureClass.h"
+#include "src/ExperienceReward.h"
+#include "src/SavingThrow.h"
+#include "src/DataManager.h"
+#include "src/LevelUpSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
 // ---------------------------------------------------------------------------

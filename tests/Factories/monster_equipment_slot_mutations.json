@@ -8,13 +8,13 @@
   ],
   "mutations": [
     {
-      "file": "src/Factories/MonsterCreator.cpp",
+      "file": "src/MonsterCreator.cpp",
       "original": "\t\tif (!c->can_equip(*carriedItem, carried.slot))",
       "mutated": "\t\tif (false)",
       "catches": "authored equipment armed without being checked against its slot"
     },
     {
-      "file": "src/Actor/Creature.cpp",
+      "file": "src/Creature.cpp",
       "original": "\t\t// Missile weapon slot can only hold ranged weapons - use ItemClass system\n\t\tif (!item.is_ranged_weapon())",
       "mutated": "\t\t// Missile weapon slot can only hold ranged weapons - use ItemClass system\n\t\tif (false)",
       "catches": "a melee weapon accepted into the missile slot"

@@ -1,8 +1,8 @@
 #include <gtest/gtest.h>
-#include "src/Systems/ItemEnhancements/ItemEnhancements.h"
-#include "src/Actor/Actor.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Combat/WeaponDamageRegistry.h"
+#include "src/ItemEnhancements.h"
+#include "src/Actor.h"
+#include "src/ItemCreator.h"
+#include "src/WeaponDamageRegistry.h"
 
 // ============================================================================
 // ENHANCEMENT SYSTEM TESTS

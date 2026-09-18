@@ -1,0 +1,166 @@
+#include <algorithm>
+#include <cassert>
+#include <string>
+
+#include "Actor.h"
+#include "InventoryOperations.h"
+#include "Colors.h"
+#include "GameContext.h"
+#include "Renderer.h"
+#include "MessageSystem.h"
+#include "ShopKeeper.h"
+#include "MenuBuy.h"
+
+void MenuBuy::populate_items()
+{
+	menuItems.clear();
+
+	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+	{
+		menuItems.push_back("No items for sale");
+		return;
+	}
+
+	assert(std::ranges::none_of(shopkeeper.get_shop_inventory().items, [](const auto& item) { return !item; }));
+	for (const auto& item : shopkeeper.get_shop_inventory().items)
+	{
+		std::string itemName = item->actorData.name;
+		int price = shopkeeper.get_buy_price(*item);
+		std::string goldText = "(" + std::to_string(price) + "g)";
+
+		size_t totalWidth = 28;
+		size_t padding = totalWidth > (itemName.length() + goldText.length()) ? totalWidth - itemName.length() - goldText.length() : 1;
+
+		std::string itemDisplay = itemName + std::string(padding, ' ') + goldText;
+		menuItems.push_back(itemDisplay);
+	}
+}
+
+MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
+	: buyer{ buyer }, shopkeeper{ shopkeeper }, ctx{ ctx }
+{
+	assert(ctx.renderer && "MenuBuy: renderer required before construction");
+	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
+	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
+
+	populate_items();
+	menu_new(
+		menuWidth,
+		menuHeight,
+		menuStartX,
+		menuStartY,
+		ctx);
+}
+
+void MenuBuy::menu_print_state(size_t state)
+{
+	if (state >= menuItems.size())
+		return;
+
+	if (currentState == state)
+	{
+		menu_highlight_on();
+	}
+	menu_print(1, static_cast<int>(state) + 1, menu_get_string(state));
+	if (currentState == state)
+	{
+		menu_highlight_off();
+	}
+}
+
+void MenuBuy::draw_content()
+{
+	populate_items();
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	{
+		menu_print_state(i);
+	}
+}
+
+void MenuBuy::draw()
+{
+	menu_clear();
+	menu_draw_box();
+	menu_draw_title("BUY ITEMS", YELLOW_BLACK_PAIR);
+
+	menu_print_header();
+
+	populate_items();
+	for (size_t i{ 0 }; i < menuItems.size(); ++i)
+	{
+		menu_print_state(i);
+	}
+	menu_refresh();
+}
+
+void MenuBuy::on_key(GameContext& ctx)
+{
+	if (lastKey == GameKey::UP || lastKey == GameKey::W)
+	{
+		if (menuItems.empty())
+		{
+			return;
+		}
+		currentState = (currentState + menuItems.size() - 1) % menuItems.size();
+	}
+	else if (lastKey == GameKey::DOWN || lastKey == GameKey::S)
+	{
+		if (menuItems.empty())
+		{
+			return;
+		}
+		currentState = (currentState + 1) % menuItems.size();
+	}
+	else if (lastKey == GameKey::ESCAPE)
+	{
+		menu_set_run_false();
+	}
+	else if (lastKey == GameKey::ENTER)
+	{
+		if (!InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+		{
+			handle_buy();
+		}
+		else
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);
+		}
+	}
+}
+
+void MenuBuy::menu(GameContext& ctx)
+{
+	menu_key_listen();
+	draw();
+	on_key(ctx);
+}
+
+void MenuBuy::handle_buy()
+{
+	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()) ||
+		currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()))
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		return;
+	}
+
+	Item* item = InventoryOperations::get_item_at(shopkeeper.get_shop_inventory(), currentState);
+	if (!item)
+	{
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		return;
+	}
+
+	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
+	{
+		[[maybe_unused]] const auto removeFromStockResult = InventoryOperations::remove_item_at(shopkeeper.get_shop_inventory(), currentState);
+		assert(removeFromStockResult.has_value());
+
+		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
+		{
+			currentState = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) - 1;
+		}
+
+		populate_items();
+	}
+}

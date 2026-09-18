@@ -2,8 +2,8 @@
 
 #include <set>
 #include <stdexcept>
-#include "src/Combat/DamageInfo.h"
-#include "src/Random/RandomDice.h"
+#include "src/DamageInfo.h"
+#include "src/RandomDice.h"
 
 // ============================================================================
 // THE WIZARD'S DAMAGE SYSTEM TESTS

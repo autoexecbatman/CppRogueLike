@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Systems/ShopKeeper.h"
-#include "src/Actor/InventoryOperations.h"
-#include "src/Factories/ItemCreator.h"
+#include "src/ShopKeeper.h"
+#include "src/InventoryOperations.h"
+#include "src/ItemCreator.h"
 #include "src/Game.h"
-#include "src/Core/GameContext.h"
+#include "src/GameContext.h"
 
 using json = nlohmann::json;
 using namespace InventoryOperations;

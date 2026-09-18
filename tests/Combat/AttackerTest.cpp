@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 #include <memory>
 
-#include "src/Actor/Actor.h"
-#include "src/Actor/Attacker.h"
-#include "src/Actor/MonsterAttacker.h"
-#include "src/Actor/PlayerAttacker.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/AttackKind.h"
-#include "src/Combat/DamageInfo.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Core/Paths.h"
+#include "src/Actor.h"
+#include "src/Attacker.h"
+#include "src/MonsterAttacker.h"
+#include "src/PlayerAttacker.h"
+#include "src/Player.h"
+#include "src/AttackKind.h"
+#include "src/DamageInfo.h"
+#include "src/ExperienceReward.h"
+#include "src/Paths.h"
 #include "src/Game.h"
 
 // ============================================================================

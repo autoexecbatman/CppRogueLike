@@ -4,19 +4,19 @@
 // Tests both ItemEnhancement stat bonuses (strength_bonus, dexterity_bonus)
 // and behavior-based bonuses (JewelryAmulet, Gauntlets, Girdle).
 
-#include "src/Actor/Actor.h"
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Actor/Item.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Systems/DataManager.h"
-#include "src/Items/ItemIdentification.h"
-#include "src/Items/MagicalItemEffects.h"
+#include "src/Actor.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/Item.h"
+#include "src/ExperienceReward.h"
+#include "src/DataManager.h"
+#include "src/ItemIdentification.h"
+#include "src/MagicalItemEffects.h"
 #include "tests/mocks/MockGameContext.h"
-#include <Core/GameContext.h>
+#include "src/GameContext.h"
 #include <gtest/gtest.h>
 #include <memory>
-#include <Utils/Vector2D.h>
+#include "src/Vector2D.h"
 
 // ============================================================================
 // TEST FIXTURE: EquipmentStatBonusTest

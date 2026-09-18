@@ -5,10 +5,10 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Objects/Web.h"
-#include "src/Utils/Vector2D.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/Web.h"
+#include "src/Vector2D.h"
 #include "tests/mocks/MockGameContext.h"
 
 class WebTest : public ::testing::Test

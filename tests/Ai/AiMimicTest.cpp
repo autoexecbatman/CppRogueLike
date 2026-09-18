@@ -6,8 +6,8 @@
 #include <memory>
 #include <nlohmann/json.hpp>
 
-#include "src/Ai/AiMimic.h"
-#include "src/Ai/Ai.h"
+#include "src/AiMimic.h"
+#include "src/Ai.h"
 
 using json = nlohmann::json;
 

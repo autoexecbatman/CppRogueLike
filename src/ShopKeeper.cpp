@@ -1,0 +1,431 @@
+#include <algorithm>
+#include <cassert>
+#include <cstdlib>
+#include <memory>
+#include <string>
+#include <utility>
+#include <vector>
+
+#include "InventoryData.h"
+#include "InventoryOperations.h"
+#include "Item.h"
+#include "Player.h"
+#include "Colors.h"
+#include "GameContext.h"
+#include "ItemCreator.h" // SINGLE SOURCE OF TRUTH
+#include "Persistent.h"
+#include "RandomDice.h"
+#include "LevelManager.h"
+#include "MessageSystem.h"
+#include "Vector2D.h"
+#include "ShopKeeper.h"
+
+using namespace InventoryOperations;
+
+ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality)
+	: shopType(type), shopQuality(quality)
+{
+	// Set pricing based on quality
+	switch (quality)
+	{
+	case ShopQuality::POOR:
+	{
+		markupPercent = 110;
+		sellbackPercent = 50;
+		break;
+	}
+	case ShopQuality::AVERAGE:
+	{
+		markupPercent = 120;
+		sellbackPercent = 60;
+		break;
+	}
+	case ShopQuality::GOOD:
+	{
+		markupPercent = 130;
+		sellbackPercent = 70;
+		break;
+	}
+	case ShopQuality::EXCELLENT:
+	{
+		markupPercent = 150;
+		sellbackPercent = 80;
+		break;
+	}
+	}
+
+	generate_shop_name();
+	// Note: generate_initial_inventory(ctx) must be called separately after construction
+}
+
+int ShopKeeper::get_buy_price(const Item& item) const
+{
+	int base_price = item.get_value() > 0 ? item.get_value() : 10;
+	return (base_price * markupPercent) / 100;
+}
+
+int ShopKeeper::get_sell_price(const Item& item) const
+{
+	int base_price = item.get_value() > 0 ? item.get_value() : 10;
+	return (base_price * sellbackPercent) / 100;
+}
+
+void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
+{
+	shopInventory.items.clear();
+
+	// Generate 3-7 random items based on shop type
+	int item_count = ctx.dice->roll(3, 7);
+
+	for (int i = 0; i < item_count; i++)
+	{
+		std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel, ctx);
+		if (item)
+		{
+			assert(add_item(shopInventory, std::move(item)).has_value());
+		}
+	}
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_item_by_type(int dungeonLevel, GameContext& ctx)
+{
+	switch (shopType)
+	{
+	case ShopType::WEAPON_SHOP:
+	{
+		return generate_random_weapon(dungeonLevel, ctx);
+	}
+	case ShopType::ARMOR_SHOP:
+	{
+		return generate_random_armor(dungeonLevel, ctx);
+	}
+	case ShopType::POTION_SHOP:
+	{
+		return generate_random_potion(dungeonLevel, ctx);
+	}
+	case ShopType::SCROLL_SHOP:
+	{
+		return generate_random_scroll(dungeonLevel, ctx);
+	}
+	case ShopType::GENERAL_STORE:
+	{
+		switch (ctx.dice->roll(0, 3))
+		{
+		case 0:
+		{
+			return generate_random_weapon(dungeonLevel, ctx);
+		}
+		case 1:
+		{
+			return generate_random_armor(dungeonLevel, ctx);
+		}
+		case 2:
+		{
+			return generate_random_potion(dungeonLevel, ctx);
+		}
+		case 3:
+		{
+			return generate_random_scroll(dungeonLevel, ctx);
+		}
+		}
+		break;
+	}
+	default:
+	{
+		return generate_random_misc_item(dungeonLevel, ctx);
+	}
+	}
+	return nullptr;
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameContext& ctx)
+{
+	auto item = ItemCreator::create_random_of_category("weapon", { 0, 0 }, ctx, dungeonLevel);
+
+	if (item && ctx.dice->roll(1, 100) <= 40)
+	{
+		item->generate_random_enhancement(true);
+	}
+
+	return item;
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_armor(int dungeonLevel, GameContext& ctx)
+{
+	auto item = ItemCreator::create_random_of_category("armor", { 0, 0 }, ctx, dungeonLevel);
+
+	if (item && ctx.dice->roll(1, 100) <= 35)
+	{
+		item->generate_random_enhancement(true);
+	}
+
+	return item;
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_potion(int dungeonLevel, GameContext& ctx)
+{
+	return ItemCreator::create_random_of_category("potion", { 0, 0 }, ctx, dungeonLevel);
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_scroll(int dungeonLevel, GameContext& ctx)
+{
+	return ItemCreator::create_random_of_category("scroll", { 0, 0 }, ctx, dungeonLevel);
+}
+
+std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, GameContext& ctx)
+{
+	Vector2D shop_pos{ 0, 0 };
+
+	std::unique_ptr<Item> item;
+	const int category = ctx.dice->roll(0, 3);
+	switch (category)
+	{
+	case 0:
+	{
+		item = ItemCreator::create_random_of_category("weapon", shop_pos, ctx, dungeonLevel);
+		break;
+	}
+	case 1:
+	{
+		item = ItemCreator::create_random_of_category("armor", shop_pos, ctx, dungeonLevel);
+		break;
+	}
+	case 2:
+	{
+		item = ItemCreator::create_random_of_category("potion", shop_pos, ctx, dungeonLevel);
+		break;
+	}
+	case 3:
+	{
+		item = ItemCreator::create("food_ration", shop_pos, *ctx.contentRegistry);
+		break;
+	}
+	}
+
+	// Apply price variation (+-5)
+	item->set_value(std::max(1, item->get_value() + ctx.dice->roll(-5, 5)));
+
+	// 15% chance for enhancement (only for equipment)
+	if (item->is_weapon() || item->is_armor())
+	{
+		if (ctx.dice->roll(1, 100) <= 15)
+		{
+			item->generate_random_enhancement(false);
+		}
+	}
+
+	return item;
+}
+
+bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& player)
+{
+	int price = get_buy_price(item);
+
+	if (player.get_gold() < price)
+	{
+		ctx.messageSystem->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
+		return false;
+	}
+
+	if (is_inventory_full(player.inventoryData))
+	{
+		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
+		return false;
+	}
+
+	player.adjust_gold(-price);
+
+	auto player_item = std::make_unique<Item>(item.position, item.actorData);
+	player_item->set_value(item.get_value());
+	player_item->enhancement = item.enhancement;
+	player_item->itemClass = item.itemClass;
+
+	// Copy behavior (variant is value-copyable)
+	player_item->behavior = item.behavior;
+
+	assert(add_item(player.inventoryData, std::move(player_item)).has_value());
+
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->finalize_message();
+
+	return true;
+}
+
+bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& player)
+{
+	int price = get_sell_price(item);
+
+	player.adjust_gold(price);
+
+	auto removed_item = remove_item(player.inventoryData, item);
+	if (removed_item.has_value())
+	{
+		if (!is_inventory_full(shopInventory))
+		{
+			assert(add_item(shopInventory, std::move(*removed_item)).has_value());
+		}
+	}
+
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You sold ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
+	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
+	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->finalize_message();
+
+	return true;
+}
+
+void ShopKeeper::generate_shop_name()
+{
+	std::vector<std::string> weapon_names = {
+		"The Sharp Edge", "Blades & Bludgeons", "Steel & Iron", "The Armory", "Warrior's Arsenal", "The Forge", "Sword & Shield", "Battle Ready"
+	};
+
+	std::vector<std::string> armor_names = {
+		"Ironclad Armory", "Plate & Mail", "The Defender", "Armor & Protection", "Steel Defense", "Guardian's Gear", "The Shield Wall", "Heavy Metal"
+	};
+
+	std::vector<std::string> potion_names = {
+		"Mystic Brews", "The Alchemy Shop", "Bubbling Cauldron", "Elixir Emporium", "Potion Master", "The Brew House", "Magical Mixtures", "Liquid Magic"
+	};
+
+	std::vector<std::string> scroll_names = {
+		"Arcane Scrolls", "The Scriptorium", "Magical Manuscripts", "Spell Scrolls", "The Magic Word", "Enchanted Texts", "Scroll & Quill", "Ancient Writings"
+	};
+
+	std::vector<std::string> general_names = {
+		"General Store", "The Trading Post", "Odds & Ends", "Everything Shop", "The Merchant's Den", "All Things", "Trade & Barter", "The Bazaar"
+	};
+
+	switch (shopType)
+	{
+	case ShopType::WEAPON_SHOP:
+	{
+		shopName = weapon_names[rand() % weapon_names.size()];
+		break;
+	}
+	case ShopType::ARMOR_SHOP:
+	{
+		shopName = armor_names[rand() % armor_names.size()];
+		break;
+	}
+	case ShopType::POTION_SHOP:
+	{
+		shopName = potion_names[rand() % potion_names.size()];
+		break;
+	}
+	case ShopType::SCROLL_SHOP:
+	{
+		shopName = scroll_names[rand() % scroll_names.size()];
+		break;
+	}
+	case ShopType::GENERAL_STORE:
+	{
+		shopName = general_names[rand() % general_names.size()];
+		break;
+	}
+	default:
+	{
+		shopName = "Shop";
+		break;
+	}
+	}
+}
+
+// Static utility function for creating random shopkeepers
+std::unique_ptr<ShopKeeper> ShopKeeper::create_random_shopkeeper()
+{
+	// Random shop type selection with weighted probabilities
+	int typeRoll = rand() % 100;
+	ShopType randomType;
+
+	if (typeRoll < 25)
+	{
+		randomType = ShopType::WEAPON_SHOP; // 25% chance
+	}
+	else if (typeRoll < 45)
+	{
+		randomType = ShopType::ARMOR_SHOP; // 20% chance
+	}
+	else if (typeRoll < 65)
+	{
+		randomType = ShopType::POTION_SHOP; // 20% chance
+	}
+	else if (typeRoll < 80)
+	{
+		randomType = ShopType::SCROLL_SHOP; // 15% chance
+	}
+	else if (typeRoll < 90)
+	{
+		randomType = ShopType::GENERAL_STORE; // 10% chance
+	}
+	else
+	{
+		randomType = ShopType::ADVENTURING_GEAR; // 10% chance
+	}
+
+	// Random quality selection with weighted probabilities
+	int qualityRoll = rand() % 100;
+	ShopQuality randomQuality;
+
+	if (qualityRoll < 15)
+	{
+		randomQuality = ShopQuality::POOR; // 15% chance
+	}
+	else if (qualityRoll < 65)
+	{
+		randomQuality = ShopQuality::AVERAGE; // 50% chance
+	}
+	else if (qualityRoll < 90)
+	{
+		randomQuality = ShopQuality::GOOD; // 25% chance
+	}
+	else
+	{
+		randomQuality = ShopQuality::EXCELLENT; // 10% chance
+	}
+
+	return std::make_unique<ShopKeeper>(randomType, randomQuality);
+}
+
+void ShopKeeper::save(json& j)
+{
+	j["shop_type"] = static_cast<int>(shopType);
+	j["shop_quality"] = static_cast<int>(shopQuality);
+	j["shop_name"] = shopName;
+	j["markup_percent"] = markupPercent;
+	j["sellback_percent"] = sellbackPercent;
+
+	// Save shop inventory
+	json inventoryJson;
+	save_inventory(shopInventory, inventoryJson);
+	j["shop_inventory"] = inventoryJson;
+}
+
+void ShopKeeper::load(const json& j)
+{
+	shopType = static_cast<ShopType>(j.at("shop_type").get<int>());
+	shopQuality = static_cast<ShopQuality>(j.at("shop_quality").get<int>());
+	shopName = j.at("shop_name").get<std::string>();
+	markupPercent = j.at("markup_percent").get<int>();
+	sellbackPercent = j.at("sellback_percent").get<int>();
+
+	// Load shop inventory
+	if (j.contains("shop_inventory"))
+	{
+		shopInventory = FloorInventory(50);
+		load_inventory(shopInventory, j["shop_inventory"]);
+	}
+}
+
+std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& j)
+{
+	auto shopkeeper = std::make_unique<ShopKeeper>();
+	shopkeeper->load(j);
+	return shopkeeper;
+}

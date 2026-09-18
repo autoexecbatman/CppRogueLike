@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Actor/Creature.h"
-#include "src/Actor/MonsterAttacker.h"
-#include "src/Ai/AiMonster.h"
-#include "src/Combat/ExperienceReward.h"
+#include "src/Creature.h"
+#include "src/MonsterAttacker.h"
+#include "src/AiMonster.h"
+#include "src/ExperienceReward.h"
 
 using json = nlohmann::json;
 

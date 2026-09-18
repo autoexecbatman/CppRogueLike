@@ -1,13 +1,13 @@
 #pragma once
-#include "src/Actor/InventoryData.h"
-#include "src/Core/GameContext.h"
-#include "src/Core/Paths.h"
-#include "src/Random/RandomDice.h"
-#include "src/Systems/ContentRegistry.h"
-#include "src/Systems/CreatureManager.h"
-#include "src/Systems/MessageSystem.h"
-#include "src/Systems/BodyPlanRegistry.h"
-#include "src/Systems/TileConfig.h"
+#include "src/InventoryData.h"
+#include "src/GameContext.h"
+#include "src/Paths.h"
+#include "src/RandomDice.h"
+#include "src/ContentRegistry.h"
+#include "src/CreatureManager.h"
+#include "src/MessageSystem.h"
+#include "src/BodyPlanRegistry.h"
+#include "src/TileConfig.h"
 
 struct MockGameContext
 {

@@ -1,13 +1,13 @@
-#include "src/Actor/Actor.h"
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Systems/DataManager.h"
+#include "src/Actor.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/DataManager.h"
 #include "tests/mocks/MockGameContext.h"
-#include <Core/GameContext.h>
+#include "src/GameContext.h"
 #include <gtest/gtest.h>
 #include <memory>
-#include <Utils/Vector2D.h>
-#include "src/Combat/ExperienceReward.h"
+#include "src/Vector2D.h"
+#include "src/ExperienceReward.h"
 
 // ============================================================================
 // PLAYER VIRTUAL INTERFACE TESTS

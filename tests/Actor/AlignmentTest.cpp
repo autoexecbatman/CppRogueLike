@@ -5,10 +5,10 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
 
-#include "src/Actor/Alignment.h"
-#include "src/Actor/Creature.h"
-#include "src/Factories/MonsterCreator.h"
-#include "src/Utils/Vector2D.h"
+#include "src/Alignment.h"
+#include "src/Creature.h"
+#include "src/MonsterCreator.h"
+#include "src/Vector2D.h"
 
 class AlignmentTest : public ::testing::Test
 {

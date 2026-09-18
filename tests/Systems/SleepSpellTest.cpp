@@ -11,12 +11,12 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Map/Map.h"
-#include "src/Systems/BuffSystem.h"
-#include "src/Systems/SpellSystem.h"
+#include "src/Creature.h"
+#include "src/Player.h"
+#include "src/ExperienceReward.h"
+#include "src/Map.h"
+#include "src/BuffSystem.h"
+#include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
 class SleepSpellTest : public ::testing::Test

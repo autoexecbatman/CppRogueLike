@@ -15,12 +15,12 @@
 
 #include <array>
 
-#include "src/Actor/Pickable.h"
-#include "src/Items/ItemClassification.h"
-#include "src/Items/MagicalItemEffects.h"
-#include "src/Items/Weapons.h"
-#include "src/Systems/BuffType.h"
-#include "src/Systems/TargetMode.h"
+#include "src/Pickable.h"
+#include "src/ItemClassification.h"
+#include "src/MagicalItemEffects.h"
+#include "src/Weapons.h"
+#include "src/BuffType.h"
+#include "src/TargetMode.h"
 
 namespace
 {

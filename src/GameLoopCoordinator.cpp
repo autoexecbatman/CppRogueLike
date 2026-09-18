@@ -1,0 +1,539 @@
+// file: Systems/GameLoopCoordinator.cpp
+#include <cassert>
+#include <cmath>
+#include <format>
+#include <string>
+#include <vector>
+
+#include <raylib.h>
+
+#include "Actor.h"
+#include "Creature.h"
+#include "Colors.h"
+#include "GameContext.h"
+#include "Paths.h"
+#include "Gui.h"
+#include "Map.h"
+#include "Minimap.h"
+#include "DeathMenu.h"
+#include "NotificationMenu.h"
+#include "InputSystem.h"
+#include "Renderer.h"
+#include "InputHandler.h"
+#include "MenuManager.h"
+#include "MessageSystem.h"
+#include "RenderingManager.h"
+#include "ContentEditor.h"
+#include "DecorEditor.h"
+#include "Vector2D.h"
+#include "AnimationSystem.h"
+#include "CreatureManager.h"
+#include "CurseSystem.h"
+#include "FloatingTextSystem.h"
+#include "HungerSystem.h"
+#include "LevelManager.h"
+#include "GameLoopCoordinator.h"
+#include "TileFeature.h"
+#include "TileConfig.h"
+#include "Player.h"
+#include "SpellTile.h"
+#include "Trap.h"
+
+// One pass of the game loop. The game is already initialised by the time this
+// runs: MenuName calls init_new_game once the blueprint is complete, and
+// load_all sets the initialised flag itself.
+void GameLoopCoordinator::handle_gameloop(GameContext& ctx, Gui& gui, int loopNum)
+{
+	if (ctx.messageSystem->is_debug_mode())
+	{
+		ctx.messageSystem->log("//====================LOOP====================//");
+		ctx.messageSystem->log(std::format("Loop number: {}\n", loopNum));
+	}
+
+	handle_input_phase(ctx);
+
+	if (ctx.inputHandler->was_resized())
+	{
+		ctx.inputHandler->clear_resize();
+		ctx.renderer->update_viewport();
+		ctx.map->compute_fov(ctx);
+
+		if (ctx.gui->guiInit)
+		{
+			ctx.gui->gui_shutdown();
+		}
+		ctx.gui->gui_init();
+		ctx.gui->guiInit = true;
+		ctx.gui->gui_update(ctx);
+
+		ctx.gameState->set_game_status(GameStatus::IDLE);
+	}
+
+	// Update game state only when player provides input and editor is not open
+#ifndef __EMSCRIPTEN__
+	const bool editor_active = (ctx.decorEditor && ctx.decorEditor->is_active()) ||
+		(ctx.contentEditor && ctx.contentEditor->is_active());
+#else
+	const bool editor_active = false;
+#endif
+	// Path pacing: allow one update step every 0.12 s while auto-walking.
+	// Keyboard input always bypasses the rate-limit (is_animation_tick() is false).
+	bool has_mouse_path = ctx.mousePathOverlay && !ctx.mousePathOverlay->empty();
+	bool pathStepReady = false;
+	if (has_mouse_path)
+	{
+		double now = GetTime();
+		if (now - mousePathStepTime >= 0.12)
+		{
+			pathStepReady = true;
+			mousePathStepTime = now;
+		}
+	}
+	if (!editor_active && (!ctx.inputHandler->is_animation_tick() || pathStepReady))
+	{
+		handle_update_phase(ctx, gui);
+	}
+
+	// Always render every frame
+	handle_render_phase(ctx, gui);
+	handle_menu_check(ctx);
+}
+
+void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
+{
+	ctx.inputHandler->reset_key();
+	if (ctx.menuManager->should_take_input())
+	{
+		ctx.inputSystem->poll();
+
+		auto handle_zoom = [&]() -> bool
+		{
+			GameKey key = ctx.inputSystem->get_key();
+
+			if (key == GameKey::MINIMAP_TOGGLE && ctx.minimap)
+			{
+				ctx.minimap->toggle();
+				return true;
+			}
+			if (key == GameKey::ZOOM_IN)
+			{
+				ctx.renderer->zoom_in();
+				ctx.map->compute_fov(ctx);
+				return true;
+			}
+			if (key == GameKey::ZOOM_OUT)
+			{
+				ctx.renderer->zoom_out();
+				ctx.map->compute_fov(ctx);
+				return true;
+			}
+#ifndef __EMSCRIPTEN__
+			if (key == GameKey::DECOR_EDIT_TOGGLE && ctx.decorEditor)
+			{
+				ctx.decorEditor->toggle();
+				return true;
+			}
+			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.contentEditor)
+			{
+				ctx.contentEditor->toggle(*ctx.contentRegistry);
+				return true;
+			}
+			if (ctx.decorEditor && ctx.decorEditor->is_active())
+			{
+				if (key == GameKey::DECOR_PREV)
+				{
+					ctx.decorEditor->cycle_prev();
+					return true;
+				}
+				if (key == GameKey::DECOR_NEXT)
+				{
+					ctx.decorEditor->cycle_next();
+					return true;
+				}
+				if (key == GameKey::DECOR_SAVE)
+				{
+					ctx.decorEditor->save_palette(Paths::TILE_CONFIG);
+					return true;
+				}
+				// Handle placement -- blocked while sheet browser is open
+				if (!ctx.decorEditor->is_browser_open() && (key == GameKey::MOUSE_LEFT || key == GameKey::MOUSE_RIGHT))
+				{
+					Vector2D world = ctx.inputSystem->get_mouse_world_tile(
+						ctx.renderer->get_camera_x(),
+						ctx.renderer->get_camera_y(),
+						ctx.renderer->get_tile_size());
+					if (key == GameKey::MOUSE_LEFT)
+					{
+						ctx.decorEditor->place(world);
+					}
+					else
+					{
+						ctx.decorEditor->erase(world);
+					}
+					return true;
+				}
+			}
+#endif
+			return false;
+		};
+
+#ifndef __EMSCRIPTEN__
+		// Editor active: consume all input -- game gets nothing.
+		if (ctx.contentEditor && ctx.contentEditor->is_active())
+		{
+			handle_zoom();
+			ctx.menuManager->set_should_take_input(true);
+			return;
+		}
+
+		if (ctx.decorEditor && ctx.decorEditor->is_active())
+		{
+			handle_zoom();
+			ctx.decorEditor->set_char_input(ctx.inputSystem->get_char_input());
+			ctx.menuManager->set_should_take_input(true);
+			return;
+		}
+#endif
+
+		if (!handle_zoom())
+		{
+			ctx.inputHandler->key_store();
+			ctx.inputHandler->key_listen(*ctx.inputSystem);
+		}
+	}
+	ctx.menuManager->set_should_take_input(true);
+}
+
+void GameLoopCoordinator::handle_update_phase(GameContext& ctx, Gui& gui)
+{
+	ctx.messageSystem->log("Running update...");
+	ctx.gameLoopCoordinator->update(ctx);
+	gui.gui_update(ctx);
+	ctx.messageSystem->log("Update OK.");
+}
+
+void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
+{
+	ctx.messageSystem->log("Running render...");
+
+	// Center camera on player before rendering
+	ctx.renderer->set_camera_center(
+		ctx.player()->position.x,
+		ctx.player()->position.y,
+		ctx.map->get_width(),
+		ctx.map->get_height());
+
+	ctx.renderer->begin_frame();
+
+	ctx.renderingManager->render(ctx);
+
+	if (ctx.animSystem)
+	{
+		ctx.animSystem->update_and_render(*ctx.renderer);
+	}
+
+	if (ctx.floatingText)
+	{
+		ctx.floatingText->update_and_render(*ctx.renderer);
+	}
+
+#ifndef __EMSCRIPTEN__
+	if (ctx.decorEditor)
+	{
+		ctx.decorEditor->update_and_render(*ctx.renderer);
+	}
+
+	if (ctx.contentEditor)
+	{
+		ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry);
+	}
+#endif
+
+	if (gui.guiInit)
+	{
+		gui.gui_render(ctx);
+	}
+
+	draw_hover_tooltip(ctx);
+
+	ctx.renderer->end_frame();
+	ctx.messageSystem->log("Render OK.");
+}
+
+void GameLoopCoordinator::handle_menu_check(GameContext& ctx)
+{
+	if (ctx.menuManager->has_active_menus(*ctx.menus))
+	{
+		ctx.gameState->set_window_state(WindowState::MENU);
+		return;
+	}
+}
+
+void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
+{
+	if (!ctx.renderer || !ctx.inputSystem || !ctx.map)
+	{
+		return;
+	}
+
+	int tileSize = ctx.renderer->get_tile_size();
+	if (tileSize <= 0)
+	{
+		return;
+	}
+
+	int cam_x = ctx.renderer->get_camera_x();
+	int cam_y = ctx.renderer->get_camera_y();
+
+	// Correct world tile: combined division avoids split-integer rounding error
+	// when cam_x is not tile-aligned (odd viewportCols on web).
+	Vector2D world_tile = ctx.inputSystem->get_mouse_world_tile(cam_x, cam_y, tileSize);
+
+	// Screen pixel position — same formula as tile rendering so the square
+	// tracks the actual rendered tile regardless of camera alignment.
+	int tx = world_tile.x * tileSize - cam_x;
+	int ty = world_tile.y * tileSize - cam_y;
+
+	// Ignore cursor over the GUI panel rows at the bottom
+	int map_rows = ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows();
+
+	if (tx < 0 || ty < 0)
+	{
+		return;
+	}
+	if (ty / tileSize >= map_rows)
+	{
+		return;
+	}
+	if (tx / tileSize >= ctx.renderer->get_viewport_cols())
+	{
+		return;
+	}
+
+	if (!ctx.map->is_in_bounds(world_tile))
+	{
+		return;
+	}
+	if (!ctx.map->is_explored(world_tile))
+	{
+		return;
+	}
+
+	bool in_fov = ctx.map->is_in_fov(world_tile);
+
+	// Build description; pick highlight tint based on content
+	std::string desc;
+	desc = ctx.tileConfig->get_tile_definition(ctx.map->get_tile_type(world_tile)).displayName;
+
+	// Tint: cyan (terrain), amber (creature), pale green (item)
+	unsigned char hr = 0, hg = 220, hb = 255;
+
+	if (in_fov)
+	{
+		Creature* actor = ctx.map->get_actor(world_tile, ctx);
+		if (actor)
+		{
+			desc = actor->actorData.name;
+			hr = 255;
+			hg = 180;
+			hb = 0; // amber
+		}
+		assert(std::ranges::none_of(ctx.floorInventory->items, [](const auto& i) { return !i; }));
+		for (const auto& item : ctx.floorInventory->items)
+		{
+			if (item->position == world_tile)
+			{
+				desc += " [" + item->actorData.name + "]";
+				if (!actor)
+				{
+					hr = 100;
+					hg = 255;
+					hb = 120;
+				} // pale green
+				break;
+			}
+		}
+	}
+
+	// Pulse: 3 Hz sine, range [0, 1]
+	float pulse = (std::sin(static_cast<float>(GetTime()) * 6.28318f * 3.0f) + 1.0f) * 0.5f;
+
+	float tx_f = static_cast<float>(tx);
+	float ty_f = static_cast<float>(ty);
+	float ts_f = static_cast<float>(tileSize);
+
+	// Inner fill: very subtle tint
+	unsigned char fill_a = static_cast<unsigned char>(10 + static_cast<int>(15.0f * pulse));
+	DrawRectangle(tx, ty, tileSize, tileSize, Color{ hr, hg, hb, fill_a });
+
+	// Full perimeter: thin line, pulsing alpha
+	unsigned char border_a = static_cast<unsigned char>(70 + static_cast<int>(80.0f * pulse));
+	DrawRectangleLinesEx(Rectangle{ tx_f, ty_f, ts_f, ts_f }, 1.0f, Color{ hr, hg, hb, border_a });
+
+	// Corner L-accents: bright, 2 px thick, clen px long
+	int clen = tileSize / 4;
+	int clw = 2;
+	unsigned char corner_a = static_cast<unsigned char>(160 + static_cast<int>(95.0f * pulse));
+	Color cc = Color{ hr, hg, hb, corner_a };
+
+	// Top-left
+	DrawRectangle(tx, ty, clen, clw, cc);
+	DrawRectangle(tx, ty, clw, clen, cc);
+	// Top-right
+	DrawRectangle(tx + tileSize - clen, ty, clen, clw, cc);
+	DrawRectangle(tx + tileSize - clw, ty, clw, clen, cc);
+	// Bottom-left
+	DrawRectangle(tx, ty + tileSize - clw, clen, clw, cc);
+	DrawRectangle(tx, ty + tileSize - clen, clw, clen, cc);
+	// Bottom-right
+	DrawRectangle(tx + tileSize - clen, ty + tileSize - clw, clen, clw, cc);
+	DrawRectangle(tx + tileSize - clw, ty + tileSize - clen, clw, clen, cc);
+
+	// Tooltip box below (or above if near bottom)
+	int font_off = (tileSize - ctx.renderer->get_font_size()) / 2;
+	int text_w = ctx.renderer->measure_text(desc);
+	int pad = tileSize / 4;
+	int box_w = text_w + pad * 2;
+	int box_h = tileSize;
+	int tip_px = tx;
+	int tip_py = ty + tileSize;
+
+	if (tip_px + box_w > ctx.renderer->get_screen_width())
+	{
+		tip_px = ctx.renderer->get_screen_width() - box_w;
+	}
+
+	if (tip_py + box_h > ctx.renderer->get_screen_height())
+	{
+		tip_py = ty - box_h;
+	}
+
+	// Dark background + matching accent border on tooltip
+	DrawRectangle(tip_px, tip_py, box_w, box_h, Color{ 8, 8, 16, 220 });
+	DrawRectangleLinesEx(
+		Rectangle{
+			static_cast<float>(tip_px), static_cast<float>(tip_py), static_cast<float>(box_w), static_cast<float>(box_h) },
+		1.0f,
+		Color{ hr, hg, hb, 180 });
+	ctx.renderer->draw_text(Vector2D{ tip_px + pad, tip_py + font_off }, desc, WHITE_BLACK_PAIR);
+}
+
+void GameLoopCoordinator::update(GameContext& ctx)
+{
+	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
+	{
+		auto victoryMenu = std::make_unique<NotificationMenu>(
+			"Victory!",
+			std::vector<std::string>{
+				"Congratulations, brave adventurer!",
+				"You have retrieved the Amulet of Yendor",
+				"and escaped the dungeon alive.",
+				"",
+				"Your legend will be remembered."
+			},
+			ctx);
+		victoryMenu->set_on_close([](GameContext& c)
+		{
+			c.gameState->set_run(false);
+		});
+		ctx.menus->push_back(std::move(victoryMenu));
+		ctx.gameState->set_game_status(GameStatus::IDLE);
+	}
+
+	ctx.map->update();
+	ctx.player()->update(ctx);
+
+	if (ctx.gameState->get_game_status() == GameStatus::STARTUP)
+	{
+#ifndef __EMSCRIPTEN__
+		// Ensure active map key is set for loaded games (new games set it in Map::init).
+		if (ctx.decorEditor && ctx.map && ctx.levelManager)
+		{
+			ctx.decorEditor->set_active_map(
+				ctx.map->get_seed(),
+				ctx.levelManager->get_dungeon_level());
+		}
+#endif
+
+		ctx.map->compute_fov(ctx);
+		ctx.map->update(); // stamp explored for the freshly-computed FOV so minimap is correct this frame
+		if (ctx.levelManager->get_dungeon_level() == 1 && !ctx.gameState->get_is_loaded_game())
+		{
+			ctx.player_concrete().on_new_game_start(ctx);
+		}
+		bool wasLoadedGame = ctx.gameState->get_is_loaded_game();
+		ctx.gameState->set_is_loaded_game(false);
+		ctx.player_concrete().recalculate_combat_stats();
+
+		if (wasLoadedGame)
+		{
+			ctx.gameState->set_game_status(GameStatus::IDLE);
+		}
+		else
+		{
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		}
+
+		if (!ctx.gui->guiInit)
+		{
+			ctx.gui->gui_init();
+			ctx.gui->guiInit = true;
+			ctx.gui->gui_update(ctx);
+		}
+	}
+
+	if (ctx.gameState->get_game_status() == GameStatus::NEW_TURN)
+	{
+		// Both floor containers are swept the same way: a feature may destroy
+		// itself from inside on_creature_enter, so it stays owned until here.
+		const auto is_spent = [](const auto& feature) { return feature->is_destroyed(); };
+		std::erase_if(*ctx.traps, is_spent);
+		std::erase_if(*ctx.spellTiles, is_spent);
+
+		if (ctx.decorations)
+		{
+			std::erase_if(*ctx.decorations,
+				[](const auto& d)
+				{ return !d || d->isBroken; });
+		}
+
+		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
+		ctx.creatureManager->spawn_creatures(ctx);
+
+		for (const auto& creature : *ctx.creatures)
+		{
+			if (creature)
+			{
+				creature->update_constitution_bonus(ctx);
+			}
+		}
+
+		if (ctx.player())
+		{
+			ctx.player()->update_constitution_bonus(ctx);
+		}
+
+		ctx.hungerSystem->increase_hunger(ctx, 1);
+		ctx.hungerSystem->apply_hunger_effects(ctx);
+
+		if (ctx.player() && ctx.curseSystem)
+		{
+			ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
+		}
+
+		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+
+		ctx.gameState->increment_time();
+		if (ctx.gameState->get_game_status() != GameStatus::DEFEAT)
+		{
+			ctx.gameState->set_game_status(GameStatus::IDLE);
+		}
+	}
+
+	if (ctx.gameState->get_game_status() == GameStatus::DEFEAT)
+	{
+		ctx.messageSystem->log("Player is dead!");
+		ctx.menus->push_back(std::make_unique<DeathMenu>(ctx));
+		ctx.gameState->set_game_status(GameStatus::IDLE);
+	}
+}

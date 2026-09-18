@@ -10,7 +10,7 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Map/Map.h"
+#include "src/Map.h"
 #include "tests/mocks/MockGameContext.h"
 
 class DescribeTileTest : public ::testing::Test

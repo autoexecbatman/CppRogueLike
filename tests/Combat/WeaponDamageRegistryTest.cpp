@@ -2,8 +2,8 @@
 #include <chrono>
 #include <string>
 #include <vector>
-#include "src/Combat/WeaponDamageRegistry.h"
-#include "src/Combat/DamageInfo.h"
+#include "src/WeaponDamageRegistry.h"
+#include "src/DamageInfo.h"
 
 // ============================================================================
 // WEAPON DAMAGE REGISTRY TESTS

@@ -12,7 +12,7 @@
 #include <array>
 #include <string_view>
 
-#include "src/Systems/BuffType.h"
+#include "src/BuffType.h"
 
 namespace
 {

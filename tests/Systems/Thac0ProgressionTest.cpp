@@ -11,8 +11,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/CreatureClass.h"
-#include "src/Systems/LevelUpSystem.h"
+#include "src/CreatureClass.h"
+#include "src/LevelUpSystem.h"
 
 // A warrior starts at 20 and gains a point of it every level.
 TEST(Thac0ProgressionTest, FighterImprovesEveryLevel)

@@ -4,8 +4,8 @@
 // Every alternative in ItemBehavior is exercised here.
 #include <gtest/gtest.h>
 
-#include "src/Actor/Pickable.h"
-#include "src/Items/MagicalItemEffects.h"
+#include "src/Pickable.h"
+#include "src/MagicalItemEffects.h"
 
 // ============================================================================
 // AC-granting types -- must return correct non-zero values

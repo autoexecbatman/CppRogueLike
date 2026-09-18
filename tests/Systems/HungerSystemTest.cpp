@@ -21,8 +21,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Core/GameContext.h"
-#include "src/Systems/HungerSystem.h"
+#include "src/GameContext.h"
+#include "src/HungerSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
 class HungerSystemTest : public ::testing::Test

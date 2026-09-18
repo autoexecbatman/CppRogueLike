@@ -8,43 +8,43 @@
   ],
   "mutations": [
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\t{ 2, { 14, 16, 15, 17, 17 } },",
       "mutated": "\t{ 2, { 14, 16, 15, 17, 16 } },",
       "catches": "one target of the warrior row misread from the table"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\t\treturn priestRows;",
       "mutated": "\t\treturn wizardRows;",
       "catches": "a priest saving on the wizard rows"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\tcase CreatureClass::FIGHTER:\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn warriorRows;",
       "mutated": "\tcase CreatureClass::FIGHTER:\n\t{\n\t\treturn warriorRows;\n\t}\n\n\tcase CreatureClass::MONSTER:\n\t{\n\t\treturn rogueRows;",
       "catches": "a monster falling off the warrior rows it shares"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\t\tif (level <= row.lastLevel)",
       "mutated": "\t\tif (level < row.lastLevel)",
       "catches": "the last level of every band pushed onto the next row"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\treturn &row_at(creatureClass, level) != &row_at(creatureClass, level - 1);",
       "mutated": "\treturn &row_at(creatureClass, level) != &row_at(creatureClass, level);",
       "catches": "no level ever improving the save"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\treturn ctx.dice->d20() + modifier >= needed;",
       "mutated": "\treturn ctx.dice->d20() + modifier > needed;",
       "catches": "a roll of exactly the target failing"
     },
     {
-      "file": "src/Combat/SavingThrow.cpp",
+      "file": "src/SavingThrow.cpp",
       "original": "\treturn ctx.dice->d20() + modifier >= needed;",
       "mutated": "\treturn ctx.dice->d20() >= needed;",
       "catches": "the ring's bonus dropped from the save"

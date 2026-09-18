@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/ActorTypes/Player.h"
-#include "src/Actor/PlayerAttacker.h"
-#include "src/Ai/PlayerController.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Systems/ContentRegistry.h"
+#include "src/Player.h"
+#include "src/PlayerAttacker.h"
+#include "src/PlayerController.h"
+#include "src/ExperienceReward.h"
+#include "src/ItemCreator.h"
+#include "src/ContentRegistry.h"
 
 using json = nlohmann::json;
 

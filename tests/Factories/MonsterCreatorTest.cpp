@@ -1,8 +1,8 @@
-#include "src/Factories/MonsterCreator.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
+#include "src/MonsterCreator.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
 #include <stdexcept>
-#include "src/Actor/Creature.h"
+#include "src/Creature.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 

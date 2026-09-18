@@ -21,8 +21,8 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemFactoryReloadTest.*
 
-#include "src/Factories/ItemCreator.h"
-#include "src/Factories/ItemFactory.h"
+#include "src/ItemCreator.h"
+#include "src/ItemFactory.h"
 #include <gtest/gtest.h>
 
 #include <string>

@@ -11,8 +11,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/CreatureClass.h"
-#include "src/Systems/LevelUpSystem.h"
+#include "src/CreatureClass.h"
+#include "src/LevelUpSystem.h"
 
 // Warriors roll through 9th and gain 3 a level after.
 TEST(HitPointProgressionTest, FighterMatchesTableFourteen)
@@ -77,8 +77,8 @@ TEST(HitPointProgressionTest, EveryClassStopsRollingAndStillGains)
 // The table above is only worth having if the level-up path reads it. These
 // drive the public entry point, LevelUpSystem::apply_level_up_benefits.
 
-#include "src/Actor/Creature.h"
-#include "src/Combat/ExperienceReward.h"
+#include "src/Creature.h"
+#include "src/ExperienceReward.h"
 #include "tests/mocks/MockGameContext.h"
 
 class HitPointGainTest : public ::testing::Test

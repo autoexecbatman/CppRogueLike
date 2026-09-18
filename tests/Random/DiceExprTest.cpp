@@ -12,8 +12,8 @@
 
 #include <stdexcept>
 
-#include "src/Random/DiceExpr.h"
-#include "src/Random/RandomDice.h"
+#include "src/DiceExpr.h"
+#include "src/RandomDice.h"
 
 TEST(DiceExprTest, ReadsCountSidesAndAPositiveBonus)
 {

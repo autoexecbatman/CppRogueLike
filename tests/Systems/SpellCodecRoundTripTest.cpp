@@ -21,7 +21,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SpellCodecRoundTripTest.*
 
-#include "src/Systems/SpellSystem.h"
+#include "src/SpellSystem.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>

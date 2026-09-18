@@ -5,8 +5,8 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/Utils/Vector2D.h"
+#include "src/Creature.h"
+#include "src/Vector2D.h"
 
 class AttitudeTest : public ::testing::Test
 {

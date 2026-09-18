@@ -8,31 +8,31 @@
   ],
   "mutations": [
     {
-      "file": "src/Systems/LevelUpSystem.cpp",
+      "file": "src/LevelUpSystem.cpp",
       "original": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level - 1);",
       "mutated": "return thac0_for_level(creatureClass, level) <= thac0_for_level(creatureClass, level - 1);",
       "catches": "a level the table does not move on reported as an improvement"
     },
     {
-      "file": "src/Systems/LevelUpSystem.cpp",
+      "file": "src/LevelUpSystem.cpp",
       "original": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level - 1);",
       "mutated": "return thac0_for_level(creatureClass, level) < thac0_for_level(creatureClass, level);",
       "catches": "an improvement compared against its own level, so no level ever improves"
     },
     {
-      "file": "src/Systems/LevelUpSystem.cpp",
+      "file": "src/LevelUpSystem.cpp",
       "original": "        return combatTables.get_rogue(level);",
       "mutated": "        return combatTables.get_fighter(level);",
       "catches": "a rogue reading the warrior table, which moves every level instead of every second"
     },
     {
-      "file": "src/Systems/LevelUpSystem.cpp",
+      "file": "src/LevelUpSystem.cpp",
       "original": "        return combatTables.get_wizard(level);",
       "mutated": "        return combatTables.get_cleric(level);",
       "catches": "a wizard reading the priest table, which drops two points where the wizard drops one"
     },
     {
-      "file": "src/Systems/LevelUpSystem.cpp",
+      "file": "src/LevelUpSystem.cpp",
       "original": "    case CreatureClass::FIGHTER:\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_fighter(level);\n    }",
       "mutated": "    case CreatureClass::FIGHTER:\n    {\n        return combatTables.get_fighter(level);\n    }\n\n    case CreatureClass::MONSTER:\n    {\n        return combatTables.get_cleric(level);\n    }",
       "catches": "a monster falling off the warrior table it is meant to share"

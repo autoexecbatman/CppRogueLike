@@ -9,8 +9,8 @@
 
 #include <gtest/gtest.h>
 
-#include "../../src/ActorTypes/Player.h"
-#include "../../src/Core/GameContext.h"
+#include "../../src/Player.h"
+#include "../../src/GameContext.h"
 #include "../../src/Game.h"
 
 namespace

@@ -10,12 +10,12 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/Player.h"
+#include "src/ExperienceReward.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
 #include "tests/mocks/MockGameContext.h"
 
 class RangedWeaponTest : public ::testing::Test

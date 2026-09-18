@@ -13,12 +13,12 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Item.h"
-#include "src/Core/GameContext.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Systems/LevelManager.h"
-#include "src/Systems/ShopKeeper.h"
+#include "src/Item.h"
+#include "src/GameContext.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
+#include "src/LevelManager.h"
+#include "src/ShopKeeper.h"
 #include "tests/mocks/MockGameContext.h"
 
 class ShopStockLevelTest : public ::testing::Test

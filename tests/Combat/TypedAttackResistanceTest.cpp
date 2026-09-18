@@ -17,16 +17,16 @@
 
 #include <gtest/gtest.h>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
-#include "src/Actor/MonsterAttacker.h"
-#include "src/ActorTypes/Player.h"
-#include "src/Combat/AttackKind.h"
-#include "src/Combat/DamageInfo.h"
-#include "src/Combat/ExperienceReward.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/MonsterAttacker.h"
+#include "src/Player.h"
+#include "src/AttackKind.h"
+#include "src/DamageInfo.h"
+#include "src/ExperienceReward.h"
 #include "src/Game.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
 
 class TypedAttackResistanceTest : public ::testing::Test
 {

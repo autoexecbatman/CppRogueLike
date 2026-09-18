@@ -26,7 +26,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemRoundTripTest.*
 
-#include "src/Factories/ItemCreator.h"
+#include "src/ItemCreator.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>

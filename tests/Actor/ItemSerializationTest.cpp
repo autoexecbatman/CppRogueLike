@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Actor/Item.h"
-#include "src/Actor/Pickable.h"
-#include "src/Systems/ItemEnhancements/ItemEnhancements.h"
-#include "src/Factories/ItemCreator.h"
+#include "src/Item.h"
+#include "src/Pickable.h"
+#include "src/ItemEnhancements.h"
+#include "src/ItemCreator.h"
 
 using json = nlohmann::json;
 

@@ -42,15 +42,15 @@
 #include <string>
 #include <string_view>
 
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
-#include "src/Actor/Item.h"
-#include "src/Colors/Colors.h"
-#include "src/Combat/ExperienceReward.h"
-#include "src/Core/Paths.h"
-#include "src/Factories/ItemCreator.h"
-#include "src/Factories/MonsterCreator.h"
-#include "src/Systems/Shopkeepers/ShopkeeperFactory.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/Item.h"
+#include "src/Colors.h"
+#include "src/ExperienceReward.h"
+#include "src/Paths.h"
+#include "src/ItemCreator.h"
+#include "src/MonsterCreator.h"
+#include "src/ShopkeeperFactory.h"
 #include "tests/mocks/MockGameContext.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so

@@ -1,0 +1,346 @@
+// file: PrefabLibrary.cpp
+#include <algorithm>
+#include <format>
+#include <fstream>
+#include <iostream>
+#include <optional>
+#include <string>
+#include <unordered_map>
+#include <vector>
+
+#include <nlohmann/json.hpp>
+
+#include "DungeonRoom.h"
+#include "Map.h"
+#include "Renderer.h"
+#include "DecorEditor.h"
+#include "PrefabLibrary.h"
+
+using json = nlohmann::json;
+
+// ---------------------------------------------------------------------------
+// Symbol map
+// ---------------------------------------------------------------------------
+
+void PrefabLibrary::register_symbol(char sym, TileRef tile, std::string_view label)
+{
+	symbolToTile[sym] = tile;
+	symbolToLabel[sym] = std::string(label);
+	paletteOrder.push_back(PaletteEntry{ sym, std::string(label) });
+}
+
+void PrefabLibrary::build_structural_symbols()
+{
+	symbolToTile.clear();
+	symbolToLabel.clear();
+	paletteOrder.clear();
+
+	// Structural markers -- no decoration sprite
+	register_symbol('#', TileRef{}, "Wall");
+	register_symbol('.', TileRef{}, "Floor");
+	register_symbol(',', TileRef{}, "Corridor");
+	register_symbol('+', TileRef{}, "Door");
+	register_symbol('~', TileRef{}, "Water");
+}
+
+// Rebuild the symbol map from tile_labels.json.
+// Call this before load() so prefab symbols resolve correctly.
+void PrefabLibrary::load_tile_labels(std::string_view path)
+{
+	build_structural_symbols();
+
+	std::ifstream in(path.data());
+	if (!in.is_open())
+		return;
+
+	json j;
+	try
+	{
+		in >> j;
+
+		if (!j.contains("palette"))
+		{
+			return;
+		}
+
+		for (const auto& e : j["palette"])
+		{
+			std::string symbolString = e.value("symbol", "");
+
+			if (symbolString.empty())
+			{
+				continue;
+			}
+
+			char sym = symbolString[0];
+			TileRef tile{
+				static_cast<TileSheet>(e.value("sheet", 0)),
+				e.value("col", -1),
+				e.value("row", -1)
+			};
+			std::string label = e.value("label", symbolString);
+
+			register_symbol(sym, tile, label);
+		}
+	}
+	catch (const json::exception& e)
+	{
+		std::clog << std::format("[PrefabLibrary] tile_config.json error: {}\n", e.what());
+	}
+}
+
+// ---------------------------------------------------------------------------
+// Public interface
+// ---------------------------------------------------------------------------
+
+// Returns decoration TileRef for symbol; invalid TileRef for structural symbols (wall/floor/corridor/door/water).
+TileRef PrefabLibrary::resolve_decor(char symbol) const
+{
+	return symbolToTile.contains(symbol) ? symbolToTile.at(symbol) : TileRef{};
+}
+
+// Returns true if symbol maps to a decoration (has a sprite to overlay).
+bool PrefabLibrary::is_decoration(char symbol) const
+{
+	return resolve_decor(symbol).is_valid();
+}
+
+// Human-readable label for a symbol.
+std::string PrefabLibrary::symbol_label(char symbol) const
+{
+	return symbolToLabel.contains(symbol) ? symbolToLabel.at(symbol) : std::string(1, symbol);
+}
+
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
+
+void PrefabLibrary::load(std::string_view path)
+{
+	std::ifstream in(path.data());
+	
+	if (!in.is_open())
+	{
+		return;
+	}
+
+	json j;
+	try
+	{
+		in >> j;
+
+		if (!j.contains("prefabs"))
+		{
+			return;
+		}
+
+		prefabs.clear();
+		for (const auto& entry : j["prefabs"])
+		{
+			Prefab p;
+			p.name = entry.value("name", "unnamed");
+			p.depthMin = entry.value("depth_min", 1);
+			p.depthMax = entry.value("depth_max", 99);
+			p.weight = entry.value("weight", 1.0f);
+
+			if (entry.contains("rows"))
+			{
+				for (const auto& row : entry["rows"])
+				{
+					p.rows.push_back(row.get<std::string>());
+				}
+			}
+
+			if (!p.rows.empty())
+			{
+				prefabs.push_back(std::move(p));
+			}
+		}
+	}
+	catch (const json::exception& e)
+	{
+		std::clog << std::format("[PrefabLibrary] prefabs.json error, clearing: {}\n", e.what());
+		prefabs.clear();
+	}
+}
+
+void PrefabLibrary::save(std::string_view path) const
+{
+	json j;
+	json arr = json::array();
+	for (const auto& p : prefabs)
+	{
+		json entry;
+		entry["name"] = p.name;
+		entry["depth_min"] = p.depthMin;
+		entry["depth_max"] = p.depthMax;
+		entry["weight"] = p.weight;
+		entry["rows"] = p.rows;
+		arr.push_back(entry);
+	}
+	j["prefabs"] = arr;
+
+	std::ofstream out(path.data());
+	out << j.dump(2);
+}
+
+// Overwrite the tile sprite assigned to a symbol in the map.
+void PrefabLibrary::set_symbol_tile(char sym, TileRef tile)
+{
+	symbolToTile[sym] = tile;
+}
+
+// Overwrite the display label for a symbol.
+void PrefabLibrary::set_symbol_label(char sym, const std::string& label)
+{
+	symbolToLabel[sym] = label;
+	auto matches_symbol = [sym](const PaletteEntry& e)
+	{
+		return e.symbol == sym;
+	};
+	auto matches = paletteOrder | std::views::filter(matches_symbol);
+	if (!matches.empty())
+	{
+		matches.front().label = label;
+	}
+}
+
+void PrefabLibrary::add_or_replace(Prefab p)
+{
+	auto has_same_name = [&p](const Prefab& existing)
+	{
+		return existing.name == p.name;
+	};
+	auto matches = prefabs | std::views::filter(has_same_name);
+	if (matches.empty())
+	{
+		prefabs.push_back(std::move(p));
+	}
+	else
+	{
+		matches.front() = std::move(p);
+	}
+}
+
+void PrefabLibrary::remove(const std::string& name)
+{
+	std::erase_if(prefabs, [&](const Prefab& p)
+		{ return p.name == name; });
+}
+
+// ---------------------------------------------------------------------------
+// Apply to rooms
+// ---------------------------------------------------------------------------
+
+namespace
+{
+// Resolves prefab name to index. Returns nullopt if not found.
+std::optional<size_t> find_prefab_index(
+	const std::vector<Prefab>& prefabs,
+	const std::string& name)
+{
+	for (size_t i = 0; i < prefabs.size(); ++i)
+	{
+		if (prefabs[i].name == name)
+		{
+			return i;
+		}
+	}
+	return std::nullopt;
+}
+
+void stamp_room(
+	const Prefab& p,
+	const DungeonRoom& room,
+	const std::unordered_map<char, TileRef>& symbolToTile,
+	DecorEditor& editor,
+	Map& map)
+{
+	// Prefab origin [0,0] = top-left wall corner of the room.
+	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
+	// aligns exactly with the room wall ring -- no centering offset needed.
+	const int baseX = room.left_wall();
+	const int baseY = room.top_wall();
+
+	for (size_t row = 0; row < p.rows.size(); ++row)
+	{
+		const std::string& rowStr = p.rows[row];
+		for (size_t col = 0; col < rowStr.size(); ++col)
+		{
+			char sym = rowStr[col];
+
+			const int worldX = baseX + static_cast<int>(col);
+			const int worldY = baseY + static_cast<int>(row);
+
+			// Clamp to floor area — border '#' characters sit in the wall ring
+			// and must never be processed as interior shape commands.
+			if (worldX < room.col || worldX > room.col_end())
+			{
+				continue;
+			}
+			if (worldY < room.row || worldY > room.row_end())
+			{
+				continue;
+			}
+			if (!map.is_in_bounds({ worldX, worldY }))
+			{
+				continue;
+			}
+
+			// Interior '#': wall this floor cell back to create room shape.
+			if (sym == '#')
+			{
+				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL, 0);
+				continue;
+			}
+
+			if (!symbolToTile.contains(sym))
+			{
+				continue;
+			}
+			const TileRef tile = symbolToTile.at(sym);
+			if (!tile.is_valid())
+			{
+				continue;
+			}
+			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
+			{
+				continue;
+			}
+
+			editor.place_tile(Vector2D{ worldX, worldY }, tile);
+		}
+	}
+}
+} // namespace
+
+// Stamps decoration tiles from one room's assigned prefab into editor overrides.
+// Called from Map::create_room before spawn_water so water can see decoration positions.
+void PrefabLibrary::apply_to_room(
+	const DungeonRoom& room,
+	DecorEditor& editor,
+	Map& map) const
+{
+	if (room.prefabName.empty())
+	{
+		return;
+	}
+	const std::optional<size_t> prefabIndex = find_prefab_index(prefabs, room.prefabName);
+	if (!prefabIndex)
+	{
+		return;
+	}
+	stamp_room(prefabs[*prefabIndex], room, symbolToTile, editor, map);
+}
+
+// Batch version used as a fallback; prefer apply_to_room called per room.
+void PrefabLibrary::apply_to_rooms(
+	const std::vector<DungeonRoom>& rooms,
+	DecorEditor& editor,
+	Map& map) const
+{
+	for (const DungeonRoom& room : rooms)
+	{
+		apply_to_room(room, editor, map);
+	}
+}

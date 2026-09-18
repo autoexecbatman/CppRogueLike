@@ -1,5 +1,5 @@
-#include "src/Actor/Creature.h"
-#include "src/Actor/EquipmentSlot.h"
+#include "src/Creature.h"
+#include "src/EquipmentSlot.h"
 #include <gtest/gtest.h>
 
 #include <vector>
