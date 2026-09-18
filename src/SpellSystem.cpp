@@ -67,8 +67,9 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 } // namespace
 
 // ---------------------------------------------------------------------------
-// Module-level mutable spell table. Loaded from JSON; falls back to defaults
-// if load() has not been called (e.g. in unit tests).
+// Module-level mutable spell table. A builtin's effect is compiled in; its name,
+// level, class and description are data, filled by load(). Before load() a builtin
+// has only its effect, which is all casting reads.
 // ---------------------------------------------------------------------------
 
 namespace
@@ -98,21 +99,21 @@ enum class SpellId
 std::map<std::string, SpellDefinition> s_custom_spells;
 
 std::map<SpellId, SpellDefinition> s_spells = {
-	{ SpellId::CURE_LIGHT_WOUNDS, { "Cure Light Wounds", 1, SpellClass::CLERIC, "Heals 1d8 HP", SpellEffectType::CURE_LIGHT_WOUNDS } },
-	{ SpellId::BLESS, { "Bless", 1, SpellClass::CLERIC, "+1 to hit for 6 turns", SpellEffectType::BLESS } },
-	{ SpellId::SANCTUARY, { "Sanctuary", 1, SpellClass::CLERIC, "Attackers must save or ignore you; 2 turns + 1 per level", SpellEffectType::SANCTUARY } },
-	{ SpellId::PROTECTION_FROM_EVIL, { "Protection From Evil", 1, SpellClass::CLERIC, "Evil attackers suffer -2 to hit", SpellEffectType::PROTECTION_FROM_EVIL } },
-	{ SpellId::HOLD_PERSON, { "Hold Person", 2, SpellClass::CLERIC, "Paralyze target for 4 turns", SpellEffectType::HOLD_PERSON } },
-	{ SpellId::SILENCE, { "Silence", 2, SpellClass::CLERIC, "Prevent target from casting", SpellEffectType::SILENCE } },
-	{ SpellId::MAGIC_MISSILE, { "Magic Missile", 1, SpellClass::WIZARD, "1d4+1 force damage, auto-hit", SpellEffectType::MAGIC_MISSILE } },
-	{ SpellId::SHIELD, { "Shield", 1, SpellClass::WIZARD, "+4 AC for 5 turns", SpellEffectType::SHIELD } },
-	{ SpellId::SLEEP, { "Sleep", 1, SpellClass::WIZARD, "Put weak enemies to sleep", SpellEffectType::SLEEP } },
-	{ SpellId::INVISIBILITY, { "Invisibility", 2, SpellClass::WIZARD, "Become invisible for 20 turns", SpellEffectType::INVISIBILITY } },
-	{ SpellId::WEB, { "Web", 2, SpellClass::WIZARD, "Create webs to trap enemies", SpellEffectType::WEB } },
-	{ SpellId::FIREBALL, { "Fireball", 3, SpellClass::WIZARD, "1d6/level fire damage in 20-ft radius, save vs. spells for half", SpellEffectType::FIREBALL } },
-	{ SpellId::TELEPORT, { "Teleport", 3, SpellClass::WIZARD, "Teleport to random location", SpellEffectType::TELEPORT } },
-	{ SpellId::KNOCK, { "Knock", 2, SpellClass::WIZARD, "Open any nearby locked door", SpellEffectType::KNOCK } },
-	{ SpellId::NONE, { "None", 0, SpellClass::BOTH, "", SpellEffectType::NONE } },
+	{ SpellId::CURE_LIGHT_WOUNDS, SpellDefinition{ .effect_type = SpellEffectType::CURE_LIGHT_WOUNDS } },
+	{ SpellId::BLESS, SpellDefinition{ .effect_type = SpellEffectType::BLESS } },
+	{ SpellId::SANCTUARY, SpellDefinition{ .effect_type = SpellEffectType::SANCTUARY } },
+	{ SpellId::PROTECTION_FROM_EVIL, SpellDefinition{ .effect_type = SpellEffectType::PROTECTION_FROM_EVIL } },
+	{ SpellId::HOLD_PERSON, SpellDefinition{ .effect_type = SpellEffectType::HOLD_PERSON } },
+	{ SpellId::SILENCE, SpellDefinition{ .effect_type = SpellEffectType::SILENCE } },
+	{ SpellId::MAGIC_MISSILE, SpellDefinition{ .effect_type = SpellEffectType::MAGIC_MISSILE } },
+	{ SpellId::SHIELD, SpellDefinition{ .effect_type = SpellEffectType::SHIELD } },
+	{ SpellId::SLEEP, SpellDefinition{ .effect_type = SpellEffectType::SLEEP } },
+	{ SpellId::INVISIBILITY, SpellDefinition{ .effect_type = SpellEffectType::INVISIBILITY } },
+	{ SpellId::WEB, SpellDefinition{ .effect_type = SpellEffectType::WEB } },
+	{ SpellId::FIREBALL, SpellDefinition{ .effect_type = SpellEffectType::FIREBALL } },
+	{ SpellId::TELEPORT, SpellDefinition{ .effect_type = SpellEffectType::TELEPORT } },
+	{ SpellId::KNOCK, SpellDefinition{ .effect_type = SpellEffectType::KNOCK } },
+	{ SpellId::NONE, SpellDefinition{ .effect_type = SpellEffectType::NONE } },
 };
 
 // JSON key <-> SpellId mapping
@@ -340,13 +341,15 @@ void SpellSystem::load(std::string_view path)
 
 	s_custom_spells.clear();
 
-	// Load known builtin keys
+	// Every builtin's name, level, class and description are data, the table holding
+	// only its effect, so a file without one is refused.
 	for (const auto& entry : SPELL_KEYS)
 	{
 		const std::string key{ entry.key };
 		if (!root.contains(key))
 		{
-			continue;
+			throw std::runtime_error(
+				std::format("SpellSystem::load -- '{}' has no record for builtin spell '{}'", resolved.string(), key));
 		}
 		const auto& j = root.at(key);
 		SpellDefinition& def = s_spells.at(entry.id);

@@ -14,6 +14,9 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <string_view>
+
+#include <nlohmann/json.hpp>
 
 #include "src/SpellSystem.h"
 
@@ -29,17 +32,35 @@ protected:
 		SpellSystem::load("data/content/spells.json");
 	}
 
-	// Writes one spell definition and returns the path it was written to.
+	// Writes the shipped spells plus one more, and returns the path it was written to.
+	// The shipped records are kept so that the added spell is the only thing wrong.
 	//
 	// The key is deliberately not one of SPELL_KEYS: a builtin spell's effect is
 	// compiled in rather than read from data, so only a custom key exercises
 	// parse_effect_type at all.
 	std::string write_spell(std::string_view spellClass, std::string_view effect)
 	{
+		nlohmann::json root = shipped_spells();
+		root["test_only_spell"] = {
+			{ "name", "Test" },
+			{ "level", 1 },
+			{ "class", spellClass },
+			{ "effect", effect },
+			{ "description", "test" },
+		};
+		return write(root);
+	}
+
+	static nlohmann::json shipped_spells()
+	{
+		std::ifstream in("data/content/spells.json");
+		return nlohmann::json::parse(in);
+	}
+
+	std::string write(const nlohmann::json& root)
+	{
 		std::ofstream out(scratchFile);
-		out << R"({ "test_only_spell": { "name": "Test", "level": 1, "class": ")"
-			<< spellClass << R"(", "effect": ")" << effect
-			<< R"(", "description": "test" } })";
+		out << root.dump();
 		return scratchFile.string();
 	}
 
@@ -52,6 +73,16 @@ protected:
 TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
 {
 	EXPECT_NO_THROW(SpellSystem::load("data/content/spells.json"));
+}
+
+// A built-in spell's name, level, class and description are data, so a file without
+// one is refused rather than leaving the spell with text the code happens to hold.
+TEST_F(SpellDataLoadTest, AFileWithoutABuiltinSpellIsRefused)
+{
+	nlohmann::json root = shipped_spells();
+	ASSERT_EQ(root.erase("bless"), 1U) << "the shipped file no longer has bless to remove";
+
+	EXPECT_THROW(SpellSystem::load(write(root)), std::runtime_error);
 }
 
 // A class the game does not know is a typo, not a request for a default.

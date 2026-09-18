@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=SpellDataLoadTest.*:SpellCodecRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellSystem::load -- '{}' has no record for builtin spell '{}'\", resolved.string(), key));",
+      "mutated": "\t\t\tcontinue;",
+      "catches": "a data file missing a builtin spell loaded silently"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tthrow std::runtime_error(std::format(\"SpellSystem: unknown spell class '{}'\", text));",
+      "mutated": "\treturn SpellClass::BOTH;",
+      "catches": "an unknown spell class turned into a default"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tthrow std::runtime_error(std::format(\"SpellSystem: unknown spell effect '{}'\", text));",
+      "mutated": "\treturn SpellEffectType::NONE;",
+      "catches": "an unknown spell effect turned into a default"
+    }
+  ]
+}
