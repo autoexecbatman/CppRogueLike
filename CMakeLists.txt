@@ -226,6 +226,8 @@ set(SOURCE_FILES # Add Source Files Here !
     # Map
     ${PROJECT_SOURCE_DIR}/Map/Map.cpp
     ${PROJECT_SOURCE_DIR}/Map/Map.h
+    ${PROJECT_SOURCE_DIR}/Map/TreasureRoom.cpp
+    ${PROJECT_SOURCE_DIR}/Map/TreasureRoom.h
     ${PROJECT_SOURCE_DIR}/Map/TileDefinition.h
     ${PROJECT_SOURCE_DIR}/Map/TileType.h
     ${PROJECT_SOURCE_DIR}/Map/DungeonRoom.h

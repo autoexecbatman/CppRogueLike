@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TreasureRoomFixture.*:StairRoomNotLocked.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\tint count = 0;\n\tfor (int y = room.top_wall(); y <= room.bottom_wall(); ++y)",
+      "mutated": "\tint count = 1;\n\tfor (int y = room.top_wall(); y <= room.bottom_wall(); ++y)",
+      "catches": "the counter starting off by one, which proves the tests link this translation unit rather than a stale copy"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\t\t\tif (map.get_tile_type(pos) != TileType::CLOSED_DOOR)",
+      "mutated": "\t\t\tif (map.get_tile_type(pos) == TileType::CLOSED_DOOR)",
+      "catches": "every wall tile counted as an entrance and every door skipped"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t{\n\t\t\t\t\t++count;",
+      "mutated": "\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))\n\t\t\t\t{\n\t\t\t\t\tcount += 2;",
+      "catches": "each entrance counted twice"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\t\t\tfor (Vector2D dir : { DIR_N, DIR_S, DIR_E, DIR_W })\n\t\t\t{\n\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
+      "mutated": "\t\t\tfor (Vector2D dir : { DIR_N, DIR_S })\n\t\t\t{\n\t\t\t\tif (room.contains((pos + dir).x, (pos + dir).y))",
+      "catches": "a door in a side wall no longer recognised as an entrance"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\t\t\t\t\tctx.map->tiles[ctx.map->get_index(pos)].doorState = DoorState::CLOSED_UNLOCKED;",
+      "mutated": "",
+      "catches": "the rollback leaving a treasure room nobody can enter"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\t\t\tctx.map->tiles[ctx.map->get_index(doorPos)].doorState = DoorState::CLOSED_LOCKED;",
+      "mutated": "",
+      "catches": "the room never locked, so the jailer guards nothing"
+    },
+    {
+      "file": "src/Map/TreasureRoom.cpp",
+      "original": "\tif (candidates.empty())\n\t{\n\t\tunlock_all_room_entrances();\n\t\treturn;",
+      "mutated": "\tif (candidates.empty())\n\t{\n\t\treturn;",
+      "catches": "the no-spawn path returning without rolling the locks back"
+    }
+  ]
+}

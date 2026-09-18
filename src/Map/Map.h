@@ -120,6 +120,9 @@ public:
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
+	// Puts a hoard on one tile, through the item factory the map owns. Quality
+	// runs 1 to 3; the dungeon level sets what is eligible to appear.
+	void generate_treasure(Vector2D pos, GameContext& ctx, int dungeonLevel, int quality) const;
 	void compute_fov(GameContext& ctx);
 	void update();
 	void render(const GameContext& ctx) const;
@@ -157,8 +160,6 @@ public:
 	void place_amulet(GameContext& ctx);
 	std::vector<MonsterPercentage> get_monster_distribution(int dungeonLevel);
 	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
-	void create_treasure_room(const DungeonRoom& room, int quality, GameContext& ctx);
-	bool maybe_create_treasure_room(int dungeonLevel, GameContext& ctx);
 	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
@@ -170,10 +171,6 @@ public:
 		const std::vector<DungeonRoom>& rooms,
 		GameContext& ctx);
 
-	// Counts doors on this room's wall border that have a room-interior
-	// cardinal neighbour. Used to select single-entrance treasure rooms.
-	int count_room_entrances(const DungeonRoom& room) const;
-
 	std::vector<Tile> tiles;
 
 protected:
@@ -184,7 +181,6 @@ protected:
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
 	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
-	void setup_treasure_room_guard(const DungeonRoom& room, GameContext& ctx);
 	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
 	// Walls back cells inside the bounding box that the chosen RoomShape excludes.
 	// Must be called after dig() and before any spawning. No-op for RECT.

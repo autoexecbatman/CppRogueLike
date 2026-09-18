@@ -8,6 +8,7 @@
 #include "src/Map/DungeonNames.h"
 #include "src/Map/DungeonRoom.h"
 #include "src/Map/Map.h"
+#include "src/Map/TreasureRoom.h"
 #include "src/Actor/Stairs.h"
 #include "src/ActorTypes/Player.h"
 #include "src/Combat/ExperienceReward.h"
@@ -25,9 +26,9 @@
 // Treasure Room Tests
 // Contract:
 //   - generate_warden_name produces valid, varied names
-//   - count_room_entrances counts only genuine room-entrance doors
+//   - TreasureRoom::count_entrances counts only genuine room-entrance doors
 //   - After map init, the staircase tile is never adjacent to a locked door
-//   - If setup_treasure_room_guard cannot place a jailer, all doors it locked
+//   - If TreasureRoom::setup_guard cannot place a jailer, all doors it locked
 //     in Pass 1 are rolled back to CLOSED_UNLOCKED
 // ============================================================================
 
@@ -42,14 +43,6 @@ namespace
     constexpr int STAIR_TEST_H = 80;
 }
 
-// Exposes the protected setup_treasure_room_guard so tests can call it directly.
-class TestableTreasureMap : public Map
-{
-public:
-    TestableTreasureMap(int w, int h) : Map(w, h) {}
-    using Map::setup_treasure_room_guard;
-};
-
 // ----------------------------------------------------------------------------
 // Shared fixture
 // ----------------------------------------------------------------------------
@@ -57,7 +50,7 @@ public:
 class TreasureRoomFixture : public ::testing::Test
 {
 protected:
-    std::unique_ptr<TestableTreasureMap> map;
+    std::unique_ptr<Map> map;
     std::unique_ptr<Player> player;
     std::vector<std::unique_ptr<Creature>> creatures;
     MockGameContext mock;
@@ -76,7 +69,7 @@ protected:
         }
         catch (...) {}
 
-        map = std::make_unique<TestableTreasureMap>(FIXTURE_W, FIXTURE_H);
+        map = std::make_unique<Map>(FIXTURE_W, FIXTURE_H);
         player = std::make_unique<Player>(Vector2D{ 1, 1 });
         player->experienceReward = std::make_unique<ExperienceReward>(0);
         player->set_dr(0);
@@ -85,7 +78,7 @@ protected:
         player->healthPool = std::make_unique<HealthPool>(20);
 
         // Use MockGameContext as base so contentRegistry, tileConfig, and
-        // inventoryData are all wired — setup_treasure_room_guard needs
+        // inventoryData are all wired — TreasureRoom::setup_guard needs
         // contentRegistry to create the dungeon_key item for the jailer.
         ctx = mock.to_game_context();
         ctx.playerOwner = &player;
@@ -165,13 +158,13 @@ TEST(DungeonNames, ProducesVariedNamesAcrossSeeds)
 }
 
 // ============================================================================
-// Map::count_room_entrances
+// TreasureRoom::count_entrances
 // ============================================================================
 
 TEST_F(TreasureRoomFixture, CountEntrances_NoDoors_ReturnsZero)
 {
     const DungeonRoom room = make_room(5, 5, 6, 6);
-    EXPECT_EQ(map->count_room_entrances(room), 0);
+    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_OneLeftWallDoor_ReturnsOne)
@@ -180,14 +173,14 @@ TEST_F(TreasureRoomFixture, CountEntrances_OneLeftWallDoor_ReturnsOne)
     // (4,7) + DIR_E = (5,7) — inside room.contains() — genuine entrance.
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 4, 7 });
-    EXPECT_EQ(map->count_room_entrances(room), 1);
+    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_OneTopWallDoor_ReturnsOne)
 {
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 7, 4 });
-    EXPECT_EQ(map->count_room_entrances(room), 1);
+    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 1);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_TwoDoors_ReturnsTwo)
@@ -195,7 +188,7 @@ TEST_F(TreasureRoomFixture, CountEntrances_TwoDoors_ReturnsTwo)
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 4, 7 });  // left wall
     place_door(Vector2D{ 7, 4 });  // top wall
-    EXPECT_EQ(map->count_room_entrances(room), 2);
+    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 2);
 }
 
 TEST_F(TreasureRoomFixture, CountEntrances_FarDoor_NotCounted)
@@ -203,11 +196,11 @@ TEST_F(TreasureRoomFixture, CountEntrances_FarDoor_NotCounted)
     // A door with no room-interior cardinal neighbour is not an entrance.
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 20, 15 });
-    EXPECT_EQ(map->count_room_entrances(room), 0);
+    EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
 }
 
 // ============================================================================
-// setup_treasure_room_guard rollback
+// TreasureRoom::setup_guard rollback
 // When the outward walk from the door is immediately blocked by a wall,
 // candidates stays empty and the function must unlock all doors Pass 1 locked.
 // ============================================================================
@@ -230,7 +223,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_NoJailerSpawn_DoorsRolledBack)
     // Confirm the outward tile is a wall (precondition).
     ASSERT_EQ(map->get_tile_type(Vector2D{ 8, 7 }), TileType::WALL);
 
-    map->setup_treasure_room_guard(room, ctx);
+    TreasureRoom::setup_guard(room, ctx);
 
     // The door must NOT remain locked after the failed guard setup.
     EXPECT_FALSE(map->is_door_locked(doorPos))
@@ -252,7 +245,7 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
     place_corridor(corridorPos);
 
     const std::size_t creaturesBefore = creatures.size();
-    map->setup_treasure_room_guard(room, ctx);
+    TreasureRoom::setup_guard(room, ctx);
 
     // Door must remain locked — a jailer guards it.
     EXPECT_TRUE(map->is_door_locked(doorPos))

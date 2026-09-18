@@ -149,6 +149,7 @@ set(PARENT_SOURCES
 
     # Map
     ${PARENT_SOURCE_DIR}/Map/Map.cpp
+    ${PARENT_SOURCE_DIR}/Map/TreasureRoom.cpp
     ${PARENT_SOURCE_DIR}/Map/DungeonGenerator.cpp
     ${PARENT_SOURCE_DIR}/Map/DungeonNames.cpp
     ${PARENT_SOURCE_DIR}/Map/FovMap.cpp
