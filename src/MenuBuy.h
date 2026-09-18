@@ -15,7 +15,10 @@ class MenuBuy : public BaseMenu
 	size_t currentState{ 0 };
 	std::vector<std::string> menuItems;
 	Creature& buyer;
-	ShopKeeper& shopkeeper; // Store shopkeeper reference
+	// The shopkeeper creature, whose purse takes the price. Declared before the shop it
+	// owns, which is derived from it.
+	Creature& owner;
+	ShopKeeper& shopkeeper;
 	GameContext& ctx; // Game context for message system
 
 	void populate_items();
@@ -25,7 +28,7 @@ class MenuBuy : public BaseMenu
 	void draw_content() override;
 
 public:
-	MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper);
+	MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner);
 	MenuBuy(const MenuBuy&) = delete;
 	MenuBuy& operator=(const MenuBuy&) = delete;
 	MenuBuy(MenuBuy&&) = delete;

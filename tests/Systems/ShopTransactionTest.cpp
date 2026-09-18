@@ -55,6 +55,16 @@ protected:
 		return held;
 	}
 
+	// Puts one item on the shop's shelves and returns it, still owned by the shop.
+	Item& shelve(const char* itemKey)
+	{
+		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, mock.content_registry);
+		EXPECT_TRUE(item);
+		Item& held = *item;
+		EXPECT_TRUE(InventoryOperations::add_item(shop.get_shop_inventory(), std::move(item)).has_value());
+		return held;
+	}
+
 	// Stocks the shop to its capacity, so nothing more fits on the shelves.
 	void fill_shelves()
 	{
@@ -90,21 +100,55 @@ TEST_F(ShopTransactionTest, AStockedShopHasSomethingToSell)
 		<< "a shop that was stocked has nothing to sell";
 }
 
-TEST_F(ShopTransactionTest, APurchaseHandsTheItemOver)
+// A purchase hands over the item that was on the shelf - that object, moved, with its
+// key and enhancement intact - and the shopkeeper receives the price.
+TEST_F(ShopTransactionTest, APurchaseHandsOverTheShelvedItemAndPaysTheOwner)
 {
-	auto forSale = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, mock.content_registry);
-	ASSERT_TRUE(forSale);
-	const int price = shop.get_buy_price(*forSale);
+	Item& onShelf = shelve("health_potion");
+	const int price = shop.get_buy_price(onShelf);
 	player.adjust_gold(price);
-	const int goldBefore = player.get_gold();
-	const std::size_t carriedBefore = player.inventoryData.items.size();
+	const int buyerGoldBefore = player.get_gold();
+	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
 
-	const bool bought = shop.process_player_purchase(ctx, *forSale, player);
+	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
 
 	ASSERT_TRUE(bought);
-	EXPECT_EQ(player.get_gold(), goldBefore - price) << "the price was paid";
-	EXPECT_EQ(player.inventoryData.items.size(), carriedBefore + 1)
-		<< "the price was paid and nothing was handed over";
+	ASSERT_EQ(player.inventoryData.items.size(), 1u) << "the price was paid and nothing was handed over";
+	EXPECT_EQ(player.inventoryData.items.front().get(), &onShelf)
+		<< "the pack must hold the shelved item itself, not a copy of some of its fields";
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore - 1) << "the item left the shelf";
+	EXPECT_EQ(player.get_gold(), buyerGoldBefore - price) << "the buyer paid";
+	EXPECT_EQ(owner.get_gold(), price) << "the price went to the shopkeeper rather than vanishing";
+}
+
+// The key is what the damage registry reads, so a bought weapon without one hits for
+// unarmed damage. The purchase used to copy the item field by field and leave it out.
+TEST_F(ShopTransactionTest, ABoughtWeaponKeepsItsKey)
+{
+	Item& onShelf = shelve("long_sword");
+	player.adjust_gold(shop.get_buy_price(onShelf));
+
+	ASSERT_TRUE(shop.process_player_purchase(ctx, onShelf, player, owner));
+
+	ASSERT_EQ(player.inventoryData.items.size(), 1u);
+	EXPECT_EQ(player.inventoryData.items.front()->itemKey, "long_sword")
+		<< "a weapon without its key is looked up as unarmed";
+}
+
+// A buyer who cannot pay is refused before anything moves, the shelf included.
+TEST_F(ShopTransactionTest, AnUnaffordablePurchaseMovesNothing)
+{
+	Item& onShelf = shelve("long_sword");
+	player.adjust_gold(-player.get_gold());
+	ASSERT_GT(shop.get_buy_price(onShelf), 0) << "a free item cannot be unaffordable";
+	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
+
+	const bool bought = shop.process_player_purchase(ctx, onShelf, player, owner);
+
+	EXPECT_FALSE(bought);
+	EXPECT_TRUE(player.inventoryData.items.empty());
+	EXPECT_EQ(shop.get_shop_inventory().items.size(), stockBefore) << "the item stays on the shelf";
+	EXPECT_EQ(owner.get_gold(), 0);
 }
 
 // A sale moves the item onto the shelves the buy menu reads, and the shopkeeper - the

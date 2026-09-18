@@ -15,8 +15,8 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\t[[maybe_unused]] const auto handedOver = add_item(player.inventoryData, std::move(player_item));\n\tassert(handedOver.has_value());",
-      "mutated": "\tassert(add_item(player.inventoryData, std::move(player_item)).has_value());",
+      "original": "\t[[maybe_unused]] const auto handedOver = add_item(buyer.inventoryData, std::move(*taken));\n\tassert(handedOver.has_value());",
+      "mutated": "\tassert(add_item(buyer.inventoryData, std::move(*taken)).has_value());",
       "catches": "the purchase back inside the assert, taking the gold and handing over nothing"
     },
     {
@@ -48,6 +48,18 @@
       "original": "\towner.adjust_gold(-price);\n",
       "mutated": "",
       "catches": "the seller paid with gold from nowhere, as before"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\towner.adjust_gold(price);\n",
+      "mutated": "",
+      "catches": "a purchase whose price goes nowhere, as before"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\tif (buyer.get_gold() < price)\n\t{",
+      "mutated": "\tif (false)\n\t{",
+      "catches": "a buyer taking what they cannot pay for"
     }
   ]
 }

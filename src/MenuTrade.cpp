@@ -7,7 +7,6 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "Renderer.h"
-#include "MessageSystem.h"
 #include "MenuBuy.h"
 #include "MenuSell.h"
 #include "MenuManager.h"
@@ -19,14 +18,7 @@ MenuTrade::MenuTrade(Creature& shopkeeper, Creature& player, GameContext& ctx)
 
     auto buyCommand = [&shopkeeper](GameContext& ctx)
     {
-        if (shopkeeper.shop != nullptr)
-        {
-            ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player(), *shopkeeper.shop));
-        }
-        else
-        {
-            ctx.messageSystem->message(WHITE_BLACK_PAIR, "This shopkeeper has nothing to sell.", true);
-        }
+        ctx.menus->push_back(std::make_unique<MenuBuy>(ctx, *ctx.player(), shopkeeper));
     };
     entries.push_back({ "Buy", 0, buyCommand });
 

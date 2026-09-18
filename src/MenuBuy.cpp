@@ -3,6 +3,7 @@
 #include <string>
 
 #include "Actor.h"
+#include "Creature.h"
 #include "InventoryOperations.h"
 #include "Colors.h"
 #include "GameContext.h"
@@ -10,6 +11,16 @@
 #include "MessageSystem.h"
 #include "ShopKeeper.h"
 #include "MenuBuy.h"
+
+namespace
+{
+	// The shop a trading creature owns. Every way into the trade menu requires one.
+	ShopKeeper& shop_of(Creature& owner)
+	{
+		assert(owner.shop && "MenuBuy opened on a creature with no shop");
+		return *owner.shop;
+	}
+}
 
 void MenuBuy::populate_items()
 {
@@ -36,8 +47,8 @@ void MenuBuy::populate_items()
 	}
 }
 
-MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, ShopKeeper& shopkeeper)
-	: buyer{ buyer }, shopkeeper{ shopkeeper }, ctx{ ctx }
+MenuBuy::MenuBuy(GameContext& ctx, Creature& buyer, Creature& owner)
+	: buyer{ buyer }, owner{ owner }, shopkeeper{ shop_of(owner) }, ctx{ ctx }
 {
 	assert(ctx.renderer && "MenuBuy: renderer required before construction");
 	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
@@ -151,11 +162,9 @@ void MenuBuy::handle_buy()
 		return;
 	}
 
-	if (shopkeeper.process_player_purchase(ctx, *item, buyer))
+	// The shop moves the item off its shelves; this menu only keeps its cursor in range.
+	if (shopkeeper.process_player_purchase(ctx, *item, buyer, owner))
 	{
-		[[maybe_unused]] const auto removeFromStockResult = InventoryOperations::remove_item_at(shopkeeper.get_shop_inventory(), currentState);
-		assert(removeFromStockResult.has_value());
-
 		if (currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) && !InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()))
 		{
 			currentState = InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()) - 1;

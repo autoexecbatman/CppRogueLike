@@ -219,35 +219,35 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 	return item;
 }
 
-bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& player)
+bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature& buyer, Creature& owner)
 {
-	int price = get_buy_price(item);
+	const int price = get_buy_price(item);
 
-	if (player.get_gold() < price)
+	// Both refusals come before anything moves, so a refused purchase leaves the shelf,
+	// the pack and both purses as they were.
+	if (buyer.get_gold() < price)
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
 		return false;
 	}
-
-	if (is_inventory_full(player.inventoryData))
+	if (is_inventory_full(buyer.inventoryData))
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
 	}
 
-	player.adjust_gold(-price);
+	// The buy menu offers only what is on these shelves, so the item is always found.
+	auto taken = remove_item(shopInventory, item);
+	assert(taken.has_value() && "process_player_purchase called with an item not on the shelves");
 
-	auto player_item = std::make_unique<Item>(item.position, item.actorData);
-	player_item->set_value(item.get_value());
-	player_item->enhancement = item.enhancement;
-	player_item->itemClass = item.itemClass;
-
-	// Copy behavior (variant is value-copyable)
-	player_item->behavior = item.behavior;
-
-	// The full-pack check above is the only way this add can fail.
-	[[maybe_unused]] const auto handedOver = add_item(player.inventoryData, std::move(player_item));
+	// The item itself moves, so its key and enhancement come with it. The full-pack check
+	// above is the only way this add can fail, and the item lives on in the pack, which
+	// keeps the reference valid for the message below.
+	[[maybe_unused]] const auto handedOver = add_item(buyer.inventoryData, std::move(*taken));
 	assert(handedOver.has_value());
+
+	buyer.adjust_gold(-price);
+	owner.adjust_gold(price);
 
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name

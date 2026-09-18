@@ -90,7 +90,15 @@ public:
 	void generate_initial_inventory(int dungeonLevel, GameContext& ctx);
 
 	// Transaction handling
-	bool process_player_purchase(GameContext& ctx, Item& item, Creature& player);
+	// Moves an item off these shelves into the buyer's pack, the price going to the
+	// owner - the shopkeeper creature, whose purse is the shop's. The item itself moves,
+	// so everything about it survives. Refuses, moving nothing, when the buyer cannot
+	// pay or the pack is full. Answers whether the purchase happened.
+	//
+	// Example:
+	//   shop.process_player_purchase(ctx, sword, player, shopkeeper);   // -> true, sword in pack
+	//   shop.process_player_purchase(ctx, sword, brokePlayer, shopkeeper);  // -> false
+	bool process_player_purchase(GameContext& ctx, Item& item, Creature& buyer, Creature& owner);
 	// Buys an item from the seller's pack onto these shelves, paid for by the owner - the
 	// shopkeeper creature, whose purse is the shop's. Refuses, moving nothing, when the
 	// shelves are full or the owner cannot pay. Answers whether the sale happened.
