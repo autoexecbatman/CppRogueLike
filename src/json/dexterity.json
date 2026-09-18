@@ -118,5 +118,35 @@
 		"ReactionAdj": 3,
 		"MissileAttackAdj": 3,
 		"DefensiveAdj": -4
+	},
+	{
+		"Dex": 21,
+		"ReactionAdj": 4,
+		"MissileAttackAdj": 4,
+		"DefensiveAdj": -5
+	},
+	{
+		"Dex": 22,
+		"ReactionAdj": 4,
+		"MissileAttackAdj": 4,
+		"DefensiveAdj": -5
+	},
+	{
+		"Dex": 23,
+		"ReactionAdj": 4,
+		"MissileAttackAdj": 4,
+		"DefensiveAdj": -5
+	},
+	{
+		"Dex": 24,
+		"ReactionAdj": 5,
+		"MissileAttackAdj": 5,
+		"DefensiveAdj": -6
+	},
+	{
+		"Dex": 25,
+		"ReactionAdj": 5,
+		"MissileAttackAdj": 5,
+		"DefensiveAdj": -6
 	}
 ]

@@ -58,17 +58,7 @@ int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx)
 
 [[nodiscard]] int ArmorClass::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const
 {
-	const auto& dexAttributes = ctx.dataManager->get_dexterity_attributes();
-	const int dexterity = owner.get_dexterity();
-
-	if (dexterity <= 0 || dexterity > static_cast<int>(dexAttributes.size()))
-	{
-		return 0;
-	}
-
-	const int defensiveAdj = dexAttributes[dexterity - 1].DefensiveAdj;
-
-	return defensiveAdj;
+	return ctx.dataManager->dexterity_for(owner.get_dexterity()).DefensiveAdj;
 }
 
 [[nodiscard]] int ArmorClass::calculate_equipment_ac_bonus(const Creature& owner, ArmorClassBreakdown& breakdown) const

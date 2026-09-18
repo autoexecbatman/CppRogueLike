@@ -183,6 +183,18 @@ TEST_F(SpiderAmbushTest, LowDexterityIsSurprisedMoreAndKeepsItsPenalty)
 	EXPECT_EQ(hp_lost_to_the_ambush(), 7) << "surprised on a 4, bitten at armour class 12";
 }
 
+// Dexterity past the table - 26 here - reads its last row, +5 to the surprise roll, so a 1
+// becomes a 6 and the player is ready. The roll must not fall off the table.
+TEST_F(SpiderAmbushTest, APlayerPastTheTableIsReadWithItsLastRow)
+{
+	player->set_dexterity(26);
+	script({ 20, 4, 100, 1, 20, 3, 100 });
+
+	int lost = 0;
+	EXPECT_NO_THROW(lost = hp_lost_to_the_ambush()) << "the surprise roll fell off the Dexterity table";
+	EXPECT_EQ(lost, 4) << "a 1 with +5 is not surprised";
+}
+
 // Dexterity 17 adds 2 to the surprise roll: a 2 becomes a 4, and the player is ready.
 TEST_F(SpiderAmbushTest, HighDexterityCanSpareThePlayerTheSurprise)
 {

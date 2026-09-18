@@ -41,8 +41,7 @@ constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d1
 //   is_surprised(player, ctx);   // -> true on a 1, false on a 2 (2 + 2 is 4)
 bool is_surprised(const Creature& creature, GameContext& ctx)
 {
-	const int reactionAdjustment =
-		ctx.dataManager->get_dexterity_attributes().at(creature.get_dexterity() - 1).ReactionAdj;
+	const int reactionAdjustment = ctx.dataManager->dexterity_for(creature.get_dexterity()).ReactionAdj;
 	return ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;
 }
 } // namespace

@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DexterityTableTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DexterityTableTest.*:SpiderAmbushTest.*"
   ],
   "mutations": [
     {
@@ -24,6 +24,30 @@
       "original": "\"Dex\": 3,\n\t\t\"ReactionAdj\": -3,\n\t\t\"MissileAttackAdj\": -3",
       "mutated": "\"Dex\": 3,\n\t\t\"ReactionAdj\": -3,\n\t\t\"MissileAttackAdj\": -2",
       "catches": "a wrong missile adjustment"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\treturn dexterityAttributes.back();",
+      "mutated": "\t\treturn DexterityAttributes{ score, 0, 0, 0 };",
+      "catches": "a score past the table reading as no adjustment"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\treturn DexterityAttributes{ score, 0, 0, 0 };",
+      "mutated": "\t\treturn dexterityAttributes.front();",
+      "catches": "a score never set read as Dexterity 1"
+    },
+    {
+      "file": "src/json/dexterity.json",
+      "original": "\"Dex\": 21,\n\t\t\"ReactionAdj\": 4,\n\t\t\"MissileAttackAdj\": 4,\n\t\t\"DefensiveAdj\": -5",
+      "mutated": "\"Dex\": 21,\n\t\t\"ReactionAdj\": 4,\n\t\t\"MissileAttackAdj\": 4,\n\t\t\"DefensiveAdj\": -4",
+      "catches": "Dexterity 21 read as though the table still stopped at 20"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "ctx.dataManager->dexterity_for(creature.get_dexterity()).ReactionAdj",
+      "mutated": "ctx.dataManager->get_dexterity_attributes().at(creature.get_dexterity() - 1).ReactionAdj",
+      "catches": "the surprise roll indexing the table itself again"
     }
   ]
 }

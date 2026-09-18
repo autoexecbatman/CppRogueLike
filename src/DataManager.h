@@ -28,6 +28,16 @@ public:
 	const std::vector<IntelligenceAttributes>& get_intelligence_attributes() const { return intelligenceAttributes; }
 	const std::vector<WisdomAttributes>& get_wisdom_attributes() const { return wisdomAttributes; }
 
+	// The Table 2 row a Dexterity score reads. A score past the table's end - which no
+	// ability reaches, the books capping every score at 25 - reads its last row; a score
+	// below 1, which only a creature never given one has, reads as no adjustment.
+	//
+	// Example:
+	//   dataManager.dexterity_for(17).DefensiveAdj;   // -> -3
+	//   dataManager.dexterity_for(26).ReactionAdj;    // -> 5, the 25 row
+	//   dataManager.dexterity_for(0).DefensiveAdj;    // -> 0
+	[[nodiscard]] DexterityAttributes dexterity_for(int score) const;
+
 private:
 	// Data storage
 	std::vector<Weapons> weapons;

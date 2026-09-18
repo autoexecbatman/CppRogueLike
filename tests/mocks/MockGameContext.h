@@ -5,6 +5,7 @@
 #include "src/RandomDice.h"
 #include "src/ContentRegistry.h"
 #include "src/CreatureManager.h"
+#include "src/DataManager.h"
 #include "src/MessageSystem.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/TileConfig.h"
@@ -14,6 +15,7 @@ struct MockGameContext
 	RandomDice dice{};
 	MessageSystem messages{};
 	CreatureManager creature_mgr{};
+	DataManager data_manager{};
 	ContentRegistry content_registry{};
 	FloorInventory inventory{ 100 };
 	GameState game_state{};
@@ -36,6 +38,10 @@ struct MockGameContext
 		// Loaded loudly: a monster built without a body plan is a broken test,
 		// not a test that quietly checks something else.
 		body_plans.load(Paths::BODY_PLANS);
+
+		// Armour class, missile and surprise rolls read the ability tables, as every
+		// context the game builds can.
+		data_manager.load_all_data(messages);
 	}
 
 	GameContext to_game_context()
@@ -44,6 +50,7 @@ struct MockGameContext
 			.messageSystem = &messages,
 			.dice = &dice,
 			.creatureManager = &creature_mgr,
+			.dataManager = &data_manager,
 			.contentRegistry = &content_registry,
 			.tileConfig = &tile_config,
 			.bodyPlanRegistry = &body_plans,

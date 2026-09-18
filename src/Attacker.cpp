@@ -200,19 +200,15 @@ int Attacker::calculate_to_hit_roll(
 	// A missile attack takes the dexterity missile adjustment; a swing does not.
 	if (kind == AttackKind::RANGED)
 	{
-		const int dexIndex = attacker.get_dexterity() - 1;
-		if (dexIndex >= 0 && static_cast<size_t>(dexIndex) < ctx.dataManager->get_dexterity_attributes().size())
-		{
-			const auto& dexAttr = ctx.dataManager->get_dexterity_attributes().at(dexIndex);
-			hitModifier += dexAttr.MissileAttackAdj;
+		const int missileAdjustment = ctx.dataManager->dexterity_for(attacker.get_dexterity()).MissileAttackAdj;
+		hitModifier += missileAdjustment;
 
-			if (dexAttr.MissileAttackAdj != 0)
-			{
-				ctx.messageSystem->log(std::format(
-					"Ranged modifier: {} from DEX {}",
-					dexAttr.MissileAttackAdj,
-					attacker.get_dexterity()));
-			}
+		if (missileAdjustment != 0)
+		{
+			ctx.messageSystem->log(std::format(
+				"Ranged modifier: {} from DEX {}",
+				missileAdjustment,
+				attacker.get_dexterity()));
 		}
 	}
 

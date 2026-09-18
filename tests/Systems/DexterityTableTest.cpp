@@ -55,6 +55,11 @@ const std::vector<TableTwoRow> TABLE_TWO{
 	{ 18, 2, 2, -4 },
 	{ 19, 3, 3, -4 },
 	{ 20, 3, 3, -4 },
+	{ 21, 4, 4, -5 },
+	{ 22, 4, 4, -5 },
+	{ 23, 4, 4, -5 },
+	{ 24, 5, 5, -6 },
+	{ 25, 5, 5, -6 },
 };
 } // namespace
 
@@ -85,6 +90,41 @@ TEST_F(DexterityTableTest, EveryRowMatchesTableTwo)
 		EXPECT_EQ(row.MissileAttackAdj, expected.missile) << "missile adjustment at Dexterity " << expected.score;
 		EXPECT_EQ(row.DefensiveAdj, expected.defensive) << "defensive adjustment at Dexterity " << expected.score;
 	}
+}
+
+// No ability goes past 25 by the book; the game has no cap, and a Dexterity enhancement on
+// equipment adds on top of gauntlets. A score beyond the table reads its last row.
+TEST_F(DexterityTableTest, AScorePastTheTableReadsItsLastRow)
+{
+	const DexterityAttributes row = game.dataManager.dexterity_for(26);
+
+	EXPECT_EQ(row.ReactionAdj, 5);
+	EXPECT_EQ(row.MissileAttackAdj, 5);
+	EXPECT_EQ(row.DefensiveAdj, -6);
+}
+
+// A score below 1 belongs only to a creature never given one, and carries no adjustment.
+TEST_F(DexterityTableTest, AScoreBelowOneCarriesNoAdjustment)
+{
+	const DexterityAttributes row = game.dataManager.dexterity_for(0);
+
+	EXPECT_EQ(row.ReactionAdj, 0);
+	EXPECT_EQ(row.MissileAttackAdj, 0);
+	EXPECT_EQ(row.DefensiveAdj, 0);
+}
+
+// Gauntlets taking an elf's 19 to 21 improve armour class further, -5 on the table.
+TEST_F(DexterityTableTest, DexterityPastTwentyStillImprovesArmourClass)
+{
+	Creature elf{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "elf", 0 } };
+	elf.experienceReward = std::make_unique<ExperienceReward>(0);
+	elf.healthPool = std::make_unique<HealthPool>(10);
+	elf.armorClass = std::make_unique<ArmorClass>(10);
+	elf.set_dexterity(21);
+
+	elf.update_armor_class(ctx);
+
+	EXPECT_EQ(elf.get_armor_class(), 5) << "Dexterity 21 is -5 to armour class";
 }
 
 // Through the path that uses it: Dexterity 7 leaves armour class 10 where it is.

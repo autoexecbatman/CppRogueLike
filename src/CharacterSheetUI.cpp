@@ -12,6 +12,7 @@
 #include "InputSystem.h"
 #include "Renderer.h"
 #include "DataManager.h"
+#include "DexterityAttributes.h"
 #include "HungerSystem.h"
 #include "ItemEnhancements.h"
 #include "CharacterSheetUI.h"
@@ -96,15 +97,9 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     int strDmgMod = get_strength_damage_modifier(player, ctx);
     int conBonus = get_constitution_bonus(player, ctx);
 
-    int missileAdj = 0;
-    int defensiveAdj = 0;
-    const auto& dexAttr = ctx.dataManager->get_dexterity_attributes();
-    if (player.get_dexterity() > 0 &&
-        player.get_dexterity() <= static_cast<int>(dexAttr.size()))
-    {
-        missileAdj = dexAttr.at(player.get_dexterity() - 1).MissileAttackAdj;
-        defensiveAdj = dexAttr.at(player.get_dexterity() - 1).DefensiveAdj;
-    }
+    const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
+    const int missileAdj = dexterityRow.MissileAttackAdj;
+    const int defensiveAdj = dexterityRow.DefensiveAdj;
 
     ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- ATTRIBUTES ---", YELLOW_BLACK_PAIR);
     row++;

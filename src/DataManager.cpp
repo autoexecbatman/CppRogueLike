@@ -1,7 +1,9 @@
 // file: Systems/DataManager.cpp
+#include <cassert>
 #include <filesystem>
 #include <fstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -54,6 +56,24 @@ void DataManager::load_all_data(MessageSystem& message_system)
 	wisdomAttributes = load_wisdom(find_data_file("wisdom.json"), message_system);
 
 	message_system.log("DataManager: All game data loaded successfully");
+}
+
+DexterityAttributes DataManager::dexterity_for(int score) const
+{
+	assert(!dexterityAttributes.empty() && "dexterity_for called before the Dexterity table was loaded");
+
+	// A score never set - a shopkeeper's - carries no adjustment.
+	if (score < 1)
+	{
+		return DexterityAttributes{ score, 0, 0, 0 };
+	}
+
+	// No ability goes higher than the table's last row, which is the book's 25.
+	if (std::cmp_greater(score, dexterityAttributes.size()))
+	{
+		return dexterityAttributes.back();
+	}
+	return dexterityAttributes.at(score - 1);
 }
 
 std::vector<Weapons> DataManager::load_weapons(const std::string& filename, MessageSystem& message_system)
