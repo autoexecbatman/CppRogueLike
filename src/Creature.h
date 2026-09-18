@@ -244,7 +244,6 @@ public:
 
 	virtual void apply_confusion(int nbTurns);
 
-	void equip(Item& item, GameContext& ctx);
 	void unequip(Item& item, GameContext& ctx);
 	void drop(Item& item, GameContext& ctx);
 

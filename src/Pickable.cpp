@@ -171,17 +171,8 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Pla
 		return true;
 	}
 
-	// NPC fallback: toggle equipped state
-	if (!item.has_state(ActorState::IS_EQUIPPED))
-	{
-		item.add_state(ActorState::IS_EQUIPPED);
-	}
-	else
-	{
-		item.remove_state(ActorState::IS_EQUIPPED);
-	}
-
-	return true;
+	// Could not be put on or taken off - a cursed item that will not come off: no turn.
+	return false;
 }
 
 } // namespace
@@ -300,8 +291,8 @@ bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
 		return true;
 	}
 
-	wearer.equip(owner, ctx);
-	return true;
+	// Could not be put on or taken off - a cursed item that will not come off: no turn.
+	return false;
 }
 
 bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContext& ctx)
@@ -547,8 +538,9 @@ bool use(Shield& shield, Item& owner, Player& wearer, GameContext& ctx)
 		}
 		return true;
 	}
-	wearer.equip(owner, ctx);
-	return true;
+
+	// Could not be put on or taken off - a cursed item that will not come off: no turn.
+	return false;
 }
 
 bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx)

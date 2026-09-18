@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=EquipmentUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\twearer.update_armor_class(ctx);\n\t\t}\n\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn false;",
+      "mutated": "\t\t\twearer.update_armor_class(ctx);\n\t\t}\n\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn true;",
+      "catches": "a failed toggle of rings and helms spending a turn"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "std::format(\"You unequip the {}.\", owner.get_name()), true);\n\t\t}\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn false;",
+      "mutated": "std::format(\"You unequip the {}.\", owner.get_name()), true);\n\t\t}\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn true;",
+      "catches": "a failed toggle of weapons spending a turn"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "std::format(\"You lower the {}.\", owner.get_name()), true);\n\t\t}\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn false;",
+      "mutated": "std::format(\"You lower the {}.\", owner.get_name()), true);\n\t\t}\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn true;",
+      "catches": "a failed toggle of shields spending a turn"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\twearer.update_armor_class(ctx);\n\t\t}\n\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\treturn false;",
+      "mutated": "\t\t\twearer.update_armor_class(ctx);\n\t\t}\n\n\t\treturn true;\n\t}\n\n\t// Could not be put on or taken off - a cursed item that will not come off: no turn.\n\titem.remove_state(ActorState::IS_EQUIPPED);\n\treturn false;",
+      "catches": "a worn ring or helm losing its equipped mark on a failed removal"
+    }
+  ]
+}

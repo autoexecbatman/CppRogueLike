@@ -16,7 +16,6 @@
 #include "Map.h"
 #include "Web.h"
 #include "DamageInfo.h"
-#include "WeaponDamageRegistry.h"
 #include "GameContext.h"
 #include "AnimationSystem.h"
 #include "Persistent.h"
@@ -700,68 +699,6 @@ void Creature::release_from_web()
 void Creature::apply_confusion(int nbTurns)
 {
 	ai = std::make_unique<AiMonsterConfused>(nbTurns, std::move(ai));
-}
-
-void Creature::equip(Item& item, GameContext& ctx)
-{
-	bool isArmor = item.is_armor();
-	bool isWeapon = item.is_weapon();
-	bool isShield = item.is_shield();
-
-	// Equipment of the same type already worn, which this item displaces.
-	// Named apart from the equippedItems member, which it would otherwise
-	// shadow.
-	std::vector<Item*> sameTypeWorn;
-
-	// Find all equipped items
-	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
-	for (const auto& invItem : inventoryData.items)
-	{
-		if (invItem->has_state(ActorState::IS_EQUIPPED))
-		{
-			bool itemIsArmor = invItem->is_armor();
-			bool itemIsWeapon = invItem->is_weapon();
-			bool itemIsShield = invItem->is_shield();
-
-			// Only consider same-type equipment for unequipping
-			if ((isArmor && itemIsArmor) || (isWeapon && itemIsWeapon) || (isShield && itemIsShield))
-			{
-				sameTypeWorn.push_back(invItem.get());
-			}
-		}
-	}
-
-	// If there's already equipment of the same type, unequip it
-	if (!sameTypeWorn.empty() && &item != sameTypeWorn[0])
-	{
-		for (auto* equipped : sameTypeWorn)
-		{
-			unequip(*equipped, ctx);
-		}
-	}
-
-	// Now equip the new item
-	item.add_state(ActorState::IS_EQUIPPED);
-
-	// Log the weapon and its damage. The item itself is the record of what is
-	// held, so nothing copies its name.
-	if (isWeapon)
-	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(item.itemKey);
-		ctx.messageSystem->log(std::format("Equipped {} - damage: {}", item.get_name(), weaponDamage));
-	}
-
-	// Log shield equipped
-	if (isShield)
-	{
-		ctx.messageSystem->log(std::format("Equipped {}", item.get_name()));
-	}
-
-	// Log armor equipped
-	if (isArmor)
-	{
-		ctx.messageSystem->log(std::format("Equipped {}", item.get_name()));
-	}
 }
 
 void Creature::unequip(Item& item, GameContext& ctx)
