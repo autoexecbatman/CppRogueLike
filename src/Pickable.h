@@ -13,6 +13,7 @@
 #include "TargetMode.h"
 #include "DamageInfo.h"
 #include "EquipmentSlot.h"
+#include "Vector2D.h"
 
 class Item;
 class Creature;
@@ -235,6 +236,23 @@ bool use(Gauntlets& g, Item& owner, Player& wearer, GameContext& ctx);
 bool use(Girdle& g, Item& owner, Player& wearer, GameContext& ctx);
 bool use(Amulet& a, Item& owner, Creature& wearer, GameContext& ctx);
 bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx);
+
+// What reading a single-target scroll at a tile did with the scroll.
+enum class ScrollReading
+{
+	SPENT, // read at the tile: the creature there, if any, took the effect
+	KEPT, // not read: the creature there has a Sanctuary that turned the reader away
+};
+
+// Reads a confusion scroll at a tile: the creature standing there is confused for the
+// given turns. A creature whose Sanctuary turns the reader away is not touched, and the
+// scroll stays unread - the reader "totally ignores the warded creature" (PHB page 436).
+// An empty tile still spends it.
+//
+// Example, a goblin on the tile, then a warded one the reader fails to save against:
+//   read_confusion_at(player, goblinTile, 8, ctx);   // -> ScrollReading::SPENT, goblin confused
+//   read_confusion_at(player, wardedTile, 8, ctx);   // -> ScrollReading::KEPT, untouched
+ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns, GameContext& ctx);
 
 // ========== Variant-level dispatchers ==========
 

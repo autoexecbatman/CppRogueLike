@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <memory>
@@ -15,6 +16,8 @@
 #include "Map.h"
 #include "Renderer.h"
 #include "AnimationSystem.h"
+#include "BuffSystem.h"
+#include "Creature.h"
 #include "CreatureManager.h"
 #include "MessageSystem.h"
 #include "RenderingManager.h"
@@ -210,9 +213,9 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(weaponRange, 0, std::move(onTarget), ctx));
 }
 
-TargetResult TargetingSystem::acquire_nearest(GameContext& ctx, Vector2D origin, int range) const
+TargetResult TargetingSystem::acquire_nearest(GameContext& ctx, const Creature& attacker, int range) const
 {
-	return target_auto_nearest(ctx, origin, range);
+	return target_auto_nearest(ctx, attacker, range);
 }
 
 int TargetingSystem::get_weapon_range(const Item* weapon)
@@ -250,12 +253,33 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 	}
 }
 
-TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, Vector2D origin, int range) const
+TargetResult TargetingSystem::target_auto_nearest(GameContext& ctx, const Creature& attacker, int range) const
 {
-	const auto& monster = ctx.creatureManager->get_closest_monster(*ctx.creatures, origin, range);
-	if (!monster)
+	// Living creatures within range - none set means any distance - nearest first, a tie
+	// keeping its order in the list.
+	std::vector<Creature*> candidates;
+	for (const auto& creature : *ctx.creatures)
 	{
-		return {};
+		assert(creature && "a creature list holds a null entry");
+		const int distance = creature->get_tile_distance(attacker.position);
+		if (!creature->is_dead() && (distance <= range || range == 0))
+		{
+			candidates.push_back(creature.get());
+		}
 	}
-	return { true, { monster } };
+	auto is_nearer = [&attacker](const Creature* left, const Creature* right)
+	{
+		return left->get_tile_distance(attacker.position) < right->get_tile_distance(attacker.position);
+	};
+	std::ranges::stable_sort(candidates, is_nearer);
+
+	// One whose Sanctuary turns the attacker away is ignored, and the next nearest taken.
+	for (Creature* candidate : candidates)
+	{
+		if (!ctx.buffSystem->is_turned_away_by_sanctuary(attacker, *candidate, ctx))
+		{
+			return { true, { candidate } };
+		}
+	}
+	return {};
 }

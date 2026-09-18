@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=SanctuarySpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\tif (!t->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *t, ctx))",
+      "mutated": "\t\t\tif (!t->is_dead())",
+      "catches": "a missile that never asks its target's Sanctuary"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\tif (!t->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *t, ctx))",
+      "mutated": "\t\t\tif (!t->is_dead() && (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *t, ctx) || true))",
+      "catches": "a missile that asks and strikes anyway"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tcontinue;\n\t\t}",
+      "catches": "Hold Person selecting without asking"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t{\n\t\t\tcontinue;\n\t\t}",
+      "mutated": "\t\tif (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))\n\t\t{\n\t\t}",
+      "catches": "Hold Person asking and holding anyway"
+    },
+    {
+      "file": "src/TargetingSystem.cpp",
+      "original": "\t\tif (!ctx.buffSystem->is_turned_away_by_sanctuary(attacker, *candidate, ctx))",
+      "mutated": "\t\tif (true)",
+      "catches": "the nearest target taken whatever its Sanctuary"
+    },
+    {
+      "file": "src/TargetingSystem.cpp",
+      "original": "\tstd::ranges::stable_sort(candidates, is_nearer);",
+      "mutated": "",
+      "catches": "the first creature in the list taken for the nearest"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tif (target && ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))",
+      "mutated": "\tif (false)",
+      "catches": "a confusion scroll read at a warded creature without asking"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\treturn ScrollReading::KEPT;",
+      "mutated": "\t\treturn ScrollReading::SPENT;",
+      "catches": "a scroll the reader could not read counted as spent"
+    }
+  ]
+}

@@ -420,7 +420,7 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 	{
 		TargetResult result = ctx.targeting->acquire_nearest(
 			ctx,
-			wearer.position,
+			wearer,
 			targetScroll.range);
 		if (!result.success || result.creatures.empty())
 		{
@@ -478,14 +478,11 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		}
 		else // PICK_TILE_SINGLE
 		{
-			Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
-			if (target)
+			// A scroll the reader could not bring themselves to read costs the turn, not the scroll.
+			if (read_confusion_at(wearer, targetPos, confuseTurns, innerCtx) == ScrollReading::KEPT)
 			{
-				target->apply_confusion(confuseTurns);
-				innerCtx.messageSystem->message(
-					WHITE_BLACK_PAIR,
-					std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
-					true);
+				innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
+				return;
 			}
 		}
 
@@ -495,6 +492,31 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(scrollRange, aoeRadius, std::move(onTarget), ctx));
 	return false; // turn and item consumption handled in callback
+}
+
+ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns, GameContext& ctx)
+{
+	Creature* target = ctx.map->get_actor(tile, ctx);
+
+	// The reader ignores a creature whose Sanctuary turns them away, and reads at nothing.
+	if (target && ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))
+	{
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("You cannot bring yourself to read the scroll at the {}.", target->actorData.name),
+			true);
+		return ScrollReading::KEPT;
+	}
+
+	if (target)
+	{
+		target->apply_confusion(turns);
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
+			true);
+	}
+	return ScrollReading::SPENT;
 }
 
 bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)

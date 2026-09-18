@@ -1111,11 +1111,12 @@ bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 	// Fire missiles - distribute among targets, prioritizing nearest
 	for (int i = 0; i < numMissiles; ++i)
 	{
-		// Target nearest living enemy
+		// Target nearest living enemy the caster may strike; one whose Sanctuary turns
+		// the caster away is ignored, and the missile goes to the next.
 		Creature* target = nullptr;
 		for (Creature* t : targets)
 		{
-			if (!t->is_dead())
+			if (!t->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(caster, *t, ctx))
 			{
 				target = t;
 				break;
@@ -1251,6 +1252,13 @@ bool SpellSystem::cast_hold_person(Creature& caster, GameContext& ctx)
 			continue;
 		}
 		if (!ctx.map->is_in_fov(creature->position))
+		{
+			continue;
+		}
+
+		// The caster selects each person; one whose Sanctuary turns the caster away is
+		// not selected, and the hold goes to another (PHB page 309).
+		if (ctx.buffSystem->is_turned_away_by_sanctuary(caster, *creature, ctx))
 		{
 			continue;
 		}

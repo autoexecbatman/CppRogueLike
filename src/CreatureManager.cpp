@@ -1,5 +1,4 @@
 #include <cassert>
-#include <limits>
 #include <memory>
 #include <span>
 #include <stdexcept>
@@ -41,31 +40,6 @@ void CreatureManager::spawn_creatures(GameContext& ctx)
 			ctx.map->add_monster(spawnPos, ctx);
 		}
 	}
-}
-
-Creature* CreatureManager::get_closest_monster(
-	std::span<const std::unique_ptr<Creature>> creatures,
-	Vector2D fromPosition,
-	int inRange) const noexcept
-{
-	Creature* closestMonster = nullptr;
-	int bestDistance = std::numeric_limits<int>::max();
-
-	for (const auto& actor : creatures)
-	{
-		assert(actor);
-		if (!actor->is_dead())
-		{
-			const int distance = actor->get_tile_distance(fromPosition);
-			if (distance < bestDistance && (distance <= inRange || inRange == 0))
-			{
-				bestDistance = distance;
-				closestMonster = actor.get();
-			}
-		}
-	}
-
-	return closestMonster;
 }
 
 Creature* CreatureManager::get_actor_at_position(

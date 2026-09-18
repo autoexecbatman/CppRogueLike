@@ -25,11 +25,6 @@ public:
 	void spawn_creatures(GameContext& ctx);
 
 	// Queries
-	Creature* get_closest_monster(
-		std::span<const std::unique_ptr<Creature>> creatures,
-		Vector2D fromPosition,
-		int inRange) const noexcept;
-
 	Creature* get_actor_at_position(
 		std::span<const std::unique_ptr<Creature>> creatures,
 		Vector2D pos) const noexcept;
