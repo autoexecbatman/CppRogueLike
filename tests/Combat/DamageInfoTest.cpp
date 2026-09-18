@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <set>
 #include <stdexcept>
 #include "src/Combat/DamageInfo.h"
 #include "src/Random/RandomDice.h"
@@ -245,4 +246,35 @@ TEST_F(DamageInfoTest, ABonusKeepsTheDamageType)
     EXPECT_EQ(flaming.damageType, DamageType::FIRE);
     const DamageInfo frost{ "1d6", DamageType::COLD };
     EXPECT_EQ(frost.with_enhancement(3).damageType, DamageType::COLD);
+}
+
+// The type a damage roll deals has a name, beside the enum rather than inside
+// whichever file needs to print one: the resolver logs it, and the monster
+// editor shows it on the field that sets it.
+TEST(DamageTypeNameTest, EveryTypeHasItsOwnName)
+{
+	EXPECT_EQ(damage_type_name(DamageType::PHYSICAL), "physical");
+	EXPECT_EQ(damage_type_name(DamageType::FIRE), "fire");
+	EXPECT_EQ(damage_type_name(DamageType::COLD), "cold");
+	EXPECT_EQ(damage_type_name(DamageType::LIGHTNING), "lightning");
+	EXPECT_EQ(damage_type_name(DamageType::POISON), "poison");
+	EXPECT_EQ(damage_type_name(DamageType::ACID), "acid");
+	EXPECT_EQ(damage_type_name(DamageType::MAGIC), "magic");
+}
+
+// The editor cycles the field one press at a time, so the order must visit every
+// type and come back to where it started - otherwise a type is unreachable from
+// the editor and can only be authored by hand.
+TEST(DamageTypeNameTest, CyclingVisitsEveryTypeAndWraps)
+{
+	DamageType type = DamageType::PHYSICAL;
+	std::set<DamageType> seen;
+	for (int step = 0; step < 7; ++step)
+	{
+		seen.insert(type);
+		type = next_damage_type(type);
+	}
+
+	EXPECT_EQ(seen.size(), 7u) << "a type the editor cannot reach";
+	EXPECT_EQ(type, DamageType::PHYSICAL) << "the cycle does not come back round";
 }

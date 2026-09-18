@@ -22,16 +22,6 @@ const std::unordered_map<DamageType, BuffType> damageResistanceBuffs = {
 	{ DamageType::POISON, BuffType::POISON_RESISTANCE },
 };
 
-// What each damage type is called in the log.
-const std::unordered_map<DamageType, std::string_view> damageTypeNames = {
-	{ DamageType::PHYSICAL, "physical" },
-	{ DamageType::FIRE, "fire" },
-	{ DamageType::COLD, "cold" },
-	{ DamageType::LIGHTNING, "lightning" },
-	{ DamageType::POISON, "poison" },
-	{ DamageType::ACID, "acid" },
-	{ DamageType::MAGIC, "magic" },
-};
 
 // Per ring of resistance strength, from the two Dungeon Master's Guide
 // entries: fire is -2 a die and +4 on the save, cold is -1 and +2.
@@ -80,14 +70,10 @@ int DamageResolver::apply_resistances(
 	damage -= damageReduced;
 	damage = std::max(0, damage);
 
-	const std::string_view typeName = damageTypeNames.contains(damageType)
-		? damageTypeNames.at(damageType)
-		: "unknown";
-
 	ctx.messageSystem->log(std::format(
 		"You resisted {} {} damage! ({}% resistance, {} -> {})",
 		damageReduced,
-		typeName,
+		damage_type_name(damageType),
 		resistancePercent,
 		originalDamage,
 		damage));

@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DamageTypeNameTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Combat/DamageInfo.h",
+      "original": "\tcase DamageType::COLD:\n\t{\n\t\treturn \"cold\";\n\t}",
+      "mutated": "\tcase DamageType::COLD:\n\t{\n\t\treturn \"fire\";\n\t}",
+      "catches": "two types sharing one name"
+    },
+    {
+      "file": "src/Combat/DamageInfo.h",
+      "original": "\tcase DamageType::MAGIC:\n\t{\n\t\treturn DamageType::PHYSICAL;\n\t}",
+      "mutated": "\tcase DamageType::MAGIC:\n\t{\n\t\treturn DamageType::MAGIC;\n\t}",
+      "catches": "the cycle stopping at the last type instead of wrapping"
+    },
+    {
+      "file": "src/Combat/DamageInfo.h",
+      "original": "\tcase DamageType::COLD:\n\t{\n\t\treturn DamageType::LIGHTNING;\n\t}",
+      "mutated": "\tcase DamageType::COLD:\n\t{\n\t\treturn DamageType::POISON;\n\t}",
+      "catches": "a type skipped, so the editor cannot reach it"
+    }
+  ]
+}

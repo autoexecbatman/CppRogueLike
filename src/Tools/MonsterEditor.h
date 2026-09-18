@@ -66,6 +66,7 @@ private:
 		DMG_NUM,
 		DMG_SIDES,
 		DMG_BONUS,
+		DMG_TYPE,
 		AI_TYPE,
 		ETHICS,
 		MORALITY,

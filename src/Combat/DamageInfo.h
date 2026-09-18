@@ -2,6 +2,8 @@
 
 #include <format>
 #include <string>
+#include <string_view>
+#include <utility>
 
 #include "../Random/DiceExpr.h"
 #include "../Random/RandomDice.h"
@@ -17,6 +19,91 @@ enum class DamageType
 	ACID, // Acid damage
 	MAGIC, // Pure magical damage
 };
+
+// What a damage type is called, wherever one is shown: the resolver's log, the
+// monster editor's field. Beside the enum so a type added there is named here.
+//
+// Example:
+//   damage_type_name(DamageType::FIRE);   // -> "fire"
+inline std::string_view damage_type_name(DamageType damageType)
+{
+	switch (damageType)
+	{
+	case DamageType::PHYSICAL:
+	{
+		return "physical";
+	}
+	case DamageType::FIRE:
+	{
+		return "fire";
+	}
+	case DamageType::COLD:
+	{
+		return "cold";
+	}
+	case DamageType::LIGHTNING:
+	{
+		return "lightning";
+	}
+	case DamageType::POISON:
+	{
+		return "poison";
+	}
+	case DamageType::ACID:
+	{
+		return "acid";
+	}
+	case DamageType::MAGIC:
+	{
+		return "magic";
+	}
+	}
+	// Every type returns above; a new one fails to compile under -Wswitch
+	// rather than falling through to a name that belongs to nothing.
+	std::unreachable();
+}
+
+// The next type in the editor's cycle, wrapping at the end, so every type is
+// reachable by pressing one key.
+//
+// Example:
+//   next_damage_type(DamageType::PHYSICAL);   // -> DamageType::FIRE
+//   next_damage_type(DamageType::MAGIC);      // -> DamageType::PHYSICAL
+inline DamageType next_damage_type(DamageType damageType)
+{
+	switch (damageType)
+	{
+	case DamageType::PHYSICAL:
+	{
+		return DamageType::FIRE;
+	}
+	case DamageType::FIRE:
+	{
+		return DamageType::COLD;
+	}
+	case DamageType::COLD:
+	{
+		return DamageType::LIGHTNING;
+	}
+	case DamageType::LIGHTNING:
+	{
+		return DamageType::POISON;
+	}
+	case DamageType::POISON:
+	{
+		return DamageType::ACID;
+	}
+	case DamageType::ACID:
+	{
+		return DamageType::MAGIC;
+	}
+	case DamageType::MAGIC:
+	{
+		return DamageType::PHYSICAL;
+	}
+	}
+	std::unreachable();
+}
 
 // Result of applying temporary HP shield to damage
 struct ShieldResult

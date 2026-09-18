@@ -920,6 +920,7 @@ std::string MonsterEditor::field_label(FieldId f) const
 	case FieldId::DMG_NUM:    return "Dmg Num";
 	case FieldId::DMG_SIDES:  return "Dmg Sides";
 	case FieldId::DMG_BONUS:  return "Dmg Bonus";
+	case FieldId::DMG_TYPE:   return "Dmg Type";
 	case FieldId::AI_TYPE:    return "AI Type";
 	case FieldId::ETHICS:     return "Ethics";
 	case FieldId::MORALITY:   return "Morality";
@@ -972,6 +973,7 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::DMG_NUM:     return std::format("{}", m_working.damage.dice.num);
 	case FieldId::DMG_SIDES:   return std::format("{}", m_working.damage.dice.sides);
 	case FieldId::DMG_BONUS:   return std::format("{}", m_working.damage.dice.bonus);
+	case FieldId::DMG_TYPE:    return std::string(damage_type_name(m_working.damage.damageType));
 	case FieldId::AI_TYPE:     return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
 	case FieldId::ETHICS:      return std::string(ethics_name(m_working.ethics));
 	case FieldId::MORALITY:    return std::string(morality_name(m_working.morality));
@@ -994,7 +996,8 @@ bool MonsterEditor::field_is_string(FieldId f) const
 bool MonsterEditor::field_is_toggle(FieldId f) const
 {
 	return f == FieldId::AI_TYPE || f == FieldId::CAN_SWIM
-		|| f == FieldId::ETHICS || f == FieldId::MORALITY;
+		|| f == FieldId::ETHICS || f == FieldId::MORALITY
+		|| f == FieldId::DMG_TYPE;
 }
 
 void MonsterEditor::field_adjust(FieldId f, int delta)
@@ -1062,6 +1065,11 @@ void MonsterEditor::field_toggle(FieldId f)
 	else if (f == FieldId::MORALITY)
 	{
 		m_working.morality = next_morality(m_working.morality);
+	}
+	else if (f == FieldId::DMG_TYPE)
+	{
+		// The dice are unchanged; only what they deal is.
+		m_working.damage = DamageInfo{ m_working.damage.dice, next_damage_type(m_working.damage.damageType) };
 	}
 }
 
