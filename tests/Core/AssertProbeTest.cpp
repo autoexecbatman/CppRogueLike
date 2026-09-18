@@ -51,6 +51,7 @@
 #include "src/ItemCreator.h"
 #include "src/MonsterCreator.h"
 #include "src/ShopkeeperFactory.h"
+#include "src/SpellSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
 // GoogleTest runs any suite whose name ends in DeathTest before the others, so
@@ -175,4 +176,15 @@ TEST_F(AssertProbeDeathTest, KillingACreatureWithNoPlayerInContextAborts)
 	creature->experienceReward = std::make_unique<ExperienceReward>(10);
 
 	EXPECT_DEATH(creature->die(ctx), "requires a live player in context");
+}
+
+// Every spell effect that lands calls onSuccess, at four sites and sometimes a turn
+// later from a targeting callback. An empty one would throw bad_function_call from
+// inside that callback; the entry point refuses it instead, naming the caller's
+// mistake. The assert is the first statement, so no spell data is needed to reach it.
+TEST_F(AssertProbeDeathTest, CastingWithoutACallbackAborts)
+{
+	std::unique_ptr<Creature> caster = make_creature();
+
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, {}, ctx), "cast_spell_by_key requires a callback");
 }
