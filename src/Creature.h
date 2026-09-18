@@ -171,9 +171,15 @@ public:
 
 	// Const-correct getter methods - return effective values (AD&D 2e: MAX(base, SET) + ADD)
 	int get_strength() const noexcept { return calculate_effective_stat(baseStrength, BuffType::STRENGTH); }
-	// Percentile of exceptional Strength, 1-100 with 100 as 18/00, or 0 for none; the
+	// Percentile of exceptional Strength, 1-100 with 100 as 18/00, or 0 for none: the
+	// creature's own, or a worn item's that sets Strength to 18/xx if that is higher. The
 	// Strength table reads it only when get_strength() is 18.
-	int get_exceptional_strength() const noexcept { return exceptionalStrength; }
+	//
+	// Example, a fighter of 18/50:
+	//   fighter.get_exceptional_strength();   // -> 50
+	//   ... wearing gauntlets of ogre power ...
+	//   fighter.get_exceptional_strength();   // -> 100
+	int get_exceptional_strength() const noexcept;
 	int get_dexterity() const noexcept { return calculate_effective_stat(baseDexterity, BuffType::DEXTERITY); }
 	int get_constitution() const noexcept { return calculate_effective_stat(baseConstitution, BuffType::CONSTITUTION); }
 	int get_intelligence() const noexcept { return calculate_effective_stat(baseIntelligence, BuffType::INTELLIGENCE); }

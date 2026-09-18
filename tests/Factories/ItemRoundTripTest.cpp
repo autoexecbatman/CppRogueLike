@@ -100,6 +100,7 @@ void expect_same_item(const std::string& key, const ItemSnapshot& before, const 
 	EXPECT_EQ(before.params.wisBonus, after.wisBonus) << key << ".wisBonus";
 	EXPECT_EQ(before.params.chaBonus, after.chaBonus) << key << ".chaBonus";
 	EXPECT_EQ(before.params.isSetMode, after.isSetMode) << key << ".isSetMode";
+	EXPECT_EQ(before.params.exceptionalStrength, after.exceptionalStrength) << key << ".exceptionalStrength";
 
 	EXPECT_EQ(before.params.nutritionValue, after.nutritionValue) << key << ".nutritionValue";
 	EXPECT_EQ(before.params.acBonus, after.acBonus) << key << ".acBonus";

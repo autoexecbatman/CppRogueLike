@@ -144,6 +144,8 @@ struct JewelryAmulet
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
+	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
+	int exceptionalStrength{ 0 };
 };
 
 struct Gauntlets
@@ -157,6 +159,8 @@ struct Gauntlets
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
+	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
+	int exceptionalStrength{ 0 };
 };
 
 struct Girdle
@@ -170,6 +174,8 @@ struct Girdle
 	MagicalEffect effect{ MagicalEffect::NONE };
 	int bonus{ 0 };
 	bool isSetMode{ false };
+	// Exceptional Strength a setting item gives with an 18, 1-100 with 100 as 18/00.
+	int exceptionalStrength{ 0 };
 };
 
 struct Amulet

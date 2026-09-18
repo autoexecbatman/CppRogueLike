@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=StatBoostEquipmentTest.*:ItemRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\texceptional = std::max(exceptional, boost.exceptionalStrength);",
+      "mutated": "\t\t\t\texceptional = boost.exceptionalStrength;",
+      "catches": "a worn 18 without a percentile erasing the wearer's own"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\tstd::visit(from_setting_item, *worn.item->behavior);",
+      "mutated": "",
+      "catches": "worn 18/xx never counted"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\trecord[\"exceptionalStrength\"] = params.exceptionalStrength;",
+      "mutated": "",
+      "catches": "the field left out when the editor saves items.json"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem.exceptionalStrength = params.exceptionalStrength;",
+      "mutated": "",
+      "catches": "the data's percentile never reaching the item"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstatBoost.exceptionalStrength = source.at(\"exceptionalStrength\").get<int>();",
+      "mutated": "\tstatBoost.exceptionalStrength = 0;",
+      "catches": "worn 18/00 lost when a game is loaded"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "\"exceptionalStrength\": 100,",
+      "mutated": "\"exceptionalStrength\": 99,",
+      "catches": "ogre gauntlets short of 18/00"
+    }
+  ]
+}

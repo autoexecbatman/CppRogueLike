@@ -190,6 +190,7 @@ nlohmann::json encode_item_entry(const ItemEntry& entry)
 	record["wisBonus"] = params.wisBonus;
 	record["chaBonus"] = params.chaBonus;
 	record["isSetMode"] = params.isSetMode;
+	record["exceptionalStrength"] = params.exceptionalStrength;
 	record["nutritionValue"] = params.nutritionValue;
 	record["acBonus"] = params.acBonus;
 	record["ranged"] = params.ranged;
@@ -258,6 +259,7 @@ ItemEntry parse_item_entry(const std::string& key, const nlohmann::json& record)
 	params.wisBonus = required_field(record, key, "wisBonus");
 	params.chaBonus = required_field(record, key, "chaBonus");
 	params.isSetMode = required_field(record, key, "isSetMode");
+	params.exceptionalStrength = required_field(record, key, "exceptionalStrength");
 	params.nutritionValue = required_field(record, key, "nutritionValue");
 	params.acBonus = required_field(record, key, "acBonus");
 	params.ranged = required_field(record, key, "ranged");
@@ -289,6 +291,7 @@ T create_stat_behavior(const ItemParams& params)
 	item.effect = params.effect;
 	item.bonus = params.effectBonus;
 	item.isSetMode = params.isSetMode;
+	item.exceptionalStrength = params.exceptionalStrength;
 	return item;
 }
 

@@ -801,6 +801,10 @@ std::string ItemEditor::field_label(FieldId f) const
 	case FieldId::WIS_BONUS:        return "WIS Bonus";
 	case FieldId::CHA_BONUS:        return "CHA Bonus";
 	case FieldId::IS_SET_MODE:      return "Is Set Mode";
+	case FieldId::EXCEPTIONAL_STRENGTH:
+	{
+		return "Exceptional STR";
+	}
 	case FieldId::NUTRITION:        return "Nutrition Value";
 	case FieldId::TILE:             return "Tile";
 	default:                        return "???";
@@ -845,6 +849,10 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::WIS_BONUS:        return std::format("{}", p.wisBonus);
 	case FieldId::CHA_BONUS:        return std::format("{}", p.chaBonus);
 	case FieldId::IS_SET_MODE:      return p.isSetMode ? "yes" : "no";
+	case FieldId::EXCEPTIONAL_STRENGTH:
+	{
+		return std::format("{}", p.exceptionalStrength);
+	}
 	case FieldId::NUTRITION:        return std::format("{}", p.nutritionValue);
 	case FieldId::TILE:             return "(tile)";
 	default:                        return "";
@@ -944,6 +952,11 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 	case FieldId::CHA_BONUS:
 		p.chaBonus = clamp_val(p.chaBonus, delta, -18, 18);
 		break;
+	case FieldId::EXCEPTIONAL_STRENGTH:
+	{
+		p.exceptionalStrength = clamp_val(p.exceptionalStrength, delta, 0, 100);
+		break;
+	}
 	case FieldId::NUTRITION:
 		p.nutritionValue = clamp_val(p.nutritionValue, delta, 0, 9999);
 		break;

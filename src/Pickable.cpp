@@ -87,6 +87,7 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 	output["wisBonus"] = statBoost.wisBonus;
 	output["chaBonus"] = statBoost.chaBonus;
 	output["isSetMode"] = statBoost.isSetMode;
+	output["exceptionalStrength"] = statBoost.exceptionalStrength;
 }
 
 template <typename T>
@@ -99,6 +100,7 @@ void load_stat_boost(T& statBoost, const json& source)
 	statBoost.wisBonus = source.contains("wisBonus") ? source.at("wisBonus").get<int>() : 0;
 	statBoost.chaBonus = source.contains("chaBonus") ? source.at("chaBonus").get<int>() : 0;
 	statBoost.isSetMode = source.contains("isSetMode") ? source.at("isSetMode").get<bool>() : false;
+	statBoost.exceptionalStrength = source.at("exceptionalStrength").get<int>();
 }
 
 // Shared use() for stat-boost equipment (Gauntlets, Girdle, JewelryAmulet): puts the item

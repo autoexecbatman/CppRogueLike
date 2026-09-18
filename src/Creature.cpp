@@ -960,6 +960,33 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 }
 } // namespace
 
+int Creature::get_exceptional_strength() const noexcept
+{
+	int exceptional = exceptionalStrength;
+
+	// A worn item that sets Strength to 18 brings its own percentile; the higher counts.
+	auto from_setting_item = [&exceptional](const auto& boost)
+	{
+		using T = std::decay_t<decltype(boost)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			if (boost.isSetMode && boost.strBonus == 18)
+			{
+				exceptional = std::max(exceptional, boost.exceptionalStrength);
+			}
+		}
+	};
+	for (const EquippedItem& worn : equippedItems)
+	{
+		assert(worn.item && "an equipment slot holds a null item");
+		if (worn.item->behavior)
+		{
+			std::visit(from_setting_item, *worn.item->behavior);
+		}
+	}
+	return exceptional;
+}
+
 // AD&D 2e: an ability score is the creature's own, or the highest value any buff or worn
 // item sets it to if that is higher, plus every buff's and worn item's addition. Nothing
 // is written back, so what is removed takes exactly its own contribution with it.

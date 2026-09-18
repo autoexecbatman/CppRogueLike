@@ -21,6 +21,8 @@
 #include <memory>
 #include <string_view>
 
+#include <nlohmann/json.hpp>
+
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
@@ -35,6 +37,7 @@
 #include "src/Paths.h"
 #include "src/Pickable.h"
 #include "src/Player.h"
+#include "src/StrengthAttributes.h"
 
 class StatBoostEquipmentTest : public ::testing::Test
 {
@@ -156,6 +159,56 @@ TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 	ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH);
+}
+
+// Gauntlets of ogre power give "18/00 Strength" (DMG, PDF page 964): +3 to hit, +6 damage.
+TEST_F(StatBoostEquipmentTest, OgreGauntletsGiveEighteenHundred)
+{
+	put_on("gauntlets_of_ogre_power");
+
+	EXPECT_EQ(player->get_strength(), 18);
+	EXPECT_EQ(player->get_exceptional_strength(), 100);
+	const StrengthAttributes row = game.dataManager.strength_for(player->get_strength(), player->get_exceptional_strength());
+	EXPECT_EQ(row.hitProb, 3);
+	EXPECT_EQ(row.dmgAdj, 6);
+}
+
+// A fighter's own 18/50 is back when the gauntlets come off.
+TEST_F(StatBoostEquipmentTest, RemovingOgreGauntletsGivesBackTheWearersOwnPercentile)
+{
+	player->set_strength(18);
+	player->set_exceptional_strength(50);
+	put_on("gauntlets_of_ogre_power");
+	ASSERT_EQ(player->get_exceptional_strength(), 100);
+
+	take_off(EquipmentSlot::GAUNTLETS);
+
+	EXPECT_EQ(player->get_exceptional_strength(), 50);
+}
+
+// An item that sets 18 with no percentile leaves the wearer's own 18/50 alone.
+TEST_F(StatBoostEquipmentTest, AnEighteenWithoutAPercentileKeepsTheWearersOwn)
+{
+	player->set_strength(18);
+	player->set_exceptional_strength(50);
+
+	put_on("amulet_of_ogre_power");
+
+	EXPECT_EQ(player->get_exceptional_strength(), 50);
+}
+
+// Worn ogre gauntlets are still 18/00 after the game is saved and loaded.
+TEST_F(StatBoostEquipmentTest, WornOgreGauntletsSurviveASaveAndALoad)
+{
+	put_on("gauntlets_of_ogre_power");
+
+	nlohmann::json saved;
+	player->save(saved);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->healthPool = std::make_unique<HealthPool>(0);
+	loaded->load(saved);
+
+	EXPECT_EQ(loaded->get_exceptional_strength(), 100);
 }
 
 // Cursed gauntlets of fumbling will not come off: using them again uses no turn, they stay

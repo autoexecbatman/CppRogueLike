@@ -46,6 +46,7 @@ struct ItemParams
 	int wisBonus{ 0 };
 	int chaBonus{ 0 };
 	bool isSetMode{ false };
+	int exceptionalStrength{ 0 };
 
 	int nutritionValue{ 0 };
 	int acBonus{ 0 };
