@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Release --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Release/test_exe.exe --gtest_filter=ShopTransactionTest.*:TreasureGoldTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\t\t\t[[maybe_unused]] const auto stocked = add_item(shopInventory, std::move(item));\n\t\t\tassert(stocked.has_value());",
+      "mutated": "\t\t\tassert(add_item(shopInventory, std::move(item)).has_value());",
+      "catches": "stocking back inside the assert, so the shipped shop sells nothing"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\t[[maybe_unused]] const auto handedOver = add_item(player.inventoryData, std::move(player_item));\n\tassert(handedOver.has_value());",
+      "mutated": "\tassert(add_item(player.inventoryData, std::move(player_item)).has_value());",
+      "catches": "the purchase back inside the assert, taking the gold and handing over nothing"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\t\t\t[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed_item));\n\t\t\tassert(shelved.has_value());",
+      "mutated": "\t\t\tassert(add_item(shopInventory, std::move(*removed_item)).has_value());",
+      "catches": "the sale back inside the assert, destroying the item it paid for"
+    },
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\t[[maybe_unused]] const auto placed = add_item(*ctx.floorInventory, std::move(goldPile));\n\tassert(placed.has_value());",
+      "mutated": "\tassert(add_item(*ctx.floorInventory, std::move(goldPile)).has_value());",
+      "catches": "the treasure pile back inside the assert, so a shipped treasure room holds no gold"
+    }
+  ]
+}

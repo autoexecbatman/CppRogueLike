@@ -176,7 +176,8 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	// Through the registry, so a treasure pile is the same item as a floor pile: one
 	// number for what it pays and what it is worth, and a tile the item data owns.
 	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, *ctx.contentRegistry);
-	assert(add_item(*ctx.floorInventory, std::move(goldPile)).has_value());
+	[[maybe_unused]] const auto placed = add_item(*ctx.floorInventory, std::move(goldPile));
+	assert(placed.has_value());
 
 	// Generate other random items
 	for (int i = 0; i < itemCount; i++)

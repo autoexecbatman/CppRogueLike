@@ -82,7 +82,9 @@ void ShopKeeper::generate_initial_inventory(int dungeonLevel, GameContext& ctx)
 		std::unique_ptr<Item> item = generate_random_item_by_type(dungeonLevel, ctx);
 		if (item)
 		{
-			assert(add_item(shopInventory, std::move(item)).has_value());
+			// At most seven items into fifty slots, so stocking cannot overflow.
+			[[maybe_unused]] const auto stocked = add_item(shopInventory, std::move(item));
+			assert(stocked.has_value());
 		}
 	}
 }
@@ -243,7 +245,9 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// Copy behavior (variant is value-copyable)
 	player_item->behavior = item.behavior;
 
-	assert(add_item(player.inventoryData, std::move(player_item)).has_value());
+	// The full-pack check above is the only way this add can fail.
+	[[maybe_unused]] const auto handedOver = add_item(player.inventoryData, std::move(player_item));
+	assert(handedOver.has_value());
 
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
@@ -266,7 +270,8 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& pla
 	{
 		if (!is_inventory_full(shopInventory))
 		{
-			assert(add_item(shopInventory, std::move(*removed_item)).has_value());
+			[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed_item));
+			assert(shelved.has_value());
 		}
 	}
 
