@@ -103,6 +103,28 @@ ConsumableEffect parse_consumable_effect(std::string_view name)
 	throw std::runtime_error(std::format("ItemCreator: unknown consumable_effect '{}'", name));
 }
 
+// Which pool an enhanced spawn rule draws from. A rule naming anything else is a typo
+// in enhanced_rules.json rather than a third pool, so it is refused by name instead of
+// quietly becoming armour.
+//
+// Example:
+//   parse_enhancement_category("weapon");   // -> EnhancedItemCategory::WEAPON
+//   parse_enhancement_category("wepaon");
+//   // throws: ItemCreator: unknown enhancement_category 'wepaon'
+EnhancedItemCategory parse_enhancement_category(std::string_view name)
+{
+	if (name == "weapon")
+	{
+		return EnhancedItemCategory::WEAPON;
+	}
+	if (name == "armor")
+	{
+		return EnhancedItemCategory::ARMOR;
+	}
+
+	throw std::runtime_error(std::format("ItemCreator: unknown enhancement_category '{}'", name));
+}
+
 // ---------------------------------------------------------------------------
 // Enum encode helpers
 // ---------------------------------------------------------------------------
@@ -408,7 +430,8 @@ void ItemCreator::load(std::string_view path)
 	std::ifstream file(resolved);
 	if (!file.is_open())
 	{
-		return;
+		throw std::runtime_error(
+			std::format("ItemCreator::load -- cannot open '{}'", resolved.string()));
 	}
 
 	nlohmann::json root = nlohmann::json::parse(file);
@@ -636,7 +659,8 @@ void ItemCreator::load_enhanced_rules(std::string_view path)
 	std::ifstream file(resolved);
 	if (!file.is_open())
 	{
-		return;
+		throw std::runtime_error(
+			std::format("ItemCreator::load_enhanced_rules -- cannot open '{}'", resolved.string()));
 	}
 
 	nlohmann::json root = nlohmann::json::parse(file);
@@ -646,14 +670,12 @@ void ItemCreator::load_enhanced_rules(std::string_view path)
 	{
 		EnhancedItemSpawnRule rule;
 
-		std::string category = entry.at("enhancement_category").get<std::string>();
-		rule.enhancementCategory = (category == "weapon")
-			? EnhancedItemCategory::WEAPON
-			: EnhancedItemCategory::ARMOR;
+		rule.enhancementCategory = parse_enhancement_category(
+			entry.at("enhancement_category").get<std::string>());
 
 		rule.baseWeight = entry.at("base_weight").get<int>();
 		rule.levelMin = entry.at("level_minimum").get<int>();
-		rule.levelMax = entry.value("level_maximum", 0);
+		rule.levelMax = entry.at("level_maximum").get<int>();
 		rule.levelScaling = entry.at("level_scaling").get<float>();
 		rule.category = entry.at("category").get<std::string>();
 
