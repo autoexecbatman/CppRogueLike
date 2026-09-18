@@ -31,7 +31,8 @@ enum class ActorState
 	IS_PROTECTED,
 	IS_SILENCED,
 	IS_FLEEING,
-	CAN_WALK_WEBS
+	CAN_WALK_WEBS,
+	IS_SURPRISED
 };
 
 //==Actor==

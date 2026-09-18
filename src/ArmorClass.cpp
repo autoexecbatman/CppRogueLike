@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <format>
 
@@ -47,6 +48,12 @@ ArmorClassBreakdown ArmorClass::update(Creature& owner, GameContext& ctx)
 	}
 
 	return breakdown;
+}
+
+int ArmorClass::without_dexterity_bonus(const Creature& owner, GameContext& ctx) const
+{
+	// A bonus counts downward, so only a negative adjustment is taken back out.
+	return armorClass - std::min(0, calculate_dexterity_ac_bonus(owner, ctx));
 }
 
 [[nodiscard]] int ArmorClass::calculate_dexterity_ac_bonus(const Creature& owner, GameContext& ctx) const

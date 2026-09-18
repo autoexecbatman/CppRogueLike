@@ -5,7 +5,6 @@
 #include "AttackKind.h"
 #include "DamageInfo.h"
 #include "Persistent.h"
-#include "RandomDice.h"
 
 class Creature;
 struct GameContext;
@@ -39,6 +38,14 @@ protected:
 		GameContext& ctx);
 
 	BackstabInfo calculate_backstab_bonus(const Creature& owner) const noexcept;
+
+	// The armour class an attack on this target is rolled against: its own, or
+	// without its Dexterity bonus while it is surprised.
+	//
+	// Example, armour class 6 of which Dexterity 18 gives 4:
+	//   armor_class_attacked(player, ctx);   // -> 6
+	//   armor_class_attacked(player, ctx);   // -> 10 while the player is IS_SURPRISED
+	[[nodiscard]] int armor_class_attacked(const Creature& target, GameContext& ctx) const;
 
 	int calculate_to_hit_roll(
 		const Creature& attacker,
@@ -86,7 +93,6 @@ public:
 	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }
 	void set_damage_info(const DamageInfo& damage) noexcept { damageInfo = damage; }
-	int roll_damage(RandomDice* dice) const { return damageInfo.roll_damage(dice); }
 
 	// Serializes damageInfo — used by MonsterAttacker. PlayerAttacker overrides with no-ops.
 	void load(const json& j) override;

@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "Actor.h"
+#include "ArmorClass.h"
 #include "Creature.h"
 #include "DexterityAttributes.h"
 #include "Colors.h"
@@ -175,8 +176,14 @@ int Attacker::calculate_to_hit_roll(
 	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
-	int rollNeeded = attacker.get_thaco() - target.get_armor_class();
+	int rollNeeded = attacker.get_thaco() - armor_class_attacked(target, ctx);
 	int hitModifier = attackPenalty;
+
+	// Table 51: a surprised defender is +1 to hit.
+	if (target.has_state(ActorState::IS_SURPRISED))
+	{
+		hitModifier += 1;
+	}
 
 	// A missile attack takes the dexterity missile adjustment; a swing does not.
 	if (kind == AttackKind::RANGED)
@@ -299,8 +306,18 @@ void Attacker::log_attack_miss(
 		attackRoll,
 		rollNeeded,
 		attacker.get_thaco(),
-		target.get_armor_class(),
+		armor_class_attacked(target, ctx),
 		attackPenalty));
+}
+
+int Attacker::armor_class_attacked(const Creature& target, GameContext& ctx) const
+{
+	// Surprise costs the defender any Dexterity bonus for the instant it lasts.
+	if (target.has_state(ActorState::IS_SURPRISED))
+	{
+		return target.armorClass->without_dexterity_bonus(target, ctx);
+	}
+	return target.get_armor_class();
 }
 
 void Attacker::load(const json& j)

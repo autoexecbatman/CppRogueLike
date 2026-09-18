@@ -59,4 +59,13 @@ public:
 	// Reports rather than announces: the caller decides whether the breakdown is
 	// worth telling anyone about.
 	ArmorClassBreakdown update(Creature& owner, GameContext& ctx);
+
+	// The armour class a surprised defender stands at: any bonus for high Dexterity
+	// taken back out, a penalty for low Dexterity kept (PHB, Effects of Surprise).
+	//
+	// Example, armour class 10 made 6 by Dexterity 18:
+	//   armorClass->without_dexterity_bonus(player, ctx);   // -> 10
+	// Dexterity 5 made it 12, a penalty, which surprise does not lift:
+	//   armorClass->without_dexterity_bonus(player, ctx);   // -> 12
+	[[nodiscard]] int without_dexterity_bonus(const Creature& owner, GameContext& ctx) const;
 };

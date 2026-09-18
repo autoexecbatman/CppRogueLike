@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=SpiderAmbushTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t\t\tambushSprung = true;\n\t\t\t}",
+      "mutated": "\t\t\t\tambushSprung = true;\n\t\t\t\tif (distanceToPlayer <= 1)\n\t\t\t\t{\n\t\t\t\t\towner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);\n\t\t\t\t}\n\t\t\t}",
+      "catches": "a second strike on discovery, ahead of the sanctuary check"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t\t\tambushSprung = true;\n\t\t\t}",
+      "mutated": "\t\t\t\tambushSprung = true;\n\t\t\t\treturn;\n\t\t\t}",
+      "catches": "an ambush that announces itself and never bites"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (blocked_by_sanctuary(owner, ctx))",
+      "mutated": "\tif (false)",
+      "catches": "a spider that ignores sanctuary"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\towner.attacker->attack(target, AttackKind::MELEE, ctx);",
+      "mutated": "\ttarget.take_damage_and_check_death(ctx.dice->roll(1, 4), ctx, DamageType::PHYSICAL);",
+      "catches": "a bite that lands without an attack roll against armour class"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "mutated": "\treturn true;",
+      "catches": "an ambush that always surprises"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "mutated": "\treturn false;",
+      "catches": "an ambush that never surprises"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "mutated": "\treturn ctx.dice->roll(1, 10) <= SURPRISED_AT_OR_BELOW;",
+      "catches": "Dexterity ignored by the surprise roll"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\treturn ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "mutated": "\treturn ctx.dice->roll(1, 10) - reactionAdjustment <= SURPRISED_AT_OR_BELOW;",
+      "catches": "the reaction adjustment applied the wrong way round"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\tif (ambushSprung && !ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))",
+      "mutated": "\t\tif (!ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))",
+      "catches": "a surprise roll after every bite, ambush or not"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t\tctx.player()->remove_state(ActorState::IS_SURPRISED);",
+      "mutated": "",
+      "catches": "a player left surprised after the round"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\thitModifier += 1;",
+      "mutated": "",
+      "catches": "no +1 to hit a surprised defender"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\treturn target.armorClass->without_dexterity_bonus(target, ctx);",
+      "mutated": "\t\treturn target.get_armor_class();",
+      "catches": "a surprised defender keeping its Dexterity bonus"
+    },
+    {
+      "file": "src/ArmorClass.cpp",
+      "original": "\treturn armorClass - std::min(0, calculate_dexterity_ac_bonus(owner, ctx));",
+      "mutated": "\treturn armorClass - calculate_dexterity_ac_bonus(owner, ctx);",
+      "catches": "surprise lifting a low-Dexterity penalty too"
+    }
+  ]
+}

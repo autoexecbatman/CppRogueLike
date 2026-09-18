@@ -13,6 +13,8 @@
 #include "Colors.h"
 #include "AttackKind.h"
 #include "DamageInfo.h"
+#include "DataManager.h"
+#include "DexterityAttributes.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"
@@ -25,11 +27,24 @@
 // Spider AI constants
 namespace
 {
-	constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
-	constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
-	constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
+constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
+constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d10
 
+// Rolls the surprise check an ambush's victim makes (PHB, The Surprise Roll): 1d10
+// plus the Dexterity reaction adjustment, surprised at 3 or less. The roll is the
+// answer, so every call spends a die.
+//
+// Example, Dexterity 17, reaction adjustment +2:
+//   is_surprised(player, ctx);   // -> true on a 1, false on a 2 (2 + 2 is 4)
+bool is_surprised(const Creature& creature, GameContext& ctx)
+{
+	const int reactionAdjustment =
+		ctx.dataManager->get_dexterity_attributes().at(creature.get_dexterity() - 1).ReactionAdj;
+	return ctx.dice->roll(1, 10) + reactionAdjustment <= SURPRISED_AT_OR_BELOW;
 }
+} // namespace
 
 //=============================================================================
 // AiSpider Implementation
@@ -60,6 +75,9 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		poisonCooldown--;
 	}
 
+	// Whether this turn is the one the ambush was discovered in, close enough to strike.
+	bool ambushSprung = false;
+
 	// Handle ambush behavior - this was missing in the previous fix
 	if (isAmbushing)
 	{
@@ -70,36 +88,14 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		{
 			isAmbushing = false;
 
-			// If player is close when we're discovered, get a surprise attack
-			int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
+			// Discovered close by, it springs. Beside the player, the ambush is its
+			// ordinary bite below, after the sanctuary check.
+			const int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 			if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
 			{
-				// Message about being ambushed
 				ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
 				ctx.messageSystem->message(WHITE_BLACK_PAIR, " ambushes you from hiding!", true);
-
-				// If right next to player, get an immediate attack
-				if (distanceToPlayer <= 1)
-				{
-					// Surprise attack gets a damage bonus - use proper damage system
-					int normalDamage = owner.attacker->roll_damage(ctx.dice);
-					int bonusDamage = ctx.dice->roll(1, 2); // Ambush damage bonus
-					int totalDamage = normalDamage + bonusDamage;
-
-					ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, " strikes with the element of surprise for ");
-					ctx.messageSystem->message(WHITE_RED_PAIR, std::to_string(totalDamage));
-					ctx.messageSystem->message(WHITE_BLACK_PAIR, " damage!", true);
-
-					// Apply damage directly
-					ctx.player()->take_damage_and_check_death(totalDamage, ctx, DamageType::PHYSICAL);
-
-					// Also try for poison
-					if (can_poison_attack(ctx))
-					{
-						poison_attack(owner, *ctx.player(), ctx);
-					}
-				}
+				ambushSprung = true;
 			}
 		}
 		else
@@ -151,14 +147,16 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	{
 		// Directly trigger attack
 		ctx.messageSystem->log("Spider attempting attack with poison");
+		bite(owner, *ctx.player(), ctx);
 
-		// First do the regular attack
-		owner.attacker->attack(*ctx.player(), AttackKind::MELEE, ctx);
-
-		// Then try poison - now independent of the regular attack
-		if (can_poison_attack(ctx))
+		// PHB: an ambush's victim rolls for surprise after the initial attack, and a
+		// surprised victim takes one more round before it can act.
+		if (ambushSprung && !ctx.player()->is_dead() && is_surprised(*ctx.player(), ctx))
 		{
-			poison_attack(owner, *ctx.player(), ctx);
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are caught off guard!", true);
+			ctx.player()->add_state(ActorState::IS_SURPRISED);
+			bite(owner, *ctx.player(), ctx);
+			ctx.player()->remove_state(ActorState::IS_SURPRISED);
 		}
 
 		return;
@@ -243,14 +241,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 		Creature* target = ctx.map->get_actor(targetPosition, ctx);
 		if (target)
 		{
-			// Normal attack
-			owner.attacker->attack(*target, AttackKind::MELEE, ctx);
-
-			// Try poison attack
-			if (can_poison_attack(ctx))
-			{
-				poison_attack(owner, *target, ctx);
-			}
+			bite(owner, *target, ctx);
 		}
 		return;
 	}
@@ -335,6 +326,17 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 	if (bestMove != owner.position && !ctx.map->get_actor(bestMove, ctx))
 	{
 		owner.position = bestMove;
+	}
+}
+
+void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
+{
+	owner.attacker->attack(target, AttackKind::MELEE, ctx);
+
+	// The venom is rolled whether or not the bite landed.
+	if (can_poison_attack(ctx))
+	{
+		poison_attack(owner, target, ctx);
 	}
 }
 
