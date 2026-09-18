@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Release --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Release/test_exe.exe --gtest_filter=StatBoostEquipmentTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": " && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this);",
+      "mutated": ";",
+      "catches": "a pack too heavy for the item still chosen for it"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && ",
+      "mutated": "const bool fitsInPack = true && ",
+      "catches": "a full pack still chosen for the item"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tif (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))",
+      "mutated": "\t\tif (false)",
+      "catches": "an item taken off with nowhere to put it"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\t\tequippedItems.emplace_back(std::move(removed), slot);\n\t\t\treturn false;",
+      "mutated": "\t\t\tequippedItems.emplace_back(std::move(removed), slot);\n\t\t\treturn true;",
+      "catches": "an item kept on reported as taken off"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\t\tremoved->position = position;\n",
+      "mutated": "",
+      "catches": "an item set down where it was picked up, not at the wearer's feet"
+    }
+  ]
+}

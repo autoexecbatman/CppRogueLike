@@ -849,11 +849,37 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// Strength, which counts every worn item.
 		std::unique_ptr<Item> removed = std::move(it->item);
 		equippedItems.erase(it);
-		removed->remove_state(ActorState::IS_EQUIPPED);
 
-		// Return item to inventory
-		[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);
-		assert(restoreItemResult.has_value());
+		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
+		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
+		// nowhere at all to put it, it stays on. An item that comes off is never lost.
+		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this);
+		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
+		{
+			ctx.messageSystem->message(
+				WHITE_BLACK_PAIR,
+				std::format("There is nowhere to put the {}, so you keep it on.", removed->actorData.name),
+				true);
+			equippedItems.emplace_back(std::move(removed), slot);
+			return false;
+		}
+
+		removed->remove_state(ActorState::IS_EQUIPPED);
+		if (fitsInPack)
+		{
+			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);
+			assert(packed.has_value());
+		}
+		else
+		{
+			ctx.messageSystem->message(
+				WHITE_BLACK_PAIR,
+				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
+				true);
+			removed->position = position;
+			[[maybe_unused]] const auto setDown = InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
+			assert(setDown.has_value());
+		}
 
 		// Update armor class if armor or shield was unequipped
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)

@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <memory>
 #include <string_view>
 
@@ -31,6 +32,7 @@
 #include "src/ExperienceReward.h"
 #include "src/Game.h"
 #include "src/HealthPool.h"
+#include "src/InventoryData.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "src/ItemCreator.h"
@@ -222,6 +224,80 @@ TEST_F(StatBoostEquipmentTest, CursedGauntletsThatWillNotComeOffKeepTheirPenalty
 	EXPECT_FALSE(use_item(*gauntlets->behavior, *gauntlets, *player, ctx)) << "a failed removal used a turn";
 	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GAUNTLETS), gauntlets);
 	EXPECT_EQ(player->get_dexterity(), 8) << "the curse's -2 was lifted while the gauntlets stayed on";
+}
+
+namespace
+{
+// Adds an item of the given weight to the pack past its weight limit, as starting gear or a
+// load is added, so the pack is as heavy as a test needs.
+void load_pack(Player& player, int weight, GameContext& ctx)
+{
+	auto burden = ItemCreator::create("dagger", player.position, *ctx.contentRegistry);
+	burden->enhancement.weight = weight;
+	[[maybe_unused]] const auto added = InventoryOperations::add_item(player.inventoryData, std::move(burden));
+	ASSERT_TRUE(added.has_value());
+}
+
+// Whether the floor holds this item at the given tile.
+bool is_on_floor(const FloorInventory& floor, const Item* item, Vector2D tile)
+{
+	auto is_it = [item, tile](const std::unique_ptr<Item>& lying)
+	{
+		return lying.get() == item && lying->position == tile;
+	};
+	return std::ranges::any_of(floor.items, is_it);
+}
+
+} // namespace
+
+// A girdle carries Strength 12's limit of 60 up to 19's 95. Taken off under a load of 80,
+// the pack cannot take it back, so it is set down at the wearer's feet - never destroyed.
+TEST_F(StatBoostEquipmentTest, AGirdleTakenOffUnderTooHeavyALoadIsSetDown)
+{
+	put_on("girdle_of_hill_giant_strength");
+	const Item* girdle = player->get_equipped_item(EquipmentSlot::GIRDLE);
+	load_pack(*player, 80, ctx);
+	// Walked elsewhere since the girdle was picked up, so its old position is not the answer.
+	player->position = Vector2D{ 3, 4 };
+
+	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
+
+	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GIRDLE), nullptr);
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, girdle, player->position)) << "the girdle was destroyed";
+}
+
+// A full pack refuses whatever the weight: the item goes to the floor.
+TEST_F(StatBoostEquipmentTest, AnItemTakenOffIntoAFullPackIsSetDown)
+{
+	put_on("gauntlets_of_ogre_power");
+	const Item* gauntlets = player->get_equipped_item(EquipmentSlot::GAUNTLETS);
+	while (!InventoryOperations::is_inventory_full(player->inventoryData))
+	{
+		load_pack(*player, 0, ctx);
+	}
+
+	EXPECT_TRUE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
+
+	EXPECT_TRUE(is_on_floor(*ctx.floorInventory, gauntlets, player->position)) << "the gauntlets were destroyed";
+}
+
+// With nowhere to put it - a full pack and a full floor - the item stays on.
+TEST_F(StatBoostEquipmentTest, AnItemWithNowhereToGoStaysOn)
+{
+	put_on("gauntlets_of_ogre_power");
+	const Item* gauntlets = player->get_equipped_item(EquipmentSlot::GAUNTLETS);
+	while (!InventoryOperations::is_inventory_full(player->inventoryData))
+	{
+		load_pack(*player, 0, ctx);
+	}
+	FloorInventory crowded{ 1 };
+	[[maybe_unused]] const auto placed = InventoryOperations::add_item(crowded, ItemCreator::create("dagger", player->position, *ctx.contentRegistry));
+	ctx.floorInventory = &crowded;
+
+	EXPECT_FALSE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
+
+	EXPECT_EQ(player->get_equipped_item(EquipmentSlot::GAUNTLETS), gauntlets) << "the gauntlets came off into nowhere";
+	EXPECT_EQ(player->get_strength(), 18);
 }
 
 // The rule is the creature's, not the player's: a monster wearing a girdle has its Strength.

@@ -45,8 +45,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tequippedItems.erase(it);\n\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n\n\t\t// Return item to inventory\n\t\t[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);\n\t\tassert(restoreItemResult.has_value());",
-      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n\n\t\t// Return item to inventory\n\t\t[[maybe_unused]] const auto restoreItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);\n\t\tassert(restoreItemResult.has_value());\n\t\tequippedItems.erase(std::ranges::find_if(equippedItems, matches_slot(slot)));",
+      "original": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tequippedItems.erase(it);\n",
+      "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n",
       "catches": "the slot list read while it holds an emptied slot"
     }
   ]
