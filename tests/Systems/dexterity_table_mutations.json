@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DexterityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/json/dexterity.json",
+      "original": "\"Dex\": 7,\n\t\t\"ReactionAdj\": 0,\n\t\t\"MissileAttackAdj\": 0,\n\t\t\"DefensiveAdj\": 0",
+      "mutated": "\"Dex\": 7,\n\t\t\"ReactionAdj\": 0,\n\t\t\"MissileAttackAdj\": 0,\n\t\t\"DefensiveAdj\": 1",
+      "catches": "Dexterity 7 penalising armour class again"
+    },
+    {
+      "file": "src/json/dexterity.json",
+      "original": "\"Dex\": 17,\n\t\t\"ReactionAdj\": 2",
+      "mutated": "\"Dex\": 17,\n\t\t\"ReactionAdj\": 1",
+      "catches": "a wrong reaction adjustment"
+    },
+    {
+      "file": "src/json/dexterity.json",
+      "original": "\"Dex\": 3,\n\t\t\"ReactionAdj\": -3,\n\t\t\"MissileAttackAdj\": -3",
+      "mutated": "\"Dex\": 3,\n\t\t\"ReactionAdj\": -3,\n\t\t\"MissileAttackAdj\": -2",
+      "catches": "a wrong missile adjustment"
+    }
+  ]
+}
