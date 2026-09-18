@@ -259,21 +259,34 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	return true;
 }
 
-bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& player)
+bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& seller, Creature& owner)
 {
-	int price = get_sell_price(item);
+	const int price = get_sell_price(item);
 
-	player.adjust_gold(price);
-
-	auto removed_item = remove_item(player.inventoryData, item);
-	if (removed_item.has_value())
+	// Both refusals come before anything moves, so a refused sale leaves the pack, the
+	// shelves and both purses as they were.
+	if (is_inventory_full(shopInventory))
 	{
-		if (!is_inventory_full(shopInventory))
-		{
-			[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed_item));
-			assert(shelved.has_value());
-		}
+		ctx.messageSystem->message(WHITE_RED_PAIR, "Shopkeeper's inventory is full.", true);
+		return false;
 	}
+	if (owner.get_gold() < price)
+	{
+		ctx.messageSystem->message(WHITE_RED_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+		return false;
+	}
+
+	// The sell menu offers only what is in the pack, so the item is always found.
+	auto removed = remove_item(seller.inventoryData, item);
+	assert(removed.has_value() && "process_player_sale called with an item the seller does not hold");
+
+	// Room was checked above, so shelving cannot fail. The item lives on in the shop,
+	// which keeps the reference valid for the message below.
+	[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed));
+	assert(shelved.has_value());
+
+	owner.adjust_gold(-price);
+	seller.adjust_gold(price);
 
 	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You sold ");
 	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name

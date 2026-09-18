@@ -35,13 +35,7 @@ void MenuSell::populate_items(std::span<std::unique_ptr<Item>> item)
 			// Display item name with right-aligned sell price
 			std::string itemName = item->actorData.name;
 
-			// Get correct sell price from shopkeeper's shop system
-			int sellPrice = item->get_value();
-			if (shopkeeper.shop != nullptr)
-			{
-				sellPrice = shopkeeper.shop->get_sell_price(*item);
-			}
-
+			const int sellPrice = shopkeeper.shop->get_sell_price(*item);
 			std::string goldText = "(" + std::to_string(sellPrice) + "g)";
 
 			// Pad to align gold values (assuming max name length ~20)
@@ -85,58 +79,15 @@ void MenuSell::handle_sell(Creature& shopkeeper, Creature& seller, GameContext& 
 		return;
 	}
 
-	const Item* item = InventoryOperations::get_item_at(seller.inventoryData, currentState);
-	if (!item)
+	Item* item = InventoryOperations::get_item_at(seller.inventoryData, currentState);
+	assert(item && "MenuSell: the pack holds a null item");
+
+	// The shop decides and reports; this menu only keeps its cursor inside the pack.
+	if (shopkeeper.shop->process_player_sale(ctx, *item, seller, shopkeeper)
+		&& currentState >= InventoryOperations::get_item_count(seller.inventoryData)
+		&& !InventoryOperations::is_inventory_empty(seller.inventoryData))
 	{
-		ctx.messageSystem->log("Error: Attempted to sell a null item.");
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Error: Invalid item.", true);
-		return;
-	}
-
-	// Use shopkeeper's pricing system if available
-	int price = item->get_value();
-	if (shopkeeper.shop != nullptr)
-	{
-		price = shopkeeper.shop->get_sell_price(*item);
-	}
-
-	if (shopkeeper.get_gold() >= price)
-	{
-		// Remove item from seller
-		auto removed_item = InventoryOperations::remove_item_at(seller.inventoryData, currentState);
-		if (removed_item.has_value())
-		{
-			shopkeeper.adjust_gold(-price);
-			seller.adjust_gold(price);
-
-			auto add_result = InventoryOperations::add_item(shopkeeper.inventoryData, std::move(*removed_item));
-			if (!add_result.has_value())
-			{
-				[[maybe_unused]] const auto returnToSellerResult = InventoryOperations::add_item(seller.inventoryData, std::move(*removed_item));
-				assert(returnToSellerResult.has_value());
-				shopkeeper.adjust_gold(price);
-				seller.adjust_gold(-price);
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper's inventory is full.", true);
-				return;
-			}
-
-			// Adjust currentState bounds
-			if (currentState >= InventoryOperations::get_item_count(seller.inventoryData) && !InventoryOperations::is_inventory_empty(seller.inventoryData))
-			{
-				currentState = InventoryOperations::get_item_count(seller.inventoryData) - 1;
-			}
-
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Item sold successfully.", true);
-		}
-		else
-		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Transaction failed.", true);
-		}
-	}
-	else
-	{
-		ctx.messageSystem->log("Shopkeeper does not have enough gold to buy the item.");
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+		currentState = InventoryOperations::get_item_count(seller.inventoryData) - 1;
 	}
 }
 
@@ -144,6 +95,8 @@ MenuSell::MenuSell(Creature& shopkeeper, Creature& player, GameContext& ctx)
 	: player(player), shopkeeper(shopkeeper)
 {
 	assert(ctx.renderer && "MenuSell: renderer required before construction");
+	// Every way into the trade menu requires a shop, so there is always one to sell to.
+	assert(shopkeeper.shop && "MenuSell opened on a creature with no shop");
 	menuHeight = static_cast<size_t>(ctx.renderer->get_viewport_rows() - ctx.renderer->get_gui_reserve_rows());
 	menuWidth = static_cast<size_t>(ctx.renderer->get_viewport_cols());
 

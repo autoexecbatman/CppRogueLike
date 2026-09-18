@@ -20,16 +20,34 @@
       "catches": "the purchase back inside the assert, taking the gold and handing over nothing"
     },
     {
-      "file": "src/ShopKeeper.cpp",
-      "original": "\t\t\t[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed_item));\n\t\t\tassert(shelved.has_value());",
-      "mutated": "\t\t\tassert(add_item(shopInventory, std::move(*removed_item)).has_value());",
-      "catches": "the sale back inside the assert, destroying the item it paid for"
-    },
-    {
       "file": "src/ItemFactory.cpp",
       "original": "\t[[maybe_unused]] const auto placed = add_item(*ctx.floorInventory, std::move(goldPile));\n\tassert(placed.has_value());",
       "mutated": "\tassert(add_item(*ctx.floorInventory, std::move(goldPile)).has_value());",
       "catches": "the treasure pile back inside the assert, so a shipped treasure room holds no gold"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\t[[maybe_unused]] const auto shelved = add_item(shopInventory, std::move(*removed));\n\tassert(shelved.has_value());",
+      "mutated": "\tassert(add_item(shopInventory, std::move(*removed)).has_value());",
+      "catches": "shelving back inside the assert, so a shipped sale shelves nothing"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\tif (is_inventory_full(shopInventory))\n\t{\n\t\tctx.messageSystem->message(WHITE_RED_PAIR, \"Shopkeeper's inventory is full.\", true);\n\t\treturn false;\n\t}",
+      "mutated": "",
+      "catches": "a sale to full shelves going ahead, which takes the item and cannot shelve it"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\tif (owner.get_gold() < price)\n\t{",
+      "mutated": "\tif (false)\n\t{",
+      "catches": "a shopkeeper buying what it cannot pay for"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\towner.adjust_gold(-price);\n",
+      "mutated": "",
+      "catches": "the seller paid with gold from nowhere, as before"
     }
   ]
 }

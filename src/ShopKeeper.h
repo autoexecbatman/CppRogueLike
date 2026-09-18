@@ -91,7 +91,14 @@ public:
 
 	// Transaction handling
 	bool process_player_purchase(GameContext& ctx, Item& item, Creature& player);
-	bool process_player_sale(GameContext& ctx, Item& item, Creature& player);
+	// Buys an item from the seller's pack onto these shelves, paid for by the owner - the
+	// shopkeeper creature, whose purse is the shop's. Refuses, moving nothing, when the
+	// shelves are full or the owner cannot pay. Answers whether the sale happened.
+	//
+	// Example:
+	//   shop.process_player_sale(ctx, potion, player, shopkeeper);   // -> true, potion shelved
+	//   shop.process_player_sale(ctx, potion, player, brokeKeeper);  // -> false, nothing moved
+	bool process_player_sale(GameContext& ctx, Item& item, Creature& seller, Creature& owner);
 
 	// Static utility function for creating random shopkeepers
 	static std::unique_ptr<ShopKeeper> create_random_shopkeeper();
