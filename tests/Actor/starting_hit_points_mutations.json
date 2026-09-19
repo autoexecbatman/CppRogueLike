@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=StartingHitPointsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->d10();",
+      "catches": "every class rolling the fighter's d10 again"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + get_hit_die();",
+      "catches": "the die's maximum taken in place of a roll, the reading the owner rejected"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
+      "mutated": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die() - 1);",
+      "catches": "a die one face short"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());",
+      "mutated": "ctx.dice->roll(1, get_hit_die());",
+      "catches": "the cushion lost, the book's 1st level alone"
+    },
+    {
+      "file": "src/GameBalance.h",
+      "original": "            inline constexpr int STARTING_CUSHION = 20;",
+      "mutated": "            inline constexpr int STARTING_CUSHION = 21;",
+      "catches": "a cushion other than the owner's 20"
+    }
+  ]
+}

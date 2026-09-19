@@ -19,6 +19,7 @@
 #include "WeaponDamageRegistry.h"
 #include "GameContext.h"
 #include "CombatProgressionTables.h"
+#include "GameBalance.h"
 #include "ItemCreator.h"
 #include "ItemClassification.h"
 #include "ItemIdentification.h"
@@ -234,7 +235,8 @@ void Player::roll_new_character(GameContext& ctx)
 	set_wisdom(roll3d6());
 	set_charisma(roll3d6());
 
-	const int playerHp = 20 + ctx.dice->d10();
+	// The owner's cushion plus one roll of the class's own die, set before this runs.
+	const int playerHp = GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());
 	const int playerDr = 1;
 	const int playerXp = 0;
 	const int playerAC = 10;

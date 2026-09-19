@@ -4,9 +4,10 @@
 // between two values the creature has held.
 //
 // Expected values come from src/json/constitution.json, the table the game
-// loads: Con 17 carries HPAdj +3 and Con 18 carries +4. A new character rolls
-// 20 + d10 base hit points at level 1, so with the die forced to 5 the base is
-// 25, the bonus makes it 28, and a point of Constitution adds one more.
+// loads: Con 17 carries HPAdj +3 and Con 18 carries +4. A new character starts
+// with 20 plus a roll of its class die, so with the die forced to 4 - a face every
+// class's die has - the base is 24, a fighter's bonus makes it 27, and a point of
+// Constitution adds one more.
 //
 // The defect this pins: the tracker's remembered score started at 0, a value no
 // creature ever had, so the first tick of every new character logged
@@ -24,7 +25,7 @@
 namespace
 {
 
-constexpr int BASE_HP = 25;
+constexpr int BASE_HP = 24;
 constexpr int BONUS_AT_15 = 1;
 constexpr int BONUS_AT_17 = 3;
 constexpr int BONUS_AT_18 = 4;
@@ -60,9 +61,8 @@ protected:
 		{
 			mock.dice.set_next_roll(3);
 		}
-		// Then the d10 of starting hit points.
-		mock.dice.set_next_roll(5);
-
+		// Then the class die of starting hit points, on a face every class's die has.
+		mock.dice.set_next_roll(4);
 	}
 
 	// Rolls a character of the given class with the forced scores above. The
@@ -169,7 +169,7 @@ TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
 	{
 		mock.dice.set_next_roll(3);
 	}
-	mock.dice.set_next_roll(5);
+	mock.dice.set_next_roll(4);
 	make_player("Wizard");
 	ASSERT_EQ(player->get_constitution(), 3);
 

@@ -60,6 +60,10 @@ namespace GameBalance
             // Wizard: one d4 through 10th, then 1 per level.
             inline constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
             inline constexpr int WIZARD_FLAT_GAIN = 1;
+
+            // A new character starts with this many on top of one roll of its class die.
+            // Not the book's: the owner's cushion over the early levels' difficulty.
+            inline constexpr int STARTING_CUSHION = 20;
         }
 
         // Fighter Progression
