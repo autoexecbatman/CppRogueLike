@@ -27,14 +27,14 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\thitModifier += ctx.dataManager->strength_for(attacker.get_strength(), attacker.get_exceptional_strength()).hitProb;",
-      "mutated": "",
+      "original": "\tint hitModifier = attackPenalty + strengthHit;",
+      "mutated": "\tint hitModifier = attackPenalty;",
       "catches": "Strength's hit adjustment never reaching the attack roll"
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\tconst StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength());",
-      "mutated": "\tconst StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), 0);",
+      "original": "\t\tctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength()),",
+      "mutated": "\t\tctx.dataManager->strength_for(owner.get_strength(), 0),",
       "catches": "exceptional Strength left out of the damage"
     },
     {

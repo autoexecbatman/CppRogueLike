@@ -3350,7 +3350,7 @@
         "handRequirement": "one_handed",
         "intBonus": 0,
         "isSetMode": false,
-        "itemClass": "bow",
+        "itemClass": "sling",
         "levelMax": 0,
         "levelMin": 1,
         "levelScaling": 0.0,

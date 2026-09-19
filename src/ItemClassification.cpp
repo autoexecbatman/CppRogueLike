@@ -21,6 +21,7 @@ ItemCategory get_category(ItemClass itemClass)
 	case ItemClass::STAFF:
 	case ItemClass::BOW:
 	case ItemClass::CROSSBOW:
+	case ItemClass::SLING:
 		return ItemCategory::WEAPON;
 
 	case ItemClass::ARMOR:
@@ -111,6 +112,7 @@ ItemClass item_class_from_string(const std::string& typeName)
 		{ "staff", ItemClass::STAFF },
 		{ "bow", ItemClass::BOW },
 		{ "crossbow", ItemClass::CROSSBOW },
+		{ "sling", ItemClass::SLING },
 		{ "armor", ItemClass::ARMOR },
 		{ "shield", ItemClass::SHIELD },
 		{ "helmet", ItemClass::HELMET },

@@ -22,8 +22,11 @@
 #include "MessageSystem.h"
 #include "StrengthAttributes.h"
 #include "Attacker.h"
+#include "AttackStrength.h"
 #include "DamageResolver.h"
 #include "DiceExpr.h"
+#include "EquipmentSlot.h"
+#include "Item.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -73,8 +76,12 @@ void Attacker::perform_single_attack(
 		return;
 	}
 
-	// The attacker's row of Table 1, exceptional Strength included.
-	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength());
+	// The part of the attacker's Table 1 row this attack takes, by what fires it.
+	const Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;
+	const AttackStrength::Adjustment strengthOnAttack = AttackStrength::adjustment(
+		ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength()),
+		kind,
+		missileWeapon);
 
 	const int attackRoll = ctx.dice->d20();
 
@@ -88,12 +95,12 @@ void Attacker::perform_single_attack(
 
 	// Calculate backstab and to-hit roll
 	const BackstabInfo backstab = calculate_backstab_bonus(owner);
-	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, backstab, kind, ctx);
+	const int rollNeeded = calculate_to_hit_roll(owner, target, attackPenalty, strengthOnAttack.hit, backstab, kind, ctx);
 	const bool isHit = (attackRoll >= rollNeeded);
 
 	if (isHit)
 	{
-		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthRow.dmgAdj, backstab, ctx);
+		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthOnAttack.damage, backstab, ctx);
 		const int finalDamage = std::max(0, baseDamage - target.get_dr());
 
 		log_attack_hit(
@@ -105,7 +112,7 @@ void Attacker::perform_single_attack(
 			finalDamage,
 			damageRoll,
 			attackDamage,
-			strengthRow.dmgAdj,
+			strengthOnAttack.damage,
 			target.get_dr(),
 			handName,
 			ctx);
@@ -178,24 +185,19 @@ int Attacker::calculate_to_hit_roll(
 	const Creature& attacker,
 	const Creature& target,
 	int attackPenalty,
+	int strengthHit,
 	const BackstabInfo& backstab,
 	AttackKind kind,
 	GameContext& ctx) const noexcept
 {
 	// AD&D 2e: THAC0 - AC = roll needed
 	int rollNeeded = attacker.get_thaco() - armor_class_attacked(target, ctx);
-	int hitModifier = attackPenalty;
+	int hitModifier = attackPenalty + strengthHit;
 
 	// Table 51: a surprised defender is +1 to hit.
 	if (target.has_state(ActorState::IS_SURPRISED))
 	{
 		hitModifier += 1;
-	}
-
-	// A swing takes Strength's hit adjustment (PHB page 181, "always applied to melees").
-	if (kind == AttackKind::MELEE)
-	{
-		hitModifier += ctx.dataManager->strength_for(attacker.get_strength(), attacker.get_exceptional_strength()).hitProb;
 	}
 
 	// A missile attack takes the dexterity missile adjustment; a swing does not.

@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=AttackStrengthTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
+      "mutated": "\t\treturn Adjustment{ row.hitProb, std::min(row.dmgAdj, 0) };",
+      "catches": "a bow taking a strong arm's hit bonus"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
+      "mutated": "\t\treturn Adjustment{ std::min(row.hitProb, 0), row.dmgAdj };",
+      "catches": "a bow taking a strong arm's damage bonus"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\treturn Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };",
+      "mutated": "\t\treturn Adjustment{};",
+      "catches": "a weak arm drawing a bow as well as any other"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\tcase ItemClass::CROSSBOW:\n\tcase ItemClass::SLING:\n",
+      "mutated": "\tcase ItemClass::SLING:\n",
+      "catches": "a crossbow taking the arm's strength"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\tcase ItemClass::CROSSBOW:\n\tcase ItemClass::SLING:\n",
+      "mutated": "\tcase ItemClass::CROSSBOW:\n",
+      "catches": "a sling taking the arm's strength"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\tif (kind == AttackKind::MELEE || missileWeapon == nullptr)\n\t{\n\t\treturn wholeRow;\n\t}",
+      "mutated": "\tif (kind == AttackKind::MELEE)\n\t{\n\t\treturn wholeRow;\n\t}\n\tif (missileWeapon == nullptr)\n\t{\n\t\treturn Adjustment{};\n\t}",
+      "catches": "a natural or thrown missile losing the arm's strength"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tconst Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;",
+      "mutated": "\tconst Item* missileWeapon = nullptr;",
+      "catches": "the attack never asking what it fires"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tint hitModifier = attackPenalty + strengthHit;",
+      "mutated": "\tint hitModifier = attackPenalty;",
+      "catches": "Strength dropped from the roll to hit"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tconst int baseDamage = calculate_damage_with_backstab(damageRoll, strengthOnAttack.damage, backstab, ctx);",
+      "mutated": "\t\tconst int baseDamage = calculate_damage_with_backstab(damageRoll, 0, backstab, ctx);",
+      "catches": "Strength dropped from damage"
+    },
+    {
+      "file": "src/ItemClassification.h",
+      "original": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;",
+      "mutated": "\treturn itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;",
+      "catches": "a sling that cannot be fired"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "        \"itemClass\": \"sling\",",
+      "mutated": "        \"itemClass\": \"bow\",",
+      "catches": "the sling classed as a bow again"
+    }
+  ]
+}

@@ -22,6 +22,7 @@ enum class ItemClass
 	STAFF,
 	BOW,
 	CROSSBOW,
+	SLING,
 
 	// Armor & Protection
 	ARMOR,
@@ -81,7 +82,8 @@ inline bool is_weapon(ItemClass itemClass)
 		itemClass == ItemClass::MACE ||
 		itemClass == ItemClass::STAFF ||
 		itemClass == ItemClass::BOW ||
-		itemClass == ItemClass::CROSSBOW;
+		itemClass == ItemClass::CROSSBOW ||
+		itemClass == ItemClass::SLING;
 }
 
 inline bool is_armor(ItemClass itemClass)
@@ -150,7 +152,7 @@ inline bool is_jewelry(ItemClass itemClass)
 // Ranged weapon checking
 inline bool is_ranged_weapon(ItemClass itemClass)
 {
-	return itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW;
+	return itemClass == ItemClass::BOW || itemClass == ItemClass::CROSSBOW || itemClass == ItemClass::SLING;
 }
 
 // Equipment slot detection
@@ -216,6 +218,11 @@ inline std::string_view encode_item_class(ItemClass itemClass)
 	case ItemClass::CROSSBOW:
 	{
 		return "crossbow";
+	}
+
+	case ItemClass::SLING:
+	{
+		return "sling";
 	}
 
 	case ItemClass::ARMOR:
@@ -333,6 +340,10 @@ inline ItemClass parse_item_class(std::string_view name)
 	if (name == "crossbow")
 	{
 		return ItemClass::CROSSBOW;
+	}
+	if (name == "sling")
+	{
+		return ItemClass::SLING;
 	}
 	if (name == "armor")
 	{

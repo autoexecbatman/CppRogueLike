@@ -28,6 +28,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/DamageInfoTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WeaponDamageRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackKindTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackStrengthTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/AttackerTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/WornResistanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SavingThrowTest.cpp
@@ -114,6 +115,7 @@ set(PARENT_SOURCES
     # Actor
     ${PARENT_SOURCE_DIR}/Actor.cpp
     ${PARENT_SOURCE_DIR}/Attacker.cpp
+    ${PARENT_SOURCE_DIR}/AttackStrength.cpp
     ${PARENT_SOURCE_DIR}/MonsterAttacker.cpp
     ${PARENT_SOURCE_DIR}/PlayerAttacker.cpp
     ${PARENT_SOURCE_DIR}/Container.cpp

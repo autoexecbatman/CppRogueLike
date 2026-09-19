@@ -61,6 +61,7 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 	{ ItemClass::STAFF, MimicBonusType::ATTACK },
 	{ ItemClass::BOW, MimicBonusType::ATTACK },
 	{ ItemClass::CROSSBOW, MimicBonusType::ATTACK },
+	{ ItemClass::SLING, MimicBonusType::ATTACK },
 };
 
 // Single source of truth: which item appearances a mimic can adopt.

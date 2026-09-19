@@ -245,6 +245,12 @@ int TargetingSystem::get_weapon_range(const Item* weapon)
 		return 6;
 	}
 
+	// The reach a sling had while it was classed as a bow.
+	case ItemClass::SLING:
+	{
+		return 5;
+	}
+
 	default:
 	{
 		return 4;

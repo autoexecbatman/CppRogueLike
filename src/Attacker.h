@@ -47,10 +47,13 @@ protected:
 	//   armor_class_attacked(player, ctx);   // -> 10 while the player is IS_SURPRISED
 	[[nodiscard]] int armor_class_attacked(const Creature& target, GameContext& ctx) const;
 
+	// The d20 an attack needs. strengthHit is the part of Strength's hit adjustment
+	// this attack takes, which AttackStrength::adjustment decides.
 	int calculate_to_hit_roll(
 		const Creature& attacker,
 		const Creature& target,
 		int attackPenalty,
+		int strengthHit,
 		const BackstabInfo& backstab,
 		AttackKind kind,
 		GameContext& ctx) const noexcept;
