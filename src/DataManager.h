@@ -5,6 +5,7 @@
 
 #include "CharismaAttributes.h"
 #include "ConstitutionAttributes.h"
+#include "CreatureClass.h"
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
 #include "StrengthAttributes.h"
@@ -50,12 +51,23 @@ public:
 	[[nodiscard]] StrengthAttributes strength_for(int score, int exceptional) const;
 
 	// The Table 3 row a Constitution score reads, with the same edges as dexterity_for.
-	// Its hit point column is the warrior's; ConstitutionTracker caps it for other classes.
+	// Its hit point column is the warrior's; constitution_hit_point_adjustment caps it for
+	// other classes, and is what a hit point reader asks.
 	//
 	// Example:
 	//   dataManager.constitution_for(17).HPAdj;   // -> 3
 	//   dataManager.constitution_for(20).HPAdj;   // -> 5
 	[[nodiscard]] ConstitutionAttributes constitution_for(int score) const;
+
+	// The hit points a Constitution score adds to each hit die, by class. Table 3's own
+	// footnote: the bonus above +2 belongs to warriors, every other class stops at +2, and
+	// a penalty is never capped. The score reads with constitution_for's edges.
+	//
+	// Example:
+	//   dataManager.constitution_hit_point_adjustment(17, CreatureClass::FIGHTER); // -> 3
+	//   dataManager.constitution_hit_point_adjustment(17, CreatureClass::WIZARD); // -> 2
+	//   dataManager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD); // -> -2
+	[[nodiscard]] int constitution_hit_point_adjustment(int score, CreatureClass creatureClass) const;
 
 private:
 	// Data storage

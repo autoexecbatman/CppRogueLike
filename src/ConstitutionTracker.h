@@ -3,8 +3,6 @@
 #include <cstdint>
 #include <optional>
 
-#include "CreatureClass.h"
-
 class Creature;
 struct GameContext;
 
@@ -16,10 +14,6 @@ private:
     // score it did not have.
     std::optional<int> lastConstitution{};
 
-    // The hit point adjustment for a score, by class. Player's Handbook Table 3:
-    // the table's bonus above +2 belongs to warriors; every other class stops at
-    // +2, and a penalty is never capped. A score off the table adjusts by 0.
-    [[nodiscard]] int calculate_constitution_hp_bonus_for_value(int constitution, CreatureClass creatureClass, GameContext& ctx) const;
     [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
 
 public:

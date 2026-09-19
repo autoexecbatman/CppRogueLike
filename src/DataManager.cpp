@@ -15,6 +15,7 @@
 // Include only the struct definitions
 #include "CharismaAttributes.h"
 #include "ConstitutionAttributes.h"
+#include "CreatureClass.h"
 #include "DexterityAttributes.h"
 #include "IntelligenceAttributes.h"
 #include "StrengthAttributes.h"
@@ -95,6 +96,9 @@ Row row_for(const std::vector<Row>& table, int score)
 	}
 	return table.at(score - 1);
 }
+
+// Player's Handbook Table 3 grants more than +2 to warriors alone.
+constexpr int NON_WARRIOR_BONUS_CAP = 2;
 } // namespace
 
 DexterityAttributes DataManager::dexterity_for(int score) const
@@ -122,6 +126,19 @@ StrengthAttributes DataManager::strength_for(int score, int exceptional) const
 ConstitutionAttributes DataManager::constitution_for(int score) const
 {
 	return row_for(constitutionAttributes, score);
+}
+
+int DataManager::constitution_hit_point_adjustment(int score, CreatureClass creatureClass) const
+{
+	const int tableAdjustment = constitution_for(score).HPAdj;
+
+	// The table is the warrior column. Only a bonus is capped, so a penalty
+	// passes through untouched for every class.
+	if (is_warrior(creatureClass))
+	{
+		return tableAdjustment;
+	}
+	return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);
 }
 
 std::vector<Weapons> DataManager::load_weapons(const std::string& filename, MessageSystem& message_system)

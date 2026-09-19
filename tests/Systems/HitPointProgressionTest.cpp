@@ -8,11 +8,25 @@
 //   Priest,  Table 23: one d8 through 9th, then 2 per level
 //   Rogue,   Table 25: one d6 through 10th, then 2 per level
 //   Wizard,  Table 20: one d4 through 10th, then 1 per level
+//
+// And the Constitution bonus each rolled die carries, Table 3 (PDF pages 33-34 of the
+// 2e archive): the warrior column above +2 for warriors only, +2 at most for every
+// other class, a penalty never capped, and no die worth less than 1.
+//
+// Run it:
+//
+//     cmake --build build --config Debug --target test_exe
+//     build\bin\Debug\test_exe.exe --gtest_filter=HitPointProgressionTest.*:HitPointGainTest.*
 
 #include <gtest/gtest.h>
 
+#include <array>
+
+#include "src/Creature.h"
 #include "src/CreatureClass.h"
+#include "src/ExperienceReward.h"
 #include "src/LevelUpSystem.h"
+#include "tests/mocks/MockGameContext.h"
 
 // Warriors roll through 9th and gain 3 a level after.
 TEST(HitPointProgressionTest, FighterMatchesTableFourteen)
@@ -77,10 +91,6 @@ TEST(HitPointProgressionTest, EveryClassStopsRollingAndStillGains)
 // The table above is only worth having if the level-up path reads it. These
 // drive the public entry point, LevelUpSystem::apply_level_up_benefits.
 
-#include "src/Creature.h"
-#include "src/ExperienceReward.h"
-#include "tests/mocks/MockGameContext.h"
-
 class HitPointGainTest : public ::testing::Test
 {
 protected:
@@ -104,6 +114,23 @@ protected:
 		return fighter.get_max_hp() - before;
 	}
 
+	// The hit points 2nd level adds to a new creature of a class and Constitution
+	// score, its hit die scripted to roll `rolled`.
+	int gain_for(CreatureClass creatureClass, int constitution, int rolled)
+	{
+		Creature adventurer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "adventurer", 0 } };
+		adventurer.healthPool = std::make_unique<HealthPool>(50);
+		adventurer.armorClass = std::make_unique<ArmorClass>(10);
+		adventurer.experienceReward = std::make_unique<ExperienceReward>(0);
+		adventurer.set_creature_class(creatureClass);
+		adventurer.set_constitution(constitution);
+		mock.dice.set_next_roll(rolled);
+
+		const int before = adventurer.get_max_hp();
+		LevelUpSystem::apply_level_up_benefits(adventurer, 2, &ctx);
+		return adventurer.get_max_hp() - before;
+	}
+
 	MockGameContext mock{};
 	GameContext ctx{};
 	Creature fighter{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", 0 } };
@@ -116,4 +143,58 @@ TEST_F(HitPointGainTest, FighterPastNinthGainsExactlyThree)
 	EXPECT_EQ(gain_at_level(10), 3);
 	EXPECT_EQ(gain_at_level(11), 3);
 	EXPECT_EQ(gain_at_level(20), 3);
+}
+
+// Table 3's footnote, read directly: "Parenthetical bonus applies to warriors only. All
+// other classes receive maximum bonus of +2 per die."
+TEST_F(HitPointGainTest, TheBonusAboveTwoIsTheWarriorsAlone)
+{
+	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(17, CreatureClass::FIGHTER), 3);
+	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(17, CreatureClass::WIZARD), 2);
+	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD), -2);
+}
+
+// Through a level: a rolled 3 is worth 5 to a rogue, priest or wizard at any score from
+// 16 up.
+TEST_F(HitPointGainTest, ANonWarriorsBonusStopsAtTwo)
+{
+	for (const CreatureClass creatureClass : { CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD })
+	{
+		for (const int constitution : { 16, 17, 18, 19, 20, 25 })
+		{
+			EXPECT_EQ(gain_for(creatureClass, constitution, 3), 5) << "class " << static_cast<int>(creatureClass) << " at Constitution " << constitution;
+		}
+	}
+}
+
+// A warrior takes the parenthetical bonus, Table 3's warrior column.
+TEST_F(HitPointGainTest, AWarriorGainsTheParentheticalBonus)
+{
+	struct WarriorBonus
+	{
+		int constitution{ 0 };
+		int bonus{ 0 };
+	};
+	constexpr std::array<WarriorBonus, 6> TABLE_THREE_WARRIOR{ {
+		{ 17, 3 },
+		{ 18, 4 },
+		{ 19, 5 },
+		{ 20, 5 },
+		{ 21, 6 },
+		{ 25, 7 },
+	} };
+
+	for (const WarriorBonus& expected : TABLE_THREE_WARRIOR)
+	{
+		EXPECT_EQ(gain_for(CreatureClass::FIGHTER, expected.constitution, 3), 3 + expected.bonus) << "Constitution " << expected.constitution;
+	}
+}
+
+// Only a bonus is capped. Constitution 3's -2 takes a wizard's rolled 4 to 2, and since
+// "no Hit Die ever yields less than 1 hit point" (page 32), a rolled 2 at Constitution
+// 1's -3 still yields 1.
+TEST_F(HitPointGainTest, APenaltyIsNotCappedAndADieYieldsAtLeastOne)
+{
+	EXPECT_EQ(gain_for(CreatureClass::WIZARD, 3, 4), 2);
+	EXPECT_EQ(gain_for(CreatureClass::WIZARD, 1, 2), 1);
 }

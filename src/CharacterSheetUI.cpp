@@ -78,7 +78,7 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     const StrengthAttributes strengthRow = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength());
     const int strHitMod = strengthRow.hitProb;
     const int strDmgMod = strengthRow.dmgAdj;
-    const int conBonus = ctx.dataManager->constitution_for(player.get_constitution()).HPAdj;
+    const int conBonus = ctx.dataManager->constitution_hit_point_adjustment(player.get_constitution(), player.get_creature_class());
 
     const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
     const int missileAdj = dexterityRow.MissileAttackAdj;

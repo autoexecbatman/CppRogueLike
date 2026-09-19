@@ -56,9 +56,9 @@
       "catches": "exceptional Strength lost in a save"
     },
     {
-      "file": "src/ConstitutionTracker.cpp",
-      "original": "    const int tableAdjustment = ctx.dataManager->constitution_for(constitution).HPAdj;",
-      "mutated": "    const int tableAdjustment = constitution > 19 ? 0 : ctx.dataManager->constitution_for(constitution).HPAdj;",
+      "file": "src/DataManager.cpp",
+      "original": "\tconst int tableAdjustment = constitution_for(score).HPAdj;",
+      "mutated": "\tconst int tableAdjustment = score > 19 ? 0 : constitution_for(score).HPAdj;",
       "catches": "Constitution past 19 losing its hit point bonus again"
     },
     {

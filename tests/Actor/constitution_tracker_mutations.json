@@ -27,20 +27,20 @@
     },
     {
       "file": "src/ConstitutionTracker.cpp",
-      "original": "const int oldBonus = lastCon.has_value() ? calculate_constitution_hp_bonus_for_value(*lastCon, owner.get_creature_class(), ctx) : 0;",
-      "mutated": "const int oldBonus = calculate_constitution_hp_bonus_for_value(currentConstitution, owner.get_creature_class(), ctx);",
+      "original": "const int oldBonus = lastCon.has_value() ? ctx.dataManager->constitution_hit_point_adjustment(*lastCon, owner.get_creature_class()) : 0;",
+      "mutated": "const int oldBonus = ctx.dataManager->constitution_hit_point_adjustment(currentConstitution, owner.get_creature_class());",
       "catches": "the old bonus read from the new score, so a real change applies nothing"
     },
     {
-      "file": "src/ConstitutionTracker.cpp",
-      "original": "    return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
-      "mutated": "    return tableAdjustment;",
+      "file": "src/DataManager.cpp",
+      "original": "\treturn std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
+      "mutated": "\treturn tableAdjustment;",
       "catches": "the warrior cap removed, so a wizard keeps the table's +3"
     },
     {
-      "file": "src/ConstitutionTracker.cpp",
-      "original": "    return std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
-      "mutated": "    return tableAdjustment > 0 ? std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP) : 0;",
+      "file": "src/DataManager.cpp",
+      "original": "\treturn std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
+      "mutated": "\treturn tableAdjustment > 0 ? std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP) : 0;",
       "catches": "the cap swallowing penalties, so a Con 3 wizard loses nothing"
     }
   ]

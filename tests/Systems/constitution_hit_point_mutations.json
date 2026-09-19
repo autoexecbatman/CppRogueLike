@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=HitPointGainTest.*:ConstitutionTrackerTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());",
+      "mutated": "        conBonus = ctx->dataManager->constitution_for(owner.get_constitution()).HPAdj;",
+      "catches": "level-up reading the warrior column for every class again"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());",
+      "mutated": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), CreatureClass::WIZARD);",
+      "catches": "level-up asking for a class other than the owner's"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\tif (is_warrior(creatureClass))\n\t{\n\t\treturn tableAdjustment;\n\t}\n",
+      "mutated": "",
+      "catches": "the cap reaching warriors"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\treturn std::min(tableAdjustment, NON_WARRIOR_BONUS_CAP);",
+      "mutated": "\treturn std::clamp(tableAdjustment, 0, NON_WARRIOR_BONUS_CAP);",
+      "catches": "the cap swallowing a penalty"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "constexpr int NON_WARRIOR_BONUS_CAP = 2;",
+      "mutated": "constexpr int NON_WARRIOR_BONUS_CAP = 3;",
+      "catches": "a non-warrior cap one too high"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    int totalHPGain = std::max(1, hitDiceRoll + conBonus);",
+      "mutated": "    int totalHPGain = hitDiceRoll + conBonus;",
+      "catches": "a hit die yielding less than 1"
+    }
+  ]
+}
