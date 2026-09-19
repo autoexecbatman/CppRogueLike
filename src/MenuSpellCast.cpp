@@ -9,6 +9,7 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "MessageSystem.h"
+#include "SpellRegistry.h"
 #include "SpellSystem.h"
 #include "MenuSpellCast.h"
 
@@ -31,7 +32,7 @@ MenuSpellCast::MenuSpellCast(Player& player, GameContext& ctx)
     int widestText = ctx.renderer->measure_text("Cast Spell (ESC to cancel):");
     for (size_t i = 0; i < availableSpells.size(); ++i)
     {
-        widestText = std::max(widestText, ctx.renderer->measure_text(spell_line(i)));
+        widestText = std::max(widestText, ctx.renderer->measure_text(spell_line(i, *ctx.spellRegistry)));
     }
 
     // One header row, then a row per spell.
@@ -66,20 +67,20 @@ void MenuSpellCast::populate_spells()
     }
 }
 
-std::string MenuSpellCast::spell_line(size_t index) const
+std::string MenuSpellCast::spell_line(size_t index, const SpellRegistry& spells) const
 {
-    const auto& def = SpellSystem::get_by_key(availableSpells[index]);
+    const SpellDefinition& definition = spells.get_by_key(availableSpells[index]);
     const char letter = static_cast<char>('a' + static_cast<int>(index));
 
     // An item-granted spell names what granted it; a memorised one names its level.
     if (!spellSources[index].empty())
     {
-        return std::format("{}) {} [{}]", letter, def.name, spellSources[index]);
+        return std::format("{}) {} [{}]", letter, definition.name, spellSources[index]);
     }
-    return std::format("{}) {} (L{})", letter, def.name, def.level);
+    return std::format("{}) {} (L{})", letter, definition.name, definition.level);
 }
 
-void MenuSpellCast::draw()
+void MenuSpellCast::draw(const SpellRegistry& spells)
 {
     menu_clear();
     menu_draw_box();
@@ -94,7 +95,7 @@ void MenuSpellCast::draw()
             menu_highlight_on();
         }
 
-        menu_print(1, row, spell_line(i));
+        menu_print(1, row, spell_line(i, spells));
 
         if (static_cast<int>(i) == selectedIndex)
         {
@@ -177,6 +178,6 @@ void MenuSpellCast::menu(GameContext& ctx)
     }
 
     menu_key_listen();
-    draw();
+    draw(*ctx.spellRegistry);
     on_key(ctx);
 }

@@ -51,6 +51,7 @@
 #endif
 		.tileConfig = &tileConfig,
 		.bodyPlanRegistry = &bodyPlanRegistry,
+		.spellRegistry = &spellRegistry,
 
 		// Game world data
 		.stairs = stairs.get(),

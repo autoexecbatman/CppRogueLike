@@ -28,6 +28,16 @@ TEST(GameContextWiring, ContextFromFreshGame_HasNoPlayer)
 	EXPECT_EQ(ctx.player(), nullptr);
 }
 
+// The spells the game casts are the registry Game owns, the one main loads.
+TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
+{
+	Game game;
+
+	const GameContext ctx = game.context();
+
+	EXPECT_EQ(ctx.spellRegistry, &game.spellRegistry);
+}
+
 // With a Player owned, both views name that object.
 TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 {

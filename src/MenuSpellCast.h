@@ -8,6 +8,7 @@
 
 struct GameContext;
 class Player;
+class SpellRegistry;
 
 class MenuSpellCast : public BaseMenu
 {
@@ -17,13 +18,13 @@ class MenuSpellCast : public BaseMenu
     int selectedIndex{ 0 };
 
     void populate_spells();
-    void draw();
+    void draw(const SpellRegistry& spells);
     void handle_selection(GameContext& ctx);
     void on_key(GameContext& ctx) override;
 
     // One spell's row, as drawn. The constructor measures these to size the box, so
     // the text that sets the width is the text that goes in it.
-    [[nodiscard]] std::string spell_line(size_t index) const;
+    [[nodiscard]] std::string spell_line(size_t index, const SpellRegistry& spells) const;
 
 public:
     MenuSpellCast(Player& player, GameContext& ctx);

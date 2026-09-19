@@ -1,5 +1,5 @@
 // file: SpellDataLoadTest.cpp
-// Verifies that SpellSystem::load refuses a spell whose class or effect is not a
+// Verifies that SpellRegistry::load refuses a spell whose class or effect is not a
 // value the game knows, rather than substituting a default.
 //
 // parse_class and parse_effect_type used to end in a catch-all else, so a typo
@@ -18,7 +18,7 @@
 
 #include <nlohmann/json.hpp>
 
-#include "src/SpellSystem.h"
+#include "src/SpellRegistry.h"
 
 class SpellDataLoadTest : public ::testing::Test
 {
@@ -27,15 +27,12 @@ protected:
 	{
 		std::error_code ignored;
 		std::filesystem::remove(scratchFile, ignored);
-
-		// Leave the registry holding real data for whatever runs next.
-		SpellSystem::load("data/content/spells.json");
 	}
 
 	// Writes the shipped spells plus one more, and returns the path it was written to.
 	// The shipped records are kept so that the added spell is the only thing wrong.
 	//
-	// The key is deliberately not one of SPELL_KEYS: a builtin spell's effect is
+	// The key is deliberately not a builtin's: a builtin spell's effect is
 	// compiled in rather than read from data, so only a custom key exercises
 	// parse_effect_type at all.
 	std::string write_spell(std::string_view spellClass, std::string_view effect)
@@ -67,12 +64,13 @@ protected:
 	std::filesystem::path scratchFile{
 		std::filesystem::temp_directory_path() / "rogue_spell_load_test.json"
 	};
+	SpellRegistry spells{};
 };
 
 // The spells the game ships with must all be readable.
 TEST_F(SpellDataLoadTest, ShippedSpellDataLoads)
 {
-	EXPECT_NO_THROW(SpellSystem::load("data/content/spells.json"));
+	EXPECT_NO_THROW(spells.load("data/content/spells.json"));
 }
 
 // A built-in spell's name, level, class and description are data, so a file without
@@ -82,7 +80,7 @@ TEST_F(SpellDataLoadTest, AFileWithoutABuiltinSpellIsRefused)
 	nlohmann::json root = shipped_spells();
 	ASSERT_EQ(root.erase("bless"), 1U) << "the shipped file no longer has bless to remove";
 
-	EXPECT_THROW(SpellSystem::load(write(root)), std::runtime_error);
+	EXPECT_THROW(spells.load(write(root)), std::runtime_error);
 }
 
 // A class the game does not know is a typo, not a request for a default.
@@ -90,7 +88,7 @@ TEST_F(SpellDataLoadTest, UnknownSpellClassIsRefused)
 {
 	const std::string path = write_spell("clric", "bless");
 
-	EXPECT_THROW(SpellSystem::load(path), std::runtime_error);
+	EXPECT_THROW(spells.load(path), std::runtime_error);
 }
 
 // Same for the effect, which used to become SpellEffectType::NONE.
@@ -98,7 +96,7 @@ TEST_F(SpellDataLoadTest, UnknownSpellEffectIsRefused)
 {
 	const std::string path = write_spell("cleric", "firebal");
 
-	EXPECT_THROW(SpellSystem::load(path), std::runtime_error);
+	EXPECT_THROW(spells.load(path), std::runtime_error);
 }
 
 // The three real class values still load.
@@ -108,6 +106,6 @@ TEST_F(SpellDataLoadTest, EveryKnownClassLoads)
 	{
 		const std::string path = write_spell(spellClass, "bless");
 
-		EXPECT_NO_THROW(SpellSystem::load(path)) << "class '" << spellClass << "' was refused";
+		EXPECT_NO_THROW(spells.load(path)) << "class '" << spellClass << "' was refused";
 	}
 }

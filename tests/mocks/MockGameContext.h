@@ -8,6 +8,7 @@
 #include "src/DataManager.h"
 #include "src/MessageSystem.h"
 #include "src/BodyPlanRegistry.h"
+#include "src/SpellRegistry.h"
 #include "src/TileConfig.h"
 
 struct MockGameContext
@@ -21,6 +22,7 @@ struct MockGameContext
 	GameState game_state{};
 	TileConfig tile_config{};
 	BodyPlanRegistry body_plans{};
+	SpellRegistry spellRegistry{};
 
 	MockGameContext()
 	{
@@ -42,6 +44,9 @@ struct MockGameContext
 		// Armour class, missile and surprise rolls read the ability tables, as every
 		// context the game builds can.
 		data_manager.load_all_data(messages);
+
+		// Casting and the spell menus read spells through ctx, as the game's context does.
+		spellRegistry.load(Paths::SPELLS);
 	}
 
 	GameContext to_game_context()
@@ -54,6 +59,7 @@ struct MockGameContext
 			.contentRegistry = &content_registry,
 			.tileConfig = &tile_config,
 			.bodyPlanRegistry = &body_plans,
+			.spellRegistry = &spellRegistry,
 			.floorInventory = &inventory,
 			.gameState = &game_state
 		};

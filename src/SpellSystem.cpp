@@ -1,18 +1,12 @@
 #include <algorithm>
 #include <cassert>
-#include <filesystem>
 #include <format>
-#include <fstream>
-#include <map>
 #include <memory>
-#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <unordered_map>
 #include <variant>
 #include <vector>
-
-#include <nlohmann/json.hpp>
 
 #include "Actor.h"
 #include "EquipmentSlot.h"
@@ -22,7 +16,6 @@
 #include "DamageInfo.h"
 #include "DamageResolver.h"
 #include "GameContext.h"
-#include "Paths.h"
 #include "MagicalItemEffects.h"
 #include "Map.h"
 #include "MenuSpellCast.h"
@@ -35,6 +28,7 @@
 #include "MessageSystem.h"
 #include "SpawnUtils.h"
 #include "SpellAnimations.h"
+#include "SpellRegistry.h"
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
 #include "TileConfig.h"
@@ -65,509 +59,6 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 	}
 }
 } // namespace
-
-// ---------------------------------------------------------------------------
-// Module-level mutable spell table. A builtin's effect is compiled in; its name,
-// level, class and description are data, filled by load(). Before load() a builtin
-// has only its effect, which is all casting reads.
-// ---------------------------------------------------------------------------
-
-namespace
-{
-
-// Implementation-only identifier used to key s_spells and SPELL_KEYS.
-// Not part of the public API -- the game addresses spells by string key.
-enum class SpellId
-{
-	CURE_LIGHT_WOUNDS,
-	BLESS,
-	SANCTUARY,
-	PROTECTION_FROM_EVIL,
-	HOLD_PERSON,
-	SILENCE,
-	MAGIC_MISSILE,
-	SHIELD,
-	SLEEP,
-	INVISIBILITY,
-	WEB,
-	FIREBALL,
-	TELEPORT,
-	KNOCK,
-	NONE
-};
-
-std::map<std::string, SpellDefinition> s_custom_spells;
-
-std::map<SpellId, SpellDefinition> s_spells = {
-	{ SpellId::CURE_LIGHT_WOUNDS, SpellDefinition{ .effect_type = SpellEffectType::CURE_LIGHT_WOUNDS } },
-	{ SpellId::BLESS, SpellDefinition{ .effect_type = SpellEffectType::BLESS } },
-	{ SpellId::SANCTUARY, SpellDefinition{ .effect_type = SpellEffectType::SANCTUARY } },
-	{ SpellId::PROTECTION_FROM_EVIL, SpellDefinition{ .effect_type = SpellEffectType::PROTECTION_FROM_EVIL } },
-	{ SpellId::HOLD_PERSON, SpellDefinition{ .effect_type = SpellEffectType::HOLD_PERSON } },
-	{ SpellId::SILENCE, SpellDefinition{ .effect_type = SpellEffectType::SILENCE } },
-	{ SpellId::MAGIC_MISSILE, SpellDefinition{ .effect_type = SpellEffectType::MAGIC_MISSILE } },
-	{ SpellId::SHIELD, SpellDefinition{ .effect_type = SpellEffectType::SHIELD } },
-	{ SpellId::SLEEP, SpellDefinition{ .effect_type = SpellEffectType::SLEEP } },
-	{ SpellId::INVISIBILITY, SpellDefinition{ .effect_type = SpellEffectType::INVISIBILITY } },
-	{ SpellId::WEB, SpellDefinition{ .effect_type = SpellEffectType::WEB } },
-	{ SpellId::FIREBALL, SpellDefinition{ .effect_type = SpellEffectType::FIREBALL } },
-	{ SpellId::TELEPORT, SpellDefinition{ .effect_type = SpellEffectType::TELEPORT } },
-	{ SpellId::KNOCK, SpellDefinition{ .effect_type = SpellEffectType::KNOCK } },
-	{ SpellId::NONE, SpellDefinition{ .effect_type = SpellEffectType::NONE } },
-};
-
-// JSON key <-> SpellId mapping
-struct SpellEntry
-{
-	SpellId id{};
-	std::string_view key{};
-};
-
-constexpr SpellEntry SPELL_KEYS[] = {
-	{ SpellId::CURE_LIGHT_WOUNDS, "cure_light_wounds" },
-	{ SpellId::BLESS, "bless" },
-	{ SpellId::SANCTUARY, "sanctuary" },
-	{ SpellId::PROTECTION_FROM_EVIL, "protection_from_evil" },
-	{ SpellId::HOLD_PERSON, "hold_person" },
-	{ SpellId::SILENCE, "silence" },
-	{ SpellId::MAGIC_MISSILE, "magic_missile" },
-	{ SpellId::SHIELD, "shield" },
-	{ SpellId::SLEEP, "sleep" },
-	{ SpellId::INVISIBILITY, "invisibility" },
-	{ SpellId::WEB, "web" },
-	{ SpellId::FIREBALL, "fireball" },
-	{ SpellId::TELEPORT, "teleport" },
-	{ SpellId::KNOCK, "knock" },
-};
-
-SpellClass parse_class(std::string_view text)
-{
-	if (text == "cleric")
-	{
-		return SpellClass::CLERIC;
-	}
-	else if (text == "wizard")
-	{
-		return SpellClass::WIZARD;
-	}
-	else if (text == "both")
-	{
-		return SpellClass::BOTH;
-	}
-
-	throw std::runtime_error(std::format("SpellSystem: unknown spell class '{}'", text));
-}
-
-std::string encode_class(SpellClass spellClass)
-{
-	if (spellClass == SpellClass::CLERIC)
-	{
-		return "cleric";
-	}
-	else if (spellClass == SpellClass::WIZARD)
-	{
-		return "wizard";
-	}
-	else
-	{
-		return "both";
-	}
-}
-
-SpellEffectType parse_effect_type(std::string_view text)
-{
-	if (text == "cure_light_wounds")
-	{
-		return SpellEffectType::CURE_LIGHT_WOUNDS;
-	}
-	else if (text == "bless")
-	{
-		return SpellEffectType::BLESS;
-	}
-	else if (text == "protection_from_evil")
-	{
-		return SpellEffectType::PROTECTION_FROM_EVIL;
-	}
-	else if (text == "sanctuary")
-	{
-		return SpellEffectType::SANCTUARY;
-	}
-	else if (text == "hold_person")
-	{
-		return SpellEffectType::HOLD_PERSON;
-	}
-	else if (text == "silence")
-	{
-		return SpellEffectType::SILENCE;
-	}
-	else if (text == "magic_missile")
-	{
-		return SpellEffectType::MAGIC_MISSILE;
-	}
-	else if (text == "shield")
-	{
-		return SpellEffectType::SHIELD;
-	}
-	else if (text == "sleep")
-	{
-		return SpellEffectType::SLEEP;
-	}
-	else if (text == "invisibility")
-	{
-		return SpellEffectType::INVISIBILITY;
-	}
-	else if (text == "web")
-	{
-		return SpellEffectType::WEB;
-	}
-	else if (text == "fireball")
-	{
-		return SpellEffectType::FIREBALL;
-	}
-	else if (text == "teleport")
-	{
-		return SpellEffectType::TELEPORT;
-	}
-	else if (text == "knock")
-	{
-		return SpellEffectType::KNOCK;
-	}
-	else if (text == "none")
-	{
-		return SpellEffectType::NONE;
-	}
-
-	throw std::runtime_error(std::format("SpellSystem: unknown spell effect '{}'", text));
-}
-
-std::string encode_effect_type(SpellEffectType effect)
-{
-	switch (effect)
-	{
-
-	case SpellEffectType::CURE_LIGHT_WOUNDS:
-	{
-		return "cure_light_wounds";
-	}
-
-	case SpellEffectType::BLESS:
-	{
-		return "bless";
-	}
-
-	case SpellEffectType::SANCTUARY:
-	{
-		return "sanctuary";
-	}
-
-	case SpellEffectType::PROTECTION_FROM_EVIL:
-	{
-		return "protection_from_evil";
-	}
-
-	case SpellEffectType::HOLD_PERSON:
-	{
-		return "hold_person";
-	}
-
-	case SpellEffectType::SILENCE:
-	{
-		return "silence";
-	}
-
-	case SpellEffectType::MAGIC_MISSILE:
-	{
-		return "magic_missile";
-	}
-
-	case SpellEffectType::SHIELD:
-	{
-		return "shield";
-	}
-
-	case SpellEffectType::SLEEP:
-	{
-		return "sleep";
-	}
-
-	case SpellEffectType::INVISIBILITY:
-	{
-		return "invisibility";
-	}
-
-	case SpellEffectType::WEB:
-	{
-		return "web";
-	}
-
-	case SpellEffectType::FIREBALL:
-	{
-		return "fireball";
-	}
-
-	case SpellEffectType::TELEPORT:
-	{
-		return "teleport";
-	}
-
-	case SpellEffectType::KNOCK:
-	{
-		return "knock";
-	}
-
-	default:
-	{
-		return "none";
-	}
-
-	}
-}
-
-} // namespace
-
-// ---------------------------------------------------------------------------
-
-void SpellSystem::load(std::string_view path)
-{
-	auto resolved = Paths::resolve(path);
-	std::ifstream f(resolved);
-	if (!f.is_open())
-	{
-		throw std::runtime_error(
-			std::format("SpellSystem::load -- cannot open '{}'", resolved.string()));
-	}
-
-	nlohmann::json root = nlohmann::json::parse(f);
-
-	s_custom_spells.clear();
-
-	// Every builtin's name, level, class and description are data, the table holding
-	// only its effect, so a file without one is refused.
-	for (const auto& entry : SPELL_KEYS)
-	{
-		const std::string key{ entry.key };
-		if (!root.contains(key))
-		{
-			throw std::runtime_error(
-				std::format("SpellSystem::load -- '{}' has no record for builtin spell '{}'", resolved.string(), key));
-		}
-		const auto& j = root.at(key);
-		SpellDefinition& def = s_spells.at(entry.id);
-		def.name = j.at("name").get<std::string>();
-		def.level = j.at("level").get<int>();
-		def.spellClass = parse_class(j.at("class").get<std::string>());
-		def.description = j.at("description").get<std::string>();
-	}
-
-	// Load custom spells: any key not in SPELL_KEYS
-	for (const auto& [key, j] : root.items())
-	{
-		bool is_builtin = false;
-		for (const auto& entry : SPELL_KEYS)
-		{
-			if (entry.key == key)
-			{
-				is_builtin = true;
-				break;
-			}
-		}
-		if (is_builtin)
-		{
-			continue;
-		}
-
-		SpellDefinition def;
-		def.name = j.at("name").get<std::string>();
-		def.level = j.at("level").get<int>();
-		def.spellClass = parse_class(j.at("class").get<std::string>());
-		def.description = j.at("description").get<std::string>();
-		if (j.contains("effect"))
-		{
-			def.effect_type = parse_effect_type(j.at("effect").get<std::string>());
-		}
-		s_custom_spells[key] = std::move(def);
-	}
-}
-
-void SpellSystem::save(std::string_view path)
-{
-	auto resolved = Paths::resolve(path);
-	std::filesystem::create_directories(resolved.parent_path());
-
-	nlohmann::json root = nlohmann::json::object();
-
-	for (const auto& entry : SPELL_KEYS)
-	{
-		const SpellDefinition& def = s_spells.at(entry.id);
-		root[std::string{ entry.key }] = nlohmann::json{
-			{ "name", def.name },
-			{ "level", def.level },
-			{ "class", encode_class(def.spellClass) },
-			{ "description", def.description }
-		};
-	}
-
-	for (const auto& [key, def] : s_custom_spells)
-	{
-		root[key] = nlohmann::json{
-			{ "name", def.name },
-			{ "level", def.level },
-			{ "class", encode_class(def.spellClass) },
-			{ "description", def.description },
-			{ "effect", encode_effect_type(def.effect_type) }
-		};
-	}
-
-	std::ofstream f(resolved);
-	if (!f.is_open())
-	{
-		throw std::runtime_error(
-			std::format("SpellSystem::save -- cannot open '{}' for writing", resolved.string()));
-	}
-	f << root.dump(4);
-	if (f.fail())
-	{
-		throw std::runtime_error(
-			std::format("SpellSystem::save -- write failed for '{}'", resolved.string()));
-	}
-}
-
-// ---------------------------------------------------------------------------
-// String-keyed API (editor)
-// ---------------------------------------------------------------------------
-
-std::vector<std::string> SpellSystem::get_all_keys()
-{
-	std::vector<std::string> keys;
-	keys.reserve(std::size(SPELL_KEYS) + s_custom_spells.size());
-	for (const auto& entry : SPELL_KEYS)
-	{
-		keys.push_back(std::string{ entry.key });
-	}
-	for (const auto& [key, _] : s_custom_spells)
-	{
-		keys.push_back(key);
-	}
-	return keys;
-}
-
-const SpellDefinition& SpellSystem::get_by_key(std::string_view key)
-{
-	for (const auto& entry : SPELL_KEYS)
-	{
-		if (entry.key == key)
-		{
-			return s_spells.at(entry.id);
-		}
-	}
-
-	if (s_custom_spells.contains(std::string{ key }))
-	{
-		return s_custom_spells.at(std::string{ key });
-	}
-
-	throw std::out_of_range(std::format("SpellSystem::get_by_key -- unknown key '{}'", key));
-}
-
-void SpellSystem::set_by_key(std::string_view key, const SpellDefinition& def)
-{
-	for (const auto& entry : SPELL_KEYS)
-	{
-		if (entry.key == key)
-		{
-			s_spells[entry.id] = def;
-			return;
-		}
-	}
-
-	if (s_custom_spells.contains(std::string{ key }))
-	{
-		s_custom_spells.at(std::string{ key }) = def;
-		return;
-	}
-
-	throw std::out_of_range(std::format("SpellSystem::set_by_key -- unknown key '{}'", key));
-}
-
-std::string SpellSystem::add_custom(SpellDefinition def)
-{
-	auto normalize = [](std::string_view name) -> std::string
-	{
-		std::string key;
-		for (char c : name)
-		{
-			if (std::isspace(static_cast<unsigned char>(c)))
-			{
-				key += '_';
-			}
-			else
-			{
-				key += static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
-			}
-		}
-
-		return key;
-	};
-
-	auto has_key = [](const std::string& key) -> bool
-	{
-		for (const auto& entry : SPELL_KEYS)
-		{
-			if (entry.key == key)
-			{
-				return true;
-			}
-		}
-
-		return s_custom_spells.contains(key);
-	};
-
-	std::string base = normalize(def.name.empty() ? "new_spell" : def.name);
-	std::string key = base;
-	if (has_key(key))
-	{
-		for (int suffix = 2;; ++suffix)
-		{
-			key = std::format("{}_{}", base, suffix);
-			if (!has_key(key))
-			{
-				break;
-			}
-		}
-	}
-	s_custom_spells[key] = std::move(def);
-
-	return key;
-}
-
-void SpellSystem::remove_custom(std::string_view key)
-{
-	for (const auto& entry : SPELL_KEYS)
-	{
-		if (entry.key == key)
-		{
-			throw std::invalid_argument(
-				std::format("SpellSystem::remove_custom -- '{}' is a built-in spell and cannot be removed", key));
-		}
-	}
-	if (!s_custom_spells.erase(std::string{ key }))
-	{
-		throw std::out_of_range(
-			std::format("SpellSystem::remove_custom -- unknown key '{}'", key));
-	}
-}
-
-bool SpellSystem::is_builtin_key(std::string_view key)
-{
-	for (const auto& entry : SPELL_KEYS)
-	{
-		if (entry.key == key)
-		{
-			return true;
-		}
-	}
-	return false;
-}
 
 std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 {
@@ -612,35 +103,6 @@ std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 	}
 
 	return {};
-}
-
-std::vector<std::string> SpellSystem::get_available_spells(CasterClass classState, int maxSpellLevel)
-{
-	std::vector<std::string> available;
-	SpellClass targetClass = (classState == CasterClass::CLERIC) ? SpellClass::CLERIC : SpellClass::WIZARD;
-
-	for (const auto& entry : SPELL_KEYS)
-	{
-		const SpellDefinition& def = s_spells.at(entry.id);
-		if (entry.id == SpellId::NONE)
-		{
-			continue;
-		}
-		if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH) && def.level <= maxSpellLevel)
-		{
-			available.push_back(std::string{ entry.key });
-		}
-	}
-
-	for (const auto& [key, def] : s_custom_spells)
-	{
-		if ((def.spellClass == targetClass || def.spellClass == SpellClass::BOTH) && def.level <= maxSpellLevel)
-		{
-			available.push_back(key);
-		}
-	}
-
-	return available;
 }
 
 void SpellSystem::dispatch_effect(
@@ -777,8 +239,8 @@ void SpellSystem::cast_spell_by_key(
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are silenced and cannot cast spells!", true);
 		return;
 	}
-	const SpellDefinition& def = get_by_key(key);
-	dispatch_effect(def.effect_type, caster, std::move(onSuccess), ctx);
+	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
+	dispatch_effect(definition.effect_type, caster, std::move(onSuccess), ctx);
 }
 
 namespace
@@ -1365,7 +827,7 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 	}
 
 	int maxSpellLevel = static_cast<int>(slots.size());
-	auto available = get_available_spells(casterClass, maxSpellLevel);
+	auto available = ctx.spellRegistry->get_available_spells(casterClass, maxSpellLevel);
 
 	// Clear current memorized spells
 	player.memorizedSpells.clear();
@@ -1376,8 +838,8 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 		int slotsAtLevel = slots[level - 1];
 		for (const std::string& key : available)
 		{
-			const SpellDefinition& def = get_by_key(key);
-			if (def.level == level && slotsAtLevel > 0)
+			const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
+			if (definition.level == level && slotsAtLevel > 0)
 			{
 				player.memorizedSpells.push_back(key);
 				--slotsAtLevel;
@@ -1392,7 +854,7 @@ void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 		{
 			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", ");
 		}
-		ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, get_by_key(player.memorizedSpells[i]).name);
+		ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, ctx.spellRegistry->get_by_key(player.memorizedSpells[i]).name);
 	}
 	ctx.messageSystem->finalize_message();
 }

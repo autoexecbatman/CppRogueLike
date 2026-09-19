@@ -4,26 +4,74 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=SpellDataLoadTest.*:SpellCodecRoundTripTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=SpellDataLoadTest.*:SpellCodecRoundTripTest.*:SpellRegistryTest.*:GameContextWiring.*"
   ],
   "mutations": [
     {
-      "file": "src/SpellSystem.cpp",
-      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellSystem::load -- '{}' has no record for builtin spell '{}'\", resolved.string(), key));",
+      "file": "src/SpellRegistry.cpp",
+      "original": "\t\t\tthrow std::runtime_error(\n\t\t\t\tstd::format(\"SpellRegistry::load -- '{}' has no record for builtin spell '{}'\", resolved.string(), key));",
       "mutated": "\t\t\tcontinue;",
       "catches": "a data file missing a builtin spell loaded silently"
     },
     {
-      "file": "src/SpellSystem.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"SpellSystem: unknown spell class '{}'\", text));",
+      "file": "src/SpellRegistry.cpp",
+      "original": "\tthrow std::runtime_error(std::format(\"SpellRegistry: unknown spell class '{}'\", text));",
       "mutated": "\treturn SpellClass::BOTH;",
       "catches": "an unknown spell class turned into a default"
     },
     {
-      "file": "src/SpellSystem.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"SpellSystem: unknown spell effect '{}'\", text));",
+      "file": "src/SpellRegistry.cpp",
+      "original": "\tthrow std::runtime_error(std::format(\"SpellRegistry: unknown spell effect '{}'\", text));",
       "mutated": "\treturn SpellEffectType::NONE;",
       "catches": "an unknown spell effect turned into a default"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\t\tspells.emplace(std::string{ builtin.key }, SpellDefinition{ .effect_type = builtin.effect });",
+      "mutated": "\t\tspells.emplace(std::string{ builtin.key }, SpellDefinition{});",
+      "catches": "a registry built without the builtins' compiled-in effects"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\tcustomSpells.clear();\n",
+      "mutated": "",
+      "catches": "a load keeping the custom spells it replaces"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\treturn builtinSpells.contains(key);",
+      "mutated": "\treturn false;",
+      "catches": "no key recognised as a builtin's"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\t\tbuiltinSpells.at(std::string{ key }) = definition;\n",
+      "mutated": "",
+      "catches": "an edit to a builtin written nowhere"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "(definition.spellClass == targetClass || definition.spellClass == SpellClass::BOTH)",
+      "mutated": "(definition.spellClass == targetClass)",
+      "catches": "a spell of both classes offered to neither"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "definition.level <= maxSpellLevel;",
+      "mutated": "definition.level < maxSpellLevel;",
+      "catches": "a caster's highest spell level left out"
+    },
+    {
+      "file": "src/SpellRegistry.cpp",
+      "original": "\tif (has_key(key))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a taken name reused as a key"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\t.spellRegistry = &spellRegistry,\n",
+      "mutated": "",
+      "catches": "the game's context carrying no spell registry"
     }
   ]
 }

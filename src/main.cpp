@@ -14,7 +14,6 @@
 #include "MonsterCreator.h"
 #include "Game.h"
 #include "Menu.h"
-#include "SpellSystem.h"
 
 #ifdef __EMSCRIPTEN__
 struct LoopData
@@ -56,8 +55,6 @@ int main()
 	// Load data before Game construction (MonsterFactory is built inside Map ctor).
 	std::clog << "STARTUP: Loading MonsterCreator\n" << std::flush;
 	MonsterCreator::load(Paths::MONSTERS);
-	std::clog << "STARTUP: Loading SpellSystem\n" << std::flush;
-	SpellSystem::load(Paths::SPELLS);
 	std::clog << "STARTUP: Loading ItemCreator\n" << std::flush;
 	ItemCreator::load(Paths::ITEMS);
 	std::clog << "STARTUP: Loading enhanced rules\n" << std::flush;
@@ -70,6 +67,8 @@ int main()
 	game->tileConfig.load(Paths::TILE_CONFIG);
 	std::clog << "STARTUP: Loading body plans\n" << std::flush;
 	game->bodyPlanRegistry.load(Paths::BODY_PLANS);
+	std::clog << "STARTUP: Loading spells\n" << std::flush;
+	game->spellRegistry.load(Paths::SPELLS);
 	std::clog << "STARTUP: Initializing world\n" << std::flush;
 	game->init_world();
 

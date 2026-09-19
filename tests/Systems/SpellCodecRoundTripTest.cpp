@@ -21,7 +21,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=SpellCodecRoundTripTest.*
 
-#include "src/SpellSystem.h"
+#include "src/SpellRegistry.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -32,17 +32,16 @@ class SpellCodecRoundTripTest : public ::testing::Test
 {
 protected:
 	std::filesystem::path roundTrip;
+	SpellRegistry spells{};
 
 	void SetUp() override
 	{
-		SpellSystem::load("data/content/spells.json");
+		spells.load("data/content/spells.json");
 		roundTrip = std::filesystem::temp_directory_path() / "spells_roundtrip.json";
 	}
 
 	void TearDown() override
 	{
-		// Leave the shared registry holding the real file, not the temporary one.
-		SpellSystem::load("data/content/spells.json");
 		std::filesystem::remove(roundTrip);
 	}
 };
@@ -58,19 +57,19 @@ TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
 	};
 
 	std::map<std::string, Encoded> before;
-	for (const std::string& key : SpellSystem::get_all_keys())
+	for (const std::string& key : spells.get_all_keys())
 	{
-		const SpellDefinition& definition = SpellSystem::get_by_key(key);
+		const SpellDefinition& definition = spells.get_by_key(key);
 		before.emplace(key, Encoded{ definition.spellClass, definition.effect_type });
 	}
 	ASSERT_FALSE(before.empty()) << "no spells loaded; the check would be vacuous";
 
-	SpellSystem::save(roundTrip.string());
-	SpellSystem::load(roundTrip.string());
+	spells.save(roundTrip.string());
+	spells.load(roundTrip.string());
 
 	for (const auto& [key, encoded] : before)
 	{
-		const SpellDefinition& reloaded = SpellSystem::get_by_key(key);
+		const SpellDefinition& reloaded = spells.get_by_key(key);
 		EXPECT_EQ(reloaded.spellClass, encoded.spellClass) << key << ".spellClass";
 		EXPECT_EQ(reloaded.effect_type, encoded.effect) << key << ".effect_type";
 	}
@@ -81,17 +80,17 @@ TEST_F(SpellCodecRoundTripTest, ClassAndEffectSurviveASave)
 TEST_F(SpellCodecRoundTripTest, TheRestOfTheDefinitionSurvivesToo)
 {
 	std::map<std::string, SpellDefinition> before;
-	for (const std::string& key : SpellSystem::get_all_keys())
+	for (const std::string& key : spells.get_all_keys())
 	{
-		before.emplace(key, SpellSystem::get_by_key(key));
+		before.emplace(key, spells.get_by_key(key));
 	}
 
-	SpellSystem::save(roundTrip.string());
-	SpellSystem::load(roundTrip.string());
+	spells.save(roundTrip.string());
+	spells.load(roundTrip.string());
 
 	for (const auto& [key, definition] : before)
 	{
-		const SpellDefinition& reloaded = SpellSystem::get_by_key(key);
+		const SpellDefinition& reloaded = spells.get_by_key(key);
 		EXPECT_EQ(reloaded.name, definition.name) << key << ".name";
 		EXPECT_EQ(reloaded.level, definition.level) << key << ".level";
 		EXPECT_EQ(reloaded.description, definition.description) << key << ".description";

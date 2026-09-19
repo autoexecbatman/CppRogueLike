@@ -89,6 +89,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/DexterityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/AbilityTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellDataLoadTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
 )
@@ -210,6 +211,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/ShopKeeper.cpp
     ${PARENT_SOURCE_DIR}/ShopkeeperFactory.cpp
     ${PARENT_SOURCE_DIR}/ItemEnhancements.cpp
+    ${PARENT_SOURCE_DIR}/SpellRegistry.cpp
     ${PARENT_SOURCE_DIR}/SpellSystem.cpp
 
     # Factories

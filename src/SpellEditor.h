@@ -3,7 +3,7 @@
 
 // Full-screen in-game spell metadata editor.
 // Entered from main menu ("Spell Editor" option).
-// Reads and writes data/content/spells.json via SpellSystem.
+// Edits the SpellRegistry in ctx and saves it to data/content/spells.json.
 //
 // Controls:
 //   Tab          -- switch focus: list <-> fields
@@ -16,7 +16,7 @@
 #include <string>
 #include <vector>
 
-#include "SpellSystem.h"
+#include "SpellRegistry.h"
 
 struct GameContext;
 class Renderer;
@@ -59,8 +59,8 @@ private:
 	// Status feedback
 	double lastSaveTime{ -100.0 };
 
-	void load_working();
-	void commit_working();
+	void load_working(const SpellRegistry& spells);
+	void commit_working(SpellRegistry& spells);
 
 	void handle_input(GameContext& ctx);
 	void handle_normal(const GameContext& ctx);
@@ -68,7 +68,7 @@ private:
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& r) const;
-	void render_list(const Renderer& r) const;
+	void render_list(const Renderer& renderer, const SpellRegistry& spells) const;
 	void render_fields(const Renderer& r) const;
 	void render_hint(const Renderer& r) const;
 
@@ -84,7 +84,7 @@ private:
 	void field_set_string(FieldId f, std::string val);
 
 public:
-	void enter();
+	void enter(const SpellRegistry& spells);
 	void exit(GameContext& ctx);
 	void tick(GameContext& ctx);
 

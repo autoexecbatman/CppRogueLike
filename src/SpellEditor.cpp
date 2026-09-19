@@ -11,7 +11,7 @@
 #include "Paths.h"
 #include "Menu.h"
 #include "Renderer.h"
-#include "SpellSystem.h"
+#include "SpellRegistry.h"
 #include "SpellEditor.h"
 
 constexpr int LIST_WIDTH = 220;
@@ -26,23 +26,23 @@ constexpr int FIELD_COUNT = static_cast<int>(FieldId::COUNT);
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-void SpellEditor::enter()
+void SpellEditor::enter(const SpellRegistry& spells)
 {
 	active = true;
 	mode = Mode::NORMAL;
 	focus = 0;
 
-	keys = SpellSystem::get_all_keys();
+	keys = spells.get_all_keys();
 
 	listCursor = 0;
 	listScroll = 0;
 
-	load_working();
+	load_working(spells);
 }
 
 void SpellEditor::exit(GameContext& ctx)
 {
-	commit_working();
+	commit_working(*ctx.spellRegistry);
 	active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
@@ -60,27 +60,27 @@ void SpellEditor::tick(GameContext& ctx)
 // Working copy
 // ---------------------------------------------------------------------------
 
-void SpellEditor::load_working()
+void SpellEditor::load_working(const SpellRegistry& spells)
 {
 	if (keys.empty())
 	{
 		return;
 	}
 
-	working = SpellSystem::get_by_key(current_key());
+	working = spells.get_by_key(current_key());
 	fieldCursor = 0;
 	mode = Mode::NORMAL;
 	editBuffer.clear();
 }
 
-void SpellEditor::commit_working()
+void SpellEditor::commit_working(SpellRegistry& spells)
 {
 	if (keys.empty())
 	{
 		return;
 	}
 
-	SpellSystem::set_by_key(current_key(), working);
+	spells.set_by_key(current_key(), working);
 }
 
 // ---------------------------------------------------------------------------
@@ -99,8 +99,8 @@ void SpellEditor::handle_input(GameContext& ctx)
 
 	if (ctrl && IsKeyPressed(KEY_S))
 	{
-		commit_working();
-		SpellSystem::save(Paths::SPELLS);
+		commit_working(*ctx.spellRegistry);
+		ctx.spellRegistry->save(Paths::SPELLS);
 		lastSaveTime = GetTime();
 		return;
 	}
@@ -123,6 +123,7 @@ void SpellEditor::handle_input(GameContext& ctx)
 
 void SpellEditor::handle_normal(const GameContext& ctx)
 {
+	SpellRegistry& spells = *ctx.spellRegistry;
 	int total = static_cast<int>(keys.size());
 	::Vector2 mouse = GetMousePosition();
 	bool clicked = IsMouseButtonPressed(MOUSE_LEFT_BUTTON);
@@ -136,9 +137,9 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != listCursor)
 			{
-				commit_working();
+				commit_working(spells);
 				listCursor = idx;
-				load_working();
+				load_working(spells);
 			}
 		}
 		else
@@ -164,17 +165,17 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 	{
 		if (IsKeyPressed(KEY_UP) && listCursor > 0)
 		{
-			commit_working();
+			commit_working(spells);
 			--listCursor;
 			if (listCursor < listScroll)
 			{
 				listScroll = listCursor;
 			}
-			load_working();
+			load_working(spells);
 		}
 		else if (IsKeyPressed(KEY_DOWN) && listCursor < total - 1)
 		{
-			commit_working();
+			commit_working(spells);
 			++listCursor;
 			int screenHeight = ctx.renderer->get_screen_height();
 			int visibleCount = (screenHeight - HEADER_HEIGHT - HINT_HEIGHT) / 32;
@@ -182,7 +183,7 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 			{
 				listScroll = listCursor - visibleCount + 1;
 			}
-			load_working();
+			load_working(spells);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
@@ -190,33 +191,33 @@ void SpellEditor::handle_normal(const GameContext& ctx)
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
-			commit_working();
-			SpellDefinition def;
-			def.name = "New Spell";
-			def.level = 1;
-			def.spellClass = SpellClass::WIZARD;
-			def.description = "No effect yet.";
-			std::string new_key = SpellSystem::add_custom(std::move(def));
-			keys = SpellSystem::get_all_keys();
+			commit_working(spells);
+			SpellDefinition definition;
+			definition.name = "New Spell";
+			definition.level = 1;
+			definition.spellClass = SpellClass::WIZARD;
+			definition.description = "No effect yet.";
+			const std::string newKey = spells.add_custom(std::move(definition));
+			keys = spells.get_all_keys();
 			for (int i = 0; i < static_cast<int>(keys.size()); ++i)
 			{
-				if (keys[i] == new_key)
+				if (keys[i] == newKey)
 				{
 					listCursor = i;
 					break;
 				}
 			}
-			load_working();
+			load_working(spells);
 			focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
-			if (!SpellSystem::is_builtin_key(current_key()))
+			if (!spells.is_builtin_key(current_key()))
 			{
-				SpellSystem::remove_custom(current_key());
-				keys = SpellSystem::get_all_keys();
+				spells.remove_custom(current_key());
+				keys = spells.get_all_keys();
 				listCursor = std::clamp(listCursor, 0, static_cast<int>(keys.size()) - 1);
-				load_working();
+				load_working(spells);
 			}
 		}
 		return;
@@ -303,7 +304,7 @@ void SpellEditor::render(const GameContext& ctx) const
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
-	render_list(r);
+	render_list(r, *ctx.spellRegistry);
 	render_fields(r);
 	render_hint(r);
 }
@@ -318,9 +319,9 @@ void SpellEditor::render_header(const Renderer& r) const
 		Color{ 130, 130, 100, 255 });
 }
 
-void SpellEditor::render_list(const Renderer& r) const
+void SpellEditor::render_list(const Renderer& renderer, const SpellRegistry& spells) const
 {
-	int screenHeight = r.get_screen_height();
+	int screenHeight = renderer.get_screen_height();
 	int body_y = HEADER_HEIGHT;
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
@@ -365,24 +366,24 @@ void SpellEditor::render_list(const Renderer& r) const
 		}
 
 		// Show spell class indicator
-		const SpellDefinition& def = is_sel
+		const SpellDefinition& definition = is_sel
 			? working
-			: SpellSystem::get_by_key(keys[i]);
+			: spells.get_by_key(keys[i]);
 
-		bool is_custom = !SpellSystem::is_builtin_key(keys[i]);
+		const bool isCustom = !spells.is_builtin_key(keys[i]);
 
-		Color class_col = (def.spellClass == SpellClass::CLERIC)
+		Color classColour = (definition.spellClass == SpellClass::CLERIC)
 			? Color{ 100, 220, 255, 255 }
 			: Color{ 255, 160, 80, 255 };
 
-		std::string label = std::format("[{}] {}{}", def.level, def.name, is_custom ? " *" : "");
+		std::string label = std::format("[{}] {}{}", definition.level, definition.name, isCustom ? " *" : "");
 		Color textColor = is_sel ? Color{ 180, 255, 180, 255 } : Color{ 200, 200, 200, 255 };
 
-		r.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
+		renderer.draw_text_color(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - 16) / 2 }, label, textColor);
 
 		// Class dot on right edge
-		const char* class_tag = (def.spellClass == SpellClass::CLERIC) ? "C" : "W";
-		r.draw_text_color(Vector2D{ LIST_WIDTH - 20, itemY + (ITEM_HEIGHT - 16) / 2 }, class_tag, class_col);
+		const char* classTag = (definition.spellClass == SpellClass::CLERIC) ? "C" : "W";
+		renderer.draw_text_color(Vector2D{ LIST_WIDTH - 20, itemY + (ITEM_HEIGHT - 16) / 2 }, classTag, classColour);
 	}
 }
 

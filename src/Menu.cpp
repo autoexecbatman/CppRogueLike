@@ -62,7 +62,7 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
     auto spellEditorCommand = [](GameContext& ctx)
     {
-        ctx.spellEditor->enter();
+        ctx.spellEditor->enter(*ctx.spellRegistry);
     };
     entries.push_back({ "Spell Editor", 'p', spellEditorCommand });
 

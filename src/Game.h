@@ -40,6 +40,7 @@
 #include "SpellTile.h"
 #include "Trap.h"
 #include "BodyPlanRegistry.h"
+#include "SpellRegistry.h"
 #include "TileConfig.h"
 #include "Dijkstra.h"
 #include "Vector2D.h"
@@ -63,6 +64,9 @@ struct Game
 	// Tile configuration (must be loaded before init_world)
 	TileConfig tileConfig{};
 	BodyPlanRegistry bodyPlanRegistry{};
+
+	// Every spell the game knows, loaded before init_world
+	SpellRegistry spellRegistry{};
 
 	// Minimap overlay
 	Minimap minimap{};

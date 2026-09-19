@@ -295,6 +295,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ShopkeeperFactory.h
     ${PROJECT_SOURCE_DIR}/ItemEnhancements.cpp
     ${PROJECT_SOURCE_DIR}/ItemEnhancements.h
+    ${PROJECT_SOURCE_DIR}/SpellRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/SpellRegistry.h
     ${PROJECT_SOURCE_DIR}/SpellSystem.cpp
     ${PROJECT_SOURCE_DIR}/SpellSystem.h
     ${PROJECT_SOURCE_DIR}/FloatingTextSystem.cpp
