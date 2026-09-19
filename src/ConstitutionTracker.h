@@ -14,8 +14,6 @@ private:
     // score it did not have.
     std::optional<int> lastConstitution{};
 
-    [[nodiscard]] int calculate_level_multiplier(const Creature& owner) const;
-
 public:
     ConstitutionTracker() = default;
     ~ConstitutionTracker() = default;

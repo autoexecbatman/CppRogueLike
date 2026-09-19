@@ -1,9 +1,9 @@
 // file: MonsterHitDiceTest.cpp
-// A monster's hit dice already stand for its constitution. AD&D 2e grants the
-// constitution hit point adjustment to characters, never to monsters, so a
-// creature built from hit dice must have the same hit points after its first
-// turn as it had when it was made - and its tracker must know the score is
-// accounted for, so a later drain is reported against the right value.
+// A monster's hit dice already stand for its constitution. The Player's Handbook
+// adds the constitution hit point adjustment to "each Hit Die rolled for the
+// character", never to a monster's, so a creature built from hit dice must have
+// the same hit points after its first turn as it had when it was made, and after
+// any later change of score - and its tracker must hold the score it was made with.
 //
 // The defect this pins: MonsterCreator recorded the score at creation and four
 // other creation paths did not, so a spider, a mimic and a shopkeeper each took
@@ -95,8 +95,7 @@ TEST_F(MonsterHitDiceTest, AMimicKeepsItsHitDice)
 }
 
 // A shopkeeper never rolls a constitution, so there is no bonus to take - but
-// the score must still be recorded, or the first drain would be reported
-// against a value it never had.
+// the score must still be recorded, as every creature built from hit dice has it.
 TEST_F(MonsterHitDiceTest, AShopkeeperRecordsItsScoreAtCreation)
 {
 	const auto shopkeeper = ShopkeeperFactory::create_shopkeeper(Vector2D{ 0, 0 }, 1, ctx);
@@ -105,4 +104,20 @@ TEST_F(MonsterHitDiceTest, AShopkeeperRecordsItsScoreAtCreation)
 	EXPECT_TRUE(shopkeeper->get_last_constitution().has_value());
 	shopkeeper->update_constitution_bonus(ctx);
 	EXPECT_EQ(shopkeeper->get_max_hp(), 100);
+}
+
+// A monster took no adjustment when it was made, so a later change of score has
+// nothing to move. Constitution 14 to 16 is 0 to +2 a die for a character; a
+// monster of 13 hit dice gains nothing from it.
+TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesNoHitPoints)
+{
+	Creature monster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "pit fiend", 0 } };
+	monster.set_creature_level(13);
+	monster.set_constitution(14);
+	monster.set_hit_dice(60);
+	monster.set_constitution(16);
+
+	monster.update_constitution_bonus(ctx);
+
+	EXPECT_EQ(monster.get_max_hp(), 60) << "a monster took a constitution adjustment when its score moved";
 }

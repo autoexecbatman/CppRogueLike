@@ -1,0 +1,71 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=HitPointProgressionTest.*:HitPointGainTest.*:ConstitutionAdjustmentLevelTest.*:ConstitutionTrackerTest.*:MonsterHitDiceTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "    return level < LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "catches": "the adjustment ending a level before the last rolled die"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;",
+      "mutated": "    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel + 1;",
+      "catches": "the adjustment running a level past the last rolled die"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    if (creatureClass == CreatureClass::MONSTER)\n    {\n        return false;\n    }\n",
+      "mutated": "",
+      "catches": "a monster taking the adjustment on its warrior dice"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    for (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
+      "mutated": "    for (int eachLevel = 1; eachLevel < level; ++eachLevel)",
+      "catches": "the count missing the current level"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    for (int eachLevel = 1; eachLevel <= level; ++eachLevel)",
+      "mutated": "    for (int eachLevel = 0; eachLevel <= level; ++eachLevel)",
+      "catches": "the count including a level 0 no creature has"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    return levels;\n}",
+      "mutated": "    return level;\n}",
+      "catches": "a change multiplied by every level again"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))",
+      "mutated": "    if (stillRollsDice)",
+      "catches": "level-up restating the rule as whether a die was rolled, which gives a monster the adjustment"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))",
+      "mutated": "    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel - 1))",
+      "catches": "level-up asking about the level it is leaving"
+    },
+    {
+      "file": "src/ConstitutionTracker.cpp",
+      "original": "    const int hpDifference = (newBonus - oldBonus) * levels;",
+      "mutated": "    const int hpDifference = (newBonus - oldBonus) * owner.get_creature_level();",
+      "catches": "the tracker multiplying a change by the whole level, the old monster answer"
+    },
+    {
+      "file": "src/ConstitutionTracker.cpp",
+      "original": "LevelUpSystem::levels_taking_constitution_adjustment(owner.get_creature_class(), owner.get_creature_level());",
+      "mutated": "LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER, owner.get_creature_level());",
+      "catches": "the tracker asking about a class other than the owner's"
+    }
+  ]
+}

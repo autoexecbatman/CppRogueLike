@@ -11,12 +11,14 @@
 //
 // And the Constitution bonus each rolled die carries, Table 3 (PDF pages 33-34 of the
 // 2e archive): the warrior column above +2 for warriors only, +2 at most for every
-// other class, a penalty never capped, and no die worth less than 1.
+// other class, a penalty never capped, and no die worth less than 1. That bonus is
+// added to "each Hit Die rolled for the character" (PDF page 32): so on exactly the
+// levels above, and on no level of a monster's.
 //
 // Run it:
 //
 //     cmake --build build --config Debug --target test_exe
-//     build\bin\Debug\test_exe.exe --gtest_filter=HitPointProgressionTest.*:HitPointGainTest.*
+//     build\bin\Debug\test_exe.exe --gtest_filter=HitPointProgressionTest.*:HitPointGainTest.*:ConstitutionAdjustmentLevelTest.*
 
 #include <gtest/gtest.h>
 
@@ -86,6 +88,50 @@ TEST(HitPointProgressionTest, EveryClassStopsRollingAndStillGains)
 		EXPECT_LE(progression.lastRolledLevel, 10) << "no 2e class rolls past 10th";
 		EXPECT_GT(progression.flatGain, 0) << "a level must always be worth something";
 	}
+}
+
+// The Constitution adjustment rides on each rolled die (page 32), so it holds through
+// the last level a class rolls.
+TEST(ConstitutionAdjustmentLevelTest, EachClassTakesItThroughItsLastRolledDie)
+{
+	struct LastRolledDie
+	{
+		CreatureClass creatureClass{ CreatureClass::MONSTER };
+		int level{ 0 };
+	};
+	constexpr std::array<LastRolledDie, 4> FROM_THE_CLASS_TABLES{ {
+		{ CreatureClass::FIGHTER, 9 },
+		{ CreatureClass::CLERIC, 9 },
+		{ CreatureClass::ROGUE, 10 },
+		{ CreatureClass::WIZARD, 10 },
+	} };
+
+	for (const LastRolledDie& expected : FROM_THE_CLASS_TABLES)
+	{
+		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, 1));
+		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, expected.level));
+		EXPECT_FALSE(LevelUpSystem::takes_constitution_adjustment_at(expected.creatureClass, expected.level + 1));
+	}
+}
+
+// A monster's hit points are its hit dice; the adjustment is the character's.
+TEST(ConstitutionAdjustmentLevelTest, AMonsterTakesItOnNoLevel)
+{
+	for (int level = 1; level <= 13; ++level)
+	{
+		EXPECT_FALSE(LevelUpSystem::takes_constitution_adjustment_at(CreatureClass::MONSTER, level)) << "level " << level;
+	}
+}
+
+// A change of score is multiplied by the levels that took the adjustment.
+TEST(ConstitutionAdjustmentLevelTest, AChangeCountsOnlyTheLevelsThatTookIt)
+{
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::WIZARD, 3), 3);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::WIZARD, 12), 10);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::ROGUE, 10), 10);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER, 12), 9);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::CLERIC, 9), 9);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13), 0);
 }
 
 // The table above is only worth having if the level-up path reads it. These
@@ -197,4 +243,11 @@ TEST_F(HitPointGainTest, APenaltyIsNotCappedAndADieYieldsAtLeastOne)
 {
 	EXPECT_EQ(gain_for(CreatureClass::WIZARD, 3, 4), 2);
 	EXPECT_EQ(gain_for(CreatureClass::WIZARD, 1, 2), 1);
+}
+
+// A monster rolls its die like a warrior and adds nothing for Constitution, as when
+// it was made: a rolled 3 at Constitution 18 is worth 3.
+TEST_F(HitPointGainTest, AMonstersLevelAddsNothingForConstitution)
+{
+	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 18, 3), 3);
 }

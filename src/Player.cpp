@@ -1004,42 +1004,6 @@ bool Player::is_item_equipped(uint64_t itemUniqueId) const noexcept
 	return std::ranges::any_of(equippedItems, matches_unique_id(itemUniqueId));
 }
 
-int Player::get_constitution_hp_multiplier() const noexcept
-{
-	const int level = get_creature_level();
-
-	// AD&D 2e: Constitution HP bonus per level caps by class
-	// Source: https://www.dragonsfoot.org/forums/viewtopic.php?t=78913&start=120
-	// - Fighters: 9 Hit Dice (levels 1-9), then +3 HP/level without Constitution bonus
-	// - Priests: 9 Hit Dice (levels 1-9), then fixed HP/level without Constitution bonus
-	// - Rogues/Wizards: 10 Hit Dice (levels 1-10), then fixed HP/level without Constitution bonus
-	switch (playerClassState)
-	{
-
-	case PlayerClassState::FIGHTER:
-	{
-		return std::min(level, 9); // AD&D 2e: Fighters get Con bonus for 9 levels
-	}
-
-	case PlayerClassState::CLERIC:
-	{
-		return std::min(level, 9); // AD&D 2e: Priests get Con bonus for 9 levels
-	}
-
-	case PlayerClassState::ROGUE:
-	case PlayerClassState::WIZARD:
-	{
-		return std::min(level, 10); // AD&D 2e: Rogues/Wizards get Con bonus for 10 levels
-	}
-
-	default:
-	{
-		return std::min(level, 10);
-	}
-
-	}
-}
-
 void Player::save(json& j)
 {
 	Creature::save(j); // Call base class save

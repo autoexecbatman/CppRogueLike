@@ -80,9 +80,8 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
         }
     };
 
-    // AD&D 2e: a character rolls hit dice only up to a class-dependent level.
-    // Past it the book grants a flat number of hit points per level, and the
-    // Constitution bonus stops applying entirely.
+    // AD&D 2e: a character rolls hit dice only up to a class-dependent level,
+    // and past it the book grants a flat number of hit points per level.
     const LevelUpSystem::HitPointProgression progression = LevelUpSystem::hit_point_progression(owner.get_creature_class());
     const bool stillRollsDice = newLevel <= progression.lastRolledLevel;
 
@@ -91,8 +90,9 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
         ? std::format("d{}", owner.get_hit_die())
         : std::string{ "fixed" };
 
+    // Decided apart from the die: a monster rolls one and still takes no adjustment.
     int conBonus = 0;
-    if (stillRollsDice)
+    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))
     {
         conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());
     }
@@ -418,6 +418,42 @@ LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(Creature
     }
 
     return LevelUpSystem::HitPointProgression{ FIGHTER_LAST_ROLLED_LEVEL, FIGHTER_FLAT_GAIN };
+}
+
+// Whether this level adds the Constitution hit point adjustment.
+//
+// Example:
+//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 10);  // -> true
+//   takes_constitution_adjustment_at(CreatureClass::WIZARD, 11);  // -> false
+bool LevelUpSystem::takes_constitution_adjustment_at(CreatureClass creatureClass, int level)
+{
+    // A monster's hit points are its hit dice, with nothing added for Constitution.
+    if (creatureClass == CreatureClass::MONSTER)
+    {
+        return false;
+    }
+
+    // A character's adjustment rides on the die, so it ends where the dice do.
+    return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;
+}
+
+// How many levels, 1st through this one, took the adjustment.
+//
+// Example:
+//   levels_taking_constitution_adjustment(CreatureClass::CLERIC, 12);  // -> 9
+//   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 5);  // -> 0
+int LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass creatureClass, int level)
+{
+    // Counted from the per-level rule rather than restated, so the two cannot disagree.
+    int levels = 0;
+    for (int eachLevel = 1; eachLevel <= level; ++eachLevel)
+    {
+        if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, eachLevel))
+        {
+            ++levels;
+        }
+    }
+    return levels;
 }
 
 // The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook

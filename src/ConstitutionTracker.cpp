@@ -3,11 +3,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "DataManager.h"
-
-[[nodiscard]] int ConstitutionTracker::calculate_level_multiplier(const Creature& owner) const
-{
-    return owner.get_constitution_hp_multiplier();
-}
+#include "LevelUpSystem.h"
 
 [[nodiscard]] ConstitutionTracker::ConstitutionChangeResult ConstitutionTracker::apply_constitution_changes(
     Creature& owner,
@@ -27,8 +23,8 @@
     result.firstApplication = !lastCon.has_value();
     const int oldBonus = lastCon.has_value() ? ctx.dataManager->constitution_hit_point_adjustment(*lastCon, owner.get_creature_class()) : 0;
     const int newBonus = ctx.dataManager->constitution_hit_point_adjustment(currentConstitution, owner.get_creature_class());
-    const int level = calculate_level_multiplier(owner);
-    const int hpDifference = (newBonus - oldBonus) * level;
+    const int levels = LevelUpSystem::levels_taking_constitution_adjustment(owner.get_creature_class(), owner.get_creature_level());
+    const int hpDifference = (newBonus - oldBonus) * levels;
 
     result.oldBonus = oldBonus;
     result.newBonus = newBonus;

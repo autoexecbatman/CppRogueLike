@@ -190,10 +190,6 @@ public:
 	// Virtual for polymorphism - monsters use HD, players override
 	virtual int get_level() const noexcept { return creatureLevel; }
 
-	// AD&D 2e: Virtual method for Constitution HP bonus multiplier cap
-	// Monsters: no cap (return level), Players: class-specific caps
-	virtual int get_constitution_hp_multiplier() const noexcept { return get_level(); }
-
 	int get_gold() const noexcept { return gold; }
 	const std::string& get_gender() const noexcept { return gender; }
 	const std::string& get_natural_attack() const noexcept { return naturalAttack; }

@@ -61,9 +61,6 @@ public:
 	void load(const json& j) override;
 	void save(json& j) override;
 
-	// AD&D 2e: Class-specific Constitution HP multiplier caps
-	int get_constitution_hp_multiplier() const noexcept override;
-
 	// NOTE: coordinates are being set in the function create_room() in Map.cpp
 
 	void racial_ability_adjustments(GameContext& ctx);

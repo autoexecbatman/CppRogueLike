@@ -21,6 +21,22 @@
 #include "src/MessageSystem.h"
 #include "tests/mocks/MockGameContext.h"
 
+namespace
+{
+
+constexpr int BASE_HP = 25;
+constexpr int BONUS_AT_15 = 1;
+constexpr int BONUS_AT_17 = 3;
+constexpr int BONUS_AT_18 = 4;
+constexpr int NON_WARRIOR_CAP = 2;
+
+// The last level each class rolls a hit die, and so takes the bonus: Player's
+// Handbook Tables 14 and 20.
+constexpr int FIGHTER_LAST_ROLLED_LEVEL = 9;
+constexpr int WIZARD_LAST_ROLLED_LEVEL = 10;
+
+} // namespace
+
 class ConstitutionTrackerTest : public ::testing::Test
 {
 protected:
@@ -78,11 +94,6 @@ protected:
 		}
 		return found;
 	}
-
-	static constexpr int BASE_HP = 25;
-	static constexpr int BONUS_AT_17 = 3;
-	static constexpr int BONUS_AT_18 = 4;
-	static constexpr int NON_WARRIOR_CAP = 2;
 
 	MockGameContext mock{};
 	GameContext ctx{};
@@ -165,4 +176,34 @@ TEST_F(ConstitutionTrackerTest, ThePenaltyIsNotCapped)
 	player->update_constitution_bonus(ctx);
 
 	EXPECT_EQ(player->get_max_hp(), BASE_HP - 2);
+}
+
+// A change is multiplied by the levels that took the bonus (page 32). A 12th-level
+// fighter's ended at 9th, so a point from 17 to 18 is worth 9 hit points, not 12.
+TEST_F(ConstitutionTrackerTest, AFightersChangeCountsOnlyTheLevelsThatRolled)
+{
+	make_player("Fighter");
+	player->set_creature_level(12);
+	player->update_constitution_bonus(ctx);
+	const int before = player->get_max_hp();
+	player->adjust_constitution(1);
+
+	player->update_constitution_bonus(ctx);
+
+	EXPECT_EQ(player->get_max_hp() - before, (BONUS_AT_18 - BONUS_AT_17) * FIGHTER_LAST_ROLLED_LEVEL);
+}
+
+// A wizard's ended at 10th: 17 to 15 moves the capped +2 to +1, one hit point off
+// each of ten levels.
+TEST_F(ConstitutionTrackerTest, AWizardsChangeCountsOnlyTheLevelsThatRolled)
+{
+	make_player("Wizard");
+	player->set_creature_level(12);
+	player->update_constitution_bonus(ctx);
+	const int before = player->get_max_hp();
+	player->adjust_constitution(-2);
+
+	player->update_constitution_bonus(ctx);
+
+	EXPECT_EQ(player->get_max_hp() - before, (BONUS_AT_15 - NON_WARRIOR_CAP) * WIZARD_LAST_ROLLED_LEVEL);
 }
