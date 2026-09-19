@@ -266,13 +266,8 @@ bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
 	animate_heal(caster.position, ctx);
 
-	int healing = ctx.dice->roll(1, 8);
-	int oldHp = caster.get_hp();
-	int maxHp = caster.get_max_hp();
-	int newHp = std::min(oldHp + healing, maxHp);
-	int actualHealing = newHp - oldHp;
-
-	caster.set_hp(newHp);
+	// Magical healing, which reaches the fire and acid wounds regeneration cannot.
+	const int actualHealing = caster.heal(ctx.dice->roll(1, 8));
 
 	ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, "Cure Light Wounds! ");
 	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("+{} HP", actualHealing));

@@ -1,7 +1,7 @@
 // file: AssertProbeTest.cpp
 //
-// Drives six invariants past their bound and checks that the assertion guarding
-// each one aborts the process.
+// Drives invariants past their bound and checks that the assertion guarding each
+// one aborts the process.
 //
 // An assertion nobody has watched fire has not been shown to exist. The rest of
 // the suite is blind to these, because an abort is not an exception: no
@@ -17,7 +17,7 @@
 //
 // Where the expectations come from: each string is copied out of the assertion
 // it targets, and carries enough of that assertion's own wording to identify it
-// - two of the six would otherwise match each other's message. A probe that
+// - two of them would otherwise match each other's message. A probe that
 // stops matching is a probe whose assertion was reworded, moved or deleted, and
 // that is the finding.
 //
@@ -26,11 +26,11 @@
 //   cmake --build build --config Debug --target test_exe
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=AssertProbeDeathTest.*
 //
-//   [==========] Running 6 tests from 1 test suite.
+//   [==========] Running 11 tests from 1 test suite.
 //   [ RUN      ] AssertProbeDeathTest.WearingNothingAborts
 //   [       OK ] AssertProbeDeathTest.WearingNothingAborts (69 ms)
 //   ...
-//   [  PASSED  ] 6 tests.
+//   [  PASSED  ] 11 tests.
 //
 // A green run here says every probe died with the right message. It does not
 // say the probes have teeth - for that, tests/assert_probes.ps1 deletes each
@@ -44,6 +44,7 @@
 
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
+#include "src/HealthPool.h"
 #include "src/Item.h"
 #include "src/Colors.h"
 #include "src/ExperienceReward.h"
@@ -184,4 +185,23 @@ TEST_F(AssertProbeDeathTest, CastingWithoutACallbackAborts)
 	std::unique_ptr<Creature> caster = make_creature();
 
 	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, {}, ctx), "cast_spell_by_key requires a callback");
+}
+
+// Regeneration counts rounds that have run, from 1. Round 0 is divisible by every
+// interval, so a caller passing it would heal every character at once.
+TEST_F(AssertProbeDeathTest, RegeneratingBeforeARoundHasRunAborts)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+
+	EXPECT_DEATH(creature->regenerate_from_constitution(0, mock.data_manager), "called before a round has run");
+}
+
+// Fire and acid damage is part of the damage taken, so it can never exceed it. A pool
+// at full health holding some would let regeneration heal a negative amount.
+TEST_F(AssertProbeDeathTest, RegeneratingWithMoreFireAndAcidThanDamageAborts)
+{
+	HealthPool pool{ 20 };
+	pool.set_unregenerable_damage(5);
+
+	EXPECT_DEATH([[maybe_unused]] const int healed = pool.regenerate(1), "more fire and acid damage than damage");
 }

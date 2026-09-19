@@ -1,5 +1,6 @@
 // file: HealthPool.cpp
 #include <algorithm>
+#include <cassert>
 #include <format>
 
 #include "HealthPool.h"
@@ -41,6 +42,12 @@ int HealthPool::take_damage(Creature& owner, int damage, GameContext& ctx, Damag
 		hp = 0;
 	}
 
+	// Fire and acid wounds are kept apart, never more than the damage the pool shows.
+	if (damageType == DamageType::FIRE || damageType == DamageType::ACID)
+	{
+		unregenerableDamage = std::min(unregenerableDamage + actualDamage, hpMax - hp);
+	}
+
 	return actualDamage;
 }
 
@@ -51,8 +58,23 @@ int HealthPool::heal(int hpToHeal)
 	const int actualHealed = newHp - currentHp;
 
 	hp = newHp;
+	unregenerableDamage -= std::min(unregenerableDamage, actualHealed);
 
 	return actualHealed;
+}
+
+int HealthPool::regenerate(int points)
+{
+	// Regeneration heals wounds; it does not raise the dead.
+	if (hp <= 0)
+	{
+		return 0;
+	}
+	assert(unregenerableDamage <= hpMax - hp && "HealthPool::regenerate: more fire and acid damage than damage");
+
+	const int healed = std::min(points, hpMax - hp - unregenerableDamage);
+	hp += healed;
+	return healed;
 }
 
 // end of file: HealthPool.cpp

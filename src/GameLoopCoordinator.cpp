@@ -29,6 +29,7 @@
 #include "AnimationSystem.h"
 #include "CreatureManager.h"
 #include "CurseSystem.h"
+#include "DataManager.h"
 #include "FloatingTextSystem.h"
 #include "HungerSystem.h"
 #include "LevelManager.h"
@@ -500,17 +501,21 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
 		ctx.creatureManager->spawn_creatures(ctx);
 
+		// The round being played; time counts the rounds already finished.
+		const int thisRound = ctx.gameState->get_time() + 1;
 		for (const auto& creature : *ctx.creatures)
 		{
 			if (creature)
 			{
 				creature->update_constitution_bonus(ctx);
+				creature->regenerate_from_constitution(thisRound, *ctx.dataManager);
 			}
 		}
 
 		if (ctx.player())
 		{
 			ctx.player()->update_constitution_bonus(ctx);
+			ctx.player()->regenerate_from_constitution(thisRound, *ctx.dataManager);
 		}
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);

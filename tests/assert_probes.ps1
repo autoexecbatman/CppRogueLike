@@ -85,6 +85,16 @@ $probes = @(
         test   = "AssertProbeDeathTest.CastingWithoutACallbackAborts"
         file   = "src/SpellSystem.cpp"
         anchor = 'assert(onSuccess && "cast_spell_by_key requires a callback");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.RegeneratingBeforeARoundHasRunAborts"
+        file   = "src/Creature.cpp"
+        anchor = 'assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.RegeneratingWithMoreFireAndAcidThanDamageAborts"
+        file   = "src/HealthPool.cpp"
+        anchor = 'assert(unregenerableDamage <= hpMax - hp && "HealthPool::regenerate: more fire and acid damage than damage");'
     }
 )
 

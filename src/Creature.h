@@ -26,6 +26,7 @@
 #include "InventoryData.h"
 #include "Item.h"
 
+class DataManager;
 class Web;
 
 // One item sitting in one slot on a creature. The creature owns it while it is
@@ -374,6 +375,8 @@ public:
 	[[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
 	[[nodiscard]] int get_temp_hp() const noexcept { return healthPool->get_temp_hp(); }
 	[[nodiscard]] int get_effective_hp() const noexcept { return healthPool->get_effective_hp(); }
+	// The fire and acid part of the damage taken, which regeneration cannot heal.
+	[[nodiscard]] int get_unregenerable_damage() const noexcept { return healthPool->get_unregenerable_damage(); }
 	void set_hp(int value) noexcept { healthPool->set_hp(value); }
 	void set_max_hp(int value) noexcept { healthPool->set_max_hp(value); }
 	void set_hp_base(int value) noexcept { healthPool->set_hp_base(value); }
@@ -396,6 +399,15 @@ public:
 	[[nodiscard]] std::optional<int> get_last_constitution() const noexcept { return constitutionTracker->get_last_constitution(); }
 	void set_last_constitution(int value) noexcept { constitutionTracker->set_last_constitution(value); }
 	void update_constitution_bonus(GameContext& ctx);
+
+	// Table 3's regeneration: from Constitution 20 a character heals 1 point each time
+	// the row's number of turns has run, counted in rounds since the game began. A
+	// monster never does, as it takes no Constitution hit points.
+	//
+	// Example, a fighter at Constitution 25, one turn between points:
+	//   fighter.regenerate_from_constitution(10, dataManager);   // heals 1
+	//   fighter.regenerate_from_constitution(11, dataManager);   // heals nothing
+	void regenerate_from_constitution(int roundsElapsed, const DataManager& dataManager);
 
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called when a creature dies — Player saves/defeats, monsters drop corpses

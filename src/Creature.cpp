@@ -13,6 +13,9 @@
 #include "Ai.h"
 #include "AiMonsterConfused.h"
 #include "Colors.h"
+#include "ConstitutionAttributes.h"
+#include "DataManager.h"
+#include "GameBalance.h"
 #include "Map.h"
 #include "Web.h"
 #include "DamageInfo.h"
@@ -76,6 +79,7 @@ void Creature::load(const json& j)
 			healthPool->set_hp(healthJson.at("hp").get<int>());
 			healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
 			healthPool->set_temp_hp(healthJson.at("tempHp").get<int>());
+			healthPool->set_unregenerable_damage(healthJson.at("unregenerableDamage").get<int>());
 		}
 	}
 	// Load constitution tracker state
@@ -181,6 +185,7 @@ void Creature::save(json& j)
 		healthJson["hp"] = healthPool->get_hp();
 		healthJson["hpBase"] = healthPool->get_hp_base();
 		healthJson["tempHp"] = healthPool->get_temp_hp();
+		healthJson["unregenerableDamage"] = healthPool->get_unregenerable_damage();
 		j["healthPool"] = healthJson;
 	}
 	// Save constitution tracker state
@@ -347,6 +352,30 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 
 // Applies damage and shows the number floating off the creature.
 //
+void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager& dataManager)
+{
+	assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");
+
+	// A monster's hit points are its hit dice, with nothing from Constitution.
+	if (creatureClass == CreatureClass::MONSTER)
+	{
+		return;
+	}
+
+	// The column holds 0 below Constitution 20, the book's "Nil".
+	const int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;
+	if (turnsBetweenPoints == 0)
+	{
+		return;
+	}
+
+	// A point each time the listed number of turns has run, reckoned in rounds.
+	if (roundsElapsed % (turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) == 0)
+	{
+		[[maybe_unused]] const int healed = healthPool->regenerate(1);
+	}
+}
+
 // HealthPool does the arithmetic and FloatingTextSystem decides how the number
 // looks; this states who was hurt and joins the two.
 int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)

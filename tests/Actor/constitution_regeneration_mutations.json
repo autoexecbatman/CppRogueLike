@@ -1,0 +1,89 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ConstitutionRegenerationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t// A monster's hit points are its hit dice, with nothing from Constitution.\n\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n",
+      "mutated": "",
+      "catches": "a monster regenerating from its Constitution"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;",
+      "mutated": "\tconst int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).hitDieMinimum;",
+      "catches": "the interval read from a column that is not Nil below 20"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (roundsElapsed % (turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) == 0)",
+      "mutated": "\tif (roundsElapsed % turnsBetweenPoints == 0)",
+      "catches": "the listed turns read as rounds"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (roundsElapsed % (turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) == 0)",
+      "mutated": "\tif (roundsElapsed % (turnsBetweenPoints * GameBalance::Time::ROUNDS_PER_TURN) != 0)",
+      "catches": "healing on every round but the listed one"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t[[maybe_unused]] const int healed = healthPool->regenerate(1);",
+      "mutated": "\t\t[[maybe_unused]] const int healed = healthPool->regenerate(2);",
+      "catches": "more than the book's 1 point"
+    },
+    {
+      "file": "src/GameBalance.h",
+      "original": "        inline constexpr int ROUNDS_PER_TURN = 10;",
+      "mutated": "        inline constexpr int ROUNDS_PER_TURN = 6;",
+      "catches": "a turn other than the book's ten rounds"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tif (damageType == DamageType::FIRE || damageType == DamageType::ACID)",
+      "mutated": "\tif (damageType == DamageType::FIRE)",
+      "catches": "acid regenerated"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tif (damageType == DamageType::FIRE || damageType == DamageType::ACID)",
+      "mutated": "\tif (damageType == DamageType::ACID)",
+      "catches": "fire regenerated"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tunregenerableDamage -= std::min(unregenerableDamage, actualHealed);\n",
+      "mutated": "",
+      "catches": "other healing leaving the fire and acid unhealed for regeneration's purposes"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tconst int healed = std::min(points, hpMax - hp - unregenerableDamage);",
+      "mutated": "\tconst int healed = std::min(points, hpMax - hp);",
+      "catches": "regeneration reaching the fire and acid"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tif (hp <= 0)\n\t{\n\t\treturn 0;\n\t}\n\tassert(",
+      "mutated": "\tassert(",
+      "catches": "regeneration raising the dead"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\t\tunregenerableDamage = std::min(unregenerableDamage + actualDamage, hpMax - hp);",
+      "mutated": "\t\tunregenerableDamage = unregenerableDamage + actualDamage;",
+      "catches": "more fire and acid kept than the damage the pool shows"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\thealthPool->set_unregenerable_damage(healthJson.at(\"unregenerableDamage\").get<int>());",
+      "mutated": "\t\t\thealthPool->set_unregenerable_damage(healthJson.at(\"tempHp\").get<int>());",
+      "catches": "the fire and acid lost across a save"
+    }
+  ]
+}
