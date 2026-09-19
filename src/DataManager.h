@@ -57,6 +57,7 @@ public:
 	// Example:
 	//   dataManager.constitution_for(17).HPAdj;   // -> 3
 	//   dataManager.constitution_for(20).HPAdj;   // -> 5
+	//   dataManager.constitution_for(21).hitDieMinimum;   // -> 3, a rolled 1 or 2 counts as 3
 	[[nodiscard]] ConstitutionAttributes constitution_for(int score) const;
 
 	// The hit points a Constitution score adds to each hit die, by class. Table 3's own

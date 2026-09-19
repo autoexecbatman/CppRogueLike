@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=HitPointGainTest.*:HitPointProgressionTest.*:ConstitutionAdjustmentLevelTest.*:ConstitutionTrackerTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n",
+      "mutated": "",
+      "catches": "a low roll at Constitution 20 and up left as rolled"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);",
+      "mutated": "        hitDiceRoll = ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum;",
+      "catches": "the minimum replacing the roll instead of raising a low one"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    int conBonus = 0;\n    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))\n    {\n        // Table 3's footnotes: from 20 up a low roll counts as more before the bonus.\n        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n",
+      "mutated": "    hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n    int conBonus = 0;\n    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))\n    {\n",
+      "catches": "the minimum raising a monster's die or a flat gain, outside the levels that take Constitution"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\tc.hitDieMinimum = item.at(\"hitDieMinimum\").get<int>();",
+      "mutated": "\t\tc.hitDieMinimum = item.at(\"HPAdj\").get<int>();",
+      "catches": "the loader reading another column into the minimum"
+    },
+    {
+      "file": "src/json/constitution.json",
+      "original": "\t\t\"Con\": 20,\n\t\t\"HPAdj\": 5,\n\t\t\"hitDieMinimum\": 2,",
+      "mutated": "\t\t\"Con\": 20,\n\t\t\"HPAdj\": 5,\n\t\t\"hitDieMinimum\": 1,",
+      "catches": "Constitution 20 losing its footnote in the data"
+    },
+    {
+      "file": "src/json/constitution.json",
+      "original": "\t\t\"Con\": 23,\n\t\t\"HPAdj\": 6,\n\t\t\"hitDieMinimum\": 4,",
+      "mutated": "\t\t\"Con\": 23,\n\t\t\"HPAdj\": 6,\n\t\t\"hitDieMinimum\": 3,",
+      "catches": "Constitution 23 read as the 21-22 footnote"
+    },
+    {
+      "file": "src/json/constitution.json",
+      "original": "\t\t\"Con\": 19,\n\t\t\"HPAdj\": 5,\n\t\t\"hitDieMinimum\": 1,",
+      "mutated": "\t\t\"Con\": 19,\n\t\t\"HPAdj\": 5,\n\t\t\"hitDieMinimum\": 2,",
+      "catches": "the footnote starting a score early"
+    }
+  ]
+}

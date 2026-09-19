@@ -315,6 +315,7 @@ std::vector<ConstitutionAttributes> DataManager::load_constitution(const std::st
 		ConstitutionAttributes c;
 		c.Con = item.value("Con", 0);
 		c.HPAdj = item.value("HPAdj", 0);
+		c.hitDieMinimum = item.at("hitDieMinimum").get<int>();
 		c.SystemShock = item.value("SystemShock", 0);
 		c.ResurrectionSurvival = item.value("ResurrectionSurvival", 0);
 		c.PoisonSave = item.value("PoisonSave", 0);

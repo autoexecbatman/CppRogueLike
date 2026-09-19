@@ -13,7 +13,9 @@
 // 2e archive): the warrior column above +2 for warriors only, +2 at most for every
 // other class, a penalty never capped, and no die worth less than 1. That bonus is
 // added to "each Hit Die rolled for the character" (PDF page 32): so on exactly the
-// levels above, and on no level of a monster's.
+// levels above, and on no level of a monster's. Table 3's footnotes raise the die
+// itself from 20 up: "All 1s rolled for Hit Dice are automatically considered 2s"
+// at 20, 1s and 2s count as 3s at 21-22, and 1s to 3s as 4s at 23-25.
 //
 // Run it:
 //
@@ -200,20 +202,21 @@ TEST_F(HitPointGainTest, TheBonusAboveTwoIsTheWarriorsAlone)
 	EXPECT_EQ(mock.data_manager.constitution_hit_point_adjustment(3, CreatureClass::WIZARD), -2);
 }
 
-// Through a level: a rolled 3 is worth 5 to a rogue, priest or wizard at any score from
-// 16 up.
+// Through a level: a rolled 4 is worth 6 to a rogue, priest or wizard at any score from
+// 16 up. A 4 is the highest die any footnote raises to, so only the bonus moves it.
 TEST_F(HitPointGainTest, ANonWarriorsBonusStopsAtTwo)
 {
 	for (const CreatureClass creatureClass : { CreatureClass::ROGUE, CreatureClass::CLERIC, CreatureClass::WIZARD })
 	{
 		for (const int constitution : { 16, 17, 18, 19, 20, 25 })
 		{
-			EXPECT_EQ(gain_for(creatureClass, constitution, 3), 5) << "class " << static_cast<int>(creatureClass) << " at Constitution " << constitution;
+			EXPECT_EQ(gain_for(creatureClass, constitution, 4), 6) << "class " << static_cast<int>(creatureClass) << " at Constitution " << constitution;
 		}
 	}
 }
 
-// A warrior takes the parenthetical bonus, Table 3's warrior column.
+// A warrior takes the parenthetical bonus, Table 3's warrior column, on a rolled 4 that
+// no footnote raises.
 TEST_F(HitPointGainTest, AWarriorGainsTheParentheticalBonus)
 {
 	struct WarriorBonus
@@ -232,7 +235,7 @@ TEST_F(HitPointGainTest, AWarriorGainsTheParentheticalBonus)
 
 	for (const WarriorBonus& expected : TABLE_THREE_WARRIOR)
 	{
-		EXPECT_EQ(gain_for(CreatureClass::FIGHTER, expected.constitution, 3), 3 + expected.bonus) << "Constitution " << expected.constitution;
+		EXPECT_EQ(gain_for(CreatureClass::FIGHTER, expected.constitution, 4), 4 + expected.bonus) << "Constitution " << expected.constitution;
 	}
 }
 
@@ -250,4 +253,67 @@ TEST_F(HitPointGainTest, APenaltyIsNotCappedAndADieYieldsAtLeastOne)
 TEST_F(HitPointGainTest, AMonstersLevelAddsNothingForConstitution)
 {
 	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 18, 3), 3);
+}
+
+// Table 3's footnotes, row by row: nothing below 20, then 2, 3, 3, 4, 4, 4.
+TEST_F(HitPointGainTest, TableThreeFootnotesSetTheLowestDie)
+{
+	for (int score = 1; score <= 19; ++score)
+	{
+		EXPECT_EQ(mock.data_manager.constitution_for(score).hitDieMinimum, 1) << "Constitution " << score;
+	}
+	EXPECT_EQ(mock.data_manager.constitution_for(20).hitDieMinimum, 2);
+	EXPECT_EQ(mock.data_manager.constitution_for(21).hitDieMinimum, 3);
+	EXPECT_EQ(mock.data_manager.constitution_for(22).hitDieMinimum, 3);
+	EXPECT_EQ(mock.data_manager.constitution_for(23).hitDieMinimum, 4);
+	EXPECT_EQ(mock.data_manager.constitution_for(24).hitDieMinimum, 4);
+	EXPECT_EQ(mock.data_manager.constitution_for(25).hitDieMinimum, 4);
+}
+
+// Through a level: a low roll counts as the footnote's number, then takes the bonus.
+TEST_F(HitPointGainTest, FromTwentyALowRollCountsAsTheFootnoteSays)
+{
+	struct LowRoll
+	{
+		CreatureClass creatureClass{ CreatureClass::MONSTER };
+		int constitution{ 0 };
+		int rolled{ 0 };
+		int gain{ 0 };
+	};
+	constexpr std::array<LowRoll, 7> RAISED_BY_TABLE_THREE{ {
+		{ CreatureClass::FIGHTER, 20, 1, 2 + 5 },
+		{ CreatureClass::WIZARD, 20, 1, 2 + 2 },
+		{ CreatureClass::FIGHTER, 21, 2, 3 + 6 },
+		{ CreatureClass::FIGHTER, 22, 1, 3 + 6 },
+		{ CreatureClass::FIGHTER, 23, 3, 4 + 6 },
+		{ CreatureClass::CLERIC, 24, 2, 4 + 2 },
+		{ CreatureClass::FIGHTER, 25, 1, 4 + 7 },
+	} };
+
+	for (const LowRoll& expected : RAISED_BY_TABLE_THREE)
+	{
+		EXPECT_EQ(gain_for(expected.creatureClass, expected.constitution, expected.rolled), expected.gain)
+			<< "class " << static_cast<int>(expected.creatureClass) << " at Constitution " << expected.constitution << " rolling " << expected.rolled;
+	}
+}
+
+// Only a low roll is raised: a 5 at Constitution 20 stays 5, and at 19 a 1 stays 1.
+TEST_F(HitPointGainTest, TheMinimumRaisesOnlyALowRoll)
+{
+	EXPECT_EQ(gain_for(CreatureClass::FIGHTER, 20, 5), 5 + 5);
+	EXPECT_EQ(gain_for(CreatureClass::FIGHTER, 19, 1), 1 + 5);
+}
+
+// A monster's die is its own, as when it was made: Constitution raises nothing.
+TEST_F(HitPointGainTest, AMonstersDieIsNotRaised)
+{
+	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 25, 1), 1);
+}
+
+// Past 9th a warrior rolls no die, so there is nothing for Constitution 25 to raise.
+TEST_F(HitPointGainTest, AFlatGainIsNotRaised)
+{
+	fighter.set_constitution(25);
+
+	EXPECT_EQ(gain_at_level(10), 3);
 }

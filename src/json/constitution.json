@@ -2,6 +2,7 @@
 	{
 		"Con": 1,
 		"HPAdj": -3,
+		"hitDieMinimum": 1,
 		"SystemShock": 25,
 		"ResurrectionSurvival": 30,
 		"PoisonSave": -2,
@@ -10,6 +11,7 @@
 	{
 		"Con": 2,
 		"HPAdj": -2,
+		"hitDieMinimum": 1,
 		"SystemShock": 30,
 		"ResurrectionSurvival": 35,
 		"PoisonSave": -1,
@@ -18,6 +20,7 @@
 	{
 		"Con": 3,
 		"HPAdj": -2,
+		"hitDieMinimum": 1,
 		"SystemShock": 35,
 		"ResurrectionSurvival": 40,
 		"PoisonSave": 0,
@@ -26,6 +29,7 @@
 	{
 		"Con": 4,
 		"HPAdj": -1,
+		"hitDieMinimum": 1,
 		"SystemShock": 40,
 		"ResurrectionSurvival": 45,
 		"PoisonSave": 0,
@@ -34,6 +38,7 @@
 	{
 		"Con": 5,
 		"HPAdj": -1,
+		"hitDieMinimum": 1,
 		"SystemShock": 45,
 		"ResurrectionSurvival": 50,
 		"PoisonSave": 0,
@@ -42,6 +47,7 @@
 	{
 		"Con": 6,
 		"HPAdj": -1,
+		"hitDieMinimum": 1,
 		"SystemShock": 50,
 		"ResurrectionSurvival": 55,
 		"PoisonSave": 0,
@@ -50,6 +56,7 @@
 	{
 		"Con": 7,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 55,
 		"ResurrectionSurvival": 60,
 		"PoisonSave": 0,
@@ -58,6 +65,7 @@
 	{
 		"Con": 8,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 60,
 		"ResurrectionSurvival": 65,
 		"PoisonSave": 0,
@@ -66,6 +74,7 @@
 	{
 		"Con": 9,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 65,
 		"ResurrectionSurvival": 70,
 		"PoisonSave": 0,
@@ -74,6 +83,7 @@
 	{
 		"Con": 10,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 70,
 		"ResurrectionSurvival": 75,
 		"PoisonSave": 0,
@@ -82,6 +92,7 @@
 	{
 		"Con": 11,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 75,
 		"ResurrectionSurvival": 80,
 		"PoisonSave": 0,
@@ -90,6 +101,7 @@
 	{
 		"Con": 12,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 80,
 		"ResurrectionSurvival": 85,
 		"PoisonSave": 0,
@@ -98,6 +110,7 @@
 	{
 		"Con": 13,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 85,
 		"ResurrectionSurvival": 90,
 		"PoisonSave": 0,
@@ -106,6 +119,7 @@
 	{
 		"Con": 14,
 		"HPAdj": 0,
+		"hitDieMinimum": 1,
 		"SystemShock": 88,
 		"ResurrectionSurvival": 92,
 		"PoisonSave": 0,
@@ -114,6 +128,7 @@
 	{
 		"Con": 15,
 		"HPAdj": 1,
+		"hitDieMinimum": 1,
 		"SystemShock": 90,
 		"ResurrectionSurvival": 94,
 		"PoisonSave": 0,
@@ -122,6 +137,7 @@
 	{
 		"Con": 16,
 		"HPAdj": 2,
+		"hitDieMinimum": 1,
 		"SystemShock": 95,
 		"ResurrectionSurvival": 96,
 		"PoisonSave": 0,
@@ -130,6 +146,7 @@
 	{
 		"Con": 17,
 		"HPAdj": 3,
+		"hitDieMinimum": 1,
 		"SystemShock": 97,
 		"ResurrectionSurvival": 98,
 		"PoisonSave": 0,
@@ -138,6 +155,7 @@
 	{
 		"Con": 18,
 		"HPAdj": 4,
+		"hitDieMinimum": 1,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 0,
@@ -146,6 +164,7 @@
 	{
 		"Con": 19,
 		"HPAdj": 5,
+		"hitDieMinimum": 1,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 1,
@@ -154,6 +173,7 @@
 	{
 		"Con": 20,
 		"HPAdj": 5,
+		"hitDieMinimum": 2,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 1,
@@ -162,6 +182,7 @@
 	{
 		"Con": 21,
 		"HPAdj": 6,
+		"hitDieMinimum": 3,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 2,
@@ -170,6 +191,7 @@
 	{
 		"Con": 22,
 		"HPAdj": 6,
+		"hitDieMinimum": 3,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 2,
@@ -178,6 +200,7 @@
 	{
 		"Con": 23,
 		"HPAdj": 6,
+		"hitDieMinimum": 4,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 3,
@@ -186,6 +209,7 @@
 	{
 		"Con": 24,
 		"HPAdj": 7,
+		"hitDieMinimum": 4,
 		"SystemShock": 99,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 3,
@@ -194,6 +218,7 @@
 	{
 		"Con": 25,
 		"HPAdj": 7,
+		"hitDieMinimum": 4,
 		"SystemShock": 100,
 		"ResurrectionSurvival": 100,
 		"PoisonSave": 4,
