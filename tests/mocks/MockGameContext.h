@@ -10,6 +10,7 @@
 #include "src/BodyPlanRegistry.h"
 #include "src/SpellRegistry.h"
 #include "src/MonsterRegistry.h"
+#include "src/ItemRegistry.h"
 #include "src/TileConfig.h"
 
 struct MockGameContext
@@ -25,6 +26,7 @@ struct MockGameContext
 	BodyPlanRegistry body_plans{};
 	SpellRegistry spellRegistry{};
 	MonsterRegistry monsterRegistry{};
+	ItemRegistry itemRegistry{};
 
 	MockGameContext()
 	{
@@ -47,10 +49,12 @@ struct MockGameContext
 		// context the game builds can.
 		data_manager.load_all_data(messages);
 
-		// Casting, the spell menus, monster creation and spawning read their data
-		// through ctx, as the game's context does.
+		// Casting, the spell menus, creating and spawning monsters and items read their
+		// data through ctx, as the game's context does.
 		spellRegistry.load(Paths::SPELLS);
 		monsterRegistry.load(Paths::MONSTERS);
+		itemRegistry.load(Paths::ITEMS);
+		itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
 	}
 
 	GameContext to_game_context()
@@ -65,6 +69,7 @@ struct MockGameContext
 			.bodyPlanRegistry = &body_plans,
 			.spellRegistry = &spellRegistry,
 			.monsterRegistry = &monsterRegistry,
+			.itemRegistry = &itemRegistry,
 			.floorInventory = &inventory,
 			.gameState = &game_state
 		};

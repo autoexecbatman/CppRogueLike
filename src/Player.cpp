@@ -293,13 +293,13 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("plate_mail", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("long_sword", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
-		equip_item(ItemCreator::create("long_bow", position, *ctx.contentRegistry), EquipmentSlot::MISSILE_WEAPON, ctx);
-		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
+		equip_item(ItemCreator::create("plate_mail", position, ctx), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("long_sword", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
+		equip_item(ItemCreator::create("long_bow", position, ctx), EquipmentSlot::MISSILE_WEAPON, ctx);
+		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
 		assert(grantFireballResult.has_value());
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
 		break;
@@ -309,9 +309,9 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("leather_armor", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("dagger", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		equip_item(ItemCreator::create("leather_armor", position, ctx), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("dagger", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
+		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
 		break;
@@ -321,14 +321,14 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("chain_mail", position, *ctx.contentRegistry), EquipmentSlot::BODY, ctx);
-		equip_item(ItemCreator::create("mace", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		equip_item(ItemCreator::create("medium_shield", position, *ctx.contentRegistry), EquipmentSlot::LEFT_HAND, ctx);
-		[[maybe_unused]] const auto grantHealthPotionResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("health_potion", position, *ctx.contentRegistry));
+		equip_item(ItemCreator::create("chain_mail", position, ctx), EquipmentSlot::BODY, ctx);
+		equip_item(ItemCreator::create("mace", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
+		equip_item(ItemCreator::create("medium_shield", position, ctx), EquipmentSlot::LEFT_HAND, ctx);
+		[[maybe_unused]] const auto grantHealthPotionResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("health_potion", position, ctx));
 		assert(grantHealthPotionResult.has_value());
-		[[maybe_unused]] const auto grantHoldPersonResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_hold_person", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantHoldPersonResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_hold_person", position, ctx));
 		assert(grantHoldPersonResult.has_value());
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
@@ -339,14 +339,14 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 	{
 		int startingGold = (ctx.dice->d4() + ctx.dice->d4()) * 10;
 		set_gold(startingGold);
-		equip_item(ItemCreator::create("staff", position, *ctx.contentRegistry), EquipmentSlot::RIGHT_HAND, ctx);
-		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, *ctx.contentRegistry));
+		equip_item(ItemCreator::create("staff", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
+		[[maybe_unused]] const auto grantFireballResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_fireball", position, ctx));
 		assert(grantFireballResult.has_value());
-		[[maybe_unused]] const auto grantLightningResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_lightning", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantLightningResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_lightning", position, ctx));
 		assert(grantLightningResult.has_value());
-		[[maybe_unused]] const auto grantSleepResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_sleep", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantSleepResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("scroll_sleep", position, ctx));
 		assert(grantSleepResult.has_value());
-		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, *ctx.contentRegistry));
+		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);

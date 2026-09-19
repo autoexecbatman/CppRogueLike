@@ -7,6 +7,7 @@
 #include "Persistent.h"
 
 class ContentRegistry;
+class ItemRegistry;
 struct GameContext;
 enum class ItemClass;
 
@@ -22,7 +23,7 @@ struct Disguise
 // Single source of truth: called at fresh construction AND as lazy init after load.
 namespace Appearance
 {
-[[nodiscard]] std::vector<Disguise> build_mimic_list(ContentRegistry& registry);
+[[nodiscard]] std::vector<Disguise> build_mimic_list(ContentRegistry& tiles, const ItemRegistry& items);
 } // namespace Appearance
 
 class AiMimic : public AiMonster

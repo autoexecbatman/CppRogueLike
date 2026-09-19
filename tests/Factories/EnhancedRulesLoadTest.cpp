@@ -17,7 +17,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=EnhancedRulesLoadTest.*
 
-#include "src/ItemCreator.h"
+#include "src/ItemRegistry.h"
 #include "src/Paths.h"
 #include <gtest/gtest.h>
 
@@ -32,6 +32,7 @@ class EnhancedRulesLoadTest : public ::testing::Test
 {
 protected:
 	std::filesystem::path damaged;
+	ItemRegistry items{};
 
 	void SetUp() override
 	{
@@ -40,8 +41,6 @@ protected:
 
 	void TearDown() override
 	{
-		// Leave the shared registry holding the real rules, not a damaged copy.
-		ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
 		std::filesystem::remove(damaged);
 	}
 
@@ -68,7 +67,7 @@ protected:
 
 		try
 		{
-			ItemCreator::load_enhanced_rules(damaged.string());
+			items.load_enhanced_rules(damaged.string());
 		}
 		catch (const std::exception& refusal)
 		{
@@ -85,7 +84,7 @@ TEST_F(EnhancedRulesLoadTest, AFileThatWillNotOpenIsRefused)
 	// nothing, which is indistinguishable from a dungeon that simply rolled none.
 	try
 	{
-		ItemCreator::load_enhanced_rules("data/content/no_such_rules.json");
+		items.load_enhanced_rules("data/content/no_such_rules.json");
 		ADD_FAILURE() << "loading a path that does not exist threw nothing";
 	}
 	catch (const std::runtime_error& refusal)
@@ -117,17 +116,17 @@ TEST_F(EnhancedRulesLoadTest, TheRealFileLoadsWithoutThrowing)
 {
 	// Paired with the refusals: they must be about the damage rather than about the
 	// loader, or they would pass while rejecting everything.
-	EXPECT_NO_THROW(ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES));
-	EXPECT_FALSE(ItemCreator::get_enhanced_rules().empty());
+	EXPECT_NO_THROW(items.load_enhanced_rules(Paths::ENHANCED_RULES));
+	EXPECT_FALSE(items.get_enhanced_rules().empty());
 }
 
 TEST_F(EnhancedRulesLoadTest, AMissingItemFileIsRefused)
 {
-	// The same hole, one function up: ItemCreator::load is the only loader in the tree
-	// that returned quietly, while MonsterCreator, SpellSystem and its own save throw.
+	// The same hole, one function up: a missing items file is refused the way every
+	// other loader refuses its own.
 	try
 	{
-		ItemCreator::load("data/content/no_such_items.json");
+		items.load("data/content/no_such_items.json");
 		ADD_FAILURE() << "loading a path that does not exist threw nothing";
 	}
 	catch (const std::runtime_error& refusal)
@@ -135,6 +134,4 @@ TEST_F(EnhancedRulesLoadTest, AMissingItemFileIsRefused)
 		EXPECT_NE(std::string(refusal.what()).find("no_such_items.json"), std::string::npos)
 			<< "the refusal must name the path it could not open: " << refusal.what();
 	}
-	// Put the real items back for whatever runs next; the registry is shared.
-	ItemCreator::load(Paths::ITEMS);
 }

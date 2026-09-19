@@ -33,6 +33,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/SavingThrowTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Combat/TypedAttackResistanceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemCreatorTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterCreatorTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterEquipmentTest.cpp
@@ -40,7 +41,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/EnhancedRulesLoadTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/TreasureGoldTest.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemFactoryReloadTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Factories/ItemSpawnTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSpawnTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
@@ -222,6 +223,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/MonsterRegistry.cpp
     ${PARENT_SOURCE_DIR}/ItemFactory.cpp
     ${PARENT_SOURCE_DIR}/ItemCreator.cpp
+    ${PARENT_SOURCE_DIR}/ItemRegistry.cpp
 
     # Objects
     ${PARENT_SOURCE_DIR}/Web.cpp

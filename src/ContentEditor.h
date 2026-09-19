@@ -8,6 +8,7 @@
 
 class ContentRegistry;
 class MonsterRegistry;
+class ItemRegistry;
 
 // ContentEditor -- developer tool for assigning sprite tiles to items and monsters.
 //
@@ -22,7 +23,7 @@ class MonsterRegistry;
 class ContentEditor
 {
 public:
-	void toggle(ContentRegistry& registry, MonsterRegistry& monsters);
+	void toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items);
 	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
 	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
 

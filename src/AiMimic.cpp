@@ -65,20 +65,20 @@ static const std::unordered_map<ItemClass, MimicBonusType> item_bonus_map = {
 
 // Single source of truth: which item appearances a mimic can adopt.
 // Called at fresh construction (Mimic ctor) and as lazy init after load.
-std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& registry)
+std::vector<Disguise> Appearance::build_mimic_list(ContentRegistry& tiles, const ItemRegistry& items)
 {
-	auto fromItem = [&registry](std::string_view key) -> Disguise
+	auto from_item = [&tiles, &items](std::string_view key) -> Disguise
 	{
-		const auto& p = ItemCreator::get_params(key);
-		return { registry.get_tile(key), std::string(p.name), p.color };
+		const ItemParams& params = items.get_params(key);
+		return { tiles.get_tile(key), std::string(params.name), params.color };
 	};
 
 	return {
-		fromItem("gold_coin"),
-		fromItem("health_potion"),
-		fromItem("scroll_lightning"),
-		fromItem("short_sword"),
-		fromItem("food_ration"),
+		from_item("gold_coin"),
+		from_item("health_potion"),
+		from_item("scroll_lightning"),
+		from_item("short_sword"),
+		from_item("food_ration"),
 	};
 }
 
@@ -92,7 +92,7 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 	// Lazy init after load: possibleDisguises is empty when created via Ai::create().
 	if (possibleDisguises.empty())
 	{
-		possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry);
+		possibleDisguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
 	}
 
 	if (owner.is_dead())

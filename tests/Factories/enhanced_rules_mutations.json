@@ -8,31 +8,31 @@
   ],
   "mutations": [
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemCreator::load -- cannot open '{}'\", resolved.string()));",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemRegistry::load -- cannot open '{}'\", resolved.string()));",
       "mutated": "\t\treturn;",
       "catches": "a missing items file loading nothing and saying nothing, as before"
     },
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemCreator::load_enhanced_rules -- cannot open '{}'\", resolved.string()));",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\t\tthrow std::runtime_error(\n\t\t\tstd::format(\"ItemRegistry::load_enhanced_rules -- cannot open '{}'\", resolved.string()));",
       "mutated": "\t\treturn;",
       "catches": "a missing rules file leaving no enhanced items and saying nothing"
     },
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\tthrow std::runtime_error(std::format(\"ItemCreator: unknown enhancement_category '{}'\", name));",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tthrow std::runtime_error(std::format(\"ItemRegistry: unknown enhancement_category '{}'\", name));",
       "mutated": "\treturn EnhancedItemCategory::ARMOR;",
       "catches": "the old ternary restored, so a typo becomes armour"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\tif (name == \"armor\")\n\t{\n\t\treturn EnhancedItemCategory::ARMOR;\n\t}",
       "mutated": "\tif (name == \"armour\")\n\t{\n\t\treturn EnhancedItemCategory::ARMOR;\n\t}",
       "catches": "the spelling the data does not use, which would refuse every armour rule"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\t\trule.levelMax = entry.at(\"level_maximum\").get<int>();",
       "mutated": "\t\trule.levelMax = entry.value(\"level_maximum\", 0);",
       "catches": "the one field that used to default, back to defaulting"

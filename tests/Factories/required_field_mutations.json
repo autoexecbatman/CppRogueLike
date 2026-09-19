@@ -8,33 +8,33 @@
   ],
   "mutations": [
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\tparams.baseWeight = required_field(record, key, \"baseWeight\");",
       "mutated": "\tparams.baseWeight = record.value(\"baseWeight\", 0);",
       "catches": "one numeric field back to a silent default, which is the original defect"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\tparams.itemClass = parse_item_class(required_field(record, key, \"itemClass\").get<std::string>());",
       "mutated": "\tparams.itemClass = parse_item_class(record.value(\"itemClass\", std::string{ \"unknown\" }));",
       "catches": "one text field back to a silent default"
     },
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\t\t\t\"ItemCreator::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
-      "mutated": "\t\t\t\"ItemCreator::load -- a record is missing a required field\"));",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
+      "mutated": "\t\t\t\"ItemRegistry::load -- a record is missing a required field\"));",
       "catches": "a refusal that names neither the record nor the field, useless across 98 of them"
     },
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\t\t\t\"ItemCreator::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
-      "mutated": "\t\t\t\"ItemCreator::load -- item '{}' is missing required field '{}'\",\n\t\t\tfield,\n\t\t\titemKey));",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
+      "mutated": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\tfield,\n\t\t\titemKey));",
       "catches": "the record and the field reported the wrong way round"
     },
     {
-      "file": "src/ItemCreator.cpp",
-      "original": "\tentry.name = required_field(record, key, \"name\").get<std::string>();",
-      "mutated": "\tentry.name = record.value(\"name\", key);",
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparsed.name = required_field(record, key, \"name\").get<std::string>();",
+      "mutated": "\tparsed.name = record.value(\"name\", key);",
       "catches": "a missing name silently becoming the registry key"
     },
     {

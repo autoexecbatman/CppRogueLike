@@ -42,6 +42,7 @@
 #include "BodyPlanRegistry.h"
 #include "SpellRegistry.h"
 #include "MonsterRegistry.h"
+#include "ItemRegistry.h"
 #include "TileConfig.h"
 #include "Dijkstra.h"
 #include "Vector2D.h"
@@ -66,9 +67,10 @@ struct Game
 	TileConfig tileConfig{};
 	BodyPlanRegistry bodyPlanRegistry{};
 
-	// Every spell and every monster the game knows, loaded before init_world
+	// Every spell, monster and item the game knows, loaded before init_world
 	SpellRegistry spellRegistry{};
 	MonsterRegistry monsterRegistry{};
+	ItemRegistry itemRegistry{};
 
 	// Minimap overlay
 	Minimap minimap{};

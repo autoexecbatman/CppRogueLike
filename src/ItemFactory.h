@@ -1,69 +1,55 @@
 #pragma once
 
-#include <functional>
-#include <span>
 #include <string>
-#include <unordered_map>
 #include <vector>
+
+// file: ItemFactory.h
+//
+// Draws random items for a dungeon level, onto the floor. The table it draws from is
+// derived from an ItemRegistry on every call - the registry's items with a spawn weight,
+// in key order, then its enhanced spawn rules - so nothing keeps a copy that an edit, a
+// new level or a game loaded from a save could find stale.
+//
+// Usage:
+//
+//   ItemFactory::spawn_random_item(position, dungeonLevel, ctx); // one item onto ctx.floorInventory
+//   ItemFactory::spawn_item_of_category(position, dungeonLevel, "potion", ctx); // one potion, if any can appear
+//   ItemFactory::generate_treasure(position, dungeonLevel, 2, ctx); // gold and two or three items
+//   ItemFactory::get_current_distribution(1, *ctx.itemRegistry); // -> one { name, category, percentage } per entry
 
 struct Vector2D;
 struct GameContext;
-struct EnhancedItemSpawnRule;
+class ItemRegistry;
 
-// A struct to represent an item type with its spawn probability
-struct ItemType
-{
-	std::string name{}; // to store in category
-	int baseWeight{}; // Base weight/probability
-	int levelMinimum{}; // Minimum dungeon level for this item
-	int levelMaximum{}; // Maximum dungeon level for this item (0 = no maximum)
-	float levelScaling{}; // How much to scale weight by level (can be negative)
-	std::string category{}; // Item category for filtering
-
-	// Factory function to create the item
-	std::function<void(Vector2D, GameContext&)> createFunc;
-};
-
+// One table entry's chance of being drawn, in percent.
 struct ItemPercentage
 {
+	// The item's name, or an enhanced rule's category.
 	std::string name{};
+	// The spawn category it is drawn under.
 	std::string category{};
+	// Its share of the level's total spawn weight, 0 to 100.
 	float percentage{};
 };
 
-class ItemFactory
+namespace ItemFactory
 {
-public:
-	ItemFactory();
-	~ItemFactory() = default;
-	ItemFactory(const ItemFactory&) = delete;
-	ItemFactory& operator=(const ItemFactory&) = delete;
-	ItemFactory(ItemFactory&&) = delete;
-	ItemFactory& operator=(ItemFactory&&) = delete;
+// Places a gold pile worth 10 to 20 gold per dungeon level per quality at position,
+// then one to five items near it, more and deeper-level ones for higher quality (1 to 3).
+void generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx);
 
-	void add_item_type(const ItemType& itemType);
-	void load_from_registry();
+// Each entry's chance at dungeonLevel, from the registry as it stands; an entry that
+// cannot appear there is left out.
+[[nodiscard]] std::vector<ItemPercentage> get_current_distribution(int dungeonLevel, const ItemRegistry& items);
 
-	// Rebuilds the spawn table from the current item registry, discarding what
-	// was there. Call after the registry changes - the editor writes items.json
-	// and reloads ItemCreator, and until this runs the table still holds the
-	// entries read at startup.
-	//
-	// Clearing first is the whole point: load_from_registry appends, so calling
-	// it twice would list every item twice and double its weight.
-	void reload_from_registry();
-	void load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rules);
-	void generate_treasure(Vector2D position, GameContext& ctx, int dungeonLevel, int quality);
-	std::vector<ItemPercentage> get_current_distribution(int dungeonLevel);
-	void spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category);
-	void spawn_random_item(Vector2D position, GameContext& ctx, int dungeonLevel);
-	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx);
+// Places one item of category at position, drawn by weight from ctx.itemRegistry for
+// dungeonLevel. Logs and places nothing when none of the category can appear.
+void spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category, GameContext& ctx);
 
-private:
-	std::vector<ItemType> itemTypes;
+// Places one item of any category at position, drawn by weight from ctx.itemRegistry
+// for dungeonLevel. Logs and places nothing when no item can appear.
+void spawn_random_item(Vector2D position, int dungeonLevel, GameContext& ctx);
 
-	// Map of item categories to filter items by type
-	std::unordered_map<std::string, std::vector<size_t>> itemCategories;
-
-	int calculate_weight(const ItemType& item, int dungeonLevel) const;
-};
+// Debug: places one enhanced item from every enhanced spawn rule at position.
+void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx);
+} // namespace ItemFactory

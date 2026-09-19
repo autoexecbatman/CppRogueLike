@@ -436,7 +436,7 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 // Puts an item into a slot this creature's body provides.
 //
 // Example:
-//   orc.wear(ItemCreator::create("long_sword", pos, tiles), EquipmentSlot::RIGHT_HAND);
+//   orc.wear(ItemCreator::create("long_sword", pos, ctx), EquipmentSlot::RIGHT_HAND);
 //   orc.get_attack_name(); // -> "long sword"
 void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
 {

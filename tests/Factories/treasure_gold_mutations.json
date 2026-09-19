@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/ItemFactory.cpp",
-      "original": "\tauto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, *ctx.contentRegistry);",
+      "original": "\tauto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, ctx);",
       "mutated": "\tauto goldPile = std::make_unique<Item>(position, ActorData{ TileRef{}, \"gold pile\", 0 });\n\tgoldPile->behavior = Gold{ goldAmount };",
       "catches": "the hand-built pile restored, worth 1 while paying out its roll"
     },

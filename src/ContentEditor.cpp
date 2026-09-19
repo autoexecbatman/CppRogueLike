@@ -6,7 +6,7 @@
 #include <raylib.h>
 
 #include "Paths.h"
-#include "ItemCreator.h"
+#include "ItemRegistry.h"
 #include "MonsterRegistry.h"
 #include "Renderer.h"
 #include "ContentRegistry.h"
@@ -49,7 +49,7 @@ constexpr MonsterEntry MONSTER_TABLE[] = {
 
 // ---------------------------------------------------------------------------
 
-void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters)
+void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters, const ItemRegistry& items)
 {
 	m_registry = &registry;
 
@@ -64,10 +64,10 @@ void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters)
 
 	if (m_active && m_item_entries.empty())
 	{
-		for (const auto& key : ItemCreator::get_all_keys())
+		for (const std::string& key : items.get_all_keys())
 		{
-			const auto& p = ItemCreator::get_params(key);
-			m_item_entries.push_back({ std::string(p.name), std::string(key), 0 });
+			const ItemParams& params = items.get_params(key);
+			m_item_entries.push_back({ std::string(params.name), key, 0 });
 		}
 		for (const auto& row : MONSTER_TABLE)
 		{

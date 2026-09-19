@@ -33,7 +33,6 @@ class WornResistanceTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		ItemCreator::load(Paths::ITEMS);
 		ctx = mock.to_game_context();
 		ctx.buffSystem = &buffs;
 
@@ -49,7 +48,7 @@ protected:
 
 	void wear(std::string_view key, EquipmentSlot slot)
 	{
-		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, mock.content_registry), slot, ctx);
+		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
 	}
 
 	// A plain sword carrying only an enhancement's fire resistance.

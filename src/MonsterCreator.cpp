@@ -43,7 +43,7 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	assert(ctx.contentRegistry && "MonsterCreator::create_from_params called without a contentRegistry");
 	for (const MonsterParams::StartingItem& carried : params.equipment)
 	{
-		std::unique_ptr<Item> carriedItem = ItemCreator::create(carried.itemKey, pos, *ctx.contentRegistry);
+		std::unique_ptr<Item> carriedItem = ItemCreator::create(carried.itemKey, pos, ctx);
 
 		// Authored data, so a mismatch is a typo in the file rather than an
 		// impossible state: it says which monster and which slot.

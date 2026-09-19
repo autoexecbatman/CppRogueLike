@@ -341,6 +341,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/ItemFactory.h
     ${PROJECT_SOURCE_DIR}/ItemCreator.cpp
     ${PROJECT_SOURCE_DIR}/ItemCreator.h
+    ${PROJECT_SOURCE_DIR}/ItemRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/ItemRegistry.h
 
     # Objects - Updated paths
     ${PROJECT_SOURCE_DIR}/Web.cpp

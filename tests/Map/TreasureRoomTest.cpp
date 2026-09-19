@@ -62,8 +62,6 @@ protected:
         try
         {
             dataManager.load_all_data(messageSystem);
-            ItemCreator::load(Paths::ITEMS);
-            ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
         }
         catch (...) {}
 
@@ -264,14 +262,6 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 
 TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 {
-    // The item registry is global, so it is loaded here rather than by the mock.
-    try
-    {
-        ItemCreator::load(Paths::ITEMS);
-        ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
-    }
-    catch (...) {}
-
     MockGameContext mock;
 
     auto map = std::make_unique<Map>(STAIR_TEST_W, STAIR_TEST_H);

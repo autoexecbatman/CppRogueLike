@@ -20,7 +20,7 @@
       "catches": "worn 18/xx never counted"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\trecord[\"exceptionalStrength\"] = params.exceptionalStrength;",
       "mutated": "",
       "catches": "the field left out when the editor saves items.json"

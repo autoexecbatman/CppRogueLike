@@ -37,7 +37,7 @@ protected:
 	{
 		game.dataManager.load_all_data(game.messageSystem);
 		game.tileConfig.load(Paths::TILE_CONFIG);
-		ItemCreator::load(Paths::ITEMS);
+		game.itemRegistry.load(Paths::ITEMS);
 
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->healthPool = std::make_unique<HealthPool>(20);
@@ -52,7 +52,7 @@ protected:
 	// Puts an item from the data on through the inventory screen's path, then curses it.
 	Item& wear_cursed(std::string_view key, EquipmentSlot slot)
 	{
-		auto item = ItemCreator::create(key, player->position, *ctx.contentRegistry);
+		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
 		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player);
 		use_item(*carried->behavior, *carried, *player, ctx);

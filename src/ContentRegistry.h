@@ -11,7 +11,7 @@
 // Owned by Game, threaded via GameContext.
 // JSON from data/content/tiles.json is the sole source of item tile assignments.
 // ContentEditor calls set_tile() to author, ContentRegistryIO to persist.
-// ItemCreator::create() receives a ContentRegistry& to resolve tiles at spawn time.
+// ItemCreator::create() reads it through ctx to resolve tiles at spawn time.
 
 class ContentRegistry
 {

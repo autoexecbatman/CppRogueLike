@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "TileType.h"
-#include "ItemFactory.h"
 #include "Persistent.h"
 #include "RandomDice.h"
 #include "Decoration.h"
@@ -73,7 +72,6 @@ private:
 	int mapWidth{};
 	int mapHeight{};
 	static constexpr std::array<Vector2D, 8> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
-	std::unique_ptr<ItemFactory> itemFactory;
 	std::vector<int> dijkstraCosts;
 
 	Vector2D get_map_size() const noexcept
@@ -118,9 +116,6 @@ public:
 	bool is_explored(Vector2D pos) const noexcept; // indicates whether this tile has already been seen by the player
 	bool can_walk(Vector2D pos, const GameContext& ctx) const noexcept;
 	void add_monster(Vector2D pos, GameContext& ctx) const;
-	// Puts a hoard on one tile, through the item factory the map owns. Quality
-	// runs 1 to 3; the dungeon level sets what is eligible to appear.
-	void generate_treasure(Vector2D pos, GameContext& ctx, int dungeonLevel, int quality) const;
 	void compute_fov(GameContext& ctx);
 	void update();
 	void render(const GameContext& ctx) const;
@@ -129,7 +124,6 @@ public:
 	std::vector<std::vector<Tile>> get_map() const noexcept;
 	void reveal(); // reveal the map
 	void regenerate(GameContext& ctx); // regenerate the map
-	void spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx); // debug: spawn all enhanced items
 	std::vector<Vector2D> neighbors(Vector2D id, const GameContext& ctx, std::optional<Vector2D> target) const;
 	double cost(Vector2D fromNode, Vector2D toNode, const GameContext& ctx);
 	int get_width() const noexcept { return mapWidth; }
@@ -156,7 +150,6 @@ public:
 	bool is_door_locked(Vector2D pos) const noexcept;
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
-	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
 	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;

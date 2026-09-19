@@ -63,7 +63,7 @@ void ShopkeeperFactory::configure_shopkeeper(Creature& shopkeeper, int dungeonLe
 	assert(ctx.contentRegistry && "configure_shopkeeper called without a contentRegistry");
 	shopkeeper.set_body_plan(ctx.bodyPlanRegistry->get("humanoid"));
 	shopkeeper.wear(
-		ItemCreator::create("dagger", shopkeeper.position, *ctx.contentRegistry),
+		ItemCreator::create("dagger", shopkeeper.position, ctx),
 		EquipmentSlot::RIGHT_HAND);
 
 	assert(shopkeeper.ai && "Shopkeeper requires Ai");

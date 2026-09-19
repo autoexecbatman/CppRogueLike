@@ -135,7 +135,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			}
 			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.contentEditor)
 			{
-				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry);
+				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry, *ctx.itemRegistry);
 				return true;
 			}
 			if (ctx.decorEditor && ctx.decorEditor->is_active())

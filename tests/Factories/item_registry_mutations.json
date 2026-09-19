@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemRegistryTest.*:ItemSpawnTableTest.*:GameContextWiring.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tentries.clear();\n",
+      "mutated": "",
+      "catches": "a load keeping the custom items it replaces"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tif (entries.contains(key))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a taken name reused as a key"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tif (is_builtin_key(key))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a shipped item treated as removable"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tfound->second.params = params;\n",
+      "mutated": "",
+      "catches": "an edit to an item written nowhere"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tentry.params.name = std::string_view{ entry.name };\n",
+      "mutated": "",
+      "catches": "an item's name view left pointing wherever its params came from"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tentry.params.category = std::string_view{ entry.category };\n",
+      "mutated": "",
+      "catches": "an item's category view left pointing wherever its params came from"
+    },
+    {
+      "file": "src/ItemRegistry.h",
+      "original": "\tItemRegistry(const ItemRegistry&) = delete;\n\tItemRegistry& operator=(const ItemRegistry&) = delete;\n",
+      "mutated": "\tItemRegistry(const ItemRegistry&) = default;\n\tItemRegistry& operator=(const ItemRegistry&) = default;\n",
+      "catches": "a registry copied, whose views would point into the original"
+    },
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\tconst std::vector<ItemType> table = spawn_table(items);\n",
+      "mutated": "\tstatic const std::vector<ItemType> table = spawn_table(items);\n",
+      "catches": "the distribution read from a table kept since its first call"
+    },
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\tconst std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\tstd::vector<const ItemType*> candidates;\n\tfor (const ItemType& item : table)\n\t{\n\t\tif (item.category == category)",
+      "mutated": "\tstatic const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);\n\n\tstd::vector<const ItemType*> candidates;\n\tfor (const ItemType& item : table)\n\t{\n\t\tif (item.category == category)",
+      "catches": "spawns drawn from a table kept since the first spawn"
+    },
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\t\tif (item.category == category)\n",
+      "mutated": "\t\tif (true)\n",
+      "catches": "a category spawn drawing from every category"
+    },
+    {
+      "file": "src/ItemFactory.cpp",
+      "original": "\t\tif (params.baseWeight <= 0)\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "an item with no spawn weight left in the table"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\t.itemRegistry = &itemRegistry,\n",
+      "mutated": "",
+      "catches": "the game's context carrying no item registry"
+    }
+  ]
+}

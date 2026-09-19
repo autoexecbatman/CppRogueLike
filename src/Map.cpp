@@ -78,7 +78,6 @@ namespace
 Map::Map(int mapWidth, int mapHeight)
 	: mapWidth(mapWidth),
 	  mapHeight(mapHeight),
-	  itemFactory(std::make_unique<ItemFactory>()),
 	  dijkstraCosts(static_cast<size_t>(mapWidth) * mapHeight, std::numeric_limits<int>::max()),
 	  fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
 	  seed(0)
@@ -645,10 +644,10 @@ void Map::add_item(Vector2D pos, GameContext& ctx)
 		return;
 	}
 
-	// Use our ItemFactory to create a random item
+	// Draw a random item from the registry for this level
 	if (ctx.levelManager)
 	{
-		itemFactory->spawn_random_item(pos, ctx, ctx.levelManager->get_dungeon_level());
+		ItemFactory::spawn_random_item(pos, ctx.levelManager->get_dungeon_level(), ctx);
 	}
 }
 
@@ -1337,11 +1336,6 @@ bool Map::can_walk(Vector2D pos, const GameContext& ctx) const noexcept
 	return true;
 }
 
-void Map::generate_treasure(Vector2D pos, GameContext& ctx, int dungeonLevel, int quality) const
-{
-	itemFactory->generate_treasure(pos, ctx, dungeonLevel, quality);
-}
-
 void Map::add_monster(Vector2D pos, GameContext& ctx) const
 {
 	// Use the monster factory to create a monster appropriate for the current dungeon level
@@ -1432,11 +1426,6 @@ void Map::regenerate(GameContext& ctx)
 	{
 		ctx.decorations->clear();
 	}
-
-	// Read the item registry again before placing anything. The item editor
-	// writes its JSON and updates the registry mid-game, and without this the
-	// item spawn table still holds whatever was loaded at startup.
-	itemFactory->reload_from_registry();
 
 	// generate a new map at current window dimensions (keep old size if curses not active)
 	const int newH = get_map_height();
@@ -1811,7 +1800,7 @@ void Map::place_amulet(GameContext& ctx)
 		}
 
 		// Create and place the amulet
-		[[maybe_unused]] const auto placeAmuletResult = InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, *ctx.contentRegistry));
+		[[maybe_unused]] const auto placeAmuletResult = InventoryOperations::add_item(*ctx.floorInventory, ItemCreator::create("amulet_of_yendor", amuletPos, ctx));
 		assert(placeAmuletResult.has_value());
 
 		// Log the placement (debug info)
@@ -1825,10 +1814,6 @@ void Map::place_amulet(GameContext& ctx)
 	}
 }
 
-std::vector<ItemPercentage> Map::get_item_distribution(int dungeonLevel)
-{
-	return itemFactory->get_current_distribution(dungeonLevel);
-}
 
 
 
@@ -1979,11 +1964,6 @@ void Map::post_process_doors()
 			}
 		}
 	}
-}
-
-void Map::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
-{
-	itemFactory->spawn_all_enhanced_items_debug(position, ctx);
 }
 
 // ---- place_from_graph: render dungeon graph (rooms + edges) to tiles ----

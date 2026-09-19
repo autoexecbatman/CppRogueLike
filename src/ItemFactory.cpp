@@ -7,132 +7,170 @@
 #include <utility>
 #include <vector>
 
-#include "InventoryOperations.h"
-#include "Item.h"
-#include "Pickable.h"
 #include "Colors.h"
 #include "GameContext.h"
-#include "Map.h"
-#include "RandomDice.h"
-#include "ItemEnhancements.h"
-#include "LevelManager.h"
-#include "MessageSystem.h"
-#include "Vector2D.h"
+#include "InventoryOperations.h"
+#include "Item.h"
 #include "ItemCreator.h"
+#include "ItemEnhancements.h"
 #include "ItemFactory.h"
+#include "ItemRegistry.h"
+#include "LevelManager.h"
+#include "Map.h"
+#include "MessageSystem.h"
+#include "Pickable.h"
+#include "RandomDice.h"
+#include "Vector2D.h"
 
-using namespace InventoryOperations; // For clean function calls
-
-ItemFactory::ItemFactory()
+namespace
 {
-	reload_from_registry();
+// One entry the table can draw, and the rule for its weight at a dungeon level.
+struct ItemType
+{
+	// The item's name, or an enhanced rule's category.
+	std::string name{};
+	// Weight at the first level.
+	int baseWeight{ 0 };
+	int levelMinimum{ 0 };
+	// No maximum when 0.
+	int levelMaximum{ 0 };
+	// How much the weight grows per level past the first; negative shrinks it.
+	float levelScaling{ 0.0f };
+	// The spawn category it is drawn under.
+	std::string category{};
+	std::function<void(Vector2D, GameContext&)> createFunc{};
+};
+
+// Places one enhanced item drawn from a rule's pool at position.
+void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, GameContext& ctx)
+{
+	const int poolIndex = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
+	const std::string_view baseKey = rule.itemPool[poolIndex];
+	const ItemEnhancement enhancement = (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
+		? ItemEnhancement::generate_weapon_enhancement()
+		: ItemEnhancement::generate_armor_enhancement();
+	[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+		*ctx.floorInventory,
+		ItemCreator::create_with_enhancement(baseKey, position, enhancement.prefix, enhancement.suffix, ctx));
+	assert(spawnItemResult.has_value());
 }
 
-void ItemFactory::reload_from_registry()
+// The spawn table as the registry holds it now: every item with a spawn weight, in key
+// order, then every enhanced spawn rule.
+std::vector<ItemType> spawn_table(const ItemRegistry& items)
 {
-	// load_from_registry and load_enhanced_rules both append, so the old table
-	// goes first or every item ends up listed twice.
-	itemTypes.clear();
-	itemCategories.clear();
+	std::vector<ItemType> table{};
 
-	load_from_registry();
-	load_enhanced_rules(ItemCreator::get_enhanced_rules());
-
-	// Populate item categories from category field
-	for (size_t i = 0; i < itemTypes.size(); i++)
+	for (const std::string& key : items.get_all_keys())
 	{
-		itemCategories[itemTypes[i].category].push_back(i);
-	}
-}
-
-// Add an item type to the factory
-void ItemFactory::add_item_type(const ItemType& itemType)
-{
-	itemTypes.push_back(itemType);
-}
-
-void ItemFactory::load_from_registry()
-{
-	for (const auto& key : ItemCreator::get_all_keys())
-	{
-		const ItemParams& params = ItemCreator::get_params(key);
+		const ItemParams& params = items.get_params(key);
 		if (params.baseWeight <= 0)
+		{
 			continue;
+		}
 
-		std::string capturedKey = key;
-		auto createFunc = (capturedKey == "gold_coin")
-			? std::function<void(Vector2D, GameContext&)>{
-				  [](Vector2D pos, GameContext& ctx)
-				  {
-					  const int level = ctx.levelManager->get_dungeon_level();
-					  const int amount = ctx.dice->roll(level * 3, level * 10);
-					  [[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-						  *ctx.floorInventory,
-						  ItemCreator::create_with_gold_amount(pos, amount, *ctx.contentRegistry));
-					  assert(spawnItemResult.has_value());
-				  }
-			  }
-			: std::function<void(Vector2D, GameContext&)>{ [capturedKey](Vector2D pos, GameContext& ctx)
-				  {
-					  [[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-						  *ctx.floorInventory,
-						  ItemCreator::create(capturedKey, pos, *ctx.contentRegistry));
-					  assert(spawnItemResult.has_value());
-				  } };
+		// A floor pile of gold is rolled for the level rather than worth its record.
+		auto place_gold = [](Vector2D pos, GameContext& ctx)
+		{
+			const int level = ctx.levelManager->get_dungeon_level();
+			const int amount = ctx.dice->roll(level * 3, level * 10);
+			[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+				*ctx.floorInventory,
+				ItemCreator::create_with_gold_amount(pos, amount, ctx));
+			assert(spawnItemResult.has_value());
+		};
+		auto place_item = [key](Vector2D pos, GameContext& ctx)
+		{
+			[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
+				*ctx.floorInventory,
+				ItemCreator::create(key, pos, ctx));
+			assert(spawnItemResult.has_value());
+		};
 
-		add_item_type(
+		table.push_back(
 			{
-				std::string{ params.name },
-				params.baseWeight,
-				params.levelMin,
-				params.levelMax,
-				params.levelScaling,
-				std::string{ params.category },
-				std::move(createFunc)
+				.name = std::string{ params.name },
+				.baseWeight = params.baseWeight,
+				.levelMinimum = params.levelMin,
+				.levelMaximum = params.levelMax,
+				.levelScaling = params.levelScaling,
+				.category = std::string{ params.category },
+				.createFunc = (key == "gold_coin")
+					? std::function<void(Vector2D, GameContext&)>{ place_gold }
+					: std::function<void(Vector2D, GameContext&)>{ place_item },
 			});
 	}
-}
 
-void ItemFactory::load_enhanced_rules(std::span<const EnhancedItemSpawnRule> rules)
-{
-	for (const auto& rule : rules)
+	for (const EnhancedItemSpawnRule& rule : items.get_enhanced_rules())
 	{
-		add_item_type(
+		table.push_back(
 			{
-				rule.category,
-				rule.baseWeight,
-				rule.levelMin,
-				rule.levelMax,
-				rule.levelScaling,
-				rule.category,
-				[rule](Vector2D pos, GameContext& ctx)
+				.name = rule.category,
+				.baseWeight = rule.baseWeight,
+				.levelMinimum = rule.levelMin,
+				.levelMaximum = rule.levelMax,
+				.levelScaling = rule.levelScaling,
+				.category = rule.category,
+				.createFunc = [rule](Vector2D pos, GameContext& ctx)
 				{
-					const int idx = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
-					const std::string_view baseKey = rule.itemPool[idx];
-					if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
-					{
-						auto enh = ItemEnhancement::generate_weapon_enhancement();
-						[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-							*ctx.floorInventory,
-							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
-						assert(spawnItemResult.has_value());
-					}
-					else
-					{
-						auto enh = ItemEnhancement::generate_armor_enhancement();
-						[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-							*ctx.floorInventory,
-							ItemCreator::create_with_enhancement(
-								baseKey, pos, enh.prefix, enh.suffix, *ctx.contentRegistry));
-						assert(spawnItemResult.has_value());
-					}
-				}
+					place_enhanced_item(rule, pos, ctx);
+				},
 			});
 	}
+
+	return table;
 }
 
-void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dungeonLevel, int quality)
+// An entry's weight at a dungeon level: 0 outside its levels, otherwise its base weight
+// scaled by level and never below 1.
+int calculate_weight(const ItemType& item, int dungeonLevel)
+{
+	if (dungeonLevel < item.levelMinimum || (item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
+	{
+		return 0;
+	}
+
+	const float levelFactor = 1.0f + (item.levelScaling * (dungeonLevel - 1));
+	const int weight = static_cast<int>(item.baseWeight * levelFactor);
+
+	return std::max(1, weight);
+}
+
+// Draws one entry of candidates by weight and places it; false when none can appear.
+bool place_one_of(const std::vector<const ItemType*>& candidates, Vector2D position, int dungeonLevel, GameContext& ctx)
+{
+	int totalWeight = 0;
+	std::vector<int> weights;
+
+	for (const ItemType* candidate : candidates)
+	{
+		const int weight = calculate_weight(*candidate, dungeonLevel);
+		weights.push_back(weight);
+		totalWeight += weight;
+	}
+
+	if (totalWeight <= 0)
+	{
+		return false;
+	}
+
+	const int roll = ctx.dice->roll(1, totalWeight);
+	int runningTotal = 0;
+
+	for (size_t index = 0; index < candidates.size(); ++index)
+	{
+		runningTotal += weights[index];
+		if (roll <= runningTotal)
+		{
+			candidates[index]->createFunc(position, ctx);
+			break;
+		}
+	}
+	return true;
+}
+} // namespace
+
+void ItemFactory::generate_treasure(Vector2D position, int dungeonLevel, int quality, GameContext& ctx)
 {
 	// quality is 1-3: 1=normal, 2=good, 3=exceptional
 
@@ -140,7 +178,6 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	int itemCount = 0;
 	switch (quality)
 	{
-
 	case 1:
 	{
 		itemCount = ctx.dice->roll(1, 2);
@@ -166,21 +203,21 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 	}
 
 	// Boost dungeon level for item generation to get better items
-	int effectiveLevel = dungeonLevel + (quality - 1) * 2;
+	const int effectiveLevel = dungeonLevel + (quality - 1) * 2;
 
 	// Always include gold with amount based on quality
-	int goldMin = 10 * dungeonLevel * quality;
-	int goldMax = 20 * dungeonLevel * quality;
-	int goldAmount = ctx.dice->roll(goldMin, goldMax);
+	const int goldMin = 10 * dungeonLevel * quality;
+	const int goldMax = 20 * dungeonLevel * quality;
+	const int goldAmount = ctx.dice->roll(goldMin, goldMax);
 
 	// Through the registry, so a treasure pile is the same item as a floor pile: one
 	// number for what it pays and what it is worth, and a tile the item data owns.
-	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, *ctx.contentRegistry);
-	[[maybe_unused]] const auto placed = add_item(*ctx.floorInventory, std::move(goldPile));
+	auto goldPile = ItemCreator::create_with_gold_amount(position, goldAmount, ctx);
+	[[maybe_unused]] const auto placed = InventoryOperations::add_item(*ctx.floorInventory, std::move(goldPile));
 	assert(placed.has_value());
 
 	// Generate other random items
-	for (int i = 0; i < itemCount; i++)
+	for (int itemIndex = 0; itemIndex < itemCount; ++itemIndex)
 	{
 		// Small offset to avoid items on same tile
 		Vector2D itemPos = position;
@@ -194,7 +231,7 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 		}
 
 		// Determine item type with biased probabilities
-		int roll = ctx.dice->d100();
+		const int roll = ctx.dice->d100();
 
 		if (quality == 3 && roll <= 5)
 		{
@@ -202,33 +239,33 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 			if (effectiveLevel >= 8 && ctx.dice->d100() <= 10)
 			{
 				// 10% chance for Amulet at high enough level
-				spawn_item_of_category(itemPos, ctx, effectiveLevel, "artifact");
+				spawn_item_of_category(itemPos, effectiveLevel, "artifact", ctx);
 			}
 			else
 			{
 				// High quality weapons
-				spawn_item_of_category(itemPos, ctx, effectiveLevel + 2, "weapon");
+				spawn_item_of_category(itemPos, effectiveLevel + 2, "weapon", ctx);
 			}
 		}
 		else if (roll <= 25)
 		{
 			// 25% chance of weapon
-			spawn_item_of_category(itemPos, ctx, effectiveLevel, "weapon");
+			spawn_item_of_category(itemPos, effectiveLevel, "weapon", ctx);
 		}
 		else if (roll <= 50)
 		{
 			// 25% chance of scroll
-			spawn_item_of_category(itemPos, ctx, effectiveLevel, "scroll");
+			spawn_item_of_category(itemPos, effectiveLevel, "scroll", ctx);
 		}
 		else if (roll <= 75)
 		{
 			// 25% chance of potion
-			spawn_item_of_category(itemPos, ctx, effectiveLevel, "potion");
+			spawn_item_of_category(itemPos, effectiveLevel, "potion", ctx);
 		}
 		else
 		{
 			// 25% chance of food
-			spawn_item_of_category(itemPos, ctx, effectiveLevel, "food");
+			spawn_item_of_category(itemPos, effectiveLevel, "food", ctx);
 		}
 	}
 
@@ -236,166 +273,82 @@ void ItemFactory::generate_treasure(Vector2D position, GameContext& ctx, int dun
 		" with " + std::to_string(itemCount + 1) + " items including gold");
 }
 
-// Get the probability distribution for the current dungeon level
-std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLevel)
+std::vector<ItemPercentage> ItemFactory::get_current_distribution(int dungeonLevel, const ItemRegistry& items)
 {
+	const std::vector<ItemType> table = spawn_table(items);
 	std::vector<ItemPercentage> distribution;
 
-	// Calculate total weights for current dungeon level
 	int totalWeight = 0;
 	std::vector<int> weights;
 
-	for (const auto& item : itemTypes)
+	for (const ItemType& item : table)
 	{
-		int weight = calculate_weight(item, dungeonLevel);
+		const int weight = calculate_weight(item, dungeonLevel);
 		weights.push_back(weight);
 		totalWeight += weight;
 	}
 
-	// Calculate percentage for each item
-	for (size_t i = 0; i < itemTypes.size(); i++)
+	for (size_t index = 0; index < table.size(); ++index)
 	{
-		if (weights[i] > 0)
+		if (weights[index] > 0)
 		{
-			float percentage = static_cast<float>(weights[i]) / totalWeight * 100.0f;
-			distribution.push_back(ItemPercentage{ itemTypes[i].name, itemTypes[i].category, percentage });
+			const float percentage = static_cast<float>(weights[index]) / totalWeight * 100.0f;
+			distribution.push_back(ItemPercentage{ table[index].name, table[index].category, percentage });
 		}
 	}
 
 	return distribution;
 }
 
-// Spawn a specific item category (weapon, potion, scroll, etc.)
-void ItemFactory::spawn_item_of_category(Vector2D position, GameContext& ctx, int dungeonLevel, const std::string& category)
+void ItemFactory::spawn_item_of_category(Vector2D position, int dungeonLevel, const std::string& category, GameContext& ctx)
 {
-	// find() retained: compound empty() check + value reuse avoids triple lookup
-	auto it = itemCategories.find(category);
-	if (it == itemCategories.end() || it->second.empty())
+	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
+
+	std::vector<const ItemType*> candidates;
+	for (const ItemType& item : table)
+	{
+		if (item.category == category)
+		{
+			candidates.push_back(&item);
+		}
+	}
+
+	if (candidates.empty())
 	{
 		ctx.messageSystem->log("No items found in category: " + category);
 		return;
 	}
 
-	const auto& indices = it->second;
-
-	// Calculate total weights for current dungeon level in this category
-	int totalWeight = 0;
-	std::vector<int> weights;
-
-	for (size_t idx : indices)
-	{
-		int weight = calculate_weight(itemTypes[idx], dungeonLevel);
-		weights.push_back(weight);
-		totalWeight += weight;
-	}
-
-	// If no valid items for this level in this category, do nothing
-	if (totalWeight <= 0)
+	if (!place_one_of(candidates, position, dungeonLevel, ctx))
 	{
 		ctx.messageSystem->log("No valid items in category " + category + " for this dungeon level!");
-		return;
-	}
-
-	// Roll random number and select item
-	int roll = ctx.dice->roll(1, totalWeight);
-	int runningTotal = 0;
-
-	for (size_t i = 0; i < indices.size(); i++)
-	{
-		runningTotal += weights[i];
-		if (roll <= runningTotal)
-		{
-			// Create the item
-			itemTypes[indices[i]].createFunc(position, ctx);
-			break;
-		}
 	}
 }
 
-// Spawn a random item at the given position based on dungeon level
-void ItemFactory::spawn_random_item(Vector2D position, GameContext& ctx, int dungeonLevel)
+void ItemFactory::spawn_random_item(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
-	// Calculate total weights for current dungeon level
-	int totalWeight = 0;
-	std::vector<int> weights;
+	const std::vector<ItemType> table = spawn_table(*ctx.itemRegistry);
 
-	for (const auto& item : itemTypes)
+	std::vector<const ItemType*> candidates;
+	for (const ItemType& item : table)
 	{
-		int weight = calculate_weight(item, dungeonLevel);
-		weights.push_back(weight);
-		totalWeight += weight;
+		candidates.push_back(&item);
 	}
 
-	// If no valid items for this level, do nothing
-	if (totalWeight <= 0)
+	if (!place_one_of(candidates, position, dungeonLevel, ctx))
 	{
 		ctx.messageSystem->log("No valid items for this dungeon level!");
-		return;
 	}
-
-	// Roll random number and select item
-	int roll = ctx.dice->roll(1, totalWeight);
-	int runningTotal = 0;
-
-	for (size_t i = 0; i < itemTypes.size(); i++)
-	{
-		runningTotal += weights[i];
-		if (roll <= runningTotal)
-		{
-			// Create the item
-			itemTypes[i].createFunc(position, ctx);
-			break;
-		}
-	}
-}
-
-// Calculate actual weight of an item based on dungeon level
-int ItemFactory::calculate_weight(const ItemType& item, int dungeonLevel) const
-{
-	// Check level requirements
-	if (dungeonLevel < item.levelMinimum || (item.levelMaximum > 0 && dungeonLevel > item.levelMaximum))
-	{
-		return 0;
-	}
-
-	// Calculate scaled weight based on dungeon level
-	float levelFactor = 1.0f + (item.levelScaling * (dungeonLevel - 1));
-	int weight = static_cast<int>(item.baseWeight * levelFactor);
-
-	// Ensure weight is at least 1 if item is available at this level
-	return std::max(1, weight);
 }
 
 void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext& ctx)
 {
 	ctx.messageSystem->log("DEBUG: Spawning enhanced items from all rules");
 
-	auto spawn_rule_sample = [&](std::span<const EnhancedItemSpawnRule> rules)
+	for (const EnhancedItemSpawnRule& rule : ctx.itemRegistry->get_enhanced_rules())
 	{
-		for (const auto& rule : rules)
-		{
-			const int idx = ctx.dice->roll(
-				0, static_cast<int>(rule.itemPool.size()) - 1);
-			const std::string_view baseKey = rule.itemPool[idx];
-			if (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
-			{
-				auto enh = ItemEnhancement::generate_weapon_enhancement();
-				[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-					*ctx.floorInventory,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
-				assert(spawnItemResult.has_value());
-			}
-			else
-			{
-				auto enh = ItemEnhancement::generate_armor_enhancement();
-				[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
-					*ctx.floorInventory,
-					ItemCreator::create_with_enhancement(baseKey, position, enh.prefix, enh.suffix, *ctx.contentRegistry));
-				assert(spawnItemResult.has_value());
-			}
-		}
-	};
+		place_enhanced_item(rule, position, ctx);
+	}
 
-	spawn_rule_sample(ItemCreator::get_enhanced_rules());
 	ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spawned enhanced items", true);
 }

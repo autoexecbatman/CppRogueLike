@@ -9,7 +9,7 @@
 
 #include "GameContext.h"
 #include "Paths.h"
-#include "ItemCreator.h"
+#include "ItemRegistry.h"
 #include "ItemClassification.h"
 #include "MagicalItemEffects.h"
 #include "Weapons.h"
@@ -103,19 +103,19 @@ void ItemEditor::enter(GameContext& ctx)
 	m_mode = Mode::NORMAL;
 	m_focus = 0;
 
-	m_keys = ItemCreator::get_all_keys();
+	m_keys = ctx.itemRegistry->get_all_keys();
 
 	m_list_cursor = 0;
 	m_list_scroll = 0;
 	m_picker_sheet = 0;
 	m_picker_scroll = 0;
 
-	load_working();
+	load_working(*ctx.itemRegistry);
 }
 
 void ItemEditor::exit(GameContext& ctx)
 {
-	commit_working();
+	commit_working(*ctx.itemRegistry);
 	m_active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
@@ -133,13 +133,13 @@ void ItemEditor::tick(GameContext& ctx)
 // Working copy
 // ---------------------------------------------------------------------------
 
-void ItemEditor::load_working()
+void ItemEditor::load_working(const ItemRegistry& items)
 {
 	if (m_keys.empty())
 		return;
 
 	const std::string& key = current_key();
-	const ItemParams& p = ItemCreator::get_params(key);
+	const ItemParams& p = items.get_params(key);
 	m_working = p;
 	m_working_name = std::string{ p.name };
 	m_working_category = std::string{ p.category };
@@ -150,13 +150,13 @@ void ItemEditor::load_working()
 	m_edit_buf.clear();
 }
 
-void ItemEditor::commit_working()
+void ItemEditor::commit_working(ItemRegistry& items)
 {
 	if (m_keys.empty())
 		return;
 	const std::string& key = current_key();
-	ItemCreator::set_name_category(key, m_working_name, m_working_category);
-	ItemCreator::set_params(key, m_working);
+	items.set_name_category(key, m_working_name, m_working_category);
+	items.set_params(key, m_working);
 	if (m_registry)
 	{
 		m_registry->set_tile(key, m_working_tile);
@@ -179,8 +179,8 @@ void ItemEditor::handle_input(GameContext& ctx)
 
 	if (ctrl && IsKeyPressed(KEY_S))
 	{
-		commit_working();
-		ItemCreator::save(Paths::ITEMS);
+		commit_working(*ctx.itemRegistry);
+		ctx.itemRegistry->save(Paths::ITEMS);
 		if (m_registry)
 		{
 			ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
@@ -211,6 +211,7 @@ void ItemEditor::handle_input(GameContext& ctx)
 
 void ItemEditor::handle_normal(const GameContext& ctx)
 {
+	ItemRegistry& items = *ctx.itemRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
 	int screenHeight = r.get_screen_height();
@@ -230,9 +231,9 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != m_list_cursor)
 			{
-				commit_working();
+				commit_working(items);
 				m_list_cursor = idx;
-				load_working();
+				load_working(items);
 			}
 		}
 		else if (m_mode == Mode::NORMAL)
@@ -268,20 +269,20 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 	{
 		if (IsKeyPressed(KEY_UP) && m_list_cursor > 0)
 		{
-			commit_working();
+			commit_working(items);
 			--m_list_cursor;
 			if (m_list_cursor < m_list_scroll)
 				m_list_scroll = m_list_cursor;
-			load_working();
+			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
 		{
-			commit_working();
+			commit_working(items);
 			++m_list_cursor;
 			int vis_list = body_h / 30;
 			if (m_list_cursor >= m_list_scroll + vis_list)
 				m_list_scroll = m_list_cursor - vis_list + 1;
-			load_working();
+			load_working(items);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
@@ -289,7 +290,7 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
-			commit_working();
+			commit_working(items);
 			ItemParams defaults;
 			defaults.itemClass = ItemClass::SWORD;
 			defaults.pickableType = PickableType::WEAPON;
@@ -299,27 +300,27 @@ void ItemEditor::handle_normal(const GameContext& ctx)
 			defaults.levelMax = 5;
 			defaults.handRequirement = HandRequirement::ONE_HANDED;
 			defaults.weaponSize = WeaponSize::MEDIUM;
-			std::string new_key = ItemCreator::add_custom("New Item", "weapon", defaults);
-			m_keys = ItemCreator::get_all_keys();
+			const std::string newKey = items.add_custom("New Item", "weapon", defaults);
+			m_keys = items.get_all_keys();
 			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
 			{
-				if (m_keys[i] == new_key)
+				if (m_keys[i] == newKey)
 				{
 					m_list_cursor = i;
 					break;
 				}
 			}
-			load_working();
+			load_working(items);
 			m_focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
-			if (!ItemCreator::is_builtin_key(current_key()))
+			if (!items.is_builtin_key(current_key()))
 			{
-				ItemCreator::remove_custom(current_key());
-				m_keys = ItemCreator::get_all_keys();
+				items.remove_custom(current_key());
+				m_keys = items.get_all_keys();
 				m_list_cursor = std::clamp(m_list_cursor, 0, static_cast<int>(m_keys.size()) - 1);
-				load_working();
+				load_working(items);
 			}
 		}
 		return;
@@ -474,7 +475,7 @@ void ItemEditor::render(const GameContext& ctx) const
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
-	render_list(r);
+	render_list(r, *ctx.itemRegistry);
 
 	if (m_mode == Mode::TILE_PICKER)
 		render_picker(r);
@@ -494,7 +495,7 @@ void ItemEditor::render_header(const Renderer& r) const
 		Color{ 100, 130, 100, 255 });
 }
 
-void ItemEditor::render_list(const Renderer& r) const
+void ItemEditor::render_list(const Renderer& r, const ItemRegistry& items) const
 {
 	int screenHeight = r.get_screen_height();
 	int body_y = HEADER_HEIGHT;
@@ -546,18 +547,18 @@ void ItemEditor::render_list(const Renderer& r) const
 			: (m_registry ? m_registry->get_tile(m_keys[i]) : TileRef{});
 		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		bool is_custom = !ItemCreator::is_builtin_key(m_keys[i]);
+		const bool isCustom = !items.is_builtin_key(m_keys[i]);
 
 		std::string display_name = is_sel
 			? m_working_name
-			: std::string{ ItemCreator::get_params(m_keys[i]).name };
+			: std::string{ items.get_params(m_keys[i]).name };
 
 		if (display_name.empty())
 		{
 			display_name = prettify_key(m_keys[i]);
 		}
 
-		if (is_custom)
+		if (isCustom)
 		{
 			display_name += " *";
 		}

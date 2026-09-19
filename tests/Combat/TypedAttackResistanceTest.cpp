@@ -35,7 +35,7 @@ protected:
 	{
 		game.dataManager.load_all_data(game.messageSystem);
 		game.tileConfig.load(Paths::TILE_CONFIG);
-		ItemCreator::load(Paths::ITEMS);
+		game.itemRegistry.load(Paths::ITEMS);
 
 		player = std::make_unique<Player>(Vector2D{ 0, 0 });
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
@@ -76,7 +76,7 @@ protected:
 
 	void wear(std::string_view key, EquipmentSlot slot)
 	{
-		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, *ctx.contentRegistry), slot, ctx);
+		player->equip_item(ItemCreator::create(key, Vector2D{ 0, 0 }, ctx), slot, ctx);
 	}
 
 	// The attack roll first, always a hit, then the damage dice in order.

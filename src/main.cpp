@@ -10,7 +10,6 @@
 #include <raylib.h>
 
 #include "Paths.h"
-#include "ItemCreator.h"
 #include "Game.h"
 #include "Menu.h"
 
@@ -51,12 +50,6 @@ int main()
 
 	std::clog << "STARTUP: Opened debug log\n" << std::flush;
 
-	// Load item data before Game construction (ItemFactory is built inside Map ctor).
-	std::clog << "STARTUP: Loading ItemCreator\n" << std::flush;
-	ItemCreator::load(Paths::ITEMS);
-	std::clog << "STARTUP: Loading enhanced rules\n" << std::flush;
-	ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
-
 	std::clog << "STARTUP: Creating Game\n" << std::flush;
 	// Game owns everything including Renderer and InputSystem
 	auto game = std::make_unique<Game>();
@@ -68,6 +61,9 @@ int main()
 	game->spellRegistry.load(Paths::SPELLS);
 	std::clog << "STARTUP: Loading monsters\n" << std::flush;
 	game->monsterRegistry.load(Paths::MONSTERS);
+	std::clog << "STARTUP: Loading items\n" << std::flush;
+	game->itemRegistry.load(Paths::ITEMS);
+	game->itemRegistry.load_enhanced_rules(Paths::ENHANCED_RULES);
 	std::clog << "STARTUP: Initializing world\n" << std::flush;
 	game->init_world();
 

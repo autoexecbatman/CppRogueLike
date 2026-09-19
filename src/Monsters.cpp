@@ -40,7 +40,7 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_hit_dice(hp);
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
-	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry);
+	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);
 
 	if (disguises.empty())
 	{

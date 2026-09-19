@@ -14,7 +14,6 @@ protected:
 
     void SetUp() override
     {
-        ItemCreator::load(Paths::ITEMS);
         ctx = mock.to_game_context();
     }
 };

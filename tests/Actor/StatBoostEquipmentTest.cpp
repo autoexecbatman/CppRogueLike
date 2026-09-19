@@ -48,7 +48,7 @@ protected:
 	{
 		game.dataManager.load_all_data(game.messageSystem);
 		game.tileConfig.load(Paths::TILE_CONFIG);
-		ItemCreator::load(Paths::ITEMS);
+		game.itemRegistry.load(Paths::ITEMS);
 
 		player->experienceReward = std::make_unique<ExperienceReward>(0);
 		player->healthPool = std::make_unique<HealthPool>(20);
@@ -64,7 +64,7 @@ protected:
 	// Puts an item from the data into the pack and uses it, as the inventory screen does.
 	void put_on(std::string_view key)
 	{
-		auto item = ItemCreator::create(key, player->position, *ctx.contentRegistry);
+		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
 		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player);
 		ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
@@ -232,7 +232,7 @@ namespace
 // load is added, so the pack is as heavy as a test needs.
 void load_pack(Player& player, int weight, GameContext& ctx)
 {
-	auto burden = ItemCreator::create("dagger", player.position, *ctx.contentRegistry);
+	auto burden = ItemCreator::create("dagger", player.position, ctx);
 	burden->enhancement.weight = weight;
 	[[maybe_unused]] const auto added = InventoryOperations::add_item(player.inventoryData, std::move(burden));
 	ASSERT_TRUE(added.has_value());
@@ -291,7 +291,7 @@ TEST_F(StatBoostEquipmentTest, AnItemWithNowhereToGoStaysOn)
 		load_pack(*player, 0, ctx);
 	}
 	FloorInventory crowded{ 1 };
-	[[maybe_unused]] const auto placed = InventoryOperations::add_item(crowded, ItemCreator::create("dagger", player->position, *ctx.contentRegistry));
+	[[maybe_unused]] const auto placed = InventoryOperations::add_item(crowded, ItemCreator::create("dagger", player->position, ctx));
 	ctx.floorInventory = &crowded;
 
 	EXPECT_FALSE(player->unequip_item(EquipmentSlot::GAUNTLETS, ctx));
@@ -307,7 +307,7 @@ TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 	ogre.set_strength(BASE_STRENGTH);
 	ogre.set_body_plan({ EquipmentSlot::GIRDLE });
 
-	ogre.wear(ItemCreator::create("girdle_of_hill_giant_strength", ogre.position, *ctx.contentRegistry), EquipmentSlot::GIRDLE);
+	ogre.wear(ItemCreator::create("girdle_of_hill_giant_strength", ogre.position, ctx), EquipmentSlot::GIRDLE);
 
 	EXPECT_EQ(ogre.get_strength(), 19);
 }

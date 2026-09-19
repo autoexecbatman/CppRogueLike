@@ -13,17 +13,13 @@ class ItemCreatorTest : public ::testing::Test
 {
 protected:
 	MockGameContext mock;
-
-	void SetUp() override
-	{
-		ItemCreator::load("data/content/items.json");
-	}
+	GameContext ctx{ mock.to_game_context() };
 };
 
 TEST_F(ItemCreatorTest, CreateHealthPotion)
 {
 	Vector2D pos(0, 0);
-	auto item = ItemCreator::create("health_potion", pos, mock.content_registry);
+	auto item = ItemCreator::create("health_potion", pos, ctx);
 
 	EXPECT_EQ(item->actorData.name, "health potion");
 	EXPECT_TRUE(item->behavior.has_value());
@@ -34,7 +30,7 @@ TEST_F(ItemCreatorTest, CreateHealthPotion)
 TEST_F(ItemCreatorTest, CreateScrollLightning)
 {
 	Vector2D pos(0, 0);
-	auto item = ItemCreator::create("scroll_lightning", pos, mock.content_registry);
+	auto item = ItemCreator::create("scroll_lightning", pos, ctx);
 
 	EXPECT_EQ(item->actorData.name, "scroll of lightning bolt");
 	EXPECT_TRUE(item->behavior.has_value());
@@ -50,7 +46,6 @@ TEST_F(ItemCreatorTest, CreateScrollLightning)
 TEST_F(ItemCreatorTest, CreateRandomPotion)
 {
 	Vector2D pos(0, 0);
-	auto ctx = mock.to_game_context();
 	auto item = ItemCreator::create_random_of_category("potion", pos, ctx, 1);
 
 	ASSERT_NE(item, nullptr);
@@ -61,7 +56,7 @@ TEST_F(ItemCreatorTest, CreateRandomPotion)
 TEST_F(ItemCreatorTest, CreateLeatherArmor)
 {
 	Vector2D pos(0, 0);
-	auto item = ItemCreator::create("leather_armor", pos, mock.content_registry);
+	auto item = ItemCreator::create("leather_armor", pos, ctx);
 
 	EXPECT_EQ(item->actorData.name, "leather armor");
 	EXPECT_TRUE(item->behavior.has_value());
@@ -72,7 +67,7 @@ TEST_F(ItemCreatorTest, CreateLeatherArmor)
 TEST_F(ItemCreatorTest, CreateIdentifyScroll)
 {
 	Vector2D pos(0, 0);
-	auto item = ItemCreator::create("identify_scroll", pos, mock.content_registry);
+	auto item = ItemCreator::create("identify_scroll", pos, ctx);
 
 	EXPECT_EQ(item->actorData.name, "identify scroll");
 	EXPECT_TRUE(item->behavior.has_value());
@@ -86,7 +81,7 @@ TEST_F(ItemCreatorTest, CreateIdentifyScroll)
 // notice: a potion that does nothing looks like a potion.
 TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 {
-	auto item = ItemCreator::create("potion_of_fire_resistance", Vector2D{ 0, 0 }, mock.content_registry);
+	auto item = ItemCreator::create("potion_of_fire_resistance", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	ASSERT_TRUE(std::holds_alternative<Consumable>(*item->behavior));
 	const auto& potion = std::get<Consumable>(*item->behavior);
@@ -100,7 +95,7 @@ TEST_F(ItemCreatorTest, FireResistancePotionIsOneRingsWorth)
 
 TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 {
-	auto item = ItemCreator::create("potion_of_cold_resistance", Vector2D{ 0, 0 }, mock.content_registry);
+	auto item = ItemCreator::create("potion_of_cold_resistance", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	ASSERT_TRUE(std::holds_alternative<Consumable>(*item->behavior));
 	const auto& potion = std::get<Consumable>(*item->behavior);
@@ -117,10 +112,10 @@ TEST_F(ItemCreatorTest, ColdResistancePotionIsOneRingsWorth)
 // which comes through the ordinary create() path like every other item.
 TEST_F(ItemCreatorTest, AGemIsWorthWhatItIsAuthoredToBeWorth)
 {
-	const int authored = ItemCreator::get_params("gem").value;
+	const int authored = mock.itemRegistry.get_params("gem").value;
 	ASSERT_GT(authored, 0) << "the data must give a gem a value for this to mean anything";
 
-	auto item = ItemCreator::create("gem", Vector2D{ 0, 0 }, mock.content_registry);
+	auto item = ItemCreator::create("gem", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	ASSERT_TRUE(std::holds_alternative<Gold>(*item->behavior));
 
@@ -150,12 +145,11 @@ TEST_F(ItemCreatorTest, AnItemWeighsItsWeightRatherThanItsSpawnRate)
 	out << root.dump(2);
 	out.close();
 
-	ItemCreator::load(apart.string());
-	auto item = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, mock.content_registry);
+	mock.itemRegistry.load(apart.string());
+	auto item = ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx);
 	ASSERT_TRUE(item);
 	const int carried = item->enhancement.weight;
 
-	ItemCreator::load("data/content/items.json");
 	std::filesystem::remove(apart);
 
 	EXPECT_EQ(carried, 7)
@@ -197,12 +191,10 @@ TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
 	out << root.dump(2);
 	out.close();
 
-	ItemCreator::load(apart.string());
-	GameContext ctx = mock.to_game_context();
+	mock.itemRegistry.load(apart.string());
 	ctx.dice->set_next_roll(50);
 	auto drawn = ItemCreator::create_random_of_category("potion", Vector2D{ 0, 0 }, ctx, 1);
 
-	ItemCreator::load("data/content/items.json");
 	std::filesystem::remove(apart);
 
 	ASSERT_TRUE(drawn);

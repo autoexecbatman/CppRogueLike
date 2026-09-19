@@ -16,6 +16,7 @@
 #include "InventoryOperations.h"
 #include "GameContext.h"
 #include "ItemCreator.h"
+#include "ItemFactory.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
@@ -322,7 +323,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx.monsterRegistry->get_params("dungeon_jailer"),
 		ctx);
 
-	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
+	auto key = ItemCreator::create("dungeon_key", best->spawnPos, ctx);
 	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer);
 	assert(giveKeyToJailerResult.has_value());
 
@@ -352,7 +353,7 @@ void TreasureRoom::create(
 	const Vector2D center{ room.center_col(), room.center_row() };
 
 	// Generate treasure at the center of the room
-	ctx.map->generate_treasure(center, ctx, ctx.levelManager->get_dungeon_level(), quality);
+	ItemFactory::generate_treasure(center, ctx.levelManager->get_dungeon_level(), quality, ctx);
 
 	// Spawn the Dungeon Warden — the named boss guarding the vault.
 	// Try the room center first, then spiral outward to find a free tile.

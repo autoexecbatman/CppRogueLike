@@ -14,13 +14,13 @@
       "catches": "the defect itself, an item weighing its draw odds"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\tparams.weight = required_field(record, key, \"weight\");",
       "mutated": "\tparams.weight = required_field(record, key, \"baseWeight\");",
       "catches": "the parser reading the spawn field into the carry field, which re-entangles them"
     },
     {
-      "file": "src/ItemCreator.cpp",
+      "file": "src/ItemRegistry.cpp",
       "original": "\trecord[\"weight\"] = params.weight;",
       "mutated": "",
       "catches": "the encoder dropping the new field, so a save loses every authored weight"

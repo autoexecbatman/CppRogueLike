@@ -3,7 +3,7 @@
 
 // Full-screen in-game item data editor.
 // Entered from main menu ("Item Editor" option).
-// Reads and writes data/content/items.json via ItemCreator.
+// Edits the ItemRegistry in ctx and saves it to data/content/items.json.
 //
 // Controls:
 //   Tab              -- switch focus: list panel <-> field panel
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "ItemCreator.h"
+#include "ItemRegistry.h"
 #include "Renderer.h"
 
 struct GameContext;
@@ -112,8 +112,8 @@ private:
 	// Status feedback
 	double m_last_save_time{ -100.0 };
 
-	void load_working();
-	void commit_working();
+	void load_working(const ItemRegistry& items);
+	void commit_working(ItemRegistry& items);
 
 	void handle_input(GameContext& ctx);
 	void handle_normal(const GameContext& ctx);
@@ -122,7 +122,7 @@ private:
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& r) const;
-	void render_list(const Renderer& r) const;
+	void render_list(const Renderer& r, const ItemRegistry& items) const;
 	void render_fields(const Renderer& r) const;
 	void render_picker(const Renderer& r) const;
 	void render_hint(const Renderer& r) const;

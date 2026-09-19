@@ -48,6 +48,16 @@ TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
 	EXPECT_EQ(ctx.monsterRegistry, &game.monsterRegistry);
 }
 
+// The items the game builds and spawns are the registry Game owns, the one main loads.
+TEST(GameContextWiring, ContextCarriesTheGamesItemRegistry)
+{
+	Game game;
+
+	const GameContext ctx = game.context();
+
+	EXPECT_EQ(ctx.itemRegistry, &game.itemRegistry);
+}
+
 // With a Player owned, both views name that object.
 TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 {

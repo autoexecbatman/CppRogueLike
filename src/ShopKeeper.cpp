@@ -199,7 +199,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 	}
 	case 3:
 	{
-		item = ItemCreator::create("food_ration", shop_pos, *ctx.contentRegistry);
+		item = ItemCreator::create("food_ration", shop_pos, ctx);
 		break;
 	}
 	}

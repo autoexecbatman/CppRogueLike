@@ -70,10 +70,8 @@ protected:
 		// claim otherwise.
 		GTEST_SKIP() << "assertions are compiled out under NDEBUG; these probes can prove nothing in this build";
 #endif
-		// Content is loaded so a probe dies on the invariant it names rather
+		// The mock loads content, so a probe dies on the invariant it names rather
 		// than on a missing file, which aborts with the wrong message.
-		ItemCreator::load(Paths::ITEMS);
-
 		ctx = mock.to_game_context();
 	}
 

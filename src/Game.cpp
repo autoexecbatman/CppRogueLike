@@ -53,6 +53,7 @@
 		.bodyPlanRegistry = &bodyPlanRegistry,
 		.spellRegistry = &spellRegistry,
 		.monsterRegistry = &monsterRegistry,
+		.itemRegistry = &itemRegistry,
 
 		// Game world data
 		.stairs = stairs.get(),

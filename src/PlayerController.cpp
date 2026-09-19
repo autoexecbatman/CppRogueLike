@@ -21,6 +21,7 @@
 #include "Controls.h"
 #include "GameContext.h"
 #include "ItemCreator.h"
+#include "ItemFactory.h"
 #include "ItemClassification.h"
 #include "Decoration.h"
 #include "Map.h"
@@ -1245,10 +1246,10 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::TEST_COMMAND:
 	{
-		ctx.map->spawn_all_enhanced_items_debug(playerOwner.position, ctx);
+		ItemFactory::spawn_all_enhanced_items_debug(playerOwner.position, ctx);
 		[[maybe_unused]] const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
-			ItemCreator::create("long_bow", playerOwner.position, *ctx.contentRegistry),
+			ItemCreator::create("long_bow", playerOwner.position, ctx),
 			playerOwner);
 		assert(debugSpawnBowResult.has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);

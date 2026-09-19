@@ -31,7 +31,6 @@ class MonsterHitDiceTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		ItemCreator::load(Paths::ITEMS);
 		dataManager.load_all_data(mock.messages);
 		ctx = mock.to_game_context();
 		ctx.dataManager = &dataManager;

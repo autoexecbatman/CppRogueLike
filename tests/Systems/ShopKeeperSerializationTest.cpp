@@ -21,7 +21,7 @@ protected:
 
     void SetUp() override
     {
-        ItemCreator::load("data/content/items.json");
+        game.itemRegistry.load("data/content/items.json");
         ctx = game.context();
     }
 

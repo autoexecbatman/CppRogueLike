@@ -32,7 +32,6 @@ protected:
 		ctx.creatures = &creatures;
 		ctx.playerOwner = &caster;
 		ctx.buffSystem = &buffs;
-		ItemCreator::load(Paths::ITEMS);
 
 		caster->healthPool = std::make_unique<HealthPool>(20);
 		caster->armorClass = std::make_unique<ArmorClass>(10);
@@ -154,7 +153,7 @@ TEST_F(FireballDamageTest, TenDiceIsTheCeiling)
 TEST_F(FireballDamageTest, ARingOfFireResistanceTakesTwoOffEveryDie)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, mock.content_registry), EquipmentSlot::RIGHT_RING);
+	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
 	force_max_dice_then_saves({ 1 });
 
 	burst_at(Vector2D{ 3, 5 });
@@ -167,7 +166,7 @@ TEST_F(FireballDamageTest, ARingOfFireResistanceTakesTwoOffEveryDie)
 TEST_F(FireballDamageTest, TheHelmOfBrillianceTakesFourOffEveryDie)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("helm_of_brilliance", Vector2D{ 3, 5 }, mock.content_registry), EquipmentSlot::HEAD);
+	wearer.wear(ItemCreator::create("helm_of_brilliance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::HEAD);
 	force_max_dice_then_saves({ 1 });
 
 	burst_at(Vector2D{ 3, 5 });
@@ -179,7 +178,7 @@ TEST_F(FireballDamageTest, TheHelmOfBrillianceTakesFourOffEveryDie)
 TEST_F(FireballDamageTest, ADieNeverGoesBelowOne)
 {
 	Creature& wearer = add_creature(3);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, mock.content_registry), EquipmentSlot::RIGHT_RING);
+	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
 	for (int die = 0; die < CASTER_LEVEL; ++die)
 	{
 		mock.dice.set_next_roll(1);
@@ -197,7 +196,7 @@ TEST_F(FireballDamageTest, ARingAddsFourToTheSave)
 {
 	Creature& wearer = add_creature(3);
 	Creature& bare = add_creature(4);
-	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, mock.content_registry), EquipmentSlot::RIGHT_RING);
+	wearer.wear(ItemCreator::create("ring_of_fire_resistance", Vector2D{ 3, 5 }, ctx), EquipmentSlot::RIGHT_RING);
 	force_max_dice_then_saves({ 13, 13 });
 
 	burst_at(Vector2D{ 3, 5 });

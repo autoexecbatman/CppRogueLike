@@ -9,7 +9,7 @@
 
 #include "src/MonsterCreator.h"
 #include "src/MonsterRegistry.h"
-#include "src/ItemCreator.h"
+#include "src/ItemRegistry.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
 #include "tests/mocks/MockGameContext.h"
@@ -22,11 +22,12 @@ class MonsterEquipmentTest : public ::testing::Test
 protected:
 	BodyPlanRegistry bodyPlans;
 	MonsterRegistry monsters{};
+	ItemRegistry items{};
 
 	void SetUp() override
 	{
 		monsters.load("data/content/monsters.json");
-		ItemCreator::load("data/content/items.json");
+		items.load("data/content/items.json");
 		bodyPlans.load("data/content/body_plans.json");
 	}
 
@@ -79,7 +80,7 @@ TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
 // display-name field never had.
 TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
 {
-	const std::vector<std::string> allItemKeys = ItemCreator::get_all_keys();
+	const std::vector<std::string> allItemKeys = items.get_all_keys();
 	const std::set<std::string> knownItemKeys(allItemKeys.begin(), allItemKeys.end());
 
 	for (const std::string& key : monsters.get_all_keys())

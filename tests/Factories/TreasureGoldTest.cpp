@@ -35,13 +35,9 @@ protected:
 	Map map{ 40, 25 };
 	MessageSystem messageSystem;
 	GameContext ctx;
-	ItemFactory factory;
 
 	void SetUp() override
 	{
-		ItemCreator::load(Paths::ITEMS);
-		ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
-
 		ctx = mock.to_game_context();
 		ctx.map = &map;
 		ctx.messageSystem = &messageSystem;
@@ -64,7 +60,7 @@ protected:
 
 TEST_F(TreasureGoldTest, ATreasurePileIsWorthWhatItPaysOut)
 {
-	factory.generate_treasure(Vector2D{ 10, 10 }, ctx, 1, 1);
+	ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
 
 	const Item* gold = find_gold();
 	ASSERT_NE(gold, nullptr) << "generate_treasure always places gold";
@@ -77,7 +73,7 @@ TEST_F(TreasureGoldTest, ATreasurePileIsWorthWhatItPaysOut)
 
 TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
 {
-	factory.generate_treasure(Vector2D{ 10, 10 }, ctx, 1, 1);
+	ItemFactory::generate_treasure(Vector2D{ 10, 10 }, 1, 1, ctx);
 
 	const Item* gold = find_gold();
 	ASSERT_NE(gold, nullptr);
@@ -85,6 +81,6 @@ TEST_F(TreasureGoldTest, ATreasurePileIsTheSameItemAsAFloorPile)
 	// A hand-built item has none of these, so each one says the pile came through the
 	// registry rather than being assembled at the call site.
 	EXPECT_EQ(gold->itemKey, "gold_coin") << "a pile with no key cannot be identified on load";
-	EXPECT_EQ(gold->itemClass, ItemCreator::get_params("gold_coin").itemClass);
-	EXPECT_EQ(gold->actorData.name, std::string(ItemCreator::get_params("gold_coin").name));
+	EXPECT_EQ(gold->itemClass, mock.itemRegistry.get_params("gold_coin").itemClass);
+	EXPECT_EQ(gold->actorData.name, std::string(mock.itemRegistry.get_params("gold_coin").name));
 }

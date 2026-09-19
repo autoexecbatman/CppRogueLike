@@ -26,7 +26,6 @@ class ShopStockLevelTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		ItemCreator::load(Paths::ITEMS);
 		ctx = mock.to_game_context();
 		ctx.levelManager = &levelManager;
 	}

@@ -39,7 +39,6 @@ class ShopTransactionTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		ItemCreator::load(Paths::ITEMS);
 		ctx = mock.to_game_context();
 		// A player built directly has strength 0, whose carry limit is 0, so every item
 		// would be too heavy. Ten is the average 3d6 roll and gives a limit of 50.
@@ -51,7 +50,7 @@ protected:
 	// Puts one item into the seller's pack and returns it, still owned by the pack.
 	Item& give_seller(const char* itemKey)
 	{
-		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, mock.content_registry);
+		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(item);
 		Item& held = *item;
 		EXPECT_TRUE(InventoryOperations::add_item(player.inventoryData, std::move(item)).has_value());
@@ -61,7 +60,7 @@ protected:
 	// Puts one item on the shop's shelves and returns it, still owned by the shop.
 	Item& shelve(const char* itemKey)
 	{
-		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, mock.content_registry);
+		auto item = ItemCreator::create(itemKey, Vector2D{ 0, 0 }, ctx);
 		EXPECT_TRUE(item);
 		Item& held = *item;
 		EXPECT_TRUE(InventoryOperations::add_item(shop.get_shop_inventory(), std::move(item)).has_value());
@@ -76,7 +75,8 @@ protected:
 		{
 			ASSERT_TRUE(InventoryOperations::add_item(
 				shelves,
-				ItemCreator::create("health_potion", Vector2D{ 0, 0 }, mock.content_registry)).has_value());
+				ItemCreator::create("health_potion", Vector2D{ 0, 0 }, ctx))
+					.has_value());
 		}
 	}
 
