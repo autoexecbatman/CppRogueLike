@@ -56,7 +56,7 @@ std::unique_ptr<BaseMenu> make_main_menu(bool startup, GameContext& ctx)
 
     auto monsterEditorCommand = [](GameContext& ctx)
     {
-        ctx.monsterEditor->enter();
+        ctx.monsterEditor->enter(*ctx.monsterRegistry);
     };
     entries.push_back({ "Monster Editor", 'm', monsterEditorCommand });
 

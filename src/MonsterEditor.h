@@ -3,7 +3,7 @@
 
 // Full-screen in-game monster data editor.
 // Entered from main menu ("Monster Editor" option).
-// Reads and writes data/content/monsters.json via MonsterCreator.
+// Edits the MonsterRegistry in ctx and saves it to data/content/monsters.json.
 //
 // Controls:
 //   Tab              -- switch focus: list panel <-> field panel
@@ -18,7 +18,7 @@
 #include <string>
 #include <vector>
 
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "Renderer.h"
 
 struct GameContext;
@@ -105,8 +105,8 @@ private:
 	// Status feedback
 	double m_last_save_time{ -100.0 };
 
-void load_working();
-	void commit_working();
+	void load_working(const MonsterRegistry& monsters);
+	void commit_working(MonsterRegistry& monsters);
 
 	void handle_input(GameContext& ctx);
 	void handle_normal(const GameContext& ctx);
@@ -115,7 +115,7 @@ void load_working();
 
 	void render(const GameContext& ctx) const;
 	void render_header(const Renderer& r) const;
-	void render_list(const Renderer& r) const;
+	void render_list(const Renderer& renderer, const MonsterRegistry& monsters) const;
 	void render_fields(const Renderer& r) const;
 	void render_picker(const Renderer& r) const;
 	void render_hint(const Renderer& r) const;
@@ -136,7 +136,7 @@ void load_working();
 	void field_set_string(FieldId f, std::string val);
 
 public:
-	void enter();
+	void enter(const MonsterRegistry& monsters);
 	void exit(GameContext& ctx);
 	void tick(GameContext& ctx);
 

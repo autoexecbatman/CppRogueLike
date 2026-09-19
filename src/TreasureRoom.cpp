@@ -17,6 +17,7 @@
 #include "GameContext.h"
 #include "ItemCreator.h"
 #include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "LevelManager.h"
 #include "MessageSystem.h"
@@ -318,7 +319,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 
 	auto jailer = MonsterCreator::create_from_params(
 		best->spawnPos,
-		MonsterCreator::get_params("dungeon_jailer"),
+		ctx.monsterRegistry->get_params("dungeon_jailer"),
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, *ctx.contentRegistry);
@@ -371,7 +372,7 @@ void TreasureRoom::create(
 		}
 		if (wardenPos)
 		{
-			MonsterParams wardenParams = MonsterCreator::get_params("dungeon_warden");
+			MonsterParams wardenParams = ctx.monsterRegistry->get_params("dungeon_warden");
 			wardenParams.name = DungeonNames::generate_warden_name(generationRng);
 			ctx.creatures->push_back(
 				MonsterCreator::create_from_params(*wardenPos, wardenParams, ctx));

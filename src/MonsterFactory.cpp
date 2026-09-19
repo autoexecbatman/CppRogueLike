@@ -1,37 +1,50 @@
 // file: MonsterFactory.cpp
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include "Monsters.h"
-#include "Spider.h"
 #include "GameContext.h"
-#include "RandomDice.h"
 #include "LevelManager.h"
 #include "MessageSystem.h"
-#include "ShopkeeperFactory.h"
-#include "Vector2D.h"
 #include "MonsterCreator.h"
 #include "MonsterFactory.h"
+#include "MonsterRegistry.h"
+#include "Monsters.h"
+#include "RandomDice.h"
+#include "ShopkeeperFactory.h"
+#include "Spider.h"
+#include "Vector2D.h"
 
-MonsterFactory::MonsterFactory()
+namespace
 {
-	reload_from_registry();
-}
+// One monster the table can draw, and the rule for its weight at a dungeon level.
+struct MonsterType
+{
+	std::string name{};
+	// Weight at the first level; 0 means never drawn at random (e.g. dungeon_jailer).
+	int baseWeight{ 0 };
+	int levelMinimum{ 1 };
+	// No maximum when 0.
+	int levelMaximum{ 0 };
+	// How much the weight grows per level past the first; negative shrinks it.
+	float levelScaling{ 0.0f };
+	std::function<void(Vector2D, GameContext&)> createFunc{};
+};
 
-void MonsterFactory::reload_from_registry()
+// The spawn table as the registry holds it now: its standard monsters, then its
+// custom ones, then the class-based creatures, whose weights are fixed here.
+std::vector<MonsterType> spawn_table(const MonsterRegistry& monsters)
 {
-	// addMonsterType appends, so the old table goes first or every monster ends
-	// up listed twice and weighted twice against anything added later.
-	monsterTypes.clear();
+	std::vector<MonsterType> table{};
 
 	// Registry-driven monsters: adding a new monster only requires a new entry
-	// in MonsterCreator's registry — nothing here changes.
-	for (const auto& [id, params] : MonsterCreator::get_registry())
+	// in the registry - nothing here changes.
+	for (const auto& [id, params] : monsters.get_standard_monsters())
 	{
-		addMonsterType(
+		table.push_back(
 			{
 				.name = params.name,
 				.baseWeight = params.baseWeight,
@@ -45,29 +58,31 @@ void MonsterFactory::reload_from_registry()
 			});
 	}
 
-	// Custom monsters — composed via editor, spawned from saved params
-	for (const auto& key : MonsterCreator::get_all_keys())
+	// Custom monsters - composed via editor, spawned from saved params
+	for (const std::string& key : monsters.get_all_keys())
 	{
-		if (MonsterCreator::is_builtin(key) || MonsterCreator::is_class_key(key))
+		if (monsters.is_builtin(key) || monsters.is_class_key(key))
+		{
 			continue;
-		const MonsterParams& p = MonsterCreator::get_params(key);
-		addMonsterType(
+		}
+		const MonsterParams& params = monsters.get_params(key);
+		table.push_back(
 			{
-				.name = p.name,
-				.baseWeight = p.baseWeight,
-				.levelMinimum = p.levelMinimum,
-				.levelMaximum = p.levelMaximum,
-				.levelScaling = p.levelScaling,
+				.name = params.name,
+				.baseWeight = params.baseWeight,
+				.levelMinimum = params.levelMinimum,
+				.levelMaximum = params.levelMaximum,
+				.levelScaling = params.levelScaling,
 				.createFunc = [key](Vector2D pos, GameContext& ctx)
 				{
 					ctx.creatures->push_back(
-						MonsterCreator::create_from_params(pos, MonsterCreator::get_params(key), ctx));
+						MonsterCreator::create_from_params(pos, ctx.monsterRegistry->get_params(key), ctx));
 				},
 			});
 	}
 
-	// Spiders — class-based (unique web-spinning behaviour)
-	addMonsterType(
+	// Spiders - class-based (unique web-spinning behaviour)
+	table.push_back(
 		{
 			.name = "Small Spider",
 			.baseWeight = 10,
@@ -80,7 +95,7 @@ void MonsterFactory::reload_from_registry()
 			},
 		});
 
-	addMonsterType(
+	table.push_back(
 		{
 			.name = "Giant Spider",
 			.baseWeight = 10,
@@ -93,7 +108,7 @@ void MonsterFactory::reload_from_registry()
 			},
 		});
 
-	addMonsterType(
+	table.push_back(
 		{
 			.name = "Web Spinner",
 			.baseWeight = 5,
@@ -106,8 +121,8 @@ void MonsterFactory::reload_from_registry()
 			},
 		});
 
-	// Mimic — class-based (disguise logic)
-	addMonsterType(
+	// Mimic - class-based (disguise logic)
+	table.push_back(
 		{
 			.name = "Mimic",
 			.baseWeight = 6,
@@ -120,8 +135,8 @@ void MonsterFactory::reload_from_registry()
 			},
 		});
 
-	// Shopkeeper — class-based (shop inventory logic)
-	addMonsterType(
+	// Shopkeeper - class-based (shop inventory logic)
+	table.push_back(
 		{
 			.name = "Shopkeeper",
 			.baseWeight = 20,
@@ -143,21 +158,24 @@ void MonsterFactory::reload_from_registry()
 				}
 			},
 		});
+
+	return table;
 }
 
-void MonsterFactory::addMonsterType(const MonsterType& monsterType)
+// A monster's weight at a dungeon level: 0 outside its levels or for a base weight of
+// 0, otherwise its base weight scaled by level and never below 1.
+int calculate_weight(const MonsterType& monster, int dungeonLevel)
 {
-	monsterTypes.push_back(monsterType);
-}
-
-int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLevel) const
-{
-	auto check_level_requirements = [](int level, int min, int max)
+	auto is_within_levels = [](int level, int minimum, int maximum)
 	{
-		if (level < min)
+		if (level < minimum)
+		{
 			return false;
-		if (max > 0 && level > max)
+		}
+		if (maximum > 0 && level > maximum)
+		{
 			return false;
+		}
 		return true;
 	};
 
@@ -167,7 +185,7 @@ int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLeve
 		return 0;
 	}
 
-	if (!check_level_requirements(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
+	if (!is_within_levels(dungeonLevel, monster.levelMinimum, monster.levelMaximum))
 	{
 		return 0;
 	}
@@ -176,13 +194,16 @@ int MonsterFactory::calculate_weight(const MonsterType& monster, int dungeonLeve
 	const int weight = static_cast<int>(monster.baseWeight * levelFactor);
 	return std::max(1, weight);
 }
+} // namespace
 
 void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
+	const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);
+
 	int totalWeight = 0;
 	std::vector<int> weights;
 
-	for (const auto& monster : monsterTypes)
+	for (const MonsterType& monster : table)
 	{
 		const int weight = calculate_weight(monster, dungeonLevel);
 		weights.push_back(weight);
@@ -195,40 +216,41 @@ void MonsterFactory::spawn_random_monster(Vector2D position, int dungeonLevel, G
 		return;
 	}
 
-	int roll = ctx.dice->roll(1, totalWeight);
+	const int roll = ctx.dice->roll(1, totalWeight);
 	int runningTotal = 0;
 
-	for (size_t i = 0; i < monsterTypes.size(); i++)
+	for (size_t index = 0; index < table.size(); ++index)
 	{
-		runningTotal += weights[i];
+		runningTotal += weights[index];
 		if (roll <= runningTotal)
 		{
-			monsterTypes[i].createFunc(position, ctx);
+			table[index].createFunc(position, ctx);
 			break;
 		}
 	}
 }
 
-std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(int dungeonLevel)
+std::vector<MonsterPercentage> MonsterFactory::get_current_distribution(int dungeonLevel, const MonsterRegistry& monsters)
 {
+	const std::vector<MonsterType> table = spawn_table(monsters);
 	std::vector<MonsterPercentage> distribution;
 
 	int totalWeight = 0;
 	std::vector<int> weights;
 
-	for (const auto& monster : monsterTypes)
+	for (const MonsterType& monster : table)
 	{
 		const int weight = calculate_weight(monster, dungeonLevel);
 		weights.push_back(weight);
 		totalWeight += weight;
 	}
 
-	for (size_t i = 0; i < monsterTypes.size(); i++)
+	for (size_t index = 0; index < table.size(); ++index)
 	{
-		if (weights[i] > 0)
+		if (weights[index] > 0)
 		{
-			const float percentage = static_cast<float>(weights[i]) / totalWeight * 100.0f;
-			distribution.push_back({ monsterTypes[i].name, percentage });
+			const float percentage = static_cast<float>(weights[index]) / totalWeight * 100.0f;
+			distribution.push_back({ table[index].name, percentage });
 		}
 	}
 

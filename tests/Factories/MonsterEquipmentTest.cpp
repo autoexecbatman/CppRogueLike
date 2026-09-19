@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "src/MonsterCreator.h"
+#include "src/MonsterRegistry.h"
 #include "src/ItemCreator.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
@@ -20,10 +21,11 @@ class MonsterEquipmentTest : public ::testing::Test
 {
 protected:
 	BodyPlanRegistry bodyPlans;
+	MonsterRegistry monsters{};
 
 	void SetUp() override
 	{
-		MonsterCreator::load("data/content/monsters.json");
+		monsters.load("data/content/monsters.json");
 		ItemCreator::load("data/content/items.json");
 		bodyPlans.load("data/content/body_plans.json");
 	}
@@ -40,7 +42,7 @@ protected:
 // than a display string.
 TEST_F(MonsterEquipmentTest, WieldingMonsterCarriesAnItemKey)
 {
-	const MonsterParams& orc = MonsterCreator::get_params("orc");
+	const MonsterParams& orc = monsters.get_params("orc");
 
 	const MonsterParams::StartingItem* mainHand = find_slot(orc, EquipmentSlot::RIGHT_HAND);
 	ASSERT_NE(mainHand, nullptr);
@@ -52,7 +54,7 @@ TEST_F(MonsterEquipmentTest, WieldingMonsterCarriesAnItemKey)
 // slot is filled.
 TEST_F(MonsterEquipmentTest, ClawedMonsterCarriesNothing)
 {
-	const MonsterParams& troll = MonsterCreator::get_params("troll");
+	const MonsterParams& troll = monsters.get_params("troll");
 
 	EXPECT_TRUE(troll.equipment.empty());
 	EXPECT_EQ(troll.naturalAttack, "Claws");
@@ -63,12 +65,12 @@ TEST_F(MonsterEquipmentTest, ClawedMonsterCarriesNothing)
 TEST_F(MonsterEquipmentTest, MisspelledWeaponsResolveToRealKeys)
 {
 	const MonsterParams::StartingItem* bow =
-		find_slot(MonsterCreator::get_params("archer"), EquipmentSlot::MISSILE_WEAPON);
+		find_slot(monsters.get_params("archer"), EquipmentSlot::MISSILE_WEAPON);
 	ASSERT_NE(bow, nullptr);
 	EXPECT_EQ(bow->itemKey, "long_bow");
 
 	const MonsterParams::StartingItem* blade =
-		find_slot(MonsterCreator::get_params("dungeon_warden"), EquipmentSlot::RIGHT_HAND);
+		find_slot(monsters.get_params("dungeon_warden"), EquipmentSlot::RIGHT_HAND);
 	ASSERT_NE(blade, nullptr);
 	EXPECT_EQ(blade->itemKey, "long_sword");
 }
@@ -80,9 +82,9 @@ TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
 	const std::vector<std::string> allItemKeys = ItemCreator::get_all_keys();
 	const std::set<std::string> knownItemKeys(allItemKeys.begin(), allItemKeys.end());
 
-	for (const std::string& key : MonsterCreator::get_all_keys())
+	for (const std::string& key : monsters.get_all_keys())
 	{
-		const MonsterParams& params = MonsterCreator::get_params(key);
+		const MonsterParams& params = monsters.get_params(key);
 		for (const MonsterParams::StartingItem& entry : params.equipment)
 		{
 			EXPECT_TRUE(knownItemKeys.contains(entry.itemKey))
@@ -97,9 +99,9 @@ TEST_F(MonsterEquipmentTest, EveryStartingItemKeyIsKnown)
 // its body has no slots at all.
 TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 {
-	for (const std::string& key : MonsterCreator::get_all_keys())
+	for (const std::string& key : monsters.get_all_keys())
 	{
-		const MonsterParams& params = MonsterCreator::get_params(key);
+		const MonsterParams& params = monsters.get_params(key);
 		const std::vector<EquipmentSlot>& plan = bodyPlans.get(params.bodyPlanName);
 		for (const MonsterParams::StartingItem& carried : params.equipment)
 		{
@@ -113,17 +115,17 @@ TEST_F(MonsterEquipmentTest, BodyPlanCoversEveryCarriedSlot)
 // The wolf wears nothing, and nothing in the data pretends otherwise.
 TEST_F(MonsterEquipmentTest, BeastHasNoSlots)
 {
-	EXPECT_TRUE(bodyPlans.get(MonsterCreator::get_params("wolf").bodyPlanName).empty());
-	EXPECT_FALSE(bodyPlans.get(MonsterCreator::get_params("orc").bodyPlanName).empty());
+	EXPECT_TRUE(bodyPlans.get(monsters.get_params("wolf").bodyPlanName).empty());
+	EXPECT_FALSE(bodyPlans.get(monsters.get_params("orc").bodyPlanName).empty());
 }
 
 // Eleven monsters share one humanoid body rather than eleven copies of the
 // same fifteen slot names.
 TEST_F(MonsterEquipmentTest, WieldersShareOneBodyTemplate)
 {
-	EXPECT_EQ(MonsterCreator::get_params("orc").bodyPlanName, "humanoid");
-	EXPECT_EQ(MonsterCreator::get_params("kobold").bodyPlanName, "humanoid");
-	EXPECT_TRUE(MonsterCreator::get_params("wolf").bodyPlanName.empty());
+	EXPECT_EQ(monsters.get_params("orc").bodyPlanName, "humanoid");
+	EXPECT_EQ(monsters.get_params("kobold").bodyPlanName, "humanoid");
+	EXPECT_TRUE(monsters.get_params("wolf").bodyPlanName.empty());
 }
 
 // A misspelled template is a data error and must not read as a creature that
@@ -143,23 +145,21 @@ TEST_F(MonsterEquipmentTest, SavePreservesEveryBodyName)
 		std::filesystem::temp_directory_path() / "monsters_roundtrip.json";
 
 	std::map<std::string, std::string> before;
-	for (const std::string& key : MonsterCreator::get_all_keys())
+	for (const std::string& key : monsters.get_all_keys())
 	{
-		before.emplace(key, MonsterCreator::get_params(key).bodyPlanName);
+		before.emplace(key, monsters.get_params(key).bodyPlanName);
 	}
 
-	MonsterCreator::save(roundTrip.string());
-	MonsterCreator::load(roundTrip.string());
+	monsters.save(roundTrip.string());
+	monsters.load(roundTrip.string());
 
 	for (const auto& [key, bodyPlanName] : before)
 	{
-		EXPECT_EQ(MonsterCreator::get_params(key).bodyPlanName, bodyPlanName)
+		EXPECT_EQ(monsters.get_params(key).bodyPlanName, bodyPlanName)
 			<< key << " lost its body across a save";
 	}
 	EXPECT_EQ(before.at("orc"), "humanoid");
 
-	// Leave the shared registry holding the real file, not the temporary one.
-	MonsterCreator::load("data/content/monsters.json");
 	std::filesystem::remove(roundTrip);
 }
 
@@ -168,7 +168,7 @@ TEST_F(MonsterEquipmentTest, SavePreservesEveryBodyName)
 TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
 {
 	const std::vector<EquipmentSlot>& plan =
-		bodyPlans.get(MonsterCreator::get_params("medusa").bodyPlanName);
+		bodyPlans.get(monsters.get_params("medusa").bodyPlanName);
 
 	EXPECT_EQ(std::ranges::find(plan, EquipmentSlot::HEAD), plan.end());
 	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::BODY), plan.end());
@@ -178,16 +178,15 @@ TEST_F(MonsterEquipmentTest, MedusaHasNoHeadSlot)
 // slots at all rather than a body nobody fills.
 TEST_F(MonsterEquipmentTest, StoneGolemWearsNothing)
 {
-	EXPECT_TRUE(MonsterCreator::get_params("golem_stone").bodyPlanName.empty());
-	EXPECT_TRUE(bodyPlans.get(
-		MonsterCreator::get_params("golem_stone").bodyPlanName).empty());
+	EXPECT_TRUE(monsters.get_params("golem_stone").bodyPlanName.empty());
+	EXPECT_TRUE(bodyPlans.get(monsters.get_params("golem_stone").bodyPlanName).empty());
 }
 
 // A harpy uses a club and wears nothing, so it has hands and no wardrobe.
 TEST_F(MonsterEquipmentTest, HarpyHasHandsAndNothingElse)
 {
 	const std::vector<EquipmentSlot>& plan =
-		bodyPlans.get(MonsterCreator::get_params("harpy").bodyPlanName);
+		bodyPlans.get(monsters.get_params("harpy").bodyPlanName);
 
 	EXPECT_EQ(plan.size(), 2u);
 	EXPECT_NE(std::ranges::find(plan, EquipmentSlot::RIGHT_HAND), plan.end());

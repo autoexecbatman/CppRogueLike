@@ -1,61 +1,43 @@
 #pragma once
 
-#include <functional>
 #include <string>
 #include <vector>
 
 #include "Vector2D.h"
 
-// Forward declarations
+// file: MonsterFactory.h
+//
+// Draws a random monster for a dungeon level. The table it draws from is derived from
+// a MonsterRegistry on every call - the registry's standard and custom monsters with
+// the weights they hold at that moment, then the class-based creatures, whose weights
+// are written in the factory - so nothing keeps a copy that an edit, a new level or a
+// game loaded from a save could find stale or empty.
+//
+// Usage:
+//
+//   MonsterFactory::spawn_random_monster(position, dungeonLevel, ctx); // pushes one creature onto ctx.creatures
+//   MonsterFactory::get_current_distribution(1, *ctx.monsterRegistry); // -> one { name, percentage } per monster that can appear
+
 struct GameContext;
+class MonsterRegistry;
 
-// A struct to represent a monster type with its spawn probability
-struct MonsterType
-{
-	std::string name;
-	int baseWeight; // Base weight/probability
-	int levelMinimum; // Minimum dungeon level for this monster
-	int levelMaximum; // Maximum dungeon level for this monster (0 = no maximum)
-	float levelScaling; // How much to scale weight by level (can be negative)
-
-	// Factory function to create the monster
-	std::function<void(Vector2D, GameContext&)> createFunc;
-};
-
+// One monster's chance of being drawn, in percent.
 struct MonsterPercentage
 {
+	// The name the monster is drawn under.
 	std::string name{};
+	// Its share of the level's total spawn weight, 0 to 100.
 	float percentage{};
 };
 
-class MonsterFactory
+namespace MonsterFactory
 {
-public:
-	MonsterFactory();
-	~MonsterFactory() = default;
-	MonsterFactory(const MonsterFactory&) = delete;
-	MonsterFactory& operator=(const MonsterFactory&) = delete;
-	MonsterFactory(MonsterFactory&&) = delete;
-	MonsterFactory& operator=(MonsterFactory&&) = delete;
+// Spawns one monster at position, onto ctx.creatures, drawn by weight from
+// ctx.monsterRegistry for dungeonLevel. Logs and spawns nothing when no monster can
+// appear at that level.
+void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);
 
-	// Spawn a random monster at the given position based on dungeon level
-	void spawn_random_monster(Vector2D position, int dungeonLevel, GameContext& ctx);
-
-	// Get the probability distribution for the current dungeon level
-	std::vector<MonsterPercentage> get_current_distribution(int dungeonLevel);
-
-	// Add a monster type to the factory
-	void addMonsterType(const MonsterType& monsterType);
-
-	// Rebuilds the spawn table from MonsterCreator's registry, discarding what
-	// was there. The monster editor writes monsters.json and updates the
-	// registry while the game runs; until this runs the table still holds the
-	// entries read at startup.
-	void reload_from_registry();
-
-private:
-	std::vector<MonsterType> monsterTypes;
-
-	// Calculate actual weight of a monster based on dungeon level
-	int calculate_weight(const MonsterType& monster, int dungeonLevel) const;
-};
+// Each monster's chance at dungeonLevel, from the registry as it stands; a monster that
+// cannot appear there is left out.
+[[nodiscard]] std::vector<MonsterPercentage> get_current_distribution(int dungeonLevel, const MonsterRegistry& monsters);
+} // namespace MonsterFactory

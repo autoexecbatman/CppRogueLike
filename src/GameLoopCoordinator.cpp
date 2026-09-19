@@ -135,7 +135,7 @@ void GameLoopCoordinator::handle_input_phase(GameContext& ctx)
 			}
 			if (key == GameKey::CONTENT_EDIT_TOGGLE && ctx.contentEditor)
 			{
-				ctx.contentEditor->toggle(*ctx.contentRegistry);
+				ctx.contentEditor->toggle(*ctx.contentRegistry, *ctx.monsterRegistry);
 				return true;
 			}
 			if (ctx.decorEditor && ctx.decorEditor->is_active())
@@ -245,7 +245,7 @@ void GameLoopCoordinator::handle_render_phase(GameContext& ctx, Gui& gui)
 
 	if (ctx.contentEditor)
 	{
-		ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry);
+		ctx.contentEditor->update_and_render(*ctx.renderer, *ctx.contentRegistry, *ctx.monsterRegistry);
 	}
 #endif
 

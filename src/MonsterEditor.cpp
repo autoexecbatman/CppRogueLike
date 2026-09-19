@@ -10,7 +10,7 @@
 
 #include "GameContext.h"
 #include "Paths.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "Menu.h"
 #include "DiceExpr.h"
 #include "Renderer.h"
@@ -154,25 +154,25 @@ std::string prettify_key(std::string_view key)
 // Lifecycle
 // ---------------------------------------------------------------------------
 
-void MonsterEditor::enter()
+void MonsterEditor::enter(const MonsterRegistry& monsters)
 {
 	m_active = true;
 	m_mode = Mode::NORMAL;
 	m_focus = 0;
 
-	m_keys = MonsterCreator::get_all_keys();
+	m_keys = monsters.get_all_keys();
 
 	m_list_cursor = 0;
 	m_list_scroll = 0;
 	m_picker_sheet = 0;
 	m_picker_scroll = 0;
 
-	load_working();
+	load_working(monsters);
 }
 
 void MonsterEditor::exit(GameContext& ctx)
 {
-	commit_working();
+	commit_working(*ctx.monsterRegistry);
 	m_active = false;
 	ctx.menus->push_back(make_main_menu(true, ctx));
 }
@@ -190,25 +190,25 @@ void MonsterEditor::tick(GameContext& ctx)
 // Working copy
 // ---------------------------------------------------------------------------
 
-void MonsterEditor::load_working()
+void MonsterEditor::load_working(const MonsterRegistry& monsters)
 {
 	if (m_keys.empty())
 		return;
 
 	const std::string& key = current_key();
-	m_is_class_based = MonsterCreator::is_class_key(key);
-	m_working = MonsterCreator::get_params(key);
+	m_is_class_based = monsters.is_class_key(key);
+	m_working = monsters.get_params(key);
 	m_field_cursor = m_is_class_based ? static_cast<int>(FieldId::TILE) : 0;
 	m_field_scroll = 0;
 	m_mode = Mode::NORMAL;
 	m_edit_buf.clear();
 }
 
-void MonsterEditor::commit_working()
+void MonsterEditor::commit_working(MonsterRegistry& monsters)
 {
 	if (m_keys.empty())
 		return;
-	MonsterCreator::set_params(current_key(), m_working);
+	monsters.set_params(current_key(), m_working);
 }
 
 // ---------------------------------------------------------------------------
@@ -227,8 +227,8 @@ void MonsterEditor::handle_input(GameContext& ctx)
 
 	if (ctrl && IsKeyPressed(KEY_S))
 	{
-		commit_working();
-		MonsterCreator::save(Paths::MONSTERS);
+		commit_working(*ctx.monsterRegistry);
+		ctx.monsterRegistry->save(Paths::MONSTERS);
 		m_last_save_time = GetTime();
 		return;
 	}
@@ -255,6 +255,7 @@ void MonsterEditor::handle_input(GameContext& ctx)
 
 void MonsterEditor::handle_normal(const GameContext& ctx)
 {
+	MonsterRegistry& monsters = *ctx.monsterRegistry;
 	bool ctrl = IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
 	const Renderer& r = *ctx.renderer;
 	int screenHeight = r.get_screen_height();
@@ -275,9 +276,9 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			idx = std::clamp(idx, 0, total - 1);
 			if (idx != m_list_cursor)
 			{
-				commit_working();
+				commit_working(monsters);
 				m_list_cursor = idx;
-				load_working();
+				load_working(monsters);
 			}
 		}
 		else if (m_mode == Mode::NORMAL)
@@ -315,24 +316,24 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 	{
 		if (IsKeyPressed(KEY_UP) && m_list_cursor > 0)
 		{
-			commit_working();
+			commit_working(monsters);
 			--m_list_cursor;
 			if (m_list_cursor < m_list_scroll)
 			{
 				m_list_scroll = m_list_cursor;
 			}
-			load_working();
+			load_working(monsters);
 		}
 		else if (IsKeyPressed(KEY_DOWN) && m_list_cursor < total - 1)
 		{
-			commit_working();
+			commit_working(monsters);
 			++m_list_cursor;
 			int vis_list = body_h / 30;
 			if (m_list_cursor >= m_list_scroll + vis_list)
 			{
 				m_list_scroll = m_list_cursor - vis_list + 1;
 			}
-			load_working();
+			load_working(monsters);
 		}
 		else if (IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_RIGHT))
 		{
@@ -340,7 +341,7 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 		}
 		else if (IsKeyPressed(KEY_A))
 		{
-			commit_working();
+			commit_working(monsters);
 			MonsterParams defaults;
 			defaults.name = "New Monster";
 			defaults.corpseName = "dead monster";
@@ -359,27 +360,27 @@ void MonsterEditor::handle_normal(const GameContext& ctx)
 			defaults.baseWeight = 10;
 			defaults.levelMinimum = 1;
 			defaults.levelMaximum = 5;
-			std::string new_key = MonsterCreator::add_custom(std::move(defaults));
-			m_keys = MonsterCreator::get_all_keys();
+			const std::string newKey = monsters.add_custom(std::move(defaults));
+			m_keys = monsters.get_all_keys();
 			for (int i = 0; i < static_cast<int>(m_keys.size()); ++i)
 			{
-				if (m_keys[i] == new_key)
+				if (m_keys[i] == newKey)
 				{
 					m_list_cursor = i;
 					break;
 				}
 			}
-			load_working();
+			load_working(monsters);
 			m_focus = 1;
 		}
 		else if (IsKeyPressed(KEY_DELETE))
 		{
-			if (!MonsterCreator::is_builtin(current_key()) && !MonsterCreator::is_class_key(current_key()))
+			if (!monsters.is_builtin(current_key()) && !monsters.is_class_key(current_key()))
 			{
-				MonsterCreator::remove_custom(current_key());
-				m_keys = MonsterCreator::get_all_keys();
+				monsters.remove_custom(current_key());
+				m_keys = monsters.get_all_keys();
 				m_list_cursor = std::clamp(m_list_cursor, 0, static_cast<int>(m_keys.size()) - 1);
-				load_working();
+				load_working(monsters);
 			}
 		}
 		return;
@@ -567,7 +568,7 @@ void MonsterEditor::render(const GameContext& ctx) const
 	DrawRectangle(0, 0, screenWidth, screenHeight, Color{ 0, 0, 0, 255 });
 
 	render_header(r);
-	render_list(r);
+	render_list(r, *ctx.monsterRegistry);
 
 	if (m_mode == Mode::TILE_PICKER)
 	{
@@ -591,9 +592,9 @@ void MonsterEditor::render_header(const Renderer& r) const
 		Color{ 130, 130, 100, 255 });
 }
 
-void MonsterEditor::render_list(const Renderer& r) const
+void MonsterEditor::render_list(const Renderer& renderer, const MonsterRegistry& monsters) const
 {
-	int screenHeight = r.get_screen_height();
+	int screenHeight = renderer.get_screen_height();
 	int body_y = HEADER_HEIGHT;
 	int body_h = screenHeight - HEADER_HEIGHT - HINT_HEIGHT;
 
@@ -616,14 +617,16 @@ void MonsterEditor::render_list(const Renderer& r) const
 		// Section separators
 		if (i > scroll)
 		{
-			bool prev_builtin = MonsterCreator::is_builtin(m_keys[i - 1]);
-			bool prev_class = MonsterCreator::is_class_key(m_keys[i - 1]);
-			bool cur_class = MonsterCreator::is_class_key(m_keys[i]);
-			bool cur_custom = !MonsterCreator::is_builtin(m_keys[i]) && !cur_class;
-			bool prev_custom = !prev_builtin && !prev_class;
+			const bool previousIsBuiltin = monsters.is_builtin(m_keys[i - 1]);
+			const bool previousIsClass = monsters.is_class_key(m_keys[i - 1]);
+			const bool currentIsClass = monsters.is_class_key(m_keys[i]);
+			const bool currentIsCustom = !monsters.is_builtin(m_keys[i]) && !currentIsClass;
+			const bool previousIsCustom = !previousIsBuiltin && !previousIsClass;
 
-			if ((prev_builtin && cur_custom) || (prev_custom && cur_class))
+			if ((previousIsBuiltin && currentIsCustom) || (previousIsCustom && currentIsClass))
+			{
 				DrawLine(LIST_PAD, itemY, LIST_WIDTH - LIST_PAD, itemY, Color{ 70, 70, 70, 200 });
+			}
 		}
 
 		bool is_sel = (i == m_list_cursor);
@@ -641,27 +644,35 @@ void MonsterEditor::render_list(const Renderer& r) const
 		if (bgColor.a > 0)
 			DrawRectangle(0, itemY, LIST_WIDTH, ITEM_HEIGHT, bgColor);
 
-		TileRef tile = is_sel ? m_working.symbol : MonsterCreator::get_tile(m_keys[i]);
-		r.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
+		const TileRef tile = is_sel ? m_working.symbol : monsters.get_tile(m_keys[i]);
+		renderer.draw_tile_screen_sized(Vector2D{ LIST_PAD, itemY + (ITEM_HEIGHT - LIST_TILE_SIZE) / 2 }, tile, LIST_TILE_SIZE);
 
-		bool is_class = MonsterCreator::is_class_key(m_keys[i]);
-		bool is_custom = !MonsterCreator::is_builtin(m_keys[i]) && !is_class;
+		const bool isClass = monsters.is_class_key(m_keys[i]);
+		const bool isCustom = !monsters.is_builtin(m_keys[i]) && !isClass;
 
-		std::string display_name = is_sel
+		std::string displayName = is_sel
 			? m_working.name
-			: MonsterCreator::get_params(m_keys[i]).name;
-		if (display_name.empty())
-			display_name = prettify_key(m_keys[i]);
-		if (is_custom)
-			display_name += " *";
+			: monsters.get_params(m_keys[i]).name;
+		if (displayName.empty())
+		{
+			displayName = prettify_key(m_keys[i]);
+		}
+		if (isCustom)
+		{
+			displayName += " *";
+		}
 
 		Color textColor;
 		if (is_sel)
-			textColor = is_class ? Color{ 255, 200, 80, 255 } : Color{ 255, 255, 100, 255 };
+		{
+			textColor = isClass ? Color{ 255, 200, 80, 255 } : Color{ 255, 255, 100, 255 };
+		}
 		else
-			textColor = is_class ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
+		{
+			textColor = isClass ? Color{ 150, 130, 110, 255 } : Color{ 200, 200, 200, 255 };
+		}
 
-		r.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, display_name, textColor);
+		renderer.draw_text_color(Vector2D{ LIST_PAD + LIST_TILE_SIZE + 4, itemY + (ITEM_HEIGHT - 16) / 2 }, displayName, textColor);
 	}
 }
 

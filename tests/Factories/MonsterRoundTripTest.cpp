@@ -1,7 +1,7 @@
 // Checks that saving monsters.json and reading it back preserves what was authored.
 //
 // What it is for. The monster editor is how content is made in this project, and it
-// writes through MonsterCreator::save, which rebuilds the file from scratch rather than
+// writes through MonsterRegistry::save, which rebuilds the file from scratch rather than
 // editing it. Any field the encoder does not write is therefore destroyed the first time
 // anyone saves, with nothing failing and nothing logged. A parser that accepts a key the
 // encoder does not emit is that bug already present.
@@ -20,7 +20,7 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=MonsterRoundTripTest.*
 
-#include "src/MonsterCreator.h"
+#include "src/MonsterRegistry.h"
 #include <gtest/gtest.h>
 
 #include <filesystem>
@@ -31,24 +31,23 @@ class MonsterRoundTripTest : public ::testing::Test
 {
 protected:
 	std::filesystem::path roundTrip;
+	MonsterRegistry monsters{};
 
 	void SetUp() override
 	{
-		MonsterCreator::load("data/content/monsters.json");
+		monsters.load("data/content/monsters.json");
 		roundTrip = std::filesystem::temp_directory_path() / "monsters_roundtrip_fields.json";
 	}
 
 	void TearDown() override
 	{
-		// Leave the shared registry holding the real file, not the temporary one.
-		MonsterCreator::load("data/content/monsters.json");
 		std::filesystem::remove(roundTrip);
 	}
 
 	void save_and_reload()
 	{
-		MonsterCreator::save(roundTrip.string());
-		MonsterCreator::load(roundTrip.string());
+		monsters.save(roundTrip.string());
+		monsters.load(roundTrip.string());
 	}
 };
 
@@ -56,16 +55,16 @@ protected:
 // The parser reads an optional "name" key, so the encoder must write one.
 TEST_F(MonsterRoundTripTest, AuthoredDisplayNameSurvivesASave)
 {
-	ASSERT_EQ(MonsterCreator::get_params("dungeon_jailer").name, "Dungeon Jailer")
+	ASSERT_EQ(monsters.get_params("dungeon_jailer").name, "Dungeon Jailer")
 		<< "precondition: the authored name is loaded in the first place";
 
 	save_and_reload();
 
-	EXPECT_EQ(MonsterCreator::get_params("dungeon_jailer").name, "Dungeon Jailer");
-	EXPECT_EQ(MonsterCreator::get_params("dungeon_warden").name, "Dungeon Warden");
+	EXPECT_EQ(monsters.get_params("dungeon_jailer").name, "Dungeon Jailer");
+	EXPECT_EQ(monsters.get_params("dungeon_warden").name, "Dungeon Warden");
 }
 
-// The five class-based creatures persist a tile and a colour only; MonsterCreator::load
+// The five class-based creatures persist a tile and a colour only; MonsterRegistry::load
 // builds the rest in code, so their other fields are not expected to survive a file.
 bool is_class_based(const std::string& key)
 {
@@ -138,11 +137,11 @@ void expect_same_monster(const std::string& key, const MonsterParams& before, co
 TEST_F(MonsterRoundTripTest, EveryPersistedFieldSurvivesASave)
 {
 	std::map<std::string, MonsterParams> before;
-	for (const std::string& key : MonsterCreator::get_all_keys())
+	for (const std::string& key : monsters.get_all_keys())
 	{
 		if (!is_class_based(key))
 		{
-			before.emplace(key, MonsterCreator::get_params(key));
+			before.emplace(key, monsters.get_params(key));
 		}
 	}
 	ASSERT_FALSE(before.empty()) << "no monsters loaded; the test would pass vacuously";
@@ -151,6 +150,6 @@ TEST_F(MonsterRoundTripTest, EveryPersistedFieldSurvivesASave)
 
 	for (const auto& [key, original] : before)
 	{
-		expect_same_monster(key, original, MonsterCreator::get_params(key));
+		expect_same_monster(key, original, monsters.get_params(key));
 	}
 }

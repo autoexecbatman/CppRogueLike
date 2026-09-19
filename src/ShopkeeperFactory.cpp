@@ -2,7 +2,6 @@
 #include <cassert>
 #include <format>
 #include <memory>
-#include <string>
 
 #include "Actor.h"
 #include "Creature.h"
@@ -13,7 +12,7 @@
 #include "ExperienceReward.h"
 #include "HealthPool.h"
 #include "GameContext.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "MessageSystem.h"
 #include "Vector2D.h"
@@ -25,7 +24,7 @@
 std::unique_ptr<Creature> ShopkeeperFactory::create_shopkeeper(Vector2D position, int dungeonLevel, GameContext& ctx)
 {
 	// Create base creature
-	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ MonsterCreator::get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
+	auto shopkeeper = std::make_unique<Creature>(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SHOPKEEPER), "Shopkeeper", YELLOW_BLACK_PAIR });
 
 	// Configure all shopkeeper components in one place
 	configure_shopkeeper(*shopkeeper, dungeonLevel, ctx);

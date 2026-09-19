@@ -335,6 +335,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/MonsterFactory.h
     ${PROJECT_SOURCE_DIR}/MonsterCreator.cpp
     ${PROJECT_SOURCE_DIR}/MonsterCreator.h
+    ${PROJECT_SOURCE_DIR}/MonsterRegistry.cpp
+    ${PROJECT_SOURCE_DIR}/MonsterRegistry.h
     ${PROJECT_SOURCE_DIR}/ItemFactory.cpp
     ${PROJECT_SOURCE_DIR}/ItemFactory.h
     ${PROJECT_SOURCE_DIR}/ItemCreator.cpp

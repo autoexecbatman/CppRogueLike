@@ -7,7 +7,7 @@
 
 #include "src/Alignment.h"
 #include "src/Creature.h"
-#include "src/MonsterCreator.h"
+#include "src/MonsterRegistry.h"
 #include "src/Vector2D.h"
 
 class AlignmentTest : public ::testing::Test
@@ -58,9 +58,10 @@ TEST_F(AlignmentTest, IsEvilReadsMoralityAlone)
 // Monstrous Manual is not on hand, so no per-monster alignment is asserted yet.
 TEST(AlignmentDataTest, MonstersWithoutAlignmentKeysLoadAsTrueNeutral)
 {
-	MonsterCreator::load("data/content/monsters.json");
+	MonsterRegistry monsters{};
+	monsters.load("data/content/monsters.json");
 
-	const MonsterParams& goblin = MonsterCreator::get_params("goblin");
+	const MonsterParams& goblin = monsters.get_params("goblin");
 
 	EXPECT_EQ(goblin.ethics, Ethics::NEUTRAL);
 	EXPECT_EQ(goblin.morality, Morality::NEUTRAL);

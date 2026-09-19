@@ -52,6 +52,7 @@
 		.tileConfig = &tileConfig,
 		.bodyPlanRegistry = &bodyPlanRegistry,
 		.spellRegistry = &spellRegistry,
+		.monsterRegistry = &monsterRegistry,
 
 		// Game world data
 		.stairs = stairs.get(),

@@ -7,6 +7,7 @@
 #include "Renderer.h"
 
 class ContentRegistry;
+class MonsterRegistry;
 
 // ContentEditor -- developer tool for assigning sprite tiles to items and monsters.
 //
@@ -21,9 +22,9 @@ class ContentRegistry;
 class ContentEditor
 {
 public:
-	void toggle(ContentRegistry& registry);
+	void toggle(ContentRegistry& registry, MonsterRegistry& monsters);
 	void set_char_input(int ch) noexcept { m_buffered_char = ch; }
-	void update_and_render(const Renderer& renderer, ContentRegistry& registry);
+	void update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters);
 
 	[[nodiscard]] bool is_active() const { return m_active; }
 
@@ -35,12 +36,12 @@ private:
 		int entity_key{ 0 }; // for monster tab (MonsterId int cast)
 	};
 
-	[[nodiscard]] TileRef current_tile() const;
-	void assign_tile(TileRef tile);
+	[[nodiscard]] TileRef current_tile(const MonsterRegistry& monsters) const;
+	void assign_tile(TileRef tile, MonsterRegistry& monsters);
 
 	void draw_header(const Renderer& renderer);
-	void draw_list(const Renderer& renderer, int list_x, int list_y, int list_w, int list_h);
-	void draw_browser(const Renderer& renderer, int panelX, int panelY, int bw, int bh);
+	void draw_list(const Renderer& renderer, const MonsterRegistry& monsters, int list_x, int list_y, int list_w, int list_h);
+	void draw_browser(const Renderer& renderer, MonsterRegistry& monsters, int panelX, int panelY, int bw, int bh);
 	void draw_hint_bar(const Renderer& renderer) const;
 	void handle_keyboard();
 

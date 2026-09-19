@@ -14,7 +14,7 @@
 #include "DamageInfo.h"
 #include "GameContext.h"
 #include "ItemCreator.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "ItemClassification.h"
 #include "Persistent.h"
 #include "ContentRegistry.h"
@@ -301,7 +301,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 
 void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 {
-	owner.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
+	owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
 	owner.actorData.color = RED_YELLOW_PAIR;
 	owner.actorData.name = "greater mimic";
 	ctx.messageSystem->log("Mimic transformed into greater mimic");
@@ -315,7 +315,7 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 	if (distanceToPlayer <= revealDistance)
 	{
 		isDisguised = false;
-		owner.actorData.tile = MonsterCreator::get_tile(MonsterId::MIMIC);
+		owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
 		owner.actorData.name = "mimic";
 		owner.actorData.color = RED_YELLOW_PAIR;
 		owner.add_state(ActorState::BLOCKS);

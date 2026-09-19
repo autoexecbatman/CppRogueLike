@@ -7,6 +7,7 @@
 #include "Creature.h"
 #include "GameContext.h"
 #include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "DungeonRoom.h"
 #include "RandomDice.h"
 #include "EncounterPlanner.h"
@@ -157,9 +158,9 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 
 	// Build candidate list: monsters eligible for this dungeon level
 	std::vector<MonsterCandidate> candidates;
-	for (const auto& key : MonsterCreator::get_all_keys())
+	for (const auto& key : ctx.monsterRegistry->get_all_keys())
 	{
-		const MonsterParams& params = MonsterCreator::get_params(key);
+		const MonsterParams& params = ctx.monsterRegistry->get_params(key);
 		if (params.xp <= 0)
 		{
 			continue;
@@ -196,6 +197,6 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 			break; // no more walkable positions
 		}
 		ctx.creatures->push_back(
-			MonsterCreator::create_from_params(*pos, MonsterCreator::get_params(key), ctx));
+			MonsterCreator::create_from_params(*pos, ctx.monsterRegistry->get_params(key), ctx));
 	}
 }

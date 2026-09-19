@@ -21,7 +21,6 @@
 #include "src/GameContext.h"
 #include "src/Paths.h"
 #include "src/ItemCreator.h"
-#include "src/MonsterCreator.h"
 #include "src/DataManager.h"
 #include "src/LevelManager.h"
 #include "src/ShopkeeperFactory.h"
@@ -32,7 +31,6 @@ class MonsterHitDiceTest : public ::testing::Test
 protected:
 	void SetUp() override
 	{
-		MonsterCreator::load(Paths::MONSTERS);
 		ItemCreator::load(Paths::ITEMS);
 		dataManager.load_all_data(mock.messages);
 		ctx = mock.to_game_context();

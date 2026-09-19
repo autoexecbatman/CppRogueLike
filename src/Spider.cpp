@@ -23,9 +23,8 @@
 #include "Colors.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
-#include "HealthPool.h"
 #include "GameContext.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
 #include "Spider.h"
@@ -36,7 +35,7 @@ constexpr int POISON_CHANCE_WEB_SPINNER = 15;
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
-	: Creature(position, ActorData{ MonsterCreator::get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR }), // Default to small spider data
+	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR }), // Default to small spider data
 	  spiderType(type)
 {
 	// Initialize based on spider type
@@ -53,7 +52,7 @@ void Spider::init_spider_type(GameContext& ctx)
 	{
 	case SpiderType::SMALL:
 		// Update actor data for small spider
-		actorData = ActorData{ MonsterCreator::get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR };
 
 		// Stats for small spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Minimum strength of 3
@@ -74,7 +73,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::GIANT:
 		// Update actor data for giant spider
-		actorData = ActorData{ MonsterCreator::get_tile(MonsterId::SPIDER_GIANT), "giant spider", RED_BLACK_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_GIANT), "giant spider", RED_BLACK_PAIR };
 
 		// Stats for giant spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
@@ -95,7 +94,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::WEB_SPINNER:
 		// Update actor data for web spinner
-		actorData = ActorData{ MonsterCreator::get_tile(MonsterId::SPIDER_WEAVER), "web weaver", BLACK_GREEN_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_WEAVER), "web weaver", BLACK_GREEN_PAIR };
 
 		// Stats for web spinner - now much more formidable
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());

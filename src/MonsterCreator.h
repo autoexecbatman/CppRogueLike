@@ -1,160 +1,27 @@
 #pragma once
 // file: MonsterCreator.h
+//
+// Builds monsters from their parameters: rolls the ability scores and hit dice, arms
+// them with their starting equipment, and gives them the AI their type names. The
+// parameters come from the MonsterRegistry in ctx.
 
 #include <memory>
-#include <optional>
-#include <string>
-#include <string_view>
-#include <unordered_map>
-#include <vector>
 
-#include "Alignment.h"
-#include "EquipmentSlot.h"
-#include "DamageInfo.h"
-#include "Renderer.h"
-#include "DiceExpr.h"
+#include "MonsterRegistry.h"
 
 // Forward declarations
 class Creature;
 struct Vector2D;
 struct GameContext;
 
-enum class MonsterId
-{
-	GOBLIN,
-	ORC,
-	TROLL,
-	DRAGON,
-	ARCHER,
-	MAGE,
-	WOLF,
-	FIRE_WOLF,
-	ICE_WOLF,
-	BAT,
-	KOBOLD,
-	// Class-based creatures -- constructed via dedicated ctors, not MonsterCreator::create()
-	MIMIC,
-	SHOPKEEPER,
-	SPIDER_SMALL,
-	SPIDER_GIANT,
-	SPIDER_WEAVER,
-};
-
-enum class MonsterAiType
-{
-	MELEE,
-	RANGED,
-};
-
-// Dice expression: roll num dice of sides sides, add bonus. num=0 means skip.
-struct MonsterParams
-{
-	// Identity
-	TileRef symbol{};
-	std::string name;
-	int color{ 0 };
-	std::string corpseName;
-
-	// Combat
-	DiceExpr hpDice{};
-	int thaco{ 20 };
-	int ac{ 10 };
-	int xp{ 0 };
-	int dr{ 0 };
-	int morale{ 10 };
-	bool undead{ false };
-	Ethics ethics{ Ethics::NEUTRAL };
-	Morality morality{ Morality::NEUTRAL };
-	int corpseWeight{ 50 };
-
-	// Ability scores
-	DiceExpr strDice{ 3, 6, 0 };
-	DiceExpr dexDice{ 3, 6, 0 };
-	DiceExpr conDice{ 3, 6, 0 };
-	DiceExpr intDice{ 3, 6, 0 };
-	DiceExpr wisDice{ 3, 6, 0 };
-	DiceExpr chaDice{ 3, 6, 0 };
-
-	// Damage this creature deals
-	DamageInfo damage{};
-
-	// One item this creature starts wearing or wielding. The key names an entry
-	// in items.json and is snake_case like every other data identifier.
-	struct StartingItem
-	{
-		EquipmentSlot slot{ EquipmentSlot::NONE };
-		std::string itemKey{};
-	};
-
-	// What the creature carries into the dungeon. Empty for anything that
-	// fights with its body.
-	std::vector<StartingItem> equipment{};
-
-	// What the creature strikes with when no slot holds a weapon - claws, a
-	// bite, a gaze. Empty for anything that wields an item.
-	std::string naturalAttack{};
-
-	// Which body template this creature is built on, named in the body_plans
-	// table. Empty for anything that wears nothing, which is most of the
-	// bestiary. The slots themselves come from the BodyPlanRegistry.
-	std::string bodyPlanName{};
-
-	// Behaviour
-	MonsterAiType aiType{ MonsterAiType::MELEE };
-	bool canSwim{ false };
-
-	// Spawn table
-	int baseWeight{ 10 };
-	int levelMinimum{ 1 };
-	int levelMaximum{ 0 };
-	float levelScaling{ 0.0f };
-};
-
 namespace MonsterCreator
 {
-// Load all monster data from JSON. Must be called before Game construction.
-void load(std::string_view path);
-
-// Persist the current registry back to JSON (called by ContentEditor on close).
-void save(std::string_view path);
-
-// Standard-monster registry (goblin, orc, ...). Used by MonsterFactory.
-[[nodiscard]] const std::unordered_map<MonsterId, MonsterParams>& get_registry();
-
-// Tile access for all monsters including class-based ones (mimic, shopkeeper, spiders).
-[[nodiscard]] TileRef get_tile(MonsterId id);
-void set_tile(MonsterId id, TileRef tile);
-
-// Overwrite full params for a standard monster. No-op for class-based.
-void set_params(MonsterId id, const MonsterParams& p);
-
-// Factory: create a standard monster at pos. Not for class-based creatures.
+// A standard monster at pos, built from ctx.monsterRegistry's parameters for it. Not
+// for class-based creatures, which their own classes construct.
 [[nodiscard]] std::unique_ptr<Creature> create(Vector2D pos, MonsterId id, GameContext& ctx);
+
+// A monster at pos built from params. An item it cannot carry in the slot the params
+// name throws, naming the monster, the item and the slot.
 [[nodiscard]] std::unique_ptr<Creature> create_from_params(Vector2D pos, const MonsterParams& params, GameContext& ctx);
-
-// --- Dynamic (string-keyed) API for editor use ---
-
-// Ordered: builtin standard keys, then custom keys (alpha), then class-based keys.
-[[nodiscard]] std::vector<std::string> get_all_keys();
-
-// Throws std::out_of_range if key is unknown.
-[[nodiscard]] const MonsterParams& get_params(std::string_view key);
-
-
-// Updates builtin, custom, or class-based entry by string key.
-void set_params(std::string_view key, const MonsterParams& p);
-
-// Tile access by string key.
-[[nodiscard]] TileRef get_tile(std::string_view key);
-void set_tile(std::string_view key, TileRef tile);
-
-// Add a new user-created monster. Returns the actual key used (derived from p.name).
-[[nodiscard]] std::string add_custom(MonsterParams p);
-
-// Remove a user-created monster. Throws if key is builtin or class-based.
-void remove_custom(std::string_view key);
-
-[[nodiscard]] bool is_builtin(std::string_view key);
-[[nodiscard]] bool is_class_key(std::string_view key);
 
 } // namespace MonsterCreator

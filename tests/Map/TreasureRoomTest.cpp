@@ -4,7 +4,6 @@
 
 #include "src/TileFeature.h"
 #include "src/ItemCreator.h"
-#include "src/MonsterCreator.h"
 #include "src/DungeonNames.h"
 #include "src/DungeonRoom.h"
 #include "src/Map.h"
@@ -65,7 +64,6 @@ protected:
             dataManager.load_all_data(messageSystem);
             ItemCreator::load(Paths::ITEMS);
             ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
-            MonsterCreator::load(Paths::MONSTERS);
         }
         catch (...) {}
 
@@ -266,12 +264,11 @@ TEST_F(TreasureRoomFixture, GuardSetup_WithCorridor_JailerIsPlaced)
 
 TEST(StairRoomNotLocked, StairsAreNeverAdjacentToLockedDoor)
 {
-    // Content registries are global singletons — load once.
+    // The item registry is global, so it is loaded here rather than by the mock.
     try
     {
         ItemCreator::load(Paths::ITEMS);
         ItemCreator::load_enhanced_rules(Paths::ENHANCED_RULES);
-        MonsterCreator::load(Paths::MONSTERS);
     }
     catch (...) {}
 

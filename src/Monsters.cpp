@@ -8,16 +8,14 @@
 #include "Colors.h"
 #include "DamageInfo.h"
 #include "ExperienceReward.h"
-#include "HealthPool.h"
 #include "GameContext.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "RandomDice.h"
-#include "ContentRegistry.h"
 #include "Vector2D.h"
 #include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
-	: Creature(position, ActorData{ MonsterCreator::get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
+	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
 {
 	const int hp = ctx.dice->d6() + ctx.dice->d4();
 	const int thaco = 17;

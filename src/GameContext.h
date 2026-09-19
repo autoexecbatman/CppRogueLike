@@ -16,6 +16,7 @@ struct Decoration;
 class TileConfig;
 class BodyPlanRegistry;
 class SpellRegistry;
+class MonsterRegistry;
 class Gui;
 class MessageSystem;
 class RandomDice;
@@ -190,6 +191,7 @@ struct GameContext
 	const TileConfig* tileConfig{ nullptr };
 	const BodyPlanRegistry* bodyPlanRegistry{ nullptr };
 	SpellRegistry* spellRegistry{ nullptr };
+	MonsterRegistry* monsterRegistry{ nullptr };
 
 	// Game world data
 	Stairs* stairs{ nullptr };

@@ -38,6 +38,16 @@ TEST(GameContextWiring, ContextCarriesTheGamesSpellRegistry)
 	EXPECT_EQ(ctx.spellRegistry, &game.spellRegistry);
 }
 
+// The monsters the game builds and spawns are the registry Game owns, the one main loads.
+TEST(GameContextWiring, ContextCarriesTheGamesMonsterRegistry)
+{
+	Game game;
+
+	const GameContext ctx = game.context();
+
+	EXPECT_EQ(ctx.monsterRegistry, &game.monsterRegistry);
+}
+
 // With a Player owned, both views name that object.
 TEST(GameContextWiring, ContextWithPlayer_BothViewsNameIt)
 {

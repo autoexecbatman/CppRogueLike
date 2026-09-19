@@ -78,7 +78,6 @@ namespace
 Map::Map(int mapWidth, int mapHeight)
 	: mapWidth(mapWidth),
 	  mapHeight(mapHeight),
-	  monsterFactory(std::make_unique<MonsterFactory>()),
 	  itemFactory(std::make_unique<ItemFactory>()),
 	  dijkstraCosts(static_cast<size_t>(mapWidth) * mapHeight, std::numeric_limits<int>::max()),
 	  fovMap(std::make_unique<FovMap>(mapWidth, mapHeight)),
@@ -1348,7 +1347,7 @@ void Map::add_monster(Vector2D pos, GameContext& ctx) const
 	// Use the monster factory to create a monster appropriate for the current dungeon level
 	if (ctx.levelManager)
 	{
-		monsterFactory->spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
+		MonsterFactory::spawn_random_monster(pos, ctx.levelManager->get_dungeon_level(), ctx);
 
 		// Log the spawn for debugging
 		Creature* monster = get_actor(pos, ctx);
@@ -1434,11 +1433,10 @@ void Map::regenerate(GameContext& ctx)
 		ctx.decorations->clear();
 	}
 
-	// Read both registries again before placing anything. The editors write
-	// their JSON and update the registries mid-game, and without this the spawn
-	// tables still hold whatever was loaded at startup.
+	// Read the item registry again before placing anything. The item editor
+	// writes its JSON and updates the registry mid-game, and without this the
+	// item spawn table still holds whatever was loaded at startup.
 	itemFactory->reload_from_registry();
-	monsterFactory->reload_from_registry();
 
 	// generate a new map at current window dimensions (keep old size if curses not active)
 	const int newH = get_map_height();
@@ -1825,11 +1823,6 @@ void Map::place_amulet(GameContext& ctx)
 			ctx.messageSystem->message(RED_YELLOW_PAIR, "You sense a powerful artifact somewhere on this level...", true);
 		}
 	}
-}
-
-std::vector<MonsterPercentage> Map::get_monster_distribution(int dungeonLevel)
-{
-	return monsterFactory->get_current_distribution(dungeonLevel);
 }
 
 std::vector<ItemPercentage> Map::get_item_distribution(int dungeonLevel)

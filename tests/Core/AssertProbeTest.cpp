@@ -72,7 +72,6 @@ protected:
 #endif
 		// Content is loaded so a probe dies on the invariant it names rather
 		// than on a missing file, which aborts with the wrong message.
-		MonsterCreator::load(Paths::MONSTERS);
 		ItemCreator::load(Paths::ITEMS);
 
 		ctx = mock.to_game_context();
@@ -94,7 +93,7 @@ protected:
 	void build_a_goblin()
 	{
 		[[maybe_unused]] const std::unique_ptr<Creature> built =
-			MonsterCreator::create_from_params(Vector2D{ 0, 0 }, MonsterCreator::get_params("goblin"), ctx);
+			MonsterCreator::create_from_params(Vector2D{ 0, 0 }, mock.monsterRegistry.get_params("goblin"), ctx);
 	}
 };
 

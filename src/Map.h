@@ -7,7 +7,6 @@
 
 #include "TileType.h"
 #include "ItemFactory.h"
-#include "MonsterFactory.h"
 #include "Persistent.h"
 #include "RandomDice.h"
 #include "Decoration.h"
@@ -74,7 +73,6 @@ private:
 	int mapWidth{};
 	int mapHeight{};
 	static constexpr std::array<Vector2D, 8> DIRS = { DIR_N, DIR_NE, DIR_E, DIR_SE, DIR_S, DIR_SW, DIR_W, DIR_NW };
-	std::unique_ptr<MonsterFactory> monsterFactory;
 	std::unique_ptr<ItemFactory> itemFactory;
 	std::vector<int> dijkstraCosts;
 
@@ -158,7 +156,6 @@ public:
 	bool is_door_locked(Vector2D pos) const noexcept;
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
 	void place_amulet(GameContext& ctx);
-	std::vector<MonsterPercentage> get_monster_distribution(int dungeonLevel);
 	std::vector<ItemPercentage> get_item_distribution(int dungeonLevel);
 	Decoration* find_decoration_at(Vector2D pos, const GameContext& ctx) const noexcept;
 	bool is_door(Vector2D pos) const noexcept;

@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=MonsterRegistryTest.*:MonsterSpawnTableTest.*:GameContextWiring.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tcustomMonsters.clear();\n",
+      "mutated": "",
+      "catches": "a load keeping the custom monsters it replaces"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tif (is_taken(key))\n",
+      "mutated": "\tif (false)\n",
+      "catches": "a taken name reused as a key"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "key_to_standard_id(key).has_value() || key_to_class_id(key).has_value() || customMonsters.contains(key)",
+      "mutated": "key_to_standard_id(key).has_value() || customMonsters.contains(key)",
+      "catches": "a class-based creature's key handed to a custom monster"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tif (key_to_standard_id(key) || key_to_class_id(key))\n",
+      "mutated": "\tif (key_to_standard_id(key))\n",
+      "catches": "a class-based creature treated as removable"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\tstandardMonsters[*id] = params;\n",
+      "mutated": "",
+      "catches": "an edit to a standard monster written nowhere"
+    },
+    {
+      "file": "src/MonsterFactory.cpp",
+      "original": "\tconst std::vector<MonsterType> table = spawn_table(monsters);\n",
+      "mutated": "\tstatic const std::vector<MonsterType> table = spawn_table(monsters);\n",
+      "catches": "the distribution read from a table kept since its first call"
+    },
+    {
+      "file": "src/MonsterFactory.cpp",
+      "original": "\tconst std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);\n",
+      "mutated": "\tstatic const std::vector<MonsterType> table = spawn_table(*ctx.monsterRegistry);\n",
+      "catches": "spawns drawn from a table kept since the first spawn"
+    },
+    {
+      "file": "src/MonsterFactory.cpp",
+      "original": "\t\tif (monsters.is_builtin(key) || monsters.is_class_key(key))\n",
+      "mutated": "\t\tif (true)\n",
+      "catches": "custom monsters left out of the table"
+    },
+    {
+      "file": "src/Game.cpp",
+      "original": "\t\t.monsterRegistry = &monsterRegistry,\n",
+      "mutated": "",
+      "catches": "the game's context carrying no monster registry"
+    }
+  ]
+}

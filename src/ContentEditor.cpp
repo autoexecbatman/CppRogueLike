@@ -7,7 +7,7 @@
 
 #include "Paths.h"
 #include "ItemCreator.h"
-#include "MonsterCreator.h"
+#include "MonsterRegistry.h"
 #include "Renderer.h"
 #include "ContentRegistry.h"
 #include "ContentRegistryIO.h"
@@ -49,7 +49,7 @@ constexpr MonsterEntry MONSTER_TABLE[] = {
 
 // ---------------------------------------------------------------------------
 
-void ContentEditor::toggle(ContentRegistry& registry)
+void ContentEditor::toggle(ContentRegistry& registry, MonsterRegistry& monsters)
 {
 	m_registry = &registry;
 
@@ -57,7 +57,7 @@ void ContentEditor::toggle(ContentRegistry& registry)
 	{
 		// Closing: persist all assignments immediately.
 		ContentRegistryIO::save(*m_registry, Paths::CONTENT_TILES);
-		MonsterCreator::save(Paths::MONSTERS);
+		monsters.save(Paths::MONSTERS);
 	}
 
 	m_active = !m_active;
@@ -78,7 +78,7 @@ void ContentEditor::toggle(ContentRegistry& registry)
 	}
 }
 
-TileRef ContentEditor::current_tile() const
+TileRef ContentEditor::current_tile(const MonsterRegistry& monsters) const
 {
 	const auto& entries = active_entries();
 	if (entries.empty())
@@ -92,10 +92,10 @@ TileRef ContentEditor::current_tile() const
 		return m_registry ? m_registry->get_tile(sel.item_key) : TileRef{};
 	}
 
-	return MonsterCreator::get_tile(static_cast<MonsterId>(sel.entity_key));
+	return monsters.get_tile(static_cast<MonsterId>(sel.entity_key));
 }
 
-void ContentEditor::assign_tile(TileRef tile)
+void ContentEditor::assign_tile(TileRef tile, MonsterRegistry& monsters)
 {
 	auto& entries = active_entries();
 	if (entries.empty())
@@ -113,7 +113,7 @@ void ContentEditor::assign_tile(TileRef tile)
 	}
 	else
 	{
-		MonsterCreator::set_tile(static_cast<MonsterId>(sel.entity_key), tile);
+		monsters.set_tile(static_cast<MonsterId>(sel.entity_key), tile);
 	}
 }
 
@@ -121,7 +121,7 @@ void ContentEditor::assign_tile(TileRef tile)
 // update_and_render
 // ---------------------------------------------------------------------------
 
-void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry& registry)
+void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry& registry, MonsterRegistry& monsters)
 {
 	if (!m_active)
 	{
@@ -145,8 +145,8 @@ void ContentEditor::update_and_render(const Renderer& renderer, ContentRegistry&
 	const int body_y = HEADER_H;
 	const int body_h = screenHeight - HEADER_H - HINT_H;
 
-	draw_list(renderer, 0, body_y, LIST_W, body_h);
-	draw_browser(renderer, LIST_W, body_y, screenWidth - LIST_W, body_h);
+	draw_list(renderer, monsters, 0, body_y, LIST_W, body_h);
+	draw_browser(renderer, monsters, LIST_W, body_y, screenWidth - LIST_W, body_h);
 	draw_hint_bar(renderer);
 }
 
@@ -190,6 +190,7 @@ void ContentEditor::draw_header(const Renderer& renderer)
 
 void ContentEditor::draw_list(
 	const Renderer& renderer,
+	const MonsterRegistry& monsters,
 	int list_x,
 	int list_y,
 	int list_w,
@@ -245,7 +246,7 @@ void ContentEditor::draw_list(
 
 		TileRef tile = (m_tab == 0)
 			? (m_registry ? m_registry->get_tile(entries[i].item_key) : TileRef{})
-			: MonsterCreator::get_tile(static_cast<MonsterId>(entries[i].entity_key));
+			: monsters.get_tile(static_cast<MonsterId>(entries[i].entity_key));
 
 		renderer.draw_tile_screen_sized(Vector2D{ list_x + PAD, itemY + (ITEM_H - TILE_SZ) / 2 }, tile, TILE_SZ);
 
@@ -263,6 +264,7 @@ void ContentEditor::draw_list(
 
 void ContentEditor::draw_browser(
 	const Renderer& renderer,
+	MonsterRegistry& monsters,
 	int panelX,
 	int panelY,
 	int bw,
@@ -332,7 +334,7 @@ void ContentEditor::draw_browser(
 		}
 	}
 
-	TileRef selected_tile = current_tile();
+	TileRef selected_tile = current_tile(monsters);
 
 	BeginScissorMode(panelX, grid_y, bw, grid_h);
 
@@ -371,7 +373,7 @@ void ContentEditor::draw_browser(
 
 			if (hovered_tile && IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && in_browser)
 			{
-				assign_tile(tid);
+				assign_tile(tid, monsters);
 			}
 		}
 	}

@@ -5,6 +5,7 @@
 #include "Colors.h"
 #include "GameContext.h"
 #include "Map.h"
+#include "MonsterFactory.h"
 #include "InputSystem.h"
 #include "Renderer.h"
 #include "BalanceViewer.h"
@@ -12,7 +13,7 @@
 BalanceViewer::BalanceViewer(int dungeonLevel, GameContext& ctx)
     : dungeonLevel(dungeonLevel)
 {
-    monsterDist = ctx.map->get_monster_distribution(dungeonLevel);
+    monsterDist = MonsterFactory::get_current_distribution(dungeonLevel, *ctx.monsterRegistry);
     itemDist = ctx.map->get_item_distribution(dungeonLevel);
 }
 
