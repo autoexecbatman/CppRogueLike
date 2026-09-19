@@ -4,6 +4,8 @@
 
 #include <raylib.h>
 
+#include "Creature.h"
+#include "CreatureClass.h"
 #include "EquipmentSlot.h"
 #include "Player.h"
 #include "Colors.h"
@@ -16,6 +18,7 @@
 #include "HungerSystem.h"
 #include "StrengthAttributes.h"
 #include "ItemEnhancements.h"
+#include "LevelUpSystem.h"
 #include "CharacterSheetUI.h"
 
 // ============================================================================
@@ -78,7 +81,6 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     const StrengthAttributes strengthRow = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength());
     const int strHitMod = strengthRow.hitProb;
     const int strDmgMod = strengthRow.dmgAdj;
-    const int conBonus = ctx.dataManager->constitution_hit_point_adjustment(player.get_constitution(), player.get_creature_class());
 
     const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
     const int missileAdj = dexterityRow.MissileAttackAdj;
@@ -96,7 +98,7 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("CON: {:2d}  ({:+d} HP/level)", player.get_constitution(), conBonus), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, CharacterSheetText::constitution_line(player, *ctx.dataManager), WHITE_BLACK_PAIR);
     row++;
 
     ctx.renderer->draw_text(
@@ -184,6 +186,31 @@ void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
 }
 
 } // anonymous namespace
+
+// ============================================================================
+// CharacterSheetText
+// ============================================================================
+
+// The Constitution line, with the last level that took the adjustment once no more do.
+//
+// Example:
+//   constitution_line(wizard, dataManager);   // 3rd level, Con 17 -> "CON: 17  (+2 HP/level)"
+std::string CharacterSheetText::constitution_line(const Creature& creature, const DataManager& dataManager)
+{
+    const CreatureClass creatureClass = creature.get_creature_class();
+    const int level = creature.get_creature_level();
+    const int adjustment = dataManager.constitution_hit_point_adjustment(creature.get_constitution(), creatureClass);
+
+    // A gain per level only while the next level still takes it.
+    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level + 1))
+    {
+        return std::format("CON: {:2d}  ({:+d} HP/level)", creature.get_constitution(), adjustment);
+    }
+
+    // Every level up to the last rolled die took it, so the count is that level.
+    const int lastLevel = LevelUpSystem::levels_taking_constitution_adjustment(creatureClass, level);
+    return std::format("CON: {:2d}  ({:+d} HP/level through level {})", creature.get_constitution(), adjustment, lastLevel);
+}
 
 // ============================================================================
 // CharacterSheetUI

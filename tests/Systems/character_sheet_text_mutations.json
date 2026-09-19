@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=CharacterSheetTextTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level + 1))",
+      "mutated": "    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level))",
+      "catches": "the line asking about the level already taken instead of the next one"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level + 1))",
+      "mutated": "    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level + 2))",
+      "catches": "the line announcing the end a level early"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "    if (LevelUpSystem::takes_constitution_adjustment_at(creatureClass, level + 1))",
+      "mutated": "    if (true)",
+      "catches": "the per-level bonus shown at every level again"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "    const int lastLevel = LevelUpSystem::levels_taking_constitution_adjustment(creatureClass, level);",
+      "mutated": "    const int lastLevel = level;",
+      "catches": "the character's own level named as the last one that took the bonus"
+    },
+    {
+      "file": "src/CharacterSheetUI.cpp",
+      "original": "    const int adjustment = dataManager.constitution_hit_point_adjustment(creature.get_constitution(), creatureClass);",
+      "mutated": "    const int adjustment = dataManager.constitution_hit_point_adjustment(creature.get_constitution(), CreatureClass::FIGHTER);",
+      "catches": "every class shown the warrior column"
+    }
+  ]
+}
