@@ -15,6 +15,36 @@
       "col": 1,
       "row": 13
     },
+    "TILE_TRAP_PIT_ARMED": {
+      "sheet": 66,
+      "col": 0,
+      "row": 0
+    },
+    "TILE_TRAP_DART_ARMED": {
+      "sheet": 66,
+      "col": 1,
+      "row": 0
+    },
+    "TILE_TRAP_ARROW_ARMED": {
+      "sheet": 66,
+      "col": 2,
+      "row": 0
+    },
+    "TILE_TRAP_PIT_SPRUNG": {
+      "sheet": 66,
+      "col": 0,
+      "row": 1
+    },
+    "TILE_TRAP_DART_SPRUNG": {
+      "sheet": 66,
+      "col": 1,
+      "row": 1
+    },
+    "TILE_TRAP_ARROW_SPRUNG": {
+      "sheet": 66,
+      "col": 2,
+      "row": 1
+    },
     "TILE_WALL_STONE": {
       "sheet": 1,
       "col": 4,

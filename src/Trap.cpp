@@ -21,9 +21,10 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 	: TileFeature(position, ActorData{}),
 	  type(trapType)
 {
-	// Set damage dice and display name based on trap type
+	// Set damage dice, display name and both tiles based on trap type. The
+	// tiles are only ever seen once the trap is no longer hidden: a hidden trap
+	// carries IS_INVISIBLE and draws nothing at all.
 	std::string trapName;
-	TileRef trapTile;
 	switch (type)
 	{
 	case TrapType::PIT:
@@ -31,7 +32,8 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 		damageDiceCount = 2;
 		damageDiceSize = 6; // 2d6 damage
 		trapName = "pit trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
+		armedTile = tileConfig.get("TILE_TRAP_PIT_ARMED");
+		sprungTile = tileConfig.get("TILE_TRAP_PIT_SPRUNG");
 		break;
 	}
 	case TrapType::DART:
@@ -39,7 +41,8 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 		damageDiceCount = 1;
 		damageDiceSize = 4; // 1d4 damage
 		trapName = "dart trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
+		armedTile = tileConfig.get("TILE_TRAP_DART_ARMED");
+		sprungTile = tileConfig.get("TILE_TRAP_DART_SPRUNG");
 		break;
 	}
 	case TrapType::ARROW:
@@ -47,13 +50,14 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 		damageDiceCount = 1;
 		damageDiceSize = 6; // 1d6 damage
 		trapName = "arrow trap";
-		trapTile = tileConfig.get("TILE_FLOOR_STONE"); // Hidden on floor
+		armedTile = tileConfig.get("TILE_TRAP_ARROW_ARMED");
+		sprungTile = tileConfig.get("TILE_TRAP_ARROW_SPRUNG");
 		break;
 	}
 	}
 
 	actorData.name = trapName;
-	actorData.tile = trapTile;
+	actorData.tile = armedTile;
 	actorData.color = YELLOW_BLACK_PAIR;
 
 	// Hidden traps are invisible until detected
@@ -108,6 +112,9 @@ DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 	if (checkResult >= disarmDC)
 	{
 		state = TrapState::DISARMED;
+		// A defused trap reads as a spent one: the pit is open and boarded over,
+		// the darts are on the floor.
+		actorData.tile = sprungTile;
 		return DisarmResult::DISARMED;
 	}
 
@@ -138,6 +145,10 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 
 	// Missed, already known, or left armed by a failed disarm: it springs.
 	state = TrapState::TRIGGERED;
+	// A sprung trap shows its sprung face, and is visible whether or not the
+	// creature ever spotted it.
+	actorData.tile = sprungTile;
+	remove_state(ActorState::IS_INVISIBLE);
 
 	// Roll damage
 	const int damage = roll_damage(*ctx.dice);
@@ -200,6 +211,9 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 	if (checkResult >= detectionDC)
 	{
 		state = TrapState::DETECTED;
+		// Spotted is spotted however it was found: attempt_detect does the same,
+		// and without this the message announces a trap that stays invisible.
+		remove_state(ActorState::IS_INVISIBLE);
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You notice a hidden trap at the last moment!", true);

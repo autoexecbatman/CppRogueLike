@@ -6,6 +6,7 @@
 
 #include "TileFeature.h"
 #include "Vector2D.h"
+#include "Renderer.h" // TileRef, held by value below
 
 class RandomDice;
 
@@ -60,6 +61,11 @@ private:
 	// The damage dice, set from the type: a 2d6 pit is count 2, size 6.
 	int damageDiceCount{ 0 };
 	int damageDiceSize{ 0 };
+	// The two faces of a trap: what it shows once spotted, and what it shows
+	// once sprung or defused. Both are resolved from the type in the
+	// constructor, so the TileConfig is not held beyond it.
+	TileRef armedTile{};
+	TileRef sprungTile{};
 	// What 1d20 plus the dexterity modifier must reach to spot the trap, and to disarm it.
 	int detectionDC{ 15 };
 	int disarmDC{ 12 };

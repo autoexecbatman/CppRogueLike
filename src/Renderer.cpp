@@ -310,7 +310,10 @@ void Renderer::load_dawnlike(std::string_view basePath)
 	load_animated(TileSheet::SHEET_HILL0, "Hill0", "Objects/", "Hill", 16);
 	load_animated(TileSheet::SHEET_TREE0, "Tree0", "Objects/", "Tree", 16);
 	load_animated(TileSheet::SHEET_GROUND0, "Ground0", "Objects/", "Ground", 16);
-	load_animated(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap", 16);
+	// Generated trap art: three types, armed on row 0 and sprung on row 1, at
+	// 64px. Static rather than an animated pair, because a trap does not
+	// animate and a generated second frame boils rather than breathes.
+	load_static(TileSheet::SHEET_TRAP0, "Trap0", "Objects/", "Trap0", 64);
 	load_static(TileSheet::SHEET_FENCE, "Fence", "Objects/", "Fence", 16);
 	load_animated(TileSheet::SHEET_MAP0, "Map0", "Objects/", "Map", 16);
 
