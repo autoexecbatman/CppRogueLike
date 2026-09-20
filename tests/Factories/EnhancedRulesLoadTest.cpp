@@ -48,7 +48,7 @@ protected:
 	// record, and returns what loading it threw.
 	std::string load_with_first_rule(const std::string& field, const nlohmann::json& value)
 	{
-		std::ifstream source(std::filesystem::path{ "data/content/enhanced_rules.json" });
+		std::ifstream source(Paths::resolve(Paths::ENHANCED_RULES));
 		EXPECT_TRUE(source.is_open()) << "cannot read the real enhanced rules";
 		nlohmann::json root = nlohmann::json::parse(source);
 		EXPECT_FALSE(root.empty()) << "no rules to damage";

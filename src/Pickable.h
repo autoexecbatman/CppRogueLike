@@ -68,6 +68,8 @@ struct Weapon
 	bool ranged{ false };
 	HandRequirement handRequirement{ HandRequirement::ONE_HANDED };
 	WeaponSize weaponSize{ WeaponSize::MEDIUM };
+	// The Strength a bow is specially made for; 0 for an ordinary weapon.
+	int strengthRating{ 0 };
 
 	bool is_ranged() const noexcept { return ranged; }
 	bool is_two_handed() const noexcept { return handRequirement == HandRequirement::TWO_HANDED; }
@@ -187,6 +189,16 @@ struct Amulet
 struct DungeonKey
 {
 };
+
+// The Strength a weapon is specially made for: a bow of heavier pull, which a weaker arm
+// cannot draw (Player's Handbook, PDF page 152) and which gives the Table 1 adjustment of
+// its rating. 0 for an ordinary weapon and for anything that is not a weapon.
+//
+// Example:
+//   strength_rating_of(compositeBow);   // -> 18
+//   strength_rating_of(longBow);        // -> 0
+//   strength_rating_of(healthPotion);   // -> 0
+[[nodiscard]] int strength_rating_of(const Item& item);
 
 // ========== The variant ==========
 

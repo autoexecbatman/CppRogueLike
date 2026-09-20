@@ -792,6 +792,10 @@ std::string ItemEditor::field_label(FieldId f) const
 	case FieldId::RANGED:           return "Ranged";
 	case FieldId::HAND_REQUIREMENT: return "Hand Requirement";
 	case FieldId::WEAPON_SIZE:      return "Weapon Size";
+	case FieldId::STRENGTH_RATING:
+	{
+		return "Made For STR";
+	}
 	case FieldId::AC_BONUS:         return "AC Bonus";
 	case FieldId::EFFECT:           return "Effect";
 	case FieldId::EFFECT_BONUS:     return "Effect Bonus";
@@ -840,6 +844,10 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::RANGED:           return p.ranged ? "yes" : "no";
 	case FieldId::HAND_REQUIREMENT: return std::string{ encode_hand_requirement(p.handRequirement) };
 	case FieldId::WEAPON_SIZE:      return std::string{ encode_weapon_size(p.weaponSize) };
+	case FieldId::STRENGTH_RATING:
+	{
+		return std::format("{}", p.strengthRating);
+	}
 	case FieldId::AC_BONUS:         return std::format("{}", p.acBonus);
 	case FieldId::EFFECT:           return std::string{ encode_magical_effect(p.effect) };
 	case FieldId::EFFECT_BONUS:     return std::format("{}", p.effectBonus);
@@ -929,6 +937,12 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 	case FieldId::CONFUSE_TURNS:
 		p.confuseTurns = clamp_val(p.confuseTurns, delta, 0, 999);
 		break;
+	case FieldId::STRENGTH_RATING:
+	{
+		// 0 is an ordinary weapon; a rating is a Strength score, and Table 1 stops at 25.
+		p.strengthRating = clamp_val(p.strengthRating, delta, 0, 25);
+		break;
+	}
 	case FieldId::AC_BONUS:
 		p.acBonus = clamp_val(p.acBonus, delta, -10, 10);
 		break;

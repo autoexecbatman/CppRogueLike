@@ -79,7 +79,9 @@ void Attacker::perform_single_attack(
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
 	const Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;
 	const AttackStrength::Adjustment strengthOnAttack = AttackStrength::adjustment(
-		ctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength()),
+		*ctx.dataManager,
+		owner.get_strength(),
+		owner.get_exceptional_strength(),
 		kind,
 		missileWeapon);
 

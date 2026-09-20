@@ -26,6 +26,7 @@
 //     build\bin\Debug\test_exe.exe --gtest_filter=ItemRoundTripTest.*
 
 #include "src/ItemRegistry.h"
+#include "src/Paths.h"
 #include <gtest/gtest.h>
 
 #include <nlohmann/json.hpp>
@@ -105,6 +106,7 @@ void expect_same_item(const std::string& key, const ItemSnapshot& before, const 
 	EXPECT_EQ(before.params.ranged, after.ranged) << key << ".ranged";
 	EXPECT_EQ(before.params.handRequirement, after.handRequirement) << key << ".handRequirement";
 	EXPECT_EQ(before.params.weaponSize, after.weaponSize) << key << ".weaponSize";
+	EXPECT_EQ(before.params.strengthRating, after.strengthRating) << key << ".strengthRating";
 
 	EXPECT_EQ(before.params.consumableEffect, after.consumableEffect) << key << ".consumableEffect";
 	EXPECT_EQ(before.params.consumableBuffType, after.consumableBuffType) << key << ".consumableBuffType";
@@ -145,7 +147,7 @@ std::string load_without_field(
 	const std::string& itemKey,
 	const std::string& field)
 {
-	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	EXPECT_TRUE(source.is_open()) << "cannot read the real items file";
 	nlohmann::json root = nlohmann::json::parse(source);
 	EXPECT_TRUE(root.contains(itemKey)) << itemKey << " must exist to be damaged";
@@ -178,7 +180,7 @@ std::string load_without_field(
 // exactly the state that produced the original bug.
 TEST_F(ItemRoundTripTest, EveryFieldOfARecordIsRequired)
 {
-	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	ASSERT_TRUE(source.is_open()) << "cannot read the real items file";
 	const nlohmann::json root = nlohmann::json::parse(source);
 	ASSERT_TRUE(root.contains("health_potion")) << "health_potion must exist to be damaged";

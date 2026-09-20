@@ -1,6 +1,7 @@
 #include "src/ItemCreator.h"
 #include "src/Vector2D.h"
 #include "src/Item.h"
+#include "src/Paths.h"
 #include "tests/mocks/MockGameContext.h"
 #include <gtest/gtest.h>
 
@@ -134,7 +135,7 @@ TEST_F(ItemCreatorTest, AnItemWeighsItsWeightRatherThanItsSpawnRate)
 	const std::filesystem::path apart =
 		std::filesystem::temp_directory_path() / "items_weight_apart.json";
 
-	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	ASSERT_TRUE(source.is_open());
 	nlohmann::json root = nlohmann::json::parse(source);
 	ASSERT_TRUE(root.contains("health_potion"));
@@ -168,7 +169,7 @@ TEST_F(ItemCreatorTest, CarryWeightDoesNotChangeHowOftenAnItemIsDrawn)
 	const std::filesystem::path apart =
 		std::filesystem::temp_directory_path() / "items_draw_apart.json";
 
-	std::ifstream source(std::filesystem::path{ "data/content/items.json" });
+	std::ifstream source(Paths::resolve(Paths::ITEMS));
 	ASSERT_TRUE(source.is_open());
 	nlohmann::json root = nlohmann::json::parse(source);
 	for (auto& [key, record] : root.items())

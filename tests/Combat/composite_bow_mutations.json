@@ -1,0 +1,77 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; cd build/bin/Debug; ./test_exe.exe --gtest_filter=AttackStrengthTest.*:ItemRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\tif (const int rating = strength_rating_of(*missileWeapon); rating > 0)",
+      "mutated": "\t\tif (const int rating = strength_rating_of(*missileWeapon); rating > 100)",
+      "catches": "a bow made for an arm treated as an ordinary bow"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\t\tconst StrengthAttributes madeFor = dataManager.strength_for(rating, 0);",
+      "mutated": "\t\t\tconst StrengthAttributes madeFor = dataManager.strength_for(strength, exceptionalStrength);",
+      "catches": "a made bow giving the wielder's row rather than the row it is made for"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn weapon ? weapon->strengthRating : 0;",
+      "mutated": "\treturn 0;",
+      "catches": "no weapon ever made for an arm"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (get_strength() < strength_rating_of(*item))",
+      "mutated": "\tif (get_strength() <= strength_rating_of(*item))",
+      "catches": "an arm at the rating refused"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (get_strength() < strength_rating_of(*item))",
+      "mutated": "\tif (false)",
+      "catches": "any arm drawing a bow made for a stronger one"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tWHITE_BLACK_PAIR,\n\t\t\tstd::format(\"You are not strong enough to draw the {}.\", item->actorData.name),\n\t\t\ttrue);\n",
+      "mutated": "",
+      "catches": "a silent refusal"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tweapon.strengthRating = source.at(\"strengthRating\").get<int>();",
+      "mutated": "\t\tweapon.strengthRating = source.at(\"weaponSize\").get<int>();",
+      "catches": "a saved bow forgetting what it was made for"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\t\treturn Weapon{ params.ranged, params.handRequirement, params.weaponSize, params.strengthRating };",
+      "mutated": "\t\treturn Weapon{ params.ranged, params.handRequirement, params.weaponSize, 0 };",
+      "catches": "a made bow built as an ordinary one"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.strengthRating = required_field(record, key, \"strengthRating\");",
+      "mutated": "\tparams.strengthRating = required_field(record, key, \"strBonus\");",
+      "catches": "the rating read from another field"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\trecord[\"strengthRating\"] = params.strengthRating;\n",
+      "mutated": "",
+      "catches": "the encoder dropping the rating, which the next load needs"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "        \"strengthRating\": 18,",
+      "mutated": "        \"strengthRating\": 17,",
+      "catches": "a composite bow made for 17, the first Baldur's Gate's +2 damage lost"
+    }
+  ]
+}

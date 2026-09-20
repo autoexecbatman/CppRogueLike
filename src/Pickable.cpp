@@ -268,6 +268,13 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 	return consume_item(owner, wearer);
 }
 
+int strength_rating_of(const Item& item)
+{
+	// Only a weapon is made for an arm.
+	const Weapon* weapon = item.behavior ? std::get_if<Weapon>(&*item.behavior) : nullptr;
+	return weapon ? weapon->strengthRating : 0;
+}
+
 bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
 {
 	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
@@ -678,6 +685,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 				output["ranged"] = b.ranged;
 				output["handReq"] = static_cast<int>(b.handRequirement);
 				output["weaponSize"] = static_cast<int>(b.weaponSize);
+				output["strengthRating"] = b.strengthRating;
 			},
 			[&output](const Shield&) { output["type"] = static_cast<int>(PickableType::SHIELD); },
 			[&output](const TargetedScroll& b)
@@ -796,6 +804,7 @@ ItemBehavior load_behavior(const json& source)
 		{
 			weapon.weaponSize = static_cast<WeaponSize>(source["weaponSize"].get<int>());
 		}
+		weapon.strengthRating = source.at("strengthRating").get<int>();
 		return weapon;
 	}
 

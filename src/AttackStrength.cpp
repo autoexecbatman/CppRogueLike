@@ -3,11 +3,21 @@
 
 #include <algorithm>
 
+#include "DataManager.h"
 #include "Item.h"
 #include "ItemClassification.h"
+#include "Pickable.h"
+#include "StrengthAttributes.h"
 
-AttackStrength::Adjustment AttackStrength::adjustment(const StrengthAttributes& row, AttackKind kind, const Item* missileWeapon)
+AttackStrength::Adjustment AttackStrength::adjustment(
+	const DataManager& dataManager,
+	int strength,
+	int exceptionalStrength,
+	AttackKind kind,
+	const Item* missileWeapon)
 {
+	const StrengthAttributes row = dataManager.strength_for(strength, exceptionalStrength);
+
 	// A swing, and a missile thrown by hand or by nature, carries the arm's whole strength.
 	const Adjustment wholeRow{ row.hitProb, row.dmgAdj };
 	if (kind == AttackKind::MELEE || missileWeapon == nullptr)
@@ -17,9 +27,16 @@ AttackStrength::Adjustment AttackStrength::adjustment(const StrengthAttributes& 
 
 	switch (missileWeapon->itemClass)
 	{
-	// A weak arm cannot draw a bow fully; a strong one gains only from a bow made for it.
 	case ItemClass::BOW:
 	{
+		// A bow made for an arm gives that arm's row; equipping keeps weaker arms from it.
+		if (const int rating = strength_rating_of(*missileWeapon); rating > 0)
+		{
+			const StrengthAttributes madeFor = dataManager.strength_for(rating, 0);
+			return Adjustment{ madeFor.hitProb, madeFor.dmgAdj };
+		}
+
+		// An ordinary bow: a weak arm cannot draw it fully, and a strong one gains nothing.
 		return Adjustment{ std::min(row.hitProb, 0), std::min(row.dmgAdj, 0) };
 	}
 

@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "./build/bin/Debug/test_exe.exe --gtest_filter=ItemCreatorTest.*ResistancePotion*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=ItemCreatorTest.*ResistancePotion*"
   ],
   "mutations": [
     {

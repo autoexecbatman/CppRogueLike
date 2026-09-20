@@ -18,6 +18,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/Paths.h"
 #include "src/SpellRegistry.h"
 
 class SpellDataLoadTest : public ::testing::Test
@@ -50,7 +51,7 @@ protected:
 
 	static nlohmann::json shipped_spells()
 	{
-		std::ifstream in("data/content/spells.json");
+		std::ifstream in(Paths::resolve(Paths::SPELLS));
 		return nlohmann::json::parse(in);
 	}
 

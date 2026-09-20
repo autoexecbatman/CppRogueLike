@@ -81,7 +81,7 @@ ItemBehavior create_behavior(const ItemParams& params)
 
 	case PickableType::WEAPON:
 	{
-		return Weapon{ params.ranged, params.handRequirement, params.weaponSize };
+		return Weapon{ params.ranged, params.handRequirement, params.weaponSize, params.strengthRating };
 	}
 
 	case PickableType::SHIELD:

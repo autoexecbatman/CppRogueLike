@@ -792,6 +792,19 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 		return false;
 	}
 
+	// A weapon made for a stronger arm cannot be drawn by this one: the first Baldur's
+	// Gate's composite bow "Requires: 18 Strength".
+	if (get_strength() < strength_rating_of(*item))
+	{
+		ctx.messageSystem->message(
+			WHITE_BLACK_PAIR,
+			std::format("You are not strong enough to draw the {}.", item->actorData.name),
+			true);
+		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this);
+		assert(returnedToPack.has_value());
+		return false;
+	}
+
 	// Unequip existing item in the slot first
 	unequip_item(slot, ctx);
 

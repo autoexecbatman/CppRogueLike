@@ -92,6 +92,9 @@ struct ItemParams
 	HandRequirement handRequirement{ HandRequirement::ONE_HANDED };
 	// A weapon's size.
 	WeaponSize weaponSize{ WeaponSize::MEDIUM };
+	// The Strength a bow is specially made for, which it needs to be drawn and whose
+	// Table 1 adjustment it gives; 0 for an ordinary weapon.
+	int strengthRating{ 0 };
 
 	// What a consumable does.
 	ConsumableEffect consumableEffect{ ConsumableEffect::NONE };

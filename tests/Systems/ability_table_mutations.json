@@ -33,8 +33,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tctx.dataManager->strength_for(owner.get_strength(), owner.get_exceptional_strength()),",
-      "mutated": "\t\tctx.dataManager->strength_for(owner.get_strength(), 0),",
+      "original": "\t\towner.get_exceptional_strength(),\n\t\tkind,",
+      "mutated": "\t\t0,\n\t\tkind,",
       "catches": "exceptional Strength left out of the damage"
     },
     {

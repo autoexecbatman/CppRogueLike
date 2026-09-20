@@ -169,6 +169,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	record["ranged"] = params.ranged;
 	record["handRequirement"] = encode_hand_requirement(params.handRequirement);
 	record["weaponSize"] = encode_weapon_size(params.weaponSize);
+	record["strengthRating"] = params.strengthRating;
 	record["consumableEffect"] = encode_consumable_effect(params.consumableEffect);
 	record["consumableBuff"] = encode_buff_type(params.consumableBuffType);
 	record["targetMode"] = encode_target_mode(params.targetMode);
@@ -238,6 +239,7 @@ ParsedItem parse_item(const std::string& key, const nlohmann::json& record)
 	params.ranged = required_field(record, key, "ranged");
 	params.handRequirement = parse_hand_requirement(required_field(record, key, "handRequirement").get<std::string>());
 	params.weaponSize = parse_weapon_size(required_field(record, key, "weaponSize").get<std::string>());
+	params.strengthRating = required_field(record, key, "strengthRating");
 	params.consumableEffect = parse_consumable_effect(required_field(record, key, "consumableEffect").get<std::string>());
 	params.consumableBuffType = parse_buff_type(required_field(record, key, "consumableBuff").get<std::string>());
 	params.targetMode = parse_target_mode(required_field(record, key, "targetMode").get<std::string>());
