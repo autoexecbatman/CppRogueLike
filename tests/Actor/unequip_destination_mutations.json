@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/Player.cpp",
-      "original": " && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this);",
+      "original": " && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this, *ctx.dataManager);",
       "mutated": ";",
       "catches": "a pack too heavy for the item still chosen for it"
     },

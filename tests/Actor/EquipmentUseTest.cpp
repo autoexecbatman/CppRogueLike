@@ -54,7 +54,7 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player);
+		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
 		use_item(*carried->behavior, *carried, *player, ctx);
 		Item* worn = player->get_equipped_item(slot);
 		EXPECT_EQ(worn, carried) << key << " was not put on";

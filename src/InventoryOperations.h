@@ -16,6 +16,7 @@
 
 // Forward declarations
 class Creature;
+class DataManager;
 
 namespace InventoryOperations
 {
@@ -39,7 +40,8 @@ InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Ite
 InventoryResult<bool> add_item_to_inventory(
 	CreatureInventory& inventory,
 	std::unique_ptr<Item> item,
-	const Creature& owner
+	const Creature& owner,
+	const DataManager& dataManager
 );
 
 // Remove from floor
@@ -53,19 +55,32 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& invento
 // Remove from creature backpack by id
 InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inventory, uint64_t uniqueId);
 
-// Weight management — creature backpack only
+// Weight management - creature backpack only
 int get_total_weight(const CreatureInventory& inventory) noexcept;
-int get_max_weight(const Creature& owner) noexcept;
-bool is_overloaded(const CreatureInventory& inventory, const Creature& owner) noexcept;
+
+// The most the owner can carry and still move, in pounds: the Strength row's
+// maxCarried, which is Table 47's Max. Carried Weight. Exceptional Strength is
+// resolved, so an 18/00 fighter is answered from its own band.
+//
+// Example:
+//   get_max_weight(strengthTenCarrier, dataManager);   // -> 110
+//   get_max_weight(hillGiantGirdled, dataManager);     // -> 640, at Strength 19
+int get_max_weight(const Creature& owner, const DataManager& dataManager) noexcept;
+bool is_overloaded(const CreatureInventory& inventory, const Creature& owner, const DataManager& dataManager) noexcept;
 
 // Whether this item can go into the pack without taking what it carries past the
 // owner's strength-based limit. The one statement of that rule: adding, picking up
 // and buying all ask here, so they cannot disagree about what is too heavy.
 //
 // Example:
-//   is_within_weight_limit(player.inventoryData, dagger, player);      // -> true
-//   is_within_weight_limit(player.inventoryData, plateArmour, weakling); // -> false
-bool is_within_weight_limit(const CreatureInventory& inventory, const Item& item, const Creature& owner) noexcept;
+//   is_within_weight_limit(player.inventoryData, dagger, player, dataManager);      // -> true
+//   is_within_weight_limit(player.inventoryData, plateArmour, weakling, dataManager); // -> false
+bool is_within_weight_limit(
+	const CreatureInventory& inventory,
+	const Item& item,
+	const Creature& owner,
+	const DataManager& dataManager
+) noexcept;
 
 // id-based search — creature backpack only
 Item* find_item_by_id(CreatureInventory& inventory, uint64_t uniqueId) noexcept;

@@ -161,7 +161,7 @@ TEST_F(ShopTransactionTest, AnUnaffordablePurchaseMovesNothing)
 TEST_F(ShopTransactionTest, APurchaseTooHeavyToCarryMovesNothing)
 {
 	Item& onShelf = shelve("long_sword");
-	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player) + 1;
+	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player, *ctx.dataManager) + 1;
 	player.adjust_gold(shop.get_buy_price(onShelf));
 	const int buyerGoldBefore = player.get_gold();
 	const std::size_t stockBefore = shop.get_shop_inventory().items.size();
@@ -178,7 +178,7 @@ TEST_F(ShopTransactionTest, APurchaseTooHeavyToCarryMovesNothing)
 TEST_F(ShopTransactionTest, APurchaseExactlyAtTheCarryLimitGoesThrough)
 {
 	Item& onShelf = shelve("long_sword");
-	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player);
+	onShelf.enhancement.weight = InventoryOperations::get_max_weight(player, *ctx.dataManager);
 	player.adjust_gold(shop.get_buy_price(onShelf));
 
 	EXPECT_TRUE(shop.process_player_purchase(ctx, onShelf, player, owner))

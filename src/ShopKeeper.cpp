@@ -235,7 +235,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
 	}
-	if (!is_within_weight_limit(buyer.inventoryData, item, buyer))
+	if (!is_within_weight_limit(buyer.inventoryData, item, buyer, *ctx.dataManager))
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Too heavy to carry.", true);
 		return false;
@@ -248,7 +248,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// The item itself moves, so its key and enhancement come with it. Room and weight
 	// were checked above, so this add cannot fail, and the item lives on in the pack,
 	// which keeps the reference valid for the message below.
-	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer);
+	[[maybe_unused]] const auto handedOver = add_item_to_inventory(buyer.inventoryData, std::move(*taken), buyer, *ctx.dataManager);
 	assert(handedOver.has_value());
 
 	buyer.adjust_gold(-price);

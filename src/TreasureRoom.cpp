@@ -324,7 +324,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 		ctx);
 
 	auto key = ItemCreator::create("dungeon_key", best->spawnPos, ctx);
-	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer);
+	[[maybe_unused]] const auto giveKeyToJailerResult = InventoryOperations::add_item_to_inventory(jailer->inventoryData, std::move(key), *jailer, *ctx.dataManager);
 	assert(giveKeyToJailerResult.has_value());
 
 	ctx.creatures->push_back(std::move(jailer));

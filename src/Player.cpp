@@ -787,7 +787,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
 		// Return item to inventory since we can't equip it
-		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this);
+		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
 		assert(pickUpItemResult.has_value());
 		return false;
 	}
@@ -800,7 +800,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 			WHITE_BLACK_PAIR,
 			std::format("You are not strong enough to draw the {}.", item->actorData.name),
 			true);
-		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this);
+		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
 		assert(returnedToPack.has_value());
 		return false;
 	}
@@ -868,7 +868,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
 		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
 		// nowhere at all to put it, it stays on. An item that comes off is never lost.
-		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this);
+		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this, *ctx.dataManager);
 		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
 		{
 			ctx.messageSystem->message(
@@ -882,7 +882,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		removed->remove_state(ActorState::IS_EQUIPPED);
 		if (fitsInPack)
 		{
-			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this);
+			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
 			assert(packed.has_value());
 		}
 		else

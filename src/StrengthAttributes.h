@@ -9,6 +9,10 @@ struct StrengthAttributes
 	int dmgAdj{};
 	int wgtAllow{};
 	int maxPress{};
+	// The most this Strength can carry and still move, in pounds: Table 47's Max. Carried
+	// Weight, or Table 1's Max. Press on the rows Table 47 does not print - Strength 1 and
+	// the giant scores. Distinct from maxPress, which is a lift overhead rather than a load.
+	int maxCarried{};
 	int openDoors{};
 	double BB_LG{};
 	std::string notes{};

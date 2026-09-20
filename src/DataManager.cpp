@@ -253,6 +253,7 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 		s.dmgAdj = item.value("Dmg", 0);
 		s.wgtAllow = item.value("Wgt", 0);
 		s.maxPress = item.value("MaxPress", 0);
+		s.maxCarried = item.at("maxCarried").get<int>();
 		s.openDoors = item.value("OpenDoors", 0);
 		s.BB_LG = item.value("BB_LG", 0.0);
 		s.notes = item.value("Notes", "");

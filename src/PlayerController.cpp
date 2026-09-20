@@ -252,7 +252,7 @@ void PlayerController::pick_item(GameContext& ctx)
 	}
 
 	// Pre-check weight before touching ownership — prevents item destruction on rejection
-	if (!InventoryOperations::is_within_weight_limit(playerOwner.inventoryData, *item, playerOwner))
+	if (!InventoryOperations::is_within_weight_limit(playerOwner.inventoryData, *item, playerOwner, *ctx.dataManager))
 	{
 		ctx.messageSystem->message(RED_BLACK_PAIR, "Too heavy to carry.", true);
 		return;
@@ -272,7 +272,8 @@ void PlayerController::pick_item(GameContext& ctx)
 	auto addResult = InventoryOperations::add_item_to_inventory(
 		playerOwner.inventoryData,
 		std::move(*removeResult),
-		playerOwner
+		playerOwner,
+		*ctx.dataManager
 	);
 
 	if (addResult.has_value())
@@ -1250,7 +1251,8 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 		[[maybe_unused]] const auto debugSpawnBowResult = InventoryOperations::add_item_to_inventory(
 			playerOwner.inventoryData,
 			ItemCreator::create("long_bow", playerOwner.position, ctx),
-			playerOwner);
+			playerOwner,
+			*ctx.dataManager);
 		assert(debugSpawnBowResult.has_value());
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
 

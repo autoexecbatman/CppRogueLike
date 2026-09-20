@@ -6,9 +6,9 @@
 #include <ranges>
 #include <utility>
 
-#include "WeightTier.h"
 #include "Actor.h"
 #include "Creature.h"
+#include "DataManager.h"
 #include "InventoryData.h"
 #include "InventoryOperations.h"
 #include "Item.h"
@@ -61,7 +61,8 @@ InventoryResult<bool> add_item(CreatureInventory& inventory, std::unique_ptr<Ite
 InventoryResult<bool> add_item_to_inventory(
 	CreatureInventory& inventory,
 	std::unique_ptr<Item> item,
-	const Creature& owner
+	const Creature& owner,
+	const DataManager& dataManager
 )
 {
 	if (!item)
@@ -75,7 +76,7 @@ InventoryResult<bool> add_item_to_inventory(
 		return std::unexpected(InventoryError::FULL);
 	}
 
-	if (!is_within_weight_limit(inventory, *item, owner))
+	if (!is_within_weight_limit(inventory, *item, owner, dataManager))
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
@@ -195,19 +196,25 @@ int get_total_weight(const CreatureInventory& inventory) noexcept
 	return total;
 }
 
-int get_max_weight(const Creature& owner) noexcept
+int get_max_weight(const Creature& owner, const DataManager& dataManager) noexcept
 {
-	return calculate_max_weight(owner.get_strength());
+	const StrengthAttributes row = dataManager.strength_for(owner.get_strength(), owner.get_exceptional_strength());
+	return row.maxCarried;
 }
 
-bool is_overloaded(const CreatureInventory& inventory, const Creature& owner) noexcept
+bool is_overloaded(const CreatureInventory& inventory, const Creature& owner, const DataManager& dataManager) noexcept
 {
-	return get_total_weight(inventory) > get_max_weight(owner);
+	return get_total_weight(inventory) > get_max_weight(owner, dataManager);
 }
 
-bool is_within_weight_limit(const CreatureInventory& inventory, const Item& item, const Creature& owner) noexcept
+bool is_within_weight_limit(
+	const CreatureInventory& inventory,
+	const Item& item,
+	const Creature& owner,
+	const DataManager& dataManager
+) noexcept
 {
-	return get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner);
+	return get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner, dataManager);
 }
 
 // ===== SEARCH OPERATIONS =====

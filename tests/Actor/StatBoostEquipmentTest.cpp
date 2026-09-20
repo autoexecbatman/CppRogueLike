@@ -66,7 +66,7 @@ protected:
 	{
 		auto item = ItemCreator::create(key, player->position, ctx);
 		Item* carried = item.get();
-		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player);
+		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
 		ASSERT_TRUE(added.has_value()) << key << " did not fit in the pack";
 		use_item(*carried->behavior, *carried, *player, ctx);
 		ASSERT_NE(player->get_equipped_item(slot_of(key)), nullptr) << key << " was not put on";
@@ -254,9 +254,13 @@ bool is_on_floor(const FloorInventory& floor, const Item* item, Vector2D tile)
 // the pack cannot take it back, so it is set down at the wearer's feet - never destroyed.
 TEST_F(StatBoostEquipmentTest, AGirdleTakenOffUnderTooHeavyALoadIsSetDown)
 {
+	// Filled to exactly what this player could carry unaided, so the girdle's own pound
+	// is one too many the moment its giant Strength stops counting. Taken before it goes
+	// on, because wearing it is what raises the capacity.
+	const int unaidedCapacity = InventoryOperations::get_max_weight(*player, *ctx.dataManager);
 	put_on("girdle_of_hill_giant_strength");
 	const Item* girdle = player->get_equipped_item(EquipmentSlot::GIRDLE);
-	load_pack(*player, 80, ctx);
+	load_pack(*player, unaidedCapacity, ctx);
 	// Walked elsewhere since the girdle was picked up, so its old position is not the answer.
 	player->position = Vector2D{ 3, 4 };
 

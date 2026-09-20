@@ -19,13 +19,15 @@
 #include "src/Creature.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
+#include "tests/mocks/MockGameContext.h"
 
 class CarryWeightTest : public ::testing::Test
 {
 protected:
 	void SetUp() override
 	{
-		// Ten is the average 3d6 roll, a limit of 50.
+		// Ten is the average 3d6 roll. What that allows is CarryCapacityTest's claim;
+		// here every case is written against the limit, whatever it is.
 		carrier.set_strength(10);
 	}
 
@@ -37,43 +39,46 @@ protected:
 		return item;
 	}
 
+	MockGameContext mock{};
+	GameContext ctx{ mock.to_game_context() };
 	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", 0 } };
 };
 
 TEST_F(CarryWeightTest, AnItemExactlyAtTheLimitFits)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier));
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier, *ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, AnItemOneOverTheLimitDoesNot)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit + 1);
 
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier, *ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, WhatIsAlreadyCarriedCountsAgainstTheLimit)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(limit - 5)).has_value());
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(5), carrier));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(6), carrier))
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(5), carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(6), carrier, *ctx.dataManager))
 		<< "the pack's own weight must count, not only the new item's";
 }
 
 TEST_F(CarryWeightTest, TheCheckedAddRefusesAnItemOverTheLimit)
 {
-	const int limit = InventoryOperations::get_max_weight(carrier);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 
 	const auto refused = InventoryOperations::add_item_to_inventory(
 		carrier.inventoryData,
 		weighing(limit + 1),
-		carrier);
+		carrier,
+		*ctx.dataManager);
 
 	ASSERT_FALSE(refused.has_value());
 	EXPECT_EQ(refused.error(), InventoryError::CAPACITY_EXCEEDED);

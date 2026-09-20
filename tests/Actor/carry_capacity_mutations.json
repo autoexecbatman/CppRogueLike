@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=CarryCapacityTest.*:CarryWeightTest.*:StatBoostEquipmentTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn row.maxCarried;",
+      "mutated": "\treturn row.maxPress;",
+      "catches": "the lift-overhead column read as the carry column, which differs only at Strength 2 and 10-11"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\treturn row.maxCarried;",
+      "mutated": "\treturn row.wgtAllow;",
+      "catches": "the unencumbered allowance read as the limit, so a carrier is refused four times too early"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tconst StrengthAttributes row = dataManager.strength_for(owner.get_strength(), owner.get_exceptional_strength());",
+      "mutated": "\tconst StrengthAttributes row = dataManager.strength_for(owner.get_strength(), 0);",
+      "catches": "exceptional Strength ignored, so an 18/00 fighter carries a plain 18's load"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\ts.maxCarried = item.at(\"maxCarried\").get<int>();",
+      "mutated": "\t\ts.maxCarried = item.at(\"MaxPress\").get<int>();",
+      "catches": "the loader reading the wrong column out of the same row"
+    }
+  ]
+}
