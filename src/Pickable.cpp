@@ -93,13 +93,13 @@ void save_stat_boost(const T& statBoost, PickableType type, json& output)
 template <typename T>
 void load_stat_boost(T& statBoost, const json& source)
 {
-	statBoost.strBonus = source.contains("strBonus") ? source.at("strBonus").get<int>() : 0;
-	statBoost.dexBonus = source.contains("dexBonus") ? source.at("dexBonus").get<int>() : 0;
-	statBoost.conBonus = source.contains("conBonus") ? source.at("conBonus").get<int>() : 0;
-	statBoost.intBonus = source.contains("intBonus") ? source.at("intBonus").get<int>() : 0;
-	statBoost.wisBonus = source.contains("wisBonus") ? source.at("wisBonus").get<int>() : 0;
-	statBoost.chaBonus = source.contains("chaBonus") ? source.at("chaBonus").get<int>() : 0;
-	statBoost.isSetMode = source.contains("isSetMode") ? source.at("isSetMode").get<bool>() : false;
+	statBoost.strBonus = source.at("strBonus").get<int>();
+	statBoost.dexBonus = source.at("dexBonus").get<int>();
+	statBoost.conBonus = source.at("conBonus").get<int>();
+	statBoost.intBonus = source.at("intBonus").get<int>();
+	statBoost.wisBonus = source.at("wisBonus").get<int>();
+	statBoost.chaBonus = source.at("chaBonus").get<int>();
+	statBoost.isSetMode = source.at("isSetMode").get<bool>();
 	statBoost.exceptionalStrength = source.at("exceptionalStrength").get<int>();
 }
 
@@ -762,26 +762,11 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::CONSUMABLE:
 	{
 		Consumable consumable;
-		if (source.contains("effect"))
-		{
-			consumable.effect = static_cast<ConsumableEffect>(source["effect"].get<int>());
-		}
-
+		consumable.effect = static_cast<ConsumableEffect>(source.at("effect").get<int>());
 		consumable.amount = source.at("amount").get<int>();
-
-		if (source.contains("duration"))
-		{
-			consumable.duration = source["duration"].get<int>();
-		}
-		if (source.contains("buffType"))
-		{
-			consumable.buffType = static_cast<BuffType>(source["buffType"].get<int>());
-		}
-		if (source.contains("isSetEffect"))
-		{
-			consumable.isSetEffect = source["isSetEffect"].get<bool>();
-		}
-
+		consumable.duration = source.at("duration").get<int>();
+		consumable.buffType = static_cast<BuffType>(source.at("buffType").get<int>());
+		consumable.isSetEffect = source.at("isSetEffect").get<bool>();
 		return consumable;
 	}
 
@@ -803,31 +788,13 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::TARGETED_SCROLL:
 	{
 		TargetedScroll targetedScroll;
-		if (source.contains("targetMode"))
-		{
-			targetedScroll.targetMode = static_cast<TargetMode>(source["targetMode"].get<int>());
-		}
+		targetedScroll.targetMode = static_cast<TargetMode>(source.at("targetMode").get<int>());
 		targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.at("scrollAnimation").get<int>());
-		if (source.contains("range"))
-		{
-			targetedScroll.range = source["range"].get<int>();
-		}
-		if (source.contains("damage"))
-		{
-			targetedScroll.damage = source["damage"].get<int>();
-		}
-		if (source.contains("confuseTurns"))
-		{
-			targetedScroll.confuseTurns = source["confuseTurns"].get<int>();
-		}
-		if (source.contains("buffType"))
-		{
-			targetedScroll.buffType = static_cast<BuffType>(source["buffType"].get<int>());
-		}
-		if (source.contains("buffDuration"))
-		{
-			targetedScroll.buffDuration = source["buffDuration"].get<int>();
-		}
+		targetedScroll.range = source.at("range").get<int>();
+		targetedScroll.damage = source.at("damage").get<int>();
+		targetedScroll.confuseTurns = source.at("confuseTurns").get<int>();
+		targetedScroll.buffType = static_cast<BuffType>(source.at("buffType").get<int>());
+		targetedScroll.buffDuration = source.at("buffDuration").get<int>();
 		return targetedScroll;
 	}
 
@@ -844,30 +811,21 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::GOLD_COIN:
 	{
 		Gold gold;
-		if (source.contains("amount"))
-		{
-			gold.amount = source["amount"].get<int>();
-		}
+		gold.amount = source.at("amount").get<int>();
 		return gold;
 	}
 
 	case PickableType::FOOD:
 	{
 		Food food;
-		if (source.contains("nutritionValue"))
-		{
-			food.nutritionValue = source["nutritionValue"].get<int>();
-		}
+		food.nutritionValue = source.at("nutritionValue").get<int>();
 		return food;
 	}
 
 	case PickableType::CORPSE_FOOD:
 	{
 		CorpseFood corpseFood;
-		if (source.contains("nutritionValue"))
-		{
-			corpseFood.nutritionValue = source["nutritionValue"].get<int>();
-		}
+		corpseFood.nutritionValue = source.at("nutritionValue").get<int>();
 		return corpseFood;
 	}
 
@@ -881,28 +839,16 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::MAGICAL_HELM:
 	{
 		MagicalHelm magicalHelm;
-		if (source.contains("effect"))
-		{
-			magicalHelm.effect = static_cast<MagicalEffect>(source["effect"].get<int>());
-		}
-		if (source.contains("bonus"))
-		{
-			magicalHelm.bonus = source["bonus"].get<int>();
-		}
+		magicalHelm.effect = static_cast<MagicalEffect>(source.at("effect").get<int>());
+		magicalHelm.bonus = source.at("bonus").get<int>();
 		return magicalHelm;
 	}
 
 	case PickableType::MAGICAL_RING:
 	{
 		MagicalRing magicalRing;
-		if (source.contains("effect"))
-		{
-			magicalRing.effect = static_cast<MagicalEffect>(source["effect"].get<int>());
-		}
-		if (source.contains("bonus"))
-		{
-			magicalRing.bonus = source["bonus"].get<int>();
-		}
+		magicalRing.effect = static_cast<MagicalEffect>(source.at("effect").get<int>());
+		magicalRing.bonus = source.at("bonus").get<int>();
 		return magicalRing;
 	}
 

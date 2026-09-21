@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=BehaviorRecordTest.*:ItemSerializationTest.*:SaveFieldNamesTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tstatBoost.strBonus = source.at(\"strBonus\").get<int>();",
+      "mutated": "\tstatBoost.strBonus = source.value(\"strBonus\", 0);",
+      "catches": "a stat-boost field defaulting quietly again when its key is missing"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconsumable.duration = source.at(\"duration\").get<int>();",
+      "mutated": "\t\tconsumable.duration = source.value(\"duration\", 0);",
+      "catches": "a consumable's duration defaulting quietly when its key is missing"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\ttargetedScroll.range = source.at(\"range\").get<int>();",
+      "mutated": "\t\ttargetedScroll.range = source.value(\"rng\", 0);",
+      "catches": "a scroll field read under a name nothing writes, the drift the round trip exists for"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tmagicalRing.bonus = source.at(\"bonus\").get<int>();",
+      "mutated": "\t\tmagicalRing.bonus = 0;",
+      "catches": "a ring's enchantment dropped on load"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tgold.amount = source.at(\"amount\").get<int>();",
+      "mutated": "\t\tgold.amount = source.value(\"amount\", 0);",
+      "catches": "a gold pile loading as nothing when its amount is missing"
+    }
+  ]
+}
