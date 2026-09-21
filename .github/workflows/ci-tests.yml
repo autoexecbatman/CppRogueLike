@@ -11,6 +11,10 @@ jobs:
   build-and-test:
     name: Build and Run Tests
     runs-on: windows-latest
+    # The runner image carries a vcpkg of its own at C:\vcpkg, which moves whenever GitHub
+    # updates the image. The pinned copy lives beside it, never in it.
+    env:
+      PINNED_VCPKG: C:\vcpkg-pinned
 
     steps:
     - name: Checkout code
@@ -23,15 +27,16 @@ jobs:
       run: |
         $baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
         if (-not $baseline) { throw "vcpkg.json names no builtin-baseline to pin vcpkg to" }
-        git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        git clone https://github.com/Microsoft/vcpkg.git $env:PINNED_VCPKG
         if ($LASTEXITCODE -ne 0) { exit 1 }
-        git -C C:\vcpkg checkout $baseline
+        git -C $env:PINNED_VCPKG checkout $baseline
         if ($LASTEXITCODE -ne 0) { exit 1 }
-        C:\vcpkg\bootstrap-vcpkg.bat
+        & "$env:PINNED_VCPKG\bootstrap-vcpkg.bat"
+        if ($LASTEXITCODE -ne 0) { exit 1 }
 
     - name: Configure CMake
       run: |
-        cmake -B build -S . -DBUILD_TESTS=ON -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake
+        cmake -B build -S . -DBUILD_TESTS=ON "-DCMAKE_TOOLCHAIN_FILE=$env:PINNED_VCPKG\scripts\buildsystems\vcpkg.cmake"
 
     - name: Build tests
       run: |
