@@ -102,8 +102,10 @@ void Attacker::perform_single_attack(
 
 	if (isHit)
 	{
+		// A blow that lands always tells: "regardless of subtractions, a successful attack
+		// roll can never cause less than 1 point of damage" (Player's Handbook, PDF page 29).
 		const int baseDamage = calculate_damage_with_backstab(damageRoll, strengthOnAttack.damage, backstab, ctx);
-		const int finalDamage = std::max(0, baseDamage - target.get_dr());
+		const int finalDamage = std::max(1, baseDamage - target.get_dr());
 
 		log_attack_hit(
 			owner,
@@ -119,16 +121,13 @@ void Attacker::perform_single_attack(
 			handName,
 			ctx);
 
-		if (finalDamage > 0)
+		if (ctx.animSystem)
 		{
-			if (ctx.animSystem)
-			{
-				ctx.animSystem->spawn_melee_hit(target.position);
-			}
-			// The reduced roll, carried on to the number the bonus, strength and damage
-			// reduction made of it.
-			target.take_damage_and_check_death(reduced.at(finalDamage), ctx);
+			ctx.animSystem->spawn_melee_hit(target.position);
 		}
+		// The reduced roll, carried on to the number the bonus, strength and damage
+		// reduction made of it.
+		target.take_damage_and_check_death(reduced.at(finalDamage), ctx);
 	}
 	else
 	{

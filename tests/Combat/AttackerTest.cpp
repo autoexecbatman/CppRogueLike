@@ -175,7 +175,10 @@ TEST_F(AttackerTest, DamageReduction_ReducesDamage)
 	EXPECT_EQ(monster->get_hp(), hpBefore - 2);
 }
 
-TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
+// "Regardless of subtractions, a successful attack roll can never cause less than 1 point
+// of damage" - Player's Handbook, PDF page 29 of the 2e archive, and said again of
+// monsters on page 211: "no successful attack can result in less than 1 point of damage".
+TEST_F(AttackerTest, DamageReduction_StillLeavesOnePointOnAHit)
 {
 	monster->set_armor_class(20);
 	monster->set_dr(10);
@@ -183,10 +186,43 @@ TEST_F(AttackerTest, DamageReduction_CanReduceToZero)
 	game.dice.set_next_d20(20);
 	game.dice.set_next_roll(5);
 
-	int hpBefore = monster->get_hp();
+	const int hpBefore = monster->get_hp();
 	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
-	// 5 damage - 10 DR = 0 actual damage
+	// Five rolled against ten of reduction, and the blow still tells.
+	EXPECT_EQ(monster->get_hp(), hpBefore - 1);
+}
+
+TEST_F(AttackerTest, AStrengthPenaltyStillLeavesOnePointOnAHit)
+{
+	// Strength 3 subtracts one from damage (Table 1), and a roll of one would take the
+	// blow to nothing without the floor. Damage reduction plays no part here.
+	player->set_strength(3);
+	monster->set_armor_class(20);
+	monster->set_dr(0);
+
+	game.dice.set_next_d20(20);
+	game.dice.set_next_roll(1);
+
+	const int hpBefore = monster->get_hp();
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+	EXPECT_EQ(monster->get_hp(), hpBefore - 1);
+}
+
+TEST_F(AttackerTest, AMissStillCostsNothing)
+{
+	// The floor belongs to a successful attack roll only: a miss must stay a miss, or
+	// "never less than 1" would quietly mean "always at least 1".
+	monster->set_armor_class(-10);
+	monster->set_dr(0);
+
+	game.dice.set_next_d20(1);
+	game.dice.set_next_roll(6);
+
+	const int hpBefore = monster->get_hp();
+	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
 	EXPECT_EQ(monster->get_hp(), hpBefore);
 }
 

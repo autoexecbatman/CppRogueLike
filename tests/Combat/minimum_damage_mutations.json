@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AttackerTest.*:AttackStrengthTest.*:SanctuarySaveTest.*:TypedAttackResistanceTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tconst int finalDamage = std::max(1, baseDamage - target.get_dr());",
+      "mutated": "\t\tconst int finalDamage = std::max(0, baseDamage - target.get_dr());",
+      "catches": "a blow that lands doing nothing again, as it did before"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tconst int finalDamage = std::max(1, baseDamage - target.get_dr());",
+      "mutated": "\t\tconst int finalDamage = std::max(2, baseDamage - target.get_dr());",
+      "catches": "a floor above the book's one point"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tconst int finalDamage = std::max(1, baseDamage - target.get_dr());",
+      "mutated": "\t\tconst int finalDamage = std::max(1, baseDamage);",
+      "catches": "damage reduction ignored once the floor is in place"
+    }
+  ]
+}
