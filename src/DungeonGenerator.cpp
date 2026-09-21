@@ -193,6 +193,12 @@ std::vector<DungeonRoom> DungeonGenerator::place_rooms(
 
 			DungeonRoom room{ roomCol, roomRow, roomWidth, roomHeight };
 			room.prefabName = std::move(chosenPrefab);
+
+			// A room takes a prefab and a procedural shape, so the two vary independently
+			// and one room in twenty is unlike any other. Both only turn floor into wall
+			// and neither sees the other, so the pair can cut a room in two; Map::create_room
+			// carves, checks the floor is still one piece, and keeps the prefab alone when
+			// it is not. The variance is the point, so the check is there rather than here.
 			room.shape = pick_room_shape(roomWidth, roomHeight, rng);
 			room.shapeVariant = rng.roll(0, 3);
 

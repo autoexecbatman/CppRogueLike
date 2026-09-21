@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoomShapeTest.*:TreasureRoomTest.*:DungeonConnectivityTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/TreasureRoom.cpp",
+      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WALL)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}",
+      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}",
+      "catches": "the vault filling its whole bounding box again, flattening whichever shape it landed on"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tif (!room_layout_is_sound(room))\n\t\t{\n\t\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
+      "mutated": "\t\tif (false)\n\t\t{\n\t\t\tdig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });",
+      "catches": "a room left as the shape and the prefab carved it, split in two or with an edge no corridor can enter"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\tif (get_tile_type(Vector2D{ column, interiorRow }) != TileType::WALL)\n\t\t\t{\n\t\t\t\treturn column;\n\t\t\t}",
+      "mutated": "\t\t\tif (true)\n\t\t\t{\n\t\t\t\treturn column;\n\t\t\t}",
+      "catches": "a corridor leaving by the room's geometric centre again, which a prefab may have walled"
+    },
+    {
+      "file": "src/PrefabLibrary.cpp",
+      "original": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream in(Paths::resolve(path));",
+      "mutated": "void PrefabLibrary::load(std::string_view path)\n{\n\tstd::ifstream in(path.data());",
+      "catches": "the prefab library silently loading nothing when the working directory is not the repository root"
+    }
+  ]
+}

@@ -154,6 +154,35 @@ public:
 	bool is_door(Vector2D pos) const noexcept;
 	bool is_open_door(Vector2D pos) const noexcept;
 	bool is_wall(Vector2D pos) const noexcept;
+
+	// The column, or row, a corridor should leave `room` by along the given interior edge:
+	// the one nearest the room's centre whose cell there is walkable. A prefab or a room
+	// shape can wall the centre itself, and a corridor aimed there opens onto rock.
+	//
+	// Example:
+	//   map.exit_column(room, room.row);        // -> the centre column, on an open room
+	//   map.exit_column(notchedRoom, room.row); // -> a column beside it, past the notch
+	int exit_column(const DungeonRoom& room, int interiorRow) const;
+	int exit_row(const DungeonRoom& room, int interiorColumn) const;
+
+	// Whether all of this room's floor is reachable from itself without leaving the room.
+	// False when the shape and the prefab have carved across each other and split it.
+	bool room_interior_is_one_piece(const DungeonRoom& room) const;
+
+	// Whether this room can be used: its floor is one piece, and every edge line holds at
+	// least one square of it, so a corridor can enter from any side. A room that fails
+	// this was carved by the shape and the prefab together into something unenterable.
+	bool room_layout_is_sound(const DungeonRoom& room) const;
+
+	// How many non-wall tiles cannot be reached from start, walking four ways and
+	// treating every door as a way through. Zero is the invariant generation must
+	// leave: a pool or a room sealed inside rock is a defect. Returns -1 when start
+	// is itself off the map or a wall, so a bad question cannot read as a clean map.
+	//
+	// Example:
+	//   map.count_unreachable_tiles(entrance);        // -> 0 on a sound dungeon
+	//   map.count_unreachable_tiles(Vector2D{0, 0});  // -> -1, the border is wall
+	int count_unreachable_tiles(Vector2D start) const noexcept;
 	int get_dijkstra_cost(Vector2D pos) const noexcept;
 	void rebuild_dijkstra_map(const std::vector<Vector2D>& goals, const GameContext& ctx);
 	void set_tile(Vector2D pos, TileType newType, double cost);

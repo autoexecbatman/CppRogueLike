@@ -138,6 +138,19 @@ void Map::init(GameContext& ctx)
 		TreasureRoom::maybe_create(ctx.levelManager->get_dungeon_level(), mapRng, ctx);
 	}
 	place_amulet(ctx);
+
+	// Generation leaves one invariant: everything it carved can be walked to from where
+	// the player starts. A pool or a room sealed inside rock is a defect, not a secret.
+	//
+	// The question is asked from the player's own tile, never the entrance room's centre.
+	// A room's centre is a point of geometry, not of floor: a moat prefab puts a solid
+	// block through the middle of its room, so the centre is rock, and asking from there
+	// says the whole map is unreachable when nothing is wrong with it.
+	assert(!ctx.rooms->empty() && "Map::init generated no rooms");
+	assert(ctx.player() && "Map::init finished without placing the player");
+	assert(
+		count_unreachable_tiles(ctx.player()->position) == 0 &&
+		"Map::init left tiles the player cannot reach");
 }
 
 void Map::generate_rooms(GameContext& ctx)
@@ -204,6 +217,59 @@ void Map::save(json& j)
 bool Map::is_wall(Vector2D pos) const noexcept
 {
 	return !fovMap->is_walkable(pos.x, pos.y);
+}
+
+int Map::count_unreachable_tiles(Vector2D start) const noexcept
+{
+	// Terrain, not permission: a door counts as passable whether it is open, shut or
+	// locked, because a shut door is a way through and a locked one is a puzzle. Asking
+	// is_wall here would call every closed door a wall - it reads the field-of-view grid,
+	// where a closed door is not walkable - and report the treasure room as a defect.
+	auto is_open = [this](Vector2D pos)
+	{
+		return get_tile_type(pos) != TileType::WALL;
+	};
+
+	if (!in_bounds(start) || !is_open(start))
+	{
+		return -1;
+	}
+
+	std::vector<bool> reached(tiles.size(), false);
+	std::vector<Vector2D> pending;
+	reached[get_index(start)] = true;
+	pending.push_back(start);
+
+	while (!pending.empty())
+	{
+		const Vector2D here = pending.back();
+		pending.pop_back();
+
+		// Four-way: the player moves on eight, but a diagonal pinched between two walls
+		// is not a passage anything should depend on.
+		const Vector2D steps[4] = {
+			Vector2D{ here.x + 1, here.y }, Vector2D{ here.x - 1, here.y }, Vector2D{ here.x, here.y + 1 }, Vector2D{ here.x, here.y - 1 }
+		};
+		for (const Vector2D& next : steps)
+		{
+			if (!in_bounds(next) || reached[get_index(next)] || !is_open(next))
+			{
+				continue;
+			}
+			reached[get_index(next)] = true;
+			pending.push_back(next);
+		}
+	}
+
+	int unreachable = 0;
+	for (const auto& tile : tiles)
+	{
+		if (tile.type != TileType::WALL && !reached[get_index(tile.position)])
+		{
+			++unreachable;
+		}
+	}
+	return unreachable;
 }
 
 bool Map::is_explored(Vector2D pos) const noexcept
@@ -730,6 +796,145 @@ void Map::dig_corridor(Vector2D begin, Vector2D end)
 	}
 }
 
+int Map::exit_column(const DungeonRoom& room, int interiorRow) const
+{
+	// The corridor leaves through the cell just inside the wall, so that cell has to be
+	// floor. A prefab or a room shape may have walled the centre column itself, which is
+	// where a corridor would otherwise aim, so walk outwards from the centre and take the
+	// nearest column whose cell on this row can be walked.
+	const int centre = room.center_col();
+	for (int offset = 0; offset <= room.width; ++offset)
+	{
+		for (const int column : { centre - offset, centre + offset })
+		{
+			if (column < room.col || column > room.col_end())
+			{
+				continue;
+			}
+			if (get_tile_type(Vector2D{ column, interiorRow }) != TileType::WALL)
+			{
+				return column;
+			}
+		}
+	}
+	// Nothing on this edge is floor. The centre keeps the old behaviour and leaves the
+	// connectivity assert in Map::init to name it rather than hiding it here.
+	return centre;
+}
+
+int Map::exit_row(const DungeonRoom& room, int interiorColumn) const
+{
+	const int centre = room.center_row();
+	for (int offset = 0; offset <= room.height; ++offset)
+	{
+		for (const int row : { centre - offset, centre + offset })
+		{
+			if (row < room.row || row > room.row_end())
+			{
+				continue;
+			}
+			if (get_tile_type(Vector2D{ interiorColumn, row }) != TileType::WALL)
+			{
+				return row;
+			}
+		}
+	}
+	return centre;
+}
+
+bool Map::room_layout_is_sound(const DungeonRoom& room) const
+{
+	// A corridor leaves by a cell on one of the four edge lines, so each line needs at
+	// least one square of floor or the room cannot be entered from that side at all.
+	auto edge_has_floor = [this](Vector2D from, Vector2D step, int cells)
+	{
+		for (int taken = 0; taken < cells; ++taken)
+		{
+			if (get_tile_type(Vector2D{ from.x + step.x * taken, from.y + step.y * taken }) != TileType::WALL)
+			{
+				return true;
+			}
+		}
+		return false;
+	};
+
+	const bool everyEdgeIsOpen =
+		edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 1, 0 }, room.width) &&
+		edge_has_floor(Vector2D{ room.col, room.row_end() }, Vector2D{ 1, 0 }, room.width) &&
+		edge_has_floor(Vector2D{ room.col, room.row }, Vector2D{ 0, 1 }, room.height) &&
+		edge_has_floor(Vector2D{ room.col_end(), room.row }, Vector2D{ 0, 1 }, room.height);
+
+	return everyEdgeIsOpen && room_interior_is_one_piece(room);
+}
+
+bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
+{
+	// Floods the room's own floor without leaving its box. Two carvers write into this
+	// box - the room's shape and its prefab - and neither sees the other, so where they
+	// cross they can leave two pockets of floor with no way between them.
+	//
+	// A corridor tile is not the room's floor even when it lies inside the box: a corridor
+	// crossing a corner of the box is cut off from the room by the wall between them, and
+	// counting it here would call a sound room split. Only what the room itself carved
+	// counts, which is floor and the water poured onto it.
+	auto belongs_to_room = [this](Vector2D pos)
+	{
+		const TileType type = get_tile_type(pos);
+		return type == TileType::FLOOR || type == TileType::WATER;
+	};
+	std::vector<bool> reached(tiles.size(), false);
+	std::vector<Vector2D> pending;
+	int floorCells = 0;
+
+	for (int row = room.row; row <= room.row_end(); ++row)
+	{
+		for (int column = room.col; column <= room.col_end(); ++column)
+		{
+			if (belongs_to_room(Vector2D{ column, row }))
+			{
+				++floorCells;
+				if (pending.empty())
+				{
+					pending.push_back(Vector2D{ column, row });
+					reached[get_index(pending.front())] = true;
+				}
+			}
+		}
+	}
+
+	if (floorCells == 0)
+	{
+		return true;
+	}
+
+	int reachedCells = 0;
+	while (!pending.empty())
+	{
+		const Vector2D here = pending.back();
+		pending.pop_back();
+		++reachedCells;
+
+		const Vector2D steps[4] = {
+			Vector2D{ here.x + 1, here.y }, Vector2D{ here.x - 1, here.y }, Vector2D{ here.x, here.y + 1 }, Vector2D{ here.x, here.y - 1 }
+		};
+		for (const Vector2D& next : steps)
+		{
+			if (!room.contains(next.x, next.y) || reached[get_index(next)])
+			{
+				continue;
+			}
+			if (!belongs_to_room(next))
+			{
+				continue;
+			}
+			reached[get_index(next)] = true;
+			pending.push_back(next);
+		}
+	}
+
+	return reachedCells == floorCells;
+}
+
 void Map::set_door(Vector2D thisTile, int tileX, int tileY, bool locked)
 {
 	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
@@ -904,6 +1109,26 @@ void Map::create_room(const DungeonRoom& room, bool first, GameContext& ctx)
 	{
 		ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
 
+		// The shape and the prefab both carve walls into this one box and neither sees
+		// the other, so where they cross they can leave two pockets of floor with no way
+		// between them. Both layers are wanted - they are what makes one room unlike the
+		// next - so the pair is tried first and only the shape is given up when it splits
+		// the room. The prefab alone is whole by construction, being one authored drawing.
+		// Try the richest layout first and give a layer up only when it fails: the shape
+		// over the prefab, then the prefab alone, then the plain box. Each fallback is
+		// strictly simpler, so the last one always succeeds - a dug rectangle is whole and
+		// has floor on all four edges by construction.
+		if (!room_layout_is_sound(room))
+		{
+			dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+			ctx.prefabLibrary->apply_to_room(room, *ctx.decorEditor, *this);
+
+			if (!room_layout_is_sound(room))
+			{
+				dig(Vector2D{ room.col, room.row }, Vector2D{ room.col_end(), room.row_end() });
+			}
+		}
+
 		// Register a blocking Decoration for every stamped tile.
 		if (ctx.decorations)
 		{
@@ -1025,6 +1250,13 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 			const int rolld100 = mapRng.roll(1, 100);
 			if (rolld100 < waterPercentage)
 			{
+				// Water fills a floor the room actually carved. This loop walks the
+				// bounding box, and a shaped room - L, cross, chamfered, pillared -
+				// leaves wall inside its own box; water there is a pool sealed in rock.
+				if (get_tile_type(waterPos) != TileType::FLOOR)
+				{
+					continue;
+				}
 				// Never place water on a decorated tile.
 				if (ctx.decorEditor && ctx.decorEditor->get_override(waterPos).is_valid())
 				{
@@ -1034,7 +1266,7 @@ void Map::spawn_water(const DungeonRoom& room, GameContext& ctx)
 				if (!would_water_block_entrance(waterPos, ctx))
 				{
 					set_tile(waterPos, TileType::WATER, 10);
-					fovMap->set_properties(waterPos.x, waterPos.y, true, true); // non-walkable and non-transparent
+					fovMap->set_properties(waterPos.x, waterPos.y, true, true); // walkable and transparent
 				}
 			}
 		}
@@ -2015,37 +2247,48 @@ void Map::place_from_graph(
 			const bool a_above = a.bottom_wall() < b.top_wall();
 			const bool a_left = a.right_wall() < b.left_wall();
 
+			// Each room is left by a cell its floor actually reaches, not by its geometric
+			// centre: a prefab or a shape may have walled the centre, and a corridor aimed
+			// there opens onto rock and strands whatever lay past the room.
 			if (a_below)
 			{
 				// a is below b -- corridor rises from a, crosses horizontally, drops to b
 				const int mid = (b.bottom_wall() + a.top_wall()) / 2;
-				dig_corridor(Vector2D{ a.center_col(), a.top_wall() }, Vector2D{ a.center_col(), mid });
-				dig_corridor(Vector2D{ a.center_col(), mid }, Vector2D{ b.center_col(), mid });
-				dig_corridor(Vector2D{ b.center_col(), mid }, Vector2D{ b.center_col(), b.bottom_wall() });
+				const int aCol = exit_column(a, a.row);
+				const int bCol = exit_column(b, b.row_end());
+				dig_corridor(Vector2D{ aCol, a.top_wall() }, Vector2D{ aCol, mid });
+				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
+				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, b.bottom_wall() });
 			}
 			else if (a_right)
 			{
 				// a is to the right of b
 				const int mid = (b.right_wall() + a.left_wall()) / 2;
-				dig_corridor(Vector2D{ a.left_wall(), a.center_row() }, Vector2D{ mid, a.center_row() });
-				dig_corridor(Vector2D{ mid, a.center_row() }, Vector2D{ mid, b.center_row() });
-				dig_corridor(Vector2D{ mid, b.center_row() }, Vector2D{ b.right_wall(), b.center_row() });
+				const int aRow = exit_row(a, a.col);
+				const int bRow = exit_row(b, b.col_end());
+				dig_corridor(Vector2D{ a.left_wall(), aRow }, Vector2D{ mid, aRow });
+				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
+				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ b.right_wall(), bRow });
 			}
 			else if (a_above)
 			{
 				// a is above b
 				const int mid = (a.bottom_wall() + b.top_wall()) / 2;
-				dig_corridor(Vector2D{ a.center_col(), a.bottom_wall() }, Vector2D{ a.center_col(), mid });
-				dig_corridor(Vector2D{ a.center_col(), mid }, Vector2D{ b.center_col(), mid });
-				dig_corridor(Vector2D{ b.center_col(), mid }, Vector2D{ b.center_col(), b.top_wall() });
+				const int aCol = exit_column(a, a.row_end());
+				const int bCol = exit_column(b, b.row);
+				dig_corridor(Vector2D{ aCol, a.bottom_wall() }, Vector2D{ aCol, mid });
+				dig_corridor(Vector2D{ aCol, mid }, Vector2D{ bCol, mid });
+				dig_corridor(Vector2D{ bCol, mid }, Vector2D{ bCol, b.top_wall() });
 			}
 			else if (a_left)
 			{
 				// a is to the left of b
 				const int mid = (a.right_wall() + b.left_wall()) / 2;
-				dig_corridor(Vector2D{ a.right_wall(), a.center_row() }, Vector2D{ mid, a.center_row() });
-				dig_corridor(Vector2D{ mid, a.center_row() }, Vector2D{ mid, b.center_row() });
-				dig_corridor(Vector2D{ mid, b.center_row() }, Vector2D{ b.left_wall(), b.center_row() });
+				const int aRow = exit_row(a, a.col_end());
+				const int bRow = exit_row(b, b.col);
+				dig_corridor(Vector2D{ a.right_wall(), aRow }, Vector2D{ mid, aRow });
+				dig_corridor(Vector2D{ mid, aRow }, Vector2D{ mid, bRow });
+				dig_corridor(Vector2D{ mid, bRow }, Vector2D{ b.left_wall(), bRow });
 			}
 			else
 			{

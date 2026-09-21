@@ -422,6 +422,11 @@ CMakeSettings.json
 /docs/src_api.html
 /docs/__pycache__
 
+# Screenshots written by docs/shoot_game.py. One run per question, thrown away after
+# it is answered - rerun the driver rather than reading a picture of an older build.
+/shots/
+/shots_*/
+
 # The Telegram assistant's mailbox for this project. Notes it leaves about
 # the game land here; they are working notes, not part of the source.
 /relay/

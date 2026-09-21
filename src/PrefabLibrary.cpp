@@ -11,6 +11,7 @@
 #include <nlohmann/json.hpp>
 
 #include "DungeonRoom.h"
+#include "Paths.h"
 #include "Map.h"
 #include "Renderer.h"
 #include "DecorEditor.h"
@@ -49,7 +50,10 @@ void PrefabLibrary::load_tile_labels(std::string_view path)
 {
 	build_structural_symbols();
 
-	std::ifstream in(path.data());
+	// Resolved, as every other loader here does: a bare relative path opens only from
+	// the repository root, so a build run from anywhere else got an empty library and
+	// rooms with no prefab in them, silently.
+	std::ifstream in(Paths::resolve(path));
 	if (!in.is_open())
 		return;
 
@@ -117,8 +121,8 @@ std::string PrefabLibrary::symbol_label(char symbol) const
 
 void PrefabLibrary::load(std::string_view path)
 {
-	std::ifstream in(path.data());
-	
+	std::ifstream in(Paths::resolve(path));
+
 	if (!in.is_open())
 	{
 		return;

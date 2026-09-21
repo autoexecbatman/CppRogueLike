@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=DungeonConnectivityTest.*:WaterMovementTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\t\t\tif (get_tile_type(waterPos) != TileType::FLOOR)\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
+      "mutated": "\t\t\t\tif (false)\n\t\t\t\t{\n\t\t\t\t\tcontinue;\n\t\t\t\t}",
+      "catches": "water painted over a shaped room's walled-back cells again, sealing pools in rock"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\treturn get_tile_type(pos) != TileType::WALL;",
+      "mutated": "\t\treturn get_tile_type(pos) != TileType::WATER;",
+      "catches": "the flood treating walls as passable and water as solid"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\tif (!in_bounds(start) || !is_open(start))\n\t{\n\t\treturn -1;\n\t}",
+      "mutated": "\tif (!in_bounds(start) || !is_open(start))\n\t{\n\t\treturn 0;\n\t}",
+      "catches": "a start off the map answered as a sound dungeon rather than refused"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\tif (tile.type != TileType::WALL && !reached[get_index(tile.position)])",
+      "mutated": "\t\tif (tile.type != TileType::WALL && reached[get_index(tile.position)])",
+      "catches": "the count reporting what it reached instead of what it could not"
+    }
+  ]
+}
