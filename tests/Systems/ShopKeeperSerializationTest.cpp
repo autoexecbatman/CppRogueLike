@@ -140,3 +140,16 @@ TEST_F(ShopKeeperSerializationTest, CustomPricing_Preserved) {
     EXPECT_EQ(loaded->get_markup_percent(), 200);
     EXPECT_EQ(loaded->get_sellback_percent(), 30);
 }
+
+// ShopKeeper::save writes the shelves on every shop, so a record without them is broken
+// rather than an empty shop: the owner's ruling is that no save fallbacks exist.
+TEST_F(ShopKeeperSerializationTest, AShopRecordWithoutItsShelvesIsRefused)
+{
+	auto original = create_test_shop();
+	json saved;
+	original->save(saved);
+	ASSERT_TRUE(saved.contains("shop_inventory")) << "the saver no longer writes the shelves";
+
+	saved.erase("shop_inventory");
+	EXPECT_ANY_THROW(ShopKeeper::create(saved)) << "a shop with no shelves loaded quietly";
+}

@@ -215,3 +215,30 @@ TEST_F(PlayerSerializationTest, Components_Preserved) {
 
     EXPECT_EQ(loaded->get_max_hp(), 30);
 }
+
+// Every field Player::save writes on every player is required on load: the owner's ruling
+// is that no save fallbacks exist. The player's own fields are what Player::save writes
+// less what Creature::save writes for the same body, so Creature's fields, pinned in its
+// own test, are not asked about twice.
+TEST_F(PlayerSerializationTest, APlayerRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
+{
+	auto original = create_test_player();
+	json playerRecord;
+	original->save(playerRecord);
+
+	json creatureRecord;
+	original->Creature::save(creatureRecord);
+
+	for (const auto& [key, value] : playerRecord.items())
+	{
+		if (creatureRecord.contains(key))
+		{
+			continue;
+		}
+		json missingOne = playerRecord;
+		missingOne.erase(key);
+		auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+		EXPECT_ANY_THROW(loaded->load(missingOne))
+			<< "a player record without \"" << key << "\" loaded quietly";
+	}
+}

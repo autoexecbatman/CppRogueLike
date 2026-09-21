@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SaveFieldNamesTest.*:PlayerSerializationTest.*:ShopKeeperSerializationTest.*:CreatureSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/InventoryOperations.h",
+      "original": "\tfor (const auto& itemJson : j.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\titem->load(itemJson);\n\t\tinventory.items.push_back(std::move(item));\n\t}",
+      "mutated": "\tfor (const auto& itemJson : j.at(\"inventory\"))\n\t{\n\t\tauto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});\n\t\ttry { item->load(itemJson); } catch (const std::exception&) { break; }\n\t\tinventory.items.push_back(std::move(item));\n\t}",
+      "catches": "a broken item swallowed again, the inventory silently cut short at it"
+    },
+    {
+      "file": "src/InventoryOperations.h",
+      "original": "\tinventory.capacity = j.at(\"capacity\").get<size_t>();",
+      "mutated": "\tinventory.capacity = j.value(\"capacity\", size_t{ 0 });",
+      "catches": "an inventory with no capacity loading as one that holds nothing"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tkillCount = j.at(\"killCount\").get<int>();",
+      "mutated": "\tkillCount = j.value(\"killCount\", 0);",
+      "catches": "a player with no kill count loading at zero"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tmemorizedSpells = j.at(\"memorizedSpells\").get<std::vector<std::string>>();",
+      "mutated": "\tmemorizedSpells = j.value(\"memorizedSpells\", std::vector<std::string>{});",
+      "catches": "a player's memorised spells lost without a word"
+    },
+    {
+      "file": "src/ShopKeeper.cpp",
+      "original": "\tload_inventory(shopInventory, j.at(\"shop_inventory\"));",
+      "mutated": "\tif (j.contains(\"shop_inventory\")) { load_inventory(shopInventory, j.at(\"shop_inventory\")); }",
+      "catches": "a shop whose shelves are missing loading as an empty shop"
+    }
+  ]
+}

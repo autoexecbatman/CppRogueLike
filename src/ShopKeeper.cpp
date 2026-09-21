@@ -439,11 +439,8 @@ void ShopKeeper::load(const json& j)
 	sellbackPercent = j.at("sellback_percent").get<int>();
 
 	// Load shop inventory
-	if (j.contains("shop_inventory"))
-	{
-		shopInventory = FloorInventory(50);
-		load_inventory(shopInventory, j["shop_inventory"]);
-	}
+	shopInventory = FloorInventory(50);
+	load_inventory(shopInventory, j.at("shop_inventory"));
 }
 
 std::unique_ptr<ShopKeeper> ShopKeeper::create(const json& j)

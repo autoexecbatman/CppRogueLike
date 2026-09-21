@@ -22,6 +22,9 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/InventoryData.h"
+#include "src/InventoryOperations.h"
+#include "src/Item.h"
 #include "src/LevelManager.h"
 
 using json = nlohmann::json;
@@ -80,4 +83,48 @@ TEST(SaveFieldNamesTest, ALevelManagerRefusesASaveMissingOnlyTheShopkeeperCount)
 
 	LevelManager read;
 	EXPECT_THROW(read.load_from_json(saved), json::exception);
+}
+
+namespace
+{
+
+// A saved floor holding two items, as save_inventory writes it.
+json saved_floor_of_two_items()
+{
+	FloorInventory floor{ 10 };
+	for (const char* name : { "first stone", "second stone" })
+	{
+		[[maybe_unused]] const auto added = InventoryOperations::add_item(
+			floor,
+			std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, 0 }));
+	}
+	json saved;
+	InventoryOperations::save_inventory(floor, saved);
+	return saved;
+}
+
+} // namespace
+
+TEST(SaveFieldNamesTest, AnInventoryRefusesARecordMissingItsCapacityOrItems)
+{
+	for (const char* key : { "capacity", "inventory" })
+	{
+		json missingOne = saved_floor_of_two_items();
+		missingOne.erase(key);
+		FloorInventory loaded{ 1 };
+		EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, missingOne))
+			<< "an inventory record without \"" << key << "\" loaded quietly";
+	}
+}
+
+TEST(SaveFieldNamesTest, ABrokenItemStopsTheInventoryLoadingRatherThanShorteningIt)
+{
+	// The second item's record loses a field Item::save always writes. A loader that
+	// caught the error would hand back a floor holding one stone and say nothing.
+	json saved = saved_floor_of_two_items();
+	saved.at("inventory").at(1).erase("itemKey");
+
+	FloorInventory loaded{ 1 };
+	EXPECT_ANY_THROW(InventoryOperations::load_inventory(loaded, saved))
+		<< "a broken item was dropped from the inventory without a word";
 }

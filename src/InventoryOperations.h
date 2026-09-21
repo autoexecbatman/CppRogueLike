@@ -204,49 +204,34 @@ void fire_inventory_event(T& inventory, InventoryEvent::Type type, const Item* i
 template <AnyInventory T>
 void load_inventory(T& inventory, const nlohmann::json& j)
 {
-	try
-	{
-		inventory.capacity = j.value("capacity", 0);
-		inventory.items.clear();
-		inventory.items.reserve(inventory.capacity);
+	inventory.capacity = j.at("capacity").get<size_t>();
+	inventory.items.clear();
+	inventory.items.reserve(inventory.capacity);
 
-		if (j.contains("inventory") && j["inventory"].is_array())
-		{
-			for (const auto& itemJson : j["inventory"])
-			{
-				auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
-				item->load(itemJson);
-				inventory.items.push_back(std::move(item));
-			}
-		}
-	}
-	catch (const std::exception& e)
+	// A broken item record throws out of here: catching it would hand back the items that
+	// came before it and silently drop the rest.
+	for (const auto& itemJson : j.at("inventory"))
 	{
-		std::cerr << "load_inventory error: " << e.what() << '\n';
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
+		item->load(itemJson);
+		inventory.items.push_back(std::move(item));
 	}
 }
 
 template <AnyInventory T>
 void save_inventory(const T& inventory, nlohmann::json& j)
 {
-	try
-	{
-		j["capacity"] = inventory.capacity;
-		j["inventory"] = nlohmann::json::array();
+	j["capacity"] = inventory.capacity;
+	j["inventory"] = nlohmann::json::array();
 
-		for (const auto& item : inventory.items)
-		{
-			if (item)
-			{
-				nlohmann::json itemJson;
-				item->save(itemJson);
-				j["inventory"].push_back(itemJson);
-			}
-		}
-	}
-	catch (const std::exception& e)
+	for (const auto& item : inventory.items)
 	{
-		std::cerr << "save_inventory error: " << e.what() << '\n';
+		if (item)
+		{
+			nlohmann::json itemJson;
+			item->save(itemJson);
+			j["inventory"].push_back(itemJson);
+		}
 	}
 }
 

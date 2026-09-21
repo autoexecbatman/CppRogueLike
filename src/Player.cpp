@@ -1061,24 +1061,18 @@ void Player::load(const json& j)
 	playerClass = j.at("playerClass").get<std::string>();
 	playerRace = j.at("playerRace").get<std::string>();
 	roundCounter = j.at("roundCounter").get<int>();
-	killCount = j.value("killCount", 0);
-	if (j.contains("memorizedSpells"))
-	{
-		memorizedSpells = j["memorizedSpells"].get<std::vector<std::string>>();
-	}
+	killCount = j.at("killCount").get<int>();
+	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
 	// trappingWeb is not serialized - it's a map reference that needs to be re-established
 
 	// Load equipped items
 	equippedItems.clear();
-	if (j.contains("equippedItems"))
+	for (const auto& itemEntry : j.at("equippedItems"))
 	{
-		for (const auto& itemEntry : j["equippedItems"])
-		{
-			EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
-			auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
-			item->load(itemEntry["item"]);
-			equippedItems.emplace_back(std::move(item), slot);
-		}
+		EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		item->load(itemEntry.at("item"));
+		equippedItems.emplace_back(std::move(item), slot);
 	}
 }
 
