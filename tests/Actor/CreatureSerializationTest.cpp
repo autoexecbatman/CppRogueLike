@@ -1,9 +1,10 @@
+#include "src/Actor.h"
+#include "src/AiMonster.h"
+#include "src/Creature.h"
+#include "src/ExperienceReward.h"
+#include "src/MonsterAttacker.h"
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
-#include "src/Creature.h"
-#include "src/MonsterAttacker.h"
-#include "src/AiMonster.h"
-#include "src/ExperienceReward.h"
 
 using json = nlohmann::json;
 
@@ -49,7 +50,6 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
 
     // Load into new creature
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
     // Verify position (Vector2D is {y, x})
@@ -81,7 +81,6 @@ TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_hp(), 15);
@@ -97,7 +96,6 @@ TEST_F(CreatureSerializationTest, ExceptionalStrength_Preserved) {
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_exceptional_strength(), 76);
@@ -113,7 +111,6 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
     EXPECT_TRUE(loaded->is_dead());
@@ -133,10 +130,8 @@ TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully) {
     EXPECT_TRUE(j.contains("constitutionTracker"));
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->load(j);
-
-    // Load should succeed
-    EXPECT_TRUE(true);
+	EXPECT_NO_THROW(loaded->load(j)) << "a creature saved with no pool was refused on load";
+	EXPECT_EQ(loaded->healthPool, nullptr) << "a pool appeared that was never saved";
 }
 
 TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
@@ -146,7 +141,6 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     original->save(j);
 
     auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
-    loaded->healthPool = std::make_unique<HealthPool>(0);
     loaded->load(j);
 
     ASSERT_NE(loaded->attacker, nullptr);
@@ -155,4 +149,53 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     const auto& damageInfo = loaded->attacker->get_damage_info();
     EXPECT_EQ(damageInfo.minDamage, 1);
     EXPECT_EQ(damageInfo.maxDamage, 6);
+}
+
+// Loaded the way the game loads a level's monsters: a fresh Creature, then load(), with
+// nothing built on it first. Every test above builds the pool by hand before loading, which
+// is how a load that dropped hit points on the floor passed all of them.
+TEST_F(CreatureSerializationTest, AMonsterLoadedIntoAFreshObjectKeepsItsHitPoints)
+{
+	auto original = create_test_creature();
+	original->healthPool->set_hp(7);
+	original->healthPool->set_temp_hp(3);
+
+	json j;
+	original->save(j);
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", 0 });
+	loaded->load(j);
+
+	ASSERT_NE(loaded->healthPool, nullptr) << "the saved hit points were dropped: no pool on the loaded monster";
+	EXPECT_EQ(loaded->get_max_hp(), 20);
+	EXPECT_EQ(loaded->get_hp(), 7);
+	EXPECT_EQ(loaded->get_temp_hp(), 3);
+}
+
+// Every field Creature::save writes on every creature is required on load: the owner's
+// ruling is that no save fallbacks exist. The unconditional fields are found by saving a
+// bare creature, which has none of the optional components, and subtracting what
+// Actor::save writes - so nothing here is a list kept by hand.
+TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
+{
+	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };
+	json bareRecord;
+	bare.save(bareRecord);
+
+	Actor plainActor{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };
+	json actorRecord;
+	plainActor.save(actorRecord);
+
+	for (const auto& [key, value] : bareRecord.items())
+	{
+		if (actorRecord.contains(key))
+		{
+			continue;
+		}
+		json missingOne = bareRecord;
+		missingOne.erase(key);
+		auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		EXPECT_ANY_THROW(loaded->load(missingOne))
+			<< "a creature record without \"" << key << "\" loaded quietly";
+	}
 }

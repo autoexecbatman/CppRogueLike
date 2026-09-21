@@ -42,50 +42,47 @@
 void Creature::load(const json& j)
 {
 	Actor::load(j); // Call base class load
-	baseStrength = j["strength"];
+	baseStrength = j.at("strength").get<int>();
 	exceptionalStrength = j.at("exceptionalStrength").get<int>();
-	baseDexterity = j["dexterity"];
-	baseConstitution = j["constitution"];
-	baseIntelligence = j["intelligence"];
-	baseWisdom = j["wisdom"];
-	baseCharisma = j["charisma"];
-	creatureLevel = j["playerLevel"];
-	gold = j["gold"];
-	gender = j["gender"];
-	naturalAttack = j.value("naturalAttack", std::string{});
+	baseDexterity = j.at("dexterity").get<int>();
+	baseConstitution = j.at("constitution").get<int>();
+	baseIntelligence = j.at("intelligence").get<int>();
+	baseWisdom = j.at("wisdom").get<int>();
+	baseCharisma = j.at("charisma").get<int>();
+	creatureLevel = j.at("playerLevel").get<int>();
+	gold = j.at("gold").get<int>();
+	gender = j.at("gender").get<std::string>();
+	naturalAttack = j.at("naturalAttack").get<std::string>();
 	ethics = static_cast<Ethics>(j.at("ethics").get<int>());
 	morality = static_cast<Morality>(j.at("morality").get<int>());
 	undead = j.at("undead").get<bool>();
 	awarenessTurns = j.at("awarenessTurns").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
-	creatureClass = static_cast<CreatureClass>(j.value("creatureClass", static_cast<int>(CreatureClass::MONSTER)));
-	hitDie = j.value("hitDie", 8);
-	attacksPerRound = j.value("attacksPerRound", 1.0f);
-	damageResistance = j.value("dr", 0);
-	thaco = j.value("thaco", 20);
+	creatureClass = static_cast<CreatureClass>(j.at("creatureClass").get<int>());
+	hitDie = j.at("hitDie").get<int>();
+	attacksPerRound = j.at("attacksPerRound").get<float>();
+	damageResistance = j.at("dr").get<int>();
+	thaco = j.at("thaco").get<int>();
 	if (j.contains("attacker"))
 	{
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{});
 		attacker->load(j["attacker"]);
 	}
-	// Load health pool data
+	// A pool that was saved is built from its record, as the other components are: the game
+	// loads a level's monsters into fresh objects, which have none to fill in.
 	if (j.contains("healthPool"))
 	{
-		const auto& healthJson = j["healthPool"];
-		if (healthPool && healthJson.contains("hpMax"))
-		{
-			healthPool->set_max_hp(healthJson.at("hpMax").get<int>());
-			healthPool->set_hp(healthJson.at("hp").get<int>());
-			healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
-			healthPool->set_temp_hp(healthJson.at("tempHp").get<int>());
-			healthPool->set_unregenerable_damage(healthJson.at("unregenerableDamage").get<int>());
-		}
+		const auto& healthJson = j.at("healthPool");
+		healthPool = std::make_unique<HealthPool>(healthJson.at("hpMax").get<int>());
+		healthPool->set_hp(healthJson.at("hp").get<int>());
+		healthPool->set_hp_base(healthJson.at("hpBase").get<int>());
+		healthPool->set_temp_hp(healthJson.at("tempHp").get<int>());
+		healthPool->set_unregenerable_damage(healthJson.at("unregenerableDamage").get<int>());
 	}
-	// Load constitution tracker state
-	if (j.contains("constitutionTracker"))
+	// Load constitution tracker state; the score inside is saved only once one is recorded.
 	{
-		const auto& constJson = j["constitutionTracker"];
+		const auto& constJson = j.at("constitutionTracker");
 		if (constJson.contains("lastConstitution"))
 		{
 			constitutionTracker->set_last_constitution(constJson.at("lastConstitution").get<int>());
@@ -109,21 +106,17 @@ void Creature::load(const json& j)
 	{
 		ai = Ai::create(j["ai"]);
 	}
-	if (j.contains("inventoryData"))
-	{
-		inventoryData = CreatureInventory(50); // Default capacity
-		InventoryOperations::load_inventory(inventoryData, j["inventoryData"]);
-	}
+	inventoryData = CreatureInventory(50); // Default capacity
+	InventoryOperations::load_inventory(inventoryData, j.at("inventoryData"));
 	if (j.contains("shop"))
 	{
 		shop = ShopKeeper::create(j["shop"]);
 	}
 
 	// Load unified buff system
-	if (j.contains("activeBuffs"))
 	{
 		activeBuffs.clear();
-		for (const auto& buffJson : j["activeBuffs"])
+		for (const auto& buffJson : j.at("activeBuffs"))
 		{
 			Buff buff{};
 			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());

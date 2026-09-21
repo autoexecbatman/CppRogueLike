@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureSerializationTest.*:PlayerSerializationTest.*:ShopKeeperSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\thealthPool = std::make_unique<HealthPool>(healthJson.at(\"hpMax\").get<int>());",
+      "mutated": "\t\tif (!healthPool) { return; }\n\t\thealthPool->set_max_hp(healthJson.at(\"hpMax\").get<int>());",
+      "catches": "a saved pool filled in only if the object already had one, so a loaded monster has none"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tcreatureClass = static_cast<CreatureClass>(j.at(\"creatureClass\").get<int>());",
+      "mutated": "\tcreatureClass = static_cast<CreatureClass>(j.value(\"creatureClass\", static_cast<int>(CreatureClass::MONSTER)));",
+      "catches": "a record without its class loading as a monster, with a monster's hit dice and THAC0"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tthaco = j.at(\"thaco\").get<int>();",
+      "mutated": "\tthaco = j.value(\"thaco\", 20);",
+      "catches": "a record without its THAC0 loading at 20"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tInventoryOperations::load_inventory(inventoryData, j.at(\"inventoryData\"));",
+      "mutated": "\tif (j.contains(\"inventoryData\")) { InventoryOperations::load_inventory(inventoryData, j.at(\"inventoryData\")); }",
+      "catches": "a record without its inventory loading as an empty pack"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tconst auto& constJson = j.at(\"constitutionTracker\");",
+      "mutated": "\t\tif (!j.contains(\"constitutionTracker\")) { return; }\n\t\tconst auto& constJson = j.at(\"constitutionTracker\");",
+      "catches": "a record without its Constitution record loading quietly"
+    }
+  ]
+}

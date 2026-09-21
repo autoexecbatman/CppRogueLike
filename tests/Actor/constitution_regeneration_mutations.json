@@ -81,8 +81,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\t\thealthPool->set_unregenerable_damage(healthJson.at(\"unregenerableDamage\").get<int>());",
-      "mutated": "\t\t\thealthPool->set_unregenerable_damage(healthJson.at(\"tempHp\").get<int>());",
+      "original": "\t\thealthPool->set_unregenerable_damage(healthJson.at(\"unregenerableDamage\").get<int>());",
+      "mutated": "\t\thealthPool->set_unregenerable_damage(healthJson.at(\"tempHp\").get<int>());",
       "catches": "the fire and acid lost across a save"
     }
   ]
