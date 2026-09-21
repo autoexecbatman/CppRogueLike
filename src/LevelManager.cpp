@@ -46,33 +46,9 @@ void LevelManager::save_to_json(nlohmann::json& j) const
 
 void LevelManager::load_from_json(const nlohmann::json& j)
 {
-	if (j.contains("level_manager"))
-	{
-		const auto& level_data = j["level_manager"];
-
-		if (level_data.contains("dungeonLevel"))
-		{
-			dungeon_level = level_data["dungeonLevel"];
-		}
-
-		if (level_data.contains("shopkeepersOnCurrentLevel"))
-		{
-			shopkeepers_on_current_level = level_data["shopkeepersOnCurrentLevel"];
-		}
-	}
-	// Legacy support - check old format
-	else
-	{
-		if (j.contains("dungeonLevel"))
-		{
-			dungeon_level = j["dungeonLevel"];
-		}
-
-		if (j.contains("shopkeepersOnCurrentLevel"))
-		{
-			shopkeepers_on_current_level = j["shopkeepersOnCurrentLevel"];
-		}
-	}
+	const auto& levelData = j.at("level_manager");
+	dungeon_level = levelData.at("dungeonLevel").get<int>();
+	shopkeepers_on_current_level = levelData.at("shopkeepersOnCurrentLevel").get<int>();
 }
 
 void LevelManager::display_level_messages(MessageSystem& message_system) const

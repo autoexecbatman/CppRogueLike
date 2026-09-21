@@ -102,6 +102,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellRegistryTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")

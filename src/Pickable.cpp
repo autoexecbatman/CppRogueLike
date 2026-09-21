@@ -683,7 +683,7 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 			{
 				output["type"] = static_cast<int>(PickableType::WEAPON);
 				output["ranged"] = b.ranged;
-				output["handReq"] = static_cast<int>(b.handRequirement);
+				output["handRequirement"] = static_cast<int>(b.handRequirement);
 				output["weaponSize"] = static_cast<int>(b.weaponSize);
 				output["strengthRating"] = b.strengthRating;
 			},
@@ -762,16 +762,7 @@ ItemBehavior load_behavior(const json& source)
 			consumable.effect = static_cast<ConsumableEffect>(source["effect"].get<int>());
 		}
 
-		// Legacy Healer save format
-		if (source.contains("amountToHeal"))
-		{
-			consumable.effect = ConsumableEffect::HEAL;
-			consumable.amount = source["amountToHeal"].get<int>();
-		}
-		else if (source.contains("amount"))
-		{
-			consumable.amount = source["amount"].get<int>();
-		}
+		consumable.amount = source.at("amount").get<int>();
 
 		if (source.contains("duration"))
 		{
@@ -792,18 +783,9 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::WEAPON:
 	{
 		Weapon weapon;
-		if (source.contains("ranged"))
-		{
-			weapon.ranged = source["ranged"].get<bool>();
-		}
-		if (source.contains("handRequirement"))
-		{
-			weapon.handRequirement = static_cast<HandRequirement>(source["handRequirement"].get<int>());
-		}
-		if (source.contains("weaponSize"))
-		{
-			weapon.weaponSize = static_cast<WeaponSize>(source["weaponSize"].get<int>());
-		}
+		weapon.ranged = source.at("ranged").get<bool>();
+		weapon.handRequirement = static_cast<HandRequirement>(source.at("handRequirement").get<int>());
+		weapon.weaponSize = static_cast<WeaponSize>(source.at("weaponSize").get<int>());
 		weapon.strengthRating = source.at("strengthRating").get<int>();
 		return weapon;
 	}
@@ -820,10 +802,7 @@ ItemBehavior load_behavior(const json& source)
 		{
 			targetedScroll.targetMode = static_cast<TargetMode>(source["targetMode"].get<int>());
 		}
-		if (source.contains("animation"))
-		{
-			targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source["animation"].get<int>());
-		}
+		targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.at("scrollAnimation").get<int>());
 		if (source.contains("range"))
 		{
 			targetedScroll.range = source["range"].get<int>();

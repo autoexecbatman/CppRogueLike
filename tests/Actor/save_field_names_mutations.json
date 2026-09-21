@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ItemSerializationTest.*:SaveFieldNamesTest.*:CodecRoundTripTest.*:PlayerSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"handRequirement\"] = static_cast<int>(b.handRequirement);",
+      "mutated": "\t\t\t\toutput[\"handReq\"] = static_cast<int>(b.handRequirement);",
+      "catches": "the saver and the loader naming the field differently again"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tweapon.handRequirement = static_cast<HandRequirement>(source.at(\"handRequirement\").get<int>());",
+      "mutated": "\t\tweapon.handRequirement = HandRequirement::ONE_HANDED;",
+      "catches": "a saved weapon's hand requirement thrown away on load"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\ttargetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.at(\"scrollAnimation\").get<int>());",
+      "mutated": "\t\ttargetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.value(\"animation\", 0));",
+      "catches": "a scroll's animation read under a name nothing writes, defaulted quietly"
+    },
+    {
+      "file": "src/LevelManager.cpp",
+      "original": "\tconst auto& levelData = j.at(\"level_manager\");",
+      "mutated": "\tconst auto& levelData = j.contains(\"level_manager\") ? j.at(\"level_manager\") : j;",
+      "catches": "a save without the block falling back to an old shape instead of failing"
+    },
+    {
+      "file": "src/LevelManager.cpp",
+      "original": "\tdungeon_level = levelData.at(\"dungeonLevel\").get<int>();",
+      "mutated": "\tdungeon_level = levelData.value(\"dungeonLevel\", 1);",
+      "catches": "a save missing its dungeon level loading as a character on level one"
+    }
+  ]
+}

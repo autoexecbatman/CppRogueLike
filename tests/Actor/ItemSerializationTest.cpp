@@ -226,3 +226,64 @@ TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
     EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
     EXPECT_TRUE(loaded->has_state(ActorState::BLOCKS));
 }
+
+// A two-handed weapon must still need two hands after a save and a load. The fixture
+// above builds a one-handed sword, which is the default, so it could never see the
+// requirement go missing - only a weapon that differs from the default can.
+TEST_F(ItemSerializationTest, HandRequirement_Preserved)
+{
+	auto original = create_test_item();
+	original->behavior = Weapon{ false, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 0 };
+
+	json j;
+	original->save(j);
+
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	loaded->load(j);
+
+	ASSERT_TRUE(loaded->behavior.has_value());
+	const Weapon* weapon = std::get_if<Weapon>(&*loaded->behavior);
+	ASSERT_NE(weapon, nullptr) << "a saved weapon came back as something else";
+	EXPECT_EQ(weapon->handRequirement, HandRequirement::TWO_HANDED)
+		<< "a two-handed weapon came back one-handed";
+	EXPECT_EQ(weapon->weaponSize, WeaponSize::LARGE) << "the weapon's size was lost";
+	EXPECT_FALSE(weapon->ranged) << "a melee weapon came back ranged";
+}
+
+// A save record missing a weapon field is a broken record, not a one-handed weapon.
+TEST_F(ItemSerializationTest, AWeaponRecordMissingAFieldIsRefused)
+{
+	auto original = create_test_item();
+	original->behavior = Weapon{ false, HandRequirement::TWO_HANDED, WeaponSize::LARGE, 0 };
+
+	json j;
+	original->save(j);
+	j["pickable"].erase("handRequirement");
+
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_THROW(loaded->load(j), nlohmann::json::exception)
+		<< "a weapon with no hand requirement loaded quietly as one-handed";
+}
+
+// A scroll's animation was written as "scrollAnimation" and read as "animation", so it
+// came back as whatever the default is. Any value but the default proves it survives.
+TEST_F(ItemSerializationTest, ScrollAnimation_Preserved)
+{
+	auto original = create_test_item();
+	TargetedScroll scroll;
+	scroll.scrollAnimation = ScrollAnimation::LIGHTNING;
+	scroll.targetMode = TargetMode::AUTO_NEAREST;
+	original->behavior = scroll;
+
+	json j;
+	original->save(j);
+
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	loaded->load(j);
+
+	ASSERT_TRUE(loaded->behavior.has_value());
+	const TargetedScroll* readBack = std::get_if<TargetedScroll>(&*loaded->behavior);
+	ASSERT_NE(readBack, nullptr) << "a saved scroll came back as something else";
+	EXPECT_EQ(readBack->scrollAnimation, ScrollAnimation::LIGHTNING)
+		<< "the scroll's animation was lost in the save";
+}
