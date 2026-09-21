@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ItemSerializationTest.*:PlayerSerializationTest.*:ShopKeeperSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Item.cpp",
+      "original": "\titemKey = j.at(\"itemKey\").get<std::string>();",
+      "mutated": "\titemKey = j.value(\"itemKey\", std::string{});",
+      "catches": "an item loading with no key when its record has none"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\tconst auto& enh = j.at(\"enhancement\");",
+      "mutated": "\t\tconst json emptyEnhancement = json::object();\n\t\tif (!j.contains(\"enhancement\")) { return; }\n\t\tconst auto& enh = j.at(\"enhancement\");",
+      "catches": "a record without its enhancement block loading quietly"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\t\tconst auto& id = j.at(\"identification\");",
+      "mutated": "\t\tif (!j.contains(\"identification\")) { return; }\n\t\tconst auto& id = j.at(\"identification\");",
+      "catches": "a record without its identification block loading quietly"
+    },
+    {
+      "file": "src/Item.cpp",
+      "original": "\tif (j.contains(\"pickable\"))\n\t{\n\t\tbehavior = load_behavior(j[\"pickable\"]);\n\t}",
+      "mutated": "\tbehavior = load_behavior(j.at(\"pickable\"));",
+      "catches": "an item with no behaviour refused, the one block that is legitimately absent"
+    }
+  ]
+}

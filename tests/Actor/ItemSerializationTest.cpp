@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include "src/Actor.h"
 #include "src/Item.h"
 #include "src/Pickable.h"
 #include "src/ItemEnhancements.h"
@@ -286,4 +287,47 @@ TEST_F(ItemSerializationTest, ScrollAnimation_Preserved)
 	ASSERT_NE(readBack, nullptr) << "a saved scroll came back as something else";
 	EXPECT_EQ(readBack->scrollAnimation, ScrollAnimation::LIGHTNING)
 		<< "the scroll's animation was lost in the save";
+}
+
+// Item::save writes itemKey, enhancement and identification on every item, so a record
+// without one is broken rather than old: the owner's ruling is that no save fallbacks
+// exist. The keys come from what Item::save writes less what Actor::save writes, so the
+// base class's own fields, which are its concern, are not asked about here.
+TEST_F(ItemSerializationTest, AnItemRecordMissingABlockItsSaverWritesIsRefused)
+{
+	auto original = create_test_item();
+	json itemRecord;
+	original->save(itemRecord);
+
+	Actor plainActor{ Vector2D{ 5, 10 }, ActorData{ TileRef{}, "Test Sword", 1 } };
+	json actorRecord;
+	plainActor.save(actorRecord);
+
+	for (const auto& [key, value] : itemRecord.items())
+	{
+		// An item with no behaviour is saved with no pickable block, so that one is optional.
+		if (actorRecord.contains(key) || key == "pickable")
+		{
+			continue;
+		}
+		json missingOne = itemRecord;
+		missingOne.erase(key);
+		auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		EXPECT_ANY_THROW(loaded->load(missingOne))
+			<< "an item record without \"" << key << "\" loaded quietly";
+	}
+}
+
+// The one block that may be absent: an item that has no behaviour saves none.
+TEST_F(ItemSerializationTest, AnItemWithNoBehaviourStillLoads)
+{
+	auto original = create_test_item();
+	original->behavior.reset();
+	json itemRecord;
+	original->save(itemRecord);
+	ASSERT_FALSE(itemRecord.contains("pickable")) << "a behaviourless item saved a behaviour";
+
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_NO_THROW(loaded->load(itemRecord));
+	EXPECT_FALSE(loaded->behavior.has_value());
 }

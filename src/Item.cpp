@@ -9,16 +9,12 @@ void Item::load(const json& j)
 {
 	Actor::load(j); // Call base class load
 	baseValue = j.at("baseValue").get<int>();
-	if (j.contains("itemKey"))
-	{
-		itemKey = j.at("itemKey").get<std::string>();
-	}
+	itemKey = j.at("itemKey").get<std::string>();
 	itemClass = static_cast<ItemClass>(j.at("itemClass").get<int>());
 
 	// Load enhancement data
-	if (j.contains("enhancement"))
 	{
-		const auto& enh = j["enhancement"];
+		const auto& enh = j.at("enhancement");
 		enhancement.prefix = static_cast<PrefixType>(enh.at("prefix").get<int>());
 		enhancement.suffix = static_cast<SuffixType>(enh.at("suffix").get<int>());
 		enhancement.damageBonus = enh.at("damageBonus").get<int>();
@@ -42,16 +38,18 @@ void Item::load(const json& j)
 	}
 
 	// Load identification status
-	if (j.contains("identification"))
 	{
-		const auto& id = j["identification"];
+		const auto& id = j.at("identification");
 		identification.identifiedType = id.at("identifiedType").get<bool>();
 		identification.identifiedEnhancement = id.at("identifiedEnhancement").get<bool>();
 		identification.identifiedBuc = id.at("identifiedBuc").get<bool>();
 	}
 
+	// Saved only when the item has a behaviour, so its absence is a real state.
 	if (j.contains("pickable"))
+	{
 		behavior = load_behavior(j["pickable"]);
+	}
 }
 
 void Item::save(json& j)
