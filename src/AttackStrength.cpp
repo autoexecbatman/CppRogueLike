@@ -29,7 +29,7 @@ AttackStrength::Adjustment AttackStrength::adjustment(
 	{
 	case ItemClass::BOW:
 	{
-		// A bow made for an arm gives that arm's row; equipping keeps weaker arms from it.
+		// A bow made for an arm gives that arm's row; can_draw stops a weaker arm before here.
 		if (const int rating = strength_rating_of(*missileWeapon); rating > 0)
 		{
 			const StrengthAttributes madeFor = dataManager.strength_for(rating, 0);

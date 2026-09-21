@@ -27,6 +27,7 @@
 #include "DiceExpr.h"
 #include "EquipmentSlot.h"
 #include "Item.h"
+#include "Pickable.h"
 
 // OCP: Data-driven buff break messaging - player notifications when buffs end from attacking
 static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES = {
@@ -64,6 +65,19 @@ void Attacker::perform_single_attack(
 		return;
 	}
 
+	// A bow made for a stronger arm than this one is not drawn at all, so nothing is rolled
+	// against it - not the attack, and not a Sanctuary save the target's ward would ask.
+	const Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;
+	if (missileWeapon && !can_draw(owner, *missileWeapon))
+	{
+		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is not strong enough to draw the ");
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, missileWeapon->actorData.name);
+		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->finalize_message();
+		return;
+	}
+
 	// Sanctuary wards whoever bears it: an attacker that fails its save against the
 	// target's casting makes no attack on it (PHB page 436).
 	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
@@ -77,7 +91,6 @@ void Attacker::perform_single_attack(
 	}
 
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
-	const Item* missileWeapon = kind == AttackKind::RANGED ? owner.get_equipped_item(EquipmentSlot::MISSILE_WEAPON) : nullptr;
 	const AttackStrength::Adjustment strengthOnAttack = AttackStrength::adjustment(
 		*ctx.dataManager,
 		owner.get_strength(),

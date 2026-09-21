@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AttackStrengthTest.*:RangedWeaponTest.*:SanctuarySaveTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn wielder.get_strength() >= strength_rating_of(weapon);",
+      "mutated": "\treturn true;",
+      "catches": "any arm drawing any bow, the rating ignored everywhere"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\treturn wielder.get_strength() >= strength_rating_of(weapon);",
+      "mutated": "\treturn wielder.get_strength() > strength_rating_of(weapon);",
+      "catches": "an arm exactly at the rating refused, off by one"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tif (missileWeapon && !can_draw(owner, *missileWeapon))",
+      "mutated": "\tif (false)",
+      "catches": "the rating checked only at equip again, so Strength lost afterwards keeps the bow drawn"
+    }
+  ]
+}

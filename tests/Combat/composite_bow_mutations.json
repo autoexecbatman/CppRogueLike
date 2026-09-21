@@ -27,13 +27,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\tif (get_strength() < strength_rating_of(*item))",
-      "mutated": "\tif (get_strength() <= strength_rating_of(*item))",
-      "catches": "an arm at the rating refused"
-    },
-    {
-      "file": "src/Player.cpp",
-      "original": "\tif (get_strength() < strength_rating_of(*item))",
+      "original": "\tif (!can_draw(*this, *item))",
       "mutated": "\tif (false)",
       "catches": "any arm drawing a bow made for a stronger one"
     },

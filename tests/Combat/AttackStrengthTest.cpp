@@ -194,6 +194,40 @@ TEST_F(AttackStrengthTest, AnArmAtTheRatingCanDrawIt)
 	EXPECT_TRUE(player->equip_item(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON, ctx));
 }
 
+// "Strength 18 to use it" - the owner's ruling for the composite bow, and to use is not
+// only to pick up. An arm that met the rating when it equipped the bow and has since lost
+// the Strength - a girdle of giant strength taken off - draws nothing.
+TEST_F(AttackStrengthTest, AnArmThatLosesItsStrengthCannotDrawTheBowItHolds)
+{
+	player->set_strength(12);
+	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
+	ASSERT_EQ(player->get_strength(), 19) << "the girdle did not raise Strength";
+	ASSERT_TRUE(player->equip_item(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON, ctx));
+	ASSERT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
+	ASSERT_EQ(player->get_strength(), 12) << "taking the girdle off did not lower Strength";
+
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::RANGED, 20), 0)
+		<< "a Strength 12 arm drew a bow made for 18";
+}
+
+// A monster holds a rated bow the same way, whoever put it in its hands.
+TEST_F(AttackStrengthTest, AMonsterTooWeakForItsBowDrawsNothing)
+{
+	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", 1 } };
+	archer.experienceReward = std::make_unique<ExperienceReward>(0);
+	archer.armorClass = std::make_unique<ArmorClass>(10);
+	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
+	archer.attacker = std::make_unique<MonsterAttacker>(archer, DamageInfo{ "1d6", DamageType::PHYSICAL });
+	archer.set_thaco(20);
+	archer.set_strength(12);
+	archer.set_dexterity(10);
+	archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
+	archer.wear(weapon("composite_bow"), EquipmentSlot::MISSILE_WEAPON);
+
+	EXPECT_EQ(damage_from(archer, *player, AttackKind::RANGED, 20), 0)
+		<< "a Strength 12 monster drew a bow made for 18";
+}
+
 // A saved bow keeps what it was made for.
 TEST_F(AttackStrengthTest, TheRatingSurvivesASave)
 {

@@ -275,6 +275,11 @@ int strength_rating_of(const Item& item)
 	return weapon ? weapon->strengthRating : 0;
 }
 
+bool can_draw(const Creature& wielder, const Item& weapon)
+{
+	return wielder.get_strength() >= strength_rating_of(weapon);
+}
+
 bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
 {
 	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);

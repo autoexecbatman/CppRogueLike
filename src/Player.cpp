@@ -794,7 +794,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 
 	// A weapon made for a stronger arm cannot be drawn by this one: the first Baldur's
 	// Gate's composite bow "Requires: 18 Strength".
-	if (get_strength() < strength_rating_of(*item))
+	if (!can_draw(*this, *item))
 	{
 		ctx.messageSystem->message(
 			WHITE_BLACK_PAIR,

@@ -200,6 +200,17 @@ struct DungeonKey
 //   strength_rating_of(healthPotion);   // -> 0
 [[nodiscard]] int strength_rating_of(const Item& item);
 
+// Whether the wielder's Strength as it stands now reaches the weapon's rating, which is
+// what it takes to use it: "Strength 18 to use it" is the owner's ruling for the composite
+// bow. Asked when the weapon is equipped and again each time it is drawn, since Strength
+// can fall in between - a girdle of giant strength taken off.
+//
+// Example:
+//   can_draw(strength18Archer, compositeBow);   // -> true
+//   can_draw(strength12Archer, compositeBow);   // -> false
+//   can_draw(strength3Archer, longBow);         // -> true, an ordinary bow asks nothing
+[[nodiscard]] bool can_draw(const Creature& wielder, const Item& weapon);
+
 // ========== The variant ==========
 
 using ItemBehavior = std::variant<
