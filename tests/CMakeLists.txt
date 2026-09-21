@@ -124,7 +124,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/AttackStrength.cpp
     ${PARENT_SOURCE_DIR}/MonsterAttacker.cpp
     ${PARENT_SOURCE_DIR}/PlayerAttacker.cpp
-    ${PARENT_SOURCE_DIR}/Container.cpp
     ${PARENT_SOURCE_DIR}/Pickable.cpp
     ${PARENT_SOURCE_DIR}/InventoryOperations.cpp
     ${PARENT_SOURCE_DIR}/Stairs.cpp
