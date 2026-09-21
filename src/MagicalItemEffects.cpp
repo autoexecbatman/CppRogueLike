@@ -7,7 +7,7 @@ const char* get_effect_description(MagicalEffect effect)
 	switch (effect)
 	{
 	case MagicalEffect::BRILLIANCE:
-		return "Grants +4 AC";
+		return "Armor of enchanted value, and resists fire";
 	case MagicalEffect::TELEPORTATION:
 		return "Teleport at will";
 	case MagicalEffect::FREE_ACTION:
@@ -37,8 +37,10 @@ int get_ac_bonus(MagicalEffect effect, int bonus)
 {
 	switch (effect)
 	{
+	// Both are worth what their own enchantment says, so neither keeps a number beside
+	// the data: a helm of brilliance "is armor of +2 value" (Dungeon Master's Guide, PDF
+	// page 968), which is the +2 its record carries.
 	case MagicalEffect::BRILLIANCE:
-		return -4;
 	case MagicalEffect::PROTECTION:
 		return -bonus;
 	default:

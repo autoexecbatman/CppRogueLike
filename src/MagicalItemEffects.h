@@ -10,7 +10,7 @@ enum class MagicalEffect
 	NONE,
 
 	// Helm effects (Authentic AD&D 2e)
-	BRILLIANCE, // +4 AC, fire resistance, light (rare)
+	BRILLIANCE, // armor of its own enchanted value, fire resistance, light (rare)
 	TELEPORTATION, // Teleport at will
 	TELEPATHY, // Read thoughts
 	UNDERWATER_ACTION, // Breathe underwater
