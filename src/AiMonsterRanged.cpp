@@ -7,6 +7,7 @@
 #include "Attacker.h"
 #include "Creature.h"
 #include "AttackKind.h"
+#include "BuffSystem.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Persistent.h"
@@ -25,7 +26,9 @@ void AiMonsterRanged::update(Creature& owner, GameContext& ctx)
 
 	owner.update_awareness(ctx);
 
-	if (owner.is_aware())
+	// A failed save against Sanctuary means this creature has lost track of the player
+	// entirely (PHB page 436), so there is nothing here to shoot at or walk toward.
+	if (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}

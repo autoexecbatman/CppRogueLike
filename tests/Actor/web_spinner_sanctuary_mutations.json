@@ -27,8 +27,8 @@
     },
     {
       "file": "src/BuffSystem.cpp",
-      "original": "\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn false;\n\t}",
-      "mutated": "\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn !SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);\n\t}",
+      "original": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn false;\n\t}\n\n\t// Already rolled against this casting: the result stands.",
+      "mutated": "\tconst auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);\n\tif (casting == warded.activeBuffs.end())\n\t{\n\t\treturn !SavingThrows::is_made(attacker, SavingThrow::SPELL, 0, ctx);\n\t}\n\n\t// Already rolled against this casting: the result stands.",
       "catches": "a save rolled against a player without sanctuary"
     }
   ]

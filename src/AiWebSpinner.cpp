@@ -5,6 +5,7 @@
 
 #include "Creature.h"
 #include "Colors.h"
+#include "BuffSystem.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Web.h"
@@ -71,7 +72,9 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	// Fall back to standard movement behavior
 	owner.update_awareness(ctx);
 
-	if (owner.is_aware())
+	// Lost track of the player through a failed Sanctuary save, and so with nothing to
+	// walk toward, it drifts like any spider with no quarry (PHB page 436).
+	if (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))
 	{
 		move_toward_player(owner, ctx);
 	}

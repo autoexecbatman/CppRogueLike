@@ -4,6 +4,7 @@
 
 #include "Actor.h"
 #include "Attacker.h"
+#include "BuffSystem.h"
 #include "Creature.h"
 #include "AttackKind.h"
 #include "GameContext.h"
@@ -192,11 +193,18 @@ void AiMonster::decide_action(Creature& owner, GameContext& ctx)
 
 	int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 
-	if (owner.is_aware() && !ctx.player()->is_invisible())
+	// A failed save against Sanctuary means this creature "loses track of and totally
+	// ignores the warded creature for the duration of the spell" (PHB page 436). Losing
+	// track is not being unable to land a blow: it stops hunting them entirely, so the
+	// player is no target at all and what is left is whatever it does with no quarry.
+	// Reading the record costs no save - one is owed only to an opponent already swinging.
+	const bool hasLostTrackOfPlayer = ctx.buffSystem->ignores_warded_creature(owner, *ctx.player());
+
+	if (owner.is_aware() && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
 		move_or_attack(owner, ctx.player()->position, ctx);
 	}
-	else if (distanceToPlayer <= 15 && !ctx.player()->is_invisible())
+	else if (distanceToPlayer <= 15 && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)
 	{
 		if (ctx.dice->d6() == 1)
 		{

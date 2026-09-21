@@ -253,6 +253,25 @@ bool BuffSystem::is_turned_away_by_sanctuary(const Creature& attacker, Creature&
 	return !isMade;
 }
 
+bool BuffSystem::ignores_warded_creature(const Creature& attacker, const Creature& warded) const noexcept
+{
+	auto is_sanctuary = [](const Buff& buff)
+	{
+		return buff.type == BuffType::SANCTUARY;
+	};
+	const auto casting = std::ranges::find_if(warded.activeBuffs, is_sanctuary);
+	if (casting == warded.activeBuffs.end())
+	{
+		return false;
+	}
+
+	auto is_this_attacker_failing = [&attacker](const OpponentSave& save)
+	{
+		return save.opponent == attacker.uniqueId && !save.isMade;
+	};
+	return std::ranges::any_of(casting->opponentSaves, is_this_attacker_failing);
+}
+
 int BuffSystem::calculate_hit_modifier(const Creature& creature) const noexcept
 {
 	// AD&D 2e: Sum all to-hit bonuses from active buffs

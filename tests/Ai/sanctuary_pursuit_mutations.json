@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SanctuaryPursuitTest.*:SanctuarySaveTest.*:WebSpinnerSanctuaryTest.*:SanctuarySpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiMonster.cpp",
+      "original": "\tif (owner.is_aware() && !ctx.player()->is_invisible() && !hasLostTrackOfPlayer)",
+      "mutated": "\tif (owner.is_aware() && !ctx.player()->is_invisible())",
+      "catches": "a monster hunting a creature it has lost track of, as it did before"
+    },
+    {
+      "file": "src/AiMonsterRanged.cpp",
+      "original": "\tif (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "mutated": "\tif (owner.is_aware())",
+      "catches": "an archer loosing arrows at a creature it has lost track of"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tif (owner.is_aware() && !ctx.buffSystem->ignores_warded_creature(owner, *ctx.player()))",
+      "mutated": "\tif (owner.is_aware())",
+      "catches": "a web spinner walking toward a creature it has lost track of"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\treturn std::ranges::any_of(casting->opponentSaves, is_this_attacker_failing);",
+      "mutated": "\treturn false;",
+      "catches": "the record never read, so a failed save changes nothing about hunting"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\treturn save.opponent == attacker.uniqueId && !save.isMade;",
+      "mutated": "\t\treturn save.opponent == attacker.uniqueId;",
+      "catches": "an attacker that made its save being treated as having lost track"
+    }
+  ]
+}
