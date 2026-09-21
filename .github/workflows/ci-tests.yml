@@ -16,9 +16,17 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    # vcpkg is checked out at the commit vcpkg.json names, so every run builds the same
+    # library versions the last one did. The commit lives in vcpkg.json alone; moving it
+    # there is how the libraries are upgraded, locally and here at once.
     - name: Setup vcpkg
       run: |
+        $baseline = (Get-Content vcpkg.json -Raw | ConvertFrom-Json).'builtin-baseline'
+        if (-not $baseline) { throw "vcpkg.json names no builtin-baseline to pin vcpkg to" }
         git clone https://github.com/Microsoft/vcpkg.git C:\vcpkg
+        if ($LASTEXITCODE -ne 0) { exit 1 }
+        git -C C:\vcpkg checkout $baseline
+        if ($LASTEXITCODE -ne 0) { exit 1 }
         C:\vcpkg\bootstrap-vcpkg.bat
 
     - name: Configure CMake
