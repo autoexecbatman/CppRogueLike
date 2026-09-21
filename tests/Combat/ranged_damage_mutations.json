@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=WeaponDamageRegistryTest.*:AttackStrengthTest.*:RangedWeaponTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/WeaponDamageRegistry.cpp",
+      "original": "\t\t{ \"light_crossbow\", { \"1d4\", DamageType::PHYSICAL } },",
+      "mutated": "\t\t{ \"light_crossbow\", { \"1d8\", DamageType::PHYSICAL } },",
+      "catches": "the light crossbow doing twice its quarrel again"
+    },
+    {
+      "file": "src/WeaponDamageRegistry.cpp",
+      "original": "\t\t{ \"heavy_crossbow\", { \"1d4+1\", DamageType::PHYSICAL } },",
+      "mutated": "\t\t{ \"heavy_crossbow\", { \"1d4\", DamageType::PHYSICAL } },",
+      "catches": "the heavy quarrel losing the point that separates it from the light one"
+    },
+    {
+      "file": "src/WeaponDamageRegistry.cpp",
+      "original": "\t\t{ \"sling\", { \"1d4\", DamageType::PHYSICAL } },",
+      "mutated": "\t\t{ \"sling\", { \"1d4+1\", DamageType::PHYSICAL } },",
+      "catches": "the sling firing a bullet where the game arms it with a stone"
+    },
+    {
+      "file": "src/WeaponDamageRegistry.cpp",
+      "original": "\t\t{ \"short_bow\", { \"1d6\", DamageType::PHYSICAL } },",
+      "mutated": "\t\t{ \"short_bow\", { \"1d8\", DamageType::PHYSICAL } },",
+      "catches": "a short bow loosing a sheaf arrow rather than a flight arrow"
+    }
+  ]
+}

@@ -159,3 +159,34 @@ TEST_F(WeaponDamageRegistryTest, Performance_FastLookup) {
     EXPECT_LT(duration.count(), 100)
         << "Weapon lookups too slow: " << duration.count() << "ms for 10k lookups";
 }
+
+// A bow or a crossbow does no damage of its own in the book: the ammunition does, and the
+// weapons table gives each round its own row (Player's Handbook, PDF page 145). The game
+// has no ammunition, so a ranged weapon carries its basic round's damage against a small
+// or man-sized target - which is what the bows and the sling already do.
+TEST_F(WeaponDamageRegistryTest, EveryRangedWeaponCarriesItsBasicAmmunition)
+{
+	struct Ranged
+	{
+		const char* weapon;
+		const char* round;
+		const char* damage;
+	};
+
+	// Flight arrow 1d6, light quarrel 1d4, heavy quarrel 1d4+1, sling stone 1d4.
+	const Ranged rangedWeapons[] = {
+		{ "short_bow", "a flight arrow", "1d6" },
+		{ "long_bow", "a flight arrow", "1d6" },
+		{ "composite_bow", "a flight arrow", "1d6" },
+		{ "light_crossbow", "a light quarrel", "1d4" },
+		{ "heavy_crossbow", "a heavy quarrel", "1d4+1" },
+		{ "sling", "a sling stone", "1d4" },
+	};
+
+	for (const Ranged& ranged : rangedWeapons)
+	{
+		const DamageInfo info = WeaponDamageRegistry::get_damage_info(ranged.weapon);
+		EXPECT_EQ(info.displayRoll, ranged.damage)
+			<< ranged.weapon << " does not do the damage of " << ranged.round;
+	}
+}

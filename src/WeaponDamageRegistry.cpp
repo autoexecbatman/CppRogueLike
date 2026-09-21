@@ -37,8 +37,8 @@ std::unordered_map<std::string, DamageInfo> WeaponDamageRegistry::create_weapon_
 		{ "short_bow", { "1d6", DamageType::PHYSICAL } },
 		{ "long_bow", DamageValues::LongBow() },
 		{ "composite_bow", { "1d6", DamageType::PHYSICAL } },
-		{ "light_crossbow", { "1d8", DamageType::PHYSICAL } },
-		{ "heavy_crossbow", { "1d10", DamageType::PHYSICAL } },
+		{ "light_crossbow", { "1d4", DamageType::PHYSICAL } },
+		{ "heavy_crossbow", { "1d4+1", DamageType::PHYSICAL } },
 		{ "sling", { "1d4", DamageType::PHYSICAL } },
 	};
 }
