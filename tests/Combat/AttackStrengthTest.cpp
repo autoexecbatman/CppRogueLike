@@ -81,6 +81,15 @@ protected:
 		ASSERT_TRUE(player->equip_item(weapon(key), slot, ctx));
 	}
 
+	// The player at Strength 12 in a girdle of hill giant strength and gauntlets of ogre power.
+	void wear_girdle_and_gauntlets()
+	{
+		player->set_strength(12);
+		ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
+		ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_ogre_power"), EquipmentSlot::GAUNTLETS, ctx));
+		ASSERT_EQ(player->get_strength(), 19) << "the girdle's 19 did not decide the score";
+	}
+
 	// Hit points the target lost to one attack whose d20 and damage die are scripted.
 	int damage_from(Creature& attacker, Creature& defender, AttackKind kind, int d20)
 	{
@@ -126,17 +135,109 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 
 	for (const Case& expected : FROM_PAGE_181)
 	{
+		Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "attacker", 0 } };
+		attacker.set_strength(expected.strength);
+		attacker.set_exceptional_strength(expected.exceptional);
 		const std::unique_ptr<Item> fired = expected.weaponKey.empty() ? nullptr : weapon(expected.weaponKey);
 		const AttackStrength::Adjustment adjustment = AttackStrength::adjustment(
 			mock.data_manager,
-			expected.strength,
-			expected.exceptional,
+			attacker,
 			expected.kind,
 			fired.get());
 
 		EXPECT_EQ(adjustment.hit, expected.hit) << expected.source;
 		EXPECT_EQ(adjustment.damage, expected.damage) << expected.source;
 	}
+}
+
+// Gauntlets of ogre power "add a +3 bonus to attack rolls and a +6 bonus to damage" to a
+// blow struck or hurled (DMG, PDF page 964), and a girdle of giant strength keeps them
+// beside its own row (page 966). A hill giant's 19 is +3 and +7, so the two are +6 and
+// +13. A bow takes neither, as it takes no strong arm's bonus.
+TEST_F(AttackStrengthTest, OgreGauntletsBesideAGirdleAddTheirOwnRow)
+{
+	wear_girdle_and_gauntlets();
+	const std::unique_ptr<Item> longBow = weapon("long_bow");
+
+	struct Case
+	{
+		std::string_view source{};
+		AttackKind kind{ AttackKind::MELEE };
+		const Item* fired{ nullptr };
+		int hit{ 0 };
+		int damage{ 0 };
+	};
+	const std::array<Case, 3> FROM_PAGES_964_AND_966{ {
+		{ "a swing", AttackKind::MELEE, nullptr, 6, 13 },
+		{ "a hurled or natural missile", AttackKind::RANGED, nullptr, 6, 13 },
+		{ "a bow", AttackKind::RANGED, longBow.get(), 0, 0 },
+	} };
+
+	for (const Case& expected : FROM_PAGES_964_AND_966)
+	{
+		const AttackStrength::Adjustment adjustment = AttackStrength::adjustment(
+			mock.data_manager,
+			*player,
+			expected.kind,
+			expected.fired);
+
+		EXPECT_EQ(adjustment.hit, expected.hit) << expected.source;
+		EXPECT_EQ(adjustment.damage, expected.damage) << expected.source;
+	}
+}
+
+// Each alone gives its own row: the girdle's 19 is +3 and +7, the gauntlets' 18/00 is +3
+// and +6.
+TEST_F(AttackStrengthTest, AGirdleOrOgreGauntletsAloneGiveOnlyTheirOwnRow)
+{
+	player->set_strength(12);
+	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
+	const AttackStrength::Adjustment girdleAlone = AttackStrength::adjustment(
+		mock.data_manager,
+		*player,
+		AttackKind::MELEE,
+		nullptr);
+	EXPECT_EQ(girdleAlone.hit, 3);
+	EXPECT_EQ(girdleAlone.damage, 7);
+
+	ASSERT_TRUE(player->unequip_item(EquipmentSlot::GIRDLE, ctx));
+	ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_ogre_power"), EquipmentSlot::GAUNTLETS, ctx));
+	const AttackStrength::Adjustment gauntletsAlone = AttackStrength::adjustment(
+		mock.data_manager,
+		*player,
+		AttackKind::MELEE,
+		nullptr);
+	EXPECT_EQ(gauntletsAlone.hit, 3);
+	EXPECT_EQ(gauntletsAlone.damage, 6);
+}
+
+// The exception is for gauntlets of ogre power: gauntlets of swimming and climbing leave
+// a girdle's blow at its own +3 and +7.
+TEST_F(AttackStrengthTest, OtherGauntletsBesideAGirdleAddNothing)
+{
+	player->set_strength(12);
+	ASSERT_TRUE(player->equip_item(weapon("girdle_of_hill_giant_strength"), EquipmentSlot::GIRDLE, ctx));
+	ASSERT_TRUE(player->equip_item(weapon("gauntlets_of_swimming_and_climbing"), EquipmentSlot::GAUNTLETS, ctx));
+
+	const AttackStrength::Adjustment swing = AttackStrength::adjustment(
+		mock.data_manager,
+		*player,
+		AttackKind::MELEE,
+		nullptr);
+
+	EXPECT_EQ(swing.hit, 3);
+	EXPECT_EQ(swing.damage, 7);
+}
+
+// Through an attack: THAC0 20 against armour class 10 needs a 10, so +6 hits on a 4 and
+// not a 3, and the blow adds 13.
+TEST_F(AttackStrengthTest, ASwingInOgreGauntletsAndAGirdleTakesBoth)
+{
+	wear_girdle_and_gauntlets();
+	ASSERT_TRUE(player->equip_item(weapon("long_sword"), EquipmentSlot::RIGHT_HAND, ctx));
+
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 3), 0) << "a 3 hit";
+	EXPECT_EQ(damage_from(*player, *target, AttackKind::MELEE, 4), DIE_ROLLED + 13);
 }
 
 // The sling is its own class now, not a bow that would take the bow's penalty.

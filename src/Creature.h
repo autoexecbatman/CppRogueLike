@@ -182,6 +182,16 @@ public:
 	//   ... wearing gauntlets of ogre power ...
 	//   fighter.get_exceptional_strength();   // -> 100
 	int get_exceptional_strength() const noexcept;
+	// The worn gauntlets that set Strength, gauntlets of ogre power, when a girdle of giant
+	// strength is worn too: the girdle takes no other Strength bonus "except in combination
+	// with gauntlets of ogre power" (DMG, PDF page 966), so theirs still counts on a blow.
+	// Null without both.
+	//
+	// Example, a fighter in a girdle of hill giant strength:
+	//   fighter.get_gauntlets_beside_girdle(); // -> nullptr
+	//   ... putting on gauntlets of ogre power ...
+	//   fighter.get_gauntlets_beside_girdle(); // -> the gauntlets, 18 and a percentile of 100
+	const Gauntlets* get_gauntlets_beside_girdle() const noexcept;
 	int get_dexterity() const noexcept { return calculate_effective_stat(baseDexterity, BuffType::DEXTERITY); }
 	int get_constitution() const noexcept { return calculate_effective_stat(baseConstitution, BuffType::CONSTITUTION); }
 	int get_intelligence() const noexcept { return calculate_effective_stat(baseIntelligence, BuffType::INTELLIGENCE); }

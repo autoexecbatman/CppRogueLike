@@ -16,7 +16,8 @@
 #include "DataManager.h"
 #include "DexterityAttributes.h"
 #include "HungerSystem.h"
-#include "StrengthAttributes.h"
+#include "AttackKind.h"
+#include "AttackStrength.h"
 #include "ItemEnhancements.h"
 #include "LevelUpSystem.h"
 #include "CharacterSheetUI.h"
@@ -78,9 +79,14 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     int tileSize = ctx.renderer->get_tile_size();
     int x = tileSize;
 
-    const StrengthAttributes strengthRow = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength());
-    const int strHitMod = strengthRow.hitProb;
-    const int strDmgMod = strengthRow.dmgAdj;
+    // What Strength gives a swing, as the attack itself reads it.
+    const AttackStrength::Adjustment swing = AttackStrength::adjustment(
+        *ctx.dataManager,
+        player,
+        AttackKind::MELEE,
+        nullptr);
+    const int strHitMod = swing.hit;
+    const int strDmgMod = swing.damage;
 
     const DexterityAttributes dexterityRow = ctx.dataManager->dexterity_for(player.get_dexterity());
     const int missileAdj = dexterityRow.MissileAttackAdj;
@@ -154,7 +160,12 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
         damageDisplay = WeaponDamageRegistry::get_unarmed_damage_info().displayRoll;
     }
 
-    const int strDmgMod = ctx.dataManager->strength_for(player.get_strength(), player.get_exceptional_strength()).dmgAdj;
+    const AttackStrength::Adjustment swing = AttackStrength::adjustment(
+        *ctx.dataManager,
+        player,
+        AttackKind::MELEE,
+        nullptr);
+    const int strDmgMod = swing.damage;
 
     ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
     row++;

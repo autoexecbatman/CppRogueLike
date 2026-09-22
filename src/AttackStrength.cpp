@@ -3,6 +3,7 @@
 
 #include <algorithm>
 
+#include "Creature.h"
 #include "DataManager.h"
 #include "Item.h"
 #include "ItemClassification.h"
@@ -11,15 +12,23 @@
 
 AttackStrength::Adjustment AttackStrength::adjustment(
 	const DataManager& dataManager,
-	int strength,
-	int exceptionalStrength,
+	const Creature& attacker,
 	AttackKind kind,
 	const Item* missileWeapon)
 {
-	const StrengthAttributes row = dataManager.strength_for(strength, exceptionalStrength);
+	const StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());
 
 	// A swing, and a missile thrown by hand or by nature, carries the arm's whole strength.
-	const Adjustment wholeRow{ row.hitProb, row.dmgAdj };
+	Adjustment wholeRow{ row.hitProb, row.dmgAdj };
+
+	// Ogre gauntlets beside a girdle of giant strength add their own row to such a blow.
+	if (const Gauntlets* gauntlets = attacker.get_gauntlets_beside_girdle())
+	{
+		const StrengthAttributes hands = dataManager.strength_for(gauntlets->strBonus, gauntlets->exceptionalStrength);
+		wholeRow.hit += hands.hitProb;
+		wholeRow.damage += hands.dmgAdj;
+	}
+
 	if (kind == AttackKind::MELEE || missileWeapon == nullptr)
 	{
 		return wholeRow;

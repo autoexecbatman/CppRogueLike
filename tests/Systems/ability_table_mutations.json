@@ -32,9 +32,9 @@
       "catches": "Strength's hit adjustment never reaching the attack roll"
     },
     {
-      "file": "src/Attacker.cpp",
-      "original": "\t\towner.get_exceptional_strength(),\n\t\tkind,",
-      "mutated": "\t\t0,\n\t\tkind,",
+      "file": "src/AttackStrength.cpp",
+      "original": "\tconst StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), attacker.get_exceptional_strength());",
+      "mutated": "\tconst StrengthAttributes row = dataManager.strength_for(attacker.get_strength(), 0);",
       "catches": "exceptional Strength left out of the damage"
     },
     {

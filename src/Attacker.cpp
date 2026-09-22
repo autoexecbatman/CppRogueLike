@@ -93,8 +93,7 @@ void Attacker::perform_single_attack(
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
 	const AttackStrength::Adjustment strengthOnAttack = AttackStrength::adjustment(
 		*ctx.dataManager,
-		owner.get_strength(),
-		owner.get_exceptional_strength(),
+		owner,
 		kind,
 		missileWeapon);
 

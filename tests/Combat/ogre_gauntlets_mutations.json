@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AttackStrengthTest.*:StatBoostEquipmentTest.*:AbilityTableTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\tif (const Gauntlets* gauntlets = attacker.get_gauntlets_beside_girdle())",
+      "mutated": "\tif (const Gauntlets* gauntlets = nullptr)",
+      "catches": "ogre gauntlets adding nothing beside a girdle, as before the rule"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\twholeRow.hit += hands.hitProb;",
+      "mutated": "",
+      "catches": "the gauntlets' +3 left off the roll to hit"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "\t\twholeRow.damage += hands.dmgAdj;",
+      "mutated": "",
+      "catches": "the gauntlets' +6 left off the damage"
+    },
+    {
+      "file": "src/AttackStrength.cpp",
+      "original": "dataManager.strength_for(gauntlets->strBonus, gauntlets->exceptionalStrength);",
+      "mutated": "dataManager.strength_for(gauntlets->strBonus, 0);",
+      "catches": "the gauntlets read as a plain 18, +1 and +2, without their percentile"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn wearsGiantStrength ? strengthGauntlets : nullptr;",
+      "mutated": "\treturn strengthGauntlets;",
+      "catches": "ogre gauntlets alone counted twice, their 18/00 as the score and again beside it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\twearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
+      "mutated": "\t\twearsGiantStrength = is_giant_strength_girdle(*worn.item);\n\t\tif (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))",
+      "catches": "only the last worn item asked about the girdle, so gauntlets put on after it hide it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;",
+      "mutated": "\treturn gauntlets;",
+      "catches": "any gauntlets counted beside the girdle, swimming and climbing included"
+    }
+  ]
+}

@@ -921,12 +921,23 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 // Whether the item is a girdle of giant strength, which is the girdle that sets Strength.
 //
 // Example:
-//   is_giant_strength_girdle(girdleOfHillGiantStrength);   // -> true
-//   is_giant_strength_girdle(gauntletsOfOgrePower);        // -> false, gauntlets
+//   is_giant_strength_girdle(girdleOfHillGiantStrength); // -> true
+//   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
 bool is_giant_strength_girdle(const Item& item) noexcept
 {
 	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
 	return girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;
+}
+
+// The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
+//
+// Example:
+//   strength_setting_gauntlets(gauntletsOfOgrePower); // -> their Gauntlets
+//   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing); // -> nullptr, they add
+const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
+{
+	const Gauntlets* gauntlets = item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
+	return gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;
 }
 } // namespace
 
@@ -955,6 +966,22 @@ int Creature::get_exceptional_strength() const noexcept
 		}
 	}
 	return exceptional;
+}
+
+const Gauntlets* Creature::get_gauntlets_beside_girdle() const noexcept
+{
+	bool wearsGiantStrength = false;
+	const Gauntlets* strengthGauntlets = nullptr;
+	for (const EquippedItem& worn : equippedItems)
+	{
+		assert(worn.item && "an equipment slot holds a null item");
+		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
+		if (const Gauntlets* gauntlets = strength_setting_gauntlets(*worn.item))
+		{
+			strengthGauntlets = gauntlets;
+		}
+	}
+	return wearsGiantStrength ? strengthGauntlets : nullptr;
 }
 
 // AD&D 2e: an ability score is the creature's own, or the highest value any buff or worn

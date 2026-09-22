@@ -39,8 +39,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\twearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);",
-      "mutated": "\t\twearsGiantStrength = is_giant_strength_girdle(*worn.item);",
+      "original": "\t\tcount_addition(effect.add);\n\t\twearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);",
+      "mutated": "\t\tcount_addition(effect.add);\n\t\twearsGiantStrength = is_giant_strength_girdle(*worn.item);",
       "catches": "only the last worn item asked, so gauntlets put on after the girdle hide it"
     },
     {
