@@ -173,6 +173,43 @@ TEST_F(SanctuarySaveTest, ANewCastingIsMetWithAFreshSave)
 	EXPECT_FALSE(turned_away_from_player(goblin)) << "a failure against the last casting held against this one";
 }
 
+// A casting over a running one is still a new casting, and a save is good only against
+// "that casting of the spell": the goblin that failed rolls again, and makes it.
+TEST_F(SanctuarySaveTest, ACastingOverARunningOneIsMetWithAFreshSave)
+{
+	cast_sanctuary(*player);
+	script({ 1, 20 });
+	ASSERT_TRUE(turned_away_from_player(goblin));
+
+	cast_sanctuary(*player);
+
+	EXPECT_FALSE(turned_away_from_player(goblin)) << "a failure against the last casting held against this one";
+}
+
+// It cuts both ways: the goblin that made its save rolls again, and fails.
+TEST_F(SanctuarySaveTest, ACastingOverARunningOneUndoesAMadeSave)
+{
+	cast_sanctuary(*player);
+	script({ 20, 1 });
+	ASSERT_FALSE(turned_away_from_player(goblin));
+
+	cast_sanctuary(*player);
+
+	EXPECT_TRUE(turned_away_from_player(goblin)) << "a success against the last casting held against this one";
+}
+
+// Another spell is not a new casting of this one: a bless leaves the saves standing.
+TEST_F(SanctuarySaveTest, AnotherBuffLeavesTheSanctuaryRecordAlone)
+{
+	cast_sanctuary(*player);
+	script({ 1, 20 });
+	ASSERT_TRUE(turned_away_from_player(goblin));
+
+	ctx.buffSystem->add_buff(*player, BuffType::BLESS, 1, 10, false);
+
+	EXPECT_TRUE(turned_away_from_player(goblin)) << "a bless wiped the sanctuary's record";
+}
+
 // Without Sanctuary nobody is turned away, and the 1 queued for a save is never read.
 TEST_F(SanctuarySaveTest, NoSanctuaryTurnsNobodyAway)
 {

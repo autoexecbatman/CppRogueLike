@@ -52,6 +52,10 @@ void BuffSystem::add_buff(Creature& creature, BuffType type, int value, int dura
 
 	if (it != creature.activeBuffs.end())
 	{
+		// A save is good against "that casting of the spell" (Player's Handbook, PDF page
+		// 436), so a casting over a running one is met with fresh saves.
+		it->opponentSaves.clear();
+
 		// AD&D 2e: Same buff type - take highest value, extend duration
 		if (value > it->value)
 		{

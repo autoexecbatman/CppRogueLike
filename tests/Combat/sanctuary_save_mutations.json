@@ -38,6 +38,18 @@
       "catches": "a monster turned away by a Sanctuary that is not there"
     },
     {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t\tit->opponentSaves.clear();",
+      "mutated": "",
+      "catches": "a casting over a running one keeping the saves rolled against the last"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tauto it = std::ranges::find_if(creature.activeBuffs, matches_type);\n\n\tif (it != creature.activeBuffs.end())",
+      "mutated": "\tauto it = std::ranges::find_if(creature.activeBuffs, matches_type);\n\tfor (Buff& anyBuff : creature.activeBuffs)\n\t{\n\t\tanyBuff.opponentSaves.clear();\n\t}\n\n\tif (it != creature.activeBuffs.end())",
+      "catches": "any other spell clearing the sanctuary's saves, not a new casting of it"
+    },
+    {
       "file": "src/Creature.cpp",
       "original": "\t\tbuffJson[\"opponentSaves\"] = savesJson;",
       "mutated": "\t\tbuffJson[\"opponentSaves\"] = json::array();",
