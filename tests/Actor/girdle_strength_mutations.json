@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=StatBoostEquipmentTest.*:EquipmentStatBonusTest.*:AttackStrengthTest.*:CarryCapacityTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\tconst bool takesBonuses = true;",
+      "catches": "every bonus added on top of a girdle of giant strength, as before the rule"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\tconst bool takesBonuses = !wearsGiantStrength;",
+      "catches": "the girdle stripping the bonuses of every ability, not Strength alone"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tconst bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;",
+      "mutated": "\tconst bool takesBonuses = type != BuffType::STRENGTH || highestSet == 0;",
+      "catches": "any set Strength refusing bonuses, where the book says it of the girdle alone"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn effectiveBase + (takesBonuses ? bonuses : 0) + penalties;",
+      "mutated": "\treturn effectiveBase + (takesBonuses ? bonuses + penalties : 0);",
+      "catches": "the girdle lifting penalties too, which the book never says"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tif (amount > 0)\n\t\t{\n\t\t\tbonuses += amount;",
+      "mutated": "\t\tif (amount < 0)\n\t\t{\n\t\t\tbonuses += amount;",
+      "catches": "bonuses and penalties filed under each other's names"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\twearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);",
+      "mutated": "\t\twearsGiantStrength = is_giant_strength_girdle(*worn.item);",
+      "catches": "only the last worn item asked, so gauntlets put on after the girdle hide it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;",
+      "mutated": "\treturn girdle != nullptr;",
+      "catches": "any girdle read as giant strength, a girdle of dwarvenkind included"
+    }
+  ]
+}

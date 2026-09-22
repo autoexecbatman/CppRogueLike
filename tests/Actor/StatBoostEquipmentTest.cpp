@@ -5,8 +5,9 @@
 // strength does: "The Strength gained is not cumulative with normal or magical Strength
 // bonuses" (Dungeon Master's Guide, PDF page 966 of the 2e archive). While worn the score
 // is the higher of the creature's own and the highest set value, plus every addition, the
-// rule buffs already follow; and taking an item off must return the score to exactly what
-// it was, in whatever order items and buffs come and go.
+// rule buffs already follow - except that under a girdle of giant strength only the
+// penalties count. Taking an item off must return the score to exactly what it was, in
+// whatever order items and buffs come and go.
 //
 // Items are put on the way the inventory screen does - use_item on the item - and taken
 // off the way the equipment screen does, unequip_item on the slot.
@@ -161,6 +162,59 @@ TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 	ctx.buffSystem->remove_buff(*player, BuffType::STRENGTH);
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH);
+}
+
+// A Strength buff adds nothing to a girdle of giant strength's 19.
+TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromABuff)
+{
+	put_on("girdle_of_hill_giant_strength");
+
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 1, 10, false);
+
+	EXPECT_EQ(player->get_strength(), 19) << "a buff's +1 was added to the girdle's 19";
+}
+
+// Nor does another worn item: gauntlets of swimming and climbing add their +2 to the
+// wearer's own score and nothing to the girdle's.
+TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromAnotherWornItem)
+{
+	put_on("girdle_of_hill_giant_strength");
+	put_on("gauntlets_of_swimming_and_climbing");
+
+	EXPECT_EQ(player->get_strength(), 19) << "the gauntlets' +2 was added to the girdle's 19";
+}
+
+// The book removes bonuses only, so a penalty still lowers the girdle's 19.
+TEST_F(StatBoostEquipmentTest, APenaltyStillLowersAGirdlesStrength)
+{
+	put_on("girdle_of_hill_giant_strength");
+
+	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, -1, 10, false);
+
+	EXPECT_EQ(player->get_strength(), 18);
+}
+
+// The rule is about the girdle's Strength alone: a Dexterity bonus still adds while it is worn.
+TEST_F(StatBoostEquipmentTest, AGirdleLeavesOtherAbilitiesTheirBonuses)
+{
+	put_on("girdle_of_hill_giant_strength");
+
+	ctx.buffSystem->add_buff(*player, BuffType::DEXTERITY, 1, 10, false);
+
+	EXPECT_EQ(player->get_dexterity(), 11);
+}
+
+// A girdle of dwarvenkind adds Constitution (DMG, PDF page 966) and sets no Strength, so
+// Strength bonuses still count while it is worn.
+TEST_F(StatBoostEquipmentTest, AGirdleThatSetsNoStrengthLeavesTheBonuses)
+{
+	put_on("gauntlets_of_swimming_and_climbing");
+	put_on("girdle_of_hill_giant_strength");
+
+	// Made a girdle of dwarvenkind, which the data does not hold.
+	player->get_equipped_item(EquipmentSlot::GIRDLE)->behavior = Girdle{ .conBonus = 1 };
+
+	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2);
 }
 
 // Gauntlets of ogre power give "18/00 Strength" (DMG, PDF page 964): +3 to hit, +6 damage.

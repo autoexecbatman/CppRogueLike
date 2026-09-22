@@ -917,6 +917,17 @@ WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexce
 	std::visit(from_stat_boost, *item.behavior);
 	return effect;
 }
+
+// Whether the item is a girdle of giant strength, which is the girdle that sets Strength.
+//
+// Example:
+//   is_giant_strength_girdle(girdleOfHillGiantStrength);   // -> true
+//   is_giant_strength_girdle(gauntletsOfOgrePower);        // -> false, gauntlets
+bool is_giant_strength_girdle(const Item& item) noexcept
+{
+	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
+	return girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;
+}
 } // namespace
 
 int Creature::get_exceptional_strength() const noexcept
@@ -947,8 +958,11 @@ int Creature::get_exceptional_strength() const noexcept
 }
 
 // AD&D 2e: an ability score is the creature's own, or the highest value any buff or worn
-// item sets it to if that is higher, plus every buff's and worn item's addition. Nothing
-// is written back, so what is removed takes exactly its own contribution with it.
+// item sets it to if that is higher, plus every buff's and worn item's addition. Under a
+// girdle of giant strength, Strength takes the penalties and none of the bonuses, since
+// its Strength "is not cumulative with normal or magical Strength bonuses" (DMG, PDF page
+// 966). Nothing is written back, so what is removed takes exactly its own contribution
+// with it.
 int Creature::calculate_effective_stat(int base_value, BuffType type) const noexcept
 {
 	auto matchesType = [type](const Buff& b)
@@ -958,7 +972,19 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 	auto matchingBuffs = activeBuffs | std::views::filter(matchesType);
 
 	int highestSet = 0; // Highest SET effect (Potion of Giant Strength → 18)
-	int sumOfAdds = 0; // Sum of ADD effects (Strength spell +1, Gauntlets +2)
+	int bonuses = 0; // Additions above zero (Gauntlets +2)
+	int penalties = 0; // Additions below zero (a weapon of weakness, -1)
+	auto count_addition = [&bonuses, &penalties](int amount)
+	{
+		if (amount > 0)
+		{
+			bonuses += amount;
+		}
+		else
+		{
+			penalties += amount;
+		}
+	};
 
 	for (const auto& buff : matchingBuffs)
 	{
@@ -968,21 +994,25 @@ int Creature::calculate_effective_stat(int base_value, BuffType type) const noex
 		}
 		else
 		{
-			sumOfAdds += buff.value;
+			count_addition(buff.value);
 		}
 	}
 
 	// Worn items count exactly as buffs do.
+	bool wearsGiantStrength = false;
 	for (const EquippedItem& worn : equippedItems)
 	{
 		assert(worn.item && "an equipment slot holds a null item");
 		const WornAbilityEffect effect = worn_ability_effect(*worn.item, type);
 		highestSet = std::max(highestSet, effect.setTo);
-		sumOfAdds += effect.add;
+		count_addition(effect.add);
+		wearsGiantStrength = wearsGiantStrength || is_giant_strength_girdle(*worn.item);
 	}
 
-	// AD&D 2e: SET effects replace base (if higher), ADD effects always stack
+	// AD&D 2e: SET effects replace base (if higher), ADD effects stack
 	// Example: base=14, SET=18, ADD=+2 → MAX(14,18) + 2 = 20
 	int effectiveBase = (highestSet > 0) ? std::max(base_value, highestSet) : base_value;
-	return effectiveBase + sumOfAdds;
+	// A girdle of giant strength refuses the bonuses and keeps the penalties.
+	const bool takesBonuses = type != BuffType::STRENGTH || !wearsGiantStrength;
+	return effectiveBase + (takesBonuses ? bonuses : 0) + penalties;
 }

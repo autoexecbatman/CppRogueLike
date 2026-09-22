@@ -9,7 +9,7 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tconst WornAbilityEffect effect = worn_ability_effect(*worn.item, type);\n\t\thighestSet = std::max(highestSet, effect.setTo);\n\t\tsumOfAdds += effect.add;",
+      "original": "\t\tconst WornAbilityEffect effect = worn_ability_effect(*worn.item, type);\n\t\thighestSet = std::max(highestSet, effect.setTo);\n\t\tcount_addition(effect.add);",
       "mutated": "\t\tstatic_cast<void>(worn);",
       "catches": "worn items counting for nothing, as a monster's always did"
     },

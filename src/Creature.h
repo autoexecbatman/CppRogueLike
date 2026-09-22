@@ -138,7 +138,8 @@ private:
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
 
-	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD)
+	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD); under a girdle of
+	// giant strength, Strength adds its penalties and none of its bonuses
 	int calculate_effective_stat(int base_value, BuffType type) const noexcept;
 
 public:
