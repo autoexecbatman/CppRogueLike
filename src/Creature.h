@@ -25,6 +25,7 @@
 #include "EquipmentSlot.h"
 #include "InventoryData.h"
 #include "Item.h"
+#include "MagicalItemEffects.h"
 
 class DataManager;
 class Web;
@@ -261,6 +262,13 @@ public:
 	// runs for any creature.
 	[[nodiscard]] Item* get_equipped_item(EquipmentSlot slot) const noexcept;
 
+	// Whether a magical ring with this effect is on either hand.
+	//
+	// Example, wearing a ring of free action on the left hand:
+	//   creature.wears_ring_of(MagicalEffect::FREE_ACTION); // -> true
+	//   creature.wears_ring_of(MagicalEffect::REGENERATION); // -> false
+	[[nodiscard]] bool wears_ring_of(MagicalEffect effect) const noexcept;
+
 	// Whether this creature can attack at a distance: a ranged weapon is in its
 	// missile slot. Asked of the slot when it matters rather than mirrored into a
 	// flag, so there is nothing to keep in step and nothing to go stale.
@@ -386,7 +394,7 @@ public:
 	[[nodiscard]] int get_hp_base() const noexcept { return healthPool->get_hp_base(); }
 	[[nodiscard]] int get_temp_hp() const noexcept { return healthPool->get_temp_hp(); }
 	[[nodiscard]] int get_effective_hp() const noexcept { return healthPool->get_effective_hp(); }
-	// The fire and acid part of the damage taken, which regeneration cannot heal.
+	// The fire and acid part of the damage taken, which Constitution regeneration cannot heal.
 	[[nodiscard]] int get_unregenerable_damage() const noexcept { return healthPool->get_unregenerable_damage(); }
 	void set_hp(int value) noexcept { healthPool->set_hp(value); }
 	void set_max_hp(int value) noexcept { healthPool->set_max_hp(value); }
@@ -419,6 +427,15 @@ public:
 	//   fighter.regenerate_from_constitution(10, dataManager);   // heals 1
 	//   fighter.regenerate_from_constitution(11, dataManager);   // heals nothing
 	void regenerate_from_constitution(int roundsElapsed, const DataManager& dataManager);
+
+	// A ring of regeneration "restores one point of damage per turn" while worn (DMG, PDF
+	// page 910): a point each time a turn of rounds has run, fire and acid wounds included,
+	// never past the maximum, for any wearer. It never raises a dead wearer.
+	//
+	// Example, a wounded fighter wearing one:
+	//   fighter.regenerate_from_ring(10); // heals 1
+	//   fighter.regenerate_from_ring(11); // heals nothing
+	void regenerate_from_ring(int roundsElapsed);
 
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called when a creature dies — Player saves/defeats, monsters drop corpses

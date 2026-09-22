@@ -6,6 +6,8 @@
 #include <gtest/gtest.h>
 
 #include "src/Creature.h"
+#include "src/EquipmentSlot.h"
+#include "src/ItemCreator.h"
 #include "src/Player.h"
 #include "src/Web.h"
 #include "src/Vector2D.h"
@@ -55,6 +57,16 @@ TEST_F(WebTest, CreatureThatWalksWebsIsUnaffected)
 	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::UNAFFECTED);
 	EXPECT_FALSE(player->is_webbed());
 	EXPECT_FALSE(web.is_destroyed());
+}
+
+// A ring of free action tears the web: the wearer passes, unbound, and the web is gone.
+TEST_F(WebTest, ARingOfFreeActionTearsTheWeb)
+{
+	ASSERT_TRUE(player->equip_item(ItemCreator::create("ring_of_free_action", player->position, ctx), EquipmentSlot::LEFT_RING, ctx));
+
+	EXPECT_EQ(web.on_creature_enter(*player, ctx), EntryResult::AFFECTED);
+	EXPECT_FALSE(player->is_webbed());
+	EXPECT_TRUE(web.is_destroyed());
 }
 
 // A failed catch roll still counts as an effect, and never binds the creature.

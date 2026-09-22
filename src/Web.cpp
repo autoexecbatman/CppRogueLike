@@ -1,10 +1,7 @@
 #include <algorithm>
-#include <variant>
 
 #include "Actor.h"
 #include "Creature.h"
-#include "EquipmentSlot.h"
-#include "Pickable.h"
 #include "Colors.h"
 #include "GameContext.h"
 #include "MagicalItemEffects.h"
@@ -31,20 +28,11 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 	}
 
 	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
-	for (const auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
+	if (creature.wears_ring_of(MagicalEffect::FREE_ACTION))
 	{
-		if (Item* equippedRing = creature.get_equipped_item(slot))
-		{
-			if (const auto* magicRing = equippedRing->behavior ? std::get_if<MagicalRing>(&*equippedRing->behavior) : nullptr)
-			{
-				if (magicRing->effect == MagicalEffect::FREE_ACTION)
-				{
-					ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
-					destroy();
-					return EntryResult::AFFECTED;
-				}
-			}
-		}
+		ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
+		destroy();
+		return EntryResult::AFFECTED;
 	}
 
 	// Calculate chance to get caught based on dexterity and web strength

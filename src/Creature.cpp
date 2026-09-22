@@ -369,6 +369,22 @@ void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager
 	}
 }
 
+void Creature::regenerate_from_ring(int roundsElapsed)
+{
+	assert(roundsElapsed > 0 && "Creature::regenerate_from_ring called before a round has run");
+
+	if (is_dead() || !wears_ring_of(MagicalEffect::REGENERATION))
+	{
+		return;
+	}
+
+	// A point each turn, reckoned in rounds; heal reaches fire and acid, which the ring mends.
+	if (roundsElapsed % GameBalance::Time::ROUNDS_PER_TURN == 0)
+	{
+		[[maybe_unused]] const int healed = healthPool->heal(1);
+	}
+}
+
 // HealthPool does the arithmetic and FloatingTextSystem decides how the number
 // looks; this states who was hurt and joins the two.
 int Creature::take_damage(int damage, GameContext& ctx, DamageType damageType)
@@ -662,6 +678,17 @@ Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 	auto worn = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	return (worn != equippedItems.end()) ? worn->item.get() : nullptr;
+}
+
+bool Creature::wears_ring_of(MagicalEffect effect) const noexcept
+{
+	auto holds_ring_of_effect = [this, effect](EquipmentSlot hand)
+	{
+		const Item* ring = get_equipped_item(hand);
+		const MagicalRing* magicalRing = ring && ring->behavior ? std::get_if<MagicalRing>(&*ring->behavior) : nullptr;
+		return magicalRing != nullptr && magicalRing->effect == effect;
+	};
+	return holds_ring_of_effect(EquipmentSlot::RIGHT_RING) || holds_ring_of_effect(EquipmentSlot::LEFT_RING);
 }
 
 // Binds this creature into a web. The caller decides what is announced.

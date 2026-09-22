@@ -196,6 +196,14 @@ TEST_F(AssertProbeDeathTest, RegeneratingBeforeARoundHasRunAborts)
 	EXPECT_DEATH(creature->regenerate_from_constitution(0, mock.data_manager), "called before a round has run");
 }
 
+// A ring of regeneration counts rounds the same way, and round 0 would heal every wearer.
+TEST_F(AssertProbeDeathTest, RegeneratingFromARingBeforeARoundHasRunAborts)
+{
+	std::unique_ptr<Creature> creature = make_creature();
+
+	EXPECT_DEATH(creature->regenerate_from_ring(0), "regenerate_from_ring called before a round has run");
+}
+
 // Fire and acid damage is part of the damage taken, so it can never exceed it. A pool
 // at full health holding some would let regeneration heal a negative amount.
 TEST_F(AssertProbeDeathTest, RegeneratingWithMoreFireAndAcidThanDamageAborts)

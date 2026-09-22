@@ -863,20 +863,10 @@ std::vector<SpellSystem::ItemGrantedSpell> SpellSystem::get_item_granted_spells(
 {
 	std::vector<ItemGrantedSpell> itemSpells;
 
-	// Check for Ring of Invisibility
-	for (auto slot : { EquipmentSlot::RIGHT_RING, EquipmentSlot::LEFT_RING })
+	// Check for Ring of Invisibility, once however many are worn
+	if (player.wears_ring_of(MagicalEffect::INVISIBILITY))
 	{
-		if (Item* ring = player.get_equipped_item(slot))
-		{
-			if (const auto* magicRing = ring->behavior ? std::get_if<MagicalRing>(&*ring->behavior) : nullptr)
-			{
-				if (magicRing->effect == MagicalEffect::INVISIBILITY)
-				{
-					itemSpells.push_back({ "invisibility", "Ring" });
-					break; // Only add once even if wearing two
-				}
-			}
-		}
+		itemSpells.push_back({ "invisibility", "Ring" });
 	}
 
 	// Check for Helm of Teleportation

@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RingEffectsTest.*:WebTest.*:ConstitutionRegenerationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (roundsElapsed % GameBalance::Time::ROUNDS_PER_TURN == 0)\n\t{\n\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
+      "mutated": "\tif (roundsElapsed % 1 == 0)\n\t{\n\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
+      "catches": "a point every round where the book gives one a turn"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t[[maybe_unused]] const int healed = healthPool->heal(1);",
+      "mutated": "\t\t[[maybe_unused]] const int healed = healthPool->regenerate(1);",
+      "catches": "the ring leaving fire and acid unhealed, as Constitution does"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (is_dead() || !wears_ring_of(MagicalEffect::REGENERATION))",
+      "mutated": "\tif (!wears_ring_of(MagicalEffect::REGENERATION))",
+      "catches": "the ring raising a dead wearer through heal"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (is_dead() || !wears_ring_of(MagicalEffect::REGENERATION))",
+      "mutated": "\tif (is_dead())",
+      "catches": "every creature regenerating, ring or none"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING) || holds_ring_of_effect(EquipmentSlot::LEFT_RING);",
+      "mutated": "\treturn holds_ring_of_effect(EquipmentSlot::RIGHT_RING);",
+      "catches": "a ring on the left hand doing nothing"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\treturn magicalRing != nullptr && magicalRing->effect == effect;",
+      "mutated": "\t\treturn magicalRing != nullptr;",
+      "catches": "any magical ring answering for every effect"
+    },
+    {
+      "file": "src/Web.cpp",
+      "original": "\tif (creature.wears_ring_of(MagicalEffect::FREE_ACTION))",
+      "mutated": "\tif (creature.wears_ring_of(MagicalEffect::INVISIBILITY))",
+      "catches": "the web asking for the wrong ring, so free action is caught like anyone"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (player.wears_ring_of(MagicalEffect::INVISIBILITY))",
+      "mutated": "\tif (player.wears_ring_of(MagicalEffect::FREE_ACTION))",
+      "catches": "the spell list asking for the wrong ring, so invisibility is never granted"
+    }
+  ]
+}

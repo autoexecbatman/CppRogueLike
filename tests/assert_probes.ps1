@@ -92,6 +92,11 @@ $probes = @(
         anchor = 'assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");'
     },
     @{
+        test   = "AssertProbeDeathTest.RegeneratingFromARingBeforeARoundHasRunAborts"
+        file   = "src/Creature.cpp"
+        anchor = 'assert(roundsElapsed > 0 && "Creature::regenerate_from_ring called before a round has run");'
+    },
+    @{
         test   = "AssertProbeDeathTest.RegeneratingWithMoreFireAndAcidThanDamageAborts"
         file   = "src/HealthPool.cpp"
         anchor = 'assert(unregenerableDamage <= hpMax - hp && "HealthPool::regenerate: more fire and acid damage than damage");'
