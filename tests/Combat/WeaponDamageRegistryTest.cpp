@@ -1,9 +1,14 @@
 #include <gtest/gtest.h>
+#include <algorithm>
 #include <chrono>
+#include <ranges>
 #include <string>
 #include <vector>
 #include "src/WeaponDamageRegistry.h"
 #include "src/DamageInfo.h"
+#include "src/ItemRegistry.h"
+#include "src/Paths.h"
+#include "src/Pickable.h"
 
 // ============================================================================
 // WEAPON DAMAGE REGISTRY TESTS
@@ -44,6 +49,40 @@ TEST_F(WeaponDamageRegistryTest, GetDamageInfo_BattleAxe) {
 
     EXPECT_EQ(info.minDamage, 1);
     EXPECT_EQ(info.maxDamage, 8);
+}
+
+// Every weapon the data ships has its damage here. One that does not is not a missing
+// number on a screen: get_damage_info answers an unknown key with a fist, and it cannot
+// throw instead, because the character sheet and the inventory call it to draw.
+TEST_F(WeaponDamageRegistryTest, EveryWeaponInTheDataHasItsDamage)
+{
+    ItemRegistry items;
+    items.load(Paths::ITEMS);
+
+    std::string unarmed;
+    for (const std::string& key : items.get_all_keys())
+    {
+        if (items.get_params(key).pickableType == PickableType::WEAPON && !WeaponDamageRegistry::is_registered(key))
+        {
+            unarmed += " " + key;
+        }
+    }
+
+    EXPECT_TRUE(unarmed.empty()) << "weapons that would hit for a fist:" << unarmed;
+}
+
+// The book names no plain crossbow: its Crossbow row heads hand, light and heavy, each
+// with its own quarrel (Player's Handbook, PDF page 145). The item the data called
+// "crossbow" cost 35 gp, which is the light crossbow's price, so it was that crossbow
+// and its spawn weight belongs to it.
+TEST_F(WeaponDamageRegistryTest, TheCrossbowThatSpawnsIsTheLightCrossbow)
+{
+    ItemRegistry items;
+    items.load(Paths::ITEMS);
+    const std::vector<std::string> keys = items.get_all_keys();
+
+    EXPECT_EQ(std::ranges::find(keys, "crossbow"), keys.end()) << "the crossbow the book does not name is back";
+    EXPECT_GT(items.get_params("light_crossbow").baseWeight, 0) << "no crossbow reaches a floor any more";
 }
 
 // Registration Status

@@ -23,7 +23,7 @@
       "file": "src/ItemRegistry.cpp",
       "original": "\t\t\t\"ItemRegistry::load -- item '{}' is missing required field '{}'\",\n\t\t\titemKey,\n\t\t\tfield));",
       "mutated": "\t\t\t\"ItemRegistry::load -- a record is missing a required field\"));",
-      "catches": "a refusal that names neither the record nor the field, useless across 98 of them"
+      "catches": "a refusal that names neither the record nor the field, useless across a file of them"
     },
     {
       "file": "src/ItemRegistry.cpp",

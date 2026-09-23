@@ -30,6 +30,12 @@
       "original": "\t\t{ \"short_bow\", { \"1d6\", DamageType::PHYSICAL } },",
       "mutated": "\t\t{ \"short_bow\", { \"1d8\", DamageType::PHYSICAL } },",
       "catches": "a short bow loosing a sheaf arrow rather than a flight arrow"
+    },
+    {
+      "file": "src/WeaponDamageRegistry.cpp",
+      "original": "\t\t{ \"morning_star\", { \"2d4\", DamageType::PHYSICAL } },",
+      "mutated": "",
+      "catches": "a weapon the data ships dropped from the map, so it hits for a fist"
     }
   ]
 }
