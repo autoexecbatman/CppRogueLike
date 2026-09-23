@@ -8,18 +8,6 @@
   ],
   "mutations": [
     {
-      "file": "src/AiSpider.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\treturn;\n\t}",
-      "mutated": "\tif (false)\n\t{\n\t\treturn;\n\t}",
-      "catches": "venom that never asks the target's Sanctuary"
-    },
-    {
-      "file": "src/AiSpider.cpp",
-      "original": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t\treturn;\n\t}",
-      "mutated": "\tif (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))\n\t{\n\t}",
-      "catches": "venom turned away by Sanctuary that lands anyway"
-    },
-    {
       "file": "src/AiWebSpinner.cpp",
       "original": "\t\tbite(owner, *ctx.player(), ctx);",
       "mutated": "",

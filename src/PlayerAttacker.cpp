@@ -26,7 +26,7 @@ DamageInfo PlayerAttacker::compute_weapon_damage(EquipmentSlot slot) const
 	return WeaponDamageRegistry::get_unarmed_damage_info();
 }
 
-void PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
+AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 {
 	// Every to-hit adjustment the equipped weapon confers, resolved at the point of
 	// attack so there is one source of truth. AD&D 2e PHB p.88: a cursed weapon is
@@ -58,20 +58,24 @@ void PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 		Item* mainWeapon = owner.get_equipped_item(EquipmentSlot::RIGHT_HAND);
 		const std::string mainName = mainWeapon ? mainWeapon->actorData.name : "unarmed";
 
-		perform_single_attack(
+		const AttackResult mainHand = perform_single_attack(
 			owner, target, mainDamage,
 			dualWieldInfo.mainHandPenalty + weapon_hit_modifier(EquipmentSlot::RIGHT_HAND),
 			mainName, kind, ctx);
 
+		// The off hand swings only while the target is still up, so a main hand that
+		// killed outright reports for both.
+		AttackResult offHand = AttackResult::PREVENTED;
 		if (!target.is_dead())
 		{
 			const DamageInfo offDamage = compute_weapon_damage(EquipmentSlot::LEFT_HAND);
-			perform_single_attack(
+			offHand = perform_single_attack(
 				owner, target, offDamage,
 				dualWieldInfo.offHandPenalty + weapon_hit_modifier(EquipmentSlot::LEFT_HAND),
 				"off hand", kind, ctx);
 		}
-		return;
+		const bool eitherLanded = mainHand == AttackResult::LANDED || offHand == AttackResult::LANDED;
+		return eitherLanded ? AttackResult::LANDED : mainHand;
 	}
 
 	// The attack says which weapon it is made with. Carrying a bow does not change
@@ -82,7 +86,7 @@ void PlayerAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 	Item* weapon = owner.get_equipped_item(weaponSlot);
 	const DamageInfo attackDamage = compute_weapon_damage(weaponSlot);
 	const std::string weaponName = weapon ? weapon->actorData.name : "unarmed";
-	perform_single_attack(owner, target, attackDamage, weapon_hit_modifier(weaponSlot), weaponName, kind, ctx);
+	return perform_single_attack(owner, target, attackDamage, weapon_hit_modifier(weaponSlot), weaponName, kind, ctx);
 }
 
 // A player's damage comes from the weapon in hand, which the item itself

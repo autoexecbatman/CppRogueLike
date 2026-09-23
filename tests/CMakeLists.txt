@@ -88,6 +88,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/StartingHitPointsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionRegenerationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RingEffectsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderVenomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RangedWeaponTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp

@@ -247,12 +247,12 @@ TEST_F(SpiderAmbushTest, SanctuaryHoldsOffASpiderThatFailsToSave)
 }
 
 // A spider turned away by Sanctuary ignores the player, so it takes no surprise round:
-// no surprise roll, and no word of one. The 1 queued where a surprise roll would be
-// read would surprise the player if it were.
+// no surprise roll, and no word of one. A turned-away bite rolls nothing after the save
+// it failed, so the 1 behind it is what a surprise roll would read, and a 1 surprises.
 TEST_F(SpiderAmbushTest, ASpiderTurnedAwayTakesNoSurpriseRound)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
-	script({ 12, 100, 1, 20, 4, 100 });
+	script({ 12, 1, 20, 4, 100 });
 
 	spider.ai->update(spider, ctx);
 

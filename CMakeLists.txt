@@ -108,6 +108,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Attacker.h
     ${PROJECT_SOURCE_DIR}/AttackStrength.cpp
     ${PROJECT_SOURCE_DIR}/AttackStrength.h
+    ${PROJECT_SOURCE_DIR}/AttackResult.h
     ${PROJECT_SOURCE_DIR}/MonsterAttacker.cpp
     ${PROJECT_SOURCE_DIR}/MonsterAttacker.h
     ${PROJECT_SOURCE_DIR}/PlayerAttacker.cpp

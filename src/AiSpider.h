@@ -35,11 +35,16 @@ protected:
 	// Specialized spider movement pattern that prefers walls and corners
 	void move_or_attack(Creature& owner, Vector2D targetPosition, GameContext& ctx) override;
 
-	// One round of the spider's attacks: its bite, then its chance at venom.
+	// One round of the spider's attacks: its bite, and the venom a bite that lands injects.
 	//
 	// Example, beside the player:
-	//   bite(owner, *ctx.player(), ctx);   // attack roll, damage on a hit, then the venom roll
+	//   bite(owner, *ctx.player(), ctx);   // attack roll, damage on a hit, then the venom
 	void bite(Creature& owner, Creature& target, GameContext& ctx);
+
+	// What this spider's venom does to a victim its bite has just landed on. This one
+	// rolls its chance and takes a few points; the kinds whose book poison is written
+	// out override it.
+	virtual void inject_venom(Creature& owner, Creature& target, GameContext& ctx);
 
 	// Check if the spider can attempt a poison attack
 	bool can_poison_attack(GameContext& ctx);

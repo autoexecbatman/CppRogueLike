@@ -23,6 +23,7 @@
 #include "Vector2D.h"
 #include "Ai.h"
 #include "AiMonster.h"
+#include "AttackResult.h"
 #include "AiSpider.h"
 
 // Spider AI constants
@@ -329,9 +330,20 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 
 void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 {
-	owner.attacker->attack(target, AttackKind::MELEE, ctx);
+	const AttackResult result = owner.attacker->attack(target, AttackKind::MELEE, ctx);
 
-	// The venom is rolled whether or not the bite landed.
+	// Poison "must be injected into the bloodstream by bite or sting" (DMG, PDF page 736),
+	// so a bite that never landed injects nothing.
+	if (result != AttackResult::LANDED)
+	{
+		return;
+	}
+
+	inject_venom(owner, target, ctx);
+}
+
+void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
+{
 	if (can_poison_attack(ctx))
 	{
 		poison_attack(owner, target, ctx);
@@ -352,12 +364,6 @@ bool AiSpider::can_poison_attack(GameContext& ctx)
 
 void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx)
 {
-	// The venom is a direct attack, so a target's Sanctuary holds it off as it does the bite.
-	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
-	{
-		return;
-	}
-
 	// Apply poison effect to target if it's the player
 	if (target.is_player())
 	{

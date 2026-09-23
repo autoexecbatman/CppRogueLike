@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SpiderVenomTest.*:WebSpinnerSanctuaryTest.*:SpiderAmbushTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (result != AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "mutated": "",
+      "catches": "venom injected by a bite that never landed, as it was before the rule"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (result != AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "mutated": "\tif (result == AttackResult::LANDED)\n\t{\n\t\treturn;\n\t}",
+      "catches": "the rule read backwards, so only a miss injects"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\treturn isHit ? AttackResult::LANDED : AttackResult::MISSED;",
+      "mutated": "\treturn AttackResult::LANDED;",
+      "catches": "every attack reported as a hit, so a missed bite injects"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\treturn isHit ? AttackResult::LANDED : AttackResult::MISSED;",
+      "mutated": "\treturn AttackResult::MISSED;",
+      "catches": "every attack reported as a miss, so no bite ever injects"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))",
+      "mutated": "\tif (true)",
+      "catches": "a venom nobody can fail to save against"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))",
+      "mutated": "\tif (false)",
+      "catches": "a venom with no saving throw at all, which is what it had"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\tconst int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;",
+      "mutated": "\tconst int constitutionAdjustment = 0;",
+      "catches": "the Constitution table's poison adjustment left out of the save"
+    },
+    {
+      "file": "src/AiWebSpinner.cpp",
+      "original": "\ttarget.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);",
+      "mutated": "\ttarget.take_damage_and_check_death(1, ctx, DamageType::POISON);",
+      "catches": "a Type F poison that wounds instead of killing"
+    }
+  ]
+}

@@ -3,6 +3,7 @@
 #include <string>
 
 #include "AttackKind.h"
+#include "AttackResult.h"
 #include "DamageInfo.h"
 #include "Persistent.h"
 
@@ -28,7 +29,7 @@ protected:
 
 	// Shared combat resolution engine — called by both strategies.
 	// DamageInfo is supplied by the caller (subclass), not computed here.
-	void perform_single_attack(
+	AttackResult perform_single_attack(
 		Creature& owner,
 		Creature& target,
 		const DamageInfo& attackDamage,
@@ -90,8 +91,9 @@ protected:
 public:
 	// Subclasses implement attack() with their owner reference and damage source.
 	// kind says which way the attack is being made; it decides which weapon is
-	// used and whether the missile to-hit adjustment applies.
-	virtual void attack(Creature& target, AttackKind kind, GameContext& ctx) = 0;
+	// used and whether the missile to-hit adjustment applies. What comes back is
+	// what the attack did, which a bite carrying poison reads before injecting it.
+	virtual AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) = 0;
 
 	// DamageInfo accessors — valid for MonsterAttacker; PlayerAttacker leaves this empty.
 	const DamageInfo& get_damage_info() const noexcept { return damageInfo; }

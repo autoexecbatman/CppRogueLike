@@ -13,6 +13,12 @@ public:
 	explicit AiWebSpinner(int poisonChance);
 
 	void update(Creature& owner, GameContext& ctx) override;
+
+protected:
+	// Type F: the victim saves against poison or dies where it stands.
+	void inject_venom(Creature& owner, Creature& target, GameContext& ctx) override;
+
+public:
 	void load(const json& j) override;
 	void save(json& j) override;
 

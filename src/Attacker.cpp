@@ -38,7 +38,7 @@ static const std::unordered_map<BuffType, std::string_view> BUFF_BREAK_MESSAGES 
 Attacker::Attacker(const DamageInfo& damage)
 	: damageInfo(damage) {}
 
-void Attacker::perform_single_attack(
+AttackResult Attacker::perform_single_attack(
 	Creature& owner,
 	Creature& target,
 	const DamageInfo& attackDamage,
@@ -51,7 +51,7 @@ void Attacker::perform_single_attack(
 	if (target.shop && kind == AttackKind::MELEE)
 	{
 		ctx.menus->push_back(std::make_unique<MenuTrade>(target, owner, ctx));
-		return;
+		return AttackResult::PREVENTED;
 	}
 
 	// Cannot attack dead targets or without strength
@@ -62,7 +62,7 @@ void Attacker::perform_single_attack(
 		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " in vain.");
 		ctx.messageSystem->finalize_message();
-		return;
+		return AttackResult::PREVENTED;
 	}
 
 	// A bow made for a stronger arm than this one is not drawn at all, so nothing is rolled
@@ -75,7 +75,7 @@ void Attacker::perform_single_attack(
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, missileWeapon->actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
 		ctx.messageSystem->finalize_message();
-		return;
+		return AttackResult::PREVENTED;
 	}
 
 	// Sanctuary wards whoever bears it: an attacker that fails its save against the
@@ -87,7 +87,7 @@ void Attacker::perform_single_attack(
 		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
 		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
 		ctx.messageSystem->finalize_message();
-		return;
+		return AttackResult::PREVENTED;
 	}
 
 	// The part of the attacker's Table 1 row this attack takes, by what fires it.
@@ -170,6 +170,8 @@ void Attacker::perform_single_attack(
 			}
 		}
 	}
+
+	return isHit ? AttackResult::LANDED : AttackResult::MISSED;
 }
 
 BackstabInfo Attacker::calculate_backstab_bonus(const Creature& owner) const noexcept

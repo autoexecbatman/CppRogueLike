@@ -69,8 +69,8 @@
     },
     {
       "file": "src/Attacker.cpp",
-      "original": "\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn;",
-      "mutated": "\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \".\");\n\t\tctx.messageSystem->finalize_message();",
+      "original": "\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\treturn AttackResult::PREVENTED;",
+      "mutated": "\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \" cannot bring itself to attack \");\n\t\tctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);\n\t\tctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, \".\");\n\t\tctx.messageSystem->finalize_message();\n\t\tstatic_cast<void>(kind);",
       "catches": "an attack turned away by Sanctuary that lands anyway"
     },
     {

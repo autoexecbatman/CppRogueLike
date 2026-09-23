@@ -16,7 +16,7 @@ private:
 public:
 	MonsterAttacker(Creature& owner, const DamageInfo& damage);
 
-	void attack(Creature& target, AttackKind kind, GameContext& ctx) override;
+	AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) override;
 
 	// load/save delegate to Attacker base (DamageInfo serialization).
 	void load(const json& j) override { Attacker::load(j); }

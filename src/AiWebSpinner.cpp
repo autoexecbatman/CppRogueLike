@@ -3,9 +3,13 @@
 #include <memory>
 #include <vector>
 
+#include "ConstitutionAttributes.h"
 #include "Creature.h"
 #include "Colors.h"
 #include "BuffSystem.h"
+#include "DamageInfo.h"
+#include "DataManager.h"
+#include "SavingThrow.h"
 #include "GameContext.h"
 #include "Map.h"
 #include "Web.h"
@@ -86,6 +90,28 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 			random_move(owner, ctx);
 		}
 	}
+}
+
+// The Monstrous Manual's giant spider, whose numbers this weaver carries - a web-spinner
+// with a 1-8 bite, THAC0 17 and armour class 4 (PDF page 1879): "Their poison is Type F,
+// which causes immediate death if the victim fails the saving throw." Table 51 prints
+// Type F as Death/0 (DMG, PDF page 737), so a made save takes nothing at all. The
+// victim's Constitution adjusts the roll, as its own table says.
+void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
+{
+	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
+	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))
+	{
+		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, " injects venom, and it does not take hold.", true);
+		return;
+	}
+
+	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
+	ctx.messageSystem->message(WHITE_RED_PAIR, " injects a deadly venom!", true);
+
+	// "Where death is listed, all hit points are immediately lost."
+	target.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);
 }
 
 bool AiWebSpinner::should_create_web(Creature& owner, GameContext& ctx)

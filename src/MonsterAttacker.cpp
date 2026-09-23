@@ -6,7 +6,7 @@
 MonsterAttacker::MonsterAttacker(Creature& owner, const DamageInfo& damage)
 	: Attacker(damage), owner(owner) {}
 
-void MonsterAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
+AttackResult MonsterAttacker::attack(Creature& target, AttackKind kind, GameContext& ctx)
 {
-	perform_single_attack(owner, target, get_damage_info(), 0, owner.get_attack_name(), kind, ctx);
+	return perform_single_attack(owner, target, get_damage_info(), 0, owner.get_attack_name(), kind, ctx);
 }

@@ -20,7 +20,7 @@ private:
 public:
 	explicit PlayerAttacker(Player& owner);
 
-	void attack(Creature& target, AttackKind kind, GameContext& ctx) override;
+	AttackResult attack(Creature& target, AttackKind kind, GameContext& ctx) override;
 
 	// Player has no base DamageInfo to serialize.
 	void load(const json& j) override;
