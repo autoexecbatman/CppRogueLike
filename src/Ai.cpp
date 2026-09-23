@@ -8,6 +8,7 @@
 #include "AiMonsterConfused.h"
 #include "AiShopkeeper.h"
 #include "AiSpider.h"
+#include "AiGiantSpider.h"
 #include "AiWebSpinner.h"
 
 //==AI==
@@ -60,6 +61,13 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	{
 		// poisonChance restored from JSON by AiSpider::load()
 		ai = std::make_unique<AiWebSpinner>(0);
+		break;
+	}
+
+	case AiType::GIANT_SPIDER:
+	{
+		// poisonChance restored from JSON by AiSpider::load()
+		ai = std::make_unique<AiGiantSpider>(0);
 		break;
 	}
 

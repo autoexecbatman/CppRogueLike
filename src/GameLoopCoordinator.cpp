@@ -510,6 +510,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 				creature->update_constitution_bonus(ctx);
 				creature->regenerate_from_constitution(thisRound, *ctx.dataManager);
 				creature->regenerate_from_ring(thisRound);
+				creature->tick_poison(ctx);
 			}
 		}
 
@@ -518,6 +519,7 @@ void GameLoopCoordinator::update(GameContext& ctx)
 			ctx.player()->update_constitution_bonus(ctx);
 			ctx.player()->regenerate_from_constitution(thisRound, *ctx.dataManager);
 			ctx.player()->regenerate_from_ring(thisRound);
+			ctx.player()->tick_poison(ctx);
 		}
 
 		ctx.hungerSystem->increase_hunger(ctx, 1);

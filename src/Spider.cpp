@@ -18,6 +18,7 @@
 
 #include "Actor.h"
 #include "MonsterAttacker.h"
+#include "AiGiantSpider.h"
 #include "AiSpider.h"
 #include "AiWebSpinner.h"
 #include "Colors.h"
@@ -89,7 +90,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		set_natural_attack("Giant fangs");
 
-		ai = std::make_unique<AiSpider>(POISON_CHANCE_GIANT_SPIDER);
+		ai = std::make_unique<AiGiantSpider>(POISON_CHANCE_GIANT_SPIDER);
 		break;
 
 	case SpiderType::WEB_SPINNER:

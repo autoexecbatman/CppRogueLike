@@ -89,6 +89,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ConstitutionRegenerationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RingEffectsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderVenomTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PoisonOnsetTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RangedWeaponTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
@@ -145,6 +146,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/AiMonsterRanged.cpp
     ${PARENT_SOURCE_DIR}/AiSpider.cpp
     ${PARENT_SOURCE_DIR}/AiWebSpinner.cpp
+    ${PARENT_SOURCE_DIR}/AiGiantSpider.cpp
 
     # Colors
     ${PARENT_SOURCE_DIR}/Colors.cpp

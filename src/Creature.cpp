@@ -64,6 +64,13 @@ void Creature::load(const json& j)
 	attacksPerRound = j.at("attacksPerRound").get<float>();
 	damageResistance = j.at("dr").get<int>();
 	thaco = j.at("thaco").get<int>();
+	// Written only while a dose is working, so a record without one carries none.
+	pendingPoison.reset();
+	if (j.contains("pendingPoison"))
+	{
+		const auto& poisonJson = j.at("pendingPoison");
+		pendingPoison = PendingPoison{ poisonJson.at("roundsUntilOnset").get<int>(), poisonJson.at("damage").get<int>() };
+	}
 	if (j.contains("attacker"))
 	{
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{});
@@ -159,6 +166,10 @@ void Creature::save(json& j)
 	j["attacksPerRound"] = attacksPerRound;
 	j["dr"] = damageResistance;
 	j["thaco"] = thaco;
+	if (pendingPoison.has_value())
+	{
+		j["pendingPoison"] = json{ { "roundsUntilOnset", pendingPoison->roundsUntilOnset }, { "damage", pendingPoison->damage } };
+	}
 	if (attacker)
 	{
 		json attackerJson;
@@ -367,6 +378,33 @@ void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager
 	{
 		[[maybe_unused]] const int healed = healthPool->regenerate(1);
 	}
+}
+
+void Creature::take_poison(int roundsUntilOnset, int damage)
+{
+	pendingPoison = PendingPoison{ roundsUntilOnset, damage };
+}
+
+void Creature::tick_poison(GameContext& ctx)
+{
+	if (!pendingPoison.has_value() || is_dead())
+	{
+		return;
+	}
+
+	--pendingPoison->roundsUntilOnset;
+	if (pendingPoison->roundsUntilOnset > 0)
+	{
+		return;
+	}
+
+	// The dose is spent as it lands, so it is taken before the damage, which may kill.
+	const int damage = pendingPoison->damage;
+	pendingPoison.reset();
+
+	ctx.messageSystem->message(actorData.color, actorData.name);
+	ctx.messageSystem->message(WHITE_RED_PAIR, " is racked by the venom!", true);
+	take_damage_and_check_death(damage, ctx, DamageType::POISON);
 }
 
 void Creature::regenerate_from_ring(int roundsElapsed)

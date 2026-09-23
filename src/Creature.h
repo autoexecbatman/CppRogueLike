@@ -77,6 +77,15 @@ enum class Attitude
 // Turns a creature keeps tracking the player after losing sight of them.
 inline constexpr int AWARENESS_TURNS = 3;
 
+// Poison working in a creature: what it will cost, and how many rounds until it does.
+// Table 51 gives every poison an onset (Dungeon Master's Guide, PDF page 737), so the
+// bite that injected it is long over when it takes hold.
+struct PendingPoison
+{
+	int roundsUntilOnset{ 0 };
+	int damage{ 0 };
+};
+
 // What a struggle against a web achieved this turn.
 enum class WebEscape
 {
@@ -138,6 +147,9 @@ private:
 	int corpseWeight{ 50 };
 
 	TileRef invisibleTile{}; // lazily resolved from TileConfig on first update()
+
+	// The dose working in this creature, if any.
+	std::optional<PendingPoison> pendingPoison{};
 
 	// AD&D 2e: Calculate effective stat value (MAX(base, SET) + ADD); under a girdle of
 	// giant strength, Strength adds its penalties and none of its bonuses
@@ -436,6 +448,20 @@ public:
 	//   fighter.regenerate_from_ring(10); // heals 1
 	//   fighter.regenerate_from_ring(11); // heals nothing
 	void regenerate_from_ring(int roundsElapsed);
+
+	// Poison at work in this creature, or nothing.
+	[[nodiscard]] std::optional<PendingPoison> get_pending_poison() const noexcept { return pendingPoison; }
+
+	// Takes a dose: damage that lands once roundsUntilOnset rounds have run. A creature
+	// carries one dose, so a second replaces the first.
+	//
+	// Example, a huge spider's Type A:
+	//   victim.take_poison(15, 15); // 15 points, 15 rounds from now
+	void take_poison(int roundsUntilOnset, int damage);
+
+	// One round of that wait. The dose lands when its rounds run out, and a creature
+	// already dead is left alone.
+	void tick_poison(GameContext& ctx);
 
 	// Lifecycle hooks — Player overrides; monsters no-op
 	// Called when a creature dies — Player saves/defeats, monsters drop corpses

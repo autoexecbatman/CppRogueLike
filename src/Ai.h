@@ -15,7 +15,8 @@ enum class AiType
 	SHOPKEEPER = 3,
 	MIMIC = 4,
 	SPIDER = 5,
-	WEB_SPINNER = 6 // append last — integer values are serialized
+	WEB_SPINNER = 6,
+	GIANT_SPIDER = 7 // append last — integer values are serialized
 };
 
 //==AI==

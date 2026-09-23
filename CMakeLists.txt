@@ -154,6 +154,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/AiSpider.cpp
     ${PROJECT_SOURCE_DIR}/AiSpider.h
     ${PROJECT_SOURCE_DIR}/AiWebSpinner.cpp
+    ${PROJECT_SOURCE_DIR}/AiGiantSpider.cpp
+    ${PROJECT_SOURCE_DIR}/AiGiantSpider.h
     ${PROJECT_SOURCE_DIR}/AiWebSpinner.h
 
     # dnd_tables
