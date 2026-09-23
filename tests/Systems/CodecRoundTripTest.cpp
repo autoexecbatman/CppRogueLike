@@ -19,6 +19,7 @@
 #include "src/ItemClassification.h"
 #include "src/MagicalItemEffects.h"
 #include "src/Weapons.h"
+#include "src/Ai.h"
 #include "src/BuffType.h"
 #include "src/TargetMode.h"
 
@@ -139,6 +140,19 @@ TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 }
 
 // A string no encoder produces must be refused rather than silently defaulted.
+// Which Ai a saved creature carries: a name in the save, so what it means does not
+// depend on the order of an enum nobody reads when editing it.
+TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
+{
+	constexpr std::array kinds = { AiType::MONSTER, AiType::CONFUSED_MONSTER, AiType::SHOPKEEPER,
+		AiType::MIMIC, AiType::SPIDER, AiType::WEB_SPINNER, AiType::GIANT_SPIDER };
+
+	for (const auto kind : kinds)
+	{
+		expect_round_trip(kind, encode_ai_type, parse_ai_type, "AiType");
+	}
+}
+
 // The parser is the only schema this data has.
 TEST(CodecRoundTripTest, UnknownStringsThrow)
 {
@@ -150,4 +164,5 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_item_class("not_a_class"), std::runtime_error);
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
 	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);
+	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
 }

@@ -506,7 +506,6 @@ void AiWebSpinner::load(const json& j)
 void AiWebSpinner::save(json& j)
 {
 	AiSpider::save(j);
-	j["type"] = static_cast<int>(AiType::WEB_SPINNER); // overwrite SPIDER written by AiSpider::save
 
 	j["webCooldown"] = webCooldown;
 }

@@ -17,6 +17,8 @@ public:
 	explicit AiSpider(int poisonChance);
 
 	void update(Creature& owner, GameContext& ctx) override;
+
+	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }
 	void move_toward_player(Creature& owner, GameContext& ctx);
 	void random_move(Creature& owner, GameContext& ctx);
 	void load(const json& j) override;

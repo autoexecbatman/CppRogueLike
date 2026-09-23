@@ -14,6 +14,8 @@ public:
 
 	void update(Creature& owner, GameContext& ctx) override;
 
+	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::WEB_SPINNER; }
+
 protected:
 	// Type F: the victim saves against poison or dies where it stands.
 	void inject_venom(Creature& owner, Creature& target, GameContext& ctx) override;

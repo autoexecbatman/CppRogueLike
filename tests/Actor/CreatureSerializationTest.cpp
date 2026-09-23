@@ -1,9 +1,13 @@
 #include "src/Actor.h"
+#include "src/Ai.h"
 #include "src/AiMonster.h"
+#include "src/AiWebSpinner.h"
 #include "src/Creature.h"
 #include "src/ExperienceReward.h"
 #include "src/MonsterAttacker.h"
 #include <gtest/gtest.h>
+#include <memory>
+#include <stdexcept>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;
@@ -176,6 +180,36 @@ TEST_F(CreatureSerializationTest, AMonsterLoadedIntoAFreshObjectKeepsItsHitPoint
 // ruling is that no save fallbacks exist. The unconditional fields are found by saving a
 // bare creature, which has none of the optional components, and subtracting what
 // Actor::save writes - so nothing here is a list kept by hand.
+// The save says which Ai a creature carries by name, so a record written by one build
+// and read by another cannot quietly hand it a different one.
+TEST_F(CreatureSerializationTest, TheAiKindIsSavedByName)
+{
+	json saved;
+	AiWebSpinner{ 0 }.save(saved);
+
+	EXPECT_EQ(saved.at("type"), "web_spinner");
+
+	const std::unique_ptr<Ai> loaded = Ai::create(saved);
+	json savedAgain;
+	loaded->save(savedAgain);
+	EXPECT_EQ(savedAgain.at("type"), "web_spinner") << "the Ai came back as something else";
+}
+
+// A record with no Ai name at all is refused too, by the field read itself.
+TEST_F(CreatureSerializationTest, ARecordWithNoAiKindIsRefused)
+{
+	EXPECT_THROW((void)Ai::create(json::object()), json::out_of_range);
+}
+
+// An Ai this build does not know is refused, rather than becoming whichever one the
+// number happens to land on.
+TEST_F(CreatureSerializationTest, AnUnknownAiKindIsRefused)
+{
+	const json saved = json{ { "type", "sorcerer_of_the_ninth_circle" } };
+
+	EXPECT_THROW((void)Ai::create(saved), std::runtime_error);
+}
+
 TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 {
 	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };

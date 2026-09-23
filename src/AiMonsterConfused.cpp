@@ -83,7 +83,7 @@ void AiMonsterConfused::load(const json& j)
 
 void AiMonsterConfused::save(json& j)
 {
-	j["type"] = static_cast<int>(AiType::CONFUSED_MONSTER);
+	j["type"] = encode_ai_type(get_ai_type());
 	j["nbTurns"] = nbTurns;
 
 	// Save the oldAi if it exists

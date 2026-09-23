@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CodecRoundTripTest.*:CreatureSerializationTest.*:AiMimicTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Ai.h",
+      "original": "\tcase AiType::WEB_SPINNER:\n\t{\n\t\treturn \"web_spinner\";\n\t}",
+      "mutated": "\tcase AiType::WEB_SPINNER:\n\t{\n\t\treturn \"spider\";\n\t}",
+      "catches": "two Ai kinds sharing one name, so one of them loads as the other"
+    },
+    {
+      "file": "src/Ai.h",
+      "original": "\tif (name == \"giant_spider\")\n\t{\n\t\treturn AiType::GIANT_SPIDER;\n\t}",
+      "mutated": "\tif (name == \"giant_spider\")\n\t{\n\t\treturn AiType::SPIDER;\n\t}",
+      "catches": "a name parsed back as the wrong Ai"
+    },
+    {
+      "file": "src/Ai.h",
+      "original": "\tthrow std::runtime_error(std::format(\"unknown ai type '{}'\", name));",
+      "mutated": "\treturn AiType::MONSTER;",
+      "catches": "an Ai this build cannot place becoming a plain monster in silence"
+    },
+    {
+      "file": "src/Ai.cpp",
+      "original": "\tconst AiType type = parse_ai_type(j.at(\"type\").get<std::string>());",
+      "mutated": "\tconst AiType type = AiType::MONSTER;",
+      "catches": "the saved name never read, so every creature loads as a plain monster"
+    },
+    {
+      "file": "src/AiWebSpinner.h",
+      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::WEB_SPINNER; }",
+      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }",
+      "catches": "a web spinner calling itself a plain spider, which its save would then write"
+    },
+    {
+      "file": "src/AiMimic.h",
+      "original": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MIMIC; }",
+      "mutated": "\t[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }",
+      "catches": "a mimic saved as a plain monster, which is what this file was written for"
+    }
+  ]
+}

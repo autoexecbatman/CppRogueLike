@@ -14,12 +14,7 @@
 //==AI==
 std::unique_ptr<Ai> Ai::create(const json& j)
 {
-	if (!j.contains("type") || !j["type"].is_number())
-	{
-		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
-	}
-
-	auto type = static_cast<AiType>(j["type"].get<int>());
+	const AiType type = parse_ai_type(j.at("type").get<std::string>());
 	std::unique_ptr<Ai> ai;
 
 	switch (type)
@@ -69,11 +64,6 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 		// poisonChance restored from JSON by AiSpider::load()
 		ai = std::make_unique<AiGiantSpider>(0);
 		break;
-	}
-
-	default:
-	{
-		throw std::runtime_error("Unknown AiType");
 	}
 
 	} // end of switch (type)

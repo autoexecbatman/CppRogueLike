@@ -12,10 +12,9 @@ class AiGiantSpider : public AiSpider
 public:
 	explicit AiGiantSpider(int poisonChance);
 
+	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::GIANT_SPIDER; }
+
 protected:
 	// Type A: 15 points fifteen rounds after the bite, or nothing on a save at +1.
 	void inject_venom(Creature& owner, Creature& target, GameContext& ctx) override;
-
-public:
-	void save(json& j) override;
 };

@@ -534,7 +534,7 @@ void AiSpider::load(const json& j)
 void AiSpider::save(json& j)
 {
 	AiMonster::save(j);
-	j["type"] = static_cast<int>(AiType::SPIDER);
+	j["type"] = encode_ai_type(get_ai_type());
 
 	j["ambushCounter"] = ambushCounter;
 	j["isAmbushing"] = isAmbushing;

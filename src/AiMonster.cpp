@@ -238,7 +238,7 @@ void AiMonster::load(const json& j)
 
 void AiMonster::save(json& j)
 {
-	j["type"] = static_cast<int>(AiType::MONSTER);
+	j["type"] = encode_ai_type(get_ai_type());
 
 }
 

@@ -20,6 +20,8 @@ protected:
 
 public:
 	void update(Creature& owner, GameContext& ctx) override;
+
+	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::MONSTER; }
 	void load(const json& j) override;
 	void save(json& j) override;
 };

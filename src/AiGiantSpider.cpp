@@ -34,9 +34,3 @@ void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext&
 	ctx.messageSystem->message(WHITE_RED_PAIR, " injects a venom that will take hold!", true);
 	target.take_poison(TYPE_A_ONSET_ROUNDS, TYPE_A_DAMAGE);
 }
-
-void AiGiantSpider::save(json& j)
-{
-	AiSpider::save(j);
-	j["type"] = static_cast<int>(AiType::GIANT_SPIDER); // overwrite SPIDER written by AiSpider::save
-}

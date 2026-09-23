@@ -28,5 +28,5 @@ void AiShopkeeper::load(const json& j)
 
 void AiShopkeeper::save(json& j)
 {
-	j["type"] = static_cast<int>(AiType::SHOPKEEPER);
+	j["type"] = encode_ai_type(get_ai_type());
 }

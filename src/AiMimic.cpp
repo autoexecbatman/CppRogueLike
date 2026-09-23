@@ -407,7 +407,7 @@ void AiMimic::save(json& j)
 	AiMonster::save(j);
 
 	// Override the MONSTER type written by AiMonster::save — we are MIMIC.
-	j["type"] = static_cast<int>(AiType::MIMIC);
+	j["type"] = encode_ai_type(get_ai_type());
 
 	j["disguiseChangeCounter"] = disguiseChangeCounter;
 	j["consumptionCooldown"] = consumptionCooldown;
