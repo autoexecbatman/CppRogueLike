@@ -56,28 +56,6 @@ std::string normalize_key(std::string_view raw)
 // ---------------------------------------------------------------------------
 // Enum parse helpers
 // ---------------------------------------------------------------------------
-ConsumableEffect parse_consumable_effect(std::string_view name)
-{
-	if (name == "none")
-	{
-		return ConsumableEffect::NONE;
-	}
-	if (name == "heal")
-	{
-		return ConsumableEffect::HEAL;
-	}
-	if (name == "add_buff")
-	{
-		return ConsumableEffect::ADD_BUFF;
-	}
-	if (name == "fail")
-	{
-		return ConsumableEffect::FAIL;
-	}
-
-	throw std::runtime_error(std::format("ItemRegistry: unknown consumable_effect '{}'", name));
-}
-
 // Which pool an enhanced spawn rule draws from. A rule naming anything else is a typo
 // in enhanced_rules.json rather than a third pool, so it is refused by name instead of
 // quietly becoming armour.
@@ -98,38 +76,6 @@ EnhancedItemCategory parse_enhancement_category(std::string_view name)
 	}
 
 	throw std::runtime_error(std::format("ItemRegistry: unknown enhancement_category '{}'", name));
-}
-
-// ---------------------------------------------------------------------------
-// Enum encode helpers
-// ---------------------------------------------------------------------------
-std::string_view encode_consumable_effect(ConsumableEffect consumableEffect)
-{
-	switch (consumableEffect)
-	{
-
-	case ConsumableEffect::NONE:
-	{
-		return "none";
-	}
-
-	case ConsumableEffect::HEAL:
-	{
-		return "heal";
-	}
-
-	case ConsumableEffect::ADD_BUFF:
-	{
-		return "add_buff";
-	}
-
-	case ConsumableEffect::FAIL:
-	{
-		return "fail";
-	}
-	}
-
-	return "none";
 }
 
 // ---------------------------------------------------------------------------

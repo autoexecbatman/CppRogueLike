@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=BehaviorRecordTest.*:CodecRoundTripTest.*:ItemSerializationTest.*:StatBoostEquipmentTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\tconst PickableType type = parse_pickable_type(source.at(\"type\").get<std::string>());",
+      "mutated": "\tconst PickableType type = PickableType::WEAPON;",
+      "catches": "the record's name never read, so every behaviour loads as a weapon"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\toutput[\"type\"] = encode_pickable_type(type);",
+      "mutated": "\toutput[\"type\"] = encode_pickable_type(PickableType::GAUNTLETS);",
+      "catches": "a girdle or an amulet saved as gauntlets, all three sharing one saver"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\t\t\toutput[\"effect\"] = encode_consumable_effect(b.effect);",
+      "mutated": "\t\t\t\toutput[\"effect\"] = encode_consumable_effect(ConsumableEffect::NONE);",
+      "catches": "a potion's effect saved as none, so it heals nothing when loaded"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "consumable.buffType = parse_buff_type(source.at(\"buffType\").get<std::string>());",
+      "mutated": "consumable.buffType = BuffType::NONE;",
+      "catches": "a potion's buff dropped on the way back in"
+    },
+    {
+      "file": "src/Pickable.h",
+      "original": "\tcase ConsumableEffect::ADD_BUFF:\n\t{\n\t\treturn \"add_buff\";\n\t}",
+      "mutated": "\tcase ConsumableEffect::ADD_BUFF:\n\t{\n\t\treturn \"heal\";\n\t}",
+      "catches": "two effects sharing one name, so one of them loads as the other"
+    },
+    {
+      "file": "src/Pickable.h",
+      "original": "\tif (name == \"add_buff\")\n\t{\n\t\treturn ConsumableEffect::ADD_BUFF;\n\t}",
+      "mutated": "\tif (name == \"add_buff\")\n\t{\n\t\treturn ConsumableEffect::HEAL;\n\t}",
+      "catches": "a name parsed back as the wrong effect"
+    },
+    {
+      "file": "src/Pickable.h",
+      "original": "\tthrow std::runtime_error(std::format(\"unknown consumable effect '{}'\", name));",
+      "mutated": "\treturn ConsumableEffect::NONE;",
+      "catches": "an effect this build cannot place becoming none in silence"
+    }
+  ]
+}

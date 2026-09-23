@@ -52,6 +52,62 @@ enum class ConsumableEffect
 	FAIL,
 };
 
+// The name a record carries for this effect.
+//
+// Example:
+//   encode_consumable_effect(ConsumableEffect::ADD_BUFF); // -> "add_buff"
+inline std::string_view encode_consumable_effect(ConsumableEffect consumableEffect)
+{
+	switch (consumableEffect)
+	{
+	case ConsumableEffect::NONE:
+	{
+		return "none";
+	}
+	case ConsumableEffect::HEAL:
+	{
+		return "heal";
+	}
+	case ConsumableEffect::ADD_BUFF:
+	{
+		return "add_buff";
+	}
+	case ConsumableEffect::FAIL:
+	{
+		return "fail";
+	}
+	}
+
+	return "none";
+}
+
+// The effect a record names. Throws naming what it read.
+//
+// Example:
+//   parse_consumable_effect("heal");    // -> ConsumableEffect::HEAL
+//   parse_consumable_effect("healng");  // throws std::runtime_error
+inline ConsumableEffect parse_consumable_effect(std::string_view name)
+{
+	if (name == "none")
+	{
+		return ConsumableEffect::NONE;
+	}
+	if (name == "heal")
+	{
+		return ConsumableEffect::HEAL;
+	}
+	if (name == "add_buff")
+	{
+		return ConsumableEffect::ADD_BUFF;
+	}
+	if (name == "fail")
+	{
+		return ConsumableEffect::FAIL;
+	}
+
+	throw std::runtime_error(std::format("unknown consumable effect '{}'", name));
+}
+
 // ========== Plain data structs (no base class, no virtuals) ==========
 
 struct Consumable

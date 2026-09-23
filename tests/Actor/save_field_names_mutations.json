@@ -9,19 +9,19 @@
   "mutations": [
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\t\t\toutput[\"handRequirement\"] = static_cast<int>(b.handRequirement);",
+      "original": "\t\t\t\toutput[\"handRequirement\"] = encode_hand_requirement(b.handRequirement);",
       "mutated": "\t\t\t\toutput[\"handReq\"] = static_cast<int>(b.handRequirement);",
       "catches": "the saver and the loader naming the field differently again"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\tweapon.handRequirement = static_cast<HandRequirement>(source.at(\"handRequirement\").get<int>());",
+      "original": "\t\tweapon.handRequirement = parse_hand_requirement(source.at(\"handRequirement\").get<std::string>());",
       "mutated": "\t\tweapon.handRequirement = HandRequirement::ONE_HANDED;",
       "catches": "a saved weapon's hand requirement thrown away on load"
     },
     {
       "file": "src/Pickable.cpp",
-      "original": "\t\ttargetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.at(\"scrollAnimation\").get<int>());",
+      "original": "\t\ttargetedScroll.scrollAnimation = parse_scroll_animation(source.at(\"scrollAnimation\").get<std::string>());",
       "mutated": "\t\ttargetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.value(\"animation\", 0));",
       "catches": "a scroll's animation read under a name nothing writes, defaulted quietly"
     },

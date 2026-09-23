@@ -140,6 +140,17 @@ TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 }
 
 // A string no encoder produces must be refused rather than silently defaulted.
+TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
+{
+	constexpr std::array effects = { ConsumableEffect::NONE, ConsumableEffect::HEAL,
+		ConsumableEffect::ADD_BUFF, ConsumableEffect::FAIL };
+
+	for (const auto effect : effects)
+	{
+		expect_round_trip(effect, encode_consumable_effect, parse_consumable_effect, "ConsumableEffect");
+	}
+}
+
 // Which Ai a saved creature carries: a name in the save, so what it means does not
 // depend on the order of an enum nobody reads when editing it.
 TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
@@ -165,4 +176,5 @@ TEST(CodecRoundTripTest, UnknownStringsThrow)
 	EXPECT_THROW((void)parse_pickable_type("not_a_type"), std::runtime_error);
 	EXPECT_THROW((void)parse_magical_effect("not_an_effect"), std::runtime_error);
 	EXPECT_THROW((void)parse_ai_type("not_an_ai"), std::runtime_error);
+	EXPECT_THROW((void)parse_consumable_effect("not_an_effect"), std::runtime_error);
 }

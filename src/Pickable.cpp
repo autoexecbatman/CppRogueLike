@@ -79,7 +79,7 @@ const V& get_or_default(const std::unordered_map<K, V>& map, const K& key, const
 template <typename T>
 void save_stat_boost(const T& statBoost, PickableType type, json& output)
 {
-	output["type"] = static_cast<int>(type);
+	output["type"] = encode_pickable_type(type);
 	output["strBonus"] = statBoost.strBonus;
 	output["dexBonus"] = statBoost.dexBonus;
 	output["conBonus"] = statBoost.conBonus;
@@ -677,84 +677,79 @@ void save_behavior(const ItemBehavior& behavior, json& output)
 		VariantVisitor{
 			[&output](const Consumable& b)
 			{
-				output["type"] = static_cast<int>(PickableType::CONSUMABLE);
-				output["effect"] = static_cast<int>(b.effect);
+				output["type"] = encode_pickable_type(PickableType::CONSUMABLE);
+				output["effect"] = encode_consumable_effect(b.effect);
 				output["amount"] = b.amount;
 				output["duration"] = b.duration;
-				output["buffType"] = static_cast<int>(b.buffType);
+				output["buffType"] = encode_buff_type(b.buffType);
 				output["isSetEffect"] = b.isSetEffect;
 			},
 			[&output](const Weapon& b)
 			{
-				output["type"] = static_cast<int>(PickableType::WEAPON);
+				output["type"] = encode_pickable_type(PickableType::WEAPON);
 				output["ranged"] = b.ranged;
-				output["handRequirement"] = static_cast<int>(b.handRequirement);
-				output["weaponSize"] = static_cast<int>(b.weaponSize);
+				output["handRequirement"] = encode_hand_requirement(b.handRequirement);
+				output["weaponSize"] = encode_weapon_size(b.weaponSize);
 				output["strengthRating"] = b.strengthRating;
 			},
-			[&output](const Shield&) { output["type"] = static_cast<int>(PickableType::SHIELD); },
+			[&output](const Shield&) { output["type"] = encode_pickable_type(PickableType::SHIELD); },
 			[&output](const TargetedScroll& b)
 			{
-				output["type"] = static_cast<int>(PickableType::TARGETED_SCROLL);
-				output["targetMode"] = static_cast<int>(b.targetMode);
-				output["scrollAnimation"] = static_cast<int>(b.scrollAnimation);
+				output["type"] = encode_pickable_type(PickableType::TARGETED_SCROLL);
+				output["targetMode"] = encode_target_mode(b.targetMode);
+				output["scrollAnimation"] = encode_scroll_animation(b.scrollAnimation);
 				output["range"] = b.range;
 				output["damage"] = b.damage;
 				output["confuseTurns"] = b.confuseTurns;
-				output["buffType"] = static_cast<int>(b.buffType);
+				output["buffType"] = encode_buff_type(b.buffType);
 				output["buffDuration"] = b.buffDuration;
 			},
-			[&output](const Teleporter&) { output["type"] = static_cast<int>(PickableType::TELEPORTER); },
-			[&output](const IdentifyScroll&) { output["type"] = static_cast<int>(PickableType::IDENTIFY_SCROLL); },
+			[&output](const Teleporter&) { output["type"] = encode_pickable_type(PickableType::TELEPORTER); },
+			[&output](const IdentifyScroll&) { output["type"] = encode_pickable_type(PickableType::IDENTIFY_SCROLL); },
 			[&output](const Gold& b)
 			{
-				output["type"] = static_cast<int>(PickableType::GOLD_COIN);
+				output["type"] = encode_pickable_type(PickableType::GOLD_COIN);
 				output["amount"] = b.amount;
 			},
 			[&output](const Food& b)
 			{
-				output["type"] = static_cast<int>(PickableType::FOOD);
+				output["type"] = encode_pickable_type(PickableType::FOOD);
 				output["nutritionValue"] = b.nutritionValue;
 			},
 			[&output](const CorpseFood& b)
 			{
-				output["type"] = static_cast<int>(PickableType::CORPSE_FOOD);
+				output["type"] = encode_pickable_type(PickableType::CORPSE_FOOD);
 				output["nutritionValue"] = b.nutritionValue;
 			},
 			[&output](const Armor& b)
 			{
-				output["type"] = static_cast<int>(PickableType::ARMOR);
+				output["type"] = encode_pickable_type(PickableType::ARMOR);
 				output["armorClass"] = b.armorClass;
 			},
 			[&output](const MagicalHelm& b)
 			{
-				output["type"] = static_cast<int>(PickableType::MAGICAL_HELM);
-				output["effect"] = static_cast<int>(b.effect);
+				output["type"] = encode_pickable_type(PickableType::MAGICAL_HELM);
+				output["effect"] = encode_magical_effect(b.effect);
 				output["bonus"] = b.bonus;
 			},
 			[&output](const MagicalRing& b)
 			{
-				output["type"] = static_cast<int>(PickableType::MAGICAL_RING);
-				output["effect"] = static_cast<int>(b.effect);
+				output["type"] = encode_pickable_type(PickableType::MAGICAL_RING);
+				output["effect"] = encode_magical_effect(b.effect);
 				output["bonus"] = b.bonus;
 			},
 			[&output](const JewelryAmulet& b) { save_stat_boost(b, PickableType::JEWELRY_AMULET, output); },
 			[&output](const Gauntlets& b) { save_stat_boost(b, PickableType::GAUNTLETS, output); },
 			[&output](const Girdle& b) { save_stat_boost(b, PickableType::GIRDLE, output); },
-			[&output](const Amulet&) { output["type"] = static_cast<int>(PickableType::QUEST_ITEM); },
-			[&output](const DungeonKey&) { output["type"] = static_cast<int>(PickableType::DUNGEON_KEY); },
+			[&output](const Amulet&) { output["type"] = encode_pickable_type(PickableType::QUEST_ITEM); },
+			[&output](const DungeonKey&) { output["type"] = encode_pickable_type(PickableType::DUNGEON_KEY); },
 		},
 		behavior);
 }
 
 ItemBehavior load_behavior(const json& source)
 {
-	if (!source.contains("type") || !source["type"].is_number())
-	{
-		throw std::runtime_error("Invalid JSON format: Missing or invalid 'type'");
-	}
-
-	const auto type = static_cast<PickableType>(source["type"].get<int>());
+	const PickableType type = parse_pickable_type(source.at("type").get<std::string>());
 
 	switch (type)
 	{
@@ -762,10 +757,10 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::CONSUMABLE:
 	{
 		Consumable consumable;
-		consumable.effect = static_cast<ConsumableEffect>(source.at("effect").get<int>());
+		consumable.effect = parse_consumable_effect(source.at("effect").get<std::string>());
 		consumable.amount = source.at("amount").get<int>();
 		consumable.duration = source.at("duration").get<int>();
-		consumable.buffType = static_cast<BuffType>(source.at("buffType").get<int>());
+		consumable.buffType = parse_buff_type(source.at("buffType").get<std::string>());
 		consumable.isSetEffect = source.at("isSetEffect").get<bool>();
 		return consumable;
 	}
@@ -774,8 +769,8 @@ ItemBehavior load_behavior(const json& source)
 	{
 		Weapon weapon;
 		weapon.ranged = source.at("ranged").get<bool>();
-		weapon.handRequirement = static_cast<HandRequirement>(source.at("handRequirement").get<int>());
-		weapon.weaponSize = static_cast<WeaponSize>(source.at("weaponSize").get<int>());
+		weapon.handRequirement = parse_hand_requirement(source.at("handRequirement").get<std::string>());
+		weapon.weaponSize = parse_weapon_size(source.at("weaponSize").get<std::string>());
 		weapon.strengthRating = source.at("strengthRating").get<int>();
 		return weapon;
 	}
@@ -788,12 +783,12 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::TARGETED_SCROLL:
 	{
 		TargetedScroll targetedScroll;
-		targetedScroll.targetMode = static_cast<TargetMode>(source.at("targetMode").get<int>());
-		targetedScroll.scrollAnimation = static_cast<ScrollAnimation>(source.at("scrollAnimation").get<int>());
+		targetedScroll.targetMode = parse_target_mode(source.at("targetMode").get<std::string>());
+		targetedScroll.scrollAnimation = parse_scroll_animation(source.at("scrollAnimation").get<std::string>());
 		targetedScroll.range = source.at("range").get<int>();
 		targetedScroll.damage = source.at("damage").get<int>();
 		targetedScroll.confuseTurns = source.at("confuseTurns").get<int>();
-		targetedScroll.buffType = static_cast<BuffType>(source.at("buffType").get<int>());
+		targetedScroll.buffType = parse_buff_type(source.at("buffType").get<std::string>());
 		targetedScroll.buffDuration = source.at("buffDuration").get<int>();
 		return targetedScroll;
 	}
@@ -839,7 +834,7 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::MAGICAL_HELM:
 	{
 		MagicalHelm magicalHelm;
-		magicalHelm.effect = static_cast<MagicalEffect>(source.at("effect").get<int>());
+		magicalHelm.effect = parse_magical_effect(source.at("effect").get<std::string>());
 		magicalHelm.bonus = source.at("bonus").get<int>();
 		return magicalHelm;
 	}
@@ -847,7 +842,7 @@ ItemBehavior load_behavior(const json& source)
 	case PickableType::MAGICAL_RING:
 	{
 		MagicalRing magicalRing;
-		magicalRing.effect = static_cast<MagicalEffect>(source.at("effect").get<int>());
+		magicalRing.effect = parse_magical_effect(source.at("effect").get<std::string>());
 		magicalRing.bonus = source.at("bonus").get<int>();
 		return magicalRing;
 	}
@@ -885,7 +880,7 @@ ItemBehavior load_behavior(const json& source)
 
 	default:
 	{
-		throw std::runtime_error(std::format("Unknown PickableType: {}", static_cast<int>(type)));
+		throw std::runtime_error(std::format("no loader for behaviour '{}'", encode_pickable_type(type)));
 	}
 	}
 }

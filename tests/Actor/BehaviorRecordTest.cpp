@@ -21,7 +21,12 @@
 
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <array>
+#include <ranges>
+#include <stdexcept>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -80,6 +85,44 @@ std::vector<NamedBehavior> every_behavior_with_fields()
 
 } // namespace
 
+// The record names what it holds, and every enum in it, so what a record means does not
+// depend on the order of an enum nobody consults when editing it.
+TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
+{
+	constexpr std::array<std::string_view, 7> enumFields = { "type", "effect", "buffType", "handRequirement", "weaponSize", "targetMode", "scrollAnimation" };
+	auto is_enum_field = [&enumFields](std::string_view key)
+	{
+		return std::ranges::find(enumFields, key) != enumFields.end();
+	};
+
+	for (const NamedBehavior& named : every_behavior_with_fields())
+	{
+		json saved;
+		save_behavior(named.behavior, saved);
+
+		for (const auto& [key, value] : saved.items())
+		{
+			if (is_enum_field(key))
+			{
+				EXPECT_TRUE(value.is_string()) << "a " << named.name << " saved \"" << key << "\" as a number";
+			}
+		}
+	}
+}
+
+// A behaviour this build cannot place is refused, rather than becoming whichever one
+// the number happens to land on.
+TEST(BehaviorRecordTest, AnUnknownBehaviourNameIsRefused)
+{
+	EXPECT_THROW((void)load_behavior(json{ { "type", "wand_of_wonder" } }), std::runtime_error);
+}
+
+// And one with no name at all, by the field read itself.
+TEST(BehaviorRecordTest, ARecordWithNoBehaviourNameIsRefused)
+{
+	EXPECT_ANY_THROW((void)load_behavior(json::object()));
+}
+
 TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
 {
 	for (const NamedBehavior& named : every_behavior_with_fields())
@@ -100,6 +143,33 @@ TEST(BehaviorRecordTest, EveryFieldASaveWritesIsRequiredToLoad)
 				<< "a " << named.name << " record without \"" << key << "\" loaded quietly";
 		}
 	}
+}
+
+// A save, a load and a save again compares the saver against itself: one that writes the
+// wrong name writes it both times and the comparison passes. These two ask what the
+// record says and what came back, which is what catches a saver.
+TEST(BehaviorRecordTest, EveryBehaviourComesBackAsItsOwnKind)
+{
+	for (const NamedBehavior& named : every_behavior_with_fields())
+	{
+		json saved;
+		save_behavior(named.behavior, saved);
+
+		const ItemBehavior loaded = load_behavior(saved);
+
+		EXPECT_EQ(loaded.index(), named.behavior.index())
+			<< "a " << named.name << " came back as a different behaviour";
+	}
+}
+
+TEST(BehaviorRecordTest, APotionsRecordNamesItsEffectAndItsBuff)
+{
+	json saved;
+	save_behavior(Consumable{ ConsumableEffect::ADD_BUFF, 7, 3, BuffType::SANCTUARY, true }, saved);
+
+	EXPECT_EQ(saved.at("type"), "consumable");
+	EXPECT_EQ(saved.at("effect"), "add_buff");
+	EXPECT_EQ(saved.at("buffType"), "sanctuary");
 }
 
 TEST(BehaviorRecordTest, EveryFieldSurvivesARoundTrip)
