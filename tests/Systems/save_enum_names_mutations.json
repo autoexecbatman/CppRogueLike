@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CodecRoundTripTest.*:CreatureSerializationTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CodecRoundTripTest.*:CreatureSerializationTest.*:MonsterRoundTripTest.*"
   ],
   "mutations": [
     {
@@ -48,6 +48,18 @@
       "original": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"cleric\";\n\t}",
       "mutated": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"wizard\";\n\t}",
       "catches": "two classes sharing one name, so a cleric is saved as a wizard"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\t{ \"type\", damage_type_name(damage.damageType) }",
+      "mutated": "\t\t{ \"type\", damage_type_name(DamageType::PHYSICAL) }",
+      "catches": "the editor writing every monster's damage back as physical, which loses the nine typed damagers on the first save"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\t\tparse_damage_type(record.at(\"type\").get<std::string>())",
+      "mutated": "\t\tDamageType::PHYSICAL",
+      "catches": "the file's damage type ignored, so a dragon breathes physical damage"
     }
   ]
 }

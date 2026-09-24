@@ -17,7 +17,7 @@
     "corpse": "dead archer",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 2,
@@ -85,7 +85,7 @@
     "corpse": "dead bat",
     "damage": {
       "display": "1d2",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 3,
     "depth_min": 1,
@@ -148,7 +148,7 @@
     "corpse": "dead bugbear",
     "damage": {
       "display": "2d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 7,
     "depth_min": 3,
@@ -216,7 +216,7 @@
     "corpse": "dead chimera",
     "damage": {
       "display": "3d12",
-      "type": 1
+      "type": "fire"
     },
     "depth_max": 0,
     "depth_min": 7,
@@ -279,7 +279,7 @@
     "corpse": "dead dragon",
     "damage": {
       "display": "1d12+5",
-      "type": 1
+      "type": "fire"
     },
     "depth_max": 0,
     "depth_min": 5,
@@ -342,7 +342,7 @@
     "corpse": "charred wolf corpse",
     "damage": {
       "display": "1d6",
-      "type": 1
+      "type": "fire"
     },
     "depth_max": 0,
     "depth_min": 3,
@@ -405,7 +405,7 @@
     "corpse": "broken gargoyle",
     "damage": {
       "display": "1d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 8,
     "depth_min": 4,
@@ -468,7 +468,7 @@
     "corpse": "dead ghoul",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 6,
     "depth_min": 2,
@@ -532,7 +532,7 @@
     "corpse": "dead giant centipede",
     "damage": {
       "display": "1d2",
-      "type": 4
+      "type": "poison"
     },
     "depth_max": 4,
     "depth_min": 1,
@@ -595,7 +595,7 @@
     "corpse": "dead giant rat",
     "damage": {
       "display": "1d3",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 4,
     "depth_min": 1,
@@ -658,7 +658,7 @@
     "corpse": "dead giant snake",
     "damage": {
       "display": "1d8",
-      "type": 4
+      "type": "poison"
     },
     "depth_max": 7,
     "depth_min": 3,
@@ -721,7 +721,7 @@
     "corpse": "dead gnoll",
     "damage": {
       "display": "2d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 6,
     "depth_min": 3,
@@ -789,7 +789,7 @@
     "corpse": "dead goblin",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 5,
     "depth_min": 1,
@@ -857,7 +857,7 @@
     "corpse": "rubble of golem",
     "damage": {
       "display": "3d24",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 7,
@@ -920,7 +920,7 @@
     "corpse": "dead harpy",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 6,
     "depth_min": 3,
@@ -983,7 +983,7 @@
     "corpse": "dead hill giant",
     "damage": {
       "display": "2d16",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 6,
@@ -1046,7 +1046,7 @@
     "corpse": "dead hobgoblin",
     "damage": {
       "display": "1d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 5,
     "depth_min": 2,
@@ -1114,7 +1114,7 @@
     "corpse": "frozen wolf corpse",
     "damage": {
       "display": "1d6",
-      "type": 2
+      "type": "cold"
     },
     "depth_max": 0,
     "depth_min": 3,
@@ -1177,7 +1177,7 @@
     "corpse": "dead kobold",
     "damage": {
       "display": "1d4",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 4,
     "depth_min": 1,
@@ -1245,7 +1245,7 @@
     "corpse": "dead lich",
     "damage": {
       "display": "1d10",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 8,
@@ -1309,7 +1309,7 @@
     "corpse": "dead mage",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 3,
@@ -1377,7 +1377,7 @@
     "corpse": "dead medusa",
     "damage": {
       "display": "1d4",
-      "type": 4
+      "type": "poison"
     },
     "depth_max": 9,
     "depth_min": 5,
@@ -1448,7 +1448,7 @@
     "corpse": "dead ogre",
     "damage": {
       "display": "1d10",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 8,
     "depth_min": 4,
@@ -1516,7 +1516,7 @@
     "corpse": "dead orc",
     "damage": {
       "display": "1d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 2,
@@ -1584,7 +1584,7 @@
     "corpse": "dead pit fiend",
     "damage": {
       "display": "1d12",
-      "type": 1
+      "type": "fire"
     },
     "depth_max": 0,
     "depth_min": 9,
@@ -1647,7 +1647,7 @@
     "corpse": "dead rat",
     "damage": {
       "display": "1d3",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 3,
     "depth_min": 1,
@@ -1710,7 +1710,7 @@
     "corpse": "dissipated shadow",
     "damage": {
       "display": "1d4",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 7,
     "depth_min": 3,
@@ -1782,7 +1782,7 @@
     "corpse": "dead skeleton",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 6,
     "depth_min": 1,
@@ -1870,7 +1870,7 @@
     "corpse": "dead troll",
     "damage": {
       "display": "1d10",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 4,
@@ -1933,7 +1933,7 @@
     "corpse": "dead vampire",
     "damage": {
       "display": "1d10",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 7,
@@ -1997,7 +1997,7 @@
     "corpse": "dead werewolf",
     "damage": {
       "display": "2d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 8,
     "depth_min": 4,
@@ -2060,7 +2060,7 @@
     "corpse": "dead wight",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 8,
     "depth_min": 4,
@@ -2124,7 +2124,7 @@
     "corpse": "dead wolf",
     "damage": {
       "display": "1d4",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 5,
     "depth_min": 1,
@@ -2187,7 +2187,7 @@
     "corpse": "dissipated wraith",
     "damage": {
       "display": "1d6",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 9,
     "depth_min": 5,
@@ -2251,7 +2251,7 @@
     "corpse": "dead wyvern",
     "damage": {
       "display": "2d12",
-      "type": 4
+      "type": "poison"
     },
     "depth_max": 0,
     "depth_min": 6,
@@ -2314,7 +2314,7 @@
     "corpse": "dead zombie",
     "damage": {
       "display": "1d8",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 6,
     "depth_min": 2,
@@ -2378,7 +2378,7 @@
     "corpse": "dead jailer",
     "damage": {
       "display": "1d6+1",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 2,
@@ -2447,7 +2447,7 @@
     "corpse": "dead warden",
     "damage": {
       "display": "1d8+3",
-      "type": 0
+      "type": "physical"
     },
     "depth_max": 0,
     "depth_min": 2,

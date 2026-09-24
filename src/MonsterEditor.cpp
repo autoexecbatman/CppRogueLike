@@ -43,47 +43,8 @@ namespace
 {
 
 // Alignment fields cycle through their axis rather than being typed, so each
-// press moves one step and wraps at the end.
-std::string_view ethics_name(Ethics ethics)
-{
-	switch (ethics)
-	{
-	case Ethics::LAWFUL:
-	{
-		return "lawful";
-	}
-	case Ethics::NEUTRAL:
-	{
-		return "neutral";
-	}
-	case Ethics::CHAOTIC:
-	{
-		return "chaotic";
-	}
-	}
-	return "neutral";
-}
-
-std::string_view morality_name(Morality morality)
-{
-	switch (morality)
-	{
-	case Morality::GOOD:
-	{
-		return "good";
-	}
-	case Morality::NEUTRAL:
-	{
-		return "neutral";
-	}
-	case Morality::EVIL:
-	{
-		return "evil";
-	}
-	}
-	return "neutral";
-}
-
+// press moves one step and wraps at the end. The names come from Alignment.h,
+// beside the enums, so the editor shows what a record carries.
 Ethics next_ethics(Ethics ethics)
 {
 	switch (ethics)
@@ -986,8 +947,8 @@ std::string MonsterEditor::field_value(FieldId f) const
 	case FieldId::DMG_BONUS:   return std::format("{}", m_working.damage.dice.bonus);
 	case FieldId::DMG_TYPE:    return std::string(damage_type_name(m_working.damage.damageType));
 	case FieldId::AI_TYPE:     return m_working.aiType == MonsterAiType::MELEE ? "melee" : "ranged";
-	case FieldId::ETHICS:      return std::string(ethics_name(m_working.ethics));
-	case FieldId::MORALITY:    return std::string(morality_name(m_working.morality));
+	case FieldId::ETHICS:      return std::string(encode_ethics(m_working.ethics));
+	case FieldId::MORALITY:    return std::string(encode_morality(m_working.morality));
 	case FieldId::CAN_SWIM:    return m_working.canSwim ? "yes" : "no";
 	case FieldId::WEIGHT:      return std::format("{}", m_working.baseWeight);
 	case FieldId::DEPTH_MIN:   return std::format("{}", m_working.levelMinimum);

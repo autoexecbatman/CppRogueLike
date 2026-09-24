@@ -20,10 +20,15 @@
 //     cmake --build build --config Debug --target test_exe
 //     build\bin\Debug\test_exe.exe --gtest_filter=MonsterRoundTripTest.*
 
+#include "src/DamageInfo.h"
 #include "src/MonsterRegistry.h"
+#include "src/Paths.h"
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include <filesystem>
+#include <fstream>
 #include <map>
 #include <string>
 
@@ -50,6 +55,71 @@ protected:
 		monsters.load(roundTrip.string());
 	}
 };
+
+// Every damage type in the file is a name, so which one a record means does not move
+// when a type is inserted into the enum. The file is read as JSON rather than through
+// the parser: what is being checked is what the bytes say.
+TEST_F(MonsterRoundTripTest, EveryDamageTypeInTheFileIsANameNotANumber)
+{
+	std::ifstream file(Paths::resolve(Paths::MONSTERS));
+	ASSERT_TRUE(file.is_open()) << "monsters.json did not open; the case measures nothing";
+
+	nlohmann::json content;
+	file >> content;
+
+	int checked = 0;
+	for (const auto& [key, record] : content.items())
+	{
+		if (!record.contains("damage"))
+		{
+			continue;
+		}
+		EXPECT_TRUE(record.at("damage").at("type").is_string())
+			<< key << " numbers its damage type";
+		++checked;
+	}
+	EXPECT_GT(checked, 0) << "no record carried a damage block; the case measures nothing";
+}
+
+// The nine records whose damage is not plain physical, each keeping the type the file
+// gave it. Twenty-nine of the thirty-eight are physical, so a mapping that collapsed
+// every type onto the first one would pass a check that only counted strings.
+TEST_F(MonsterRoundTripTest, TheTypedDamagersKeepTheirType)
+{
+	const std::map<std::string, DamageType> expected{
+		{ "chimera", DamageType::FIRE },
+		{ "dragon", DamageType::FIRE },
+		{ "fire_wolf", DamageType::FIRE },
+		{ "pit_fiend", DamageType::FIRE },
+		{ "ice_wolf", DamageType::COLD },
+		{ "giant_centipede", DamageType::POISON },
+		{ "giant_snake", DamageType::POISON },
+		{ "medusa", DamageType::POISON },
+		{ "wyvern", DamageType::POISON },
+	};
+
+	for (const auto& [key, damageType] : expected)
+	{
+		EXPECT_EQ(monsters.get_params(key).damage.damageType, damageType)
+			<< key << " lost the damage type the file gave it";
+	}
+
+	save_and_reload();
+
+	for (const auto& [key, damageType] : expected)
+	{
+		EXPECT_EQ(monsters.get_params(key).damage.damageType, damageType)
+			<< key << " lost its damage type across a save";
+	}
+}
+
+// A damage type this build cannot place is refused, rather than becoming whichever type
+// the number lands on.
+TEST_F(MonsterRoundTripTest, ADamageTypeThisBuildDoesNotKnowIsRefused)
+{
+	nlohmann::json record = nlohmann::json{ { "display", "1d6" }, { "type", "sonic" } };
+	EXPECT_THROW((void)parse_damage_type(record.at("type").get<std::string>()), std::runtime_error);
+}
 
 // data/content/monsters.json gives dungeon_jailer the display name "Dungeon Jailer".
 // The parser reads an optional "name" key, so the encoder must write one.

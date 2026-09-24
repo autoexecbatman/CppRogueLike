@@ -164,7 +164,7 @@ DamageInfo parse_damage(const nlohmann::json& record)
 {
 	return DamageInfo{
 		record.at("display").get<std::string>(),
-		static_cast<DamageType>(record.at("type").get<int>())
+		parse_damage_type(record.at("type").get<std::string>())
 	};
 }
 
@@ -172,7 +172,7 @@ nlohmann::json encode_damage(const DamageInfo& damage)
 {
 	return nlohmann::json{
 		{ "display", damage.displayRoll },
-		{ "type", static_cast<int>(damage.damageType) }
+		{ "type", damage_type_name(damage.damageType) }
 	};
 }
 
@@ -224,8 +224,8 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.undead = entry.value("undead", false);
 	// Optional by design: entries authored before alignment existed default to
 	// true neutral rather than failing to load.
-	params.ethics = static_cast<Ethics>(entry.value("ethics", static_cast<int>(Ethics::NEUTRAL)));
-	params.morality = static_cast<Morality>(entry.value("morality", static_cast<int>(Morality::NEUTRAL)));
+	params.ethics = parse_ethics(entry.value("ethics", std::string{ encode_ethics(Ethics::NEUTRAL) }));
+	params.morality = parse_morality(entry.value("morality", std::string{ encode_morality(Morality::NEUTRAL) }));
 	params.corpseWeight = entry.value("corpse_weight", 50);
 	params.strDice = parse_dice(entry.at("str"));
 	params.dexDice = parse_dice(entry.at("dex"));
@@ -267,8 +267,8 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 		{ "dr", params.dr },
 		{ "morale", params.morale },
 		{ "undead", params.undead },
-		{ "ethics", static_cast<int>(params.ethics) },
-		{ "morality", static_cast<int>(params.morality) },
+		{ "ethics", encode_ethics(params.ethics) },
+		{ "morality", encode_morality(params.morality) },
 		{ "corpse_weight", params.corpseWeight },
 		{ "str", encode_dice(params.strDice) },
 		{ "dex", encode_dice(params.dexDice) },
