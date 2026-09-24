@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WALL)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}",
-      "mutated": "\t\t\tif (false)\n\t\t\t{\n\t\t\t\tcontinue;\n\t\t\t}",
+      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)",
+      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) != TileType::WATER)",
       "catches": "the vault filling its whole bounding box again, flattening whichever shape it landed on"
     },
     {

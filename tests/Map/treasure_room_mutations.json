@@ -15,6 +15,18 @@
     },
     {
       "file": "src/TreasureRoom.cpp",
+      "original": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)",
+      "mutated": "\t\t\tif (ctx.map->get_tile_type(Vector2D{ x, y }) != TileType::WALL)",
+      "catches": "the vault clearing every cell of its box that is not wall, so a corridor clipping a corner becomes a pocket of room floor"
+    },
+    {
+      "file": "src/TreasureRoom.cpp",
+      "original": "\t\t\t\tctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);",
+      "mutated": "",
+      "catches": "the vault leaving its pools standing, so the treasure sits in water"
+    },
+    {
+      "file": "src/TreasureRoom.cpp",
       "original": "\t\t\tif (map.get_tile_type(pos) != TileType::CLOSED_DOOR)",
       "mutated": "\t\t\tif (map.get_tile_type(pos) == TileType::CLOSED_DOOR)",
       "catches": "every wall tile counted as an entrance and every door skipped"

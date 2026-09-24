@@ -26,6 +26,7 @@
 // Contract:
 //   - generate_warden_name produces valid, varied names
 //   - TreasureRoom::count_entrances counts only genuine room-entrance doors
+//   - TreasureRoom::create drains the pools on the vault floor and writes nothing else
 //   - After map init, the staircase tile is never adjacent to a locked door
 //   - If TreasureRoom::setup_guard cannot place a jailer, all doors it locked
 //     in Pass 1 are rolled back to CLOSED_UNLOCKED
@@ -56,6 +57,7 @@ protected:
     GameContext ctx;
     DataManager dataManager;
     MessageSystem messageSystem;
+    LevelManager levelManager;
 
     void SetUp() override
     {
@@ -82,6 +84,8 @@ protected:
         ctx.messageSystem = &messageSystem;
         ctx.creatures = &creatures;
         ctx.map = map.get();
+        // TreasureRoom::create reads the dungeon level for its hoard and its escort.
+        ctx.levelManager = &levelManager;
 
         map->init_tiles();  // blank wall grid; tests manually stamp rooms and doors
     }
@@ -193,6 +197,45 @@ TEST_F(TreasureRoomFixture, CountEntrances_FarDoor_NotCounted)
     const DungeonRoom room = make_room(5, 5, 6, 6);
     place_door(Vector2D{ 20, 15 });
     EXPECT_EQ(TreasureRoom::count_entrances(*map, room), 0);
+}
+
+// ============================================================================
+// TreasureRoom::create clears the vault's own floor
+// ============================================================================
+
+TEST_F(TreasureRoomFixture, VaultClearsItsWaterAndAdoptsNoCorridor)
+{
+    // Floor [10..17] x [5..11]. The wall at (13,8) stands for what a room shape
+    // carves back. The pool at (11,6) is what the clearing exists for. The corridor
+    // at (10,11) clips the bottom-left corner of the box and is walled off from the
+    // room by (10,10) and (11,11) - the shape a corridor leaves when its path crosses
+    // a corner of a room it does not connect.
+    const DungeonRoom room = make_room(10, 5, 8, 7);
+    const Vector2D shapeWall{ 13, 8 };
+    const Vector2D pool{ 11, 6 };
+    const Vector2D clippedCorner{ 10, 11 };
+    // The two cells that cut that corner off from the rest of the room's floor.
+    const Vector2D cornerWallAbove{ 10, 10 };
+    const Vector2D cornerWallBeside{ 11, 11 };
+    map->set_tile(shapeWall, TileType::WALL, 0.0);
+    map->set_tile(pool, TileType::WATER, 10.0);
+    map->set_tile(cornerWallAbove, TileType::WALL, 0.0);
+    map->set_tile(cornerWallBeside, TileType::WALL, 0.0);
+    place_corridor(clippedCorner);
+    ASSERT_TRUE(map->room_interior_is_one_piece(room))
+        << "the room is split before the vault touches it - the case measures nothing";
+
+    RandomDice generationRng{ 7 };
+    TreasureRoom::create(room, 1, generationRng, ctx);
+
+    EXPECT_EQ(map->get_tile_type(pool), TileType::FLOOR)
+        << "the vault left water standing on its own floor";
+    EXPECT_EQ(map->get_tile_type(shapeWall), TileType::WALL)
+        << "the vault flattened the wall its room's shape carved";
+    EXPECT_EQ(map->get_tile_type(clippedCorner), TileType::CORRIDOR)
+        << "the vault took a corridor that only clipped its box for its own floor";
+    EXPECT_TRUE(map->room_interior_is_one_piece(room))
+        << "the vault left a pocket of floor with no way into it";
 }
 
 // ============================================================================

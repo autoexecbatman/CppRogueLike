@@ -340,19 +340,18 @@ void TreasureRoom::create(
 	assert(ctx.levelManager && "TreasureRoom::create called without levelManager");
 	assert(ctx.dice && "TreasureRoom::create called without dice");
 
-	// Clear the vault floor of water and anything else underfoot, so the treasure and
-	// its warden have room. The room itself is already carved, shape included: this
-	// walks the bounding box, so writing floor over a wall here would fill in an L's
-	// corner, a cross's arms or a pillared room's pillars and leave a plain rectangle.
+	// Drain the pools on the vault floor, so the treasure and its warden stand dry.
+	// Water is the whole of the clearing: this walks the bounding box, which also holds
+	// the walls the room's shape carved and any corridor that clipped a corner of it,
+	// and floor written over either one flattens the shape or seals off a pocket.
 	for (int y = room.row; y <= room.row_end(); y++)
 	{
 		for (int x = room.col; x <= room.col_end(); x++)
 		{
-			if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WALL)
+			if (ctx.map->get_tile_type(Vector2D{ x, y }) == TileType::WATER)
 			{
-				continue;
+				ctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
 			}
-			ctx.map->set_tile(Vector2D{ x, y }, TileType::FLOOR, 1);
 		}
 	}
 
