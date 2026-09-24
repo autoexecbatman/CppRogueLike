@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CodecRoundTripTest.*:CreatureSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/DamageInfo.h",
+      "original": "\tif (name == \"acid\")\n\t{\n\t\treturn DamageType::ACID;\n\t}",
+      "mutated": "\tif (name == \"acid\")\n\t{\n\t\treturn DamageType::POISON;\n\t}",
+      "catches": "a damage type parsed back as the wrong one, so a saved acid attack comes back as poison"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\tj[\"damageInfo\"][\"type\"] = damage_type_name(damageInfo.damageType);",
+      "mutated": "\tj[\"damageInfo\"][\"type\"] = damage_type_name(DamageType::PHYSICAL);",
+      "catches": "every attack saved as physical, which a round trip against the same saver cannot see"
+    },
+    {
+      "file": "src/Attacker.cpp",
+      "original": "\t\tparse_damage_type(damageJson.at(\"type\").get<std::string>())",
+      "mutated": "\t\tdamageJson.at(\"type\").is_string() ? parse_damage_type(damageJson.at(\"type\").get<std::string>()) : DamageType::PHYSICAL",
+      "catches": "a record numbering its damage type loading as physical rather than being refused"
+    },
+    {
+      "file": "src/Alignment.h",
+      "original": "\tif (name == \"chaotic\")\n\t{\n\t\treturn Ethics::CHAOTIC;\n\t}",
+      "mutated": "\tif (name == \"chaotic\")\n\t{\n\t\treturn Ethics::LAWFUL;\n\t}",
+      "catches": "an alignment parsed back as its opposite on the law/chaos axis"
+    },
+    {
+      "file": "src/Alignment.h",
+      "original": "\tif (name == \"evil\")\n\t{\n\t\treturn Morality::EVIL;\n\t}",
+      "mutated": "\tif (name == \"evil\")\n\t{\n\t\treturn Morality::GOOD;\n\t}",
+      "catches": "an alignment parsed back as its opposite on the good/evil axis"
+    },
+    {
+      "file": "src/CreatureClass.h",
+      "original": "\tif (name == \"monster\")\n\t{\n\t\treturn CreatureClass::MONSTER;\n\t}",
+      "mutated": "\tif (name == \"monster\")\n\t{\n\t\treturn CreatureClass::FIGHTER;\n\t}",
+      "catches": "every monster loading as a fighter, with a fighter's tables"
+    },
+    {
+      "file": "src/CreatureClass.h",
+      "original": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"cleric\";\n\t}",
+      "mutated": "\tcase CreatureClass::CLERIC:\n\t{\n\t\treturn \"wizard\";\n\t}",
+      "catches": "two classes sharing one name, so a cleric is saved as a wizard"
+    }
+  ]
+}

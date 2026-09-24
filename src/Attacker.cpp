@@ -349,14 +349,15 @@ int Attacker::armor_class_attacked(const Creature& target, GameContext& ctx) con
 void Attacker::load(const json& j)
 {
 	// The dice are the record; the range is derived from them.
+	const json& damageJson = j.at("damageInfo");
 	damageInfo = DamageInfo{
-		j["damageInfo"]["display"].get<std::string>(),
-		static_cast<DamageType>(j["damageInfo"]["type"].get<int>())
+		damageJson.at("display").get<std::string>(),
+		parse_damage_type(damageJson.at("type").get<std::string>())
 	};
 }
 
 void Attacker::save(json& j)
 {
 	j["damageInfo"]["display"] = damageInfo.displayRoll;
-	j["damageInfo"]["type"] = static_cast<int>(damageInfo.damageType);
+	j["damageInfo"]["type"] = damage_type_name(damageInfo.damageType);
 }

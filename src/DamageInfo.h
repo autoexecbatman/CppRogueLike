@@ -1,6 +1,7 @@
 #pragma once
 
 #include <format>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -20,8 +21,10 @@ enum class DamageType
 	MAGIC, // Pure magical damage
 };
 
-// What a damage type is called, wherever one is shown: the resolver's log, the
-// monster editor's field. Beside the enum so a type added there is named here.
+// What a damage type is called: the name a save carries for it, and the one shown in
+// the resolver's log and the monster editor's field. One table, so a record and a label
+// cannot drift apart - and changing a string here changes what a save means, since
+// parse_damage_type below is its inverse.
 //
 // Example:
 //   damage_type_name(DamageType::FIRE);   // -> "fire"
@@ -61,6 +64,47 @@ inline std::string_view damage_type_name(DamageType damageType)
 	// Every type returns above; a new one fails to compile under -Wswitch
 	// rather than falling through to a name that belongs to nothing.
 	std::unreachable();
+}
+
+// The damage type a record names, the inverse of damage_type_name. Throws naming what
+// it read, so a record written by a build that knew a type this one does not is refused
+// rather than cast to whichever type the number lands on.
+//
+// Example:
+//   parse_damage_type("fire");    // -> DamageType::FIRE
+//   parse_damage_type("sonic");   // throws std::runtime_error
+inline DamageType parse_damage_type(std::string_view name)
+{
+	if (name == "physical")
+	{
+		return DamageType::PHYSICAL;
+	}
+	if (name == "fire")
+	{
+		return DamageType::FIRE;
+	}
+	if (name == "cold")
+	{
+		return DamageType::COLD;
+	}
+	if (name == "lightning")
+	{
+		return DamageType::LIGHTNING;
+	}
+	if (name == "poison")
+	{
+		return DamageType::POISON;
+	}
+	if (name == "acid")
+	{
+		return DamageType::ACID;
+	}
+	if (name == "magic")
+	{
+		return DamageType::MAGIC;
+	}
+
+	throw std::runtime_error(std::format("unknown damage type '{}'", name));
 }
 
 // The next type in the editor's cycle, wrapping at the end, so every type is

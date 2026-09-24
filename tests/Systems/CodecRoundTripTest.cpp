@@ -23,6 +23,7 @@
 #include "src/Alignment.h"
 #include "src/BuffType.h"
 #include "src/CreatureClass.h"
+#include "src/DamageInfo.h"
 #include "src/TargetMode.h"
 
 namespace
@@ -196,9 +197,23 @@ TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
 	}
 }
 
+// What an attacker's damage is, in a save and on the screen alike: damage_type_name is
+// the only table, so this round trip also pins the label the resolver's log prints.
+TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
+{
+	constexpr std::array types = { DamageType::PHYSICAL, DamageType::FIRE, DamageType::COLD,
+		DamageType::LIGHTNING, DamageType::POISON, DamageType::ACID, DamageType::MAGIC };
+
+	for (const auto type : types)
+	{
+		expect_round_trip(type, damage_type_name, parse_damage_type, "DamageType");
+	}
+}
+
 // The parser is the only schema this data has.
 TEST(CodecRoundTripTest, UnknownStringsThrow)
 {
+	EXPECT_THROW((void)parse_damage_type("sonic"), std::runtime_error);
 	EXPECT_THROW((void)parse_ethics("scrupulous"), std::runtime_error);
 	EXPECT_THROW((void)parse_morality("saintly"), std::runtime_error);
 	EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);

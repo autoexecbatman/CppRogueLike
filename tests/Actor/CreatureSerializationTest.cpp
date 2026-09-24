@@ -252,6 +252,44 @@ TEST_F(CreatureSerializationTest, ARunningBuffIsSavedByName)
 	EXPECT_EQ(loaded->activeBuffs.front().type, BuffType::BLESS);
 }
 
+// The damage an attacker deals carries its type by name, for the same reason: a record
+// numbering it means something else the moment a type is inserted into the list.
+TEST_F(CreatureSerializationTest, AnAttackersDamageTypeIsSavedByName)
+{
+	auto creature = create_test_creature();
+	creature->attacker = std::make_unique<MonsterAttacker>(*creature, DamageInfo{ "2d4", DamageType::ACID });
+
+	json saved;
+	creature->save(saved);
+
+	EXPECT_EQ(saved.at("attacker").at("damageInfo").at("type"), "acid");
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	loaded->load(saved);
+
+	ASSERT_NE(loaded->attacker, nullptr);
+	EXPECT_EQ(loaded->attacker->get_damage_info().damageType, DamageType::ACID);
+}
+
+// A damage type this build does not know is refused rather than cast to whatever the
+// number lands on, and so is a record still numbering it.
+TEST_F(CreatureSerializationTest, AnUnknownDamageTypeIsRefused)
+{
+	auto creature = create_test_creature();
+	json saved;
+	creature->save(saved);
+
+	json withUnknownName = saved;
+	withUnknownName["attacker"]["damageInfo"]["type"] = "sonic";
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_THROW(loaded->load(withUnknownName), std::runtime_error);
+
+	json withNumber = saved;
+	withNumber["attacker"]["damageInfo"]["type"] = 3;
+	auto second = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_ANY_THROW(second->load(withNumber));
+}
+
 // A name this build cannot place is refused, rather than becoming whichever value the
 // number happens to land on.
 TEST_F(CreatureSerializationTest, AnAlignmentNameThisBuildDoesNotKnowIsRefused)
