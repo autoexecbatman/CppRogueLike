@@ -28,6 +28,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -96,6 +98,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -159,6 +163,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 1,
       "num": 3,
@@ -227,6 +233,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 9,
@@ -290,6 +298,8 @@
       "sides": 6
     },
     "dr": 2,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 5,
       "num": 1,
@@ -353,6 +363,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -416,6 +428,8 @@
       "sides": 6
     },
     "dr": 1,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 4,
@@ -479,6 +493,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -543,6 +559,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -606,6 +624,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -669,6 +689,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 4,
       "num": 4,
@@ -732,6 +754,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -800,6 +824,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": -1,
       "num": 1,
@@ -868,6 +894,8 @@
       "sides": 6
     },
     "dr": 4,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 12,
@@ -931,6 +959,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 3,
@@ -994,6 +1024,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 8,
@@ -1057,6 +1089,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 1,
       "num": 1,
@@ -1125,6 +1159,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -1188,6 +1224,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1256,6 +1294,8 @@
       "sides": 6
     },
     "dr": 2,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 11,
@@ -1320,6 +1360,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1388,6 +1430,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 6,
@@ -1459,6 +1503,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 1,
       "num": 4,
@@ -1527,6 +1573,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1595,6 +1643,8 @@
       "sides": 6
     },
     "dr": 3,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 13,
@@ -1658,6 +1708,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1721,6 +1773,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 3,
       "num": 3,
@@ -1793,6 +1847,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1881,6 +1937,8 @@
       "sides": 6
     },
     "dr": 1,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 1,
@@ -1944,6 +2002,8 @@
       "sides": 6
     },
     "dr": 3,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 3,
       "num": 8,
@@ -2008,6 +2068,8 @@
       "sides": 6
     },
     "dr": 1,
+    "ethics": "chaotic",
+    "morality": "evil",
     "hp": {
       "bonus": 3,
       "num": 4,
@@ -2071,6 +2133,8 @@
       "sides": 6
     },
     "dr": 1,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 3,
       "num": 4,
@@ -2135,6 +2199,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -2198,6 +2264,8 @@
       "sides": 6
     },
     "dr": 1,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 3,
       "num": 5,
@@ -2262,6 +2330,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "evil",
     "hp": {
       "bonus": 7,
       "num": 7,
@@ -2325,6 +2395,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "neutral",
+    "morality": "neutral",
     "hp": {
       "bonus": 0,
       "num": 2,
@@ -2389,6 +2461,8 @@
       "sides": 6
     },
     "dr": 0,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 3,
@@ -2458,6 +2532,8 @@
       "sides": 6
     },
     "dr": 2,
+    "ethics": "lawful",
+    "morality": "evil",
     "hp": {
       "bonus": 0,
       "num": 5,

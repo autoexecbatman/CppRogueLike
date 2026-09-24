@@ -49,6 +49,31 @@ void Spider::init_spider_type(GameContext& ctx)
 	add_state(ActorState::CAN_SWIM); // Spiders can walk on water (they're light)
 	add_state(ActorState::CAN_WALK_WEBS); // Spiders are not caught by webs, their own or others'
 
+	// Monstrous Manual, the spider entry, in its column order: the hairy spider is
+	// neutral evil, the huge one neutral, and the giant one chaotic evil. Which of
+	// them each of these is was settled with their venom.
+	switch (spiderType)
+	{
+	case SpiderType::SMALL:
+	{
+		set_ethics(Ethics::NEUTRAL);
+		set_morality(Morality::EVIL);
+		break;
+	}
+	case SpiderType::GIANT:
+	{
+		set_ethics(Ethics::NEUTRAL);
+		set_morality(Morality::NEUTRAL);
+		break;
+	}
+	case SpiderType::WEB_SPINNER:
+	{
+		set_ethics(Ethics::CHAOTIC);
+		set_morality(Morality::EVIL);
+		break;
+	}
+	}
+
 	switch (spiderType)
 	{
 	case SpiderType::SMALL:

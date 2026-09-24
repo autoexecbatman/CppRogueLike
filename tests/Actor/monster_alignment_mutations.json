@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AlignmentTest.*:AlignmentDataTest.*:AlignmentCodeBuiltTest.*:AlignmentShiftTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.ethics = parse_ethics(entry.at(\"ethics\").get<std::string>());",
+      "mutated": "\tparams.ethics = parse_ethics(entry.value(\"ethics\", std::string{ \"neutral\" }));",
+      "catches": "an unfinished record handed the old true-neutral default instead of being refused"
+    },
+    {
+      "file": "src/MonsterRegistry.cpp",
+      "original": "\tparams.morality = parse_morality(entry.at(\"morality\").get<std::string>());",
+      "mutated": "\tparams.morality = parse_morality(std::string{ \"neutral\" });",
+      "catches": "every monster loading as neutral whatever its record says, which leaves Protection from Evil warding against nothing"
+    },
+    {
+      "file": "src/Spider.cpp",
+      "original": "\tcase SpiderType::SMALL:\n\t{\n\t\tset_ethics(Ethics::NEUTRAL);\n\t\tset_morality(Morality::EVIL);",
+      "mutated": "\tcase SpiderType::SMALL:\n\t{\n\t\tset_ethics(Ethics::NEUTRAL);\n\t\tset_morality(Morality::NEUTRAL);",
+      "catches": "the hairy spider losing the evil its entry gives it"
+    },
+    {
+      "file": "src/Spider.cpp",
+      "original": "\tcase SpiderType::WEB_SPINNER:\n\t{\n\t\tset_ethics(Ethics::CHAOTIC);",
+      "mutated": "\tcase SpiderType::WEB_SPINNER:\n\t{\n\t\tset_ethics(Ethics::NEUTRAL);",
+      "catches": "the giant spider read as the huge one, which is the confusion the venom work already had to settle"
+    },
+    {
+      "file": "src/Monsters.cpp",
+      "original": "\tset_morality(Morality::EVIL);",
+      "mutated": "\tset_morality(Morality::NEUTRAL);",
+      "catches": "the killer mimic becoming the common one, which bargains rather than ambushes"
+    }
+  ]
+}

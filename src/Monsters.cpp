@@ -32,6 +32,11 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 
 	set_natural_attack("Pseudopod");
 
+	// Monstrous Manual, the mimic entry's second column: the killer mimic, which is
+	// what an ambusher that never bargains is. Neutral (evil).
+	set_ethics(Ethics::NEUTRAL);
+	set_morality(Morality::EVIL);
+
 	attacker = std::make_unique<MonsterAttacker>(*this, DamageValues::Dagger());
 	experienceReward = std::make_unique<ExperienceReward>(150);
 	set_dr(1);

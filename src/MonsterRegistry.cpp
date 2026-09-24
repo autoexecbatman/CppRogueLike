@@ -222,10 +222,10 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 	params.morale = entry.at("morale").get<int>();
 	// Optional by design: entries authored before turning existed are living.
 	params.undead = entry.value("undead", false);
-	// Optional by design: entries authored before alignment existed default to
-	// true neutral rather than failing to load.
-	params.ethics = parse_ethics(entry.value("ethics", std::string{ encode_ethics(Ethics::NEUTRAL) }));
-	params.morality = parse_morality(entry.value("morality", std::string{ encode_morality(Morality::NEUTRAL) }));
+	// Required: every record the Monstrous Manual names carries the alignment its entry
+	// gives, so a missing one is an unfinished record rather than a monster with no side.
+	params.ethics = parse_ethics(entry.at("ethics").get<std::string>());
+	params.morality = parse_morality(entry.at("morality").get<std::string>());
 	params.corpseWeight = entry.value("corpse_weight", 50);
 	params.strDice = parse_dice(entry.at("str"));
 	params.dexDice = parse_dice(entry.at("dex"));
