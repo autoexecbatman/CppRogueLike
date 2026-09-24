@@ -42,7 +42,21 @@ jobs:
       run: |
         cmake --build build --config Debug --target test_exe
 
+    # The exit code and the tail of the output go to the job summary, which the Actions
+    # API serves without the admin rights a job log needs. pwsh rewrites every non-zero
+    # code to 1 of its own accord, and the real one names the fault: 3 is an abort,
+    # 3221225477 an access violation, 3221226505 a stack-buffer or fastfail check.
     - name: Run tests
       run: |
+        $PSNativeCommandUseErrorActionPreference = $false
         cd build\bin\Debug
-        .\test_exe.exe
+        .\test_exe.exe > test_stdout.txt 2> test_stderr.txt
+        $code = $LASTEXITCODE
+        Get-Content test_stdout.txt
+        Get-Content test_stderr.txt
+        "test_exe exit code: $code" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+        if ($code -ne 0) {
+          Get-Content test_stdout.txt -Tail 30 | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          Get-Content test_stderr.txt -Tail 30 | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+        }
+        exit $code
