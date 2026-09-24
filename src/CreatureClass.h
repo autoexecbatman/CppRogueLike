@@ -1,5 +1,9 @@
 #pragma once
 
+#include <format>
+#include <stdexcept>
+#include <string_view>
+
 // file: CreatureClass.h
 //
 // The AD&D 2e class a creature belongs to. Kept apart from Creature so a
@@ -25,6 +29,73 @@ enum class CreatureClass
 	WIZARD,
 	MONSTER,
 };
+
+// The name a save carries for this class.
+//
+// Deliberately without a default case: adding a CreatureClass makes this and the parser
+// below fail to compile under -Wswitch until both know it.
+//
+// Example:
+//   encode_creature_class(CreatureClass::CLERIC);  // -> "cleric"
+[[nodiscard]] inline constexpr std::string_view encode_creature_class(CreatureClass creatureClass)
+{
+	switch (creatureClass)
+	{
+	case CreatureClass::FIGHTER:
+	{
+		return "fighter";
+	}
+	case CreatureClass::ROGUE:
+	{
+		return "rogue";
+	}
+	case CreatureClass::CLERIC:
+	{
+		return "cleric";
+	}
+	case CreatureClass::WIZARD:
+	{
+		return "wizard";
+	}
+	case CreatureClass::MONSTER:
+	{
+		return "monster";
+	}
+	}
+
+	return "monster";
+}
+
+// The class a record names. Throws naming what it read.
+//
+// Example:
+//   parse_creature_class("wizard");  // -> CreatureClass::WIZARD
+//   parse_creature_class("bard");    // throws std::runtime_error
+[[nodiscard]] inline CreatureClass parse_creature_class(std::string_view name)
+{
+	if (name == "fighter")
+	{
+		return CreatureClass::FIGHTER;
+	}
+	if (name == "rogue")
+	{
+		return CreatureClass::ROGUE;
+	}
+	if (name == "cleric")
+	{
+		return CreatureClass::CLERIC;
+	}
+	if (name == "wizard")
+	{
+		return CreatureClass::WIZARD;
+	}
+	if (name == "monster")
+	{
+		return CreatureClass::MONSTER;
+	}
+
+	throw std::runtime_error(std::format("unknown creature class '{}'", name));
+}
 
 // Whether a class advances on the warrior tables - the constitution column with
 // the bonus above +2, and the warrior hit dice. Fighter is the only warrior the

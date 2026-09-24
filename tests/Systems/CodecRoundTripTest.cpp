@@ -20,7 +20,9 @@
 #include "src/MagicalItemEffects.h"
 #include "src/Weapons.h"
 #include "src/Ai.h"
+#include "src/Alignment.h"
 #include "src/BuffType.h"
+#include "src/CreatureClass.h"
 #include "src/TargetMode.h"
 
 namespace
@@ -164,9 +166,42 @@ TEST(CodecRoundTripTest, AiTypeSurvivesEncoding)
 	}
 }
 
+// Where a creature stands on the law/chaos axis, and on the good/evil one. Two axes
+// rather than nine labels, so each one round-trips on its own.
+TEST(CodecRoundTripTest, AlignmentSurvivesEncoding)
+{
+	constexpr std::array ethics = { Ethics::LAWFUL, Ethics::NEUTRAL, Ethics::CHAOTIC };
+	for (const auto axis : ethics)
+	{
+		expect_round_trip(axis, encode_ethics, parse_ethics, "Ethics");
+	}
+
+	constexpr std::array moralities = { Morality::GOOD, Morality::NEUTRAL, Morality::EVIL };
+	for (const auto axis : moralities)
+	{
+		expect_round_trip(axis, encode_morality, parse_morality, "Morality");
+	}
+}
+
+// Which class a saved creature belongs to, MONSTER included - it is what everything that
+// is not a player character carries, so a save that loses it loses the most common value.
+TEST(CodecRoundTripTest, CreatureClassSurvivesEncoding)
+{
+	constexpr std::array classes = { CreatureClass::FIGHTER, CreatureClass::ROGUE,
+		CreatureClass::CLERIC, CreatureClass::WIZARD, CreatureClass::MONSTER };
+
+	for (const auto creatureClass : classes)
+	{
+		expect_round_trip(creatureClass, encode_creature_class, parse_creature_class, "CreatureClass");
+	}
+}
+
 // The parser is the only schema this data has.
 TEST(CodecRoundTripTest, UnknownStringsThrow)
 {
+	EXPECT_THROW((void)parse_ethics("scrupulous"), std::runtime_error);
+	EXPECT_THROW((void)parse_morality("saintly"), std::runtime_error);
+	EXPECT_THROW((void)parse_creature_class("bard"), std::runtime_error);
 	EXPECT_THROW((void)parse_target_mode("not_a_mode"), std::runtime_error);
 	EXPECT_THROW((void)parse_scroll_animation("not_an_animation"), std::runtime_error);
 	EXPECT_THROW((void)parse_hand_requirement("not_a_requirement"), std::runtime_error);

@@ -210,6 +210,74 @@ TEST_F(CreatureSerializationTest, AnUnknownAiKindIsRefused)
 	EXPECT_THROW((void)Ai::create(saved), std::runtime_error);
 }
 
+// A creature's alignment and class go into the record as names, so a record written by
+// one build and read by another cannot quietly change what it says.
+TEST_F(CreatureSerializationTest, TheAlignmentAndClassAreSavedByName)
+{
+	auto creature = create_test_creature();
+	creature->set_ethics(Ethics::LAWFUL);
+	creature->set_morality(Morality::EVIL);
+	creature->set_creature_class(CreatureClass::ROGUE);
+
+	json saved;
+	creature->save(saved);
+
+	EXPECT_EQ(saved.at("ethics"), "lawful");
+	EXPECT_EQ(saved.at("morality"), "evil");
+	EXPECT_EQ(saved.at("creatureClass"), "rogue");
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	loaded->load(saved);
+
+	EXPECT_EQ(loaded->get_ethics(), Ethics::LAWFUL);
+	EXPECT_EQ(loaded->get_morality(), Morality::EVIL);
+	EXPECT_EQ(loaded->get_creature_class(), CreatureClass::ROGUE);
+}
+
+// And so does every buff the creature is carrying.
+TEST_F(CreatureSerializationTest, ARunningBuffIsSavedByName)
+{
+	auto creature = create_test_creature();
+	creature->activeBuffs.push_back(Buff{ BuffType::BLESS, 1, 30, false, {} });
+
+	json saved;
+	creature->save(saved);
+
+	EXPECT_EQ(saved.at("activeBuffs").at(0).at("type"), "bless");
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	loaded->load(saved);
+
+	ASSERT_EQ(loaded->activeBuffs.size(), 1u);
+	EXPECT_EQ(loaded->activeBuffs.front().type, BuffType::BLESS);
+}
+
+// A name this build cannot place is refused, rather than becoming whichever value the
+// number happens to land on.
+TEST_F(CreatureSerializationTest, AnAlignmentNameThisBuildDoesNotKnowIsRefused)
+{
+	auto creature = create_test_creature();
+	json saved;
+	creature->save(saved);
+	saved["ethics"] = "scrupulous";
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_THROW(loaded->load(saved), std::runtime_error);
+}
+
+// And so is a record still numbering them: saves are not kept compatible here, so the
+// old shape fails loudly instead of being read as an index into today's enum.
+TEST_F(CreatureSerializationTest, ARecordNumberingItsEnumsIsRefused)
+{
+	auto creature = create_test_creature();
+	json saved;
+	creature->save(saved);
+	saved["creatureClass"] = 1;
+
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	EXPECT_ANY_THROW(loaded->load(saved));
+}
+
 TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 {
 	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };

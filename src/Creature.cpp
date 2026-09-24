@@ -53,13 +53,13 @@ void Creature::load(const json& j)
 	gold = j.at("gold").get<int>();
 	gender = j.at("gender").get<std::string>();
 	naturalAttack = j.at("naturalAttack").get<std::string>();
-	ethics = static_cast<Ethics>(j.at("ethics").get<int>());
-	morality = static_cast<Morality>(j.at("morality").get<int>());
+	ethics = parse_ethics(j.at("ethics").get<std::string>());
+	morality = parse_morality(j.at("morality").get<std::string>());
 	undead = j.at("undead").get<bool>();
 	awarenessTurns = j.at("awarenessTurns").get<int>();
 	webStuckTurns = j.at("webStuckTurns").get<int>();
 	webStrength = j.at("webStrength").get<int>();
-	creatureClass = static_cast<CreatureClass>(j.at("creatureClass").get<int>());
+	creatureClass = parse_creature_class(j.at("creatureClass").get<std::string>());
 	hitDie = j.at("hitDie").get<int>();
 	attacksPerRound = j.at("attacksPerRound").get<float>();
 	damageResistance = j.at("dr").get<int>();
@@ -126,7 +126,7 @@ void Creature::load(const json& j)
 		for (const auto& buffJson : j.at("activeBuffs"))
 		{
 			Buff buff{};
-			buff.type = static_cast<BuffType>(buffJson.at("type").get<int>());
+			buff.type = parse_buff_type(buffJson.at("type").get<std::string>());
 			buff.value = buffJson.at("value").get<int>();
 			buff.turnsRemaining = buffJson.at("turnsRemaining").get<int>();
 			buff.isSetEffect = buffJson.at("isSetEffect").get<bool>();
@@ -155,13 +155,13 @@ void Creature::save(json& j)
 	j["gold"] = gold;
 	j["gender"] = gender;
 	j["naturalAttack"] = naturalAttack;
-	j["ethics"] = static_cast<int>(ethics);
-	j["morality"] = static_cast<int>(morality);
+	j["ethics"] = encode_ethics(ethics);
+	j["morality"] = encode_morality(morality);
 	j["undead"] = undead;
 	j["awarenessTurns"] = awarenessTurns;
 	j["webStuckTurns"] = webStuckTurns;
 	j["webStrength"] = webStrength;
-	j["creatureClass"] = static_cast<int>(creatureClass);
+	j["creatureClass"] = encode_creature_class(creatureClass);
 	j["hitDie"] = hitDie;
 	j["attacksPerRound"] = attacksPerRound;
 	j["dr"] = damageResistance;
@@ -236,7 +236,7 @@ void Creature::save(json& j)
 	for (const auto& buff : activeBuffs)
 	{
 		json buffJson;
-		buffJson["type"] = static_cast<int>(buff.type);
+		buffJson["type"] = encode_buff_type(buff.type);
 		buffJson["value"] = buff.value;
 		buffJson["turnsRemaining"] = buff.turnsRemaining;
 		buffJson["isSetEffect"] = buff.isSetEffect;
