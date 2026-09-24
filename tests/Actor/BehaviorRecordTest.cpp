@@ -83,18 +83,24 @@ std::vector<NamedBehavior> every_behavior_with_fields()
 	};
 }
 
+// The fields of a behaviour record that carry an enum.
+constexpr std::array<std::string_view, 7> ENUM_FIELDS = { "type", "effect", "buffType", "handRequirement", "weaponSize", "targetMode", "scrollAnimation" };
+
+// Whether a record's key is one of those. The array is a file-scope constant and this
+// takes no capture: MSVC 14.51 gives a lambda that captures a function-local constexpr
+// array its own copy, so ranges::find returns an iterator into one object while end()
+// names another, and the debug iterator check aborts the process on the mismatch.
+bool is_enum_field(std::string_view key)
+{
+	return std::ranges::find(ENUM_FIELDS, key) != ENUM_FIELDS.end();
+}
+
 } // namespace
 
 // The record names what it holds, and every enum in it, so what a record means does not
 // depend on the order of an enum nobody consults when editing it.
 TEST(BehaviorRecordTest, EveryEnumInTheRecordIsANameNotANumber)
 {
-	constexpr std::array<std::string_view, 7> enumFields = { "type", "effect", "buffType", "handRequirement", "weaponSize", "targetMode", "scrollAnimation" };
-	auto is_enum_field = [&enumFields](std::string_view key)
-	{
-		return std::ranges::find(enumFields, key) != enumFields.end();
-	};
-
 	for (const NamedBehavior& named : every_behavior_with_fields())
 	{
 		json saved;
