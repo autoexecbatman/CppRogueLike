@@ -42,6 +42,24 @@
       "original": "\tfor (const auto& item : owner.inventoryData.items)\n\t{\n\t\tassert(item && \"the pack owns every entry it holds\");\n\t\ttotal += item->enhancement.weight;\n\t}\n",
       "mutated": "",
       "catches": "the pack dropping out of the load once the body was added to it"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "constexpr int CLOTHING_POUNDS = 5;",
+      "mutated": "constexpr int CLOTHING_POUNDS = 10;",
+      "catches": "a clothing allowance that is not the five pounds the book allows"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;",
+      "mutated": "\tint total = CLOTHING_POUNDS;",
+      "catches": "a creature dressed by a rule written for characters"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tint total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;",
+      "mutated": "\tint total = 0;",
+      "catches": "the allowance dropped, which leaves every character five pounds light"
     }
   ]
 }

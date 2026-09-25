@@ -183,9 +183,18 @@ InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inve
 
 // ===== CAPACITY MANAGEMENT =====
 
+namespace
+{
+// What the book allows for the clothes a character stands up in.
+constexpr int CLOTHING_POUNDS = 5;
+} // namespace
+
 int get_total_weight(const Creature& owner) noexcept
 {
-	int total = 0;
+	// "Add five pounds for clothing, if any is worn" (Player's Handbook, PDF page 160).
+	// Table 47 is Character Encumbrance and nothing here dresses a creature, so a
+	// character starts from the allowance and a monster from nothing.
+	int total = (owner.get_creature_class() == CreatureClass::MONSTER) ? 0 : CLOTHING_POUNDS;
 	for (const auto& item : owner.inventoryData.items)
 	{
 		assert(item && "the pack owns every entry it holds");

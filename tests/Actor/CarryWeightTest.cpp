@@ -115,3 +115,42 @@ TEST_F(CarryWeightTest, ThePackAndTheBodyAreOneLoad)
 	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - worn + 1), carrier, *ctx.dataManager))
 		<< "the worn half of the load did not count";
 }
+
+// "To calculate encumbrance, simply total the pounds of gear carried by the creature
+// or character. Add five pounds for clothing, if any is worn." (Player's Handbook,
+// PDF page 160.) The game has no clothing item, so the allowance is the load a
+// character starts from rather than something in a slot.
+TEST_F(CarryWeightTest, ACharacterCarriesTheBooksFivePoundsOfClothing)
+{
+	carrier.set_creature_class(CreatureClass::ROGUE);
+
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 5) << "an empty character still wears clothes";
+
+	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 15);
+}
+
+// Table 47 is Character Encumbrance, and nothing here dresses a creature. A monster
+// carries what it carries.
+TEST_F(CarryWeightTest, AMonsterWearsNoClothing)
+{
+	carrier.set_creature_class(CreatureClass::MONSTER);
+
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 0);
+
+	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(10)).has_value());
+
+	EXPECT_EQ(InventoryOperations::get_total_weight(carrier), 10);
+}
+
+// The allowance is part of the load, so it counts against the limit like any other
+// five pounds: a character has five fewer to spend than a creature of equal Strength.
+TEST_F(CarryWeightTest, TheClothingAllowanceCountsAgainstTheLimit)
+{
+	carrier.set_creature_class(CreatureClass::CLERIC);
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - 5), carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - 4), carrier, *ctx.dataManager));
+}

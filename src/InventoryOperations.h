@@ -55,14 +55,17 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& invento
 // Remove from creature backpack by id
 InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inventory, uint64_t uniqueId);
 
-// Everything the owner is carrying, in pounds: what is in the pack and what is on the
-// body. The book totals "the pounds of gear carried by the creature or character"
-// (Player's Handbook, PDF page 160) and draws no line between the two, so armour
-// cannot be carried for nothing by putting it on.
+// Everything the owner is carrying, in pounds: what is in the pack, what is on the
+// body, and the five pounds the book allows for a character's clothes. It totals "the
+// pounds of gear carried by the creature or character... Add five pounds for clothing,
+// if any is worn" (Player's Handbook, PDF page 160) and draws no line between pack and
+// body, so armour cannot be carried for nothing by putting it on. A monster wears no
+// clothing here, Table 47 being Character Encumbrance.
 //
 // Example:
-//   get_total_weight(emptyHanded);                 // -> 0
-//   get_total_weight(plateMailedSwordsman);        // -> 54, the 50 worn and the 4 held
+//   get_total_weight(emptyHandedMonster);          // -> 0
+//   get_total_weight(emptyHandedRogue);            // -> 5, the clothes it stands in
+//   get_total_weight(plateMailedSwordsman);        // -> 59, the 50 worn, the 4 held and the 5
 int get_total_weight(const Creature& owner) noexcept;
 
 // The most the owner can carry and still move, in pounds: the Strength row's
