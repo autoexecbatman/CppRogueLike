@@ -70,13 +70,6 @@ std::string prettify_key(std::string_view key)
 	return result;
 }
 
-template <typename E>
-E cycle_enum(E val, int count)
-{
-	int v = (static_cast<int>(val) + 1) % count;
-	return static_cast<E>(v);
-}
-
 std::string_view consumable_effect_str(ConsumableEffect e)
 {
 	switch (e)
@@ -983,47 +976,37 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 void ItemEditor::field_toggle(FieldId f)
 {
 	ItemParams& p = m_working;
-	constexpr int ITEM_CLASS_COUNT = static_cast<int>(ItemClass::QUEST_ITEM) + 1;
-	constexpr int PICKABLE_COUNT = static_cast<int>(PickableType::QUEST_ITEM) + 1;
-	constexpr int CONSUMABLE_EFFECT_COUNT = static_cast<int>(ConsumableEffect::FAIL) + 1;
-	constexpr int BUFF_COUNT = static_cast<int>(BuffType::HOLD_PERSON) + 1;
-	constexpr int TARGET_MODE_COUNT = static_cast<int>(TargetMode::FOV_BUFF) + 1;
-	constexpr int SCROLL_ANIM_COUNT = static_cast<int>(ScrollAnimation::EXPLOSION) + 1;
-	constexpr int HAND_REQ_COUNT = static_cast<int>(HandRequirement::OFF_HAND_ONLY) + 1;
-	constexpr int WEAPON_SIZE_COUNT = static_cast<int>(WeaponSize::GIANT) + 1;
-	constexpr int EFFECT_COUNT = static_cast<int>(MagicalEffect::PROTECTION) + 1;
-
 	switch (f)
 	{
 	case FieldId::ITEM_CLASS:
-		p.itemClass = cycle_enum(p.itemClass, ITEM_CLASS_COUNT);
+		p.itemClass = next_item_class(p.itemClass);
 		break;
 	case FieldId::PICKABLE_TYPE:
-		p.pickableType = cycle_enum(p.pickableType, PICKABLE_COUNT);
+		p.pickableType = next_pickable_type(p.pickableType);
 		break;
 	case FieldId::CONSUMABLE_EFFECT:
-		p.consumableEffect = cycle_enum(p.consumableEffect, CONSUMABLE_EFFECT_COUNT);
+		p.consumableEffect = next_consumable_effect(p.consumableEffect);
 		break;
 	case FieldId::CONSUMABLE_BUFF:
-		p.consumableBuffType = cycle_enum(p.consumableBuffType, BUFF_COUNT);
+		p.consumableBuffType = next_buff_type(p.consumableBuffType);
 		break;
 	case FieldId::TARGET_MODE:
-		p.targetMode = cycle_enum(p.targetMode, TARGET_MODE_COUNT);
+		p.targetMode = next_target_mode(p.targetMode);
 		break;
 	case FieldId::SCROLL_ANIM:
-		p.scrollAnimation = cycle_enum(p.scrollAnimation, SCROLL_ANIM_COUNT);
+		p.scrollAnimation = next_scroll_animation(p.scrollAnimation);
 		break;
 	case FieldId::RANGED:
 		p.ranged = !p.ranged;
 		break;
 	case FieldId::HAND_REQUIREMENT:
-		p.handRequirement = cycle_enum(p.handRequirement, HAND_REQ_COUNT);
+		p.handRequirement = next_hand_requirement(p.handRequirement);
 		break;
 	case FieldId::WEAPON_SIZE:
-		p.weaponSize = cycle_enum(p.weaponSize, WEAPON_SIZE_COUNT);
+		p.weaponSize = next_weapon_size(p.weaponSize);
 		break;
 	case FieldId::EFFECT:
-		p.effect = cycle_enum(p.effect, EFFECT_COUNT);
+		p.effect = next_magical_effect(p.effect);
 		break;
 	case FieldId::IS_SET_MODE:
 		p.isSetMode = !p.isSetMode;

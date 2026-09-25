@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
+
 #include <format>
 #include <stdexcept>
 #include <string_view>
@@ -43,6 +46,42 @@ enum class PickableType
 	DUNGEON_KEY,
 };
 
+// Every PickableType, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<PickableType, 17> ALL_PICKABLE_TYPE = {
+	PickableType::TARGETED_SCROLL,
+	PickableType::TELEPORTER,
+	PickableType::WEAPON,
+	PickableType::SHIELD,
+	PickableType::CONSUMABLE,
+	PickableType::GOLD_COIN,
+	PickableType::FOOD,
+	PickableType::CORPSE_FOOD,
+	PickableType::ARMOR,
+	PickableType::MAGICAL_HELM,
+	PickableType::MAGICAL_RING,
+	PickableType::JEWELRY_AMULET,
+	PickableType::GAUNTLETS,
+	PickableType::GIRDLE,
+	PickableType::QUEST_ITEM,
+	PickableType::IDENTIFY_SCROLL,
+	PickableType::DUNGEON_KEY,
+};
+
+// The next PickableType in that order, wrapping at the end.
+//
+// Example:
+//   next_pickable_type(PickableType::TARGETED_SCROLL);   // -> PickableType::TELEPORTER
+[[nodiscard]] inline PickableType next_pickable_type(PickableType value)
+{
+	const auto found = std::ranges::find(ALL_PICKABLE_TYPE, value);
+	if (found == ALL_PICKABLE_TYPE.end() || found + 1 == ALL_PICKABLE_TYPE.end())
+	{
+		return ALL_PICKABLE_TYPE.front();
+	}
+	return *(found + 1);
+}
+
 // Effect type for Consumable
 enum class ConsumableEffect
 {
@@ -51,6 +90,29 @@ enum class ConsumableEffect
 	ADD_BUFF,
 	FAIL,
 };
+
+// Every ConsumableEffect, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<ConsumableEffect, 4> ALL_CONSUMABLE_EFFECT = {
+	ConsumableEffect::NONE,
+	ConsumableEffect::HEAL,
+	ConsumableEffect::ADD_BUFF,
+	ConsumableEffect::FAIL,
+};
+
+// The next ConsumableEffect in that order, wrapping at the end.
+//
+// Example:
+//   next_consumable_effect(ConsumableEffect::NONE);   // -> ConsumableEffect::HEAL
+[[nodiscard]] inline ConsumableEffect next_consumable_effect(ConsumableEffect value)
+{
+	const auto found = std::ranges::find(ALL_CONSUMABLE_EFFECT, value);
+	if (found == ALL_CONSUMABLE_EFFECT.end() || found + 1 == ALL_CONSUMABLE_EFFECT.end())
+	{
+		return ALL_CONSUMABLE_EFFECT.front();
+	}
+	return *(found + 1);
+}
 
 // The name a record carries for this effect.
 //

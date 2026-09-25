@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
+
 #include <format>
 #include <stdexcept>
 #include <string>
@@ -13,6 +16,28 @@ enum class HandRequirement
 	OFF_HAND_ONLY // Shield, buckler
 };
 
+// Every HandRequirement, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<HandRequirement, 3> ALL_HAND_REQUIREMENT = {
+	HandRequirement::ONE_HANDED,
+	HandRequirement::TWO_HANDED,
+	HandRequirement::OFF_HAND_ONLY,
+};
+
+// The next HandRequirement in that order, wrapping at the end.
+//
+// Example:
+//   next_hand_requirement(HandRequirement::ONE_HANDED);   // -> HandRequirement::TWO_HANDED
+[[nodiscard]] inline HandRequirement next_hand_requirement(HandRequirement value)
+{
+	const auto found = std::ranges::find(ALL_HAND_REQUIREMENT, value);
+	if (found == ALL_HAND_REQUIREMENT.end() || found + 1 == ALL_HAND_REQUIREMENT.end())
+	{
+		return ALL_HAND_REQUIREMENT.front();
+	}
+	return *(found + 1);
+}
+
 // AD&D 2e Weapon Size Categories for Two-Weapon Fighting
 enum class WeaponSize
 {
@@ -22,6 +47,30 @@ enum class WeaponSize
 	LARGE, // Two-handed sword, halberd - cannot dual wield
 	GIANT // Giant weapons - cannot dual wield
 };
+
+// Every WeaponSize, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<WeaponSize, 5> ALL_WEAPON_SIZE = {
+	WeaponSize::TINY,
+	WeaponSize::SMALL,
+	WeaponSize::MEDIUM,
+	WeaponSize::LARGE,
+	WeaponSize::GIANT,
+};
+
+// The next WeaponSize in that order, wrapping at the end.
+//
+// Example:
+//   next_weapon_size(WeaponSize::TINY);   // -> WeaponSize::SMALL
+[[nodiscard]] inline WeaponSize next_weapon_size(WeaponSize value)
+{
+	const auto found = std::ranges::find(ALL_WEAPON_SIZE, value);
+	if (found == ALL_WEAPON_SIZE.end() || found + 1 == ALL_WEAPON_SIZE.end())
+	{
+		return ALL_WEAPON_SIZE.front();
+	}
+	return *(found + 1);
+}
 
 // LEGACY: Weapons struct maintained for data loading compatibility only
 // Combat system uses WeaponDamageRegistry + DamageInfo exclusively

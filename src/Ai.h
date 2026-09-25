@@ -25,8 +25,9 @@ enum class AiType
 
 // The name a save carries for this Ai.
 //
-// Deliberately without a default case: adding an AiType makes this and the parser
-// below fail to compile under -Wswitch until both know it.
+// Deliberately without a default case, so adding an AiType warns here and in the
+// parser below under -Wswitch. No build passes -Werror, so the warning is the whole
+// of it: what refuses an unplaced value is CodecRoundTripTest's list.
 //
 // Example:
 //   encode_ai_type(AiType::WEB_SPINNER); // -> "web_spinner"

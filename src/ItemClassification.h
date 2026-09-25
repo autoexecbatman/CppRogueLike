@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
+
 #include <format>
 #include <stdexcept>
 #include <string_view>
@@ -46,6 +49,50 @@ enum class ItemClass
 	TOOL,
 	QUEST_ITEM,
 };
+
+// Every ItemClass, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<ItemClass, 25> ALL_ITEM_CLASS = {
+	ItemClass::UNKNOWN,
+	ItemClass::DAGGER,
+	ItemClass::SWORD,
+	ItemClass::GREAT_SWORD,
+	ItemClass::AXE,
+	ItemClass::HAMMER,
+	ItemClass::MACE,
+	ItemClass::STAFF,
+	ItemClass::BOW,
+	ItemClass::CROSSBOW,
+	ItemClass::SLING,
+	ItemClass::ARMOR,
+	ItemClass::SHIELD,
+	ItemClass::HELMET,
+	ItemClass::RING,
+	ItemClass::AMULET,
+	ItemClass::GAUNTLETS,
+	ItemClass::GIRDLE,
+	ItemClass::POTION,
+	ItemClass::SCROLL,
+	ItemClass::FOOD,
+	ItemClass::GOLD_COIN,
+	ItemClass::GEM,
+	ItemClass::TOOL,
+	ItemClass::QUEST_ITEM,
+};
+
+// The next ItemClass in that order, wrapping at the end.
+//
+// Example:
+//   next_item_class(ItemClass::UNKNOWN);   // -> ItemClass::DAGGER
+[[nodiscard]] inline ItemClass next_item_class(ItemClass value)
+{
+	const auto found = std::ranges::find(ALL_ITEM_CLASS, value);
+	if (found == ALL_ITEM_CLASS.end() || found + 1 == ALL_ITEM_CLASS.end())
+	{
+		return ALL_ITEM_CLASS.front();
+	}
+	return *(found + 1);
+}
 
 // Item category for grouping
 enum class ItemCategory

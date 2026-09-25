@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
+
 #include <format>
 #include <stdexcept>
 #include <string_view>
@@ -26,6 +29,37 @@ enum class MagicalEffect
 	// Protection effects (bonus level stored in MagicalItemParams)
 	PROTECTION, // +N AC and saves (no stack with armor AC)
 };
+
+// Every MagicalEffect, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<MagicalEffect, 12> ALL_MAGICAL_EFFECT = {
+	MagicalEffect::NONE,
+	MagicalEffect::BRILLIANCE,
+	MagicalEffect::TELEPORTATION,
+	MagicalEffect::TELEPATHY,
+	MagicalEffect::UNDERWATER_ACTION,
+	MagicalEffect::FREE_ACTION,
+	MagicalEffect::REGENERATION,
+	MagicalEffect::INVISIBILITY,
+	MagicalEffect::FIRE_RESISTANCE,
+	MagicalEffect::COLD_RESISTANCE,
+	MagicalEffect::SPELL_STORING,
+	MagicalEffect::PROTECTION,
+};
+
+// The next MagicalEffect in that order, wrapping at the end.
+//
+// Example:
+//   next_magical_effect(MagicalEffect::NONE);   // -> MagicalEffect::BRILLIANCE
+[[nodiscard]] inline MagicalEffect next_magical_effect(MagicalEffect value)
+{
+	const auto found = std::ranges::find(ALL_MAGICAL_EFFECT, value);
+	if (found == ALL_MAGICAL_EFFECT.end() || found + 1 == ALL_MAGICAL_EFFECT.end())
+	{
+		return ALL_MAGICAL_EFFECT.front();
+	}
+	return *(found + 1);
+}
 
 // Helper for describing effects
 namespace MagicalEffectUtils

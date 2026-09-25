@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EnumCycleTest.*:CodecRoundTripTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.h",
+      "original": "\tPickableType::QUEST_ITEM,\n\tPickableType::IDENTIFY_SCROLL,\n\tPickableType::DUNGEON_KEY,",
+      "mutated": "\tPickableType::QUEST_ITEM,",
+      "catches": "the two pickable types the stale count cut off dropping out of the list again"
+    },
+    {
+      "file": "src/BuffType.h",
+      "original": "\tBuffType::SANCTUARY,\n\tBuffType::PROTECTION_FROM_EVIL,\n\tBuffType::SILENCE,\n\tBuffType::WEBBED,",
+      "mutated": "\tBuffType::SANCTUARY,",
+      "catches": "the buffs added since the editor was written falling off the end of the list"
+    },
+    {
+      "file": "src/Weapons.h",
+      "original": "\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\tif (found == ALL_WEAPON_SIZE.end() || found + 1 == ALL_WEAPON_SIZE.end())",
+      "mutated": "\tconst auto found = std::ranges::find(ALL_WEAPON_SIZE, value);\n\tif (found == ALL_WEAPON_SIZE.end())",
+      "catches": "the cycle running off the end of the list instead of wrapping"
+    },
+    {
+      "file": "src/TargetMode.h",
+      "original": "\treturn *(found + 1);\n}\nenum class ScrollAnimation : int",
+      "mutated": "\treturn *found;\n}\nenum class ScrollAnimation : int",
+      "catches": "a cycle that never advances, so the editor's field cannot be changed at all"
+    }
+  ]
+}

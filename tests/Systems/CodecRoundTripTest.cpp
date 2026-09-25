@@ -7,9 +7,12 @@
 // unknown period with nothing to notice. Each pair now sits beside its enum,
 // which is what makes this file possible.
 //
-// The value lists are written out rather than derived: a list read from the code
-// under test cannot disagree with it. Adding an enumerator without adding it here
-// leaves a gap, which is the residual risk of refusing a COUNT sentinel.
+// The value lists live beside their enums as ALL_*, because the item editor cycles
+// through the same lists: one place to add a value, read by the editor and by this.
+// Adding an enumerator and not adding it to its list leaves a gap in both, which is
+// the residual risk of refusing a COUNT sentinel. EnumCycleTest narrows it to a value
+// appended at the end, since anything inserted earlier shifts the list out of step
+// with the enum's own numbering.
 
 #include <gtest/gtest.h>
 
@@ -41,8 +44,7 @@ void expect_round_trip(EnumType value, Encode encode, Parse parse, const char* l
 
 TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)
 {
-	constexpr std::array modes = { TargetMode::AUTO_NEAREST, TargetMode::PICK_TILE_SINGLE,
-		TargetMode::PICK_TILE_AOE, TargetMode::FOV_BUFF };
+	constexpr auto& modes = ALL_TARGET_MODE;
 
 	for (const auto mode : modes)
 	{
@@ -52,8 +54,7 @@ TEST(CodecRoundTripTest, TargetModeSurvivesEncoding)
 
 TEST(CodecRoundTripTest, ScrollAnimationSurvivesEncoding)
 {
-	constexpr std::array animations = { ScrollAnimation::NONE, ScrollAnimation::LIGHTNING,
-		ScrollAnimation::EXPLOSION };
+	constexpr auto& animations = ALL_SCROLL_ANIMATION;
 
 	for (const auto animation : animations)
 	{
@@ -63,8 +64,7 @@ TEST(CodecRoundTripTest, ScrollAnimationSurvivesEncoding)
 
 TEST(CodecRoundTripTest, HandRequirementSurvivesEncoding)
 {
-	constexpr std::array requirements = { HandRequirement::ONE_HANDED, HandRequirement::TWO_HANDED,
-		HandRequirement::OFF_HAND_ONLY };
+	constexpr auto& requirements = ALL_HAND_REQUIREMENT;
 
 	for (const auto requirement : requirements)
 	{
@@ -74,8 +74,7 @@ TEST(CodecRoundTripTest, HandRequirementSurvivesEncoding)
 
 TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
 {
-	constexpr std::array sizes = { WeaponSize::TINY, WeaponSize::SMALL, WeaponSize::MEDIUM,
-		WeaponSize::LARGE, WeaponSize::GIANT };
+	constexpr auto& sizes = ALL_WEAPON_SIZE;
 
 	for (const auto size : sizes)
 	{
@@ -85,12 +84,7 @@ TEST(CodecRoundTripTest, WeaponSizeSurvivesEncoding)
 
 TEST(CodecRoundTripTest, BuffTypeSurvivesEncoding)
 {
-	constexpr std::array buffs = { BuffType::NONE, BuffType::INVISIBILITY, BuffType::BLESS,
-		BuffType::SHIELD, BuffType::STRENGTH, BuffType::DEXTERITY, BuffType::CONSTITUTION,
-		BuffType::INTELLIGENCE, BuffType::WISDOM, BuffType::CHARISMA, BuffType::SPEED,
-		BuffType::FIRE_RESISTANCE, BuffType::COLD_RESISTANCE, BuffType::LIGHTNING_RESISTANCE,
-		BuffType::POISON_RESISTANCE, BuffType::SLEEP, BuffType::HOLD_PERSON, BuffType::SANCTUARY,
-		BuffType::PROTECTION_FROM_EVIL, BuffType::SILENCE, BuffType::WEBBED };
+	constexpr auto& buffs = ALL_BUFF_TYPE;
 
 	for (const auto buff : buffs)
 	{
@@ -100,13 +94,7 @@ TEST(CodecRoundTripTest, BuffTypeSurvivesEncoding)
 
 TEST(CodecRoundTripTest, ItemClassSurvivesEncoding)
 {
-	constexpr std::array values = { ItemClass::DAGGER, ItemClass::SWORD, ItemClass::GREAT_SWORD,
-		ItemClass::AXE, ItemClass::HAMMER, ItemClass::MACE,
-		ItemClass::STAFF, ItemClass::BOW, ItemClass::CROSSBOW,
-		ItemClass::ARMOR, ItemClass::SHIELD, ItemClass::HELMET,
-		ItemClass::RING, ItemClass::AMULET, ItemClass::GAUNTLETS,
-		ItemClass::GIRDLE, ItemClass::POTION, ItemClass::SCROLL,
-		ItemClass::FOOD };
+	constexpr auto& values = ALL_ITEM_CLASS;
 
 	for (const auto value : values)
 	{
@@ -116,12 +104,7 @@ TEST(CodecRoundTripTest, ItemClassSurvivesEncoding)
 
 TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
 {
-	constexpr std::array values = { PickableType::TARGETED_SCROLL, PickableType::TELEPORTER, PickableType::WEAPON,
-		PickableType::SHIELD, PickableType::CONSUMABLE, PickableType::GOLD_COIN,
-		PickableType::FOOD, PickableType::CORPSE_FOOD, PickableType::ARMOR,
-		PickableType::MAGICAL_HELM, PickableType::MAGICAL_RING, PickableType::JEWELRY_AMULET,
-		PickableType::GAUNTLETS, PickableType::GIRDLE, PickableType::QUEST_ITEM,
-		PickableType::IDENTIFY_SCROLL, PickableType::DUNGEON_KEY };
+	constexpr auto& values = ALL_PICKABLE_TYPE;
 
 	for (const auto value : values)
 	{
@@ -131,10 +114,7 @@ TEST(CodecRoundTripTest, PickableTypeSurvivesEncoding)
 
 TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 {
-	constexpr std::array values = { MagicalEffect::NONE, MagicalEffect::BRILLIANCE, MagicalEffect::TELEPORTATION,
-		MagicalEffect::TELEPATHY, MagicalEffect::UNDERWATER_ACTION, MagicalEffect::FREE_ACTION,
-		MagicalEffect::REGENERATION, MagicalEffect::INVISIBILITY, MagicalEffect::FIRE_RESISTANCE,
-		MagicalEffect::COLD_RESISTANCE, MagicalEffect::SPELL_STORING };
+	constexpr auto& values = ALL_MAGICAL_EFFECT;
 
 	for (const auto value : values)
 	{
@@ -145,8 +125,7 @@ TEST(CodecRoundTripTest, MagicalEffectSurvivesEncoding)
 // A string no encoder produces must be refused rather than silently defaulted.
 TEST(CodecRoundTripTest, ConsumableEffectSurvivesEncoding)
 {
-	constexpr std::array effects = { ConsumableEffect::NONE, ConsumableEffect::HEAL,
-		ConsumableEffect::ADD_BUFF, ConsumableEffect::FAIL };
+	constexpr auto& effects = ALL_CONSUMABLE_EFFECT;
 
 	for (const auto effect : effects)
 	{

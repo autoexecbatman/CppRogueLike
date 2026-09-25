@@ -32,8 +32,9 @@ enum class CreatureClass
 
 // The name a save carries for this class.
 //
-// Deliberately without a default case: adding a CreatureClass makes this and the parser
-// below fail to compile under -Wswitch until both know it.
+// Deliberately without a default case, so adding a CreatureClass warns here and in the
+// parser below under -Wswitch. No build passes -Werror, so it is a warning rather than
+// a refusal.
 //
 // Example:
 //   encode_creature_class(CreatureClass::CLERIC);  // -> "cleric"

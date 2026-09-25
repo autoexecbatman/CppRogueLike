@@ -41,8 +41,9 @@ enum class Morality
 
 // The name a save carries for a creature's place on the law/chaos axis.
 //
-// Deliberately without a default case: adding an Ethics value makes this and the parser
-// below fail to compile under -Wswitch until both know it.
+// Deliberately without a default case, so adding an Ethics value warns here and in the
+// parser below under -Wswitch. No build passes -Werror, so it is a warning rather than
+// a refusal.
 //
 // Example:
 //   encode_ethics(Ethics::LAWFUL);  // -> "lawful"

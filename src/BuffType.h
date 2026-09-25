@@ -1,5 +1,8 @@
 #pragma once
 
+#include <algorithm>
+#include <array>
+
 #include <format>
 #include <stdexcept>
 #include <string_view>
@@ -38,11 +41,52 @@ enum class BuffType
 	WEBBED,
 };
 
+// Every BuffType, in the order the enum declares them, so a cycle through the
+// editor's field reaches all of them and adding one is a single edit here.
+inline constexpr std::array<BuffType, 21> ALL_BUFF_TYPE = {
+	BuffType::NONE,
+	BuffType::INVISIBILITY,
+	BuffType::BLESS,
+	BuffType::SHIELD,
+	BuffType::STRENGTH,
+	BuffType::DEXTERITY,
+	BuffType::CONSTITUTION,
+	BuffType::INTELLIGENCE,
+	BuffType::WISDOM,
+	BuffType::CHARISMA,
+	BuffType::SPEED,
+	BuffType::FIRE_RESISTANCE,
+	BuffType::COLD_RESISTANCE,
+	BuffType::LIGHTNING_RESISTANCE,
+	BuffType::POISON_RESISTANCE,
+	BuffType::SLEEP,
+	BuffType::HOLD_PERSON,
+	BuffType::SANCTUARY,
+	BuffType::PROTECTION_FROM_EVIL,
+	BuffType::SILENCE,
+	BuffType::WEBBED,
+};
+
+// The next BuffType in that order, wrapping at the end.
+//
+// Example:
+//   next_buff_type(BuffType::NONE);   // -> BuffType::INVISIBILITY
+[[nodiscard]] inline BuffType next_buff_type(BuffType value)
+{
+	const auto found = std::ranges::find(ALL_BUFF_TYPE, value);
+	if (found == ALL_BUFF_TYPE.end() || found + 1 == ALL_BUFF_TYPE.end())
+	{
+		return ALL_BUFF_TYPE.front();
+	}
+	return *(found + 1);
+}
+
 // Maps a buff type to the string used in items.json and shown in the editor.
 //
-// Deliberately without a default case: adding a BuffType makes both this and
-// every other switch over the enum fail to compile under -Wswitch, which is how
-// PROTECTION_FROM_EVIL was caught silently encoding as "none".
+// Deliberately without a default case, so adding a BuffType warns here and in every
+// other switch over the enum under -Wswitch - which is how PROTECTION_FROM_EVIL was
+// caught silently encoding as "none". No build passes -Werror, so it warns rather
+// than refusing; ALL_BUFF_TYPE below is what the editor and the tests read.
 //
 // Example:
 //   encode_buff_type(BuffType::BLESS);     // -> "bless"
