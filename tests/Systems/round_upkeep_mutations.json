@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoundUpkeepTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tcreature.regenerate_from_constitution(thisRound, *ctx.dataManager);",
+      "mutated": "",
+      "catches": "the round no longer asking Constitution to mend, which is what left the suite green before this file existed"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tcreature.regenerate_from_ring(thisRound);",
+      "mutated": "",
+      "catches": "the ring of regeneration doing nothing once a turn"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\t\tcreature.tick_poison(ctx);",
+      "mutated": "",
+      "catches": "a dose that never comes due, so poison is a message and no damage"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\tif (ctx.player())\n\t{\n\t\tfeel_the_round(*ctx.player());\n\t}",
+      "mutated": "",
+      "catches": "the round reaching every creature and skipping the player, who is not in that list"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\tctx.hungerSystem->increase_hunger(ctx, 1);",
+      "mutated": "",
+      "catches": "a round costing no hunger, so nobody ever needs to eat"
+    },
+    {
+      "file": "src/GameLoopCoordinator.cpp",
+      "original": "\tctx.gameState->increment_time();",
+      "mutated": "",
+      "catches": "the clock standing still, which freezes every rule that reads the round number"
+    }
+  ]
+}

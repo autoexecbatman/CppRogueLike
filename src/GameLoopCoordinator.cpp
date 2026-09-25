@@ -419,6 +419,46 @@ void GameLoopCoordinator::draw_hover_tooltip(GameContext& ctx)
 	ctx.renderer->draw_text(Vector2D{ tip_px + pad, tip_py + font_off }, desc, WHITE_BLACK_PAIR);
 }
 
+void GameLoopCoordinator::apply_round_upkeep(GameContext& ctx)
+{
+	// The round being played; time counts the rounds already finished.
+	const int thisRound = ctx.gameState->get_time() + 1;
+
+	// One place for what a round does to a body, so the player and the creatures cannot
+	// drift apart - they were two copies of these four calls.
+	const auto feel_the_round = [&ctx, thisRound](Creature& creature)
+	{
+		creature.update_constitution_bonus(ctx);
+		creature.regenerate_from_constitution(thisRound, *ctx.dataManager);
+		creature.regenerate_from_ring(thisRound);
+		creature.tick_poison(ctx);
+	};
+
+	for (const auto& creature : *ctx.creatures)
+	{
+		assert(creature && "the creature list owns every entry it holds");
+		feel_the_round(*creature);
+	}
+
+	// The player is not in that list, so the round has to reach them on its own.
+	if (ctx.player())
+	{
+		feel_the_round(*ctx.player());
+	}
+
+	ctx.hungerSystem->increase_hunger(ctx, 1);
+	ctx.hungerSystem->apply_hunger_effects(ctx);
+
+	if (ctx.player() && ctx.curseSystem)
+	{
+		ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
+	}
+
+	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
+
+	ctx.gameState->increment_time();
+}
+
 void GameLoopCoordinator::update(GameContext& ctx)
 {
 	if (ctx.gameState->get_game_status() == GameStatus::VICTORY)
@@ -501,38 +541,8 @@ void GameLoopCoordinator::update(GameContext& ctx)
 		ctx.creatureManager->update_creatures(*ctx.creatures, ctx);
 		ctx.creatureManager->spawn_creatures(ctx);
 
-		// The round being played; time counts the rounds already finished.
-		const int thisRound = ctx.gameState->get_time() + 1;
-		for (const auto& creature : *ctx.creatures)
-		{
-			if (creature)
-			{
-				creature->update_constitution_bonus(ctx);
-				creature->regenerate_from_constitution(thisRound, *ctx.dataManager);
-				creature->regenerate_from_ring(thisRound);
-				creature->tick_poison(ctx);
-			}
-		}
+		apply_round_upkeep(ctx);
 
-		if (ctx.player())
-		{
-			ctx.player()->update_constitution_bonus(ctx);
-			ctx.player()->regenerate_from_constitution(thisRound, *ctx.dataManager);
-			ctx.player()->regenerate_from_ring(thisRound);
-			ctx.player()->tick_poison(ctx);
-		}
-
-		ctx.hungerSystem->increase_hunger(ctx, 1);
-		ctx.hungerSystem->apply_hunger_effects(ctx);
-
-		if (ctx.player() && ctx.curseSystem)
-		{
-			ctx.curseSystem->apply_curses(ctx.player_concrete(), ctx);
-		}
-
-		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
-
-		ctx.gameState->increment_time();
 		if (ctx.gameState->get_game_status() != GameStatus::DEFEAT)
 		{
 			ctx.gameState->set_game_status(GameStatus::IDLE);
