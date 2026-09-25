@@ -1,9 +1,11 @@
 #pragma once
 
 class Creature;
+class DataManager;
 struct GameContext;
 
 #include "CreatureClass.h"
+#include "DiceExpr.h"
 
 // Handles combat improvements on level up according to AD&D 2e rules.
 // Each function encapsulates one domain rule: THAC0 progression, HP gain,
@@ -38,16 +40,16 @@ namespace LevelUpSystem
     //   hit_point_progression(CreatureClass::WIZARD).flatGain;        // -> 1
     HitPointProgression hit_point_progression(CreatureClass creatureClass);
 
-    // Whether a creature of this class adds its Constitution hit point
-    // adjustment on this level. The book adds it to "each Hit Die rolled for the
-    // character" (Player's Handbook, PDF page 32), so it holds on exactly the
-    // levels hit_point_progression rolls, and never for a monster, whose hit
-    // points are its hit dice.
+    // Whether a creature of this class rolls a hit die on this level, and so
+    // adds its Constitution hit point adjustment. The book adds it to "each Hit
+    // Die rolled for the character" (Player's Handbook, PDF page 32), so it
+    // holds on exactly the levels hit_point_progression rolls - and on all of a
+    // monster's, which are hit dice rather than levels and are every one rolled.
     //
     // Example:
     //   takes_constitution_adjustment_at(CreatureClass::FIGHTER, 9);   // -> true
     //   takes_constitution_adjustment_at(CreatureClass::FIGHTER, 10);  // -> false, a flat 3 from here
-    //   takes_constitution_adjustment_at(CreatureClass::MONSTER, 1);   // -> false
+    //   takes_constitution_adjustment_at(CreatureClass::MONSTER, 13);  // -> true
     bool takes_constitution_adjustment_at(CreatureClass creatureClass, int level);
 
     // How many of levels 1 through `level` took the adjustment - what a change
@@ -58,8 +60,46 @@ namespace LevelUpSystem
     // Example:
     //   levels_taking_constitution_adjustment(CreatureClass::WIZARD, 3);    // -> 3
     //   levels_taking_constitution_adjustment(CreatureClass::FIGHTER, 12);  // -> 9
-    //   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13);  // -> 0
+    //   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13);  // -> 13
     int levels_taking_constitution_adjustment(CreatureClass creatureClass, int level);
+
+    // What one rolled hit die is worth, and the two numbers a level-up message
+    // shows: the die after the score's own minimum and the adjustment on it.
+    struct HitDieValue
+    {
+        int dieValue{ 0 };
+        int adjustment{ 0 };
+        int total{ 0 };
+    };
+
+    // One hit die taken through the Constitution rules: a score of 20 or better
+    // counts a low roll as more (Table 3's footnotes), the score's hit point
+    // adjustment is added, and no die ever yields less than 1 hit point
+    // (Player's Handbook, PDF page 32). The adjustment is read on the warrior
+    // column for warriors and monsters and capped at +2 for everyone else.
+    //
+    // Example, Constitution 18 on the warrior column:
+    //   hit_die_value(5, CreatureClass::MONSTER, 18, dataManager).total;  // -> 9
+    //   hit_die_value(1, CreatureClass::MONSTER, 3, dataManager).total;   // -> 1, the floor
+    HitDieValue hit_die_value(
+        int rolledDie,
+        CreatureClass creatureClass,
+        int constitution,
+        const DataManager& dataManager);
+
+    // The hit points a creature rolls from a hit dice expression: every die
+    // through hit_die_value, then the expression's own bonus, which is the
+    // monster's rather than a die and takes no adjustment. A creature always
+    // ends with at least one hit point.
+    //
+    // Example, dice forced to 5 and 5, Constitution 18:
+    //   roll_hit_points({ 2, 8, 4 }, CreatureClass::MONSTER, 18, dataManager, dice);  // -> 22
+    int roll_hit_points(
+        const DiceExpr& hitDice,
+        CreatureClass creatureClass,
+        int constitution,
+        const DataManager& dataManager,
+        RandomDice& dice);
 
     // The THAC0 a class attacks at on a given level. AD&D 2e Player's Handbook
     // attack tables: a warrior improves a point a level, a rogue a point every

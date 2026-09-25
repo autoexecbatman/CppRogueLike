@@ -4,20 +4,20 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=HitPointGainTest.*:ConstitutionTrackerTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HitPointGainTest.*:ConstitutionTrackerTest.*:LevelUpSystemTest.*:AbilityTableTest.*:MonsterHitDiceTest.*"
   ],
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());",
-      "mutated": "        conBonus = ctx->dataManager->constitution_for(owner.get_constitution()).HPAdj;",
-      "catches": "level-up reading the warrior column for every class again"
+      "original": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
+      "mutated": "    const int adjustment = dataManager.constitution_for(constitution).HPAdj;",
+      "catches": "the warrior column read for every class again"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());",
-      "mutated": "        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), CreatureClass::WIZARD);",
-      "catches": "level-up asking for a class other than the owner's"
+      "original": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);",
+      "mutated": "    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, CreatureClass::WIZARD);",
+      "catches": "the die asking for a class other than its owner's"
     },
     {
       "file": "src/DataManager.cpp",
@@ -39,8 +39,8 @@
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    int totalHPGain = std::max(1, hitDiceRoll + conBonus);",
-      "mutated": "    int totalHPGain = hitDiceRoll + conBonus;",
+      "original": "    return LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };",
+      "mutated": "    return LevelUpSystem::HitDieValue{ dieValue, adjustment, dieValue + adjustment };",
       "catches": "a hit die yielding less than 1"
     }
   ]

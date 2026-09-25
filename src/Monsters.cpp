@@ -7,8 +7,10 @@
 #include "AiMimic.h"
 #include "Colors.h"
 #include "DamageInfo.h"
+#include "DataManager.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
+#include "LevelUpSystem.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
@@ -17,7 +19,6 @@
 Mimic::Mimic(Vector2D position, GameContext& ctx)
 	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
 {
-	const int hp = ctx.dice->d6() + ctx.dice->d4();
 	const int thaco = 17;
 	const int ac = 7;
 
@@ -42,7 +43,23 @@ Mimic::Mimic(Vector2D position, GameContext& ctx)
 	set_dr(1);
 	set_thaco(thaco);
 	armorClass = std::make_unique<ArmorClass>(ac);
-	set_hit_dice(hp);
+
+	// Two hit dice of different sizes, rolled after the score each of them
+	// carries. Each is named, because the operands of + are unsequenced and
+	// these draw from the die stream.
+	assert(ctx.dataManager && "Mimic built without a dataManager");
+	const auto roll_hit_die = [this, &ctx](int sides)
+	{
+		return LevelUpSystem::roll_hit_points(
+			DiceExpr{ 1, sides, 0 },
+			get_creature_class(),
+			get_constitution(),
+			*ctx.dataManager,
+			*ctx.dice);
+	};
+	const int firstHitDie = roll_hit_die(6);
+	const int secondHitDie = roll_hit_die(4);
+	set_hit_dice(firstHitDie + secondHitDie);
 
 	// Build disguise list -- single source of truth is in AiMimic (Appearance::build_mimic_list).
 	auto disguises = Appearance::build_mimic_list(*ctx.contentRegistry, *ctx.itemRegistry);

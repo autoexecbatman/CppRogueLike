@@ -10,10 +10,12 @@
 #include "BodyPlanRegistry.h"
 #include "Creature.h"
 #include "DamageInfo.h"
+#include "DataManager.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
 #include "HealthPool.h"
 #include "ItemCreator.h"
+#include "LevelUpSystem.h"
 #include "MonsterAttacker.h"
 #include "MonsterCreator.h"
 #include "MonsterRegistry.h"
@@ -65,7 +67,14 @@ std::unique_ptr<Creature> MonsterCreator::create_from_params(
 	c->set_corpse_weight(params.corpseWeight);
 	c->set_creature_level(params.hpDice.num);
 
-	const int hp = std::max(1, roll_dice(ctx.dice, params.hpDice));
+	// Rolled after the scores are set, because each die carries the Constitution.
+	assert(ctx.dataManager && "MonsterCreator::create_from_params called without a dataManager");
+	const int hp = LevelUpSystem::roll_hit_points(
+		params.hpDice,
+		c->get_creature_class(),
+		c->get_constitution(),
+		*ctx.dataManager,
+		*ctx.dice);
 
 	c->attacker = std::make_unique<MonsterAttacker>(*c, params.damage);
 	c->experienceReward = std::make_unique<ExperienceReward>(params.xp);

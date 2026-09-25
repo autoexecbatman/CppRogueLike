@@ -23,8 +23,10 @@
 #include "AiWebSpinner.h"
 #include "Colors.h"
 #include "DamageInfo.h"
+#include "DataManager.h"
 #include "ExperienceReward.h"
 #include "GameContext.h"
+#include "LevelUpSystem.h"
 #include "MonsterRegistry.h"
 #include "RandomDice.h"
 #include "Vector2D.h"
@@ -74,6 +76,18 @@ void Spider::init_spider_type(GameContext& ctx)
 	}
 	}
 
+	// Called after each variant's score is set, because every hit die carries it.
+	assert(ctx.dataManager && "Spider built without a dataManager");
+	const auto roll_hit_dice = [this, &ctx](int sides, int bonus)
+	{
+		return LevelUpSystem::roll_hit_points(
+			DiceExpr{ 1, sides, bonus },
+			get_creature_class(),
+			get_constitution(),
+			*ctx.dataManager,
+			*ctx.dice);
+	};
+
 	switch (spiderType)
 	{
 	case SpiderType::SMALL:
@@ -90,7 +104,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(0);
 		set_thaco(20);
 		armorClass = std::make_unique<ArmorClass>(7);
-		set_hit_dice(ctx.dice->d2() + 2);
+		set_hit_dice(roll_hit_dice(2, 2));
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d4", DamageType::PHYSICAL });
 		set_natural_attack("Venomous fangs");
 
@@ -111,7 +125,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(19);
 		armorClass = std::make_unique<ArmorClass>(5);
-		set_hit_dice(ctx.dice->d4() + 3);
+		set_hit_dice(roll_hit_dice(4, 3));
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		set_natural_attack("Giant fangs");
 
@@ -132,7 +146,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		set_dr(1);
 		set_thaco(17);
 		armorClass = std::make_unique<ArmorClass>(5);
-		set_hit_dice(ctx.dice->d8() + 5);
+		set_hit_dice(roll_hit_dice(8, 5));
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d8", DamageType::PHYSICAL });
 		set_natural_attack("Toxic fangs");
 

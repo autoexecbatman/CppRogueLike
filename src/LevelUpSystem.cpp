@@ -83,23 +83,24 @@ int apply_hit_point_gain(Creature& owner, int newLevel, GameContext* ctx)
     // AD&D 2e: a character rolls hit dice only up to a class-dependent level,
     // and past it the book grants a flat number of hit points per level.
     const LevelUpSystem::HitPointProgression progression = LevelUpSystem::hit_point_progression(owner.get_creature_class());
-    const bool stillRollsDice = newLevel <= progression.lastRolledLevel;
 
-    int hitDiceRoll = stillRollsDice ? roll_hit_die() : progression.flatGain;
-    std::string diceType = stillRollsDice
+    // One question, because the adjustment rides on a rolled die: the level that
+    // stops rolling is the level that stops taking it.
+    const bool stillRollsDice = LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel);
+
+    // Past the last rolled level the book hands out a flat number, and a number
+    // handed out has no die for the score to ride on.
+    const LevelUpSystem::HitDieValue gained = stillRollsDice
+        ? LevelUpSystem::hit_die_value(roll_hit_die(), owner.get_creature_class(), owner.get_constitution(), *ctx->dataManager)
+        : LevelUpSystem::HitDieValue{ progression.flatGain, 0, progression.flatGain };
+
+    const std::string diceType = stillRollsDice
         ? std::format("d{}", owner.get_hit_die())
         : std::string{ "fixed" };
 
-    // Decided apart from the die: a monster rolls one and still takes no adjustment.
-    int conBonus = 0;
-    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))
-    {
-        // Table 3's footnotes: from 20 up a low roll counts as more before the bonus.
-        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);
-        conBonus = ctx->dataManager->constitution_hit_point_adjustment(owner.get_constitution(), owner.get_creature_class());
-    }
-
-    int totalHPGain = std::max(1, hitDiceRoll + conBonus);
+    const int hitDiceRoll = gained.dieValue;
+    const int conBonus = gained.adjustment;
+    const int totalHPGain = gained.total;
 
     owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);
     owner.set_max_hp(owner.get_max_hp() + totalHPGain);
@@ -429,21 +430,63 @@ LevelUpSystem::HitPointProgression LevelUpSystem::hit_point_progression(Creature
 //   takes_constitution_adjustment_at(CreatureClass::WIZARD, 11);  // -> false
 bool LevelUpSystem::takes_constitution_adjustment_at(CreatureClass creatureClass, int level)
 {
-    // A monster's hit points are its hit dice, with nothing added for Constitution.
+    // A monster's levels are its hit dice and it rolls every one of them, so the
+    // adjustment never runs out the way a character's table runs out of dice.
     if (creatureClass == CreatureClass::MONSTER)
     {
-        return false;
+        return true;
     }
 
     // A character's adjustment rides on the die, so it ends where the dice do.
     return level <= LevelUpSystem::hit_point_progression(creatureClass).lastRolledLevel;
 }
 
+// One hit die under the Constitution rules.
+//
+// Example:
+//   hit_die_value(5, CreatureClass::MONSTER, 18, dataManager).total;  // -> 9
+LevelUpSystem::HitDieValue LevelUpSystem::hit_die_value(
+    int rolledDie,
+    CreatureClass creatureClass,
+    int constitution,
+    const DataManager& dataManager)
+{
+    // Table 3's footnotes: from a score of 20 a low roll counts as more.
+    const int dieValue = std::max(rolledDie, dataManager.constitution_for(constitution).hitDieMinimum);
+    const int adjustment = dataManager.constitution_hit_point_adjustment(constitution, creatureClass);
+
+    // "No Hit Die ever yields less than 1 hit point, regardless of modifications."
+    return LevelUpSystem::HitDieValue{ dieValue, adjustment, std::max(1, dieValue + adjustment) };
+}
+
+// A whole hit dice expression rolled and adjusted.
+//
+// Example, dice forced to 5 and 5:
+//   roll_hit_points({ 2, 8, 4 }, CreatureClass::MONSTER, 18, dataManager, dice);  // -> 22
+int LevelUpSystem::roll_hit_points(
+    const DiceExpr& hitDice,
+    CreatureClass creatureClass,
+    int constitution,
+    const DataManager& dataManager,
+    RandomDice& dice)
+{
+    // The bonus belongs to the creature rather than to a die, so no adjustment
+    // rides on it and the per-die floor does not reach it.
+    int total = hitDice.bonus;
+    for (const int rolled : roll_each_die(&dice, hitDice))
+    {
+        total += LevelUpSystem::hit_die_value(rolled, creatureClass, constitution, dataManager).total;
+    }
+
+    // A negative bonus on a small expression can still spend the whole roll.
+    return std::max(1, total);
+}
+
 // How many levels, 1st through this one, took the adjustment.
 //
 // Example:
 //   levels_taking_constitution_adjustment(CreatureClass::CLERIC, 12);  // -> 9
-//   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 5);  // -> 0
+//   levels_taking_constitution_adjustment(CreatureClass::MONSTER, 5);  // -> 5
 int LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass creatureClass, int level)
 {
     // Counted from the per-level rule rather than restated, so the two cannot disagree.

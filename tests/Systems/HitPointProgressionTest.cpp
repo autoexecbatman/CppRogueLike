@@ -116,12 +116,13 @@ TEST(ConstitutionAdjustmentLevelTest, EachClassTakesItThroughItsLastRolledDie)
 	}
 }
 
-// A monster's hit points are its hit dice; the adjustment is the character's.
-TEST(ConstitutionAdjustmentLevelTest, AMonsterTakesItOnNoLevel)
+// A monster's levels are its hit dice and every one of them is rolled, so none
+// of them is past the level a character's table stops rolling at.
+TEST(ConstitutionAdjustmentLevelTest, AMonsterTakesItOnEveryLevel)
 {
 	for (int level = 1; level <= 13; ++level)
 	{
-		EXPECT_FALSE(LevelUpSystem::takes_constitution_adjustment_at(CreatureClass::MONSTER, level)) << "level " << level;
+		EXPECT_TRUE(LevelUpSystem::takes_constitution_adjustment_at(CreatureClass::MONSTER, level)) << "level " << level;
 	}
 }
 
@@ -133,7 +134,7 @@ TEST(ConstitutionAdjustmentLevelTest, AChangeCountsOnlyTheLevelsThatTookIt)
 	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::ROGUE, 10), 10);
 	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::FIGHTER, 12), 9);
 	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::CLERIC, 9), 9);
-	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13), 0);
+	EXPECT_EQ(LevelUpSystem::levels_taking_constitution_adjustment(CreatureClass::MONSTER, 13), 13);
 }
 
 // The table above is only worth having if the level-up path reads it. These
@@ -248,11 +249,12 @@ TEST_F(HitPointGainTest, APenaltyIsNotCappedAndADieYieldsAtLeastOne)
 	EXPECT_EQ(gain_for(CreatureClass::WIZARD, 1, 2), 1);
 }
 
-// A monster rolls its die like a warrior and adds nothing for Constitution, as when
-// it was made: a rolled 3 at Constitution 18 is worth 3.
-TEST_F(HitPointGainTest, AMonstersLevelAddsNothingForConstitution)
+// A monster rolls its die like a warrior and takes the warrior's bonus on it, as
+// when it was made: a rolled 3 at Constitution 18 is worth 3 and 4. The
+// non-warrior cap would make it 5.
+TEST_F(HitPointGainTest, AMonstersLevelAddsItsConstitutionLikeAWarriors)
 {
-	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 18, 3), 3);
+	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 18, 3), 7);
 }
 
 // Table 3's footnotes, row by row: nothing below 20, then 2, 3, 3, 4, 4, 4.
@@ -304,10 +306,11 @@ TEST_F(HitPointGainTest, TheMinimumRaisesOnlyALowRoll)
 	EXPECT_EQ(gain_for(CreatureClass::FIGHTER, 19, 1), 1 + 5);
 }
 
-// A monster's die is its own, as when it was made: Constitution raises nothing.
-TEST_F(HitPointGainTest, AMonstersDieIsNotRaised)
+// A monster reads the same footnotes: at Constitution 25 a rolled 1 counts as 4
+// and then takes the warrior's 7.
+TEST_F(HitPointGainTest, AMonstersDieIsRaisedLikeAWarriors)
 {
-	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 25, 1), 1);
+	EXPECT_EQ(gain_for(CreatureClass::MONSTER, 25, 1), 11);
 }
 
 // Past 9th a warrior rolls no die, so there is nothing for Constitution 25 to raise.

@@ -4,26 +4,26 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=HitPointGainTest.*:HitPointProgressionTest.*:ConstitutionAdjustmentLevelTest.*:ConstitutionTrackerTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HitPointGainTest.*:HitPointProgressionTest.*:ConstitutionAdjustmentLevelTest.*:ConstitutionTrackerTest.*:MonsterHitDiceTest.*:LevelUpSystemTest.*:AbilityTableTest.*"
   ],
   "mutations": [
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n",
-      "mutated": "",
+      "original": "    const int dieValue = std::max(rolledDie, dataManager.constitution_for(constitution).hitDieMinimum);",
+      "mutated": "    const int dieValue = rolledDie;",
       "catches": "a low roll at Constitution 20 and up left as rolled"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);",
-      "mutated": "        hitDiceRoll = ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum;",
+      "original": "    const int dieValue = std::max(rolledDie, dataManager.constitution_for(constitution).hitDieMinimum);",
+      "mutated": "    const int dieValue = dataManager.constitution_for(constitution).hitDieMinimum;",
       "catches": "the minimum replacing the roll instead of raising a low one"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    int conBonus = 0;\n    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))\n    {\n        // Table 3's footnotes: from 20 up a low roll counts as more before the bonus.\n        hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n",
-      "mutated": "    hitDiceRoll = std::max(hitDiceRoll, ctx->dataManager->constitution_for(owner.get_constitution()).hitDieMinimum);\n    int conBonus = 0;\n    if (LevelUpSystem::takes_constitution_adjustment_at(owner.get_creature_class(), newLevel))\n    {\n",
-      "catches": "the minimum raising a monster's die or a flat gain, outside the levels that take Constitution"
+      "original": "        : LevelUpSystem::HitDieValue{ progression.flatGain, 0, progression.flatGain };",
+      "mutated": "        : LevelUpSystem::hit_die_value(progression.flatGain, owner.get_creature_class(), owner.get_constitution(), *ctx->dataManager);",
+      "catches": "a flat gain raised and adjusted as though it were a rolled die"
     },
     {
       "file": "src/DataManager.cpp",

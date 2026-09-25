@@ -99,13 +99,16 @@ enum class CreatureClass
 }
 
 // Whether a class advances on the warrior tables - the constitution column with
-// the bonus above +2, and the warrior hit dice. Fighter is the only warrior the
-// game has; a paladin or ranger joins here, and every warrior rule follows.
+// the bonus above +2, and the warrior hit dice. Fighter is the only warrior
+// class the game has; a paladin or ranger joins here, and every warrior rule
+// follows. A monster reads them too: the Dungeon Master Guide's Ability Scores
+// for Monsters grants hit point bonuses for high scores "as a warrior", and the
+// attack and hit point tables already put monsters on the warrior's.
 //
 // Example:
 //   is_warrior(CreatureClass::FIGHTER);  // -> true
 //   is_warrior(CreatureClass::WIZARD);   // -> false
 [[nodiscard]] inline constexpr bool is_warrior(CreatureClass creatureClass)
 {
-	return creatureClass == CreatureClass::FIGHTER;
+	return creatureClass == CreatureClass::FIGHTER || creatureClass == CreatureClass::MONSTER;
 }

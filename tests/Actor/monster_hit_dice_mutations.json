@@ -4,20 +4,50 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=MonsterHitDiceTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=MonsterHitDiceTest.*"
   ],
   "mutations": [
     {
       "file": "src/Creature.cpp",
       "original": "\tconstitutionTracker->set_last_constitution(get_constitution());\n}",
       "mutated": "}",
-      "catches": "hit dice given without the score recorded, so the first tick applies a bonus"
+      "catches": "hit dice given without the score recorded, so the first tick applies it twice"
+    },
+    {
+      "file": "src/CreatureClass.h",
+      "original": "\treturn creatureClass == CreatureClass::FIGHTER || creatureClass == CreatureClass::MONSTER;",
+      "mutated": "\treturn creatureClass == CreatureClass::FIGHTER;",
+      "catches": "a monster capped at the non-warrior +2 instead of reading the warrior column"
+    },
+    {
+      "file": "src/MonsterCreator.cpp",
+      "original": "\t\tc->get_constitution(),",
+      "mutated": "\t\t10,",
+      "catches": "creation rolling hit dice against a score that is not the monster's"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    int total = hitDice.bonus;",
+      "mutated": "    int total = 0;",
+      "catches": "the flat bonus written into a hit dice expression dropped"
     },
     {
       "file": "src/Monsters.cpp",
-      "original": "\tset_hit_dice(hp);",
-      "mutated": "\thealthPool = std::make_unique<HealthPool>(hp);",
-      "catches": "the mimic building its pool directly again"
+      "original": "\tconst int firstHitDie = roll_hit_die(6);",
+      "mutated": "\tconst int firstHitDie = ctx.dice->d6();",
+      "catches": "the mimic's larger hit die rolled with no score on it"
+    },
+    {
+      "file": "src/Monsters.cpp",
+      "original": "\tset_hit_dice(firstHitDie + secondHitDie);",
+      "mutated": "\thealthPool = std::make_unique<HealthPool>(firstHitDie + secondHitDie);",
+      "catches": "the mimic building its pool directly again, so its score is never recorded"
+    },
+    {
+      "file": "src/Spider.cpp",
+      "original": "\t\tset_hit_dice(roll_hit_dice(8, 5));",
+      "mutated": "\t\tset_hit_dice(ctx.dice->d8() + 5);",
+      "catches": "the web weaver rolling hit dice with no score on them"
     },
     {
       "file": "src/ShopkeeperFactory.cpp",
