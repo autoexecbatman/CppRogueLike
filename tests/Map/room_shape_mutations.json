@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoomShapeTest.*:TreasureRoomTest.*:DungeonConnectivityTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=RoomShapeTest.*:TreasureRoomFixture.*:StairRoomNotLocked.*:DungeonConnectivityTest.*"
   ],
   "mutations": [
     {
