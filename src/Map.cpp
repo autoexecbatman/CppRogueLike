@@ -388,8 +388,9 @@ bool Map::is_collision(Creature& owner, TileType tileType, Vector2D pos, GameCon
 		return false;
 	}
 
-	// An ability can carry a creature through - a spider across water.
-	return !(definition.hasBypassState && owner.has_state(definition.bypassState));
+	// An ability can carry a creature through - a spider across water, or anyone
+	// wearing the gauntlets that grant it.
+	return !(definition.hasBypassState && owner.has_bypass(definition.bypassState));
 }
 
 void Map::compute_fov(GameContext& ctx)

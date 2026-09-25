@@ -9,6 +9,12 @@
 #include "src/DataManager.h"
 #include "src/MessageSystem.h"
 #include "src/RandomDice.h"
+#include "src/TileConfig.h"
+#include "src/Paths.h"
+#include "src/Item.h"
+#include "src/Pickable.h"
+#include "src/MagicalItemEffects.h"
+#include "src/EquipmentSlot.h"
 
 // ============================================================================
 // MAP TESTS
@@ -31,6 +37,7 @@ protected:
     DataManager dataManager;
     MessageSystem messageSystem;
     RandomDice dice;
+    TileConfig tileConfig;
 
     void SetUp() override
     {
@@ -55,6 +62,16 @@ protected:
         ctx.dice = &dice;
         ctx.creatures = &creatures;
         ctx.map = map.get();
+
+        // What a tile does is data, and is_collision reads it.
+        try
+        {
+            tileConfig.load(Paths::TILE_CONFIG);
+        }
+        catch (...)
+        {
+        }
+        ctx.tileConfig = &tileConfig;
 
         dice.set_test_mode(true);
 
@@ -479,3 +496,28 @@ TEST_F(MapTest, Cost_WaterTile_IsHigher)
     EXPECT_GT(waterCost, floorCost);
 }
 
+
+// Water blocks whoever cannot cross it, and the tile's bypass state is asked of the
+// creature rather than of its own flags alone - so a creature wearing the gauntlets of
+// swimming and climbing walks into water that stops a creature without them.
+TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
+{
+    const Vector2D pool{ 4, 4 };
+    map->set_tile(pool, TileType::WATER, 1.0);
+
+    Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", 0 } };
+    EXPECT_TRUE(map->is_collision(wader, TileType::WATER, pool, ctx)) << "water stopped nobody";
+
+    Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", 0 } };
+    spider.add_state(ActorState::CAN_SWIM);
+    EXPECT_FALSE(map->is_collision(spider, TileType::WATER, pool, ctx));
+
+    // Worn rather than innate, and put straight into the slot: how it got there is
+    // Player::equip_item's business, not the map's.
+    auto gauntlets = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{});
+    gauntlets->behavior = Gauntlets{ .effect = MagicalEffect::SWIMMING };
+    wader.equippedItems.emplace_back(std::move(gauntlets), EquipmentSlot::GAUNTLETS);
+
+    EXPECT_FALSE(map->is_collision(wader, TileType::WATER, pool, ctx))
+        << "the map asked the creature's own states and not what it wears";
+}

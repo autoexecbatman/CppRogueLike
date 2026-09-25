@@ -1,5 +1,6 @@
 ﻿#include <algorithm>
 #include <cassert>
+#include <concepts>
 #include <format>
 #include <memory>
 #include <ranges>
@@ -792,6 +793,55 @@ Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 	auto worn = std::ranges::find_if(equippedItems, matches_slot(slot));
 
 	return (worn != equippedItems.end()) ? worn->item.get() : nullptr;
+}
+
+namespace
+{
+// A behaviour that names a magical effect. Consumable carries an `effect` of its own
+// kind, so the type is part of the test rather than the member name alone.
+template <typename Behavior>
+concept GrantsMagicalEffect = requires(const Behavior& behavior) {
+	{ behavior.effect } -> std::same_as<const MagicalEffect&>;
+};
+} // namespace
+
+// Any worn item whose behaviour names an effect answers here, so an effect moves
+// between slots - a ring, a helm, a pair of gauntlets - without this changing.
+bool Creature::wears_item_with(MagicalEffect effect) const noexcept
+{
+	const auto grants_the_effect = [effect](const EquippedItem& equipped)
+	{
+		if (!equipped.item || !equipped.item->behavior)
+		{
+			return false;
+		}
+
+		const auto matches = [effect](const auto& behavior)
+		{
+			if constexpr (GrantsMagicalEffect<std::remove_cvref_t<decltype(behavior)>>)
+			{
+				return behavior.effect == effect;
+			}
+			else
+			{
+				return false;
+			}
+		};
+		return std::visit(matches, *equipped.item->behavior);
+	};
+	return std::ranges::any_of(equippedItems, grants_the_effect);
+}
+
+// A creature's own state, or the one worn source the game has for one: the gauntlets
+// of swimming and climbing, whose wearer "can swim as fast as a triton" (Dungeon
+// Master Guide, PDF page 964) and so crosses the water this game models swimming as.
+bool Creature::has_bypass(ActorState state) const noexcept
+{
+	if (has_state(state))
+	{
+		return true;
+	}
+	return state == ActorState::CAN_SWIM && wears_item_with(MagicalEffect::SWIMMING);
 }
 
 bool Creature::wears_ring_of(MagicalEffect effect) const noexcept

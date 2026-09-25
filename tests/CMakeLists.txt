@@ -98,6 +98,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SwimmingGauntletsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EncumbranceBandTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp

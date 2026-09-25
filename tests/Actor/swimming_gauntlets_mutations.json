@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SwimmingGauntletsTest.*:StatBoostEquipmentTest.*:MapTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "data/content/items.json",
+      "original": "        \"effect\": \"swimming\",",
+      "mutated": "        \"effect\": \"none\",",
+      "catches": "the gauntlets losing the one thing the book does give them"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn state == ActorState::CAN_SWIM && wears_item_with(MagicalEffect::SWIMMING);",
+      "mutated": "\treturn wears_item_with(MagicalEffect::SWIMMING);",
+      "catches": "the gauntlets opening every tile a state guards, not only water"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (has_state(state))\n\t{\n\t\treturn true;\n\t}\n",
+      "mutated": "",
+      "catches": "a creature's own ability forgotten once a worn source was added beside it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\treturn std::ranges::any_of(equippedItems, grants_the_effect);",
+      "mutated": "\treturn std::ranges::none_of(equippedItems, grants_the_effect);",
+      "catches": "the search inverted, so wearing the item is what takes the effect away"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\t\t\treturn behavior.effect == effect;",
+      "mutated": "\t\t\t\treturn true;",
+      "catches": "any effect-bearing item answering for every effect"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\treturn !(definition.hasBypassState && owner.has_bypass(definition.bypassState));",
+      "mutated": "\treturn !(definition.hasBypassState && owner.has_state(definition.bypassState));",
+      "catches": "the map reading a creature's own flags and never what it wears"
+    }
+  ]
+}

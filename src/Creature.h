@@ -292,6 +292,21 @@ public:
 	//   creature.wears_ring_of(MagicalEffect::REGENERATION); // -> false
 	[[nodiscard]] bool wears_ring_of(MagicalEffect effect) const noexcept;
 
+	// Whether anything worn, in any slot, grants this effect.
+	//
+	// Example, wearing gauntlets of swimming and climbing:
+	//   creature.wears_item_with(MagicalEffect::SWIMMING);   // -> true
+	[[nodiscard]] bool wears_item_with(MagicalEffect effect) const noexcept;
+
+	// Whether the creature may cross a tile guarded by this state - of its own, or
+	// from something it wears. Asked where the tile is tested, so a worn source is
+	// never copied onto the creature and never has to be taken off again.
+	//
+	// Example, a creature with no state of its own, in gauntlets of swimming:
+	//   creature.has_bypass(ActorState::CAN_SWIM);   // -> true
+	//   creature.has_state(ActorState::CAN_SWIM);    // -> false
+	[[nodiscard]] bool has_bypass(ActorState state) const noexcept;
+
 	// Whether this creature can attack at a distance: a ranged weapon is in its
 	// missile slot. Asked of the slot when it matters rather than mirrored into a
 	// flag, so there is nothing to keep in step and nothing to go stale.

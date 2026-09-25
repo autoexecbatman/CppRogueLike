@@ -73,6 +73,16 @@ protected:
 		ASSERT_NE(player->get_equipped_item(slot_of(key)), nullptr) << key << " was not put on";
 	}
 
+	// An adding item, built here because the data holds none: every Strength item it
+	// carries sets the score outright. What these cases are about is the rule that a
+	// bonus adds, not any particular item, so the slot is filled from the data and the
+	// behaviour replaced - the same way a girdle of dwarvenkind is made below.
+	void put_on_adding_gauntlets(int strengthBonus)
+	{
+		put_on("gauntlets_of_swimming_and_climbing");
+		player->get_equipped_item(EquipmentSlot::GAUNTLETS)->behavior = Gauntlets{ .strBonus = strengthBonus };
+	}
+
 	// Takes off whatever is in the slot, as the equipment screen does.
 	void take_off(EquipmentSlot slot)
 	{
@@ -99,18 +109,21 @@ protected:
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 0, 0 }) };
 };
 
-// Gauntlets of swimming and climbing add +2, once.
+// An item that adds Strength adds it once, not once per query.
 TEST_F(StatBoostEquipmentTest, AnAddingItemAddsOnce)
 {
-	put_on("gauntlets_of_swimming_and_climbing");
+	put_on_adding_gauntlets(2);
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2);
+	EXPECT_EQ(player->get_strength(), BASE_STRENGTH + 2) << "asking twice added twice";
 }
 
-// Taking them off returns exactly what they gave.
+// Taking it off returns exactly what it gave.
 TEST_F(StatBoostEquipmentTest, RemovingAnAddingItemRestoresTheScore)
 {
-	put_on("gauntlets_of_swimming_and_climbing");
+	put_on_adding_gauntlets(2);
+	ASSERT_EQ(player->get_strength(), BASE_STRENGTH + 2);
+
 	take_off(EquipmentSlot::GAUNTLETS);
 
 	EXPECT_EQ(player->get_strength(), BASE_STRENGTH);
@@ -155,7 +168,7 @@ TEST_F(StatBoostEquipmentTest, TwoSettingItemsComeOffInEitherOrder)
 TEST_F(StatBoostEquipmentTest, ABuffIsNotAbsorbedByEquipment)
 {
 	ctx.buffSystem->add_buff(*player, BuffType::STRENGTH, 19, 10, true);
-	put_on("gauntlets_of_swimming_and_climbing");
+	put_on_adding_gauntlets(2);
 	ASSERT_EQ(player->get_strength(), 21) << "the buff's 19, plus 2";
 
 	take_off(EquipmentSlot::GAUNTLETS);
@@ -174,12 +187,12 @@ TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromABuff)
 	EXPECT_EQ(player->get_strength(), 19) << "a buff's +1 was added to the girdle's 19";
 }
 
-// Nor does another worn item: gauntlets of swimming and climbing add their +2 to the
-// wearer's own score and nothing to the girdle's.
+// Nor does another worn item: an adding pair of gauntlets raises the wearer's own
+// score and adds nothing to the girdle's.
 TEST_F(StatBoostEquipmentTest, AGirdleTakesNoBonusFromAnotherWornItem)
 {
 	put_on("girdle_of_hill_giant_strength");
-	put_on("gauntlets_of_swimming_and_climbing");
+	put_on_adding_gauntlets(2);
 
 	EXPECT_EQ(player->get_strength(), 19) << "the gauntlets' +2 was added to the girdle's 19";
 }
@@ -208,7 +221,7 @@ TEST_F(StatBoostEquipmentTest, AGirdleLeavesOtherAbilitiesTheirBonuses)
 // Strength bonuses still count while it is worn.
 TEST_F(StatBoostEquipmentTest, AGirdleThatSetsNoStrengthLeavesTheBonuses)
 {
-	put_on("gauntlets_of_swimming_and_climbing");
+	put_on_adding_gauntlets(2);
 	put_on("girdle_of_hill_giant_strength");
 
 	// Made a girdle of dwarvenkind, which the data does not hold.

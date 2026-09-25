@@ -18,6 +18,9 @@ enum class MagicalEffect
 	TELEPATHY, // Read thoughts
 	UNDERWATER_ACTION, // Breathe underwater
 
+	// Gauntlet effects
+	SWIMMING, // Swim, which in this game is crossing water
+
 	// Ring effects
 	FREE_ACTION, // Immune to paralysis, web, hold
 	REGENERATION, // Heal 1 HP per turn
@@ -32,12 +35,13 @@ enum class MagicalEffect
 
 // Every MagicalEffect, in the order the enum declares them, so a cycle through the
 // editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<MagicalEffect, 12> ALL_MAGICAL_EFFECT = {
+inline constexpr std::array<MagicalEffect, 13> ALL_MAGICAL_EFFECT = {
 	MagicalEffect::NONE,
 	MagicalEffect::BRILLIANCE,
 	MagicalEffect::TELEPORTATION,
 	MagicalEffect::TELEPATHY,
 	MagicalEffect::UNDERWATER_ACTION,
+	MagicalEffect::SWIMMING,
 	MagicalEffect::FREE_ACTION,
 	MagicalEffect::REGENERATION,
 	MagicalEffect::INVISIBILITY,
@@ -100,6 +104,11 @@ inline std::string_view encode_magical_effect(MagicalEffect magicalEffect)
 		return "underwater_action";
 	}
 
+	case MagicalEffect::SWIMMING:
+	{
+		return "swimming";
+	}
+
 	case MagicalEffect::FREE_ACTION:
 	{
 		return "free_action";
@@ -157,6 +166,10 @@ inline MagicalEffect parse_magical_effect(std::string_view name)
 	if (name == "telepathy")
 	{
 		return MagicalEffect::TELEPATHY;
+	}
+	if (name == "swimming")
+	{
+		return MagicalEffect::SWIMMING;
 	}
 	if (name == "underwater_action")
 	{
