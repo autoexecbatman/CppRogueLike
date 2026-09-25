@@ -235,7 +235,7 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
 		return false;
 	}
-	if (!is_within_weight_limit(buyer.inventoryData, item, buyer, *ctx.dataManager))
+	if (!is_within_weight_limit(item, buyer, *ctx.dataManager))
 	{
 		ctx.messageSystem->message(WHITE_RED_PAIR, "Too heavy to carry.", true);
 		return false;

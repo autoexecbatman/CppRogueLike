@@ -55,8 +55,15 @@ InventoryResult<std::unique_ptr<Item>> remove_item_at(CreatureInventory& invento
 // Remove from creature backpack by id
 InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inventory, uint64_t uniqueId);
 
-// Weight management - creature backpack only
-int get_total_weight(const CreatureInventory& inventory) noexcept;
+// Everything the owner is carrying, in pounds: what is in the pack and what is on the
+// body. The book totals "the pounds of gear carried by the creature or character"
+// (Player's Handbook, PDF page 160) and draws no line between the two, so armour
+// cannot be carried for nothing by putting it on.
+//
+// Example:
+//   get_total_weight(emptyHanded);                 // -> 0
+//   get_total_weight(plateMailedSwordsman);        // -> 54, the 50 worn and the 4 held
+int get_total_weight(const Creature& owner) noexcept;
 
 // The most the owner can carry and still move, in pounds: the Strength row's
 // maxCarried, which is Table 47's Max. Carried Weight. Exceptional Strength is
@@ -66,17 +73,16 @@ int get_total_weight(const CreatureInventory& inventory) noexcept;
 //   get_max_weight(strengthTenCarrier, dataManager);   // -> 110
 //   get_max_weight(hillGiantGirdled, dataManager);     // -> 640, at Strength 19
 int get_max_weight(const Creature& owner, const DataManager& dataManager) noexcept;
-bool is_overloaded(const CreatureInventory& inventory, const Creature& owner, const DataManager& dataManager) noexcept;
+bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexcept;
 
-// Whether this item can go into the pack without taking what it carries past the
-// owner's strength-based limit. The one statement of that rule: adding, picking up
+// Whether this item can go into the pack without taking what the owner carries past
+// its strength-based limit. The one statement of that rule: adding, picking up
 // and buying all ask here, so they cannot disagree about what is too heavy.
 //
 // Example:
-//   is_within_weight_limit(player.inventoryData, dagger, player, dataManager);      // -> true
-//   is_within_weight_limit(player.inventoryData, plateArmour, weakling, dataManager); // -> false
+//   is_within_weight_limit(dagger, player, dataManager);      // -> true
+//   is_within_weight_limit(plateArmour, weakling, dataManager); // -> false
 bool is_within_weight_limit(
-	const CreatureInventory& inventory,
 	const Item& item,
 	const Creature& owner,
 	const DataManager& dataManager

@@ -80,6 +80,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnumCycleTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/MutationPlanTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/RoundUpkeepTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ItemWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellCodecRoundTripTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HitPointProgressionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CharacterSheetTextTest.cpp

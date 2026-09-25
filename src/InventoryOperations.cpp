@@ -76,7 +76,7 @@ InventoryResult<bool> add_item_to_inventory(
 		return std::unexpected(InventoryError::FULL);
 	}
 
-	if (!is_within_weight_limit(inventory, *item, owner, dataManager))
+	if (!is_within_weight_limit(*item, owner, dataManager))
 	{
 		fire_inventory_event(inventory, InventoryEvent::Type::INVENTORY_FULL, item.get());
 		return std::unexpected(InventoryError::CAPACITY_EXCEEDED);
@@ -183,15 +183,20 @@ InventoryResult<std::unique_ptr<Item>> remove_item_by_id(CreatureInventory& inve
 
 // ===== CAPACITY MANAGEMENT =====
 
-int get_total_weight(const CreatureInventory& inventory) noexcept
+int get_total_weight(const Creature& owner) noexcept
 {
 	int total = 0;
-	for (const auto& item : inventory.items)
+	for (const auto& item : owner.inventoryData.items)
 	{
-		if (item)
-		{
-			total += item->enhancement.weight;
-		}
+		assert(item && "the pack owns every entry it holds");
+		total += item->enhancement.weight;
+	}
+
+	// Worn gear is carried gear; only where it sits differs.
+	for (const EquippedItem& equipped : owner.equippedItems)
+	{
+		assert(equipped.item && "an equipment slot owns the item in it");
+		total += equipped.item->enhancement.weight;
 	}
 	return total;
 }
@@ -202,19 +207,18 @@ int get_max_weight(const Creature& owner, const DataManager& dataManager) noexce
 	return row.maxCarried;
 }
 
-bool is_overloaded(const CreatureInventory& inventory, const Creature& owner, const DataManager& dataManager) noexcept
+bool is_overloaded(const Creature& owner, const DataManager& dataManager) noexcept
 {
-	return get_total_weight(inventory) > get_max_weight(owner, dataManager);
+	return get_total_weight(owner) > get_max_weight(owner, dataManager);
 }
 
 bool is_within_weight_limit(
-	const CreatureInventory& inventory,
 	const Item& item,
 	const Creature& owner,
 	const DataManager& dataManager
 ) noexcept
 {
-	return get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner, dataManager);
+	return get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);
 }
 
 // ===== SEARCH OPERATIONS =====

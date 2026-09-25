@@ -16,7 +16,9 @@
 
 #include <memory>
 
+#include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
+#include "src/EquipmentSlot.h"
 #include "src/InventoryOperations.h"
 #include "src/Item.h"
 #include "tests/mocks/MockGameContext.h"
@@ -49,7 +51,7 @@ TEST_F(CarryWeightTest, AnItemExactlyAtTheLimitFits)
 	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit);
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier, *ctx.dataManager));
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*item, carrier, *ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, AnItemOneOverTheLimitDoesNot)
@@ -57,7 +59,7 @@ TEST_F(CarryWeightTest, AnItemOneOverTheLimitDoesNot)
 	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	const auto item = weighing(limit + 1);
 
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *item, carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*item, carrier, *ctx.dataManager));
 }
 
 TEST_F(CarryWeightTest, WhatIsAlreadyCarriedCountsAgainstTheLimit)
@@ -65,8 +67,8 @@ TEST_F(CarryWeightTest, WhatIsAlreadyCarriedCountsAgainstTheLimit)
 	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
 	ASSERT_TRUE(InventoryOperations::add_item(carrier.inventoryData, weighing(limit - 5)).has_value());
 
-	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(5), carrier, *ctx.dataManager));
-	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(carrier.inventoryData, *weighing(6), carrier, *ctx.dataManager))
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(5), carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(6), carrier, *ctx.dataManager))
 		<< "the pack's own weight must count, not only the new item's";
 }
 
@@ -83,4 +85,33 @@ TEST_F(CarryWeightTest, TheCheckedAddRefusesAnItemOverTheLimit)
 	ASSERT_FALSE(refused.has_value());
 	EXPECT_EQ(refused.error(), InventoryError::CAPACITY_EXCEEDED);
 	EXPECT_TRUE(carrier.inventoryData.items.empty()) << "a refused item must not be kept";
+}
+
+// The book totals "the pounds of gear carried by the creature or character" and draws
+// no line between the pack and the body (Player's Handbook, PDF page 160). Worn plate
+// is still plate: putting it on cannot be a way to carry it for nothing.
+TEST_F(CarryWeightTest, WhatIsWornCountsAgainstTheLimit)
+{
+	carrier.set_body_plan(mock.body_plans.get("humanoid"));
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	carrier.wear(weighing(limit + 1), EquipmentSlot::BODY);
+
+	EXPECT_TRUE(InventoryOperations::is_overloaded(carrier, *ctx.dataManager))
+		<< "armour heavier than the carrier weighed nothing once it was worn";
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(1), carrier, *ctx.dataManager))
+		<< "a creature already over its limit in worn gear could still fill its pack";
+}
+
+// Pack and body add up. Half the limit worn and an empty pack leaves room for the
+// other half exactly, and for nothing past it.
+TEST_F(CarryWeightTest, ThePackAndTheBodyAreOneLoad)
+{
+	carrier.set_body_plan(mock.body_plans.get("humanoid"));
+	const int limit = InventoryOperations::get_max_weight(carrier, *ctx.dataManager);
+	const int worn = limit / 2;
+	carrier.wear(weighing(worn), EquipmentSlot::BODY);
+
+	EXPECT_TRUE(InventoryOperations::is_within_weight_limit(*weighing(limit - worn), carrier, *ctx.dataManager));
+	EXPECT_FALSE(InventoryOperations::is_within_weight_limit(*weighing(limit - worn + 1), carrier, *ctx.dataManager))
+		<< "the worn half of the load did not count";
 }

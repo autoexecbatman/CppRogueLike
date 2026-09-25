@@ -9,25 +9,25 @@
   "mutations": [
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\treturn get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
-      "mutated": "\treturn get_total_weight(inventory) + item.enhancement.weight < get_max_weight(owner, dataManager);",
+      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
+      "mutated": "\treturn get_total_weight(owner) + item.enhancement.weight < get_max_weight(owner, dataManager);",
       "catches": "an item that fits exactly being refused"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\treturn get_total_weight(inventory) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
+      "original": "\treturn get_total_weight(owner) + item.enhancement.weight <= get_max_weight(owner, dataManager);",
       "mutated": "\treturn item.enhancement.weight <= get_max_weight(owner, dataManager);",
       "catches": "the pack's own weight ignored, so a full pack keeps accepting"
     },
     {
       "file": "src/InventoryOperations.cpp",
-      "original": "\tif (!is_within_weight_limit(inventory, *item, owner, dataManager))\n",
+      "original": "\tif (!is_within_weight_limit(*item, owner, dataManager))\n",
       "mutated": "\tif (false)\n",
       "catches": "the checked add no longer checking weight"
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\tif (!is_within_weight_limit(buyer.inventoryData, item, buyer, *ctx.dataManager))\n\t{",
+      "original": "\tif (!is_within_weight_limit(item, buyer, *ctx.dataManager))\n\t{",
       "mutated": "\tif (false)\n\t{",
       "catches": "a shop selling what the buyer cannot lift, as before"
     }

@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ItemWeightTest.*:CarryWeightTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "data/content/items.json",
+      "original": "        \"baseWeight\": 1,\n        \"weight\": 50,",
+      "mutated": "        \"baseWeight\": 1,\n        \"weight\": 1,",
+      "catches": "plate mail back at its spawn rarity, which is where the defect came from"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "        \"baseWeight\": 50,\n        \"weight\": 1,",
+      "mutated": "        \"baseWeight\": 50,\n        \"weight\": 50,",
+      "catches": "a health potion weighing what it is common, not what it is heavy"
+    },
+    {
+      "file": "data/content/items.json",
+      "original": "        \"baseWeight\": 12,\n        \"weight\": 3,",
+      "mutated": "        \"baseWeight\": 12,\n        \"weight\": 12,",
+      "catches": "a longbow at four times the book's three pounds"
+    },
+    {
+      "file": "src/ItemCreator.cpp",
+      "original": "\titem->enhancement.weight = params.weight;",
+      "mutated": "\titem->enhancement.weight = 0;",
+      "catches": "the weight in the data never reaching the item that is carried"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tfor (const EquippedItem& equipped : owner.equippedItems)\n\t{\n\t\tassert(equipped.item && \"an equipment slot owns the item in it\");\n\t\ttotal += equipped.item->enhancement.weight;\n\t}\n",
+      "mutated": "",
+      "catches": "worn gear weighing nothing again, so armour is free once it is on"
+    },
+    {
+      "file": "src/InventoryOperations.cpp",
+      "original": "\tfor (const auto& item : owner.inventoryData.items)\n\t{\n\t\tassert(item && \"the pack owns every entry it holds\");\n\t\ttotal += item->enhancement.weight;\n\t}\n",
+      "mutated": "",
+      "catches": "the pack dropping out of the load once the body was added to it"
+    }
+  ]
+}

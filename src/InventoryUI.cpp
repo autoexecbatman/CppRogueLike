@@ -93,7 +93,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	ctx.renderer->draw_text(Vector2D{ closeBtn.get_x(), closeBtn.get_y() }, "[X]", RED_BLACK_PAIR);
 
 	// Draw weight info with tier on the right side
-	int currentWeight = InventoryOperations::get_total_weight(playerRef.inventoryData);
+	int currentWeight = InventoryOperations::get_total_weight(playerRef);
 	int maxWeight = InventoryOperations::get_max_weight(playerRef, *ctx.dataManager);
 	WeightTier tier = get_weight_tier(currentWeight, maxWeight);
 
@@ -401,7 +401,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 	int fontOff = (tileSize - fontSize) / 2;
 
 	// Draw overloaded warning if inventory exceeds max weight
-	if (InventoryOperations::is_overloaded(playerRef.inventoryData, playerRef, *ctx.dataManager))
+	if (InventoryOperations::is_overloaded(playerRef, *ctx.dataManager))
 	{
 		std::string_view warning = "OVERLOADED! Movement speed reduced.";
 		int warningW = ctx.renderer->measure_text(warning);

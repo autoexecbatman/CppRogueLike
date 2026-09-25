@@ -868,7 +868,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
 		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
 		// nowhere at all to put it, it stays on. An item that comes off is never lost.
-		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(inventoryData, *removed, *this, *ctx.dataManager);
+		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
 		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
 		{
 			ctx.messageSystem->message(

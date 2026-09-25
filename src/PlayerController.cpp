@@ -252,7 +252,7 @@ void PlayerController::pick_item(GameContext& ctx)
 	}
 
 	// Pre-check weight before touching ownership — prevents item destruction on rejection
-	if (!InventoryOperations::is_within_weight_limit(playerOwner.inventoryData, *item, playerOwner, *ctx.dataManager))
+	if (!InventoryOperations::is_within_weight_limit(*item, playerOwner, *ctx.dataManager))
 	{
 		ctx.messageSystem->message(RED_BLACK_PAIR, "Too heavy to carry.", true);
 		return;
