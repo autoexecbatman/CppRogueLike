@@ -8,6 +8,7 @@
 		"maxCarried": 3,
 		"OpenDoors": 1,
 		"BB_LG": 0,
+		"encumbrance": null,
 		"Notes": ""
 	},
 	{
@@ -19,6 +20,7 @@
 		"maxCarried": 6,
 		"OpenDoors": 1,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 1, "lightTo": 2, "moderateTo": 3, "heavyTo": 4 },
 		"Notes": ""
 	},
 	{
@@ -30,6 +32,7 @@
 		"maxCarried": 10,
 		"OpenDoors": 2,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 5, "lightTo": 6, "moderateTo": 7, "heavyTo": 9 },
 		"Notes": ""
 	},
 	{
@@ -41,6 +44,7 @@
 		"maxCarried": 25,
 		"OpenDoors": 3,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 10, "lightTo": 13, "moderateTo": 16, "heavyTo": 19 },
 		"Notes": ""
 	},
 	{
@@ -52,6 +56,7 @@
 		"maxCarried": 25,
 		"OpenDoors": 3,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 10, "lightTo": 13, "moderateTo": 16, "heavyTo": 19 },
 		"Notes": ""
 	},
 	{
@@ -63,6 +68,7 @@
 		"maxCarried": 55,
 		"OpenDoors": 4,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 20, "lightTo": 29, "moderateTo": 38, "heavyTo": 46 },
 		"Notes": ""
 	},
 	{
@@ -74,6 +80,7 @@
 		"maxCarried": 55,
 		"OpenDoors": 4,
 		"BB_LG": 0,
+		"encumbrance": { "unencumberedTo": 20, "lightTo": 29, "moderateTo": 38, "heavyTo": 46 },
 		"Notes": ""
 	},
 	{
@@ -85,6 +92,7 @@
 		"maxCarried": 90,
 		"OpenDoors": 5,
 		"BB_LG": 1,
+		"encumbrance": { "unencumberedTo": 35, "lightTo": 50, "moderateTo": 65, "heavyTo": 80 },
 		"Notes": ""
 	},
 	{
@@ -96,6 +104,7 @@
 		"maxCarried": 90,
 		"OpenDoors": 5,
 		"BB_LG": 1,
+		"encumbrance": { "unencumberedTo": 35, "lightTo": 50, "moderateTo": 65, "heavyTo": 80 },
 		"Notes": ""
 	},
 	{
@@ -107,6 +116,7 @@
 		"maxCarried": 110,
 		"OpenDoors": 6,
 		"BB_LG": 2,
+		"encumbrance": { "unencumberedTo": 40, "lightTo": 58, "moderateTo": 76, "heavyTo": 96 },
 		"Notes": ""
 	},
 	{
@@ -118,6 +128,7 @@
 		"maxCarried": 110,
 		"OpenDoors": 6,
 		"BB_LG": 2,
+		"encumbrance": { "unencumberedTo": 40, "lightTo": 58, "moderateTo": 76, "heavyTo": 96 },
 		"Notes": ""
 	},
 	{
@@ -129,6 +140,7 @@
 		"maxCarried": 140,
 		"OpenDoors": 7,
 		"BB_LG": 4,
+		"encumbrance": { "unencumberedTo": 45, "lightTo": 69, "moderateTo": 93, "heavyTo": 117 },
 		"Notes": ""
 	},
 	{
@@ -140,6 +152,7 @@
 		"maxCarried": 140,
 		"OpenDoors": 7,
 		"BB_LG": 4,
+		"encumbrance": { "unencumberedTo": 45, "lightTo": 69, "moderateTo": 93, "heavyTo": 117 },
 		"Notes": ""
 	},
 	{
@@ -151,6 +164,7 @@
 		"maxCarried": 170,
 		"OpenDoors": 8,
 		"BB_LG": 7,
+		"encumbrance": { "unencumberedTo": 55, "lightTo": 85, "moderateTo": 115, "heavyTo": 145 },
 		"Notes": ""
 	},
 	{
@@ -162,6 +176,7 @@
 		"maxCarried": 170,
 		"OpenDoors": 8,
 		"BB_LG": 7,
+		"encumbrance": { "unencumberedTo": 55, "lightTo": 85, "moderateTo": 115, "heavyTo": 145 },
 		"Notes": ""
 	},
 	{
@@ -173,6 +188,7 @@
 		"maxCarried": 195,
 		"OpenDoors": 9,
 		"BB_LG": 10,
+		"encumbrance": { "unencumberedTo": 70, "lightTo": 100, "moderateTo": 130, "heavyTo": 160 },
 		"Notes": ""
 	},
 	{
@@ -184,6 +200,7 @@
 		"maxCarried": 220,
 		"OpenDoors": 10,
 		"BB_LG": 13,
+		"encumbrance": { "unencumberedTo": 85, "lightTo": 121, "moderateTo": 157, "heavyTo": 193 },
 		"Notes": ""
 	},
 	{
@@ -195,6 +212,7 @@
 		"maxCarried": 255,
 		"OpenDoors": 11,
 		"BB_LG": 16,
+		"encumbrance": { "unencumberedTo": 110, "lightTo": 149, "moderateTo": 188, "heavyTo": 227 },
 		"Notes": ""
 	},
 	{
@@ -206,6 +224,7 @@
 		"maxCarried": 640,
 		"OpenDoors": 16,
 		"BB_LG": 50,
+		"encumbrance": null,
 		"Notes": "Hill Giant"
 	},
 	{
@@ -217,6 +236,7 @@
 		"maxCarried": 700,
 		"OpenDoors": 17,
 		"BB_LG": 60,
+		"encumbrance": null,
 		"Notes": "Stone Giant"
 	},
 	{
@@ -228,6 +248,7 @@
 		"maxCarried": 810,
 		"OpenDoors": 17,
 		"BB_LG": 70,
+		"encumbrance": null,
 		"Notes": "Frost Giant"
 	},
 	{
@@ -239,6 +260,7 @@
 		"maxCarried": 970,
 		"OpenDoors": 18,
 		"BB_LG": 80,
+		"encumbrance": null,
 		"Notes": "Fire Giant"
 	},
 	{
@@ -250,6 +272,7 @@
 		"maxCarried": 1130,
 		"OpenDoors": 18,
 		"BB_LG": 90,
+		"encumbrance": null,
 		"Notes": "Cloud Giant"
 	},
 	{
@@ -261,6 +284,7 @@
 		"maxCarried": 1440,
 		"OpenDoors": 19,
 		"BB_LG": 95,
+		"encumbrance": null,
 		"Notes": "Storm Giant"
 	},
 	{
@@ -272,6 +296,7 @@
 		"maxCarried": 1750,
 		"OpenDoors": 19,
 		"BB_LG": 99,
+		"encumbrance": null,
 		"Notes": "Maximum"
 	},
 	{
@@ -285,6 +310,7 @@
 		"maxCarried": 280,
 		"OpenDoors": 12,
 		"BB_LG": 20,
+		"encumbrance": { "unencumberedTo": 135, "lightTo": 174, "moderateTo": 213, "heavyTo": 252 },
 		"Notes": "18/01-50"
 	},
 	{
@@ -298,6 +324,7 @@
 		"maxCarried": 305,
 		"OpenDoors": 13,
 		"BB_LG": 25,
+		"encumbrance": { "unencumberedTo": 160, "lightTo": 199, "moderateTo": 238, "heavyTo": 277 },
 		"Notes": "18/51-75"
 	},
 	{
@@ -311,6 +338,7 @@
 		"maxCarried": 330,
 		"OpenDoors": 14,
 		"BB_LG": 30,
+		"encumbrance": { "unencumberedTo": 185, "lightTo": 224, "moderateTo": 263, "heavyTo": 302 },
 		"Notes": "18/76-90"
 	},
 	{
@@ -324,6 +352,7 @@
 		"maxCarried": 380,
 		"OpenDoors": 15,
 		"BB_LG": 35,
+		"encumbrance": { "unencumberedTo": 235, "lightTo": 274, "moderateTo": 313, "heavyTo": 352 },
 		"Notes": "18/91-99"
 	},
 	{
@@ -337,6 +366,7 @@
 		"maxCarried": 480,
 		"OpenDoors": 16,
 		"BB_LG": 40,
+		"encumbrance": { "unencumberedTo": 335, "lightTo": 374, "moderateTo": 413, "heavyTo": 452 },
 		"Notes": "18/00"
 	}
 ]

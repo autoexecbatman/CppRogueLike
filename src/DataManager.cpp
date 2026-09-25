@@ -264,6 +264,19 @@ std::vector<StrengthAttributes> DataManager::load_strength(const std::string& fi
 			s.exceptionalFrom = item.at("ExceptionalFrom").get<int>();
 			s.exceptionalTo = item.at("ExceptionalTo").get<int>();
 		}
+
+		// Table 47's bands, null on the scores the table does not print. The key is
+		// required on every row, so a row that simply forgot it fails loudly.
+		const nlohmann::json& bands = item.at("encumbrance");
+		if (!bands.is_null())
+		{
+			s.encumbrance = EncumbranceBands{
+				bands.at("unencumberedTo").get<int>(),
+				bands.at("lightTo").get<int>(),
+				bands.at("moderateTo").get<int>(),
+				bands.at("heavyTo").get<int>()
+			};
+		}
 		data.push_back(s);
 	}
 

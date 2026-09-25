@@ -18,7 +18,8 @@
 #include "Colors.h"
 #include "DamageInfo.h"
 #include "WeaponDamageRegistry.h"
-#include "WeightTier.h"
+#include "DataManager.h"
+#include "Encumbrance.h"
 #include "GameContext.h"
 #include "ItemClassification.h"
 #include "InputSystem.h"
@@ -92,43 +93,49 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	CloseButtonArea closeBtn = CloseButtonArea(*ctx.renderer, vcols);
 	ctx.renderer->draw_text(Vector2D{ closeBtn.get_x(), closeBtn.get_y() }, "[X]", RED_BLACK_PAIR);
 
-	// Draw weight info with tier on the right side
-	int currentWeight = InventoryOperations::get_total_weight(playerRef);
-	int maxWeight = InventoryOperations::get_max_weight(playerRef, *ctx.dataManager);
-	WeightTier tier = get_weight_tier(currentWeight, maxWeight);
+	// What the character carries, and the band Table 47 puts that load in.
+	const int currentWeight = InventoryOperations::get_total_weight(playerRef);
+	const int maxWeight = InventoryOperations::get_max_weight(playerRef, *ctx.dataManager);
+	const StrengthAttributes strengthRow = ctx.dataManager->strength_for(
+		playerRef.get_strength(),
+		playerRef.get_exceptional_strength());
+	const std::optional<EncumbranceBand> band = encumbrance_band(currentWeight, strengthRow);
 
-	std::string tierName;
-	int tierColor = WHITE_BLACK_PAIR;
-	switch (tier)
+	// A score Table 47 does not print has no band, so the line shows the load alone
+	// rather than a word the book never wrote.
+	const auto colour_for = [](EncumbranceBand named)
 	{
-	case WeightTier::LIGHT:
-	{
-		tierName = "LIGHT";
-		tierColor = WHITE_BLACK_PAIR;
-		break;
-	}
-	case WeightTier::MODERATE:
-	{
-		tierName = "MODERATE";
-		tierColor = YELLOW_BLACK_PAIR;
-		break;
-	}
-	case WeightTier::HEAVY:
-	{
-		tierName = "HEAVY";
-		tierColor = MAGENTA_BLACK_PAIR;
-		break;
-	}
-	case WeightTier::OVERENCUMBERED:
-	{
-		tierName = "OVERENCUMBERED";
-		tierColor = RED_BLACK_PAIR;
-		break;
-	}
-	}
+		switch (named)
+		{
+		case EncumbranceBand::UNENCUMBERED:
+		case EncumbranceBand::LIGHT:
+		{
+			return WHITE_BLACK_PAIR;
+		}
+		case EncumbranceBand::MODERATE:
+		{
+			return YELLOW_BLACK_PAIR;
+		}
+		case EncumbranceBand::HEAVY:
+		case EncumbranceBand::SEVERE:
+		{
+			return MAGENTA_BLACK_PAIR;
+		}
+		case EncumbranceBand::OVERLOADED:
+		{
+			return RED_BLACK_PAIR;
+		}
+		}
+		return WHITE_BLACK_PAIR;
+	};
 
-	std::string weightInfo = std::format("Weight: {}/{} [{}]", currentWeight, maxWeight, tierName);
-	ctx.renderer->draw_text(Vector2D{ tileSize, fontOff }, weightInfo, tierColor);
+	const std::string weightInfo = band.has_value()
+		? std::format("Weight: {}/{} [{}]", currentWeight, maxWeight, encumbrance_band_name(*band))
+		: std::format("Weight: {}/{}", currentWeight, maxWeight);
+	ctx.renderer->draw_text(
+		Vector2D{ tileSize, fontOff },
+		weightInfo,
+		band.has_value() ? colour_for(*band) : WHITE_BLACK_PAIR);
 }
 
 // Draw a full-width white highlight bar at the given tile row.
@@ -403,7 +410,9 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 	// Draw overloaded warning if inventory exceeds max weight
 	if (InventoryOperations::is_overloaded(playerRef, *ctx.dataManager))
 	{
-		std::string_view warning = "OVERLOADED! Movement speed reduced.";
+		// Table 48 turns a band into a reduced movement rate and this game has no
+		// movement rate, so the warning says what being over the maximum does here.
+		std::string_view warning = "OVERLOADED! You can pick nothing up.";
 		int warningW = ctx.renderer->measure_text(warning);
 		int warningX = (screen_cols(ctx) * tileSize - warningW) / 2;
 		ctx.renderer->draw_text(Vector2D{ warningX, fontOff }, warning, RED_BLACK_PAIR);

@@ -10,5 +10,6 @@
   {"label": "allocate_die_on_constitution", "keys": ["2"]},
   {"label": "allocate_die_taken_back", "keys": ["Backspace"]},
   {"label": "enter_name", "keys": ["Enter"]},
-  {"label": "in_game", "keys": ["Enter"]}
+  {"label": "in_game", "keys": ["Enter"]},
+  {"label": "inventory_weight_band", "keys": ["i"]}
 ]

@@ -1,6 +1,18 @@
 #pragma once
 
+#include <optional>
 #include <string>
+
+// Table 47's four band boundaries: the heaviest load each named band still holds.
+// Severe runs from heavyTo + 1 up to the row's maxCarried, and anything past that is
+// more than the character can carry at all.
+struct EncumbranceBands
+{
+	int unencumberedTo{ 0 };
+	int lightTo{ 0 };
+	int moderateTo{ 0 };
+	int heavyTo{ 0 };
+};
 
 struct StrengthAttributes
 {
@@ -20,4 +32,8 @@ struct StrengthAttributes
 	// this percentile range; both are 0 on a row for a plain score.
 	int exceptionalFrom{};
 	int exceptionalTo{};
+	// Table 47's bands for this row. Absent on the scores the table does not print -
+	// Strength 1, and 19 and up - where the book gives no bands at all rather than
+	// bands this game would have to invent.
+	std::optional<EncumbranceBands> encumbrance{};
 };

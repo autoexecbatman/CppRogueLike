@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EncumbranceBandTest.*:CarryCapacityTest.*:CarryWeightTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Encumbrance.cpp",
+      "original": "\tif (carriedPounds <= bands.unencumberedTo)",
+      "mutated": "\tif (carriedPounds < bands.unencumberedTo)",
+      "catches": "the top of a band read as past it, so every boundary names the wrong band"
+    },
+    {
+      "file": "src/Encumbrance.cpp",
+      "original": "\tif (carriedPounds > row.maxCarried)\n\t{\n\t\treturn EncumbranceBand::OVERLOADED;\n\t}\n",
+      "mutated": "",
+      "catches": "a load past the maximum reported as merely Severe"
+    },
+    {
+      "file": "src/Encumbrance.cpp",
+      "original": "\tif (carriedPounds > row.maxCarried)",
+      "mutated": "\tif (carriedPounds >= row.maxCarried)",
+      "catches": "the last pound a character can carry called more than it can carry"
+    },
+    {
+      "file": "src/Encumbrance.cpp",
+      "original": "\tif (!row.encumbrance.has_value())\n\t{\n\t\treturn std::nullopt;\n\t}\n",
+      "mutated": "",
+      "catches": "a score Table 47 never printed given bands of zero, so every load reads Severe"
+    },
+    {
+      "file": "src/Encumbrance.cpp",
+      "original": "\tif (carriedPounds <= bands.moderateTo)\n\t{\n\t\treturn EncumbranceBand::MODERATE;\n\t}\n",
+      "mutated": "",
+      "catches": "a band skipped, which no arithmetic on the maximum would have noticed"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\t\t\tbands.at(\"lightTo\").get<int>(),",
+      "mutated": "\t\t\t\tbands.at(\"moderateTo\").get<int>(),",
+      "catches": "the loader reading one column of Table 47 into another"
+    },
+    {
+      "file": "src/DataManager.cpp",
+      "original": "\t\tif (!bands.is_null())",
+      "mutated": "\t\tif (bands.is_null())",
+      "catches": "the rows the book prints and the rows it does not swapped"
+    },
+    {
+      "file": "src/json/strength.json",
+      "original": "\t\t\"encumbrance\": { \"unencumberedTo\": 40, \"lightTo\": 58, \"moderateTo\": 76, \"heavyTo\": 96 },\n\t\t\"Notes\": \"\"\n\t},\n\t{\n\t\t\"Str\": 11,",
+      "mutated": "\t\t\"encumbrance\": { \"unencumberedTo\": 36, \"lightTo\": 58, \"moderateTo\": 76, \"heavyTo\": 96 },\n\t\t\"Notes\": \"\"\n\t},\n\t{\n\t\t\"Str\": 11,",
+      "catches": "Strength 10's first boundary read off the neighbouring row of the table"
+    },
+    {
+      "file": "src/json/strength.json",
+      "original": "\t\t\"encumbrance\": { \"unencumberedTo\": 335, \"lightTo\": 374, \"moderateTo\": 413, \"heavyTo\": 452 },",
+      "mutated": "\t\t\"encumbrance\": { \"unencumberedTo\": 110, \"lightTo\": 149, \"moderateTo\": 188, \"heavyTo\": 227 },",
+      "catches": "18/00 given a plain 18's bands, so exceptional Strength carries nothing extra"
+    }
+  ]
+}
