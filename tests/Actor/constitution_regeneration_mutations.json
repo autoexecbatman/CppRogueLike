@@ -9,9 +9,9 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\t// A monster's hit points are its hit dice, with nothing from Constitution.\n\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n",
-      "mutated": "",
-      "catches": "a monster regenerating from its Constitution"
+      "original": "\t// The column holds 0 below Constitution 20, the book's \"Nil\".",
+      "mutated": "\tif (creatureClass == CreatureClass::MONSTER)\n\t{\n\t\treturn;\n\t}\n\t// The column holds 0 below Constitution 20, the book's \"Nil\".",
+      "catches": "a monster shut out of the regeneration column again, which is a different column from the hit point one that does exclude it"
     },
     {
       "file": "src/Creature.cpp",

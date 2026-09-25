@@ -104,10 +104,27 @@ TEST_F(ConstitutionRegenerationTest, NineteenRegeneratesNothing)
 	EXPECT_EQ(regenerate_through(*character, ROUNDS_WATCHED), 0);
 }
 
-// A monster takes no Constitution hit points, so no regeneration from it either.
-TEST_F(ConstitutionRegenerationTest, AMonsterDoesNotRegenerate)
+// A monster mends at the same rate anyone else does. This used to assert the opposite,
+// reasoning that a monster takes no Constitution hit points - which is true of Table 3's
+// Hit Point Adjustment column and says nothing about its Regeneration column. The DMG's
+// Ability Scores for Monsters settles it: a creature with ability scores "gains all the
+// bonuses and penalties associated with its actual ability score as listed in the
+// Player's Handbook", and Constitution's "modifiers apply to creatures in the same way
+// they do for characters". This game rolls six scores for every monster.
+TEST_F(ConstitutionRegenerationTest, AMonsterMendsLikeAnyoneElse)
 {
 	auto monster = make_creature(CreatureClass::MONSTER, 25, 200, 100);
+	auto fighter = make_creature(CreatureClass::FIGHTER, 25, 200, 100);
+
+	EXPECT_EQ(regenerate_through(*monster, ROUNDS_WATCHED), regenerate_through(*fighter, ROUNDS_WATCHED))
+		<< "a monster with the same Constitution mended a different amount";
+}
+
+// And a monster whose Constitution is below the table's threshold still mends nothing,
+// so the rule is the score rather than the kind of creature.
+TEST_F(ConstitutionRegenerationTest, AMonsterBelowTheThresholdMendsNothing)
+{
+	auto monster = make_creature(CreatureClass::MONSTER, 19, 200, 100);
 
 	EXPECT_EQ(regenerate_through(*monster, ROUNDS_WATCHED), 0);
 }

@@ -360,12 +360,12 @@ void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager
 {
 	assert(roundsElapsed > 0 && "Creature::regenerate_from_constitution called before a round has run");
 
-	// A monster's hit points are its hit dice, with nothing from Constitution.
-	if (creatureClass == CreatureClass::MONSTER)
-	{
-		return;
-	}
-
+	// Every creature with a Constitution score mends by it, monsters included: the DMG's
+	// Ability Scores for Monsters gives a creature "all the bonuses and penalties
+	// associated with its actual ability score as listed in the Player's Handbook". What
+	// a monster does not take is Table 3's hit point adjustment, which is a different
+	// column of the same table.
+	//
 	// The column holds 0 below Constitution 20, the book's "Nil".
 	const int turnsBetweenPoints = dataManager.constitution_for(get_constitution()).Regeneration;
 	if (turnsBetweenPoints == 0)
