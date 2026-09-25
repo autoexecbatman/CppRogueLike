@@ -104,6 +104,8 @@ set(SOURCE_FILES # Add Source Files Here !
     # Actor
     ${PROJECT_SOURCE_DIR}/Actor.cpp
     ${PROJECT_SOURCE_DIR}/Actor.h
+    ${PROJECT_SOURCE_DIR}/AbilityAllocation.cpp
+    ${PROJECT_SOURCE_DIR}/AbilityAllocation.h
     ${PROJECT_SOURCE_DIR}/Attacker.cpp
     ${PROJECT_SOURCE_DIR}/Attacker.h
     ${PROJECT_SOURCE_DIR}/AttackStrength.cpp
@@ -192,6 +194,8 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/Menu.cpp
     ${PROJECT_SOURCE_DIR}/Menu.h
     ${PROJECT_SOURCE_DIR}/MenuClass.cpp
+    ${PROJECT_SOURCE_DIR}/MenuAbilityScores.cpp
+    ${PROJECT_SOURCE_DIR}/MenuAbilityScores.h
     ${PROJECT_SOURCE_DIR}/MenuClass.h
     ${PROJECT_SOURCE_DIR}/MenuGender.cpp
     ${PROJECT_SOURCE_DIR}/MenuGender.h

@@ -6,6 +6,7 @@
 #include "RandomDice.h"
 #include "ListMenu.h"
 #include "MenuClass.h"
+#include "Player.h"
 #include "MenuRace.h"
 
 std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
@@ -15,6 +16,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto humanCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Human";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HUMAN);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Human", 'h', humanCommand });
@@ -22,6 +24,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto dwarfCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Dwarf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::DWARF);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Dwarf", 'd', dwarfCommand });
@@ -29,6 +32,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto elfCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Elf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::ELF);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Elf", 'e', elfCommand });
@@ -36,6 +40,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto gnomeCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Gnome";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::GNOME);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Gnome", 'g', gnomeCommand });
@@ -43,6 +48,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto halfElfCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Half-Elf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFELF);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Half-Elf", 0, halfElfCommand });
@@ -50,6 +56,7 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
     auto halflingCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerRace = "Halfling";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFLING);
         ctx.menus->push_back(make_class_menu(ctx));
     };
     entries.push_back({ "Halfling", 'l', halflingCommand });
@@ -60,21 +67,27 @@ std::unique_ptr<BaseMenu> make_race_menu(GameContext& ctx)
         {
         case 1:
             ctx.playerBlueprint->playerRace = "Human";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HUMAN);
             break;
         case 2:
             ctx.playerBlueprint->playerRace = "Dwarf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::DWARF);
             break;
         case 3:
             ctx.playerBlueprint->playerRace = "Elf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::ELF);
             break;
         case 4:
             ctx.playerBlueprint->playerRace = "Gnome";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::GNOME);
             break;
         case 5:
             ctx.playerBlueprint->playerRace = "Half-Elf";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFELF);
             break;
         case 6:
             ctx.playerBlueprint->playerRace = "Halfling";
+        ctx.playerBlueprint->racialModifier = racial_ability_modifiers(Player::PlayerRaceState::HALFLING);
             break;
         default:
             break;

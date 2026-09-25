@@ -3,6 +3,12 @@
   {"label": "select_gender", "keys": ["Enter"]},
   {"label": "select_race", "keys": ["Enter"]},
   {"label": "select_class", "keys": ["Enter"]},
+  {"label": "allocate_opened", "keys": ["Enter"]},
+  {"label": "allocate_first_die_on_strength", "keys": ["1"]},
+  {"label": "allocate_cursor_on_dexterity", "keys": ["ArrowDown"]},
+  {"label": "allocate_cursor_on_constitution", "keys": ["ArrowDown"]},
+  {"label": "allocate_die_on_constitution", "keys": ["2"]},
+  {"label": "allocate_die_taken_back", "keys": ["Backspace"]},
   {"label": "enter_name", "keys": ["Enter"]},
   {"label": "in_game", "keys": ["Enter"]}
 ]

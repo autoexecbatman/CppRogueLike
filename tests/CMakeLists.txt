@@ -97,6 +97,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/RangedWeaponTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SpiderAmbushTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/WebSpinnerSanctuaryTest.cpp
@@ -127,6 +128,7 @@ set(PARENT_SOURCES
 
     # Actor
     ${PARENT_SOURCE_DIR}/Actor.cpp
+    ${PARENT_SOURCE_DIR}/AbilityAllocation.cpp
     ${PARENT_SOURCE_DIR}/Attacker.cpp
     ${PARENT_SOURCE_DIR}/AttackStrength.cpp
     ${PARENT_SOURCE_DIR}/MonsterAttacker.cpp
@@ -162,6 +164,7 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/NotificationMenu.cpp
     ${PARENT_SOURCE_DIR}/Menu.cpp
     ${PARENT_SOURCE_DIR}/MenuClass.cpp
+    ${PARENT_SOURCE_DIR}/MenuAbilityScores.cpp
     ${PARENT_SOURCE_DIR}/MenuGender.cpp
     ${PARENT_SOURCE_DIR}/MenuName.cpp
     ${PARENT_SOURCE_DIR}/MenuRace.cpp

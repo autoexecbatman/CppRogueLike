@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "AbilityAllocation.h"
 #include "InventoryData.h"
 #include "Stairs.h"
 
@@ -120,6 +121,24 @@ struct PlayerBlueprint
 	std::string name{ "Player" };
 	std::string playerClass{ "None" };
 	std::string playerRace{ "None" };
+
+	// The six as Method VI allocated them, before the race is paid. They start
+	// where the method starts them, so a blueprint that never reached the
+	// allocation screen still builds a legal character rather than a blank one.
+	// The class and the race as the menus that picked them already knew them,
+	// so the allocation screen reads Table 13's row and the racial modifiers
+	// without parsing a display name back into an enum.
+	CreatureClass creatureClass{ CreatureClass::MONSTER };
+	std::array<int, ABILITY_COUNT> racialModifier{};
+
+	std::array<int, ABILITY_COUNT> abilityScores{
+		METHOD_SIX_STARTING_SCORE,
+		METHOD_SIX_STARTING_SCORE,
+		METHOD_SIX_STARTING_SCORE,
+		METHOD_SIX_STARTING_SCORE,
+		METHOD_SIX_STARTING_SCORE,
+		METHOD_SIX_STARTING_SCORE
+	};
 };
 
 /**

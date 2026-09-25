@@ -213,6 +213,13 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 	applyClassData(blueprint.playerClass);
 	applyRaceData(blueprint.playerRace);
 
+	// The six come from the allocation screen rather than from dice here: Method VI
+	// is what character creation runs, and the blueprint carries what it produced.
+	for (const Ability ability : ALL_ABILITY)
+	{
+		set_ability(ability, blueprint.abilityScores.at(ability_index(ability)));
+	}
+
 	set_gold(100);
 	controller = std::make_unique<PlayerController>(*this);
 	roll_new_character(ctx);
@@ -222,19 +229,7 @@ Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext&
 
 void Player::roll_new_character(GameContext& ctx)
 {
-	// Rolling for stats
-	auto roll3d6 = [&ctx]()
-	{
-		return ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6();
-	};
-
-	set_strength(roll3d6());
-	set_dexterity(roll3d6());
-	set_constitution(roll3d6());
-	set_intelligence(roll3d6());
-	set_wisdom(roll3d6());
-	set_charisma(roll3d6());
-
+	// The six are allocated before the character exists, so nothing here touches them.
 	// The owner's cushion plus one roll of the class's own die, set before this runs.
 	const int playerHp = GameBalance::Leveling::HitPoints::STARTING_CUSHION + ctx.dice->roll(1, get_hit_die());
 	const int playerDr = 1;
@@ -362,65 +357,62 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 
 	}
 }
-void Player::racial_ability_adjustments(GameContext& ctx)
+std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race)
 {
-	// Apply stat changes and collect the display lines in a single pass.
-	// Human and Half-elf have no stat modifications (AD&D 2e PHB), so they
-	// produce no entries and no popup is shown.
-	std::vector<std::string> bonusLines;
-
-	switch (playerRaceState)
+	switch (race)
 	{
-
-	case Player::PlayerRaceState::HUMAN:
-	case Player::PlayerRaceState::HALFELF:
-	{
-		break;
-	}
-
 	case Player::PlayerRaceState::DWARF:
 	{
-		adjust_constitution(1);
-		adjust_charisma(-1);
-		bonusLines.push_back("+1 Constitution");
-		bonusLines.push_back("-1 Charisma");
-		break;
+		return { 0, 0, 1, 0, 0, -1 };
 	}
-
 	case Player::PlayerRaceState::ELF:
 	{
-		adjust_dexterity(1);
-		adjust_constitution(-1);
-		bonusLines.push_back("+1 Dexterity");
-		bonusLines.push_back("-1 Constitution");
-		break;
+		return { 0, 1, -1, 0, 0, 0 };
 	}
-
 	case Player::PlayerRaceState::GNOME:
 	{
-		adjust_intelligence(1);
-		adjust_wisdom(-1);
-		bonusLines.push_back("+1 Intelligence");
-		bonusLines.push_back("-1 Wisdom");
-		break;
+		return { 0, 0, 0, 1, -1, 0 };
 	}
-
 	case Player::PlayerRaceState::HALFLING:
 	{
-		adjust_dexterity(1);
-		adjust_strength(-1);
-		bonusLines.push_back("+1 Dexterity");
-		bonusLines.push_back("-1 Strength");
-		break;
+		return { -1, 1, 0, 0, 0, 0 };
 	}
-
-	default:
+	case Player::PlayerRaceState::HUMAN:
+	case Player::PlayerRaceState::HALFELF:
+	case Player::PlayerRaceState::NONE:
 	{
-		break;
+		return {};
+	}
 	}
 
+	return {};
+}
+
+std::vector<std::string> Player::pay_racial_adjustments()
+{
+	// Pay the race and collect the display lines in a single pass. Human and
+	// half-elf modify nothing, so they produce no entries and no popup is shown.
+	const std::array<int, ABILITY_COUNT> modifiers = racial_ability_modifiers(playerRaceState);
+	std::vector<std::string> bonusLines;
+
+	for (const Ability ability : ALL_ABILITY)
+	{
+		const int modifier = modifiers.at(ability_index(ability));
+		if (modifier == 0)
+		{
+			continue;
+		}
+
+		adjust_ability(ability, modifier);
+		bonusLines.push_back(std::format("{:+} {}", modifier, ability_name(ability)));
 	}
 
+	return bonusLines;
+}
+
+void Player::racial_ability_adjustments(GameContext& ctx)
+{
+	std::vector<std::string> bonusLines = pay_racial_adjustments();
 	if (bonusLines.empty())
 	{
 		return;

@@ -6,7 +6,7 @@
 #include "RandomDice.h"
 #include "ListMenu.h"
 #include "MenuClass.h"
-#include "MenuName.h"
+#include "MenuAbilityScores.h"
 
 std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 {
@@ -15,28 +15,32 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
     auto fighterCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerClass = "Fighter";
-        ctx.menus->push_back(std::make_unique<MenuName>(ctx));
+        ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
+        ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
     };
     entries.push_back({ "Fighter", 'f', fighterCommand });
 
     auto rogueCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerClass = "Rogue";
-        ctx.menus->push_back(std::make_unique<MenuName>(ctx));
+        ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
+        ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
     };
     entries.push_back({ "Rogue", 'r', rogueCommand });
 
     auto clericCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerClass = "Cleric";
-        ctx.menus->push_back(std::make_unique<MenuName>(ctx));
+        ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
+        ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
     };
     entries.push_back({ "Cleric", 'c', clericCommand });
 
     auto wizardCommand = [](GameContext& ctx)
     {
         ctx.playerBlueprint->playerClass = "Wizard";
-        ctx.menus->push_back(std::make_unique<MenuName>(ctx));
+        ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
+        ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
     };
     entries.push_back({ "Wizard", 'z', wizardCommand });
 
@@ -48,24 +52,28 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
         case 1:
 		{
 			ctx.playerBlueprint->playerClass = "Fighter";
+			ctx.playerBlueprint->creatureClass = CreatureClass::FIGHTER;
 			break;
 		}
 
         case 2:
 		{
 			ctx.playerBlueprint->playerClass = "Rogue";
+			ctx.playerBlueprint->creatureClass = CreatureClass::ROGUE;
 			break;
 		}
 
         case 3:
 		{
 			ctx.playerBlueprint->playerClass = "Wizard";
+			ctx.playerBlueprint->creatureClass = CreatureClass::WIZARD;
 			break;
 		}
 
         case 4:
 		{
 			ctx.playerBlueprint->playerClass = "Cleric";
+			ctx.playerBlueprint->creatureClass = CreatureClass::CLERIC;
 			break;
 		}
 
@@ -75,7 +83,7 @@ std::unique_ptr<BaseMenu> make_class_menu(GameContext& ctx)
 		}
 
         }
-        ctx.menus->push_back(std::make_unique<MenuName>(ctx));
+        ctx.menus->push_back(std::make_unique<MenuAbilityScores>(ctx));
     };
     entries.push_back({ "Random", 'x', randomCommand });
 

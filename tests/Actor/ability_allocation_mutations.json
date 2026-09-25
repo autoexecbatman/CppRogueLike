@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=AbilityAllocationTest.*:ConstitutionTrackerTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AbilityAllocation.h",
+      "original": "inline constexpr int METHOD_SIX_STARTING_SCORE = 8;",
+      "mutated": "inline constexpr int METHOD_SIX_STARTING_SCORE = 10;",
+      "catches": "an ability starting somewhere other than the 8 the method names"
+    },
+    {
+      "file": "src/AbilityAllocation.h",
+      "original": "inline constexpr int METHOD_SIX_DICE = 7;",
+      "mutated": "inline constexpr int METHOD_SIX_DICE = 6;",
+      "catches": "a pool of the wrong size, which is the whole of what the method gives"
+    },
+    {
+      "file": "src/AbilityAllocation.h",
+      "original": "inline constexpr int ABILITY_MAXIMUM = 18;",
+      "mutated": "inline constexpr int ABILITY_MAXIMUM = 19;",
+      "catches": "a score allowed past the 18 the book caps it at"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\treturn allocated(ability) + unplaced.at(dieIndex) <= ABILITY_MAXIMUM;",
+      "mutated": "\treturn allocated(ability) + unplaced.at(dieIndex) < ABILITY_MAXIMUM;",
+      "catches": "a die that fills the gap to exactly 18 refused, which is the count the book allows"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\tif (dieIndex >= unplaced.size())\n\t{\n\t\treturn false;\n\t}\n",
+      "mutated": "",
+      "catches": "a die index nobody rolled read off the end of the pool"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\tunplaced.push_back(dice.back());\n\tdice.pop_back();",
+      "mutated": "\tunplaced.push_back(dice.front());\n\tdice.erase(dice.begin());",
+      "catches": "the first die placed coming back instead of the last one"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\treturn allocated(ability) + racialModifier.at(ability_index(ability));",
+      "mutated": "\treturn allocated(ability);",
+      "catches": "the race dropped from what the player reads and from the minimum it is judged by"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\tif (!required.has_value() || score(required->ability) >= required->score)",
+      "mutated": "\tif (!required.has_value() || allocated(required->ability) >= required->score)",
+      "catches": "Table 13 judged before the race is paid, so a halfling fighter passes at 8"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\t\treturn ClassMinimum{ Ability::DEXTERITY, TABLE_THIRTEEN_MINIMUM };",
+      "mutated": "\t\treturn ClassMinimum{ Ability::STRENGTH, TABLE_THIRTEEN_MINIMUM };",
+      "catches": "a thief judged on the fighter's row"
+    },
+    {
+      "file": "src/AbilityAllocation.cpp",
+      "original": "\tconstexpr int TABLE_THIRTEEN_MINIMUM = 9;",
+      "mutated": "\tconstexpr int TABLE_THIRTEEN_MINIMUM = 8;",
+      "catches": "a minimum that every untouched allocation already meets, so the gate never closes"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tadjust_ability(ability, modifier);",
+      "mutated": "",
+      "catches": "the racial adjustment announced and not paid"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tset_ability(ability, blueprint.abilityScores.at(ability_index(ability)));",
+      "mutated": "",
+      "catches": "the allocated scores never reaching the character that was built from them"
+    }
+  ]
+}

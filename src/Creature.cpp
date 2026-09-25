@@ -299,6 +299,82 @@ void Creature::update_armor_class(GameContext& ctx)
 	}
 }
 
+// One of the six, chosen at run time. The named setters stay and do the work;
+// these are the entry points for code that does not know which ability it holds.
+void Creature::set_ability(Ability ability, int value) noexcept
+{
+	switch (ability)
+	{
+	case Ability::STRENGTH:
+	{
+		set_strength(value);
+		break;
+	}
+	case Ability::DEXTERITY:
+	{
+		set_dexterity(value);
+		break;
+	}
+	case Ability::CONSTITUTION:
+	{
+		set_constitution(value);
+		break;
+	}
+	case Ability::INTELLIGENCE:
+	{
+		set_intelligence(value);
+		break;
+	}
+	case Ability::WISDOM:
+	{
+		set_wisdom(value);
+		break;
+	}
+	case Ability::CHARISMA:
+	{
+		set_charisma(value);
+		break;
+	}
+	}
+}
+
+void Creature::adjust_ability(Ability ability, int delta) noexcept
+{
+	switch (ability)
+	{
+	case Ability::STRENGTH:
+	{
+		adjust_strength(delta);
+		break;
+	}
+	case Ability::DEXTERITY:
+	{
+		adjust_dexterity(delta);
+		break;
+	}
+	case Ability::CONSTITUTION:
+	{
+		adjust_constitution(delta);
+		break;
+	}
+	case Ability::INTELLIGENCE:
+	{
+		adjust_intelligence(delta);
+		break;
+	}
+	case Ability::WISDOM:
+	{
+		adjust_wisdom(delta);
+		break;
+	}
+	case Ability::CHARISMA:
+	{
+		adjust_charisma(delta);
+		break;
+	}
+	}
+}
+
 void Creature::set_hit_dice(int hitPoints)
 {
 	assert(hitPoints > 0 && "Creature::set_hit_dice called with a roll at or below zero");

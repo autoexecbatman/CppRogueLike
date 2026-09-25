@@ -5,6 +5,7 @@
 #include <vector>
 #include <optional>
 
+#include "AbilityAllocation.h"
 #include "Ai.h"
 #include "ArmorClass.h"
 #include "ConstitutionTracker.h"
@@ -239,6 +240,16 @@ public:
 	void adjust_intelligence(int delta) noexcept { baseIntelligence += delta; }
 	void adjust_wisdom(int delta) noexcept { baseWisdom += delta; }
 	void adjust_charisma(int delta) noexcept { baseCharisma += delta; }
+
+	// One of the six, chosen at run time rather than by name. For code that works
+	// on whichever ability it was handed - a racial table, an allocation screen -
+	// where six near-identical calls would say the same thing six times.
+	//
+	// Example:
+	//   halfling.adjust_ability(Ability::STRENGTH, -1);
+	//   fighter.set_ability(Ability::WISDOM, 12);
+	void set_ability(Ability ability, int value) noexcept;
+	void adjust_ability(Ability ability, int delta) noexcept;
 	void adjust_gold(int delta) noexcept { gold += delta; }
 	void adjust_level(int delta) noexcept { creatureLevel += delta; }
 
