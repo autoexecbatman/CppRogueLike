@@ -1323,8 +1323,12 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::HIDE:
 	{
-		if (playerOwner.attempt_hide(ctx))
+		// The turn is spent on an attempt, not on a success: the thief does not
+		// know which it was, and a free turn would tell him.
+		if (playerOwner.attempt_hide(ctx) == Player::HideAttempt::ATTEMPTED)
+		{
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+		}
 		break;
 	}
 

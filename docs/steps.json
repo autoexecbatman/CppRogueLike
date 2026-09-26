@@ -17,8 +17,11 @@
   {"label": "thief_one_point_on_open_locks", "keys": ["ArrowRight"]},
   {"label": "thief_open_locks_filled", "keys": [" "]},
   {"label": "thief_cursor_on_find_traps", "keys": ["ArrowDown"]},
-  {"label": "thief_find_traps_filled", "keys": [" "]},
+  {"label": "thief_cursor_on_move_silently", "keys": ["ArrowDown"]},
+  {"label": "thief_cursor_on_hide_in_shadows", "keys": ["ArrowDown"]},
+  {"label": "thief_hide_in_shadows_filled", "keys": [" "]},
   {"label": "thief_point_taken_back", "keys": ["ArrowLeft"]},
   {"label": "in_game_after_thief_skills", "keys": ["Enter"]},
+  {"label": "hide_in_shadows", "keys": ["Shift+h"]},
   {"label": "inventory_weight_band", "keys": ["i"]}
 ]

@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HideInShadowsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Player.cpp",
+      "original": "\tconst std::optional<int> skill = thief_skill(ThiefSkill::HIDE_IN_SHADOWS);",
+      "mutated": "\tconst std::optional<int> skill = thief_skill(ThiefSkill::MOVE_SILENTLY);",
+      "catches": "hiding rolled against the wrong one of the eight thief skills"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (!skill.has_value() || skill.value() <= 0)",
+      "mutated": "\tif (!skill.has_value())",
+      "catches": "a thief whose adjustments left the skill at nothing hiding anyway"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
+      "mutated": "\t\treturn !creature->is_dead();",
+      "catches": "any creature at all counting as a watcher, noticed or not"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
+      "mutated": "\t\treturn !creature->is_dead() && ctx.map->is_in_fov(creature->position);",
+      "catches": "the old question - whether the thief can see it - back in place of the book's"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn !creature->is_dead() && creature->is_aware();",
+      "mutated": "\t\treturn creature->is_aware();",
+      "catches": "a dead guard still watching"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (ctx.dice->d100() <= skill.value())",
+      "mutated": "\tif (ctx.dice->d100() < skill.value())",
+      "catches": "the percentage read as the first failure rather than the last success"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (ctx.dice->d100() <= skill.value())",
+      "mutated": "\tif (true)",
+      "catches": "hiding that always works, which is the rule this replaced"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t}\n\tctx.messageSystem->message(CYAN_BLACK_PAIR, \"You melt into the shadows...\", true);\n\treturn HideAttempt::ATTEMPTED;",
+      "mutated": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t\tctx.messageSystem->message(CYAN_BLACK_PAIR, \"You melt into the shadows...\", true);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(RED_BLACK_PAIR, \"You fail to hide.\", true);\n\treturn HideAttempt::WATCHED;",
+      "catches": "the roll's result told to the player, which the book keeps secret"
+    }
+  ]
+}

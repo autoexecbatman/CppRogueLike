@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <format>
 #include <memory>
+#include <optional>
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -666,47 +667,49 @@ void Player::animate_resting(GameContext& ctx)
 	ctx.renderingManager->render(ctx);
 }
 
-bool Player::attempt_hide(GameContext& ctx)
+Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 {
-	// Only rogues can hide
-	if (playerClassState != PlayerClassState::ROGUE)
+	// Hide in Shadows is the thief's, and a score the adjustments leave at nothing
+	// is one the book says has to be bought up before it can be used at all.
+	const std::optional<int> skill = thief_skill(ThiefSkill::HIDE_IN_SHADOWS);
+	if (!skill.has_value() || skill.value() <= 0)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Only rogues can hide in shadows.", true);
-		return false;
+		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You cannot hide in shadows.", true);
+		return HideAttempt::NOT_A_THIEF;
 	}
 
-	// Already invisible
+	// Nothing to try; the thief is already in the shadows.
 	if (is_invisible())
 	{
 		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
-		return false;
+		return HideAttempt::ALREADY_HIDDEN;
 	}
 
-	// Check if enemies can see player
-	bool observed = false;
-	for (const auto& creature : *ctx.creatures)
+	// "A thief can never become hidden while a guard is watching him, no matter what
+	// his dice roll is." What settles it is whether anything is looking for him,
+	// which is what awareness holds - not whether he happens to be able to see it.
+	const auto is_watching = [](const std::unique_ptr<Creature>& creature)
 	{
-		if (creature && !creature->is_dead())
-		{
-			if (ctx.map->is_in_fov(creature->position))
-			{
-				observed = true;
-				break;
-			}
-		}
-	}
-
-	if (observed)
+		assert(creature && "creatures holds a null entry");
+		return !creature->is_dead() && creature->is_aware();
+	};
+	if (std::ranges::any_of(*ctx.creatures, is_watching))
 	{
-		ctx.messageSystem->message(RED_BLACK_PAIR, "You cannot hide while being observed!", true);
-		return false;
+		ctx.messageSystem->message(RED_BLACK_PAIR, "You cannot hide while watched.", true);
+		return HideAttempt::WATCHED;
 	}
 
-	// Success - hide duration based on level
-	int hideDuration = 10 + get_creature_level() * 2;
-	ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
-	ctx.messageSystem->message(CYAN_BLACK_PAIR, std::format("You melt into the shadows... (Hidden for {} turns)", hideDuration), true);
-	return true;
+	// "The DM rolls the dice and keeps the result secret, but the thief always thinks
+	// he is hidden": the roll decides whether anything happens and the line the player
+	// reads is the same either way. The duration is the game's own, since the book
+	// ends a hide by moving rather than by counting turns.
+	if (ctx.dice->d100() <= skill.value())
+	{
+		const int hideDuration = 10 + get_creature_level() * 2;
+		ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
+	}
+	ctx.messageSystem->message(CYAN_BLACK_PAIR, "You melt into the shadows...", true);
+	return HideAttempt::ATTEMPTED;
 }
 
 // Clean Weapon Equipment System using Unique IDs

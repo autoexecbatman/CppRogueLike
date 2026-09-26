@@ -88,7 +88,26 @@ public:
 	void render(const GameContext& ctx) const noexcept;
 	bool rest(GameContext& ctx);
 	void animate_resting(GameContext& ctx);
-	bool attempt_hide(GameContext& ctx);
+	// What a try at hiding did. Success and failure are one answer on purpose:
+	// "The DM rolls the dice and keeps the result secret, but the thief always
+	// thinks he is hidden" (PHB, Hide in Shadows). A caller that could tell them
+	// apart would leak the roll, so the type does not let it.
+	enum class HideAttempt
+	{
+		NOT_A_THIEF, // no Hide in Shadows percentage to roll against
+		ALREADY_HIDDEN, // nothing to try; the thief is already in the shadows
+		WATCHED, // someone is looking, which no roll can beat
+		ATTEMPTED, // the roll was made, and the thief believes it worked
+	};
+
+	// One try at melting into the shadows, rolled against Hide in Shadows and kept
+	// secret from the player. The turn is spent on ATTEMPTED whatever the roll said.
+	//
+	// Example, a thief nobody has noticed:
+	//   player.attempt_hide(ctx);   // -> HideAttempt::ATTEMPTED, hidden or not
+	// The same thief with a monster hunting it:
+	//   player.attempt_hide(ctx);   // -> HideAttempt::WATCHED, no roll made
+	[[nodiscard]] HideAttempt attempt_hide(GameContext& ctx);
 
 	// Equipment system methods
 	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);

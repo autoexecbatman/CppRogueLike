@@ -100,6 +100,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillCharacterTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/HideInShadowsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Objects/TrapDisarmTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SwimmingGauntletsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EncumbranceBandTest.cpp
