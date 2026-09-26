@@ -1451,6 +1451,18 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 			ctx.messageSystem->message(WHITE_BLACK_PAIR, "That trap is already disarmed.", true);
 			break;
 		}
+		case DisarmResult::NO_SKILL:
+		{
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You cannot work a trap.", true);
+			break;
+		}
+		case DisarmResult::BEYOND_SKILL:
+		{
+			// The attempt is spent until the next level, so the turn is spent too.
+			ctx.messageSystem->message(WHITE_BLACK_PAIR, "This trap is beyond you.", true);
+			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
+			break;
+		}
 		case DisarmResult::DISARMED:
 		{
 			ctx.messageSystem->message(GREEN_BLACK_PAIR, "You successfully disarm the trap.", true);

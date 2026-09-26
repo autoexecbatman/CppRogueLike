@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; ./build/bin/Debug/test_exe.exe --gtest_filter=TrapDamageTest.*:TrapDisarmTest.*"
   ],
   "mutations": [
     {
@@ -41,7 +41,7 @@
       "file": "src/Trap.cpp",
       "original": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED)",
       "mutated": "\t// A disarmed trap is walked over.\n\tif (state == TrapState::DISARMED || state == TrapState::TRIGGERED)",
-      "catches": "a failed disarm leaving the disarmer unhurt"
+      "catches": "a trap that has gone off before read as spent, so the accident on 96 costs nothing"
     }
   ]
 }

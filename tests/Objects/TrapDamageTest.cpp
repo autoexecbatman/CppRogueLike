@@ -122,32 +122,3 @@ TEST_F(TrapDamageTest, AKnownTrapSpringsWithoutAnotherDetectionRoll)
 	EXPECT_EQ(before - victim.get_hp(), 12) << "walking onto a known trap sets it off";
 }
 
-TEST_F(TrapDamageTest, AFailedDisarmSpringsTheTrapOnTheDisarmer)
-{
-	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-	ASSERT_NO_FATAL_FAILURE(notice(pit));
-
-	// Disarm 1 fails against twelve; the dice are six and six; the coin keeps it.
-	mock.dice.set_next_roll(1);
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(6);
-	mock.dice.set_next_roll(2);
-	const int before = victim.get_hp();
-
-	EXPECT_EQ(pit.attempt_disarm(victim, ctx), DisarmResult::TRIGGERED);
-	EXPECT_EQ(before - victim.get_hp(), 12) << "the trap goes off on whoever was working on it";
-}
-
-TEST_F(TrapDamageTest, ADisarmedTrapIsInert)
-{
-	Trap pit{ Vector2D{ 5, 5 }, TrapType::PIT, mock.tile_config };
-	ASSERT_NO_FATAL_FAILURE(notice(pit));
-
-	// Disarm 20 succeeds. Nothing after is scripted.
-	mock.dice.set_next_roll(20);
-	ASSERT_EQ(pit.attempt_disarm(victim, ctx), DisarmResult::DISARMED);
-	const int before = victim.get_hp();
-
-	EXPECT_EQ(pit.on_creature_enter(victim, ctx), EntryResult::UNAFFECTED);
-	EXPECT_EQ(victim.get_hp(), before) << "a disarmed trap is walked over";
-}

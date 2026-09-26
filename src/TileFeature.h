@@ -57,6 +57,8 @@ enum class DisarmResult
 	NOT_DISARMABLE, // this kind of feature has nothing to disarm -- a web
 	NOT_VISIBLE, // there is something there, but the creature has not found it
 	ALREADY_DISARMED, // disarmed earlier; nothing left to do
+	NO_SKILL, // the character has no Find/Remove Traps percentage to roll against
+	BEYOND_SKILL, // the roll failed without setting it off, and will until a level is gained
 	DISARMED, // the attempt succeeded
 	TRIGGERED, // the attempt failed and set the feature off
 };

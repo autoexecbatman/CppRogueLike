@@ -8,6 +8,7 @@
 #include "Vector2D.h"
 #include "Renderer.h" // TileRef, held by value below
 
+class Player;
 class RandomDice;
 
 enum class TrapType
@@ -47,10 +48,21 @@ public:
 	// walked over. Springing deals the damage dice and stops the move.
 	EntryResult on_creature_enter(Creature& creature, GameContext& ctx) override;
 
-	// Disarm attempt: the creature rolls 1d20 plus its dexterity modifier
-	// against the trap's disarm DC. Failure sets the trap off. Traps are the
-	// only feature that answers this, which is why it is not on TileFeature.
-	DisarmResult attempt_disarm(Creature& creature, GameContext& ctx);
+	// One attempt at removing this trap, rolled against the character's own
+	// Find/Remove Traps percentage (PHB page 87). Nobody without that skill can
+	// try. An ordinary failure leaves the trap exactly as it was and takes the
+	// character's attempt for this experience level; only a roll of 96 or more
+	// sets it off. Traps are the only feature that answers this, which is why it
+	// is not on TileFeature.
+	//
+	// Example, a thief whose Find/Remove Traps is 45, on a trap it has found:
+	//   trap.attempt_disarm(thief, ctx);   // d100 40  -> DisarmResult::DISARMED
+	//   trap.attempt_disarm(thief, ctx);   // d100 90  -> BEYOND_SKILL, untouched
+	//   trap.attempt_disarm(thief, ctx);   // no roll  -> BEYOND_SKILL, same level
+	//   trap.attempt_disarm(thief, ctx);   // d100 97  -> TRIGGERED, and it hurts
+	// A fighter standing over the same trap:
+	//   trap.attempt_disarm(fighter, ctx); // no roll  -> DisarmResult::NO_SKILL
+	DisarmResult attempt_disarm(Player& thief, GameContext& ctx);
 
 	// Destroy this trap (called after trigger or successful disarm)
 	void destroy();
@@ -66,9 +78,14 @@ private:
 	// constructor, so the TileConfig is not held beyond it.
 	TileRef armedTile{};
 	TileRef sprungTile{};
-	// What 1d20 plus the dexterity modifier must reach to spot the trap, and to disarm it.
+	// What 1d20 plus the dexterity modifier must reach to spot the trap. Removing
+	// one is a percentile skill instead, so it has no such number.
 	int detectionDC{ 15 };
-	int disarmDC{ 12 };
+
+	// The experience level at which this trap was last worked on, 0 for never. The
+	// book gives a thief one attempt per level on a given trap, so the trap is what
+	// remembers it: a character who fails here may still try the next trap along.
+	int disarmAttemptedAtLevel{ 0 };
 
 	// The detection roll a hidden trap gets as a creature steps onto it: 1d20 plus
 	// the dexterity modifier against detectionDC, success leaving it DETECTED.

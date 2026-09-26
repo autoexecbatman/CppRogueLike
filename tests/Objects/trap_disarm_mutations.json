@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=TrapDisarmTest.*:TrapDamageTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tconst std::optional<int> skill = creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);",
+      "mutated": "\tconst std::optional<int> skill = creature.thief_skill(ThiefSkill::OPEN_LOCKS);",
+      "catches": "a trap rolled against the wrong one of the eight thief skills"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (!skill.has_value() || skill.value() <= 0)",
+      "mutated": "\tif (!skill.has_value())",
+      "catches": "a thief whose adjustments left the skill at nothing rolling anyway"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (level <= disarmAttemptedAtLevel)",
+      "mutated": "\tif (level < disarmAttemptedAtLevel)",
+      "catches": "a second attempt at the same level, which the book buys with a level"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tdisarmAttemptedAtLevel = level;",
+      "mutated": "",
+      "catches": "the attempt never recorded, so every failure is a free retry"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (roll <= skill.value())",
+      "mutated": "\tif (roll < skill.value())",
+      "catches": "the percentage read as the first failure rather than the last success"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "constexpr int ACCIDENTAL_TRIGGER = 96;",
+      "mutated": "constexpr int ACCIDENTAL_TRIGGER = 95;",
+      "catches": "the accident band widened past the 96 to 100 the book prints"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\tif (roll >= ACCIDENTAL_TRIGGER)",
+      "mutated": "\tif (roll > ACCIDENTAL_TRIGGER)",
+      "catches": "96 itself left out of the band it opens"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t// \"the trap is beyond the thief's current skill\" - so it is left as it was.\n\treturn DisarmResult::BEYOND_SKILL;",
+      "mutated": "\tstate = TrapState::TRIGGERED;\n\ton_creature_enter(creature, ctx);\n\treturn DisarmResult::TRIGGERED;",
+      "catches": "every failure springing the trap, which is the rule this replaced"
+    },
+    {
+      "file": "src/Trap.cpp",
+      "original": "\t\tstate = TrapState::DISARMED;",
+      "mutated": "\t\tstate = TrapState::DETECTED;",
+      "catches": "a successful removal leaving the trap armed"
+    }
+  ]
+}

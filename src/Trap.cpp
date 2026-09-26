@@ -4,11 +4,14 @@
 #include <algorithm>
 #include <cassert>
 #include <format>
+#include <optional>
 #include <ranges>
 #include <string>
 
 #include "DamageInfo.h"
 #include "DiceExpr.h"
+#include "Player.h"
+#include "ThiefSkills.h"
 #include "Trap.h"
 #include "GameContext.h"
 #include "RandomDice.h"
@@ -90,7 +93,15 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 	return false;
 }
 
-DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
+// The lowest d100 roll that sets a trap off on the thief working on it: the book
+// gives the accident a band of its own, 96 to 100, rather than making every
+// failure spring it.
+namespace
+{
+constexpr int ACCIDENTAL_TRIGGER = 96;
+} // namespace
+
+DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 {
 	// Nothing left to disarm.
 	if (state == TrapState::DISARMED)
@@ -104,12 +115,26 @@ DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 		return DisarmResult::NOT_VISIBLE;
 	}
 
-	// Roll 1d20 + DEX modifier vs disarm DC
-	int roll = ctx.dice->roll(1, 20);
-	int dexMod = (creature.get_dexterity() - 10) / 2;
-	int checkResult = roll + dexMod;
+	// Find/Remove Traps is the thief's, and the book gives nobody else a way to
+	// work on a trap. A score of nothing is a skill not yet bought up to a usable
+	// percentage, which the book treats the same way.
+	const std::optional<int> skill = creature.thief_skill(ThiefSkill::FIND_REMOVE_TRAPS);
+	if (!skill.has_value() || skill.value() <= 0)
+	{
+		return DisarmResult::NO_SKILL;
+	}
 
-	if (checkResult >= disarmDC)
+	// "He can try disarming the trap again when he advances to the next experience
+	// level": one attempt per level on this trap, and the trap remembers which.
+	const int level = creature.get_creature_level();
+	if (level <= disarmAttemptedAtLevel)
+	{
+		return DisarmResult::BEYOND_SKILL;
+	}
+	disarmAttemptedAtLevel = level;
+
+	const int roll = ctx.dice->d100();
+	if (roll <= skill.value())
 	{
 		state = TrapState::DISARMED;
 		// A defused trap reads as a spent one: the pit is open and boarded over,
@@ -118,11 +143,17 @@ DisarmResult Trap::attempt_disarm(Creature& creature, GameContext& ctx)
 		return DisarmResult::DISARMED;
 	}
 
-	// A failed attempt sets the trap off on the creature working on it.
-	state = TrapState::TRIGGERED;
-	on_creature_enter(creature, ctx);
+	// "If the dice roll is 96-100, the thief accidentally triggers the trap and
+	// suffers the consequences."
+	if (roll >= ACCIDENTAL_TRIGGER)
+	{
+		state = TrapState::TRIGGERED;
+		on_creature_enter(creature, ctx);
+		return DisarmResult::TRIGGERED;
+	}
 
-	return DisarmResult::TRIGGERED;
+	// "the trap is beyond the thief's current skill" - so it is left as it was.
+	return DisarmResult::BEYOND_SKILL;
 }
 
 EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
