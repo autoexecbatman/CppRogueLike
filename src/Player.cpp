@@ -24,6 +24,7 @@
 #include "ItemClassification.h"
 #include "ItemIdentification.h"
 #include "Map.h"
+#include "MenuThiefSkills.h"
 #include "Web.h"
 #include "Persistent.h"
 #include "RandomDice.h"
@@ -256,6 +257,10 @@ void Player::on_new_game_start(GameContext& ctx)
 	// After the racial adjustments, which can take a halfling's 18 away or give it.
 	roll_exceptional_strength(ctx);
 	equip_class_starting_gear(ctx);
+	// After the gear, because Table 29 reads the armour the thief is standing in
+	// and the kit puts leather on a rogue: a screen opened before it would show
+	// numbers the character loses on its first turn.
+	push_thief_skill_allocation(*this, get_creature_level(), ctx);
 }
 
 void Player::roll_exceptional_strength(GameContext& ctx)
@@ -469,47 +474,76 @@ void Player::calculate_thaco()
 	}
 }
 
-int Player::get_open_locks_skill() const noexcept
+std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(Player::PlayerRaceState race)
 {
-	if (playerClassState != PlayerClassState::ROGUE)
+	// Table 27, read across each race's column: Pick Pockets, Open Locks,
+	// Find/Remove Traps, Move Silently, Hide in Shadows, Detect Noise, Climb Walls,
+	// Read Languages.
+	switch (race)
 	{
-		return 0;
+	case Player::PlayerRaceState::DWARF:
+	{
+		return { 0, 10, 15, 0, 0, 0, -10, -5 };
+	}
+	case Player::PlayerRaceState::ELF:
+	{
+		return { 5, -5, 0, 5, 10, 5, 0, 0 };
+	}
+	case Player::PlayerRaceState::GNOME:
+	{
+		return { 0, 5, 10, 5, 5, 10, -15, 0 };
+	}
+	case Player::PlayerRaceState::HALFELF:
+	{
+		return { 10, 0, 0, 0, 5, 0, 0, 0 };
+	}
+	case Player::PlayerRaceState::HALFLING:
+	{
+		return { 5, 5, 5, 10, 15, 5, -15, -5 };
+	}
+	case Player::PlayerRaceState::HUMAN:
+	case Player::PlayerRaceState::NONE:
+	{
+		return {};
+	}
 	}
 
-	// AD&D 2e PHB Open Locks table: base 10 at level 1, +5 per level, cap 95.
-	constexpr int BASE_OPEN_LOCKS = 10;
-	constexpr int PER_LEVEL_BONUS = 5;
-	constexpr int MAX_OPEN_LOCKS = 95;
+	return {};
+}
 
-	int level = get_creature_level();
-	int baseChance = BASE_OPEN_LOCKS + (level - 1) * PER_LEVEL_BONUS;
-
-	// Dexterity adjustment for Open Locks (PHB 2e thief skill table):
-	// Dex 9-10: -10, Dex 11-12: -5, Dex 13-14: 0, Dex 15-16: +5, Dex 17-18: +10
-	int dex = get_dexterity();
-	int dexBonus = 0;
-	if (dex <= 10)
+std::optional<ThiefArmor> Player::thief_armor() const noexcept
+{
+	// Nothing on the body is Table 29's "No Armor" column, which is a bonus.
+	const Item* worn = get_equipped_item(EquipmentSlot::BODY);
+	if (worn == nullptr)
 	{
-		dexBonus = -10;
-	}
-	else if (dex <= 12)
-	{
-		dexBonus = -5;
-	}
-	else if (dex <= 14)
-	{
-		dexBonus = 0;
-	}
-	else if (dex <= 16)
-	{
-		dexBonus = 5;
-	}
-	else
-	{
-		dexBonus = 10;
+		return ThiefArmor::NONE;
 	}
 
-	return std::clamp(baseChance + dexBonus, 0, MAX_OPEN_LOCKS);
+	return thief_armor_column(worn->itemKey);
+}
+
+std::optional<int> Player::thief_skill(ThiefSkill skill) const noexcept
+{
+	// The thief skills belong to the one class the book gives them to.
+	if (get_creature_class() != CreatureClass::ROGUE)
+	{
+		return std::nullopt;
+	}
+
+	// Armour Table 29 has no column for leaves the skill with no number at all.
+	const std::optional<ThiefArmor> armor = thief_armor();
+	if (!armor.has_value())
+	{
+		return std::nullopt;
+	}
+
+	return thief_skill_score(
+		skill,
+		thief_skill_racial_adjustments(playerRaceState).at(thief_skill_index(skill)),
+		get_dexterity(),
+		armor.value(),
+		thiefSkillPoints.at(thief_skill_index(skill)));
 }
 
 void Player::consume_food(int nutrition, GameContext& ctx)
@@ -1023,6 +1057,7 @@ void Player::save(json& j)
 	j["roundCounter"] = roundCounter;
 	j["killCount"] = killCount;
 	j["memorizedSpells"] = memorizedSpells;
+	j["thiefSkillPoints"] = thiefSkillPoints;
 
 	// Save equipped items
 	json equippedJson = json::array();
@@ -1055,6 +1090,7 @@ void Player::load(const json& j)
 	roundCounter = j.at("roundCounter").get<int>();
 	killCount = j.at("killCount").get<int>();
 	memorizedSpells = j.at("memorizedSpells").get<std::vector<std::string>>();
+	thiefSkillPoints = j.at("thiefSkillPoints").get<std::array<int, THIEF_SKILL_COUNT>>();
 	// trappingWeb is not serialized - it's a map reference that needs to be re-established
 
 	// Load equipped items

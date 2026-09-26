@@ -16,6 +16,7 @@
 #include "Item.h"
 #include "Pickable.h"
 #include "Player.h"
+#include "ThiefSkills.h"
 #include "Colors.h"
 #include "AttackKind.h"
 #include "Controls.h"
@@ -740,8 +741,10 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		return true;
 	}
 
-	// Branch 2: Rogue -- Open Locks percentage roll (AD&D 2e thief skill).
-	const int openLocksChance = playerOwner.get_open_locks_skill();
+	// Branch 2: Rogue -- Open Locks percentage roll (PHB Tables 26 to 29). A score
+	// of zero is a skill the thief has not bought up to a usable percentage yet,
+	// and armour the book gives no column for answers with no skill at all.
+	const int openLocksChance = playerOwner.thief_skill(ThiefSkill::OPEN_LOCKS).value_or(0);
 	if (openLocksChance > 0)
 	{
 		if (ctx.dice->d100() <= openLocksChance)

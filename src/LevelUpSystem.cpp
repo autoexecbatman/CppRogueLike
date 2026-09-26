@@ -13,6 +13,7 @@
 #include "GameBalance.h"
 #include "LevelUpSystem.h"
 #include "SavingThrow.h"
+#include "ThiefSkills.h"
 
 // ============================================================================
 // Private implementation — not visible outside this translation unit.
@@ -191,11 +192,16 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
         ctx->messageSystem->log(std::format("Rogue backstab multiplier increased to x{}", backstabMultiplier));
     }
 
-    if (newLevel % 2 == 0)
-    {
-        ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, "Your thieving skills improve!");
-        ctx->messageSystem->finalize_message();
-    }
+    // "Each time the thief rises a level in experience, the player receives another
+    // 30 points to distribute" (PHB page 84). What the level gives is the points;
+    // the screen that spends them is opened by DisplayManager, the half of a
+    // level-up that draws.
+    ctx->messageSystem->append_message_part(YELLOW_BLACK_PAIR, "Thief skills: ");
+    ctx->messageSystem->append_message_part(
+        GREEN_BLACK_PAIR,
+        std::to_string(thief_skill_grant_at_level(newLevel).points));
+    ctx->messageSystem->append_message_part(WHITE_BLACK_PAIR, " points to spend.");
+    ctx->messageSystem->finalize_message();
 }
 
 void apply_cleric_improvements(int newLevel, GameContext* ctx)

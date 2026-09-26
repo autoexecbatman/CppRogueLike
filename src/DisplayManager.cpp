@@ -15,6 +15,7 @@
 #include "BalanceViewer.h"
 #include "CharacterSheetUI.h"
 #include "LevelUpUI.h"
+#include "MenuThiefSkills.h"
 #include "DisplayManager.h"
 
 void DisplayManager::display_help(GameContext& ctx) const
@@ -41,6 +42,11 @@ void DisplayManager::display_levelup(Player& player, int xpLevel, GameContext& c
 {
 	// Apply all level up benefits through the new LevelUpSystem
 	LevelUpSystem::apply_level_up_benefits(player, xpLevel, &ctx);
+
+	// A thief's level is thirty discretionary points (PHB page 84), spent on a
+	// screen of their own. Pushed under the summary so the player reads what the
+	// level gave before deciding where it goes.
+	push_thief_skill_allocation(player, xpLevel, ctx);
 
 	// Display the level up screen using the dedicated UI class
 	ctx.menus->push_back(std::make_unique<LevelUpUI>(player, xpLevel));

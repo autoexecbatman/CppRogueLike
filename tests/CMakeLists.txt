@@ -98,6 +98,8 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryCapacityTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/CarryWeightTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/AbilityAllocationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillsTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/ThiefSkillCharacterTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/SwimmingGauntletsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EncumbranceBandTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/MonsterHitDiceTest.cpp
@@ -131,6 +133,8 @@ set(PARENT_SOURCES
     # Actor
     ${PARENT_SOURCE_DIR}/Actor.cpp
     ${PARENT_SOURCE_DIR}/AbilityAllocation.cpp
+    ${PARENT_SOURCE_DIR}/ThiefSkills.cpp
+    ${PARENT_SOURCE_DIR}/MenuThiefSkills.cpp
     ${PARENT_SOURCE_DIR}/Encumbrance.cpp
     ${PARENT_SOURCE_DIR}/Attacker.cpp
     ${PARENT_SOURCE_DIR}/AttackStrength.cpp

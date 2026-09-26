@@ -1,0 +1,125 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ThiefSkillsTest.*:ThiefSkillCharacterTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "constexpr std::array<int, THIEF_SKILL_COUNT> BASE_SCORE{ 15, 10, 5, 10, 5, 15, 60, 0 };",
+      "mutated": "constexpr std::array<int, THIEF_SKILL_COUNT> BASE_SCORE{ 15, 10, 5, 10, 5, 15, 50, 0 };",
+      "catches": "Table 26 mistranscribed, the one row nothing else would notice"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t{ 0, 5, 0, 0, 0 }, // 16",
+      "mutated": "\t{ 0, 0, 0, 0, 0 }, // 16",
+      "catches": "Dexterity 16 losing the one adjustment the whole row carries"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "constexpr int HIGHEST_PRINTED_DEXTERITY = 19;",
+      "mutated": "constexpr int HIGHEST_PRINTED_DEXTERITY = 18;",
+      "catches": "the table's last printed row dropped, so 19 reads 18's"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t{ 10, 0, -10, -20, -15 }, // Move Silently",
+      "mutated": "\t{ 0, 0, -10, -20, -15 }, // Move Silently",
+      "catches": "Table 29's No Armor column read as no adjustment rather than a bonus"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t{ 0, 0, -5, -10, -10 }, // Open Locks",
+      "mutated": "\t{ 0, -5, -5, -10, -10 }, // Open Locks",
+      "catches": "leather penalised, when the base scores already assume it"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\treturn std::clamp(total, 0, THIEF_SKILL_MAXIMUM);",
+      "mutated": "\treturn std::max(total, 0);",
+      "catches": "the 95 ceiling the book puts on every skill"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\treturn std::clamp(total, 0, THIEF_SKILL_MAXIMUM);",
+      "mutated": "\treturn std::min(total, THIEF_SKILL_MAXIMUM);",
+      "catches": "a negative score reported instead of a skill the thief does not have"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t\treturn ThiefSkillGrant{ 60, 30 };",
+      "mutated": "\t\treturn ThiefSkillGrant{ 30, 30 };",
+      "catches": "first level handed a later level's thirty points"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\treturn ThiefSkillGrant{ 30, 15 };",
+      "mutated": "\treturn ThiefSkillGrant{ 30, 30 };",
+      "catches": "a later level letting thirty points land on one skill"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\tif (assigned_to(skill) >= perSkillLimit)",
+      "mutated": "\tif (assigned_to(skill) > perSkillLimit)",
+      "catches": "one point past the limit, the boundary the book states"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\treturn score(skill) < THIEF_SKILL_MAXIMUM;",
+      "mutated": "\treturn true;",
+      "catches": "points taken onto a skill already at the ceiling, where they do nothing"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\treturn assigned_to(skill) > 0;",
+      "mutated": "\treturn alreadySpent.at(thief_skill_index(skill)) + assigned_to(skill) > 0;",
+      "catches": "an earlier level's points taken back out through this grant's screen"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t\ttotal.at(index) = alreadySpent.at(index) + assigned.at(index);",
+      "mutated": "\t\ttotal.at(index) = assigned.at(index);",
+      "catches": "every earlier level's points thrown away by accepting a new grant"
+    },
+    {
+      "file": "src/ThiefSkills.cpp",
+      "original": "\t{ \"hide_armor\", ThiefArmor::HIDE_OR_STUDDED_LEATHER },",
+      "mutated": "\t{ \"hide_armor\", ThiefArmor::LEATHER },",
+      "catches": "an armour read in the wrong one of Table 29's columns"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tif (get_creature_class() != CreatureClass::ROGUE)",
+      "mutated": "\tif (get_creature_class() == CreatureClass::ROGUE)",
+      "catches": "thief skills given to every class but the one the book gives them to"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn ThiefArmor::NONE;",
+      "mutated": "\t\treturn ThiefArmor::LEATHER;",
+      "catches": "an empty body slot read as leather, losing Table 29's bonus column"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\tthiefSkillPoints.at(thief_skill_index(skill)));",
+      "mutated": "\t\t0);",
+      "catches": "the points the player spent left out of the number they rolled against"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\tj[\"thiefSkillPoints\"] = thiefSkillPoints;",
+      "mutated": "",
+      "catches": "a character's spent points not written to the save at all"
+    },
+    {
+      "file": "src/Player.cpp",
+      "original": "\t\treturn { 0, 10, 15, 0, 0, 0, -10, -5 };",
+      "mutated": "\t\treturn { 0, 10, 15, 0, 0, 0, 10, -5 };",
+      "catches": "Table 27's dwarf penalty on Climb Walls read as a bonus"
+    }
+  ]
+}

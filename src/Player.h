@@ -1,6 +1,8 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -11,6 +13,7 @@
 #include "EquipmentSlot.h"
 #include "PlayerController.h"
 #include "Persistent.h"
+#include "ThiefSkills.h"
 #include "Vector2D.h"
 
 class Item;
@@ -46,6 +49,11 @@ public:
 	int killCount{ 0 }; // Tracks kill count for log.
 
 	std::vector<std::string> memorizedSpells;
+
+	// The discretionary percentage points the player has put on each thief skill,
+	// in ALL_THIEF_SKILL order. Choices rather than a function of level, so they
+	// are stored and saved; every other part of a skill's number is derived.
+	std::array<int, THIEF_SKILL_COUNT> thiefSkillPoints{};
 
 	std::unique_ptr<PlayerController> controller;
 
@@ -97,8 +105,24 @@ public:
 
 	bool is_player() const noexcept override { return true; }
 
-	// AD&D 2e Open Locks: Rogue-only, level-based percentage chance
-	int get_open_locks_skill() const noexcept;
+	// Which of Table 29's columns the armour on this character's body is read in.
+	// An empty body slot is the "No Armor" column; armour heavier than chain mail
+	// is nullopt, because the table prints no column for it and the book does not
+	// let a thief wear it.
+	//
+	// Example, a rogue in the leather the starting kit gives:
+	//   player.thief_armor();   // -> ThiefArmor::LEATHER
+	[[nodiscard]] std::optional<ThiefArmor> thief_armor() const noexcept;
+
+	// The percentage this character rolls against for a thief skill, Tables 26 to
+	// 29 and the points spent all included. Nullopt for anyone who is not a rogue,
+	// and for a rogue in armour Table 29 has no column for.
+	//
+	// Example, a 1st-level dwarf rogue with Dexterity 17 in leather, no points yet:
+	//   player.thief_skill(ThiefSkill::OPEN_LOCKS);   // -> 30
+	// The same rogue wearing plate mail:
+	//   player.thief_skill(ThiefSkill::OPEN_LOCKS);   // -> nullopt
+	[[nodiscard]] std::optional<int> thief_skill(ThiefSkill skill) const noexcept;
 
 	// Display interface overrides
 	std::string get_class_display_name() const { return playerClass; }
@@ -146,3 +170,12 @@ public:
 //   racial_ability_modifiers(Player::PlayerRaceState::HALFLING);   // -> { -1, 1, 0, 0, 0, 0 }
 //   racial_ability_modifiers(Player::PlayerRaceState::HUMAN);      // -> all zero
 [[nodiscard]] std::array<int, ABILITY_COUNT> racial_ability_modifiers(Player::PlayerRaceState race);
+
+// Player's Handbook Table 27, Thieving Skill Racial Adjustments (PDF page 85), in
+// ALL_THIEF_SKILL order. A human takes none. It lives here rather than in
+// ThiefSkills because the race does: the tables there take the column as a number.
+//
+// Example:
+//   thief_skill_racial_adjustments(Player::PlayerRaceState::DWARF);
+//   // -> { 0, 10, 15, 0, 0, 0, -10, -5 }, being Open Locks +10 and Climb Walls -10
+[[nodiscard]] std::array<int, THIEF_SKILL_COUNT> thief_skill_racial_adjustments(Player::PlayerRaceState race);
