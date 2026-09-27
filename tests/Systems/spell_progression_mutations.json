@@ -1,0 +1,65 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SpellProgressionTest.*:SpellAnnouncementTest.*:LevelUpSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tconst std::size_t row = std::min(static_cast<std::size_t>(level), table.size()) - 1;",
+      "mutated": "\tconst std::size_t row = std::min(static_cast<std::size_t>(level), std::size_t{ 10 }) - 1;",
+      "catches": "the table clamped at 10th again, which is the row it used to stop at"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\treturn table.at(row);",
+      "mutated": "\treturn table.at(0);",
+      "catches": "every level handed first level's slots"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\treturn static_cast<int>(get_spell_slots(classState, level).size());",
+      "mutated": "\treturn static_cast<int>(get_spell_slots(classState, level).size()) + 1;",
+      "catches": "a caster told it reaches one spell level past what the table grants"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\t{ 4, 4, 4, 4, 4, 1 },",
+      "mutated": "\t\t\t{ 4, 4, 4, 4, 4 },",
+      "catches": "Table 21's twelfth row losing the sixth spell level it opens"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\t\t{ 5, 4, 4, 3, 2, 1 },",
+      "mutated": "\t\t\t{ 5, 4, 4, 3, 2 },",
+      "catches": "Table 24's eleventh row losing the sixth spell level it opens"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))",
+      "mutated": "    if (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1))",
+      "catches": "a level that opened nothing announcing a spell level all the same"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))\n    {\n        return;\n    }\n",
+      "mutated": "",
+      "catches": "the comparison dropped, so every level announces whatever the table holds"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    announce_new_spell_level(CasterClass::CLERIC, newLevel, ctx);",
+      "mutated": "",
+      "catches": "the cleric never told a new spell level is open"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    announce_new_spell_level(CasterClass::WIZARD, newLevel, ctx);",
+      "mutated": "    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"Your arcane knowledge deepens!\");\n    ctx->messageSystem->finalize_message();",
+      "catches": "the empty claim back in place of the announcement that means something"
+    }
+  ]
+}

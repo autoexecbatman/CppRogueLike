@@ -19,6 +19,17 @@ public:
 	// Get spell slots for class/level (AD&D 2e tables)
 	static std::vector<int> get_spell_slots(CasterClass classState, int level);
 
+	// The highest spell level this caster can reach at that experience level, which
+	// is how many rows of slots the table hands it. Everything that tells the player
+	// what it may cast asks this rather than working it out again, the same way the
+	// cleric's turning reach is asked rather than recomputed.
+	//
+	// Example:
+	//   highest_spell_level(CasterClass::WIZARD, 11);   // -> 5, 11th grants no new level
+	//   highest_spell_level(CasterClass::WIZARD, 12);   // -> 6
+	//   highest_spell_level(CasterClass::NONE, 10);     // -> 0
+	[[nodiscard]] static int highest_spell_level(CasterClass classState, int level);
+
 	// Cast a spell by string key (works for builtin and custom spells), read from
 	// ctx.spellRegistry. onSuccess is called when the spell takes effect:
 	// immediately for instant spells, and a turn later through the TargetingMenu

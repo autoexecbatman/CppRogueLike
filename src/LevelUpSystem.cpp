@@ -13,6 +13,7 @@
 #include "GameBalance.h"
 #include "LevelUpSystem.h"
 #include "SavingThrow.h"
+#include "SpellSystem.h"
 #include "ThiefSkills.h"
 
 // ============================================================================
@@ -166,12 +167,6 @@ void apply_fighter_improvements(Creature& owner, int newLevel, GameContext* ctx)
             ctx->messageSystem->log("Fighter gained extra attack (3/2 attacks per round)");
         }
     }
-
-    if (newLevel % 3 == 0)
-    {
-        ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Your martial prowess improves!");
-        ctx->messageSystem->finalize_message();
-    }
 }
 
 void apply_rogue_improvements(int newLevel, GameContext* ctx)
@@ -204,6 +199,26 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
     ctx->messageSystem->finalize_message();
 }
 
+// Says so when a level opens a spell level that was out of reach before. The number
+// comes from the progression table rather than from a formula beside it, so the two
+// cannot disagree.
+void announce_new_spell_level(CasterClass casterClass, int newLevel, GameContext* ctx)
+{
+    const int reachNow = SpellSystem::highest_spell_level(casterClass, newLevel);
+    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))
+    {
+        return;
+    }
+
+    ctx->messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
+    ctx->messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "New spell level!");
+    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now cast level ");
+    ctx->messageSystem->append_message_part(ColorPairId::GREEN_BLACK, std::to_string(reachNow));
+    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " spells.");
+    ctx->messageSystem->finalize_message();
+    ctx->messageSystem->log(std::format("Spell reach rose to level {} at experience level {}", reachNow, newLevel));
+}
+
 void apply_cleric_improvements(int newLevel, GameContext* ctx)
 {
     if (!ctx)
@@ -226,11 +241,7 @@ void apply_cleric_improvements(int newLevel, GameContext* ctx)
         ctx->messageSystem->log(std::format("Cleric turning reach rose to {} HD at level {}", reachNow, newLevel));
     }
 
-    if (newLevel >= 2)
-    {
-        ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Your divine power grows stronger!");
-        ctx->messageSystem->finalize_message();
-    }
+    announce_new_spell_level(CasterClass::CLERIC, newLevel, ctx);
 }
 
 void apply_wizard_improvements(int newLevel, GameContext* ctx)
@@ -240,23 +251,7 @@ void apply_wizard_improvements(int newLevel, GameContext* ctx)
         return;
     }
 
-    if (newLevel % 2 == 1 && newLevel > 1)
-    {
-        int spellLevel = (newLevel + 1) / 2;
-        if (spellLevel <= 9)
-        {
-            ctx->messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "Special: ");
-            ctx->messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "New spell level!");
-            ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " You can now cast level ");
-            ctx->messageSystem->append_message_part(ColorPairId::GREEN_BLACK, std::to_string(spellLevel));
-            ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " spells.");
-            ctx->messageSystem->finalize_message();
-            ctx->messageSystem->log(std::format("Wizard can now cast level {} spells", spellLevel));
-        }
-    }
-
-    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Your arcane knowledge deepens!");
-    ctx->messageSystem->finalize_message();
+    announce_new_spell_level(CasterClass::WIZARD, newLevel, ctx);
 }
 
 void apply_class_specific_improvements(Creature& owner, int newLevel, GameContext* ctx)

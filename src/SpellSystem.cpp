@@ -60,49 +60,91 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 }
 } // namespace
 
+namespace
+{
+// The table's row for that level. A caster past the last printed row keeps what the
+// last row gave it, which is where the book stops rather than a number of our own.
+const std::vector<int>& row_for_level(const std::vector<std::vector<int>>& table, int level)
+{
+	static const std::vector<int> none{};
+	if (level < 1)
+	{
+		return none;
+	}
+	const std::size_t row = std::min(static_cast<std::size_t>(level), table.size()) - 1;
+	return table.at(row);
+}
+} // namespace
+
 std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 {
 	// AD&D 2e spell progression tables
 	// Returns slots per spell level [level1, level2, level3, ...]
 
+	// Priest Spell Progression, Player's Handbook Table 24 (PDF page 72), one row
+	// per level from 1st to 20th. The sixth and seventh columns carry footnotes the
+	// game does not honour yet: they need Wisdom 17 and 18.
 	if (classState == CasterClass::CLERIC)
 	{
-		// Cleric spell progression
 		static const std::vector<std::vector<int>> clericSlots = {
-			{ 1 }, // Level 1
-			{ 2 }, // Level 2
-			{ 2, 1 }, // Level 3
-			{ 3, 2 }, // Level 4
-			{ 3, 3, 1 }, // Level 5
-			{ 3, 3, 2 }, // Level 6
-			{ 3, 3, 2, 1 }, // Level 7
-			{ 3, 3, 3, 2 }, // Level 8
-			{ 4, 4, 3, 2, 1 }, // Level 9
-			{ 4, 4, 3, 3, 2 }, // Level 10
+			{ 1 },
+			{ 2 },
+			{ 2, 1 },
+			{ 3, 2 },
+			{ 3, 3, 1 },
+			{ 3, 3, 2 },
+			{ 3, 3, 2, 1 },
+			{ 3, 3, 3, 2 },
+			{ 4, 4, 3, 2, 1 },
+			{ 4, 4, 3, 3, 2 },
+			{ 5, 4, 4, 3, 2, 1 },
+			{ 6, 5, 5, 3, 2, 2 },
+			{ 6, 6, 6, 4, 2, 2 },
+			{ 6, 6, 6, 5, 3, 2, 1 },
+			{ 6, 6, 6, 6, 4, 2, 1 },
+			{ 7, 7, 7, 6, 4, 3, 1 },
+			{ 7, 7, 7, 7, 5, 3, 2 },
+			{ 8, 8, 8, 8, 6, 4, 2 },
+			{ 9, 9, 8, 8, 6, 4, 2 },
+			{ 9, 9, 9, 8, 7, 5, 2 },
 		};
-		int idx = std::min(level, 10) - 1;
-		return idx >= 0 ? clericSlots[idx] : std::vector<int>{};
+		return row_for_level(clericSlots, level);
 	}
-	else if (classState == CasterClass::WIZARD)
+
+	// Wizard Spell Progression, Table 21 (PDF page 66), to 20th level.
+	if (classState == CasterClass::WIZARD)
 	{
-		// Wizard spell progression
 		static const std::vector<std::vector<int>> wizardSlots = {
-			{ 1 }, // Level 1
-			{ 2 }, // Level 2
-			{ 2, 1 }, // Level 3
-			{ 3, 2 }, // Level 4
-			{ 4, 2, 1 }, // Level 5
-			{ 4, 2, 2 }, // Level 6
-			{ 4, 3, 2, 1 }, // Level 7
-			{ 4, 3, 3, 2 }, // Level 8
-			{ 4, 3, 3, 2, 1 }, // Level 9
-			{ 4, 4, 3, 2, 2 }, // Level 10
+			{ 1 },
+			{ 2 },
+			{ 2, 1 },
+			{ 3, 2 },
+			{ 4, 2, 1 },
+			{ 4, 2, 2 },
+			{ 4, 3, 2, 1 },
+			{ 4, 3, 3, 2 },
+			{ 4, 3, 3, 2, 1 },
+			{ 4, 4, 3, 2, 2 },
+			{ 4, 4, 4, 3, 3 },
+			{ 4, 4, 4, 4, 4, 1 },
+			{ 5, 5, 5, 4, 4, 2 },
+			{ 5, 5, 5, 4, 4, 2, 1 },
+			{ 5, 5, 5, 5, 5, 2, 1 },
+			{ 5, 5, 5, 5, 5, 3, 2, 1 },
+			{ 5, 5, 5, 5, 5, 3, 3, 2 },
+			{ 5, 5, 5, 5, 5, 3, 3, 2, 1 },
+			{ 5, 5, 5, 5, 5, 3, 3, 3, 1 },
+			{ 5, 5, 5, 5, 5, 4, 3, 3, 2 },
 		};
-		int idx = std::min(level, 10) - 1;
-		return idx >= 0 ? wizardSlots[idx] : std::vector<int>{};
+		return row_for_level(wizardSlots, level);
 	}
 
 	return {};
+}
+
+int SpellSystem::highest_spell_level(CasterClass classState, int level)
+{
+	return static_cast<int>(get_spell_slots(classState, level).size());
 }
 
 void SpellSystem::dispatch_effect(
