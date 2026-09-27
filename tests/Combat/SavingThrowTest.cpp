@@ -149,7 +149,7 @@ protected:
 		{
 			for (const auto& part : mock.messages.get_attack_message_at(index))
 			{
-				if (part.logMessageText.find("Saving throws improved") != std::string::npos)
+				if (part.text.find("Saving throws improved") != std::string::npos)
 				{
 					return true;
 				}

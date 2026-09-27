@@ -59,7 +59,7 @@ DeathMenu::DeathMenu(GameContext& ctx)
             std::string line{};
             for (const auto& part : parts)
             {
-                line += part.logMessageText;
+                line += part.text;
             }
             if (!line.empty())
             {

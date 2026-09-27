@@ -77,9 +77,9 @@ protected:
 		{
 			for (const auto& part : mock.messages.get_attack_message_at(index))
 			{
-				if (part.logMessageText.find("Constitution") != std::string::npos)
+				if (part.text.find("Constitution") != std::string::npos)
 				{
-					found.push_back(part.logMessageText);
+					found.push_back(part.text);
 				}
 			}
 		}

@@ -282,7 +282,7 @@ TEST_F(AttackStrengthTest, AnArmBelowTheRatingCannotDrawIt)
 	{
 		for (const auto& part : mock.messages.get_attack_message_at(index))
 		{
-			refused = refused || part.logMessageText.find("not strong enough") != std::string::npos;
+			refused = refused || part.text.find("not strong enough") != std::string::npos;
 		}
 	}
 	EXPECT_TRUE(refused) << "the refusal said nothing";

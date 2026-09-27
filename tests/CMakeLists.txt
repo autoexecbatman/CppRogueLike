@@ -191,7 +191,6 @@ set(PARENT_SOURCES
 
     # Gui
     ${PARENT_SOURCE_DIR}/Gui.cpp
-    ${PARENT_SOURCE_DIR}/LogMessage.cpp
 
     # Map
     ${PARENT_SOURCE_DIR}/Map.cpp

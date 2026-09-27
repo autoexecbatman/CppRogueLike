@@ -232,7 +232,6 @@ set(SOURCE_FILES # Add Source Files Here !
     # Gui
     ${PROJECT_SOURCE_DIR}/Gui.cpp
     ${PROJECT_SOURCE_DIR}/Gui.h
-    ${PROJECT_SOURCE_DIR}/LogMessage.cpp
     ${PROJECT_SOURCE_DIR}/LogMessage.h
 
     # Map

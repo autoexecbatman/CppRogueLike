@@ -150,7 +150,7 @@ static LogCursor draw_log_part(
 	LogCursor cursor,
 	const LogPanel& panel)
 {
-	std::string remainingText(part.logMessageText);
+	std::string remainingText(part.text);
 	while (!remainingText.empty() && cursor.row < panel.rowCount)
 	{
 		const std::string shown = renderer.fit_text_to_width(remainingText, panel.rightEdge - cursor.x);
@@ -167,7 +167,7 @@ static LogCursor draw_log_part(
 		renderer.draw_text(
 			Vector2D{ cursor.x, hud_text_row_y(panel.baseY, panel.tileSize, cursor.row) },
 			shown,
-			part.logMessageColor);
+			part.color);
 		remainingText.erase(0, shown.size());
 
 		// The part ended on this row, so the next part starts beside it.

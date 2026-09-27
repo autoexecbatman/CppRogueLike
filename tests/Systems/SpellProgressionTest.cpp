@@ -202,7 +202,7 @@ protected:
 			bool isSpellMessage = false;
 			for (const auto& part : parts)
 			{
-				if (part.logMessageText.find("New spell level!") != std::string::npos)
+				if (part.text.find("New spell level!") != std::string::npos)
 				{
 					isSpellMessage = true;
 				}
@@ -213,7 +213,7 @@ protected:
 			}
 			for (const auto& part : parts)
 			{
-				const std::string& text = part.logMessageText;
+				const std::string& text = part.text;
 				if (!text.empty() && std::isdigit(static_cast<unsigned char>(text.front())))
 				{
 					return std::stoi(text);
@@ -241,7 +241,7 @@ protected:
 		{
 			for (const auto& part : mock.messages.get_attack_message_at(index))
 			{
-				if (part.logMessageText.find(fragment) != std::string::npos)
+				if (part.text.find(fragment) != std::string::npos)
 				{
 					return true;
 				}

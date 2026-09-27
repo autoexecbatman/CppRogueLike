@@ -115,7 +115,7 @@ protected:
 		{
 			for (const LogMessage& part : game.messageSystem.get_attack_message_at(index))
 			{
-				if (part.logMessageText.find(text) != std::string::npos)
+				if (part.text.find(text) != std::string::npos)
 				{
 					return true;
 				}

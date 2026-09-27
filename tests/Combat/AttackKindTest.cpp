@@ -92,7 +92,7 @@ protected:
 		{
 			for (const auto& part : ctx.messageSystem->get_attack_message_at(index))
 			{
-				joined += part.logMessageText;
+				joined += part.text;
 			}
 		}
 		return joined;
