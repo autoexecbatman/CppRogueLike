@@ -202,10 +202,11 @@ void apply_rogue_improvements(int newLevel, GameContext* ctx)
 // Says so when a level opens a spell level that was out of reach before. The number
 // comes from the progression table rather than from a formula beside it, so the two
 // cannot disagree.
-void announce_new_spell_level(CasterClass casterClass, int newLevel, GameContext* ctx)
+void announce_new_spell_level(CasterClass casterClass, const Creature& owner, int newLevel, GameContext* ctx)
 {
-    const int reachNow = SpellSystem::highest_spell_level(casterClass, newLevel);
-    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))
+    const int wisdom = owner.get_wisdom();
+    const int reachNow = SpellSystem::highest_spell_level(casterClass, newLevel, wisdom, *ctx->dataManager);
+    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))
     {
         return;
     }
@@ -219,7 +220,7 @@ void announce_new_spell_level(CasterClass casterClass, int newLevel, GameContext
     ctx->messageSystem->log(std::format("Spell reach rose to level {} at experience level {}", reachNow, newLevel));
 }
 
-void apply_cleric_improvements(int newLevel, GameContext* ctx)
+void apply_cleric_improvements(const Creature& owner, int newLevel, GameContext* ctx)
 {
     if (!ctx)
     {
@@ -241,17 +242,17 @@ void apply_cleric_improvements(int newLevel, GameContext* ctx)
         ctx->messageSystem->log(std::format("Cleric turning reach rose to {} HD at level {}", reachNow, newLevel));
     }
 
-    announce_new_spell_level(CasterClass::CLERIC, newLevel, ctx);
+    announce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);
 }
 
-void apply_wizard_improvements(int newLevel, GameContext* ctx)
+void apply_wizard_improvements(const Creature& owner, int newLevel, GameContext* ctx)
 {
     if (!ctx)
     {
         return;
     }
 
-    announce_new_spell_level(CasterClass::WIZARD, newLevel, ctx);
+    announce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);
 }
 
 void apply_class_specific_improvements(Creature& owner, int newLevel, GameContext* ctx)
@@ -277,13 +278,13 @@ void apply_class_specific_improvements(Creature& owner, int newLevel, GameContex
 
     case CreatureClass::CLERIC:
     {
-        apply_cleric_improvements(newLevel, ctx);
+        apply_cleric_improvements(owner, newLevel, ctx);
         break;
     }
 
     case CreatureClass::WIZARD:
     {
-        apply_wizard_improvements(newLevel, ctx);
+        apply_wizard_improvements(owner, newLevel, ctx);
         break;
     }
 

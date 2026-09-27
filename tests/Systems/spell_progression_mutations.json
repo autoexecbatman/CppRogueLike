@@ -4,7 +4,7 @@
     "powershell",
     "-NoProfile",
     "-Command",
-    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SpellProgressionTest.*:SpellAnnouncementTest.*:LevelUpSystemTest.*"
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SpellProgressionTest.*:PriestSpellsTest.*:SpellAnnouncementTest.*:LevelUpSystemTest.*"
   ],
   "mutations": [
     {
@@ -21,9 +21,9 @@
     },
     {
       "file": "src/SpellSystem.cpp",
-      "original": "\treturn static_cast<int>(get_spell_slots(classState, level).size());",
-      "mutated": "\treturn static_cast<int>(get_spell_slots(classState, level).size()) + 1;",
-      "catches": "a caster told it reaches one spell level past what the table grants"
+      "original": "\treturn static_cast<int>(get_spell_slots(classState, level, wisdom, dataManager).size());",
+      "mutated": "\treturn static_cast<int>(progression_slots(classState, level).size());",
+      "catches": "the reach read off the printed table, ignoring the Wisdom the footnotes need"
     },
     {
       "file": "src/SpellSystem.cpp",
@@ -38,26 +38,56 @@
       "catches": "Table 24's eleventh row losing the sixth spell level it opens"
     },
     {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tif (row.Wis > wisdom)",
+      "mutated": "\t\tif (row.Wis >= wisdom)",
+      "catches": "the caster's own Wisdom row left out of a cumulative column"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tif (row.Wis > wisdom)",
+      "mutated": "\t\tif (false)",
+      "catches": "the score ignored, so every row's bonus is handed to every priest"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (classState != CasterClass::CLERIC)\n\t{\n\t\treturn slots;\n\t}",
+      "mutated": "\tif (classState == CasterClass::NONE)\n\t{\n\t\treturn slots;\n\t}",
+      "catches": "a wizard taking the bonus spells and the gate the book gives only a priest"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "constexpr int WISDOM_FOR_SIXTH_LEVEL = 17;",
+      "mutated": "constexpr int WISDOM_FOR_SIXTH_LEVEL = 16;",
+      "catches": "the sixth column opened one point of Wisdom early"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "constexpr int WISDOM_FOR_SEVENTH_LEVEL = 18;",
+      "mutated": "constexpr int WISDOM_FOR_SEVENTH_LEVEL = 17;",
+      "catches": "the seventh column opened one point of Wisdom early"
+    },
+    {
+      "file": "src/json/wisdom.json",
+      "original": "    \"bonusSpells\": [\n      1,\n      3\n    ]",
+      "mutated": "    \"bonusSpells\": [\n      1\n    ]",
+      "catches": "row 19 losing the second of the two levels it adds, which one integer could not hold"
+    },
+    {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))",
-      "mutated": "    if (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1))",
+      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
+      "mutated": "    if (reachNow < SpellSystem::highest_spell_level(casterClass, newLevel - 1, wisdom, *ctx->dataManager))",
       "catches": "a level that opened nothing announcing a spell level all the same"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    if (reachNow <= SpellSystem::highest_spell_level(casterClass, newLevel - 1))\n    {\n        return;\n    }\n",
-      "mutated": "",
-      "catches": "the comparison dropped, so every level announces whatever the table holds"
-    },
-    {
-      "file": "src/LevelUpSystem.cpp",
-      "original": "    announce_new_spell_level(CasterClass::CLERIC, newLevel, ctx);",
+      "original": "    announce_new_spell_level(CasterClass::CLERIC, owner, newLevel, ctx);",
       "mutated": "",
       "catches": "the cleric never told a new spell level is open"
     },
     {
       "file": "src/LevelUpSystem.cpp",
-      "original": "    announce_new_spell_level(CasterClass::WIZARD, newLevel, ctx);",
+      "original": "    announce_new_spell_level(CasterClass::WIZARD, owner, newLevel, ctx);",
       "mutated": "    ctx->messageSystem->append_message_part(ColorPairId::WHITE_BLACK, \"Your arcane knowledge deepens!\");\n    ctx->messageSystem->finalize_message();",
       "catches": "the empty claim back in place of the announcement that means something"
     }

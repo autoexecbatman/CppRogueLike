@@ -5,6 +5,8 @@
 #include <string_view>
 #include <vector>
 
+class DataManager;
+
 #include "SpellRegistry.h"
 #include "Vector2D.h"
 
@@ -17,7 +19,24 @@ class SpellSystem
 {
 public:
 	// Get spell slots for class/level (AD&D 2e tables)
-	static std::vector<int> get_spell_slots(CasterClass classState, int level);
+	// The progression table as the book prints it: Table 21 for a wizard, Table 24
+	// for a priest, one row per level to 20th. Nothing about the caster beyond its
+	// class and level, which is what makes it checkable against the page.
+	static std::vector<int> progression_slots(CasterClass classState, int level);
+
+	// The bonus spells a priest's Wisdom is worth, as a count per spell level
+	// (Table 5). The column is a list and it is cumulative - a Wisdom of 15 carries
+	// rows 13, 14 and 15 - so the rule is here and the rows are in wisdom.json.
+	//
+	// Example:
+	//   bonus_priest_spells(15, dataManager);   // -> { 2, 1 }, two 1st and one 2nd
+	//   bonus_priest_spells(12, dataManager);   // -> { }, nothing below 13
+	static std::vector<int> bonus_priest_spells(int wisdom, const DataManager& dataManager);
+
+	// What this caster actually memorises: the progression table, plus a priest's
+	// Wisdom bonus where there is a row for it, and without the sixth and seventh
+	// rows unless Table 24's footnotes are satisfied - Wisdom 17 and 18.
+	static std::vector<int> get_spell_slots(CasterClass classState, int level, int wisdom, const DataManager& dataManager);
 
 	// The highest spell level this caster can reach at that experience level, which
 	// is how many rows of slots the table hands it. Everything that tells the player
@@ -28,7 +47,7 @@ public:
 	//   highest_spell_level(CasterClass::WIZARD, 11);   // -> 5, 11th grants no new level
 	//   highest_spell_level(CasterClass::WIZARD, 12);   // -> 6
 	//   highest_spell_level(CasterClass::NONE, 10);     // -> 0
-	[[nodiscard]] static int highest_spell_level(CasterClass classState, int level);
+	[[nodiscard]] static int highest_spell_level(CasterClass classState, int level, int wisdom, const DataManager& dataManager);
 
 	// Cast a spell by string key (works for builtin and custom spells), read from
 	// ctx.spellRegistry. onSuccess is called when the spell takes effect:

@@ -415,7 +415,7 @@ std::vector<WisdomAttributes> DataManager::load_wisdom(const std::string& filena
 		WisdomAttributes w;
 		w.Wis = item.value("Wis", 0);
 		w.MagicalDefenseAdj = item.value("MagicalDefenseAdj", 0);
-		w.BonusSpells = item.value("BonusSpells", 0);
+		w.bonusSpells = item.at("bonusSpells").get<std::vector<int>>();
 		w.ChanceOfSpellFailure = item.value("ChanceOfSpellFailure", 0);
 		w.SpellImmunity = item.value("SpellImmunity", 0);
 		data.push_back(w);

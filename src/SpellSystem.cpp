@@ -29,6 +29,7 @@
 #include "SpawnUtils.h"
 #include "SpellAnimations.h"
 #include "SpellRegistry.h"
+#include "DataManager.h"
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
 #include "TileConfig.h"
@@ -62,6 +63,14 @@ CasterClass to_caster_class(Player::PlayerClassState state)
 
 namespace
 {
+// Table 24's sixth and seventh columns are footnoted: a priest reaches them only at
+// these Wisdom scores. The rows are counted from one, so the fifth column is five
+// rows and the sixth is six.
+constexpr std::size_t SIXTH_SPELL_LEVEL_ROW = 5;
+constexpr std::size_t SEVENTH_SPELL_LEVEL_ROW = 6;
+constexpr int WISDOM_FOR_SIXTH_LEVEL = 17;
+constexpr int WISDOM_FOR_SEVENTH_LEVEL = 18;
+
 // The table's row for that level. A caster past the last printed row keeps what the
 // last row gave it, which is where the book stops rather than a number of our own.
 const std::vector<int>& row_for_level(const std::vector<std::vector<int>>& table, int level)
@@ -76,7 +85,7 @@ const std::vector<int>& row_for_level(const std::vector<std::vector<int>>& table
 }
 } // namespace
 
-std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
+std::vector<int> SpellSystem::progression_slots(CasterClass classState, int level)
 {
 	// AD&D 2e spell progression tables
 	// Returns slots per spell level [level1, level2, level3, ...]
@@ -142,9 +151,68 @@ std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level)
 	return {};
 }
 
-int SpellSystem::highest_spell_level(CasterClass classState, int level)
+std::vector<int> SpellSystem::bonus_priest_spells(int wisdom, const DataManager& dataManager)
 {
-	return static_cast<int>(get_spell_slots(classState, level).size());
+	// "Bonus spells are cumulative", so a score is worth every row up to it.
+	std::vector<int> perSpellLevel;
+	for (const WisdomAttributes& row : dataManager.get_wisdom_attributes())
+	{
+		if (row.Wis > wisdom)
+		{
+			break;
+		}
+
+		for (const int spellLevel : row.bonusSpells)
+		{
+			if (static_cast<std::size_t>(spellLevel) > perSpellLevel.size())
+			{
+				perSpellLevel.resize(static_cast<std::size_t>(spellLevel), 0);
+			}
+			++perSpellLevel.at(static_cast<std::size_t>(spellLevel) - 1);
+		}
+	}
+	return perSpellLevel;
+}
+
+std::vector<int> SpellSystem::get_spell_slots(CasterClass classState, int level, int wisdom, const DataManager& dataManager)
+{
+	std::vector<int> slots = progression_slots(classState, level);
+
+	// Table 5's bonus spells and Table 24's two footnotes are a priest's alone.
+	if (classState != CasterClass::CLERIC)
+	{
+		return slots;
+	}
+
+	// "* Usable only by priests with 17 or greater Wisdom" on the sixth column, and
+	// 18 on the seventh, so a priest below those never reaches those rows.
+	std::size_t reachableRows = SIXTH_SPELL_LEVEL_ROW;
+	if (wisdom >= WISDOM_FOR_SIXTH_LEVEL)
+	{
+		reachableRows = SEVENTH_SPELL_LEVEL_ROW;
+	}
+	if (wisdom >= WISDOM_FOR_SEVENTH_LEVEL)
+	{
+		reachableRows = SEVENTH_SPELL_LEVEL_ROW + 1;
+	}
+	if (slots.size() > reachableRows)
+	{
+		slots.resize(reachableRows);
+	}
+
+	// "these spells are available only when the priest is entitled to spells of the
+	// appropriate level", so a bonus with no row of its own is not granted.
+	const std::vector<int> bonus = bonus_priest_spells(wisdom, dataManager);
+	for (std::size_t index = 0; index < bonus.size() && index < slots.size(); ++index)
+	{
+		slots.at(index) += bonus.at(index);
+	}
+	return slots;
+}
+
+int SpellSystem::highest_spell_level(CasterClass classState, int level, int wisdom, const DataManager& dataManager)
+{
+	return static_cast<int>(get_spell_slots(classState, level, wisdom, dataManager).size());
 }
 
 void SpellSystem::dispatch_effect(
@@ -856,7 +924,7 @@ bool SpellSystem::cast_knock(Creature& caster, GameContext& ctx)
 void SpellSystem::show_memorization_menu(Player& player, GameContext& ctx)
 {
 	CasterClass casterClass = to_caster_class(player.playerClassState);
-	auto slots = get_spell_slots(casterClass, player.get_creature_level());
+	auto slots = get_spell_slots(casterClass, player.get_creature_level(), player.get_wisdom(), *ctx.dataManager);
 	if (slots.empty())
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot cast spells.", MessageCompletion::FINISHED);

@@ -88,21 +88,37 @@ const std::vector<std::vector<int>> PRIEST_TABLE_24 = {
 };
 } // namespace
 
-TEST(SpellProgressionTest, TheWizardTableIsTableTwentyOneToTwentiethLevel)
+// Wisdom 18 is used wherever a case is about the table's own reach rather than about
+// the Wisdom gate: it satisfies both of Table 24's footnotes, so nothing is withheld.
+class SpellProgressionTest : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		dataManager.load_all_data(messages);
+	}
+
+	static constexpr int UNGATED_WISDOM = 18;
+
+	DataManager dataManager{};
+	MessageSystem messages{};
+};
+
+TEST_F(SpellProgressionTest, TheWizardTableIsTableTwentyOneToTwentiethLevel)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::WIZARD, level),
+		EXPECT_EQ(SpellSystem::progression_slots(CasterClass::WIZARD, level),
 			WIZARD_TABLE_21.at(static_cast<std::size_t>(level) - 1))
 			<< "wizard level " << level;
 	}
 }
 
-TEST(SpellProgressionTest, ThePriestTableIsTableTwentyFourToTwentiethLevel)
+TEST_F(SpellProgressionTest, ThePriestTableIsTableTwentyFourToTwentiethLevel)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, level),
+		EXPECT_EQ(SpellSystem::progression_slots(CasterClass::CLERIC, level),
 			PRIEST_TABLE_24.at(static_cast<std::size_t>(level) - 1))
 			<< "priest level " << level;
 	}
@@ -110,14 +126,14 @@ TEST(SpellProgressionTest, ThePriestTableIsTableTwentyFourToTwentiethLevel)
 
 // The number a level-up announces is the number the table grants, so the two cannot
 // come apart - which is the whole defect this replaces.
-TEST(SpellProgressionTest, TheHighestSpellLevelIsWhatTheTableGrants)
+TEST_F(SpellProgressionTest, TheHighestSpellLevelIsWhatTheTableGrants)
 {
 	for (int level = 1; level <= 20; ++level)
 	{
-		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, level),
+		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, level, UNGATED_WISDOM, dataManager),
 			static_cast<int>(WIZARD_TABLE_21.at(static_cast<std::size_t>(level) - 1).size()))
 			<< "wizard level " << level;
-		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, level),
+		EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, level, UNGATED_WISDOM, dataManager),
 			static_cast<int>(PRIEST_TABLE_24.at(static_cast<std::size_t>(level) - 1).size()))
 			<< "priest level " << level;
 	}
@@ -126,26 +142,26 @@ TEST(SpellProgressionTest, TheHighestSpellLevelIsWhatTheTableGrants)
 // The rows the old formula got wrong. (level + 1) / 2 promised a sixth spell level at
 // 11th; Table 21 grants it at 12th, and the formula runs away from the table from
 // there - a seventh at 13th where the book gives it at 14th, and so on.
-TEST(SpellProgressionTest, AWizardReachesSixthLevelSpellsAtTwelfthNotEleventh)
+TEST_F(SpellProgressionTest, AWizardReachesSixthLevelSpellsAtTwelfthNotEleventh)
 {
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 10), 5);
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 11), 5) << "11th grants no new level";
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 12), 6);
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 13), 6) << "13th grants no new level";
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 14), 7);
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 10, UNGATED_WISDOM, dataManager), 5);
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 11, UNGATED_WISDOM, dataManager), 5) << "11th grants no new level";
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 12, UNGATED_WISDOM, dataManager), 6);
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 13, UNGATED_WISDOM, dataManager), 6) << "13th grants no new level";
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 14, UNGATED_WISDOM, dataManager), 7);
 }
 
 // A caster past the table's last row keeps what 20th level gave it rather than
 // growing forever, and a non-caster has nothing at any level.
-TEST(SpellProgressionTest, PastTwentiethTheTableHoldsAndANonCasterHasNothing)
+TEST_F(SpellProgressionTest, PastTwentiethTheTableHoldsAndANonCasterHasNothing)
 {
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 25),
-		SpellSystem::highest_spell_level(CasterClass::WIZARD, 20));
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, 25),
-		SpellSystem::highest_spell_level(CasterClass::CLERIC, 20));
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::WIZARD, 25, UNGATED_WISDOM, dataManager),
+		SpellSystem::highest_spell_level(CasterClass::WIZARD, 20, UNGATED_WISDOM, dataManager));
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::CLERIC, 25, UNGATED_WISDOM, dataManager),
+		SpellSystem::highest_spell_level(CasterClass::CLERIC, 20, UNGATED_WISDOM, dataManager));
 
-	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::NONE, 10), 0);
-	EXPECT_TRUE(SpellSystem::get_spell_slots(CasterClass::NONE, 10).empty());
+	EXPECT_EQ(SpellSystem::highest_spell_level(CasterClass::NONE, 10, UNGATED_WISDOM, dataManager), 0);
+	EXPECT_TRUE(SpellSystem::progression_slots(CasterClass::NONE, 10).empty());
 }
 
 // The announcement itself: a level-up says so only when the table opened something.
@@ -163,7 +179,14 @@ protected:
 	// or 0 for no such message.
 	int announced_level_at(CreatureClass creatureClass, int newLevel)
 	{
+		return announced_level_at(creatureClass, newLevel, 18);
+	}
+
+	// Wisdom matters to a priest: Table 24's sixth and seventh rows are footnoted.
+	int announced_level_at(CreatureClass creatureClass, int newLevel, int wisdom)
+	{
 		Creature caster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK } };
+		caster.set_wisdom(wisdom);
 		caster.healthPool = std::make_unique<HealthPool>(50);
 		caster.armorClass = std::make_unique<ArmorClass>(10);
 		caster.experienceReward = std::make_unique<ExperienceReward>(0);
@@ -204,6 +227,7 @@ protected:
 	bool said(CreatureClass creatureClass, int newLevel, std::string_view fragment)
 	{
 		Creature caster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "caster", ColorPairId::WHITE_BLACK } };
+		caster.set_wisdom(18);
 		caster.healthPool = std::make_unique<HealthPool>(50);
 		caster.armorClass = std::make_unique<ArmorClass>(10);
 		caster.experienceReward = std::make_unique<ExperienceReward>(0);
@@ -250,6 +274,16 @@ TEST_F(SpellAnnouncementTest, AClericIsToldOnTheLevelsTableTwentyFourOpens)
 	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14), 7);
 }
 
+// A priest below the footnotes' Wisdom never reaches those rows, so it is never told
+// about them however high its level goes.
+TEST_F(SpellAnnouncementTest, APriestTooUnwiseForASpellLevelIsNotToldAboutIt)
+{
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11, 16), 0) << "the sixth needs Wisdom 17";
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 11, 17), 6);
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14, 17), 0) << "the seventh needs Wisdom 18";
+	EXPECT_EQ(announced_level_at(CreatureClass::CLERIC, 14, 18), 7);
+}
+
 // A fighter has no spell table, so it is never told about one - and the levels that
 // used to carry "Your martial prowess improves!" now carry nothing of their own.
 TEST_F(SpellAnnouncementTest, AFighterIsNeverToldAboutSpells)
@@ -272,4 +306,84 @@ TEST_F(SpellAnnouncementTest, NoLevelClaimsAnImprovementThatDidNotHappen)
 		EXPECT_FALSE(said(CreatureClass::WIZARD, level, "arcane knowledge")) << "level " << level;
 	}
 }
+
+// Table 5's Bonus Spells column, which is a list of spell levels and is cumulative:
+// "a priest with a Wisdom of 15 is entitled to two 1st-level bonus spells and one
+// 2nd-level bonus spell" (PHB, PDF page 36). The rows add 1st at 13, 1st at 14, 2nd
+// at 15, 2nd at 16, 3rd at 17, 4th at 18, and 1st and 3rd at 19.
+//
+// The column used to be a single integer per row, which cannot say "1st, 3rd" - and
+// row 19 held 2, which is neither the level it names nor a count of anything.
+class PriestSpellsTest : public ::testing::Test
+{
+protected:
+	void SetUp() override
+	{
+		dataManager.load_all_data(messages);
+	}
+
+	DataManager dataManager{};
+	MessageSystem messages{};
+};
+
+// The book's own worked example is the case that can only pass if the rule is
+// cumulative: at Wisdom 15 the two 1st-level bonuses come from rows 13 and 14.
+TEST_F(PriestSpellsTest, WisdomFifteenGivesTwoFirstLevelBonusesAndOneSecond)
+{
+	const std::vector<int> bonus = SpellSystem::bonus_priest_spells(15, dataManager);
+
+	ASSERT_GE(bonus.size(), 2u);
+	EXPECT_EQ(bonus.at(0), 2) << "two 1st-level bonus spells";
+	EXPECT_EQ(bonus.at(1), 1) << "one 2nd-level bonus spell";
+}
+
+TEST_F(PriestSpellsTest, BonusSpellsAccumulateRowByRow)
+{
+	EXPECT_TRUE(SpellSystem::bonus_priest_spells(12, dataManager).empty()) << "nothing below 13";
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(13, dataManager), (std::vector<int>{ 1 }));
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(14, dataManager), (std::vector<int>{ 2 }));
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(16, dataManager), (std::vector<int>{ 2, 2 }));
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(17, dataManager), (std::vector<int>{ 2, 2, 1 }));
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(18, dataManager), (std::vector<int>{ 2, 2, 1, 1 }));
+
+	// Row 19 adds a 1st and a 3rd, which is the row a single integer could not carry.
+	EXPECT_EQ(SpellSystem::bonus_priest_spells(19, dataManager), (std::vector<int>{ 3, 2, 2, 1 }));
+}
+
+// "these spells are available only when the priest is entitled to spells of the
+// appropriate level": a 1st-level priest has one row of slots, so a 4th-level bonus
+// has nowhere to go.
+TEST_F(PriestSpellsTest, ABonusNeedsARowToLandOn)
+{
+	const std::vector<int> atFirst = SpellSystem::get_spell_slots(CasterClass::CLERIC, 1, 18, dataManager);
+
+	ASSERT_EQ(atFirst.size(), 1u) << "1st level grants one row, whatever the Wisdom";
+	EXPECT_EQ(atFirst.at(0), 1 + 2) << "one from Table 24, two 1st-level bonuses";
+}
+
+// Table 24's footnotes: the sixth column is usable only with Wisdom 17 or greater,
+// the seventh only with 18 or greater.
+TEST_F(PriestSpellsTest, TheSixthAndSeventhRowsNeedWisdomSeventeenAndEighteen)
+{
+	// 11th level is where Table 24 first prints a sixth-level slot.
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 16, dataManager).size(), 5u)
+		<< "Wisdom 16 cannot reach the sixth";
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 11, 17, dataManager).size(), 6u);
+
+	// 14th is where the seventh first appears.
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 17, dataManager).size(), 6u)
+		<< "Wisdom 17 cannot reach the seventh";
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::CLERIC, 14, 18, dataManager).size(), 7u);
+}
+
+// A wizard's spells are not a priest's: Table 5 says bonus spells are for "a priest
+// (and only a priest)", and no footnote gates a wizard's rows.
+TEST_F(PriestSpellsTest, AWizardTakesNoWisdomBonusAndNoWisdomGate)
+{
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 18, dataManager),
+		SpellSystem::progression_slots(CasterClass::WIZARD, 12));
+	EXPECT_EQ(SpellSystem::get_spell_slots(CasterClass::WIZARD, 12, 9, dataManager),
+		SpellSystem::progression_slots(CasterClass::WIZARD, 12));
+}
+
 // end of file: SpellProgressionTest.cpp
