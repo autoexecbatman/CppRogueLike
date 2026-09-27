@@ -116,11 +116,13 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
     const std::string key = availableSpells[selectedIndex];
     const bool isMemorized = spellSources[selectedIndex].empty();
 
-    // onSuccess fires when the spell takes effect — immediately for instant spells,
-    // deferred via TargetingMenu callback for targeted spells.
+    // onCastComplete fires when the casting is over, which is not the same as the
+    // spell working: a priest's Wisdom can fizzle it, and the book expends the spell
+    // either way. Immediate for an instant spell, a turn later through the
+    // TargetingMenu callback for a targeted one.
     // Init-capture &playerRef = player binds to the Player member (session lifetime),
     // not to a local alias that would dangle after handle_selection() returns.
-    auto onSuccess = [key, isMemorized, &playerRef = player](GameContext& innerCtx)
+    auto onCastComplete = [key, isMemorized, &playerRef = player](GameContext& innerCtx)
     {
         if (isMemorized)
         {
@@ -129,7 +131,8 @@ void MenuSpellCast::handle_selection(GameContext& ctx)
         innerCtx.gameState->set_game_status(GameStatus::NEW_TURN);
     };
 
-    SpellSystem::cast_spell_by_key(key, player, std::move(onSuccess), ctx);
+    const SpellSource source = isMemorized ? SpellSource::MEMORIZED : SpellSource::ITEM;
+    SpellSystem::cast_spell_by_key(key, player, source, std::move(onCastComplete), ctx);
     menu_set_run_false();
 }
 

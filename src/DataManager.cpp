@@ -106,6 +106,11 @@ DexterityAttributes DataManager::dexterity_for(int score) const
 	return row_for(dexterityAttributes, score);
 }
 
+WisdomAttributes DataManager::wisdom_for(int score) const
+{
+	return row_for(wisdomAttributes, score);
+}
+
 StrengthAttributes DataManager::strength_for(int score, int exceptional) const
 {
 	// Only an 18 has exceptional Strength; everywhere else the percentile means nothing.

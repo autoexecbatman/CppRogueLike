@@ -30,6 +30,7 @@
 #include "SpellAnimations.h"
 #include "SpellRegistry.h"
 #include "DataManager.h"
+#include "RandomDice.h"
 #include "SpellSystem.h"
 #include "TargetingMenu.h"
 #include "TileConfig.h"
@@ -333,24 +334,60 @@ void SpellSystem::dispatch_effect(
 	}
 }
 
+int SpellSystem::spell_failure_chance(const Creature& caster, const DataManager& dataManager)
+{
+	// Table 5 is Wisdom's, and the column is the priest's: "Priests with low Wisdom
+	// scores run the risk of having their spells fizzle." A wizard casts on
+	// Intelligence and the book gives it no such chance.
+	if (caster.get_creature_class() != CreatureClass::CLERIC)
+	{
+		return 0;
+	}
+	return dataManager.wisdom_for(caster.get_wisdom()).ChanceOfSpellFailure;
+}
+
+bool SpellSystem::spell_fizzles(const Creature& caster, const DataManager& dataManager, RandomDice& dice)
+{
+	// A caster the table gives no chance is not made to roll for one.
+	const int chance = spell_failure_chance(caster, dataManager);
+	if (chance <= 0)
+	{
+		return false;
+	}
+
+	// "if the number rolled is less than or equal to the listed chance for spell
+	// failure, the spell is expended with absolutely no effect whatsoever."
+	return dice.d100() <= chance;
+}
+
 void SpellSystem::cast_spell_by_key(
 	std::string_view key,
 	Creature& caster,
-	std::function<void(GameContext&)> onSuccess,
+	SpellSource source,
+	std::function<void(GameContext&)> onCastComplete,
 	GameContext& ctx)
 {
 	// Every effect that succeeds calls this, at four sites and sometimes a turn
 	// later from a targeting callback. An empty one throws there rather than
 	// here, which is a long way from the caller that omitted it.
-	assert(onSuccess && "cast_spell_by_key requires a callback");
+	assert(onCastComplete && "cast_spell_by_key requires a callback");
 
 	if (caster.has_state(ActorState::IS_SILENCED))
 	{
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are silenced and cannot cast spells!", MessageCompletion::FINISHED);
 		return;
 	}
+	// A priest's own spell can fail on its Wisdom. The casting is over either way -
+	// the spell is expended - so the callback runs and only the effect is skipped.
+	if (source == SpellSource::MEMORIZED && spell_fizzles(caster, *ctx.dataManager, *ctx.dice))
+	{
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your spell fizzles.", MessageCompletion::FINISHED);
+		onCastComplete(ctx);
+		return;
+	}
+
 	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
-	dispatch_effect(definition.effect_type, caster, std::move(onSuccess), ctx);
+	dispatch_effect(definition.effect_type, caster, std::move(onCastComplete), ctx);
 }
 
 namespace

@@ -184,7 +184,7 @@ TEST_F(AssertProbeDeathTest, CastingWithoutACallbackAborts)
 {
 	std::unique_ptr<Creature> caster = make_creature();
 
-	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, {}, ctx), "cast_spell_by_key requires a callback");
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, {}, ctx), "cast_spell_by_key requires a callback");
 }
 
 // Regeneration counts rounds that have run, from 1. Round 0 is divisible by every

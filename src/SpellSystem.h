@@ -6,6 +6,15 @@
 #include <vector>
 
 class DataManager;
+class RandomDice;
+
+// Where a casting comes from. A priest's own memorised spell is the one its Wisdom
+// can fail (Table 5); a spell a ring or a helm casts is the item's, not the priest's.
+enum class SpellSource
+{
+	MEMORIZED,
+	ITEM,
+};
 
 #include "SpellRegistry.h"
 #include "Vector2D.h"
@@ -57,8 +66,21 @@ public:
 	static void cast_spell_by_key(
 		std::string_view key,
 		Creature& caster,
-		std::function<void(GameContext&)> onSuccess,
+		SpellSource source,
+		std::function<void(GameContext&)> onCastComplete,
 		GameContext& ctx);
+
+	// What Table 5 gives this caster's Wisdom as a percentage chance that any one of
+	// its spells fizzles. Zero for anyone but a priest, and for a priest of Wisdom 13
+	// or better.
+	//
+	// Example:
+	//   spell_failure_chance(priestOfWisdomNine, dataManager);   // -> 20
+	[[nodiscard]] static int spell_failure_chance(const Creature& caster, const DataManager& dataManager);
+
+	// Rolls percentile dice against that chance, and answers whether this casting is
+	// lost. A caster with no chance to fail is not made to roll.
+	[[nodiscard]] static bool spell_fizzles(const Creature& caster, const DataManager& dataManager, RandomDice& dice);
 
 	// Item-granted spells
 	struct ItemGrantedSpell

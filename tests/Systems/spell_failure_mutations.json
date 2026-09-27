@@ -1,0 +1,53 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=SpellFailureTest.*:SanctuarySpellTest.*:SleepSpellTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (caster.get_creature_class() != CreatureClass::CLERIC)",
+      "mutated": "\tif (caster.get_creature_class() == CreatureClass::MONSTER)",
+      "catches": "a wizard made to roll on a column the book gives only a priest"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\treturn dataManager.wisdom_for(caster.get_wisdom()).ChanceOfSpellFailure;",
+      "mutated": "\treturn dataManager.wisdom_for(caster.get_wisdom()).MagicalDefenseAdj;",
+      "catches": "the wrong column of Table 5 read as the chance to fail"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (chance <= 0)\n\t{\n\t\treturn false;\n\t}",
+      "mutated": "",
+      "catches": "a caster who cannot fail still spending a roll, which moves every later one"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\treturn dice.d100() <= chance;",
+      "mutated": "\treturn dice.d100() < chance;",
+      "catches": "the boundary the book states, where a roll at the chance fails"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tif (source == SpellSource::MEMORIZED && spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
+      "mutated": "\tif (spell_fizzles(caster, *ctx.dataManager, *ctx.dice))",
+      "catches": "a ring's spell failed by the priest's Wisdom, when it is not the priest's spell"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\t\tonCastComplete(ctx);\n\t\treturn;",
+      "mutated": "\t\treturn;",
+      "catches": "a fizzle costing nothing, where the book expends the spell regardless"
+    },
+    {
+      "file": "src/json/wisdom.json",
+      "original": "    \"Wis\": 9,\n    \"MagicalDefenseAdj\": 0,\n    \"ChanceOfSpellFailure\": 20,",
+      "mutated": "    \"Wis\": 9,\n    \"MagicalDefenseAdj\": 0,\n    \"ChanceOfSpellFailure\": 25,",
+      "catches": "Table 5's row for the lowest Wisdom a priest can have"
+    }
+  ]
+}

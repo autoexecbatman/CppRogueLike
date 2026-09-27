@@ -39,6 +39,13 @@ public:
 	//   dataManager.dexterity_for(0).DefensiveAdj;    // -> 0
 	[[nodiscard]] DexterityAttributes dexterity_for(int score) const;
 
+	// The Table 5 row a Wisdom score reads, with the same edges as dexterity_for.
+	//
+	// Example:
+	//   dataManager.wisdom_for(9).ChanceOfSpellFailure;   // -> 20
+	//   dataManager.wisdom_for(13).ChanceOfSpellFailure;  // -> 0
+	[[nodiscard]] WisdomAttributes wisdom_for(int score) const;
+
 	// The Table 1 row a Strength score reads, with the same edges as dexterity_for. At
 	// Strength 18 an exceptional percentile of 1-100 reads the 18/xx band holding it;
 	// at any other score it is ignored, as the book gives it only to an 18.

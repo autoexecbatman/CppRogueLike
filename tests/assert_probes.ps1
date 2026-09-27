@@ -84,7 +84,7 @@ $probes = @(
     @{
         test   = "AssertProbeDeathTest.CastingWithoutACallbackAborts"
         file   = "src/SpellSystem.cpp"
-        anchor = 'assert(onSuccess && "cast_spell_by_key requires a callback");'
+        anchor = 'assert(onCastComplete && "cast_spell_by_key requires a callback");'
     },
     @{
         test   = "AssertProbeDeathTest.RegeneratingBeforeARoundHasRunAborts"

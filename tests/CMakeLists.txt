@@ -120,6 +120,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ColorPairTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellProgressionTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellFailureTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")

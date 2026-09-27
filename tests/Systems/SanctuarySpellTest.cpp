@@ -91,7 +91,7 @@ protected:
 
 	void cast(const char* key)
 	{
-		SpellSystem::cast_spell_by_key(key, *caster, [](GameContext&) {}, ctx);
+		SpellSystem::cast_spell_by_key(key, *caster, SpellSource::MEMORIZED, [](GameContext&) {}, ctx);
 	}
 
 	static int hp_lost(const Creature& creature)
