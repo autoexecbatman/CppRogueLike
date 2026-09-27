@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Colors.h"
+
 #include <map>
 #include <span>
 #include <string>
@@ -40,7 +42,7 @@ struct ItemParams
 	// The name every menu shows - a view into the string the registry owns.
 	std::string_view name{ "" };
 	// The colour pair it is drawn in.
-	int color{ 0 };
+	ColorPairId color{ ColorPairId::WHITE_BLACK };
 	// What kind of item it is, for identification and a mimic's disguise.
 	ItemClass itemClass{ ItemClass::UNKNOWN };
 	// What it is worth in gold.

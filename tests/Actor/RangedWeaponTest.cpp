@@ -10,6 +10,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/Player.h"
@@ -90,7 +91,7 @@ TEST_F(RangedWeaponTest, UnequippingSomethingElseLeavesItAlone)
 // A monster with a bow answers the same way; nothing about this is player-only.
 TEST_F(RangedWeaponTest, AMonsterAnswersFromItsOwnSlot)
 {
-	Creature archer{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "archer", 0 } };
+	Creature archer{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
 	archer.healthPool = std::make_unique<HealthPool>(10);
 	archer.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 	EXPECT_FALSE(archer.has_ranged_weapon());
@@ -105,7 +106,7 @@ TEST_F(RangedWeaponTest, AMonsterAnswersFromItsOwnSlot)
 // still not something to shoot with.
 TEST_F(RangedWeaponTest, AMeleeWeaponWornInTheMissileSlotIsStillNotRanged)
 {
-	Creature confused{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "kobold", 0 } };
+	Creature confused{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "kobold", ColorPairId::WHITE_BLACK } };
 	confused.healthPool = std::make_unique<HealthPool>(10);
 	confused.set_body_plan({ EquipmentSlot::MISSILE_WEAPON });
 

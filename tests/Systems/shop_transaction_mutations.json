@@ -33,7 +33,7 @@
     },
     {
       "file": "src/ShopKeeper.cpp",
-      "original": "\tif (is_inventory_full(shopInventory))\n\t{\n\t\tctx.messageSystem->message(WHITE_RED_PAIR, \"Shopkeeper's inventory is full.\", true);\n\t\treturn false;\n\t}",
+      "original": "\tif (is_inventory_full(shopInventory))\n\t{\n\t\tctx.messageSystem->message(ColorPairId::WHITE_RED, \"Shopkeeper's inventory is full.\", MessageCompletion::FINISHED);\n\t\treturn false;\n\t}",
       "mutated": "",
       "catches": "a sale to full shelves going ahead, which takes the item and cannot shelve it"
     },

@@ -22,6 +22,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/ConstitutionAttributes.h"
@@ -154,7 +155,7 @@ protected:
 	// A 1d4 attacker from THAC0 20 with the given Strength, and a target at armour class 10.
 	std::unique_ptr<Creature> brute_with(int strength, int exceptional)
 	{
-		auto brute = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "brute", 0 });
+		auto brute = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "brute", ColorPairId::WHITE_BLACK });
 		brute->experienceReward = std::make_unique<ExperienceReward>(0);
 		brute->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		brute->armorClass = std::make_unique<ArmorClass>(10);

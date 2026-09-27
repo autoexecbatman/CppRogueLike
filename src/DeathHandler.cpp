@@ -27,12 +27,12 @@ DestructibleType MonsterDeathHandler::type() const
 void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
 {
     ctx.messageSystem->append_message_part(owner.actorData.color, std::format("{}", owner.actorData.name));
-    ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+    ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is dead.\n");
     ctx.messageSystem->finalize_message();
 
-    ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You get ");
-    ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", owner.get_xp()));
-    ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+    ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You get ");
+    ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::format("{}", owner.get_xp()));
+    ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " experience points.\n");
     ctx.messageSystem->finalize_message();
 
     assert(ctx.player() != nullptr && "MonsterDeathHandler::execute requires a live player in context");

@@ -350,5 +350,5 @@ void ItemFactory::spawn_all_enhanced_items_debug(Vector2D position, GameContext&
 		place_enhanced_item(rule, position, ctx);
 	}
 
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spawned enhanced items", true);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spawned enhanced items", MessageCompletion::FINISHED);
 }

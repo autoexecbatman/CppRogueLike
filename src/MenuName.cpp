@@ -49,18 +49,18 @@ void MenuName::draw_name_screen()
 {
 	menu_clear();
 	menu_draw_box();
-	menu_draw_title("ENTER NAME", YELLOW_BLACK_PAIR);
+	menu_draw_title("ENTER NAME", ColorPairId::YELLOW_BLACK);
 
 	assert(renderer && "MenuName::draw_name_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
 	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	renderer->draw_text(Vector2D{ textX, firstRowY }, "Name: " + inputText + "_", WHITE_BLACK_PAIR);
+	renderer->draw_text(Vector2D{ textX, firstRowY }, "Name: " + inputText + "_", ColorPairId::WHITE_BLACK);
 	renderer->draw_text(
 		Vector2D{ textX, firstRowY + TEXT_ROW_PITCH },
 		renderer->fit_text_to_width("[Enter] Confirm  [Esc] Skip", interior_width()),
-		CYAN_BLACK_PAIR);
+		ColorPairId::CYAN_BLACK);
 
 	menu_refresh();
 }

@@ -212,7 +212,7 @@ MonsterParams parse_full_params(const nlohmann::json& entry)
 {
 	MonsterParams params;
 	params.symbol = parse_tile(entry.at("tile"));
-	params.color = entry.at("color").get<int>();
+	params.color = parse_color_pair(entry.at("color").get<std::string>());
 	params.corpseName = entry.at("corpse").get<std::string>();
 	params.hpDice = parse_dice(entry.at("hp"));
 	params.thaco = entry.at("thaco").get<int>();
@@ -257,7 +257,7 @@ nlohmann::json encode_full_params(const MonsterParams& params)
 {
 	return nlohmann::json{
 		{ "tile", encode_tile(params.symbol) },
-		{ "color", params.color },
+		{ "color", color_pair_name(params.color) },
 		{ "name", params.name },
 		{ "corpse", params.corpseName },
 		{ "hp", encode_dice(params.hpDice) },

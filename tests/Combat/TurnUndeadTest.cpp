@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/Player.h"
 #include "src/ExperienceReward.h"
@@ -35,7 +36,7 @@ protected:
 	// which is the row a turning attempt reads.
 	Creature& add_undead(int hitDice, Vector2D position)
 	{
-		auto undead = std::make_unique<Creature>(position, ActorData{ TileRef{}, "skeleton", 0 });
+		auto undead = std::make_unique<Creature>(position, ActorData{ TileRef{}, "skeleton", ColorPairId::WHITE_BLACK });
 		undead->healthPool = std::make_unique<HealthPool>(8);
 
 		// Every creature the game builds has one; die() reads it for the kill reward.
@@ -48,7 +49,7 @@ protected:
 
 	Creature& add_living(Vector2D position)
 	{
-		auto living = std::make_unique<Creature>(position, ActorData{ TileRef{}, "goblin", 0 });
+		auto living = std::make_unique<Creature>(position, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		living->healthPool = std::make_unique<HealthPool>(8);
 		creatures.push_back(std::move(living));
 		return *creatures.back();

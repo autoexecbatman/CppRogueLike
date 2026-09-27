@@ -75,7 +75,7 @@ void MenuSell::handle_sell(Creature& shopkeeper, Creature& seller, GameContext& 
 	if (InventoryOperations::is_inventory_empty(seller.inventoryData) ||
 		currentState >= InventoryOperations::get_item_count(seller.inventoryData))
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
 		return;
 	}
 
@@ -139,7 +139,7 @@ void MenuSell::draw()
 {
 	menu_clear();
 	menu_draw_box();
-	menu_draw_title("SELL ITEMS", YELLOW_BLACK_PAIR);
+	menu_draw_title("SELL ITEMS", ColorPairId::YELLOW_BLACK);
 
 	menu_print_header();
 
@@ -181,7 +181,7 @@ void MenuSell::on_key(GameContext& ctx)
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items to sell.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No items to sell.", MessageCompletion::FINISHED);
 		}
 	}
 	else if (lastKey == GameKey::ESCAPE)

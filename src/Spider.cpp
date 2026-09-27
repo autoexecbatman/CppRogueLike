@@ -38,7 +38,7 @@ constexpr int POISON_CHANCE_WEB_SPINNER = 15;
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
-	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR }), // Default to small spider data
+	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", ColorPairId::GREEN_BLACK }), // Default to small spider data
 	  spiderType(type)
 {
 	// Initialize based on spider type
@@ -92,7 +92,7 @@ void Spider::init_spider_type(GameContext& ctx)
 	{
 	case SpiderType::SMALL:
 		// Update actor data for small spider
-		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", GREEN_BLACK_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_SMALL), "small spider", ColorPairId::GREEN_BLACK };
 
 		// Stats for small spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6()); // Minimum strength of 3
@@ -113,7 +113,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::GIANT:
 		// Update actor data for giant spider
-		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_GIANT), "giant spider", RED_BLACK_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_GIANT), "giant spider", ColorPairId::RED_BLACK };
 
 		// Stats for giant spider
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());
@@ -134,7 +134,7 @@ void Spider::init_spider_type(GameContext& ctx)
 
 	case SpiderType::WEB_SPINNER:
 		// Update actor data for web spinner
-		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_WEAVER), "web weaver", BLACK_GREEN_PAIR };
+		actorData = ActorData{ ctx.monsterRegistry->get_tile(MonsterId::SPIDER_WEAVER), "web weaver", ColorPairId::BLACK_GREEN };
 
 		// Stats for web spinner - now much more formidable
 		set_strength(ctx.dice->d6() + ctx.dice->d6() + ctx.dice->d6());

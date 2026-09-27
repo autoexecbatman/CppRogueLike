@@ -8,7 +8,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -78,7 +78,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 14,
+    "color": "magenta_black",
     "con": {
       "bonus": 1,
       "num": 1,
@@ -143,7 +143,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -213,7 +213,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 19,
+    "color": "red_yellow",
     "con": {
       "bonus": 0,
       "num": 5,
@@ -278,7 +278,7 @@
       "num": 4,
       "sides": 6
     },
-    "color": 19,
+    "color": "red_yellow",
     "con": {
       "bonus": 0,
       "num": 5,
@@ -343,7 +343,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 19,
+    "color": "red_yellow",
     "con": {
       "bonus": 2,
       "num": 3,
@@ -408,7 +408,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -473,7 +473,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -539,7 +539,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 1,
@@ -604,7 +604,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 1,
@@ -669,7 +669,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -734,7 +734,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -804,7 +804,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 11,
+    "color": "yellow_black",
     "con": {
       "bonus": 1,
       "num": 2,
@@ -874,7 +874,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 6,
@@ -939,7 +939,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 14,
+    "color": "magenta_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -1004,7 +1004,7 @@
       "num": 2,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 5,
@@ -1069,7 +1069,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -1139,7 +1139,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 2,
       "num": 3,
@@ -1204,7 +1204,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -1274,7 +1274,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -1340,7 +1340,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 3,
+    "color": "white_blue",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -1410,7 +1410,7 @@
       "num": 2,
       "sides": 6
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -1483,7 +1483,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -1553,7 +1553,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -1623,7 +1623,7 @@
       "num": 2,
       "sides": 6
     },
-    "color": 19,
+    "color": "red_yellow",
     "con": {
       "bonus": 0,
       "num": 5,
@@ -1688,7 +1688,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 1,
@@ -1753,7 +1753,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -1827,7 +1827,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 0,
       "num": 1,
@@ -1917,7 +1917,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -1982,7 +1982,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -2048,7 +2048,7 @@
       "num": 2,
       "sides": 6
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 2,
       "num": 3,
@@ -2113,7 +2113,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -2179,7 +2179,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 21,
+    "color": "brown_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -2244,7 +2244,7 @@
       "num": 1,
       "sides": 4
     },
-    "color": 15,
+    "color": "cyan_blue",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -2310,7 +2310,7 @@
       "num": 1,
       "sides": 6
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 4,
@@ -2375,7 +2375,7 @@
       "num": 1,
       "sides": 2
     },
-    "color": 10,
+    "color": "green_black",
     "con": {
       "bonus": 0,
       "num": 2,
@@ -2441,7 +2441,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 9,
+    "color": "red_black",
     "con": {
       "bonus": 0,
       "num": 3,
@@ -2512,7 +2512,7 @@
       "num": 3,
       "sides": 6
     },
-    "color": 14,
+    "color": "magenta_black",
     "con": {
       "bonus": 2,
       "num": 3,

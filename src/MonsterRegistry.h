@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Colors.h"
+
 #include <map>
 #include <string>
 #include <string_view>
@@ -71,7 +73,7 @@ struct MonsterParams
 	// The name messages and menus show; a standard monster's is read from its corpse.
 	std::string name;
 	// The colour pair it is drawn in.
-	int color{ 0 };
+	ColorPairId color{ ColorPairId::WHITE_BLACK };
 	// What its corpse is called.
 	std::string corpseName;
 

@@ -2,8 +2,10 @@
 
 #include <string>
 
+#include "Colors.h"
+
 struct LogMessage
 {
-	int logMessageColor{ 0 };
+	ColorPairId logMessageColor{ ColorPairId::WHITE_BLACK };
 	std::string logMessageText{};
 };

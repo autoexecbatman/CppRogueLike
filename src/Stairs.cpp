@@ -4,4 +4,4 @@
 #include "Stairs.h"
 
 Stairs::Stairs(Vector2D position)
-	: Actor(position, ActorData{ TileRef{}, "stairs", WHITE_BLACK_PAIR }) {}
+	: Actor(position, ActorData{ TileRef{}, "stairs", ColorPairId::WHITE_BLACK }) {}

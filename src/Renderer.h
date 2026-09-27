@@ -6,6 +6,7 @@
 
 #include <raylib.h>
 
+#include "Colors.h"
 #include "Vector2D.h"
 
 class TileConfig;
@@ -101,7 +102,6 @@ inline constexpr int GUI_TEXT_ROWS = 6;        // Text rows the HUD lays out
 		tileSize + GUI_TEXT_TOP_INSET + (GUI_TEXT_ROWS - 1) * UI_TEXT_ROW_PITCH + fontSize;
 	return (neededPixels + tileSize - 1) / tileSize;
 }
-inline constexpr int MAX_COLOR_PAIRS = 23;    // Size of the color pair table
 
 // DawnLike sprite sheet indices.
 // Sheets with 0/1 suffixes are animation frame pairs.
@@ -258,7 +258,7 @@ class Renderer
 	int currentAnimFrame{ 0 };
 	double lastAnimToggle{ 0.0 };
 
-	std::array<ColorPair, MAX_COLOR_PAIRS> colorPairs{};
+	std::array<ColorPair, COLOR_PAIR_TABLE_SIZE> colorPairs{};
 
 	void init_color_pairs();
 	void load_sheet(TileSheet id, std::string_view name, std::string_view path0, std::string_view path1, int cellSize);
@@ -296,7 +296,7 @@ public:
 
 	// Screen-space drawing at an explicit pixel size (used by tile picker).
 	void draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int displaySize) const;
-	void draw_text(Vector2D screenPos, std::string_view text, int colorPairId) const;
+	void draw_text(Vector2D screenPos, std::string_view text, ColorPairId colorPair) const;
 	void draw_text_color(Vector2D screenPos, std::string_view text, Color color) const;
 	void draw_bar(Vector2D screenPos, int w, int h, float ratio, Color filled, Color empty) const;
 
@@ -324,7 +324,7 @@ public:
 	void add_light_quad(int screenX, int screenY, int tileSize, Color tileColor);
 	void apply_light_mask();
 
-	[[nodiscard]] ColorPair get_color_pair(int id) const;
+	[[nodiscard]] ColorPair get_color_pair(ColorPairId pair) const;
 	[[nodiscard]] ScreenMetrics metrics() const;
 	[[nodiscard]] int measure_text(std::string_view text) const;
 	// The longest prefix of text that fits in maxWidth pixels, cut at a space when

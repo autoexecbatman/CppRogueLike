@@ -92,7 +92,7 @@ void MenuBuy::draw()
 {
 	menu_clear();
 	menu_draw_box();
-	menu_draw_title("BUY ITEMS", YELLOW_BLACK_PAIR);
+	menu_draw_title("BUY ITEMS", ColorPairId::YELLOW_BLACK);
 
 	menu_print_header();
 
@@ -134,7 +134,7 @@ void MenuBuy::on_key(GameContext& ctx)
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "No items for sale.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No items for sale.", MessageCompletion::FINISHED);
 		}
 	}
 }
@@ -151,14 +151,14 @@ void MenuBuy::handle_buy()
 	if (InventoryOperations::is_inventory_empty(shopkeeper.get_shop_inventory()) ||
 		currentState >= InventoryOperations::get_item_count(shopkeeper.get_shop_inventory()))
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
 		return;
 	}
 
 	Item* item = InventoryOperations::get_item_at(shopkeeper.get_shop_inventory(), currentState);
 	if (!item)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid selection.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid selection.", MessageCompletion::FINISHED);
 		return;
 	}
 

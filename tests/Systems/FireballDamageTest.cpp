@@ -12,6 +12,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/Player.h"
 #include "src/EquipmentSlot.h"
@@ -44,7 +45,7 @@ protected:
 	Creature& add_creature(int column)
 	{
 		auto creature = std::make_unique<Creature>(
-			Vector2D{ column, 5 }, ActorData{ TileRef{}, "goblin", 0 });
+			Vector2D{ column, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		creature->set_strength(10);
 		creature->set_body_plan({ EquipmentSlot::RIGHT_RING, EquipmentSlot::HEAD });

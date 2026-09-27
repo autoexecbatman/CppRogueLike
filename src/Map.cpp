@@ -340,7 +340,7 @@ void Map::describe_tile(TileType tileType, GameContext& ctx)
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->log(definition.entryMessage);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, definition.entryMessage, true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, definition.entryMessage, MessageCompletion::FINISHED);
 	}
 }
 
@@ -2042,7 +2042,7 @@ void Map::place_amulet(GameContext& ctx)
 			ctx.messageSystem->log("Placed Amulet of Yendor at " + std::to_string(amuletPos.x) + "," + std::to_string(amuletPos.y));
 
 			// Add a hint message
-			ctx.messageSystem->message(RED_YELLOW_PAIR, "You sense a powerful artifact somewhere on this level...", true);
+			ctx.messageSystem->message(ColorPairId::RED_YELLOW, "You sense a powerful artifact somewhere on this level...", MessageCompletion::FINISHED);
 		}
 	}
 }

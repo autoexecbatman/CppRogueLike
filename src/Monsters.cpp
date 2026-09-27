@@ -17,7 +17,7 @@
 #include "Monsters.h"
 
 Mimic::Mimic(Vector2D position, GameContext& ctx)
-	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", RED_YELLOW_PAIR })
+	: Creature(position, ActorData{ ctx.monsterRegistry->get_tile(MonsterId::MIMIC), "mimic", ColorPairId::RED_YELLOW })
 {
 	const int thaco = 17;
 	const int ac = 7;

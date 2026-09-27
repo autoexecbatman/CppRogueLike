@@ -61,7 +61,7 @@ Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 
 	actorData.name = trapName;
 	actorData.tile = armedTile;
-	actorData.color = YELLOW_BLACK_PAIR;
+	actorData.color = ColorPairId::YELLOW_BLACK;
 
 	// Hidden traps are invisible until detected
 	add_state(ActorState::IS_INVISIBLE);
@@ -85,7 +85,7 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 		remove_state(ActorState::IS_INVISIBLE);  // Trap is now visible
 		if (ctx.messageSystem)
 		{
-			ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You notice a hidden trap!", true);
+			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap!", MessageCompletion::FINISHED);
 		}
 		return true;
 	}
@@ -206,7 +206,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 			break;
 		}
 		}
-		ctx.messageSystem->message(RED_BLACK_PAIR, std::format("You trigger the {} and take {} damage!", trapName, damage), true);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("You trigger the {} and take {} damage!", trapName, damage), MessageCompletion::FINISHED);
 	}
 
 	creature.take_damage_and_check_death(damage, ctx, DamageType::PHYSICAL);
@@ -217,7 +217,7 @@ EntryResult Trap::on_creature_enter(Creature& creature, GameContext& ctx)
 		destroy();
 		if (ctx.messageSystem)
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The trap is destroyed.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The trap is destroyed.", MessageCompletion::FINISHED);
 		}
 	}
 
@@ -247,7 +247,7 @@ void Trap::attempt_passive_detection(Creature& creature, GameContext& ctx)
 		remove_state(ActorState::IS_INVISIBLE);
 		if (ctx.messageSystem)
 		{
-			ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You notice a hidden trap at the last moment!", true);
+			ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You notice a hidden trap at the last moment!", MessageCompletion::FINISHED);
 		}
 	}
 }

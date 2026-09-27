@@ -78,7 +78,7 @@ public:
 	std::string get_hunger_bar_string(int bar_width = 20) const;
 
 	// Returns color code for hunger UI display
-	int get_hunger_color() const;
+	ColorPairId get_hunger_color() const;
 
 	// Returns true if player is hungry enough to suffer penalties
 	bool is_suffering_hunger_penalties() const;

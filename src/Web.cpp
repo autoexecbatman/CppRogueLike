@@ -11,7 +11,7 @@
 #include "Web.h"
 
 Web::Web(Vector2D position, int strength, const TileConfig& tileConfig)
-	: SpellTile(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", BLACK_WHITE_PAIR }),
+	: SpellTile(position, ActorData{ tileConfig.get("TILE_WEB"), "spider web", ColorPairId::BLACK_WHITE }),
 	  webStrength(strength)
 {
 	// Webs don't block movement but do have their effect when passed through
@@ -30,7 +30,7 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 	// Check for Ring of Free Action (AD&D 2e: grants immunity to webs and paralysis)
 	if (creature.wears_ring_of(MagicalEffect::FREE_ACTION))
 	{
-		ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your ring of free action protects you from the web!", true);
+		ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "Your ring of free action protects you from the web!", MessageCompletion::FINISHED);
 		destroy();
 		return EntryResult::AFFECTED;
 	}
@@ -47,7 +47,7 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 		// Apply the effect through polymorphic interface
 		creature.apply_web_effect(stuckTurns, webStrength, this);
 
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're caught in a sticky web!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're caught in a sticky web!", MessageCompletion::FINISHED);
 
 		// Player loses their turn
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
@@ -55,13 +55,13 @@ EntryResult Web::on_creature_enter(Creature& creature, GameContext& ctx)
 	}
 	else
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You carefully navigate through the web.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You carefully navigate through the web.", MessageCompletion::FINISHED);
 
 		// 50% chance to destroy the web
 		if (ctx.dice->d2() == 1)
 		{
 			destroy();
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You tear through the web, clearing a path.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You tear through the web, clearing a path.", MessageCompletion::FINISHED);
 		}
 
 		return EntryResult::AFFECTED;

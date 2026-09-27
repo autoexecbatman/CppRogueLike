@@ -94,8 +94,8 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 			const int distanceToPlayer = owner.get_tile_distance(ctx.player()->position);
 			if (ctx.map->is_in_fov(owner.position) && distanceToPlayer <= 3)
 			{
-				ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, " ambushes you from hiding!", true);
+				ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " ambushes you from hiding!", MessageCompletion::FINISHED);
 				ambushSprung = true;
 			}
 		}
@@ -152,7 +152,7 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		// comes last because it spends a die, and only a round that can happen should.
 		if (ambushSprung && !ctx.player()->is_dead() && !ctx.buffSystem->is_turned_away_by_sanctuary(owner, *ctx.player(), ctx) && is_surprised(*ctx.player(), ctx))
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are caught off guard!", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are caught off guard!", MessageCompletion::FINISHED);
 			ctx.player()->add_state(ActorState::IS_SURPRISED);
 			bite(owner, *ctx.player(), ctx);
 			ctx.player()->remove_state(ActorState::IS_SURPRISED);
@@ -371,10 +371,10 @@ void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx
 		int poisonDamage = ctx.dice->roll(1, 3);
 
 		// Display poison message with damage amount
-		ctx.messageSystem->message(RED_BLACK_PAIR, owner.actorData.name);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " injects venom for ");
-		ctx.messageSystem->message(WHITE_RED_PAIR, std::to_string(poisonDamage));
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " extra poison damage!", true);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, owner.actorData.name, MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects venom for ", MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, std::to_string(poisonDamage), MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " extra poison damage!", MessageCompletion::FINISHED);
 
 		// Deal the poison damage
 		target.take_damage_and_check_death(poisonDamage, ctx, DamageType::POISON);

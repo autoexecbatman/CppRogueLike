@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ColorPairTest.*:CodecRoundTripTest.*:EnumCycleTest.*:ItemRoundTripTest.*:CreatureSerializationTest.*:ItemSerializationTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Colors.h",
+      "original": "inline constexpr std::size_t COLOR_PAIR_TABLE_SIZE = ALL_COLOR_PAIR.size() + 1;",
+      "mutated": "inline constexpr std::size_t COLOR_PAIR_TABLE_SIZE = ALL_COLOR_PAIR.size();",
+      "catches": "the table one slot short, which is what a hand-kept size drifts into"
+    },
+    {
+      "file": "src/Colors.h",
+      "original": "\t\treturn \"brown_black\";",
+      "mutated": "\t\treturn \"brown\";",
+      "catches": "a pair's name changed, which changes what every record carrying it means"
+    },
+    {
+      "file": "src/Colors.h",
+      "original": "\t\tthrow std::runtime_error(std::format(\"unknown color pair '{}'\", name));",
+      "mutated": "\t\treturn ColorPairId::WHITE_BLACK;",
+      "catches": "an unreadable colour defaulting silently instead of refusing the record"
+    },
+    {
+      "file": "src/Colors.h",
+      "original": "\treturn static_cast<std::size_t>(pair);",
+      "mutated": "\treturn static_cast<std::size_t>(pair) - 1;",
+      "catches": "the table indexed as though slot zero belonged to the first pair"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\trecord[\"color\"] = color_pair_name(params.color);",
+      "mutated": "\trecord[\"color\"] = color_pair_name(ColorPairId::WHITE_BLACK);",
+      "catches": "an item's colour thrown away on the way back out to the data"
+    },
+    {
+      "file": "src/ItemRegistry.cpp",
+      "original": "\tparams.color = parse_color_pair(required_field(record, key, \"color\").get<std::string>());",
+      "mutated": "\tparams.color = ColorPairId::WHITE_BLACK;",
+      "catches": "the colour in the record never read at all"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\tactorData.color = parse_color_pair(j[\"actorData\"].at(\"color\").get<std::string>());",
+      "mutated": "\tactorData.color = ColorPairId::WHITE_BLACK;",
+      "catches": "a saved colour not read back, so every loaded actor turns white"
+    },
+    {
+      "file": "src/Actor.cpp",
+      "original": "\t\t{ \"color\", color_pair_name(actorData.color) }",
+      "mutated": "\t\t{ \"color\", color_pair_name(ColorPairId::RED_BLACK) }",
+      "catches": "every actor saved under one colour whatever it was drawn in"
+    }
+  ]
+}

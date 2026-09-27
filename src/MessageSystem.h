@@ -1,11 +1,23 @@
 #pragma once
 
+#include "Colors.h"
+
 #include <string>
 #include <vector>
 
 #include "LogMessage.h"
 
 class Gui;
+
+// Whether a message stands on its own or is the opening of one built in parts.
+// A message is often assembled from several coloured runs - "You hit " in white,
+// the monster's name in its own colour - and the log holds them as one entry, so
+// the caller has to say which it is writing.
+enum class MessageCompletion
+{
+	CONTINUED, // more parts follow, added with append_message_part
+	FINISHED, // the line is whole and closes the log entry
+};
 
 // - Handles all messaging and logging functionality
 class MessageSystem
@@ -19,8 +31,8 @@ public:
 	MessageSystem& operator=(MessageSystem&&) = delete;
 
 	// Core message functionality
-	void message(int color, std::string_view text, bool isComplete = false);
-	void append_message_part(int color, std::string_view text);
+	void message(ColorPairId color, std::string_view text, MessageCompletion completion);
+	void append_message_part(ColorPairId color, std::string_view text);
 	void finalize_message();
 	void transfer_messages_to_gui(Gui& gui);
 
@@ -30,7 +42,7 @@ public:
 
 	// Getters for current message state
 	const std::string& get_current_message() const noexcept { return messageToDisplay; }
-	int get_current_message_color() const noexcept { return messageColor; }
+	ColorPairId get_current_message_color() const noexcept { return messageColor; }
 
 	// Debug mode control
 	void enable_debug_mode() noexcept { debugMode = true; }
@@ -50,7 +62,7 @@ private:
 	std::vector<LogMessage> attackMessageParts;
 	std::vector<std::vector<LogMessage>> attackMessagesWhole;
 	std::string messageToDisplay{ "Init Message" };
-	int messageColor{ 0 };
+	ColorPairId messageColor{ ColorPairId::WHITE_BLACK };
 
 	// Debug state
 	bool debugMode{ true };

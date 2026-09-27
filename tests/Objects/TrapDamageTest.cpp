@@ -20,6 +20,7 @@
 
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
 #include "src/TileFeature.h"
@@ -49,7 +50,7 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature victim{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "adventurer", 0 } };
+	Creature victim{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "adventurer", ColorPairId::WHITE_BLACK } };
 };
 
 TEST_F(TrapDamageTest, APitDealsTwoSixSidedDice)

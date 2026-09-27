@@ -5,6 +5,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/Player.h"
 #include "src/Map.h"
@@ -50,7 +51,7 @@ protected:
 	GameContext ctx{};
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature monster{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", 0 } };
+	Creature monster{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
 };
 
 // A creature starts with no knowledge of the player.

@@ -67,7 +67,7 @@ void ListMenu::draw()
 {
     menu_clear();
     menu_draw_box();
-    menu_draw_title(title, YELLOW_BLACK_PAIR);
+    menu_draw_title(title, ColorPairId::YELLOW_BLACK);
     draw_entries();
     menu_refresh();
 }

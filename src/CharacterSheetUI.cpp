@@ -54,7 +54,7 @@ void display_basic_info(const Player& player, GameContext& ctx, int& row)
         player.playerClass,
         player.playerRace,
         player.get_level());
-    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, line, WHITE_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, line, ColorPairId::WHITE_BLACK);
     row += 2;
 }
 
@@ -70,7 +70,7 @@ void display_experience_info(const Player& player, GameContext& ctx, int& row)
     ctx.renderer->draw_text(
         Vector2D{ x, panel_text_row_y(0, tileSize, row) },
         std::format("XP: {} / {}   (Need: {})", currentXP, nextLevelXP, xpNeeded),
-        CYAN_BLACK_PAIR);
+        ColorPairId::CYAN_BLACK);
     row += 2;
 }
 
@@ -92,23 +92,23 @@ void display_attributes(const Player& player, GameContext& ctx, int& row)
     const int missileAdj = dexterityRow.MissileAttackAdj;
     const int defensiveAdj = dexterityRow.DefensiveAdj;
 
-    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- ATTRIBUTES ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- ATTRIBUTES ---", ColorPairId::YELLOW_BLACK);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:>2}  ({:+d} hit, {:+d} dmg)", strength_text(player), strHitMod, strDmgMod), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("STR: {:>2}  ({:+d} hit, {:+d} dmg)", strength_text(player), strHitMod, strDmgMod), ColorPairId::WHITE_BLACK);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("DEX: {:2d}  ({:+d} missile, {:+d} defensive)", player.get_dexterity(), missileAdj, defensiveAdj), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("DEX: {:2d}  ({:+d} missile, {:+d} defensive)", player.get_dexterity(), missileAdj, defensiveAdj), ColorPairId::WHITE_BLACK);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, CharacterSheetText::constitution_line(player, *ctx.dataManager), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, CharacterSheetText::constitution_line(player, *ctx.dataManager), ColorPairId::WHITE_BLACK);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("INT: {:2d}   WIS: {:2d}   CHA: {:2d}", player.get_intelligence(), player.get_wisdom(), player.get_charisma()), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("INT: {:2d}   WIS: {:2d}   CHA: {:2d}", player.get_intelligence(), player.get_wisdom(), player.get_charisma()), ColorPairId::WHITE_BLACK);
     row += 2;
 }
 
@@ -122,19 +122,19 @@ void display_combat_stats(const Player& player, GameContext& ctx, int& row)
     int baseHP = player.get_hp_base();
     int conBonusTotal = maxHp - baseHP;
 
-    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- COMBAT ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- COMBAT ---", ColorPairId::YELLOW_BLACK);
     row++;
 
-    int hpColor = (hp > maxHp / 2)
-        ? GREEN_BLACK_PAIR
-        : (hp > maxHp / 4 ? YELLOW_BLACK_PAIR : RED_BLACK_PAIR);
+    const ColorPairId hpColor = (hp > maxHp / 2)
+        ? ColorPairId::GREEN_BLACK
+        : (hp > maxHp / 4 ? ColorPairId::YELLOW_BLACK : ColorPairId::RED_BLACK);
 
     ctx.renderer->draw_text(
         Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("HP: {} / {}  (Base: {}, Con Bonus: {:+d})", hp, maxHp, baseHP, conBonusTotal), hpColor);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("THAC0: {}   AC: {}   DR: {}", player.get_thaco(), player.get_armor_class(), player.get_dr()), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("THAC0: {}   AC: {}   DR: {}", player.get_thaco(), player.get_armor_class(), player.get_dr()), ColorPairId::WHITE_BLACK);
     row += 2;
 }
 
@@ -167,7 +167,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
         nullptr);
     const int strDmgMod = swing.damage;
 
-    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- EQUIPMENT ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- EQUIPMENT ---", ColorPairId::YELLOW_BLACK);
     row++;
 
     std::string weaponName = equippedWeapon
@@ -175,7 +175,7 @@ void display_equipment_info(const Player& player, GameContext& ctx, int& row)
         : "(unarmed)";
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Weapon: {}   Damage: {}  (STR bonus: {:+d})", weaponName, damageDisplay, strDmgMod), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Weapon: {}   Damage: {}  (STR bonus: {:+d})", weaponName, damageDisplay, strDmgMod), ColorPairId::WHITE_BLACK);
     row += 2;
 }
 
@@ -188,11 +188,11 @@ void display_right_panel_info(const Player& player, GameContext& ctx, int& row)
         ? ctx.hungerSystem->get_hunger_state_string()
         : "Unknown";
 
-    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- OTHER ---", YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, panel_text_row_y(0, tileSize, row) }, "--- OTHER ---", ColorPairId::YELLOW_BLACK);
     row++;
 
     ctx.renderer->draw_text(
-        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Gender: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.get_gold(), hungerStr), WHITE_BLACK_PAIR);
+        Vector2D{ x, panel_text_row_y(0, tileSize, row) }, std::format("Gender: {}   Gold: {} gp   Hunger: {}", player.get_gender(), player.get_gold(), hungerStr), ColorPairId::WHITE_BLACK);
     row += 2;
 }
 
@@ -257,12 +257,12 @@ void CharacterSheetUI::menu(GameContext& ctx)
     std::string_view title = "CHARACTER SHEET";
     int title_w = ctx.renderer->measure_text(title);
     int title_x = (screenW - title_w) / 2;
-    ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ title_x, font_off }, title, ColorPairId::YELLOW_BLACK);
 
     std::string_view hint = "[ESC] or [SPACE] to close";
     int hint_w = ctx.renderer->measure_text(hint);
     int hint_x = (screenW - hint_w) / 2;
-    ctx.renderer->draw_text(Vector2D{ hint_x, screenH - tileSize + font_off }, hint, CYAN_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ hint_x, screenH - tileSize + font_off }, hint, ColorPairId::CYAN_BLACK);
 
     int row = 0;
     display_basic_info(player_ref, ctx, row);

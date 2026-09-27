@@ -50,7 +50,7 @@ void NotificationMenu::draw()
 {
     menu_clear();
     menu_draw_box();
-    menu_draw_title(title, YELLOW_BLACK_PAIR);
+    menu_draw_title(title, ColorPairId::YELLOW_BLACK);
 
     int row{ 0 };
     for (const auto& line : lines)

@@ -26,6 +26,7 @@
 
 #include <array>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
@@ -167,7 +168,7 @@ protected:
 	// score, its hit die scripted to roll `rolled`.
 	int gain_for(CreatureClass creatureClass, int constitution, int rolled)
 	{
-		Creature adventurer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "adventurer", 0 } };
+		Creature adventurer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "adventurer", ColorPairId::WHITE_BLACK } };
 		adventurer.healthPool = std::make_unique<HealthPool>(50);
 		adventurer.armorClass = std::make_unique<ArmorClass>(10);
 		adventurer.experienceReward = std::make_unique<ExperienceReward>(0);
@@ -182,7 +183,7 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature fighter{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", 0 } };
+	Creature fighter{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK } };
 };
 
 // Past 9th a warrior gains exactly 3, with no die and no Constitution bonus,

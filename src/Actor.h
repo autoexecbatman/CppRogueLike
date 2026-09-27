@@ -15,7 +15,7 @@ struct ActorData
 {
 	TileRef tile{};
 	std::string name{ "string" };
-	int color{ WHITE_BLACK_PAIR };
+	ColorPairId color{ ColorPairId::WHITE_BLACK };
 };
 
 enum class ActorState
@@ -43,7 +43,7 @@ class Actor : public Persistent
 public:
 	Vector2D position{ 0, 0 };
 	Vector2D direction{ 0, 0 };
-	ActorData actorData{ TileRef{}, "string", 0 };
+	ActorData actorData{ TileRef{}, "string", ColorPairId::WHITE_BLACK };
 	UniqueId::IdType uniqueId{};
 	std::vector<ActorState> states;
 
@@ -73,7 +73,7 @@ public:
 		return actorData.tile;
 	}
 
-	virtual int get_display_color() const noexcept
+	virtual ColorPairId get_display_color() const noexcept
 	{
 		return actorData.color;
 	}

@@ -24,6 +24,7 @@
 
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/GameContext.h"
 #include "src/InventoryOperations.h"
@@ -83,7 +84,7 @@ protected:
 	ShopKeeper shop{ ShopType::GENERAL_STORE, ShopQuality::AVERAGE };
 	Player player{ Vector2D{ 1, 1 } };
 	// The shopkeeper creature: the shop's goods live in the ShopKeeper, its gold here.
-	Creature owner{ Vector2D{ 2, 1 }, ActorData{ TileRef{}, "shopkeeper", 0 } };
+	Creature owner{ Vector2D{ 2, 1 }, ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK } };
 };
 
 TEST_F(ShopTransactionTest, AStockedShopHasSomethingToSell)

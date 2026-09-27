@@ -24,6 +24,7 @@
 #include "src/Weapons.h"
 #include "src/Ai.h"
 #include "src/Alignment.h"
+#include "src/Colors.h"
 #include "src/BuffType.h"
 #include "src/CreatureClass.h"
 #include "src/DamageInfo.h"
@@ -189,9 +190,19 @@ TEST(CodecRoundTripTest, DamageTypeSurvivesEncoding)
 	}
 }
 
+// Every colour pair a record can carry.
+TEST(CodecRoundTripTest, ColorPairSurvivesEncoding)
+{
+	for (const ColorPairId pair : ALL_COLOR_PAIR)
+	{
+		expect_round_trip(pair, color_pair_name, parse_color_pair, "ColorPairId");
+	}
+}
+
 // The parser is the only schema this data has.
 TEST(CodecRoundTripTest, UnknownStringsThrow)
 {
+	EXPECT_THROW((void)parse_color_pair("puce"), std::runtime_error);
 	EXPECT_THROW((void)parse_damage_type("sonic"), std::runtime_error);
 	EXPECT_THROW((void)parse_ethics("scrupulous"), std::runtime_error);
 	EXPECT_THROW((void)parse_morality("saintly"), std::runtime_error);

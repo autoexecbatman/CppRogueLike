@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/InventoryOperations.h"
 #include "tests/mocks/MockGameContext.h"
@@ -40,7 +41,7 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{ mock.to_game_context() };
-	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", 0 } };
+	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", ColorPairId::WHITE_BLACK } };
 };
 
 TEST_F(CarryCapacityTest, AnAverageStrengthCarriesTheTablesHundredAndTen)

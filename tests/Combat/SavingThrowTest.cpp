@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/ExperienceReward.h"
@@ -134,7 +135,7 @@ protected:
 	// its saving throws improved.
 	bool announced_at(CreatureClass creatureClass, int newLevel)
 	{
-		Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", 0 } };
+		Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK } };
 		creature.healthPool = std::make_unique<HealthPool>(50);
 		creature.armorClass = std::make_unique<ArmorClass>(10);
 		creature.experienceReward = std::make_unique<ExperienceReward>(0);

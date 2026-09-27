@@ -307,15 +307,15 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	Color filled;
 	if (ratio > 0.5f)
 	{
-		filled = ctx.renderer->get_color_pair(GREEN_BLACK_PAIR).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::GREEN_BLACK).fg;
 	}
 	else if (ratio > 0.25f)
 	{
-		filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
 	}
 	else
 	{
-		filled = ctx.renderer->get_color_pair(RED_BLACK_PAIR).fg;
+		filled = ctx.renderer->get_color_pair(ColorPairId::RED_BLACK).fg;
 	}
 
 	Color barEmpty = { 20, 20, 30, 255 };
@@ -330,7 +330,7 @@ void Gui::render_hp_bar(const GameContext& ctx)
 	ctx.renderer->draw_text(
 		Vector2D{ textX, rowY + (UI_TEXT_ROW_PITCH - ctx.renderer->get_font_size()) / 2 },
 		hpText,
-		WHITE_BLACK_PAIR);
+		ColorPairId::WHITE_BLACK);
 }
 
 void Gui::render_hunger_status(const GameContext& ctx)
@@ -348,7 +348,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	}
 
 	const std::string hungerText = ctx.hungerSystem->get_hunger_state_string();
-	const int hungerColor = ctx.hungerSystem->get_hunger_color();
+	const ColorPairId hungerColor = ctx.hungerSystem->get_hunger_color();
 
 	// Fullness, not hunger: this bar sits beside the health bar and has to fill
 	// the same way, so a well fed creature shows a full one.
@@ -366,7 +366,7 @@ void Gui::render_hunger_status(const GameContext& ctx)
 	const int barH = GUI_BAR_HEIGHT;
 	const int barY = rowY + (UI_TEXT_ROW_PITCH - barH) / 2;
 
-	Color filled = ctx.renderer->get_color_pair(YELLOW_BLACK_PAIR).fg;
+	Color filled = ctx.renderer->get_color_pair(ColorPairId::YELLOW_BLACK).fg;
 	Color barEmpty = { 20, 20, 30, 255 };
 	ctx.renderer->draw_bar(Vector2D{ barX, barY }, barW, barH, ratio, filled, barEmpty);
 
@@ -403,33 +403,33 @@ void Gui::gui_print_stats(const GameContext& ctx) noexcept
 	// ability scores with their derived modifiers.
 
 	// Row 1: Name, which clips to the panel. Everything below it is sized to fit.
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) }, ctx.renderer->fit_text_to_width(ctx.player()->actorData.name, statsWidth), YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 0) }, ctx.renderer->fit_text_to_width(ctx.player()->actorData.name, statsWidth), ColorPairId::YELLOW_BLACK);
 
 	// Row 2: Class
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) }, ctx.renderer->fit_text_to_width(ctx.player_concrete().get_class_display_name(), statsWidth), YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 1) }, ctx.renderer->fit_text_to_width(ctx.player_concrete().get_class_display_name(), statsWidth), ColorPairId::YELLOW_BLACK);
 
 	// Row 3: Level and to-hit. T0 = THAC0 abbreviation.
 	auto levelLine = std::format(
 		"Lv.{}  T0:{}",
 		ctx.player()->get_level(),
 		ctx.player()->get_thaco());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 2) }, ctx.renderer->fit_text_to_width(levelLine, statsWidth), WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 2) }, ctx.renderer->fit_text_to_width(levelLine, statsWidth), ColorPairId::WHITE_BLACK);
 
 	// Row 4: What stops a hit landing, and what it costs when one does.
 	auto defenceLine = std::format(
 		"AC:{}  DR:{}",
 		ctx.player()->get_armor_class(),
 		ctx.player()->get_dr());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 3) }, ctx.renderer->fit_text_to_width(defenceLine, statsWidth), WHITE_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 3) }, ctx.renderer->fit_text_to_width(defenceLine, statsWidth), ColorPairId::WHITE_BLACK);
 
 	// Row 5: Attack roll
 	auto atkLine = std::format(
 		"Atk: {}", ctx.player_concrete().get_equipped_weapon_damage_roll());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 4) }, ctx.renderer->fit_text_to_width(atkLine, statsWidth), GREEN_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 4) }, ctx.renderer->fit_text_to_width(atkLine, statsWidth), ColorPairId::GREEN_BLACK);
 
 	// Row 6: Gold. The "gp" suffix went with the rest of the width.
 	auto goldLine = std::format("Gold: {}", ctx.player_concrete().get_gold());
-	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 5) }, ctx.renderer->fit_text_to_width(goldLine, statsWidth), YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ statsX, hud_text_row_y(baseY, tileSize, 5) }, ctx.renderer->fit_text_to_width(goldLine, statsWidth), ColorPairId::YELLOW_BLACK);
 }
 
 // ---------------------------------------------------------------------------
@@ -497,7 +497,7 @@ void Gui::render_player_status(const GameContext& ctx)
 		ctx.renderer->draw_text(
 			Vector2D{ GUI_PANEL_LEFT_MARGIN, hud_text_row_y(baseY, tileSize, 2) },
 			"CONFUSED",
-			RED_BLACK_PAIR);
+			ColorPairId::RED_BLACK);
 	}
 }
 

@@ -98,17 +98,17 @@ void PlayerController::update(GameContext& ctx)
 		{
 		case WebEscape::BROKE_FREE:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You break free from the web!", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You break free from the web!", MessageCompletion::FINISHED);
 			break;
 		}
 		case WebEscape::STRUGGLED_FREE:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You finally break free from the web!", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You finally break free from the web!", MessageCompletion::FINISHED);
 			break;
 		}
 		case WebEscape::STILL_STUCK:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're still stuck in the web.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're still stuck in the web.", MessageCompletion::FINISHED);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			return;
 		}
@@ -136,7 +136,7 @@ void PlayerController::update(GameContext& ctx)
 		if (confusionTurns == 0)
 		{
 			playerOwner.remove_state(ActorState::IS_CONFUSED);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your mind clears.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your mind clears.", MessageCompletion::FINISHED);
 		}
 		else
 		{
@@ -147,12 +147,12 @@ void PlayerController::update(GameContext& ctx)
 				};
 				moveVector = allDirections[ctx.dice->roll(0, 7)];
 
-				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You stumble around in confusion!", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_GREEN, "You stumble around in confusion!", MessageCompletion::FINISHED);
 				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			}
 			else
 			{
-				ctx.messageSystem->message(WHITE_GREEN_PAIR, "You struggle to control your movements...", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_GREEN, "You struggle to control your movements...", MessageCompletion::FINISHED);
 
 				const auto& moves = direction_map();
 				if (moves.contains(key))
@@ -231,7 +231,7 @@ void PlayerController::pick_item(GameContext& ctx)
 
 	if (!item)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's nothing here to pick up.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's nothing here to pick up.", MessageCompletion::FINISHED);
 		return;
 	}
 
@@ -239,7 +239,7 @@ void PlayerController::pick_item(GameContext& ctx)
 	{
 		Gold& goldBehavior = std::get<Gold>(*item->behavior);
 		playerOwner.adjust_gold(goldBehavior.amount);
-		ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", true);
+		ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You picked up " + std::to_string(goldBehavior.amount) + " gold.", MessageCompletion::FINISHED);
 		[[maybe_unused]] const auto takeGoldResult = InventoryOperations::remove_item(*ctx.floorInventory, *item);
 		assert(takeGoldResult.has_value());
 		return;
@@ -248,14 +248,14 @@ void PlayerController::pick_item(GameContext& ctx)
 	// Pre-check slot capacity before touching ownership
 	if (InventoryOperations::is_inventory_full(playerOwner.inventoryData))
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your inventory is full!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your inventory is full!", MessageCompletion::FINISHED);
 		return;
 	}
 
 	// Pre-check weight before touching ownership — prevents item destruction on rejection
 	if (!InventoryOperations::is_within_weight_limit(*item, playerOwner, *ctx.dataManager))
 	{
-		ctx.messageSystem->message(RED_BLACK_PAIR, "Too heavy to carry.", true);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, "Too heavy to carry.", MessageCompletion::FINISHED);
 		return;
 	}
 
@@ -279,7 +279,7 @@ void PlayerController::pick_item(GameContext& ctx)
 
 	if (addResult.has_value())
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You picked up the " + itemName + ".", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You picked up the " + itemName + ".", MessageCompletion::FINISHED);
 	}
 	else
 	{
@@ -332,7 +332,7 @@ void PlayerController::look_on_floor(Vector2D target, GameContext& ctx)
 	for (const auto& i : ctx.floorInventory->items)
 	{
 		if (i && i->position == target)
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There's a " + i->actorData.name + " here", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There's a " + i->actorData.name + " here", MessageCompletion::FINISHED);
 	}
 }
 
@@ -371,18 +371,18 @@ bool PlayerController::look_to_attack(Vector2D& target, GameContext& ctx)
 					ctx.decorEditor->erase(decor->position);
 
 				ctx.messageSystem->message(
-					WHITE_BLACK_PAIR,
+					ColorPairId::WHITE_BLACK,
 					std::format("The {} shatters!", decor->name),
-					true);
+					MessageCompletion::FINISHED);
 				if (!decor->lootTableKey.empty())
 					ctx.map->add_item(decor->position, ctx);
 			}
 			else
 			{
 				ctx.messageSystem->message(
-					WHITE_BLACK_PAIR,
+					ColorPairId::WHITE_BLACK,
 					std::format("You hit the {}.", decor->name),
-					true);
+					MessageCompletion::FINISHED);
 			}
 			return false;
 		}
@@ -446,40 +446,40 @@ void PlayerController::attempt_turn_undead(GameContext& ctx)
 
 	if (!report.attempted)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have no deity to channel.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have no deity to channel.", MessageCompletion::FINISHED);
 		return;
 	}
 
 	if (report.turned.empty() && report.destroyed.empty() && report.resisted.empty())
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You hold up your holy symbol, but nothing stirs.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You hold up your holy symbol, but nothing stirs.", MessageCompletion::FINISHED);
 		return;
 	}
 
-	ctx.messageSystem->message(YELLOW_BLACK_PAIR, "You raise your holy symbol!", true);
+	ctx.messageSystem->message(ColorPairId::YELLOW_BLACK, "You raise your holy symbol!", MessageCompletion::FINISHED);
 
 	for (const Creature* destroyed : report.destroyed)
 	{
 		ctx.messageSystem->message(
-			GREEN_BLACK_PAIR,
+			ColorPairId::GREEN_BLACK,
 			std::format("The {} crumbles to dust!", destroyed->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 	}
 
 	for (const Creature* turned : report.turned)
 	{
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("The {} recoils and flees!", turned->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 	}
 
 	for (const Creature* resisted : report.resisted)
 	{
 		ctx.messageSystem->message(
-			RED_BLACK_PAIR,
+			ColorPairId::RED_BLACK,
 			std::format("The {} is unmoved.", resisted->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 	}
 
 	ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
@@ -508,9 +508,9 @@ void PlayerController::confirm_attack_on_peaceful(Creature& target, GameContext&
 		victim->set_attitude(Attitude::HOSTILE);
 
 		menuCtx.messageSystem->message(
-			RED_BLACK_PAIR,
+			ColorPairId::RED_BLACK,
 			std::format("You attack the {}!", victim->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 
 		strike(*victim, menuCtx);
 		menuCtx.menus->back()->back = true;
@@ -562,7 +562,7 @@ void PlayerController::strike(Creature& target, GameContext& ctx)
 
 		if (attackIndex > 0)
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Follow-up attack: ", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Follow-up attack: ", MessageCompletion::FINISHED);
 		}
 
 		playerOwner.attacker->attack(target, AttackKind::MELEE, ctx);
@@ -628,7 +628,7 @@ bool PlayerController::look_to_move(const Vector2D& targetPosition, GameContext&
 			if (!blockedMessage.empty())
 			{
 				ctx.messageSystem->log(blockedMessage);
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, blockedMessage, true);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, blockedMessage, MessageCompletion::FINISHED);
 			}
 			break;
 		}
@@ -736,7 +736,7 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		[[maybe_unused]] const auto consumeUnlockResult = InventoryOperations::remove_item(playerOwner.inventoryData, *keyItem);
 		assert(consumeUnlockResult.has_value());
 		ctx.map->open_all_room_doors(doorPos, ctx);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You use the key. The lock turns.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You use the key. The lock turns.", MessageCompletion::FINISHED);
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
@@ -751,11 +751,11 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		{
 			ctx.map->unlock_door(doorPos);
 			ctx.map->open_door(doorPos, ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You pick the lock.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You pick the lock.", MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You fail to pick the lock.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You fail to pick the lock.", MessageCompletion::FINISHED);
 		}
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
@@ -770,18 +770,18 @@ bool PlayerController::resolve_locked_door(Vector2D doorPos, GameContext& ctx)
 		if (strRoll >= BASH_DC)
 		{
 			ctx.map->set_tile(doorPos, TileType::FLOOR, 1);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You smash the door open! The crash echoes down the corridor.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You smash the door open! The crash echoes down the corridor.", MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You slam into the door but it holds.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You slam into the door but it holds.", MessageCompletion::FINISHED);
 		}
 		ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		return true;
 	}
 
 	// Branch 4: no tool available.
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is locked. You have no way through it.", true);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is locked. You have no way through it.", MessageCompletion::FINISHED);
 	return false;
 }
 
@@ -1197,7 +1197,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 	case Controls::QUIT:
 	{
 		ctx.gameState->set_run(false);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You quit the game ! Press any key ...", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You quit the game ! Press any key ...", MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -1257,14 +1257,14 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			playerOwner,
 			*ctx.dataManager);
 		assert(debugSpawnBowResult.has_value());
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Long bow added to inventory.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Long bow added to inventory.", MessageCompletion::FINISHED);
 
 		playerOwner.memorizedSpells.push_back("magic_missile");
 		playerOwner.memorizedSpells.push_back("magic_missile");
 		playerOwner.memorizedSpells.push_back("sleep");
 		playerOwner.memorizedSpells.push_back("web");
 		playerOwner.memorizedSpells.push_back("teleport");
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Spells added -- press Shift+C to cast.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Spells added -- press Shift+C to cast.", MessageCompletion::FINISHED);
 
 		// Spawn a shopkeeper on the first walkable adjacent tile
 		const std::array<Vector2D, 4> cardinals{ Vector2D{0, -1}, Vector2D{0, 1}, Vector2D{-1, 0}, Vector2D{1, 0} };
@@ -1274,7 +1274,7 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 			if (ctx.map->can_walk(spawnPos, ctx))
 			{
 				ctx.creatures->push_back(ShopkeeperFactory::create_shopkeeper(spawnPos, ctx.levelManager->get_dungeon_level(), ctx));
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "DEBUG: Shopkeeper spawned.", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "DEBUG: Shopkeeper spawned.", MessageCompletion::FINISHED);
 				break;
 			}
 		}
@@ -1290,21 +1290,21 @@ void PlayerController::call_action(Controls key, GameContext& ctx)
 
 	case Controls::OPEN_DOOR:
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::OPEN;
 		break;
 	}
 
 	case Controls::CLOSE_DOOR:
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::CLOSE;
 		break;
 	}
 
 	case Controls::DISARM:
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Which direction? (use arrow keys)", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Which direction? (use arrow keys)", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::DISARM;
 		break;
 	}
@@ -1358,7 +1358,7 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	int dirKey = ctx.inputHandler->get_current_key();
 	if (dirKey == 27)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cancelled.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Cancelled.", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -1368,14 +1368,14 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	Vector2D doorPos = handle_direction_input(dirKey, ctx);
 	if (doorPos.x == 0 && doorPos.y == 0)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Invalid direction.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Invalid direction.", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
 
 	if (!ctx.map->is_door(doorPos))
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "There is no door there.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no door there.", MessageCompletion::FINISHED);
 		pendingDoorAction = PendingDoorAction::NONE;
 		return true;
 	}
@@ -1386,12 +1386,12 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		{
 			if (ctx.map->open_door(doorPos, ctx))
 			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You open the door.", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You open the door.", MessageCompletion::FINISHED);
 				ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			}
 			else
 			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already open.", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is already open.", MessageCompletion::FINISHED);
 			}
 		}
 		else
@@ -1403,16 +1403,16 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 	{
 		if (ctx.map->close_door(doorPos, ctx))
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You close the door.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You close the door.", MessageCompletion::FINISHED);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 		}
 		else if (ctx.map->get_actor(doorPos, ctx) != nullptr)
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Something is blocking the door.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Something is blocking the door.", MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "The door is already closed.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The door is already closed.", MessageCompletion::FINISHED);
 		}
 	}
 	else if (pendingDoorAction == PendingDoorAction::DISARM)
@@ -1442,40 +1442,40 @@ bool PlayerController::resolve_pending_door(GameContext& ctx)
 		{
 		case DisarmResult::NOT_DISARMABLE:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "There is no trap there.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "There is no trap there.", MessageCompletion::FINISHED);
 			break;
 		}
 		case DisarmResult::NOT_VISIBLE:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You don't see a trap there.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You don't see a trap there.", MessageCompletion::FINISHED);
 			break;
 		}
 		case DisarmResult::ALREADY_DISARMED:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "That trap is already disarmed.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "That trap is already disarmed.", MessageCompletion::FINISHED);
 			break;
 		}
 		case DisarmResult::NO_SKILL:
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You cannot work a trap.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot work a trap.", MessageCompletion::FINISHED);
 			break;
 		}
 		case DisarmResult::BEYOND_SKILL:
 		{
 			// The attempt is spent until the next level, so the turn is spent too.
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "This trap is beyond you.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "This trap is beyond you.", MessageCompletion::FINISHED);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			break;
 		}
 		case DisarmResult::DISARMED:
 		{
-			ctx.messageSystem->message(GREEN_BLACK_PAIR, "You successfully disarm the trap.", true);
+			ctx.messageSystem->message(ColorPairId::GREEN_BLACK, "You successfully disarm the trap.", MessageCompletion::FINISHED);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			break;
 		}
 		case DisarmResult::TRIGGERED:
 		{
-			ctx.messageSystem->message(RED_BLACK_PAIR, "You trigger the trap while attempting to disarm it!", true);
+			ctx.messageSystem->message(ColorPairId::RED_BLACK, "You trigger the trap while attempting to disarm it!", MessageCompletion::FINISHED);
 			ctx.gameState->set_game_status(GameStatus::NEW_TURN);
 			break;
 		}

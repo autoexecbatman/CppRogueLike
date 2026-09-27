@@ -154,7 +154,7 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 {
 	if (!ctx.player()->has_ranged_weapon())
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You need a ranged weapon to attack at a distance!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You need a ranged weapon to attack at a distance!", MessageCompletion::FINISHED);
 		return;
 	}
 
@@ -171,13 +171,13 @@ void TargetingSystem::handle_ranged_attack(GameContext& ctx) const
 		Creature* target = innerCtx.map->get_actor(targetPos, innerCtx);
 		if (!target || target == innerCtx.player())
 		{
-			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "No valid target there.", true);
+			innerCtx.messageSystem->message(ColorPairId::WHITE_BLACK, "No valid target there.", MessageCompletion::FINISHED);
 			return;
 		}
 
 		if (!innerCtx.map->has_los(innerCtx.player()->position, targetPos))
 		{
-			innerCtx.messageSystem->message(WHITE_BLACK_PAIR, "No clear line of sight.", true);
+			innerCtx.messageSystem->message(ColorPairId::WHITE_BLACK, "No clear line of sight.", MessageCompletion::FINISHED);
 			return;
 		}
 

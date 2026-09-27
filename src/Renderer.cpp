@@ -661,9 +661,9 @@ void Renderer::draw_tile_screen_sized(Vector2D screenPos, TileRef tile, int disp
 	DrawTexturePro(texture, srcRect, destRect, { 0.0f, 0.0f }, 0.0f, RL_WHITE);
 }
 
-void Renderer::draw_text(Vector2D screenPos, std::string_view text, int colorPairId) const
+void Renderer::draw_text(Vector2D screenPos, std::string_view text, ColorPairId colorPair) const
 {
-	ColorPair pair = get_color_pair(colorPairId);
+	ColorPair pair = get_color_pair(colorPair);
 	std::string textStr(text);
 
 	if (fontLoaded)
@@ -816,13 +816,10 @@ void Renderer::set_camera_center(int world_tile_x, int world_tile_y, int map_w, 
 	camera.y = std::clamp(camera.y, 0, std::max(0, map_px_h - viewport_px_h));
 }
 
-ColorPair Renderer::get_color_pair(int id) const
+ColorPair Renderer::get_color_pair(ColorPairId pair) const
 {
-	if (id >= 0 && id < MAX_COLOR_PAIRS)
-	{
-		return colorPairs[id];
-	}
-	return ColorPair{ RL_WHITE, RL_BLACK };
+	// Every pair has a slot by construction, so this reads rather than checks.
+	return colorPairs.at(color_pair_index(pair));
 }
 
 ScreenMetrics Renderer::metrics() const
@@ -871,45 +868,54 @@ int Renderer::measure_text(std::string_view text) const
 	return MeasureText(text_str.c_str(), fontSize);
 }
 
+// Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the colours
+// are one row rather than a constant here and an index there. Adding a pair to the
+// enum without a colour here fails the static_assert below.
+namespace
+{
+constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
+constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
+constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };
+
+constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
+	{ RL_WHITE, RL_BLACK }, // WHITE_BLACK
+	{ RL_WHITE, RL_RED }, // WHITE_RED
+	{ RL_WHITE, RL_BLUE }, // WHITE_BLUE
+	{ RL_WHITE, PAIR_DIM_GREEN }, // WHITE_GREEN
+	{ RL_BLACK, RL_WHITE }, // BLACK_WHITE
+	{ RL_BLACK, RL_GREEN }, // BLACK_GREEN
+	{ RL_BLACK, RL_YELLOW }, // BLACK_YELLOW
+	{ RL_BLACK, RL_RED }, // BLACK_RED
+	{ RL_RED, RL_BLACK }, // RED_BLACK
+	{ RL_GREEN, RL_BLACK }, // GREEN_BLACK
+	{ RL_YELLOW, RL_BLACK }, // YELLOW_BLACK
+	{ RL_BLUE, RL_BLACK }, // BLUE_BLACK
+	{ PAIR_CYAN, RL_BLACK }, // CYAN_BLACK
+	{ RL_MAGENTA, RL_BLACK }, // MAGENTA_BLACK
+	{ PAIR_CYAN, RL_BLUE }, // CYAN_BLUE
+	{ RL_RED, RL_WHITE }, // RED_WHITE
+	{ RL_GREEN, RL_YELLOW }, // GREEN_YELLOW
+	{ RL_GREEN, RL_MAGENTA }, // GREEN_MAGENTA
+	{ RL_RED, RL_YELLOW }, // RED_YELLOW
+	{ RL_GREEN, RL_RED }, // GREEN_RED
+	{ PAIR_BROWN, RL_BLACK }, // BROWN_BLACK
+	{ PAIR_DIM_GREEN, RL_BLACK }, // DIM_GREEN_BLACK
+} };
+
+static_assert(
+	PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
+	"every colour pair needs its two colours and no more");
+} // namespace
+
 void Renderer::init_color_pairs()
 {
-	// Default: white on black
-	for (auto& pair : colorPairs)
+	// Slot zero belongs to no pair and is what an unfilled table reads as.
+	colorPairs.fill(ColorPair{ RL_WHITE, RL_BLACK });
+
+	for (std::size_t index = 0; index < ALL_COLOR_PAIR.size(); ++index)
 	{
-		pair = ColorPair{ RL_WHITE, RL_BLACK };
+		colorPairs.at(color_pair_index(ALL_COLOR_PAIR.at(index))) = PAIR_COLORS.at(index);
 	}
-
-	// === WHITE FOREGROUND PAIRS ===
-	colorPairs[1] = ColorPair{ RL_WHITE, RL_BLACK };
-	colorPairs[2] = ColorPair{ RL_WHITE, RL_RED };
-	colorPairs[3] = ColorPair{ RL_WHITE, RL_BLUE };
-	colorPairs[4] = ColorPair{ RL_WHITE, Color{ 0, 102, 0, 255 } }; // dim green bg
-
-	// === BLACK FOREGROUND PAIRS ===
-	colorPairs[5] = ColorPair{ RL_BLACK, RL_WHITE };
-	colorPairs[6] = ColorPair{ RL_BLACK, RL_GREEN };
-	colorPairs[7] = ColorPair{ RL_BLACK, RL_YELLOW };
-	colorPairs[8] = ColorPair{ RL_BLACK, RL_RED };
-
-	// === COLORED FOREGROUND ON BLACK ===
-	colorPairs[9] = ColorPair{ RL_RED, RL_BLACK };
-	colorPairs[10] = ColorPair{ RL_GREEN, RL_BLACK };
-	colorPairs[11] = ColorPair{ RL_YELLOW, RL_BLACK };
-	colorPairs[12] = ColorPair{ RL_BLUE, RL_BLACK };
-	colorPairs[13] = ColorPair{ Color{ 0, 255, 255, 255 }, RL_BLACK }; // cyan
-	colorPairs[14] = ColorPair{ RL_MAGENTA, RL_BLACK };
-
-	// === SPECIAL COMBINATIONS ===
-	colorPairs[15] = ColorPair{ Color{ 0, 255, 255, 255 }, RL_BLUE }; // cyan on blue
-	colorPairs[16] = ColorPair{ RL_RED, RL_WHITE };
-	colorPairs[17] = ColorPair{ RL_GREEN, RL_YELLOW };
-	colorPairs[18] = ColorPair{ RL_GREEN, RL_MAGENTA };
-	colorPairs[19] = ColorPair{ RL_RED, RL_YELLOW };
-	colorPairs[20] = ColorPair{ RL_GREEN, RL_RED };
-
-	// === CUSTOM COLORS ===
-	colorPairs[21] = ColorPair{ Color{ 128, 77, 0, 255 }, RL_BLACK }; // brown
-	colorPairs[22] = ColorPair{ Color{ 0, 102, 0, 255 }, RL_BLACK }; // dim green
 }
 
 // end of file: Renderer.cpp

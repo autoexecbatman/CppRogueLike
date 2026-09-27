@@ -49,7 +49,7 @@ protected:
 	Creature& add_creature(int hitDice, int column, bool undead)
 	{
 		auto creature = std::make_unique<Creature>(
-			Vector2D{ column, 5 }, ActorData{ TileRef{}, undead ? "skeleton" : "goblin", 0 });
+			Vector2D{ column, 5 }, ActorData{ TileRef{}, undead ? "skeleton" : "goblin", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(8);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->set_creature_level(hitDice);

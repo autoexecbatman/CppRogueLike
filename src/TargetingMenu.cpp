@@ -127,7 +127,7 @@ void TargetingMenu::menu(GameContext& ctx)
     ctx.renderer->draw_text(
         Vector2D{ 4, 4 },
         "Select target -- arrows/WASD: move  Enter: confirm  Esc: cancel",
-        WHITE_BLACK_PAIR);
+        ColorPairId::WHITE_BLACK);
 
     ctx.renderer->end_frame();
 }

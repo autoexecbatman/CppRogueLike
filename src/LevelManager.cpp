@@ -53,10 +53,10 @@ void LevelManager::load_from_json(const nlohmann::json& j)
 
 void LevelManager::display_level_messages(MessageSystem& message_system) const
 {
-	message_system.message(WHITE_BLACK_PAIR, "You take a moment to rest, and recover your strength.", true);
-	message_system.message(WHITE_BLACK_PAIR, "After a rare moment of peace, you descend", true);
-	message_system.message(WHITE_BLACK_PAIR, "deeper into the heart of the dungeon...", true);
-	message_system.message(WHITE_BLACK_PAIR, std::format("You are now on level {}", dungeon_level), true);
+	message_system.message(ColorPairId::WHITE_BLACK, "You take a moment to rest, and recover your strength.", MessageCompletion::FINISHED);
+	message_system.message(ColorPairId::WHITE_BLACK, "After a rare moment of peace, you descend", MessageCompletion::FINISHED);
+	message_system.message(ColorPairId::WHITE_BLACK, "deeper into the heart of the dungeon...", MessageCompletion::FINISHED);
+	message_system.message(ColorPairId::WHITE_BLACK, std::format("You are now on level {}", dungeon_level), MessageCompletion::FINISHED);
 }
 
 void LevelManager::heal_player_between_levels(GameContext& ctx) const
@@ -71,8 +71,8 @@ void LevelManager::heal_player_between_levels(GameContext& ctx) const
 
 	if (actualHealed > 0)
 	{
-		ctx.messageSystem->message(GREEN_BLACK_PAIR,
+		ctx.messageSystem->message(ColorPairId::GREEN_BLACK,
 			std::format("You rest between levels and recover {} HP.", actualHealed),
-			true);
+			MessageCompletion::FINISHED);
 	}
 }

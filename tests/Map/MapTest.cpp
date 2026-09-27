@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <limits>
 
+#include "src/Colors.h"
 #include "src/Map.h"
 #include "src/DungeonRoom.h"
 #include "src/GameContext.h"
@@ -505,10 +506,10 @@ TEST_F(MapTest, WaterIsCrossedByWhateverGrantsSwimming)
     const Vector2D pool{ 4, 4 };
     map->set_tile(pool, TileType::WATER, 1.0);
 
-    Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", 0 } };
+    Creature wader{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "wader", ColorPairId::WHITE_BLACK } };
     EXPECT_TRUE(map->is_collision(wader, TileType::WATER, pool, ctx)) << "water stopped nobody";
 
-    Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", 0 } };
+    Creature spider{ Vector2D{ 3, 4 }, ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK } };
     spider.add_state(ActorState::CAN_SWIM);
     EXPECT_FALSE(map->is_collision(spider, TileType::WATER, pool, ctx));
 

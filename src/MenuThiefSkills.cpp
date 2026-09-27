@@ -123,14 +123,14 @@ void MenuThiefSkills::draw_allocation_screen()
 {
 	menu_clear();
 	menu_draw_box();
-	menu_draw_title("THIEF SKILLS", YELLOW_BLACK_PAIR);
+	menu_draw_title("THIEF SKILLS", ColorPairId::YELLOW_BLACK);
 
 	assert(renderer && "MenuThiefSkills::draw_allocation_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
 	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, int colorPair)
+	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, ColorPairId colorPair)
 	{
 		renderer->draw_text(
 			Vector2D{ textX, firstRowY + row * TEXT_ROW_PITCH },
@@ -141,17 +141,17 @@ void MenuThiefSkills::draw_allocation_screen()
 	int row = FIRST_SKILL_ROW;
 	for (const ThiefSkill skill : ALL_THIEF_SKILL)
 	{
-		const int colorPair = (skill == cursor) ? YELLOW_BLACK_PAIR : WHITE_BLACK_PAIR;
+		const const ColorPairId colorPair = (skill == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(skill), colorPair);
 		++row;
 	}
 
-	draw_row(POOL_ROW, pool_line(), WHITE_BLACK_PAIR);
+	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
 
 	const bool allSpent = allocation.remaining_points() == 0;
-	draw_row(STATUS_ROW, status_line(), allSpent ? GREEN_BLACK_PAIR : RED_BLACK_PAIR);
-	draw_row(FIRST_HINT_ROW, "[up/down] skill   [left/right] one point", CYAN_BLACK_PAIR);
-	draw_row(FIRST_HINT_ROW + 1, "[space] fill it   [Enter] done", CYAN_BLACK_PAIR);
+	draw_row(STATUS_ROW, status_line(), allSpent ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+	draw_row(FIRST_HINT_ROW, "[up/down] skill   [left/right] one point", ColorPairId::CYAN_BLACK);
+	draw_row(FIRST_HINT_ROW + 1, "[space] fill it   [Enter] done", ColorPairId::CYAN_BLACK);
 
 	menu_refresh();
 }

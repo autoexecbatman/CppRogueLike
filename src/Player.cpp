@@ -105,7 +105,7 @@ constexpr auto matches_unique_id = [](uint64_t uniqueId)
 } // namespace
 
 Player::Player(Vector2D position)
-	: Creature(position, ActorData{ TileRef{}, "Player", WHITE_BLACK_PAIR })
+	: Creature(position, ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
 {
 	set_gold(100);
 	controller = std::make_unique<PlayerController>(*this);
@@ -150,7 +150,7 @@ std::string_view Player::sprite_tile_key() const noexcept
 }
 
 Player::Player(Vector2D position, const PlayerBlueprint& blueprint, GameContext& ctx)
-	: Creature(position, ActorData{ TileRef{}, blueprint.name, WHITE_BLACK_PAIR })
+	: Creature(position, ActorData{ TileRef{}, blueprint.name, ColorPairId::WHITE_BLACK })
 {
 	set_gender(blueprint.gender);
 	playerClass = blueprint.playerClass;
@@ -304,7 +304,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		assert(grantFireballResult.has_value());
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Fighter equipped with plate mail, long sword, shield, long bow, fireball scroll. [DEBUG]", MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -316,7 +316,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		equip_item(ItemCreator::create("dagger", position, ctx), EquipmentSlot::RIGHT_HAND, ctx);
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Rogue equipped with leather armor and dagger.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Rogue equipped with leather armor and dagger.", MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -334,7 +334,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Cleric equipped with chain mail, mace, and shield. Spells memorized.", MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -352,7 +352,7 @@ void Player::equip_class_starting_gear(GameContext& ctx)
 		[[maybe_unused]] const auto grantIdentifyScrollResult = InventoryOperations::add_item(inventoryData, ItemCreator::create("identify_scroll", position, ctx));
 		assert(grantIdentifyScrollResult.has_value());
 		SpellSystem::show_memorization_menu(*this, ctx);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Wizard equipped with staff. Attack scrolls and spells ready.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Wizard equipped with staff. Attack scrolls and spells ready.", MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -564,7 +564,7 @@ bool Player::rest(GameContext& ctx)
 	// Check if player is already at full health
 	if (get_hp() >= get_max_hp())
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You're already at full health.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You're already at full health.", MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -592,7 +592,7 @@ bool Player::rest(GameContext& ctx)
 			// If hostile enemy is within 5 tiles, can't rest
 			if (distance <= 5)
 			{
-				ctx.messageSystem->message(WHITE_BLACK_PAIR, "You can't rest with enemies nearby!", true);
+				ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You can't rest with enemies nearby!", MessageCompletion::FINISHED);
 				return false;
 			}
 		}
@@ -602,7 +602,7 @@ bool Player::rest(GameContext& ctx)
 	if (ctx.hungerSystem->get_hunger_state() == HungerState::STARVING ||
 		ctx.hungerSystem->get_hunger_state() == HungerState::DYING)
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "You're too hungry to rest!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "You're too hungry to rest!", MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -623,20 +623,20 @@ bool Player::rest(GameContext& ctx)
 	HungerState afterState = ctx.hungerSystem->get_hunger_state();
 
 	// Display message with more detail
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Resting recovers ");
-	ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, std::to_string(amountHealed));
-	ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " health");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Resting recovers ");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, std::to_string(amountHealed));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, " health");
 
 	if (beforeState != afterState)
 	{
 		// If hunger state changed, mention it
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", but you've become ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", but you've become ");
 		ctx.messageSystem->append_message_part(ctx.hungerSystem->get_hunger_color(), ctx.hungerSystem->get_hunger_state_string().c_str());
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 	}
 	else
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ", consuming your food.");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ", consuming your food.");
 	}
 
 	ctx.messageSystem->finalize_message();
@@ -674,14 +674,14 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	const std::optional<int> skill = thief_skill(ThiefSkill::HIDE_IN_SHADOWS);
 	if (!skill.has_value() || skill.value() <= 0)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You cannot hide in shadows.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You cannot hide in shadows.", MessageCompletion::FINISHED);
 		return HideAttempt::NOT_A_THIEF;
 	}
 
 	// Nothing to try; the thief is already in the shadows.
 	if (is_invisible())
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already hidden.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are already hidden.", MessageCompletion::FINISHED);
 		return HideAttempt::ALREADY_HIDDEN;
 	}
 
@@ -695,7 +695,7 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	};
 	if (std::ranges::any_of(*ctx.creatures, is_watching))
 	{
-		ctx.messageSystem->message(RED_BLACK_PAIR, "You cannot hide while watched.", true);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, "You cannot hide while watched.", MessageCompletion::FINISHED);
 		return HideAttempt::WATCHED;
 	}
 
@@ -708,7 +708,7 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 		const int hideDuration = 10 + get_creature_level() * 2;
 		ctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);
 	}
-	ctx.messageSystem->message(CYAN_BLACK_PAIR, "You melt into the shadows...", true);
+	ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "You melt into the shadows...", MessageCompletion::FINISHED);
 	return HideAttempt::ATTEMPTED;
 }
 
@@ -826,9 +826,9 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	if (!can_draw(*this, *item))
 	{
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("You are not strong enough to draw the {}.", item->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
 		assert(returnedToPack.has_value());
 		return false;
@@ -844,7 +844,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 		{
 			// Two-handed weapon - also unequip left hand
 			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You grip the " + item->actorData.name + " with both hands.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->actorData.name + " with both hands.", MessageCompletion::FINISHED);
 		}
 	}
 
@@ -865,7 +865,7 @@ bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCont
 	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 	{
 		update_armor_class(ctx);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(get_armor_class()) + ".", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
 	}
 
 	return true;
@@ -883,9 +883,9 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		if (it->item->get_enhancement().blessing == BlessingStatus::CURSED)
 		{
 			ctx.messageSystem->message(
-				RED_BLACK_PAIR,
+				ColorPairId::RED_BLACK,
 				std::format("The {} is cursed and cannot be removed!", it->item->actorData.name),
-				true);
+				MessageCompletion::FINISHED);
 			return false;
 		}
 
@@ -901,9 +901,9 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
 		{
 			ctx.messageSystem->message(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("There is nowhere to put the {}, so you keep it on.", removed->actorData.name),
-				true);
+				MessageCompletion::FINISHED);
 			equippedItems.emplace_back(std::move(removed), slot);
 			return false;
 		}
@@ -917,9 +917,9 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		else
 		{
 			ctx.messageSystem->message(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
-				true);
+				MessageCompletion::FINISHED);
 			removed->position = position;
 			[[maybe_unused]] const auto setDown = InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
 			assert(setDown.has_value());
@@ -929,7 +929,7 @@ bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
 		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
 		{
 			update_armor_class(ctx);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Your armor class is now " + std::to_string(get_armor_class()) + ".", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
 		}
 
 		return true;
@@ -1101,7 +1101,7 @@ void Player::load(const json& j)
 	for (const auto& itemEntry : j.at("equippedItems"))
 	{
 		EquipmentSlot slot = static_cast<EquipmentSlot>(itemEntry.at("slot").get<int>());
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 		item->load(itemEntry.at("item"));
 		equippedItems.emplace_back(std::move(item), slot);
 	}
@@ -1164,9 +1164,9 @@ void Player::levelup_update(GameContext& ctx)
 		adjust_level(1);
 		set_xp(get_xp() - levelUpXp);
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("Your battle skills grow stronger! You reached level {}", get_creature_level()),
-			true);
+			MessageCompletion::FINISHED);
 
 		if (ctx.displayManager != nullptr)
 		{

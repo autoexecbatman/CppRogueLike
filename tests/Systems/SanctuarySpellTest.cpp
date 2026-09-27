@@ -72,7 +72,7 @@ protected:
 
 	Creature& add_creature(const char* name, int column)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ column, 5 }, ActorData{ TileRef{}, name, 0 });
+		auto creature = std::make_unique<Creature>(Vector2D{ column, 5 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->ai = std::make_unique<AiMonster>();

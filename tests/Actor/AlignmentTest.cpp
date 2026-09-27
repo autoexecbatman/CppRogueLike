@@ -11,6 +11,7 @@
 #include <tuple>
 #include <vector>
 
+#include "src/Colors.h"
 #include "src/Alignment.h"
 #include "src/Paths.h"
 #include "src/Monsters.h"
@@ -23,7 +24,7 @@
 class AlignmentTest : public ::testing::Test
 {
 protected:
-	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", 0 } };
+	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
 };
 
 // Nothing is aligned until its data says so.

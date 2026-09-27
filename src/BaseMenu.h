@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Colors.h"
+
 #include <string>
 
 #include "InputSystem.h"
@@ -55,7 +57,7 @@ public:
 	void menu_set_run_true() { run = true; }
 	void menu_set_run_false() { run = false; }
 	void menu_draw_box();
-	void menu_draw_title(std::string_view title, int colorPair);
+	void menu_draw_title(std::string_view title, ColorPairId colorPair);
 
 	virtual void menu(GameContext& ctx) = 0;
 	virtual void draw_content() {}

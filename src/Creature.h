@@ -494,7 +494,7 @@ public:
 	virtual void die(GameContext& ctx);
 
 	TileRef get_display_tile() const noexcept override;
-	int get_display_color() const noexcept override;
+	ColorPairId get_display_color() const noexcept override;
 
 	std::unique_ptr<Attacker> attacker; // the actor can attack
 	std::unique_ptr<ExperienceReward> experienceReward; // the actor can earn experience

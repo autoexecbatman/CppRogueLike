@@ -24,6 +24,7 @@
 
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/ItemCreator.h"
@@ -48,7 +49,7 @@ protected:
 
 	MockGameContext mock{};
 	GameContext ctx{};
-	Creature swimmer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "swimmer", 0 } };
+	Creature swimmer{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "swimmer", ColorPairId::WHITE_BLACK } };
 };
 
 // The book's entry grants no Strength, so neither does the item.
@@ -113,7 +114,7 @@ TEST_F(SwimmingGauntletsTest, TheyGrantSwimmingAndNothingElse)
 	EXPECT_TRUE(swimmer.has_bypass(ActorState::CAN_SWIM));
 	EXPECT_FALSE(swimmer.has_bypass(ActorState::CAN_WALK_WEBS));
 
-	Creature spider{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "spider", 0 } };
+	Creature spider{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "spider", ColorPairId::WHITE_BLACK } };
 	spider.add_state(ActorState::CAN_SWIM);
 
 	EXPECT_TRUE(spider.has_bypass(ActorState::CAN_SWIM)) << "a creature's own state still answers";

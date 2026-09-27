@@ -21,6 +21,7 @@
 #include <initializer_list>
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/AiMonster.h"
 #include "src/AiMonsterRanged.h"
 #include "src/AiWebSpinner.h"
@@ -131,7 +132,7 @@ protected:
 	Map map{ 20, 20 };
 	std::vector<std::unique_ptr<Creature>> creatures{};
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ PLAYER_COLUMN, CORRIDOR_ROW }) };
-	Creature goblin{ Vector2D{ GOBLIN_START_COLUMN, CORRIDOR_ROW }, ActorData{ TileRef{}, "goblin", 0 } };
+	Creature goblin{ Vector2D{ GOBLIN_START_COLUMN, CORRIDOR_ROW }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
 };
 
 TEST_F(SanctuaryPursuitTest, AMonsterThatFailedItsSaveStopsClosingIn)

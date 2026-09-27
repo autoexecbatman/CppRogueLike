@@ -88,10 +88,10 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	std::string_view title = "INVENTORY";
 	int titleW = ctx.renderer->measure_text(title);
 	int titleX = (screenW - titleW) / 2;
-	ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, YELLOW_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, ColorPairId::YELLOW_BLACK);
 
 	CloseButtonArea closeBtn = CloseButtonArea(*ctx.renderer, vcols);
-	ctx.renderer->draw_text(Vector2D{ closeBtn.get_x(), closeBtn.get_y() }, "[X]", RED_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ closeBtn.get_x(), closeBtn.get_y() }, "[X]", ColorPairId::RED_BLACK);
 
 	// What the character carries, and the band Table 47 puts that load in.
 	const int currentWeight = InventoryOperations::get_total_weight(playerRef);
@@ -110,23 +110,23 @@ void InventoryUI::draw_frame(GameContext& ctx)
 		case EncumbranceBand::UNENCUMBERED:
 		case EncumbranceBand::LIGHT:
 		{
-			return WHITE_BLACK_PAIR;
+			return ColorPairId::WHITE_BLACK;
 		}
 		case EncumbranceBand::MODERATE:
 		{
-			return YELLOW_BLACK_PAIR;
+			return ColorPairId::YELLOW_BLACK;
 		}
 		case EncumbranceBand::HEAVY:
 		case EncumbranceBand::SEVERE:
 		{
-			return MAGENTA_BLACK_PAIR;
+			return ColorPairId::MAGENTA_BLACK;
 		}
 		case EncumbranceBand::OVERLOADED:
 		{
-			return RED_BLACK_PAIR;
+			return ColorPairId::RED_BLACK;
 		}
 		}
-		return WHITE_BLACK_PAIR;
+		return ColorPairId::WHITE_BLACK;
 	};
 
 	const std::string weightInfo = band.has_value()
@@ -135,7 +135,7 @@ void InventoryUI::draw_frame(GameContext& ctx)
 	ctx.renderer->draw_text(
 		Vector2D{ tileSize, fontOff },
 		weightInfo,
-		band.has_value() ? colour_for(*band) : WHITE_BLACK_PAIR);
+		band.has_value() ? colour_for(*band) : ColorPairId::WHITE_BLACK);
 }
 
 // Draw a full-width white highlight bar at the given tile row.
@@ -147,7 +147,7 @@ void InventoryUI::draw_highlight_row(int row, GameContext& ctx)
 	int barX = tileSize;
 	int barW = ctx.renderer->get_screen_width() - 2 * tileSize;
 
-	ColorPair pair = ctx.renderer->get_color_pair(BLACK_WHITE_PAIR);
+	ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
 	DrawRectangle(barX, row_top_y(tileSize, row), barW, UI_TEXT_ROW_PITCH, pair.bg);
 }
 
@@ -415,7 +415,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 		std::string_view warning = "OVERLOADED! You can pick nothing up.";
 		int warningW = ctx.renderer->measure_text(warning);
 		int warningX = (screen_cols(ctx) * tileSize - warningW) / 2;
-		ctx.renderer->draw_text(Vector2D{ warningX, fontOff }, warning, RED_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ warningX, fontOff }, warning, ColorPairId::RED_BLACK);
 	}
 
 	int tabY = row_top_y(tileSize, TAB_ROW);
@@ -435,12 +435,12 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 
 	for (const auto& tab : tabs)
 	{
-		int colorPair = (tab.screen == activeScreen) ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
+		const ColorPairId colorPair = (tab.screen == activeScreen) ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
 		int textW = ctx.renderer->measure_text(tab.text);
 
 		if (tab.screen == activeScreen)
 		{
-			ColorPair pair = ctx.renderer->get_color_pair(BLACK_WHITE_PAIR);
+			ColorPair pair = ctx.renderer->get_color_pair(ColorPairId::BLACK_WHITE);
 			DrawRectangle(px - 4, tabY, textW + 8, UI_TEXT_ROW_PITCH, pair.bg);
 		}
 
@@ -453,7 +453,7 @@ void InventoryUI::render_tab_bar(GameContext& ctx)
 	std::string_view hint = "[Left/Right] Switch";
 	int hintW = ctx.renderer->measure_text(hint);
 	int hintX = ctx.renderer->get_screen_width() - tileSize - hintW - PANEL_EDGE_CLEARANCE;
-	ctx.renderer->draw_text(Vector2D{ hintX, row_text_y(tileSize, fontSize, TAB_ROW) }, hint, CYAN_BLACK_PAIR);
+	ctx.renderer->draw_text(Vector2D{ hintX, row_text_y(tileSize, fontSize, TAB_ROW) }, hint, ColorPairId::CYAN_BLACK);
 }
 
 void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx)
@@ -472,7 +472,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 			draw_highlight_row(y, ctx);
 		}
 
-		int rowColor = isCursorRow ? BLACK_WHITE_PAIR : WHITE_BLACK_PAIR;
+		const ColorPairId rowColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::WHITE_BLACK;
 
 		std::string slotLabel = std::format("{:<14}: ", slotInfo.label);
 
@@ -512,7 +512,7 @@ void InventoryUI::render_equipment_screen(const Player& player, GameContext& ctx
 	{
 		int filterY = FIRST_CONTENT_ROW + SLOT_COUNT + 1;
 		std::string filterText = std::format("FILTER: {}", SLOT_TABLE[equipmentCursor].label);
-		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, filterY) }, filterText, YELLOW_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, filterY) }, filterText, ColorPairId::YELLOW_BLACK);
 	}
 }
 
@@ -534,7 +534,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 		{
 			msg = "No items fit this slot.";
 		}
-		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, startY + 1) }, msg, WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, startY + 1) }, msg, ColorPairId::WHITE_BLACK);
 		return;
 	}
 
@@ -553,7 +553,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 
 		if (entry.kind == BackpackEntry::Kind::CATEGORY_HEADER)
 		{
-			int headerColor = isCursorRow ? BLACK_WHITE_PAIR : YELLOW_BLACK_PAIR;
+			const ColorPairId headerColor = isCursorRow ? ColorPairId::BLACK_WHITE : ColorPairId::YELLOW_BLACK;
 			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, y) }, entry.headerText, headerColor);
 		}
 		else if (entry.item)
@@ -580,7 +580,7 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 				line += std::format(" ({} gp)", entry.item->get_value());
 			}
 
-			int itemColor = isCursorRow ? BLACK_WHITE_PAIR : entry.item->actorData.color;
+			const ColorPairId itemColor = isCursorRow ? ColorPairId::BLACK_WHITE : entry.item->actorData.color;
 			ctx.renderer->draw_text(Vector2D{ 3 * tileSize, row_text_y(tileSize, fontSize, y) }, line, itemColor);
 		}
 
@@ -591,11 +591,11 @@ void InventoryUI::render_item_list_screen(GameContext& ctx)
 	int arrowX = screen_cols(ctx) * tileSize - 4 * tileSize;
 	if (scrollOffset > 0)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY) }, "^^^", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY) }, "^^^", ColorPairId::CYAN_BLACK);
 	}
 	if (scrollOffset + contentHeight < totalEntries)
 	{
-		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY + contentHeight - 1) }, "vvv", CYAN_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ arrowX, row_text_y(tileSize, fontSize, startY + contentHeight - 1) }, "vvv", ColorPairId::CYAN_BLACK);
 	}
 }
 
@@ -656,12 +656,12 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 		}
 		if (!line2.empty())
 		{
-			ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + 1) }, line2, WHITE_BLACK_PAIR);
+			ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + 1) }, line2, ColorPairId::WHITE_BLACK);
 		}
 	}
 	else if (activeScreen == InventoryScreen::EQUIPMENT)
 	{
-		ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY) }, "Press [Enter] to browse items for this slot.", WHITE_BLACK_PAIR);
+		ctx.renderer->draw_text(Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY) }, "Press [Enter] to browse items for this slot.", ColorPairId::WHITE_BLACK);
 	}
 
 	const char* keybinds = (activeScreen == InventoryScreen::EQUIPMENT)
@@ -674,7 +674,7 @@ void InventoryUI::render_detail_bar(const Player& player, GameContext& ctx)
 	ctx.renderer->draw_text(
 		Vector2D{ tileSize, row_text_y(tileSize, fontSize, detailY + DETAIL_BAR_ROWS - 1) },
 		ctx.renderer->fit_text_to_width(keybinds, keybindWidth),
-		CYAN_BLACK_PAIR);
+		ColorPairId::CYAN_BLACK);
 }
 
 // ============================================================
@@ -906,7 +906,7 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 			activeScreen = InventoryScreen::EQUIPMENT;
 			return true;
 		}
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -971,14 +971,14 @@ bool InventoryUI::handle_input(Player& player, GameContext& ctx)
 		if (mousePixelX < 0 || mousePixelX >= ctx.renderer->get_screen_width()
 			|| mousePixelY < 0 || mousePixelY >= ctx.renderer->get_screen_height())
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
 			return false;
 		}
 
 		// Close button [X]
 		if (CloseButtonArea(*ctx.renderer, screen_cols(ctx)).contains(mousePixelX, mousePixelY))
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Inventory closed.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Inventory closed.", MessageCompletion::FINISHED);
 			return false;
 		}
 
@@ -1142,9 +1142,9 @@ void InventoryUI::handle_enter_equipment(Player& player, GameContext& ctx)
 		std::string itemName = std::string(equipped->get_name());
 		player.unequip_item(slot, ctx);
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("You unequipped the {}.", itemName),
-			true);
+			MessageCompletion::FINISHED);
 	}
 	else
 	{
@@ -1196,7 +1196,7 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		Item* equipped = player.get_equipped_item(slot);
 		if (!equipped)
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "Nothing to drop.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Nothing to drop.", MessageCompletion::FINISHED);
 			return;
 		}
 
@@ -1213,9 +1213,9 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		{
 			player.drop(**it, ctx);
 			ctx.messageSystem->message(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("You drop the {}.", itemName),
-				true);
+				MessageCompletion::FINISHED);
 		}
 	}
 	else
@@ -1234,9 +1234,9 @@ void InventoryUI::handle_drop(Player& player, GameContext& ctx)
 		std::string itemName = std::string(entry.item->get_name());
 		player.drop(*entry.item, ctx);
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("You drop the {}.", itemName),
-			true);
+			MessageCompletion::FINISHED);
 	}
 }
 

@@ -23,6 +23,7 @@
 
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/Creature.h"
@@ -72,7 +73,7 @@ protected:
 	// so one that has not been given a look has not noticed the thief.
 	Creature& add_monster_at(Vector2D where)
 	{
-		auto monster = std::make_unique<Creature>(where, ActorData{ TileRef{}, "goblin", 0 });
+		auto monster = std::make_unique<Creature>(where, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		monster->healthPool = std::make_unique<HealthPool>(8);
 		Creature& placed = *monster;
 		creatures.push_back(std::move(monster));

@@ -227,17 +227,17 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	// the pack and both purses as they were.
 	if (buyer.get_gold() < price)
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "You don't have enough gold!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "You don't have enough gold!", MessageCompletion::FINISHED);
 		return false;
 	}
 	if (is_inventory_full(buyer.inventoryData))
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "Your inventory is full!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Your inventory is full!", MessageCompletion::FINISHED);
 		return false;
 	}
 	if (!is_within_weight_limit(item, buyer, *ctx.dataManager))
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "Too heavy to carry.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Too heavy to carry.", MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -254,11 +254,11 @@ bool ShopKeeper::process_player_purchase(GameContext& ctx, Item& item, Creature&
 	buyer.adjust_gold(-price);
 	owner.adjust_gold(price);
 
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You bought ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You bought ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");
 	ctx.messageSystem->finalize_message();
 
 	return true;
@@ -272,12 +272,12 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	// shelves and both purses as they were.
 	if (is_inventory_full(shopInventory))
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "Shopkeeper's inventory is full.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Shopkeeper's inventory is full.", MessageCompletion::FINISHED);
 		return false;
 	}
 	if (owner.get_gold() < price)
 	{
-		ctx.messageSystem->message(WHITE_RED_PAIR, "Shopkeeper does not have enough gold to buy the item.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, "Shopkeeper does not have enough gold to buy the item.", MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -293,11 +293,11 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	owner.adjust_gold(-price);
 	seller.adjust_gold(price);
 
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You sold ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, item.get_name()); // Use enhanced name
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " for ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(price));
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " gold.");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You sold ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, item.get_name()); // Use enhanced name
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " for ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(price));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " gold.");
 	ctx.messageSystem->finalize_message();
 
 	return true;

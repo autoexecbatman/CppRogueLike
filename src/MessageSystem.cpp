@@ -7,7 +7,7 @@
 
 MessageSystem::MessageSystem() = default;
 
-void MessageSystem::message(int color, std::string_view text, bool isComplete)
+void MessageSystem::message(ColorPairId color, std::string_view text, MessageCompletion completion)
 {
     // Store message in system
     messageToDisplay = text;
@@ -16,8 +16,8 @@ void MessageSystem::message(int color, std::string_view text, bool isComplete)
     // Always append the message part to attackMessageParts
     attackMessageParts.push_back(LogMessage{ color, std::string(text) });
 
-    // If isComplete flag is set, consider the message to be finished
-    if (isComplete)
+    // A finished message closes the entry; a continued one waits for its parts.
+    if (completion == MessageCompletion::FINISHED)
     {
         // Add the entire composed message parts to attackMessagesWhole
         attackMessagesWhole.push_back(attackMessageParts);
@@ -27,10 +27,10 @@ void MessageSystem::message(int color, std::string_view text, bool isComplete)
     }
 
     log("Stored message: '" + messageToDisplay + "'");
-    log("Stored message color: " + std::to_string(messageColor));
+    log(std::string{ "Stored message color: " } + std::string{ color_pair_name(messageColor) });
 }
 
-void MessageSystem::append_message_part(int color, std::string_view text)
+void MessageSystem::append_message_part(ColorPairId color, std::string_view text)
 {
     attackMessageParts.push_back({ color, std::string(text) });
 }

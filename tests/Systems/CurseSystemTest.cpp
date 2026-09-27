@@ -44,7 +44,7 @@ protected:
 		std::string_view name,
 		EquipmentSlot slot)
 	{
-		auto item = std::make_unique<Item>(Vector2D{}, ActorData{ TileRef{}, std::string(name), WHITE_BLACK_PAIR });
+		auto item = std::make_unique<Item>(Vector2D{}, ActorData{ TileRef{}, std::string(name), ColorPairId::WHITE_BLACK });
 		item->itemClass = itemClass;
 		item->enhancement.blessing = blessing;
 		player->equippedItems.push_back(EquippedItem(std::move(item), slot));

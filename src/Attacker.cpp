@@ -58,9 +58,9 @@ AttackResult Attacker::perform_single_attack(
 	if (target.is_dead() || owner.get_strength() <= 0)
 	{
 		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " attacks ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " attacks ");
 		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " in vain.");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " in vain.");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
 	}
@@ -71,9 +71,9 @@ AttackResult Attacker::perform_single_attack(
 	if (missileWeapon && !can_draw(owner, *missileWeapon))
 	{
 		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is not strong enough to draw the ");
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, missileWeapon->actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is not strong enough to draw the ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, missileWeapon->actorData.name);
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
 	}
@@ -83,9 +83,9 @@ AttackResult Attacker::perform_single_attack(
 	if (ctx.buffSystem->is_turned_away_by_sanctuary(owner, target, ctx))
 	{
 		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " cannot bring itself to attack ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " cannot bring itself to attack ");
 		ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 		ctx.messageSystem->finalize_message();
 		return AttackResult::PREVENTED;
 	}
@@ -164,9 +164,9 @@ AttackResult Attacker::perform_single_attack(
 			if (BUFF_BREAK_MESSAGES.contains(buff_type))
 			{
 				ctx.messageSystem->message(
-					CYAN_BLACK_PAIR,
+					ColorPairId::CYAN_BLACK,
 					std::string(BUFF_BREAK_MESSAGES.at(buff_type)),
-					true);
+					MessageCompletion::FINISHED);
 			}
 		}
 	}
@@ -254,7 +254,7 @@ int Attacker::calculate_damage_with_backstab(
 	{
 		baseDamage *= backstab.damageMultiplier;
 		ctx.messageSystem->append_message_part(
-			MAGENTA_BLACK_PAIR,
+			ColorPairId::MAGENTA_BLACK,
 			std::format(" BACKSTAB x{}! ", backstab.damageMultiplier));
 	}
 
@@ -276,18 +276,18 @@ void Attacker::log_attack_hit(
 	GameContext& ctx) const noexcept
 {
 	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
-	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({:+})", attackPenalty));
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({:+})", attackPenalty));
 	}
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
-	ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, ". Hit! ");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, ". Hit! ");
 	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " takes ");
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", finalDamage));
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" dmg ({}).", attackDamage.displayRoll));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " takes ");
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}", finalDamage));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" dmg ({}).", attackDamage.displayRoll));
 	ctx.messageSystem->finalize_message();
 
 	ctx.messageSystem->log(std::format(
@@ -313,16 +313,16 @@ void Attacker::log_attack_miss(
 	GameContext& ctx) const noexcept
 {
 	ctx.messageSystem->append_message_part(attacker.actorData.color, attacker.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({}) rolls ", handName));
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, std::format("{}", attackRoll));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({}) rolls ", handName));
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, std::format("{}", attackRoll));
 	if (attackPenalty != 0)
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" ({:+})", attackPenalty));
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" ({:+})", attackPenalty));
 	}
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format(" vs {}", rollNeeded));
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, ". Miss! ");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format(" vs {}", rollNeeded));
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, ". Miss! ");
 	ctx.messageSystem->append_message_part(target.actorData.color, target.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is unharmed.");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is unharmed.");
 	ctx.messageSystem->finalize_message();
 
 	ctx.messageSystem->log(std::format(

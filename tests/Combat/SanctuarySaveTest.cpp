@@ -26,6 +26,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/AttackKind.h"
 #include "src/BuffSystem.h"
@@ -112,8 +113,8 @@ protected:
 	Game game;
 	GameContext ctx;
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature goblin{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", 0 } };
-	Creature orc{ Vector2D{ 6, 5 }, ActorData{ TileRef{}, "orc", 0 } };
+	Creature goblin{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature orc{ Vector2D{ 6, 5 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK } };
 };
 
 // The fixture's rolls mean what the tests say: 12 fails every attacker's save here and

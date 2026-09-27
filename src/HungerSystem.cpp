@@ -150,39 +150,39 @@ std::string HungerSystem::get_hunger_bar_string(int bar_width) const
 	return bar;
 }
 
-int HungerSystem::get_hunger_color() const
+ColorPairId HungerSystem::get_hunger_color() const
 {
 	switch (get_hunger_state())
 	{
 
 	case HungerState::WELL_FED:
 	{
-		return WHITE_GREEN_PAIR; // Green
+		return ColorPairId::WHITE_GREEN; // Green
 	}
 
 	case HungerState::SATIATED:
 	{
-		return WHITE_BLACK_PAIR; // White
+		return ColorPairId::WHITE_BLACK; // White
 	}
 
 	case HungerState::HUNGRY:
 	{
-		return GREEN_BLACK_PAIR; // Yellow
+		return ColorPairId::GREEN_BLACK; // Yellow
 	}
 
 	case HungerState::STARVING:
 	{
-		return RED_BLACK_PAIR; // Orange/Brown
+		return ColorPairId::RED_BLACK; // Orange/Brown
 	}
 
 	case HungerState::DYING:
 	{
-		return WHITE_RED_PAIR; // Red
+		return ColorPairId::WHITE_RED; // Red
 	}
 
 	default:
 	{
-		return WHITE_BLACK_PAIR;
+		return ColorPairId::WHITE_BLACK;
 	}
 
 	}

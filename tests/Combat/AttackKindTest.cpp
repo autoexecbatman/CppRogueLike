@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Attacker.h"
 #include "src/Item.h"
@@ -43,7 +44,7 @@ protected:
 		player->set_strength(10);
 		player->set_dexterity(10);
 
-		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", 1 });
+		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
 		monster->set_dr(0);
 		monster->set_thaco(19);
@@ -70,7 +71,7 @@ protected:
 	// depends on - the name it expects back, and the slot the name belongs to.
 	std::unique_ptr<Item> make_weapon(const std::string& name, ItemClass itemClass)
 	{
-		auto weapon = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, 1 });
+		auto weapon = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		weapon->itemClass = itemClass;
 		weapon->behavior = Weapon{};
 		return weapon;

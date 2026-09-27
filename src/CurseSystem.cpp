@@ -18,9 +18,9 @@ void CurseSystem::apply_weapon_curse(const Item& item, GameContext& ctx)
 		return;
 	}
 	ctx.messageSystem->message(
-		14,
+		ColorPairId::MAGENTA_BLACK,
 		std::format("Your {} weakens your aim!", item.actorData.name),
-		true);
+		MessageCompletion::FINISHED);
 }
 
 // Emits "deteriorates" notification for cursed armor.
@@ -31,9 +31,9 @@ void CurseSystem::apply_armor_curse(const Item& item, GameContext& ctx)
 		return;
 	}
 	ctx.messageSystem->message(
-		14,
+		ColorPairId::MAGENTA_BLACK,
 		std::format("Your {} deteriorates under the curse!", item.actorData.name),
-		true);
+		MessageCompletion::FINISHED);
 }
 
 // Drains 1 HP per turn and emits "drains" notification for cursed amulets.
@@ -53,16 +53,16 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->message(
-			15,
+			ColorPairId::CYAN_BLUE,
 			std::format("The curse drains {} HP from you!", damageTaken),
-			true);
+			MessageCompletion::FINISHED);
 	}
 
 	if (player.get_hp() <= 0)
 	{
 		if (ctx.messageSystem)
 		{
-			ctx.messageSystem->message(12, "The curse has killed you!", true);
+			ctx.messageSystem->message(ColorPairId::BLUE_BLACK, "The curse has killed you!", MessageCompletion::FINISHED);
 		}
 		ctx.gameState->set_game_status(GameStatus::DEFEAT);
 	}

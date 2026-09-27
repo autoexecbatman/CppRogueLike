@@ -40,12 +40,12 @@ void BalanceViewer::menu(GameContext& ctx)
     std::string title = std::format("BALANCE VIEWER  --  Dungeon Level {}", dungeonLevel);
     int titleW = ctx.renderer->measure_text(title);
     int titleX = (vcols * tileSize - titleW) / 2;
-    ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, YELLOW_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ titleX, fontOff }, title, ColorPairId::YELLOW_BLACK);
 
     std::string_view hint = "[ESC] or [SPACE] to close";
     int hintW = ctx.renderer->measure_text(hint);
     int hintX = (vcols * tileSize - hintW) / 2;
-    ctx.renderer->draw_text(Vector2D{ hintX, (vrows - 1) * tileSize + fontOff }, hint, CYAN_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ hintX, (vrows - 1) * tileSize + fontOff }, hint, ColorPairId::CYAN_BLACK);
 
     // Left column: monsters. Right column: items.
     const int halfCols = vcols / 2;
@@ -68,7 +68,7 @@ void BalanceViewer::draw_column(
     int x = startCol * tileSize + tileSize;
     int row = 2;
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, GREEN_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
     ++row;
 
     for (const auto& entry : dist)
@@ -79,7 +79,7 @@ void BalanceViewer::draw_column(
         }
 
         std::string line = std::format("{}  {:.1f}%", entry.name, entry.percentage);
-        ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
         ++row;
     }
 }
@@ -97,7 +97,7 @@ void BalanceViewer::draw_item_column(
     int x = startCol * tileSize + tileSize;
     int row = 2;
 
-    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, GREEN_BLACK_PAIR);
+    ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, header, ColorPairId::GREEN_BLACK);
     ++row;
 
     for (const auto& entry : dist)
@@ -108,7 +108,7 @@ void BalanceViewer::draw_item_column(
         }
 
         std::string line = std::format("{:<24} {:5.1f}%  {}", entry.name, entry.percentage, entry.category);
-        ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, WHITE_BLACK_PAIR);
+        ctx.renderer->draw_text(Vector2D{ x, row * tileSize + fontOff }, line, ColorPairId::WHITE_BLACK);
         ++row;
     }
 }

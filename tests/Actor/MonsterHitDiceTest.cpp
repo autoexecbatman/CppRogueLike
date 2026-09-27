@@ -14,6 +14,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/DataManager.h"
 #include "src/GameContext.h"
@@ -150,7 +151,7 @@ TEST_F(MonsterHitDiceTest, AMonsterKeepsWhatItWasMadeWith)
 // three hit dice carry it three times.
 TEST_F(MonsterHitDiceTest, AMonstersChangedScoreMovesByItsHitDice)
 {
-	Creature monster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "pit fiend", 0 } };
+	Creature monster{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "pit fiend", ColorPairId::WHITE_BLACK } };
 	monster.set_creature_level(3);
 	monster.set_constitution(14);
 	monster.set_hit_dice(30);

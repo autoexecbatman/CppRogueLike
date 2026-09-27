@@ -53,7 +53,7 @@ void Actor::load(const json& j)
 		tileJ.at("row").get<int>()
 	};
 	actorData.name = j["actorData"].at("name").get<std::string>();
-	actorData.color = j["actorData"].at("color").get<int>();
+	actorData.color = parse_color_pair(j["actorData"].at("color").get<std::string>());
 	uniqueId = j.at("uniqueId").get<UniqueId::IdType>();
 
 	// Clear existing states before loading saved states
@@ -73,7 +73,7 @@ void Actor::save(json& j)
 	j["actorData"] = {
 		{ "tile", { { "sheet", static_cast<int>(actorData.tile.sheet) }, { "col", actorData.tile.col }, { "row", actorData.tile.row } } },
 		{ "name", actorData.name },
-		{ "color", actorData.color }
+		{ "color", color_pair_name(actorData.color) }
 	};
 	j["uniqueId"] = uniqueId;
 

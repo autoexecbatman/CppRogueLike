@@ -19,6 +19,7 @@
 #include <initializer_list>
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiWebSpinner.h"
 #include "src/ArmorClass.h"
@@ -101,7 +102,7 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spinner{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "web weaver", 0 } };
+	Creature spinner{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "web weaver", ColorPairId::WHITE_BLACK } };
 };
 
 // The spinner saves against the spell on a 12 and fails. A hit is queued behind it, so

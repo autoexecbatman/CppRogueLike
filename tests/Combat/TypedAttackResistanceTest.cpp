@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
 #include "src/MonsterAttacker.h"
@@ -60,7 +61,7 @@ protected:
 	// A monster whose natural attack is the given damage, strong enough to hit.
 	std::unique_ptr<Creature> monster_with(DamageInfo attack)
 	{
-		auto monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "beast", 1 });
+		auto monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "beast", ColorPairId::WHITE_BLACK });
 		monster->experienceReward = std::make_unique<ExperienceReward>(0);
 		monster->set_dr(0);
 		monster->set_thaco(19);

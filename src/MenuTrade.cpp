@@ -71,7 +71,7 @@ void MenuTrade::draw()
 {
     menu_clear();
     menu_draw_box();
-    menu_draw_title("TRADE", YELLOW_BLACK_PAIR);
+    menu_draw_title("TRADE", ColorPairId::YELLOW_BLACK);
     for (size_t i{ 0 }; i < entries.size(); ++i)
     {
         menu_print_state(i);

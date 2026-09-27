@@ -66,8 +66,8 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 			webCooldown = WEB_COOLDOWN;
 
 			// Show message about web spinning
-			ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, " spins a sticky web!", true);
+			ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " spins a sticky web!", MessageCompletion::FINISHED);
 
 			return;
 		}
@@ -102,13 +102,13 @@ void AiWebSpinner::inject_venom(Creature& owner, Creature& target, GameContext& 
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
 	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, constitutionAdjustment, ctx))
 	{
-		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " injects venom, and it does not take hold.", true);
+		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects venom, and it does not take hold.", MessageCompletion::FINISHED);
 		return;
 	}
 
-	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-	ctx.messageSystem->message(WHITE_RED_PAIR, " injects a deadly venom!", true);
+	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a deadly venom!", MessageCompletion::FINISHED);
 
 	// "Where death is listed, all hit points are immediately lost."
 	target.take_damage_and_check_death(target.get_hp(), ctx, DamageType::POISON);
@@ -221,14 +221,14 @@ bool AiWebSpinner::try_create_web(Creature& owner, GameContext& ctx)
 	generate_web_entities(webCenter, webSize, ctx);
 
 	// Dramatic message about web creation
-	ctx.messageSystem->message(RED_YELLOW_PAIR, owner.actorData.name);
+	ctx.messageSystem->message(ColorPairId::RED_YELLOW, owner.actorData.name, MessageCompletion::CONTINUED);
 	if (webSize >= WEB_MAX_SIZE - 1)
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " creates a massive web network!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " creates a massive web network!", MessageCompletion::FINISHED);
 	}
 	else
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " spins a complex web structure!", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " spins a complex web structure!", MessageCompletion::FINISHED);
 	}
 
 	// Mark this spider as having laid a web - now using our own method

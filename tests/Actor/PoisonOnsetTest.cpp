@@ -25,6 +25,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/AiGiantSpider.h"
 #include "src/ArmorClass.h"
@@ -123,7 +124,7 @@ protected:
 	GameContext ctx;
 	Map map{ 20, 20 };
 	std::unique_ptr<Player> player{ std::make_unique<Player>(Vector2D{ 4, 5 }) };
-	Creature spider{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "giant spider", 0 } };
+	Creature spider{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "giant spider", ColorPairId::WHITE_BLACK } };
 };
 
 // A dose waits its rounds out, and lands on the last of them.
@@ -191,7 +192,7 @@ TEST_F(PoisonOnsetTest, WithoutADoseNothingHappens)
 // The dead are not poisoned further: the dose stays where it is, and nothing lands.
 TEST_F(PoisonOnsetTest, ADeadCreatureIsLeftAlone)
 {
-	Creature victim{ Vector2D{ 7, 5 }, ActorData{ TileRef{}, "victim", 0 } };
+	Creature victim{ Vector2D{ 7, 5 }, ActorData{ TileRef{}, "victim", ColorPairId::WHITE_BLACK } };
 	victim.healthPool = std::make_unique<HealthPool>(10);
 	victim.take_poison(1, TYPE_A_DAMAGE);
 	victim.set_hp(0);

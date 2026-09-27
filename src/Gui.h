@@ -1,5 +1,7 @@
 #pragma once
 
+#include "Colors.h"
+
 #include <string>
 #include <vector>
 
@@ -17,7 +19,7 @@ inline int gui_width()
 class Gui : public Persistent
 {
 private:
-	int guiMessageColor{ 0 };
+	ColorPairId guiMessageColor{ ColorPairId::WHITE_BLACK };
 	std::string guiMessage{};
 	std::vector<std::vector<LogMessage>> displayMessages;
 
@@ -41,9 +43,9 @@ public:
 	void render_messages() noexcept;
 
 	void set_message(const std::string& msg) { guiMessage = msg; }
-	void set_message_color(int color) { guiMessageColor = color; }
+	void set_message_color(ColorPairId color) { guiMessageColor = color; }
 	const std::string& get_message() const { return guiMessage; }
-	int get_message_color() const { return guiMessageColor; }
+	ColorPairId get_message_color() const { return guiMessageColor; }
 
 protected:
 	void render_hp_bar(const GameContext& ctx);

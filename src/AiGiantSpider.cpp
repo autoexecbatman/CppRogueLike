@@ -25,12 +25,12 @@ void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext&
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
 	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HUGE_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))
 	{
-		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, " injects venom, and it does not take hold.", true);
+		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects venom, and it does not take hold.", MessageCompletion::FINISHED);
 		return;
 	}
 
-	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name);
-	ctx.messageSystem->message(WHITE_RED_PAIR, " injects a venom that will take hold!", true);
+	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a venom that will take hold!", MessageCompletion::FINISHED);
 	target.take_poison(TYPE_A_ONSET_ROUNDS, TYPE_A_DAMAGE);
 }

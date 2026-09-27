@@ -33,7 +33,7 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tctx.messageSystem->message(\n\t\t\tWHITE_BLACK_PAIR,\n\t\t\tstd::format(\"You are not strong enough to draw the {}.\", item->actorData.name),\n\t\t\ttrue);\n",
+      "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\tstd::format(\"You are not strong enough to draw the {}.\", item->actorData.name),\n\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a silent refusal"
     },

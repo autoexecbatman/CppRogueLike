@@ -69,7 +69,7 @@ void BaseMenu::menu_print_header()
 	renderer->draw_text(
 		Vector2D{ pixelX, rowTop + (UI_TEXT_ROW_PITCH - fontSize) / 2 },
 		"Item                       Price",
-		CYAN_BLACK_PAIR);
+		ColorPairId::CYAN_BLACK);
 }
 
 void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
@@ -83,13 +83,13 @@ void BaseMenu::menu_draw_row(int pixelX, int row, const std::string& text)
 	{
 		int bar_x = (static_cast<int>(menuStartX) + 1) * tileSize;
 		int bar_w = (static_cast<int>(menuWidth) - 2) * tileSize;
-		ColorPair pair = renderer->get_color_pair(BLACK_WHITE_PAIR);
+		ColorPair pair = renderer->get_color_pair(ColorPairId::BLACK_WHITE);
 		DrawRectangle(bar_x, rowTop, bar_w, UI_TEXT_ROW_PITCH, pair.bg);
-		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, BLACK_WHITE_PAIR);
+		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, ColorPairId::BLACK_WHITE);
 	}
 	else
 	{
-		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, WHITE_BLACK_PAIR);
+		renderer->draw_text(Vector2D{ pixelX, glyphY }, text, ColorPairId::WHITE_BLACK);
 	}
 }
 
@@ -122,7 +122,7 @@ void BaseMenu::menu_draw_box()
 	renderer->draw_frame(Vector2D{ pixelX, pixelY }, static_cast<int>(menuWidth), static_cast<int>(menuHeight), *tileConfig);
 }
 
-void BaseMenu::menu_draw_title(std::string_view title, int colorPair)
+void BaseMenu::menu_draw_title(std::string_view title, ColorPairId colorPair)
 {
 	assert(renderer && "BaseMenu::menu_draw_title called without a renderer");
 

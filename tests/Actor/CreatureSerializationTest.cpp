@@ -1,3 +1,4 @@
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Ai.h"
 #include "src/AiMonster.h"
@@ -22,7 +23,7 @@ protected:
     std::unique_ptr<Creature> create_test_creature() {
         auto creature = std::make_unique<Creature>(
             Vector2D{ 20, 10 },
-            ActorData{TileRef{}, "goblin", 1}
+            ActorData{TileRef{}, "goblin", ColorPairId::BROWN_BLACK }
         );
         creature->set_strength(14);
         creature->set_dexterity(12);
@@ -53,7 +54,7 @@ TEST_F(CreatureSerializationTest, FullCreature_SaveLoad_RoundTrip) {
     original->save(j);
 
     // Load into new creature
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     // Verify position (Vector2D is {y, x})
@@ -84,7 +85,7 @@ TEST_F(CreatureSerializationTest, Creature_WithDamage_PreserveHP) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_hp(), 15);
@@ -99,7 +100,7 @@ TEST_F(CreatureSerializationTest, ExceptionalStrength_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_exceptional_strength(), 76);
@@ -114,7 +115,7 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_TRUE(loaded->is_dead());
@@ -122,7 +123,7 @@ TEST_F(CreatureSerializationTest, Creature_Dead_PreservesState) {
 
 TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully) {
     // Create creature without healthPool
-    auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", 1});
+    auto original = std::make_unique<Creature>(Vector2D{5, 5}, ActorData{TileRef{}, "mystery", ColorPairId::WHITE_BLACK });
     // Don't add healthPool
 
     json j;
@@ -133,7 +134,7 @@ TEST_F(CreatureSerializationTest, Creature_NoHealthPool_HandledGracefully) {
     // But constitutionTracker should still exist
     EXPECT_TRUE(j.contains("constitutionTracker"));
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_NO_THROW(loaded->load(j)) << "a creature saved with no pool was refused on load";
 	EXPECT_EQ(loaded->healthPool, nullptr) << "a pool appeared that was never saved";
 }
@@ -144,7 +145,7 @@ TEST_F(CreatureSerializationTest, AttackerDamage_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     ASSERT_NE(loaded->attacker, nullptr);
@@ -167,7 +168,7 @@ TEST_F(CreatureSerializationTest, AMonsterLoadedIntoAFreshObjectKeepsItsHitPoint
 	json j;
 	original->save(j);
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "Unnamed", ColorPairId::WHITE_BLACK });
 	loaded->load(j);
 
 	ASSERT_NE(loaded->healthPool, nullptr) << "the saved hit points were dropped: no pool on the loaded monster";
@@ -226,7 +227,7 @@ TEST_F(CreatureSerializationTest, TheAlignmentAndClassAreSavedByName)
 	EXPECT_EQ(saved.at("morality"), "evil");
 	EXPECT_EQ(saved.at("creatureClass"), "rogue");
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(saved);
 
 	EXPECT_EQ(loaded->get_ethics(), Ethics::LAWFUL);
@@ -245,7 +246,7 @@ TEST_F(CreatureSerializationTest, ARunningBuffIsSavedByName)
 
 	EXPECT_EQ(saved.at("activeBuffs").at(0).at("type"), "bless");
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(saved);
 
 	ASSERT_EQ(loaded->activeBuffs.size(), 1u);
@@ -264,7 +265,7 @@ TEST_F(CreatureSerializationTest, AnAttackersDamageTypeIsSavedByName)
 
 	EXPECT_EQ(saved.at("attacker").at("damageInfo").at("type"), "acid");
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(saved);
 
 	ASSERT_NE(loaded->attacker, nullptr);
@@ -281,12 +282,12 @@ TEST_F(CreatureSerializationTest, AnUnknownDamageTypeIsRefused)
 
 	json withUnknownName = saved;
 	withUnknownName["attacker"]["damageInfo"]["type"] = "sonic";
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_THROW(loaded->load(withUnknownName), std::runtime_error);
 
 	json withNumber = saved;
 	withNumber["attacker"]["damageInfo"]["type"] = 3;
-	auto second = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto second = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_ANY_THROW(second->load(withNumber));
 }
 
@@ -299,7 +300,7 @@ TEST_F(CreatureSerializationTest, AnAlignmentNameThisBuildDoesNotKnowIsRefused)
 	creature->save(saved);
 	saved["ethics"] = "scrupulous";
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_THROW(loaded->load(saved), std::runtime_error);
 }
 
@@ -312,17 +313,17 @@ TEST_F(CreatureSerializationTest, ARecordNumberingItsEnumsIsRefused)
 	creature->save(saved);
 	saved["creatureClass"] = 1;
 
-	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_ANY_THROW(loaded->load(saved));
 }
 
 TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWritesIsRefused)
 {
-	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };
+	Creature bare{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK } };
 	json bareRecord;
 	bare.save(bareRecord);
 
-	Actor plainActor{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", 1 } };
+	Actor plainActor{ Vector2D{ 5, 5 }, ActorData{ TileRef{}, "bare", ColorPairId::WHITE_BLACK } };
 	json actorRecord;
 	plainActor.save(actorRecord);
 
@@ -334,8 +335,27 @@ TEST_F(CreatureSerializationTest, ACreatureRecordMissingAFieldItsSaverAlwaysWrit
 		}
 		json missingOne = bareRecord;
 		missingOne.erase(key);
-		auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		auto loaded = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 		EXPECT_ANY_THROW(loaded->load(missingOne))
 			<< "a creature record without \"" << key << "\" loaded quietly";
 	}
+}
+
+// The colour a creature is drawn in is part of what a save has to carry. It was
+// written and read as a bare integer until 2026-09-27 and nothing checked it made
+// the trip; BROWN_BLACK is used above rather than WHITE_BLACK because white on
+// black is what a colour that failed to load reads as.
+TEST_F(CreatureSerializationTest, DisplayColourSurvivesTheTrip)
+{
+    auto original = create_test_creature();
+    ASSERT_EQ(original->actorData.color, ColorPairId::BROWN_BLACK);
+
+    json saved;
+    original->save(saved);
+    EXPECT_EQ(saved["actorData"]["color"], "brown_black") << "the save carries the name";
+
+    auto loaded = std::make_unique<Creature>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK});
+    loaded->load(saved);
+
+    EXPECT_EQ(loaded->actorData.color, ColorPairId::BROWN_BLACK);
 }

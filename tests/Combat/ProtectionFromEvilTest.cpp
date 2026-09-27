@@ -6,6 +6,7 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
@@ -27,8 +28,8 @@ protected:
 	}
 
 	BuffSystem buffs{};
-	Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", 0 } };
-	Creature target{ Vector2D{ 1, 0 }, ActorData{ TileRef{}, "cleric", 0 } };
+	Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
+	Creature target{ Vector2D{ 1, 0 }, ActorData{ TileRef{}, "cleric", ColorPairId::WHITE_BLACK } };
 };
 
 // An unwarded target imposes nothing, however evil the attacker.

@@ -818,7 +818,7 @@ std::string ItemEditor::field_value(FieldId f) const
 	case FieldId::CATEGORY:         return m_working_category;
 	case FieldId::ITEM_CLASS:       return std::string{ encode_item_class(p.itemClass) };
 	case FieldId::PICKABLE_TYPE:    return std::string{ encode_pickable_type(p.pickableType) };
-	case FieldId::COLOR:            return std::format("{}", p.color);
+	case FieldId::COLOR:            return std::string{ color_pair_name(p.color) };
 	case FieldId::VALUE:            return std::format("{}", p.value);
 	case FieldId::BASE_WEIGHT:      return std::format("{}", p.baseWeight);
 	case FieldId::WEIGHT:           return std::format("{}", p.weight);
@@ -878,6 +878,7 @@ bool ItemEditor::field_is_toggle(FieldId f) const
 		|| f == FieldId::HAND_REQUIREMENT
 		|| f == FieldId::WEAPON_SIZE
 		|| f == FieldId::EFFECT
+		|| f == FieldId::COLOR
 		|| f == FieldId::IS_SET_MODE;
 }
 
@@ -891,9 +892,6 @@ void ItemEditor::field_adjust(FieldId f, int delta)
 	ItemParams& p = m_working;
 	switch (f)
 	{
-	case FieldId::COLOR:
-		p.color = clamp_val(p.color, delta, 0, 999);
-		break;
 	case FieldId::VALUE:
 		p.value = clamp_val(p.value, delta, 0, 99999);
 		break;
@@ -978,6 +976,9 @@ void ItemEditor::field_toggle(FieldId f)
 	ItemParams& p = m_working;
 	switch (f)
 	{
+	case FieldId::COLOR:
+		p.color = next_color_pair(p.color);
+		break;
 	case FieldId::ITEM_CLASS:
 		p.itemClass = next_item_class(p.itemClass);
 		break;

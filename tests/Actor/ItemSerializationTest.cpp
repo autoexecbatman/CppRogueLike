@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <nlohmann/json.hpp>
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Item.h"
 #include "src/Pickable.h"
@@ -18,7 +19,7 @@ protected:
     std::unique_ptr<Item> create_test_item() {
         auto item = std::make_unique<Item>(
             Vector2D{5, 10},
-            ActorData{TileRef{}, "Test Sword", 1}
+            ActorData{TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK }
         );
         item->set_value(80);
         item->itemKey = "long_sword";
@@ -34,7 +35,7 @@ TEST_F(ItemSerializationTest, BasicFields_SaveLoad_RoundTrip) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->get_value(), 80);
@@ -59,7 +60,7 @@ TEST_F(ItemSerializationTest, Enhancement_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::SHARP);
@@ -83,7 +84,7 @@ TEST_F(ItemSerializationTest, Enhancement_AllResistances_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.fireResistance, 25);
@@ -100,7 +101,7 @@ TEST_F(ItemSerializationTest, Enhancement_CursedAndBlessed_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.blessing, BlessingStatus::CURSED);
@@ -112,7 +113,7 @@ TEST_F(ItemSerializationTest, Pickable_Preserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     ASSERT_TRUE(loaded->behavior.has_value()) << "Pickable component not loaded";
@@ -125,7 +126,7 @@ TEST_F(ItemSerializationTest, NoEnhancement_DefaultValues) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_EQ(loaded->enhancement.prefix, PrefixType::NONE);
@@ -148,14 +149,14 @@ TEST_F(ItemSerializationTest, AllItemClasses_SaveLoad) {
     };
 
     for (ItemClass itemClass : classes) {
-        auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "test", 1});
+        auto item = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "test", ColorPairId::WHITE_BLACK });
         item->itemClass = itemClass;
         item->set_value(40);
 
         json j;
         item->save(j);
 
-        auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+        auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
         loaded->load(j);
 
         EXPECT_EQ(loaded->itemClass, itemClass) << "ItemClass mismatch for " << static_cast<int>(itemClass);
@@ -173,7 +174,7 @@ TEST_F(ItemSerializationTest, States_SavedAndLoaded) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
@@ -186,7 +187,7 @@ TEST_F(ItemSerializationTest, States_NotEquipped_StaysUnequipped) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_FALSE(loaded->has_state(ActorState::IS_EQUIPPED));
@@ -201,7 +202,7 @@ TEST_F(ItemSerializationTest, States_LoadClearsPreviousStates) {
     original->save(j);
 
     // Create item and give it a state BEFORE loading
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->add_state(ActorState::IS_EQUIPPED);  // Pre-existing state
     ASSERT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
 
@@ -221,7 +222,7 @@ TEST_F(ItemSerializationTest, States_MultipleStates_AllPreserved) {
     json j;
     original->save(j);
 
-    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", 0});
+    auto loaded = std::make_unique<Item>(Vector2D{0, 0}, ActorData{TileRef{}, "temp", ColorPairId::WHITE_BLACK });
     loaded->load(j);
 
     EXPECT_TRUE(loaded->has_state(ActorState::IS_EQUIPPED));
@@ -239,7 +240,7 @@ TEST_F(ItemSerializationTest, HandRequirement_Preserved)
 	json j;
 	original->save(j);
 
-	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(j);
 
 	ASSERT_TRUE(loaded->behavior.has_value());
@@ -261,7 +262,7 @@ TEST_F(ItemSerializationTest, AWeaponRecordMissingAFieldIsRefused)
 	original->save(j);
 	j["pickable"].erase("handRequirement");
 
-	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_THROW(loaded->load(j), nlohmann::json::exception)
 		<< "a weapon with no hand requirement loaded quietly as one-handed";
 }
@@ -279,7 +280,7 @@ TEST_F(ItemSerializationTest, ScrollAnimation_Preserved)
 	json j;
 	original->save(j);
 
-	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	loaded->load(j);
 
 	ASSERT_TRUE(loaded->behavior.has_value());
@@ -299,7 +300,7 @@ TEST_F(ItemSerializationTest, AnItemRecordMissingABlockItsSaverWritesIsRefused)
 	json itemRecord;
 	original->save(itemRecord);
 
-	Actor plainActor{ Vector2D{ 5, 10 }, ActorData{ TileRef{}, "Test Sword", 1 } };
+	Actor plainActor{ Vector2D{ 5, 10 }, ActorData{ TileRef{}, "Test Sword", ColorPairId::WHITE_BLACK } };
 	json actorRecord;
 	plainActor.save(actorRecord);
 
@@ -312,7 +313,7 @@ TEST_F(ItemSerializationTest, AnItemRecordMissingABlockItsSaverWritesIsRefused)
 		}
 		json missingOne = itemRecord;
 		missingOne.erase(key);
-		auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+		auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 		EXPECT_ANY_THROW(loaded->load(missingOne))
 			<< "an item record without \"" << key << "\" loaded quietly";
 	}
@@ -327,7 +328,7 @@ TEST_F(ItemSerializationTest, AnItemWithNoBehaviourStillLoads)
 	original->save(itemRecord);
 	ASSERT_FALSE(itemRecord.contains("pickable")) << "a behaviourless item saved a behaviour";
 
-	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", 0 });
+	auto loaded = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "temp", ColorPairId::WHITE_BLACK });
 	EXPECT_NO_THROW(loaded->load(itemRecord));
 	EXPECT_FALSE(loaded->behavior.has_value());
 }

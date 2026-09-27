@@ -16,6 +16,7 @@
 
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/BodyPlanRegistry.h"
 #include "src/Creature.h"
 #include "src/EquipmentSlot.h"
@@ -36,14 +37,14 @@ protected:
 	// A bare item of the given weight; nothing else about it matters to the rule.
 	static std::unique_ptr<Item> weighing(int weight)
 	{
-		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "stone", 0 });
+		auto item = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "stone", ColorPairId::WHITE_BLACK });
 		item->enhancement.weight = weight;
 		return item;
 	}
 
 	MockGameContext mock{};
 	GameContext ctx{ mock.to_game_context() };
-	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", 0 } };
+	Creature carrier{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "carrier", ColorPairId::WHITE_BLACK } };
 };
 
 TEST_F(CarryWeightTest, AnItemExactlyAtTheLimitFits)

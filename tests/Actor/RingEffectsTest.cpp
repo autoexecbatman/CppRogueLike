@@ -20,6 +20,7 @@
 #include <string_view>
 #include <vector>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
@@ -46,7 +47,7 @@ protected:
 	// ring. Constitution 10 regenerates nothing of its own.
 	std::unique_ptr<Creature> make_wearer(CreatureClass creatureClass, int maxHp, int hp)
 	{
-		auto wearer = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wearer", 0 });
+		auto wearer = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "wearer", ColorPairId::WHITE_BLACK });
 		wearer->healthPool = std::make_unique<HealthPool>(maxHp);
 		wearer->set_creature_class(creatureClass);
 		wearer->set_constitution(10);

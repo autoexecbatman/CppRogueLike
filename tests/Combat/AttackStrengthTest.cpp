@@ -20,6 +20,7 @@
 #include <memory>
 #include <string_view>
 
+#include "src/Colors.h"
 #include "src/AttackKind.h"
 #include "src/AttackStrength.h"
 #include "src/Creature.h"
@@ -60,7 +61,7 @@ protected:
 		player->set_dexterity(10);
 		ctx.playerOwner = &player;
 
-		target = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", 1 });
+		target = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		target->experienceReward = std::make_unique<ExperienceReward>(0);
 		target->armorClass = std::make_unique<ArmorClass>(10);
 		target->healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -135,7 +136,7 @@ TEST_F(AttackStrengthTest, EachSourceTakesItsPartOfTheRow)
 
 	for (const Case& expected : FROM_PAGE_181)
 	{
-		Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "attacker", 0 } };
+		Creature attacker{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "attacker", ColorPairId::WHITE_BLACK } };
 		attacker.set_strength(expected.strength);
 		attacker.set_exceptional_strength(expected.exceptional);
 		const std::unique_ptr<Item> fired = expected.weaponKey.empty() ? nullptr : weapon(expected.weaponKey);
@@ -314,7 +315,7 @@ TEST_F(AttackStrengthTest, AnArmThatLosesItsStrengthCannotDrawTheBowItHolds)
 // A monster holds a rated bow the same way, whoever put it in its hands.
 TEST_F(AttackStrengthTest, AMonsterTooWeakForItsBowDrawsNothing)
 {
-	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", 1 } };
+	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -335,7 +336,7 @@ TEST_F(AttackStrengthTest, TheRatingSurvivesASave)
 	json saved;
 	weapon("composite_bow")->save(saved);
 
-	Item loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "", 0 } };
+	Item loaded{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "", ColorPairId::WHITE_BLACK } };
 	loaded.load(saved);
 
 	EXPECT_EQ(strength_rating_of(loaded), 18);
@@ -372,7 +373,7 @@ TEST_F(AttackStrengthTest, ACrossbowIgnoresAWeakArm)
 // A monster's bow is read from its own missile slot, so the rule reaches it too.
 TEST_F(AttackStrengthTest, AMonsterArcherFollowsTheSameRule)
 {
-	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", 1 } };
+	Creature archer{ Vector2D{ 0, 1 }, ActorData{ TileRef{}, "archer", ColorPairId::WHITE_BLACK } };
 	archer.experienceReward = std::make_unique<ExperienceReward>(0);
 	archer.armorClass = std::make_unique<ArmorClass>(10);
 	archer.healthPool = std::make_unique<HealthPool>(STARTING_HP);

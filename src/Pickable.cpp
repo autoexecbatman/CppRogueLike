@@ -121,9 +121,9 @@ bool use_stat_boost(EquipmentSlot slot, Item& item, Player& wearer, GameContext&
 
 	wearer.update_armor_class(ctx);
 	ctx.messageSystem->message(
-		WHITE_BLACK_PAIR,
+		ColorPairId::WHITE_BLACK,
 		std::format("You {} the {}.", wasEquipped ? "remove" : "put on", item.actorData.name),
-		true);
+		MessageCompletion::FINISHED);
 	return true;
 }
 
@@ -150,17 +150,17 @@ bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Pla
 			if (effect == MagicalEffect::INVISIBILITY && wearer.is_invisible())
 			{
 				ctx.buffSystem->remove_buff(wearer, BuffType::INVISIBILITY);
-				ctx.messageSystem->message(CYAN_BLACK_PAIR, "Your invisibility fades.", true);
+				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "Your invisibility fades.", MessageCompletion::FINISHED);
 			}
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You remove the " + item.actorData.name + ".", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You remove the " + item.actorData.name + ".", MessageCompletion::FINISHED);
 		}
 		else
 		{
 			if (effect == MagicalEffect::INVISIBILITY)
 			{
-				ctx.messageSystem->message(CYAN_BLACK_PAIR, "The ring pulses with arcane power. Press Ctrl+C to cast.", true);
+				ctx.messageSystem->message(ColorPairId::CYAN_BLACK, "The ring pulses with arcane power. Press Ctrl+C to cast.", MessageCompletion::FINISHED);
 			}
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You put on the " + item.actorData.name + ".", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You put on the " + item.actorData.name + ".", MessageCompletion::FINISHED);
 		}
 
 		if (MagicalEffectUtils::is_protection_effect(effect) || effect == MagicalEffect::BRILLIANCE)
@@ -233,11 +233,11 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 	{
 		if (wearer.get_hp() >= wearer.get_max_hp())
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, "You are already at full health.", true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You are already at full health.", MessageCompletion::FINISHED);
 			return false;
 		}
 		const int healed = wearer.heal(consumable.amount);
-		ctx.messageSystem->message(GREEN_BLACK_PAIR, std::format("You feel better! (+{} HP)", healed), true);
+		ctx.messageSystem->message(ColorPairId::GREEN_BLACK, std::format("You feel better! (+{} HP)", healed), MessageCompletion::FINISHED);
 		break;
 	}
 
@@ -245,21 +245,21 @@ bool use(Consumable& consumable, Item& owner, Creature& wearer, GameContext& ctx
 	{
 		ctx.buffSystem->add_buff(wearer, consumable.buffType, consumable.amount, consumable.duration, consumable.isSetEffect);
 		ctx.messageSystem->message(
-			CYAN_BLACK_PAIR,
+			ColorPairId::CYAN_BLACK,
 			std::format("You feel the effect of the {} for {} turns.", owner.get_name(), consumable.duration),
-			true);
+			MessageCompletion::FINISHED);
 		break;
 	}
 
 	case ConsumableEffect::NONE:
 	{
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You use the {}.", owner.get_name()), true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, std::format("You use the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		break;
 	}
 
 	case ConsumableEffect::FAIL:
 	{
-		ctx.messageSystem->message(RED_BLACK_PAIR, std::format("Nothing happens with the {}.", owner.get_name()), true);
+		ctx.messageSystem->message(ColorPairId::RED_BLACK, std::format("Nothing happens with the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		return false;
 	}
 
@@ -292,13 +292,13 @@ bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
 		{
 			const std::string slotName = (preferred == EquipmentSlot::LEFT_HAND) ? "off-hand" : "main hand";
 			ctx.messageSystem->message(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("You equip the {} in your {}.", owner.get_name(), slotName),
-				true);
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You unequip the {}.", owner.get_name()), true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, std::format("You unequip the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		}
 		return true;
 	}
@@ -336,13 +336,13 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 
 		if (affected > 0)
 		{
-			ctx.messageSystem->append_message_part(CYAN_BLACK_PAIR, std::format("{}! ", owner.get_name()));
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, std::format("{} creatures are affected.", affected));
+			ctx.messageSystem->append_message_part(ColorPairId::CYAN_BLACK, std::format("{}! ", owner.get_name()));
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, std::format("{} creatures are affected.", affected));
 			ctx.messageSystem->finalize_message();
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("The {} has no effect.", owner.get_name()), true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, std::format("The {} has no effect.", owner.get_name()), MessageCompletion::FINISHED);
 		}
 
 		return consume_item(owner, wearer);
@@ -359,12 +359,12 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 			return false;
 		}
 		auto* target = result.creatures[0];
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "A lightning bolt strikes the ");
-		ctx.messageSystem->append_message_part(WHITE_BLUE_PAIR, target->actorData.name);
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " with a loud thunder!");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "A lightning bolt strikes the ");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLUE, target->actorData.name);
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " with a loud thunder!");
 		ctx.messageSystem->finalize_message();
 		SpellAnimations::animate_lightning(wearer.position, target->position, ctx);
-		ctx.messageSystem->message(WHITE_RED_PAIR, std::format("The damage is {} hit points.", targetScroll.damage), true);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, std::format("The damage is {} hit points.", targetScroll.damage), MessageCompletion::FINISHED);
 		target->take_damage_and_check_death(targetScroll.damage, ctx, DamageType::LIGHTNING);
 		ctx.creatureManager->cleanup_dead_creatures(*ctx.creatures);
 		return consume_item(owner, wearer);
@@ -390,16 +390,16 @@ bool use(TargetedScroll& targetScroll, Item& owner, Creature& wearer, GameContex
 		if (mode == TargetMode::PICK_TILE_AOE)
 		{
 			innerCtx.messageSystem->append_message_part(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("The fireball explodes, burning everything within {} tiles!", scrollRange));
 			innerCtx.messageSystem->finalize_message();
 			// The scroll casts the spell itself, at the level the book reads it at.
 			const SpellSystem::FireballBurst burst = SpellSystem::burst_fireball(
 				targetPos, SpellSystem::SCROLL_FIREBALL_CASTER_LEVEL, aoeRadius, innerCtx);
 			innerCtx.messageSystem->message(
-				WHITE_BLACK_PAIR,
+				ColorPairId::WHITE_BLACK,
 				std::format("{}d6 = {} fire, {} struck.", burst.diceCount, burst.totalDamage, burst.struck),
-				true);
+				MessageCompletion::FINISHED);
 
 			if (innerCtx.player()->get_tile_distance(targetPos) <= aoeRadius)
 			{
@@ -434,9 +434,9 @@ ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns
 	if (target && ctx.buffSystem->is_turned_away_by_sanctuary(reader, *target, ctx))
 	{
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("You cannot bring yourself to read the scroll at the {}.", target->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 		return ScrollReading::KEPT;
 	}
 
@@ -444,9 +444,9 @@ ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns
 	{
 		target->apply_confusion(turns);
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			std::format("The eyes of the {} look vacant, as he starts to stumble around!", target->actorData.name),
-			true);
+			MessageCompletion::FINISHED);
 	}
 	return ScrollReading::SPENT;
 }
@@ -454,9 +454,9 @@ ScrollReading read_confusion_at(const Creature& reader, Vector2D tile, int turns
 bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	wearer.adjust_gold(gold.amount);
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, "You gained ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::to_string(gold.amount));
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, " gold.");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, "You gained ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::to_string(gold.amount));
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, " gold.");
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
 }
@@ -464,9 +464,9 @@ bool use(Gold& gold, Item& owner, Creature& wearer, GameContext& ctx)
 bool use(Food& food, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	ctx.hungerSystem->decrease_hunger(ctx, food.nutritionValue);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, owner.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ".");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, owner.actorData.name);
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ".");
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
 }
@@ -485,9 +485,9 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 
 	const std::string& flavor = get_or_default(corpseFlavorText, owner.actorData.name, std::string{ "It tastes... questionable." });
 
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You eat the ");
-	ctx.messageSystem->append_message_part(RED_BLACK_PAIR, owner.actorData.name);
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, ". " + flavor);
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You eat the ");
+	ctx.messageSystem->append_message_part(ColorPairId::RED_BLACK, owner.actorData.name);
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, ". " + flavor);
 	ctx.messageSystem->finalize_message();
 	return consume_item(owner, wearer);
 }
@@ -500,10 +500,10 @@ bool use(Armor& armor, Item& item, Player& wearer, GameContext& ctx)
 	if (success)
 	{
 		ctx.messageSystem->message(
-			WHITE_BLACK_PAIR,
+			ColorPairId::WHITE_BLACK,
 			was_equipped ? "You remove the " + item.actorData.name + "."
 			             : "You put on the " + item.actorData.name + ".",
-			true);
+			             MessageCompletion::FINISHED);
 	}
 
 	return success;
@@ -542,11 +542,11 @@ bool use(Shield& shield, Item& owner, Player& wearer, GameContext& ctx)
 		Item* equipped = wearer.get_equipped_item(EquipmentSlot::LEFT_HAND);
 		if (equipped && equipped->uniqueId == owner.uniqueId)
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You raise the {}.", owner.get_name()), true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, std::format("You raise the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(WHITE_BLACK_PAIR, std::format("You lower the {}.", owner.get_name()), true);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, std::format("You lower the {}.", owner.get_name()), MessageCompletion::FINISHED);
 		}
 		return true;
 	}
@@ -559,8 +559,8 @@ bool use(Teleporter& teleporter, Item& owner, Creature& wearer, GameContext& ctx
 {
 	wearer.position = SpawnUtils::find_random_floor_tile(ctx);
 	ctx.map->compute_fov(ctx);
-	ctx.messageSystem->message(BLUE_BLACK_PAIR, "You feel disoriented as the world shifts around you!", true);
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You have been teleported to a new location.", true);
+	ctx.messageSystem->message(ColorPairId::BLUE_BLACK, "You feel disoriented as the world shifts around you!", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You have been teleported to a new location.", MessageCompletion::FINISHED);
 	return consume_item(owner, wearer);
 }
 
@@ -583,25 +583,25 @@ bool use(IdentifyScroll& identifyScroll, Item& owner, Creature& wearer, GameCont
 		}
 	}
 	ctx.messageSystem->message(
-		CYAN_BLACK_PAIR,
+		ColorPairId::CYAN_BLACK,
 		identifiedCount > 0
 			? std::format("You use the {}. {} items identified!", owner.get_name(), identifiedCount)
 			: std::format("You use the {}. All items were already identified.", owner.get_name()),
-		true);
+			MessageCompletion::FINISHED);
 	return consume_item(owner, wearer);
 }
 
 bool use(Amulet& amulet, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "The Amulet of Yendor glows brightly in your hands!", true);
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "You feel a powerful magic enveloping you...", true);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "The Amulet of Yendor glows brightly in your hands!", MessageCompletion::FINISHED);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You feel a powerful magic enveloping you...", MessageCompletion::FINISHED);
 	ctx.gameState->set_game_status(GameStatus::VICTORY);
 	return false;
 }
 
 bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
 {
-	ctx.messageSystem->message(WHITE_BLACK_PAIR, "Bump into a locked door to use this key.", true);
+	ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Bump into a locked door to use this key.", MessageCompletion::FINISHED);
 	return false;
 }
 

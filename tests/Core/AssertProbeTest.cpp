@@ -78,12 +78,12 @@ protected:
 
 	static std::unique_ptr<Creature> make_creature()
 	{
-		return std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "orc", WHITE_BLACK_PAIR });
+		return std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "orc", ColorPairId::WHITE_BLACK });
 	}
 
 	static std::unique_ptr<Item> make_item(std::string_view name)
 	{
-		return std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, std::string(name), WHITE_BLACK_PAIR });
+		return std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, std::string(name), ColorPairId::WHITE_BLACK });
 	}
 
 	// The goblin carries a short sword, so this one call reaches both of

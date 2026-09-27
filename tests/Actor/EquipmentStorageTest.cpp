@@ -18,7 +18,7 @@ protected:
 
 	void SetUp() override
 	{
-		ActorData data{ TileRef{}, "orc", WHITE_BLACK_PAIR };
+		ActorData data{ TileRef{}, "orc", ColorPairId::WHITE_BLACK };
 		creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, data);
 		creature->set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::BODY });
 	}
@@ -26,7 +26,7 @@ protected:
 	void wear(std::string_view name, EquipmentSlot slot)
 	{
 		auto item = std::make_unique<Item>(
-			Vector2D{}, ActorData{ TileRef{}, std::string(name), WHITE_BLACK_PAIR });
+			Vector2D{}, ActorData{ TileRef{}, std::string(name), ColorPairId::WHITE_BLACK });
 		creature->equippedItems.push_back(EquippedItem(std::move(item), slot));
 	}
 };

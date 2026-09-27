@@ -54,7 +54,7 @@ ContextMenu::ContextMenu(
 void ContextMenu::draw_content()
 {
 	menu_draw_box();
-	menu_draw_title("Action", WHITE_BLACK_PAIR);
+	menu_draw_title("Action", ColorPairId::WHITE_BLACK);
 
 	for (int i = 0; i < static_cast<int>(menuOptions.size()); ++i)
 	{

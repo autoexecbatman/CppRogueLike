@@ -50,8 +50,8 @@ AttackResult PlayerAttacker::attack(Creature& target, AttackKind kind, GameConte
 	const Player::DualWieldInfo dualWieldInfo = owner.get_dual_wield_info();
 	if (dualWieldInfo.isDualWielding)
 	{
-		ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "Dual wielding: ");
-		ctx.messageSystem->append_message_part(GREEN_BLACK_PAIR, "Fighting with both weapons!");
+		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "Dual wielding: ");
+		ctx.messageSystem->append_message_part(ColorPairId::GREEN_BLACK, "Fighting with both weapons!");
 		ctx.messageSystem->finalize_message();
 
 		const DamageInfo mainDamage = compute_weapon_damage(EquipmentSlot::RIGHT_HAND);

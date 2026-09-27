@@ -96,7 +96,7 @@ json saved_floor_of_two_items()
 	{
 		[[maybe_unused]] const auto added = InventoryOperations::add_item(
 			floor,
-			std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, 0 }));
+			std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK }));
 	}
 	json saved;
 	InventoryOperations::save_inventory(floor, saved);

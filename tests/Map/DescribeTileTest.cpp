@@ -26,7 +26,7 @@ protected:
 	// whatever was there before.
 	std::string message_after(TileType tileType)
 	{
-		mock.messages.message(WHITE_BLACK_PAIR, "sentinel", true);
+		mock.messages.message(ColorPairId::WHITE_BLACK, "sentinel", MessageCompletion::FINISHED);
 		map.describe_tile(tileType, ctx);
 		return mock.messages.get_current_message();
 	}

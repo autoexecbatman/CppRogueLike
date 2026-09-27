@@ -114,14 +114,14 @@ void MenuAbilityScores::draw_allocation_screen()
 {
 	menu_clear();
 	menu_draw_box();
-	menu_draw_title("ABILITY SCORES", YELLOW_BLACK_PAIR);
+	menu_draw_title("ABILITY SCORES", ColorPairId::YELLOW_BLACK);
 
 	assert(renderer && "MenuAbilityScores::draw_allocation_screen called before menu_new");
 	const int tileSize = renderer->get_tile_size();
 	const int textX = (static_cast<int>(menuStartX) + 1) * tileSize;
 	const int firstRowY = static_cast<int>(menuStartY) * tileSize + tileSize + TEXT_TOP_INSET;
 
-	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, int colorPair)
+	const auto draw_row = [this, textX, firstRowY](int row, const std::string& text, ColorPairId colorPair)
 	{
 		renderer->draw_text(
 			Vector2D{ textX, firstRowY + row * TEXT_ROW_PITCH },
@@ -132,17 +132,17 @@ void MenuAbilityScores::draw_allocation_screen()
 	int row = FIRST_ABILITY_ROW;
 	for (const Ability ability : ALL_ABILITY)
 	{
-		const int colorPair = (ability == cursor) ? YELLOW_BLACK_PAIR : WHITE_BLACK_PAIR;
+		const const ColorPairId colorPair = (ability == cursor) ? ColorPairId::YELLOW_BLACK : ColorPairId::WHITE_BLACK;
 		draw_row(row, row_for(ability), colorPair);
 		++row;
 	}
 
-	draw_row(POOL_ROW, pool_line(), WHITE_BLACK_PAIR);
+	draw_row(POOL_ROW, pool_line(), ColorPairId::WHITE_BLACK);
 
 	const bool ready = !allocation.unmet_minimum().has_value();
-	draw_row(STATUS_ROW, status_line(), ready ? GREEN_BLACK_PAIR : RED_BLACK_PAIR);
-	draw_row(FIRST_HINT_ROW, "[up/down] choose an ability   [1-7] spend that die", CYAN_BLACK_PAIR);
-	draw_row(FIRST_HINT_ROW + 1, "[backspace] take a die back   [Enter] done", CYAN_BLACK_PAIR);
+	draw_row(STATUS_ROW, status_line(), ready ? ColorPairId::GREEN_BLACK : ColorPairId::RED_BLACK);
+	draw_row(FIRST_HINT_ROW, "[up/down] choose an ability   [1-7] spend that die", ColorPairId::CYAN_BLACK);
+	draw_row(FIRST_HINT_ROW + 1, "[backspace] take a die back   [Enter] done", ColorPairId::CYAN_BLACK);
 
 	menu_refresh();
 }

@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Attacker.h"
 #include "src/MonsterAttacker.h"
@@ -47,7 +48,7 @@ protected:
 		player->set_strength(10);
 		player->set_dexterity(10);
 
-		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", 1 });
+		monster = std::make_unique<Creature>(Vector2D{ 0, 1 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK });
 		monster->experienceReward = std::make_unique<ExperienceReward>(50);
 		monster->set_dr(0);
 		monster->set_thaco(19);
@@ -79,7 +80,7 @@ protected:
 
 TEST_F(AttackerTest, Serialization_RoundTrip)
 {
-	Creature dummy(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "dummy", 1 });
+	Creature dummy(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "dummy", ColorPairId::WHITE_BLACK });
 	MonsterAttacker original(dummy, DamageInfo{ "2d4", DamageType::FIRE });
 
 	json j;

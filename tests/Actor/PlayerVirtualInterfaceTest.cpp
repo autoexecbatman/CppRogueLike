@@ -1,3 +1,4 @@
+#include "src/Colors.h"
 #include "src/Actor.h"
 #include "src/Creature.h"
 #include "src/Player.h"
@@ -37,7 +38,7 @@ protected:
 
         creature_base = std::make_unique<Creature>(
             Vector2D{ 1, 1 },
-            ActorData{ TileRef{}, "test_creature", 1 });
+            ActorData{ TileRef{}, "test_creature", ColorPairId::WHITE_BLACK });
         creature_base->experienceReward = std::make_unique<ExperienceReward>(50);
         creature_base->set_dr(2);
         creature_base->set_thaco(19);

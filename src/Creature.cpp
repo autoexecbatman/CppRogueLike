@@ -404,15 +404,15 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 	{
 		if (result.hpDifference > 0)
 		{
-			ctx.messageSystem->message(GREEN_BLACK_PAIR,
+			ctx.messageSystem->message(ColorPairId::GREEN_BLACK,
 				std::format("Constitution increased from {} to {}! You gain {} hit points.", *oldCon, get_constitution(), result.hpDifference),
-				true);
+				MessageCompletion::FINISHED);
 		}
 		else
 		{
-			ctx.messageSystem->message(RED_BLACK_PAIR,
+			ctx.messageSystem->message(ColorPairId::RED_BLACK,
 				std::format("Constitution decreased from {} to {}! You lose {} hit points.", *oldCon, get_constitution(), -result.hpDifference),
-				true);
+				MessageCompletion::FINISHED);
 		}
 	}
 
@@ -421,7 +421,7 @@ void Creature::update_constitution_bonus(GameContext& ctx)
 		set_hp(0);
 		if (is_player())
 		{
-			ctx.messageSystem->message(RED_BLACK_PAIR, "Your life force has been drained beyond recovery. You die!", true);
+			ctx.messageSystem->message(ColorPairId::RED_BLACK, "Your life force has been drained beyond recovery. You die!", MessageCompletion::FINISHED);
 		}
 		else
 		{
@@ -479,8 +479,8 @@ void Creature::tick_poison(GameContext& ctx)
 	const int damage = pendingPoison->damage;
 	pendingPoison.reset();
 
-	ctx.messageSystem->message(actorData.color, actorData.name);
-	ctx.messageSystem->message(WHITE_RED_PAIR, " is racked by the venom!", true);
+	ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(ColorPairId::WHITE_RED, " is racked by the venom!", MessageCompletion::FINISHED);
 	take_damage_and_check_death(damage, ctx, DamageType::POISON);
 }
 
@@ -955,7 +955,7 @@ void Creature::drop(Item& item, GameContext& ctx)
 	if (addResult.has_value())
 	{
 		InventoryOperations::optimize_inventory_storage(inventoryData);
-		ctx.messageSystem->message(WHITE_BLACK_PAIR, "You dropped the item.", true);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You dropped the item.", MessageCompletion::FINISHED);
 	}
 }
 
@@ -968,11 +968,11 @@ TileRef Creature::get_display_tile() const noexcept
 	return Actor::get_display_tile();
 }
 
-int Creature::get_display_color() const noexcept
+ColorPairId Creature::get_display_color() const noexcept
 {
 	if (is_invisible())
 	{
-		return CYAN_BLACK_PAIR;
+		return ColorPairId::CYAN_BLACK;
 	}
 	return Actor::get_display_color();
 }
@@ -981,12 +981,12 @@ void Creature::die(GameContext& ctx)
 {
 	// Monster death: message, reward, animation, drop items, create corpse
 	ctx.messageSystem->append_message_part(actorData.color, std::format("{}", actorData.name));
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " is dead.\n");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " is dead.\n");
 	ctx.messageSystem->finalize_message();
 
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "You get ");
-	ctx.messageSystem->append_message_part(YELLOW_BLACK_PAIR, std::format("{}", get_xp()));
-	ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " experience points.\n");
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "You get ");
+	ctx.messageSystem->append_message_part(ColorPairId::YELLOW_BLACK, std::format("{}", get_xp()));
+	ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " experience points.\n");
 	ctx.messageSystem->finalize_message();
 
 	assert(ctx.player() != nullptr && "Creature::die requires a live player in context");

@@ -1,4 +1,6 @@
 #pragma once
+
+#include "Colors.h"
 #include <string>
 #include <vector>
 
@@ -16,7 +18,7 @@ struct Disguise
 {
 	TileRef tile{};
 	std::string name{};
-	int color{};
+	ColorPairId color{ ColorPairId::WHITE_BLACK };
 };
 
 // Build the list of item appearances a mimic can adopt.

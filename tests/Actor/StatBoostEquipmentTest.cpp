@@ -25,6 +25,7 @@
 
 #include <nlohmann/json.hpp>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/BuffSystem.h"
 #include "src/BuffType.h"
@@ -374,7 +375,7 @@ TEST_F(StatBoostEquipmentTest, AnItemWithNowhereToGoStaysOn)
 // The rule is the creature's, not the player's: a monster wearing a girdle has its Strength.
 TEST_F(StatBoostEquipmentTest, AMonsterWearingAGirdleHasItsStrength)
 {
-	Creature ogre{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "ogre", 0 } };
+	Creature ogre{ Vector2D{ 1, 1 }, ActorData{ TileRef{}, "ogre", ColorPairId::WHITE_BLACK } };
 	ogre.set_strength(BASE_STRENGTH);
 	ogre.set_body_plan({ EquipmentSlot::GIRDLE });
 

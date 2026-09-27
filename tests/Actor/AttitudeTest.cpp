@@ -5,13 +5,14 @@
 
 #include <gtest/gtest.h>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/Vector2D.h"
 
 class AttitudeTest : public ::testing::Test
 {
 protected:
-	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", 0 } };
+	Creature creature{ Vector2D{ 0, 0 }, ActorData{ TileRef{}, "goblin", ColorPairId::WHITE_BLACK } };
 };
 
 // Creatures are hostile unless something says otherwise.

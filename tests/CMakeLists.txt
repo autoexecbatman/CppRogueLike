@@ -118,6 +118,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CurseSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/HungerSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ColorPairTest.cpp
 )
 
 message(STATUS "Found ${CMAKE_CURRENT_LIST_LENGTH} test source files: ${TEST_SOURCES}")
@@ -162,9 +163,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/AiSpider.cpp
     ${PARENT_SOURCE_DIR}/AiWebSpinner.cpp
     ${PARENT_SOURCE_DIR}/AiGiantSpider.cpp
-
-    # Colors
-    ${PARENT_SOURCE_DIR}/Colors.cpp
 
     # Menu
     ${PARENT_SOURCE_DIR}/AnimationBarrierMenu.cpp

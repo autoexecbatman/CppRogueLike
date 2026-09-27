@@ -172,7 +172,7 @@ void MenuSpellCast::menu(GameContext& ctx)
 {
     if (availableSpells.empty())
     {
-        ctx.messageSystem->message(WHITE_BLACK_PAIR, "No spells available.", true);
+        ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "No spells available.", MessageCompletion::FINISHED);
         menu_set_run_false();
         return;
     }

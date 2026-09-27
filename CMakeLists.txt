@@ -181,7 +181,6 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/WisdomAttributes.h
 
     # Colors
-    ${PROJECT_SOURCE_DIR}/Colors.cpp
     ${PROJECT_SOURCE_DIR}/Colors.h
 
     # Controls

@@ -86,7 +86,7 @@ nlohmann::json encode_item(const ItemParams& params)
 	nlohmann::json record;
 	record["name"] = std::string{ params.name };
 	record["category"] = std::string{ params.category };
-	record["color"] = params.color;
+	record["color"] = color_pair_name(params.color);
 	record["itemClass"] = encode_item_class(params.itemClass);
 	record["value"] = params.value;
 	record["pickableType"] = encode_pickable_type(params.pickableType);
@@ -156,7 +156,7 @@ ParsedItem parse_item(const std::string& key, const nlohmann::json& record)
 	parsed.category = required_field(record, key, "category").get<std::string>();
 
 	ItemParams& params = parsed.params;
-	params.color = required_field(record, key, "color");
+	params.color = parse_color_pair(required_field(record, key, "color").get<std::string>());
 	params.itemClass = parse_item_class(required_field(record, key, "itemClass").get<std::string>());
 	params.value = required_field(record, key, "value");
 	params.pickableType = parse_pickable_type(required_field(record, key, "pickableType").get<std::string>());

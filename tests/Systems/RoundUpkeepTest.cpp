@@ -24,6 +24,7 @@
 #include <memory>
 #include <vector>
 
+#include "src/Colors.h"
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
 #include "src/CurseSystem.h"
@@ -74,7 +75,7 @@ protected:
 	// say every Constitution modifier applies to a creature as to a character.
 	Creature& add_creature(const std::string& name, int constitution)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, name, 1 });
+		auto creature = std::make_unique<Creature>(Vector2D{ 5, 5 }, ActorData{ TileRef{}, name, ColorPairId::WHITE_BLACK });
 		creature->experienceReward = std::make_unique<ExperienceReward>(0);
 		creature->armorClass = std::make_unique<ArmorClass>(10);
 		creature->healthPool = std::make_unique<HealthPool>(STARTING_HP);
@@ -130,7 +131,7 @@ TEST_F(RoundUpkeepTest, ARingOfRegenerationHealsOnTheTurnsRound)
 
 	// A hand to wear it on: a creature built in a test has no body until it is given one.
 	wearer.set_body_plan({ EquipmentSlot::RIGHT_RING });
-	auto ring = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "ring of regeneration", 1 });
+	auto ring = std::make_unique<Item>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "ring of regeneration", ColorPairId::WHITE_BLACK });
 	ring->behavior = MagicalRing{ MagicalEffect::REGENERATION, 0 };
 	wearer.wear(std::move(ring), EquipmentSlot::RIGHT_RING);
 	ASSERT_TRUE(wearer.wears_ring_of(MagicalEffect::REGENERATION)) << "the ring is not on";

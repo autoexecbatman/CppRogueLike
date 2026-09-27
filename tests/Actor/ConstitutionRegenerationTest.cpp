@@ -18,6 +18,7 @@
 #include <array>
 #include <memory>
 
+#include "src/Colors.h"
 #include "src/Creature.h"
 #include "src/CreatureClass.h"
 #include "src/DamageInfo.h"
@@ -44,7 +45,7 @@ protected:
 	// A creature of this class and Constitution with maxHp hit points, down to hp.
 	std::unique_ptr<Creature> make_creature(CreatureClass creatureClass, int constitution, int maxHp, int hp)
 	{
-		auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", 0 });
+		auto creature = std::make_unique<Creature>(Vector2D{ 0, 0 }, ActorData{ TileRef{}, "hero", ColorPairId::WHITE_BLACK });
 		creature->healthPool = std::make_unique<HealthPool>(maxHp);
 		creature->set_creature_class(creatureClass);
 		creature->set_constitution(constitution);

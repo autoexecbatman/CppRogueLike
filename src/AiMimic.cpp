@@ -168,10 +168,10 @@ void AiMimic::update(Creature& owner, GameContext& ctx)
 				continue;
 			}
 
-			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "The mimic ");
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "consumes the ");
+			ctx.messageSystem->append_message_part(ColorPairId::RED_YELLOW, "The mimic ");
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "consumes the ");
 			ctx.messageSystem->append_message_part(item->actorData.color, item->actorData.name);
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, "!");
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, "!");
 			ctx.messageSystem->finalize_message();
 
 			ctx.messageSystem->log(std::format("Mimic consuming item: {}", item->actorData.name));
@@ -303,7 +303,7 @@ void AiMimic::boost_confusion_power(GameContext& ctx)
 void AiMimic::transform_to_greater_mimic(Creature& owner, GameContext& ctx)
 {
 	owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
-	owner.actorData.color = RED_YELLOW_PAIR;
+	owner.actorData.color = ColorPairId::RED_YELLOW;
 	owner.actorData.name = "greater mimic";
 	ctx.messageSystem->log("Mimic transformed into greater mimic");
 }
@@ -318,16 +318,16 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 		isDisguised = false;
 		owner.actorData.tile = ctx.monsterRegistry->get_tile(MonsterId::MIMIC);
 		owner.actorData.name = "mimic";
-		owner.actorData.color = RED_YELLOW_PAIR;
+		owner.actorData.color = ColorPairId::RED_YELLOW;
 		owner.add_state(ActorState::BLOCKS);
 
 		ctx.messageSystem->log("Mimic revealed itself!");
 
 		if (ctx.dice->d20() > ctx.player()->get_wisdom())
 		{
-			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, "The ");
-			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "mimic");
-			ctx.messageSystem->append_message_part(WHITE_GREEN_PAIR, " reveals itself and confuses you!");
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, "The ");
+			ctx.messageSystem->append_message_part(ColorPairId::RED_YELLOW, "mimic");
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_GREEN, " reveals itself and confuses you!");
 			ctx.messageSystem->finalize_message();
 
 			ctx.player()->add_state(ActorState::IS_CONFUSED);
@@ -336,8 +336,8 @@ void AiMimic::check_revealing(Creature& owner, GameContext& ctx)
 		}
 		else
 		{
-			ctx.messageSystem->append_message_part(RED_YELLOW_PAIR, "A mimic");
-			ctx.messageSystem->append_message_part(WHITE_BLACK_PAIR, " reveals itself but you resist its confusion!");
+			ctx.messageSystem->append_message_part(ColorPairId::RED_YELLOW, "A mimic");
+			ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " reveals itself but you resist its confusion!");
 			ctx.messageSystem->finalize_message();
 			ctx.messageSystem->log("Player resisted mimic confusion");
 		}

@@ -51,8 +51,8 @@
     },
     {
       "file": "src/Player.cpp",
-      "original": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t}\n\tctx.messageSystem->message(CYAN_BLACK_PAIR, \"You melt into the shadows...\", true);\n\treturn HideAttempt::ATTEMPTED;",
-      "mutated": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t\tctx.messageSystem->message(CYAN_BLACK_PAIR, \"You melt into the shadows...\", true);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(RED_BLACK_PAIR, \"You fail to hide.\", true);\n\treturn HideAttempt::WATCHED;",
+      "original": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t}\n\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\treturn HideAttempt::ATTEMPTED;",
+      "mutated": "\t\tconst int hideDuration = 10 + get_creature_level() * 2;\n\t\tctx.buffSystem->add_buff(*this, BuffType::INVISIBILITY, 0, hideDuration, false);\n\t\tctx.messageSystem->message(ColorPairId::CYAN_BLACK, \"You melt into the shadows...\", MessageCompletion::FINISHED);\n\t\treturn HideAttempt::ATTEMPTED;\n\t}\n\tctx.messageSystem->message(ColorPairId::RED_BLACK, \"You fail to hide.\", MessageCompletion::FINISHED);\n\treturn HideAttempt::WATCHED;",
       "catches": "the roll's result told to the player, which the book keeps secret"
     }
   ]
