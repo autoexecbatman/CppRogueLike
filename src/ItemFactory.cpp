@@ -47,8 +47,8 @@ void place_enhanced_item(const EnhancedItemSpawnRule& rule, Vector2D position, G
 	const int poolIndex = ctx.dice->roll(0, static_cast<int>(rule.itemPool.size()) - 1);
 	const std::string_view baseKey = rule.itemPool[poolIndex];
 	const ItemEnhancement enhancement = (rule.enhancementCategory == EnhancedItemCategory::WEAPON)
-		? ItemEnhancement::generate_weapon_enhancement()
-		: ItemEnhancement::generate_armor_enhancement();
+		? ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED)
+		: ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED);
 	[[maybe_unused]] const auto spawnItemResult = InventoryOperations::add_item(
 		*ctx.floorInventory,
 		ItemCreator::create_with_enhancement(baseKey, position, enhancement.prefix, enhancement.suffix, ctx));

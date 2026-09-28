@@ -30,7 +30,7 @@ public:
 
 	// Enhancement system
 	void apply_enhancement(const ItemEnhancement& newEnhancement);
-	void generate_random_enhancement(bool allowMagical);
+	void generate_random_enhancement(MagicalPrefixes magicalPrefixes);
 	const ItemEnhancement& get_enhancement() const noexcept { return enhancement; }
 	bool is_enhanced() const noexcept;
 

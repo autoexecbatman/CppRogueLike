@@ -426,7 +426,7 @@ void ItemEnhancement::apply_enhancement_effects()
 }
 
 // Random generation methods
-ItemEnhancement ItemEnhancement::generate_random_enhancement(bool allowMagical)
+ItemEnhancement ItemEnhancement::generate_random_enhancement(MagicalPrefixes magicalPrefixes)
 {
 	ItemEnhancement enhancement;
 
@@ -448,23 +448,46 @@ ItemEnhancement ItemEnhancement::generate_random_enhancement(bool allowMagical)
 	}
 	// 40% chance for no enhancement
 
-	if (!allowMagical)
+	if (magicalPrefixes == MagicalPrefixes::EXCLUDED)
 	{
-		// Remove magical prefixes if not allowed
-		if (enhancement.prefix == PrefixType::FLAMING ||
-			enhancement.prefix == PrefixType::FROST ||
-			enhancement.prefix == PrefixType::SHOCK ||
-			enhancement.prefix == PrefixType::MAGICAL)
-		{
-			enhancement.prefix = PrefixType::NONE;
-		}
+		enhancement.strip_magical_prefix();
 	}
 
 	enhancement.apply_enhancement_effects();
 	return enhancement;
 }
 
-ItemEnhancement ItemEnhancement::generate_weapon_enhancement()
+// Clears the prefix when it is one of the four magical ones, leaving any suffix
+// alone. Every generator calls this before apply_enhancement_effects, whose
+// bonuses accumulate, so a prefix cleared afterwards would leave its own behind.
+//
+// Example:
+//   enhancement.prefix = PrefixType::FLAMING;
+//   enhancement.strip_magical_prefix();   // prefix is now NONE
+//   enhancement.prefix = PrefixType::SHARP;
+//   enhancement.strip_magical_prefix();   // SHARP is mundane and stays
+void ItemEnhancement::strip_magical_prefix()
+{
+	switch (prefix)
+	{
+
+	case PrefixType::FLAMING:
+	case PrefixType::FROST:
+	case PrefixType::SHOCK:
+	case PrefixType::MAGICAL:
+	{
+		prefix = PrefixType::NONE;
+		break;
+	}
+
+	default:
+	{
+		break;
+	}
+	}
+}
+
+ItemEnhancement ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes magicalPrefixes)
 {
 	ItemEnhancement enhancement;
 
@@ -478,11 +501,16 @@ ItemEnhancement ItemEnhancement::generate_weapon_enhancement()
 		enhancement.suffix = get_random_combat_suffix();
 	}
 
+	if (magicalPrefixes == MagicalPrefixes::EXCLUDED)
+	{
+		enhancement.strip_magical_prefix();
+	}
+
 	enhancement.apply_enhancement_effects();
 	return enhancement;
 }
 
-ItemEnhancement ItemEnhancement::generate_armor_enhancement()
+ItemEnhancement ItemEnhancement::generate_armor_enhancement(MagicalPrefixes magicalPrefixes)
 {
 	ItemEnhancement enhancement;
 
@@ -494,6 +522,11 @@ ItemEnhancement ItemEnhancement::generate_armor_enhancement()
 	if (roll >= 25 && roll < 55)
 	{
 		enhancement.suffix = get_random_resistance_suffix();
+	}
+
+	if (magicalPrefixes == MagicalPrefixes::EXCLUDED)
+	{
+		enhancement.strip_magical_prefix();
 	}
 
 	enhancement.apply_enhancement_effects();

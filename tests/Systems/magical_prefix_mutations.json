@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EnhancementSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t\tprefix = PrefixType::NONE;\n\t\tbreak;\n",
+      "mutated": "\t\tbreak;\n",
+      "catches": "a strip that inspects the prefix and leaves it, so excluding magical prefixes excludes nothing"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t\tenhancement.suffix = get_random_combat_suffix();\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
+      "mutated": "\t\tenhancement.suffix = get_random_combat_suffix();\n\t}",
+      "catches": "the weapon generator ignoring the choice, which is the defect this replaced"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\t\tenhancement.suffix = get_random_resistance_suffix();\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
+      "mutated": "\t\tenhancement.suffix = get_random_resistance_suffix();\n\t}",
+      "catches": "the armour generator ignoring the choice, so MAGICAL survives an exclusion"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\tcase PrefixType::FLAMING:\n\tcase PrefixType::FROST:\n",
+      "mutated": "\tcase PrefixType::FROST:\n",
+      "catches": "FLAMING dropped from the set the strip recognises"
+    }
+  ]
+}

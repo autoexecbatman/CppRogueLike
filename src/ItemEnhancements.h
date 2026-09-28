@@ -5,6 +5,15 @@
 #include "DamageInfo.h"
 #include "ItemIdentification.h"
 
+// Whether a random draw may hand back one of the magical prefixes - FLAMING,
+// FROST, SHOCK and MAGICAL. Every generator takes it, because which pool a
+// draw uses depends on the item and the choice belongs to the caller.
+enum class MagicalPrefixes
+{
+	ALLOWED,
+	EXCLUDED,
+};
+
 enum class PrefixType
 {
 	NONE,
@@ -112,14 +121,18 @@ struct ItemEnhancement
 	void apply_enhancement_effects();
 
 	// Enhancement generation
-	static ItemEnhancement generate_random_enhancement(bool allowMagical);
-	static ItemEnhancement generate_weapon_enhancement();
-	static ItemEnhancement generate_armor_enhancement();
+	static ItemEnhancement generate_random_enhancement(MagicalPrefixes magicalPrefixes);
+	static ItemEnhancement generate_weapon_enhancement(MagicalPrefixes magicalPrefixes);
+	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes);
 
 	// Rarity-based generation
 	static ItemEnhancement generate_by_rarity(int rarity_level); // 1-5
 
 private:
+	// Clears a magical prefix, before the effects are applied - they accumulate,
+	// so a prefix cleared afterwards would leave its bonuses behind.
+	void strip_magical_prefix();
+
 	static PrefixType get_random_weapon_prefix();
 	static PrefixType get_random_armor_prefix();
 	static PrefixType get_random_universal_prefix();

@@ -283,7 +283,7 @@ TEST_F(EnhancementSystemTest, ColdResistance_InValidRange) {
 // ----------------------------------------------------------------------------
 
 TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
-    auto enhancement = ItemEnhancement::generate_random_enhancement(true);
+    auto enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED);
 
     // Should have at least one enhancement (prefix or suffix or level)
     bool hasEnhancement = (enhancement.prefix != PrefixType::NONE) ||
@@ -295,8 +295,57 @@ TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
     EXPECT_NO_THROW(enhancement.get_full_name("test item"));
 }
 
+// The shop's ordinary equipment asks for no magical prefixes. Every pool holds
+// some - FLAMING, FROST and SHOCK among the weapon prefixes, MAGICAL among the
+// armour ones - so the choice has to reach whichever generator runs, and a draw
+// that excludes them must never hand one back.
+//
+// Sampled rather than scripted: these generators draw from rand(), which nothing
+// in the suite can queue. Unseeded it runs the same sequence every process, so
+// the count below is the same on every run.
+TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesExcludesThemFromEveryPool) {
+    constexpr int DRAWS = 400;
+
+    auto is_magical = [](PrefixType prefix) {
+        return prefix == PrefixType::FLAMING
+            || prefix == PrefixType::FROST
+            || prefix == PrefixType::SHOCK
+            || prefix == PrefixType::MAGICAL;
+    };
+
+    int magicalWeapons = 0;
+    int magicalArmor = 0;
+    for (int draw = 0; draw < DRAWS; ++draw) {
+        if (is_magical(ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::EXCLUDED).prefix)) {
+            ++magicalWeapons;
+        }
+        if (is_magical(ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::EXCLUDED).prefix)) {
+            ++magicalArmor;
+        }
+    }
+
+    EXPECT_EQ(magicalWeapons, 0) << "a weapon drew FLAMING, FROST or SHOCK when the caller excluded them";
+    EXPECT_EQ(magicalArmor, 0) << "armour drew MAGICAL when the caller excluded it";
+}
+
+// The counterpart, so the exclusion is shown to be doing something rather than
+// the pools happening to hold nothing magical.
+TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
+    constexpr int DRAWS = 400;
+
+    int magical = 0;
+    for (int draw = 0; draw < DRAWS; ++draw) {
+        const PrefixType prefix = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED).prefix;
+        if (prefix == PrefixType::FLAMING || prefix == PrefixType::FROST || prefix == PrefixType::SHOCK) {
+            ++magical;
+        }
+    }
+
+    EXPECT_GT(magical, 0) << "the weapon pool never produced a magical prefix at all";
+}
+
 TEST_F(EnhancementSystemTest, GenerateWeaponEnhancement_ValidForWeapons) {
-    auto enhancement = ItemEnhancement::generate_weapon_enhancement();
+    auto enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED);
 
     // Weapon enhancements should typically affect damage or to-hit
     // After applying effects
@@ -307,7 +356,7 @@ TEST_F(EnhancementSystemTest, GenerateWeaponEnhancement_ValidForWeapons) {
 }
 
 TEST_F(EnhancementSystemTest, GenerateArmorEnhancement_ValidForArmor) {
-    auto enhancement = ItemEnhancement::generate_armor_enhancement();
+    auto enhancement = ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED);
 
     enhancement.apply_enhancement_effects();
 
