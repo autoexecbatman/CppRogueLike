@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EquipHandTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemClassification.cpp",
+      "original": "\treturn is_weapon(itemClass) || is_shield(itemClass);\n",
+      "mutated": "\treturn is_weapon(itemClass);\n",
+      "catches": "the main hand refusing a shield"
+    },
+    {
+      "file": "src/ItemClassification.cpp",
+      "original": "\treturn !is_two_handed_weapon(itemClass);\n",
+      "mutated": "\treturn true;\n",
+      "catches": "a two-handed weapon allowed in the off-hand, so both hands hold something at once"
+    },
+    {
+      "file": "src/ItemClassification.cpp",
+      "original": "\tif (!is_weapon(itemClass))\n\t\treturn false;\n",
+      "mutated": "",
+      "catches": "a potion or a ring accepted into the off-hand"
+    },
+    {
+      "file": "src/ItemClassification.cpp",
+      "original": "\tcase ItemClass::STAFF:\n\t\treturn true;\n",
+      "mutated": "\t\treturn true;\n",
+      "catches": "a staff read as one-handed, so it fits the off-hand"
+    }
+  ]
+}
