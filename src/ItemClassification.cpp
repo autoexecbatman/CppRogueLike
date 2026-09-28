@@ -90,7 +90,6 @@ bool is_two_handed_weapon(ItemClass itemClass)
 	switch (itemClass)
 	{
 	case ItemClass::GREAT_SWORD:
-	case ItemClass::AXE:
 	case ItemClass::BOW:
 	case ItemClass::CROSSBOW:
 	case ItemClass::STAFF:

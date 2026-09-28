@@ -30,6 +30,12 @@
       "original": "\tcase ItemClass::STAFF:\n\t\treturn true;\n",
       "mutated": "\t\treturn true;\n",
       "catches": "a staff read as one-handed, so it fits the off-hand"
+    },
+    {
+      "file": "src/ItemClassification.cpp",
+      "original": "\tcase ItemClass::GREAT_SWORD:\n\tcase ItemClass::BOW:\n",
+      "mutated": "\tcase ItemClass::GREAT_SWORD:\n\tcase ItemClass::AXE:\n\tcase ItemClass::BOW:\n",
+      "catches": "an axe put back among the two-handed weapons, where the book's Size M battle axe does not belong"
     }
   ]
 }

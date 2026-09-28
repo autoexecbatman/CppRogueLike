@@ -31,8 +31,7 @@
 
 namespace
 {
-// The two rules under test. They live in ItemClassificationUtils; naming them
-// here lets each assertion below read as the claim it makes.
+// Named here so each assertion reads as the claim it makes.
 bool right_hand_takes(ItemClass itemClass)
 {
 	return ItemClassificationUtils::can_equip_to_right_hand(itemClass);
@@ -43,19 +42,19 @@ bool left_hand_takes(ItemClass itemClass)
 	return ItemClassificationUtils::can_equip_to_left_hand(itemClass);
 }
 
-// Swung in one hand, so either hand will take one.
+// AXE is here because Table 44 gives a battle axe Size M at 7 lb: the book marks a
+// two-handed weapon with a "Two-handed" sub-row or Size L, and neither axe has one.
 constexpr std::array ONE_HANDED_WEAPONS{
 	ItemClass::DAGGER,
 	ItemClass::SWORD,
 	ItemClass::HAMMER,
 	ItemClass::MACE,
 	ItemClass::SLING,
+	ItemClass::AXE,
 };
 
-// Needs both hands, so only the main hand can hold one.
 constexpr std::array TWO_HANDED_WEAPONS{
 	ItemClass::GREAT_SWORD,
-	ItemClass::AXE,
 	ItemClass::STAFF,
 	ItemClass::BOW,
 	ItemClass::CROSSBOW,
@@ -63,7 +62,6 @@ constexpr std::array TWO_HANDED_WEAPONS{
 
 constexpr std::array SHIELDS{ ItemClass::SHIELD };
 
-// Worn, drunk, read, carried or spent - none of them held as a weapon is.
 constexpr std::array NOT_HELD_IN_A_HAND{
 	ItemClass::UNKNOWN,
 	ItemClass::ARMOR,
@@ -82,8 +80,6 @@ constexpr std::array NOT_HELD_IN_A_HAND{
 };
 } // namespace
 
-// The groups above have to be the whole enum, or a class added later is tested
-// by nothing and this file quietly stops covering what it claims to.
 TEST(EquipHandTest, TheFourGroupsAreTheWholeEnum)
 {
 	std::vector<ItemClass> grouped;
@@ -110,8 +106,6 @@ TEST(EquipHandTest, AOneHandedWeaponGoesInEitherHand)
 	}
 }
 
-// The substantive half: both hands are on the weapon, so the off-hand is not
-// free to hold it alongside something else.
 TEST(EquipHandTest, ATwoHandedWeaponGoesInTheMainHandOnly)
 {
 	for (const ItemClass weapon : TWO_HANDED_WEAPONS)
@@ -139,8 +133,7 @@ TEST(EquipHandTest, WhatIsNotAWeaponOrAShieldGoesInNeitherHand)
 	}
 }
 
-// Left is a subset of right: the off-hand's rule is the main hand's plus a
-// restriction, never a different set.
+// The off-hand's rule is the main hand's plus a restriction, never a different set.
 TEST(EquipHandTest, WhateverTheOffHandTakesTheMainHandTakesToo)
 {
 	for (const ItemClass itemClass : ALL_ITEM_CLASS)
