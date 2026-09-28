@@ -172,7 +172,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 			{
 				continue;
 			}
-			ctx.map->tiles[ctx.map->get_index(doorPos)].doorState = DoorState::CLOSED_LOCKED;
+			ctx.map->lock_door(doorPos);
 		}
 	}
 
@@ -261,10 +261,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 				{
 					continue;
 				}
-				if (ctx.map->is_door_locked(pos))
-				{
-					ctx.map->tiles[ctx.map->get_index(pos)].doorState = DoorState::CLOSED_UNLOCKED;
-				}
+				ctx.map->unlock_door(pos);
 			}
 		}
 	};

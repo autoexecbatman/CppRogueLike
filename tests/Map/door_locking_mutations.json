@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=DoorLockingTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Map.cpp",
+      "original": "\ttiles[tileIndex].doorState = DoorState::CLOSED_LOCKED;\n\treturn true;\n",
+      "mutated": "\treturn true;\n",
+      "catches": "a lock that reports success and turns nothing"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t// An open door, a wall or floor has no lock to turn.\n\tif (!is_door(pos) || get_tile_type(pos) != TileType::CLOSED_DOOR)\n\t{\n\t\treturn false;\n\t}\n",
+      "mutated": "",
+      "catches": "a stretch of floor accepting a lock, which leaves a doorState on a tile that is no door"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t// Already locked, so this call changed nothing.\n\tif (tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED)\n\t{\n\t\treturn false;\n\t}\n",
+      "mutated": "",
+      "catches": "a second lock on the same door reporting that it did the locking"
+    },
+    {
+      "file": "src/Map.cpp",
+      "original": "\t\ttiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;\n\t}\n}\n\nvoid Map::set_tile",
+      "mutated": "\t\ttiles[tileIndex].doorState = DoorState::CLOSED_LOCKED;\n\t}\n}\n\nvoid Map::set_tile",
+      "catches": "every door in the dungeon placed locked"
+    }
+  ]
+}

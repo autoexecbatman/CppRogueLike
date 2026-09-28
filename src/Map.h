@@ -146,6 +146,7 @@ public:
 	bool has_los(Vector2D from, Vector2D to) const noexcept;
 	bool open_door(Vector2D pos, GameContext& ctx);
 	bool close_door(Vector2D pos, GameContext& ctx);
+	bool lock_door(Vector2D pos);
 	bool unlock_door(Vector2D pos);
 	bool is_door_locked(Vector2D pos) const noexcept;
 	void open_all_room_doors(Vector2D doorPos, GameContext& ctx);
@@ -199,7 +200,7 @@ protected:
 	friend class DungeonGenerator;
 	void dig(Vector2D begin, Vector2D end);
 	void dig_corridor(Vector2D begin, Vector2D end);
-	void set_door(Vector2D thisTile, int tileX, int tileY, bool locked);
+	void set_door(Vector2D position);
 	void create_room(const DungeonRoom& room, bool first, GameContext& ctx);
 	// Walls back cells inside the bounding box that the chosen RoomShape excludes.
 	// Must be called after dig() and before any spawning. No-op for RECT.

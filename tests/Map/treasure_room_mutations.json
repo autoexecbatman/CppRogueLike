@@ -45,13 +45,13 @@
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\t\t\tctx.map->tiles[ctx.map->get_index(pos)].doorState = DoorState::CLOSED_UNLOCKED;",
+      "original": "\t\t\t\tctx.map->unlock_door(pos);\n",
       "mutated": "",
       "catches": "the rollback leaving a treasure room nobody can enter"
     },
     {
       "file": "src/TreasureRoom.cpp",
-      "original": "\t\t\tctx.map->tiles[ctx.map->get_index(doorPos)].doorState = DoorState::CLOSED_LOCKED;",
+      "original": "\t\t\tctx.map->lock_door(doorPos);\n",
       "mutated": "",
       "catches": "the room never locked, so the jailer guards nothing"
     },

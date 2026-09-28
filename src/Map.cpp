@@ -936,17 +936,15 @@ bool Map::room_interior_is_one_piece(const DungeonRoom& room) const
 	return reachedCells == floorCells;
 }
 
-void Map::set_door(Vector2D thisTile, int tileX, int tileY, bool locked)
+void Map::set_door(Vector2D position)
 {
-	set_tile(thisTile, TileType::CLOSED_DOOR, 2);
-	fovMap->set_properties(tileX, tileY, false, false);
+	set_tile(position, TileType::CLOSED_DOOR, 2);
+	fovMap->set_properties(position.x, position.y, false, false);
 
-	size_t tileIndex = get_index(thisTile);
+	size_t tileIndex = get_index(position);
 	if (tileIndex < tiles.size())
 	{
-		tiles[tileIndex].doorState = locked
-			? DoorState::CLOSED_LOCKED
-			: DoorState::CLOSED_UNLOCKED;
+		tiles[tileIndex].doorState = DoorState::CLOSED_UNLOCKED;
 	}
 }
 
@@ -1902,6 +1900,39 @@ bool Map::close_door(Vector2D pos, GameContext& ctx)
 	return true;
 }
 
+// Locks a closed door, the counterpart to unlock_door. Refuses anything that is
+// not a closed door, and refuses a door already locked, so the return says
+// whether this call is what locked it.
+//
+// Example:
+//   map.set_door(Vector2D{ 5, 7 });   // placed closed and unlocked
+//   map.lock_door(Vector2D{ 5, 7 });  // -> true
+//   map.lock_door(Vector2D{ 5, 7 });  // -> false, already locked
+//   map.lock_door(Vector2D{ 8, 7 });  // -> false, a stretch of floor
+bool Map::lock_door(Vector2D pos)
+{
+	// An open door, a wall or floor has no lock to turn.
+	if (!is_door(pos) || get_tile_type(pos) != TileType::CLOSED_DOOR)
+	{
+		return false;
+	}
+
+	size_t tileIndex = get_index(pos);
+	if (tileIndex >= tiles.size())
+	{
+		return false;
+	}
+
+	// Already locked, so this call changed nothing.
+	if (tiles[tileIndex].doorState == DoorState::CLOSED_LOCKED)
+	{
+		return false;
+	}
+
+	tiles[tileIndex].doorState = DoorState::CLOSED_LOCKED;
+	return true;
+}
+
 bool Map::unlock_door(Vector2D pos)
 {
 	if (!is_door(pos) || get_tile_type(pos) != TileType::CLOSED_DOOR)
@@ -2166,7 +2197,7 @@ void Map::post_process_doors()
 					{
 						// Move door UP
 						Vector2D upPos = { pos.x, pos.y - 1 };
-						set_door(upPos, upPos.x, upPos.y, false);
+						set_door(upPos);
 					}
 					// Check for W.w/CDW/WWW pattern (move door UP) - where . = water or corridor
 					else if (isWall(upLeft) &&
@@ -2177,7 +2208,7 @@ void Map::post_process_doors()
 					{
 						// Move door UP
 						Vector2D upPos = { pos.x, pos.y - 1 };
-						set_door(upPos, upPos.x, upPos.y, false);
+						set_door(upPos);
 					}
 					// Check for Z-pattern: WRR/CCW/WWW (move door left)
 					else if (isWall(upLeft) && isRoom(up) && isRoom(upRight) &&
@@ -2186,12 +2217,12 @@ void Map::post_process_doors()
 					{
 						// Move door LEFT
 						Vector2D leftPos = { pos.x - 1, pos.y };
-						set_door(leftPos, leftPos.x, leftPos.y, false);
+						set_door(leftPos);
 					}
 					else
 					{
 						// All other doors (including WRR/CCR/WRR pattern)
-						set_door(pos, pos.x, pos.y, false);
+						set_door(pos);
 					}
 				}
 			}
