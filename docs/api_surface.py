@@ -529,8 +529,8 @@ def collect(source_directory):
             made.append(cindex.Index.create())
         return made[0]
 
-    # Recursive: this repository nests src/ by subsystem. src/Debug is Visual Studio
-    # build output and .cpp.test.cpp files are in no CMakeLists, so neither is source.
+    # Recursive, so a subdirectory added later is walked rather than silently missed.
+    # src/Debug is Visual Studio build output, which is not source.
     def sources(pattern):
         return [
             path for path in sorted(source_directory.rglob(pattern))

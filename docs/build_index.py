@@ -157,9 +157,8 @@ def has_usage(block):
 def collect(source_directory):
     """Every source file paired with what its documentation block says.
 
-    Walks recursively: this repository nests src/ by subsystem, so a non-recursive glob
-    finds three files and reports full coverage over them. Build output under src/Debug
-    and unbuilt .cpp.test.cpp files are skipped - neither is source.
+    Walks recursively, so a subdirectory added later is walked rather than silently
+    missed. Build output under src/Debug is skipped, which is not source.
 
     Sorted by name within each group so the page is stable between runs and a diff of two
     runs shows a real change rather than a reordering.
