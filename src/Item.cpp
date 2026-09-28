@@ -187,21 +187,21 @@ void Item::apply_enhancement(const ItemEnhancement& newEnhancement)
 	// Name is computed dynamically by get_name() -- do not modify actorData.name
 }
 
-void Item::generate_random_enhancement(MagicalPrefixes magicalPrefixes)
+void Item::generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice)
 {
 	// Each kind of item draws from its own pool, and every pool holds magical
 	// prefixes, so the choice goes to whichever generator runs.
 	if (is_weapon())
 	{
-		enhancement = ItemEnhancement::generate_weapon_enhancement(magicalPrefixes);
+		enhancement = ItemEnhancement::generate_weapon_enhancement(magicalPrefixes, dice);
 	}
 	else if (is_armor())
 	{
-		enhancement = ItemEnhancement::generate_armor_enhancement(magicalPrefixes);
+		enhancement = ItemEnhancement::generate_armor_enhancement(magicalPrefixes, dice);
 	}
 	else
 	{
-		enhancement = ItemEnhancement::generate_random_enhancement(magicalPrefixes);
+		enhancement = ItemEnhancement::generate_random_enhancement(magicalPrefixes, dice);
 	}
 }
 

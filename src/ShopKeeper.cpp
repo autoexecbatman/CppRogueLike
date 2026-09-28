@@ -146,7 +146,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_weapon(int dungeonLevel, GameC
 
 	if (item && ctx.dice->roll(1, 100) <= 40)
 	{
-		item->generate_random_enhancement(MagicalPrefixes::ALLOWED);
+		item->generate_random_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice);
 	}
 
 	return item;
@@ -158,7 +158,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_armor(int dungeonLevel, GameCo
 
 	if (item && ctx.dice->roll(1, 100) <= 35)
 	{
-		item->generate_random_enhancement(MagicalPrefixes::ALLOWED);
+		item->generate_random_enhancement(MagicalPrefixes::ALLOWED, *ctx.dice);
 	}
 
 	return item;
@@ -212,7 +212,7 @@ std::unique_ptr<Item> ShopKeeper::generate_random_misc_item(int dungeonLevel, Ga
 	{
 		if (ctx.dice->roll(1, 100) <= 15)
 		{
-			item->generate_random_enhancement(MagicalPrefixes::EXCLUDED);
+			item->generate_random_enhancement(MagicalPrefixes::EXCLUDED, *ctx.dice);
 		}
 	}
 

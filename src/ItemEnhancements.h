@@ -5,6 +5,8 @@
 #include "DamageInfo.h"
 #include "ItemIdentification.h"
 
+class RandomDice;
+
 // Whether a random draw may hand back one of the magical prefixes - FLAMING,
 // FROST, SHOCK and MAGICAL. Every generator takes it, because which pool a
 // draw uses depends on the item and the choice belongs to the caller.
@@ -121,22 +123,22 @@ struct ItemEnhancement
 	void apply_enhancement_effects();
 
 	// Enhancement generation
-	static ItemEnhancement generate_random_enhancement(MagicalPrefixes magicalPrefixes);
-	static ItemEnhancement generate_weapon_enhancement(MagicalPrefixes magicalPrefixes);
-	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes);
+	static ItemEnhancement generate_random_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
+	static ItemEnhancement generate_weapon_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
+	static ItemEnhancement generate_armor_enhancement(MagicalPrefixes magicalPrefixes, RandomDice& dice);
 
 	// Rarity-based generation
-	static ItemEnhancement generate_by_rarity(int rarity_level); // 1-5
+	static ItemEnhancement generate_by_rarity(int rarity_level, RandomDice& dice); // 1-5
 
 private:
 	// Clears a magical prefix, before the effects are applied - they accumulate,
 	// so a prefix cleared afterwards would leave its bonuses behind.
 	void strip_magical_prefix();
 
-	static PrefixType get_random_weapon_prefix();
-	static PrefixType get_random_armor_prefix();
-	static PrefixType get_random_universal_prefix();
-	static SuffixType get_random_combat_suffix();
-	static SuffixType get_random_resistance_suffix();
-	static SuffixType get_random_special_suffix();
+	static PrefixType get_random_weapon_prefix(RandomDice& dice);
+	static PrefixType get_random_armor_prefix(RandomDice& dice);
+	static PrefixType get_random_universal_prefix(RandomDice& dice);
+	static SuffixType get_random_combat_suffix(RandomDice& dice);
+	static SuffixType get_random_resistance_suffix(RandomDice& dice);
+	static SuffixType get_random_special_suffix(RandomDice& dice);
 };

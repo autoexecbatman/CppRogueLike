@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "src/ItemEnhancements.h"
+#include "src/RandomDice.h"
 #include "src/Actor.h"
 #include "src/ItemCreator.h"
 #include "src/WeaponDamageRegistry.h"
@@ -12,9 +13,17 @@
 class EnhancementSystemTest : public ::testing::Test {
 protected:
     ItemEnhancement defaultEnhancement;
+    // The generators draw from this rather than from rand(), so a test can queue
+    // the rolls it wants. Left out of test mode except where a test asks for it.
+    RandomDice dice;
 
     void SetUp() override {
         defaultEnhancement = ItemEnhancement{};
+    }
+
+    void TearDown() override {
+        dice.set_test_mode(false);
+        dice.clear_fixed_rolls();
     }
 };
 
@@ -283,7 +292,7 @@ TEST_F(EnhancementSystemTest, ColdResistance_InValidRange) {
 // ----------------------------------------------------------------------------
 
 TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
-    auto enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED);
+    auto enhancement = ItemEnhancement::generate_random_enhancement(MagicalPrefixes::ALLOWED, dice);
 
     // Should have at least one enhancement (prefix or suffix or level)
     bool hasEnhancement = (enhancement.prefix != PrefixType::NONE) ||
@@ -293,6 +302,68 @@ TEST_F(EnhancementSystemTest, GenerateRandom_ReturnsValidEnhancement) {
     // May or may not have enhancement depending on random chance
     // Just verify no crash
     EXPECT_NO_THROW(enhancement.get_full_name("test item"));
+}
+
+// An enhancement is drawn from the game's own generator, so a test can queue the
+// rolls and get a determined result. It used to draw from rand(), which no test
+// could reach: the same scripted sequence gave a different answer every call.
+//
+// The weapon generator asks for two rolls - one in 0..99 deciding whether a
+// prefix is drawn at all (under 40) and whether a suffix is (20 to 59), then one
+// index into the nine-entry weapon prefix pool.
+TEST_F(EnhancementSystemTest, ScriptedRollsDetermineTheDraw) {
+    dice.set_test_mode(true);
+
+    dice.set_next_roll(10);
+    dice.set_next_roll(4);
+    const PrefixType first = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+    dice.set_next_roll(10);
+    dice.set_next_roll(4);
+    const PrefixType again = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+    EXPECT_EQ(first, again) << "the same script gave two different draws, so the rolls are not what decides";
+
+    // A different index has to reach a different prefix, or the first pair agreeing
+    // would prove only that the pool has one entry.
+    dice.set_next_roll(10);
+    dice.set_next_roll(0);
+    const PrefixType other = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
+
+    EXPECT_NE(first, other) << "the index roll did not choose the prefix";
+}
+
+// The pool's order, pinned: index 4 of the weapon prefixes is FLAMING, and a roll
+// of 10 draws a prefix and no suffix.
+TEST_F(EnhancementSystemTest, TheIndexRollPicksOutOfTheWeaponPool) {
+    dice.set_test_mode(true);
+    dice.set_next_roll(10);
+    dice.set_next_roll(4);
+
+    const ItemEnhancement enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
+
+    EXPECT_EQ(enhancement.prefix, PrefixType::FLAMING);
+    EXPECT_EQ(enhancement.suffix, SuffixType::NONE) << "a roll of 10 is outside the suffix band";
+
+}
+
+// The span the index is drawn over, which a scripted roll cannot see: in test
+// mode RandomDice hands back the queued value whatever range was asked for, so
+// roll(0, size - 2) and roll(0, size - 1) both return an 8 that was queued. A
+// seeded generator is asked instead, and the question is whether the pool's last
+// entry is ever reached at all.
+TEST_F(EnhancementSystemTest, EveryEntryOfTheWeaponPoolIsReachable) {
+    constexpr int DRAWS = 400;
+    constexpr unsigned int SEED = 20260928u;
+    RandomDice seeded{ SEED };
+
+    bool sawLastEntry = false;
+    for (int draw = 0; draw < DRAWS && !sawLastEntry; ++draw) {
+        sawLastEntry = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, seeded).prefix
+            == PrefixType::CURSED;
+    }
+
+    EXPECT_TRUE(sawLastEntry) << "the last of the nine weapon prefixes is out of reach";
 }
 
 // The shop's ordinary equipment asks for no magical prefixes. Every pool holds
@@ -316,10 +387,10 @@ TEST_F(EnhancementSystemTest, ExcludingMagicalPrefixesExcludesThemFromEveryPool)
     int magicalWeapons = 0;
     int magicalArmor = 0;
     for (int draw = 0; draw < DRAWS; ++draw) {
-        if (is_magical(ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::EXCLUDED).prefix)) {
+        if (is_magical(ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix)) {
             ++magicalWeapons;
         }
-        if (is_magical(ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::EXCLUDED).prefix)) {
+        if (is_magical(ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::EXCLUDED, dice).prefix)) {
             ++magicalArmor;
         }
     }
@@ -335,7 +406,7 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
 
     int magical = 0;
     for (int draw = 0; draw < DRAWS; ++draw) {
-        const PrefixType prefix = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED).prefix;
+        const PrefixType prefix = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice).prefix;
         if (prefix == PrefixType::FLAMING || prefix == PrefixType::FROST || prefix == PrefixType::SHOCK) {
             ++magical;
         }
@@ -345,7 +416,7 @@ TEST_F(EnhancementSystemTest, AllowingMagicalPrefixesStillDrawsThem) {
 }
 
 TEST_F(EnhancementSystemTest, GenerateWeaponEnhancement_ValidForWeapons) {
-    auto enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED);
+    auto enhancement = ItemEnhancement::generate_weapon_enhancement(MagicalPrefixes::ALLOWED, dice);
 
     // Weapon enhancements should typically affect damage or to-hit
     // After applying effects
@@ -356,7 +427,7 @@ TEST_F(EnhancementSystemTest, GenerateWeaponEnhancement_ValidForWeapons) {
 }
 
 TEST_F(EnhancementSystemTest, GenerateArmorEnhancement_ValidForArmor) {
-    auto enhancement = ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED);
+    auto enhancement = ItemEnhancement::generate_armor_enhancement(MagicalPrefixes::ALLOWED, dice);
 
     enhancement.apply_enhancement_effects();
 
@@ -365,7 +436,7 @@ TEST_F(EnhancementSystemTest, GenerateArmorEnhancement_ValidForArmor) {
 }
 
 TEST_F(EnhancementSystemTest, GenerateByRarity_Level1_BasicEnhancement) {
-    auto enhancement = ItemEnhancement::generate_by_rarity(1);
+    auto enhancement = ItemEnhancement::generate_by_rarity(1, dice);
 
     // Low rarity should have minimal bonuses
     enhancement.apply_enhancement_effects();
@@ -375,7 +446,7 @@ TEST_F(EnhancementSystemTest, GenerateByRarity_Level1_BasicEnhancement) {
 }
 
 TEST_F(EnhancementSystemTest, GenerateByRarity_Level5_PowerfulEnhancement) {
-    auto enhancement = ItemEnhancement::generate_by_rarity(5);
+    auto enhancement = ItemEnhancement::generate_by_rarity(5, dice);
 
     enhancement.apply_enhancement_effects();
 

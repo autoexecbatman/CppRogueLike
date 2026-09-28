@@ -15,14 +15,14 @@
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tenhancement.suffix = get_random_combat_suffix();\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
-      "mutated": "\t\tenhancement.suffix = get_random_combat_suffix();\n\t}",
+      "original": "\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
+      "mutated": "\t\tenhancement.suffix = get_random_combat_suffix(dice);\n\t}",
       "catches": "the weapon generator ignoring the choice, which is the defect this replaced"
     },
     {
       "file": "src/ItemEnhancements.cpp",
-      "original": "\t\tenhancement.suffix = get_random_resistance_suffix();\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
-      "mutated": "\t\tenhancement.suffix = get_random_resistance_suffix();\n\t}",
+      "original": "\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t}\n\n\tif (magicalPrefixes == MagicalPrefixes::EXCLUDED)\n\t{\n\t\tenhancement.strip_magical_prefix();\n\t}",
+      "mutated": "\t\tenhancement.suffix = get_random_resistance_suffix(dice);\n\t}",
       "catches": "the armour generator ignoring the choice, so MAGICAL survives an exclusion"
     },
     {

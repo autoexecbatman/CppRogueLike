@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EnhancementSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\treturn weapon_prefixes[dice.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 1)];\n",
+      "mutated": "\treturn weapon_prefixes[0];\n",
+      "catches": "the pool index stopped being a roll, so every weapon draws the same prefix"
+    },
+    {
+      "file": "src/ItemEnhancements.cpp",
+      "original": "\treturn weapon_prefixes[dice.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 1)];\n",
+      "mutated": "\treturn weapon_prefixes[dice.roll(0, static_cast<int>(std::size(weapon_prefixes)) - 2)];\n",
+      "catches": "the last entry of the weapon pool unreachable, an off-by-one in the span"
+    }
+  ]
+}
