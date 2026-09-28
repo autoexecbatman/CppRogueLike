@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=ConstitutionShareOfHitPointsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
+      "mutated": "",
+      "catches": "base left behind by a level-up, so every hit point gained reads as Constitution on the sheet"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    owner.set_hp_base(owner.get_hp_base() + hitDiceRoll);\n",
+      "mutated": "    owner.set_hp_base(owner.get_hp_base() + totalHPGain);\n",
+      "catches": "base taking the adjustment too, so the sheet reports no Constitution at any score"
+    },
+    {
+      "file": "src/LevelUpSystem.cpp",
+      "original": "    owner.set_max_hp(owner.get_max_hp() + totalHPGain);\n",
+      "mutated": "    owner.set_max_hp(owner.get_max_hp() + hitDiceRoll);\n",
+      "catches": "the adjustment never reaching the maximum, so a high Constitution grants nothing"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\t: hpBase(hpMax),\n",
+      "mutated": "\t: hpBase(0),\n",
+      "catches": "a body built owing its whole pool to Constitution"
+    }
+  ]
+}
