@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CureLightWoundsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tconst int actualHealing = caster.heal(ctx.dice->roll(1, 8));\n",
+      "mutated": "\tconst int actualHealing = ctx.dice->roll(1, 8);\n",
+      "catches": "a spell that reports its roll and heals nobody"
+    },
+    {
+      "file": "src/SpellSystem.cpp",
+      "original": "\tconst int actualHealing = caster.heal(ctx.dice->roll(1, 8));\n",
+      "mutated": "\tconst int actualHealing = caster.heal(ctx.dice->roll(1, 6));\n",
+      "catches": "a d6 where the book prints 1d8, which no scripted roll can see"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\tconst int newHp = std::min(currentHp + hpToHeal, hpMax);\n",
+      "mutated": "\tconst int newHp = currentHp + hpToHeal;\n",
+      "catches": "healing past the maximum, so a cure raises a body above whole"
+    },
+    {
+      "file": "src/HealthPool.cpp",
+      "original": "\treturn actualHealed;\n",
+      "mutated": "\treturn hpToHeal;\n",
+      "catches": "the report taken from the die instead of from the body, so the line claims healing that never landed"
+    }
+  ]
+}

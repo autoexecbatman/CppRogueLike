@@ -121,6 +121,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SaveFieldNamesTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ColorPairTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellProgressionTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/CureLightWoundsTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/SpellFailureTest.cpp
 )
 
