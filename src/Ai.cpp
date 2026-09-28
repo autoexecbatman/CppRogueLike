@@ -48,21 +48,21 @@ std::unique_ptr<Ai> Ai::create(const json& j)
 	case AiType::SPIDER:
 	{
 		// poisonChance restored from JSON by AiSpider::load()
-		ai = std::make_unique<AiSpider>(0);
+		ai = std::make_unique<AiSpider>();
 		break;
 	}
 
 	case AiType::WEB_SPINNER:
 	{
 		// poisonChance restored from JSON by AiSpider::load()
-		ai = std::make_unique<AiWebSpinner>(0);
+		ai = std::make_unique<AiWebSpinner>();
 		break;
 	}
 
 	case AiType::GIANT_SPIDER:
 	{
 		// poisonChance restored from JSON by AiSpider::load()
-		ai = std::make_unique<AiGiantSpider>(0);
+		ai = std::make_unique<AiGiantSpider>();
 		break;
 	}
 

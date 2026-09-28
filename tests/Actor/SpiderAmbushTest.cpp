@@ -82,7 +82,7 @@ protected:
 		spider.set_natural_attack("fangs");
 
 		// Lying in wait, with turns left, and no venom.
-		auto ambusher = std::make_unique<AiSpider>(0);
+		auto ambusher = std::make_unique<AiSpider>();
 		ambusher->load(json{ { "isAmbushing", true }, { "ambushCounter", 5 }, { "poisonChance", 0 } });
 		spider.ai = std::move(ambusher);
 	}

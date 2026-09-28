@@ -14,8 +14,6 @@ struct GameContext;
 class AiSpider : public AiMonster
 {
 public:
-	explicit AiSpider(int poisonChance);
-
 	void update(Creature& owner, GameContext& ctx) override;
 
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::SPIDER; }
@@ -30,8 +28,6 @@ public:
 protected:
 	int ambushCounter{ 0 }; // Counter for ambush behavior
 	bool isAmbushing{ false }; // Is this spider currently in ambush mode?
-	int poisonCooldown{ 0 }; // Cooldown for poison attacks
-	int poisonChance{0}; // Per-type poison hit probability (0-100), set at construction
 	bool webLaid{ false }; // Tracks if this spider has created a web
 
 	// Specialized spider movement pattern that prefers walls and corners
@@ -44,15 +40,9 @@ protected:
 	void bite(Creature& owner, Creature& target, GameContext& ctx);
 
 	// What this spider's venom does to a victim its bite has just landed on. This one
-	// rolls its chance and takes a few points; the kinds whose book poison is written
-	// out override it.
+	// is the Monstrous Manual's hairy spider, whose weak poison penalises rather than
+	// wounds; the kinds with a Table 51 poison override it.
 	virtual void inject_venom(Creature& owner, Creature& target, GameContext& ctx);
-
-	// Check if the spider can attempt a poison attack
-	bool can_poison_attack(GameContext& ctx);
-
-	// Perform a poison attack on the target
-	void poison_attack(Creature& owner, Creature& target, GameContext& ctx);
 
 	// Find the best ambush position near walls. Returns nullopt when no valid position exists.
 	std::optional<Vector2D> find_ambush_position(Creature& owner, Vector2D targetPosition, GameContext& ctx);

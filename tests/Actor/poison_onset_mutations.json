@@ -9,8 +9,8 @@
   "mutations": [
     {
       "file": "src/Creature.cpp",
-      "original": "\tpendingPoison = PendingPoison{ roundsUntilOnset, damage };",
-      "mutated": "",
+      "original": "\tpendingPoison = dose;\n}",
+      "mutated": "\tpendingPoison = PendingPoison{};\n}",
       "catches": "a dose that goes nowhere, so poison never takes hold"
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\tconst int damage = pendingPoison->damage;\n\tpendingPoison.reset();",
-      "mutated": "\tconst int damage = pendingPoison->damage;",
+      "original": "\tconst int damage = pendingPoison->damage;\n\tconst BuffType effect = pendingPoison->effect;\n\tconst int effectValue = pendingPoison->effectValue;\n\tconst int effectRounds = pendingPoison->effectRounds;\n\tpendingPoison.reset();",
+      "mutated": "\tconst int damage = pendingPoison->damage;\n\tconst BuffType effect = pendingPoison->effect;\n\tconst int effectValue = pendingPoison->effectValue;\n\tconst int effectRounds = pendingPoison->effectRounds;",
       "catches": "a dose that lands every round once its onset has run"
     },
     {
@@ -39,13 +39,13 @@
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tj[\"pendingPoison\"] = json{ { \"roundsUntilOnset\", pendingPoison->roundsUntilOnset }, { \"damage\", pendingPoison->damage } };",
+      "original": "\t\tj[\"pendingPoison\"] = poisonJson;\n",
       "mutated": "",
       "catches": "a dose left out of the saved game, so sleeping it off works"
     },
     {
       "file": "src/Creature.cpp",
-      "original": "\t\tpendingPoison = PendingPoison{ poisonJson.at(\"roundsUntilOnset\").get<int>(), poisonJson.at(\"damage\").get<int>() };",
+      "original": "\t\tpendingPoison = dose;\n",
       "mutated": "",
       "catches": "a dose written to the save and dropped on the way back"
     },
@@ -72,6 +72,24 @@
       "original": "constexpr int TYPE_A_DAMAGE = 15;",
       "mutated": "constexpr int TYPE_A_DAMAGE = 1;",
       "catches": "Type A costing a point where the table prints fifteen"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tpoisonJson[\"effect\"] = encode_buff_type(pendingPoison->effect);\n",
+      "mutated": "\t\tpoisonJson[\"effect\"] = encode_buff_type(BuffType::NONE);\n",
+      "catches": "a dose's condition dropped on the way out, so a venom that only debilitates saves as nothing"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tdose.effect = parse_buff_type(poisonJson.at(\"effect\").get<std::string>());\n",
+      "mutated": "\t\tdose.effect = BuffType::NONE;\n",
+      "catches": "the condition read back as nothing, which no damage field would show"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tpoisonJson[\"effectRounds\"] = pendingPoison->effectRounds;\n",
+      "mutated": "\t\tpoisonJson[\"effectRounds\"] = 0;\n",
+      "catches": "a condition that survives the save with no rounds left to run"
     }
   ]
 }

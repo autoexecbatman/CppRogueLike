@@ -70,7 +70,13 @@ void Creature::load(const json& j)
 	if (j.contains("pendingPoison"))
 	{
 		const auto& poisonJson = j.at("pendingPoison");
-		pendingPoison = PendingPoison{ poisonJson.at("roundsUntilOnset").get<int>(), poisonJson.at("damage").get<int>() };
+		PendingPoison dose{};
+		dose.roundsUntilOnset = poisonJson.at("roundsUntilOnset").get<int>();
+		dose.damage = poisonJson.at("damage").get<int>();
+		dose.effect = parse_buff_type(poisonJson.at("effect").get<std::string>());
+		dose.effectValue = poisonJson.at("effectValue").get<int>();
+		dose.effectRounds = poisonJson.at("effectRounds").get<int>();
+		pendingPoison = dose;
 	}
 	if (j.contains("attacker"))
 	{
@@ -169,7 +175,13 @@ void Creature::save(json& j)
 	j["thaco"] = thaco;
 	if (pendingPoison.has_value())
 	{
-		j["pendingPoison"] = json{ { "roundsUntilOnset", pendingPoison->roundsUntilOnset }, { "damage", pendingPoison->damage } };
+		json poisonJson;
+		poisonJson["roundsUntilOnset"] = pendingPoison->roundsUntilOnset;
+		poisonJson["damage"] = pendingPoison->damage;
+		poisonJson["effect"] = encode_buff_type(pendingPoison->effect);
+		poisonJson["effectValue"] = pendingPoison->effectValue;
+		poisonJson["effectRounds"] = pendingPoison->effectRounds;
+		j["pendingPoison"] = poisonJson;
 	}
 	if (attacker)
 	{
@@ -457,9 +469,9 @@ void Creature::regenerate_from_constitution(int roundsElapsed, const DataManager
 	}
 }
 
-void Creature::take_poison(int roundsUntilOnset, int damage)
+void Creature::take_poison(PendingPoison dose)
 {
-	pendingPoison = PendingPoison{ roundsUntilOnset, damage };
+	pendingPoison = dose;
 }
 
 void Creature::tick_poison(GameContext& ctx)
@@ -477,7 +489,25 @@ void Creature::tick_poison(GameContext& ctx)
 
 	// The dose is spent as it lands, so it is taken before the damage, which may kill.
 	const int damage = pendingPoison->damage;
+	const BuffType effect = pendingPoison->effect;
+	const int effectValue = pendingPoison->effectValue;
+	const int effectRounds = pendingPoison->effectRounds;
 	pendingPoison.reset();
+
+	// A poison that debilitates leaves its condition behind; one that wounds does not.
+	if (effect != BuffType::NONE)
+	{
+		ctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false);
+
+		// The onset is a round after the bite, so it is announced when it arrives.
+		ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_RED, " is weakened by the venom!", MessageCompletion::FINISHED);
+	}
+
+	if (damage <= 0)
+	{
+		return;
+	}
 
 	ctx.messageSystem->message(actorData.color, actorData.name, MessageCompletion::CONTINUED);
 	ctx.messageSystem->message(ColorPairId::WHITE_RED, " is racked by the venom!", MessageCompletion::FINISHED);

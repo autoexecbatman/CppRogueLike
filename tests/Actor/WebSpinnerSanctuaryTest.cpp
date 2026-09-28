@@ -72,7 +72,7 @@ protected:
 		spinner.set_strength(8);
 		spinner.set_dexterity(10);
 		spinner.set_natural_attack("fangs");
-		spinner.ai = std::make_unique<AiWebSpinner>(0);
+		spinner.ai = std::make_unique<AiWebSpinner>();
 	}
 
 	void TearDown() override
@@ -131,7 +131,7 @@ TEST_F(WebSpinnerSanctuaryTest, ASpinnerThatSavesBitesAsUsual)
 // a 3 waits for the venom's damage, which must never be read.
 TEST_F(WebSpinnerSanctuaryTest, NoVenomFromASpinnerTurnedAway)
 {
-	spinner.ai = std::make_unique<AiWebSpinner>(100);
+	spinner.ai = std::make_unique<AiWebSpinner>();
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
 	script({ 12, 20, 3 });
 

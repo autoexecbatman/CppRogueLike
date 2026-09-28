@@ -79,7 +79,7 @@ protected:
 		spinner.set_strength(8);
 		spinner.set_dexterity(10);
 		spinner.set_natural_attack("fangs");
-		spinner.ai = std::make_unique<AiWebSpinner>(0);
+		spinner.ai = std::make_unique<AiWebSpinner>();
 	}
 
 	void TearDown() override

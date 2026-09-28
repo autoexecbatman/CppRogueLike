@@ -186,7 +186,7 @@ TEST_F(CreatureSerializationTest, AMonsterLoadedIntoAFreshObjectKeepsItsHitPoint
 TEST_F(CreatureSerializationTest, TheAiKindIsSavedByName)
 {
 	json saved;
-	AiWebSpinner{ 0 }.save(saved);
+	AiWebSpinner{}.save(saved);
 
 	EXPECT_EQ(saved.at("type"), "web_spinner");
 

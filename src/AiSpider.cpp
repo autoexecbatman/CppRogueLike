@@ -15,6 +15,7 @@
 #include "BuffSystem.h"
 #include "DamageInfo.h"
 #include "DataManager.h"
+#include "SavingThrow.h"
 #include "DexterityAttributes.h"
 #include "GameContext.h"
 #include "Map.h"
@@ -31,7 +32,10 @@ namespace
 {
 constexpr int AMBUSH_DURATION = 5; // How long spiders stay in ambush mode
 constexpr int AMBUSH_CHANCE = 30; // % chance to enter ambush mode when not seen
-constexpr int POISON_COOLDOWN = 6; // Turns between poison attacks
+// The venom lands a round after the bite, as the spider's entry says.
+constexpr int HAIRY_SPIDER_VENOM_ONSET_ROUNDS = 1;
+// "Victims receive a +2 bonus to saving throws vs. the hairy spiders' weak poison."
+constexpr int HAIRY_SPIDER_SAVE_BONUS = 2;
 constexpr int SURPRISED_AT_OR_BELOW = 3; // PHB: surprised on a 1, 2 or 3 of 1d10
 
 // Rolls the surprise check an ambush's victim makes (PHB, The Surprise Roll): 1d10
@@ -51,11 +55,6 @@ bool is_surprised(const Creature& creature, GameContext& ctx)
 // AiSpider Implementation
 //=============================================================================
 
-AiSpider::AiSpider(int poisonChance)
-	: poisonChance(poisonChance)
-{
-}
-
 void AiSpider::update(Creature& owner, GameContext& ctx)
 {
 	// Skip if spider is dead
@@ -68,12 +67,6 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 	if (owner.get_strength() <= 0)
 	{
 		owner.set_strength(3); // Ensure minimum strength
-	}
-
-	// Reduce poison cooldown if active
-	if (poisonCooldown > 0)
-	{
-		poisonCooldown--;
 	}
 
 	// Whether this turn is the one the ambush was discovered in, close enough to strike.
@@ -344,44 +337,32 @@ void AiSpider::bite(Creature& owner, Creature& target, GameContext& ctx)
 
 void AiSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
-	if (can_poison_attack(ctx))
+	// The Monstrous Manual's hairy spider, whose poison is in no table: "Victims
+	// receive a +2 bonus to saving throws vs. the hairy spiders' weak poison. If the
+	// saving throw fails, the victim's AC and attack rolls are penalized by 1, and
+	// Dexterity is penalized by -3 with respect to Dexterity checks. These effects
+	// begin one round after the bite and last for 1d4+1 rounds."
+	//
+	// The Dexterity penalty is left out: it is on Dexterity checks, and the game has
+	// no check separate from the score.
+	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
+	if (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))
 	{
-		poison_attack(owner, target, ctx);
-	}
-}
-
-bool AiSpider::can_poison_attack(GameContext& ctx)
-{
-	// Check cooldown
-	if (poisonCooldown > 0)
-	{
-		return false;
+		ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects a weak poison, and it does not take hold.", MessageCompletion::FINISHED);
+		return;
 	}
 
-	// Roll for poison chance (set at construction by spider type)
-	return ctx.dice->d100() <= poisonChance;
-}
+	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
+	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a weak poison that will take hold!", MessageCompletion::FINISHED);
 
-void AiSpider::poison_attack(Creature& owner, Creature& target, GameContext& ctx)
-{
-	// Apply poison effect to target if it's the player
-	if (target.is_player())
-	{
-		// Calculate poison damage (1-3 points)
-		int poisonDamage = ctx.dice->roll(1, 3);
-
-		// Display poison message with damage amount
-		ctx.messageSystem->message(ColorPairId::RED_BLACK, owner.actorData.name, MessageCompletion::CONTINUED);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " injects venom for ", MessageCompletion::CONTINUED);
-		ctx.messageSystem->message(ColorPairId::WHITE_RED, std::to_string(poisonDamage), MessageCompletion::CONTINUED);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, " extra poison damage!", MessageCompletion::FINISHED);
-
-		// Deal the poison damage
-		target.take_damage_and_check_death(poisonDamage, ctx, DamageType::POISON);
-
-		// Reset cooldown
-		poisonCooldown = POISON_COOLDOWN;
-	}
+	// Weak poison: it takes no hit points, only the point off everything it touches.
+	target.take_poison(PendingPoison{
+		.roundsUntilOnset = HAIRY_SPIDER_VENOM_ONSET_ROUNDS,
+		.damage = 0,
+		.effect = BuffType::HAIRY_SPIDER_VENOM,
+		.effectValue = -HAIRY_SPIDER_VENOM_PENALTY,
+		.effectRounds = ctx.dice->d4() + 1 });
 }
 
 std::optional<Vector2D> AiSpider::find_ambush_position(
@@ -519,16 +500,6 @@ void AiSpider::load(const json& j)
 	{
 		isAmbushing = j.at("isAmbushing").get<bool>();
 	}
-
-	if (j.contains("poisonCooldown"))
-	{
-		poisonCooldown = j.at("poisonCooldown").get<int>();
-	}
-
-	if (j.contains("poisonChance"))
-	{
-		poisonChance = j.at("poisonChance").get<int>();
-	}
 }
 
 void AiSpider::save(json& j)
@@ -538,6 +509,4 @@ void AiSpider::save(json& j)
 
 	j["ambushCounter"] = ambushCounter;
 	j["isAmbushing"] = isAmbushing;
-	j["poisonCooldown"] = poisonCooldown;
-	j["poisonChance"] = poisonChance;
 }

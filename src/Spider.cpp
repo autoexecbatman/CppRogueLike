@@ -32,9 +32,6 @@
 #include "Vector2D.h"
 #include "Spider.h"
 
-constexpr int POISON_CHANCE_SMALL_SPIDER = 25;
-constexpr int POISON_CHANCE_GIANT_SPIDER = 15;
-constexpr int POISON_CHANCE_WEB_SPINNER = 15;
 
 // Base Spider constructor
 Spider::Spider(Vector2D position, GameContext& ctx, SpiderType type)
@@ -108,7 +105,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d4", DamageType::PHYSICAL });
 		set_natural_attack("Venomous fangs");
 
-		ai = std::make_unique<AiSpider>(POISON_CHANCE_SMALL_SPIDER);
+		ai = std::make_unique<AiSpider>();
 		break;
 
 	case SpiderType::GIANT:
@@ -129,7 +126,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d6", DamageType::PHYSICAL });
 		set_natural_attack("Giant fangs");
 
-		ai = std::make_unique<AiGiantSpider>(POISON_CHANCE_GIANT_SPIDER);
+		ai = std::make_unique<AiGiantSpider>();
 		break;
 
 	case SpiderType::WEB_SPINNER:
@@ -150,7 +147,7 @@ void Spider::init_spider_type(GameContext& ctx)
 		attacker = std::make_unique<MonsterAttacker>(*this, DamageInfo{ "1d8", DamageType::PHYSICAL });
 		set_natural_attack("Toxic fangs");
 
-		ai = std::make_unique<AiWebSpinner>(POISON_CHANCE_WEB_SPINNER);
+		ai = std::make_unique<AiWebSpinner>();
 		break;
 	}
 

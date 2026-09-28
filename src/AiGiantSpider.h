@@ -10,8 +10,6 @@ struct GameContext;
 class AiGiantSpider : public AiSpider
 {
 public:
-	explicit AiGiantSpider(int poisonChance);
-
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::GIANT_SPIDER; }
 
 protected:

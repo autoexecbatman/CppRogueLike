@@ -164,7 +164,7 @@ TEST_F(RoundUpkeepTest, PoisonComesDueDuringTheUpkeep)
 {
 	Creature& bitten = add_creature("bitten", 10);
 	const int before = bitten.healthPool->get_hp();
-	bitten.take_poison(1, 3);
+	bitten.take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = 3 });
 
 	run_rounds(1);
 

@@ -10,8 +10,6 @@ struct Vector2D;
 class AiWebSpinner : public AiSpider
 {
 public:
-	explicit AiWebSpinner(int poisonChance);
-
 	void update(Creature& owner, GameContext& ctx) override;
 
 	[[nodiscard]] AiType get_ai_type() const noexcept override { return AiType::WEB_SPINNER; }

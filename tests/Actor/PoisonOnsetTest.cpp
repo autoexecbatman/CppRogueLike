@@ -29,6 +29,7 @@
 #include "src/Actor.h"
 #include "src/AiGiantSpider.h"
 #include "src/ArmorClass.h"
+#include "src/BuffType.h"
 #include "src/ConstitutionAttributes.h"
 #include "src/Creature.h"
 #include "src/DamageInfo.h"
@@ -79,7 +80,7 @@ protected:
 		spider.set_strength(8);
 		spider.set_dexterity(10);
 		spider.set_natural_attack("fangs");
-		spider.ai = std::make_unique<AiGiantSpider>(0);
+		spider.ai = std::make_unique<AiGiantSpider>();
 	}
 
 	void TearDown() override
@@ -130,7 +131,7 @@ protected:
 // A dose waits its rounds out, and lands on the last of them.
 TEST_F(PoisonOnsetTest, ADoseLandsWhenItsRoundsRunOut)
 {
-	player->take_poison(TYPE_A_ONSET_ROUNDS, TYPE_A_DAMAGE);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = TYPE_A_ONSET_ROUNDS, .damage = TYPE_A_DAMAGE });
 
 	EXPECT_EQ(tick_through(*player, TYPE_A_ONSET_ROUNDS - 1), 0) << "the poison landed early";
 	EXPECT_EQ(tick_through(*player, 1), TYPE_A_DAMAGE);
@@ -140,7 +141,7 @@ TEST_F(PoisonOnsetTest, ADoseLandsWhenItsRoundsRunOut)
 // It lands once, not every round after.
 TEST_F(PoisonOnsetTest, ADoseLandsOnlyOnce)
 {
-	player->take_poison(1, TYPE_A_DAMAGE);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 
 	EXPECT_EQ(tick_through(*player, 20), TYPE_A_DAMAGE);
 }
@@ -148,8 +149,8 @@ TEST_F(PoisonOnsetTest, ADoseLandsOnlyOnce)
 // One dose at a time: a second bite replaces what the first left working.
 TEST_F(PoisonOnsetTest, ASecondDoseReplacesTheFirst)
 {
-	player->take_poison(10, 5);
-	player->take_poison(2, 7);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 10, .damage = 5 });
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 2, .damage = 7 });
 
 	EXPECT_EQ(tick_through(*player, 2), 7);
 	EXPECT_EQ(tick_through(*player, 20), 0);
@@ -159,7 +160,7 @@ TEST_F(PoisonOnsetTest, ASecondDoseReplacesTheFirst)
 TEST_F(PoisonOnsetTest, ADoseCanKill)
 {
 	player->set_hp(4);
-	player->take_poison(1, TYPE_A_DAMAGE);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 
 	tick_through(*player, 1);
 
@@ -169,7 +170,7 @@ TEST_F(PoisonOnsetTest, ADoseCanKill)
 // A dose survives a saved game: what is owed is owed.
 TEST_F(PoisonOnsetTest, ADoseSurvivesASaveAndALoad)
 {
-	player->take_poison(9, TYPE_A_DAMAGE);
+	player->take_poison(PendingPoison{ .roundsUntilOnset = 9, .damage = TYPE_A_DAMAGE });
 
 	nlohmann::json saved;
 	player->save(saved);
@@ -180,6 +181,29 @@ TEST_F(PoisonOnsetTest, ADoseSurvivesASaveAndALoad)
 	ASSERT_TRUE(loaded->get_pending_poison().has_value()) << "the poison was forgotten in the save";
 	EXPECT_EQ(loaded->get_pending_poison()->roundsUntilOnset, 9);
 	EXPECT_EQ(loaded->get_pending_poison()->damage, TYPE_A_DAMAGE);
+}
+
+// A dose that debilitates rather than wounds is all condition and no damage, so a save
+// that keeps only the damage keeps nothing: it comes back as a dose that does nothing.
+TEST_F(PoisonOnsetTest, ADoseCarriesItsConditionThroughASaveAndALoad)
+{
+	player->take_poison(PendingPoison{
+		.roundsUntilOnset = 1,
+		.damage = 0,
+		.effect = BuffType::HAIRY_SPIDER_VENOM,
+		.effectValue = -1,
+		.effectRounds = 3 });
+
+	nlohmann::json saved;
+	player->save(saved);
+	auto loaded = std::make_unique<Player>(Vector2D{ 0, 0 });
+	loaded->healthPool = std::make_unique<HealthPool>(STARTING_HP);
+	loaded->load(saved);
+
+	ASSERT_TRUE(loaded->get_pending_poison().has_value()) << "the poison was forgotten in the save";
+	EXPECT_EQ(loaded->get_pending_poison()->effect, BuffType::HAIRY_SPIDER_VENOM);
+	EXPECT_EQ(loaded->get_pending_poison()->effectValue, -1);
+	EXPECT_EQ(loaded->get_pending_poison()->effectRounds, 3);
 }
 
 // A creature carrying nothing ticks nothing.
@@ -194,7 +218,7 @@ TEST_F(PoisonOnsetTest, ADeadCreatureIsLeftAlone)
 {
 	Creature victim{ Vector2D{ 7, 5 }, ActorData{ TileRef{}, "victim", ColorPairId::WHITE_BLACK } };
 	victim.healthPool = std::make_unique<HealthPool>(10);
-	victim.take_poison(1, TYPE_A_DAMAGE);
+	victim.take_poison(PendingPoison{ .roundsUntilOnset = 1, .damage = TYPE_A_DAMAGE });
 	victim.set_hp(0);
 
 	tick_through(victim, 20);

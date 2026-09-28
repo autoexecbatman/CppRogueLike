@@ -24,11 +24,6 @@ constexpr int MAX_WEBS = 5; // Maximum number of webs that can exist at once per
 constexpr int WEB_MAX_SIZE = 5;
 constexpr int WEB_STRENGTH = 3;
 
-AiWebSpinner::AiWebSpinner(int poisonChance)
-	: AiSpider(poisonChance)
-{
-}
-
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
 	// Always ensure spiders have strength
@@ -41,10 +36,6 @@ void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 	if (webCooldown > 0)
 	{
 		webCooldown--;
-	}
-	if (poisonCooldown > 0)
-	{
-		poisonCooldown--;
 	}
 
 	// DIRECT ATTACK CODE - Check if player is adjacent

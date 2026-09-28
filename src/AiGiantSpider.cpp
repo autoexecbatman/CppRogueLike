@@ -15,11 +15,6 @@ constexpr int TYPE_A_DAMAGE = 15;
 constexpr int TYPE_A_ONSET_ROUNDS = 15;
 constexpr int HUGE_SPIDER_SAVE_BONUS = 1;
 
-AiGiantSpider::AiGiantSpider(int poisonChance)
-	: AiSpider(poisonChance)
-{
-}
-
 void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext& ctx)
 {
 	const int constitutionAdjustment = ctx.dataManager->constitution_for(target.get_constitution()).PoisonSave;
@@ -32,5 +27,5 @@ void AiGiantSpider::inject_venom(Creature& owner, Creature& target, GameContext&
 
 	ctx.messageSystem->message(owner.actorData.color, owner.actorData.name, MessageCompletion::CONTINUED);
 	ctx.messageSystem->message(ColorPairId::WHITE_RED, " injects a venom that will take hold!", MessageCompletion::FINISHED);
-	target.take_poison(TYPE_A_ONSET_ROUNDS, TYPE_A_DAMAGE);
+	target.take_poison(PendingPoison{ .roundsUntilOnset = TYPE_A_ONSET_ROUNDS, .damage = TYPE_A_DAMAGE });
 }

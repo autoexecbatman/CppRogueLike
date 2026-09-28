@@ -230,7 +230,7 @@ TEST_F(SanctuaryPursuitTest, AWebSpinnerThatLostTrackStopsClosingIn)
 {
 	// The spinner has its own update and so its own gate. Its poison chance is zero, so
 	// nothing here depends on venom - only on whether it still walks toward the player.
-	goblin.ai = std::make_unique<AiWebSpinner>(0);
+	goblin.ai = std::make_unique<AiWebSpinner>();
 	ctx.buffSystem->add_buff(*player, BuffType::SANCTUARY, 0, 10, false);
 	make_the_goblin_fail_its_save();
 	const int distanceBefore = goblin_distance_to_player();

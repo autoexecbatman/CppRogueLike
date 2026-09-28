@@ -1,0 +1,83 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HairySpiderVenomTest.*:SpiderVenomTest.*:PoisonOnsetTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "constexpr int HAIRY_SPIDER_SAVE_BONUS = 2;",
+      "mutated": "constexpr int HAIRY_SPIDER_SAVE_BONUS = 1;",
+      "catches": "the +2 the spider's own entry grants its victims, read as the huge spider's +1"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t.effectRounds = ctx.dice->d4() + 1 });",
+      "mutated": "\t\t.effectRounds = ctx.dice->d4() });",
+      "catches": "1d4 rounds where the book prints 1d4+1"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t.effectValue = -HAIRY_SPIDER_VENOM_PENALTY,",
+      "mutated": "\t\t.effectValue = HAIRY_SPIDER_VENOM_PENALTY,",
+      "catches": "the penalty applied as a bonus, so a bite improves the victim's armour class"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\t.damage = 0,",
+      "mutated": "\t\t.damage = 3,",
+      "catches": "a weak poison taking hit points, which is the venom this replaced"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tif (SavingThrows::is_made(target, SavingThrow::PARALYZATION_POISON_DEATH, HAIRY_SPIDER_SAVE_BONUS + constitutionAdjustment, ctx))",
+      "mutated": "\tif (false)",
+      "catches": "the saving throw skipped, so every bite that lands poisons"
+    },
+    {
+      "file": "src/BuffType.h",
+      "original": "inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;",
+      "mutated": "inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 2;",
+      "catches": "the one point the book prints for both armour class and attack rolls"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\t{ BuffType::HAIRY_SPIDER_VENOM, -HAIRY_SPIDER_VENOM_PENALTY },",
+      "mutated": "",
+      "catches": "the venom reaching armour class and leaving attack rolls alone"
+    },
+    {
+      "file": "src/BuffSystem.cpp",
+      "original": "\tBuffType::SHIELD,\n\tBuffType::HAIRY_SPIDER_VENOM,",
+      "mutated": "\tBuffType::SHIELD,",
+      "catches": "the venom reaching attack rolls and leaving armour class alone"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tctx.buffSystem->add_buff(*this, effect, effectValue, effectRounds, false);\n",
+      "mutated": "",
+      "catches": "a dose that carries a condition landing as nothing at all"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_RED, \" is weakened by the venom!\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "the onset arriving in silence, which is the whole of what a venom taking no hit points looks like"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\tctx.messageSystem->message(ColorPairId::WHITE_RED, \" injects a weak poison that will take hold!\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "a bite that poisons without a word"
+    },
+    {
+      "file": "src/AiSpider.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::WHITE_BLACK, \" injects a weak poison, and it does not take hold.\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "a save that is made leaving the bite unexplained"
+    }
+  ]
+}

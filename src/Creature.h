@@ -85,6 +85,11 @@ struct PendingPoison
 {
 	int roundsUntilOnset{ 0 };
 	int damage{ 0 };
+	// What the dose leaves behind when it lands, for a poison that debilitates
+	// rather than wounds. NONE for the ones that only take hit points.
+	BuffType effect{ BuffType::NONE };
+	int effectValue{ 0 };
+	int effectRounds{ 0 };
 };
 
 // What a struggle against a web achieved this turn.
@@ -483,7 +488,7 @@ public:
 	//
 	// Example, a huge spider's Type A:
 	//   victim.take_poison(15, 15); // 15 points, 15 rounds from now
-	void take_poison(int roundsUntilOnset, int damage);
+	void take_poison(PendingPoison dose);
 
 	// One round of that wait. The dose lands when its rounds run out, and a creature
 	// already dead is left alone.

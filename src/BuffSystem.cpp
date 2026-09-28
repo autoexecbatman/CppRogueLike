@@ -24,6 +24,7 @@ static const std::unordered_map<BuffType, ActorState> buff_state_effects = {
 // AD&D 2e: Lower AC = better defense, so buff values are negated when calculating AC
 static const std::unordered_set<BuffType> ac_affecting_buffs = {
 	BuffType::SHIELD,
+	BuffType::HAIRY_SPIDER_VENOM,
 	// Future extensions: BuffType::ARMOR, BuffType::PROTECTION_FROM_EVIL, etc.
 };
 
@@ -38,6 +39,7 @@ static const std::unordered_set<BuffType> buffs_broken_by_attacking = {
 // AD&D 2e: Bless gives +1 to hit, future buffs may give other bonuses
 static const std::unordered_map<BuffType, int> buff_hit_modifiers = {
 	{ BuffType::BLESS, 1 },
+	{ BuffType::HAIRY_SPIDER_VENOM, -HAIRY_SPIDER_VENOM_PENALTY },
 	// Future extensions: {BuffType::PRAYER, 1}, {BuffType::CURSE, -1}, etc.
 };
 

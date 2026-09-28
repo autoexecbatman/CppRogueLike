@@ -39,11 +39,17 @@ enum class BuffType
 	PROTECTION_FROM_EVIL,
 	SILENCE,
 	WEBBED,
+	HAIRY_SPIDER_VENOM,
 };
+
+// The hairy spider's weak poison: "the victim's AC and attack rolls are penalized by
+// 1" (Monstrous Manual). One number for both halves, so the AC path and the to-hit
+// table read the same constant.
+inline constexpr int HAIRY_SPIDER_VENOM_PENALTY = 1;
 
 // Every BuffType, in the order the enum declares them, so a cycle through the
 // editor's field reaches all of them and adding one is a single edit here.
-inline constexpr std::array<BuffType, 21> ALL_BUFF_TYPE = {
+inline constexpr std::array<BuffType, 22> ALL_BUFF_TYPE = {
 	BuffType::NONE,
 	BuffType::INVISIBILITY,
 	BuffType::BLESS,
@@ -65,6 +71,7 @@ inline constexpr std::array<BuffType, 21> ALL_BUFF_TYPE = {
 	BuffType::PROTECTION_FROM_EVIL,
 	BuffType::SILENCE,
 	BuffType::WEBBED,
+	BuffType::HAIRY_SPIDER_VENOM,
 };
 
 // The next BuffType in that order, wrapping at the end.
@@ -179,6 +186,10 @@ inline constexpr std::string_view encode_buff_type(BuffType buffType)
 	{
 		return "webbed";
 	}
+	case BuffType::HAIRY_SPIDER_VENOM:
+	{
+		return "hairy_spider_venom";
+	}
 	}
 
 	return "none";
@@ -290,6 +301,10 @@ inline BuffType parse_buff_type(std::string_view name)
 	if (name == "webbed")
 	{
 		return BuffType::WEBBED;
+	}
+	if (name == "hairy_spider_venom")
+	{
+		return BuffType::HAIRY_SPIDER_VENOM;
 	}
 
 	throw std::runtime_error(std::format("unknown buff_type '{}'", name));
