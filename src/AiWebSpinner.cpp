@@ -26,12 +26,6 @@ constexpr int WEB_STRENGTH = 3;
 
 void AiWebSpinner::update(Creature& owner, GameContext& ctx)
 {
-	// Always ensure spiders have strength
-	if (owner.get_strength() <= 0)
-	{
-		owner.set_strength(4); // Ensure minimum strength
-	}
-
 	// Update cooldowns
 	if (webCooldown > 0)
 	{

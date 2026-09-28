@@ -1,5 +1,6 @@
 #include <vector>
 #include <algorithm>
+#include <cassert>
 #include <format>
 #include <memory>
 #include <string>
@@ -54,8 +55,13 @@ AttackResult Attacker::perform_single_attack(
 		return AttackResult::PREVENTED;
 	}
 
-	// Cannot attack dead targets or without strength
-	if (target.is_dead() || owner.get_strength() <= 0)
+	// Every path that builds a creature sets a Strength above zero and nothing in the
+	// game lowers a monster's, so a swing without one is a creature left unfinished.
+	assert(owner.get_strength() > 0 && "attacked with no Strength");
+
+	// A target already dead is a real outcome: two creatures can swing at one victim
+	// in a round, and the second finds it gone.
+	if (target.is_dead())
 	{
 		ctx.messageSystem->append_message_part(owner.actorData.color, owner.actorData.name);
 		ctx.messageSystem->append_message_part(ColorPairId::WHITE_BLACK, " attacks ");

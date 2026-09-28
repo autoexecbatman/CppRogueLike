@@ -49,7 +49,10 @@
 #include "src/Colors.h"
 #include "src/ExperienceReward.h"
 #include "src/Paths.h"
+#include "src/AttackKind.h"
+#include "src/DamageInfo.h"
 #include "src/ItemCreator.h"
+#include "src/MonsterAttacker.h"
 #include "src/MonsterCreator.h"
 #include "src/ShopkeeperFactory.h"
 #include "src/SpellSystem.h"
@@ -124,6 +127,23 @@ TEST_F(AssertProbeDeathTest, HitDiceAtZeroAbort)
 	std::unique_ptr<Creature> creature = make_creature();
 
 	EXPECT_DEATH(creature->set_hit_dice(0), "roll at or below zero");
+}
+
+// Every path that builds a creature gives it a Strength above zero - a spider
+// rolls 3d6, MonsterCreator floors its roll at 1, and a player's comes from the
+// blueprint - and nothing in the game lowers a monster's score. So a swing from a
+// creature with none is a creature that was never finished being built, and the
+// attack path is where that first becomes visible.
+TEST_F(AssertProbeDeathTest, AttackingWithNoStrengthAborts)
+{
+	std::unique_ptr<Creature> attacker = make_creature();
+	attacker->healthPool = std::make_unique<HealthPool>(10);
+	attacker->attacker = std::make_unique<MonsterAttacker>(*attacker, DamageInfo{ "1d4", DamageType::PHYSICAL });
+
+	std::unique_ptr<Creature> target = make_creature();
+	target->healthPool = std::make_unique<HealthPool>(10);
+
+	EXPECT_DEATH(attacker->attacker->attack(*target, AttackKind::MELEE, ctx), "attacked with no Strength");
 }
 
 // Fire and cold are resisted per die before they land, so a plain total of

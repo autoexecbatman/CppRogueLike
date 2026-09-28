@@ -100,6 +100,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.RegeneratingWithMoreFireAndAcidThanDamageAborts"
         file   = "src/HealthPool.cpp"
         anchor = 'assert(unregenerableDamage <= hpMax - hp && "HealthPool::regenerate: more fire and acid damage than damage");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.AttackingWithNoStrengthAborts"
+        file   = "src/Attacker.cpp"
+        anchor = 'assert(owner.get_strength() > 0 && "attacked with no Strength");'
     }
 )
 

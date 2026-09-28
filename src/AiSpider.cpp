@@ -63,12 +63,6 @@ void AiSpider::update(Creature& owner, GameContext& ctx)
 		return;
 	}
 
-	// Always ensure spiders have strength
-	if (owner.get_strength() <= 0)
-	{
-		owner.set_strength(3); // Ensure minimum strength
-	}
-
 	// Whether this turn is the one the ambush was discovered in, close enough to strike.
 	bool ambushSprung = false;
 

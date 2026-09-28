@@ -8,6 +8,7 @@
 #include "src/PlayerAttacker.h"
 #include "src/Player.h"
 #include "src/AttackKind.h"
+#include "src/AttackResult.h"
 #include "src/DamageInfo.h"
 #include "src/ExperienceReward.h"
 #include "src/Paths.h"
@@ -276,6 +277,25 @@ TEST_F(AttackerTest, Attack_CanKillTarget)
 	player->attacker->attack(*monster, AttackKind::MELEE, ctx);
 
 	EXPECT_TRUE(monster->is_dead());
+}
+
+// Two creatures can swing at one victim in a round, so the second finds it already
+// dead. That is a real outcome rather than a fault: the swing is refused, and nothing
+// is rolled for it.
+TEST_F(AttackerTest, AttackingAnAlreadyDeadTargetIsRefused)
+{
+	monster->set_hp(0);
+	ASSERT_TRUE(monster->is_dead());
+
+	// A certain hit is queued behind the refusal, so a guard that never fired would
+	// land it and be visible here rather than passing as nothing happening.
+	game.dice.set_next_d20(20);
+	game.dice.set_next_roll(6);
+
+	const AttackResult result = player->attacker->attack(*monster, AttackKind::MELEE, ctx);
+
+	EXPECT_EQ(result, AttackResult::PREVENTED);
+	EXPECT_EQ(monster->get_hp(), 0) << "a refused swing still rolled damage";
 }
 
 TEST_F(AttackerTest, Attack_MonsterDeathAwardsXP)
