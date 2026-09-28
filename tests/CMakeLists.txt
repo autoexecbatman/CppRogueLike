@@ -46,6 +46,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Factories/MonsterSpawnTableTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/LevelUpSystemTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopKeeperSerializationTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopNameTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopStockLevelTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/ShopTransactionTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Systems/EnhancementSystemTest.cpp

@@ -1,6 +1,5 @@
 #include <algorithm>
 #include <cassert>
-#include <cstdlib>
 #include <memory>
 #include <string>
 #include <utility>
@@ -22,7 +21,7 @@
 
 using namespace InventoryOperations;
 
-ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality)
+ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice)
 	: shopType(type), shopQuality(quality)
 {
 	// Set pricing based on quality
@@ -54,7 +53,7 @@ ShopKeeper::ShopKeeper(ShopType type, ShopQuality quality)
 	}
 	}
 
-	generate_shop_name();
+	generate_shop_name(dice);
 	// Note: generate_initial_inventory(ctx) must be called separately after construction
 }
 
@@ -303,7 +302,7 @@ bool ShopKeeper::process_player_sale(GameContext& ctx, Item& item, Creature& sel
 	return true;
 }
 
-void ShopKeeper::generate_shop_name()
+void ShopKeeper::generate_shop_name(RandomDice& dice)
 {
 	std::vector<std::string> weapon_names = {
 		"The Sharp Edge", "Blades & Bludgeons", "Steel & Iron", "The Armory", "Warrior's Arsenal", "The Forge", "Sword & Shield", "Battle Ready"
@@ -329,27 +328,27 @@ void ShopKeeper::generate_shop_name()
 	{
 	case ShopType::WEAPON_SHOP:
 	{
-		shopName = weapon_names[rand() % weapon_names.size()];
+		shopName = weapon_names[dice.roll(0, static_cast<int>(weapon_names.size()) - 1)];
 		break;
 	}
 	case ShopType::ARMOR_SHOP:
 	{
-		shopName = armor_names[rand() % armor_names.size()];
+		shopName = armor_names[dice.roll(0, static_cast<int>(armor_names.size()) - 1)];
 		break;
 	}
 	case ShopType::POTION_SHOP:
 	{
-		shopName = potion_names[rand() % potion_names.size()];
+		shopName = potion_names[dice.roll(0, static_cast<int>(potion_names.size()) - 1)];
 		break;
 	}
 	case ShopType::SCROLL_SHOP:
 	{
-		shopName = scroll_names[rand() % scroll_names.size()];
+		shopName = scroll_names[dice.roll(0, static_cast<int>(scroll_names.size()) - 1)];
 		break;
 	}
 	case ShopType::GENERAL_STORE:
 	{
-		shopName = general_names[rand() % general_names.size()];
+		shopName = general_names[dice.roll(0, static_cast<int>(general_names.size()) - 1)];
 		break;
 	}
 	default:
@@ -358,62 +357,6 @@ void ShopKeeper::generate_shop_name()
 		break;
 	}
 	}
-}
-
-// Static utility function for creating random shopkeepers
-std::unique_ptr<ShopKeeper> ShopKeeper::create_random_shopkeeper()
-{
-	// Random shop type selection with weighted probabilities
-	int typeRoll = rand() % 100;
-	ShopType randomType;
-
-	if (typeRoll < 25)
-	{
-		randomType = ShopType::WEAPON_SHOP; // 25% chance
-	}
-	else if (typeRoll < 45)
-	{
-		randomType = ShopType::ARMOR_SHOP; // 20% chance
-	}
-	else if (typeRoll < 65)
-	{
-		randomType = ShopType::POTION_SHOP; // 20% chance
-	}
-	else if (typeRoll < 80)
-	{
-		randomType = ShopType::SCROLL_SHOP; // 15% chance
-	}
-	else if (typeRoll < 90)
-	{
-		randomType = ShopType::GENERAL_STORE; // 10% chance
-	}
-	else
-	{
-		randomType = ShopType::ADVENTURING_GEAR; // 10% chance
-	}
-
-	// Random quality selection with weighted probabilities
-	int qualityRoll = rand() % 100;
-	ShopQuality randomQuality;
-
-	if (qualityRoll < 15)
-	{
-		randomQuality = ShopQuality::POOR; // 15% chance
-	}
-	else if (qualityRoll < 65)
-	{
-		randomQuality = ShopQuality::AVERAGE; // 50% chance
-	}
-	else if (qualityRoll < 90)
-	{
-		randomQuality = ShopQuality::GOOD; // 25% chance
-	}
-	else
-	{
-		randomQuality = ShopQuality::EXCELLENT; // 10% chance
-	}
-
-	return std::make_unique<ShopKeeper>(randomType, randomQuality);
 }
 
 void ShopKeeper::save(json& j)

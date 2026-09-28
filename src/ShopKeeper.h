@@ -29,6 +29,7 @@ enum class ShopQuality
 // Forward declarations
 struct GameContext;
 class Item;
+class RandomDice;
 class Creature;
 
 class ShopKeeper : public Persistent
@@ -41,7 +42,7 @@ private:
 	int markupPercent{ 120 }; // Buy price percentage
 	int sellbackPercent{ 60 }; // Sell price percentage
 
-	void generate_shop_name();
+	void generate_shop_name(RandomDice& dice);
 
 	// Random item generation methods
 	std::unique_ptr<Item> generate_random_item_by_type(int dungeonLevel, GameContext& ctx);
@@ -52,7 +53,7 @@ private:
 	std::unique_ptr<Item> generate_random_misc_item(int dungeonLevel, GameContext& ctx);
 
 public:
-	ShopKeeper(ShopType type, ShopQuality quality);
+	ShopKeeper(ShopType type, ShopQuality quality, RandomDice& dice);
 	ShopKeeper() = default;
 
 	~ShopKeeper() override = default;
@@ -109,5 +110,4 @@ public:
 	bool process_player_sale(GameContext& ctx, Item& item, Creature& seller, Creature& owner);
 
 	// Static utility function for creating random shopkeepers
-	static std::unique_ptr<ShopKeeper> create_random_shopkeeper();
 };

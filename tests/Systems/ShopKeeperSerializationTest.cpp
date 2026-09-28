@@ -26,14 +26,14 @@ protected:
     }
 
     std::unique_ptr<ShopKeeper> create_test_shop() {
-        auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD);
+		auto shop = std::make_unique<ShopKeeper>(ShopType::WEAPON_SHOP, ShopQuality::GOOD, game.dice);
         shop->generate_initial_inventory(1, ctx);
         return shop;
     }
 };
 
 TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip) {
-    ShopKeeper original(ShopType::ARMOR_SHOP, ShopQuality::EXCELLENT);
+	ShopKeeper original(ShopType::ARMOR_SHOP, ShopQuality::EXCELLENT, game.dice);
 
     json j;
     original.save(j);
@@ -49,7 +49,7 @@ TEST_F(ShopKeeperSerializationTest, BasicFields_SaveLoad_RoundTrip) {
 }
 
 TEST_F(ShopKeeperSerializationTest, Inventory_Preserved) {
-    ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE);
+	ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE, game.dice);
     original.generate_initial_inventory(1, ctx);
 
     // Shop should have generated 3-7 items
@@ -77,7 +77,7 @@ TEST_F(ShopKeeperSerializationTest, AllShopTypes_SaveLoad) {
     };
 
     for (ShopType type : types) {
-        ShopKeeper original(type, ShopQuality::AVERAGE);
+		ShopKeeper original(type, ShopQuality::AVERAGE, game.dice);
         original.generate_initial_inventory(1, ctx);
 
         json j;
@@ -99,7 +99,7 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad) {
     };
 
     for (ShopQuality quality : qualities) {
-        ShopKeeper original(ShopType::GENERAL_STORE, quality);
+		ShopKeeper original(ShopType::GENERAL_STORE, quality, game.dice);
         original.generate_initial_inventory(1, ctx);
 
         json j;
@@ -113,7 +113,7 @@ TEST_F(ShopKeeperSerializationTest, AllQualities_SaveLoad) {
 }
 
 TEST_F(ShopKeeperSerializationTest, EmptyInventory_HandledGracefully) {
-    ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE);
+	ShopKeeper original(ShopType::WEAPON_SHOP, ShopQuality::AVERAGE, game.dice);
 
     original.get_shop_inventory().items.clear();
 
@@ -127,7 +127,7 @@ TEST_F(ShopKeeperSerializationTest, EmptyInventory_HandledGracefully) {
 }
 
 TEST_F(ShopKeeperSerializationTest, CustomPricing_Preserved) {
-    ShopKeeper original(ShopType::GENERAL_STORE, ShopQuality::AVERAGE);
+	ShopKeeper original(ShopType::GENERAL_STORE, ShopQuality::AVERAGE, game.dice);
     original.set_markup_percent(200);
     original.set_sellback_percent(30);
 

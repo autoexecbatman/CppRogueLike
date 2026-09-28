@@ -61,7 +61,7 @@ protected:
 TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
 {
 	ASSERT_EQ(levelManager.get_dungeon_level(), 1) << "the manager must disagree with the level the shop is told";
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(20, ctx);
@@ -73,7 +73,7 @@ TEST_F(ShopStockLevelTest, StocksForTheLevelItIsTold)
 // Told level 1, it stocks for 1, whatever else the context holds.
 TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
 {
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(1, ctx);
@@ -85,7 +85,7 @@ TEST_F(ShopStockLevelTest, StocksForLevelOneWhenToldOne)
 TEST_F(ShopStockLevelTest, NeedsNoLevelManager)
 {
 	ctx.levelManager = nullptr;
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(20, ctx);
@@ -98,7 +98,7 @@ TEST_F(ShopStockLevelTest, NeedsNoLevelManager)
 // off-by-one in either direction lands on the other side of that line.
 TEST_F(ShopStockLevelTest, ToldBelowTheBoundaryStocksTheLowerCandidate)
 {
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(5, ctx);
@@ -108,7 +108,7 @@ TEST_F(ShopStockLevelTest, ToldBelowTheBoundaryStocksTheLowerCandidate)
 
 TEST_F(ShopStockLevelTest, ToldAtTheBoundaryStocksTheHigherCandidate)
 {
-	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::ARMOR_SHOP, ShopQuality::AVERAGE, mock.dice };
 	force_three_last_candidates();
 
 	shop.generate_initial_inventory(6, ctx);

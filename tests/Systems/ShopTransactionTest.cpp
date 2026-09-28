@@ -81,7 +81,7 @@ protected:
 		}
 	}
 
-	ShopKeeper shop{ ShopType::GENERAL_STORE, ShopQuality::AVERAGE };
+	ShopKeeper shop{ ShopType::GENERAL_STORE, ShopQuality::AVERAGE, mock.dice };
 	Player player{ Vector2D{ 1, 1 } };
 	// The shopkeeper creature: the shop's goods live in the ShopKeeper, its gold here.
 	Creature owner{ Vector2D{ 2, 1 }, ActorData{ TileRef{}, "shopkeeper", ColorPairId::WHITE_BLACK } };
@@ -91,7 +91,7 @@ TEST_F(ShopTransactionTest, AStockedShopHasSomethingToSell)
 {
 	// A potion shop draws one roll per item and nothing else, so three items cost the
 	// count roll and three draws.
-	ShopKeeper potionShop{ ShopType::POTION_SHOP, ShopQuality::AVERAGE };
+	ShopKeeper potionShop{ ShopType::POTION_SHOP, ShopQuality::AVERAGE, mock.dice };
 	mock.dice.set_next_roll(3);
 	for (int item = 0; item < 3; ++item)
 	{
