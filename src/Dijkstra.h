@@ -26,14 +26,11 @@ public:
 		const GameContext& ctx);
 	std::vector<Vector2D> reconstruct_path(
 		Vector2D start, Vector2D goal, const std::vector<Vector2D>& cameFrom);
-	// Heuristic function for A* search
+	// Admissible for eight-way movement, where a diagonal costs what a cardinal
+	// costs, so it never overestimates the steps remaining.
 	double heuristic(Vector2D a, Vector2D b)
 	{
-		// Chebyshev distance (max of absolute differences)
-		// Admissible for 8-directional movement where diagonals cost same as cardinal
-		int dx = std::abs(a.x - b.x);
-		int dy = std::abs(a.y - b.y);
-		return static_cast<double>(std::max(dx, dy));
+		return static_cast<double>(a.chebyshev_distance_to(b));
 	}
 };
 

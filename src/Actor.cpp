@@ -89,7 +89,7 @@ void Actor::save(json& j)
 // a function to get the Chebyshev distance from an actor to a specific tile of the map
 int Actor::get_tile_distance(Vector2D tilePosition) const noexcept
 {
-	return std::max(std::abs(position.x - tilePosition.x), std::abs(position.y - tilePosition.y));
+	return position.chebyshev_distance_to(tilePosition);
 }
 
 // the actor render function with color

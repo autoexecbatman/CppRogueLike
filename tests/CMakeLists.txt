@@ -63,6 +63,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/MapTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TrapSpawnTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DoorLockingTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Map/PathfindingTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/TreasureRoomTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/WaterMovementTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Map/DescribeTileTest.cpp

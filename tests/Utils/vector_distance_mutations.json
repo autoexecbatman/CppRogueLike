@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=Vector2DTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Vector2D.h",
+      "original": "\t\treturn std::max(std::abs(x - other.x), std::abs(y - other.y));\n",
+      "mutated": "\t\treturn std::abs(x - other.x) + std::abs(y - other.y);\n",
+      "catches": "Chebyshev computed as Manhattan, so a diagonal reads twice as far as it is"
+    },
+    {
+      "file": "src/Vector2D.h",
+      "original": "\t\treturn std::abs(x - other.x) + std::abs(y - other.y);\n",
+      "mutated": "\t\treturn std::max(std::abs(x - other.x), std::abs(y - other.y));\n",
+      "catches": "Manhattan computed as Chebyshev, so a diagonal reads half as far"
+    }
+  ]
+}

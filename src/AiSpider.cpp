@@ -300,7 +300,7 @@ void AiSpider::move_or_attack(Creature& owner, Vector2D targetPosition, GameCont
 
 	for (const auto& move : possibleMoves)
 	{
-		int dist = std::abs(move.x - targetPosition.x) + std::abs(move.y - targetPosition.y);
+		int dist = move.manhattan_distance_to(targetPosition);
 		if (dist < bestDistance)
 		{
 			bestDistance = dist;
@@ -381,8 +381,7 @@ std::optional<Vector2D> AiSpider::find_ambush_position(
 
 	auto is_in_ambush_range = [&](Vector2D pos) -> bool
 	{
-		int dist = std::abs(pos.x - targetPosition.x) +
-			std::abs(pos.y - targetPosition.y);
+		int dist = pos.manhattan_distance_to(targetPosition);
 		return dist >= 3 && dist <= 12;
 	};
 

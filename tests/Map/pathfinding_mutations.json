@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PathfindingTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Dijkstra.cpp",
+      "original": "\tif (cameFrom.at(goalIndex) == Vector2D{ -1, -1 })\n\t{\n\t\treturn path; // No path found, return empty vector\n\t}\n",
+      "mutated": "",
+      "catches": "an unreachable goal handed back a route instead of nothing"
+    },
+    {
+      "file": "src/Dijkstra.cpp",
+      "original": "\tpath.push_back(start); // Optional: Include the starting point\n",
+      "mutated": "",
+      "catches": "a path that starts one cell along, so the walker's own tile is missing"
+    },
+    {
+      "file": "src/Dijkstra.cpp",
+      "original": "\tstd::reverse(path.begin(), path.end()); // Reverse the path to get it from start to goal\n",
+      "mutated": "",
+      "catches": "a path handed back from goal to start, which walks the player backwards"
+    }
+  ]
+}

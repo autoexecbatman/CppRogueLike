@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <iostream>
 
@@ -111,6 +112,13 @@ struct Vector2D
 	int manhattan_distance_to(Vector2D other) const noexcept
 	{
 		return std::abs(x - other.x) + std::abs(y - other.y);
+	}
+
+	// Steps apart on an eight-way grid where a diagonal costs what a cardinal
+	// costs, which is how everything in this game moves.
+	int chebyshev_distance_to(Vector2D other) const noexcept
+	{
+		return std::max(std::abs(x - other.x), std::abs(y - other.y));
 	}
 };
 

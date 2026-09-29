@@ -275,11 +275,6 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 	// With all doors now locked, filter to candidates whose spawn tile is
 	// still reachable from the stairs. A dead-end corridor that only connects
 	// back through a locked door will fail this check.
-	auto manhattan = [](Vector2D a, Vector2D b)
-	{
-		return std::abs(a.x - b.x) + std::abs(a.y - b.y);
-	};
-
 	const Vector2D playerPos = ctx.player()->position;
 	const bool stairsAvailable = ctx.stairs != nullptr;
 
@@ -294,7 +289,7 @@ void TreasureRoom::setup_guard(const DungeonRoom& room, GameContext& ctx)
 			continue; // dead-end pocket — skip
 		}
 
-		const int dist = manhattan(c.spawnPos, playerPos);
+		const int dist = c.spawnPos.manhattan_distance_to(playerPos);
 		if (dist < bestDist)
 		{
 			bestDist = dist;
