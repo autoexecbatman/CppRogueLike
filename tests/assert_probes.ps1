@@ -105,6 +105,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.AttackingWithNoStrengthAborts"
         file   = "src/Attacker.cpp"
         anchor = 'assert(owner.get_strength() > 0 && "attacked with no Strength");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.DroppingAPackHoldingNothingAborts"
+        file   = "src/DeathHandler.cpp"
+        anchor = 'assert(std::ranges::none_of(owner.inventoryData.items, is_nothing) && "a pack holds nothing where an item should be");'
     }
 )
 

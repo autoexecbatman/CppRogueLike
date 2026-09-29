@@ -43,7 +43,8 @@ void MonsterDeathHandler::execute(Creature& owner, GameContext& ctx)
         ctx.animSystem->spawn_death(owner.position);
     }
 
-    assert(std::ranges::none_of(owner.inventoryData.items, [](const auto& i) { return !i; }));
+    [[maybe_unused]] auto is_nothing = [](const auto& carried) { return !carried; };
+    assert(std::ranges::none_of(owner.inventoryData.items, is_nothing) && "a pack holds nothing where an item should be");
     for (auto& item : owner.inventoryData.items)
     {
         item->position = owner.position;

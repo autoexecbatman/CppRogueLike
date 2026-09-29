@@ -43,6 +43,8 @@
 #include <string_view>
 
 #include "src/Creature.h"
+#include "src/Player.h"
+#include "src/DeathHandler.h"
 #include "src/EquipmentSlot.h"
 #include "src/HealthPool.h"
 #include "src/Item.h"
@@ -144,6 +146,27 @@ TEST_F(AssertProbeDeathTest, AttackingWithNoStrengthAborts)
 	target->healthPool = std::make_unique<HealthPool>(10);
 
 	EXPECT_DEATH(attacker->attacker->attack(*target, AttackKind::MELEE, ctx), "attacked with no Strength");
+}
+
+// The pack owns every entry it holds, and the death handler dereferences each one
+// to drop it. A null there is a container that stopped owning its contents, which
+// the loop would find by walking into it.
+TEST_F(AssertProbeDeathTest, DroppingAPackHoldingNothingAborts)
+{
+	// execute checks for a player first, so without one this would die on that
+	// instead and prove nothing about the pack.
+	std::unique_ptr<Player> killer = std::make_unique<Player>(Vector2D{ 1, 1 });
+	killer->healthPool = std::make_unique<HealthPool>(20);
+	killer->experienceReward = std::make_unique<ExperienceReward>(0);
+	ctx.playerOwner = &killer;
+
+	std::unique_ptr<Creature> creature = make_creature();
+	creature->healthPool = std::make_unique<HealthPool>(8);
+	creature->experienceReward = std::make_unique<ExperienceReward>(5);
+	creature->inventoryData.items.push_back(nullptr);
+
+	MonsterDeathHandler handler;
+	EXPECT_DEATH(handler.execute(*creature, ctx), "a pack holds nothing where an item should be");
 }
 
 // Fire and cold are resisted per die before they land, so a plain total of
