@@ -1,0 +1,47 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EncounterPlannerTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\treturn 0;\n\t}\n\n\tcase RoomType::STANDARD:\n",
+      "mutated": "\t\treturn 1;\n\t}\n\n\tcase RoomType::STANDARD:\n",
+      "catches": "an entrance worth spending on, so the player arrives into an ambush"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\treturn static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * DANGER_MULTIPLIER);\n",
+      "mutated": "\t\treturn static_cast<int>(dungeonLevel * BASE_XP_PER_LEVEL * STANDARD_MULTIPLIER);\n",
+      "catches": "a danger room worth no more than an ordinary one"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\t\tremaining -= candidate.xpCost;\n",
+      "mutated": "",
+      "catches": "the first pass spending nothing it takes, so a room fills past its budget"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\tif (static_cast<int>(selected.size()) >= cap)\n\t\t{\n\t\t\tbreak;\n\t\t}\n",
+      "mutated": "",
+      "catches": "the cap ignored while taking one of each kind"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\tif (candidate.xpCost <= remaining)\n\t\t{\n\t\t\tselected.push_back(candidate.key);\n",
+      "mutated": "\t\tif (true)\n\t\t{\n\t\t\tselected.push_back(candidate.key);\n",
+      "catches": "a kind taken without the money for it"
+    },
+    {
+      "file": "src/EncounterPlanner.cpp",
+      "original": "\t\tremaining -= pick.xpCost;\n",
+      "mutated": "",
+      "catches": "the fill pass spending nothing, so it buys until the cap whatever the purse"
+    }
+  ]
+}

@@ -25,12 +25,13 @@ namespace
 	constexpr float STANDARD_MULTIPLIER = 1.0f;
 	constexpr float DANGER_MULTIPLIER = 2.5f;
 	constexpr float TREASURE_MULTIPLIER = 1.5f;
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Budget calculation
 // ---------------------------------------------------------------------------
 
-int calculate_budget(RoomType type, int dungeonLevel)
+int encounter_budget(RoomType type, int dungeonLevel)
 {
 	switch (type)
 	{
@@ -108,10 +109,6 @@ std::vector<std::string> select_encounter(
 	{
 		const int idx = rng.roll(0, static_cast<int>(affordable.size()) - 1);
 		const MonsterCandidate& pick = *affordable[idx];
-		if (pick.xpCost > remaining)
-		{
-			break;
-		}
 		selected.push_back(pick.key);
 		remaining -= pick.xpCost;
 
@@ -130,12 +127,6 @@ std::vector<std::string> select_encounter(
 }
 
 // ---------------------------------------------------------------------------
-// Random walkable position inside room
-// ---------------------------------------------------------------------------
-
-} // namespace
-
-// ---------------------------------------------------------------------------
 // Public interface
 // ---------------------------------------------------------------------------
 
@@ -147,7 +138,7 @@ void plan_encounter(const DungeonRoom& room, GameContext& ctx)
 	assert(ctx.creatures);
 
 	const int dungeonLevel = ctx.levelManager->get_dungeon_level();
-	const int baseBudget = calculate_budget(room.type, dungeonLevel);
+	const int baseBudget = encounter_budget(room.type, dungeonLevel);
 	const int roll = ctx.dice->roll(60, 100);
 	const int budget = baseBudget * roll / 100;
 
