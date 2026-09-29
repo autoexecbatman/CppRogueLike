@@ -1,0 +1,23 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=EquipmentUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tremoved->remove_state(ActorState::IS_EQUIPPED);\n",
+      "mutated": "",
+      "catches": "an item packed away still claiming to be worn, which is what made Creature::drop carry a branch for it"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\tif (fitsInPack)\n",
+      "mutated": "\t\tif (false)\n",
+      "catches": "an item taken off never returning to the pack, so it is on neither the wearer nor the floor"
+    }
+  ]
+}

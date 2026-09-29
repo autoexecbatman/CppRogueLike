@@ -17,6 +17,88 @@
 #include "DecorEditor.h"
 #include "PrefabLibrary.h"
 
+namespace
+{
+// Resolves prefab name to index. Returns nullopt if not found.
+std::optional<size_t> find_prefab_index(
+	const std::vector<Prefab>& prefabs,
+	const std::string& name)
+{
+	for (size_t i = 0; i < prefabs.size(); ++i)
+	{
+		if (prefabs[i].name == name)
+		{
+			return i;
+		}
+	}
+	return std::nullopt;
+}
+
+void stamp_room(
+	const Prefab& p,
+	const DungeonRoom& room,
+	const std::unordered_map<char, TileRef>& symbolToTile,
+	DecorEditor& editor,
+	Map& map)
+{
+	// Prefab origin [0,0] = top-left wall corner of the room.
+	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
+	// aligns exactly with the room wall ring -- no centering offset needed.
+	const int baseX = room.left_wall();
+	const int baseY = room.top_wall();
+
+	for (size_t row = 0; row < p.rows.size(); ++row)
+	{
+		const std::string& rowStr = p.rows[row];
+		for (size_t col = 0; col < rowStr.size(); ++col)
+		{
+			char sym = rowStr[col];
+
+			const int worldX = baseX + static_cast<int>(col);
+			const int worldY = baseY + static_cast<int>(row);
+
+			// Clamp to floor area — border '#' characters sit in the wall ring
+			// and must never be processed as interior shape commands.
+			if (worldX < room.col || worldX > room.col_end())
+			{
+				continue;
+			}
+			if (worldY < room.row || worldY > room.row_end())
+			{
+				continue;
+			}
+			if (!map.is_in_bounds({ worldX, worldY }))
+			{
+				continue;
+			}
+
+			// Interior '#': wall this floor cell back to create room shape.
+			if (sym == '#')
+			{
+				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL, 0);
+				continue;
+			}
+
+			if (!symbolToTile.contains(sym))
+			{
+				continue;
+			}
+			const TileRef tile = symbolToTile.at(sym);
+			if (!tile.is_valid())
+			{
+				continue;
+			}
+			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
+			{
+				continue;
+			}
+
+			editor.place_tile(Vector2D{ worldX, worldY }, tile);
+		}
+	}
+}
+} // namespace
+
 using json = nlohmann::json;
 
 // ---------------------------------------------------------------------------
@@ -235,88 +317,6 @@ void PrefabLibrary::remove(const std::string& name)
 // ---------------------------------------------------------------------------
 // Apply to rooms
 // ---------------------------------------------------------------------------
-
-namespace
-{
-// Resolves prefab name to index. Returns nullopt if not found.
-std::optional<size_t> find_prefab_index(
-	const std::vector<Prefab>& prefabs,
-	const std::string& name)
-{
-	for (size_t i = 0; i < prefabs.size(); ++i)
-	{
-		if (prefabs[i].name == name)
-		{
-			return i;
-		}
-	}
-	return std::nullopt;
-}
-
-void stamp_room(
-	const Prefab& p,
-	const DungeonRoom& room,
-	const std::unordered_map<char, TileRef>& symbolToTile,
-	DecorEditor& editor,
-	Map& map)
-{
-	// Prefab origin [0,0] = top-left wall corner of the room.
-	// Room was sized to (p.width()-2) x (p.height()-2) so the '#' border
-	// aligns exactly with the room wall ring -- no centering offset needed.
-	const int baseX = room.left_wall();
-	const int baseY = room.top_wall();
-
-	for (size_t row = 0; row < p.rows.size(); ++row)
-	{
-		const std::string& rowStr = p.rows[row];
-		for (size_t col = 0; col < rowStr.size(); ++col)
-		{
-			char sym = rowStr[col];
-
-			const int worldX = baseX + static_cast<int>(col);
-			const int worldY = baseY + static_cast<int>(row);
-
-			// Clamp to floor area — border '#' characters sit in the wall ring
-			// and must never be processed as interior shape commands.
-			if (worldX < room.col || worldX > room.col_end())
-			{
-				continue;
-			}
-			if (worldY < room.row || worldY > room.row_end())
-			{
-				continue;
-			}
-			if (!map.is_in_bounds({ worldX, worldY }))
-			{
-				continue;
-			}
-
-			// Interior '#': wall this floor cell back to create room shape.
-			if (sym == '#')
-			{
-				map.set_tile(Vector2D{ worldX, worldY }, TileType::WALL, 0);
-				continue;
-			}
-
-			if (!symbolToTile.contains(sym))
-			{
-				continue;
-			}
-			const TileRef tile = symbolToTile.at(sym);
-			if (!tile.is_valid())
-			{
-				continue;
-			}
-			if (map.get_tile_type({ worldX, worldY }) != TileType::FLOOR)
-			{
-				continue;
-			}
-
-			editor.place_tile(Vector2D{ worldX, worldY }, tile);
-		}
-	}
-}
-} // namespace
 
 // Stamps decoration tiles from one room's assigned prefab into editor overrides.
 // Called from Map::create_room before spawn_water so water can see decoration positions.

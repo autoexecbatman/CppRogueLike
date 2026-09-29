@@ -26,13 +26,13 @@
       "catches": "no weapon ever made for an arm"
     },
     {
-      "file": "src/Player.cpp",
+      "file": "src/Creature.cpp",
       "original": "\tif (!can_draw(*this, *item))",
       "mutated": "\tif (false)",
       "catches": "any arm drawing a bow made for a stronger one"
     },
     {
-      "file": "src/Player.cpp",
+      "file": "src/Creature.cpp",
       "original": "\t\tctx.messageSystem->message(\n\t\t\tColorPairId::WHITE_BLACK,\n\t\t\tstd::format(\"You are not strong enough to draw the {}.\", item->actorData.name),\n\t\t\tMessageCompletion::FINISHED);\n",
       "mutated": "",
       "catches": "a silent refusal"

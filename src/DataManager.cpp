@@ -26,6 +26,36 @@
 
 namespace
 {
+// The row a score reads from an ability table ordered by score from 1. Past the end it
+// is the last row, the books capping every ability at 25; below 1, a score a creature
+// was never given, it is a row of no adjustment.
+//
+// Example, with the Dexterity table's 25 rows:
+//   row_for(dexterity, 17).DefensiveAdj;   // -> -3
+//   row_for(dexterity, 26).DefensiveAdj;   // -> -6, the 25 row
+//   row_for(dexterity, 0).DefensiveAdj;    // -> 0
+template <typename Row>
+Row row_for(const std::vector<Row>& table, int score)
+{
+	assert(!table.empty() && "an ability table read before it was loaded");
+
+	if (score < 1)
+	{
+		return Row{};
+	}
+	if (std::cmp_greater(score, table.size()))
+	{
+		return table.back();
+	}
+	return table.at(score - 1);
+}
+
+// Player's Handbook Table 3 grants more than +2 to warriors alone.
+constexpr int NON_WARRIOR_BONUS_CAP = 2;
+} // namespace
+
+namespace
+{
 // Search multiple paths for a JSON file
 std::string find_data_file(const std::string& filename)
 {
@@ -70,36 +100,6 @@ void DataManager::load_all_data(MessageSystem& message_system)
 
 	message_system.log("DataManager: All game data loaded successfully");
 }
-
-namespace
-{
-// The row a score reads from an ability table ordered by score from 1. Past the end it
-// is the last row, the books capping every ability at 25; below 1, a score a creature
-// was never given, it is a row of no adjustment.
-//
-// Example, with the Dexterity table's 25 rows:
-//   row_for(dexterity, 17).DefensiveAdj;   // -> -3
-//   row_for(dexterity, 26).DefensiveAdj;   // -> -6, the 25 row
-//   row_for(dexterity, 0).DefensiveAdj;    // -> 0
-template <typename Row>
-Row row_for(const std::vector<Row>& table, int score)
-{
-	assert(!table.empty() && "an ability table read before it was loaded");
-
-	if (score < 1)
-	{
-		return Row{};
-	}
-	if (std::cmp_greater(score, table.size()))
-	{
-		return table.back();
-	}
-	return table.at(score - 1);
-}
-
-// Player's Handbook Table 3 grants more than +2 to warriors alone.
-constexpr int NON_WARRIOR_BONUS_CAP = 2;
-} // namespace
 
 DexterityAttributes DataManager::dexterity_for(int score) const
 {

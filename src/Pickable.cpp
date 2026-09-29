@@ -111,7 +111,7 @@ void load_stat_boost(T& statBoost, const json& source)
 // Example:
 //   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, worn: Strength 19
 //   use_stat_boost(EquipmentSlot::GIRDLE, girdle, player, ctx);   // -> true, removed: Strength as before
-bool use_stat_boost(EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
+bool use_stat_boost(EquipmentSlot slot, Item& item, Creature& wearer, GameContext& ctx)
 {
 	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
 	if (!wearer.toggle_equipment(item.uniqueId, slot, ctx))
@@ -128,7 +128,7 @@ bool use_stat_boost(EquipmentSlot slot, Item& item, Player& wearer, GameContext&
 }
 
 // Shared use() for magical equipment (MagicalHelm, MagicalRing)
-bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Player& wearer, GameContext& ctx)
+bool use_magical_equip(MagicalEffect effect, EquipmentSlot slot, Item& item, Creature& wearer, GameContext& ctx)
 {
 	const bool wasEquipped = wearer.is_item_equipped(item.uniqueId);
 	EquipmentSlot targetSlot = slot;
@@ -188,7 +188,7 @@ bool Weapon::validate_dual_wield(const Item* mainHand, const Item* offHand) cons
 	return mainHand->is_weapon() && offHand->is_weapon();
 }
 
-EquipmentSlot Weapon::get_preferred_slot(const Player* player) const
+EquipmentSlot Weapon::get_preferred_slot(const Creature* wearer) const
 {
 	if (ranged)
 	{
@@ -200,8 +200,8 @@ EquipmentSlot Weapon::get_preferred_slot(const Player* player) const
 		return EquipmentSlot::RIGHT_HAND;
 	}
 
-	Item* mainHand = player->get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	Item* offHand = player->get_equipped_item(EquipmentSlot::LEFT_HAND);
+	Item* mainHand = wearer->get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	Item* offHand = wearer->get_equipped_item(EquipmentSlot::LEFT_HAND);
 
 	if (!mainHand || offHand)
 	{
@@ -280,7 +280,7 @@ bool can_draw(const Creature& wielder, const Item& weapon)
 	return wielder.get_strength() >= strength_rating_of(weapon);
 }
 
-bool use(Weapon& weapon, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Weapon& weapon, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	const EquipmentSlot preferred = weapon.get_preferred_slot(&wearer);
 	const bool success = wearer.toggle_weapon(owner.uniqueId, preferred, ctx);
@@ -492,7 +492,7 @@ bool use(CorpseFood& corpseFood, Item& owner, Creature& wearer, GameContext& ctx
 	return consume_item(owner, wearer);
 }
 
-bool use(Armor& armor, Item& item, Player& wearer, GameContext& ctx)
+bool use(Armor& armor, Item& item, Creature& wearer, GameContext& ctx)
 {
 	const bool was_equipped = wearer.is_item_equipped(item.uniqueId);
 	const bool success = wearer.toggle_armor(item.uniqueId, ctx);
@@ -509,32 +509,32 @@ bool use(Armor& armor, Item& item, Player& wearer, GameContext& ctx)
 	return success;
 }
 
-bool use(MagicalHelm& magicalHelm, Item& owner, Player& wearer, GameContext& ctx)
+bool use(MagicalHelm& magicalHelm, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_magical_equip(magicalHelm.effect, EquipmentSlot::HEAD, owner, wearer, ctx);
 }
 
-bool use(MagicalRing& magicalRing, Item& owner, Player& wearer, GameContext& ctx)
+bool use(MagicalRing& magicalRing, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_magical_equip(magicalRing.effect, EquipmentSlot::RIGHT_RING, owner, wearer, ctx);
 }
 
-bool use(JewelryAmulet& jewelryAmulet, Item& owner, Player& wearer, GameContext& ctx)
+bool use(JewelryAmulet& jewelryAmulet, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(EquipmentSlot::NECK, owner, wearer, ctx);
 }
 
-bool use(Gauntlets& gauntlets, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Gauntlets& gauntlets, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(EquipmentSlot::GAUNTLETS, owner, wearer, ctx);
 }
 
-bool use(Girdle& girdle, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Girdle& girdle, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return use_stat_boost(EquipmentSlot::GIRDLE, owner, wearer, ctx);
 }
 
-bool use(Shield& shield, Item& owner, Player& wearer, GameContext& ctx)
+bool use(Shield& shield, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	const bool success = wearer.toggle_shield(owner.uniqueId, ctx);
 	if (success)
@@ -607,7 +607,7 @@ bool use(DungeonKey& key, Item& owner, Creature& wearer, GameContext& ctx)
 
 // ========== Variant-level dispatchers ==========
 
-bool use_item(ItemBehavior& behavior, Item& owner, Player& wearer, GameContext& ctx)
+bool use_item(ItemBehavior& behavior, Item& owner, Creature& wearer, GameContext& ctx)
 {
 	return std::visit(
 		[&owner, &wearer, &ctx](auto& behavior) -> bool

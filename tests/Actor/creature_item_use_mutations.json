@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureEquipmentUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tconst int healed = wearer.heal(consumable.amount);\n",
+      "mutated": "\t\tconst int healed = wearer.heal(1);\n",
+      "catches": "a potion pouring one point instead of what it holds, which an is-it-greater assertion could not see"
+    },
+    {
+      "file": "src/Pickable.cpp",
+      "original": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\n\t}\n\n\treturn consume_item(owner, wearer);\n",
+      "mutated": "\t\tctx.messageSystem->message(ColorPairId::RED_BLACK, std::format(\"Nothing happens with the {}.\", owner.get_name()), MessageCompletion::FINISHED);\n\t\treturn false;\n\t}\n\n\t}\n\n\treturn true;\n",
+      "catches": "a draught drunk and still in the pack, so one potion heals forever"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tequippedItems.emplace_back(std::move(item), slot);\n",
+      "mutated": "\tequippedItems.emplace_back(std::move(item), EquipmentSlot::BODY);\n",
+      "catches": "an item put in whichever slot, not the one asked for"
+    }
+  ]
+}

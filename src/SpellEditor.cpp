@@ -14,6 +14,88 @@
 #include "SpellRegistry.h"
 #include "SpellEditor.h"
 
+namespace
+{
+
+std::string effect_type_name(SpellEffectType e)
+{
+	switch (e)
+	{
+	case SpellEffectType::CURE_LIGHT_WOUNDS:
+	{
+		return "Cure Light Wounds";
+	}
+	case SpellEffectType::BLESS:
+	{
+		return "Bless";
+	}
+	case SpellEffectType::SANCTUARY:
+	{
+		return "Sanctuary";
+	}
+	case SpellEffectType::HOLD_PERSON:
+	{
+		return "Hold Person";
+	}
+	case SpellEffectType::SILENCE:
+	{
+		return "Silence";
+	}
+	case SpellEffectType::MAGIC_MISSILE:
+	{
+		return "Magic Missile";
+	}
+	case SpellEffectType::SHIELD:
+	{
+		return "Shield";
+	}
+	case SpellEffectType::SLEEP:
+	{
+		return "Sleep";
+	}
+	case SpellEffectType::INVISIBILITY:
+	{
+		return "Invisibility";
+	}
+	case SpellEffectType::WEB:
+	{
+		return "Web";
+	}
+	case SpellEffectType::FIREBALL:
+	{
+		return "Fireball";
+	}
+	case SpellEffectType::TELEPORT:
+	{
+		return "Teleport";
+	}
+	default:
+	{
+		return "None";
+	}
+	}
+}
+
+SpellEffectType effect_type_next(SpellEffectType e)
+{
+	int v = static_cast<int>(e) + 1;
+	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
+	if (v > LAST)
+		v = 0;
+	return static_cast<SpellEffectType>(v);
+}
+
+SpellEffectType effect_type_prev(SpellEffectType e)
+{
+	int v = static_cast<int>(e) - 1;
+	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
+	if (v < 0)
+		v = LAST;
+	return static_cast<SpellEffectType>(v);
+}
+
+} // namespace
+
 constexpr int LIST_WIDTH = 220;
 constexpr int HEADER_HEIGHT = 48;
 constexpr int HINT_HEIGHT = 28;
@@ -500,57 +582,28 @@ FieldId SpellEditor::current_field() const
 	return static_cast<FieldId>(fieldCursor);
 }
 
-namespace
-{
-
-std::string effect_type_name(SpellEffectType e)
-{
-	switch (e)
-	{
-	case SpellEffectType::CURE_LIGHT_WOUNDS: return "Cure Light Wounds";
-	case SpellEffectType::BLESS:             return "Bless";
-	case SpellEffectType::SANCTUARY:         return "Sanctuary";
-	case SpellEffectType::HOLD_PERSON:       return "Hold Person";
-	case SpellEffectType::SILENCE:           return "Silence";
-	case SpellEffectType::MAGIC_MISSILE:     return "Magic Missile";
-	case SpellEffectType::SHIELD:            return "Shield";
-	case SpellEffectType::SLEEP:             return "Sleep";
-	case SpellEffectType::INVISIBILITY:      return "Invisibility";
-	case SpellEffectType::WEB:               return "Web";
-	case SpellEffectType::FIREBALL:          return "Fireball";
-	case SpellEffectType::TELEPORT:          return "Teleport";
-	default:                                 return "None";
-	}
-}
-
-SpellEffectType effect_type_next(SpellEffectType e)
-{
-	int v = static_cast<int>(e) + 1;
-	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (v > LAST) v = 0;
-	return static_cast<SpellEffectType>(v);
-}
-
-SpellEffectType effect_type_prev(SpellEffectType e)
-{
-	int v = static_cast<int>(e) - 1;
-	constexpr int LAST = static_cast<int>(SpellEffectType::NONE);
-	if (v < 0) v = LAST;
-	return static_cast<SpellEffectType>(v);
-}
-
-} // namespace
-
 std::string SpellEditor::field_label(FieldId f) const
 {
 	switch (f)
 	{
-	case FieldId::NAME:        return "Name";
-	case FieldId::LEVEL:       return "Level";
-	case FieldId::CLASS:       return "Class";
+	case FieldId::NAME:
+	{
+		return "Name";
+	}
+	case FieldId::LEVEL:
+	{
+		return "Level";
+	}
+	case FieldId::CLASS:
+	{
+		return "Class";
+	}
 	case FieldId::EFFECT_TYPE: return "Effect";
 	case FieldId::DESCRIPTION: return "Description";
-	default:                   return "???";
+	default:
+	{
+		return "???";
+	}
 	}
 }
 
@@ -558,15 +611,38 @@ std::string SpellEditor::field_value(FieldId f) const
 {
 	switch (f)
 	{
-	case FieldId::NAME:        return working.name;
-	case FieldId::LEVEL:       return std::format("{}", working.level);
+	case FieldId::NAME:
+	{
+		return working.name;
+	}
+	case FieldId::LEVEL:
+	{
+		return std::format("{}", working.level);
+	}
 	case FieldId::CLASS:
-		if (working.spellClass == SpellClass::CLERIC) return "cleric";
-		if (working.spellClass == SpellClass::WIZARD) return "wizard";
+	{
+		if (working.spellClass == SpellClass::CLERIC)
+		{
+			return "cleric";
+		}
+		if (working.spellClass == SpellClass::WIZARD)
+		{
+			return "wizard";
+		}
 		return "both";
-	case FieldId::EFFECT_TYPE: return effect_type_name(working.effect_type);
-	case FieldId::DESCRIPTION: return working.description;
-	default:                   return "";
+	}
+	case FieldId::EFFECT_TYPE:
+	{
+		return effect_type_name(working.effect_type);
+	}
+	case FieldId::DESCRIPTION:
+	{
+		return working.description;
+	}
+	default:
+	{
+		return "";
+	}
 	}
 }
 

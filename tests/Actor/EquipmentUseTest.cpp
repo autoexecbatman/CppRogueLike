@@ -17,6 +17,8 @@
 #include <string_view>
 
 #include "src/Actor.h"
+#include <algorithm>
+
 #include "src/ArmorClass.h"
 #include "src/EquipmentSlot.h"
 #include "src/ExperienceReward.h"
@@ -62,6 +64,27 @@ protected:
 		return *carried;
 	}
 
+	// Puts an item from the data on through the inventory screen's path.
+	Item& wear(std::string_view key, EquipmentSlot slot)
+	{
+		auto item = ItemCreator::create(key, player->position, ctx);
+		Item* carried = item.get();
+		[[maybe_unused]] const auto added = InventoryOperations::add_item_to_inventory(player->inventoryData, std::move(item), *player, *ctx.dataManager);
+		use_item(*carried->behavior, *carried, *player, ctx);
+		EXPECT_EQ(player->get_equipped_item(slot), carried) << key << " was not put on";
+		return *carried;
+	}
+
+	// Whether the pack holds this item, and whether it still says it is worn.
+	bool pack_holds(const Item& item) const
+	{
+		auto is_the_item = [&item](const std::unique_ptr<Item>& packed)
+		{
+			return packed.get() == &item;
+		};
+		return std::ranges::any_of(player->inventoryData.items, is_the_item);
+	}
+
 	// Uses a worn cursed item again and checks that nothing happened.
 	void expect_nothing_happens(Item& item, EquipmentSlot slot)
 	{
@@ -101,4 +124,20 @@ TEST_F(EquipmentUseTest, ACursedShieldThatWillNotComeOffCostsNothing)
 	Item& shield = wear_cursed("small_shield", EquipmentSlot::LEFT_HAND);
 
 	expect_nothing_happens(shield, EquipmentSlot::LEFT_HAND);
+}
+
+// An item taken off goes back to the pack without its equipped mark. Creature::drop
+// searches the pack alone and trusts that, so a mark left behind would make a
+// dropped item claim to be worn.
+TEST_F(EquipmentUseTest, AnItemTakenOffLeavesItsMarkBehind)
+{
+	Item& armor = wear("leather_armor", EquipmentSlot::BODY);
+
+	ASSERT_TRUE(armor.has_state(ActorState::IS_EQUIPPED)) << "it was not worn to begin with";
+	ASSERT_FALSE(pack_holds(armor)) << "a worn item is owned by its slot, not by the pack";
+
+	ASSERT_TRUE(player->unequip_item(EquipmentSlot::BODY, ctx));
+
+	EXPECT_TRUE(pack_holds(armor)) << "it did not come back to the pack";
+	EXPECT_FALSE(armor.has_state(ActorState::IS_EQUIPPED)) << "a packed item still claims to be worn";
 }

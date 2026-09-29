@@ -110,17 +110,8 @@ public:
 	[[nodiscard]] HideAttempt attempt_hide(GameContext& ctx);
 
 	// Equipment system methods
-	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
-	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
-	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
-	bool is_dual_wielding() const noexcept;
 
 	// Equipment system - unique ID based methods
-	bool toggle_armor(uint64_t itemUniqueId, GameContext& ctx);
-	bool is_item_equipped(uint64_t itemUniqueId) const noexcept;
-	bool toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx);
-	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx);
-	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx);
 
 	bool is_player() const noexcept override { return true; }
 

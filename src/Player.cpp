@@ -17,7 +17,6 @@
 #include "Pickable.h"
 #include "Ai.h"
 #include "Colors.h"
-#include "WeaponDamageRegistry.h"
 #include "GameContext.h"
 #include "CombatProgressionTables.h"
 #include "GameBalance.h"
@@ -42,6 +41,7 @@
 #include "SpellSystem.h"
 #include "Vector2D.h"
 #include "Player.h"
+#include "WeaponDamageRegistry.h"
 
 // XP table helpers — pure functions, no state
 namespace
@@ -91,18 +91,6 @@ constexpr int calculate_wizard_xp(int level) noexcept
 	return calculate_xp_for_level(level, wizard_xp, 125000);
 }
 } // namespace (xp helpers)
-
-// Equipment comparison predicates for DRY compliance
-namespace
-{
-constexpr auto matches_unique_id = [](uint64_t uniqueId)
-{
-	return [uniqueId](const EquippedItem& equipped)
-	{
-		return equipped.item->uniqueId == uniqueId;
-	};
-};
-} // namespace
 
 Player::Player(Vector2D position)
 	: Creature(position, ActorData{ TileRef{}, "Player", ColorPairId::WHITE_BLACK })
@@ -712,263 +700,6 @@ Player::HideAttempt Player::attempt_hide(GameContext& ctx)
 	return HideAttempt::ATTEMPTED;
 }
 
-// Clean Weapon Equipment System using Unique IDs
-bool Player::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
-{
-	// Check if weapon is already equipped
-	if (is_item_equipped(itemUniqueId))
-	{
-		// Find which slot and unequip
-		for (auto slot : { EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON })
-		{
-			Item* equipped = get_equipped_item(slot);
-			if (equipped && equipped->uniqueId == itemUniqueId)
-			{
-				return unequip_item(slot, ctx);
-			}
-		}
-	}
-	else
-	{
-		// Find item in inventory and equip it
-		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, itemUniqueId);
-		if (itemToEquip)
-		{
-			// Remove item from inventory
-			auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
-			if (result.has_value())
-			{
-				auto itemToEquip = std::move(*result);
-
-				// Determine appropriate slot based on item classification
-				EquipmentSlot target_slot;
-
-				if (ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass))
-				{
-					target_slot = EquipmentSlot::MISSILE_WEAPON;
-				}
-				else
-				{
-					target_slot = preferredSlot;
-				}
-
-				return equip_item(std::move(itemToEquip), target_slot, ctx);
-			}
-		}
-	}
-	return false;
-}
-
-bool Player::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
-{
-	// Shields always go in LEFT_HAND slot
-	if (is_item_equipped(itemUniqueId))
-	{
-		return unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-	}
-	else
-	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
-		if (result.has_value())
-		{
-			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
-		}
-		return false;
-	}
-}
-
-bool Player::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
-{
-	// Check if item is already equipped
-	if (is_item_equipped(itemUniqueId))
-	{
-		// Unequip the item
-		return unequip_item(slot, ctx);
-	}
-	else
-	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
-		if (result.has_value())
-		{
-			return equip_item(std::move(*result), slot, ctx);
-		}
-		return false;
-	}
-}
-
-bool Player::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx)
-{
-	if (!item)
-	{
-		if (ctx.messageSystem->is_debug_mode())
-			ctx.messageSystem->log("DEBUG: equip_item failed - null item");
-		return false;
-	}
-
-	if (!can_equip(*item, slot))
-	{
-		if (ctx.messageSystem->is_debug_mode())
-		{
-			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->actorData.name);
-			ctx.messageSystem->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
-			ctx.messageSystem->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
-			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
-			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
-		}
-		// Return item to inventory since we can't equip it
-		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
-		assert(pickUpItemResult.has_value());
-		return false;
-	}
-
-	// A weapon made for a stronger arm cannot be drawn by this one: the first Baldur's
-	// Gate's composite bow "Requires: 18 Strength".
-	if (!can_draw(*this, *item))
-	{
-		ctx.messageSystem->message(
-			ColorPairId::WHITE_BLACK,
-			std::format("You are not strong enough to draw the {}.", item->actorData.name),
-			MessageCompletion::FINISHED);
-		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
-		assert(returnedToPack.has_value());
-		return false;
-	}
-
-	// Unequip existing item in the slot first
-	unequip_item(slot, ctx);
-
-	// Special handling for two-handed weapons - use ItemClass system
-	if (slot == EquipmentSlot::RIGHT_HAND)
-	{
-		if (item->is_two_handed_weapon())
-		{
-			// Two-handed weapon - also unequip left hand
-			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->actorData.name + " with both hands.", MessageCompletion::FINISHED);
-		}
-	}
-
-	// Add equipped item
-	equippedItems.emplace_back(std::move(item), slot);
-
-	// Mark item as equipped
-	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
-
-	// Log weapon equip
-	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
-	{
-		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemKey);
-		ctx.messageSystem->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
-	}
-
-	// Update armor class if armor or shield was equipped
-	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
-	{
-		update_armor_class(ctx);
-		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
-	}
-
-	return true;
-}
-
-bool Player::unequip_item(EquipmentSlot slot, GameContext& ctx)
-{
-	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
-	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
-
-	if (it != equippedItems.end())
-	{
-		// AD&D 2e PHB p.230: cursed items are magically bound to the wearer.
-		// Only a Remove Curse spell breaks the bond.
-		if (it->item->get_enhancement().blessing == BlessingStatus::CURSED)
-		{
-			ctx.messageSystem->message(
-				ColorPairId::RED_BLACK,
-				std::format("The {} is cursed and cannot be removed!", it->item->actorData.name),
-				MessageCompletion::FINISHED);
-			return false;
-		}
-
-		// Out of the slot list before anything reads it again: the pack's weight check reads
-		// Strength, which counts every worn item.
-		std::unique_ptr<Item> removed = std::move(it->item);
-		equippedItems.erase(it);
-
-		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
-		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
-		// nowhere at all to put it, it stays on. An item that comes off is never lost.
-		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
-		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("There is nowhere to put the {}, so you keep it on.", removed->actorData.name),
-				MessageCompletion::FINISHED);
-			equippedItems.emplace_back(std::move(removed), slot);
-			return false;
-		}
-
-		removed->remove_state(ActorState::IS_EQUIPPED);
-		if (fitsInPack)
-		{
-			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
-			assert(packed.has_value());
-		}
-		else
-		{
-			ctx.messageSystem->message(
-				ColorPairId::WHITE_BLACK,
-				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
-				MessageCompletion::FINISHED);
-			removed->position = position;
-			[[maybe_unused]] const auto setDown = InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
-			assert(setDown.has_value());
-		}
-
-		// Update armor class if armor or shield was unequipped
-		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
-		{
-			update_armor_class(ctx);
-			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
-		}
-
-		return true;
-	}
-
-	return false;
-}
-
-bool Player::is_slot_occupied(EquipmentSlot slot) const noexcept
-{
-	return get_equipped_item(slot) != nullptr;
-}
-
-bool Player::is_dual_wielding() const noexcept
-{
-	// Check if both hands have weapons equipped
-	auto rightHand = get_equipped_item(EquipmentSlot::RIGHT_HAND);
-	auto leftHand = get_equipped_item(EquipmentSlot::LEFT_HAND);
-
-	if (!rightHand || !leftHand)
-	{
-		return false;
-	}
-
-	// Check if left hand item is a weapon (not a shield) - use ItemClass system
-	if (leftHand->is_shield())
-	{
-		return false; // Shield, not dual wielding
-	}
-
-	// Check if left hand item is a weapon
-	if (leftHand->is_weapon())
-	{
-		return true; // Both hands have weapons
-	}
-
-	return false;
-}
-
 std::string Player::get_equipped_weapon_damage_roll() const noexcept
 {
 	auto rightHandWeapon = get_equipped_item(EquipmentSlot::RIGHT_HAND);
@@ -1021,31 +752,6 @@ Player::DualWieldInfo Player::get_dual_wield_info() const noexcept
 	}
 
 	return info;
-}
-
-// Clean Equipment System using Unique IDs
-bool Player::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
-{
-	// Check if item is already equipped
-	if (is_item_equipped(itemUniqueId))
-	{
-		// Unequip the armor
-		return unequip_item(EquipmentSlot::BODY, ctx);
-	}
-	else
-	{
-		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
-		if (result.has_value())
-		{
-			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
-		}
-		return false;
-	}
-}
-
-bool Player::is_item_equipped(uint64_t itemUniqueId) const noexcept
-{
-	return std::ranges::any_of(equippedItems, matches_unique_id(itemUniqueId));
 }
 
 void Player::save(json& j)

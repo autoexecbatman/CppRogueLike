@@ -36,8 +36,152 @@
 #include "InventoryData.h"
 #include "Item.h"
 #include "Creature.h"
+#include "WeaponDamageRegistry.h"
 #include "Player.h"
 #include "Pickable.h"
+
+// Puts an item into a slot this creature's body provides.
+//
+// Example:
+//   orc.wear(ItemCreator::create("long_sword", pos, ctx), EquipmentSlot::RIGHT_HAND);
+//   orc.get_attack_name(); // -> "long sword"
+// Equipment comparison predicates for DRY compliance
+namespace
+{
+constexpr auto matches_unique_id = [](uint64_t uniqueId)
+{
+	return [uniqueId](const EquippedItem& equipped)
+	{
+		return equipped.item->uniqueId == uniqueId;
+	};
+};
+} // namespace
+
+namespace
+{
+// A behaviour that names a magical effect. Consumable carries an `effect` of its own
+// kind, so the type is part of the test rather than the member name alone.
+template <typename Behavior>
+concept GrantsMagicalEffect = requires(const Behavior& behavior) {
+	{ behavior.effect } -> std::same_as<const MagicalEffect&>;
+};
+} // namespace
+
+namespace
+{
+// What one worn item does to one ability: a value it sets the score to, an amount it
+// adds, or neither. Ability-raising gauntlets, girdles and amulets set or add as their
+// data says; a worn item's Strength or Dexterity enhancement adds.
+//
+// Example, for Strength:
+//   worn_ability_effect(girdleOfHillGiantStrength, BuffType::STRENGTH);   // -> { 19, 0 }
+//   worn_ability_effect(swimmingGauntlets, BuffType::STRENGTH);           // -> { 0, 2 }
+//   worn_ability_effect(longSword, BuffType::STRENGTH);                   // -> { 0, 0 }
+struct WornAbilityEffect
+{
+	int setTo{ 0 };
+	int add{ 0 };
+};
+
+WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexcept
+{
+	WornAbilityEffect effect{};
+
+	// An enhancement's bonus adds; only Strength and Dexterity have ever applied.
+	if (ability == BuffType::STRENGTH)
+	{
+		effect.add += item.get_enhancement().strengthBonus;
+	}
+	if (ability == BuffType::DEXTERITY)
+	{
+		effect.add += item.get_enhancement().dexterityBonus;
+	}
+
+	if (!item.behavior)
+	{
+		return effect;
+	}
+
+	auto from_stat_boost = [ability, &effect](const auto& boost)
+	{
+		using T = std::decay_t<decltype(boost)>;
+		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
+		{
+			int amount = 0;
+			switch (ability)
+			{
+			case BuffType::STRENGTH:
+			{
+				amount = boost.strBonus;
+				break;
+			}
+			case BuffType::DEXTERITY:
+			{
+				amount = boost.dexBonus;
+				break;
+			}
+			case BuffType::CONSTITUTION:
+			{
+				amount = boost.conBonus;
+				break;
+			}
+			case BuffType::INTELLIGENCE:
+			{
+				amount = boost.intBonus;
+				break;
+			}
+			case BuffType::WISDOM:
+			{
+				amount = boost.wisBonus;
+				break;
+			}
+			case BuffType::CHARISMA:
+			{
+				amount = boost.chaBonus;
+				break;
+			}
+			default:
+			{
+				break;
+			}
+			}
+
+			if (boost.isSetMode)
+			{
+				effect.setTo = amount;
+			}
+			else
+			{
+				effect.add += amount;
+			}
+		}
+	};
+	std::visit(from_stat_boost, *item.behavior);
+	return effect;
+}
+
+// Whether the item is a girdle of giant strength, which is the girdle that sets Strength.
+//
+// Example:
+//   is_giant_strength_girdle(girdleOfHillGiantStrength); // -> true
+//   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
+bool is_giant_strength_girdle(const Item& item) noexcept
+{
+	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
+	return girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;
+}
+
+// The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
+//
+// Example:
+//   strength_setting_gauntlets(gauntletsOfOgrePower); // -> their Gauntlets
+//   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing); // -> nullptr, they add
+const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
+{
+	const Gauntlets* gauntlets = item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
+	return gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;
+}
+} // namespace
 
 //==Creature==
 void Creature::load(const json& j)
@@ -616,11 +760,6 @@ bool Creature::has_slot(EquipmentSlot slot) const noexcept
 	return std::ranges::find(bodyPlan, slot) != bodyPlan.end();
 }
 
-// Puts an item into a slot this creature's body provides.
-//
-// Example:
-//   orc.wear(ItemCreator::create("long_sword", pos, ctx), EquipmentSlot::RIGHT_HAND);
-//   orc.get_attack_name(); // -> "long sword"
 void Creature::wear(std::unique_ptr<Item> item, EquipmentSlot slot)
 {
 	assert(item && "Creature::wear called with no item");
@@ -811,7 +950,6 @@ bool Creature::can_equip(const Item& item, EquipmentSlot slot) const noexcept
 	return true;
 }
 
-
 bool Creature::has_ranged_weapon() const noexcept
 {
 	const Item* missile = get_equipped_item(EquipmentSlot::MISSILE_WEAPON);
@@ -824,16 +962,6 @@ Item* Creature::get_equipped_item(EquipmentSlot slot) const noexcept
 
 	return (worn != equippedItems.end()) ? worn->item.get() : nullptr;
 }
-
-namespace
-{
-// A behaviour that names a magical effect. Consumable carries an `effect` of its own
-// kind, so the type is part of the test rather than the member name alone.
-template <typename Behavior>
-concept GrantsMagicalEffect = requires(const Behavior& behavior) {
-	{ behavior.effect } -> std::same_as<const MagicalEffect&>;
-};
-} // namespace
 
 // Any worn item whose behaviour names an effect answers here, so an effect moves
 // between slots - a ring, a helm, a pair of gauntlets - without this changing.
@@ -944,22 +1072,6 @@ void Creature::apply_confusion(int nbTurns)
 	ai = std::make_unique<AiMonsterConfused>(nbTurns, std::move(ai));
 }
 
-void Creature::unequip(Item& item, GameContext& ctx)
-{
-	// Check if the item is actually equipped
-	if (item.has_state(ActorState::IS_EQUIPPED))
-	{
-		// Remove the equipped state
-		item.remove_state(ActorState::IS_EQUIPPED);
-
-		// Unequipping a weapon leaves the creature striking with its body
-		if (item.is_weapon())
-		{
-			ctx.messageSystem->log("Unequipped weapon - now unarmed");
-		}
-	}
-}
-
 void Creature::drop(Item& item, GameContext& ctx)
 {
 	[[maybe_unused]] auto is_null = [](const auto& invItem) { return !invItem; };
@@ -976,16 +1088,285 @@ void Creature::drop(Item& item, GameContext& ctx)
 	auto& foundPtr = matches.front();
 	foundPtr->position = position;
 
-	if (foundPtr->has_state(ActorState::IS_EQUIPPED))
-	{
-		unequip(*foundPtr, ctx);
-	}
-
 	auto addResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
 	if (addResult.has_value())
 	{
 		InventoryOperations::optimize_inventory_storage(inventoryData);
 		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You dropped the item.", MessageCompletion::FINISHED);
+	}
+}
+
+bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx)
+{
+	if (!item)
+	{
+		if (ctx.messageSystem->is_debug_mode())
+			ctx.messageSystem->log("DEBUG: equip_item failed - null item");
+		return false;
+	}
+
+	if (!can_equip(*item, slot))
+	{
+		if (ctx.messageSystem->is_debug_mode())
+		{
+			ctx.messageSystem->log("DEBUG: can_equip failed for " + item->actorData.name);
+			ctx.messageSystem->log("DEBUG: Item class: " + std::to_string(static_cast<int>(item->itemClass)));
+			ctx.messageSystem->log("DEBUG: Is armor: " + std::string(item->is_armor() ? "true" : "false"));
+			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
+			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
+		}
+		// Return item to inventory since we can't equip it
+		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
+		assert(pickUpItemResult.has_value());
+		return false;
+	}
+
+	// A weapon made for a stronger arm cannot be drawn by this one: the first Baldur's
+	// Gate's composite bow "Requires: 18 Strength".
+	if (!can_draw(*this, *item))
+	{
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			std::format("You are not strong enough to draw the {}.", item->actorData.name),
+			MessageCompletion::FINISHED);
+		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
+		assert(returnedToPack.has_value());
+		return false;
+	}
+
+	// Unequip existing item in the slot first
+	unequip_item(slot, ctx);
+
+	// Special handling for two-handed weapons - use ItemClass system
+	if (slot == EquipmentSlot::RIGHT_HAND)
+	{
+		if (item->is_two_handed_weapon())
+		{
+			// Two-handed weapon - also unequip left hand
+			unequip_item(EquipmentSlot::LEFT_HAND, ctx);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "You grip the " + item->actorData.name + " with both hands.", MessageCompletion::FINISHED);
+		}
+	}
+
+	// Add equipped item
+	equippedItems.emplace_back(std::move(item), slot);
+
+	// Mark item as equipped
+	equippedItems.back().item->add_state(ActorState::IS_EQUIPPED);
+
+	// Log weapon equip
+	if (slot == EquipmentSlot::RIGHT_HAND && equippedItems.back().item->is_weapon())
+	{
+		std::string weaponDamage = WeaponDamageRegistry::get_damage_roll(equippedItems.back().item->itemKey);
+		ctx.messageSystem->log("Equipped " + equippedItems.back().item->actorData.name + " - damage: " + weaponDamage);
+	}
+
+	// Update armor class if armor or shield was equipped
+	if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
+	{
+		update_armor_class(ctx);
+		ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
+	}
+
+	return true;
+}
+bool Creature::unequip_item(EquipmentSlot slot, GameContext& ctx)
+{
+	// erase after move requires iterator; find_if + erase is the correct C++23 pattern here
+	auto it = std::ranges::find_if(equippedItems, matches_slot(slot));
+
+	if (it != equippedItems.end())
+	{
+		// AD&D 2e PHB p.230: cursed items are magically bound to the wearer.
+		// Only a Remove Curse spell breaks the bond.
+		if (it->item->get_enhancement().blessing == BlessingStatus::CURSED)
+		{
+			ctx.messageSystem->message(
+				ColorPairId::RED_BLACK,
+				std::format("The {} is cursed and cannot be removed!", it->item->actorData.name),
+				MessageCompletion::FINISHED);
+			return false;
+		}
+
+		// Out of the slot list before anything reads it again: the pack's weight check reads
+		// Strength, which counts every worn item.
+		std::unique_ptr<Item> removed = std::move(it->item);
+		equippedItems.erase(it);
+
+		// The pack takes it if it can. A full pack, or one too heavy now - taking off a
+		// Strength item lowers what can be carried - leaves it at the wearer's feet; with
+		// nowhere at all to put it, it stays on. An item that comes off is never lost.
+		const bool fitsInPack = !InventoryOperations::is_inventory_full(inventoryData) && InventoryOperations::is_within_weight_limit(*removed, *this, *ctx.dataManager);
+		if (!fitsInPack && InventoryOperations::is_inventory_full(*ctx.floorInventory))
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format("There is nowhere to put the {}, so you keep it on.", removed->actorData.name),
+				MessageCompletion::FINISHED);
+			equippedItems.emplace_back(std::move(removed), slot);
+			return false;
+		}
+
+		removed->remove_state(ActorState::IS_EQUIPPED);
+		if (fitsInPack)
+		{
+			[[maybe_unused]] const auto packed = InventoryOperations::add_item_to_inventory(inventoryData, std::move(removed), *this, *ctx.dataManager);
+			assert(packed.has_value());
+		}
+		else
+		{
+			ctx.messageSystem->message(
+				ColorPairId::WHITE_BLACK,
+				std::format("You cannot carry the {} as well, and set it down.", removed->actorData.name),
+				MessageCompletion::FINISHED);
+			removed->position = position;
+			[[maybe_unused]] const auto setDown = InventoryOperations::add_item(*ctx.floorInventory, std::move(removed));
+			assert(setDown.has_value());
+		}
+
+		// Update armor class if armor or shield was unequipped
+		if (slot == EquipmentSlot::BODY || slot == EquipmentSlot::LEFT_HAND)
+		{
+			update_armor_class(ctx);
+			ctx.messageSystem->message(ColorPairId::WHITE_BLACK, "Your armor class is now " + std::to_string(get_armor_class()) + ".", MessageCompletion::FINISHED);
+		}
+
+		return true;
+	}
+
+	return false;
+}
+bool Creature::is_slot_occupied(EquipmentSlot slot) const noexcept
+{
+	return get_equipped_item(slot) != nullptr;
+}
+bool Creature::is_item_equipped(uint64_t itemUniqueId) const noexcept
+{
+	return std::ranges::any_of(equippedItems, matches_unique_id(itemUniqueId));
+}
+bool Creature::is_dual_wielding() const noexcept
+{
+	// Check if both hands have weapons equipped
+	auto rightHand = get_equipped_item(EquipmentSlot::RIGHT_HAND);
+	auto leftHand = get_equipped_item(EquipmentSlot::LEFT_HAND);
+
+	if (!rightHand || !leftHand)
+	{
+		return false;
+	}
+
+	// Check if left hand item is a weapon (not a shield) - use ItemClass system
+	if (leftHand->is_shield())
+	{
+		return false; // Shield, not dual wielding
+	}
+
+	// Check if left hand item is a weapon
+	if (leftHand->is_weapon())
+	{
+		return true; // Both hands have weapons
+	}
+
+	return false;
+}
+// Clean Equipment System using Unique IDs
+bool Creature::toggle_armor(uint64_t itemUniqueId, GameContext& ctx)
+{
+	// Check if item is already equipped
+	if (is_item_equipped(itemUniqueId))
+	{
+		// Unequip the armor
+		return unequip_item(EquipmentSlot::BODY, ctx);
+	}
+	else
+	{
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		if (result.has_value())
+		{
+			return equip_item(std::move(*result), EquipmentSlot::BODY, ctx);
+		}
+		return false;
+	}
+}
+bool Creature::toggle_shield(uint64_t itemUniqueId, GameContext& ctx)
+{
+	// Shields always go in LEFT_HAND slot
+	if (is_item_equipped(itemUniqueId))
+	{
+		return unequip_item(EquipmentSlot::LEFT_HAND, ctx);
+	}
+	else
+	{
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		if (result.has_value())
+		{
+			return equip_item(std::move(*result), EquipmentSlot::LEFT_HAND, ctx);
+		}
+		return false;
+	}
+}
+// Clean Weapon Equipment System using Unique IDs
+bool Creature::toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx)
+{
+	// Check if weapon is already equipped
+	if (is_item_equipped(itemUniqueId))
+	{
+		// Find which slot and unequip
+		for (auto slot : { EquipmentSlot::RIGHT_HAND, EquipmentSlot::LEFT_HAND, EquipmentSlot::MISSILE_WEAPON })
+		{
+			Item* equipped = get_equipped_item(slot);
+			if (equipped && equipped->uniqueId == itemUniqueId)
+			{
+				return unequip_item(slot, ctx);
+			}
+		}
+	}
+	else
+	{
+		// Find item in inventory and equip it
+		Item* itemToEquip = InventoryOperations::find_item_by_id(inventoryData, itemUniqueId);
+		if (itemToEquip)
+		{
+			// Remove item from inventory
+			auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+			if (result.has_value())
+			{
+				auto itemToEquip = std::move(*result);
+
+				// Determine appropriate slot based on item classification
+				EquipmentSlot target_slot;
+
+				if (ItemClassificationUtils::is_ranged_weapon(itemToEquip->itemClass))
+				{
+					target_slot = EquipmentSlot::MISSILE_WEAPON;
+				}
+				else
+				{
+					target_slot = preferredSlot;
+				}
+
+				return equip_item(std::move(itemToEquip), target_slot, ctx);
+			}
+		}
+	}
+	return false;
+}
+bool Creature::toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx)
+{
+	// Check if item is already equipped
+	if (is_item_equipped(itemUniqueId))
+	{
+		// Unequip the item
+		return unequip_item(slot, ctx);
+	}
+	else
+	{
+		auto result = InventoryOperations::remove_item_by_id(inventoryData, itemUniqueId);
+		if (result.has_value())
+		{
+			return equip_item(std::move(*result), slot, ctx);
+		}
+		return false;
 	}
 }
 
@@ -1045,122 +1426,6 @@ void Creature::die(GameContext& ctx)
 	[[maybe_unused]] const auto placeCorpseResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(corpse));
 	assert(placeCorpseResult.has_value());
 }
-
-namespace
-{
-// What one worn item does to one ability: a value it sets the score to, an amount it
-// adds, or neither. Ability-raising gauntlets, girdles and amulets set or add as their
-// data says; a worn item's Strength or Dexterity enhancement adds.
-//
-// Example, for Strength:
-//   worn_ability_effect(girdleOfHillGiantStrength, BuffType::STRENGTH);   // -> { 19, 0 }
-//   worn_ability_effect(swimmingGauntlets, BuffType::STRENGTH);           // -> { 0, 2 }
-//   worn_ability_effect(longSword, BuffType::STRENGTH);                   // -> { 0, 0 }
-struct WornAbilityEffect
-{
-	int setTo{ 0 };
-	int add{ 0 };
-};
-
-WornAbilityEffect worn_ability_effect(const Item& item, BuffType ability) noexcept
-{
-	WornAbilityEffect effect{};
-
-	// An enhancement's bonus adds; only Strength and Dexterity have ever applied.
-	if (ability == BuffType::STRENGTH)
-	{
-		effect.add += item.get_enhancement().strengthBonus;
-	}
-	if (ability == BuffType::DEXTERITY)
-	{
-		effect.add += item.get_enhancement().dexterityBonus;
-	}
-
-	if (!item.behavior)
-	{
-		return effect;
-	}
-
-	auto from_stat_boost = [ability, &effect](const auto& boost)
-	{
-		using T = std::decay_t<decltype(boost)>;
-		if constexpr (std::is_same_v<T, JewelryAmulet> || std::is_same_v<T, Gauntlets> || std::is_same_v<T, Girdle>)
-		{
-			int amount = 0;
-			switch (ability)
-			{
-			case BuffType::STRENGTH:
-			{
-				amount = boost.strBonus;
-				break;
-			}
-			case BuffType::DEXTERITY:
-			{
-				amount = boost.dexBonus;
-				break;
-			}
-			case BuffType::CONSTITUTION:
-			{
-				amount = boost.conBonus;
-				break;
-			}
-			case BuffType::INTELLIGENCE:
-			{
-				amount = boost.intBonus;
-				break;
-			}
-			case BuffType::WISDOM:
-			{
-				amount = boost.wisBonus;
-				break;
-			}
-			case BuffType::CHARISMA:
-			{
-				amount = boost.chaBonus;
-				break;
-			}
-			default:
-			{
-				break;
-			}
-			}
-
-			if (boost.isSetMode)
-			{
-				effect.setTo = amount;
-			}
-			else
-			{
-				effect.add += amount;
-			}
-		}
-	};
-	std::visit(from_stat_boost, *item.behavior);
-	return effect;
-}
-
-// Whether the item is a girdle of giant strength, which is the girdle that sets Strength.
-//
-// Example:
-//   is_giant_strength_girdle(girdleOfHillGiantStrength); // -> true
-//   is_giant_strength_girdle(gauntletsOfOgrePower); // -> false, gauntlets
-bool is_giant_strength_girdle(const Item& item) noexcept
-{
-	const Girdle* girdle = item.behavior ? std::get_if<Girdle>(&*item.behavior) : nullptr;
-	return girdle != nullptr && girdle->isSetMode && girdle->strBonus > 0;
-}
-
-// The item's gauntlets if they set Strength, as gauntlets of ogre power do, or null.
-//
-// Example:
-//   strength_setting_gauntlets(gauntletsOfOgrePower); // -> their Gauntlets
-//   strength_setting_gauntlets(gauntletsOfSwimmingAndClimbing); // -> nullptr, they add
-const Gauntlets* strength_setting_gauntlets(const Item& item) noexcept
-{
-	const Gauntlets* gauntlets = item.behavior ? std::get_if<Gauntlets>(&*item.behavior) : nullptr;
-	return gauntlets != nullptr && gauntlets->isSetMode && gauntlets->strBonus > 0 ? gauntlets : nullptr;
-}
-} // namespace
 
 int Creature::get_exceptional_strength() const noexcept
 {

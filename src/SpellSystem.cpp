@@ -37,6 +37,34 @@
 
 namespace
 {
+void animate_heal(const Vector2D& pos, GameContext& ctx)
+{
+	if (!ctx.animSystem)
+	{
+		return;
+	}
+
+	ctx.animSystem->spawn_effect(
+		pos,
+		ctx.tileConfig->get("TILE_EFFECT_HEAL"),
+		60,
+		220,
+		60,
+		0.5f);
+}
+} // namespace
+
+namespace
+{
+// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
+int calculate_num_missiles(int casterLevel)
+{
+	return std::min(5, 1 + (casterLevel - 1) / 2);
+}
+} // namespace
+
+namespace
+{
 // Helper to convert PlayerClassState to CasterClass
 CasterClass to_caster_class(Player::PlayerClassState state)
 {
@@ -245,8 +273,9 @@ void SpellSystem::dispatch_effect(
 	}
 
 	default:
+	{
 		break;
-
+	}
 	}
 
 	// Instant spells: cast synchronously, call onSuccess if successful
@@ -389,25 +418,6 @@ void SpellSystem::cast_spell_by_key(
 	const SpellDefinition& definition = ctx.spellRegistry->get_by_key(key);
 	dispatch_effect(definition.effect_type, caster, std::move(onCastComplete), ctx);
 }
-
-namespace
-{
-void animate_heal(const Vector2D& pos, GameContext& ctx)
-{
-	if (!ctx.animSystem)
-	{
-		return;
-	}
-
-	ctx.animSystem->spawn_effect(
-		pos,
-		ctx.tileConfig->get("TILE_EFFECT_HEAL"),
-		60,
-		220,
-		60,
-		0.5f);
-}
-} // namespace
 
 bool SpellSystem::cast_cure_light_wounds(Creature& caster, GameContext& ctx)
 {
@@ -673,15 +683,6 @@ void SpellSystem::cast_fireball(
 
 	ctx.menus->push_back(std::make_unique<TargetingMenu>(range, radius, std::move(onTarget), ctx));
 }
-
-namespace
-{
-// AD&D 2e: 1 missile at level 1, +1 every 2 levels, max 5
-int calculate_num_missiles(int casterLevel)
-{
-	return std::min(5, 1 + (casterLevel - 1) / 2);
-}
-} // namespace
 
 bool SpellSystem::cast_magic_missile(Creature& caster, GameContext& ctx)
 {

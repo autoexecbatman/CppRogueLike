@@ -10,37 +10,6 @@
 #include "Renderer.h"
 #include "TileConfig.h"
 
-using json = nlohmann::json;
-
-TileRef TileConfig::get(std::string_view key) const
-{
-	if (!m_tiles.contains(std::string(key)))
-	{
-		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
-		fflush(stderr);
-		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
-	}
-	return m_tiles.at(std::string(key));
-}
-
-AutotileGroup TileConfig::get_autotile(std::string_view key) const
-{
-	if (!m_autotile_groups.contains(std::string(key)))
-	{
-		throw std::runtime_error(std::format("TileConfig::get_autotile -- unknown key '{}'", key));
-	}
-	return m_autotile_groups.at(std::string(key));
-}
-
-WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
-{
-	if (!m_wall_autotile_groups.contains(std::string(key)))
-	{
-		throw std::runtime_error(std::format("TileConfig::get_wall_autotile -- unknown key '{}'", key));
-	}
-	return m_wall_autotile_groups.at(std::string(key));
-}
-
 namespace
 {
 // Tile types are authored by name so the file reads as the game does, and a
@@ -124,6 +93,37 @@ TileDefinition parse_tile_definition(const json& value)
 	return definition;
 }
 } // namespace
+
+using json = nlohmann::json;
+
+TileRef TileConfig::get(std::string_view key) const
+{
+	if (!m_tiles.contains(std::string(key)))
+	{
+		fprintf(stderr, "ERROR: TileConfig::get -- unknown key '%s'\n", std::string(key).c_str());
+		fflush(stderr);
+		throw std::runtime_error(std::format("TileConfig::get -- unknown key '{}'", key));
+	}
+	return m_tiles.at(std::string(key));
+}
+
+AutotileGroup TileConfig::get_autotile(std::string_view key) const
+{
+	if (!m_autotile_groups.contains(std::string(key)))
+	{
+		throw std::runtime_error(std::format("TileConfig::get_autotile -- unknown key '{}'", key));
+	}
+	return m_autotile_groups.at(std::string(key));
+}
+
+WallAutotileGroup TileConfig::get_wall_autotile(std::string_view key) const
+{
+	if (!m_wall_autotile_groups.contains(std::string(key)))
+	{
+		throw std::runtime_error(std::format("TileConfig::get_wall_autotile -- unknown key '{}'", key));
+	}
+	return m_wall_autotile_groups.at(std::string(key));
+}
 
 const TileDefinition& TileConfig::get_tile_definition(TileType tileType) const
 {

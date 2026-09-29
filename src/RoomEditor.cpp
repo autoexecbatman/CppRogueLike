@@ -15,6 +15,17 @@
 #include "PrefabLibrary.h"
 #include "RoomEditor.h"
 
+// Sheets available in the picker, in Tab-cycle order.
+static constexpr TileSheet PICKER_SHEETS[] = {
+	TileSheet::SHEET_DECOR0, TileSheet::SHEET_DECOR1, TileSheet::SHEET_FLOOR, TileSheet::SHEET_WALL, TileSheet::SHEET_TILE
+};
+
+static constexpr int PICKER_SHEET_COUNT = 5;
+
+static constexpr std::string_view PICKER_SHEET_NAMES[] = {
+	"Decor0", "Decor1", "Floor", "Wall", "Tile"
+};
+
 namespace
 {
 	// Layout (all in tiles; pixels = value * tile_size)
@@ -679,21 +690,33 @@ TileRef RoomEditor::symbol_tile_id(char sym) const
 	switch (sym)
 	{
 	case '#':
+	{
 		return tileConfigRef.get("TILE_WALL_STONE");
+	}
 	case '.':
+	{
 		return tileConfigRef.get("TILE_FLOOR_STONE");
+	}
 	case ',':
+	{
 		return tileConfigRef.get("TILE_CORRIDOR");
+	}
 	case '+':
+	{
 		return tileConfigRef.get("TILE_DOOR_CLOSED");
+	}
 	case '~':
+	{
 		return tileConfigRef.get("TILE_WATER");
+	}
 	default:
+	{
 		if (library)
 		{
 			return library->resolve_decor(sym);
 		}
 		return TileRef{};
+	}
 	}
 }
 
@@ -1114,15 +1137,6 @@ void RoomEditor::render_input_overlay(const Renderer& renderer) const
 // ---------------------------------------------------------------------------
 // Tile picker (F2)
 // ---------------------------------------------------------------------------
-
-// Sheets available in the picker, in Tab-cycle order.
-static constexpr TileSheet PICKER_SHEETS[] = {
-	TileSheet::SHEET_DECOR0, TileSheet::SHEET_DECOR1, TileSheet::SHEET_FLOOR, TileSheet::SHEET_WALL, TileSheet::SHEET_TILE
-};
-static constexpr int PICKER_SHEET_COUNT = 5;
-static constexpr std::string_view PICKER_SHEET_NAMES[] = {
-	"Decor0", "Decor1", "Floor", "Wall", "Tile"
-};
 
 void RoomEditor::handle_input_picker(GameContext& ctx)
 {

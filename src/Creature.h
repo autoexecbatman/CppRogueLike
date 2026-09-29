@@ -281,7 +281,6 @@ public:
 
 	virtual void apply_confusion(int nbTurns);
 
-	void unequip(Item& item, GameContext& ctx);
 	void drop(Item& item, GameContext& ctx);
 
 	bool is_invisible() const noexcept { return has_state(ActorState::IS_INVISIBLE); }
@@ -345,6 +344,15 @@ public:
 	// it. The slot must be one the body plan grants: wearing boots on a wolf
 	// is a data error, not a runtime outcome.
 	void wear(std::unique_ptr<Item> item, EquipmentSlot slot);
+	bool equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameContext& ctx);
+	bool unequip_item(EquipmentSlot slot, GameContext& ctx);
+	bool is_slot_occupied(EquipmentSlot slot) const noexcept;
+	bool is_item_equipped(uint64_t itemUniqueId) const noexcept;
+	bool is_dual_wielding() const noexcept;
+	bool toggle_armor(uint64_t itemUniqueId, GameContext& ctx);
+	bool toggle_shield(uint64_t itemUniqueId, GameContext& ctx);
+	bool toggle_weapon(uint64_t itemUniqueId, EquipmentSlot preferredSlot, GameContext& ctx);
+	bool toggle_equipment(uint64_t itemUniqueId, EquipmentSlot slot, GameContext& ctx);
 
 	// What this creature strikes with: the weapon in its main hand, or the
 	// attack its body provides when no slot holds one. "unarmed" when it has

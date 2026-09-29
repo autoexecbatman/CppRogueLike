@@ -29,6 +29,51 @@ constexpr Color RL_BLUE = { 0, 121, 241, 255 };
 constexpr Color RL_YELLOW = { 253, 249, 0, 255 };
 constexpr Color RL_MAGENTA = { 255, 0, 255, 255 };
 
+// What a frame paints behind its border tiles. This is the colour the GUI_FRAME_*
+// sprites fill their own 56-pixel bodies with, measured off a render: while the
+// two differed, every border tile read as a band across the panel it enclosed.
+// One name, so a frame cannot disagree with its own art.
+static constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
+
+// Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the colours
+// are one row rather than a constant here and an index there. Adding a pair to the
+// enum without a colour here fails the static_assert below.
+namespace
+{
+constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
+constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
+constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };
+
+constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
+	{ RL_WHITE, RL_BLACK }, // WHITE_BLACK
+	{ RL_WHITE, RL_RED }, // WHITE_RED
+	{ RL_WHITE, RL_BLUE }, // WHITE_BLUE
+	{ RL_WHITE, PAIR_DIM_GREEN }, // WHITE_GREEN
+	{ RL_BLACK, RL_WHITE }, // BLACK_WHITE
+	{ RL_BLACK, RL_GREEN }, // BLACK_GREEN
+	{ RL_BLACK, RL_YELLOW }, // BLACK_YELLOW
+	{ RL_BLACK, RL_RED }, // BLACK_RED
+	{ RL_RED, RL_BLACK }, // RED_BLACK
+	{ RL_GREEN, RL_BLACK }, // GREEN_BLACK
+	{ RL_YELLOW, RL_BLACK }, // YELLOW_BLACK
+	{ RL_BLUE, RL_BLACK }, // BLUE_BLACK
+	{ PAIR_CYAN, RL_BLACK }, // CYAN_BLACK
+	{ RL_MAGENTA, RL_BLACK }, // MAGENTA_BLACK
+	{ PAIR_CYAN, RL_BLUE }, // CYAN_BLUE
+	{ RL_RED, RL_WHITE }, // RED_WHITE
+	{ RL_GREEN, RL_YELLOW }, // GREEN_YELLOW
+	{ RL_GREEN, RL_MAGENTA }, // GREEN_MAGENTA
+	{ RL_RED, RL_YELLOW }, // RED_YELLOW
+	{ RL_GREEN, RL_RED }, // GREEN_RED
+	{ PAIR_BROWN, RL_BLACK }, // BROWN_BLACK
+	{ PAIR_DIM_GREEN, RL_BLACK }, // DIM_GREEN_BLACK
+} };
+
+static_assert(
+	PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
+	"every colour pair needs its two colours and no more");
+} // namespace
+
 constexpr double animInterval = 0.5;
 
 constexpr std::size_t sheet_idx(TileSheet s) noexcept
@@ -720,12 +765,6 @@ void Renderer::zoom_out()
 	}
 }
 
-// What a frame paints behind its border tiles. This is the colour the GUI_FRAME_*
-// sprites fill their own 56-pixel bodies with, measured off a render: while the
-// two differed, every border tile read as a band across the panel it enclosed.
-// One name, so a frame cannot disagree with its own art.
-static constexpr Color FRAME_FILL{ 20, 12, 28, 255 };
-
 void Renderer::draw_frame(Vector2D screenPos, int wTiles, int hTiles, const TileConfig& tileConfig) const
 {
 	assert(sheetsLoaded && "Renderer::draw_frame called before sheets are loaded");
@@ -867,45 +906,6 @@ int Renderer::measure_text(std::string_view text) const
 	}
 	return MeasureText(text_str.c_str(), fontSize);
 }
-
-// Each pair's two colours, in ALL_COLOR_PAIR's order, so the name and the colours
-// are one row rather than a constant here and an index there. Adding a pair to the
-// enum without a colour here fails the static_assert below.
-namespace
-{
-constexpr Color PAIR_CYAN{ 0, 255, 255, 255 };
-constexpr Color PAIR_BROWN{ 128, 77, 0, 255 };
-constexpr Color PAIR_DIM_GREEN{ 0, 102, 0, 255 };
-
-constexpr std::array<ColorPair, ALL_COLOR_PAIR.size()> PAIR_COLORS = { {
-	{ RL_WHITE, RL_BLACK }, // WHITE_BLACK
-	{ RL_WHITE, RL_RED }, // WHITE_RED
-	{ RL_WHITE, RL_BLUE }, // WHITE_BLUE
-	{ RL_WHITE, PAIR_DIM_GREEN }, // WHITE_GREEN
-	{ RL_BLACK, RL_WHITE }, // BLACK_WHITE
-	{ RL_BLACK, RL_GREEN }, // BLACK_GREEN
-	{ RL_BLACK, RL_YELLOW }, // BLACK_YELLOW
-	{ RL_BLACK, RL_RED }, // BLACK_RED
-	{ RL_RED, RL_BLACK }, // RED_BLACK
-	{ RL_GREEN, RL_BLACK }, // GREEN_BLACK
-	{ RL_YELLOW, RL_BLACK }, // YELLOW_BLACK
-	{ RL_BLUE, RL_BLACK }, // BLUE_BLACK
-	{ PAIR_CYAN, RL_BLACK }, // CYAN_BLACK
-	{ RL_MAGENTA, RL_BLACK }, // MAGENTA_BLACK
-	{ PAIR_CYAN, RL_BLUE }, // CYAN_BLUE
-	{ RL_RED, RL_WHITE }, // RED_WHITE
-	{ RL_GREEN, RL_YELLOW }, // GREEN_YELLOW
-	{ RL_GREEN, RL_MAGENTA }, // GREEN_MAGENTA
-	{ RL_RED, RL_YELLOW }, // RED_YELLOW
-	{ RL_GREEN, RL_RED }, // GREEN_RED
-	{ PAIR_BROWN, RL_BLACK }, // BROWN_BLACK
-	{ PAIR_DIM_GREEN, RL_BLACK }, // DIM_GREEN_BLACK
-} };
-
-static_assert(
-	PAIR_COLORS.size() == ALL_COLOR_PAIR.size(),
-	"every colour pair needs its two colours and no more");
-} // namespace
 
 void Renderer::init_color_pairs()
 {

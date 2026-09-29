@@ -44,7 +44,7 @@
       "catches": "a failed removal using a turn"
     },
     {
-      "file": "src/Player.cpp",
+      "file": "src/Creature.cpp",
       "original": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n\t\tequippedItems.erase(it);\n",
       "mutated": "\t\tstd::unique_ptr<Item> removed = std::move(it->item);\n",
       "catches": "the slot list read while it holds an emptied slot"

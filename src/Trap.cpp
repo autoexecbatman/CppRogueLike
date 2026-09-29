@@ -20,6 +20,14 @@
 #include "TileConfig.h"
 #include "MessageSystem.h"
 
+// The lowest d100 roll that sets a trap off on the thief working on it: the book
+// gives the accident a band of its own, 96 to 100, rather than making every
+// failure spring it.
+namespace
+{
+constexpr int ACCIDENTAL_TRIGGER = 96;
+} // namespace
+
 Trap::Trap(Vector2D position, TrapType trapType, const TileConfig& tileConfig)
 	: TileFeature(position, ActorData{}),
 	  type(trapType)
@@ -92,14 +100,6 @@ bool Trap::attempt_detect(Creature& creature, GameContext& ctx)
 
 	return false;
 }
-
-// The lowest d100 roll that sets a trap off on the thief working on it: the book
-// gives the accident a band of its own, 96 to 100, rather than making every
-// failure spring it.
-namespace
-{
-constexpr int ACCIDENTAL_TRIGGER = 96;
-} // namespace
 
 DisarmResult Trap::attempt_disarm(Player& creature, GameContext& ctx)
 {
@@ -257,8 +257,6 @@ int Trap::roll_damage(RandomDice& dice) const
 	// Every die rolled on its own: a 2d6 pit ranges from 2 to 12.
 	return roll_dice(&dice, DiceExpr{ damageDiceCount, damageDiceSize, 0 });
 }
-
-
 
 void Trap::destroy()
 {
