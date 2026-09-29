@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=FovMapTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\tfor (auto& c : cells_)\n\t{\n\t\tc.visible = false;\n\t}\n",
+      "mutated": "",
+      "catches": "a view that adds to the last one, so a creature keeps seeing rooms it walked out of"
+    },
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\tcells_[cell_index(panelX, panelY)].visible = true;\n",
+      "mutated": "",
+      "catches": "the cell underfoot unlit, so a creature cannot see where it stands"
+    },
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\t\t\tif (in_bounds(sx, sy) && dx * dx + dy * dy <= radius * radius)\n",
+      "mutated": "\t\t\tif (in_bounds(sx, sy) && dx * dx + dy * dy <= radius * radius * 2)\n",
+      "catches": "sight reaching in a square rather than a circle, lighting the corners"
+    },
+    {
+      "file": "src/FovMap.cpp",
+      "original": "\t\t\telse if (!in_bounds(sx, sy) || !cells_[cell_index(sx, sy)].transparent)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
+      "mutated": "\t\t\telse if (false)\n\t\t\t{\n\t\t\t\tblocked = true;\n",
+      "catches": "nothing ever casting a shadow, so a wall is seen through"
+    }
+  ]
+}
