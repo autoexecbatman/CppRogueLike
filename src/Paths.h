@@ -10,7 +10,7 @@
 namespace Paths
 {
 inline constexpr std::string_view LOG      = "clog.txt";
-inline constexpr std::string_view SAVE_FILE = "saves/game->sav";
+inline constexpr std::string_view SAVE_FILE = "saves/game.sav";
 
 inline constexpr std::string_view DAWNLIKE_DIR = "DawnLike";
 // The advance is the load size, not the design: both this and SDS_6x6 measured

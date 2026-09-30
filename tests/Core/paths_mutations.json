@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=PathsTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Paths.h",
+      "original": "inline constexpr std::string_view SAVE_FILE = \"saves/game.sav\";\n",
+      "mutated": "inline constexpr std::string_view SAVE_FILE = \"saves/game->sav\";\n",
+      "catches": "the save path this test was written for: a name Windows refuses"
+    },
+    {
+      "file": "src/Paths.h",
+      "original": "inline constexpr std::string_view LOG      = \"clog.txt\";\n",
+      "mutated": "inline constexpr std::string_view LOG      = \"clog?.txt\";\n",
+      "catches": "a reserved character reaching any other path constant"
+    },
+    {
+      "file": "tests/Core/PathsTest.cpp",
+      "original": "\t\t\tfound.push_back({ matched[1].str(), matched[2].str() });\n",
+      "mutated": "",
+      "catches": "the header parse returning nothing, which would make every case vacuous"
+    }
+  ]
+}
