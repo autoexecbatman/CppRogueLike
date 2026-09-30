@@ -1,0 +1,59 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=HungerSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\thungerValue = std::min(hungerValue + amount, hungerMax);\n",
+      "mutated": "\thungerValue = hungerValue + amount;\n",
+      "catches": "a counter that runs past starving with nothing to stop it"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\thungerValue = std::max(hungerValue - amount, 0);\n",
+      "mutated": "\thungerValue = hungerValue - amount;\n",
+      "catches": "eating past full leaving a negative stomach"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "constexpr int WELL_FED_THRESHOLD{ 200 };\n",
+      "mutated": "constexpr int WELL_FED_THRESHOLD{ 199 };\n",
+      "catches": "a threshold moved by one, which is the whole of what a state means"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\tif (hungerValue <= SATIATED_THRESHOLD)\n",
+      "mutated": "\tif (hungerValue < SATIATED_THRESHOLD)\n",
+      "catches": "a boundary value falling into the next state up"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\treturn std::clamp(1.0f - static_cast<float>(hungerValue) / static_cast<float>(hungerMax), 0.0f, 1.0f);\n",
+      "mutated": "\treturn std::clamp(static_cast<float>(hungerValue) / static_cast<float>(hungerMax), 0.0f, 1.0f);\n",
+      "catches": "the meter reading hunger where it should read fullness, which is the defect the HUD shipped"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\t\tlastNotifiedState = current;\n\t\treturn;\n",
+      "mutated": "\t\treturn;\n",
+      "catches": "a baseline never recorded, so no crossing is ever announced"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\tif (*lastNotifiedState == current)\n",
+      "mutated": "\tif (*lastNotifiedState != current)\n",
+      "catches": "a message on every tick, or silence when the state actually moves"
+    },
+    {
+      "file": "src/HungerSystem.cpp",
+      "original": "\t\tj[\"lastNotifiedState\"] = static_cast<int>(*lastNotifiedState);\n",
+      "mutated": "",
+      "catches": "a load that re-announces a state the player was already told"
+    }
+  ]
+}

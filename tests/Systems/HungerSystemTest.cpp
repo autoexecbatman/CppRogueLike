@@ -21,6 +21,8 @@
 
 #include <gtest/gtest.h>
 
+#include <nlohmann/json.hpp>
+
 #include "src/GameContext.h"
 #include "src/HungerSystem.h"
 #include "tests/mocks/MockGameContext.h"
@@ -158,4 +160,72 @@ TEST_F(HungerSystemTest, StateFollowsTheCounterAcrossEveryThreshold)
 		EXPECT_EQ(hunger.get_hunger_state(), boundary.expected)
 			<< "hungerValue " << boundary.hungerValue;
 	}
+}
+
+// A creature that has eaten is not suffering, and one that is hungry or worse is.
+// The boundary is the HUNGRY threshold, so this is the case that can see it move.
+TEST_F(HungerSystemTest, PenaltiesBeginExactlyWhereHungerDoes)
+{
+	hunger.increase_hunger(ctx, 400);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::SATIATED);
+	EXPECT_FALSE(hunger.is_suffering_hunger_penalties()) << "a satiated creature was reported as suffering";
+
+	hunger.increase_hunger(ctx, 1);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
+	EXPECT_TRUE(hunger.is_suffering_hunger_penalties()) << "hunger arrived without its penalties";
+}
+
+// What the counter is, and what the player was last told, both survive a save. The
+// second is the one worth pinning: it is the only thing stopping a load announcing
+// a state change the player has already been told about.
+TEST_F(HungerSystemTest, ACounterAndWhatWasAnnouncedBothSurviveASave)
+{
+	hunger.increase_hunger(ctx, 1);
+
+	// One call from WELL_FED to HUNGRY passes SATIATED without stopping, and the
+	// player is told what they are now rather than everything they went through.
+	hunger.increase_hunger(ctx, 500);
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
+	ASSERT_EQ(mock.messages.get_stored_message_count(), 1u);
+
+	nlohmann::json saved;
+	hunger.save(saved);
+
+	HungerSystem loaded{};
+	loaded.load(saved);
+
+	EXPECT_EQ(loaded.get_hunger_value(), hunger.get_hunger_value());
+	EXPECT_EQ(loaded.get_hunger_state(), hunger.get_hunger_state());
+
+	// The load restored what was announced, so an unchanged state says nothing more.
+	const size_t before = mock.messages.get_stored_message_count();
+	loaded.increase_hunger(ctx, 1);
+	EXPECT_EQ(mock.messages.get_stored_message_count(), before)
+		<< "the loaded system re-announced a state the player already knew";
+}
+
+// A load that forgets what was announced is silent exactly once, and it is the
+// once that matters: the first threshold the player crosses afterwards. An
+// ordinary tick after loading cannot show this, because an empty record and a
+// matching record are both silent.
+TEST_F(HungerSystemTest, AThresholdCrossedRightAfterLoadingIsStillAnnounced)
+{
+	hunger.increase_hunger(ctx, 1);
+	hunger.increase_hunger(ctx, 500); // into HUNGRY, announced
+	ASSERT_EQ(hunger.get_hunger_state(), HungerState::HUNGRY);
+
+	nlohmann::json saved;
+	hunger.save(saved);
+
+	HungerSystem loaded{};
+	loaded.load(saved);
+
+	const size_t before = mock.messages.get_stored_message_count();
+
+	// The first thing that happens after the load crosses into STARVING.
+	loaded.increase_hunger(ctx, 250);
+
+	ASSERT_EQ(loaded.get_hunger_state(), HungerState::STARVING);
+	EXPECT_EQ(mock.messages.get_stored_message_count(), before + 1)
+		<< "the load lost what was announced, so the first crossing after it went unsaid";
 }
