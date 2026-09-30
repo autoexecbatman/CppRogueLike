@@ -1,7 +1,6 @@
 #include <algorithm>
 #include <cstdint>
 #include <format>
-#include <iostream>
 #include <memory>
 #include <optional>
 #include <string>
@@ -21,7 +20,6 @@
 #include "FloatingTextSystem.h"
 #include "GameBalance.h"
 #include "GameContext.h"
-#include "GameStateManager.h"
 #include "HealthPool.h"
 #include "HungerSystem.h"
 #include "InventoryOperations.h"
@@ -240,15 +238,10 @@ void Player::roll_new_character(GameContext& ctx)
 
 void Player::die(GameContext& ctx)
 {
+	// Declaring the run lost is the whole of it. Removing the save is permadeath
+	// housekeeping, which the loop does when it handles DEFEAT - a death is a
+	// domain event and must not reach the filesystem.
 	ctx.gameState->set_game_status(GameStatus::DEFEAT);
-	// Called on the class: delete_save_file is static, so reaching it through
-	// ctx.stateManager would dereference nothing and hide the handle being absent.
-	// It reports true when there was nothing to delete, so false means a save
-	// survived the character who owned it and the next run would offer it.
-	if (!GameStateManager::delete_save_file())
-	{
-		std::clog << "[Player::die] the save file could not be deleted; it will outlive the character\n";
-	}
 }
 
 void Player::on_new_game_start(GameContext& ctx)

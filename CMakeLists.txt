@@ -370,9 +370,7 @@ set(SOURCE_FILES # Add Source Files Here !
     ${PROJECT_SOURCE_DIR}/UniqueId.h
 
     # Combat - Weapon damage system
-    ${PROJECT_SOURCE_DIR}/DeathHandler.cpp
     ${PROJECT_SOURCE_DIR}/GameContext.cpp
-    ${PROJECT_SOURCE_DIR}/DeathHandler.h
     ${PROJECT_SOURCE_DIR}/WeaponDamageRegistry.cpp
     ${PROJECT_SOURCE_DIR}/WeaponDamageRegistry.h
     ${PROJECT_SOURCE_DIR}/AttackKind.h

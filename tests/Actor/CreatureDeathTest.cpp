@@ -7,11 +7,10 @@
 // hands its experience to the player, drops what it was carrying onto the floor
 // where it fell, and leaves a corpse in its place.
 //
-// It is reached here by calling die() rather than by constructing a handler.
-// src/DeathHandler.cpp holds a second copy of this same body, which nothing in
-// src/ constructs - see the note in project_open_threats. Testing that copy is
-// what this file did until 2026-09-30, and it measured a function the game never
-// calls.
+// It is reached here by calling die(). src/DeathHandler.cpp held a second copy of
+// this body that nothing constructed, and testing that copy is what this file did
+// until 2026-09-30 - it measured a function the game never called. Those files are
+// gone now.
 //
 // What these tests deliberately do not claim: that a monster's *worn* gear
 // disappears. It does - execute walks inventoryData.items and never touches

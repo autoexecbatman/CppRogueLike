@@ -56,6 +56,7 @@ set(TEST_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/BehaviorRecordTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerSerializationTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PickableAcBonusTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerDeathTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Actor/PlayerVirtualInterfaceTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/AiMimicTest.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/Ai/SanctuaryPursuitTest.cpp
@@ -275,7 +276,6 @@ set(PARENT_SOURCES
     ${PARENT_SOURCE_DIR}/UniqueId.cpp
 
     # Combat
-    ${PARENT_SOURCE_DIR}/DeathHandler.cpp
     ${PARENT_SOURCE_DIR}/GameContext.cpp
     ${PARENT_SOURCE_DIR}/WeaponDamageRegistry.cpp
     ${PARENT_SOURCE_DIR}/ArmorClass.cpp

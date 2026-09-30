@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include <format>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,7 @@
 #include "FloatingTextSystem.h"
 #include "GameContext.h"
 #include "GameLoopCoordinator.h"
+#include "GameStateManager.h"
 #include "Gui.h"
 #include "HungerSystem.h"
 #include "InputHandler.h"
@@ -553,6 +555,14 @@ void GameLoopCoordinator::update(GameContext& ctx)
 	if (ctx.gameState->get_game_status() == GameStatus::DEFEAT)
 	{
 		ctx.messageSystem->log("Player is dead!");
+		// Permadeath: the character is gone, so the save that would restore it goes
+		// too. Called on the class because delete_save_file is static. It reports
+		// true when there was nothing to delete, so false means a save outlived the
+		// character who owned it and the next run would offer it.
+		if (!GameStateManager::delete_save_file())
+		{
+			std::clog << "[GameLoopCoordinator] the save file could not be deleted; it will outlive the character\n";
+		}
 		ctx.menus->push_back(std::make_unique<DeathMenu>(ctx));
 		ctx.gameState->set_game_status(GameStatus::IDLE);
 	}
