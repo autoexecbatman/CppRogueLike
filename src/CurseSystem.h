@@ -20,9 +20,14 @@ class CurseSystem
 private:
 	void apply_weapon_curse(const Item& item, GameContext& ctx);
 	void apply_armor_curse(const Item& item, GameContext& ctx);
-	void apply_hp_drain(int damage, Player& player, GameContext& ctx);
 
 public:
-    void apply_curses(Player& player, GameContext& ctx);
+	void apply_curses(Player& player, GameContext& ctx);
+
+	// Takes `damage` from the wearer, says so, and ends the game if it was the
+	// last of their health. Public because the amount is the whole of what it
+	// does: a cursed amulet costs one a turn today, and the drain that kills is a
+	// different case from the drain that does not.
+	void apply_hp_drain(int damage, Player& player, GameContext& ctx);
 
 };

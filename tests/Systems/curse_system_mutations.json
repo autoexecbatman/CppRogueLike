@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CurseSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "\t\tplayer.die(ctx);\n",
+      "mutated": "",
+      "catches": "a curse that kills without ending the game"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "\tif (player.is_dead())\n",
+      "mutated": "\tif (!player.is_dead())\n",
+      "catches": "a curse that ends the game while the player still stands"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "\t\t\tctx.messageSystem->message(ColorPairId::BLUE_BLACK, \"The curse has killed you!\", MessageCompletion::FINISHED);\n",
+      "mutated": "",
+      "catches": "a death the player is never told the curse caused"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "\tif (damage <= 0)\n",
+      "mutated": "\tif (damage <= 1)\n",
+      "catches": "the amulet's one-point drain skipped as though it were nothing"
+    }
+  ]
+}

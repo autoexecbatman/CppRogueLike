@@ -784,7 +784,7 @@ bool SpellSystem::cast_sleep(Creature& caster, GameContext& ctx)
 	std::vector<Creature*> sleepable{};
 	for (const auto& creature : *ctx.creatures)
 	{
-		assert(creature && "creatures list holds a null entry");
+		assert(creature && "cast_sleep: creatures list holds a null entry");
 
 		if (creature->is_dead() || creature->is_undead())
 		{

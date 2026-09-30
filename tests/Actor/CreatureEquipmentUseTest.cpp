@@ -124,4 +124,57 @@ TEST_F(CreatureEquipmentUseTest, ACreatureDrinksAPotion)
 	EXPECT_FALSE(pack_holds(potion)) << "the potion was drunk and is still in the pack";
 }
 
+// A refused item goes back to the pack it came out of. Carrying it again adds no
+// weight, so a carrier already past its limit - which taking off a Strength item
+// can leave it - gets it back all the same instead of losing it.
+TEST_F(CreatureEquipmentUseTest, AnOverloadedCreatureKeepsWhatItCannotPutOn)
+{
+	carry("plate_mail");
+	Item& sword = carry("long_sword");
+	auto taken = InventoryOperations::remove_item(orc->inventoryData, sword);
+	ASSERT_TRUE(taken.has_value());
+	orc->set_strength(3);
+	ASSERT_TRUE(InventoryOperations::is_overloaded(*orc, *ctx.dataManager)) << "the carrier is within its limit, so the gate is never asked";
+	ASSERT_FALSE(orc->can_equip(sword, EquipmentSlot::BODY)) << "the sword would go on, so the refusal is never reached";
+
+	EXPECT_FALSE(orc->equip_item(std::move(*taken), EquipmentSlot::BODY, ctx));
+
+	EXPECT_TRUE(pack_holds(sword)) << "the refused sword was destroyed rather than put back";
+}
+
+TEST_F(CreatureEquipmentUseTest, AnOverloadedCreatureKeepsTheBowItCannotDraw)
+{
+	orc->set_body_plan({ EquipmentSlot::RIGHT_HAND, EquipmentSlot::BODY, EquipmentSlot::MISSILE_WEAPON });
+	carry("plate_mail");
+	Item& bow = carry("composite_bow");
+	auto taken = InventoryOperations::remove_item(orc->inventoryData, bow);
+	ASSERT_TRUE(taken.has_value());
+	orc->set_strength(3);
+	ASSERT_TRUE(InventoryOperations::is_overloaded(*orc, *ctx.dataManager)) << "the carrier is within its limit, so the gate is never asked";
+	ASSERT_TRUE(orc->can_equip(bow, EquipmentSlot::MISSILE_WEAPON)) << "the slot refuses the bow, so the draw check is never reached";
+	ASSERT_FALSE(can_draw(*orc, bow)) << "a Strength 3 arm draws the bow, so nothing is refused";
+
+	EXPECT_FALSE(orc->equip_item(std::move(*taken), EquipmentSlot::MISSILE_WEAPON, ctx));
+
+	EXPECT_TRUE(pack_holds(bow)) << "the undrawable bow was destroyed rather than put back";
+}
+
+// A floor with no room refuses the drop before anything moves, so the pack keeps the
+// item and holds no empty slot where it was.
+TEST_F(CreatureEquipmentUseTest, DroppingOntoAFullFloorKeepsTheItem)
+{
+	Item& sword = carry("long_sword");
+	InventoryOperations::set_inventory_capacity(*ctx.floorInventory, ctx.floorInventory->items.size());
+	ASSERT_TRUE(InventoryOperations::is_inventory_full(*ctx.floorInventory));
+
+	orc->drop(sword, ctx);
+
+	auto is_empty_slot = [](const std::unique_ptr<Item>& packed)
+	{
+		return !packed;
+	};
+	EXPECT_TRUE(pack_holds(sword)) << "the sword left the pack for a floor with no room";
+	EXPECT_TRUE(std::ranges::none_of(orc->inventoryData.items, is_empty_slot)) << "the pack holds an empty slot where the sword was";
+}
+
 // end of file: CreatureEquipmentUseTest.cpp

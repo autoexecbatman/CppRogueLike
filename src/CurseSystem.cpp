@@ -45,11 +45,6 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 	}
 
 	const int damageTaken = player.take_damage(damage, ctx, DamageType::MAGIC);
-	if (player.is_dead())
-	{
-		player.die(ctx);
-	}
-
 	if (ctx.messageSystem)
 	{
 		ctx.messageSystem->message(
@@ -58,13 +53,14 @@ void CurseSystem::apply_hp_drain(int damage, Player& player, GameContext& ctx)
 			MessageCompletion::FINISHED);
 	}
 
-	if (player.get_hp() <= 0)
+	// The drain is reported before the death; die owns the defeat status.
+	if (player.is_dead())
 	{
 		if (ctx.messageSystem)
 		{
 			ctx.messageSystem->message(ColorPairId::BLUE_BLACK, "The curse has killed you!", MessageCompletion::FINISHED);
 		}
-		ctx.gameState->set_game_status(GameStatus::DEFEAT);
+		player.die(ctx);
 	}
 }
 

@@ -1085,7 +1085,16 @@ void Creature::drop(Item& item, GameContext& ctx)
 		return;
 	}
 
+	// A floor with no room refuses before anything moves, so the item stays in the pack
 	auto& foundPtr = matches.front();
+	if (InventoryOperations::is_inventory_full(*ctx.floorInventory))
+	{
+		ctx.messageSystem->message(
+			ColorPairId::WHITE_BLACK,
+			std::format("There is no room to set the {} down here.", foundPtr->actorData.name),
+			MessageCompletion::FINISHED);
+		return;
+	}
 	foundPtr->position = position;
 
 	auto addResult = InventoryOperations::add_item(*ctx.floorInventory, std::move(foundPtr));
@@ -1115,8 +1124,8 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 			ctx.messageSystem->log("DEBUG: Slot: " + std::to_string(static_cast<int>(slot)));
 			ctx.messageSystem->log("DEBUG: equip_item failed - can_equip returned false for " + item->actorData.name + " in slot " + std::to_string(static_cast<int>(slot)));
 		}
-		// Return item to inventory since we can't equip it
-		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
+		// Back to the pack it came out of: carrying it again adds no weight, so no weight gate
+		[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));
 		assert(pickUpItemResult.has_value());
 		return false;
 	}
@@ -1129,7 +1138,8 @@ bool Creature::equip_item(std::unique_ptr<Item> item, EquipmentSlot slot, GameCo
 			ColorPairId::WHITE_BLACK,
 			std::format("You are not strong enough to draw the {}.", item->actorData.name),
 			MessageCompletion::FINISHED);
-		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);
+		// Back to the pack it came out of, as for a slot that refuses it
+		[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));
 		assert(returnedToPack.has_value());
 		return false;
 	}

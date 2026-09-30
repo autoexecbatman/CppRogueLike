@@ -4,6 +4,8 @@
 #include <optional>
 #include <string>
 
+#include "Colors.h"
+
 struct GameContext;
 
 // Hunger states in ascending order of hunger
@@ -18,6 +20,19 @@ enum class HungerState
 
 class HungerSystem
 {
+private:
+	int hungerValue{ 0 }; // Internal hunger counter
+	int hungerMax{ 1000 }; // Maximum hunger value
+	bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
+
+	// What the player was last told they were, empty until the first message.
+	// Held only so a transition has something to compare against; the current
+	// state comes from get_hunger_state().
+	std::optional<HungerState> lastNotifiedState{};
+
+	// Announces a move to a different state, and records what was announced.
+	void notify_state_change(GameContext& ctx);
+
 public:
 	HungerSystem() = default;
 	~HungerSystem() = default;
@@ -26,8 +41,8 @@ public:
 	HungerSystem(HungerSystem&&) = delete;
 	HungerSystem& operator=(HungerSystem&&) = delete;
 
-	// Increases hunger by the specified amount (or default amount)
-	void increase_hunger(GameContext& ctx, int amount = 1);
+	// Increases hunger by the specified amount
+	void increase_hunger(GameContext& ctx, int amount);
 
 	// Decreases hunger by the specified amount
 	void decrease_hunger(GameContext& ctx, int amount);
@@ -74,9 +89,6 @@ public:
 	// Returns numerical hunger display (e.g., "150/1000")
 	std::string get_hunger_numerical_string() const;
 
-	// Returns hunger progress bar string
-	std::string get_hunger_bar_string(int bar_width = 20) const;
-
 	// Returns color code for hunger UI display
 	ColorPairId get_hunger_color() const;
 
@@ -89,18 +101,5 @@ public:
 	// Save/Load methods for game persistence
 	void save(nlohmann::json& j) const;
 	void load(const nlohmann::json& j);
-
-private:
-	int hungerValue{ 0 }; // Internal hunger counter
-	int hungerMax{ 1000 }; // Maximum hunger value
-	bool wellFedMessageShown{ false }; // Prevents spam of well-fed message
-
-	// What the player was last told they were, empty until the first message.
-	// Held only so a transition has something to compare against; the current
-	// state comes from get_hunger_state().
-	std::optional<HungerState> lastNotifiedState{};
-
-	// Announces a move to a different state, and records what was announced.
-	void notify_state_change(GameContext& ctx);
 
 };

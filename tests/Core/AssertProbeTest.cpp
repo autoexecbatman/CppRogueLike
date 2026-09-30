@@ -26,11 +26,11 @@
 //   cmake --build build --config Debug --target test_exe
 //   cd build/bin/Debug && ./test_exe.exe --gtest_filter=AssertProbeDeathTest.*
 //
-//   [==========] Running 15 tests from 1 test suite.
+//   [==========] Running 16 tests from 1 test suite.
 //   [ RUN      ] AssertProbeDeathTest.WearingNothingAborts
 //   [       OK ] AssertProbeDeathTest.WearingNothingAborts (69 ms)
 //   ...
-//   [  PASSED  ] 15 tests.
+//   [  PASSED  ] 16 tests.
 //
 // A green run here says every probe died with the right message. It does not
 // say the probes have teeth - for that, tests/assert_probes.ps1 deletes each
@@ -273,4 +273,20 @@ TEST_F(AssertProbeDeathTest, TurningWithANullInTheCreatureListAborts)
 
 	EXPECT_DEATH([[maybe_unused]] const TurnUndeadReport report = turn_undead(*priest, ctx),
 		"turn_undead: creatures list holds a null entry");
+}
+
+// Sleep gathers its targets from the whole creature list, which owns every entry
+// it holds. A null there would be dereferenced by the first eligibility check.
+TEST_F(AssertProbeDeathTest, SleepingWithANullInTheCreatureListAborts)
+{
+	// An orc casts on no Wisdom table, so the spell reaches its effect without a fizzle roll.
+	std::unique_ptr<Creature> caster = make_creature();
+	const auto ignoreCompletion = [](GameContext&) {};
+
+	std::vector<std::unique_ptr<Creature>> creatures{};
+	creatures.push_back(nullptr);
+	ctx.creatures = &creatures;
+
+	EXPECT_DEATH(SpellSystem::cast_spell_by_key("sleep", *caster, SpellSource::MEMORIZED, ignoreCompletion, ctx),
+		"cast_sleep: creatures list holds a null entry");
 }

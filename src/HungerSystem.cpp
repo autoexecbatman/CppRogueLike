@@ -1,6 +1,8 @@
 #include <algorithm>
-#include <string>
 #include <cassert>
+#include <format>
+#include <string>
+#include <utility>
 
 #include <nlohmann/json.hpp>
 
@@ -93,13 +95,10 @@ std::string HungerSystem::get_hunger_state_string() const
 	{
 		return "Dying";
 	}
-
-	default:
-	{
-		return "Unknown";
 	}
-
-	}
+	// Every state returns above; a new one warns under -Wswitch rather than taking
+	// a name that belongs to nothing.
+	std::unreachable();
 }
 
 int HungerSystem::get_hunger_value() const
@@ -124,30 +123,6 @@ float HungerSystem::get_fullness_ratio() const
 std::string HungerSystem::get_hunger_numerical_string() const
 {
 	return std::format("{}/{}", hungerValue, hungerMax);
-}
-
-std::string HungerSystem::get_hunger_bar_string(int bar_width) const
-{
-	// Calculate fill percentage
-	float fill_percentage = static_cast<float>(hungerValue) / hungerMax;
-	int filled_chars = static_cast<int>(fill_percentage * bar_width);
-
-	std::string bar = "[";
-
-	// Add filled portion
-	for (int i = 0; i < filled_chars; ++i)
-	{
-		bar += "=";
-	}
-
-	// Add empty portion
-	for (int i = filled_chars; i < bar_width; ++i)
-	{
-		bar += "-";
-	}
-
-	bar += "]";
-	return bar;
 }
 
 ColorPairId HungerSystem::get_hunger_color() const
@@ -179,13 +154,10 @@ ColorPairId HungerSystem::get_hunger_color() const
 	{
 		return ColorPairId::WHITE_RED; // Red
 	}
-
-	default:
-	{
-		return ColorPairId::WHITE_BLACK;
 	}
-
-	}
+	// Every state returns above; a new one warns under -Wswitch rather than taking
+	// a colour that belongs to nothing.
+	std::unreachable();
 }
 
 bool HungerSystem::is_suffering_hunger_penalties() const
@@ -198,10 +170,9 @@ bool HungerSystem::is_suffering_hunger_penalties() const
 
 void HungerSystem::apply_hunger_effects(GameContext& ctx)
 {
-	if (!ctx.player())
-	{
-		return;
-	}
+	// The round upkeep is the only caller and it runs on a live game, so a missing
+	// player is a wiring fault rather than a state the game passes through.
+	assert(ctx.player() && "apply_hunger_effects ran without a player");
 
 	// Reset any previous hunger effects first
 	// This is assuming the player's base stats are stored somewhere and can be restored

@@ -1,0 +1,29 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Release --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Release; ./test_exe.exe --gtest_filter=CreatureEquipmentUseTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item(inventoryData, std::move(item));",
+      "mutated": "[[maybe_unused]] const auto pickUpItemResult = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
+      "catches": "an item a slot refuses sent back through the weight gate, which destroys it on an overloaded carrier"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item(inventoryData, std::move(item));",
+      "mutated": "[[maybe_unused]] const auto returnedToPack = InventoryOperations::add_item_to_inventory(inventoryData, std::move(item), *this, *ctx.dataManager);",
+      "catches": "a bow too strong to draw sent back through the weight gate, which destroys it on an overloaded carrier"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tif (InventoryOperations::is_inventory_full(*ctx.floorInventory))",
+      "mutated": "\tif (false)",
+      "catches": "a drop onto a full floor moving the item out of the pack, destroying it and leaving an empty slot"
+    }
+  ]
+}

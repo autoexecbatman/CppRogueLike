@@ -110,3 +110,34 @@ TEST_F(CurseSystemTest, UncursedItemsIgnored)
 
 	EXPECT_EQ(message_system.get_current_message(), msgBefore);
 }
+
+// A drain that empties the pool: the player reads the drain, then the death, and
+// the game is lost.
+TEST_F(CurseSystemTest, LethalDrainReportsDrainThenDeathAndDefeats)
+{
+	// One hit point, so the amulet's one-point drain is lethal.
+	player->healthPool = std::make_unique<HealthPool>(1);
+	equip_cursed(ItemClass::AMULET, BlessingStatus::CURSED, "amulet of life drain", EquipmentSlot::NECK);
+
+	curse_system.apply_curses(*player, ctx);
+
+	ASSERT_GE(message_system.get_stored_message_count(), 2u);
+	const size_t lastIndex = message_system.get_stored_message_count() - 1;
+	EXPECT_EQ(message_system.get_attack_message_at(lastIndex - 1).front().text, "The curse drains 1 HP from you!");
+	EXPECT_EQ(message_system.get_attack_message_at(lastIndex).front().text, "The curse has killed you!");
+	EXPECT_EQ(game_state.get_game_status(), GameStatus::DEFEAT);
+}
+
+// A drain the player survives says nothing of death and leaves the game running.
+TEST_F(CurseSystemTest, SurvivableDrainNeitherKillsNorDefeats)
+{
+	// Two hit points, so one drain leaves the player standing.
+	player->healthPool = std::make_unique<HealthPool>(2);
+	equip_cursed(ItemClass::AMULET, BlessingStatus::CURSED, "amulet of life drain", EquipmentSlot::NECK);
+
+	curse_system.apply_curses(*player, ctx);
+
+	EXPECT_EQ(player->get_hp(), 1);
+	EXPECT_EQ(message_system.get_current_message(), "The curse drains 1 HP from you!");
+	EXPECT_NE(game_state.get_game_status(), GameStatus::DEFEAT);
+}

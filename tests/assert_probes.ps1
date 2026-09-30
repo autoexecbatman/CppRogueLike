@@ -115,6 +115,11 @@ $probes = @(
         test   = "AssertProbeDeathTest.TurningWithANullInTheCreatureListAborts"
         file   = "src/TurnUndead.cpp"
         anchor = 'assert(creature && "turn_undead: creatures list holds a null entry");'
+    },
+    @{
+        test   = "AssertProbeDeathTest.SleepingWithANullInTheCreatureListAborts"
+        file   = "src/SpellSystem.cpp"
+        anchor = 'assert(creature && "cast_sleep: creatures list holds a null entry");'
     }
 )
 

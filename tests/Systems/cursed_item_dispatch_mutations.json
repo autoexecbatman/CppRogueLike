@@ -1,0 +1,35 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CurseSystemTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "        if (item.get_enhancement().blessing != BlessingStatus::CURSED)\n",
+      "mutated": "        if (item.get_enhancement().blessing == BlessingStatus::CURSED)\n",
+      "catches": "blessed and plain gear punished while cursed gear goes quiet"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "\t\tstd::format(\"Your {} weakens your aim!\", item.actorData.name),\n",
+      "mutated": "\t\tstd::format(\"Your {} feels heavy.\", item.actorData.name),\n",
+      "catches": "a weapon curse that says nothing about what it is doing"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "        else if (item.is_armor())\n",
+      "mutated": "        else if (item.is_weapon())\n",
+      "catches": "cursed armour falling through every branch and reporting nothing"
+    },
+    {
+      "file": "src/CurseSystem.cpp",
+      "original": "        else if (item.is_amulet())\n",
+      "mutated": "        else if (item.is_ring())\n",
+      "catches": "the drain moving to a slot the game does not put amulets in"
+    }
+  ]
+}
