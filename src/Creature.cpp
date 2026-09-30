@@ -1408,7 +1408,11 @@ void Creature::die(GameContext& ctx)
 		ctx.animSystem->spawn_death(position);
 	}
 
-	assert(std::ranges::none_of(inventoryData.items, [](const auto& i) { return !i; }));
+	[[maybe_unused]] auto is_nothing = [](const auto& carried)
+	{
+		return !carried;
+	};
+	assert(std::ranges::none_of(inventoryData.items, is_nothing) && "a pack holds nothing where an item should be");
 	for (auto& item : inventoryData.items)
 	{
 		item->position = position;

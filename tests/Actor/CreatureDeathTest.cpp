@@ -1,9 +1,17 @@
-// file: DeathHandlerTest.cpp
+// file: CreatureDeathTest.cpp
 // What a monster leaves behind.
 //
-// MonsterDeathHandler::execute had no test. What it does, in order: says the
-// creature is dead, hands its experience to the player, drops what it was
-// carrying onto the floor where it fell, and leaves a corpse in its place.
+// Creature::die is the death every monster in the game actually goes through:
+// combat reaches it through take_damage_and_check_death, and Player overrides it
+// with the defeat screen. What it does, in order: says the creature is dead,
+// hands its experience to the player, drops what it was carrying onto the floor
+// where it fell, and leaves a corpse in its place.
+//
+// It is reached here by calling die() rather than by constructing a handler.
+// src/DeathHandler.cpp holds a second copy of this same body, which nothing in
+// src/ constructs - see the note in project_open_threats. Testing that copy is
+// what this file did until 2026-09-30, and it measured a function the game never
+// calls.
 //
 // What these tests deliberately do not claim: that a monster's *worn* gear
 // disappears. It does - execute walks inventoryData.items and never touches
@@ -15,7 +23,7 @@
 // Run it:
 //
 //     cmake --build build --config Debug --target test_exe
-//     build\bin\Debug\test_exe.exe --gtest_filter=DeathHandlerTest.*
+//     build\bin\Debug\test_exe.exe --gtest_filter=CreatureDeathTest.*
 
 #include <gtest/gtest.h>
 
@@ -25,7 +33,6 @@
 
 #include "src/ArmorClass.h"
 #include "src/Creature.h"
-#include "src/DeathHandler.h"
 #include "src/ExperienceReward.h"
 #include "src/HealthPool.h"
 #include "src/InventoryOperations.h"
@@ -41,7 +48,7 @@ constexpr Vector2D WHERE_IT_FELL{ 7, 9 };
 constexpr Vector2D PICKED_UP_OVER_THERE{ 2, 2 };
 } // namespace
 
-class DeathHandlerTest : public ::testing::Test
+class CreatureDeathTest : public ::testing::Test
 {
 protected:
 	void SetUp() override
@@ -73,10 +80,11 @@ protected:
 		return *held;
 	}
 
+	// The path combat takes: take_damage_and_check_death calls die() the moment
+	// the pool empties, so this is the same entry point a killing blow uses.
 	void kill_it()
 	{
-		MonsterDeathHandler handler;
-		handler.execute(*monster, ctx);
+		monster->die(ctx);
 	}
 
 	bool floor_holds(const Item& item) const
@@ -105,7 +113,7 @@ protected:
 };
 
 // The reward for the kill reaches the player.
-TEST_F(DeathHandlerTest, TheKillerIsPaidTheExperience)
+TEST_F(CreatureDeathTest, TheKillerIsPaidTheExperience)
 {
 	const int before = player->get_xp();
 
@@ -115,7 +123,7 @@ TEST_F(DeathHandlerTest, TheKillerIsPaidTheExperience)
 }
 
 // What it carried falls where it fell, so it can be picked up.
-TEST_F(DeathHandlerTest, WhatItCarriedFallsWhereItDied)
+TEST_F(CreatureDeathTest, WhatItCarriedFallsWhereItDied)
 {
 	Item& loot = carried("health_potion");
 
@@ -127,7 +135,7 @@ TEST_F(DeathHandlerTest, WhatItCarriedFallsWhereItDied)
 }
 
 // A body is left in its place, named for what it was.
-TEST_F(DeathHandlerTest, ACorpseIsLeftBehindNamedForTheCreature)
+TEST_F(CreatureDeathTest, ACorpseIsLeftBehindNamedForTheCreature)
 {
 	kill_it();
 
@@ -139,7 +147,7 @@ TEST_F(DeathHandlerTest, ACorpseIsLeftBehindNamedForTheCreature)
 
 // A corpse weighs what the creature's body weighs, which is what makes carrying
 // one a decision rather than free food.
-TEST_F(DeathHandlerTest, ACorpseWeighsWhatTheBodyWeighed)
+TEST_F(CreatureDeathTest, ACorpseWeighsWhatTheBodyWeighed)
 {
 	const int bodyWeight = monster->get_corpse_weight();
 	ASSERT_GT(bodyWeight, 0) << "this creature's body weighs nothing, so the test below proves nothing";
@@ -152,7 +160,7 @@ TEST_F(DeathHandlerTest, ACorpseWeighsWhatTheBodyWeighed)
 }
 
 // Everything it carried goes, not merely the first thing.
-TEST_F(DeathHandlerTest, EveryCarriedItemFalls)
+TEST_F(CreatureDeathTest, EveryCarriedItemFalls)
 {
 	Item& first = carried("health_potion");
 	Item& second = carried("bread");
@@ -163,4 +171,4 @@ TEST_F(DeathHandlerTest, EveryCarriedItemFalls)
 	EXPECT_TRUE(floor_holds(second)) << "only part of the pack was dropped";
 }
 
-// end of file: DeathHandlerTest.cpp
+// end of file: CreatureDeathTest.cpp

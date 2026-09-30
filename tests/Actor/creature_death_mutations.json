@@ -1,0 +1,41 @@
+{
+  "cwd": "E:/repo/C++RogueLike",
+  "test_command": [
+    "powershell",
+    "-NoProfile",
+    "-Command",
+    "cmake --build build --config Debug --target test_exe > $null; if ($LASTEXITCODE -ne 0) { exit 1 }; Set-Location build/bin/Debug; ./test_exe.exe --gtest_filter=CreatureDeathTest.*"
+  ],
+  "mutations": [
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tctx.player_concrete().on_kill_reward(get_xp(), ctx);\n",
+      "mutated": "",
+      "catches": "a kill that pays nothing, so a character never advances"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\t\titem->position = position;\n",
+      "mutated": "",
+      "catches": "loot landing where it was made rather than where the creature fell"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tcorpse->actorData.name = std::format(\"dead {}\", get_name());\n",
+      "mutated": "\tcorpse->actorData.name = get_name();\n",
+      "catches": "a corpse that reads as a living creature of the same name"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tcorpse->enhancement.weight = get_corpse_weight();\n",
+      "mutated": "",
+      "catches": "a weightless body, so carrying corpses costs nothing"
+    },
+    {
+      "file": "src/Creature.cpp",
+      "original": "\tinventoryData.items.clear();\n",
+      "mutated": "",
+      "catches": "a looted corpse still listing what it no longer holds"
+    }
+  ]
+}
